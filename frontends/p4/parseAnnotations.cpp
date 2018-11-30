@@ -34,13 +34,12 @@ bool ParseAnnotations::needsParsing(IR::Annotation* annotation) {
 }
 
 void ParseAnnotations::postorder(IR::Annotation* annotation) {
-    // @tableonly, @defaultonly, @hidden, @atomic, and @optional have no
-    // arguments.
-    PARSE_NO_ARGS(IR::Annotation::tableOnlyAnnotation)
-    PARSE_NO_ARGS(IR::Annotation::defaultOnlyAnnotation)
-    PARSE_NO_ARGS(IR::Annotation::hiddenAnnotation)
-    PARSE_NO_ARGS(IR::Annotation::atomicAnnotation)
-    PARSE_NO_ARGS(IR::Annotation::optionalAnnotation)
+    // @tableonly, @defaultonly, @hidden, @atomic, and @optional have no body.
+    PARSE_NO_BODY(IR::Annotation::tableOnlyAnnotation)
+    PARSE_NO_BODY(IR::Annotation::defaultOnlyAnnotation)
+    PARSE_NO_BODY(IR::Annotation::hiddenAnnotation)
+    PARSE_NO_BODY(IR::Annotation::atomicAnnotation)
+    PARSE_NO_BODY(IR::Annotation::optionalAnnotation)
 
     // @name and @deprecated have a string literal argument.
     PARSE(IR::Annotation::nameAnnotation, StringLiteral)

@@ -148,8 +148,7 @@ P4ParserDriver::parse(AbstractP4Lexer& lexer, const char* sourceFile,
 /* static */ const IR::P4Program*
 P4ParserDriver::parse(std::istream& in, const char* sourceFile,
                       unsigned sourceLine /* = 1 */) {
-    if (Log::verbose())
-        std::cout << "Parsing P4-16 program " << sourceFile << std::endl;
+    LOG1("Parsing P4-16 program " << sourceFile);
 
     P4ParserDriver driver;
     P4Lexer lexer(in);
@@ -168,8 +167,7 @@ template<typename T> const T*
 P4ParserDriver::parse(P4AnnotationLexer::Type type,
                       Util::SourceInfo srcInfo,
                       IR::Vector<IR::AnnotationToken>* body) {
-    if (Log::verbose())
-        std::cout << "Parsing P4-16 annotation " << srcInfo << std::endl;
+    LOG3("Parsing P4-16 annotation " << srcInfo);
 
     P4AnnotationLexer lexer(type, body);
     if (!parse(lexer, srcInfo.getSourceFile())) {
@@ -250,8 +248,7 @@ V1ParserDriver::V1ParserDriver()
 /* static */ const IR::V1Program*
 V1ParserDriver::parse(std::istream& in, const char* sourceFile,
                       unsigned sourceLine /* = 1 */) {
-    if (Log::verbose())
-        std::cout << "Parsing P4-14 program " << sourceFile << std::endl;
+    LOG1("Parsing P4-14 program " << sourceFile);
 
     // Create and configure the parser and lexer.
     V1ParserDriver driver;

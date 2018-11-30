@@ -372,11 +372,11 @@ annotation
 annotationBody
     : /* empty */
         { $$ = new IR::Vector<IR::AnnotationToken>; }
-    | "(" annotationBody ")"
-        { $$ = new IR::Vector<IR::AnnotationToken>;
-          $$->push_back(new IR::AnnotationToken(@1, $1.type, $1.text));
-          $$->append(*$2);
-          $$->push_back(new IR::AnnotationToken(@3, $3.type, $3.text)); }
+    | annotationBody "(" annotationBody ")"
+        { $$ = $1;
+          $$->push_back(new IR::AnnotationToken(@2, $2.type, $2.text));
+          $$->append(*$3);
+          $$->push_back(new IR::AnnotationToken(@4, $4.type, $4.text)); }
     | annotationBody annotationToken
         { $$ = $1;
           switch ($2.type) {

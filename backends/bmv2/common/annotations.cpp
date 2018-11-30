@@ -19,7 +19,7 @@ limitations under the License.
 namespace BMV2 {
 
 void ParseAnnotations::postorder(IR::Annotation* annotation) {
-    PARSE_NO_ARGS("metadata")
+    PARSE_NO_BODY("metadata")
 
     PARSE("alias", StringLiteral)
     PARSE("priority", Constant)

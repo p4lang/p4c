@@ -210,13 +210,9 @@ externalId(const IR::IDeclaration* declaration) {
 
     // If the user specified an @id annotation, use that.
     if (auto idAnnotation = declaration->getAnnotation("id")) {
-        if (idAnnotation->expr.size() != 1) {
-            ::error("@id should be an integer for declaration %1%", declaration);
-            return boost::none;
-        }
-
         auto idConstant = idAnnotation->expr[0]->to<IR::Constant>();
-        if (idConstant == nullptr || !idConstant->fitsInt()) {
+        CHECK_NULL(idConstant);
+        if (!idConstant->fitsInt()) {
             ::error("@id should be an integer for declaration %1%", declaration);
             return boost::none;
         }
@@ -664,6 +660,8 @@ class ParseAnnotations : public P4::ParseAnnotations {
     ParseAnnotations() : P4::ParseAnnotations("P4Runtime") { }
     virtual void postorder(IR::Annotation* annotation) override {
         PARSE("controller_header", StringLiteral)
+        PARSE_NO_BODY("hidden")
+        PARSE("id", Constant)
     }
 };
 
@@ -771,15 +769,8 @@ class P4RuntimeAnalyzer {
         auto controllerAnnotation = type->getAnnotation("controller_header");
         CHECK_NULL(controllerAnnotation);
 
-        if (controllerAnnotation->expr.size() != 1) {
-            ::error("@controller_header should be a string for declaration %1%", type);
-            return;
-        }
         auto nameConstant = controllerAnnotation->expr[0]->to<IR::StringLiteral>();
-        if (nameConstant == nullptr) {
-            ::error("@controller_header should be a string for declaration %1%", type);
-            return;
-        }
+        CHECK_NULL(nameConstant);
         auto controllerName = nameConstant->value;
 
         auto header = p4Info->add_controller_packet_metadata();

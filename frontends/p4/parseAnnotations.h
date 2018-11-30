@@ -25,7 +25,7 @@ limitations under the License.
  */
 namespace P4 {
 
-#define PARSE_NO_ARGS(aname)                                          \
+#define PARSE_NO_BODY(aname)                                          \
     if (annotation->name == aname) {                                  \
         if (!annotation->body.empty()) {                              \
             ::error("%1% should not have any arguments", annotation); \
