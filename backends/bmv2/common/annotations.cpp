@@ -15,49 +15,14 @@ limitations under the License.
 */
 
 #include "annotations.h"
-#include "frontends/parsers/parserDriver.h"
 
 namespace BMV2 {
 
-using P4::P4ParserDriver;
-
 void ParseAnnotations::postorder(IR::Annotation* annotation) {
-    // @metadata has no arguments.
-    if (annotation->name == "metadata") {
-        if (!annotation->body.empty()) {
-            ::error("%1% should not have any arguments", annotation);
-        }
+    PARSE_NO_ARGS("metadata")
 
-        return;
-    }
-
-    // @alias has a string literal argument.
-    if (annotation->name == "alias") {
-        if (!needsParsing(annotation)) return;
-
-        const IR::StringLiteral* parsed =
-                P4ParserDriver::parseStringLiteral(annotation->srcInfo,
-                                                   &annotation->body);
-        if (parsed != nullptr) {
-            annotation->expr.push_back(parsed);
-        }
-        return;
-    }
-
-    // @priority has an int constant argument.
-    if (annotation->name == "priority") {
-        if (!needsParsing(annotation)) return;
-
-        const IR::Constant* parsed =
-                P4ParserDriver::parseInteger(annotation->srcInfo,
-                                             &annotation->body);
-        if (parsed != nullptr) {
-            annotation->expr.push_back(parsed);
-        }
-        return;
-    }
-
-    // Unknown annotation. Leave as is.
+    PARSE("alias", StringLiteral)
+    PARSE("priority", Constant)
 }
 
 }  // namespace BMV2

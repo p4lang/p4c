@@ -18,11 +18,60 @@ limitations under the License.
 #define _P4_PARSEANNOTATIONS_H_
 
 #include "ir/ir.h"
+#include "frontends/parsers/parserDriver.h"
 
 /*
  * Parses known/predefined annotations used by the compiler.
  */
 namespace P4 {
+
+#define PARSE_NO_ARGS(aname)                                          \
+    if (annotation->name == aname) {                                  \
+        if (!annotation->body.empty()) {                              \
+            ::error("%1% should not have any arguments", annotation); \
+        }                                                             \
+                                                                      \
+        return;                                                       \
+    }
+
+#define PARSE(aname, tname)                                         \
+    if (annotation->name == aname) {                                \
+        if (!needsParsing(annotation)) return;                      \
+                                                                    \
+        const IR::tname* parsed =                                   \
+            P4::P4ParserDriver::parse ## tname(annotation->srcInfo, \
+                                               &annotation->body);  \
+        if (parsed != nullptr) {                                    \
+            annotation->expr.push_back(parsed);                     \
+        }                                                           \
+        return;                                                     \
+    }
+
+#define PARSE_EXPRESSION_LIST(aname)                                     \
+    if (annotation->name == aname) {                                     \
+        if (!needsParsing(annotation)) return;                           \
+                                                                         \
+        const IR::Vector<IR::Expression>* parsed =                       \
+            P4::P4ParserDriver::parseExpressionList(annotation->srcInfo, \
+                                                    &annotation->body);  \
+        if (parsed != nullptr) {                                         \
+            annotation->expr.append(*parsed);                            \
+        }                                                                \
+        return;                                                          \
+    }
+
+#define PARSE_KV_LIST(aname)                                     \
+    if (annotation->name == aname) {                             \
+        if (!needsParsing(annotation)) return;                   \
+                                                                 \
+        const IR::IndexedVector<IR::NamedExpression>* parsed =   \
+            P4::P4ParserDriver::parseKvList(annotation->srcInfo, \
+                                            &annotation->body);  \
+        if (parsed != nullptr) {                                 \
+            annotation->kv.append(*parsed);                      \
+        }                                                        \
+        return;                                                  \
+    }
 
 class ParseAnnotations : public Modifier {
  public:

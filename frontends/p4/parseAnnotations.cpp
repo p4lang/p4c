@@ -15,7 +15,6 @@ limitations under the License.
 */
 
 #include "parseAnnotations.h"
-#include "frontends/parsers/parserDriver.h"
 
 namespace P4 {
 
@@ -37,53 +36,21 @@ bool ParseAnnotations::needsParsing(IR::Annotation* annotation) {
 void ParseAnnotations::postorder(IR::Annotation* annotation) {
     // @tableonly, @defaultonly, @hidden, @atomic, and @optional have no
     // arguments.
-    if (annotation->name == IR::Annotation::tableOnlyAnnotation
-            || annotation->name == IR::Annotation::defaultOnlyAnnotation
-            || annotation->name == IR::Annotation::hiddenAnnotation
-            || annotation->name == IR::Annotation::atomicAnnotation
-            || annotation->name == IR::Annotation::optionalAnnotation) {
-        if (!annotation->body.empty()) {
-            ::error("%1% should not have any arguments", annotation);
-        }
-
-        return;
-    }
-
-    if (!needsParsing(annotation)) return;
+    PARSE_NO_ARGS(IR::Annotation::tableOnlyAnnotation)
+    PARSE_NO_ARGS(IR::Annotation::defaultOnlyAnnotation)
+    PARSE_NO_ARGS(IR::Annotation::hiddenAnnotation)
+    PARSE_NO_ARGS(IR::Annotation::atomicAnnotation)
+    PARSE_NO_ARGS(IR::Annotation::optionalAnnotation)
 
     // @name and @deprecated have a string literal argument.
-    if (annotation->name == IR::Annotation::nameAnnotation
-            || annotation->name == IR::Annotation::deprecatedAnnotation) {
-        const IR::StringLiteral* parsed =
-                P4ParserDriver::parseStringLiteral(annotation->srcInfo,
-                                                   &annotation->body);
-        if (parsed != nullptr) {
-            annotation->expr.push_back(parsed);
-        }
-        return;
-    }
+    PARSE(IR::Annotation::nameAnnotation, StringLiteral)
+    PARSE(IR::Annotation::deprecatedAnnotation, StringLiteral)
 
     // @length has an expression argument.
-    if (annotation->name == IR::Annotation::lengthAnnotation) {
-        const IR::Expression* parsed =
-                P4ParserDriver::parseExpression(annotation->srcInfo,
-                                                &annotation->body);
-        if (parsed != nullptr) {
-            annotation->expr.push_back(parsed);
-        }
-        return;
-    }
+    PARSE(IR::Annotation::lengthAnnotation, Expression)
 
     // @pkginfo has a key-value list argument.
-    if (annotation->name == IR::Annotation::pkginfoAnnotation) {
-        const IR::IndexedVector<IR::NamedExpression>* parsed =
-                P4ParserDriver::parseKvList(annotation->srcInfo,
-                                            &annotation->body);
-        if (parsed != nullptr) {
-            annotation->kv.append(*parsed);
-        }
-        return;
-    }
+    PARSE_KV_LIST(IR::Annotation::pkginfoAnnotation)
 
     // Unknown annotation. Leave as is.
 }

@@ -204,8 +204,8 @@ P4ParserDriver::parseExpression(Util::SourceInfo srcInfo,
 }
 
 /* static */ const IR::Constant*
-P4ParserDriver::parseInteger(Util::SourceInfo srcInfo,
-                             IR::Vector<IR::AnnotationToken>* body) {
+P4ParserDriver::parseConstant(Util::SourceInfo srcInfo,
+                              IR::Vector<IR::AnnotationToken>* body) {
     P4ParserDriver driver;
     return driver.parse<IR::Constant>(
             P4AnnotationLexer::INTEGER, srcInfo, body);
