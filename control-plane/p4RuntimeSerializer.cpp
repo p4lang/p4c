@@ -43,6 +43,7 @@ limitations under the License.
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/parseAnnotations.h"
+#include "frontends/parsers/parserDriver.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
@@ -661,9 +662,24 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
 /// Parses P4Runtime-specific annotations.
 class ParseAnnotations : public P4::ParseAnnotations {
  public:
-   ParseAnnotations() : P4::ParseAnnotations("P4Runtime") { }
-   virtual void postorder(IR::Annotation* annotation) override {
-   }
+    ParseAnnotations() : P4::ParseAnnotations("P4Runtime") { }
+    virtual void postorder(IR::Annotation* annotation) override {
+        using P4::P4ParserDriver;
+
+        // @controller_header has a string literal argument.
+        if (annotation->name == "controller_header") {
+            if (!needsParsing(annotation)) return;
+
+            const IR::StringLiteral* parsed =
+                    P4ParserDriver::parseStringLiteral(annotation->srcInfo,
+                                                       &annotation->body);
+            if (parsed != nullptr) {
+                annotation->expr.push_back(parsed);
+            }
+            return;
+        }
+
+    }
 };
 
 /// An analyzer which translates the information available in the P4 IR into a
