@@ -25,75 +25,72 @@ limitations under the License.
  */
 namespace P4 {
 
-#define PARSE_NO_BODY(aname)                                          \
-    if (annotation->name == aname) {                                  \
-        if (!annotation->body.empty()) {                              \
-            ::error("%1% should not have any arguments", annotation); \
-        }                                                             \
-                                                                      \
-        return;                                                       \
+#define PARSE_NO_BODY(aname) \
+    { aname, &P4::ParseAnnotations::parseNoBody }
+
+#define PARSE(aname, tname)                                             \
+    { aname, [](IR::Annotation* annotation) {                           \
+            if (!P4::ParseAnnotations::needsParsing(annotation)) {      \
+                return;                                                 \
+            }                                                           \
+                                                                        \
+            const IR::tname* parsed =                                   \
+                P4::P4ParserDriver::parse ## tname(annotation->srcInfo, \
+                                                   annotation->body);   \
+            if (parsed != nullptr) {                                    \
+                annotation->expr.push_back(parsed);                     \
+            }                                                           \
+        }                                                               \
     }
 
-#define PARSE(aname, tname)                                         \
-    if (annotation->name == aname) {                                \
-        if (!needsParsing(annotation)) {                            \
-            return;                                                 \
-        }                                                           \
-                                                                    \
-        const IR::tname* parsed =                                   \
-            P4::P4ParserDriver::parse ## tname(annotation->srcInfo, \
-                                               annotation->body);   \
-        if (parsed != nullptr) {                                    \
-            annotation->expr.push_back(parsed);                     \
-        }                                                           \
-        return;                                                     \
-    }
+#define PARSE_EXPRESSION_LIST(aname) \
+    { aname, &P4::ParseAnnotations::parseExpressionList }
 
-#define PARSE_EXPRESSION_LIST(aname)                                     \
-    if (annotation->name == aname) {                                     \
-        if (!needsParsing(annotation)) {                                 \
-            return;                                                      \
-        }                                                                \
-                                                                         \
-        const IR::Vector<IR::Expression>* parsed =                       \
-            P4::P4ParserDriver::parseExpressionList(annotation->srcInfo, \
-                                                    annotation->body);   \
-        if (parsed != nullptr) {                                         \
-            annotation->expr.append(*parsed);                            \
-        }                                                                \
-        return;                                                          \
-    }
-
-#define PARSE_KV_LIST(aname)                                     \
-    if (annotation->name == aname) {                             \
-        if (!needsParsing(annotation)) {                         \
-            return;                                              \
-        }                                                        \
-                                                                 \
-        const IR::IndexedVector<IR::NamedExpression>* parsed =   \
-            P4::P4ParserDriver::parseKvList(annotation->srcInfo, \
-                                            annotation->body);   \
-        if (parsed != nullptr) {                                 \
-            annotation->kv.append(*parsed);                      \
-        }                                                        \
-        return;                                                  \
-    }
+#define PARSE_KV_LIST(aname) \
+    { aname, &P4::ParseAnnotations::parseKvList }
 
 class ParseAnnotations : public Modifier {
  public:
     using Modifier::postorder;
-    ParseAnnotations() { setName("ParseAnnotations"); }
-    explicit ParseAnnotations(const char* targetName) {
-        cstring s = cstring(targetName) + cstring("__ParseAnnotations");
-        setName(s);
-    }
-    void postorder(IR::Annotation* annotation) override;
 
- protected:
+    typedef std::function<void(IR::Annotation*)> Handler;
+
+    /// Keyed on annotation names.
+    typedef std::unordered_map<cstring, Handler> HandlerMap;
+
+    /// Produces a pass that rewrites the spec-defined annotations.
+    ParseAnnotations() : handlers(standardHandlers()) {
+        setName("ParseAnnotations");
+    }
+
+    /// Produces a pass that rewrites a custom set of annotations.
+    ParseAnnotations(const char* targetName, HandlerMap handlers)
+            : handlers(handlers) {
+        #define SUFFIX "__ParseAnnotations"
+        int len = strlen(targetName) + strlen(SUFFIX) + 1;
+        char s[len];
+        snprintf(s, len, "%s%s", targetName, SUFFIX);
+        setName(s);
+        #undef SUFFIX
+
+        std::map<cstring, int> mymap = {{"one", 1}, {"two", 2}};
+    }
+
+    void postorder(IR::Annotation* annotation) override final;
+
+    static HandlerMap standardHandlers();
+
+    static void parseNoBody(IR::Annotation* annotation);
+    static void parseExpressionList(IR::Annotation* annotation);
+    static void parseKvList(IR::Annotation* annotation);
+
     /// Checks if the annotation needs parsing. An annotation needs parsing if
     /// it was derived from P4₁₆. A BUG is thrown if the annotation is derived
     /// from P4₁₆ and is already parsed.
-    bool needsParsing(IR::Annotation* annotation);
+    static bool needsParsing(IR::Annotation* annotation);
+
+ private:
+    HandlerMap handlers;
 };
 
 }  // namespace P4

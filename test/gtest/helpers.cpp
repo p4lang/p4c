@@ -129,10 +129,9 @@ namespace Test {
 
 class ParseAnnotations : public P4::ParseAnnotations {
  public:
-    ParseAnnotations() : P4::ParseAnnotations("FrontendTest") { }
-    void postorder(IR::Annotation* annotation) override {
-        PARSE("my_anno", StringLiteral)
-    }
+    ParseAnnotations() : P4::ParseAnnotations("FrontendTest", {
+                PARSE("my_anno", StringLiteral)
+            }) { }
 };
 
 /* static */ boost::optional<FrontendTestCase>

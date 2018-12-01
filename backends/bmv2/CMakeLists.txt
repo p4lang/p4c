@@ -42,7 +42,6 @@ add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_PSA_SWITCH_SRCS}")
 set (BMV2_BACKEND_COMMON_SRCS
   common/JsonObjects.cpp
   common/action.cpp
-  common/annotations.cpp
   common/control.cpp
   common/controlFlowGraph.cpp
   common/deparser.cpp

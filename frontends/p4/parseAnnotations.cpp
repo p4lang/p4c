@@ -18,6 +18,60 @@ limitations under the License.
 
 namespace P4 {
 
+ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
+    return {
+            // @tableonly, @defaultonly, @hidden, @atomic, and @optional have
+            // no body.
+            PARSE_NO_BODY(IR::Annotation::tableOnlyAnnotation),
+            PARSE_NO_BODY(IR::Annotation::defaultOnlyAnnotation),
+            PARSE_NO_BODY(IR::Annotation::hiddenAnnotation),
+            PARSE_NO_BODY(IR::Annotation::atomicAnnotation),
+            PARSE_NO_BODY(IR::Annotation::optionalAnnotation),
+
+            // @name and @deprecated have a string literal argument.
+            PARSE(IR::Annotation::nameAnnotation, StringLiteral),
+            PARSE(IR::Annotation::deprecatedAnnotation, StringLiteral),
+
+            // @length has an expression argument.
+            PARSE(IR::Annotation::lengthAnnotation, Expression),
+
+            // @pkginfo has a key-value list argument.
+            PARSE_KV_LIST(IR::Annotation::pkginfoAnnotation)
+        };
+}
+
+void ParseAnnotations::parseNoBody(IR::Annotation* annotation) {
+    if (!annotation->body.empty()) {
+        ::error("%1% should not have any argumentss", annotation);
+    }
+}
+
+void ParseAnnotations::parseExpressionList(IR::Annotation* annotation) {
+    if (!needsParsing(annotation)) {
+        return;
+    }
+
+    const IR::Vector<IR::Expression>* parsed =
+        P4::P4ParserDriver::parseExpressionList(annotation->srcInfo,
+                                                annotation->body);
+    if (parsed != nullptr) {
+        annotation->expr.append(*parsed);
+    }
+}
+
+void ParseAnnotations::parseKvList(IR::Annotation* annotation) {
+    if (!needsParsing(annotation)) {
+        return;
+    }
+
+    const IR::IndexedVector<IR::NamedExpression>* parsed =
+        P4::P4ParserDriver::parseKvList(annotation->srcInfo,
+                                        annotation->body);
+    if (parsed != nullptr) {
+        annotation->kv.append(*parsed);
+    }
+}
+
 bool ParseAnnotations::needsParsing(IR::Annotation* annotation) {
     if (!annotation->expr.empty() || !annotation->kv.empty()) {
         // We already have an expression or a key-value list. This happens when
@@ -34,24 +88,12 @@ bool ParseAnnotations::needsParsing(IR::Annotation* annotation) {
 }
 
 void ParseAnnotations::postorder(IR::Annotation* annotation) {
-    // @tableonly, @defaultonly, @hidden, @atomic, and @optional have no body.
-    PARSE_NO_BODY(IR::Annotation::tableOnlyAnnotation)
-    PARSE_NO_BODY(IR::Annotation::defaultOnlyAnnotation)
-    PARSE_NO_BODY(IR::Annotation::hiddenAnnotation)
-    PARSE_NO_BODY(IR::Annotation::atomicAnnotation)
-    PARSE_NO_BODY(IR::Annotation::optionalAnnotation)
+    if (!handlers.count(annotation->name)) {
+        // Unknown annotation. Leave as is.
+        return;
+    }
 
-    // @name and @deprecated have a string literal argument.
-    PARSE(IR::Annotation::nameAnnotation, StringLiteral)
-    PARSE(IR::Annotation::deprecatedAnnotation, StringLiteral)
-
-    // @length has an expression argument.
-    PARSE(IR::Annotation::lengthAnnotation, Expression)
-
-    // @pkginfo has a key-value list argument.
-    PARSE_KV_LIST(IR::Annotation::pkginfoAnnotation)
-
-    // Unknown annotation. Leave as is.
+    handlers[annotation->name](annotation);
 }
 
 }  // namespace P4
