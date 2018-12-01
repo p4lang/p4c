@@ -981,6 +981,67 @@ TEST_F(P4Runtime, IsConstTable) {
     EXPECT_FALSE(table_non_const->is_const_table());
 }
 
+TEST_F(P4Runtime, TableActionsAnnotations) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        header Header { bit<8> hfA; }
+        struct Headers { Header h; }
+        struct Metadata { }
+
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm) {
+            state start { transition accept; } }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) {
+            action a() { sm.egress_spec = 0; }
+            action b() { sm.egress_spec = 1; }
+            action c() { sm.egress_spec = 2; }
+
+            table t {
+                key = { h.h.hfA : exact; }
+                actions = { @defaultonly a; @tableonly b; c; }
+                default_action = a();
+            }
+            apply { t.apply(); }
+        }
+        V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )"));
+
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0u, ::diagnosticCount());
+
+    auto table = findTable(*test, "ingress.t");
+    ASSERT_TRUE(table != nullptr);
+
+    // finds action reference based on the action name
+    // returns nullptr if something goes wrong (e.g. not a valid action name for
+    // this table)
+    auto findActionRef = [test, table](const std::string& name) -> const p4configv1::ActionRef*{
+        auto action = findAction(*test, name);
+        if (!action) return nullptr;
+        auto find_it = std::find_if(
+            table->action_refs().begin(), table->action_refs().end(),
+            [action](const p4configv1::ActionRef& ref) {
+                return ref.id() == action->preamble().id(); });
+        return (find_it != table->action_refs().end()) ? &*find_it : nullptr;
+    };
+    auto actionRefA = findActionRef("ingress.a");
+    ASSERT_TRUE(actionRefA != nullptr);
+    EXPECT_EQ(actionRefA->scope(), p4configv1::ActionRef::DEFAULT_ONLY);
+    auto actionRefB = findActionRef("ingress.b");
+    ASSERT_TRUE(actionRefB != nullptr);
+    EXPECT_EQ(actionRefB->scope(), p4configv1::ActionRef::TABLE_ONLY);
+    auto actionRefC = findActionRef("ingress.c");
+    ASSERT_TRUE(actionRefC != nullptr);
+    EXPECT_EQ(actionRefC->scope(), p4configv1::ActionRef::TABLE_AND_DEFAULT);
+}
+
 TEST_F(P4Runtime, ValueSet) {
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
         header Header { bit<32> hfA; bit<16> hfB; }
