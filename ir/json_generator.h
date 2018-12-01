@@ -204,7 +204,8 @@ class JSONGenerator {
             << (indent + 1) << "\"text\" : \"" << v->text << "\"," << std::endl
             << (indent + 1) << "\"skip\" : " << v->skip << "," << std::endl
             << (indent + 1) << "\"base\" : " << v->base << "," << std::endl
-            << (indent + 1) << "\"hasWidth\" : " << v->hasWidth << std::endl
+            << (indent + 1) << "\"hasWidth\" : "
+                << (v->hasWidth ? "true" : "false") << std::endl
             << indent << "}";
     }
 
