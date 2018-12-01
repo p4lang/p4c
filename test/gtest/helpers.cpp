@@ -131,7 +131,6 @@ class ParseAnnotations : public P4::ParseAnnotations {
  public:
     ParseAnnotations() : P4::ParseAnnotations("FrontendTest") { }
     void postorder(IR::Annotation* annotation) override {
-        PARSE_EXPRESSION_LIST("diagnostic")
         PARSE("my_anno", StringLiteral)
     }
 };
