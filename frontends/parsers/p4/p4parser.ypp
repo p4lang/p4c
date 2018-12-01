@@ -89,11 +89,6 @@ class Token {
             : Token(type, unparsedConstant.text,
                     new UnparsedConstant(unparsedConstant)) { }
 
-    virtual UnparsedConstant getConst() {
-        if (unparsedConstant == nullptr) BUG("Not a const");
-        return *unparsedConstant;
-    }
-
  private:
     explicit Token(int type, cstring text, UnparsedConstant* unparsedConstant)
             : type(type), text(text), unparsedConstant(unparsedConstant) { }
@@ -379,17 +374,7 @@ annotationBody
           $$->push_back(new IR::AnnotationToken(@4, $4.type, $4.text)); }
     | annotationBody annotationToken
         { $$ = $1;
-          switch ($2.type) {
-          case token::TOK_INTEGER:
-              {
-                  auto uc = $2.getConst();
-                  auto constInfo = new IR::UnparsedConstant(@2, uc.skip, uc.base, uc.hasWidth);
-                  $$->push_back(new IR::AnnotationToken(@2, $2.type, $2.text, constInfo));
-              }
-              break;
-          default:
-              $$->push_back(new IR::AnnotationToken(@2, $2.type, $2.text));
-          } }
+          $$->push_back(new IR::AnnotationToken(@2, $2.type, $2.text, $2.unparsedConstant)); }
     ;
 
 annotationToken

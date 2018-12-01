@@ -5,7 +5,7 @@ namespace P4 {
 
 UnparsedConstant unparsedConstant(const IR::AnnotationToken* token) {
     UnparsedConstant result {
-        token->text,
+        token->constInfo->text,
         token->constInfo->skip,
         token->constInfo->base,
         token->constInfo->hasWidth

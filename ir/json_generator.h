@@ -195,6 +195,19 @@ class JSONGenerator {
             << indent << "}";
     }
 
+    void generate(const UnparsedConstant* v) {
+        if (v == nullptr) {
+            return;
+        }
+
+        out << "{" << std::endl
+            << (indent + 1) << "\"text\" : \"" << v->text << "\"," << std::endl
+            << (indent + 1) << "\"skip\" : " << v->skip << "," << std::endl
+            << (indent + 1) << "\"base\" : " << v->base << "," << std::endl
+            << (indent + 1) << "\"hasWidth\" : " << v->hasWidth << std::endl
+            << indent << "}";
+    }
+
     template<typename T>
     typename std::enable_if<
                     has_toJSON<T>::value &&

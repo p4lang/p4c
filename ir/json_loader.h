@@ -203,6 +203,22 @@ class JSONLoader {
         if (auto *s = json->to<std::string>())
             s->c_str() >> v; }
 
+    void unpack_json(UnparsedConstant*& v) {
+        const JsonObject* obj = json->to<JsonObject>();
+        cstring text("");
+        unsigned skip = 0;
+        unsigned base = 0;
+        bool hasWidth = false;
+
+        load(::get(obj, "text"), text);
+        load(::get(obj, "skip"), skip);
+        load(::get(obj, "base"), base);
+        load(::get(obj, "hasWidth"), hasWidth);
+
+        UnparsedConstant result {text, skip, base, hasWidth};
+        v = &result;
+    }
+
     template<typename T>
     typename std::enable_if<
         has_fromJSON<T>::value &&

@@ -12,6 +12,10 @@
    - some simple leaf classes used frequently
 */
 
+#emit
+#include "frontends/common/constantParsing.h"
+#end
+
 /// a value that can be evaluated at compile-time
 interface CompileTimeValue {}
 
@@ -188,22 +192,13 @@ class NamedExpression : Declaration {
     Expression expression;
 }
 
-/// Really, we should #include "constantParsing.h" and use the UnparsedConstant
-/// defined there, but ir-generator doesn't seem to support this.
-class UnparsedConstant {
-    unsigned skip;
-    unsigned base;
-    bool hasWidth;
-    dbprint { }
-}
-
 /// A token in an unparsed annotation.
-/// This should really be P4::P4Parser::symbol_type, but ir-generator doesn't
-/// support this.
+/// This should really be P4::P4Parser::symbol_type, but p4parser.hpp depends
+/// on the IR in a way that makes it difficult to #include in this file.
 class AnnotationToken {
     int token_type;  // P4Parser::token_type in disguise.
     cstring text;
-    optional NullOK UnparsedConstant constInfo = NULL;
+    optional NullOK UnparsedConstant* constInfo = nullptr;
     dbprint { out << text; }
 }
 
