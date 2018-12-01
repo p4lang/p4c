@@ -205,18 +205,17 @@ static void crash_shutdown(int sig, siginfo_t *info, void *uctxt) {
     (void) uctxt;  // Suppress unused parameter warning.
 #endif
 #if HAVE_EXECINFO_H
-    if (LOGGING(1)) {
         static void *buffer[64];
         int size = backtrace(buffer, 64);
         char **strings = backtrace_symbols(buffer, size);
         for (int i = 1; i < size; i++) {
             if (strings)
-                LOG1("  " << strings[i]);
+                printf("  %s\n", strings[i]);
             if (const char *line = addr2line(buffer[i], strings ? strings[i] : 0))
-                LOG1("    " << line); }
+                printf("    %s\n", line); }
         if (size < 1)
-            LOG1("backtrace failed");
-        free(strings); }
+            printf("backtrace failed\n");
+        free(strings);
 #endif
     MTONLY(
         if (++threads_dumped < int(thread_ids.size())) {
