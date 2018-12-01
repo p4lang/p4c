@@ -23,7 +23,8 @@ void CheckDeprecated::warnIfDeprecated(
     const IR::IAnnotated* annotated, const IR::Node* errorNode) {
     if (annotated == nullptr)
         return;
-    auto anno = annotated->getAnnotations()->getSingle("deprecated");
+    auto anno =
+        annotated->getAnnotations()->getSingle(IR::Annotation::deprecatedAnnotation);
     if (anno == nullptr)
         return;
 
