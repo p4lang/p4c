@@ -822,11 +822,6 @@ class P4RuntimeAnalyzer {
         if (defaultAction && defaultAction->isConst) {
             auto id = symbols.getId(P4RuntimeSymbolType::ACTION(), defaultAction->name);
             table->set_const_default_action_id(id);
-
-            // TODO(antonin): Generally the parameters of const default actions
-            // are bound at compile time, so this is a good default, but we need
-            // to add support for the cases where they aren't.
-            table->set_const_default_action_has_mutable_params(false);
         }
 
         for (const auto& action : actions) {
@@ -834,6 +829,16 @@ class P4RuntimeAnalyzer {
             auto action_ref = table->add_action_refs();
             action_ref->set_id(id);
             addAnnotations(action_ref, action.annotations);
+            // set action ref scope
+            auto isTableOnly = (action.annotations->getAnnotation("tableonly") != nullptr);
+            auto isDefaultOnly = (action.annotations->getAnnotation("defaultonly") != nullptr);
+            if (isTableOnly && isDefaultOnly) {
+                ::error("Table '%1%' has an action reference ('%2%') which is annotated "
+                        "with both '@tableonly' and '@defaultonly'", name, action.name);
+            }
+            if (isTableOnly) action_ref->set_scope(p4configv1::ActionRef::TABLE_ONLY);
+            else if (isDefaultOnly) action_ref->set_scope(p4configv1::ActionRef::DEFAULT_ONLY);
+            else action_ref->set_scope(p4configv1::ActionRef::TABLE_AND_DEFAULT);
         }
 
         size_t index = 1;
