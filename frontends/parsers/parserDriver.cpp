@@ -165,8 +165,8 @@ P4ParserDriver::parse(FILE* in, const char* sourceFile,
 
 template<typename T> const T*
 P4ParserDriver::parse(P4AnnotationLexer::Type type,
-                      Util::SourceInfo srcInfo,
-                      IR::Vector<IR::AnnotationToken>* body) {
+                      const Util::SourceInfo& srcInfo,
+                      const IR::Vector<IR::AnnotationToken>& body) {
     LOG3("Parsing P4-16 annotation " << srcInfo);
 
     P4AnnotationLexer lexer(type, body);
@@ -178,40 +178,40 @@ P4ParserDriver::parse(P4AnnotationLexer::Type type,
 }
 
 /* static */ const IR::Vector<IR::Expression>*
-P4ParserDriver::parseExpressionList(Util::SourceInfo srcInfo,
-                                    IR::Vector<IR::AnnotationToken>* body) {
+P4ParserDriver::parseExpressionList(const Util::SourceInfo& srcInfo,
+                                    const IR::Vector<IR::AnnotationToken>& body) {
     P4ParserDriver driver;
     return driver.parse<IR::Vector<IR::Expression>>(
             P4AnnotationLexer::EXPRESSION_LIST, srcInfo, body);
 }
 
 /* static */ const IR::IndexedVector<IR::NamedExpression>*
-P4ParserDriver::parseKvList(Util::SourceInfo srcInfo,
-                            IR::Vector<IR::AnnotationToken>* body) {
+P4ParserDriver::parseKvList(const Util::SourceInfo& srcInfo,
+                            const IR::Vector<IR::AnnotationToken>& body) {
     P4ParserDriver driver;
     return driver.parse<IR::IndexedVector<IR::NamedExpression>>(
             P4AnnotationLexer::KV_LIST, srcInfo, body);
 }
 
 /* static */ const IR::Expression*
-P4ParserDriver::parseExpression(Util::SourceInfo srcInfo,
-                                IR::Vector<IR::AnnotationToken>* body) {
+P4ParserDriver::parseExpression(const Util::SourceInfo& srcInfo,
+                                const IR::Vector<IR::AnnotationToken>& body) {
     P4ParserDriver driver;
     return driver.parse<IR::Expression>(
             P4AnnotationLexer::EXPRESSION, srcInfo, body);
 }
 
 /* static */ const IR::Constant*
-P4ParserDriver::parseConstant(Util::SourceInfo srcInfo,
-                              IR::Vector<IR::AnnotationToken>* body) {
+P4ParserDriver::parseConstant(const Util::SourceInfo& srcInfo,
+                              const IR::Vector<IR::AnnotationToken>& body) {
     P4ParserDriver driver;
     return driver.parse<IR::Constant>(
             P4AnnotationLexer::INTEGER, srcInfo, body);
 }
 
 /* static */ const IR::StringLiteral*
-P4ParserDriver::parseStringLiteral(Util::SourceInfo srcInfo,
-                                   IR::Vector<IR::AnnotationToken>* body) {
+P4ParserDriver::parseStringLiteral(const Util::SourceInfo& srcInfo,
+                                   const IR::Vector<IR::AnnotationToken>& body) {
     P4ParserDriver driver;
     return driver.parse<IR::StringLiteral>(
             P4AnnotationLexer::STRING_LITERAL, srcInfo, body);

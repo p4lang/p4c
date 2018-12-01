@@ -132,7 +132,6 @@ class ParseAnnotations : public P4::ParseAnnotations {
     ParseAnnotations() : P4::ParseAnnotations("FrontendTest") { }
     void postorder(IR::Annotation* annotation) override {
         PARSE_EXPRESSION_LIST("diagnostic")
-        PARSE("id", Constant)
         PARSE("my_anno", StringLiteral)
     }
 };
@@ -152,8 +151,6 @@ FrontendTestCase::create(const std::string& source,
         return boost::none;
     }
 
-    program = program->apply(ParseAnnotations());
-
     P4::P4COptionPragmaParser optionsPragmaParser;
     program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
     if (::errorCount() > 0) {
@@ -172,6 +169,17 @@ FrontendTestCase::create(const std::string& source,
     if (::errorCount() > 0) {
         std::cerr << "Encountered " << ::errorCount()
                   << " errors while executing frontend" << std::endl;
+        return boost::none;
+    }
+
+    program = program->apply(ParseAnnotations());
+    if (program == nullptr) {
+        std::cerr << "Back-end annotation parsing failed" << std::endl;
+        return boost::none;
+    }
+    if (::errorCount() > 0) {
+        std::cerr << "Encountered " << ::errorCount()
+                  << " errors while parsing back-end annotations" << std::endl;
         return boost::none;
     }
 

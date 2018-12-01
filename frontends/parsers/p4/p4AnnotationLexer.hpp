@@ -18,14 +18,13 @@ class P4AnnotationLexer : public AbstractP4Lexer {
 
  private:
     Type type;
-    IR::Vector<IR::AnnotationToken> body;
+    const IR::Vector<IR::AnnotationToken>& body;
     bool needStart;
     IR::Vector<IR::AnnotationToken>::const_iterator it;
 
  public:
-    explicit P4AnnotationLexer(Type type,
-                               IR::Vector<IR::AnnotationToken>* body)
-        : type(type), body(*body), needStart(true), it(this->body.begin()) { }
+    P4AnnotationLexer(Type type, const IR::Vector<IR::AnnotationToken>& body)
+        : type(type), body(body), needStart(true), it(this->body.begin()) { }
 
     Token yylex(P4::P4ParserDriver& driver);
 };

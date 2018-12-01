@@ -42,7 +42,7 @@ namespace P4 {
                                                                     \
         const IR::tname* parsed =                                   \
             P4::P4ParserDriver::parse ## tname(annotation->srcInfo, \
-                                               &annotation->body);  \
+                                               annotation->body);   \
         if (parsed != nullptr) {                                    \
             annotation->expr.push_back(parsed);                     \
         }                                                           \
@@ -57,7 +57,7 @@ namespace P4 {
                                                                          \
         const IR::Vector<IR::Expression>* parsed =                       \
             P4::P4ParserDriver::parseExpressionList(annotation->srcInfo, \
-                                                    &annotation->body);  \
+                                                    annotation->body);   \
         if (parsed != nullptr) {                                         \
             annotation->expr.append(*parsed);                            \
         }                                                                \
@@ -72,7 +72,7 @@ namespace P4 {
                                                                  \
         const IR::IndexedVector<IR::NamedExpression>* parsed =   \
             P4::P4ParserDriver::parseKvList(annotation->srcInfo, \
-                                            &annotation->body);  \
+                                            annotation->body);   \
         if (parsed != nullptr) {                                 \
             annotation->kv.append(*parsed);                      \
         }                                                        \

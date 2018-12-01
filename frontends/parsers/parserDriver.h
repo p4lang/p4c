@@ -120,24 +120,24 @@ class P4ParserDriver final : public AbstractParserDriver {
      * @returns an AST node if parsing was successful, or null otherwise.
      */
     static const IR::Vector<IR::Expression>* parseExpressionList(
-        Util::SourceInfo srcInfo,
-        IR::Vector<IR::AnnotationToken>* body);
+        const Util::SourceInfo& srcInfo,
+        const IR::Vector<IR::AnnotationToken>& body);
 
     static const IR::IndexedVector<IR::NamedExpression>* parseKvList(
-        Util::SourceInfo srcInfo,
-        IR::Vector<IR::AnnotationToken>* body);
+        const Util::SourceInfo& srcInfo,
+        const IR::Vector<IR::AnnotationToken>& body);
 
     static const IR::Expression* parseExpression(
-        Util::SourceInfo srcInfo,
-        IR::Vector<IR::AnnotationToken>* body);
+        const Util::SourceInfo& srcInfo,
+        const IR::Vector<IR::AnnotationToken>& body);
 
     static const IR::Constant* parseConstant(
-        Util::SourceInfo srcInfo,
-        IR::Vector<IR::AnnotationToken>* body);
+        const Util::SourceInfo& srcInfo,
+        const IR::Vector<IR::AnnotationToken>& body);
 
     static const IR::StringLiteral* parseStringLiteral(
-        Util::SourceInfo srcInfo,
-        IR::Vector<IR::AnnotationToken>* body);
+        const Util::SourceInfo& srcInfo,
+        const IR::Vector<IR::AnnotationToken>& body);
 
  protected:
     friend class P4::P4Lexer;
@@ -185,8 +185,8 @@ class P4ParserDriver final : public AbstractParserDriver {
 
     /// Common functionality for parsing annotation bodies.
     template<typename T> const T* parse(P4AnnotationLexer::Type type,
-                                        Util::SourceInfo srcInfo,
-                                        IR::Vector<IR::AnnotationToken>* body);
+                                        const Util::SourceInfo& srcInfo,
+                                        const IR::Vector<IR::AnnotationToken>& body);
 
     /// All P4 `error` declarations are merged together in the node, which is
     /// lazily created the first time we see an `error` declaration. (This node
