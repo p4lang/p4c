@@ -14,10 +14,7 @@ UnparsedConstant unparsedConstant(const IR::AnnotationToken* token) {
     return result;
 }
 
-P4AnnotationLexer::Token P4AnnotationLexer::yylex(P4::P4ParserDriver& driver) {
-    // Driver not used here. Suppress compiler warning.
-    (void) driver;
-
+P4AnnotationLexer::Token P4AnnotationLexer::yylex(P4::P4ParserDriver&) {
     if (needStart) {
         needStart = false;
         return P4Parser::symbol_type((P4Parser::token_type) type,
