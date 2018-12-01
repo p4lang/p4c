@@ -66,17 +66,12 @@ class ParseAnnotations : public Modifier {
     /// Produces a pass that rewrites a custom set of annotations.
     ParseAnnotations(const char* targetName, HandlerMap handlers)
             : handlers(handlers) {
-        #define SUFFIX "__ParseAnnotations"
-        int len = strlen(targetName) + strlen(SUFFIX) + 1;
-        char s[len];
-        snprintf(s, len, "%s%s", targetName, SUFFIX);
-        setName(s);
-        #undef SUFFIX
-
-        std::map<cstring, int> mymap = {{"one", 1}, {"two", 2}};
+        std::string buf = targetName;
+        buf += "__ParseAnnotations";
+        setName(buf.c_str());
     }
 
-    void postorder(IR::Annotation* annotation) override final;
+    void postorder(IR::Annotation* annotation) final;
 
     static HandlerMap standardHandlers();
 
