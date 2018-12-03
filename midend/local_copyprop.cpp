@@ -375,13 +375,14 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
                         var->live = true; });
                     if (inferForFunc)
                         inferForFunc->reads.insert(obj);
+                    return mc;
                 } else {
                     BUG_CHECK(mem->member == "setValid" || mem->member == "setInvalid",
                               "Unexpected header method %s", mem->member);
                     LOG3("header method call " << mc->method << " writes to " << obj);
-                    dropValuesUsing(obj);
                     if (inferForFunc)
-                        inferForFunc->writes.insert(obj); }
+                        inferForFunc->writes.insert(obj);
+                    return mc; }
             } else if (mem->expr->type->is<IR::Type_Stack>()) {
                 BUG_CHECK(mem->member == "push_front" || mem->member == "pop_front",
                           "Unexpected stack method %s", mem->member);
@@ -391,7 +392,8 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
                     var->live = true; });
                 if (inferForFunc) {
                     inferForFunc->reads.insert(obj);
-                    inferForFunc->writes.insert(obj); } } } }
+                    inferForFunc->writes.insert(obj); }
+                return mc; } } }
     if (auto fn = mc->method->to<IR::PathExpression>()) {
         if (actions.count(fn->path->name)) {
             LOG3("action method call " << mc->method);
