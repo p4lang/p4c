@@ -21,6 +21,7 @@ limitations under the License.
 #include <algorithm>
 #include <cstring>
 #include <set>
+#include "backends/bmv2/common/annotations.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "simpleSwitch.h"
 

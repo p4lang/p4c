@@ -26,7 +26,6 @@ limitations under the License.
 #include "frontends/p4/unusedDeclarations.h"
 #include "midend/convertEnums.h"
 #include "backends/bmv2/common/action.h"
-#include "backends/bmv2/common/annotations.h"
 #include "backends/bmv2/common/backend.h"
 #include "backends/bmv2/common/control.h"
 #include "backends/bmv2/common/deparser.h"
