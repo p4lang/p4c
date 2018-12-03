@@ -134,6 +134,16 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %token             START_PROGRAM START_EXPRESSION_LIST START_KV_LIST
                    START_EXPRESSION START_INTEGER START_STRING_LITERAL
 %token             END
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Language token definitions.
+//
+// NB: Tokens defined here should be added to the annotationToken production.
+//
+///////////////////////////////////////////////////////////////////////////////
+
 %token<Token>      UNEXPECTED_TOKEN
 %token<Token>      LE "<="
 %token<Token>      GE ">="
@@ -181,6 +191,9 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 
 %token<cstring> IDENTIFIER TYPE_IDENTIFIER STRING_LITERAL
 %token<UnparsedConstant>  INTEGER
+
+// End of token definitions ///////////////////////////////////////////////////
+
 
 %type<IR::ID*>              name nonTypeName nonTableKwName
 %type<IR::Direction>        direction
