@@ -375,6 +375,8 @@ annotations
 annotation
     : "@" name                        { $$ = new IR::Annotation(@1, *$2, {}); }
     | "@" name "(" annotationBody ")" { $$ = new IR::Annotation(@1, *$2, *$4); }
+    // Experimental: backwards compatibility with P4-14 pragmas (which
+    // themselves are experimental!)
     | PRAGMA name annotationBody END_PRAGMA
                                       { $$ = new IR::Annotation(@1, *$2, *$3); }
     ;
