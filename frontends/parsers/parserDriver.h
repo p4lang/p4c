@@ -81,6 +81,9 @@ class AbstractParserDriver {
     /// The location of the most recent token.
     Util::SourceInfo yylloc;
 
+    /// Scratch storage for the lexer to remember its previous state.
+    int saveState = -1;
+
  private:
     /// The line number from the most recent #line directive.
     int lineDirectiveLine = 0;
@@ -260,9 +263,6 @@ class V1ParserDriver final : public P4::AbstractParserDriver {
 
     /// The root of the IR tree we're constructing.
     IR::V1Program* global = nullptr;
-
-    /// Scratch storage for the lexer to remember its previous state.
-    int saveState = -1;
 
  private:
     /// The currently active pragmas.

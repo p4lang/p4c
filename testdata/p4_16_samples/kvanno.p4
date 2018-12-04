@@ -1,4 +1,4 @@
-@kvanno(
+@pkginfo(
 name="x",
 value=0
 )

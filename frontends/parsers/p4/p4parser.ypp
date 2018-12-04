@@ -144,7 +144,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-%token<Token>      UNEXPECTED_TOKEN
+%token<Token>      UNEXPECTED_TOKEN END_PRAGMA
 %token<Token>      LE "<="
 %token<Token>      GE ">="
 %token<Token>      SHL "<<"
@@ -186,8 +186,8 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %token<Token>      TRUE FALSE THIS
 %token<Token>      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DEFAULT
                    ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
-                   INT KEY SELECT MATCH_KIND TYPE OUT PACKAGE PARSER RETURN STATE STRUCT
-                   SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
+                   INT KEY SELECT MATCH_KIND TYPE OUT PACKAGE PARSER PRAGMA RETURN STATE
+                   STRUCT SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
 
 %token<cstring> IDENTIFIER TYPE_IDENTIFIER STRING_LITERAL
 %token<UnparsedConstant>  INTEGER
@@ -375,6 +375,8 @@ annotations
 annotation
     : "@" name                        { $$ = new IR::Annotation(@1, *$2, {}); }
     | "@" name "(" annotationBody ")" { $$ = new IR::Annotation(@1, *$2, *$4); }
+    | PRAGMA name annotationBody END_PRAGMA
+                                      { $$ = new IR::Annotation(@1, *$2, *$3); }
     ;
 
 annotationBody
@@ -392,6 +394,7 @@ annotationBody
 
 annotationToken
     : UNEXPECTED_TOKEN { $$ = $1; }
+    | END_PRAGMA       { $$ = $1; }
     | ABSTRACT         { $$ = $1; }
     | ACTION           { $$ = $1; }
     | ACTIONS          { $$ = $1; }
@@ -420,6 +423,7 @@ annotationToken
     | OUT              { $$ = $1; }
     | PARSER           { $$ = $1; }
     | PACKAGE          { $$ = $1; }
+    | PRAGMA           { $$ = $1; }
     | RETURN           { $$ = $1; }
     | SELECT           { $$ = $1; }
     | STATE            { $$ = $1; }

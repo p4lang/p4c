@@ -10,6 +10,7 @@ using Parser = P4::P4Parser;
 #define YY_DECL Parser::symbol_type P4::P4Lexer::yylex(P4::P4ParserDriver& driver)
 
 #define YY_USER_ACTION driver.onReadToken(yytext);
+#define YY_USER_INIT driver.saveState = NORMAL
 #define yyterminate() return Parser::make_END(driver.yylloc);
 
 #define makeToken(symbol) \
@@ -39,7 +40,7 @@ using Parser = P4::P4Parser;
 
 %x COMMENT STRING
 %x LINE1 LINE2 LINE3
-%s NORMAL
+%s NORMAL PRAGMA_LINE
 
 
 %%
@@ -54,12 +55,26 @@ using Parser = P4::P4Parser;
 %}
 
 [ \t\r]+              ;
+<PRAGMA_LINE>[\n]     { BEGIN INITIAL;
+                        driver.saveState = NORMAL;
+                        return makeToken(END_PRAGMA); }
 [\n]                  { BEGIN INITIAL; }
 "//".*                { driver.onReadComment(yytext+2, true); }
 "/*"                  { BEGIN COMMENT; }
 <COMMENT>([^*]|[*]+[^/*])*[*]+"/" {
                          /* http://www.cs.dartmouth.edu/~mckeeman/cs118/assignments/comment.html */
-                         driver.onReadComment(yytext, false); BEGIN NORMAL; }
+                         driver.onReadComment(yytext, false);
+                         if (driver.saveState == PRAGMA_LINE) {
+                             // If the comment contains a newline, end the pragma line.
+                             for (int i = 0; i < strlen(yytext); i++) {
+                                 if (yytext[i] == '\n') {
+                                     driver.saveState = NORMAL;
+                                     BEGIN driver.saveState;
+                                     return makeToken(END_PRAGMA);
+                                 }
+                             }
+                         }
+                         BEGIN driver.saveState; }
 
 <INITIAL>"#line"      { BEGIN(LINE1); }
 <INITIAL>"# "         { BEGIN(LINE1); }
@@ -75,57 +90,60 @@ using Parser = P4::P4Parser;
 \"              { BEGIN(STRING); driver.stringLiteral = ""; }
 <STRING>\\\"    { driver.stringLiteral += yytext; }
 <STRING>\\\\    { driver.stringLiteral += yytext; }
-<STRING>\"      { BEGIN(INITIAL);
+<STRING>\"      { BEGIN(driver.saveState);
                   auto string = cstring(driver.stringLiteral);
                   return Parser::make_STRING_LITERAL(string, driver.yylloc); }
 <STRING>.       { driver.stringLiteral += yytext; }
 <STRING>\n      { driver.stringLiteral += yytext; }
 
-"abstract"      { BEGIN(NORMAL); return makeToken(ABSTRACT); }
-"action"        { BEGIN(NORMAL); return makeToken(ACTION); }
-"actions"       { BEGIN(NORMAL); return makeToken(ACTIONS); }
-"apply"         { BEGIN(NORMAL); return makeToken(APPLY); }
-"bool"          { BEGIN(NORMAL); return makeToken(BOOL); }
-"bit"           { BEGIN(NORMAL); return makeToken(BIT); }
-"const"         { BEGIN(NORMAL); return makeToken(CONST); }
-"control"       { BEGIN(NORMAL); return makeToken(CONTROL); }
-"default"       { BEGIN(NORMAL); return makeToken(DEFAULT); }
-"else"          { BEGIN(NORMAL); return makeToken(ELSE); }
-"entries"       { BEGIN(NORMAL); return makeToken(ENTRIES); }
-"enum"          { BEGIN(NORMAL); return makeToken(ENUM); }
-"error"         { BEGIN(NORMAL); return makeToken(ERROR); }
-"exit"          { BEGIN(NORMAL); return makeToken(EXIT); }
-"extern"        { BEGIN(NORMAL); return makeToken(EXTERN); }
-"false"         { BEGIN(NORMAL); return makeToken(FALSE); }
-"header"        { BEGIN(NORMAL); return makeToken(HEADER); }
-"header_union"  { BEGIN(NORMAL); return makeToken(HEADER_UNION); }
-"if"            { BEGIN(NORMAL); return makeToken(IF); }
-"in"            { BEGIN(NORMAL); return makeToken(IN); }
-"inout"         { BEGIN(NORMAL); return makeToken(INOUT); }
-"int"           { BEGIN(NORMAL); return makeToken(INT); }
-"key"           { BEGIN(NORMAL); return makeToken(KEY); }
-"match_kind"    { BEGIN(NORMAL); return makeToken(MATCH_KIND); }
-"type"          { BEGIN(NORMAL); return makeToken(TYPE); }
-"out"           { BEGIN(NORMAL); return makeToken(OUT); }
-"parser"        { BEGIN(NORMAL); return makeToken(PARSER); }
-"package"       { BEGIN(NORMAL); return makeToken(PACKAGE); }
-"return"        { BEGIN(NORMAL); return makeToken(RETURN); }
-"select"        { BEGIN(NORMAL); return makeToken(SELECT); }
-"state"         { BEGIN(NORMAL); return makeToken(STATE); }
-"struct"        { BEGIN(NORMAL); return makeToken(STRUCT); }
-"switch"        { BEGIN(NORMAL); return makeToken(SWITCH); }
-"table"         { BEGIN(NORMAL); return makeToken(TABLE); }
-"this"          { BEGIN(NORMAL); return makeToken(THIS); }
-"transition"    { BEGIN(NORMAL); return makeToken(TRANSITION); }
-"true"          { BEGIN(NORMAL); return makeToken(TRUE); }
-"tuple"         { BEGIN(NORMAL); return makeToken(TUPLE); }
-"typedef"       { BEGIN(NORMAL); return makeToken(TYPEDEF); }
-"varbit"        { BEGIN(NORMAL); return makeToken(VARBIT); }
-"value_set"     { BEGIN(NORMAL); return makeToken(VALUESET); }
-"void"          { BEGIN(NORMAL); return makeToken(VOID); }
-"_"             { BEGIN(NORMAL); return makeToken(DONTCARE); }
+"@pragma"       { BEGIN((driver.saveState = PRAGMA_LINE));
+                  return makeToken(PRAGMA); }
+
+"abstract"      { BEGIN(driver.saveState); return makeToken(ABSTRACT); }
+"action"        { BEGIN(driver.saveState); return makeToken(ACTION); }
+"actions"       { BEGIN(driver.saveState); return makeToken(ACTIONS); }
+"apply"         { BEGIN(driver.saveState); return makeToken(APPLY); }
+"bool"          { BEGIN(driver.saveState); return makeToken(BOOL); }
+"bit"           { BEGIN(driver.saveState); return makeToken(BIT); }
+"const"         { BEGIN(driver.saveState); return makeToken(CONST); }
+"control"       { BEGIN(driver.saveState); return makeToken(CONTROL); }
+"default"       { BEGIN(driver.saveState); return makeToken(DEFAULT); }
+"else"          { BEGIN(driver.saveState); return makeToken(ELSE); }
+"entries"       { BEGIN(driver.saveState); return makeToken(ENTRIES); }
+"enum"          { BEGIN(driver.saveState); return makeToken(ENUM); }
+"error"         { BEGIN(driver.saveState); return makeToken(ERROR); }
+"exit"          { BEGIN(driver.saveState); return makeToken(EXIT); }
+"extern"        { BEGIN(driver.saveState); return makeToken(EXTERN); }
+"false"         { BEGIN(driver.saveState); return makeToken(FALSE); }
+"header"        { BEGIN(driver.saveState); return makeToken(HEADER); }
+"header_union"  { BEGIN(driver.saveState); return makeToken(HEADER_UNION); }
+"if"            { BEGIN(driver.saveState); return makeToken(IF); }
+"in"            { BEGIN(driver.saveState); return makeToken(IN); }
+"inout"         { BEGIN(driver.saveState); return makeToken(INOUT); }
+"int"           { BEGIN(driver.saveState); return makeToken(INT); }
+"key"           { BEGIN(driver.saveState); return makeToken(KEY); }
+"match_kind"    { BEGIN(driver.saveState); return makeToken(MATCH_KIND); }
+"type"          { BEGIN(driver.saveState); return makeToken(TYPE); }
+"out"           { BEGIN(driver.saveState); return makeToken(OUT); }
+"parser"        { BEGIN(driver.saveState); return makeToken(PARSER); }
+"package"       { BEGIN(driver.saveState); return makeToken(PACKAGE); }
+"return"        { BEGIN(driver.saveState); return makeToken(RETURN); }
+"select"        { BEGIN(driver.saveState); return makeToken(SELECT); }
+"state"         { BEGIN(driver.saveState); return makeToken(STATE); }
+"struct"        { BEGIN(driver.saveState); return makeToken(STRUCT); }
+"switch"        { BEGIN(driver.saveState); return makeToken(SWITCH); }
+"table"         { BEGIN(driver.saveState); return makeToken(TABLE); }
+"this"          { BEGIN(driver.saveState); return makeToken(THIS); }
+"transition"    { BEGIN(driver.saveState); return makeToken(TRANSITION); }
+"true"          { BEGIN(driver.saveState); return makeToken(TRUE); }
+"tuple"         { BEGIN(driver.saveState); return makeToken(TUPLE); }
+"typedef"       { BEGIN(driver.saveState); return makeToken(TYPEDEF); }
+"varbit"        { BEGIN(driver.saveState); return makeToken(VARBIT); }
+"value_set"     { BEGIN(driver.saveState); return makeToken(VALUESET); }
+"void"          { BEGIN(driver.saveState); return makeToken(VOID); }
+"_"             { BEGIN(driver.saveState); return makeToken(DONTCARE); }
 [A-Za-z_][A-Za-z0-9_]* {
-                  BEGIN(NORMAL);
+                  BEGIN(driver.saveState);
                   cstring name = yytext;
                   Util::ProgramStructure::SymbolKind kind =
                       driver.structure->lookupIdentifier(name);
@@ -142,79 +160,79 @@ using Parser = P4::P4Parser;
                   }
                 }
 
-0[xX][0-9a-fA-F_]+ { BEGIN(NORMAL);
+0[xX][0-9a-fA-F_]+ { BEGIN(driver.saveState);
                      UnparsedConstant constant{yytext, 2, 16, false};
                      return Parser::make_INTEGER(constant, driver.yylloc); }
-0[dD][0-9_]+       { BEGIN(NORMAL);
+0[dD][0-9_]+       { BEGIN(driver.saveState);
                      UnparsedConstant constant{yytext, 2, 10, false};
                      return Parser::make_INTEGER(constant, driver.yylloc); }
-0[oO][0-7_]+       { BEGIN(NORMAL);
+0[oO][0-7_]+       { BEGIN(driver.saveState);
                      UnparsedConstant constant{yytext, 2, 8, false};
                      return Parser::make_INTEGER(constant, driver.yylloc); }
-0[bB][01_]+        { BEGIN(NORMAL);
+0[bB][01_]+        { BEGIN(driver.saveState);
                      UnparsedConstant constant{yytext, 2, 2, false};
                      return Parser::make_INTEGER(constant, driver.yylloc); }
-[0-9][0-9_]*       { BEGIN(NORMAL);
+[0-9][0-9_]*       { BEGIN(driver.saveState);
                      UnparsedConstant constant{yytext, 0, 10, false};
                      return Parser::make_INTEGER(constant, driver.yylloc); }
 
-[0-9]+[ws]0[xX][0-9a-fA-F_]+ { BEGIN(NORMAL);
+[0-9]+[ws]0[xX][0-9a-fA-F_]+ { BEGIN(driver.saveState);
                                UnparsedConstant constant{yytext, 2, 16, true};
                                return Parser::make_INTEGER(constant, driver.yylloc); }
-[0-9]+[ws]0[dD][0-9_]+  { BEGIN(NORMAL);
+[0-9]+[ws]0[dD][0-9_]+  { BEGIN(driver.saveState);
                           UnparsedConstant constant{yytext, 2, 10, true};
                           return Parser::make_INTEGER(constant, driver.yylloc); }
-[0-9]+[ws]0[oO][0-7_]+  { BEGIN(NORMAL);
+[0-9]+[ws]0[oO][0-7_]+  { BEGIN(driver.saveState);
                           UnparsedConstant constant{yytext, 2, 8, true};
                           return Parser::make_INTEGER(constant, driver.yylloc); }
-[0-9]+[ws]0[bB][01_]+   { BEGIN(NORMAL);
+[0-9]+[ws]0[bB][01_]+   { BEGIN(driver.saveState);
                           UnparsedConstant constant{yytext, 2, 2, true};
                           return Parser::make_INTEGER(constant, driver.yylloc); }
-[0-9]+[ws][0-9_]+       { BEGIN(NORMAL);
+[0-9]+[ws][0-9_]+       { BEGIN(driver.saveState);
                           UnparsedConstant constant{yytext, 0, 10, true};
                           return Parser::make_INTEGER(constant, driver.yylloc); }
 
-"&&&"           { BEGIN(NORMAL); return makeToken(MASK); }
-".."            { BEGIN(NORMAL); return makeToken(RANGE); }
-"<<"            { BEGIN(NORMAL); return makeToken(SHL); }
-"&&"            { BEGIN(NORMAL); return makeToken(AND); }
-"||"            { BEGIN(NORMAL); return makeToken(OR); }
-"=="            { BEGIN(NORMAL); return makeToken(EQ); }
-"!="            { BEGIN(NORMAL); return makeToken(NE); }
-">="            { BEGIN(NORMAL); return makeToken(GE); }
-"<="            { BEGIN(NORMAL); return makeToken(LE); }
-"++"            { BEGIN(NORMAL); return makeToken(PP); }
+"&&&"           { BEGIN(driver.saveState); return makeToken(MASK); }
+".."            { BEGIN(driver.saveState); return makeToken(RANGE); }
+"<<"            { BEGIN(driver.saveState); return makeToken(SHL); }
+"&&"            { BEGIN(driver.saveState); return makeToken(AND); }
+"||"            { BEGIN(driver.saveState); return makeToken(OR); }
+"=="            { BEGIN(driver.saveState); return makeToken(EQ); }
+"!="            { BEGIN(driver.saveState); return makeToken(NE); }
+">="            { BEGIN(driver.saveState); return makeToken(GE); }
+"<="            { BEGIN(driver.saveState); return makeToken(LE); }
+"++"            { BEGIN(driver.saveState); return makeToken(PP); }
 
-"+"            { BEGIN(NORMAL); return makeToken(PLUS); }
-"|+|"          { BEGIN(NORMAL); return makeToken(PLUS_SAT); }
-"-"            { BEGIN(NORMAL); return makeToken(MINUS); }
-"|-|"          { BEGIN(NORMAL); return makeToken(MINUS_SAT); }
-"*"            { BEGIN(NORMAL); return makeToken(MUL); }
-"/"            { BEGIN(NORMAL); return makeToken(DIV); }
-"%"            { BEGIN(NORMAL); return makeToken(MOD); }
+"+"            { BEGIN(driver.saveState); return makeToken(PLUS); }
+"|+|"          { BEGIN(driver.saveState); return makeToken(PLUS_SAT); }
+"-"            { BEGIN(driver.saveState); return makeToken(MINUS); }
+"|-|"          { BEGIN(driver.saveState); return makeToken(MINUS_SAT); }
+"*"            { BEGIN(driver.saveState); return makeToken(MUL); }
+"/"            { BEGIN(driver.saveState); return makeToken(DIV); }
+"%"            { BEGIN(driver.saveState); return makeToken(MOD); }
 
-"|"            { BEGIN(NORMAL); return makeToken(BIT_OR); }
-"&"            { BEGIN(NORMAL); return makeToken(BIT_AND); }
-"^"            { BEGIN(NORMAL); return makeToken(BIT_XOR); }
-"~"            { BEGIN(NORMAL); return makeToken(COMPLEMENT); }
+"|"            { BEGIN(driver.saveState); return makeToken(BIT_OR); }
+"&"            { BEGIN(driver.saveState); return makeToken(BIT_AND); }
+"^"            { BEGIN(driver.saveState); return makeToken(BIT_XOR); }
+"~"            { BEGIN(driver.saveState); return makeToken(COMPLEMENT); }
 
-"("            { BEGIN(NORMAL); return makeToken(L_PAREN); }
-")"            { BEGIN(NORMAL); return makeToken(R_PAREN); }
-"["            { BEGIN(NORMAL); return makeToken(L_BRACKET); }
-"]"            { BEGIN(NORMAL); return makeToken(R_BRACKET); }
-"{"            { BEGIN(NORMAL); return makeToken(L_BRACE); }
-"}"            { BEGIN(NORMAL); return makeToken(R_BRACE); }
-"<"            { BEGIN(NORMAL); return makeToken(L_ANGLE); }
-">"            { BEGIN(NORMAL); return makeToken(R_ANGLE); }
+"("            { BEGIN(driver.saveState); return makeToken(L_PAREN); }
+")"            { BEGIN(driver.saveState); return makeToken(R_PAREN); }
+"["            { BEGIN(driver.saveState); return makeToken(L_BRACKET); }
+"]"            { BEGIN(driver.saveState); return makeToken(R_BRACKET); }
+"{"            { BEGIN(driver.saveState); return makeToken(L_BRACE); }
+"}"            { BEGIN(driver.saveState); return makeToken(R_BRACE); }
+"<"            { BEGIN(driver.saveState); return makeToken(L_ANGLE); }
+">"            { BEGIN(driver.saveState); return makeToken(R_ANGLE); }
 
-"!"            { BEGIN(NORMAL); return makeToken(NOT); }
-":"            { BEGIN(NORMAL); return makeToken(COLON); }
-","            { BEGIN(NORMAL); return makeToken(COMMA); }
-"?"            { BEGIN(NORMAL); return makeToken(QUESTION); }
-"."            { BEGIN(NORMAL); return makeToken(DOT); }
-"="            { BEGIN(NORMAL); return makeToken(ASSIGN); }
-";"            { BEGIN(NORMAL); return makeToken(SEMICOLON); }
-"@"            { BEGIN(NORMAL); return makeToken(AT); }
+"!"            { BEGIN(driver.saveState); return makeToken(NOT); }
+":"            { BEGIN(driver.saveState); return makeToken(COLON); }
+","            { BEGIN(driver.saveState); return makeToken(COMMA); }
+"?"            { BEGIN(driver.saveState); return makeToken(QUESTION); }
+"."            { BEGIN(driver.saveState); return makeToken(DOT); }
+"="            { BEGIN(driver.saveState); return makeToken(ASSIGN); }
+";"            { BEGIN(driver.saveState); return makeToken(SEMICOLON); }
+"@"            { BEGIN(driver.saveState); return makeToken(AT); }
 
 <*>.|\n        { return makeToken(UNEXPECTED_TOKEN); }
 
