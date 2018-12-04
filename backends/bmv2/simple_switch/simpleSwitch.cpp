@@ -21,6 +21,7 @@ limitations under the License.
 #include <algorithm>
 #include <cstring>
 #include <set>
+#include "backends/bmv2/common/annotations.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "simpleSwitch.h"
 
@@ -852,6 +853,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     auto program = tlb->getProgram();
     // These passes are logically bmv2-specific
     PassManager simplify = {
+        new ParseAnnotations(),
         new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
         new P4::SynthesizeActions(refMap, typeMap,

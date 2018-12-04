@@ -10,7 +10,13 @@ using Parser = P4::P4Parser;
 #define YY_DECL Parser::symbol_type P4::P4Lexer::yylex(P4::P4ParserDriver& driver)
 
 #define YY_USER_ACTION driver.onReadToken(yytext);
+#define YY_USER_INIT driver.saveState = NORMAL
 #define yyterminate() return Parser::make_END(driver.yylloc);
+
+#define makeToken(symbol) \
+    Parser::make_ ## symbol( \
+        P4::Token(Parser::token::TOK_ ## symbol, yytext), \
+        driver.yylloc)
 
 // Silence the warnings triggered by the code flex generates.
 #pragma GCC diagnostic ignored "-Wpragmas"
@@ -34,18 +40,41 @@ using Parser = P4::P4Parser;
 
 %x COMMENT STRING
 %x LINE1 LINE2 LINE3
-%s NORMAL
+%s NORMAL PRAGMA_LINE
 
 
 %%
 
+%{
+    // Insert a token at the beginning of the stream to tell the parser that
+    // the stream should be parsed as a program.
+    if (needStartToken) {
+        needStartToken = false;
+        return Parser::make_START_PROGRAM(driver.yylloc);
+    }
+%}
+
 [ \t\r]+              ;
+<PRAGMA_LINE>[\n]     { BEGIN INITIAL;
+                        driver.saveState = NORMAL;
+                        return makeToken(END_PRAGMA); }
 [\n]                  { BEGIN INITIAL; }
 "//".*                { driver.onReadComment(yytext+2, true); }
 "/*"                  { BEGIN COMMENT; }
 <COMMENT>([^*]|[*]+[^/*])*[*]+"/" {
                          /* http://www.cs.dartmouth.edu/~mckeeman/cs118/assignments/comment.html */
-                         driver.onReadComment(yytext, false); BEGIN NORMAL; }
+                         driver.onReadComment(yytext, false);
+                         if (driver.saveState == PRAGMA_LINE) {
+                             // If the comment contains a newline, end the pragma line.
+                             for (int i = 0; i < strlen(yytext); i++) {
+                                 if (yytext[i] == '\n') {
+                                     driver.saveState = NORMAL;
+                                     BEGIN driver.saveState;
+                                     return makeToken(END_PRAGMA);
+                                 }
+                             }
+                         }
+                         BEGIN driver.saveState; }
 
 <INITIAL>"#line"      { BEGIN(LINE1); }
 <INITIAL>"# "         { BEGIN(LINE1); }
@@ -61,57 +90,60 @@ using Parser = P4::P4Parser;
 \"              { BEGIN(STRING); driver.stringLiteral = ""; }
 <STRING>\\\"    { driver.stringLiteral += yytext; }
 <STRING>\\\\    { driver.stringLiteral += yytext; }
-<STRING>\"      { BEGIN(INITIAL);
+<STRING>\"      { BEGIN(driver.saveState);
                   auto string = cstring(driver.stringLiteral);
                   return Parser::make_STRING_LITERAL(string, driver.yylloc); }
 <STRING>.       { driver.stringLiteral += yytext; }
 <STRING>\n      { driver.stringLiteral += yytext; }
 
-"abstract"      { BEGIN(NORMAL); return Parser::make_ABSTRACT(driver.yylloc); }
-"action"        { BEGIN(NORMAL); return Parser::make_ACTION(driver.yylloc); }
-"actions"       { BEGIN(NORMAL); return Parser::make_ACTIONS(driver.yylloc); }
-"apply"         { BEGIN(NORMAL); return Parser::make_APPLY(driver.yylloc); }
-"bool"          { BEGIN(NORMAL); return Parser::make_BOOL(driver.yylloc); }
-"bit"           { BEGIN(NORMAL); return Parser::make_BIT(driver.yylloc); }
-"const"         { BEGIN(NORMAL); return Parser::make_CONST(driver.yylloc); }
-"control"       { BEGIN(NORMAL); return Parser::make_CONTROL(driver.yylloc); }
-"default"       { BEGIN(NORMAL); return Parser::make_DEFAULT(driver.yylloc); }
-"else"          { BEGIN(NORMAL); return Parser::make_ELSE(driver.yylloc); }
-"entries"       { BEGIN(NORMAL); return Parser::make_ENTRIES(driver.yylloc); }
-"enum"          { BEGIN(NORMAL); return Parser::make_ENUM(driver.yylloc); }
-"error"         { BEGIN(NORMAL); return Parser::make_ERROR(driver.yylloc); }
-"exit"          { BEGIN(NORMAL); return Parser::make_EXIT(driver.yylloc); }
-"extern"        { BEGIN(NORMAL); return Parser::make_EXTERN(driver.yylloc); }
-"false"         { BEGIN(NORMAL); return Parser::make_FALSE(driver.yylloc); }
-"header"        { BEGIN(NORMAL); return Parser::make_HEADER(driver.yylloc); }
-"header_union"  { BEGIN(NORMAL); return Parser::make_HEADER_UNION(driver.yylloc); }
-"if"            { BEGIN(NORMAL); return Parser::make_IF(driver.yylloc); }
-"in"            { BEGIN(NORMAL); return Parser::make_IN(driver.yylloc); }
-"inout"         { BEGIN(NORMAL); return Parser::make_INOUT(driver.yylloc); }
-"int"           { BEGIN(NORMAL); return Parser::make_INT(driver.yylloc); }
-"key"           { BEGIN(NORMAL); return Parser::make_KEY(driver.yylloc); }
-"match_kind"    { BEGIN(NORMAL); return Parser::make_MATCH_KIND(driver.yylloc); }
-"type"          { BEGIN(NORMAL); return Parser::make_TYPE(driver.yylloc); }
-"out"           { BEGIN(NORMAL); return Parser::make_OUT(driver.yylloc); }
-"parser"        { BEGIN(NORMAL); return Parser::make_PARSER(driver.yylloc); }
-"package"       { BEGIN(NORMAL); return Parser::make_PACKAGE(driver.yylloc); }
-"return"        { BEGIN(NORMAL); return Parser::make_RETURN(driver.yylloc); }
-"select"        { BEGIN(NORMAL); return Parser::make_SELECT(driver.yylloc); }
-"state"         { BEGIN(NORMAL); return Parser::make_STATE(driver.yylloc); }
-"struct"        { BEGIN(NORMAL); return Parser::make_STRUCT(driver.yylloc); }
-"switch"        { BEGIN(NORMAL); return Parser::make_SWITCH(driver.yylloc); }
-"table"         { BEGIN(NORMAL); return Parser::make_TABLE(driver.yylloc); }
-"this"          { BEGIN(NORMAL); return Parser::make_THIS(driver.yylloc); }
-"transition"    { BEGIN(NORMAL); return Parser::make_TRANSITION(driver.yylloc); }
-"true"          { BEGIN(NORMAL); return Parser::make_TRUE(driver.yylloc); }
-"tuple"         { BEGIN(NORMAL); return Parser::make_TUPLE(driver.yylloc); }
-"typedef"       { BEGIN(NORMAL); return Parser::make_TYPEDEF(driver.yylloc); }
-"varbit"        { BEGIN(NORMAL); return Parser::make_VARBIT(driver.yylloc); }
-"value_set"     { BEGIN(NORMAL); return Parser::make_VALUESET(driver.yylloc); }
-"void"          { BEGIN(NORMAL); return Parser::make_VOID(driver.yylloc); }
-"_"             { BEGIN(NORMAL); return Parser::make_DONTCARE(driver.yylloc); }
+"@pragma"       { BEGIN((driver.saveState = PRAGMA_LINE));
+                  return makeToken(PRAGMA); }
+
+"abstract"      { BEGIN(driver.saveState); return makeToken(ABSTRACT); }
+"action"        { BEGIN(driver.saveState); return makeToken(ACTION); }
+"actions"       { BEGIN(driver.saveState); return makeToken(ACTIONS); }
+"apply"         { BEGIN(driver.saveState); return makeToken(APPLY); }
+"bool"          { BEGIN(driver.saveState); return makeToken(BOOL); }
+"bit"           { BEGIN(driver.saveState); return makeToken(BIT); }
+"const"         { BEGIN(driver.saveState); return makeToken(CONST); }
+"control"       { BEGIN(driver.saveState); return makeToken(CONTROL); }
+"default"       { BEGIN(driver.saveState); return makeToken(DEFAULT); }
+"else"          { BEGIN(driver.saveState); return makeToken(ELSE); }
+"entries"       { BEGIN(driver.saveState); return makeToken(ENTRIES); }
+"enum"          { BEGIN(driver.saveState); return makeToken(ENUM); }
+"error"         { BEGIN(driver.saveState); return makeToken(ERROR); }
+"exit"          { BEGIN(driver.saveState); return makeToken(EXIT); }
+"extern"        { BEGIN(driver.saveState); return makeToken(EXTERN); }
+"false"         { BEGIN(driver.saveState); return makeToken(FALSE); }
+"header"        { BEGIN(driver.saveState); return makeToken(HEADER); }
+"header_union"  { BEGIN(driver.saveState); return makeToken(HEADER_UNION); }
+"if"            { BEGIN(driver.saveState); return makeToken(IF); }
+"in"            { BEGIN(driver.saveState); return makeToken(IN); }
+"inout"         { BEGIN(driver.saveState); return makeToken(INOUT); }
+"int"           { BEGIN(driver.saveState); return makeToken(INT); }
+"key"           { BEGIN(driver.saveState); return makeToken(KEY); }
+"match_kind"    { BEGIN(driver.saveState); return makeToken(MATCH_KIND); }
+"type"          { BEGIN(driver.saveState); return makeToken(TYPE); }
+"out"           { BEGIN(driver.saveState); return makeToken(OUT); }
+"parser"        { BEGIN(driver.saveState); return makeToken(PARSER); }
+"package"       { BEGIN(driver.saveState); return makeToken(PACKAGE); }
+"return"        { BEGIN(driver.saveState); return makeToken(RETURN); }
+"select"        { BEGIN(driver.saveState); return makeToken(SELECT); }
+"state"         { BEGIN(driver.saveState); return makeToken(STATE); }
+"struct"        { BEGIN(driver.saveState); return makeToken(STRUCT); }
+"switch"        { BEGIN(driver.saveState); return makeToken(SWITCH); }
+"table"         { BEGIN(driver.saveState); return makeToken(TABLE); }
+"this"          { BEGIN(driver.saveState); return makeToken(THIS); }
+"transition"    { BEGIN(driver.saveState); return makeToken(TRANSITION); }
+"true"          { BEGIN(driver.saveState); return makeToken(TRUE); }
+"tuple"         { BEGIN(driver.saveState); return makeToken(TUPLE); }
+"typedef"       { BEGIN(driver.saveState); return makeToken(TYPEDEF); }
+"varbit"        { BEGIN(driver.saveState); return makeToken(VARBIT); }
+"value_set"     { BEGIN(driver.saveState); return makeToken(VALUESET); }
+"void"          { BEGIN(driver.saveState); return makeToken(VOID); }
+"_"             { BEGIN(driver.saveState); return makeToken(DONTCARE); }
 [A-Za-z_][A-Za-z0-9_]* {
-                  BEGIN(NORMAL);
+                  BEGIN(driver.saveState);
                   cstring name = yytext;
                   Util::ProgramStructure::SymbolKind kind =
                       driver.structure->lookupIdentifier(name);
@@ -128,80 +160,80 @@ using Parser = P4::P4Parser;
                   }
                 }
 
-0[xX][0-9a-fA-F_]+ { BEGIN(NORMAL);
+0[xX][0-9a-fA-F_]+ { BEGIN(driver.saveState);
                      UnparsedConstant constant{yytext, 2, 16, false};
                      return Parser::make_INTEGER(constant, driver.yylloc); }
-0[dD][0-9_]+       { BEGIN(NORMAL);
+0[dD][0-9_]+       { BEGIN(driver.saveState);
                      UnparsedConstant constant{yytext, 2, 10, false};
                      return Parser::make_INTEGER(constant, driver.yylloc); }
-0[oO][0-7_]+       { BEGIN(NORMAL);
+0[oO][0-7_]+       { BEGIN(driver.saveState);
                      UnparsedConstant constant{yytext, 2, 8, false};
                      return Parser::make_INTEGER(constant, driver.yylloc); }
-0[bB][01_]+        { BEGIN(NORMAL);
+0[bB][01_]+        { BEGIN(driver.saveState);
                      UnparsedConstant constant{yytext, 2, 2, false};
                      return Parser::make_INTEGER(constant, driver.yylloc); }
-[0-9][0-9_]*       { BEGIN(NORMAL);
+[0-9][0-9_]*       { BEGIN(driver.saveState);
                      UnparsedConstant constant{yytext, 0, 10, false};
                      return Parser::make_INTEGER(constant, driver.yylloc); }
 
-[0-9]+[ws]0[xX][0-9a-fA-F_]+ { BEGIN(NORMAL);
+[0-9]+[ws]0[xX][0-9a-fA-F_]+ { BEGIN(driver.saveState);
                                UnparsedConstant constant{yytext, 2, 16, true};
                                return Parser::make_INTEGER(constant, driver.yylloc); }
-[0-9]+[ws]0[dD][0-9_]+  { BEGIN(NORMAL);
+[0-9]+[ws]0[dD][0-9_]+  { BEGIN(driver.saveState);
                           UnparsedConstant constant{yytext, 2, 10, true};
                           return Parser::make_INTEGER(constant, driver.yylloc); }
-[0-9]+[ws]0[oO][0-7_]+  { BEGIN(NORMAL);
+[0-9]+[ws]0[oO][0-7_]+  { BEGIN(driver.saveState);
                           UnparsedConstant constant{yytext, 2, 8, true};
                           return Parser::make_INTEGER(constant, driver.yylloc); }
-[0-9]+[ws]0[bB][01_]+   { BEGIN(NORMAL);
+[0-9]+[ws]0[bB][01_]+   { BEGIN(driver.saveState);
                           UnparsedConstant constant{yytext, 2, 2, true};
                           return Parser::make_INTEGER(constant, driver.yylloc); }
-[0-9]+[ws][0-9_]+       { BEGIN(NORMAL);
+[0-9]+[ws][0-9_]+       { BEGIN(driver.saveState);
                           UnparsedConstant constant{yytext, 0, 10, true};
                           return Parser::make_INTEGER(constant, driver.yylloc); }
 
-"&&&"           { BEGIN(NORMAL); return Parser::make_MASK(driver.yylloc); }
-".."            { BEGIN(NORMAL); return Parser::make_RANGE(driver.yylloc); }
-"<<"            { BEGIN(NORMAL); return Parser::make_SHL(driver.yylloc); }
-"&&"            { BEGIN(NORMAL); return Parser::make_AND(driver.yylloc); }
-"||"            { BEGIN(NORMAL); return Parser::make_OR(driver.yylloc); }
-"=="            { BEGIN(NORMAL); return Parser::make_EQ(driver.yylloc); }
-"!="            { BEGIN(NORMAL); return Parser::make_NE(driver.yylloc); }
-">="            { BEGIN(NORMAL); return Parser::make_GE(driver.yylloc); }
-"<="            { BEGIN(NORMAL); return Parser::make_LE(driver.yylloc); }
-"++"            { BEGIN(NORMAL); return Parser::make_PP(driver.yylloc); }
+"&&&"           { BEGIN(driver.saveState); return makeToken(MASK); }
+".."            { BEGIN(driver.saveState); return makeToken(RANGE); }
+"<<"            { BEGIN(driver.saveState); return makeToken(SHL); }
+"&&"            { BEGIN(driver.saveState); return makeToken(AND); }
+"||"            { BEGIN(driver.saveState); return makeToken(OR); }
+"=="            { BEGIN(driver.saveState); return makeToken(EQ); }
+"!="            { BEGIN(driver.saveState); return makeToken(NE); }
+">="            { BEGIN(driver.saveState); return makeToken(GE); }
+"<="            { BEGIN(driver.saveState); return makeToken(LE); }
+"++"            { BEGIN(driver.saveState); return makeToken(PP); }
 
-"+"            { BEGIN(NORMAL); return Parser::make_PLUS(driver.yylloc); }
-"|+|"          { BEGIN(NORMAL); return Parser::make_PLUS_SAT(driver.yylloc); }
-"-"            { BEGIN(NORMAL); return Parser::make_MINUS(driver.yylloc); }
-"|-|"          { BEGIN(NORMAL); return Parser::make_MINUS_SAT(driver.yylloc); }
-"*"            { BEGIN(NORMAL); return Parser::make_MUL(driver.yylloc); }
-"/"            { BEGIN(NORMAL); return Parser::make_DIV(driver.yylloc); }
-"%"            { BEGIN(NORMAL); return Parser::make_MOD(driver.yylloc); }
+"+"            { BEGIN(driver.saveState); return makeToken(PLUS); }
+"|+|"          { BEGIN(driver.saveState); return makeToken(PLUS_SAT); }
+"-"            { BEGIN(driver.saveState); return makeToken(MINUS); }
+"|-|"          { BEGIN(driver.saveState); return makeToken(MINUS_SAT); }
+"*"            { BEGIN(driver.saveState); return makeToken(MUL); }
+"/"            { BEGIN(driver.saveState); return makeToken(DIV); }
+"%"            { BEGIN(driver.saveState); return makeToken(MOD); }
 
-"|"            { BEGIN(NORMAL); return Parser::make_BIT_OR(driver.yylloc); }
-"&"            { BEGIN(NORMAL); return Parser::make_BIT_AND(driver.yylloc); }
-"^"            { BEGIN(NORMAL); return Parser::make_BIT_XOR(driver.yylloc); }
-"~"            { BEGIN(NORMAL); return Parser::make_COMPLEMENT(driver.yylloc); }
+"|"            { BEGIN(driver.saveState); return makeToken(BIT_OR); }
+"&"            { BEGIN(driver.saveState); return makeToken(BIT_AND); }
+"^"            { BEGIN(driver.saveState); return makeToken(BIT_XOR); }
+"~"            { BEGIN(driver.saveState); return makeToken(COMPLEMENT); }
 
-"("            { BEGIN(NORMAL); return Parser::make_L_PAREN(driver.yylloc); }
-")"            { BEGIN(NORMAL); return Parser::make_R_PAREN(driver.yylloc); }
-"["            { BEGIN(NORMAL); return Parser::make_L_BRACKET(driver.yylloc); }
-"]"            { BEGIN(NORMAL); return Parser::make_R_BRACKET(driver.yylloc); }
-"{"            { BEGIN(NORMAL); return Parser::make_L_BRACE(driver.yylloc); }
-"}"            { BEGIN(NORMAL); return Parser::make_R_BRACE(driver.yylloc); }
-"<"            { BEGIN(NORMAL); return Parser::make_L_ANGLE(driver.yylloc); }
-">"            { BEGIN(NORMAL); return Parser::make_R_ANGLE(driver.yylloc); }
+"("            { BEGIN(driver.saveState); return makeToken(L_PAREN); }
+")"            { BEGIN(driver.saveState); return makeToken(R_PAREN); }
+"["            { BEGIN(driver.saveState); return makeToken(L_BRACKET); }
+"]"            { BEGIN(driver.saveState); return makeToken(R_BRACKET); }
+"{"            { BEGIN(driver.saveState); return makeToken(L_BRACE); }
+"}"            { BEGIN(driver.saveState); return makeToken(R_BRACE); }
+"<"            { BEGIN(driver.saveState); return makeToken(L_ANGLE); }
+">"            { BEGIN(driver.saveState); return makeToken(R_ANGLE); }
 
-"!"            { BEGIN(NORMAL); return Parser::make_NOT(driver.yylloc); }
-":"            { BEGIN(NORMAL); return Parser::make_COLON(driver.yylloc); }
-","            { BEGIN(NORMAL); return Parser::make_COMMA(driver.yylloc); }
-"?"            { BEGIN(NORMAL); return Parser::make_QUESTION(driver.yylloc); }
-"."            { BEGIN(NORMAL); return Parser::make_DOT(driver.yylloc); }
-"="            { BEGIN(NORMAL); return Parser::make_ASSIGN(driver.yylloc); }
-";"            { BEGIN(NORMAL); return Parser::make_SEMICOLON(driver.yylloc); }
-"@"            { BEGIN(NORMAL); return Parser::make_AT(driver.yylloc); }
+"!"            { BEGIN(driver.saveState); return makeToken(NOT); }
+":"            { BEGIN(driver.saveState); return makeToken(COLON); }
+","            { BEGIN(driver.saveState); return makeToken(COMMA); }
+"?"            { BEGIN(driver.saveState); return makeToken(QUESTION); }
+"."            { BEGIN(driver.saveState); return makeToken(DOT); }
+"="            { BEGIN(driver.saveState); return makeToken(ASSIGN); }
+";"            { BEGIN(driver.saveState); return makeToken(SEMICOLON); }
+"@"            { BEGIN(driver.saveState); return makeToken(AT); }
 
-<*>.|\n        { return Parser::make_UNEXPECTED_TOKEN(driver.yylloc); }
+<*>.|\n        { return makeToken(UNEXPECTED_TOKEN); }
 
 %%

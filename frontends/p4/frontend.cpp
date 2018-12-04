@@ -43,6 +43,7 @@ limitations under the License.
 #include "localizeActions.h"
 #include "moveConstructors.h"
 #include "moveDeclarations.h"
+#include "parseAnnotations.h"
 #include "parserControlFlow.h"
 #include "removeReturns.h"
 #include "resetHeaders.h"
@@ -124,6 +125,8 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
 
     PassManager passes = {
+        // Parse annotations
+        new ParseAnnotations(),
         new PrettyPrint(options),
         // Simple checks on parsed program
         new ValidateParsedProgram(),

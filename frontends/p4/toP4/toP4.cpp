@@ -18,6 +18,7 @@ limitations under the License.
 #include <string>
 #include "toP4.h"
 #include "frontends/common/options.h"
+#include "frontends/parsers/p4/p4parser.hpp"
 
 namespace P4 {
 
@@ -1106,6 +1107,24 @@ bool ToP4::preorder(const IR::Annotation * a) {
             builder.append(kvp->name);
             builder.append("=");
             visit(kvp->expression);
+        }
+        builder.append(")");
+    }
+    if (!a->body.empty() && a->expr.empty() && a->kv.empty()) {
+        // Have an unparsed annotation.
+        // We could be prettier here with smarter logic, but let's do the easy
+        // thing by separating every token with a space.
+        builder.append("(");
+        bool first = true;
+        for (auto tok : a->body) {
+            if (!first) builder.append(" ");
+            first = false;
+
+            bool haveStringLiteral =
+                tok->token_type == P4Parser::token_type::TOK_STRING_LITERAL;
+            if (haveStringLiteral) builder.append("\"");
+            builder.append(tok->text);
+            if (haveStringLiteral) builder.append("\"");
         }
         builder.append(")");
     }

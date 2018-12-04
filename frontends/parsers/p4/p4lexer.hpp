@@ -9,6 +9,7 @@
 #include <FlexLexer.h>
 #endif
 
+#include "frontends/parsers/p4/abstractP4Lexer.hpp"
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "lib/source_file.h"
 
@@ -16,27 +17,15 @@ namespace P4 {
 
 class P4ParserDriver;
 
-class P4Lexer : public p4FlexLexer {
-    typedef P4::P4Parser::symbol_type Token;
-
+class P4Lexer : public AbstractP4Lexer, public p4FlexLexer {
  public:
-    explicit P4Lexer(std::istream& input) : p4FlexLexer(&input) { }
+    explicit P4Lexer(std::istream& input)
+        : p4FlexLexer(&input), needStartToken(true) { }
 
-    /**
-     * Invoked by the parser to advance to the next token in the input stream.
-     *
-     * Note that we could store @driver as a member on the class, but it's
-     * actually useful to explicitly pass it in. In C++, you cannot overload a
-     * method on return type only. Since yyFlexLexer already declares a version
-     * of yylex() that takes no arguments and returns an int, and we need to
-     * return a Token, we need to add an additional argument to permit the
-     * overload.
-     *
-     * @return the token that was just read.
-     */
-    virtual Token yylex(P4::P4ParserDriver& driver);
+    virtual Token yylex(P4::P4ParserDriver& driver) override;
 
  private:
+    bool needStartToken;
     int yylex() override { return p4FlexLexer::yylex(); }
 };
 

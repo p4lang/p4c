@@ -10,6 +10,7 @@
 
 #include "frontends/common/constantFolding.h"
 #include "frontends/parsers/p4/p4lexer.hpp"
+#include "frontends/parsers/p4/p4AnnotationLexer.hpp"
 #include "frontends/parsers/p4/p4parser.hpp"
 #include "frontends/parsers/v1/v1lexer.hpp"
 #include "frontends/parsers/v1/v1parser.hpp"
@@ -120,33 +121,39 @@ void AbstractParserDriver::onParseError(const Util::SourceInfo& location,
 
 P4ParserDriver::P4ParserDriver()
   : structure(new Util::ProgramStructure)
-  , declarations(new IR::Vector<IR::Node>())
+  , nodes(new IR::Vector<IR::Node>())
 { }
 
-/* static */ const IR::P4Program*
-P4ParserDriver::parse(std::istream& in, const char* sourceFile,
+bool
+P4ParserDriver::parse(AbstractP4Lexer& lexer, const char* sourceFile,
                       unsigned sourceLine /* = 1 */) {
-    if (Log::verbose())
-        std::cout << "Parsing P4-16 program " << sourceFile << std::endl;
-
-    // Create and configure the parser and lexer.
-    P4ParserDriver driver;
-    P4Lexer lexer(in);
-    P4Parser parser(driver, lexer);
+    // Create and configure the parser.
+    P4Parser parser(*this, lexer);
 
 #ifdef YYDEBUG
     if (const char *p = getenv("YYDEBUG"))
         parser.set_debug_level(atoi(p));
-    driver.structure->setDebug(parser.debug_level() != 0);
+    structure->setDebug(parser.debug_level() != 0);
 #endif
 
     // Provide an initial source location.
-    driver.sources->mapLine(sourceFile, sourceLine);
+    sources->mapLine(sourceFile, sourceLine);
 
     // Parse.
-    if (parser.parse() != 0) return nullptr;
-    driver.structure->endParse();
-    return new IR::P4Program(driver.declarations->srcInfo, *driver.declarations);
+    if (parser.parse() != 0) return false;
+    structure->endParse();
+    return true;
+}
+
+/* static */ const IR::P4Program*
+P4ParserDriver::parse(std::istream& in, const char* sourceFile,
+                      unsigned sourceLine /* = 1 */) {
+    LOG1("Parsing P4-16 program " << sourceFile);
+
+    P4ParserDriver driver;
+    P4Lexer lexer(in);
+    if (!driver.parse(lexer, sourceFile, sourceLine)) return nullptr;
+    return new IR::P4Program(driver.nodes->srcInfo, *driver.nodes);
 }
 
 /* static */ const IR::P4Program*
@@ -154,6 +161,60 @@ P4ParserDriver::parse(FILE* in, const char* sourceFile,
                       unsigned sourceLine /* = 1 */) {
     AutoStdioInputStream inputStream(in);
     return parse(inputStream.get(), sourceFile, sourceLine);
+}
+
+template<typename T> const T*
+P4ParserDriver::parse(P4AnnotationLexer::Type type,
+                      const Util::SourceInfo& srcInfo,
+                      const IR::Vector<IR::AnnotationToken>& body) {
+    LOG3("Parsing P4-16 annotation " << srcInfo);
+
+    P4AnnotationLexer lexer(type, body);
+    if (!parse(lexer, srcInfo.getSourceFile())) {
+        return nullptr;
+    }
+
+    return nodes->front()->to<T>();
+}
+
+/* static */ const IR::Vector<IR::Expression>*
+P4ParserDriver::parseExpressionList(const Util::SourceInfo& srcInfo,
+                                    const IR::Vector<IR::AnnotationToken>& body) {
+    P4ParserDriver driver;
+    return driver.parse<IR::Vector<IR::Expression>>(
+            P4AnnotationLexer::EXPRESSION_LIST, srcInfo, body);
+}
+
+/* static */ const IR::IndexedVector<IR::NamedExpression>*
+P4ParserDriver::parseKvList(const Util::SourceInfo& srcInfo,
+                            const IR::Vector<IR::AnnotationToken>& body) {
+    P4ParserDriver driver;
+    return driver.parse<IR::IndexedVector<IR::NamedExpression>>(
+            P4AnnotationLexer::KV_LIST, srcInfo, body);
+}
+
+/* static */ const IR::Expression*
+P4ParserDriver::parseExpression(const Util::SourceInfo& srcInfo,
+                                const IR::Vector<IR::AnnotationToken>& body) {
+    P4ParserDriver driver;
+    return driver.parse<IR::Expression>(
+            P4AnnotationLexer::EXPRESSION, srcInfo, body);
+}
+
+/* static */ const IR::Constant*
+P4ParserDriver::parseConstant(const Util::SourceInfo& srcInfo,
+                              const IR::Vector<IR::AnnotationToken>& body) {
+    P4ParserDriver driver;
+    return driver.parse<IR::Constant>(
+            P4AnnotationLexer::INTEGER, srcInfo, body);
+}
+
+/* static */ const IR::StringLiteral*
+P4ParserDriver::parseStringLiteral(const Util::SourceInfo& srcInfo,
+                                   const IR::Vector<IR::AnnotationToken>& body) {
+    P4ParserDriver driver;
+    return driver.parse<IR::StringLiteral>(
+            P4AnnotationLexer::STRING_LITERAL, srcInfo, body);
 }
 
 /* static */ void P4ParserDriver::checkShift(const Util::SourceInfo& l,
@@ -169,7 +230,7 @@ P4ParserDriver::parse(FILE* in, const char* sourceFile,
 
 void P4ParserDriver::onReadErrorDeclaration(IR::Type_Error* error) {
     if (allErrors == nullptr) {
-        declarations->push_back(error);
+        nodes->push_back(error);
         allErrors = error;
         return;
     }
@@ -187,8 +248,7 @@ V1ParserDriver::V1ParserDriver()
 /* static */ const IR::V1Program*
 V1ParserDriver::parse(std::istream& in, const char* sourceFile,
                       unsigned sourceLine /* = 1 */) {
-    if (Log::verbose())
-        std::cout << "Parsing P4-14 program " << sourceFile << std::endl;
+    LOG1("Parsing P4-14 program " << sourceFile);
 
     // Create and configure the parser and lexer.
     V1ParserDriver driver;

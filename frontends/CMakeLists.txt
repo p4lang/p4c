@@ -39,6 +39,7 @@ set (P4_FRONTEND_SRCS
   p4/moveConstructors.cpp
   p4/moveDeclarations.cpp
   p4/parameterSubstitution.cpp
+  p4/parseAnnotations.cpp
   p4/parserCallGraph.cpp
   p4/parserControlFlow.cpp
   p4/removeReturns.cpp
@@ -100,6 +101,7 @@ set (P4_FRONTEND_HDRS
   p4/moveConstructors.h
   p4/moveDeclarations.h
   p4/parameterSubstitution.h
+  p4/parseAnnotations.h
   p4/parserCallGraph.h
   p4/parserControlFlow.h
   p4/removeReturns.h
@@ -171,10 +173,13 @@ set (V1_FRONTEND_HDRS
 
 set (PARSERS_SRCS
   parsers/parserDriver.cpp
+  parsers/p4/p4AnnotationLexer.cpp
   )
 
 set (PARSERS_HDRS
   parsers/parserDriver.h
+  parsers/p4/abstractP4Lexer.hpp
+  parsers/p4/p4AnnotationLexer.hpp
   )
 
 macro(add_parser pname)

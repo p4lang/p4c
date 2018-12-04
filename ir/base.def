@@ -12,6 +12,10 @@
    - some simple leaf classes used frequently
 */
 
+#emit
+#include "frontends/common/constantParsing.h"
+#end
+
 /// a value that can be evaluated at compile-time
 interface CompileTimeValue {}
 
@@ -188,15 +192,29 @@ class NamedExpression : Declaration {
     Expression expression;
 }
 
+/// A token in an unparsed annotation.
+/// This should really be P4::P4Parser::symbol_type, but p4parser.hpp depends
+/// on the IR in a way that makes it difficult to #include in this file.
+class AnnotationToken {
+    int token_type;  // P4Parser::token_type in disguise.
+    cstring text;
+    optional NullOK UnparsedConstant* constInfo = nullptr;
+    dbprint { out << text; }
+}
+
 /// Annotations are used to provide additional information to the compiler
 /// Most P4 entities can be optionally annotated
 class Annotation {
     ID name;
+    /// An unparsed annotation body
+    inline Vector<AnnotationToken> body;
     /// Annotations that are simple expressions
     inline Vector<Expression> expr;
     /// Annotations described as key-value pairs
     inline IndexedVector<NamedExpression> kv;
     Annotation { if (!srcInfo) srcInfo = name.srcInfo; }
+    Annotation(Util::SourceInfo si, ID n, const Vector<AnnotationToken> &a)
+    : Node(si), name(n), body(a) {}
     Annotation(Util::SourceInfo si, ID n, const std::initializer_list<const Expression *> &a)
     : Node(si), name(n), expr(a) {}
     Annotation(Util::SourceInfo si, ID n, const IR::Vector<Expression> &a)
@@ -215,6 +233,8 @@ class Annotation {
     static const cstring hiddenAnnotation;  /// Object should not be exposed to the control-plane.
     static const cstring lengthAnnotation;  /// P4-14 annotation for varbit fields.
     static const cstring optionalAnnotation;  /// Optional parameter annotation
+    static const cstring pkginfoAnnotation;  /// Package documentation annotation.
+    static const cstring deprecatedAnnotation;  /// Deprecation annotation.
     toString{ return cstring("@") + name; }
     validate{ BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name"); }
 

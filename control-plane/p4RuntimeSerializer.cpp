@@ -42,6 +42,7 @@ limitations under the License.
 // and tableNeedsPriority implementations.
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/parseAnnotations.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
@@ -209,13 +210,9 @@ externalId(const IR::IDeclaration* declaration) {
 
     // If the user specified an @id annotation, use that.
     if (auto idAnnotation = declaration->getAnnotation("id")) {
-        if (idAnnotation->expr.size() != 1) {
-            ::error("@id should be an integer for declaration %1%", declaration);
-            return boost::none;
-        }
-
         auto idConstant = idAnnotation->expr[0]->to<IR::Constant>();
-        if (idConstant == nullptr || !idConstant->fitsInt()) {
+        CHECK_NULL(idConstant);
+        if (!idConstant->fitsInt()) {
             ::error("@id should be an integer for declaration %1%", declaration);
             return boost::none;
         }
@@ -657,6 +654,16 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
     return matchFields;
 }
 
+/// Parses P4Runtime-specific annotations.
+class ParseAnnotations : public P4::ParseAnnotations {
+ public:
+    ParseAnnotations() : P4::ParseAnnotations("P4Runtime", {
+                PARSE("controller_header", StringLiteral),
+                PARSE_NO_BODY("hidden"),
+                PARSE("id", Constant)
+            }) { }
+};
+
 /// An analyzer which translates the information available in the P4 IR into a
 /// representation of the control plane API which is consumed by P4Runtime.
 class P4RuntimeAnalyzer {
@@ -761,15 +768,8 @@ class P4RuntimeAnalyzer {
         auto controllerAnnotation = type->getAnnotation("controller_header");
         CHECK_NULL(controllerAnnotation);
 
-        if (controllerAnnotation->expr.size() != 1) {
-            ::error("@controller_header should be a string for declaration %1%", type);
-            return;
-        }
         auto nameConstant = controllerAnnotation->expr[0]->to<IR::StringLiteral>();
-        if (nameConstant == nullptr) {
-            ::error("@controller_header should be a string for declaration %1%", type);
-            return;
-        }
+        CHECK_NULL(nameConstant);
         auto controllerName = nameConstant->value;
 
         auto header = p4Info->add_controller_packet_metadata();
@@ -1361,6 +1361,7 @@ P4RuntimeSerializer::generateP4Runtime(const IR::P4Program* program, cstring arc
     P4::TypeMap typeMap;
     auto* evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     PassManager p4RuntimeFixups = {
+        new ControlPlaneAPI::ParseAnnotations(),
         // We can only handle a very restricted class of action parameters - the
         // types need to be bit<> or int<> - so we fail without this pass.
         new P4::RemoveActionParameters(&refMap, &typeMap),

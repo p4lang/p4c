@@ -24,6 +24,7 @@ limitations under the License.
 #include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
+#include "frontends/p4/parseAnnotations.h"
 
 namespace detail {
 
@@ -126,6 +127,13 @@ P4CTestEnvironment::P4CTestEnvironment() {
 
 namespace Test {
 
+class ParseAnnotations : public P4::ParseAnnotations {
+ public:
+    ParseAnnotations() : P4::ParseAnnotations("FrontendTest", {
+                PARSE("my_anno", StringLiteral)
+            }) { }
+};
+
 /* static */ boost::optional<FrontendTestCase>
 FrontendTestCase::create(const std::string& source,
                          CompilerOptions::FrontendVersion langVersion
@@ -159,6 +167,17 @@ FrontendTestCase::create(const std::string& source,
     if (::errorCount() > 0) {
         std::cerr << "Encountered " << ::errorCount()
                   << " errors while executing frontend" << std::endl;
+        return boost::none;
+    }
+
+    program = program->apply(ParseAnnotations());
+    if (program == nullptr) {
+        std::cerr << "Back-end annotation parsing failed" << std::endl;
+        return boost::none;
+    }
+    if (::errorCount() > 0) {
+        std::cerr << "Encountered " << ::errorCount()
+                  << " errors while parsing back-end annotations" << std::endl;
         return boost::none;
     }
 

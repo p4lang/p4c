@@ -60,6 +60,7 @@ set (BMV2_BACKEND_COMMON_SRCS
 set (BMV2_BACKEND_COMMON_HDRS
   common/JsonObjects.h
   common/action.h
+  common/annotations.h
   common/backend.h
   common/control.h
   common/controlFlowGraph.h

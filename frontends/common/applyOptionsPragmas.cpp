@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/options.h"
+#include "frontends/parsers/parserDriver.h"
 #include "lib/error.h"
 #include "lib/log.h"
 
@@ -59,14 +60,27 @@ boost::optional<IOptionPragmaParser::CommandLineOptions>
 P4COptionPragmaParser::parseDiagnostic(const IR::Annotation* annotation) {
     CommandLineOptions newOptions;
 
-    auto& pragmaArgs = annotation->expr;
-    if (pragmaArgs.size() != 2) {
+    auto pragmaArgs = &annotation->expr;
+
+    // Parsing of option pragmas is done early in the compiler, before P4₁₆
+    // annotations are parsed, so we are responsible for doing our own parsing
+    // here.
+    if (pragmaArgs->empty()) {
+        auto parseResult =
+            P4ParserDriver::parseExpressionList(annotation->srcInfo,
+                                                annotation->body);
+        if (parseResult != nullptr) {
+            pragmaArgs = parseResult;
+        }
+    }
+
+    if (pragmaArgs->size() != 2) {
         ::warning("@diagnostic takes two arguments: %1%", annotation);
         return boost::none;
     }
 
-    auto* diagnosticName = pragmaArgs[0]->to<IR::StringLiteral>();
-    auto* diagnosticAction = pragmaArgs[1]->to<IR::StringLiteral>();
+    auto* diagnosticName = pragmaArgs->at(0)->to<IR::StringLiteral>();
+    auto* diagnosticAction = pragmaArgs->at(1)->to<IR::StringLiteral>();
     if (!diagnosticName || !diagnosticAction) {
         ::warning("@diagnostic arguments must be strings: %1%", annotation);
         return boost::none;
