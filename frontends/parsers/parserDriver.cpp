@@ -169,7 +169,7 @@ P4ParserDriver::parse(P4AnnotationLexer::Type type,
                       const IR::Vector<IR::AnnotationToken>& body) {
     LOG3("Parsing P4-16 annotation " << srcInfo);
 
-    P4AnnotationLexer lexer(type, body);
+    P4AnnotationLexer lexer(type, srcInfo, body);
     if (!parse(lexer, srcInfo.getSourceFile())) {
         return nullptr;
     }

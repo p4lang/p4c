@@ -133,7 +133,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %define api.token.prefix {TOK_}
 %token             START_PROGRAM START_EXPRESSION_LIST START_KV_LIST
                    START_EXPRESSION START_INTEGER START_STRING_LITERAL
-%token             END
+%token             END END_ANNOTATION
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -301,7 +301,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 // Simulate multiple start symbols to allow the parser to be reused for
 // annotation bodies.
 start
-    : fragment END { driver.nodes->push_back($1->getNode()); YYACCEPT; }
+    : fragment END_ANNOTATION { driver.nodes->push_back($1->getNode()); YYACCEPT; }
     | START_PROGRAM program
     ;
 
