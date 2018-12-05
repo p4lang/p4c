@@ -1341,10 +1341,8 @@ void TypeInference::validateFields(const IR::Type* type,
         auto ftype = getType(field);
         if (ftype == nullptr)
             return;
-        if (ftype->is<IR::Type_Struct>() && onlyBitsOrBitStructs(ftype))
-            continue;
         if (!checker(ftype))
-            typeError("Field %1% of %2% cannot have type %3% !!",
+            typeError("Field %1% of %2% cannot have type %3%",
                       field, type->toString(), field->type);
     }
 }
@@ -2816,9 +2814,11 @@ void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
 
             auto arg0 = mce->arguments->at(0);
             auto argType = typeMap->getType(arg0, true);
-            if (!argType->is<IR::Type_Header>() && !argType->is<IR::Type_Struct>()
+            if (!argType->is<IR::Type_Header>() &&
+                !(argType->is<IR::Type_Struct>() && onlyBitsOrBitStructs(argType))
                 && !argType->is<IR::Type_Dontcare>()) {
-                typeError("%1%: argument must be a header", mce->arguments->at(0));
+                typeError("%1%: argument must be a header/bit-vector struct",
+                          mce->arguments->at(0));
                 return;
             }
 

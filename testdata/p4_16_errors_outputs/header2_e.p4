@@ -1,10 +1,6 @@
 struct s {
 }
 
-header h {
-    s field;
-}
-
 parser p();
 struct s1 {
     p field;

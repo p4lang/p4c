@@ -1,3 +1,3 @@
-issue477.p4(28): error: p.h: argument must be a header
+issue477.p4(28): error: p.h: argument must be a header/bit-vector struct
         b.extract(p.h);
                   ^^^
