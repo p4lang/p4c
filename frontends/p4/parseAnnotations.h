@@ -59,13 +59,15 @@ class ParseAnnotations : public Modifier {
     typedef std::unordered_map<cstring, Handler> HandlerMap;
 
     /// Produces a pass that rewrites the spec-defined annotations.
-    ParseAnnotations() : handlers(standardHandlers()) {
+    ParseAnnotations(bool warn = false) : warnUnknown(warn),
+                                          handlers(standardHandlers()) {
         setName("ParseAnnotations");
     }
 
     /// Produces a pass that rewrites a custom set of annotations.
-    ParseAnnotations(const char* targetName, HandlerMap handlers)
-            : handlers(handlers) {
+    ParseAnnotations(const char* targetName, HandlerMap handlers,
+                     bool warn = false)
+            : warnUnknown(warn), handlers(handlers) {
         std::string buf = targetName;
         buf += "__ParseAnnotations";
         setName(buf.c_str());
@@ -85,6 +87,9 @@ class ParseAnnotations : public Modifier {
     static bool needsParsing(IR::Annotation* annotation);
 
  private:
+    /// Whether to warn about unknown annotations.
+    const bool warnUnknown;
+
     HandlerMap handlers;
 };
 

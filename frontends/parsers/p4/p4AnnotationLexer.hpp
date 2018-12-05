@@ -26,8 +26,8 @@ class P4AnnotationLexer : public AbstractP4Lexer {
  public:
     P4AnnotationLexer(Type type, const Util::SourceInfo& srcInfo,
                       const IR::Vector<IR::AnnotationToken>& body)
-        : srcInfo(srcInfo), type(type), body(body), needStart(true),
-          it(this->body.begin()) { }
+        : type(type), body(body), needStart(true), it(this->body.begin()),
+          srcInfo(srcInfo) { }
 
     Token yylex(P4::P4ParserDriver& driver);
 };

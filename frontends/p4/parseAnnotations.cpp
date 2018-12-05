@@ -89,7 +89,10 @@ bool ParseAnnotations::needsParsing(IR::Annotation* annotation) {
 
 void ParseAnnotations::postorder(IR::Annotation* annotation) {
     if (!handlers.count(annotation->name)) {
-        // Unknown annotation. Leave as is.
+        // Unknown annotation. Leave as is, but warn if desired.
+        if (warnUnknown) {
+            ::warning("Unknown annotation: %1%", annotation->name);
+        }
         return;
     }
 
