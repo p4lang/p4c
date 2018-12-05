@@ -1366,7 +1366,9 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
         while (t->is<IR::Type_Newtype>())
             t = getTypeType(t->to<IR::Type_Newtype>()->type);
         return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>() ||
-               t->is<IR::Type_SerEnum>() || t->is<IR::Type_Struct>(); };
+        t->is<IR::Type_SerEnum>() ||
+        (t->is<IR::Type_Struct>() &&
+         onlyBitsOrBitStructs(t->to<IR::Type_Struct>())); };
     validateFields(canon, validator);
 
     const IR::StructField* varbit = nullptr;
@@ -1419,7 +1421,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
 const IR::Node* TypeInference::postorder(IR::Type_HeaderUnion *type) {
     auto canon = setTypeType(type);
     auto validator = [] (const IR::Type* t) { return t->is<IR::Type_Header>(); };
-    validateFields(canon, validator);  // Not supporting union for Issue 383
+    validateFields(canon, validator);
     return type;
 }
 
@@ -2815,8 +2817,7 @@ void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
             auto arg0 = mce->arguments->at(0);
             auto argType = typeMap->getType(arg0, true);
             if (!argType->is<IR::Type_Header>() &&
-                !(argType->is<IR::Type_Struct>() && onlyBitsOrBitStructs(argType))
-                && !argType->is<IR::Type_Dontcare>()) {
+                !argType->is<IR::Type_Dontcare>()) {
                 typeError("%1%: argument must be a header/bit-vector struct",
                           mce->arguments->at(0));
                 return;
