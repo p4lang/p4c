@@ -1341,8 +1341,9 @@ void TypeInference::validateFields(const IR::Type* type,
         auto ftype = getType(field);
         if (ftype == nullptr)
             return;
-        if ((ftype->is<IR::Type_Struct>() && !onlyBitsOrBitStructs(ftype))
-            && !(checker(ftype)))
+        if (ftype->is<IR::Type_Struct>() && onlyBitsOrBitStructs(ftype))
+            continue;
+        if (!checker(ftype))
             typeError("Field %1% of %2% cannot have type %3% !!",
                       field, type->toString(), field->type);
     }
@@ -1359,13 +1360,15 @@ const IR::Node* TypeInference::postorder(IR::StructField* field) {
     return field;
 }
 
+// Nested bit-vector struct inside a Header is supported
+// Experimental feature - see Issue 383.
 const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
     auto canon = setTypeType(type);
     auto validator = [this] (const IR::Type* t) {
         while (t->is<IR::Type_Newtype>())
             t = getTypeType(t->to<IR::Type_Newtype>()->type);
         return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>() ||
-               t->is<IR::Type_SerEnum>(); };
+               t->is<IR::Type_SerEnum>() || t->is<IR::Type_Struct>(); };
     validateFields(canon, validator);
 
     const IR::StructField* varbit = nullptr;
@@ -1398,6 +1401,8 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
     return type;
 }
 
+// Nested bit-vector structs are supported as Experimental
+// No other type is supported inside struct.
 const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
     auto canon = setTypeType(type);
     auto validator = [this] (const IR::Type* t) {
@@ -1416,7 +1421,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
 const IR::Node* TypeInference::postorder(IR::Type_HeaderUnion *type) {
     auto canon = setTypeType(type);
     auto validator = [] (const IR::Type* t) { return t->is<IR::Type_Header>(); };
-    validateFields(canon, validator);
+    validateFields(canon, validator);  // Not supporting union for Issue 383
     return type;
 }
 
