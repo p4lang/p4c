@@ -16,19 +16,20 @@ limitations under the License.
 
 #include <core.p4>
 
+struct Tst {
+    bit<32> sdata;
+}
+
 header Header {
     bit<32> data;
+    Tst     t;
 }
 
-struct Tst {
-    bit<32> data;
-}
-
-parser p0(packet_in p, out Header h, out Tst t) {
+parser p0(packet_in p, out Header h) {
     bool b = true;
     state start {
         p.extract(h);
-	p.extract(t);
+	p.extract(h.t);
         transition select(h.data, b) {
             (_, true):    next;
             (_, _): reject;
@@ -44,7 +45,7 @@ parser p0(packet_in p, out Header h, out Tst t) {
     }
 }
 
-parser proto(packet_in p, out Header h, out Tst t);
+parser proto(packet_in p, out Header h);
 package top(proto _p);
 
 top(p0()) main;
