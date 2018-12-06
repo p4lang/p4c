@@ -131,8 +131,11 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %printer { yyoutput << $$; } <*>;
 
 %define api.token.prefix {TOK_}
-%token             START_PROGRAM START_EXPRESSION_LIST START_KV_LIST
+%token             START_PROGRAM
+                   START_EXPRESSION_LIST START_KV_LIST
                    START_EXPRESSION START_INTEGER START_STRING_LITERAL
+                   START_EXPRESSION_PAIR START_STRING_LITERAL_PAIR
+                   START_EXPRESSION_TRIPLE START_STRING_LITERAL_TRIPLE
 %token             END END_ANNOTATION
 
 
@@ -306,11 +309,41 @@ start
     ;
 
 fragment
+      // Lists
     : START_EXPRESSION_LIST expressionList { $$ = $2; }
     | START_KV_LIST kvList                 { $$ = $2; }
+
+      // Singletons
     | START_EXPRESSION expression          { $$ = $2; }
     | START_INTEGER INTEGER                { $$ = parseConstant(@2, $2, 0); }
     | START_STRING_LITERAL STRING_LITERAL  { $$ = new IR::StringLiteral(@2, $2); }
+
+      // Pairs
+    | START_EXPRESSION_PAIR expression "," expression
+        { auto* result = new IR::Vector<IR::Expression>();
+          result->push_back($2);
+          result->push_back($4);
+          $$ = result; }
+    | START_STRING_LITERAL_PAIR STRING_LITERAL "," STRING_LITERAL
+        { auto* result = new IR::Vector<IR::Expression>();
+          result->push_back(new IR::StringLiteral(@2, $2));
+          result->push_back(new IR::StringLiteral(@4, $4));
+          $$ = result; }
+
+      // Triples
+    | START_EXPRESSION_TRIPLE expression "," expression "," expression
+        { auto* result = new IR::Vector<IR::Expression>();
+          result->push_back($2);
+          result->push_back($4);
+          result->push_back($6);
+          $$ = result; }
+    | START_STRING_LITERAL_TRIPLE STRING_LITERAL "," STRING_LITERAL ","
+      STRING_LITERAL
+        { auto* result = new IR::Vector<IR::Expression>();
+          result->push_back(new IR::StringLiteral(@2, $2));
+          result->push_back(new IR::StringLiteral(@4, $4));
+          result->push_back(new IR::StringLiteral(@6, $6));
+          $$ = result; }
     ;
 
 program : input END { YYACCEPT; };
@@ -396,7 +429,6 @@ annotationBody
 
 annotationToken
     : UNEXPECTED_TOKEN { $$ = $1; }
-    | END_PRAGMA       { $$ = $1; }
     | ABSTRACT         { $$ = $1; }
     | ACTION           { $$ = $1; }
     | ACTIONS          { $$ = $1; }

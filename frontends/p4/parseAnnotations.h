@@ -25,9 +25,11 @@ limitations under the License.
  */
 namespace P4 {
 
+// Parses an annotation with no body.
 #define PARSE_NO_BODY(aname) \
     { aname, &P4::ParseAnnotations::parseNoBody }
 
+// Parses an annotation with a single-element body.
 #define PARSE(aname, tname)                                             \
     { aname, [](IR::Annotation* annotation) {                           \
             if (!P4::ParseAnnotations::needsParsing(annotation)) {      \
@@ -41,6 +43,39 @@ namespace P4 {
                 annotation->expr.push_back(parsed);                     \
             }                                                           \
         }                                                               \
+    }
+
+// Parses an annotation whose body is a pair.
+#define PARSE_PAIR(aname, tname)                                   \
+    { aname, [](IR::Annotation* annotation) {                      \
+            if (!P4::ParseAnnotations::needsParsing(annotation)) { \
+                return;                                            \
+            }                                                      \
+                                                                   \
+            const IR::Vector<IR::Expression>* parsed =             \
+                P4::P4ParserDriver::parse ## tname ## Pair(        \
+                    annotation->srcInfo,                           \
+                    annotation->body);                             \
+            if (parsed != nullptr) {                               \
+                annotation->expr.append(*parsed);                  \
+            }                                                      \
+        }                                                          \
+    }
+
+// Parses an annotation whose body is a triple.
+#define PARSE_TRIPLE(aname, tname)                                 \
+    { aname, [](IR::Annotation* annotation) {                      \
+            if (!P4::ParseAnnotations::needsParsing(annotation)) { \
+                return;                                            \
+            }                                                      \
+                                                                   \
+            const IR::Vector<IR::Expression>* parsed =             \
+                P4::P4ParserDriver::parse ## tname ## Triple(      \
+                    annotation->srcInfo, annotation->body);        \
+            if (parsed != nullptr) {                               \
+                annotation->expr.append(*parsed);                  \
+            }                                                      \
+        }                                                          \
     }
 
 #define PARSE_EXPRESSION_LIST(aname) \

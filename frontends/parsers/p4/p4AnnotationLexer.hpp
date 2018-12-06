@@ -9,11 +9,22 @@ namespace P4 {
 class P4AnnotationLexer : public AbstractP4Lexer {
  public:
     enum Type {
+        // Lists
         EXPRESSION_LIST = P4Parser::token_type::TOK_START_EXPRESSION_LIST,
         KV_LIST = P4Parser::token_type::TOK_START_KV_LIST,
+
+        // Singletons
         EXPRESSION = P4Parser::token_type::TOK_START_EXPRESSION,
         INTEGER = P4Parser::token_type::TOK_START_INTEGER,
         STRING_LITERAL = P4Parser::token_type::TOK_START_STRING_LITERAL,
+
+        // Pairs
+        EXPRESSION_PAIR = P4Parser::token_type::TOK_START_EXPRESSION_PAIR,
+        STRING_LITERAL_PAIR = P4Parser::token_type::TOK_START_STRING_LITERAL_PAIR,
+
+        // Triples
+        EXPRESSION_TRIPLE = P4Parser::token_type::TOK_START_EXPRESSION_TRIPLE,
+        STRING_LITERAL_TRIPLE = P4Parser::token_type::TOK_START_STRING_LITERAL_TRIPLE,
     };
 
  private:

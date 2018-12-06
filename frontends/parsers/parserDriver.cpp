@@ -217,6 +217,38 @@ P4ParserDriver::parseStringLiteral(const Util::SourceInfo& srcInfo,
             P4AnnotationLexer::STRING_LITERAL, srcInfo, body);
 }
 
+/* static */ const IR::Vector<IR::Expression>*
+P4ParserDriver::parseExpressionPair(const Util::SourceInfo& srcInfo,
+                                    const IR::Vector<IR::AnnotationToken>& body) {
+    P4ParserDriver driver;
+    return driver.parse<IR::Vector<IR::Expression>>(
+            P4AnnotationLexer::EXPRESSION_PAIR, srcInfo, body);
+}
+
+/* static */ const IR::Vector<IR::Expression>*
+P4ParserDriver::parseStringLiteralPair(const Util::SourceInfo& srcInfo,
+                                       const IR::Vector<IR::AnnotationToken>& body) {
+    P4ParserDriver driver;
+    return driver.parse<IR::Vector<IR::Expression>>(
+            P4AnnotationLexer::STRING_LITERAL_PAIR, srcInfo, body);
+}
+
+/* static */ const IR::Vector<IR::Expression>*
+P4ParserDriver::parseExpressionTriple(const Util::SourceInfo& srcInfo,
+                                     const IR::Vector<IR::AnnotationToken>& body) {
+    P4ParserDriver driver;
+    return driver.parse<IR::Vector<IR::Expression>>(
+            P4AnnotationLexer::EXPRESSION_TRIPLE, srcInfo, body);
+}
+
+/* static */ const IR::Vector<IR::Expression>*
+P4ParserDriver::parseStringLiteralTriple(const Util::SourceInfo& srcInfo,
+                                         const IR::Vector<IR::AnnotationToken>& body) {
+    P4ParserDriver driver;
+    return driver.parse<IR::Vector<IR::Expression>>(
+            P4AnnotationLexer::STRING_LITERAL_TRIPLE, srcInfo, body);
+}
+
 /* static */ void P4ParserDriver::checkShift(const Util::SourceInfo& l,
                                              const Util::SourceInfo& r) {
     if (!l.isValid() || !r.isValid())
