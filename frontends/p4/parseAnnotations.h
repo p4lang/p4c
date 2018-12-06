@@ -32,10 +32,6 @@ namespace P4 {
 // Parses an annotation with a single-element body.
 #define PARSE(aname, tname)                                             \
     { aname, [](IR::Annotation* annotation) {                           \
-            if (!P4::ParseAnnotations::needsParsing(annotation)) {      \
-                return;                                                 \
-            }                                                           \
-                                                                        \
             const IR::tname* parsed =                                   \
                 P4::P4ParserDriver::parse ## tname(annotation->srcInfo, \
                                                    annotation->body);   \
@@ -48,10 +44,6 @@ namespace P4 {
 // Parses an annotation whose body is a pair.
 #define PARSE_PAIR(aname, tname)                                   \
     { aname, [](IR::Annotation* annotation) {                      \
-            if (!P4::ParseAnnotations::needsParsing(annotation)) { \
-                return;                                            \
-            }                                                      \
-                                                                   \
             const IR::Vector<IR::Expression>* parsed =             \
                 P4::P4ParserDriver::parse ## tname ## Pair(        \
                     annotation->srcInfo,                           \
@@ -65,10 +57,6 @@ namespace P4 {
 // Parses an annotation whose body is a triple.
 #define PARSE_TRIPLE(aname, tname)                                 \
     { aname, [](IR::Annotation* annotation) {                      \
-            if (!P4::ParseAnnotations::needsParsing(annotation)) { \
-                return;                                            \
-            }                                                      \
-                                                                   \
             const IR::Vector<IR::Expression>* parsed =             \
                 P4::P4ParserDriver::parse ## tname ## Triple(      \
                     annotation->srcInfo, annotation->body);        \
@@ -115,11 +103,6 @@ class ParseAnnotations : public Modifier {
     static void parseNoBody(IR::Annotation* annotation);
     static void parseExpressionList(IR::Annotation* annotation);
     static void parseKvList(IR::Annotation* annotation);
-
-    /// Checks if the annotation needs parsing. An annotation needs parsing if
-    /// it was derived from P4₁₆. A BUG is thrown if the annotation is derived
-    /// from P4₁₆ and is already parsed.
-    static bool needsParsing(IR::Annotation* annotation);
 
  private:
     /// Whether to warn about unknown annotations.

@@ -47,10 +47,6 @@ void ParseAnnotations::parseNoBody(IR::Annotation* annotation) {
 }
 
 void ParseAnnotations::parseExpressionList(IR::Annotation* annotation) {
-    if (!needsParsing(annotation)) {
-        return;
-    }
-
     const IR::Vector<IR::Expression>* parsed =
         P4::P4ParserDriver::parseExpressionList(annotation->srcInfo,
                                                 annotation->body);
@@ -60,10 +56,6 @@ void ParseAnnotations::parseExpressionList(IR::Annotation* annotation) {
 }
 
 void ParseAnnotations::parseKvList(IR::Annotation* annotation) {
-    if (!needsParsing(annotation)) {
-        return;
-    }
-
     const IR::IndexedVector<IR::NamedExpression>* parsed =
         P4::P4ParserDriver::parseKvList(annotation->srcInfo,
                                         annotation->body);
@@ -72,22 +64,16 @@ void ParseAnnotations::parseKvList(IR::Annotation* annotation) {
     }
 }
 
-bool ParseAnnotations::needsParsing(IR::Annotation* annotation) {
-    if (!annotation->expr.empty() || !annotation->kv.empty()) {
-        // We already have an expression or a key-value list. This happens when
-        // we have a P4₁₄ program, in which case the annotation body had better
-        // be empty.
-        if (!annotation->body.empty()) {
-            BUG("Annotation has been parsed already");
-        }
-
-        return false;
+void ParseAnnotations::postorder(IR::Annotation* annotation) {
+    if (!annotation->needsParsing) {
+        return;
     }
 
-    return true;
-}
+    if (!annotation->expr.empty() || !annotation->kv.empty()) {
+        BUG("Unparsed annotation with non-empty expr or kv");
+        return;
+    }
 
-void ParseAnnotations::postorder(IR::Annotation* annotation) {
     if (!handlers.count(annotation->name)) {
         // Unknown annotation. Leave as is, but warn if desired.
         if (warnUnknown) {
@@ -97,6 +83,7 @@ void ParseAnnotations::postorder(IR::Annotation* annotation) {
     }
 
     handlers[annotation->name](annotation);
+    annotation->needsParsing = false;
 }
 
 }  // namespace P4
