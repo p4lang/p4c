@@ -231,13 +231,13 @@ class Annotation {
 
     /// The remaining constructors are for compiler-generated annotations.
     Annotation(Util::SourceInfo si, ID n, const std::initializer_list<const Expression *> &a)
-    : Node(si), name(n), expr(a), needsParsing(false) {}
+    : Node(si), name(n), needsParsing(false), expr(a) {}
     Annotation(Util::SourceInfo si, ID n, const IR::Vector<Expression> &a)
-    : Node(si), name(n), expr(a), needsParsing(false) {}
+    : Node(si), name(n), needsParsing(false), expr(a) {}
     Annotation(Util::SourceInfo si, ID n, const IndexedVector<NamedExpression> &kv)
-    : Node(si), name(n), kv(kv), needsParsing(false) {}
-    Annotation(ID n, const std::initializer_list<const Expression *> &a) : name(n), expr(a), needsParsing(false) {}
-    Annotation(ID n, const IR::Vector<Expression> &a) : name(n), expr(a), needsParsing(false) {}
+    : Node(si), name(n), needsParsing(false), kv(kv) {}
+    Annotation(ID n, const std::initializer_list<const Expression *> &a) : name(n), needsParsing(false), expr(a) {}
+    Annotation(ID n, const IR::Vector<Expression> &a) : name(n), needsParsing(false), expr(a) {}
 
     Annotation(ID n, intmax_t v) : name(n) {
         expr.push_back(new Constant(v)); }
