@@ -225,11 +225,11 @@ class Annotation {
 
     Annotation { if (!srcInfo) srcInfo = name.srcInfo; }
 
-    /// For annotations parsed from P4₁₆ source.
+    /// For annotations parsed from P4-16 source.
     Annotation(Util::SourceInfo si, ID n, const Vector<AnnotationToken> &a)
     : Node(si), name(n), body(a), needsParsing(true) {}
 
-    /// The remaining constructors are for compiler-generated annotations.
+    // The remaining constructors are for compiler-generated annotations.
     Annotation(Util::SourceInfo si, ID n, const std::initializer_list<const Expression *> &a)
     : Node(si), name(n), needsParsing(false), expr(a) {}
     Annotation(Util::SourceInfo si, ID n, const IR::Vector<Expression> &a)

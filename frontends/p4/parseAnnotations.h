@@ -25,9 +25,13 @@ limitations under the License.
  */
 namespace P4 {
 
-// Parses an annotation with no body.
-#define PARSE_NO_BODY(aname) \
-    { aname, &P4::ParseAnnotations::parseNoBody }
+// A no-op handler. Useful for avoiding warnings about ignored annotations.
+#define PARSE_SKIP(aname) \
+    { aname, &P4::ParseAnnotations::parseSkip }
+
+// Parses an empty annotation.
+#define PARSE_EMPTY(aname) \
+    { aname, &P4::ParseAnnotations::parseEmpty }
 
 // Parses an annotation with a single-element body.
 #define PARSE(aname, tname)                                             \
@@ -38,6 +42,7 @@ namespace P4 {
             if (parsed != nullptr) {                                    \
                 annotation->expr.push_back(parsed);                     \
             }                                                           \
+            return parsed != nullptr;                                   \
         }                                                               \
     }
 
@@ -51,6 +56,7 @@ namespace P4 {
             if (parsed != nullptr) {                               \
                 annotation->expr.append(*parsed);                  \
             }                                                      \
+            return parsed != nullptr;                              \
         }                                                          \
     }
 
@@ -63,6 +69,7 @@ namespace P4 {
             if (parsed != nullptr) {                               \
                 annotation->expr.append(*parsed);                  \
             }                                                      \
+            return parsed != nullptr;                              \
         }                                                          \
     }
 
@@ -76,7 +83,9 @@ class ParseAnnotations : public Modifier {
  public:
     using Modifier::postorder;
 
-    typedef std::function<void(IR::Annotation*)> Handler;
+    /// A handler returns true when the body of the given annotation is parsed
+    /// successfully.
+    typedef std::function<bool(IR::Annotation*)> Handler;
 
     /// Keyed on annotation names.
     typedef std::unordered_map<cstring, Handler> HandlerMap;
@@ -100,9 +109,10 @@ class ParseAnnotations : public Modifier {
 
     static HandlerMap standardHandlers();
 
-    static void parseNoBody(IR::Annotation* annotation);
-    static void parseExpressionList(IR::Annotation* annotation);
-    static void parseKvList(IR::Annotation* annotation);
+    static bool parseSkip(IR::Annotation* annotation);
+    static bool parseEmpty(IR::Annotation* annotation);
+    static bool parseExpressionList(IR::Annotation* annotation);
+    static bool parseKvList(IR::Annotation* annotation);
 
  private:
     /// Whether to warn about unknown annotations.

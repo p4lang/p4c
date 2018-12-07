@@ -659,7 +659,7 @@ class ParseAnnotations : public P4::ParseAnnotations {
  public:
     ParseAnnotations() : P4::ParseAnnotations("P4Runtime", {
                 PARSE("controller_header", StringLiteral),
-                PARSE_NO_BODY("hidden"),
+                PARSE_EMPTY("hidden"),
                 PARSE("id", Constant)
             }) { }
 };

@@ -28,7 +28,7 @@ namespace BMV2 {
 class ParseAnnotations : public P4::ParseAnnotations {
  public:
     ParseAnnotations() : P4::ParseAnnotations("BMV2", {
-                PARSE_NO_BODY("metadata"),
+                PARSE_EMPTY("metadata"),
                 PARSE("alias", StringLiteral),
                 PARSE("priority", Constant)
             }) { }
