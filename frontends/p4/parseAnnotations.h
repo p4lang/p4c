@@ -82,8 +82,8 @@ class ParseAnnotations : public Modifier {
     typedef std::unordered_map<cstring, Handler> HandlerMap;
 
     /// Produces a pass that rewrites the spec-defined annotations.
-    ParseAnnotations(bool warn = false) : warnUnknown(warn),
-                                          handlers(standardHandlers()) {
+    explicit ParseAnnotations(bool warn = false) : warnUnknown(warn),
+                                                   handlers(standardHandlers()) {
         setName("ParseAnnotations");
     }
 
