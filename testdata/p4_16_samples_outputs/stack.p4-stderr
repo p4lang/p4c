@@ -1,0 +1,3 @@
+stack.p4(30): warning: stack.next: reading uninitialized value
+        b = stack.next;
+            ^^^^^^^^^^
