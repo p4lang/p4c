@@ -33,6 +33,7 @@ header bitvec_hdr {
 
 struct parsed_packet_t {
     bitvec_hdr bvh;
+    bitvec_hdr bvh1;    
 };
 
 
