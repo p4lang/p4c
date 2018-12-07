@@ -20,10 +20,12 @@ class P4AnnotationLexer : public AbstractP4Lexer {
 
         // Pairs
         EXPRESSION_PAIR = P4Parser::token_type::TOK_START_EXPRESSION_PAIR,
+        INTEGER_PAIR = P4Parser::token_type::TOK_START_INTEGER_PAIR,
         STRING_LITERAL_PAIR = P4Parser::token_type::TOK_START_STRING_LITERAL_PAIR,
 
         // Triples
         EXPRESSION_TRIPLE = P4Parser::token_type::TOK_START_EXPRESSION_TRIPLE,
+        INTEGER_TRIPLE = P4Parser::token_type::TOK_START_INTEGER_TRIPLE,
         STRING_LITERAL_TRIPLE = P4Parser::token_type::TOK_START_STRING_LITERAL_TRIPLE,
     };
 

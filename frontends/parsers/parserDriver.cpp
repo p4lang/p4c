@@ -226,6 +226,14 @@ P4ParserDriver::parseExpressionPair(const Util::SourceInfo& srcInfo,
 }
 
 /* static */ const IR::Vector<IR::Expression>*
+P4ParserDriver::parseConstantPair(const Util::SourceInfo& srcInfo,
+                                  const IR::Vector<IR::AnnotationToken>& body) {
+    P4ParserDriver driver;
+    return driver.parse<IR::Vector<IR::Expression>>(
+            P4AnnotationLexer::INTEGER_PAIR, srcInfo, body);
+}
+
+/* static */ const IR::Vector<IR::Expression>*
 P4ParserDriver::parseStringLiteralPair(const Util::SourceInfo& srcInfo,
                                        const IR::Vector<IR::AnnotationToken>& body) {
     P4ParserDriver driver;
@@ -239,6 +247,14 @@ P4ParserDriver::parseExpressionTriple(const Util::SourceInfo& srcInfo,
     P4ParserDriver driver;
     return driver.parse<IR::Vector<IR::Expression>>(
             P4AnnotationLexer::EXPRESSION_TRIPLE, srcInfo, body);
+}
+
+/* static */ const IR::Vector<IR::Expression>*
+P4ParserDriver::parseConstantTriple(const Util::SourceInfo& srcInfo,
+                                    const IR::Vector<IR::AnnotationToken>& body) {
+    P4ParserDriver driver;
+    return driver.parse<IR::Vector<IR::Expression>>(
+            P4AnnotationLexer::INTEGER_TRIPLE, srcInfo, body);
 }
 
 /* static */ const IR::Vector<IR::Expression>*

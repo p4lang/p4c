@@ -134,8 +134,10 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %token             START_PROGRAM
                    START_EXPRESSION_LIST START_KV_LIST
                    START_EXPRESSION START_INTEGER START_STRING_LITERAL
-                   START_EXPRESSION_PAIR START_STRING_LITERAL_PAIR
-                   START_EXPRESSION_TRIPLE START_STRING_LITERAL_TRIPLE
+                   START_EXPRESSION_PAIR START_INTEGER_PAIR
+                   START_STRING_LITERAL_PAIR
+                   START_EXPRESSION_TRIPLE START_INTEGER_TRIPLE
+                   START_STRING_LITERAL_TRIPLE
 %token             END END_ANNOTATION
 
 
@@ -324,6 +326,11 @@ fragment
           result->push_back($2);
           result->push_back($4);
           $$ = result; }
+    | START_INTEGER_PAIR INTEGER "," INTEGER
+        { auto* result = new IR::Vector<IR::Expression>();
+          result->push_back(parseConstant(@2, $2, 0));
+          result->push_back(parseConstant(@4, $4, 0));
+          $$ = result; }
     | START_STRING_LITERAL_PAIR STRING_LITERAL "," STRING_LITERAL
         { auto* result = new IR::Vector<IR::Expression>();
           result->push_back(new IR::StringLiteral(@2, $2));
@@ -336,6 +343,12 @@ fragment
           result->push_back($2);
           result->push_back($4);
           result->push_back($6);
+          $$ = result; }
+    | START_INTEGER_TRIPLE INTEGER "," INTEGER "," INTEGER
+        { auto* result = new IR::Vector<IR::Expression>();
+          result->push_back(parseConstant(@2, $2, 0));
+          result->push_back(parseConstant(@4, $4, 0));
+          result->push_back(parseConstant(@6, $6, 0));
           $$ = result; }
     | START_STRING_LITERAL_TRIPLE STRING_LITERAL "," STRING_LITERAL ","
       STRING_LITERAL
