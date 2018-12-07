@@ -22,11 +22,19 @@ void StructTypeReplacement::flatten(const P4::TypeMap* typeMap,
                                     cstring prefix,
                                     const IR::Type* type,
                                     IR::IndexedVector<IR::StructField> *fields) {
-    if (auto st = type->to<IR::Type_Struct>()) {
-        structFieldMap.emplace(prefix, st);
-        for (auto f : st->fields)
-            flatten(typeMap, prefix + "." + f->name, f->type, fields);
-        return;
+    structFieldMap.emplace(prefix, type);
+    const IR::Type_Struct* st;
+    const IR::Type_Header* ht;
+    if (type->is<IR::Type_Struct>()) {
+      st = type->to<IR::Type_Struct>();
+      for (auto f : st->fields)
+          flatten(typeMap, prefix + "." + f->name, f->type, fields);
+      return;
+    } else if (type->is<IR::Type_Header>()) {
+      ht = type->to<IR::Type_Header>();
+      for (auto f : ht->fields)
+          flatten(typeMap, prefix + "." + f->name, f->type, fields);
+      return;
     }
     cstring fieldName = prefix.replace(".", "_") +
                         cstring::to_cstring(fieldNameRemap.size());
@@ -35,10 +43,16 @@ void StructTypeReplacement::flatten(const P4::TypeMap* typeMap,
 }
 
 StructTypeReplacement::StructTypeReplacement(
-    const P4::TypeMap* typeMap, const IR::Type_Struct* type) {
+    const P4::TypeMap* typeMap, const IR::Type* type) {
     auto vec = new IR::IndexedVector<IR::StructField>();
     flatten(typeMap, "", type, vec);
-    replacementType = new IR::Type_Struct(type->name, IR::Annotations::empty, *vec);
+    if (type->is<IR::Type_Struct>()) {
+        replacementType = new IR::Type_Struct(type->to<IR::Type_Struct>()->name,
+                                              IR::Annotations::empty, *vec);
+    } else if (type->is<IR::Type_Header>()) {
+        replacementType = new IR::Type_Header(type->to<IR::Type_Header>()->name,
+                                              IR::Annotations::empty, *vec);
+    }
 }
 
 const IR::StructInitializerExpression* StructTypeReplacement::explode(
@@ -46,7 +60,17 @@ const IR::StructInitializerExpression* StructTypeReplacement::explode(
     auto vec = new IR::IndexedVector<IR::NamedExpression>();
     auto fieldType = ::get(structFieldMap, prefix);
     CHECK_NULL(fieldType);
-    for (auto f : fieldType->fields) {
+    const IR::Type_Struct *st;
+    const IR::Type_Header *ht;
+    bool is_struct = false;
+    if (fieldType->is<IR::Type_Struct>()) {
+      is_struct = true;
+      st = fieldType->to<IR::Type_Struct>();
+    } else if (fieldType->is<IR::Type_Header>()) {
+      ht = fieldType->to<IR::Type_Header>();
+    }
+
+    for (auto f : is_struct ? st->fields : ht->fields) {
         cstring fieldName = prefix + "." + f->name.name;
         auto newFieldname = ::get(fieldNameRemap, fieldName);
         const IR::Expression* expr;
@@ -57,21 +81,26 @@ const IR::StructInitializerExpression* StructTypeReplacement::explode(
         }
         vec->push_back(new IR::NamedExpression(f->name, expr));
     }
-    return new IR::StructInitializerExpression(fieldType->name, *vec, false);
+    return new IR::StructInitializerExpression(is_struct ? st->name : ht->name,
+                                               *vec, false);
 }
 
-static const IR::Type_Struct* isNestedStruct(const P4::TypeMap* typeMap, const IR::Type* type) {
+static const IR::Type* isNestedStruct(const P4::TypeMap* typeMap, const IR::Type* type) {
     if (auto st = type->to<IR::Type_Struct>()) {
         for (auto f : st->fields) {
             auto ft = typeMap->getType(f, true);
-            if (ft->is<IR::Type_Struct>())
+            if (ft->is<IR::Type_Struct>()) {
                 return st;
-        }
+            }
+            if (ft->is<IR::Type_Header>()) {
+                return ft->to<IR::Type_Header>();
+            }
+         }
     }
     return nullptr;
 }
 
-void NestedStructMap::createReplacement(const IR::Type_Struct* type) {
+void NestedStructMap::createReplacement(const IR::Type* type) {
     auto repl = ::get(replacement, type);
     if (repl != nullptr)
         return;
@@ -105,6 +134,14 @@ const IR::Node* ReplaceStructs::preorder(IR::P4Program* program) {
 }
 
 const IR::Node* ReplaceStructs::postorder(IR::Type_Struct* type) {
+    auto canon = replacementMap->typeMap->getTypeType(getOriginal(), true);
+    auto repl = replacementMap->getReplacement(canon);
+    if (repl != nullptr)
+        return repl->replacementType;
+    return type;
+}
+
+const IR::Node* ReplaceStructs::postorder(IR::Type_Header* type) {
     auto canon = replacementMap->typeMap->getTypeType(getOriginal(), true);
     auto repl = replacementMap->getReplacement(canon);
     if (repl != nullptr)

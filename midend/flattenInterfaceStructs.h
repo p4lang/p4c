@@ -22,6 +22,12 @@ limitations under the License.
 
 namespace P4 {
 
+/*
+ *  This pass eliminates nested structs and another special struct that appear 
+ *  within the interfaces of controls or parsers.  The special struct includes
+ *  at least one P4 header where the P4 header includes nested bit-vector struct(s).
+*/
+
 /**
 Describes how a nested struct type is replaced: the new type to
 replace it and how each field is renamed.  For example, consider
@@ -43,7 +49,7 @@ struct M {
 }
 */
 struct StructTypeReplacement : public IHasDbPrint {
-    StructTypeReplacement(const P4::TypeMap* typeMap, const IR::Type_Struct* type);
+    StructTypeReplacement(const P4::TypeMap* typeMap, const IR::Type* type);
 
     // Maps nested field names to final field names.
     // In our example this could be:
@@ -55,7 +61,7 @@ struct StructTypeReplacement : public IHasDbPrint {
     // Maps internal fields names to types.
     // .t -> T
     // .t.s -> S
-    std::map<cstring, const IR::Type_Struct*> structFieldMap;
+    std::map<cstring, const IR::Type*> structFieldMap;
     // Holds a new flat type
     // struct M {
     //    bit _t_s_a0;
@@ -95,7 +101,7 @@ struct NestedStructMap {
     NestedStructMap(P4::ReferenceMap* refMap, P4::TypeMap* typeMap):
             refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
-    void createReplacement(const IR::Type_Struct* type);
+    void createReplacement(const IR::Type* type);
     StructTypeReplacement* getReplacement(const IR::Type* type) const
     { return ::get(replacement, type); }
     bool empty() const { return replacement.empty(); }
@@ -168,6 +174,7 @@ class ReplaceStructs : public Transform {
     const IR::Node* preorder(IR::P4Parser* parser) override;
     const IR::Node* preorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::Type_Struct* type) override;
+    const IR::Node* postorder(IR::Type_Header* type) override;
 };
 
 class FlattenInterfaceStructs final : public PassManager {
