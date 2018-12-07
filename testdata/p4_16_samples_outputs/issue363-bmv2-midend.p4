@@ -35,14 +35,19 @@ struct parsed_packet_t {
     bitvec_hdr bvh1;
 }
 
+struct tst_t {
+    bitvec_hdr bvh0;
+}
+
 parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     state start {
         pk.extract<bitvec_hdr>(h.bvh);
+        pk.extract<bitvec_hdr>(h.bvh1);
         transition accept;
     }
 }
 
-control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
+control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     @hidden action act() {
         local_metadata.row.alt0.valid = local_metadata.row.alt1.valid;
         local_metadata.row.alt0.port = local_metadata.row.alt1.port;
@@ -69,6 +74,7 @@ control egress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata,
 control deparser(packet_out b, in parsed_packet_t h) {
     apply {
         b.emit<bitvec_hdr>(h.bvh);
+        b.emit<bitvec_hdr>(h.bvh1);
     }
 }
 
