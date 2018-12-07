@@ -118,6 +118,10 @@ class ParseAnnotations : public Modifier {
     /// Whether to warn about unknown annotations.
     const bool warnUnknown;
 
+    /// The set of unknown annotations for which warnings have already been
+    /// made.
+    std::set<cstring> warned;
+
     HandlerMap handlers;
 };
 
