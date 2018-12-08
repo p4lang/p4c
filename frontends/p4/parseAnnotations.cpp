@@ -46,7 +46,7 @@ bool ParseAnnotations::parseSkip(IR::Annotation*) {
 
 bool ParseAnnotations::parseEmpty(IR::Annotation* annotation) {
     if (!annotation->body.empty()) {
-        ::error("%1% should not have any argumentss", annotation);
+        ::error("%1% should not have any arguments", annotation);
         return false;
     }
 
