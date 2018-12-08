@@ -18,24 +18,26 @@ limitations under the License.
 
 namespace P4 {
 
-const ParseAnnotations::HandlerMap& ParseAnnotations::standardHandlers = {
-    // @tableonly, @defaultonly, @hidden, @atomic, and @optional have
-    // empty bodies.
-    PARSE_EMPTY(IR::Annotation::tableOnlyAnnotation),
-    PARSE_EMPTY(IR::Annotation::defaultOnlyAnnotation),
-    PARSE_EMPTY(IR::Annotation::hiddenAnnotation),
-    PARSE_EMPTY(IR::Annotation::atomicAnnotation),
-    PARSE_EMPTY(IR::Annotation::optionalAnnotation),
+ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
+    return {
+            // @tableonly, @defaultonly, @hidden, @atomic, and @optional have
+            // empty bodies.
+            PARSE_EMPTY(IR::Annotation::tableOnlyAnnotation),
+            PARSE_EMPTY(IR::Annotation::defaultOnlyAnnotation),
+            PARSE_EMPTY(IR::Annotation::hiddenAnnotation),
+            PARSE_EMPTY(IR::Annotation::atomicAnnotation),
+            PARSE_EMPTY(IR::Annotation::optionalAnnotation),
 
-    // @name and @deprecated have a string literal argument.
-    PARSE(IR::Annotation::nameAnnotation, StringLiteral),
-    PARSE(IR::Annotation::deprecatedAnnotation, StringLiteral),
+            // @name and @deprecated have a string literal argument.
+            PARSE(IR::Annotation::nameAnnotation, StringLiteral),
+            PARSE(IR::Annotation::deprecatedAnnotation, StringLiteral),
 
-    // @length has an expression argument.
-    PARSE(IR::Annotation::lengthAnnotation, Expression),
+            // @length has an expression argument.
+            PARSE(IR::Annotation::lengthAnnotation, Expression),
 
-    // @pkginfo has a key-value list argument.
-    PARSE_KV_LIST(IR::Annotation::pkginfoAnnotation)
+            // @pkginfo has a key-value list argument.
+            PARSE_KV_LIST(IR::Annotation::pkginfoAnnotation)
+        };
 };
 
 bool ParseAnnotations::parseSkip(IR::Annotation*) {

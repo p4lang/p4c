@@ -91,8 +91,8 @@ class ParseAnnotations : public Modifier {
     typedef std::unordered_map<cstring, Handler> HandlerMap;
 
     /// Produces a pass that rewrites the spec-defined annotations.
-    explicit ParseAnnotations(bool warn = false) : warnUnknown(warn),
-                                                   handlers(standardHandlers) {
+    explicit ParseAnnotations(bool warn = false)
+            : warnUnknown(warn), handlers(standardHandlers()) {
         setName("ParseAnnotations");
     }
 
@@ -100,24 +100,22 @@ class ParseAnnotations : public Modifier {
     ParseAnnotations(const char* targetName, bool includeStandard,
                      HandlerMap handlers,
                      bool warn = false)
-            : warnUnknown(warn), handlers(handlers) {
+            : warnUnknown(warn) {
         std::string buf = targetName;
         buf += "__ParseAnnotations";
         setName(buf.c_str());
 
         if (includeStandard) {
-            // Merge in standard handlers without clobbering custom handlers.
-            for (const auto& entry : standardHandlers) {
-                if (this->handlers.count(entry.first) == 0) {
-                    this->handlers[entry.first] = entry.second;
-                }
-            }
+            this->handlers = standardHandlers();
+            this->handlers.insert(handlers.begin(), handlers.end());
+        } else {
+            this->handlers = handlers;
         }
     }
 
     void postorder(IR::Annotation* annotation) final;
 
-    static const HandlerMap& standardHandlers;
+    static HandlerMap standardHandlers();
 
     static bool parseSkip(IR::Annotation* annotation);
     static bool parseEmpty(IR::Annotation* annotation);
