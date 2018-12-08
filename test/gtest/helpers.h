@@ -21,6 +21,7 @@ limitations under the License.
 #include <string>
 
 #include "frontends/common/options.h"
+#include "frontends/p4/parseAnnotations.h"
 #include "gtest/gtest.h"
 
 namespace IR {
@@ -105,11 +106,19 @@ class P4CTest : public ::testing::Test {
 };
 
 struct FrontendTestCase {
+    static const CompilerOptions::FrontendVersion defaultVersion =
+        CompilerOptions::FrontendVersion::P4_16;
+
     /// Create a test case that only requires the frontend to run.
     static boost::optional<FrontendTestCase>
     create(const std::string& source,
-           CompilerOptions::FrontendVersion langVersion
-              = CompilerOptions::FrontendVersion::P4_16);
+           CompilerOptions::FrontendVersion langVersion = defaultVersion,
+           P4::ParseAnnotations parseAnnotations = P4::ParseAnnotations());
+
+    static boost::optional<FrontendTestCase>
+    create(const std::string& source, P4::ParseAnnotations parseAnnotations) {
+        return create(source, defaultVersion, parseAnnotations);
+    }
 
     /// The output of the frontend.
     const IR::P4Program* program;
