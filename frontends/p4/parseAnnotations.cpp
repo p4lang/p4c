@@ -38,7 +38,7 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
             // @pkginfo has a key-value list argument.
             PARSE_KV_LIST(IR::Annotation::pkginfoAnnotation)
         };
-};
+}
 
 bool ParseAnnotations::parseSkip(IR::Annotation*) {
     return false;
