@@ -18,15 +18,26 @@ limitations under the License.
 #define _P4_FRONTEND_H_
 
 #include "ir/ir.h"
+#include "parseAnnotations.h"
 #include "../common/options.h"
 
 namespace P4 {
 
 class FrontEnd {
+    /// A pass for parsing annotations.
+    ParseAnnotations parseAnnotations;
+
     std::vector<DebugHook> hooks;
+
  public:
     FrontEnd() = default;
+    explicit FrontEnd(ParseAnnotations parseAnnotations)
+        : parseAnnotations(parseAnnotations) { }
     explicit FrontEnd(DebugHook hook) { hooks.push_back(hook); }
+    explicit FrontEnd(ParseAnnotations parseAnnotations, DebugHook hook)
+            : FrontEnd(parseAnnotations) {
+        hooks.push_back(hook);
+    }
     void addDebugHook(DebugHook hook) { hooks.push_back(hook); }
     const IR::P4Program* run(const CompilerOptions& options, const IR::P4Program* program,
                              bool skipSideEffectOrdering = false);

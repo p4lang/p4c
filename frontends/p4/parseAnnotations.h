@@ -92,22 +92,32 @@ class ParseAnnotations : public Modifier {
 
     /// Produces a pass that rewrites the spec-defined annotations.
     explicit ParseAnnotations(bool warn = false) : warnUnknown(warn),
-                                                   handlers(standardHandlers()) {
+                                                   handlers(standardHandlers) {
         setName("ParseAnnotations");
     }
 
     /// Produces a pass that rewrites a custom set of annotations.
-    ParseAnnotations(const char* targetName, HandlerMap handlers,
+    ParseAnnotations(const char* targetName, bool includeStandard,
+                     HandlerMap handlers,
                      bool warn = false)
             : warnUnknown(warn), handlers(handlers) {
         std::string buf = targetName;
         buf += "__ParseAnnotations";
         setName(buf.c_str());
+
+        if (includeStandard) {
+            // Merge in standard handlers without clobbering custom handlers.
+            for (const auto& entry : standardHandlers) {
+                if (this->handlers.count(entry.first) == 0) {
+                    this->handlers[entry.first] = entry.second;
+                }
+            }
+        }
     }
 
     void postorder(IR::Annotation* annotation) final;
 
-    static HandlerMap standardHandlers();
+    static const HandlerMap& standardHandlers;
 
     static bool parseSkip(IR::Annotation* annotation);
     static bool parseEmpty(IR::Annotation* annotation);

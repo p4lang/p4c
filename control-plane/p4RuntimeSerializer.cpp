@@ -657,7 +657,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
 /// Parses P4Runtime-specific annotations.
 class ParseAnnotations : public P4::ParseAnnotations {
  public:
-    ParseAnnotations() : P4::ParseAnnotations("P4Runtime", {
+    ParseAnnotations() : P4::ParseAnnotations("P4Runtime", false, {
                 PARSE("controller_header", StringLiteral),
                 PARSE_EMPTY("hidden"),
                 PARSE("id", Constant)

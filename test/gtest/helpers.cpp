@@ -129,7 +129,7 @@ namespace Test {
 
 class ParseAnnotations : public P4::ParseAnnotations {
  public:
-    ParseAnnotations() : P4::ParseAnnotations("FrontendTest", {
+    ParseAnnotations() : P4::ParseAnnotations("FrontendTest", false, {
                 PARSE("my_anno", StringLiteral)
             }) { }
 };
