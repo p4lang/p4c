@@ -85,16 +85,17 @@ void ParseAnnotations::postorder(IR::Annotation* annotation) {
         return;
     }
 
-    if (!handlers.count(annotation->name)) {
+    cstring name = annotation->name.name;
+    if (!handlers.count(name)) {
         // Unknown annotation. Leave as is, but warn if desired.
-        if (warnUnknown && warned.count(annotation->name) != 0) {
-            warned.insert(annotation->name);
+        if (warnUnknown && warned.count(name) == 0) {
+            warned.insert(name);
             ::warning("Unknown annotation: %1%", annotation->name);
         }
         return;
     }
 
-    annotation->needsParsing = !handlers[annotation->name](annotation);
+    annotation->needsParsing = !handlers[name](annotation);
 }
 
 }  // namespace P4
