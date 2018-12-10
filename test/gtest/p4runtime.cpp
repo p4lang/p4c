@@ -32,6 +32,7 @@ limitations under the License.
 #include "control-plane/typeSpecConverter.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/parseAnnotations.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
 #include "helpers.h"
@@ -49,14 +50,25 @@ using P4Ids = p4configv1::P4Ids;
 
 using google::protobuf::util::MessageDifferencer;
 
+const cstring defaultArch = "v1model";
+
 boost::optional<P4::P4RuntimeAPI>
 createP4RuntimeTestCase(
     const std::string& source,
-    CompilerOptions::FrontendVersion langVersion = CompilerOptions::FrontendVersion::P4_16,
-    const cstring arch = "v1model") {
-    auto frontendTestCase = FrontendTestCase::create(source, langVersion);
+    CompilerOptions::FrontendVersion langVersion = FrontendTestCase::defaultVersion,
+    const cstring arch = defaultArch,
+    P4::ParseAnnotations parseAnnotations = P4::ParseAnnotations()) {
+    auto frontendTestCase = FrontendTestCase::create(source, langVersion, parseAnnotations);
     if (!frontendTestCase) return boost::none;
     return P4::generateP4Runtime(frontendTestCase->program, arch);
+}
+
+boost::optional<P4::P4RuntimeAPI>
+createP4RuntimeTestCase(
+    const std::string& source,
+    P4::ParseAnnotations parseAnnotations) {
+    return createP4RuntimeTestCase(source, FrontendTestCase::defaultVersion,
+                                   defaultArch, parseAnnotations);
 }
 
 /// Generic meta function which searches an object by @name in the given range
@@ -1077,6 +1089,13 @@ TEST_F(P4Runtime, ValueSet) {
     EXPECT_EQ(16, vset->size());
 }
 
+class ParseAnnotations : public P4::ParseAnnotations {
+ public:
+    ParseAnnotations() : P4::ParseAnnotations("FrontendTest", true, {
+                PARSE("my_anno", StringLiteral)
+            }) { }
+};
+
 TEST_F(P4Runtime, Register) {
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
         header Header { bit<32> hfA; bit<16> hfB; }
@@ -1101,7 +1120,7 @@ TEST_F(P4Runtime, Register) {
                 my_register_2.write(32w10, h.h); } }
         V1Switch(parse(), verifyChecksum(), ingress(), egress(),
                  computeChecksum(), deparse()) main;
-    )"));
+    )"), ParseAnnotations());
 
     ASSERT_TRUE(test);
     EXPECT_EQ(0u, ::diagnosticCount());

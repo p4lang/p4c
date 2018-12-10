@@ -127,17 +127,12 @@ P4CTestEnvironment::P4CTestEnvironment() {
 
 namespace Test {
 
-class ParseAnnotations : public P4::ParseAnnotations {
- public:
-    ParseAnnotations() : P4::ParseAnnotations("FrontendTest", {
-                PARSE("my_anno", StringLiteral)
-            }) { }
-};
-
 /* static */ boost::optional<FrontendTestCase>
 FrontendTestCase::create(const std::string& source,
                          CompilerOptions::FrontendVersion langVersion
-                            /* = CompilerOptions::FrontendVersion::P4_16 */) {
+                            /* = CompilerOptions::FrontendVersion::P4_16 */,
+                         P4::ParseAnnotations parseAnnotations
+                            /* = P4::ParseAnnotations() */) {
     auto* program = P4::parseP4String(source, langVersion);
     if (program == nullptr) {
         std::cerr << "Couldn't parse test case source" << std::endl;
@@ -159,7 +154,7 @@ FrontendTestCase::create(const std::string& source,
 
     CompilerOptions options;
     options.langVersion = langVersion;
-    program = P4::FrontEnd().run(options, program, true);
+    program = P4::FrontEnd(parseAnnotations).run(options, program, true);
     if (program == nullptr) {
         std::cerr << "Frontend failed" << std::endl;
         return boost::none;
@@ -170,11 +165,6 @@ FrontendTestCase::create(const std::string& source,
         return boost::none;
     }
 
-    program = program->apply(ParseAnnotations());
-    if (program == nullptr) {
-        std::cerr << "Back-end annotation parsing failed" << std::endl;
-        return boost::none;
-    }
     if (::errorCount() > 0) {
         std::cerr << "Encountered " << ::errorCount()
                   << " errors while parsing back-end annotations" << std::endl;
