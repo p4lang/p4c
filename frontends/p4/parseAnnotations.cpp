@@ -21,12 +21,12 @@ namespace P4 {
 ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
     return {
             // @tableonly, @defaultonly, @hidden, @atomic, and @optional have
-            // no body.
-            PARSE_NO_BODY(IR::Annotation::tableOnlyAnnotation),
-            PARSE_NO_BODY(IR::Annotation::defaultOnlyAnnotation),
-            PARSE_NO_BODY(IR::Annotation::hiddenAnnotation),
-            PARSE_NO_BODY(IR::Annotation::atomicAnnotation),
-            PARSE_NO_BODY(IR::Annotation::optionalAnnotation),
+            // empty bodies.
+            PARSE_EMPTY(IR::Annotation::tableOnlyAnnotation),
+            PARSE_EMPTY(IR::Annotation::defaultOnlyAnnotation),
+            PARSE_EMPTY(IR::Annotation::hiddenAnnotation),
+            PARSE_EMPTY(IR::Annotation::atomicAnnotation),
+            PARSE_EMPTY(IR::Annotation::optionalAnnotation),
 
             // @name and @deprecated have a string literal argument.
             PARSE(IR::Annotation::nameAnnotation, StringLiteral),
@@ -40,60 +40,62 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
         };
 }
 
-void ParseAnnotations::parseNoBody(IR::Annotation* annotation) {
+bool ParseAnnotations::parseSkip(IR::Annotation*) {
+    return false;
+}
+
+bool ParseAnnotations::parseEmpty(IR::Annotation* annotation) {
     if (!annotation->body.empty()) {
-        ::error("%1% should not have any argumentss", annotation);
-    }
-}
-
-void ParseAnnotations::parseExpressionList(IR::Annotation* annotation) {
-    if (!needsParsing(annotation)) {
-        return;
-    }
-
-    const IR::Vector<IR::Expression>* parsed =
-        P4::P4ParserDriver::parseExpressionList(annotation->srcInfo,
-                                                annotation->body);
-    if (parsed != nullptr) {
-        annotation->expr.append(*parsed);
-    }
-}
-
-void ParseAnnotations::parseKvList(IR::Annotation* annotation) {
-    if (!needsParsing(annotation)) {
-        return;
-    }
-
-    const IR::IndexedVector<IR::NamedExpression>* parsed =
-        P4::P4ParserDriver::parseKvList(annotation->srcInfo,
-                                        annotation->body);
-    if (parsed != nullptr) {
-        annotation->kv.append(*parsed);
-    }
-}
-
-bool ParseAnnotations::needsParsing(IR::Annotation* annotation) {
-    if (!annotation->expr.empty() || !annotation->kv.empty()) {
-        // We already have an expression or a key-value list. This happens when
-        // we have a P4₁₄ program, in which case the annotation body had better
-        // be empty.
-        if (!annotation->body.empty()) {
-            BUG("Annotation has been parsed already");
-        }
-
+        ::error("%1% should not have any arguments", annotation);
         return false;
     }
 
     return true;
 }
 
+bool ParseAnnotations::parseExpressionList(IR::Annotation* annotation) {
+    const IR::Vector<IR::Expression>* parsed =
+        P4::P4ParserDriver::parseExpressionList(annotation->srcInfo,
+                                                annotation->body);
+    if (parsed != nullptr) {
+        annotation->expr.append(*parsed);
+    }
+
+    return parsed != nullptr;
+}
+
+bool ParseAnnotations::parseKvList(IR::Annotation* annotation) {
+    const IR::IndexedVector<IR::NamedExpression>* parsed =
+        P4::P4ParserDriver::parseKvList(annotation->srcInfo,
+                                        annotation->body);
+    if (parsed != nullptr) {
+        annotation->kv.append(*parsed);
+    }
+
+    return parsed != nullptr;
+}
+
 void ParseAnnotations::postorder(IR::Annotation* annotation) {
-    if (!handlers.count(annotation->name)) {
-        // Unknown annotation. Leave as is.
+    if (!annotation->needsParsing) {
         return;
     }
 
-    handlers[annotation->name](annotation);
+    if (!annotation->expr.empty() || !annotation->kv.empty()) {
+        BUG("Unparsed annotation with non-empty expr or kv");
+        return;
+    }
+
+    cstring name = annotation->name.name;
+    if (!handlers.count(name)) {
+        // Unknown annotation. Leave as is, but warn if desired.
+        if (warnUnknown && warned.count(name) == 0) {
+            warned.insert(name);
+            ::warning("Unknown annotation: %1%", annotation->name);
+        }
+        return;
+    }
+
+    annotation->needsParsing = !handlers[name](annotation);
 }
 
 }  // namespace P4

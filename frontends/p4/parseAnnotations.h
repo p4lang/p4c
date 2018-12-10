@@ -25,22 +25,52 @@ limitations under the License.
  */
 namespace P4 {
 
-#define PARSE_NO_BODY(aname) \
-    { aname, &P4::ParseAnnotations::parseNoBody }
+// A no-op handler. Useful for avoiding warnings about ignored annotations.
+#define PARSE_SKIP(aname) \
+    { aname, &P4::ParseAnnotations::parseSkip }
 
+// Parses an empty annotation.
+#define PARSE_EMPTY(aname) \
+    { aname, &P4::ParseAnnotations::parseEmpty }
+
+// Parses an annotation with a single-element body.
 #define PARSE(aname, tname)                                             \
     { aname, [](IR::Annotation* annotation) {                           \
-            if (!P4::ParseAnnotations::needsParsing(annotation)) {      \
-                return;                                                 \
-            }                                                           \
-                                                                        \
             const IR::tname* parsed =                                   \
                 P4::P4ParserDriver::parse ## tname(annotation->srcInfo, \
                                                    annotation->body);   \
             if (parsed != nullptr) {                                    \
                 annotation->expr.push_back(parsed);                     \
             }                                                           \
+            return parsed != nullptr;                                   \
         }                                                               \
+    }
+
+// Parses an annotation whose body is a pair.
+#define PARSE_PAIR(aname, tname)                                   \
+    { aname, [](IR::Annotation* annotation) {                      \
+            const IR::Vector<IR::Expression>* parsed =             \
+                P4::P4ParserDriver::parse ## tname ## Pair(        \
+                    annotation->srcInfo,                           \
+                    annotation->body);                             \
+            if (parsed != nullptr) {                               \
+                annotation->expr.append(*parsed);                  \
+            }                                                      \
+            return parsed != nullptr;                              \
+        }                                                          \
+    }
+
+// Parses an annotation whose body is a triple.
+#define PARSE_TRIPLE(aname, tname)                                 \
+    { aname, [](IR::Annotation* annotation) {                      \
+            const IR::Vector<IR::Expression>* parsed =             \
+                P4::P4ParserDriver::parse ## tname ## Triple(      \
+                    annotation->srcInfo, annotation->body);        \
+            if (parsed != nullptr) {                               \
+                annotation->expr.append(*parsed);                  \
+            }                                                      \
+            return parsed != nullptr;                              \
+        }                                                          \
     }
 
 #define PARSE_EXPRESSION_LIST(aname) \
@@ -53,38 +83,53 @@ class ParseAnnotations : public Modifier {
  public:
     using Modifier::postorder;
 
-    typedef std::function<void(IR::Annotation*)> Handler;
+    /// A handler returns true when the body of the given annotation is parsed
+    /// successfully.
+    typedef std::function<bool(IR::Annotation*)> Handler;
 
     /// Keyed on annotation names.
     typedef std::unordered_map<cstring, Handler> HandlerMap;
 
     /// Produces a pass that rewrites the spec-defined annotations.
-    ParseAnnotations() : handlers(standardHandlers()) {
+    explicit ParseAnnotations(bool warn = false)
+            : warnUnknown(warn), handlers(standardHandlers()) {
         setName("ParseAnnotations");
     }
 
     /// Produces a pass that rewrites a custom set of annotations.
-    ParseAnnotations(const char* targetName, HandlerMap handlers)
-            : handlers(handlers) {
+    ParseAnnotations(const char* targetName, bool includeStandard,
+                     HandlerMap handlers,
+                     bool warn = false)
+            : warnUnknown(warn) {
         std::string buf = targetName;
         buf += "__ParseAnnotations";
         setName(buf.c_str());
+
+        if (includeStandard) {
+            this->handlers = standardHandlers();
+            this->handlers.insert(handlers.begin(), handlers.end());
+        } else {
+            this->handlers = handlers;
+        }
     }
 
     void postorder(IR::Annotation* annotation) final;
 
     static HandlerMap standardHandlers();
 
-    static void parseNoBody(IR::Annotation* annotation);
-    static void parseExpressionList(IR::Annotation* annotation);
-    static void parseKvList(IR::Annotation* annotation);
-
-    /// Checks if the annotation needs parsing. An annotation needs parsing if
-    /// it was derived from P4₁₆. A BUG is thrown if the annotation is derived
-    /// from P4₁₆ and is already parsed.
-    static bool needsParsing(IR::Annotation* annotation);
+    static bool parseSkip(IR::Annotation* annotation);
+    static bool parseEmpty(IR::Annotation* annotation);
+    static bool parseExpressionList(IR::Annotation* annotation);
+    static bool parseKvList(IR::Annotation* annotation);
 
  private:
+    /// Whether to warn about unknown annotations.
+    const bool warnUnknown;
+
+    /// The set of unknown annotations for which warnings have already been
+    /// made.
+    std::set<cstring> warned;
+
     HandlerMap handlers;
 };
 

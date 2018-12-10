@@ -131,9 +131,14 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %printer { yyoutput << $$; } <*>;
 
 %define api.token.prefix {TOK_}
-%token             START_PROGRAM START_EXPRESSION_LIST START_KV_LIST
+%token             START_PROGRAM
+                   START_EXPRESSION_LIST START_KV_LIST
                    START_EXPRESSION START_INTEGER START_STRING_LITERAL
-%token             END
+                   START_EXPRESSION_PAIR START_INTEGER_PAIR
+                   START_STRING_LITERAL_PAIR
+                   START_EXPRESSION_TRIPLE START_INTEGER_TRIPLE
+                   START_STRING_LITERAL_TRIPLE
+%token             END END_ANNOTATION
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -301,16 +306,57 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 // Simulate multiple start symbols to allow the parser to be reused for
 // annotation bodies.
 start
-    : fragment END { driver.nodes->push_back($1->getNode()); YYACCEPT; }
+    : fragment END_ANNOTATION { driver.nodes->push_back($1->getNode()); YYACCEPT; }
     | START_PROGRAM program
     ;
 
 fragment
+      // Lists
     : START_EXPRESSION_LIST expressionList { $$ = $2; }
     | START_KV_LIST kvList                 { $$ = $2; }
+
+      // Singletons
     | START_EXPRESSION expression          { $$ = $2; }
     | START_INTEGER INTEGER                { $$ = parseConstant(@2, $2, 0); }
     | START_STRING_LITERAL STRING_LITERAL  { $$ = new IR::StringLiteral(@2, $2); }
+
+      // Pairs
+    | START_EXPRESSION_PAIR expression "," expression
+        { auto* result = new IR::Vector<IR::Expression>();
+          result->push_back($2);
+          result->push_back($4);
+          $$ = result; }
+    | START_INTEGER_PAIR INTEGER "," INTEGER
+        { auto* result = new IR::Vector<IR::Expression>();
+          result->push_back(parseConstant(@2, $2, 0));
+          result->push_back(parseConstant(@4, $4, 0));
+          $$ = result; }
+    | START_STRING_LITERAL_PAIR STRING_LITERAL "," STRING_LITERAL
+        { auto* result = new IR::Vector<IR::Expression>();
+          result->push_back(new IR::StringLiteral(@2, $2));
+          result->push_back(new IR::StringLiteral(@4, $4));
+          $$ = result; }
+
+      // Triples
+    | START_EXPRESSION_TRIPLE expression "," expression "," expression
+        { auto* result = new IR::Vector<IR::Expression>();
+          result->push_back($2);
+          result->push_back($4);
+          result->push_back($6);
+          $$ = result; }
+    | START_INTEGER_TRIPLE INTEGER "," INTEGER "," INTEGER
+        { auto* result = new IR::Vector<IR::Expression>();
+          result->push_back(parseConstant(@2, $2, 0));
+          result->push_back(parseConstant(@4, $4, 0));
+          result->push_back(parseConstant(@6, $6, 0));
+          $$ = result; }
+    | START_STRING_LITERAL_TRIPLE STRING_LITERAL "," STRING_LITERAL ","
+      STRING_LITERAL
+        { auto* result = new IR::Vector<IR::Expression>();
+          result->push_back(new IR::StringLiteral(@2, $2));
+          result->push_back(new IR::StringLiteral(@4, $4));
+          result->push_back(new IR::StringLiteral(@6, $6));
+          $$ = result; }
     ;
 
 program : input END { YYACCEPT; };
@@ -373,8 +419,13 @@ annotations
     ;
 
 annotation
-    : "@" name                        { $$ = new IR::Annotation(@1, *$2, {}); }
-    | "@" name "(" annotationBody ")" { $$ = new IR::Annotation(@1, *$2, *$4); }
+    : "@" name
+        { // Initialize with an empty sequence of annotation tokens so that the
+          // annotation node is marked as unparsed.
+          IR::Vector<IR::AnnotationToken> body;
+          $$ = new IR::Annotation(@1, *$2, body); }
+    | "@" name "(" annotationBody ")"
+        { $$ = new IR::Annotation(@1, *$2, *$4); }
     // Experimental: backwards compatibility with P4-14 pragmas (which
     // themselves are experimental!)
     | PRAGMA name annotationBody END_PRAGMA
@@ -396,7 +447,6 @@ annotationBody
 
 annotationToken
     : UNEXPECTED_TOKEN { $$ = $1; }
-    | END_PRAGMA       { $$ = $1; }
     | ABSTRACT         { $$ = $1; }
     | ACTION           { $$ = $1; }
     | ACTIONS          { $$ = $1; }

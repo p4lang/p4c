@@ -122,6 +122,7 @@ class P4ParserDriver final : public AbstractParserDriver {
      * @param body  The unparsed annotation body.
      * @returns an AST node if parsing was successful, or null otherwise.
      */
+    // Lists /////////////////////////////////////////////////////////////////
     static const IR::Vector<IR::Expression>* parseExpressionList(
         const Util::SourceInfo& srcInfo,
         const IR::Vector<IR::AnnotationToken>& body);
@@ -130,6 +131,7 @@ class P4ParserDriver final : public AbstractParserDriver {
         const Util::SourceInfo& srcInfo,
         const IR::Vector<IR::AnnotationToken>& body);
 
+    // Singletons ////////////////////////////////////////////////////////////
     static const IR::Expression* parseExpression(
         const Util::SourceInfo& srcInfo,
         const IR::Vector<IR::AnnotationToken>& body);
@@ -139,6 +141,32 @@ class P4ParserDriver final : public AbstractParserDriver {
         const IR::Vector<IR::AnnotationToken>& body);
 
     static const IR::StringLiteral* parseStringLiteral(
+        const Util::SourceInfo& srcInfo,
+        const IR::Vector<IR::AnnotationToken>& body);
+
+    // Pairs /////////////////////////////////////////////////////////////////
+    static const IR::Vector<IR::Expression>* parseExpressionPair(
+        const Util::SourceInfo& srcInfo,
+        const IR::Vector<IR::AnnotationToken>& body);
+
+    static const IR::Vector<IR::Expression>* parseConstantPair(
+        const Util::SourceInfo& srcInfo,
+        const IR::Vector<IR::AnnotationToken>& body);
+
+    static const IR::Vector<IR::Expression>* parseStringLiteralPair(
+        const Util::SourceInfo& srcInfo,
+        const IR::Vector<IR::AnnotationToken>& body);
+
+    // Triples ///////////////////////////////////////////////////////////////
+    static const IR::Vector<IR::Expression>* parseExpressionTriple(
+        const Util::SourceInfo& srcInfo,
+        const IR::Vector<IR::AnnotationToken>& body);
+
+    static const IR::Vector<IR::Expression>* parseConstantTriple(
+        const Util::SourceInfo& srcInfo,
+        const IR::Vector<IR::AnnotationToken>& body);
+
+    static const IR::Vector<IR::Expression>* parseStringLiteralTriple(
         const Util::SourceInfo& srcInfo,
         const IR::Vector<IR::AnnotationToken>& body);
 

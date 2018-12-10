@@ -206,26 +206,41 @@ class AnnotationToken {
 /// Most P4 entities can be optionally annotated
 class Annotation {
     ID name;
+
     /// An unparsed annotation body
     inline Vector<AnnotationToken> body;
+
+    /// Whether the annotation body needs to be parsed.
+    /// Invariant: if this is true, then expr and kv must both be empty. If the
+    /// annotation is compiler-generated (e.g., derived from a P4₁₄ pragma),
+    /// then needsParsing will be false and the body will be empty, but expr or
+    /// kv may be populated.
+    bool needsParsing;
+
     /// Annotations that are simple expressions
     inline Vector<Expression> expr;
+
     /// Annotations described as key-value pairs
     inline IndexedVector<NamedExpression> kv;
+
     Annotation { if (!srcInfo) srcInfo = name.srcInfo; }
+
+    /// For annotations parsed from P4-16 source.
     Annotation(Util::SourceInfo si, ID n, const Vector<AnnotationToken> &a)
-    : Node(si), name(n), body(a) {}
+    : Node(si), name(n), body(a), needsParsing(true) {}
+
+    // The remaining constructors are for compiler-generated annotations.
     Annotation(Util::SourceInfo si, ID n, const std::initializer_list<const Expression *> &a)
-    : Node(si), name(n), expr(a) {}
+    : Node(si), name(n), needsParsing(false), expr(a) {}
     Annotation(Util::SourceInfo si, ID n, const IR::Vector<Expression> &a)
-    : Node(si), name(n), expr(a) {}
+    : Node(si), name(n), needsParsing(false), expr(a) {}
     Annotation(Util::SourceInfo si, ID n, const IndexedVector<NamedExpression> &kv)
-    : Node(si), name(n), kv(kv) {}
-    Annotation(ID n, const std::initializer_list<const Expression *> &a) : name(n), expr(a) {}
-    Annotation(ID n, const IR::Vector<Expression> &a) : name(n), expr(a) {}
+    : Node(si), name(n), needsParsing(false), kv(kv) {}
+    Annotation(ID n, const std::initializer_list<const Expression *> &a) : name(n), needsParsing(false), expr(a) {}
+    Annotation(ID n, const IR::Vector<Expression> &a) : name(n), needsParsing(false), expr(a) {}
+
     Annotation(ID n, intmax_t v) : name(n) {
         expr.push_back(new Constant(v)); }
-    /// Predefined annotations used by the compiler
     static const cstring nameAnnotation;  /// Indicates the control-plane name.
     static const cstring tableOnlyAnnotation;  /// Action cannot be a default_action.
     static const cstring defaultOnlyAnnotation;  /// action can only be a default_action.
@@ -236,7 +251,13 @@ class Annotation {
     static const cstring pkginfoAnnotation;  /// Package documentation annotation.
     static const cstring deprecatedAnnotation;  /// Deprecation annotation.
     toString{ return cstring("@") + name; }
-    validate{ BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name"); }
+    validate{
+        BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name");
+        BUG_CHECK(!(needsParsing && !expr.empty()),
+            "unparsed annotation body with non-empty expr");
+        BUG_CHECK(!(needsParsing && !kv.empty()),
+            "unparsed annotation body with non-empty kv");
+    }
 
     /// Useful helper: extracts name value from a name annotation
     static cstring getName(const Annotation* annotation);

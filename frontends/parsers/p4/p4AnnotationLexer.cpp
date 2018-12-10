@@ -18,11 +18,11 @@ P4AnnotationLexer::Token P4AnnotationLexer::yylex(P4::P4ParserDriver&) {
     if (needStart) {
         needStart = false;
         return P4Parser::symbol_type((P4Parser::token_type) type,
-                                     Util::SourceInfo(body.srcInfo));
+                                     Util::SourceInfo(srcInfo));
     }
 
     if (it == body.end()) {
-        return P4Parser::make_END(Util::SourceInfo(body.srcInfo));
+        return P4Parser::make_END_ANNOTATION(Util::SourceInfo(srcInfo));
     }
 
     auto cur = *(it++);
