@@ -43,7 +43,7 @@ class JsonString : public JsonData, public std::string {
     JsonString(JsonString&&) = default;
     JsonString &operator=(const JsonString&) & = default;
     JsonString &operator=(JsonString&&) & = default;
-    operator cstring() { return cstring(*this); }
+    operator cstring() { return cstring(this->c_str()); }
 };
 
 class JsonVector : public JsonData, public std::vector<JsonData*> {
