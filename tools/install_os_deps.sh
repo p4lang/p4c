@@ -16,11 +16,24 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
     echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> ~/.bash_profile
     echo 'echo "===== RAN BASH_PROFILE ====="' >> ~/.bash_profile
     echo 'echo "===== RAN BASH_PROFILE =====" >&2' >> ~/.bash_profile
+    echo 'echo "===== RAN BASHRC ====="' >> ~/.bashrc
+    echo 'echo "===== RAN BASHRC =====" >&2' >> ~/.bashrc
+
+    ls -Al ~
+
+    cat >/tmp/moo <<EOF
+#!/bin/bash
+
+which bison
+bison --version
+EOF
+
+    chmod a+x /tmp/moo
+    /tmp/moo
+
     export PATH="/usr/local/opt/bison/bin:$PATH"
-    which bison
-    bison --version
-    find / -name bison -type f
-    find / -name bison -type f -exec {} --version \;
+    find / -name bison \( -type f -o -type l \) 2>/dev/null
+    find / -name bison \( -type f -o -type l \) -exec {} --version \; 2>/dev/null
 
     # install pip and required pip packages
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
