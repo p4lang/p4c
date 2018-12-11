@@ -19,6 +19,10 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
     echo 'echo "===== RAN BASHRC ====="' >> ~/.bashrc
     echo 'echo "===== RAN BASHRC =====" >&2' >> ~/.bashrc
 
+    echo 'env ========================================='
+
+    env | sort
+
     echo 'profile ======================================'
 
     cat ~/.bash_profile
@@ -30,6 +34,17 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
     echo 'job_stages ==================================='
 
     cat /Users/travis/.travis/job_stages
+
+    echo '=============================================='
+
+    cat > /tmp/moo <<EOF
+#!/bin/bash
+
+env | sort
+EOF
+
+    chmod a+r /tmp/moo
+    /tmp/moo
 
     echo '=============================================='
 
