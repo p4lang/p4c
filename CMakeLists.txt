@@ -72,7 +72,7 @@ set (P4C_LIB_DEPS)
 # required tools and libraries
 find_package (PythonInterp REQUIRED)
 find_package (FLEX REQUIRED)
-find_package (BISON REQUIRED)
+find_package (BISON 3.0.2 REQUIRED)
 if (ENABLE_PROTOBUF_STATIC)
   set(SAVED_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
   set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
