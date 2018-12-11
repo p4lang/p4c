@@ -27,6 +27,10 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
 
     cat ~/.bashrc
 
+    echo 'job_stages ==================================='
+
+    cat /Users/travis/.travis/job_stages
+
     echo '=============================================='
 
     # install pip and required pip packages
