@@ -15,6 +15,8 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
     $BREW link --force bison
     echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> ~/.bash_profile
     export PATH="/usr/local/opt/bison/bin:$PATH"
+    which bison
+    find / -name bison -perm /111 -type f
 
     # install pip and required pip packages
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
