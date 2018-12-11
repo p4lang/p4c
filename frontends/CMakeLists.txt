@@ -237,7 +237,6 @@ set (FRONTEND_SOURCES
 set_source_files_properties(${IR_GENERATED_SRCS} PROPERTIES GENERATED TRUE)
 set_source_files_properties(${v1PARSER_GEN_SRCS} PROPERTIES GENERATED TRUE)
 set_source_files_properties(${p4PARSER_GEN_SRCS} PROPERTIES GENERATED TRUE)
-set_source_files_properties(frontends/parsers/p4/p4parser.hpp PROPERTIES GENERATED TRUE)
 
 set (FRONTEND_CPPLINT_FILES
   ${P4_FRONTEND_SRCS} ${P4_FRONTEND_HDRS}

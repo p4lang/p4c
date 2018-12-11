@@ -13,7 +13,8 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
 
     # Prefer Homebrew's bison over the macOS-provided version
     $BREW link --force bison
-    echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' > ~/.bash_profile
+    echo 'export PATH="/usr/local/opt/bison/bin:$PATH"' >> ~/.bash_profile
+    export PATH="/usr/local/opt/bison/bin:$PATH"
 
     # install pip and required pip packages
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
