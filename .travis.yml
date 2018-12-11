@@ -21,6 +21,7 @@ env:
 
 before_install:
   - tools/install_os_deps.sh
+  - [[ $TRAVIS_OS_NAME == 'osx' ]] && export PATH="/usr/local/opt/bison/bin:$PATH"
 
 install:
   - if [[ $TRAVIS_OS_NAME == 'linux' ]] ; then tools/start_ccache; fi
