@@ -1384,18 +1384,6 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
                           varbit, field);
                 return type;
             }
-        } else if (ftype->is<IR::Type_Struct>()) {
-            for (auto nfield : ftype->to<IR::Type_Struct>()->fields) {
-                auto ntype = getType(nfield);
-                if (ntype == nullptr)
-                    return type;
-                if (!onlyBitsOrBitStructs(ntype)) {
-                    typeError("struct %1% in header %2% contains non-fixed "
-                              "width bitfields or structs",
-                              field, type->toString());
-                    return type;
-                }
-            }
         }
     }
     return type;
