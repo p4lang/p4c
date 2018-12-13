@@ -252,7 +252,7 @@ class TypeNameExpression : Expression {
     TypeNameExpression { if (!srcInfo && typeName) srcInfo = typeName->srcInfo; }
     TypeNameExpression(ID id) : Expression(id.srcInfo),
                                 typeName(new IR::Type_Name(new IR::Path(id))) {}
-    dbprint{ Node::dbprint(out); out << typeName; }
+    dbprint{ out << typeName; }
     toString { return typeName->toString(); }
 }
 

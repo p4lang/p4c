@@ -109,7 +109,8 @@ class Parameter : Declaration, IAnnotated {
     { return direction == IR::Direction::Out || direction == IR::Direction::InOut; }
     bool isOptional() const {
         return getAnnotation(Annotation::optionalAnnotation) != nullptr; }
-    dbprint { out << annotations << direction << ' ' << type << ' ' << name; }
+    dbprint { out << annotations << direction << (direction != IR::Direction::None ? " " : "")
+                  << type << ' ' << name; }
 }
 
 class ParameterList : ISimpleNamespace {
