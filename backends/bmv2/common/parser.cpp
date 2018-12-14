@@ -119,6 +119,10 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                     }
                     return result;
                 }
+            } else if (extmeth->method->name.name == corelib.packetIn.lookahead.name) {
+                // bare lookahead call -- should flag an error if there's not enough
+                // pakcet data, but ignore for now.
+                return nullptr;
             }
         } else if (minst->is<P4::ExternFunction>()) {
             auto extfn = minst->to<P4::ExternFunction>();
@@ -387,7 +391,8 @@ bool ParserConverter::preorder(const IR::P4Parser* parser) {
         // convert statements
         for (auto s : state->components) {
             auto op = convertParserStatement(s);
-            ctxt->json->add_parser_op(state_id, op);
+            if (op)
+                ctxt->json->add_parser_op(state_id, op);
         }
         // convert transitions
         if (state->selectExpression != nullptr) {
