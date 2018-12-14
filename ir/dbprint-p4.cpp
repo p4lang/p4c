@@ -109,6 +109,7 @@ void IR::P4Parser::dbprint(std::ostream &out) const {
     out << "parser " << name;
     if (type->typeParameters && !type->typeParameters->empty())
         out << type->typeParameters;
+    out << '(' << type->applyParams << ')';
     if (constructorParams)
         out << '(' << constructorParams << ')';
     out << " " << type->annotations << "{" << indent;

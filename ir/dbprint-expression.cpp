@@ -183,18 +183,20 @@ void IR::Mask::dbprint(std::ostream &out) const {
 }
 
 void IR::Cast::dbprint(std::ostream &out) const {
-    int prec = getprec(out);
+    int flags = dbgetflags(out);
+    int prec = flags & Precedence;
     if (prec > Prec_Prefix) out << '(';
-    out << setprec(Prec_Prefix) << "(" << type << ")" << setprec(Prec_Prefix)
-        << expr << setprec(prec);
+    out << setprec(Prec_Prefix) << Brief << "(" << type << ")" << setprec(Prec_Prefix) << expr;
     if (prec > Prec_Prefix) out << ')';
     if (prec == 0) out << ';';
+    dbsetflags(out, flags);
 }
 
 void IR::MethodCallExpression::dbprint(std::ostream &out) const {
-    int prec = getprec(out);
+    int flags = dbgetflags(out);
+    int prec = flags & Precedence;
     if (prec > Prec_Postfix) out << '(';
-    out << setprec(Prec_Postfix) << method;
+    out << Brief << setprec(Prec_Postfix) << method;
     if (typeArguments->size() > 0) {
         out << "<";
         const char *sep = "";
@@ -207,9 +209,10 @@ void IR::MethodCallExpression::dbprint(std::ostream &out) const {
     for (auto a : *arguments) {
         out << sep << setprec(Prec_Low) << a;
         sep = ", "; }
-    out << ")" << setprec(prec);
+    out << ")";
     if (prec > Prec_Postfix) out << ')';
     if (prec == 0) out << ';';
+    dbsetflags(out, flags);
 }
 
 void IR::ConstructorCallExpression::dbprint(std::ostream &out) const {
