@@ -1,14 +1,8 @@
 #include <core.p4>
 
 parser par(out bool b) {
-    bit<32> x_0;
-    bit<32> y_0;
-    bit<32> x_1;
     state start {
-        y_0 = 32w0;
-        x_1 = y_0 + 32w6;
-        x_0 = x_1;
-        b = x_0 == 32w0;
+        b = false;
         transition accept;
     }
 }

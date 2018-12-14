@@ -401,7 +401,7 @@ control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata me
     clone_metadata_t clone_md_0;
     apply {
         clone_md_0.data.h1.setValid();
-        clone_md_0.data.h1 = { 32w0 };
+        clone_md_0.data.h1 = {32w0};
         clone_md_0.type = 3w0;
         if (meta.custom_clone_id == 3w1) 
             ostd.clone_metadata = clone_md_0;

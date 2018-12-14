@@ -64,7 +64,7 @@ parser Parser(packet_in packet, out headers hdr) {
         tmp_1.operand_a = tmp_5[95:64];
         tmp_1.operand_b = tmp_5[63:32];
         tmp_1.res = tmp_5[31:0];
-        transition select(tmp.p, tmp_0.four, tmp_1.ver) {
+        transition select(tmp_3[127:120], tmp_4[119:112], tmp_5[111:104]) {
             (8w0x50, 8w0x34, 8w0x1): parse_p4calc;
             default: accept;
         }

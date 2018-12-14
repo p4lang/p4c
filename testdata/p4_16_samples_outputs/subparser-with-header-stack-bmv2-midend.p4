@@ -35,11 +35,9 @@ struct metadata {
 }
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    bit<8> my_next_hdr_type_0;
     h1_t hdr_0_h1;
     h2_t[5] hdr_0_h2;
     h3_t hdr_0_h3;
-    bit<8> ret_next_hdr_type_0;
     state start {
         pkt.extract<h1_t>(hdr.h1);
         verify(hdr.h1.hdr_type == 8w1, error.BadHeaderType);
@@ -55,12 +53,10 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
         hdr_0_h3 = hdr.h3;
         pkt.extract<h2_t>(hdr_0_h2.next);
         verify(hdr_0_h2.last.hdr_type == 8w2, error.BadHeaderType);
-        ret_next_hdr_type_0 = hdr_0_h2.last.next_hdr_type;
         hdr.h1 = hdr_0_h1;
         hdr.h2 = hdr_0_h2;
         hdr.h3 = hdr_0_h3;
-        my_next_hdr_type_0 = ret_next_hdr_type_0;
-        transition select(my_next_hdr_type_0) {
+        transition select(hdr_0_h2.last.next_hdr_type) {
             8w2: parse_other_h2;
             8w3: parse_h3;
             default: accept;

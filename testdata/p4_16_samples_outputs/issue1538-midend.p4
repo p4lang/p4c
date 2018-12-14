@@ -16,30 +16,10 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<16> tmp_port_0;
-    bit<16> tmp;
-    bit<16> tmp_0;
-    bit<16> x_0;
-    bool hasReturned;
-    bit<16> retval;
-    bit<16> x_1;
-    bool hasReturned_0;
-    bit<16> retval_0;
     state start {
-        x_0 = (bit<16>)standard_metadata.ingress_port;
-        hasReturned = false;
-        hasReturned = true;
-        retval = x_0 + 16w1;
-        tmp = retval;
-        tmp_port_0 = tmp;
         packet.extract<ethernet_t>(hdr.ethernet);
-        x_1 = hdr.ethernet.etherType;
-        hasReturned_0 = false;
-        hasReturned_0 = true;
-        retval_0 = x_1 + 16w1;
-        tmp_0 = retval_0;
-        hdr.ethernet.etherType = tmp_0;
-        meta.tmp_port = tmp_port_0;
+        hdr.ethernet.etherType = hdr.ethernet.etherType + 16w1;
+        meta.tmp_port = (bit<16>)standard_metadata.ingress_port + 16w1;
         transition accept;
     }
 }
