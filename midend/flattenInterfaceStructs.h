@@ -174,7 +174,6 @@ class ReplaceStructs : public Transform {
     const IR::Node* preorder(IR::P4Parser* parser) override;
     const IR::Node* preorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::Type_Struct* type) override;
-    const IR::Node* postorder(IR::Type_Header* type) override;
 };
 
 class FlattenInterfaceStructs final : public PassManager {

@@ -22,16 +22,17 @@ void StructTypeReplacement::flatten(const P4::TypeMap* typeMap,
                                     cstring prefix,
                                     const IR::Type* type,
                                     IR::IndexedVector<IR::StructField> *fields) {
-    structFieldMap.emplace(prefix, type);
     const IR::Type_Struct* st;
     const IR::Type_Header* ht;
     if (type->is<IR::Type_Struct>()) {
       st = type->to<IR::Type_Struct>();
+      structFieldMap.emplace(prefix, type);
       for (auto f : st->fields)
           flatten(typeMap, prefix + "." + f->name, f->type, fields);
       return;
     } else if (type->is<IR::Type_Header>()) {
       ht = type->to<IR::Type_Header>();
+      structFieldMap.emplace(prefix, type);
       for (auto f : ht->fields)
           flatten(typeMap, prefix + "." + f->name, f->type, fields);
       return;
@@ -92,12 +93,22 @@ static const IR::Type* isNestedStruct(const P4::TypeMap* typeMap, const IR::Type
             if (ft->is<IR::Type_Struct>()) {
                 return st;
             }
-            if (ft->is<IR::Type_Header>()) {
-                return ft->to<IR::Type_Header>();
-            }
          }
     }
     return nullptr;
+}
+
+static const bool HeaderHasStruct(const P4::TypeMap* typeMap,
+                                  const IR::Type* type) {
+    if (auto st = type->to<IR::Type_Header>()) {
+        for (auto f : st->fields) {
+            auto ft = typeMap->getType(f, true);
+            if (ft->is<IR::Type_Struct>()) {
+                return true;
+            }
+         }
+    }
+    return false;
 }
 
 void NestedStructMap::createReplacement(const IR::Type* type) {
@@ -117,8 +128,24 @@ bool FindTypesToReplace::preorder(const IR::Declaration_Instance* inst) {
     if (!ts->baseType->is<IR::Type_Package>())
         return false;
     for (auto t : *ts->arguments) {
-        if (auto st = isNestedStruct(map->typeMap, t))
+      if (auto st = isNestedStruct(map->typeMap, t)) {
             map->createReplacement(st);
+            LOG3("Replacement arg: " << t);
+      } else {
+          if (t->is<IR::Type_Struct>()) {
+              auto st1 = t->to<IR::Type_Struct>();
+              for (auto f : st1->fields) {
+                  auto ft = map->typeMap->getType(f, true);
+                  if (ft->is<IR::Type_Header>()) {
+                      if (!HeaderHasStruct(map->typeMap, ft)) {
+                          return false;
+                      }
+                      map->createReplacement(t);
+                      LOG3("Replacement arg2: " << t);
+                  }
+              }
+          }
+      }
     }
     return false;
 }
@@ -141,37 +168,41 @@ const IR::Node* ReplaceStructs::postorder(IR::Type_Struct* type) {
     return type;
 }
 
-const IR::Node* ReplaceStructs::postorder(IR::Type_Header* type) {
-    auto canon = replacementMap->typeMap->getTypeType(getOriginal(), true);
-    auto repl = replacementMap->getReplacement(canon);
-    if (repl != nullptr)
-        return repl->replacementType;
-    return type;
-}
-
 const IR::Node* ReplaceStructs::postorder(IR::Member* expression) {
+    LOG3("EXPR: " << expression);
     // Find out if this applies to one of the parameters that are being replaced.
-    if (getParent<IR::Member>() != nullptr)
+    if (getParent<IR::Member>() != nullptr) {
+      //        std::cout << "Parent not null: " << std::endl;
         // We only want to process the outermost Member
         return expression;
+    }
     const IR::Expression* e = expression;
     cstring prefix = "";
     while (auto mem = e->to<IR::Member>()) {
         e = mem->expr;
         prefix = cstring(".") + mem->member + prefix;
     }
+    LOG3("Prefix: " << prefix);
     auto pe = e->to<IR::PathExpression>();
-    if (pe == nullptr)
+    if (pe == nullptr) {
+        LOG3("PE null: ");
         return expression;
+    }
     // At this point we know that pe is an expression of the form
     // param.field1.etc.fieldN, where param has a type that needs to be replaced.
     auto decl = replacementMap->refMap->getDeclaration(pe->path, true);
     auto param = decl->to<IR::Parameter>();
-    if (param == nullptr)
+    if (param == nullptr) {
+        LOG3("Param null: ");
         return expression;
+    }
     auto repl = ::get(toReplace, param);
-    if (repl == nullptr)
+    if (repl == nullptr) {
+        LOG3("Repl null: " << param);
         return expression;
+    } else {
+        LOG3("Repl valid: " << param << " " << repl);
+    }
     auto newFieldName = ::get(repl->fieldNameRemap, prefix);
     const IR::Expression* result;
     if (newFieldName.isNullOrEmpty()) {
@@ -182,8 +213,10 @@ const IR::Node* ReplaceStructs::postorder(IR::Member* expression) {
         // of a struct-valued field as a left-value have been already
         // replaced by the NestedStructs pass.)
         result = repl->explode(pe, prefix);
+        LOG3("RESULT field NULL: " << result);
     } else {
         result = new IR::Member(pe, newFieldName);
+        LOG3("RESULT: " << result);
     }
     LOG3("Replacing " << expression << " with " << result);
     return result;
