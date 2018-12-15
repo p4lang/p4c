@@ -1,3 +1,3 @@
-extract.p4(20): error: h: argument must be a header/bit-vector struct
+extract.p4(20): error: h: argument must be a header
         p.extract(h); // error: not a header
                   ^

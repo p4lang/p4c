@@ -15,19 +15,8 @@ struct local_metadata_t {
     row_t row;
 }
 
-struct mac_t {
-    bit<28> lower28Bits;
-    bit<20> upper20Bits;
-}
-
-struct macDA_t {
-    mac_t macDA;
-}
-
 header bitvec_hdr {
-    bit<5>  g2;
-    bit<3>  g3;
-    macDA_t mac;
+    row_t row;
 }
 
 struct parsed_packet_t {
@@ -41,8 +30,6 @@ struct tst_t {
 
 parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     state start {
-        pk.extract(h.bvh);
-        pk.extract(h.bvh1);
         transition accept;
     }
 }
@@ -64,8 +51,6 @@ control egress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata,
 
 control deparser(packet_out b, in parsed_packet_t h) {
     apply {
-        b.emit(h.bvh);
-        b.emit(h.bvh1);
     }
 }
 

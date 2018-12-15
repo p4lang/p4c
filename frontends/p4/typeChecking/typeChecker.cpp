@@ -1397,8 +1397,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
         while (t->is<IR::Type_Newtype>())
             t = getTypeType(t->to<IR::Type_Newtype>()->type);
         return t->is<IR::Type_Struct>() || t->is<IR::Type_Bits>() ||
-        (t->is<IR::Type_Header>() && headerHasStruct(typeMap, t)) ||
-        t->is<IR::Type_HeaderUnion>() ||
+        t->is<IR::Type_Header>() || t->is<IR::Type_HeaderUnion>() ||
         t->is<IR::Type_Enum>() || t->is<IR::Type_Error>() ||
         t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() ||
         t->is<IR::Type_Varbits>() || t->is<IR::Type_ActionEnum>() ||
@@ -2759,36 +2758,15 @@ bool TypeInference::onlyBitsOrBitStructs(const IR::Type* type) const {
     return true;
 }
 
-bool TypeInference::headerHasStruct(const P4::TypeMap* typeMap,
-                                    const IR::Type* type) const {
-    bool status = false;
-    if (auto st = type->to<IR::Type_Header>()) {
-        for (auto f : st->fields) {
-            auto ft = typeMap->getType(f, true);
-            if (ft->is<IR::Type_Struct>() && onlyBitsOrBitStructs(ft)) {
-                status = true;
-            } else if (ft->is<IR::Type_Bits>()) {
-                status = true;
-            } else {
-                continue;
-            }
-         }
-         return status;
-    }
-    return status;
-}
-
 void TypeInference::checkEmitType(const IR::Expression* emit, const IR::Type* type) const {
-    if ((type->is<IR::Type_Header>() && headerHasStruct(typeMap, type))  ||
-        type->is<IR::Type_Stack>() || type->is<IR::Type_HeaderUnion>())
+    if (type->is<IR::Type_Header>() || type->is<IR::Type_Stack>() ||
+        type->is<IR::Type_HeaderUnion>())
         return;
 
     if (type->is<IR::Type_Struct>()) {
         for (auto f : type->to<IR::Type_Struct>()->fields) {
             auto ftype = typeMap->getType(f);
             if (ftype == nullptr)
-                continue;
-            if (ftype->is<IR::Type_Bits>())
                 continue;
             checkEmitType(emit, ftype);
         }
