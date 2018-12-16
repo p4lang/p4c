@@ -44,6 +44,7 @@ char *program_name;
 
 #ifdef MULTITHREAD
 #include <pthread.h>
+#include <mutex>
 std::vector<pthread_t>          thread_ids;
 __thread        int             my_id;
 

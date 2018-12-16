@@ -32,6 +32,9 @@ limitations under the License.
 #include <string>
 #include <unordered_map>
 #include <vector>
+#ifdef MULTITHREAD
+#include <mutex>
+#endif  // MULTITHREAD
 
 namespace Log {
 namespace Detail {
@@ -73,6 +76,25 @@ void OutputLogPrefix::setup_ostream_xalloc(std::ostream &out) {
     }
 }
 
+#ifdef MULTITHREAD
+struct OutputLogPrefix::lock_t {
+    int         refcnt = 1;
+    std::mutex  theMutex;
+
+    void lock() { theMutex.lock(); }
+    void unlock() { theMutex.unlock(); }
+    static void cleanup(std::ios_base::event event, std::ios_base &out, int index) {
+        if (event == std::ios_base::erase_event) {
+            auto *p = static_cast<lock_t *>(out.pword(index));
+            if (p && --p->refcnt <= 0) delete p;
+        } else if (event == std::ios_base::copyfmt_event) {
+            auto *p = static_cast<lock_t *>(out.pword(index));
+            if (p) p->refcnt++;
+        }
+    }
+};
+#endif  // MULTITHREAD
+
 OutputLogPrefix::~OutputLogPrefix() {
 #ifdef MULTITHREAD
     if (lock) lock->unlock();
@@ -86,7 +108,7 @@ void OutputLogPrefix::indent(std::ostream &out) {
     out << indent_t::getindent(out);
 }
 
-std::ostream& operator<<(std::ostream& out, const Log::Detail::OutputLogPrefix& pfx) {
+std::ostream& operator<<(std::ostream& out, const OutputLogPrefix& pfx) {
     std::stringstream tmp;
 #ifdef CLOCK_MONOTONIC
     if (LOGGING(2)) {
@@ -108,11 +130,12 @@ std::ostream& operator<<(std::ostream& out, const Log::Detail::OutputLogPrefix& 
         tmp << ':' << pfx.level << ':'; }
     pfx.setup_ostream_xalloc(out);
 #ifdef MULTITHREAD
-    if (!(pfx.lock = static_cast<std::mutex *>(out.pword(pfx.ostream_xalloc)))) {
+    if (!(pfx.lock = static_cast<OutputLogPrefix::lock_t *>(out.pword(pfx.ostream_xalloc)))) {
         static std::mutex lock;
         std::lock_guard<std::mutex> acquire(lock);
-        if (!(pfx.lock = static_cast<std::mutex *>(out.pword(pfx.ostream_xalloc)))) {
-            out.pword(pfx.ostream_xalloc) = pfx.lock = new NOGC_ARGS std::mutex; } }
+        if (!(pfx.lock = static_cast<OutputLogPrefix::lock_t *>(out.pword(pfx.ostream_xalloc)))) {
+            out.pword(pfx.ostream_xalloc) = pfx.lock = new NOGC_ARGS OutputLogPrefix::lock_t;
+            out.register_callback(OutputLogPrefix::lock_t::cleanup, pfx.ostream_xalloc); } }
     pfx.lock->lock();
 #endif  // MULTITHREAD
     if (tmp.str().size() > 0) {
