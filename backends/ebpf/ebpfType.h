@@ -73,6 +73,16 @@ class EBPFBoolType : public EBPFType, public IHasWidth {
     unsigned implementationWidthInBits() override { return 8; }
 };
 
+class EBPFStackType : public EBPFType, public IHasWidth {
+ public:
+    EBPFStackType(const IR::Type_Stack* type) : EBPFType(type) {}
+    void emit(CodeBuilder* builder) override;
+    void declare(CodeBuilder* builder, cstring id, bool asPointer) override;
+    void emitInitializer(CodeBuilder* builder) override;
+    unsigned widthInBits() override;
+    unsigned implementationWidthInBits();
+};
+
 class EBPFScalarType : public EBPFType, public IHasWidth {
  public:
     const unsigned width;
