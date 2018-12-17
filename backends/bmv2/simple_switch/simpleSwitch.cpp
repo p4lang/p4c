@@ -782,6 +782,10 @@ SimpleSwitchBackend::convertChecksum(const IR::BlockStatement *block, Util::Json
                     cksum->emplace("target", jleft->to<Util::JsonObject>()->get("value"));
                     cksum->emplace("type", "generic");
                     cksum->emplace("calculation", calcName);
+                    if (verify)
+                        cksum->emplace("verify", true);
+                    else
+                        cksum->emplace("update", true);
                     auto ifcond = conv->convert(
                         mi->expr->arguments->at(0)->expression, true, false);
                     cksum->emplace("if_cond", ifcond);
