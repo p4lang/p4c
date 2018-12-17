@@ -30,7 +30,11 @@ static int indentctl_index = -1;
 static void delete_indent(std::ios_base::event event, std::ios_base &out, int index) {
     if (event == std::ios_base::erase_event) {
         auto p = static_cast<indent_t *>(out.pword(index));
-        delete p; }
+        delete p;
+    } else if (event == std::ios_base::copyfmt_event) {
+        auto &p = out.pword(index);
+        p = new NOGC_ARGS indent_t(*static_cast<indent_t *>(p));
+    }
 }
 
 indent_t &indent_t::getindent(std::ostream &out) {

@@ -24,9 +24,6 @@ limitations under the License.
 #include "indent.h"
 
 #include "config.h"
-#ifdef MULTITHREAD
-#include <mutex>
-#endif  // MULTITHREAD
 
 #ifndef __GNUC__
 #define __attribute__(X)
@@ -53,7 +50,8 @@ class OutputLogPrefix {
     static void setup_ostream_xalloc(std::ostream &);
     friend std::ostream& operator<<(std::ostream&, const OutputLogPrefix&);
 #ifdef MULTITHREAD
-    mutable std::mutex *lock = nullptr;
+    struct lock_t;
+    mutable lock_t *lock = nullptr;
 #endif  // MULTITHREAD
  public:
     OutputLogPrefix(const char* f, int l) : fn(f), level(l) {}
