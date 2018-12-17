@@ -104,6 +104,11 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
             s->ifFalse = nullptr;
             s->condition = new IR::LNot(s->condition); }
         return s; }
+    IR::BlockStatement *postorder(IR::BlockStatement *blk) override {
+        if (!blk->components.empty()) return blk;
+        if (getParent<IR::BlockStatement>() || getParent<IR::IndexedVector<IR::StatOrDecl>>())
+            return nullptr;
+        return blk; }
 
  public:
     explicit ElimDead(DoLocalCopyPropagation &self) : self(self) {}
@@ -208,8 +213,10 @@ void DoLocalCopyPropagation::visit_local_decl(const IR::Declaration_Variable *va
 }
 
 const IR::Node *DoLocalCopyPropagation::postorder(IR::Declaration_Variable *var) {
-    if (!working) return var;
-    visit_local_decl(var);
+    if (working)
+        visit_local_decl(var);
+    else
+        visitAgain();
     return var;
 }
 
@@ -225,6 +232,7 @@ const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name) {
         if (findContext<IR::KeyElement>(ctxt) && ctxt->child_index == 1)
             inferForTable->keyreads.insert(name); }
     if (!working) return nullptr;
+    LOG6("  copyprop_name(" << name << ")" << (isWrite() ? " (write)" : ""));
     if (isWrite()) {
         dropValuesUsing(name);
         if (inferForFunc)
@@ -322,7 +330,9 @@ IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStateme
                  * may make things worse rather than better */
                 return as; }
             LOG3("  saving value for " << dest << ": " << as->right);
-            available[dest].val = as->right; }
+            available[dest].val = as->right;
+        } else {
+            LOG3("Can't copyprop " << as->right << " due to side effects"); }
     } else {
         LOG3("dest of assignment is " << as->left << " so skipping");
     }
@@ -357,17 +367,18 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
                 LOG3("table apply method call " << mc->method);
                 apply_table(&tables[obj]);
                 return mc;
-            } else if (mem->expr->type->is<IR::Type_Extern>()) {
+            } else if (auto ext = mem->expr->type->to<IR::Type_Extern>()) {
                 auto name = obj + '.' + mem->member;
                 if (methods.count(name)) {
                     LOG3("concrete method call " << name);
                     apply_function(&methods[name]);
                     return mc;
+                } else if (ext->name == "packet_in" || ext->name == "packet_out") {
+                    LOG3(ext->name << '.' << mem->member << " call");
+                    // we currently do no track the liveness of packet_in/out objects
+                    return mc;
                 } else {
-                    LOG3("extern method call " << mc->method << " does nothing");
-                    // FIXME -- is this safe? If an abstract method in outer scope that
-                    // we haven't seen a definition for, it might affects non-locals?
-                    return mc; }
+                    LOG3("unknown extern method call " << mc->method); }
             } else if (mem->expr->type->is<IR::Type_Header>()) {
                 if (mem->member == "isValid") {
                     forOverlapAvail(obj, [obj](cstring, VarInfo *var) {
@@ -382,6 +393,7 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
                     dropValuesUsing(obj);
                     if (inferForFunc)
                         inferForFunc->writes.insert(obj); }
+                return mc;
             } else if (mem->expr->type->is<IR::Type_Stack>()) {
                 BUG_CHECK(mem->member == "push_front" || mem->member == "pop_front",
                           "Unexpected stack method %s", mem->member);
@@ -391,8 +403,9 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
                     var->live = true; });
                 if (inferForFunc) {
                     inferForFunc->reads.insert(obj);
-                    inferForFunc->writes.insert(obj); } } } }
-    if (auto fn = mc->method->to<IR::PathExpression>()) {
+                    inferForFunc->writes.insert(obj); }
+                return mc; } }
+    } else if (auto fn = mc->method->to<IR::PathExpression>()) {
         if (actions.count(fn->path->name)) {
             LOG3("action method call " << mc->method);
             apply_function(&actions[fn->path->name]);
@@ -546,6 +559,42 @@ IR::P4Table *DoLocalCopyPropagation::postorder(IR::P4Table *tbl) {
          " actions=" << inferForTable->actions);
     inferForTable = nullptr;
     return tbl;
+}
+
+const IR::P4Parser *DoLocalCopyPropagation::postorder(IR::P4Parser *parser) {
+    BUG_CHECK(!working && available.empty(), "corrupt internal data struct");
+    working = true;
+    LOG2("DoLocalCopyPropagation working on parser " << parser->name);
+    visit(parser->parserLocals, "parserLocals");  // visit these again with working==true
+    for (auto *state : parser->states)
+        apply_function(&states[state->name]);
+    auto *rv = parser->apply(ElimDead(*this));
+    working = false;
+    available.clear();
+    return rv;
+}
+
+IR::ParserState *DoLocalCopyPropagation::preorder(IR::ParserState *state) {
+    visitOnce();
+    BUG_CHECK(!working && available.empty(), "corrupt internal data struct");
+    working = true;
+    LOG2("DoLocalCopyPropagation working on parser state " << state->name);
+    LOG4(state);
+    inferForFunc = &states[state->name];
+    return state;
+}
+
+IR::ParserState *DoLocalCopyPropagation::postorder(IR::ParserState *state) {
+    BUG_CHECK(working && inferForFunc == &states[state->name], "corrupt internal data struct");
+    LOG5("DoLocalCopyPropagation before ElimDead " << state->name);
+    LOG5(state);
+    state->components = *state->components.apply(ElimDead(*this));
+    working = false;
+    inferForFunc = nullptr;
+    available.clear();
+    LOG3("DoLocalCopyPropagation finished parser state " << state->name);
+    LOG4(state);
+    return state;
 }
 
 }  // namespace P4

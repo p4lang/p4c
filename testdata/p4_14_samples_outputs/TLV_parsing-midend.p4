@@ -126,7 +126,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         hdr.ipv4_option_timestamp.value = tmp_hdr_1.value;
         hdr.ipv4_option_timestamp.len = tmp_hdr_1.len;
         hdr.ipv4_option_timestamp.data = tmp_hdr_2.data;
-        meta.my_metadata.parse_ipv4_counter = meta.my_metadata.parse_ipv4_counter - hdr.ipv4_option_timestamp.len;
+        meta.my_metadata.parse_ipv4_counter = meta.my_metadata.parse_ipv4_counter - tmp_hdr_1.len;
         transition parse_ipv4_options;
     }
     @name(".parse_ipv4_options") state parse_ipv4_options {

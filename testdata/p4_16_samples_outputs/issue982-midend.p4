@@ -268,8 +268,6 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
     bit<3> user_meta_0_custom_clone_id;
     clone_0_t user_meta_0_clone;
     clone_1_t user_meta_0_clone_0;
-    bit<10> istd_0_egress_port;
-    InstanceType_t istd_0_instance_type;
     bit<3> istd_0_clone_metadata_type;
     clone_union_t istd_0_clone_metadata_data;
     fwd_metadata_t user_meta_1_fwd_metadata;
@@ -310,8 +308,6 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
         transition accept;
     }
     state parse_clone_header {
-        istd_0_egress_port = istd.egress_port;
-        istd_0_instance_type = istd.instance_type;
         istd_0_clone_metadata_type = istd.clone_metadata.type;
         istd_0_clone_metadata_data.h0 = istd.clone_metadata.data.h0;
         istd_0_clone_metadata_data.h1 = istd.clone_metadata.data.h1;
@@ -319,7 +315,7 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
         user_meta_1_custom_clone_id = user_meta.custom_clone_id;
         user_meta_1_clone = user_meta.clone_0;
         user_meta_1_clone_0 = user_meta.clone_1;
-        transition select(istd_0_clone_metadata_type) {
+        transition select(istd.clone_metadata.type) {
             3w0: CloneParser_parse_clone_header;
             3w1: CloneParser_parse_clone_header_0;
             default: reject;
