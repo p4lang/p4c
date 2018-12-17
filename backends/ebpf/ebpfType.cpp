@@ -26,21 +26,26 @@ EBPFType* EBPFTypeFactory::create(const IR::Type* type) {
     EBPFType* result = nullptr;
     if (type->is<IR::Type_Boolean>()) {
         result = new EBPFBoolType();
-    } else if (type->is<IR::Type_Bits>()) {
-        result = new EBPFScalarType(type->to<IR::Type_Bits>());
-    } else if (type->is<IR::Type_StructLike>()) {
-        result = new EBPFStructType(type->to<IR::Type_StructLike>());
-    } else if (type->is<IR::Type_Typedef>()) {
+    } else if (auto bt = type->to<IR::Type_Bits>()) {
+        result = new EBPFScalarType(bt);
+    } else if (auto st = type->to<IR::Type_StructLike>()) {
+        result = new EBPFStructType(st);
+    } else if (auto tt = type->to<IR::Type_Typedef>()) {
         auto canon = typeMap->getTypeType(type, true);
         result = create(canon);
-        auto path = new IR::Path(type->to<IR::Type_Typedef>()->name);
+        auto path = new IR::Path(tt->name);
         result = new EBPFTypeName(new IR::Type_Name(path), result);
-    } else if (type->is<IR::Type_Name>()) {
+    } else if (auto tn = type->to<IR::Type_Name>()) {
         auto canon = typeMap->getTypeType(type, true);
         result = create(canon);
-        result = new EBPFTypeName(type->to<IR::Type_Name>(), result);
-    } else if (type->is<IR::Type_Enum>()) {
-        return new EBPFEnumType(type->to<IR::Type_Enum>());
+        result = new EBPFTypeName(tn, result);
+    } else if (auto te = type->to<IR::Type_Enum>()) {
+        result = new EBPFEnumType(te);
+    } else if (auto ts = type->to<IR::Type_Stack>()) {
+        auto et = create(ts->elementType);
+        if (et == nullptr)
+            return nullptr;
+        result = new EBPFStackType(ts, et);
     } else {
         ::error("Type %1% not supported", type);
     }
@@ -54,6 +59,30 @@ EBPFBoolType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
     if (asPointer)
         builder->append("*");
     builder->appendFormat(" %s", id.c_str());
+}
+
+/////////////////////////////////////////////////////////////
+
+void EBPFStackType::declare(CodeBuilder* builder, cstring id, bool) {
+    elementType->declareArray(builder, id, size);
+}
+
+void EBPFStackType::emitInitializer(CodeBuilder* builder) {
+    builder->append("{");
+    for (unsigned i = 0; i < size; i++) {
+        if (i > 0)
+            builder->append(", ");
+        elementType->emitInitializer(builder);
+    }
+    builder->append(" }");
+}
+
+unsigned EBPFStackType::widthInBits() {
+    return size * elementType->to<IHasWidth>()->widthInBits();
+}
+
+unsigned EBPFStackType::implementationWidthInBits() {
+    return size * elementType->to<IHasWidth>()->implementationWidthInBits();
 }
 
 /////////////////////////////////////////////////////////////
@@ -196,6 +225,11 @@ void EBPFStructType::emit(CodeBuilder* builder) {
     builder->endOfStatement(true);
 }
 
+void
+EBPFStructType::declareArray(CodeBuilder* builder, cstring id, unsigned size) {
+    builder->appendFormat("%s %s[%d]", name.c_str(), id.c_str(), size);
+}
+
 ///////////////////////////////////////////////////////////////
 
 void EBPFTypeName::declare(CodeBuilder* builder, cstring id, bool asPointer) {
@@ -224,6 +258,12 @@ unsigned EBPFTypeName::implementationWidthInBits() {
         return 0;
     }
     return wt->implementationWidthInBits();
+}
+
+void
+EBPFTypeName::declareArray(CodeBuilder* builder, cstring id, unsigned size) {
+    declare(builder, id, false);
+    builder->appendFormat("[%d]", size);
 }
 
 ////////////////////////////////////////////////////////////////
