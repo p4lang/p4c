@@ -3,10 +3,6 @@ header ipv4_option_timestamp_t_1 {
     bit<8> len;
 }
 
-header ipv4_option_timestamp_t_2 {
-    varbit<304> data;
-}
-
 #include <core.p4>
 #include <v1model.p4>
 
@@ -86,9 +82,9 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    ipv4_option_timestamp_t_1 tmp_hdr_1;
-    ipv4_option_timestamp_t_2 tmp_hdr_2;
-    bit<8> tmp;
+    ipv4_option_timestamp_t_1 tmp_hdr_0;
+    ipv4_option_timestamp_t_1 tmp;
+    bit<8> tmp_0;
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -120,18 +116,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition parse_ipv4_options;
     }
     @name(".parse_ipv4_option_timestamp") state parse_ipv4_option_timestamp {
-        packet.extract<ipv4_option_timestamp_t_1>(tmp_hdr_1);
-        packet.extract<ipv4_option_timestamp_t_2>(tmp_hdr_2, ((bit<32>)tmp_hdr_1.len << 3) + 32w4294967280);
-        hdr.ipv4_option_timestamp.setValid();
-        hdr.ipv4_option_timestamp.value = tmp_hdr_1.value;
-        hdr.ipv4_option_timestamp.len = tmp_hdr_1.len;
-        hdr.ipv4_option_timestamp.data = tmp_hdr_2.data;
+        tmp = packet.lookahead<ipv4_option_timestamp_t_1>();
+        tmp_hdr_0 = tmp;
+        packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_hdr_0.len << 3) + 32w4294967280);
         meta.my_metadata.parse_ipv4_counter = meta.my_metadata.parse_ipv4_counter - hdr.ipv4_option_timestamp.len;
         transition parse_ipv4_options;
     }
     @name(".parse_ipv4_options") state parse_ipv4_options {
-        tmp = packet.lookahead<bit<8>>();
-        transition select(meta.my_metadata.parse_ipv4_counter, tmp[7:0]) {
+        tmp_0 = packet.lookahead<bit<8>>();
+        transition select(meta.my_metadata.parse_ipv4_counter, tmp_0[7:0]) {
             (8w0x0 &&& 8w0xff, 8w0x0 &&& 8w0x0): accept;
             (8w0x0 &&& 8w0x0, 8w0x0 &&& 8w0xff): parse_ipv4_option_EOL;
             (8w0x0 &&& 8w0x0, 8w0x1 &&& 8w0xff): parse_ipv4_option_NOP;

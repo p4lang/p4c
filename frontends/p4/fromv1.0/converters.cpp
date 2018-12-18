@@ -878,7 +878,6 @@ class FixExtracts final : public Transform {
             if (fixedHeaderType == nullptr)
                 // We only keep the fields prior to the varbit field
                 fields.push_back(f);
-
         }
         if (fixedHeaderType != nullptr) {
             LOG3("Extracted fixed-size header type from " << type << " into " << fixedHeaderType);

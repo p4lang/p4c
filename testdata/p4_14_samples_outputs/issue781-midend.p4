@@ -13,10 +13,6 @@ header ipv4_t_1 {
     bit<32> dstAddr;
 }
 
-header ipv4_t_2 {
-    varbit<320> options_ipv4;
-}
-
 #include <core.p4>
 #include <v1model.p4>
 
@@ -46,25 +42,26 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    ipv4_t_1 tmp_hdr_1;
-    ipv4_t_2 tmp_hdr_2;
+    ipv4_t_1 tmp_hdr_0;
+    ipv4_t_1 tmp;
+    bit<160> tmp_0;
     @name(".start") state start {
-        packet.extract<ipv4_t_1>(tmp_hdr_1);
-        packet.extract<ipv4_t_2>(tmp_hdr_2, ((bit<32>)tmp_hdr_1.ihl << 2 << 3) + 32w4294967136);
-        hdr.h.setValid();
-        hdr.h.version = tmp_hdr_1.version;
-        hdr.h.ihl = tmp_hdr_1.ihl;
-        hdr.h.diffserv = tmp_hdr_1.diffserv;
-        hdr.h.totalLen = tmp_hdr_1.totalLen;
-        hdr.h.id = tmp_hdr_1.id;
-        hdr.h.flags = tmp_hdr_1.flags;
-        hdr.h.fragOffset = tmp_hdr_1.fragOffset;
-        hdr.h.ttl = tmp_hdr_1.ttl;
-        hdr.h.protocol = tmp_hdr_1.protocol;
-        hdr.h.hdrChecksum = tmp_hdr_1.hdrChecksum;
-        hdr.h.srcAddr = tmp_hdr_1.srcAddr;
-        hdr.h.dstAddr = tmp_hdr_1.dstAddr;
-        hdr.h.options_ipv4 = tmp_hdr_2.options_ipv4;
+        tmp_0 = packet.lookahead<bit<160>>();
+        tmp.setValid();
+        tmp.version = tmp_0[159:156];
+        tmp.ihl = tmp_0[155:152];
+        tmp.diffserv = tmp_0[151:144];
+        tmp.totalLen = tmp_0[143:128];
+        tmp.id = tmp_0[127:112];
+        tmp.flags = tmp_0[111:109];
+        tmp.fragOffset = tmp_0[108:96];
+        tmp.ttl = tmp_0[95:88];
+        tmp.protocol = tmp_0[87:80];
+        tmp.hdrChecksum = tmp_0[79:64];
+        tmp.srcAddr = tmp_0[63:32];
+        tmp.dstAddr = tmp_0[31:0];
+        tmp_hdr_0 = tmp;
+        packet.extract<ipv4_t>(hdr.h, ((bit<32>)tmp_hdr_0.ihl << 2 << 3) + 32w4294967136);
         transition accept;
     }
 }

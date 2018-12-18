@@ -15,10 +15,6 @@ header ipv4_t_1 {
     bit<32> dstAddr;
 }
 
-header ipv4_t_2 {
-    varbit<352> options;
-}
-
 #include <core.p4>
 #include <v1model.p4>
 
@@ -68,7 +64,6 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     ipv4_t_1 tmp_hdr;
-    ipv4_t_2 tmp_hdr_0;
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.ethertype) {
@@ -78,24 +73,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name(".parse_ipv4") state parse_ipv4 {
-        packet.extract(tmp_hdr);
-        packet.extract(tmp_hdr_0, (bit<32>)((bit<32>)tmp_hdr.ihl * 32w4 * 8 - 160));
-        hdr.ipv4.setValid();
-        hdr.ipv4.version = tmp_hdr.version;
-        hdr.ipv4.ihl = tmp_hdr.ihl;
-        hdr.ipv4.diffserv = tmp_hdr.diffserv;
-        hdr.ipv4.totalLen = tmp_hdr.totalLen;
-        hdr.ipv4.identification = tmp_hdr.identification;
-        hdr.ipv4.reserved_0 = tmp_hdr.reserved_0;
-        hdr.ipv4.df = tmp_hdr.df;
-        hdr.ipv4.mf = tmp_hdr.mf;
-        hdr.ipv4.fragOffset = tmp_hdr.fragOffset;
-        hdr.ipv4.ttl = tmp_hdr.ttl;
-        hdr.ipv4.protocol = tmp_hdr.protocol;
-        hdr.ipv4.hdrChecksum = tmp_hdr.hdrChecksum;
-        hdr.ipv4.srcAddr = tmp_hdr.srcAddr;
-        hdr.ipv4.dstAddr = tmp_hdr.dstAddr;
-        hdr.ipv4.options = tmp_hdr_0.options;
+        tmp_hdr = packet.lookahead<ipv4_t_1>();
+        packet.extract(hdr.ipv4, (bit<32>)((bit<32>)tmp_hdr.ihl * 32w4 * 8 - 160));
         transition accept;
     }
     @name(".parse_vlan_tag") state parse_vlan_tag {
