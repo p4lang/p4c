@@ -41,11 +41,6 @@ header tcp_t {
     bit<16> urgentPtr;
 }
 
-header IPv4_up_to_ihl_only_h {
-    bit<4> version;
-    bit<4> ihl;
-}
-
 struct headers {
     ethernet_t ethernet;
     ipv4_t     ipv4;
