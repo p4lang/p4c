@@ -1351,11 +1351,10 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
         while (t->is<IR::Type_Newtype>())
             t = getTypeType(t->to<IR::Type_Newtype>()->type);
         return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>() ||
-        t->is<IR::Type_SerEnum>() ||
-        // Nested bit-vector struct inside a Header is supported as an
-        // Experimental feature - see p4-spec Issue 383.
-        (t->is<IR::Type_Struct>() &&
-         onlyBitsOrBitStructs(t->to<IR::Type_Struct>())); };
+               // Nested bit-vector struct inside a Header is supported
+               // Experimental feature - see Issue 383.
+               t->is<IR::Type_Struct>() && onlyBitsOrBitStructs(t) ||
+               t->is<IR::Type_SerEnum>(); };
     validateFields(canon, validator);
 
     const IR::StructField* varbit = nullptr;
@@ -1376,8 +1375,6 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
     return type;
 }
 
-// Nested bit-vector structs are supported as Experimental
-// No other type is supported inside struct.
 const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
     auto canon = setTypeType(type);
     auto validator = [this] (const IR::Type* t) {
@@ -2770,8 +2767,8 @@ void TypeInference::checkEmitType(const IR::Expression* emit, const IR::Type* ty
         return;
     }
 
-    typeError("%1%: argument must be a header, stack or union, or a "
-              "struct or tuple of such types, %2%", emit, type);
+    typeError("%1%: argument must be a header, stack or union, or a struct or tuple of such types",
+            emit);
 }
 
 void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
@@ -2791,10 +2788,8 @@ void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
 
             auto arg0 = mce->arguments->at(0);
             auto argType = typeMap->getType(arg0, true);
-            if (!argType->is<IR::Type_Header>() &&
-                !argType->is<IR::Type_Dontcare>()) {
-                typeError("%1%: argument must be a header",
-                          mce->arguments->at(0));
+            if (!argType->is<IR::Type_Header>() && !argType->is<IR::Type_Dontcare>()) {
+                typeError("%1%: argument must be a header", mce->arguments->at(0));
                 return;
             }
 

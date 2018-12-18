@@ -90,7 +90,7 @@ bool TypeUnification::unifyCall(const IR::Node* errorPosition,
         }
 
         auto leftIt = left.find(param->name.name);
-        // This should have been checked by the CheckNamedArgs pass.
+        // This shold have been checked by the CheckNamedArgs pass.
         BUG_CHECK(leftIt != left.end(), "%1%: Duplicate argument name?", param->name);
         left.erase(leftIt);
 

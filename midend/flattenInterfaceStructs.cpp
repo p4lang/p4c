@@ -37,7 +37,6 @@ void StructTypeReplacement::flatten(const P4::TypeMap* typeMap,
 StructTypeReplacement::StructTypeReplacement(
     const P4::TypeMap* typeMap, const IR::Type* type) {
     auto vec = new IR::IndexedVector<IR::StructField>();
-    LOG3("StructTypeReplacement:" << type);
     flatten(typeMap, "", type, vec);
     auto tname = type->to<IR::Type_Declaration>()->name;
     if (type->is<IR::Type_Header>()) {
@@ -113,11 +112,12 @@ bool FindTypesToReplace::preorder(const IR::Declaration_Instance* inst) {
             map->createReplacement(st);
         } else if (auto st = t->to<IR::Type_Struct>()) {
             for (auto f : st->fields) {
-              auto ft = map->typeMap->getType(f, true);
-              if (auto ht = isHeaderWithStruct(map->typeMap, ft))
-                  map->createReplacement(ht);
-          }
-      }
+                auto ft = map->typeMap->getType(f, true);
+                if (auto ht = isHeaderWithStruct(map->typeMap, ft)) {
+                    map->createReplacement(ht);
+                }
+            }
+        }
     }
     return false;
 }
@@ -176,7 +176,7 @@ const IR::Node* ReplaceStructs::postorder(IR::Member* expression) {
     } else {
         result = new IR::Member(pe, newFieldName);
     }
-    LOG3("Swapping " << expression << " with " << result);
+    LOG3("Replacing " << expression << " with " << result);
     return result;
 }
 
@@ -247,17 +247,6 @@ const IR::Node* ReplaceHeaders::postorder(IR::Member* expression) {
     const IR::Expression* result;
     if (newFieldName.isNullOrEmpty()) {
         BUG("cannot find replacement for %s", prefix);
-        /*
-        std::cout << "expression = " << expression << "\n";
-        std::cout << "e = " << e << "\n";
-        std::cout << "e->toString = " << e->toString() << "\n";
-        std::cout << "repl = " << repl << "\n";
-        std::cout << "prefix = " << prefix << "\n";
-        std::cout << "newFieldName = " << newFieldName << "\n";
-        std::cout << "cannot find replacement for " << prefix << "\n";
-        return expression;
-        */
-        //  result = repl->explode(e, prefix);
     } else {
         result = new IR::Member(e, newFieldName);
     }
