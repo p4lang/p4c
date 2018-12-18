@@ -164,6 +164,8 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
         if (sit == src->parameters->parameters.end()) {
             if (dit->isOptional())
                 continue;
+            if (dit->defaultValue != nullptr)
+                continue;
             if (reportErrors)
                 ::error("%1%: Cannot unify functions with different number of arguments: "
                         "%2% to %3%", errorPosition, src, dest);
@@ -206,6 +208,7 @@ bool TypeUnification::unifyBlocks(const IR::Node* errorPosition,
         constraints->addUnifiableTypeVariable(tv);
     for (auto tv : src->typeParameters->parameters)
         constraints->addUnifiableTypeVariable(tv);
+
     if (dest->is<IR::Type_Package>()) {
         // Two packages unify if and only if they have the same name
         // and if their corresponding parameters unify
