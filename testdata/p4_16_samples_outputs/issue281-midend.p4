@@ -46,7 +46,6 @@ parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t 
     ethernet_t hdr_1_ether;
     vlan_t hdr_1_vlan;
     ipv4_t hdr_1_ipv4;
-    bit<16> l3_etherType;
     ipv4_t l3_ipv4;
     vlan_t l3_vlan;
     state start {
@@ -56,17 +55,16 @@ parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t 
         l2_ether.setInvalid();
         b.extract<ethernet_t>(l2_ether);
         hdr_0_ether = l2_ether;
-        hdr.ether = hdr_0_ether;
+        hdr.ether = l2_ether;
         hdr.vlan = hdr_0_vlan;
         hdr.ipv4 = hdr_0_ipv4;
-        hdr_1_ether = hdr.ether;
-        hdr_1_vlan = hdr.vlan;
-        hdr_1_ipv4 = hdr.ipv4;
+        hdr_1_ether = l2_ether;
+        hdr_1_vlan = hdr_0_vlan;
+        hdr_1_ipv4 = hdr_0_ipv4;
         transition L3_start;
     }
     state L3_start {
-        l3_etherType = hdr_1_ether.etherType;
-        transition select(l3_etherType) {
+        transition select(hdr_1_ether.etherType) {
             16w0x800: L3_ipv4;
             16w0x8100: L3_vlan;
             default: start_2;

@@ -24,7 +24,6 @@ struct headers {
 
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_t resubmit_meta, in empty_t recirculate_meta) {
     ethernet_t parsed_hdr_0_ethernet;
-    fwd_metadata_t user_meta_0_fwd_metadata;
     state start {
         parsed_hdr_0_ethernet.setInvalid();
         buffer.extract<ethernet_t>(parsed_hdr_0_ethernet);
@@ -35,7 +34,6 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
 
 parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_egress_parser_input_metadata_t istd, in empty_t normal_meta, in empty_t clone_i2e_meta, in empty_t clone_e2e_meta) {
     ethernet_t parsed_hdr_1_ethernet;
-    fwd_metadata_t user_meta_1_fwd_metadata;
     state start {
         parsed_hdr_1_ethernet.setInvalid();
         buffer.extract<ethernet_t>(parsed_hdr_1_ethernet);

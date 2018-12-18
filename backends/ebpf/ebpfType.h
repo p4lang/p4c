@@ -33,8 +33,8 @@ class EBPFType : public EBPFObject {
     virtual void emit(CodeBuilder* builder) = 0;
     virtual void declare(CodeBuilder* builder, cstring id, bool asPointer) = 0;
     virtual void emitInitializer(CodeBuilder* builder) = 0;
-    virtual void declareArray(CodeBuilder* /*builder*/, const char* /*id*/, unsigned /*size*/)
-    { BUG("Arrays of %1% not supported", type); }
+    virtual void declareArray(CodeBuilder* /*builder*/, cstring /*id*/, unsigned /*size*/)
+    { BUG("%1%: unsupported array", type); }
     template<typename T> bool is() const { return dynamic_cast<const T*>(this) != nullptr; }
     template<typename T> T *to() { return dynamic_cast<T*>(this); }
 };
@@ -73,6 +73,22 @@ class EBPFBoolType : public EBPFType, public IHasWidth {
     unsigned implementationWidthInBits() override { return 8; }
 };
 
+class EBPFStackType : public EBPFType, public IHasWidth {
+    EBPFType* elementType;
+    unsigned  size;
+ public:
+    EBPFStackType(const IR::Type_Stack* type, EBPFType* elementType) :
+            EBPFType(type), elementType(elementType), size(type->getSize()) {
+        CHECK_NULL(type); CHECK_NULL(elementType);
+        BUG_CHECK(elementType->is<IHasWidth>(), "Unexpected element type %1%", elementType);
+    }
+    void emit(CodeBuilder*) override {}
+    void declare(CodeBuilder* builder, cstring id, bool asPointer) override;
+    void emitInitializer(CodeBuilder* builder) override;
+    unsigned widthInBits() override;
+    unsigned implementationWidthInBits();
+};
+
 class EBPFScalarType : public EBPFType, public IHasWidth {
  public:
     const unsigned width;
@@ -104,6 +120,7 @@ class EBPFTypeName : public EBPFType, public IHasWidth {
     void emitInitializer(CodeBuilder* builder) override;
     unsigned widthInBits() override;
     unsigned implementationWidthInBits() override;
+    void declareArray(CodeBuilder* builder, cstring id, unsigned size) override;
 };
 
 // Also represents headers and unions
@@ -131,6 +148,7 @@ class EBPFStructType : public EBPFType, public IHasWidth {
     unsigned widthInBits() override { return width; }
     unsigned implementationWidthInBits() override { return implWidth; }
     void emit(CodeBuilder* builder) override;
+    void declareArray(CodeBuilder* builder, cstring id, unsigned size) override;
 };
 
 class EBPFEnumType : public EBPFType, public EBPF::IHasWidth {
@@ -142,7 +160,6 @@ class EBPFEnumType : public EBPFType, public EBPF::IHasWidth {
     { builder->append("0"); }
     unsigned widthInBits() override { return 32; }
     unsigned implementationWidthInBits() override { return 32; }
-
     const IR::Type_Enum* getType() const { return type->to<IR::Type_Enum>(); }
 };
 

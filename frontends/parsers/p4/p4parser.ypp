@@ -910,7 +910,8 @@ typeArg
     ;
 
 typeArgumentList
-    : typeArg                        { $$ = new IR::Vector<IR::Type>(); $$->push_back($1); }
+    : /* empty */                    { $$ = new IR::Vector<IR::Type>(); }
+    | typeArg                        { $$ = new IR::Vector<IR::Type>(); $$->push_back($1); }
     | typeArgumentList "," typeArg   { $$ = $1; $$->push_back($3); }
     ;
 

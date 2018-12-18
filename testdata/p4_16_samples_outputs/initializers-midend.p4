@@ -6,11 +6,9 @@ extern Fake {
 }
 
 parser P() {
-    bit<32> x_0;
     @name("P.fake") Fake() fake_0;
     state start {
-        x_0 = 32w0;
-        fake_0.call(x_0);
+        fake_0.call(32w0);
         transition accept;
     }
 }
