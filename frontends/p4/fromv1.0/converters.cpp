@@ -837,7 +837,7 @@ class FixExtracts final : public Transform {
     struct HeaderSplit {
         /// Fixed-size part of a header type (computed for each extract).
         const IR::Type_Header* fixedHeaderType;
-        /// Expression computing the length of the fixed-size header.
+        /// Expression computing the length of the variable-size header.
         const IR::Expression* headerLength;
     };
 
@@ -850,8 +850,9 @@ class FixExtracts final : public Transform {
     /// Maps each original header type name to the fixed part of it.
     std::map<cstring, HeaderSplit*> fixedPart;
 
-    /// If a header type contains a varbit field a, then create a new
+    /// If a header type contains a varbit field then create a new
     /// header type containing only the fields prior to the varbit.
+    /// Returns nullptr otherwise.
     HeaderSplit* splitHeaderType(const IR::Type_Header* type) {
         auto fixed = ::get(fixedPart, type->name.name);
         if (fixed != nullptr)
@@ -892,10 +893,11 @@ class FixExtracts final : public Transform {
     }
 
     /**
-       This pass rewrites expressions that apprear in a @length annotation:
-       PathExpressions that refer to enclosing struct fields are rewritten to
-       refer to the proper fields of a variable `var`.  In the example above, `len`
-       is translated to `h_0.len`.
+       This pass rewrites expressions that appear in a @length
+       annotation: PathExpressions that refer to enclosing struct
+       fields are rewritten to refer to the proper fields of a
+       variable `var`.  In the example above, the variable is `h_0`
+       and `len` is translated to `h_0.len`.
     */
     class RewriteLength final : public Transform {
         const IR::Type_Header* header;
