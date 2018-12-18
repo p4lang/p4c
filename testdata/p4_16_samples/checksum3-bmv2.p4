@@ -139,10 +139,9 @@ control cIngress(inout headers hdr,
             hdr.ethernet.dstAddr = 0xbad;
         }
         // Modify a field in the IPv4 header that is included in the
-        // IPv4 header checksum calculation, but intentionally _do
-        // not_ update the checksum field.  We want to verify that
-        // this P4 program does not update the received checksum
-        // field.
+        // IPv4 header checksum calculation.  Control uc below should
+        // calculate and fill in the correct Ipv4 checksum for the
+        // updated IPv4 header contents.
         if (hdr.ipv4.isValid()) {
             hdr.ipv4.ttl = hdr.ipv4.ttl |-| 1;
         }

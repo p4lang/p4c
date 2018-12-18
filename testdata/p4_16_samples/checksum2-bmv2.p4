@@ -33,7 +33,6 @@ header ethernet_t {
     bit<16> etherType;
 }
 
-// IPv4 header _with_ options
 header ipv4_t {
     bit<4>       version;
     bit<4>       ihl;
@@ -93,8 +92,7 @@ typedef tuple<
 // Declare user-defined errors that may be signaled during parsing
 error {
     IPv4HeaderTooShort,
-    IPv4IncorrectVersion,
-    IPv4ChecksumError
+    IPv4IncorrectVersion
 }
 
 parser parserI(packet_in pkt,

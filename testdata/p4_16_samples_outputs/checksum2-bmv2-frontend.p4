@@ -1,7 +1,6 @@
 error {
     IPv4HeaderTooShort,
-    IPv4IncorrectVersion,
-    IPv4ChecksumError
+    IPv4IncorrectVersion
 }
 #include <core.p4>
 #include <v1model.p4>
