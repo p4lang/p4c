@@ -1,0 +1,51 @@
+# Copyright 2018 Cisco Systems, Inc.
+
+# Scapy commands that can be used to generate some of the input
+# packets below.
+
+# pkt1_bad=Ether(src='00:11:22:33:44:55', dst='66:77:88:99:aa:bb') / IP(dst='10.1.0.1') / "payload"
+# pkt1_good=Ether(str(pkt1_bad))
+# pkt1_bad[IP].chksum=pkt1_good[IP].chksum+1
+
+# def str_to_hex(s):
+#     return ''.join(map(lambda x: '%02x' % (ord(x)), s))
+
+# >>> str_to_hex(str(pkt1_good))
+# '66778899aabb00112233445508004500001b00010000400064d20a00020f0a0100017061796c6f6164'
+# >>> str_to_hex(str(pkt1_bad))
+# '66778899aabb00112233445508004500001b00010000400064d30a00020f0a0100017061796c6f6164'
+
+######################################################################
+# Verify that when an Ethernet packet with an IPv4 header is received
+# with no parser errors, and a correct IPv4 header checksum, it is
+# sent out with IPv4 TTL decremented, but the checksum _remains
+# unchanged_, i.e. it is now wrong.
+
+packet 0 66778899aabb 001122334455 0800  4500001b 00010000 400064d2 0a00020f 0a010001  7061796c6f6164
+expect 0 66778899aabb 001122334455 0800  4500001b 00010000 3f0064d2 0a00020f 0a010001  7061796c6f6164
+
+
+######################################################################
+# Packet that should have a parser error, because IPv4 version is 3,
+# not the 4 that is checked for via the P4 program's parser
+
+# pkt2_bad=Ether(src='00:11:22:33:44:55', dst='66:77:88:99:aa:bb') / IP(dst='10.1.0.1') / "payload"
+# pkt2_bad[IP].version=3
+# str_to_hex(str(pkt2_bad))
+
+packet 0 66778899aabb 001122334455 0800  3500001b 00010000 400074d2 0a00020f 0a010001  7061796c6f6164
+# TTL decremented, dest MAC address replaced with 0xbad because of
+# parser error detected.
+expect 0 000000000bad 001122334455 0800  3500001b 00010000 3f0074d2 0a00020f 0a010001  7061796c6f6164
+
+
+######################################################################
+# Packet that has a wrong IPv4 header checksum when received, which
+# should be detected by the program, _but not corrected_.
+
+# See commands to create pkt1_bad above
+
+packet 0 66778899aabb 001122334455 0800  4500001b 00010000 400064d3 0a00020f 0a010001  7061796c6f6164
+# TTL decremented, source MAC address replaced with 0xbad because of
+# incorrect received checksum detected.
+expect 0 66778899aabb 000000000bad 0800  4500001b 00010000 3f0064d3 0a00020f 0a010001  7061796c6f6164
