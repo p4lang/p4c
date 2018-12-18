@@ -177,6 +177,22 @@ pi_status_t _pi_act_prof_grp_remove_mbr(pi_session_handle_t session_handle,
   return PI_STATUS_SUCCESS;
 }
 
+pi_status_t _pi_act_prof_grp_set_mbrs(pi_session_handle_t session_handle,
+                                      pi_dev_id_t dev_id,
+                                      pi_p4_id_t act_prof_id,
+                                      pi_indirect_handle_t grp_handle,
+                                      size_t num_mbrs,
+                                      const pi_indirect_handle_t *mbr_handles) {
+  _BM_UNUSED(session_handle);
+  _BM_UNUSED(dev_id);
+  _BM_UNUSED(act_prof_id);
+  _BM_UNUSED(grp_handle);
+  _BM_UNUSED(num_mbrs);
+  _BM_UNUSED(mbr_handles);
+  // TODO(antonin)
+  return PI_STATUS_NOT_IMPLEMENTED_BY_TARGET;
+}
+
 pi_status_t _pi_act_prof_entries_fetch(pi_session_handle_t session_handle,
                                        pi_dev_id_t dev_id,
                                        pi_p4_id_t act_prof_id,
@@ -246,6 +262,11 @@ pi_status_t _pi_act_prof_entries_fetch_done(pi_session_handle_t session_handle,
   delete[] res->entries_groups;
   delete[] res->mbr_handles;
   return PI_STATUS_SUCCESS;
+}
+
+int _pi_act_prof_api_support(pi_dev_id_t dev_id) {
+  _BM_UNUSED(dev_id);
+  return PI_ACT_PROF_API_SUPPORT_GRP_ADD_AND_REMOVE_MBR;
 }
 
 }
