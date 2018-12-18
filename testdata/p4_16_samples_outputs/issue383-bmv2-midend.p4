@@ -49,34 +49,40 @@ parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_m
 }
 
 control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    action do_act() {
-        h.bvh1.row.alt1.valid = 1w0;
-        local_metadata.col.bvh.row.alt0.valid = 1w0;
+    @name(".NoAction") action NoAction_0() {
     }
-    table tns {
+    @name("ingress.do_act") action do_act() {
+        h.bvh1.row.alt1.valid = 1w0;
+    }
+    @name("ingress.tns") table tns_0 {
         key = {
             h.bvh1.row.alt1.valid                : exact @name("h.bvh1.row.alt1.valid") ;
             local_metadata.col.bvh.row.alt0.valid: exact @name("local_metadata.col.bvh.row.alt0.valid") ;
         }
         actions = {
             do_act();
-            @defaultonly NoAction();
+            @defaultonly NoAction_0();
         }
-        default_action = NoAction();
+        default_action = NoAction_0();
     }
-    apply {
-        tst_t s;
-        tns.apply();
+    @hidden action act() {
         h.bvh0.row.alt0.valid = 1w0;
-        s.row0.alt0 = local_metadata.row1.alt1;
-        s.row1.alt0.valid = 1w1;
-        s.row1.alt1.port = local_metadata.row0.alt1.port + 7w1;
-        s.col.bvh.row.alt0.valid = 1w0;
         local_metadata.col.bvh.row.alt0.valid = 1w0;
-        local_metadata.row0.alt0 = local_metadata.row1.alt1;
+        local_metadata.row0.alt0.valid = local_metadata.row1.alt1.valid;
+        local_metadata.row0.alt0.port = local_metadata.row1.alt1.port;
         local_metadata.row1.alt0.valid = 1w1;
         local_metadata.row1.alt1.port = local_metadata.row0.alt1.port + 7w1;
         clone3<row_t>(CloneType.I2E, 32w0, local_metadata.row0);
+    }
+    @hidden table tbl_act {
+        actions = {
+            act();
+        }
+        const default_action = act();
+    }
+    apply {
+        tns_0.apply();
+        tbl_act.apply();
     }
 }
 

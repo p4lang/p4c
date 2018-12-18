@@ -14,8 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// P4 program fragment - used by the arith-* compiler tests
-
 // This is false if the P4 core library has not been included
 #ifdef _CORE_P4_
 

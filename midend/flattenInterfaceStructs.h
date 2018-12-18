@@ -22,12 +22,6 @@ limitations under the License.
 
 namespace P4 {
 
-/*
- *  This pass eliminates nested structs and another special struct that appear 
- *  within the interfaces of controls or parsers.  The special struct includes
- *  at least one P4 header where the P4 header includes nested bit-vector struct(s).
-*/
-
 /**
 Describes how a nested struct type is replaced: the new type to
 replace it and how each field is renamed.  For example, consider
@@ -176,6 +170,23 @@ class ReplaceStructs : public Transform {
     const IR::Node* postorder(IR::Type_Struct* type) override;
 };
 
+class ReplaceHeaders : public Transform {
+    NestedStructMap* replacementMap;
+    std::map<const cstring, StructTypeReplacement*> toReplace;
+
+ public:
+    explicit ReplaceHeaders(NestedStructMap* sm): replacementMap(sm) {
+        CHECK_NULL(sm);
+        setName("ReplaceStructs");
+    }
+
+    const IR::Node* preorder(IR::P4Program* program) override;
+    const IR::Node* postorder(IR::Member* expression) override;
+    const IR::Node* preorder(IR::P4Parser* parser) override;
+    const IR::Node* preorder(IR::P4Control* control) override;
+    const IR::Node* postorder(IR::Type_Header* type) override;
+};
+
 class FlattenInterfaceStructs final : public PassManager {
  public:
     FlattenInterfaceStructs(ReferenceMap* refMap, TypeMap* typeMap) {
@@ -183,6 +194,7 @@ class FlattenInterfaceStructs final : public PassManager {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new FindTypesToReplace(sm));
         passes.push_back(new ReplaceStructs(sm));
+        passes.push_back(new ReplaceHeaders(sm));
         passes.push_back(new ClearTypeMap(typeMap));
         setName("FlattenInterfaceStructs");
     }

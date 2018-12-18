@@ -693,10 +693,6 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
             return f->size == 1 && !f->isSigned;
         } else if (auto se = dest->to<IR::Type_SerEnum>()) {
             return TypeMap::equivalent(src, se->type);
-        } else if (dest->is<IR::Type_Struct>() && onlyBitsOrBitStructs(dest)) {
-            auto t = dest->to<IR::Type_Struct>();
-            if (f->size == t->width_bits())
-                return true;
         }
     } else if (src->is<IR::Type_Boolean>()) {
         if (dest->is<IR::Type_Bits>()) {
@@ -712,16 +708,7 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
         if (auto db = dest->to<IR::Type_Bits>()) {
             return TypeMap::equivalent(se->type, db);
         }
-    } else if (src->is<IR::Type_Struct>() && onlyBitsOrBitStructs(src)) {
-      if (dest->is<IR::Type_Bits>()) {
-          auto f = dest->to<IR::Type_Bits>();
-          auto t = src->to<IR::Type_Struct>();
-          if (f->size == t->width_bits()) {
-              return true;
-          }
-      }
     }
-
     return false;
 }
 
@@ -1358,8 +1345,6 @@ const IR::Node* TypeInference::postorder(IR::StructField* field) {
     return field;
 }
 
-// Nested bit-vector struct inside a Header is supported
-// Experimental feature - see Issue 383.
 const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
     auto canon = setTypeType(type);
     auto validator = [this] (const IR::Type* t) {
@@ -1367,6 +1352,8 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
             t = getTypeType(t->to<IR::Type_Newtype>()->type);
         return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>() ||
         t->is<IR::Type_SerEnum>() ||
+        // Nested bit-vector struct inside a Header is supported as an
+        // Experimental feature - see p4-spec Issue 383.
         (t->is<IR::Type_Struct>() &&
          onlyBitsOrBitStructs(t->to<IR::Type_Struct>())); };
     validateFields(canon, validator);
@@ -2205,8 +2192,7 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
     if (!castType->is<IR::Type_Bits>() &&
         !castType->is<IR::Type_Boolean>() &&
         !castType->is<IR::Type_Newtype>() &&
-        !castType->is<IR::Type_SerEnum>() &&
-        !(castType->is<IR::Type_Struct>() && onlyBitsOrBitStructs(castType))) {
+        !castType->is<IR::Type_SerEnum>()) {
         ::error("%1%: cast not supported", expression->destType);
         return expression;
     }
@@ -2754,8 +2740,9 @@ bool TypeInference::onlyBitsOrBitStructs(const IR::Type* type) const {
             if (!onlyBitsOrBitStructs(ftype))
                 return false;
         }
+        return true;
     }
-    return true;
+    return false;
 }
 
 void TypeInference::checkEmitType(const IR::Expression* emit, const IR::Type* type) const {
