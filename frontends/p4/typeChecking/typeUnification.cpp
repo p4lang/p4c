@@ -208,7 +208,6 @@ bool TypeUnification::unifyBlocks(const IR::Node* errorPosition,
         constraints->addUnifiableTypeVariable(tv);
     for (auto tv : src->typeParameters->parameters)
         constraints->addUnifiableTypeVariable(tv);
-
     if (dest->is<IR::Type_Package>()) {
         // Two packages unify if and only if they have the same name
         // and if their corresponding parameters unify
@@ -385,8 +384,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
 
         return true;
     } else if (dest->is<IR::Type_Declaration>() && src->is<IR::Type_Declaration>()) {
-        bool canUnify = typeid(dest) == typeid(src) &&
-                dest->to<IR::Type_Declaration>()->name == src->to<IR::Type_Declaration>()->name;
+        bool canUnify = typeid(dest) == typeid(src);
         if (!canUnify && reportErrors)
             ::error("%1%: Cannot unify %2% to %3%",
                     errorPosition, src->toString(), dest->toString());
