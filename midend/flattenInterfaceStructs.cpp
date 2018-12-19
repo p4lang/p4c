@@ -245,11 +245,9 @@ const IR::Node* ReplaceHeaders::postorder(IR::Member* expression) {
         return expression;
     auto newFieldName = ::get(repl->fieldNameRemap, prefix);
     const IR::Expression* result;
-    if (newFieldName.isNullOrEmpty()) {
-        BUG("cannot find replacement for %s", prefix);
-    } else {
-        result = new IR::Member(e, newFieldName);
-    }
+    BUG_CHECK(!newFieldName.isNullOrEmpty(), "Cannot find replacement for %s",
+              prefix);
+    result = new IR::Member(e, newFieldName);
     LOG3("Replacing " << expression << " with " << result);
     return result;
 }

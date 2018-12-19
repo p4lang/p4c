@@ -66,7 +66,6 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
         default_action = NoAction_0();
     }
     @hidden action act() {
-        h.bvh0.row.alt0.valid = 1w0;
         local_metadata.col.bvh.row.alt0.valid = 1w0;
         local_metadata.row0.alt0.valid = local_metadata.row1.alt1.valid;
         local_metadata.row0.alt0.port = local_metadata.row1.alt1.port;

@@ -67,7 +67,6 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     }
     apply {
         tns_0.apply();
-        h.bvh0.row.alt0.valid = 1w0;
         local_metadata.col.bvh.row.alt0.valid = 1w0;
         local_metadata.row0.alt0 = local_metadata.row1.alt1;
         local_metadata.row1.alt0.valid = 1w1;

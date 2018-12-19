@@ -170,6 +170,13 @@ class ReplaceStructs : public Transform {
     const IR::Node* postorder(IR::Type_Struct* type) override;
 };
 
+/*
+ * This pass transforms the type signatures of instantiated controls,
+ * parsers, and packages.  It does not transform methods, functions or
+ * actions.  It starts from package instantiations: every type argument
+ * that is P4 header including nested structure is replaced with
+ * "simpler" flat type for structure.
+ */
 class ReplaceHeaders : public Transform {
     NestedStructMap* replacementMap;
     std::map<const cstring, StructTypeReplacement*> toReplace;
@@ -177,7 +184,7 @@ class ReplaceHeaders : public Transform {
  public:
     explicit ReplaceHeaders(NestedStructMap* sm): replacementMap(sm) {
         CHECK_NULL(sm);
-        setName("ReplaceStructs");
+        setName("ReplaceHeaders");
     }
 
     const IR::Node* preorder(IR::P4Program* program) override;

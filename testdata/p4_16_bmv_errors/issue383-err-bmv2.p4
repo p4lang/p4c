@@ -25,27 +25,13 @@ struct macDA_t
     mac_t     macDA;
 }
 
-header bitvec_hdr {
-    bit<5> g2;
-    bit<3> g3;
-    macDA_t mac;
-}
 
-struct parsed_packet_t {
-    bitvec_hdr bvh;
-    bitvec_hdr bvh1;    
-};
-
-struct tst_t {
-    bitvec_hdr bvh0;
-}
+struct parsed_packet_t {};
 
 parser parse(packet_in pk, out parsed_packet_t h,
              inout local_metadata_t local_metadata,
              inout standard_metadata_t standard_metadata) {
   state start {
-    pk.extract(h.bvh);
-    pk.extract(h.bvh1);
     transition accept;
   }
 }
@@ -54,23 +40,12 @@ control ingress(inout parsed_packet_t h,
                 inout local_metadata_t local_metadata,
 	        inout standard_metadata_t standard_metadata) {
     apply {
-        tst_t s;
-
         bit<48> mac;
-        // h.bvh.mac.macDA.lower28Bits = 0;
-        // h.bvh.mac.macDA.upper20Bits = 0;
-
-        local_metadata.row.alt0 = local_metadata.row.alt1;
-        local_metadata.row.alt0.valid = 1;
-        local_metadata.row.alt1.port = local_metadata.row.alt1.port + 1;
-        clone3(CloneType.I2E, 0, local_metadata.row);
-
-        // mac = h.bvh.mac.macDA.upper20Bits ++ h.bvh.mac.macDA.lower28Bits;
-
-//        Cast support is TODO for bmv2.
-        h.bvh.mac.macDA = (mac_t) mac;
-        mac       = (bit<48>) h.bvh.mac.macDA;
-
+	macDA_t sip;
+	
+        sip.macDA = (macDA_t) mac;
+        mac       = (bit<48>) sip.macDA;
+	
     }
 }
 
@@ -82,8 +57,6 @@ control egress(inout parsed_packet_t hdr,
 
 control deparser(packet_out b, in parsed_packet_t h) {
   apply {
-     b.emit(h.bvh);
-     b.emit(h.bvh1);
    }
 }
 

@@ -68,6 +68,8 @@ parser parse(packet_in pk, out parsed_packet_t h,
 control ingress(inout parsed_packet_t h,
                 inout local_metadata_t local_metadata,
 	        inout standard_metadata_t standard_metadata) {
+    tst_t s;
+    bitvec_hdr bh;
 
     action do_act() {
         h.bvh1.row.alt1.valid = 0;
@@ -85,10 +87,11 @@ control ingress(inout parsed_packet_t h,
     }
     
     apply {
-        tst_t s;
+
         tns.apply();
 
-        h.bvh0.row.alt0.valid = 0;
+        // Copy another header's data to local variable.
+        bh.row.alt0.valid = h.bvh0.row.alt0.valid;
 
         s.row0.alt0 = local_metadata.row1.alt1;
         s.row1.alt0.valid = 1;
