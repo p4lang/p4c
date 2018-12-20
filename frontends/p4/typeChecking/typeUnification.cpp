@@ -384,7 +384,8 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
 
         return true;
     } else if (dest->is<IR::Type_Declaration>() && src->is<IR::Type_Declaration>()) {
-        bool canUnify = typeid(dest) == typeid(src);
+        bool canUnify = typeid(dest) == typeid(src) &&
+            dest->to<IR::Type_Declaration>()->name == src->to<IR::Type_Declaration>()->name;
         if (!canUnify && reportErrors)
             ::error("%1%: Cannot unify %2% to %3%",
                     errorPosition, src->toString(), dest->toString());
