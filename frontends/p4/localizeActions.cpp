@@ -25,8 +25,8 @@ class ParamCloner : public ClonePathExpressions {
  public:
     ParamCloner() { setName("ParamCloner"); }
     const IR::Node* postorder(IR::Parameter* param) override {
-        return new IR::Parameter(param->srcInfo, param->name,
-                                 param->annotations, param->direction, param->type);
+        return new IR::Parameter(param->srcInfo, param->name, param->annotations,
+                                 param->direction, param->type, param->defaultValue);
     }
     const IR::Node* postorder(IR::Declaration_Variable* decl) override {
         return new IR::Declaration_Variable(decl->srcInfo, decl->name,
