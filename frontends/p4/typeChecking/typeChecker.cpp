@@ -234,7 +234,8 @@ const IR::ParameterList* TypeInference::canonicalizeParameters(const IR::Paramet
             return nullptr;
         BUG_CHECK(!paramType->is<IR::Type_Type>(), "%1%: Unexpected parameter type", paramType);
         if (paramType != p->type) {
-            p = new IR::Parameter(p->srcInfo, p->name, p->annotations, p->direction, paramType);
+            p = new IR::Parameter(p->srcInfo, p->name, p->annotations,
+                                  p->direction, paramType, p->defaultValue);
             changes = true;
         }
         setType(p, paramType);
@@ -1402,14 +1403,6 @@ const IR::Node* TypeInference::postorder(IR::Parameter* param) {
     if (paramType == nullptr)
         return param;
     BUG_CHECK(!paramType->is<IR::Type_Type>(), "%1%: unexpected type", paramType);
-
-    if (param->defaultValue != nullptr) {
-        auto init = assignment(param, paramType, param->defaultValue);
-        if (init == nullptr)
-            return param;
-        if (param->defaultValue != init)
-            param->defaultValue = init;
-    }
 
     if (paramType->is<IR::P4Control>() || paramType->is<IR::P4Parser>()) {
         typeError("%1%: parameter cannot have type %2%", param, paramType);

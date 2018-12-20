@@ -1,9 +1,9 @@
 #include <core.p4>
 
-extern void f(bit<32> a=32w0, bit<32> b);
+extern void f(bit<32> a=0, bit<32> b);
 extern E {
-    E(bit<32> x=32w0);
-    void f(in bit<16> z=16w2);
+    E(bit<32> x=0);
+    void f(in bit<16> z=2);
 }
 
 control ctrl();
