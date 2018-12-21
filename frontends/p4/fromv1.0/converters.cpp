@@ -854,30 +854,36 @@ class FixExtracts final : public Transform {
     /// header type containing only the fields prior to the varbit.
     /// Returns nullptr otherwise.
     HeaderSplit* splitHeaderType(const IR::Type_Header* type) {
+        // Maybe we have seen this type already
         auto fixed = ::get(fixedPart, type->name.name);
         if (fixed != nullptr)
             return fixed;
 
         const IR::Expression* headerLength = nullptr;
+        // We allocate the following when we find the first varbit field.
         const IR::Type_Header* fixedHeaderType = nullptr;
         IR::IndexedVector<IR::StructField> fields;
 
         for (auto f : type->fields) {
             if (f->type->is<IR::Type_Varbits>()) {
                 cstring hname = structure->makeUniqueName(type->name);
-                if (fixedHeaderType != nullptr)
+                if (fixedHeaderType != nullptr) {
                     ::error("%1%: header types with multiple varbit fields are not supported",
                             type);
+                    return nullptr;
+                }
                 fixedHeaderType = new IR::Type_Header(IR::ID(hname), fields);
+                // extract length from annotation
                 auto anno = f->getAnnotation(IR::Annotation::lengthAnnotation);
                 BUG_CHECK(anno != nullptr, "No length annotation on varbit field", f);
                 BUG_CHECK(anno->expr.size() == 1, "Expected exactly 1 argument", anno->expr);
                 headerLength = anno->expr.at(0);
-                f = new IR::StructField(f->srcInfo, f->name, f->type);  // lose the annotation
-            }
-            if (fixedHeaderType == nullptr)
+                // We keep going through the loop just to check whether there is another
+                // varbit field in the header.
+            } else if (fixedHeaderType == nullptr) {
                 // We only keep the fields prior to the varbit field
                 fields.push_back(f);
+            }
         }
         if (fixedHeaderType != nullptr) {
             LOG3("Extracted fixed-size header type from " << type << " into " << fixedHeaderType);
