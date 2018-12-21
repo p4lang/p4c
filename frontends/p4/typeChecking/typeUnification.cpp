@@ -184,6 +184,9 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
         if ((*sit)->isOptional()) {
             ++sit;
             continue; }
+        if ((*sit)->defaultValue != nullptr) {
+            ++sit;
+            continue; }
         if (reportErrors)
             ::error("%1%: Cannot unify functions with different number of arguments: "
                     "%2% to %3%", errorPosition, src, dest);
