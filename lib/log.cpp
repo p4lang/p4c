@@ -32,6 +32,7 @@ limitations under the License.
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <regex>
 #ifdef MULTITHREAD
 #include <mutex>
 #endif  // MULTITHREAD
@@ -145,45 +146,15 @@ std::ostream& operator<<(std::ostream& out, const OutputLogPrefix& pfx) {
     return out;
 }
 
-static bool match(const char *pattern, const char *name) {
-    const char *pend = pattern + strcspn(pattern, ",:");
-    const char *pbackup = 0;
-    while (1) {
-        while (pattern < pend && *pattern == *name) {
-            pattern++;
-            name++; }
-        if (pattern == pend) {
-            if (!strcmp(name, ".cpp") || !strcmp(name, ".h")) return true;
-            return *name == 0; }
-        if (*pattern == '[') {
-            bool negate = false;
-            if (pattern[1] == '^') {
-                negate = true;
-                ++pattern; }
-            while ((*++pattern != *name || pattern[1] == '-') && *pattern != ']' && *pattern) {
-                if (pattern[1] == '-' && pattern[2] != ']') {
-                    if (*name >= pattern[0] && *name <= pattern[2]) break;
-                    pattern += 2; } }
-            if ((*pattern == ']' || !*pattern) ^ negate) return false;
-            while (*pattern && *pattern++ != ']') continue;
-            if (pattern > pend) pend = pattern + strcspn(pattern, ",:");
-            name++;
-            continue; }
-        if (*pattern++ != '*') return false;
-        if (pattern == pend) return true;
-        while (*name && *name != *pattern) {
-            if (pbackup && *name == *pbackup) {
-                pattern = pbackup;
-                break; }
-            name++; }
-        pbackup = pattern;
+static bool match(const char *pattern, const char *file) {
+    if (strcmp(file + strlen(file) - 2, ".h") || strcmp(file + strlen(file) - 4, ".cpp")) {
+        std::regex expr(std::string(pattern, strchr(pattern, ':') - pattern));
+        return std::regex_search(file, expr);
     }
+    return false;
 }
 
 const char *uncachedFileLogSpec(const char* file) {
-    if (auto* startOfFilename = strrchr(file, '/'))
-        file = startOfFilename + 1;
-
     for (auto& spec : debugSpecs)
         for (auto* pattern = spec.c_str(); pattern; pattern = strchr(pattern, ',')) {
             while (*pattern == ',') pattern++;
