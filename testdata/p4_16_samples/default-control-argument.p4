@@ -8,7 +8,7 @@ struct empty_t {}
 control C<H, M>(
     inout H hdr,
     inout M meta,
-    in intrinsic_metadata_t intr_md = {0, 0, 0});
+    in intrinsic_metadata_t intr_md = {0, 0});
 
 package P<H, M>(C<H, M> c);
 
@@ -20,3 +20,4 @@ control MyC(inout hdr_t hdr, inout meta_t meta) {
 }
 
 P(MyC()) main;
+

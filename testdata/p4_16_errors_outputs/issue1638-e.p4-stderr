@@ -1,3 +1,0 @@
-issue1638-e.p4(22): error: main: Cannot unify functions with different number of arguments:  function(hdr, meta) to  function(hdr, meta, intr_md)
-P(MyC()) main;
-         ^^^^
