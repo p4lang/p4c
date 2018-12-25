@@ -72,11 +72,13 @@ template<class T> void IR::Vector<T>::visit_children(Visitor &v) {
 template<class T> void IR::Vector<T>::visit_children(Visitor &v) const {
     for (auto &a : vec) v.visit(a); }
 template<class T> void IR::Vector<T>::parallel_visit_children(Visitor &v) {
-    auto &start(v.flow_clone());
-    if (!vec.empty()) v.flow_dead();
-    for (auto i = vec.begin(); i != vec.end();) {
-        auto &clone(start.flow_clone());
-        auto n = clone.apply_visitor(*i);
+    Visitor *start = nullptr, *tmp = &v;
+    size_t todo = vec.size();
+    if (todo > 1) start = &v.flow_clone();
+    for (auto i = vec.begin(); i != vec.end(); --todo, tmp = nullptr) {
+        if (!tmp)
+            tmp = todo > 1 ? &start->flow_clone() : start;
+        auto n = tmp->apply_visitor(*i);
         if (!n && *i) {
             i = erase(i);
         } else if (n == *i) {
@@ -102,15 +104,21 @@ template<class T> void IR::Vector<T>::parallel_visit_children(Visitor &v) {
             BUG("visitor returned invalid type %s for Vector<%s>",
                 n->node_type_name(), T::static_type_name());
         }
-        v.flow_merge(clone); }
+        if (tmp != &v)
+            v.flow_merge(*tmp); }
 }
 template<class T> void IR::Vector<T>::parallel_visit_children(Visitor &v) const {
-    auto &start(v.flow_clone());
-    if (!vec.empty()) v.flow_dead();
+    Visitor *start = nullptr, *tmp = &v;
+    size_t todo = vec.size();
+    if (todo > 1) start = &v.flow_clone();
     for (auto &a : vec) {
-        auto &clone(start.flow_clone());
-        clone.visit(a);
-        v.flow_merge(clone); }
+        if (!tmp)
+            tmp = todo > 1 ? &start->flow_clone() : start;
+        tmp->visit(a);
+        if (tmp != &v)
+            v.flow_merge(*tmp);
+        --todo;
+        tmp = nullptr; }
 }
 IRNODE_DEFINE_APPLY_OVERLOAD(Vector, template<class T>, <T>)
 template<class T> void IR::Vector<T>::toJSON(JSONGenerator &json) const {

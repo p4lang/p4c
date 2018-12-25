@@ -127,7 +127,6 @@ class Visitor {
 
     // Functions for IR visit_children to call for ControlFlowVisitors.
     virtual Visitor &flow_clone() { return *this; }
-    virtual void flow_dead() { }
 
     /** Merge the given visitor into this visitor at a joint point in the
      * control flow graph.  Should update @this and leave the other unchanged.
