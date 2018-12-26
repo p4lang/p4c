@@ -206,8 +206,7 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
     }
 
     if (!expression->right->is<IR::Constant>()) {
-        ::error("%1%: all array indexes must be constant on this architecture",
-                expression->right);
+        ::error(ErrorType::ERR_INVALID, expression->right, "all array indexes must be constant");
     } else {
         int index = expression->right->to<IR::Constant>()->asInt();
         elementAccess += "[" + Util::toString(index) + "]";
@@ -333,7 +332,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         auto mem = expression->expr->to<IR::Member>();
         auto memtype = typeMap->getType(mem->expr, true);
         if (memtype->is<IR::Type_Stack>() && mem->member == IR::Type_Stack::next)
-            ::error("%1%: Reading next field, which is always uninitialized", mem);
+            ::error(ErrorType::ERR_UNINITIALIZED, mem, "next field read");
         // array.last.field => type: "stack_field", value: [ array, field ]
         if (memtype->is<IR::Type_Stack>() && mem->member == IR::Type_Stack::last) {
             auto l = get(mem->expr);
@@ -433,7 +432,7 @@ void ExpressionConverter::postorder(const IR::Mux* expression)  {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::error("%1%: expression to complex for this target", expression);
+        ::error(ErrorType::ERR_EXPRESSION, expression, "too complex for this target");
         return;
     }
 
@@ -473,7 +472,7 @@ void ExpressionConverter::binary(const IR::Operation_Binary* expression) {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::error("%1%: expression to complex for this target", expression);
+        ::error(ErrorType::ERR_EXPRESSION, expression, "too complex for this target");
         return;
     }
 
@@ -528,7 +527,7 @@ void ExpressionConverter::postorder(const IR::ListExpression* expression)  {
     auto result = new Util::JsonArray();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::error("%1%: expression to complex for this target", expression);
+        ::error(ErrorType::ERR_EXPRESSION, expression, "too complex for this target");
         return;
     }
 
@@ -543,7 +542,7 @@ void ExpressionConverter::postorder(const IR::StructInitializerExpression* expre
     auto result = new Util::JsonArray();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::error("%1%: expression to complex for this target", expression);
+        ::error(ErrorType::ERR_EXPRESSION, expression, "too complex for this target");
         return;
     }
 
@@ -557,7 +556,7 @@ void ExpressionConverter::postorder(const IR::Operation_Unary* expression)  {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::error("%1%: expression to complex for this target", expression);
+        ::error(ErrorType::ERR_EXPRESSION, expression, "too complex for this target");
         return;
     }
 

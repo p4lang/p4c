@@ -56,7 +56,7 @@ void PsaProgramStructure::createStructLike(ConversionContext* ctxt, const IR::Ty
             max_length += type->size;
             field->append("*");
             if (varbitFound)
-                ::error("%1%: headers with multiple varbit fields not supported", st);
+                ::error(ErrorType::ERR_UNSUPPORTED, st, "headers with multiple varbit fields");
             varbitFound = true;
         } else if (ftype->is<IR::Type_Error>()) {
             field->append(f->name.name);
@@ -289,8 +289,8 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
         if (ft->is<IR::Type_StructLike>()) {
             // The headers struct can not contain nested structures.
             if (isHeader && ft->is<IR::Type_Struct>()) {
-                ::error("Type %1% should only contain headers, header stacks, or header unions",
-                        type);
+                ::error(ErrorType::ERR_INVALID, type,
+                        "type should only contain headers, header stacks, or header unions");
                 return;
             }
             if (auto hft = ft->to<IR::Type_Header>()) {
@@ -303,7 +303,8 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
                         addHeaderType(h_type);
                         addHeaderInstance(h_type, uf->controlPlaneName());
                     } else {
-                        ::error("Type %1% cannot contain type %2%", ft, uft);
+                        ::error(ErrorType::ERR_INVALID, ft, "type cannot contain type " +
+                                uft->toString());
                         return;
                     }
                 }
@@ -728,7 +729,7 @@ void ExternConverter_Meter::convertExternInstance(
     else if (mkind_name == "BYTES")
         type = "bytes";
     else
-        ::error("Unexpected meter type %1%", mkind->getNode());
+        ::error(ErrorType::ERR_UNEXPECTED, mkind->getNode(), "meter type");
     jmtr->emplace("type", type);
     ctxt->json->meter_arrays->append(jmtr);
 }
@@ -790,7 +791,7 @@ void ExternConverter_Register::convertExternInstance(
         return;
     }
     if (sz->to<IR::Constant>()->value == 0)
-        error("%1%: direct registers are not supported in bmv2", inst);
+        error(ErrorType::ERR_UNSUPPORTED, inst, "direct registers");
     jreg->emplace("size", sz->to<IR::Constant>()->value);
     if (!eb->instanceType->is<IR::Type_SpecializedCanonical>()) {
         modelError("%1%: Expected a generic specialized type", eb->instanceType);
@@ -803,12 +804,12 @@ void ExternConverter_Register::convertExternInstance(
     }
     auto regType = st->arguments->at(0);
     if (!regType->is<IR::Type_Bits>()) {
-        ::error("%1%: Only registers with bit or int types are currently supported", eb);
+        ::error(ErrorType::ERR_UNSUPPORTED, eb, "registers with types other than bit or int");
         return;
     }
     unsigned width = regType->width_bits();
     if (width == 0) {
-        ::error("%1%: unknown width", st->arguments->at(0));
+        ::error(ErrorType::ERR_UNKNOWN, st->arguments->at(0), "width");
         return;
     }
     jreg->emplace("bitwidth", width);
@@ -836,7 +837,7 @@ void ExternConverter_ActionProfile::convertExternInstance(
 
     auto sz = eb->findParameterValue("size");
     if (!sz->is<IR::Constant>()) {
-        ::error("%1%: expected a constant", sz);
+        ::error(ErrorType::ERR_EXPECTED, sz, "a constant");
     }
     action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
 
@@ -859,7 +860,7 @@ void ExternConverter_ActionSelector::convertExternInstance(
 
     auto sz = eb->findParameterValue("size");
     if (!sz->is<IR::Constant>()) {
-        ::error("%1%: expected a constant", sz);
+        ::error(ErrorType::ERR_EXPECTED, sz, "a constant");
     }
     action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
 

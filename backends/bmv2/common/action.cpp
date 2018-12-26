@@ -129,7 +129,7 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                 continue;
             }
         }
-        ::error("%1%: not yet supported on this target", s);
+        ::error(ErrorType::ERR_EXPRESSION, s, "not yet supported on this target");
     }
 }
 
@@ -144,7 +144,8 @@ ActionConverter::convertActionParams(const IR::ParameterList *parameters,
         param->emplace("name", p->name);
         auto type = ctxt->typeMap->getType(p, true);
         if (!type->is<IR::Type_Bits>())
-            ::error("%1%: Action parameters can only be bit<> or int<> on this target", p);
+            ::error(ErrorType::ERR_INVALID, p,
+                    "action parameters must be bit<> or int<> on this target");
         param->emplace("bitwidth", type->width_bits());
         params->append(param);
     }
