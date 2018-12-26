@@ -95,4 +95,8 @@ class CompilationError : public P4CExceptionBase {
     } while (0)
 
 }  // namespace Util
+
+/// Report an error and exit
+#define FATAL_ERROR(...) do { throw Util::CompilationError(__VA_ARGS__); } while (0)
+
 #endif /* P4C_LIB_EXCEPTIONS_H_ */

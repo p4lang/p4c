@@ -128,6 +128,10 @@ git push -f
 
 * After committing changes, create a pull request (using the github web UI)
 
+* Follow these
+  [guidelines](CodingStandardPhilosophy.md#Git-commits-and-pull-requests)
+  to write commit messages and open pull requests.
+
 ## Debugging
 
 * To debug the build process you can run `make V=1`
@@ -224,23 +228,9 @@ The testing infrastructure is based on small python and shell scripts.
   * use `BUG_CHECK()` instead of `assert`, and always supply an
     informative error message
 
-  * use `::error()` and `::warning()` for error reporting.  They use the
-    `boost::format` for the format argument, which has some compatibility
-    for `printf` arguments.   These functions handle IR and SourceInfo
-    objects smartly.  Here is an example:
-
-```C++
-IR::NamedRef *ref;
-error("%1%: No header or metadata named '%2%'", ref->srcInfo, ref->name);
-```
-
-output:
-
-```
-../testdata/v1_errors/missing_decls1.p4(6): Error: No header or metadata named 'data'
-    if (data.b2 == 0) {
-        ^^^^
-```
+  * use `::error()` and `::warning()` for error reporting. See the
+    [guidelines](CodingStandardPhilosophy.md#Handling-errors) for more
+    details.
 
   * use `LOGn()` for log messages -- the `n` is an integer constant for
     verbosity level.  These can be controlled on a per-source-file basis

@@ -47,6 +47,51 @@ inline void error(const char* format, T... args) {
     context.errorReporter().diagnoseUnnamed(action, format, args...);
 }
 
+/// Report errors of type kind. Requires that the node argument have source info.
+/// The message format is declared in the error catalog.
+template<class T,
+         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+         class... Args>
+void error(int kind, const T *node, Args... args) {
+    auto& context = BaseCompileContext::get();
+    auto action = context.getDefaultErrorDiagnosticAction();
+    context.errorReporter().diagnose(action, kind, node, args...);
+}
+
+/// The const ref variant of the above
+template<class T,
+         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+         class... Args>
+void error(int kind, const T &node, Args... args) {
+    auto& context = BaseCompileContext::get();
+    auto action = context.getDefaultErrorDiagnosticAction();
+    context.errorReporter().diagnose(action, kind, node, args...);
+}
+
+/// Convert errors that have a first argument as a node with source info to errors with kind
+/// This allows incremental migration toward minimizing the number of errors and warnings
+/// reported when passes are repeated, as typed errors are filtered.
+template<class T,
+         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+         class... Args>
+void error(const char *format, const T *node, Args... args) {
+    auto& context = BaseCompileContext::get();
+    auto action = context.getDefaultErrorDiagnosticAction();
+    context.errorReporter().diagnose(action, ErrorType::LEGACY_ERROR, format, node, args...);
+}
+
+/// The const ref variant of the above
+template<class T,
+         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+         class... Args>
+void error(const char *format, const T &node, Args... args) {
+    auto& context = BaseCompileContext::get();
+    auto action = context.getDefaultErrorDiagnosticAction();
+    context.errorReporter().diagnose(action, ErrorType::LEGACY_ERROR, format, node, args...);
+}
+
+
+/// Report an error if condition e is false.
 #define ERROR_CHECK(e, ...) do { if (!(e)) ::error(__VA_ARGS__); } while (0)
 
 /// Report a warning with the given message.
@@ -57,6 +102,50 @@ inline void warning(const char* format, T... args) {
     context.errorReporter().diagnoseUnnamed(action, format, args...);
 }
 
+/// Report warnings of type kind. Requires that the node argument have source info.
+/// The message format is declared in the error catalog.
+template<class T,
+         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+         class... Args>
+void warning(int kind, const T *node, Args... args) {
+    auto& context = BaseCompileContext::get();
+    auto action = context.getDefaultWarningDiagnosticAction();
+    context.errorReporter().diagnose(action, kind, node, args...);
+}
+
+/// The const ref variant of the above
+template<class T,
+         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+         class... Args>
+void warning(int kind, const T &node, Args... args) {
+    auto& context = BaseCompileContext::get();
+    auto action = context.getDefaultWarningDiagnosticAction();
+    context.errorReporter().diagnose(action, kind, node, args...);
+}
+
+/// Convert warnings that have a first argument as a node with source info to warnings with kind
+/// This allows incremental migration toward minimizing the number of warnings
+/// reported when passes are repeated, as typed warnings are filtered.
+template<class T,
+         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+         class... Args>
+void warning(const char *format, const T *node, Args... args) {
+    auto& context = BaseCompileContext::get();
+    auto action = context.getDefaultWarningDiagnosticAction();
+    context.errorReporter().diagnose(action, ErrorType::LEGACY_WARNING, format, node, args...);
+}
+
+/// The const ref variant of the above
+template<class T,
+         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+         class... Args>
+void warning(const char *format, const T &node, Args... args) {
+    auto& context = BaseCompileContext::get();
+    auto action = context.getDefaultWarningDiagnosticAction();
+    context.errorReporter().diagnose(action, ErrorType::LEGACY_WARNING, format, node, args...);
+}
+
+/// Report a warning if condition e is false.
 #define WARN_CHECK(e, ...) do { if (!(e)) ::warning(__VA_ARGS__); } while (0)
 
 /**
