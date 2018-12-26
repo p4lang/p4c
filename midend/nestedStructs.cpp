@@ -18,30 +18,16 @@ bool ComplexValues::isNestedStruct(const IR::Type* type) {
     return false;
 }
 
-bool ComplexValues::isHeaderWithStruct(const IR::Type* type) {
-    if (!type->is<IR::Type_Header>())
-        return false;
-    auto st = type->to<IR::Type_Header>();
-    for (auto f : st->fields) {
-        auto ftype = typeMap->getType(f, true);
-        if (ftype->is<IR::Type_Struct>()) {
-            LOG3("Type " << dbp(type) << " is nested");
-            return true;
-        }
-    }
-    return false;
-}
-
-void ComplexValues::explode(cstring prefix,
-                            const IR::IndexedVector<IR::StructField> &fields,
+void ComplexValues::explode(cstring prefix, const IR::Type_Struct* type,
                             FieldsMap* map, IR::Vector<IR::Declaration>* result) {
-    for (auto f : fields) {
+    CHECK_NULL(type);
+    for (auto f : type->fields) {
         cstring fname = prefix + "_" + f->name;
         auto ftype = typeMap->getType(f, true);
         if (isNestedStruct(ftype)) {
             auto submap = new FieldsMap();
             map->members.emplace(f->name.name, submap);
-            explode(fname, ftype->to<IR::Type_Struct>()->fields, submap, result);
+            explode(fname, ftype->to<IR::Type_Struct>(), submap, result);
         } else {
             cstring newName = refMap->newName(fname);
             auto comp = new FinalName(newName);
@@ -55,7 +41,7 @@ void ComplexValues::explode(cstring prefix,
 
 const IR::Node* RemoveNestedStructs::postorder(IR::Declaration_Variable* decl) {
     auto type = values->typeMap->getType(getOriginal(), true);
-    if (!(values->isNestedStruct(type) || values->isHeaderWithStruct(type)))
+    if (!values->isNestedStruct(type))
         return decl;
 
     BUG_CHECK(decl->initializer == nullptr, "%1%: did not expect an initializer", decl);
@@ -64,7 +50,7 @@ const IR::Node* RemoveNestedStructs::postorder(IR::Declaration_Variable* decl) {
     auto result = new IR::Vector<IR::Declaration>();
     auto map = new ComplexValues::FieldsMap();
     values->values.emplace(getOriginal<IR::Declaration_Variable>(), map);
-    values->explode(decl->getName().name, type->to<IR::Type_StructLike>()->fields, map, result);
+    values->explode(decl->getName().name, type->to<IR::Type_Struct>(), map, result);
     return result;
 }
 

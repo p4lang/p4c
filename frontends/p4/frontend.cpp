@@ -145,12 +145,11 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new Deprecated(&refMap),
         new CheckNamedArgs(),
         new TypeInference(&refMap, &typeMap, false),  // insert casts
-        new BindTypeVariables(&typeMap),
-        new StructInitializers(&refMap, &typeMap),
-        // Another round of constant folding, using type information.
-        new ClearTypeMap(&typeMap),
         new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
+        new BindTypeVariables(&refMap, &typeMap),
+        new StructInitializers(&refMap, &typeMap),
         new TableKeyNames(&refMap, &typeMap),
+        // Another round of constant folding, using type information.
         new ConstantFolding(&refMap, &typeMap),
         new StrengthReduction(),
         new UselessCasts(&refMap, &typeMap),

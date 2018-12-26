@@ -43,7 +43,7 @@ struct M {
 }
 */
 struct StructTypeReplacement : public IHasDbPrint {
-    StructTypeReplacement(const P4::TypeMap* typeMap, const IR::Type* type);
+    StructTypeReplacement(const P4::TypeMap* typeMap, const IR::Type_Struct* type);
 
     // Maps nested field names to final field names.
     // In our example this could be:
@@ -55,7 +55,7 @@ struct StructTypeReplacement : public IHasDbPrint {
     // Maps internal fields names to types.
     // .t -> T
     // .t.s -> S
-    std::map<cstring, const IR::Type*> structFieldMap;
+    std::map<cstring, const IR::Type_Struct*> structFieldMap;
     // Holds a new flat type
     // struct M {
     //    bit _t_s_a0;
@@ -95,7 +95,7 @@ struct NestedStructMap {
     NestedStructMap(P4::ReferenceMap* refMap, P4::TypeMap* typeMap):
             refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
-    void createReplacement(const IR::Type* type);
+    void createReplacement(const IR::Type_Struct* type);
     StructTypeReplacement* getReplacement(const IR::Type* type) const
     { return ::get(replacement, type); }
     bool empty() const { return replacement.empty(); }
@@ -170,30 +170,6 @@ class ReplaceStructs : public Transform {
     const IR::Node* postorder(IR::Type_Struct* type) override;
 };
 
-/*
- * This pass transforms the type signatures of instantiated controls,
- * parsers, and packages.  It does not transform methods, functions or
- * actions.  It starts from package instantiations: every type argument
- * that is P4 header including nested structure is replaced with
- * "simpler" flat type for structure.
- */
-class ReplaceHeaders : public Transform {
-    NestedStructMap* replacementMap;
-    std::map<const cstring, StructTypeReplacement*> toReplace;
-
- public:
-    explicit ReplaceHeaders(NestedStructMap* sm): replacementMap(sm) {
-        CHECK_NULL(sm);
-        setName("ReplaceHeaders");
-    }
-
-    const IR::Node* preorder(IR::P4Program* program) override;
-    const IR::Node* postorder(IR::Member* expression) override;
-    const IR::Node* preorder(IR::P4Parser* parser) override;
-    const IR::Node* preorder(IR::P4Control* control) override;
-    const IR::Node* postorder(IR::Type_Header* type) override;
-};
-
 class FlattenInterfaceStructs final : public PassManager {
  public:
     FlattenInterfaceStructs(ReferenceMap* refMap, TypeMap* typeMap) {
@@ -201,7 +177,6 @@ class FlattenInterfaceStructs final : public PassManager {
         passes.push_back(new TypeChecking(refMap, typeMap));
         passes.push_back(new FindTypesToReplace(sm));
         passes.push_back(new ReplaceStructs(sm));
-        passes.push_back(new ReplaceHeaders(sm));
         passes.push_back(new ClearTypeMap(typeMap));
         setName("FlattenInterfaceStructs");
     }

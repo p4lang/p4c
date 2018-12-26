@@ -164,6 +164,8 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
         if (sit == src->parameters->parameters.end()) {
             if (dit->isOptional())
                 continue;
+            if (dit->defaultValue != nullptr)
+                continue;
             if (reportErrors)
                 ::error("%1%: Cannot unify functions with different number of arguments: "
                         "%2% to %3%", errorPosition, src, dest);
@@ -180,6 +182,9 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
     }
     while (sit != src->parameters->parameters.end()) {
         if ((*sit)->isOptional()) {
+            ++sit;
+            continue; }
+        if ((*sit)->defaultValue != nullptr) {
             ++sit;
             continue; }
         if (reportErrors)
@@ -383,7 +388,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         return true;
     } else if (dest->is<IR::Type_Declaration>() && src->is<IR::Type_Declaration>()) {
         bool canUnify = typeid(dest) == typeid(src) &&
-                dest->to<IR::Type_Declaration>()->name == src->to<IR::Type_Declaration>()->name;
+            dest->to<IR::Type_Declaration>()->name == src->to<IR::Type_Declaration>()->name;
         if (!canUnify && reportErrors)
             ::error("%1%: Cannot unify %2% to %3%",
                     errorPosition, src->toString(), dest->toString());

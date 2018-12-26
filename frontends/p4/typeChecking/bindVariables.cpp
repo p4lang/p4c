@@ -17,7 +17,7 @@ class FindUntypedInt : public Inspector {
 };
 
 /// Lookup a type variable
-const IR::Type* BindTypeVariables::getVarValue(
+const IR::Type* DoBindTypeVariables::getVarValue(
     const IR::Type_Var* var, const IR::Node* errorPosition) const {
     const IR::Type* rtype = nullptr;
     auto type = typeMap->getSubstitution(var);
@@ -45,7 +45,7 @@ const IR::Type* BindTypeVariables::getVarValue(
     return rtype;  // This may be nullptr
 }
 
-const IR::Node* BindTypeVariables::postorder(IR::Expression* expression) {
+const IR::Node* DoBindTypeVariables::postorder(IR::Expression* expression) {
     // This is needed to handle newly created expressions because
     // their children have changed.
     auto type = typeMap->getType(getOriginal(), true);
@@ -53,7 +53,7 @@ const IR::Node* BindTypeVariables::postorder(IR::Expression* expression) {
     return expression;
 }
 
-const IR::Node* BindTypeVariables::postorder(IR::Declaration_Instance* decl) {
+const IR::Node* DoBindTypeVariables::postorder(IR::Declaration_Instance* decl) {
     if (decl->type->is<IR::Type_Specialized>())
         return decl;
     auto type = typeMap->getType(getOriginal(), true);
@@ -74,7 +74,7 @@ const IR::Node* BindTypeVariables::postorder(IR::Declaration_Instance* decl) {
     return decl;
 }
 
-const IR::Node* BindTypeVariables::postorder(IR::MethodCallExpression* expression) {
+const IR::Node* DoBindTypeVariables::postorder(IR::MethodCallExpression* expression) {
     if (!expression->typeArguments->empty())
         return expression;
     auto type = typeMap->getType(expression->method, true);
@@ -94,7 +94,7 @@ const IR::Node* BindTypeVariables::postorder(IR::MethodCallExpression* expressio
     return expression;
 }
 
-const IR::Node* BindTypeVariables::postorder(IR::ConstructorCallExpression* expression) {
+const IR::Node* DoBindTypeVariables::postorder(IR::ConstructorCallExpression* expression) {
     if (expression->constructedType->is<IR::Type_Specialized>())
         return expression;
     auto type = typeMap->getType(getOriginal(), true);
@@ -116,7 +116,7 @@ const IR::Node* BindTypeVariables::postorder(IR::ConstructorCallExpression* expr
     return expression;
 }
 
-const IR::Node* BindTypeVariables::insertTypes(const IR::Node* node) {
+const IR::Node* DoBindTypeVariables::insertTypes(const IR::Node* node) {
     CHECK_NULL(node);
     CHECK_NULL(newTypes);
     if (newTypes->empty())
