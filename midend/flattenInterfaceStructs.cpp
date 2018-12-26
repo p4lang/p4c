@@ -31,7 +31,7 @@ void StructTypeReplacement::flatten(const P4::TypeMap* typeMap,
     cstring fieldName = prefix.replace(".", "_") +
                         cstring::to_cstring(fieldNameRemap.size());
     fieldNameRemap.emplace(prefix, fieldName);
-    fields->push_back(new IR::StructField(IR::ID(fieldName), type));
+    fields->push_back(new IR::StructField(IR::ID(fieldName), type->getP4Type()));
 }
 
 StructTypeReplacement::StructTypeReplacement(
@@ -45,7 +45,7 @@ const IR::StructInitializerExpression* StructTypeReplacement::explode(
     const IR::Expression *root, cstring prefix) {
     auto vec = new IR::IndexedVector<IR::NamedExpression>();
     auto fieldType = ::get(structFieldMap, prefix);
-    CHECK_NULL(fieldType);
+    BUG_CHECK(fieldType, "No field for %1%", prefix);
     for (auto f : fieldType->fields) {
         cstring fieldName = prefix + "." + f->name.name;
         auto newFieldname = ::get(fieldNameRemap, fieldName);
@@ -114,9 +114,6 @@ const IR::Node* ReplaceStructs::postorder(IR::Type_Struct* type) {
 
 const IR::Node* ReplaceStructs::postorder(IR::Member* expression) {
     // Find out if this applies to one of the parameters that are being replaced.
-    if (getParent<IR::Member>() != nullptr)
-        // We only want to process the outermost Member
-        return expression;
     const IR::Expression* e = expression;
     cstring prefix = "";
     while (auto mem = e->to<IR::Member>()) {
@@ -138,6 +135,13 @@ const IR::Node* ReplaceStructs::postorder(IR::Member* expression) {
     auto newFieldName = ::get(repl->fieldNameRemap, prefix);
     const IR::Expression* result;
     if (newFieldName.isNullOrEmpty()) {
+        auto type = replacementMap->typeMap->getType(getOriginal(), true);
+        // This could be, for example, a method like setValid.
+        if (!type->is<IR::Type_Struct>())
+            return expression;
+        if (getParent<IR::Member>() != nullptr)
+            // We only want to process the outermost Member
+            return expression;
         // Prefix is a reference to a field of the original struct whose
         // type is actually a struct itself.  We need to replace the field
         // with a struct initializer expression.  (This won't work if the
