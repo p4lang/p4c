@@ -35,6 +35,7 @@ limitations under the License.
 #include "midend/eliminateTuples.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
+#include "midend/flattenHeaders.h"
 #include "midend/flattenInterfaceStructs.h"
 #include "midend/local_copyprop.h"
 #include "midend/nestedStructs.h"
@@ -85,6 +86,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options) : MidEnd(option
         new P4::NestedStructs(&refMap, &typeMap),
         new P4::SimplifySelectList(&refMap, &typeMap),
         new P4::RemoveSelectBooleans(&refMap, &typeMap),
+        new P4::FlattenHeaders(&refMap, &typeMap),
         new P4::FlattenInterfaceStructs(&refMap, &typeMap),
         new P4::Predication(&refMap),
         new P4::MoveDeclarations(),  // more may have been introduced

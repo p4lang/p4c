@@ -1,5 +1,6 @@
 /*
-Copyright 2018 MNK Consulting, LLC.
+    Copyright 2018 MNK Consulting, LLC.
+    http://mnkcg.com
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -61,6 +62,7 @@ parser parse(packet_in pk, out parsed_packet_t h,
   state start {
     pk.extract(h.bvh0);
     pk.extract(h.bvh1);
+    pk.extract(local_metadata.col.bvh);
     transition accept;
   }
 }

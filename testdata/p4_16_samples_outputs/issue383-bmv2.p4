@@ -44,6 +44,7 @@ parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_m
     state start {
         pk.extract(h.bvh0);
         pk.extract(h.bvh1);
+        pk.extract(local_metadata.col.bvh);
         transition accept;
     }
 }
