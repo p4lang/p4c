@@ -38,7 +38,7 @@ const IR::Node* DoRemoveParserControlFlow::postorder(IR::ParserState* state) {
 
             states->push_back(currentState);
             auto ifstat = c->to<IR::IfStatement>();
-            cstring joinName = refMap->newName(state->name.name + "_join");
+            joinName = refMap->newName(state->name.name + "_join");
 
             // s_true
             cstring trueName = refMap->newName(state->name.name + "_true");

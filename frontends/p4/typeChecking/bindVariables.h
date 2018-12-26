@@ -30,11 +30,8 @@ class DoBindTypeVariables : public Transform {
 };
 
 class BindTypeVariables : public PassManager {
-    ReferenceMap* refMap;
-    TypeMap      *typeMap;
  public:
-    BindTypeVariables(ReferenceMap* refMap, TypeMap* typeMap):
-            refMap(refMap), typeMap(typeMap) {
+    BindTypeVariables(ReferenceMap* refMap, TypeMap* typeMap) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap);
         passes.push_back(new ClearTypeMap(typeMap));
         passes.push_back(new ResolveReferences(refMap));
