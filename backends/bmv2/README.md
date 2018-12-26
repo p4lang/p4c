@@ -24,25 +24,6 @@ Here are some unsupported features we are aware of. We will update this list as
 more features get supported in the bmv2 compiler backend and as we discover more
 issues.
 
-- nested structs in structs used as block constructor parameters
-```
-struct s0_t {
-  bit<8> f1;
-  bit<8> f2;
-};
-
-struct s1_t {
-  s0_t s01;
-  s0_t s02;
-};
-
-parser parse(packet_in pkt, out parsed_packet_t hdr,
-             inout s1_t my_metadata,
-             inout standard_metadata_t standard_metadata) {
-  // ...
-}
-```
-
 - explicit transition to reject in parse state
 
 - compound action parameters (can only be `bit<>` or `int<>`)
@@ -62,7 +43,5 @@ controlc c() {
 ```
 
 - user-defined extern types / methods which are not defined in `v1model.p4`
-
-- stacks of headers containing varbit fields
 
 - stacks of header unions

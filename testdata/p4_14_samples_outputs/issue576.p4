@@ -29,8 +29,23 @@ header ipv4_t {
     bit<16>     hdrChecksum;
     bit<32>     srcAddr;
     bit<32>     dstAddr;
-    @length(((bit<32>)ihl << 2 << 3) + 32w4294967136) 
+    @length(((bit<32>)ihl << 2) * 8 - 160) 
     varbit<320> options_ipv4;
+}
+
+header simpleipv4_t {
+    bit<4>  version;
+    bit<4>  ihl;
+    bit<8>  diffserv;
+    bit<16> totalLen;
+    bit<16> id;
+    bit<3>  flags;
+    bit<13> fragOffset;
+    bit<8>  ttl;
+    bit<8>  protocol;
+    bit<16> hdrChecksum;
+    bit<32> srcAddr;
+    bit<32> dstAddr;
 }
 
 struct metadata {
@@ -38,30 +53,21 @@ struct metadata {
 
 struct headers {
     @name(".h") 
-    ipv4_t h;
+    ipv4_t[2]       h;
+    @name(".sh") 
+    simpleipv4_t[2] sh;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    ipv4_t_1 tmp_hdr;
     ipv4_t_1 tmp_hdr_0;
-    ipv4_t_1 tmp;
-    bit<160> tmp_0;
     @name(".start") state start {
-        tmp_0 = packet.lookahead<bit<160>>();
-        tmp.setValid();
-        tmp.version = tmp_0[159:156];
-        tmp.ihl = tmp_0[155:152];
-        tmp.diffserv = tmp_0[151:144];
-        tmp.totalLen = tmp_0[143:128];
-        tmp.id = tmp_0[127:112];
-        tmp.flags = tmp_0[111:109];
-        tmp.fragOffset = tmp_0[108:96];
-        tmp.ttl = tmp_0[95:88];
-        tmp.protocol = tmp_0[87:80];
-        tmp.hdrChecksum = tmp_0[79:64];
-        tmp.srcAddr = tmp_0[63:32];
-        tmp.dstAddr = tmp_0[31:0];
-        tmp_hdr_0 = tmp;
-        packet.extract<ipv4_t>(hdr.h, ((bit<32>)tmp_hdr_0.ihl << 2 << 3) + 32w4294967136);
+        packet.extract(hdr.sh.next);
+        packet.extract(hdr.sh.next);
+        tmp_hdr = packet.lookahead<ipv4_t_1>();
+        packet.extract(hdr.h.next, (bit<32>)(((bit<32>)tmp_hdr.ihl << 2) * 8 - 160));
+        tmp_hdr_0 = packet.lookahead<ipv4_t_1>();
+        packet.extract(hdr.h.next, (bit<32>)(((bit<32>)tmp_hdr_0.ihl << 2) * 8 - 160));
         transition accept;
     }
 }
@@ -78,7 +84,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<ipv4_t>(hdr.h);
+        packet.emit(hdr.sh);
+        packet.emit(hdr.h);
     }
 }
 
@@ -92,5 +99,5 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
+V1Switch(ParserImpl(), verifyChecksum(), ingress(), egress(), computeChecksum(), DeparserImpl()) main;
 
