@@ -22,6 +22,7 @@ struct alt_t {
   bit<7> port;
 };
 
+@MNK_annotation("(test flatten)")
 struct row_t {
   alt_t alt0;
   alt_t alt1;
