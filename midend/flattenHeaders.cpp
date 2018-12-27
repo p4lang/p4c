@@ -33,7 +33,7 @@ void HeaderTypeReplacement::flatten(const P4::TypeMap* typeMap,
     cstring fieldName = prefix.replace(".", "_") +
                         cstring::to_cstring(fieldNameRemap.size());
     fieldNameRemap.emplace(prefix, fieldName);
-    fields->push_back(new IR::StructField(IR::ID(fieldName), type));
+    fields->push_back(new IR::StructField(IR::ID(fieldName), type->getP4Type()));
     LOG3("FH Flatten: " << type << " | " << prefix);
 }
 
@@ -87,9 +87,6 @@ const IR::Node* ReplaceHeaders::postorder(IR::Type_Header* type) {
 
 const IR::Node* ReplaceHeaders::postorder(IR::Member* expression) {
     // Find out if this applies to one of the parameters that are being replaced.
-    if (getParent<IR::Member>() != nullptr)
-        // We only want to process the outermost Member
-        return expression;
     LOG3("FH Starting replacing " << expression);
     const IR::Expression* e = expression;
     cstring prefix = "";
@@ -113,8 +110,18 @@ const IR::Node* ReplaceHeaders::postorder(IR::Member* expression) {
     // param.field1.etc.hdr, where hdr needs to be replaced.
     auto newFieldName = ::get(repl->fieldNameRemap, prefix);
     const IR::Expression* result;
-    BUG_CHECK(!newFieldName.isNullOrEmpty(),
-              "cannot find replacement for %s in type %s", prefix, h);
+    if (newFieldName.isNullOrEmpty()) {
+        auto type = replacementMap->typeMap->getType(getOriginal(), true);
+        // This could be, for example, a method like setValid.
+        if (!type->is<IR::Type_Struct>())
+            return expression;
+        if (getParent<IR::Member>() != nullptr)
+            // We only want to process the outermost Member
+            return expression;
+        BUG_CHECK(!newFieldName.isNullOrEmpty(),
+                  "FH cannot find replacement for %s in type %s", prefix, h);
+    }
+
     result = new IR::Member(e, newFieldName);
     LOG3("FH Replacing " << expression << " with " << result);
     return result;
