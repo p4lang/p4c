@@ -30,7 +30,7 @@ add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${P4TEST_SRCS};${P4TEST_HDRS}")
 build_unified(P4TEST_SRCS ALL)
 add_executable(p4test ${P4TEST_SRCS} ${EXTENSION_P4_14_CONV_SOURCES})
 target_link_libraries (p4test ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
-add_dependencies(p4test genIR)
+add_dependencies(p4test genIR frontend)
 
 install (TARGETS p4test
   RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
