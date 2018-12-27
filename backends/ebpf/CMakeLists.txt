@@ -56,7 +56,7 @@ set (P4C_EBPF_DIST_HEADERS p4include/ebpf_model.p4)
 build_unified(P4C_EBPF_SRCS ALL)
 add_executable(p4c-ebpf ${P4C_EBPF_SRCS})
 target_link_libraries (p4c-ebpf ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
-add_dependencies(p4c-ebpf genIR)
+add_dependencies(p4c-ebpf genIR frontend)
 
 install (TARGETS p4c-ebpf
   RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})

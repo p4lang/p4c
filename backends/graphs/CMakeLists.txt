@@ -33,7 +33,7 @@ add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${GRAPHS_SRCS};${GRAPHS_HDRS}")
 build_unified(GRAPHS_SRCS ALL)
 add_executable(p4c-graphs ${GRAPHS_SRCS} ${EXTENSION_P4_14_CONV_SOURCES})
 target_link_libraries (p4c-graphs ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
-add_dependencies(p4c-graphs genIR)
+add_dependencies(p4c-graphs genIR frontend)
 
 install (TARGETS p4c-graphs
   RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
