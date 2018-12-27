@@ -464,8 +464,8 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                         return nullptr;
                     }
                 } else {
-                    ::warning("parser_value_set has no @parser_value_set_size annotation");
-                    ::warning("using default size 4");
+                    ::warning("%1%: parser_value_set has no @parser_value_set_size annotation."
+                              "Using default size 4.", c);
                     sizeConstant = new IR::Constant(4);
                 }
                 auto annos = addGlobalNameAnnotation(value_set->name, value_set->annotations);

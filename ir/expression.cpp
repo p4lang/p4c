@@ -92,10 +92,10 @@ IR::Constant::handleOverflow(bool noWarning) {
     } else {
         if (sgn(value) < 0) {
             if (!noWarning)
-                ::warning("%1%: negative value with unsigned type", this);
+                ::warning(ErrorType::WARN_MISMATCH, this, "negative value with unsigned type");
         } else if ((value & mask) != value) {
             if (!noWarning)
-                ::warning("%1%: value does not fit in %2% bits", this, width);
+                ::warning(ErrorType::WARN_MISMATCH, this, "value does not fit in %2% bits", width);
         }
 
         value = value & mask;

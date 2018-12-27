@@ -138,13 +138,13 @@ ResolutionContext::resolveUnique(IR::ID name,
     }
 
     if (decls->empty()) {
-        ::error("Could not find declaration for %1%", name);
+        ::error(ErrorType::ERR_NOT_FOUND, name, "declaration");
         return nullptr;
     }
     if (decls->size() == 1)
         return decls->at(0);
 
-    ::error("Multiple matching declarations for %1%", name);
+    ::error(ErrorType::ERR_INVALID, name, "multiple matching declarations", name);
     for (auto a : *decls)
         ::error("Candidate: %1%", a);
     return nullptr;
@@ -293,7 +293,8 @@ void ResolveReferences::postorder(const IR::P4Program*) {
 bool ResolveReferences::preorder(const IR::This* pointer) {
     auto decl = findContext<IR::Declaration_Instance>();
     if (findContext<IR::Function>() == nullptr || decl == nullptr)
-        ::error("%1%: can only be used in the definition of an abstract method", pointer);
+        ::error(ErrorType::ERR_INVALID, pointer,
+                "can only be used in the definition of an abstract method");
     refMap->setDeclaration(pointer, decl);
     return true;
 }

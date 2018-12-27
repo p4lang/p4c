@@ -67,7 +67,7 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                        } else if (!strcmp(arg, "1.2") || !strcmp(arg, "16")) {
                            langVersion = CompilerOptions::FrontendVersion::P4_16;
                        } else {
-                           ::error("Illegal language version %1%", arg);
+                           ::error(ErrorType::ERR_INVALID, arg, "language version");
                            return false;
                        }
                        return true; },
@@ -80,7 +80,7 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                        } else if (!strcmp(arg, "16") || !strcmp(arg, "p4-16")) {
                            langVersion = CompilerOptions::FrontendVersion::P4_16;
                        } else {
-                           ::error("Illegal language version %1%", arg);
+                           ::error(ErrorType::ERR_INVALID, arg, "language version");
                            return false;
                        }
                        return true; },
@@ -113,7 +113,7 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                        } else if (!strcmp(arg, "text")) {
                            p4RuntimeFormat = P4::P4RuntimeFormat::TEXT;
                        } else {
-                           ::error("Illegal P4Runtime format %1%", arg);
+                           ::error(ErrorType::ERR_INVALID, arg, "P4Runtime format");
                            return false;
                        }
                        return true; },
@@ -297,7 +297,7 @@ FILE* CompilerOptions::preprocess() {
             + " -I" + (isv1() ? p4_14includePath : p4includePath) + " " + file;
 
         if (Log::verbose())
-            std::cerr << "Invoking preprocessor " << std::endl << cmd << std::endl;
+            std::clog << "Invoking preprocessor " << std::endl << cmd << std::endl;
         in = popen(cmd.c_str(), "r");
         if (in == nullptr) {
             ::error("Error invoking preprocessor");
