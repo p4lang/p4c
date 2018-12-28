@@ -30,7 +30,7 @@ limitations under the License.
 #include "p4RuntimeArchStandard.h"
 
 using ::P4::ControlPlaneAPI::Helpers::getExternInstanceFromProperty;
-using ::P4::ControlPlaneAPI::Helpers::addAnnotations;
+using ::P4::ControlPlaneAPI::Helpers::setPreamble;
 
 namespace p4configv1 = ::p4::config::v1;
 
@@ -611,9 +611,9 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         auto profile = p4Info->add_action_profiles();
         auto id = symbols.getId(SymbolType::ACTION_PROFILE(),
                                 actionProfile.name);
-        profile->mutable_preamble()->set_id(id);
-        profile->mutable_preamble()->set_name(actionProfile.name);
-        profile->mutable_preamble()->set_alias(symbols.getAlias(actionProfile.name));
+        setPreamble(profile->mutable_preamble(), id,
+                    actionProfile.name, symbols.getAlias(actionProfile.name),
+                    actionProfile.annotations);
         profile->set_with_selector(
             actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR);
         profile->set_size(actionProfile.size);
@@ -623,17 +623,15 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
             for (const auto& table : tablesIt->second)
                 profile->add_table_ids(symbols.getId(P4RuntimeSymbolType::TABLE(), table));
         }
-
-        addAnnotations(profile->mutable_preamble(), actionProfile.annotations);
     }
 
     /// Set common fields between Counter and DirectCounter.
     template <typename Kind>
-    void setCounterCommon(const P4RuntimeSymbolTableIface& symbols, Kind *counter,
+    void setCounterCommon(const P4RuntimeSymbolTableIface& symbols, Kind *counter, p4rt_id_t id,
                           const Helpers::Counterlike<ArchCounterExtern>& counterInstance) {
-        counter->mutable_preamble()->set_name(counterInstance.name);
-        counter->mutable_preamble()->set_alias(symbols.getAlias(counterInstance.name));
-        addAnnotations(counter->mutable_preamble(), counterInstance.annotations);
+        setPreamble(counter->mutable_preamble(), id,
+                    counterInstance.name, symbols.getAlias(counterInstance.name),
+                    counterInstance.annotations);
         auto counter_spec = counter->mutable_spec();
         counter_spec->set_unit(CounterTraits::mapUnitName(counterInstance.unit));
     }
@@ -645,27 +643,25 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
             auto counter = p4Info->add_direct_counters();
             auto id = symbols.getId(SymbolType::DIRECT_COUNTER(),
                                     counterInstance.name);
-            counter->mutable_preamble()->set_id(id);
-            setCounterCommon(symbols, counter, counterInstance);
+            setCounterCommon(symbols, counter, id, counterInstance);
             auto tableId = symbols.getId(P4RuntimeSymbolType::TABLE(), *counterInstance.table);
             counter->set_direct_table_id(tableId);
         } else {
             auto counter = p4Info->add_counters();
             auto id = symbols.getId(SymbolType::COUNTER(),
                                     counterInstance.name);
-            counter->mutable_preamble()->set_id(id);
-            setCounterCommon(symbols, counter, counterInstance);
+            setCounterCommon(symbols, counter, id, counterInstance);
             counter->set_size(counterInstance.size);
         }
     }
 
     /// Set common fields between Meter and DirectMeter.
     template <typename Kind>
-    void setMeterCommon(const P4RuntimeSymbolTableIface& symbols, Kind *meter,
+    void setMeterCommon(const P4RuntimeSymbolTableIface& symbols, Kind *meter, p4rt_id_t id,
                         const Helpers::Counterlike<ArchMeterExtern>& meterInstance) {
-        meter->mutable_preamble()->set_name(meterInstance.name);
-        meter->mutable_preamble()->set_alias(symbols.getAlias(meterInstance.name));
-        addAnnotations(meter->mutable_preamble(), meterInstance.annotations);
+        setPreamble(meter->mutable_preamble(), id,
+                    meterInstance.name, symbols.getAlias(meterInstance.name),
+                    meterInstance.annotations);
         auto meter_spec = meter->mutable_spec();
         meter_spec->set_unit(MeterTraits::mapUnitName(meterInstance.unit));
     }
@@ -677,16 +673,14 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
             auto meter = p4Info->add_direct_meters();
             auto id = symbols.getId(SymbolType::DIRECT_METER(),
                                     meterInstance.name);
-            meter->mutable_preamble()->set_id(id);
-            setMeterCommon(symbols, meter, meterInstance);
+            setMeterCommon(symbols, meter, id, meterInstance);
             auto tableId = symbols.getId(P4RuntimeSymbolType::TABLE(), *meterInstance.table);
             meter->set_direct_table_id(tableId);
         } else {
             auto meter = p4Info->add_meters();
             auto id = symbols.getId(SymbolType::METER(),
                                     meterInstance.name);
-            meter->mutable_preamble()->set_id(id);
-            setMeterCommon(symbols, meter, meterInstance);
+            setMeterCommon(symbols, meter, id, meterInstance);
             meter->set_size(meterInstance.size);
         }
     }
@@ -697,10 +691,9 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         auto register_ = p4Info->add_registers();
         auto id = symbols.getId(SymbolType::REGISTER(),
                                 registerInstance.name);
-        register_->mutable_preamble()->set_id(id);
-        register_->mutable_preamble()->set_name(registerInstance.name);
-        register_->mutable_preamble()->set_alias(symbols.getAlias(registerInstance.name));
-        addAnnotations(register_->mutable_preamble(), registerInstance.annotations);
+        setPreamble(register_->mutable_preamble(), id,
+                    registerInstance.name, symbols.getAlias(registerInstance.name),
+                    registerInstance.annotations);
         register_->set_size(registerInstance.size);
         register_->mutable_type_spec()->CopyFrom(*registerInstance.typeSpec);
     }
@@ -717,11 +710,10 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         serializedInstances.insert(id);
 
         auto* digestInstance = p4Info->add_digests();
-        digestInstance->mutable_preamble()->set_id(id);
-        digestInstance->mutable_preamble()->set_name(digest.name);
-        digestInstance->mutable_preamble()->set_alias(symbols.getAlias(digest.name));
+        setPreamble(digestInstance->mutable_preamble(), id,
+                    digest.name, symbols.getAlias(digest.name),
+                    digest.annotations);
         digestInstance->mutable_type_spec()->CopyFrom(*digest.typeSpec);
-        addAnnotations(digestInstance->mutable_preamble(), digest.annotations);
     }
 
     /// @return the table implementation property, or nullptr if the table has no

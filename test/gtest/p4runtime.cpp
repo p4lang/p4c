@@ -16,6 +16,8 @@ limitations under the License.
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+#include <boost/algorithm/string/replace.hpp>
+#include <boost/optional.hpp>
 #include <google/protobuf/util/message_differencer.h>
 
 #include <iterator>
@@ -684,9 +686,9 @@ TEST_F(P4Runtime, Digests) {
     }
 }
 
-// TODO(antonin): there is a boiler-plate code required for PSA so if we write
-// more tests for the PSA P4Info generation, we will need to find a less verbose
-// solution.
+// TODO(antonin): there is a lot of boiler-plate code required for PSA so if we
+// write more tests for the PSA P4Info generation, we will need to find a less
+// verbose solution.
 TEST_F(P4Runtime, PSADigests) {
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::PSA, R"(
         header Header { bit<16> headerFieldA; bit<8> headerFieldB; }
@@ -1147,6 +1149,152 @@ TEST_F(P4Runtime, Register) {
         EXPECT_EQ("Header", typeSpec.header().name());
     }
 }
+
+TEST_F(P4Runtime, Documentation) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        struct Headers { }
+        struct Metadata { }
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm) {
+            state start { transition accept; } }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) {
+            @brief("This action does nothing duh!")
+            action noop() { }
+
+            action drop() { mark_to_drop(); }
+
+            // we cannot test a multi-line annotation here (with escaped new line)
+            // because the preprocessor is not run
+            @description("A table that matches on the ingress port and decides whether or not to drop the packet")
+            table t {
+                key = { sm.ingress_port : exact @brief("Ingress port"); }
+                actions = { noop; drop; }
+                default_action = noop;
+            }
+
+            apply {
+                t.apply();
+            }
+        }
+
+        V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )"));
+
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0u, ::diagnosticCount());
+
+    {
+      auto table = findTable(*test, "ingress.t");
+      ASSERT_TRUE(table != nullptr);
+      const auto& tDocumentation = table->preamble().doc();
+      EXPECT_EQ(tDocumentation.brief(), "");
+      // NOLINTNEXTLINE(whitespace/line_length)
+      EXPECT_EQ(tDocumentation.description(), "A table that matches on the ingress port and decides whether or not to drop the packet");
+
+      const auto& mf = table->match_fields(0);
+      const auto& mfDocumentation = mf.doc();
+      EXPECT_EQ(mfDocumentation.brief(), "Ingress port");
+      EXPECT_EQ(mfDocumentation.description(), "");
+    }
+
+    {
+      auto noop = findAction(*test, "ingress.noop");
+      ASSERT_TRUE(noop != nullptr);
+      const auto& aDocumentation = noop->preamble().doc();
+      EXPECT_EQ(aDocumentation.brief(), "This action does nothing duh!");
+      EXPECT_EQ(aDocumentation.description(), "");
+    }
+
+    {
+      auto drop = findAction(*test, "ingress.drop");
+      ASSERT_TRUE(drop != nullptr);
+      EXPECT_FALSE(drop->preamble().has_doc());
+    }
+}
+
+class P4RuntimePkgInfo : public P4CTest {
+ protected:
+    static boost::optional<P4::P4RuntimeAPI> createTestCase(const char* annotations);
+};
+
+/* static */
+boost::optional<P4::P4RuntimeAPI> P4RuntimePkgInfo::createTestCase(const char* annotations) {
+    auto source = P4_SOURCE(P4Headers::V1MODEL, R"(
+        struct Headers { }
+        struct Metadata { }
+
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm) {
+            state start { transition accept; } }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        %ANNOTATIONS%
+        V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )");
+    boost::replace_first(source, "%ANNOTATIONS%", annotations);
+    return createP4RuntimeTestCase(source);
+}
+
+TEST_F(P4RuntimePkgInfo, NoAnnotations) {
+    auto test = createTestCase("");
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0u, ::diagnosticCount());
+    const auto& pkgInfo = test->p4Info->pkg_info();
+    EXPECT_EQ(pkgInfo.arch(), "v1model");
+}
+
+TEST_F(P4RuntimePkgInfo, GeneralCase) {
+    auto test = createTestCase(R"(
+        @pkginfo(name="prog.p4", version="1.0.0")
+        @pkginfo(contact="p4-dev@lists.p4.org")
+        @brief("This is a P4 program"))");
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0u, ::diagnosticCount());
+    const auto& pkgInfo = test->p4Info->pkg_info();
+    EXPECT_EQ(pkgInfo.arch(), "v1model");
+    EXPECT_EQ(pkgInfo.name(), "prog.p4");
+    EXPECT_EQ(pkgInfo.version(), "1.0.0");
+    EXPECT_EQ(pkgInfo.doc().brief(), "This is a P4 program");
+}
+
+TEST_F(P4RuntimePkgInfo, OverrideArch) {
+    auto test = createTestCase(R"(@pkginfo(arch="v1"))");
+    ASSERT_TRUE(test);
+    // we expect 1 warning for overriding the architecture
+    EXPECT_EQ(1u, ::diagnosticCount());
+    const auto& pkgInfo = test->p4Info->pkg_info();
+    EXPECT_EQ(pkgInfo.arch(), "v1");
+}
+
+TEST_F(P4RuntimePkgInfo, ValueNotAString) {
+    auto test = createTestCase(R"(@pkginfo(name=77))");
+    ASSERT_TRUE(test);
+    // we expect 1 error message
+    EXPECT_EQ(1u, ::diagnosticCount());
+    const auto& pkgInfo = test->p4Info->pkg_info();
+    EXPECT_EQ(pkgInfo.name(), "");
+}
+
+TEST_F(P4RuntimePkgInfo, DuplicateKey) {
+    auto test = createTestCase(R"(@pkginfo(name="aaa", name="bbb"))");
+    // kv annotations use an IndexedVector, which does not allow duplicate keys.
+    ASSERT_FALSE(test);
+}
+
 
 class P4RuntimeDataTypeSpec : public P4Runtime {
  protected:
