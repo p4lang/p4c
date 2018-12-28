@@ -1556,7 +1556,14 @@ CONVERT_PRIMITIVE(modify_field_with_hash_based_offset) {
         new IR::Cast(max->srcInfo, IR::Type_Bits::get(2 * flc->output_width), max)));
     auto hash = new IR::PathExpression(structure->v1model.hash.Id());
     auto mc = new IR::MethodCallExpression(primitive->srcInfo, hash, args);
-    auto result = new IR::MethodCallStatement(primitive->srcInfo, mc);
+    auto annos = new IR::Annotations();
+    // Save the original field list calculation name in an annotation
+    annos->addAnnotation("field_list_calc_name", new IR::StringLiteral(flc->name));
+    // Save the original field list names in annotations
+    for (auto fl_name : flc->input->names) {
+        annos->addAnnotation("field_list_name", new IR::StringLiteral(fl_name));
+    }
+    auto result = new IR::MethodCallStatement(primitive->srcInfo, annos, mc);
     return result;
 }
 
