@@ -236,8 +236,8 @@ void forAllEvaluatedBlocks(const IR::ToplevelBlock* aToplevelBlock, Func functio
 std::string serializeOneAnnotation(const IR::Annotation* annotation);
 
 /// Serialize @annotated's P4 annotations and attach them to a P4Info message
-/// with an 'annotations' field. '@name' and '@id' are ignored, as well as
-/// annotations whose name satisfies predicate @p.
+/// with an 'annotations' field. '@name', '@id' and documentation annotations
+/// are ignored, as well as annotations whose name satisfies predicate @p.
 template <typename Message, typename UnaryPredicate>
 void addAnnotations(Message* message, const IR::IAnnotated* annotated, UnaryPredicate p) {
     CHECK_NULL(message);
@@ -250,6 +250,12 @@ void addAnnotations(Message* message, const IR::IAnnotated* annotated, UnaryPred
         // elsewhere in P4Info messages.
         if (annotation->name == IR::Annotation::nameAnnotation) continue;
         if (annotation->name == "id") continue;
+
+        // Don't output the @brief or @description annotations; they're
+        // represented using the documentation fields.
+        if (annotation->name == "brief" || annotation->name == "description")
+          continue;
+
         if (p(annotation->name)) continue;
 
         message->add_annotations(serializeOneAnnotation(annotation));
@@ -261,6 +267,48 @@ template <typename Message>
 void addAnnotations(Message* message, const IR::IAnnotated* annotated) {
     addAnnotations(message, annotated, [](cstring){ return false; });
 }
+
+/// Set the 'doc' field for a P4Info message, using the '@brief' and
+/// '@description' annotations if present.
+template <typename Message>
+void addDocumentation(Message* message, const IR::IAnnotated* annotated) {
+    CHECK_NULL(message);
+
+    // Synthesized resources may have no annotations.
+    if (annotated == nullptr) return;
+
+    ::p4::config::v1::Documentation doc;
+    bool hasDoc = false;
+
+    // we iterate over all annotations looking for '@brief' and / or
+    // '@description'. As per the P4Runtime spec, we only set the 'doc' field in
+    // the message if at least one of them is present.
+    for (const IR::Annotation* annotation : annotated->getAnnotations()->annotations) {
+        if (annotation->name == "brief") {
+            auto brief = annotation->expr[0]->to<IR::StringLiteral>();
+            // guaranteed by ParseAnnotations pass
+            CHECK_NULL(brief);
+            doc.set_brief(brief->value);
+            hasDoc = true;
+            continue;
+        }
+        if (annotation->name == "description") {
+            auto description = annotation->expr[0]->to<IR::StringLiteral>();
+            // guaranteed by ParseAnnotations pass
+            CHECK_NULL(description);
+            doc.set_description(description->value);
+            hasDoc = true;
+            continue;
+        }
+    }
+
+    if (hasDoc) message->mutable_doc()->CopyFrom(doc);
+}
+
+/// Set all the fields in the @preamble, including the 'annotations' and 'doc'
+/// fields.
+void setPreamble(::p4::config::v1::Preamble* preamble,
+                 p4rt_id_t id, cstring name, cstring alias, const IR::IAnnotated* annotated);
 
 /// @return @table's size property if available, falling back to the
 /// architecture's default size.

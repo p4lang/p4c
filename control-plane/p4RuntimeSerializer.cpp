@@ -16,6 +16,7 @@ limitations under the License.
 
 #include <algorithm>
 #include <iostream>
+#include <set>
 #include <typeinfo>
 #include <unordered_map>
 #include <utility>
@@ -69,6 +70,8 @@ namespace P4 {
 namespace ControlPlaneAPI {
 
 using Helpers::addAnnotations;
+using Helpers::addDocumentation;
+using Helpers::setPreamble;
 
 static const p4rt_id_t INVALID_ID = p4configv1::P4Ids::UNSPECIFIED;
 
@@ -660,7 +663,9 @@ class ParseAnnotations : public P4::ParseAnnotations {
     ParseAnnotations() : P4::ParseAnnotations("P4Runtime", false, {
                 PARSE("controller_header", StringLiteral),
                 PARSE_EMPTY("hidden"),
-                PARSE("id", Constant)
+                PARSE("id", Constant),
+                PARSE("brief", StringLiteral),
+                PARSE("description", StringLiteral)
             }) { }
 };
 
@@ -697,6 +702,10 @@ class P4RuntimeAnalyzer {
      * @param evaluatedProgram  An up-to-date evaluated version of the program.
      * @param refMap  An up-to-date reference map.
      * @param refMap  An up-to-date type map.
+     * @param archHandler  An implementation of P4RuntimeArchHandlerIface which
+     * handles architecture-specific constructs (e.g. externs).
+     * @param arch  The name of the P4_16 architecture the program was written
+     * against.
      * @return a P4Info message representing the program's control plane API.
      *         Never returns null.
      */
@@ -704,7 +713,8 @@ class P4RuntimeAnalyzer {
                                 const IR::ToplevelBlock* evaluatedProgram,
                                 ReferenceMap* refMap,
                                 TypeMap* typeMap,
-                                P4RuntimeArchHandlerIface* archHandler);
+                                P4RuntimeArchHandlerIface* archHandler,
+                                cstring arch);
 
     void addAction(const IR::P4Action* actionDeclaration) {
         if (isHidden(actionDeclaration)) return;
@@ -731,10 +741,7 @@ class P4RuntimeAnalyzer {
         serializedActions.insert(id);
 
         auto action = p4Info->add_actions();
-        action->mutable_preamble()->set_id(id);
-        action->mutable_preamble()->set_name(name);
-        action->mutable_preamble()->set_alias(symbols.getAlias(name));
-        addAnnotations(action->mutable_preamble(), annotations);
+        setPreamble(action->mutable_preamble(), id, name, symbols.getAlias(name), annotations);
 
         size_t index = 1;
         for (auto actionParam : *actionDeclaration->parameters->getEnumerator()) {
@@ -743,6 +750,7 @@ class P4RuntimeAnalyzer {
             param->set_id(index++);
             param->set_name(paramName);
             addAnnotations(param, actionParam->to<IR::IAnnotated>());
+            addDocumentation(param, actionParam->to<IR::IAnnotated>());
 
             auto paramType = typeMap->getType(actionParam, true);
             if (!paramType->is<IR::Type_Bits>() && !paramType->is<IR::Type_Boolean>()) {
@@ -773,11 +781,11 @@ class P4RuntimeAnalyzer {
         auto controllerName = nameConstant->value;
 
         auto header = p4Info->add_controller_packet_metadata();
-        header->mutable_preamble()->set_id(id);
-        // According to the p4info specification, we use the name specified in the annotation for
-        // the p4info preamble, not the P4 fully-qualified name.
-        header->mutable_preamble()->set_name(controllerName);
-        addAnnotations(header->mutable_preamble(), annotations);
+        // According to the P4Info specification, we use the name specified in
+        // the annotation for the p4info preamble, not the P4 fully-qualified
+        // name.
+        setPreamble(header->mutable_preamble(), id,
+                    controllerName /* name */, controllerName /* alias */, annotations);
 
         size_t index = 1;
         for (auto headerField : type->fields) {
@@ -813,10 +821,11 @@ class P4RuntimeAnalyzer {
         auto annotations = tableDeclaration->to<IR::IAnnotated>();
 
         auto table = p4Info->add_tables();
-        table->mutable_preamble()->set_id(symbols.getId(P4RuntimeSymbolType::TABLE(), name));
-        table->mutable_preamble()->set_name(name);
-        table->mutable_preamble()->set_alias(symbols.getAlias(name));
-        addAnnotations(table->mutable_preamble(), annotations);
+        setPreamble(table->mutable_preamble(),
+                    symbols.getId(P4RuntimeSymbolType::TABLE(), name),
+                    name,
+                    symbols.getAlias(name),
+                    annotations);
         table->set_size(tableSize);
 
         if (defaultAction && defaultAction->isConst) {
@@ -847,6 +856,7 @@ class P4RuntimeAnalyzer {
             match_field->set_id(index++);
             match_field->set_name(field.name);
             addAnnotations(match_field, field.annotations);
+            addDocumentation(match_field, field.annotations);
             match_field->set_bitwidth(field.bitwidth);
             match_field->set_match_type(field.type);
         }
@@ -918,9 +928,8 @@ class P4RuntimeAnalyzer {
 
         auto vs = p4Info->add_value_sets();
         auto id = symbols.getId(P4RuntimeSymbolType::VALUE_SET(), name);
-        vs->mutable_preamble()->set_id(id);
-        vs->mutable_preamble()->set_name(name);
-        vs->mutable_preamble()->set_alias(symbols.getAlias(name));
+        setPreamble(vs->mutable_preamble(), id, name, symbols.getAlias(name),
+                    inst->to<IR::IAnnotated>());
         vs->set_bitwidth(bitwidth);
         vs->set_size(size);
     }
@@ -929,6 +938,68 @@ class P4RuntimeAnalyzer {
     /// architecture-specific postAdd method for post-processing.
     void postAdd() const {
         archHandler->postAdd(symbols, p4Info);
+    }
+
+    /// Sets the pkg_info field of the P4Info message, using the annotations on
+    /// the P4 program package.
+    void addPkgInfo(const IR::ToplevelBlock* evaluatedProgram, cstring arch) const {
+        auto* main = evaluatedProgram->getMain();
+        if (main == nullptr) {
+            ::warning("Program does not contain a main module, "
+                      "so P4Info's 'pkg_info' field will not be set");
+            return;
+        }
+        auto* decl = main->node->to<IR::Declaration_Instance>();
+        CHECK_NULL(decl);
+        auto* pkginfo = p4Info->mutable_pkg_info();
+
+        pkginfo->set_arch(arch);
+
+        std::set<cstring> keysVisited;
+
+        // @pkginfo annotation
+        for (auto* annotation : decl->getAnnotations()->annotations) {
+            if (annotation->name != IR::Annotation::pkginfoAnnotation) continue;
+            for (auto* kv : annotation->kv) {
+                auto name = kv->name.name;
+                auto setStringField = [kv, name, pkginfo, &keysVisited](cstring fName) {
+                    auto* v = kv->expression->to<IR::StringLiteral>();
+                    if (v == nullptr) {
+                        ::error("Value for '%1%' key in @pkginfo annotation is not a string", kv);
+                        return;
+                    }
+                    // kv annotations are represented with an IndexedVector in
+                    // the IR, so a program with duplicate keys is actually
+                    // rejected at parse time.
+                    BUG_CHECK(!keysVisited.count(fName), "Duplicate keys in @pkginfo");
+                    keysVisited.insert(fName);
+                    // use Protobuf reflection library to minimize code
+                    // duplication.
+                    auto* descriptor = pkginfo->GetDescriptor();
+                    auto* f = descriptor->FindFieldByName(static_cast<std::string>(fName));
+                    pkginfo->GetReflection()->SetString(
+                        pkginfo, f, static_cast<std::string>(v->value));
+                };
+                if (name == "name" || name == "version" || name == "organization" ||
+                    name == "contact" || name == "url") {
+                    setStringField(name);
+                } else if (name == "arch") {
+                    ::warning("The '%1%' field in PkgInfo should be set by the compiler, "
+                              "not by the user", kv);
+                    // override the value set previously with the user-provided
+                    // value.
+                    setStringField(name);
+                } else {
+                    ::warning("Unknown key name '%1%' in @pkginfo annotation", name);
+                }
+            }
+        }
+
+        // add other annotations on the P4 package to the message. @pkginfo is
+        // ignored using the unary predicate argument to addAnnotations.
+        addAnnotations(pkginfo, decl, [](cstring name) { return name == "pkginfo"; });
+
+        addDocumentation(pkginfo, decl);
     }
 
  private:
@@ -1281,7 +1352,8 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
                            const IR::ToplevelBlock* evaluatedProgram,
                            ReferenceMap* refMap,
                            TypeMap* typeMap,
-                           P4RuntimeArchHandlerIface* archHandler) {
+                           P4RuntimeArchHandlerIface* archHandler,
+                           cstring arch) {
     using namespace ControlPlaneAPI;
 
     CHECK_NULL(archHandler);
@@ -1331,6 +1403,8 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
 
     analyzer.postAdd();
 
+    analyzer.addPkgInfo(evaluatedProgram, arch);
+
     P4RuntimeEntriesConverter entriesConverter(symbols);
     Helpers::forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
         if (block->is<IR::TableBlock>())
@@ -1379,7 +1453,7 @@ P4RuntimeSerializer::generateP4Runtime(const IR::P4Program* program, cstring arc
     auto archHandler = (*archHandlerBuilderIt->second)(&refMap, &typeMap, evaluatedProgram);
 
     return P4RuntimeAnalyzer::analyze(p4RuntimeProgram, evaluatedProgram,
-                                      &refMap, &typeMap, archHandler);
+                                      &refMap, &typeMap, archHandler, arch);
 }
 
 void P4RuntimeAPI::serializeP4InfoTo(std::ostream* destination, P4RuntimeFormat format) {

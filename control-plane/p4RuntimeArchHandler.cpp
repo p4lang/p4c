@@ -144,6 +144,16 @@ std::string serializeOneAnnotation(const IR::Annotation* annotation) {
     return serializedAnnotation;
 }
 
+void setPreamble(::p4::config::v1::Preamble* preamble,
+                 p4rt_id_t id, cstring name, cstring alias, const IR::IAnnotated* annotated) {
+    CHECK_NULL(preamble);
+    preamble->set_id(id);
+    preamble->set_name(name);
+    preamble->set_alias(alias);
+    addAnnotations(preamble, annotated);
+    addDocumentation(preamble, annotated);
+}
+
 }  // namespace Helpers
 
 }  // namespace ControlPlaneAPI
