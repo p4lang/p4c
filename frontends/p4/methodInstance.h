@@ -129,6 +129,11 @@ class ExternMethod final : public MethodInstance {
     const IR::Method*      method;
     const IR::Type_Extern* originalExternType;    // type of object method is applied to
     const IR::Type_Extern* actualExternType;      // with type variables substituted
+
+    /// Set of IR::Method and IR::Function objects that may be called by this method.
+    // If this method is abstract, will consist of (just) the concrete implementation,
+    // otherwise will consist of those methods that are @synchronous with this
+    std::vector<const IR::IDeclaration *> mayCall() const;
 };
 
 /** Represents the call of an extern function */
