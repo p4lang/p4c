@@ -359,26 +359,52 @@ IR::IfStatement *DoLocalCopyPropagation::postorder(IR::IfStatement *s) {
     return s;
 }
 
+bool isAsync(const IR::Vector<IR::Method> methods, cstring callee, cstring caller) {
+    if (callee[0] == '.') callee = callee.substr(1);
+    for (auto *m : methods) {
+        if (m->name != callee) continue;
+        auto sync = m->getAnnotation(IR::Annotation::synchronousAnnotation);
+        if (!sync) return true;
+        for (auto m : sync->expr) {
+            auto mname = m->to<IR::PathExpression>();
+            if (mname && mname->path->name == caller)
+                return false; }
+        return true; }
+    return false;  // can't find the method, so assume synchronous
+}
+
 IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpression *mc) {
     if (!working) return mc;
+    auto *mi = MethodInstance::resolve(mc, refMap, typeMap, true);
     if (auto mem = mc->method->to<IR::Member>()) {
         if (auto obj = expr_name(mem->expr)) {
             if (tables.count(obj)) {
                 LOG3("table apply method call " << mc->method);
                 apply_table(&tables[obj]);
                 return mc;
-            } else if (auto ext = mem->expr->type->to<IR::Type_Extern>()) {
+            } else if (auto em = mi->to<ExternMethod>()) {
+                auto ext = em->actualExternType;
                 auto name = obj + '.' + mem->member;
                 if (methods.count(name)) {
                     LOG3("concrete method call " << name);
                     apply_function(&methods[name]);
                     return mc;
-                } else if (ext->name == "packet_in" || ext->name == "packet_out") {
+                } else if (ext && (ext->name == "packet_in" || ext->name == "packet_out")) {
                     LOG3(ext->name << '.' << mem->member << " call");
                     // we currently do no track the liveness of packet_in/out objects
                     return mc;
                 } else {
-                    LOG3("unknown extern method call " << mc->method); }
+                    // extern method call might trigger various concrete implementation
+                    // method in the object, so act as if all of them are applied
+                    // FIXME -- Could it invoke methods on other objects or otherwise affect
+                    // global values?  Not clear -- we probably need a hook for backends
+                    // to provide per-extern flow info to this (and other) frontend passes.
+                    LOG3("extern method call " << name);
+                    for (auto *n : em->mayCall()) {
+                        if (auto *method = ::getref(methods, obj + '.' + n->getName())) {
+                            LOG4("  might call " << obj << '.' << n->getName());
+                            apply_function(method); } }
+                    return mc; }
             } else if (mem->expr->type->is<IR::Type_Header>()) {
                 if (mem->member == "isValid") {
                     forOverlapAvail(obj, [obj](cstring, VarInfo *var) {
@@ -409,12 +435,21 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
         if (actions.count(fn->path->name)) {
             LOG3("action method call " << mc->method);
             apply_function(&actions[fn->path->name]);
+            return mc;
+        } else if (mi->is<P4::ExternFunction>()) {
+            LOG3("extern function call " << mc->method);
+            // assume it has no side-effects on anything not explicitly passed to it?
+            // maybe should have annotations if it does
             return mc; } }
     LOG3("unknown method call " << mc->method << " clears all nonlocal saved values");
-    for (auto &var : Values(available)) {
-        if (!var.local) {
-            var.val = nullptr;
-            var.live = true; } }
+    for (auto &var : available) {
+        if (!var.second.local) {
+            LOG7("    may access non-local " << var.first);
+            var.second.val = nullptr;
+            var.second.live = true;
+            if (inferForFunc) {
+                inferForFunc->reads.insert(var.first);
+                inferForFunc->writes.insert(var.first); } } }
     return mc;
 }
 
@@ -508,11 +543,15 @@ IR::P4Control *DoLocalCopyPropagation::preorder(IR::P4Control *ctrl) {
 }
 
 void DoLocalCopyPropagation::apply_function(DoLocalCopyPropagation::FuncInfo *act) {
+    LOG7("apply_function reads=" << act->reads << " writes=" << act->writes);
     for (auto write : act->writes)
         dropValuesUsing(write);
     for (auto read : act->reads)
         forOverlapAvail(read, [](cstring, VarInfo *var) {
             var->live = true; });
+    if (inferForFunc) {
+        inferForFunc->writes.insert(act->writes.begin(), act->writes.end());
+        inferForFunc->reads.insert(act->reads.begin(), act->reads.end()); }
 }
 
 void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl) {

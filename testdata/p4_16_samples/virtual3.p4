@@ -13,29 +13,39 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#include <core.p4>
 
+// In arch file
 extern Virtual {
     Virtual();
-    void run(in bit<16> ix);  // internally calls f
-    @synchronous(run) abstract bit<16> f(in bit<16> ix);
+    // abstract methods must be implemented
+    // by the users
+    void increment();
+    @synchronous(increment) abstract bit<16> f(in bit<16> ix);
+    bit<16> total();
 }
 
-extern State {
-    State(int<16> size);
-    bit<16> get(in bit<16> index);
-}
-
+// User code
 control c(inout bit<16> p) {
-    Virtual() cntr = {
-        State(1024) state;
+    bit<16>     local;
 
+    Virtual() cntr = {  // implementation
         bit<16> f(in bit<16> ix) {  // abstract method implementation
-            return state.get(ix);
+            return (ix + local);
         }
     };
+    action final_ctr() { p = cntr.total(); }
+    action add_ctr() { cntr.increment(); }
+    table run_ctr {
+        key = { p : exact; }
+        actions = { add_ctr; final_ctr; }
+    }
 
     apply {
-        cntr.run(6);
+        // abstract methods may be called by the extern
+        // internally as part of its computation.
+        local = 4;
+        run_ctr.apply();
     }
 }
 
