@@ -16,10 +16,8 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name(".intrinsic_metadata") 
-    intrinsic_metadata_t intrinsic_metadata;
-    @name(".meta") 
-    meta_t               meta;
+    bit<48> _intrinsic_metadata_ingress_global_tstamp0;
+    bit<16> _meta_val161;
 }
 
 struct headers {
@@ -47,7 +45,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".NoAction") action NoAction_0() {
     }
     @name(".test_action") action test_action() {
-        digest<test1_digest>(32w0x666, { hdr.ethernet.dstAddr, standard_metadata });
+        digest<test1_digest>(32w0x666, {hdr.ethernet.dstAddr,standard_metadata});
     }
     @name(".tbl0") table tbl0_0 {
         actions = {

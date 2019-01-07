@@ -17,8 +17,12 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name(".ing_metadata") 
-    ingress_metadata_t ing_metadata;
+    bit<8>  _ing_metadata_drop0;
+    bit<8>  _ing_metadata_egress_port1;
+    bit<8>  _ing_metadata_f12;
+    bit<16> _ing_metadata_f23;
+    bit<32> _ing_metadata_f34;
+    bit<64> _ing_metadata_f45;
 }
 
 struct headers {
@@ -71,28 +75,28 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".nop") action nop_8() {
     }
     @name(".ing_drop") action ing_drop() {
-        meta.ing_metadata.drop = 8w1;
+        meta._ing_metadata_drop0 = 8w1;
     }
     @name(".set_f1") action set_f1(bit<8> f1) {
-        meta.ing_metadata.f1 = f1;
+        meta._ing_metadata_f12 = f1;
     }
     @name(".set_f2") action set_f2(bit<16> f2) {
-        meta.ing_metadata.f2 = f2;
+        meta._ing_metadata_f23 = f2;
     }
     @name(".set_f2") action set_f2_2(bit<16> f2) {
-        meta.ing_metadata.f2 = f2;
+        meta._ing_metadata_f23 = f2;
     }
     @name(".set_f3") action set_f3(bit<32> f3) {
-        meta.ing_metadata.f3 = f3;
+        meta._ing_metadata_f34 = f3;
     }
     @name(".set_f3") action set_f3_2(bit<32> f3) {
-        meta.ing_metadata.f3 = f3;
+        meta._ing_metadata_f34 = f3;
     }
     @name(".set_egress_port") action set_egress_port(bit<8> egress_port) {
-        meta.ing_metadata.egress_port = egress_port;
+        meta._ing_metadata_egress_port1 = egress_port;
     }
     @name(".set_f4") action set_f4(bit<64> f4) {
-        meta.ing_metadata.f4 = f4;
+        meta._ing_metadata_f45 = f4;
     }
     @name(".i_t1") table i_t1_0 {
         actions = {

@@ -10,7 +10,11 @@ struct row_t {
 }
 
 header hdr {
-    row_t row;
+    bit<8>  _row_e0;
+    bit<16> _row_t1;
+    bit<8>  _row_l2;
+    bit<8>  _row_r3;
+    bit<8>  _row_v4;
 }
 
 struct Header_t {
@@ -57,7 +61,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
     }
     @name("ingress.t_exact") table t_exact_0 {
         key = {
-            h.h.row.e: exact @name("h.h.row.e") ;
+            h.h._row_e0: exact @name("h.h.row.e") ;
         }
         actions = {
             a();

@@ -9,8 +9,8 @@ struct parsed_headers_t {
 }
 
 struct metadata_t {
-    PortId_t foo;
-    PortId_t bar;
+    bit<9> _foo__v0;
+    bit<9> _bar__v1;
 }
 
 parser ParserImpl(packet_in packet, out parsed_headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
@@ -21,10 +21,10 @@ parser ParserImpl(packet_in packet, out parsed_headers_t hdr, inout metadata_t m
 
 control IngressImpl(inout parsed_headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     @hidden action act() {
-        meta.foo._v = meta.foo._v + 9w1;
+        meta._foo__v0 = meta._foo__v0 + 9w1;
     }
     @hidden action act_0() {
-        meta.foo._v = meta.foo._v + 9w1;
+        meta._foo__v0 = meta._foo__v0 + 9w1;
     }
     @hidden table tbl_act {
         actions = {
@@ -39,9 +39,9 @@ control IngressImpl(inout parsed_headers_t hdr, inout metadata_t meta, inout sta
         const default_action = act_0();
     }
     apply {
-        if (meta.foo._v == meta.bar._v) 
+        if (meta._foo__v0 == meta._bar__v1) 
             tbl_act.apply();
-        if (meta.foo._v == 9w192) 
+        if (meta._foo__v0 == 9w192) 
             tbl_act_0.apply();
     }
 }

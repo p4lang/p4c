@@ -21,8 +21,10 @@ header queueing_metadata_t {
 }
 
 struct metadata {
-    @name(".queueing_metadata") 
-    queueing_metadata_t_0 queueing_metadata;
+    bit<48> _queueing_metadata_enq_timestamp0;
+    bit<24> _queueing_metadata_enq_qdepth1;
+    bit<32> _queueing_metadata_deq_timedelta2;
+    bit<24> _queueing_metadata_deq_qdepth3;
 }
 
 struct headers {
@@ -51,10 +53,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name(".copy_queueing_data") action copy_queueing_data() {
         hdr.queueing_hdr.setValid();
-        hdr.queueing_hdr.enq_timestamp = meta.queueing_metadata.enq_timestamp;
-        hdr.queueing_hdr.enq_qdepth = meta.queueing_metadata.enq_qdepth;
-        hdr.queueing_hdr.deq_timedelta = meta.queueing_metadata.deq_timedelta;
-        hdr.queueing_hdr.deq_qdepth = meta.queueing_metadata.deq_qdepth;
+        hdr.queueing_hdr.enq_timestamp = meta._queueing_metadata_enq_timestamp0;
+        hdr.queueing_hdr.enq_qdepth = meta._queueing_metadata_enq_qdepth1;
+        hdr.queueing_hdr.deq_timedelta = meta._queueing_metadata_deq_timedelta2;
+        hdr.queueing_hdr.deq_qdepth = meta._queueing_metadata_deq_qdepth3;
     }
     @name(".t_egress") table t_egress_0 {
         actions = {
