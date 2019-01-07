@@ -181,7 +181,6 @@ class FlattenHeaders final : public PassManager {
     }
 };
 
-
 }  // namespace P4
 
 #endif /* _MIDEND_FLATTENHEADERS_H_ */
