@@ -178,7 +178,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         flowlet_id.read(meta._ingress_metadata_flowlet_id2, (bit<32>)meta._ingress_metadata_flowlet_map_index1);
         meta._ingress_metadata_flow_ipg0 = (bit<32>)meta._intrinsic_metadata_ingress_global_timestamp6;
         flowlet_lasttime.read(meta._ingress_metadata_flowlet_lasttime3, (bit<32>)meta._ingress_metadata_flowlet_map_index1);
-        meta._ingress_metadata_flow_ipg0 = meta._ingress_metadata_flow_ipg0 - meta._ingress_metadata_flowlet_lasttime3;
+        meta._ingress_metadata_flow_ipg0 = (bit<32>)meta._intrinsic_metadata_ingress_global_timestamp6 - meta._ingress_metadata_flowlet_lasttime3;
         flowlet_lasttime.write((bit<32>)meta._ingress_metadata_flowlet_map_index1, (bit<32>)meta._intrinsic_metadata_ingress_global_timestamp6);
     }
     @name(".set_dmac") action set_dmac(bit<48> dmac) {
