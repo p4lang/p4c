@@ -656,29 +656,26 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
     }
 
     // Symbolically call some apply methods (actions and tables)
-    std::vector<const IR::IDeclaration *> callee;
+    const IR::Node* callee = nullptr;
     if (mi->is<ActionCall>()) {
         auto action = mi->to<ActionCall>()->action;
-        callee.push_back(action);
+        callee = action;
     } else if (mi->isApply()) {
         auto am = mi->to<ApplyMethod>();
         if (am->isTableApply()) {
             auto table = am->object->to<IR::P4Table>();
-            callee.push_back(table);
+            callee = table;
         }
-    } else if (auto em = mi->to<ExternMethod>()) {
-        // symbolically call all the methods that might be called via this extern method
-        callee = em->mayCall(); }
-    if (!callee.empty()) {
-        LOG3("Analyzing " << DBPrint::Brief << callee << DBPrint::Reset);
+    }
+
+    if (callee != nullptr) {
+        LOG3("Analyzing " << dbp(callee));
         ProgramPoint pt(callingContext, expression);
         ComputeWriteSet cw(this, pt, currentDefinitions);
-        for (auto c : callee)
-            (void)c->getNode()->apply(cw);
+        (void)callee->apply(cw);
         currentDefinitions = cw.currentDefinitions;
         exitDefinitions = exitDefinitions->joinDefinitions(cw.exitDefinitions);
-        LOG3("Definitions after call of " << DBPrint::Brief << expression << ": " <<
-             currentDefinitions << DBPrint::Reset);
+        LOG3("Definitions after call of " << expression << ": " << currentDefinitions);
     }
 
     auto result = LocationSet::empty;
@@ -755,10 +752,11 @@ bool ComputeWriteSet::preorder(const IR::P4Control* control) {
     enterScope(control->getApplyParameters(), &control->controlLocals, startPoint);
     exitDefinitions = new Definitions();
     returnedDefinitions = new Definitions();
-    BUG_CHECK(controlLocals == nullptr, "Nested controls?");
-    controlLocals = &control->controlLocals;
+    for (auto l : control->controlLocals) {
+        if (l->is<IR::Declaration_Instance>())
+            visit(l);  // process virtual Functions if any
+    }
     visit(control->body);
-    controlLocals = nullptr;;
     auto returned = currentDefinitions->joinDefinitions(returnedDefinitions);
     auto exited = returned->joinDefinitions(exitDefinitions);
     return setDefinitions(exited, control->body);
@@ -934,13 +932,3 @@ bool ComputeWriteSet::preorder(const IR::MethodCallStatement* statement) {
 }
 
 }  // namespace P4
-
-// functions for calling from gdb
-void dump(const P4::StorageLocation *s) { std::cout << *s << std::endl; }
-void dump(const P4::LocationSet *s) { std::cout << *s << std::endl; }
-void dump(const P4::ProgramPoint *p) { std::cout << *p << std::endl; }
-void dump(const P4::ProgramPoint &p) { std::cout << p << std::endl; }
-void dump(const P4::ProgramPoints *p) { std::cout << *p << std::endl; }
-void dump(const P4::ProgramPoints &p) { std::cout << p << std::endl; }
-void dump(const P4::Definitions *d) { std::cout << *d << std::endl; }
-void dump(const P4::AllDefinitions *d) { std::cout << *d << std::endl; }

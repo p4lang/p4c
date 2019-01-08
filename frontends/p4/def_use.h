@@ -276,8 +276,6 @@ class ProgramPoint : public IHasDbPrint {
     { return stack.empty() ? nullptr : stack.back(); }
     bool isBeforeStart() const
     { return stack.empty(); }
-    std::vector<const IR::Node*>::const_iterator begin() const { return stack.begin(); }
-    std::vector<const IR::Node*>::const_iterator end() const { return stack.end(); }
 };
 }  // namespace P4
 
@@ -410,16 +408,14 @@ class ComputeWriteSet : public Inspector {
     bool                lhs;
     /// For each expression the location set it writes
     std::map<const IR::Expression*, const LocationSet*> writes;
-    const IR::IndexedVector<IR::Declaration>    *controlLocals = nullptr;
 
     /// Creates new visitor, but with same underlying data structures.
     /// Needed to visit some program fragments repeatedly.
     ComputeWriteSet(const ComputeWriteSet* source, ProgramPoint context, Definitions* definitions) :
             allDefinitions(source->allDefinitions), currentDefinitions(definitions),
             returnedDefinitions(nullptr), exitDefinitions(source->exitDefinitions),
-            callingContext(context), storageMap(source->storageMap), lhs(false),
-            controlLocals(source->controlLocals) {
-        visitDagOnce = false;
+            callingContext(context), storageMap(source->storageMap), lhs(false) {
+        setName("ComputeWriteSet");
     }
     void enterScope(const IR::ParameterList* parameters,
                     const IR::IndexedVector<IR::Declaration>* locals,
@@ -442,9 +438,9 @@ class ComputeWriteSet : public Inspector {
  public:
     explicit ComputeWriteSet(AllDefinitions* allDefinitions) :
             allDefinitions(allDefinitions), currentDefinitions(nullptr),
-            returnedDefinitions(nullptr), exitDefinitions(new Definitions()),
+            returnedDefinitions(nullptr), exitDefinitions(nullptr),
             storageMap(allDefinitions->storageMap), lhs(false)
-    { CHECK_NULL(allDefinitions); visitDagOnce = false; }
+    { CHECK_NULL(allDefinitions); setName("ComputeWriteSet"); }
 
     // expressions
     bool preorder(const IR::Literal* expression) override;

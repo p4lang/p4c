@@ -49,8 +49,6 @@ if legal to do so.
 
  */
 class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteContext {
-    ReferenceMap                *refMap;
-    TypeMap                     *typeMap;
     bool                        working = false;
     struct VarInfo {
         bool                    local = false;
@@ -111,11 +109,12 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     DoLocalCopyPropagation(const DoLocalCopyPropagation &) = default;
 
  public:
-    DoLocalCopyPropagation(ReferenceMap* refMap, TypeMap* typeMap,
+    explicit DoLocalCopyPropagation(
         std::function<bool(const Context *, const IR::Expression *)> policy)
-    : refMap(refMap), typeMap(typeMap), tables(*new std::map<cstring, TableInfo>),
-      actions(*new std::map<cstring, FuncInfo>), methods(*new std::map<cstring, FuncInfo>),
-      states(*new std::map<cstring, FuncInfo>), policy(policy) {}
+    : tables(*new std::map<cstring, TableInfo>), actions(*new std::map<cstring, FuncInfo>),
+      methods(*new std::map<cstring, FuncInfo>), states(*new std::map<cstring, FuncInfo>),
+      policy(policy)
+    { setName("DoLocalCopyPropagation"); }
 };
 
 class LocalCopyPropagation : public PassManager {
@@ -125,7 +124,7 @@ class LocalCopyPropagation : public PassManager {
             [](const Context *, const IR::Expression *) -> bool { return true; }
     ) {
         passes.push_back(new TypeChecking(refMap, typeMap, true));
-        passes.push_back(new DoLocalCopyPropagation(refMap, typeMap, policy));
+        passes.push_back(new DoLocalCopyPropagation(policy));
         setName("LocalCopyPropagation");
     }
 };
