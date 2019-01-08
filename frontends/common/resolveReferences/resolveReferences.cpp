@@ -404,15 +404,10 @@ void ResolveReferences::postorder(const IR::Type_Method *t) {
 
 bool ResolveReferences::preorder(const IR::Type_Extern *t) {
     refMap->usedName(t->name.name);
-    // FIXME -- should the typeParamters be part of the extern's scope?
-    addToContext(t->typeParameters);
-    addToContext(t);
-    return true; }
+    addToContext(t->typeParameters); return true; }
 
 void ResolveReferences::postorder(const IR::Type_Extern *t) {
-    removeFromContext(t);
-    removeFromContext(t->typeParameters);
-    }
+    removeFromContext(t->typeParameters); }
 
 bool ResolveReferences::preorder(const IR::ParserState *s) {
     refMap->usedName(s->name.name);
