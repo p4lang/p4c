@@ -69,6 +69,7 @@ class FindUninitialized : public Inspector {
     // This does not include location sets read by subexpressions.
     std::map<const IR::Expression*, const LocationSet*> readLocations;
     HasUses*        hasUses;  // output
+    const IR::IndexedVector<IR::Declaration>    *controlLocals = nullptr;
 
     const LocationSet* getReads(const IR::Expression* expression, bool nonNull = false) const {
         auto result = ::get(readLocations, expression);
@@ -78,7 +79,7 @@ class FindUninitialized : public Inspector {
     }
     // 'expression' is reading the 'loc' location set
     void reads(const IR::Expression* expression, const LocationSet* loc) {
-        LOG3(dbp(expression) << " reads " << loc);
+        LOG3(expression << " reads " << loc);
         CHECK_NULL(expression);
         CHECK_NULL(loc);
         readLocations.emplace(expression, loc);
@@ -92,8 +93,8 @@ class FindUninitialized : public Inspector {
             context(context), refMap(parent->definitions->storageMap->refMap),
             typeMap(parent->definitions->storageMap->typeMap),
             definitions(parent->definitions), lhs(false), currentPoint(context),
-            hasUses(parent->hasUses)
-    { setName("FindUninitialized"); }
+            hasUses(parent->hasUses), controlLocals(parent->controlLocals)
+    { visitDagOnce = false; }
 
  public:
     FindUninitialized(AllDefinitions* definitions, HasUses* hasUses) :
@@ -103,13 +104,13 @@ class FindUninitialized : public Inspector {
             hasUses(hasUses) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(definitions);
         CHECK_NULL(hasUses);
-        setName("FindUninitialized"); }
+        visitDagOnce = false; }
 
     // we control the traversal order manually, so we always 'prune()'
     // (return false from preorder)
 
     bool preorder(const IR::ParserState* state) override {
-        LOG3("FU Visiting " << dbp(state));
+        LOG3("FU Visiting state " << state->name);
         context = ProgramPoint(state);
         currentPoint = ProgramPoint(state);  // point before the first statement
         visit(state->components, "components");
@@ -159,20 +160,19 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::P4Control* control) override {
-        LOG3("FU Visiting " << dbp(control));
+        LOG3("FU Visiting control " << control->name);
         currentPoint = ProgramPoint(control);
-        for (auto d : control->controlLocals)
-            if (d->is<IR::Declaration_Instance>())
-                // visit virtual Function implementation if any
-                visit(d);
+        controlLocals = &control->controlLocals;
         visit(control->body);
         checkOutParameters(
             control, control->getApplyMethodType()->parameters, getCurrentDefinitions());
+        controlLocals = nullptr;
         return false;
     }
 
     bool preorder(const IR::Function* func) override {
-        LOG3("FU Visiting " << dbp(func));
+        LOG3("FU Visiting function " << func->name);
+        LOG5(func);
         currentPoint = ProgramPoint(func);
         visit(func->body);
         bool checkReturn = !func->type->returnType->is<IR::Type_Void>();
@@ -181,7 +181,7 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::P4Parser* parser) override {
-        LOG3("FU Visiting " << dbp(parser));
+        LOG3("FU Visiting parser " << parser->name);
         visit(parser->states, "states");
         auto accept = ProgramPoint(parser->getDeclByName(IR::ParserState::accept)->getNode());
         auto acceptdefs = definitions->getDefinitions(accept, true);
@@ -202,26 +202,26 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::ReturnStatement* statement) override {
-        LOG3("FU Visiting " << dbp(statement));
+        LOG3("FU Visiting " << statement);
         if (statement->expression != nullptr)
             visit(statement->expression);
         return setCurrent(statement);
     }
 
     bool preorder(const IR::MethodCallStatement* statement) override {
-        LOG3("FU Visiting " << dbp(statement));
+        LOG3("FU Visiting " << statement);
         visit(statement->methodCall);
         return setCurrent(statement);
     }
 
     bool preorder(const IR::BlockStatement* statement) override {
-        LOG3("FU Visiting " << dbp(statement));
+        LOG3("FU Visiting " << statement);
         visit(statement->components, "components");
         return setCurrent(statement);
     }
 
     bool preorder(const IR::IfStatement* statement) override {
-        LOG3("FU Visiting " << dbp(statement));
+        LOG3("FU Visiting " << statement);
         visit(statement->condition);
         auto saveCurrent = currentPoint;
         visit(statement->ifTrue);
@@ -233,13 +233,13 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::SwitchStatement* statement) override {
-        LOG3("FU Visiting " << dbp(statement));
+        LOG3("FU Visiting " << statement);
         visit(statement->expression);
         currentPoint = ProgramPoint(statement->expression);
         auto saveCurrent = currentPoint;
         for (auto c : statement->cases) {
             if (c->statement != nullptr) {
-                LOG3("Visiting " << dbp(c));
+                LOG3("Visiting " << c);
                 currentPoint = saveCurrent;
                 visit(c);
             }
@@ -315,7 +315,7 @@ class FindUninitialized : public Inspector {
     // For the following we compute the read set and save it.
     // We check the read set later.
     bool preorder(const IR::PathExpression* expression) override {
-        LOG3("FU Visiting " << dbp(expression));
+        LOG3("FU Visiting [" << expression->id << "]: " << expression);
         if (lhs) {
             reads(expression, LocationSet::empty);
             return false;
@@ -333,7 +333,7 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::P4Action* action) override {
-        LOG3("FU Visiting " << dbp(action));
+        LOG3("FU Visiting " << action);
         currentPoint = ProgramPoint(context, action);
         visit(action->body);
         checkOutParameters(action, action->parameters, getCurrentDefinitions());
@@ -341,7 +341,7 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::P4Table* table) override {
-        LOG3("FU Visiting " << dbp(table));
+        LOG3("FU Visiting " << table->name);
         auto savePoint = ProgramPoint(context, table);
         currentPoint = savePoint;
         auto key = table->getKey();
@@ -358,7 +358,7 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::MethodCallExpression* expression) override {
-        LOG3("FU Visiting " << dbp(expression));
+        LOG3("FU Visiting [" << expression->id << "]: " << expression);
         visit(expression->method);
         auto mi = MethodInstance::resolve(expression, refMap, typeMap);
         if (auto bim = mi->to<BuiltInMethod>()) {
@@ -378,23 +378,25 @@ class FindUninitialized : public Inspector {
             }
         }
 
-        // Symbolically call some methods (actions and tables)
-        const IR::Node* callee = nullptr;
-        if (mi->is<ActionCall>()) {
-            auto action = mi->to<ActionCall>()->action;
-            callee = action;
+        // Symbolically call some methods (actions and tables, extern methods)
+        std::vector <const IR::IDeclaration *> callee;
+        if (auto ac = mi->to<ActionCall>()) {
+            callee.push_back(ac->action);
         } else if (mi->isApply()) {
             auto am = mi->to<ApplyMethod>();
             if (am->isTableApply()) {
                 auto table = am->object->to<IR::P4Table>();
-                callee = table;
+                callee.push_back(table);
             }
-        }
-        if (callee != nullptr) {
-            LOG3("Analyzing " << dbp(callee));
+        } else if (auto em = mi->to<ExternMethod>()) {
+            LOG4("##call to extern " << expression);
+            callee = em->mayCall(); }
+        if (!callee.empty()) {
+            LOG3("Analyzing " << callee);
             ProgramPoint pt(context, expression);
             FindUninitialized fu(this, pt);
-            (void)callee->apply(fu);
+            for (auto c : callee)
+                (void)c->getNode()->apply(fu);
         }
 
         for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
@@ -415,7 +417,7 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::Member* expression) override {
-        LOG3("FU Visiting " << dbp(expression));
+        LOG3("FU Visiting [" << expression->id << "]: " << expression);
         visit(expression->expr);
         if (expression->expr->is<IR::TypeNameExpression>()) {
             // this is a constant
@@ -455,7 +457,7 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::Slice* expression) override {
-        LOG3("FU Visiting " << dbp(expression));
+        LOG3("FU Visiting [" << expression->id << "]: " << expression);
         bool save = lhs;
         lhs = false;  // slices on the LHS also read the data
         visit(expression->e0);
@@ -467,7 +469,7 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::ArrayIndex* expression) override {
-        LOG3("FU Visiting " << dbp(expression));
+        LOG3("FU Visiting [" << expression->id << "]: " << expression);
         if (expression->right->is<IR::Constant>()) {
             if (lhs) {
                 reads(expression, LocationSet::empty);
@@ -527,7 +529,7 @@ class RemoveUnused : public Transform {
     { CHECK_NULL(hasUses); setName("RemoveUnused"); }
     const IR::Node* postorder(IR::AssignmentStatement* statement) override {
         if (!hasUses->hasUses(getOriginal())) {
-            LOG3("Removing statement " << dbp(getOriginal()) << " " << statement);
+            LOG3("Removing statement " << getOriginal() << " " << statement);
             SideEffects se(nullptr, nullptr);
             (void)statement->right->apply(se);
 
@@ -564,6 +566,7 @@ class ProcessDefUse : public PassManager {
 
 const IR::Node* DoSimplifyDefUse::process(const IR::Node* node) {
     ProcessDefUse process(refMap, typeMap);
+    LOG5("ProcessDefUse of:\n" << node);
     return node->apply(process);
 }
 

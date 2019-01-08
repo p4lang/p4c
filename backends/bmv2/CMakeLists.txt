@@ -84,7 +84,7 @@ add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_BACKEND_COMMON_SRCS};${BM
 
 build_unified(BMV2_BACKEND_COMMON_SRCS)
 add_library(bmv2backend ${BMV2_BACKEND_COMMON_SRCS})
-add_dependencies(bmv2backend genIR)
+add_dependencies(bmv2backend genIR frontend)
 
 build_unified(BMV2_SIMPLE_SWiTCH_SRCS)
 add_executable(p4c-bm2-ss ${BMV2_SIMPLE_SWITCH_SRCS})

@@ -250,6 +250,7 @@ class Annotation {
     static const cstring optionalAnnotation;  /// Optional parameter annotation
     static const cstring pkginfoAnnotation;  /// Package documentation annotation.
     static const cstring deprecatedAnnotation;  /// Deprecation annotation.
+    static const cstring synchronousAnnotation;  /// Synchronous annotation.
     toString{ return cstring("@") + name; }
     validate{
         BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name");
