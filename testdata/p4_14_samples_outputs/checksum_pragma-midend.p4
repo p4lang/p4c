@@ -26,6 +26,8 @@ header ipv4_t {
 }
 
 struct metadata {
+    @name(".ingress_metadata") 
+    ingress_metadata_t ingress_metadata;
 }
 
 struct headers {

@@ -15,8 +15,8 @@ struct B {
 }
 
 struct metadata {
-    bit<9>  _meta_A0;
-    bit<10> _meta_B1;
+    @name(".meta") 
+    B meta;
 }
 
 struct headers {
@@ -41,12 +41,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".A") action A_2(bit<8> val, bit<9> port, bit<10> idx) {
         hdr.A.b1 = val;
         standard_metadata.egress_spec = port;
-        meta._meta_B1 = idx;
+        meta.meta.B = idx;
     }
     @name(".noop") action noop() {
     }
     @name(".B") action B_4() {
-        B_2.count((bit<32>)meta._meta_B1);
+        B_2.count((bit<32>)meta.meta.B);
     }
     @name(".A") table A_3 {
         actions = {

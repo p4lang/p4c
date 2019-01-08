@@ -17,7 +17,8 @@ header data_t {
 }
 
 struct metadata {
-    bit<32> _meta_sum0;
+    @name(".meta") 
+    meta_t meta;
 }
 
 struct headers {
@@ -36,7 +37,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".NoAction") action NoAction_0() {
     }
     @name(".addf2") action addf2() {
-        meta._meta_sum0 = hdr.data.f2 + 32w100;
+        meta.meta.sum = hdr.data.f2 + 32w100;
     }
     @name(".noop") action noop() {
     }

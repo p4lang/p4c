@@ -6,7 +6,8 @@ struct m_t {
 }
 
 struct metadata {
-    bit<32> _m_f10;
+    @name(".m") 
+    m_t m;
 }
 
 struct headers {
@@ -14,7 +15,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".start") state start {
-        meta._m_f10 = 32w2;
+        meta.m.f1 = 32w2;
         transition accept;
     }
 }
@@ -28,7 +29,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".NoAction") action NoAction_0() {
     }
     @name(".a1") action a1() {
-        meta._m_f10 = 32w1;
+        meta.m.f1 = 32w1;
     }
     @name(".t1") table t1_0 {
         actions = {

@@ -29,9 +29,7 @@ header ipv4_t {
 }
 
 struct metadata {
-    bit<12> _ingress_metadata_vrf0;
-    bit<16> _ingress_metadata_bd1;
-    bit<16> _ingress_metadata_nexthop_index2;
+    ingress_metadata_t ingress_metadata;
 }
 
 struct headers {
@@ -69,7 +67,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction_0();
         }
         key = {
-            meta._ingress_metadata_nexthop_index2: exact @name("meta.ingress_metadata.nexthop_index") ;
+            meta.ingress_metadata.nexthop_index: exact @name("meta.ingress_metadata.nexthop_index") ;
         }
         size = 32768;
         default_action = NoAction_0();
@@ -91,7 +89,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".NoAction") action NoAction_11() {
     }
     @name("ingress.set_vrf") action set_vrf(bit<12> vrf) {
-        meta._ingress_metadata_vrf0 = vrf;
+        meta.ingress_metadata.vrf = vrf;
     }
     @name("ingress.on_miss") action on_miss_2() {
     }
@@ -100,18 +98,18 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("ingress.on_miss") action on_miss_6() {
     }
     @name("ingress.fib_hit_nexthop") action fib_hit_nexthop(bit<16> nexthop_index) {
-        meta._ingress_metadata_nexthop_index2 = nexthop_index;
+        meta.ingress_metadata.nexthop_index = nexthop_index;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name("ingress.fib_hit_nexthop") action fib_hit_nexthop_2(bit<16> nexthop_index) {
-        meta._ingress_metadata_nexthop_index2 = nexthop_index;
+        meta.ingress_metadata.nexthop_index = nexthop_index;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name("ingress.set_egress_details") action set_egress_details(bit<9> egress_spec) {
         standard_metadata.egress_spec = egress_spec;
     }
     @name("ingress.set_bd") action set_bd(bit<16> bd) {
-        meta._ingress_metadata_bd1 = bd;
+        meta.ingress_metadata.bd = bd;
     }
     @name("ingress.bd") table bd_0 {
         actions = {
@@ -119,7 +117,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_1();
         }
         key = {
-            meta._ingress_metadata_bd1: exact @name("meta.ingress_metadata.bd") ;
+            meta.ingress_metadata.bd: exact @name("meta.ingress_metadata.bd") ;
         }
         size = 65536;
         default_action = NoAction_1();
@@ -131,8 +129,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_8();
         }
         key = {
-            meta._ingress_metadata_vrf0: exact @name("meta.ingress_metadata.vrf") ;
-            hdr.ipv4.dstAddr           : exact @name("hdr.ipv4.dstAddr") ;
+            meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
+            hdr.ipv4.dstAddr         : exact @name("hdr.ipv4.dstAddr") ;
         }
         size = 131072;
         default_action = NoAction_8();
@@ -144,8 +142,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_9();
         }
         key = {
-            meta._ingress_metadata_vrf0: exact @name("meta.ingress_metadata.vrf") ;
-            hdr.ipv4.dstAddr           : lpm @name("hdr.ipv4.dstAddr") ;
+            meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
+            hdr.ipv4.dstAddr         : lpm @name("hdr.ipv4.dstAddr") ;
         }
         size = 16384;
         default_action = NoAction_9();
@@ -157,7 +155,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_10();
         }
         key = {
-            meta._ingress_metadata_nexthop_index2: exact @name("meta.ingress_metadata.nexthop_index") ;
+            meta.ingress_metadata.nexthop_index: exact @name("meta.ingress_metadata.nexthop_index") ;
         }
         size = 32768;
         default_action = NoAction_10();

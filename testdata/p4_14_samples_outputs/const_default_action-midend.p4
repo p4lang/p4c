@@ -22,10 +22,8 @@ header vlan_tag_t {
 }
 
 struct metadata {
-    bit<9>  _ingress_metadata_ingress_port0;
-    bit<14> _ingress_metadata_bd1;
-    bit<14> _ingress_metadata_rid2;
-    bit<1>  _ingress_metadata_drop_flag3;
+    @name(".ingress_metadata") 
+    ingress_metadata_t ingress_metadata;
 }
 
 struct headers {
@@ -69,18 +67,18 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".no_op") action _no_op_2() {
     }
     @name(".set_bd_properties") action _set_bd_properties_0(bit<14> bd, bit<14> ingress_rid) {
-        meta._ingress_metadata_bd1 = bd;
-        meta._ingress_metadata_rid2 = ingress_rid;
+        meta.ingress_metadata.bd = bd;
+        meta.ingress_metadata.rid = ingress_rid;
     }
     @name(".set_bd_properties") action _set_bd_properties_2(bit<14> bd, bit<14> ingress_rid) {
-        meta._ingress_metadata_bd1 = bd;
-        meta._ingress_metadata_rid2 = ingress_rid;
+        meta.ingress_metadata.bd = bd;
+        meta.ingress_metadata.rid = ingress_rid;
     }
     @name(".port_vlan_mapping_miss") action _port_vlan_mapping_miss_0() {
-        meta._ingress_metadata_drop_flag3 = 1w1;
+        meta.ingress_metadata.drop_flag = 1w1;
     }
     @name(".port_vlan_mapping_miss") action _port_vlan_mapping_miss_2() {
-        meta._ingress_metadata_drop_flag3 = 1w1;
+        meta.ingress_metadata.drop_flag = 1w1;
     }
     @name(".port_vlan_to_bd_mapping") table _port_vlan_to_bd_mapping {
         actions = {

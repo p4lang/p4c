@@ -16,8 +16,8 @@ header data_t {
 }
 
 struct metadata {
-    bit<16> _counter_metadata_counter_index0;
-    bit<4>  _counter_metadata_counter_run1;
+    @name(".counter_metadata") 
+    counter_metadata_t counter_metadata;
 }
 
 struct headers {
@@ -41,12 +41,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".count1") @min_width(32) counter(32w16384, CounterType.packets) count1_0;
     @name(".set_index") action set_index(bit<16> index, bit<9> port) {
-        meta._counter_metadata_counter_index0 = index;
+        meta.counter_metadata.counter_index = index;
         standard_metadata.egress_spec = port;
-        meta._counter_metadata_counter_run1 = 4w1;
+        meta.counter_metadata.counter_run = 4w1;
     }
     @name(".count_entries") action count_entries() {
-        count1_0.count((bit<32>)meta._counter_metadata_counter_index0);
+        count1_0.count((bit<32>)meta.counter_metadata.counter_index);
     }
     @name(".seth2") action seth2(bit<16> val) {
         hdr.data.h2 = val;
@@ -94,7 +94,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         index_setter_0.apply();
-        if (meta._counter_metadata_counter_run1 == 4w1) {
+        if (meta.counter_metadata.counter_run == 4w1) {
             stats_0.apply();
             test1_0.apply();
         }

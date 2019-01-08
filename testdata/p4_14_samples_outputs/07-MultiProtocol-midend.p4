@@ -72,9 +72,8 @@ header vlan_tag_t {
 }
 
 struct metadata {
-    bit<1> _ing_metadata_drop0;
-    bit<9> _ing_metadata_egress_port1;
-    bit<4> _ing_metadata_packet_type2;
+    @name(".ing_metadata") 
+    ingress_metadata_t ing_metadata;
 }
 
 struct headers {
@@ -168,19 +167,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".NoAction") action NoAction_15() {
     }
     @name(".l2_packet") action l2_packet() {
-        meta._ing_metadata_packet_type2 = 4w0;
+        meta.ing_metadata.packet_type = 4w0;
     }
     @name(".ipv4_packet") action ipv4_packet() {
-        meta._ing_metadata_packet_type2 = 4w1;
+        meta.ing_metadata.packet_type = 4w1;
     }
     @name(".ipv6_packet") action ipv6_packet() {
-        meta._ing_metadata_packet_type2 = 4w2;
+        meta.ing_metadata.packet_type = 4w2;
     }
     @name(".mpls_packet") action mpls_packet() {
-        meta._ing_metadata_packet_type2 = 4w3;
+        meta.ing_metadata.packet_type = 4w3;
     }
     @name(".mim_packet") action mim_packet() {
-        meta._ing_metadata_packet_type2 = 4w4;
+        meta.ing_metadata.packet_type = 4w4;
     }
     @name(".nop") action nop() {
     }
@@ -195,28 +194,28 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".nop") action nop_10() {
     }
     @name("._drop") action _drop() {
-        meta._ing_metadata_drop0 = 1w1;
+        meta.ing_metadata.drop = 1w1;
     }
     @name("._drop") action _drop_3() {
-        meta._ing_metadata_drop0 = 1w1;
+        meta.ing_metadata.drop = 1w1;
     }
     @name("._drop") action _drop_4() {
-        meta._ing_metadata_drop0 = 1w1;
+        meta.ing_metadata.drop = 1w1;
     }
     @name(".set_egress_port") action set_egress_port(bit<9> egress_port) {
-        meta._ing_metadata_egress_port1 = egress_port;
+        meta.ing_metadata.egress_port = egress_port;
     }
     @name(".set_egress_port") action set_egress_port_3(bit<9> egress_port) {
-        meta._ing_metadata_egress_port1 = egress_port;
+        meta.ing_metadata.egress_port = egress_port;
     }
     @name(".set_egress_port") action set_egress_port_4(bit<9> egress_port) {
-        meta._ing_metadata_egress_port1 = egress_port;
+        meta.ing_metadata.egress_port = egress_port;
     }
     @name(".discard") action discard() {
         mark_to_drop();
     }
     @name(".send_packet") action send_packet() {
-        standard_metadata.egress_spec = meta._ing_metadata_egress_port1;
+        standard_metadata.egress_spec = meta.ing_metadata.egress_port;
     }
     @name(".ethertype_match") table ethertype_match_0 {
         actions = {
@@ -283,7 +282,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_13();
         }
         key = {
-            meta._ing_metadata_drop0: exact @name("ing_metadata.drop") ;
+            meta.ing_metadata.drop: exact @name("ing_metadata.drop") ;
         }
         default_action = NoAction_13();
     }

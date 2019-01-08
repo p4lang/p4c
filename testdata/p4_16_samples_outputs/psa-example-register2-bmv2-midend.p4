@@ -30,6 +30,7 @@ struct fwd_metadata_t {
 }
 
 struct metadata {
+    fwd_metadata_t fwd_metadata;
 }
 
 struct headers {

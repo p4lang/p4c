@@ -6,7 +6,8 @@ struct h {
 }
 
 struct metadata {
-    bit<1> _m_b0;
+    @name(".m") 
+    h m;
 }
 
 struct headers {

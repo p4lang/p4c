@@ -12,7 +12,7 @@ struct test_struct {
 }
 
 struct local_metadata_t {
-    error _test_test_error0;
+    test_struct test;
 }
 
 parser parse(packet_in pk, out parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
@@ -32,7 +32,7 @@ control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata
         const default_action = act();
     }
     apply {
-        if (local_metadata._test_test_error0 == error.Unused) 
+        if (local_metadata.test.test_error == error.Unused) 
             tbl_act.apply();
     }
 }

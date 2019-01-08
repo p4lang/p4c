@@ -20,9 +20,8 @@ header axon_hop_t {
 }
 
 struct metadata {
-    bit<8>  _my_metadata_fwdHopCount0;
-    bit<8>  _my_metadata_revHopCount1;
-    bit<16> _my_metadata_headerLen2;
+    @name(".my_metadata") 
+    my_metadata_t my_metadata;
 }
 
 struct headers {
@@ -38,34 +37,34 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     bit<64> tmp;
     @name(".parse_fwdHop") state parse_fwdHop {
         packet.extract<axon_hop_t>(hdr.axon_fwdHop.next);
-        meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;
+        meta.my_metadata.fwdHopCount = meta.my_metadata.fwdHopCount + 8w255;
         transition parse_next_fwdHop;
     }
     @name(".parse_head") state parse_head {
         packet.extract<axon_head_t>(hdr.axon_head);
-        meta._my_metadata_fwdHopCount0 = hdr.axon_head.fwdHopCount;
-        meta._my_metadata_revHopCount1 = hdr.axon_head.revHopCount;
-        meta._my_metadata_headerLen2 = (bit<16>)(8w2 + hdr.axon_head.fwdHopCount + hdr.axon_head.revHopCount);
+        meta.my_metadata.fwdHopCount = hdr.axon_head.fwdHopCount;
+        meta.my_metadata.revHopCount = hdr.axon_head.revHopCount;
+        meta.my_metadata.headerLen = (bit<16>)(8w2 + hdr.axon_head.fwdHopCount + hdr.axon_head.revHopCount);
         transition select(hdr.axon_head.fwdHopCount) {
             8w0: accept;
             default: parse_next_fwdHop;
         }
     }
     @name(".parse_next_fwdHop") state parse_next_fwdHop {
-        transition select(meta._my_metadata_fwdHopCount0) {
+        transition select(meta.my_metadata.fwdHopCount) {
             8w0x0: parse_next_revHop;
             default: parse_fwdHop;
         }
     }
     @name(".parse_next_revHop") state parse_next_revHop {
-        transition select(meta._my_metadata_revHopCount1) {
+        transition select(meta.my_metadata.revHopCount) {
             8w0x0: accept;
             default: parse_revHop;
         }
     }
     @name(".parse_revHop") state parse_revHop {
         packet.extract<axon_hop_t>(hdr.axon_revHop.next);
-        meta._my_metadata_revHopCount1 = meta._my_metadata_revHopCount1 + 8w255;
+        meta.my_metadata.revHopCount = meta.my_metadata.revHopCount + 8w255;
         transition parse_next_revHop;
     }
     @name(".start") state start {
@@ -124,7 +123,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_3();
     }
     apply {
-        if (hdr.axon_head.axonLength != meta._my_metadata_headerLen2) 
+        if (hdr.axon_head.axonLength != meta.my_metadata.headerLen) 
             drop_pkt_0.apply();
         else 
             route_pkt_0.apply();

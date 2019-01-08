@@ -3,12 +3,12 @@ struct PortId_t {
 }
 
 struct metadata_t {
-    bit<9> _foo__v0;
+    PortId_t foo;
 }
 
 control I(inout metadata_t meta) {
     @hidden action act() {
-        meta._foo__v0 = meta._foo__v0 + 9w1;
+        meta.foo._v = meta.foo._v + 9w1;
     }
     @hidden table tbl_act {
         actions = {
@@ -17,7 +17,7 @@ control I(inout metadata_t meta) {
         const default_action = act();
     }
     apply {
-        if (meta._foo__v0 == 9w192) 
+        if (meta.foo._v == 9w192) 
             tbl_act.apply();
     }
 }

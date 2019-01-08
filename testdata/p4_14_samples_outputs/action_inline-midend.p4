@@ -6,7 +6,8 @@ struct ht {
 }
 
 struct metadata {
-    bit<1> _md_b0;
+    @name(".md") 
+    ht md;
 }
 
 struct headers {
@@ -22,8 +23,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".NoAction") action NoAction_0() {
     }
     @name(".b") action b_1() {
-        meta._md_b0 = meta._md_b0 + 1w1;
-        meta._md_b0 = meta._md_b0 + 1w1;
+        meta.md.b = meta.md.b + 1w1;
+        meta.md.b = meta.md.b + 1w1;
     }
     @name(".t") table t_0 {
         actions = {

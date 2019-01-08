@@ -10,7 +10,7 @@ struct H {
 }
 
 struct M {
-    bool _some_meta_flag0;
+    some_meta_t some_meta;
 }
 
 control DeparserI(packet_out packet, in H hdr) {
@@ -36,7 +36,7 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 
 control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
     @hidden action act() {
-        meta._some_meta_flag0 = true;
+        meta.some_meta.flag = true;
     }
     @hidden table tbl_act {
         actions = {

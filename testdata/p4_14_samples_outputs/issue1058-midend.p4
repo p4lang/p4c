@@ -16,8 +16,10 @@ header ethernet_t {
 }
 
 struct metadata {
-    bit<48> _intrinsic_metadata_ingress_global_tstamp0;
-    bit<16> _meta_val161;
+    @name(".intrinsic_metadata") 
+    intrinsic_metadata_t intrinsic_metadata;
+    @name(".meta") 
+    meta_t               meta;
 }
 
 struct headers {

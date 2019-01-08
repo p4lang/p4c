@@ -19,11 +19,10 @@ header ethernet_t {
 }
 
 struct metadata {
-    bit<4>  _intrinsic_metadata_mcast_grp0;
-    bit<4>  _intrinsic_metadata_egress_rid1;
-    bit<16> _intrinsic_metadata_mcast_hash2;
-    bit<32> _intrinsic_metadata_lf_field_list3;
-    bit<32> _meta_register_tmp4;
+    @name(".intrinsic_metadata") 
+    intrinsic_metadata_t intrinsic_metadata;
+    @name(".meta") 
+    meta_t               meta;
 }
 
 struct headers {

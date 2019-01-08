@@ -60,9 +60,8 @@ struct mystruct1_t {
 }
 
 struct metadata {
-    bit<4>  _mystruct1_a0;
-    bit<4>  _mystruct1_b1;
-    bit<16> _hash12;
+    mystruct1_t mystruct1;
+    bit<16>     hash1;
 }
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
@@ -157,7 +156,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         default_action = NoAction_5();
     }
     @hidden action act() {
-        meta._hash12 = hdr.ipv4.dstAddr[15:0];
+        meta.hash1 = hdr.ipv4.dstAddr[15:0];
     }
     @hidden table tbl_act {
         actions = {

@@ -16,8 +16,8 @@ header data_t {
 }
 
 struct metadata {
-    bit<16> _counter_metadata_counter_index_first0;
-    bit<16> _counter_metadata_counter_index_second1;
+    @name(".counter_metadata") 
+    counter_metadata_t counter_metadata;
 }
 
 struct headers {
@@ -38,15 +38,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".count1") @min_width(32) counter(32w16384, CounterType.packets) count1_0;
     @name(".count2") @min_width(32) counter(32w16384, CounterType.packets) count2_0;
     @name(".set_index") action set_index(bit<16> index1, bit<16> index2, bit<9> port) {
-        meta._counter_metadata_counter_index_first0 = index1;
-        meta._counter_metadata_counter_index_second1 = index2;
+        meta.counter_metadata.counter_index_first = index1;
+        meta.counter_metadata.counter_index_second = index2;
         standard_metadata.egress_spec = port;
     }
     @name(".count_entries") action count_entries() {
-        count1_0.count((bit<32>)meta._counter_metadata_counter_index_first0);
+        count1_0.count((bit<32>)meta.counter_metadata.counter_index_first);
     }
     @name(".count_entries2") action count_entries2() {
-        count2_0.count((bit<32>)meta._counter_metadata_counter_index_second1);
+        count2_0.count((bit<32>)meta.counter_metadata.counter_index_second);
     }
     @name(".index_setter") table index_setter_0 {
         actions = {

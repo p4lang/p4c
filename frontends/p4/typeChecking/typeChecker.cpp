@@ -2725,8 +2725,8 @@ bool TypeInference::onlyBitsOrBitStructs(const IR::Type* type) const {
     } else if (auto ht = type->to<IR::Type_Struct>()) {
         for (auto f : ht->fields) {
             auto ftype = typeMap->getType(f);
-            if (ftype == nullptr)
-                BUG("onlyBitsOrBitStructs check could not find type for %1%", f);
+            BUG_CHECK((ftype != nullptr), "onlyBitsOrBitStructs check could not find type "
+                      "for %1%", f);
             if (!onlyBitsOrBitStructs(ftype))
                 return false;
         }

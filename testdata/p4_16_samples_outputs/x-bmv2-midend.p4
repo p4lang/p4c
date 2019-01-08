@@ -15,7 +15,7 @@ struct H {
 }
 
 struct M {
-    bit<32> _s_x0;
+    S s;
 }
 
 control VerifyChecksumI(inout H hdr, inout M meta) {

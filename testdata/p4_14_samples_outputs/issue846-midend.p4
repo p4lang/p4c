@@ -14,9 +14,8 @@ header hdr0_t {
 }
 
 struct metadata {
-    bit<16> _meta_x0;
-    bit<16> _meta_y1;
-    bit<16> _meta_z2;
+    @name(".meta") 
+    meta_t meta;
 }
 
 struct headers {
@@ -57,17 +56,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".do_nothing") action do_nothing_6() {
     }
     @name(".action_0") action action_0(bit<8> p) {
-        meta._meta_x0 = 16w1;
-        meta._meta_y1 = 16w2;
+        meta.meta.x = 16w1;
+        meta.meta.y = 16w2;
     }
     @name(".action_1") action action_1(bit<8> p) {
-        meta._meta_z2 = meta._meta_y1 + meta._meta_x0;
+        meta.meta.z = meta.meta.y + meta.meta.x;
     }
     @name(".action_1") action action_2(bit<8> p) {
-        meta._meta_z2 = meta._meta_y1 + meta._meta_x0;
+        meta.meta.z = meta.meta.y + meta.meta.x;
     }
     @name(".action_2") action action_7(bit<8> p) {
-        hdr.hdr0.a = meta._meta_z2;
+        hdr.hdr0.a = meta.meta.z;
     }
     @name(".t0") table t0_0 {
         actions = {
@@ -100,8 +99,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_6();
         }
         key = {
-            meta._meta_y1: ternary @name("meta.y") ;
-            meta._meta_z2: exact @name("meta.z") ;
+            meta.meta.y: ternary @name("meta.y") ;
+            meta.meta.z: exact @name("meta.z") ;
         }
         size = 512;
         default_action = NoAction_6();

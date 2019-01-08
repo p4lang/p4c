@@ -53,8 +53,7 @@ struct mystruct1_t {
 }
 
 struct metadata {
-    bit<4> _mystruct1_a0;
-    bit<4> _mystruct1_b1;
+    mystruct1_t mystruct1;
 }
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {

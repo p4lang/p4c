@@ -33,7 +33,7 @@ struct test_digest_t {
 }
 
 struct metadata {
-    bit<48> _test_digest_in_mac_srcAddr0;
+    test_digest_t test_digest;
 }
 
 struct headers {
@@ -103,8 +103,8 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         default_action = NoAction_1();
     }
     @name("MyIngress.send_digest") action send_digest() {
-        meta._test_digest_in_mac_srcAddr0 = hdr.ethernet.srcAddr;
-        digest<test_digest_t>(32w1, {hdr.ethernet.srcAddr});
+        meta.test_digest.in_mac_srcAddr = hdr.ethernet.srcAddr;
+        digest<test_digest_t>(32w1, meta.test_digest);
     }
     @hidden table tbl_send_digest {
         actions = {

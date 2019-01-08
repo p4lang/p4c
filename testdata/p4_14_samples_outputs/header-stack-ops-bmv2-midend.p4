@@ -27,7 +27,8 @@ header h2_t {
 }
 
 struct metadata {
-    bit<8> _m_op0;
+    @name(".m") 
+    metadata_t m;
 }
 
 struct headers {
@@ -69,13 +70,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".op1_a_record_op") action op1_a_record_op() {
-        meta._m_op0 = hdr.h1.op1;
+        meta.m.op = hdr.h1.op1;
     }
     @name(".op2_a_record_op") action op2_a_record_op() {
-        meta._m_op0 = hdr.h1.op2;
+        meta.m.op = hdr.h1.op2;
     }
     @name(".op3_a_record_op") action op3_a_record_op() {
-        meta._m_op0 = hdr.h1.op3;
+        meta.m.op = hdr.h1.op3;
     }
     @name(".a_clear_h2_valid") action a_clear_h2_valid() {
         hdr.h1.h2_valid_bits = 8w0;
@@ -916,253 +917,253 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         op1_t_record_op_0.apply();
-        if (meta._m_op0 == 8w0x0) 
+        if (meta.m.op == 8w0x0) 
             ;
         else 
-            if (meta._m_op0 >> 4 == 8w1) 
-                if (meta._m_op0 & 8w0xf == 8w1) 
+            if (meta.m.op >> 4 == 8w1) 
+                if (meta.m.op & 8w0xf == 8w1) 
                     _op1_t_push.apply();
                 else 
-                    if (meta._m_op0 & 8w0xf == 8w2) 
+                    if (meta.m.op & 8w0xf == 8w2) 
                         _op1_t_push_0.apply();
                     else 
-                        if (meta._m_op0 & 8w0xf == 8w3) 
+                        if (meta.m.op & 8w0xf == 8w3) 
                             _op1_t_push_1.apply();
                         else 
-                            if (meta._m_op0 & 8w0xf == 8w4) 
+                            if (meta.m.op & 8w0xf == 8w4) 
                                 _op1_t_push_2.apply();
                             else 
-                                if (meta._m_op0 & 8w0xf == 8w5) 
+                                if (meta.m.op & 8w0xf == 8w5) 
                                     _op1_t_push_3.apply();
             else 
-                if (meta._m_op0 >> 4 == 8w2) 
-                    if (meta._m_op0 & 8w0xf == 8w1) 
+                if (meta.m.op >> 4 == 8w2) 
+                    if (meta.m.op & 8w0xf == 8w1) 
                         _op1_t_pop.apply();
                     else 
-                        if (meta._m_op0 & 8w0xf == 8w2) 
+                        if (meta.m.op & 8w0xf == 8w2) 
                             _op1_t_pop_0.apply();
                         else 
-                            if (meta._m_op0 & 8w0xf == 8w3) 
+                            if (meta.m.op & 8w0xf == 8w3) 
                                 _op1_t_pop_1.apply();
                             else 
-                                if (meta._m_op0 & 8w0xf == 8w4) 
+                                if (meta.m.op & 8w0xf == 8w4) 
                                     _op1_t_pop_2.apply();
                                 else 
-                                    if (meta._m_op0 & 8w0xf == 8w5) 
+                                    if (meta.m.op & 8w0xf == 8w5) 
                                         _op1_t_pop_3.apply();
                 else 
-                    if (meta._m_op0 >> 4 == 8w3) 
-                        if (meta._m_op0 & 8w0xf == 8w0) 
+                    if (meta.m.op >> 4 == 8w3) 
+                        if (meta.m.op & 8w0xf == 8w0) 
                             _op1_t_assign_header.apply();
                         else 
-                            if (meta._m_op0 & 8w0xf == 8w1) 
+                            if (meta.m.op & 8w0xf == 8w1) 
                                 _op1_t_assign_header_0.apply();
                             else 
-                                if (meta._m_op0 & 8w0xf == 8w2) 
+                                if (meta.m.op & 8w0xf == 8w2) 
                                     _op1_t_assign_header_1.apply();
                                 else 
-                                    if (meta._m_op0 & 8w0xf == 8w3) 
+                                    if (meta.m.op & 8w0xf == 8w3) 
                                         _op1_t_assign_header_2.apply();
                                     else 
-                                        if (meta._m_op0 & 8w0xf == 8w4) 
+                                        if (meta.m.op & 8w0xf == 8w4) 
                                             _op1_t_assign_header_3.apply();
                     else 
-                        if (meta._m_op0 >> 4 == 8w4) 
-                            if (meta._m_op0 & 8w0xf == 8w0) 
+                        if (meta.m.op >> 4 == 8w4) 
+                            if (meta.m.op & 8w0xf == 8w0) 
                                 _op1_t_remove_header.apply();
                             else 
-                                if (meta._m_op0 & 8w0xf == 8w1) 
+                                if (meta.m.op & 8w0xf == 8w1) 
                                     _op1_t_remove_header_0.apply();
                                 else 
-                                    if (meta._m_op0 & 8w0xf == 8w2) 
+                                    if (meta.m.op & 8w0xf == 8w2) 
                                         _op1_t_remove_header_1.apply();
                                     else 
-                                        if (meta._m_op0 & 8w0xf == 8w3) 
+                                        if (meta.m.op & 8w0xf == 8w3) 
                                             _op1_t_remove_header_2.apply();
                                         else 
-                                            if (meta._m_op0 & 8w0xf == 8w4) 
+                                            if (meta.m.op & 8w0xf == 8w4) 
                                                 _op1_t_remove_header_3.apply();
                         else 
-                            if (meta._m_op0 >> 4 == 8w5) 
-                                if (meta._m_op0 & 8w0xf == 8w0) 
+                            if (meta.m.op >> 4 == 8w5) 
+                                if (meta.m.op & 8w0xf == 8w0) 
                                     _op1_t_add_header.apply();
                                 else 
-                                    if (meta._m_op0 & 8w0xf == 8w1) 
+                                    if (meta.m.op & 8w0xf == 8w1) 
                                         _op1_t_add_header_0.apply();
                                     else 
-                                        if (meta._m_op0 & 8w0xf == 8w2) 
+                                        if (meta.m.op & 8w0xf == 8w2) 
                                             _op1_t_add_header_1.apply();
                                         else 
-                                            if (meta._m_op0 & 8w0xf == 8w3) 
+                                            if (meta.m.op & 8w0xf == 8w3) 
                                                 _op1_t_add_header_2.apply();
                                             else 
-                                                if (meta._m_op0 & 8w0xf == 8w4) 
+                                                if (meta.m.op & 8w0xf == 8w4) 
                                                     _op1_t_add_header_3.apply();
         op2_t_record_op_0.apply();
-        if (meta._m_op0 == 8w0x0) 
+        if (meta.m.op == 8w0x0) 
             ;
         else 
-            if (meta._m_op0 >> 4 == 8w1) 
-                if (meta._m_op0 & 8w0xf == 8w1) 
+            if (meta.m.op >> 4 == 8w1) 
+                if (meta.m.op & 8w0xf == 8w1) 
                     _op2_t_push.apply();
                 else 
-                    if (meta._m_op0 & 8w0xf == 8w2) 
+                    if (meta.m.op & 8w0xf == 8w2) 
                         _op2_t_push_0.apply();
                     else 
-                        if (meta._m_op0 & 8w0xf == 8w3) 
+                        if (meta.m.op & 8w0xf == 8w3) 
                             _op2_t_push_1.apply();
                         else 
-                            if (meta._m_op0 & 8w0xf == 8w4) 
+                            if (meta.m.op & 8w0xf == 8w4) 
                                 _op2_t_push_2.apply();
                             else 
-                                if (meta._m_op0 & 8w0xf == 8w5) 
+                                if (meta.m.op & 8w0xf == 8w5) 
                                     _op2_t_push_3.apply();
             else 
-                if (meta._m_op0 >> 4 == 8w2) 
-                    if (meta._m_op0 & 8w0xf == 8w1) 
+                if (meta.m.op >> 4 == 8w2) 
+                    if (meta.m.op & 8w0xf == 8w1) 
                         _op2_t_pop.apply();
                     else 
-                        if (meta._m_op0 & 8w0xf == 8w2) 
+                        if (meta.m.op & 8w0xf == 8w2) 
                             _op2_t_pop_0.apply();
                         else 
-                            if (meta._m_op0 & 8w0xf == 8w3) 
+                            if (meta.m.op & 8w0xf == 8w3) 
                                 _op2_t_pop_1.apply();
                             else 
-                                if (meta._m_op0 & 8w0xf == 8w4) 
+                                if (meta.m.op & 8w0xf == 8w4) 
                                     _op2_t_pop_2.apply();
                                 else 
-                                    if (meta._m_op0 & 8w0xf == 8w5) 
+                                    if (meta.m.op & 8w0xf == 8w5) 
                                         _op2_t_pop_3.apply();
                 else 
-                    if (meta._m_op0 >> 4 == 8w3) 
-                        if (meta._m_op0 & 8w0xf == 8w0) 
+                    if (meta.m.op >> 4 == 8w3) 
+                        if (meta.m.op & 8w0xf == 8w0) 
                             _op2_t_assign_header.apply();
                         else 
-                            if (meta._m_op0 & 8w0xf == 8w1) 
+                            if (meta.m.op & 8w0xf == 8w1) 
                                 _op2_t_assign_header_0.apply();
                             else 
-                                if (meta._m_op0 & 8w0xf == 8w2) 
+                                if (meta.m.op & 8w0xf == 8w2) 
                                     _op2_t_assign_header_1.apply();
                                 else 
-                                    if (meta._m_op0 & 8w0xf == 8w3) 
+                                    if (meta.m.op & 8w0xf == 8w3) 
                                         _op2_t_assign_header_2.apply();
                                     else 
-                                        if (meta._m_op0 & 8w0xf == 8w4) 
+                                        if (meta.m.op & 8w0xf == 8w4) 
                                             _op2_t_assign_header_3.apply();
                     else 
-                        if (meta._m_op0 >> 4 == 8w4) 
-                            if (meta._m_op0 & 8w0xf == 8w0) 
+                        if (meta.m.op >> 4 == 8w4) 
+                            if (meta.m.op & 8w0xf == 8w0) 
                                 _op2_t_remove_header.apply();
                             else 
-                                if (meta._m_op0 & 8w0xf == 8w1) 
+                                if (meta.m.op & 8w0xf == 8w1) 
                                     _op2_t_remove_header_0.apply();
                                 else 
-                                    if (meta._m_op0 & 8w0xf == 8w2) 
+                                    if (meta.m.op & 8w0xf == 8w2) 
                                         _op2_t_remove_header_1.apply();
                                     else 
-                                        if (meta._m_op0 & 8w0xf == 8w3) 
+                                        if (meta.m.op & 8w0xf == 8w3) 
                                             _op2_t_remove_header_2.apply();
                                         else 
-                                            if (meta._m_op0 & 8w0xf == 8w4) 
+                                            if (meta.m.op & 8w0xf == 8w4) 
                                                 _op2_t_remove_header_3.apply();
                         else 
-                            if (meta._m_op0 >> 4 == 8w5) 
-                                if (meta._m_op0 & 8w0xf == 8w0) 
+                            if (meta.m.op >> 4 == 8w5) 
+                                if (meta.m.op & 8w0xf == 8w0) 
                                     _op2_t_add_header.apply();
                                 else 
-                                    if (meta._m_op0 & 8w0xf == 8w1) 
+                                    if (meta.m.op & 8w0xf == 8w1) 
                                         _op2_t_add_header_0.apply();
                                     else 
-                                        if (meta._m_op0 & 8w0xf == 8w2) 
+                                        if (meta.m.op & 8w0xf == 8w2) 
                                             _op2_t_add_header_1.apply();
                                         else 
-                                            if (meta._m_op0 & 8w0xf == 8w3) 
+                                            if (meta.m.op & 8w0xf == 8w3) 
                                                 _op2_t_add_header_2.apply();
                                             else 
-                                                if (meta._m_op0 & 8w0xf == 8w4) 
+                                                if (meta.m.op & 8w0xf == 8w4) 
                                                     _op2_t_add_header_3.apply();
         op3_t_record_op_0.apply();
-        if (meta._m_op0 == 8w0x0) 
+        if (meta.m.op == 8w0x0) 
             ;
         else 
-            if (meta._m_op0 >> 4 == 8w1) 
-                if (meta._m_op0 & 8w0xf == 8w1) 
+            if (meta.m.op >> 4 == 8w1) 
+                if (meta.m.op & 8w0xf == 8w1) 
                     _op3_t_push.apply();
                 else 
-                    if (meta._m_op0 & 8w0xf == 8w2) 
+                    if (meta.m.op & 8w0xf == 8w2) 
                         _op3_t_push_0.apply();
                     else 
-                        if (meta._m_op0 & 8w0xf == 8w3) 
+                        if (meta.m.op & 8w0xf == 8w3) 
                             _op3_t_push_1.apply();
                         else 
-                            if (meta._m_op0 & 8w0xf == 8w4) 
+                            if (meta.m.op & 8w0xf == 8w4) 
                                 _op3_t_push_2.apply();
                             else 
-                                if (meta._m_op0 & 8w0xf == 8w5) 
+                                if (meta.m.op & 8w0xf == 8w5) 
                                     _op3_t_push_3.apply();
             else 
-                if (meta._m_op0 >> 4 == 8w2) 
-                    if (meta._m_op0 & 8w0xf == 8w1) 
+                if (meta.m.op >> 4 == 8w2) 
+                    if (meta.m.op & 8w0xf == 8w1) 
                         _op3_t_pop.apply();
                     else 
-                        if (meta._m_op0 & 8w0xf == 8w2) 
+                        if (meta.m.op & 8w0xf == 8w2) 
                             _op3_t_pop_0.apply();
                         else 
-                            if (meta._m_op0 & 8w0xf == 8w3) 
+                            if (meta.m.op & 8w0xf == 8w3) 
                                 _op3_t_pop_1.apply();
                             else 
-                                if (meta._m_op0 & 8w0xf == 8w4) 
+                                if (meta.m.op & 8w0xf == 8w4) 
                                     _op3_t_pop_2.apply();
                                 else 
-                                    if (meta._m_op0 & 8w0xf == 8w5) 
+                                    if (meta.m.op & 8w0xf == 8w5) 
                                         _op3_t_pop_3.apply();
                 else 
-                    if (meta._m_op0 >> 4 == 8w3) 
-                        if (meta._m_op0 & 8w0xf == 8w0) 
+                    if (meta.m.op >> 4 == 8w3) 
+                        if (meta.m.op & 8w0xf == 8w0) 
                             _op3_t_assign_header.apply();
                         else 
-                            if (meta._m_op0 & 8w0xf == 8w1) 
+                            if (meta.m.op & 8w0xf == 8w1) 
                                 _op3_t_assign_header_0.apply();
                             else 
-                                if (meta._m_op0 & 8w0xf == 8w2) 
+                                if (meta.m.op & 8w0xf == 8w2) 
                                     _op3_t_assign_header_1.apply();
                                 else 
-                                    if (meta._m_op0 & 8w0xf == 8w3) 
+                                    if (meta.m.op & 8w0xf == 8w3) 
                                         _op3_t_assign_header_2.apply();
                                     else 
-                                        if (meta._m_op0 & 8w0xf == 8w4) 
+                                        if (meta.m.op & 8w0xf == 8w4) 
                                             _op3_t_assign_header_3.apply();
                     else 
-                        if (meta._m_op0 >> 4 == 8w4) 
-                            if (meta._m_op0 & 8w0xf == 8w0) 
+                        if (meta.m.op >> 4 == 8w4) 
+                            if (meta.m.op & 8w0xf == 8w0) 
                                 _op3_t_remove_header.apply();
                             else 
-                                if (meta._m_op0 & 8w0xf == 8w1) 
+                                if (meta.m.op & 8w0xf == 8w1) 
                                     _op3_t_remove_header_0.apply();
                                 else 
-                                    if (meta._m_op0 & 8w0xf == 8w2) 
+                                    if (meta.m.op & 8w0xf == 8w2) 
                                         _op3_t_remove_header_1.apply();
                                     else 
-                                        if (meta._m_op0 & 8w0xf == 8w3) 
+                                        if (meta.m.op & 8w0xf == 8w3) 
                                             _op3_t_remove_header_2.apply();
                                         else 
-                                            if (meta._m_op0 & 8w0xf == 8w4) 
+                                            if (meta.m.op & 8w0xf == 8w4) 
                                                 _op3_t_remove_header_3.apply();
                         else 
-                            if (meta._m_op0 >> 4 == 8w5) 
-                                if (meta._m_op0 & 8w0xf == 8w0) 
+                            if (meta.m.op >> 4 == 8w5) 
+                                if (meta.m.op & 8w0xf == 8w0) 
                                     _op3_t_add_header.apply();
                                 else 
-                                    if (meta._m_op0 & 8w0xf == 8w1) 
+                                    if (meta.m.op & 8w0xf == 8w1) 
                                         _op3_t_add_header_0.apply();
                                     else 
-                                        if (meta._m_op0 & 8w0xf == 8w2) 
+                                        if (meta.m.op & 8w0xf == 8w2) 
                                             _op3_t_add_header_1.apply();
                                         else 
-                                            if (meta._m_op0 & 8w0xf == 8w3) 
+                                            if (meta.m.op & 8w0xf == 8w3) 
                                                 _op3_t_add_header_2.apply();
                                             else 
-                                                if (meta._m_op0 & 8w0xf == 8w4) 
+                                                if (meta.m.op & 8w0xf == 8w4) 
                                                     _op3_t_add_header_3.apply();
         t_clear_h2_valid_0.apply();
         if (hdr.h2[0].isValid()) 

@@ -93,7 +93,8 @@ header vlan_tag_t {
 }
 
 struct metadata {
-    bit<1> _routing_metadata_drop0;
+    @name(".routing_metadata") 
+    routing_metadata_t routing_metadata;
 }
 
 struct headers {
@@ -175,7 +176,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name(".start") state start {
-        meta._routing_metadata_drop0 = 1w0;
+        meta.routing_metadata.drop = 1w0;
         transition parse_ethernet;
     }
     state noMatch {
