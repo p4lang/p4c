@@ -10,8 +10,9 @@ struct s_t {
 }
 
 header h_t {
-    s_t     s;
-    bit<32> f32;
+    bit<8>  _s_f80;
+    bit<16> _s_f161;
+    bit<32> _f322;
 }
 
 struct headers {
@@ -20,7 +21,7 @@ struct headers {
 
 parser MyIP(packet_in buffer, out headers hdr, inout EMPTY b, in psa_ingress_parser_input_metadata_t c, in EMPTY d, in EMPTY e) {
     state start {
-        buffer.extract(hdr.h);
+        buffer.extract<h_t>(hdr.h);
         transition accept;
     }
 }
@@ -32,8 +33,17 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 }
 
 control MyIC(inout headers hdr, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    apply {
+    @hidden action act() {
         d.egress_port = c.ingress_port;
+    }
+    @hidden table tbl_act {
+        actions = {
+            act();
+        }
+        const default_action = act();
+    }
+    apply {
+        tbl_act.apply();
     }
 }
 
@@ -48,9 +58,18 @@ struct digest_t {
 }
 
 control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout headers hdr, in EMPTY e, in psa_ingress_output_metadata_t f) {
-    Digest<digest_t>() digest;
+    @name("MyID.digest") Digest<digest_t>() digest_0;
+    @hidden action act_0() {
+        digest_0.pack({ hdr.h, f.egress_port });
+    }
+    @hidden table tbl_act_0 {
+        actions = {
+            act_0();
+        }
+        const default_action = act_0();
+    }
     apply {
-        digest.pack({ hdr.h, f.egress_port });
+        tbl_act_0.apply();
     }
 }
 
@@ -59,9 +78,9 @@ control MyED(packet_out buffer, out EMPTY a, out EMPTY b, inout EMPTY c, in EMPT
     }
 }
 
-IngressPipeline(MyIP(), MyIC(), MyID()) ip;
+IngressPipeline<headers, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyIP(), MyIC(), MyID()) ip;
 
-EgressPipeline(MyEP(), MyEC(), MyED()) ep;
+EgressPipeline<EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(MyEP(), MyEC(), MyED()) ep;
 
-PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+PSA_Switch<headers, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
 
