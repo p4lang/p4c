@@ -1,9 +1,3 @@
-header2_e.p4(20): error: Field field of header h cannot have type struct s
-    s field; // no struct fields allowed in headers
-      ^^^^^
-header2_e.p4(16)
-struct s {}
-       ^
 header2_e.p4(27): error: Field field of struct s1 cannot have type parser p
     p field; // no functor-typed fields allowed
       ^^^^^

@@ -1352,6 +1352,9 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
         while (t->is<IR::Type_Newtype>())
             t = getTypeType(t->to<IR::Type_Newtype>()->type);
         return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>() ||
+               // Nested bit-vector struct inside a Header is supported
+               // Experimental feature - see Issue 383.
+               (t->is<IR::Type_Struct>() && onlyBitsOrBitStructs(t)) ||
                t->is<IR::Type_SerEnum>(); };
     validateFields(canon, validator);
 
@@ -2711,6 +2714,23 @@ bool TypeInference::hasVarbitsOrUnions(const IR::Type* type) const {
             if (hasVarbitsOrUnions(f))
                 return true;
         }
+    }
+    return false;
+}
+
+bool TypeInference::onlyBitsOrBitStructs(const IR::Type* type) const {
+    // called for a canonical type
+    if (type->is<IR::Type_Bits>()) {
+        return true;
+    } else if (auto ht = type->to<IR::Type_Struct>()) {
+        for (auto f : ht->fields) {
+            auto ftype = typeMap->getType(f);
+            BUG_CHECK((ftype != nullptr), "onlyBitsOrBitStructs check could not find type "
+                      "for %1%", f);
+            if (!onlyBitsOrBitStructs(ftype))
+                return false;
+        }
+        return true;
     }
     return false;
 }

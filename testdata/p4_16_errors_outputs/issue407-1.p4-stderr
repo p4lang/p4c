@@ -25,18 +25,6 @@ issue407-1.p4(51): error: Field x11 of header H cannot have type header Ethernet
 issue407-1.p4(51)
     Ethernet_h[4] x11;
     ^^^^^^^^^^^^^
-issue407-1.p4(52): error: Field x12 of header H cannot have type struct mystruct1
-    mystruct1 x12;
-              ^^^
-issue407-1.p4(21)
-struct mystruct1 {
-       ^^^^^^^^^
-issue407-1.p4(53): error: Field x13 of header H cannot have type struct mystruct2
-    mystruct2 x13;
-              ^^^
-issue407-1.p4(26)
-struct mystruct2 {
-       ^^^^^^^^^
 issue407-1.p4(54): error: Field x14 of header H cannot have type Tuple(2)
     myTuple0 x14;
              ^^^
