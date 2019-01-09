@@ -35,9 +35,9 @@ void HeaderTypeReplacement::flatten(const P4::TypeMap* typeMap,
                         cstring::to_cstring(fieldNameRemap.size());
     fieldNameRemap.emplace(prefix, fieldName);
     const IR::Annotations* annos = IR::Annotations::empty;
-    annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
-                              new IR::StringLiteral(originalName));
-    fields->push_back(new IR::StructField(IR::ID(fieldName), annos, type->getP4Type()));
+    auto ann = annos->addAnnotation(IR::Annotation::nameAnnotation,
+                                    new IR::StringLiteral(originalName));
+    fields->push_back(new IR::StructField(IR::ID(fieldName), ann, type->getP4Type()));
     LOG3("FH Flatten: " << type << " | " << prefix);
 }
 
