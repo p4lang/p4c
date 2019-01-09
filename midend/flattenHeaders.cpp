@@ -30,14 +30,16 @@ void HeaderTypeReplacement::flatten(const P4::TypeMap* typeMap,
         }
         return;
     }
-    cstring originalName = prefix;
+    //  cstring originalName = prefix; TODO once behavioral model is fixed.
     cstring fieldName = prefix.replace(".", "_") +
                         cstring::to_cstring(fieldNameRemap.size());
     fieldNameRemap.emplace(prefix, fieldName);
+#if 0  // TODO once behavioral model is fixed.
     const IR::Annotations* annos = IR::Annotations::empty;
     auto ann = annos->addAnnotation(IR::Annotation::nameAnnotation,
                                     new IR::StringLiteral(originalName));
-    fields->push_back(new IR::StructField(IR::ID(fieldName), ann, type->getP4Type()));
+#endif
+    fields->push_back(new IR::StructField(IR::ID(fieldName), /* ann, */ type->getP4Type()));
     LOG3("FH Flatten: " << type << " | " << prefix);
 }
 
