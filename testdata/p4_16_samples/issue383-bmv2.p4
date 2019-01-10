@@ -31,9 +31,9 @@ struct alt_t {
     bit<1> valid;
     bit<7> port;
     int<8> hashRes;
-    bool   useHash;
+//    bool   useHash;
     EthTypes type;
-    bit<7> pad;  
+//    bit<7> pad;  
 };
 
 @MNK_annotation("(test flatten)")
