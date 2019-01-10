@@ -367,9 +367,6 @@ class ErrorReporter final {
  private:
     std::ostream* outputstream;
 
-    /// Message catalog for errors: error type to message format.
-    static std::map<int, const std::string> errorCatalog;
-
     /// Track errors or warnings that have already been issued for a particular source location
     std::set<std::pair<int, const Util::SourceInfo>> errorTracker;
 
@@ -386,6 +383,15 @@ class ErrorReporter final {
     bool error_reported(int err, const Util::SourceInfo source) {
         auto p = errorTracker.emplace(err, source);
         return !p.second;  // if insertion took place, then we have not seen the error.
+    }
+
+    /// retrieve the format from the error catalog
+    const char *get_format(int errorCode) {
+        return ErrorCatalog::getCatalog().getFormat(errorCode);
+    }
+    /// retrieve the format from the error catalog
+    const char *get_error_name(int errorCode) {
+        return ErrorCatalog::getCatalog().getName(errorCode);
     }
 
  public:
@@ -409,40 +415,40 @@ class ErrorReporter final {
         return message;
     }
 
-    template <typename Kind, class T,
-              typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+    template <class T,
+              typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo,
+                                                                 T>::value>::type,
               typename... Args>
-    void diagnose(DiagnosticAction action, Kind k, const T *node, Args... args) {
-        if (!error_reported(k, node->getSourceInfo()))
-            diagnoseUnnamed(action, errorCatalog.at(k).c_str(), node, std::forward<Args>(args)...);
-    }
-
-    template <typename Kind, class T,
-              typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
-              typename... Args>
-    void diagnose(DiagnosticAction action, Kind k, const T &node, Args... args) {
-        if (!error_reported(k, node.getSourceInfo()))
-            diagnoseUnnamed(action, errorCatalog.at(k).c_str(), node, std::forward<Args>(args)...);
+    void diagnose(DiagnosticAction action, const int errorCode, const char *format, const T *node,
+                  Args... args) {
+        if (!error_reported(errorCode, node->getSourceInfo())) {
+            std::string fmt = std::string(get_format(errorCode)) + " " + format;
+            const char *name = get_error_name(errorCode);
+            if (name)
+                diagnose(action, name, fmt.c_str(), node, args...);
+            else
+                diagnoseUnnamed(action, fmt.c_str(), node, std::forward<Args>(args)...);
+        }
     }
 
     template <class T,
-              typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+              typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo,
+                                                                 T>::value>::type,
               typename... Args>
-    void diagnose(DiagnosticAction action, int kind, const char *format, const T *node,
+    void diagnose(DiagnosticAction action, const int errorCode, const char *format, const T &node,
                   Args... args) {
-        if (!error_reported(kind, node->getSourceInfo()))
-            diagnoseUnnamed(action, format, node, std::forward<Args>(args)...);
+        diagnose(action, errorCode, format, &node, std::forward<Args>(args)...);
     }
 
-    template <class T,
-              typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
-              typename... Args>
-    void diagnose(DiagnosticAction action, int kind, const char *format, const T &node,
-                  Args... args) {
-        if (!error_reported(kind, node.getSourceInfo()))
-            diagnoseUnnamed(action, format, node, std::forward<Args>(args)...);
+    template <typename... Args>
+    void diagnose(DiagnosticAction action, const int errorCode, const char *format, Args... args) {
+        std::string fmt = std::string(get_format(errorCode)) + " " + format;
+        const char *name = get_error_name(errorCode);
+        if (name)
+            diagnose(action, name, fmt.c_str(), args...);
+        else
+            diagnoseUnnamed(action, fmt.c_str(), std::forward<Args>(args)...);
     }
-
 
     template <typename... T>
     void diagnose(DiagnosticAction action, const char* diagnosticName,

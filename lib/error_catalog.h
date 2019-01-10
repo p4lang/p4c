@@ -17,6 +17,9 @@ limitations under the License.
 #ifndef P4C_LIB_ERROR_CATALOG_H_
 #define P4C_LIB_ERROR_CATALOG_H_
 
+#include <map>
+#include <string>
+
 /// enumerate supported errors
 /// Backends should extend this class with additional errors in the range 500-999 and
 /// warnings in the range 1500-2141.
@@ -25,29 +28,94 @@ class ErrorType {
  public:
     // -------- Errors -------------
     // errors as initially defined with a format string
-    static const int LEGACY_ERROR      = 0;
-    static const int ERR_UNKNOWN       = 1;  // unknown construct (in context)
-    static const int ERR_UNSUPPORTED   = 2;  // unsupported construct
-    static const int ERR_UNEXPECTED    = 3;  // unexpected construct
-    static const int ERR_UNINITIALIZED = 4;  // uninitialized reads/writes
-    static const int ERR_EXPECTED      = 5;  // language, compiler expects a different construct
-    static const int ERR_NOT_FOUND     = 6;  // A different way to say ERR_EXPECTED
-    static const int ERR_INVALID       = 7;  // invalid construct
-    static const int ERR_EXPRESSION    = 8;  // expression too complex, or other expression related errors
-    static const int ERR_OVERLIMIT     = 9;  // program node exceeds target limits
-    static const int ERR_INSUFFICIENT  = 10;  // program node does not have enough of ...
+    static const int LEGACY_ERROR;
+    static const int ERR_UNKNOWN;             // unknown construct (in context)
+    static const int ERR_UNSUPPORTED;         // unsupported construct
+    static const int ERR_UNEXPECTED;          // unexpected construct
+    static const int ERR_UNINITIALIZED;       // uninitialized reads/writes
+    static const int ERR_EXPECTED;            // language, compiler expects a different construct
+    static const int ERR_NOT_FOUND;           // A different way to say ERR_EXPECTED
+    static const int ERR_INVALID;             // invalid construct
+    static const int ERR_EXPRESSION;          // expression too complex, or other expression
+                                              // related errors
+    static const int ERR_OVERLIMIT;           // program node exceeds target limits
+    static const int ERR_INSUFFICIENT;        // program node does not have enough of ...
 
     // If we specialize for 1000 error types we're good!
-    static const int ERR_MAX_ERRORS = 999;
+    static const int ERR_MAX_ERRORS;
 
     // -------- Warnings -----------
     // warnings as initially defined with a format string
-    static const int LEGACY_WARNING = ERR_MAX_ERRORS + 1;
-    static const int WARN_UNKNOWN     = 1001;  // unknown construct (in context)
-    static const int WARN_UNSUPPORTED = 1002;  // unsupported construct
-    static const int WARN_MISMATCH    = 1003;  // mismatched constructs
+    static const int LEGACY_WARNING;
+    static const int WARN_FAILED;             // non-fatal failure!
+    static const int WARN_UNKNOWN;            // unknown construct (in context)
+    static const int WARN_INVALID;            // invalid construct
+    static const int WARN_UNSUPPORTED;        // unsupported construct
+    static const int WARN_DEPRECATED;         // deprecated feature
+    static const int WARN_UNINITIALIZED;      // unitialized instance
+    static const int WARN_UNUSED;             // unused instance
+    static const int WARN_MISSING;            // missing construct
+    static const int WARN_ORDERING;           // inconsistent statement ordering
+    static const int WARN_MISMATCH;           // mismatched constructs
+    static const int WARN_OVERFLOW;           // values do not fit
+    static const int WARN_IGNORE_PROPERTY;    // invalid property for object, ignored
+    static const int WARN_TYPE_INFERENCE;     // type inference can not infer, substitutes
+    static const int WARN_PARSER_TRANSITION;  // parser transition non-fatal issues
+    static const int WARN_UNREACHABLE;        // parser state unreachable
+    static const int WARN_SHADOWING;          // instance shadowing
+    static const int WARN_IGNORE;             // simply ignore
 
-    static const int WARN_MAX_WARNINGS = 2142;
+    static const int WARN_MAX_WARNINGS;
+};
+
+class ErrorCatalog {
+ public:
+    /// Return the singleton object
+    static ErrorCatalog &getCatalog() {
+        static ErrorCatalog instance;
+        return instance;
+    }
+
+    /// add to the catalog
+    /// returns false if the code already exists and forceReplace was not set to true
+    /// @param errorCode - integer value for the error/warning
+    /// @param name      - name for the error. Used to enable/disable all errors of that type
+    /// @param fmt       - error string format
+    /// @param forceReplace - override an existing error type in the catalog
+    bool add(int errorCode, const char *name, const std::string fmt, bool forceReplace = false) {
+        if (forceReplace)
+            errorCatalog.erase(errorCode);
+        auto it = errorCatalog.emplace(errorCode, std::pair<const char *, std::string>(name, fmt));
+        return it.second;
+    }
+
+    /// add to the catalog
+    /// returns false if the code already exists and forceReplace was not set to true
+    bool add(int errorCode, const char *name, const char *fmt, bool forceReplace = false) {
+        return add(errorCode, name, std::string(fmt), forceReplace);
+    }
+
+    /// retrieve the name for errorCode
+    const char *getName(int errorCode) {
+        if (errorCatalog.count(errorCode))
+            return errorCatalog.at(errorCode).first;
+        return "--unknown--";
+    }
+
+    /// retrieve the message format for errorCode
+    const char *getFormat(int errorCode) {
+        if (errorCatalog.count(errorCode))
+            return errorCatalog.at(errorCode).second.c_str();
+        std::string msg = std::string("errorCatalog message not set for error code ") +
+            std::to_string(errorCode);
+        return msg.c_str();
+    }
+
+ private:
+    explicit ErrorCatalog() {}
+
+    /// map from errorCode to pairs of (name, format)
+    static std::map<int, std::pair<const char *, const std::string>> errorCatalog;
 };
 
 #endif  // P4C_LIB_ERROR_CATALOG_H_

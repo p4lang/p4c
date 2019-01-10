@@ -17,21 +17,78 @@ limitations under the License.
 #include <map>
 #include <string>
 #include "error_catalog.h"
-#include "error_reporter.h"
 
-std::map<int, const std::string> ErrorReporter::errorCatalog = {
-    { ErrorType::ERR_UNKNOWN,     "%1%: Unknown %2%"},      // args: %1% - IR node, %2% - what
-    { ErrorType::ERR_UNSUPPORTED, "%1%: Unsupported %2%"},  // args: %1% - IR node, %2% - what
-    { ErrorType::ERR_UNEXPECTED,  "%1%: Unexpected %2%"},   // args: %1% - IR node, %2% - what
-    { ErrorType::ERR_EXPECTED,    "%1%: Expected %2%"},     // args: %1% - IR node, %2% - what
-    { ErrorType::ERR_NOT_FOUND,   "%1%: %2% not found"},    // args: %1% - IR node, %2% - what
-    { ErrorType::ERR_INVALID,     "%1%: Invalid %2%"},      // args: %1% - IR node, %2% - what
-    { ErrorType::ERR_EXPRESSION,  "%1%: Expression %2%"},   // args: %1% - the expr, %2% - what
-    { ErrorType::ERR_OVERLIMIT,   "%1%: Target supports %2% %3% %4%"}, // args: %1% - IR node, %2% - what, %3% - limit, %4% - unit
-    { ErrorType::ERR_INSUFFICIENT,  "%1%: Target requires %2% %3% %4%"}, // args: %1% - IR node, %2% - limit, %3% - what, %4% - units
-    { ErrorType::ERR_UNINITIALIZED, "%1%: Uninitialized %2%"}, // args: %1% - IR node, %2% - what
+// -------- Errors -------------
+const int ErrorType::LEGACY_ERROR      =   0;
+const int ErrorType::ERR_UNKNOWN       =   1;
+const int ErrorType::ERR_UNSUPPORTED   =   2;
+const int ErrorType::ERR_UNEXPECTED    =   3;
+const int ErrorType::ERR_UNINITIALIZED =   4;
+const int ErrorType::ERR_EXPECTED      =   5;
+const int ErrorType::ERR_NOT_FOUND     =   6;
+const int ErrorType::ERR_INVALID       =   7;
+const int ErrorType::ERR_EXPRESSION    =   8;
+const int ErrorType::ERR_OVERLIMIT     =   9;
+const int ErrorType::ERR_INSUFFICIENT  =  10;
+// If we specialize for 1000 error types we're good!
+const int ErrorType::ERR_MAX_ERRORS    = 999;
+
+// ------ Warnings -----------
+const int ErrorType::LEGACY_WARNING = ERR_MAX_ERRORS + 1;
+const int ErrorType::WARN_FAILED            = 1001;
+const int ErrorType::WARN_UNKNOWN           = 1002;
+const int ErrorType::WARN_INVALID           = 1003;
+const int ErrorType::WARN_UNSUPPORTED       = 1004;
+const int ErrorType::WARN_DEPRECATED        = 1005;
+const int ErrorType::WARN_UNINITIALIZED     = 1006;
+const int ErrorType::WARN_UNUSED            = 1007;
+const int ErrorType::WARN_MISSING           = 1008;
+const int ErrorType::WARN_ORDERING          = 1009;
+const int ErrorType::WARN_MISMATCH          = 1010;
+const int ErrorType::WARN_OVERFLOW          = 1011;
+const int ErrorType::WARN_IGNORE_PROPERTY   = 1012;
+const int ErrorType::WARN_TYPE_INFERENCE    = 1013;
+const int ErrorType::WARN_PARSER_TRANSITION = 1014;
+const int ErrorType::WARN_UNREACHABLE       = 1015;
+const int ErrorType::WARN_SHADOWING         = 1016;
+const int ErrorType::WARN_IGNORE            = 1017;
+const int ErrorType::WARN_MAX_WARNINGS      = 2142;
+
+using ErrorSig = std::pair<const char *, const std::string>;
+
+// map from errorCode to pairs of (name, format)
+std::map<int, ErrorSig> ErrorCatalog::errorCatalog = {
+    // Errors
+    { ErrorType::LEGACY_ERROR,           ErrorSig("legacy", "")},
+    { ErrorType::ERR_UNKNOWN,            ErrorSig("unknown", "%1%: Unknown error")},
+    { ErrorType::ERR_UNSUPPORTED,        ErrorSig("unsupported", "%1%: Unsupported")},
+    { ErrorType::ERR_UNEXPECTED,         ErrorSig("unexpected", "%1%: Unexpected")},
+    { ErrorType::ERR_EXPECTED,           ErrorSig("expected", "%1%: Expected")},
+    { ErrorType::ERR_NOT_FOUND,          ErrorSig("not-found", "%1%: Not found")},
+    { ErrorType::ERR_INVALID,            ErrorSig("invalid", "%1%: Invalid")},
+    { ErrorType::ERR_EXPRESSION,         ErrorSig("expr", "%1%: Expression")},
+    { ErrorType::ERR_OVERLIMIT,          ErrorSig("overlimit", "%1%: Target supports")},
+    { ErrorType::ERR_INSUFFICIENT,       ErrorSig("insufficient", "%1%: Target requires")},
+    { ErrorType::ERR_UNINITIALIZED,      ErrorSig("uninitialized", "%1%: Uninitialized")},
+
     // Warnings
-    { ErrorType::WARN_UNKNOWN,     "%1%: Unknown %2%"},      // args: %1% - IR node, %2% - what
-    { ErrorType::WARN_UNSUPPORTED, "%1%: Unsupported %2%"},  // args: %1% - IR node, %2% - what
-    { ErrorType::WARN_MISMATCH,    "%1%: %2%"},              // args: %1% - IR node, $2% -what
+    { ErrorType::LEGACY_WARNING,         ErrorSig("legacy", "")},
+    { ErrorType::WARN_FAILED,            ErrorSig("failed", "%1%:")},
+    { ErrorType::WARN_UNKNOWN,           ErrorSig("unknown", "%1%:")},
+    { ErrorType::WARN_INVALID,           ErrorSig("invalid", "%1%:")},
+    { ErrorType::WARN_UNSUPPORTED,       ErrorSig("unsupported", "%1%:")},
+    { ErrorType::WARN_DEPRECATED,        ErrorSig("deprecated", "%1%:")},
+    { ErrorType::WARN_UNINITIALIZED,     ErrorSig("uninitialized", "%1%:")},
+    { ErrorType::WARN_UNUSED,            ErrorSig("unused", "%1%:")},
+    { ErrorType::WARN_MISSING,           ErrorSig("missing", "%1%:")},
+    { ErrorType::WARN_ORDERING,          ErrorSig("ordering", "%1%:")},
+    { ErrorType::WARN_MISMATCH,          ErrorSig("mismatch", "%1%:")},
+    { ErrorType::WARN_OVERFLOW,          ErrorSig("overflow", "%1%:")},
+    { ErrorType::WARN_IGNORE_PROPERTY,   ErrorSig("ignore-prop", "%1%:")},
+    { ErrorType::WARN_TYPE_INFERENCE,    ErrorSig("type-inference", "%1%:")},
+    { ErrorType::WARN_PARSER_TRANSITION, ErrorSig("parser-transition", "%1%:")},
+    { ErrorType::WARN_UNREACHABLE,       ErrorSig("parser-transition", "%1%:")},
+    { ErrorType::WARN_SHADOWING,         ErrorSig("shadow", "%1%:")},
+    { ErrorType::WARN_IGNORE,            ErrorSig("ignore", "%1%:")},
+
 };
