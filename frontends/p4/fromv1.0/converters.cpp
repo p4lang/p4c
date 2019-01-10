@@ -44,7 +44,7 @@ const IR::Node* ExpressionConverter::postorder(IR::Mask* expression) {
     auto cst = expression->right->to<IR::Constant>();
     mpz_class value = cst->value;
     if (value == 0) {
-        ::warning("%1%: zero mask", expression->right);
+        ::warning(ErrorType::WARN_INVALID, "%1%: zero mask", expression->right);
         return cst;
     }
     auto range = Util::findOnes(value);
@@ -467,7 +467,7 @@ class FixupExtern : public Modifier {
 const IR::Type_Extern *ExternConverter::convertExternType(ProgramStructure *structure,
             const IR::Type_Extern *ext, cstring name) {
     if (!ext->attributes.empty())
-        warning("%s: P4_14 extern type not fully supported", ext);
+        warning(ErrorType::WARN_UNSUPPORTED, "%s: P4_14 extern type not fully supported", ext);
     return ext->apply(FixupExtern(structure, name))->to<IR::Type_Extern>();
 }
 
@@ -478,7 +478,7 @@ const IR::Declaration_Instance *ExternConverter::convertExternInstance(ProgramSt
     auto *et = rv->type->to<IR::Type_Extern>();
     BUG_CHECK(et, "Extern %s is not extern type, but %s", ext, ext->type);
     if (!ext->properties.empty())
-        warning("%s: P4_14 extern not fully supported", ext);
+        warning(ErrorType::WARN_UNSUPPORTED, "%s: P4_14 extern not fully supported", ext);
     if (structure->extern_remap.count(et))
         et = structure->extern_remap.at(et);
     rv->name = name;
@@ -580,8 +580,9 @@ class DiscoverStructure : public Inspector {
     explicit DiscoverStructure(ProgramStructure* structure) : structure(structure)
     { CHECK_NULL(structure); setName("DiscoverStructure"); }
 
-    void postorder(const IR::ParserException* ex) override
-    { ::warning("%1%: parser exception is not translated to P4-16", ex); }
+    void postorder(const IR::ParserException* ex) override {
+        ::warning(ErrorType::WARN_UNSUPPORTED, "%1%: parser exception is not translated to P4-16",
+                  ex); }
     void postorder(const IR::Metadata* md) override
     { structure->metadata.emplace(md); checkReserved(md, md->name, "metadata"); }
     void postorder(const IR::Header* hd) override

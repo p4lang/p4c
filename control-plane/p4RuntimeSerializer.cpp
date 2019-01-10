@@ -636,7 +636,8 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
             // Nothing to do here, we cannot even perform some sanity-checking.
             continue;
         } else {
-            ::warning("Table '%1%': cannot represent match type '%2%' in P4Runtime, ignoring",
+            ::warning(ErrorType::WARN_MISMATCH,
+                      "Table '%1%': cannot represent match type '%2%' in P4Runtime, ignoring",
                       table->controlPlaneName(), matchTypeName);
             continue;
         }
@@ -963,7 +964,7 @@ class P4RuntimeAnalyzer {
             if (annotation->name != IR::Annotation::pkginfoAnnotation) continue;
             for (auto* kv : annotation->kv) {
                 auto name = kv->name.name;
-                auto setStringField = [kv, name, pkginfo, &keysVisited](cstring fName) {
+                auto setStringField = [kv, pkginfo, &keysVisited](cstring fName) {
                     auto* v = kv->expression->to<IR::StringLiteral>();
                     if (v == nullptr) {
                         ::error("Value for '%1%' key in @pkginfo annotation is not a string", kv);
@@ -985,13 +986,15 @@ class P4RuntimeAnalyzer {
                     name == "contact" || name == "url") {
                     setStringField(name);
                 } else if (name == "arch") {
-                    ::warning("The '%1%' field in PkgInfo should be set by the compiler, "
+                    ::warning(ErrorType::WARN_INVALID,
+                              "The '%1%' field in PkgInfo should be set by the compiler, "
                               "not by the user", kv);
                     // override the value set previously with the user-provided
                     // value.
                     setStringField(name);
                 } else {
-                    ::warning("Unknown key name '%1%' in @pkginfo annotation", name);
+                    ::warning(ErrorType::WARN_UNKNOWN,
+                              "Unknown key name '%1%' in @pkginfo annotation", name);
                 }
             }
         }

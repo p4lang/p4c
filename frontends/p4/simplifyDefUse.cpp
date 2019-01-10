@@ -448,7 +448,8 @@ class FindUninitialized : public Inspector {
                 reads(expression, storage);
                 registerUses(expression, false);
                 if (!lhs && expression->member.name == IR::Type_Stack::next)
-                    ::warning("%1%: reading uninitialized value", expression);
+                    ::warning(ErrorType::WARN_UNINITIALIZED,
+                              "%1%: reading uninitialized value", expression);
                 return false;
             } else if (expression->member.name == IR::Type_Stack::lastIndex) {
                 auto index = storage->getArrayLastIndex();

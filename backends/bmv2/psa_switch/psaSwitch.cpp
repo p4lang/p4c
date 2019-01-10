@@ -56,7 +56,8 @@ void PsaProgramStructure::createStructLike(ConversionContext* ctxt, const IR::Ty
             max_length += type->size;
             field->append("*");
             if (varbitFound)
-                ::error(ErrorType::ERR_UNSUPPORTED, st, "headers with multiple varbit fields");
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "headers with multiple varbit fields are not supported", st);
             varbitFound = true;
         } else if (ftype->is<IR::Type_Error>()) {
             field->append(f->name.name);
@@ -289,8 +290,9 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
         if (ft->is<IR::Type_StructLike>()) {
             // The headers struct can not contain nested structures.
             if (isHeader && ft->is<IR::Type_Struct>()) {
-                ::error(ErrorType::ERR_INVALID, type,
-                        "type should only contain headers, header stacks, or header unions");
+                ::error(ErrorType::ERR_INVALID,
+                        "Type %1% should only contain headers, header stacks, or header unions",
+                        type);
                 return;
             }
             if (auto hft = ft->to<IR::Type_Header>()) {
@@ -303,8 +305,8 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
                         addHeaderType(h_type);
                         addHeaderInstance(h_type, uf->controlPlaneName());
                     } else {
-                        ::error(ErrorType::ERR_INVALID, ft, "type cannot contain type " +
-                                uft->toString());
+                        ::error(ErrorType::ERR_INVALID,
+                                "Type %1% cannot contain type %2%", ft, uft);
                         return;
                     }
                 }
@@ -403,7 +405,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     if (!main) return;
 
     if (main->type->name != "PSA_Switch")
-        ::warning("%1%: the main package should be called PSA_Switch"
+        ::warning(ErrorType::WARN_INVALID, "%1%: the main package should be called PSA_Switch"
                   "; are you using the wrong architecture?", main->type->name);
 
     main->apply(*parsePsaArch);
@@ -686,7 +688,7 @@ void ExternConverter_DirectCounter::convertExternInstance(
     cstring name = inst->controlPlaneName();
     auto it = ctxt->structure->directCounterMap.find(name);
     if (it == ctxt->structure->directCounterMap.end()) {
-        ::warning("%1%: Direct counter not used; ignoring", inst);
+        ::warning(ErrorType::WARN_UNUSED, "%1%: Direct counter not used; ignoring", inst);
     } else {
         auto jctr = new Util::JsonObject();
         jctr->emplace("name", name);
@@ -729,7 +731,7 @@ void ExternConverter_Meter::convertExternInstance(
     else if (mkind_name == "BYTES")
         type = "bytes";
     else
-        ::error(ErrorType::ERR_UNEXPECTED, mkind->getNode(), "meter type");
+        ::error(ErrorType::ERR_UNEXPECTED, "meter type", mkind->getNode());
     jmtr->emplace("type", type);
     ctxt->json->meter_arrays->append(jmtr);
 }
@@ -791,7 +793,7 @@ void ExternConverter_Register::convertExternInstance(
         return;
     }
     if (sz->to<IR::Constant>()->value == 0)
-        error(ErrorType::ERR_UNSUPPORTED, inst, "direct registers");
+        error(ErrorType::ERR_UNSUPPORTED, "direct registers", inst);
     jreg->emplace("size", sz->to<IR::Constant>()->value);
     if (!eb->instanceType->is<IR::Type_SpecializedCanonical>()) {
         modelError("%1%: Expected a generic specialized type", eb->instanceType);
@@ -804,12 +806,12 @@ void ExternConverter_Register::convertExternInstance(
     }
     auto regType = st->arguments->at(0);
     if (!regType->is<IR::Type_Bits>()) {
-        ::error(ErrorType::ERR_UNSUPPORTED, eb, "registers with types other than bit or int");
+        ::error(ErrorType::ERR_UNSUPPORTED, "registers with types other than bit or int", eb);
         return;
     }
     unsigned width = regType->width_bits();
     if (width == 0) {
-        ::error(ErrorType::ERR_UNKNOWN, st->arguments->at(0), "width");
+        ::error(ErrorType::ERR_UNKNOWN, "width", st->arguments->at(0));
         return;
     }
     jreg->emplace("bitwidth", width);
@@ -837,7 +839,7 @@ void ExternConverter_ActionProfile::convertExternInstance(
 
     auto sz = eb->findParameterValue("size");
     if (!sz->is<IR::Constant>()) {
-        ::error(ErrorType::ERR_EXPECTED, sz, "a constant");
+        ::error(ErrorType::ERR_EXPECTED, "a constant", sz);
     }
     action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
 
@@ -860,7 +862,7 @@ void ExternConverter_ActionSelector::convertExternInstance(
 
     auto sz = eb->findParameterValue("size");
     if (!sz->is<IR::Constant>()) {
-        ::error(ErrorType::ERR_EXPECTED, sz, "a constant");
+        ::error(ErrorType::ERR_EXPECTED, "a constant", sz);
     }
     action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
 
@@ -878,7 +880,7 @@ void ExternConverter_ActionSelector::convertExternInstance(
     if (input == nullptr) {
         // the selector is never used by any table, we cannot figure out its
         // input and therefore cannot include it in the JSON
-        ::warning("Action selector '%1%' is never referenced by a table "
+        ::warning(ErrorType::WARN_UNUSED, "Action selector '%1%' is never referenced by a table "
                   "and cannot be included in bmv2 JSON", c);
         return;
     }

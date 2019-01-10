@@ -33,7 +33,7 @@ void CheckDeprecated::warnIfDeprecated(
         if (auto str = a->to<IR::StringLiteral>())
             message += str->value;
     }
-    ::warning("%1%: Using deprecated feature %2%. %3%",
+    ::warning(ErrorType::WARN_DEPRECATED, "%1%: Using deprecated feature %2%. %3%",
               errorNode, annotated->getNode(), message);
 }
 

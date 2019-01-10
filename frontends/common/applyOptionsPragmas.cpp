@@ -75,14 +75,15 @@ P4COptionPragmaParser::parseDiagnostic(const IR::Annotation* annotation) {
     }
 
     if (pragmaArgs->size() != 2) {
-        ::warning("@diagnostic takes two arguments: %1%", annotation);
+        ::warning(ErrorType::WARN_MISSING, "@diagnostic takes two arguments: %1%", annotation);
         return boost::none;
     }
 
     auto* diagnosticName = pragmaArgs->at(0)->to<IR::StringLiteral>();
     auto* diagnosticAction = pragmaArgs->at(1)->to<IR::StringLiteral>();
     if (!diagnosticName || !diagnosticAction) {
-        ::warning("@diagnostic arguments must be strings: %1%", annotation);
+        ::warning(ErrorType::WARN_MISSING, "@diagnostic arguments must be strings: %1%",
+                  annotation);
         return boost::none;
     }
 
@@ -94,7 +95,7 @@ P4COptionPragmaParser::parseDiagnostic(const IR::Annotation* annotation) {
     } else if (diagnosticAction->value == "error") {
         diagnosticOption = "--Werror=";
     } else {
-        ::warning("@diagnostic's second argument must be 'disable', "
+        ::warning(ErrorType::WARN_MISMATCH, "@diagnostic's second argument must be 'disable', "
                   "'warn', or 'error': %1%", annotation);
         return boost::none;
     }

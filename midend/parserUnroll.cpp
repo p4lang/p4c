@@ -271,7 +271,8 @@ class ParserSymbolicInterpreter {
                     }
 
                     if (conservative)
-                        ::warning("Potential parser cycle without extracting any bytes:\n%1%",
+                        ::warning(ErrorType::WARN_PARSER_TRANSITION,
+                                  "Potential parser cycle without extracting any bytes:\n%1%",
                                   stateChain(state));
                     else
                         ::error("Parser cycle without extracting any bytes:\n%1%",

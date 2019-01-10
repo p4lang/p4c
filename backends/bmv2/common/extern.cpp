@@ -82,8 +82,8 @@ ExternConverter::convertExternObject(ConversionContext* ctxt,
         }
         return primitive;
     } else {
-        ::error(ErrorType::ERR_UNKNOWN, em->method->name,
-                "extern method from type " + em->originalExternType->name);
+        ::error(ErrorType::ERR_UNKNOWN, "Unknown extern method %1% from type %2%",
+                em->method->name, em->originalExternType->name);
         return nullptr;
     }
 }
@@ -94,7 +94,7 @@ ExternConverter::convertExternInstance(ConversionContext* ,
                                        const IR::ExternBlock* eb,
                                        const bool& emitExterns) {
     if (!emitExterns)
-        ::error(ErrorType::ERR_UNKNOWN, eb->type->name, "extern instance");
+        ::error(ErrorType::ERR_UNKNOWN, "extern instance", eb->type->name);
 }
 
 Util::IJson*
@@ -104,7 +104,7 @@ ExternConverter::convertExternFunction(ConversionContext* ctxt,
                                        const IR::StatOrDecl* s,
                                        const bool emitExterns) {
     if (!emitExterns) {
-        ::error(ErrorType::ERR_UNKNOWN, ef->method->name, "extern function");
+        ::error(ErrorType::ERR_UNKNOWN, "extern function", ef->method->name);
         return nullptr;
     }
     auto primitive = mkPrimitive(ef->method->name);

@@ -33,7 +33,7 @@ SharedActionSelectorCheck::preorder(const IR::P4Table* table) {
     auto implementation = table->properties->getProperty("implementation");
     if (implementation == nullptr) return false;
     if (!implementation->value->is<IR::ExpressionValue>()) {
-        ::error(ErrorType::ERR_EXPECTED, implementation, "expression for property");
+        ::error(ErrorType::ERR_EXPECTED, "expression for property", implementation);
         return false;
     }
     auto propv = implementation->value->to<IR::ExpressionValue>();
@@ -41,12 +41,12 @@ SharedActionSelectorCheck::preorder(const IR::P4Table* table) {
     auto pathe = propv->expression->to<IR::PathExpression>();
     auto decl = refMap->getDeclaration(pathe->path, true);
     if (!decl->is<IR::Declaration_Instance>()) {
-        ::error(ErrorType::ERR_EXPECTED, pathe, "a reference to an instance");
+        ::error(ErrorType::ERR_EXPECTED, "a reference to an instance", pathe);
         return false;
     }
     auto dcltype = typeMap->getType(pathe, true);
     if (!dcltype->is<IR::Type_Extern>()) {
-        ::error(ErrorType::ERR_UNEXPECTED, dcltype, "type for implementation");
+        ::error(ErrorType::ERR_UNEXPECTED, "type for implementation", dcltype);
         return false;
     }
     auto type_extern_name = dcltype->to<IR::Type_Extern>()->name;
@@ -73,8 +73,9 @@ SharedActionSelectorCheck::preorder(const IR::P4Table* table) {
     };
 
     if (!cmp_inputs(it->second, input)) {
-        ::error(ErrorType::ERR_INVALID, decl,
-                "Action selector is used by multiple tables with different selector inputs");
+        ::error(ErrorType::ERR_INVALID,
+                "Action selector %1% is used by multiple tables with different selector inputs",
+                decl);
     }
 
     return false;

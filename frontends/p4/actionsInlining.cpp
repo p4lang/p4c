@@ -32,7 +32,7 @@ void DiscoverActionsInlining::postorder(const IR::MethodCallStatement* mcs) {
     auto caller = findContext<IR::P4Action>();
     if (caller == nullptr) {
         if (findContext<IR::P4Parser>() != nullptr) {
-            ::error(ErrorType::ERR_UNSUPPORTED, mcs, "action invocation in parser");
+            ::error(ErrorType::ERR_UNSUPPORTED, "action invocation in parser", mcs);
         } else if (findContext<IR::P4Control>() == nullptr) {
             BUG("%1%: unexpected action invocation", mcs);
         }

@@ -86,7 +86,7 @@ class EBPFStackType : public EBPFType, public IHasWidth {
     void declare(CodeBuilder* builder, cstring id, bool asPointer) override;
     void emitInitializer(CodeBuilder* builder) override;
     unsigned widthInBits() override;
-    unsigned implementationWidthInBits();
+    unsigned implementationWidthInBits() override;
 };
 
 class EBPFScalarType : public EBPFType, public IHasWidth {

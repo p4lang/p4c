@@ -138,13 +138,13 @@ ResolutionContext::resolveUnique(IR::ID name,
     }
 
     if (decls->empty()) {
-        ::error(ErrorType::ERR_NOT_FOUND, name, "declaration");
+        ::error(ErrorType::ERR_NOT_FOUND, "declaration", name);
         return nullptr;
     }
     if (decls->size() == 1)
         return decls->at(0);
 
-    ::error(ErrorType::ERR_INVALID, name, "multiple matching declarations", name);
+    ::error(ErrorType::ERR_INVALID, "multiple matching declarations", name);
     for (auto a : *decls)
         ::error("Candidate: %1%", a);
     return nullptr;
@@ -251,7 +251,7 @@ void ResolveReferences::checkShadowing(const IR::INamespace* ns) const {
                 // attribute locals often match attributes
                 continue;
 
-            ::warning("%1% shadows %2%", node, pnode);
+            ::warning(ErrorType::WARN_SHADOWING, "%1% shadows %2%", node, pnode);
         }
     }
 }
@@ -293,8 +293,8 @@ void ResolveReferences::postorder(const IR::P4Program*) {
 bool ResolveReferences::preorder(const IR::This* pointer) {
     auto decl = findContext<IR::Declaration_Instance>();
     if (findContext<IR::Function>() == nullptr || decl == nullptr)
-        ::error(ErrorType::ERR_INVALID, pointer,
-                "can only be used in the definition of an abstract method");
+        ::error(ErrorType::ERR_INVALID,
+                "%1% can only be used in the definition of an abstract method", pointer);
     refMap->setDeclaration(pointer, decl);
     return true;
 }

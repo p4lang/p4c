@@ -89,9 +89,9 @@ bool CFG::dfs(Node* node, std::set<Node*> &visited,
     if (node->is<TableNode>()) {
         table = node->to<TableNode>()->table;
         if (stack.find(table) != stack.end()) {
-            ::error(ErrorType::ERR_INVALID, table,
-                    "program for this target since it contains a path from table " + table->name +
-                    " back to itself");
+            ::error(ErrorType::ERR_INVALID,
+                    "Program can not be implemented on this taret since it contains a path from "
+                    "table %1% back to itself", table);
             return false;
         }
     }
@@ -149,8 +149,8 @@ bool CFG::checkMergeable(std::set<TableNode*> nodes) const {
         }
         bool same = first->successors.checkSame(tn->successors);
         if (!same) {
-            ::error(ErrorType::ERR_INVALID, tn->table, "program on this target, because table " +
-                    tn->table->name + "has multiple successors");
+            ::error(ErrorType::ERR_INVALID, "Program is not supported by this target, because "
+                    "table %1% has multiple successors", tn->table);
             return false;
         }
     }
@@ -209,7 +209,7 @@ class CFGBuilder : public Inspector {
             return false;
         auto am = instance->to<P4::ApplyMethod>();
         if (!am->object->is<IR::P4Table>()) {
-            ::error(ErrorType::ERR_INVALID, statement, "apply method must be on a table");
+            ::error(ErrorType::ERR_INVALID, "apply method must be on a table", statement);
             return false;
         }
         auto tc = am->object->to<IR::P4Table>();

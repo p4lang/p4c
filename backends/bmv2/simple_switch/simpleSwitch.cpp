@@ -575,7 +575,7 @@ void ExternConverter_direct_counter::convertExternInstance(
     cstring name = inst->controlPlaneName();
     auto it = ctxt->structure->directCounterMap.find(name);
     if (it == ctxt->structure->directCounterMap.end()) {
-        ::warning("%1%: Direct counter not used; ignoring", inst);
+        ::warning(ErrorType::WARN_UNUSED, "%1%: Direct counter not used; ignoring", inst);
     } else {
         auto jctr = new Util::JsonObject();
         jctr->emplace("name", name);
@@ -678,12 +678,12 @@ void ExternConverter_action_profile::convertExternInstance(
         }
         auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
         selector->emplace("algo", algo);
-        auto input = ctxt->selector_check->get_selector_input(
-            c->to<IR::Declaration_Instance>());
+        auto input = ctxt->selector_check->get_selector_input(inst);
         if (input == nullptr) {
             // the selector is never used by any table, we cannot figure out its
             // input and therefore cannot include it in the JSON
-            ::warning("Action selector '%1%' is never referenced by a table "
+            ::warning(// ErrorType::WARN_UNUSED, -- none of the P4 objects seem to have source info
+                      "Action selector '%1%' is never referenced by a table "
                       "and cannot be included in bmv2 JSON", c);
             return;
         }
@@ -735,12 +735,12 @@ void ExternConverter_action_selector::convertExternInstance(
         }
         auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
         selector->emplace("algo", algo);
-        auto input = ctxt->selector_check->get_selector_input(
-            c->to<IR::Declaration_Instance>());
+        auto input = ctxt->selector_check->get_selector_input(inst);
         if (input == nullptr) {
             // the selector is never used by any table, we cannot figure out its
             // input and therefore cannot include it in the JSON
-            ::warning("Action selector '%1%' is never referenced by a table "
+            ::warning(// ErrorType::WARN_UNUSED, -- none of the P4 objects seem to have source info
+                      "Action selector '%1%' is never referenced by a table "
                       "and cannot be included in bmv2 JSON", c);
             return;
         }
@@ -873,7 +873,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     if (!main) return;  // no main
 
     if (main->type->name != "V1Switch")
-        ::warning("%1%: the main package should be called V1Switch"
+        ::warning(ErrorType::WARN_INVALID, "%1%: the main package should be called V1Switch"
                   "; are you using the wrong architecture?", main->type->name);
 
     main->apply(*parseV1Arch);

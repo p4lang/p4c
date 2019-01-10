@@ -32,13 +32,15 @@ const IR::Expression* LowerExpressions::shift(const IR::Operation_Binary* expres
         auto cst = rhs->to<IR::Constant>();
         mpz_class maxShift = Util::shift_left(1, LowerExpressions::maxShiftWidth);
         if (cst->value > maxShift)
-            ::error(ErrorType::ERR_OVERLIMIT, expression, "shift amounts up to", maxShift, "bits");
+            ::error(ErrorType::ERR_OVERLIMIT, "%1%: shift amount limited to %2% on this target",
+                    expression, maxShift);
     } else {
         BUG_CHECK(rhstype->is<IR::Type_Bits>(), "%1%: expected a bit<> type", rhstype);
         auto bs = rhstype->to<IR::Type_Bits>();
         if (bs->size > LowerExpressions::maxShiftWidth)
-            ::error(ErrorType::ERR_OVERLIMIT, expression, "shift amounts up to",
-                    LowerExpressions::maxShiftWidth, "bits");
+            ::error(ErrorType::ERR_OVERLIMIT,
+                    "%1%: shift amount limited to %2% bits on this target",
+                    expression, LowerExpressions::maxShiftWidth);
     }
     auto ltype = typeMap->getType(getOriginal(), true);
     typeMap->setType(expression, ltype);
@@ -289,7 +291,7 @@ RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
             // one knew of this feature, since it was not very clearly
             // documented.
             if (expression->arguments->size() != 2) {
-                ::error(ErrorType::ERR_EXPECTED, expression, "2 arguments");
+                ::error(ErrorType::ERR_EXPECTED, "2 arguments", expression);
                 return expression;
             }
             auto vec = new IR::Vector<IR::Argument>();

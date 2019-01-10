@@ -129,7 +129,7 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                 continue;
             }
         }
-        ::error(ErrorType::ERR_EXPRESSION, s, "not yet supported on this target");
+        ::error(ErrorType::ERR_UNSUPPORTED, "%1% not yet supported on this target", s);
     }
 }
 
@@ -138,14 +138,14 @@ ActionConverter::convertActionParams(const IR::ParameterList *parameters,
                                      Util::JsonArray* params) {
     for (auto p : *parameters->getEnumerator()) {
         if (!ctxt->refMap->isUsed(p))
-            ::warning("Unused action parameter %1%", p);
+            ::warning(ErrorType::WARN_UNUSED, "Unused action parameter %1%", p);
 
         auto param = new Util::JsonObject();
         param->emplace("name", p->name);
         auto type = ctxt->typeMap->getType(p, true);
         if (!type->is<IR::Type_Bits>())
-            ::error(ErrorType::ERR_INVALID, p,
-                    "action parameters must be bit<> or int<> on this target");
+            ::error(ErrorType::ERR_INVALID,
+                    "action parameters must be bit<> or int<> on this target", p);
         param->emplace("bitwidth", type->width_bits());
         params->append(param);
     }

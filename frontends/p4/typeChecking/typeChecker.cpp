@@ -1972,7 +1972,7 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
             return expression;
         }
         if (shift >= lt->size)
-            ::warning("%1%: shifting value with %2% bits by %3%",
+            ::warning(ErrorType::WARN_OVERFLOW, "%1%: shifting value with %2% bits by %3%",
                       expression, lt->size, shift);
     }
 
