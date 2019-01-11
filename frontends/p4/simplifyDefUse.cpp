@@ -73,7 +73,6 @@ class FindUninitialized : public Inspector {
     // This does not include location sets read by subexpressions.
     std::map<const IR::Expression*, const LocationSet*> readLocations;
     HasUses*        hasUses;  // output
-    const IR::IndexedVector<IR::Declaration>    *controlLocals = nullptr;
 
     const LocationSet* getReads(const IR::Expression* expression, bool nonNull = false) const {
         auto result = ::get(readLocations, expression);
@@ -97,8 +96,7 @@ class FindUninitialized : public Inspector {
             context(context), refMap(parent->definitions->storageMap->refMap),
             typeMap(parent->definitions->storageMap->typeMap),
             definitions(parent->definitions), lhs(false), currentPoint(context),
-            hasUses(parent->hasUses), controlLocals(parent->controlLocals)
-    { visitDagOnce = false; }
+            hasUses(parent->hasUses) { visitDagOnce = false; }
 
  public:
     FindUninitialized(AllDefinitions* definitions, HasUses* hasUses) :
@@ -166,7 +164,6 @@ class FindUninitialized : public Inspector {
     bool preorder(const IR::P4Control* control) override {
         LOG3("FU Visiting control " << control->name << "[" << control->id << "]");
         BUG_CHECK(context.isBeforeStart(), "non-empty context in FindUnitialized::P4Control");
-        controlLocals = &control->controlLocals;
         currentPoint = ProgramPoint(control);
         for (auto d : control->controlLocals)
             if (d->is<IR::Declaration_Instance>())
@@ -175,7 +172,6 @@ class FindUninitialized : public Inspector {
         visit(control->body);
         checkOutParameters(
             control, control->getApplyMethodType()->parameters, getCurrentDefinitions());
-        controlLocals = nullptr;
         return false;
     }
 

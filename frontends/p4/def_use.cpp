@@ -755,14 +755,11 @@ bool ComputeWriteSet::preorder(const IR::P4Control* control) {
     enterScope(control->getApplyParameters(), &control->controlLocals, startPoint);
     exitDefinitions = new Definitions();
     returnedDefinitions = new Definitions();
-    BUG_CHECK(controlLocals == nullptr, "Nested controls?");
-    controlLocals = &control->controlLocals;
     for (auto l : control->controlLocals) {
         if (l->is<IR::Declaration_Instance>())
             visit(l);  // process virtual Functions if any
     }
     visit(control->body);
-    controlLocals = nullptr;;
     auto returned = currentDefinitions->joinDefinitions(returnedDefinitions);
     auto exited = returned->joinDefinitions(exitDefinitions);
     return setDefinitions(exited, control->body);

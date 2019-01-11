@@ -416,15 +416,13 @@ class ComputeWriteSet : public Inspector {
     bool                lhs;
     /// For each expression the location set it writes
     std::map<const IR::Expression*, const LocationSet*> writes;
-    const IR::IndexedVector<IR::Declaration>    *controlLocals = nullptr;
 
     /// Creates new visitor, but with same underlying data structures.
     /// Needed to visit some program fragments repeatedly.
     ComputeWriteSet(const ComputeWriteSet* source, ProgramPoint context, Definitions* definitions) :
             allDefinitions(source->allDefinitions), currentDefinitions(definitions),
             returnedDefinitions(nullptr), exitDefinitions(source->exitDefinitions),
-            callingContext(context), storageMap(source->storageMap), lhs(false),
-            controlLocals(source->controlLocals) {
+            callingContext(context), storageMap(source->storageMap), lhs(false) {
         visitDagOnce = false;
     }
     void enterScope(const IR::ParameterList* parameters,
