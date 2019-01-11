@@ -1,23 +1,9 @@
 #include <core.p4>
 #include <v1model.p4>
 
-enum bit<16> EthTypes {
-    IPv4 = 16w0x800,
-    ARP = 16w0x806,
-    RARP = 16w0x8035,
-    EtherTalk = 16w0x809b,
-    VLAN = 16w0x8100,
-    IPX = 16w0x8137,
-    IPv6 = 16w0x86dd
-}
-
 struct alt_t {
-    bit<1>   valid;
-    bit<7>   port;
-    int<8>   hashRes;
-    bool     useHash;
-    EthTypes type;
-    bit<7>   pad;
+    bit<1> valid;
+    bit<7> port;
 }
 
 @MNK_annotation("(test flatten)") struct row_t {

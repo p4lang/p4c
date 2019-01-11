@@ -2,20 +2,32 @@
 #include <v1model.p4>
 
 struct alt_t {
-    bit<1> valid;
-    bit<7> port;
+    bit<1>  valid;
+    bit<7>  port;
+    int<8>  hashRes;
+    bool    useHash;
+    bit<16> type;
+    bit<7>  pad;
 }
 
-@MNK_annotation("(test flatten)") struct row_t {
+struct row_t {
     alt_t alt0;
     alt_t alt1;
 }
 
 header bitvec_hdr {
-    bit<1> _row_alt0_valid0;
-    bit<7> _row_alt0_port1;
-    bit<1> _row_alt1_valid2;
-    bit<7> _row_alt1_port3;
+    bit<1>  _row_alt0_valid0;
+    bit<7>  _row_alt0_port1;
+    int<8>  _row_alt0_hashRes2;
+    bool    _row_alt0_useHash3;
+    bit<16> _row_alt0_type4;
+    bit<7>  _row_alt0_pad5;
+    bit<1>  _row_alt1_valid6;
+    bit<7>  _row_alt1_port7;
+    int<8>  _row_alt1_hashRes8;
+    bool    _row_alt1_useHash9;
+    bit<16> _row_alt1_type10;
+    bit<7>  _row_alt1_pad11;
 }
 
 struct col_t {
@@ -35,19 +47,8 @@ struct parsed_packet_t {
     bitvec_hdr bvh1;
 }
 
-struct tst_t {
-    row_t      row0;
-    row_t      row1;
-    col_t      col;
-    bitvec_hdr bvh0;
-    bitvec_hdr bvh1;
-}
-
 parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     state start {
-        pk.extract<bitvec_hdr>(h.bvh0);
-        pk.extract<bitvec_hdr>(h.bvh1);
-        pk.extract<bitvec_hdr>(local_metadata.col.bvh);
         transition accept;
     }
 }
@@ -56,12 +57,13 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     @name(".NoAction") action NoAction_0() {
     }
     @name("ingress.do_act") action do_act() {
-        h.bvh1._row_alt1_valid2 = 1w0;
+        h.bvh1._row_alt1_valid6 = 1w0;
+        h.bvh1._row_alt1_useHash9 = true;
     }
     @name("ingress.tns") table tns_0 {
         key = {
-            h.bvh1._row_alt1_valid2                : exact @name("h.bvh1.row.alt1.valid") ;
-            local_metadata.col.bvh._row_alt0_valid0: exact @name("local_metadata.col.bvh.row.alt0.valid") ;
+            h.bvh1._row_alt1_valid6                  : exact @name("h.bvh1.row.alt1.valid") ;
+            local_metadata.col.bvh._row_alt0_useHash3: exact @name("local_metadata.col.bvh.row.alt0.useHash") ;
         }
         actions = {
             do_act();
@@ -73,6 +75,10 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
         local_metadata.col.bvh._row_alt0_valid0 = 1w0;
         local_metadata.row0.alt0.valid = local_metadata.row1.alt1.valid;
         local_metadata.row0.alt0.port = local_metadata.row1.alt1.port;
+        local_metadata.row0.alt0.hashRes = local_metadata.row1.alt1.hashRes;
+        local_metadata.row0.alt0.useHash = local_metadata.row1.alt1.useHash;
+        local_metadata.row0.alt0.type = local_metadata.row1.alt1.type;
+        local_metadata.row0.alt0.pad = local_metadata.row1.alt1.pad;
         local_metadata.row1.alt0.valid = 1w1;
         local_metadata.row1.alt1.port = local_metadata.row0.alt1.port + 7w1;
         clone3<row_t>(CloneType.I2E, 32w0, local_metadata.row0);
@@ -96,8 +102,6 @@ control egress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata,
 
 control deparser(packet_out b, in parsed_packet_t h) {
     apply {
-        b.emit<bitvec_hdr>(h.bvh0);
-        b.emit<bitvec_hdr>(h.bvh1);
     }
 }
 
