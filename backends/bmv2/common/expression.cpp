@@ -399,7 +399,8 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 e->append(l);
                 e->append(fieldName);
             }
-            if (!simpleExpressionsOnly && !leftValue && type->is<IR::Type_Boolean>()) {
+            if (!simpleExpressionsOnly && !leftValue && type->is<IR::Type_Boolean>()
+                && (getParent<IR::Member>() != nullptr)) {
                 auto cast = new Util::JsonObject();
                 auto value = new Util::JsonObject();
                 cast->emplace("type", "expression");
@@ -408,6 +409,10 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 value->emplace("left", Util::JsonValue::null);
                 value->emplace("right", result);
                 result = cast;
+            } else if (type->is<IR::Type_Boolean>()) {
+                auto value = new Util::JsonObject();
+                value->emplace("left", Util::JsonValue::null);
+                value->emplace("right", result);
             }
         }
     }
