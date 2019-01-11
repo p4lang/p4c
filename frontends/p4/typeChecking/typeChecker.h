@@ -118,10 +118,12 @@ class TypeInference : public Transform {
     bool checkAbstractMethods(const IR::Declaration_Instance* inst, const IR::Type_Extern* type);
     void addSubstitutions(const TypeVariableSubstitution* tvs);
 
-    /** Converts each type to a canonical representation. */
-    const IR::Type* canonicalize(const IR::Type* type);
-    const IR::IndexedVector<IR::StructField>* canonicalizeFields(const IR::Type_StructLike* type);
-    const IR::ParameterList* canonicalizeParameters(const IR::ParameterList* params);
+    /** Converts each type to a canonical representation.
+     *  Made virtual to enable private midend passes to extend standard IR with custom IR classes.
+     */
+    virtual const IR::Type* canonicalize(const IR::Type* type);
+    virtual const IR::IndexedVector<IR::StructField>* canonicalizeFields(const IR::Type_StructLike* type);
+    virtual const IR::ParameterList* canonicalizeParameters(const IR::ParameterList* params);
 
     // various helpers
     bool hasVarbitsOrUnions(const IR::Type* type) const;
