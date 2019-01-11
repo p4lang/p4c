@@ -129,7 +129,7 @@ const IR::Node* ReplaceHeaders::postorder(IR::Member* expression) {
     }
 
     result = new IR::Member(expression->type, e, newFieldName);
-    LOG3("FH Replacing " << expression << "(" << expression->type << ") with " << result << "(" << result->type << ")");
+    LOG3("FH Replacing " << expression << " with " << result);
     typeMap->setType(result, expression->type);
     typeMap->setLeftValue(result);
     return result;
