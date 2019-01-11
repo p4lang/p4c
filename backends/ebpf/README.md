@@ -203,7 +203,7 @@ Additionally, the eBPF compiler test suite has the following python dependencies
 You can install these using:
 ```
 $ sudo apt-get install clang llvm libpcap-dev libelf-dev iproute2 net-tools
-$ sudo pip install pyroute2 ply scapy
+$ sudo pip install pyroute2 ply scapy==2.4.0
 ```
 
 ### Supported capabilities
