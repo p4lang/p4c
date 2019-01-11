@@ -1,4 +1,4 @@
-issue584.p4(28): error: hash: cannot infer bitwidth for integer-valued type parameter M
+issue584.p4(28): [--Werror=legacy] error:  hash: cannot infer bitwidth for integer-valued type parameter M
         hash(var, HashAlgorithm.crc16, 16w0, hdr, 0xFFFF);
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 v1model.p4(138)

@@ -1,36 +1,6 @@
-issue306.p4(30): error: Structure struct my_packet does not have a field stack
+issue306.p4(30): [--Werror=legacy] error:  Structure struct my_packet does not have a field stack
 struct my_packet {
        ^^^^^^^^^
 issue306.p4(45)
     b.extract(p.stack.next);
                 ^^^^^
-issue306.p4(30): error: Structure struct my_packet does not have a field stack
-struct my_packet {
-       ^^^^^^^^^
-issue306.p4(46)
-    transition select(p.stack.last.op_code) {
-                        ^^^^^
-issue306.p4(30): error: Structure struct my_packet does not have a field stack
-struct my_packet {
-       ^^^^^^^^^
-issue306.p4(53)
-    b.extract(p.stack.next);
-                ^^^^^
-issue306.p4(30): error: Structure struct my_packet does not have a field stack
-struct my_packet {
-       ^^^^^^^^^
-issue306.p4(54)
-    transition select(p.stack.last.op_code) {
-                        ^^^^^
-issue306.p4(30): error: Structure struct my_packet does not have a field stack
-struct my_packet {
-       ^^^^^^^^^
-issue306.p4(73)
-    key = { p.stack[0].op_code : exact; }
-              ^^^^^
-issue306.p4(30): error: Structure struct my_packet does not have a field stack
-struct my_packet {
-       ^^^^^^^^^
-issue306.p4(91)
-    b.emit(p.stack);
-             ^^^^^

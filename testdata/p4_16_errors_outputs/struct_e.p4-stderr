@@ -1,10 +1,10 @@
-struct_e.p4(16): error: Structure struct s does not have a field data
+struct_e.p4(16): [--Werror=legacy] error:  Structure struct s does not have a field data
 struct s {}
        ^
 struct_e.p4(24)
         v.data = 1w0; // no such field
           ^^^^
-struct_e.p4(25): error: Cannot extract field data from b which has type bit<1>
+struct_e.p4(25): [--Werror=legacy] error:  Cannot extract field data from b which has type bit<1>
         b.data = 5; // no such field
           ^^^^
 struct_e.p4(25)
