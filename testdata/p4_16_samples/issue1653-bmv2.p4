@@ -46,7 +46,7 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata,
 
         // Copy another header's data to local variable.
         bh.x = h.bvh0.x;
-        clone3(CloneType.I2E, 0, local_metadata);
+        clone3(CloneType.I2E, 0, h);
     }
 }
 
