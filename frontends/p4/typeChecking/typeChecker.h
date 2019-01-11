@@ -123,7 +123,8 @@ class TypeInference : public Transform {
      *  Made virtual to enable private midend passes to extend standard IR with custom IR classes.
      */
     virtual const IR::Type* canonicalize(const IR::Type* type);
-    virtual const IR::IndexedVector<IR::StructField>* canonicalizeFields(const IR::Type_StructLike* type);
+    virtual const IR::IndexedVector<IR::StructField>*
+        canonicalizeFields(const IR::Type_StructLike* type);
     virtual const IR::ParameterList* canonicalizeParameters(const IR::ParameterList* params);
 
     // various helpers
