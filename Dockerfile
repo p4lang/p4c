@@ -44,7 +44,7 @@ ENV P4C_RUNTIME_DEPS cpp \
 ENV P4C_PIP_PACKAGES tenjin \
                      pyroute2 \
                      ply \
-                     scapy
+                     scapy==2.4.0
 COPY . /p4c/
 WORKDIR /p4c/
 RUN apt-get update && \
