@@ -128,8 +128,10 @@ const IR::Node* ReplaceHeaders::postorder(IR::Member* expression) {
                   "FH cannot find replacement for %s in type %s", prefix, h);
     }
 
-    result = new IR::Member(e, newFieldName);
-    LOG3("FH Replacing " << expression << " with " << result);
+    result = new IR::Member(expression->type, e, newFieldName);
+    LOG3("FH Replacing " << expression << "(" << expression->type << ") with " << result << "(" << result->type << ")");
+    typeMap->setType(result, expression->type);
+    typeMap->setLeftValue(result);
     return result;
 }
 

@@ -157,9 +157,11 @@ struct local_metadata_t {
 */
 class ReplaceHeaders : public Transform {
     NestedHeaderMap* replacementMap;
+    P4::TypeMap* typeMap;
 
  public:
-    explicit ReplaceHeaders(NestedHeaderMap* sm): replacementMap(sm) {
+    explicit ReplaceHeaders(NestedHeaderMap* sm, TypeMap* typeMap):
+    replacementMap(sm), typeMap(typeMap) {
         CHECK_NULL(sm);
         setName("ReplaceHeaders");
     }
@@ -173,9 +175,9 @@ class FlattenHeaders final : public PassManager {
  public:
     FlattenHeaders(ReferenceMap* refMap, TypeMap* typeMap) {
         auto sm = new NestedHeaderMap(refMap, typeMap);
-        passes.push_back(new TypeChecking(refMap, typeMap));
+        passes.push_back(new TypeChecking(refMap, typeMap, true));
         passes.push_back(new FindHeaderTypesToReplace(sm));
-        passes.push_back(new ReplaceHeaders(sm));
+        passes.push_back(new ReplaceHeaders(sm, typeMap));
         setName("FlattenHeaders");
     }
 };
