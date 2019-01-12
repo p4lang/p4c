@@ -41,6 +41,7 @@ const cstring IR::Annotation::lengthAnnotation = "length";
 const cstring IR::Annotation::optionalAnnotation = "optional";
 const cstring IR::Annotation::pkginfoAnnotation = "pkginfo";
 const cstring IR::Annotation::deprecatedAnnotation = "deprecated";
+const cstring IR::Annotation::synchronousAnnotation = "synchronous";
 
 int Type_Declaration::nextId = 0;
 int Type_InfInt::nextId = 0;
