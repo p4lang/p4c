@@ -500,9 +500,20 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
             // Use temporaries for these parameters
             std::set<const IR::Parameter*> useTemporary;
 
-            auto call = workToDo->uniqueCaller(inst);
+            const IR::MethodCallStatement *call = nullptr;
+            for (auto m : workToDo->callToInstance) {
+                if (m.second != inst) continue;
+                if (call) {
+                    if (!call->equiv(*m.first)) {
+                        call = nullptr;
+                        break; }
+                } else {
+                    call = m.first; } }
             MethodInstance *mi = nullptr;
             if (call != nullptr) {
+                // All call sites are the same (call is one of them), so we use the
+                // same arguments in all cases.  So we can avoid copies if args do
+                // not alias
                 std::map<const IR::Parameter*, const LocationSet*> locationSets;
                 FindLocationSets fls(refMap, typeMap);
 

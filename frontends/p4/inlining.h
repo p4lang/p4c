@@ -235,14 +235,12 @@ class GeneralInliner : public AbstractInliner<InlineList, InlineSummary> {
 class InlinePass : public PassManager {
     InlineList toInline;
  public:
-    InlinePass(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator) {
-        passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new DiscoverInlining(&toInline, refMap, typeMap, evaluator));
-        passes.push_back(new InlineDriver<InlineList, InlineSummary>(
-            &toInline, new GeneralInliner(refMap->isV1())));
-        passes.push_back(new RemoveAllUnusedDeclarations(refMap));
-        setName("InlinePass");
-    }
+    InlinePass(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator)
+    : PassManager({
+        new TypeChecking(refMap, typeMap),
+        new DiscoverInlining(&toInline, refMap, typeMap, evaluator),
+        new InlineDriver<InlineList, InlineSummary>(&toInline, new GeneralInliner(refMap->isV1())),
+        new RemoveAllUnusedDeclarations(refMap) }) { }
 };
 
 /**
@@ -252,13 +250,12 @@ passed as arguments using constructor arguments.
 */
 class Inline : public PassRepeated {
  public:
-    Inline(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator) {
-        passes.push_back(new InlinePass(refMap, typeMap, evaluator));
+    Inline(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator)
+    : PassManager({
+        new InlinePass(refMap, typeMap, evaluator),
         // After inlining the output of the evaluator changes, so
         // we have to run it again
-        passes.push_back(evaluator);
-        setName("Inline");
-    }
+        evaluator }) {}
 };
 
 }  // namespace P4
