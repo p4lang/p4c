@@ -18,6 +18,9 @@ limitations under the License.
 #define _P4_STRENGTHREDUCTION_H_
 
 #include "ir/ir.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
 
 namespace P4 {
 
@@ -80,7 +83,7 @@ class DoStrengthReduction final : public Transform {
 };
 
 class StrengthReduction : public PassManager {
-public:
+ public:
     StrengthReduction(ReferenceMap* refMap, TypeMap* typeMap) {
         passes.push_back(new TypeChecking(refMap, typeMap, true));
         passes.push_back(new DoStrengthReduction());
