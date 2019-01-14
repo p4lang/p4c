@@ -54,6 +54,9 @@ class StrengthReduction final : public Transform {
     /// and a power of `2` and `-1` otherwise.
     int isPowerOf2(const IR::Expression* expr) const;
 
+    const IR::Node* simplifyShift(IR::Slice* expr);
+    const IR::Node* simplifyConcat(IR::Slice* expr);
+
  public:
     StrengthReduction() { visitDagOnce = true; setName("StrengthReduction"); }
 
