@@ -20,34 +20,34 @@ namespace P4 {
 
 /// @section Helper methods
 
-bool StrengthReduction::isOne(const IR::Expression* expr) const {
+bool DoStrengthReduction::isOne(const IR::Expression* expr) const {
     auto cst = expr->to<IR::Constant>();
     if (cst == nullptr)
         return false;
     return cst->value == 1;
 }
 
-bool StrengthReduction::isZero(const IR::Expression* expr) const {
+bool DoStrengthReduction::isZero(const IR::Expression* expr) const {
     auto cst = expr->to<IR::Constant>();
     if (cst == nullptr)
         return false;
     return cst->value == 0;
 }
 
-bool StrengthReduction::isTrue(const IR::Expression* expr) const {
+bool DoStrengthReduction::isTrue(const IR::Expression* expr) const {
     auto cst = expr->to<IR::BoolLiteral>();
     if (cst == nullptr)
         return false;
     return cst->value;
 }
 
-bool StrengthReduction::isFalse(const IR::Expression* expr) const {
+bool DoStrengthReduction::isFalse(const IR::Expression* expr) const {
     auto cst = expr->to<IR::BoolLiteral>();
     if (cst == nullptr)
         return false;
     return !cst->value;
 }
-int StrengthReduction::isPowerOf2(const IR::Expression* expr) const {
+int DoStrengthReduction::isPowerOf2(const IR::Expression* expr) const {
     auto cst = expr->to<IR::Constant>();
     if (cst == nullptr)
         return -1;
@@ -64,13 +64,13 @@ int StrengthReduction::isPowerOf2(const IR::Expression* expr) const {
 
 /// @section Visitor Methods
 
-const IR::Node* StrengthReduction::postorder(IR::Cmpl* expr) {
+const IR::Node* DoStrengthReduction::postorder(IR::Cmpl* expr) {
     if (auto a = expr->expr->to<IR::Cmpl>())
         return a->expr;
     return expr;
 }
 
-const IR::Node* StrengthReduction::postorder(IR::BAnd* expr) {
+const IR::Node* DoStrengthReduction::postorder(IR::BAnd* expr) {
     if (isZero(expr->left))
         return expr->left;
     if (isZero(expr->right))
@@ -82,7 +82,7 @@ const IR::Node* StrengthReduction::postorder(IR::BAnd* expr) {
     return expr;
 }
 
-const IR::Node* StrengthReduction::postorder(IR::BOr* expr) {
+const IR::Node* DoStrengthReduction::postorder(IR::BOr* expr) {
     if (isZero(expr->left))
         return expr->right;
     if (isZero(expr->right))
@@ -94,7 +94,7 @@ const IR::Node* StrengthReduction::postorder(IR::BOr* expr) {
     return expr;
 }
 
-const IR::Node* StrengthReduction::postorder(IR::BXor* expr) {
+const IR::Node* DoStrengthReduction::postorder(IR::BXor* expr) {
     if (isZero(expr->left))
         return expr->right;
     if (isZero(expr->right))
@@ -111,7 +111,7 @@ const IR::Node* StrengthReduction::postorder(IR::BXor* expr) {
     return expr;
 }
 
-const IR::Node* StrengthReduction::postorder(IR::LAnd* expr) {
+const IR::Node* DoStrengthReduction::postorder(IR::LAnd* expr) {
     if (isFalse(expr->left))
         return expr->left;
     if (isTrue(expr->left))
@@ -122,7 +122,7 @@ const IR::Node* StrengthReduction::postorder(IR::LAnd* expr) {
     return expr;
 }
 
-const IR::Node* StrengthReduction::postorder(IR::LOr* expr) {
+const IR::Node* DoStrengthReduction::postorder(IR::LOr* expr) {
     if (isFalse(expr->left))
         return expr->right;
     if (isTrue(expr->left))
@@ -133,7 +133,7 @@ const IR::Node* StrengthReduction::postorder(IR::LOr* expr) {
     return expr;
 }
 
-const IR::Node* StrengthReduction::postorder(IR::LNot* expr) {
+const IR::Node* DoStrengthReduction::postorder(IR::LNot* expr) {
     if (auto e = expr->expr->to<IR::Equ>())
         return new IR::Neq(e->left, e->right);
     if (auto e = expr->expr->to<IR::Neq>())
@@ -149,7 +149,7 @@ const IR::Node* StrengthReduction::postorder(IR::LNot* expr) {
     return expr;
 }
 
-const IR::Node* StrengthReduction::postorder(IR::Sub* expr) {
+const IR::Node* DoStrengthReduction::postorder(IR::Sub* expr) {
     if (isZero(expr->right))
         return expr->left;
     if (isZero(expr->left))
@@ -164,7 +164,7 @@ const IR::Node* StrengthReduction::postorder(IR::Sub* expr) {
     return expr;
 }
 
-const IR::Node* StrengthReduction::postorder(IR::Add* expr) {
+const IR::Node* DoStrengthReduction::postorder(IR::Add* expr) {
     if (isZero(expr->right))
         return expr->left;
     if (isZero(expr->left))
@@ -172,19 +172,19 @@ const IR::Node* StrengthReduction::postorder(IR::Add* expr) {
     return expr;
 }
 
-const IR::Node* StrengthReduction::postorder(IR::Shl* expr) {
+const IR::Node* DoStrengthReduction::postorder(IR::Shl* expr) {
     if (isZero(expr->right) || isZero(expr->left))
         return expr->left;
     return expr;
 }
 
-const IR::Node* StrengthReduction::postorder(IR::Shr* expr) {
+const IR::Node* DoStrengthReduction::postorder(IR::Shr* expr) {
     if (isZero(expr->right) || isZero(expr->left))
         return expr->left;
     return expr;
 }
 
-const IR::Node* StrengthReduction::postorder(IR::Mul* expr) {
+const IR::Node* DoStrengthReduction::postorder(IR::Mul* expr) {
     if (isZero(expr->left))
         return expr->left;
     if (isZero(expr->right))
@@ -208,7 +208,7 @@ const IR::Node* StrengthReduction::postorder(IR::Mul* expr) {
     return expr;
 }
 
-const IR::Node* StrengthReduction::postorder(IR::Div* expr) {
+const IR::Node* DoStrengthReduction::postorder(IR::Div* expr) {
     if (isZero(expr->right)) {
         ::error("%1%: Division by zero", expr);
         return expr;
@@ -226,7 +226,7 @@ const IR::Node* StrengthReduction::postorder(IR::Div* expr) {
     return expr;
 }
 
-const IR::Node* StrengthReduction::postorder(IR::Mod* expr) {
+const IR::Node* DoStrengthReduction::postorder(IR::Mod* expr) {
     if (isZero(expr->right)) {
         ::error("%1%: Modulo by zero", expr);
         return expr;
@@ -244,7 +244,7 @@ const IR::Node* StrengthReduction::postorder(IR::Mod* expr) {
     return expr;
 }
 
-const IR::Node* StrengthReduction::simplifyShift(IR::Slice* expr) {
+const IR::Node* DoStrengthReduction::simplifyShift(IR::Slice* expr) {
     int shift_amt = 0;
     const IR::Expression *shift_of = nullptr;
     if (auto sh = expr->e0->to<IR::Shr>()) {
@@ -265,7 +265,7 @@ const IR::Node* StrengthReduction::simplifyShift(IR::Slice* expr) {
     return expr;
 }
 
-const IR::Node* StrengthReduction::simplifyConcat(IR::Slice* expr) {
+const IR::Node* DoStrengthReduction::simplifyConcat(IR::Slice* expr) {
     if (!expr->e0->is<IR::Concat>())
         return expr;
 
@@ -273,6 +273,9 @@ const IR::Node* StrengthReduction::simplifyConcat(IR::Slice* expr) {
     auto hi = int(expr->getH());
     auto left = expr->e0->to<IR::Concat>()->left;
     auto right = expr->e0->to<IR::Concat>()->right;
+
+    if (left->type->is<IR::Type_Unknown>() || right->type->is<IR::Type_Unknown>())
+        return expr;
 
     if ((hi == (left->type->width_bits() + right->type->width_bits() - 1)) && (lo == 0))
         return expr->e0;
@@ -304,7 +307,7 @@ const IR::Node* StrengthReduction::simplifyConcat(IR::Slice* expr) {
     return expr;
 }
 
-const IR::Node* StrengthReduction::postorder(IR::Slice* expr) {
+const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
     // remove slice if equals to expr width
     auto lo = int(expr->getL());
     auto hi = int(expr->getH());

@@ -91,7 +91,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::ExpandEmit(&refMap, &typeMap),
         new P4::HandleNoMatch(&refMap),
         new P4::SimplifyParsers(&refMap),
-        new P4::StrengthReduction(),
+        new P4::StrengthReduction(&refMap, &typeMap),
         new P4::EliminateTuples(&refMap, &typeMap),
         new P4::SimplifyComparisons(&refMap, &typeMap),
         new P4::CopyStructures(&refMap, &typeMap),
