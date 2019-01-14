@@ -2720,8 +2720,8 @@ bool TypeInference::hasVarbitsOrUnions(const IR::Type* type) const {
 
 bool TypeInference::onlyBitsOrBitStructs(const IR::Type* type) const {
     // called for a canonical type
-    if (type->is<IR::Type_Bits>() || type->is<IR::Type_InfInt>() ||
-        type->is<IR::Type_Boolean>() || type->is<IR::Type_SerEnum>()) {
+    if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>() ||
+        type->is<IR::Type_SerEnum>()) {
         return true;
     } else if (auto ht = type->to<IR::Type_Struct>()) {
         for (auto f : ht->fields) {
