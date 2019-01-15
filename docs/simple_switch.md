@@ -377,3 +377,63 @@ if (egress_spec == 511) {
     the control plane configured for that clone session).
 }
 ```
+
+
+## Table match kinds supported
+
+`simple_switch` supports table key fields with any of the following `match_kind`
+values:
+
++ `exact` - from P4_16 language specification
++ `lpm` - from P4_16 language specification
++ `ternary` - from P4_16 language specification
++ `range` - defined in `v1model.p4`
++ `selector` - defined in `v1model.p4`
+
+`selector` is only supported for tables with an action profile or action
+selector implementation.
+
+If a table has more than one `lpm` key field, it is rejected by the `p4c` BMv2
+back end. This could be generalized slightly, as described below, but that
+restriction is in place as of the January 2019 version of `p4c`.
+
+If a table has at least one `range` field, it is implemented internally as a
+`range` table in BMv2. Because a single search key could match mutiple entries,
+every entry must be assigned a numeric priority by the control plane software
+when it is installed. If multiple installed table entries match the same search
+key, one among them with the maximum numeric priority will "win", and its action
+performed. Note that winner is one with maximum numeric priority value if you
+use the P4Runtime API to specify the numeric priorities. Check the documentation
+of your control plane API if you use a different one, as some might choose to
+use the convention that minimum numeric priority values win over larger ones.
+
+A `range` table may have an `lpm` field. If so, the prefix length is used to
+determine whether a search key matches the entry, but the prefix length does
+_not_ determine the relative priority among multiple matching table
+entries. Only the numeric priority supplied by the control plane software
+determines that. Because of this, it would be reasonable for a `range` table to
+support multiple `lpm` key fields, but as of January 2019 this is not supported.
+
+If a table has no `range` field, but at least one `ternary` field, it is
+implemented internally as a `ternary` table in BMv2. As for `range` tables, a
+single search key can be matched by multiple table entries, and thus every entry
+must have a numeric priority assigned by the control plane software. The same
+note about `lpm` fields described above for `range` tables also applied to
+`ternary` tables.
+
+If a table has neither `range` nor `ternary` fields, but at least one `lpm`
+field, there must be exactly one `lpm` field. There can be 0 or more `exact`
+fields. While there can be multiple installed table entries that match a single
+search key, with these restrictions there can be at most one matching table
+entry of each possible prefix length of the `lpm` field (because no two table
+entries installed at the same time are allowed to have the same search key). The
+matching entry with the longest prefix length is always the winner. The control
+plane cannot specify a priority when installing entries for such a table -- it
+is always determined by the prefix length.
+
+If a table has only `exact` fields, it is implemented internally as an `exact`
+table in BMv2. For any search key, there can be at most one matching table
+entry, because duplicate search keys are not allowed to be installed. Thus no
+numeric priority is ever needed to determine the "winning" matching table entry.
+BMv2 (and many other P4 implementations) implements the match portion of such a
+table's functionality using a hash table.
