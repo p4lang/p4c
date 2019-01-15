@@ -169,13 +169,18 @@ static bool match(const char *pattern, const char *name) {
             if (pattern > pend) pend = pattern + strcspn(pattern, ",:");
             name++;
             continue; }
-        if (*pattern++ != '*') return false;
+        if (!pbackup && *pattern != '*') return false;
+        while (*pattern == '*') {
+            ++pattern;
+            pbackup = nullptr; }
         if (pattern == pend) return true;
+        // FIXME -- does not work for * followed by [ -- matches a literal [ instead.
         while (*name && *name != *pattern) {
             if (pbackup && *name == *pbackup) {
                 pattern = pbackup;
                 break; }
             name++; }
+        if (!*name) return false;
         pbackup = pattern;
     }
 }
