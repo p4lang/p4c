@@ -151,7 +151,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new TableKeyNames(&refMap, &typeMap),
         // Another round of constant folding, using type information.
         new ConstantFolding(&refMap, &typeMap),
-        new StrengthReduction(),
+        new StrengthReduction(&refMap, &typeMap),
         new UselessCasts(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
         new FrontEndDump(),  // used for testing the program at this point
