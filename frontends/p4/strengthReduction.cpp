@@ -287,8 +287,8 @@ const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
         } else if (expr->getH() < rwidth) {
             expr->e0 = cat->right;
         } else {
-            return new IR::Concat(expr->type, 
-                    new IR::Slice(cat->left, expr->getH() - rwidth, 0), 
+            return new IR::Concat(expr->type,
+                    new IR::Slice(cat->left, expr->getH() - rwidth, 0),
                     new IR::Slice(cat->right, rwidth-1, expr->getL()));
         }
     }
