@@ -19,5 +19,5 @@ if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
     # install pip and required pip packages
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
     python get-pip.py --user
-    pip install --user scapy ply
+    pip install --user scapy==2.4.0 ply
 fi

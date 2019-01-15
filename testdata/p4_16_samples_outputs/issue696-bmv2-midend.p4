@@ -74,22 +74,17 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
 }
 
 control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    Value val_0;
-    bit<32> inc_0;
     bit<32> tmp;
     bit<32> tmp_0;
     @name("Eg.test") action test() {
-        val_0.field1 = 32w0;
         tmp = tmp;
         tmp = 32w0;
-        inc_0 = tmp;
         tmp_0 = tmp_0;
         tmp_0 = 32w0;
         debug.write(32w0, tmp_0);
-        debug.write(32w1, inc_0);
-        val_0.field1 = 32w1;
-        debug.write(32w2, inc_0);
-        reg.write(32w0, val_0.field1);
+        debug.write(32w1, tmp);
+        debug.write(32w2, tmp);
+        reg.write(32w0, 32w1);
     }
     @hidden table tbl_test {
         actions = {

@@ -1,5 +1,4 @@
 FROM p4lang/behavioral-model:latest
-MAINTAINER Seth Fowler <seth.fowler@barefootnetworks.com>
 
 # Default to using 2 make jobs, which is a good default for CI. If you're
 # building locally or you know there are more cores available, you may want to
@@ -44,7 +43,7 @@ ENV P4C_RUNTIME_DEPS cpp \
 ENV P4C_PIP_PACKAGES tenjin \
                      pyroute2 \
                      ply \
-                     scapy
+                     scapy==2.4.0
 COPY . /p4c/
 WORKDIR /p4c/
 RUN apt-get update && \

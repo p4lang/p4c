@@ -194,4 +194,29 @@ Instantiation* Instantiation::resolve(const IR::Declaration_Instance* instance,
     return nullptr;  // unreachable
 }
 
+std::vector<const IR::IDeclaration *> ExternMethod::mayCall() const {
+    std::vector<const IR::IDeclaration *> rv;
+    auto *di = object->to<IR::Declaration_Instance>();
+    if (!di || !di->initializer) {
+        rv.push_back(method);
+    } else if (auto *em_decl = di->initializer->components
+                                .getDeclaration<IR::IDeclaration>(method->name)) {
+        rv.push_back(em_decl);
+    } else {
+        for (auto meth : originalExternType->methods) {
+            auto sync = meth->getAnnotation(IR::Annotation::synchronousAnnotation);
+            if (!sync) continue;
+            for (auto m : sync->expr) {
+                auto mname = m->to<IR::PathExpression>();
+                if (!mname ||  method->name != mname->path->name)
+                    continue;
+                if (auto *am = di->initializer->components
+                                .getDeclaration<IR::IDeclaration>(meth->name)) {
+                    rv.push_back(am);
+                } else if (!meth->getAnnotation(IR::Annotation::optionalAnnotation)) {
+                    error("No implementation for abstract %s in %s called via %s",
+                          meth, di, method); } } } }
+    return rv;
+}
+
 }  // namespace P4

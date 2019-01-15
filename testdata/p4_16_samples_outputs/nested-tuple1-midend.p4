@@ -17,13 +17,11 @@ extern void f<D>(in D data);
 control c(inout bit<1> r) {
     T s_f1_field;
     T s_f1_field_0;
-    T s_f2;
     @hidden action act() {
         s_f1_field.f = 1w0;
         s_f1_field_0.f = 1w1;
-        s_f2.f = 1w0;
         f<tuple_0>({ s_f1_field, s_f1_field_0 });
-        r = s_f2.f & 1w1;
+        r = 1w0;
     }
     @hidden table tbl_act {
         actions = {

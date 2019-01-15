@@ -72,94 +72,71 @@ class ExternConverter {
     static cstring convertHashAlgorithm(cstring algorithm);
 };
 
-#define EXTERN_CONVERTER_W_FUNCTION_AND_MODEL(extern_name, model_type, model_name, ...)  \
-    class ExternConverter_##extern_name##__VA_ARGS__ : public ExternConverter { \
+#define EXTERN_CONVERTER_W_FUNCTION_AND_MODEL(extern_name, model_type, model_name)  \
+    class ExternConverter_##extern_name : public ExternConverter {              \
         model_type&  model_name;                                                \
-        ExternConverter_##extern_name##__VA_ARGS__() :                          \
+        ExternConverter_##extern_name() :                                       \
             model_name(model_type::instance) {                                  \
             registerExternConverter(#extern_name, this); }                      \
-        static ExternConverter_##extern_name##__VA_ARGS__ singleton;            \
+        static ExternConverter_##extern_name singleton;                         \
         Util::IJson* convertExternFunction(ConversionContext* ctxt,             \
             const P4::ExternFunction* ef, const IR::MethodCallExpression* mc,   \
             const IR::StatOrDecl* s, const bool emitExterns) override;  };
 
-#define EXTERN_CONVERTER_W_FUNCTION(extern_name, ...)                           \
-    class ExternConverter_##extern_name##__VA_ARGS__ : public ExternConverter { \
-        ExternConverter_##extern_name##__VA_ARGS__() {                          \
+#define EXTERN_CONVERTER_W_FUNCTION(extern_name)                                \
+    class ExternConverter_##extern_name : public ExternConverter {              \
+        ExternConverter_##extern_name() {                                       \
             registerExternConverter(#extern_name, this); }                      \
-        static ExternConverter_##extern_name##__VA_ARGS__ singleton;            \
+        static ExternConverter_##extern_name singleton;                         \
         Util::IJson* convertExternFunction(ConversionContext* ctxt,             \
             const P4::ExternFunction* ef, const IR::MethodCallExpression* mc,   \
             const IR::StatOrDecl* s, const bool emitExterns) override;  };
 
-#define EXTERN_CONVERTER_W_INSTANCE_AND_MODEL(extern_name, model_type, model_name, ...) \
-    class ExternConverter_##extern_name##__VA_ARGS__ : public ExternConverter { \
+#define EXTERN_CONVERTER_W_INSTANCE_AND_MODEL(extern_name, model_type, model_name) \
+    class ExternConverter_##extern_name : public ExternConverter {              \
         model_type&      model_name;                                            \
-        ExternConverter_##extern_name##__VA_ARGS__() :                          \
+        ExternConverter_##extern_name() :                                       \
             model_name(model_type::instance) {                                  \
             registerExternConverter(#extern_name, this); }                      \
-        static ExternConverter_##extern_name##__VA_ARGS__ singleton;            \
-        void convertExternInstance(ConversionContext* ctxt,             \
-            const IR::Declaration* c, const IR::ExternBlock* eb,        \
+        static ExternConverter_##extern_name singleton;                         \
+        void convertExternInstance(ConversionContext* ctxt,                     \
+            const IR::Declaration* c, const IR::ExternBlock* eb,                \
             const bool& emitExterns) override; };
 
-#define EXTERN_CONVERTER_W_INSTANCE(extern_name, ...)                          \
-    class ExternConverter_##extern_name##__VA_ARGS__ : public ExternConverter { \
-        ExternConverter_##extern_name##__VA_ARGS__() {                          \
+#define EXTERN_CONVERTER_W_INSTANCE(extern_name)                                \
+    class ExternConverter_##extern_name : public ExternConverter {              \
+        ExternConverter_##extern_name() {                                       \
             registerExternConverter(#extern_name, this); }                      \
-        static ExternConverter_##extern_name##__VA_ARGS__ singleton;            \
-        void convertExternInstance(ConversionContext* ctxt,             \
-            const IR::Declaration* c, const IR::ExternBlock* eb,        \
+        static ExternConverter_##extern_name singleton;                         \
+        void convertExternInstance(ConversionContext* ctxt,                     \
+            const IR::Declaration* c, const IR::ExternBlock* eb,                \
             const bool& emitExterns) override; };
 
-#define EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE_AND_MODEL(extern_name, type, name, ...)  \
-    class ExternConverter_##extern_name##__VA_ARGS__ : public ExternConverter { \
+#define EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE_AND_MODEL(extern_name, type, name)  \
+    class ExternConverter_##extern_name : public ExternConverter {              \
         type&      name;                                                        \
-        ExternConverter_##extern_name##__VA_ARGS__() :                          \
+        ExternConverter_##extern_name() :                                       \
             name(type::instance) {                                              \
             registerExternConverter(#extern_name, this); }                      \
-        static ExternConverter_##extern_name##__VA_ARGS__ singleton;            \
-        void convertExternInstance(ConversionContext* ctxt,             \
-            const IR::Declaration* c, const IR::ExternBlock* eb,        \
-            const bool& emitExternes) override;      \
+        static ExternConverter_##extern_name singleton;                         \
+        void convertExternInstance(ConversionContext* ctxt,                     \
+            const IR::Declaration* c, const IR::ExternBlock* eb,                \
+            const bool& emitExternes) override;                                 \
         Util::IJson* convertExternObject(ConversionContext* ctxt,               \
             const P4::ExternMethod* em, const IR::MethodCallExpression* mc,     \
             const IR::StatOrDecl* s, const bool& emitExterns) override; };
 
-#define EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(extern_name, ...)               \
-    class ExternConverter_##extern_name##__VA_ARGS__ : public ExternConverter { \
-        ExternConverter_##extern_name##__VA_ARGS__() {                          \
+#define EXTERN_CONVERTER_W_OBJECT_AND_INSTANCE(extern_name)                     \
+    class ExternConverter_##extern_name : public ExternConverter {              \
+        ExternConverter_##extern_name() {                                       \
             registerExternConverter(#extern_name, this); }                      \
-        static ExternConverter_##extern_name##__VA_ARGS__ singleton;            \
-        void convertExternInstance(ConversionContext* ctxt,             \
-            const IR::Declaration* c, const IR::ExternBlock* eb,        \
-            const bool& emitExterns) override;      \
+        static ExternConverter_##extern_name singleton;                         \
+        void convertExternInstance(ConversionContext* ctxt,                     \
+            const IR::Declaration* c, const IR::ExternBlock* eb,                \
+            const bool& emitExterns) override;                                  \
         Util::IJson* convertExternObject(ConversionContext* ctxt,               \
             const P4::ExternMethod* em, const IR::MethodCallExpression* mc,     \
             const IR::StatOrDecl* s, const bool& emitExterns) override; };
-
-#define EXTERN_CONVERTER_SINGLETON(extern_name, ...)                           \
-    ExternConverter_##extern_name##__VA_ARGS__                                 \
-       ExternConverter_##extern_name##__VA_ARGS__::singleton;
-
-#define CONVERT_EXTERN_INSTANCE(extern_name, ...)                                     \
-    void ExternConverter_##extern_name##__VA_ARGS__::convertExternInstance(   \
-        UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,              \
-        UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns)
-
-
-#define CONVERT_EXTERN_OBJECT(extern_name, ...)                                       \
-    Util::IJson* ExternConverter_##extern_name##__VA_ARGS__::convertExternObject(     \
-        UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,            \
-        UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,    \
-        UNUSED const bool& emitExterns)
-
-
-#define CONVERT_EXTERN_FUNCTION(extern_name, ...)                                     \
-    Util::IJson* ExternConverter_##extern_name##__VA_ARGS__::convertExternFunction(   \
-        UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,          \
-        UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,    \
-        UNUSED const bool emitExterns)
 
 }  // namespace BMV2
 

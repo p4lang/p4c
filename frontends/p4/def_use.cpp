@@ -656,26 +656,29 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
     }
 
     // Symbolically call some apply methods (actions and tables)
-    const IR::Node* callee = nullptr;
+    std::vector<const IR::IDeclaration *> callee;
     if (mi->is<ActionCall>()) {
         auto action = mi->to<ActionCall>()->action;
-        callee = action;
+        callee.push_back(action);
     } else if (mi->isApply()) {
         auto am = mi->to<ApplyMethod>();
         if (am->isTableApply()) {
             auto table = am->object->to<IR::P4Table>();
-            callee = table;
+            callee.push_back(table);
         }
-    }
-
-    if (callee != nullptr) {
-        LOG3("Analyzing " << dbp(callee));
+    } else if (auto em = mi->to<ExternMethod>()) {
+        // symbolically call all the methods that might be called via this extern method
+        callee = em->mayCall(); }
+    if (!callee.empty()) {
+        LOG3("Analyzing " << DBPrint::Brief << callee << DBPrint::Reset);
         ProgramPoint pt(callingContext, expression);
         ComputeWriteSet cw(this, pt, currentDefinitions);
-        (void)callee->apply(cw);
+        for (auto c : callee)
+            (void)c->getNode()->apply(cw);
         currentDefinitions = cw.currentDefinitions;
         exitDefinitions = exitDefinitions->joinDefinitions(cw.exitDefinitions);
-        LOG3("Definitions after call of " << expression << ": " << currentDefinitions);
+        LOG3("Definitions after call of " << DBPrint::Brief << expression << ": " <<
+             currentDefinitions << DBPrint::Reset);
     }
 
     auto result = LocationSet::empty;
@@ -932,3 +935,14 @@ bool ComputeWriteSet::preorder(const IR::MethodCallStatement* statement) {
 }
 
 }  // namespace P4
+
+// functions for calling from gdb
+void dump(const P4::StorageLocation *s) { std::cout << *s << std::endl; }
+void dump(const P4::StorageMap *s) { std::cout << *s << std::endl; }
+void dump(const P4::LocationSet *s) { std::cout << *s << std::endl; }
+void dump(const P4::ProgramPoint *p) { std::cout << *p << std::endl; }
+void dump(const P4::ProgramPoint &p) { std::cout << p << std::endl; }
+void dump(const P4::ProgramPoints *p) { std::cout << *p << std::endl; }
+void dump(const P4::ProgramPoints &p) { std::cout << p << std::endl; }
+void dump(const P4::Definitions *d) { std::cout << *d << std::endl; }
+void dump(const P4::AllDefinitions *d) { std::cout << *d << std::endl; }

@@ -238,6 +238,12 @@ class StorageMap {
         auto result = ::get(storage, decl);
         return result;
     }
+    virtual void dbprint(std::ostream& out) const {
+        for (auto &it : storage)
+            out << it.first << ": " << it.second << std::endl;
+        if (retVal)
+            out << "retVal: " << retVal << std::endl;
+    }
 };
 
 /// Indicates a statement in the program.
@@ -276,6 +282,8 @@ class ProgramPoint : public IHasDbPrint {
     { return stack.empty() ? nullptr : stack.back(); }
     bool isBeforeStart() const
     { return stack.empty(); }
+    std::vector<const IR::Node*>::const_iterator begin() const { return stack.begin(); }
+    std::vector<const IR::Node*>::const_iterator end() const { return stack.end(); }
 };
 }  // namespace P4
 
@@ -415,7 +423,7 @@ class ComputeWriteSet : public Inspector {
             allDefinitions(source->allDefinitions), currentDefinitions(definitions),
             returnedDefinitions(nullptr), exitDefinitions(source->exitDefinitions),
             callingContext(context), storageMap(source->storageMap), lhs(false) {
-        setName("ComputeWriteSet");
+        visitDagOnce = false;
     }
     void enterScope(const IR::ParameterList* parameters,
                     const IR::IndexedVector<IR::Declaration>* locals,
@@ -438,9 +446,9 @@ class ComputeWriteSet : public Inspector {
  public:
     explicit ComputeWriteSet(AllDefinitions* allDefinitions) :
             allDefinitions(allDefinitions), currentDefinitions(nullptr),
-            returnedDefinitions(nullptr), exitDefinitions(nullptr),
+            returnedDefinitions(nullptr), exitDefinitions(new Definitions()),
             storageMap(allDefinitions->storageMap), lhs(false)
-    { CHECK_NULL(allDefinitions); setName("ComputeWriteSet"); }
+    { CHECK_NULL(allDefinitions); visitDagOnce = false; }
 
     // expressions
     bool preorder(const IR::Literal* expression) override;

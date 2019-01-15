@@ -18,6 +18,9 @@ limitations under the License.
 #define _P4_STRENGTHREDUCTION_H_
 
 #include "ir/ir.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/typeMap.h"
 
 namespace P4 {
 
@@ -41,7 +44,7 @@ namespace P4 {
   *    - Should this pass be merged with constant folding?
   *    - Should we store constant values in the IR instead of computing them explicitly?
   */
-class StrengthReduction final : public Transform {
+class DoStrengthReduction final : public Transform {
     /// @returns `true` if @p expr is the constant `1`.
     bool isOne(const IR::Expression* expr) const;
     /// @returns `true` if @p expr is the constant `0`.
@@ -50,12 +53,17 @@ class StrengthReduction final : public Transform {
     bool isTrue(const IR::Expression* expr) const;
     /// @returns `true` if @p expr is the constant `false`.
     bool isFalse(const IR::Expression* expr) const;
+    /// @returns `true` if @p expr is all ones.
+    bool isAllOnes(const IR::Expression* expr) const;
     /// @returns the logarithm (base 2) of @p expr if it is positive
     /// and a power of `2` and `-1` otherwise.
     int isPowerOf2(const IR::Expression* expr) const;
 
+    const IR::Node* simplifyShift(IR::Slice* expr);
+    const IR::Node* simplifyConcat(IR::Slice* expr);
+
  public:
-    StrengthReduction() { visitDagOnce = true; setName("StrengthReduction"); }
+    DoStrengthReduction() { visitDagOnce = true; setName("StrengthReduction"); }
 
     using Transform::postorder;
 
@@ -74,6 +82,14 @@ class StrengthReduction final : public Transform {
     const IR::Node* postorder(IR::Div* expr) override;
     const IR::Node* postorder(IR::Mod* expr) override;
     const IR::Node* postorder(IR::Slice* expr) override;
+};
+
+class StrengthReduction : public PassManager {
+ public:
+    StrengthReduction(ReferenceMap* refMap, TypeMap* typeMap) {
+        passes.push_back(new TypeChecking(refMap, typeMap, true));
+        passes.push_back(new DoStrengthReduction());
+    }
 };
 
 }  // namespace P4

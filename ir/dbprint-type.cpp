@@ -45,6 +45,7 @@ void IR::Type_MethodBase::dbprint(std::ostream& out) const {
 
 void IR::Method::dbprint(std::ostream& out) const {
     int flags = dbgetflags(out);
+    out << annotations;
     if (isAbstract) out << "abstract ";
     out << Brief << type->returnType << " " << name;
     if (type->typeParameters != nullptr)

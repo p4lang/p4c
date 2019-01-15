@@ -86,7 +86,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
         new P4::SimplifySelectCases(&refMap, &typeMap, false),  // accept non-constant keysets
         new P4::HandleNoMatch(&refMap),
         new P4::SimplifyParsers(&refMap),
-        new P4::StrengthReduction(),
+        new P4::StrengthReduction(&refMap, &typeMap),
         new P4::SimplifyComparisons(&refMap, &typeMap),
         new P4::EliminateTuples(&refMap, &typeMap),
         new P4::LocalCopyPropagation(&refMap, &typeMap),

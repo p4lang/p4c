@@ -443,35 +443,47 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     json->add_meta_info();
 }
 
-EXTERN_CONVERTER_SINGLETON(Hash)
-EXTERN_CONVERTER_SINGLETON(Checksum)
-EXTERN_CONVERTER_SINGLETON(InternetChecksum)
-EXTERN_CONVERTER_SINGLETON(Counter)
-EXTERN_CONVERTER_SINGLETON(DirectCounter)
-EXTERN_CONVERTER_SINGLETON(Meter)
-EXTERN_CONVERTER_SINGLETON(DirectMeter)
-EXTERN_CONVERTER_SINGLETON(Register)
-EXTERN_CONVERTER_SINGLETON(Random)
-EXTERN_CONVERTER_SINGLETON(ActionProfile)
-EXTERN_CONVERTER_SINGLETON(ActionSelector)
-EXTERN_CONVERTER_SINGLETON(Digest)
+ExternConverter_Hash ExternConverter_Hash::singleton;
+ExternConverter_Checksum ExternConverter_Checksum::singleton;
+ExternConverter_InternetChecksum ExternConverter_InternetChecksum::singleton;
+ExternConverter_Counter ExternConverter_Counter::singleton;
+ExternConverter_DirectCounter ExternConverter_DirectCounter::singleton;
+ExternConverter_Meter ExternConverter_Meter::singleton;
+ExternConverter_DirectMeter ExternConverter_DirectMeter::singleton;
+ExternConverter_Register ExternConverter_Register::singleton;
+ExternConverter_Random ExternConverter_Random::singleton;
+ExternConverter_ActionProfile ExternConverter_ActionProfile::singleton;
+ExternConverter_ActionSelector ExternConverter_ActionSelector::singleton;
+ExternConverter_Digest ExternConverter_Digest::singleton;
 
-CONVERT_EXTERN_OBJECT(Hash) {
+Util::IJson* ExternConverter_Hash::convertExternObject(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const bool& emitExterns) {
     auto primitive = mkPrimitive("Hash");
     return primitive;
 }
 
-CONVERT_EXTERN_OBJECT(Checksum) {
+Util::IJson* ExternConverter_Checksum::convertExternObject(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const bool& emitExterns) {
     auto primitive = mkPrimitive("Checksum");
     return primitive;
 }
 
-CONVERT_EXTERN_OBJECT(InternetChecksum) {
+Util::IJson* ExternConverter_InternetChecksum::convertExternObject(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const bool& emitExterns) {
     auto primitive = mkPrimitive("InternetChecksum");
     return primitive;
 }
 
-CONVERT_EXTERN_OBJECT(Counter) {
+Util::IJson* ExternConverter_Counter::convertExternObject(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 1) {
         modelError("Expected 1 argument for %1%", mc);
         return nullptr;
@@ -487,7 +499,11 @@ CONVERT_EXTERN_OBJECT(Counter) {
     parameters->append(index);
     return primitive;
 }
-CONVERT_EXTERN_OBJECT(DirectCounter) {
+
+Util::IJson* ExternConverter_DirectCounter::convertExternObject(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 0) {
         modelError("Expected 0 argument for %1%", mc);
         return nullptr;
@@ -495,7 +511,11 @@ CONVERT_EXTERN_OBJECT(DirectCounter) {
     // Do not generate any code for this operation
     return nullptr;
 }
-CONVERT_EXTERN_OBJECT(Meter) {
+
+Util::IJson* ExternConverter_Meter::convertExternObject(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 2) {
         modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
@@ -513,7 +533,11 @@ CONVERT_EXTERN_OBJECT(Meter) {
     parameters->append(result);
     return primitive;
 }
-CONVERT_EXTERN_OBJECT(DirectMeter) {
+
+Util::IJson* ExternConverter_DirectMeter::convertExternObject(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 1) {
         modelError("Expected 1 argument for %1%", mc);
         return nullptr;
@@ -523,7 +547,11 @@ CONVERT_EXTERN_OBJECT(DirectMeter) {
     // Do not generate any code for this operation
     return nullptr;
 }
-CONVERT_EXTERN_OBJECT(Register) {
+
+Util::IJson* ExternConverter_Register::convertExternObject(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 2) {
         modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
@@ -556,7 +584,11 @@ CONVERT_EXTERN_OBJECT(Register) {
     }
     return nullptr;
 }
-CONVERT_EXTERN_OBJECT(Random) {
+
+Util::IJson* ExternConverter_Random::convertExternObject(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 3) {
         modelError("Expected 3 arguments for %1%", mc);
         return nullptr;
@@ -575,7 +607,10 @@ CONVERT_EXTERN_OBJECT(Random) {
     return primitive;
 }
 
-CONVERT_EXTERN_OBJECT(Digest) {
+Util::IJson* ExternConverter_Digest::convertExternObject(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 1) {
         modelError("Expected 1 arguments for %1%", mc);
         return nullptr;
@@ -608,10 +643,24 @@ CONVERT_EXTERN_OBJECT(Digest) {
     return primitive;
 }
 
-CONVERT_EXTERN_INSTANCE(Hash) { /* TODO */ }
-CONVERT_EXTERN_INSTANCE(Checksum) { /* TODO */ }
-CONVERT_EXTERN_INSTANCE(InternetChecksum) { /* TODO */ }
-CONVERT_EXTERN_INSTANCE(Counter) {
+void ExternConverter_Hash::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns)
+{ /* TODO */ }
+
+void ExternConverter_Checksum::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns)
+{ /* TODO */ }
+
+void ExternConverter_InternetChecksum::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns)
+{ /* TODO */ }
+
+void ExternConverter_Counter::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto jctr = new Util::JsonObject();
@@ -628,7 +677,10 @@ CONVERT_EXTERN_INSTANCE(Counter) {
     jctr->emplace("is_direct", false);
     ctxt->json->counters->append(jctr);
 }
-CONVERT_EXTERN_INSTANCE(DirectCounter) {
+
+void ExternConverter_DirectCounter::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto it = ctxt->structure->directCounterMap.find(name);
@@ -644,7 +696,10 @@ CONVERT_EXTERN_INSTANCE(DirectCounter) {
         ctxt->json->counters->append(jctr);
     }
 }
-CONVERT_EXTERN_INSTANCE(Meter) {
+
+void ExternConverter_Meter::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto jmtr = new Util::JsonObject();
@@ -678,7 +733,9 @@ CONVERT_EXTERN_INSTANCE(Meter) {
     ctxt->json->meter_arrays->append(jmtr);
 }
 
-CONVERT_EXTERN_INSTANCE(DirectMeter) {
+void ExternConverter_DirectMeter::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto info = ctxt->structure->directMeterMap.getInfo(c);
@@ -717,7 +774,9 @@ CONVERT_EXTERN_INSTANCE(DirectMeter) {
     ctxt->json->meter_arrays->append(jmtr);
 }
 
-CONVERT_EXTERN_INSTANCE(Register) {
+void ExternConverter_Register::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto jreg = new Util::JsonObject();
@@ -755,8 +814,15 @@ CONVERT_EXTERN_INSTANCE(Register) {
     jreg->emplace("bitwidth", width);
     ctxt->json->register_arrays->append(jreg);
 }
-CONVERT_EXTERN_INSTANCE(Random) { /* TODO */ }
-CONVERT_EXTERN_INSTANCE(ActionProfile) {
+
+void ExternConverter_Random::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns)
+{ /* TODO */ }
+
+void ExternConverter_ActionProfile::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     // Might call this multiple times if the selector/profile is used more than
@@ -776,7 +842,10 @@ CONVERT_EXTERN_INSTANCE(ActionProfile) {
 
     ctxt->action_profiles->append(action_profile);
 }
-CONVERT_EXTERN_INSTANCE(ActionSelector) {
+
+void ExternConverter_ActionSelector::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     // Might call this multiple times if the selector/profile is used more than
@@ -821,6 +890,10 @@ CONVERT_EXTERN_INSTANCE(ActionSelector) {
 
     ctxt->action_profiles->append(action_profile);
 }
-CONVERT_EXTERN_INSTANCE(Digest) { /* TODO */ }
+
+void ExternConverter_Digest::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns)
+{ /* TODO */ }
 
 }  // namespace BMV2
