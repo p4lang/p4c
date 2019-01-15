@@ -72,14 +72,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction_5();
     }
-    headers hdr_0;
-    metadata meta_0;
-    standard_metadata_t standard_metadata_0;
     @name(".send") action _send_0(bit<9> port) {
-        standard_metadata_0.egress_port = port;
+        standard_metadata.egress_port = port;
     }
     @name(".send") action _send_2(bit<9> port) {
-        standard_metadata_0.egress_port = port;
+        standard_metadata.egress_port = port;
     }
     @name(".discard") action _discard_0() {
         mark_to_drop();
@@ -94,7 +91,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_6();
         }
         key = {
-            hdr_0.ethernet.dstAddr: exact @name("ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr") ;
         }
         size = 1024;
         default_action = NoAction_6();
@@ -106,7 +103,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_7();
         }
         key = {
-            hdr_0.ethernet.dstAddr: exact @name("ethernet.dstAddr") ;
+            hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr") ;
         }
         size = 1024;
         default_action = NoAction_7();
@@ -114,29 +111,23 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         if (standard_metadata.ingress_port & 9w0x1 == 9w1) {
             a1_0.apply();
-            hdr_0 = hdr;
-            meta_0 = meta;
-            standard_metadata_0 = standard_metadata;
-            if (standard_metadata_0.ingress_port & 9w0x2 == 9w1) 
+            hdr = hdr;
+            meta = meta;
+            standard_metadata = standard_metadata;
+            if (standard_metadata.ingress_port & 9w0x2 == 9w1) 
                 _c1.apply();
-            if (standard_metadata_0.ingress_port & 9w0x4 == 9w1) 
+            if (standard_metadata.ingress_port & 9w0x4 == 9w1) 
                 _c2.apply();
-            hdr = hdr_0;
-            meta = meta_0;
-            standard_metadata = standard_metadata_0;
+            hdr = hdr;
+            meta = meta;
+            standard_metadata = standard_metadata;
         }
         else {
             b1_0.apply();
-            hdr_0 = hdr;
-            meta_0 = meta;
-            standard_metadata_0 = standard_metadata;
-            if (standard_metadata_0.ingress_port & 9w0x2 == 9w1) 
+            if (standard_metadata.ingress_port & 9w0x2 == 9w1) 
                 _c1.apply();
-            if (standard_metadata_0.ingress_port & 9w0x4 == 9w1) 
+            if (standard_metadata.ingress_port & 9w0x4 == 9w1) 
                 _c2.apply();
-            hdr = hdr_0;
-            meta = meta_0;
-            standard_metadata = standard_metadata_0;
         }
     }
 }
