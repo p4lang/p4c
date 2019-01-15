@@ -69,6 +69,7 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
         default_action = NoAction_0();
     }
     @hidden action act() {
+        h.bvh0._row_alt1_type10 = 16w0x800;
         local_metadata.row0.alt0.useHash = true;
         clone3<row_t>(CloneType.I2E, 32w0, local_metadata.row0);
     }

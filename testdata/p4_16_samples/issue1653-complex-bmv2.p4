@@ -55,8 +55,8 @@ struct parsed_packet_t {
 };
 
 parser parse(packet_in pk, out parsed_packet_t h,
-inout local_metadata_t local_metadata,
-inout standard_metadata_t standard_metadata) {
+             inout local_metadata_t local_metadata,
+             inout standard_metadata_t standard_metadata) {
     state start {
 	pk.extract(h.bvh0);
 	pk.extract(h.bvh1);
@@ -90,6 +90,8 @@ control ingress(inout parsed_packet_t h,
 
         // Copy another header's data to local variable.
         bh.row.alt0.useHash = h.bvh0.row.alt0.useHash;
+        bh.row.alt1.type = EthTypes.IPv4;
+        h.bvh0.row.alt1.type = bh.row.alt1.type; 
 
         local_metadata.row0.alt0.useHash = true;
         clone3(CloneType.I2E, 0, local_metadata.row0);

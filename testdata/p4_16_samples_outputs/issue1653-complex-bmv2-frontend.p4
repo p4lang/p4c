@@ -52,6 +52,7 @@ parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_m
 control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
+    bitvec_hdr bh_0;
     @name("ingress.do_act") action do_act() {
         h.bvh1.row.alt1.valid = 1w0;
         local_metadata.row0.alt0.valid = 1w0;
@@ -69,6 +70,8 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     }
     apply {
         tns_0.apply();
+        bh_0.row.alt1.type = EthTypes.IPv4;
+        h.bvh0.row.alt1.type = bh_0.row.alt1.type;
         local_metadata.row0.alt0.useHash = true;
         clone3<row_t>(CloneType.I2E, 32w0, local_metadata.row0);
     }

@@ -69,6 +69,8 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     apply {
         tns.apply();
         bh.row.alt0.useHash = h.bvh0.row.alt0.useHash;
+        bh.row.alt1.type = EthTypes.IPv4;
+        h.bvh0.row.alt1.type = bh.row.alt1.type;
         local_metadata.row0.alt0.useHash = true;
         clone3<row_t>(CloneType.I2E, 32w0, local_metadata.row0);
     }
