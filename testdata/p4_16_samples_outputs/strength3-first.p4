@@ -18,25 +18,28 @@ struct Meta {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     action case0() {
-        h.h.c = (bit<8>)(16w0 ++ h.h.a);
+        h.h.c = (bit<8>)((16w0 ++ h.h.a)[15:0] ++ 16w0[15:0]);
     }
     action case1() {
-        h.h.c = (bit<8>)h.h.a;
+        h.h.c = (bit<8>)h.h.a[15:0];
     }
     action case2() {
-        h.h.c = (bit<8>)16w0;
+        h.h.c = (bit<8>)16w0[15:0];
     }
     action case3() {
         h.h.c = h.h.a[7:0];
     }
     action case4() {
-        h.h.c = (bit<8>)(16w0[7:0] ++ h.h.a);
+        h.h.c = (bit<8>)(16w0[7:0] ++ h.h.a[15:0]);
     }
     action case5() {
         h.h.c = (bit<8>)(16w0[7:0] ++ h.h.a[15:8]);
     }
     action case6() {
-        h.h.c = (bit<8>)(16w0 ++ h.h.a[15:8]);
+        h.h.c = (bit<8>)(16w0[15:0] ++ h.h.a[15:8]);
+    }
+    action case7() {
+        h.h.c = (bit<8>)(16w0 ++ h.h.a >> 3)[31:8];
     }
     table t {
         actions = {
@@ -47,6 +50,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             case4();
             case5();
             case6();
+            case7();
         }
         const default_action = case0();
     }
