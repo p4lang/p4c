@@ -89,12 +89,9 @@ control ingress(inout parsed_packet_t h,
         tns.apply();
 
         // Copy another header's data to local variable.
-        bh.row.alt0.valid = h.bvh0.row.alt0.valid;
+        bh.row.alt0.useHash = h.bvh0.row.alt0.useHash;
 
-        local_metadata.row0.alt0.valid = 0;
-        local_metadata.row0.alt0 = local_metadata.row1.alt1;
-        local_metadata.row1.alt0.valid = 1;
-        local_metadata.row1.alt1.port = local_metadata.row0.alt1.port + 1;
+        local_metadata.row0.alt0.useHash = true;
         clone3(CloneType.I2E, 0, local_metadata.row0);
     }
 }
