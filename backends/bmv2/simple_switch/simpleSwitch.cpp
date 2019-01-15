@@ -91,24 +91,27 @@ bool ParseV1Architecture::preorder(const IR::PackageBlock* main) {
     return false;
 }
 
-EXTERN_CONVERTER_SINGLETON(clone)
-EXTERN_CONVERTER_SINGLETON(clone3)
-EXTERN_CONVERTER_SINGLETON(hash)
-EXTERN_CONVERTER_SINGLETON(digest)
-EXTERN_CONVERTER_SINGLETON(resubmit)
-EXTERN_CONVERTER_SINGLETON(recirculate)
-EXTERN_CONVERTER_SINGLETON(mark_to_drop)
-EXTERN_CONVERTER_SINGLETON(random)
-EXTERN_CONVERTER_SINGLETON(truncate)
-EXTERN_CONVERTER_SINGLETON(register)
-EXTERN_CONVERTER_SINGLETON(counter)
-EXTERN_CONVERTER_SINGLETON(meter)
-EXTERN_CONVERTER_SINGLETON(direct_counter)
-EXTERN_CONVERTER_SINGLETON(direct_meter)
-EXTERN_CONVERTER_SINGLETON(action_profile)
-EXTERN_CONVERTER_SINGLETON(action_selector)
+ExternConverter_clone ExternConverter_clone::singleton;
+ExternConverter_clone3 ExternConverter_clone3::singleton;
+ExternConverter_hash ExternConverter_hash::singleton;
+ExternConverter_digest ExternConverter_digest::singleton;
+ExternConverter_resubmit ExternConverter_resubmit::singleton;
+ExternConverter_recirculate ExternConverter_recirculate::singleton;
+ExternConverter_mark_to_drop ExternConverter_mark_to_drop::singleton;
+ExternConverter_random ExternConverter_random::singleton;
+ExternConverter_truncate ExternConverter_truncate::singleton;
+ExternConverter_register ExternConverter_register::singleton;
+ExternConverter_counter ExternConverter_counter::singleton;
+ExternConverter_meter ExternConverter_meter::singleton;
+ExternConverter_direct_counter ExternConverter_direct_counter::singleton;
+ExternConverter_direct_meter ExternConverter_direct_meter::singleton;
+ExternConverter_action_profile ExternConverter_action_profile::singleton;
+ExternConverter_action_selector ExternConverter_action_selector::singleton;
 
-CONVERT_EXTERN_FUNCTION(clone) {
+Util::IJson* ExternConverter_clone::convertExternFunction(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    UNUSED const bool emitExterns) {
     int id = -1;
     if (mc->arguments->size() != 2) {
         modelError("Expected 2 arguments for %1%", mc);
@@ -141,7 +144,10 @@ CONVERT_EXTERN_FUNCTION(clone) {
     return primitive;
 }
 
-CONVERT_EXTERN_FUNCTION(clone3) {
+Util::IJson* ExternConverter_clone3::convertExternFunction(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    UNUSED const bool emitExterns) {
     (void) v1model.clone.clone3.name;
     int id = -1;
     if (mc->arguments->size() != 3) {
@@ -174,7 +180,10 @@ CONVERT_EXTERN_FUNCTION(clone3) {
     return primitive;
 }
 
-CONVERT_EXTERN_FUNCTION(hash) {
+Util::IJson* ExternConverter_hash::convertExternFunction(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    UNUSED const bool emitExterns) {
     static std::set<cstring> supportedHashAlgorithms = {
         v1model.algorithm.crc32.name, v1model.algorithm.crc32_custom.name,
         v1model.algorithm.crc16.name, v1model.algorithm.crc16_custom.name,
@@ -211,7 +220,10 @@ CONVERT_EXTERN_FUNCTION(hash) {
     return primitive;
 }
 
-CONVERT_EXTERN_FUNCTION(digest) {
+Util::IJson* ExternConverter_digest::convertExternFunction(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    UNUSED const bool emitExterns) {
     if (mc->arguments->size() != 2) {
         modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
@@ -246,7 +258,10 @@ CONVERT_EXTERN_FUNCTION(digest) {
     return primitive;
 }
 
-CONVERT_EXTERN_FUNCTION(resubmit) {
+Util::IJson* ExternConverter_resubmit::convertExternFunction(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    UNUSED const bool emitExterns) {
     if (mc->arguments->size() != 1) {
         modelError("Expected 1 argument for %1%", mc);
         return nullptr;
@@ -278,7 +293,11 @@ CONVERT_EXTERN_FUNCTION(resubmit) {
     parameters->append(jcst);
     return primitive;
 }
-CONVERT_EXTERN_FUNCTION(recirculate) {
+
+Util::IJson* ExternConverter_recirculate::convertExternFunction(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    UNUSED const bool emitExterns) {
     if (mc->arguments->size() != 1) {
         modelError("Expected 1 argument for %1%", mc);
         return nullptr;
@@ -311,7 +330,10 @@ CONVERT_EXTERN_FUNCTION(recirculate) {
     return primitive;
 }
 
-CONVERT_EXTERN_FUNCTION(mark_to_drop) {
+Util::IJson* ExternConverter_mark_to_drop::convertExternFunction(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    UNUSED const bool emitExterns) {
     if (mc->arguments->size() != 0) {
         modelError("Expected 0 arguments for %1%", mc);
         return nullptr;
@@ -322,7 +344,10 @@ CONVERT_EXTERN_FUNCTION(mark_to_drop) {
     return primitive;
 }
 
-CONVERT_EXTERN_FUNCTION(random) {
+Util::IJson* ExternConverter_random::convertExternFunction(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    UNUSED const bool emitExterns) {
     if (mc->arguments->size() != 3) {
         modelError("Expected 3 arguments for %1%", mc);
         return nullptr;
@@ -340,7 +365,10 @@ CONVERT_EXTERN_FUNCTION(random) {
     return primitive;
 }
 
-CONVERT_EXTERN_FUNCTION(truncate) {
+Util::IJson* ExternConverter_truncate::convertExternFunction(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    UNUSED const bool emitExterns) {
     if (mc->arguments->size() != 1) {
         modelError("Expected 1 arguments for %1%", mc);
         return nullptr;
@@ -353,7 +381,10 @@ CONVERT_EXTERN_FUNCTION(truncate) {
     return primitive;
 }
 
-CONVERT_EXTERN_OBJECT(counter) {
+Util::IJson* ExternConverter_counter::convertExternObject(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 1) {
         modelError("Expected 1 argument for %1%", mc);
         return nullptr;
@@ -370,7 +401,9 @@ CONVERT_EXTERN_OBJECT(counter) {
     return primitive;
 }
 
-CONVERT_EXTERN_INSTANCE(counter) {
+void ExternConverter_counter::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto jctr = new Util::JsonObject();
@@ -388,7 +421,10 @@ CONVERT_EXTERN_INSTANCE(counter) {
     ctxt->json->counters->append(jctr);
 }
 
-CONVERT_EXTERN_OBJECT(meter) {
+Util::IJson* ExternConverter_meter::convertExternObject(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 2) {
         modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
@@ -407,7 +443,9 @@ CONVERT_EXTERN_OBJECT(meter) {
     return primitive;
 }
 
-CONVERT_EXTERN_INSTANCE(meter) {
+void ExternConverter_meter::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto jmtr = new Util::JsonObject();
@@ -441,7 +479,10 @@ CONVERT_EXTERN_INSTANCE(meter) {
     ctxt->json->meter_arrays->append(jmtr);
 }
 
-CONVERT_EXTERN_OBJECT(register) {
+Util::IJson* ExternConverter_register::convertExternObject(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 2) {
         modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
@@ -474,7 +515,9 @@ CONVERT_EXTERN_OBJECT(register) {
     return nullptr;
 }
 
-CONVERT_EXTERN_INSTANCE(register) {
+void ExternConverter_register::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto jreg = new Util::JsonObject();
@@ -513,7 +556,10 @@ CONVERT_EXTERN_INSTANCE(register) {
     ctxt->json->register_arrays->append(jreg);
 }
 
-CONVERT_EXTERN_OBJECT(direct_counter) {
+Util::IJson* ExternConverter_direct_counter::convertExternObject(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 0) {
         modelError("Expected 0 argument for %1%", mc);
         return nullptr;
@@ -522,7 +568,9 @@ CONVERT_EXTERN_OBJECT(direct_counter) {
     return nullptr;
 }
 
-CONVERT_EXTERN_INSTANCE(direct_counter) {
+void ExternConverter_direct_counter::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto it = ctxt->structure->directCounterMap.find(name);
@@ -539,7 +587,10 @@ CONVERT_EXTERN_INSTANCE(direct_counter) {
     }
 }
 
-CONVERT_EXTERN_OBJECT(direct_meter) {
+Util::IJson* ExternConverter_direct_meter::convertExternObject(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 1) {
         modelError("Expected 1 argument for %1%", mc);
         return nullptr;
@@ -550,7 +601,9 @@ CONVERT_EXTERN_OBJECT(direct_meter) {
     return nullptr;
 }
 
-CONVERT_EXTERN_INSTANCE(direct_meter) {
+void ExternConverter_direct_meter::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto info = ctxt->structure->directMeterMap.getInfo(c);
@@ -589,7 +642,9 @@ CONVERT_EXTERN_INSTANCE(direct_meter) {
     ctxt->json->meter_arrays->append(jmtr);
 }
 
-CONVERT_EXTERN_INSTANCE(action_profile) {
+void ExternConverter_action_profile::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     // Might call this multiple times if the selector/profile is used more than
@@ -644,7 +699,9 @@ CONVERT_EXTERN_INSTANCE(action_profile) {
 }
 
 // action selector conversion is the same as action profile
-CONVERT_EXTERN_INSTANCE(action_selector) {
+void ExternConverter_action_selector::convertExternInstance(
+    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     // Might call this multiple times if the selector/profile is used more than

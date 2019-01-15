@@ -150,7 +150,10 @@ ExternConverter::addToFieldList(ConversionContext* ctxt,
         return;
     }
 
+    bool simple = ctxt->conv->simpleExpressionsOnly;
+    ctxt->conv->simpleExpressionsOnly = true;  // we do not want casts d2b in field_lists
     auto j = ctxt->conv->convert(expr);
+    ctxt->conv->simpleExpressionsOnly = simple;  // restore state
     if (auto jo = j->to<Util::JsonObject>()) {
         if (auto t = jo->get("type")) {
             if (auto type = t->to<Util::JsonValue>()) {
