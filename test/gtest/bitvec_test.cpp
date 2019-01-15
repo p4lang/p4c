@@ -93,4 +93,22 @@ TEST(Bitvec, getslice) {
     EXPECT_EQ(slice.ffs(80), 96);
 }
 
+TEST(Bitvec, barrel_shift) {
+    bitvec bv;
+    bv.setrange(0, 4);
+    bv.setrange(12, 4);
+    bitvec bv_test1 = bv.barrel_shift_left(8, 16);
+
+    bitvec bv_verify1(4, 8);
+    EXPECT_EQ(bv_test1, bv_verify1);
+
+    bitvec bv_test2 = bv.barrel_shift_left(32, 16);
+    EXPECT_EQ(bv_test2, bv);
+
+    bitvec bv_test3 = bv.barrel_shift_left(1, 16);
+    bitvec bv_verify3(0, 5);
+    bv_verify3.setrange(13, 3);
+    EXPECT_EQ(bv_test3, bv_verify3);
+}
+
 }  // namespace Test

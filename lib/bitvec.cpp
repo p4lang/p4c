@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "bitvec.h"
 #include "hex.h"
+#include "lib/exceptions.h"
 
 std::ostream &operator<<(std::ostream &os, const bitvec &bv) {
     if (bv.size == 1) {
@@ -144,4 +145,21 @@ bool bitvec::is_contiguous() const {
     if (empty())
         return false;
     return max().index() - min().index() + 1 == popcount();
+}
+
+/**
+ * The purpose of this function is to barrel_shift a bitvec around a pivot.  This function
+ * will crash if the pivot is smaller than the size of the bitvector
+ */
+bitvec bitvec::barrel_shift_left(size_t shift, size_t pivot) const {
+    if (max().index() > pivot) {
+        BUG("Barrel shifting around pivot %d is smaller than the max of the bitvec %d", pivot,
+            max().index());
+        return *this;
+    }
+    int single_shift = shift % pivot;
+    bitvec rv;
+    rv |= *this << single_shift;
+    rv |= *this >> (pivot - single_shift);
+    return rv & bitvec(0, pivot);
 }

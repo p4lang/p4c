@@ -435,6 +435,7 @@ class bitvec {
     bitvec &operator<<=(size_t count);
     bitvec operator>>(size_t count) const { bitvec rv(*this); rv >>= count; return rv; }
     bitvec operator<<(size_t count) const { bitvec rv(*this); rv <<= count; return rv; }
+    bitvec barrel_shift_left(size_t shift, size_t pivot) const;
     int popcount() const {
         int rv = 0;
         for (size_t i = 0; i < size; i++)
