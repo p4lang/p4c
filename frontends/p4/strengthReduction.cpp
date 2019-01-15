@@ -244,7 +244,7 @@ const IR::Node* DoStrengthReduction::postorder(IR::Mod* expr) {
     return expr;
 }
 
-const IR::Node* DoStrengthReduction::simplifyShift(IR::Slice* expr) {
+const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
     int shift_amt = 0;
     const IR::Expression *shift_of = nullptr;
     if (auto sh = expr->e0->to<IR::Shr>()) {
@@ -262,63 +262,21 @@ const IR::Node* DoStrengthReduction::simplifyShift(IR::Slice* expr) {
             expr->e0 = shift_of;
             expr->e1 = new IR::Constant(hi + shift_amt);
             expr->e2 = new IR::Constant(lo + shift_amt); } }
-    return expr;
-}
 
-const IR::Node* DoStrengthReduction::simplifyConcat(IR::Slice* expr) {
-    if (!expr->e0->is<IR::Concat>())
-        return expr;
-
-    auto lo = int(expr->getL());
-    auto hi = int(expr->getH());
-    auto left = expr->e0->to<IR::Concat>()->left;
-    auto right = expr->e0->to<IR::Concat>()->right;
-
-    if (left->type->is<IR::Type_Unknown>() || right->type->is<IR::Type_Unknown>())
-        return expr;
-
-    if ((hi == (left->type->width_bits() + right->type->width_bits() - 1)) && (lo == 0))
-        return expr->e0;
-
-    if ((hi == (right->type->width_bits() - 1)) && (lo == 0))
-        return right;
-
-    if ((hi == (left->type->width_bits() + right->type->width_bits() - 1)) &&
-        (lo == right->type->width_bits()))
-        return left;
-
-    if ((hi == (left->type->width_bits() + right->type->width_bits() - 1)) &&
-        (lo < right->type->width_bits()))
-        return new IR::Concat(left, new IR::Slice(right, right->type->width_bits() - 1, lo));
-
-    if ((hi >= right->type->width_bits()) && (lo == 0))
-        return new IR::Concat(new IR::Slice(left, hi - right->type->width_bits(), 0), right);
-
-    if ((hi >= right->type->width_bits()) && (lo < right->type->width_bits()))
-        return new IR::Concat(new IR::Slice(left, hi - right->type->width_bits(), 0),
-                              new IR::Slice(right, right->type->width_bits() - 1, lo));
-
-    if ((hi < right->type->width_bits()) && (lo >= 0))
-        return new IR::Slice(right, hi, lo);
-
-    if ((hi >= right->type->width_bits()) && (lo >= right->type->width_bits()))
-        return new IR::Slice(left, hi - right->type->width_bits(), lo - right->type->width_bits());
-
-    return expr;
-}
-
-const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
-    // remove slice if equals to expr width
-    auto lo = int(expr->getL());
-    auto hi = int(expr->getH());
-    if ((hi == (expr->e0->type->width_bits() - 1)) && (lo == 0))
-        return expr->e0;
-
-    if (expr->e0->is<IR::Shr>() || expr->e0->is<IR::Shl>())
-        return simplifyShift(expr);
-
-    if (expr->e0->is<IR::Concat>())
-        return simplifyConcat(expr);
+    while (auto cat = expr->e0->to<IR::Concat>()) {
+        unsigned rwidth = cat->right->type->width_bits();
+        if (expr->getL() >= rwidth) {
+            expr->e0 = cat->left;
+            expr->e1 = new IR::Constant(expr->getH() - rwidth);
+            expr->e2 = new IR::Constant(expr->getL() - rwidth);
+        } else if (expr->getH() < rwidth) {
+            expr->e0 = cat->right;
+        } else {
+            return new IR::Concat(expr->type, 
+                    new IR::Slice(cat->left, expr->getH() - rwidth, 0), 
+                    new IR::Slice(cat->right, rwidth-1, expr->getL()));
+        }
+    }
 
     return expr;
 }
