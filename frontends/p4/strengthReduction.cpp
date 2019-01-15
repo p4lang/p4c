@@ -62,6 +62,17 @@ int DoStrengthReduction::isPowerOf2(const IR::Expression* expr) const {
     return log;
 }
 
+bool DoStrengthReduction::isAllOnes(const IR::Expression* expr) const {
+    auto cst = expr->to<IR::Constant>();
+    if (cst == nullptr)
+        return false;
+    mpz_class value = cst->value;
+    if (sgn(value) <= 0)
+        return false;
+    auto bitcnt = mpz_popcount(value.get_mpz_t());
+    return bitcnt == (unsigned long)(expr->type->width_bits());
+}
+
 /// @section Visitor Methods
 
 const IR::Node* DoStrengthReduction::postorder(IR::Cmpl* expr) {
@@ -75,6 +86,10 @@ const IR::Node* DoStrengthReduction::postorder(IR::BAnd* expr) {
         return expr->left;
     if (isZero(expr->right))
         return expr->right;
+    if (isAllOnes(expr->left))
+        return expr->right;
+    if (isAllOnes(expr->right))
+        return expr->left;
     auto l = expr->left->to<IR::Cmpl>();
     auto r = expr->right->to<IR::Cmpl>();
     if (l && r)

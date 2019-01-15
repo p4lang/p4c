@@ -53,6 +53,8 @@ class DoStrengthReduction final : public Transform {
     bool isTrue(const IR::Expression* expr) const;
     /// @returns `true` if @p expr is the constant `false`.
     bool isFalse(const IR::Expression* expr) const;
+    /// @returns `true` if @p expr is all ones.
+    bool isAllOnes(const IR::Expression* expr) const;
     /// @returns the logarithm (base 2) of @p expr if it is positive
     /// and a power of `2` and `-1` otherwise.
     int isPowerOf2(const IR::Expression* expr) const;

@@ -23,7 +23,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".NoAction") action NoAction_0() {
     }
     @name(".mask") action mask() {
-        hdr.h.x = hdr.h.x & 32w0xffffffff;
     }
     @name(".t") table t_0 {
         actions = {
