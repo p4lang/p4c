@@ -54,6 +54,7 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     }
     @name("ingress.do_act") action do_act() {
         h.bvh1.row.alt1.valid = 1w0;
+        local_metadata.row0.alt0.valid = 1w0;
     }
     @name("ingress.tns") table tns_0 {
         key = {
@@ -68,9 +69,7 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     }
     apply {
         tns_0.apply();
-        local_metadata.row0.alt0 = local_metadata.row1.alt1;
-        local_metadata.row1.alt0.valid = 1w1;
-        local_metadata.row1.alt1.port = local_metadata.row0.alt1.port + 7w1;
+        local_metadata.row0.alt0.useHash = true;
         clone3<row_t>(CloneType.I2E, 32w0, local_metadata.row0);
     }
 }

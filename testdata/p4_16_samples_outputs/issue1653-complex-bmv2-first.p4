@@ -68,11 +68,8 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     }
     apply {
         tns.apply();
-        bh.row.alt0.valid = h.bvh0.row.alt0.valid;
-        local_metadata.row0.alt0.valid = 1w0;
-        local_metadata.row0.alt0 = local_metadata.row1.alt1;
-        local_metadata.row1.alt0.valid = 1w1;
-        local_metadata.row1.alt1.port = local_metadata.row0.alt1.port + 7w1;
+        bh.row.alt0.useHash = h.bvh0.row.alt0.useHash;
+        local_metadata.row0.alt0.useHash = true;
         clone3<row_t>(CloneType.I2E, 32w0, local_metadata.row0);
     }
 }

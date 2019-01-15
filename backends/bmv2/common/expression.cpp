@@ -83,8 +83,7 @@ const IR::Node* ArithmeticFixup::postorder(IR::Cast* expression) {
 
 void ExpressionConverter::mapExpression(const IR::Expression* expression, Util::IJson* json) {
     map.emplace(expression, json);
-	//    LOG3("Mapping " << dbp(expression) << " to " << json->toString());
-	std::cout << "Mapping " << dbp(expression) << " to " << json->toString() << "\n";	
+    LOG3("Mapping " << dbp(expression) << " to " << json->toString());
 }
 
 Util::IJson* ExpressionConverter::get(const IR::Expression* expression) const {
@@ -92,8 +91,7 @@ Util::IJson* ExpressionConverter::get(const IR::Expression* expression) const {
     if (result == nullptr) {
         LOG3("Looking up " << expression);
         for (auto it : map) {
-		  //		  LOG3(" " << it.first << " " << it.second);
-		  std::cout << " " << it.first << " " << it.second << "\n";;
+            LOG3(" " << it.first << " " << it.second);
         }
     }
     BUG_CHECK(result, "%1%: could not convert to Json", expression);
@@ -598,8 +596,7 @@ void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
         result->emplace("value", paramIndex);
         mapExpression(expression, result);
     } else if (auto var = decl->to<IR::Declaration_Variable>()) {
-	  //        LOG3("Variable to json " << var);
-	  std::cout << "Variable to json " << var << "\n";
+        LOG3("Variable to json " << var);
         auto result = new Util::JsonObject();
         auto type = typeMap->getType(var, true);
         if (type->is<IR::Type_StructLike>()) {
