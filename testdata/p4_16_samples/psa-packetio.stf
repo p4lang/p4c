@@ -1,0 +1,3 @@
+add table0 0 istd.ingress_port:1 hdr.ethernet.dstAddr:0x112233445566 hdr.ethernet.srcAddr:0x778899aabbcc hdr.ethernet.etherType:0x0800 set_egress_port(port:2)
+packet 1 112233 445566 778899 aabbcc 0800
+expect 2 112233 445566 778899 aabbcc 0800
