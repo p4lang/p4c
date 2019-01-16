@@ -1,0 +1,20 @@
+pkg_info {
+  arch: "v1model"
+}
+registers {
+  preamble {
+    id: 369118178
+    name: "r"
+    alias: "r"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 8
+      }
+    }
+  }
+  size: 2
+}
+type_info {
+}

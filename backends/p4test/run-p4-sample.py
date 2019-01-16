@@ -151,8 +151,6 @@ def recompile_file(options, produced, mustBeIdentical):
 def check_generated_files(options, tmpdir, expecteddir):
     files = os.listdir(tmpdir)
     for file in files:
-        if "p4info" in file:
-            continue
         if options.verbose:
             print("Checking", file)
         produced = tmpdir + "/" + file

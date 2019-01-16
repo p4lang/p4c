@@ -1,0 +1,96 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33559735
+    name: "ingress.m_filter"
+    alias: "m_filter"
+  }
+  match_fields {
+    id: 1
+    name: "meta.meta.meter_tag"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16788328
+  }
+  action_refs {
+    id: 16781360
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 16
+}
+tables {
+  preamble {
+    id: 33597405
+    name: "ingress.m_table"
+    alias: "m_table"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16779733
+  }
+  action_refs {
+    id: 16781360
+  }
+  action_refs {
+    id: 16800567
+  }
+  direct_resource_ids: 352370409
+  size: 16384
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16788328
+    name: "ingress._drop"
+    alias: "_drop"
+  }
+}
+actions {
+  preamble {
+    id: 16781360
+    name: "ingress._nop"
+    alias: "_nop"
+  }
+}
+actions {
+  preamble {
+    id: 16779733
+    name: "ingress.m_action"
+    alias: "m_action"
+  }
+  params {
+    id: 1
+    name: "meter_idx"
+    bitwidth: 9
+  }
+}
+direct_meters {
+  preamble {
+    id: 352370409
+    name: "ingress.namedmeter"
+    alias: "namedmeter"
+  }
+  spec {
+    unit: PACKETS
+  }
+  direct_table_id: 33597405
+}
+type_info {
+}

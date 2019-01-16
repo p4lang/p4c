@@ -1,0 +1,59 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33616793
+    name: "cIngress.guh"
+    alias: "guh"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dstAddr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16819683
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33587833
+    name: "cIngress.debug_table"
+    alias: "debug_table"
+  }
+  match_fields {
+    id: 1
+    name: "meta.mystruct1.hash1"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "meta.mystruct1.hash_drop"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16819683
+    name: "cIngress.hash_drop_decision"
+    alias: "hash_drop_decision"
+  }
+}
+type_info {
+}

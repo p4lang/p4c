@@ -1,0 +1,27 @@
+pkg_info {
+  arch: "psa"
+}
+actions {
+  preamble {
+    id: 16780617
+    name: "update_pkt_ip_byte_count"
+    alias: "update_pkt_ip_byte_count"
+  }
+}
+registers {
+  preamble {
+    id: 369133592
+    name: "ingress.port_pkt_ip_bytes_in"
+    alias: "port_pkt_ip_bytes_in"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 80
+      }
+    }
+  }
+  size: 512
+}
+type_info {
+}

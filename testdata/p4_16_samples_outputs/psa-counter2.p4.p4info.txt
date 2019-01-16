@@ -1,0 +1,62 @@
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 33610509
+    name: "MyIC.tbl"
+    alias: "tbl"
+  }
+  match_fields {
+    id: 1
+    name: "a.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16800567
+  }
+  action_refs {
+    id: 16835440
+  }
+  size: 1024
+  idle_timeout_behavior: NOTIFY_CONTROL
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16835440
+    name: "MyIC.execute"
+    alias: "execute"
+  }
+}
+counters {
+  preamble {
+    id: 302023597
+    name: "MyIC.counter0"
+    alias: "counter0"
+  }
+  spec {
+    unit: PACKETS
+  }
+  size: 1024
+}
+counters {
+  preamble {
+    id: 302034433
+    name: "MyIC.counter1"
+    alias: "counter1"
+  }
+  spec {
+    unit: PACKETS
+  }
+  size: 1024
+}
+type_info {
+}

@@ -1,0 +1,43 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33595117
+    name: "ingress.t_range"
+    alias: "t_range"
+  }
+  match_fields {
+    id: 1
+    name: "h.h.r"
+    bitwidth: 8
+    match_type: RANGE
+  }
+  action_refs {
+    id: 16795253
+  }
+  action_refs {
+    id: 16837978
+  }
+  size: 1024
+  is_const_table: true
+}
+actions {
+  preamble {
+    id: 16795253
+    name: "ingress.a"
+    alias: "a"
+  }
+}
+actions {
+  preamble {
+    id: 16837978
+    name: "ingress.a_with_control_params"
+    alias: "a_with_control_params"
+  }
+  params {
+    id: 1
+    name: "x"
+    bitwidth: 9
+  }
+}

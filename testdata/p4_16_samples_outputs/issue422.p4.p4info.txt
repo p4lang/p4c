@@ -1,0 +1,31 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33584914
+    name: "cIngress.tbl1"
+    alias: "tbl1"
+  }
+  action_refs {
+    id: 16808330
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16808330
+    name: "cIngress.foo"
+    alias: "foo"
+  }
+}

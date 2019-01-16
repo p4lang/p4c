@@ -1,0 +1,60 @@
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 33610509
+    name: "MyIC.tbl"
+    alias: "tbl"
+  }
+  match_fields {
+    id: 1
+    name: "a.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16800567
+  }
+  action_refs {
+    id: 16824071
+  }
+  size: 1024
+  idle_timeout_behavior: NOTIFY_CONTROL
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16824071
+    name: "MyIC.execute_register"
+    alias: "execute_register"
+  }
+  params {
+    id: 1
+    name: "idx"
+    bitwidth: 10
+  }
+}
+registers {
+  preamble {
+    id: 369130048
+    name: "MyIC.reg"
+    alias: "reg"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 10
+      }
+    }
+  }
+  size: 1024
+}
+type_info {
+}

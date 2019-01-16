@@ -1,0 +1,21 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33594939
+    name: "ingress.t1"
+    alias: "t1"
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}

@@ -1,0 +1,27 @@
+pkg_info {
+  arch: "psa"
+}
+counters {
+  preamble {
+    id: 302023597
+    name: "MyIC.counter0"
+    alias: "counter0"
+  }
+  spec {
+    unit: PACKETS
+  }
+  size: 1024
+}
+counters {
+  preamble {
+    id: 302034433
+    name: "MyIC.counter1"
+    alias: "counter1"
+  }
+  spec {
+    unit: PACKETS
+  }
+  size: 1024
+}
+type_info {
+}

@@ -1,0 +1,12 @@
+pkg_info {
+  arch: "v1model"
+}
+actions {
+  preamble {
+    id: 16827160
+    name: "IngressI.a"
+    alias: "a"
+  }
+}
+type_info {
+}

@@ -1,0 +1,21 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33618730
+    name: "EgressI.t"
+    alias: "t"
+  }
+  action_refs {
+    id: 16801890
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16801890
+    name: "EgressI.a"
+    alias: "a"
+  }
+}

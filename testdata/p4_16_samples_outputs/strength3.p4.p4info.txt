@@ -1,0 +1,92 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33614349
+    name: "ingress.t"
+    alias: "t"
+  }
+  action_refs {
+    id: 16800267
+  }
+  action_refs {
+    id: 16807847
+  }
+  action_refs {
+    id: 16782284
+  }
+  action_refs {
+    id: 16797246
+  }
+  action_refs {
+    id: 16837873
+  }
+  action_refs {
+    id: 16779157
+  }
+  action_refs {
+    id: 16819678
+  }
+  action_refs {
+    id: 16793963
+  }
+  const_default_action_id: 16800267
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800267
+    name: "ingress.case0"
+    alias: "case0"
+  }
+}
+actions {
+  preamble {
+    id: 16807847
+    name: "ingress.case1"
+    alias: "case1"
+  }
+}
+actions {
+  preamble {
+    id: 16782284
+    name: "ingress.case2"
+    alias: "case2"
+  }
+}
+actions {
+  preamble {
+    id: 16797246
+    name: "ingress.case3"
+    alias: "case3"
+  }
+}
+actions {
+  preamble {
+    id: 16837873
+    name: "ingress.case4"
+    alias: "case4"
+  }
+}
+actions {
+  preamble {
+    id: 16779157
+    name: "ingress.case5"
+    alias: "case5"
+  }
+}
+actions {
+  preamble {
+    id: 16819678
+    name: "ingress.case6"
+    alias: "case6"
+  }
+}
+actions {
+  preamble {
+    id: 16793963
+    name: "ingress.case7"
+    alias: "case7"
+  }
+}

@@ -1,0 +1,31 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33562569
+    name: "ingress.t_exact"
+    alias: "t_exact"
+  }
+  match_fields {
+    id: 1
+    name: "m.my_err"
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16798640
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16798640
+    name: "ingress.set_error_idx"
+    alias: "set_error_idx"
+  }
+  params {
+    id: 1
+    name: "idx"
+    bitwidth: 8
+  }
+}
