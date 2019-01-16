@@ -28,10 +28,8 @@ control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_
     @name("cIngress.E.c1.stats") counter(32w65536, CounterType.packets) E_c1_stats;
     apply {
         hdr.ethernet.etherType = hdr.ethernet.etherType << 1;
-        hdr.ethernet.etherType = hdr.ethernet.etherType;
         hdr.ethernet.etherType = hdr.ethernet.etherType + 16w1;
         E_c1_stats.count((bit<32>)hdr.ethernet.etherType);
-        hdr.ethernet.etherType = hdr.ethernet.etherType;
         hdr.ethernet.etherType = hdr.ethernet.etherType << 3;
         hdr.ethernet.etherType = hdr.ethernet.etherType + 16w1;
         E_c1_stats.count((bit<32>)hdr.ethernet.etherType);

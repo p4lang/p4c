@@ -69,10 +69,7 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
         const default_action = NoAction_0();
     }
     apply {
-        qArg1 = qArg1;
-        qArg2 = qArg2;
         p1_thost_T.apply();
-        qArg1 = qArg1;
         p1_thost_T.apply();
         p1_Tinner.apply();
     }
