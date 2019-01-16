@@ -125,7 +125,7 @@ void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool
     }
 }
 
-void HeaderConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
+void HeaderConverter::addHeaderStacks(const IR::Type_StructLike* headersStruct) {
     LOG1("Creating stack " << headersStruct);
     for (auto f : headersStruct->fields) {
         auto ft = ctxt->typeMap->getType(f, true);
@@ -380,8 +380,14 @@ bool HeaderConverter::preorder(const IR::Parameter* param) {
     LOG3("convert param " << param);
     //// keep track of which headers we've already generated the ctxt->json for
     auto ft = ctxt->typeMap->getType(param->getNode(), true);
-    if (ft->is<IR::Type_Struct>()) {
-        auto st = ft->to<IR::Type_Struct>();
+    const IR::Type_StructLike* st;
+    if (ft->is<IR::Type_StructLike>()) {
+        if (ft->is<IR::Type_Struct>()) {
+            st = ft->to<IR::Type_Struct>();
+        } else if (ft->is<IR::Type_Header>()) {
+            st = ft->to<IR::Type_Header>();
+        }
+
         if (visitedHeaders.find(st->getName()) != visitedHeaders.end())
             return false;  // already seen
         else

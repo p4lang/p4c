@@ -58,8 +58,8 @@ struct tst_t {
 }
 
 parser parse(packet_in pk, out parsed_packet_t h,
-inout local_metadata_t local_metadata,
-inout standard_metadata_t standard_metadata) {
+             inout local_metadata_t local_metadata,
+             inout standard_metadata_t standard_metadata) {
     state start {
 	pk.extract(h.bvh0);
 	pk.extract(h.bvh1);
@@ -69,8 +69,8 @@ inout standard_metadata_t standard_metadata) {
 }
 
 control ingress(inout parsed_packet_t h,
-inout local_metadata_t local_metadata,
-inout standard_metadata_t standard_metadata) {
+                inout local_metadata_t local_metadata,
+                inout standard_metadata_t standard_metadata) {
     tst_t s;
     bitvec_hdr bh;
 
@@ -116,8 +116,8 @@ inout standard_metadata_t standard_metadata) {
 }
 
 control egress(inout parsed_packet_t hdr,
-inout local_metadata_t local_metadata,
-inout standard_metadata_t standard_metadata) {
+               inout local_metadata_t local_metadata,
+               inout standard_metadata_t standard_metadata) {
     apply { }
 }
 
@@ -129,12 +129,12 @@ control deparser(packet_out b, in parsed_packet_t h) {
 }
 
 control verify_checksum(inout parsed_packet_t hdr,
-inout local_metadata_t local_metadata) {
+                        inout local_metadata_t local_metadata) {
     apply { }
 }
 
 control compute_checksum(inout parsed_packet_t hdr,
-inout local_metadata_t local_metadata) {
+                         inout local_metadata_t local_metadata) {
     apply { }
 }
 

@@ -6,51 +6,46 @@ header hdr {
     bool    x;
 }
 
-struct Headers {
-    hdr h;
+struct metadata {
 }
 
-struct Meta {
-}
-
-parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
+parser parserI(packet_in pkt, out hdr h, inout metadata meta, inout standard_metadata_t stdmeta) {
     state start {
-        b.extract<hdr>(h.h);
+        pkt.extract<hdr>(h);
         transition accept;
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) {
+control cIngressI(inout hdr h, inout metadata meta, inout standard_metadata_t stdmeta) {
+    hdr tmp_0;
+    apply {
+        tmp_0.x = false;
+        tmp_0.f = h.f + 31w1;
+        h.f = tmp_0.f;
+        h.x = tmp_0.x;
+    }
+}
+
+control cEgress(inout hdr h, inout metadata meta, inout standard_metadata_t stdmeta) {
     apply {
     }
 }
 
-control update(inout Headers h, inout Meta m) {
+control vc(inout hdr h, inout metadata meta) {
     apply {
     }
 }
 
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+control uc(inout hdr h, inout metadata meta) {
     apply {
     }
 }
 
-control deparser(packet_out b, in Headers h) {
+control DeparserI(packet_out packet, in hdr h) {
     apply {
-        b.emit<hdr>(h.h);
+        packet.emit<hdr>(h);
     }
 }
 
-control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    hdr c_tmp;
-    apply {
-        c_tmp.x = false;
-        c_tmp.f = h.h.f + 31w1;
-        h.h.f = c_tmp.f;
-        h.h.x = c_tmp.x;
-        sm.egress_spec = 9w0;
-    }
-}
-
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch<hdr, metadata>(parserI(), vc(), cIngressI(), cEgress(), uc(), DeparserI()) main;
 

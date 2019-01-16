@@ -47,7 +47,7 @@ class HeaderConverter : public Inspector {
 
  public:
     void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
-    void addHeaderStacks(const IR::Type_Struct* type);
+    void addHeaderStacks(const IR::Type_StructLike* type);
     bool isHeaders(const IR::Type_StructLike* st);
 
     Visitor::profile_t init_apply(const IR::Node* node) override;
