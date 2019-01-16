@@ -147,19 +147,33 @@ bool bitvec::is_contiguous() const {
     return max().index() - min().index() + 1 == popcount();
 }
 
-/**
- * The purpose of this function is to barrel_shift a bitvec around a pivot.  This function
- * will crash if the pivot is smaller than the size of the bitvector
- */
-bitvec bitvec::barrel_shift_left(size_t shift, size_t pivot) const {
-    if (max().index() > pivot) {
-        BUG("Barrel shifting around pivot %d is smaller than the max of the bitvec %d", pivot,
-            max().index());
-        return *this;
-    }
-    int single_shift = shift % pivot;
+bitvec bitvec::rotate_helper(size_t start_bit, size_t rotation_idx, size_t end_bit) const {
+    BUG_CHECK(start_bit <= rotation_idx && rotation_idx < end_bit, "Invalid rotation on bitvec, as "
+              "rotation_idx does not fall between start_bit and end_bit");
+    bitvec rot_mask(start_bit, end_bit - start_bit);
+    bitvec rotation_section = *this & rot_mask; 
+    int down_shift = rotation_idx - start_bit;
+    int up_shift = (end_bit - start_bit) - down_shift;
     bitvec rv;
-    rv |= *this << single_shift;
-    rv |= *this >> (pivot - single_shift);
-    return rv & bitvec(0, pivot);
+    rv = (rotation_section >> down_shift) | (rotation_section << up_shift);
+    return rv & rot_mask; 
+}
+
+/**
+ * Designed to imitate the std::rotate/std::rotate_copy function for vectors.  Return a bitvec
+ * which has the bit at rotation_idx appear at start_bit, and the corresponding data
+ * between start_bit and end_bit rotated.  Similar to std::rotate/std::rotate_copy, end_bit is
+ * exclusive
+ */
+void bitvec::rotate(size_t start_bit, size_t rotation_idx, size_t end_bit) {
+    bitvec rot_section = rotate_helper(start_bit, rotation_idx, end_bit);
+    clrrange(start_bit, end_bit - start_bit);
+    *this |= rot_section;
+}
+
+bitvec bitvec::rotate_copy(size_t start_bit, size_t rotation_idx, size_t end_bit) const {
+    bitvec rot_section = rotate_helper(start_bit, rotation_idx, end_bit);
+    bitvec rot_mask(start_bit, end_bit - start_bit);
+    bitvec rv = rot_section | (*this - rot_mask);
+    return rv;
 }

@@ -435,7 +435,8 @@ class bitvec {
     bitvec &operator<<=(size_t count);
     bitvec operator>>(size_t count) const { bitvec rv(*this); rv >>= count; return rv; }
     bitvec operator<<(size_t count) const { bitvec rv(*this); rv <<= count; return rv; }
-    bitvec barrel_shift_left(size_t shift, size_t pivot) const;
+    void rotate(size_t start_bit, size_t rotation_idx, size_t end_bit);
+    bitvec rotate_copy(size_t start_bit, size_t rotation_idx, size_t end_bit) const;
     int popcount() const {
         int rv = 0;
         for (size_t i = 0; i < size; i++)
@@ -473,6 +474,9 @@ class bitvec {
         }
         size = newsize;
     }
+
+    bitvec rotate_helper(size_t start_bit, size_t rotation_idx, size_t end_bit) const;
+                       
 
  public:
     friend std::ostream &operator<<(std::ostream &, const bitvec &);
