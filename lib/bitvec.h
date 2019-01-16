@@ -476,7 +476,6 @@ class bitvec {
     }
 
     bitvec rotate_helper(size_t start_bit, size_t rotation_idx, size_t end_bit) const;
-                       
 
  public:
     friend std::ostream &operator<<(std::ostream &, const bitvec &);
