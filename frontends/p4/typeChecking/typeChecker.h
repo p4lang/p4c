@@ -67,8 +67,6 @@ class TypeInference : public Transform {
     ReferenceMap* refMap;
     // Output: type map
     TypeMap* typeMap;
-    // If true we expect to leave the program unchanged
-    bool readOnly;
     const IR::Node* initialNode;
 
  public:
@@ -78,6 +76,8 @@ class TypeInference : public Transform {
                   bool readOnly = false);
 
  protected:
+    // If true we expect to leave the program unchanged
+    bool readOnly;
     const IR::Type* getType(const IR::Node* element) const;
     const IR::Type* getTypeType(const IR::Node* element) const;
     void setType(const IR::Node* element, const IR::Type* type);
@@ -159,7 +159,7 @@ class TypeInference : public Transform {
     static constexpr bool forbidPackages = true;
     bool checkParameters(const IR::ParameterList* paramList,
                          bool forbidModules = false, bool forbidPackage = false) const;
-    const IR::Type* setTypeType(const IR::Type* type, bool learn = true);
+    virtual const IR::Type* setTypeType(const IR::Type* type, bool learn = true);
 
     /// This is used to validate the initializer for the default_action
     /// or for actions in the entries list.  Returns the action list element
