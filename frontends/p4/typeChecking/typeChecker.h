@@ -67,8 +67,6 @@ class TypeInference : public Transform {
     ReferenceMap* refMap;
     // Output: type map
     TypeMap* typeMap;
-    // If true we expect to leave the program unchanged
-    bool readOnly;
     const IR::Node* initialNode;
 
  public:
@@ -78,6 +76,8 @@ class TypeInference : public Transform {
                   bool readOnly = false);
 
  protected:
+    // If true we expect to leave the program unchanged
+    bool readOnly;
     const IR::Type* getType(const IR::Node* element) const;
     const IR::Type* getTypeType(const IR::Node* element) const;
     void setType(const IR::Node* element, const IR::Type* type);
