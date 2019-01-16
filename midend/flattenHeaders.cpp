@@ -29,6 +29,12 @@ void HeaderTypeReplacement::flatten(const P4::TypeMap* typeMap,
             flatten(typeMap, prefix + "." + f->name, ft, fields);
         }
         return;
+    } else if (auto st = type->to<IR::Type_Header>()) {
+        for (auto f : st->fields) {
+            auto ft = typeMap->getType(f, true);
+            flatten(typeMap, prefix + "." + f->name, ft, fields);
+        }
+        return;
     }
     //  cstring originalName = prefix; TODO once behavioral model is fixed.
     cstring fieldName = prefix.replace(".", "_") +
