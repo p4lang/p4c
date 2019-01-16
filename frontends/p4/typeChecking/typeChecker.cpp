@@ -39,8 +39,7 @@ class ConstantTypeSubstitution : public Transform {
                              ReferenceMap* refMap,
                              TypeMap* typeMap) : subst(subst), refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(subst); CHECK_NULL(refMap); CHECK_NULL(typeMap);
-        LOG3("ConstantTypeSubstitution " << subst);
-        setName("ConstantTypeSubstitution"); }
+        LOG3("ConstantTypeSubstitution " << subst); }
     const IR::Node* postorder(IR::Constant* cst) override {
         auto cstType = typeMap->getType(getOriginal(), true);
         if (!cstType->is<IR::ITypeVar>())
@@ -92,7 +91,6 @@ TypeChecking::TypeChecking(ReferenceMap* refMap, TypeMap* typeMap,
        new P4::TypeInference(refMap, typeMap, true),
        updateExpressions ? new ApplyTypesToExpressions(typeMap) : nullptr,
        updateExpressions ? new P4::ResolveReferences(refMap) : nullptr });
-    setName("TypeChecking");
     setStopOnError(true);
 }
 
@@ -125,7 +123,6 @@ TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap, bool readOn
     CHECK_NULL(typeMap);
     CHECK_NULL(refMap);
     visitDagOnce = false;  // the done() method will take care of this
-    setName("TypeInference");
 }
 
 Visitor::profile_t TypeInference::init_apply(const IR::Node* node) {

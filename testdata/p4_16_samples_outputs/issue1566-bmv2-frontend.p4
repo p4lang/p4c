@@ -25,19 +25,14 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout metadata_t meta, inou
 }
 
 control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    bit<16> x_0;
     @name("cIngress.E.c1.stats") counter(32w65536, CounterType.packets) E_c1_stats;
     apply {
         hdr.ethernet.etherType = hdr.ethernet.etherType << 1;
-        x_0 = hdr.ethernet.etherType;
-        x_0 = x_0 + 16w1;
-        E_c1_stats.count((bit<32>)x_0);
-        hdr.ethernet.etherType = x_0;
+        hdr.ethernet.etherType = hdr.ethernet.etherType + 16w1;
+        E_c1_stats.count((bit<32>)hdr.ethernet.etherType);
         hdr.ethernet.etherType = hdr.ethernet.etherType << 3;
-        x_0 = hdr.ethernet.etherType;
-        x_0 = x_0 + 16w1;
-        E_c1_stats.count((bit<32>)x_0);
-        hdr.ethernet.etherType = x_0;
+        hdr.ethernet.etherType = hdr.ethernet.etherType + 16w1;
+        E_c1_stats.count((bit<32>)hdr.ethernet.etherType);
     }
 }
 

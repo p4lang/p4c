@@ -345,12 +345,7 @@ bool CompilerOptions::isv1() const {
 
 void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pass,
                                const IR::Node* node) const {
-    // Some pass names are currently C++ class names mangled;
-    // this is a weak attempt at making them more readable.
-    std::string p = pass;
-    size_t last = p.find_last_of("0123456789", strlen(pass) - 3);
-    if (last != strlen(pass))
-        pass = pass + last + 1;
+    if (strncmp(pass, "P4::", 4) == 0) pass += 4;
     cstring name = cstring(manager) + "_" + Util::toString(seq) + "_" + pass;
     if (Log::verbose())
         std::cerr << name << std::endl;

@@ -35,20 +35,18 @@ struct Packet_data {
 }
 
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
-    TArg1 p1_tArg1;
-    TArg2 p1_aArg2;
     @name(".NoAction") action NoAction_0() {
     }
     @name("Q_pipe.p1.thost.B_action") action p1_thost_B_action_0(BParamType bData) {
-        p1_tArg1.field1 = bData;
+        qArg1.field1 = bData;
     }
     @name("Q_pipe.p1.thost.C_action") action p1_thost_C_action_0(bit<9> cData) {
-        p1_tArg1.field1 = cData;
+        qArg1.field1 = cData;
     }
     @name("Q_pipe.p1.thost.T") table p1_thost_T {
         key = {
-            p1_tArg1.field1: ternary @name("tArg1.field1") ;
-            p1_aArg2.field2: exact @name("aArg2.field2") ;
+            qArg1.field1: ternary @name("tArg1.field1") ;
+            qArg2.field2: exact @name("aArg2.field2") ;
         }
         actions = {
             p1_thost_B_action_0();
@@ -62,7 +60,7 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     }
     @name("Q_pipe.p1.Tinner") table p1_Tinner {
         key = {
-            p1_tArg1.field1: ternary @name("pArg1.field1") ;
+            qArg1.field1: ternary @name("pArg1.field1") ;
         }
         actions = {
             p1_Drop_0();
@@ -70,43 +68,9 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
         }
         const default_action = NoAction_0();
     }
-    @hidden action act() {
-        p1_tArg1.field1 = qArg1.field1;
-        p1_tArg1.drop = qArg1.drop;
-        p1_aArg2.field2 = qArg2.field2;
-    }
-    @hidden action act_0() {
-        qArg1.field1 = p1_tArg1.field1;
-        p1_tArg1.drop = qArg1.drop;
-        p1_aArg2.field2 = qArg2.field2;
-    }
-    @hidden action act_1() {
-        qArg1.field1 = p1_tArg1.field1;
-    }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
-    @hidden table tbl_act_0 {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
-    }
-    @hidden table tbl_act_1 {
-        actions = {
-            act_1();
-        }
-        const default_action = act_1();
-    }
     apply {
-        tbl_act.apply();
         p1_thost_T.apply();
-        tbl_act_0.apply();
         p1_thost_T.apply();
-        tbl_act_1.apply();
         p1_Tinner.apply();
     }
 }

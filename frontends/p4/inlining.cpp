@@ -500,9 +500,20 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
             // Use temporaries for these parameters
             std::set<const IR::Parameter*> useTemporary;
 
-            auto call = workToDo->uniqueCaller(inst);
+            const IR::MethodCallStatement *call = nullptr;
+            for (auto m : workToDo->callToInstance) {
+                if (m.second != inst) continue;
+                if (call) {
+                    if (!call->equiv(*m.first)) {
+                        call = nullptr;
+                        break; }
+                } else {
+                    call = m.first; } }
             MethodInstance *mi = nullptr;
             if (call != nullptr) {
+                // All call sites are the same (call is one of them), so we use the
+                // same arguments in all cases.  So we can avoid copies if args do
+                // not alias
                 std::map<const IR::Parameter*, const LocationSet*> locationSets;
                 FindLocationSets fls(refMap, typeMap);
 
@@ -595,10 +606,10 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
         LOG3("Looking for " << param->name);
         auto initializer = substs->paramSubst.lookup(param);
         auto arg = mi->substitution.lookup(param);
-        if ((param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) &&
-            initializer != arg) {
-            auto stat = new IR::AssignmentStatement(initializer->expression, arg->expression);
-            body.push_back(stat);
+        if ((param->direction == IR::Direction::In || param->direction == IR::Direction::InOut)) {
+            if (!initializer->expression->equiv(*arg->expression)) {
+                auto stat = new IR::AssignmentStatement(initializer->expression, arg->expression);
+                body.push_back(stat); }
         } else if (param->direction == IR::Direction::Out) {
             auto paramType = typeMap->getType(param, true);
             // This is important, since this variable may be used many times.
@@ -606,7 +617,6 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
         } else if (param->direction == IR::Direction::None) {
             auto initializer = mi->substitution.lookup(param);
             substs->paramSubst.add(param, initializer);
-            continue;
         }
     }
 
@@ -619,7 +629,7 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
         if (param->direction == IR::Direction::InOut || param->direction == IR::Direction::Out) {
             auto left = mi->substitution.lookup(param);
             auto arg = substs->paramSubst.lookupByName(param->name);
-            if (arg != left) {
+            if (!left->expression->equiv(*arg->expression)) {
                 auto copyout = new IR::AssignmentStatement(
                     left->expression, arg->expression->clone());
                 body.push_back(copyout);
@@ -747,8 +757,10 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
             LOG3("Looking for " << param->name);
             if (param->direction == IR::Direction::In || param->direction == IR::Direction::InOut) {
                 auto arg = substs->paramSubst.lookupByName(param->name);
-                auto stat = new IR::AssignmentStatement(arg->expression, initializer->expression);
-                current.push_back(stat);
+                if (!arg->expression->equiv(*initializer->expression)) {
+                    auto stat = new IR::AssignmentStatement(arg->expression,
+                                                            initializer->expression);
+                    current.push_back(stat); }
             } else if (param->direction == IR::Direction::Out) {
                 auto arg = substs->paramSubst.lookupByName(param->name);
                 auto paramType = typeMap->getType(param, true);
@@ -789,8 +801,9 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
             if (param->direction == IR::Direction::InOut ||
                 param->direction == IR::Direction::Out) {
                 auto arg = substs->paramSubst.lookupByName(param->name);
-                auto copyout = new IR::AssignmentStatement(left, arg->expression->clone());
-                current.push_back(copyout);
+                if (!left->equiv(*arg->expression)) {
+                    auto copyout = new IR::AssignmentStatement(left, arg->expression->clone());
+                    current.push_back(copyout); }
             }
         }
     }
