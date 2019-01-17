@@ -1,52 +1,75 @@
 #include <core.p4>
 #include <v1model.p4>
 
-header hdr {
-    bit<31> f;
-    bool    x;
+header Hdr1 {
+    bit<7> a;
+    bool   x;
 }
 
-struct metadata {
+header Hdr2 {
+    bit<16> b;
 }
 
-parser parserI(packet_in pkt, out hdr h, inout metadata meta, inout standard_metadata_t stdmeta) {
+header_union U {
+    Hdr1 h1;
+    Hdr2 h2;
+}
+
+struct Headers {
+    Hdr1 h1;
+    U    u;
+}
+
+struct Meta {
+}
+
+parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract(h);
+        b.extract(h.h1);
+        transition select(h.h1.a) {
+            0: getH1;
+            default: getH2;
+        }
+    }
+    state getH1 {
+        b.extract(h.u.h1);
+        transition accept;
+    }
+    state getH2 {
+        b.extract(h.u.h2);
         transition accept;
     }
 }
 
-control cIngressI(inout hdr h, inout metadata meta, inout standard_metadata_t stdmeta) {
-    apply {
-        hdr tmp;
-        tmp.x = false;
-        h.x = true;
-        tmp.f = h.f + 1;
-        h.f = tmp.f;
-        h.x = tmp.x;
-    }
-}
-
-control cEgress(inout hdr h, inout metadata meta, inout standard_metadata_t stdmeta) {
+control vrfy(inout Headers h, inout Meta m) {
     apply {
     }
 }
 
-control vc(inout hdr h, inout metadata meta) {
+control update(inout Headers h, inout Meta m) {
     apply {
     }
 }
 
-control uc(inout hdr h, inout metadata meta) {
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
+        h.u.h1.x = true;
     }
 }
 
-control DeparserI(packet_out packet, in hdr h) {
+control deparser(packet_out b, in Headers h) {
     apply {
-        packet.emit(h);
+        b.emit(h.h1);
+        b.emit(h.u);
     }
 }
 
-V1Switch(parserI(), vc(), cIngressI(), cEgress(), uc(), DeparserI()) main;
+control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+        if (h.u.h2.isValid()) 
+            h.u.h2.setInvalid();
+    }
+}
+
+V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
 

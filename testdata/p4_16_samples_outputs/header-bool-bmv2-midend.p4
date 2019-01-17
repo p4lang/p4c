@@ -1,25 +1,59 @@
 #include <core.p4>
 #include <v1model.p4>
 
-header hdr {
-    bit<31> f;
-    bool    x;
+header Hdr1 {
+    bit<7> a;
+    bool   x;
 }
 
-struct metadata {
+header Hdr2 {
+    bit<16> b;
 }
 
-parser parserI(packet_in pkt, out hdr h, inout metadata meta, inout standard_metadata_t stdmeta) {
+header_union U {
+    Hdr1 h1;
+    Hdr2 h2;
+}
+
+struct Headers {
+    Hdr1 h1;
+    U    u;
+}
+
+struct Meta {
+}
+
+parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        pkt.extract<hdr>(h);
+        b.extract<Hdr1>(h.h1);
+        transition select(h.h1.a) {
+            7w0: getH1;
+            default: getH2;
+        }
+    }
+    state getH1 {
+        b.extract<Hdr1>(h.u.h1);
+        transition accept;
+    }
+    state getH2 {
+        b.extract<Hdr2>(h.u.h2);
         transition accept;
     }
 }
 
-control cIngressI(inout hdr h, inout metadata meta, inout standard_metadata_t stdmeta) {
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
+
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
+
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action act() {
-        h.f = h.f + 31w1;
-        h.x = false;
+        h.u.h1.x = true;
     }
     @hidden table tbl_act {
         actions = {
@@ -32,26 +66,29 @@ control cIngressI(inout hdr h, inout metadata meta, inout standard_metadata_t st
     }
 }
 
-control cEgress(inout hdr h, inout metadata meta, inout standard_metadata_t stdmeta) {
+control deparser(packet_out b, in Headers h) {
     apply {
+        b.emit<Hdr1>(h.h1);
+        b.emit<Hdr1>(h.u.h1);
+        b.emit<Hdr2>(h.u.h2);
     }
 }
 
-control vc(inout hdr h, inout metadata meta) {
+control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @hidden action act_0() {
+        h.u.h2.setInvalid();
+    }
+    @hidden table tbl_act_0 {
+        actions = {
+            act_0();
+        }
+        const default_action = act_0();
+    }
     apply {
+        if (h.u.h2.isValid()) 
+            tbl_act_0.apply();
     }
 }
 
-control uc(inout hdr h, inout metadata meta) {
-    apply {
-    }
-}
-
-control DeparserI(packet_out packet, in hdr h) {
-    apply {
-        packet.emit<hdr>(h);
-    }
-}
-
-V1Switch<hdr, metadata>(parserI(), vc(), cIngressI(), cEgress(), uc(), DeparserI()) main;
+V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
 
