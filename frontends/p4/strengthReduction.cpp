@@ -271,12 +271,22 @@ const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
             shift_amt = -k->asInt();
             shift_of = sh->left; } }
     if (shift_of) {
+        if (!shift_of->type->is<IR::Type_Bits>())
+            return expr;
+        if (shift_of->type->to<IR::Type_Bits>()->isSigned)
+            return expr;
         int hi = expr->getH();
         int lo = expr->getL();
         if (lo + shift_amt >= 0 && hi + shift_amt < shift_of->type->width_bits()) {
             expr->e0 = shift_of;
             expr->e1 = new IR::Constant(hi + shift_amt);
-            expr->e2 = new IR::Constant(lo + shift_amt); } }
+            expr->e2 = new IR::Constant(lo + shift_amt); }
+        if (lo + shift_amt < 0) {
+            expr->e0 = shift_of;
+            expr->e1 = new IR::Constant(hi + shift_amt);
+            expr->e2 = new IR::Constant(0);
+            return new IR::Concat(expr->type, expr,
+                    new IR::Constant(IR::Type_Bits::get(-(lo + shift_amt)), 0)); } }
 
     while (auto cat = expr->e0->to<IR::Concat>()) {
         unsigned rwidth = cat->right->type->width_bits();
