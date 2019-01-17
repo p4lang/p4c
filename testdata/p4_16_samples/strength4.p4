@@ -17,6 +17,9 @@ struct local_metadata_t {
    bit<16> f16;
    bit<16> m16;
    bit<16> d16;
+   int<16> x16;
+   int<16> a16;
+   int<16> b16;
    }
 
 parser parser_impl(packet_in packet,
@@ -40,6 +43,8 @@ control egress_impl(inout headers_t hdr,
     apply {
           local_metadata.m16 = ((16w0 ++ local_metadata.f16) << 1)[15:0];
           local_metadata.d16 = ((16w0 ++ local_metadata.f16) >> 1)[15:0];
+	  local_metadata.a16 = ((16s0 ++ local_metadata.x16) << 1)[15:0];
+	  local_metadata.b16 = ((16s0 ++ local_metadata.x16) >> 1)[15:0];
     }
 }
 
