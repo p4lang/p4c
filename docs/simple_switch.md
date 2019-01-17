@@ -437,3 +437,33 @@ entry, because duplicate search keys are not allowed to be installed. Thus no
 numeric priority is ever needed to determine the "winning" matching table entry.
 BMv2 (and many other P4 implementations) implements the match portion of such a
 table's functionality using a hash table.
+
+
+## P4_16 plus v1model architecture notes
+
+This section is an incomplete description of the v1model architecture
+for P4_16.  Much of the earlier parts of this document are also a
+description of the P4_16 v1model architecture, but in some cases they
+also serve to document the P4_14 behavior of `simple_switch`.  This
+section is only for things specific to P4_16 plus the v1model
+architecture.
+
+There is a type called `H` that is a parameter to the package
+`V1Switch` definition in `v1model.p4`, excerpted below:
+
+```P4
+package V1Switch<H, M>(Parser<H, M> p,
+                       VerifyChecksum<H, M> vr,
+                       Ingress<H, M> ig,
+                       Egress<H, M> eg,
+                       ComputeChecksum<H, M> ck,
+                       Deparser<H> dep
+                       );
+```
+
+This type `H` is restricted to be a struct that contains member fields
+of one of the following types, and no others:
+
++ header
++ header_union
++ header stack
