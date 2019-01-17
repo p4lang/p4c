@@ -23,7 +23,13 @@ void HeaderTypeReplacement::flatten(const P4::TypeMap* typeMap,
                                     cstring prefix,
                                     const IR::Type* type,
                                     IR::IndexedVector<IR::StructField> *fields) {
-    if (auto st = type->to<IR::Type_StructLike>()) {
+    if (auto st = type->to<IR::Type_Struct>()) {
+        for (auto f : st->fields) {
+            auto ft = typeMap->getType(f, true);
+            flatten(typeMap, prefix + "." + f->name, ft, fields);
+        }
+        return;
+    } else if (auto st = type->to<IR::Type_Header>()) {
         for (auto f : st->fields) {
             auto ft = typeMap->getType(f, true);
             flatten(typeMap, prefix + "." + f->name, ft, fields);
