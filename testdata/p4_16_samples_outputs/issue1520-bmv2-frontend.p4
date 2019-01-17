@@ -1,8 +1,12 @@
 #include <core.p4>
 #include <v1model.p4>
 
-struct headers {
+header Header {
     bit<16> x;
+}
+
+struct headers {
+    Header h;
 }
 
 struct metadata {
@@ -10,7 +14,7 @@ struct metadata {
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        hdr.x = 16w0;
+        hdr.h.x = 16w0;
         transition accept;
     }
 }
@@ -24,8 +28,8 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     @name("MyIngress.h.c1.r") register<bit<16>>(32w8) h_c1_r;
     @name("MyIngress.h.c2.r") register<bit<16>>(32w8) h_c2_r;
     apply {
-        h_c1_r.read(hdr.x, 32w0);
-        h_c2_r.read(hdr.x, 32w0);
+        h_c1_r.read(hdr.h.x, 32w0);
+        h_c2_r.read(hdr.h.x, 32w0);
     }
 }
 
