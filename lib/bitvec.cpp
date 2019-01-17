@@ -147,7 +147,7 @@ bool bitvec::is_contiguous() const {
     return max().index() - min().index() + 1 == popcount();
 }
 
-bitvec bitvec::rotate_helper(size_t start_bit, size_t rotation_idx, size_t end_bit) const {
+bitvec bitvec::rotate_right_helper(size_t start_bit, size_t rotation_idx, size_t end_bit) const {
     BUG_CHECK(start_bit <= rotation_idx && rotation_idx < end_bit, "Invalid rotation on bitvec, as "
               "rotation_idx does not fall between start_bit and end_bit");
     bitvec rot_mask(start_bit, end_bit - start_bit);
@@ -165,14 +165,14 @@ bitvec bitvec::rotate_helper(size_t start_bit, size_t rotation_idx, size_t end_b
  * between start_bit and end_bit rotated.  Similar to std::rotate/std::rotate_copy, end_bit is
  * exclusive
  */
-void bitvec::rotate(size_t start_bit, size_t rotation_idx, size_t end_bit) {
-    bitvec rot_section = rotate_helper(start_bit, rotation_idx, end_bit);
+void bitvec::rotate_right(size_t start_bit, size_t rotation_idx, size_t end_bit) {
+    bitvec rot_section = rotate_right_helper(start_bit, rotation_idx, end_bit);
     clrrange(start_bit, end_bit - start_bit);
     *this |= rot_section;
 }
 
-bitvec bitvec::rotate_copy(size_t start_bit, size_t rotation_idx, size_t end_bit) const {
-    bitvec rot_section = rotate_helper(start_bit, rotation_idx, end_bit);
+bitvec bitvec::rotate_right_copy(size_t start_bit, size_t rotation_idx, size_t end_bit) const {
+    bitvec rot_section = rotate_right_helper(start_bit, rotation_idx, end_bit);
     bitvec rot_mask(start_bit, end_bit - start_bit);
     bitvec rv = rot_section | (*this - rot_mask);
     return rv;
