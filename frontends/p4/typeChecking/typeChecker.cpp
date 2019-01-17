@@ -1352,7 +1352,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
                // Nested bit-vector struct inside a Header is supported
                // Experimental feature - see Issue 383.
                (t->is<IR::Type_Struct>() && onlyBitsOrBitStructs(t)) ||
-               t->is<IR::Type_SerEnum>(); };
+               t->is<IR::Type_SerEnum>() || t->is<IR::Type_Boolean>(); };
     validateFields(canon, validator);
 
     const IR::StructField* varbit = nullptr;
@@ -2717,7 +2717,8 @@ bool TypeInference::hasVarbitsOrUnions(const IR::Type* type) const {
 
 bool TypeInference::onlyBitsOrBitStructs(const IR::Type* type) const {
     // called for a canonical type
-    if (type->is<IR::Type_Bits>()) {
+    if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>() ||
+        type->is<IR::Type_SerEnum>()) {
         return true;
     } else if (auto ht = type->to<IR::Type_Struct>()) {
         for (auto f : ht->fields) {

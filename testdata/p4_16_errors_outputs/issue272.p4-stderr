@@ -1,3 +1,0 @@
-issue272.p4(20): error: Field x of header boolfield cannot have type bool
-    bool x;
-         ^

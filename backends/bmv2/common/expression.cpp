@@ -294,7 +294,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
             LOG3("looking up field " << field);
             CHECK_NULL(field);
             auto name = ::get(structure->scalarMetadataFields, field);
-            CHECK_NULL(name);
+            BUG_CHECK((name != nullptr), "NULL name: %1%", field->name);
             if (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() ||
                 leftValue || simpleExpressionsOnly) {
                 result->emplace("type", "field");

@@ -4,9 +4,6 @@ issue407-1.p4(47): error: Field x7 of header H cannot have type error
 core.p4(23)
 error {
 ^
-issue407-1.p4(48): error: Field x8 of header H cannot have type bool
-    bool x8;
-         ^^
 issue407-1.p4(49): error: Field x9 of header H cannot have type myenum1
     myenum1 x9;
             ^^
