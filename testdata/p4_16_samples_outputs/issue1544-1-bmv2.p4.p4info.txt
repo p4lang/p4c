@@ -1,0 +1,44 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33594010
+    name: "ingress.mac_da"
+    alias: "mac_da"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.dstAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16821713
+  }
+  action_refs {
+    id: 16815499
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16815499
+    name: "my_drop"
+    alias: "my_drop"
+  }
+}
+actions {
+  preamble {
+    id: 16821713
+    name: "ingress.set_port"
+    alias: "set_port"
+  }
+  params {
+    id: 1
+    name: "output_port"
+    bitwidth: 9
+  }
+}
+type_info {
+}

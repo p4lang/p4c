@@ -1,0 +1,99 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33564422
+    name: "ingress.debug_table_cksum1"
+    alias: "debug_table_cksum1"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ethernet.dstAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "hdr.ethernet.etherType"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 4
+    name: "user_meta.fwd_meta.exp_etherType"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 5
+    name: "user_meta.fwd_meta.tmp"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 6
+    name: "user_meta.fwd_meta.exp_x1"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 7
+    name: "user_meta.fwd_meta.x1"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 8
+    name: "user_meta.fwd_meta.exp_x2"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 9
+    name: "user_meta.fwd_meta.x2"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 10
+    name: "user_meta.fwd_meta.exp_x3"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 11
+    name: "user_meta.fwd_meta.x3"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 12
+    name: "user_meta.fwd_meta.exp_x4"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 13
+    name: "user_meta.fwd_meta.x4"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}

@@ -1,0 +1,27 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33605678
+    name: "IngressI.do_aux.adjust_lkp_fields"
+    alias: "adjust_lkp_fields"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}

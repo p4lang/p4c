@@ -1,0 +1,248 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33596743
+    name: "ingress.ecmp_group"
+    alias: "ecmp_group"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dstAddr"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 16788328
+  }
+  action_refs {
+    id: 16836056
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33566903
+    name: "ingress.ecmp_nhop"
+    alias: "ecmp_nhop"
+  }
+  match_fields {
+    id: 1
+    name: "meta.ingress_metadata.ecmp_offset"
+    bitwidth: 14
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16788328
+  }
+  action_refs {
+    id: 16787244
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 16384
+}
+tables {
+  preamble {
+    id: 33565359
+    name: "ingress.flowlet"
+    alias: "flowlet"
+  }
+  action_refs {
+    id: 16813893
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33590050
+    name: "ingress.forward"
+    alias: "forward"
+  }
+  match_fields {
+    id: 1
+    name: "meta.ingress_metadata.nhop_ipv4"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16792359
+  }
+  action_refs {
+    id: 16788328
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 512
+}
+tables {
+  preamble {
+    id: 33565493
+    name: "ingress.new_flowlet"
+    alias: "new_flowlet"
+  }
+  action_refs {
+    id: 16807312
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33573008
+    name: "egress.send_frame"
+    alias: "send_frame"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.egress_port"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16781737
+  }
+  action_refs {
+    id: 16806759
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 256
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16788328
+    name: "ingress._drop"
+    alias: "ingress._drop"
+  }
+}
+actions {
+  preamble {
+    id: 16836056
+    name: "ingress.set_ecmp_select"
+    alias: "set_ecmp_select"
+  }
+  params {
+    id: 1
+    name: "ecmp_base"
+    bitwidth: 8
+  }
+  params {
+    id: 2
+    name: "ecmp_count"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 16787244
+    name: "ingress.set_nhop"
+    alias: "set_nhop"
+  }
+  params {
+    id: 1
+    name: "nhop_ipv4"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 16813893
+    name: "ingress.lookup_flowlet_map"
+    alias: "lookup_flowlet_map"
+  }
+}
+actions {
+  preamble {
+    id: 16792359
+    name: "ingress.set_dmac"
+    alias: "set_dmac"
+  }
+  params {
+    id: 1
+    name: "dmac"
+    bitwidth: 48
+  }
+}
+actions {
+  preamble {
+    id: 16807312
+    name: "ingress.update_flowlet_id"
+    alias: "update_flowlet_id"
+  }
+}
+actions {
+  preamble {
+    id: 16781737
+    name: "egress.rewrite_mac"
+    alias: "rewrite_mac"
+  }
+  params {
+    id: 1
+    name: "smac"
+    bitwidth: 48
+  }
+}
+actions {
+  preamble {
+    id: 16806759
+    name: "egress._drop"
+    alias: "egress._drop"
+  }
+}
+registers {
+  preamble {
+    id: 369118452
+    name: "ingress.flowlet_id"
+    alias: "flowlet_id"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 16
+      }
+    }
+  }
+  size: 8192
+}
+registers {
+  preamble {
+    id: 369118221
+    name: "ingress.flowlet_lasttime"
+    alias: "flowlet_lasttime"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 8192
+}
+type_info {
+}

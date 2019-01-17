@@ -1,0 +1,12 @@
+pkg_info {
+  arch: "psa"
+}
+value_sets {
+  preamble {
+    id: 50366883
+    name: "MyIP.pvs"
+    alias: "pvs"
+  }
+  bitwidth: 16
+  size: 4
+}

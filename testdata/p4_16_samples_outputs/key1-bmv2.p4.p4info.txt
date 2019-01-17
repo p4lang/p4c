@@ -1,0 +1,37 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33615638
+    name: "ingress.c.t"
+    alias: "t"
+  }
+  match_fields {
+    id: 1
+    name: "e"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16837667
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16837667
+    name: "ingress.c.a"
+    alias: "a"
+  }
+}

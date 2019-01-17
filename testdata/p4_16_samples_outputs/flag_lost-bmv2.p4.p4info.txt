@@ -1,0 +1,59 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33593274
+    name: "ingress.ipv4_lpm"
+    alias: "ipv4_lpm"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dstAddr"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 16800567
+  }
+  action_refs {
+    id: 16785927
+  }
+  action_refs {
+    id: 16832181
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16832181
+    name: "ingress.drop"
+    alias: "drop"
+  }
+}
+actions {
+  preamble {
+    id: 16785927
+    name: "ingress.ipv4_forward"
+    alias: "ipv4_forward"
+  }
+  params {
+    id: 1
+    name: "dstAddr"
+    bitwidth: 48
+  }
+  params {
+    id: 2
+    name: "port"
+    bitwidth: 9
+  }
+}
+type_info {
+}

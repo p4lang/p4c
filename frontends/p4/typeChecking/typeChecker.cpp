@@ -118,8 +118,8 @@ const IR::Type* TypeInference::cloneWithFreshTypeVariables(const IR::IMayBeGener
 }
 
 TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap, bool readOnly) :
-        refMap(refMap), typeMap(typeMap), readOnly(readOnly),
-        initialNode(nullptr) {
+        refMap(refMap), typeMap(typeMap),
+        initialNode(nullptr), readOnly(readOnly) {
     CHECK_NULL(typeMap);
     CHECK_NULL(refMap);
     visitDagOnce = false;  // the done() method will take care of this

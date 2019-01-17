@@ -1,0 +1,160 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33615889
+    name: "MyIngress.forward"
+    alias: "forward"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dstAddr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16837735
+  }
+  action_refs {
+    id: 16805608
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33574068
+    name: "MyIngress.ipv4_lpm"
+    alias: "ipv4_lpm"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dstAddr"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 16826124
+  }
+  action_refs {
+    id: 16805608
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33604441
+    name: "MyEgress.send_frame"
+    alias: "send_frame"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.egress_port"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16828148
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16805608
+    name: "MyIngress.drop"
+    alias: "drop"
+  }
+}
+actions {
+  preamble {
+    id: 16837735
+    name: "MyIngress.set_dmac"
+    alias: "set_dmac"
+  }
+  params {
+    id: 1
+    name: "dstAddr"
+    bitwidth: 48
+  }
+}
+actions {
+  preamble {
+    id: 16826124
+    name: "MyIngress.set_nhop"
+    alias: "set_nhop"
+  }
+  params {
+    id: 1
+    name: "dstAddr"
+    bitwidth: 32
+  }
+  params {
+    id: 2
+    name: "port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 16842278
+    name: "MyIngress.send_digest"
+    alias: "send_digest"
+  }
+}
+actions {
+  preamble {
+    id: 16828148
+    name: "MyEgress.rewrite_mac"
+    alias: "rewrite_mac"
+  }
+  params {
+    id: 1
+    name: "srcAddr"
+    bitwidth: 48
+  }
+}
+digests {
+  preamble {
+    id: 385901477
+    name: "test_digest_t"
+    alias: "test_digest_t"
+  }
+  type_spec {
+    struct {
+      name: "test_digest_t"
+    }
+  }
+}
+type_info {
+  structs {
+    key: "test_digest_t"
+    value {
+      members {
+        name: "in_mac_srcAddr"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 48
+            }
+          }
+        }
+      }
+    }
+  }
+}

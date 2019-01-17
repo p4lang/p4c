@@ -1,0 +1,23 @@
+pkg_info {
+  arch: "v1model"
+}
+digests {
+  preamble {
+    id: 385916781
+    name: "digest_0"
+    alias: "digest_0"
+  }
+  type_spec {
+    tuple {
+      members {
+        bitstring {
+          bit {
+            bitwidth: 48
+          }
+        }
+      }
+    }
+  }
+}
+type_info {
+}

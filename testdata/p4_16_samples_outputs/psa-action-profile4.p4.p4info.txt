@@ -1,0 +1,76 @@
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 33610509
+    name: "MyIC.tbl"
+    alias: "tbl"
+  }
+  match_fields {
+    id: 1
+    name: "a.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16800567
+  }
+  action_refs {
+    id: 16781592
+  }
+  size: 1024
+  idle_timeout_behavior: NOTIFY_CONTROL
+}
+tables {
+  preamble {
+    id: 33555510
+    name: "MyIC.tbl2"
+    alias: "tbl2"
+  }
+  match_fields {
+    id: 1
+    name: "a.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16800567
+  }
+  action_refs {
+    id: 16786149
+  }
+  size: 1024
+  idle_timeout_behavior: NOTIFY_CONTROL
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16786149
+    name: "MyIC.a1"
+    alias: "a1"
+  }
+}
+actions {
+  preamble {
+    id: 16781592
+    name: "MyIC.a2"
+    alias: "a2"
+  }
+}
+action_profiles {
+  preamble {
+    id: 285236196
+    name: "MyIC.ap"
+    alias: "ap"
+  }
+  size: 1024
+}
+type_info {
+}

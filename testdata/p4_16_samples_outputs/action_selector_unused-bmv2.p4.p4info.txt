@@ -1,0 +1,14 @@
+pkg_info {
+  arch: "v1model"
+}
+action_profiles {
+  preamble {
+    id: 285230093
+    name: "IngressI.as"
+    alias: "as"
+  }
+  with_selector: true
+  size: 1024
+}
+type_info {
+}

@@ -1,0 +1,22 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33614349
+    name: "ingress.t"
+    alias: "t"
+  }
+  action_refs {
+    id: 16826359
+  }
+  const_default_action_id: 16826359
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16826359
+    name: "ingress.shift"
+    alias: "shift"
+  }
+}

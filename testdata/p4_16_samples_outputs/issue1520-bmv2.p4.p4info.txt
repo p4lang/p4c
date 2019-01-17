@@ -1,0 +1,35 @@
+pkg_info {
+  arch: "v1model"
+}
+registers {
+  preamble {
+    id: 369136003
+    name: "MyIngress.h.c1.r"
+    alias: "c1.r"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 16
+      }
+    }
+  }
+  size: 8
+}
+registers {
+  preamble {
+    id: 369141712
+    name: "MyIngress.h.c2.r"
+    alias: "c2.r"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 16
+      }
+    }
+  }
+  size: 8
+}
+type_info {
+}

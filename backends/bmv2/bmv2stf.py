@@ -388,7 +388,7 @@ class RunBMV2(object):
         self.cli_stdin.flush()
         self.packetDelay = 1
     def do_command(self, cmd):
-        if self.options.verbose:
+        if self.options.verbose and cmd != "":
             print("STF Command:", cmd)
         first, cmd = nextWord(cmd)
         if first == "":

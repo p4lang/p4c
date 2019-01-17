@@ -1,0 +1,41 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33614349
+    name: "ingress.t"
+    alias: "t"
+  }
+  action_refs {
+    id: 16801679
+  }
+  const_default_action_id: 16801679
+  direct_resource_ids: 318771034
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16801679
+    name: "ingress.my_action"
+    alias: "my_action"
+  }
+  params {
+    id: 1
+    name: "a"
+    bitwidth: 9
+  }
+}
+direct_counters {
+  preamble {
+    id: 318771034
+    name: "ingress.c"
+    alias: "c"
+  }
+  spec {
+    unit: PACKETS
+  }
+  direct_table_id: 33614349
+}
+type_info {
+}

@@ -1,0 +1,45 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33595553
+    name: "cIngress.t"
+    alias: "t"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.x.add1"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "m.x.add2"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "m.z"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 4
+    name: "z"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16808330
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16808330
+    name: "cIngress.foo"
+    alias: "foo"
+  }
+}

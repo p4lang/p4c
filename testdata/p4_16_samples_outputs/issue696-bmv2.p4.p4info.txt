@@ -1,0 +1,42 @@
+pkg_info {
+  arch: "v1model"
+}
+actions {
+  preamble {
+    id: 16793215
+    name: "Eg.test"
+    alias: "test"
+  }
+}
+registers {
+  preamble {
+    id: 369154380
+    name: "debug"
+    alias: "debug"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 100
+}
+registers {
+  preamble {
+    id: 369130682
+    name: "reg"
+    alias: "reg"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 32
+      }
+    }
+  }
+  size: 1
+}
+type_info {
+}

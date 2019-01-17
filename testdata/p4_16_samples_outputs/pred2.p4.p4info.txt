@@ -1,0 +1,22 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33605419
+    name: "Ing.tbl_cond"
+    alias: "tbl_cond"
+  }
+  action_refs {
+    id: 16834953
+  }
+  const_default_action_id: 16834953
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16834953
+    name: "Ing.cond"
+    alias: "cond"
+  }
+}

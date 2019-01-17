@@ -1,0 +1,33 @@
+pkg_info {
+  arch: "v1model"
+}
+registers {
+  preamble {
+    id: 369121423
+    name: "Ing.r"
+    alias: "r"
+  }
+  type_spec {
+    struct {
+      name: "S"
+    }
+  }
+  size: 100
+}
+type_info {
+  structs {
+    key: "S"
+    value {
+      members {
+        name: "f"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 32
+            }
+          }
+        }
+      }
+    }
+  }
+}

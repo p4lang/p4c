@@ -1,0 +1,67 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33618272
+    name: "cIngress.t1"
+    alias: "t1"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.dstAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16820406
+  }
+  action_refs {
+    id: 16824875
+  }
+  action_refs {
+    id: 16785046
+  }
+  action_refs {
+    id: 16799572
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16820406
+    name: "cIngress.a1"
+    alias: "a1"
+  }
+}
+actions {
+  preamble {
+    id: 16824875
+    name: "cIngress.a2"
+    alias: "a2"
+  }
+}
+actions {
+  preamble {
+    id: 16785046
+    name: "cIngress.a3"
+    alias: "a3"
+  }
+}
+actions {
+  preamble {
+    id: 16799572
+    name: "cIngress.a4"
+    alias: "a4"
+  }
+}
