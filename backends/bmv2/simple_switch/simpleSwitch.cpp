@@ -908,6 +908,33 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     userMetaType = decl->to<IR::Type_Struct>();
     LOG2("User metadata type is " << userMetaType);
 
+    {
+        // Find the header types
+        auto headersParam = params->parameters.at(1);
+        auto headersType = headersParam->type;
+        if (!headersType->is<IR::Type_Name>()) {
+            ::error("%1%: expected type to be a struct", headersParam->type);
+            return;
+        }
+        decl = refMap->getDeclaration(headersType->to<IR::Type_Name>()->path);
+        auto st = decl->to<IR::Type_Struct>();
+        if (st == nullptr) {
+            ::error("%1%: expected type to be a struct", headersParam->type);
+            return;
+        }
+        LOG2("Headers type is " << st);
+        for (auto f: st->fields) {
+            auto t = typeMap->getType(f, true);
+            if (!t->is<IR::Type_Header>() &&
+                !t->is<IR::Type_Stack>() &&
+                !t->is<IR::Type_HeaderUnion>()) {
+                ::error("%1%: the type of should be a struct of headers, stacks, or unions",
+                        headersParam->type);
+                return;
+            }
+        }
+    }
+
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
     auto program = tlb->getProgram();
     // These passes are logically bmv2-specific

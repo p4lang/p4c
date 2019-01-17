@@ -219,7 +219,7 @@ extern void truncate(in bit<32> length);
 
 // Architecture.
 // M should be a struct of structs
-// H should be a struct of headers or stacks
+// H should be a struct of headers, stacks or header_unions
 
 parser Parser<H, M>(packet_in b,
                     out H parsedHdr,
