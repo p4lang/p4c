@@ -282,6 +282,8 @@ class TypeInference : public Transform {
 
     Visitor::profile_t init_apply(const IR::Node* node) override;
     void end_apply(const IR::Node* Node) override;
+
+    TypeInference* clone() const override { return new TypeInference(refMap, typeMap, true); }
 };
 
 // Copy types from the typeMap to expressions.  Updates the typeMap with newly created nodes

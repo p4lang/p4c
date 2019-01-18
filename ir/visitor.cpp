@@ -418,7 +418,7 @@ bool ControlFlowVisitor::join_flows(const IR::Node *n) {
             // Otherwise, this is the first time this node has been visited.
             // Clone this visitor and store it as the initial accumulator
             // value.
-            status.first = clone();
+            status.first = dynamic_cast<ControlFlowVisitor*>(clone());
             return true; } }
     return false;
 }
@@ -440,7 +440,7 @@ bool Transform::check_clone(const Visitor *v) {
 }
 
 ControlFlowVisitor &ControlFlowVisitor::flow_clone() {
-    auto *rv = clone();
+    auto *rv = dynamic_cast<ControlFlowVisitor *>(clone());
     assert(rv->check_clone(this));
     return *rv;
 }
