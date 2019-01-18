@@ -148,8 +148,7 @@ bool bitvec::is_contiguous() const {
 }
 
 bitvec bitvec::rotate_right_helper(size_t start_bit, size_t rotation_idx, size_t end_bit) const {
-    BUG_CHECK(start_bit <= rotation_idx && rotation_idx < end_bit, "Invalid rotation on bitvec, as "
-              "rotation_idx does not fall between start_bit and end_bit");
+    assert(start_bit <= rotation_idx && rotation_idx < end_bit);
     bitvec rot_mask(start_bit, end_bit - start_bit);
     bitvec rotation_section = *this & rot_mask;
     int down_shift = rotation_idx - start_bit;
