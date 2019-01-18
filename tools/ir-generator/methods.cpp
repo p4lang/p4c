@@ -58,39 +58,46 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         return buf.str(); } } },
 { "equiv", { &NamedType::Bool(),
              { new IrField(new ReferenceType(new NamedType(IrClass::nodeClass()), true), "a_") },
-             CONST + IN_IMPL + OVERRIDE,
-    [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
+             EXTEND + CONST + IN_IMPL + OVERRIDE,
+    [](IrClass *cl, Util::SourceInfo srcInfo, cstring body) -> cstring {
         std::stringstream buf;
         buf << "{" << std::endl;
         buf << cl->indent << cl->indent
             << "if (static_cast<const Node *>(this) == &a_) return true;\n";
-        buf << cl->indent << cl->indent << "if (typeid(*this) != typeid(a_)) return false;\n";
         if (auto parent = cl->getParent()) {
-            if (parent && parent->name != "Node")
+            if (parent->name == "Node") {
+                buf << cl->indent << cl->indent << "if (typeid(*this) != typeid(a_)) "
+                                                   "return false;\n";
+            } else {
                 buf << cl->indent << cl->indent << "if (!" << parent->name
-                    << "::equiv(a_)) return false;\n"; }
-        bool first = true;
-        for (auto f : *cl->getFields()) {
-            if (*f->type == NamedType::SourceInfo()) continue;  // FIXME -- deal with SourcInfo
-            if (first) {
-                buf << cl->indent << cl->indent << "auto &a = static_cast<const " << cl->name
-                                                << " &>(a_);\n";
-                buf << cl->indent << cl->indent << "return ";
-                first = false;
-            } else {
-                buf << std::endl << cl->indent << cl->indent << "&& "; }
-            if (f->type->resolve(cl->containedIn) == nullptr) {
-                // This is not an IR pointer
-                buf << f->name << " == a." << f->name;
-            } else if (f->isInline) {
-                buf << f->name << ".equiv(a." << f->name << ")";
-            } else {
-                buf << "(" << f->name << " ? a." << f->name << " ? "
-                    << f->name << "->equiv(*a." << f->name << ")"
-                    << " : false : a." << f->name << " == nullptr)"; } }
-        if (first) {  // no fields?
-            buf << cl->indent << cl->indent << "return true"; }
-        buf << ";" << std::endl;
+                    << "::equiv(a_)) return false;\n"; } }
+        if (body) {
+            buf << cl->indent << cl->indent << "auto &a = static_cast<const " << cl->name
+                                            << " &>(a_);\n";
+            buf << LineDirective(srcInfo, true) << body;
+        } else {
+            bool first = true;
+            for (auto f : *cl->getFields()) {
+                if (*f->type == NamedType::SourceInfo()) continue;  // FIXME -- deal with SourcInfo
+                if (first) {
+                    buf << cl->indent << cl->indent << "auto &a = static_cast<const " << cl->name
+                                                    << " &>(a_);\n";
+                    buf << cl->indent << cl->indent << "return ";
+                    first = false;
+                } else {
+                    buf << std::endl << cl->indent << cl->indent << "&& "; }
+                if (f->type->resolve(cl->containedIn) == nullptr) {
+                    // This is not an IR pointer
+                    buf << f->name << " == a." << f->name;
+                } else if (f->isInline) {
+                    buf << f->name << ".equiv(a." << f->name << ")";
+                } else {
+                    buf << "(" << f->name << " ? a." << f->name << " ? "
+                        << f->name << "->equiv(*a." << f->name << ")"
+                        << " : false : a." << f->name << " == nullptr)"; } }
+            if (first) {  // no fields?
+                buf << cl->indent << cl->indent << "return true"; }
+            buf << ";" << std::endl; }
         buf << cl->indent << "}";
         return buf.str(); } } },
 { "operator<<", { &ReferenceType::OstreamRef, { new IrField(&ReferenceType::OstreamRef, "out") },
@@ -289,7 +296,7 @@ void IrClass::generateMethods() {
                 // By default predefined methods return a pointer to their
                 // concrete type.
                 m->rtype = new PointerType(new NamedType(this)); }
-            if (info.flags & EXTEND)
+            if (m->isUser && (info.flags & EXTEND))
                 m->body = info.create(this, m->srcInfo, m->body);
             if (info.flags & FRIEND)
                 m->isFriend = true;
