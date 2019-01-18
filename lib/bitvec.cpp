@@ -16,7 +16,6 @@ limitations under the License.
 
 #include "bitvec.h"
 #include "hex.h"
-#include "lib/exceptions.h"
 
 std::ostream &operator<<(std::ostream &os, const bitvec &bv) {
     if (bv.size == 1) {
