@@ -2,7 +2,7 @@
 #include <v1model.p4>
 
 struct switch_metadata_t {
-    bit<9> port;
+    bit<8> port;
 }
 
 header serialized_switch_metadata_t {
@@ -25,7 +25,7 @@ parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_m
 control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     apply {
         h.mirrored_md.setValid();
-        h.mirrored_md.meta = {9w0};
+        h.mirrored_md.meta = {8w0};
     }
 }
 

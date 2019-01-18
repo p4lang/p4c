@@ -2,11 +2,11 @@
 #include <v1model.p4>
 
 struct switch_metadata_t {
-    bit<9> port;
+    bit<8> port;
 }
 
 header serialized_switch_metadata_t {
-    bit<9> _meta_port0;
+    bit<8> _meta_port0;
 }
 
 struct parsed_packet_t {
@@ -25,7 +25,7 @@ parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_m
 control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     @hidden action act() {
         h.mirrored_md.setValid();
-        h.mirrored_md._meta_port0 = 9w0;
+        h.mirrored_md._meta_port0 = 8w0;
     }
     @hidden table tbl_act {
         actions = {
