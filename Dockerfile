@@ -42,7 +42,7 @@ ENV P4C_RUNTIME_DEPS cpp \
                      python
 ENV P4C_PIP_PACKAGES tenjin \
                      pyroute2 \
-                     ply \
+                     ply==3.8 \
                      scapy==2.4.0
 COPY . /p4c/
 WORKDIR /p4c/
