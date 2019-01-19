@@ -519,6 +519,7 @@ class QueueingLogicPriRL {
     auto &q_info_pri = q_info.at(*priority);
     q_info_pri.size--;
     q_info.size--;
+    w_info.size--;
   }
 
   //! Same as
@@ -548,7 +549,7 @@ class QueueingLogicPriRL {
     auto &q_info_pri = q_info.at(priority);
     auto &w_info = workers_info.at(worker_id);
     LockType lock(w_info.q_mutex);
-    return q_info.size;
+    return q_info_pri.size;
   }
 
   //! Set the capacity of all the priority queues for logical queue \p queue_id
