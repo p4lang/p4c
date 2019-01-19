@@ -113,35 +113,16 @@ int64_t getTableSize(const IR::P4Table* table) {
     return tableSize == 0 ? defaultTableSize : tableSize;
 }
 
-static std::string serializeAnnotationExpression(const IR::Expression* expr) {
-    // Using the ToP4 inspector seems to be giving slightly better results than
-    // toString(). However, the type checker is run on annotation expressions
-    // which is why most of the time a string literal is used, in which case
-    // there is probably no difference between toString() and ToP4.
+std::string serializeOneAnnotation(const IR::Annotation* annotation) {
+    // we do not need custom serialization logic here: the P4Info should include
+    // the annotation as it was in P4.
     std::ostringstream oss;
     ToP4 top4(&oss, false);
-    expr->apply(top4);
-    return oss.str();
-}
-
-std::string serializeOneAnnotation(const IR::Annotation* annotation) {
-    std::string serializedAnnotation = "@" + annotation->name + "(";
-    auto expressions = annotation->expr;
-    for (size_t i = 0; i < expressions.size(); ++i) {
-        serializedAnnotation.append(serializeAnnotationExpression(expressions[i]));
-        if (i + 1 < expressions.size()) serializedAnnotation.append(", ");
-    }
-    auto kvs = annotation->kv;
-    if (expressions.size() > 0 && kvs.size() > 0) serializedAnnotation.append(", ");
-    for (auto it = kvs.begin(); it != kvs.end();) {
-        serializedAnnotation.append((*it)->name.name);
-        serializedAnnotation.append("=");
-        serializedAnnotation.append(serializeAnnotationExpression((*it)->expression));
-        if (++it != kvs.end()) serializedAnnotation.append(", ");
-    }
-    serializedAnnotation.append(")");
-
-    return serializedAnnotation;
+    annotation->apply(top4);
+    auto serializedAnnnotation = oss.str();
+    // remove the whitespace added by ToP4.
+    serializedAnnnotation.pop_back();
+    return serializedAnnnotation;
 }
 
 void setPreamble(::p4::config::v1::Preamble* preamble,
