@@ -439,6 +439,11 @@ bool Transform::check_clone(const Visitor *v) {
     return true;
 }
 
+ControlFlowVisitor* ControlFlowVisitor::clone() const {
+    BUG("must implement %s::clone method", name());
+    return nullptr;
+}
+
 ControlFlowVisitor &ControlFlowVisitor::flow_clone() {
     auto *rv = clone();
     assert(rv->check_clone(this));

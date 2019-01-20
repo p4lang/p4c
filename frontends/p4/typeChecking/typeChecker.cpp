@@ -33,12 +33,16 @@ class ConstantTypeSubstitution : public Transform {
     TypeVariableSubstitution* subst;
     ReferenceMap            * refMap;
     TypeMap                 * typeMap;
+    TypeInference           * tc;
 
  public:
     ConstantTypeSubstitution(TypeVariableSubstitution* subst,
                              ReferenceMap* refMap,
-                             TypeMap* typeMap) : subst(subst), refMap(refMap), typeMap(typeMap) {
+                             TypeMap* typeMap,
+                             TypeInference* tc) : 
+        subst(subst), refMap(refMap), typeMap(typeMap), tc(tc) {
         CHECK_NULL(subst); CHECK_NULL(refMap); CHECK_NULL(typeMap);
+        CHECK_NULL(tc);
         LOG3("ConstantTypeSubstitution " << subst); }
     const IR::Node* postorder(IR::Constant* cst) override {
         auto cstType = typeMap->getType(getOriginal(), true);
@@ -60,24 +64,24 @@ class ConstantTypeSubstitution : public Transform {
     const IR::Expression* convert(const IR::Expression* expr) {
         auto result = expr->apply(*this)->to<IR::Expression>();
         if (result != expr && (::errorCount() == 0)) {
-            TypeInference learn(refMap, typeMap, true);
-            (void)result->apply(learn);
+            auto *learn = tc->clone();
+            (void)result->apply(*learn);
         }
         return result;
     }
     const IR::Vector<IR::Expression>* convert(const IR::Vector<IR::Expression>* vec) {
         auto result = vec->apply(*this)->to<IR::Vector<IR::Expression>>();
         if (result != vec) {
-            TypeInference learn(refMap, typeMap, true);
-            (void)result->apply(learn);
+            auto *learn = tc->clone();
+            (void)result->apply(*learn);
         }
         return result;
     }
     const IR::Vector<IR::Argument>* convert(const IR::Vector<IR::Argument>* vec) {
         auto result = vec->apply(*this)->to<IR::Vector<IR::Argument>>();
         if (result != vec) {
-            TypeInference learn(refMap, typeMap, true);
-            (void)result->apply(learn);
+            auto *learn = tc->clone();
+            (void)result->apply(*learn);
         }
         return result;
     }
@@ -108,13 +112,13 @@ const IR::Type* TypeInference::cloneWithFreshTypeVariables(const IR::IMayBeGener
     }
 
     TypeVariableSubstitutionVisitor sv(&tvs, true);
-    auto clone = type->to<IR::Type>()->apply(sv);
-    CHECK_NULL(clone);
+    auto cl = type->to<IR::Type>()->apply(sv);
+    CHECK_NULL(cl);
     // Learn this new type
-    TypeInference tc(refMap, typeMap, true);
-    (void)clone->apply(tc);
-    LOG3("Cloned for type variables " << type << " into " << clone);
-    return clone->to<IR::Type>();
+    auto *tc = clone();
+    (void)cl->apply(*tc);
+    LOG3("Cloned for type variables " << type << " into " << cl);
+    return cl->to<IR::Type>();
 }
 
 TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap, bool readOnly) :
@@ -143,6 +147,10 @@ void TypeInference::end_apply(const IR::Node* node) {
     typeMap->updateMap(node);
     if (node->is<IR::P4Program>())
         LOG3("Typemap: " << std::endl << typeMap);
+}
+
+TypeInference *TypeInference::clone() const {
+    return new TypeInference(this->refMap, this->typeMap, true);
 }
 
 bool TypeInference::done() const {
@@ -562,8 +570,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             type->srcInfo, baseCanon, args, specialized);
         // learn the types of all components of the specialized type
         LOG2("Scanning the specialized type");
-        TypeInference tc(refMap, typeMap, true);
-        (void)result->apply(tc);
+        auto *tc = clone();
+        (void)result->apply(*tc);
         return result;
     } else {
         BUG("Unexpected type %1%", dbp(type));
@@ -735,7 +743,7 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
         // error already signalled
         return sourceExpression;
     if (!tvs->isIdentity()) {
-        ConstantTypeSubstitution cts(tvs, refMap, typeMap);
+        ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
         return cts.convert(sourceExpression);  // sets type
     }
     return sourceExpression;
@@ -821,7 +829,7 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
             continue;
         }
 
-        ConstantTypeSubstitution cts(tvs, refMap, typeMap);
+        ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
         auto newArg = cts.convert(arg->expression);
         if (::errorCount() > 0)
             return arguments;
@@ -999,7 +1007,7 @@ TypeInference::containerInstantiation(
         return std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>(nullptr, nullptr);
     addSubstitutions(tvs);
 
-    ConstantTypeSubstitution cts(tvs, refMap, typeMap);
+    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
     auto newArgs = cts.convert(constructorArguments);
 
     auto returnType = tvs->lookup(rettype);
@@ -1053,9 +1061,9 @@ const IR::Type* TypeInference::setTypeType(const IR::Type* type, bool learn) {
     if (canon != nullptr) {
         // Learn the new type
         if (canon != typeToCanonicalize && learn) {
-            TypeInference tc(refMap, typeMap, true);
+            auto *tc = clone();
             unsigned e = ::errorCount();
-            (void)canon->apply(tc);
+            (void)canon->apply(*tc);
             if (::errorCount() > e)
                 return nullptr;
         }
@@ -1217,7 +1225,7 @@ const IR::Node* TypeInference::postorder(IR::SerEnumMember* member) {
     if (tvs->isIdentity())
         return member;
 
-    ConstantTypeSubstitution cts(tvs, refMap, typeMap);
+    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
     member->value = cts.convert(member->value);  // sets type
     return member;
 }
@@ -1230,9 +1238,9 @@ const IR::Node* TypeInference::postorder(IR::P4ValueSet* decl) {
     if (canon != nullptr) {
         // Learn the new type
         if (canon != decl->elementType) {
-            TypeInference tc(refMap, typeMap, true);
+            auto *tc = clone();
             unsigned e = ::errorCount();
-            (void)canon->apply(tc);
+            (void)canon->apply(*tc);
             if (::errorCount() > e)
                 return nullptr;
         }
@@ -1494,7 +1502,7 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
                 // error already signalled
                 return expression;
             if (!tvs->isIdentity()) {
-                ConstantTypeSubstitution cts(tvs, refMap, typeMap);
+                ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
                 expression->left = cts.convert(expression->left);
                 expression->right = cts.convert(expression->right);
             }
@@ -1518,7 +1526,7 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
                     // error already signalled
                     return expression;
                 if (!tvs->isIdentity()) {
-                    ConstantTypeSubstitution cts(tvs, refMap, typeMap);
+                    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
                     expression->left = cts.convert(expression->left);
                     expression->right = cts.convert(expression->right);
                 }
@@ -1686,7 +1694,7 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
     TypeVariableSubstitution *tvs = unify(entry, keyTuple, entryKeyType);
     if (tvs == nullptr)
         return entry;
-    ConstantTypeSubstitution cts(tvs, refMap, typeMap);
+    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
     auto ks = cts.convert(keyset);
     if (::errorCount() > 0)
         return entry;
@@ -2356,7 +2364,7 @@ const IR::Node* TypeInference::postorder(IR::Mux* expression) {
     auto tvs = unify(expression, secondType, thirdType);
     if (tvs != nullptr) {
         if (!tvs->isIdentity()) {
-            ConstantTypeSubstitution cts(tvs, refMap, typeMap);
+            ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
             auto e1 = cts.convert(expression->e1);
             auto e2 = cts.convert(expression->e2);
             if (::errorCount() > 0)
@@ -2489,8 +2497,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         if (methodType == nullptr)
             return expression;
         // sometimes this is a synthesized type, so we have to crawl it to understand it
-        TypeInference learn(refMap, typeMap, true);
-        (void)methodType->apply(learn);
+        auto *learn = clone();
+        (void)methodType->apply(*learn);
 
         setType(getOriginal(), methodType);
         setType(expression, methodType);
@@ -2682,7 +2690,7 @@ TypeInference::actionCall(bool inActionList,
         return actionCall;
     addSubstitutions(tvs);
 
-    ConstantTypeSubstitution cts(tvs, refMap, typeMap);
+    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
     actionCall = cts.convert(actionCall)->to<IR::MethodCallExpression>();  // cast arguments
     if (::errorCount() > 0)
         return actionCall;
@@ -2889,8 +2897,8 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
 
         // construct types for the specMethodType, use a new typeChecker
         // that uses the same tables!
-        TypeInference learn(refMap, typeMap, true);
-        (void)specMethodType->apply(learn);
+        auto *learn = clone();
+        (void)specMethodType->apply(*learn);
 
         auto canon = getType(specMethodType);
         if (canon == nullptr)
@@ -2922,7 +2930,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         setType(getOriginal(), returnType);
         setType(expression, returnType);
 
-        ConstantTypeSubstitution cts(tvs, refMap, typeMap);
+        ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
         auto result = cts.convert(expression)->to<IR::MethodCallExpression>();  // cast arguments
         if (::errorCount() > 0)
             return expression;
@@ -3043,7 +3051,7 @@ TypeInference::matchCase(const IR::SelectExpression* select, const IR::Type_Tupl
     auto tvs = unify(select, useSelType, caseType);
     if (tvs == nullptr)
         return nullptr;
-    ConstantTypeSubstitution cts(tvs, refMap, typeMap);
+    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
     auto ks = cts.convert(selectCase->keyset);
     if (::errorCount() > 0)
         return selectCase;
