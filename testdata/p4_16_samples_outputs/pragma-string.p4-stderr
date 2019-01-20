@@ -1,7 +1,1 @@
-string_anno.p4:21:7: warning: missing terminating " character
- @name("string with
-       ^
-string_anno.p4:22:8: warning: missing terminating " character
- newline") const bit d = 1;
-        ^
 warning: Program does not contain a `main' module

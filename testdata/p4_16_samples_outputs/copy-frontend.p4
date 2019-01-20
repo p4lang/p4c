@@ -6,7 +6,7 @@ control c(inout bit<32> b) {
     S s1_0;
     S s2_0;
     @name("c.a") action a() {
-        s2_0 = { 32w0 };
+        s2_0 = {32w0};
         s1_0 = s2_0;
         s2_0 = s1_0;
         b = s2_0.x;
