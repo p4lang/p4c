@@ -18,7 +18,7 @@ tables {
   }
   action_refs {
     id: 16800567
-    annotations: "@defaultonly()"
+    annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
   size: 65536
@@ -49,7 +49,7 @@ tables {
   }
   action_refs {
     id: 16800567
-    annotations: "@defaultonly()"
+    annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
   size: 131072
@@ -80,7 +80,7 @@ tables {
   }
   action_refs {
     id: 16800567
-    annotations: "@defaultonly()"
+    annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
   size: 16384
@@ -105,7 +105,7 @@ tables {
   }
   action_refs {
     id: 16800567
-    annotations: "@defaultonly()"
+    annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
   size: 32768
@@ -127,7 +127,7 @@ tables {
   }
   action_refs {
     id: 16800567
-    annotations: "@defaultonly()"
+    annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
   size: 32768
@@ -152,7 +152,7 @@ tables {
   }
   action_refs {
     id: 16800567
-    annotations: "@defaultonly()"
+    annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
   size: 32768

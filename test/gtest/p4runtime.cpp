@@ -1295,6 +1295,26 @@ TEST_F(P4RuntimePkgInfo, DuplicateKey) {
     ASSERT_FALSE(test);
 }
 
+TEST_F(P4RuntimePkgInfo, UnknownAnnotations) {
+    auto test = createTestCase(R"(
+        @my_annotation_1
+        @my_annotation_2()
+        @my_annotation_3(test)
+        @my_annotation_4("test"))");
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0u, ::diagnosticCount());
+    const auto& pkgInfo = test->p4Info->pkg_info();
+    const auto& annotations = pkgInfo.annotations();
+    ASSERT_EQ(annotations.size(), 4);
+    // P4 order is preserved when building the IR and generating P4Info
+    EXPECT_EQ(annotations.Get(0), "@my_annotation_1");
+    // The IR doesn't preserve the empty brackets
+    // EXPECT_EQ(annotations.Get(1), "@my_annotation_2()");
+    EXPECT_EQ(annotations.Get(1), "@my_annotation_2");
+    EXPECT_EQ(annotations.Get(2), "@my_annotation_3(test)");
+    EXPECT_EQ(annotations.Get(3), "@my_annotation_4(\"test\")");
+}
+
 
 class P4RuntimeDataTypeSpec : public P4Runtime {
  protected:

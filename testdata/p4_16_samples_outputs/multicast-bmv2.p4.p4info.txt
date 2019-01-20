@@ -12,7 +12,7 @@ tables {
   }
   action_refs {
     id: 16800567
-    annotations: "@defaultonly()"
+    annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
   size: 1
@@ -37,7 +37,7 @@ tables {
   }
   action_refs {
     id: 16800567
-    annotations: "@defaultonly()"
+    annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
   size: 512
@@ -62,7 +62,7 @@ tables {
   }
   action_refs {
     id: 16800567
-    annotations: "@defaultonly()"
+    annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
   size: 1024
@@ -87,7 +87,7 @@ tables {
   }
   action_refs {
     id: 16800567
-    annotations: "@defaultonly()"
+    annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
   size: 256

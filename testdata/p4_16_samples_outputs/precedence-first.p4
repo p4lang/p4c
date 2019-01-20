@@ -83,7 +83,7 @@ action ac() {
     a = b + c;
     a = f.z + b;
     a = fct(f.z + b, b + c);
-    f = { a + b, c };
-    g = { { a + b, c }, { a + b, c } };
-    g = { { a + b + b, c }, { a + (b + c), c } };
+    f = {a + b,c};
+    g = {{a + b,c},{a + b,c}};
+    g = {{a + b + b,c},{a + (b + c),c}};
 }

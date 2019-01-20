@@ -7,7 +7,7 @@ struct headers {
 extern void f(headers h);
 control c() {
     @hidden action act() {
-        f({ 32w5 });
+        f({32w5});
     }
     @hidden table tbl_act {
         actions = {
