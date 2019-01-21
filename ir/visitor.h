@@ -125,6 +125,8 @@ class Visitor {
             ctxt->child_index = cidx; }
         v.parallel_visit_children(*this); }
 
+    virtual Visitor *clone() const { BUG("need %s::clone method",  name()); return nullptr; }
+
     // Functions for IR visit_children to call for ControlFlowVisitors.
     virtual Visitor &flow_clone() { return *this; }
 
@@ -312,7 +314,7 @@ class Transform : public virtual Visitor {
 class ControlFlowVisitor : public virtual Visitor {
     std::map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> *flow_join_points = 0;
  protected:
-    virtual ControlFlowVisitor *clone() const = 0;
+    ControlFlowVisitor* clone() const override = 0;
     void init_join_flows(const IR::Node *root) override;
     bool join_flows(const IR::Node *n) override;
 
