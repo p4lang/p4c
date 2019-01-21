@@ -39,7 +39,7 @@ class ConstantTypeSubstitution : public Transform {
     ConstantTypeSubstitution(TypeVariableSubstitution* subst,
                              ReferenceMap* refMap,
                              TypeMap* typeMap,
-                             TypeInference* tc) : 
+                             TypeInference* tc) :
         subst(subst), refMap(refMap), typeMap(typeMap), tc(tc) {
         CHECK_NULL(subst); CHECK_NULL(refMap); CHECK_NULL(typeMap);
         CHECK_NULL(tc);
