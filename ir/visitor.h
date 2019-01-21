@@ -314,7 +314,7 @@ class Transform : public virtual Visitor {
 class ControlFlowVisitor : public virtual Visitor {
     std::map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> *flow_join_points = 0;
  protected:
-    ControlFlowVisitor* clone() const override;
+    ControlFlowVisitor* clone() const override = 0;
     void init_join_flows(const IR::Node *root) override;
     bool join_flows(const IR::Node *n) override;
 
