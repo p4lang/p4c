@@ -57,6 +57,7 @@ parser.cpp \
 parser_error.cpp \
 pcap_file.cpp \
 pipeline.cpp \
+periodic_task.cpp \
 port_monitor.cpp \
 phv.cpp \
 phv_source.cpp \

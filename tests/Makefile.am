@@ -60,6 +60,7 @@ test_fields \
 test_devmgr \
 test_packet \
 test_extern \
+test_periodic_tasks \
 test_switch \
 test_target_parser \
 test_runtime_iface \
@@ -98,6 +99,7 @@ test_pcap_SOURCES            = $(common_source) test_pcap.cpp
 test_devmgr_SOURCES          = $(common_source) test_devmgr.cpp
 test_packet_SOURCES          = $(common_source) test_packet.cpp
 test_extern_SOURCES          = $(common_source) test_extern.cpp
+test_periodic_tasks_SOURCES  = $(common_source) test_periodic_tasks.cpp
 test_switch_SOURCES          = $(common_source) test_switch.cpp
 test_target_parser_SOURCES   = $(common_source) test_target_parser.cpp
 test_runtime_iface_SOURCES   = $(common_source) test_runtime_iface.cpp
@@ -134,6 +136,7 @@ test_fields.cpp \
 test_devmgr.cpp \
 test_packet.cpp \
 test_extern.cpp \
+test_periodic_tasks.cpp \
 test_switch.cpp \
 test_target_parser.cpp \
 test_runtime_iface.cpp \

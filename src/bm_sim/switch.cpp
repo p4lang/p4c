@@ -28,6 +28,7 @@
 #include <bm/bm_sim/debugger.h>
 #include <bm/bm_sim/event_logger.h>
 #include <bm/bm_sim/packet.h>
+#include <bm/bm_sim/periodic_task.h>
 
 #include <cassert>
 #include <fstream>
@@ -82,6 +83,8 @@ SwitchWContexts::start_and_return() {
   }
   start();  // DevMgr::start
   start_and_return_();
+  // Starts any registered periodically-executing externs
+  PeriodicTaskList::get_instance().start();
 }
 
 void
