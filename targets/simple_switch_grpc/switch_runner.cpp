@@ -320,6 +320,9 @@ class NotificationsCapture : public bm::TransportIface {
     } else if (!memcmp("LEA|", msg.data(), 4)) {
       handle_LEA(reinterpret_cast<const LEA_hdr_t *>(&storage),
                  data, msg.size() - hdr_size);
+    } else if (!memcmp("AGE|", msg.data(), 4)) {
+      handle_AGE(reinterpret_cast<const AGE_hdr_t *>(&storage),
+                 data, msg.size() - hdr_size);
     }
     return 0;
   }
@@ -396,6 +399,45 @@ class NotificationsCapture : public bm::TransportIface {
     pi_msg->entries = new char[size];
     std::memcpy(pi_msg->entries, data, size);
     pi_learn_new_msg(pi_msg);
+  }
+
+  void handle_AGE(const AGE_hdr_t *hdr, const char *data, size_t size) const {
+    (void) size;
+    // do not send notifications to PI if there is an ongoing swap; this is a
+    // requirement of the p4lang P4Runtime implementation.
+    if (ongoing_swap) {
+      BMLOG_TRACE(
+          "Ignoring AGE notification because of ongoing dataplane swap");
+      return;
+    }
+
+    const auto *ageing_monitor = sw->get_ageing_monitor(0);
+    auto table_name = ageing_monitor->get_table_name_from_id(hdr->table_id);
+    if (table_name == "") {
+      bm::Logger::get()->error(
+          "Ignoring AGE notification with unknown table id {}", hdr->table_id);
+      return;
+    }
+    auto *p4info = pi_get_device_p4info(hdr->switch_id);
+    if (p4info == nullptr) {
+      bm::Logger::get()->error(
+          "Ignoring AGE notification for device {} which has no p4info",
+          hdr->switch_id);
+      return;
+    }
+    pi_p4_id_t pi_id = pi_p4info_table_id_from_name(p4info, table_name.c_str());
+    if (pi_id == PI_INVALID_ID) {
+      bm::Logger::get()->error(
+          "Ignoring AGE notification for table whose name '{}' "
+          "cannot be found in p4info", table_name);
+      return;
+    }
+
+    auto *handles = reinterpret_cast<const uint32_t *>(data);
+    for (unsigned int i = 0; i < hdr->num_entries; i++) {
+      bm::pi::table_idle_timeout_notify(
+          hdr->switch_id, pi_id, static_cast<pi_entry_handle_t>(handles[i]));
+    }
   }
 
   int open_() override {

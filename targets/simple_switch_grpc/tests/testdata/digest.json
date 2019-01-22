@@ -246,7 +246,7 @@
           ],
           "source_info" : {
             "filename" : "digest.p4",
-            "line" : 70,
+            "line" : 71,
             "column" : 26,
             "source_fragment" : "sm.egress_spec = sm.ingress_port"
           }
@@ -287,7 +287,7 @@
           "type" : "simple",
           "max_size" : 4096,
           "with_counters" : false,
-          "support_timeout" : false,
+          "support_timeout" : true,
           "direct_meters" : null,
           "action_ids" : [1, 0],
           "actions" : ["ingress.send_digest", "NoAction"],
@@ -394,7 +394,7 @@
       ["standard_metadata", "recirculate_flag"]
     ]
   ],
-  "program" : "./digest.p4i",
+  "program" : "/tmp//digest.p4i",
   "__meta__" : {
     "version" : [2, 18],
     "compiler" : "https://github.com/p4lang/p4c"

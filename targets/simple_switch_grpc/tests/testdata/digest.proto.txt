@@ -1,3 +1,6 @@
+pkg_info {
+  arch: "v1model"
+}
 tables {
   preamble {
     id: 33610141
@@ -17,6 +20,7 @@ tables {
     id: 16800567
   }
   size: 4096
+  idle_timeout_behavior: NOTIFY_CONTROL
 }
 actions {
   preamble {

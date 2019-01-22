@@ -24,28 +24,33 @@
 
 namespace pibmv2 {
 
-Buffer::Buffer() {
-  data.reserve(2048);
+Buffer::Buffer(size_t capacity) {
+  data_.reserve(capacity);
 }
 
 char *
 Buffer::extend(size_t s) {
   if (s == 0) return nullptr;
-  const auto size = data.size();
-  data.resize(size + s);
-  return &data[size];
+  const auto size = data_.size();
+  data_.resize(size + s);
+  return &data_[size];
 }
 
 char *
 Buffer::copy() const {
-  char *res = new char[data.size()];
-  std::copy(data.begin(), data.end(), res);
+  char *res = new char[data_.size()];
+  std::copy(data_.begin(), data_.end(), res);
   return res;
+}
+
+char *
+Buffer::data() {
+  return data_.data();
 }
 
 size_t
 Buffer::size() const {
-  return data.size();
+  return data_.size();
 }
 
 }  // namespace pibmv2

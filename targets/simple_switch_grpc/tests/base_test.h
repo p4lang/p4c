@@ -61,6 +61,15 @@ class SimpleSwitchGrpcBaseTest : public ::testing::Test {
 
   void set_election_id(p4::v1::Uint128 *election_id) const;
 
+  grpc::Status write(const p4::v1::Entity &entity,
+                     p4::v1::Update::Type type) const;
+  grpc::Status insert(const p4::v1::Entity &entity) const;
+  grpc::Status modify(const p4::v1::Entity &entity) const;
+  grpc::Status remove(const p4::v1::Entity &entity) const;
+
+  grpc::Status read(const p4::v1::Entity &entity,
+                    p4::v1::ReadResponse *rep) const;
+
   // calls p4runtime_stub->Write, with the appropriate election_id
   grpc::Status Write(ClientContext *context,
                      p4::v1::WriteRequest &request,

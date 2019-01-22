@@ -196,3 +196,10 @@ TEST_F(AgeingTest, NoDuplicate) {
   elapsed = duration_cast<milliseconds>(tp4 - tp3).count();
   ASSERT_GT(elapsed, (unsigned int) (sweep_int * 1.5));
 }
+
+TEST_F(AgeingTest, GetTableNameFromId) {
+  unsigned int sweep_int = 200u;
+  init_monitor(sweep_int);
+  EXPECT_EQ(ageing_monitor->get_table_name_from_id(0), "test_table");
+  EXPECT_EQ(ageing_monitor->get_table_name_from_id(1), "");
+}

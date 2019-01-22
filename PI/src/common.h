@@ -71,16 +71,18 @@ struct IndirectHMgr {
 
 class Buffer {
  public:
-  Buffer();
+  explicit Buffer(size_t capacity = 2048);
 
   char *extend(size_t s);
 
   char *copy() const;
 
+  char *data();  // returns non-owning pointer
+
   size_t size() const;
 
  private:
-  std::vector<char> data{};
+  std::vector<char> data_{};
 };
 
 }  // namespace pibmv2

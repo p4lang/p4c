@@ -53,7 +53,11 @@ class AgeingMonitor final : public AgeingMonitorIface {
 
   void set_sweep_interval(unsigned int ms) override;
 
+  unsigned int get_sweep_interval() override;
+
   void reset_state() override;
+
+  std::string get_table_name_from_id(p4object_id_t id) const override;
 
  private:
   void sweep_loop();
@@ -119,7 +123,14 @@ AgeingMonitor::add_table(MatchTableAbstract *table) {
 
 void
 AgeingMonitor::set_sweep_interval(unsigned int ms) {
+  std::unique_lock<std::mutex> lock(mutex);
   sweep_interval_ms = ms;
+}
+
+unsigned int
+AgeingMonitor::get_sweep_interval() {
+  std::unique_lock<std::mutex> lock(mutex);
+  return sweep_interval_ms;
 }
 
 void
@@ -132,6 +143,14 @@ AgeingMonitor::reset_state() {
     TableData &data = entry.second;
     data.prev_sweep_entries.clear();
   }
+}
+
+std::string
+AgeingMonitor::get_table_name_from_id(p4object_id_t id) const {
+  // we use a std::map, but lookup should be fast for such a small map
+  auto it = tables_with_ageing.find(id);
+  if (it == tables_with_ageing.end()) return "";
+  return it->second.table->get_name();
 }
 
 void

@@ -22,8 +22,10 @@
 #define BM_BM_SIM_AGEING_H_
 
 #include <memory>
+#include <string>
 
 #include "device_id.h"
+#include "named_p4object.h"
 #include "transport.h"
 
 namespace bm {
@@ -48,7 +50,16 @@ class AgeingMonitorIface {
 
   virtual void set_sweep_interval(unsigned int ms) = 0;
 
+  virtual unsigned int get_sweep_interval() = 0;
+
   virtual void reset_state() = 0;
+
+  //! Returns an empty string if table doesn't support idle timeout; this is
+  //! useful to decode notifications.
+  //! Not thread-safe but can be called safely after the map has been populated
+  //! by P4Objects::init_objects, including as idle notifications are being
+  //! generated.
+  virtual std::string get_table_name_from_id(p4object_id_t id) const = 0;
 
   static std::unique_ptr<AgeingMonitorIface> make(
       device_id_t device_id, cxt_id_t cxt_id,

@@ -56,6 +56,7 @@ class MatchTableAbstract : public NamedP4Object {
     std::vector<MatchKeyParam> match_key;
     uint32_t timeout_ms{0};
     uint32_t time_since_hit_ms{0};
+    int priority;
   };
 
   class handle_iterator
@@ -286,7 +287,6 @@ class MatchTable : public MatchTableAbstract {
   struct Entry : public EntryCommon {
     const ActionFn *action_fn;
     ActionData action_data;
-    int priority;
   };
 
  public:
@@ -381,7 +381,6 @@ class MatchTableIndirect : public MatchTableAbstract {
 
   struct Entry : public EntryCommon {
     mbr_hdl_t mbr;
-    int priority;
   };
 
  public:
@@ -476,7 +475,6 @@ class MatchTableIndirectWS : public MatchTableIndirect {
   struct Entry : public EntryCommon {
     mbr_hdl_t mbr;
     grp_hdl_t grp;
-    int priority;
   };
 
  public:

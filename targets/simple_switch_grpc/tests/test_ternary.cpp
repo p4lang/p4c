@@ -82,27 +82,12 @@ class SimpleSwitchGrpcTest_Ternary : public SimpleSwitchGrpcBaseTest {
   }
 
   grpc::Status add_entry(const p4v1::Entity &entry) const {
-    p4v1::WriteRequest request;
-    request.set_device_id(device_id);
-    auto update = request.add_updates();
-    update->set_type(p4v1::Update_Type_INSERT);
-    update->mutable_entity()->CopyFrom(entry);
-    ClientContext context;
-    p4v1::WriteResponse rep;
-    return Write(&context, request, &rep);
+    return insert(entry);
   }
 
   grpc::Status read_entry(const p4v1::Entity &entry,
                           p4v1::ReadResponse *rep) const {
-    p4v1::ReadRequest request;
-    request.set_device_id(device_id);
-    auto *entity = request.add_entities();
-    entity->CopyFrom(entry);
-    ClientContext context;
-    std::unique_ptr<grpc::ClientReader<p4v1::ReadResponse> > reader(
-        p4runtime_stub->Read(&context, request));
-    reader->Read(rep);
-    return reader->Finish();
+    return read(entry, rep);
   }
 
   grpc::Status send_and_receive(const std::string &pkt, int ig_port,

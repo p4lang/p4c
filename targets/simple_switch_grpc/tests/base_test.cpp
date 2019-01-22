@@ -102,6 +102,47 @@ SimpleSwitchGrpcBaseTest::set_election_id(p4v1::Uint128 *election_id) const {
 }
 
 grpc::Status
+SimpleSwitchGrpcBaseTest::write(const p4v1::Entity &entity,
+                                p4v1::Update::Type type) const {
+  p4v1::WriteRequest request;
+  request.set_device_id(device_id);
+  auto update = request.add_updates();
+  update->set_type(type);
+  update->mutable_entity()->CopyFrom(entity);
+  ClientContext context;
+  p4v1::WriteResponse rep;
+  return Write(&context, request, &rep);
+}
+
+grpc::Status
+SimpleSwitchGrpcBaseTest::insert(const p4v1::Entity &entity) const {
+  return write(entity, p4v1::Update::INSERT);
+}
+
+grpc::Status
+SimpleSwitchGrpcBaseTest::modify(const p4v1::Entity &entity) const {
+  return write(entity, p4v1::Update::MODIFY);
+}
+
+grpc::Status
+SimpleSwitchGrpcBaseTest::remove(const p4v1::Entity &entity) const {
+  return write(entity, p4v1::Update::DELETE);
+}
+
+grpc::Status
+SimpleSwitchGrpcBaseTest::read(const p4v1::Entity &entity,
+                               p4v1::ReadResponse *rep) const {
+  p4v1::ReadRequest request;
+  request.set_device_id(device_id);
+  request.add_entities()->CopyFrom(entity);
+  ClientContext context;
+  std::unique_ptr<grpc::ClientReader<p4v1::ReadResponse> > reader(
+      p4runtime_stub->Read(&context, request));
+  reader->Read(rep);
+  return reader->Finish();
+}
+
+grpc::Status
 SimpleSwitchGrpcBaseTest::Write(ClientContext *context,
                                 p4v1::WriteRequest &request,
                                 p4v1::WriteResponse *response) const {

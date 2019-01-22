@@ -25,6 +25,7 @@
 #include <PI/int/serialize.h>
 #include <PI/p4info.h>
 #include <PI/pi.h>
+#include <PI/target/pi_tables_imp.h>
 
 #include <algorithm>
 #include <limits>
@@ -150,8 +151,9 @@ pi_entry_handle_t add_entry(const pi_p4info_t *p4info,
                             const std::string &t_name,
                             std::vector<bm::MatchKeyParam> &&match_key,
                             int priority,
-                            const pi_action_data_t *adata) {
+                            const pi_table_entry_t *table_entry) {
   _BM_UNUSED(dev_tgt);
+  const pi_action_data_t *adata = table_entry->entry.action_data;
   auto action_data = pibmv2::build_action_data(adata, p4info);
   pi_p4_id_t action_id = adata->action_id;
   std::string a_name(pi_p4info_action_name_from_id(p4info, action_id));
@@ -161,6 +163,14 @@ pi_entry_handle_t add_entry(const pi_p4info_t *p4info,
       std::move(action_data), &entry_handle, priority);
   if (error_code != bm::MatchErrorCode::SUCCESS)
     throw bm_exception(error_code);
+  auto *properties = table_entry->entry_properties;
+  if (pi_entry_properties_is_set(properties, PI_ENTRY_PROPERTY_TYPE_TTL)) {
+    auto error_code = pibmv2::switch_->mt_set_entry_ttl(
+        0, t_name, entry_handle,
+        static_cast<unsigned int>(properties->ttl_ns / 1000000));
+    if (error_code != bm::MatchErrorCode::SUCCESS)
+      throw bm_exception(error_code);
+  }
   return static_cast<pi_entry_handle_t>(entry_handle);
 }
 
@@ -169,9 +179,10 @@ pi_entry_handle_t add_indirect_entry(const pi_p4info_t *p4info,
                                      const std::string &t_name,
                                      std::vector<bm::MatchKeyParam> &&match_key,
                                      int priority,
-                                     pi_indirect_handle_t h) {
+                                     const pi_table_entry_t *table_entry) {
   _BM_UNUSED(p4info);  // needed later?
   _BM_UNUSED(dev_tgt);
+  pi_indirect_handle_t h = table_entry->entry.indirect_handle;
   bm::entry_handle_t entry_handle;
   bool is_grp_h = pibmv2::IndirectHMgr::is_grp_h(h);
   bm::MatchErrorCode error_code;
@@ -185,6 +196,14 @@ pi_entry_handle_t add_indirect_entry(const pi_p4info_t *p4info,
   }
   if (error_code != bm::MatchErrorCode::SUCCESS)
     throw bm_exception(error_code);
+  auto *properties = table_entry->entry_properties;
+  if (pi_entry_properties_is_set(properties, PI_ENTRY_PROPERTY_TYPE_TTL)) {
+    auto error_code = pibmv2::switch_->mt_indirect_set_entry_ttl(
+        0, t_name, entry_handle,
+        static_cast<unsigned int>(properties->ttl_ns / 1000000));
+    if (error_code != bm::MatchErrorCode::SUCCESS)
+      throw bm_exception(error_code);
+  }
   return static_cast<pi_entry_handle_t>(entry_handle);
 }
 
@@ -410,6 +429,29 @@ void build_action_entry_2<bm::MatchTableIndirectWS::Entry>(
                        indirect_handle);
 }
 
+void emit_match_key(const std::vector<bm::MatchKeyParam> &match_key,
+                    Buffer *buffer) {
+  for (const auto &p : match_key) {
+    switch (p.type) {
+      case bm::MatchKeyParam::Type::EXACT:
+        std::copy(p.key.begin(), p.key.end(), buffer->extend(p.key.size()));
+        break;
+      case bm::MatchKeyParam::Type::LPM:
+        std::copy(p.key.begin(), p.key.end(), buffer->extend(p.key.size()));
+        emit_uint32(buffer->extend(sizeof(uint32_t)), p.prefix_length);
+        break;
+      case bm::MatchKeyParam::Type::TERNARY:
+      case bm::MatchKeyParam::Type::RANGE:
+        std::copy(p.key.begin(), p.key.end(), buffer->extend(p.key.size()));
+        std::copy(p.mask.begin(), p.mask.end(), buffer->extend(p.mask.size()));
+        break;
+      case bm::MatchKeyParam::Type::VALID:
+        *buffer->extend(1) = (p.key == std::string("\x01", 1)) ? 1 : 0;
+        break;
+    }
+  }
+}
+
 template <
   typename M,
   typename std::vector<typename M::Entry> (bm::RuntimeInterface::*GetFn)(
@@ -444,28 +486,12 @@ void get_entries_common(const pi_p4info_t *p4info, pi_p4_id_t table_id,
     int priority = (e.priority == -1) ?
         0 : PriorityInverter::bm_to_pi(e.priority);
     emit_uint32(buffer.extend(sizeof(uint32_t)), priority);
-    for (const auto &p : e.match_key) {
-      switch (p.type) {
-        case bm::MatchKeyParam::Type::EXACT:
-          std::copy(p.key.begin(), p.key.end(), buffer.extend(p.key.size()));
-          break;
-        case bm::MatchKeyParam::Type::LPM:
-          std::copy(p.key.begin(), p.key.end(), buffer.extend(p.key.size()));
-          emit_uint32(buffer.extend(sizeof(uint32_t)), p.prefix_length);
-          break;
-        case bm::MatchKeyParam::Type::TERNARY:
-        case bm::MatchKeyParam::Type::RANGE:
-          std::copy(p.key.begin(), p.key.end(), buffer.extend(p.key.size()));
-          std::copy(p.mask.begin(), p.mask.end(), buffer.extend(p.mask.size()));
-          break;
-        case bm::MatchKeyParam::Type::VALID:
-          *buffer.extend(1) = (p.key == std::string("\x01", 1)) ? 1 : 0;
-          break;
-      }
-    }
+    emit_match_key(e.match_key, &buffer);
+
     build_action_entry_2(p4info, e, &buffer);
 
     // properties
+    // TODO(antonin): add TTL
     emit_uint32(buffer.extend(sizeof(uint32_t)), 0);
 
     // direct resources
@@ -545,6 +571,41 @@ void get_entries(const pi_p4info_t *p4info, pi_p4_id_t table_id,
                              p4info, table_id, res);
       break;
   }
+}
+
+bm::MatchTableAbstract::EntryCommon get_match_entry(
+    const pi_p4info_t *p4info, pi_p4_id_t table_id, pi_entry_handle_t handle) {
+  std::string t_name(pi_p4info_table_name_from_id(p4info, table_id));
+
+  switch (pibmv2::switch_->mt_get_type(0, t_name)) {
+    case bm::MatchTableType::NONE:
+      throw bm_exception(bm::MatchErrorCode::INVALID_TABLE_NAME);
+    case bm::MatchTableType::SIMPLE: {
+      bm::MatchTable::Entry entry;
+      auto error_code = pibmv2::switch_->mt_get_entry(
+          0, t_name, handle, &entry);
+      if (error_code != bm::MatchErrorCode::SUCCESS)
+        throw bm_exception(error_code);
+      return entry;
+    }
+    case bm::MatchTableType::INDIRECT: {
+      bm::MatchTableIndirect::Entry entry;
+      auto error_code = pibmv2::switch_->mt_indirect_get_entry(
+          0, t_name, handle, &entry);
+      if (error_code != bm::MatchErrorCode::SUCCESS)
+        throw bm_exception(error_code);
+      return entry;
+    }
+    case bm::MatchTableType::INDIRECT_WS: {
+      bm::MatchTableIndirectWS::Entry entry;
+      auto error_code = pibmv2::switch_->mt_indirect_ws_get_entry(
+          0, t_name, handle, &entry);
+      if (error_code != bm::MatchErrorCode::SUCCESS)
+        throw bm_exception(error_code);
+      return entry;
+    }
+  }
+  return {};
 }
 
 void set_direct_resources(const pi_p4info_t *p4info, pi_dev_id_t dev_id,
@@ -663,13 +724,11 @@ pi_status_t _pi_table_entry_add(pi_session_handle_t session_handle,
     switch (table_entry->entry_type) {
       case PI_ACTION_ENTRY_TYPE_DATA:
         *entry_handle = add_entry(
-            p4info, dev_tgt, t_name, std::move(mkey), priority,
-            table_entry->entry.action_data);
+            p4info, dev_tgt, t_name, std::move(mkey), priority, table_entry);
         break;
       case PI_ACTION_ENTRY_TYPE_INDIRECT:
         *entry_handle = add_indirect_entry(
-            p4info, dev_tgt, t_name, std::move(mkey), priority,
-            table_entry->entry.indirect_handle);
+            p4info, dev_tgt, t_name, std::move(mkey), priority, table_entry);
         break;
       default:
         assert(0);
@@ -894,4 +953,80 @@ pi_status_t _pi_table_entries_fetch_done(pi_session_handle_t session_handle,
   return PI_STATUS_SUCCESS;
 }
 
+pi_status_t _pi_table_idle_timeout_config_set(
+    pi_session_handle_t session_handle, pi_dev_id_t dev_id, pi_p4_id_t table_id,
+    const pi_idle_timeout_config_t *config) {
+  _BM_UNUSED(session_handle);
+  _BM_UNUSED(dev_id);
+  _BM_UNUSED(table_id);
+  _BM_UNUSED(config);
+  // The PI library is expected to check that idle timeout is enabled on the
+  // table.
+
+  // Do not do anything at the moment. The ageing sweep_interval for bmv2 is
+  // global and not per table, so it would be too much trouble to maintain a
+  // per-table map here and use the minimum value.
+  return PI_STATUS_SUCCESS;
 }
+
+pi_status_t _pi_table_entry_get_remaining_ttl(
+    pi_session_handle_t session_handle, pi_dev_id_t dev_id, pi_p4_id_t table_id,
+    pi_entry_handle_t entry_handle, uint64_t *ttl_ns) {
+  _BM_UNUSED(session_handle);
+  _BM_UNUSED(dev_id);
+
+  const auto *p4info = pibmv2::get_device_info(dev_id);
+  assert(p4info != nullptr);
+
+  // The PI library is expected to check that idle timeout is enabled on the
+  // table.
+
+  try {
+    auto entry = get_match_entry(p4info, table_id, entry_handle);
+    if (entry.timeout_ms == 0) {
+      *ttl_ns = std::numeric_limits<uint64_t>::max();
+    } else {
+      *ttl_ns = (entry.timeout_ms > entry.time_since_hit_ms) ?
+          ((entry.timeout_ms - entry.time_since_hit_ms) * 1000 * 1000) : 0;
+    }
+  } catch (const bm_exception &e) {
+    return e.get();
+  }
+
+  return PI_STATUS_SUCCESS;
+}
+
+}
+
+namespace bm {
+
+namespace pi {
+
+pi_status_t table_idle_timeout_notify(pi_dev_id_t dev_id, pi_p4_id_t table_id,
+                                      pi_entry_handle_t entry_handle) {
+  const auto *p4info = pibmv2::get_device_info(dev_id);
+  assert(p4info != nullptr);
+
+  pi_match_key_t match_key;
+  match_key.p4info = p4info;
+  match_key.table_id = table_id;
+  Buffer buffer(128);
+  try {
+    auto entry = get_match_entry(p4info, table_id, entry_handle);
+    emit_match_key(entry.match_key, &buffer);
+    match_key.priority = (entry.priority == -1) ?
+        0 : PriorityInverter::bm_to_pi(entry.priority);
+    match_key.data_size = buffer.size();
+    // non-owning pointer, the application must make a copy if needed before the
+    // callback returns
+    match_key.data = buffer.data();
+    return pi_table_idle_timeout_notify(
+        dev_id, table_id, &match_key, entry_handle);
+  } catch (const bm_exception &e) {
+    return e.get();
+  }
+}
+
+}  // namespace pi
+
+}  // namespace bm

@@ -66,6 +66,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         actions = { send_digest; NoAction; }
         default_action = send_digest();
         size = 4096;
+        support_timeout = true;
     }
     apply { smac.apply(); sm.egress_spec = sm.ingress_port; }
 }

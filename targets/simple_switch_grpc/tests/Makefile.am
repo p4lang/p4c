@@ -37,7 +37,8 @@ test_basic.cpp test_grpc_dp.cpp test_packet_io.cpp \
 test_counter.cpp test_meter.cpp \
 test_ternary.cpp \
 test_pre.cpp \
-test_digest.cpp
+test_digest.cpp \
+test_idle_timeout.cpp
 if WITH_SYSREPO
 test_gtest_SOURCES += test_gnmi.cpp
 endif

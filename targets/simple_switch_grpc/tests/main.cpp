@@ -51,7 +51,7 @@ class SimpleSwitchGrpcEnv : public ::testing::Environment {
     argv.push_back("45459");
 #endif  // WITH_THRIFT
     // you can uncomment this when debugging
-    // argv.push_back("--log-console");
+    argv.push_back("--log-console");
     argv.push_back(start_json);
     auto argc = static_cast<int>(argv.size());
     parser.parse(argc, const_cast<char **>(argv.data()), nullptr);
