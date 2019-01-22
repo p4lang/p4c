@@ -154,6 +154,19 @@ Util::IJson* ExternConverter_clone3::convertExternFunction(
         modelError("Expected 3 arguments for %1%", mc);
         return nullptr;
     }
+    auto exp = mc->arguments->at(2)->expression;
+    if (exp->type->is<IR::Type_Struct>()) {
+        auto strct = exp->type->to<IR::Type_Struct>();
+        for (auto f : strct->fields) {
+            auto ftype = f->type;
+            if (ftype->is<IR::Type_Header>()) {
+                ::error("v1 model does not support header %1% inside struct for clone3 arg %2%",
+                        f, exp);
+                return nullptr;
+            }
+        }
+    }
+
     cstring name = ctxt->refMap->newName("fl");
     id = createFieldList(ctxt, mc->arguments->at(2)->expression, "field_lists", name,
                          ctxt->json->field_lists);
