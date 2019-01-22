@@ -9,7 +9,6 @@ struct s_t {
 }
 
 header h_t {
-    // UNCOMMENT
     s_t s;
     bit<32> f32;
 }
@@ -99,4 +98,3 @@ PSA_Switch(
     PacketReplicationEngine(),
     ep,
     BufferingQueueingEngine()) main;
-

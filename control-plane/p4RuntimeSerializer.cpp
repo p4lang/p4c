@@ -1440,7 +1440,6 @@ P4RuntimeSerializer::generateP4Runtime(const IR::P4Program* program, cstring arc
         // We can only handle a very restricted class of action parameters - the
         // types need to be bit<> or int<> - so we fail without this pass.
         new P4::RemoveActionParameters(&refMap, &typeMap),
-        new P4::FlattenHeaders(&refMap, &typeMap),		
         // Update types and reevaluate the program.
         new P4::TypeChecking(&refMap, &typeMap, /* updateExpressions = */ true),
         evaluator
