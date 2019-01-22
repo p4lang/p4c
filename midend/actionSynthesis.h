@@ -34,7 +34,21 @@ class ActionSynthesisPolicy {
        If the policy returns true the control block is processed,
        otherwise it is left unchanged.
     */
-    virtual bool convert(const IR::P4Control* control) const = 0;
+    virtual bool convert(const Visitor::Context *ctxt, const IR::P4Control* control) = 0;
+
+    /**
+       Called for each statement that may be put into an action when there are preceeding
+       statements already put into an action --
+        @param ctxt context of the code being processsed (control and parents)
+        @param blk  previous statement(s) being put into an action
+        @param stmt statement to be added to the block for a single action
+        @returns
+            true  statement should be added to the same action
+            false statement should start a new action
+    */
+    virtual bool can_combine(const Visitor::Context *, const IR::BlockStatement *,
+                             const IR::StatOrDecl *) {
+        return true; }
 };
 
 /**
