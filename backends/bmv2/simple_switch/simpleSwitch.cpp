@@ -40,7 +40,7 @@ static void recycleHasValidData(const IR::Expression* exp, cstring op) {
             auto ftype = f->type;
             if (ftype->is<IR::Type_Header>()) {
                 ::error("v1 model does not support header %1% inside struct "
-                        "for %2% arg %3%", f, exp, op);
+                        "%2% as arg to %3%", f, exp, op);
                 return;
             }
         }
