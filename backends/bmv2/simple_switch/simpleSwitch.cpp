@@ -33,6 +33,20 @@ using BMV2::stringRepr;
 
 namespace BMV2 {
 
+static void recycleHasValidData(const IR::Expression* exp, cstring op) {
+    if (exp->type->is<IR::Type_Struct>()) {
+        auto strct = exp->type->to<IR::Type_Struct>();
+        for (auto f : strct->fields) {
+            auto ftype = f->type;
+            if (ftype->is<IR::Type_Header>()) {
+                ::error("v1 model does not support header %1% inside struct "
+                        "for %2% arg %3%", f, exp, op);
+                return;
+            }
+        }
+    }
+}
+
 void ParseV1Architecture::modelError(const char* format, const IR::Node* node) {
     ::error(format, node);
     ::error("Are you using an up-to-date v1model.p4?");
@@ -155,18 +169,7 @@ Util::IJson* ExternConverter_clone3::convertExternFunction(
         return nullptr;
     }
     auto exp = mc->arguments->at(2)->expression;
-    if (exp->type->is<IR::Type_Struct>()) {
-        auto strct = exp->type->to<IR::Type_Struct>();
-        for (auto f : strct->fields) {
-            auto ftype = f->type;
-            if (ftype->is<IR::Type_Header>()) {
-                ::error("v1 model does not support header %1% inside struct for clone3 arg %2%",
-                        f, exp);
-                return nullptr;
-            }
-        }
-    }
-
+    recycleHasValidData(exp, "clone3");
     cstring name = ctxt->refMap->newName("fl");
     id = createFieldList(ctxt, mc->arguments->at(2)->expression, "field_lists", name,
                          ctxt->json->field_lists);
@@ -279,6 +282,8 @@ Util::IJson* ExternConverter_resubmit::convertExternFunction(
         modelError("Expected 1 argument for %1%", mc);
         return nullptr;
     }
+    auto exp = mc->arguments->at(0)->expression;
+    recycleHasValidData(exp, "resubmit");
     auto primitive = mkPrimitive("resubmit");
     auto parameters = mkParameters(primitive);
     primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
@@ -315,6 +320,8 @@ Util::IJson* ExternConverter_recirculate::convertExternFunction(
         modelError("Expected 1 argument for %1%", mc);
         return nullptr;
     }
+    auto exp = mc->arguments->at(0)->expression;
+    recycleHasValidData(exp, "recirculate");
     auto primitive = mkPrimitive("recirculate");
     auto parameters = mkParameters(primitive);
     primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
