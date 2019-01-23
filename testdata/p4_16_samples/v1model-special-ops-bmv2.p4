@@ -218,31 +218,22 @@ control ingress(inout headers_t hdr,
         // the packet that will be processed by the ingress control
         // block in the future.
 
-        // Note: There is what might be considered a bug in p4c that
-        // if you give an individual metadata field name in the list
-        // below, and the compiler can simplify it to a constant
-        // value, e.g. because you assign that field a constant value
-        // shortly before the resubmit() call, then the BMv2 JSON file
-        // will have that constant value in it instead of the field
-        // name.  I believe in that case that BMv2 simple_switch will
+        // Note: There is a bug in p4c that in some cases can cause
+        // one or more of the fields _not_ to be preserved.  See the
+        // "Caveat emptor" section of the README.md file here:
+        // https://github.com/jafingerhut/p4-guide/tree/master/v1model-special-ops#caveat-emptor
         // _not_ have that metadata field value preserved.
 
-        // If you give an entire struct like standard_metadata, it
-        // includes all fields inside of that struct.  Even though
-        // standard_metadata.instance_type is one of the fields inside
-        // of this struct, that field's value will _not_ be preserved
-        // across the resubmit operation -- the resubmitted packet
-        // will have standard_metadata.instance_type ==
-        // BMV2_V1MODEL_INSTANCE_TYPE_RESUBMIT.  The instance_type
-        // field is an exception to the "preserve metadata field
-        // value" rule.
+        // While p4c as of 2019-Jan-23 does not give any error or
+        // warning messages if you attempt to preserve
+        // standard_metadata fields, the entire standard_metadata
+        // struct, packet header fields, or entire packet headers,
+        // these should probably be made into p4c error messages in
+        // the future.
 
-        // For the resubmit operation, standard_metadata.resubmit_flag
-        // is 0 for the resubmitted packet, which avoids that packet
-        // being resubmitted indefinitely, unless your program
-        // explicitly causes a separate call to resubmit() on each
-        // execution of ingress.
-        resubmit(standard_metadata);
+        // If you give an entire struct, it includes all fields inside
+        // of that struct.
+        resubmit({});
     }
     action do_clone_i2e(bit<32> l2ptr) {
         // BMv2 simple_switch can have multiple different clone
@@ -257,7 +248,7 @@ control ingress(inout headers_t hdr,
         // resubmit() call above.  clone() is the same as clone3(),
         // except there are only 2 parameters, and thus no metadata
         // field values are preserved in the cloned packet.
-        clone3(CloneType.I2E, I2E_CLONE_SESSION_ID, standard_metadata);
+        clone3(CloneType.I2E, I2E_CLONE_SESSION_ID, {});
         meta.fwd.l2ptr = l2ptr;
     }
     table ipv4_da_lpm {
@@ -308,10 +299,10 @@ control ingress(inout headers_t hdr,
         // Note that for resubmitted packets, everything else about
         // their contents and metadata _except_ the
         // standard_metadata.instance_type field will be the same
-        // about them, plus the metadata fields you give as an
-        // argument to the resubmit() call.  Thus you probably need
-        // some ingress code that causes something different to happen
-        // for resubmitted vs. not-resubmitted packets, or else
+        // about them, plus the user-defined metadata fields you give
+        // as an argument to the resubmit() call.  Thus you probably
+        // need some ingress code that causes something different to
+        // happen for resubmitted vs. not-resubmitted packets, or else
         // whatever caused the packet to be resubmitted will happen
         // for the packet after being resubmitted, too, in an infinite
         // loop.
@@ -367,13 +358,13 @@ control egress(inout headers_t hdr,
         // See the resubmit() call above for comments about the
         // parameter to recirculate(), which has the same form as for
         // resubmit.
-        recirculate(standard_metadata);
+        recirculate({});
     }
     action do_clone_e2e(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
         // See the resubmit() call for notes on the 3rd argument,
         // which is similar to the only argument to resubmit().
-        clone3(CloneType.E2E, E2E_CLONE_SESSION_ID, standard_metadata);
+        clone3(CloneType.E2E, E2E_CLONE_SESSION_ID, {});
     }
     table send_frame {
         key = {
@@ -463,7 +454,6 @@ control computeChecksum(inout headers_t hdr, inout meta_t meta) {
 }
 
 V1Switch(ParserImpl(),
-
          verifyChecksum(),
          ingress(),
          egress(),
