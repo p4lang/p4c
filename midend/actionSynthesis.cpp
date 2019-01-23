@@ -113,7 +113,7 @@ bool DoSynthesizeActions::mustMove(const IR::AssignmentStatement *assign) {
 const IR::Node* DoSynthesizeActions::preorder(IR::P4Control* control) {
     actions.clear();
     changes = false;
-    if (policy != nullptr && !policy->convert(control))
+    if (policy != nullptr && !policy->convert(getContext(), control))
         prune();  // skip this one
     return control;
 }
@@ -132,10 +132,20 @@ const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
     for (auto c : statement->components) {
         if (c->is<IR::AssignmentStatement>()) {
             if (mustMove(c->to<IR::AssignmentStatement>())) {
+                if (policy && !actbody->components.empty() &&
+                    !policy->can_combine(getContext(), actbody, c)) {
+                    auto action = createAction(actbody);
+                    left->push_back(action);
+                    actbody = new IR::BlockStatement; }
                 actbody->push_back(c);
                 continue; }
         } else if (c->is<IR::MethodCallStatement>()) {
             if (mustMove(c->to<IR::MethodCallStatement>())) {
+                if (policy && !actbody->components.empty() &&
+                    !policy->can_combine(getContext(), actbody, c)) {
+                    auto action = createAction(actbody);
+                    left->push_back(action);
+                    actbody = new IR::BlockStatement; }
                 actbody->push_back(c);
                 continue;
             }

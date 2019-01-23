@@ -82,7 +82,7 @@ class SkipControls : public P4::ActionSynthesisPolicy {
 
  public:
     explicit SkipControls(const std::set<cstring> *skip) : skip(skip) { CHECK_NULL(skip); }
-    bool convert(const IR::P4Control* control) const {
+    bool convert(const Visitor::Context *, const IR::P4Control* control) override {
         if (skip->find(control->name) != skip->end())
             return false;
         return true;
