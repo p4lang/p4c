@@ -34,6 +34,19 @@ limitations under the License.
 
 namespace P4V1 {
 
+static const IR::IDeclaration* getFirstDeclaration(
+    const IR::Vector<IR::Node>* nodes,
+    cstring name) {
+    for (auto node : *nodes) {
+        auto decl = node->to<IR::IDeclaration>();
+        if (decl == nullptr)
+            continue;
+        if (decl->getName() == name)
+            return decl;
+    }
+    return nullptr;
+}
+
 ProgramStructure::ProgramStructure() :
         v1model(P4V1::V1Model::instance), p4lib(P4::P4CoreLibrary::instance),
         types(&allNames), metadata(&allNames), headers(&allNames), stacks(&allNames),
@@ -269,7 +282,8 @@ void ProgramStructure::createExterns() {
         if (auto et = ExternConverter::cvtExternType(this, it.first, it.second)) {
             if (et != it.first)
                 extern_remap[it.first] = et;
-            declarations->push_back(et); } }
+            if (et != getFirstDeclaration(declarations, et->name))
+                declarations->push_back(et); } }
 }
 
 const IR::Expression* ProgramStructure::paramReference(const IR::Parameter* param) {
@@ -2082,7 +2096,8 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
     for (auto c : registersToDo) {
         auto reg = registers.get(c);
         auto r = convert(reg, registers.get(reg));
-        declarations->push_back(r);
+        if (getFirstDeclaration(declarations, r->name) == nullptr)
+            declarations->push_back(r);
     }
 
     for (auto c : externsToDo) {
