@@ -291,6 +291,13 @@ class Annotations {
     // already present.
     Annotations addAnnotationIfNew(cstring name, Expression expr) const {
         return getSingle(name) ? this : addAnnotation(name, expr); }
+    Annotations append(Annotations other) {
+        if (other == nullptr)
+            return this;
+        for (auto a : other->annotations)
+            add(a);
+        return this;
+    }
     // If annotations with the same name are already present, remove them.
     // Add this annotation.
     Annotations addOrReplace(cstring name, Expression expr) const {
