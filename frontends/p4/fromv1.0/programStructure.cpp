@@ -675,9 +675,7 @@ void ProgramStructure::createDeparser() {
     }
 
     std::vector<const IR::Expression*> sortedHeaders;
-    bool loop = headerOrder.sccSort(startHeader, sortedHeaders);
-    if (loop)
-        ::warning("The order of headers in deparser is not uniquely determined by parser!");
+    headerOrder.sccSort(startHeader, sortedHeaders);
 
     auto params = new IR::ParameterList;
     auto poutpath = new IR::Path(p4lib.packetOut.Id());
