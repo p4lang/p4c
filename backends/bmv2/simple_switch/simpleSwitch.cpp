@@ -109,22 +109,22 @@ ExternConverter_action_profile ExternConverter_action_profile::singleton;
 ExternConverter_action_selector ExternConverter_action_selector::singleton;
 
 Util::IJson* ExternConverter_clone::convertExternFunction(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
     int id = -1;
     if (mc->arguments->size() != 2) {
-        modelError("Expected 2 arguments for %1%", mc);
+        ConversionContext::modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
     }
     cstring name = ctxt->refMap->newName("fl");
     auto emptylist = new IR::ListExpression({});
-    id = createFieldList(ctxt, emptylist, "field_lists", name, ctxt->json->field_lists);
+    id = ctxt->createFieldList(emptylist, name);
 
     auto cloneType = mc->arguments->at(0);
     auto ei = P4::EnumInstance::resolve(cloneType->expression, ctxt->typeMap);
     if (ei == nullptr) {
-        modelError("%1%: must be a constant on this target", cloneType);
+        ConversionContext::modelError("%1%: must be a constant on this target", cloneType);
         return nullptr;
     }
     cstring prim = ei->name == "I2E" ? "clone_ingress_pkt_to_egress" :
@@ -144,23 +144,45 @@ Util::IJson* ExternConverter_clone::convertExternFunction(
     return primitive;
 }
 
+static int getRecirculateFieldListId(ConversionContext* ctxt, const IR::Node* node) {
+    int id = -1;
+    // Find the field list called 'recirculate' (we use the same
+    // annotation as for recirculate)
+    for (auto it : *ctxt->json->field_lists) {
+        auto j = it->to<Util::JsonObject>();
+        CHECK_NULL(j);
+        auto name = j->get("name")->to<Util::JsonValue>()->getString();
+        if (name == "recirculate") {
+            id = j->get("id")->to<Util::JsonValue>()->getInt();
+            break;
+        }
+    }
+
+    if (id < 0)
+        ::error("%1%: No fields annotated for recirculation in user metadata", node);
+    return id;
+}
+
 Util::IJson* ExternConverter_clone3::convertExternFunction(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
     (void) v1model.clone.clone3.name;
     int id = -1;
-    if (mc->arguments->size() != 3) {
-        modelError("Expected 3 arguments for %1%", mc);
+    if (mc->arguments->size() == 3) {
+        cstring name = ctxt->refMap->newName("fl");
+        id = ctxt->createFieldList(mc->arguments->at(2)->expression, name);
+    } else if (mc->arguments->size() == 2) {
+        id = getRecirculateFieldListId(ctxt, mc);
+    } else {
+        ConversionContext::modelError("Expected 2 or 3 arguments for %1%", mc);
         return nullptr;
     }
-    cstring name = ctxt->refMap->newName("fl");
-    id = createFieldList(ctxt, mc->arguments->at(2)->expression, "field_lists", name,
-                         ctxt->json->field_lists);
+
     auto cloneType = mc->arguments->at(0);
     auto ei = P4::EnumInstance::resolve(cloneType->expression, ctxt->typeMap);
     if (ei == nullptr) {
-        modelError("%1%: must be a constant on this target", cloneType);
+        ConversionContext::modelError("%1%: must be a constant on this target", cloneType);
         return nullptr;
     }
     cstring prim = ei->name == "I2E" ? "clone_ingress_pkt_to_egress" :
@@ -181,8 +203,8 @@ Util::IJson* ExternConverter_clone3::convertExternFunction(
 }
 
 Util::IJson* ExternConverter_hash::convertExternFunction(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
     static std::set<cstring> supportedHashAlgorithms = {
         v1model.algorithm.crc32.name, v1model.algorithm.crc32_custom.name,
@@ -192,7 +214,7 @@ Util::IJson* ExternConverter_hash::convertExternFunction(
     };
 
     if (mc->arguments->size() != 5) {
-        modelError("Expected 5 arguments for %1%", mc);
+        ConversionContext::modelError("Expected 5 arguments for %1%", mc);
         return nullptr;
     }
     auto primitive = mkPrimitive("modify_field_with_hash_based_offset");
@@ -210,7 +232,7 @@ Util::IJson* ExternConverter_hash::convertExternFunction(
         return nullptr;
     }
     auto fields = mc->arguments->at(3);
-    auto calcName = createCalculation(ctxt, ei->name, fields->expression, ctxt->json->calculations,
+    auto calcName = ctxt->createCalculation(ei->name, fields->expression, ctxt->json->calculations,
                                       false, nullptr);
     calculation->emplace("type", "calculation");
     calculation->emplace("value", calcName);
@@ -221,11 +243,11 @@ Util::IJson* ExternConverter_hash::convertExternFunction(
 }
 
 Util::IJson* ExternConverter_digest::convertExternFunction(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
     if (mc->arguments->size() != 2) {
-        modelError("Expected 2 arguments for %1%", mc);
+        ConversionContext::modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
     }
     auto primitive = mkPrimitive("generate_digest");
@@ -242,15 +264,14 @@ Util::IJson* ExternConverter_digest::convertExternFunction(
             auto origType = ctxt->refMap->getDeclaration(
                 typeArg->to<IR::Type_Name>()->path, true);
             if (!origType->is<IR::Type_Struct>()) {
-                modelError("%1%: expected a struct type", origType->getNode());
+                ConversionContext::modelError("%1%: expected a struct type", origType->getNode());
                 return nullptr;
             }
             auto st = origType->to<IR::Type_Struct>();
             listName = st->controlPlaneName();
         }
     }
-    int id = createFieldList(ctxt, mc->arguments->at(1)->expression, "learn_lists",
-                             listName, ctxt->json->learn_lists);
+    int id = ctxt->createFieldList(mc->arguments->at(1)->expression, listName, true);
     auto cst = new IR::Constant(id);
     ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
     auto jcst = ctxt->conv->convert(cst);
@@ -259,80 +280,102 @@ Util::IJson* ExternConverter_digest::convertExternFunction(
 }
 
 Util::IJson* ExternConverter_resubmit::convertExternFunction(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
-    if (mc->arguments->size() != 1) {
-        modelError("Expected 1 argument for %1%", mc);
-        return nullptr;
-    }
-    auto primitive = mkPrimitive("resubmit");
-    auto parameters = mkParameters(primitive);
-    primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
-    cstring listName = "resubmit";
-    // If we are supplied a type argument that is a named type use
-    // that for the list name.
-    if (mc->typeArguments->size() == 1) {
-        auto typeArg = mc->typeArguments->at(0);
-        if (typeArg->is<IR::Type_Name>()) {
-            auto origType = ctxt->refMap->getDeclaration(
-                typeArg->to<IR::Type_Name>()->path, true);
-            if (!origType->is<IR::Type_Struct>()) {
-                modelError("%1%: expected a struct type", origType->getNode());
-                return nullptr;
+    if (mc->arguments->size() == 1) {
+        auto primitive = mkPrimitive("resubmit");
+        auto parameters = mkParameters(primitive);
+        primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
+        cstring listName = "resubmit";
+        // If we are supplied a type argument that is a named type use
+        // that for the list name.
+        if (mc->typeArguments->size() == 1) {
+            auto typeArg = mc->typeArguments->at(0);
+            if (typeArg->is<IR::Type_Name>()) {
+                auto origType = ctxt->refMap->getDeclaration(
+                    typeArg->to<IR::Type_Name>()->path, true);
+                if (!origType->is<IR::Type_Struct>()) {
+                    ConversionContext::modelError(
+                        "%1%: expected a struct type", origType->getNode());
+                    return nullptr;
+                }
+                auto st = origType->to<IR::Type_Struct>();
+                listName = st->controlPlaneName();
             }
-            auto st = origType->to<IR::Type_Struct>();
-            listName = st->controlPlaneName();
         }
+        int id = ctxt->createFieldList(mc->arguments->at(0)->expression, listName);
+        auto cst = new IR::Constant(id);
+        ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
+        auto jcst = ctxt->conv->convert(cst);
+        parameters->append(jcst);
+        return primitive;
+    } else if (mc->arguments->size() == 0) {
+        auto primitive = mkPrimitive("resubmit");
+        auto parameters = mkParameters(primitive);
+        primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
+
+        int id = getRecirculateFieldListId(ctxt, mc);
+        auto cst = new IR::Constant(id);
+        ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
+        auto jcst = ctxt->conv->convert(cst);
+        parameters->append(jcst);
+        return primitive;
     }
-    int id = createFieldList(ctxt, mc->arguments->at(0)->expression, "field_lists",
-                             listName, ctxt->json->field_lists);
-    auto cst = new IR::Constant(id);
-    ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
-    auto jcst = ctxt->conv->convert(cst);
-    parameters->append(jcst);
-    return primitive;
+    ConversionContext::modelError("Expected 0 or 1 arguments for %1%", mc);
+    return nullptr;
 }
 
 Util::IJson* ExternConverter_recirculate::convertExternFunction(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
-    if (mc->arguments->size() != 1) {
-        modelError("Expected 1 argument for %1%", mc);
-        return nullptr;
-    }
-    auto primitive = mkPrimitive("recirculate");
-    auto parameters = mkParameters(primitive);
-    primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
-    cstring listName = "recirculate";
-    // If we are supplied a type argument that is a named type use
-    // that for the list name.
-    if (mc->typeArguments->size() == 1) {
-        auto typeArg = mc->typeArguments->at(0);
-        if (typeArg->is<IR::Type_Name>()) {
-            auto origType = ctxt->refMap->getDeclaration(
-                typeArg->to<IR::Type_Name>()->path, true);
-            if (!origType->is<IR::Type_Struct>()) {
-                modelError("%1%: expected a struct type", origType->getNode());
-                return nullptr;
+    if (mc->arguments->size() == 1) {
+        auto primitive = mkPrimitive("recirculate");
+        auto parameters = mkParameters(primitive);
+        primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
+        cstring listName = "recirculate";
+        // If we are supplied a type argument that is a named type use
+        // that for the list name.
+        if (mc->typeArguments->size() == 1) {
+            auto typeArg = mc->typeArguments->at(0);
+            if (typeArg->is<IR::Type_Name>()) {
+                auto origType = ctxt->refMap->getDeclaration(
+                    typeArg->to<IR::Type_Name>()->path, true);
+                if (!origType->is<IR::Type_Struct>()) {
+                    ConversionContext::modelError(
+                        "%1%: expected a struct type", origType->getNode());
+                    return nullptr;
+                }
+                auto st = origType->to<IR::Type_Struct>();
+                listName = st->controlPlaneName();
             }
-            auto st = origType->to<IR::Type_Struct>();
-            listName = st->controlPlaneName();
         }
+        int id = ctxt->createFieldList(mc->arguments->at(0)->expression, listName);
+        auto cst = new IR::Constant(id);
+        ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
+        auto jcst = ctxt->conv->convert(cst);
+        parameters->append(jcst);
+        return primitive;
+    } else if (mc->arguments->size() == 0) {
+        auto primitive = mkPrimitive("recirculate");
+        auto parameters = mkParameters(primitive);
+        primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
+
+        int id = getRecirculateFieldListId(ctxt, mc);
+        auto cst = new IR::Constant(id);
+        ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
+        auto jcst = ctxt->conv->convert(cst);
+        parameters->append(jcst);
+        return primitive;
     }
-    int id = createFieldList(ctxt, mc->arguments->at(0)->expression, "field_lists",
-                             listName, ctxt->json->field_lists);
-    auto cst = new IR::Constant(id);
-    ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
-    auto jcst = ctxt->conv->convert(cst);
-    parameters->append(jcst);
-    return primitive;
+    ConversionContext::modelError("Expected 0 or 1 arguments for %1%", mc);
+    return nullptr;
 }
 
 Util::IJson* ExternConverter_mark_to_drop::convertExternFunction(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
     if (mc->arguments->size() != 1) {
         modelError("Expected 1 argument for %1%", mc);
@@ -347,11 +390,11 @@ Util::IJson* ExternConverter_mark_to_drop::convertExternFunction(
 }
 
 Util::IJson* ExternConverter_random::convertExternFunction(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
     if (mc->arguments->size() != 3) {
-        modelError("Expected 3 arguments for %1%", mc);
+        ConversionContext::modelError("Expected 3 arguments for %1%", mc);
         return nullptr;
     }
     auto primitive =
@@ -369,10 +412,10 @@ Util::IJson* ExternConverter_random::convertExternFunction(
 
 Util::IJson* ExternConverter_truncate::convertExternFunction(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
     if (mc->arguments->size() != 1) {
-        modelError("Expected 1 arguments for %1%", mc);
+        ConversionContext::modelError("Expected 1 arguments for %1%", mc);
         return nullptr;
     }
     auto primitive = mkPrimitive(v1model.truncate.name);
@@ -384,11 +427,11 @@ Util::IJson* ExternConverter_truncate::convertExternFunction(
 }
 
 Util::IJson* ExternConverter_counter::convertExternObject(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    ConversionContext* ctxt, const P4::ExternMethod* em,
+    const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 1) {
-        modelError("Expected 1 argument for %1%", mc);
+        ConversionContext::modelError("Expected 1 argument for %1%", mc);
         return nullptr;
     }
     auto primitive = mkPrimitive("count");
@@ -404,8 +447,8 @@ Util::IJson* ExternConverter_counter::convertExternObject(
 }
 
 void ExternConverter_counter::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+    ConversionContext* ctxt, const IR::Declaration* c,
+    const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto jctr = new Util::JsonObject();
@@ -415,7 +458,7 @@ void ExternConverter_counter::convertExternInstance(
     auto sz = eb->findParameterValue(v1model.counter.sizeParam.name);
     CHECK_NULL(sz);
     if (!sz->is<IR::Constant>()) {
-        modelError("%1%: expected a constant", sz->getNode());
+        ConversionContext::modelError("%1%: expected a constant", sz->getNode());
         return;
     }
     jctr->emplace("size", sz->to<IR::Constant>()->value);
@@ -424,11 +467,11 @@ void ExternConverter_counter::convertExternInstance(
 }
 
 Util::IJson* ExternConverter_meter::convertExternObject(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    ConversionContext* ctxt, const P4::ExternMethod* em,
+    const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 2) {
-        modelError("Expected 2 arguments for %1%", mc);
+        ConversionContext::modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
     }
     auto primitive = mkPrimitive("execute_meter");
@@ -446,8 +489,8 @@ Util::IJson* ExternConverter_meter::convertExternObject(
 }
 
 void ExternConverter_meter::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+    ConversionContext* ctxt, const IR::Declaration* c,
+    const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto jmtr = new Util::JsonObject();
@@ -458,7 +501,7 @@ void ExternConverter_meter::convertExternInstance(
     auto sz = eb->findParameterValue(v1model.meter.sizeParam.name);
     CHECK_NULL(sz);
     if (!sz->is<IR::Constant>()) {
-        modelError("%1%: expected a constant", sz->getNode());
+        ConversionContext::modelError("%1%: expected a constant", sz->getNode());
         return;
     }
     jmtr->emplace("size", sz->to<IR::Constant>()->value);
@@ -466,7 +509,7 @@ void ExternConverter_meter::convertExternInstance(
     auto mkind = eb->findParameterValue(v1model.meter.typeParam.name);
     CHECK_NULL(mkind);
     if (!mkind->is<IR::Declaration_ID>()) {
-        modelError("%1%: expected a member", mkind->getNode());
+        ConversionContext::modelError("%1%: expected a member", mkind->getNode());
         return;
     }
     cstring mkind_name = mkind->to<IR::Declaration_ID>()->name;
@@ -482,11 +525,11 @@ void ExternConverter_meter::convertExternInstance(
 }
 
 Util::IJson* ExternConverter_register::convertExternObject(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    ConversionContext* ctxt, const P4::ExternMethod* em,
+    const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 2) {
-        modelError("Expected 2 arguments for %1%", mc);
+        ConversionContext::modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
     }
     auto reg = new Util::JsonObject();
@@ -518,8 +561,8 @@ Util::IJson* ExternConverter_register::convertExternObject(
 }
 
 void ExternConverter_register::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+    ConversionContext* ctxt, const IR::Declaration* c,
+    const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto jreg = new Util::JsonObject();
@@ -529,19 +572,19 @@ void ExternConverter_register::convertExternInstance(
     auto sz = eb->findParameterValue(v1model.registers.sizeParam.name);
     CHECK_NULL(sz);
     if (!sz->is<IR::Constant>()) {
-        modelError("%1%: expected a constant", sz->getNode());
+        ConversionContext::modelError("%1%: expected a constant", sz->getNode());
         return;
     }
     if (sz->to<IR::Constant>()->value == 0)
         error("%1%: direct registers are not supported in bmv2", inst);
     jreg->emplace("size", sz->to<IR::Constant>()->value);
     if (!eb->instanceType->is<IR::Type_SpecializedCanonical>()) {
-        modelError("%1%: Expected a generic specialized type", eb->instanceType);
+        ConversionContext::modelError("%1%: Expected a generic specialized type", eb->instanceType);
         return;
     }
     auto st = eb->instanceType->to<IR::Type_SpecializedCanonical>();
     if (st->arguments->size() != 1) {
-        modelError("%1%: expected 1 type argument", st);
+        ConversionContext::modelError("%1%: expected 1 type argument", st);
         return;
     }
     auto regType = st->arguments->at(0);
@@ -560,10 +603,10 @@ void ExternConverter_register::convertExternInstance(
 
 Util::IJson* ExternConverter_direct_counter::convertExternObject(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 0) {
-        modelError("Expected 0 argument for %1%", mc);
+        ConversionContext::modelError("Expected 0 argument for %1%", mc);
         return nullptr;
     }
     // Do not generate any code for this operation
@@ -571,8 +614,8 @@ Util::IJson* ExternConverter_direct_counter::convertExternObject(
 }
 
 void ExternConverter_direct_counter::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+    ConversionContext* ctxt, const IR::Declaration* c,
+    const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto it = ctxt->structure->directCounterMap.find(name);
@@ -590,11 +633,11 @@ void ExternConverter_direct_counter::convertExternInstance(
 }
 
 Util::IJson* ExternConverter_direct_meter::convertExternObject(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    ConversionContext* ctxt, const P4::ExternMethod* em,
+    const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 1) {
-        modelError("Expected 1 argument for %1%", mc);
+        ConversionContext::modelError("Expected 1 argument for %1%", mc);
         return nullptr;
     }
     auto dest = mc->arguments->at(0);
@@ -604,8 +647,8 @@ Util::IJson* ExternConverter_direct_meter::convertExternObject(
 }
 
 void ExternConverter_direct_meter::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+    ConversionContext* ctxt, const IR::Declaration* c,
+    const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto info = ctxt->structure->directMeterMap.getInfo(c);
@@ -640,7 +683,7 @@ void ExternConverter_direct_meter::convertExternInstance(
     auto mkind = eb->findParameterValue(v1model.directMeter.typeParam.name);
     CHECK_NULL(mkind);
     if (!mkind->is<IR::Declaration_ID>()) {
-        modelError("%1%: expected a member", mkind->getNode());
+        ConversionContext::modelError("%1%: expected a member", mkind->getNode());
         return;
     }
     cstring mkind_name = mkind->to<IR::Declaration_ID>()->name;
@@ -650,7 +693,7 @@ void ExternConverter_direct_meter::convertExternInstance(
     } else if (mkind_name == v1model.meter.meterType.bytes.name) {
         type = "bytes";
     } else {
-        modelError("%1%: unexpected meter type", mkind->getNode());
+        ConversionContext::modelError("%1%: unexpected meter type", mkind->getNode());
         return;
     }
     jmtr->emplace("type", type);
@@ -663,8 +706,8 @@ void ExternConverter_direct_meter::convertExternInstance(
 }
 
 void ExternConverter_action_profile::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+    ConversionContext* ctxt, const IR::Declaration* c,
+    const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     // Might call this multiple times if the selector/profile is used more than
@@ -693,7 +736,7 @@ void ExternConverter_action_profile::convertExternInstance(
         auto hash = eb->findParameterValue(
             v1model.action_selector.algorithmParam.name);
         if (!hash->is<IR::Declaration_ID>()) {
-            modelError("%1%: expected a member", hash->getNode());
+            ConversionContext::modelError("%1%: expected a member", hash->getNode());
             return;
         }
         auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
@@ -719,8 +762,8 @@ void ExternConverter_action_profile::convertExternInstance(
 
 // action selector conversion is the same as action profile
 void ExternConverter_action_selector::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+    ConversionContext* ctxt, const IR::Declaration* c,
+    const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     // Might call this multiple times if the selector/profile is used more than
@@ -749,7 +792,7 @@ void ExternConverter_action_selector::convertExternInstance(
         auto hash = eb->findParameterValue(
             v1model.action_selector.algorithmParam.name);
         if (!hash->is<IR::Declaration_ID>()) {
-            modelError("%1%: expected a member", hash->getNode());
+            ConversionContext::modelError("%1%: expected a member", hash->getNode());
             return;
         }
         auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
@@ -775,8 +818,7 @@ void ExternConverter_action_selector::convertExternInstance(
 
 void
 SimpleSwitchBackend::modelError(const char* format, const IR::Node* node) const {
-    ::error(format, node);
-    ::error("Are you using an up-to-date v1model.p4?");
+    ConversionContext::modelError(format, node);
 }
 
 cstring
@@ -795,7 +837,7 @@ SimpleSwitchBackend::createCalculation(cstring algo, const IR::Expression* field
         auto list = new IR::ListExpression({});
         auto type = typeMap->getType(fields, true);
         if (!type->is<IR::Type_StructLike>()) {
-            modelError("%1%: expected a struct", fields);
+            ConversionContext::modelError("%1%: expected a struct", fields);
             return calcName;
         }
         for (auto f : type->to<IR::Type_StructLike>()->fields) {
@@ -860,7 +902,7 @@ SimpleSwitchBackend::convertChecksum(const IR::BlockStatement *block, Util::Json
                                  functionName == v1model.update_checksum_with_payload.name))) {
                     bool usePayload = functionName.endsWith("_with_payload");
                     if (mi->expr->arguments->size() != 4) {
-                        modelError("%1%: Expected 4 arguments", mc);
+                        ConversionContext::modelError("%1%: Expected 4 arguments", mc);
                         return;
                     }
                     auto cksum = new Util::JsonObject();
@@ -907,6 +949,53 @@ void SimpleSwitchBackend::createActions(ConversionContext* ctxt, V1ProgramStruct
 }
 
 void
+SimpleSwitchBackend::createRecirculateFieldsList(
+    ConversionContext* ctxt, const IR::ToplevelBlock* tlb, cstring scalarName) {
+    auto main = tlb->getMain();
+    CHECK_NULL(main);
+
+    // The user metadata has changed, so grab it again.
+    // Find the user metadata declaration
+    // Validation has already been done
+    auto parser = main->findParameterValue(v1model.sw.parser.name)->to<IR::ParserBlock>();
+    CHECK_NULL(parser);
+    auto params = parser->container->getApplyParameters();
+    BUG_CHECK(params->size() == 4, "%1%: expected 4 parameters", parser);
+    auto metaParam = params->parameters.at(2);
+    auto paramType = ctxt->typeMap->getType(metaParam, true);
+    auto userMetaType = paramType->to<IR::Type_Struct>();
+    LOG2("User metadata type is " << userMetaType);
+
+    Util::JsonArray* elements = nullptr;
+    LOG2("Scanning user metadata fields for annotations");
+
+    for (auto f : userMetaType->fields) {
+        LOG3("Scanning field " << f);
+        auto anno = f->getAnnotations()->getSingle("recirculate");
+        if (anno == nullptr)
+            continue;
+
+        if (elements == nullptr) {
+            LOG2("Creating recirculate field list");
+            // Create the list once an element with an annotation is found
+            auto fl = new Util::JsonObject();
+            ctxt->json->field_lists->append(fl);
+            int id = nextId("field_lists");
+            fl->emplace("id", id);
+            fl->emplace("name", "recirculate");
+            elements = mkArrayField(fl, "elements");
+        }
+        auto field = new Util::JsonObject();
+        field->emplace("type", "field");
+        auto value = new Util::JsonArray();
+        value->append(scalarName);
+        value->append(f->name);
+        field->emplace("value", value);
+        elements->append(field);
+    }
+}
+
+void
 SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     structure = new V1ProgramStructure();
 
@@ -931,7 +1020,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     auto parser = main->findParameterValue(v1model.sw.parser.name);
     if (parser == nullptr) return;
     if (!parser->is<IR::ParserBlock>()) {
-        modelError("%1%: main package  match the expected model", main);
+        ConversionContext::modelError("%1%: main package  match the expected model", main);
         return;
     }
     auto params = parser->to<IR::ParserBlock>()->container->getApplyParameters();
@@ -1052,11 +1141,11 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     cstring scalarsName = refMap->newName("scalars");
     // This visitor is used in multiple passes to convert expression to json
     conv = new SimpleSwitchExpressionConverter(refMap, typeMap, structure, scalarsName);
-
     auto ctxt = new ConversionContext(refMap, typeMap, toplevel, structure, conv, json);
-
     auto hconv = new HeaderConverter(ctxt, scalarsName);
     program->apply(*hconv);
+
+    createRecirculateFieldsList(ctxt, toplevel, scalarsName);
 
     auto pconv = new ParserConverter(ctxt);
     structure->parser->apply(*pconv);
@@ -1074,7 +1163,6 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
 
     convertChecksum(structure->compute_checksum->body, json->checksums,
                     json->calculations, false);
-
     convertChecksum(structure->verify_checksum->body, json->checksums,
                     json->calculations, true);
 

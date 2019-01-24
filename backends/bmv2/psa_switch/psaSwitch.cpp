@@ -535,7 +535,7 @@ Util::IJson* ExternConverter_Counter::convertExternObject(
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 1) {
-        modelError("Expected 1 argument for %1%", mc);
+        ConversionContext::modelError("Expected 1 argument for %1%", mc);
         return nullptr;
     }
     auto primitive = mkPrimitive("_" + em->originalExternType->name +
@@ -556,7 +556,7 @@ Util::IJson* ExternConverter_DirectCounter::convertExternObject(
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 0) {
-        modelError("Expected 0 argument for %1%", mc);
+        ConversionContext::modelError("Expected 0 argument for %1%", mc);
         return nullptr;
     }
     // Do not generate any code for this operation
@@ -568,7 +568,7 @@ Util::IJson* ExternConverter_Meter::convertExternObject(
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 2) {
-        modelError("Expected 2 arguments for %1%", mc);
+        ConversionContext::modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
     }
     auto primitive = mkPrimitive("execute_meter");
@@ -590,7 +590,7 @@ Util::IJson* ExternConverter_DirectMeter::convertExternObject(
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 1) {
-        modelError("Expected 1 argument for %1%", mc);
+        ConversionContext::modelError("Expected 1 argument for %1%", mc);
         return nullptr;
     }
     auto dest = mc->arguments->at(0);
@@ -604,7 +604,7 @@ Util::IJson* ExternConverter_Register::convertExternObject(
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 2) {
-        modelError("Expected 2 arguments for %1%", mc);
+        ConversionContext::modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
     }
     auto reg = new Util::JsonObject();
@@ -641,7 +641,7 @@ Util::IJson* ExternConverter_Random::convertExternObject(
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 3) {
-        modelError("Expected 3 arguments for %1%", mc);
+        ConversionContext::modelError("Expected 3 arguments for %1%", mc);
         return nullptr;
     }
     auto primitive =
@@ -663,7 +663,7 @@ Util::IJson* ExternConverter_Digest::convertExternObject(
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
     if (mc->arguments->size() != 1) {
-        modelError("Expected 1 arguments for %1%", mc);
+        ConversionContext::modelError("Expected 1 arguments for %1%", mc);
         return nullptr;
     }
     auto primitive = mkPrimitive("generate_digest");
@@ -678,15 +678,14 @@ Util::IJson* ExternConverter_Digest::convertExternObject(
             auto origType = ctxt->refMap->getDeclaration(
                 typeArg->to<IR::Type_Name>()->path, true);
             if (!origType->is<IR::Type_Struct>()) {
-                modelError("%1%: expected a struct type", origType->getNode());
+                ConversionContext::modelError("%1%: expected a struct type", origType->getNode());
                 return nullptr;
             }
             auto st = origType->to<IR::Type_Struct>();
             listName = st->controlPlaneName();
         }
     }
-    int id = createFieldList(ctxt, mc->arguments->at(0)->expression, "learn_lists",
-                             listName, ctxt->json->learn_lists);
+    int id = ctxt->createFieldList(mc->arguments->at(0)->expression, listName, true);
     auto cst = new IR::Constant(id);
     ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
     auto jcst = ctxt->conv->convert(cst);
@@ -721,7 +720,7 @@ void ExternConverter_Counter::convertExternInstance(
     auto sz = eb->findParameterValue("n_counters");
     CHECK_NULL(sz);
     if (!sz->is<IR::Constant>()) {
-        modelError("%1%: expected a constant", sz->getNode());
+        ConversionContext::modelError("%1%: expected a constant", sz->getNode());
         return;
     }
     jctr->emplace("size", sz->to<IR::Constant>()->value);
@@ -830,7 +829,7 @@ void ExternConverter_Meter::convertExternInstance(
     auto sz = eb->findParameterValue("n_meters");
     CHECK_NULL(sz);
     if (!sz->is<IR::Constant>()) {
-        modelError("%1%: expected a constant", sz->getNode());
+        ConversionContext::modelError("%1%: expected a constant", sz->getNode());
         return;
     }
     jmtr->emplace("size", sz->to<IR::Constant>()->value);
@@ -838,7 +837,7 @@ void ExternConverter_Meter::convertExternInstance(
     auto mkind = eb->findParameterValue("type");
     CHECK_NULL(mkind);
     if (!mkind->is<IR::Declaration_ID>()) {
-        modelError("%1%: expected a member", mkind->getNode());
+        ConversionContext::modelError("%1%: expected a member", mkind->getNode());
         return;
     }
     cstring mkind_name = mkind->to<IR::Declaration_ID>()->name;
@@ -872,7 +871,7 @@ void ExternConverter_DirectMeter::convertExternInstance(
     auto mkind = eb->findParameterValue("type");
     CHECK_NULL(mkind);
     if (!mkind->is<IR::Declaration_ID>()) {
-        modelError("%1%: expected a member", mkind->getNode());
+        ConversionContext::modelError("%1%: expected a member", mkind->getNode());
         return;
     }
     cstring mkind_name = mkind->to<IR::Declaration_ID>()->name;
@@ -882,7 +881,7 @@ void ExternConverter_DirectMeter::convertExternInstance(
     } else if (mkind_name == "BYTES") {
         type = "bytes";
     } else {
-        modelError("%1%: unexpected meter type", mkind->getNode());
+        ConversionContext::modelError("%1%: unexpected meter type", mkind->getNode());
         return;
     }
     jmtr->emplace("type", type);
@@ -906,19 +905,19 @@ void ExternConverter_Register::convertExternInstance(
     auto sz = eb->findParameterValue("size");
     CHECK_NULL(sz);
     if (!sz->is<IR::Constant>()) {
-        modelError("%1%: expected a constant", sz->getNode());
+        ConversionContext::modelError("%1%: expected a constant", sz->getNode());
         return;
     }
     if (sz->to<IR::Constant>()->value == 0)
         error(ErrorType::ERR_UNSUPPORTED, "direct registers", inst);
     jreg->emplace("size", sz->to<IR::Constant>()->value);
     if (!eb->instanceType->is<IR::Type_SpecializedCanonical>()) {
-        modelError("%1%: Expected a generic specialized type", eb->instanceType);
+        ConversionContext::modelError("%1%: Expected a generic specialized type", eb->instanceType);
         return;
     }
     auto st = eb->instanceType->to<IR::Type_SpecializedCanonical>();
     if (st->arguments->size() != 1) {
-        modelError("%1%: expected 1 type argument", st);
+        ConversionContext::modelError("%1%: expected 1 type argument", st);
         return;
     }
     auto regType = st->arguments->at(0);
@@ -987,7 +986,7 @@ void ExternConverter_ActionSelector::convertExternInstance(
     auto hash = eb->findParameterValue("algo");
 
     if (!hash->is<IR::Declaration_ID>()) {
-        modelError("%1%: expected a member", hash->getNode());
+        ConversionContext::modelError("%1%: expected a member", hash->getNode());
         return;
     }
     auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
