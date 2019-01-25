@@ -146,6 +146,32 @@ class bm_exception : public std::exception {
   bm::MatchErrorCode error_code;
 };
 
+void set_ttl(const std::string &t_name,
+             const pi_table_entry_t *table_entry,
+             pi_entry_handle_t entry_handle) {
+  auto *properties = table_entry->entry_properties;
+  if (pi_entry_properties_is_set(properties, PI_ENTRY_PROPERTY_TYPE_TTL)) {
+    auto error_code = pibmv2::switch_->mt_set_entry_ttl(
+        0, t_name, entry_handle,
+        static_cast<unsigned int>(properties->ttl_ns / 1000000));
+    if (error_code != bm::MatchErrorCode::SUCCESS)
+      throw bm_exception(error_code);
+  }
+}
+
+void set_indirect_ttl(const std::string &t_name,
+                      const pi_table_entry_t *table_entry,
+                      pi_entry_handle_t entry_handle) {
+  auto *properties = table_entry->entry_properties;
+  if (pi_entry_properties_is_set(properties, PI_ENTRY_PROPERTY_TYPE_TTL)) {
+    auto error_code = pibmv2::switch_->mt_indirect_set_entry_ttl(
+        0, t_name, entry_handle,
+        static_cast<unsigned int>(properties->ttl_ns / 1000000));
+    if (error_code != bm::MatchErrorCode::SUCCESS)
+      throw bm_exception(error_code);
+  }
+}
+
 pi_entry_handle_t add_entry(const pi_p4info_t *p4info,
                             pi_dev_tgt_t dev_tgt,
                             const std::string &t_name,
@@ -163,14 +189,7 @@ pi_entry_handle_t add_entry(const pi_p4info_t *p4info,
       std::move(action_data), &entry_handle, priority);
   if (error_code != bm::MatchErrorCode::SUCCESS)
     throw bm_exception(error_code);
-  auto *properties = table_entry->entry_properties;
-  if (pi_entry_properties_is_set(properties, PI_ENTRY_PROPERTY_TYPE_TTL)) {
-    auto error_code = pibmv2::switch_->mt_set_entry_ttl(
-        0, t_name, entry_handle,
-        static_cast<unsigned int>(properties->ttl_ns / 1000000));
-    if (error_code != bm::MatchErrorCode::SUCCESS)
-      throw bm_exception(error_code);
-  }
+  set_ttl(t_name, table_entry, entry_handle);
   return static_cast<pi_entry_handle_t>(entry_handle);
 }
 
@@ -196,14 +215,7 @@ pi_entry_handle_t add_indirect_entry(const pi_p4info_t *p4info,
   }
   if (error_code != bm::MatchErrorCode::SUCCESS)
     throw bm_exception(error_code);
-  auto *properties = table_entry->entry_properties;
-  if (pi_entry_properties_is_set(properties, PI_ENTRY_PROPERTY_TYPE_TTL)) {
-    auto error_code = pibmv2::switch_->mt_indirect_set_entry_ttl(
-        0, t_name, entry_handle,
-        static_cast<unsigned int>(properties->ttl_ns / 1000000));
-    if (error_code != bm::MatchErrorCode::SUCCESS)
-      throw bm_exception(error_code);
-  }
+  set_indirect_ttl(t_name, table_entry, entry_handle);
   return static_cast<pi_entry_handle_t>(entry_handle);
 }
 
@@ -897,9 +909,11 @@ pi_status_t _pi_table_entry_modify(pi_session_handle_t session_handle,
     if (table_entry->entry_type == PI_ACTION_ENTRY_TYPE_DATA) {
       modify_entry(p4info, dev_id, t_name, entry_handle,
                    table_entry->entry.action_data);
+      set_ttl(t_name, table_entry, entry_handle);
     } else if (table_entry->entry_type == PI_ACTION_ENTRY_TYPE_INDIRECT) {
       modify_indirect_entry(p4info, dev_id, t_name, entry_handle,
                             table_entry->entry.indirect_handle);
+      set_indirect_ttl(t_name, table_entry, entry_handle);
     } else {
       assert(0);
     }

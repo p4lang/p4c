@@ -228,6 +228,29 @@ TEST_F(SimpleSwitchGrpcTest_IdleTimeout, ReadEntry) {
   }
 }
 
+TEST_F(SimpleSwitchGrpcTest_IdleTimeout, ModifyTTL) {
+  const std::string smac("\x11\x22\x33\x44\x55\x66");
+  const std::chrono::milliseconds idle_timeout_1{30000};  // 30 seconds
+  const std::chrono::milliseconds idle_timeout_2{4000};  // 4 seconds
+  auto entry = make_entry(smac, idle_timeout_1);
+  EXPECT_TRUE(insert(entry).ok());
+  {
+    auto notification = receive_notification(std::chrono::milliseconds(2000));
+    EXPECT_TRUE(notification == nullptr);
+  }
+  entry.mutable_table_entry()->set_idle_timeout_ns(
+      std::chrono::duration_cast<std::chrono::nanoseconds>(
+          idle_timeout_2).count());
+  EXPECT_TRUE(modify(entry).ok());
+  {
+    // bmv2 resets the TTL of the entry (resets the "timer") when the max TTL
+    // is modified. The P4Runtime spec doesn't mandate a specific behavior...
+    auto notification = receive_notification(
+        idle_timeout_2 + std::chrono::milliseconds(1500));
+    EXPECT_TRUE(notification != nullptr);
+  }
+}
+
 }  // namespace
 
 }  // namespace testing
