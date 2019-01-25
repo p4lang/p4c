@@ -91,6 +91,7 @@ struct int_metadata_t {
 }
 
 struct int_metadata_i2e_t {
+    @recirculate 
     bit<1> sink;
     bit<1> source;
 }
@@ -3138,7 +3139,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".nop") action _nop_57() {
     }
     @name(".egress_mirror") action _egress_mirror_0(bit<32> session_id) {
+<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
 <<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch-midend.p4
+=======
+<<<<<<< ce1d3691bdb972ba8db166a7109a69422927fddf
+>>>>>>> Remove useless back-end pass
         meta._i2e_metadata_mirror_session_id36 = (bit<16>)session_id;
         clone3<tuple_0>(CloneType.E2E, session_id, { meta._i2e_metadata_ingress_tstamp35, (bit<16>)session_id });
 =======
@@ -3169,7 +3174,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         meta.fabric_metadata.reason_code = reason_code;
         clone3(CloneType.E2E, 32w250);
         mark_to_drop();
+<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
 >>>>>>> Tag metadata fields that need to be recirculated
+=======
+>>>>>>> Remove useless back-end pass
+>>>>>>> Remove useless back-end pass
     }
     @name(".egress_acl") table _egress_acl {
         actions = {
@@ -3263,61 +3272,50 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     bit<16> ifindex;
 }
 
+<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
 <<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch-midend.p4
 struct tuple_2 {
     bit<1>  field_5;
     bit<16> field_6;
+=======
+struct tuple_0 {
+    bit<32> field;
+    bit<32> field_0;
+    bit<8>  field_1;
+    bit<16> field_2;
+    bit<16> field_3;
+>>>>>>> Remove useless back-end pass
+}
+
+struct tuple_1 {
+    bit<48> field_4;
+    bit<48> field_5;
+    bit<32> field_6;
+    bit<32> field_7;
+    bit<8>  field_8;
+    bit<16> field_9;
+    bit<16> field_10;
+}
+
+struct tuple_2 {
+    bit<128> field_11;
+    bit<128> field_12;
+    bit<8>   field_13;
+    bit<16>  field_14;
+    bit<16>  field_15;
 }
 
 struct tuple_3 {
-    tuple_1 field_7;
-    bit<16> field_8;
-    bit<16> field_9;
+    bit<48>  field_16;
+    bit<48>  field_17;
+    bit<128> field_18;
+    bit<128> field_19;
+    bit<8>   field_20;
+    bit<16>  field_21;
+    bit<16>  field_22;
 }
 
-struct tuple_4 {
-    bit<32> field_10;
-    bit<32> field_11;
-    bit<8>  field_12;
-    bit<16> field_13;
-    bit<16> field_14;
-}
-
-struct tuple_5 {
-    bit<48> field_15;
-    bit<48> field_16;
-    bit<32> field_17;
-    bit<32> field_18;
-    bit<8>  field_19;
-    bit<16> field_20;
-    bit<16> field_21;
-}
-
-struct tuple_6 {
-    bit<128> field_22;
-    bit<128> field_23;
-    bit<8>   field_24;
-    bit<16>  field_25;
-    bit<16>  field_26;
-}
-
-struct tuple_7 {
-    bit<48>  field_27;
-    bit<48>  field_28;
-    bit<128> field_29;
-    bit<128> field_30;
-    bit<8>   field_31;
-    bit<16>  field_32;
-    bit<16>  field_33;
-}
-
-struct tuple_8 {
-    bit<16> field_34;
-    bit<48> field_35;
-    bit<48> field_36;
-    bit<16> field_37;
-}
-
+<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
 struct tuple_9 {
     bit<16> field_38;
     bit<8>  field_39;
@@ -3358,12 +3356,17 @@ struct tuple_3 {
     bit<16>  field_22;
 }
 
+=======
+>>>>>>> Remove useless back-end pass
 struct tuple_4 {
     bit<16> field_23;
     bit<48> field_24;
     bit<48> field_25;
     bit<16> field_26;
+<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
 >>>>>>> Tag metadata fields that need to be recirculated:testdata/p4_14_samples_outputs/switch_20160226/switch-midend.p4
+=======
+>>>>>>> Remove useless back-end pass
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -3848,10 +3851,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta._int_metadata_i2e_source55 = 1w0;
     }
     @name(".int_sink_gpe") action _int_sink_gpe_0(bit<32> mirror_id) {
+<<<<<<< ce1d3691bdb972ba8db166a7109a69422927fddf
         meta._int_metadata_insert_byte_cnt50 = meta._int_metadata_gpe_int_hdr_len51 << 2;
         meta._int_metadata_i2e_sink54 = 1w1;
         meta._i2e_metadata_mirror_session_id36 = (bit<16>)mirror_id;
         clone3<tuple_2>(CloneType.I2E, mirror_id, { 1w1, (bit<16>)mirror_id });
+=======
+        meta.int_metadata.insert_byte_cnt = meta.int_metadata.gpe_int_hdr_len << 2;
+        meta.int_metadata_i2e.sink = 1w1;
+        meta.i2e_metadata.mirror_session_id = (bit<16>)mirror_id;
+        clone3(CloneType.I2E, mirror_id);
+>>>>>>> Remove useless back-end pass
         hdr.int_header.setInvalid();
         hdr.int_val[0].setInvalid();
         hdr.int_val[1].setInvalid();
@@ -4539,9 +4549,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".sflow_ing_pkt_to_cpu") action _sflow_ing_pkt_to_cpu_0(bit<32> sflow_i2e_mirror_id, bit<16> reason_code) {
         _sflow_ingress_session_pkt_counter.count();
+<<<<<<< ce1d3691bdb972ba8db166a7109a69422927fddf
         meta._fabric_metadata_reason_code28 = reason_code;
         meta._i2e_metadata_mirror_session_id36 = (bit<16>)sflow_i2e_mirror_id;
+<<<<<<< b59b6f9946a58e016c48d0bd0398b17193ebb138
         clone3<tuple_3>(CloneType.I2E, sflow_i2e_mirror_id, { { meta._ingress_metadata_bd42, meta._ingress_metadata_ifindex38, reason_code, meta._ingress_metadata_ingress_port37 }, meta._sflow_metadata_sflow_session_id136, (bit<16>)sflow_i2e_mirror_id });
+=======
+        clone3<tuple_3>(CloneType.I2E, sflow_i2e_mirror_id, { { meta._ingress_metadata_bd42, meta._ingress_metadata_ifindex38, reason_code, meta._ingress_metadata_ingress_port37 }, meta._sflow_metadata_sflow_session_id146, (bit<16>)sflow_i2e_mirror_id });
+=======
+        meta.fabric_metadata.reason_code = reason_code;
+        meta.i2e_metadata.mirror_session_id = (bit<16>)sflow_i2e_mirror_id;
+        clone3(CloneType.I2E, sflow_i2e_mirror_id);
+>>>>>>> Remove useless back-end pass
+>>>>>>> Remove useless back-end pass
     }
     @name(".sflow_ing_take_sample") table _sflow_ing_take_sample {
         actions = {
@@ -4724,11 +4744,23 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta._fabric_metadata_reason_code28 = acl_copy_reason;
     }
     @name(".acl_mirror") action _acl_mirror_1(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
+<<<<<<< ce1d3691bdb972ba8db166a7109a69422927fddf
         meta._i2e_metadata_mirror_session_id36 = (bit<16>)session_id;
         meta._i2e_metadata_ingress_tstamp35 = (bit<32>)standard_metadata.ingress_global_timestamp;
         clone3<tuple_0>(CloneType.I2E, session_id, { (bit<32>)standard_metadata.ingress_global_timestamp, (bit<16>)session_id });
         meta._acl_metadata_acl_stats_index11 = acl_stats_index;
+<<<<<<< b59b6f9946a58e016c48d0bd0398b17193ebb138
         meta._meter_metadata_meter_index107 = acl_meter_index;
+=======
+        meta._meter_metadata_meter_index113 = acl_meter_index;
+=======
+        meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
+        clone3(CloneType.I2E, session_id);
+        meta.acl_metadata.acl_stats_index = acl_stats_index;
+        meta.meter_metadata.meter_index = acl_meter_index;
+>>>>>>> Remove useless back-end pass
+>>>>>>> Remove useless back-end pass
     }
 <<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch-midend.p4
     @name(".acl_redirect_nexthop") action _acl_redirect_nexthop_1(bit<16> nexthop_index, bit<14> acl_stats_index, bit<16> acl_meter_index, bit<1> acl_copy, bit<16> acl_copy_reason) {
@@ -4821,6 +4853,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta._fabric_metadata_reason_code28 = acl_copy_reason;
     }
     @name(".acl_mirror") action _acl_mirror_2(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
+<<<<<<< ce1d3691bdb972ba8db166a7109a69422927fddf
         meta._i2e_metadata_mirror_session_id36 = (bit<16>)session_id;
 <<<<<<< 43bd696b29be944551572728dfc9ec48437ee961
         meta._i2e_metadata_ingress_tstamp35 = (bit<32>)standard_metadata.ingress_global_timestamp;
@@ -4852,6 +4885,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 <<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch-midend.p4
         meta._meter_metadata_meter_index113 = acl_meter_index;
 =======
+<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
 =======
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
         meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
@@ -4867,7 +4901,25 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.acl_metadata.acl_stats_index = acl_stats_index;
 >>>>>>> Tag metadata fields that need to be recirculated
 >>>>>>> Tag metadata fields that need to be recirculated:testdata/p4_14_samples_outputs/switch_20160226/switch-midend.p4
+<<<<<<< b59b6f9946a58e016c48d0bd0398b17193ebb138
 >>>>>>> Tag metadata fields that need to be recirculated
+=======
+=======
+        meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
+        clone3(CloneType.I2E, session_id);
+        meta.acl_metadata.acl_stats_index = acl_stats_index;
+        meta.meter_metadata.meter_index = acl_meter_index;
+    }
+    @name(".acl_mirror") action _acl_mirror_4(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
+        meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
+        clone3(CloneType.I2E, session_id);
+        meta.acl_metadata.acl_stats_index = acl_stats_index;
+        meta.meter_metadata.meter_index = acl_meter_index;
+>>>>>>> Remove useless back-end pass
+>>>>>>> Remove useless back-end pass
+>>>>>>> Remove useless back-end pass
     }
     @name(".acl_redirect_nexthop") action _acl_redirect_nexthop_2(bit<16> nexthop_index, bit<14> acl_stats_index, bit<16> acl_meter_index, bit<1> acl_copy, bit<16> acl_copy_reason) {
         meta._acl_metadata_acl_redirect7 = 1w1;
@@ -5501,11 +5553,18 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_208();
     }
     @name(".compute_lkp_ipv4_hash") action _compute_lkp_ipv4_hash_0() {
+<<<<<<< b59b6f9946a58e016c48d0bd0398b17193ebb138
 <<<<<<< 43bd696b29be944551572728dfc9ec48437ee961
         hash<bit<16>, bit<16>, tuple_4, bit<32>>(meta._hash_metadata_hash132, HashAlgorithm.crc16, 16w0, { meta._ipv4_metadata_lkp_ipv4_sa56, meta._ipv4_metadata_lkp_ipv4_da57, meta._l3_metadata_lkp_ip_proto82, meta._l3_metadata_lkp_l4_sport85, meta._l3_metadata_lkp_l4_dport86 }, 32w65536);
         hash<bit<16>, bit<16>, tuple_5, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, { meta._l2_metadata_lkp_mac_sa65, meta._l2_metadata_lkp_mac_da66, meta._ipv4_metadata_lkp_ipv4_sa56, meta._ipv4_metadata_lkp_ipv4_da57, meta._l3_metadata_lkp_ip_proto82, meta._l3_metadata_lkp_l4_sport85, meta._l3_metadata_lkp_l4_dport86 }, 32w65536);
 =======
+=======
+<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
+>>>>>>> Remove useless back-end pass
 <<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch-midend.p4
+=======
+<<<<<<< ce1d3691bdb972ba8db166a7109a69422927fddf
+>>>>>>> Remove useless back-end pass
         hash<bit<16>, bit<16>, tuple_4, bit<32>>(meta._hash_metadata_hash132, HashAlgorithm.crc16, 16w0, { meta._ipv4_metadata_lkp_ipv4_sa62, meta._ipv4_metadata_lkp_ipv4_da63, meta._l3_metadata_lkp_ip_proto88, meta._l3_metadata_lkp_l4_sport91, meta._l3_metadata_lkp_l4_dport92 }, 32w65536);
         hash<bit<16>, bit<16>, tuple_5, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, { meta._l2_metadata_lkp_mac_sa71, meta._l2_metadata_lkp_mac_da72, meta._ipv4_metadata_lkp_ipv4_sa62, meta._ipv4_metadata_lkp_ipv4_da63, meta._l3_metadata_lkp_ip_proto88, meta._l3_metadata_lkp_l4_sport91, meta._l3_metadata_lkp_l4_dport92 }, 32w65536);
 =======
@@ -5526,8 +5585,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 <<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch-midend.p4
         hash<bit<16>, bit<16>, tuple_8, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, { meta._ingress_metadata_ifindex38, meta._l2_metadata_lkp_mac_sa71, meta._l2_metadata_lkp_mac_da72, meta._l2_metadata_lkp_mac_type74 }, 32w65536);
 =======
+<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
         hash<bit<16>, bit<16>, tuple_6, bit<32>>(meta._hash_metadata_hash231, HashAlgorithm.crc16, 16w0, { meta._ingress_metadata_ifindex36, meta._l2_metadata_lkp_mac_sa69, meta._l2_metadata_lkp_mac_da70, meta._l2_metadata_lkp_mac_type71 }, 32w65536);
 =======
+=======
+>>>>>>> Remove useless back-end pass
         hash<bit<16>, bit<16>, tuple_0, bit<32>>(meta.hash_metadata.hash1, HashAlgorithm.crc16, 16w0, { meta.ipv4_metadata.lkp_ipv4_sa, meta.ipv4_metadata.lkp_ipv4_da, meta.l3_metadata.lkp_ip_proto, meta.l3_metadata.lkp_l4_sport, meta.l3_metadata.lkp_l4_dport }, 32w65536);
         hash<bit<16>, bit<16>, tuple_1, bit<32>>(meta.hash_metadata.hash2, HashAlgorithm.crc16, 16w0, { meta.l2_metadata.lkp_mac_sa, meta.l2_metadata.lkp_mac_da, meta.ipv4_metadata.lkp_ipv4_sa, meta.ipv4_metadata.lkp_ipv4_da, meta.l3_metadata.lkp_ip_proto, meta.l3_metadata.lkp_l4_sport, meta.l3_metadata.lkp_l4_dport }, 32w65536);
     }
@@ -5537,9 +5599,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".compute_lkp_non_ip_hash") action _compute_lkp_non_ip_hash_0() {
         hash<bit<16>, bit<16>, tuple_4, bit<32>>(meta.hash_metadata.hash2, HashAlgorithm.crc16, 16w0, { meta.ingress_metadata.ifindex, meta.l2_metadata.lkp_mac_sa, meta.l2_metadata.lkp_mac_da, meta.l2_metadata.lkp_mac_type }, 32w65536);
+<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
 >>>>>>> Tag metadata fields that need to be recirculated
 >>>>>>> Tag metadata fields that need to be recirculated:testdata/p4_14_samples_outputs/switch_20160226/switch-midend.p4
+<<<<<<< b59b6f9946a58e016c48d0bd0398b17193ebb138
 >>>>>>> Tag metadata fields that need to be recirculated
+=======
+=======
+>>>>>>> Remove useless back-end pass
+>>>>>>> Remove useless back-end pass
+>>>>>>> Remove useless back-end pass
     }
     @name(".computed_two_hashes") action _computed_two_hashes_0() {
         meta._hash_metadata_entropy_hash34 = meta._hash_metadata_hash233;
@@ -5893,6 +5962,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
 <<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch-midend.p4
     @name(".copy_to_cpu_with_reason") action _copy_to_cpu_with_reason_0(bit<16> reason_code) {
+<<<<<<< ce1d3691bdb972ba8db166a7109a69422927fddf
         meta._fabric_metadata_reason_code28 = reason_code;
         clone3<tuple_1>(CloneType.I2E, 32w250, { meta._ingress_metadata_bd42, meta._ingress_metadata_ifindex38, reason_code, meta._ingress_metadata_ingress_port37 });
 =======
@@ -5912,8 +5982,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".copy_to_cpu") action _copy_to_cpu_0() {
         clone3<tuple_1>(CloneType.I2E, 32w250, { meta._ingress_metadata_bd42, meta._ingress_metadata_ifindex38, meta._fabric_metadata_reason_code28, meta._ingress_metadata_ingress_port37 });
 =======
+<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
         meta._fabric_metadata_dst_device28 = 8w0;
 =======
+=======
+>>>>>>> Remove useless back-end pass
         meta.fabric_metadata.reason_code = reason_code;
         clone3(CloneType.I2E, 32w250);
     }
@@ -5922,8 +5995,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         clone3(CloneType.I2E, 32w250);
         mark_to_drop();
         meta.fabric_metadata.dst_device = 8w0;
+<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
 >>>>>>> Tag metadata fields that need to be recirculated
 >>>>>>> Tag metadata fields that need to be recirculated:testdata/p4_14_samples_outputs/switch_20160226/switch-midend.p4
+=======
+    }
+    @name(".copy_to_cpu") action _copy_to_cpu_0() {
+        clone3(CloneType.I2E, 32w250);
+>>>>>>> Remove useless back-end pass
+>>>>>>> Remove useless back-end pass
     }
     @name(".drop_packet") action _drop_packet_0() {
         mark_to_drop(standard_metadata);
@@ -5933,7 +6013,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         mark_to_drop(standard_metadata);
     }
     @name(".negative_mirror") action _negative_mirror_0(bit<32> session_id) {
+<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
 <<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch-midend.p4
+=======
+<<<<<<< ce1d3691bdb972ba8db166a7109a69422927fddf
+>>>>>>> Remove useless back-end pass
         clone3<tuple_9>(CloneType.I2E, session_id, { meta._ingress_metadata_ifindex38, meta._ingress_metadata_drop_reason44 });
 =======
 <<<<<<< 1968b35515ddd4809e438d338481981969628fc8
@@ -5943,7 +6027,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 =======
         clone3(CloneType.I2E, session_id);
         mark_to_drop();
+<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
 >>>>>>> Tag metadata fields that need to be recirculated
+=======
+>>>>>>> Remove useless back-end pass
+>>>>>>> Remove useless back-end pass
     }
     @name(".drop_stats") table _drop_stats_1 {
         actions = {
@@ -6304,6 +6392,7 @@ control DeparserImpl(packet_out packet, in headers hdr) {
     }
 }
 
+<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
 <<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch-midend.p4
 struct tuple_10 {
     bit<4>  field_40;
@@ -6318,6 +6407,8 @@ struct tuple_10 {
     bit<32> field_49;
     bit<32> field_50;
 =======
+=======
+>>>>>>> Remove useless back-end pass
 struct tuple_5 {
     bit<4>  field_27;
     bit<4>  field_28;
@@ -6330,11 +6421,15 @@ struct tuple_5 {
     bit<8>  field_35;
     bit<32> field_36;
     bit<32> field_37;
+<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
 >>>>>>> Tag metadata fields that need to be recirculated:testdata/p4_14_samples_outputs/switch_20160226/switch-midend.p4
+=======
+>>>>>>> Remove useless back-end pass
 }
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
+<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
 <<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch-midend.p4
         verify_checksum<tuple_10, bit<16>>(hdr.inner_ipv4.ihl == 4w5, { hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr }, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
         verify_checksum<tuple_10, bit<16>>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
@@ -6342,11 +6437,16 @@ control verifyChecksum(inout headers hdr, inout metadata meta) {
         verify_checksum<tuple_5, bit<16>>(hdr.inner_ipv4.ihl == 4w5, { hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr }, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
         verify_checksum<tuple_5, bit<16>>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
 >>>>>>> Tag metadata fields that need to be recirculated:testdata/p4_14_samples_outputs/switch_20160226/switch-midend.p4
+=======
+        verify_checksum<tuple_5, bit<16>>(hdr.inner_ipv4.ihl == 4w5, { hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr }, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
+        verify_checksum<tuple_5, bit<16>>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+>>>>>>> Remove useless back-end pass
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
+<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
 <<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch-midend.p4
         update_checksum<tuple_10, bit<16>>(hdr.inner_ipv4.ihl == 4w5, { hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr }, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
         update_checksum<tuple_10, bit<16>>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
@@ -6354,6 +6454,10 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
         update_checksum<tuple_5, bit<16>>(hdr.inner_ipv4.ihl == 4w5, { hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr }, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
         update_checksum<tuple_5, bit<16>>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
 >>>>>>> Tag metadata fields that need to be recirculated:testdata/p4_14_samples_outputs/switch_20160226/switch-midend.p4
+=======
+        update_checksum<tuple_5, bit<16>>(hdr.inner_ipv4.ihl == 4w5, { hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr }, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
+        update_checksum<tuple_5, bit<16>>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+>>>>>>> Remove useless back-end pass
     }
 }
 

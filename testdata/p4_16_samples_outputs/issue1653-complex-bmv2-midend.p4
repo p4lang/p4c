@@ -31,6 +31,7 @@ header bitvec_hdr {
 }
 
 struct local_metadata_t {
+<<<<<<< ce1d3691bdb972ba8db166a7109a69422927fddf
     bit<1>     _row0_alt0_valid0;
     bit<7>     _row0_alt0_port1;
     int<8>     _row0_alt0_hashRes2;
@@ -57,6 +58,13 @@ struct local_metadata_t {
     bit<7>     _row1_alt1_pad23;
     bitvec_hdr _bvh024;
     bitvec_hdr _bvh125;
+=======
+    @recirculate 
+    row_t      row0;
+    row_t      row1;
+    bitvec_hdr bvh0;
+    bitvec_hdr bvh1;
+>>>>>>> Remove useless back-end pass
 }
 
 struct parsed_packet_t {
@@ -92,8 +100,13 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     }
     @hidden action act() {
         h.bvh0._row_alt1_type10 = 16w0x800;
+<<<<<<< ce1d3691bdb972ba8db166a7109a69422927fddf
         local_metadata._row0_alt0_useHash3 = true;
         clone3<row_t>(CloneType.I2E, 32w0, {{local_metadata._row0_alt0_valid0,local_metadata._row0_alt0_port1,local_metadata._row0_alt0_hashRes2,true,local_metadata._row0_alt0_type4,local_metadata._row0_alt0_pad5},{local_metadata._row0_alt1_valid6,local_metadata._row0_alt1_port7,local_metadata._row0_alt1_hashRes8,local_metadata._row0_alt1_useHash9,local_metadata._row0_alt1_type10,local_metadata._row0_alt1_pad11}});
+=======
+        local_metadata.row0.alt0.useHash = true;
+        clone3(CloneType.I2E, 32w0);
+>>>>>>> Remove useless back-end pass
     }
     @hidden table tbl_act {
         actions = {

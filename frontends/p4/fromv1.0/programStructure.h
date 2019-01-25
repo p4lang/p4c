@@ -256,7 +256,7 @@ class ProgramStructure {
     bool isHeader(const IR::ConcreteHeaderRef* nhr) const;
     cstring makeUniqueName(cstring base);
     bool isFieldInList(cstring type, cstring field, const IR::FieldList* fl);
-    /// True if this field is in one of the recirculated field lists    
+    /// True if this field is in one of the recirculated field lists
     virtual bool isRecirculated(cstring type, cstring field);
 
     const IR::V1Control* ingress;

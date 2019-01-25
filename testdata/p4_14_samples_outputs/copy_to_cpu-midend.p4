@@ -75,15 +75,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-struct tuple_0 {
-    standard_metadata_t field;
-}
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_1() {
     }
     @name(".do_copy_to_cpu") action do_copy_to_cpu() {
-        clone3<tuple_0>(CloneType.I2E, 32w250, { standard_metadata });
+        clone3(CloneType.I2E, 32w250);
     }
     @name(".copy_to_cpu") table copy_to_cpu_0 {
         actions = {

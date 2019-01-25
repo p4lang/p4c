@@ -79,7 +79,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".NoAction") action NoAction_1() {
     }
     @name(".do_copy_to_cpu") action do_copy_to_cpu() {
-        clone3<tuple<standard_metadata_t>>(CloneType.I2E, 32w250, { standard_metadata });
+        clone3(CloneType.I2E, 32w250);
     }
     @name(".copy_to_cpu") table copy_to_cpu_0 {
         actions = {

@@ -956,9 +956,8 @@ SimpleSwitchBackend::createRecirculateFieldsList(
     auto main = tlb->getMain();
     CHECK_NULL(main);
 
-    // The user metadata has changed, so grab it again.
-    // Find the user metadata declaration
-    // Validation has already been done
+    // Find the user metadata declaration.
+    // Validation has already been done, so we use BUG instead of error.
     auto parser = main->findParameterValue(v1model.sw.parser.name)->to<IR::ParserBlock>();
     CHECK_NULL(parser);
     auto params = parser->container->getApplyParameters();
@@ -991,7 +990,8 @@ SimpleSwitchBackend::createRecirculateFieldsList(
         field->emplace("type", "field");
         auto value = new Util::JsonArray();
         value->append(scalarName);
-        value->append(f->controlPlaneName());
+        auto name = ::get(ctxt->structure->scalarMetadataFields, f);
+        value->append(name);
         field->emplace("value", value);
         elements->append(field);
     }
@@ -1013,11 +1013,6 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     if (::errorCount() > 0)
         return;
 
-    /// Declaration which introduces the user metadata.
-    /// We expect this to be a struct type.
-    const IR::Type_Struct* userMetaType = nullptr;
-    cstring userMetaName = refMap->newName("userMetadata");
-
     // Find the user metadata declaration
     auto parser = main->findParameterValue(v1model.sw.parser.name);
     if (parser == nullptr) return;
@@ -1038,7 +1033,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         ::error("%1%: expected the user metadata type to be a struct", paramType);
         return;
     }
-    userMetaType = decl->to<IR::Type_Struct>();
+    auto userMetaType = decl->to<IR::Type_Struct>();
     LOG2("User metadata type is " << userMetaType);
 
     {
@@ -1084,6 +1079,12 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         // and ParseAnnotations should be skipped
         new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
+    PassManager simplify = {
+        new ParseAnnotations(),
+        // One has to clear the type map after parsing annotations
+        // because the annotations on types in the typemap are
+        // not parsed, so they may need to be changed.
+        new P4::ClearTypeMap(typeMap),
         new P4::SynthesizeActions(refMap, typeMap,
                                   new SkipControls(&structure->non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),

@@ -31,7 +31,7 @@ struct alt_t {
     int<8> hashRes;
     bool   useHash;
     EthTypes type;
-    bit<7> pad;  
+    bit<7> pad;
 };
 
 struct row_t {
@@ -44,6 +44,7 @@ header bitvec_hdr {
 }
 
 struct local_metadata_t {
+    @recirculate
     row_t row0;
     row_t row1;
     bitvec_hdr bvh0;
@@ -52,7 +53,7 @@ struct local_metadata_t {
 
 struct parsed_packet_t {
     bitvec_hdr bvh0;
-    bitvec_hdr bvh1;   
+    bitvec_hdr bvh1;
 };
 
 parser parse(packet_in pk, out parsed_packet_t h,
@@ -72,9 +73,9 @@ control ingress(inout parsed_packet_t h,
 
     action do_act() {
         h.bvh1.row.alt1.valid = 0;
-        local_metadata.row0.alt0.valid = 0;	
+        local_metadata.row0.alt0.valid = 0;
     }
-    
+
     table tns {
         key = {
             h.bvh1.row.alt1.valid : exact;
@@ -84,7 +85,7 @@ control ingress(inout parsed_packet_t h,
             do_act;
         }
     }
-    
+
     apply {
 
         tns.apply();
@@ -92,10 +93,10 @@ control ingress(inout parsed_packet_t h,
         // Copy another header's data to local variable.
         bh.row.alt0.useHash = h.bvh0.row.alt0.useHash;
         bh.row.alt1.type = EthTypes.IPv4;
-        h.bvh0.row.alt1.type = bh.row.alt1.type; 
+        h.bvh0.row.alt1.type = bh.row.alt1.type;
 
         local_metadata.row0.alt0.useHash = true;
-        clone3(CloneType.I2E, 0, local_metadata.row0);
+        clone3(CloneType.I2E, 0);
     }
 }
 
@@ -108,7 +109,7 @@ control egress(inout parsed_packet_t hdr,
 control deparser(packet_out b, in parsed_packet_t h) {
     apply {
         b.emit(h.bvh0);
-        b.emit(h.bvh1);    
+        b.emit(h.bvh1);
     }
 }
 
@@ -124,4 +125,3 @@ control compute_checksum(inout parsed_packet_t hdr,
 
 V1Switch(parse(), verify_checksum(), ingress(), egress(),
 compute_checksum(), deparser()) main;
-
