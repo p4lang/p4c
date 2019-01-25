@@ -172,8 +172,8 @@ Util::IJson* ExternConverter_clone3::convertExternFunction(
     (void) v1model.clone.clone3.name;
     int id = -1;
     if (mc->arguments->size() == 3) {
-        cstring name = ctxt->refMap->newName("fl");
-        id = ctxt->createFieldList(mc->arguments->at(2)->expression, name);
+        ::error("clone3 with 3 arguments is deprecated; please use clone3 with 2 arguments");
+        return nullptr;
     } else if (mc->arguments->size() == 2) {
         id = getRecirculateFieldListId(ctxt, mc);
     } else {
@@ -286,32 +286,8 @@ Util::IJson* ExternConverter_resubmit::convertExternFunction(
     const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
     if (mc->arguments->size() == 1) {
-        auto primitive = mkPrimitive("resubmit");
-        auto parameters = mkParameters(primitive);
-        primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
-        cstring listName = "resubmit";
-        // If we are supplied a type argument that is a named type use
-        // that for the list name.
-        if (mc->typeArguments->size() == 1) {
-            auto typeArg = mc->typeArguments->at(0);
-            if (typeArg->is<IR::Type_Name>()) {
-                auto origType = ctxt->refMap->getDeclaration(
-                    typeArg->to<IR::Type_Name>()->path, true);
-                if (!origType->is<IR::Type_Struct>()) {
-                    ConversionContext::modelError(
-                        "%1%: expected a struct type", origType->getNode());
-                    return nullptr;
-                }
-                auto st = origType->to<IR::Type_Struct>();
-                listName = st->controlPlaneName();
-            }
-        }
-        int id = ctxt->createFieldList(mc->arguments->at(0)->expression, listName);
-        auto cst = new IR::Constant(id);
-        ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
-        auto jcst = ctxt->conv->convert(cst);
-        parameters->append(jcst);
-        return primitive;
+        ::error("resubmit with 1 argument is deprecated; please use resubmit()");
+        return nullptr;
     } else if (mc->arguments->size() == 0) {
         auto primitive = mkPrimitive("resubmit");
         auto parameters = mkParameters(primitive);
@@ -333,32 +309,8 @@ Util::IJson* ExternConverter_recirculate::convertExternFunction(
     const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
     if (mc->arguments->size() == 1) {
-        auto primitive = mkPrimitive("recirculate");
-        auto parameters = mkParameters(primitive);
-        primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
-        cstring listName = "recirculate";
-        // If we are supplied a type argument that is a named type use
-        // that for the list name.
-        if (mc->typeArguments->size() == 1) {
-            auto typeArg = mc->typeArguments->at(0);
-            if (typeArg->is<IR::Type_Name>()) {
-                auto origType = ctxt->refMap->getDeclaration(
-                    typeArg->to<IR::Type_Name>()->path, true);
-                if (!origType->is<IR::Type_Struct>()) {
-                    ConversionContext::modelError(
-                        "%1%: expected a struct type", origType->getNode());
-                    return nullptr;
-                }
-                auto st = origType->to<IR::Type_Struct>();
-                listName = st->controlPlaneName();
-            }
-        }
-        int id = ctxt->createFieldList(mc->arguments->at(0)->expression, listName);
-        auto cst = new IR::Constant(id);
-        ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
-        auto jcst = ctxt->conv->convert(cst);
-        parameters->append(jcst);
-        return primitive;
+        ::error("recirculate with 1 argument is deprecated; please use recirculate()");
+        return nullptr;
     } else if (mc->arguments->size() == 0) {
         auto primitive = mkPrimitive("recirculate");
         auto parameters = mkParameters(primitive);
