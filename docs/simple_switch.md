@@ -94,11 +94,13 @@ Here are the fields:
   control in v1model, which is executed after the parser and before
   ingress.
 - `clone_spec` (v1m): should not be accessed directly. It is set by
-  the `clone` and `clone3` action primitives and is required for the
-  packet clone (aka mirror) feature. The "ingress to egress" clone
-  primitive action must be called from the ingress pipeline, and the
-  "egress to egress" clone primitive action must be called from the
-  egress pipeline.
+  the `clone` and `clone3` primitive actions in P4_16 programs, or the
+  `clone_ingress_pkt_to_egress` and `clone_egress_pkt_to_egress`
+  primitive actions for P4_14 programs, and is required for the packet
+  clone (aka mirror) feature. The "ingress to egress" clone primitive
+  action must be called from the ingress pipeline, and the "egress to
+  egress" clone primitive action must be called from the egress
+  pipeline.
 
 ## Intrinsic metadata
 
@@ -235,7 +237,7 @@ file](../targets/simple_switch/primitives.cpp).
 After-ingress pseudocode - the short version:
 
 ```
-if (clone_spec != 0) {      // because your code called clone or clone3
+if (clone_spec != 0) {      // because your code called a clone primitive action
     make a clone of the packet with details configured for the clone session
 }
 if (lf_field_list != 0) {   // because your code called generate_digest
@@ -258,11 +260,14 @@ version:
 
 ```
 if (clone_spec != 0) {
-    // This condition will be true if your code called the clone or
-    // clone3 primitive action during ingress processing.
+    // This condition will be true if your code called the `clone` or
+    // `clone3` primitive action from a P4_16 program, or the
+    // `clone_ingress_pkt_to_egress` primitive action in a P4_14
+    // program, during ingress processing.
+
     Make a clone of the packet destined for the egress_port configured
     in the clone (aka mirror) session id number that was given when the
-    last clone or clone3 primitive action was called.
+    last clone primitive action was called.
 
     The packet contents will be the same as when it most recently
     began the ingress processing, where the clone operation was
@@ -272,10 +277,14 @@ if (clone_spec != 0) {
     this occurrence of ingress processing via a recirculate operation,
     for example.)
 
-    If it was a clone3 action, also preserve the final ingress values
-    of the metadata fields specified in the field list argument,
-    except assign clone_spec a value of 0 always, and instance_type a
-    value of PKT_INSTANCE_TYPE_INGRESS_CLONE.
+    If it was a clone3 (P4_16) or clone_ingress_pkt_to_egress (P4_14)
+    action, also preserve the final ingress values of the metadata
+    fields specified in the field list argument, except assign
+    clone_spec a value of 0 always, and instance_type a value of
+    PKT_INSTANCE_TYPE_INGRESS_CLONE.
+
+    The cloned packet will continue processing at the beginning of
+    your egress code.
     // fall through to code below
 }
 if (lf_field_list != 0) {
@@ -319,7 +328,7 @@ if (resubmit_flag != 0) {
 After-egress pseudocode - the short version:
 
 ```
-if (clone_spec != 0) {    // because your code called clone or clone3
+if (clone_spec != 0) {    // because your code called a clone primitive action
     make a clone of the packet with details configured for the clone session
 }
 if (egress_spec == 511) {  // because your code called drop/mark_to_drop
@@ -337,8 +346,11 @@ version:
 
 ```
 if (clone_spec != 0) {
-    // This condition will be true if your code called the clone or
-    // clone3 primitive action during egress processing.
+    // This condition will be true if your code called the `clone` or
+    // `clone3` primitive action from a P4_16 program, or the
+    // `clone_egress_pkt_to_egress` primitive action in a P4_14
+    // program, during egress processing.
+
     Make a clone of the packet destined for the egress_port configured
     in the clone (aka mirror) session id number that was given when the
     last clone or clone3 primitive action was called.
@@ -347,10 +359,14 @@ if (clone_spec != 0) {
     egress processing, with any modifications made to the packet
     during both ingress and egress processing.
 
-    If it was a clone3 action, also preserve the final egress values
-    of the metadata fields specified in the field list argument,
-    except assign clone_spec a value of 0 always, and instance_type a
-    value of PKT_INSTANCE_TYPE_EGRESS_CLONE.
+    If it was a clone3 (P4_16) or clone_egress_pkt_to_egress (P4_14)
+    action, also preserve the final egress values of the metadata
+    fields specified in the field list argument, except assign
+    clone_spec a value of 0 always, and instance_type a value of
+    PKT_INSTANCE_TYPE_EGRESS_CLONE.
+
+    The cloned packet will continue processing at the beginning of
+    your egress code.
     // fall through to code below
 }
 if (egress_spec == 511) {
