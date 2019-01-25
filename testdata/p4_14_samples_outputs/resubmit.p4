@@ -9,6 +9,7 @@ struct intrinsic_metadata_t {
 }
 
 struct mymeta_t {
+    @recirculate 
     bit<8> f1;
 }
 
@@ -51,7 +52,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("._resubmit") action _resubmit() {
         meta.mymeta.f1 = 8w1;
-        resubmit({ standard_metadata, meta.mymeta });
+        resubmit();
     }
     @name(".t_ingress_1") table t_ingress_1 {
         actions = {

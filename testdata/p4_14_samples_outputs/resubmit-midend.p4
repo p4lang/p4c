@@ -9,6 +9,7 @@ struct intrinsic_metadata_t {
 }
 
 struct mymeta_t {
+    @recirculate 
     bit<8> f1;
 }
 
@@ -42,11 +43,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-struct tuple_0 {
-    standard_metadata_t field;
-    mymeta_t            field_0;
-}
-
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
@@ -60,8 +56,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.egress_spec = port;
     }
     @name("._resubmit") action _resubmit() {
+<<<<<<< 43bd696b29be944551572728dfc9ec48437ee961
         meta._mymeta_f10 = 8w1;
+=======
+<<<<<<< 1968b35515ddd4809e438d338481981969628fc8
+        meta._mymeta_f14 = 8w1;
+>>>>>>> Tag metadata fields that need to be recirculated
         resubmit<tuple_0>({ standard_metadata, {8w1} });
+=======
+        meta.mymeta.f1 = 8w1;
+        resubmit();
+>>>>>>> Tag metadata fields that need to be recirculated
     }
     @name(".t_ingress_1") table t_ingress {
         actions = {

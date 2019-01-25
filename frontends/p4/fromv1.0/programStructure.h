@@ -132,6 +132,8 @@ class ProgramStructure {
     std::map<cstring, const IR::Meter*> directMeters;
     std::map<const IR::Meter*, const IR::Declaration_Instance*> meterMap;
     std::map<cstring, const IR::Declaration_Instance*> counterMap;
+    /// Field lists that participate in recirculation.
+    std::set<const IR::FieldList*> recirculatedFieldLists;
 
     std::map<const IR::V1Table*, const IR::V1Control*> tableMapping;
     std::map<const IR::V1Table*, const IR::Apply*> tableInvocation;
@@ -253,6 +255,9 @@ class ProgramStructure {
     void tablesReferred(const IR::V1Control* control, std::vector<const IR::V1Table*> &out);
     bool isHeader(const IR::ConcreteHeaderRef* nhr) const;
     cstring makeUniqueName(cstring base);
+    bool isFieldInList(cstring type, cstring field, const IR::FieldList* fl);
+    /// True if this field is in one of the recirculated field lists    
+    virtual bool isRecirculated(cstring type, cstring field);
 
     const IR::V1Control* ingress;
     IR::ID ingressReference;

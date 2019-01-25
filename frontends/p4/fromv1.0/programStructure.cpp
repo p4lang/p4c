@@ -114,6 +114,46 @@ void ProgramStructure::checkHeaderType(const IR::Type_StructLike* hdr, bool meta
     }
 }
 
+bool ProgramStructure::isFieldInList(cstring type, cstring field, const IR::FieldList* fl) {
+    LOG3("Checking " << type << "." << field << " in " << fl);
+    for (auto e : fl->fields) {
+        if (auto mem = e->to<IR::Member>()) {
+            auto expr = mem->expr;
+            auto mfield = mem->member;
+            if (mfield != field)
+                continue;
+            CHECK_NULL(expr->type);
+            auto etype = expr->type->to<IR::Type_StructLike>();
+            if (etype != nullptr && etype->name == type)
+                return true;
+        } else if (auto path = e->to<IR::PathExpression>()) {
+            auto l = field_lists.get(path->path->name);
+            BUG_CHECK(l != nullptr, "%1%: unexpected expression in field list", e);
+            return isFieldInList(type, field, l);
+        } else if (auto chr = e->to<IR::ConcreteHeaderRef>()) {
+            auto htype = chr->ref->type;
+            CHECK_NULL(htype);
+            if (htype->name != type)
+                continue;
+            for (auto f : htype->fields) {
+                if (f->name == field)
+                    return true;
+            }
+        } else {
+            BUG("%1%: unexpected expression in field list", e);
+        }
+    }
+    return false;
+}
+
+bool ProgramStructure::isRecirculated(cstring type, cstring field) {
+    for (auto f : recirculatedFieldLists) {
+        if (isFieldInList(type, field, f))
+            return true;
+    }
+    return false;
+}
+
 cstring ProgramStructure::createType(const IR::Type_StructLike* type, bool header,
                                      std::unordered_set<const IR::Type*> *converted) {
     if (converted->count(type))
@@ -190,14 +230,14 @@ void ProgramStructure::createTypes() {
 
 const IR::Type_Struct* ProgramStructure::createFieldListType(const IR::Expression* expression) {
     if (!expression->is<IR::PathExpression>()) {
-      ::error("%1%: expected a field list", expression);
-      return nullptr;
+        ::error("%1%: expected a field list", expression);
+        return nullptr;
     }
     auto nr = expression->to<IR::PathExpression>();
     auto fl = field_lists.get(nr->path->name);
     if (fl == nullptr) {
-      ::error("%1%: Expected a field list", expression);
-      return nullptr;
+        ::error("%1%: Expected a field list", expression);
+        return nullptr;
     }
 
     auto name = makeUniqueName(nr->path->name);
@@ -1070,14 +1110,14 @@ const IR::Expression* ProgramStructure::convertFieldList(const IR::Expression* e
     ExpressionConverter conv(this);
 
     if (!expression->is<IR::PathExpression>()) {
-      ::error("%1%: expected a field list", expression);
-      return expression;
+        ::error("%1%: expected a field list", expression);
+        return expression;
     }
     auto nr = expression->to<IR::PathExpression>();
     auto fl = field_lists.get(nr->path->name);
     if (fl == nullptr) {
-      ::error("%1%: Expected a field list", expression);
-      return expression;
+        ::error("%1%: Expected a field list", expression);
+        return expression;
     }
     auto result = conv.convert(fl);
     return result;
@@ -1503,11 +1543,7 @@ CONVERT_PRIMITIVE(modify_field_rng_uniform) {
 CONVERT_PRIMITIVE(recirculate) {
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 1);
-    auto right = structure->convertFieldList(primitive->operands.at(0));
-    if (right == nullptr)
-        return nullptr;
     auto args = new IR::Vector<IR::Argument>();
-    args->push_back(new IR::Argument(right));
     auto path = new IR::PathExpression(structure->v1model.recirculate.Id());
     auto mc = new IR::MethodCallExpression(primitive->srcInfo, path, args);
     return new IR::MethodCallStatement(mc->srcInfo, mc);
@@ -1528,11 +1564,6 @@ convertClone(ProgramStructure *structure, const IR::Primitive *primitive, Model:
     args->push_back(
         new IR::Argument(new IR::Cast(primitive->operands.at(0)->srcInfo,
                                       structure->v1model.clone.sessionType, session)));
-    if (primitive->operands.size() == 2) {
-        auto list = structure->convertFieldList(primitive->operands.at(1));
-        if (list != nullptr)
-            args->push_back(new IR::Argument(list));
-    }
 
     auto id = primitive->operands.size() == 2 ? structure->v1model.clone.clone3.Id()
                                                : structure->v1model.clone.Id();
@@ -1553,13 +1584,7 @@ CONVERT_PRIMITIVE(clone_i2e) {
 CONVERT_PRIMITIVE(resubmit) {
     ExpressionConverter conv(structure);
     BUG_CHECK(primitive->operands.size() <= 1, "Expected 0 or 1 operands for %1%", primitive);
-    const IR::Expression *list;
-    if (primitive->operands.size() > 0)
-        list = structure->convertFieldList(primitive->operands.at(0));
-    else
-        list = new IR::ListExpression({});
-    return new IR::MethodCallStatement(primitive->srcInfo, structure->v1model.resubmit.Id(),
-                                       { new IR::Argument(list) });
+    return new IR::MethodCallStatement(primitive->srcInfo, structure->v1model.resubmit.Id(), {});
 }
 
 CONVERT_PRIMITIVE(execute_meter) {

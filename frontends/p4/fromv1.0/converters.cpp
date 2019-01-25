@@ -421,10 +421,13 @@ class ValidateLenExpr : public Inspector {
 }  // namespace
 
 const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
-    if (!field->type->is<IR::Type_Varbits>()) return field;
+    auto type = findContext<IR::Type_StructLike>();
+    if (type == nullptr)
+        return field;
+
     // given a struct with length and max_length, the
     // varbit field size is max_length * 8 - struct_size
-    if (auto type = findContext<IR::Type_StructLike>()) {
+    if (field->type->is<IR::Type_Varbits>()) {
         if (auto len = type->getAnnotation("length")) {
             if (len->expr.size() == 1) {
                 auto lenexpr = len->expr[0];
@@ -438,6 +441,9 @@ const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
             }
         }
     }
+    if (structure->isRecirculated(type->name.name, field->name.name))
+        field->annotations = field->annotations->add(
+            new IR::Annotation("recirculate", {}));
     return field;
 }
 
@@ -805,6 +811,40 @@ class ComputeTableCallGraph : public Inspector {
         LOG3("Invoking " << tbl << " in " << parent->name);
         structure->tableMapping.emplace(tbl, parent);
         structure->tableInvocation.emplace(tbl, apply);
+    }
+};
+
+class FindRecirculated : public Inspector {
+    ProgramStructure* structure;
+
+    void add(const IR::Primitive* primitive, unsigned operand) {
+        auto expression = primitive->operands.at(operand);
+        if (!expression->is<IR::PathExpression>()) {
+            ::error("%1%: expected a field list", expression);
+            return;
+        }
+        auto nr = expression->to<IR::PathExpression>();
+        auto fl = structure->field_lists.get(nr->path->name);
+        if (fl == nullptr) {
+            ::error("%1%: Expected a field list", expression);
+            return;
+        }
+        LOG3("Recirculated " << nr->path->name);
+        structure->recirculatedFieldLists.emplace(fl);
+    }
+
+ public:
+    explicit FindRecirculated(ProgramStructure* structure): structure(structure)
+    { CHECK_NULL(structure); setName("FindRecirculated"); }
+
+    void postorder(const IR::Primitive* primitive) override {
+        if (primitive->name == "recirculate") {
+            add(primitive, 0);
+        } else if (primitive->name == "resubmit") {
+            add(primitive, 0);
+        } else if (primitive->name.startsWith("clone") && primitive->operands.size() == 2) {
+            add(primitive, 1);
+        }
     }
 };
 
@@ -1365,6 +1405,7 @@ Converter::Converter() {
     passes.emplace_back(new TypeCheck());
     // Convert
     passes.emplace_back(new DiscoverStructure(structure));
+    passes.emplace_back(new FindRecirculated(structure));
     passes.emplace_back(new ComputeCallGraph(structure));
     passes.emplace_back(new ComputeTableCallGraph(structure));
     passes.emplace_back(new Rewriter(structure));

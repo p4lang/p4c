@@ -39,6 +39,7 @@ struct egress_metadata_t {
 struct fabric_metadata_t {
     bit<3>  packetType;
     bit<1>  fabric_header_present;
+    @recirculate 
     bit<16> reason_code;
     bit<8>  dst_device;
     bit<16> dst_port;
@@ -55,18 +56,24 @@ struct hash_metadata_t {
 }
 
 struct i2e_metadata_t {
+    @recirculate 
     bit<32> ingress_tstamp;
+    @recirculate 
     bit<16> mirror_session_id;
 }
 
 struct ingress_metadata_t {
+    @recirculate 
     bit<9>  ingress_port;
+    @recirculate 
     bit<16> ifindex;
     bit<16> egress_ifindex;
     bit<2>  port_type;
     bit<16> outer_bd;
+    @recirculate 
     bit<16> bd;
     bit<1>  drop_flag;
+    @recirculate 
     bit<8>  drop_reason;
     bit<1>  control_frame;
     bit<16> bypass_lookups;
@@ -2910,7 +2917,7 @@ control process_egress_acl(inout headers hdr, inout metadata meta, inout standar
     }
     @name(".egress_mirror") action egress_mirror(bit<32> session_id) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-        clone3(CloneType.E2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
+        clone3(CloneType.E2E, (bit<32>)session_id);
     }
     @name(".egress_mirror_drop") action egress_mirror_drop(bit<32> session_id) {
         egress_mirror(session_id);
@@ -2918,7 +2925,7 @@ control process_egress_acl(inout headers hdr, inout metadata meta, inout standar
     }
     @name(".egress_copy_to_cpu") action egress_copy_to_cpu(bit<16> reason_code) {
         meta.fabric_metadata.reason_code = reason_code;
-        clone3(CloneType.E2E, (bit<32>)32w250, { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port });
+        clone3(CloneType.E2E, (bit<32>)32w250);
     }
     @name(".egress_redirect_to_cpu") action egress_redirect_to_cpu(bit<16> reason_code) {
         egress_copy_to_cpu(reason_code);
@@ -4397,8 +4404,17 @@ control process_mac_acl(inout headers hdr, inout metadata meta, inout standard_m
     }
     @name(".acl_mirror") action acl_mirror(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
+<<<<<<< 43bd696b29be944551572728dfc9ec48437ee961
         meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
+=======
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
+<<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch.p4
+>>>>>>> Tag metadata fields that need to be recirculated
         clone3(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
+=======
+        meta.ingress_metadata.enable_dod = 1w0;
+        clone3(CloneType.I2E, (bit<32>)session_id);
+>>>>>>> Tag metadata fields that need to be recirculated:testdata/p4_14_samples_outputs/switch_20160226/switch.p4
         meta.acl_metadata.acl_stats_index = acl_stats_index;
         meta.meter_metadata.meter_index = acl_meter_index;
     }
@@ -4463,8 +4479,17 @@ control process_ip_acl(inout headers hdr, inout metadata meta, inout standard_me
     }
     @name(".acl_mirror") action acl_mirror(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
+<<<<<<< 43bd696b29be944551572728dfc9ec48437ee961
         meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
+=======
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
+<<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch.p4
+>>>>>>> Tag metadata fields that need to be recirculated
         clone3(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
+=======
+        meta.ingress_metadata.enable_dod = 1w0;
+        clone3(CloneType.I2E, (bit<32>)session_id);
+>>>>>>> Tag metadata fields that need to be recirculated:testdata/p4_14_samples_outputs/switch_20160226/switch.p4
         meta.acl_metadata.acl_stats_index = acl_stats_index;
         meta.meter_metadata.meter_index = acl_meter_index;
     }
@@ -5638,7 +5663,7 @@ control process_system_acl(inout headers hdr, inout metadata meta, inout standar
     }
     @name(".copy_to_cpu_with_reason") action copy_to_cpu_with_reason(bit<16> reason_code) {
         meta.fabric_metadata.reason_code = reason_code;
-        clone3(CloneType.I2E, (bit<32>)32w250, { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port });
+        clone3(CloneType.I2E, (bit<32>)32w250);
     }
     @name(".redirect_to_cpu") action redirect_to_cpu(bit<16> reason_code) {
         copy_to_cpu_with_reason(reason_code);
@@ -5656,8 +5681,13 @@ control process_system_acl(inout headers hdr, inout metadata meta, inout standar
         mark_to_drop(standard_metadata);
     }
     @name(".negative_mirror") action negative_mirror(bit<32> session_id) {
+<<<<<<< 1968b35515ddd4809e438d338481981969628fc8
         clone3(CloneType.I2E, (bit<32>)session_id, { meta.ingress_metadata.ifindex, meta.ingress_metadata.drop_reason });
         mark_to_drop(standard_metadata);
+=======
+        clone3(CloneType.I2E, (bit<32>)session_id);
+        mark_to_drop();
+>>>>>>> Tag metadata fields that need to be recirculated
     }
     @name(".drop_stats") table drop_stats_0 {
         actions = {

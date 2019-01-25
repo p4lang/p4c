@@ -11,7 +11,9 @@ struct intrinsic_metadata_t {
 }
 
 struct metaA_t {
+    @recirculate 
     bit<8> f1;
+    @recirculate 
     bit<8> f2;
 }
 
@@ -44,21 +46,30 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-struct tuple_0 {
-    standard_metadata_t field;
-    metaA_t             field_0;
-}
-
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
     @name("._nop") action _nop() {
     }
     @name("._recirculate") action _recirculate() {
+<<<<<<< 43bd696b29be944551572728dfc9ec48437ee961
         recirculate<tuple_0>({ standard_metadata, {meta._metaA_f10,meta._metaA_f21} });
     }
     @name("._clone_e2e") action _clone_e2e(bit<32> mirror_id) {
         clone3<tuple_0>(CloneType.E2E, mirror_id, { standard_metadata, {meta._metaA_f10,meta._metaA_f21} });
+=======
+<<<<<<< 1968b35515ddd4809e438d338481981969628fc8
+        recirculate<tuple_0>({ standard_metadata, {meta._metaA_f16,meta._metaA_f27} });
+    }
+    @name("._clone_e2e") action _clone_e2e(bit<32> mirror_id) {
+        clone3<tuple_0>(CloneType.E2E, mirror_id, { standard_metadata, {meta._metaA_f16,meta._metaA_f27} });
+=======
+        recirculate();
+    }
+    @name("._clone_e2e") action _clone_e2e(bit<32> mirror_id) {
+        clone3(CloneType.E2E, mirror_id);
+>>>>>>> Tag metadata fields that need to be recirculated
+>>>>>>> Tag metadata fields that need to be recirculated
     }
     @name(".t_egress") table t_egress_0 {
         actions = {
@@ -96,10 +107,24 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.mcast_grp = mgrp;
     }
     @name("._resubmit") action _resubmit() {
+<<<<<<< 43bd696b29be944551572728dfc9ec48437ee961
         resubmit<tuple_0>({ standard_metadata, {meta._metaA_f10,meta._metaA_f21} });
     }
     @name("._clone_i2e") action _clone_i2e(bit<32> mirror_id) {
         clone3<tuple_0>(CloneType.I2E, mirror_id, { standard_metadata, {meta._metaA_f10,meta._metaA_f21} });
+=======
+<<<<<<< 1968b35515ddd4809e438d338481981969628fc8
+        resubmit<tuple_0>({ standard_metadata, {meta._metaA_f16,meta._metaA_f27} });
+    }
+    @name("._clone_i2e") action _clone_i2e(bit<32> mirror_id) {
+        clone3<tuple_0>(CloneType.I2E, mirror_id, { standard_metadata, {meta._metaA_f16,meta._metaA_f27} });
+=======
+        resubmit();
+    }
+    @name("._clone_i2e") action _clone_i2e(bit<32> mirror_id) {
+        clone3(CloneType.I2E, mirror_id);
+>>>>>>> Tag metadata fields that need to be recirculated
+>>>>>>> Tag metadata fields that need to be recirculated
     }
     @name(".t_ingress_1") table t_ingress {
         actions = {

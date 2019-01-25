@@ -11,7 +11,9 @@ struct intrinsic_metadata_t {
 }
 
 struct metaA_t {
+    @recirculate 
     bit<8> f1;
+    @recirculate 
     bit<8> f2;
 }
 
@@ -50,10 +52,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("._nop") action _nop() {
     }
     @name("._recirculate") action _recirculate() {
-        recirculate<tuple<standard_metadata_t, metaA_t>>({ standard_metadata, meta.metaA });
+        recirculate();
     }
     @name("._clone_e2e") action _clone_e2e(bit<32> mirror_id) {
-        clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.E2E, mirror_id, { standard_metadata, meta.metaA });
+        clone3(CloneType.E2E, mirror_id);
     }
     @name(".t_egress") table t_egress_0 {
         actions = {
@@ -91,10 +93,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.mcast_grp = mgrp;
     }
     @name("._resubmit") action _resubmit() {
-        resubmit<tuple<standard_metadata_t, metaA_t>>({ standard_metadata, meta.metaA });
+        resubmit();
     }
     @name("._clone_i2e") action _clone_i2e(bit<32> mirror_id) {
-        clone3<tuple<standard_metadata_t, metaA_t>>(CloneType.I2E, mirror_id, { standard_metadata, meta.metaA });
+        clone3(CloneType.I2E, mirror_id);
     }
     @name(".t_ingress_1") table t_ingress {
         actions = {

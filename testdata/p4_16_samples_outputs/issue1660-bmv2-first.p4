@@ -2,6 +2,7 @@
 #include <v1model.p4>
 
 struct HasBool {
+    @recirculate 
     bool x;
 }
 
@@ -21,7 +22,7 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     apply {
         HasBool b;
         b.x = true;
-        clone3<HasBool>(CloneType.I2E, 32w0, b);
+        clone3(CloneType.I2E, 32w0);
     }
 }
 
