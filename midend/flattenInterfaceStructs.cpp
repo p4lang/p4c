@@ -21,8 +21,12 @@ namespace P4 {
 void StructTypeReplacement::flatten(const P4::TypeMap* typeMap,
                                     cstring prefix,
                                     const IR::Type* type,
-                                    const IR::Annotations* annotations,
+                                    const IR::Annotations* annotations,  // from parent
                                     IR::IndexedVector<IR::StructField> *fields) {
+    // Drop name annotations
+    IR::Annotations::Filter f =
+            [](const IR::Annotation* a) { return a->name != IR::Annotation::nameAnnotation; };
+    annotations = annotations->where(f);
     if (auto st = type->to<IR::Type_Struct>()) {
         structFieldMap.emplace(prefix, st);
         for (auto f : st->fields) {

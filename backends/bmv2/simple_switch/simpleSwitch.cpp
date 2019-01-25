@@ -144,7 +144,7 @@ Util::IJson* ExternConverter_clone::convertExternFunction(
     return primitive;
 }
 
-static int getRecirculateFieldListId(ConversionContext* ctxt, const IR::Node* node) {
+static int getRecirculateFieldListId(ConversionContext* ctxt, const IR::Node*) {
     int id = -1;
     // Find the field list called 'recirculate' (we use the same
     // annotation as for recirculate)
@@ -157,9 +157,11 @@ static int getRecirculateFieldListId(ConversionContext* ctxt, const IR::Node* no
             break;
         }
     }
-
-    if (id < 0)
-        ::error("%1%: No fields annotated for recirculation in user metadata", node);
+    if (id == -1) {
+        // Create an empty list.
+        cstring name = ctxt->refMap->newName("empty");
+        id = ctxt->createFieldList(new IR::ListExpression({}), name);
+    }
     return id;
 }
 
@@ -989,7 +991,7 @@ SimpleSwitchBackend::createRecirculateFieldsList(
         field->emplace("type", "field");
         auto value = new Util::JsonArray();
         value->append(scalarName);
-        value->append(f->name);
+        value->append(f->controlPlaneName());
         field->emplace("value", value);
         elements->append(field);
     }
