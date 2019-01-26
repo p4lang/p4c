@@ -349,9 +349,12 @@ class Cast : Operation_Unary {
     validate{ BUG_CHECK(!destType->is<Type_Unknown>(), "%1%: Cannot cast to unknown type", this); }
 }
 
-class SelectCase {
+class SelectCase : IAnnotated {
+    optional Annotations annotations = Annotations::empty;
     Expression     keyset;
     PathExpression state;
+
+    Annotations     getAnnotations() const override { return annotations; }
     dbprint { out << keyset << ": " << state; }
 }
 
