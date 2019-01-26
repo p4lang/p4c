@@ -355,7 +355,7 @@ class SelectCase : IAnnotated {
     PathExpression state;
 
     Annotations     getAnnotations() const override { return annotations; }
-    dbprint { out << keyset << ": " << state; }
+    dbprint { out << keyset << ": " << state << " " << annotations; }
 }
 
 class SelectExpression : Expression {
