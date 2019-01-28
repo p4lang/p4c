@@ -57,7 +57,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".do_drop") action do_drop() {
     }
     @name(".route_ipv4") action route_ipv4(bit<9> egress_spec) {
-        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
         standard_metadata.egress_spec = egress_spec;
     }
     @name(".routing") table routing {

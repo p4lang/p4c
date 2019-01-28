@@ -1,3 +1,0 @@
-source_routing.p4(60): warning: -1: negative value with unsigned type
-    add_to_field(easyroute_head.num_valid, -1);
-                                            ^

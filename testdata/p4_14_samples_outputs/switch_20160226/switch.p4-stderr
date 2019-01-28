@@ -1,18 +1,3 @@
-l3.p4(140): warning: -1: negative value with unsigned type
-    add_to_field(ipv4.ttl, -1);
-                            ^
-l3.p4(150): warning: -1: negative value with unsigned type
-    add_to_field(ipv4.ttl, -1);
-                            ^
-l3.p4(156): warning: -1: negative value with unsigned type
-    add_to_field(ipv6.hopLimit, -1);
-                                 ^
-l3.p4(166): warning: -1: negative value with unsigned type
-    add_to_field(ipv6.hopLimit, -1);
-                                 ^
-l3.p4(172): warning: -1: negative value with unsigned type
-    add_to_field(mpls[0].ttl, -1);
-                               ^
 tunnel.p4(880): warning: -14: negative value with unsigned type
     add(egress_metadata.payload_length, standard_metadata.packet_length, -14);
                                                                           ^^
