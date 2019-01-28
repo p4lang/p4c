@@ -19,7 +19,6 @@ tunnel.p4(1002): warning: -14: negative value with unsigned type
 fabric.p4(210): warning: Could not infer type for fabric_mgid, using bit<8>
 action set_fabric_multicast(fabric_mgid) {
                             ^^^^^^^^^^^
-warning: The order of headers in deparser is not uniquely determined by parser!
 parser.p4(487): warning: SelectCase: unreachable
         default: parse_all_int_meta_value_heders;
         ^^^^^^^
