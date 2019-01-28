@@ -1,9 +1,0 @@
-issue1001-bmv2.p4(20): warning: clone3: Using deprecated feature clone3. Use clone3 with 3 arguments the @recirculate annotation on user metadata fields
-        clone3<Meta>(CloneType.I2E, 32w64, x);
-        ^^^^^^
-v1model.p4(216)
-extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
-            ^^^^^^
-issue1001-bmv2.p4(20): [--Wwarn=uninitialized_use] warning: x may not be completely initialized
-        clone3<Meta>(CloneType.I2E, 32w64, x);
-                                           ^

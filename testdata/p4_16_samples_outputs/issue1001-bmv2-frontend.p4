@@ -5,6 +5,7 @@ struct Headers {
 }
 
 struct Meta {
+    @recirculate 
     bit<1> b;
 }
 
@@ -16,9 +17,8 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    Meta x_0;
     apply {
-        clone3<Meta>(CloneType.I2E, 32w64, x_0);
+        clone3(CloneType.I2E, 32w64);
     }
 }
 
