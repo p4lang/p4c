@@ -1254,13 +1254,24 @@ CONVERT_PRIMITIVE(add_to_field) {
     auto left = conv.convert(primitive->operands.at(0));
     auto left2 = conv.convert(primitive->operands.at(0));
     // convert twice, so we have different expression trees on RHS and LHS
-    auto right = conv.convert(primitive->operands.at(1));
+    auto right = primitive->operands.at(1);
     bool isSaturated = isSaturatedField(left) || isSaturatedField(right);
     IR::Operation_Binary *op = nullptr;
-    if (isSaturated)
-        op = new IR::AddSat(primitive->srcInfo, left, right);
-    else
-        op = new IR::Add(primitive->srcInfo, left, right);
+    if (auto k = primitive->operands.at(1)->to<IR::Constant>()) {
+        if (k->value < 0 && !k->type->to<IR::Type::Bits>()->isSigned) {
+            // adding a negative value to an unsigned field -- want to turn this into a
+            // subtract to avoid the warning about 'negative value with unsigned type'
+            right = new IR::Constant(k->srcInfo, k->type, -k->value);
+            if (isSaturated)
+                op = new IR::SubSat(primitive->srcInfo, left, right);
+            else
+                op = new IR::Sub(primitive->srcInfo, left, right); } }
+    if (!op) {
+        right = conv.convert(right);
+        if (isSaturated)
+            op = new IR::AddSat(primitive->srcInfo, left, right);
+        else
+            op = new IR::Add(primitive->srcInfo, left, right); }
     LOG3("add_to_field: isSaturated " << isSaturated << ", op: " << op);
     return structure->assign(primitive->srcInfo, left2, op, primitive->operands.at(0)->type);
 }

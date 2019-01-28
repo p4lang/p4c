@@ -1,3 +1,0 @@
-issue894.p4(127): warning: -1: negative value with unsigned type
-    add_to_field(ipv4.ttl, -1);
-                            ^

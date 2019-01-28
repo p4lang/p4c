@@ -25,12 +25,6 @@ action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, d
 sai_p4.p4(282): warning: Could not infer type for fdb_learning_limit_violation, using bit<8>
 action set_in_port(port, type_, oper_status, speed, admin_state, default_vlan, default_vlan_priority, ingress_filtering, drop_untagged, drop_tagged, port_loopback_mode, fdb_learning, stp_state, update_dscp, mtu, sflow, flood_storm_control, broadcast_storm_control, multicast_storm_control, global_flow_control, max_learned_address, fdb_learning_limit_violation) {
                                                                                                                                                                                                                                                                                                                                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-sai_p4.p4(405): warning: -1: negative value with unsigned type
-    add_to_field(ipv4.ttl, -1);
-                            ^
-sai_p4.p4(412): warning: -1: negative value with unsigned type
-    add_to_field(ipv4.ttl, -1);
-                            ^
 sai_p4.p4(265): warning: Could not infer type for max_virtual_routers, using bit<8>
 action set_switch(port_number, cpu_port, max_virtual_routers, fdb_table_size, on_link_route_supported, oper_status, max_temp, switching_mode, cpu_flood_enable, ttl1_action, port_vlan_id, src_mac_address, fdb_aging_time, fdb_unicast_miss_action, fdb_broadcast_miss_action, fdb_multicast_miss_action, ecmp_hash_seed, ecmp_hash_type, ecmp_hash_fields, ecmp_max_paths, vr_id) {
                                          ^^^^^^^^^^^^^^^^^^^
