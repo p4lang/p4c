@@ -587,8 +587,12 @@ class HeaderRepresentation {
  private:
     const IR::Expression* hdrsParam;  // reference to headers parameter in deparser
     std::map<cstring, const IR::Expression*> header;
+    /// This is for parsers that have no extracts
     std::map<cstring, const IR::Expression*> fakeHeader;
+    /// One expression for each constant stack index
     std::map<const IR::Expression*, std::map<int, const IR::Expression*>> stackElement;
+    /// One expression for each each stack[next]
+    std::map<const IR::Expression*, const IR::Expression*> stackNextElement;
 
  public:
     explicit HeaderRepresentation(const IR::Expression* hdrsParam) :
@@ -605,9 +609,16 @@ class HeaderRepresentation {
         } else if (expression->is<IR::HeaderStackItemRef>()) {
             auto hsir = expression->to<IR::HeaderStackItemRef>();
             auto hdr = getHeader(hsir->base_);
-            if (hsir->index_->is<IR::PathExpression>())
-                // This is most certainly 'next'.
-                return hdr;
+            if (auto pe = hsir->index_->to<IR::PathExpression>()) {
+                if (pe->path->name.name == "next") {
+                    if (stackNextElement.find(hdr) == stackNextElement.end())
+                        stackNextElement[hdr] = new IR::Member(hdr, IR::ID("next"));
+                    return stackNextElement[hdr];
+                } else {
+                    ::error("%1%: Illegal extract stack expression", pe);
+                    return hdr;
+                }
+            }
             BUG_CHECK(hsir->index_->is<IR::Constant>(), "%1%: expected a constant", hsir->index_);
             int index = hsir->index_->to<IR::Constant>()->asInt();
             if (stackElement.find(hdr) != stackElement.end()) {
@@ -646,8 +657,11 @@ void ProgramStructure::createDeparser() {
         } else {
             for (auto e : extracts[caller]) {
                 auto h = hr.getHeader(e);
-                if (lastExtract != nullptr)
-                    headerOrder.calls(lastExtract, h);
+                if (lastExtract != nullptr) {
+                    if (!lastExtract->is<IR::Member>() || lastExtract != h)
+                        // Do not add self-edges between h[next] and h[next]
+                        headerOrder.calls(lastExtract, h);
+                }
                 lastExtract = h;
             }
         }
@@ -660,7 +674,12 @@ void ProgramStructure::createDeparser() {
                 auto h = hr.getHeader(e);
                 firstExtract = h;
             }
-            headerOrder.calls(lastExtract, firstExtract);
+            if (!lastExtract->is<IR::Member>() || lastExtract != firstExtract)
+                // Do not add self-edges between h[next] and h[next]
+                // TODO: this is not 100% precise, since it ignores
+                // edges h[next]->h[next] that go through other
+                // headers.  We will still get warnings for these cases.
+                headerOrder.calls(lastExtract, firstExtract);
         }
     }
 
@@ -698,6 +717,11 @@ void ProgramStructure::createDeparser() {
         if (exp->is<IR::StringLiteral>())
             // a "fake" header
             continue;
+        if (auto mem = exp->to<IR::Member>())
+            if (mem->expr->is<IR::Member>())
+                // This is a 'hdr.h.next'; use hdr.h instead
+                exp = mem->expr;
+
         auto args = new IR::Vector<IR::Argument>();
         args->push_back(new IR::Argument(exp));
         const IR::Expression* method = new IR::Member(
