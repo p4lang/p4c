@@ -90,10 +90,10 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     action do_resubmit(bit<32> new_ipv4_dstAddr) {
         hdr.ipv4.dstAddr = new_ipv4_dstAddr;
-        resubmit(standard_metadata);
+        resubmit({  });
     }
     action do_clone_i2e(bit<32> l2ptr) {
-        clone3(CloneType.I2E, I2E_CLONE_SESSION_ID, standard_metadata);
+        clone3(CloneType.I2E, I2E_CLONE_SESSION_ID, {  });
         meta.fwd.l2ptr = l2ptr;
     }
     table ipv4_da_lpm {
@@ -162,11 +162,11 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
     }
     action do_recirculate(bit<32> new_ipv4_dstAddr) {
         hdr.ipv4.dstAddr = new_ipv4_dstAddr;
-        recirculate(standard_metadata);
+        recirculate({  });
     }
     action do_clone_e2e(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
-        clone3(CloneType.E2E, E2E_CLONE_SESSION_ID, standard_metadata);
+        clone3(CloneType.E2E, E2E_CLONE_SESSION_ID, {  });
     }
     table send_frame {
         key = {

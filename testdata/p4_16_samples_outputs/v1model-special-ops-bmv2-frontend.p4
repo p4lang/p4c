@@ -76,10 +76,10 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     @name("ingress.do_resubmit") action do_resubmit(bit<32> new_ipv4_dstAddr) {
         hdr.ipv4.dstAddr = new_ipv4_dstAddr;
-        resubmit<standard_metadata_t>(standard_metadata);
+        resubmit<tuple<>>({  });
     }
     @name("ingress.do_clone_i2e") action do_clone_i2e(bit<32> l2ptr) {
-        clone3<standard_metadata_t>(CloneType.I2E, 32w5, standard_metadata);
+        clone3<tuple<>>(CloneType.I2E, 32w5, {  });
         meta.fwd.l2ptr = l2ptr;
     }
     @name("ingress.ipv4_da_lpm") table ipv4_da_lpm_0 {
@@ -163,11 +163,11 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
     }
     @name("egress.do_recirculate") action do_recirculate(bit<32> new_ipv4_dstAddr) {
         hdr.ipv4.dstAddr = new_ipv4_dstAddr;
-        recirculate<standard_metadata_t>(standard_metadata);
+        recirculate<tuple<>>({  });
     }
     @name("egress.do_clone_e2e") action do_clone_e2e(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
-        clone3<standard_metadata_t>(CloneType.E2E, 32w11, standard_metadata);
+        clone3<tuple<>>(CloneType.E2E, 32w11, {  });
     }
     @name("egress.send_frame") table send_frame_0 {
         key = {
