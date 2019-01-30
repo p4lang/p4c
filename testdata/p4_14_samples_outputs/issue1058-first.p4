@@ -16,10 +16,8 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name(".intrinsic_metadata") 
-    intrinsic_metadata_t intrinsic_metadata;
     @name(".meta") 
-    meta_t               meta;
+    meta_t meta;
 }
 
 struct headers {

@@ -59,10 +59,21 @@ header ipv4_option_NOP_t {
 }
 
 struct metadata {
+<<<<<<< afcf5fc1f4ecaacbc3e6fb4dba074c329a553ce0
     bit<4>  _intrinsic_metadata_mcast_grp0;
     bit<4>  _intrinsic_metadata_egress_rid1;
+<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
     bit<32> _intrinsic_metadata_lf_field_list2;
     bit<8>  _my_metadata_parse_ipv4_counter3;
+=======
+    bit<16> _intrinsic_metadata_mcast_hash2;
+    bit<32> _intrinsic_metadata_lf_field_list3;
+    bit<8>  _my_metadata_parse_ipv4_counter4;
+=======
+    @name(".my_metadata") 
+    my_metadata_t my_metadata;
+>>>>>>> Handle p4-14 intrinsic_metadata
+>>>>>>> Handle p4-14 intrinsic_metadata
 }
 
 struct headers {

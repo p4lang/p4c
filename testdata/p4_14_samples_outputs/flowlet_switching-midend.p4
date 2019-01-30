@@ -53,6 +53,7 @@ header tcp_t {
 }
 
 struct metadata {
+<<<<<<< afcf5fc1f4ecaacbc3e6fb4dba074c329a553ce0
     bit<32> _ingress_metadata_flow_ipg0;
     bit<13> _ingress_metadata_flowlet_map_index1;
     bit<16> _ingress_metadata_flowlet_id2;
@@ -63,6 +64,10 @@ struct metadata {
     bit<32> _intrinsic_metadata_lf_field_list7;
     bit<16> _intrinsic_metadata_mcast_grp8;
     bit<16> _intrinsic_metadata_egress_rid9;
+=======
+    @name(".ingress_metadata") 
+    ingress_metadata_t ingress_metadata;
+>>>>>>> Handle p4-14 intrinsic_metadata
 }
 
 struct headers {
@@ -174,12 +179,21 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name(".lookup_flowlet_map") action lookup_flowlet_map() {
+<<<<<<< afcf5fc1f4ecaacbc3e6fb4dba074c329a553ce0
         hash<bit<13>, bit<13>, tuple_1, bit<26>>(meta._ingress_metadata_flowlet_map_index1, HashAlgorithm.crc16, 13w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort }, 26w13);
         flowlet_id.read(meta._ingress_metadata_flowlet_id2, (bit<32>)meta._ingress_metadata_flowlet_map_index1);
         meta._ingress_metadata_flow_ipg0 = (bit<32>)meta._intrinsic_metadata_ingress_global_timestamp6;
         flowlet_lasttime.read(meta._ingress_metadata_flowlet_lasttime3, (bit<32>)meta._ingress_metadata_flowlet_map_index1);
         meta._ingress_metadata_flow_ipg0 = (bit<32>)meta._intrinsic_metadata_ingress_global_timestamp6 - meta._ingress_metadata_flowlet_lasttime3;
         flowlet_lasttime.write((bit<32>)meta._ingress_metadata_flowlet_map_index1, (bit<32>)meta._intrinsic_metadata_ingress_global_timestamp6);
+=======
+        hash<bit<13>, bit<13>, tuple_1, bit<26>>(meta.ingress_metadata.flowlet_map_index, HashAlgorithm.crc16, 13w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort }, 26w13);
+        flowlet_id.read(meta.ingress_metadata.flowlet_id, (bit<32>)meta.ingress_metadata.flowlet_map_index);
+        meta.ingress_metadata.flow_ipg = (bit<32>)standard_metadata.ingress_global_timestamp;
+        flowlet_lasttime.read(meta.ingress_metadata.flowlet_lasttime, (bit<32>)meta.ingress_metadata.flowlet_map_index);
+        meta.ingress_metadata.flow_ipg = (bit<32>)standard_metadata.ingress_global_timestamp - meta.ingress_metadata.flowlet_lasttime;
+        flowlet_lasttime.write((bit<32>)meta.ingress_metadata.flowlet_map_index, (bit<32>)standard_metadata.ingress_global_timestamp);
+>>>>>>> Handle p4-14 intrinsic_metadata
     }
     @name(".set_dmac") action set_dmac(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;

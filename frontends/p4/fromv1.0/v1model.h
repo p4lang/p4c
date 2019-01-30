@@ -244,6 +244,9 @@ class V1Model : public ::Model::Model {
     V1Model() :
             Model::Model("0.1"), file("v1model.p4"),
             standardMetadata("standard_metadata"),
+            // The following 2 are not really docmented in the P4-14 spec.
+            intrinsicMetadata("intrinsic_metadata"),
+            queueingMetadata("queueing_metadata"),
             headersType("headers"),
             metadataType("metadata"),
             standardMetadataType("standard_metadata_t"),
@@ -266,6 +269,8 @@ class V1Model : public ::Model::Model {
  public:
     ::Model::Elem       file;
     ::Model::Elem       standardMetadata;
+    ::Model::Elem       intrinsicMetadata;
+    ::Model::Elem       queueingMetadata;
     ::Model::Type_Model headersType;
     ::Model::Type_Model metadataType;
     StandardMetadataType_Model standardMetadataType;

@@ -1,6 +1,14 @@
 issue841.p4(39): [--Wwarn=deprecated] warning: Checksum16: Using deprecated feature Checksum16. Please use verify_checksum/update_checksum instead.
     Checksum16() checksum;
     ^^^^^^^^^^
+<<<<<<< f8876762cdc76c37c88afa82ea56fb6a04c76861
 v1model.p4(313)
+=======
+<<<<<<< 73f100e460e60d8a872522991603a2b2c3cf77ea
+v1model.p4(153)
+=======
+v1model.p4(196)
+>>>>>>> Handle p4-14 intrinsic_metadata
+>>>>>>> Handle p4-14 intrinsic_metadata
 extern Checksum16 {
        ^^^^^^^^^^

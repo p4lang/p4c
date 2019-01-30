@@ -1,3 +1,7 @@
+<<<<<<< afcf5fc1f4ecaacbc3e6fb4dba074c329a553ce0
 issue1696-1.p4(10): [--Wwarn=ordering] warning: []: the order of headers in deparser is not uniquely determined by parser!
     extract(stack[0]);
                   ^
+=======
+warning: The order of headers in deparser is not uniquely determined by parser!
+>>>>>>> Handle p4-14 intrinsic_metadata

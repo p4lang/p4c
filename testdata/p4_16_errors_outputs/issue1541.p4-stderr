@@ -1,7 +1,15 @@
 issue1541.p4(25): [--Wwarn=shadow] warning: hash shadows hash
     action hash() {
            ^^^^
+<<<<<<< f8876762cdc76c37c88afa82ea56fb6a04c76861
 v1model.p4(301)
+=======
+<<<<<<< 73f100e460e60d8a872522991603a2b2c3cf77ea
+v1model.p4(141)
+=======
+v1model.p4(184)
+>>>>>>> Handle p4-14 intrinsic_metadata
+>>>>>>> Handle p4-14 intrinsic_metadata
 extern void hash<O, T, D, M>(out O result, in HashAlgorithm algo, in T base, in D data, in M max);
             ^^^^
 issue1541.p4(26): [--Werror=type-error] error: hash: Recursive action call

@@ -63,8 +63,10 @@ header tcp_t {
 }
 
 struct metadata {
+<<<<<<< afcf5fc1f4ecaacbc3e6fb4dba074c329a553ce0
     bit<4>  _intrinsic_metadata_mcast_grp0;
     bit<4>  _intrinsic_metadata_egress_rid1;
+<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
     bit<32> _intrinsic_metadata_lf_field_list2;
     bit<1>  _meta_do_forward3;
     bit<32> _meta_ipv4_sa4;
@@ -77,6 +79,25 @@ struct metadata {
     bit<1>  _meta_is_ext_if11;
     bit<16> _meta_tcpLength12;
     bit<8>  _meta_if_index13;
+=======
+    bit<16> _intrinsic_metadata_mcast_hash2;
+    bit<32> _intrinsic_metadata_lf_field_list3;
+    bit<1>  _meta_do_forward4;
+    bit<32> _meta_ipv4_sa5;
+    bit<32> _meta_ipv4_da6;
+    bit<16> _meta_tcp_sp7;
+    bit<16> _meta_tcp_dp8;
+    bit<32> _meta_nhop_ipv49;
+    bit<32> _meta_if_ipv4_addr10;
+    bit<48> _meta_if_mac_addr11;
+    bit<1>  _meta_is_ext_if12;
+    bit<16> _meta_tcpLength13;
+    bit<8>  _meta_if_index14;
+=======
+    @name(".meta") 
+    meta_t meta;
+>>>>>>> Handle p4-14 intrinsic_metadata
+>>>>>>> Handle p4-14 intrinsic_metadata
 }
 
 struct headers {

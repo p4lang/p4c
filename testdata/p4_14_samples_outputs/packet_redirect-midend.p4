@@ -2,7 +2,7 @@
 #include <v1model.p4>
 
 struct intrinsic_metadata_t {
-    bit<4>  mcast_grp;
+    bit<16> mcast_grp;
     bit<4>  egress_rid;
     bit<32> lf_field_list;
     bit<64> ingress_global_timestamp;
@@ -26,8 +26,10 @@ header hdrA_t {
 }
 
 struct metadata {
+<<<<<<< afcf5fc1f4ecaacbc3e6fb4dba074c329a553ce0
     bit<4>  _intrinsic_metadata_mcast_grp0;
     bit<4>  _intrinsic_metadata_egress_rid1;
+<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
     bit<32> _intrinsic_metadata_lf_field_list2;
     bit<64> _intrinsic_metadata_ingress_global_timestamp3;
     bit<16> _intrinsic_metadata_resubmit_flag4;
@@ -36,6 +38,23 @@ struct metadata {
     bit<8>  _metaA_f27;
     bit<8>  _metaB_f18;
     bit<8>  _metaB_f29;
+=======
+    bit<16> _intrinsic_metadata_mcast_hash2;
+    bit<32> _intrinsic_metadata_lf_field_list3;
+    bit<64> _intrinsic_metadata_ingress_global_timestamp4;
+    bit<16> _intrinsic_metadata_resubmit_flag5;
+    bit<16> _intrinsic_metadata_recirculate_flag6;
+    bit<8>  _metaA_f17;
+    bit<8>  _metaA_f28;
+    bit<8>  _metaB_f19;
+    bit<8>  _metaB_f210;
+=======
+    @name(".metaA") 
+    metaA_t metaA;
+    @name(".metaB") 
+    metaB_t metaB;
+>>>>>>> Handle p4-14 intrinsic_metadata
+>>>>>>> Handle p4-14 intrinsic_metadata
 }
 
 struct headers {
@@ -98,8 +117,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.egress_spec = port;
         meta._metaA_f16 = 8w1;
     }
+<<<<<<< afcf5fc1f4ecaacbc3e6fb4dba074c329a553ce0
     @name("._multicast") action _multicast(bit<4> mgrp) {
         meta._intrinsic_metadata_mcast_grp0 = mgrp;
+=======
+    @name("._multicast") action _multicast(bit<16> mgrp) {
+        standard_metadata.mcast_grp = mgrp;
+>>>>>>> Handle p4-14 intrinsic_metadata
     }
     @name("._resubmit") action _resubmit() {
         resubmit<tuple_0>({ standard_metadata, {meta._metaA_f16,meta._metaA_f27} });

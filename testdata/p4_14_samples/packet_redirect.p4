@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ metadata metaB_t metaB;
 
 header_type intrinsic_metadata_t {
     fields {
-        mcast_grp : 4;
+        mcast_grp : 16;
         egress_rid : 4;
         lf_field_list: 32;
         ingress_global_timestamp : 64;

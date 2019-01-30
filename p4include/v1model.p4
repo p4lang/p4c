@@ -56,23 +56,69 @@ struct standard_metadata_t {
     //
     // flattening fields that exist in bmv2-ss
     // queueing metadata
-    @alias("queueing_metadata.enq_timestamp") bit<32> enq_timestamp;
-    @alias("queueing_metadata.enq_qdepth")    bit<19> enq_qdepth;
-    @alias("queueing_metadata.deq_timedelta") bit<32> deq_timedelta;
-    @alias("queueing_metadata.deq_qdepth")    bit<19> deq_qdepth;
+    @alias("queueing_metadata.enq_timestamp")
+    bit<32> enq_timestamp;
+    @alias("queueing_metadata.enq_qdepth")
+    bit<19> enq_qdepth;
+    @alias("queueing_metadata.deq_timedelta")
+    bit<32> deq_timedelta;
+    /// queue depth at the packet dequeue time.
+    @alias("queueing_metadata.deq_qdepth")
+    bit<19> deq_qdepth;
+
     // intrinsic metadata
-    @alias("intrinsic_metadata.ingress_global_timestamp") bit<48> ingress_global_timestamp;
-    @alias("intrinsic_metadata.egress_global_timestamp") bit<48> egress_global_timestamp;
-    @alias("intrinsic_metadata.lf_field_list") bit<32> lf_field_list;
-    @alias("intrinsic_metadata.mcast_grp")     bit<16> mcast_grp;
-    @alias("intrinsic_metadata.resubmit_flag") bit<32> resubmit_flag;
-    @alias("intrinsic_metadata.egress_rid")    bit<16> egress_rid;
+    @alias("intrinsic_metadata.ingress_global_timestamp")
+    bit<48> ingress_global_timestamp;
+    @alias("intrinsic_metadata.egress_global_timestamp")
+    bit<48> egress_global_timestamp;
+    /// Learn filter field list
+    @alias("intrinsic_metadata.lf_field_list")
+    bit<32> lf_field_list;
+    /// multicast group id (key for the mcast replication table)
+    @alias("intrinsic_metadata.mcast_grp")
+    bit<16> mcast_grp;
+    /// flag distinguishing original packets from resubmitted packets.
+    @alias("intrinsic_metadata.resubmit_flag")
+    bit<32> resubmit_flag;
+    /// Replication ID for multicast
+    @alias("intrinsic_metadata.egress_rid")
+    bit<16> egress_rid;
+    @alias("intrinsic_metadata.recirculate_flag")
+    bit<32> recirculate_flag;
     /// Indicates that a verify_checksum() method has failed.
-    // 1 if a checksum error was found, otherwise 0.
+    /// 1 if a checksum error was found, otherwise 0.
     bit<1>  checksum_error;
-    @alias("intrinsic_metadata.recirculate_flag") bit<32> recirculate_flag;
     /// Error produced by parsing
     error parser_error;
+
+    // The following fields are not part of the P4-14 standard, but they seem
+    // to be supported by BMv2 and required by switch.p4
+    @alias("intrinsic_metadata.ucast_egress_port")
+    bit<9> ucast_egress_port;
+    /// global timestamp (ns) taken upon arrival at ingress.
+    @alias("intrinsic_metadata.ingress_global_tstamp")
+    bit<48> ingress_global_tstamp;
+    /// flag indicating whether a packet is deflected due to deflect_on_drop.
+    @alias("intrinsic_metadata.deflection_flag")
+    bit<1> deflection_flag;
+    /// flag indicating whether a packet can be deflected by TM on congestion drop
+    @alias("intrinsic_metadata.deflect_on_drop")
+    bit<1> deflect_on_drop;
+    /// time snapshot taken when the packet is enqueued (in nsec).
+    @alias("intrinsic_metadata.enq_tstamp")
+    bit<32> enq_tstamp;
+    // queue congestion status at the packet enqueue time.
+    @alias("intrinsic_metadata.enq_congest_stat")
+    bit<2> enq_congest_stat;
+    /// queue congestion status at the packet dequeue time.
+    @alias("intrinsic_metadata.deq_congest_stat")
+    bit<2> deq_congest_stat;
+    /// multicast hashing
+    @alias("intrinsic_metadata.mcast_hash")
+    bit<13> mcast_hash;
+    /// set packet priority
+    @alias("intrinsic_metadata.priority")
+    bit<3> priority;
 }
 
 enum CounterType {
