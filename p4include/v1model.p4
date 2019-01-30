@@ -90,9 +90,14 @@ struct standard_metadata_t {
     bit<1>  checksum_error;
     /// Error produced by parsing
     error parser_error;
+    /// set packet priority
+    @alias("intrinsic_metadata.priority")
+    bit<3> priority;
 
-    // The following fields are not part of the P4-14 standard, but they seem
-    // to be supported by BMv2 and required by switch.p4
+    // The following fields are not part of the P4-14 standard, nor are they
+    // recognized and treated specially by BMv2.  The are here solely for the
+    // purpose of supporting the compilation of legacy versions of switch.p4
+    // from the p4c testsuite.
     @alias("intrinsic_metadata.ucast_egress_port")
     bit<9> ucast_egress_port;
     /// global timestamp (ns) taken upon arrival at ingress.
@@ -116,9 +121,6 @@ struct standard_metadata_t {
     /// multicast hashing
     @alias("intrinsic_metadata.mcast_hash")
     bit<13> mcast_hash;
-    /// set packet priority
-    @alias("intrinsic_metadata.priority")
-    bit<3> priority;
 }
 
 enum CounterType {
