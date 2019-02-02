@@ -1,4 +1,6 @@
-warning: parser_value_set has no @parser_value_set_size annotation
-warning: using default size 4
-warning: parser_value_set has no @parser_value_set_size annotation
-warning: using default size 4
+parser_value_set1.p4(43): [--Wwarn=missing] warning: CaseEntry: parser_value_set has no @parser_value_set_size annotation.Using default size 4.
+        pvs0 : ingress;
+        ^^^^
+parser_value_set1.p4(45): [--Wwarn=missing] warning: CaseEntry: parser_value_set has no @parser_value_set_size annotation.Using default size 4.
+        pvs1 : parse_inner_ethernet;
+        ^^^^

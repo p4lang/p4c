@@ -1,4 +1,4 @@
-issue306.p4(30): [--Werror=legacy] error:  Structure struct my_packet does not have a field stack
+issue306.p4(30): [--Werror=type-error] error: Structure struct my_packet does not have a field stack
 struct my_packet {
        ^^^^^^^^^
 issue306.p4(45)

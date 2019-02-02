@@ -1,3 +1,3 @@
-issue513.p4(60): [--Werror=legacy] error:  MethodCallStatement: Conditional execution in actions is not supported on this target
+issue513.p4(60): [--Werror=legacy] error: MethodCallStatement: Conditional execution in actions is not supported on this target
             mark_to_drop();
             ^^^^^^^^^^^^^^

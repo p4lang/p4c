@@ -698,7 +698,7 @@ void ProgramStructure::createDeparser() {
     bool loop = headerOrder.sccSort(startHeader, sortedHeaders);
     if (loop)
         ::warning(ErrorType::WARN_ORDERING,
-                  "The order of headers in deparser is not uniquely determined by parser!",
+                  "%1%: the order of headers in deparser is not uniquely determined by parser!",
                   startHeader);
 
     auto params = new IR::ParameterList;

@@ -36,10 +36,11 @@ class ErrorType {
     static const int ERR_EXPECTED;            // language, compiler expects a different construct
     static const int ERR_NOT_FOUND;           // A different way to say ERR_EXPECTED
     static const int ERR_INVALID;             // invalid construct
-    static const int ERR_EXPRESSION;          // expression too complex, or other expression
-                                              // related errors
+    static const int ERR_EXPRESSION;          // expression related errors
     static const int ERR_OVERLIMIT;           // program node exceeds target limits
     static const int ERR_INSUFFICIENT;        // program node does not have enough of ...
+    static const int ERR_TYPE_ERROR;          // P4 type checking errors
+    static const int ERR_UNSUPPORTED_ON_TARGET;  // target can not handle construct
 
     // If we specialize for 1000 error types we're good!
     static const int ERR_MAX_ERRORS;
@@ -112,7 +113,7 @@ class ErrorCatalog {
     }
 
  private:
-    explicit ErrorCatalog() {}
+    ErrorCatalog() {}
 
     /// map from errorCode to pairs of (name, format)
     static std::map<int, std::pair<const char *, const std::string>> errorCatalog;

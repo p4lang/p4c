@@ -682,8 +682,7 @@ void ExternConverter_action_profile::convertExternInstance(
         if (input == nullptr) {
             // the selector is never used by any table, we cannot figure out its
             // input and therefore cannot include it in the JSON
-            ::warning(// ErrorType::WARN_UNUSED, -- none of the P4 objects seem to have source info
-                      "Action selector '%1%' is never referenced by a table "
+            ::warning("Action selector '%1%' is never referenced by a table "
                       "and cannot be included in bmv2 JSON", c);
             return;
         }
@@ -739,8 +738,7 @@ void ExternConverter_action_selector::convertExternInstance(
         if (input == nullptr) {
             // the selector is never used by any table, we cannot figure out its
             // input and therefore cannot include it in the JSON
-            ::warning(// ErrorType::WARN_UNUSED, -- none of the P4 objects seem to have source info
-                      "Action selector '%1%' is never referenced by a table "
+            ::warning("Action selector '%1%' is never referenced by a table "
                       "and cannot be included in bmv2 JSON", c);
             return;
         }

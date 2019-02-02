@@ -1,6 +1,6 @@
-parser_pragma2.p4(18): warning: SelectCase: unreachable
+parser_pragma2.p4(18): [--Wwarn=parser-transition] warning: SelectCase: unreachable
         0xAB00 : Cowles;
         ^^^^^^
-parser_pragma2.p4(16): warning: ListExpression: transition does not depend on select argument
+parser_pragma2.p4(16): [--Wwarn=parser-transition] warning: ListExpression: transition does not depend on select argument
     return select(current(0, 32)) {
                   ^^^^^^^^^^^^^^

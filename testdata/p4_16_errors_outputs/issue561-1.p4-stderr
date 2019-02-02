@@ -1,4 +1,4 @@
-issue561-1.p4(29): [--Werror=legacy] error:  u: Cannot unify Tuple(2) to header_union U
+issue561-1.p4(29): [--Werror=legacy] error: u: Cannot unify Tuple(2) to header_union U
         U u = { { 10 }, { 20 } }; // illegal to initialize unions
         ^^^^^^^^^^^^^^^^^^^^^^^^^
 issue561-1.p4(29)
@@ -7,7 +7,7 @@ issue561-1.p4(29)
 issue561-1.p4(19)
 header_union U {
              ^
-issue561-1.p4(19): [--Werror=legacy] error:  Structure header_union U does not have a field setValid
+issue561-1.p4(19): [--Werror=type-error] error: Structure header_union U does not have a field setValid
 header_union U {
              ^
 issue561-1.p4(30)

@@ -17,10 +17,10 @@ limitations under the License.
 #ifndef P4C_LIB_ERROR_REPORTER_H_
 #define P4C_LIB_ERROR_REPORTER_H_
 
+#include <boost/format.hpp>
+#include <stdarg.h>
 #include <map>
 #include <set>
-#include <stdarg.h>
-#include <boost/format.hpp>
 #include <type_traits>
 
 #include "lib/cstring.h"
@@ -422,7 +422,9 @@ class ErrorReporter final {
     void diagnose(DiagnosticAction action, const int errorCode, const char *format, const T *node,
                   Args... args) {
         if (!error_reported(errorCode, node->getSourceInfo())) {
-            std::string fmt = std::string(get_format(errorCode)) + " " + format;
+            std::string fmt = std::string(get_format(errorCode));
+            if (!fmt.empty()) fmt += std::string(" ") + format;
+            else              fmt += format;
             const char *name = get_error_name(errorCode);
             if (name)
                 diagnose(action, name, fmt.c_str(), node, args...);
@@ -442,7 +444,9 @@ class ErrorReporter final {
 
     template <typename... Args>
     void diagnose(DiagnosticAction action, const int errorCode, const char *format, Args... args) {
-        std::string fmt = std::string(get_format(errorCode)) + " " + format;
+        std::string fmt = std::string(get_format(errorCode));
+        if (!fmt.empty()) fmt += std::string(" ") + format;
+        else              fmt += format;
         const char *name = get_error_name(errorCode);
         if (name)
             diagnose(action, name, fmt.c_str(), args...);

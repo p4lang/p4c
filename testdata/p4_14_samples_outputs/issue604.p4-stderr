@@ -1,18 +1,6 @@
-issue604.p4(2): warning: extern_test: P4_14 extern type not fully supported
+issue604.p4(2): [--Wwarn=unsupported] warning: extern_test: P4_14 extern type not fully supported
 extern_type extern_test {
 ^
-issue604.p4(8): warning: my_extern_inst: P4_14 extern not fully supported
+issue604.p4(8): [--Wwarn=unsupported] warning: my_extern_inst: P4_14 extern not fully supported
 extern extern_test my_extern_inst {
                    ^^^^^^^^^^^^^^
-issue604.p4(2): warning: extern_test: extern has attributes, which are not supported in P4-16, and thus are not emitted as P4-16
-extern_type extern_test {
-^
-issue604.p4(2): warning: extern_test: extern has attributes, which are not supported in P4-16, and thus are not emitted as P4-16
-extern_type extern_test {
-^
-issue604.p4(2): warning: extern_test: extern has attributes, which are not supported in P4-16, and thus are not emitted as P4-16
-extern_type extern_test {
-^
-issue604.p4(2): warning: extern_test: extern has attributes, which are not supported in P4-16, and thus are not emitted as P4-16
-extern_type extern_test {
-^

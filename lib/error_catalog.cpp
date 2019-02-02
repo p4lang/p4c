@@ -30,6 +30,8 @@ const int ErrorType::ERR_INVALID       =   7;
 const int ErrorType::ERR_EXPRESSION    =   8;
 const int ErrorType::ERR_OVERLIMIT     =   9;
 const int ErrorType::ERR_INSUFFICIENT  =  10;
+const int ErrorType::ERR_TYPE_ERROR    =  11;
+const int ErrorType::ERR_UNSUPPORTED_ON_TARGET = 12;
 // If we specialize for 1000 error types we're good!
 const int ErrorType::ERR_MAX_ERRORS    = 999;
 
@@ -70,25 +72,27 @@ std::map<int, ErrorSig> ErrorCatalog::errorCatalog = {
     { ErrorType::ERR_OVERLIMIT,          ErrorSig("overlimit", "%1%: Target supports")},
     { ErrorType::ERR_INSUFFICIENT,       ErrorSig("insufficient", "%1%: Target requires")},
     { ErrorType::ERR_UNINITIALIZED,      ErrorSig("uninitialized", "%1%: Uninitialized")},
+    { ErrorType::ERR_TYPE_ERROR,         ErrorSig("type-error", "")},
+    { ErrorType::ERR_UNSUPPORTED_ON_TARGET, ErrorSig("target-error",
+                                                     "%1%: Unsupported on target")},
 
     // Warnings
     { ErrorType::LEGACY_WARNING,         ErrorSig("legacy", "")},
-    { ErrorType::WARN_FAILED,            ErrorSig("failed", "%1%:")},
-    { ErrorType::WARN_UNKNOWN,           ErrorSig("unknown", "%1%:")},
-    { ErrorType::WARN_INVALID,           ErrorSig("invalid", "%1%:")},
-    { ErrorType::WARN_UNSUPPORTED,       ErrorSig("unsupported", "%1%:")},
-    { ErrorType::WARN_DEPRECATED,        ErrorSig("deprecated", "%1%:")},
-    { ErrorType::WARN_UNINITIALIZED,     ErrorSig("uninitialized", "%1%:")},
-    { ErrorType::WARN_UNUSED,            ErrorSig("unused", "%1%:")},
-    { ErrorType::WARN_MISSING,           ErrorSig("missing", "%1%:")},
-    { ErrorType::WARN_ORDERING,          ErrorSig("ordering", "%1%:")},
-    { ErrorType::WARN_MISMATCH,          ErrorSig("mismatch", "%1%:")},
-    { ErrorType::WARN_OVERFLOW,          ErrorSig("overflow", "%1%:")},
-    { ErrorType::WARN_IGNORE_PROPERTY,   ErrorSig("ignore-prop", "%1%:")},
-    { ErrorType::WARN_TYPE_INFERENCE,    ErrorSig("type-inference", "%1%:")},
-    { ErrorType::WARN_PARSER_TRANSITION, ErrorSig("parser-transition", "%1%:")},
-    { ErrorType::WARN_UNREACHABLE,       ErrorSig("parser-transition", "%1%:")},
-    { ErrorType::WARN_SHADOWING,         ErrorSig("shadow", "%1%:")},
-    { ErrorType::WARN_IGNORE,            ErrorSig("ignore", "%1%:")},
-
+    { ErrorType::WARN_FAILED,            ErrorSig("failed", "")},
+    { ErrorType::WARN_UNKNOWN,           ErrorSig("unknown", "")},
+    { ErrorType::WARN_INVALID,           ErrorSig("invalid", "")},
+    { ErrorType::WARN_UNSUPPORTED,       ErrorSig("unsupported", "")},
+    { ErrorType::WARN_DEPRECATED,        ErrorSig("deprecated", "")},
+    { ErrorType::WARN_UNINITIALIZED,     ErrorSig("uninitialized", "")},
+    { ErrorType::WARN_UNUSED,            ErrorSig("unused", "")},
+    { ErrorType::WARN_MISSING,           ErrorSig("missing", "")},
+    { ErrorType::WARN_ORDERING,          ErrorSig("ordering", "")},
+    { ErrorType::WARN_MISMATCH,          ErrorSig("mismatch", "")},
+    { ErrorType::WARN_OVERFLOW,          ErrorSig("overflow", "")},
+    { ErrorType::WARN_IGNORE_PROPERTY,   ErrorSig("ignore-prop", "")},
+    { ErrorType::WARN_TYPE_INFERENCE,    ErrorSig("type-inference", "")},
+    { ErrorType::WARN_PARSER_TRANSITION, ErrorSig("parser-transition", "")},
+    { ErrorType::WARN_UNREACHABLE,       ErrorSig("parser-transition", "")},
+    { ErrorType::WARN_SHADOWING,         ErrorSig("shadow", "")},
+    { ErrorType::WARN_IGNORE,            ErrorSig("ignore", "")},
 };

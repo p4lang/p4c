@@ -432,7 +432,7 @@ void ExpressionConverter::postorder(const IR::Mux* expression)  {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::error(ErrorType::ERR_EXPRESSION, "too complex for this target", expression);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "expression too complex", expression);
         return;
     }
 
@@ -472,7 +472,7 @@ void ExpressionConverter::binary(const IR::Operation_Binary* expression) {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::error(ErrorType::ERR_EXPRESSION, "too complex for this target", expression);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "expression too complex", expression);
         return;
     }
 
@@ -527,7 +527,7 @@ void ExpressionConverter::postorder(const IR::ListExpression* expression)  {
     auto result = new Util::JsonArray();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::error(ErrorType::ERR_EXPRESSION, "too complex for this target", expression);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "expression too complex", expression);
         return;
     }
 
@@ -542,7 +542,7 @@ void ExpressionConverter::postorder(const IR::StructInitializerExpression* expre
     auto result = new Util::JsonArray();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::error(ErrorType::ERR_EXPRESSION, "too complex for this target", expression);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "expression too complex", expression);
         return;
     }
 
@@ -556,7 +556,7 @@ void ExpressionConverter::postorder(const IR::Operation_Unary* expression)  {
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     if (simpleExpressionsOnly) {
-        ::error(ErrorType::ERR_EXPRESSION, "too complex for this target", expression);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "expression too complex", expression);
         return;
     }
 

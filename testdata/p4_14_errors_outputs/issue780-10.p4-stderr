@@ -1,4 +1,4 @@
-issue780-10.p4(1): error: V1Control standard_metadata_t cannot have this name; it can only be used for type
+issue780-10.p4(1): [--Werror=legacy] error: V1Control standard_metadata_t cannot have this name; it can only be used for type
 control standard_metadata_t { }
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 error: 1 errors encountered, aborting compilation

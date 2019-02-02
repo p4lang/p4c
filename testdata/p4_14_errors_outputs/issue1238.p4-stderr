@@ -1,4 +1,4 @@
-issue1238.p4(11): error: subtract: operation only defined for bit/int types
+issue1238.p4(11): [--Werror=legacy] error: subtract: operation only defined for bit/int types
   subtract(palatalising, palatalising, 1);
   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 error: 1 errors encountered, aborting compilation
