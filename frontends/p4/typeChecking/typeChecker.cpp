@@ -2467,8 +2467,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         auto stb = type->to<IR::Type_StructLike>();
         auto field = stb->getField(member);
         if (field == nullptr) {
-            typeError("Structure %1% does not have a field %2%",
-                      stb, expression->member);
+            typeError("Field %1% is not a member of structure %2%",
+                      expression->member, stb);
             return expression;
         }
 
