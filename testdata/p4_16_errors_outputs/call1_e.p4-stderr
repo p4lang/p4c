@@ -1,4 +1,4 @@
-call1_e.p4(20): error: s: cannot allocate objects of type struct S
+call1_e.p4(20): [--Werror=type-error] error: s: cannot allocate objects of type struct S
     S() s; // structs have no constructors
         ^
 call1_e.p4(16)

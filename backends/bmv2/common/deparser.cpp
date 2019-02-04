@@ -59,7 +59,8 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
                             auto val = j->to<Util::JsonObject>()->get("value");
                             result->append(val);
                         } else {
-                            ::error("%1%: emit only supports header and stack arguments, not %2%",
+                            ::error(ErrorType::ERR_UNSUPPORTED,
+                                    "%1%: emit only supports header and stack arguments, not %2%",
                                     arg, type);
                         }
                     }
@@ -67,7 +68,7 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
                 }
             }
         }
-        ::error("%1%: not supported with a deparser on this target", s);
+        ::error(ErrorType::ERR_UNSUPPORTED, "within a deparser on this target", s);
     }
     ctxt->conv->simpleExpressionsOnly = false;
 }

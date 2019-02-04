@@ -100,7 +100,7 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::SwitchStatement* statement)
             if ((*it)->statement != nullptr)
                 break;
             else
-                ::warning("%1%: fallthrough with no statement", last); }
+                ::warning(ErrorType::WARN_MISSING, "%1%: fallthrough with no statement", last); }
         statement->cases.erase(it.base(), statement->cases.end()); }
     return statement;
 }

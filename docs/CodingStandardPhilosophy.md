@@ -1,3 +1,5 @@
+# Coding Standard
+
 When writing code in any language the most important consideration is
 readability.  Code will be read by many more people and many more times
 than it will be written.  So the goal is to write code that clearly and
@@ -77,3 +79,100 @@ repeating (visual) patterns should usually be avoided.  This is an aspect
 of the DRY (do not repeat yourself) principle in software engineering,
 since any repetition tends to lead to repeating patterns that are then
 harder to read.
+
+## Commenting the code
+
+Code comments should be meaningful and aid to the understanding of the
+code. We use [Doxygen](http://www.doxygen.nl/manual/docblocks.html)
+style comments. Comments should reflect the programmer's intention
+(rather than enumerating the code) and the reasoning behind certain
+decisions. Comments should also capture invariants that are not
+directly visible in the code. There are arguments that code should be
+self-documenting, and indeed we encourage the writing of clean
+self-explanatory code. Comments should contribute the additional
+meaning that helps extensibility and maintainability by a large group
+of developers.
+
+## Handling errors
+
+The main goal of issuing errors and warnings is for the programmer to
+write correct P4 code. Errors and warnings should be _actionable_,
+i.e., the programmer needs to understand what was wrong with the
+program and if possible, get an idea on how to fix the problem. While
+error messages are not intended to replace learning the language and
+reading the language specification, there are many instances in which
+the compiler messages really help emphasizing certain semantics
+aspects that are overlooked. Therefore, please take the time to think
+through the information you want to convey and write good, explicit
+error messages.
+
+An additional goal of the p4c compiler is to provide as many error
+messages as possible in one go. Therefore, while there is support for
+`FATAL_ERROR`s, it is desirable to try to continue execution and
+report all possible errors, using the `error` and `warning`
+calls. With the free form implementation of error messages, repeated
+passes of the compiler will then issue the same message multiple
+times. This results in frustrating the programmer.
+
+To address the repeated message issue, as of Dec 2018, we introduce
+error/warning types. They classify the errors and impose a format that
+allows the compiler to automatically filter repeated messages. The
+filtering is based on the type of error and the source code location
+of the object that reports the error. Thus, it allows multiple error
+types per source code line, and ensures that only one error is
+reported even if the message is raised multiple times. We encourage
+compiler developers to use this method for issuing errors. The error
+codes and formats are defined in `lib/error_catalog.[h,cpp]`. Backends
+can extend the codes and formats as needed (and they are encouraged to
+do so).
+
+Most of the errors as of Dec 2018 are written in free form: they use
+the `boost::format` for the format argument, which has some
+compatibility for `printf` arguments.  These functions handle IR and
+SourceInfo objects smartly.  Here is an example:
+
+```C++
+IR::NamedRef *ref;
+error("%1%: No header or metadata named '%2%'", ref->srcInfo, ref->name);
+```
+
+output:
+
+```
+../testdata/v1_errors/missing_decls1.p4(6): Error: No header or metadata named 'data'
+    if (data.b2 == 0) {
+        ^^^^
+```
+
+To ease the transition to typed errors and warnings, free form
+messages whose first argument (`%1%`) is an `IR::Node` (or more
+precisely a class that implements `Util::IHasSourceInfo` interface),
+will be converted automatically to typed errors that use the format
+argument of the message rather than the error catalog predefined
+formats.
+
+
+## Git commits and pull requests
+
+Git histories are a beautiful tool to understand design decisions and
+build a knowledge base for resolving issues. Commit messages allow
+relating issues to resolutions and to explain the resolutions
+to everyone. Writing good commit messages takes some practice,
+fortunately, there are a number of simple guideline steps that go a
+long way. Universally, the recommendation is to use a 50 character
+summary line, followed by a detailed explanation of your commit, why
+it is necessary (link to the relevant issue), how it addresses the
+issue, what are its implications. For a more detailed exposure,
+including guidelines on how to express the text, see this
+[blog post](http://chris.beams.io/posts/git-commit/).
+
+Github pull requests (PRs) created based on a single commit will
+inherit the commit message, and thus allow your reviewers to
+understand the work done without chasing multiple other issues, email
+messages, etc. Multi-commit PRs do not have this feature, however, we
+encourage you to cut and paste from your commit messages and provide a
+synopsis of what the PR is trying to accomplish. It is also strongly
+recommended that multi-commit PRs squash all their commits in to a
+single commit when merged. The Github web interface makes it very easy
+to do, and allows you to edit the final commit message directly in the
+browser.

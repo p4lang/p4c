@@ -1,4 +1,4 @@
-header3.p4(18): error: Field field1 of header H cannot have type Tuple(2)
+header3.p4(18): [--Werror=type-error] error: Field field1 of header H cannot have type Tuple(2)
     tuple<bit, bit> field1; // tuples not allowed in header
                     ^^^^^^
 header3.p4(18)

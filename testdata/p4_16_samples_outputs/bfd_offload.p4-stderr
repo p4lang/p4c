@@ -1,4 +1,4 @@
-bfd_offload.p4(29): warning: bfd_session_liveness_tracker: unused instance
+bfd_offload.p4(29): [--Wwarn=unused] warning: bfd_session_liveness_tracker: unused instance
 BFD_Offload(32768) bfd_session_liveness_tracker = {
                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 warning: Program does not contain a `main' module

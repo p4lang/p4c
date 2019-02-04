@@ -1,9 +1,9 @@
-nostart.p4(18): warning: next: implicit transition to `reject'
+nostart.p4(18): [--Wwarn=parser-transition] warning: next: implicit transition to `reject'
     state next {}
           ^^^^
 nostart.p4(17): error: parser p: parser does not have a `start' state
 parser p() {
        ^
-nostart.p4(17): warning: accept state in parser p is unreachable
+nostart.p4(17): [--Wwarn=parser-transition] warning: accept state in parser p is unreachable
 parser p() {
        ^

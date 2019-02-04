@@ -104,15 +104,15 @@ const IR::Node* DoConstantFolding::postorder(IR::Type_Bits* type) {
             type->size = cst->asInt();
             type->expression = nullptr;
             if (type->size <= 0) {
-                ::error("%1%: Illegal type size", type);
+                ::error(ErrorType::ERR_INVALID, "type size", type);
                 // Convert it to something legal so we don't get
                 // weird errors elsewhere.
                 type->size = 64;
             }
             if (type->size == 1 && type->isSigned)
-                ::error("%1%: Signed types cannot be 1-bit wide", type);
+                ::error(ErrorType::ERR_INVALID, "signed type which is 1-bit wide", type);
         } else {
-            ::error("Could not evaluate %1% to a constant", type->expression);
+            ::error(ErrorType::ERR_EXPECTED, "to evaluate to a constant", type->expression);
         }
     }
     return type;
@@ -124,9 +124,9 @@ const IR::Node* DoConstantFolding::postorder(IR::Type_Varbits* type) {
             type->size = cst->asInt();
             type->expression = nullptr;
             if (type->size <= 0)
-                ::error("%1%: Illegal type size", type);
+                ::error(ErrorType::ERR_INVALID, "type size", type);
         } else {
-            ::error("Could not evaluate %1% to a constant", type->expression);
+            ::error(ErrorType::ERR_EXPECTED, "to evaluate to a constant", type->expression);
         }
     }
     return type;
@@ -171,7 +171,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Cmpl* e) {
 
     auto cst = op->to<IR::Constant>();
     if (cst == nullptr) {
-        ::error("%1%: Expected an integer value", op);
+        ::error(ErrorType::ERR_EXPECTED, "an integer value", op);
         return e;
     }
     const IR::Type* t = op->type;
@@ -198,7 +198,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Neg* e) {
 
     auto cst = op->to<IR::Constant>();
     if (cst == nullptr) {
-        ::error("%1%: Expected an integer value", op);
+        ::error(ErrorType::ERR_EXPECTED, "an integer value", op);
         return e;
     }
     const IR::Type* t = op->type;
@@ -511,17 +511,17 @@ const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
 
     auto cmsb = msb->to<IR::Constant>();
     if (cmsb == nullptr) {
-        ::error("%1%: Expected an integer value", msb);
+        ::error(ErrorType::ERR_EXPECTED, "an integer value", msb);
         return e;
     }
     auto clsb = lsb->to<IR::Constant>();
     if (clsb == nullptr) {
-        ::error("%1%: Expected an integer value", lsb);
+        ::error(ErrorType::ERR_EXPECTED, "an integer value", lsb);
         return e;
     }
     auto cbase = e0->to<IR::Constant>();
     if (cbase == nullptr) {
-        ::error("%1%: Expected an integer value", e->e0);
+        ::error(ErrorType::ERR_EXPECTED, "an integer value", e->e0);
         return e;
     }
 
@@ -655,7 +655,7 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
 
     auto cr = right->to<IR::Constant>();
     if (cr == nullptr) {
-        ::error("%1%: Expected an integer value", right);
+        ::error(ErrorType::ERR_EXPECTED, "an integer value", right);
         return e;
     }
     if (sgn(cr->value) < 0) {
@@ -674,7 +674,7 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
 
     auto cl = left->to<IR::Constant>();
     if (cl == nullptr) {
-        ::error("%1%: Expected an integer value", left);
+        ::error(ErrorType::ERR_EXPECTED, "an integer value", left);
         return e;
     }
 
@@ -684,7 +684,8 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
     auto tb = left->type->to<IR::Type_Bits>();
     if (tb != nullptr) {
         if (((unsigned)tb->size < shift) && warnings)
-            ::warning("%1%: Shifting %2%-bit value with %3%", e, tb->size, shift);
+            ::warning(ErrorType::WARN_OVERFLOW,
+                      "%1%: Shifting %2%-bit value with %3%", e, tb->size, shift);
     }
 
     if (e->is<IR::Shl>())
@@ -844,7 +845,7 @@ const IR::Node* DoConstantFolding::postorder(IR::SelectExpression* expression) {
     for (auto c : expression->selectCases) {
         if (finished) {
             if (warnings)
-                ::warning("%1%: unreachable case", c);
+                ::warning(ErrorType::WARN_PARSER_TRANSITION, "%1%: unreachable case", c);
             continue;
         }
         auto inside = setContains(c->keyset, sel);
@@ -869,7 +870,7 @@ const IR::Node* DoConstantFolding::postorder(IR::SelectExpression* expression) {
 
     if (changes) {
         if (cases.size() == 0 && result == expression && warnings)
-            ::warning("%1%: no case matches", expression);
+            ::warning(ErrorType::WARN_PARSER_TRANSITION, "%1%: no case matches", expression);
         expression->selectCases = std::move(cases);
     }
     return result;

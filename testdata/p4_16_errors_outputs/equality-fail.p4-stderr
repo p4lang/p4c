@@ -1,18 +1,18 @@
-equality-fail.p4(23): error: ==: not defined on varbit<32> and header H
+equality-fail.p4(23): [--Werror=type-error] error: ==: not defined on varbit<32> and header H
         if (a == h1) {
             ^^^^^^^
-equality-fail.p4(25): error: ==: not defined on header H and struct S
+equality-fail.p4(25): [--Werror=type-error] error: ==: not defined on header H and struct S
         } else if (h1 == s2) {
                    ^^^^^^^^
-equality-fail.p4(27): error: ==: not defined on struct S and header H[]
+equality-fail.p4(27): [--Werror=type-error] error: ==: not defined on struct S and header H[]
         } else if (s1 == a2) {
                    ^^^^^^^^
-equality-fail.p4(29): error: ==: not defined on header H[] and bit<32>
+equality-fail.p4(29): [--Werror=type-error] error: ==: not defined on header H[] and bit<32>
         } else if (a1 == h1.a) {
                    ^^^^^^^^^^
-equality-fail.p4(31): error: ==: not defined on varbit<32> and bit<32>
+equality-fail.p4(31): [--Werror=type-error] error: ==: not defined on varbit<32> and bit<32>
         } else if (a == h1.a) {
                    ^^^^^^^^^
-equality-fail.p4(33): error: ==: not defined on header H[] and header H[]
+equality-fail.p4(33): [--Werror=type-error] error: ==: not defined on header H[] and header H[]
         } else if (a1 == a3) {
                    ^^^^^^^^

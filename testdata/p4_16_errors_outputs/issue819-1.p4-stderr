@@ -1,6 +1,6 @@
-issue819-1.p4(14): error: Type parameters needed for wc
+issue819-1.p4(14): [--Werror=type-error] error: Type parameters needed for wc
 control MyC1(WrapControls wc) {
                           ^^
-issue819-1.p4(19): error: Type parameters needed for wc
+issue819-1.p4(19): [--Werror=type-error] error: Type parameters needed for wc
 control MyC2(WrapControls wc) {
                           ^^

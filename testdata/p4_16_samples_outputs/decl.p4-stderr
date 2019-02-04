@@ -1,10 +1,10 @@
-decl.p4(33): warning: y shadows y
+decl.p4(33): [--Wwarn=shadow] warning: y shadows y
                 bit y;
                 ^^^^^^
 decl.p4(30)
             bit y;
             ^^^^^^
-decl.p4(37): warning: y shadows y
+decl.p4(37): [--Wwarn=shadow] warning: y shadows y
                     bit y;
                     ^^^^^^
 decl.p4(33)

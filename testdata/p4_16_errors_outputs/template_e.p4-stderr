@@ -1,4 +1,4 @@
-template_e.p4(16): error: T: Duplicates declaration T
+template_e.p4(16): [--Werror=legacy] error: T: Duplicates declaration T
 package S<T, T
              ^
 template_e.p4(16)

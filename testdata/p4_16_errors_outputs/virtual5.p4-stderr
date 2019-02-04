@@ -1,4 +1,4 @@
-virtual5.p4(25): error: g: no matching abstract method in Virtual
+virtual5.p4(25): [--Werror=type-error] error: g: no matching abstract method in Virtual
         bit<16> g() { return 0; }
                 ^
 virtual5.p4(16)

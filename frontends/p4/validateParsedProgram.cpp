@@ -184,7 +184,7 @@ void ValidateParsedProgram::postorder(const IR::SwitchStatement* statement) {
     bool defaultFound = false;
     for (auto c : statement->cases) {
         if (defaultFound) {
-            ::warning("%1%: label following default label", c);
+            ::warning(ErrorType::WARN_ORDERING, "%1%: label following default label", c);
             break;
         }
         if (c->label->is<IR::DefaultExpression>())

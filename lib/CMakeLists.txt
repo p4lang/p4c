@@ -17,6 +17,7 @@ set (LIBP4CTOOLKIT_SRCS
 	compile_context.cpp
 	crash.cpp
 	cstring.cpp
+        error_catalog.cpp
 	gc.cpp
 	gmputil.cpp
 	hash.cpp
@@ -43,6 +44,7 @@ set (LIBP4CTOOLKIT_HDRS
 	cstring.h
 	enumerator.h
 	error.h
+        error_catalog.h
 	error_reporter.h
 	exceptions.h
 	gc.h

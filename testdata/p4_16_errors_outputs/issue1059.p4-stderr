@@ -1,6 +1,6 @@
-issue1059.p4(1): error: Structure struct X does not have a field x
-struct X {}
-       ^
-issue1059.p4(9)
+issue1059.p4(9): [--Werror=type-error] error: Field x is not a member of structure struct X
         a(x.x);
             ^
+issue1059.p4(1)
+struct X {}
+       ^

@@ -1,15 +1,15 @@
-typecheck1_e.p4(27): error: Cannot apply ~ to value d of type bool
+typecheck1_e.p4(27): [--Werror=type-error] error: Cannot apply ~ to value d of type bool
         d = ~d;
              ^
-typecheck1_e.p4(32): error: +: cannot be applied to d of type bool
+typecheck1_e.p4(32): [--Werror=type-error] error: +: cannot be applied to d of type bool
         d = d + d;
             ^
-typecheck1_e.p4(33): error: -: cannot be applied to d of type bool
+typecheck1_e.p4(33): [--Werror=type-error] error: -: cannot be applied to d of type bool
         d = d - d;
             ^
-typecheck1_e.p4(35): error: Cannot apply ! to value a of type bit<32>
+typecheck1_e.p4(35): [--Werror=type-error] error: Cannot apply ! to value a of type bit<32>
         a = !a;
              ^
-typecheck1_e.p4(36): error: Cannot apply ! to value b of type int<32>
+typecheck1_e.p4(36): [--Werror=type-error] error: Cannot apply ! to value b of type int<32>
         b = !b;
              ^

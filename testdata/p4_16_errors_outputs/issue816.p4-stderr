@@ -1,4 +1,4 @@
-issue816.p4(15): error: c1: parameter cannot have type control C
+issue816.p4(15): [--Werror=type-error] error: c1: parameter cannot have type control C
 action a(in C c1, in C c2) {
               ^^
 issue816.p4(4)

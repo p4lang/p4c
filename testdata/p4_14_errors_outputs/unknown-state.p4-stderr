@@ -1,4 +1,4 @@
-unknown-state.p4(2): error: ingress: unknown state
+unknown-state.p4(2): [--Werror=legacy] error: ingress: unknown state
     return ingress;
            ^^^^^^^
 error: 1 errors encountered, aborting compilation

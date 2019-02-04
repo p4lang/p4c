@@ -1,3 +1,3 @@
-issue430-1-bmv2.p4(44): warning: Cannot find a good name for digest method call, using auto-generated name 'digest_0'
+issue430-1-bmv2.p4(44): [--Wwarn=mismatch] warning: Cannot find a good name for digest method call, using auto-generated name 'digest_0'
         digest(5, { hdr.ethernet.srcAddr });
         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -1,4 +1,4 @@
-pr1363.p4(12): warning: implementation shadows implementation
+pr1363.p4(12): [--Wwarn=shadow] warning: implementation shadows implementation
     implementation = ActionProfile(32);
     ^^^^^^^^^^^^^^
 pr1363.p4(3)

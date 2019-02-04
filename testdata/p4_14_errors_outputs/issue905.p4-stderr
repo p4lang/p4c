@@ -1,4 +1,4 @@
-issue905.p4(34): error: *: not defined on operands of type varbit<0>
+issue905.p4(34): [--Werror=legacy] error: *: not defined on operands of type varbit<0>
  modify_field(can_data.value, can_data.value * 2); // error
                                              ^
 error: 1 errors encountered, aborting compilation

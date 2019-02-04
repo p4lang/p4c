@@ -1,4 +1,4 @@
-issue1542.p4(27): error: 2: argument does not match declaration in actions list: 1
+issue1542.p4(27): [--Werror=type-error] error: 2: argument does not match declaration in actions list: 1
             ( true, 1, true ) : multicast(2);
                                           ^
 issue1542.p4(22)

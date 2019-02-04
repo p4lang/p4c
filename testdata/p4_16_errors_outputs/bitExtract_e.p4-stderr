@@ -1,9 +1,9 @@
-bitExtract_e.p4(25): error: s[3:0]: bit extraction only defined for bit<> types
+bitExtract_e.p4(25): [--Werror=type-error] error: s[3:0]: bit extraction only defined for bit<> types
         bit<4> x = s[3:0]; // wrong type for s
                    ^^^^^^
-bitExtract_e.p4(26): error: Bit index 7 greater than width 4
+bitExtract_e.p4(26): [--Werror=type-error] error: Bit index 7 greater than width 4
         bit<8> y = dt[7:0]; // too many bits
                       ^
-bitExtract_e.p4(27): error: Bit index 7 greater than width 4
+bitExtract_e.p4(27): [--Werror=type-error] error: Bit index 7 greater than width 4
         bit<4> z = dt[7:4]; // too many bits
                       ^

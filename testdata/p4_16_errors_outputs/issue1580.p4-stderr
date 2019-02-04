@@ -1,6 +1,6 @@
-issue1580.p4(65): error: Entry: Action marked with defaultonly used in table
+issue1580.p4(65): [--Werror=type-error] error: Entry: Action marked with defaultonly used in table
             3 : a3();
             ^^^^^^^^
-issue1580.p4(69): error: default_action: Action marked with tableonly used as default action
+issue1580.p4(69): [--Werror=type-error] error: default_action: Action marked with tableonly used as default action
         default_action = a1;
         ^^^^^^^^^^^^^^

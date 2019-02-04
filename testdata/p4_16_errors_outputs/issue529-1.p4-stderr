@@ -1,6 +1,6 @@
-issue529-1.p4(28): error: h_t: cast not supported
+issue529-1.p4(28): [--Werror=legacy] error: h_t: cast not supported
         h_t h2 = (h_t) h; // illegal cast
                   ^^^
-issue529-1.p4(29): error: h_t: cast not supported
+issue529-1.p4(29): [--Werror=legacy] error: h_t: cast not supported
         h_t h4 = (h_t) { h.f }; // illegal cast
                   ^^^

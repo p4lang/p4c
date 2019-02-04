@@ -841,7 +841,8 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
             auto it = autoNames.find(call);
             if (it == autoNames.end()) {
               controlPlaneName = "digest_" + cstring::to_cstring(autoNames.size());
-              ::warning("Cannot find a good name for %1% method call, using "
+              ::warning(ErrorType::WARN_MISMATCH,
+                        "Cannot find a good name for %1% method call, using "
                         "auto-generated name '%2%'", call, controlPlaneName);
               autoNames.emplace(call, controlPlaneName);
             } else {

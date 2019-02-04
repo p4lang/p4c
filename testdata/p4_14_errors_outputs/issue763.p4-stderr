@@ -1,4 +1,4 @@
-issue763.p4(1): error: v1HeaderType: same name as v1HeaderType
+issue763.p4(1): [--Werror=legacy] error: v1HeaderType: same name as v1HeaderType
 header_type X {
 ^
 issue763.p4(7)

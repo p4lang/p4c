@@ -1,1 +1,1 @@
-warning: SelectCase: unreachable case
+[--Wwarn=parser-transition] warning: SelectCase: unreachable case

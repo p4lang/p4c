@@ -1,3 +1,3 @@
-issue774-2.p4(11): error: Could not infer type for DefaultExpression
+issue774-2.p4(11): [--Werror=legacy] error: Could not infer type for DefaultExpression
         b.extract(_);
                   ^

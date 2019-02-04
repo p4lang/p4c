@@ -1,3 +1,3 @@
-div3.p4(19): error: /: could not evaluate at compilation time
+div3.p4(19): [--Werror=legacy] error: /: could not evaluate at compilation time
         a = a / b; // not a compile-time constant
             ^^^^^

@@ -129,11 +129,13 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         auto ls = left->to<IR::Type_Stack>();
         auto rs = right->to<IR::Type_Stack>();
         if (!ls->sizeKnown()) {
-            ::error("%1%: Size of header stack type should be a constant", left);
+            ::error(ErrorType::ERR_TYPE_ERROR,
+                    "%1%: Size of header stack type should be a constant", left);
             return false;
         }
         if (!rs->sizeKnown()) {
-            ::error("%1%: Size of header stack type should be a constant", right);
+            ::error(ErrorType::ERR_TYPE_ERROR,
+                    "%1%: Size of header stack type should be a constant", right);
             return false;
         }
         return equivalent(ls->elementType, rs->elementType) &&

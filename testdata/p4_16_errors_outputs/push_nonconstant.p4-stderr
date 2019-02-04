@@ -1,3 +1,3 @@
-push_nonconstant.p4(10): error: x: argument must be a constant
+push_nonconstant.p4(10): [--Werror=invalid] error: x: Invalid argument must be a constant
         h.push_front(x);
                      ^
