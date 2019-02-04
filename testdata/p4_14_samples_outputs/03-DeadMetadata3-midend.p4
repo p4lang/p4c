@@ -7,8 +7,8 @@ struct m_t {
 }
 
 struct metadata {
-    @name(".m") 
-    m_t m;
+    bit<32> _m_f10;
+    bit<32> _m_f21;
 }
 
 struct headers {
@@ -31,10 +31,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".NoAction") action NoAction_3() {
     }
     @name(".a1") action a1() {
-        meta.m.f1 = 32w1;
+        meta._m_f10 = 32w1;
     }
     @name(".a2") action a2() {
-        meta.m.f2 = 32w2;
+        meta._m_f21 = 32w2;
     }
     @name(".t1") table t1_0 {
         actions = {
@@ -49,7 +49,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         key = {
-            meta.m.f1: exact @name("m.f1") ;
+            meta._m_f10: exact @name("m.f1") ;
         }
         default_action = NoAction_3();
     }

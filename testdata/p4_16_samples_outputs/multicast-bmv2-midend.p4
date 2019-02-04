@@ -35,10 +35,12 @@ header ipv4_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata") 
-    intrinsic_metadata_t intrinsic_metadata;
-    @name("routing_metadata") 
-    routing_metadata_t   routing_metadata;
+    bit<16> _intrinsic_metadata_mcast_grp0;
+    bit<16> _intrinsic_metadata_egress_rid1;
+    bit<16> _intrinsic_metadata_mcast_hash2;
+    bit<32> _intrinsic_metadata_lf_field_list3;
+    bit<48> _intrinsic_metadata_ingress_global_timestamp4;
+    bit<32> _routing_metadata_nhop_ipv45;
 }
 
 struct headers {
@@ -99,7 +101,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".NoAction") action NoAction_7() {
     }
     @name(".bcast") action bcast() {
-        meta.intrinsic_metadata.mcast_grp = 16w1;
+        meta._intrinsic_metadata_mcast_grp0 = 16w1;
     }
     @name(".set_dmac") action set_dmac(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
@@ -111,7 +113,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         mark_to_drop();
     }
     @name(".set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
-        meta.routing_metadata.nhop_ipv4 = nhop_ipv4;
+        meta._routing_metadata_nhop_ipv45 = nhop_ipv4;
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
@@ -130,7 +132,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_6();
         }
         key = {
-            meta.routing_metadata.nhop_ipv4: exact @name("meta.routing_metadata.nhop_ipv4") ;
+            meta._routing_metadata_nhop_ipv45: exact @name("meta.routing_metadata.nhop_ipv4") ;
         }
         size = 512;
         default_action = NoAction_6();

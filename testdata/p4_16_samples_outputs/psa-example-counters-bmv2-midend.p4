@@ -30,7 +30,6 @@ struct fwd_metadata_t {
 }
 
 struct metadata {
-    fwd_metadata_t fwd_metadata;
 }
 
 typedef bit<48> ByteCounter_t;

@@ -18,7 +18,7 @@ header ipv4_t {
 }
 
 struct metadata {
-    routing_metadata_t routing_metadata;
+    bit<32> _routing_metadata_nhop_ipv40;
 }
 
 struct headers {

@@ -31,10 +31,32 @@ header bitvec_hdr {
 }
 
 struct local_metadata_t {
-    row_t      row0;
-    row_t      row1;
-    bitvec_hdr bvh0;
-    bitvec_hdr bvh1;
+    bit<1>     _row0_alt0_valid0;
+    bit<7>     _row0_alt0_port1;
+    int<8>     _row0_alt0_hashRes2;
+    bool       _row0_alt0_useHash3;
+    bit<16>    _row0_alt0_type4;
+    bit<7>     _row0_alt0_pad5;
+    bit<1>     _row0_alt1_valid6;
+    bit<7>     _row0_alt1_port7;
+    int<8>     _row0_alt1_hashRes8;
+    bool       _row0_alt1_useHash9;
+    bit<16>    _row0_alt1_type10;
+    bit<7>     _row0_alt1_pad11;
+    bit<1>     _row1_alt0_valid12;
+    bit<7>     _row1_alt0_port13;
+    int<8>     _row1_alt0_hashRes14;
+    bool       _row1_alt0_useHash15;
+    bit<16>    _row1_alt0_type16;
+    bit<7>     _row1_alt0_pad17;
+    bit<1>     _row1_alt1_valid18;
+    bit<7>     _row1_alt1_port19;
+    int<8>     _row1_alt1_hashRes20;
+    bool       _row1_alt1_useHash21;
+    bit<16>    _row1_alt1_type22;
+    bit<7>     _row1_alt1_pad23;
+    bitvec_hdr _bvh024;
+    bitvec_hdr _bvh125;
 }
 
 struct parsed_packet_t {
@@ -55,12 +77,12 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     }
     @name("ingress.do_act") action do_act() {
         h.bvh1._row_alt1_valid6 = 1w0;
-        local_metadata.row0.alt0.valid = 1w0;
+        local_metadata._row0_alt0_valid0 = 1w0;
     }
     @name("ingress.tns") table tns_0 {
         key = {
-            h.bvh1._row_alt1_valid6       : exact @name("h.bvh1.row.alt1.valid") ;
-            local_metadata.row0.alt0.valid: exact @name("local_metadata.row0.alt0.valid") ;
+            h.bvh1._row_alt1_valid6         : exact @name("h.bvh1.row.alt1.valid") ;
+            local_metadata._row0_alt0_valid0: exact @name("local_metadata.row0.alt0.valid") ;
         }
         actions = {
             do_act();
@@ -70,8 +92,8 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
     }
     @hidden action act() {
         h.bvh0._row_alt1_type10 = 16w0x800;
-        local_metadata.row0.alt0.useHash = true;
-        clone3<row_t>(CloneType.I2E, 32w0, local_metadata.row0);
+        local_metadata._row0_alt0_useHash3 = true;
+        clone3<row_t>(CloneType.I2E, 32w0, {{local_metadata._row0_alt0_valid0,local_metadata._row0_alt0_port1,local_metadata._row0_alt0_hashRes2,true,local_metadata._row0_alt0_type4,local_metadata._row0_alt0_pad5},{local_metadata._row0_alt1_valid6,local_metadata._row0_alt1_port7,local_metadata._row0_alt1_hashRes8,local_metadata._row0_alt1_useHash9,local_metadata._row0_alt1_type10,local_metadata._row0_alt1_pad11}});
     }
     @hidden table tbl_act {
         actions = {

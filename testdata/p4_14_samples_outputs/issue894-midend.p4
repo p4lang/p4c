@@ -45,8 +45,11 @@ header tcp_t {
 }
 
 struct metadata {
-    @name(".custom_metadata") 
-    custom_metadata_t custom_metadata;
+    bit<32> _custom_metadata_nhop_ipv40;
+    bit<16> _custom_metadata_hash_val11;
+    bit<16> _custom_metadata_hash_val22;
+    bit<16> _custom_metadata_count_val13;
+    bit<16> _custom_metadata_count_val24;
 }
 
 struct headers {
@@ -142,19 +145,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ethernet.dstAddr = dmac;
     }
     @name(".set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
-        meta.custom_metadata.nhop_ipv4 = nhop_ipv4;
+        meta._custom_metadata_nhop_ipv40 = nhop_ipv4;
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name(".set_heavy_hitter_count") action set_heavy_hitter_count() {
-        hash<bit<16>, bit<16>, tuple_0, bit<32>>(meta.custom_metadata.hash_val1, HashAlgorithm.csum16, 16w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort }, 32w16);
-        heavy_hitter_counter1.read(meta.custom_metadata.count_val1, (bit<32>)meta.custom_metadata.hash_val1);
-        meta.custom_metadata.count_val1 = meta.custom_metadata.count_val1 + 16w1;
-        heavy_hitter_counter1.write((bit<32>)meta.custom_metadata.hash_val1, meta.custom_metadata.count_val1);
-        hash<bit<16>, bit<16>, tuple_0, bit<32>>(meta.custom_metadata.hash_val2, HashAlgorithm.crc16, 16w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort }, 32w16);
-        heavy_hitter_counter2.read(meta.custom_metadata.count_val2, (bit<32>)meta.custom_metadata.hash_val2);
-        meta.custom_metadata.count_val2 = meta.custom_metadata.count_val2 + 16w1;
-        heavy_hitter_counter2.write((bit<32>)meta.custom_metadata.hash_val2, meta.custom_metadata.count_val2);
+        hash<bit<16>, bit<16>, tuple_0, bit<32>>(meta._custom_metadata_hash_val11, HashAlgorithm.csum16, 16w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort }, 32w16);
+        heavy_hitter_counter1.read(meta._custom_metadata_count_val13, (bit<32>)meta._custom_metadata_hash_val11);
+        meta._custom_metadata_count_val13 = meta._custom_metadata_count_val13 + 16w1;
+        heavy_hitter_counter1.write((bit<32>)meta._custom_metadata_hash_val11, meta._custom_metadata_count_val13);
+        hash<bit<16>, bit<16>, tuple_0, bit<32>>(meta._custom_metadata_hash_val22, HashAlgorithm.crc16, 16w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort }, 32w16);
+        heavy_hitter_counter2.read(meta._custom_metadata_count_val24, (bit<32>)meta._custom_metadata_hash_val22);
+        meta._custom_metadata_count_val24 = meta._custom_metadata_count_val24 + 16w1;
+        heavy_hitter_counter2.write((bit<32>)meta._custom_metadata_hash_val22, meta._custom_metadata_count_val24);
     }
     @name(".drop_heavy_hitter_table") table drop_heavy_hitter_table_0 {
         actions = {
@@ -171,7 +174,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_7();
         }
         key = {
-            meta.custom_metadata.nhop_ipv4: exact @name("custom_metadata.nhop_ipv4") ;
+            meta._custom_metadata_nhop_ipv40: exact @name("custom_metadata.nhop_ipv4") ;
         }
         size = 512;
         default_action = NoAction_7();
@@ -198,7 +201,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         set_heavy_hitter_count_table_0.apply();
-        if (meta.custom_metadata.count_val1 > 16w100 && meta.custom_metadata.count_val2 > 16w100) 
+        if (meta._custom_metadata_count_val13 > 16w100 && meta._custom_metadata_count_val24 > 16w100) 
             drop_heavy_hitter_table_0.apply();
         else {
             ipv4_lpm_0.apply();

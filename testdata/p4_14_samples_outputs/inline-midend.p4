@@ -6,8 +6,7 @@ struct h {
 }
 
 struct metadata {
-    @name(".m") 
-    h m;
+    bit<1> _m_b0;
 }
 
 struct headers {
@@ -32,7 +31,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_0();
     }
     apply {
-        if (meta.m.b == 1w1) 
+        if (meta._m_b0 == 1w1) 
             _t_0.apply();
     }
 }
