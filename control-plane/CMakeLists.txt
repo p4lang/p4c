@@ -71,6 +71,7 @@ add_custom_command(OUTPUT ${P4RUNTIME_GEN_SRCS} ${P4RUNTIME_GEN_HDRS}
 #PROTOBUF_GENERATE_PYTHON (P4RUNTIME_GEN_PYTHON P4RUNTIME_INFO_GEN_HDRS ${P4RUNTIME_INFO_PROTO})
 
 set (CONTROLPLANE_SRCS
+  flattenHeader.cpp
   p4RuntimeArchHandler.cpp
   p4RuntimeArchStandard.cpp
   p4RuntimeSerializer.cpp
@@ -82,6 +83,7 @@ set (CONTROLPLANE_SOURCES
   )
 
 set (CONTROLPLANE_HDRS
+  flattenHeader.h
   p4RuntimeArchHandler.h
   p4RuntimeArchStandard.h
   p4RuntimeSerializer.h
