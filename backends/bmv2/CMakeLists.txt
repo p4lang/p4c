@@ -149,6 +149,17 @@ set (XFAIL_TESTS
   # tested it with the proposed fix for issue #1694 that is on PR
   # #1704, and it passes.
   testdata/p4_14_samples/p414-special-ops-3-bmv2.p4
+  # As of 2019-Feb-04 latest p4c code, this program fails due to the
+  # root cause of both issues #1694 and #1669.  I have tested it with
+  # the proposed fix for issue #1694 that is on PR #1704, and while
+  # that does make the produced BMv2 JSON file able to cause packets
+  # to be recirculated, resubmitted, etc. it still has the bug of not
+  # preserving the metadata specified in the program's field_lists, so
+  # the STF tests fail because of issue #1669.  As of this writing,
+  # this program is the _only_ p4c test program that relies for its
+  # successful execution on the preservation of metadata across
+  # resubmit, recirculate, and/or clone operations.
+  testdata/p4_14_samples/p414-special-ops-2-bmv2.p4
   # This test uses a feature currently unsupported in the BMv2 back-end.
   testdata/p4_16_samples/issue907-bmv2.p4
   # This test uses a table graph that is not implementable in BMv2

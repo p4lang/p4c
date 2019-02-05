@@ -66,9 +66,6 @@ set (P4RUNTIME_EXCLUDE
   # error not supported in static entries, not strictly required for P4Info
   # generation though
   testdata/p4_16_samples/issue1062-bmv2.p4
-  # issue #1670: no support for headers containing structs
-  testdata/p4_16_samples/issue1670-bmv2.p4
-  testdata/p4_16_samples/p4rt_digest_complex.p4
 )
 # Do not generate P4Info for tests which are expected to fail P4 compilation.
 p4c_find_test_names ("${P4C_SOURCE_DIR}/testdata/p4_16_errors/*.p4" P4RUNTIME_EXCLUDE_ERRORS)

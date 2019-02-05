@@ -771,6 +771,8 @@ class P4RuntimeAnalyzer {
     void addControllerHeader(const IR::Type_Header* type) {
         if (isHidden(type)) return;
 
+        auto flattenedHeaderType = FlattenHeader::flatten(typeMap, type);
+
         auto name = type->controlPlaneName();
         auto id = symbols.getId(P4RuntimeSymbolType::CONTROLLER_HEADER(), name);
         auto annotations = type->to<IR::IAnnotated>();
@@ -790,7 +792,7 @@ class P4RuntimeAnalyzer {
                     controllerName /* name */, controllerName /* alias */, annotations);
 
         size_t index = 1;
-        for (auto headerField : type->fields) {
+        for (auto headerField : flattenedHeaderType->fields) {
             if (isHidden(headerField)) continue;
             auto metadata = header->add_metadata();
             auto fieldName = headerField->controlPlaneName();
