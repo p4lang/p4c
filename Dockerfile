@@ -24,6 +24,7 @@ ENV BM_DEPS automake \
             curl \
             g++-6 \
             git \
+            lcov \
             libjudy-dev \
             libgmp-dev \
             libpcap-dev \
