@@ -464,8 +464,9 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                         return nullptr;
                     }
                 } else {
-                    ::warning("parser_value_set has no @parser_value_set_size annotation");
-                    ::warning("using default size 4");
+                    ::warning(ErrorType::WARN_MISSING,
+                              "%1%: parser_value_set has no @parser_value_set_size annotation."
+                              "Using default size 4.", c);
                     sizeConstant = new IR::Constant(4);
                 }
                 auto annos = addGlobalNameAnnotation(value_set->name, value_set->annotations);
@@ -696,7 +697,9 @@ void ProgramStructure::createDeparser() {
     std::vector<const IR::Expression*> sortedHeaders;
     bool loop = headerOrder.sccSort(startHeader, sortedHeaders);
     if (loop)
-        ::warning("The order of headers in deparser is not uniquely determined by parser!");
+        ::warning(ErrorType::WARN_ORDERING,
+                  "%1%: the order of headers in deparser is not uniquely determined by parser!",
+                  startHeader);
 
     auto params = new IR::ParameterList;
     auto poutpath = new IR::Path(p4lib.packetOut.Id());
@@ -958,7 +961,7 @@ const IR::Expression* ProgramStructure::convertHashAlgorithm(
     } else if (algorithm == "xor16") {
         result = v1model.algorithm.xor16.Id();
     } else {
-        ::warning("%1%: unexpected algorithm", algorithm);
+        ::warning(ErrorType::WARN_UNSUPPORTED, "%1%: unexpected algorithm", algorithm);
         result = algorithm;
     }
     auto pe = new IR::TypeNameExpression(v1model.algorithm.Id());
@@ -970,7 +973,8 @@ const IR::Expression* ProgramStructure::convertHashAlgorithms(const IR::NameList
     if (!algorithm || algorithm->names.empty()) return nullptr;
     if (algorithm->names.size() > 1) {
 #if 1
-        ::warning("%s: Multiple algorithms in a field list not supported in P4_16 -- using "
+        ::warning(ErrorType::WARN_UNSUPPORTED,
+                  "%s: Multiple algorithms in a field list not supported in P4_16 -- using "
                   "only the first", algorithm->names[0].srcInfo);
 #else
         auto rv = new IR::ListExpression({});
@@ -1547,7 +1551,8 @@ CONVERT_PRIMITIVE(execute_meter) {
         ::error("Expected a meter reference %1%", ref);
         return nullptr; }
     if (!meter->implementation.name.isNullOrEmpty())
-        ::warning("Ignoring `implementation' field of meter %1%", meter);
+        ::warning(ErrorType::WARN_IGNORE_PROPERTY, "Ignoring `implementation' field of meter %1%",
+                  meter);
     auto newname = structure->meters.get(meter);
     auto meterref = new IR::PathExpression(newname);
     auto methodName = structure->v1model.meter.executeMeter.Id();
@@ -1750,7 +1755,8 @@ ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newNam
             direction = p->write ? IR::Direction::InOut : IR::Direction::None;
         auto type = p->type;
         if (type == IR::Type_Unknown::get()) {
-            ::warning("Could not infer type for %1%, using bit<8>", p);
+            ::warning(ErrorType::WARN_TYPE_INFERENCE,
+                      "Could not infer type for %1%, using bit<8>", p);
             type = IR::Type_Bits::get(8);
         } else if (type->is<IR::Type_StructLike>()) {
             auto path = new IR::Path(type->to<IR::Type_StructLike>()->name);
@@ -1868,7 +1874,8 @@ ProgramStructure::convert(const IR::Register* reg, cstring newName,
             newName = reg->layout;
         regElementType = new IR::Type_Name(new IR::Path(newName));
     } else {
-        ::warning("%1%: Register width unspecified; using %2%", reg, defaultRegisterWidth);
+        ::warning(ErrorType::WARN_MISSING,
+                  "%1%: Register width unspecified; using %2%", reg, defaultRegisterWidth);
         regElementType = IR::Type_Bits::get(defaultRegisterWidth);
     }
 

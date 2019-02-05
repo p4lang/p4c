@@ -1,4 +1,4 @@
-issue763-2.p4(1): error: v1HeaderType: name standard_metadata_t is reserved
+issue763-2.p4(1): [--Werror=legacy] error: v1HeaderType: name standard_metadata_t is reserved
 header_type standard_metadata_t {
 ^
 error: 1 errors encountered, aborting compilation

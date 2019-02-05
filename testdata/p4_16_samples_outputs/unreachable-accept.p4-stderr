@@ -1,9 +1,9 @@
-unreachable-accept.p4(31): warning: start: implicit transition to `reject'
+unreachable-accept.p4(31): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
     state start {
           ^^^^^
-unreachable-accept.p4(30): warning: accept state in parser Parser is unreachable
+unreachable-accept.p4(30): [--Wwarn=parser-transition] warning: accept state in parser Parser is unreachable
 parser Parser(packet_in pkt_in, out headers_t hdr) {
        ^^^^^^
-unreachable-accept.p4(30): warning: accept state in parser Parser is unreachable
+unreachable-accept.p4(30): [--Wwarn=parser-transition] warning: accept state in parser Parser is unreachable
 parser Parser(packet_in pkt_in, out headers_t hdr) {
        ^^^^^^

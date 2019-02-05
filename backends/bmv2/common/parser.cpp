@@ -79,7 +79,8 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                     auto arg = mce->arguments->at(0);
                     auto argtype = ctxt->typeMap->getType(arg->expression, true);
                     if (!argtype->is<IR::Type_Header>()) {
-                        ::error("%1%: extract only accepts arguments with header types, not %2%",
+                        ::error(ErrorType::ERR_INVALID,
+                                "%1%: extract only accepts arguments with header types, not %2%",
                                 arg, argtype);
                         return result;
                     }
@@ -189,7 +190,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
             return result;
         }
     }
-    ::error("%1%: not supported in parser on this target", stat);
+    ::error(ErrorType::ERR_UNSUPPORTED, "in parser on this target", stat);
     return result;
 }
 
@@ -199,11 +200,11 @@ void ParserConverter::convertSimpleKey(const IR::Expression* keySet,
     if (keySet->is<IR::Mask>()) {
         auto mk = keySet->to<IR::Mask>();
         if (!mk->left->is<IR::Constant>()) {
-            ::error("%1% must evaluate to a compile-time constant", mk->left);
+            ::error(ErrorType::ERR_INVALID, "must evaluate to a compile-time constant", mk->left);
             return;
         }
         if (!mk->right->is<IR::Constant>()) {
-            ::error("%1% must evaluate to a compile-time constant", mk->right);
+            ::error(ErrorType::ERR_INVALID, "must evaluate to a compile-time constant", mk->right);
             return;
         }
         value = mk->left->to<IR::Constant>()->value;
@@ -218,7 +219,7 @@ void ParserConverter::convertSimpleKey(const IR::Expression* keySet,
         value = 0;
         mask = 0;
     } else {
-        ::error("%1% must evaluate to a compile-time constant", keySet);
+        ::error(ErrorType::ERR_INVALID, "must evaluate to a compile-time constant", keySet);
         value = 0;
         mask = 0;
     }
@@ -302,7 +303,9 @@ Util::IJson* ParserConverter::stateName(IR::ID state) {
     if (state.name == IR::ParserState::accept) {
         return Util::JsonValue::null;
     } else if (state.name == IR::ParserState::reject) {
-        ::warning("Explicit transition to %1% not supported on this target", state);
+        ::warning(ErrorType::WARN_UNSUPPORTED,
+                  "Explicit transition to %1% not supported on this target",
+                  state);
         return Util::JsonValue::null;
     } else {
         return new Util::JsonValue(state.name);

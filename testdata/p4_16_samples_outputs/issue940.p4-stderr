@@ -1,16 +1,16 @@
-issue940.p4(9): warning: Checksum16: Using deprecated feature Checksum16. Please use verify_checksum/update_checksum instead.
+issue940.p4(9): [--Wwarn=deprecated] warning: Checksum16: Using deprecated feature Checksum16. Please use verify_checksum/update_checksum instead.
 Checksum16() instance;
 ^^^^^^^^^^
 issue940.p4(2)
 extern Checksum16 {
        ^^^^^^^^^^
-issue940.p4(13): warning: wrong: Using deprecated feature wrong. Please don't use this function.
+issue940.p4(13): [--Wwarn=deprecated] warning: wrong: Using deprecated feature wrong. Please don't use this function.
         bit<6> x = wrong();
                    ^^^^^
 issue940.p4(7)
 extern bit<6> wrong();
               ^^^^^
-issue940.p4(9): warning: instance: unused instance
+issue940.p4(9): [--Wwarn=unused] warning: instance: unused instance
 Checksum16() instance;
              ^^^^^^^^
 warning: Program does not contain a `main' module

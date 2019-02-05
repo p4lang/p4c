@@ -28,14 +28,14 @@ void DoCheckConstants::postorder(const IR::MethodCallExpression* expression) {
                       "Expected 1 argument for %1%", expression);
             auto arg0 = expression->arguments->at(0)->expression;
             if (!arg0->is<IR::Constant>())
-                ::error("%1%: argument must be a constant", arg0);
+                ::error(ErrorType::ERR_INVALID, "argument must be a constant", arg0);
         }
     }
 }
 
 void DoCheckConstants::postorder(const IR::KeyElement* key) {
     if (key->expression->is<IR::Literal>())
-        ::warning("%1%: Constant key field", key->expression);
+        ::warning(ErrorType::WARN_MISMATCH, "%1%: Constant key field", key->expression);
 }
 
 void DoCheckConstants::postorder(const IR::P4Table* table) {

@@ -1,4 +1,4 @@
-tuple-to-header.p4(23): error: AssignmentStatement: Cannot assign a Tuple(1) to a header H
+tuple-to-header.p4(23): [--Werror=type-error] error: AssignmentStatement: Cannot assign a Tuple(1) to a header H
         h = t; // illegal assignment between tuple and header
           ^
 tuple-to-header.p4(20)

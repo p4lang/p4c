@@ -59,7 +59,8 @@ class RemoveUnreachableStates : public Transform {
         auto orig = getOriginal<IR::ParserState>();
         if (reachable.find(orig) == reachable.end()) {
             if (state->name == IR::ParserState::accept) {
-                ::warning("%1% state in %2% is unreachable", state, findContext<IR::P4Parser>());
+                ::warning(ErrorType::WARN_UNREACHABLE,
+                          "%1% state in %2% is unreachable", state, findContext<IR::P4Parser>());
                 return state;
             } else  {
                 LOG1("Removing unreachable state " << dbp(state));

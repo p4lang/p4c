@@ -40,7 +40,8 @@ void DirectMeterMap::setTable(const IR::IDeclaration* meter, const IR::P4Table* 
     auto info = getInfo(meter);
     CHECK_NULL(info);
     if (info->table != nullptr)
-        ::error("%1%: Direct meters cannot be attached to multiple tables %2% and %3%",
+        ::error(ErrorType::ERR_INVALID,
+                "%1%: Direct meters cannot be attached to multiple tables %2% and %3%",
                 meter, table, info->table);
     info->table = table;
 }
@@ -75,8 +76,9 @@ void DirectMeterMap::setDestination(const IR::IDeclaration* meter,
     } else {
         bool same = checkSame(destination, info->destinationField);
         if (!same)
-            ::error("On this target all meter operations must write to the same destination "
-                    "but %1% and %2% are different", destination, info->destinationField);
+            ::error(ErrorType::ERR_INVALID,
+                    "all meter operations must write to the same destination,"
+                    " however %1% and %2% are different", destination, info->destinationField);
     }
 }
 
@@ -90,4 +92,3 @@ void DirectMeterMap::setSize(const IR::IDeclaration* meter, unsigned size) {
 }
 
 }  // namespace BMV2
-

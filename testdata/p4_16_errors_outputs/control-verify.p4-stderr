@@ -1,3 +1,3 @@
-control-verify.p4(7): error: verify: may only be invoked in parsers
+control-verify.p4(7): [--Werror=type-error] error: verify: may only be invoked in parsers
     verify(8w0 == 8w1, error.Oops);
     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

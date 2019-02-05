@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "p4/config/v1/p4types.pb.h"
 
+#include "flattenHeader.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
 #include "ir/ir.h"
@@ -39,9 +40,10 @@ namespace P4 {
 namespace ControlPlaneAPI {
 
 TypeSpecConverter::TypeSpecConverter(
-    const P4::ReferenceMap* refMap, P4TypeInfo* p4RtTypeInfo)
-    : refMap(refMap), p4RtTypeInfo(p4RtTypeInfo) {
+    const P4::ReferenceMap* refMap, const P4::TypeMap* typeMap, P4TypeInfo* p4RtTypeInfo)
+    : refMap(refMap), typeMap(typeMap), p4RtTypeInfo(p4RtTypeInfo) {
     CHECK_NULL(refMap);
+    CHECK_NULL(typeMap);
 }
 
 bool TypeSpecConverter::preorder(const IR::Type* type) {
@@ -174,18 +176,20 @@ bool TypeSpecConverter::preorder(const IR::Type_Struct* type) {
 }
 
 bool TypeSpecConverter::preorder(const IR::Type_Header* type) {
+    auto flattenedHeaderType = FlattenHeader::flatten(typeMap, type);
     if (p4RtTypeInfo) {
         auto name = std::string(type->controlPlaneName());
         auto headers = p4RtTypeInfo->mutable_headers();
         if (headers->find(name) == headers->end()) {
             auto headerTypeSpec = new p4configv1::P4HeaderTypeSpec();
-            for (auto f : type->fields) {
+            for (auto f : flattenedHeaderType->fields) {
                 auto fType = f->type;
                 visit(fType);
                 auto fTypeSpec = map.at(fType);
                 CHECK_NULL(fTypeSpec);
                 BUG_CHECK(fTypeSpec->has_bitstring(),
-                          "Only bistring fields expected in header type declaration %1%", type);
+                          "Only bitstring fields expected in flattened header type %1%",
+                          flattenedHeaderType);
                 auto member = headerTypeSpec->add_members();
                 member->set_name(f->controlPlaneName());
                 member->mutable_type_spec()->CopyFrom(fTypeSpec->bitstring());
@@ -250,8 +254,9 @@ bool TypeSpecConverter::preorder(const IR::Type_Error* type) {
 
 const P4DataTypeSpec* TypeSpecConverter::convert(
     const P4::ReferenceMap* refMap,
+    const P4::TypeMap* typeMap,
     const IR::Type* type, P4TypeInfo* typeInfo) {
-    TypeSpecConverter typeSpecConverter(refMap, typeInfo);
+    TypeSpecConverter typeSpecConverter(refMap, typeMap, typeInfo);
     type->apply(typeSpecConverter);
     return typeSpecConverter.map.at(type);
 }

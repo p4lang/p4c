@@ -82,7 +82,7 @@ ExternConverter::convertExternObject(ConversionContext* ctxt,
         }
         return primitive;
     } else {
-        ::error("Unknown extern method %1% from type %2%",
+        ::error(ErrorType::ERR_UNKNOWN, "Unknown extern method %1% from type %2%",
                 em->method->name, em->originalExternType->name);
         return nullptr;
     }
@@ -94,7 +94,7 @@ ExternConverter::convertExternInstance(ConversionContext* ,
                                        const IR::ExternBlock* eb,
                                        const bool& emitExterns) {
     if (!emitExterns)
-        ::error("Unknown extern instance %1%", eb->type->name);
+        ::error(ErrorType::ERR_UNKNOWN, "extern instance", eb->type->name);
 }
 
 Util::IJson*
@@ -104,7 +104,7 @@ ExternConverter::convertExternFunction(ConversionContext* ctxt,
                                        const IR::StatOrDecl* s,
                                        const bool emitExterns) {
     if (!emitExterns) {
-        ::error("Unknown extern function %1%", ef->method->name);
+        ::error(ErrorType::ERR_UNKNOWN, "extern function", ef->method->name);
         return nullptr;
     }
     auto primitive = mkPrimitive(ef->method->name);
@@ -248,7 +248,7 @@ ExternConverter::convertHashAlgorithm(cstring algorithm) {
     else if (algorithm == P4V1::V1Model::instance.algorithm.xor16.name)
         result = "xor16";
     else
-        ::error("%1%: unexpected algorithm", algorithm);
+        ::error("Unsupported algorithm %1%", algorithm);
     return result;
 }
 

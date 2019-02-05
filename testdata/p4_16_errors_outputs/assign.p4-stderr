@@ -1,3 +1,3 @@
-assign.p4(23): error: Expression e1 cannot be the target of an assignment
+assign.p4(23): [--Werror=type-error] error: Expression e1 cannot be the target of an assignment
         e1 = e2;
         ^^

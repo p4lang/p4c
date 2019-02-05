@@ -1,4 +1,4 @@
-shadow3.p4(20): warning: p shadows p
+shadow3.p4(20): [--Wwarn=shadow] warning: p shadows p
   bit<8> p = 0;
   ^^^^^^^^^^^^^
 shadow3.p4(19)

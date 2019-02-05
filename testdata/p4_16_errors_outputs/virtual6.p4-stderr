@@ -1,4 +1,4 @@
-virtual6.p4(22): error: cntr: g abstract method not implemented
+virtual6.p4(22): [--Werror=type-error] error: cntr: g abstract method not implemented
     Virtual() cntr = {
               ^^^^
 virtual6.p4(18)

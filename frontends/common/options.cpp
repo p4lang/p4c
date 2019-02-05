@@ -270,7 +270,8 @@ std::vector<const char*>* CompilerOptions::process(int argc, char* const argv[])
 
 void CompilerOptions::validateOptions() const {
     if (p4RuntimeFile.isNullOrEmpty() && !p4RuntimeEntriesFile.isNullOrEmpty()) {
-        ::warning("When '--p4runtime-entries-file' is used without '--p4runtime-file', "
+        ::warning(ErrorType::WARN_IGNORE,
+                  "When '--p4runtime-entries-file' is used without '--p4runtime-file', "
                   "it is ignored");
     }
 }

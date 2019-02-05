@@ -1,7 +1,7 @@
 issue1499.p4(18): error: latest: latest not yet defined
   set_metadata(hesitation.contracts, latest.cornstarchs);
                                      ^^^^^^
-issue1499.p4(21): error: ingress: unknown state
+issue1499.p4(21): [--Werror=legacy] error: ingress: unknown state
     1024 : ingress;
            ^^^^^^^
 error: 2 errors encountered, aborting compilation

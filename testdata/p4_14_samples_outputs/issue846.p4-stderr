@@ -1,9 +1,9 @@
-issue846.p4(47): warning: Could not infer type for p, using bit<8>
+issue846.p4(47): [--Wwarn=type-inference] warning: Could not infer type for p, using bit<8>
 action action_0(p){
                 ^
-issue846.p4(51): warning: Could not infer type for p, using bit<8>
+issue846.p4(51): [--Wwarn=type-inference] warning: Could not infer type for p, using bit<8>
 action action_1(p){
                 ^
-issue846.p4(54): warning: Could not infer type for p, using bit<8>
+issue846.p4(54): [--Wwarn=type-inference] warning: Could not infer type for p, using bit<8>
 action action_2(p){
                 ^

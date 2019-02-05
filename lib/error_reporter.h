@@ -17,8 +17,10 @@ limitations under the License.
 #ifndef P4C_LIB_ERROR_REPORTER_H_
 #define P4C_LIB_ERROR_REPORTER_H_
 
-#include <stdarg.h>
 #include <boost/format.hpp>
+#include <stdarg.h>
+#include <map>
+#include <set>
 #include <type_traits>
 
 #include "lib/cstring.h"
@@ -354,6 +356,8 @@ enum class DiagnosticAction {
     Error    /// Print an error and signal that compilation should be aborted.
 };
 
+#include "error_catalog.h"
+
 // Keeps track of compilation errors.
 // Errors are specified using the error() and warning() methods,
 // that use boost::format format strings, i.e.,
@@ -363,9 +367,31 @@ class ErrorReporter final {
  private:
     std::ostream* outputstream;
 
+    /// Track errors or warnings that have already been issued for a particular source location
+    std::set<std::pair<int, const Util::SourceInfo>> errorTracker;
+
+    /// Output the message and flush the stream
     void emit_message(cstring message) {
         *outputstream << message;
         outputstream->flush();
+    }
+
+    /// Check whether an error has already been reported, by keeping track of error type
+    /// and source info.
+    /// If the error has been reported, return true. Otherwise, insert add the error to the
+    /// list of seen errors, and return false.
+    bool error_reported(int err, const Util::SourceInfo source) {
+        auto p = errorTracker.emplace(err, source);
+        return !p.second;  // if insertion took place, then we have not seen the error.
+    }
+
+    /// retrieve the format from the error catalog
+    const char *get_format(int errorCode) {
+        return ErrorCatalog::getCatalog().getFormat(errorCode);
+    }
+    /// retrieve the format from the error catalog
+    const char *get_error_name(int errorCode) {
+        return ErrorCatalog::getCatalog().getName(errorCode);
     }
 
  public:
@@ -387,6 +413,45 @@ class ErrorReporter final {
         boost::format fmt(format);
         std::string message = ::error_helper(fmt, "", "", "", args...);
         return message;
+    }
+
+    template <class T,
+              typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo,
+                                                                 T>::value>::type,
+              typename... Args>
+    void diagnose(DiagnosticAction action, const int errorCode, const char *format, const T *node,
+                  Args... args) {
+        if (!error_reported(errorCode, node->getSourceInfo())) {
+            std::string fmt = std::string(get_format(errorCode));
+            if (!fmt.empty()) fmt += std::string(" ") + format;
+            else              fmt += format;
+            const char *name = get_error_name(errorCode);
+            if (name)
+                diagnose(action, name, fmt.c_str(), node, args...);
+            else
+                diagnoseUnnamed(action, fmt.c_str(), node, std::forward<Args>(args)...);
+        }
+    }
+
+    template <class T,
+              typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo,
+                                                                 T>::value>::type,
+              typename... Args>
+    void diagnose(DiagnosticAction action, const int errorCode, const char *format, const T &node,
+                  Args... args) {
+        diagnose(action, errorCode, format, &node, std::forward<Args>(args)...);
+    }
+
+    template <typename... Args>
+    void diagnose(DiagnosticAction action, const int errorCode, const char *format, Args... args) {
+        std::string fmt = std::string(get_format(errorCode));
+        if (!fmt.empty()) fmt += std::string(" ") + format;
+        else              fmt += format;
+        const char *name = get_error_name(errorCode);
+        if (name)
+            diagnose(action, name, fmt.c_str(), args...);
+        else
+            diagnoseUnnamed(action, fmt.c_str(), std::forward<Args>(args)...);
     }
 
     template <typename... T>

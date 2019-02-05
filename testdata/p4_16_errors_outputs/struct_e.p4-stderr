@@ -1,10 +1,10 @@
-struct_e.p4(16): error: Structure struct s does not have a field data
-struct s {}
-       ^
-struct_e.p4(24)
+struct_e.p4(24): [--Werror=type-error] error: Field data is not a member of structure struct s
         v.data = 1w0; // no such field
           ^^^^
-struct_e.p4(25): error: Cannot extract field data from b which has type bit<1>
+struct_e.p4(16)
+struct s {}
+       ^
+struct_e.p4(25): [--Werror=type-error] error: Cannot extract field data from b which has type bit<1>
         b.data = 5; // no such field
           ^^^^
 struct_e.p4(25)

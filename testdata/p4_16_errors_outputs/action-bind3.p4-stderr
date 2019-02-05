@@ -1,9 +1,9 @@
-action-bind3.p4(21): error: 0: parameter d cannot be bound: it is set by the control plane
+action-bind3.p4(21): [--Werror=type-error] error: 0: parameter d cannot be bound: it is set by the control plane
         actions = { a(x, 0); } // error: too many arguments
                          ^
 action-bind3.p4(17)
     action a(inout bit<32> b, bit<32> d) {
                                       ^
-action-bind3.p4(22): error: 0: must be a left-value
+action-bind3.p4(22): [--Werror=type-error] error: 0: must be a left-value
         default_action = a(0);
                            ^

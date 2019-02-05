@@ -1,4 +1,4 @@
-action-bind1.p4(22): error: a: Parameter b must be bound
+action-bind1.p4(22): [--Werror=type-error] error: a: Parameter b must be bound
         default_action = a(); // error: too few arguments
                          ^^^
 action-bind1.p4(17)

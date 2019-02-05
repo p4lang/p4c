@@ -1,7 +1,7 @@
-issue803-2.p4(140): warning: ig2: unused instance
+issue803-2.p4(140): [--Wwarn=unused] warning: ig2: unused instance
     (ing_parse(), ingress(), ing_deparse()) ig2;
                                             ^^^
-issue803-2.p4(144): warning: eg2: unused instance
+issue803-2.p4(144): [--Wwarn=unused] warning: eg2: unused instance
     (egr_parse(), egress(), egr_deparse()) eg2;
                                            ^^^
 issue803-2.p4(80): [--Wwarn=uninitialized_out_param] warning: out parameter parsed_hdr may be uninitialized when ing_parse terminates

@@ -1,3 +1,3 @@
-acl1.p4(223): warning: Could not infer type for session_id, using bit<8>
+acl1.p4(223): [--Wwarn=type-inference] warning: Could not infer type for session_id, using bit<8>
 action negative_mirror(session_id) {
                        ^^^^^^^^^^

@@ -92,7 +92,7 @@ class TypeInference : public Transform {
 
     template<typename... T>
     void typeError(const char* format, T... args) const {
-        ::error(format, args...);
+        ::error(ErrorType::ERR_TYPE_ERROR, format, args...);
     }
 
     // This is needed because sometimes we invoke visitors recursively on subtrees explicitly.

@@ -1,6 +1,6 @@
-issue823.p4(17): warning: accept state in parser MyP2 is unreachable
+issue823.p4(17): [--Wwarn=parser-transition] warning: accept state in parser MyP2 is unreachable
 parser MyP2(packet_in pkt, out headers_t hdr) {
        ^^^^
-issue823.p4(23): warning: accept state in parser MyP1 is unreachable
+issue823.p4(23): [--Wwarn=parser-transition] warning: accept state in parser MyP1 is unreachable
 parser MyP1(packet_in pkt, out headers_t hdr) {
        ^^^^

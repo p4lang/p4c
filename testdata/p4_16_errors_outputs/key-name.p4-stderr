@@ -1,3 +1,3 @@
-key-name.p4(28): error: +: Complex key expression requires a @name annotation
+key-name.p4(28): [--Werror=legacy] error: +: Complex key expression requires a @name annotation
         key = { h.a + h.a : exact; }
                 ^^^^^^^^^

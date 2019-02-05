@@ -1,6 +1,6 @@
-interface1.p4(24): warning: x: unused instance
+interface1.p4(24): [--Wwarn=unused] warning: x: unused instance
     X<int<32>>() x;
                  ^
-interface1.p4(25): warning: y: unused instance
+interface1.p4(25): [--Wwarn=unused] warning: y: unused instance
     Y() y;
         ^

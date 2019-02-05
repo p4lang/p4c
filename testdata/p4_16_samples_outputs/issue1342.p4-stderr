@@ -1,4 +1,4 @@
-issue1342.p4(3): warning: X shadows X
+issue1342.p4(3): [--Wwarn=shadow] warning: X shadows X
 bit f<X>() {
       ^
 issue1342.p4(1)

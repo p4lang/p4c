@@ -1,7 +1,4 @@
-issue780-6.p4(1): error: header standard_metadata cannot have this name; it can only be used for metadata
+issue780-6.p4(1): [--Werror=legacy] error: header standard_metadata cannot have this name; it can only be used for metadata
 header_type standard_metadata {
 ^
-issue780-6.p4(1): error: struct standard_metadata cannot have this name; it can only be used for metadata
-header_type standard_metadata {
-^
-error: 2 errors encountered, aborting compilation
+error: 1 errors encountered, aborting compilation

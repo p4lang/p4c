@@ -1,13 +1,13 @@
-generic1_e.p4(21): error: Type parameters needed for x
+generic1_e.p4(21): [--Werror=type-error] error: Type parameters needed for x
 control p1(If x) // missing type parameter
               ^
-generic1_e.p4(26): error: If<...>: Type If has 1 type parameter(s), but it is specialized with 2
+generic1_e.p4(26): [--Werror=type-error] error: If<...>: Type If has 1 type parameter(s), but it is specialized with 2
 control p2(If<int<32>, int<32>> x) // too many type parameters
            ^^^^^^^^^^^^^^^^^^^^
 generic1_e.p4(16)
 extern If<T>
        ^^
-generic1_e.p4(36): error: h<...>: Type header h is not generic and thus it cannot be specialized using type arguments
+generic1_e.p4(36): [--Werror=type-error] error: h<...>: Type header h is not generic and thus it cannot be specialized using type arguments
         h<bit> x; // no type parameter
         ^^^^^^
 generic1_e.p4(31)

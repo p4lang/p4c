@@ -1,6 +1,6 @@
-neg.p4(21): error: /: Cannot operate on signed values
+neg.p4(21): [--Werror=type-error] error: /: Cannot operate on signed values
     c = a / b; // not defined for signed values
         ^^^^^
-neg.p4(22): error: %: Cannot operate on signed values
+neg.p4(22): [--Werror=type-error] error: %: Cannot operate on signed values
     c = a % b;
         ^^^^^

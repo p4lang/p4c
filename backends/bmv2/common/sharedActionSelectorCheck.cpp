@@ -17,6 +17,7 @@ limitations under the License.
 #include "sharedActionSelectorCheck.h"
 
 #include <algorithm>
+#include "lib/error.h"
 
 namespace BMV2 {
 
@@ -32,7 +33,7 @@ SharedActionSelectorCheck::preorder(const IR::P4Table* table) {
     auto implementation = table->properties->getProperty("implementation");
     if (implementation == nullptr) return false;
     if (!implementation->value->is<IR::ExpressionValue>()) {
-        ::error("%1%: expected expression for property", implementation);
+        ::error(ErrorType::ERR_EXPECTED, "expression for property", implementation);
         return false;
     }
     auto propv = implementation->value->to<IR::ExpressionValue>();
@@ -40,12 +41,12 @@ SharedActionSelectorCheck::preorder(const IR::P4Table* table) {
     auto pathe = propv->expression->to<IR::PathExpression>();
     auto decl = refMap->getDeclaration(pathe->path, true);
     if (!decl->is<IR::Declaration_Instance>()) {
-        ::error("%1%: expected a reference to an instance", pathe);
+        ::error(ErrorType::ERR_EXPECTED, "a reference to an instance", pathe);
         return false;
     }
     auto dcltype = typeMap->getType(pathe, true);
     if (!dcltype->is<IR::Type_Extern>()) {
-        ::error("%1%: unexpected type for implementation", dcltype);
+        ::error(ErrorType::ERR_UNEXPECTED, "type for implementation", dcltype);
         return false;
     }
     auto type_extern_name = dcltype->to<IR::Type_Extern>()->name;
@@ -72,8 +73,8 @@ SharedActionSelectorCheck::preorder(const IR::P4Table* table) {
     };
 
     if (!cmp_inputs(it->second, input)) {
-        ::error(
-                "Action selector '%1%' is used by multiple tables with different selector inputs",
+        ::error(ErrorType::ERR_INVALID,
+                "Action selector %1% is used by multiple tables with different selector inputs",
                 decl);
     }
 
