@@ -144,6 +144,11 @@ set (XFAIL_TESTS
   testdata/p4_14_samples/issue60.p4
   # compiler claims (incorrectly?) that c2 has mulitple successors, so is not supported
   testdata/p4_14_samples/issue-1426.p4
+  # As of 2019-Feb-04 latest p4c, this program fails due to the root
+  # cause of both issues #1694, but is not affected by #1669.  I have
+  # tested it with the proposed fix for issue #1694 that is on PR
+  # #1704, and it passes.
+  testdata/p4_14_samples/p414-special-ops-3-bmv2.p4
   # This test uses a feature currently unsupported in the BMv2 back-end.
   testdata/p4_16_samples/issue907-bmv2.p4
   # This test uses a table graph that is not implementable in BMv2
