@@ -413,10 +413,12 @@ const IR::Node *DoStrengthReduction::postorder(IR::Slice *expr) {
 
     // out-of-bound error has been caught in type checking
     if (auto sl = expr->e0->to<IR::Slice>()) {
-        auto e = sl->e0;
-        auto hi = expr->getH() + sl->getL();
-        auto lo = expr->getL() + sl->getL();
-        return new IR::Slice(e, hi, lo);
+        int delta = sl->getL();
+        expr->e0 = sl->e0;
+        if (delta != 0) {
+            expr->e1 = new IR::Constant(expr->getH() + delta);
+            expr->e2 = new IR::Constant(expr->getL() + delta);
+        }
     }
 
     auto slice_width = expr->getH() - expr->getL() + 1;
