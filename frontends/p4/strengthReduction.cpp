@@ -318,6 +318,12 @@ const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
             return new IR::Concat(expr->type, expr,
                     new IR::Constant(IR::Type_Bits::get(-(lo + shift_amt)), 0)); } }
 
+    while (auto cast = expr->e0->to<IR::Cast>()) {
+        if (size_t(expr->getH()) < cast->expr->type->width_bits()) {
+            expr->e0 = cast->expr;
+        } else {
+            break; } }
+
     while (auto cat = expr->e0->to<IR::Concat>()) {
         unsigned rwidth = cat->right->type->width_bits();
         if (expr->getL() >= rwidth) {
@@ -335,11 +341,11 @@ const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
 
     // out-of-bound error has been caught in type checking
     if (auto sl = expr->e0->to<IR::Slice>()) {
-        auto e = sl->e0;
-        auto hi = expr->getH() + sl->getL();
-        auto lo = expr->getL() + sl->getL();
-        return new IR::Slice(e, hi, lo);
-    }
+        int delta = sl->getL();
+        expr->e0 = sl->e0;
+        if (delta != 0) {
+            expr->e1 = new IR::Constant(expr->getH() + delta);
+            expr->e2 = new IR::Constant(expr->getL() + delta); } }
 
     auto slice_width = expr->getH() - expr->getL() + 1;
     if (slice_width == (unsigned)expr->e0->type->width_bits())
