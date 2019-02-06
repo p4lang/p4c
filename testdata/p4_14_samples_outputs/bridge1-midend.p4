@@ -14,8 +14,7 @@ header data_t {
 }
 
 struct metadata {
-    @name(".meta") 
-    metadata_t meta;
+    bit<8> _meta_val0;
 }
 
 struct headers {
@@ -32,7 +31,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".copyb1") action copyb1() {
-        hdr.data.b1 = meta.meta.val;
+        hdr.data.b1 = meta._meta_val0;
     }
     @name(".output") table output_0 {
         actions = {
@@ -51,7 +50,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".NoAction") action NoAction_3() {
     }
     @name(".setb1") action setb1(bit<8> val, bit<9> port) {
-        meta.meta.val = val;
+        meta._meta_val0 = val;
         standard_metadata.egress_spec = port;
     }
     @name(".noop") action noop() {
@@ -75,7 +74,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         key = {
-            meta.meta.val: exact @name("meta.val") ;
+            meta._meta_val0: exact @name("meta.val") ;
         }
         default_action = NoAction_3();
     }

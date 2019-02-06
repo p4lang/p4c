@@ -12,8 +12,7 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name(".meta") 
-    meta_t meta;
+    bit<16> _meta_val160;
 }
 
 struct headers {

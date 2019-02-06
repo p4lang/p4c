@@ -83,8 +83,78 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name(".ingress_metadata") 
-    ingress_metadata_t ingress_metadata;
+    bit<16> _ingress_metadata_bd0;
+    bit<12> _ingress_metadata_vrf1;
+    bit<12> _ingress_metadata_v6_vrf2;
+    bit<1>  _ingress_metadata_ipv4_term3;
+    bit<1>  _ingress_metadata_ipv6_term4;
+    bit<1>  _ingress_metadata_igmp_snoop5;
+    bit<1>  _ingress_metadata_tunnel_term6;
+    bit<32> _ingress_metadata_tunnel_vni7;
+    bit<16> _ingress_metadata_ing_meter8;
+    bit<16> _ingress_metadata_i_lif9;
+    bit<16> _ingress_metadata_i_tunnel_lif10;
+    bit<16> _ingress_metadata_o_lif11;
+    bit<16> _ingress_metadata_if_acl_label12;
+    bit<16> _ingress_metadata_route_acl_label13;
+    bit<16> _ingress_metadata_bd_flags14;
+    bit<8>  _ingress_metadata_stp_instance15;
+    bit<1>  _ingress_metadata_route16;
+    bit<1>  _ingress_metadata_inner_route17;
+    bit<1>  _ingress_metadata_l2_miss18;
+    bit<1>  _ingress_metadata_l3_lpm_miss19;
+    bit<16> _ingress_metadata_mc_index20;
+    bit<16> _ingress_metadata_inner_mc_index21;
+    bit<16> _ingress_metadata_nhop22;
+    bit<10> _ingress_metadata_ecmp_index23;
+    bit<14> _ingress_metadata_ecmp_offset24;
+    bit<16> _ingress_metadata_nsh_value25;
+    bit<8>  _ingress_metadata_lag_index26;
+    bit<15> _ingress_metadata_lag_port27;
+    bit<14> _ingress_metadata_lag_offset28;
+    bit<1>  _ingress_metadata_flood29;
+    bit<1>  _ingress_metadata_learn_type30;
+    bit<48> _ingress_metadata_learn_mac31;
+    bit<32> _ingress_metadata_learn_ipv432;
+    bit<1>  _ingress_metadata_mcast_drop33;
+    bit<1>  _ingress_metadata_drop_234;
+    bit<1>  _ingress_metadata_drop_135;
+    bit<1>  _ingress_metadata_drop_036;
+    bit<8>  _ingress_metadata_drop_reason37;
+    bit<1>  _ingress_metadata_copy_to_cpu38;
+    bit<10> _ingress_metadata_mirror_sesion_id39;
+    bit<1>  _ingress_metadata_urpf40;
+    bit<2>  _ingress_metadata_urpf_mode41;
+    bit<16> _ingress_metadata_urpf_strict42;
+    bit<1>  _ingress_metadata_ingress_bypass43;
+    bit<24> _ingress_metadata_ipv4_dstaddr_24b44;
+    bit<16> _ingress_metadata_nhop_index45;
+    bit<1>  _ingress_metadata_if_drop46;
+    bit<1>  _ingress_metadata_route_drop47;
+    bit<32> _ingress_metadata_ipv4_dest48;
+    bit<48> _ingress_metadata_eth_dstAddr49;
+    bit<48> _ingress_metadata_eth_srcAddr50;
+    bit<8>  _ingress_metadata_ipv4_ttl51;
+    bit<3>  _ingress_metadata_dcsp52;
+    bit<3>  _ingress_metadata_buffer_qos53;
+    bit<16> _ingress_metadata_ip_srcPort54;
+    bit<16> _ingress_metadata_ip_dstPort55;
+    bit<1>  _ingress_metadata_mcast_pkt56;
+    bit<1>  _ingress_metadata_inner_mcast_pkt57;
+    bit<1>  _ingress_metadata_if_copy_to_cpu58;
+    bit<16> _ingress_metadata_if_nhop59;
+    bit<9>  _ingress_metadata_if_port60;
+    bit<10> _ingress_metadata_if_ecmp_index61;
+    bit<8>  _ingress_metadata_if_lag_index62;
+    bit<1>  _ingress_metadata_route_copy_to_cpu63;
+    bit<16> _ingress_metadata_route_nhop64;
+    bit<9>  _ingress_metadata_route_port65;
+    bit<10> _ingress_metadata_route_ecmp_index66;
+    bit<8>  _ingress_metadata_route_lag_index67;
+    bit<8>  _ingress_metadata_tun_type68;
+    bit<1>  _ingress_metadata_nat_enable69;
+    bit<13> _ingress_metadata_nat_source_index70;
+    bit<13> _ingress_metadata_nat_dest_index71;
 }
 
 struct headers {
@@ -108,7 +178,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".no_action") action no_action() {
     }
     @name(".ing_meter_set") action ing_meter_set(bit<16> meter_) {
-        meta.ingress_metadata.ing_meter = meter_;
+        meta._ingress_metadata_ing_meter8 = meter_;
     }
     @name(".storm_control") table storm_control_0 {
         actions = {
@@ -117,8 +187,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_0();
         }
         key = {
-            meta.ingress_metadata.bd: exact @name("ingress_metadata.bd") ;
-            hdr.ethernet.dstAddr    : ternary @name("ethernet.dstAddr") ;
+            meta._ingress_metadata_bd0: exact @name("ingress_metadata.bd") ;
+            hdr.ethernet.dstAddr      : ternary @name("ethernet.dstAddr") ;
         }
         size = 8192;
         default_action = NoAction_0();

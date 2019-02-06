@@ -24,8 +24,12 @@ header vag_t {
 }
 
 struct metadata {
-    @name(".ing_metadata") 
-    ingress_metadata_t ing_metadata;
+    bit<1>    _ing_metadata_drop0;
+    bit<8>    _ing_metadata_egress_port1;
+    bit<1024> _ing_metadata_f12;
+    bit<512>  _ing_metadata_f23;
+    bit<256>  _ing_metadata_f34;
+    bit<128>  _ing_metadata_f45;
 }
 
 struct headers {
@@ -80,16 +84,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".nop") action nop_8() {
     }
     @name(".set_f1") action set_f1(bit<1024> f1) {
-        meta.ing_metadata.f1 = f1;
+        meta._ing_metadata_f12 = f1;
     }
     @name(".set_f2") action set_f2(bit<512> f2) {
-        meta.ing_metadata.f2 = f2;
+        meta._ing_metadata_f23 = f2;
     }
     @name(".set_f3") action set_f3(bit<256> f3) {
-        meta.ing_metadata.f3 = f3;
+        meta._ing_metadata_f34 = f3;
     }
     @name(".set_f4") action set_f4(bit<128> f4) {
-        meta.ing_metadata.f4 = f4;
+        meta._ing_metadata_f45 = f4;
     }
     @name(".i_t1") table i_t1_0 {
         actions = {

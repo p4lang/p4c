@@ -52,7 +52,6 @@ limitations under the License.
 #include "lib/nullstream.h"
 #include "lib/ordered_set.h"
 #include "midend/removeParameters.h"
-#include "midend/flattenHeaders.h"
 
 #include "p4RuntimeSerializer.h"
 #include "p4RuntimeArchHandler.h"
