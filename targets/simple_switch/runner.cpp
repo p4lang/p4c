@@ -74,6 +74,14 @@ int SimpleSwitchRunner::init_and_start(const bm::OptionsParser &parser) {
   return 0;
 }
 
+device_id_t SimpleSwitchRunner::get_device_id() const {
+  return simple_switch->get_device_id();
+}
+
+DevMgr *SimpleSwitchRunner::get_dev_mgr() {
+  return simple_switch.get();
+}
+
 }  // namespace sswitch
 
 }  // namespace bm

@@ -21,6 +21,8 @@
 #ifndef SIMPLE_SWITCH_BM_SIMPLE_SWITCH_RUNNER_H_
 #define SIMPLE_SWITCH_BM_SIMPLE_SWITCH_RUNNER_H_
 
+#include <bm/bm_sim/dev_mgr.h>
+#include <bm/bm_sim/device_id.h>
 #include <bm/bm_sim/options_parse.h>
 
 #include <cstdint>
@@ -38,6 +40,10 @@ class SimpleSwitchRunner {
   ~SimpleSwitchRunner();
 
   int init_and_start(const bm::OptionsParser &parser);
+
+  device_id_t get_device_id() const;
+
+  DevMgr *get_dev_mgr();
 
  private:
   uint32_t cpu_port{0};
