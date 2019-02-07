@@ -91,15 +91,16 @@ const IR::Node* LowerExpressions::postorder(IR::Slice* expression) {
     // This is in a RHS expression a[m:l]  ->  (cast)(a >> l)
     int h = expression->getH();
     int l = expression->getL();
+    auto e0type = typeMap->getType(expression->e0, true);
+    BUG_CHECK(e0type->is<IR::Type_Bits>(), "%1%: expected a bit<> type", e0type);
     const IR::Expression* expr;
     if (l != 0) {
         expr = new IR::Shr(expression->e0->srcInfo, expression->e0, new IR::Constant(l));
-        auto e0type = typeMap->getType(expression->e0, true);
         typeMap->setType(expr, e0type);
     } else {
         expr = expression->e0;
     }
-    auto type = IR::Type_Bits::get(h - l + 1);
+    auto type = IR::Type_Bits::get(h - l + 1, e0type->to<IR::Type_Bits>()->isSigned);
     auto result = new IR::Cast(expression->srcInfo, type, expr);
     typeMap->setType(result, type);
     LOG3("Replaced " << expression << " with " << result);
