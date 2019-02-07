@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "typeChecker.h"
+#include <iostream>
 #include "lib/log.h"
 #include "typeUnification.h"
 #include "typeSubstitution.h"
@@ -24,6 +25,8 @@ limitations under the License.
 #include "syntacticEquivalence.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/methodInstance.h"
+
+using namespace std;
 
 namespace P4 {
 
@@ -175,7 +178,7 @@ const IR::Type* TypeInference::getTypeType(const IR::Node* element) const {
     // See comment in getType() above.
     if (result == nullptr) {
         if (::errorCount() == 0)
-            BUG("Could not find type of %1%", element);
+            BUG("Could not find Typetype of %1%", element);
         return nullptr;
     }
     BUG_CHECK(result->is<IR::Type_Type>(), "%1%: expected a TypeType", dbp(result));
@@ -2452,8 +2455,6 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             if (!isLeftValue(expression->expr))
                 typeError("%1%: must be applied to a left-value", expression);
             // Built-in method
-            // TODO(Hemant): remove duplicate code below. Without dup
-            // the code crashes if canonicalisze is outside the if-else-if
             if (member == IR::Type_Header::setValid ||
                 member == IR::Type_Header::setInvalid) {
                 auto type = new IR::Type_Method(IR::Type_Void::get(),
@@ -2473,7 +2474,29 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                     return expression;
                 setType(getOriginal(), ctype);
                 setType(expression, ctype);
+
+                const IR::Expression* e = expression;
+                auto mem = e->to<IR::Member>();
+                auto t = typeMap->getType(mem->expr, true);
+                auto ht = t->to<IR::Type_Header>();
+                if (ht == nullptr) {
+                    ::error("%1%: null header?", expression);
+                    return expression;
+                }
+                auto sz = ht->width_bits();
+                if (member == IR::Type_Header::sizeBits) {
+                    cout << "sizeBits: " << sz << endl;
+                } else if (member == IR::Type_Header::sizeBytes) {
+                    sz = ((sz + 7) >> 3);
+                    cout << "sizeBytes: " << sz << endl;
+                }
+#if 1
                 return expression;
+#else  // TODO: which method in this class to swap the method with result?
+                auto result = new IR::Constant(sz);
+                setType(result, IR::Type_Bits::get(sz));
+                return result;
+#endif
             }
         }
 
@@ -2848,7 +2871,9 @@ void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
 
 const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
     if (done()) return expression;
+    auto expr = expression->to<IR::MethodCallExpression>()->method;
     LOG2("Solving method call " << dbp(expression));
+    //  cout << "Solving method call " << expr->toString() << endl;
     auto methodType = getType(expression->method);
     if (methodType == nullptr)
         return expression;
