@@ -643,6 +643,11 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
             auto v = base->getField(StorageFactory::validFieldName);
             expressionWrites(expression, v);
             return false;
+        } else if (name == IR::Type_Header::sizeBits ||
+                   name == IR::Type_Header::sizeBytes) {
+            auto v = base->getField(StorageFactory::validFieldName);
+            expressionWrites(expression, v);
+            return false;
         } else if (name == IR::Type_Stack::push_front ||
                    name == IR::Type_Stack::pop_front) {
             expressionWrites(expression, base);

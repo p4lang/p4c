@@ -263,6 +263,8 @@ class Type_Header : Type_StructLike {
     static const cstring setValid;
     static const cstring setInvalid;
     static const cstring isValid;
+    static const cstring sizeBits;
+    static const cstring sizeBytes;
 #nodbprint
     toString{ return cstring("header ") + externalName(); }
 }

@@ -28,6 +28,8 @@ const cstring IR::Type_Stack::pop_front = "pop_front";
 const cstring IR::Type_Header::isValid = "isValid";
 const cstring IR::Type_Header::setValid = "setValid";
 const cstring IR::Type_Header::setInvalid = "setInvalid";
+const cstring IR::Type_Header::sizeBits = "sizeBits";
+const cstring IR::Type_Header::sizeBytes = "sizeBytes";
 
 const IR::ID IR::Type_Table::hit = ID("hit");
 const IR::ID IR::Type_Table::action_run = ID("action_run");

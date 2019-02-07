@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "lib/log.h"
 #include "typeChecker.h"
+#include "lib/log.h"
 #include "typeUnification.h"
 #include "typeSubstitution.h"
 #include "typeConstraints.h"
@@ -2449,12 +2449,25 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             }
         }
         if (type->is<IR::Type_Header>()) {
+            if (!isLeftValue(expression->expr))
+                typeError("%1%: must be applied to a left-value", expression);
+            // Built-in method
+            // TODO(Hemant): remove duplicate code below. Without dup
+            // the code crashes if canonicalisze is outside the if-else-if
             if (member == IR::Type_Header::setValid ||
                 member == IR::Type_Header::setInvalid) {
-                if (!isLeftValue(expression->expr))
-                    typeError("%1%: must be applied to a left-value", expression);
-                // Built-in method
-                auto type = new IR::Type_Method(IR::Type_Void::get(), new IR::ParameterList);
+                auto type = new IR::Type_Method(IR::Type_Void::get(),
+                                                new IR::ParameterList);
+                auto ctype = canonicalize(type);
+                if (ctype == nullptr)
+                    return expression;
+                setType(getOriginal(), ctype);
+                setType(expression, ctype);
+                return expression;
+            } else if ((member == IR::Type_Header::sizeBits) ||
+                       (member == IR::Type_Header::sizeBytes)) {
+                auto type = new IR::Type_Method(IR::Type_Bits::get(32),
+                                                new IR::ParameterList);
                 auto ctype = canonicalize(type);
                 if (ctype == nullptr)
                     return expression;
