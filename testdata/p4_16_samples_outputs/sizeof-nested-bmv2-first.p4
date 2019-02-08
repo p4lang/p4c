@@ -12,7 +12,8 @@ struct alt_t {
 }
 
 header bitvec_hdr {
-    row_t row;
+    row_t      row;
+    varbit<32> v;
 }
 
 struct col_t {
@@ -25,6 +26,7 @@ struct local_metadata_t {
     col_t      col;
     bitvec_hdr bvh0;
     bitvec_hdr bvh1;
+    varbit<32> v;
 }
 
 struct parsed_packet_t {
@@ -43,11 +45,11 @@ struct tst_t {
 parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     bit<32> len = 32w0;
     state start {
-        pk.extract<bitvec_hdr>(h.bvh0);
-        pk.extract<bitvec_hdr>(h.bvh1);
+        pk.extract<bitvec_hdr>(h.bvh0, 32w32);
+        pk.extract<bitvec_hdr>(h.bvh1, 32w32);
         len = 32w32;
         len = 32w4;
-        pk.extract<bitvec_hdr>(local_metadata.col.bvh);
+        pk.extract<bitvec_hdr>(local_metadata.col.bvh, 32w32);
         transition accept;
     }
 }
