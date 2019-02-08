@@ -148,9 +148,13 @@ class BackendDriver:
         # P4Runtime options
         if opts.p4runtime_file:
             self.add_command_option('compiler',
-                                       "--p4runtime-file {}".format(opts.p4runtime_file))
+                                    "--p4runtime-file {}".format(opts.p4runtime_file))
             self.add_command_option('compiler',
-                                       "--p4runtime-format {}".format(opts.p4runtime_format))
+                                    "--p4runtime-format {}".format(opts.p4runtime_format))
+
+        if opts.p4runtime_files:
+            self.add_command_option('compiler',
+                                    "--p4runtime-files {}".format(opts.p4runtime_files))
 
         # set developer options
         if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
