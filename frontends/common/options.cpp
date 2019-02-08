@@ -111,9 +111,9 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    "to the specified file.");
     registerOption("--p4runtime-entries-files", "files",
                    [this](const char* arg) { p4RuntimeEntriesFiles = arg; return true; },
-                   "Write static table entries as a P4Runtime WriteRequest message"
-                   "to the specified files; the file format is inferred from the suffix."
-                   "Legal suffixes are .json, .txt and .bin");
+                   "Write static table entries as a P4Runtime WriteRequest message\n"
+                   "to the specified files (comma-separated list); the file format is\n"
+                   "inferred from the suffix. Legal suffixes are .json, .txt and .bin");
     registerOption("--p4runtime-format", "{binary,json,text}",
                    [this](const char* arg) {
                        if (!strcmp(arg, "binary")) {
