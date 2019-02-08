@@ -234,8 +234,7 @@ def process_file(options, argv):
     if arch is not None:
         args.extend(["--arch", arch])
         if options.generateP4Runtime:
-            args.extend(["--p4runtime-format", "text"])
-            args.extend(["--p4runtime-file", p4runtimefile])
+            args.extend(["--p4runtime-files", p4runtimefile])
 
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
         args.extend(["--std", "p4-14"]);

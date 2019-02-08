@@ -1570,8 +1570,6 @@ P4RuntimeSerializer::serializeP4RuntimeIfRequired(const IR::P4Program* program,
     }
 
     // Do the same for the entries files
-    // The options parser in the frontend already prints a warning if
-    // '--p4runtime-entries-file' is used without '--p4runtime-file'.
     files.clear();
     formats.clear();
     if (!options.p4RuntimeEntriesFile.isNullOrEmpty()) {

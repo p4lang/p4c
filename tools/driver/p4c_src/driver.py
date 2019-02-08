@@ -147,6 +147,8 @@ class BackendDriver:
 
         # P4Runtime options
         if opts.p4runtime_file:
+            print >> sys.stderr, "'--p4runtime-file' and '--p4runtime-format'", \
+                "are deprecated, consider using '--p4runtime-files'"
             self.add_command_option('compiler',
                                     "--p4runtime-file {}".format(opts.p4runtime_file))
             self.add_command_option('compiler',
