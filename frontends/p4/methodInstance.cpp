@@ -55,9 +55,7 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, ReferenceMap* refMa
         } else if (basetype->is<IR::Type_Header>()) {
             if (mem->member == IR::Type_Header::setValid ||
                 mem->member == IR::Type_Header::setInvalid ||
-                mem->member == IR::Type_Header::isValid ||
-                mem->member == IR::Type_Header::sizeBits ||
-                mem->member == IR::Type_Header::sizeBytes)
+                mem->member == IR::Type_Header::isValid)
                 return new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>());
         } else if (basetype->is<IR::Type_Stack>()) {
             if (mem->member == IR::Type_Stack::push_front ||

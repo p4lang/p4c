@@ -102,7 +102,7 @@ parser ParserImpl(packet_in packet,
     state parse_ethernet {
         packet.extract(hdr.ethernet);
         len = hdr.ethernet.sizeBits() + hdr.ethernet.sizeBits();
-        len = hdr.ethernet.sizeBytes();	
+        len = hdr.ethernet.sizeBytes() + hdr.ethernet.sizeBytes();	
         transition select(hdr.ethernet.etherType) {
             ETHERTYPE_IPV4: parse_ipv4;
             default: accept;

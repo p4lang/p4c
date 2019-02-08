@@ -1851,21 +1851,8 @@ const IR::Node* TypeInference::binaryBool(const IR::Operation_Binary* expression
 
 const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expression) {
     if (done()) return expression;
-    // dump(expression);
-    const IR::Type *rtype, *ltype;
-    if ((expression->left != nullptr) &&
-		(expression->left->to<IR::MethodCallExpression>() != nullptr)) {
-	  auto method = expression->left->to<IR::MethodCallExpression>()->method;
-      if (method->type->is<IR::Type_Bits>()) {
-		ltype = method->type->to<IR::Type_Bits>();
-		rtype = ltype;
-		//		expression->left = method->to<IR::Constant>();
-		cout << "TI Visiting " << dbp(getOriginal()) << expression << endl;
-	  }
-    } else {
-        ltype = getType(expression->left);
-        rtype = getType(expression->right);
-	}
+    auto ltype = getType(expression->left);
+    auto rtype = getType(expression->right);
     if (ltype == nullptr || rtype == nullptr)
         return expression;
 
@@ -2490,17 +2477,16 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 }
                 auto sz = ht->width_bits();
                 if (member == IR::Type_Header::sizeBits) {
-                    cout << "sizeBits: " << sz << endl;
+                    // cout << "sizeBits: " << sz << endl;
                 } else if (member == IR::Type_Header::sizeBytes) {
                     sz = ((sz + 7) >> 3);
-                    cout << "sizeBytes: " << sz << endl;
+                    // cout << "sizeBytes: " << sz << endl;
                 }
                 auto result = new IR::Constant(sz);
                 result->type = IR::Type_Bits::get(32);
                 auto ctype = canonicalize(result->type);
                 BUG_CHECK(ctype != nullptr, "null ctype %1%",  expression);
                 setType(result, ctype);
-				// dump(result);
                 return result;
             }
         }
@@ -2879,8 +2865,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
     auto method = expression->to<IR::MethodCallExpression>()->method;
     LOG2("Solving method call " << dbp(expression));
     if (method->type->is<IR::Type_Bits>()) {
-	    // cout << "Solving method call " << method->toString() << endl;
-        return expression;
+        return method;
     }
     auto methodType = getType(expression->method);
     if (methodType == nullptr)
@@ -3264,20 +3249,7 @@ const IR::Node* TypeInference::postorder(IR::ReturnStatement* statement) {
 
 const IR::Node* TypeInference::postorder(IR::AssignmentStatement* assign) {
     LOG3("TI Visiting " << dbp(getOriginal()));
-    const IR::Type *rtype, *ltype;
-    if ((assign->right != nullptr) &&
-        (assign->right->to<IR::MethodCallExpression>() != nullptr)) {
-        auto method = assign->right->to<IR::MethodCallExpression>()->method;
-        if (method->type->is<IR::Type_Bits>()) {
-            // dump(assign->right);
-            rtype = method->type->to<IR::Type_Bits>();
-            ltype = rtype;
-            assign->right = method->to<IR::Constant>();
-        }
-		cout << "TI Visiting " << dbp(getOriginal()) << assign << endl;
-    }
-
-    ltype = getType(assign->left);
+    auto ltype = getType(assign->left);
     if (ltype == nullptr) {
         ::error("assign has null ltype: %1%", ltype);
         return assign;
