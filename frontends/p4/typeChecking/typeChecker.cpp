@@ -513,6 +513,17 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         else
             canon = str;
         return canon;
+    } else if (type->is<IR::Type_SerStruct>()) {
+        auto str = type->to<IR::Type_SerStruct>();
+        auto fields = canonicalizeFields(str);
+        if (fields == nullptr)
+            return nullptr;
+        const IR::Type* canon;
+        if (fields != &str->fields)
+            canon = new IR::Type_SerStruct(str->srcInfo, str->name, str->annotations, *fields);
+        else
+            canon = str;
+        return canon;
     } else if (type->is<IR::Type_HeaderUnion>()) {
         auto str = type->to<IR::Type_HeaderUnion>();
         auto fields = canonicalizeFields(str);
@@ -1357,9 +1368,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
         while (t->is<IR::Type_Newtype>())
             t = getTypeType(t->to<IR::Type_Newtype>()->type);
         return t->is<IR::Type_Bits>() || t->is<IR::Type_Varbits>() ||
-               // Nested bit-vector struct inside a Header is supported
-               // Experimental feature - see Issue 383.
-               (t->is<IR::Type_Struct>() && onlyBitsOrBitStructs(t)) ||
+               t->is<IR::Type_SerStruct>() ||
                t->is<IR::Type_SerEnum>() || t->is<IR::Type_Boolean>(); };
     validateFields(canon, validator);
 
@@ -1392,6 +1401,18 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
         t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() ||
         t->is<IR::Type_Varbits>() || t->is<IR::Type_ActionEnum>() ||
         t->is<IR::Type_Tuple>() || t->is<IR::Type_SerEnum>(); };
+    validateFields(canon, validator);
+    return type;
+}
+
+const IR::Node* TypeInference::postorder(IR::Type_SerStruct* type) {
+    auto canon = setTypeType(type);
+    auto validator = [this] (const IR::Type* t) {
+        while (t->is<IR::Type_Newtype>())
+            t = getTypeType(t->to<IR::Type_Newtype>()->type);
+        return t->is<IR::Type_SerStruct>() || t->is<IR::Type_Bits>() ||
+               t->is<IR::Type_Boolean>() ||
+               t->is<IR::Type_SerEnum>(); };
     validateFields(canon, validator);
     return type;
 }
@@ -2719,24 +2740,6 @@ bool TypeInference::hasVarbitsOrUnions(const IR::Type* type) const {
             if (hasVarbitsOrUnions(f))
                 return true;
         }
-    }
-    return false;
-}
-
-bool TypeInference::onlyBitsOrBitStructs(const IR::Type* type) const {
-    // called for a canonical type
-    if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>() ||
-        type->is<IR::Type_SerEnum>()) {
-        return true;
-    } else if (auto ht = type->to<IR::Type_Struct>()) {
-        for (auto f : ht->fields) {
-            auto ftype = typeMap->getType(f);
-            BUG_CHECK((ftype != nullptr), "onlyBitsOrBitStructs check could not find type "
-                      "for %1%", f);
-            if (!onlyBitsOrBitStructs(ftype))
-                return false;
-        }
-        return true;
     }
     return false;
 }

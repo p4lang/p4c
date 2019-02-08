@@ -312,7 +312,8 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
                 return false;
         }
         return true;
-    } else if (dest->is<IR::Type_Struct>() || dest->is<IR::Type_Header>()) {
+    } else if (dest->is<IR::Type_Struct>() || dest->is<IR::Type_Header>() ||
+               dest->is<IR::Type_SerStruct>()) {
         auto strct = dest->to<IR::Type_StructLike>();
         if (auto tpl = src->to<IR::Type_Tuple>()) {
             if (strct->fields.size() != tpl->components.size()) {

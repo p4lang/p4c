@@ -129,7 +129,6 @@ class TypeInference : public Transform {
 
     // various helpers
     bool hasVarbitsOrUnions(const IR::Type* type) const;
-    bool onlyBitsOrBitStructs(const IR::Type* type) const;
     void checkCorelibMethods(const ExternMethod* em) const;
     void checkEmitType(const IR::Expression* emit, const IR::Type* type) const;
     bool containsHeader(const IR::Type* canonType);
@@ -212,6 +211,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Type_Header* type) override;
     const IR::Node* postorder(IR::Type_Stack* type) override;
     const IR::Node* postorder(IR::Type_Struct* type) override;
+    const IR::Node* postorder(IR::Type_SerStruct* type) override;
     const IR::Node* postorder(IR::Type_HeaderUnion* type) override;
     const IR::Node* postorder(IR::Type_Typedef* type) override;
     const IR::Node* postorder(IR::Type_Specialized* type) override;

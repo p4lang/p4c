@@ -267,6 +267,11 @@ class Type_Header : Type_StructLike {
     toString{ return cstring("header ") + externalName(); }
 }
 
+class Type_SerStruct : Type_StructLike {
+#nodbprint
+    toString{ return cstring("serializable struct ") + externalName(); }
+}
+
 class Type_Set : Type {
     Type elementType;
     dbprint{ Node::dbprint(out); out << "<" << elementType << ">"; }

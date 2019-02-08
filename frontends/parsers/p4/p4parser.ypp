@@ -191,8 +191,8 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %token<Token>      TRUE FALSE THIS
 %token<Token>      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DEFAULT
                    ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
-                   INT KEY SELECT MATCH_KIND TYPE OUT PACKAGE PARSER PRAGMA RETURN STATE
-                   STRUCT SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
+                   INT KEY SELECT MATCH_KIND TYPE OUT PACKAGE PARSER PRAGMA RETURN SERIALIZABLE
+                   STATE STRUCT SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
 
 %token<cstring> IDENTIFIER TYPE_IDENTIFIER STRING_LITERAL
 %token<UnparsedConstant>  INTEGER
@@ -246,6 +246,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
                             objDeclaration tableDeclaration controlLocalDeclaration
                             parserLocalElement valueSetDeclaration
 %type<IR::Type_Declaration*>  headerTypeDeclaration structTypeDeclaration
+                              serStructTypeDeclaration
                               headerUnionDeclaration derivedTypeDeclaration
                               parserDeclaration controlDeclaration enumDeclaration
                               typedefDeclaration packageTypeDeclaration typeDeclaration
@@ -939,6 +940,7 @@ derivedTypeDeclaration
     : headerTypeDeclaration            { $$ = $1; }
     | headerUnionDeclaration           { $$ = $1; }
     | structTypeDeclaration            { $$ = $1; }
+    | serStructTypeDeclaration         { $$ = $1; }
     | enumDeclaration                  { $$ = $1; }
     ;
 
@@ -952,6 +954,12 @@ structTypeDeclaration
     : optAnnotations
         STRUCT name { driver.structure->declareType(*$3); }
         "{" structFieldList "}" { $$ = new IR::Type_Struct(@3, *$3, $1, *$6); }
+    ;
+
+serStructTypeDeclaration
+    : optAnnotations
+        SERIALIZABLE STRUCT name { driver.structure->declareType(*$4); }
+        "{" structFieldList "}" { $$ = new IR::Type_SerStruct(@4, *$4, $1, *$7); }
     ;
 
 headerUnionDeclaration

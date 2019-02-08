@@ -23,7 +23,7 @@ void HeaderTypeReplacement::flatten(const P4::TypeMap* typeMap,
                                     cstring prefix,
                                     const IR::Type* type,
                                     IR::IndexedVector<IR::StructField> *fields) {
-    if (auto st = type->to<IR::Type_Struct>()) {
+    if (auto st = type->to<IR::Type_SerStruct>()) {
         for (auto f : st->fields) {
             auto ft = typeMap->getType(f, true);
             flatten(typeMap, prefix + "." + f->name, ft, fields);
@@ -69,7 +69,7 @@ bool FindHeaderTypesToReplace::preorder(const IR::Type_Header* type) {
     // check if header has structs in it and create flat replacement if it does
     for (auto f : type->fields) {
         auto ft = map->typeMap->getType(f, true);
-        if (ft->is<IR::Type_Struct>()) {
+        if (ft->is<IR::Type_SerStruct>()) {
             map->createReplacement(type);
             break;
         }
@@ -125,7 +125,7 @@ const IR::Node* ReplaceHeaders::postorder(IR::Member* expression) {
     if (newFieldName.isNullOrEmpty()) {
         auto type = replacementMap->typeMap->getType(getOriginal(), true);
         // This could be, for example, a method like setValid.
-        if (!type->is<IR::Type_Struct>())
+        if (!type->is<IR::Type_SerStruct>())
             return expression;
         if (getParent<IR::Member>() != nullptr)
             // We only want to process the outermost Member

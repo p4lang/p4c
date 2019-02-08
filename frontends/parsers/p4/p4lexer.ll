@@ -129,6 +129,7 @@ using Parser = P4::P4Parser;
 "package"       { BEGIN(driver.saveState); return makeToken(PACKAGE); }
 "return"        { BEGIN(driver.saveState); return makeToken(RETURN); }
 "select"        { BEGIN(driver.saveState); return makeToken(SELECT); }
+"serializable"  { BEGIN(driver.saveState); return makeToken(SERIALIZABLE); }
 "state"         { BEGIN(driver.saveState); return makeToken(STATE); }
 "struct"        { BEGIN(driver.saveState); return makeToken(STRUCT); }
 "switch"        { BEGIN(driver.saveState); return makeToken(SWITCH); }
