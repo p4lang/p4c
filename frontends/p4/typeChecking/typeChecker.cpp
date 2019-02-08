@@ -2452,11 +2452,11 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             }
         }
         if (type->is<IR::Type_Header>()) {
-            if (!isLeftValue(expression->expr))
-                typeError("%1%: must be applied to a left-value", expression);
-            // Built-in method
+            // Built-in methods
             if (member == IR::Type_Header::setValid ||
                 member == IR::Type_Header::setInvalid) {
+                if (!isLeftValue(expression->expr))
+                    typeError("%1%: must be applied to a left-value", expression);
                 auto type = new IR::Type_Method(IR::Type_Void::get(),
                                                 new IR::ParameterList);
                 auto ctype = canonicalize(type);
@@ -2476,12 +2476,13 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                     return expression;
                 }
                 auto sz = ht->width_bits();
-                if (member == IR::Type_Header::sizeBits) {
-                    // cout << "sizeBits: " << sz << endl;
-                } else if (member == IR::Type_Header::sizeBytes) {
+                if (member == IR::Type_Header::sizeBytes) {
                     sz = ((sz + 7) >> 3);
                     // cout << "sizeBytes: " << sz << endl;
+                } else {
+                    // cout << "sizeBits: " << sz << endl;
                 }
+
                 auto result = new IR::Constant(sz);
                 result->type = IR::Type_Bits::get(32);
                 auto ctype = canonicalize(result->type);

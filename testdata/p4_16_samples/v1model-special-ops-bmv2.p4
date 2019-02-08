@@ -94,15 +94,12 @@ parser ParserImpl(packet_in packet,
                   inout standard_metadata_t standard_metadata)
 {
     const bit<16> ETHERTYPE_IPV4 = 16w0x0800;
-    bit<32> len = 0;
 
     state start {
         transition parse_ethernet;
     }
     state parse_ethernet {
         packet.extract(hdr.ethernet);
-        len = hdr.ethernet.sizeBits() + hdr.ethernet.sizeBits();
-        len = hdr.ethernet.sizeBytes() + hdr.ethernet.sizeBytes();	
         transition select(hdr.ethernet.etherType) {
             ETHERTYPE_IPV4: parse_ipv4;
             default: accept;
