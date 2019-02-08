@@ -1851,8 +1851,21 @@ const IR::Node* TypeInference::binaryBool(const IR::Operation_Binary* expression
 
 const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expression) {
     if (done()) return expression;
-    auto ltype = getType(expression->left);
-    auto rtype = getType(expression->right);
+    // dump(expression);
+    const IR::Type *rtype, *ltype;
+    if ((expression->left != nullptr) &&
+		(expression->left->to<IR::MethodCallExpression>() != nullptr)) {
+	  auto method = expression->left->to<IR::MethodCallExpression>()->method;
+      if (method->type->is<IR::Type_Bits>()) {
+		ltype = method->type->to<IR::Type_Bits>();
+		rtype = ltype;
+		//		expression->left = method->to<IR::Constant>();
+		cout << "TI Visiting " << dbp(getOriginal()) << expression << endl;
+	  }
+    } else {
+        ltype = getType(expression->left);
+        rtype = getType(expression->right);
+	}
     if (ltype == nullptr || rtype == nullptr)
         return expression;
 
@@ -2487,7 +2500,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 auto ctype = canonicalize(result->type);
                 BUG_CHECK(ctype != nullptr, "null ctype %1%",  expression);
                 setType(result, ctype);
-                // dump(result);
+				// dump(result);
                 return result;
             }
         }
@@ -2866,7 +2879,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
     auto method = expression->to<IR::MethodCallExpression>()->method;
     LOG2("Solving method call " << dbp(expression));
     if (method->type->is<IR::Type_Bits>()) {
-        // cout << "Solving method call " << method->toString() << endl;
+	    // cout << "Solving method call " << method->toString() << endl;
         return expression;
     }
     auto methodType = getType(expression->method);
@@ -3261,7 +3274,7 @@ const IR::Node* TypeInference::postorder(IR::AssignmentStatement* assign) {
             ltype = rtype;
             assign->right = method->to<IR::Constant>();
         }
-        cout << "TI Visiting " << dbp(getOriginal()) << assign << endl;
+		cout << "TI Visiting " << dbp(getOriginal()) << assign << endl;
     }
 
     ltype = getType(assign->left);

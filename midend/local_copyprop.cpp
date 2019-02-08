@@ -413,8 +413,7 @@ IR::MethodCallExpression *DoLocalCopyPropagation::postorder(IR::MethodCallExpres
                     if (inferForFunc)
                         inferForFunc->reads.insert(obj);
                 } else {
-                    BUG_CHECK(mem->member == "setValid" || mem->member == "setInvalid"
-                              || mem->member == "sizeBits" || mem->member == "sizeBytes",
+                    BUG_CHECK(mem->member == "setValid" || mem->member == "setInvalid",
                               "Unexpected header method %s", mem->member);
                     LOG3("header method call " << mc->method << " writes to " << obj);
                     dropValuesUsing(obj);
