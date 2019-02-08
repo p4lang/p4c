@@ -101,7 +101,7 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    [this](const char* arg) { p4RuntimeFiles = arg; return true; },
                    "Write the P4Runtime control plane API description to the specified\n"
                    "files (comma-separated list).  The format is inferred from the file\n"
-                   "suffix: .info, .json, .p4info");
+                   "suffix: .txt, .json, .bin");
     registerOption("--p4runtime-file", "file",
                    [this](const char* arg) { p4RuntimeFile = arg; return true; },
                    "Write a P4Runtime control plane API description to the specified file.");
@@ -109,6 +109,11 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    [this](const char* arg) { p4RuntimeEntriesFile = arg; return true; },
                    "Write static table entries as a P4Runtime WriteRequest message"
                    "to the specified file.");
+    registerOption("--p4runtime-entries-files", "files",
+                   [this](const char* arg) { p4RuntimeEntriesFiles = arg; return true; },
+                   "Write static table entries as a P4Runtime WriteRequest message"
+                   "to the specified files; the file format is inferred from the suffix."
+                   "Legal suffixes are .json, .txt and .bin");
     registerOption("--p4runtime-format", "{binary,json,text}",
                    [this](const char* arg) {
                        if (!strcmp(arg, "binary")) {
