@@ -120,6 +120,11 @@ def main():
                         help="Write a P4Runtime control plane API description "
                         "to the specified file.",
                         action="store", default=None)
+    parser.add_argument("--p4runtime-files",
+                        help="Write a set of P4Runtime control plane API description "
+                        "to the specified files; format is detected based on file suffix."
+                        "Legal suffixes are .txt, .json, .bin",
+                        action="store", default=None)
     parser.add_argument("--p4runtime-format",
                         choices=["binary", "json", "text"],
                         help="Choose output format for the P4Runtime API "

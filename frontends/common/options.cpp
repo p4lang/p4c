@@ -97,6 +97,11 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("--toJSON", "file",
                    [this](const char* arg) { dumpJsonFile = arg; return true; },
                    "Dump the compiler IR after the midend as JSON in the specified file.");
+    registerOption("--p4runtime-files", "filelist",
+                   [this](const char* arg) { p4RuntimeFiles = arg; return true; },
+                   "Write the P4Runtime control plane API description to the specified\n"
+                   "files (comma-separated list).  The format is inferred from the file\n"
+                   "suffix: .txt, .json, .bin");
     registerOption("--p4runtime-file", "file",
                    [this](const char* arg) { p4RuntimeFile = arg; return true; },
                    "Write a P4Runtime control plane API description to the specified file.");
@@ -104,6 +109,11 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    [this](const char* arg) { p4RuntimeEntriesFile = arg; return true; },
                    "Write static table entries as a P4Runtime WriteRequest message"
                    "to the specified file.");
+    registerOption("--p4runtime-entries-files", "files",
+                   [this](const char* arg) { p4RuntimeEntriesFiles = arg; return true; },
+                   "Write static table entries as a P4Runtime WriteRequest message\n"
+                   "to the specified files (comma-separated list); the file format is\n"
+                   "inferred from the suffix. Legal suffixes are .json, .txt and .bin");
     registerOption("--p4runtime-format", "{binary,json,text}",
                    [this](const char* arg) {
                        if (!strcmp(arg, "binary")) {
@@ -269,9 +279,12 @@ std::vector<const char*>* CompilerOptions::process(int argc, char* const argv[])
 }
 
 void CompilerOptions::validateOptions() const {
-    if (p4RuntimeFile.isNullOrEmpty() && !p4RuntimeEntriesFile.isNullOrEmpty()) {
+    if (p4RuntimeFile.isNullOrEmpty() &&
+        p4RuntimeFiles.isNullOrEmpty() &&
+        (!p4RuntimeEntriesFile.isNullOrEmpty() ||
+         !p4RuntimeEntriesFiles.isNullOrEmpty())) {
         ::warning(ErrorType::WARN_IGNORE,
-                  "When '--p4runtime-entries-file' is used without '--p4runtime-file', "
+                  "When '--p4runtime-entries-file(s)' used without '--p4runtime-file(s)', "
                   "it is ignored");
     }
 }

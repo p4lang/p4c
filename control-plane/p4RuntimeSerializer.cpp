@@ -1501,35 +1501,105 @@ void P4RuntimeAPI::serializeEntriesTo(std::ostream* destination, P4RuntimeFormat
         ::error("Failed to serialize the P4Runtime static table entries to the output");
 }
 
+static bool parseFileNames(cstring fileNameVector,
+                           std::vector<cstring> &files,
+                           std::vector<P4::P4RuntimeFormat> &formats) {
+    for (auto current = fileNameVector; current; ) {
+        cstring name = current;
+        const char* comma = current.find(',');
+        if (comma != nullptr) {
+            name = current.before(comma);
+            current = comma + 1;
+        } else {
+            current = cstring();
+        }
+        files.push_back(name);
+
+        if (cstring suffix = name.find('.')) {
+            if (suffix == ".json") {
+                formats.push_back(P4::P4RuntimeFormat::JSON);
+            } else if (suffix == ".bin") {
+                formats.push_back(P4::P4RuntimeFormat::BINARY);
+            } else if (suffix == ".txt") {
+                formats.push_back(P4::P4RuntimeFormat::TEXT);
+            } else {
+                ::error("%1%: Could not detect p4runtime info file format from file suffix %2%",
+                        name, suffix);
+                return false;
+            }
+        } else {
+            ::error("%1%: unknown file kind; known suffixes are .bin, .txt, .json", name);
+            return false;
+        }
+    }
+    return true;
+}
+
 void
 P4RuntimeSerializer::serializeP4RuntimeIfRequired(const IR::P4Program* program,
                                                   const CompilerOptions& options) {
+    std::vector<cstring> files;
+    std::vector<P4::P4RuntimeFormat> formats;
+
+    if (!options.p4RuntimeFile.isNullOrEmpty()) {
+        files.push_back(options.p4RuntimeFile);
+        formats.push_back(options.p4RuntimeFormat);
+    }
+    if (!parseFileNames(options.p4RuntimeFiles, files, formats))
+        return;
+
+    bool apiGenerated = false;
+    P4RuntimeAPI p4Runtime;
+    if (!files.empty()) {
+        auto arch = P4RuntimeSerializer::resolveArch(options);
+        if (Log::verbose())
+            std::cout << "Generating P4Runtime output for architecture " << arch << std::endl;
+        p4Runtime = get()->generateP4Runtime(program, arch);
+        apiGenerated = true;
+
+        for (unsigned i = 0; i < files.size(); i++) {
+            cstring file = files.at(i);
+            P4::P4RuntimeFormat format = formats.at(i);
+            std::ostream* out = openFile(file, false);
+            if (!out) {
+                ::error("Couldn't open P4Runtime API file: %1%", file);
+                continue;
+            }
+            p4Runtime.serializeP4InfoTo(out, format);
+        }
+    }
+
+    // Do the same for the entries files
     // The options parser in the frontend already prints a warning if
     // '--p4runtime-entries-file' is used without '--p4runtime-file'.
-    if (options.p4RuntimeFile.isNullOrEmpty()) return;
-
-    auto arch = P4RuntimeSerializer::resolveArch(options);
-
-    if (Log::verbose())
-        std::cout << "Generating P4Runtime output for architecture " << arch << std::endl;
-
-    auto p4Runtime = get()->generateP4Runtime(program, arch);
-
-    std::ostream* out = openFile(options.p4RuntimeFile, false);
-    if (!out) {
-        ::error("Couldn't open P4Runtime API file: %1%", options.p4RuntimeFile);
-        return;
-    }
-    p4Runtime.serializeP4InfoTo(out, options.p4RuntimeFormat);
-
+    files.clear();
+    formats.clear();
     if (!options.p4RuntimeEntriesFile.isNullOrEmpty()) {
-        std::ostream* out = openFile(options.p4RuntimeEntriesFile, false);
-        if (!out) {
-            ::error("Couldn't open P4Runtime static entries file: %1%",
-                    options.p4RuntimeEntriesFile);
-            return;
+        files.push_back(options.p4RuntimeEntriesFile);
+        formats.push_back(options.p4RuntimeFormat);
+    }
+
+    if (!parseFileNames(options.p4RuntimeEntriesFiles, files, formats))
+        return;
+    if (!files.empty()) {
+        if (!apiGenerated) {
+            auto arch = P4RuntimeSerializer::resolveArch(options);
+            if (Log::verbose())
+                std::cout << "Generating P4Runtime output for architecture " << arch << std::endl;
+            p4Runtime = get()->generateP4Runtime(program, arch);
         }
-        p4Runtime.serializeEntriesTo(out, options.p4RuntimeFormat);
+
+        for (unsigned i = 0; i < files.size(); i++) {
+            cstring file = files.at(i);
+            P4::P4RuntimeFormat format = formats.at(i);
+            std::ostream* out = openFile(file, false);
+            if (!out) {
+                ::error("Couldn't open P4Runtime static entries file: %1%",
+                        options.p4RuntimeEntriesFile);
+                continue;
+            }
+            p4Runtime.serializeEntriesTo(out, format);
+        }
     }
 }
 
