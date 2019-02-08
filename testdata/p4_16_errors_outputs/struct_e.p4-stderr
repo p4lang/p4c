@@ -4,7 +4,9 @@ struct_e.p4(24): [--Werror=type-error] error: Field data is not a member of stru
 struct_e.p4(16)
 struct s {}
        ^
-terminate called after throwing an instance of 'Util::CompilerBug'
-  what():  In file: /home/hemant/int/p4c/lib/crash.cpp:229
-[31mCompiler Bug[0m: Exiting with SIGSEGV
-
+struct_e.p4(25): [--Werror=type-error] error: Cannot extract field data from b which has type bit<1>
+        b.data = 5; // no such field
+          ^^^^
+struct_e.p4(25)
+        b.data = 5; // no such field
+        ^

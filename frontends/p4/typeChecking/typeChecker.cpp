@@ -3251,10 +3251,8 @@ const IR::Node* TypeInference::postorder(IR::ReturnStatement* statement) {
 const IR::Node* TypeInference::postorder(IR::AssignmentStatement* assign) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto ltype = getType(assign->left);
-    if (ltype == nullptr) {
-        ::error("assign has null ltype: %1%", ltype);
+    if (ltype == nullptr)
         return assign;
-    }
 
     if (!isLeftValue(assign->left)) {
         typeError("Expression %1% cannot be the target of an assignment", assign->left);
