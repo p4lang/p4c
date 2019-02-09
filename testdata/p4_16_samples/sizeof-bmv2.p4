@@ -7,7 +7,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -55,7 +55,7 @@ struct mystruct1 {
 }
 
 control DeparserI(packet_out packet,
-                  in Parsed_packet hdr) {
+in Parsed_packet hdr) {
     apply { packet.emit(hdr.ethernet); }
 }
 
@@ -70,17 +70,17 @@ parser parserI(packet_in pkt,
         len = hdr.ethernet.sizeBits() + hdr.ethernet.sizeBits();
         len = hdr.ethernet.sizeBytes() + hdr.ethernet.sizeBytes();
         transition select(hdr.ethernet.etherType) {
-        16w0x0800: parse_ipv4;
-        default: accept;
+            16w0x0800: parse_ipv4;
+            default: accept;
         }
     }
     state parse_ipv4 {
         bit<16> my_local = 2;
         pkt.extract(hdr.ipv4);
         transition select(hdr.ipv4.version, hdr.ipv4.protocol) {
-        (4w0x4, 8w0x06): accept;
-        (4w0x4, 8w0x17): accept;
-        default: accept;
+            (4w0x4, 8w0x06): accept;
+            (4w0x4, 8w0x17): accept;
+            default: accept;
         }
     }
 }
@@ -108,8 +108,8 @@ control uc(inout Parsed_packet hdr,
 }
 
 V1Switch<Parsed_packet, mystruct1>(parserI(),
-                                   vc(),
-                                   cIngress(),
-                                   cEgress(),
-                                   uc(),
-                                   DeparserI()) main;
+vc(),
+cIngress(),
+cEgress(),
+uc(),
+DeparserI()) main;

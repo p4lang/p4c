@@ -6,7 +6,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,13 +18,13 @@ limitations under the License.
 #include <v1model.p4>
 
 struct alt_t {
-  bit<1> valid;
-  bit<7> port;
+    bit<1> valid;
+    bit<7> port;
 };
 
 struct row_t {
-  alt_t alt0;
-  alt_t alt1;
+    alt_t alt0;
+    alt_t alt1;
 };
 
 header Hdr1 {
@@ -88,7 +88,7 @@ control deparser(packet_out b, in Headers h) {
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         if (h.u.h2.isValid())
-            h.u.h2.setInvalid();
+        h.u.h2.setInvalid();
     }
 }
 
