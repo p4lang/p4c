@@ -2451,10 +2451,11 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 return expression;
             }
         }
-        if (type->is<IR::Type_Header>()) {
+        if (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>()) {
             // Built-in methods
-            if (member == IR::Type_Header::setValid ||
-                member == IR::Type_Header::setInvalid) {
+            if ((member == IR::Type_Header::setValid ||
+                member == IR::Type_Header::setInvalid) &&
+                type->is<IR::Type_Header>()) {
                 if (!isLeftValue(expression->expr))
                     typeError("%1%: must be applied to a left-value", expression);
                 auto type = new IR::Type_Method(IR::Type_Void::get(),
@@ -2470,9 +2471,14 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 const IR::Expression* e = expression;
                 auto mem = e->to<IR::Member>();
                 auto t = typeMap->getType(mem->expr, true);
-                auto ht = t->to<IR::Type_Header>();
+                const IR::Type_StructLike* ht;
+                if (t->is<IR::Type_Header>()) {
+                    ht = t->to<IR::Type_Header>();
+                } else if (t->is<IR::Type_HeaderUnion>()) {
+                    ht = t->to<IR::Type_HeaderUnion>();
+                }
                 if (ht == nullptr) {
-                    ::error("%1%: null header?", expression);
+                    ::error("%1%: null header/headerUnion?", expression);
                     return expression;
                 }
                 auto sz = ht->width_bits();
@@ -2482,7 +2488,6 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 } else {
                     // cout << "sizeBits: " << sz << endl;
                 }
-
                 auto result = new IR::Constant(sz);
                 result->type = IR::Type_Bits::get(32);
                 auto ctype = canonicalize(result->type);
