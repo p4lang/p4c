@@ -2438,7 +2438,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         return expression;
     }
 
-    if (type->is<IR::Type_StructLike>()) {
+    if (type->is<IR::Type_StructLike>() || type->is<IR::Type_Stack>()) {
         if (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>()) {
             if (member == IR::Type_Header::isValid) {
                 // Built-in method
@@ -2451,7 +2451,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 return expression;
             }
         }
-        if (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>()) {
+        if (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>() ||
+            type->is<IR::Type_Stack>()) {
             // Built-in methods
             if ((member == IR::Type_Header::setValid ||
                 member == IR::Type_Header::setInvalid) &&
@@ -2472,21 +2473,36 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 auto mem = e->to<IR::Member>();
                 auto t = typeMap->getType(mem->expr, true);
                 const IR::Type_StructLike* ht;
+                int sz = 0;
+                int size = 0;
                 if (t->is<IR::Type_Header>()) {
                     ht = t->to<IR::Type_Header>();
                 } else if (t->is<IR::Type_HeaderUnion>()) {
                     ht = t->to<IR::Type_HeaderUnion>();
+                } else if (t->is<IR::Type_Stack>()) {
+                    auto stack = type->to<IR::Type_Stack>();
+                    size = type->to<IR::Type_Stack>()->getSize();
+                    auto stype = stack->elementType;
+                    if (stype->is<IR::Type_Header>()) {
+                        ht = stype->to<IR::Type_Header>();
+                        if (ht == nullptr) {
+                            ::error("%1%: null header/headerUnion?", expression);
+                            return expression;
+                        }
+                        sz = size * ht->width_bits();
+                    }
                 }
                 if (ht == nullptr) {
                     ::error("%1%: null header/headerUnion?", expression);
                     return expression;
                 }
-                auto sz = ht->width_bits();
+                if (!size)  // Not a stack
+                    sz = ht->width_bits();
                 if (member == IR::Type_Header::sizeBytes) {
                     sz = ((sz + 7) >> 3);
-                    // cout << "sizeBytes: " << sz << endl;
+                    //cout << "sizeBytes: " << sz << endl;
                 } else {
-                    // cout << "sizeBits: " << sz << endl;
+				    //cout << "sizeBits: " << sz << endl;
                 }
                 auto result = new IR::Constant(sz);
                 result->type = IR::Type_Bits::get(32);

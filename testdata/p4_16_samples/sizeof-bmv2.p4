@@ -88,18 +88,7 @@ parser parserI(packet_in pkt,
 control cIngress(inout Parsed_packet hdr,
                  inout mystruct1 meta,
                  inout standard_metadata_t stdmeta) {
-    action foo() {
-        meta.b = meta.b + 5;
-    }
-    table guh {
-        key = { hdr.ethernet.srcAddr : exact; }
-        actions = { foo; }
-        default_action = foo;
-    }
-
-    apply {
-        guh.apply();
-    }
+    apply { }
 }
 
 control cEgress(inout Parsed_packet hdr,

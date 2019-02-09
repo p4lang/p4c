@@ -6,7 +6,7 @@ struct alt_t {
     bit<7> port;
 }
 
-@MNK_annotation("(test flatten)") struct row_t {
+struct row_t {
     alt_t alt0;
     alt_t alt1;
 }
@@ -61,39 +61,7 @@ parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_m
 }
 
 control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    @name(".NoAction") action NoAction_0() {
-    }
-    @name("ingress.do_act") action do_act() {
-        h.bvh1._row_alt1_valid2 = 1w0;
-    }
-    @name("ingress.tns") table tns_0 {
-        key = {
-            h.bvh1._row_alt1_valid2                  : exact @name("h.bvh1.row.alt1.valid") ;
-            local_metadata._col_bvh8._row_alt0_valid0: exact @name("local_metadata.col.bvh.row.alt0.valid") ;
-        }
-        actions = {
-            do_act();
-            @defaultonly NoAction_0();
-        }
-        default_action = NoAction_0();
-    }
-    @hidden action act() {
-        local_metadata._col_bvh8._row_alt0_valid0 = 1w0;
-        local_metadata._row0_alt0_valid0 = local_metadata._row1_alt1_valid6;
-        local_metadata._row0_alt0_port1 = local_metadata._row1_alt1_port7;
-        local_metadata._row1_alt0_valid4 = 1w1;
-        local_metadata._row1_alt1_port7 = local_metadata._row0_alt1_port3 + 7w1;
-        clone3<row_t>(CloneType.I2E, 32w0, {{local_metadata._row1_alt1_valid6,local_metadata._row0_alt0_port1},{local_metadata._row0_alt1_valid2,local_metadata._row0_alt1_port3}});
-    }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
     apply {
-        tns_0.apply();
-        tbl_act.apply();
     }
 }
 
@@ -104,8 +72,6 @@ control egress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata,
 
 control deparser(packet_out b, in parsed_packet_t h) {
     apply {
-        b.emit<bitvec_hdr>(h.bvh0);
-        b.emit<bitvec_hdr>(h.bvh1);
     }
 }
 

@@ -1,5 +1,5 @@
 /*
-    Copyright 2018 MNK Consulting, LLC.
+    Copyright 2019 MNK Consulting, LLC.
     http://mnkcg.com
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,7 +22,6 @@ struct alt_t {
   bit<7> port;
 };
 
-@MNK_annotation("(test flatten)")
 struct row_t {
   alt_t alt0;
   alt_t alt1;
@@ -76,48 +75,7 @@ parser parse(packet_in pk, out parsed_packet_t h,
 control ingress(inout parsed_packet_t h,
                 inout local_metadata_t local_metadata,
 	        inout standard_metadata_t standard_metadata) {
-    tst_t s;
-    bitvec_hdr bh;
-
-    action do_act() {
-        h.bvh1.row.alt1.valid = 0;
-        local_metadata.col.bvh.row.alt0.valid = 0;	
-    }
-    
-    table tns {
-        key = {
-            h.bvh1.row.alt1.valid : exact;
-            local_metadata.col.bvh.row.alt0.valid : exact;
-        }
-	actions = {
-            do_act;
-        }
-    }
-    
-    apply {
-
-        tns.apply();
-
-        // Copy another header's data to local variable.
-        bh.row.alt0.valid = h.bvh0.row.alt0.valid;
-
-        s.row0.alt0 = local_metadata.row1.alt1;
-        s.row1.alt0.valid = 1;
-        s.row1.alt1.port = local_metadata.row0.alt1.port + 1;
-        s.col.bvh.row.alt0.valid = 0;
-
-        local_metadata.col.bvh.row.alt0.valid = 0;
-        local_metadata.row0.alt0 = local_metadata.row1.alt1;
-        local_metadata.row1.alt0.valid = 1;
-        local_metadata.row1.alt1.port = local_metadata.row0.alt1.port + 1;
-        clone3(CloneType.I2E, 0, local_metadata.row0);
-
-/*
-        Cast support is TODO for bmv2.
-        sip.macDA = (macDA_t) mac;
-        mac       = (bit<48>) sip.macDA;
-*/
-    }
+    apply { }
 }
 
 control egress(inout parsed_packet_t hdr,
@@ -127,10 +85,7 @@ control egress(inout parsed_packet_t hdr,
 }
 
 control deparser(packet_out b, in parsed_packet_t h) {
-    apply {
-        b.emit(h.bvh0);
-        b.emit(h.bvh1);
-    }
+    apply { }
 }
 
 control verify_checksum(inout parsed_packet_t hdr,
