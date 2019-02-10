@@ -31,17 +31,16 @@ namespace {
 // Used to set the type of Constants after type inference
 class ConstantTypeSubstitution : public Transform {
     TypeVariableSubstitution* subst;
-    ReferenceMap            * refMap;
     TypeMap                 * typeMap;
     TypeInference           * tc;
 
  public:
     ConstantTypeSubstitution(TypeVariableSubstitution* subst,
-                             ReferenceMap* refMap,
+                             ReferenceMap*,
                              TypeMap* typeMap,
                              TypeInference* tc) :
-        subst(subst), refMap(refMap), typeMap(typeMap), tc(tc) {
-        CHECK_NULL(subst); CHECK_NULL(refMap); CHECK_NULL(typeMap);
+        subst(subst), typeMap(typeMap), tc(tc) {
+        CHECK_NULL(subst); CHECK_NULL(typeMap);
         CHECK_NULL(tc);
         LOG3("ConstantTypeSubstitution " << subst); }
     const IR::Node* postorder(IR::Constant* cst) override {
@@ -1808,7 +1807,7 @@ const IR::Node* TypeInference::postorder(IR::ArrayIndex* expression) {
         }
         int index = cst->asInt();
         if (index < 0) {
-            typeError("Negative array index %1%", cst);
+            typeError("%1%: Negative array index %2%", expression, cst);
             return expression;
         }
         if (hst->sizeKnown()) {
@@ -2305,11 +2304,11 @@ const IR::Node* TypeInference::postorder(IR::Slice* expression) {
     int m = msb->asInt();
     int l = lsb->asInt();
     if (m < 0) {
-        typeError("%1%: negative bit index", msb);
+        typeError("%1%: negative bit index %2%", expression, msb);
         return expression;
     }
     if (l < 0) {
-        typeError("%1%: negative bit index", msb);
+        typeError("%1%: negative bit index %2%", expression, lsb);
         return expression;
     }
     if (m >= bst->size) {

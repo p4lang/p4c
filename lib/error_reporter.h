@@ -22,6 +22,7 @@ limitations under the License.
 #include <map>
 #include <set>
 #include <type_traits>
+#include <unordered_map>
 
 #include "lib/cstring.h"
 #include "lib/source_file.h"
@@ -397,7 +398,8 @@ class ErrorReporter final {
  public:
     ErrorReporter()
         : errorCount(0),
-          warningCount(0)
+          warningCount(0),
+          defaultWarningDiagnosticAction(DiagnosticAction::Warn)
     { outputstream = &std::cerr; }
 
     // error message for a bug
@@ -426,8 +428,9 @@ class ErrorReporter final {
             if (!fmt.empty()) fmt += std::string(" ") + format;
             else              fmt += format;
             const char *name = get_error_name(errorCode);
+            auto da = getDiagnosticAction(name, action);
             if (name)
-                diagnose(action, name, fmt.c_str(), node, args...);
+                diagnose(da, name, fmt.c_str(), node, args...);
             else
                 diagnoseUnnamed(action, fmt.c_str(), node, std::forward<Args>(args)...);
         }
@@ -448,8 +451,9 @@ class ErrorReporter final {
         if (!fmt.empty()) fmt += std::string(" ") + format;
         else              fmt += format;
         const char *name = get_error_name(errorCode);
+        auto da = getDiagnosticAction(name, action);
         if (name)
-            diagnose(action, name, fmt.c_str(), args...);
+            diagnose(da, name, fmt.c_str(), args...);
         else
             diagnoseUnnamed(action, fmt.c_str(), std::forward<Args>(args)...);
     }
@@ -549,9 +553,44 @@ class ErrorReporter final {
         va_end(args);
     }
 
+    /// @return the action to take for the given diagnostic, falling back to the
+    /// default action if it wasn't overridden via the command line or a pragma.
+    DiagnosticAction
+    getDiagnosticAction(cstring diagnostic, DiagnosticAction defaultAction) {
+        auto it = diagnosticActions.find(diagnostic);
+        if (it != diagnosticActions.end()) return it->second;
+        // if we're dealing with warnings and they have been globally modified
+        // (ingnored or turned into errors), then return the global default
+        if (defaultAction == DiagnosticAction::Warn &&
+            defaultWarningDiagnosticAction != DiagnosticAction::Warn)
+            return defaultWarningDiagnosticAction;
+        return defaultAction;
+    }
+
+    /// Set the action to take for the given diagnostic.
+    void setDiagnosticAction(cstring diagnostic, DiagnosticAction action) {
+        diagnosticActions[diagnostic] = action;
+    }
+
+    /// @return the default diagnostic action for calls to `::warning()`.
+    DiagnosticAction getDefaultWarningDiagnosticAction() {
+        return defaultWarningDiagnosticAction;
+    }
+
+    /// set the default diagnostic action for calls to `::warning()`.
+    void setDefaultWarningDiagnosticAction(DiagnosticAction action) {
+        defaultWarningDiagnosticAction = action;
+    }
+
  private:
     unsigned errorCount;
     unsigned warningCount;
+
+    /// The default diagnostic action for calls to `::warning()`.
+    DiagnosticAction defaultWarningDiagnosticAction;
+
+    /// allow filtering of diagnostic actions
+    std::unordered_map<cstring, DiagnosticAction> diagnosticActions;
 };
 
 #endif /* P4C_LIB_ERROR_REPORTER_H_ */

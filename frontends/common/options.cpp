@@ -394,46 +394,6 @@ DebugHook CompilerOptions::getDebugHook() const {
     return CompileContextStack::top<P4CContext>();
 }
 
-P4CContext::P4CContext()
-    : defaultWarningDiagnosticAction(DiagnosticAction::Warn) { }
-
-DiagnosticAction P4CContext::getDefaultWarningDiagnosticAction() {
-    return defaultWarningDiagnosticAction;
-}
-
-void P4CContext::setDefaultWarningDiagnosticAction(DiagnosticAction action) {
-    defaultWarningDiagnosticAction = action;
-}
-
-DiagnosticAction P4CContext::getDiagnosticAction(cstring diagnostic,
-                                                 DiagnosticAction defaultAction) {
-    auto it = diagnosticActions.find(diagnostic);
-    if (it != diagnosticActions.end()) return it->second;
-    switch (defaultAction) {
-        case DiagnosticAction::Ignore: return defaultAction;
-        case DiagnosticAction::Warn: return getDefaultWarningDiagnosticAction();
-        case DiagnosticAction::Error: return getDefaultErrorDiagnosticAction();
-    }
-    BUG("Invalid default DiagnosticAction");
-}
-
-void P4CContext::setDiagnosticAction(cstring diagnostic, DiagnosticAction action) {
-    if (!isRecognizedDiagnostic(diagnostic))
-        DIAGNOSE_WARN("unknown_diagnostic",
-                      "Unrecognized diagnostic: %1%", diagnostic);
-
-    switch (action) {
-        case DiagnosticAction::Ignore:
-            LOG1("Ignoring diagnostic: " << diagnostic); break;
-        case DiagnosticAction::Warn:
-            LOG1("Reporting warning for diagnostic: " << diagnostic); break;
-        case DiagnosticAction::Error:
-            LOG1("Reporting error for diagnostic: " << diagnostic); break;
-    }
-
-    diagnosticActions[diagnostic] = action;
-}
-
 bool P4CContext::isRecognizedDiagnostic(cstring diagnostic) {
     static const std::unordered_set<cstring> recognizedDiagnostics = {
         "uninitialized_out_param",
