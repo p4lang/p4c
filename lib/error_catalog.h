@@ -107,8 +107,8 @@ class ErrorCatalog {
     const char *getFormat(int errorCode) {
         if (errorCatalog.count(errorCode))
             return errorCatalog.at(errorCode).second.c_str();
-        std::string msg = std::string("errorCatalog message not set for error code ") +
-            std::to_string(errorCode);
+        static std::string msg("errorCatalog message not set for error code ");
+        msg += std::to_string(errorCode);
         return msg.c_str();
     }
 
