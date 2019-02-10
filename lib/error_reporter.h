@@ -398,7 +398,8 @@ class ErrorReporter final {
  public:
     ErrorReporter()
         : errorCount(0),
-          warningCount(0)
+          warningCount(0),
+          defaultWarningDiagnosticAction(DiagnosticAction::Warn)
     { outputstream = &std::cerr; }
 
     // error message for a bug
@@ -558,6 +559,11 @@ class ErrorReporter final {
     getDiagnosticAction(cstring diagnostic, DiagnosticAction defaultAction) {
         auto it = diagnosticActions.find(diagnostic);
         if (it != diagnosticActions.end()) return it->second;
+        // if we're dealing with warnings and they have been globally modified
+        // (ingnored or turned into errors), then return the global default
+        if (defaultAction == DiagnosticAction::Warn &&
+            defaultWarningDiagnosticAction != DiagnosticAction::Warn)
+            return defaultWarningDiagnosticAction;
         return defaultAction;
     }
 
@@ -566,13 +572,25 @@ class ErrorReporter final {
         diagnosticActions[diagnostic] = action;
     }
 
+    /// @return the default diagnostic action for calls to `::warning()`.
+    DiagnosticAction getDefaultWarningDiagnosticAction() {
+        return defaultWarningDiagnosticAction;
+    }
+
+    /// set the default diagnostic action for calls to `::warning()`.
+    void setDefaultWarningDiagnosticAction(DiagnosticAction action) {
+        defaultWarningDiagnosticAction = action;
+    }
+
  private:
     unsigned errorCount;
     unsigned warningCount;
 
+    /// The default diagnostic action for calls to `::warning()`.
+    DiagnosticAction defaultWarningDiagnosticAction;
+
     /// allow filtering of diagnostic actions
     std::unordered_map<cstring, DiagnosticAction> diagnosticActions;
-
 };
 
 #endif /* P4C_LIB_ERROR_REPORTER_H_ */

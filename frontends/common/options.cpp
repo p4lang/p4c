@@ -394,17 +394,6 @@ DebugHook CompilerOptions::getDebugHook() const {
     return CompileContextStack::top<P4CContext>();
 }
 
-P4CContext::P4CContext()
-    : defaultWarningDiagnosticAction(DiagnosticAction::Warn) { }
-
-DiagnosticAction P4CContext::getDefaultWarningDiagnosticAction() {
-    return defaultWarningDiagnosticAction;
-}
-
-void P4CContext::setDefaultWarningDiagnosticAction(DiagnosticAction action) {
-    defaultWarningDiagnosticAction = action;
-}
-
 bool P4CContext::isRecognizedDiagnostic(cstring diagnostic) {
     static const std::unordered_set<cstring> recognizedDiagnostics = {
         "uninitialized_out_param",
