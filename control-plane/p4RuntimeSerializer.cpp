@@ -1515,7 +1515,7 @@ static bool parseFileNames(cstring fileNameVector,
         }
         files.push_back(name);
 
-        if (cstring suffix = name.find('.')) {
+        if (cstring suffix = name.findlast('.')) {
             if (suffix == ".json") {
                 formats.push_back(P4::P4RuntimeFormat::JSON);
             } else if (suffix == ".bin") {
@@ -1570,8 +1570,6 @@ P4RuntimeSerializer::serializeP4RuntimeIfRequired(const IR::P4Program* program,
     }
 
     // Do the same for the entries files
-    // The options parser in the frontend already prints a warning if
-    // '--p4runtime-entries-file' is used without '--p4runtime-file'.
     files.clear();
     formats.clear();
     if (!options.p4RuntimeEntriesFile.isNullOrEmpty()) {

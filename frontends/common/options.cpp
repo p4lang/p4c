@@ -100,15 +100,17 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("--p4runtime-files", "filelist",
                    [this](const char* arg) { p4RuntimeFiles = arg; return true; },
                    "Write the P4Runtime control plane API description to the specified\n"
-                   "files (comma-separated list).  The format is inferred from the file\n"
+                   "files (comma-separated list). The format is inferred from the file\n"
                    "suffix: .txt, .json, .bin");
     registerOption("--p4runtime-file", "file",
                    [this](const char* arg) { p4RuntimeFile = arg; return true; },
-                   "Write a P4Runtime control plane API description to the specified file.");
+                   "Write a P4Runtime control plane API description to the specified file.\n"
+                   "[Deprecated; use '--p4runtime-files' instead].");
     registerOption("--p4runtime-entries-file", "file",
                    [this](const char* arg) { p4RuntimeEntriesFile = arg; return true; },
                    "Write static table entries as a P4Runtime WriteRequest message"
-                   "to the specified file.");
+                   "to the specified file.\n"
+                   "[Deprecated; use '--p4runtime-entries-files' instead].");
     registerOption("--p4runtime-entries-files", "files",
                    [this](const char* arg) { p4RuntimeEntriesFiles = arg; return true; },
                    "Write static table entries as a P4Runtime WriteRequest message\n"
@@ -127,7 +129,8 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                            return false;
                        }
                        return true; },
-                   "Choose output format for the P4Runtime API description (default is binary).");
+                   "Choose output format for the P4Runtime API description (default is binary).\n"
+                   "[Deprecated; use '--p4runtime-files' instead].");
     registerOption("--Wdisable", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
@@ -279,13 +282,15 @@ std::vector<const char*>* CompilerOptions::process(int argc, char* const argv[])
 }
 
 void CompilerOptions::validateOptions() const {
-    if (p4RuntimeFile.isNullOrEmpty() &&
-        p4RuntimeFiles.isNullOrEmpty() &&
-        (!p4RuntimeEntriesFile.isNullOrEmpty() ||
-         !p4RuntimeEntriesFiles.isNullOrEmpty())) {
-        ::warning(ErrorType::WARN_IGNORE,
-                  "When '--p4runtime-entries-file(s)' used without '--p4runtime-file(s)', "
-                  "it is ignored");
+    if (!p4RuntimeFile.isNullOrEmpty()) {
+        ::warning(ErrorType::WARN_DEPRECATED,
+                  "'--p4runtime-file' and '--p4runtime-format' are deprecated, "
+                  "consider using '--p4runtime-files' instead");
+    }
+    if (!p4RuntimeEntriesFile.isNullOrEmpty()) {
+        ::warning(ErrorType::WARN_DEPRECATED,
+                  "'--p4runtime-entries-file' is deprecated, "
+                  "consider using '--p4runtime-entries-files' instead");
     }
 }
 

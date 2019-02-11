@@ -118,17 +118,20 @@ def main():
                         action="store", metavar="PATH", default=".")
     parser.add_argument("--p4runtime-file",
                         help="Write a P4Runtime control plane API description "
-                        "to the specified file.",
+                        "to the specified file. "
+                        "[Deprecated; use '--p4runtime-files' instead]",
                         action="store", default=None)
     parser.add_argument("--p4runtime-files",
-                        help="Write a set of P4Runtime control plane API description "
-                        "to the specified files; format is detected based on file suffix."
-                        "Legal suffixes are .txt, .json, .bin",
+                        help="Write the P4Runtime control plane API description (P4Info) "
+                        "to the specified files (comma-separated list); "
+                        "format is detected based on file suffix. "
+                        "Legal suffixes are .txt, .json, .bin.",
                         action="store", default=None)
     parser.add_argument("--p4runtime-format",
                         choices=["binary", "json", "text"],
                         help="Choose output format for the P4Runtime API "
-                        "description (default is binary).",
+                        "description (default is binary). "
+                        "[Deprecated; use '--p4runtime-files' instead]",
                         action="store", default="binary")
     parser.add_argument("--target-help", dest="show_target_help",
                         help="Display target specific command line options.",
