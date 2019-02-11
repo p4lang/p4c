@@ -15,7 +15,6 @@ limitations under the License.
 */
 
 #include "typeChecker.h"
-#include <iostream>
 #include "lib/log.h"
 #include "typeUnification.h"
 #include "typeSubstitution.h"
@@ -25,8 +24,6 @@ limitations under the License.
 #include "syntacticEquivalence.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/methodInstance.h"
-
-using namespace std;
 
 namespace P4 {
 
@@ -178,7 +175,7 @@ const IR::Type* TypeInference::getTypeType(const IR::Node* element) const {
     // See comment in getType() above.
     if (result == nullptr) {
         if (::errorCount() == 0)
-            BUG("Could not find Typetype of %1%", element);
+            BUG("Could not find type of %1%", element);
         return nullptr;
     }
     BUG_CHECK(result->is<IR::Type_Type>(), "%1%: expected a TypeType", dbp(result));
@@ -2438,31 +2435,22 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         return expression;
     }
 
-    int sz = 0;
-    int size = 0;
     if (type->is<IR::Type_Stack>()) {
+        int sz = 0;
         if ((member == IR::Type_Header::sizeBits) ||
             (member == IR::Type_Header::sizeBytes)) {
-            const IR::Expression* e = expression;
-            auto mem = e->to<IR::Member>();
-            auto t = typeMap->getType(mem->expr, true);
+            auto t = typeMap->getType(expression->expr, true);
             const IR::Type_StructLike* ht;
             auto stack = type->to<IR::Type_Stack>();
-            size = type->to<IR::Type_Stack>()->getSize();
+            sz = type->to<IR::Type_Stack>()->getSize();
             auto stype = stack->elementType;
             if (stype->is<IR::Type_Header>()) {
-                ht = stype->to<IR::Type_Header>();
-                if (ht == nullptr) {
-                    ::error("%1%: null header/headerUnion?", expression);
-                    return expression;
+                if (auto ht = stype->to<IR::Type_Header>()) {
+                    sz = sz * ht->width_bits();
                 }
-                sz = size * ht->width_bits();
             }
             if (member == IR::Type_Header::sizeBytes) {
                 sz = ((sz + 7) >> 3);
-                // cout << "sizeBytes: " << sz << endl;
-            } else {
-                // cout << "sizeBits: " << sz << endl;
             }
             auto result = new IR::Constant(sz);
             result->type = IR::Type_Bits::get(32);
@@ -2487,14 +2475,20 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             }
         }
         if (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>()) {
+            if (type->is<IR::Type_HeaderUnion>() &&
+                (member == IR::Type_Header::setValid ||
+                member == IR::Type_Header::setInvalid)) {
+                ::error(ErrorType::ERR_INVALID, "setValid and setInvalid are "
+                        "not defined for header unions", expression);
+                return expression;
+            }
             // Built-in methods
             if ((member == IR::Type_Header::setValid ||
                 member == IR::Type_Header::setInvalid) &&
                 type->is<IR::Type_Header>()) {
                 if (!isLeftValue(expression->expr))
                     typeError("%1%: must be applied to a left-value", expression);
-                auto type = new IR::Type_Method(IR::Type_Void::get(),
-                                                new IR::ParameterList);
+                auto type = new IR::Type_Method(IR::Type_Void::get(), new IR::ParameterList);
                 auto ctype = canonicalize(type);
                 if (ctype == nullptr)
                     return expression;
@@ -2503,9 +2497,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 return expression;
             } else if ((member == IR::Type_Header::sizeBits) ||
                        (member == IR::Type_Header::sizeBytes)) {
-                const IR::Expression* e = expression;
-                auto mem = e->to<IR::Member>();
-                auto t = typeMap->getType(mem->expr, true);
+                int sz = 0;
+                auto t = typeMap->getType(expression->expr, true);
                 const IR::Type_StructLike* ht;
                 if (t->is<IR::Type_Header>()) {
                     ht = t->to<IR::Type_Header>();
@@ -2519,9 +2512,6 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 sz = ht->width_bits();
                 if (member == IR::Type_Header::sizeBytes) {
                     sz = ((sz + 7) >> 3);
-                    // cout << "sizeBytes: " << sz << endl;
-                } else {
-                    // cout << "sizeBits: " << sz << endl;
                 }
                 auto result = new IR::Constant(sz);
                 result->type = IR::Type_Bits::get(32);
@@ -2903,8 +2893,8 @@ void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
 
 const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
     if (done()) return expression;
-    auto method = expression->to<IR::MethodCallExpression>()->method;
     LOG2("Solving method call " << dbp(expression));
+    auto method = expression->method;
     if (method->type->is<IR::Type_Bits>()) {
         return method;
     }
