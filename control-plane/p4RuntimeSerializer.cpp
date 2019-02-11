@@ -1515,7 +1515,7 @@ static bool parseFileNames(cstring fileNameVector,
         }
         files.push_back(name);
 
-        if (cstring suffix = name.find('.')) {
+        if (cstring suffix = name.findlast('.')) {
             if (suffix == ".json") {
                 formats.push_back(P4::P4RuntimeFormat::JSON);
             } else if (suffix == ".bin") {
