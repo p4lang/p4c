@@ -2444,10 +2444,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             auto stack = type->to<IR::Type_Stack>();
             sz = type->to<IR::Type_Stack>()->getSize();
             auto stype = stack->elementType;
-            if (stype->is<IR::Type_Header>()) {
-                if (auto ht = stype->to<IR::Type_Header>()) {
-                    sz = sz * ht->width_bits();
-                }
+            if (auto ht = stype->to<IR::Type_Header>()) {
+                sz = sz * ht->width_bits();
             }
             if (member == IR::Type_Header::sizeBytes) {
                 sz = ((sz + 7) >> 3);
