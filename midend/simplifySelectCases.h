@@ -50,8 +50,11 @@ class DoSimplifySelectCases : public Transform {
 
 class SimplifySelectCases : public PassManager {
  public:
-    SimplifySelectCases(ReferenceMap* refMap, TypeMap* typeMap, bool requireConstants) {
-        passes.push_back(new TypeChecking(refMap, typeMap));
+    SimplifySelectCases(ReferenceMap* refMap, TypeMap* typeMap, bool requireConstants,
+            TypeChecking* typeChecking = nullptr) {
+        if (!typeChecking)
+            typeChecking = new TypeChecking(refMap, typeMap);
+        passes.push_back(typeChecking);
         passes.push_back(new DoSimplifySelectCases(typeMap, requireConstants));
         setName("SimplifySelectCases");
     }

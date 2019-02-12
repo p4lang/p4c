@@ -95,17 +95,23 @@ class DoReplaceTuples final : public Transform {
 
 class EliminateTuples final : public PassManager {
  public:
-    EliminateTuples(ReferenceMap* refMap, TypeMap* typeMap) {
+    EliminateTuples(ReferenceMap* refMap, TypeMap* typeMap,
+            TypeChecking* typeChecking = nullptr,
+            TypeInference* typeInference = nullptr) {
         auto repl = new ReplacementMap(refMap, typeMap);
-        passes.push_back(new TypeChecking(refMap, typeMap));
+        if (!typeChecking)
+            typeChecking = new TypeChecking(refMap, typeMap);
+        passes.push_back(typeChecking);
         passes.push_back(new DoReplaceTuples(repl));
         passes.push_back(new ClearTypeMap(typeMap));
         // We do a round of type-checking which may mutate the program.
         // This will convert some ListExpressions
         // into StructInitializerExpression where tuples were converted
         // to structs.
-        passes.push_back(new ResolveReferences(refMap)),
-        passes.push_back(new TypeInference(refMap, typeMap, false));
+        passes.push_back(new ResolveReferences(refMap));
+        if (!typeInference)
+            typeInference = new TypeInference(refMap, typeMap, false);
+        passes.push_back(typeInference);
         setName("EliminateTuples");
     }
 };

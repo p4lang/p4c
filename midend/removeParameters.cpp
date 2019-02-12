@@ -153,7 +153,8 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::MethodCallExpression* ex
     return expression;
 }
 
-RemoveActionParameters::RemoveActionParameters(ReferenceMap* refMap, TypeMap* typeMap) {
+RemoveActionParameters::RemoveActionParameters(ReferenceMap* refMap, TypeMap* typeMap,
+                                               TypeChecking* typeChecking) {
     setName("RemoveActionParameters");
     auto ai = new ActionInvocation();
     // MoveDeclarations() is needed because of this case:
@@ -165,7 +166,9 @@ RemoveActionParameters::RemoveActionParameters(ReferenceMap* refMap, TypeMap* ty
     // bit<32> w;
     // table t() { actions = a(); ... }
     passes.emplace_back(new MoveDeclarations());
-    passes.emplace_back(new TypeChecking(refMap, typeMap));
+    if (!typeChecking)
+        typeChecking = new TypeChecking(refMap, typeMap);
+    passes.emplace_back(typeChecking);
     passes.emplace_back(new FindActionParameters(refMap, typeMap, ai));
     passes.emplace_back(new DoRemoveActionParameters(ai));
     passes.emplace_back(new ClearTypeMap(typeMap));

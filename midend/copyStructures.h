@@ -69,10 +69,13 @@ class DoCopyStructures : public Transform {
 class CopyStructures : public PassRepeated {
  public:
     CopyStructures(ReferenceMap* refMap, TypeMap* typeMap,
-                   bool errorOnMethodCall = true) :
+                   bool errorOnMethodCall = true,
+                   TypeChecking* typeChecking = nullptr) :
             PassManager({}) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("CopyStructures");
-        passes.emplace_back(new TypeChecking(refMap, typeMap));
+        if (!typeChecking)
+            typeChecking = new TypeChecking(refMap, typeMap);
+        passes.emplace_back(typeChecking);
         passes.emplace_back(new DoCopyStructures(typeMap, errorOnMethodCall));
     }
 };
