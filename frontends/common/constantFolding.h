@@ -147,9 +147,12 @@ class DoConstantFolding : public Transform {
  */
 class ConstantFolding : public PassManager {
  public:
-    ConstantFolding(ReferenceMap* refMap, TypeMap* typeMap, bool warnings = true) {
-        if (typeMap != nullptr)
-            passes.push_back(new TypeChecking(refMap, typeMap));
+    ConstantFolding(ReferenceMap* refMap, TypeMap* typeMap, bool warnings = true,
+            TypeChecking* typeChecking = nullptr) {
+        if (typeMap != nullptr) {
+            if (!typeChecking)
+                typeChecking = new TypeChecking(refMap, typeMap);
+            passes.push_back(typeChecking); }
         passes.push_back(new DoConstantFolding(refMap, typeMap, warnings));
         if (typeMap != nullptr)
             passes.push_back(new ClearTypeMap(typeMap));

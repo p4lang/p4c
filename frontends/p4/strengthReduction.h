@@ -86,8 +86,11 @@ class DoStrengthReduction final : public Transform {
 
 class StrengthReduction : public PassManager {
  public:
-    StrengthReduction(ReferenceMap* refMap, TypeMap* typeMap) {
-        passes.push_back(new TypeChecking(refMap, typeMap, true));
+    StrengthReduction(ReferenceMap* refMap, TypeMap* typeMap,
+            TypeChecking* typeChecking = nullptr) {
+        if (!typeChecking)
+            typeChecking = new TypeChecking(refMap, typeMap, true);
+        passes.push_back(typeChecking);
         passes.push_back(new DoStrengthReduction());
     }
 };

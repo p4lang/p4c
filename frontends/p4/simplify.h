@@ -65,8 +65,11 @@ class DoSimplifyControlFlow : public Transform {
 /// steps enable further simplification.
 class SimplifyControlFlow : public PassRepeated {
  public:
-    SimplifyControlFlow(ReferenceMap* refMap, TypeMap* typeMap) {
-        passes.push_back(new TypeChecking(refMap, typeMap));
+    SimplifyControlFlow(ReferenceMap* refMap, TypeMap* typeMap,
+            TypeChecking* typeChecking = nullptr) {
+        if (!typeChecking)
+            typeChecking = new TypeChecking(refMap, typeMap);
+        passes.push_back(typeChecking);
         passes.push_back(new DoSimplifyControlFlow(refMap, typeMap));
         setName("SimplifyControlFlow");
     }

@@ -57,8 +57,11 @@ class DoExpandLookahead : public Transform {
 
 class ExpandLookahead : public PassManager {
  public:
-    ExpandLookahead(ReferenceMap* refMap, TypeMap* typeMap) {
-        passes.push_back(new TypeChecking(refMap, typeMap));
+    ExpandLookahead(ReferenceMap* refMap, TypeMap* typeMap,
+            TypeChecking* typeChecking = nullptr) {
+        if (!typeChecking)
+            typeChecking = new TypeChecking(refMap, typeMap);
+        passes.push_back(typeChecking);
         passes.push_back(new DoExpandLookahead(refMap, typeMap));
         setName("ExpandLookahead");
     }

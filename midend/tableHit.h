@@ -44,8 +44,11 @@ class DoTableHit : public Transform {
 
 class TableHit : public PassManager {
  public:
-    TableHit(ReferenceMap* refMap, TypeMap* typeMap) {
-        passes.push_back(new TypeChecking(refMap, typeMap));
+    TableHit(ReferenceMap* refMap, TypeMap* typeMap,
+             TypeChecking* typeChecking = nullptr) {
+        if (!typeChecking)
+            typeChecking = new TypeChecking(refMap, typeMap);
+        passes.push_back(typeChecking);
         passes.push_back(new DoTableHit(refMap, typeMap));
         setName("TableHit");
     }

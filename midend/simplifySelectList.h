@@ -76,10 +76,13 @@ class UnnestSelectList : public Transform {
 
 class SimplifySelectList : public PassManager {
  public:
-    SimplifySelectList(ReferenceMap* refMap, TypeMap* typeMap) {
-        passes.push_back(new TypeChecking(refMap, typeMap));
+    SimplifySelectList(ReferenceMap* refMap, TypeMap* typeMap,
+                       TypeChecking* typeChecking = nullptr) {
+        if (!typeChecking)
+            typeChecking = new TypeChecking(refMap, typeMap);
+        passes.push_back(typeChecking);
         passes.push_back(new SubstituteStructures(typeMap));
-        passes.push_back(new TypeChecking(refMap, typeMap));
+        passes.push_back(typeChecking);
         passes.push_back(new UnnestSelectList);
         setName("SimplifySelectList");
     }

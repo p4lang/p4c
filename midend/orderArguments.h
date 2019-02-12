@@ -43,8 +43,11 @@ class DoOrderArguments : public Transform {
 
 class OrderArguments : public PassManager {
  public:
-    OrderArguments(ReferenceMap* refMap, TypeMap* typeMap) {
-        passes.push_back(new TypeChecking(refMap, typeMap));
+    OrderArguments(ReferenceMap* refMap, TypeMap* typeMap,
+            TypeChecking* typeChecking = nullptr) {
+        if (!typeChecking)
+            typeChecking = new TypeChecking(refMap, typeMap);
+        passes.push_back(typeChecking);
         passes.push_back(new DoOrderArguments(refMap, typeMap));
         setName("OrderArguments");
     }

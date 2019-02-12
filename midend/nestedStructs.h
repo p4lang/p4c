@@ -137,9 +137,12 @@ class RemoveNestedStructs final : public Transform {
 
 class NestedStructs final : public PassManager {
  public:
-    NestedStructs(ReferenceMap* refMap, TypeMap* typeMap) {
+    NestedStructs(ReferenceMap* refMap, TypeMap* typeMap,
+            TypeChecking* typeChecking = nullptr) {
         auto values = new ComplexValues(refMap, typeMap);
-        passes.push_back(new TypeChecking(refMap, typeMap));
+        if (!typeChecking)
+            typeChecking = new TypeChecking(refMap, typeMap);
+        passes.push_back(typeChecking);
         passes.push_back(new RemoveNestedStructs(values));
         passes.push_back(new ClearTypeMap(typeMap));
         setName("NestedStructs");
