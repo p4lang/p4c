@@ -36,6 +36,7 @@ parseConstantWithWidth(Util::SourceInfo srcInfo, const char* text,
                        unsigned skip, unsigned base) {
     char *sep;
     auto size = strtol(text, &sep, 10);
+    sep += strspn(sep, " \t\r\n");
     if (sep == nullptr || !*sep)
        BUG("Expected to find separator %1%", text);
     if (size <= 0) {
@@ -45,8 +46,9 @@ parseConstantWithWidth(Util::SourceInfo srcInfo, const char* text,
         ::error("%1%: %2% size too large", srcInfo, size);
         return nullptr; }
 
-    bool isSigned = *sep == 's';
-    mpz_class value = Util::cvtInt(sep+skip+1, base);
+    bool isSigned = *sep++ == 's';
+    sep += strspn(sep, " \t\r\n");
+    mpz_class value = Util::cvtInt(sep+skip, base);
     const IR::Type* type = IR::Type_Bits::get(srcInfo, size, isSigned);
     IR::Constant* result = new IR::Constant(srcInfo, type, value, base);
     return result;
