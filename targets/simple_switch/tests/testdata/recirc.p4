@@ -79,7 +79,7 @@ control ingress {
 }
 
 control egress {
-    if (standard_metadata.instance_type == 0) {
+    if (hdrA1.f1 == 0) {
         apply(t_recirc);
     }
 }

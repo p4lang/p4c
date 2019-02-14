@@ -1,517 +1,440 @@
 {
-    "__meta__": {
-        "version": [
-            2,
-            5
-        ],
-        "compiler": "https://github.com/p4lang/p4c-bm"
+  "header_types" : [
+    {
+      "name" : "scalars_0",
+      "id" : 0,
+      "fields" : []
     },
-    "header_types": [
+    {
+      "name" : "standard_metadata",
+      "id" : 1,
+      "fields" : [
+        ["ingress_port", 9, false],
+        ["egress_spec", 9, false],
+        ["egress_port", 9, false],
+        ["clone_spec", 32, false],
+        ["instance_type", 32, false],
+        ["drop", 1, false],
+        ["recirculate_port", 16, false],
+        ["packet_length", 32, false],
+        ["checksum_error", 1, false],
+        ["parser_error", 32, false],
+        ["_padding", 3, false]
+      ]
+    },
+    {
+      "name" : "hdrA_t",
+      "id" : 2,
+      "fields" : [
+        ["f1", 8, false]
+      ]
+    },
+    {
+      "name" : "intrinsic_metadata_t",
+      "id" : 3,
+      "fields" : [
+        ["mcast_grp", 4, false],
+        ["egress_rid", 4, false],
+        ["mcast_hash", 16, false],
+        ["lf_field_list", 32, false],
+        ["ingress_global_timestamp", 64, false],
+        ["resubmit_flag", 16, false],
+        ["recirculate_flag", 16, false]
+      ]
+    }
+  ],
+  "headers" : [
+    {
+      "name" : "scalars",
+      "id" : 0,
+      "header_type" : "scalars_0",
+      "metadata" : true,
+      "pi_omit" : true
+    },
+    {
+      "name" : "standard_metadata",
+      "id" : 1,
+      "header_type" : "standard_metadata",
+      "metadata" : true,
+      "pi_omit" : true
+    },
+    {
+      "name" : "hdrA1",
+      "id" : 2,
+      "header_type" : "hdrA_t",
+      "metadata" : false,
+      "pi_omit" : true
+    },
+    {
+      "name" : "hdrA2",
+      "id" : 3,
+      "header_type" : "hdrA_t",
+      "metadata" : false,
+      "pi_omit" : true
+    },
+    {
+      "name" : "intrinsic_metadata",
+      "id" : 4,
+      "header_type" : "intrinsic_metadata_t",
+      "metadata" : true,
+      "pi_omit" : true
+    }
+  ],
+  "header_stacks" : [],
+  "header_union_types" : [],
+  "header_unions" : [],
+  "header_union_stacks" : [],
+  "field_lists" : [
+    {
+      "id" : 1,
+      "name" : "tuple_0",
+      "source_info" : {
+        "filename" : "recirc.p4",
+        "line" : 53,
+        "column" : 0,
+        "source_fragment" : "field_list recirc_FL { ..."
+      },
+      "elements" : [
         {
-            "name": "standard_metadata_t",
-            "id": 0,
-            "fields": [
-                [
-                    "ingress_port",
-                    9
-                ],
-                [
-                    "packet_length",
-                    32
-                ],
-                [
-                    "egress_spec",
-                    9
-                ],
-                [
-                    "egress_port",
-                    9
-                ],
-                [
-                    "egress_instance",
-                    32
-                ],
-                [
-                    "instance_type",
-                    32
-                ],
-                [
-                    "clone_spec",
-                    32
-                ],
-                [
-                    "_padding",
-                    5
-                ]
-            ],
-            "length_exp": null,
-            "max_length": null
+          "type" : "field",
+          "value" : ["standard_metadata", "ingress_port"]
         },
         {
-            "name": "intrinsic_metadata_t",
-            "id": 1,
-            "fields": [
-                [
-                    "mcast_grp",
-                    4
-                ],
-                [
-                    "egress_rid",
-                    4
-                ],
-                [
-                    "mcast_hash",
-                    16
-                ],
-                [
-                    "lf_field_list",
-                    32
-                ],
-                [
-                    "ingress_global_timestamp",
-                    64
-                ],
-                [
-                    "resubmit_flag",
-                    16
-                ],
-                [
-                    "recirculate_flag",
-                    16
-                ]
-            ],
-            "length_exp": null,
-            "max_length": null
+          "type" : "field",
+          "value" : ["standard_metadata", "egress_spec"]
         },
         {
-            "name": "hdrA_t",
-            "id": 2,
-            "fields": [
-                [
-                    "f1",
-                    8
-                ]
-            ],
-            "length_exp": null,
-            "max_length": null
-        }
-    ],
-    "headers": [
-        {
-            "name": "standard_metadata",
-            "id": 0,
-            "header_type": "standard_metadata_t",
-            "metadata": true
+          "type" : "field",
+          "value" : ["standard_metadata", "egress_port"]
         },
         {
-            "name": "intrinsic_metadata",
-            "id": 1,
-            "header_type": "intrinsic_metadata_t",
-            "metadata": true
+          "type" : "field",
+          "value" : ["standard_metadata", "clone_spec"]
         },
         {
-            "name": "hdrA1",
-            "id": 2,
-            "header_type": "hdrA_t",
-            "metadata": false
+          "type" : "field",
+          "value" : ["standard_metadata", "instance_type"]
         },
         {
-            "name": "hdrA2",
-            "id": 3,
-            "header_type": "hdrA_t",
-            "metadata": false
-        }
-    ],
-    "header_stacks": [],
-    "parsers": [
-        {
-            "name": "parser",
-            "id": 0,
-            "init_state": "start",
-            "parse_states": [
-                {
-                    "name": "start",
-                    "id": 0,
-                    "parser_ops": [
-                        {
-                            "op": "extract",
-                            "parameters": [
-                                {
-                                    "type": "regular",
-                                    "value": "hdrA1"
-                                }
-                            ]
-                        }
-                    ],
-                    "transition_key": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "hdrA1",
-                                "f1"
-                            ]
-                        }
-                    ],
-                    "transitions": [
-                        {
-                            "type": "hexstr",
-                            "value": "0x00",
-                            "mask": null,
-                            "next_state": null
-                        },
-                        {
-                            "type": "default",
-                            "value": null,
-                            "mask": null,
-                            "next_state": "more"
-                        }
-                    ]
-                },
-                {
-                    "name": "more",
-                    "id": 1,
-                    "parser_ops": [
-                        {
-                            "op": "extract",
-                            "parameters": [
-                                {
-                                    "type": "regular",
-                                    "value": "hdrA2"
-                                }
-                            ]
-                        },
-                        {
-                            "op": "set",
-                            "parameters": [
-                                {
-                                    "type": "field",
-                                    "value": [
-                                        "hdrA2",
-                                        "f1"
-                                    ]
-                                },
-                                {
-                                    "type": "hexstr",
-                                    "value": "0xab"
-                                }
-                            ]
-                        }
-                    ],
-                    "transition_key": [],
-                    "transitions": [
-                        {
-                            "type": "default",
-                            "value": null,
-                            "mask": null,
-                            "next_state": null
-                        }
-                    ]
-                }
-            ]
-        }
-    ],
-    "parse_vsets": [],
-    "deparsers": [
-        {
-            "name": "deparser",
-            "id": 0,
-            "order": [
-                "hdrA1",
-                "hdrA2"
-            ]
-        }
-    ],
-    "meter_arrays": [],
-    "actions": [
-        {
-            "name": "loopback",
-            "id": 0,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
-                                "egress_spec"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
-                                "ingress_port"
-                            ]
-                        }
-                    ]
-                }
-            ]
+          "type" : "field",
+          "value" : ["standard_metadata", "drop"]
         },
         {
-            "name": "recirc",
-            "id": 1,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "hdrA1",
-                                "f1"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                },
-                {
-                    "op": "add_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "hdrA2"
-                        }
-                    ]
-                },
-                {
-                    "op": "recirculate",
-                    "parameters": [
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                }
-            ]
-        }
-    ],
-    "pipelines": [
-        {
-            "name": "ingress",
-            "id": 0,
-            "init_table": "t_loopback",
-            "tables": [
-                {
-                    "name": "t_loopback",
-                    "id": 0,
-                    "match_type": "exact",
-                    "type": "simple",
-                    "max_size": 16384,
-                    "with_counters": false,
-                    "direct_meters": null,
-                    "support_timeout": false,
-                    "key": [],
-                    "actions": [
-                        "loopback"
-                    ],
-                    "next_tables": {
-                        "loopback": null
-                    },
-                    "default_entry": {
-                        "action_id": 0,
-                        "action_const": true,
-                        "action_data": [],
-                        "action_entry_const": false
-                    },
-                    "base_default_next": null
-                }
-            ],
-            "action_profiles": [],
-            "conditionals": []
+          "type" : "field",
+          "value" : ["standard_metadata", "recirculate_port"]
         },
         {
-            "name": "egress",
-            "id": 1,
-            "init_table": "_condition_0",
-            "tables": [
-                {
-                    "name": "t_recirc",
-                    "id": 1,
-                    "match_type": "exact",
-                    "type": "simple",
-                    "max_size": 16384,
-                    "with_counters": false,
-                    "direct_meters": null,
-                    "support_timeout": false,
-                    "key": [],
-                    "actions": [
-                        "recirc"
-                    ],
-                    "next_tables": {
-                        "recirc": null
-                    },
-                    "default_entry": {
-                        "action_id": 1,
-                        "action_const": true,
-                        "action_data": [],
-                        "action_entry_const": false
-                    },
-                    "base_default_next": null
-                }
-            ],
-            "action_profiles": [],
-            "conditionals": [
-                {
-                    "name": "_condition_0",
-                    "id": 0,
-                    "expression": {
-                        "type": "expression",
-                        "value": {
-                            "op": "==",
-                            "left": {
-                                "type": "field",
-                                "value": [
-                                    "standard_metadata",
-                                    "instance_type"
-                                ]
-                            },
-                            "right": {
-                                "type": "hexstr",
-                                "value": "0x0"
-                            }
-                        }
-                    },
-                    "true_next": "t_recirc",
-                    "false_next": null
-                }
-            ]
-        }
-    ],
-    "calculations": [],
-    "checksums": [],
-    "learn_lists": [],
-    "field_lists": [
+          "type" : "field",
+          "value" : ["standard_metadata", "packet_length"]
+        },
         {
-            "id": 1,
-            "name": "recirc_FL",
-            "elements": [
-                {
-                    "type": "field",
-                    "value": [
-                        "standard_metadata",
-                        "ingress_port"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "standard_metadata",
-                        "packet_length"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "standard_metadata",
-                        "egress_spec"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "standard_metadata",
-                        "egress_port"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "standard_metadata",
-                        "egress_instance"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "standard_metadata",
-                        "instance_type"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "standard_metadata",
-                        "clone_spec"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "standard_metadata",
-                        "_padding"
-                    ]
-                }
-            ]
+          "type" : "field",
+          "value" : ["standard_metadata", "checksum_error"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "parser_error"]
         }
-    ],
-    "counter_arrays": [],
-    "register_arrays": [],
-    "force_arith": [
-        [
-            "standard_metadata",
-            "ingress_port"
-        ],
-        [
-            "standard_metadata",
-            "packet_length"
-        ],
-        [
-            "standard_metadata",
-            "egress_spec"
-        ],
-        [
-            "standard_metadata",
-            "egress_port"
-        ],
-        [
-            "standard_metadata",
-            "egress_instance"
-        ],
-        [
-            "standard_metadata",
-            "instance_type"
-        ],
-        [
-            "standard_metadata",
-            "clone_spec"
-        ],
-        [
-            "standard_metadata",
-            "_padding"
-        ],
-        [
-            "intrinsic_metadata",
-            "mcast_grp"
-        ],
-        [
-            "intrinsic_metadata",
-            "egress_rid"
-        ],
-        [
-            "intrinsic_metadata",
-            "mcast_hash"
-        ],
-        [
-            "intrinsic_metadata",
-            "lf_field_list"
-        ],
-        [
-            "intrinsic_metadata",
-            "ingress_global_timestamp"
-        ],
-        [
-            "intrinsic_metadata",
-            "resubmit_flag"
-        ],
-        [
-            "intrinsic_metadata",
-            "recirculate_flag"
-        ]
-    ]
+      ]
+    }
+  ],
+  "errors" : [
+    ["NoError", 1],
+    ["PacketTooShort", 2],
+    ["NoMatch", 3],
+    ["StackOutOfBounds", 4],
+    ["HeaderTooShort", 5],
+    ["ParserTimeout", 6]
+  ],
+  "enums" : [],
+  "parsers" : [
+    {
+      "name" : "parser",
+      "id" : 0,
+      "init_state" : "start",
+      "parse_states" : [
+        {
+          "name" : "more",
+          "id" : 0,
+          "parser_ops" : [
+            {
+              "parameters" : [
+                {
+                  "type" : "regular",
+                  "value" : "hdrA2"
+                }
+              ],
+              "op" : "extract"
+            },
+            {
+              "parameters" : [
+                {
+                  "type" : "field",
+                  "value" : ["hdrA2", "f1"]
+                },
+                {
+                  "type" : "hexstr",
+                  "value" : "0xab"
+                }
+              ],
+              "op" : "set"
+            }
+          ],
+          "transitions" : [
+            {
+              "value" : "default",
+              "mask" : null,
+              "next_state" : null
+            }
+          ],
+          "transition_key" : []
+        },
+        {
+          "name" : "start",
+          "id" : 1,
+          "parser_ops" : [
+            {
+              "parameters" : [
+                {
+                  "type" : "regular",
+                  "value" : "hdrA1"
+                }
+              ],
+              "op" : "extract"
+            }
+          ],
+          "transitions" : [
+            {
+              "type" : "hexstr",
+              "value" : "0x00",
+              "mask" : null,
+              "next_state" : null
+            },
+            {
+              "value" : "default",
+              "mask" : null,
+              "next_state" : "more"
+            }
+          ],
+          "transition_key" : [
+            {
+              "type" : "field",
+              "value" : ["hdrA1", "f1"]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "parse_vsets" : [],
+  "deparsers" : [
+    {
+      "name" : "deparser",
+      "id" : 0,
+      "order" : ["hdrA1", "hdrA2"]
+    }
+  ],
+  "meter_arrays" : [],
+  "counter_arrays" : [],
+  "register_arrays" : [],
+  "calculations" : [],
+  "learn_lists" : [],
+  "actions" : [
+    {
+      "name" : "recirc",
+      "id" : 0,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["hdrA1", "f1"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x01"
+            }
+          ],
+          "source_info" : {
+            "filename" : "recirc.p4",
+            "line" : 67,
+            "column" : 4,
+            "source_fragment" : "modify_field(hdrA1.f1, 0x01)"
+          }
+        },
+        {
+          "op" : "add_header",
+          "parameters" : [
+            {
+              "type" : "header",
+              "value" : "hdrA2"
+            }
+          ],
+          "source_info" : {
+            "filename" : "recirc.p4",
+            "line" : 68,
+            "column" : 4,
+            "source_fragment" : "add_header(hdrA2)"
+          }
+        },
+        {
+          "op" : "recirculate",
+          "parameters" : [
+            {
+              "type" : "hexstr",
+              "value" : "0x1"
+            }
+          ],
+          "source_info" : {
+            "filename" : "recirc.p4",
+            "line" : 69,
+            "column" : 4,
+            "source_fragment" : "recirculate(recirc_FL)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "loopback",
+      "id" : 1,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "egress_spec"]
+            },
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "ingress_port"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "recirc.p4",
+            "line" : 58,
+            "column" : 4,
+            "source_fragment" : "modify_field(standard_metadata.egress_spec, standard_metadata.ingress_port)"
+          }
+        }
+      ]
+    }
+  ],
+  "pipelines" : [
+    {
+      "name" : "ingress",
+      "id" : 0,
+      "init_table" : "t_loopback",
+      "tables" : [
+        {
+          "name" : "t_loopback",
+          "id" : 0,
+          "source_info" : {
+            "filename" : "recirc.p4",
+            "line" : 61,
+            "column" : 0,
+            "source_fragment" : "table t_loopback { ..."
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [1],
+          "actions" : ["loopback"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "loopback" : null
+          },
+          "default_entry" : {
+            "action_id" : 1,
+            "action_const" : false,
+            "action_data" : [],
+            "action_entry_const" : false
+          }
+        }
+      ],
+      "action_profiles" : [],
+      "conditionals" : []
+    },
+    {
+      "name" : "egress",
+      "id" : 1,
+      "init_table" : "node_5",
+      "tables" : [
+        {
+          "name" : "t_recirc",
+          "id" : 1,
+          "source_info" : {
+            "filename" : "recirc.p4",
+            "line" : 72,
+            "column" : 0,
+            "source_fragment" : "table t_recirc { ..."
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [0],
+          "actions" : ["recirc"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "recirc" : null
+          },
+          "default_entry" : {
+            "action_id" : 0,
+            "action_const" : false,
+            "action_data" : [],
+            "action_entry_const" : false
+          }
+        }
+      ],
+      "action_profiles" : [],
+      "conditionals" : [
+        {
+          "name" : "node_5",
+          "id" : 0,
+          "source_info" : {
+            "filename" : "recirc.p4",
+            "line" : 82,
+            "column" : 17,
+            "source_fragment" : "=="
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "==",
+              "left" : {
+                "type" : "field",
+                "value" : ["hdrA1", "f1"]
+              },
+              "right" : {
+                "type" : "hexstr",
+                "value" : "0x00"
+              }
+            }
+          },
+          "false_next" : null,
+          "true_next" : "t_recirc"
+        }
+      ]
+    }
+  ],
+  "checksums" : [],
+  "force_arith" : [],
+  "extern_instances" : [],
+  "field_aliases" : [],
+  "program" : "./recirc.p4i",
+  "__meta__" : {
+    "version" : [2, 18],
+    "compiler" : "https://github.com/p4lang/p4c"
+  }
 }

@@ -1,714 +1,941 @@
 {
-    "header_types": [
+  "header_types" : [
+    {
+      "name" : "scalars_0",
+      "id" : 0,
+      "fields" : []
+    },
+    {
+      "name" : "standard_metadata",
+      "id" : 1,
+      "fields" : [
+        ["ingress_port", 9, false],
+        ["egress_spec", 9, false],
+        ["egress_port", 9, false],
+        ["clone_spec", 32, false],
+        ["instance_type", 32, false],
+        ["drop", 1, false],
+        ["recirculate_port", 16, false],
+        ["packet_length", 32, false],
+        ["checksum_error", 1, false],
+        ["parser_error", 32, false],
+        ["_padding", 3, false]
+      ]
+    },
+    {
+      "name" : "hdrA_t",
+      "id" : 2,
+      "fields" : [
+        ["f1", 8, false],
+        ["f2", 8, false]
+      ]
+    },
+    {
+      "name" : "intrinsic_metadata_t",
+      "id" : 3,
+      "fields" : [
+        ["mcast_grp", 4, false],
+        ["egress_rid", 4, false],
+        ["mcast_hash", 16, false],
+        ["lf_field_list", 32, false],
+        ["ingress_global_timestamp", 64, false],
+        ["resubmit_flag", 16, false],
+        ["recirculate_flag", 16, false]
+      ]
+    },
+    {
+      "name" : "metaA_t",
+      "id" : 4,
+      "fields" : [
+        ["f1", 8, false],
+        ["f2", 8, false]
+      ]
+    },
+    {
+      "name" : "metaB_t",
+      "id" : 5,
+      "fields" : [
+        ["f1", 8, false],
+        ["f2", 8, false]
+      ]
+    }
+  ],
+  "headers" : [
+    {
+      "name" : "scalars",
+      "id" : 0,
+      "header_type" : "scalars_0",
+      "metadata" : true,
+      "pi_omit" : true
+    },
+    {
+      "name" : "standard_metadata",
+      "id" : 1,
+      "header_type" : "standard_metadata",
+      "metadata" : true,
+      "pi_omit" : true
+    },
+    {
+      "name" : "hdrA",
+      "id" : 2,
+      "header_type" : "hdrA_t",
+      "metadata" : false,
+      "pi_omit" : true
+    },
+    {
+      "name" : "hdrA2",
+      "id" : 3,
+      "header_type" : "hdrA_t",
+      "metadata" : false,
+      "pi_omit" : true
+    },
+    {
+      "name" : "intrinsic_metadata",
+      "id" : 4,
+      "header_type" : "intrinsic_metadata_t",
+      "metadata" : true,
+      "pi_omit" : true
+    },
+    {
+      "name" : "metaA",
+      "id" : 5,
+      "header_type" : "metaA_t",
+      "metadata" : true,
+      "pi_omit" : true
+    },
+    {
+      "name" : "metaB",
+      "id" : 6,
+      "header_type" : "metaB_t",
+      "metadata" : true,
+      "pi_omit" : true
+    }
+  ],
+  "header_stacks" : [],
+  "header_union_types" : [],
+  "header_unions" : [],
+  "header_union_stacks" : [],
+  "field_lists" : [
+    {
+      "id" : 1,
+      "name" : "tuple_0",
+      "source_info" : {
+        "filename" : "packet_redirect.p4",
+        "line" : 66,
+        "column" : 0,
+        "source_fragment" : "field_list redirect_FL { ..."
+      },
+      "elements" : [
         {
-            "name": "standard_metadata_t",
-            "id": 0,
-            "fields": [
-                [
-                    "ingress_port",
-                    9
-                ],
-                [
-                    "packet_length",
-                    32
-                ],
-                [
-                    "egress_spec",
-                    9
-                ],
-                [
-                    "egress_port",
-                    9
-                ],
-                [
-                    "egress_instance",
-                    32
-                ],
-                [
-                    "instance_type",
-                    32
-                ],
-                [
-                    "clone_spec",
-                    32
-                ],
-                [
-                    "_padding",
-                    5
-                ]
-            ],
-            "length_exp": null,
-            "max_length": null
+          "type" : "field",
+          "value" : ["standard_metadata", "ingress_port"]
         },
         {
-            "name": "hdrA_t",
-            "id": 1,
-            "fields": [
-                [
-                    "f1",
-                    8
-                ],
-                [
-                    "f2",
-                    8
-                ]
-            ],
-            "length_exp": null,
-            "max_length": null
+          "type" : "field",
+          "value" : ["standard_metadata", "egress_spec"]
         },
         {
-            "name": "metaA_t",
-            "id": 2,
-            "fields": [
-                [
-                    "f1",
-                    8
-                ],
-                [
-                    "f2",
-                    8
-                ]
-            ],
-            "length_exp": null,
-            "max_length": null
+          "type" : "field",
+          "value" : ["standard_metadata", "egress_port"]
         },
         {
-            "name": "intrinsic_metadata_t",
-            "id": 3,
-            "fields": [
-                [
-                    "mcast_grp",
-                    4
-                ],
-                [
-                    "egress_rid",
-                    4
-                ],
-                [
-                    "mcast_hash",
-                    16
-                ],
-                [
-                    "lf_field_list",
-                    32
-                ],
-                [
-                    "ingress_global_timestamp",
-                    64
-                ],
-                [
-                    "resubmit_flag",
-                    16
-                ],
-                [
-                    "recirculate_flag",
-                    16
-                ]
-            ],
-            "length_exp": null,
-            "max_length": null
+          "type" : "field",
+          "value" : ["standard_metadata", "clone_spec"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "instance_type"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "drop"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "recirculate_port"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "packet_length"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "checksum_error"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "parser_error"]
+        },
+        {
+          "type" : "field",
+          "value" : ["metaA", "f1"]
+        },
+        {
+          "type" : "field",
+          "value" : ["metaA", "f2"]
         }
-    ],
-    "headers": [
+      ]
+    },
+    {
+      "id" : 2,
+      "name" : "fl",
+      "source_info" : {
+        "filename" : "packet_redirect.p4",
+        "line" : 66,
+        "column" : 0,
+        "source_fragment" : "field_list redirect_FL { ..."
+      },
+      "elements" : [
         {
-            "name": "standard_metadata",
-            "id": 0,
-            "header_type": "standard_metadata_t",
-            "metadata": true
+          "type" : "field",
+          "value" : ["standard_metadata", "ingress_port"]
         },
         {
-            "name": "hdrA",
-            "id": 1,
-            "header_type": "hdrA_t",
-            "metadata": false
+          "type" : "field",
+          "value" : ["standard_metadata", "egress_spec"]
         },
         {
-            "name": "hdrA2",
-            "id": 2,
-            "header_type": "hdrA_t",
-            "metadata": false
+          "type" : "field",
+          "value" : ["standard_metadata", "egress_port"]
         },
         {
-            "name": "metaA",
-            "id": 3,
-            "header_type": "metaA_t",
-            "metadata": true
+          "type" : "field",
+          "value" : ["standard_metadata", "clone_spec"]
         },
         {
-            "name": "intrinsic_metadata",
-            "id": 4,
-            "header_type": "intrinsic_metadata_t",
-            "metadata": true
+          "type" : "field",
+          "value" : ["standard_metadata", "instance_type"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "drop"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "recirculate_port"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "packet_length"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "checksum_error"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "parser_error"]
+        },
+        {
+          "type" : "field",
+          "value" : ["metaA", "f1"]
+        },
+        {
+          "type" : "field",
+          "value" : ["metaA", "f2"]
         }
-    ],
-    "header_stacks": [],
-    "parsers": [
+      ]
+    },
+    {
+      "id" : 3,
+      "name" : "tuple_0",
+      "source_info" : {
+        "filename" : "packet_redirect.p4",
+        "line" : 66,
+        "column" : 0,
+        "source_fragment" : "field_list redirect_FL { ..."
+      },
+      "elements" : [
         {
-            "name": "parser",
-            "id": 0,
-            "init_state": "start",
-            "parse_states": [
-                {
-                    "name": "start",
-                    "id": 0,
-                    "parser_ops": [
-                        {
-                            "op": "extract",
-                            "parameters": [
-                                {
-                                    "type": "regular",
-                                    "value": "hdrA"
-                                }
-                            ]
-                        },
-                        {
-                            "op": "extract",
-                            "parameters": [
-                                {
-                                    "type": "regular",
-                                    "value": "hdrA2"
-                                }
-                            ]
-                        }
-                    ],
-                    "transition_key": [],
-                    "transitions": [
-                        {
-                            "value": "default",
-                            "mask": null,
-                            "next_state": null
-                        }
-                    ]
-                }
-            ]
+          "type" : "field",
+          "value" : ["standard_metadata", "ingress_port"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "egress_spec"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "egress_port"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "clone_spec"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "instance_type"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "drop"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "recirculate_port"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "packet_length"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "checksum_error"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "parser_error"]
+        },
+        {
+          "type" : "field",
+          "value" : ["metaA", "f1"]
+        },
+        {
+          "type" : "field",
+          "value" : ["metaA", "f2"]
         }
-    ],
-    "deparsers": [
+      ]
+    },
+    {
+      "id" : 4,
+      "name" : "fl_0",
+      "source_info" : {
+        "filename" : "packet_redirect.p4",
+        "line" : 66,
+        "column" : 0,
+        "source_fragment" : "field_list redirect_FL { ..."
+      },
+      "elements" : [
         {
-            "name": "deparser",
-            "id": 0,
-            "order": [
-                "hdrA",
-                "hdrA2"
-            ]
+          "type" : "field",
+          "value" : ["standard_metadata", "ingress_port"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "egress_spec"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "egress_port"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "clone_spec"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "instance_type"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "drop"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "recirculate_port"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "packet_length"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "checksum_error"]
+        },
+        {
+          "type" : "field",
+          "value" : ["standard_metadata", "parser_error"]
+        },
+        {
+          "type" : "field",
+          "value" : ["metaA", "f1"]
+        },
+        {
+          "type" : "field",
+          "value" : ["metaA", "f2"]
         }
-    ],
-    "meter_arrays": [],
-    "actions": [
+      ]
+    }
+  ],
+  "errors" : [
+    ["NoError", 1],
+    ["PacketTooShort", 2],
+    ["NoMatch", 3],
+    ["StackOutOfBounds", 4],
+    ["HeaderTooShort", 5],
+    ["ParserTimeout", 6]
+  ],
+  "enums" : [],
+  "parsers" : [
+    {
+      "name" : "parser",
+      "id" : 0,
+      "init_state" : "start",
+      "parse_states" : [
         {
-            "name": "_nop",
-            "id": 0,
-            "runtime_data": [],
-            "primitives": []
-        },
-        {
-            "name": "_exit",
-            "id": 1,
-            "runtime_data": [],
-            "primitives": [
+          "name" : "start",
+          "id" : 0,
+          "parser_ops" : [
+            {
+              "parameters" : [
                 {
-                    "op": "exit",
-                    "parameters": []
+                  "type" : "regular",
+                  "value" : "hdrA"
                 }
-            ]
-        },
-        {
-            "name": "_resubmit",
-            "id": 2,
-            "runtime_data": [],
-            "primitives": [
+              ],
+              "op" : "extract"
+            },
+            {
+              "parameters" : [
                 {
-                    "op": "resubmit",
-                    "parameters": [
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
+                  "type" : "regular",
+                  "value" : "hdrA2"
                 }
-            ]
-        },
-        {
-            "name": "_recirculate",
-            "id": 3,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "recirculate",
-                    "parameters": [
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "_multicast",
-            "id": 4,
-            "runtime_data": [
-                {
-                    "name": "mgrp",
-                    "bitwidth": 4
-                }
-            ],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "intrinsic_metadata",
-                                "mcast_grp"
-                            ]
-                        },
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        }
-                    ]
-                },
-                {
-                    "op": "remove_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "hdrA2"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "_clone_i2e",
-            "id": 5,
-            "runtime_data": [
-                {
-                    "name": "mirror_id",
-                    "bitwidth": 32
-                }
-            ],
-            "primitives": [
-                {
-                    "op": "clone_ingress_pkt_to_egress",
-                    "parameters": [
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "_clone_e2e",
-            "id": 6,
-            "runtime_data": [
-                {
-                    "name": "mirror_id",
-                    "bitwidth": 32
-                }
-            ],
-            "primitives": [
-                {
-                    "op": "clone_egress_pkt_to_egress",
-                    "parameters": [
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "set_hdr",
-            "id": 7,
-            "runtime_data": [],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "hdrA",
-                                "f2"
-                            ]
-                        },
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
-                                "packet_length"
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "_set_port",
-            "id": 8,
-            "runtime_data": [
-                {
-                    "name": "port",
-                    "bitwidth": 9
-                }
-            ],
-            "primitives": [
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "standard_metadata",
-                                "egress_spec"
-                            ]
-                        },
-                        {
-                            "type": "runtime_data",
-                            "value": 0
-                        }
-                    ]
-                },
-                {
-                    "op": "modify_field",
-                    "parameters": [
-                        {
-                            "type": "field",
-                            "value": [
-                                "metaA",
-                                "f1"
-                            ]
-                        },
-                        {
-                            "type": "hexstr",
-                            "value": "0x1"
-                        }
-                    ]
-                },
-                {
-                    "op": "remove_header",
-                    "parameters": [
-                        {
-                            "type": "header",
-                            "value": "hdrA2"
-                        }
-                    ]
-                }
-            ]
+              ],
+              "op" : "extract"
+            }
+          ],
+          "transitions" : [
+            {
+              "value" : "default",
+              "mask" : null,
+              "next_state" : null
+            }
+          ],
+          "transition_key" : []
         }
-    ],
-    "pipelines": [
+      ]
+    }
+  ],
+  "parse_vsets" : [],
+  "deparsers" : [
+    {
+      "name" : "deparser",
+      "id" : 0,
+      "order" : ["hdrA", "hdrA2"]
+    }
+  ],
+  "meter_arrays" : [],
+  "counter_arrays" : [],
+  "register_arrays" : [],
+  "calculations" : [],
+  "learn_lists" : [],
+  "actions" : [
+    {
+      "name" : "NoAction",
+      "id" : 0,
+      "runtime_data" : [],
+      "primitives" : []
+    },
+    {
+      "name" : "NoAction",
+      "id" : 1,
+      "runtime_data" : [],
+      "primitives" : []
+    },
+    {
+      "name" : "_nop",
+      "id" : 2,
+      "runtime_data" : [],
+      "primitives" : []
+    },
+    {
+      "name" : "_recirculate",
+      "id" : 3,
+      "runtime_data" : [],
+      "primitives" : [
         {
-            "name": "ingress",
-            "id": 0,
-            "init_table": "t_ingress_1",
-            "tables": [
-                {
-                    "name": "t_ingress_1",
-                    "id": 0,
-                    "match_type": "exact",
-                    "type": "simple",
-                    "max_size": 128,
-                    "with_counters": false,
-                    "direct_meters": null,
-                    "support_timeout": false,
-                    "key": [
-                        {
-                            "match_type": "exact",
-                            "target": [
-                                "hdrA",
-                                "f1"
-                            ],
-                            "mask": null
-                        },
-                        {
-                            "match_type": "exact",
-                            "target": [
-                                "metaA",
-                                "f1"
-                            ],
-                            "mask": null
-                        }
-                    ],
-                    "actions": [
-                        "_nop",
-                        "_set_port",
-                        "_multicast",
-                        "_exit"
-                    ],
-                    "next_tables": {
-                        "_nop": "t_ingress_2",
-                        "_set_port": "t_ingress_2",
-                        "_multicast": "t_ingress_2",
-                        "_exit": "t_ingress_2"
-                    },
-                    "base_default_next": "t_ingress_2"
-                },
-                {
-                    "name": "t_ingress_2",
-                    "id": 1,
-                    "match_type": "ternary",
-                    "type": "simple",
-                    "max_size": 128,
-                    "with_counters": false,
-                    "direct_meters": null,
-                    "support_timeout": false,
-                    "key": [
-                        {
-                            "match_type": "exact",
-                            "target": [
-                                "hdrA",
-                                "f1"
-                            ],
-                            "mask": null
-                        },
-                        {
-                            "match_type": "ternary",
-                            "target": [
-                                "standard_metadata",
-                                "instance_type"
-                            ],
-                            "mask": null
-                        }
-                    ],
-                    "actions": [
-                        "_nop",
-                        "_resubmit",
-                        "_clone_i2e"
-                    ],
-                    "next_tables": {
-                        "_nop": null,
-                        "_resubmit": null,
-                        "_clone_i2e": null
-                    },
-                    "base_default_next": null
+          "op" : "recirculate",
+          "parameters" : [
+            {
+              "type" : "hexstr",
+              "value" : "0x1"
+            }
+          ],
+          "source_info" : {
+            "filename" : "packet_redirect.p4",
+            "line" : 76,
+            "column" : 4,
+            "source_fragment" : "recirculate(redirect_FL)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "_clone_e2e",
+      "id" : 4,
+      "runtime_data" : [
+        {
+          "name" : "mirror_id",
+          "bitwidth" : 32
+        }
+      ],
+      "primitives" : [
+        {
+          "op" : "clone_egress_pkt_to_egress",
+          "parameters" : [
+            {
+              "type" : "runtime_data",
+              "value" : 0
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x2"
+            }
+          ],
+          "source_info" : {
+            "filename" : "packet_redirect.p4",
+            "line" : 89,
+            "column" : 4,
+            "source_fragment" : "clone_egress_pkt_to_egress(mirror_id, redirect_FL)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "set_hdr",
+      "id" : 5,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["hdrA", "f2"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["standard_metadata", "packet_length"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xff"
+                  }
                 }
-            ],
-            "conditionals": []
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "packet_redirect.p4",
+            "line" : 137,
+            "column" : 4,
+            "source_fragment" : "modify_field(hdrA.f2, standard_metadata.packet_length)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "NoAction",
+      "id" : 6,
+      "runtime_data" : [],
+      "primitives" : []
+    },
+    {
+      "name" : "NoAction",
+      "id" : 7,
+      "runtime_data" : [],
+      "primitives" : []
+    },
+    {
+      "name" : "_nop",
+      "id" : 8,
+      "runtime_data" : [],
+      "primitives" : []
+    },
+    {
+      "name" : "_nop",
+      "id" : 9,
+      "runtime_data" : [],
+      "primitives" : []
+    },
+    {
+      "name" : "_set_port",
+      "id" : 10,
+      "runtime_data" : [
+        {
+          "name" : "port",
+          "bitwidth" : 9
+        }
+      ],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "egress_spec"]
+            },
+            {
+              "type" : "runtime_data",
+              "value" : 0
+            }
+          ],
+          "source_info" : {
+            "filename" : "packet_redirect.p4",
+            "line" : 92,
+            "column" : 17,
+            "source_fragment" : "port) { ..."
+          }
         },
         {
-            "name": "egress",
-            "id": 1,
-            "init_table": "t_egress",
-            "tables": [
-                {
-                    "name": "t_egress",
-                    "id": 2,
-                    "match_type": "ternary",
-                    "type": "simple",
-                    "max_size": 128,
-                    "with_counters": false,
-                    "direct_meters": null,
-                    "support_timeout": false,
-                    "key": [
-                        {
-                            "match_type": "exact",
-                            "target": [
-                                "hdrA",
-                                "f1"
-                            ],
-                            "mask": null
-                        },
-                        {
-                            "match_type": "ternary",
-                            "target": [
-                                "standard_metadata",
-                                "instance_type"
-                            ],
-                            "mask": null
-                        }
-                    ],
-                    "actions": [
-                        "_nop",
-                        "_recirculate",
-                        "_clone_e2e"
-                    ],
-                    "next_tables": {
-                        "_nop": "t_exit",
-                        "_recirculate": "t_exit",
-                        "_clone_e2e": "t_exit"
-                    },
-                    "base_default_next": "t_exit"
-                },
-                {
-                    "name": "t_exit",
-                    "id": 3,
-                    "match_type": "exact",
-                    "type": "simple",
-                    "max_size": 1,
-                    "with_counters": false,
-                    "direct_meters": null,
-                    "support_timeout": false,
-                    "key": [],
-                    "actions": [
-                        "set_hdr"
-                    ],
-                    "next_tables": {
-                        "set_hdr": null
-                    },
-                    "base_default_next": null
-                }
-            ],
-            "conditionals": []
-        }
-    ],
-    "calculations": [],
-    "checksums": [],
-    "learn_lists": [],
-    "field_lists": [
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["metaA", "f1"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x01"
+            }
+          ],
+          "source_info" : {
+            "filename" : "packet_redirect.p4",
+            "line" : 94,
+            "column" : 4,
+            "source_fragment" : "modify_field(metaA.f1, 1)"
+          }
+        },
         {
-            "id": 1,
-            "name": "redirect_FL",
-            "elements": [
-                {
-                    "type": "field",
-                    "value": [
-                        "standard_metadata",
-                        "ingress_port"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "standard_metadata",
-                        "packet_length"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "standard_metadata",
-                        "egress_spec"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "standard_metadata",
-                        "egress_port"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "standard_metadata",
-                        "egress_instance"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "standard_metadata",
-                        "instance_type"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "standard_metadata",
-                        "clone_spec"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "standard_metadata",
-                        "_padding"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "metaA",
-                        "f1"
-                    ]
-                },
-                {
-                    "type": "field",
-                    "value": [
-                        "metaA",
-                        "f2"
-                    ]
-                }
-            ]
+          "op" : "remove_header",
+          "parameters" : [
+            {
+              "type" : "header",
+              "value" : "hdrA2"
+            }
+          ],
+          "source_info" : {
+            "filename" : "packet_redirect.p4",
+            "line" : 95,
+            "column" : 4,
+            "source_fragment" : "remove_header(hdrA2)"
+          }
         }
-    ],
-    "counter_arrays": [],
-    "register_arrays": [],
-    "force_arith": [
-        [
-            "standard_metadata",
-            "ingress_port"
-        ],
-        [
-            "standard_metadata",
-            "packet_length"
-        ],
-        [
-            "standard_metadata",
-            "egress_spec"
-        ],
-        [
-            "standard_metadata",
-            "egress_port"
-        ],
-        [
-            "standard_metadata",
-            "egress_instance"
-        ],
-        [
-            "standard_metadata",
-            "instance_type"
-        ],
-        [
-            "standard_metadata",
-            "clone_spec"
-        ],
-        [
-            "standard_metadata",
-            "_padding"
-        ],
-        [
-            "intrinsic_metadata",
-            "mcast_grp"
-        ],
-        [
-            "intrinsic_metadata",
-            "egress_rid"
-        ],
-        [
-            "intrinsic_metadata",
-            "mcast_hash"
-        ],
-        [
-            "intrinsic_metadata",
-            "lf_field_list"
-        ],
-        [
-            "intrinsic_metadata",
-            "ingress_global_timestamp"
-        ],
-        [
-            "intrinsic_metadata",
-            "resubmit_flag"
-        ],
-        [
-            "intrinsic_metadata",
-            "recirculate_flag"
-        ]
-    ]
+      ]
+    },
+    {
+      "name" : "_multicast",
+      "id" : 11,
+      "runtime_data" : [
+        {
+          "name" : "mgrp",
+          "bitwidth" : 4
+        }
+      ],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["intrinsic_metadata", "mcast_grp"]
+            },
+            {
+              "type" : "runtime_data",
+              "value" : 0
+            }
+          ],
+          "source_info" : {
+            "filename" : "packet_redirect.p4",
+            "line" : 79,
+            "column" : 18,
+            "source_fragment" : "mgrp) { ..."
+          }
+        },
+        {
+          "op" : "remove_header",
+          "parameters" : [
+            {
+              "type" : "header",
+              "value" : "hdrA2"
+            }
+          ],
+          "source_info" : {
+            "filename" : "packet_redirect.p4",
+            "line" : 81,
+            "column" : 4,
+            "source_fragment" : "remove_header(hdrA2)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "_exit",
+      "id" : 12,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "exit",
+          "parameters" : [],
+          "source_info" : {
+            "filename" : "packet_redirect.p4",
+            "line" : 99,
+            "column" : 4,
+            "source_fragment" : "exit()"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "_resubmit",
+      "id" : 13,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "resubmit",
+          "parameters" : [
+            {
+              "type" : "hexstr",
+              "value" : "0x3"
+            }
+          ],
+          "source_info" : {
+            "filename" : "packet_redirect.p4",
+            "line" : 72,
+            "column" : 4,
+            "source_fragment" : "resubmit(redirect_FL)"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "_clone_i2e",
+      "id" : 14,
+      "runtime_data" : [
+        {
+          "name" : "mirror_id",
+          "bitwidth" : 32
+        }
+      ],
+      "primitives" : [
+        {
+          "op" : "clone_ingress_pkt_to_egress",
+          "parameters" : [
+            {
+              "type" : "runtime_data",
+              "value" : 0
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x4"
+            }
+          ],
+          "source_info" : {
+            "filename" : "packet_redirect.p4",
+            "line" : 85,
+            "column" : 4,
+            "source_fragment" : "clone_ingress_pkt_to_egress(mirror_id, redirect_FL)"
+          }
+        }
+      ]
+    }
+  ],
+  "pipelines" : [
+    {
+      "name" : "ingress",
+      "id" : 0,
+      "init_table" : "t_ingress_1",
+      "tables" : [
+        {
+          "name" : "t_ingress_1",
+          "id" : 0,
+          "source_info" : {
+            "filename" : "packet_redirect.p4",
+            "line" : 102,
+            "column" : 0,
+            "source_fragment" : "table t_ingress_1 { ..."
+          },
+          "key" : [
+            {
+              "match_type" : "exact",
+              "name" : "hdrA.f1",
+              "target" : ["hdrA", "f1"],
+              "mask" : null
+            },
+            {
+              "match_type" : "exact",
+              "name" : "metaA.f1",
+              "target" : ["metaA", "f1"],
+              "mask" : null
+            }
+          ],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 128,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [8, 10, 11, 12, 6],
+          "actions" : ["_nop", "_set_port", "_multicast", "_exit", "NoAction"],
+          "base_default_next" : "t_ingress_2",
+          "next_tables" : {
+            "_nop" : "t_ingress_2",
+            "_set_port" : "t_ingress_2",
+            "_multicast" : "t_ingress_2",
+            "_exit" : "t_ingress_2",
+            "NoAction" : "t_ingress_2"
+          },
+          "default_entry" : {
+            "action_id" : 6,
+            "action_const" : false,
+            "action_data" : [],
+            "action_entry_const" : false
+          }
+        },
+        {
+          "name" : "t_ingress_2",
+          "id" : 1,
+          "source_info" : {
+            "filename" : "packet_redirect.p4",
+            "line" : 113,
+            "column" : 0,
+            "source_fragment" : "table t_ingress_2 { ..."
+          },
+          "key" : [
+            {
+              "match_type" : "exact",
+              "name" : "hdrA.f1",
+              "target" : ["hdrA", "f1"],
+              "mask" : null
+            },
+            {
+              "match_type" : "ternary",
+              "name" : "standard_metadata.instance_type",
+              "target" : ["standard_metadata", "instance_type"],
+              "mask" : null
+            }
+          ],
+          "match_type" : "ternary",
+          "type" : "simple",
+          "max_size" : 128,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [9, 13, 14, 7],
+          "actions" : ["_nop", "_resubmit", "_clone_i2e", "NoAction"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "_nop" : null,
+            "_resubmit" : null,
+            "_clone_i2e" : null,
+            "NoAction" : null
+          },
+          "default_entry" : {
+            "action_id" : 7,
+            "action_const" : false,
+            "action_data" : [],
+            "action_entry_const" : false
+          }
+        }
+      ],
+      "action_profiles" : [],
+      "conditionals" : []
+    },
+    {
+      "name" : "egress",
+      "id" : 1,
+      "init_table" : "t_egress",
+      "tables" : [
+        {
+          "name" : "t_egress",
+          "id" : 2,
+          "source_info" : {
+            "filename" : "packet_redirect.p4",
+            "line" : 124,
+            "column" : 0,
+            "source_fragment" : "table t_egress { ..."
+          },
+          "key" : [
+            {
+              "match_type" : "exact",
+              "name" : "hdrA.f1",
+              "target" : ["hdrA", "f1"],
+              "mask" : null
+            },
+            {
+              "match_type" : "ternary",
+              "name" : "standard_metadata.instance_type",
+              "target" : ["standard_metadata", "instance_type"],
+              "mask" : null
+            },
+            {
+              "match_type" : "ternary",
+              "name" : "hdrA.f2",
+              "target" : ["hdrA", "f2"],
+              "mask" : null
+            }
+          ],
+          "match_type" : "ternary",
+          "type" : "simple",
+          "max_size" : 128,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [2, 3, 4, 0],
+          "actions" : ["_nop", "_recirculate", "_clone_e2e", "NoAction"],
+          "base_default_next" : "t_exit",
+          "next_tables" : {
+            "_nop" : "t_exit",
+            "_recirculate" : "t_exit",
+            "_clone_e2e" : "t_exit",
+            "NoAction" : "t_exit"
+          },
+          "default_entry" : {
+            "action_id" : 0,
+            "action_const" : false,
+            "action_data" : [],
+            "action_entry_const" : false
+          }
+        },
+        {
+          "name" : "t_exit",
+          "id" : 3,
+          "source_info" : {
+            "filename" : "packet_redirect.p4",
+            "line" : 140,
+            "column" : 0,
+            "source_fragment" : "table t_exit { ..."
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [5, 1],
+          "actions" : ["set_hdr", "NoAction"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "set_hdr" : null,
+            "NoAction" : null
+          },
+          "default_entry" : {
+            "action_id" : 1,
+            "action_const" : false,
+            "action_data" : [],
+            "action_entry_const" : false
+          }
+        }
+      ],
+      "action_profiles" : [],
+      "conditionals" : []
+    }
+  ],
+  "checksums" : [],
+  "force_arith" : [],
+  "extern_instances" : [],
+  "field_aliases" : [],
+  "program" : "./packet_redirect.p4i",
+  "__meta__" : {
+    "version" : [2, 18],
+    "compiler" : "https://github.com/p4lang/p4c"
+  }
 }

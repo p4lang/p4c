@@ -513,6 +513,8 @@ SimpleSwitch::ingress_thread() {
       BMLOG_DEBUG_PKT(*packet, "Dropping packet at the end of ingress");
       continue;
     }
+    auto &f_instance_type = phv->get_field("standard_metadata.instance_type");
+    f_instance_type.set(PKT_INSTANCE_TYPE_NORMAL);
 
     enqueue(egress_port, std::move(packet));
   }

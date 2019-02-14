@@ -125,6 +125,7 @@ table t_egress {
     reads {
         hdrA.f1 : exact;
         standard_metadata.instance_type : ternary;
+        hdrA.f2 : ternary;
     }
     actions {
         _nop; _recirculate; _clone_e2e;
