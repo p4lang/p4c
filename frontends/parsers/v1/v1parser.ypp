@@ -123,6 +123,7 @@ typedef const IR::Type ConstType;
 
 #undef yylex
 #define yylex lexer.yylex
+static const IR::Expression *removeRedundantValid(const IR::Expression *e);
 %}
 
 // Use iostreams to print all values. We have a number of semantic actions that
@@ -785,6 +786,10 @@ field_match_list: /* epsilon */ { $$ = new IR::Vector<IR::Expression>(); }
       { ($$=$1)->push_back(new IR::Primitive(@2+@4, $4, $2));
         $$->srcInfo += @2 + @4;
         $<IR::V1Table*>-2->reads_types.push_back(IR::ID(@4, $4)); }
+    | field_match_list field_or_masked_ref ":" VALID ";"
+      { ($$=$1)->push_back(new IR::Primitive(@2+@4, $4, removeRedundantValid($2)));
+        $$->srcInfo += @2 + @4;
+        $<IR::V1Table*>-2->reads_types.push_back(IR::ID(@4, $4)); }
     | field_match_list error ";" { $$ = $1; }
     | field_match_list error { $$ = $1; }
 ;
@@ -1111,4 +1116,11 @@ name: IDENTIFIER { $$ = IR::ID(@1, $1); }
 void V1::V1Parser::error(const Util::SourceInfo& location,
                          const std::string& message) {
     driver.onParseError(location, message);
+}
+
+static const IR::Expression *removeRedundantValid(const IR::Expression *e) {
+    if (auto *prim = e->to<IR::Primitive>()) {
+        if (prim->name == "valid")
+            return prim->operands.at(0); }
+    return e;
 }
