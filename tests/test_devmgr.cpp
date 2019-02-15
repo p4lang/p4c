@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include <bm/config.h>
 #include <bm/bm_sim/dev_mgr.h>
 #include <bm/bm_sim/port_monitor.h>
 #include <bm/bm_apps/packet_pipe.h>
@@ -255,7 +256,7 @@ class PacketInReceiver {
   mutable std::condition_variable can_read{};
 };
 
-#ifdef BMNANOMSG_ON
+#ifdef BM_NANOMSG_ON
 
 // is here because DevMgr has a protected destructor
 class PacketInSwitch : public DevMgr { };
@@ -445,7 +446,7 @@ TEST_F(PacketInDevMgrPortStatusTest, Status) {
   check_and_reset_counts(0u, 1u, 0u, 0u);
 }
 
-#endif  // BMNANOMSG_ON
+#endif  // BM_NANOMSG_ON
 
 struct PMActive { };
 struct PMPassive { };

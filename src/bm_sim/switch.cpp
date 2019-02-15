@@ -20,6 +20,7 @@
 
 #include <boost/filesystem.hpp>
 
+#include <bm/config.h>
 #include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/switch.h>
 #include <bm/bm_sim/P4Objects.h>
@@ -94,7 +95,7 @@ SwitchWContexts::reset_target_state() {
 
 std::string
 SwitchWContexts::get_debugger_addr() const {
-#ifdef BMDEBUG_ON
+#ifdef BM_DEBUG_ON
   return Debugger::get_addr();
 #else
   return "";
@@ -211,7 +212,7 @@ SwitchWContexts::init_from_options_parser(
 
   auto transport = my_transport;
   if (transport == nullptr) {
-#ifdef BMNANOMSG_ON
+#ifdef BM_NANOMSG_ON
     notifications_addr = parser.notifications_addr;
     transport = std::shared_ptr<TransportIface>(
         TransportIface::make_nanomsg(notifications_addr));
@@ -223,7 +224,7 @@ SwitchWContexts::init_from_options_parser(
   // won't hurt if transport has already been opened
   transport->open();
 
-#ifdef BMDEBUG_ON
+#ifdef BM_DEBUG_ON
   // has to be before init_objects because forces arith
   if (parser.debugger) {
     for (Context &c : contexts)
@@ -252,7 +253,7 @@ SwitchWContexts::init_from_options_parser(
     set_dev_mgr(std::move(my_dev_mgr));
   else if (parser.use_files)
     set_dev_mgr_files(parser.wait_time);
-#ifdef BMNANOMSG_ON
+#ifdef BM_NANOMSG_ON
   else if (parser.packet_in)
     set_dev_mgr_packet_in(device_id, parser.packet_in_addr, transport);
 #endif
@@ -456,7 +457,7 @@ SwitchWContexts::do_swap() {
       phv_source->set_phv_factory(cxt_id, &cxt.get_phv_factory());
     rc &= swap_done;
   }
-#ifdef BMDEBUG_ON
+#ifdef BM_DEBUG_ON
   Debugger::get()->config_change();
 #endif
   BMELOG(config_change);

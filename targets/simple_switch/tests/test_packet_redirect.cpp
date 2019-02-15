@@ -20,6 +20,7 @@
 
 #include <gtest/gtest.h>
 
+#include <bm/config.h>
 #include <bm/bm_apps/packet_pipe.h>
 #include <bm/bm_sim/logger.h>
 
@@ -66,7 +67,7 @@ class SimpleSwitch_PacketRedirectP4 : public ::testing::Test {
   // the simple_switch target detaches threads
   static void SetUpTestCase() {
     // bm::Logger::set_logger_console();
-#ifdef BMELOG_ON
+#ifdef BM_ELOG_ON
     auto event_transport = bm::TransportIface::make_nanomsg(event_logger_addr);
     event_transport->open();
     bm::EventLogger::init(std::move(event_transport));
@@ -191,7 +192,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Baseline) {
   ASSERT_EQ(2, static_cast<int>(recv_buffer[1]));
   ASSERT_EQ(port_out, recv_port);
 
-#ifdef BMELOG_ON
+#ifdef BM_ELOG_ON
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
   events.get_and_remove_events(pid(0), &pevents, 8u);
@@ -273,7 +274,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Multicast) {
   ASSERT_TRUE((recv_port_1 == 1 && recv_port_2 == 2) ||
               (recv_port_1 == 2 && recv_port_2 == 1));
 
-#ifdef BMELOG_ON
+#ifdef BM_ELOG_ON
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 
@@ -356,7 +357,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4_CloneI2E, CloneI2E) {
 
   test_switch->mirroring_delete_session(mirror_id);
 
-#ifdef BMELOG_ON
+#ifdef BM_ELOG_ON
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 
@@ -417,7 +418,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4_CloneI2E, CloneI2E_Multicast) {
   test_switch->mirroring_delete_session(mirror_id);
   return;
 
-#ifdef BMELOG_ON
+#ifdef BM_ELOG_ON
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 
@@ -508,7 +509,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4_CloneE2E, CloneE2E) {
 
   test_switch->mirroring_delete_session(mirror_id);
 
-#ifdef BMELOG_ON
+#ifdef BM_ELOG_ON
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 
@@ -567,7 +568,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4_CloneE2E, CloneE2E_Multicast) {
 
   test_switch->mirroring_delete_session(mirror_id);
 
-#ifdef BMELOG_ON
+#ifdef BM_ELOG_ON
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 
@@ -645,7 +646,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Resubmit) {
   receiver.read(recv_buffer, sizeof(pkt), &recv_port);
   ASSERT_EQ(port_out_2, recv_port);
 
-#ifdef BMELOG_ON
+#ifdef BM_ELOG_ON
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 
@@ -722,7 +723,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, Recirculate) {
   receiver.read(recv_buffer, sizeof(pkt), &recv_port);
   ASSERT_EQ(port_out_2, recv_port);
 
-#ifdef BMELOG_ON
+#ifdef BM_ELOG_ON
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 
@@ -775,7 +776,7 @@ TEST_F(SimpleSwitch_PacketRedirectP4, ExitIngress) {
   receiver.read(recv_buffer, sizeof(pkt), &recv_port);
   ASSERT_EQ(port_out, recv_port);
 
-#ifdef BMELOG_ON
+#ifdef BM_ELOG_ON
   // event check
   std::vector<NNEventListener::NNEvent> pevents;
 

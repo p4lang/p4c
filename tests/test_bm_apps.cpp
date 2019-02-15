@@ -18,7 +18,9 @@
  *
  */
 
-#ifdef BMNANOMSG_ON
+#include <bm/config.h>
+
+#ifdef BM_NANOMSG_ON
 
 #include <gtest/gtest.h>
 
@@ -206,4 +208,4 @@ TEST_F(NotificationsTest, PortEvent) {
   test(1, PortStatus::PORT_UP, true, PortEvent::PORT_UP);
 }
 
-#endif  // BMNANOMSG_ON
+#endif  // BM_NANOMSG_ON

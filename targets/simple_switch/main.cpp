@@ -20,6 +20,8 @@
 
 /* Switch instance */
 
+#include <bm/config.h>
+
 #ifdef BM_HAVE_DLOPEN
 #  include <dlfcn.h>
 #endif  // BM_HAVE_DLOPEN

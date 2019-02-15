@@ -18,7 +18,9 @@
  *
  */
 
-#ifdef P4THRIFT
+#include <bm/config.h>
+
+#ifdef BM_P4THRIFT
 #include <p4thrift/protocol/TBinaryProtocol.h>
 #include <p4thrift/server/TSimpleServer.h>
 #include <p4thrift/server/TThreadedServer.h>

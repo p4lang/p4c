@@ -35,6 +35,8 @@
 #ifndef BM_BM_SIM_DEV_MGR_H_
 #define BM_BM_SIM_DEV_MGR_H_
 
+#include <bm/config.h>
+
 #include <functional>
 #include <string>
 #include <map>
@@ -170,7 +172,7 @@ class DevMgr : public PacketDispatcherIface {
   // wait before starting to process packets.
   void set_dev_mgr_files(unsigned wait_time_in_seconds);
 
-#ifdef BMNANOMSG_ON
+#ifdef BM_NANOMSG_ON
   // if enforce ports is set to true, packets coming in on un-registered ports
   // are dropped
   void set_dev_mgr_packet_in(

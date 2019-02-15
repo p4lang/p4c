@@ -1,7 +1,9 @@
 #ifndef _BM_RUNTIME_BM_RUNTIME_H_
 #define _BM_RUNTIME_BM_RUNTIME_H_
 
-#ifdef P4THRIFT
+#include <bm/config.h>
+
+#ifdef BM_P4THRIFT
 #include <p4thrift/processor/TMultiplexedProcessor.h>
 
 namespace thrift_provider = p4::thrift;
@@ -36,4 +38,4 @@ int start_server(bm::SwitchWContexts *sw, int port);
 
 }
 
-#endif
+#endif  // _BM_RUNTIME_BM_RUNTIME_H_

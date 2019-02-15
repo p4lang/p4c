@@ -18,9 +18,10 @@
  *
  */
 
+#include <bm/config.h>
 #include <bm/PsaSwitch.h>
 
-#ifdef P4THRIFT
+#ifdef BM_P4THRIFT
 #include <p4thrift/protocol/TBinaryProtocol.h>
 #include <p4thrift/server/TThreadedServer.h>
 #include <p4thrift/transport/TServerSocket.h>

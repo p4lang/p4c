@@ -13,7 +13,8 @@ AM_CPPFLAGS += -DWITH_SYSREPO
 endif
 
 if WITH_THRIFT
-AM_CPPFLAGS += -DWITH_THRIFT
+AM_CPPFLAGS += -DWITH_THRIFT \
+-I$(builddir)/../simple_switch/gen-cpp
 endif
 
 bin_PROGRAMS = simple_switch_grpc

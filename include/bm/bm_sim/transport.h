@@ -21,6 +21,8 @@
 #ifndef BM_BM_SIM_TRANSPORT_H_
 #define BM_BM_SIM_TRANSPORT_H_
 
+#include <bm/config.h>
+
 #include <string>
 #include <initializer_list>
 #include <memory>
@@ -59,7 +61,7 @@ class TransportIface {
     return send_msgs_(msgs);
   }
 
-#ifdef BMNANOMSG_ON
+#ifdef BM_NANOMSG_ON
   static std::unique_ptr<TransportIface> make_nanomsg(const std::string &addr);
 #endif
   static std::unique_ptr<TransportIface> make_dummy();

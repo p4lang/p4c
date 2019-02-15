@@ -45,8 +45,6 @@ AC_ARG_WITH([pdfixed],
 
 AM_CONDITIONAL([COND_PDFIXED], [test "$want_pdfixed" = yes])
 
-MY_CPPFLAGS=""
-
 AC_ARG_WITH([nanomsg],
     AS_HELP_STRING([--with-nanomsg], [Build Nanomsg RPC service, if disabled then you must have some other way of controlling the switch]),
     [want_nanomsg="$withval"], [want_nanomsg=yes])
@@ -59,7 +57,7 @@ AC_ARG_ENABLE([debugger],
 AS_IF([test "x$enable_debugger" = "xyes"], [
     AS_IF([test "$want_nanomsg" = "yes"], [
         debugger_enabled=yes
-        MY_CPPFLAGS="$MY_CPPFLAGS -DBMDEBUG_ON"
+        AC_DEFINE([DEBUG_ON], [], [Enable debugger])
     ], [
         AC_MSG_ERROR([Cannot use debugger without nanomsg])
     ])
@@ -71,10 +69,11 @@ AC_ARG_ENABLE([logging_macros],
                    [Disable compile time debug and trace logging macros]))
 AS_IF([test "x$enable_logging_macros" != "xno"], [
     logging_macros_enabled=yes
-    MY_CPPFLAGS="$MY_CPPFLAGS -DBMLOG_DEBUG_ON -DBMLOG_TRACE_ON"
+    AC_DEFINE([LOG_DEBUG_ON], [], [Enable compile-time macro for debug logging])
+    AC_DEFINE([LOG_TRACE_ON], [], [Enable compile-time macro for trace logging])
 ])
 
-# BMELOG_ON is defined by default, since it is required for some tests
+# BM_ELOG_ON is defined by default, since it is required for some tests
 elogger_enabled=no
 AC_ARG_ENABLE([elogger],
     AS_HELP_STRING([--disable-elogger],
@@ -83,7 +82,7 @@ AC_ARG_ENABLE([elogger],
 AS_IF([test "x$enable_elogger" != "xno"], [
     AS_IF([test "$want_nanomsg" = "yes"], [
         elogger_enabled=yes
-        MY_CPPFLAGS="$MY_CPPFLAGS -DBMELOG_ON"
+        AC_DEFINE([ELOG_ON], [], [Enable nanomsg event logger])
     ], [
         AC_MSG_WARN([Cannot use elogger without nanomsg])
     ])
@@ -118,7 +117,7 @@ AC_ARG_ENABLE([WP4-16-stacks],
     [enable_WP4_16_stacks="$enableval"], [enable_WP4_16_stacks=yes])
 
 AS_IF([test "$enable_WP4_16_stacks" = "yes"],
-      [MY_CPPFLAGS="$MY_CPPFLAGS -DBM_WP4_16_STACKS"])
+      [AC_DEFINE([WP4_16_STACKS], [], [Implement stacks as per P4_16 spec])])
 
 # Checks for programs.
 AC_PROG_CXX
@@ -150,7 +149,7 @@ AS_IF([test "$want_thrift" = yes], [
     AS_IF([test "$want_p4thrift" = yes], [
         AC_PATH_PROG([THRIFT], [p4thrift], [])
         AC_SUBST([THRIFT_LIB], ["-lp4thrift"])
-        MY_CPPFLAGS="$MY_CPPFLAGS -DP4THRIFT"
+        AC_DEFINE([P4THRIFT], [], [Use P4.org Thrift fork])
         AC_CHECK_HEADER([p4thrift/P4Thrift.h], [], [AC_MSG_ERROR([P4Thrift headers not found. Install P4Thrift from http://github.com/p4lang/thrift/])])
     ], [
         AC_PATH_PROG([THRIFT], [thrift], [])
@@ -158,9 +157,9 @@ AS_IF([test "$want_thrift" = yes], [
         AC_CHECK_HEADER([thrift/Thrift.h], [], [AC_MSG_ERROR([Thrift headers not found. Install Thrift from http://thrift.apache.org/docs/install/])])
     ])
     AS_IF([test x"$THRIFT" = x], [AC_MSG_ERROR([cannot find thrift])])
-    MY_CPPFLAGS="$MY_CPPFLAGS -DBMTHRIFT_ON"
+    AC_DEFINE([THRIFT_ON], [], [Enable Thrift support])
     AC_CHECK_HEADER([thrift/stdcxx.h], [
-        MY_CPPFLAGS="$MY_CPPFLAGS -DHAVE_THRIFT_STDCXX_H"
+        AC_DEFINE([HAVE_THRIFT_STDCXX_H], [], [Found Thrift stdcxx wrapper])
     ], [])
 ])
 
@@ -178,7 +177,7 @@ utility vector], [], [AC_MSG_ERROR([Missing header file])])
 
 AS_IF([test "$want_nanomsg" = yes], [
     AC_CHECK_LIB([nanomsg], [nn_errno], [], [AC_MSG_ERROR([Missing libnanomsg])])
-    MY_CPPFLAGS="$MY_CPPFLAGS -DBMNANOMSG_ON"
+    AC_DEFINE([NANOMSG_ON], [], [Enable Nanomsg support])
 ])
 
 # Check for pthread, libjudy, libgmp, libpcap
@@ -222,7 +221,8 @@ AS_IF([test "x$enable_modules" != "xno"], [
   AC_MSG_CHECKING(for dlopen())
   AC_CHECK_HEADERS(dlfcn.h, [
     AC_SEARCH_LIBS([dlopen], [dl], [
-      MY_CPPFLAGS="$MY_CPPFLAGS -DBM_HAVE_DLOPEN -DBM_ENABLE_MODULES"
+      AC_DEFINE([HAVE_DLOPEN], [], [Found dlopen])
+      AC_DEFINE([ENABLE_MODULES], [], [Enable dynamic loading of modules])
       modules_enabled=yes
     ], [
       AC_MSG_RESULT(no)
@@ -252,8 +252,8 @@ AC_CHECK_HEADER([boost/program_options.hpp], [], [AC_MSG_ERROR([Missing boost pr
 AC_CHECK_HEADER([boost/functional/hash.hpp], [], [AC_MSG_ERROR([Missing boost functional hash header])])
 AC_CHECK_HEADER([boost/filesystem.hpp], [], [AC_MSG_ERROR([Missing boost filesystem header])])
 
-AC_SUBST([AM_CPPFLAGS], ["$MY_CPPFLAGS \
-                          -I\$(top_srcdir)/include \
+AC_SUBST([AM_CPPFLAGS], ["-I\$(top_srcdir)/include \
+                          -I\$(top_builddir)/include \
                           -isystem\$(top_srcdir)/third_party/jsoncpp/include \
                           -isystem\$(top_srcdir)/third_party/spdlog"])
 AC_SUBST([AM_CFLAGS], ["$PTHREAD_CFLAGS"])
@@ -307,6 +307,8 @@ AC_CONFIG_FILES([tests/utils.cpp
                  mininet/stress_test_ipv4.py])
 AC_CONFIG_FILES([targets/simple_switch/tests/CLI_tests/run_one_test.py],
                 [chmod +x targets/simple_switch/tests/CLI_tests/run_one_test.py])
+
+AX_PREFIX_CONFIG_H([include/bm/config.h], [BM])
 
 AC_OUTPUT
 

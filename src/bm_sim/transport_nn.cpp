@@ -18,7 +18,9 @@
  *
  */
 
-#ifdef BMNANOMSG_ON
+#include <bm/config.h>
+
+#ifdef BM_NANOMSG_ON
 
 #include <bm/bm_sim/transport.h>
 #include <bm/bm_sim/nn.h>
@@ -122,4 +124,4 @@ TransportIface::make_nanomsg(const std::string &addr) {
 
 }  // namespace bm
 
-#endif  // BMNANOMSG_ON
+#endif  // BM_NANOMSG_ON

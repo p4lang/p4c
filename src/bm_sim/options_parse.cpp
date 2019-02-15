@@ -18,6 +18,7 @@
  *
  */
 
+#include <bm/config.h>
 #include <bm/bm_sim/options_parse.h>
 #include <bm/bm_sim/event_logger.h>
 #include <bm/bm_sim/logger.h>
@@ -102,12 +103,12 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp,
        "(interface X corresponds to two files X_in.pcap and X_out.pcap). "
        "Argument is the time to wait (in seconds) before starting to process "
        "the packet files.")
-#ifdef BMNANOMSG_ON
+#ifdef BM_NANOMSG_ON
       ("packet-in", po::value<std::string>(),
        "Enable receiving packet on this (nanomsg) socket. "
        "The --interface options will be ignored.")
 #endif
-#ifdef BMTHRIFT_ON
+#ifdef BM_THRIFT_ON
       ("thrift-port", po::value<int>(),
        "TCP port on which to run the Thrift runtime server")
 #endif
@@ -125,13 +126,13 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp,
        "'trace', 'debug', 'info', 'warn', 'error', off'; default is 'trace'")
       ("log-flush", "If used with '--log-file', the logger will flush to disk "
        "after every log message")
-#ifdef BMNANOMSG_ON
+#ifdef BM_NANOMSG_ON
       ("notifications-addr", po::value<std::string>(),
        "Specify the nanomsg address to use for notifications "
        "(e.g. learning, ageing, ...); "
        "default is ipc:///tmp/bmv2-<device-id>-notifications.ipc")
 #endif
-#ifdef BMDEBUG_ON
+#ifdef BM_DEBUG_ON
       ("debugger", "Activate debugger")
       ("debugger-addr", po::value<std::string>(),
        "Specify the nanomsg address to use for debugger communication; "
@@ -245,7 +246,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp,
     device_id = vm["device-id"].as<device_id_t>();
   }
 
-#ifdef BMNANOMSG_ON
+#ifdef BM_NANOMSG_ON
   if (vm.count("notifications-addr")) {
     notifications_addr = vm["notifications-addr"].as<std::string>();
   } else {
@@ -255,7 +256,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp,
 #endif
 
   if (vm.count("nanolog")) {
-#ifndef BMELOG_ON
+#ifndef BM_ELOG_ON
     outstream << "Warning: you requested the nanomsg event logger, but bmv2 "
               << "was compiled without -DBMELOG, and the event logger cannot "
               << "be activated\n";
@@ -299,10 +300,10 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp,
 
   auto log_requested = console_logging || !file_logger.empty();
   auto missing_macros = false;
-#ifndef BMLOG_TRACE_ON
+#ifndef BM_LOG_TRACE_ON
   missing_macros |= log_level <= Logger::LogLevel::TRACE;
 #endif
-#ifndef BMLOG_DEBUG_ON
+#ifndef BM_LOG_DEBUG_ON
   missing_macros |= log_level <= Logger::LogLevel::DEBUG;
 #endif
   if (log_requested && missing_macros) {
@@ -354,7 +355,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp,
       wait_time = 0;
   }
 
-#ifdef BMNANOMSG_ON
+#ifdef BM_NANOMSG_ON
   if (vm.count("packet-in")) {
     packet_in = true;
     packet_in_addr = vm["packet-in"].as<std::string>();
@@ -377,7 +378,7 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp,
         + std::to_string(device_id) + std::string("-debug.ipc");
   }
 
-#ifdef BMTHRIFT_ON
+#ifdef BM_THRIFT_ON
   int default_thrift_port = 9090;
   if (vm.count("thrift-port")) {
     thrift_port = vm["thrift-port"].as<int>();

@@ -6,8 +6,6 @@ AC_INIT([simple-switch-grpc], [0.1], [antonin@barefootnetworks.com])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 AC_CONFIG_HEADERS([config.h])
 
-MY_CPPFLAGS=""
-
 AC_PROG_CC
 AC_PROG_CXX
 
@@ -34,7 +32,7 @@ AC_ARG_ENABLE([Werror],
     AS_HELP_STRING([--enable-Werror], [Make all compiler warnings fatal]),
     [enable_Werror="$enableval"], [enable_Werror=no])
 
-AC_SUBST([AM_CPPFLAGS], ["$MY_CPPFLAGS"])
+AC_SUBST([AM_CPPFLAGS], [])
 AC_SUBST([AM_CFLAGS], ["$PTHREAD_CFLAGS"])
 # Using ax_append_compile_flags requires copying 4 macro definitions from the
 # autoconf archive to m4/

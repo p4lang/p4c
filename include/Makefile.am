@@ -1,6 +1,11 @@
 ACLOCAL_AMFLAGS = ${ACLOCAL_FLAGS} -I m4
 
-nobase_include_HEADERS =
+nobase_include_HEADERS = \
+bm/config.h
+
+distclean-local: distclean-ax-prefix-config-h
+distclean-ax-prefix-config-h:
+	rm -f bm/config.h
 
 if COND_NANOMSG
 nobase_include_HEADERS += \

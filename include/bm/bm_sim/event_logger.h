@@ -23,6 +23,8 @@
 #ifndef BM_BM_SIM_EVENT_LOGGER_H_
 #define BM_BM_SIM_EVENT_LOGGER_H_
 
+#include <bm/config.h>
+
 #include <string>
 #include <memory>
 
@@ -124,7 +126,7 @@ class EventLogger {
 //! // packet processing
 //! BMELOG(packet_out, packet);
 //! @endcode
-#ifdef BMELOG_ON
+#ifdef BM_ELOG_ON
 #define BMELOG(fn, ...) bm::EventLogger::get()->fn(__VA_ARGS__)
 #else
 #define BMELOG(fn, ...)

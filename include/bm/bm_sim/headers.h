@@ -23,6 +23,8 @@
 #ifndef BM_BM_SIM_HEADERS_H_
 #define BM_BM_SIM_HEADERS_H_
 
+#include <bm/config.h>
+
 #include <vector>
 #include <string>
 #include <set>
@@ -265,7 +267,7 @@ class Header : public NamedP4Object {
   // same value.
   bool cmp(const Header &other) const;
 
-#ifdef BMDEBUG_ON
+#ifdef BM_DEBUG_ON
   void set_packet_id(const Debugger::PacketId *id);
 #else
   void set_packet_id(const Debugger::PacketId *) { }
@@ -313,7 +315,7 @@ class Header : public NamedP4Object {
   int nbytes_packet{0};
   std::unique_ptr<ArithExpression> VL_expr;
   std::unique_ptr<UnionMembership> union_membership{nullptr};
-#ifdef BMDEBUG_ON
+#ifdef BM_DEBUG_ON
   const Debugger::PacketId *packet_id{&Debugger::dummy_PacketId};
 #endif
 };

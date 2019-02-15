@@ -2946,7 +2946,7 @@ extern bool WITH_VALGRIND;  // defined in main.cpp
 
 // used to fail because of deadlock in dump_entry_string (when called from
 // apply_action); could only be observed when bmv2 was compiled with
-// -DBMLOG_DEBUG_ON
+// BM_LOG_DEBUG_ON defined
 TEST_F(TableDeadlock, DumpEntryString) {
   auto modify_loop = [this](size_t iters, entry_handle_t handle) {
     for (size_t i = 0; i < iters; i++) {

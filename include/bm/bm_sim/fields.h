@@ -23,6 +23,8 @@
 #ifndef BM_BM_SIM_FIELDS_H_
 #define BM_BM_SIM_FIELDS_H_
 
+#include <bm/config.h>
+
 #include <algorithm>  // for std::copy
 
 #include <cassert>
@@ -143,7 +145,7 @@ class Field : public Data {
 
   void reset_VL();
 
-#ifdef BMDEBUG_ON
+#ifdef BM_DEBUG_ON
   void set_id(uint64_t id) { my_id = id; }
   void set_packet_id(const Debugger::PacketId *id) { packet_id = id; }
 #else
@@ -189,7 +191,7 @@ class Field : public Data {
   Bignum mask{1};
   Bignum max{1};
   Bignum min{1};
-#ifdef BMDEBUG_ON
+#ifdef BM_DEBUG_ON
   uint64_t my_id{};
   const Debugger::PacketId *packet_id{&Debugger::dummy_PacketId};
 #endif

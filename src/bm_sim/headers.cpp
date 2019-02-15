@@ -18,6 +18,8 @@
  *
  */
 
+#include <bm/config.h>
+
 #include <bm/bm_sim/headers.h>
 #include <bm/bm_sim/header_unions.h>
 #include <bm/bm_sim/phv.h>
@@ -279,7 +281,7 @@ Header::deparse(char *data) const {
   }
 }
 
-#ifdef BMDEBUG_ON
+#ifdef BM_DEBUG_ON
 void
 Header::set_packet_id(const Debugger::PacketId *id) {
   for (Field &f : fields) f.set_packet_id(id);

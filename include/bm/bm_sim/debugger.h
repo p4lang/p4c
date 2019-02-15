@@ -21,10 +21,10 @@
 #ifndef BM_BM_SIM_DEBUGGER_H_
 #define BM_BM_SIM_DEBUGGER_H_
 
+#include <bm/config.h>
+
 #include <limits>
 #include <string>
-
-// #define BMDEBUG_ON
 
 namespace bm {
 
@@ -145,7 +145,7 @@ class DebuggerIface {
   virtual std::string get_addr_() const = 0;
 };
 
-#ifdef BMDEBUG_ON
+#ifdef BM_DEBUG_ON
 #define DEBUGGER_NOTIFY_UPDATE(packet_id, id, bytes, nbits) \
   Debugger::get()->notify_update(packet_id, id, bytes, nbits);
 #define DEBUGGER_NOTIFY_UPDATE_V(packet_id, id, v) \

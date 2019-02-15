@@ -33,6 +33,7 @@
 #ifndef BM_BM_SIM_LOGGER_H_
 #define BM_BM_SIM_LOGGER_H_
 
+#include <bm/config.h>
 #include <bm/spdlog/spdlog.h>
 
 #include <string>
@@ -106,17 +107,17 @@ class Logger {
 
 }  // namespace bm
 
-#ifdef BMLOG_DEBUG_ON
+#ifdef BM_LOG_DEBUG_ON
 //! Preferred way (because can be disabled at compile time) to log a debug
-//! message. Is enabled by preprocessor BMLOG_DEBUG_ON.
+//! message. Is enabled by preprocessor BM_LOG_DEBUG_ON.
 #define BMLOG_DEBUG(...) bm::Logger::get()->debug(__VA_ARGS__);
 #else
 #define BMLOG_DEBUG(...)
 #endif
 
-#ifdef BMLOG_TRACE_ON
+#ifdef BM_LOG_TRACE_ON
 //! Preferred way (because can be disabled at compile time) to log a trace
-//! message. Is enabled by preprocessor BMLOG_TRACE_ON.
+//! message. Is enabled by preprocessor BM_LOG_TRACE_ON.
 #define BMLOG_TRACE(...) bm::Logger::get()->trace(__VA_ARGS__);
 #else
 #define BMLOG_TRACE(...)

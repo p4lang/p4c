@@ -1,3 +1,6 @@
 #!/bin/sh
 
-exec autoreconf -fi
+# generates config.h.in
+autoheader
+
+autoreconf -fi
