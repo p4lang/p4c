@@ -253,6 +253,7 @@ class Annotation {
     static const cstring pkginfoAnnotation;  /// Package documentation annotation.
     static const cstring deprecatedAnnotation;  /// Deprecation annotation.
     static const cstring synchronousAnnotation;  /// Synchronous annotation.
+    static const cstring matchAnnotation;  /// Match annotation (for value sets).
     toString{ return cstring("@") + name; }
     validate{
         BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name");
