@@ -5,7 +5,7 @@ send us an email (p4-dev@lists.p4.org).
 
 All developers must sign the [P4.org](http://p4.org) CLA and return it to
 (membership@p4.org) before making contributions. The CLA is available
-[here](http://p4.org/wp-content/uploads/2015/07/P4_Language_Consortium_Membership_Agreement.pdf).
+[here](https://p4.org/assets/P4_Language_Consortium_Membership_Agreement.pdf).
 
 ### Coding guidelines
 
