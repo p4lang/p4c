@@ -54,6 +54,13 @@ using google::protobuf::util::MessageDifferencer;
 
 const cstring defaultArch = "v1model";
 
+class ParseAnnotations : public P4::ParseAnnotations {
+ public:
+    ParseAnnotations() : P4::ParseAnnotations("FrontendTest", true, {
+                PARSE("my_anno", StringLiteral)
+            }) { }
+};
+
 boost::optional<P4::P4RuntimeAPI>
 createP4RuntimeTestCase(
     const std::string& source,
@@ -1058,16 +1065,24 @@ TEST_F(P4Runtime, TableActionsAnnotations) {
 
 TEST_F(P4Runtime, ValueSet) {
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
-        header Header { bit<32> hfA; bit<16> hfB; }
+        header Header { bit<8> hfA; bit<8> hfB; bit<8> hfC; }
         struct Headers { Header h; }
         struct Metadata { }
 
+        match_kind { custom }
+
+        struct pvs_t {
+            @match(ternary) @my_anno("body") bit<8> f1;
+            bit<8> f2;
+            @match(custom) bit<8> f3;
+        }
+
         parser parse(packet_in p, out Headers h, inout Metadata m,
                      inout standard_metadata_t sm) {
-            value_set<tuple<bit<32>, bit<16>>>(16) pvs;
+            value_set<pvs_t>(16) pvs;
             state start {
                 p.extract(h.h);
-                transition select(h.h.hfA, h.h.hfB) {
+                transition select(h.h.hfA, h.h.hfB, h.h.hfC) {
                     pvs: accept;
                     default: reject; } } }
         control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
@@ -1079,24 +1094,38 @@ TEST_F(P4Runtime, ValueSet) {
                         inout standard_metadata_t sm) { apply { } }
         V1Switch(parse(), verifyChecksum(), ingress(), egress(),
                  computeChecksum(), deparse()) main;
-    )"));
+    )"), ParseAnnotations());
 
     ASSERT_TRUE(test);
     EXPECT_EQ(0u, ::diagnosticCount());
 
     auto vset = findValueSet(*test, "parse.pvs");
     ASSERT_TRUE(vset != nullptr);
-    EXPECT_EQ(unsigned(P4Ids::VALUE_SET), vset->preamble().id() >> 24);
-    EXPECT_EQ(48, vset->bitwidth());
-    EXPECT_EQ(16, vset->size());
-}
+    EXPECT_EQ(vset->preamble().id() >> 24, unsigned(P4Ids::VALUE_SET));
+    EXPECT_EQ(vset->size(), 16);
+    ASSERT_EQ(vset->match_size(), 3);
 
-class ParseAnnotations : public P4::ParseAnnotations {
- public:
-    ParseAnnotations() : P4::ParseAnnotations("FrontendTest", true, {
-                PARSE("my_anno", StringLiteral)
-            }) { }
-};
+    using MatchField = p4configv1::MatchField;
+    auto checkMatchField = [](const p4configv1::MatchField& mf,
+                              unsigned int id, cstring name,
+                              const std::vector<cstring> annotations,
+                              int bitwidth,
+                              boost::optional<MatchField::MatchType> matchType,
+                              boost::optional<cstring> otherMatchType) {
+        EXPECT_EQ(mf.id(), id);
+        EXPECT_EQ(mf.name(), name);
+        ASSERT_EQ(static_cast<size_t>(mf.annotations_size()), annotations.size());
+        for (int i = 0; i < mf.annotations_size(); i++)
+          EXPECT_EQ(mf.annotations(i), annotations.at(i));
+        EXPECT_EQ(mf.bitwidth(), bitwidth);
+        if (matchType) EXPECT_EQ(mf.match_type(), *matchType);
+        if (otherMatchType) EXPECT_EQ(mf.other_match_type(), *otherMatchType);
+    };
+    checkMatchField(vset->match(0), 1, "f1", {"@my_anno(\"body\")"}, 8,
+                    MatchField::TERNARY, boost::none);
+    checkMatchField(vset->match(1), 2, "f2", {}, 8, MatchField::EXACT, boost::none);
+    checkMatchField(vset->match(2), 3, "f3", {}, 8, boost::none, cstring("custom"));
+}
 
 TEST_F(P4Runtime, Register) {
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(

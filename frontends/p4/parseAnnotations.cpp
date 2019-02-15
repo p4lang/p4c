@@ -39,7 +39,10 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
             PARSE_KV_LIST(IR::Annotation::pkginfoAnnotation),
 
             // @synchronous has a list of method names
-            PARSE_EXPRESSION_LIST(IR::Annotation::synchronousAnnotation)
+            PARSE_EXPRESSION_LIST(IR::Annotation::synchronousAnnotation),
+
+            // @match has an expression argument
+            PARSE(IR::Annotation::matchAnnotation, Expression),
         };
 }
 

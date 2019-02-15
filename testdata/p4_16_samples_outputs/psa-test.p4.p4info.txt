@@ -7,6 +7,10 @@ value_sets {
     name: "MyIP.pvs"
     alias: "pvs"
   }
-  bitwidth: 16
+  match {
+    id: 1
+    bitwidth: 16
+    match_type: EXACT
+  }
   size: 4
 }
