@@ -38,7 +38,7 @@ struct headers {
     ipv4_t     ipv4;
 }
 
-const PortId_t NUM_PORTS = 10w512;
+const bit<32> NUM_PORTS = 32w512;
 typedef bit<80> PacketByteCountState_t;
 action update_pkt_ip_byte_count(inout PacketByteCountState_t s, in bit<16> ip_length_bytes) {
     s[79:48] = s[79:48] + 32w1;
@@ -64,7 +64,7 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     Register<PacketByteCountState_t, PortId_t>(32w512) port_pkt_ip_bytes_in;
     apply {
-        ostd.egress_port = 10w0;
+        ostd.egress_port = (PortId_t)32w0;
         if (hdr.ipv4.isValid()) @atomic {
             PacketByteCountState_t tmp;
             tmp = port_pkt_ip_bytes_in.read(istd.ingress_port);

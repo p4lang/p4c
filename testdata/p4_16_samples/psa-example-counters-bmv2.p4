@@ -56,7 +56,7 @@ typedef bit<48> ByteCounter_t;
 typedef bit<32> PacketCounter_t;
 typedef bit<80> PacketByteCounter_t;
 
-const PortId_t NUM_PORTS = 512;
+const bit<32> NUM_PORTS = 512;
 
 struct headers {
     ethernet_t       ethernet;
@@ -123,7 +123,7 @@ control ingress(inout headers hdr,
                 in    psa_ingress_input_metadata_t  istd,
                 inout psa_ingress_output_metadata_t ostd)
 {
-    Counter<ByteCounter_t, PortId_t>((bit<32>) NUM_PORTS, PSA_CounterType_t.BYTES)
+    Counter<ByteCounter_t, PortId_t>(NUM_PORTS, PSA_CounterType_t.BYTES)
         port_bytes_in;
     DirectCounter<PacketByteCounter_t>(PSA_CounterType_t.PACKETS_AND_BYTES)
         per_prefix_pkt_byte_count;
@@ -159,7 +159,7 @@ control egress(inout headers hdr,
                in    psa_egress_input_metadata_t  istd,
                inout psa_egress_output_metadata_t ostd)
 {
-    Counter<ByteCounter_t, PortId_t>((bit<32>) NUM_PORTS, PSA_CounterType_t.BYTES)
+    Counter<ByteCounter_t, PortId_t>(NUM_PORTS, PSA_CounterType_t.BYTES)
         port_bytes_out;
     apply {
         // By doing these stats updates on egress, then because
