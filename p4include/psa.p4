@@ -61,11 +61,14 @@ limitations under the License.
 
 /* The comments after each line give the name of a similar field in
  * the BMv2 simple_switch implementation, on which the width of this
- * PSA type is based. */
-typedef bit<9>  PortIdUint_t;          // ingress_port, egress_port
+ * PSA type is based, or in some cases the bit width of the
+ * corresponding type in the P4Runtime specification, so that BMv2
+ * psa_switch will not need to do runtime numeric translation of those
+ * values, simplifying that implementation aspect of psa_switch. */
+typedef bit<32> PortIdUint_t;          // width of P4Runtime PortId
 typedef bit<16> MulticastGroupUint_t;  // mcast_grp
 typedef bit<16> CloneSessionIdUint_t;  // clone_spec, but see below
-typedef bit<3>  ClassOfServiceUint_t;  // priority in p4c PR #1704
+typedef bit<8>  ClassOfServiceUint_t;  // width of P4Runtime ClassOfService
 typedef bit<32> PacketLengthUint_t;    // packet_length
 typedef bit<16> EgressInstanceUint_t;  // egress_rid
 typedef bit<48> TimestampUint_t;       // ingress_global_timestamp, egress_global_timestamp
