@@ -31,9 +31,13 @@ limitations under the License.
  */
 #define PSA_ON_BMV2_CORE_TYPES
 #ifdef PSA_ON_BMV2_CORE_TYPES
-/* The bit widths shown below are specifc to the BMv2 psa_switch
+/* The bit widths shown below are specific to the BMv2 psa_switch
  * target.  These types do _not_ dictate what sizes these types should
- * have for any other PSA implementation of PSA.
+ * have for any other implementation of PSA.  Each PSA implementation
+ * is free to use its own custom width in bits for those types that
+ * are bit<W> for some W.  One reason they are here is to support the
+ * implementation of PSA on BMv2.  Another is so that we can easily
+ * compile this file, and example PSA P4 programs that include it.
  *
  * In many cases, the bit widths of these types have been chosen to be
  * the same as corresponding types in the v1model architecture, but
@@ -93,55 +97,7 @@ const CloneSessionId_t PSA_CLONE_SESSION_TO_CPU = (CloneSessionId_t) 0;
 
 #endif  // PSA_ON_BMV2_CORE_TYPES
 
-#undef PSA_EXAMPLE_CORE_TYPES
-#ifdef PSA_EXAMPLE_CORE_TYPES
-/* The bit widths shown below are only examples.  Each PSA
- * implementation is free to use its own custom width in bits for
- * those types that are bit<W> for some W.  The only reason that there
- * are example numerical widths in this file is so that we can easily
- * compile this file, and example PSA P4 programs that include it. */
-
-/* These are defined using `typedef`, not `type`, so they are truly
- * just different names for the type bit<W> for the particular width W
- * shown.  Unlike the `type` definitions below, values declared with
- * the `typedef` type names can be freely mingled in expressions, just
- * as any value declared with type bit<W> can.  Values declared with
- * one of the `type` names below _cannot_ be so freely mingled, unless
- * you first cast them to the corresponding `typedef` type.  While
- * that may be inconvenient when you need to do arithmetic on such
- * values, it is the price to pay for having all occurrences of values
- * of the `type` types marked as such in the automatically generated
- * control plane API.
- *
- * Note that the width of typedef <name>Uint_t will always be the same
- * as the width of type <name>_t. */
-typedef bit<10> PortIdUint_t;
-typedef bit<10> MulticastGroupUint_t;
-typedef bit<10> CloneSessionIdUint_t;
-typedef bit<3>  ClassOfServiceUint_t;
-typedef bit<14> PacketLengthUint_t;
-typedef bit<16> EgressInstanceUint_t;
-typedef bit<48> TimestampUint_t;
-
-@p4runtime_translation("p4.org/psa/v1/PortId_t", 32)
-type PortIdUint_t         PortId_t;
-type MulticastGroupUint_t MulticastGroup_t;
-type CloneSessionIdUint_t CloneSessionId_t;
-@p4runtime_translation("p4.org/psa/v1/ClassOfService_t", 8)
-type ClassOfServiceUint_t ClassOfService_t;
-type PacketLengthUint_t   PacketLength_t;
-type EgressInstanceUint_t EgressInstance_t;
-type TimestampUint_t      Timestamp_t;
-typedef error   ParserError_t;
-
-const PortId_t PSA_PORT_RECIRCULATE = (PortId_t) 254;
-const PortId_t PSA_PORT_CPU = (PortId_t) 255;
-
-const CloneSessionId_t PSA_CLONE_SESSION_TO_CPU = (CloneSessionId_t) 0;
-
-#endif  // PSA_EXAMPLE_CORE_TYPES
-
-#ifdef 0
+#ifndef PSA_ON_BMV2_CORE_TYPES
 #error "Please define the following types for PSA and the PSA_EXAMPLE_CORE_TYPES macro"
 // BEGIN:Type_defns
 /* These are defined using `typedef`, not `type`, so they are truly
