@@ -39,10 +39,9 @@ limitations under the License.
  * implementation of PSA on BMv2.  Another is so that we can easily
  * compile this file, and example PSA P4 programs that include it.
  *
- * In many cases, the bit widths of these types have been chosen to be
- * the same as corresponding types in the v1model architecture, but
- * this is simply because it should help keep the differences between
- * BMV2 simple_switch and BMv2 psa_switch a tiny bit smaller. */
+ * The bit widths for BMv2 psa_switch have been chosen to be the same
+ * as the corresponding InHeader types later.  This simplifies the
+ * implementation of P4Runtime for BMv2 psa_switch. */
 
 /* These are defined using `typedef`, not `type`, so they are truly
  * just different names for the type bit<W> for the particular width W
@@ -58,20 +57,13 @@ limitations under the License.
  *
  * Note that the width of typedef <name>Uint_t will always be the same
  * as the width of type <name>_t. */
-
-/* The comments after each line give the name of a similar field in
- * the BMv2 simple_switch implementation, on which the width of this
- * PSA type is based, or in some cases the bit width of the
- * corresponding type in the P4Runtime specification, so that BMv2
- * psa_switch will not need to do runtime numeric translation of those
- * values, simplifying that implementation aspect of psa_switch. */
-typedef bit<32> PortIdUint_t;          // width of P4Runtime PortId
-typedef bit<16> MulticastGroupUint_t;  // mcast_grp
-typedef bit<16> CloneSessionIdUint_t;  // clone_spec, but see below
-typedef bit<8>  ClassOfServiceUint_t;  // width of P4Runtime ClassOfService
-typedef bit<32> PacketLengthUint_t;    // packet_length
-typedef bit<16> EgressInstanceUint_t;  // egress_rid
-typedef bit<48> TimestampUint_t;       // ingress_global_timestamp, egress_global_timestamp
+typedef bit<32> PortIdUint_t;
+typedef bit<32> MulticastGroupUint_t;
+typedef bit<16> CloneSessionIdUint_t;
+typedef bit<8>  ClassOfServiceUint_t;
+typedef bit<16> PacketLengthUint_t;
+typedef bit<16> EgressInstanceUint_t;
+typedef bit<64> TimestampUint_t;
 
 /* Note: clone_spec in BMv2 simple_switch v1model is 32 bits wide, but
  * it is used such that 16 of its bits contain a clone/mirror session
@@ -93,8 +85,8 @@ type EgressInstanceUint_t EgressInstance_t;
 type TimestampUint_t      Timestamp_t;
 typedef error   ParserError_t;
 
-const PortId_t PSA_PORT_RECIRCULATE = (PortId_t) 510;
-const PortId_t PSA_PORT_CPU = (PortId_t) 511;
+const PortId_t PSA_PORT_RECIRCULATE = (PortId_t) 0xfffffffa;
+const PortId_t PSA_PORT_CPU = (PortId_t) 0xfffffffd;
 
 const CloneSessionId_t PSA_CLONE_SESSION_TO_CPU = (CloneSessionId_t) 0;
 

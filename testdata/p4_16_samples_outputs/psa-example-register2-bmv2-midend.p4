@@ -71,7 +71,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         port_pkt_ip_bytes_in_0.write(istd.ingress_port, tmp);
     }
     @hidden action act_1() {
-        ostd.egress_port = 10w0;
+        ostd.egress_port = 32w0;
     }
     @hidden table tbl_act {
         actions = {
