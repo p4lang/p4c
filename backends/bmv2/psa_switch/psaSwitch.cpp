@@ -283,8 +283,7 @@ void InspectPsaProgram::addHeaderInstance(const IR::Type_StructLike *st, cstring
 }
 
 void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bool isHeader) {
-    addHeaderType(type);
-    addHeaderInstance(type, type->controlPlaneName());
+    LOG3("Adding " << type);
     for (auto f : type->fields) {
         auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
@@ -295,14 +294,20 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
                         type);
                 return;
             }
+            auto st = ft->to<IR::Type_StructLike>();
+            addHeaderType(st);
+        }
+    }
+
+    for (auto f : type->fields) {
+        auto ft = typeMap->getType(f, true);
+        if (ft->is<IR::Type_StructLike>()) {
             if (auto hft = ft->to<IR::Type_Header>()) {
-                addHeaderType(hft);
                 addHeaderInstance(hft, f->controlPlaneName());
             } else if (ft->is<IR::Type_HeaderUnion>()) {
                 for (auto uf : ft->to<IR::Type_HeaderUnion>()->fields) {
                     auto uft = typeMap->getType(uf, true);
                     if (auto h_type = uft->to<IR::Type_Header>()) {
-                        addHeaderType(h_type);
                         addHeaderInstance(h_type, uf->controlPlaneName());
                     } else {
                         ::error(ErrorType::ERR_INVALID,
