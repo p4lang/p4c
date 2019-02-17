@@ -106,6 +106,7 @@ class ExpressionConverter : public Inspector {
     void postorder(const IR::BoolLiteral* expression) override;
     void postorder(const IR::MethodCallExpression* expression) override;
     void postorder(const IR::Cast* expression) override;
+    void postorder(const IR::Slice* expression) override;
     void postorder(const IR::AddSat* expression) override { saturated_binary(expression); }
     void postorder(const IR::SubSat* expression) override { saturated_binary(expression); }
     void postorder(const IR::Constant* expression) override;
