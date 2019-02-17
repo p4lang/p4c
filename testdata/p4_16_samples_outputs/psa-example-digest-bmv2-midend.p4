@@ -39,7 +39,7 @@ struct mac_learn_digest_t {
 struct metadata {
     bool    _send_mac_learn_msg0;
     bit<48> _mac_learn_msg_srcAddr1;
-    bit<10> _mac_learn_msg_ingress_port2;
+    bit<32> _mac_learn_msg_ingress_port2;
 }
 
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
@@ -126,7 +126,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     @name("ingress.do_L2_forward") action do_L2_forward(PortId_t egress_port) {
         ostd.drop = false;
-        ostd.multicast_group = 10w0;
+        ostd.multicast_group = 32w0;
         ostd.egress_port = egress_port;
     }
     @name("ingress.l2_tbl") table l2_tbl_0 {

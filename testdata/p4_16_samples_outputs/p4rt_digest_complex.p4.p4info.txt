@@ -30,7 +30,7 @@ type_info {
         type_spec {
           bitstring {
             bit {
-              bitwidth: 10
+              bitwidth: 32
             }
           }
         }

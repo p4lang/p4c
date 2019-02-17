@@ -32,7 +32,7 @@ actions {
   params {
     id: 1
     name: "oport"
-    bitwidth: 10
+    bitwidth: 32
   }
 }
 actions {

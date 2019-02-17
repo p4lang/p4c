@@ -199,7 +199,7 @@ TypeVariableSubstitution* TypeInference::unify(const IR::Node* errorPosition,
     if (srcType == destType)
         return new TypeVariableSubstitution();
 
-    TypeConstraints constraints(typeMap->getSubstitutions());
+    TypeConstraints constraints(typeMap->getSubstitutions(), typeMap);
     constraints.addEqualityConstraint(destType, srcType);
     auto tvs = constraints.solve(errorPosition);
     addSubstitutions(tvs);
@@ -999,7 +999,7 @@ TypeInference::containerInstantiation(
     auto callType = new IR::Type_MethodCall(node->srcInfo,
                                             new IR::Vector<IR::Type>(),
                                             rettype, args);
-    TypeConstraints constraints(typeMap->getSubstitutions());
+    TypeConstraints constraints(typeMap->getSubstitutions(), typeMap);
     constraints.addEqualityConstraint(constructor, callType);
     auto tvs = constraints.solve(node);
     if (tvs == nullptr)
@@ -2605,7 +2605,7 @@ TypeInference::actionCall(bool inActionList,
 
     bool inTable = findContext<IR::P4Table>() != nullptr;
 
-    TypeConstraints constraints(typeMap->getSubstitutions());
+    TypeConstraints constraints(typeMap->getSubstitutions(), typeMap);
     auto params = new IR::ParameterList;
 
     // keep track of parameters that have not been matched yet
@@ -2882,7 +2882,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         auto callType = new IR::Type_MethodCall(expression->srcInfo,
                                                 typeArgs, rettype, args);
 
-        TypeConstraints constraints(typeMap->getSubstitutions());
+        TypeConstraints constraints(typeMap->getSubstitutions(), typeMap);
         constraints.addEqualityConstraint(ft, callType);
         auto tvs = constraints.solve(expression);
         if (tvs == nullptr)

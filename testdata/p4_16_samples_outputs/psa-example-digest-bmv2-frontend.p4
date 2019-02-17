@@ -120,7 +120,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
             psa_ingress_output_metadata_t meta_3 = ostd;
             PortId_t egress_port_1 = egress_port;
             meta_3.drop = false;
-            meta_3.multicast_group = 10w0;
+            meta_3.multicast_group = (MulticastGroup_t)32w0;
             meta_3.egress_port = egress_port_1;
             ostd = meta_3;
         }

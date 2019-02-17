@@ -754,13 +754,19 @@ class P4RuntimeAnalyzer {
             addDocumentation(param, actionParam->to<IR::IAnnotated>());
 
             auto paramType = typeMap->getType(actionParam, true);
-            if (!paramType->is<IR::Type_Bits>() && !paramType->is<IR::Type_Boolean>()) {
-                ::error("Action parameter %1% has a type which is not bit<> or int<> or bool",
-                        actionParam);
+            if (!paramType->is<IR::Type_Bits>() && !paramType->is<IR::Type_Boolean>()
+                && !paramType->is<IR::Type_Newtype>()) {
+                ::error("Action parameter %1% has a type which is not "
+                        "bit<> or int<> or bool or New type", actionParam);
                 continue;
             }
             if (paramType->is<IR::Type_Boolean>()) {
                 param->set_bitwidth(1);
+            } else if (paramType->is<IR::Type_Newtype>()) {
+                auto newType = paramType->to<IR::Type_Newtype>();
+                auto n = newType->type->to<IR::Type_Name>();
+                auto canon = typeMap->getTypeType(n, true);
+                param->set_bitwidth(canon->width_bits());
             } else {
                 param->set_bitwidth(paramType->width_bits());
             }

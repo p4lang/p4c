@@ -91,7 +91,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     @name("ingress.next_hop") action next_hop(PortId_t oport) {
         per_prefix_pkt_byte_count_0.count();
         ostd.drop = false;
-        ostd.multicast_group = 10w0;
+        ostd.multicast_group = 32w0;
         ostd.egress_port = oport;
     }
     @name("ingress.default_route_drop") action default_route_drop() {

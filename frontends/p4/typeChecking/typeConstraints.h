@@ -68,8 +68,8 @@ class TypeConstraints final {
  public:
     TypeVariableSubstitutionVisitor replaceVariables;
 
-    explicit TypeConstraints(const TypeVariableSubstitution* definedVariables) :
-            unification(new TypeUnification(this)), definedVariables(definedVariables),
+    explicit TypeConstraints(const TypeVariableSubstitution* definedVariables, TypeMap* typeMap) :
+    unification(new TypeUnification(this, typeMap)), definedVariables(definedVariables),
             replaceVariables(definedVariables) {}
 
     // Mark this variable as being free.

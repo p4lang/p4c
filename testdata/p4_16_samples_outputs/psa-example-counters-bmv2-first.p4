@@ -36,7 +36,7 @@ struct metadata {
 typedef bit<48> ByteCounter_t;
 typedef bit<32> PacketCounter_t;
 typedef bit<80> PacketByteCounter_t;
-const PortId_t NUM_PORTS = 10w512;
+const bit<32> NUM_PORTS = 32w512;
 struct headers {
     ethernet_t ethernet;
     ipv4_t     ipv4;
