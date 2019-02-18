@@ -1248,10 +1248,14 @@ class P4RuntimeEntriesConverter {
             return stringRepr(k->to<IR::Constant>(), keyWidth);
         } else if (k->is<IR::BoolLiteral>()) {
             return stringRepr(k->to<IR::BoolLiteral>(), keyWidth);
-        } else if (k->type->is<IR::Type_Error>()) {
+        } else if (k->type->is<IR::Type_Error>() ||
+                   k->type->is<IR::Type_Enum>()) {
             auto mem = k->to<IR::Member>();
             auto name = mem->expr->toString();
-            return stringRepr(k->type->to<IR::Type_Error>(), strlen(name));
+            if (k->type->is<IR::Type_Error>())
+                return stringRepr(k->type->to<IR::Type_Error>(), strlen(name));
+            else
+                return stringRepr(name);
         } else {
             ::error("%1% invalid key expression", k);
             return boost::none;
