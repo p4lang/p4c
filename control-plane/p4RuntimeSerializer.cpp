@@ -1198,6 +1198,11 @@ class P4RuntimeEntriesConverter {
             } else if (arg->expression->is<IR::BoolLiteral>()) {
                 auto value = stringRepr(arg->expression->to<IR::BoolLiteral>(), width);
                 protoParam->set_value(*value);
+            } else if (arg->expression->is<IR::Type_Name>()) {
+                auto n = arg->expression->to<IR::Type_Name>();
+                auto name = n->path->name.name;
+                auto value = stringRepr(name);
+                protoParam->set_value(*value);
             } else {
                 ::error("%1% unsupported argument expression", arg->expression);
                 continue;
