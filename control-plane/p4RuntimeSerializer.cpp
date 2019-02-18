@@ -56,6 +56,7 @@ limitations under the License.
 #include "p4RuntimeSerializer.h"
 #include "p4RuntimeArchHandler.h"
 #include "p4RuntimeArchStandard.h"
+#include "flattenHeader.h"
 
 namespace p4v1 = ::p4::v1;
 namespace p4configv1 = ::p4::config::v1;
