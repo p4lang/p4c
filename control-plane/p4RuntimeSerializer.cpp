@@ -1122,7 +1122,8 @@ class P4RuntimeEntriesConverter {
     }
 
     /// Appends the 'const entries' for the table to the WriteRequest message.
-    void addTableEntries(const IR::TableBlock* tableBlock, ReferenceMap* refMap) {
+    void addTableEntries(const IR::TableBlock* tableBlock, ReferenceMap* refMap,
+                         TypeMap* typeMap) {
         CHECK_NULL(tableBlock);
         auto table = tableBlock->container;
 
@@ -1141,7 +1142,7 @@ class P4RuntimeEntriesConverter {
             auto protoEntry = protoEntity->mutable_table_entry();
             protoEntry->set_table_id(tableId);
             addMatchKey(protoEntry, table, e->getKeys(), refMap);
-            addAction(protoEntry, e->getAction(), refMap);
+            addAction(protoEntry, e->getAction(), refMap, typeMap);
             // TODO(antonin): according to the P4 specification, "Entries in a
             // table are matched in the program order, stopping at the first
             // matching entry." Based on the definition of 'priority' in
@@ -1168,7 +1169,8 @@ class P4RuntimeEntriesConverter {
 
     void addAction(p4v1::TableEntry* protoEntry,
                    const IR::Expression* actionRef,
-                   ReferenceMap* refMap) const {
+                   ReferenceMap* refMap,
+                   TypeMap* typeMap) const {
         if (!actionRef->is<IR::MethodCallExpression>()) {
             ::error("%1%: invalid action in entries list", actionRef);
             return;
@@ -1188,7 +1190,8 @@ class P4RuntimeEntriesConverter {
             auto protoParam = protoAction->add_params();
             protoParam->set_param_id(parameterId++);
             auto parameter = actionDecl->parameters->parameters.at(parameterIndex);
-            auto width = parameter->type->width_bits();
+            auto canon = typeMap->getTypeType(parameter->type, true);
+            auto width = canon->width_bits();
             if (arg->expression->is<IR::Constant>()) {
                 auto value = stringRepr(arg->expression->to<IR::Constant>(), width);
                 protoParam->set_value(*value);
@@ -1419,7 +1422,8 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
     P4RuntimeEntriesConverter entriesConverter(symbols);
     Helpers::forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
         if (block->is<IR::TableBlock>())
-            entriesConverter.addTableEntries(block->to<IR::TableBlock>(), refMap);
+            entriesConverter.addTableEntries(block->to<IR::TableBlock>(), refMap,
+                                             typeMap);
     });
 
     auto* p4Info = analyzer.getP4Info();
