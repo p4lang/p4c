@@ -1253,7 +1253,7 @@ class P4RuntimeEntriesConverter {
             auto mem = k->to<IR::Member>();
             auto name = mem->expr->toString();
             if (k->type->is<IR::Type_Error>())
-                return stringRepr(k->type->to<IR::Type_Error>(), strlen(name));
+                return stringRepr(k->type->to<IR::Type_Error>());
             else
                 return stringRepr(name);
         } else {
@@ -1376,7 +1376,7 @@ class P4RuntimeEntriesConverter {
         return stringReprConstant(v, width);
     }
 
-    boost::optional<std::string> stringRepr(const IR::Type_Error* err, int width) const {
+    boost::optional<std::string> stringRepr(const IR::Type_Error* err) const {
         return stringRepr(err->error);
     }
 
