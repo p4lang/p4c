@@ -127,6 +127,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options) : MidEnd(options) {
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::CompileTimeOperations(),
         new P4::TableHit(&refMap, &typeMap),
+        new P4::MoveActionsToTables(&refMap, &typeMap),
         new P4::RemoveLeftSlices(&refMap, &typeMap),
         new P4::TypeChecking(&refMap, &typeMap),
         new P4::MidEndLast(),
