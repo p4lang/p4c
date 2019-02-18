@@ -649,6 +649,25 @@ void ExpressionConverter::postorder(const IR::TypeNameExpression* expression)  {
     (void)expression;
 }
 
+void ExpressionConverter::postorder(const IR::Slice *expression) {
+    auto result = new Util::JsonObject();
+    auto expr = expression->e0;
+    int h = expression->getH();
+    int l = expression->getL();
+    auto mask = Util::maskFromSlice(h, l);
+    result->emplace("type", "expression");
+    auto band = new Util::JsonObject();
+    result->emplace("value", band);
+    band->emplace("op", "&");
+    auto right = new Util::JsonObject();
+    auto bitwidth = expression->type->width_bits();
+    right->emplace("type", "hexstr");
+    right->emplace("value", stringRepr(mask, ROUNDUP(bitwidth, 8)));
+    band->emplace("left", get(expr));
+    band->emplace("right", right);
+    mapExpression(expression, result);
+}
+
 void ExpressionConverter::postorder(const IR::Expression* expression)  {
     BUG("%1%: Unhandled case", expression);
 }
