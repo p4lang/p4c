@@ -53,6 +53,8 @@ struct headers {
     ipv4_t           ipv4;
 }
 
+type ipv4_t ipv4T_t;
+
 struct empty_metadata_t {
 }
 
