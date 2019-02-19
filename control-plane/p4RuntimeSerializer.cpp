@@ -56,6 +56,7 @@ limitations under the License.
 #include "p4RuntimeSerializer.h"
 #include "p4RuntimeArchHandler.h"
 #include "p4RuntimeArchStandard.h"
+#include "flattenHeader.h"
 
 namespace p4v1 = ::p4::v1;
 namespace p4configv1 = ::p4::config::v1;
@@ -191,6 +192,8 @@ struct MatchField {
 
     const cstring name;       // The fully qualified external name of this field.
     const MatchType type;     // The match algorithm - exact, ternary, range, etc.
+    const cstring other_match_type;  // If the match type is an arch-specific one
+                                     // in this case, type must be MatchTypes::UNSPECIFIED
     const uint32_t bitwidth;  // How wide this field is.
     const IR::IAnnotated* annotations;  // If non-null, any annotations applied
                                         // to this field.
@@ -604,6 +607,38 @@ getActionRefs(const IR::P4Table* table, ReferenceMap* refMap) {
     return actions;
 }
 
+static cstring
+getMatchTypeName(const IR::PathExpression* matchPathExpr, const ReferenceMap* refMap) {
+    CHECK_NULL(matchPathExpr);
+    auto matchTypeDecl = refMap->getDeclaration(matchPathExpr->path, true)
+        ->to<IR::Declaration_ID>();
+    BUG_CHECK(matchTypeDecl != nullptr, "No declaration for match type '%1%'", matchPathExpr);
+    return matchTypeDecl->name.name;
+}
+
+/// maps the match type name to the corresponding P4Info MatchType enum
+/// member. If the match type should not be exposed to the control plane and
+/// should be ignored, boost::none is returned. If the match type does not
+/// correspond to any standard match type known to P4Info, default enum member
+/// UNSPECIFIED is returned.
+static boost::optional<MatchField::MatchType>
+getMatchType(cstring matchTypeName) {
+    if (matchTypeName == P4CoreLibrary::instance.exactMatch.name) {
+        return MatchField::MatchTypes::EXACT;
+    } else if (matchTypeName == P4CoreLibrary::instance.lpmMatch.name) {
+        return MatchField::MatchTypes::LPM;
+    } else if (matchTypeName == P4CoreLibrary::instance.ternaryMatch.name) {
+        return MatchField::MatchTypes::TERNARY;
+    } else if (matchTypeName == P4V1::V1Model::instance.rangeMatchType.name) {
+        return MatchField::MatchTypes::RANGE;
+    } else if (matchTypeName == P4V1::V1Model::instance.selectorMatchType.name) {
+        // Nothing to do here, we cannot even perform some sanity-checking.
+        return boost::none;
+    } else {
+        return MatchField::MatchTypes::UNSPECIFIED;
+    }
+}
+
 /// @return the header instance fields matched against by @table's key. The
 /// fields are represented as a (fully qualified field name, match type) tuple.
 static std::vector<MatchField>
@@ -614,32 +649,9 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
     if (!key) return matchFields;
 
     for (auto keyElement : key->keyElements) {
-        auto matchTypeDecl = refMap->getDeclaration(keyElement->matchType->path, true)
-                                   ->to<IR::Declaration_ID>();
-        BUG_CHECK(matchTypeDecl != nullptr, "No declaration for match type '%1%'",
-                                            keyElement->matchType);
-        const auto matchTypeName = matchTypeDecl->name.name;
-
-        MatchField::MatchType matchType;
-        // TODO(antonin): remove v1model dependency and find a way to handle
-        // architecture-specific match types, which are supported by P4Runtime.
-        if (matchTypeName == P4CoreLibrary::instance.exactMatch.name) {
-            matchType = MatchField::MatchTypes::EXACT;
-        } else if (matchTypeName == P4CoreLibrary::instance.lpmMatch.name) {
-            matchType = MatchField::MatchTypes::LPM;
-        } else if (matchTypeName == P4CoreLibrary::instance.ternaryMatch.name) {
-            matchType = MatchField::MatchTypes::TERNARY;
-        } else if (matchTypeName == P4V1::V1Model::instance.rangeMatchType.name) {
-            matchType = MatchField::MatchTypes::RANGE;
-        } else if (matchTypeName == P4V1::V1Model::instance.selectorMatchType.name) {
-            // Nothing to do here, we cannot even perform some sanity-checking.
-            continue;
-        } else {
-            ::warning(ErrorType::WARN_MISMATCH,
-                      "Table '%1%': cannot represent match type '%2%' in P4Runtime, ignoring",
-                      table->controlPlaneName(), matchTypeName);
-            continue;
-        }
+        auto matchTypeName = getMatchTypeName(keyElement->matchType, refMap);
+        auto matchType = getMatchType(matchTypeName);
+        if (matchType == boost::none) continue;
 
         auto matchFieldName = explicitNameAnnotation(keyElement);
         BUG_CHECK(bool(matchFieldName), "Table '%1%': Match field '%2%' has no "
@@ -649,7 +661,6 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
           typeMap->getType(keyElement->expression->getNode(), true);
         BUG_CHECK(matchFieldType != nullptr,
                   "Couldn't determine type for key element %1%", keyElement);
-
         size_t w;
         if (matchFieldType->is<IR::Type_Newtype>()) {
             auto newType = matchFieldType->to<IR::Type_Newtype>();
@@ -880,7 +891,10 @@ class P4RuntimeAnalyzer {
             addAnnotations(match_field, field.annotations);
             addDocumentation(match_field, field.annotations);
             match_field->set_bitwidth(field.bitwidth);
-            match_field->set_match_type(field.type);
+            if (field.type != MatchField::MatchTypes::UNSPECIFIED)
+                match_field->set_match_type(field.type);
+            else
+                match_field->set_other_match_type(field.other_match_type);
         }
 
         if (isConstTable) {
@@ -932,8 +946,8 @@ class P4RuntimeAnalyzer {
         // guaranteed by caller
         CHECK_NULL(inst);
 
-        auto et = typeMap->getTypeType(inst->elementType, true);
-        auto bitwidth = static_cast<uint32_t>(et->width_bits());
+        auto vs = p4Info->add_value_sets();
+
         auto name = inst->controlPlaneName();
 
         unsigned int size = 0;
@@ -948,12 +962,79 @@ class P4RuntimeAnalyzer {
         }
         size = sizeConstant->value.get_ui();
 
-        auto vs = p4Info->add_value_sets();
         auto id = symbols.getId(P4RuntimeSymbolType::VALUE_SET(), name);
         setPreamble(vs->mutable_preamble(), id, name, symbols.getAlias(name),
                     inst->to<IR::IAnnotated>());
-        vs->set_bitwidth(bitwidth);
         vs->set_size(size);
+
+        /// Look for a @match annotation on the struct field and set the match
+        /// type of the match field appropriately.
+        auto setMatchType = [this](const IR::StructField* sf, p4configv1::MatchField* match) {
+            auto matchAnnotation = sf->getAnnotation(IR::Annotation::matchAnnotation);
+            // default is EXACT
+            if (!matchAnnotation) {
+                match->set_match_type(MatchField::MatchTypes::EXACT);  // default match type
+                return;
+            }
+            auto matchPathExpr = matchAnnotation->expr[0]->to<IR::PathExpression>();
+            CHECK_NULL(matchPathExpr);
+            auto matchTypeName = getMatchTypeName(matchPathExpr, refMap);
+            auto matchType = getMatchType(matchTypeName);
+            if (matchType == boost::none) {
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "match type for Value Set '@match' annotation",
+                        matchAnnotation);
+                return;
+            }
+            if (matchType != MatchField::MatchTypes::UNSPECIFIED)
+                match->set_match_type(*matchType);
+            else
+                match->set_other_match_type(matchTypeName);
+        };
+
+        // TODO(antonin): handle new types
+
+        // as per the P4Runtime v1.0.0 specification
+        auto et = typeMap->getTypeType(inst->elementType, true);
+        if (et->is<IR::Type_Bits>()) {
+            auto* match = vs->add_match();
+            match->set_id(1);
+            match->set_bitwidth(et->width_bits());
+            match->set_match_type(MatchField::MatchTypes::EXACT);
+        } else if (et->is<IR::Type_Struct>()) {
+            int fieldId = 1;
+            for (auto f : et->to<IR::Type_Struct>()->fields) {
+                auto fType = f->type;
+                if (!fType->is<IR::Type_Bits>()) {
+                    ::error(ErrorType::ERR_UNSUPPORTED,
+                            "type parameter for Value Set; "
+                            "this version of P4Runtime requires that when the type parameter "
+                            "of a Value Set is a struct, all the fields of the struct "
+                            "must be of type bit<W>, but %1% is not", f);
+                    continue;
+                }
+                auto* match = vs->add_match();
+                match->set_id(fieldId++);
+                match->set_name(f->controlPlaneName());
+                match->set_bitwidth(fType->width_bits());
+                setMatchType(f, match);
+                // add annotations save for the @match one
+                addAnnotations(
+                    match, f,
+                    [](cstring name) { return name == IR::Annotation::matchAnnotation; });
+                addDocumentation(match, f);
+            }
+        } else if (et->is<IR::Type_Tuple>()) {
+            ::error(ErrorType::ERR_UNSUPPORTED,
+                    "type parameter for Value Set; "
+                    "this version of P4Runtime requires the type parameter of a Value Set "
+                    "to be a bit<W> or a struct of bit<W> fields",
+                    inst);
+        } else {
+            ::error(ErrorType::ERR_INVALID,
+                    "type parameter for Value Set; it must be one of bit<W>, struct or tuple",
+                    inst);
+        }
     }
 
     /// To be called after all objects have been added to P4Info. Calls the

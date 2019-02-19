@@ -66,6 +66,11 @@ set (P4RUNTIME_EXCLUDE
   # error not supported in static entries, not strictly required for P4Info
   # generation though
   testdata/p4_16_samples/issue1062-bmv2.p4
+  # P4Info generation fails (as expected with the current P4Runtime spec) with:
+  # Unsupported type parameter for Value Set; this version of P4Runtime requires
+  # that when the type parameter of a Value Set is a struct, all the fields of
+  # the struct must be of type bit<W>, but inner is not
+  testdata/p4_16_samples/pvs-nested-struct.p4
 )
 # Do not generate P4Info for tests which are expected to fail P4 compilation.
 p4c_find_test_names ("${P4C_SOURCE_DIR}/testdata/p4_16_errors/*.p4" P4RUNTIME_EXCLUDE_ERRORS)
