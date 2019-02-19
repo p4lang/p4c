@@ -129,6 +129,7 @@ control ingress(inout headers hdr,
         per_prefix_pkt_byte_count;
 
     action next_hop(PortId_t oport) {
+        oport = 0;
         per_prefix_pkt_byte_count.count();
         send_to_port(ostd, oport);
     }
