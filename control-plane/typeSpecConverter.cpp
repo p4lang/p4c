@@ -107,10 +107,12 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
         // Type_Name nodes for NewType are only replaced in the midend, not the
         // frontend, but the P4Info generation happens after the frontend, so we
         // have to handle this case.
+        auto newt = decl->to<IR::Type_Newtype>();
+        name = newt->name;
+        typeSpec->mutable_new_type()->set_name(name);
         auto newType = decl->to<IR::Type_Newtype>()->type;
-        auto name = newType->to<IR::Type_Name>();
-        visit(name);
-        typeSpec = map.at(name);
+        visit(newType);
+        typeSpec = map.at(newType);
         CHECK_NULL(typeSpec);
         map.emplace(type, typeSpec);
         return false;
