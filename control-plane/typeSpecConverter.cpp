@@ -116,7 +116,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
 bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
     auto typeSpec = new p4configv1::P4NewTypeSpec();
     auto newTypeSpec = typeSpec->mutable_original_type(); 
-	map.emplace(type, newTypeSpec);
+    map.emplace(type, newTypeSpec);
     return false;
 }
 
