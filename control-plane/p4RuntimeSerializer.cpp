@@ -665,7 +665,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
         if (matchFieldType->is<IR::Type_Newtype>()) {
             auto newType = matchFieldType->to<IR::Type_Newtype>();
             auto n = newType->type->to<IR::Type_Name>();
-			BUG_CHECK(n == nullptr, "%1%: Cannot get key type", matchFieldType);
+            BUG_CHECK(n != nullptr, "%1%: Cannot get key type", matchFieldType);
             auto canon = typeMap->getTypeType(n, true);
             if (canon->is<IR::Type_Bits>()) {
                 auto k = canon->to<IR::Type_Bits>();
@@ -676,8 +676,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
         }
         matchFields.push_back(MatchField{*matchFieldName, *matchType, matchTypeName,
                                          (uint32_t)w,
-                                         keyElement->to<IR::IAnnotated>()});		
-
+                                         keyElement->to<IR::IAnnotated>()});
     }
 
     return matchFields;

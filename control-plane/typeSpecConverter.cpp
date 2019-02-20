@@ -108,8 +108,9 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
         // frontend, but the P4Info generation happens after the frontend, so we
         // have to handle this case.
         auto newType = decl->to<IR::Type_Newtype>()->type;
-        visit(newType);
-        typeSpec = map.at(newType);
+        auto name = newType->to<IR::Type_Name>();
+        visit(name);
+        typeSpec = map.at(name);
         CHECK_NULL(typeSpec);
         map.emplace(type, typeSpec);
         return false;

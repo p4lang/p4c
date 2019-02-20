@@ -43,6 +43,27 @@ tables {
   size: 1024
   idle_timeout_behavior: NOTIFY_CONTROL
 }
+tables {
+  preamble {
+    id: 33601325
+    name: "ingress.tst_tbl"
+    alias: "tst_tbl"
+  }
+  match_fields {
+    id: 1
+    name: "meta.mac_learn_msg.ingress_port"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16797276
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+  idle_timeout_behavior: NOTIFY_CONTROL
+}
 actions {
   preamble {
     id: 16800567
@@ -62,6 +83,18 @@ actions {
     id: 16830849
     name: "ingress.do_L2_forward"
     alias: "do_L2_forward"
+  }
+  params {
+    id: 1
+    name: "egress_port"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 16797276
+    name: "ingress.do_tst"
+    alias: "do_tst"
   }
   params {
     id: 1

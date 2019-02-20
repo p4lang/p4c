@@ -99,6 +99,9 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     action do_L2_forward(PortId_t egress_port) {
         send_to_port(ostd, egress_port);
     }
+    action do_tst(PortId_t egress_port) {
+        send_to_port(ostd, egress_port);
+    }
     table l2_tbl {
         key = {
             hdr.ethernet.dstAddr: exact;
@@ -109,10 +112,21 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
         }
         default_action = NoAction();
     }
+    table tst_tbl {
+        key = {
+            meta.mac_learn_msg.ingress_port: exact;
+        }
+        actions = {
+            do_tst;
+            NoAction;
+        }
+        default_action = NoAction();
+    }
     apply {
         meta.send_mac_learn_msg = false;
         learned_sources.apply();
         l2_tbl.apply();
+        tst_tbl.apply();
     }
 }
 

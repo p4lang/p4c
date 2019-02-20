@@ -107,7 +107,9 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
 control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".NoAction") action NoAction_3() {
+    @name(".NoAction") action NoAction_4() {
+    }
+    @name(".NoAction") action NoAction_5() {
     }
     @name("ingress.unknown_source") action unknown_source() {
         meta._send_mac_learn_msg0 = true;
@@ -129,15 +131,30 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
         ostd.multicast_group = 32w0;
         ostd.egress_port = egress_port;
     }
+    @name("ingress.do_tst") action do_tst(PortId_t egress_port) {
+        ostd.drop = false;
+        ostd.multicast_group = 32w0;
+        ostd.egress_port = egress_port;
+    }
     @name("ingress.l2_tbl") table l2_tbl_0 {
         key = {
             hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
         }
         actions = {
             do_L2_forward();
-            NoAction_3();
+            NoAction_4();
         }
-        default_action = NoAction_3();
+        default_action = NoAction_4();
+    }
+    @name("ingress.tst_tbl") table tst_tbl_0 {
+        key = {
+            meta._mac_learn_msg_ingress_port2: exact @name("meta.mac_learn_msg.ingress_port") ;
+        }
+        actions = {
+            do_tst();
+            NoAction_5();
+        }
+        default_action = NoAction_5();
     }
     @hidden action act() {
         meta._send_mac_learn_msg0 = false;
@@ -152,6 +169,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
         tbl_act.apply();
         learned_sources_0.apply();
         l2_tbl_0.apply();
+        tst_tbl_0.apply();
     }
 }
 
