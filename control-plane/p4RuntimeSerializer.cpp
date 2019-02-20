@@ -664,9 +664,8 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
         size_t w;
         if (matchFieldType->is<IR::Type_Newtype>()) {
             auto newType = matchFieldType->to<IR::Type_Newtype>();
-            auto n = newType->type->to<IR::Type_Name>();
-            BUG_CHECK(n != nullptr, "%1%: Cannot get key type", matchFieldType);
-            auto canon = typeMap->getTypeType(n, true);
+            auto canon = typeMap->getTypeType(newType, true);
+            canon = canon->to<IR::Type_Newtype>()->type;
             if (canon->is<IR::Type_Bits>()) {
                 auto k = canon->to<IR::Type_Bits>();
                 w = k->width_bits();
@@ -787,10 +786,13 @@ class P4RuntimeAnalyzer {
             if (paramType->is<IR::Type_Boolean>()) {
                 param->set_bitwidth(1);
             } else if (paramType->is<IR::Type_Newtype>()) {
-                auto newType = paramType->to<IR::Type_Newtype>();
-                auto n = newType->type->to<IR::Type_Name>();
-                auto canon = typeMap->getTypeType(n, true);
-                param->set_bitwidth(canon->width_bits());
+                auto t = paramType->to<IR::Type_Newtype>();
+                auto canon = typeMap->getTypeType(t, true);
+                paramType = canon->to<IR::Type_Newtype>()->type;
+                if (paramType->is<IR::Type_Bits>()) {
+                   auto type = paramType->to<IR::Type_Bits>();
+                   param->set_bitwidth(type->width_bits());
+                }
             } else {
                 param->set_bitwidth(paramType->width_bits());
             }

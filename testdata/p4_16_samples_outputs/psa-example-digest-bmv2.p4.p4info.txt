@@ -52,7 +52,7 @@ tables {
   match_fields {
     id: 1
     name: "meta.mac_learn_msg.ingress_port"
-    bitwidth: 32
+    bitwidth: -1867732424
     match_type: EXACT
   }
   action_refs {
@@ -87,7 +87,6 @@ actions {
   params {
     id: 1
     name: "egress_port"
-    bitwidth: 32
   }
 }
 actions {
@@ -99,7 +98,6 @@ actions {
   params {
     id: 1
     name: "egress_port"
-    bitwidth: 32
   }
 }
 digests {
