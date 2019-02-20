@@ -58,7 +58,6 @@ tables {
   match_fields {
     id: 9
     name: "hdr.custom.ett"
-    bitwidth: 8
     match_type: EXACT
   }
   match_fields {
@@ -82,7 +81,6 @@ tables {
   match_fields {
     id: 13
     name: "hdr.custom.edtt"
-    bitwidth: 8
     match_type: EXACT
   }
   match_fields {
@@ -94,19 +92,16 @@ tables {
   match_fields {
     id: 15
     name: "hdr.custom.etdt"
-    bitwidth: 8
     match_type: EXACT
   }
   match_fields {
     id: 16
     name: "hdr.custom.ettd"
-    bitwidth: 8
     match_type: EXACT
   }
   match_fields {
     id: 17
     name: "hdr.custom.ettt"
-    bitwidth: 8
     match_type: EXACT
   }
   action_refs {

@@ -661,14 +661,20 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
           typeMap->getType(keyElement->expression->getNode(), true);
         BUG_CHECK(matchFieldType != nullptr,
                   "Couldn't determine type for key element %1%", keyElement);
-        size_t w;
+        size_t w = 0;
+		// Table key needs different newtype handling because the top newtype
+		// could be Type_Bits.
         if (matchFieldType->is<IR::Type_Newtype>()) {
             auto newType = matchFieldType->to<IR::Type_Newtype>();
-            auto canon = typeMap->getTypeType(newType, true);
-            canon = canon->to<IR::Type_Newtype>()->type;
-            if (canon->is<IR::Type_Bits>()) {
-                auto k = canon->to<IR::Type_Bits>();
-                w = k->width_bits();
+            if (newType->type->is<IR::Type_Bits>()) {
+                w = newType->width_bits();
+            } else if (newType->type->is<IR::Type_Name>()) {
+                auto n = newType->type->to<IR::Type_Name>();
+                auto canon = typeMap->getTypeType(n, true);
+                if (canon->is<IR::Type_Bits>()) {
+                    auto k = canon->to<IR::Type_Bits>();
+                    w = k->width_bits();
+                }
             }
         } else {
             w = matchFieldType->width_bits();
