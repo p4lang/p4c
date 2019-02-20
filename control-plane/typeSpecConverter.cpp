@@ -104,23 +104,19 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
         map.emplace(type, typeSpec);
         return false;
     } else if (decl->is<IR::Type_Newtype>()) {
-        // Type_Name nodes for NewType are only replaced in the midend, not the
-        // frontend, but the P4Info generation happens after the frontend, so we
-        // have to handle this case.
-        auto newt = decl->to<IR::Type_Newtype>();
-        name = newt->name;
         typeSpec->mutable_new_type()->set_name(name);
-        auto newType = decl->to<IR::Type_Newtype>()->type;
-        visit(newType);
-        typeSpec = map.at(newType);
-        CHECK_NULL(typeSpec);
-        map.emplace(type, typeSpec);
-        return false;
     } else {
         BUG("Unexpected named type %1%", type);
     }
     visit(decl->getNode());
     map.emplace(type, typeSpec);
+    return false;
+}
+
+bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
+    auto typeSpec = new p4configv1::P4NewTypeSpec();
+    auto newTypeSpec = typeSpec->mutable_original_type(); 
+	map.emplace(type, newTypeSpec);
     return false;
 }
 

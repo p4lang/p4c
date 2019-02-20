@@ -662,8 +662,8 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
         BUG_CHECK(matchFieldType != nullptr,
                   "Couldn't determine type for key element %1%", keyElement);
         size_t w = 0;
-		// Table key needs different newtype handling because the top newtype
-		// could be Type_Bits.
+        // Table key needs different newtype handling because the top newtype
+        // could be Type_Bits.
         if (matchFieldType->is<IR::Type_Newtype>()) {
             auto newType = matchFieldType->to<IR::Type_Newtype>();
             if (newType->type->is<IR::Type_Bits>()) {

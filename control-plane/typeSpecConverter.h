@@ -65,6 +65,7 @@ class TypeSpecConverter : public Inspector {
     bool preorder(const IR::Type_Stack* type) override;
 
     bool preorder(const IR::Type_Name* type) override;
+    bool preorder(const IR::Type_Newtype* type) override;	
 
     // these methods do not update the "map", but update p4RtTypeInfo if it is
     // not null.
