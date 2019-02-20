@@ -75,7 +75,7 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
 
 Util::IJson* DeparserConverter::convertDeparser(const IR::P4Control* ctrl) {
     auto result = new Util::JsonObject();
-    result->emplace("name", "deparser");  // at least in simple_router this name is hardwired
+    result->emplace("name", name);
     result->emplace("id", nextId("deparser"));
     result->emplace_non_null("source_info", ctrl->sourceInfoJsonObj());
     auto order = mkArrayField(result, "order");
