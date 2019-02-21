@@ -639,6 +639,40 @@ getMatchType(cstring matchTypeName) {
     }
 }
 
+static uint32_t
+getNewtypeWidth(const IR::Type* type, TypeMap* typeMap, ReferenceMap* refMap) {
+    uint32_t w = 0;
+    if (type == nullptr)
+        return w;
+
+    const IR::Type* newType = type;
+    while (newType->is<IR::Type_Newtype>())
+        newType = newType->to<IR::Type_Newtype>()->type;
+    while (newType->is<IR::Type_Typedef>())
+        newType = newType->to<IR::Type_Typedef>()->type;
+
+    if (newType->is<IR::Type_Bits>()) {
+        w = newType->width_bits();
+        return w;
+    } else if (newType->is<IR::Type_Name>()) {
+        auto n = newType->to<IR::Type_Name>();
+        auto canon = typeMap->getTypeType(n, true);
+        if (canon->is<IR::Type_Bits>()) {
+            auto k = canon->to<IR::Type_Bits>();
+            w = k->width_bits();
+            return w;
+        } else {
+            auto decl = refMap->getDeclaration(n->path, true);
+            if (decl->is<IR::Type_Newtype>())
+                w = getNewtypeWidth(decl->to<IR::Type_Newtype>(), typeMap, refMap);
+            else if (decl->is<IR::Type_Typedef>())
+                w = getNewtypeWidth(decl->to<IR::Type_Typedef>(), typeMap, refMap);
+            return w;
+        }
+    }
+    return w;
+}
+
 /// @return the header instance fields matched against by @table's key. The
 /// fields are represented as a (fully qualified field name, match type) tuple.
 static std::vector<MatchField>
@@ -661,26 +695,15 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
           typeMap->getType(keyElement->expression->getNode(), true);
         BUG_CHECK(matchFieldType != nullptr,
                   "Couldn't determine type for key element %1%", keyElement);
-        size_t w = 0;
-        // Table key needs different newtype handling because the top newtype
-        // could be Type_Bits.
-        if (matchFieldType->is<IR::Type_Newtype>()) {
-            auto newType = matchFieldType->to<IR::Type_Newtype>();
-            if (newType->type->is<IR::Type_Bits>()) {
-                w = newType->width_bits();
-            } else if (newType->type->is<IR::Type_Name>()) {
-                auto n = newType->type->to<IR::Type_Name>();
-                auto canon = typeMap->getTypeType(n, true);
-                if (canon->is<IR::Type_Bits>()) {
-                    auto k = canon->to<IR::Type_Bits>();
-                    w = k->width_bits();
-                }
-            }
-        } else {
+        uint32_t w = 0;
+        if (matchFieldType->is<IR::Type_Newtype>())
+            w = getNewtypeWidth(matchFieldType, typeMap, refMap);
+        else
             w = matchFieldType->width_bits();
-        }
+
+        BUG_CHECK(w, "MatchField failed width for: %1%", *matchFieldName);
         matchFields.push_back(MatchField{*matchFieldName, *matchType, matchTypeName,
-                                         (uint32_t)w,
+                                         w,
                                          keyElement->to<IR::IAnnotated>()});
     }
 
@@ -792,13 +815,8 @@ class P4RuntimeAnalyzer {
             if (paramType->is<IR::Type_Boolean>()) {
                 param->set_bitwidth(1);
             } else if (paramType->is<IR::Type_Newtype>()) {
-                auto t = paramType->to<IR::Type_Newtype>();
-                auto canon = typeMap->getTypeType(t, true);
-                paramType = canon->to<IR::Type_Newtype>()->type;
-                if (paramType->is<IR::Type_Bits>()) {
-                   auto type = paramType->to<IR::Type_Bits>();
-                   param->set_bitwidth(type->width_bits());
-                }
+                auto w = getNewtypeWidth(paramType, typeMap, refMap);
+                param->set_bitwidth(w);
             } else {
                 param->set_bitwidth(paramType->width_bits());
             }

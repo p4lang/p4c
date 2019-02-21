@@ -87,6 +87,7 @@ actions {
   params {
     id: 1
     name: "egress_port"
+    bitwidth: 32
   }
 }
 actions {
@@ -98,6 +99,7 @@ actions {
   params {
     id: 1
     name: "egress_port"
+    bitwidth: 32
   }
 }
 digests {

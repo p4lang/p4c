@@ -78,6 +78,10 @@ list (APPEND P4RUNTIME_EXCLUDE ${P4RUNTIME_EXCLUDE_ERRORS})
 set (P4_XFAIL_TESTS
   # issue #13
   testdata/p4_16_samples/cast-call.p4
+  # One PSA 1.1 test fails due to use of type_error - needs discussion
+  testdata/p4_16_samples/psa-example-parser-checksum.p4
+  testdata/p4_16_samples/issue1062-1-bmv2.p4
+  testdata/p4_16_samples/issue1304.p4
   )
 p4c_add_tests_w_p4runtime("p4" ${P4TEST_DRIVER} "${P4TEST_SUITES}" "${P4_XFAIL_TESTS}" "${P4RUNTIME_EXCLUDE}")
 
