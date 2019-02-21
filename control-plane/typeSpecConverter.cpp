@@ -114,9 +114,22 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
 }
 
 bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
-    auto typeSpec = new p4configv1::P4NewTypeSpec();
-    auto newTypeSpec = typeSpec->mutable_original_type(); 
-    map.emplace(type, newTypeSpec);
+    if (p4RtTypeInfo) {
+        auto name = std::string(type->controlPlaneName());
+        auto types = p4RtTypeInfo->mutable_new_types();
+        if (types->find(name) == types->end()) {
+            auto newTypeSpec = new p4configv1::P4NewTypeSpec();
+            (void)newTypeSpec->mutable_original_type();
+            auto dataType = newTypeSpec->mutable_original_type();
+            auto newType = type->type;
+            auto n = newType->to<IR::Type_Name>();
+            visit(n);
+            auto typeSpec = map.at(n);
+            dataType->mutable_bitstring()->CopyFrom(typeSpec->bitstring());
+            (*types)[name] = *newTypeSpec;
+       }
+    }
+    map.emplace(type, nullptr);
     return false;
 }
 

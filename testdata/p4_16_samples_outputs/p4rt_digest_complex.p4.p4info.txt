@@ -64,4 +64,16 @@ type_info {
       }
     }
   }
+  new_types {
+    key: "PortId_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 32
+          }
+        }
+      }
+    }
+  }
 }
