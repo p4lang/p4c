@@ -120,14 +120,16 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
         uint32_t sdnB;
         auto ann = type->getAnnotation("p4runtime_translation");
         BUG_CHECK(ann != nullptr, "Null Annotation is newtype API gen: %1%", type);
-        if (ann->expr.size() > 1)
+        if (ann->expr.size() > 1) {
             ::error("invalid annotation %1%", ann->expr);
-        orig = false;
-        for (auto a : ann->body) {
-            if (a->text.startsWith("p4.org/psa/v1")) {
-                uri = a->text;
-            } else if (isdigit(a->text.c_str()[0])) {
-                sdnB = atoi(a->text);
+        } else {
+            orig = false;
+            for (auto a : ann->body) {
+                if (a->text.startsWith("p4.org/psa/v1")) {
+                    uri = a->text;
+                } else if (isdigit(a->text.c_str()[0])) {
+                    sdnB = atoi(a->text);
+                }
             }
         }
 
