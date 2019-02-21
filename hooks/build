@@ -17,4 +17,11 @@ if [ "$BUILD_PATH" != "/" ]; then
     # remove leading '/'
     DOCKERFILE_PATH_OPTION="-f ${BUILD_PATH:1}"
 fi
-docker build --build-arg PARENT_VERSION=$DOCKER_TAG $DOCKERFILE_PATH_OPTION -t $IMAGE_NAME .
+# Special case for release, since we do not have a release PI image at the
+# moment
+if [ "$DOCKER_TAG" = "release" ]; then
+    PARENT_VERSION="latest"
+else
+    PARENT_VERSION=$DOCKER_TAG
+fi
+docker build --build-arg PARENT_VERSION=$PARENT_VERSION $DOCKERFILE_PATH_OPTION -t $IMAGE_NAME .
