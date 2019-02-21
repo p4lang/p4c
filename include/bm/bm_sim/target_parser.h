@@ -124,6 +124,30 @@ class TargetParserBasic : public TargetParserIface {
   std::unique_ptr<TargetParserBasicStore> var_store;
 };
 
+//! Same as TargetParserBasic but supports the '--load-modules' command-line
+//! option by default. This option is used to load shared objects dynamically at
+//! runtime. Often, these objects / modules contain new primtive action or
+//! extern definitions. If you plan on using '--load-modules' in your target,
+//! and you plan on providing primitive / extern definitions dynamically, you
+//! will need to link your executable with -rdynamic.
+class TargetParserBasicWithDynModules : public TargetParserBasic {
+ public:
+  TargetParserBasicWithDynModules();
+  ~TargetParserBasicWithDynModules();
+
+  //! See bm::TargetParserIface::parse. Make sure all possible options have been
+  //! registered using add_string_option(), add_int_option(), add_uint_option()
+  //! or add_flag_option().
+  int parse(const std::vector<std::string> &more_options,
+            std::ostream *errstream) override;
+
+ private:
+  //! Name of the option.
+  static constexpr char load_modules_option[] = "load-modules";
+
+  int load_modules(std::ostream *errstream);
+};
+
 }  // namespace bm
 
 #endif  // BM_BM_SIM_TARGET_PARSER_H_

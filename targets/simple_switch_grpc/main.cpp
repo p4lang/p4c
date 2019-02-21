@@ -27,7 +27,7 @@
 
 int
 main(int argc, char* argv[]) {
-  bm::TargetParserBasic simple_switch_parser;
+  bm::TargetParserBasicWithDynModules simple_switch_parser;
   simple_switch_parser.add_flag_option(
       "disable-swap",
       "disable JSON swapping at runtime");

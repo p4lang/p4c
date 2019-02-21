@@ -27,7 +27,8 @@ libsimple_switch_grpc.la
 # We follow this tutorial to link with grpc++_reflection:
 # https://github.com/grpc/grpc/blob/master/doc/server_reflection_tutorial.md
 simple_switch_grpc_LDFLAGS = \
--Wl,--no-as-needed,-lgrpc++_reflection,--as-needed
+-Wl,--no-as-needed,-lgrpc++_reflection,--as-needed \
+-rdynamic
 
 lib_LTLIBRARIES = libbm_grpc_dataplane.la
 noinst_LTLIBRARIES = libsimple_switch_grpc.la

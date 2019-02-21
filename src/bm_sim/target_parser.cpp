@@ -18,15 +18,23 @@
  *
  */
 
+#include <bm/config.h>
+
+#ifdef BM_HAVE_DLOPEN
+#include <dlfcn.h>
+#endif  // BM_HAVE_DLOPEN
+
+#include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/target_parser.h>
 
 #include <boost/program_options.hpp>
 
-#include <string>
-#include <vector>
 #include <memory>
-#include <unordered_set>
 #include <ostream>
+#include <sstream>
+#include <string>
+#include <unordered_set>
+#include <vector>
 
 namespace po = boost::program_options;
 
@@ -172,5 +180,55 @@ TargetParserBasic::ReturnCode
 TargetParserBasic::get_flag_option(const std::string &name, bool *v) const {
   return var_store->get_option<bool>(name, v);
 }
+
+TargetParserBasicWithDynModules::TargetParserBasicWithDynModules() {
+#ifdef BM_ENABLE_MODULES
+    add_string_option(load_modules_option,
+                      "Load the given .so files (comma-separated) as modules.");
+#endif  // BM_ENABLE_MODULES
+}
+
+TargetParserBasicWithDynModules::~TargetParserBasicWithDynModules() = default;
+
+int
+TargetParserBasicWithDynModules::parse(
+    const std::vector<std::string> &more_options,
+    std::ostream *errstream) {
+  int rc = 0;
+  if ((rc = TargetParserBasic::parse(more_options, errstream)) != 0) return rc;
+#ifdef BM_ENABLE_MODULES
+  if ((rc = load_modules(errstream)) != 0) return rc;
+#endif  // BM_ENABLE_MODULES
+  return 0;
+}
+
+int
+TargetParserBasicWithDynModules::load_modules(std::ostream *errstream) {
+  _BM_UNUSED(errstream);
+#ifdef BM_ENABLE_MODULES
+  std::string modules;
+  ReturnCode retval = get_string_option(load_modules_option, &modules);
+  if (retval == ReturnCode::OPTION_NOT_PROVIDED)
+    return 0;
+  if (retval != ReturnCode::SUCCESS)
+    return 1;  // Unexpected error
+  std::istringstream iss(modules);
+  std::string module;
+  while (std::getline(iss, module, ',')) {
+#ifdef BM_HAVE_DLOPEN
+    if (!dlopen(module.c_str(), RTLD_NOW | RTLD_GLOBAL)) {
+      *errstream << "WARNING: Skipping module: " << module << ": "
+                 << dlerror() << std::endl;
+    }
+#else  // BM_HAVE_DLOPEN
+#error modules enabled, but no loading method available
+#endif  // BM_HAVE_DLOPEN
+  }
+#endif  // BM_ENABLE_MODULES
+  return 0;
+}
+
+/* static */
+constexpr char TargetParserBasicWithDynModules::load_modules_option[];
 
 }  // namespace bm
