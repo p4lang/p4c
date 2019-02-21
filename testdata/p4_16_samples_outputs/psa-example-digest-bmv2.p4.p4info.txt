@@ -129,10 +129,8 @@ type_info {
       members {
         name: "ingress_port"
         type_spec {
-          bitstring {
-            bit {
-              bitwidth: 32
-            }
+          new_type {
+            name: "PortId_t"
           }
         }
       }
