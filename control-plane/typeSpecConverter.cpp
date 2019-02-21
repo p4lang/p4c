@@ -115,17 +115,40 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
 
 bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
     if (p4RtTypeInfo) {
+        bool orig = true;
+        cstring uri;
+        uint32_t sdnB;
+        auto ann = type->getAnnotation("p4runtime_translation");
+        BUG_CHECK(ann != nullptr, "Null Annotation is newtype API gen: %1%", type);
+        if (ann->expr.size() > 1)
+            ::error("invalid annotation %1%", ann->expr);
+        orig = false;
+        for (auto a : ann->body) {
+            if (a->text.startsWith("p4.org/psa/v1")) {
+                uri = a->text;
+            } else if (isdigit(a->text.c_str()[0])) {
+                sdnB = atoi(a->text);
+            }
+        }
+
         auto name = std::string(type->controlPlaneName());
         auto types = p4RtTypeInfo->mutable_new_types();
         if (types->find(name) == types->end()) {
             auto newTypeSpec = new p4configv1::P4NewTypeSpec();
-            (void)newTypeSpec->mutable_original_type();
-            auto dataType = newTypeSpec->mutable_original_type();
             auto newType = type->type;
             auto n = newType->to<IR::Type_Name>();
             visit(n);
             auto typeSpec = map.at(n);
-            dataType->mutable_bitstring()->CopyFrom(typeSpec->bitstring());
+            if (orig) {
+                (void)newTypeSpec->mutable_original_type();
+                auto dataType = newTypeSpec->mutable_original_type();
+                dataType->mutable_bitstring()->CopyFrom(typeSpec->bitstring());
+            } else {
+                (void)newTypeSpec->mutable_translated_type();
+                auto dataType = newTypeSpec->mutable_translated_type();
+                dataType->set_uri(std::string(uri));
+                dataType->set_sdn_bitwidth(sdnB);
+            }
             (*types)[name] = *newTypeSpec;
        }
     }
