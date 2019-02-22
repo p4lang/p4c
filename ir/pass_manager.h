@@ -33,9 +33,6 @@ class PassManager : virtual public Visitor, virtual public Backtrack {
     bool                stop_on_error = true;
     bool                running = false;
     unsigned            seqNo = 0;
-    void addPasses(const std::initializer_list<Visitor *> &init) {
-        never_backtracks_cache = -1;
-        for (auto p : init) if (p) passes.emplace_back(p); }
     void runDebugHooks(const char* visitorName, const IR::Node* node);
     profile_t init_apply(const IR::Node *root) override {
         running = true;
@@ -45,6 +42,9 @@ class PassManager : virtual public Visitor, virtual public Backtrack {
     PassManager() = default;
     PassManager(const std::initializer_list<Visitor *> &init)
     { addPasses(init); }
+    void addPasses(const std::initializer_list<Visitor *> &init) {
+        never_backtracks_cache = -1;
+        for (auto p : init) if (p) passes.emplace_back(p); }
     const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
     bool backtrack(trigger &trig) override;
     bool never_backtracks() override;

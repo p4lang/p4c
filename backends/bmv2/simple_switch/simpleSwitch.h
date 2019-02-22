@@ -35,6 +35,7 @@ limitations under the License.
 #include "backends/bmv2/common/parser.h"
 #include "backends/bmv2/common/programStructure.h"
 #include "backends/bmv2/common/sharedActionSelectorCheck.h"
+#include "backends/bmv2/common/options.h"
 
 namespace BMV2 {
 

@@ -32,6 +32,8 @@ limitations under the License.
 #include "backends/bmv2/psa_switch/midend.h"
 #include "backends/bmv2/psa_switch/psaSwitch.h"
 #include "backends/bmv2/psa_switch/version.h"
+#include "ir/json_loader.h"
+#include "fstream"
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
@@ -41,8 +43,10 @@ int main(int argc, char *const argv[]) {
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = BMV2_PSA_VERSION_STRING;
 
-    if (options.process(argc, argv) != nullptr)
-        options.setInputFile();
+    if (options.process(argc, argv) != nullptr) {
+            if (options.loadIRFromJson == false)
+                    options.setInputFile();
+    }
     if (::errorCount() > 0)
         return 1;
 
@@ -50,28 +54,49 @@ int main(int argc, char *const argv[]) {
 
     // BMV2 is required for compatibility with the previous compiler.
     options.preprocessor_options += " -D__TARGET_BMV2__";
-    auto program = P4::parseP4File(options);
-    if (program == nullptr || ::errorCount() > 0)
-        return 1;
-    try {
-        P4::P4COptionPragmaParser optionsPragmaParser;
-        program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
 
-        P4::FrontEnd frontend;
-        frontend.addDebugHook(hook);
-        program = frontend.run(options, program);
-    } catch (const Util::P4CExceptionBase &bug) {
-        std::cerr << bug.what() << std::endl;
-        return 1;
+    const IR::P4Program *program = nullptr;
+    const IR::ToplevelBlock* toplevel = nullptr;
+
+
+    if (options.loadIRFromJson == false) {
+        program = P4::parseP4File(options);
+
+        if (program == nullptr || ::errorCount() > 0)
+            return 1;
+        try {
+            P4::P4COptionPragmaParser optionsPragmaParser;
+            program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
+
+            P4::FrontEnd frontend;
+            frontend.addDebugHook(hook);
+            program = frontend.run(options, program);
+        } catch (const Util::P4CExceptionBase &bug) {
+            std::cerr << bug.what() << std::endl;
+            return 1;
+        }
+        if (program == nullptr || ::errorCount() > 0)
+            return 1;
+    } else {
+        std::filebuf fb;
+        if (fb.open(options.file, std::ios::in) == nullptr) {
+            ::error("%s: No such file or directory.", options.file);
+            return 1;
+        }
+        std::istream inJson(&fb);
+        JSONLoader jsonFileLoader(inJson);
+        if (jsonFileLoader.json == nullptr) {
+            ::error("Not valid input file");
+            return 1;
+        }
+        program = new IR::P4Program(jsonFileLoader);
+        fb.close();
     }
-    if (program == nullptr || ::errorCount() > 0)
-        return 1;
 
     P4::serializeP4RuntimeIfRequired(program, options);
     if (::errorCount() > 0)
         return 1;
 
-    const IR::ToplevelBlock* toplevel = nullptr;
     BMV2::PsaSwitchMidEnd midEnd(options);
     midEnd.addDebugHook(hook);
     try {
@@ -80,7 +105,7 @@ int main(int argc, char *const argv[]) {
             toplevel->getMain() == nullptr)
             return 1;
         if (options.dumpJsonFile)
-            JSONGenerator(*openFile(options.dumpJsonFile, true)) << program << std::endl;
+            JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
     } catch (const Util::P4CExceptionBase &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
