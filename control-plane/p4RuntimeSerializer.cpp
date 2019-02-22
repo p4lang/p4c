@@ -701,7 +701,6 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
         else
             w = matchFieldType->width_bits();
 
-        BUG_CHECK(w, "MatchField failed width for: %1%", *matchFieldName);
         matchFields.push_back(MatchField{*matchFieldName, *matchType, matchTypeName,
                                          w,
                                          keyElement->to<IR::IAnnotated>()});
