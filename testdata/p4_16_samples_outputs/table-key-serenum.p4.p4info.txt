@@ -21,6 +21,7 @@ tables {
     scope: DEFAULT_ONLY
   }
   size: 1024
+  is_const_table: true
 }
 actions {
   preamble {
@@ -34,5 +35,10 @@ actions {
     id: 16828138
     name: "c.do_act"
     alias: "do_act"
+  }
+  params {
+    id: 1
+    name: "type"
+    bitwidth: 32
   }
 }

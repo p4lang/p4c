@@ -33,8 +33,9 @@ parser prs(packet_in p, out Headers h) {
     }
 }
 
-control c(inout Headers h) {
-    action do_act() {
+control c(inout Headers h, inout standard_metadata_t sm) {
+    action do_act(bit<32> type) {
+        sm.instance_type = type;
     }
     table tns {
         key = {
@@ -44,6 +45,13 @@ control c(inout Headers h) {
             do_act();
             @defaultonly NoAction();
         }
+        const entries = {
+                        EthTypes.IPv4 : do_act(32w0x800);
+
+                        EthTypes.VLAN : do_act(32w0x8100);
+
+        }
+
         default_action = NoAction();
     }
     apply {
@@ -52,7 +60,7 @@ control c(inout Headers h) {
 }
 
 parser p<H>(packet_in _p, out H h);
-control ctr<H>(inout H h);
-package top<H>(p<H> _p, ctr<H> _c);
-top<Headers>(prs(), c()) main;
+control ctr<H, SM>(inout H h, inout SM sm);
+package top<H, SM>(p<H> _p, ctr<H, SM> _c);
+top<Headers, standard_metadata_t>(prs(), c()) main;
 

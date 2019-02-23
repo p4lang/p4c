@@ -298,9 +298,12 @@ bool TypeSpecConverter::preorder(const IR::Type_SerEnum* type) {
         auto enums = p4RtTypeInfo->mutable_serializable_enums();
         if (enums->find(name) == enums->end()) {
             auto enumTypeSpec = new p4configv1::P4SerializableEnumTypeSpec();
+            auto bitTypeSpec = new p4configv1::P4BitTypeSpec();
+            enumTypeSpec->set_allocated_underlying_type(bitTypeSpec);
             for (auto m : type->members) {
                 auto member = enumTypeSpec->add_members();
                 member->set_name(m->controlPlaneName());
+                member->set_value(std::string(m->value->toString()));
             }
             (*enums)[name] = *enumTypeSpec;
         }
