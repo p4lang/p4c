@@ -146,9 +146,15 @@ void PsaProgramStructure::createHeaders(ConversionContext* ctxt) {
 }
 
 void PsaProgramStructure::createParsers(ConversionContext* ctxt) {
-    auto cvt = new ParserConverter(ctxt);
-    for (auto kv : parsers) {
-        kv.second->apply(*cvt);
+    {
+        auto cvt = new ParserConverter(ctxt, "ingress_parser");
+        auto ingress = parsers.at("ingress");
+        ingress->apply(*cvt);
+    }
+    {
+        auto cvt = new ParserConverter(ctxt, "egress_parser");
+        auto ingress = parsers.at("egress");
+        ingress->apply(*cvt);
     }
 }
 
@@ -183,11 +189,16 @@ void PsaProgramStructure::createControls(ConversionContext* ctxt) {
 }
 
 void PsaProgramStructure::createDeparsers(ConversionContext* ctxt) {
-    auto cvt = new DeparserConverter(ctxt);
-    auto ingress = deparsers.at("ingress");
-    ingress->apply(*cvt);
-    auto egress = deparsers.at("egress");
-    egress->apply(*cvt);
+    {
+        auto cvt = new DeparserConverter(ctxt, "ingress_deparser");
+        auto ingress = deparsers.at("ingress");
+        ingress->apply(*cvt);
+    }
+    {
+        auto cvt = new DeparserConverter(ctxt, "egress_deparser");
+        auto egress = deparsers.at("egress");
+        egress->apply(*cvt);
+    }
 }
 
 void PsaProgramStructure::createGlobals() {

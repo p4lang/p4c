@@ -374,8 +374,7 @@ ParserConverter::createDefaultTransition() {
 }
 
 bool ParserConverter::preorder(const IR::P4Parser* parser) {
-    // hanw hard-coded parser name assumed by BMv2
-    auto parser_id = ctxt->json->add_parser("parser");
+    auto parser_id = ctxt->json->add_parser(name);
 
     for (auto s : parser->parserLocals) {
         if (auto inst = s->to<IR::P4ValueSet>()) {
