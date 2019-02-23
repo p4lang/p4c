@@ -1368,7 +1368,8 @@ class P4RuntimeEntriesConverter {
         } else if (k->is<IR::BoolLiteral>()) {
             return stringRepr(k->to<IR::BoolLiteral>(), keyWidth);
         } else if (k->type->is<IR::Type_Error>() ||
-                   k->type->is<IR::Type_Enum>()) {
+                   k->type->is<IR::Type_Enum>() ||
+                   k->type->is<IR::Type_SerEnum>()) {
             auto mem = k->to<IR::Member>();
             auto name = mem->expr->toString();
             if (k->type->is<IR::Type_Error>())

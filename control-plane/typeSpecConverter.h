@@ -73,6 +73,7 @@ class TypeSpecConverter : public Inspector {
     bool preorder(const IR::Type_Header* type) override;
     bool preorder(const IR::Type_HeaderUnion* type) override;
     bool preorder(const IR::Type_Enum* type) override;
+    bool preorder(const IR::Type_SerEnum* type) override;
     bool preorder(const IR::Type_Error* type) override;
 
  public:

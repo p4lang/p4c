@@ -90,6 +90,8 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
         typeSpec->mutable_header_union()->set_name(name);
     } else if (decl->is<IR::Type_Enum>()) {
         typeSpec->mutable_enum_()->set_name(name);
+    } else if (decl->is<IR::Type_SerEnum>()) {
+        typeSpec->mutable_serializable_enum()->set_name(name);
     } else if (decl->is<IR::Type_Error>()) {
         // enable "error" field in P4DataTypeSpec's type_spec oneof
         (void)typeSpec->mutable_error();
@@ -279,6 +281,23 @@ bool TypeSpecConverter::preorder(const IR::Type_Enum* type) {
         auto enums = p4RtTypeInfo->mutable_enums();
         if (enums->find(name) == enums->end()) {
             auto enumTypeSpec = new p4configv1::P4EnumTypeSpec();
+            for (auto m : type->members) {
+                auto member = enumTypeSpec->add_members();
+                member->set_name(m->controlPlaneName());
+            }
+            (*enums)[name] = *enumTypeSpec;
+        }
+    }
+    map.emplace(type, nullptr);
+    return false;
+}
+
+bool TypeSpecConverter::preorder(const IR::Type_SerEnum* type) {
+    if (p4RtTypeInfo) {
+        auto name = std::string(type->controlPlaneName());
+        auto enums = p4RtTypeInfo->mutable_serializable_enums();
+        if (enums->find(name) == enums->end()) {
+            auto enumTypeSpec = new p4configv1::P4SerializableEnumTypeSpec();
             for (auto m : type->members) {
                 auto member = enumTypeSpec->add_members();
                 member->set_name(m->controlPlaneName());
