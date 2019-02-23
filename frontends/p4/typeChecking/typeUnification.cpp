@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "typeUnification.h"
 #include "typeConstraints.h"
+#include "frontends/p4/typeMap.h"
 
 namespace P4 {
 
@@ -369,22 +370,6 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
             constraints->addEqualityConstraint(dest, src);
             return true;
         }
-        if (src->is<IR::Type_Newtype>()) {
-            auto newType = src->to<IR::Type_Newtype>();
-            auto n = newType->type->to<IR::Type_Name>();
-            if (n == nullptr) {
-                ::error("%1%: Cannot unify %2% to %3%", errorPosition, src, dest);
-                return false;
-            }
-            auto canon = typeMap->getTypeType(n, true);
-            if (canon->is<IR::Type_Bits>() && dest->is<IR::Type_Bits>()) {
-                auto s = canon->to<IR::Type_Bits>();
-                auto d = dest->to<IR::Type_Bits>();
-                if (d->width_bits() == s->width_bits())
-                    return true;
-            }
-        }
-
         if (!src->is<IR::Type_Base>()) {
             if (reportErrors)
                 ::error("%1%: Cannot unify %2% to %3%",
@@ -419,20 +404,6 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         }
         constraints->addEqualityConstraint(dstack->elementType, sstack->elementType);
         return true;
-    } else if (dest->is<IR::Type_Newtype>() && src->is<IR::Type_Bits>()) {
-        auto newType = dest->to<IR::Type_Newtype>();
-        auto n = newType->type->to<IR::Type_Name>();
-        if (n == nullptr) {
-            ::error("%1%: Cannot unify %2% to %3%", errorPosition, src, dest);
-            return false;
-        }
-        auto canon = typeMap->getTypeType(n, true);
-        if (canon->is<IR::Type_Bits>() && src->is<IR::Type_Bits>()) {
-            auto d = canon->to<IR::Type_Bits>();
-            auto s = src->to<IR::Type_Bits>();
-            if (d->width_bits() == s->width_bits())
-                return true;
-        }
     }
 
     if (reportErrors)
