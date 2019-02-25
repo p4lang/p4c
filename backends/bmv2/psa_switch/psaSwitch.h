@@ -99,7 +99,7 @@ class PsaProgramStructure : public ProgramStructure {
     void createTypes(ConversionContext* ctxt);
     void createHeaders(ConversionContext* ctxt);
     void createParsers(ConversionContext* ctxt);
-    void createExterns();
+    void createExterns(ConversionContext* ctxt);
     void createActions(ConversionContext* ctxt);
     void createControls(ConversionContext* ctxt);
     void createDeparsers(ConversionContext* ctxt);
@@ -125,7 +125,8 @@ class ParsePsaArchitecture : public Inspector {
     bool preorder(const IR::ToplevelBlock* block) override;
     bool preorder(const IR::PackageBlock* block) override;
     bool preorder(const IR::ExternBlock* block) override;
-
+    bool preorder(const IR::ControlBlock* block) override;
+    
     profile_t init_apply(const IR::Node *root) override {
         structure->block_type.clear();
         structure->globals.clear();

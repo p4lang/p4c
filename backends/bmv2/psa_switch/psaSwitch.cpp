@@ -16,13 +16,14 @@ limitations under the License.
 
 #include "frontends/common/model.h"
 #include "psaSwitch.h"
+#include <iostream>
 
 namespace BMV2 {
 
 void PsaProgramStructure::create(ConversionContext* ctxt) {
     createTypes(ctxt);
     createHeaders(ctxt);
-    createExterns();
+    createExterns(ctxt);
     createParsers(ctxt);
     createActions(ctxt);
     createControls(ctxt);
@@ -152,7 +153,20 @@ void PsaProgramStructure::createParsers(ConversionContext* ctxt) {
     }
 }
 
-void PsaProgramStructure::createExterns() {
+void PsaProgramStructure::createExterns(ConversionContext* ctxt) {
+    for (auto di : extern_instances){
+      auto extern_obj = new Util::JsonObject();
+      cstring name = di.second->controlPlaneName();
+      cstring type = di.second->type->toString();
+      extern_obj->emplace("name", name);
+      extern_obj->emplace("id", nextId("extern_instances"));
+      extern_obj->emplace("type", type);
+      ctxt->json->externs->append(extern_obj);
+      Util::JsonArray *arr = ctxt->json->insert_array_field(extern_obj, "arguments");
+      for(auto it : *di.second->arguments){
+        arr->append(it->toString());
+      }
+    }
     /* TODO */
     // add parse_vsets to json
     // add meter_arrays to json
@@ -198,6 +212,15 @@ void PsaProgramStructure::createGlobals() {
 }
 
 bool ParsePsaArchitecture::preorder(const IR::ToplevelBlock* block) {
+    /// Blocks are not in IR tree, use a custom visitor to traverse
+    for (auto it : block->constantValue) {
+        if (it.second->is<IR::Block>())
+            visit(it.second->getNode());
+    }
+    return false;
+}
+
+bool ParsePsaArchitecture::preorder(const IR::ControlBlock* block) {
     /// Blocks are not in IR tree, use a custom visitor to traverse
     for (auto it : block->constantValue) {
         if (it.second->is<IR::Block>())
@@ -413,6 +436,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         ::warning(ErrorType::WARN_INVALID, "%1%: the main package should be called PSA_Switch"
                   "; are you using the wrong architecture?", main->type->name);
 
+    // tlb->apply(*parsePsaArch) ;
     main->apply(*parsePsaArch);
 
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
@@ -463,6 +487,8 @@ ExternConverter_Random ExternConverter_Random::singleton;
 ExternConverter_ActionProfile ExternConverter_ActionProfile::singleton;
 ExternConverter_ActionSelector ExternConverter_ActionSelector::singleton;
 ExternConverter_Digest ExternConverter_Digest::singleton;
+
+
 
 Util::IJson* ExternConverter_Hash::convertExternObject(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
