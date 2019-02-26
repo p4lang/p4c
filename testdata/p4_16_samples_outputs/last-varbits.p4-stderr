@@ -1,0 +1,6 @@
+last-varbits.p4(35): [--Wwarn=uninitialized_out_param] warning: out parameter v may be uninitialized when c terminates
+control c(out bit<32> v) { // uninitialized
+                      ^
+last-varbits.p4(35)
+control c(out bit<32> v) { // uninitialized
+        ^

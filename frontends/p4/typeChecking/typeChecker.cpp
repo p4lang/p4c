@@ -2722,6 +2722,24 @@ bool TypeInference::hasVarbitsOrUnions(const IR::Type* type) const {
     return false;
 }
 
+// Returns true if Varbits field of a header is not the
+// last field.
+bool TypeInference::hasErrVarbits(const IR::Type* type) const {
+    if (type->is<IR::Type_Header>()) {
+        bool hit_varbit = false;
+        auto ht = type->to<IR::Type_Header>();
+        for (auto field : ht->fields) {
+            if (field->type->is<IR::Type_Varbits>()) {
+                hit_varbit = true;
+                continue;
+            }
+            if (hit_varbit)
+                return true;
+        }
+    }
+    return false;
+}
+
 bool TypeInference::onlyBitsOrBitStructs(const IR::Type* type) const {
     // called for a canonical type
     if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>() ||
@@ -2798,6 +2816,9 @@ void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
             } else if (argCount == 2) {
                 if (!hasVarbitsOrUnions(argType))
                     typeError("%1%: argument should contain a varbit field", arg0);
+                if (hasErrVarbits(argType))
+                    typeError("%1%: argument should have varbit as last field",
+                              arg0);
             } else {
                 // core.p4 is corrupted.
                 typeError("%1%: Expected 1 or 2 arguments for '%2%' method",
