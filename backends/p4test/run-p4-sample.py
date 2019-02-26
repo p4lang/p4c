@@ -277,7 +277,7 @@ def process_file(options, argv):
         result = check_generated_files(options, tmpdir, expected_dirname);
     if (result == SUCCESS) and (not expected_error):
         result = recompile_file(options, ppfile, False)
-    if (result == SUCCESS) and (not expected_error) and (lastFile is not None):
+    if (result == SUCCESS) and (not expected_error) and (lastFile is not None) and (arch is not "psa"):
         # Unfortunately compilation and pretty-printing of lastFile is
         # not idempotent: For example a constant such as 8s128 is
         # converted by the compiler to -8s128.
