@@ -407,6 +407,9 @@ const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
                     new IR::Annotation("length", { fieldlen }));
             }
         }
+        // The varbit field should always be the last one in P4-14
+        if (type->fields.back()->name != field->name)
+            ::error("%1%: varbit field must be last in header", field);
     }
     return field;
 }

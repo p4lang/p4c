@@ -1,0 +1,4 @@
+issue1745.p4(3): error: options: varbit field must be last in header
+        options : *;
+        ^^^^^^^^^^^
+error: 1 errors encountered, aborting compilation
