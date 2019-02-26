@@ -1,0 +1,3 @@
+last-varbits.p4(30): [--Werror=type-error] error: h: argument should have varbit as last field
+        p.extract(h, 320);
+                  ^

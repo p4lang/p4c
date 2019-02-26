@@ -1,5 +1,6 @@
 /*
-Copyright 2019 VMware, Inc.
+Copyright 2019 MNK Consulting
+    http://mnkcg.com
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +22,7 @@ header Header {
     bit<32> data2;
     bit<32> data3;
     varbit<320> options;
-    bit<8>  length;    
+    bit<8>  length;
 }
 
 parser p1(packet_in p, out Header h) {
