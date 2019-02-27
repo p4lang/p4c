@@ -649,9 +649,6 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap, ReferenceMap* refMap) {
     if (type == nullptr)
         return w;
 
-    if (type->is<IR::Type_Bits>())
-        return type->width_bits();
-
     const IR::Type* newType = type;
     while (newType->is<IR::Type_Newtype>())
         newType = newType->to<IR::Type_Newtype>()->type;
@@ -677,7 +674,7 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap, ReferenceMap* refMap) {
             return w;
         }
     }
-    return w;
+    return type->width_bits();
 }
 
 /// @return the header instance fields matched against by @table's key. The
