@@ -1,5 +1,4 @@
 #include <core.p4>
-#include <v1model.p4>
 
 typedef bit<48> EthernetAddress;
 header Ethernet_h {
@@ -24,65 +23,14 @@ header ipv4_t {
     bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
+    bit<8>  sizeInBits;
 }
 
 struct Parsed_packet {
     Ethernet_h ethernet;
     ipv4_t     ipv4;
-    bit<32>    length;
 }
 
 struct mystruct1 {
-    bit<4> a;
-    bit<4> b;
 }
-
-control DeparserI(packet_out packet, in Parsed_packet hdr) {
-    apply {
-        packet.emit<Ethernet_h>(hdr.ethernet);
-    }
-}
-
-parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
-    bit<32> len_0;
-    state start {
-        pkt.extract<Ethernet_h>(hdr.ethernet);
-        len_0 = 32w28;
-        hdr.length = len_0;
-        transition select(hdr.ethernet.etherType) {
-            16w0x800: parse_ipv4;
-            default: accept;
-        }
-    }
-    state parse_ipv4 {
-        pkt.extract<ipv4_t>(hdr.ipv4);
-        transition select(hdr.ipv4.version, hdr.ipv4.protocol) {
-            (4w0x4, 8w0x6): accept;
-            (4w0x4, 8w0x17): accept;
-            default: accept;
-        }
-    }
-}
-
-control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
-    apply {
-    }
-}
-
-control cEgress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
-    apply {
-    }
-}
-
-control vc(inout Parsed_packet hdr, inout mystruct1 meta) {
-    apply {
-    }
-}
-
-control uc(inout Parsed_packet hdr, inout mystruct1 meta) {
-    apply {
-    }
-}
-
-V1Switch<Parsed_packet, mystruct1>(parserI(), vc(), cIngress(), cEgress(), uc(), DeparserI()) main;
 
