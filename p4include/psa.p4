@@ -76,12 +76,17 @@ typedef bit<64> TimestampUint_t;
 
 @p4runtime_translation("p4.org/psa/v1/PortId_t", 32)
 type PortIdUint_t         PortId_t;
+@p4runtime_translation("p4.org/psa/v1/MulticastGroup_t", 32)
 type MulticastGroupUint_t MulticastGroup_t;
+@p4runtime_translation("p4.org/psa/v1/CloneSessionId_t", 16)
 type CloneSessionIdUint_t CloneSessionId_t;
 @p4runtime_translation("p4.org/psa/v1/ClassOfService_t", 8)
 type ClassOfServiceUint_t ClassOfService_t;
+@p4runtime_translation("p4.org/psa/v1/PacketLength_t", 16)
 type PacketLengthUint_t   PacketLength_t;
+@p4runtime_translation("p4.org/psa/v1/EgressInstance_t", 16)
 type EgressInstanceUint_t EgressInstance_t;
+@p4runtime_translation("p4.org/psa/v1/Timestamp_t", 64)
 type TimestampUint_t      Timestamp_t;
 typedef error   ParserError_t;
 
@@ -119,12 +124,17 @@ typedef bit<unspecified> TimestampUint_t;
 
 @p4runtime_translation("p4.org/psa/v1/PortId_t", 32)
 type PortIdUint_t         PortId_t;
+@p4runtime_translation("p4.org/psa/v1/MulticastGroup_t", 32)
 type MulticastGroupUint_t MulticastGroup_t;
+@p4runtime_translation("p4.org/psa/v1/CloneSessionId_t", 16)
 type CloneSessionIdUint_t CloneSessionId_t;
 @p4runtime_translation("p4.org/psa/v1/ClassOfService_t", 8)
 type ClassOfServiceUint_t ClassOfService_t;
+@p4runtime_translation("p4.org/psa/v1/PacketLength_t", 16)
 type PacketLengthUint_t   PacketLength_t;
+@p4runtime_translation("p4.org/psa/v1/EgressInstance_t", 16)
 type EgressInstanceUint_t EgressInstance_t;
+@p4runtime_translation("p4.org/psa/v1/Timestamp_t", 64)
 type TimestampUint_t      Timestamp_t;
 typedef error   ParserError_t;
 
@@ -172,12 +182,17 @@ typedef bit<64> TimestampInHeaderUint_t;
 
 @p4runtime_translation("p4.org/psa/v1/PortIdInHeader_t", 32)
 type  PortIdInHeaderUint_t         PortIdInHeader_t;
+@p4runtime_translation("p4.org/psa/v1/MulticastGroupInHeader_t", 32)
 type  MulticastGroupInHeaderUint_t MulticastGroupInHeader_t;
+@p4runtime_translation("p4.org/psa/v1/CloneSessionIdInHeader_t", 16)
 type  CloneSessionIdInHeaderUint_t CloneSessionIdInHeader_t;
 @p4runtime_translation("p4.org/psa/v1/ClassOfServiceInHeader_t", 8)
 type  ClassOfServiceInHeaderUint_t ClassOfServiceInHeader_t;
+@p4runtime_translation("p4.org/psa/v1/PacketLengthInHeader_t", 16)
 type  PacketLengthInHeaderUint_t   PacketLengthInHeader_t;
+@p4runtime_translation("p4.org/psa/v1/EgressInstanceInHeader_t", 16)
 type  EgressInstanceInHeaderUint_t EgressInstanceInHeader_t;
+@p4runtime_translation("p4.org/psa/v1/TimestampInHeader_t", 64)
 type  TimestampInHeaderUint_t      TimestampInHeader_t;
 // END:Type_defns2
 
