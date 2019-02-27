@@ -639,11 +639,18 @@ getMatchType(cstring matchTypeName) {
     }
 }
 
+/*
+ * This function supports a deeply nested mix of Type_Newtype and typedef.
+ *The function also supported Type_Bits.
+*/
 static uint32_t
-getNewtypeWidth(const IR::Type* type, TypeMap* typeMap, ReferenceMap* refMap) {
+getTypeWidth(const IR::Type* type, TypeMap* typeMap, ReferenceMap* refMap) {
     uint32_t w = 0;
     if (type == nullptr)
         return w;
+
+    if (type->is<IR::Type_Bits>())
+        return type->width_bits();
 
     const IR::Type* newType = type;
     while (newType->is<IR::Type_Newtype>())
@@ -664,9 +671,9 @@ getNewtypeWidth(const IR::Type* type, TypeMap* typeMap, ReferenceMap* refMap) {
         } else {
             auto decl = refMap->getDeclaration(n->path, true);
             if (decl->is<IR::Type_Newtype>())
-                w = getNewtypeWidth(decl->to<IR::Type_Newtype>(), typeMap, refMap);
+                w = getTypeWidth(decl->to<IR::Type_Newtype>(), typeMap, refMap);
             else if (decl->is<IR::Type_Typedef>())
-                w = getNewtypeWidth(decl->to<IR::Type_Typedef>(), typeMap, refMap);
+                w = getTypeWidth(decl->to<IR::Type_Typedef>(), typeMap, refMap);
             return w;
         }
     }
@@ -695,12 +702,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
           typeMap->getType(keyElement->expression->getNode(), true);
         BUG_CHECK(matchFieldType != nullptr,
                   "Couldn't determine type for key element %1%", keyElement);
-        uint32_t w = 0;
-        if (matchFieldType->is<IR::Type_Newtype>())
-            w = getNewtypeWidth(matchFieldType, typeMap, refMap);
-        else
-            w = matchFieldType->width_bits();
-
+        uint32_t w = getTypeWidth(matchFieldType, typeMap, refMap);
         matchFields.push_back(MatchField{*matchFieldName, *matchType, matchTypeName,
                                          w,
                                          keyElement->to<IR::IAnnotated>()});
@@ -814,7 +816,7 @@ class P4RuntimeAnalyzer {
             if (paramType->is<IR::Type_Boolean>()) {
                 param->set_bitwidth(1);
             } else if (paramType->is<IR::Type_Newtype>()) {
-                auto w = getNewtypeWidth(paramType, typeMap, refMap);
+                auto w = getTypeWidth(paramType, typeMap, refMap);
                 param->set_bitwidth(w);
             } else {
                 param->set_bitwidth(paramType->width_bits());
