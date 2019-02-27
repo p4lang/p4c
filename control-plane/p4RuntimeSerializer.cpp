@@ -808,7 +808,7 @@ class P4RuntimeAnalyzer {
             if (!paramType->is<IR::Type_Bits>() && !paramType->is<IR::Type_Boolean>()
                 && !paramType->is<IR::Type_Newtype>()) {
                 ::error("Action parameter %1% has a type which is not "
-                        "bit<> or int<> or bool or New type", actionParam);
+                        "bit<> or int<> or bool or type", actionParam);
                 continue;
             }
             if (paramType->is<IR::Type_Boolean>()) {
@@ -1316,11 +1316,6 @@ class P4RuntimeEntriesConverter {
                 protoParam->set_value(*value);
             } else if (arg->expression->is<IR::BoolLiteral>()) {
                 auto value = stringRepr(arg->expression->to<IR::BoolLiteral>(), width);
-                protoParam->set_value(*value);
-            } else if (arg->expression->is<IR::Type_Name>()) {
-                auto n = arg->expression->to<IR::Type_Name>();
-                auto name = n->path->name.name;
-                auto value = stringRepr(name);
                 protoParam->set_value(*value);
             } else {
                 ::error("%1% unsupported argument expression", arg->expression);
