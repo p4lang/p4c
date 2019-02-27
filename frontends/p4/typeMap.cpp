@@ -284,7 +284,6 @@ bool TypeMap::implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to) 
     return false;
 }
 
-
 // Used for tuples and stacks only
 const IR::Type* TypeMap::getCanonical(const IR::Type* type) {
     // Currently a linear search; hopefully this won't be too expensive in practice
@@ -304,5 +303,36 @@ const IR::Type* TypeMap::getCanonical(const IR::Type* type) {
     return type;
 }
 
+unsigned TypeMap::width_bits(const IR::Type* type, const IR::Node* errorPosition) {
+    auto t = getTypeType(type, true);
+    if (auto tb = t->to<IR::Type_Bits>()) {
+        return tb->width_bits();
+    } else if (auto ts = t->to<IR::Type_StructLike>()) {
+        unsigned result = 0;
+        bool isUnion = t->is<IR::Type_HeaderUnion>();
+        for (auto f : ts->fields) {
+            unsigned w = width_bits(f->type, errorPosition);
+            if (w == 0)
+                return 0;
+            if (isUnion)
+                result = std::max(w, result);
+            else
+                result = result + w;
+        }
+        return result;
+    } else if (auto ths = t->to<IR::Type_Stack>()) {
+        auto w = width_bits(ths->elementType, errorPosition);
+        return w * ths->getSize();
+    } else if (auto te = t->to<IR::Type_SerEnum>()) {
+        return width_bits(te->type, errorPosition);
+    } else if (t->is<IR::Type_Boolean>()) {
+        return 1;
+    } else if (auto tnt = t->to<IR::Type_Newtype>()) {
+        return width_bits(tnt->type, errorPosition);
+    }
+
+    ::error("%1%: width not well-defined", errorPosition);
+    return 0;
+}
 
 }  // namespace P4

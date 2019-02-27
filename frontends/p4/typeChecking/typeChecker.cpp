@@ -1469,7 +1469,15 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
 
     bool equTest = expression->is<IR::Equ>() || expression->is<IR::Neq>();
 
-    if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_Bits>()) {
+    if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_InfInt>()) {
+        // This can happen because we are replacing some constant functions with
+        // constants during type checking
+        setType(getOriginal(), IR::Type_Boolean::get());
+        setType(expression, IR::Type_Boolean::get());
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+        return expression;
+    } else if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_Bits>()) {
         auto e = expression->clone();
         auto cst = expression->left->to<IR::Constant>();
         CHECK_NULL(cst);
@@ -2448,6 +2456,16 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 return expression;
             }
         }
+        if (inMethod && (member == IR::Type_Header::sizeInBits)) {
+            // Built-in method
+            auto type = new IR::Type_Method(new IR::Type_InfInt(), new IR::ParameterList());
+            auto ctype = canonicalize(type);
+            if (ctype == nullptr)
+                return expression;
+            setType(getOriginal(), ctype);
+            setType(expression, ctype);
+            return expression;
+        }
         if (type->is<IR::Type_Header>()) {
             if (inMethod && (member == IR::Type_Header::setValid ||
                              member == IR::Type_Header::setInvalid)) {
@@ -2858,6 +2876,24 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             inActionsList = true;
         return actionCall(inActionsList, expression);
     } else {
+        // Constant-fold sizeInBits
+        if (auto mem = expression->method->to<IR::Member>()) {
+            auto type = typeMap->getType(mem->expr, true);
+            if (mem->member == IR::Type_StructLike::sizeInBits &&
+                type->is<IR::Type_StructLike>()) {
+                LOG3("Folding sizeInBits");
+                unsigned w = typeMap->width_bits(type, expression);
+                if (w == 0)
+                    return expression;
+                auto result = new IR::Constant(w);
+                auto tt = new IR::Type_Type(result->type);
+                setType(result->type, tt);
+                setType(result, result->type);
+                setCompileTimeConstant(result);
+                return result;
+            }
+        }
+
         // We build a type for the callExpression and unify it with the method expression
         // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
         auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), nullptr));
