@@ -2439,8 +2439,6 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         int sz = 0;
         if ((member == IR::Type_Header::sizeBits) ||
             (member == IR::Type_Header::sizeBytes)) {
-            auto t = typeMap->getType(expression->expr, true);
-            const IR::Type_StructLike* ht;
             auto stack = type->to<IR::Type_Stack>();
             sz = type->to<IR::Type_Stack>()->getSize();
             auto stype = stack->elementType;
@@ -2503,19 +2501,14 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 } else if (t->is<IR::Type_HeaderUnion>()) {
                     ht = t->to<IR::Type_HeaderUnion>();
                 }
-                if (ht == nullptr) {
-                    ::error("%1%: null header/headerUnion?", expression);
-                    return expression;
-                }
+                BUG_CHECK(ht != nullptr, "%1%: null header/headerUnion?", expression);
                 sz = ht->width_bits();
                 if (member == IR::Type_Header::sizeBytes) {
                     sz = ((sz + 7) >> 3);
                 }
-                auto result = new IR::Constant(sz);
-                result->type = IR::Type_Bits::get(32);
-                auto ctype = canonicalize(result->type);
-                BUG_CHECK(ctype != nullptr, "null ctype %1%",  expression);
-                setType(result, ctype);
+                std::cout << "SZ: " << sz << std::endl;  // TODO: remove after review.
+                auto result = new IR::Constant(IR::Type::Bits::get(32), sz);
+                setType(result, result->type);
                 return result;
             }
         }
