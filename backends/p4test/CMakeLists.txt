@@ -78,10 +78,6 @@ list (APPEND P4RUNTIME_EXCLUDE ${P4RUNTIME_EXCLUDE_ERRORS})
 set (P4_XFAIL_TESTS
   # issue #13
   testdata/p4_16_samples/cast-call.p4
-  # Several PSA arch programs that fail with p4test
-  testdata/p4_16_samples/psa-example-digest-bmv2.p4
-  testdata/p4_16_samples/p4rt_digest_complex.p4
-  testdata/p4_16_samples/psa-example-counters-bmv2.p4
   )
 p4c_add_tests_w_p4runtime("p4" ${P4TEST_DRIVER} "${P4TEST_SUITES}" "${P4_XFAIL_TESTS}" "${P4RUNTIME_EXCLUDE}")
 
