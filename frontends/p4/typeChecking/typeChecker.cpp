@@ -2506,7 +2506,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 if (member == IR::Type_Header::sizeBytes) {
                     sz = ((sz + 7) >> 3);
                 }
-                std::cout << "SZ: " << sz << std::endl;  // TODO: remove after review.
+                // std::cout << "SZ: " << sz << std::endl;  // TODO: remove after review.
                 auto result = new IR::Constant(IR::Type::Bits::get(32), sz);
                 setType(result, result->type);
                 return result;

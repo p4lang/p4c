@@ -29,6 +29,7 @@ header ipv4_t {
 struct Parsed_packet {
     Ethernet_h ethernet;
     ipv4_t     ipv4;
+    bit<32>    length;
 }
 
 struct mystruct1 {
@@ -49,6 +50,7 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout
         pkt.extract<Ethernet_h>(hdr.ethernet);
         len = 32w224;
         len = 32w28;
+        hdr.length = len;
         transition select(hdr.ethernet.etherType) {
             16w0x800: parse_ipv4;
             default: accept;
