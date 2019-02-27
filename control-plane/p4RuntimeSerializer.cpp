@@ -1543,7 +1543,7 @@ P4RuntimeSerializer::generateP4Runtime(const IR::P4Program* program, cstring arc
                                       &refMap, &typeMap, archHandler, arch);
 }
 
-void P4RuntimeAPI::serializeP4InfoTo(std::ostream* destination, P4RuntimeFormat format) {
+void P4RuntimeAPI::serializeP4InfoTo(std::ostream* destination, P4RuntimeFormat format) const {
     using namespace ControlPlaneAPI;
 
     bool success = true;
@@ -1563,7 +1563,7 @@ void P4RuntimeAPI::serializeP4InfoTo(std::ostream* destination, P4RuntimeFormat 
         ::error("Failed to serialize the P4Runtime API to the output");
 }
 
-void P4RuntimeAPI::serializeEntriesTo(std::ostream* destination, P4RuntimeFormat format) {
+void P4RuntimeAPI::serializeEntriesTo(std::ostream* destination, P4RuntimeFormat format) const {
     using namespace ControlPlaneAPI;
 
     bool success = true;
@@ -1623,6 +1623,26 @@ P4RuntimeSerializer::serializeP4RuntimeIfRequired(const IR::P4Program* program,
     std::vector<cstring> files;
     std::vector<P4::P4RuntimeFormat> formats;
 
+    // only generate P4Info is required by use-provided options
+    if (options.p4RuntimeFile.isNullOrEmpty() &&
+        options.p4RuntimeFiles.isNullOrEmpty() &&
+        options.p4RuntimeEntriesFile.isNullOrEmpty() &&
+        options.p4RuntimeEntriesFiles.isNullOrEmpty()) {
+        return;
+    }
+    auto arch = P4RuntimeSerializer::resolveArch(options);
+    if (Log::verbose())
+        std::cout << "Generating P4Runtime output for architecture " << arch << std::endl;
+    auto p4Runtime = get()->generateP4Runtime(program, arch);
+    serializeP4RuntimeIfRequired(p4Runtime, options);
+}
+
+void
+P4RuntimeSerializer::serializeP4RuntimeIfRequired(const P4RuntimeAPI& p4Runtime,
+                                                  const CompilerOptions& options) {
+    std::vector<cstring> files;
+    std::vector<P4::P4RuntimeFormat> formats;
+
     if (!options.p4RuntimeFile.isNullOrEmpty()) {
         files.push_back(options.p4RuntimeFile);
         formats.push_back(options.p4RuntimeFormat);
@@ -1630,15 +1650,7 @@ P4RuntimeSerializer::serializeP4RuntimeIfRequired(const IR::P4Program* program,
     if (!parseFileNames(options.p4RuntimeFiles, files, formats))
         return;
 
-    bool apiGenerated = false;
-    P4RuntimeAPI p4Runtime;
     if (!files.empty()) {
-        auto arch = P4RuntimeSerializer::resolveArch(options);
-        if (Log::verbose())
-            std::cout << "Generating P4Runtime output for architecture " << arch << std::endl;
-        p4Runtime = get()->generateP4Runtime(program, arch);
-        apiGenerated = true;
-
         for (unsigned i = 0; i < files.size(); i++) {
             cstring file = files.at(i);
             P4::P4RuntimeFormat format = formats.at(i);
@@ -1662,13 +1674,6 @@ P4RuntimeSerializer::serializeP4RuntimeIfRequired(const IR::P4Program* program,
     if (!parseFileNames(options.p4RuntimeEntriesFiles, files, formats))
         return;
     if (!files.empty()) {
-        if (!apiGenerated) {
-            auto arch = P4RuntimeSerializer::resolveArch(options);
-            if (Log::verbose())
-                std::cout << "Generating P4Runtime output for architecture " << arch << std::endl;
-            p4Runtime = get()->generateP4Runtime(program, arch);
-        }
-
         for (unsigned i = 0; i < files.size(); i++) {
             cstring file = files.at(i);
             P4::P4RuntimeFormat format = formats.at(i);
