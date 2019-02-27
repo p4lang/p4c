@@ -2434,9 +2434,10 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         return expression;
     }
 
+    bool inMethod = getParent<IR::MethodCallExpression>() != nullptr;
     if (type->is<IR::Type_StructLike>()) {
         if (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>()) {
-            if (member == IR::Type_Header::isValid) {
+            if (inMethod && (member == IR::Type_Header::isValid)) {
                 // Built-in method
                 auto type = new IR::Type_Method(IR::Type_Boolean::get(), new IR::ParameterList());
                 auto ctype = canonicalize(type);
@@ -2448,8 +2449,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             }
         }
         if (type->is<IR::Type_Header>()) {
-            if (member == IR::Type_Header::setValid ||
-                member == IR::Type_Header::setInvalid) {
+            if (inMethod && (member == IR::Type_Header::setValid ||
+                             member == IR::Type_Header::setInvalid)) {
                 if (!isLeftValue(expression->expr))
                     typeError("%1%: must be applied to a left-value", expression);
                 // Built-in method
