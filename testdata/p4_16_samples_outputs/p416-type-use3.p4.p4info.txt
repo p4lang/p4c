@@ -60,6 +60,9 @@ tables {
     name: "hdr.custom.ett"
     bitwidth: 8
     match_type: EXACT
+    type_name {
+      name: "CustomT_t"
+    }
   }
   match_fields {
     id: 10
@@ -84,6 +87,9 @@ tables {
     name: "hdr.custom.edtt"
     bitwidth: 8
     match_type: EXACT
+    type_name {
+      name: "CustomDT_t"
+    }
   }
   match_fields {
     id: 14
@@ -102,12 +108,18 @@ tables {
     name: "hdr.custom.ettd"
     bitwidth: 8
     match_type: EXACT
+    type_name {
+      name: "CustomT_t"
+    }
   }
   match_fields {
     id: 17
     name: "hdr.custom.ettt"
     bitwidth: 8
     match_type: EXACT
+    type_name {
+      name: "CustomTT_t"
+    }
   }
   action_refs {
     id: 16829338

@@ -197,6 +197,7 @@ struct MatchField {
     const uint32_t bitwidth;  // How wide this field is.
     const IR::IAnnotated* annotations;  // If non-null, any annotations applied
                                         // to this field.
+    const cstring type_name;  // The Type_Newtype expression name of this field.
 };
 
 struct ActionRef {
@@ -677,6 +678,22 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap, ReferenceMap* refMap) {
     return type->width_bits();
 }
 
+static cstring
+getTypeName(const IR::Type* newType, ReferenceMap* refMap) {
+    if (newType->is<IR::Type_Newtype>()) {
+        while (newType->is<IR::Type_Newtype>())
+            newType = newType->to<IR::Type_Newtype>()->type;
+        if (newType->is<IR::Type_Name>()) {
+            auto tt = newType->to<IR::Type_Name>();
+            auto decl = refMap->getDeclaration(tt->path, true);
+            if (decl->is<IR::Type_Newtype>()) {
+                return(tt->path->name);
+            }
+        }
+    }
+    return nullptr;
+}
+
 /// @return the header instance fields matched against by @table's key. The
 /// fields are represented as a (fully qualified field name, match type) tuple.
 static std::vector<MatchField>
@@ -686,6 +703,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
     auto key = table->getKey();
     if (!key) return matchFields;
 
+    cstring type_name;
     for (auto keyElement : key->keyElements) {
         auto matchTypeName = getMatchTypeName(keyElement->matchType, refMap);
         auto matchType = getMatchType(matchTypeName);
@@ -699,10 +717,11 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
           typeMap->getType(keyElement->expression->getNode(), true);
         BUG_CHECK(matchFieldType != nullptr,
                   "Couldn't determine type for key element %1%", keyElement);
+        auto newType = matchFieldType;
+        type_name = getTypeName(newType, refMap);
         uint32_t w = getTypeWidth(matchFieldType, typeMap, refMap);
         matchFields.push_back(MatchField{*matchFieldName, *matchType, matchTypeName,
-                                         w,
-                                         keyElement->to<IR::IAnnotated>()});
+                                   w, keyElement->to<IR::IAnnotated>(), type_name});
     }
 
     return matchFields;
@@ -919,6 +938,11 @@ class P4RuntimeAnalyzer {
                 match_field->set_match_type(field.type);
             else
                 match_field->set_other_match_type(field.other_match_type);
+            if (field.type_name) {
+                auto namedType = new p4configv1::P4NamedType();
+                namedType->set_name(field.type_name);
+                match_field->set_allocated_type_name(namedType);
+            }
         }
 
         if (isConstTable) {
