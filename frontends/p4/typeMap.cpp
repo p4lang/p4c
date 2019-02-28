@@ -329,6 +329,8 @@ int TypeMap::width_bits(const IR::Type* type, const IR::Node* errorPosition) {
         return 1;
     } else if (auto tnt = t->to<IR::Type_Newtype>()) {
         return width_bits(tnt->type, errorPosition);
+    } else if (type->is<IR::Type_Varbits>()) {
+        return 0;
     }
 
     ::error("%1%: width not well-defined", errorPosition);
