@@ -33,8 +33,7 @@ bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
         while (substitution->is<IR::Type_Newtype>())
             substitution = substitution->to<IR::Type_Newtype>()->type;
         if (!substitution->is<IR::Type_InfInt>() &&
-            !substitution->is<IR::Type_Bits>() &&
-            !substitution->is<IR::Type_Var>()) {
+            !substitution->is<IR::Type_Bits>()) {
             ::error(ErrorType::ERR_TYPE_ERROR,
                     "%1%: Cannot unify type %2% with %3%", errorLocation, var, substitution);
             return false;

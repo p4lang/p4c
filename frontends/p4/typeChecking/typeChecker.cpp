@@ -743,7 +743,12 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
         return sourceExpression;
     if (!tvs->isIdentity()) {
         ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-        return cts.convert(sourceExpression);  // sets type
+        sourceExpression = cts.convert(sourceExpression);  // sets type
+    }
+    if (initType->is<IR::Type_InfInt>()) {
+        sourceExpression = new IR::Cast(destType->getP4Type(), sourceExpression);
+        setType(sourceExpression, destType);
+        setCompileTimeConstant(sourceExpression);
     }
     return sourceExpression;
 }
@@ -1870,6 +1875,13 @@ const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expressio
         typeError("%1%: cannot be applied to %2% of type %3%",
                   expression->getStringOp(), expression->right, rtype->toString());
         return expression;
+    } else if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_InfInt>()) {
+        auto t = new IR::Type_InfInt();
+        setType(getOriginal(), t);
+        setType(expression, t);
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
+        return expression;
     }
 
     const IR::Type* resultType = ltype;
@@ -2882,8 +2894,8 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             if (mem->member == IR::Type_StructLike::sizeInBits &&
                 type->is<IR::Type_StructLike>()) {
                 LOG3("Folding sizeInBits");
-                unsigned w = typeMap->width_bits(type, expression);
-                if (w == 0)
+                int w = typeMap->width_bits(type, expression);
+                if (w < 0)
                     return expression;
                 auto result = new IR::Constant(w);
                 auto tt = new IR::Type_Type(result->type);

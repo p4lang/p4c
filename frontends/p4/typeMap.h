@@ -92,8 +92,8 @@ class TypeMap final : public ProgramMap {
     // Used for tuples and stacks only
     const IR::Type* getCanonical(const IR::Type* type);
     /// The width in bits of this type.  If the width is not
-    /// well-defined this will report an error and return 0.
-    unsigned width_bits(const IR::Type* type, const IR::Node* errorPosition);
+    /// well-defined this will report an error and return -1.
+    int width_bits(const IR::Type* type, const IR::Node* errorPosition);
 };
 }  // namespace P4
 

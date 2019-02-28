@@ -303,7 +303,7 @@ const IR::Type* TypeMap::getCanonical(const IR::Type* type) {
     return type;
 }
 
-unsigned TypeMap::width_bits(const IR::Type* type, const IR::Node* errorPosition) {
+int TypeMap::width_bits(const IR::Type* type, const IR::Node* errorPosition) {
     auto t = getTypeType(type, true);
     if (auto tb = t->to<IR::Type_Bits>()) {
         return tb->width_bits();
@@ -332,7 +332,7 @@ unsigned TypeMap::width_bits(const IR::Type* type, const IR::Node* errorPosition
     }
 
     ::error("%1%: width not well-defined", errorPosition);
-    return 0;
+    return -1;
 }
 
 }  // namespace P4
