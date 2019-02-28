@@ -1385,15 +1385,6 @@ class P4RuntimeEntriesConverter {
             return stringRepr(k->to<IR::Constant>(), keyWidth);
         } else if (k->is<IR::BoolLiteral>()) {
             return stringRepr(k->to<IR::BoolLiteral>(), keyWidth);
-        } else if (k->type->is<IR::Type_Error>() ||
-                   k->type->is<IR::Type_Enum>() ||
-                   k->type->is<IR::Type_SerEnum>()) {
-            auto mem = k->to<IR::Member>();
-            auto name = mem->expr->toString();
-            if (k->type->is<IR::Type_Error>())
-                return stringRepr(k->type->to<IR::Type_Error>());
-            else
-                return stringRepr(name);
         } else {
             ::error("%1% invalid key expression", k);
             return boost::none;
@@ -1497,14 +1488,6 @@ class P4RuntimeEntriesConverter {
         return std::string(data.begin(), data.end());
     }
 
-    boost::optional<std::string> stringRepr(cstring value) const {
-        if (strlen(value) == 0) {
-            ::error("%1%: P4Runtime does not support zero len in match key", value);
-            return boost::none;
-        }
-        return std::string(value);
-    }
-
     boost::optional<std::string> stringRepr(const IR::Constant* constant, int width) const {
         return stringReprConstant(constant->value, width);
     }
@@ -1512,10 +1495,6 @@ class P4RuntimeEntriesConverter {
     boost::optional<std::string> stringRepr(const IR::BoolLiteral* constant, int width) const {
         auto v = static_cast<mpz_class>(constant->value ? 1 : 0);
         return stringReprConstant(v, width);
-    }
-
-    boost::optional<std::string> stringRepr(const IR::Type_Error* err) const {
-        return stringRepr(err->error);
     }
 
     /// We represent all static table entries as one P4Runtime WriteRequest object

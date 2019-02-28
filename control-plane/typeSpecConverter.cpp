@@ -126,10 +126,11 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
                 ::error("invalid annotation %1%", ann->expr);
             } else {
                 orig = false;
+                int i = 0;
                 for (auto a : ann->body) {
-                    if (a->text.startsWith("p4.org/psa/v1")) {
+                    if (!i++)
                         uri = a->text;
-                    } else if (isdigit(a->text.c_str()[0])) {
+                    if (isdigit(a->text.c_str()[0])) {
                         sdnB = atoi(a->text);
                     }
                 }
