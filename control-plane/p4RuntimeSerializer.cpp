@@ -678,20 +678,36 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap, ReferenceMap* refMap) {
     return type->width_bits();
 }
 
+/*
+ * Function only supports single-line type statement and if p4runtime Annotation
+ * is detected, the function returns a cstring for use as type_name
+*/
 static cstring
-getTypeName(const IR::Type* newType, ReferenceMap* refMap) {
-    if (newType->is<IR::Type_Newtype>()) {
-        while (newType->is<IR::Type_Newtype>())
-            newType = newType->to<IR::Type_Newtype>()->type;
-        if (newType->is<IR::Type_Name>()) {
-            auto tt = newType->to<IR::Type_Name>();
-            auto decl = refMap->getDeclaration(tt->path, true);
-            if (decl->is<IR::Type_Newtype>()) {
-                return(tt->path->name);
+getTypeName(const IR::Type* type) {
+    cstring type_name = nullptr;
+    if (type == nullptr)
+        return type_name;
+    if (type->is<IR::Type_Newtype>()) {
+        auto newt = type->to<IR::Type_Newtype>();
+        type_name = newt->name;
+    }
+    cstring uri;
+    auto ann = type->getAnnotation("p4runtime_translation");
+    if (ann != nullptr) {
+        if (ann->expr.size() > 1) {
+            ::error("invalid annotation %1%", ann->expr);
+        } else {
+            int i = 0;
+            for (auto a : ann->body) {
+                if (!i++) {
+                    uri = a->text;
+                    if (uri.endsWith(type_name))
+                    return type_name;
+                }
             }
         }
     }
-    return nullptr;
+    return type_name;
 }
 
 /// @return the header instance fields matched against by @table's key. The
@@ -703,7 +719,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
     auto key = table->getKey();
     if (!key) return matchFields;
 
-    cstring type_name;
+    cstring type_name = nullptr;
     for (auto keyElement : key->keyElements) {
         auto matchTypeName = getMatchTypeName(keyElement->matchType, refMap);
         auto matchType = getMatchType(matchTypeName);
@@ -717,8 +733,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
           typeMap->getType(keyElement->expression->getNode(), true);
         BUG_CHECK(matchFieldType != nullptr,
                   "Couldn't determine type for key element %1%", keyElement);
-        auto newType = matchFieldType;
-        type_name = getTypeName(newType, refMap);
+        type_name = getTypeName(matchFieldType);
         uint32_t w = getTypeWidth(matchFieldType, typeMap, refMap);
         matchFields.push_back(MatchField{*matchFieldName, *matchType, matchTypeName,
                                    w, keyElement->to<IR::IAnnotated>(), type_name});

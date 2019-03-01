@@ -54,6 +54,9 @@ tables {
     name: "meta.mac_learn_msg.ingress_port"
     bitwidth: 32
     match_type: EXACT
+    type_name {
+      name: "PortId_t"
+    }
   }
   action_refs {
     id: 16797276

@@ -2,7 +2,7 @@
 #include <v1model.p4>
 
 typedef bit<48> EthD_t;
-type bit<48> EthT_t;
+@p4runtime_translation("p4.org/psa/v1/EthT_t" , 48) type bit<48> EthT_t;
 typedef bit<8> CustomD_t;
 type bit<8> CustomT_t;
 typedef CustomD_t CustomDD_t;
@@ -100,17 +100,6 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
             hdr.custom.ed       : exact;
             hdr.custom.et       : exact;
             hdr.custom.edd      : exact;
-            hdr.custom.edt      : exact;
-            hdr.custom.etd      : exact;
-            hdr.custom.ett      : exact;
-            hdr.custom.eddd     : exact;
-            hdr.custom.eddt     : exact;
-            hdr.custom.edtd     : exact;
-            hdr.custom.edtt     : exact;
-            hdr.custom.etdd     : exact;
-            hdr.custom.etdt     : exact;
-            hdr.custom.ettd     : exact;
-            hdr.custom.ettt     : exact;
         }
         actions = {
             set_output;

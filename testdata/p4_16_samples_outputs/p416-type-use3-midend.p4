@@ -96,17 +96,6 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
             hdr.custom.ed       : exact @name("hdr.custom.ed") ;
             hdr.custom.et       : exact @name("hdr.custom.et") ;
             hdr.custom.edd      : exact @name("hdr.custom.edd") ;
-            hdr.custom.edt      : exact @name("hdr.custom.edt") ;
-            hdr.custom.etd      : exact @name("hdr.custom.etd") ;
-            hdr.custom.ett      : exact @name("hdr.custom.ett") ;
-            hdr.custom.eddd     : exact @name("hdr.custom.eddd") ;
-            hdr.custom.eddt     : exact @name("hdr.custom.eddt") ;
-            hdr.custom.edtd     : exact @name("hdr.custom.edtd") ;
-            hdr.custom.edtt     : exact @name("hdr.custom.edtt") ;
-            hdr.custom.etdd     : exact @name("hdr.custom.etdd") ;
-            hdr.custom.etdt     : exact @name("hdr.custom.etdt") ;
-            hdr.custom.ettd     : exact @name("hdr.custom.ettd") ;
-            hdr.custom.ettt     : exact @name("hdr.custom.ettt") ;
         }
         actions = {
             set_output();

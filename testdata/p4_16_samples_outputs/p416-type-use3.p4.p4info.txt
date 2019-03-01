@@ -12,6 +12,9 @@ tables {
     name: "hdr.ethernet.srcAddr"
     bitwidth: 48
     match_type: EXACT
+    type_name {
+      name: "EthT_t"
+    }
   }
   match_fields {
     id: 2
@@ -36,90 +39,15 @@ tables {
     name: "hdr.custom.et"
     bitwidth: 8
     match_type: EXACT
+    type_name {
+      name: "CustomT_t"
+    }
   }
   match_fields {
     id: 6
     name: "hdr.custom.edd"
     bitwidth: 8
     match_type: EXACT
-  }
-  match_fields {
-    id: 7
-    name: "hdr.custom.edt"
-    bitwidth: 8
-    match_type: EXACT
-  }
-  match_fields {
-    id: 8
-    name: "hdr.custom.etd"
-    bitwidth: 8
-    match_type: EXACT
-  }
-  match_fields {
-    id: 9
-    name: "hdr.custom.ett"
-    bitwidth: 8
-    match_type: EXACT
-    type_name {
-      name: "CustomT_t"
-    }
-  }
-  match_fields {
-    id: 10
-    name: "hdr.custom.eddd"
-    bitwidth: 8
-    match_type: EXACT
-  }
-  match_fields {
-    id: 11
-    name: "hdr.custom.eddt"
-    bitwidth: 8
-    match_type: EXACT
-  }
-  match_fields {
-    id: 12
-    name: "hdr.custom.edtd"
-    bitwidth: 8
-    match_type: EXACT
-  }
-  match_fields {
-    id: 13
-    name: "hdr.custom.edtt"
-    bitwidth: 8
-    match_type: EXACT
-    type_name {
-      name: "CustomDT_t"
-    }
-  }
-  match_fields {
-    id: 14
-    name: "hdr.custom.etdd"
-    bitwidth: 8
-    match_type: EXACT
-  }
-  match_fields {
-    id: 15
-    name: "hdr.custom.etdt"
-    bitwidth: 8
-    match_type: EXACT
-  }
-  match_fields {
-    id: 16
-    name: "hdr.custom.ettd"
-    bitwidth: 8
-    match_type: EXACT
-    type_name {
-      name: "CustomT_t"
-    }
-  }
-  match_fields {
-    id: 17
-    name: "hdr.custom.ettt"
-    bitwidth: 8
-    match_type: EXACT
-    type_name {
-      name: "CustomTT_t"
-    }
   }
   action_refs {
     id: 16829338
