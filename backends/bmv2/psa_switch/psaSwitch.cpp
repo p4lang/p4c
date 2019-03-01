@@ -23,7 +23,7 @@ namespace BMV2 {
 void PsaProgramStructure::create(ConversionContext* ctxt) {
     createTypes(ctxt);
     createHeaders(ctxt);
-    createExterns(ctxt);
+    createExterns();
     createParsers(ctxt);
     createActions(ctxt);
     createControls(ctxt);
@@ -153,20 +153,7 @@ void PsaProgramStructure::createParsers(ConversionContext* ctxt) {
     }
 }
 
-void PsaProgramStructure::createExterns(ConversionContext* ctxt) {
-    for (auto di : extern_instances){
-      auto extern_obj = new Util::JsonObject();
-      cstring name = di.second->controlPlaneName();
-      cstring type = di.second->type->toString();
-      extern_obj->emplace("name", name);
-      extern_obj->emplace("id", nextId("extern_instances"));
-      extern_obj->emplace("type", type);
-      ctxt->json->externs->append(extern_obj);
-      Util::JsonArray *arr = ctxt->json->insert_array_field(extern_obj, "arguments");
-      for(auto it : *di.second->arguments){
-        arr->append(it->toString());
-      }
-    }
+void PsaProgramStructure::createExterns() {
     /* TODO */
     // add parse_vsets to json
     // add meter_arrays to json
@@ -710,6 +697,21 @@ void ExternConverter_Counter::convertExternInstance(
     jctr->emplace("size", sz->to<IR::Constant>()->value);
     jctr->emplace("is_direct", false);
     ctxt->json->counters->append(jctr);
+
+    auto extern_obj = new Util::JsonObject();
+    extern_obj->emplace("name", name);
+    extern_obj->emplace("id", nextId("extern_instances"));
+    extern_obj->emplace("source_info", inst->sourceInfoJsonObj());
+    ctxt->json->externs->append(extern_obj);
+    Util::JsonArray *arr = ctxt->json->insert_array_field(extern_obj, "attributes");
+    int index = 0;
+    for(auto it : *inst->arguments){
+      auto attr_obj = new Util::JsonObject();
+      attr_obj->emplace("name", eb->getConstructorParameters()->getParameter(index++)->toString());
+      attr_obj->emplace("type", it->expression->type->toString());
+      attr_obj->emplace("value", it->expression->toString());
+      arr->append(attr_obj);
+    }
 }
 
 void ExternConverter_DirectCounter::convertExternInstance(

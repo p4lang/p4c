@@ -99,7 +99,7 @@ class PsaProgramStructure : public ProgramStructure {
     void createTypes(ConversionContext* ctxt);
     void createHeaders(ConversionContext* ctxt);
     void createParsers(ConversionContext* ctxt);
-    void createExterns(ConversionContext* ctxt);
+    void createExterns();
     void createActions(ConversionContext* ctxt);
     void createControls(ConversionContext* ctxt);
     void createDeparsers(ConversionContext* ctxt);
