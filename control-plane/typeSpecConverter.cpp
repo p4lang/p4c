@@ -120,7 +120,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
         bool orig = true;
         cstring uri;
         uint32_t sdnB;
-        auto ann = type->getAnnotation(IR::Annotation::pitranslateAnnotation);
+        auto ann = type->getAnnotation(IR::Annotation::p4runtimeTranslationAnnotation);
         if (ann != nullptr) {
             orig = false;
             int i = 0;

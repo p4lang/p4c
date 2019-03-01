@@ -692,7 +692,7 @@ getTypeName(const IR::Type* type) {
         type_name = newt->name;
     }
     cstring uri;
-    auto ann = type->getAnnotation(IR::Annotation::pitranslateAnnotation);
+    auto ann = type->getAnnotation(IR::Annotation::p4runtimeTranslationAnnotation);
     if (ann != nullptr) {
         int i = 0;
         for (auto a : ann->body) {

@@ -15,8 +15,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _P4_VALIDATEPITRANSLATEANNOTATIONS_H_
-#define _P4_VALIDATEPITRANSLATEANNOTATIONS_H_
+#ifndef _P4_VALIDATEP4TRANSLATIONANNOTATIONS_H_
+#define _P4_VALIDATEP4TRANSLATIONANNOTATIONS_H_
 
 #include "lib/error.h"
 #include "ir/ir.h"
@@ -27,13 +27,13 @@ namespace P4 {
 /**
  * Checks that p4runtime annotations.
  */
-class ValidatePITranslateAnnotations final : public Inspector {
+class ValidateP4runtimeTranslationAnnotations final : public Inspector {
     TypeMap* typeMap;
  public:
-    explicit ValidatePITranslateAnnotations(TypeMap* typeMap): typeMap(typeMap)
-    { setName("ValidatePITranslateAnnotations"); }
+    explicit ValidateP4runtimeTranslationAnnotations(TypeMap* typeMap): typeMap(typeMap)
+    { setName("ValidateP4TranslationAnnotations"); }
     void postorder(const IR::Annotation* annotation) override {
-        if (annotation->name != IR::Annotation::pitranslateAnnotation)
+        if (annotation->name != IR::Annotation::p4runtimeTranslationAnnotation)
             return;
         if (annotation->expr.size() > 1)
             ::error(ErrorType::ERR_INVALID,
@@ -53,4 +53,4 @@ class ValidatePITranslateAnnotations final : public Inspector {
 
 }  // namespace P4
 
-#endif /* _P4_VALIDATEPITRANSLATEANNOTATIONS_H_ */
+#endif /* _P4_VALIDATEP4TRANSLATIONANNOTATIONS_H_ */
