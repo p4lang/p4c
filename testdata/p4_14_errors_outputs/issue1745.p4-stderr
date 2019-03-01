@@ -1,0 +1,7 @@
+issue1745.p4(6): [--Werror=legacy] error: length_: header length must depend only on fields prior to the varbit field options
+    length: length_;
+            ^^^^^^^
+issue1745.p4(3)
+        options : *;
+        ^^^^^^^^^^^
+error: 1 errors encountered, aborting compilation

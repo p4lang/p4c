@@ -392,6 +392,34 @@ const IR::Type_Varbits *TypeConverter::postorder(IR::Type_Varbits *vbtype) {
     return vbtype;
 }
 
+namespace {
+
+/// Checks that all references in a header length expression
+/// are to fields prior to the varbit field.
+class ValidateLenExpr : public Inspector {
+    std::set<cstring> prior;
+    const IR::StructField* varbitField;
+
+ public:
+    ValidateLenExpr(const IR::Type_StructLike* headerType, const IR::StructField* varbitField):
+            varbitField(varbitField) {
+        for (auto f : headerType->fields) {
+            if (f->name.name == varbitField->name.name)
+                break;
+            prior.emplace(f->name);
+        }
+    }
+    void postorder(const IR::PathExpression* expression) override {
+        BUG_CHECK(!expression->path->absolute, "%1%: absolute path", expression);
+        cstring name = expression->path->name.name;
+        if (prior.find(name) == prior.end())
+            ::error("%1%: header length must depend only on fields prior to the varbit field %2%",
+                    expression, varbitField);
+    }
+};
+
+}  // namespace
+
 const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
     if (!field->type->is<IR::Type_Varbits>()) return field;
     // given a struct with length and max_length, the
@@ -400,6 +428,8 @@ const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
         if (auto len = type->getAnnotation("length")) {
             if (len->expr.size() == 1) {
                 auto lenexpr = len->expr[0];
+                ValidateLenExpr vle(type, field);
+                lenexpr->apply(vle);
                 auto scale = new IR::Mul(lenexpr->srcInfo, lenexpr, new IR::Constant(8));
                 auto fieldlen = new IR::Sub(
                     scale->srcInfo, scale, new IR::Constant(type->width_bits()));
