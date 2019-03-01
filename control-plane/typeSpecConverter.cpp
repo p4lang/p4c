@@ -120,19 +120,15 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
         bool orig = true;
         cstring uri;
         uint32_t sdnB;
-        auto ann = type->getAnnotation("p4runtime_translation");
+        auto ann = type->getAnnotation(IR::Annotation::pitranslateAnnotation);
         if (ann != nullptr) {
-            if (ann->expr.size() > 1) {
-                ::error("invalid annotation %1%", ann->expr);
-            } else {
-                orig = false;
-                int i = 0;
-                for (auto a : ann->body) {
-                    if (!i++)
-                        uri = a->text;
-                    if (isdigit(a->text.c_str()[0])) {
-                        sdnB = atoi(a->text);
-                    }
+            orig = false;
+            int i = 0;
+            for (auto a : ann->body) {
+                if (!i++)
+                    uri = a->text;
+                if (isdigit(a->text.c_str()[0])) {
+                    sdnB = atoi(a->text);
                 }
             }
         }

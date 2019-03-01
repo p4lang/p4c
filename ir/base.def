@@ -254,6 +254,7 @@ class Annotation {
     static const cstring deprecatedAnnotation;  /// Deprecation annotation.
     static const cstring synchronousAnnotation;  /// Synchronous annotation.
     static const cstring matchAnnotation;  /// Match annotation (for value sets).
+    static const cstring pitranslateAnnotation; // p4runtime_translate annotation.
     toString{ return cstring("@") + name; }
     validate{
         BUG_CHECK(!name.name.isNullOrEmpty(), "empty annotation name");

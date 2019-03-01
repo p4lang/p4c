@@ -692,20 +692,16 @@ getTypeName(const IR::Type* type) {
         type_name = newt->name;
     }
     cstring uri;
-    auto ann = type->getAnnotation("p4runtime_translation");
+    auto ann = type->getAnnotation(IR::Annotation::pitranslateAnnotation);
     if (ann != nullptr) {
-        if (ann->expr.size() > 1) {
-            ::error("invalid annotation %1%", ann->expr);
-        } else {
-            int i = 0;
-            for (auto a : ann->body) {
-                if (!i++) {
-                    uri = a->text;
-                    if (uri.endsWith(type_name))
+        int i = 0;
+        for (auto a : ann->body) {
+            if (!i++) {
+                uri = a->text;
+                if (uri.endsWith(type_name))
                     return type_name;
-                }
             }
-        }
+         }
     }
     return type_name;
 }
