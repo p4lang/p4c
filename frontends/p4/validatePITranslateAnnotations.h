@@ -38,7 +38,16 @@ class ValidatePITranslateAnnotations final : public Inspector {
         if (annotation->expr.size() > 1)
             ::error(ErrorType::ERR_INVALID,
                     "%1%: annotation must have exactly 1 argument", annotation);
-        // TODO: more validation coming soon.
+        int i = 0;
+        for (auto a : annotation->body) {
+            i++;
+            if (!a->is<IR::AnnotationToken>())
+                ::error(ErrorType::ERR_INVALID,
+                "%1%: annotation element is not AnnotationToken", annotation);
+        }
+        if (i > 3)
+            ::error(ErrorType::ERR_INVALID,
+                    "%1%: annotation has more than 3 elements", annotation);
     }
 };
 
