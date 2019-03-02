@@ -266,8 +266,12 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
             return;
         }
         // convert normal parameters
-        if (type->is<IR::Type_Stack>()) {
-            result->emplace("type", "header_stack");
+        if (auto st = type->to<IR::Type_Stack>()) {
+            auto et = typeMap->getTypeType(st->elementType, true);
+            if (et->is<IR::Type_HeaderUnion>())
+                result->emplace("type", "header_union_stack");
+            else
+                result->emplace("type", "header_stack");
             result->emplace("value", fieldName);
         } else if (type->is<IR::Type_HeaderUnion>()) {
             result->emplace("type", "header_union");
@@ -354,12 +358,20 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         if (parentType->is<IR::Type_HeaderUnion>()) {
             BUG_CHECK(l->is<Util::JsonObject>(), "Not a JsonObject");
             auto lv = l->to<Util::JsonObject>()->get("value");
-            BUG_CHECK(lv->is<Util::JsonValue>(), "Not a JsonValue");
-            fieldName = lv->to<Util::JsonValue>()->getString() + "." + fieldName;
-            // Each header in a union is allocated a separate header instance.
-            // Refer to that instance directly.
-            result->emplace("type", "header");
-            result->emplace("value", fieldName);
+            if (lv->is<Util::JsonValue>()) {
+                fieldName = lv->to<Util::JsonValue>()->getString() + "." + fieldName;
+                // Each header in a union is allocated a separate header instance.
+                // Refer to that instance directly.
+                result->emplace("type", "header");
+                result->emplace("value", fieldName);
+            } else {
+                // lv must be a reference to a union stack field
+                auto a = lv->to<Util::JsonArray>()->clone();
+                CHECK_NULL(a);
+                result->emplace("type", "union_stack_field");
+                a->append(fieldName);
+                result->emplace("value", a);
+            }
         } else if (parentType->is<IR::Type_Stack>() &&
                    expression->member == IR::Type_Stack::lastIndex) {
             auto l = get(expression->expr);
@@ -630,8 +642,12 @@ void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
             auto f = mkArrayField(r, "value");
             f->append(scalarsName);
             f->append(var->name);
-        } else if (type->is<IR::Type_Stack>()) {
-            result->emplace("type", "header_stack");
+        } else if (auto st = type->to<IR::Type_Stack>()) {
+            auto et = typeMap->getTypeType(st->elementType, true);
+            if (et->is<IR::Type_HeaderUnion>())
+                result->emplace("type", "header_union_stack");
+            else
+                result->emplace("type", "header_stack");
             result->emplace("value", var->name);
         } else if (type->is<IR::Type_Error>()) {
             result->emplace("type", "field");

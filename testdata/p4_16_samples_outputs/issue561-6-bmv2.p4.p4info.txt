@@ -1,0 +1,52 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33593625
+    name: "ingress.debug_hdr"
+    alias: "debug_hdr"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.base.t"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdr.u[0].byte.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "hdr.u[0].short.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 4
+    name: "hdr.u[1].byte.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  match_fields {
+    id: 5
+    name: "hdr.u[1].short.$valid$"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16800567
+  }
+  const_default_action_id: 16800567
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}

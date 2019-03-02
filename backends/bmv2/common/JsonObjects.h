@@ -39,6 +39,8 @@ class JsonObjects {
     unsigned add_metadata(const cstring& type, const cstring& name);
     void add_header_stack(const cstring& type, const cstring& name,
                           const unsigned size, std::vector<unsigned>& header_ids);
+    void add_header_union_stack(const cstring& type, const cstring& name,
+                                const unsigned size, std::vector<unsigned>& header_ids);
     void add_error(const cstring& name, const unsigned type);
     void add_enum(const cstring& enum_name, const cstring& entry_name,
                   const unsigned entry_value);
