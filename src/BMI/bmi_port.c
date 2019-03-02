@@ -30,7 +30,9 @@
 #include "BMI/bmi_port.h"
 
 #include <fcntl.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
+#include <sys/types.h>
 
 typedef struct bmi_port_s {
   bmi_interface_t *bmi;
@@ -45,6 +47,7 @@ typedef struct bmi_port_s {
 
 typedef struct bmi_port_mgr_s {
   bmi_port_t ports_info[PORT_COUNT_MAX];
+  int socketpairfd[2];
   fd_set fds;
   int max_fd;
   void *cookie;
@@ -98,6 +101,12 @@ static void *run_select(void *data) {
     /* the thread terminates */
     if(max_fd == -1) return NULL;
 
+    if (FD_ISSET(port_mgr->socketpairfd[1], &fds)) {
+      char buf[1] = {'\x00'};
+      read(port_mgr->socketpairfd[1], buf, sizeof(buf));
+      write(port_mgr->socketpairfd[1], buf, sizeof(buf));
+    }
+
     if(n <= 0) { // timeout or EINTR
       continue;
     }
@@ -138,7 +147,13 @@ int bmi_port_create_mgr(bmi_port_mgr_t **port_mgr) {
 
   memset(port_mgr_, 0, sizeof(bmi_port_mgr_t));
 
+  if (socketpair(PF_LOCAL, SOCK_STREAM, 0, port_mgr_->socketpairfd)) {
+    perror("socketpair");
+    return -1;
+  }
+
   FD_ZERO(&port_mgr_->fds);
+  FD_SET(port_mgr_->socketpairfd[1], &port_mgr_->fds);
 
   exitCode = pthread_rwlock_init(&port_mgr_->lock, NULL);
   if (exitCode != 0)
@@ -237,11 +252,15 @@ static int _bmi_port_interface_remove(bmi_port_mgr_t *port_mgr, int port_num) {
   if(!port_in_use(port)) return -1;
   free(port->ifname);
 
+  FD_CLR(port->fd, &port_mgr->fds);
+
+  char buf[1] = {'\x00'};
+  write(port_mgr->socketpairfd[0], buf, sizeof(buf));
+  read(port_mgr->socketpairfd[0], buf, sizeof(buf));
+
   if(bmi_interface_destroy(port->bmi) != 0) return -1;
 
   memset(port, 0, sizeof(bmi_port_t));
-
-  FD_CLR(port->fd, &port_mgr->fds);
 
   return 0;
 }
@@ -271,6 +290,9 @@ int bmi_port_destroy_mgr(bmi_port_mgr_t *port_mgr) {
     bmi_port_t *port = get_port(port_mgr, i);
     pthread_mutex_destroy(&port->stats_lock);
   }
+
+  close(port_mgr->socketpairfd[0]);
+  close(port_mgr->socketpairfd[1]);
 
   pthread_rwlock_destroy(&port_mgr->lock);
   free(port_mgr);
