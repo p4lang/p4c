@@ -518,6 +518,16 @@ P4Objects::add_primitive_to_action(const Json::Value &cfg_primitive,
           header_stack_id, field_offset);
 
       phv_factory.enable_stack_field_arith(header_stack_id, field_offset);
+    } else if (type == "header_union") {
+      const auto header_union_name = cfg_parameter["value"].asString();
+      auto header_union_id = get_header_union_id_cfg(header_union_name);
+      action_fn->parameter_push_back_header_union(header_union_id);
+    } else if (type == "header_union_stack") {
+      const auto header_union_stack_name = cfg_parameter["value"].asString();
+      auto header_union_stack_id = get_header_union_stack_id_cfg(
+          header_union_stack_name);
+      action_fn->parameter_push_back_header_union_stack(header_union_stack_id);
+      phv_factory.enable_all_union_stack_field_arith(header_union_stack_id);
     } else {
       throw json_exception(
           EFormat() << "Parameter type '" << type << "' not supported",
