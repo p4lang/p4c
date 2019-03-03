@@ -686,7 +686,7 @@ void ExternConverter_Counter::convertExternInstance(
     ctxt->json->counters->append(jctr);
 
     // Code below used to add json into EXTERN_INSTANCES NODE
-    
+
     auto extern_obj = new Util::JsonObject();
     extern_obj->emplace("name", name);
     extern_obj->emplace("id", nextId("extern_instances"));
@@ -705,7 +705,7 @@ void ExternConverter_Counter::convertExternInstance(
     attr_obj->emplace("type", "hexstr");
     attr_obj->emplace("value", repr);
     arr->append(attr_obj);
-    
+
     // second argument is the counter type, this is psa metadata, the converter
     // in conversion context will handle that for us
     auto arg2 = inst->arguments->at(1)->expression->to<IR::Member>();
@@ -732,7 +732,7 @@ void ExternConverter_DirectCounter::convertExternInstance(
         jctr->emplace("binding", it->second->controlPlaneName());
         ctxt->json->counters->append(jctr);
 
-        // Adding direct counter to EXTERN_INSTANCES 
+        // Adding direct counter to EXTERN_INSTANCES
 
         auto extern_obj = new Util::JsonObject();
         extern_obj->emplace("name", name);

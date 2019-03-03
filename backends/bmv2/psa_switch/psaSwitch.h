@@ -51,28 +51,26 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
      * Checks if a Parameter is of type PSA_CounterType_t returns true
      * if it is, false otherwise.
      */
-    bool isCounterMetaData(const IR::Parameter* param){
+    bool isCounterMetaData(const IR::Parameter* param) {
       return param->type->toString() == "PSA_CounterType_t";
     }
 
     Util::IJson* convertParam(UNUSED const IR::Parameter* param, cstring fieldName) override {
-        if(isCounterMetaData(param)){ // check if its counter metadata
+        if (isCounterMetaData(param)) {  // check if its counter metadata
           auto jsn = new Util::JsonObject();
           jsn->emplace("name", param->toString());
           jsn->emplace("type", "hexstr");
           auto bitwidth = param->type->width_bits();
 
           // encode the counter type from enum -> int
-          if(fieldName == "BYTES"){
-            cstring repr = BMV2::stringRepr(0, ROUNDUP(bitwidth,32));
+          if (fieldName == "BYTES") {
+            cstring repr = BMV2::stringRepr(0, ROUNDUP(bitwidth, 32));
             jsn->emplace("value", repr);
-          }
-          else if(fieldName == "PACKETS"){
-            cstring repr = BMV2::stringRepr(1, ROUNDUP(bitwidth,32));
+          } else if (fieldName == "PACKETS") {
+            cstring repr = BMV2::stringRepr(1, ROUNDUP(bitwidth, 32));
             jsn->emplace("value", repr);
-          }
-          else{
-            cstring repr = BMV2::stringRepr(2, ROUNDUP(bitwidth,32));
+          } else {
+            cstring repr = BMV2::stringRepr(2, ROUNDUP(bitwidth, 32));
             jsn->emplace("value", repr);
           }
           return jsn;
@@ -155,7 +153,7 @@ class ParsePsaArchitecture : public Inspector {
     bool preorder(const IR::ToplevelBlock* block) override;
     bool preorder(const IR::PackageBlock* block) override;
     bool preorder(const IR::ExternBlock* block) override;
-    
+
     profile_t init_apply(const IR::Node *root) override {
         structure->block_type.clear();
         structure->globals.clear();
