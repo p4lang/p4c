@@ -16,7 +16,6 @@ limitations under the License.
 
 #include "frontends/common/model.h"
 #include "psaSwitch.h"
-#include <iostream>
 
 namespace BMV2 {
 
@@ -199,15 +198,6 @@ void PsaProgramStructure::createGlobals() {
 }
 
 bool ParsePsaArchitecture::preorder(const IR::ToplevelBlock* block) {
-    /// Blocks are not in IR tree, use a custom visitor to traverse
-    for (auto it : block->constantValue) {
-        if (it.second->is<IR::Block>())
-            visit(it.second->getNode());
-    }
-    return false;
-}
-
-bool ParsePsaArchitecture::preorder(const IR::ControlBlock* block) {
     /// Blocks are not in IR tree, use a custom visitor to traverse
     for (auto it : block->constantValue) {
         if (it.second->is<IR::Block>())
@@ -423,7 +413,6 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         ::warning(ErrorType::WARN_INVALID, "%1%: the main package should be called PSA_Switch"
                   "; are you using the wrong architecture?", main->type->name);
 
-    // tlb->apply(*parsePsaArch) ;
     main->apply(*parsePsaArch);
 
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
@@ -474,8 +463,6 @@ ExternConverter_Random ExternConverter_Random::singleton;
 ExternConverter_ActionProfile ExternConverter_ActionProfile::singleton;
 ExternConverter_ActionSelector ExternConverter_ActionSelector::singleton;
 ExternConverter_Digest ExternConverter_Digest::singleton;
-
-
 
 Util::IJson* ExternConverter_Hash::convertExternObject(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,

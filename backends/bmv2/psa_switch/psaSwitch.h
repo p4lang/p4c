@@ -155,7 +155,6 @@ class ParsePsaArchitecture : public Inspector {
     bool preorder(const IR::ToplevelBlock* block) override;
     bool preorder(const IR::PackageBlock* block) override;
     bool preorder(const IR::ExternBlock* block) override;
-    bool preorder(const IR::ControlBlock* block) override;
     
     profile_t init_apply(const IR::Node *root) override {
         structure->block_type.clear();
