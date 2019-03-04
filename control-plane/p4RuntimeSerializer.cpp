@@ -889,10 +889,12 @@ class P4RuntimeAnalyzer {
             addAnnotations(metadata, headerField->to<IR::IAnnotated>());
 
             auto fieldType = typeMap->getType(headerField, true);
-            BUG_CHECK(fieldType->is<IR::Type_Bits>(),
-                      "Header field %1% has a type which is not bit<> or int<>",
+            BUG_CHECK((fieldType->is<IR::Type_Bits>() ||
+                      fieldType->is<IR::Type_Newtype>()),
+                      "Header field %1% has a type which is not bit<>,int<>, or type",
                       headerField);
-            metadata->set_bitwidth(fieldType->width_bits());
+            auto w = getTypeWidth(fieldType, typeMap, refMap);
+            metadata->set_bitwidth(w);
         }
     }
 
