@@ -91,6 +91,9 @@ actions {
     id: 1
     name: "egress_port"
     bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
   }
 }
 actions {
@@ -103,6 +106,9 @@ actions {
     id: 1
     name: "egress_port"
     bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
   }
   params {
     id: 2

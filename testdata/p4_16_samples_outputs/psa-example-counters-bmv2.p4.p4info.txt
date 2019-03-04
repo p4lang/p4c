@@ -33,6 +33,9 @@ actions {
     id: 1
     name: "oport"
     bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
   }
 }
 actions {
