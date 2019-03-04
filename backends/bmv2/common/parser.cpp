@@ -74,7 +74,8 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
             if (extmeth->method->name.name == corelib.packetIn.extract.name) {
                 int argCount = mce->arguments->size();
                 if (argCount < 1 || argCount > 2) {
-                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: unknown extract method", mce);
+                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                            "%1%: unknown extract method", mce);
                     return result;
                 }
 

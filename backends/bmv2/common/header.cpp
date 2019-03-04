@@ -338,7 +338,8 @@ Visitor::profile_t HeaderConverter::init_apply(const IR::Node* node) {
                     Util::JsonArray* unionFields = new Util::JsonArray();
                     for (auto uf : ut->fields) {
                         auto uft = ctxt->typeMap->getType(uf, true);
-                        auto h_name = v->name + "[" + Util::toString(i) + "]." + uf->controlPlaneName();
+                        auto h_name = v->name + "[" + Util::toString(i) + "]." +
+                                      uf->controlPlaneName();
                         auto h_type = uft->to<IR::Type_StructLike>()
                                       ->controlPlaneName();
                         unsigned id = ctxt->json->add_header(h_type, h_name);
@@ -349,7 +350,8 @@ Visitor::profile_t HeaderConverter::init_apply(const IR::Node* node) {
                     auto union_id = ctxt->json->add_union(union_type, unionFields, name);
                     union_ids.push_back(union_id);
                 }
-                ctxt->json->add_header_union_stack(union_type, v->name, stack->getSize(), union_ids);
+                ctxt->json->add_header_union_stack(
+                    union_type, v->name, stack->getSize(), union_ids);
             } else {
                 BUG("%1: unexpected stack element type", type);
             }
