@@ -104,6 +104,11 @@ actions {
     name: "egress_port"
     bitwidth: 32
   }
+  params {
+    id: 2
+    name: "serEnumT"
+    bitwidth: 16
+  }
 }
 digests {
   preamble {

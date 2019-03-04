@@ -1,6 +1,16 @@
 #include <core.p4>
 #include <psa.p4>
 
+enum bit<16> EthTypes {
+    IPv4 = 16w0x800,
+    ARP = 16w0x806,
+    RARP = 16w0x8035,
+    EtherTalk = 16w0x809b,
+    VLAN = 16w0x8100,
+    IPX = 16w0x8137,
+    IPv6 = 16w0x86dd
+}
+
 typedef bit<48> EthernetAddress;
 header ethernet_t {
     EthernetAddress dstAddr;
@@ -26,6 +36,7 @@ header ipv4_t {
 struct headers {
     ethernet_t ethernet;
     ipv4_t     ipv4;
+    EthTypes   type;
 }
 
 struct empty_metadata_t {
@@ -99,7 +110,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     action do_L2_forward(PortId_t egress_port) {
         send_to_port(ostd, egress_port);
     }
-    action do_tst(PortId_t egress_port) {
+    action do_tst(PortId_t egress_port, EthTypes serEnumT) {
         send_to_port(ostd, egress_port);
     }
     table l2_tbl {

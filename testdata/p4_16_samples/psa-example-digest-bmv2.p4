@@ -25,6 +25,16 @@ limitations under the License.
 #include <core.p4>
 #include "psa.p4"
 
+enum bit<16> EthTypes {
+    IPv4 = 0x0800,
+    ARP = 0x0806,
+    RARP = 0x8035,
+    EtherTalk = 0x809B,
+    VLAN = 0x8100,
+    IPX = 0x8137,
+    IPv6 = 0x86DD
+}
+
 typedef bit<48>  EthernetAddress;
 
 header ethernet_t {
@@ -51,6 +61,7 @@ header ipv4_t {
 struct headers {
     ethernet_t       ethernet;
     ipv4_t           ipv4;
+    EthTypes         type;
 }
 
 struct empty_metadata_t {
@@ -169,7 +180,7 @@ control ingress(inout headers hdr,
     action do_L2_forward (PortId_t egress_port) {
         send_to_port(ostd, egress_port);
     }
-    action do_tst (PortId_t egress_port) {
+    action do_tst (PortId_t egress_port, EthTypes serEnumT) {
         send_to_port(ostd, egress_port);        
     }
     table l2_tbl {

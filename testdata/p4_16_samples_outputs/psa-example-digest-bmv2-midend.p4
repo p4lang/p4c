@@ -26,6 +26,7 @@ header ipv4_t {
 struct headers {
     ethernet_t ethernet;
     ipv4_t     ipv4;
+    bit<16>    type;
 }
 
 struct empty_metadata_t {
@@ -45,6 +46,7 @@ struct metadata {
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
     ethernet_t parsed_hdr_0_ethernet;
     ipv4_t parsed_hdr_0_ipv4;
+    bit<16> parsed_hdr_0_type;
     bool meta_1_send_mac_learn_msg;
     mac_learn_digest_t meta_1_mac_learn_msg;
     state start {
@@ -66,6 +68,7 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
     state start_0 {
         parsed_hdr.ethernet = parsed_hdr_0_ethernet;
         parsed_hdr.ipv4 = parsed_hdr_0_ipv4;
+        parsed_hdr.type = parsed_hdr_0_type;
         meta._send_mac_learn_msg0 = meta_1_send_mac_learn_msg;
         meta._mac_learn_msg_srcAddr1 = meta_1_mac_learn_msg.srcAddr;
         meta._mac_learn_msg_ingress_port2 = meta_1_mac_learn_msg.ingress_port;
@@ -76,6 +79,7 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
 parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata meta, in psa_egress_parser_input_metadata_t istd, in empty_metadata_t normal_meta, in empty_metadata_t clone_i2e_meta, in empty_metadata_t clone_e2e_meta) {
     ethernet_t parsed_hdr_1_ethernet;
     ipv4_t parsed_hdr_1_ipv4;
+    bit<16> parsed_hdr_1_type;
     bool meta_2_send_mac_learn_msg;
     mac_learn_digest_t meta_2_mac_learn_msg;
     state start {
@@ -97,6 +101,7 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
     state start_1 {
         parsed_hdr.ethernet = parsed_hdr_1_ethernet;
         parsed_hdr.ipv4 = parsed_hdr_1_ipv4;
+        parsed_hdr.type = parsed_hdr_1_type;
         meta._send_mac_learn_msg0 = meta_2_send_mac_learn_msg;
         meta._mac_learn_msg_srcAddr1 = meta_2_mac_learn_msg.srcAddr;
         meta._mac_learn_msg_ingress_port2 = meta_2_mac_learn_msg.ingress_port;
@@ -131,7 +136,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
         ostd.multicast_group = 32w0;
         ostd.egress_port = egress_port;
     }
-    @name("ingress.do_tst") action do_tst(PortId_t egress_port) {
+    @name("ingress.do_tst") action do_tst(PortId_t egress_port, bit<16> serEnumT) {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
         ostd.egress_port = egress_port;

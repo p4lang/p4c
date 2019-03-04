@@ -835,9 +835,10 @@ class P4RuntimeAnalyzer {
 
             auto paramType = typeMap->getType(actionParam, true);
             if (!paramType->is<IR::Type_Bits>() && !paramType->is<IR::Type_Boolean>()
-                && !paramType->is<IR::Type_Newtype>()) {
+                && !paramType->is<IR::Type_Newtype>() &&
+                !paramType->is<IR::Type_SerEnum>()) {
                 ::error("Action parameter %1% has a type which is not "
-                        "bit<> or int<> or bool or type", actionParam);
+                        "bit<>, int<>, bool, type or Serializable Enum", actionParam);
                 continue;
             }
             if (paramType->is<IR::Type_Boolean>()) {
@@ -845,6 +846,10 @@ class P4RuntimeAnalyzer {
             } else if (paramType->is<IR::Type_Newtype>()) {
                 auto w = getTypeWidth(paramType, typeMap, refMap);
                 param->set_bitwidth(w);
+            } else if (paramType->is<IR::Type_SerEnum>()) {
+                auto se = paramType->to<IR::Type_SerEnum>();
+                auto type = se->type;
+                param->set_bitwidth(type->width_bits());
             } else {
                 param->set_bitwidth(paramType->width_bits());
             }
