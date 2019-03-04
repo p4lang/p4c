@@ -45,7 +45,7 @@ packet 0 525400123502 080027f87bea 0800 4500 001c 0001 0000 4011 645c 0a00020f 0
 #        MAC DA       MAC SA    ethtype start of IPv4 hdr   TTL       IPv4 SA  IPv4 DA  UDP header with 0 UDP payload bytes
 #                                  VVVV                     VV
 #        ------------ ------------ ---- ------------------- --        -------- --------
-expect 2 0213570be5ff 001122334455 0800 4500 001c 0001 0000 3f11 e56c 0afc8102 0a010065 16a100500008d278
+expect 2 0213570be5ff 001122334455 0800 4500 001c 0001 0000 3f11 e56c 0afc8102 0a010065 16a100500008d278 $
 
 ######################################################################
 
@@ -82,7 +82,7 @@ packet 0 525400123502 080027f87bea 0800 4500 001c 0001 0000 4011 63f8 0a00020f 0
 #        MAC DA       MAC SA    ethtype start of IPv4 hdr   TTL       IPv4 SA  IPv4 DA  UDP header with 0 UDP payload bytes
 #                                  VVVV                     VV
 #        ------------ ------------ ---- ------------------- --        -------- --------
-expect 2 0213571cecff 001122334455 0800 4500 001c 0001 0000 3e11 11a4 0ac75663 0a010002 16a100500008d214
+expect 2 0213571cecff 001122334455 0800 4500 001c 0001 0000 3e11 11a4 0ac75663 0a010002 16a100500008d214 $
 
 ######################################################################
 
@@ -121,7 +121,7 @@ packet 0 525400123502 080027f87bea 0800 4500 001c 0001 0000 4011 6488 0a00020f 0
 #        MAC DA       MAC SA    ethtype start of IPv4 hdr   TTL       IPv4 SA  IPv4 DA  UDP header with 0 UDP payload bytes
 #                                  VVVV                     VV
 #        ------------ ------------ ---- ------------------- --        -------- --------
-expect 1 0213570dd0ff 001122334455 0800 4500 001c 0001 0000 3f11 6588 0a00020f 0a030037 16a100500008d2a4
+expect 1 0213570dd0ff 001122334455 0800 4500 001c 0001 0000 3f11 6588 0a00020f 0a030037 16a100500008d2a4 $
 
 # cloned packet out:
 # 8-byte switch-to-cpu header containing data 0x012e012e5a5a5a5a, followed by:
@@ -134,7 +134,7 @@ expect 1 0213570dd0ff 001122334455 0800 4500 001c 0001 0000 3f11 6588 0a00020f 0
 #        switch_to_cpu       MAC DA       MAC SA    ethtype start of IPv4 hdr   TTL       IPv4 SA  IPv4 DA  UDP header with 0 UDP payload bytes
 #        header                                        VVVV                     VV
 #        -----------------   ------------ ------------ ---- ------------------- --        -------- --------
-expect 4 012e012e 5a5a5a5a   525400123502 080027f87bea 0800 4500 001c 0001 0000 4011 6488 0a00020f 0a030037 16a100500008d2a4
+expect 4 012e012e 5a5a5a5a   525400123502 080027f87bea 0800 4500 001c 0001 0000 4011 6488 0a00020f 0a030037 16a100500008d2a4 $
 
 ######################################################################
 
@@ -173,7 +173,7 @@ packet 0 525400123502 080027f87bea 0800 4500 001c 0001 0000 4011 6392 0a00020f 0
 #        MAC DA       MAC SA    ethtype start of IPv4 hdr   TTL       IPv4 SA  IPv4 DA  UDP header with 0 UDP payload bytes
 #                                  VVVV                     VV
 #        ------------ ------------ ---- ------------------- --        -------- --------
-expect 0 021357efbeff 001122335544 0800 4500 001c 0001 0000 3f11 6492 0a00020f 0a2f0101 16a100500008d1ae
+expect 0 021357efbeff 001122335544 0800 4500 001c 0001 0000 3f11 6492 0a00020f 0a2f0101 16a100500008d1ae $
 
 # cloned packet out:
 # 8-byte switch-to-cpu header containing data 0x0e2e0e2e5a5a5a5a, followed by:
@@ -185,7 +185,7 @@ expect 0 021357efbeff 001122335544 0800 4500 001c 0001 0000 3f11 6492 0a00020f 0
 #        switch_to_cpu       MAC DA       MAC SA    ethtype start of IPv4 hdr   TTL       IPv4 SA  IPv4 DA  UDP header with 0 UDP payload bytes
 #        header                                        VVVV                     VV
 #        -----------------   ------------ ------------ ---- ------------------- --        -------- --------
-expect 5 0e2e0e2e 5a5a5a5a   021357efbeff 001122335544 0800 4500 001c 0001 0000 3f11 6492 0a00020f 0a2f0101 16a100500008d1ae
+expect 5 0e2e0e2e 5a5a5a5a   021357efbeff 001122335544 0800 4500 001c 0001 0000 3f11 6492 0a00020f 0a2f0101 16a100500008d1ae $
 
 ######################################################################
 
@@ -252,12 +252,12 @@ packet 0 525400123502 080027f87bea 0800 4500 001c 0001 0000 4011 8bbd 0a00020f e
 # This is because of the way the P4 program was written.  It is not
 # the correct behavior for an RFC compliant router forwarding IP
 # multicast packets.
-expect 6 525400123502 001122330a55 0800 4500 001c 0001 0000 4011 8bbd 0a00020f e1010203 16a100500008f9d9
+expect 6 525400123502 001122330a55 0800 4500 001c 0001 0000 4011 8bbd 0a00020f e1010203 16a100500008f9d9 $
 
 # copy #2 packet out to port 7:
 # only difference with copy #1 above is output port and Ethernet source MAC address
-expect 7 525400123502 001122330b55 0800 4500 001c 0001 0000 4011 8bbd 0a00020f e1010203 16a100500008f9d9
+expect 7 525400123502 001122330b55 0800 4500 001c 0001 0000 4011 8bbd 0a00020f e1010203 16a100500008f9d9 $
 
 # copy #3 packet out to port 8:
 # only difference with copy #1 above is output port and Ethernet source MAC address
-expect 8 525400123502 001122330c55 0800 4500 001c 0001 0000 4011 8bbd 0a00020f e1010203 16a100500008f9d9
+expect 8 525400123502 001122330c55 0800 4500 001c 0001 0000 4011 8bbd 0a00020f e1010203 16a100500008f9d9 $
