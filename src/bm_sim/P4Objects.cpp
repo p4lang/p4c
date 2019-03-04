@@ -42,7 +42,7 @@ using std::string;
 namespace {
 
 constexpr int required_major_version = 2;
-constexpr int max_minor_version = 18;
+constexpr int max_minor_version = 19;
 // not needed for now
 // constexpr int min_minor_version = 0;
 
@@ -1031,7 +1031,13 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
           ArithExpression VL_expr;
           if (op_type == "extract_VL") {
             const auto &cfg_VL_expr = cfg_parameters[1];
-            assert(cfg_VL_expr["type"].asString() == "expression");
+            if (cfg_VL_expr["type"].asString() != "expression") {
+              throw json_exception(
+                  EFormat() << "Parser 'extract_VL' operation has invalid "
+                            << "length type '" << cfg_VL_expr["type"].asString()
+                            << "', expected 'expression'",
+                  cfg_VL_expr);
+            }
             build_expression(cfg_VL_expr["value"], &VL_expr);
             VL_expr.build();
           }
@@ -1171,9 +1177,43 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
           parse_state->add_method_call(action_fn.get());
           parse_methods.push_back(std::move(action_fn));
         } else if (op_type == "shift") {
-          assert(cfg_parameters.size() == 1);
+          if (cfg_parameters.size() != 1) {
+            throw json_exception(
+                EFormat() << "Parser 'shift' operation has invalid number of "
+                          << "arguments, expected " << 1,
+                cfg_parser_op);
+          }
           auto shift_bytes = static_cast<size_t>(cfg_parameters[0].asInt());
           parse_state->add_shift(shift_bytes);
+        } else if (op_type == "advance") {
+          if (cfg_parameters.size() != 1) {
+            throw json_exception(
+                EFormat() << "Parser 'advance' operation has invalid number of "
+                          << "arguments, expected " << 1,
+                cfg_parser_op);
+          }
+          const auto &shift_type = cfg_parameters[0]["type"].asString();
+          if (shift_type == "field") {
+            const auto shift = field_info(
+                cfg_parameters[0]["value"][0].asString(),
+                cfg_parameters[0]["value"][1].asString());
+            parse_state->add_advance_from_field(
+                std::get<0>(shift), std::get<1>(shift));
+            enable_arith(std::get<0>(shift), std::get<1>(shift));
+          } else if (shift_type == "hexstr") {
+            parse_state->add_advance_from_data(
+                Data(cfg_parameters[0]["value"].asString()));
+          } else if (shift_type == "expression") {
+            ArithExpression expr;
+            build_expression(cfg_parameters[0]["value"], &expr);
+            expr.build();
+            parse_state->add_advance_from_expression(expr);
+          } else {
+            throw json_exception(
+                EFormat() << "Parser 'advance' operation has unsupported "
+                          << "parameter type '" << shift_type << "'",
+                cfg_parser_op);
+          }
         } else {
           throw json_exception(
               EFormat() << "Parser op '" << op_type << "'not supported",

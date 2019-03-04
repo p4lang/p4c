@@ -10,7 +10,7 @@ on each attribute.
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.18*.
+The version described in this document is *2.19*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -274,7 +274,7 @@ parser. The attributes for these objects are:
   in the correct order. Each parser operation is represented by a JSON object,
   whose attributes are:
     - `op`: the type of operation, either `extract`, `extract_VL`, `set`,
-    `verify`, `shift` or `primitive`.
+    `verify`, `shift`, `advance` or `primitive`.
     - `parameters`: a JSON array of objects encoding the parameters to the
     parser operation. Depending on the type of operation, the constraints are
     different. A description of these constraints is included [later in this
@@ -335,7 +335,10 @@ In the `parser_ops` array, the format of the `parameters` array depends on the
   boolean expression while the second should be an expression resolving to a
   valid integral value for an error constant (see [here](#errors)).
   - `shift`: we expect a single parameter, the number of bytes to shift (shifted
-  packet data will be discarded).
+  packet data will be discarded). `shift` is deprecated in favor of `advance`
+  (see below).
+  - `advance`: we expect a single parameter, the number of bytes to shift, which
+  can be of type `hexstr`, `field` or `expression`. `advance` replaces `shift`.
   - `primitive`: introduced for P4_16, where extern methods can be called from
   parser states. It only takes one parameter, which is itself a JSON object with
   the following attributes:

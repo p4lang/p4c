@@ -93,6 +93,10 @@ class Data {
 
   virtual void export_bytes() {}
 
+  //! Returns a value less than zero if Data is negative, a value greater than
+  //! zero if Data is positive, and zero if Data is zero.
+  int sign() const { return value.sign(); }
+
   // TODO(Antonin): need to figure out what to do with signed values
   //! Set the value of Data from any integral type
   template<typename T,
@@ -175,7 +179,7 @@ class Data {
     export_bytes();  // not very efficient for fields, we import then export...
   }
 
-  //! Convert the value of Data to any inegral type
+  //! Convert the value of Data to any integral type
   template<typename T,
            typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
   T get() const {

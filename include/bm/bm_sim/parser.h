@@ -259,6 +259,10 @@ class ParseState : public NamedP4Object {
 
   void add_shift(size_t shift_bytes);
 
+  void add_advance_from_data(const Data &shift_bytes);
+  void add_advance_from_expression(const ArithExpression &shift_bytes);
+  void add_advance_from_field(header_id_t shift_header, int shift_offset);
+
   void set_key_builder(const ParseSwitchKeyBuilder &builder);
 
   void add_switch_case(const ByteContainer &key, const ParseState *next_state);
