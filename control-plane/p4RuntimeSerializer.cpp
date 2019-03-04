@@ -846,6 +846,12 @@ class P4RuntimeAnalyzer {
             } else if (paramType->is<IR::Type_Newtype>()) {
                 auto w = getTypeWidth(paramType, typeMap, refMap);
                 param->set_bitwidth(w);
+                cstring type_name = getTypeName(paramType);
+                if (type_name) {
+                    auto namedType = new p4configv1::P4NamedType();
+                    namedType->set_name(type_name);
+                    param->set_allocated_type_name(namedType);
+                }
             } else if (paramType->is<IR::Type_SerEnum>()) {
                 auto se = paramType->to<IR::Type_SerEnum>();
                 auto type = se->type;
