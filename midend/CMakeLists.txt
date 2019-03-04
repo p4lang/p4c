@@ -17,6 +17,7 @@ set (MIDEND_SRCS
   complexComparison.cpp
   convertEnums.cpp
   copyStructures.cpp
+  eliminateAdvance.cpp
   eliminateTuples.cpp
   eliminateNewtype.cpp
   eliminateSerEnums.cpp
@@ -52,6 +53,7 @@ set (MIDEND_HDRS
   complexComparison.h
   convertEnums.h
   copyStructures.h
+  eliminateAdvance.h
   eliminateTuples.h
   eliminateNewtype.h
   eliminateSerEnums.h
@@ -59,7 +61,7 @@ set (MIDEND_HDRS
   expandLookahead.h
   expr_uses.h
   flattenInterfaceStructs.h
-  flattenHeaders.h  
+  flattenHeaders.h
   has_side_effects.h
   interpreter.h
   local_copyprop.h
