@@ -43,6 +43,9 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
 
             // @match has an expression argument
             PARSE(IR::Annotation::matchAnnotation, Expression),
+
+            // @p4runtime_translation has two args
+            PARSE_PAIR(IR::Annotation::p4runtimeTranslationAnnotation, Expression),
         };
 }
 

@@ -99,6 +99,9 @@ actions {
     id: 3
     name: "et"
     bitwidth: 8
+    type_name {
+      name: "CustomT_t"
+    }
   }
   params {
     id: 4
@@ -109,16 +112,25 @@ actions {
     id: 5
     name: "edt"
     bitwidth: 8
+    type_name {
+      name: "CustomDT_t"
+    }
   }
   params {
     id: 6
     name: "etd"
     bitwidth: 8
+    type_name {
+      name: "CustomT_t"
+    }
   }
   params {
     id: 7
     name: "ett"
     bitwidth: 8
+    type_name {
+      name: "CustomTT_t"
+    }
   }
   params {
     id: 8
@@ -129,36 +141,57 @@ actions {
     id: 9
     name: "eddt"
     bitwidth: 8
+    type_name {
+      name: "CustomDDT_t"
+    }
   }
   params {
     id: 10
     name: "edtd"
     bitwidth: 8
+    type_name {
+      name: "CustomDT_t"
+    }
   }
   params {
     id: 11
     name: "edtt"
     bitwidth: 8
+    type_name {
+      name: "CustomDTT_t"
+    }
   }
   params {
     id: 12
     name: "etdd"
     bitwidth: 8
+    type_name {
+      name: "CustomT_t"
+    }
   }
   params {
     id: 13
     name: "etdt"
     bitwidth: 8
+    type_name {
+      name: "CustomTDT_t"
+    }
   }
   params {
     id: 14
     name: "ettd"
     bitwidth: 8
+    type_name {
+      name: "CustomTT_t"
+    }
   }
   params {
     id: 15
     name: "ettt"
     bitwidth: 8
+    type_name {
+      name: "CustomTTT_t"
+    }
   }
 }
 type_info {

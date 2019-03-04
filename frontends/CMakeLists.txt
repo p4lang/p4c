@@ -132,7 +132,6 @@ set (P4_FRONTEND_HDRS
   p4/uselessCasts.h
   p4/validateMatchAnnotations.h
   p4/validateParsedProgram.h
-  p4/validatePITranslateAnnotations.h
   )
 
 
