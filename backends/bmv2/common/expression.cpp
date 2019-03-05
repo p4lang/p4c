@@ -717,19 +717,20 @@ ExpressionConverter::convert(const IR::Expression* e, bool doFixup, bool wrap, b
     }
 
     std::set<cstring> to_wrap({"expression", "stack_field"});
-
     // This is weird, but that's how it is: expression and stack_field must be wrapped in
     // another outer object. In a future version of the bmv2 JSON, this will not be needed
     // anymore as expressions will be treated in a more uniform way.
-    if (wrap && result->is<Util::JsonObject>()) {
-        auto to = result->to<Util::JsonObject>()->get("type");
-        if (to != nullptr && to->to<Util::JsonValue>() != nullptr) {
-            auto jv = *to->to<Util::JsonValue>();
-            if (jv.isString() && to_wrap.find(jv.getString()) != to_wrap.end()) {
-                auto rwrap = new Util::JsonObject();
-                rwrap->emplace("type", "expression");
-                rwrap->emplace("value", result);
-                result = rwrap;
+    if (wrap) {
+        if (auto ro = result->to<Util::JsonObject>()) {
+            if (auto to = ro->get("type")) {
+                if (auto jv = to->to<Util::JsonValue>()) {
+                    if (jv->isString() && to_wrap.find(jv->getString()) != to_wrap.end()) {
+                        auto rwrap = new Util::JsonObject();
+                        rwrap->emplace("type", "expression");
+                        rwrap->emplace("value", result);
+                        result = rwrap;
+                    }
+                }
             }
         }
     }
