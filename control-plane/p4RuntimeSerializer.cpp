@@ -650,14 +650,17 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap, ReferenceMap* refMap) {
     if (type == nullptr)
         return w;
 
+    LOG3(">> " << type->getP4Type());
     const IR::Type* newType = type;
     while (newType->is<IR::Type_Newtype>())
         newType = newType->to<IR::Type_Newtype>()->type;
     while (newType->is<IR::Type_Typedef>())
         newType = newType->to<IR::Type_Typedef>()->type;
 
+    LOG3("After while " << newType->getP4Type());
     if (newType->is<IR::Type_Bits>()) {
         w = newType->width_bits();
+        LOG3("First bits " << type->getP4Type());
         return w;
     } else if (newType->is<IR::Type_Name>()) {
         auto n = newType->to<IR::Type_Name>();
@@ -665,9 +668,11 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap, ReferenceMap* refMap) {
         if (canon->is<IR::Type_Bits>()) {
             auto k = canon->to<IR::Type_Bits>();
             w = k->width_bits();
+            LOG3("Second bits " << type->getP4Type());
             return w;
         } else {
             auto decl = refMap->getDeclaration(n->path, true);
+            LOG3("Recursion " << n->path);
             if (decl->is<IR::Type_Newtype>())
                 w = getTypeWidth(decl->to<IR::Type_Newtype>(), typeMap, refMap);
             else if (decl->is<IR::Type_Typedef>())
@@ -675,6 +680,7 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap, ReferenceMap* refMap) {
             return w;
         }
     }
+    LOG3("End " << type->getP4Type());
     return type->width_bits();
 }
 

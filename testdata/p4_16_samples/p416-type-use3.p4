@@ -156,6 +156,13 @@ control ingress(inout headers_t hdr,
             hdr.custom.ed        : exact;
             hdr.custom.et        : exact;
             hdr.custom.edd       : exact;
+            hdr.custom.eddt      : exact;
+            hdr.custom.edtd      : exact;
+            hdr.custom.edtt      : exact;
+            hdr.custom.etdd      : exact;
+            hdr.custom.etdt      : exact;
+            hdr.custom.ettd      : exact;
+            hdr.custom.ettt      : exact;
         }
         actions = {
             set_output;
