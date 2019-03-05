@@ -654,6 +654,11 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap, ReferenceMap* refMap) {
         return w;
 
     LOG3(">> " << type->getP4Type());
+    if (type->is<IR::Type_SerEnum>()) {
+        auto se = type->to<IR::Type_SerEnum>();
+        auto type = se->type;
+        return type->width_bits();
+    }
     const IR::Type* newType = type;
     while (newType->is<IR::Type_Newtype>())
         newType = newType->to<IR::Type_Newtype>()->type;
@@ -1418,10 +1423,20 @@ class P4RuntimeEntriesConverter {
             return stringRepr(k->to<IR::Constant>(), keyWidth);
         } else if (k->is<IR::BoolLiteral>()) {
             return stringRepr(k->to<IR::BoolLiteral>(), keyWidth);
-        } else if (k->type->is<IR::Type_SerEnum>()) {
-            auto mem = k->to<IR::Member>();
-            auto name = mem->expr->toString();
-            return stringRepr(name);
+        } else if (k->is<IR::Member>()) {
+             // used to process const entries of serEnum
+             auto mem = k->to<IR::Member>();
+             if (mem->type->is<IR::Type_SerEnum>()) {
+                 auto se = mem->type->to<IR::Type_SerEnum>();
+                 auto w = se->type->width_bits();
+                 for (auto m : se->members) {
+                     auto smem = m->to<IR::SerEnumMember>();
+                     if (smem->name == mem->member.name) {
+                         auto type = smem->value->to<IR::Constant>();
+                         return stringRepr(type, w);
+                     }
+                 }
+             }
         } else {
             ::error("%1% invalid key expression", k);
             return boost::none;
