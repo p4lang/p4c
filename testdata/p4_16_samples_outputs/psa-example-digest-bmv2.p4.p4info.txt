@@ -113,7 +113,7 @@ actions {
   params {
     id: 2
     name: "serEnumT"
-    bitwidth: 16
+    bitwidth: 112
   }
 }
 digests {
