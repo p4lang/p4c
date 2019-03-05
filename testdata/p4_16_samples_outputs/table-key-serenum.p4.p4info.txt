@@ -10,6 +10,7 @@ tables {
   match_fields {
     id: 1
     name: "h.eth.type"
+    bitwidth: 16
     match_type: EXACT
   }
   action_refs {

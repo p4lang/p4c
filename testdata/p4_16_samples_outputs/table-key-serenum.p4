@@ -54,8 +54,6 @@ control c(inout Headers h, inout standard_metadata_t sm) {
     }
     apply {
         tns.apply();
-        if (h.eth.type == EthTypes.VLAN) {
-        }
     }
 }
 
