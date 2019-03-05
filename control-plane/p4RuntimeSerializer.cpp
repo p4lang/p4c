@@ -197,7 +197,7 @@ struct MatchField {
     const uint32_t bitwidth;  // How wide this field is.
     const IR::IAnnotated* annotations;  // If non-null, any annotations applied
                                         // to this field.
-    const cstring type_name;  // The Type_Newtype expression name of this field.
+    const cstring type_name;  // Optional field, used if field is user-defined type.
 };
 
 struct ActionRef {
@@ -844,7 +844,7 @@ class P4RuntimeAnalyzer {
                 && !paramType->is<IR::Type_Newtype>() &&
                 !paramType->is<IR::Type_SerEnum>()) {
                 ::error("Action parameter %1% has a type which is not "
-                        "bit<>, int<>, bool, type or Serializable Enum", actionParam);
+                        "bit<>, int<>, bool, type or serializable enum", actionParam);
                 continue;
             }
             if (paramType->is<IR::Type_Boolean>()) {
@@ -854,9 +854,8 @@ class P4RuntimeAnalyzer {
                 param->set_bitwidth(w);
                 cstring type_name = getTypeName(paramType);
                 if (type_name) {
-                    auto namedType = new p4configv1::P4NamedType();
+                    auto namedType = param->mutable_type_name();
                     namedType->set_name(type_name);
-                    param->set_allocated_type_name(namedType);
                 }
             } else if (paramType->is<IR::Type_SerEnum>()) {
                 auto se = paramType->to<IR::Type_SerEnum>();
