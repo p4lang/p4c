@@ -125,6 +125,20 @@ void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool
     }
 }
 
+Util::JsonArray* HeaderConverter::addHeaderUnionFields(
+    cstring hdrName, const IR::Type_HeaderUnion* type) {
+    auto result = new Util::JsonArray();
+    for (auto uf : type->fields) {
+        auto uft = ctxt->typeMap->getType(uf, true);
+        auto h_name = hdrName + "." + uf->controlPlaneName();
+        auto h_type = uft->to<IR::Type_StructLike>()
+                      ->controlPlaneName();
+        unsigned id = ctxt->json->add_header(h_type, h_name);
+        result->append(id);
+    }
+    return result;
+}
+
 void HeaderConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
     LOG1("Creating stack " << headersStruct);
     for (auto f : headersStruct->fields) {
@@ -148,15 +162,7 @@ void HeaderConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
                     // We have to add separately a header instance for all
                     // headers in the union.  Each instance will be named with
                     // a prefix including the union name, e.g., "u.h"
-                    Util::JsonArray* fields = new Util::JsonArray();
-                    for (auto uf : type->to<IR::Type_HeaderUnion>()->fields) {
-                        auto uft = ctxt->typeMap->getType(uf, true);
-                        auto h_name = hdrName + "." + uf->controlPlaneName();
-                        auto h_type = uft->to<IR::Type_StructLike>()
-                                         ->controlPlaneName();
-                        unsigned id = ctxt->json->add_header(h_type, h_name);
-                        fields->append(id);
-                    }
+                    auto fields = addHeaderUnionFields(hdrName, type->to<IR::Type_HeaderUnion>());
                     id = ctxt->json->add_union(stack_type, fields, hdrName);
                 } else {
                     id = ctxt->json->add_header(stack_type, hdrName);
@@ -335,19 +341,11 @@ Visitor::profile_t HeaderConverter::init_apply(const IR::Node* node) {
                 cstring union_type = ut->controlPlaneName();
                 std::vector<unsigned> union_ids;
                 for (unsigned i=0; i < stack->getSize(); i++) {
-                    Util::JsonArray* unionFields = new Util::JsonArray();
-                    for (auto uf : ut->fields) {
-                        auto uft = ctxt->typeMap->getType(uf, true);
-                        auto h_name = v->name + "[" + Util::toString(i) + "]." +
-                                      uf->controlPlaneName();
-                        auto h_type = uft->to<IR::Type_StructLike>()
-                                      ->controlPlaneName();
-                        unsigned id = ctxt->json->add_header(h_type, h_name);
-                        unionFields->append(id);
-                    }
-
+                    Util::JsonArray* result = new Util::JsonArray();
                     cstring name = v->name + "[" + Util::toString(i) + "]";
-                    auto union_id = ctxt->json->add_union(union_type, unionFields, name);
+                    auto fields = addHeaderUnionFields(name, ut);
+                    result->concatenate(fields);
+                    auto union_id = ctxt->json->add_union(union_type, fields, name);
                     union_ids.push_back(union_id);
                 }
                 ctxt->json->add_header_union_stack(
