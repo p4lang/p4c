@@ -869,6 +869,7 @@ baseType
     : BOOL   { $$ = IR::Type_Boolean::get(); }
     | ERROR  { $$ = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error"))); }
     | BIT    { $$ = IR::Type::Bits::get(@1, 1); }
+    | INT    { $$ = new IR::Type_InfInt(); }
     | BIT "<" INTEGER ">"
       { $$ = IR::Type::Bits::get(@1+@4, parseConstant(@3, $3, 0)->asInt(), false); }
     | INT "<" INTEGER ">"
