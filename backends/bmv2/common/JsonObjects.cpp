@@ -241,7 +241,7 @@ JsonObjects::add_metadata(const cstring& type, const cstring& name) {
 
 void
 JsonObjects::add_header_stack(const cstring& type, const cstring& name,
-                              const unsigned size, std::vector<unsigned>& ids) {
+                              const unsigned size, const std::vector<unsigned>& ids) {
     auto stack = new Util::JsonObject();
     unsigned id = BMV2::nextId("stack");
     stack->emplace("name", name);
@@ -258,7 +258,7 @@ JsonObjects::add_header_stack(const cstring& type, const cstring& name,
 
 void
 JsonObjects::add_header_union_stack(const cstring& type, const cstring& name,
-                                    const unsigned size, std::vector<unsigned>& ids) {
+                                    const unsigned size, const std::vector<unsigned>& ids) {
     auto stack = new Util::JsonObject();
     unsigned id = BMV2::nextId("union_stack");
     stack->emplace("name", name);

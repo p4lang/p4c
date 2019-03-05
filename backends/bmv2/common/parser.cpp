@@ -142,12 +142,9 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
 
                 if (argCount == 2) {
                     auto arg2 = mce->arguments->at(1);
-                    auto jexpr = ctxt->conv->convert(arg2->expression, true, false);
-                    auto rwrap = new Util::JsonObject();
                     // The spec says that this must always be wrapped in an expression
-                    rwrap->emplace("type", "expression");
-                    rwrap->emplace("value", jexpr);
-                    params->append(rwrap);
+                    auto jexpr = ctxt->conv->convert(arg2->expression, true, true);
+                    params->append(jexpr);
                 }
                 return result;
             } else if (extmeth->method->name.name == corelib.packetIn.lookahead.name) {
