@@ -642,7 +642,10 @@ getMatchType(cstring matchTypeName) {
 
 /*
  * This function supports a deeply nested mix of Type_Newtype and typedef.
- *The function also supported Type_Bits.
+ * The function also supported Type_Bits.
+ * TODO: Integrate with sizeof PR when it gets checked in. Right now, I
+ * it is not positive if the sizeof PR will solve all cases of daisy-chains
+ * of typedef and type which is supported here.
 */
 static uint32_t
 getTypeWidth(const IR::Type* type, TypeMap* typeMap, ReferenceMap* refMap) {

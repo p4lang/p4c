@@ -258,6 +258,7 @@ type_info {
     key: "MySerEnum1"
     value {
       underlying_type {
+        bitwidth: 8
       }
       members {
         name: "foo"
