@@ -643,7 +643,7 @@ getMatchType(cstring matchTypeName) {
 /*
  * This function supports a deeply nested mix of Type_Newtype and typedef.
  * The function also supported Type_Bits.
- * TODO: Integrate with sizeof PR when it gets checked in. Right now, I
+ * TODO(hemant): Integrate with sizeof PR when it gets checked in. Right now,
  * it is not positive if the sizeof PR will solve all cases of daisy-chains
  * of typedef and type which is supported here.
 */
@@ -977,9 +977,8 @@ class P4RuntimeAnalyzer {
             else
                 match_field->set_other_match_type(field.other_match_type);
             if (field.type_name) {
-                auto namedType = new p4configv1::P4NamedType();
+                auto namedType = match_field->mutable_type_name();
                 namedType->set_name(field.type_name);
-                match_field->set_allocated_type_name(namedType);
             }
         }
 
