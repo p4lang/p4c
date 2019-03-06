@@ -180,6 +180,8 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/psa-fwd-bmv2.p4
   # This reads stack.next
   testdata/p4_16_samples/issue692-bmv2.p4
+  # This test uses computations in the verify/update checksum controls - unsupported
+  testdata/p4_16_samples/issue1756-bmv2.p4
   )
 
 if (HAVE_SIMPLE_SWITCH)
