@@ -1551,14 +1551,6 @@ class P4RuntimeEntriesConverter {
         return stringReprConstant(v, width);
     }
 
-    boost::optional<std::string> stringRepr(cstring value) const {
-        if (strlen(value) == 0) {
-           ::error("%1%: P4Runtime does not support zero len in match key", value);
-           return boost::none;
-        }
-        return std::string(value);
-    }
-
     /// We represent all static table entries as one P4Runtime WriteRequest object
     p4v1::WriteRequest *entries;
     /// The symbols used in the API and their ids.
