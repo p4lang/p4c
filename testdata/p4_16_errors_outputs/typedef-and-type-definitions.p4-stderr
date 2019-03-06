@@ -1,3 +1,6 @@
+typedef-and-type-definitions.p4(112): error: intT_t: `type' can only be applied to base types or tuple types
+type int intT_t;
+         ^^^^^^
 typedef-and-type-definitions.p4(115): error: vT_t: `type' can only be applied to base types or tuple types
 type varbit<8> vT_t; // error
                ^^^^

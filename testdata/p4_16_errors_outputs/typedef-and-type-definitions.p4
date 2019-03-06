@@ -27,6 +27,7 @@ enum bit<7> serializable_enum1_t {
     D = 8
 }
 
+typedef int intD_t;
 typedef bit<8> bD_t;
 typedef int<8> iD_t;
 typedef varbit<8> vD_t;
@@ -50,6 +51,7 @@ typedef struct PointA_t {
 PointAD_t;
 typedef tuple<bit<8>, bit<17>> Tuple1D_t;
 typedef tuple<bit<8>, varbit<17>> Tuple2D_t;
+type int intT_t;
 type bit<8> bT_t;
 type int<8> iT_t;
 type varbit<8> vT_t;

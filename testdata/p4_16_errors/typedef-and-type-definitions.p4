@@ -60,11 +60,9 @@ enum bit<7> serializable_enum1_t {
 // typdef
 //////////////////////////////////////////////////////////////////////
 
-// int, void, match_kind cause syntax error that causes compiler to
+// void, match_kind cause syntax error that causes compiler to
 // stop immediately without looking for further errors.
 
-// syntax error, unexpected IDENTIFIER, expecting <
-//typedef int        intD_t;
 // syntax error, unexpected VOID, expecting ENUM or HEADER or HEADER_UNION or STRUCT
 //typedef void       voidD_t;
 //syntax error, unexpected MATCH_KIND, expecting ENUM or HEADER or HEADER_UNION or STRUCT
@@ -73,6 +71,8 @@ enum bit<7> serializable_enum1_t {
 // The compiler allows all of the typedef definitions below, without
 // error.
 
+
+typedef int        intD_t;
 typedef bit<8>     bD_t;
 typedef int<8>     iD_t;
 typedef varbit<8>  vD_t;
@@ -94,11 +94,9 @@ typedef tuple<bit<8>, varbit<17> > Tuple2D_t;
 // type
 //////////////////////////////////////////////////////////////////////
 
-// int, void, match_kind cause syntax error that causes compiler to
+// void, match_kind cause syntax error that causes compiler to
 // stop immediately without looking for further errors.
 
-// syntax error, unexpected IDENTIFIER, expecting <
-//type    int        intT_t;
 // syntax error, unexpected VOID, expecting ENUM or HEADER or HEADER_UNION or STRUCT
 //type    void       voidT_t;
 // syntax error, unexpected MATCH_KIND, expecting ENUM or HEADER or HEADER_UNION or STRUCT
@@ -110,6 +108,8 @@ typedef tuple<bit<8>, varbit<17> > Tuple2D_t;
 
 // error: <type_name>: 'type' can only be applied to base types or tuple types
 
+
+type    int        intT_t;
 type    bit<8>     bT_t;
 type    int<8>     iT_t;
 type    varbit<8>  vT_t;  // error
