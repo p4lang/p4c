@@ -648,48 +648,11 @@ getMatchType(cstring matchTypeName) {
  * of typedef and type which is supported here.
 */
 static uint32_t
-getTypeWidth(const IR::Type* type, TypeMap* typeMap, ReferenceMap* refMap) {
+getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
     uint32_t w = 0;
     if (type == nullptr)
         return w;
-
-    LOG3(">> " << type->getP4Type());
-    if (type->is<IR::Type_SerEnum>()) {
-        auto se = type->to<IR::Type_SerEnum>();
-        auto type = se->type;
-        return type->width_bits();
-    }
-    const IR::Type* newType = type;
-    while (newType->is<IR::Type_Newtype>())
-        newType = newType->to<IR::Type_Newtype>()->type;
-    while (newType->is<IR::Type_Typedef>())
-        newType = newType->to<IR::Type_Typedef>()->type;
-
-    LOG3("After while " << newType->getP4Type());
-    if (newType->is<IR::Type_Bits>()) {
-        w = newType->width_bits();
-        LOG3("First bits " << type->getP4Type());
-        return w;
-    } else if (newType->is<IR::Type_Name>()) {
-        auto n = newType->to<IR::Type_Name>();
-        auto canon = typeMap->getTypeType(n, true);
-        if (canon->is<IR::Type_Bits>()) {
-            auto k = canon->to<IR::Type_Bits>();
-            w = k->width_bits();
-            LOG3("Second bits " << type->getP4Type());
-            return w;
-        } else {
-            auto decl = refMap->getDeclaration(n->path, true);
-            LOG3("Recursion " << n->path);
-            if (decl->is<IR::Type_Newtype>())
-                w = getTypeWidth(decl->to<IR::Type_Newtype>(), typeMap, refMap);
-            else if (decl->is<IR::Type_Typedef>())
-                w = getTypeWidth(decl->to<IR::Type_Typedef>(), typeMap, refMap);
-            return w;
-        }
-    }
-    LOG3("End " << type->getP4Type());
-    return type->width_bits();
+    return typeMap->minWidthBits(type, nullptr);
 }
 
 /*
@@ -744,7 +707,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
         BUG_CHECK(matchFieldType != nullptr,
                   "Couldn't determine type for key element %1%", keyElement);
         type_name = getTypeName(matchFieldType);
-        uint32_t w = getTypeWidth(matchFieldType, typeMap, refMap);
+        uint32_t w = getTypeWidth(matchFieldType, typeMap);
         matchFields.push_back(MatchField{*matchFieldName, *matchType, matchTypeName,
                                    w, keyElement->to<IR::IAnnotated>(), type_name});
     }
@@ -858,7 +821,7 @@ class P4RuntimeAnalyzer {
             if (paramType->is<IR::Type_Boolean>()) {
                 param->set_bitwidth(1);
             } else if (paramType->is<IR::Type_Newtype>()) {
-                auto w = getTypeWidth(paramType, typeMap, refMap);
+                auto w = getTypeWidth(paramType, typeMap);
                 param->set_bitwidth(w);
                 cstring type_name = getTypeName(paramType);
                 if (type_name) {
@@ -912,7 +875,7 @@ class P4RuntimeAnalyzer {
                       fieldType->is<IR::Type_Newtype>()),
                       "Header field %1% has a type which is not bit<>,int<>, or type",
                       headerField);
-            auto w = getTypeWidth(fieldType, typeMap, refMap);
+            auto w = getTypeWidth(fieldType, typeMap);
             metadata->set_bitwidth(w);
         }
     }

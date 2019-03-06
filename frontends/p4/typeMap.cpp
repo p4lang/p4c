@@ -337,4 +337,20 @@ int TypeMap::minWidthBits(const IR::Type* type, const IR::Node* errorPosition) {
     return -1;
 }
 
+int TypeMap::keyElementValid(const IR::Type* type, const IR::Node* errorPosition) {
+    auto t = getTypeType(type, true);
+    if (auto tb = t->to<IR::Type_Bits>()) {
+        return tb->width_bits();
+    } else if (auto te = t->to<IR::Type_SerEnum>()) {
+        return keyElementValid(te->type, errorPosition);
+    } else if (t->is<IR::Type_Boolean>()) {
+        return 1;
+    } else if (auto tnt = t->to<IR::Type_Newtype>()) {
+        return keyElementValid(tnt->type, errorPosition);
+    }
+
+    ::error("%1%: width not well-defined", errorPosition);
+    return -1;
+}
+
 }  // namespace P4

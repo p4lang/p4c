@@ -94,6 +94,8 @@ class TypeMap final : public ProgramMap {
     /// The minimum width in bits of this type.  If the width is not
     /// well-defined this will report an error and return -1.
     int minWidthBits(const IR::Type* type, const IR::Node* errorPosition);
+    /// Used by typeChecker to validate keyElement.
+    int keyElementValid(const IR::Type* type, const IR::Node* errorPosition);
 };
 }  // namespace P4
 
