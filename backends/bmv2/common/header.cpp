@@ -125,6 +125,20 @@ void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool
     }
 }
 
+Util::JsonArray* HeaderConverter::addHeaderUnionFields(
+    cstring hdrName, const IR::Type_HeaderUnion* type) {
+    auto result = new Util::JsonArray();
+    for (auto uf : type->fields) {
+        auto uft = ctxt->typeMap->getType(uf, true);
+        auto h_name = hdrName + "." + uf->controlPlaneName();
+        auto h_type = uft->to<IR::Type_StructLike>()
+                      ->controlPlaneName();
+        unsigned id = ctxt->json->add_header(h_type, h_name);
+        result->append(id);
+    }
+    return result;
+}
+
 void HeaderConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
     LOG1("Creating stack " << headersStruct);
     for (auto f : headersStruct->fields) {
@@ -135,18 +149,33 @@ void HeaderConverter::addHeaderStacks(const IR::Type_Struct* headersStruct) {
         auto stack_name = f->controlPlaneName();
         auto stack_size = stack->getSize();
         auto type = ctxt->typeMap->getTypeType(stack->elementType, true);
-        BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
-        auto ht = type->to<IR::Type_Header>();
-        addHeaderType(ht);
-        cstring stack_type = stack->elementType->to<IR::Type_Header>()
-                                               ->controlPlaneName();
-        std::vector<unsigned> ids;
-        for (unsigned i = 0; i < stack_size; i++) {
-            cstring hdrName = f->controlPlaneName() + "[" + Util::toString(i) + "]";
-            auto id = ctxt->json->add_header(stack_type, hdrName);
-            ids.push_back(id);
+        bool isUnion = type->is<IR::Type_HeaderUnion>();
+        if (type->is<IR::Type_Header>() || isUnion) {
+            auto ht = type->to<IR::Type_StructLike>();
+            addHeaderType(ht);
+            cstring stack_type = ht->controlPlaneName();
+            std::vector<unsigned> ids;
+            for (unsigned i = 0; i < stack_size; i++) {
+                cstring hdrName = f->controlPlaneName() + "[" + Util::toString(i) + "]";
+                int id;
+                if (isUnion) {
+                    // We have to add separately a header instance for all
+                    // headers in the union.  Each instance will be named with
+                    // a prefix including the union name, e.g., "u.h"
+                    auto fields = addHeaderUnionFields(hdrName, type->to<IR::Type_HeaderUnion>());
+                    id = ctxt->json->add_union(stack_type, fields, hdrName);
+                } else {
+                    id = ctxt->json->add_header(stack_type, hdrName);
+                }
+                ids.push_back(id);
+            }
+            if (isUnion)
+                ctxt->json->add_header_union_stack(stack_type, stack_name, stack_size, ids);
+            else
+                ctxt->json->add_header_stack(stack_type, stack_name, stack_size, ids);
+        } else {
+            BUG("%1%: unexpected type in stack", type);
         }
-        ctxt->json->add_header_stack(stack_type, stack_name, stack_size, ids);
     }
 }
 
@@ -296,18 +325,34 @@ Visitor::profile_t HeaderConverter::init_apply(const IR::Node* node) {
             addHeaderType(st);
         } else if (auto stack = type->to<IR::Type_Stack>()) {
             auto type = ctxt->typeMap->getTypeType(stack->elementType, true);
-            BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
-            auto ht = type->to<IR::Type_Header>();
-            addHeaderType(ht);
-            cstring header_type = stack->elementType->to<IR::Type_Header>()
-                                                    ->controlPlaneName();
-            std::vector<unsigned> header_ids;
-            for (unsigned i=0; i < stack->getSize(); i++) {
-                cstring name = v->name + "[" + Util::toString(i) + "]";
-                auto header_id = ctxt->json->add_header(header_type, name);
-                header_ids.push_back(header_id);
+            if (type->is<IR::Type_Header>()) {
+                auto ht = type->to<IR::Type_Header>();
+                addHeaderType(ht);
+                cstring header_type = stack->elementType->to<IR::Type_Header>()
+                                      ->controlPlaneName();
+                std::vector<unsigned> header_ids;
+                for (unsigned i=0; i < stack->getSize(); i++) {
+                    cstring name = v->name + "[" + Util::toString(i) + "]";
+                    auto header_id = ctxt->json->add_header(header_type, name);
+                    header_ids.push_back(header_id);
+                }
+                ctxt->json->add_header_stack(header_type, v->name, stack->getSize(), header_ids);
+            } else if (auto ut = type->to<IR::Type_HeaderUnion>()) {
+                cstring union_type = ut->controlPlaneName();
+                std::vector<unsigned> union_ids;
+                for (unsigned i=0; i < stack->getSize(); i++) {
+                    Util::JsonArray* result = new Util::JsonArray();
+                    cstring name = v->name + "[" + Util::toString(i) + "]";
+                    auto fields = addHeaderUnionFields(name, ut);
+                    result->concatenate(fields);
+                    auto union_id = ctxt->json->add_union(union_type, fields, name);
+                    union_ids.push_back(union_id);
+                }
+                ctxt->json->add_header_union_stack(
+                    union_type, v->name, stack->getSize(), union_ids);
+            } else {
+                BUG("%1: unexpected stack element type", type);
             }
-            ctxt->json->add_header_stack(header_type, v->name, stack->getSize(), header_ids);
         } else if (type->is<IR::Type_Varbits>()) {
             // For each varbit variable we synthesize a separate header instance,
             // since we cannot have multiple varbit fields in a single header.

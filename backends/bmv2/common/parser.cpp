@@ -73,56 +73,88 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
             auto extmeth = minst->to<P4::ExternMethod>();
             if (extmeth->method->name.name == corelib.packetIn.extract.name) {
                 int argCount = mce->arguments->size();
-                if (argCount == 1 || argCount == 2) {
-                    cstring ename = argCount == 1 ? "extract" : "extract_VL";
-                    result->emplace("op", ename);
-                    auto arg = mce->arguments->at(0);
-                    auto argtype = ctxt->typeMap->getType(arg->expression, true);
-                    if (!argtype->is<IR::Type_Header>()) {
-                        ::error(ErrorType::ERR_INVALID,
-                                "%1%: extract only accepts arguments with header types, not %2%",
-                                arg, argtype);
-                        return result;
-                    }
-                    auto param = new Util::JsonObject();
-                    params->append(param);
-                    cstring type;
-                    Util::IJson* j = nullptr;
+                if (argCount < 1 || argCount > 2) {
+                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                            "%1%: unknown extract method", mce);
+                    return result;
+                }
 
-                    if (arg->expression->is<IR::Member>()) {
-                        auto mem = arg->expression->to<IR::Member>();
-                        auto baseType = ctxt->typeMap->getType(mem->expr, true);
-                        if (baseType->is<IR::Type_Stack>()) {
-                            if (mem->member == IR::Type_Stack::next) {
-                                type = "stack";
-                                j = ctxt->conv->convert(mem->expr);
-                            } else {
-                                BUG("%1%: unsupported", mem);
+                cstring ename = argCount == 1 ? "extract" : "extract_VL";
+                result->emplace("op", ename);
+                auto arg = mce->arguments->at(0);
+                auto argtype = ctxt->typeMap->getType(arg->expression, true);
+                if (!argtype->is<IR::Type_Header>()) {
+                    ::error(ErrorType::ERR_INVALID,
+                            "%1%: extract only accepts arguments with header types, not %2%",
+                            arg, argtype);
+                    return result;
+                }
+                auto param = new Util::JsonObject();
+                params->append(param);
+                cstring type;
+                Util::IJson* j = nullptr;
+
+                if (auto mem = arg->expression->to<IR::Member>()) {
+                    auto baseType = ctxt->typeMap->getType(mem->expr, true);
+                    if (baseType->is<IR::Type_Stack>()) {
+                        if (mem->member == IR::Type_Stack::next) {
+                            // stack.next
+                            type = "stack";
+                            j = ctxt->conv->convert(mem->expr);
+                        } else {
+                            BUG("%1%: unsupported", mem);
+                        }
+                    } else if (baseType->is<IR::Type_HeaderUnion>()) {
+                        auto parent = mem->expr->to<IR::Member>();
+                        if (parent != nullptr) {
+                            auto parentType = ctxt->typeMap->getType(parent->expr, true);
+                            if (parentType->is<IR::Type_Stack>()) {
+                                // stack.next.unionfield
+                                if (parent->member == IR::Type_Stack::next) {
+                                    type = "union_stack";
+                                    j = ctxt->conv->convert(parent->expr);
+                                    Util::JsonArray *a;
+                                    if (j->is<Util::JsonArray>()) {
+                                        a = j->to<Util::JsonArray>()->clone();
+                                    } else if (j->is<Util::JsonObject>()) {
+                                        a = new Util::JsonArray();
+                                        a->push_back(j->to<Util::JsonObject>()->get("value"));
+                                    } else {
+                                        BUG("unexpected");
+                                    }
+                                    a->append(mem->member.name);
+                                    auto j0 = new Util::JsonObject();
+                                    j = j0->emplace("value", a);
+                                } else {
+                                    BUG("%1%: unsupported", mem);
+                                }
                             }
                         }
                     }
-                    if (j == nullptr) {
-                        type = "regular";
-                        j = ctxt->conv->convert(arg->expression);
-                    }
-                    auto value = j->to<Util::JsonObject>()->get("value");
-                    param->emplace("type", type);
-                    param->emplace("value", value);
-
-                    if (argCount == 2) {
-                        auto arg2 = mce->arguments->at(1);
-                        auto jexpr = ctxt->conv->convert(arg2->expression, true, false);
-                        auto rwrap = new Util::JsonObject();
-                        // The spec says that this must always be wrapped in an expression
-                        rwrap->emplace("type", "expression");
-                        rwrap->emplace("value", jexpr);
-                        params->append(rwrap);
-                    }
-                    return result;
                 }
+                if (j == nullptr) {
+                    type = "regular";
+                    j = ctxt->conv->convert(arg->expression);
+                }
+                auto value = j->to<Util::JsonObject>()->get("value");
+                param->emplace("type", type);
+                param->emplace("value", value);
+
+                if (argCount == 2) {
+                    auto arg2 = mce->arguments->at(1);
+                    // The spec says that this must always be wrapped in an expression.
+                    // However, calling convert with the third argument set to 'true'
+                    // does not do that.
+                    auto jexpr = ctxt->conv->convert(arg2->expression, true, false);
+                    auto rwrap = new Util::JsonObject();
+                    rwrap->emplace("type", "expression");
+                    rwrap->emplace("value", jexpr);
+                    params->append(rwrap);
+                }
+                return result;
             } else if (extmeth->method->name.name == corelib.packetIn.lookahead.name) {
                 // bare lookahead call -- should flag an error if there's not enough
-                // pakcet data, but ignore for now.
+                // packet data, but ignore for now.
                 return nullptr;
             }
         } else if (minst->is<P4::ExternFunction>()) {
