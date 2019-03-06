@@ -296,9 +296,6 @@ bool TypeSpecConverter::preorder(const IR::Type_SerEnum* type) {
         if (enums->find(name) == enums->end()) {
             auto enumTypeSpec = new p4configv1::P4SerializableEnumTypeSpec();
             auto bitTypeSpec = enumTypeSpec->mutable_underlying_type();
-            // TODO(hemant): is the bitwidth, the width of the enum such
-            // as <bit<16> or should we multiply 16 times number of members
-            // in the enum?
             bitTypeSpec->set_bitwidth(type->type->width_bits());
             for (auto m : type->members) {
                 auto member = enumTypeSpec->add_members();
