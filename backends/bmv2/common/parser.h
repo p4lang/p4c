@@ -30,6 +30,7 @@ class JsonObjects;
 
 class ParserConverter : public Inspector {
     ConversionContext*   ctxt;
+    cstring              name;
     P4::P4CoreLibrary&   corelib;
 
  protected:
@@ -46,8 +47,8 @@ class ParserConverter : public Inspector {
 
  public:
     bool preorder(const IR::P4Parser* p) override;
-    explicit ParserConverter(ConversionContext* ctxt) :
-        ctxt(ctxt), corelib(P4::P4CoreLibrary::instance) {
+    explicit ParserConverter(ConversionContext* ctxt, cstring name = "parser")
+        : ctxt(ctxt), name(name), corelib(P4::P4CoreLibrary::instance) {
         setName("ParserConverter");
     }
 };

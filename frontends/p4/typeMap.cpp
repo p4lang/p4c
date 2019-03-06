@@ -284,7 +284,6 @@ bool TypeMap::implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to) 
     return false;
 }
 
-
 // Used for tuples and stacks only
 const IR::Type* TypeMap::getCanonical(const IR::Type* type) {
     // Currently a linear search; hopefully this won't be too expensive in practice
@@ -304,5 +303,38 @@ const IR::Type* TypeMap::getCanonical(const IR::Type* type) {
     return type;
 }
 
+int TypeMap::minWidthBits(const IR::Type* type, const IR::Node* errorPosition) {
+    auto t = getTypeType(type, true);
+    if (auto tb = t->to<IR::Type_Bits>()) {
+        return tb->width_bits();
+    } else if (auto ts = t->to<IR::Type_StructLike>()) {
+        int result = 0;
+        bool isUnion = t->is<IR::Type_HeaderUnion>();
+        for (auto f : ts->fields) {
+            int w = minWidthBits(f->type, errorPosition);
+            if (w < 0)
+                return w;
+            if (isUnion)
+                result = std::max(w, result);
+            else
+                result = result + w;
+        }
+        return result;
+    } else if (auto ths = t->to<IR::Type_Stack>()) {
+        auto w = minWidthBits(ths->elementType, errorPosition);
+        return w * ths->getSize();
+    } else if (auto te = t->to<IR::Type_SerEnum>()) {
+        return minWidthBits(te->type, errorPosition);
+    } else if (t->is<IR::Type_Boolean>()) {
+        return 1;
+    } else if (auto tnt = t->to<IR::Type_Newtype>()) {
+        return minWidthBits(tnt->type, errorPosition);
+    } else if (type->is<IR::Type_Varbits>()) {
+        return 0;
+    }
+
+    ::error("%1%: width not well-defined", errorPosition);
+    return -1;
+}
 
 }  // namespace P4

@@ -1,6 +1,3 @@
-issue764.p4(8): [--Werror=legacy] error: func: cannot infer bitwidth for integer-valued type parameter T
+issue764.p4(8): [--Werror=legacy] error: 5: could not infer a width
         func(5);
-        ^^^^^^^
-issue764.p4(1)
-extern void func<T>(in T x);
-                 ^
+             ^

@@ -1,0 +1,3 @@
+issue1732.p4(5): [--Werror=type-error] error: 2: value must be a match_kind
+    @match(1+1) bit<16> f16;
+           ^^^

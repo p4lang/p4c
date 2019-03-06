@@ -44,7 +44,7 @@ namespace BMV2 {
 class PsaSwitchExpressionConverter : public ExpressionConverter {
  public:
     PsaSwitchExpressionConverter(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                                      ProgramStructure* structure, cstring scalarsName) :
+                                 ProgramStructure* structure, cstring scalarsName) :
     BMV2::ExpressionConverter(refMap, typeMap, structure, scalarsName) { }
 
     void modelError(const char* format, const cstring field) {
