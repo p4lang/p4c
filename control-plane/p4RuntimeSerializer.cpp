@@ -1437,11 +1437,12 @@ class P4RuntimeEntriesConverter {
                      }
                  }
              }
+             ::error("%1% invalid Member key expression", k);
+             return boost::none;
         } else {
             ::error("%1% invalid key expression", k);
             return boost::none;
         }
-        return boost::none;
     }
 
     void addExact(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
