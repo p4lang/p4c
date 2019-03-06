@@ -223,6 +223,8 @@ class StructField : Declaration, IAnnotated {
 }
 
 abstract Type_StructLike : Type_Declaration, ISimpleNamespace, IAnnotated {
+    static const cstring minSizeInBits;
+    static const cstring minSizeInBytes;
     optional Annotations                        annotations = Annotations::empty;
     optional inline IndexedVector<StructField>  fields;
     Annotations getAnnotations() const override { return annotations; }
