@@ -169,7 +169,7 @@ class Type_InfInt : Type, ITypeVar {
     dbprint { out << "int/" << declid; }
     toString { return "int"; }
     operator== { return declid == a.declid; }
-    const Type* getP4Type() const override { return nullptr; }
+    const Type* getP4Type() const override { return this; }
 }
 
 class Type_Dontcare : Type_Base {
@@ -223,6 +223,8 @@ class StructField : Declaration, IAnnotated {
 }
 
 abstract Type_StructLike : Type_Declaration, ISimpleNamespace, IAnnotated {
+    static const cstring minSizeInBits;
+    static const cstring minSizeInBytes;
     optional Annotations                        annotations = Annotations::empty;
     optional inline IndexedVector<StructField>  fields;
     Annotations getAnnotations() const override { return annotations; }

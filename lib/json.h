@@ -111,6 +111,7 @@ class JsonArray final : public IJson, public std::vector<IJson*> {
     friend class Test::TestJson;
  public:
     void serialize(std::ostream& out) const;
+    JsonArray* clone() const { return new JsonArray(*this); }
     JsonArray* append(IJson* value);
     JsonArray* append(mpz_class v) { append(new JsonValue(v)); return this; }
     template<typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
@@ -120,8 +121,13 @@ class JsonArray final : public IJson, public std::vector<IJson*> {
     JsonArray* append(cstring s) { append(new JsonValue(s)); return this; }
     JsonArray* append(const std::string &s) { append(new JsonValue(s)); return this; }
     JsonArray* append(const char* s) { append(new JsonValue(s)); return this; }
+    JsonArray* concatenate(const Util::JsonArray* other) {
+        for (auto v : *other) append(v);
+        return this;
+    }
     JsonArray(std::initializer_list<IJson*> data) : std::vector<IJson*>(data) {} // NOLINT
     JsonArray() = default;
+    JsonArray(std::vector<IJson*> &data) : std::vector<IJson*>(data) {} // NOLINT
 };
 
 class JsonObject final : public IJson, public ordered_map<cstring, IJson*> {

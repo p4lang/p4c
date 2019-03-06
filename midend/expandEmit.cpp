@@ -32,8 +32,7 @@ bool DoExpandEmit::expandArg(
             auto index = new IR::Constant(i);
             auto element = new IR::Argument(
                 arg->srcInfo, arg->name, new IR::ArrayIndex(arg->expression, index));
-            result->push_back(element);
-            resultTypes->push_back(st->elementType);
+            expandArg(st->elementType, element, result, resultTypes);
         }
         return true;
     } else if (auto tup = type->to<IR::Type_Tuple>()) {

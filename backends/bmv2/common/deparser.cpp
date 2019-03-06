@@ -41,26 +41,16 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
                                   "Expected exactly 1 argument for %1%", mc);
                         auto arg = mc->arguments->at(0);
                         auto type = ctxt->typeMap->getType(arg, true);
-                        if (type->is<IR::Type_Stack>()) {
-                            // This branch is in fact never taken, because
-                            // arrays are expanded into elements.
-                            int size = type->to<IR::Type_Stack>()->getSize();
-                            for (int i=0; i < size; i++) {
-                                auto j = ctxt->conv->convert(arg->expression);
-                                auto e = j->to<Util::JsonObject>()->get("value");
-                                BUG_CHECK(e->is<Util::JsonValue>(),
-                                          "%1%: Expected a Json value", e->toString());
-                                cstring ref = e->to<Util::JsonValue>()->getString();
-                                ref += "[" + Util::toString(i) + "]";
-                                result->append(ref);
-                            }
-                        } else if (type->is<IR::Type_Header>()) {
+                        if (type->is<IR::Type_Header>()) {
                             auto j = ctxt->conv->convert(arg->expression);
                             auto val = j->to<Util::JsonObject>()->get("value");
                             result->append(val);
                         } else {
+                            // We don't need to handle other types,
+                            // like header unions or stacks; they were
+                            // expanded by the expandEmit pass.
                             ::error(ErrorType::ERR_UNSUPPORTED,
-                                    "%1%: emit only supports header and stack arguments, not %2%",
+                                    "%1%: emit only supports header arguments, not %2%",
                                     arg, type);
                         }
                     }

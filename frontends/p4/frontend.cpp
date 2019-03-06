@@ -127,7 +127,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
 
     PassManager passes = {
         // Parse annotations
-        &parseAnnotations,
+        new ParseAnnotationBodies(&parseAnnotations, &typeMap),
         new PrettyPrint(options),
         // Simple checks on parsed program
         new ValidateParsedProgram(),

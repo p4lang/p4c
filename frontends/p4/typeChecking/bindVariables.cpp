@@ -2,47 +2,65 @@
 
 namespace P4 {
 
-class FindUntypedInt : public Inspector {
-    const IR::Node *pos;
-    bool preorder(const IR::Node *) override { return pos == nullptr; }
-    bool preorder(const IR::Type *) override { return false; }
-    void postorder(const IR::Constant *c) override { if (c->type->is<IR::Type_InfInt>()) pos = c; }
-    Visitor::profile_t init_apply(const IR::Node *root) override {
-        pos = nullptr;
-        return Inspector::init_apply(root); }
-
+namespace {
+// Reports errors for all sub-expressions which have type InfInt.
+class ErrorOnInfInt : public Inspector {
  public:
-    explicit FindUntypedInt(const IR::Node *n) { n->apply(*this); }
-    operator const IR::Node *() const { return pos; }
+    const TypeMap* typeMap;
+
+    explicit ErrorOnInfInt(const TypeMap* typeMap): typeMap(typeMap) {}
+    void postorder(const IR::Expression *expression) override {
+        auto t = typeMap->getType(expression, true);
+        if (t->is<IR::Type_InfInt>())
+            ::error("%1%: could not infer a width", expression);
+    }
 };
+
+class HasInfInt : public Inspector {
+ public:
+    bool found = false;
+    bool preorder(const IR::Type_Stack* type) override {
+        visit(type->elementType);
+        // We skip the array size, that's a constant
+        return false;
+    }
+    bool preorder(const IR::Annotation*) override {
+        // Ignore constants that may show up in annotations
+        return false;
+    }
+    void postorder(const IR::Type_InfInt*) override { found = true; }
+    static bool find(const IR::Node* node) {
+        HasInfInt hii;
+        node->apply(hii);
+        return hii.found;
+    }
+};
+
+}  // namespace
+
+/// Validate the type of a type variable.  The type must not contain
+/// Type_InfInt inside.
+/// Return nullptr if the type is not suitable to assign to a type variable.
+static const IR::Type* validateType(
+    const IR::Type* type, const TypeMap* typeMap, const IR::Node* errorPosition) {
+    auto repl = type->getP4Type();
+    if (type == nullptr || repl == nullptr || HasInfInt::find(type)) {
+        auto eoi = new ErrorOnInfInt(typeMap);
+        errorPosition->apply(*eoi);
+        return nullptr;
+    }
+    return repl;
+}
 
 /// Lookup a type variable
 const IR::Type* DoBindTypeVariables::getVarValue(
     const IR::Type_Var* var, const IR::Node* errorPosition) const {
-    const IR::Type* rtype = nullptr;
     auto type = typeMap->getSubstitution(var);
-    if (type != nullptr)
-        rtype = type->getP4Type();
-    else
-        rtype = new IR::Type_Dontcare;
-    if (rtype == nullptr) {
-        cstring errorMessage;
-        errorMessage = "%1%: cannot infer type for type parameter %2%";
-        if (type != nullptr) {
-            // FIXME -- what we really want here for the error message is the expression which
-            // caused us to be unable to infer a usable type -- generally an untyped integer
-            // constant in the code.  There's no easy way to extract that, however.  We need
-            // to keep a map<Type_Var, set<Expression>> from type inferencing containing all
-            // the expressions used to infer the type of the Type Var.  For now we use a best
-            // guess trying to print something relevant.
-            if (type->is<IR::Type_InfInt>()) {
-                errorMessage = "%1%: cannot infer bitwidth for integer-valued type parameter %2%";
-            } else if (const IR::Node *pos = FindUntypedInt(errorPosition)) {
-                errorMessage = "%1%: cannot infer bitwidth for untyped integer constant used "
-                               "in type parameter %2%";
-                errorPosition = pos; } }
-        ::error(errorMessage.c_str(), errorPosition, var); }
-    return rtype;  // This may be nullptr
+    if (type == nullptr)
+        return new IR::Type_Dontcare;
+    auto result = validateType(type, typeMap, errorPosition);
+    LOG2("Replacing " << var << " with " << result);
+    return result;
 }
 
 const IR::Node* DoBindTypeVariables::postorder(IR::Expression* expression) {
@@ -64,7 +82,7 @@ const IR::Node* DoBindTypeVariables::postorder(IR::Declaration_Instance* decl) {
         return decl;
     auto typeArgs = new IR::Vector<IR::Type>();
     for (auto p : mt->getTypeParameters()->parameters) {
-        auto type = getVarValue(p, decl);
+        auto type = getVarValue(p, getOriginal());
         if (type == nullptr)
             return decl;
         typeArgs->push_back(type);
@@ -85,7 +103,7 @@ const IR::Node* DoBindTypeVariables::postorder(IR::MethodCallExpression* express
         return expression;
     auto typeArgs = new IR::Vector<IR::Type>();
     for (auto p : mt->getTypeParameters()->parameters) {
-        auto type = getVarValue(p, expression);
+        auto type = getVarValue(p, getOriginal());
         if (type == nullptr)
             return expression;
         typeArgs->push_back(type);
@@ -105,7 +123,7 @@ const IR::Node* DoBindTypeVariables::postorder(IR::ConstructorCallExpression* ex
         return expression;
     auto typeArgs = new IR::Vector<IR::Type>();
     for (auto p : mt->getTypeParameters()->parameters) {
-        auto type = getVarValue(p, expression);
+        auto type = getVarValue(p, getOriginal());
         if (type == nullptr)
             return expression;
         typeArgs->push_back(type);
