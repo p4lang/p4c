@@ -745,7 +745,7 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
         ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
         sourceExpression = cts.convert(sourceExpression);  // sets type
     }
-    if (initType->is<IR::Type_InfInt>()) {
+    if (initType->is<IR::Type_InfInt>() && !destType->is<IR::Type_InfInt>()) {
         sourceExpression = new IR::Cast(destType->getP4Type(), sourceExpression);
         setType(sourceExpression, destType);
         setCompileTimeConstant(sourceExpression);
