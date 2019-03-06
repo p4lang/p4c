@@ -678,8 +678,15 @@ class RunBMV2(object):
     def comparePacket(self, expected, received):
         received = ''.join(ByteToHex(str(received)).split()).upper()
         expected = ''.join(expected.split()).upper()
+        strict_length_check = False
+        if expected[-1] == '$':
+            strict_length_check = True
+            expected = expected[:-1]
         if len(received) < len(expected):
-            reportError("Received packet too short", len(received), "vs", len(expected))
+            reportError("Received packet too short", len(received), "vs",
+                        len(expected), "(in units of hex digits)")
+            reportError("Full expected packet is ", expected)
+            reportError("Full received packet is ", received)
             return FAILURE
         for i in range(0, len(expected)):
             if expected[i] == "*":
@@ -690,6 +697,12 @@ class RunBMV2(object):
                 reportError("Full expected packet is ", expected)
                 reportError("Full received packet is ", received)
                 return FAILURE
+        if strict_length_check and len(received) > len(expected):
+            reportError("Received packet too long", len(received), "vs",
+                        len(expected), "(in units of hex digits)")
+            reportError("Full expected packet is ", expected)
+            reportError("Full received packet is ", received)
+            return FAILURE
         return SUCCESS
     def showLog(self):
         with open(self.folder + "/" + self.switchLogFile + ".txt") as a:

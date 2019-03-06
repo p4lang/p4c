@@ -28,6 +28,8 @@ const cstring IR::Type_Stack::pop_front = "pop_front";
 const cstring IR::Type_Header::isValid = "isValid";
 const cstring IR::Type_Header::setValid = "setValid";
 const cstring IR::Type_Header::setInvalid = "setInvalid";
+const cstring IR::Type_StructLike::minSizeInBits = "minSizeInBits";
+const cstring IR::Type_StructLike::minSizeInBytes = "minSizeInBytes";
 
 const IR::ID IR::Type_Table::hit = ID("hit");
 const IR::ID IR::Type_Table::action_run = ID("action_run");
@@ -42,6 +44,7 @@ const cstring IR::Annotation::optionalAnnotation = "optional";
 const cstring IR::Annotation::pkginfoAnnotation = "pkginfo";
 const cstring IR::Annotation::deprecatedAnnotation = "deprecated";
 const cstring IR::Annotation::synchronousAnnotation = "synchronous";
+const cstring IR::Annotation::matchAnnotation = "match";
 
 int Type_Declaration::nextId = 0;
 int Type_InfInt::nextId = 0;
