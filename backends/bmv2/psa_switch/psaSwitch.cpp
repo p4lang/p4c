@@ -697,7 +697,7 @@ void ExternConverter_Counter::convertExternInstance(
     // first argument to create a counter is just a number, convert and dump to json
     // we get a name from param, type and value from the arguments
     auto attr_obj = new Util::JsonObject();
-    auto arg1 = inst->arguments->at(0)->expression->to<IR::Constant>();
+    auto arg1 = sz->to<IR::Constant>();
     auto param1 = eb->getConstructorParameters()->getParameter(0);
     auto bitwidth = arg1->type->width_bits();
     cstring repr = BMV2::stringRepr(arg1->value, ROUNDUP(bitwidth, 8));
@@ -708,9 +708,15 @@ void ExternConverter_Counter::convertExternInstance(
 
     // second argument is the counter type, this is psa metadata, the converter
     // in conversion context will handle that for us
-    auto arg2 = inst->arguments->at(1)->expression->to<IR::Member>();
+    auto tp = eb->findParameterValue("type");
+    CHECK_NULL(tp);
+    if (!tp->is<IR::Declaration_ID>()) {
+      modelError("%1%: expected a declaration_id", tp->getNode());
+      return;
+    }
+    auto arg2 = tp->to<IR::Declaration_ID>();
     auto param2 = eb->getConstructorParameters()->getParameter(1);
-    auto mem = arg2->member.name;
+    auto mem = arg2->toString();
     auto jsn = ctxt->conv->convertParam(param2, mem);
     arr->append(jsn);
 }
@@ -743,9 +749,15 @@ void ExternConverter_DirectCounter::convertExternInstance(
 
         // Direct Counter only has a single argument, which is psa metadata
         // converter in conversion context will handle this for us
-        auto param = eb->getConstructorParameters()->getParameter(0);
-        auto arg = inst->arguments->at(0)->expression->to<IR::Member>();
-        auto mem = arg->member.name;
+        auto tp = eb->findParameterValue("type");
+        CHECK_NULL(tp);
+        if (!tp->is<IR::Declaration_ID>()) {
+          modelError("%1%: expected a declaration_id", tp->getNode());
+          return;
+        }
+        auto arg = tp->to<IR::Declaration_ID>();
+        auto param = eb->getConstructorParameters()->getParameter(1);
+        auto mem = arg->toString();
         auto jsn = ctxt->conv->convertParam(param, mem);
         arr->append(jsn);
     }

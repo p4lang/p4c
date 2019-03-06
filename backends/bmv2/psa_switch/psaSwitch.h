@@ -47,6 +47,11 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
                                       ProgramStructure* structure, cstring scalarsName) :
     BMV2::ExpressionConverter(refMap, typeMap, structure, scalarsName) { }
 
+    void modelError(const char* format, const cstring field) {
+      ::error(format, field);
+      ::error("Invalid metadata parameter value");
+    }
+
     /**
      * Checks if a Parameter is of type PSA_CounterType_t returns true
      * if it is, false otherwise.
@@ -69,9 +74,12 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
           } else if (fieldName == "PACKETS") {
             cstring repr = BMV2::stringRepr(1, ROUNDUP(bitwidth, 32));
             jsn->emplace("value", repr);
-          } else {
+          } else if (fieldName == "PACKETS_AND_BYTES") {
             cstring repr = BMV2::stringRepr(2, ROUNDUP(bitwidth, 32));
             jsn->emplace("value", repr);
+          } else {
+            modelError("%1%: Exptected a PSA_CounterType_t", fieldName);
+            return nullptr;
           }
           return jsn;
         }
