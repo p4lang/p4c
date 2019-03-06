@@ -3,9 +3,16 @@ header H {
 }
 
 type bit<32> T;
+enum bit<16> E {
+    z = 16w0
+}
+
 header H1 {
     bit<16> f;
+    bit<8>  minSizeInBytes;
+    bit<8>  minSizeInBits;
     T       f1;
+    E       e;
 }
 
 struct Flags {
@@ -15,13 +22,15 @@ struct Flags {
 }
 
 header Nested {
-    Flags   flags;
-    bit<32> b;
+    Flags      flags;
+    bit<32>    b;
+    varbit<32> v;
 }
 
 struct S {
-    H  h1;
-    H1 h2;
+    H    h1;
+    H1   h2;
+    H[3] h3;
 }
 
 header_union HU {

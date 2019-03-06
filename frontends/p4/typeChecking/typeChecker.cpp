@@ -1972,12 +1972,6 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
     if (ltype == nullptr || rtype == nullptr)
         return expression;
 
-    if (!ltype->is<IR::Type_Bits>()) {
-        typeError("%1% left operand of shift must be a numeric type, not %2%",
-                  expression, ltype->toString());
-        return expression;
-    }
-
     auto lt = ltype->to<IR::Type_Bits>();
     if (expression->right->is<IR::Constant>()) {
         auto cst = expression->right->to<IR::Constant>();
@@ -1990,7 +1984,7 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
             typeError("%1%: Negative shift amount %2%", expression, cst);
             return expression;
         }
-        if (shift >= lt->size)
+        if (lt != nullptr && shift >= lt->size)
             ::warning(ErrorType::WARN_OVERFLOW, "%1%: shifting value with %2% bits by %3%",
                       expression, lt->size, shift);
     }
@@ -1998,6 +1992,12 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
     if (rtype->is<IR::Type_Bits>() && rtype->to<IR::Type_Bits>()->isSigned) {
         typeError("%1%: Shift amount must be an unsigned number",
                   expression->right);
+        return expression;
+    }
+
+    if (!lt && !ltype->is<IR::Type_InfInt>()) {
+        typeError("%1% left operand of shift must be a numeric type, not %2%",
+                  expression, ltype->toString());
         return expression;
     }
 
@@ -2026,6 +2026,13 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
     } else if (br == nullptr && !rtype->is<IR::Type_InfInt>()) {
         typeError("%1%: cannot be applied to %2% of type %3%",
                   expression->getStringOp(), expression->right, rtype->toString());
+        return expression;
+    } else if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_InfInt>()) {
+        auto t = new IR::Type_InfInt();
+        setType(getOriginal(), t);
+        setType(expression, t);
+        setCompileTimeConstant(expression);
+        setCompileTimeConstant(getOriginal<IR::Expression>());
         return expression;
     }
 
@@ -2468,7 +2475,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 return expression;
             }
         }
-        if (inMethod && (member == IR::Type_Header::sizeInBits)) {
+        if (inMethod && (member == IR::Type_Header::minSizeInBits ||
+                         member == IR::Type_Header::minSizeInBytes)) {
             // Built-in method
             auto type = new IR::Type_Method(new IR::Type_InfInt(), new IR::ParameterList());
             auto ctype = canonicalize(type);
@@ -2535,7 +2543,6 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         return expression;
     }
 
-
     if (type->is<IR::Type_Stack>()) {
         if (member == IR::Type_Stack::next ||
             member == IR::Type_Stack::last) {
@@ -2578,6 +2585,17 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 return expression;
             setType(getOriginal(), canon);
             setType(expression, canon);
+            return expression;
+        } else if (inMethod && (
+            member == IR::Type_StructLike::minSizeInBytes ||
+            member == IR::Type_StructLike::minSizeInBits)) {
+            // Built-in method
+            auto type = new IR::Type_Method(new IR::Type_InfInt(), new IR::ParameterList());
+            auto ctype = canonicalize(type);
+            if (ctype == nullptr)
+                return expression;
+            setType(getOriginal(), ctype);
+            setType(expression, ctype);
             return expression;
         }
     }
@@ -2888,15 +2906,19 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             inActionsList = true;
         return actionCall(inActionsList, expression);
     } else {
-        // Constant-fold sizeInBits
+        // Constant-fold minSizeInBits, minSizeInBytes
         if (auto mem = expression->method->to<IR::Member>()) {
             auto type = typeMap->getType(mem->expr, true);
-            if (mem->member == IR::Type_StructLike::sizeInBits &&
-                type->is<IR::Type_StructLike>()) {
-                LOG3("Folding sizeInBits");
-                int w = typeMap->width_bits(type, expression);
+            if ((mem->member == IR::Type_StructLike::minSizeInBits ||
+                 mem->member == IR::Type_StructLike::minSizeInBytes) &&
+                (type->is<IR::Type_StructLike>() ||
+                 type->is<IR::Type_Stack>())) {
+                LOG3("Folding " << mem->member);
+                int w = typeMap->minWidthBits(type, expression);
                 if (w < 0)
                     return expression;
+                if (mem->member == IR::Type_StructLike::minSizeInBytes)
+                    w = ROUNDUP(w, 8);
                 auto result = new IR::Constant(w);
                 auto tt = new IR::Type_Type(result->type);
                 setType(result->type, tt);
