@@ -868,8 +868,7 @@ class P4RuntimeAnalyzer {
             } else if (paramType->is<IR::Type_SerEnum>()) {
                 auto se = paramType->to<IR::Type_SerEnum>();
                 auto type = se->type;
-                auto sz = se->members.size();
-                param->set_bitwidth(sz*type->width_bits());
+                param->set_bitwidth(type->width_bits());
             } else {
                 param->set_bitwidth(paramType->width_bits());
             }
