@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -281,6 +281,8 @@ const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
             expr->e0 = shift_of;
             expr->e1 = new IR::Constant(hi + shift_amt);
             expr->e2 = new IR::Constant(lo + shift_amt); }
+        if (hi + shift_amt <= 0)
+            return new IR::Constant(IR::Type_Bits::get(hi - lo + 1), 0);
         if (lo + shift_amt < 0) {
             expr->e0 = shift_of;
             expr->e1 = new IR::Constant(hi + shift_amt);
