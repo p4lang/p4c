@@ -20,7 +20,7 @@ parser MyParser(packet_in packet,
     state start {
         packet.advance(8);
         packet.extract(hdr.byte);
-        packet.advance((bit<32>)hdr.byte.byte);
+        packet.advance((bit<32>)(hdr.byte.byte * 8));
         transition accept;
     }
 }
