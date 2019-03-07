@@ -658,31 +658,64 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
 }
 
 /*
- * Function only supports single-line type statement and if p4runtime Annotation
- * is detected, the function returns a cstring for use as type_name
+ * Function checks if type->name is included in p4runtime_translated
+ * annotation or not.
 */
-static cstring
-getTypeName(const IR::Type* type) {
-    cstring type_name = nullptr;
-    if (type == nullptr)
-        return type_name;
-    if (type->is<IR::Type_Newtype>()) {
-        auto newt = type->to<IR::Type_Newtype>();
-        type_name = newt->name;
-    }
-    cstring uri;
+static bool
+isAnnotated(const IR::Type_Newtype* type) {
     auto ann = type->getAnnotation(IR::Annotation::p4runtimeTranslationAnnotation);
     if (ann != nullptr) {
         int i = 0;
+        cstring uri;
         for (auto a : ann->body) {
             if (!i++) {
                 uri = a->text;
-                if (uri.endsWith(type_name))
-                    return type_name;
+                if (uri.endsWith(type->name))
+                    return true;
             }
          }
     }
-    return type_name;
+    return false;
+}
+
+/*
+ * The function returns a cstring for use as type_name for any nested type.
+*/
+static cstring
+getTypeName(const IR::Type* type, std::vector<const IR::Type_Newtype*>& list,
+            TypeMap* typeMap) {
+    cstring type_name = nullptr;
+    if (type == nullptr)
+        return type_name;
+	
+    if (type->is<IR::Type_Bits>()) {
+        if (!list.empty())  {
+            auto nt = list.front();
+            if (isAnnotated(nt))
+                return nt->name;
+        }
+        return type_name;
+    }
+
+    auto t = typeMap->getTypeType(type, true);
+    if (t->is<IR::Type_Newtype>()) {
+        LOG3("getTypeName: " << type->getP4Type() << " " << t->getP4Type());
+        auto newt = t->to<IR::Type_Newtype>();
+        type_name = newt->name;
+        if (newt->type->is<IR::Type_Bits>() && isAnnotated(newt)) {
+            return type_name;
+        }
+        list.push_back(newt);
+        return getTypeName(newt->type, list, typeMap);
+    }
+
+    if (list.empty())
+        return type_name;
+    auto nt = list.front();
+    LOG3("List front: " << nt->name << " " << nt->getP4Type() << std::endl);
+    if (isAnnotated(nt))
+        return nt->name;
+    return nullptr;
 }
 
 /// @return the header instance fields matched against by @table's key. The
@@ -694,8 +727,8 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
     auto key = table->getKey();
     if (!key) return matchFields;
 
-    cstring type_name = nullptr;
     for (auto keyElement : key->keyElements) {
+        cstring type_name = nullptr;
         auto matchTypeName = getMatchTypeName(keyElement->matchType, refMap);
         auto matchType = getMatchType(matchTypeName);
         if (matchType == boost::none) continue;
@@ -708,7 +741,9 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
           typeMap->getType(keyElement->expression->getNode(), true);
         BUG_CHECK(matchFieldType != nullptr,
                   "Couldn't determine type for key element %1%", keyElement);
-        type_name = getTypeName(matchFieldType);
+        std::vector<const IR::Type_Newtype*> vec;
+        type_name = getTypeName(matchFieldType, vec, typeMap);
+        vec.clear();
         uint32_t w = getTypeWidth(matchFieldType, typeMap);
         matchFields.push_back(MatchField{*matchFieldName, *matchType, matchTypeName,
                                    w, keyElement->to<IR::IAnnotated>(), type_name});
@@ -825,7 +860,8 @@ class P4RuntimeAnalyzer {
             } else if (paramType->is<IR::Type_Newtype>()) {
                 auto w = getTypeWidth(paramType, typeMap);
                 param->set_bitwidth(w);
-                cstring type_name = getTypeName(paramType);
+                std::vector<const IR::Type_Newtype*> vec;
+                cstring type_name = getTypeName(paramType, vec, typeMap);
                 if (type_name) {
                     auto namedType = param->mutable_type_name();
                     namedType->set_name(type_name);

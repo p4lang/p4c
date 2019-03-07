@@ -14,9 +14,9 @@ type CustomDD_t CustomDDT_t;
 typedef CustomDT_t CustomDTD_t;
 type CustomDT_t CustomDTT_t;
 typedef CustomTD_t CustomTDD_t;
-type CustomTD_t CustomTDT_t;
+@p4runtime_translation("p4.org/psa/v1/CustomTDT_t", 8) type CustomTD_t CustomTDT_t;
 typedef CustomTT_t CustomTTD_t;
-type CustomTT_t CustomTTT_t;
+@p4runtime_translation("p4.org/psa/v1/CustomTTT_t", 8) type CustomTT_t CustomTTT_t;
 header ethernet_t {
     EthD_t  dstAddr;
     EthT_t  srcAddr;
