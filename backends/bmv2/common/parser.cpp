@@ -128,6 +128,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                                 } else {
                                     BUG("%1%: unsupported", mem);
                                 }
+                            }
                         }
                     }
                 }
@@ -229,7 +230,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
 
             paramsValue->emplace("op", primitive);
             return result;
-        }
+         }
     }
     ::error(ErrorType::ERR_UNSUPPORTED, "in parser on this target", stat);
     return result;

@@ -3,7 +3,13 @@
 #include <core.p4>
 #include <v1model.p4>
 
-struct headers {}
+header H {
+    bit<8> byte;
+}
+
+struct headers {
+    H byte;
+}
 
 struct metadata {}
 
@@ -13,6 +19,8 @@ parser MyParser(packet_in packet,
                 inout standard_metadata_t standard_metadata) {
     state start {
         packet.advance(8);
+        packet.extract(hdr.byte);
+        packet.advance((bit<32>)hdr.byte.byte);
         transition accept;
     }
 }
