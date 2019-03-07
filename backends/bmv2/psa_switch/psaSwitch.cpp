@@ -714,7 +714,7 @@ void ExternConverter_Counter::convertExternInstance(
     auto attr_obj = new Util::JsonObject();
     auto arg1 = sz->to<IR::Constant>();
     auto param1 = eb->getConstructorParameters()->getParameter(0);
-    auto bitwidth = TypeMap::minWidthBits(arg1->type, sz->getNode());
+    auto bitwidth = ctxt->typeMap->minWidthBits(arg1->type, sz->getNode());
     cstring repr = BMV2::stringRepr(arg1->value, ROUNDUP(bitwidth, 8));
     attr_obj->emplace("name", param1->toString());
     attr_obj->emplace("type", "hexstr");
