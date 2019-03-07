@@ -326,7 +326,8 @@ In the `parser_ops` array, the format of the `parameters` array depends on the
   built-in rather than a property of the header. For this operation, we require
   2 parameters. The first one follows the same rules as `extract`'s first and
   only parameter. The second one must be of type `expression` (to compute the
-  length in bits of the variable-length field in the header).
+  length in bits of the variable-length field in the header). bmv2 currently
+  requires this expression to evaluate to a multiple of 8.
   - `set`: takes exactly 2 parameters; the first one needs to be of type `field`
   with the appropriate value. The second one can be of type `field`, `hexstr`,
   `lookahead` or `expression`, with the appropriate value (see
@@ -337,8 +338,10 @@ In the `parser_ops` array, the format of the `parameters` array depends on the
   - `shift`: we expect a single parameter, the number of bytes to shift (shifted
   packet data will be discarded). `shift` is deprecated in favor of `advance`
   (see below).
-  - `advance`: we expect a single parameter, the number of bytes to shift, which
-  can be of type `hexstr`, `field` or `expression`. `advance` replaces `shift`.
+  - `advance`: we expect a single parameter, the number of *bits* to shift,
+  which can be of type `hexstr`, `field` or `expression`. `advance` replaces
+  `shift`. bmv2 currently requires the number of bits to shift to be a multiple
+  of 8.
   - `primitive`: introduced for P4_16, where extern methods can be called from
   parser states. It only takes one parameter, which is itself a JSON object with
   the following attributes:

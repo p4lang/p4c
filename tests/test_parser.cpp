@@ -1825,7 +1825,7 @@ TEST_F(ParserShiftTest, ShiftOneByte) {
 }
 
 TEST_F(ParserShiftTest, AdvanceByData) {
-  parse_state.add_advance_from_data(Data(1));  // 1-byte shift
+  parse_state.add_advance_from_data(Data(1 * 8));  // 1-byte shift
   parse_state.add_extract(testHeader);
 
   std::string packet_data("\xab\xcd");
@@ -1838,7 +1838,7 @@ TEST_F(ParserShiftTest, AdvanceByData) {
 
 TEST_F(ParserShiftTest, AdvanceByExpression) {
   ArithExpression expr;
-  expr.push_back_load_const(Data(1));
+  expr.push_back_load_const(Data(1 * 8));
   expr.build();
   parse_state.add_advance_from_expression(expr);  // 1-byte shift
   parse_state.add_extract(testHeader);
@@ -1859,7 +1859,7 @@ TEST_F(ParserShiftTest, AdvanceByField) {
   auto packet = get_pkt(packet_data);
 
   auto &f_shift = packet.get_phv()->get_field(metaHeader, 0);  // f8
-  f_shift.set(1);
+  f_shift.set(1 * 8);
 
   parse_and_check_no_error(&packet);
   const auto &f = packet.get_phv()->get_field(testHeader, 0);  // f8
