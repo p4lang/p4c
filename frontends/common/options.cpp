@@ -383,6 +383,7 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
                     std::cerr << "Writing program to " << fileName << std::endl;
                 P4::ToP4 toP4(stream, Log::verbose(), file);
                 node->apply(toP4);
+                delete stream;  // close the file
             }
             break;
         }

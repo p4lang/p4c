@@ -26,7 +26,7 @@ std::ostream* openFile(cstring name, bool nullOnError) {
     }
     std::ofstream *file = new std::ofstream(name);
     if (!file->good()) {
-        ::error("Error writing output to file %1%", name);
+        ::error("Error writing output to file %1%: %2%", name, strerror(errno));
         if (nullOnError)
             return new nullstream();
         return nullptr;
