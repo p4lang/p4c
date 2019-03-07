@@ -55,7 +55,7 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK)
                 BUG("Unexpected enumeration value %1%", static_cast<int>(type));
             }
 
-            if (!forwardOK) {
+            if (!forwardOK && name.srcInfo.isValid()) {
                 std::function<bool(const IR::IDeclaration*)> locationFilter =
                         [name](const IR::IDeclaration* d) {
                     Util::SourceInfo nsi = name.srcInfo;
@@ -96,7 +96,7 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK)
                 BUG("Unexpected enumeration value %1%", static_cast<int>(type));
             }
 
-            if (!forwardOK) {
+            if (!forwardOK && name.srcInfo.isValid()) {
                 Util::SourceInfo nsi = name.srcInfo;
                 Util::SourceInfo dsi = decl->getNode()->srcInfo;
                 bool before = dsi <= nsi;
