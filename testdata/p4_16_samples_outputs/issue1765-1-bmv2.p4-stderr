@@ -1,0 +1,12 @@
+issue1765-1-bmv2.p4(232): [--Wwarn=unused] warning: Table ndp_answer is not used; removing
+    table ndp_answer {
+          ^^^^^^^^^^
+issue1765-1-bmv2.p4(245): [--Wwarn=unused] warning: Table port2mcast is not used; removing
+    table port2mcast {
+          ^^^^^^^^^^
+issue1765-1-bmv2.p4(257): [--Wwarn=unused] warning: Table addr2mcast is not used; removing
+    table addr2mcast {
+          ^^^^^^^^^^
+issue1765-1-bmv2.p4(269): [--Wwarn=unused] warning: Table ndp is not used; removing
+    table ndp {
+          ^^^

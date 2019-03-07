@@ -1,0 +1,29 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33616793
+    name: "cIngress.guh"
+    alias: "guh"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.tcp.dstPort"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16808330
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16808330
+    name: "cIngress.foo"
+    alias: "foo"
+  }
+}
+type_info {
+}
