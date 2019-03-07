@@ -817,6 +817,7 @@ class EnsureExpressionIsSimple : public Inspector {
     bool preorder(const IR::Member*) override { return true; }
     bool preorder(const IR::ListExpression*) override { return true; }
     bool preorder(const IR::Constant*) override { return true; }
+    bool preorder(const IR::ArrayIndex*) override { return true; }
 };
 }   // namespace
 
