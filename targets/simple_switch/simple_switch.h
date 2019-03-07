@@ -126,6 +126,8 @@ class SimpleSwitch : public Switch {
 
   class MirroringSessions;
 
+  class InputBuffer;
+
   enum PktInstanceType {
     PKT_INSTANCE_TYPE_NORMAL,
     PKT_INSTANCE_TYPE_INGRESS_CLONE,
@@ -169,7 +171,9 @@ class SimpleSwitch : public Switch {
  private:
   port_t max_port;
   std::vector<std::thread> threads_;
-  Queue<std::unique_ptr<Packet> > input_buffer;
+  std::unique_ptr<InputBuffer> input_buffer;
+  // for these queues, the write operation is non-blocking and we drop the
+  // packet if the queue is full
 #ifdef SSWITCH_PRIORITY_QUEUEING_ON
   bm::QueueingLogicPriRL<std::unique_ptr<Packet>, EgressThreadMapper>
 #else

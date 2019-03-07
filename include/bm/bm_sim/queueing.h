@@ -397,9 +397,9 @@ class QueueingLogicRL {
 //! high priority can starve lower-priority queues. For example, if the queue
 //! with priority `0` always contains at least one element, the other queues
 //! will never be served.
-//! As for QueueingLogicRL, the write behavior (push_front()) is blocking: once
-//! a logical queue is full, subsequent incoming elements will be dropped until
-//! the queue starts draining again.
+//! As for QueueingLogicRL, the write behavior (push_front()) is not blocking:
+//! once a logical queue is full, subsequent incoming elements will be dropped
+//! until the queue starts draining again.
 //! Look at the documentation for QueueingLogic for more information about the
 //! template parameters (they are the same).
 template <typename T, typename FMap>
