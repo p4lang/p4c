@@ -695,6 +695,44 @@ void ExternConverter_Counter::convertExternInstance(
     jctr->emplace("size", sz->to<IR::Constant>()->value);
     jctr->emplace("is_direct", false);
     ctxt->json->counters->append(jctr);
+
+    // Code below used to add json into EXTERN_INSTANCES NODE
+
+    auto extern_obj = new Util::JsonObject();
+    extern_obj->emplace("name", name);
+    extern_obj->emplace("id", nextId("extern_instances"));
+    extern_obj->emplace("source_info", inst->sourceInfoJsonObj());
+    ctxt->json->externs->append(extern_obj);
+    Util::JsonArray *arr = ctxt->json->insert_array_field(extern_obj, "attributes");
+
+    if (eb->getConstructorParameters()->size() != 2) {
+      modelError("%1%: expected two parameters", eb);
+      return;
+    }
+    // first argument to create a counter is just a number, convert and dump to json
+    // we get a name from param, type and value from the arguments
+    auto attr_obj = new Util::JsonObject();
+    auto arg1 = sz->to<IR::Constant>();
+    auto param1 = eb->getConstructorParameters()->getParameter(0);
+    auto bitwidth = ctxt->typeMap->minWidthBits(arg1->type, sz->getNode());
+    cstring repr = BMV2::stringRepr(arg1->value, ROUNDUP(bitwidth, 8));
+    attr_obj->emplace("name", param1->toString());
+    attr_obj->emplace("type", "hexstr");
+    attr_obj->emplace("value", repr);
+    arr->append(attr_obj);
+
+    // second argument is the counter type, this is psa metadata, the converter
+    // in conversion context will handle that for us
+    auto tp = eb->findParameterValue("type");
+    if (!tp || !tp->is<IR::Declaration_ID>()) {
+      modelError("%1%: expected a declaration_id", tp->getNode());
+      return;
+    }
+    auto arg2 = tp->to<IR::Declaration_ID>();
+    auto param2 = eb->getConstructorParameters()->getParameter(1);
+    auto mem = arg2->toString();
+    auto jsn = ctxt->conv->convertParam(param2, mem);
+    arr->append(jsn);
 }
 
 void ExternConverter_DirectCounter::convertExternInstance(
@@ -713,6 +751,32 @@ void ExternConverter_DirectCounter::convertExternInstance(
         jctr->emplace("is_direct", true);
         jctr->emplace("binding", it->second->controlPlaneName());
         ctxt->json->counters->append(jctr);
+
+        // Adding direct counter to EXTERN_INSTANCES
+
+        auto extern_obj = new Util::JsonObject();
+        extern_obj->emplace("name", name);
+        extern_obj->emplace("id", nextId("extern_instances"));
+        extern_obj->emplace("source_info", inst->sourceInfoJsonObj());
+        ctxt->json->externs->append(extern_obj);
+        Util::JsonArray *arr = ctxt->json->insert_array_field(extern_obj, "attributes");
+
+        // Direct Counter only has a single argument, which is psa metadata
+        // converter in conversion context will handle this for us
+        auto tp = eb->findParameterValue("type");
+        if (!tp || !tp->is<IR::Declaration_ID>()) {
+          modelError("%1%: expected a declaration_id", tp->getNode());
+          return;
+        }
+        if (eb->getConstructorParameters()->size() < 2) {
+          modelError("%1%: expected 2 parameters", eb);
+          return;
+        }
+        auto arg = tp->to<IR::Declaration_ID>();
+        auto param = eb->getConstructorParameters()->getParameter(1);
+        auto mem = arg->toString();
+        auto jsn = ctxt->conv->convertParam(param, mem);
+        arr->append(jsn);
     }
 }
 
