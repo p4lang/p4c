@@ -643,15 +643,17 @@ getMatchType(cstring matchTypeName) {
 /*
  * This function supports a deeply nested mix of Type_Newtype and typedef.
  * The function also supported Type_Bits.
- * TODO(hemant): Integrate with sizeof PR when it gets checked in. Right now,
- * it is not positive if the sizeof PR will solve all cases of daisy-chains
- * of typedef and type which is supported here.
+ * A non-zero width, or zero width, or -1 is returned by midWidthbits() used
+ * by this function. For -1, a failure code, the BUG_CHECK is invoked.
+ * Therefore the uint32_t returned by the function is fine.
 */
 static uint32_t
 getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
     uint32_t w = 0;
     if (type == nullptr)
         return w;
+    BUG_CHECK(!type->is<IR::Type_Error>(), "p4runtime does not support type: %1%",
+              type->getP4Type());
     return typeMap->minWidthBits(type, nullptr);
 }
 
