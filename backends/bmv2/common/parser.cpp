@@ -128,7 +128,6 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                                 } else {
                                     BUG("%1%: unsupported", mem);
                                 }
-                            }
                         }
                     }
                 }
@@ -156,6 +155,16 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                 // bare lookahead call -- should flag an error if there's not enough
                 // packet data, but ignore for now.
                 return nullptr;
+            } else if (extmeth->method->name.name == corelib.packetIn.advance.name) {
+                if (mce->arguments->size() != 1) {
+                    ::error(ErrorType::ERR_UNSUPPORTED, "%1%: expected 1 argument", mce);
+                    return result;
+                }
+                auto arg = mce->arguments->at(0);
+                auto jexpr = ctxt->conv->convert(arg->expression, true, false);
+                result->emplace("op", "advance");
+                params->append(jexpr);
+                return result;
             }
         } else if (minst->is<P4::ExternFunction>()) {
             auto extfn = minst->to<P4::ExternFunction>();

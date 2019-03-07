@@ -1,0 +1,6 @@
+packet 0 00 00 11223344
+expect 0 11223344$
+packet 0 00 01 11223344
+expect 0 223344$
+packet 0 00 02 11223344
+expect 0 3344$

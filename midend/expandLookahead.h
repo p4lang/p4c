@@ -24,11 +24,11 @@ limitations under the License.
 
 namespace P4 {
 
-// Given an assignment like
-// a = lookahead<T>();
-// this is transformed into
-// bit<X> tmp = lookahead<sizeof<T>>();
-// a = { tmp[f1,f0], tmp[f2, f1+1], ... }
+/// Given an assignment like
+/// a = lookahead<T>();
+/// this is transformed into
+/// bit<X> tmp = lookahead<sizeof<T>>();
+/// a = { tmp[f1,f0], tmp[f2, f1+1], ... }
 class DoExpandLookahead : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
