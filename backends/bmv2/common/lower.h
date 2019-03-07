@@ -67,6 +67,8 @@ class RemoveComplexExpressionsPolicy {
 BMv2 does not support complex expressions for a select
 or as arguments to external functions.
 Such expressions are lifted into a temporaries.
+Also, convert a statement like lookahead<T>() into
+tmp = lookahead<T>();
 */
 class RemoveComplexExpressions : public Transform {
     P4::ReferenceMap* refMap;
@@ -114,6 +116,7 @@ class RemoveComplexExpressions : public Transform {
         return control;
     }
     const IR::Node* postorder(IR::Statement* statement) override;
+    const IR::Node* postorder(IR::MethodCallStatement* statement) override;
 };
 
 }  // namespace BMV2

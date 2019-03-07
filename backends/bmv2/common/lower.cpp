@@ -14,9 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "frontends/p4/fromv1.0/v1model.h"
 #include "lower.h"
+#include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/fromv1.0/v1model.h"
 #include "lib/gmputil.h"
 
 namespace BMV2 {
@@ -334,6 +335,26 @@ RemoveComplexExpressions::postorder(IR::Statement* statement) {
     block->push_back(statement);
     assignments.clear();
     return block;
+}
+
+const IR::Node*
+RemoveComplexExpressions::postorder(IR::MethodCallStatement* statement) {
+    auto mi = P4::MethodInstance::resolve(statement, refMap, typeMap);
+    if (auto em = mi->to<P4::ExternMethod>()) {
+        if (em->originalExternType->name != P4::P4CoreLibrary::instance.packetIn.name ||
+            em->method->name != P4::P4CoreLibrary::instance.packetIn.lookahead.name)
+            return statement;
+        auto type = em->actualMethodType->returnType;
+        auto name = refMap->newName("tmp");
+        LOG3("Adding variable for lookahead " << name);
+        auto decl = new IR::Declaration_Variable(IR::ID(name), type->getP4Type());
+        newDecls.push_back(decl);
+        typeMap->setType(decl, typeMap->getTypeType(type, true));
+        auto assign = new IR::AssignmentStatement(
+            statement->srcInfo, new IR::PathExpression(name), statement->methodCall);
+        return assign;
+    }
+    return statement;
 }
 
 }  // namespace BMV2
