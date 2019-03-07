@@ -687,7 +687,7 @@ getTypeName(const IR::Type* type, std::vector<const IR::Type_Newtype*>& list,
     cstring type_name = nullptr;
     if (type == nullptr)
         return type_name;
-	
+
     if (type->is<IR::Type_Bits>()) {
         if (!list.empty())  {
             auto nt = list.front();
@@ -727,6 +727,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
     auto key = table->getKey();
     if (!key) return matchFields;
 
+    std::vector<const IR::Type_Newtype*> vec;
     for (auto keyElement : key->keyElements) {
         cstring type_name = nullptr;
         auto matchTypeName = getMatchTypeName(keyElement->matchType, refMap);
@@ -741,7 +742,6 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
           typeMap->getType(keyElement->expression->getNode(), true);
         BUG_CHECK(matchFieldType != nullptr,
                   "Couldn't determine type for key element %1%", keyElement);
-        std::vector<const IR::Type_Newtype*> vec;
         type_name = getTypeName(matchFieldType, vec, typeMap);
         vec.clear();
         uint32_t w = getTypeWidth(matchFieldType, typeMap);
@@ -839,6 +839,7 @@ class P4RuntimeAnalyzer {
         setPreamble(action->mutable_preamble(), id, name, symbols.getAlias(name), annotations);
 
         size_t index = 1;
+        std::vector<const IR::Type_Newtype*> vec;
         for (auto actionParam : *actionDeclaration->parameters->getEnumerator()) {
             auto param = action->add_params();
             auto paramName = actionParam->controlPlaneName();
@@ -860,8 +861,8 @@ class P4RuntimeAnalyzer {
             } else if (paramType->is<IR::Type_Newtype>()) {
                 auto w = getTypeWidth(paramType, typeMap);
                 param->set_bitwidth(w);
-                std::vector<const IR::Type_Newtype*> vec;
                 cstring type_name = getTypeName(paramType, vec, typeMap);
+                vec.clear();
                 if (type_name) {
                     auto namedType = param->mutable_type_name();
                     namedType->set_name(type_name);
