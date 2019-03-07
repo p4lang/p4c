@@ -3326,8 +3326,6 @@ const IR::Node* TypeInference::postorder(IR::KeyElement* elem) {
     auto ktype = getType(elem->expression);
     if (ktype == nullptr)
         return elem;
-    while (ktype->is<IR::Type_Newtype>())
-        ktype = ktype->to<IR::Type_Newtype>()->type;
     if (!ktype->is<IR::Type_Enum>() && !ktype->is<IR::Type_Error>() &&
         !(typeMap->keyElementValid(ktype, elem->expression) > 0))
         typeError("Key %1% field type must be a scalar type; it cannot be %2%",
