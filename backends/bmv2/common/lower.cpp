@@ -328,13 +328,18 @@ RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
 }
 
 const IR::Node*
-RemoveComplexExpressions::postorder(IR::Statement* statement) {
+RemoveComplexExpressions::simpleStatement(IR::Statement* statement) {
     if (assignments.empty())
         return statement;
     auto block = new IR::BlockStatement(assignments);
     block->push_back(statement);
     assignments.clear();
     return block;
+}
+
+const IR::Node*
+RemoveComplexExpressions::postorder(IR::Statement* statement) {
+    return simpleStatement(statement);
 }
 
 const IR::Node*
@@ -354,7 +359,7 @@ RemoveComplexExpressions::postorder(IR::MethodCallStatement* statement) {
             statement->srcInfo, new IR::PathExpression(name), statement->methodCall);
         return assign;
     }
-    return statement;
+    return simpleStatement(statement);
 }
 
 }  // namespace BMV2
