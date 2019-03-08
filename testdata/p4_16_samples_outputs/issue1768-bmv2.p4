@@ -1,8 +1,8 @@
 #include <core.p4>
 #include <v1model.p4>
 
-struct B32 {
-    bit<(8 * 32)> bits;
+struct B8 {
+    bit<(8 * 8)> bits;
 }
 
 struct headers {
@@ -13,7 +13,7 @@ struct metadata {
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.lookahead<B32>();
+        packet.lookahead<B8>();
         transition accept;
     }
 }
@@ -25,6 +25,8 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
+        if (standard_metadata.parser_error != error.NoError) 
+            mark_to_drop();
     }
 }
 

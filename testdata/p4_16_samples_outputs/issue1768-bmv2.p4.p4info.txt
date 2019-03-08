@@ -1,3 +1,5 @@
 pkg_info {
   arch: "v1model"
 }
+type_info {
+}
