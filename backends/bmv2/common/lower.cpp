@@ -348,7 +348,7 @@ RemoveComplexExpressions::postorder(IR::MethodCallStatement* statement) {
     if (auto em = mi->to<P4::ExternMethod>()) {
         if (em->originalExternType->name != P4::P4CoreLibrary::instance.packetIn.name ||
             em->method->name != P4::P4CoreLibrary::instance.packetIn.lookahead.name)
-            return statement;
+            return simpleStatement(statement);
         auto type = em->actualMethodType->returnType;
         auto name = refMap->newName("tmp");
         LOG3("Adding variable for lookahead " << name);
@@ -357,7 +357,7 @@ RemoveComplexExpressions::postorder(IR::MethodCallStatement* statement) {
         typeMap->setType(decl, typeMap->getTypeType(type, true));
         auto assign = new IR::AssignmentStatement(
             statement->srcInfo, new IR::PathExpression(name), statement->methodCall);
-        return assign;
+        return simpleStatement(assign);
     }
     return simpleStatement(statement);
 }
