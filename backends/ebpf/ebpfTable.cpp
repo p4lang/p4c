@@ -54,6 +54,67 @@ class ActionTranslationVisitor : public CodeGenInspector {
         return false;
     }
 
+    bool preorder(const IR::MethodCallExpression* expression) {
+        auto mi = P4::MethodInstance::resolve(expression, refMap, typeMap);
+        if (mi->is<P4::ExternFunction>()) {
+            auto func = mi->to<P4::ExternFunction>();
+            if (func->method->name.name == "assert") {
+                BUG_CHECK(expression->arguments->size() == 1,
+                        "%1%: Expected one argument ", expression);
+                builder->emitIndent();
+                builder->append("if (");
+                visit(expression->arguments->at(0)->expression);  // condition
+                builder->append(" == false) ");
+                builder->blockStart();
+                builder->emitIndent();
+                builder->appendFormat("% s = % s;",
+                     program->errorVar.c_str(), P4::P4CoreLibrary::instance.assertError);
+                builder->newline();
+                auto srcInfo = expression->srcInfo;
+                auto sourceFragment = srcInfo.toBriefSourceFragment();
+                auto sourceFile = srcInfo.getSourceFile();
+                auto linePosition = srcInfo.toPositionString();
+                builder->emitIndent();
+                builder->appendFormat(
+                    "fprintf(stderr, \"Assert error: '% s' failed, file '% s', line % s\\n\");",
+                    sourceFragment.c_str(), sourceFile.c_str(), linePosition.c_str());
+                builder->newline();
+                builder->emitIndent();
+                builder->appendFormat("goto %s;", IR::ParserState::reject.c_str());
+                builder->newline();
+                builder->blockEnd(true);
+                return false;
+            } else if (func->method->name.name == "assume") {
+                BUG_CHECK(expression->arguments->size() == 1,
+                        "%1%: Expected one argument ", expression);
+                builder->emitIndent();
+                builder->append("if (");
+                visit(expression->arguments->at(0)->expression);  // condition
+                builder->append(" == true) ");
+                builder->blockStart();
+                builder->emitIndent();
+                builder->appendFormat("% s = % s;",
+                     program->errorVar.c_str(), P4::P4CoreLibrary::instance.assumeError);
+                builder->newline();
+                auto srcInfo = expression->srcInfo;
+                auto sourceFragment = srcInfo.toBriefSourceFragment();
+                auto sourceFile = srcInfo.getSourceFile();
+                auto linePosition = srcInfo.toPositionString();
+                builder->emitIndent();
+                builder->appendFormat(
+                    "fprintf(stderr, \"Assume error: '% s' failed, file '% s', line % s\\n\");",
+                    sourceFragment.c_str(), sourceFile.c_str(), linePosition.c_str());
+                builder->newline();
+                builder->emitIndent();
+                builder->appendFormat("goto %s;", IR::ParserState::reject.c_str());
+                builder->newline();
+                builder->blockEnd(true);
+                return false;
+            }
+        }
+        return CodeGenInspector::preorder(expression);
+    }
+
     bool preorder(const IR::P4Action* act) {
         action = act;
         visit(action->body);

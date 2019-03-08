@@ -187,6 +187,22 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                     params->append(jexpr);
                 }
                 return result;
+            } else if (extfn->method->name.name == "assert") {
+                BUG_CHECK(mce->arguments->size() == 1, "%1%: Expected 1 argument ", mce);
+                result->emplace("op", extfn->method->name.name);
+                auto cond = mce->arguments->at(0);
+                auto expr = ctxt->conv->convert(cond->expression, true, false);
+                params->append(expr);
+                result->emplace_non_null("source_info", mce->sourceInfoJsonObj());
+                return result;
+            } else if (extfn->method->name.name == "assume") {
+                BUG_CHECK(mce->arguments->size() == 1, "%1%: Expected 1 argument ", mce);
+                result->emplace("op", extfn->method->name.name);
+                auto cond = mce->arguments->at(0);
+                auto expr = ctxt->conv->convert(cond->expression, true, false);
+                params->append(expr);
+                result->emplace_non_null("source_info", mce->sourceInfoJsonObj());
+                return result;
             }
         } else if (minst->is<P4::BuiltInMethod>()) {
             /* example result:

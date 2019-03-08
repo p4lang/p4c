@@ -107,6 +107,46 @@ ExternConverter_direct_counter ExternConverter_direct_counter::singleton;
 ExternConverter_direct_meter ExternConverter_direct_meter::singleton;
 ExternConverter_action_profile ExternConverter_action_profile::singleton;
 ExternConverter_action_selector ExternConverter_action_selector::singleton;
+ExternConverter_assert ExternConverter_assert::singleton;
+ExternConverter_assume ExternConverter_assume::singleton;
+
+Util::IJson* ExternConverter_assert::convertExternFunction(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    UNUSED const bool emitExterns) {
+        if (mc->arguments->size() != 1) {
+            modelError("Expected 1 arguments for %1%", mc);
+            return nullptr;
+        }
+        auto primitive = mkPrimitive("assert");
+        auto parameters = mkParameters(primitive);
+        auto cond = mc->arguments->at(0);
+        // wrap expression in an additional JSON expression block
+        // cast the result of expression to b2d
+        auto jsonExpr = ctxt->conv->convert(cond->expression, true, true, true);
+        parameters->append(jsonExpr);
+        primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+        return primitive;
+}
+
+Util::IJson* ExternConverter_assume::convertExternFunction(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    UNUSED const bool emitExterns) {
+        if (mc->arguments->size() != 1) {
+            modelError("Expected 1 arguments for %1%", mc);
+            return nullptr;
+        }
+        auto primitive = mkPrimitive("assume");
+        auto parameters = mkParameters(primitive);
+        auto cond = mc->arguments->at(0);
+        // wrap expression in an additional JSON expression block
+        // cast the result of expression to b2d
+        auto jsonExpr = ctxt->conv->convert(cond->expression, true, true, true);
+        parameters->append(jsonExpr);
+        primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+        return primitive;
+}
 
 Util::IJson* ExternConverter_clone::convertExternFunction(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,

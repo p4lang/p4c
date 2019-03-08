@@ -47,21 +47,65 @@ bool ControlBodyTranslator::preorder(const IR::PathExpression* expression) {
 }
 
 void ControlBodyTranslator::processFunction(const P4::ExternFunction* function) {
-    ::error("%1%: Not supported", function->method);
+    if (function->method->name.name == "assert") {
+        BUG_CHECK(function->expr->arguments->size() == 1,
+                "%1%: Expected one argument in ", function);
+        builder->emitIndent();
+        builder->append("if (");
+        visit(function->expr->arguments->at(0)->expression);
+        builder->append(" == false) ");
+        builder->blockStart();
+        builder->emitIndent();
+        builder->appendFormat("% s = % s;",
+             control->program->errorVar.c_str(), P4::P4CoreLibrary::instance.assertError);
+        builder->newline();
+        auto srcInfo = function->expr->srcInfo;
+        auto sourceFragment = srcInfo.toBriefSourceFragment();
+        auto sourceFile = srcInfo.getSourceFile();
+        auto linePosition = srcInfo.toPositionString();
+        builder->emitIndent();
+        builder->appendFormat(
+            "fprintf(stderr, \"Assertion error: ' % s ' failed, file ' % s ', line % s \\n\");",
+            sourceFragment.c_str(), sourceFile.c_str(), linePosition.c_str());
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("goto %s;", IR::ParserState::reject.c_str());
+        builder->newline();
+        builder->blockEnd(true);
+        return;
+    } else if (function->method->name.name == "assume") {
+        BUG_CHECK(function->expr->arguments->size() == 1,
+                "%1%: Expected one argument in ", function);
+        builder->emitIndent();
+        builder->append("if (");
+        visit(function->expr->arguments->at(0)->expression);
+        builder->append(" == true) ");
+        builder->blockStart();
+        builder->emitIndent();
+        builder->appendFormat("% s = % s;",
+             control->program->errorVar.c_str(), P4::P4CoreLibrary::instance.assumeError);
+        builder->newline();
+        auto srcInfo = function->expr->srcInfo;
+        auto sourceFragment = srcInfo.toBriefSourceFragment();
+        auto sourceFile = srcInfo.getSourceFile();
+        auto linePosition = srcInfo.toPositionString();
+        builder->emitIndent();
+        builder->appendFormat(
+            "fprintf(stderr, \"Assume error: ' % s ' failed, file ' % s ', line % s \\n\");",
+            sourceFragment.c_str(), sourceFile.c_str(), linePosition.c_str());
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("goto %s;", IR::ParserState::reject.c_str());
+        builder->newline();
+        builder->blockEnd(true);
+        return;
+    }
+    ::error("%1%: Not supported ", function->method);
 }
 
 bool ControlBodyTranslator::preorder(const IR::MethodCallExpression* expression) {
     builder->append("/* ");
-    visit(expression->method);
-    builder->append("(");
-    bool first = true;
-    for (auto a  : *expression->arguments) {
-        if (!first)
-            builder->append(", ");
-        first = false;
-        visit(a);
-    }
-    builder->append(")");
+    builder->append(expression->srcInfo.toBriefSourceFragment().c_str());
     builder->append("*/");
     builder->newline();
 

@@ -30,6 +30,8 @@ enum class StandardExceptions {
     OverwritingHeader,
     HeaderTooShort,
     ParserTimeout,
+    AssertError,
+    AssumeError
 };
 }  // namespace P4
 
@@ -55,6 +57,12 @@ inline std::ostream& operator<<(std::ostream &out, P4::StandardExceptions e) {
             break;
         case P4::StandardExceptions::ParserTimeout:
             out << "ParserTimeout";
+            break;
+        case P4::StandardExceptions::AssertError:
+            out << "AssertError";
+            break;
+        case P4::StandardExceptions::AssumeError:
+            out << "AssumeError";
             break;
         default:
             BUG("Unhandled case");
@@ -105,7 +113,9 @@ class P4CoreLibrary : public ::Model::Model {
             noMatch(StandardExceptions::NoMatch),
             stackOutOfBounds(StandardExceptions::StackOutOfBounds),
             overwritingHeader(StandardExceptions::OverwritingHeader),
-            headerTooShort(StandardExceptions::HeaderTooShort) {}
+            headerTooShort(StandardExceptions::HeaderTooShort),
+            assertError(StandardExceptions::AssertError),
+            assumeError(StandardExceptions::AssumeError) {}
 
  public:
     static P4CoreLibrary instance;
@@ -124,6 +134,8 @@ class P4CoreLibrary : public ::Model::Model {
     P4Exception_Model stackOutOfBounds;
     P4Exception_Model overwritingHeader;
     P4Exception_Model headerTooShort;
+    P4Exception_Model assertError;
+    P4Exception_Model assumeError;
 };
 
 }  // namespace P4

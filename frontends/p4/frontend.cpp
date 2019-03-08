@@ -63,6 +63,7 @@ limitations under the License.
 #include "uselessCasts.h"
 #include "validateMatchAnnotations.h"
 #include "validateParsedProgram.h"
+#include "removeAssertAssume.h"
 
 namespace P4 {
 
@@ -148,6 +149,9 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new TypeInference(&refMap, &typeMap, false),  // insert casts
         new ValidateMatchAnnotations(&typeMap),
         new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
+#ifdef NDEBUG
+        new RemoveAssertAssume(&refMap, &typeMap),  // only needed in RELEASE mode
+#endif
         new BindTypeVariables(&refMap, &typeMap),
         new StructInitializers(&refMap, &typeMap),
         new TableKeyNames(&refMap, &typeMap),

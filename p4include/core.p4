@@ -26,7 +26,9 @@ error {
     NoMatch,           /// 'select' expression has no matches.
     StackOutOfBounds,  /// Reference to invalid element of a header stack.
     HeaderTooShort,    /// Extracting too many bits into a varbit field.
-    ParserTimeout      /// Parser execution time limit exceeded.
+    ParserTimeout,     /// Parser execution time limit exceeded.
+    AssertError,       /// Assert error - when bool == false in assert(bool)
+    AssumeError        /// Assume error - when bool == true in assume(bool)
 }
 
 extern packet_in {
@@ -62,6 +64,8 @@ extern packet_out {
 /// Check a predicate @check in the parser; if the predicate is true do nothing,
 /// otherwise set the parser error to @toSignal, and transition to the `reject` state.
 extern void verify(in bool check, in error toSignal);
+extern void assert(in bool check);
+extern void assume(in bool check);
 
 /// Built-in action that does nothing.
 action NoAction() {}

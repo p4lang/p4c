@@ -21,7 +21,8 @@ namespace EBPF {
 
 
 void KernelSamplesTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
-    builder->append("#include \"ebpf_kernel.h\"\n");
+    builder->append("#include \"ebpf_kernel.h\"\n"
+                     "#include <stdio.h>\n");
     builder->newline();
 }
 
@@ -75,7 +76,8 @@ void KernelSamplesTarget::emitMain(Util::SourceCodeBuilder* builder,
 //////////////////////////////////////////////////////////////
 
 void TestTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
-    builder->append("#include \"ebpf_test.h\"\n");
+    builder->append("#include \"ebpf_test.h\"\n"
+                    "#include <stdio.h>\n");
     builder->newline();
 }
 
@@ -105,7 +107,8 @@ void BccTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
                     "#include <uapi/linux/if_packet.h>\n"
                     "#include <uapi/linux/ip.h>\n"
                     "#include <linux/skbuff.h>\n"
-                    "#include <linux/netdevice.h>\n");
+                    "#include <linux/netdevice.h>\n"
+                    "#include <stdio.h>\n");
 }
 
 void BccTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
