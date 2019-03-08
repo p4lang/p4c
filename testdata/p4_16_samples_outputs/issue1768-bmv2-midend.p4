@@ -13,7 +13,7 @@ struct metadata {
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        packet.lookahead<B8>();
+        packet.lookahead<bit<64>>();
         transition accept;
     }
 }
