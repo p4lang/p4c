@@ -34,7 +34,7 @@ using BMV2::stringRepr;
 namespace BMV2 {
 
 void ParseV1Architecture::modelError(const char* format, const IR::Node* node) {
-    ::error(format, node);
+    ::error(ErrorType::ERR_UNSUPPORTED, format, node);
     ::error("Are you using an up-to-date v1model.p4?");
 }
 
@@ -801,6 +801,26 @@ SimpleSwitchBackend::createCalculation(cstring algo, const IR::Expression* field
     return calcName;
 }
 
+namespace {
+class EnsureExpressionIsSimple : public Inspector {
+    cstring block;
+ public:
+    explicit EnsureExpressionIsSimple(cstring block): block(block) {
+        setName("EnsureExpressionIsSimple");
+    }
+    bool preorder(const IR::Expression* expression) override {
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "%1%: Computations are not supported in %2%", expression, block);
+        return false;
+    }
+    bool preorder(const IR::PathExpression*) override { return true; }
+    bool preorder(const IR::Member*) override { return true; }
+    bool preorder(const IR::ListExpression*) override { return true; }
+    bool preorder(const IR::Constant*) override { return true; }
+    bool preorder(const IR::ArrayIndex*) override { return true; }
+};
+}   // namespace
+
 void
 SimpleSwitchBackend::convertChecksum(const IR::BlockStatement *block, Util::JsonArray* checksums,
                                      Util::JsonArray* calculations, bool verify) {
@@ -827,8 +847,12 @@ SimpleSwitchBackend::convertChecksum(const IR::BlockStatement *block, Util::Json
                     auto ei = P4::EnumInstance::resolve(
                         mi->expr->arguments->at(3)->expression, typeMap);
                     cstring algo = ExternConverter::convertHashAlgorithm(ei->name);
+                    auto calcExpr = mi->expr->arguments->at(1)->expression;
+                    EnsureExpressionIsSimple eeis(
+                        verify ? v1model.verify_checksum.name : v1model.update_checksum.name);
+                    (void)calcExpr->apply(eeis);
                     cstring calcName = createCalculation(
-                        algo, mi->expr->arguments->at(1)->expression,
+                        algo, calcExpr,
                         calculations, usePayload, mc);
                     cksum->emplace("name", refMap->newName("cksum_"));
                     cksum->emplace("id", nextId("checksums"));

@@ -1296,9 +1296,8 @@ const IR::Node* TypeInference::postorder(IR::Type_Newtype* type) {
     auto argType = getTypeType(type->type);
     if (!argType->is<IR::Type_Bits>() &&
         !argType->is<IR::Type_Boolean>() &&
-        !argType->is<IR::Type_Tuple>() &&
         !argType->is<IR::Type_Newtype>())
-        ::error("%1%: `type' can only be applied to base types or tuple types",
+        ::error("%1%: `type' can only be applied to base types",
                 type);
     return type;
 }

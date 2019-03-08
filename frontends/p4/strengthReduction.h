@@ -40,9 +40,6 @@ namespace P4 {
   *   - most arithmetic and boolean expressions are simplified
   *   - division and modulus by `0`
   *
-  * @todo: Some open issues:
-  *    - Should this pass be merged with constant folding?
-  *    - Should we store constant values in the IR instead of computing them explicitly?
   */
 class DoStrengthReduction final : public Transform {
     /// @returns `true` if @p expr is the constant `1`.

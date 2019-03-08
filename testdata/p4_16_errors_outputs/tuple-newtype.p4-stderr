@@ -1,0 +1,3 @@
+tuple-newtype.p4(5): error: T: `type' can only be applied to base types
+type tuple<bit> T;
+                ^

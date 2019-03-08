@@ -47,7 +47,43 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
                                  ProgramStructure* structure, cstring scalarsName) :
     BMV2::ExpressionConverter(refMap, typeMap, structure, scalarsName) { }
 
+    void modelError(const char* format, const cstring field) {
+      ::error(format, field);
+      ::error("Invalid metadata parameter value");
+    }
+
+    /**
+     * Checks if a Parameter is of type PSA_CounterType_t returns true
+     * if it is, false otherwise.
+     */
+    bool isCounterMetaData(const IR::Parameter* param) {
+      return param->type->toString() == "PSA_CounterType_t";
+    }
+
     Util::IJson* convertParam(UNUSED const IR::Parameter* param, cstring fieldName) override {
+        if (isCounterMetaData(param)) {  // check if its counter metadata
+          auto jsn = new Util::JsonObject();
+          jsn->emplace("name", param->toString());
+          jsn->emplace("type", "hexstr");
+          auto bitwidth = param->type->width_bits();
+
+          // encode the counter type from enum -> int
+          if (fieldName == "BYTES") {
+            cstring repr = BMV2::stringRepr(0, ROUNDUP(bitwidth, 32));
+            jsn->emplace("value", repr);
+          } else if (fieldName == "PACKETS") {
+            cstring repr = BMV2::stringRepr(1, ROUNDUP(bitwidth, 32));
+            jsn->emplace("value", repr);
+          } else if (fieldName == "PACKETS_AND_BYTES") {
+            cstring repr = BMV2::stringRepr(2, ROUNDUP(bitwidth, 32));
+            jsn->emplace("value", repr);
+          } else {
+            modelError("%1%: Exptected a PSA_CounterType_t", fieldName);
+            return nullptr;
+          }
+          return jsn;
+        }
+
         LOG3("convert " << fieldName);
         return nullptr;
     }

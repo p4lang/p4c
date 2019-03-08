@@ -180,7 +180,10 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/psa-fwd-bmv2.p4
   # This reads stack.next
   testdata/p4_16_samples/issue692-bmv2.p4
-  )
+  # These test use computations in the verify/update checksum controls - unsupported
+  testdata/p4_16_samples/issue1765-bmv2.p4
+  testdata/p4_16_samples/issue1765-1-bmv2.p4
+)
 
 if (HAVE_SIMPLE_SWITCH)
   p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_V1MODEL_TEST_SUITES}" "${XFAIL_TESTS}")
