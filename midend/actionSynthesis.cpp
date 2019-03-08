@@ -73,7 +73,7 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
 
     auto annos = new IR::Annotations();
     annos->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
-    auto tbl = new IR::P4Table(tblName, annos, props);
+    auto tbl = new IR::P4Table(statement->srcInfo, tblName, annos, props);
     tables.push_back(tbl);
 
     // Table invocation statement
@@ -138,6 +138,7 @@ const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
                     left->push_back(action);
                     actbody = new IR::BlockStatement; }
                 actbody->push_back(c);
+                actbody->srcInfo += c->srcInfo;
                 continue; }
         } else if (c->is<IR::MethodCallStatement>()) {
             if (mustMove(c->to<IR::MethodCallStatement>())) {
@@ -147,6 +148,7 @@ const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
                     left->push_back(action);
                     actbody = new IR::BlockStatement; }
                 actbody->push_back(c);
+                actbody->srcInfo += c->srcInfo;
                 continue;
             }
         } else {
@@ -190,8 +192,8 @@ const IR::Statement* DoSynthesizeActions::createAction(const IR::Statement* toAd
     auto action = new IR::P4Action(name, annos, new IR::ParameterList(), body);
     actions.push_back(action);
     auto actpath = new IR::PathExpression(name);
-    auto repl = new IR::MethodCallExpression(actpath);
-    auto result = new IR::MethodCallStatement(repl->srcInfo, repl);
+    auto repl = new IR::MethodCallExpression(toAdd->srcInfo, actpath);
+    auto result = new IR::MethodCallStatement(toAdd->srcInfo, repl);
     return result;
 }
 
