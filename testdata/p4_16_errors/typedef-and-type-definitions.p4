@@ -106,7 +106,7 @@ typedef tuple<bit<8>, varbit<17> > Tuple2D_t;
 // Every line marked '// error' below causes the compiler to issue an
 // error message of this form:
 
-// error: <type_name>: 'type' can only be applied to base types or tuple types
+// error: <type_name>: 'type' can only be applied to base types
 
 
 type    int        intT_t;
@@ -123,8 +123,8 @@ type    h1_t[3]    h1StackT_t;  // error
 type    hu1_t      hu1T_t;  // error
 type    s1_t       s1T_t;  // error
 type    struct PointB_t { int<32> x; int<32> y; } PointBD_t;  // error
-type    tuple<bit<8>, bit<17> > Tuple1T_t;
-type    tuple<bit<8>, varbit<17> > Tuple2T_t;  // should this be an error, since it contains a varbit element?
+type    tuple<bit<8>, bit<17> > Tuple1T_t;  // error
+type    tuple<bit<8>, varbit<17> > Tuple2T_t;  // error
 
 
 // typedef on top of another typedef or type are allowed
@@ -140,7 +140,7 @@ type    bT_t bTT_t;
 // Every line marked '// error' below causes the compiler to issue an
 // error message of this form:
 
-// error: <type_name>: 'type' can only be applied to base types or tuple types
+// error: <type_name>: 'type' can only be applied to base types
 
 type    iD_t iDT_t;
 type    vD_t vDT_t;  // error
@@ -154,5 +154,5 @@ type    h1StackD_t h1StackDT_t;  // error
 type    hu1D_t hu1DT_t;  // error
 type    s1D_t s1DT_t;  // error
 type    PointAD_t PointADT_t;  // error
-type    Tuple1D_t Tuple1DT_t;
-type    Tuple2D_t Tuple2DT_t;  // should this be an error, since it contains a varbit element?
+type    Tuple1D_t Tuple1DT_t;  // error
+type    Tuple2D_t Tuple2DT_t;  // error
