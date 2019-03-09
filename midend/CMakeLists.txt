@@ -59,7 +59,7 @@ set (MIDEND_HDRS
   expandLookahead.h
   expr_uses.h
   flattenInterfaceStructs.h
-  flattenHeaders.h  
+  flattenHeaders.h
   has_side_effects.h
   interpreter.h
   local_copyprop.h
