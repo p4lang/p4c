@@ -658,27 +658,6 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
 }
 
 /*
- * Function checks if type->name is included in p4runtime_translated
- * annotation or not.
-*/
-static bool
-isAnnotated(const IR::Type_Newtype* type) {
-    auto ann = type->getAnnotation(IR::Annotation::p4runtimeTranslationAnnotation);
-    if (ann != nullptr) {
-        int i = 0;
-        cstring uri;
-        for (auto a : ann->body) {
-            if (!i++) {
-                uri = a->text;
-                if (uri.endsWith(type->name))
-                    return true;
-            }
-         }
-    }
-    return false;
-}
-
-/*
  * The function returns a cstring for use as type_name for any nested type.
 */
 static cstring
@@ -691,8 +670,7 @@ getTypeName(const IR::Type* type, std::vector<const IR::Type_Newtype*>& list,
     if (type->is<IR::Type_Bits>()) {
         if (!list.empty())  {
             auto nt = list.front();
-            if (isAnnotated(nt))
-                return nt->name;
+            return nt->name;
         }
         return type_name;
     }
@@ -702,7 +680,7 @@ getTypeName(const IR::Type* type, std::vector<const IR::Type_Newtype*>& list,
         LOG3("getTypeName: " << type->getP4Type() << " " << t->getP4Type());
         auto newt = t->to<IR::Type_Newtype>();
         type_name = newt->name;
-        if (newt->type->is<IR::Type_Bits>() && isAnnotated(newt)) {
+        if (newt->type->is<IR::Type_Bits>()) {
             return type_name;
         }
         list.push_back(newt);
@@ -713,9 +691,7 @@ getTypeName(const IR::Type* type, std::vector<const IR::Type_Newtype*>& list,
         return type_name;
     auto nt = list.front();
     LOG3("List front: " << nt->name << " " << nt->getP4Type() << std::endl);
-    if (isAnnotated(nt))
-        return nt->name;
-    return nullptr;
+    return nt->name;
 }
 
 /// @return the header instance fields matched against by @table's key. The
