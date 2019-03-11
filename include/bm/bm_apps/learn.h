@@ -21,8 +21,6 @@
 #ifndef BM_BM_APPS_LEARN_H_
 #define BM_BM_APPS_LEARN_H_
 
-#include <boost/shared_ptr.hpp>
-
 #include <string>
 #include <functional>
 #include <memory>
@@ -71,7 +69,7 @@ class LearnListener {
 
   void ack_buffer(cxt_id_t cxt_id, list_id_t list_id, buffer_id_t buffer_id);
 
-  boost::shared_ptr<bm_runtime::standard::StandardClient> get_client() {
+  std::shared_ptr<bm_runtime::standard::StandardClient> get_client() {
     return bm_client;
   }
 
@@ -87,7 +85,7 @@ class LearnListener {
   std::thread listen_thread{};
   bool stop_listen_thread{false};
   mutable std::mutex mutex{};
-  boost::shared_ptr<bm_runtime::standard::StandardClient> bm_client{nullptr};
+  std::shared_ptr<bm_runtime::standard::StandardClient> bm_client{nullptr};
 };
 
 }  // namespace bm_apps

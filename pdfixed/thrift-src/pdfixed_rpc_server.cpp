@@ -1,4 +1,6 @@
-#ifdef P4THRIFT
+#include <bm/config.h>
+
+#ifdef BM_P4THRIFT
 #include <p4thrift/protocol/TBinaryProtocol.h>
 #include <p4thrift/server/TSimpleServer.h>
 #include <p4thrift/server/TThreadedServer.h>
@@ -18,12 +20,19 @@ namespace thrift_provider = p4::thrift;
 namespace thrift_provider = apache::thrift;
 #endif
 
+#ifdef BM_HAVE_THRIFT_STDCXX_H
+#include <thrift/stdcxx.h>
+namespace stdcxx = thrift_provider::stdcxx;
+#else
+namespace stdcxx = boost;
+#endif
+
 using namespace ::thrift_provider;
 using namespace ::thrift_provider::protocol;
 using namespace ::thrift_provider::transport;
 using namespace ::thrift_provider::server;
 
-using boost::shared_ptr;
+using ::stdcxx::shared_ptr;
 
 #include <pthread.h>
 

@@ -42,6 +42,7 @@ You also need to install the following from source. Feel free to use the
 install scripts under travis/.
 
 - [thrift 0.9.2](https://github.com/apache/thrift/releases/tag/0.9.2) or later
+  (up to 0.12.1)
 - [nanomsg 1.0.0](https://github.com/nanomsg/nanomsg/releases/tag/1.0.0) or
   later
 

@@ -23,6 +23,7 @@
 #include <bm/bm_sim/switch.h>
 #include <bm/bm_sim/simple_pre_lag.h>
 #include <bm/bm_sim/logger.h>
+#include <bm/thrift/stdcxx.h>
 
 namespace bm_runtime { namespace simple_pre_lag {
 
@@ -142,8 +143,9 @@ private:
   std::vector<std::shared_ptr<McSimplePreLAG> > pres{};
 };
 
-boost::shared_ptr<SimplePreLAGIf> get_handler(SwitchWContexts *switch_) {
-  return boost::shared_ptr<SimplePreLAGHandler>(new SimplePreLAGHandler(switch_));
+::stdcxx::shared_ptr<SimplePreLAGIf> get_handler(SwitchWContexts *switch_) {
+  return ::stdcxx::shared_ptr<SimplePreLAGHandler>(
+      new SimplePreLAGHandler(switch_));
 }
 
 }  // namespace simple_pre_lag

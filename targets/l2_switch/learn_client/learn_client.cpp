@@ -48,7 +48,7 @@ void learn_cb(const bm_apps::LearnListener::MsgInfo &msg_info,
   (void) cookie;
   std::cout << "CB with " << msg_info.num_samples << " samples\n";
 
-  boost::shared_ptr<runtime::StandardClient> client = listener->get_client();
+  auto client = listener->get_client();
   assert(client);
 
   for (unsigned int i = 0; i < msg_info.num_samples; i++) {

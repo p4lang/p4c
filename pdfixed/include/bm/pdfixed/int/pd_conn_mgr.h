@@ -21,7 +21,9 @@
 #ifndef BM_PDFIXED_INT_PD_CONN_MGR_H_
 #define BM_PDFIXED_INT_PD_CONN_MGR_H_
 
-#ifdef P4THRIFT
+#include <bm/config.h>
+
+#ifdef BM_P4THRIFT
 #include <p4thrift/protocol/TBinaryProtocol.h>
 #include <p4thrift/transport/TSocket.h>
 #include <p4thrift/transport/TTransportUtils.h>
@@ -35,6 +37,13 @@ namespace thrift_provider = p4::thrift;
 #include <thrift/protocol/TMultiplexedProtocol.h>
 
 namespace thrift_provider = apache::thrift;
+#endif
+
+#ifdef BM_HAVE_THRIFT_STDCXX_H
+#include <thrift/stdcxx.h>
+namespace stdcxx = thrift_provider::stdcxx;
+#else
+namespace stdcxx = boost;
 #endif
 
 #include <mutex>
@@ -74,7 +83,8 @@ struct ClientState {
   std::mutex mutex{};
   std::vector<void *> ptrs{};
   int dev_id{};
-  boost::shared_ptr<::thrift_provider::protocol::TTransport> transport{nullptr};
+  ::stdcxx::shared_ptr<::thrift_provider::protocol::TTransport>
+  transport{nullptr};
 };
 
 }  // namespace detail
@@ -119,12 +129,12 @@ struct Connector<A, Args...> {
     using namespace ::thrift_provider::protocol;  // NOLINT(build/namespaces)
     using namespace ::thrift_provider::transport;  // NOLINT(build/namespaces)
 
-    boost::shared_ptr<TTransport> socket(
+    ::stdcxx::shared_ptr<TTransport> socket(
         new TSocket("localhost", thrift_port_num));
-    boost::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
-    boost::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
+    ::stdcxx::shared_ptr<TTransport> transport(new TBufferedTransport(socket));
+    ::stdcxx::shared_ptr<TProtocol> protocol(new TBinaryProtocol(transport));
 
-    boost::shared_ptr<TMultiplexedProtocol> sub_protocol(
+    ::stdcxx::shared_ptr<TMultiplexedProtocol> sub_protocol(
         new TMultiplexedProtocol(protocol, *it));
 
     cstate->transport = transport;

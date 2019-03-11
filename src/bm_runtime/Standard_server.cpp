@@ -23,6 +23,7 @@
 #include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/logger.h>
 #include <bm/bm_sim/switch.h>
+#include <bm/thrift/stdcxx.h>
 
 #include <functional>
 
@@ -1269,8 +1270,8 @@ void StandardHandler::copy_one_group(
   for (const auto h : from.mbr_handles) g->mbr_handles.push_back(h);
 }
 
-boost::shared_ptr<StandardIf> get_handler(SwitchWContexts *switch_) {
-  return boost::shared_ptr<StandardHandler>(new StandardHandler(switch_));
+::stdcxx::shared_ptr<StandardIf> get_handler(SwitchWContexts *switch_) {
+  return ::stdcxx::shared_ptr<StandardHandler>(new StandardHandler(switch_));
 }
 
 }  // namespace standard

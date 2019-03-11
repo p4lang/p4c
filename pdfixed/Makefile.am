@@ -154,10 +154,6 @@ AM_CPPFLAGS += -I$(srcdir)/include
 AM_CPPFLAGS += -I$(top_srcdir)/include
 AM_CPPFLAGS += -I$(builddir)/pd_thrift_gen/gen-cpp/
 
-if P4THRIFT
-    AM_CPPFLAGS += -DP4THRIFT
-endif
-
 CLEANFILES = $(BUILT_SOURCES) \
 pdfixed_thrift_files.ts \
 pd_thrift_gen/gen-cpp/mc_server.skeleton.cpp \

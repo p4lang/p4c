@@ -44,6 +44,7 @@ namespace thrift_provider = apache::thrift;
 #include <nanomsg/pubsub.h>
 
 #include <iostream>
+#include <memory>
 #include <string>
 
 #include <cassert>
@@ -115,7 +116,7 @@ LearnListener::start() {
   shared_ptr<TMultiplexedProtocol> standard_protocol(
       new TMultiplexedProtocol(protocol, "standard"));
 
-  bm_client = boost::shared_ptr<runtime::StandardClient>(
+  bm_client = std::shared_ptr<runtime::StandardClient>(
       new runtime::StandardClient(standard_protocol));
 
   transport->open();
