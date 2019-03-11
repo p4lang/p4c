@@ -131,12 +131,13 @@ const IR::Node* FunctionsInliner::preorder(IR::P4Parser* parser) {
 }
 
 const IR::Node* FunctionsInliner::preorder(IR::P4Control* control) {
-    if (preCaller()) {
-        control->visit_children(*this);
+    bool hasWork = preCaller();
+    // We always visit the children: there may be function calls in
+    // actions within the control
+    control->visit_children(*this);
+    if (hasWork)
         return postCaller(control);
-    } else {
-        return control;
-    }
+    return control;
 }
 
 const IR::Node* FunctionsInliner::preorder(IR::Function* function) {
