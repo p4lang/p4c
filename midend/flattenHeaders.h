@@ -49,6 +49,7 @@ struct HeaderTypeReplacement : public IHasDbPrint {
     void flatten(const P4::TypeMap* typeMap,
                  cstring prefix,
                  const IR::Type* type,
+                 const IR::Annotations* annos,
                  IR::IndexedVector<IR::StructField> *fields);
 };
 
@@ -177,6 +178,7 @@ class FlattenHeaders final : public PassManager {
         passes.push_back(new FindHeaderTypesToReplace(sm));
         passes.push_back(new ReplaceHeaders(sm));
         passes.push_back(new ClearTypeMap(typeMap));
+        passes.push_back(new TypeChecking(refMap, typeMap, true));
         setName("FlattenHeaders");
     }
 };
