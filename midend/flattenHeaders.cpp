@@ -19,15 +19,31 @@ limitations under the License.
 
 namespace P4 {
 
+template <typename Func>
+const IR::Annotations* filterAnnotation(const IR::Annotations* annot, Func function) {
+    auto annotations = new IR::Annotations();
+    for (auto an : annot->annotations) {
+        if (function(an))
+            continue;
+        annotations->add(an);
+    }
+    return annotations;
+}
+
 void HeaderTypeReplacement::flatten(const P4::TypeMap* typeMap,
                                     cstring prefix,
                                     const IR::Type* type,
                                     const IR::Annotations* annos,
                                     IR::IndexedVector<IR::StructField> *fields) {
     if (auto st = type->to<IR::Type_StructLike>()) {
+        auto annotations = filterAnnotation(st->annotations, [&](const IR::Annotation* annot) {
+            if (annot->name == IR::Annotation::nameAnnotation)
+                return true;
+            return false;
+        });
         for (auto f : st->fields) {
             auto ft = typeMap->getType(f, true);
-            flatten(typeMap, prefix + "." + f->name, ft, st->annotations, fields);
+            flatten(typeMap, prefix + "." + f->name, ft, annotations, fields);
         }
         return;
     }
