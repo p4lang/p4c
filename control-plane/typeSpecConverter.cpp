@@ -117,12 +117,12 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
 
 bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
     if (p4RtTypeInfo) {
-        bool orig = true;
+        bool orig_type = true;
         cstring uri;
         uint32_t sdnB;
-        auto ann = type->getAnnotation(IR::Annotation::p4runtimeTranslationAnnotation);
+        auto ann = type->getAnnotation("p4runtime_translation");
         if (ann != nullptr) {
-            orig = false;
+            orig_type = false;
             int i = 0;
             for (auto a : ann->body) {
                 if (!i++)
@@ -141,12 +141,9 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
             auto n = newType->to<IR::Type_Name>();
             visit(n);
             auto typeSpec = map.at(n);
-            if (orig) {
-                (void)newTypeSpec->mutable_original_type();
-                auto dataType = newTypeSpec->mutable_original_type();
-                dataType->mutable_bitstring()->CopyFrom(typeSpec->bitstring());
+            if (orig_type) {
+                newTypeSpec->mutable_original_type()->CopyFrom(*typeSpec);
             } else {
-                (void)newTypeSpec->mutable_translated_type();
                 auto dataType = newTypeSpec->mutable_translated_type();
                 dataType->set_uri(std::string(uri));
                 dataType->set_sdn_bitwidth(sdnB);

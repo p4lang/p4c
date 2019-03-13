@@ -727,7 +727,10 @@ class ParseAnnotations : public P4::ParseAnnotations {
                 PARSE_EMPTY("hidden"),
                 PARSE("id", Constant),
                 PARSE("brief", StringLiteral),
-                PARSE("description", StringLiteral)
+                PARSE("description", StringLiteral),
+                // @p4runtime_translation has two args
+                PARSE_PAIR("p4runtime_translation",
+                           Expression),
             }) { }
 };
 
