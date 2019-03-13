@@ -649,9 +649,9 @@ getMatchType(cstring matchTypeName) {
 */
 static int
 getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
-    uint32_t w = 0;
+    int w = 0;
     if (type == nullptr)
-        return w;
+        return -2;
     return typeMap->minWidthBits(type, nullptr);
 }
 
@@ -718,7 +718,9 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
                   "Couldn't determine type for key element %1%", keyElement);
         type_name = getTypeName(matchFieldType, vec, typeMap);
         vec.clear();
-        uint32_t w = getTypeWidth(matchFieldType, typeMap);
+        int w = getTypeWidth(matchFieldType, typeMap);
+        if (w < 0)
+            return matchFields;
         matchFields.push_back(MatchField{*matchFieldName, *matchType, matchTypeName,
                                    w, keyElement->to<IR::IAnnotated>(), type_name});
     }
@@ -834,6 +836,8 @@ class P4RuntimeAnalyzer {
                 param->set_bitwidth(1);
             } else if (paramType->is<IR::Type_Newtype>()) {
                 auto w = getTypeWidth(paramType, typeMap);
+                if (w < 0)
+                    return;
                 param->set_bitwidth(w);
                 cstring type_name = getTypeName(paramType, vec, typeMap);
                 vec.clear();
@@ -889,6 +893,8 @@ class P4RuntimeAnalyzer {
                       "Header field %1% has a type which is not bit<>,int<>, or type",
                       headerField);
             auto w = getTypeWidth(fieldType, typeMap);
+            if (w < 0)
+                return;
             metadata->set_bitwidth(w);
         }
     }
