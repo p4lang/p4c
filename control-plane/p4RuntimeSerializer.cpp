@@ -661,9 +661,9 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
           typeMap->getType(keyElement->expression->getNode(), true);
         BUG_CHECK(matchFieldType != nullptr,
                   "Couldn't determine type for key element %1%", keyElement);
-        int width = typeMap->minWidthBits(matchFieldType, keyElement);
-        if (width < 0)
-            return matchFields;
+        while (matchFieldType->is<IR::Type_Newtype>())
+            matchFieldType = typeMap->getTypeType(matchFieldType, true);
+        unsigned width = matchFieldType->width_bits();
         matchFields.push_back(MatchField{*matchFieldName, *matchType, matchTypeName,
                                          uint32_t(width), keyElement->to<IR::IAnnotated>()});
     }
