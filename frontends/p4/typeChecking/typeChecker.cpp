@@ -3321,15 +3321,16 @@ const IR::Node* TypeInference::postorder(IR::SelectCase* sc) {
     return sc;
 }
 
+// TODO: Mihai to change this code with PR 1787
 const IR::Node* TypeInference::postorder(IR::KeyElement* elem) {
     auto ktype = getType(elem->expression);
     if (ktype == nullptr)
         return elem;
     while (ktype->is<IR::Type_Newtype>())
-        ktype = getTypeType(ktype->to<IR::Type_Newtype>()->type);
-    if (!ktype->is<IR::Type_Bits>() && !ktype->is<IR::Type_SerEnum>() &&
+        ktype = ktype->to<IR::Type_Newtype>()->type;
+    if (!ktype->is<IR::Type_Bits>() && !ktype->is<IR::Type_Enum>() &&
         !ktype->is<IR::Type_Error>() && !ktype->is<IR::Type_Boolean>() &&
-        !ktype->is<IR::Type_Enum>())
+        !ktype->is<IR::Type_Name>() && !ktype->is<IR::Type_SerEnum>())
         typeError("Key %1% field type must be a scalar type; it cannot be %2%",
                   elem->expression, ktype->toString());
     auto type = getType(elem->matchType);

@@ -649,9 +649,6 @@ getMatchType(cstring matchTypeName) {
 */
 static int
 getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
-    int w = 0;
-    if (type == nullptr)
-        return -2;
     return typeMap->minWidthBits(type, nullptr);
 }
 
