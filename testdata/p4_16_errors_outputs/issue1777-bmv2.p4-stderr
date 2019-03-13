@@ -1,0 +1,3 @@
+issue1777-bmv2.p4(64): [--Werror=unsupported] error: meta.reg_data2: Unsupported meta.reg_data2: writing to a structure is not supported on this target
+        reg2.read(meta.reg_data2, (bit<32>) reg_idx);
+                  ^^^^^^^^^^^^^^

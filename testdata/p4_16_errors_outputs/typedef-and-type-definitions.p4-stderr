@@ -1,0 +1,75 @@
+typedef-and-type-definitions.p4(112): error: intT_t: `type' can only be applied to base types
+type int intT_t;
+         ^^^^^^
+typedef-and-type-definitions.p4(115): error: vT_t: `type' can only be applied to base types
+type varbit<8> vT_t; // error
+               ^^^^
+typedef-and-type-definitions.p4(116): error: errorT_t: `type' can only be applied to base types
+type error errorT_t; // error
+           ^^^^^^^^
+typedef-and-type-definitions.p4(118): error: enum1T_t: `type' can only be applied to base types
+type enum1_t enum1T_t; // error
+             ^^^^^^^^
+typedef-and-type-definitions.p4(119): error: serializable_enum1T_t: `type' can only be applied to base types
+type serializable_enum1_t serializable_enum1T_t; // error
+                          ^^^^^^^^^^^^^^^^^^^^^
+typedef-and-type-definitions.p4(120): error: H1T_t: `type' can only be applied to base types
+type h1_t H1T_t; // error
+          ^^^^^
+typedef-and-type-definitions.p4(121): error: H2bT_t: `type' can only be applied to base types
+type header h2b_t { bit<16> f2; bit<8> f3; } H2bT_t; // error
+                                             ^^^^^^
+typedef-and-type-definitions.p4(122): error: h1StackT_t: `type' can only be applied to base types
+type h1_t[3] h1StackT_t; // error
+             ^^^^^^^^^^
+typedef-and-type-definitions.p4(123): error: hu1T_t: `type' can only be applied to base types
+type hu1_t hu1T_t; // error
+           ^^^^^^
+typedef-and-type-definitions.p4(124): error: s1T_t: `type' can only be applied to base types
+type s1_t s1T_t; // error
+          ^^^^^
+typedef-and-type-definitions.p4(125): error: PointBD_t: `type' can only be applied to base types
+type struct PointB_t { int<32> x; int<32> y; } PointBD_t; // error
+                                               ^^^^^^^^^
+typedef-and-type-definitions.p4(126): error: Tuple1T_t: `type' can only be applied to base types
+type tuple<bit<8>, bit<17> > Tuple1T_t; // error
+                             ^^^^^^^^^
+typedef-and-type-definitions.p4(127): error: Tuple2T_t: `type' can only be applied to base types
+type tuple<bit<8>, varbit<17> > Tuple2T_t; // error
+                                ^^^^^^^^^
+typedef-and-type-definitions.p4(146): error: vDT_t: `type' can only be applied to base types
+type vD_t vDT_t; // error
+          ^^^^^
+typedef-and-type-definitions.p4(147): error: errorDT_t: `type' can only be applied to base types
+type errorD_t errorDT_t; // error
+              ^^^^^^^^^
+typedef-and-type-definitions.p4(149): error: enum1DT_t: `type' can only be applied to base types
+type enum1D_t enum1DT_t; // error
+              ^^^^^^^^^
+typedef-and-type-definitions.p4(150): error: serializable_enum1DT_t: `type' can only be applied to base types
+type serializable_enum1D_t serializable_enum1DT_t; // error
+                           ^^^^^^^^^^^^^^^^^^^^^^
+typedef-and-type-definitions.p4(151): error: H1DT_t: `type' can only be applied to base types
+type H1D_t H1DT_t; // error
+           ^^^^^^
+typedef-and-type-definitions.p4(152): error: H2aDT_t: `type' can only be applied to base types
+type H2aD_t H2aDT_t; // error
+            ^^^^^^^
+typedef-and-type-definitions.p4(153): error: h1StackDT_t: `type' can only be applied to base types
+type h1StackD_t h1StackDT_t; // error
+                ^^^^^^^^^^^
+typedef-and-type-definitions.p4(154): error: hu1DT_t: `type' can only be applied to base types
+type hu1D_t hu1DT_t; // error
+            ^^^^^^^
+typedef-and-type-definitions.p4(155): error: s1DT_t: `type' can only be applied to base types
+type s1D_t s1DT_t; // error
+           ^^^^^^
+typedef-and-type-definitions.p4(156): error: PointADT_t: `type' can only be applied to base types
+type PointAD_t PointADT_t; // error
+               ^^^^^^^^^^
+typedef-and-type-definitions.p4(157): error: Tuple1DT_t: `type' can only be applied to base types
+type Tuple1D_t Tuple1DT_t; // error
+               ^^^^^^^^^^
+typedef-and-type-definitions.p4(158): error: Tuple2DT_t: `type' can only be applied to base types
+type Tuple2D_t Tuple2DT_t; // error
+               ^^^^^^^^^^
