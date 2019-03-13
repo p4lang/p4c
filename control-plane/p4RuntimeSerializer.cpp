@@ -719,7 +719,8 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
         if (w < 0)
             return matchFields;
         matchFields.push_back(MatchField{*matchFieldName, *matchType, matchTypeName,
-                                   w, keyElement->to<IR::IAnnotated>(), type_name});
+                              (uint32_t)w, keyElement->to<IR::IAnnotated>(),
+                              type_name});
     }
 
     return matchFields;
