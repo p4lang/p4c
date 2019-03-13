@@ -338,28 +338,10 @@ int TypeMap::minWidthBits(const IR::Type* type, const IR::Node* errorPosition) {
         return 0;
     }
 
-    ::error("%1%: width not well-defined", errorPosition);
-    return -1;
-}
-
-int TypeMap::keyElementValid(const IR::Type* type, const IR::Node* errorPosition) {
-    // Check first if incoming type is bits, otherwise getTypeType will
-    // cause failure in getType and p4runtime gtestp4c tests fail.
-    if (type->is<IR::Type_Bits>()) {
-        return type->width_bits();
-    }
-    auto t = getTypeType(type, true);
-    if (auto tb = t->to<IR::Type_Bits>()) {
-        return tb->width_bits();
-    } else if (auto te = t->to<IR::Type_SerEnum>()) {
-        return keyElementValid(te->type, errorPosition);
-    } else if (t->is<IR::Type_Boolean>()) {
-        return 1;
-    } else if (auto tnt = t->to<IR::Type_Newtype>()) {
-        return keyElementValid(tnt->type, errorPosition);
-    }
-
-    ::error("%1%: width not well-defined", errorPosition);
+    if (errorPosition)
+        ::error("%1%: width not well-defined", errorPosition);
+    else
+        ::error("width not well-defined");
     return -1;
 }
 

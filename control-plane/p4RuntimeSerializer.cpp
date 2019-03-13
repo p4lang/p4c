@@ -647,13 +647,11 @@ getMatchType(cstring matchTypeName) {
  * by this function. For -1, a failure code, the BUG_CHECK is invoked.
  * Therefore the uint32_t returned by the function is fine.
 */
-static uint32_t
+static int
 getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
     uint32_t w = 0;
     if (type == nullptr)
         return w;
-    BUG_CHECK(!type->is<IR::Type_Error>(), "p4runtime does not support type: %1%",
-              type->getP4Type());
     return typeMap->minWidthBits(type, nullptr);
 }
 
