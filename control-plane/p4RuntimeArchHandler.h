@@ -214,9 +214,9 @@ bool isExternPropertyConstructedInPlace(const IR::P4Table* table,
 /// Visit evaluated blocks under the provided top-level block. Guarantees that
 /// each block is visited only once, even if multiple paths to reach it exist.
 template <typename Func>
-void forAllEvaluatedBlocks(const IR::Block* aToplevelBlock, Func function) {
+void forAllEvaluatedBlocks(const IR::Block* block, Func function) {
     std::set<const IR::Block*> visited;
-    ordered_set<const IR::Block*> frontier{aToplevelBlock};
+    ordered_set<const IR::Block*> frontier{block};
 
     while (!frontier.empty()) {
         // Pop a block off the frontier of blocks we haven't yet visited.
