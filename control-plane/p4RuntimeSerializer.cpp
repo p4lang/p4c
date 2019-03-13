@@ -640,16 +640,9 @@ getMatchType(cstring matchTypeName) {
     }
 }
 
-/*
- * This function supports a deeply nested mix of Type_Newtype and typedef.
- * The function also supported Type_Bits.
- * A non-zero width, or zero width, or -1 is returned by midWidthbits() used
- * by this function. For -1, a failure code, the BUG_CHECK is invoked.
- * Therefore the uint32_t returned by the function is fine.
-*/
 static int
 getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
-    return typeMap->minWidthBits(type, nullptr);
+    return typeMap->minWidthBits(type, type->getNode());
 }
 
 /*
@@ -830,25 +823,17 @@ class P4RuntimeAnalyzer {
                         "bit<>, int<>, bool, type or serializable enum", actionParam);
                 continue;
             }
-            if (paramType->is<IR::Type_Boolean>()) {
-                param->set_bitwidth(1);
-            } else if (paramType->is<IR::Type_Newtype>()) {
-                auto w = getTypeWidth(paramType, typeMap);
-                if (w < 0)
-                    return;
-                param->set_bitwidth(w);
+            int w = getTypeWidth(paramType, typeMap);
+            if (w < 0)
+                return;
+            param->set_bitwidth(w);
+            if (paramType->is<IR::Type_Newtype>()) {
                 cstring type_name = getTypeName(paramType, vec, typeMap);
                 vec.clear();
                 if (type_name) {
                     auto namedType = param->mutable_type_name();
                     namedType->set_name(type_name);
                 }
-            } else if (paramType->is<IR::Type_SerEnum>()) {
-                auto se = paramType->to<IR::Type_SerEnum>();
-                auto type = se->type;
-                param->set_bitwidth(type->width_bits());
-            } else {
-                param->set_bitwidth(paramType->width_bits());
             }
         }
     }
@@ -1348,8 +1333,9 @@ class P4RuntimeEntriesConverter {
             auto protoParam = protoAction->add_params();
             protoParam->set_param_id(parameterId++);
             auto parameter = actionDecl->parameters->parameters.at(parameterIndex++);
-            auto canon = typeMap->getTypeType(parameter->type, true);
-            auto width = canon->width_bits();
+            int width = getTypeWidth(parameter->type, typeMap);
+            if (width < 0)
+                return;
             if (arg->expression->is<IR::Constant>()) {
                 auto value = stringRepr(arg->expression->to<IR::Constant>(), width);
                 protoParam->set_value(*value);
@@ -1402,7 +1388,7 @@ class P4RuntimeEntriesConverter {
         } else if (k->is<IR::BoolLiteral>()) {
             return stringRepr(k->to<IR::BoolLiteral>(), keyWidth);
         } else if (k->is<IR::Member>()) {
-             // used to process const entries of serEnum
+             // A SerEnum is a member const entries are processed here.
              auto mem = k->to<IR::Member>();
              if (mem->type->is<IR::Type_SerEnum>()) {
                  auto se = mem->type->to<IR::Type_SerEnum>();
