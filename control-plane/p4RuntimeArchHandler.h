@@ -136,7 +136,7 @@ class P4RuntimeArchHandlerIface {
     /// Get control plane name for @Block
     virtual cstring getControlPlaneName(const IR::Block* block) {
         auto decl = block->getContainer();
-        return decl ? decl->controlPlaneName() : ""; 
+        return decl ? decl->controlPlaneName() : "";
     }
     /// Collects architecture-specific properties for @tableBlock in @symbols
     /// table.
@@ -211,8 +211,8 @@ getExternInstanceFromProperty(const IR::P4Table* table,
 bool isExternPropertyConstructedInPlace(const IR::P4Table* table,
                                         const cstring& propertyName);
 
-/// Visit evaluated blocks under the provided top-level block. Guarantees that
-/// each block is visited only once, even if multiple paths to reach it exist.
+/// Visit evaluated blocks under the provided block. Guarantees that each
+/// block is visited only once, even if multiple paths to reach it exist.
 template <typename Func>
 void forAllEvaluatedBlocks(const IR::Block* block, Func function) {
     std::set<const IR::Block*> visited;
