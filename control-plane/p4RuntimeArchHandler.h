@@ -133,7 +133,7 @@ class P4RuntimeSymbolTableIface {
 class P4RuntimeArchHandlerIface {
  public:
     virtual ~P4RuntimeArchHandlerIface() { }
-    /// Get control plane name for @Block
+    /// Get control plane name for @block
     virtual cstring getControlPlaneName(const IR::Block* block) {
         auto decl = block->getContainer();
         return decl ? decl->controlPlaneName() : "";
