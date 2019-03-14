@@ -642,6 +642,12 @@ getMatchType(cstring matchTypeName) {
 
 static int
 getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
+    // p4runtime tests use bit Slices which are Type_Bits
+    // which will cause failure in minWidthBits.
+    // Thus compute width here for Slices and any other bit-field.
+    if (type->is<IR::Type_Bits>()) {
+        return static_cast<int>(type->width_bits());
+    }
     return typeMap->minWidthBits(type, type->getNode());
 }
 

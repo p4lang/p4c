@@ -306,11 +306,6 @@ const IR::Type* TypeMap::getCanonical(const IR::Type* type) {
 int TypeMap::minWidthBits(const IR::Type* type, const IR::Node* errorPosition) {
     if (type == nullptr)
         return -2;
-    // Check first if incoming type is bits, otherwise getTypeType will
-    // cause failure in getType and p4runtime gtestp4c tests fail.
-    if (type->is<IR::Type_Bits>()) {
-        return type->width_bits();
-    }
     auto t = getTypeType(type, true);
     if (auto tb = t->to<IR::Type_Bits>()) {
         return tb->width_bits();
