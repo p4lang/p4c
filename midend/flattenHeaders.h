@@ -178,7 +178,6 @@ class FlattenHeaders final : public PassManager {
         passes.push_back(new FindHeaderTypesToReplace(sm));
         passes.push_back(new ReplaceHeaders(sm));
         passes.push_back(new ClearTypeMap(typeMap));
-        passes.push_back(new TypeChecking(refMap, typeMap, true));
         setName("FlattenHeaders");
     }
 };

@@ -36,11 +36,13 @@ void HeaderTypeReplacement::flatten(const P4::TypeMap* typeMap,
                                     const IR::Annotations* annos,
                                     IR::IndexedVector<IR::StructField> *fields) {
     if (auto st = type->to<IR::Type_StructLike>()) {
-        auto annotations = filterAnnotation(st->annotations, [&](const IR::Annotation* annot) {
-            if (annot->name == IR::Annotation::nameAnnotation)
-                return true;
-            return false;
-        });
+        std::function<bool(const IR::Annotation*)> nameFilter =
+            [](const IR::Annotation* annot) {
+                if (annot->name == IR::Annotation::nameAnnotation)
+                    return true;
+                return false;
+            };
+        auto annotations = st->annotations->where(nameFilter);
         for (auto f : st->fields) {
             auto ft = typeMap->getType(f, true);
             flatten(typeMap, prefix + "." + f->name, ft, annotations, fields);
