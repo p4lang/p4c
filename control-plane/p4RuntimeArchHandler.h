@@ -133,6 +133,11 @@ class P4RuntimeSymbolTableIface {
 class P4RuntimeArchHandlerIface {
  public:
     virtual ~P4RuntimeArchHandlerIface() { }
+    /// Get control plane name for @block
+    virtual cstring getControlPlaneName(const IR::Block* block) {
+        auto decl = block->getContainer();
+        return decl ? decl->controlPlaneName() : "";
+    }
     /// Collects architecture-specific properties for @tableBlock in @symbols
     /// table.
     virtual void collectTableProperties(P4RuntimeSymbolTableIface* symbols,
@@ -206,12 +211,12 @@ getExternInstanceFromProperty(const IR::P4Table* table,
 bool isExternPropertyConstructedInPlace(const IR::P4Table* table,
                                         const cstring& propertyName);
 
-/// Visit evaluated blocks under the provided top-level block. Guarantees that
-/// each block is visited only once, even if multiple paths to reach it exist.
+/// Visit evaluated blocks under the provided block. Guarantees that each
+/// block is visited only once, even if multiple paths to reach it exist.
 template <typename Func>
-void forAllEvaluatedBlocks(const IR::ToplevelBlock* aToplevelBlock, Func function) {
+void forAllEvaluatedBlocks(const IR::Block* block, Func function) {
     std::set<const IR::Block*> visited;
-    ordered_set<const IR::Block*> frontier{aToplevelBlock};
+    ordered_set<const IR::Block*> frontier{block};
 
     while (!frontier.empty()) {
         // Pop a block off the frontier of blocks we haven't yet visited.
