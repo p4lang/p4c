@@ -118,19 +118,17 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
 bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
     if (p4RtTypeInfo) {
         bool orig_type = true;
-        cstring uri;
-        uint32_t sdnB;
+        const IR::StringLiteral* uri;
+        const IR::Constant* sdnB;
         auto ann = type->getAnnotation("p4runtime_translation");
         if (ann != nullptr) {
             orig_type = false;
-            int i = 0;
-            for (auto a : ann->body) {
-                if (!i++)
-                    uri = a->text;
-                if (isdigit(a->text.c_str()[0])) {
-                    sdnB = atoi(a->text);
-                }
-            }
+            uri = ann->expr[0]->to<IR::StringLiteral>();
+            BUG_CHECK(uri, "P4runtime annotation does not have uri: %1%",
+                      type->getP4Type());
+            sdnB = ann->expr[1]->to<IR::Constant>();
+            BUG_CHECK(sdnB, "P4runtime annotation does not have sdn: %1%",
+                      type->getP4Type());
         }
 
         auto name = std::string(type->controlPlaneName());
@@ -142,11 +140,13 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
             visit(n);
             auto typeSpec = map.at(n);
             if (orig_type) {
-                newTypeSpec->mutable_original_type()->CopyFrom(*typeSpec);
+                auto dataType = newTypeSpec->mutable_original_type();
+                if (typeSpec->has_bitstring())
+                    dataType->mutable_bitstring()->CopyFrom(typeSpec->bitstring());
             } else {
                 auto dataType = newTypeSpec->mutable_translated_type();
-                dataType->set_uri(std::string(uri));
-                dataType->set_sdn_bitwidth(sdnB);
+                dataType->set_uri(std::string(uri->value));
+                dataType->set_sdn_bitwidth((uint32_t) sdnB->value.get_si());
             }
             (*types)[name] = *newTypeSpec;
        }

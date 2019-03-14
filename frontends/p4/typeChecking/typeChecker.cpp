@@ -3321,7 +3321,6 @@ const IR::Node* TypeInference::postorder(IR::SelectCase* sc) {
     return sc;
 }
 
-// TODO: Mihai to change this code with PR 1787
 const IR::Node* TypeInference::postorder(IR::KeyElement* elem) {
     auto ktype = getType(elem->expression);
     if (ktype == nullptr)
