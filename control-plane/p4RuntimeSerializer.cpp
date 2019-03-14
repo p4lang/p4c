@@ -661,31 +661,12 @@ getTypeName(const IR::Type* type, std::vector<const IR::Type_Newtype*>& list,
     if (type == nullptr)
         return type_name;
 
-    if (type->is<IR::Type_Bits>()) {
-        if (!list.empty())  {
-            auto nt = list.front();
-            return nt->name;
-        }
-        return type_name;
-    }
-
     auto t = typeMap->getTypeType(type, true);
     if (t->is<IR::Type_Newtype>()) {
         LOG3("getTypeName: " << type->getP4Type() << " " << t->getP4Type());
         auto newt = t->to<IR::Type_Newtype>();
-        type_name = newt->name;
-        if (newt->type->is<IR::Type_Bits>()) {
-            return type_name;
-        }
-        list.push_back(newt);
-        return getTypeName(newt->type, list, typeMap);
+        return newt->name;
     }
-
-    if (list.empty())
-        return type_name;
-    auto nt = list.front();
-    LOG3("List front: " << nt->name << " " << nt->getP4Type() << std::endl);
-    return nt->name;
 }
 
 /// @return the header instance fields matched against by @table's key. The

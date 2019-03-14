@@ -91,7 +91,7 @@ tables {
     bitwidth: 8
     match_type: EXACT
     type_name {
-      name: "CustomT_t"
+      name: "CustomTDT_t"
     }
   }
   match_fields {
@@ -100,7 +100,7 @@ tables {
     bitwidth: 8
     match_type: EXACT
     type_name {
-      name: "CustomT_t"
+      name: "CustomTT_t"
     }
   }
   match_fields {
@@ -109,7 +109,7 @@ tables {
     bitwidth: 8
     match_type: EXACT
     type_name {
-      name: "CustomT_t"
+      name: "CustomTTT_t"
     }
   }
   action_refs {
@@ -192,7 +192,7 @@ actions {
     name: "ett"
     bitwidth: 8
     type_name {
-      name: "CustomT_t"
+      name: "CustomTT_t"
     }
   }
   params {
@@ -237,7 +237,7 @@ actions {
     name: "etdt"
     bitwidth: 8
     type_name {
-      name: "CustomT_t"
+      name: "CustomTDT_t"
     }
   }
   params {
@@ -245,7 +245,7 @@ actions {
     name: "ettd"
     bitwidth: 8
     type_name {
-      name: "CustomT_t"
+      name: "CustomTT_t"
     }
   }
   params {
@@ -253,7 +253,7 @@ actions {
     name: "ettt"
     bitwidth: 8
     type_name {
-      name: "CustomT_t"
+      name: "CustomTTT_t"
     }
   }
 }
