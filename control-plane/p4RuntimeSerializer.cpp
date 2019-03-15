@@ -197,6 +197,7 @@ struct MatchField {
     const uint32_t bitwidth;  // How wide this field is.
     const IR::IAnnotated* annotations;  // If non-null, any annotations applied
                                         // to this field.
+    const cstring type_name;  // Optional field, used if field is user-defined type.
 };
 
 struct ActionRef {
@@ -639,6 +640,45 @@ getMatchType(cstring matchTypeName) {
     }
 }
 
+static int
+getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
+    // p4runtime tests use bit Slices which are Type_Bits
+    // which will cause failure in minWidthBits.
+    // Thus compute width here for Slices and any other bit-field.
+    if (auto tb = type->to<IR::Type_Bits>()) {
+        return static_cast<int>(tb->width_bits());
+    }
+    auto ann = type->getAnnotation("p4runtime_translation");
+    if (ann != nullptr) {
+        auto sdnB = ann->expr[1]->to<IR::Constant>();
+        return static_cast<int>(sdnB->value.get_si());
+    }
+    return typeMap->minWidthBits(type, type->getNode());
+}
+
+/*
+ * The function returns a cstring for use as type_name for any nested type.
+*/
+static cstring
+getTypeName(const IR::Type* type, TypeMap* typeMap) {
+    cstring type_name = nullptr;
+    if (type == nullptr)
+        return type_name;
+
+    // p4runtime uses bit slices which are Type_Bits and cause
+    // a BUG in typeMap.cpp if getTypeType() is used on such a
+    // Type_Bits.
+    if (type->is<IR::Type_Bits>())
+        return type_name;
+
+    auto t = typeMap->getTypeType(type, true);
+    if (t->is<IR::Type_Newtype>()) {
+        LOG3("getTypeName: " << type->getP4Type() << " " << t->getP4Type());
+        auto newt = t->to<IR::Type_Newtype>();
+        return newt->name;
+    }
+}
+
 /// @return the header instance fields matched against by @table's key. The
 /// fields are represented as a (fully qualified field name, match type) tuple.
 static std::vector<MatchField>
@@ -649,6 +689,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
     if (!key) return matchFields;
 
     for (auto keyElement : key->keyElements) {
+        cstring type_name = nullptr;
         auto matchTypeName = getMatchTypeName(keyElement->matchType, refMap);
         auto matchType = getMatchType(matchTypeName);
         if (matchType == boost::none) continue;
@@ -661,11 +702,13 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
           typeMap->getType(keyElement->expression->getNode(), true);
         BUG_CHECK(matchFieldType != nullptr,
                   "Couldn't determine type for key element %1%", keyElement);
-        while (auto mt = matchFieldType->to<IR::Type_Newtype>())
-            matchFieldType = typeMap->getTypeType(mt->type, true);
-        unsigned width = matchFieldType->width_bits();
-        matchFields.push_back(MatchField{*matchFieldName, *matchType, matchTypeName,
-                                         uint32_t(width), keyElement->to<IR::IAnnotated>()});
+        type_name = getTypeName(matchFieldType, typeMap);
+        int width = getTypeWidth(matchFieldType, typeMap);
+        if (width < 0)
+            return matchFields;
+        matchFields.push_back(MatchField{*matchFieldName, *matchType,
+                              matchTypeName, uint32_t(width),
+                              keyElement->to<IR::IAnnotated>(), type_name});
     }
 
     return matchFields;
@@ -679,7 +722,10 @@ class ParseAnnotations : public P4::ParseAnnotations {
                 PARSE_EMPTY("hidden"),
                 PARSE("id", Constant),
                 PARSE("brief", StringLiteral),
-                PARSE("description", StringLiteral)
+                PARSE("description", StringLiteral),
+                // @p4runtime_translation has two args
+                PARSE_PAIR("p4runtime_translation",
+                           Expression),
             }) { }
 };
 
@@ -767,15 +813,23 @@ class P4RuntimeAnalyzer {
             addDocumentation(param, actionParam->to<IR::IAnnotated>());
 
             auto paramType = typeMap->getType(actionParam, true);
-            if (!paramType->is<IR::Type_Bits>() && !paramType->is<IR::Type_Boolean>()) {
-                ::error("Action parameter %1% has a type which is not bit<> or int<> or bool",
-                        actionParam);
+            if (!paramType->is<IR::Type_Bits>() && !paramType->is<IR::Type_Boolean>()
+                && !paramType->is<IR::Type_Newtype>() &&
+                !paramType->is<IR::Type_SerEnum>()) {
+                ::error("Action parameter %1% has a type which is not "
+                        "bit<>, int<>, bool, type or serializable enum", actionParam);
                 continue;
             }
-            if (paramType->is<IR::Type_Boolean>()) {
-                param->set_bitwidth(1);
-            } else {
-                param->set_bitwidth(paramType->width_bits());
+            int w = getTypeWidth(paramType, typeMap);
+            if (w < 0)
+                return;
+            param->set_bitwidth(w);
+            if (paramType->is<IR::Type_Newtype>()) {
+                cstring type_name = getTypeName(paramType, typeMap);
+                if (type_name) {
+                    auto namedType = param->mutable_type_name();
+                    namedType->set_name(type_name);
+                }
             }
         }
     }
@@ -813,10 +867,14 @@ class P4RuntimeAnalyzer {
             addAnnotations(metadata, headerField->to<IR::IAnnotated>());
 
             auto fieldType = typeMap->getType(headerField, true);
-            BUG_CHECK(fieldType->is<IR::Type_Bits>(),
-                      "Header field %1% has a type which is not bit<> or int<>",
+            BUG_CHECK((fieldType->is<IR::Type_Bits>() ||
+                      fieldType->is<IR::Type_Newtype>()),
+                      "Header field %1% has a type which is not bit<>,int<>, or type",
                       headerField);
-            metadata->set_bitwidth(fieldType->width_bits());
+            auto w = getTypeWidth(fieldType, typeMap);
+            if (w < 0)
+                return;
+            metadata->set_bitwidth(w);
         }
     }
 
@@ -878,6 +936,10 @@ class P4RuntimeAnalyzer {
                 match_field->set_match_type(field.type);
             else
                 match_field->set_other_match_type(field.other_match_type);
+            if (field.type_name) {
+                auto namedType = match_field->mutable_type_name();
+                namedType->set_name(field.type_name);
+            }
         }
 
         if (isConstTable) {
@@ -1199,7 +1261,8 @@ class P4RuntimeEntriesConverter {
     }
 
     /// Appends the 'const entries' for the table to the WriteRequest message.
-    void addTableEntries(const IR::TableBlock* tableBlock, ReferenceMap* refMap) {
+    void addTableEntries(const IR::TableBlock* tableBlock, ReferenceMap* refMap,
+                         TypeMap* typeMap) {
         CHECK_NULL(tableBlock);
         auto table = tableBlock->container;
 
@@ -1218,7 +1281,7 @@ class P4RuntimeEntriesConverter {
             auto protoEntry = protoEntity->mutable_table_entry();
             protoEntry->set_table_id(tableId);
             addMatchKey(protoEntry, table, e->getKeys(), refMap);
-            addAction(protoEntry, e->getAction(), refMap);
+            addAction(protoEntry, e->getAction(), refMap, typeMap);
             // TODO(antonin): according to the P4 specification, "Entries in a
             // table are matched in the program order, stopping at the first
             // matching entry." Based on the definition of 'priority' in
@@ -1245,7 +1308,8 @@ class P4RuntimeEntriesConverter {
 
     void addAction(p4v1::TableEntry* protoEntry,
                    const IR::Expression* actionRef,
-                   ReferenceMap* refMap) const {
+                   ReferenceMap* refMap,
+                   TypeMap* typeMap) const {
         if (!actionRef->is<IR::MethodCallExpression>()) {
             ::error("%1%: invalid action in entries list", actionRef);
             return;
@@ -1264,8 +1328,10 @@ class P4RuntimeEntriesConverter {
         for (auto arg : *actionCall->arguments) {
             auto protoParam = protoAction->add_params();
             protoParam->set_param_id(parameterId++);
-            auto parameter = actionDecl->parameters->parameters.at(parameterIndex);
-            auto width = parameter->type->width_bits();
+            auto parameter = actionDecl->parameters->parameters.at(parameterIndex++);
+            int width = getTypeWidth(parameter->type, typeMap);
+            if (width < 0)
+                return;
             if (arg->expression->is<IR::Constant>()) {
                 auto value = stringRepr(arg->expression->to<IR::Constant>(), width);
                 protoParam->set_value(*value);
@@ -1317,6 +1383,22 @@ class P4RuntimeEntriesConverter {
             return stringRepr(k->to<IR::Constant>(), keyWidth);
         } else if (k->is<IR::BoolLiteral>()) {
             return stringRepr(k->to<IR::BoolLiteral>(), keyWidth);
+        } else if (k->is<IR::Member>()) {
+             // A SerEnum is a member const entries are processed here.
+             auto mem = k->to<IR::Member>();
+             if (mem->type->is<IR::Type_SerEnum>()) {
+                 auto se = mem->type->to<IR::Type_SerEnum>();
+                 auto w = se->type->width_bits();
+                 for (auto m : se->members) {
+                     auto smem = m->to<IR::SerEnumMember>();
+                     if (smem->name == mem->member.name) {
+                         auto type = smem->value->to<IR::Constant>();
+                         return stringRepr(type, w);
+                     }
+                 }
+             }
+             ::error("%1% invalid Member key expression", k);
+             return boost::none;
         } else {
             ::error("%1% invalid key expression", k);
             return boost::none;
@@ -1496,7 +1578,8 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
     P4RuntimeEntriesConverter entriesConverter(symbols);
     Helpers::forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
         if (block->is<IR::TableBlock>())
-            entriesConverter.addTableEntries(block->to<IR::TableBlock>(), refMap);
+            entriesConverter.addTableEntries(block->to<IR::TableBlock>(), refMap,
+                                             typeMap);
     });
 
     auto* p4Info = analyzer.getP4Info();

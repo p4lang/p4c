@@ -32,7 +32,10 @@ actions {
   params {
     id: 1
     name: "oport"
-    bitwidth: 10
+    bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
   }
 }
 actions {

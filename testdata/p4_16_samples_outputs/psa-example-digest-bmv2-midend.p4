@@ -26,6 +26,7 @@ header ipv4_t {
 struct headers {
     ethernet_t ethernet;
     ipv4_t     ipv4;
+    bit<16>    type;
 }
 
 struct empty_metadata_t {
@@ -39,12 +40,13 @@ struct mac_learn_digest_t {
 struct metadata {
     bool    _send_mac_learn_msg0;
     bit<48> _mac_learn_msg_srcAddr1;
-    bit<10> _mac_learn_msg_ingress_port2;
+    bit<32> _mac_learn_msg_ingress_port2;
 }
 
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
     ethernet_t parsed_hdr_0_ethernet;
     ipv4_t parsed_hdr_0_ipv4;
+    bit<16> parsed_hdr_0_type;
     bool meta_1_send_mac_learn_msg;
     mac_learn_digest_t meta_1_mac_learn_msg;
     state start {
@@ -66,6 +68,7 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
     state start_0 {
         parsed_hdr.ethernet = parsed_hdr_0_ethernet;
         parsed_hdr.ipv4 = parsed_hdr_0_ipv4;
+        parsed_hdr.type = parsed_hdr_0_type;
         meta._send_mac_learn_msg0 = meta_1_send_mac_learn_msg;
         meta._mac_learn_msg_srcAddr1 = meta_1_mac_learn_msg.srcAddr;
         meta._mac_learn_msg_ingress_port2 = meta_1_mac_learn_msg.ingress_port;
@@ -76,6 +79,7 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
 parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata meta, in psa_egress_parser_input_metadata_t istd, in empty_metadata_t normal_meta, in empty_metadata_t clone_i2e_meta, in empty_metadata_t clone_e2e_meta) {
     ethernet_t parsed_hdr_1_ethernet;
     ipv4_t parsed_hdr_1_ipv4;
+    bit<16> parsed_hdr_1_type;
     bool meta_2_send_mac_learn_msg;
     mac_learn_digest_t meta_2_mac_learn_msg;
     state start {
@@ -97,6 +101,7 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
     state start_1 {
         parsed_hdr.ethernet = parsed_hdr_1_ethernet;
         parsed_hdr.ipv4 = parsed_hdr_1_ipv4;
+        parsed_hdr.type = parsed_hdr_1_type;
         meta._send_mac_learn_msg0 = meta_2_send_mac_learn_msg;
         meta._mac_learn_msg_srcAddr1 = meta_2_mac_learn_msg.srcAddr;
         meta._mac_learn_msg_ingress_port2 = meta_2_mac_learn_msg.ingress_port;
@@ -107,7 +112,9 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
 control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".NoAction") action NoAction_3() {
+    @name(".NoAction") action NoAction_4() {
+    }
+    @name(".NoAction") action NoAction_5() {
     }
     @name("ingress.unknown_source") action unknown_source() {
         meta._send_mac_learn_msg0 = true;
@@ -126,7 +133,12 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     @name("ingress.do_L2_forward") action do_L2_forward(PortId_t egress_port) {
         ostd.drop = false;
-        ostd.multicast_group = 10w0;
+        ostd.multicast_group = 32w0;
+        ostd.egress_port = egress_port;
+    }
+    @name("ingress.do_tst") action do_tst(PortId_t egress_port, bit<16> serEnumT) {
+        ostd.drop = false;
+        ostd.multicast_group = 32w0;
         ostd.egress_port = egress_port;
     }
     @name("ingress.l2_tbl") table l2_tbl_0 {
@@ -135,9 +147,19 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
         }
         actions = {
             do_L2_forward();
-            NoAction_3();
+            NoAction_4();
         }
-        default_action = NoAction_3();
+        default_action = NoAction_4();
+    }
+    @name("ingress.tst_tbl") table tst_tbl_0 {
+        key = {
+            meta._mac_learn_msg_ingress_port2: exact @name("meta.mac_learn_msg.ingress_port") ;
+        }
+        actions = {
+            do_tst();
+            NoAction_5();
+        }
+        default_action = NoAction_5();
     }
     @hidden action act() {
         meta._send_mac_learn_msg0 = false;
@@ -152,6 +174,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
         tbl_act.apply();
         learned_sources_0.apply();
         l2_tbl_0.apply();
+        tst_tbl_0.apply();
     }
 }
 

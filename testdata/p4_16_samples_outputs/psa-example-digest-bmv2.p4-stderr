@@ -1,0 +1,6 @@
+psa-example-digest-bmv2.p4(84): [--Wwarn=uninitialized_out_param] warning: out parameter parsed_hdr may be uninitialized when CommonParser terminates
+    out headers parsed_hdr,
+                ^^^^^^^^^^
+psa-example-digest-bmv2.p4(82)
+parser CommonParser(
+       ^^^^^^^^^^^^

@@ -90,6 +90,8 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
         typeSpec->mutable_header_union()->set_name(name);
     } else if (decl->is<IR::Type_Enum>()) {
         typeSpec->mutable_enum_()->set_name(name);
+    } else if (decl->is<IR::Type_SerEnum>()) {
+        typeSpec->mutable_serializable_enum()->set_name(name);
     } else if (decl->is<IR::Type_Error>()) {
         // enable "error" field in P4DataTypeSpec's type_spec oneof
         (void)typeSpec->mutable_error();
@@ -103,11 +105,55 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
         CHECK_NULL(typeSpec);
         map.emplace(type, typeSpec);
         return false;
+    } else if (decl->is<IR::Type_Newtype>()) {
+        typeSpec->mutable_new_type()->set_name(name);
     } else {
         BUG("Unexpected named type %1%", type);
     }
     visit(decl->getNode());
     map.emplace(type, typeSpec);
+    return false;
+}
+
+// This function is invoked if psa.p4 has a Newtype. The function
+// is not invoked for user-defined NewType.
+bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
+    if (p4RtTypeInfo) {
+        bool orig_type = true;
+        const IR::StringLiteral* uri;
+        const IR::Constant* sdnB;
+        auto ann = type->getAnnotation("p4runtime_translation");
+        if (ann != nullptr) {
+            orig_type = false;
+            uri = ann->expr[0]->to<IR::StringLiteral>();
+            BUG_CHECK(uri, "P4runtime annotation does not have uri: %1%",
+                      type->getP4Type());
+            sdnB = ann->expr[1]->to<IR::Constant>();
+            BUG_CHECK(sdnB, "P4runtime annotation does not have sdn: %1%",
+                      type->getP4Type());
+        }
+
+        auto name = std::string(type->controlPlaneName());
+        auto types = p4RtTypeInfo->mutable_new_types();
+        if (types->find(name) == types->end()) {
+            auto newTypeSpec = new p4configv1::P4NewTypeSpec();
+            auto newType = type->type;
+            auto n = newType->to<IR::Type_Name>();
+            visit(n);
+            auto typeSpec = map.at(n);
+            if (orig_type) {
+                auto dataType = newTypeSpec->mutable_original_type();
+                if (typeSpec->has_bitstring())
+                    dataType->mutable_bitstring()->CopyFrom(typeSpec->bitstring());
+            } else {
+                auto dataType = newTypeSpec->mutable_translated_type();
+                dataType->set_uri(std::string(uri->value));
+                dataType->set_sdn_bitwidth((uint32_t) sdnB->value.get_si());
+            }
+            (*types)[name] = *newTypeSpec;
+       }
+    }
+    map.emplace(type, nullptr);
     return false;
 }
 
@@ -234,6 +280,26 @@ bool TypeSpecConverter::preorder(const IR::Type_Enum* type) {
             for (auto m : type->members) {
                 auto member = enumTypeSpec->add_members();
                 member->set_name(m->controlPlaneName());
+            }
+            (*enums)[name] = *enumTypeSpec;
+        }
+    }
+    map.emplace(type, nullptr);
+    return false;
+}
+
+bool TypeSpecConverter::preorder(const IR::Type_SerEnum* type) {
+    if (p4RtTypeInfo) {
+        auto name = std::string(type->controlPlaneName());
+        auto enums = p4RtTypeInfo->mutable_serializable_enums();
+        if (enums->find(name) == enums->end()) {
+            auto enumTypeSpec = new p4configv1::P4SerializableEnumTypeSpec();
+            auto bitTypeSpec = enumTypeSpec->mutable_underlying_type();
+            bitTypeSpec->set_bitwidth(type->type->width_bits());
+            for (auto m : type->members) {
+                auto member = enumTypeSpec->add_members();
+                member->set_name(m->controlPlaneName());
+                member->set_value(std::string(m->value->toString()));
             }
             (*enums)[name] = *enumTypeSpec;
         }
