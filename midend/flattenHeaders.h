@@ -94,7 +94,7 @@ class FindHeaderTypesToReplace : public Inspector {
     }
     bool preorder(const IR::Type_Header* type) override;
     void createReplacement(const IR::Type_Header* type, AnnotationSelectionPolicy *policy);
-    HeaderTypeReplacement* getReplacement(const cstring name) const { 
+    HeaderTypeReplacement* getReplacement(const cstring name) const {
         return ::get(replacement, name); }
     bool empty() const { return replacement.empty(); }
 };
