@@ -188,6 +188,7 @@ class InspectPsaProgram : public Inspector {
     void postorder(const IR::Declaration_Instance* di) override;
 
     bool isHeaders(const IR::Type_StructLike* st);
+    bool isStandardMetadata(const IR::Type_StructLike* st);
     void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
     void addHeaderType(const IR::Type_StructLike *st);
     void addHeaderInstance(const IR::Type_StructLike *st, cstring name);
