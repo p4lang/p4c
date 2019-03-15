@@ -39,12 +39,6 @@ void FindHeaderTypesToReplace::HeaderTypeReplacement::flatten(cstring prefix,
     cstring fieldName = prefix.replace(".", "_") +
                         cstring::to_cstring(fieldNameRemap.size());
     fieldNameRemap.emplace(prefix, fieldName);
-#if 0  // TODO once behavioral model is fixed.
-    const IR::Annotations* annos = IR::Annotations::empty;
-        auto ann = annos->addAnnotation(IR::Annotation::nameAnnotation,
-                                        new IR::StringLiteral(originalName));
-#endif
-
     fields->push_back(new IR::StructField(IR::ID(fieldName), annos, type->getP4Type()));
     LOG3("Flatten: " << type << " | " << prefix);
 }
