@@ -115,6 +115,8 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
     return false;
 }
 
+// This function is invoked if psa.p4 has a Newtype. The function
+// is not invoked for user-defined NewType.
 bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
     if (p4RtTypeInfo) {
         bool orig_type = true;

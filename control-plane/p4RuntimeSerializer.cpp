@@ -648,6 +648,11 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
     if (auto tb = type->to<IR::Type_Bits>()) {
         return static_cast<int>(tb->width_bits());
     }
+    auto ann = type->getAnnotation("p4runtime_translation");
+    if (ann != nullptr) {
+        auto sdnB = ann->expr[1]->to<IR::Constant>();
+        return static_cast<int>(sdnB->value.get_si());
+    }
     return typeMap->minWidthBits(type, type->getNode());
 }
 
