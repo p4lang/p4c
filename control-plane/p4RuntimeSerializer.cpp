@@ -645,8 +645,8 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
     // p4runtime tests use bit Slices which are Type_Bits
     // which will cause failure in minWidthBits.
     // Thus compute width here for Slices and any other bit-field.
-    if (type->is<IR::Type_Bits>()) {
-        return static_cast<int>(type->width_bits());
+    if (auto tb = type->to<IR::Type_Bits>()) {
+        return static_cast<int>(tb->width_bits());
     }
     return typeMap->minWidthBits(type, type->getNode());
 }
@@ -659,6 +659,12 @@ getTypeName(const IR::Type* type, std::vector<const IR::Type_Newtype*>& list,
             TypeMap* typeMap) {
     cstring type_name = nullptr;
     if (type == nullptr)
+        return type_name;
+
+    // p4runtime uses bit slices which are Type_Bits and cause
+    // a BUG in typeMap.cpp if getTypeType() is used on such a
+    // Type_Bits.
+    if (type->is<IR::Type_Bits>())
         return type_name;
 
     auto t = typeMap->getTypeType(type, true);
