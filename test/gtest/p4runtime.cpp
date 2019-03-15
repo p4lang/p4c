@@ -382,9 +382,11 @@ TEST_F(P4Runtime, P4_16_MatchFields) {
     using MatchField = p4configv1::MatchField;
 
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        type bit<8> CustomT_t;
         header Header { bit<16> headerField; }
         header AnotherHeader { bit<8> anotherHeaderField; }
-        header_union HeaderUnion { Header a; AnotherHeader b; }
+        header YetAnotherHeader { CustomT_t yetAnotherHeaderField; }
+        header_union HeaderUnion { Header a; AnotherHeader b; YetAnotherHeader c;}
         struct Headers { Header h; Header[4] hStack; HeaderUnion hUnion; }
         struct Metadata { bit<33> metadataField; }
         parser parse(packet_in p, out Headers h, inout Metadata m,
@@ -449,6 +451,7 @@ TEST_F(P4Runtime, P4_16_MatchFields) {
                     h.h.headerField << 13 : ternary @name("lShift");  // 36
                     h.h.headerField + 6 : exact @name("plusSix");     // 37
                     h.h.headerField + 6 : ternary @name("plusSix");   // 38
+                    h.hUnion.c.yetAnotherHeaderField : exact;         // 39
 
                     // Action selectors. These won't be included in the list of
                     // match fields; they're just here as a sanity check.
@@ -478,7 +481,7 @@ TEST_F(P4Runtime, P4_16_MatchFields) {
 
     auto* igTable = findTable(*test, "ingress.igTable");
     ASSERT_TRUE(igTable != nullptr);
-    EXPECT_EQ(38, igTable->match_fields_size());
+    EXPECT_EQ(39, igTable->match_fields_size());
 
     std::vector<ExpectedMatchField> expected = {
         { 1, "h.h.headerField", 16, MatchField::EXACT },
@@ -519,6 +522,7 @@ TEST_F(P4Runtime, P4_16_MatchFields) {
         { 36, "lShift", 16, MatchField::TERNARY },
         { 37, "plusSix", 16, MatchField::EXACT },
         { 38, "plusSix", 16, MatchField::TERNARY },
+        { 39, "h.hUnion.c.yetAnotherHeaderField", 8, MatchField::EXACT },
     };
 
     for (auto i = 0; i < igTable->match_fields_size(); i++) {
