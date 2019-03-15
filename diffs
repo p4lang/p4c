@@ -1,0 +1,1140 @@
+diff --git a/backends/p4test/CMakeLists.txt b/backends/p4test/CMakeLists.txt
+index cacc11d7..e2e9b826 100644
+--- a/backends/p4test/CMakeLists.txt
++++ b/backends/p4test/CMakeLists.txt
+@@ -71,6 +71,10 @@ set (P4RUNTIME_EXCLUDE
+   # that when the type parameter of a Value Set is a struct, all the fields of
+   # the struct must be of type bit<W>, but inner is not
+   testdata/p4_16_samples/pvs-nested-struct.p4
++  # Two tests below use `error` for table key which p4runtime 1.0
++  # does not support.
++  testdata/p4_16_samples/issue1062-1-bmv2.p4
++  testdata/p4_16_samples/issue1304.p4
+ )
+ # Do not generate P4Info for tests which are expected to fail P4 compilation.
+ p4c_find_test_names ("${P4C_SOURCE_DIR}/testdata/p4_16_errors/*.p4" P4RUNTIME_EXCLUDE_ERRORS)
+@@ -78,10 +82,7 @@ list (APPEND P4RUNTIME_EXCLUDE ${P4RUNTIME_EXCLUDE_ERRORS})
+ set (P4_XFAIL_TESTS
+   # issue #13
+   testdata/p4_16_samples/cast-call.p4
+-  # Several PSA arch programs that fail with p4test
+-  testdata/p4_16_samples/psa-example-digest-bmv2.p4
+-  testdata/p4_16_samples/p4rt_digest_complex.p4
+-  testdata/p4_16_samples/psa-example-counters-bmv2.p4
++  testdata/p4_16_samples/psa-example-parser-checksum.p4
+   )
+ p4c_add_tests_w_p4runtime("p4" ${P4TEST_DRIVER} "${P4TEST_SUITES}" "${P4_XFAIL_TESTS}" "${P4RUNTIME_EXCLUDE}")
+ 
+diff --git a/control-plane/p4RuntimeSerializer.cpp b/control-plane/p4RuntimeSerializer.cpp
+index 7222024c..b0dcbf92 100644
+--- a/control-plane/p4RuntimeSerializer.cpp
++++ b/control-plane/p4RuntimeSerializer.cpp
+@@ -197,6 +197,7 @@ struct MatchField {
+     const uint32_t bitwidth;  // How wide this field is.
+     const IR::IAnnotated* annotations;  // If non-null, any annotations applied
+                                         // to this field.
++    const cstring type_name;  // Optional field, used if field is user-defined type.
+ };
+ 
+ struct ActionRef {
+@@ -639,6 +640,45 @@ getMatchType(cstring matchTypeName) {
+     }
+ }
+ 
++static int
++getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
++    // p4runtime tests use bit Slices which are Type_Bits
++    // which will cause failure in minWidthBits.
++    // Thus compute width here for Slices and any other bit-field.
++    if (auto tb = type->to<IR::Type_Bits>()) {
++        return static_cast<int>(tb->width_bits());
++    }
++    auto ann = type->getAnnotation("p4runtime_translation");
++    if (ann != nullptr) {
++        auto sdnB = ann->expr[1]->to<IR::Constant>();
++        return static_cast<int>(sdnB->value.get_si());
++    }
++    return typeMap->minWidthBits(type, type->getNode());
++}
++
++/*
++ * The function returns a cstring for use as type_name for any nested type.
++*/
++static cstring
++getTypeName(const IR::Type* type, TypeMap* typeMap) {
++    cstring type_name = nullptr;
++    if (type == nullptr)
++        return type_name;
++
++    // p4runtime uses bit slices which are Type_Bits and cause
++    // a BUG in typeMap.cpp if getTypeType() is used on such a
++    // Type_Bits.
++    if (type->is<IR::Type_Bits>())
++        return type_name;
++
++    auto t = typeMap->getTypeType(type, true);
++    if (t->is<IR::Type_Newtype>()) {
++        LOG3("getTypeName: " << type->getP4Type() << " " << t->getP4Type());
++        auto newt = t->to<IR::Type_Newtype>();
++        return newt->name;
++    }
++}
++
+ /// @return the header instance fields matched against by @table's key. The
+ /// fields are represented as a (fully qualified field name, match type) tuple.
+ static std::vector<MatchField>
+@@ -649,6 +689,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
+     if (!key) return matchFields;
+ 
+     for (auto keyElement : key->keyElements) {
++        cstring type_name = nullptr;
+         auto matchTypeName = getMatchTypeName(keyElement->matchType, refMap);
+         auto matchType = getMatchType(matchTypeName);
+         if (matchType == boost::none) continue;
+@@ -661,11 +702,13 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
+           typeMap->getType(keyElement->expression->getNode(), true);
+         BUG_CHECK(matchFieldType != nullptr,
+                   "Couldn't determine type for key element %1%", keyElement);
+-        while (auto mt = matchFieldType->to<IR::Type_Newtype>())
+-            matchFieldType = typeMap->getTypeType(mt->type, true);
+-        unsigned width = matchFieldType->width_bits();
+-        matchFields.push_back(MatchField{*matchFieldName, *matchType, matchTypeName,
+-                                         uint32_t(width), keyElement->to<IR::IAnnotated>()});
++        type_name = getTypeName(matchFieldType, typeMap);
++        int width = getTypeWidth(matchFieldType, typeMap);
++        if (width < 0)
++            return matchFields;
++        matchFields.push_back(MatchField{*matchFieldName, *matchType,
++                              matchTypeName, uint32_t(width),
++                              keyElement->to<IR::IAnnotated>(), type_name});
+     }
+ 
+     return matchFields;
+@@ -679,7 +722,10 @@ class ParseAnnotations : public P4::ParseAnnotations {
+                 PARSE_EMPTY("hidden"),
+                 PARSE("id", Constant),
+                 PARSE("brief", StringLiteral),
+-                PARSE("description", StringLiteral)
++                PARSE("description", StringLiteral),
++                // @p4runtime_translation has two args
++                PARSE_PAIR("p4runtime_translation",
++                           Expression),
+             }) { }
+ };
+ 
+@@ -767,15 +813,23 @@ class P4RuntimeAnalyzer {
+             addDocumentation(param, actionParam->to<IR::IAnnotated>());
+ 
+             auto paramType = typeMap->getType(actionParam, true);
+-            if (!paramType->is<IR::Type_Bits>() && !paramType->is<IR::Type_Boolean>()) {
+-                ::error("Action parameter %1% has a type which is not bit<> or int<> or bool",
+-                        actionParam);
++            if (!paramType->is<IR::Type_Bits>() && !paramType->is<IR::Type_Boolean>()
++                && !paramType->is<IR::Type_Newtype>() &&
++                !paramType->is<IR::Type_SerEnum>()) {
++                ::error("Action parameter %1% has a type which is not "
++                        "bit<>, int<>, bool, type or serializable enum", actionParam);
+                 continue;
+             }
+-            if (paramType->is<IR::Type_Boolean>()) {
+-                param->set_bitwidth(1);
+-            } else {
+-                param->set_bitwidth(paramType->width_bits());
++            int w = getTypeWidth(paramType, typeMap);
++            if (w < 0)
++                return;
++            param->set_bitwidth(w);
++            if (paramType->is<IR::Type_Newtype>()) {
++                cstring type_name = getTypeName(paramType, typeMap);
++                if (type_name) {
++                    auto namedType = param->mutable_type_name();
++                    namedType->set_name(type_name);
++                }
+             }
+         }
+     }
+@@ -813,10 +867,14 @@ class P4RuntimeAnalyzer {
+             addAnnotations(metadata, headerField->to<IR::IAnnotated>());
+ 
+             auto fieldType = typeMap->getType(headerField, true);
+-            BUG_CHECK(fieldType->is<IR::Type_Bits>(),
+-                      "Header field %1% has a type which is not bit<> or int<>",
++            BUG_CHECK((fieldType->is<IR::Type_Bits>() ||
++                      fieldType->is<IR::Type_Newtype>()),
++                      "Header field %1% has a type which is not bit<>,int<>, or type",
+                       headerField);
+-            metadata->set_bitwidth(fieldType->width_bits());
++            auto w = getTypeWidth(fieldType, typeMap);
++            if (w < 0)
++                return;
++            metadata->set_bitwidth(w);
+         }
+     }
+ 
+@@ -878,6 +936,10 @@ class P4RuntimeAnalyzer {
+                 match_field->set_match_type(field.type);
+             else
+                 match_field->set_other_match_type(field.other_match_type);
++            if (field.type_name) {
++                auto namedType = match_field->mutable_type_name();
++                namedType->set_name(field.type_name);
++            }
+         }
+ 
+         if (isConstTable) {
+@@ -1199,7 +1261,8 @@ class P4RuntimeEntriesConverter {
+     }
+ 
+     /// Appends the 'const entries' for the table to the WriteRequest message.
+-    void addTableEntries(const IR::TableBlock* tableBlock, ReferenceMap* refMap) {
++    void addTableEntries(const IR::TableBlock* tableBlock, ReferenceMap* refMap,
++                         TypeMap* typeMap) {
+         CHECK_NULL(tableBlock);
+         auto table = tableBlock->container;
+ 
+@@ -1218,7 +1281,7 @@ class P4RuntimeEntriesConverter {
+             auto protoEntry = protoEntity->mutable_table_entry();
+             protoEntry->set_table_id(tableId);
+             addMatchKey(protoEntry, table, e->getKeys(), refMap);
+-            addAction(protoEntry, e->getAction(), refMap);
++            addAction(protoEntry, e->getAction(), refMap, typeMap);
+             // TODO(antonin): according to the P4 specification, "Entries in a
+             // table are matched in the program order, stopping at the first
+             // matching entry." Based on the definition of 'priority' in
+@@ -1245,7 +1308,8 @@ class P4RuntimeEntriesConverter {
+ 
+     void addAction(p4v1::TableEntry* protoEntry,
+                    const IR::Expression* actionRef,
+-                   ReferenceMap* refMap) const {
++                   ReferenceMap* refMap,
++                   TypeMap* typeMap) const {
+         if (!actionRef->is<IR::MethodCallExpression>()) {
+             ::error("%1%: invalid action in entries list", actionRef);
+             return;
+@@ -1264,8 +1328,10 @@ class P4RuntimeEntriesConverter {
+         for (auto arg : *actionCall->arguments) {
+             auto protoParam = protoAction->add_params();
+             protoParam->set_param_id(parameterId++);
+-            auto parameter = actionDecl->parameters->parameters.at(parameterIndex);
+-            auto width = parameter->type->width_bits();
++            auto parameter = actionDecl->parameters->parameters.at(parameterIndex++);
++            int width = getTypeWidth(parameter->type, typeMap);
++            if (width < 0)
++                return;
+             if (arg->expression->is<IR::Constant>()) {
+                 auto value = stringRepr(arg->expression->to<IR::Constant>(), width);
+                 protoParam->set_value(*value);
+@@ -1317,6 +1383,22 @@ class P4RuntimeEntriesConverter {
+             return stringRepr(k->to<IR::Constant>(), keyWidth);
+         } else if (k->is<IR::BoolLiteral>()) {
+             return stringRepr(k->to<IR::BoolLiteral>(), keyWidth);
++        } else if (k->is<IR::Member>()) {
++             // A SerEnum is a member const entries are processed here.
++             auto mem = k->to<IR::Member>();
++             if (mem->type->is<IR::Type_SerEnum>()) {
++                 auto se = mem->type->to<IR::Type_SerEnum>();
++                 auto w = se->type->width_bits();
++                 for (auto m : se->members) {
++                     auto smem = m->to<IR::SerEnumMember>();
++                     if (smem->name == mem->member.name) {
++                         auto type = smem->value->to<IR::Constant>();
++                         return stringRepr(type, w);
++                     }
++                 }
++             }
++             ::error("%1% invalid Member key expression", k);
++             return boost::none;
+         } else {
+             ::error("%1% invalid key expression", k);
+             return boost::none;
+@@ -1496,7 +1578,8 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
+     P4RuntimeEntriesConverter entriesConverter(symbols);
+     Helpers::forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
+         if (block->is<IR::TableBlock>())
+-            entriesConverter.addTableEntries(block->to<IR::TableBlock>(), refMap);
++            entriesConverter.addTableEntries(block->to<IR::TableBlock>(), refMap,
++                                             typeMap);
+     });
+ 
+     auto* p4Info = analyzer.getP4Info();
+diff --git a/control-plane/typeSpecConverter.cpp b/control-plane/typeSpecConverter.cpp
+index 349d641c..f9a6f042 100644
+--- a/control-plane/typeSpecConverter.cpp
++++ b/control-plane/typeSpecConverter.cpp
+@@ -90,6 +90,8 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
+         typeSpec->mutable_header_union()->set_name(name);
+     } else if (decl->is<IR::Type_Enum>()) {
+         typeSpec->mutable_enum_()->set_name(name);
++    } else if (decl->is<IR::Type_SerEnum>()) {
++        typeSpec->mutable_serializable_enum()->set_name(name);
+     } else if (decl->is<IR::Type_Error>()) {
+         // enable "error" field in P4DataTypeSpec's type_spec oneof
+         (void)typeSpec->mutable_error();
+@@ -103,6 +105,8 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
+         CHECK_NULL(typeSpec);
+         map.emplace(type, typeSpec);
+         return false;
++    } else if (decl->is<IR::Type_Newtype>()) {
++        typeSpec->mutable_new_type()->set_name(name);
+     } else {
+         BUG("Unexpected named type %1%", type);
+     }
+@@ -111,6 +115,48 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
+     return false;
+ }
+ 
++// This function is invoked if psa.p4 has a Newtype. The function
++// is not invoked for user-defined NewType.
++bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
++    if (p4RtTypeInfo) {
++        bool orig_type = true;
++        const IR::StringLiteral* uri;
++        const IR::Constant* sdnB;
++        auto ann = type->getAnnotation("p4runtime_translation");
++        if (ann != nullptr) {
++            orig_type = false;
++            uri = ann->expr[0]->to<IR::StringLiteral>();
++            BUG_CHECK(uri, "P4runtime annotation does not have uri: %1%",
++                      type->getP4Type());
++            sdnB = ann->expr[1]->to<IR::Constant>();
++            BUG_CHECK(sdnB, "P4runtime annotation does not have sdn: %1%",
++                      type->getP4Type());
++        }
++
++        auto name = std::string(type->controlPlaneName());
++        auto types = p4RtTypeInfo->mutable_new_types();
++        if (types->find(name) == types->end()) {
++            auto newTypeSpec = new p4configv1::P4NewTypeSpec();
++            auto newType = type->type;
++            auto n = newType->to<IR::Type_Name>();
++            visit(n);
++            auto typeSpec = map.at(n);
++            if (orig_type) {
++                auto dataType = newTypeSpec->mutable_original_type();
++                if (typeSpec->has_bitstring())
++                    dataType->mutable_bitstring()->CopyFrom(typeSpec->bitstring());
++            } else {
++                auto dataType = newTypeSpec->mutable_translated_type();
++                dataType->set_uri(std::string(uri->value));
++                dataType->set_sdn_bitwidth((uint32_t) sdnB->value.get_si());
++            }
++            (*types)[name] = *newTypeSpec;
++       }
++    }
++    map.emplace(type, nullptr);
++    return false;
++}
++
+ bool TypeSpecConverter::preorder(const IR::Type_Tuple* type) {
+     auto typeSpec = new P4DataTypeSpec();
+     auto tupleTypeSpec = typeSpec->mutable_tuple();
+@@ -242,6 +288,26 @@ bool TypeSpecConverter::preorder(const IR::Type_Enum* type) {
+     return false;
+ }
+ 
++bool TypeSpecConverter::preorder(const IR::Type_SerEnum* type) {
++    if (p4RtTypeInfo) {
++        auto name = std::string(type->controlPlaneName());
++        auto enums = p4RtTypeInfo->mutable_serializable_enums();
++        if (enums->find(name) == enums->end()) {
++            auto enumTypeSpec = new p4configv1::P4SerializableEnumTypeSpec();
++            auto bitTypeSpec = enumTypeSpec->mutable_underlying_type();
++            bitTypeSpec->set_bitwidth(type->type->width_bits());
++            for (auto m : type->members) {
++                auto member = enumTypeSpec->add_members();
++                member->set_name(m->controlPlaneName());
++                member->set_value(std::string(m->value->toString()));
++            }
++            (*enums)[name] = *enumTypeSpec;
++        }
++    }
++    map.emplace(type, nullptr);
++    return false;
++}
++
+ bool TypeSpecConverter::preorder(const IR::Type_Error* type) {
+     if (p4RtTypeInfo && !p4RtTypeInfo->has_error()) {
+         auto errorTypeSpec = p4RtTypeInfo->mutable_error();
+diff --git a/control-plane/typeSpecConverter.h b/control-plane/typeSpecConverter.h
+index 48b4b227..ce6b75b8 100644
+--- a/control-plane/typeSpecConverter.h
++++ b/control-plane/typeSpecConverter.h
+@@ -65,6 +65,7 @@ class TypeSpecConverter : public Inspector {
+     bool preorder(const IR::Type_Stack* type) override;
+ 
+     bool preorder(const IR::Type_Name* type) override;
++    bool preorder(const IR::Type_Newtype* type) override;
+ 
+     // these methods do not update the "map", but update p4RtTypeInfo if it is
+     // not null.
+@@ -72,6 +73,7 @@ class TypeSpecConverter : public Inspector {
+     bool preorder(const IR::Type_Header* type) override;
+     bool preorder(const IR::Type_HeaderUnion* type) override;
+     bool preorder(const IR::Type_Enum* type) override;
++    bool preorder(const IR::Type_SerEnum* type) override;
+     bool preorder(const IR::Type_Error* type) override;
+ 
+  public:
+diff --git a/frontends/p4/typeMap.cpp b/frontends/p4/typeMap.cpp
+index ceba0687..359e68ba 100644
+--- a/frontends/p4/typeMap.cpp
++++ b/frontends/p4/typeMap.cpp
+@@ -304,6 +304,8 @@ const IR::Type* TypeMap::getCanonical(const IR::Type* type) {
+ }
+ 
+ int TypeMap::minWidthBits(const IR::Type* type, const IR::Node* errorPosition) {
++    if (type == nullptr)
++        return -2;
+     auto t = getTypeType(type, true);
+     if (auto tb = t->to<IR::Type_Bits>()) {
+         return tb->width_bits();
+@@ -333,7 +335,10 @@ int TypeMap::minWidthBits(const IR::Type* type, const IR::Node* errorPosition) {
+         return 0;
+     }
+ 
+-    ::error("%1%: width not well-defined", errorPosition);
++    if (errorPosition)
++        ::error("%1%: width not well-defined", errorPosition);
++    else
++        ::error("width not well-defined");
+     return -1;
+ }
+ 
+diff --git a/test/gtest/p4runtime.cpp b/test/gtest/p4runtime.cpp
+index cb857a34..81f9f07f 100644
+--- a/test/gtest/p4runtime.cpp
++++ b/test/gtest/p4runtime.cpp
+@@ -382,9 +382,11 @@ TEST_F(P4Runtime, P4_16_MatchFields) {
+     using MatchField = p4configv1::MatchField;
+ 
+     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
++        type bit<8> CustomT_t;
+         header Header { bit<16> headerField; }
+         header AnotherHeader { bit<8> anotherHeaderField; }
+-        header_union HeaderUnion { Header a; AnotherHeader b; }
++        header YetAnotherHeader { CustomT_t yetAnotherHeaderField; }
++        header_union HeaderUnion { Header a; AnotherHeader b; YetAnotherHeader c;}
+         struct Headers { Header h; Header[4] hStack; HeaderUnion hUnion; }
+         struct Metadata { bit<33> metadataField; }
+         parser parse(packet_in p, out Headers h, inout Metadata m,
+@@ -449,6 +451,7 @@ TEST_F(P4Runtime, P4_16_MatchFields) {
+                     h.h.headerField << 13 : ternary @name("lShift");  // 36
+                     h.h.headerField + 6 : exact @name("plusSix");     // 37
+                     h.h.headerField + 6 : ternary @name("plusSix");   // 38
++                    h.hUnion.c.yetAnotherHeaderField : exact;         // 39
+ 
+                     // Action selectors. These won't be included in the list of
+                     // match fields; they're just here as a sanity check.
+@@ -478,7 +481,7 @@ TEST_F(P4Runtime, P4_16_MatchFields) {
+ 
+     auto* igTable = findTable(*test, "ingress.igTable");
+     ASSERT_TRUE(igTable != nullptr);
+-    EXPECT_EQ(38, igTable->match_fields_size());
++    EXPECT_EQ(39, igTable->match_fields_size());
+ 
+     std::vector<ExpectedMatchField> expected = {
+         { 1, "h.h.headerField", 16, MatchField::EXACT },
+@@ -519,6 +522,7 @@ TEST_F(P4Runtime, P4_16_MatchFields) {
+         { 36, "lShift", 16, MatchField::TERNARY },
+         { 37, "plusSix", 16, MatchField::EXACT },
+         { 38, "plusSix", 16, MatchField::TERNARY },
++        { 39, "h.hUnion.c.yetAnotherHeaderField", 8, MatchField::EXACT },
+     };
+ 
+     for (auto i = 0; i < igTable->match_fields_size(); i++) {
+diff --git a/testdata/p4_16_samples/psa-example-digest-bmv2.p4 b/testdata/p4_16_samples/psa-example-digest-bmv2.p4
+index 41ba5ea8..e1a5ccdf 100644
+--- a/testdata/p4_16_samples/psa-example-digest-bmv2.p4
++++ b/testdata/p4_16_samples/psa-example-digest-bmv2.p4
+@@ -25,6 +25,16 @@ limitations under the License.
+ #include <core.p4>
+ #include "psa.p4"
+ 
++enum bit<16> EthTypes {
++    IPv4 = 0x0800,
++    ARP = 0x0806,
++    RARP = 0x8035,
++    EtherTalk = 0x809B,
++    VLAN = 0x8100,
++    IPX = 0x8137,
++    IPv6 = 0x86DD
++}
++
+ typedef bit<48>  EthernetAddress;
+ 
+ header ethernet_t {
+@@ -51,6 +61,7 @@ header ipv4_t {
+ struct headers {
+     ethernet_t       ethernet;
+     ipv4_t           ipv4;
++    EthTypes         type;
+ }
+ 
+ struct empty_metadata_t {
+@@ -169,15 +180,24 @@ control ingress(inout headers hdr,
+     action do_L2_forward (PortId_t egress_port) {
+         send_to_port(ostd, egress_port);
+     }
++    action do_tst (PortId_t egress_port, EthTypes serEnumT) {
++        send_to_port(ostd, egress_port);        
++    }
+     table l2_tbl {
+         key = { hdr.ethernet.dstAddr : exact; }
+         actions = { do_L2_forward; NoAction; }
+         default_action = NoAction();
+     }
++    table tst_tbl {
++        key = { meta.mac_learn_msg.ingress_port : exact; }
++        actions = { do_tst; NoAction; }
++        default_action = NoAction();
++    }
+     apply {
+         meta.send_mac_learn_msg = false;
+         learned_sources.apply();
+         l2_tbl.apply();
++        tst_tbl.apply();	
+     }
+ }
+ // END:Digest_Example_Part2
+diff --git a/testdata/p4_16_samples/psa-portid-using-newtype2.p4 b/testdata/p4_16_samples/psa-portid-using-newtype2.p4
+index b15871eb..e5413ab9 100644
+--- a/testdata/p4_16_samples/psa-portid-using-newtype2.p4
++++ b/testdata/p4_16_samples/psa-portid-using-newtype2.p4
+@@ -10,7 +10,6 @@ typedef bit<PORT_BITWIDTH> PortIdUInt_t;
+ 
+ // request translation by P4Runtime agent of all occurrences of PortId_t exposed
+ // to control-plane
+-@p4runtime_translate("port")
+ type bit<PORT_BITWIDTH> PortId_t;
+ 
+ //const PortId_t PSA_CPU_PORT = (PortId_t) 9w192; // target-specific
+@@ -39,13 +38,8 @@ type bit<PORT_BITWIDTH> PortId_t;
+ // number space PortId_t values into headers to be sent to the CPU
+ // port, or for parsing headers containing PortId_t values in certain
+ // headers in packets from the CPU port.
+-@p4runtime_translate("port")
+ type bit<32> PortIdInHeader_t;
+ 
+-// used to cast between PortId_t and PortIdInHeader_t the programmer needs to be
+-// aware that he may be exposing non-translated values to the control-plane,
+-// unless he use @p4runtime_translate appropriately
+-
+ // Note: all of these casts are necessary with the current type
+ // code.  Eliminating any one of them results in a compiler error when
+ // using the macro as done later in this program.  The nice thing is
+@@ -88,8 +82,6 @@ header packet_in_header_t {
+     // Translation will occur in agent software for this field,
+     // because it is inside of a controller_header, and because
+     // PortIdInHeader_t is defined as a type with a
+-    // @p4runtime_translate("port") annotation.  No such annotation is
+-    // needed here.
+     PortIdInHeader_t ingress_port;
+ }
+ 
+diff --git a/testdata/p4_16_samples_outputs/issue1739-bmv2.p4.p4info.txt b/testdata/p4_16_samples_outputs/issue1739-bmv2.p4.p4info.txt
+index 2d1dd1e5..356fd7d0 100644
+--- a/testdata/p4_16_samples_outputs/issue1739-bmv2.p4.p4info.txt
++++ b/testdata/p4_16_samples_outputs/issue1739-bmv2.p4.p4info.txt
+@@ -12,6 +12,9 @@ tables {
+     name: "hdr.ipv4.dstAddr"
+     bitwidth: 32
+     match_type: LPM
++    type_name {
++      name: "IPv4Address_t"
++    }
+   }
+   action_refs {
+     id: 16829338
+@@ -32,6 +35,9 @@ tables {
+     name: "hdr.ipv4.srcAddr"
+     bitwidth: 32
+     match_type: TERNARY
++    type_name {
++      name: "IPv4Address2_t"
++    }
+   }
+   action_refs {
+     id: 16815499
+diff --git a/testdata/p4_16_samples_outputs/p4rt_digest_complex.p4.p4info.txt b/testdata/p4_16_samples_outputs/p4rt_digest_complex.p4.p4info.txt
+index d266175b..39d50dc7 100644
+--- a/testdata/p4_16_samples_outputs/p4rt_digest_complex.p4.p4info.txt
++++ b/testdata/p4_16_samples_outputs/p4rt_digest_complex.p4.p4info.txt
+@@ -28,10 +28,8 @@ type_info {
+       members {
+         name: "port"
+         type_spec {
+-          bitstring {
+-            bit {
+-              bitwidth: 10
+-            }
++          new_type {
++            name: "PortId_t"
+           }
+         }
+       }
+@@ -66,4 +64,13 @@ type_info {
+       }
+     }
+   }
++  new_types {
++    key: "PortId_t"
++    value {
++      translated_type {
++        uri: "p4.org/psa/v1/PortId_t"
++        sdn_bitwidth: 32
++      }
++    }
++  }
+ }
+diff --git a/testdata/p4_16_samples_outputs/psa-example-counters-bmv2-first.p4 b/testdata/p4_16_samples_outputs/psa-example-counters-bmv2-first.p4
+index abc6196a..6d6ebef9 100644
+--- a/testdata/p4_16_samples_outputs/psa-example-counters-bmv2-first.p4
++++ b/testdata/p4_16_samples_outputs/psa-example-counters-bmv2-first.p4
+@@ -36,7 +36,7 @@ struct metadata {
+ typedef bit<48> ByteCounter_t;
+ typedef bit<32> PacketCounter_t;
+ typedef bit<80> PacketByteCounter_t;
+-const PortId_t NUM_PORTS = 10w512;
++const bit<32> NUM_PORTS = 32w512;
+ struct headers {
+     ethernet_t ethernet;
+     ipv4_t     ipv4;
+diff --git a/testdata/p4_16_samples_outputs/psa-example-counters-bmv2-frontend.p4 b/testdata/p4_16_samples_outputs/psa-example-counters-bmv2-frontend.p4
+index 17c5ece0..c11b9ab4 100644
+--- a/testdata/p4_16_samples_outputs/psa-example-counters-bmv2-frontend.p4
++++ b/testdata/p4_16_samples_outputs/psa-example-counters-bmv2-frontend.p4
+@@ -103,7 +103,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
+             psa_ingress_output_metadata_t meta_2 = ostd;
+             PortId_t egress_port_1 = oport;
+             meta_2.drop = false;
+-            meta_2.multicast_group = 10w0;
++            meta_2.multicast_group = (MulticastGroup_t)32w0;
+             meta_2.egress_port = egress_port_1;
+             ostd = meta_2;
+         }
+diff --git a/testdata/p4_16_samples_outputs/psa-example-counters-bmv2-midend.p4 b/testdata/p4_16_samples_outputs/psa-example-counters-bmv2-midend.p4
+index 778abd74..c78c9219 100644
+--- a/testdata/p4_16_samples_outputs/psa-example-counters-bmv2-midend.p4
++++ b/testdata/p4_16_samples_outputs/psa-example-counters-bmv2-midend.p4
+@@ -91,7 +91,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
+     @name("ingress.next_hop") action next_hop(PortId_t oport) {
+         per_prefix_pkt_byte_count_0.count();
+         ostd.drop = false;
+-        ostd.multicast_group = 10w0;
++        ostd.multicast_group = 32w0;
+         ostd.egress_port = oport;
+     }
+     @name("ingress.default_route_drop") action default_route_drop() {
+diff --git a/testdata/p4_16_samples_outputs/psa-example-counters-bmv2.p4 b/testdata/p4_16_samples_outputs/psa-example-counters-bmv2.p4
+index 0da801cf..6e5918ec 100644
+--- a/testdata/p4_16_samples_outputs/psa-example-counters-bmv2.p4
++++ b/testdata/p4_16_samples_outputs/psa-example-counters-bmv2.p4
+@@ -36,7 +36,7 @@ struct metadata {
+ typedef bit<48> ByteCounter_t;
+ typedef bit<32> PacketCounter_t;
+ typedef bit<80> PacketByteCounter_t;
+-const PortId_t NUM_PORTS = 512;
++const bit<32> NUM_PORTS = 512;
+ struct headers {
+     ethernet_t ethernet;
+     ipv4_t     ipv4;
+@@ -76,7 +76,7 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
+ }
+ 
+ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
+-    Counter<ByteCounter_t, PortId_t>((bit<32>)NUM_PORTS, PSA_CounterType_t.BYTES) port_bytes_in;
++    Counter<ByteCounter_t, PortId_t>(NUM_PORTS, PSA_CounterType_t.BYTES) port_bytes_in;
+     DirectCounter<PacketByteCounter_t>(PSA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_byte_count;
+     action next_hop(PortId_t oport) {
+         per_prefix_pkt_byte_count.count();
+@@ -106,7 +106,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
+ }
+ 
+ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
+-    Counter<ByteCounter_t, PortId_t>((bit<32>)NUM_PORTS, PSA_CounterType_t.BYTES) port_bytes_out;
++    Counter<ByteCounter_t, PortId_t>(NUM_PORTS, PSA_CounterType_t.BYTES) port_bytes_out;
+     apply {
+         port_bytes_out.count(istd.egress_port);
+     }
+diff --git a/testdata/p4_16_samples_outputs/psa-example-counters-bmv2.p4.p4info.txt b/testdata/p4_16_samples_outputs/psa-example-counters-bmv2.p4.p4info.txt
+index 599d4bd5..b17bb21a 100644
+--- a/testdata/p4_16_samples_outputs/psa-example-counters-bmv2.p4.p4info.txt
++++ b/testdata/p4_16_samples_outputs/psa-example-counters-bmv2.p4.p4info.txt
+@@ -32,7 +32,10 @@ actions {
+   params {
+     id: 1
+     name: "oport"
+-    bitwidth: 10
++    bitwidth: 32
++    type_name {
++      name: "PortId_t"
++    }
+   }
+ }
+ actions {
+diff --git a/testdata/p4_16_samples_outputs/psa-example-digest-bmv2-first.p4 b/testdata/p4_16_samples_outputs/psa-example-digest-bmv2-first.p4
+index 119c1de4..27b2cf12 100644
+--- a/testdata/p4_16_samples_outputs/psa-example-digest-bmv2-first.p4
++++ b/testdata/p4_16_samples_outputs/psa-example-digest-bmv2-first.p4
+@@ -1,6 +1,16 @@
+ #include <core.p4>
+ #include <psa.p4>
+ 
++enum bit<16> EthTypes {
++    IPv4 = 16w0x800,
++    ARP = 16w0x806,
++    RARP = 16w0x8035,
++    EtherTalk = 16w0x809b,
++    VLAN = 16w0x8100,
++    IPX = 16w0x8137,
++    IPv6 = 16w0x86dd
++}
++
+ typedef bit<48> EthernetAddress;
+ header ethernet_t {
+     EthernetAddress dstAddr;
+@@ -26,6 +36,7 @@ header ipv4_t {
+ struct headers {
+     ethernet_t ethernet;
+     ipv4_t     ipv4;
++    EthTypes   type;
+ }
+ 
+ struct empty_metadata_t {
+@@ -99,6 +110,9 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
+     action do_L2_forward(PortId_t egress_port) {
+         send_to_port(ostd, egress_port);
+     }
++    action do_tst(PortId_t egress_port, EthTypes serEnumT) {
++        send_to_port(ostd, egress_port);
++    }
+     table l2_tbl {
+         key = {
+             hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
+@@ -109,10 +123,21 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
+         }
+         default_action = NoAction();
+     }
++    table tst_tbl {
++        key = {
++            meta.mac_learn_msg.ingress_port: exact @name("meta.mac_learn_msg.ingress_port") ;
++        }
++        actions = {
++            do_tst();
++            NoAction();
++        }
++        default_action = NoAction();
++    }
+     apply {
+         meta.send_mac_learn_msg = false;
+         learned_sources.apply();
+         l2_tbl.apply();
++        tst_tbl.apply();
+     }
+ }
+ 
+diff --git a/testdata/p4_16_samples_outputs/psa-example-digest-bmv2-frontend.p4 b/testdata/p4_16_samples_outputs/psa-example-digest-bmv2-frontend.p4
+index 34ab7971..bbfa4658 100644
+--- a/testdata/p4_16_samples_outputs/psa-example-digest-bmv2-frontend.p4
++++ b/testdata/p4_16_samples_outputs/psa-example-digest-bmv2-frontend.p4
+@@ -1,6 +1,16 @@
+ #include <core.p4>
+ #include <psa.p4>
+ 
++enum bit<16> EthTypes {
++    IPv4 = 16w0x800,
++    ARP = 16w0x806,
++    RARP = 16w0x8035,
++    EtherTalk = 16w0x809b,
++    VLAN = 16w0x8100,
++    IPX = 16w0x8137,
++    IPv6 = 16w0x86dd
++}
++
+ typedef bit<48> EthernetAddress;
+ header ethernet_t {
+     EthernetAddress dstAddr;
+@@ -26,6 +36,7 @@ header ipv4_t {
+ struct headers {
+     ethernet_t ethernet;
+     ipv4_t     ipv4;
++    EthTypes   type;
+ }
+ 
+ struct empty_metadata_t {
+@@ -98,7 +109,9 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
+ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
+     @name(".NoAction") action NoAction_0() {
+     }
+-    @name(".NoAction") action NoAction_3() {
++    @name(".NoAction") action NoAction_4() {
++    }
++    @name(".NoAction") action NoAction_5() {
+     }
+     @name("ingress.unknown_source") action unknown_source() {
+         meta.send_mac_learn_msg = true;
+@@ -120,25 +133,46 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
+             psa_ingress_output_metadata_t meta_3 = ostd;
+             PortId_t egress_port_1 = egress_port;
+             meta_3.drop = false;
+-            meta_3.multicast_group = 10w0;
++            meta_3.multicast_group = (MulticastGroup_t)32w0;
+             meta_3.egress_port = egress_port_1;
+             ostd = meta_3;
+         }
+     }
++    @name("ingress.do_tst") action do_tst(PortId_t egress_port, EthTypes serEnumT) {
++        {
++            psa_ingress_output_metadata_t meta_4 = ostd;
++            PortId_t egress_port_2 = egress_port;
++            meta_4.drop = false;
++            meta_4.multicast_group = (MulticastGroup_t)32w0;
++            meta_4.egress_port = egress_port_2;
++            ostd = meta_4;
++        }
++    }
+     @name("ingress.l2_tbl") table l2_tbl_0 {
+         key = {
+             hdr.ethernet.dstAddr: exact @name("hdr.ethernet.dstAddr") ;
+         }
+         actions = {
+             do_L2_forward();
+-            NoAction_3();
++            NoAction_4();
++        }
++        default_action = NoAction_4();
++    }
++    @name("ingress.tst_tbl") table tst_tbl_0 {
++        key = {
++            meta.mac_learn_msg.ingress_port: exact @name("meta.mac_learn_msg.ingress_port") ;
++        }
++        actions = {
++            do_tst();
++            NoAction_5();
+         }
+-        default_action = NoAction_3();
++        default_action = NoAction_5();
+     }
+     apply {
+         meta.send_mac_learn_msg = false;
+         learned_sources_0.apply();
+         l2_tbl_0.apply();
++        tst_tbl_0.apply();
+     }
+ }
+ 
+diff --git a/testdata/p4_16_samples_outputs/psa-example-digest-bmv2-midend.p4 b/testdata/p4_16_samples_outputs/psa-example-digest-bmv2-midend.p4
+index dcdfe694..a0d445b3 100644
+--- a/testdata/p4_16_samples_outputs/psa-example-digest-bmv2-midend.p4
++++ b/testdata/p4_16_samples_outputs/psa-example-digest-bmv2-midend.p4
+@@ -26,6 +26,7 @@ header ipv4_t {
+ struct headers {
+     ethernet_t ethernet;
+     ipv4_t     ipv4;
++    bit<16>    type;
+ }
+ 
+ struct empty_metadata_t {
+@@ -39,12 +40,13 @@ struct mac_learn_digest_t {
+ struct metadata {
+     bool    _send_mac_learn_msg0;
+     bit<48> _mac_learn_msg_srcAddr1;
+-    bit<10> _mac_learn_msg_ingress_port2;
++    bit<32> _mac_learn_msg_ingress_port2;
+ }
+ 
+ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
+     ethernet_t parsed_hdr_0_ethernet;
+     ipv4_t parsed_hdr_0_ipv4;
++    bit<16> parsed_hdr_0_type;
+     bool meta_1_send_mac_learn_msg;
+     mac_learn_digest_t meta_1_mac_learn_msg;
+     state start {
+@@ -66,6 +68,7 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
+     state start_0 {
+         parsed_hdr.ethernet = parsed_hdr_0_ethernet;
+         parsed_hdr.ipv4 = parsed_hdr_0_ipv4;
++        parsed_hdr.type = parsed_hdr_0_type;
+         meta._send_mac_learn_msg0 = meta_1_send_mac_learn_msg;
+         meta._mac_learn_msg_srcAddr1 = meta_1_mac_learn_msg.srcAddr;
+         meta._mac_learn_msg_ingress_port2 = meta_1_mac_learn_msg.ingress_port;
+@@ -76,6 +79,7 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
+ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata meta, in psa_egress_parser_input_metadata_t istd, in empty_metadata_t normal_meta, in empty_metadata_t clone_i2e_meta, in empty_metadata_t clone_e2e_meta) {
+     ethernet_t parsed_hdr_1_ethernet;
+     ipv4_t parsed_hdr_1_ipv4;
++    bit<16> parsed_hdr_1_type;
+     bool meta_2_send_mac_learn_msg;
+     mac_learn_digest_t meta_2_mac_learn_msg;
+     state start {
+@@ -97,6 +101,7 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
+     state start_1 {
+         parsed_hdr.ethernet = parsed_hdr_1_ethernet;
+         parsed_hdr.ipv4 = parsed_hdr_1_ipv4;
++        parsed_hdr.type = parsed_hdr_1_type;
+         meta._send_mac_learn_msg0 = meta_2_send_mac_learn_msg;
+         meta._mac_learn_msg_srcAddr1 = meta_2_mac_learn_msg.srcAddr;
+         meta._mac_learn_msg_ingress_port2 = meta_2_mac_learn_msg.ingress_port;
+@@ -107,7 +112,9 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
+ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
+     @name(".NoAction") action NoAction_0() {
+     }
+-    @name(".NoAction") action NoAction_3() {
++    @name(".NoAction") action NoAction_4() {
++    }
++    @name(".NoAction") action NoAction_5() {
+     }
+     @name("ingress.unknown_source") action unknown_source() {
+         meta._send_mac_learn_msg0 = true;
+@@ -126,7 +133,12 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
+     }
+     @name("ingress.do_L2_forward") action do_L2_forward(PortId_t egress_port) {
+         ostd.drop = false;
+-        ostd.multicast_group = 10w0;
++        ostd.multicast_group = 32w0;
++        ostd.egress_port = egress_port;
++    }
++    @name("ingress.do_tst") action do_tst(PortId_t egress_port, bit<16> serEnumT) {
++        ostd.drop = false;
++        ostd.multicast_group = 32w0;
+         ostd.egress_port = egress_port;
+     }
+     @name("ingress.l2_tbl") table l2_tbl_0 {
+@@ -135,9 +147,19 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
+         }
+         actions = {
+             do_L2_forward();
+-            NoAction_3();
++            NoAction_4();
++        }
++        default_action = NoAction_4();
++    }
++    @name("ingress.tst_tbl") table tst_tbl_0 {
++        key = {
++            meta._mac_learn_msg_ingress_port2: exact @name("meta.mac_learn_msg.ingress_port") ;
++        }
++        actions = {
++            do_tst();
++            NoAction_5();
+         }
+-        default_action = NoAction_3();
++        default_action = NoAction_5();
+     }
+     @hidden action act() {
+         meta._send_mac_learn_msg0 = false;
+@@ -152,6 +174,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
+         tbl_act.apply();
+         learned_sources_0.apply();
+         l2_tbl_0.apply();
++        tst_tbl_0.apply();
+     }
+ }
+ 
+diff --git a/testdata/p4_16_samples_outputs/psa-example-digest-bmv2.p4 b/testdata/p4_16_samples_outputs/psa-example-digest-bmv2.p4
+index 4ac4301f..45e4b4f4 100644
+--- a/testdata/p4_16_samples_outputs/psa-example-digest-bmv2.p4
++++ b/testdata/p4_16_samples_outputs/psa-example-digest-bmv2.p4
+@@ -1,6 +1,16 @@
+ #include <core.p4>
+ #include <psa.p4>
+ 
++enum bit<16> EthTypes {
++    IPv4 = 0x800,
++    ARP = 0x806,
++    RARP = 0x8035,
++    EtherTalk = 0x809b,
++    VLAN = 0x8100,
++    IPX = 0x8137,
++    IPv6 = 0x86dd
++}
++
+ typedef bit<48> EthernetAddress;
+ header ethernet_t {
+     EthernetAddress dstAddr;
+@@ -26,6 +36,7 @@ header ipv4_t {
+ struct headers {
+     ethernet_t ethernet;
+     ipv4_t     ipv4;
++    EthTypes   type;
+ }
+ 
+ struct empty_metadata_t {
+@@ -99,6 +110,9 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
+     action do_L2_forward(PortId_t egress_port) {
+         send_to_port(ostd, egress_port);
+     }
++    action do_tst(PortId_t egress_port, EthTypes serEnumT) {
++        send_to_port(ostd, egress_port);
++    }
+     table l2_tbl {
+         key = {
+             hdr.ethernet.dstAddr: exact;
+@@ -109,10 +123,21 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
+         }
+         default_action = NoAction();
+     }
++    table tst_tbl {
++        key = {
++            meta.mac_learn_msg.ingress_port: exact;
++        }
++        actions = {
++            do_tst;
++            NoAction;
++        }
++        default_action = NoAction();
++    }
+     apply {
+         meta.send_mac_learn_msg = false;
+         learned_sources.apply();
+         l2_tbl.apply();
++        tst_tbl.apply();
+     }
+ }
+ 
+diff --git a/testdata/p4_16_samples_outputs/psa-example-digest-bmv2.p4-stderr b/testdata/p4_16_samples_outputs/psa-example-digest-bmv2.p4-stderr
+index e69de29b..a25b9380 100644
+--- a/testdata/p4_16_samples_outputs/psa-example-digest-bmv2.p4-stderr
++++ b/testdata/p4_16_samples_outputs/psa-example-digest-bmv2.p4-stderr
+@@ -0,0 +1,6 @@
++psa-example-digest-bmv2.p4(84): [--Wwarn=uninitialized_out_param] warning: out parameter parsed_hdr may be uninitialized when CommonParser terminates
++    out headers parsed_hdr,
++                ^^^^^^^^^^
++psa-example-digest-bmv2.p4(82)
++parser CommonParser(
++       ^^^^^^^^^^^^
+diff --git a/testdata/p4_16_samples_outputs/psa-example-digest-bmv2.p4.p4info.txt b/testdata/p4_16_samples_outputs/psa-example-digest-bmv2.p4.p4info.txt
+index a6176f9a..f3436eda 100644
+--- a/testdata/p4_16_samples_outputs/psa-example-digest-bmv2.p4.p4info.txt
++++ b/testdata/p4_16_samples_outputs/psa-example-digest-bmv2.p4.p4info.txt
+@@ -43,6 +43,30 @@ tables {
+   size: 1024
+   idle_timeout_behavior: NOTIFY_CONTROL
+ }
++tables {
++  preamble {
++    id: 33601325
++    name: "ingress.tst_tbl"
++    alias: "tst_tbl"
++  }
++  match_fields {
++    id: 1
++    name: "meta.mac_learn_msg.ingress_port"
++    bitwidth: 32
++    match_type: EXACT
++    type_name {
++      name: "PortId_t"
++    }
++  }
++  action_refs {
++    id: 16797276
++  }
++  action_refs {
++    id: 16800567
++  }
++  size: 1024
++  idle_timeout_behavior: NOTIFY_CONTROL
++}
+ actions {
+   preamble {
+     id: 16800567
+@@ -66,7 +90,30 @@ actions {
+   params {
+     id: 1
+     name: "egress_port"
+-    bitwidth: 10
++    bitwidth: 32
++    type_name {
++      name: "PortId_t"
++    }
++  }
++}
++actions {
++  preamble {
++    id: 16797276
++    name: "ingress.do_tst"
++    alias: "do_tst"
++  }
++  params {
++    id: 1
++    name: "egress_port"
++    bitwidth: 32
++    type_name {
++      name: "PortId_t"
++    }
++  }
++  params {
++    id: 2
++    name: "serEnumT"
++    bitwidth: 16
+   }
+ }
+ digests {
+@@ -98,13 +145,20 @@ type_info {
+       members {
+         name: "ingress_port"
+         type_spec {
+-          bitstring {
+-            bit {
+-              bitwidth: 10
+-            }
++          new_type {
++            name: "PortId_t"
+           }
+         }
+       }
+     }
+   }
++  new_types {
++    key: "PortId_t"
++    value {
++      translated_type {
++        uri: "p4.org/psa/v1/PortId_t"
++        sdn_bitwidth: 32
++      }
++    }
++  }
+ }
+diff --git a/testdata/p4_16_samples_outputs/psa-portid-using-newtype2-first.p4 b/testdata/p4_16_samples_outputs/psa-portid-using-newtype2-first.p4
+index b1122c13..a57fe37d 100644
+--- a/testdata/p4_16_samples_outputs/psa-portid-using-newtype2-first.p4
++++ b/testdata/p4_16_samples_outputs/psa-portid-using-newtype2-first.p4
+@@ -1,8 +1,8 @@
+ #include <core.p4>
+ 
+ typedef bit<9> PortIdUInt_t;
+-@p4runtime_translate("port") type bit<9> PortId_t;
+-@p4runtime_translate("port") type bit<32> PortIdInHeader_t;
++type bit<9> PortId_t;
++type bit<32> PortIdInHeader_t;
+ match_kind {
+     range,
+     selector
+diff --git a/testdata/p4_16_samples_outputs/psa-portid-using-newtype2-frontend.p4 b/testdata/p4_16_samples_outputs/psa-portid-using-newtype2-frontend.p4
+index 24eba29d..4e4f37e8 100644
+--- a/testdata/p4_16_samples_outputs/psa-portid-using-newtype2-frontend.p4
++++ b/testdata/p4_16_samples_outputs/psa-portid-using-newtype2-frontend.p4
+@@ -1,8 +1,8 @@
+ #include <core.p4>
+ 
+ typedef bit<9> PortIdUInt_t;
+-@p4runtime_translate("port") type bit<9> PortId_t;
+-@p4runtime_translate("port") type bit<32> PortIdInHeader_t;
++type bit<9> PortId_t;
++type bit<32> PortIdInHeader_t;
+ match_kind {
+     range,
+     selector
+diff --git a/testdata/p4_16_samples_outputs/psa-portid-using-newtype2.p4 b/testdata/p4_16_samples_outputs/psa-portid-using-newtype2.p4
+index 63e44dcf..eb4df0ec 100644
+--- a/testdata/p4_16_samples_outputs/psa-portid-using-newtype2.p4
++++ b/testdata/p4_16_samples_outputs/psa-portid-using-newtype2.p4
+@@ -1,8 +1,8 @@
+ #include <core.p4>
+ 
+ typedef bit<9> PortIdUInt_t;
+-@p4runtime_translate("port") type bit<9> PortId_t;
+-@p4runtime_translate("port") type bit<32> PortIdInHeader_t;
++type bit<9> PortId_t;
++type bit<32> PortIdInHeader_t;
+ match_kind {
+     range,
+     selector
