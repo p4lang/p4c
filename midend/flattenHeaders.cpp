@@ -19,17 +19,6 @@ limitations under the License.
 
 namespace P4 {
 
-template <typename Func>
-const IR::Annotations* filterAnnotation(const IR::Annotations* annot, Func function) {
-    auto annotations = new IR::Annotations();
-    for (auto an : annot->annotations) {
-        if (function(an))
-            continue;
-        annotations->add(an);
-    }
-    return annotations;
-}
-
 void HeaderTypeReplacement::flatten(const P4::TypeMap* typeMap,
                                     cstring prefix,
                                     const IR::Type* type,
