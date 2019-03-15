@@ -26,6 +26,8 @@ void FindHeaderTypesToReplace::HeaderTypeReplacement::flatten(cstring prefix,
     if (auto st = type->to<IR::Type_StructLike>()) {
         std::function<bool(const IR::Annotation *)> selector =
                 [&policy](const IR::Annotation *annot) {
+                    if (!policy)
+                        return false;
                     return policy->keep(annot);
                 };
         auto annotations = st->annotations->where(selector);
