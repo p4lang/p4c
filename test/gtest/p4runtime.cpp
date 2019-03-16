@@ -1118,8 +1118,8 @@ TEST_F(P4Runtime, ValueSet) {
         for (int i = 0; i < mf.annotations_size(); i++)
           EXPECT_EQ(mf.annotations(i), annotations.at(i));
         EXPECT_EQ(mf.bitwidth(), bitwidth);
-        if (matchType) EXPECT_EQ(mf.match_type(), *matchType);
-        if (otherMatchType) EXPECT_EQ(mf.other_match_type(), *otherMatchType);
+        if (matchType) { EXPECT_EQ(mf.match_type(), *matchType); }
+        if (otherMatchType) { EXPECT_EQ(mf.other_match_type(), *otherMatchType); }
     };
     checkMatchField(vset->match(0), 1, "f1", {"@my_anno(\"body\")"}, 8,
                     MatchField::TERNARY, boost::none);

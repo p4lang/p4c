@@ -146,7 +146,7 @@ class Graphs : public Inspector {
      public:
         void operator()(Graph &g) const {
             auto vertices = boost::vertices(g);
-            for (auto vit = vertices.first; vit != vertices.second; ++vit) {
+            for (auto &vit = vertices.first; vit != vertices.second; ++vit) {
                 const auto &vinfo = g[*vit];
                 auto attrs = boost::get(boost::vertex_attribute, g);
                 attrs[*vit]["label"] = vinfo.name;
@@ -155,7 +155,7 @@ class Graphs : public Inspector {
                 attrs[*vit]["margin"] = vertexTypeGetMargin(vinfo.type);
             }
             auto edges = boost::edges(g);
-            for (auto eit = edges.first; eit != edges.second; ++eit) {
+            for (auto &eit = edges.first; eit != edges.second; ++eit) {
                 auto attrs = boost::get(boost::edge_attribute, g);
                 attrs[*eit]["label"] = boost::get(boost::edge_name, g, *eit);
             }
