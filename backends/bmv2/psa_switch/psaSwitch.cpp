@@ -372,19 +372,14 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
     }
 }
 
-bool InspectPsaProgram::isStandardMetadata(const IR::Type_StructLike* st) {
-    cstring stName = st->toString();
-    if (!strcmp(stName, "struct psa_ingress_parser_input_metadata_t") ||
-        !strcmp(stName, "struct psa_egress_parser_input_metadata_t") ||
-        !strcmp(stName, "struct psa_ingress_input_metadata_t") ||
-        !strcmp(stName, "struct psa_ingress_output_metadata_t") ||
-        !strcmp(stName, "struct psa_egress_input_metadata_t") ||
-        !strcmp(stName, "struct psa_egress_deparser_input_metadata_t") ||
-        !strcmp(stName, "struct psa_egress_output_metadata_t")) {
-      return true;
-    } else {
-      return false;
-  }
+bool InspectPsaProgram::isStandardMetadata(cstring ptName) {
+    return (!strcmp(ptName, "psa_ingress_parser_input_metadata_t") ||
+        !strcmp(ptName, "psa_egress_parser_input_metadata_t") ||
+        !strcmp(ptName, "psa_ingress_input_metadata_t") ||
+        !strcmp(ptName, "psa_ingress_output_metadata_t") ||
+        !strcmp(ptName, "psa_egress_input_metadata_t") ||
+        !strcmp(ptName, "psa_egress_deparser_input_metadata_t") ||
+        !strcmp(ptName, "psa_egress_output_metadata_t"));
 }
 
 // This visitor only visits the parameter in the statement from architecture.
@@ -396,10 +391,12 @@ bool InspectPsaProgram::preorder(const IR::Parameter* param) {
         return false;
     auto st = ft->to<IR::Type_StructLike>();
     // check if it is psa specific standard metadata
-    if (isStandardMetadata(st)) {
+    cstring ptName = param->type->toString();
+    if (isStandardMetadata(ptName)) {
       addHeaderType(st);
-      // remove struct and _t from type name
-      addHeaderInstance(st, (st->toString()).substr(7, st->toString().size()-9));
+      // remove _t from type name
+      cstring headerName = ptName.exceptLast(2);
+      addHeaderInstance(st, headerName);
     }
     // parameter must be a type that we have not seen before
     if (pinfo->hasVisited(st))
