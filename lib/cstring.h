@@ -271,7 +271,7 @@ inline std::string& operator+=(std::string& a, cstring b) {
     return a; }
 
 template<class T> cstring cstring::make_unique(const T &inuse, cstring base, char sep) {
-    char suffix[8];
+    char suffix[12];
     cstring rv = base;
     int counter = 0;
     while (inuse.count(rv)) {

@@ -125,6 +125,7 @@ symbol_print(FILE* file, int type, YYSTYPE value)
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-function"
 #include "ir-generator-lex.c"
 #pragma GCC diagnostic pop
 

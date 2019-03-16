@@ -530,7 +530,7 @@ abstract Block : CompileTimeValue {
 
 class TableBlock : Block {
     P4Table container;
-    const IDeclaration* getContainer() const { return container; }
+    const IDeclaration* getContainer() const override { return container; }
 #nodbprint
 }
 
@@ -558,7 +558,7 @@ class ParserBlock : InstantiatedBlock {
         return container->constructorParams; }
     toString { return container->toString(); }
     ID getName() const override { return container->getName(); }
-    const IDeclaration* getContainer() const { return container; }
+    const IDeclaration* getContainer() const override { return container; }
 #nodbprint
 }
 
@@ -568,7 +568,7 @@ class ControlBlock : InstantiatedBlock {
         return container->constructorParams; }
     toString { return container->toString(); }
     ID getName() const override { return container->getName(); }
-    const IDeclaration* getContainer() const { return container; }
+    const IDeclaration* getContainer() const override { return container; }
 #nodbprint
 }
 
