@@ -371,12 +371,12 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
     void collectTableProperties(P4RuntimeSymbolTableIface* symbols,
                                 const IR::TableBlock* tableBlock) override {
         CHECK_NULL(tableBlock);
-        auto table = tableBlock->container;
         bool isConstructedInPlace = false;
 
         {
             auto instance = getExternInstanceFromProperty(
-                table,
+                this,
+                tableBlock,
                 ActionProfileTraits<arch>::propertyName(),
                 refMap,
                 typeMap,
@@ -393,7 +393,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         }
         {
             auto instance = getExternInstanceFromProperty(
-                table,
+                this,
+                tableBlock,
                 CounterTraits::directPropertyName(),
                 refMap,
                 typeMap,
@@ -408,7 +409,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         }
         {
             auto instance = getExternInstanceFromProperty(
-                table,
+                this,
+                tableBlock,
                 MeterTraits::directPropertyName(),
                 refMap,
                 typeMap,
@@ -479,22 +481,21 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                             p4configv1::Table* table,
                             const IR::TableBlock* tableBlock) override {
         CHECK_NULL(tableBlock);
-        auto tableDeclaration = tableBlock->container;
 
         using Helpers::isExternPropertyConstructedInPlace;
 
-        auto implementation = getActionProfile(tableDeclaration, refMap, typeMap);
+        auto implementation = getActionProfile(this, tableBlock, refMap, typeMap);
         auto directCounter = Helpers::getDirectCounterlike<ArchCounterExtern>(
-            tableDeclaration, refMap, typeMap);
+            this, tableBlock, refMap, typeMap);
         auto directMeter = Helpers::getDirectCounterlike<ArchMeterExtern>(
-            tableDeclaration, refMap, typeMap);
+            this, tableBlock, refMap, typeMap);
 
         if (implementation) {
             auto id = symbols.getId(SymbolType::ACTION_PROFILE(),
                                     implementation->name);
             table->set_implementation_id(id);
             auto propertyName = ActionProfileTraits<arch>::propertyName();
-            if (isExternPropertyConstructedInPlace(tableDeclaration, propertyName))
+            if (isExternPropertyConstructedInPlace(this, tableBlock, propertyName))
                 addActionProfile(symbols, p4info, *implementation);
         }
 
@@ -523,10 +524,10 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
 
         auto p4RtTypeInfo = p4info->mutable_type_info();
         if (externBlock->type->name == CounterTraits::typeName()) {
-            auto counter = Helpers::Counterlike<ArchCounterExtern>::from(externBlock);
+            auto counter = Helpers::Counterlike<ArchCounterExtern>::from(this, externBlock);
             if (counter) addCounter(symbols, p4info, *counter);
         } else if (externBlock->type->name == MeterTraits::typeName()) {
-            auto meter = Helpers::Counterlike<ArchMeterExtern>::from(externBlock);
+            auto meter = Helpers::Counterlike<ArchMeterExtern>::from(this, externBlock);
             if (meter) addMeter(symbols, p4info, *meter);
         } else if (externBlock->type->name == RegisterTraits<arch>::typeName()) {
             auto register_ = Register::from<arch>(externBlock, refMap, typeMap, p4RtTypeInfo);
@@ -574,10 +575,12 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
     /// @return the action profile referenced in @table's implementation property,
     /// if it has one, or boost::none otherwise.
     static boost::optional<ActionProfile>
-    getActionProfile(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap) {
+    getActionProfile(P4RuntimeArchHandlerIface* archHandler,
+                     const IR::TableBlock* tableBlock, ReferenceMap* refMap, TypeMap* typeMap) {
+        const IR::P4Table* table = tableBlock->container;
         auto propertyName = ActionProfileTraits<arch>::propertyName();
         auto instance =
-            getExternInstanceFromProperty(table, propertyName, refMap, typeMap);
+            getExternInstanceFromProperty(archHandler, tableBlock, propertyName, refMap, typeMap);
         if (!instance) return boost::none;
         auto size = instance->substitution.lookupByName(
             ActionProfileTraits<arch>::sizeParamName())->expression;

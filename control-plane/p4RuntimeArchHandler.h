@@ -200,7 +200,8 @@ namespace Helpers {
 /// @return an extern instance defined or referenced by the value of @table's
 /// @propertyName property, or boost::none if no extern was referenced.
 boost::optional<ExternInstance>
-getExternInstanceFromProperty(const IR::P4Table* table,
+getExternInstanceFromProperty(P4RuntimeArchHandlerIface* archHandler,
+                              const IR::TableBlock* tableBlock,
                               const cstring& propertyName,
                               ReferenceMap* refMap,
                               TypeMap* typeMap,
@@ -208,7 +209,8 @@ getExternInstanceFromProperty(const IR::P4Table* table,
 
 /// @return true if the extern instance assigned to property @propertyName for
 /// the @table was constructed in-place or outside of teh @table declaration.
-bool isExternPropertyConstructedInPlace(const IR::P4Table* table,
+bool isExternPropertyConstructedInPlace(P4RuntimeArchHandlerIface* archHandler,
+                                        const IR::TableBlock* tableBlock,
                                         const cstring& propertyName);
 
 /// Visit evaluated blocks under the provided block. Guarantees that each
@@ -361,7 +363,7 @@ struct Counterlike {
     /// @return the information required to serialize an explicit @instance of
     /// @Kind, which is defined inside a control block.
     static boost::optional<Counterlike<Kind>>
-    from(const IR::ExternBlock* instance) {
+    from(P4RuntimeArchHandlerIface* archHandler, const IR::ExternBlock* instance) {
         CHECK_NULL(instance);
         auto declaration = instance->node->to<IR::IDeclaration>();
 
@@ -382,7 +384,7 @@ struct Counterlike {
             return boost::none;
         }
 
-        return Counterlike<Kind>{declaration->controlPlaneName(),
+        return Counterlike<Kind>{archHandler->getControlPlaneName(instance),
                                  declaration->to<IR::IAnnotated>(),
                                  unit->to<IR::Declaration_ID>()->name,
                                  size->template to<IR::Constant>()->value.get_si(),
@@ -393,7 +395,9 @@ struct Counterlike {
     /// is either defined in or referenced by a property value of @table. (This
     /// implies that @instance is a direct resource of @table.)
     static boost::optional<Counterlike<Kind>>
-    fromDirect(const ExternInstance& instance, const IR::P4Table* table) {
+    fromDirect(P4RuntimeArchHandlerIface *archHandler, const IR::TableBlock* tableBlock,
+            const ExternInstance& instance) {
+        auto table = tableBlock->container;
         CHECK_NULL(table);
         BUG_CHECK(instance.name != boost::none,
                   "Caller should've ensured we have a name");
@@ -417,9 +421,10 @@ struct Counterlike {
         }
 
         auto unit = unitArgument->to<IR::Member>()->member.name;
+        auto tableName = archHandler->getControlPlaneName(tableBlock);
         return Counterlike<Kind>{*instance.name, instance.annotations,
                                  unit, Helpers::getTableSize(table),
-                                 table->controlPlaneName()};
+                                 tableName };
     }
 };
 
@@ -427,12 +432,13 @@ struct Counterlike {
 /// boost::none otherwise.
 template <typename Kind>
 boost::optional<Counterlike<Kind>>
-getDirectCounterlike(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap) {
+getDirectCounterlike(P4RuntimeArchHandlerIface* archHandler,
+        const IR::TableBlock* tableBlock, ReferenceMap *refMap, TypeMap *typeMap) {
     auto propertyName = CounterlikeTraits<Kind>::directPropertyName();
     auto instance =
-      getExternInstanceFromProperty(table, propertyName, refMap, typeMap);
+        getExternInstanceFromProperty(archHandler, tableBlock, propertyName, refMap, typeMap);
     if (!instance) return boost::none;
-    return Counterlike<Kind>::fromDirect(*instance, table);
+    return Counterlike<Kind>::fromDirect(archHandler, tableBlock, *instance);
 }
 
 }  // namespace Helpers

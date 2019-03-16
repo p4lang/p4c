@@ -525,7 +525,7 @@ abstract Block : CompileTimeValue {
         BUG_CHECK(it != constantValue.end(), "%1%: No such node %2%", this, node);
         return it->second; }
     visit_children { (void)v; }
-    virtual const IDeclaration* getContainer() const { return nullptr; }
+    virtual const IDeclaration* getContainer() const { return node->to<IR::IDeclaration>(); }
 }
 
 class TableBlock : Block {

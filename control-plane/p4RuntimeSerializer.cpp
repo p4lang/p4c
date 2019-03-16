@@ -1065,13 +1065,13 @@ class P4RuntimeAnalyzer {
         });
     }
 
-    void addValueSet(const IR::P4ValueSet* inst) {
+    void addValueSet(const IR::P4ValueSet* inst, const cstring name) {
         // guaranteed by caller
         CHECK_NULL(inst);
 
         auto vs = p4Info->add_value_sets();
 
-        auto name = inst->controlPlaneName();
+        // auto name = inst->controlPlaneName();
 
         unsigned int size = 0;
         auto sizeConstant = inst->size->to<IR::Constant>();
@@ -1296,29 +1296,34 @@ static void collectTableSymbols(P4RuntimeSymbolTable& symbols,
 }
 
 static void collectParserSymbols(P4RuntimeSymbolTable& symbols,
+                                 P4RuntimeArchHandlerIface* archHandler,
                                  const IR::ParserBlock* parserBlock) {
     CHECK_NULL(parserBlock);
 
     auto parser = parserBlock->container;
     CHECK_NULL(parser);
 
+    auto name = archHandler->getControlPlaneName(parserBlock);
+
     for (auto s : parser->parserLocals) {
         if (auto inst = s->to<IR::P4ValueSet>()) {
-            symbols.add(P4RuntimeSymbolType::VALUE_SET(), inst);
+            // symbols.add(P4RuntimeSymbolType::VALUE_SET(), inst);
+            symbols.add(P4RuntimeSymbolType::VALUE_SET(), name);
         }
     }
 }
 
-static void analyzeParser(P4RuntimeAnalyzer& analyzer,
-                          const IR::ParserBlock* parserBlock) {
+static void analyzeParser(P4RuntimeArchHandlerIface* archHandler,
+        P4RuntimeAnalyzer& analyzer, const IR::ParserBlock* parserBlock) {
     CHECK_NULL(parserBlock);
 
+    auto name = archHandler->getControlPlaneName(parserBlock);
     auto parser = parserBlock->container;
     CHECK_NULL(parser);
 
     for (auto s : parser->parserLocals) {
         if (auto inst = s->to<IR::P4ValueSet>()) {
-            analyzer.addValueSet(inst);
+            analyzer.addValueSet(inst, name);
         }
     }
 }
@@ -1690,7 +1695,7 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
             } else if (block->is<IR::TableBlock>()) {
                 collectTableSymbols(symbols, archHandler, block->to<IR::TableBlock>());
             } else if (block->is<IR::ParserBlock>()) {
-                collectParserSymbols(symbols, block->to<IR::ParserBlock>());
+                collectParserSymbols(symbols, archHandler, block->to<IR::ParserBlock>());
             }
         });
         forAllMatching<IR::Type_Header>(program, [&](const IR::Type_Header* type) {
@@ -1713,7 +1718,7 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
         } else if (block->is<IR::TableBlock>()) {
             analyzer.addTable(block->to<IR::TableBlock>());
         } else if (block->is<IR::ParserBlock>()) {
-            analyzeParser(analyzer, block->to<IR::ParserBlock>());
+            analyzeParser(archHandler, analyzer, block->to<IR::ParserBlock>());
         }
     });
     forAllMatching<IR::Type_Header>(program, [&](const IR::Type_Header* type) {
