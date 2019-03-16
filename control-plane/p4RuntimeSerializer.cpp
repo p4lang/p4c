@@ -1265,7 +1265,7 @@ class P4RuntimeEntriesConverter {
         for (auto arg : *actionCall->arguments) {
             auto protoParam = protoAction->add_params();
             protoParam->set_param_id(parameterId++);
-            auto parameter = actionDecl->parameters->parameters.at(parameterIndex);
+            auto parameter = actionDecl->parameters->parameters.at(parameterIndex++);
             auto width = parameter->type->width_bits();
             if (arg->expression->is<IR::Constant>()) {
                 auto value = stringRepr(arg->expression->to<IR::Constant>(), width);
