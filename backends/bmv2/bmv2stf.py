@@ -83,7 +83,7 @@ def convert_packet_bin2hexstr(pkt_bin):
     return ''.join(ByteToHex(str(pkt_bin)).split()).upper()
 
 def convert_packet_stf2hexstr(pkt_stf_text):
-    return ''.join(expected.split()).upper()
+    return ''.join(pkt_stf_text.split()).upper()
 
 def reportError(*message):
     print("***", *message)
