@@ -83,7 +83,7 @@ const IR::Node* ArithmeticFixup::postorder(IR::Cast* expression) {
 
 void ExpressionConverter::mapExpression(const IR::Expression* expression, Util::IJson* json) {
     map.emplace(expression, json);
-    LOG3("Mapping " << dbp(expression) << " to " << json->toString());
+    LOG3("alex Mapping " << dbp(expression) << " to " << json->toString());
 }
 
 Util::IJson* ExpressionConverter::get(const IR::Expression* expression) const {
@@ -259,12 +259,15 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
     auto param = enclosingParamReference(expression->expr);
     if (param != nullptr) {
         // convert architecture-dependent parameter
+      LOG1("alex param is not null " << param->toString());
         if (auto result = convertParam(param, fieldName)) {
-            mapExpression(expression, result);
+	  LOG1("alex convert architecture-dependent parameter " << param->toString());
+	  mapExpression(expression, result);
             return;
         }
         // convert normal parameters
         if (auto st = type->to<IR::Type_Stack>()) {
+	  LOG1("alex convert normal typestack" << param->toString());
             auto et = typeMap->getTypeType(st->elementType, true);
             if (et->is<IR::Type_HeaderUnion>())
                 result->emplace("type", "header_union_stack");
@@ -272,9 +275,11 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 result->emplace("type", "header_stack");
             result->emplace("value", fieldName);
         } else if (type->is<IR::Type_HeaderUnion>()) {
+	  LOG1("alex convert normal headerunion" << param->toString());
             result->emplace("type", "header_union");
             result->emplace("value", fieldName);
         } else if (parentType->is<IR::Type_HeaderUnion>()) {
+	  LOG1("alex convert normal parent headerunion" << param->toString());
             auto l = get(expression->expr);
             cstring nestedField = fieldName;
             if (l->is<Util::JsonObject>()) {
@@ -290,22 +295,28 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         } else if (parentType->is<IR::Type_StructLike>() &&
                    (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() ||
                     type->is<IR::Type_Boolean>())) {
+	  LOG1("alex convert normal structlike" << param->toString());
             auto field = parentType->to<IR::Type_StructLike>()->getField(
                 expression->member);
             LOG3("looking up field " << field);
             CHECK_NULL(field);
+            LOG1("alex checking structure->scalarMetadataFields " << structure->scalarMetadataFields.size());
             auto name = ::get(structure->scalarMetadataFields, field);
             BUG_CHECK((name != nullptr), "NULL name: %1%", field->name);
             if (type->is<IR::Type_Bits>() || type->is<IR::Type_Error>() ||
                 leftValue || simpleExpressionsOnly) {
+	      LOG1("alex is type_bits");
                 result->emplace("type", "field");
                 auto e = mkArrayField(result, "value");
+		LOG1("alex scalarsName " << scalarsName);
+		LOG1("alex name " << name);
                 e->append(scalarsName);
                 e->append(name);
             } else if (type->is<IR::Type_Boolean>()) {
                 // Boolean variables are stored as ints, so we
                 // have to insert a conversion when reading such a
                 // variable
+	      LOG1("alex is type_boolean");
                 result->emplace("type", "expression");
                 auto e = new Util::JsonObject();
                 result->emplace("value", e);
@@ -320,6 +331,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 a->append(name);
             }
         } else {
+	  LOG1("alex catch all now");
             // This may be wrong, but the caller will handle it properly
             // (e.g., this can be a method, such as packet.lookahead)
             result->emplace("type", "header");
@@ -704,6 +716,7 @@ ExpressionConverter::convert(const IR::Expression* e, bool doFixup, bool wrap, b
         BUG("%1%: Could not convert expression", e);
 
     if (convertBool) {
+      LOG1("alex convertbool " << result);
         auto obj = new Util::JsonObject();
         obj->emplace("type", "expression");
         auto conv = new Util::JsonObject();

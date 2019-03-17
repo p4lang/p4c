@@ -60,8 +60,22 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
       return param->type->toString() == "PSA_CounterType_t";
     }
 
+    
+    bool isStandardMetadata(cstring ptName) {
+      return (!strcmp(ptName, "psa_ingress_parser_input_metadata_t") ||
+        !strcmp(ptName, "psa_egress_parser_input_metadata_t") ||
+        !strcmp(ptName, "psa_ingress_input_metadata_t") ||
+        !strcmp(ptName, "psa_ingress_output_metadata_t") ||
+        !strcmp(ptName, "psa_egress_input_metadata_t") ||
+        !strcmp(ptName, "psa_egress_deparser_input_metadata_t") ||
+        !strcmp(ptName, "psa_egress_output_metadata_t"));
+    }
+
+
     Util::IJson* convertParam(UNUSED const IR::Parameter* param, cstring fieldName) override {
-        if (isCounterMetaData(param)) {  // check if its counter metadata
+      LOG1("alex conertParam " << param->toString() << " fieldName " << fieldName);
+      cstring ptName = param->type->toString();
+      if (isCounterMetaData(param)) {  // check if its counter metadata
           auto jsn = new Util::JsonObject();
           jsn->emplace("name", param->toString());
           jsn->emplace("type", "hexstr");
@@ -82,7 +96,24 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
             return nullptr;
           }
           return jsn;
-        }
+      } else if (isStandardMetadata(ptName)) {
+	LOG1("alex is standardmetadata");
+	//TODO Alex: 
+	  auto jsn = new Util::JsonObject();
+	  //jsn->emplace("type", "field");
+	  //jsn->emplace("value", "coolbeans");
+	  jsn->emplace("type", "field");
+	  auto a = mkArrayField(jsn, "value");
+	  a->append(ptName.exceptLast(2));
+	  a->append(fieldName);
+	 
+	  //jsn->emplace("value", ptName.exceptLast(2), fieldName);
+	  
+          return jsn;
+      } else {
+	LOG1("alex return nullptr ");
+	return nullptr;
+      }
 
         LOG3("convert " << fieldName);
         return nullptr;
