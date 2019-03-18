@@ -1065,13 +1065,13 @@ class P4RuntimeAnalyzer {
         });
     }
 
-    void addValueSet(const IR::P4ValueSet* inst, const cstring name) {
+    void addValueSet(const IR::P4ValueSet* inst, const cstring parserName) {
         // guaranteed by caller
         CHECK_NULL(inst);
 
         auto vs = p4Info->add_value_sets();
 
-        // auto name = inst->controlPlaneName();
+        auto pvsName = parserName + "." + inst->name.originalName;
 
         unsigned int size = 0;
         auto sizeConstant = inst->size->to<IR::Constant>();
@@ -1085,8 +1085,8 @@ class P4RuntimeAnalyzer {
         }
         size = sizeConstant->value.get_ui();
 
-        auto id = symbols.getId(P4RuntimeSymbolType::VALUE_SET(), name);
-        setPreamble(vs->mutable_preamble(), id, name, symbols.getAlias(name),
+        auto id = symbols.getId(P4RuntimeSymbolType::VALUE_SET(), pvsName);
+        setPreamble(vs->mutable_preamble(), id, pvsName, symbols.getAlias(pvsName),
                     inst->to<IR::IAnnotated>());
         vs->set_size(size);
 
@@ -1303,12 +1303,13 @@ static void collectParserSymbols(P4RuntimeSymbolTable& symbols,
     auto parser = parserBlock->container;
     CHECK_NULL(parser);
 
-    auto name = archHandler->getControlPlaneName(parserBlock);
+    auto parserName = archHandler->getControlPlaneName(parserBlock);
 
     for (auto s : parser->parserLocals) {
         if (auto inst = s->to<IR::P4ValueSet>()) {
-            // symbols.add(P4RuntimeSymbolType::VALUE_SET(), inst);
-            symbols.add(P4RuntimeSymbolType::VALUE_SET(), name);
+            auto pvsName = parserName + "." + inst->name.originalName; 
+            auto id = externalId(inst);
+            symbols.add(P4RuntimeSymbolType::VALUE_SET(), pvsName, id);
         }
     }
 }
