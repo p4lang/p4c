@@ -39,6 +39,7 @@ limitations under the License.
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/externInstance.h"
+#include "frontends/p4/enumInstance.h"
 // TODO(antonin): this include should go away when we cleanup getMatchFields
 // and tableNeedsPriority implementations.
 #include "frontends/p4/fromv1.0/v1model.h"
@@ -1278,7 +1279,7 @@ class P4RuntimeEntriesConverter {
             auto protoEntity = protoUpdate->mutable_entity();
             auto protoEntry = protoEntity->mutable_table_entry();
             protoEntry->set_table_id(tableId);
-            addMatchKey(protoEntry, table, e->getKeys(), refMap);
+            addMatchKey(protoEntry, table, e->getKeys(), refMap, typeMap);
             addAction(protoEntry, e->getAction(), refMap, typeMap);
             // TODO(antonin): according to the P4 specification, "Entries in a
             // table are matched in the program order, stopping at the first
@@ -1346,7 +1347,8 @@ class P4RuntimeEntriesConverter {
     void addMatchKey(p4v1::TableEntry* protoEntry,
                      const IR::P4Table* table,
                      const IR::ListExpression* keyset,
-                     ReferenceMap* refMap) const {
+                     ReferenceMap* refMap,
+                     TypeMap* typeMap) const {
         int keyIndex = 0;
         int fieldId = 1;
         for (auto k : keyset->components) {
@@ -1357,13 +1359,13 @@ class P4RuntimeEntriesConverter {
             auto protoMatch = protoEntry->add_match();
             protoMatch->set_field_id(fieldId++);
             if (matchType == P4CoreLibrary::instance.exactMatch.name) {
-                addExact(protoMatch, k, keyWidth);
+                addExact(protoMatch, k, keyWidth, typeMap);
             } else if (matchType == P4CoreLibrary::instance.lpmMatch.name) {
-                addLpm(protoMatch, k, keyWidth);
+                addLpm(protoMatch, k, keyWidth, typeMap);
             } else if (matchType == P4CoreLibrary::instance.ternaryMatch.name) {
-                addTernary(protoMatch, k, keyWidth);
+                addTernary(protoMatch, k, keyWidth, typeMap);
             } else if (matchType == P4V1::V1Model::instance.rangeMatchType.name) {
-                addRange(protoMatch, k, keyWidth);
+                addRange(protoMatch, k, keyWidth, typeMap);
             } else {
                 if (!k->is<IR::DefaultExpression>())
                     ::error("%1%: match type not supported by P4Runtime serializer", matchType);
@@ -1376,7 +1378,7 @@ class P4RuntimeEntriesConverter {
     /// expression is simple (integer literal or boolean literal) or returns
     /// boost::none otherwise.
     boost::optional<std::string> convertSimpleKeyExpression(
-        const IR::Expression* k, int keyWidth) const {
+        const IR::Expression* k, int keyWidth, TypeMap* typeMap) const {
         if (k->is<IR::Constant>()) {
             return stringRepr(k->to<IR::Constant>(), keyWidth);
         } else if (k->is<IR::BoolLiteral>()) {
@@ -1384,16 +1386,13 @@ class P4RuntimeEntriesConverter {
         } else if (k->is<IR::Member>()) {
              // A SerEnum is a member const entries are processed here.
              auto mem = k->to<IR::Member>();
-             if (mem->type->is<IR::Type_SerEnum>()) {
+             auto ei = EnumInstance::resolve(mem, typeMap);
+             if (!ei) return boost::none;
+             if (auto sei = ei->to<SerEnumInstance>()) {
+                 auto type = sei->value->to<IR::Constant>();
                  auto se = mem->type->to<IR::Type_SerEnum>();
-                 auto w = se->type->width_bits();
-                 for (auto m : se->members) {
-                     auto smem = m->to<IR::SerEnumMember>();
-                     if (smem->name == mem->member.name) {
-                         auto type = smem->value->to<IR::Constant>();
-                         return stringRepr(type, w);
-                     }
-                 }
+                 auto w = se->width_bits();
+                 return stringRepr(type, w);
              }
              ::error("%1% invalid Member key expression", k);
              return boost::none;
@@ -1403,18 +1402,20 @@ class P4RuntimeEntriesConverter {
         }
     }
 
-    void addExact(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
+    void addExact(p4v1::FieldMatch* protoMatch, const IR::Expression* k,
+                  int keyWidth, TypeMap* typeMap) const {
         auto protoExact = protoMatch->mutable_exact();
-        auto value = convertSimpleKeyExpression(k, keyWidth);
+        auto value = convertSimpleKeyExpression(k, keyWidth, typeMap);
         if (value == boost::none) return;
         protoExact->set_value(*value);
     }
 
-    void addLpm(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
+    void addLpm(p4v1::FieldMatch* protoMatch, const IR::Expression* k,
+                int keyWidth, TypeMap *typeMap) const {
         auto protoLpm = protoMatch->mutable_lpm();
         if (k->is<IR::Mask>()) {
             auto km = k->to<IR::Mask>();
-            auto value = convertSimpleKeyExpression(km->left, keyWidth);
+            auto value = convertSimpleKeyExpression(km->left, keyWidth, typeMap);
             if (value == boost::none) return;
             protoLpm->set_value(*value);
             auto trailing_zeros = [](unsigned long n) { return n ? __builtin_ctzl(n) : 0; };
@@ -1430,19 +1431,20 @@ class P4RuntimeEntriesConverter {
             protoLpm->set_value(*stringReprConstant(0, keyWidth));
             protoLpm->set_prefix_len(0);
         } else {
-            auto value = convertSimpleKeyExpression(k, keyWidth);
+            auto value = convertSimpleKeyExpression(k, keyWidth, typeMap);
             if (value == boost::none) return;
             protoLpm->set_value(*value);
             protoLpm->set_prefix_len(keyWidth);
         }
     }
 
-    void addTernary(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
+    void addTernary(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth,
+                    TypeMap* typeMap) const {
         auto protoTernary = protoMatch->mutable_ternary();
         if (k->is<IR::Mask>()) {
             auto km = k->to<IR::Mask>();
-            auto value = convertSimpleKeyExpression(km->left, keyWidth);
-            auto mask = convertSimpleKeyExpression(km->right, keyWidth);
+            auto value = convertSimpleKeyExpression(km->left, keyWidth, typeMap);
+            auto mask = convertSimpleKeyExpression(km->right, keyWidth, typeMap);
             if (value == boost::none || mask == boost::none) return;
             protoTernary->set_value(*value);
             protoTernary->set_mask(*mask);
@@ -1450,19 +1452,20 @@ class P4RuntimeEntriesConverter {
             protoTernary->set_value(*stringReprConstant(0, keyWidth));
             protoTernary->set_mask(*stringReprConstant(0, keyWidth));
         } else {
-            auto value = convertSimpleKeyExpression(k, keyWidth);
-            if (value == boost::none) return;
+          auto value = convertSimpleKeyExpression(k, keyWidth, typeMap);
+          if (value == boost::none) { return; }
             protoTernary->set_value(*value);
             protoTernary->set_mask(*stringReprConstant(Util::mask(keyWidth), keyWidth));
         }
     }
 
-    void addRange(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
+    void addRange(p4v1::FieldMatch* protoMatch, const IR::Expression* k,
+                  int keyWidth, TypeMap* typeMap) const {
         auto protoRange = protoMatch->mutable_range();
         if (k->is<IR::Range>()) {
             auto kr = k->to<IR::Range>();
-            auto start = convertSimpleKeyExpression(kr->left, keyWidth);
-            auto end = convertSimpleKeyExpression(kr->right, keyWidth);
+            auto start = convertSimpleKeyExpression(kr->left, keyWidth, typeMap);
+            auto end = convertSimpleKeyExpression(kr->right, keyWidth, typeMap);
             if (start == boost::none || end == boost::none) return;
             protoRange->set_low(*start);
             protoRange->set_high(*end);
@@ -1470,7 +1473,7 @@ class P4RuntimeEntriesConverter {
             protoRange->set_low(*stringReprConstant(0, keyWidth));
             protoRange->set_high(*stringReprConstant((1 << keyWidth)-1, keyWidth));
         } else {
-            auto value = convertSimpleKeyExpression(k, keyWidth);
+            auto value = convertSimpleKeyExpression(k, keyWidth, typeMap);
             if (value == boost::none) return;
             protoRange->set_low(*value);
             protoRange->set_high(*value);

@@ -126,11 +126,13 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
         if (ann != nullptr) {
             orig_type = false;
             uri = ann->expr[0]->to<IR::StringLiteral>();
-            ::error("P4runtime annotation does not have uri: %1%",
-                    type);
+            if (!uri)
+                ::error("P4runtime annotation does not have uri: %1%",
+                        type);
             sdnB = ann->expr[1]->to<IR::Constant>();
-            ::error("P4runtime annotation does not have sdn: %1%",
-                    type);
+            if (!sdnB)
+                ::error("P4runtime annotation does not have sdn: %1%",
+                        type);
         }
 
         auto name = std::string(type->controlPlaneName());
