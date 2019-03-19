@@ -1,0 +1,76 @@
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33614349
+      match {
+        field_id: 1
+        exact {
+          value: "\001"
+        }
+      }
+      action {
+        action {
+          action_id: 16832985
+        }
+      }
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33614349
+      match {
+        field_id: 1
+        exact {
+          value: "\002"
+        }
+      }
+      action {
+        action {
+          action_id: 16813446
+        }
+      }
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33614349
+      match {
+        field_id: 1
+        exact {
+          value: "\003"
+        }
+      }
+      action {
+        action {
+          action_id: 16838633
+        }
+      }
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33614349
+      match {
+        field_id: 1
+        exact {
+          value: "\004"
+        }
+      }
+      action {
+        action {
+          action_id: 16783139
+        }
+      }
+    }
+  }
+}
