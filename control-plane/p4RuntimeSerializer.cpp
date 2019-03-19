@@ -705,8 +705,6 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
                   "Couldn't determine type for key element %1%", keyElement);
         type_name = getTypeName(matchFieldType, typeMap);
         int width = getTypeWidth(matchFieldType, typeMap);
-        if (width < 0)
-            return matchFields;
         matchFields.push_back(MatchField{*matchFieldName, *matchType,
                               matchTypeName, uint32_t(width),
                               keyElement->to<IR::IAnnotated>(), type_name});
@@ -1387,12 +1385,12 @@ class P4RuntimeEntriesConverter {
         } else if (k->is<IR::Member>()) {
              // A SerEnum is a member const entries are processed here.
              auto mem = k->to<IR::Member>();
+             auto se = mem->type->to<IR::Type_SerEnum>();
              auto ei = EnumInstance::resolve(mem, typeMap);
              if (!ei) return boost::none;
              if (auto sei = ei->to<SerEnumInstance>()) {
                  auto type = sei->value->to<IR::Constant>();
-                 auto se = mem->type->to<IR::Type_SerEnum>();
-                 auto w = se->width_bits();
+                 auto w = se->type->width_bits();
                  return stringRepr(type, w);
              }
              ::error("%1% invalid Member key expression", k);
