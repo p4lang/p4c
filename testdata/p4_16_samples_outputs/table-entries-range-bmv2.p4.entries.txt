@@ -1,0 +1,75 @@
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33595117
+      match {
+        field_id: 1
+        range {
+          low: "\001"
+          high: "\010"
+        }
+      }
+      action {
+        action {
+          action_id: 16837978
+          params {
+            param_id: 1
+            value: "\000\025"
+          }
+        }
+      }
+      priority: 1
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33595117
+      match {
+        field_id: 1
+        range {
+          low: "\006"
+          high: "\014"
+        }
+      }
+      action {
+        action {
+          action_id: 16837978
+          params {
+            param_id: 1
+            value: "\000\026"
+          }
+        }
+      }
+      priority: 2
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33595117
+      match {
+        field_id: 1
+        range {
+          low: "\000"
+          high: "\377"
+        }
+      }
+      action {
+        action {
+          action_id: 16837978
+          params {
+            param_id: 1
+            value: "\000\027"
+          }
+        }
+      }
+      priority: 3
+    }
+  }
+}

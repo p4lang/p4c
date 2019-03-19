@@ -198,7 +198,8 @@ def process_file(options, argv):
     ppfile = tmpdir + "/" + basename                  # after parsing
     referenceOutputs = ",".join(rename.keys())
     stderr = tmpdir + "/" + basename + "-stderr"
-    p4runtimefile = tmpdir + "/" + basename + ".p4info.txt"
+    p4runtimeFile = tmpdir + "/" + basename + ".p4info.txt"
+    p4runtimeEntriesFile = tmpdir + "/" + basename + ".entries.txt"
 
     # Create the `json_outputs` directory if it doesn't already exist. There's a
     # race here since multiple tests may run this code in parallel, so we can't
@@ -234,7 +235,8 @@ def process_file(options, argv):
     if arch is not None:
         args.extend(["--arch", arch])
         if options.generateP4Runtime:
-            args.extend(["--p4runtime-files", p4runtimefile])
+            args.extend(["--p4runtime-files", p4runtimeFile])
+            args.extend(["--p4runtime-entries-files", p4runtimeEntriesFile])
 
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
         args.extend(["--std", "p4-14"]);

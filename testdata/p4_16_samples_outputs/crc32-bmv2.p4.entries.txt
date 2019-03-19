@@ -1,0 +1,114 @@
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33563863
+      match {
+        field_id: 1
+        exact {
+          value: "+"
+        }
+      }
+      action {
+        action {
+          action_id: 16789700
+        }
+      }
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33563863
+      match {
+        field_id: 1
+        exact {
+          value: "-"
+        }
+      }
+      action {
+        action {
+          action_id: 16838158
+        }
+      }
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33563863
+      match {
+        field_id: 1
+        exact {
+          value: "&"
+        }
+      }
+      action {
+        action {
+          action_id: 16807127
+        }
+      }
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33563863
+      match {
+        field_id: 1
+        exact {
+          value: "|"
+        }
+      }
+      action {
+        action {
+          action_id: 16815851
+        }
+      }
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33563863
+      match {
+        field_id: 1
+        exact {
+          value: "^"
+        }
+      }
+      action {
+        action {
+          action_id: 16797152
+        }
+      }
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33563863
+      match {
+        field_id: 1
+        exact {
+          value: ">"
+        }
+      }
+      action {
+        action {
+          action_id: 16805060
+        }
+      }
+    }
+  }
+}
