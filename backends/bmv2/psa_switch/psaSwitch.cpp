@@ -121,7 +121,7 @@ void PsaProgramStructure::createHeaders(ConversionContext* ctxt) {
     }
     for (auto kv : metadata) {
         auto type = kv.second->type->to<IR::Type_StructLike>();
-        ctxt->json->add_header(type->controlPlaneName(), kv.second->name);
+        ctxt->json->add_metadata(type->controlPlaneName(), kv.second->name);
     }
     /* TODO */
     // for (auto kv : header_stacks) {
@@ -372,6 +372,16 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
     }
 }
 
+bool InspectPsaProgram::isStandardMetadata(cstring ptName) {
+    return (!strcmp(ptName, "psa_ingress_parser_input_metadata_t") ||
+        !strcmp(ptName, "psa_egress_parser_input_metadata_t") ||
+        !strcmp(ptName, "psa_ingress_input_metadata_t") ||
+        !strcmp(ptName, "psa_ingress_output_metadata_t") ||
+        !strcmp(ptName, "psa_egress_input_metadata_t") ||
+        !strcmp(ptName, "psa_egress_deparser_input_metadata_t") ||
+        !strcmp(ptName, "psa_egress_output_metadata_t"));
+}
+
 // This visitor only visits the parameter in the statement from architecture.
 bool InspectPsaProgram::preorder(const IR::Parameter* param) {
     auto ft = typeMap->getType(param->getNode(), true);
@@ -380,6 +390,14 @@ bool InspectPsaProgram::preorder(const IR::Parameter* param) {
     if (!ft->is<IR::Type_StructLike>())
         return false;
     auto st = ft->to<IR::Type_StructLike>();
+    // check if it is psa specific standard metadata
+    cstring ptName = param->type->toString();
+    if (isStandardMetadata(ptName)) {
+      addHeaderType(st);
+      // remove _t from type name
+      cstring headerName = ptName.exceptLast(2);
+      addHeaderInstance(st, headerName);
+    }
     // parameter must be a type that we have not seen before
     if (pinfo->hasVisited(st))
         return false;

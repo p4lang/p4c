@@ -19,20 +19,21 @@ limitations under the License.
 
 namespace P4 {
 
-void HeaderTypeReplacement::flatten(const P4::TypeMap* typeMap,
-                                    cstring prefix,
-                                    const IR::Type* type,
-                                    IR::IndexedVector<IR::StructField> *fields) {
-    if (auto st = type->to<IR::Type_Struct>()) {
+void FindHeaderTypesToReplace::HeaderTypeReplacement::flatten(cstring prefix,
+        const IR::Type* type, const IR::Annotations* annos,
+        IR::IndexedVector<IR::StructField> *fields,
+        AnnotationSelectionPolicy *policy) {
+    if (auto st = type->to<IR::Type_StructLike>()) {
+        std::function<bool(const IR::Annotation *)> selector =
+                [&policy](const IR::Annotation *annot) {
+                    if (!policy)
+                        return false;
+                    return policy->keep(annot);
+                };
+        auto annotations = st->annotations->where(selector);
         for (auto f : st->fields) {
             auto ft = typeMap->getType(f, true);
-            flatten(typeMap, prefix + "." + f->name, ft, fields);
-        }
-        return;
-    } else if (auto st = type->to<IR::Type_Header>()) {
-        for (auto f : st->fields) {
-            auto ft = typeMap->getType(f, true);
-            flatten(typeMap, prefix + "." + f->name, ft, fields);
+            flatten(prefix + "." + f->name, ft, annotations, fields, policy);
         }
         return;
     }
@@ -40,37 +41,31 @@ void HeaderTypeReplacement::flatten(const P4::TypeMap* typeMap,
     cstring fieldName = prefix.replace(".", "_") +
                         cstring::to_cstring(fieldNameRemap.size());
     fieldNameRemap.emplace(prefix, fieldName);
-#if 0  // TODO once behavioral model is fixed.
-    const IR::Annotations* annos = IR::Annotations::empty;
-    auto ann = annos->addAnnotation(IR::Annotation::nameAnnotation,
-                                    new IR::StringLiteral(originalName));
-#endif
-    fields->push_back(new IR::StructField(IR::ID(fieldName), /* ann, */ type->getP4Type()));
-    LOG3("FH Flatten: " << type << " | " << prefix);
+    fields->push_back(new IR::StructField(IR::ID(fieldName), annos, type->getP4Type()));
+    LOG3("Flatten: " << type << " | " << prefix);
 }
 
-HeaderTypeReplacement::HeaderTypeReplacement(
-    const P4::TypeMap* typeMap, const IR::Type_Header* type) {
+FindHeaderTypesToReplace::HeaderTypeReplacement::HeaderTypeReplacement(
+    const P4::TypeMap* typeMap, const IR::Type_Header* type, AnnotationSelectionPolicy *policy) :
+    typeMap(typeMap) {
     auto vec = new IR::IndexedVector<IR::StructField>();
-    flatten(typeMap, "", type, vec);
+    flatten("", type, IR::Annotations::empty, vec, policy);
     replacementType = new IR::Type_Header(type->name, IR::Annotations::empty, *vec);
 }
 
-void NestedHeaderMap::createReplacement(const IR::Type_Header* type) {
-    auto repl = ::get(replacement, type->name);
-    if (repl != nullptr)
+void FindHeaderTypesToReplace::createReplacement(const IR::Type_Header* type,
+        AnnotationSelectionPolicy *policy) {
+    if (replacement.count(type->name))
         return;
-    repl = new HeaderTypeReplacement(typeMap, type);
-    LOG3("FH Replacement for " << type << " is " << repl);
-    replacement.emplace(type->name, repl);
+    replacement.emplace(type->name, new HeaderTypeReplacement(typeMap, type, policy));
 }
 
 bool FindHeaderTypesToReplace::preorder(const IR::Type_Header* type) {
     // check if header has structs in it and create flat replacement if it does
     for (auto f : type->fields) {
-        auto ft = map->typeMap->getType(f, true);
+        auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_Struct>()) {
-            map->createReplacement(type);
+            createReplacement(type, policy);
             break;
         }
     }
@@ -80,7 +75,7 @@ bool FindHeaderTypesToReplace::preorder(const IR::Type_Header* type) {
 /////////////////////////////////
 
 const IR::Node* ReplaceHeaders::preorder(IR::P4Program* program) {
-    if (replacementMap->empty()) {
+    if (findHeaderTypesToReplace->empty()) {
         // nothing to do
         prune();
     }
@@ -88,42 +83,40 @@ const IR::Node* ReplaceHeaders::preorder(IR::P4Program* program) {
 }
 
 const IR::Node* ReplaceHeaders::postorder(IR::Type_Header* type) {
-    auto canon = replacementMap->typeMap->getTypeType(getOriginal(), true);
+    auto canon = typeMap->getTypeType(getOriginal(), true);
     auto name = canon->to<IR::Type_Header>()->name;
-    auto repl = replacementMap->getReplacement(name);
-    if (repl != nullptr)
+    auto repl = findHeaderTypesToReplace->getReplacement(name);
+    if (repl != nullptr) {
+        LOG3("Replace " << type << " with " << repl->replacementType);
         return repl->replacementType;
-    LOG3("FH NO REPLACEMENT FOUND FOR " << type);
+    }
     return type;
 }
 
 const IR::Node* ReplaceHeaders::postorder(IR::Member* expression) {
     // Find out if this applies to one of the parameters that are being replaced.
-    LOG3("FH Starting replacing " << expression);
     const IR::Expression* e = expression;
     cstring prefix = "";
     const IR::Type_Header* h = nullptr;
     while (auto mem = e->to<IR::Member>()) {
         e = mem->expr;
         prefix = cstring(".") + mem->member + prefix;
-        auto type = replacementMap->typeMap->getType(e, true);
+        auto type = typeMap->getType(e, true);
         if ((h = type->to<IR::Type_Header>())) break;
     }
     if (h == nullptr)
         return expression;
 
-    auto repl = replacementMap->getReplacement(h->name);
+    auto repl = findHeaderTypesToReplace->getReplacement(h->name);
     if (repl == nullptr) {
-        LOG3("FH Replacement not found for header " << h);
         return expression;
     }
-    LOG3("FH Found replacement type " << h);
     // At this point we know that e is an expression of the form
     // param.field1.etc.hdr, where hdr needs to be replaced.
     auto newFieldName = ::get(repl->fieldNameRemap, prefix);
     const IR::Expression* result;
     if (newFieldName.isNullOrEmpty()) {
-        auto type = replacementMap->typeMap->getType(getOriginal(), true);
+        auto type = typeMap->getType(getOriginal(), true);
         // This could be, for example, a method like setValid.
         if (!type->is<IR::Type_Struct>())
             return expression;
@@ -131,11 +124,11 @@ const IR::Node* ReplaceHeaders::postorder(IR::Member* expression) {
             // We only want to process the outermost Member
             return expression;
         BUG_CHECK(!newFieldName.isNullOrEmpty(),
-                  "FH cannot find replacement for %s in type %s", prefix, h);
+                  "cannot find replacement for %s in type %s", prefix, h);
     }
 
     result = new IR::Member(e, newFieldName);
-    LOG3("FH Replacing " << expression << " with " << result);
+    LOG3("Replacing " << expression << " with " << result);
     return result;
 }
 

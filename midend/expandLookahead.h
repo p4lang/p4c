@@ -34,16 +34,25 @@ class DoExpandLookahead : public Transform {
     P4::TypeMap* typeMap;
     IR::IndexedVector<IR::Declaration> newDecls;
 
+    struct ExpansionInfo {
+        const IR::Statement* statement;
+        unsigned width;
+        const IR::Type* origType;
+        const IR::PathExpression* tmp;  // temporary used for result
+    };
+
     const IR::Expression* expand(
         const IR::PathExpression* base, const IR::Type* type, unsigned* offset);
     void expandSetValid(const IR::Expression* base, const IR::Type* type,
                         IR::IndexedVector<IR::StatOrDecl>* output);
+    ExpansionInfo* convertLookahead(const IR::MethodCallExpression* expression);
 
  public:
     DoExpandLookahead(ReferenceMap* refMap, TypeMap* typeMap) :
             refMap(refMap), typeMap(typeMap) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoExpandLookahead"); }
     const IR::Node* postorder(IR::AssignmentStatement* statement) override;
+    const IR::Node* postorder(IR::MethodCallStatement* statement) override;
     const IR::Node* preorder(IR::P4Control* control) override
     { prune(); return control; }
     const IR::Node* preorder(IR::P4Parser* parser) override
