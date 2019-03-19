@@ -769,7 +769,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
 };
 
 /// Implements @ref P4RuntimeArchHandlerIface for the v1model architecture. The
-/// overridden metods will be called by the @P4RuntimeSerializer to collect and
+/// overridden methods will be called by the @P4RuntimeSerializer to collect and
 /// serialize v1model-specific symbols which are exposed to the control-plane.
 class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch::V1MODEL> {
  public:
@@ -889,7 +889,7 @@ V1ModelArchHandlerBuilder::operator()(
 }
 
 /// Implements @ref P4RuntimeArchHandlerIface for the PSA architecture. The
-/// overridden metods will be called by the @P4RuntimeSerializer to collect and
+/// overridden methods will be called by the @P4RuntimeSerializer to collect and
 /// serialize PSA-specific symbols which are exposed to the control-plane.
 class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PSA> {
  public:

@@ -23,65 +23,80 @@ limitations under the License.
 
 namespace P4 {
 
-struct HeaderTypeReplacement : public IHasDbPrint {
-    HeaderTypeReplacement(const P4::TypeMap* typeMap, const IR::Type_Header* type);
-
-    // Maps nested field names to final field names.
-    // In our example this could be:
-    // .t.s.a -> _t_s_a0;
-    // .t.s.b -> _t_s_b1;
-    // .t.y -> _t_y2;
-    // .x -> _x3;
-    std::map<cstring, cstring> fieldNameRemap;
-    // Holds a new flat type
-    // struct M {
-    //    bit _t_s_a0;
-    //    bool _t_s_b1;
-    //    bit<6> _t_y2;
-    //    bit<3> _x3;
-    // }
-    const IR::Type* replacementType;
-    virtual void dbprint(std::ostream& out) const {
-        out << replacementType;
-    }
-
-    // Helper for constructor
-    void flatten(const P4::TypeMap* typeMap,
-                 cstring prefix,
-                 const IR::Type* type,
-                 IR::IndexedVector<IR::StructField> *fields);
-};
-
 /**
- * Maintains a map between an original header type and its
- * replacement.
+ * Policy to select which annotations of the nested struct to attach
+ * to the struct fields after the nest struct is flattened.
  */
-struct NestedHeaderMap {
-    P4::ReferenceMap* refMap;
-    P4::TypeMap* typeMap;
+class AnnotationSelectionPolicy {
+ public:
+    virtual ~AnnotationSelectionPolicy() {}
 
-    ordered_map<cstring, HeaderTypeReplacement*> replacement;
-
-    NestedHeaderMap(P4::ReferenceMap* refMap, P4::TypeMap* typeMap):
-            refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
-    void createReplacement(const IR::Type_Header* type);
-    HeaderTypeReplacement* getReplacement(const cstring name) const
-    { return ::get(replacement, name); }
-    bool empty() const { return replacement.empty(); }
+    /**
+     * Call for each nested struct to check if the annotation of the nested
+     * struct should be kept on its fields.
+     *
+     * @return
+     *  true if the annotation should be kept on the field.
+     *  false if the annotation should be discarded.
+     */
+    virtual bool keep(const IR::Annotation*) {
+        return false;
+    }
 };
 
 /**
 Find the types to replace and insert them in the nested struct map.
  */
 class FindHeaderTypesToReplace : public Inspector {
-    NestedHeaderMap* map;
+    P4::TypeMap* typeMap;
+    AnnotationSelectionPolicy *policy;
+
+    struct HeaderTypeReplacement : public IHasDbPrint {
+        HeaderTypeReplacement(const P4::TypeMap* typeMap, const IR::Type_Header* type,
+                AnnotationSelectionPolicy *policy);
+        const P4::TypeMap *typeMap;
+
+        // Maps nested field names to final field names.
+        // In our example this could be:
+        // .t.s.a -> _t_s_a0;
+        // .t.s.b -> _t_s_b1;
+        // .t.y -> _t_y2;
+        // .x -> _x3;
+        std::map<cstring, cstring> fieldNameRemap;
+        // Holds a new flat type
+        // struct M {
+        //    bit _t_s_a0;
+        //    bool _t_s_b1;
+        //    bit<6> _t_y2;
+        //    bit<3> _x3;
+        // }
+        const IR::Type* replacementType;
+        virtual void dbprint(std::ostream& out) const {
+            out << replacementType;
+        }
+
+        // Helper for constructor
+        void flatten(cstring prefix,
+                     const IR::Type* type,
+                     const IR::Annotations* annos,
+                     IR::IndexedVector<IR::StructField> *fields,
+                     AnnotationSelectionPolicy *policy);
+    };
+
+    ordered_map<cstring, HeaderTypeReplacement*> replacement;
+
  public:
-    explicit FindHeaderTypesToReplace(NestedHeaderMap* map): map(map) {
+    explicit FindHeaderTypesToReplace(P4::TypeMap *typeMap,
+            AnnotationSelectionPolicy *policy):
+        typeMap(typeMap), policy(policy) {
         setName("FindHeaderTypesToReplace");
-        CHECK_NULL(map);
+        CHECK_NULL(typeMap);
     }
     bool preorder(const IR::Type_Header* type) override;
+    void createReplacement(const IR::Type_Header* type, AnnotationSelectionPolicy *policy);
+    HeaderTypeReplacement* getReplacement(const cstring name) const {
+        return ::get(replacement, name); }
+    bool empty() const { return replacement.empty(); }
 };
 
 /**
@@ -156,11 +171,15 @@ struct local_metadata_t {
 	
 */
 class ReplaceHeaders : public Transform {
-    NestedHeaderMap* replacementMap;
+    P4::TypeMap *typeMap;
+    FindHeaderTypesToReplace* findHeaderTypesToReplace;
 
  public:
-    explicit ReplaceHeaders(NestedHeaderMap* sm): replacementMap(sm) {
-        CHECK_NULL(sm);
+    explicit ReplaceHeaders(P4::TypeMap *typeMap,
+                            FindHeaderTypesToReplace* findHeaderTypesToReplace):
+                            typeMap(typeMap),
+                            findHeaderTypesToReplace(findHeaderTypesToReplace) {
+        CHECK_NULL(typeMap); CHECK_NULL(findHeaderTypesToReplace);
         setName("ReplaceHeaders");
     }
 
@@ -171,11 +190,12 @@ class ReplaceHeaders : public Transform {
 
 class FlattenHeaders final : public PassManager {
  public:
-    FlattenHeaders(ReferenceMap* refMap, TypeMap* typeMap) {
-        auto sm = new NestedHeaderMap(refMap, typeMap);
+    FlattenHeaders(ReferenceMap* refMap, TypeMap* typeMap,
+            AnnotationSelectionPolicy *policy = nullptr) {
+        auto findHeadersToReplace = new FindHeaderTypesToReplace(typeMap, policy);
         passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new FindHeaderTypesToReplace(sm));
-        passes.push_back(new ReplaceHeaders(sm));
+        passes.push_back(findHeadersToReplace);
+        passes.push_back(new ReplaceHeaders(typeMap, findHeadersToReplace));
         passes.push_back(new ClearTypeMap(typeMap));
         setName("FlattenHeaders");
     }

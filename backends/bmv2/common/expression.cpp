@@ -107,12 +107,11 @@ void ExpressionConverter::postorder(const IR::BoolLiteral* expression)  {
 
 void ExpressionConverter::postorder(const IR::MethodCallExpression* expression)  {
     auto instance = P4::MethodInstance::resolve(expression, refMap, typeMap);
-    if (instance->is<P4::ExternMethod>()) {
-        auto em = instance->to<P4::ExternMethod>();
+    if (auto em = instance->to<P4::ExternMethod>()) {
         if (em->originalExternType->name == corelib.packetIn.name &&
             em->method->name == corelib.packetIn.lookahead.name) {
-            BUG_CHECK(expression->typeArguments->size() == 1,
-                      "Expected 1 type parameter for %1%", em->method);
+            if (expression->typeArguments->size() != 1)
+                ::error(ErrorType::ERR_INVALID, "Expected 1 type parameter for %1%", em->method);
             auto targ = expression->typeArguments->at(0);
             auto typearg = typeMap->getTypeType(targ, true);
             int width = typearg->width_bits();
@@ -125,8 +124,7 @@ void ExpressionConverter::postorder(const IR::MethodCallExpression* expression) 
             mapExpression(expression, j);
             return;
         }
-    } else if (instance->is<P4::BuiltInMethod>()) {
-        auto bim = instance->to<P4::BuiltInMethod>();
+    } else if (auto bim = instance->to<P4::BuiltInMethod>()) {
         if (bim->name == IR::Type_Header::isValid) {
             auto type = typeMap->getType(bim->appliedTo, true);
             auto result = new Util::JsonObject();

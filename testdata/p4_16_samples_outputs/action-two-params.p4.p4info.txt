@@ -1,0 +1,51 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33567740
+    name: "MyIngress.ingress_tbl"
+    alias: "ingress_tbl"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dstAddr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16780658
+  }
+  action_refs {
+    id: 16805608
+  }
+  const_default_action_id: 16805608
+  size: 1024
+  is_const_table: true
+}
+actions {
+  preamble {
+    id: 16805608
+    name: "MyIngress.drop"
+    alias: "drop"
+  }
+}
+actions {
+  preamble {
+    id: 16780658
+    name: "MyIngress.actTbl"
+    alias: "actTbl"
+  }
+  params {
+    id: 1
+    name: "id"
+    bitwidth: 24
+  }
+  params {
+    id: 2
+    name: "ip"
+    bitwidth: 32
+  }
+}
+type_info {
+}
