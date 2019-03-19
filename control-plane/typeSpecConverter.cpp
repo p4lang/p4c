@@ -115,8 +115,8 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
     return false;
 }
 
-// This function is invoked if psa.p4 has a Newtype. The function
-// is not invoked for user-defined NewType.
+// This function is invoked if an architecure's model .p4 file has a Newtype.
+// The function is not invoked for user-defined NewType.
 bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
     if (p4RtTypeInfo) {
         bool orig_type = true;
@@ -126,11 +126,11 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
         if (ann != nullptr) {
             orig_type = false;
             uri = ann->expr[0]->to<IR::StringLiteral>();
-            BUG_CHECK(uri, "P4runtime annotation does not have uri: %1%",
-                      type->getP4Type());
+            ::error("P4runtime annotation does not have uri: %1%",
+                    type);
             sdnB = ann->expr[1]->to<IR::Constant>();
-            BUG_CHECK(sdnB, "P4runtime annotation does not have sdn: %1%",
-                      type->getP4Type());
+            ::error("P4runtime annotation does not have sdn: %1%",
+                    type);
         }
 
         auto name = std::string(type->controlPlaneName());

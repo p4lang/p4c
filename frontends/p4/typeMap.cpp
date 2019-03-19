@@ -304,8 +304,7 @@ const IR::Type* TypeMap::getCanonical(const IR::Type* type) {
 }
 
 int TypeMap::minWidthBits(const IR::Type* type, const IR::Node* errorPosition) {
-    if (type == nullptr)
-        return -2;
+    CHECK_NULL(type);
     auto t = getTypeType(type, true);
     if (auto tb = t->to<IR::Type_Bits>()) {
         return tb->width_bits();
@@ -335,10 +334,8 @@ int TypeMap::minWidthBits(const IR::Type* type, const IR::Node* errorPosition) {
         return 0;
     }
 
-    if (errorPosition)
-        ::error("%1%: width not well-defined", errorPosition);
-    else
-        ::error("width not well-defined");
+    CHECK_NULL(errorPosition);
+    ::error("%1%: width not well-defined", errorPosition);
     return -1;
 }
 

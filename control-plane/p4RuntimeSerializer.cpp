@@ -197,7 +197,7 @@ struct MatchField {
     const uint32_t bitwidth;  // How wide this field is.
     const IR::IAnnotated* annotations;  // If non-null, any annotations applied
                                         // to this field.
-    const cstring type_name;  // Optional field, used if field is user-defined type.
+    const cstring type_name;  // Optional field when field is Type_Newtype.
 };
 
 struct ActionRef {
@@ -657,13 +657,13 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
 }
 
 /*
- * The function returns a cstring for use as type_name for any nested type.
+ * The function returns a cstring for use as type_name for any daisy-chained
+ * Type_Newtype.
 */
 static cstring
 getTypeName(const IR::Type* type, TypeMap* typeMap) {
     cstring type_name = nullptr;
-    if (type == nullptr)
-        return type_name;
+    CHECK_NULL(type);
 
     // p4runtime uses bit slices which are Type_Bits and cause
     // a BUG in typeMap.cpp if getTypeType() is used on such a
@@ -672,10 +672,10 @@ getTypeName(const IR::Type* type, TypeMap* typeMap) {
         return type_name;
 
     auto t = typeMap->getTypeType(type, true);
-    if (t->is<IR::Type_Newtype>()) {
-        LOG3("getTypeName: " << type->getP4Type() << " " << t->getP4Type());
-        auto newt = t->to<IR::Type_Newtype>();
+    if (auto newt = t->to<IR::Type_Newtype>()) {
         return newt->name;
+    } else {
+        return type_name;
     }
 }
 
@@ -824,12 +824,10 @@ class P4RuntimeAnalyzer {
             if (w < 0)
                 return;
             param->set_bitwidth(w);
-            if (paramType->is<IR::Type_Newtype>()) {
-                cstring type_name = getTypeName(paramType, typeMap);
-                if (type_name) {
-                    auto namedType = param->mutable_type_name();
-                    namedType->set_name(type_name);
-                }
+            cstring type_name = getTypeName(paramType, typeMap);
+            if (type_name) {
+                auto namedType = param->mutable_type_name();
+                namedType->set_name(type_name);
             }
         }
     }
