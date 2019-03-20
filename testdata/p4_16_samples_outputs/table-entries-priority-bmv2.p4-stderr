@@ -1,0 +1,12 @@
+table-entries-priority-bmv2.p4(66): [--Wwarn=mismatch] warning: P4Runtime requires that Ternary matches have masked-off bits set to 0, updating value 4369 to conform to the P4Runtime specification
+            0x1111 &&& 0xF : a_with_control_params(1) @priority(3);
+            ^^^^^^
+table-entries-priority-bmv2.p4(66): [--Wwarn=deprecated] warning: The @priority annotation on Entry is not part of the P4 specification, nor of the P4Runtime specification, and will be ignored
+            0x1111 &&& 0xF : a_with_control_params(1) @priority(3);
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+table-entries-priority-bmv2.p4(68): [--Wwarn=mismatch] warning: P4Runtime requires that Ternary matches have masked-off bits set to 0, updating value 4481 to conform to the P4Runtime specification
+            0x1181 &&& 0xF00F : a_with_control_params(3) @priority(1);
+            ^^^^^^
+table-entries-priority-bmv2.p4(68): [--Wwarn=deprecated] warning: The @priority annotation on Entry is not part of the P4 specification, nor of the P4Runtime specification, and will be ignored
+            0x1181 &&& 0xF00F : a_with_control_params(3) @priority(1);
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

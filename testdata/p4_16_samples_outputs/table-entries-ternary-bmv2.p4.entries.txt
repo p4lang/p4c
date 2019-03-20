@@ -6,7 +6,7 @@ updates {
       match {
         field_id: 1
         ternary {
-          value: "\021\021"
+          value: "\000\001"
           mask: "\000\017"
         }
       }
@@ -19,7 +19,7 @@ updates {
           }
         }
       }
-      priority: 1
+      priority: 4
     }
   }
 }
@@ -44,31 +44,6 @@ updates {
           }
         }
       }
-      priority: 2
-    }
-  }
-}
-updates {
-  type: INSERT
-  entity {
-    table_entry {
-      table_id: 33556639
-      match {
-        field_id: 1
-        ternary {
-          value: "\021\021"
-          mask: "\360\000"
-        }
-      }
-      action {
-        action {
-          action_id: 16837978
-          params {
-            param_id: 1
-            value: "\000\003"
-          }
-        }
-      }
       priority: 3
     }
   }
@@ -81,10 +56,28 @@ updates {
       match {
         field_id: 1
         ternary {
-          value: "\000\000"
-          mask: "\000\000"
+          value: "\020\000"
+          mask: "\360\000"
         }
       }
+      action {
+        action {
+          action_id: 16837978
+          params {
+            param_id: 1
+            value: "\000\003"
+          }
+        }
+      }
+      priority: 2
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33556639
       action {
         action {
           action_id: 16837978
@@ -94,7 +87,7 @@ updates {
           }
         }
       }
-      priority: 4
+      priority: 1
     }
   }
 }

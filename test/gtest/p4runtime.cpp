@@ -840,7 +840,7 @@ TEST_F(P4Runtime, StaticTableEntries) {
                 const entries = {
                     (0x01, 0x1111 &&& 0xF   ) : a_with_control_params(1);
                     (0x02, 0x1181           ) : a_with_control_params(2);
-                    (0x03, 0x1111 &&& 0xF000) : a_with_control_params(3);
+                    (0x03, 0x1000 &&& 0xF000) : a_with_control_params(3);
                     (0x04, _                ) : a_with_control_params(4);
                 }
             }
@@ -863,7 +863,9 @@ TEST_F(P4Runtime, StaticTableEntries) {
     )"));
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::diagnosticCount());
+    // we expect one warning for 0x1111 &&& 0xF (the match will be re-written
+    // as 0x0001 &&& 0xF to conform to the P4Runtime spec)
+    EXPECT_EQ(1u, ::diagnosticCount());
 
     auto entries = test->entries;
     const auto& updates = entries->updates();
@@ -879,24 +881,26 @@ TEST_F(P4Runtime, StaticTableEntries) {
         auto action = findAction(*test, "ingress.a_with_control_params");
         ASSERT_TRUE(action != nullptr);
 
-        int priority = 0;
+        int priority = 1000;
         auto check_entry = [&](const p4v1::Update& update,
                                const std::string& exact_v,
-                               const std::string& ternary_v,
-                               const std::string& ternary_mask,
+                               const boost::optional<std::string>& ternary_v,
+                               const boost::optional<std::string>& ternary_mask,
                                const std::string& param_v) {
             EXPECT_EQ(p4v1::Update::INSERT, update.type());
             const auto& protoEntry = update.entity().table_entry();
             EXPECT_EQ(table->preamble().id(), protoEntry.table_id());
 
-            ASSERT_EQ(2, protoEntry.match().size());
+            ASSERT_EQ((ternary_v == boost::none) ? 1 : 2, protoEntry.match().size());
             const auto& mfA = protoEntry.match().Get(0);
             EXPECT_EQ(hfAId, mfA.field_id());
             EXPECT_EQ(exact_v, mfA.exact().value());
-            const auto& mfB = protoEntry.match().Get(1);
-            EXPECT_EQ(hfBId, mfB.field_id());
-            EXPECT_EQ(ternary_v, mfB.ternary().value());
-            EXPECT_EQ(ternary_mask, mfB.ternary().mask());
+            if (ternary_v != boost::none) {
+              const auto& mfB = protoEntry.match().Get(1);
+              EXPECT_EQ(hfBId, mfB.field_id());
+              EXPECT_EQ(*ternary_v, mfB.ternary().value());
+              EXPECT_EQ(*ternary_mask, mfB.ternary().mask());
+            }
 
             const auto& protoAction = protoEntry.action().action();
             EXPECT_EQ(action->preamble().id(), protoAction.action_id());
@@ -905,20 +909,20 @@ TEST_F(P4Runtime, StaticTableEntries) {
             EXPECT_EQ(xId, param.param_id());
             EXPECT_EQ(param_v, param.value());
 
-            // increasing numerical priority, i.e. decreasing logical priority
-            EXPECT_LT(priority, protoEntry.priority());
+            // decreasing priority
+            EXPECT_LT(protoEntry.priority(), priority);
             priority = protoEntry.priority();
         };
         // We assume that the entries are generated in the same order as they
         // appear in the P4 program
-        check_entry(updates.Get(0), "\x01", "\x11\x11", std::string("\x00\x0f", 2),
+        check_entry(updates.Get(0), "\x01", std::string("\x00\x01", 2), std::string("\x00\x0f", 2),
                     std::string("\x00\x01", 2));
-        check_entry(updates.Get(1), "\x02", "\x11\x81", "\xff\xff",
+        check_entry(updates.Get(1), "\x02", std::string("\x11\x81"), std::string("\xff\xff"),
                     std::string("\x00\x02", 2));
-        check_entry(updates.Get(2), "\x03", "\x11\x11", std::string("\xf0\x00", 2),
+        check_entry(updates.Get(2), "\x03", std::string("\x10\x00", 2), std::string("\xf0\x00", 2),
                     std::string("\x00\x03", 2));
-        check_entry(updates.Get(3), "\x04", std::string("\x00\x00", 2),
-                    std::string("\x00\x00", 2), std::string("\x00\x04", 2));
+        check_entry(updates.Get(3), "\x04", boost::none, boost::none,  // don't care match
+                    std::string("\x00\x04", 2));
     }
 
     {

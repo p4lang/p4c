@@ -19,7 +19,7 @@ updates {
           }
         }
       }
-      priority: 1
+      priority: 3
     }
   }
 }
@@ -53,13 +53,6 @@ updates {
   entity {
     table_entry {
       table_id: 33595117
-      match {
-        field_id: 1
-        range {
-          low: "\000"
-          high: "\377"
-        }
-      }
       action {
         action {
           action_id: 16837978
@@ -69,7 +62,7 @@ updates {
           }
         }
       }
-      priority: 3
+      priority: 1
     }
   }
 }

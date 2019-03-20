@@ -12,7 +12,7 @@ updates {
       match {
         field_id: 2
         ternary {
-          value: "\021\021"
+          value: "\000\001"
           mask: "\000\017"
         }
       }
@@ -25,7 +25,7 @@ updates {
           }
         }
       }
-      priority: 1
+      priority: 4
     }
   }
 }
@@ -56,7 +56,7 @@ updates {
           }
         }
       }
-      priority: 2
+      priority: 3
     }
   }
 }
@@ -74,7 +74,7 @@ updates {
       match {
         field_id: 2
         ternary {
-          value: "\021\021"
+          value: "\020\000"
           mask: "\360\000"
         }
       }
@@ -87,7 +87,7 @@ updates {
           }
         }
       }
-      priority: 3
+      priority: 2
     }
   }
 }
@@ -102,13 +102,6 @@ updates {
           value: "\004"
         }
       }
-      match {
-        field_id: 2
-        ternary {
-          value: "\000\000"
-          mask: "\000\000"
-        }
-      }
       action {
         action {
           action_id: 16837978
@@ -118,7 +111,7 @@ updates {
           }
         }
       }
-      priority: 4
+      priority: 1
     }
   }
 }
