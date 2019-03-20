@@ -905,8 +905,9 @@ typeParameterList
 
 typeArg
     : typeRef                     { $$ = $1; }
-    | nonTypeName                      { $$ = new IR::Type_Name(@1, new IR::Path(*$1)); }
+    | nonTypeName                 { $$ = new IR::Type_Name(@1, new IR::Path(*$1)); }
         // This is necessary because template arguments may introduce the return type
+    | VOID                        { $$ = IR::Type_Void::get(); }
     | "_"                         { $$ = new IR::Type_Dontcare(@1); }
     ;
 
@@ -918,6 +919,7 @@ typeArgumentList
 
 realTypeArg
     : typeRef                     { $$ = $1; }
+    | VOID                        { $$ = IR::Type_Void::get(); }
     | "_"                         { $$ = new IR::Type_Dontcare(@1); }
     ;
 
