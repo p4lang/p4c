@@ -76,15 +76,6 @@ using Helpers::setPreamble;
 
 static const p4rt_id_t INVALID_ID = p4configv1::P4Ids::UNSPECIFIED;
 
-// TODO(antonin): Here are the known issues:
-// - We don't currently distinguish between the case where the const default
-//   action has mutable params and the case where it doesn't.
-// - Locals are intentionally not exposed, but this prevents table match keys
-//   which involve complex expressions from working, because those expressions
-//   are desugared into a match against a local. This could be fixed just by
-//   exposing locals, but first we need to decide how it makes sense to expose
-//   this information to the control plane.
-
 /// @return true if @node has an @hidden annotation.
 static bool isHidden(const IR::Node* node) {
     return node->getAnnotation("hidden") != nullptr;
@@ -1210,7 +1201,7 @@ class P4RuntimeEntriesConverter {
         auto tableName = table->controlPlaneName();
         auto tableId = symbols.getId(P4RuntimeSymbolType::TABLE(), tableName);
 
-        int entryPriority = 1;
+        int entryPriority = entriesList->entries.size();
         auto needsPriority = tableNeedsPriority(table, refMap);
         for (auto e : entriesList->entries) {
             auto protoUpdate = entries->add_updates();
@@ -1220,13 +1211,21 @@ class P4RuntimeEntriesConverter {
             protoEntry->set_table_id(tableId);
             addMatchKey(protoEntry, table, e->getKeys(), refMap);
             addAction(protoEntry, e->getAction(), refMap);
-            // TODO(antonin): according to the P4 specification, "Entries in a
-            // table are matched in the program order, stopping at the first
-            // matching entry." Based on the definition of 'priority' in
-            // P4Runtime, we may need a different scheme to allocate priority
-            // values. For now this assumes that the entry with priority '1' has
-            // the highest priority.
-            if (needsPriority) protoEntry->set_priority(entryPriority++);
+            // According to the P4 specification, "Entries in a table are
+            // matched in the program order, stopping at the first matching
+            // entry." In P4Runtime, the lowest valid priority value is 1 and
+            // entries with a higher numerical priority value have higher
+            // priority. So we assign the first entry a priority of #entries and
+            // we decrement the priority by 1 for each entry. The last entry in
+            // the table will have priority 1.
+            if (needsPriority) protoEntry->set_priority(entryPriority--);
+
+            auto priorityAnnotation = e->getAnnotation("priority");
+            if (priorityAnnotation != nullptr) {
+                ::warning(ErrorType::WARN_DEPRECATED,
+                          "The @priority annotation on %1% is not part of the P4 specification, "
+                          "nor of the P4Runtime specification, and will be ignored", e);
+            }
         }
     }
 
@@ -1291,16 +1290,14 @@ class P4RuntimeEntriesConverter {
             auto keyWidth = tableKey->expression->type->width_bits();
             auto matchType = getKeyMatchType(tableKey, refMap);
 
-            auto protoMatch = protoEntry->add_match();
-            protoMatch->set_field_id(fieldId++);
             if (matchType == P4CoreLibrary::instance.exactMatch.name) {
-                addExact(protoMatch, k, keyWidth);
+                addExact(protoEntry, fieldId++, k, keyWidth);
             } else if (matchType == P4CoreLibrary::instance.lpmMatch.name) {
-                addLpm(protoMatch, k, keyWidth);
+                addLpm(protoEntry, fieldId++, k, keyWidth);
             } else if (matchType == P4CoreLibrary::instance.ternaryMatch.name) {
-                addTernary(protoMatch, k, keyWidth);
+                addTernary(protoEntry, fieldId++, k, keyWidth);
             } else if (matchType == P4V1::V1Model::instance.rangeMatchType.name) {
-                addRange(protoMatch, k, keyWidth);
+                addRange(protoEntry, fieldId++, k, keyWidth);
             } else {
                 if (!k->is<IR::DefaultExpression>())
                     ::error("%1%: match type not supported by P4Runtime serializer", matchType);
@@ -1324,78 +1321,134 @@ class P4RuntimeEntriesConverter {
         }
     }
 
-    void addExact(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
+    /// Convert a key expression to the mpz_class integer value if the
+    /// expression is simple (integer literal or boolean literal) or returns
+    /// boost::none otherwise.
+    boost::optional<mpz_class> simpleKeyExpressionValue(const IR::Expression* k) const {
+        if (k->is<IR::Constant>()) {
+            return k->to<IR::Constant>()->value;
+        } else if (k->is<IR::BoolLiteral>()) {
+            return static_cast<mpz_class>(k->to<IR::BoolLiteral>()->value ? 1 : 0);
+        } else {
+            ::error("%1% invalid key expression", k);
+            return boost::none;
+        }
+    }
+
+    void addExact(p4v1::TableEntry* protoEntry, int fieldId,
+                  const IR::Expression* k, int keyWidth) const {
+        auto protoMatch = protoEntry->add_match();
+        protoMatch->set_field_id(fieldId);
         auto protoExact = protoMatch->mutable_exact();
         auto value = convertSimpleKeyExpression(k, keyWidth);
         if (value == boost::none) return;
         protoExact->set_value(*value);
     }
 
-    void addLpm(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
-        auto protoLpm = protoMatch->mutable_lpm();
+    void addLpm(p4v1::TableEntry* protoEntry, int fieldId,
+                const IR::Expression* k, int keyWidth) const {
+        if (k->is<IR::DefaultExpression>())  // don't care, skip in P4Runtime message
+            return;
+        int prefixLen;
+        boost::optional<std::string> valueStr;
         if (k->is<IR::Mask>()) {
             auto km = k->to<IR::Mask>();
-            auto value = convertSimpleKeyExpression(km->left, keyWidth);
+            auto value = simpleKeyExpressionValue(km->left);
             if (value == boost::none) return;
-            protoLpm->set_value(*value);
-            auto trailing_zeros = [](unsigned long n) { return n ? __builtin_ctzl(n) : 0; };
-            auto count_ones = [](unsigned long n) { return n ? __builtin_popcountl(n) : 0;};
-            unsigned long mask = km->right->to<IR::Constant>()->value.get_ui();
+            auto trailing_zeros = [keyWidth](const mpz_class& n) -> int {
+                return (n == 0) ? keyWidth : mpz_scan1(n.get_mpz_t(), 0); };
+            auto count_ones = [](const mpz_class& n) -> int {
+                return mpz_popcount(n.get_mpz_t()); };
+            auto mask = km->right->to<IR::Constant>()->value;
             auto len = trailing_zeros(mask);
             if (len + count_ones(mask) != keyWidth) {  // any remaining 0s in the prefix?
                 ::error("%1% invalid mask for LPM key", k);
                 return;
             }
-            protoLpm->set_prefix_len(keyWidth - len);
-        } else if (k->is<IR::DefaultExpression>()) {
-            protoLpm->set_value(*stringReprConstant(0, keyWidth));
-            protoLpm->set_prefix_len(0);
+            if ((*value & mask) != *value) {
+                ::warning(ErrorType::WARN_MISMATCH,
+                          "P4Runtime requires that LPM matches have masked-off bits set to 0, "
+                          "updating value %1% to conform to the P4Runtime specification", km->left);
+                *value &= mask;
+            }
+            if (mask == 0)  // don't care
+                return;
+            prefixLen = keyWidth - len;
+            valueStr = stringReprConstant(*value, keyWidth);
         } else {
-            auto value = convertSimpleKeyExpression(k, keyWidth);
-            if (value == boost::none) return;
-            protoLpm->set_value(*value);
-            protoLpm->set_prefix_len(keyWidth);
+            prefixLen = keyWidth;
+            valueStr = convertSimpleKeyExpression(k, keyWidth);
         }
+        if (valueStr == boost::none) return;
+        auto protoMatch = protoEntry->add_match();
+        protoMatch->set_field_id(fieldId);
+        auto protoLpm = protoMatch->mutable_lpm();
+        protoLpm->set_value(*valueStr);
+        protoLpm->set_prefix_len(prefixLen);
     }
 
-    void addTernary(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
-        auto protoTernary = protoMatch->mutable_ternary();
+    void addTernary(p4v1::TableEntry* protoEntry, int fieldId,
+                    const IR::Expression* k, int keyWidth) const {
+        if (k->is<IR::DefaultExpression>())  // don't care, skip in P4Runtime message
+            return;
+        boost::optional<std::string> valueStr;
+        boost::optional<std::string> maskStr;
         if (k->is<IR::Mask>()) {
             auto km = k->to<IR::Mask>();
-            auto value = convertSimpleKeyExpression(km->left, keyWidth);
-            auto mask = convertSimpleKeyExpression(km->right, keyWidth);
+            auto value = simpleKeyExpressionValue(km->left);
+            auto mask = simpleKeyExpressionValue(km->right);
             if (value == boost::none || mask == boost::none) return;
-            protoTernary->set_value(*value);
-            protoTernary->set_mask(*mask);
-        } else if (k->is<IR::DefaultExpression>()) {
-            protoTernary->set_value(*stringReprConstant(0, keyWidth));
-            protoTernary->set_mask(*stringReprConstant(0, keyWidth));
+            if ((*value & *mask) != *value) {
+                ::warning(ErrorType::WARN_MISMATCH,
+                          "P4Runtime requires that Ternary matches have masked-off bits set to 0, "
+                          "updating value %1% to conform to the P4Runtime specification", km->left);
+                *value &= *mask;
+            }
+            if (*mask == 0)  // don't care
+                return;
+            valueStr = stringReprConstant(*value, keyWidth);
+            maskStr = stringReprConstant(*mask, keyWidth);
         } else {
-            auto value = convertSimpleKeyExpression(k, keyWidth);
-            if (value == boost::none) return;
-            protoTernary->set_value(*value);
-            protoTernary->set_mask(*stringReprConstant(Util::mask(keyWidth), keyWidth));
+            valueStr = convertSimpleKeyExpression(k, keyWidth);
+            maskStr = stringReprConstant(Util::mask(keyWidth), keyWidth);
         }
+        if (valueStr == boost::none || maskStr == boost::none) return;
+        auto protoMatch = protoEntry->add_match();
+        protoMatch->set_field_id(fieldId);
+        auto protoTernary = protoMatch->mutable_ternary();
+        protoTernary->set_value(*valueStr);
+        protoTernary->set_mask(*maskStr);
     }
 
-    void addRange(p4v1::FieldMatch* protoMatch, const IR::Expression* k, int keyWidth) const {
-        auto protoRange = protoMatch->mutable_range();
+    void addRange(p4v1::TableEntry* protoEntry, int fieldId,
+                  const IR::Expression* k, int keyWidth) const {
+        if (k->is<IR::DefaultExpression>())  // don't care, skip in P4Runtime message
+            return;
+        boost::optional<std::string> startStr;
+        boost::optional<std::string> endStr;
         if (k->is<IR::Range>()) {
             auto kr = k->to<IR::Range>();
-            auto start = convertSimpleKeyExpression(kr->left, keyWidth);
-            auto end = convertSimpleKeyExpression(kr->right, keyWidth);
+            auto start = simpleKeyExpressionValue(kr->left);
+            auto end = simpleKeyExpressionValue(kr->right);
             if (start == boost::none || end == boost::none) return;
-            protoRange->set_low(*start);
-            protoRange->set_high(*end);
-        } else if (k->is<IR::DefaultExpression>()) {
-            protoRange->set_low(*stringReprConstant(0, keyWidth));
-            protoRange->set_high(*stringReprConstant((1 << keyWidth)-1, keyWidth));
+            mpz_class maxValue = (mpz_class(1) << keyWidth) - 1;
+            // These should be guaranteed by the frontend
+            BUG_CHECK(*start <= *end, "Invalid range with start greater than end");
+            BUG_CHECK(*end <= maxValue, "End of range is too large");
+            if (*start == 0 && *end == maxValue)  // don't care
+                return;
+            startStr = stringReprConstant(*start, keyWidth);
+            endStr = stringReprConstant(*end, keyWidth);
         } else {
-            auto value = convertSimpleKeyExpression(k, keyWidth);
-            if (value == boost::none) return;
-            protoRange->set_low(*value);
-            protoRange->set_high(*value);
+            startStr = convertSimpleKeyExpression(k, keyWidth);
+            endStr = startStr;
         }
+        if (startStr == boost::none || endStr == boost::none) return;
+        auto protoMatch = protoEntry->add_match();
+        protoMatch->set_field_id(fieldId);
+        auto protoRange = protoMatch->mutable_range();
+        protoRange->set_low(*startStr);
+        protoRange->set_high(*endStr);
     }
 
     cstring getKeyMatchType(const IR::KeyElement* ke, ReferenceMap* refMap) const {
@@ -1414,6 +1467,15 @@ class P4RuntimeEntriesConverter {
         auto bitsRequired = static_cast<size_t>(mpz_sizeinbase(value.get_mpz_t(), 2));
         BUG_CHECK(static_cast<size_t>(width) >= bitsRequired,
                   "Cannot represent %1% on %2% bits", value, width);
+        // TODO(antonin): P4Runtime defines the canonical representation for
+        // bit<W> value as the smallest binary string required to represent the
+        // value (no 0 padding). Unfortunately the reference P4Runtime
+        // implementation (https://github.com/p4lang/PI) does not currently
+        // support the canonical representation, so instead we use a padded
+        // binary string, which according to the P4Runtime specification is also
+        // valid (but not the canonical representation, which means no RW
+        // symmetry).
+        // auto bytes = ROUNDUP(mpz_sizeinbase(value.get_mpz_t(), 2), 8);
         auto bytes = ROUNDUP(width, 8);
         std::vector<char> data(bytes);
         mpz_export(data.data(), NULL, 1 /* big endian word */, bytes,
