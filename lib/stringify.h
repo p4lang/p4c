@@ -63,7 +63,7 @@ cstring toString(std::string value);
 cstring toString(const char* value);
 cstring toString(cstring value);
 cstring toString(StringRef value);
-cstring toString(const mpz_class* value);
+cstring toString(const mpz_class* value, unsigned int base = 10);
 cstring toString(const void* value);
 
 // printf into a string
