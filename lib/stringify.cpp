@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include <stdarg.h>
+#include <sstream>
 #include "stringify.h"
 
 namespace Util {
@@ -40,10 +41,32 @@ cstring toString(const void* value) {
     return result.str();
 }
 
-cstring toString(const mpz_class* value) {
+cstring toString(const mpz_class* value, unsigned int base) {
     if (value == nullptr)
         return cstring::literal("<nullptr>");
-    return cstring(value->get_str());
+    mpz_class v = *value;
+    std::ostringstream oss;
+    if (v < 0) {
+        oss << "-";
+        v = -v;
+    }
+    switch (base) {
+        case 2:
+            oss << "0b";
+            break;
+        case 8:
+            oss << "0o";
+            break;
+        case 16:
+            oss << "0x";
+            break;
+        case 10:
+            break;
+        default:
+            throw std::runtime_error("Unexpected base");
+    }
+    oss << v.get_str(static_cast<int>(base));
+    return oss.str();
 }
 
 cstring toString(cstring value) {
