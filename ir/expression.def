@@ -218,7 +218,7 @@ class Constant : Literal {
     Constant operator-(const Constant &c) const;
     Constant operator-() const;
 #end
-    toString { return Util::toString(&value); }
+    toString { return Util::toString(&value, base); }
     visit_children { v.visit(type, "type"); }
 }
 
