@@ -1355,13 +1355,13 @@ class P4RuntimeEntriesConverter {
             auto matchType = getKeyMatchType(tableKey, refMap);
 
             if (matchType == P4CoreLibrary::instance.exactMatch.name) {
-                addExact(protoEntry, fieldId++, k, keyWidth);
+			  addExact(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else if (matchType == P4CoreLibrary::instance.lpmMatch.name) {
-                addLpm(protoEntry, fieldId++, k, keyWidth);
+			  addLpm(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else if (matchType == P4CoreLibrary::instance.ternaryMatch.name) {
-                addTernary(protoEntry, fieldId++, k, keyWidth);
+			  addTernary(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else if (matchType == P4V1::V1Model::instance.rangeMatchType.name) {
-                addRange(protoEntry, fieldId++, k, keyWidth);
+			  addRange(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else {
                 if (!k->is<IR::DefaultExpression>())
                     ::error("%1%: match type not supported by P4Runtime serializer", matchType);
@@ -1520,10 +1520,6 @@ class P4RuntimeEntriesConverter {
             startStr = stringReprConstant(*start, keyWidth);
             endStr = stringReprConstant(*end, keyWidth);
         } else {
-            auto value = convertSimpleKeyExpression(k, keyWidth, typeMap);
-            if (value == boost::none) return;
-            protoRange->set_low(*value);
-            protoRange->set_high(*value);
             startStr = convertSimpleKeyExpression(k, keyWidth, typeMap);
             endStr = startStr;
         }
