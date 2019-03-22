@@ -634,12 +634,6 @@ getMatchType(cstring matchTypeName) {
 
 static int
 getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
-    // p4runtime tests use bit Slices which are Type_Bits
-    // which will cause failure in minWidthBits.
-    // Thus compute width here for Slices and any other bit-field.
-    if (auto tb = type->to<IR::Type_Bits>()) {
-        return static_cast<int>(tb->width_bits());
-    }
     auto ann = type->getAnnotation("p4runtime_translation");
     if (ann != nullptr) {
         auto sdnB = ann->expr[1]->to<IR::Constant>();
@@ -656,12 +650,6 @@ static cstring
 getTypeName(const IR::Type* type, TypeMap* typeMap) {
     cstring type_name = nullptr;
     CHECK_NULL(type);
-
-    // p4runtime uses bit slices which are Type_Bits and cause
-    // a BUG in typeMap.cpp if getTypeType() is used on such a
-    // Type_Bits.
-    if (type->is<IR::Type_Bits>())
-        return type_name;
 
     auto t = typeMap->getTypeType(type, true);
     if (auto newt = t->to<IR::Type_Newtype>()) {
