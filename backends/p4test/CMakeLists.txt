@@ -71,6 +71,9 @@ set (P4RUNTIME_EXCLUDE
   # that when the type parameter of a Value Set is a struct, all the fields of
   # the struct must be of type bit<W>, but inner is not
   testdata/p4_16_samples/pvs-nested-struct.p4
+  # These tests use 'error' as a table key
+  testdata/p4_16_samples/issue1304.p4
+  testdata/p4_16_samples/issue1062-1-bmv2.p4
 )
 # Do not generate P4Info for tests which are expected to fail P4 compilation.
 p4c_find_test_names ("${P4C_SOURCE_DIR}/testdata/p4_16_errors/*.p4" P4RUNTIME_EXCLUDE_ERRORS)
