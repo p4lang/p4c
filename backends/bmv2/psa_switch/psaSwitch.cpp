@@ -269,9 +269,9 @@ bool InspectPsaProgram::isHeaders(const IR::Type_StructLike* st) {
 }
 
 void InspectPsaProgram::addHeaderType(const IR::Type_StructLike *st) {
-  LOG1("alex adding headerType " << st->toString());
+  LOG1("cornell: adding headerType " << st->toString());
     if (st->is<IR::Type_HeaderUnion>()) {
-      LOG1("alex is type_headerunion");
+      LOG1("cornell: is type_headerunion");
         for (auto f : st->fields) {
             auto ftype = typeMap->getType(f, true);
             auto ht = ftype->to<IR::Type_Header>();
@@ -281,10 +281,10 @@ void InspectPsaProgram::addHeaderType(const IR::Type_StructLike *st) {
         pinfo->header_union_types.emplace(st->getName(), st->to<IR::Type_HeaderUnion>());
         return;
     } else if (st->is<IR::Type_Header>()) {
-      LOG1("alex is type_header");
+      LOG1("cornell: is type_header");
       pinfo->header_types.emplace(st->getName(), st->to<IR::Type_Header>());
     } else if (st->is<IR::Type_Struct>()) {
-      LOG1("alex is type_struct");
+      LOG1("cornell: is type_struct");
         pinfo->metadata_types.emplace(st->getName(), st->to<IR::Type_Struct>());
     }
 }
@@ -301,9 +301,9 @@ void InspectPsaProgram::addHeaderInstance(const IR::Type_StructLike *st, cstring
 
 void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bool isHeader) {
     LOG3("Adding " << type);
-    LOG1("alex adding " << type->toString() << " and isHeader " << isHeader);
+    LOG1("cornell: adding " << type->toString() << " and isHeader " << isHeader);
     for (auto f : type->fields) {
-        LOG1("alex iterating through fields " << f->toString());
+        LOG1("cornell: iterating through fields " << f->toString());
         auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
             // The headers struct can not contain nested structures.
