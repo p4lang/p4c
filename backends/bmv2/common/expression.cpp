@@ -83,6 +83,7 @@ const IR::Node* ArithmeticFixup::postorder(IR::Cast* expression) {
 
 void ExpressionConverter::mapExpression(const IR::Expression* expression, Util::IJson* json) {
     map.emplace(expression, json);
+    LOG3("Mapping " << dbp(expression) << " to " << json->toString());
 }
 
 Util::IJson* ExpressionConverter::get(const IR::Expression* expression) const {
@@ -259,8 +260,8 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
     if (param != nullptr) {
         // convert architecture-dependent parameter
         if (auto result = convertParam(param, fieldName)) {
-          mapExpression(expression, result);
-          return;
+            mapExpression(expression, result);
+            return;
         }
         // convert normal parameters
         if (auto st = type->to<IR::Type_Stack>()) {

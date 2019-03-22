@@ -60,7 +60,7 @@ void PsaProgramStructure::createStructLike(ConversionContext* ctxt, const IR::Ty
             if (varbitFound)
                 ::error(ErrorType::ERR_UNSUPPORTED,
                         "headers with multiple varbit fields are not supported", st);
-          varbitFound = true;
+            varbitFound = true;
         } else if (ftype->is<IR::Type_Error>()) {
             field->append(f->name.name);
             field->append(error_width);
@@ -269,7 +269,7 @@ bool InspectPsaProgram::isHeaders(const IR::Type_StructLike* st) {
 }
 
 void InspectPsaProgram::addHeaderType(const IR::Type_StructLike *st) {
-  LOG1("cornell: adding headerType " << st->toString());
+    LOG1("cornell: adding headerType " << st->toString());
     if (st->is<IR::Type_HeaderUnion>()) {
       LOG1("cornell: is type_headerunion");
         for (auto f : st->fields) {
