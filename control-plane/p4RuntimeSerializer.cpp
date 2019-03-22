@@ -656,7 +656,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
             matchFieldType = typeMap->getTypeType(mt->type, true);
         int width = typeMap->minWidthBits(matchFieldType, matchFieldType);
         if (width < 0)
-            return;
+            return matchFields;
         matchFields.push_back(MatchField{*matchFieldName, *matchType, matchTypeName,
                         uint32_t(width), keyElement->to<IR::IAnnotated>()});
     }
