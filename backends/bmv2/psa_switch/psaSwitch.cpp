@@ -36,46 +36,39 @@ void PsaProgramStructure::createStructLike(ConversionContext* ctxt, const IR::Ty
     unsigned max_length = 0;  // for variable-sized headers
     bool varbitFound = false;
     auto fields = new Util::JsonArray();
-    LOG1("alex createStructLike " << st->toString());
+    LOG1("cornell: createStructLike " << st->toString());
     for (auto f : st->fields) {
         auto field = new Util::JsonArray();
         auto ftype = typeMap->getType(f, true);
-	LOG1("alex iterating getting type and name " << f << " " << ftype->toString());
+        LOG1("cornell: iterating getting type and name " << f << " " << ftype->toString());
         if (ftype->to<IR::Type_StructLike>()) {
-	  LOG1("type structlike");
             BUG("%1%: nested structure", st);
         } else if (ftype->is<IR::Type_Boolean>()) {
-	  LOG1("type boolean");
-	  field->append(f->name.name);
+            field->append(f->name.name);
             field->append(1);
             field->append(false);
             max_length += 1;
         } else if (auto type = ftype->to<IR::Type_Bits>()) {
-	  LOG1("type bits");
-	  field->append(f->name.name);
+            field->append(f->name.name);
             field->append(type->size);
             field->append(type->isSigned);
             max_length += type->size;
         } else if (auto type = ftype->to<IR::Type_Varbits>()) {
-	  LOG1("type varbits");
-	  field->append(f->name.name);
+            field->append(f->name.name);
             max_length += type->size;
             field->append("*");
             if (varbitFound)
                 ::error(ErrorType::ERR_UNSUPPORTED,
                         "headers with multiple varbit fields are not supported", st);
-            varbitFound = true;
+          varbitFound = true;
         } else if (ftype->is<IR::Type_Error>()) {
-	  LOG1("type error");
-	  field->append(f->name.name);
+            field->append(f->name.name);
             field->append(error_width);
             field->append(false);
             max_length += error_width;
         } else if (ftype->to<IR::Type_Stack>()) {
-	  LOG1("type stack");
-	  BUG("%1%: nested stack", st);
+            BUG("%1%: nested stack", st);
         } else {
-	  LOG1("type bug");
             BUG("%1%: unexpected type for %2%.%3%", ftype, st, f->name);
         }
         fields->append(field);
@@ -326,15 +319,13 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
     }
 
     for (auto f : type->fields) {
-      LOG1("alex iterating through fields again " << f->toString());
         auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
-	  LOG1("alex iterating through fields " << f->toString());
             if (auto hft = ft->to<IR::Type_Header>()) {
-                LOG1("alex is type_header");
+                LOG1("cornell: is type_header");
                 addHeaderInstance(hft, f->controlPlaneName());
             } else if (ft->is<IR::Type_HeaderUnion>()) {
-                LOG1("alex is type_headerunion");
+                LOG1("cornell: is type_headerunion");
                 for (auto uf : ft->to<IR::Type_HeaderUnion>()->fields) {
                     auto uft = typeMap->getType(uf, true);
                     if (auto h_type = uft->to<IR::Type_Header>()) {
@@ -349,12 +340,12 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
                                                   type->to<IR::Type_HeaderUnion>());
                 addHeaderInstance(type, f->controlPlaneName());
             } else {
-                LOG1("alex add struct type " << type);
+                LOG1("cornell: add struct type " << type);
                 pinfo->metadata_types.emplace(type->getName(), type->to<IR::Type_Struct>());
                 addHeaderInstance(type, f->controlPlaneName());
             }
         } else if (ft->is<IR::Type_Stack>()) {
-            LOG1("alex is type stack stack " << ft->toString());
+            LOG1("cornell: is type stack stack " << ft->toString());
             auto stack = ft->to<IR::Type_Stack>();
             // auto stack_name = f->controlPlaneName();
             auto stack_size = stack->getSize();
@@ -373,39 +364,28 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
             }
             // addHeaderStackInstance();
         } else {
-            LOG1("alex is treating this field like a scalar local variable");
             // Treat this field like a scalar local variable
             cstring newName = refMap->newName(type->getName() + "." + f->name);
-            LOG1("alex printing newname for scalarMetadataFields " << newName);
-	    if (ft->is<IR::Type_Bits>()) {
-	        LOG1("alex smdf is a type bit ");
+            LOG1("cornell: newname for scalarMetadataFields " << newName);
+            if (ft->is<IR::Type_Bits>()) {
+                LOG1("cornell: is a type bit ");
                 auto tb = ft->to<IR::Type_Bits>();
                 pinfo->scalars_width += tb->size;
                 pinfo->scalarMetadataFields.emplace(f, newName);
             } else if (ft->is<IR::Type_Boolean>()) {
-	        LOG1("alex smdf is a type bit ");
+                LOG1("cornell: smdf is a type bit ");
                 pinfo->scalars_width += 1;
                 pinfo->scalarMetadataFields.emplace(f, newName);
-            } else if (ft->is<IR::Type_Error>()){
-	        LOG1("alex smdf is a type bit ");
+            } else if (ft->is<IR::Type_Error>()) {
+                LOG1("cornell: smdf is a type bit ");
                 pinfo->scalars_width += 32;
                 pinfo->scalarMetadataFields.emplace(f, newName);
             } else {
-	        LOG1("alex smdf is a bug ");
+                LOG1("cornell: smdf is a bug ");
                 BUG("%1%: Unhandled type for %2%", ft, f);
             }
         }
     }
-}
-
-bool InspectPsaProgram::isStandardMetadata(cstring ptName) {
-    return (!strcmp(ptName, "psa_ingress_parser_input_metadata_t") ||
-        !strcmp(ptName, "psa_egress_parser_input_metadata_t") ||
-        !strcmp(ptName, "psa_ingress_input_metadata_t") ||
-        !strcmp(ptName, "psa_ingress_output_metadata_t") ||
-        !strcmp(ptName, "psa_egress_input_metadata_t") ||
-        !strcmp(ptName, "psa_egress_deparser_input_metadata_t") ||
-        !strcmp(ptName, "psa_egress_output_metadata_t"));
 }
 
 // This visitor only visits the parameter in the statement from architecture.
@@ -413,20 +393,19 @@ bool InspectPsaProgram::preorder(const IR::Parameter* param) {
     auto ft = typeMap->getType(param->getNode(), true);
     LOG3("add param " << ft);
     // only convert parameters that are IR::Type_StructLike
-    if (!ft->is<IR::Type_StructLike>()){
-      LOG1("alex is not type_structlike returning");
+    if (!ft->is<IR::Type_StructLike>()) {
       return false;
     }
     auto st = ft->to<IR::Type_StructLike>();
     // check if it is psa specific standard metadata
     cstring ptName = param->type->toString();
     // parameter must be a type that we have not seen before
-    if (pinfo->hasVisited(st)){
-      LOG1("alex is visited returning");
+    if (pinfo->hasVisited(st)) {
+      LOG1("cornell: is visited returning");
       return false;
     }
-    if (isStandardMetadata(ptName)) {
-      LOG1("alex adding stdmeta");
+    if (PsaSwitchExpressionConverter::isStandardMetadata(ptName)) {
+      LOG1("cornell: adding stdmeta");
       addHeaderType(st);
       // remove _t from type name
       cstring headerName = ptName.exceptLast(2);
@@ -780,7 +759,7 @@ void ExternConverter_Counter::convertExternInstance(
     auto arg2 = tp->to<IR::Declaration_ID>();
     auto param2 = eb->getConstructorParameters()->getParameter(1);
     auto mem = arg2->toString();
-    LOG1("alex convertParam in ps.cpp for p2 " << param2->toString() << " and mem " << mem);
+    LOG1("cornell: convertParam in ps.cpp for p2 " << param2->toString() << " and mem " << mem);
     auto jsn = ctxt->conv->convertParam(param2, mem);
     arr->append(jsn);
 }
@@ -825,7 +804,8 @@ void ExternConverter_DirectCounter::convertExternInstance(
         auto arg = tp->to<IR::Declaration_ID>();
         auto param = eb->getConstructorParameters()->getParameter(1);
         auto mem = arg->toString();
-	LOG1("alex convertParam in ps.cpp for param " << param->toString() << " and mem " << mem);
+        LOG1("cornell: convertParam in ps.cpp for param " << param->toString()
+          << " and mem " << mem);
         auto jsn = ctxt->conv->convertParam(param, mem);
         arr->append(jsn);
     }
