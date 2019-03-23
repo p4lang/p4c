@@ -36,11 +36,11 @@ void PsaProgramStructure::createStructLike(ConversionContext* ctxt, const IR::Ty
     unsigned max_length = 0;  // for variable-sized headers
     bool varbitFound = false;
     auto fields = new Util::JsonArray();
-    LOG1("cornell: createStructLike " << st->toString());
+    LOG5("In createStructLike with struct " << st->toString());
     for (auto f : st->fields) {
         auto field = new Util::JsonArray();
         auto ftype = typeMap->getType(f, true);
-        LOG1("cornell: iterating getting type and name " << f << " " << ftype->toString());
+        LOG5("Iterating field with field " << f << " and type " << ftype->toString());
         if (ftype->to<IR::Type_StructLike>()) {
             BUG("%1%: nested structure", st);
         } else if (ftype->is<IR::Type_Boolean>()) {
@@ -269,9 +269,9 @@ bool InspectPsaProgram::isHeaders(const IR::Type_StructLike* st) {
 }
 
 void InspectPsaProgram::addHeaderType(const IR::Type_StructLike *st) {
-    LOG1("cornell: adding headerType " << st->toString());
+    LOG5("In addHeaderType with struct " << st->toString());
     if (st->is<IR::Type_HeaderUnion>()) {
-      LOG1("cornell: is type_headerunion");
+      LOG5("Struct is Type_HeaderUnion");
         for (auto f : st->fields) {
             auto ftype = typeMap->getType(f, true);
             auto ht = ftype->to<IR::Type_Header>();
@@ -281,10 +281,10 @@ void InspectPsaProgram::addHeaderType(const IR::Type_StructLike *st) {
         pinfo->header_union_types.emplace(st->getName(), st->to<IR::Type_HeaderUnion>());
         return;
     } else if (st->is<IR::Type_Header>()) {
-      LOG1("cornell: is type_header");
+      LOG5("Struct is Type_Header");
       pinfo->header_types.emplace(st->getName(), st->to<IR::Type_Header>());
     } else if (st->is<IR::Type_Struct>()) {
-      LOG1("cornell: is type_struct");
+      LOG5("Struct is Type_Struct");
         pinfo->metadata_types.emplace(st->getName(), st->to<IR::Type_Struct>());
     }
 }
@@ -300,10 +300,9 @@ void InspectPsaProgram::addHeaderInstance(const IR::Type_StructLike *st, cstring
 }
 
 void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bool isHeader) {
-    LOG3("Adding " << type);
-    LOG1("cornell: adding " << type->toString() << " and isHeader " << isHeader);
+    LOG5("Adding type " << type->toString() << " and isHeader " << isHeader);
     for (auto f : type->fields) {
-        LOG1("cornell: iterating through fields " << f->toString());
+        LOG5("Iterating through field " << f->toString());
         auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
             // The headers struct can not contain nested structures.
@@ -322,10 +321,10 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
         auto ft = typeMap->getType(f, true);
         if (ft->is<IR::Type_StructLike>()) {
             if (auto hft = ft->to<IR::Type_Header>()) {
-                LOG1("cornell: is type_header");
+                LOG5("Field is Type_Header");
                 addHeaderInstance(hft, f->controlPlaneName());
             } else if (ft->is<IR::Type_HeaderUnion>()) {
-                LOG1("cornell: is type_headerunion");
+                LOG5("Field is Type_HeaderUnion");
                 for (auto uf : ft->to<IR::Type_HeaderUnion>()->fields) {
                     auto uft = typeMap->getType(uf, true);
                     if (auto h_type = uft->to<IR::Type_Header>()) {
@@ -340,12 +339,12 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
                                                   type->to<IR::Type_HeaderUnion>());
                 addHeaderInstance(type, f->controlPlaneName());
             } else {
-                LOG1("cornell: add struct type " << type);
+                LOG5("Adding struct with type " << type);
                 pinfo->metadata_types.emplace(type->getName(), type->to<IR::Type_Struct>());
                 addHeaderInstance(type, f->controlPlaneName());
             }
         } else if (ft->is<IR::Type_Stack>()) {
-            LOG1("cornell: is type stack stack " << ft->toString());
+            LOG5("Field is Type_Stack " << ft->toString());
             auto stack = ft->to<IR::Type_Stack>();
             // auto stack_name = f->controlPlaneName();
             auto stack_size = stack->getSize();
@@ -366,22 +365,21 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
         } else {
             // Treat this field like a scalar local variable
             cstring newName = refMap->newName(type->getName() + "." + f->name);
-            LOG1("cornell: newname for scalarMetadataFields " << newName);
+            LOG5("newname for scalarMetadataFields is " << newName);
             if (ft->is<IR::Type_Bits>()) {
-                LOG1("cornell: is a type bit ");
+                LOG5("Field is a Type_Bits");
                 auto tb = ft->to<IR::Type_Bits>();
                 pinfo->scalars_width += tb->size;
                 pinfo->scalarMetadataFields.emplace(f, newName);
             } else if (ft->is<IR::Type_Boolean>()) {
-                LOG1("cornell: smdf is a type bit ");
+                LOG5("Field is a Type_Boolean");
                 pinfo->scalars_width += 1;
                 pinfo->scalarMetadataFields.emplace(f, newName);
             } else if (ft->is<IR::Type_Error>()) {
-                LOG1("cornell: smdf is a type bit ");
+                LOG5("Field is a Type_Error");
                 pinfo->scalars_width += 32;
                 pinfo->scalarMetadataFields.emplace(f, newName);
             } else {
-                LOG1("cornell: smdf is a bug ");
                 BUG("%1%: Unhandled type for %2%", ft, f);
             }
         }
@@ -401,11 +399,11 @@ bool InspectPsaProgram::preorder(const IR::Parameter* param) {
     cstring ptName = param->type->toString();
     // parameter must be a type that we have not seen before
     if (pinfo->hasVisited(st)) {
-      LOG1("cornell: is visited returning");
+      LOG5("Parameter is visited, returning");
       return false;
     }
     if (PsaSwitchExpressionConverter::isStandardMetadata(ptName)) {
-      LOG1("cornell: adding stdmeta");
+      LOG5("Parameter is psa standard metadata");
       addHeaderType(st);
       // remove _t from type name
       cstring headerName = ptName.exceptLast(2);
@@ -759,7 +757,7 @@ void ExternConverter_Counter::convertExternInstance(
     auto arg2 = tp->to<IR::Declaration_ID>();
     auto param2 = eb->getConstructorParameters()->getParameter(1);
     auto mem = arg2->toString();
-    LOG1("cornell: convertParam in ps.cpp for p2 " << param2->toString() << " and mem " << mem);
+    LOG5("In convertParam with p2 " << param2->toString() << " and mem " << mem);
     auto jsn = ctxt->conv->convertParam(param2, mem);
     arr->append(jsn);
 }
@@ -804,7 +802,7 @@ void ExternConverter_DirectCounter::convertExternInstance(
         auto arg = tp->to<IR::Declaration_ID>();
         auto param = eb->getConstructorParameters()->getParameter(1);
         auto mem = arg->toString();
-        LOG1("cornell: convertParam in ps.cpp for param " << param->toString()
+        LOG5("In convertParam with param " << param->toString()
           << " and mem " << mem);
         auto jsn = ctxt->conv->convertParam(param, mem);
         arr->append(jsn);
