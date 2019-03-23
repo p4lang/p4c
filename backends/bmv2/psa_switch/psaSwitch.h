@@ -53,15 +53,31 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
     }
 
     /**
-     * Checks if a Parameter is of type PSA_CounterType_t returns true
+     * Checks if a string is of type PSA_CounterType_t returns true
      * if it is, false otherwise.
      */
-    bool isCounterMetaData(const IR::Parameter* param) {
-      return param->type->toString() == "PSA_CounterType_t";
+    static bool isCounterMetadata(cstring ptName) {
+      return !strcmp(ptName, "PSA_CounterType_t");
     }
 
+    /**
+     * Checks if a string is a psa metadata returns true
+     * if it is, false otherwise.
+     */
+    static bool isStandardMetadata(cstring ptName) {
+      return (!strcmp(ptName, "psa_ingress_parser_input_metadata_t") ||
+        !strcmp(ptName, "psa_egress_parser_input_metadata_t") ||
+        !strcmp(ptName, "psa_ingress_input_metadata_t") ||
+        !strcmp(ptName, "psa_ingress_output_metadata_t") ||
+        !strcmp(ptName, "psa_egress_input_metadata_t") ||
+        !strcmp(ptName, "psa_egress_deparser_input_metadata_t") ||
+        !strcmp(ptName, "psa_egress_output_metadata_t"));
+    }
+
+
     Util::IJson* convertParam(UNUSED const IR::Parameter* param, cstring fieldName) override {
-        if (isCounterMetaData(param)) {  // check if its counter metadata
+      cstring ptName = param->type->toString();
+      if (isCounterMetadata(ptName)) {  // check if its counter metadata
           auto jsn = new Util::JsonObject();
           jsn->emplace("name", param->toString());
           jsn->emplace("type", "hexstr");
@@ -82,10 +98,20 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
             return nullptr;
           }
           return jsn;
-        }
+      } else if (isStandardMetadata(ptName)) {  // check if its psa metadata
+          auto jsn = new Util::JsonObject();
 
-        LOG3("convert " << fieldName);
+          // encode the metadata type and field in json
+          jsn->emplace("type", "field");
+          auto a = mkArrayField(jsn, "value");
+          a->append(ptName.exceptLast(2));
+          a->append(fieldName);
+          return jsn;
+      } else {
+        // not a special type
         return nullptr;
+      }
+      return nullptr;
     }
 };
 
@@ -188,7 +214,6 @@ class InspectPsaProgram : public Inspector {
     void postorder(const IR::Declaration_Instance* di) override;
 
     bool isHeaders(const IR::Type_StructLike* st);
-    bool isStandardMetadata(cstring ptName);
     void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
     void addHeaderType(const IR::Type_StructLike *st);
     void addHeaderInstance(const IR::Type_StructLike *st, cstring name);
