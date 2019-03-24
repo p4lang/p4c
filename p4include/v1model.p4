@@ -112,9 +112,16 @@ extern direct_counter {
      * count() causes the counter state associated with the matched
      * table entry to be read, modified, and written back, atomically
      * relative to the processing of other packets.
+     *
+     * TBD: Is the direct_counter state updated even if an action is
+     * executed that does not call the count() method?
      */
     void count();
 }
+
+#define V1MODEL_METER_COLOR_GREEN  0
+#define V1MODEL_METER_COLOR_YELLOW 1
+#define V1MODEL_METER_COLOR_RED    2
 
 extern meter {
     meter(bit<32> size, MeterType type);
