@@ -20,7 +20,7 @@ limitations under the License.
 #define P4C_LIB_EXCEPTIONS_H_
 
 #include <exception>
-#include "lib/error.h"
+#include "lib/error_helper.h"
 
 namespace Util {
 
@@ -80,7 +80,6 @@ class CompilerUnimplemented final : public P4CExceptionBase {
 
 /// This class indicates a compilation error that we do not want to recover from.
 /// This may be due to a malformed input program.
-/// TODO: this class is very seldom used, perhaps we can remove it.
 class CompilationError : public P4CExceptionBase {
  public:
     template <typename... T>

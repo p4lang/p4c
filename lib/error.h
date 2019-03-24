@@ -45,7 +45,7 @@ template <typename... T>
 inline void error(const char* format, T... args) {
     auto& context = BaseCompileContext::get();
     auto action = context.getDefaultErrorDiagnosticAction();
-    context.errorReporter().diagnoseUnnamed(action, format, args...);
+    context.errorReporter().diagnose(action, nullptr, format, args...);
 }
 
 /// Report errors of type kind. Requires that the node argument have source info.
@@ -105,7 +105,7 @@ template <typename... T>
 inline void warning(const char* format, T... args) {
     auto& context = BaseCompileContext::get();
     auto action = context.getDefaultWarningDiagnosticAction();
-    context.errorReporter().diagnoseUnnamed(action, format, args...);
+    context.errorReporter().diagnose(action, nullptr, format, args...);
 }
 
 /// Report warnings of type kind. Requires that the node argument have source info.
