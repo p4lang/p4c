@@ -1,0 +1,4 @@
+nasty_meta.p4(24): [--Werror=invalid] error: extract: Invalid argument. Expected a header not struct ethernet_t
+    extract(ethernet);
+    ^^^^^^^^^^^^^^^^^
+error: 1 errors encountered, aborting compilation
