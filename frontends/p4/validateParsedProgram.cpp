@@ -179,10 +179,12 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Constant* decl) {
 void ValidateParsedProgram::postorder(const IR::EntriesList* l) {
     auto table = findContext<IR::P4Table>();
     if (table == nullptr)
-        ::error(ErrorType::ERR_INVALID, "initializer. Table initializers must belong to a table", l);
+        ::error(ErrorType::ERR_INVALID,
+                "initializer. Table initializers must belong to a table", l);
     auto ep = table->properties->getProperty(IR::TableProperties::entriesPropertyName);
     if (!ep->isConstant)
-        ::error(ErrorType::ERR_INVALID, "initializer. Table initializers must be constant", l);
+        ::error(ErrorType::ERR_INVALID,
+                "initializer. Table initializers must be constant", l);
 }
 
 /// Switch statements are not allowed in actions.
