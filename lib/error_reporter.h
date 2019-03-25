@@ -17,338 +17,9 @@ limitations under the License.
 #ifndef P4C_LIB_ERROR_REPORTER_H_
 #define P4C_LIB_ERROR_REPORTER_H_
 
-#include <boost/format.hpp>
-#include <stdarg.h>
-#include <map>
-#include <set>
-#include <type_traits>
-#include <unordered_map>
-
-#include "lib/cstring.h"
-#include "lib/source_file.h"
-#include "lib/stringify.h"
-
-// All these methods return std::string because this is the native format of boost::format
-// If tail is not empty, it is appended on a new line
-// Position is printed at the beginning.
-static inline std::string error_helper(boost::format& f, std::string message,
-                                       std::string position, std::string tail) {
-    std::string text = boost::str(f);
-    std::string result = position;
-    if (!position.empty())
-        result += ": ";
-    result += message + text + "\n" + tail;
-    return result;
-}
-
-template<class... Args>
-std::string error_helper(boost::format& f, std::string message, std::string position,
-                         std::string tail, const char* t, Args... args);
-
-template<class... Args>
-std::string error_helper(boost::format& f, std::string message, std::string position,
-                         std::string tail, const cstring& t, Args... args);
-
-template<class... Args>
-std::string error_helper(boost::format& f, std::string message,
-                         std::string position, std::string tail,
-                         const Util::SourceInfo &info, Args... args);
-
-template<typename T, class... Args>
-auto error_helper(boost::format& f, std::string message, std::string position,
-                  std::string tail, const T &t, Args... args) ->
-    typename std::enable_if<Util::HasToString<T>::value &&
-                            !std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type;
-
-template<typename T, class... Args>
-auto error_helper(boost::format& f, std::string message, std::string position,
-                  std::string tail, const T *t, Args... args) ->
-    typename std::enable_if<Util::HasToString<T>::value &&
-                            !std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type;
-
-template<typename T, class... Args>
-auto error_helper(boost::format& f, std::string message, std::string position,
-                  std::string tail, const T &t, Args... args) ->
-    typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type;
-
-template<typename T, class... Args>
-auto error_helper(boost::format& f, std::string message, std::string position,
-                  std::string tail, const T *t, Args... args) ->
-    typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type;
-
-template<class... Args>
-std::string error_helper(boost::format& f, std::string message, std::string position,
-                         std::string tail, const mpz_class *t, Args... args);
-
-template<class... Args>
-std::string error_helper(boost::format& f, std::string message, std::string position,
-                         std::string tail, const mpz_class &t, Args... args);
-
-template<typename T, class... Args>
-auto
-error_helper(boost::format& f, std::string message,
-             std::string position, std::string tail,
-             const T& t, Args... args) ->
-    typename std::enable_if<std::is_arithmetic<T>::value, std::string>::type;
-
-// actual implementations
-
-template<class... Args>
-std::string error_helper(boost::format& f, std::string message, std::string position,
-                         std::string tail, const char* t, Args... args) {
-    return error_helper(f % t, message, position, tail, std::forward<Args>(args)...);
-}
-
-template<class... Args>
-std::string error_helper(boost::format& f, std::string message, std::string position,
-                         std::string tail, const cstring& t, Args... args) {
-    return error_helper(f % t.c_str(), message, position, tail, std::forward<Args>(args)...);
-}
-
-template<typename T, class... Args>
-auto error_helper(boost::format& f, std::string message, std::string position,
-                  std::string tail, const T &t, Args... args) ->
-    typename std::enable_if<Util::HasToString<T>::value &&
-                            !std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type {
-    return error_helper(f % t.toString(), message, position, tail, std::forward<Args>(args)...);
-}
-
-template<typename T, class... Args>
-auto error_helper(boost::format& f, std::string message, std::string position,
-                  std::string tail, const T *t, Args... args) ->
-    typename std::enable_if<Util::HasToString<T>::value &&
-                            !std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type {
-    return error_helper(f % t->toString(), message, position, tail, std::forward<Args>(args)...);
-}
-
-template<class... Args>
-std::string error_helper(boost::format& f, std::string message, std::string position,
-                         std::string tail, const mpz_class *t, Args... args) {
-    return error_helper(f % t->get_str(), message, position, tail, std::forward<Args>(args)...);
-}
-
-template<class... Args>
-std::string error_helper(boost::format& f, std::string message, std::string position,
-                         std::string tail, const mpz_class &t, Args... args) {
-    return error_helper(f % t.get_str(), message, position, tail, std::forward<Args>(args)...);
-}
-
-template<typename T, class... Args>
-auto
-error_helper(boost::format& f, std::string message, std::string position,
-             std::string tail, const T& t, Args... args) ->
-    typename std::enable_if<std::is_arithmetic<T>::value, std::string>::type {
-    return error_helper(f % t, message, position, tail, std::forward<Args>(args)...);
-}
-
-template<class... Args>
-std::string error_helper(boost::format& f, std::string message, std::string position,
-                         std::string tail, const Util::SourceInfo &info, Args... args) {
-    cstring posString = info.toPositionString();
-    if (position.empty()) {
-        position = posString;
-        posString = "";
-    } else {
-        if (!posString.isNullOrEmpty())
-            posString += "\n";
-    }
-    return error_helper(f % "", message, position, tail + posString + info.toSourceFragment(),
-                        std::forward<Args>(args)...);
-}
-
-template<typename T, class... Args>
-auto error_helper(boost::format& f, std::string message, std::string position,
-                  std::string tail, const T *t, Args... args) ->
-    typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type {
-    cstring posString = t->getSourceInfo().toPositionString();
-    if (position.empty()) {
-        position = posString;
-        posString = "";
-    } else {
-        if (!posString.isNullOrEmpty())
-            posString += "\n";
-    }
-    return error_helper(f % t->toString(), message, position,
-                        tail + posString + t->getSourceInfo().toSourceFragment(),
-                        std::forward<Args>(args)...);
-}
-
-template<typename T, class... Args>
-auto error_helper(boost::format& f, std::string message, std::string position,
-                  std::string tail, const T &t, Args... args) ->
-    typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type {
-    cstring posString = t.getSourceInfo().toPositionString();
-    if (position.empty()) {
-        position = posString;
-        posString = "";
-    } else {
-        if (!posString.isNullOrEmpty())
-            posString += "\n";
-    }
-    return error_helper(f % t.toString(), message, position,
-                        tail + posString + t.getSourceInfo().toSourceFragment(),
-                        std::forward<Args>(args)...);
-}
-
-/***********************************************************************************/
-
-static inline std::string bug_helper(boost::format& f, std::string message,
-                                     std::string position, std::string tail) {
-    std::string text = boost::str(f);
-    std::string result = position;
-    if (!position.empty())
-        result += ": ";
-    result += message + text + "\n" + tail;
-    return result;
-}
-
-template<class... Args>
-std::string bug_helper(boost::format& f, std::string message, std::string position,
-                       std::string tail, const char* t, Args... args);
-
-template<class... Args>
-std::string bug_helper(boost::format& f, std::string message, std::string position,
-                       std::string tail, const cstring& t, Args... args);
-
-template<class... Args>
-std::string bug_helper(boost::format& f, std::string message,
-                       std::string position, std::string tail,
-                       const Util::SourceInfo &info, Args... args);
-
-template<typename T, class... Args>
-auto bug_helper(boost::format& f, std::string message, std::string position,
-                std::string tail, const T &t, Args... args) ->
-    typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type;
-
-template<typename T, class... Args>
-auto bug_helper(boost::format& f, std::string message, std::string position,
-                std::string tail, const T *t, Args... args) ->
-    typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type;
-
-template<typename T, class... Args>
-auto bug_helper(boost::format& f, std::string message, std::string position,
-                std::string tail, const T *t, Args... args) ->
-    typename std::enable_if<!std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type;
-
-template<class... Args>
-std::string bug_helper(boost::format& f, std::string message, std::string position,
-                       std::string tail, const mpz_class *t, Args... args);
-
-template<class... Args>
-std::string bug_helper(boost::format& f, std::string message, std::string position,
-                       std::string tail, const mpz_class &t, Args... args);
-
-template<typename T, class... Args>
-auto
-bug_helper(boost::format& f, std::string message, std::string position,
-           std::string tail, const T& t, Args... args) ->
-    typename std::enable_if<!std::is_base_of<Util::IHasSourceInfo, T>::value,
-                            std::string>::type;
-
-// actual implementations
-
-template<class... Args>
-std::string bug_helper(boost::format& f, std::string message, std::string position,
-                       std::string tail, const char* t, Args... args) {
-    return bug_helper(f % t, message, position, tail, std::forward<Args>(args)...);
-}
-
-template<class... Args>
-std::string bug_helper(boost::format& f, std::string message, std::string position,
-                       std::string tail, const cstring& t, Args... args) {
-    return bug_helper(f % t.c_str(), message, position, tail, std::forward<Args>(args)...);
-}
-
-template<typename T, class... Args>
-auto bug_helper(boost::format& f, std::string message, std::string position,
-                std::string tail, const T *t, Args... args) ->
-        typename std::enable_if<!std::is_base_of<Util::IHasSourceInfo, T>::value,
-                                std::string>::type {
-    std::stringstream str;
-    str << t;
-    return bug_helper(f % str.str(), message, position, tail, std::forward<Args>(args)...);
-}
-
-template<class... Args>
-std::string bug_helper(boost::format& f, std::string message, std::string position,
-                       std::string tail, const mpz_class *t, Args... args) {
-    return bug_helper(f % t->get_str(), message, position, tail, std::forward<Args>(args)...);
-}
-
-template<class... Args>
-std::string bug_helper(boost::format& f, std::string message, std::string position,
-                       std::string tail, const mpz_class &t, Args... args) {
-    return bug_helper(f % t.get_str(), message, position, tail, std::forward<Args>(args)...);
-}
-
-template<typename T, class... Args>
-auto
-bug_helper(boost::format& f, std::string message, std::string position,
-           std::string tail, const T& t, Args... args) ->
-    typename std::enable_if<!std::is_base_of<Util::IHasSourceInfo, T>::value,
-                            std::string>::type {
-    return bug_helper(f % t, message, position, tail, std::forward<Args>(args)...);
-}
-
-template<class... Args>
-std::string bug_helper(boost::format& f, std::string message, std::string position,
-                       std::string tail, const Util::SourceInfo &info, Args... args) {
-    cstring posString = info.toPositionString();
-    if (position.empty()) {
-        position = posString;
-        posString = "";
-    } else {
-        if (!posString.isNullOrEmpty())
-            posString += "\n";
-    }
-    return bug_helper(f % "", message, position, tail + posString + info.toSourceFragment(),
-                        std::forward<Args>(args)...);
-}
-
-template<typename T, class... Args>
-auto bug_helper(boost::format& f, std::string message, std::string position,
-                std::string tail, const T *t, Args... args) ->
-    typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type {
-    if (t == nullptr) {
-        return bug_helper(f, message, position,
-                          tail, std::forward<Args>(args)...);
-    }
-
-    cstring posString = t->getSourceInfo().toPositionString();
-    if (position.empty()) {
-        position = posString;
-        posString = "";
-    } else {
-        if (!posString.isNullOrEmpty())
-            posString += "\n";
-    }
-    std::stringstream str;
-    str << t;
-    return bug_helper(f % str.str(), message, position,
-                      tail + posString + t->getSourceInfo().toSourceFragment(),
-                      std::forward<Args>(args)...);
-}
-
-template<typename T, class... Args>
-auto bug_helper(boost::format& f, std::string message, std::string position,
-                std::string tail, const T &t, Args... args) ->
-    typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, std::string>::type {
-    cstring posString = t.getSourceInfo().toPositionString();
-    if (position.empty()) {
-        position = posString;
-        posString = "";
-    } else {
-        if (!posString.isNullOrEmpty())
-            posString += "\n";
-    }
-    std::stringstream str;
-    str << t;
-    return bug_helper(f % str.str(), message, position,
-                        tail + posString + t.getSourceInfo().toSourceFragment(),
-                        std::forward<Args>(args)...);
-}
-
-/***********************************************************************************/
+#include "error_helper.h"
+#include "error_catalog.h"
+#include "exceptions.h"
 
 /// An action to take when a diagnostic message is triggered.
 enum class DiagnosticAction {
@@ -357,7 +28,6 @@ enum class DiagnosticAction {
     Error    /// Print an error and signal that compilation should be aborted.
 };
 
-#include "error_catalog.h"
 
 // Keeps track of compilation errors.
 // Errors are specified using the error() and warning() methods,
@@ -399,6 +69,7 @@ class ErrorReporter final {
     ErrorReporter()
         : errorCount(0),
           warningCount(0),
+          maxErrorCount(20),
           defaultWarningDiagnosticAction(DiagnosticAction::Warn)
     { outputstream = &std::cerr; }
 
@@ -432,7 +103,7 @@ class ErrorReporter final {
             if (name)
                 diagnose(da, name, fmt.c_str(), node, args...);
             else
-                diagnoseUnnamed(action, fmt.c_str(), node, std::forward<Args>(args)...);
+                diagnose(action, nullptr, fmt.c_str(), node, std::forward<Args>(args)...);
         }
     }
 
@@ -455,9 +126,11 @@ class ErrorReporter final {
         if (name)
             diagnose(da, name, fmt.c_str(), args...);
         else
-            diagnoseUnnamed(action, fmt.c_str(), std::forward<Args>(args)...);
+            diagnose(action, nullptr, fmt.c_str(), std::forward<Args>(args)...);
     }
 
+    /// The sink of all the diagnostic functions. Here the error gets printed
+    /// or an exception thrown if the error count exceeds maxErrorCount.
     template <typename... T>
     void diagnose(DiagnosticAction action, const char* diagnosticName,
                   const char* format, T... args) {
@@ -466,59 +139,51 @@ class ErrorReporter final {
         std::string prefix;
         if (action == DiagnosticAction::Warn) {
             warningCount++;
-            prefix.append("[--Wwarn=");
-            prefix.append(diagnosticName);
-            prefix.append("] warning: ");
+            if (diagnosticName != nullptr) {
+                prefix.append("[--Wwarn=");
+                prefix.append(diagnosticName);
+                prefix.append("] warning: ");
+            } else {
+                prefix.append("warning: ");
+            }
         } else if (action == DiagnosticAction::Error) {
             errorCount++;
-            prefix.append("[--Werror=");
-            prefix.append(diagnosticName);
-            prefix.append("] error: ");
+            if (diagnosticName != nullptr) {
+                prefix.append("[--Werror=");
+                prefix.append(diagnosticName);
+                prefix.append("] error: ");
+            } else {
+                prefix.append("error: ");
+            }
         }
 
         boost::format fmt(format);
         std::string message = ::error_helper(fmt, prefix, "", "", args...);
         emit_message(message);
+        if (errorCount >= maxErrorCount)
+            FATAL_ERROR("Number of errors exceeded set maximum of %1%", maxErrorCount);
     }
 
-    template <typename... T>
-    void diagnoseUnnamed(DiagnosticAction action, const char* format, T... args) {
-        const char* msg;
-        if (action == DiagnosticAction::Error) {
-            msg = "error: ";
-            errorCount++;
-        } else if (action == DiagnosticAction::Warn) {
-            msg = "warning: ";
-            warningCount++;
-        } else {
-            return;
-        }
-        boost::format fmt(format);
-        std::string message = ::error_helper(fmt, msg, "", "", args...);
-        emit_message(message);
+
+    unsigned getErrorCount() const { return errorCount; }
+
+    unsigned getMaxErrorCount() const { return maxErrorCount; }
+    /// set maxErrorCount to a the @newMaxCount threshold and return the previous value
+    unsigned setMaxErrorCount(unsigned newMaxCount) {
+        auto r = maxErrorCount;
+        maxErrorCount = newMaxCount;
+        return r;
     }
 
-    unsigned getErrorCount() const {
-        return errorCount;
-    }
-
-    unsigned getWarningCount() const {
-        return warningCount;
-    }
+    unsigned getWarningCount() const { return warningCount; }
 
     /// @return the number of diagnostics (warnings and errors) encountered
     /// in the current CompileContext.
-    unsigned getDiagnosticCount() const {
-        return errorCount + warningCount;
-    }
+    unsigned getDiagnosticCount() const { return errorCount + warningCount; }
 
-    void setOutputStream(std::ostream* stream) {
-        outputstream = stream;
-    }
+    void setOutputStream(std::ostream* stream) { outputstream = stream; }
 
-    std::ostream* getOutputStream() const {
-        return outputstream;
-    }
+    std::ostream* getOutputStream() const { return outputstream; }
 
     /// Reports an error @message at @location. This allows us to use the
     /// position information provided by Bison.
@@ -585,6 +250,7 @@ class ErrorReporter final {
  private:
     unsigned errorCount;
     unsigned warningCount;
+    unsigned maxErrorCount;  /// the maximum number of errors that we print before fail
 
     /// The default diagnostic action for calls to `::warning()`.
     DiagnosticAction defaultWarningDiagnosticAction;

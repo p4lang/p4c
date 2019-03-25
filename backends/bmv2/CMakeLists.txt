@@ -177,7 +177,7 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/psa-example-counters-bmv2.p4
   testdata/p4_16_samples/psa-example-digest-bmv2.p4
   testdata/p4_16_samples/psa-example-register2-bmv2.p4
-  testdata/p4_16_samples/psa-fwd-bmv2.p4
+  # testdata/p4_16_samples/psa-fwd-bmv2.p4
   # This reads stack.next
   testdata/p4_16_samples/issue692-bmv2.p4
   # These test use computations in the verify/update checksum controls - unsupported

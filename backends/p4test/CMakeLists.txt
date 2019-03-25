@@ -84,7 +84,7 @@ set (P4_XFAIL_TESTS
   testdata/p4_16_samples/cast-call.p4
   testdata/p4_16_samples/psa-example-parser-checksum.p4
   )
-p4c_add_tests_w_p4runtime("p4" ${P4TEST_DRIVER} "${P4TEST_SUITES}" "${P4_XFAIL_TESTS}" "${P4RUNTIME_EXCLUDE}")
+p4c_add_tests_w_p4runtime("p4" ${P4TEST_DRIVER} "${P4TEST_SUITES}" "${P4_XFAIL_TESTS}" "${P4RUNTIME_EXCLUDE}" "-a '--maxErrorCount 100'")
 
 set (P4_14_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"

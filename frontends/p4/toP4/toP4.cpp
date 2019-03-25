@@ -365,12 +365,15 @@ bool ToP4::preorder(const IR::TypeParameters* t) {
     if (!t->empty()) {
         builder.append("<");
         bool first = true;
+        bool decl = isDeclaration;
+        isDeclaration = false;
         for (auto a : t->parameters) {
             if (!first)
                 builder.append(", ");
             first = false;
             visit(a);
         }
+        isDeclaration = decl;
         builder.append(">");
     }
     return false;
@@ -419,10 +422,13 @@ bool ToP4::preorder(const IR::Function* function) {
 
 bool ToP4::preorder(const IR::Type_Extern* t) {
     dump(2);
-    visit(t->annotations);
-    builder.append("extern ");
+    if (isDeclaration) {
+        visit(t->annotations);
+        builder.append("extern "); }
     builder.append(t->name);
     visit(t->typeParameters);
+    if (!isDeclaration)
+        return false;
     builder.spc();
     builder.blockStart();
 
@@ -471,10 +477,13 @@ bool ToP4::preorder(const IR::Type_Package* package) {
 
 bool ToP4::process(const IR::Type_StructLike* t, const char* name) {
     dump(2);
-    builder.emitIndent();
-    visit(t->annotations);
-    builder.appendFormat("%s ", name);
+    if (isDeclaration) {
+        builder.emitIndent();
+        visit(t->annotations);
+        builder.appendFormat("%s ", name); }
     builder.append(t->name);
+    if (!isDeclaration)
+        return false;
     builder.spc();
     builder.blockStart();
 
@@ -880,11 +889,14 @@ bool ToP4::preorder(const IR::MethodCallExpression* e) {
         builder.append("(");
     visit(e->method);
     if (!e->typeArguments->empty()) {
+        bool decl = isDeclaration;
+        isDeclaration = false;
         builder.append("<");
         setVecSep(", ");
         visit(e->typeArguments);
         doneVec();
         builder.append(">");
+        isDeclaration = decl;
     }
     builder.append("(");
     setVecSep(", ");
@@ -1151,7 +1163,10 @@ bool ToP4::preorder(const IR::Parameter* p) {
         default:
             BUG("Unexpected case");
     }
+    bool decl = isDeclaration;
+    isDeclaration = false;
     visit(p->type);
+    isDeclaration = decl;
     builder.spc();
     builder.append(p->name);
     if (p->defaultValue != nullptr) {

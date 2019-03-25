@@ -304,7 +304,11 @@ const IR::Statement* ProgramStructure::convertParserStatement(const IR::Expressi
             auto dest = conv.convert(primitive->operands.at(0));
             auto destType = dest->type;
             CHECK_NULL(destType);
-            BUG_CHECK(destType->is<IR::Type_Header>(), "%1%: expected a header", destType);
+            if (!destType->is<IR::Type_Header>()) {
+                ::error(ErrorType::ERR_INVALID, "argument. Expected a header not %2%",
+                        primitive, destType->toString());
+                return nullptr;
+            }
             auto finalDestType = ::get(
                 finalHeaderType, destType->to<IR::Type_Header>()->externalName());
             BUG_CHECK(finalDestType != nullptr, "%1%: could not find final type",

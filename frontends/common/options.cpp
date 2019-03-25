@@ -170,6 +170,12 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
         }, "Report an error for a compiler diagnostic, or treat all warnings as "
            "errors if no diagnostic is specified.",
         OptionFlags::OptionalArgument);
+    registerOption("--maxErrorCount", "errorCount",
+                   [](const char *arg) {
+                       auto maxError = strtoul(arg, nullptr, 10);
+                       P4CContext::get().errorReporter().setMaxErrorCount(maxError);
+                       return true; },
+                   "Set the maximum number of errors to display before failing.");
     registerOption("--testJson", nullptr,
                     [this](const char*) { debugJson = true; return true; },
                     "[Compiler debugging] Dump and undump the IR");
@@ -233,6 +239,11 @@ static void convertToAbsPath(const char* const relPath, char (&output)[N]) {
 bool setIncludePathIfExists(const char*& includePathOut,
                             const char* possiblePath) {
     struct stat st;
+    char buffer[PATH_MAX];
+    int len;
+    if ((len = readlink(possiblePath, buffer, sizeof(buffer))) > 0) {
+        buffer[len] = 0;
+        possiblePath = buffer; }
     if (!(stat(possiblePath, &st) >= 0 && S_ISDIR(st.st_mode))) return false;
     includePathOut = strdup(possiblePath);
     return true;
