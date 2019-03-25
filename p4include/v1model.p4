@@ -223,13 +223,13 @@ extern register<T> {
      * execute them in a P4_16 block annotated with an @atomic
      * annotation.
      *
-     * The BMv2 implementation supports parallel execution, and uses
-     * locking of register objects used within an action to guarantee
-     * that the execution of all steps within an action is atomic,
-     * relative to other packets executing that or other actions that
-     * access any of the same register objects.  You need not use the
-     * @atomic annotation in your P4_16 program in order for this
-     * level of atomicity to be guaranteed for you.
+     * The BMv2 implementation supports parallel execution.  It uses
+     * locking of all register objects accessed within an action to
+     * guarantee that the execution of all steps within an action is
+     * atomic, relative to other packets executing the same action, or
+     * any action that accesses some of the same register objects.
+     * You need not use the @atomic annotation in your P4_16 program
+     * in order for this level of atomicity to be guaranteed for you.
      *
      * @param index The index of the register array element to be
      *              written, normally a value in the range [0,
