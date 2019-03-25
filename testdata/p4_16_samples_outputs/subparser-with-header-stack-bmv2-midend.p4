@@ -35,7 +35,6 @@ struct metadata {
 }
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    h2_t[5] hdr_0_h2;
     state start {
         pkt.extract<h1_t>(hdr.h1);
         verify(hdr.h1.hdr_type == 8w1, error.BadHeaderType);
@@ -46,11 +45,9 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
         }
     }
     state parse_first_h2 {
-        hdr_0_h2 = hdr.h2;
-        pkt.extract<h2_t>(hdr_0_h2.next);
-        verify(hdr_0_h2.last.hdr_type == 8w2, error.BadHeaderType);
-        hdr.h2 = hdr_0_h2;
-        transition select(hdr_0_h2.last.next_hdr_type) {
+        pkt.extract<h2_t>(hdr.h2.next);
+        verify(hdr.h2.last.hdr_type == 8w2, error.BadHeaderType);
+        transition select(hdr.h2.last.next_hdr_type) {
             8w2: parse_other_h2;
             8w3: parse_h3;
             default: accept;
