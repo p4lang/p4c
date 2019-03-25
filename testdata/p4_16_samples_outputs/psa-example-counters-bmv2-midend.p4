@@ -40,47 +40,39 @@ struct headers {
 }
 
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
-    ethernet_t parsed_hdr_0_ethernet;
-    ipv4_t parsed_hdr_0_ipv4;
     state start {
-        parsed_hdr_0_ethernet.setInvalid();
-        parsed_hdr_0_ipv4.setInvalid();
-        buffer.extract<ethernet_t>(parsed_hdr_0_ethernet);
-        transition select(parsed_hdr_0_ethernet.etherType) {
+        parsed_hdr.ethernet.setInvalid();
+        parsed_hdr.ipv4.setInvalid();
+        buffer.extract<ethernet_t>(parsed_hdr.ethernet);
+        transition select(parsed_hdr.ethernet.etherType) {
             16w0x800: CommonParser_parse_ipv4;
             default: start_0;
         }
     }
     state CommonParser_parse_ipv4 {
-        buffer.extract<ipv4_t>(parsed_hdr_0_ipv4);
+        buffer.extract<ipv4_t>(parsed_hdr.ipv4);
         transition start_0;
     }
     state start_0 {
-        parsed_hdr.ethernet = parsed_hdr_0_ethernet;
-        parsed_hdr.ipv4 = parsed_hdr_0_ipv4;
         transition accept;
     }
 }
 
 parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_egress_parser_input_metadata_t istd, in empty_metadata_t normal_meta, in empty_metadata_t clone_i2e_meta, in empty_metadata_t clone_e2e_meta) {
-    ethernet_t parsed_hdr_1_ethernet;
-    ipv4_t parsed_hdr_1_ipv4;
     state start {
-        parsed_hdr_1_ethernet.setInvalid();
-        parsed_hdr_1_ipv4.setInvalid();
-        buffer.extract<ethernet_t>(parsed_hdr_1_ethernet);
-        transition select(parsed_hdr_1_ethernet.etherType) {
+        parsed_hdr.ethernet.setInvalid();
+        parsed_hdr.ipv4.setInvalid();
+        buffer.extract<ethernet_t>(parsed_hdr.ethernet);
+        transition select(parsed_hdr.ethernet.etherType) {
             16w0x800: CommonParser_parse_ipv4_0;
             default: start_1;
         }
     }
     state CommonParser_parse_ipv4_0 {
-        buffer.extract<ipv4_t>(parsed_hdr_1_ipv4);
+        buffer.extract<ipv4_t>(parsed_hdr.ipv4);
         transition start_1;
     }
     state start_1 {
-        parsed_hdr.ethernet = parsed_hdr_1_ethernet;
-        parsed_hdr.ipv4 = parsed_hdr_1_ipv4;
         transition accept;
     }
 }
