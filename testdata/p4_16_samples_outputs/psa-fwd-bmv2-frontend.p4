@@ -23,39 +23,29 @@ struct headers {
 }
 
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_t resubmit_meta, in empty_t recirculate_meta) {
-    headers parsed_hdr_0;
-    metadata user_meta_0;
     state start {
-        parsed_hdr_0.ethernet.setInvalid();
-        user_meta_0 = user_meta;
+        parsed_hdr.ethernet.setInvalid();
         transition CommonParser_start;
     }
     state CommonParser_start {
-        buffer.extract<ethernet_t>(parsed_hdr_0.ethernet);
+        buffer.extract<ethernet_t>(parsed_hdr.ethernet);
         transition start_0;
     }
     state start_0 {
-        parsed_hdr = parsed_hdr_0;
-        user_meta = user_meta_0;
         transition accept;
     }
 }
 
 parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_egress_parser_input_metadata_t istd, in empty_t normal_meta, in empty_t clone_i2e_meta, in empty_t clone_e2e_meta) {
-    headers parsed_hdr_1;
-    metadata user_meta_1;
     state start {
-        parsed_hdr_1.ethernet.setInvalid();
-        user_meta_1 = user_meta;
+        parsed_hdr.ethernet.setInvalid();
         transition CommonParser_start_0;
     }
     state CommonParser_start_0 {
-        buffer.extract<ethernet_t>(parsed_hdr_1.ethernet);
+        buffer.extract<ethernet_t>(parsed_hdr.ethernet);
         transition start_1;
     }
     state start_1 {
-        parsed_hdr = parsed_hdr_1;
-        user_meta = user_meta_1;
         transition accept;
     }
 }

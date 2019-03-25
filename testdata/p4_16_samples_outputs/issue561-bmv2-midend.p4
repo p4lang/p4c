@@ -103,8 +103,6 @@ struct Tcp_option_sack_top {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    Tcp_option_stack vec_0;
-    Tcp_option_padding_h padding_0;
     bit<7> Tcp_option_parser_tcp_hdr_bytes_left;
     bit<8> Tcp_option_parser_tmp;
     bit<16> tmp;
@@ -124,57 +122,57 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state parse_tcp {
         packet.extract<tcp_t>(hdr.tcp);
-        vec_0[0].end.setInvalid();
-        vec_0[0].nop.setInvalid();
-        vec_0[0].ss.setInvalid();
-        vec_0[0].s.setInvalid();
-        vec_0[0].sack.setInvalid();
-        vec_0[1].end.setInvalid();
-        vec_0[1].nop.setInvalid();
-        vec_0[1].ss.setInvalid();
-        vec_0[1].s.setInvalid();
-        vec_0[1].sack.setInvalid();
-        vec_0[2].end.setInvalid();
-        vec_0[2].nop.setInvalid();
-        vec_0[2].ss.setInvalid();
-        vec_0[2].s.setInvalid();
-        vec_0[2].sack.setInvalid();
-        vec_0[3].end.setInvalid();
-        vec_0[3].nop.setInvalid();
-        vec_0[3].ss.setInvalid();
-        vec_0[3].s.setInvalid();
-        vec_0[3].sack.setInvalid();
-        vec_0[4].end.setInvalid();
-        vec_0[4].nop.setInvalid();
-        vec_0[4].ss.setInvalid();
-        vec_0[4].s.setInvalid();
-        vec_0[4].sack.setInvalid();
-        vec_0[5].end.setInvalid();
-        vec_0[5].nop.setInvalid();
-        vec_0[5].ss.setInvalid();
-        vec_0[5].s.setInvalid();
-        vec_0[5].sack.setInvalid();
-        vec_0[6].end.setInvalid();
-        vec_0[6].nop.setInvalid();
-        vec_0[6].ss.setInvalid();
-        vec_0[6].s.setInvalid();
-        vec_0[6].sack.setInvalid();
-        vec_0[7].end.setInvalid();
-        vec_0[7].nop.setInvalid();
-        vec_0[7].ss.setInvalid();
-        vec_0[7].s.setInvalid();
-        vec_0[7].sack.setInvalid();
-        vec_0[8].end.setInvalid();
-        vec_0[8].nop.setInvalid();
-        vec_0[8].ss.setInvalid();
-        vec_0[8].s.setInvalid();
-        vec_0[8].sack.setInvalid();
-        vec_0[9].end.setInvalid();
-        vec_0[9].nop.setInvalid();
-        vec_0[9].ss.setInvalid();
-        vec_0[9].s.setInvalid();
-        vec_0[9].sack.setInvalid();
-        padding_0.setInvalid();
+        hdr.tcp_options_vec[0].end.setInvalid();
+        hdr.tcp_options_vec[0].nop.setInvalid();
+        hdr.tcp_options_vec[0].ss.setInvalid();
+        hdr.tcp_options_vec[0].s.setInvalid();
+        hdr.tcp_options_vec[0].sack.setInvalid();
+        hdr.tcp_options_vec[1].end.setInvalid();
+        hdr.tcp_options_vec[1].nop.setInvalid();
+        hdr.tcp_options_vec[1].ss.setInvalid();
+        hdr.tcp_options_vec[1].s.setInvalid();
+        hdr.tcp_options_vec[1].sack.setInvalid();
+        hdr.tcp_options_vec[2].end.setInvalid();
+        hdr.tcp_options_vec[2].nop.setInvalid();
+        hdr.tcp_options_vec[2].ss.setInvalid();
+        hdr.tcp_options_vec[2].s.setInvalid();
+        hdr.tcp_options_vec[2].sack.setInvalid();
+        hdr.tcp_options_vec[3].end.setInvalid();
+        hdr.tcp_options_vec[3].nop.setInvalid();
+        hdr.tcp_options_vec[3].ss.setInvalid();
+        hdr.tcp_options_vec[3].s.setInvalid();
+        hdr.tcp_options_vec[3].sack.setInvalid();
+        hdr.tcp_options_vec[4].end.setInvalid();
+        hdr.tcp_options_vec[4].nop.setInvalid();
+        hdr.tcp_options_vec[4].ss.setInvalid();
+        hdr.tcp_options_vec[4].s.setInvalid();
+        hdr.tcp_options_vec[4].sack.setInvalid();
+        hdr.tcp_options_vec[5].end.setInvalid();
+        hdr.tcp_options_vec[5].nop.setInvalid();
+        hdr.tcp_options_vec[5].ss.setInvalid();
+        hdr.tcp_options_vec[5].s.setInvalid();
+        hdr.tcp_options_vec[5].sack.setInvalid();
+        hdr.tcp_options_vec[6].end.setInvalid();
+        hdr.tcp_options_vec[6].nop.setInvalid();
+        hdr.tcp_options_vec[6].ss.setInvalid();
+        hdr.tcp_options_vec[6].s.setInvalid();
+        hdr.tcp_options_vec[6].sack.setInvalid();
+        hdr.tcp_options_vec[7].end.setInvalid();
+        hdr.tcp_options_vec[7].nop.setInvalid();
+        hdr.tcp_options_vec[7].ss.setInvalid();
+        hdr.tcp_options_vec[7].s.setInvalid();
+        hdr.tcp_options_vec[7].sack.setInvalid();
+        hdr.tcp_options_vec[8].end.setInvalid();
+        hdr.tcp_options_vec[8].nop.setInvalid();
+        hdr.tcp_options_vec[8].ss.setInvalid();
+        hdr.tcp_options_vec[8].s.setInvalid();
+        hdr.tcp_options_vec[8].sack.setInvalid();
+        hdr.tcp_options_vec[9].end.setInvalid();
+        hdr.tcp_options_vec[9].nop.setInvalid();
+        hdr.tcp_options_vec[9].ss.setInvalid();
+        hdr.tcp_options_vec[9].s.setInvalid();
+        hdr.tcp_options_vec[9].sack.setInvalid();
+        hdr.tcp_options_padding.setInvalid();
         verify(hdr.tcp.dataOffset >= 4w5, error.TcpDataOffsetTooSmall);
         Tcp_option_parser_tcp_hdr_bytes_left = (bit<7>)(hdr.tcp.dataOffset + 4w11) << 2;
         transition Tcp_option_parser_next_option;
@@ -197,26 +195,26 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     state Tcp_option_parser_parse_tcp_option_end {
-        packet.extract<Tcp_option_end_h>(vec_0.next.end);
+        packet.extract<Tcp_option_end_h>(hdr.tcp_options_vec.next.end);
         Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w127;
-        packet.extract<Tcp_option_padding_h>(padding_0, (bit<32>)((bit<9>)Tcp_option_parser_tcp_hdr_bytes_left << 3));
+        packet.extract<Tcp_option_padding_h>(hdr.tcp_options_padding, (bit<32>)((bit<9>)Tcp_option_parser_tcp_hdr_bytes_left << 3));
         transition parse_tcp_0;
     }
     state Tcp_option_parser_parse_tcp_option_nop {
-        packet.extract<Tcp_option_nop_h>(vec_0.next.nop);
+        packet.extract<Tcp_option_nop_h>(hdr.tcp_options_vec.next.nop);
         Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w127;
         transition Tcp_option_parser_next_option;
     }
     state Tcp_option_parser_parse_tcp_option_ss {
         verify(Tcp_option_parser_tcp_hdr_bytes_left >= 7w5, error.TcpOptionTooLongForHeader);
         Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w123;
-        packet.extract<Tcp_option_ss_h>(vec_0.next.ss);
+        packet.extract<Tcp_option_ss_h>(hdr.tcp_options_vec.next.ss);
         transition Tcp_option_parser_next_option;
     }
     state Tcp_option_parser_parse_tcp_option_s {
         verify(Tcp_option_parser_tcp_hdr_bytes_left >= 7w4, error.TcpOptionTooLongForHeader);
         Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w124;
-        packet.extract<Tcp_option_s_h>(vec_0.next.s);
+        packet.extract<Tcp_option_s_h>(hdr.tcp_options_vec.next.s);
         transition Tcp_option_parser_next_option;
     }
     state Tcp_option_parser_parse_tcp_option_sack {
@@ -224,12 +222,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         verify(tmp[7:0] == 8w10 || tmp[7:0] == 8w18 || tmp[7:0] == 8w26 || tmp[7:0] == 8w34, error.TcpBadSackOptionLength);
         verify(Tcp_option_parser_tcp_hdr_bytes_left >= (bit<7>)tmp[7:0], error.TcpOptionTooLongForHeader);
         Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left - (bit<7>)tmp[7:0];
-        packet.extract<Tcp_option_sack_h>(vec_0.next.sack, (bit<32>)((tmp[7:0] << 3) + 8w240));
+        packet.extract<Tcp_option_sack_h>(hdr.tcp_options_vec.next.sack, (bit<32>)((tmp[7:0] << 3) + 8w240));
         transition Tcp_option_parser_next_option;
     }
     state parse_tcp_0 {
-        hdr.tcp_options_vec = vec_0;
-        hdr.tcp_options_padding = padding_0;
         transition accept;
     }
     state noMatch {
