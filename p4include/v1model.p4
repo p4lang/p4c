@@ -218,18 +218,11 @@ extern register<T> {
      * If you wish to perform a read() followed later by a write() to
      * the same register array element, and you wish the
      * read-modify-write sequence to be atomic relative to other
-     * processed packets, then there may be parallel
-     * implementations of the v1model architecture for which you must
-     * execute them in a P4_16 block annotated with an @atomic
-     * annotation.
-     *
-     * The BMv2 implementation supports parallel execution.  It uses
-     * locking of all register objects accessed within an action to
-     * guarantee that the execution of all steps within an action is
-     * atomic, relative to other packets executing the same action, or
-     * any action that accesses some of the same register objects.
-     * You need not use the @atomic annotation in your P4_16 program
-     * in order for this level of atomicity to be guaranteed for you.
+     * processed packets, then there may be parallel implementations
+     * of the v1model architecture for which you must execute them in
+     * a P4_16 block annotated with an @atomic annotation.  See the
+     * P4_16 language specification description of the @atomic
+     * annotation for more details.
      *
      * @param index The index of the register array element to be
      *              written, normally a value in the range [0,
@@ -252,10 +245,6 @@ extern action_profile {
  * Generate a random number in the range lo..hi, inclusive, and write
  * it to the result parameter.  The value written to result is not
  * specified if lo > hi.
- *
- * In the BMv2 implementation, lo and hi can be run-time variables,
- * i.e. they need not be compile-time constants, and they need not be
- * limited to the constraint that (hi - lo + 1) is a power of 2.
  *
  * @param T          Must be a type bit<W> with 1 <= W <= 64
  */
@@ -300,12 +289,6 @@ extern void mark_to_drop();
  * parameter.  The value written to the out parameter named result
  * will always be in the range [base, base+max-1] inclusive, if max >=
  * 1.  If max=0, the value written to result will always be base.
- *
- * In the BMv2 implementation, call the hash value that is calculated
- * from the data H.  The value written to result is: (base + (H %
- * max)) if max >= 1, otherwise base.  base and max can be run-time
- * variables, i.e. they need not be compile-time constants, and max
- * need not be limited to have a value that is a power of 2.
  *
  * @param O          Must be a type bit<W>
  * @param D          Must be a tuple type where all the fields are bit-fields (type bit<W> or int<W>) or varbits.
