@@ -492,6 +492,9 @@ also serve to document the P4_14 behavior of `simple_switch`.  This
 section is only for things specific to P4_16 plus the v1model
 architecture.
 
+
+### Restrictions on type `H`
+
 There is a type called `H` that is a parameter to the package
 `V1Switch` definition in `v1model.p4`, excerpted below:
 
@@ -511,3 +514,94 @@ of one of the following types, and no others:
 + header
 + header_union
 + header stack
+
+
+### Restrictions on parser code
+
+The P4_16 language specification version 1.1 does not support `if`
+statements inside of parsers.  Because the `p4c` compiler in-lines
+calls to functions at the location of the call, this restriction
+extends to function bodies of functions called from a parser.  There
+are two potential workarounds:
+
++ If the conditional execution can be done just as effectively by
+  waiting to do it during ingress control processing, you can use `if`
+  statements there.
++ In some cases you can implement the desired conditional execution
+  effect using `transition select` statements to branch to different
+  parser states, each of which can have its own distinct code.
+
+In the `v1model` architecture, a packet reaching the `reject` parser
+state, e.g. because it failed a `verify` call, is _not_ automatically
+dropped.  Such a packet will begin `Ingress` processing with the value
+of the `parser_error` standard metadata field equal to the error that
+occurred.  Your P4 code can direct such packets to be dropped if you
+wish, but you may also choose to write code that will do other things
+with such packets, e.g. send a clone of them to a control CPU for
+further analysis or error logging.
+
+`p4c` plus `simple_switch` does not support transitioning to the
+`reject` state explicitly in the source code.  It can only do so via
+failing a call to `verify`.
+
+
+### Restrictions on code in the `VerifyChecksum` control
+
+The `VerifyChecksum` control is executed just after the `Parser`
+completes, and just before the `Ingress` control begins.  `p4c` plus
+`simple_switch` only support a sequence of calls to the
+`verify_checksum` or `verify_checksum_with_payload` extern functions
+inside such controls.  See the `v1model.p4` include file for their
+definition.  The first argument to these functions is a boolean, which
+can be an arbitrary boolean condition used to make the checksum
+calculation conditional on that expression being true.
+
+In the `v1model` architecture, a packet having an incorrect checksum
+is _not_ automatically dropped.  Such a packet will begin `Ingress`
+processing with the value of the `checksum_error` standard metadata
+field equal to 1.  If your program has multiple calls to
+`verify_checksum` and/or `verify_checksum_with_payload`, there is no
+way supported to determine which of the calls was the one that found
+an incorrect checksum.  Your P4 code can direct such packets to be
+dropped if you wish, but this will not automatically be done for you.
+
+
+### Restrictions on code in the `Ingress` and `Egress` controls
+
+`simple_switch` does not support doing `apply` on the same table more
+than once for a single execution of the `Ingress` control, nor for a
+single execution of the `Egress` control.
+
+In some cases, you can work around this restriction by having multiple
+tables with similar definitions, and `apply` each of them once per
+execution of the `Ingress` control (or `Egress`).  If you want two
+such tables to contain the same set of table entries and actions, then
+you must write your control plane software to keep their contents the
+same, e.g. always add an entry to `T2` every time you add an entry to
+`T1`, etc.
+
+This restriction is one that could be generalized in `simple_switch`,
+but realize that some high speed ASIC implementations of P4 may also
+impose this same restriction, because the restriction can be imposed
+by the design of the hardware.
+
+
+### Restrictions on code in the `ComputeChecksum` control
+
+The `ComputeChecksum` control is executed just after the `Egress`
+control completes, and just before the `Deparser` control begins.
+`p4c` plus `simple_switch` only support a sequence of calls to the
+`update_checksum` or `update_checksum_with_payload` extern functions
+inside such controls.  The first argument to these functions is a
+boolean, which can be an arbitrary boolean condition used to make the
+checksum update action conditional on that expression being true.
+
+
+### Restrictions on code in the `Deparser` control
+
+The `Deparser` control is restricted to contain only a sequence of
+calls to the `emit` method of the `packet_out` object.
+
+The most straightforward approach to avoiding the restrictions in the
+`ComputeChecksum` and `Deparser` controls is to write the more general
+code you want near the end of the `Egress` control.
