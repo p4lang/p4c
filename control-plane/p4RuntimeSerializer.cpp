@@ -668,12 +668,24 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
 class ParseAnnotations : public P4::ParseAnnotations {
  public:
     ParseAnnotations() : P4::ParseAnnotations("P4Runtime", false, {
-                PARSE("controller_header", StringLiteral),
-                PARSE_EMPTY("hidden"),
-                PARSE("id", Constant),
-                PARSE("brief", StringLiteral),
-                PARSE("description", StringLiteral)
-            }) { }
+        PARSE("controller_header", StringLiteral),
+        PARSE_EMPTY("hidden"),
+        PARSE("id", Constant),
+        PARSE("brief", StringLiteral),
+        PARSE("description", StringLiteral),
+        // This annotation is architecture-specific in theory, but given that it
+        // is "reserved" by the P4Runtime specification, I don't really have any
+        // qualms about adding it here. I don't think it is possible to just run
+        // a different ParseAnnotations pass in the constructor of the
+        // architecture-specific P4RuntimeArchHandlerIface implementation, since
+        // ParseAnnotations modifies the program. I don't really like the
+        // possible alternatives either: 1) modify the P4RuntimeArchHandlerIface
+        // interface so that each implementation can provide a custom
+        // ParseAnnotations instance, or 2) run a ParseAnnotations pass
+        // "locally" (in this case on action profile instances since this
+        // annotation is for them).
+        PARSE("max_group_size", Constant)
+    }) { }
 };
 
 /// An analyzer which translates the information available in the P4 IR into a
