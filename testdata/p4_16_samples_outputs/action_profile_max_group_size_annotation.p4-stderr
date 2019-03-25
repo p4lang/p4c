@@ -1,0 +1,3 @@
+action_profile_max_group_size_annotation.p4(39): [--Wwarn=ignore] warning: Ignoring annotation @max_group_size on action profile 'ap', which does not have a selector
+        @name("ap") @max_group_size(200) implementation = action_profile(32w128);
+                                         ^^^^^^^^^^^^^^
