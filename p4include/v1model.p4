@@ -124,7 +124,7 @@ extern direct_counter {
      * the table is applied and a table entry is matched, the counter
      * state associated with the matching entry is read, modified, and
      * written back, atomically relative to the processing of other
-     * packets, regardless of whethr the count() method is called in
+     * packets, regardless of whether the count() method is called in
      * the body of that action.
      */
     void count();
@@ -164,9 +164,9 @@ extern direct_meter<T> {
      * You must provide a choice of whether to meter based on the
      * number of packets, regardless of their size
      * (MeterType.packets), or based upon the number of bytes the
-     * packets have (MeterType.bytes).  After constructing the object,
-     * you can associate it with at most one table, by adding the
-     * following table property to the definition of that table:
+     * packets contain (MeterType.bytes).  After constructing the
+     * object, you can associate it with at most one table, by adding
+     * the following table property to the definition of that table:
      *
      *     meters = <object_name>;
      */
@@ -177,7 +177,7 @@ extern direct_meter<T> {
      * constructor, every time the table is applied and a table entry
      * is matched, the meter state associated with the matching entry
      * is read, modified, and written back, atomically relative to the
-     * processing of other packets, regardless of whethr the read()
+     * processing of other packets, regardless of whether the read()
      * method is called in the body of that action.
      *
      * read() may only be called within an action executed as a result
@@ -206,9 +206,9 @@ extern register<T> {
      * @param result Only types T that are bit<W> are currently
      *              supported.  When index is in range, the value of
      *              result becomes the value read from the register
-     *              array element.  When index is out of range, the
-     *              final value of result is not specified, and should
-     *              be ignored by the caller.
+     *              array element.  When index >= size, the final
+     *              value of result is not specified, and should be
+     *              ignored by the caller.
      */
     void read(out T result, in bit<32> index);
     /***
