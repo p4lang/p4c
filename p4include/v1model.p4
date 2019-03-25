@@ -104,17 +104,28 @@ extern counter {
 }
 
 extern direct_counter {
+    /***
+     * A direct_counter object is created by calling its constructor.
+     * You must provide a choice of whether to maintain only a packet
+     * count (CounterType.packets), only a byte count
+     * (CounterType.bytes), or both (CounterType.packets_and_bytes).
+     * After constructing the object, you can associate it with at
+     * most one table, by adding the following table property to the
+     * definition of that table:
+     *
+     *     counters = <object_name>;
+     */
     direct_counter(CounterType type);
     /***
-     * count() on a direct_counter object may only be called within an
-     * action executed as a result of matching a table entry, of a
-     * table that has a direct_counter associated with it.  Calling
-     * count() causes the counter state associated with the matched
-     * table entry to be read, modified, and written back, atomically
-     * relative to the processing of other packets.
-     *
-     * TBD: Is the direct_counter state updated even if an action is
-     * executed that does not call the count() method?
+     * The count() method is actually unnecessary in the v1model
+     * architecture.  This is because after a direct_counter object
+     * has been associated with a table as described in the
+     * documentation for the direct_counter constructor, every time
+     * the table is applied and a table entry is matched, the counter
+     * state associated with the matching entry is read, modified, and
+     * written back, atomically relative to the processing of other
+     * packets, regardless of whethr the count() method is called in
+     * the body of that action.
      */
     void count();
 }
@@ -148,19 +159,32 @@ extern meter {
 }
 
 extern direct_meter<T> {
+    /***
+     * A direct_meter object is created by calling its constructor.
+     * You must provide a choice of whether to meter based on the
+     * number of packets, regardless of their size
+     * (MeterType.packets), or based upon the number of bytes the
+     * packets have (MeterType.bytes).  After constructing the object,
+     * you can associate it with at most one table, by adding the
+     * following table property to the definition of that table:
+     *
+     *     meters = <object_name>;
+     */
     direct_meter(MeterType type);
     /***
+     * After a direct_meter object has been associated with a table as
+     * described in the documentation for the direct_meter
+     * constructor, every time the table is applied and a table entry
+     * is matched, the meter state associated with the matching entry
+     * is read, modified, and written back, atomically relative to the
+     * processing of other packets, regardless of whethr the read()
+     * method is called in the body of that action.
+     *
      * read() may only be called within an action executed as a result
      * of matching a table entry, of a table that has a direct_meter
-     * associated with it.  Calling read() causes the meter state
-     * associated with the matched table entry to be read, modified,
-     * and written back, atomically relative to the processing of
-     * other packets, and an integer encoding of one of the colors
-     * green, yellow, or red to be written to the result out
-     * parameter.
-     *
-     * TBD: Is the meter state updated even if an action is executed
-     * that does not call the read() method?
+     * associated with it.  Calling read() causes an integer encoding
+     * of one of the colors green, yellow, or red to be written to the
+     * result out parameter.
      *
      * @param result Type T must be bit<W> with W >= 2.  The value of
      *              result will be assigned 0 for color GREEN, 1 for
@@ -189,12 +213,19 @@ extern register<T> {
     void read(out T result, in bit<32> index);
     /***
      * write() writes the state of the register array at the specified
-     * index, with the value provided by the value parameter.  If you
-     * wish to perform a read() followed later by a write() to the
-     * same register array element, and you wish the read-modify-write
-     * sequence to be atomic relative to other processed packets, you
-     * must execute them in a P4_16 block annotated with an @atomic
+     * index, with the value provided by the value parameter.
+     *
+     * If you wish to perform a read() followed later by a write() to
+     * the same register array element, and you wish the
+     * read-modify-write sequence to be atomic relative to other
+     * processed packets, then there may be parallel
+     * implementations of the v1model architecture for which you must
+     * execute them in a P4_16 block annotated with an @atomic
      * annotation.
+     *
+     * TBD: Is BMv2 simple_switch such a parallel implementation?
+     * Does it guarantee @atomic behavior even when configured to
+     * execute the processing of multiple packets in parallel?
      *
      * @param index The index of the register array element to be
      *              written, normally a value in the range [0,
@@ -217,10 +248,11 @@ extern action_profile {
  * Generate a random number in the range lo..hi, inclusive, and write
  * it to the result parameter.
  *
- * TBD: Do p4c and behavioral-model support run-time variable values
- * of lo and hi?  Are they restricted such that (hi - lo + 1) must a
- * value that is a power of 2, or are arbitrary values supported?
- * What happens if lo > hi?
+ * In the BMv2 implementation, lo and hi can be run-time variables,
+ * i.e. they need not be compile-time constants, and they need not be
+ * limited to the constraint that (hi - lo + 1) is a power of 2.
+ *
+ * The value written to result is not specified if lo > hi.
  *
  * @param T          Must be a type bit<W>
  */
@@ -245,7 +277,11 @@ enum HashAlgorithm {
  * mark_to_drop() is a primitive action that modifies
  * standard_metadata.egress_spec to an implementation-specific special
  * value that in some cases causes the packet to be dropped at the end
- * of ingress or egress processing.
+ * of ingress or egress processing.  It also assigns 0 to
+ * standard_metadata.mcast_grp.  Either of those metadata fields may
+ * be changed by executing later P4 code, after calling
+ * mark_to_drop(), and this can change the resulting behavior of the
+ * packet to do something other than drop.
  *
  * See
  * https://github.com/p4lang/behavioral-model/blob/master/docs/simple_switch.md
@@ -258,12 +294,15 @@ extern void mark_to_drop();
 
 /***
  * Calculate a hash function of the value specified by the data
- * parameter.  Call this value H.  The value written to the result out
- * parameter is then: (base + (H % max)).
+ * parameter.  The value written to the out parameter named result
+ * will always be in the range [base, base+max-1] inclusive, if max >=
+ * 1.  If max=0, the value written to result will always be base.
  *
- * TBD: Do p4c and behavioral-model support run-time variable values
- * of max?  Is it restricted to have a value that is a power of 2, or
- * are arbitrary values supported?  What happens if max is 0?
+ * In the BMv2 implementation, call the hash value that is calculated
+ * from the data H.  The value written to result is: (base + (H %
+ * max)) if max >= 1, otherwise base.  base and max can be run-time
+ * variables, i.e. they need not be compile-time constants, and max
+ * need not be limited to have a value that is a power of 2.
  *
  * @param O          Must be a type bit<W>
  * @param D          Must be a tuple type where all the fields are bit-fields (type bit<W> or int<W>) or varbits.
