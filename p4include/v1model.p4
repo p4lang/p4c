@@ -250,15 +250,14 @@ extern action_profile {
 
 /***
  * Generate a random number in the range lo..hi, inclusive, and write
- * it to the result parameter.
+ * it to the result parameter.  The value written to result is not
+ * specified if lo > hi.
  *
  * In the BMv2 implementation, lo and hi can be run-time variables,
  * i.e. they need not be compile-time constants, and they need not be
  * limited to the constraint that (hi - lo + 1) is a power of 2.
  *
- * The value written to result is not specified if lo > hi.
- *
- * @param T          Must be a type bit<W>
+ * @param T          Must be a type bit<W> with 1 <= W <= 64
  */
 extern void random<T>(out T result, in T lo, in T hi);
 
