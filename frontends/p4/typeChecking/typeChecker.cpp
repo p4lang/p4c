@@ -330,6 +330,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             return type;
         auto tb = type->to<IR::Type_Bits>();
         auto canon = IR::Type_Bits::get(tb->size, tb->isSigned);
+        if (!typeMap->contains(canon))
+            typeMap->setType(canon, new IR::Type_Type(canon));
         return canon;
     } else if (type->is<IR::Type_Enum>() ||
                type->is<IR::Type_SerEnum>() ||
