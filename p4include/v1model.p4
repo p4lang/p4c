@@ -246,7 +246,7 @@ extern action_profile {
  * it to the result parameter.  The value written to result is not
  * specified if lo > hi.
  *
- * @param T          Must be a type bit<W> with 1 <= W <= 64
+ * @param T          Must be a type bit<W>
  */
 extern void random<T>(out T result, in T lo, in T hi);
 
