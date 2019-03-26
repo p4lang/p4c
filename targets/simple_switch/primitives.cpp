@@ -41,6 +41,7 @@ using bm::CounterArray;
 using bm::RegisterArray;
 using bm::NamedCalculation;
 using bm::HeaderStack;
+using bm::Logger;
 
 class modify_field : public ActionPrimitive<Data &, const Data &> {
   void operator ()(Data &dst, const Data &src) {
@@ -59,8 +60,21 @@ class modify_field_rng_uniform
     using hash = std::hash<std::thread::id>;
     static thread_local engine generator(hash()(std::this_thread::get_id()));
     using distrib64 = std::uniform_int_distribution<uint64_t>;
-    distrib64 distribution(b.get_uint64(), e.get_uint64());
-    f.set(distribution(generator));
+    auto lo = b.get_uint64();
+    auto hi = e.get_uint64();
+    if (lo > hi) {
+        Logger::get()->warn("random result is not specified when lo > hi");
+        // Return without writing to the result field at all.  We
+        // should avoid the distrib64 call below, since its behavior
+        // is not defined in this case.
+        return;
+    }
+    distrib64 distribution(lo, hi);
+    auto rand_val = distribution(generator);
+    BMLOG_TRACE_PKT(get_packet(),
+                    "random(lo={}, hi={}) = {}",
+                    lo, hi, rand_val);
+    f.set(rand_val);
   }
 };
 
@@ -264,8 +278,17 @@ class modify_field_with_hash_based_offset
                            const NamedCalculation &, const Data &> {
   void operator ()(Data &dst, const Data &base,
                    const NamedCalculation &hash, const Data &size) {
-    uint64_t v =
-      (hash.output(get_packet()) % size.get<uint64_t>()) + base.get<uint64_t>();
+    auto b = base.get<uint64_t>();
+    auto orig_sz = size.get<uint64_t>();
+    auto sz = orig_sz;
+    if (sz == 0) {
+        sz = 1;
+        Logger::get()->warn("hash max given as 0, but treating it as 1");
+    }
+    auto v = (hash.output(get_packet()) % sz) + b;
+    BMLOG_TRACE_PKT(get_packet(),
+                    "hash(base={}, max={}) = {}",
+                    b, orig_sz, v);
     dst.set(v);
   }
 };
