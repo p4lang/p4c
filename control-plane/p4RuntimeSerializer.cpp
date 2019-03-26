@@ -643,20 +643,17 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
 }
 
 /*
- * The function returns a cstring for use as type_name for any daisy-chained
- * Type_Newtype.
+ * The function returns a cstring for use as type_name for a Type_Newtype.
 */
 static cstring
 getTypeName(const IR::Type* type, TypeMap* typeMap) {
-    cstring type_name = nullptr;
     CHECK_NULL(type);
 
     auto t = typeMap->getTypeType(type, true);
     if (auto newt = t->to<IR::Type_Newtype>()) {
         return newt->name;
-    } else {
-        return type_name;
     }
+    return nullptr;
 }
 
 /// @return the header instance fields matched against by @table's key. The
