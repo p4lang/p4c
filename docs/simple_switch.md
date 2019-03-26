@@ -492,6 +492,12 @@ also serve to document the P4_14 behavior of `simple_switch`.  This
 section is only for things specific to P4_16 plus the v1model
 architecture.
 
+In some cases, the details documented here are for how the v1model
+architecture is implemented in BMv2 simple_switch.  Such details are
+prefaced with the "BMv2 v1model implementation".  There may be other
+implementations of the v1model architecture that make different
+implementation choices or restrictions.
+
 
 ### Restrictions on type `H`
 
@@ -605,3 +611,48 @@ calls to the `emit` method of the `packet_out` object.
 The most straightforward approach to avoiding the restrictions in the
 `ComputeChecksum` and `Deparser` controls is to write the more general
 code you want near the end of the `Egress` control.
+
+
+### BMv2 `register` implementation notes
+
+The BMv2 v1model implementation supports parallel execution.  It uses
+locking of all register objects accessed within an action to guarantee
+that the execution of all steps within an action are atomic, relative
+to other packets executing the same action, or any action that
+accesses some of the same register objects.  You need not use the
+`@atomic` annotation in your P4_16 program in order for this level of
+atomicity to be guaranteed for you.
+
+It is still recommended to use the `@atomic` annotation in your P4_16
+code to mark blocks of code containing multiple register accesses that
+you wish to be atomic relative to other packets being processed, but
+as of March 2019, the BMv2 implementation ignores such annotations.
+
+
+### BMv2 `random` implementation notes
+
+The BMv2 v1model implementation of the `random` function supports the
+`lo` and `hi` parameters being run-time variables, i.e. they need not
+be compile time constants.
+
+Also, they need not be limited to the constraint that `(hi - lo + 1)`
+is a power of 2.
+
+Type `T` is restricted to be `bit<W>` for `W <= 64`.
+
+
+### BMv2 `hash` implementation notes
+
+The BMv2 v1model implementation of the `hash` function supports `base`
+and `max` parameters being run-time variables, i.e. the need not be
+compile time constants.
+
+Also, `max` need not be limited to the constraint that it is a power
+of 2.
+
+Call the hash value that is calculated from the data H.  The value
+written to the out parameter named `result` is: `(base + (H % max))`
+if `max >= 1`, otherwise `base`.
+
+The type `O` of the `result`, `T` of `base`, and `M` of `max` are
+restricted to be `bit<W>` for `W <= 64`.
