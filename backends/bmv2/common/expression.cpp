@@ -251,7 +251,9 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         result->emplace("type", "hexstr");
         auto decl = type->to<IR::Type_Error>()->getDeclByName(expression->member.name);
         auto errorValue = structure->errorCodesMap.at(decl);
-        result->emplace("value", Util::toString(errorValue));
+        // this generates error constant like hex value
+        auto reprValue = stringRepr(errorValue);
+        result->emplace("value", reprValue);
         mapExpression(expression, result);
         return;
     }
