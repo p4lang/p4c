@@ -64,7 +64,7 @@ const IR::Node* LowerExpressions::postorder(IR::Cast* expression) {
     auto srcType = typeMap->getType(expression->expr, true);
     if (destType->is<IR::Type_Boolean>() && srcType->is<IR::Type_Bits>()) {
         auto zero = new IR::Constant(srcType, 0);
-        auto cmp = new IR::Equ(expression->srcInfo, expression->expr, zero);
+        auto cmp = new IR::Neq(expression->srcInfo, expression->expr, zero);
         typeMap->setType(cmp, destType);
         LOG3("Replaced " << expression << " with " << cmp);
         return cmp;
