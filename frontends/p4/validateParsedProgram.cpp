@@ -32,13 +32,13 @@ void ValidateParsedProgram::postorder(const IR::Constant* c) {
 /// Check that extern constructor names match the enclosing extern
 void ValidateParsedProgram::postorder(const IR::Method* m) {
     if (m->name.isDontCare())
-        ::error(ErrorType::ERR_INVALID, "%1%: Illegal method/function name", m->name);
+        ::error(ErrorType::ERR_INVALID, "method/function name", m->name);
     if (auto ext = findContext<IR::Type_Extern>()) {
         if (m->name == ext->name && m->type->returnType != nullptr)
-            ::error(ErrorType::ERR_INVALID, "%1%: Constructor cannot have a return type", m);
+            ::error(ErrorType::ERR_INVALID, "type. Constructor cannot have a return type", m);
         if (m->type->returnType == nullptr) {
             if (m->name != ext->name) {
-                ::error(ErrorType::ERR_INVALID, "%1%: Method has no return type", m);
+                ::error(ErrorType::ERR_INVALID, "type. Method has no return type", m);
                 return;
             }
             for (auto p : *m->type->parameters)
@@ -52,7 +52,7 @@ void ValidateParsedProgram::postorder(const IR::Method* m) {
 /// Struct field names cannot be underscore
 void ValidateParsedProgram::postorder(const IR::StructField* f) {
     if (f->name.isDontCare())
-        ::error(ErrorType::ERR_INVALID, "%1%: Illegal field name", f->name);
+        ::error(ErrorType::ERR_INVALID, "field name", f->name);
 }
 
 /// Width of a bit<> type is at least 0
