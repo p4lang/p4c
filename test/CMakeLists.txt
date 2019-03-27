@@ -58,6 +58,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/source_file_test.cpp
   gtest/transforms.cpp
   gtest/stringify.cpp
+  gtest/load_ir_from_json.cpp
   )
 set (GTEST_UNITTEST_HEADERS
   gtest/helpers.h
