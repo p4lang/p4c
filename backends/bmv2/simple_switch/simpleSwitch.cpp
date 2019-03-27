@@ -607,9 +607,9 @@ void ExternConverter_direct_meter::convertExternInstance(
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto info = ctxt->structure->directMeterMap.getInfo(c);
-    CHECK_NULL(info);
-    CHECK_NULL(info->table);
-    CHECK_NULL(info->destinationField);
+    if (info == nullptr || info->table == nullptr)
+        // probably meter is unused
+        return;
 
     auto jmtr = new Util::JsonObject();
     jmtr->emplace("name", name);
@@ -637,9 +637,14 @@ void ExternConverter_direct_meter::convertExternInstance(
     jmtr->emplace("size", info->tableSize);
     cstring tblname = info->table->controlPlaneName();
     jmtr->emplace("binding", tblname);
-    auto result = ctxt->conv->convert(info->destinationField);
-    jmtr->emplace("result_target", result->to<Util::JsonObject>()->get("value"));
-    ctxt->json->meter_arrays->append(jmtr);
+    if (info->destinationField == nullptr) {
+        ::error(ErrorType::ERR_INVALID, "meter.  Meter does not update any fields",
+                c->getNode());
+    } else {
+        auto result = ctxt->conv->convert(info->destinationField);
+        jmtr->emplace("result_target", result->to<Util::JsonObject>()->get("value"));
+        ctxt->json->meter_arrays->append(jmtr);
+    }
 }
 
 void ExternConverter_action_profile::convertExternInstance(

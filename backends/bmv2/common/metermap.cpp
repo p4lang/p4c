@@ -38,7 +38,10 @@ DirectMeterMap::DirectMeterInfo* DirectMeterMap::getInfo(const IR::IDeclaration*
  */
 void DirectMeterMap::setTable(const IR::IDeclaration* meter, const IR::P4Table* table) {
     auto info = getInfo(meter);
-    CHECK_NULL(info);
+    if (info == nullptr) {
+        ::warning(ErrorType::WARN_UNUSED, "%1%: meter not used", meter);
+        info = createInfo(meter);
+    }
     if (info->table != nullptr)
         ::error(ErrorType::ERR_INVALID,
                 "%1%: Direct meters cannot be attached to multiple tables %2% and %3%",
@@ -87,7 +90,8 @@ void DirectMeterMap::setDestination(const IR::IDeclaration* meter,
  */
 void DirectMeterMap::setSize(const IR::IDeclaration* meter, unsigned size) {
     auto info = getInfo(meter);
-    CHECK_NULL(info);
+    if (info == nullptr)
+        info = createInfo(meter);
     info->tableSize = size;
 }
 

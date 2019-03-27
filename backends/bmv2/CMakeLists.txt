@@ -183,6 +183,8 @@ set (XFAIL_TESTS
   # These test use computations in the verify/update checksum controls - unsupported
   testdata/p4_16_samples/issue1765-bmv2.p4
   testdata/p4_16_samples/issue1765-1-bmv2.p4
+  # Test does not use meter properly
+  testdata/p4_16_samples/issue1829-bmv2.p4
 )
 
 if (HAVE_SIMPLE_SWITCH)
