@@ -727,7 +727,6 @@ class ParseAnnotations : public P4::ParseAnnotations {
         PARSE_PAIR("p4runtime_translation",
                    Expression),
     }) { }
-
 };
 
 /// An analyzer which translates the information available in the P4 IR into a
@@ -869,7 +868,7 @@ class P4RuntimeAnalyzer {
             BUG_CHECK((fieldType->is<IR::Type_Bits>() ||
                       fieldType->is<IR::Type_Newtype>() ||
                       fieldType->is<IR::Type_SerEnum>()),
-                      "Header field %1% has a type which is not bit<>,int<>, or type",
+                      "Header field %1% has a type which is not bit<>, int<>, type, or serializable enum",
                       headerField);
             auto w = getTypeWidth(fieldType, typeMap);
             if (w < 0)
