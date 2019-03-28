@@ -637,7 +637,18 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
     auto ann = type->getAnnotation("p4runtime_translation");
     if (ann != nullptr) {
         auto sdnB = ann->expr[1]->to<IR::Constant>();
-        return static_cast<int>(sdnB->value.get_si());
+        if (!sdnB) {
+            ::error("P4runtime annotation in serializer does not have sdn: %1%",
+                    type);
+            return -1;
+        }
+        int w = static_cast<int>(sdnB->value.get_si());
+        if (w > 0x7fffffff) {
+            ::error("P4runtime annotation in serializer has sdn > max int: %1%",
+                    type);
+            return -2;
+        }
+        return w;
     }
     return typeMap->minWidthBits(type, type->getNode());
 }
@@ -682,7 +693,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
         type_name = getTypeName(matchFieldType, typeMap);
         int width = getTypeWidth(matchFieldType, typeMap);
         if (width < 0)
-            return matchFields;		
+            return matchFields;
         matchFields.push_back(MatchField{*matchFieldName, *matchType,
                               matchTypeName, uint32_t(width),
                               keyElement->to<IR::IAnnotated>(), type_name});
@@ -703,6 +714,18 @@ class ParseAnnotations : public P4::ParseAnnotations {
                 // @p4runtime_translation has two args
                 PARSE_PAIR("p4runtime_translation",
                            Expression),
+                // This annotation is architecture-specific in theory, but given that it
+                // is "reserved" by the P4Runtime specification, I don't really have any
+                // qualms about adding it here. I don't think it is possible to just run
+                // a different ParseAnnotations pass in the constructor of the
+                // architecture-specific P4RuntimeArchHandlerIface implementation, since
+                // ParseAnnotations modifies the program. I don't really like the
+                // possible alternatives either: 1) modify the P4RuntimeArchHandlerIface
+                // interface so that each implementation can provide a custom
+                // ParseAnnotations instance, or 2) run a ParseAnnotations pass
+                // "locally" (in this case on action profile instances since this
+                // annotation is for them).
+                PARSE("max_group_size", Constant)
             }) { }
 };
 
@@ -843,7 +866,8 @@ class P4RuntimeAnalyzer {
 
             auto fieldType = typeMap->getType(headerField, true);
             BUG_CHECK((fieldType->is<IR::Type_Bits>() ||
-                      fieldType->is<IR::Type_Newtype>()),
+                      fieldType->is<IR::Type_Newtype>() ||
+                      fieldType->is<IR::Type_SerEnum>()),
                       "Header field %1% has a type which is not bit<>,int<>, or type",
                       headerField);
             auto w = getTypeWidth(fieldType, typeMap);
@@ -1342,13 +1366,13 @@ class P4RuntimeEntriesConverter {
             auto matchType = getKeyMatchType(tableKey, refMap);
 
             if (matchType == P4CoreLibrary::instance.exactMatch.name) {
-			  addExact(protoEntry, fieldId++, k, keyWidth, typeMap);
+              addExact(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else if (matchType == P4CoreLibrary::instance.lpmMatch.name) {
-			  addLpm(protoEntry, fieldId++, k, keyWidth, typeMap);
+              addLpm(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else if (matchType == P4CoreLibrary::instance.ternaryMatch.name) {
-			  addTernary(protoEntry, fieldId++, k, keyWidth, typeMap);
+              addTernary(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else if (matchType == P4V1::V1Model::instance.rangeMatchType.name) {
-			  addRange(protoEntry, fieldId++, k, keyWidth, typeMap);
+              addRange(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else {
                 if (!k->is<IR::DefaultExpression>())
                     ::error("%1%: match type not supported by P4Runtime serializer", matchType);
@@ -1400,7 +1424,7 @@ class P4RuntimeEntriesConverter {
     }
 
     void addExact(p4v1::TableEntry* protoEntry, int fieldId,
-                  const IR::Expression* k, 
+                  const IR::Expression* k,
                   int keyWidth, TypeMap* typeMap) const {
         auto protoMatch = protoEntry->add_match();
         protoMatch->set_field_id(fieldId);
@@ -1411,7 +1435,7 @@ class P4RuntimeEntriesConverter {
     }
 
     void addLpm(p4v1::TableEntry* protoEntry, int fieldId,
-                const IR::Expression* k, 
+                const IR::Expression* k,
                 int keyWidth, TypeMap *typeMap) const {
         if (k->is<IR::DefaultExpression>())  // don't care, skip in P4Runtime message
             return;

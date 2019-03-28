@@ -311,9 +311,27 @@ void addDocumentation(Message* message, const IR::IAnnotated* annotated) {
 }
 
 /// Set all the fields in the @preamble, including the 'annotations' and 'doc'
-/// fields.
+/// fields. '@name', '@id' and documentation annotations are ignored, as well as
+/// annotations whose name satisfies predicate @p.
+template <typename UnaryPredicate>
 void setPreamble(::p4::config::v1::Preamble* preamble,
-                 p4rt_id_t id, cstring name, cstring alias, const IR::IAnnotated* annotated);
+                 p4rt_id_t id, cstring name, cstring alias,
+                 const IR::IAnnotated* annotated, UnaryPredicate p) {
+    CHECK_NULL(preamble);
+    preamble->set_id(id);
+    preamble->set_name(name);
+    preamble->set_alias(alias);
+    addAnnotations(preamble, annotated, p);
+    addDocumentation(preamble, annotated);
+}
+
+/// Calls setPreamble with a unconditionally false predicate (no annotation
+/// filtered out).
+void setPreamble(::p4::config::v1::Preamble* preamble,
+                 p4rt_id_t id, cstring name, cstring alias,
+                 const IR::IAnnotated* annotated) {
+    setPreamble(preamble, id, name, alias, annotated, [](cstring){ return false; });
+}
 
 /// @return @table's size property if available, falling back to the
 /// architecture's default size.
