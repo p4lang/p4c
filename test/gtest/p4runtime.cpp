@@ -525,6 +525,7 @@ TEST_F(P4Runtime, P4_16_MatchFields) {
         { 39, "h.hUnion.c.yetAnotherHeaderField", 8, MatchField::EXACT },
     };
 
+    // TODO (hemant): check for type_name and see if new_types has the name in p4info.
     for (auto i = 0; i < igTable->match_fields_size(); i++) {
         SCOPED_TRACE(expected[i].id);
         EXPECT_EQ(expected[i].id, igTable->match_fields(i).id());
