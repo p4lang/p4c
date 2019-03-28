@@ -22,18 +22,19 @@ parser parse(packet_in pk, out parsed_packet_t hdr, inout local_metadata_t local
 }
 
 control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    @hidden action act() {
-        mark_to_drop();
+    @name(".markToDrop") action markToDrop() {
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_markToDrop {
         actions = {
-            act();
+            markToDrop();
         }
-        const default_action = act();
+        const default_action = markToDrop();
     }
     apply {
         if (local_metadata._test_test_error0 == error.Unused) 
-            tbl_act.apply();
+            tbl_markToDrop.apply();
     }
 }
 

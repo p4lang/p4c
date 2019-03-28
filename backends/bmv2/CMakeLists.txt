@@ -144,11 +144,6 @@ set (XFAIL_TESTS
   testdata/p4_14_samples/issue60.p4
   # compiler claims (incorrectly?) that c2 has mulitple successors, so is not supported
   testdata/p4_14_samples/issue-1426.p4
-  # As of 2019-Feb-04 latest p4c, this program fails due to the root
-  # cause of both issues #1694, but is not affected by #1669.  I have
-  # tested it with the proposed fix for issue #1694 that is on PR
-  # #1704, and it passes.
-  testdata/p4_14_samples/p414-special-ops-3-bmv2.p4
   # As of 2019-Feb-04 latest p4c code, this program fails due to the
   # root cause of both issues #1694 and #1669.  I have tested it with
   # the proposed fix for issue #1694 that is on PR #1704, and while
@@ -177,7 +172,7 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/psa-example-counters-bmv2.p4
   testdata/p4_16_samples/psa-example-digest-bmv2.p4
   testdata/p4_16_samples/psa-example-register2-bmv2.p4
-  # testdata/p4_16_samples/psa-fwd-bmv2.p4
+  testdata/p4_16_samples/psa-fwd-bmv2.p4
   # This reads stack.next
   testdata/p4_16_samples/issue692-bmv2.p4
   # These test use computations in the verify/update checksum controls - unsupported

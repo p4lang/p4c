@@ -134,7 +134,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.tcp.dstPort = meta.meta.tcp_dp;
     }
     @name("._drop") action _drop() {
-        mark_to_drop();
+        {
+            standard_metadata_t standard_metadata_1 = standard_metadata;
+            standard_metadata_1.egress_spec = 9w511;
+            standard_metadata_1.mcast_grp = 16w0;
+            standard_metadata = standard_metadata_1;
+        }
     }
     @name(".do_cpu_encap") action do_cpu_encap() {
         hdr.cpu_header.setValid();
@@ -183,16 +188,36 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ethernet.dstAddr = dmac;
     }
     @name("._drop") action _drop_2() {
-        mark_to_drop();
+        {
+            standard_metadata_t standard_metadata_2 = standard_metadata;
+            standard_metadata_2.egress_spec = 9w511;
+            standard_metadata_2.mcast_grp = 16w0;
+            standard_metadata = standard_metadata_2;
+        }
     }
     @name("._drop") action _drop_6() {
-        mark_to_drop();
+        {
+            standard_metadata_t standard_metadata_3 = standard_metadata;
+            standard_metadata_3.egress_spec = 9w511;
+            standard_metadata_3.mcast_grp = 16w0;
+            standard_metadata = standard_metadata_3;
+        }
     }
     @name("._drop") action _drop_7() {
-        mark_to_drop();
+        {
+            standard_metadata_t standard_metadata_6 = standard_metadata;
+            standard_metadata_6.egress_spec = 9w511;
+            standard_metadata_6.mcast_grp = 16w0;
+            standard_metadata = standard_metadata_6;
+        }
     }
     @name("._drop") action _drop_8() {
-        mark_to_drop();
+        {
+            standard_metadata_t standard_metadata_7 = standard_metadata;
+            standard_metadata_7.egress_spec = 9w511;
+            standard_metadata_7.mcast_grp = 16w0;
+            standard_metadata = standard_metadata_7;
+        }
     }
     @name(".set_if_info") action set_if_info(bit<32> ipv4_addr, bit<48> mac_addr, bit<1> is_ext) {
         meta.meta.if_ipv4_addr = ipv4_addr;
@@ -209,7 +234,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".nat_miss_ext_to_int") action nat_miss_ext_to_int() {
         meta.meta.do_forward = 1w0;
-        mark_to_drop();
+        {
+            standard_metadata_t standard_metadata_8 = standard_metadata;
+            standard_metadata_8.egress_spec = 9w511;
+            standard_metadata_8.mcast_grp = 16w0;
+            standard_metadata = standard_metadata_8;
+        }
     }
     @name(".nat_hit_int_to_ext") action nat_hit_int_to_ext(bit<32> srcAddr, bit<16> srcPort) {
         meta.meta.do_forward = 1w1;

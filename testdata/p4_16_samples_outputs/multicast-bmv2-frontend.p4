@@ -62,7 +62,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.ethernet.srcAddr = smac;
     }
     @name("._drop") action _drop() {
-        mark_to_drop();
+        {
+            standard_metadata_t standard_metadata_1 = standard_metadata;
+            standard_metadata_1.egress_spec = 9w511;
+            standard_metadata_1.mcast_grp = 16w0;
+            standard_metadata = standard_metadata_1;
+        }
     }
     @name("egress.send_frame") table send_frame_0 {
         actions = {
@@ -95,10 +100,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ethernet.dstAddr = dmac;
     }
     @name("._drop") action _drop_2() {
-        mark_to_drop();
+        {
+            standard_metadata_t standard_metadata_2 = standard_metadata;
+            standard_metadata_2.egress_spec = 9w511;
+            standard_metadata_2.mcast_grp = 16w0;
+            standard_metadata = standard_metadata_2;
+        }
     }
     @name("._drop") action _drop_4() {
-        mark_to_drop();
+        {
+            standard_metadata_t standard_metadata_4 = standard_metadata;
+            standard_metadata_4.egress_spec = 9w511;
+            standard_metadata_4.mcast_grp = 16w0;
+            standard_metadata = standard_metadata_4;
+        }
     }
     @name(".set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
         meta.routing_metadata.nhop_ipv4 = nhop_ipv4;

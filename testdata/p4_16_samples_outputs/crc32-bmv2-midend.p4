@@ -134,10 +134,12 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
     @name("MyIngress.operation_drop") action operation_drop() {
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name("MyIngress.operation_drop") action operation_drop_2() {
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name("MyIngress.calculate") table calculate_0 {
         key = {

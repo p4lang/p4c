@@ -40,7 +40,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("_drop") action _drop() {
-        mark_to_drop();
+        markToDrop(standard_metadata);
     }
     @name("_nop") action _nop() {
     }

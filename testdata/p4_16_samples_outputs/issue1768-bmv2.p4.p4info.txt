@@ -1,5 +1,10 @@
 pkg_info {
   arch: "v1model"
 }
-type_info {
+actions {
+  preamble {
+    id: 16788389
+    name: "markToDrop"
+    alias: "markToDrop"
+  }
 }

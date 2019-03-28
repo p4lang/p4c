@@ -236,10 +236,12 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".my_drop") action my_drop() {
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name(".my_drop") action my_drop_0() {
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name("ingress.set_l2ptr") action set_l2ptr(bit<32> l2ptr) {
         meta._fwd_metadata_l2ptr0 = l2ptr;
@@ -278,7 +280,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".my_drop") action my_drop_1() {
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name("egress.rewrite_mac") action rewrite_mac(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;

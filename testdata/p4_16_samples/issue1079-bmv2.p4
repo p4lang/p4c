@@ -44,7 +44,7 @@ control EmptyEgress(inout headers_t hdr,
                     inout standard_metadata_t standard_metadata)
 {
   apply {
-    mark_to_drop();
+    markToDrop(standard_metadata);
   }
 }
 

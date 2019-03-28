@@ -27,14 +27,20 @@ header ipv4_t {
 }
 
 struct metadata {
+<<<<<<< 45707c3563244f920d5714e8f7fa43c8ff4d9521
     @name("routing_metadata") 
+=======
+    @name("intrinsic_metadata")
+    intrinsic_metadata_t intrinsic_metadata;
+    @name("routing_metadata")
+>>>>>>> Deprecate @mark_to_drop; replace with markToDrop action
     routing_metadata_t   routing_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
-    @name("ipv4") 
+    @name("ipv4")
     ipv4_t     ipv4;
 }
 
@@ -60,7 +66,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.ethernet.srcAddr = smac;
     }
     @name("._drop") action _drop() {
-        mark_to_drop();
+        markToDrop(standard_metadata);
     }
     @name("send_frame") table send_frame {
         actions = {
@@ -85,7 +91,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ethernet.dstAddr = dmac;
     }
     @name("._drop") action _drop() {
-        mark_to_drop();
+        markToDrop(standard_metadata);
     }
     @name(".set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
         meta.routing_metadata.nhop_ipv4 = nhop_ipv4;

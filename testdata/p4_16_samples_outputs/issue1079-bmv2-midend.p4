@@ -39,17 +39,18 @@ control EmptyIngress(inout headers_t headers, inout metadata_t meta, inout stand
 }
 
 control EmptyEgress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @hidden action act() {
-        mark_to_drop();
+    @name(".markToDrop") action markToDrop() {
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_markToDrop {
         actions = {
-            act();
+            markToDrop();
         }
-        const default_action = act();
+        const default_action = markToDrop();
     }
     apply {
-        tbl_act.apply();
+        tbl_markToDrop.apply();
     }
 }
 

@@ -66,10 +66,12 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     @name(".NoAction") action NoAction_1() {
     }
     @name("MyIngress.drop") action drop_1() {
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name("MyIngress.drop") action drop_3() {
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name("MyIngress.set_dmac") action set_dmac(macAddr_t dstAddr) {
         hdr.ethernet.dstAddr = dstAddr;

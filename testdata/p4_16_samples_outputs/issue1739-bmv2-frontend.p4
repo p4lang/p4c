@@ -50,11 +50,21 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
 }
 
 control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
-    @name(".my_drop") action my_drop() {
-        mark_to_drop();
+    @name(".my_drop") action my_drop(inout standard_metadata_t smeta) {
+        {
+            standard_metadata_t standard_metadata_1 = smeta;
+            standard_metadata_1.egress_spec = 9w511;
+            standard_metadata_1.mcast_grp = 16w0;
+            smeta = standard_metadata_1;
+        }
     }
-    @name(".my_drop") action my_drop_0() {
-        mark_to_drop();
+    @name(".my_drop") action my_drop_0(inout standard_metadata_t smeta_1) {
+        {
+            standard_metadata_t standard_metadata_2 = smeta_1;
+            standard_metadata_2.egress_spec = 9w511;
+            standard_metadata_2.mcast_grp = 16w0;
+            smeta_1 = standard_metadata_2;
+        }
     }
     @name(".NoAction") action NoAction_0() {
     }
@@ -67,16 +77,16 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         }
         actions = {
             set_output();
-            my_drop();
+            my_drop(standard_metadata);
         }
-        default_action = my_drop();
+        default_action = my_drop(standard_metadata);
     }
     @name("ingress.ipv4_sa_filter") table ipv4_sa_filter_0 {
         key = {
             hdr.ipv4.srcAddr: ternary @name("hdr.ipv4.srcAddr") ;
         }
         actions = {
-            my_drop_0();
+            my_drop_0(standard_metadata);
             NoAction_0();
         }
         const default_action = NoAction_0();

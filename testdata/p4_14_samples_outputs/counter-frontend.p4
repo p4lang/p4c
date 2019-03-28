@@ -52,7 +52,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".m_action") action m_action_0(bit<32> idx) {
         my_direct_counter_0.count();
         my_indirect_counter_0.count(idx);
-        mark_to_drop();
+        {
+            standard_metadata_t standard_metadata_1 = standard_metadata;
+            standard_metadata_1.egress_spec = 9w511;
+            standard_metadata_1.mcast_grp = 16w0;
+            standard_metadata = standard_metadata_1;
+        }
     }
     @name("._nop") action _nop_0() {
         my_direct_counter_0.count();

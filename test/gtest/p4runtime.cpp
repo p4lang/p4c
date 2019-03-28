@@ -1201,7 +1201,7 @@ TEST_F(P4Runtime, Documentation) {
             @brief("This action does nothing duh!")
             action noop() { }
 
-            action drop() { mark_to_drop(); }
+            action drop() { markToDrop(sm); }
 
             // we cannot test a multi-line annotation here (with escaped new line)
             // because the preprocessor is not run

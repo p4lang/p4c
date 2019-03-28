@@ -51,10 +51,12 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
 
 control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
     @name(".my_drop") action my_drop() {
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name(".my_drop") action my_drop_0() {
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name(".NoAction") action NoAction_0() {
     }

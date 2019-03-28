@@ -255,7 +255,7 @@ class V1Model : public ::Model::Model {
             tableAttributes(), rangeMatchType("range"), selectorMatchType("selector"),
             verify("verifyChecksum", headersType), compute("computeChecksum", headersType),
             digest_receiver(), hash(), algorithm(),
-            registers(), drop("mark_to_drop"),
+            registers(), drop("markToDrop"),
             recirculate("recirculate"), verify_checksum("verify_checksum"),
             update_checksum("update_checksum"),
             verify_checksum_with_payload("verify_checksum_with_payload"),

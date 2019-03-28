@@ -66,5 +66,3 @@ actions {
     alias: "drop"
   }
 }
-type_info {
-}

@@ -1,6 +1,0 @@
-drop-bmv2.p4(27): [--Wwarn=uninitialized_out_param] warning: out parameter smeta may be uninitialized when drop terminates
-action drop(out standard_metadata_t smeta) { mark_to_drop(); } // this global action seems to cause the problem
-                                    ^^^^^
-drop-bmv2.p4(27)
-action drop(out standard_metadata_t smeta) { mark_to_drop(); } // this global action seems to cause the problem
-       ^^^^

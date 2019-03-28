@@ -3134,7 +3134,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         meta._egress_filter_metadata_inner_bd14 = meta._ingress_metadata_bd42 ^ meta._egress_metadata_bd19;
     }
     @name(".set_egress_filter_drop") action _set_egress_filter_drop_0() {
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name(".egress_filter") table _egress_filter {
         actions = {
@@ -3159,12 +3160,14 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".egress_mirror_drop") action _egress_mirror_drop_0(bit<32> session_id) {
         meta._i2e_metadata_mirror_session_id36 = (bit<16>)session_id;
         clone3<tuple_0>(CloneType.E2E, session_id, { meta._i2e_metadata_ingress_tstamp35, (bit<16>)session_id });
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name(".egress_redirect_to_cpu") action _egress_redirect_to_cpu_0(bit<16> reason_code) {
         meta._fabric_metadata_reason_code28 = reason_code;
         clone3<tuple_1>(CloneType.E2E, 32w250, { meta._ingress_metadata_bd42, meta._ingress_metadata_ifindex38, reason_code, meta._ingress_metadata_ingress_port37 });
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name(".egress_acl") table _egress_acl {
         actions = {
@@ -4618,7 +4621,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta._l2_metadata_l2_nexthop_type76 = 1w1;
     }
     @name(".dmac_drop") action _dmac_drop_0() {
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name(".smac_miss") action _smac_miss_0() {
         meta._l2_metadata_l2_src_miss78 = 1w1;
@@ -5459,7 +5463,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".meter_deny") action _meter_deny_0() {
         _meter_stats.count();
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name(".meter_action") table _meter_action {
         actions = {
@@ -5762,22 +5767,26 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".redirect_to_cpu") action _redirect_to_cpu_0(bit<16> reason_code) {
         meta._fabric_metadata_reason_code28 = reason_code;
         clone3<tuple_1>(CloneType.I2E, 32w250, { meta._ingress_metadata_bd42, meta._ingress_metadata_ifindex38, reason_code, meta._ingress_metadata_ingress_port37 });
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
         meta._fabric_metadata_dst_device29 = 8w0;
     }
     @name(".copy_to_cpu") action _copy_to_cpu_0() {
         clone3<tuple_1>(CloneType.I2E, 32w250, { meta._ingress_metadata_bd42, meta._ingress_metadata_ifindex38, meta._fabric_metadata_reason_code28, meta._ingress_metadata_ingress_port37 });
     }
     @name(".drop_packet") action _drop_packet_0() {
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name(".drop_packet_with_reason") action _drop_packet_with_reason_0(bit<32> drop_reason) {
         _drop_stats.count(drop_reason);
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name(".negative_mirror") action _negative_mirror_0(bit<32> session_id) {
         clone3<tuple_9>(CloneType.I2E, session_id, { meta._ingress_metadata_ifindex38, meta._ingress_metadata_drop_reason44 });
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name(".drop_stats") table _drop_stats_1 {
         actions = {

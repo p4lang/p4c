@@ -67,5 +67,3 @@ action_profiles {
   size: 1024
   max_group_size: 200
 }
-type_info {
-}

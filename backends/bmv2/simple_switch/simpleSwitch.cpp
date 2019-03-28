@@ -330,6 +330,7 @@ Util::IJson* ExternConverter_recirculate::convertExternFunction(
     return primitive;
 }
 
+// TODO: this is deprecated.
 Util::IJson* ExternConverter_mark_to_drop::convertExternFunction(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,

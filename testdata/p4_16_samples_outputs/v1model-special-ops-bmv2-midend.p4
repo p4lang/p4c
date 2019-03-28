@@ -62,10 +62,12 @@ struct tuple_0 {
 
 control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
     @name(".my_drop") action my_drop() {
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name(".my_drop") action my_drop_0() {
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name("ingress.set_l2ptr") action set_l2ptr(bit<32> l2ptr) {
         meta._fwd_l2ptr0 = l2ptr;
@@ -149,7 +151,8 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
     @name(".NoAction") action NoAction_0() {
     }
     @name(".my_drop") action my_drop_1() {
-        mark_to_drop();
+        standard_metadata.egress_spec = 9w511;
+        standard_metadata.mcast_grp = 16w0;
     }
     @name("egress.set_out_bd") action set_out_bd(bit<24> bd) {
         meta._fwd_out_bd1 = bd;

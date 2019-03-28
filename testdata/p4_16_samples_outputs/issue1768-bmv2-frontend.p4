@@ -24,9 +24,13 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name(".markToDrop") action markToDrop(inout standard_metadata_t standard_metadata_1) {
+        standard_metadata_1.egress_spec = 9w511;
+        standard_metadata_1.mcast_grp = 16w0;
+    }
     apply {
         if (standard_metadata.parser_error != error.NoError) 
-            mark_to_drop();
+            markToDrop(standard_metadata);
     }
 }
 

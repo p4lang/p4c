@@ -22,11 +22,15 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
 }
 
 control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
+    @name(".markToDrop") action markToDrop(inout standard_metadata_t standard_metadata_1) {
+        standard_metadata_1.egress_spec = 9w511;
+        standard_metadata_1.mcast_grp = 16w0;
+    }
     bit<16> rand_int_0;
     apply {
         random<bit<16>>(rand_int_0, 16w0, 16w49151);
         if (rand_int_0 < 16w32768) 
-            mark_to_drop();
+            markToDrop(standard_metadata);
     }
 }
 

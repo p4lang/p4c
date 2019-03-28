@@ -66,5 +66,3 @@ action_profiles {
   with_selector: true
   size: 1024
 }
-type_info {
-}
