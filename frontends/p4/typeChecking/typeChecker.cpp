@@ -2285,7 +2285,7 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
                decl->is<IR::Declaration_Instance>()) {
         setCompileTimeConstant(expression);
         setCompileTimeConstant(getOriginal<IR::Expression>());
-    } else if (decl->is<IR::Method>()) {
+    } else if (decl->is<IR::Method>() || decl->is<IR::Function>()) {
         type = getType(decl->getNode());
         // Each method invocation uses fresh type variables
         type = cloneWithFreshTypeVariables(type->to<IR::Type_MethodBase>());
