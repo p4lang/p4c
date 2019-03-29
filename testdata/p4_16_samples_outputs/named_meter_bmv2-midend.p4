@@ -42,8 +42,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ingress.namedmeter") direct_meter<bit<32>>(MeterType.packets) my_meter_0;
     @name("ingress._drop") action _drop() {
-        standard_metadata.egress_spec = 9w511;
-        standard_metadata.mcast_grp = 16w0;
+        mark_to_drop(standard_metadata);
     }
     @name("ingress._nop") action _nop() {
     }

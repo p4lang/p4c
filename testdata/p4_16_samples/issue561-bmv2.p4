@@ -264,7 +264,7 @@ parser ParserImpl(packet_in packet,
 }
 
 action my_drop(inout standard_metadata_t smeta) {
-    markToDrop(smeta);
+    mark_to_drop(smeta);
 }
 
 control ingress(inout headers hdr,

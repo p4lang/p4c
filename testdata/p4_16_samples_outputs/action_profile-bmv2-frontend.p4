@@ -20,20 +20,10 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name(".NoAction") action NoAction_3() {
     }
     @name("IngressI.drop") action drop_1() {
-        {
-            standard_metadata_t standard_metadata_1 = smeta;
-            standard_metadata_1.egress_spec = 9w511;
-            standard_metadata_1.mcast_grp = 16w0;
-            smeta = standard_metadata_1;
-        }
+        mark_to_drop(smeta);
     }
     @name("IngressI.drop") action drop_3() {
-        {
-            standard_metadata_t standard_metadata_2 = smeta;
-            standard_metadata_2.egress_spec = 9w511;
-            standard_metadata_2.mcast_grp = 16w0;
-            smeta = standard_metadata_2;
-        }
+        mark_to_drop(smeta);
     }
     @name("IngressI.indirect") table indirect_0 {
         key = {

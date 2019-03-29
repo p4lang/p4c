@@ -29,7 +29,7 @@ control MyIngress(inout headers hdr,
                   inout standard_metadata_t standard_metadata) {
     apply {
         if (standard_metadata.parser_error != error.NoError)
-            markToDrop(standard_metadata);
+            mark_to_drop(standard_metadata);
     }
 }
 

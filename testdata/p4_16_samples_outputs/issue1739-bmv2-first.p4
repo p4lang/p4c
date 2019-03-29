@@ -36,7 +36,7 @@ struct headers_t {
 }
 
 action my_drop(inout standard_metadata_t smeta) {
-    markToDrop(smeta);
+    mark_to_drop(smeta);
 }
 parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
     const bit<16> ETHERTYPE_IPV4 = 16w0x800;

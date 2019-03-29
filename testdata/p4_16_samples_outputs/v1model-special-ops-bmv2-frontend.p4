@@ -58,20 +58,10 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
 
 control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
     @name(".my_drop") action my_drop(inout standard_metadata_t smeta) {
-        {
-            standard_metadata_t standard_metadata_1 = smeta;
-            standard_metadata_1.egress_spec = 9w511;
-            standard_metadata_1.mcast_grp = 16w0;
-            smeta = standard_metadata_1;
-        }
+        mark_to_drop(smeta);
     }
     @name(".my_drop") action my_drop_0(inout standard_metadata_t smeta_1) {
-        {
-            standard_metadata_t standard_metadata_2 = smeta_1;
-            standard_metadata_2.egress_spec = 9w511;
-            standard_metadata_2.mcast_grp = 16w0;
-            smeta_1 = standard_metadata_2;
-        }
+        mark_to_drop(smeta_1);
     }
     bit<32> ipv4_address_0;
     bit<8> byte0_0;
@@ -152,12 +142,7 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
     @name(".NoAction") action NoAction_0() {
     }
     @name(".my_drop") action my_drop_1(inout standard_metadata_t smeta_2) {
-        {
-            standard_metadata_t standard_metadata_3 = smeta_2;
-            standard_metadata_3.egress_spec = 9w511;
-            standard_metadata_3.mcast_grp = 16w0;
-            smeta_2 = standard_metadata_3;
-        }
+        mark_to_drop(smeta_2);
     }
     @name("egress.set_out_bd") action set_out_bd(bit<24> bd) {
         meta.fwd.out_bd = bd;

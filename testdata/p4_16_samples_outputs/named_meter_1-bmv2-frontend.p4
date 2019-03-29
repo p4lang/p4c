@@ -44,12 +44,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".NoAction") action NoAction_3() {
     }
     @name("ingress._drop") action _drop() {
-        {
-            standard_metadata_t standard_metadata_1 = standard_metadata;
-            standard_metadata_1.egress_spec = 9w511;
-            standard_metadata_1.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_1;
-        }
+        mark_to_drop(standard_metadata);
     }
     @name("ingress._nop") action _nop() {
     }

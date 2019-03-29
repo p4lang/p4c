@@ -187,7 +187,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 action my_drop(inout standard_metadata_t smeta) {
-    markToDrop(smeta);
+    mark_to_drop(smeta);
 }
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action set_l2ptr(bit<32> l2ptr) {

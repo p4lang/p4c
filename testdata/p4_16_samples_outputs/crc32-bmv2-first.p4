@@ -93,7 +93,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         send_back(nselect);
     }
     action operation_drop() {
-        markToDrop(standard_metadata);
+        mark_to_drop(standard_metadata);
     }
     table calculate {
         key = {

@@ -55,3 +55,5 @@ actions {
     bitwidth: 9
   }
 }
+type_info {
+}

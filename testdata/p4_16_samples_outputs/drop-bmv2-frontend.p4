@@ -15,12 +15,7 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name(".drop") action drop_0(inout standard_metadata_t smeta_1) {
-        {
-            standard_metadata_t standard_metadata_1 = smeta_1;
-            standard_metadata_1.egress_spec = 9w511;
-            standard_metadata_1.mcast_grp = 16w0;
-            smeta_1 = standard_metadata_1;
-        }
+        mark_to_drop(smeta_1);
     }
     @name("IngressI.forward") table forward_0 {
         key = {

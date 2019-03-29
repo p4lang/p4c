@@ -23,29 +23,28 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
 
 control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
     bit<16> rand_int_0;
-    @name(".markToDrop") action markToDrop() {
-        standard_metadata.egress_spec = 9w511;
-        standard_metadata.mcast_grp = 16w0;
-    }
     @hidden action act() {
+        mark_to_drop(standard_metadata);
+    }
+    @hidden action act_0() {
         random<bit<16>>(rand_int_0, 16w0, 16w49151);
     }
     @hidden table tbl_act {
+        actions = {
+            act_0();
+        }
+        const default_action = act_0();
+    }
+    @hidden table tbl_act_0 {
         actions = {
             act();
         }
         const default_action = act();
     }
-    @hidden table tbl_markToDrop {
-        actions = {
-            markToDrop();
-        }
-        const default_action = markToDrop();
-    }
     apply {
         tbl_act.apply();
         if (rand_int_0 < 16w32768) 
-            tbl_markToDrop.apply();
+            tbl_act_0.apply();
     }
 }
 

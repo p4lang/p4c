@@ -22,7 +22,7 @@ struct headers {
 }
 
 action my_drop(inout standard_metadata_t smeta) {
-    markToDrop(smeta);
+    mark_to_drop(smeta);
 }
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     bit<16> tmp_port = incr((bit<16>)standard_metadata.ingress_port);

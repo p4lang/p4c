@@ -37,7 +37,7 @@ struct headers {
 }
 
 action my_drop(inout standard_metadata_t smeta) {
-    markToDrop(smeta);
+    mark_to_drop(smeta);
 }
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     const bit<16> ETHERTYPE_IPV4 = 16w0x800;
@@ -65,7 +65,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     action drop_with_count() {
         ipv4_da_lpm_stats.count();
-        markToDrop(standard_metadata);
+        mark_to_drop(standard_metadata);
     }
     action set_bd_dmac_intf(bit<24> bd, bit<48> dmac, bit<9> intf) {
         meta.fwd_metadata.out_bd = bd;

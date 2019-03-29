@@ -52,12 +52,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".my_drop") action my_drop(inout standard_metadata_t smeta) {
-        {
-            standard_metadata_t standard_metadata_1 = smeta;
-            standard_metadata_1.egress_spec = 9w511;
-            standard_metadata_1.mcast_grp = 16w0;
-            smeta = standard_metadata_1;
-        }
+        mark_to_drop(smeta);
     }
     @name("ingress.ipv4_da_lpm_stats") direct_counter(CounterType.packets) ipv4_da_lpm_stats_0;
     @name("ingress.set_l2ptr") action set_l2ptr(bit<32> l2ptr) {
@@ -66,12 +61,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ingress.drop_with_count") action drop_with_count() {
         ipv4_da_lpm_stats_0.count();
-        {
-            standard_metadata_t standard_metadata_2 = standard_metadata;
-            standard_metadata_2.egress_spec = 9w511;
-            standard_metadata_2.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_2;
-        }
+        mark_to_drop(standard_metadata);
     }
     @name("ingress.set_bd_dmac_intf") action set_bd_dmac_intf(bit<24> bd, bit<48> dmac, bit<9> intf) {
         meta.fwd_metadata.out_bd = bd;
@@ -108,12 +98,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".my_drop") action my_drop_0(inout standard_metadata_t smeta_1) {
-        {
-            standard_metadata_t standard_metadata_4 = smeta_1;
-            standard_metadata_4.egress_spec = 9w511;
-            standard_metadata_4.mcast_grp = 16w0;
-            smeta_1 = standard_metadata_4;
-        }
+        mark_to_drop(smeta_1);
     }
     @name("egress.rewrite_mac") action rewrite_mac(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;

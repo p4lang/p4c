@@ -66,20 +66,10 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     @name(".NoAction") action NoAction_1() {
     }
     @name("MyIngress.drop") action drop_1() {
-        {
-            standard_metadata_t standard_metadata_1 = standard_metadata;
-            standard_metadata_1.egress_spec = 9w511;
-            standard_metadata_1.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_1;
-        }
+        mark_to_drop(standard_metadata);
     }
     @name("MyIngress.drop") action drop_3() {
-        {
-            standard_metadata_t standard_metadata_2 = standard_metadata;
-            standard_metadata_2.egress_spec = 9w511;
-            standard_metadata_2.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_2;
-        }
+        mark_to_drop(standard_metadata);
     }
     @name("MyIngress.set_dmac") action set_dmac(macAddr_t dstAddr) {
         hdr.ethernet.dstAddr = dstAddr;

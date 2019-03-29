@@ -57,12 +57,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     @name(".NoAction") action NoAction_0() {
     }
     @name("MyIngress.drop") action drop_1() {
-        {
-            standard_metadata_t standard_metadata_1 = standard_metadata;
-            standard_metadata_1.egress_spec = 9w511;
-            standard_metadata_1.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_1;
-        }
+        mark_to_drop(standard_metadata);
     }
     @name("MyIngress.ipv4_forward") action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;

@@ -20,10 +20,10 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name(".NoAction") action NoAction_3() {
     }
     @name("IngressI.drop") action drop_1() {
-        mark_to_drop();
+        mark_to_drop(smeta);
     }
     @name("IngressI.drop") action drop_3() {
-        mark_to_drop();
+        mark_to_drop(smeta);
     }
     @name("IngressI.as") action_selector(HashAlgorithm.identity, 32w1024, 32w10) as_0;
     @name("IngressI.indirect_ws") table indirect_ws_0 {

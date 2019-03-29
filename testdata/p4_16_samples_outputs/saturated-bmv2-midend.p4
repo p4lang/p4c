@@ -66,8 +66,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         h.h.res_16 = h.h.opr1_16 |-| h.h.opr2_16;
     }
     @name("ingress.drop") action drop_1() {
-        standard_meta.egress_spec = 9w511;
-        standard_meta.mcast_grp = 16w0;
+        mark_to_drop(standard_meta);
     }
     @name("ingress.t") table t_0 {
         key = {

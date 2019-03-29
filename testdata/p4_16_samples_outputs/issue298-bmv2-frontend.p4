@@ -110,12 +110,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".NoAction") action NoAction_0() {
     }
     @name("egress._drop") action _drop() {
-        {
-            standard_metadata_t standard_metadata_1 = standard_metadata;
-            standard_metadata_1.egress_spec = 9w511;
-            standard_metadata_1.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_1;
-        }
+        mark_to_drop(standard_metadata);
     }
     @name("egress.drop_tbl") table drop_tbl_0 {
         key = {

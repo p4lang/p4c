@@ -22,13 +22,9 @@ parser parse(packet_in pk, out parsed_packet_t hdr, inout local_metadata_t local
 }
 
 control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    @name(".markToDrop") action markToDrop(inout standard_metadata_t standard_metadata_1) {
-        standard_metadata_1.egress_spec = 9w511;
-        standard_metadata_1.mcast_grp = 16w0;
-    }
     apply {
         if (local_metadata.test.test_error == error.Unused) 
-            markToDrop(standard_metadata);
+            mark_to_drop(standard_metadata);
     }
 }
 

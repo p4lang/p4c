@@ -53,7 +53,7 @@ struct headers {
 }
 
 action my_drop(inout standard_metadata_t smeta) {
-    markToDrop(smeta);
+    mark_to_drop(smeta);
 }
 
 parser ParserImpl(packet_in packet,
@@ -94,7 +94,7 @@ control ingress(inout headers hdr,
     }
     action drop_with_count() {
         ipv4_da_lpm_stats.count();
-        markToDrop(standard_metadata);
+        mark_to_drop(standard_metadata);
     }
     action set_bd_dmac_intf(bit<24> bd, bit<48> dmac, bit<9> intf) {
         meta.fwd_metadata.out_bd = bd;

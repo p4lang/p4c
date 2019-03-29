@@ -28,7 +28,7 @@ control ingress(inout parsed_packet_t hdr,
 	        inout standard_metadata_t standard_metadata) {
     apply {
         if (local_metadata.test.test_error == error.Unused)
-            markToDrop(standard_metadata);
+            mark_to_drop(standard_metadata);
     }
 }
 
