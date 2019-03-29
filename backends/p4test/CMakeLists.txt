@@ -85,6 +85,11 @@ set (P4_XFAIL_TESTS
   testdata/p4_16_samples/psa-example-digest-bmv2.p4
   testdata/p4_16_samples/p4rt_digest_complex.p4
   testdata/p4_16_samples/psa-example-counters-bmv2.p4
+  # This program uses a counter incorrectly and p4runtime generation
+  # fails (as it should).  We do not add this program to p4_16_errors
+  # because we are not generating p4runtime information for the
+  # programs in that folder.
+  testdata/p4_16_samples/issue1829-2-bmv2.p4
   )
 p4c_add_tests_w_p4runtime("p4" ${P4TEST_DRIVER} "${P4TEST_SUITES}" "${P4_XFAIL_TESTS}" "${P4RUNTIME_EXCLUDE}" "-a '--maxErrorCount 100'")
 
