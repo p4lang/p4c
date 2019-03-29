@@ -1,0 +1,30 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33578829
+    name: "ingressImpl.mac_da"
+    alias: "mac_da"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.dstAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16788889
+  }
+  const_default_action_id: 16788889
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16788889
+    name: "ingressImpl.do_meter"
+    alias: "do_meter"
+  }
+}
+type_info {
+}

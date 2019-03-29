@@ -607,8 +607,25 @@ void ExternConverter_direct_meter::convertExternInstance(
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto info = ctxt->structure->directMeterMap.getInfo(c);
-    CHECK_NULL(info);
-    CHECK_NULL(info->table);
+    if (info == nullptr) {
+        // This can happen if a direct_meter object is constructed,
+        // but then not associated with any table.  A warning message
+        // is already generated elsewhere regarding this.  We should
+        // not crash here.
+        return;
+    }
+    if (info->table == nullptr) {
+        // This can happen if a direct_meter object is constructed,
+        // and:
+        // + a read call is made in a table's action for the direct
+        //   meter, but the table has no 'meters = my_meter;' table
+        //   property.
+        // + the meter is incorrectly associated with a table via a
+        //   property like 'counters = my_meter;'.
+        ::error(ErrorType::ERR_INVALID,
+                "direct meter is not associated with any table"
+                " via 'meters' table property", inst);
+    }
     CHECK_NULL(info->destinationField);
 
     auto jmtr = new Util::JsonObject();
