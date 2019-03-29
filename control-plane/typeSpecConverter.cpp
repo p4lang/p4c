@@ -138,8 +138,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
                         type);
                 return false;
             }
-            int w = static_cast<int>(sdnB->value.get_si());
-            if (w > 0x7fffffff) {
+            if (!sdnB->value.fits_sint_p()) {
                 ::error("P4runtime annotation in has sdn > max int: %1%",
                         type);
                 return false;

@@ -642,13 +642,12 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
                     type);
             return -1;
         }
-        int w = static_cast<int>(sdnB->value.get_si());
-        if (w > 0x7fffffff) {
+        if (!sdnB->value.fits_sint_p()) {
             ::error("P4runtime annotation in serializer has sdn > max int: %1%",
                     type);
             return -2;
         }
-        return w;
+        return static_cast<int>(sdnB->value.get_si());
     }
     return typeMap->minWidthBits(type, type->getNode());
 }
@@ -868,7 +867,8 @@ class P4RuntimeAnalyzer {
             BUG_CHECK((fieldType->is<IR::Type_Bits>() ||
                       fieldType->is<IR::Type_Newtype>() ||
                       fieldType->is<IR::Type_SerEnum>()),
-                      "Header field %1% has a type which is not bit<>, int<>, type, or serializable enum",
+                      "Header field %1% has a type which is not bit<>, "
+                      "int<>, type, or serializable enum",
                       headerField);
             auto w = getTypeWidth(fieldType, typeMap);
             if (w < 0)
