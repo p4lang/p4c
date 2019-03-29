@@ -64,7 +64,7 @@ class QueueingTest : public ::testing::Test {
   std::vector<RndInput> values;
 
   QueueingTest()
-      : queue(nb_queues, nb_workers, capacity, WorkerMapper(nb_workers)),
+      : queue(nb_workers, capacity, WorkerMapper(nb_workers)),
         values(iterations) { }
 
   virtual void SetUp() {
@@ -161,7 +161,7 @@ class QueueingRLTest : public ::testing::Test {
                 "for RL test, capacity needs to be greater or equal to # pkts");
 
   QueueingRLTest()
-      : queue(nb_queues, nb_workers, capacity, WorkerMapper(nb_workers)),
+      : queue(nb_workers, capacity, WorkerMapper(nb_workers)),
         values(iterations) { }
 
   virtual void SetUp() {
@@ -239,7 +239,7 @@ class QueueingPriRLTest : public ::testing::Test {
   std::vector<RndInputPri> values;
 
   QueueingPriRLTest()
-      : queue(nb_queues, nb_workers, capacity, WorkerMapper(nb_workers),
+      : queue(nb_workers, capacity, WorkerMapper(nb_workers),
               nb_priorities),
         values(iterations) { }
 

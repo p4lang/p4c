@@ -41,7 +41,7 @@ class SimpleSwitchGrpcEnv : public ::testing::Environment {
   // simple_switch detaches threads.
   void SetUp() override {
     auto &runner = SimpleSwitchGrpcRunner::get_instance(
-        256, true, SimpleSwitchGrpcBaseTest::grpc_server_addr,
+        true, SimpleSwitchGrpcBaseTest::grpc_server_addr,
         SimpleSwitchGrpcBaseTest::cpu_port,
         SimpleSwitchGrpcBaseTest::dp_grpc_server_addr);
     bm::OptionsParser parser;
@@ -51,7 +51,7 @@ class SimpleSwitchGrpcEnv : public ::testing::Environment {
     argv.push_back("45459");
 #endif  // WITH_THRIFT
     // you can uncomment this when debugging
-    argv.push_back("--log-console");
+    // argv.push_back("--log-console");
     argv.push_back(start_json);
     auto argc = static_cast<int>(argv.size());
     parser.parse(argc, const_cast<char **>(argv.data()), nullptr);

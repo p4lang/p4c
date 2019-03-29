@@ -44,8 +44,9 @@ namespace bm {
 class BmiDevMgrImp : public DevMgrIface {
  public:
   BmiDevMgrImp(device_id_t device_id,
+               int max_port_count,
                std::shared_ptr<TransportIface> notifications_transport) {
-    if (bmi_port_create_mgr(&port_mgr)) {
+    if (bmi_port_create_mgr(&port_mgr, max_port_count)) {
       Logger::get()->critical("Could not initialize BMI port manager");
       std::exit(1);
     }
@@ -158,10 +159,11 @@ class BmiDevMgrImp : public DevMgrIface {
 void
 DevMgr::set_dev_mgr_bmi(
     device_id_t device_id,
+    int max_port_count,
     std::shared_ptr<TransportIface> notifications_transport) {
   assert(!pimp);
   pimp = std::unique_ptr<DevMgrIface>(
-      new BmiDevMgrImp(device_id, notifications_transport));
+      new BmiDevMgrImp(device_id, max_port_count, notifications_transport));
 }
 
 }  // namespace bm

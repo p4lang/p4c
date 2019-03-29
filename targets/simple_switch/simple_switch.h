@@ -83,7 +83,7 @@ class SimpleSwitch : public Switch {
 
  public:
   // by default, swapping is off
-  explicit SimpleSwitch(port_t max_port = 256, bool enable_swap = false);
+  explicit SimpleSwitch(bool enable_swap = false);
 
   ~SimpleSwitch();
 
@@ -169,7 +169,6 @@ class SimpleSwitch : public Switch {
   void multicast(Packet *packet, unsigned int mgid);
 
  private:
-  port_t max_port;
   std::vector<std::thread> threads_;
   std::unique_ptr<InputBuffer> input_buffer;
   // for these queues, the write operation is non-blocking and we drop the

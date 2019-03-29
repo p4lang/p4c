@@ -51,12 +51,12 @@ class SimpleSwitchGrpcRunner {
   // there is no real need for a singleton here, except for the fact that we use
   // PIGrpcServerRunAddr, ... which uses static state
   static SimpleSwitchGrpcRunner &get_instance(
-      bm::DevMgrIface::port_t max_port = 512, bool enable_swap = false,
+      bool enable_swap = false,
       std::string grpc_server_addr = "0.0.0.0:50051",
       bm::DevMgrIface::port_t cpu_port = 0,
       std::string dp_grpc_server_addr = "") {
     static SimpleSwitchGrpcRunner instance(
-        max_port, enable_swap, grpc_server_addr, cpu_port, dp_grpc_server_addr);
+        enable_swap, grpc_server_addr, cpu_port, dp_grpc_server_addr);
     return instance;
   }
 
@@ -74,8 +74,7 @@ class SimpleSwitchGrpcRunner {
   bool is_dp_service_active();
 
  private:
-  SimpleSwitchGrpcRunner(bm::DevMgrIface::port_t max_port = 512,
-                         bool enable_swap = false,
+  SimpleSwitchGrpcRunner(bool enable_swap = false,
                          std::string grpc_server_addr = "0.0.0.0:50051",
                          bm::DevMgrIface::port_t cpu_port = 0,
                          std::string dp_grpc_server_addr = "");

@@ -165,6 +165,7 @@ class DevMgr : public PacketDispatcherIface {
 
   void set_dev_mgr_bmi(
       device_id_t device_id,
+      int max_port_count,
       std::shared_ptr<TransportIface> notifications_transport = nullptr);
 
   // The interface names are instead interpreted as file names.
@@ -219,6 +220,8 @@ class DevMgr : public PacketDispatcherIface {
   std::string sample_packet_data(const char *buffer, int len);
 
   size_t dump_packet_data{0};
+
+  int max_port_count;
 
  private:
   // Actual implementation (private)

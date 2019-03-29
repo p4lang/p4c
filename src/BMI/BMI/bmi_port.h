@@ -40,7 +40,7 @@ typedef struct bmi_port_stats_s {
    returns. */
 typedef void (*bmi_packet_handler_t)(int port_num, const char *buffer, int len, void *cookie);
 
-int bmi_port_create_mgr(bmi_port_mgr_t **port_mgr);
+int bmi_port_create_mgr(bmi_port_mgr_t **port_mgr, int max_port_count);
 
 /* Start running the port manager on its own thread */
 int bmi_start_mgr(bmi_port_mgr_t *port_mgr);

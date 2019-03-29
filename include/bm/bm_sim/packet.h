@@ -122,7 +122,7 @@ class Packet final {
   packet_id_t get_packet_id() const { return packet_id; }
 
   //! Get the egress_port of this Packet. The egress_port needs to be set by the
-  //! target using set_ingress_port().
+  //! target using set_egress_port().
   int get_egress_port() const { return egress_port; }
   //! Get the ingress_port of the packet.
   int get_ingress_port() const { return ingress_port; }

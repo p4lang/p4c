@@ -30,24 +30,38 @@
 #ifndef BM_BM_SIM_QUEUEING_H_
 #define BM_BM_SIM_QUEUEING_H_
 
-#include <deque>
-#include <queue>
-#include <vector>
-#include <mutex>
-#include <condition_variable>
-#include <chrono>
 #include <algorithm>  // for std::max
+#include <chrono>
+#include <condition_variable>
+#include <deque>
+#include <mutex>
+#include <queue>
+#include <tuple>  // for std::forward_as_tuple
+#include <unordered_map>
+#include <utility>  // for std::piecewise_construct
+#include <vector>
 
 namespace bm {
 
-//! One of the most basic queueing block possible. Lets you choose (at runtime)
-//! the desired number of logical queues and the number of worker threads that
-//! will be reading from these queues. I write "logical queues" because the
-//! implementation actually uses as many physical queues as there are worker
-//! threads. However, each logical queue still has its own maximum capacity.
-//! As of now, the behavior is blocking for both read (pop_back()) and write
-//! (push_front()), but we may offer additional options if there is interest
-//! expressed in the future.
+// These queueing implementations used to have one lock for each worker, which
+// meant that as long as 2 queues were assigned to different workers, they could
+// operate (push / pop) in parallel. Since we added support for arbitrary port
+// ids (and the port id is used as the queue id), we no longer have a reasonable
+// upper bound on the maximum possible port id at construction time and we can
+// no longer use a vector indexed by the queue id to store queue
+// information. Each push / pop operation can potentially insert a new entry
+// into the map. In order to accomodate for this, we had to start using a single
+// lock, shared by all the workers. It's unlikely that contention for this lock
+// will be a bottleneck.
+
+//! One of the most basic queueing block possible. Supports an arbitrary number
+//! of logical queues (identified by arbitrary integer ids). Lets you choose (at
+//! runtime) the number of worker threads that will be reading from these
+//! queues. I write "logical queues" because the implementation actually uses as
+//! many physical queues as there are worker threads. However, each logical
+//! queue still has its own maximum capacity.  As of now, the behavior is
+//! blocking for both read (pop_back()) and write (push_front()), but we may
+//! offer additional options if there is interest expressed in the future.
 //!
 //! Template parameter `T` is the type (has to be movable) of the objects that
 //! will be stored in the queues. Template parameter `FMap` is a callable object
@@ -67,32 +81,30 @@ namespace bm {
 //! @endcode
 template <typename T, typename FMap>
 class QueueingLogic {
+  using MutexType = std::mutex;
+  using LockType = std::unique_lock<MutexType>;
+
  public:
-  //! \p nb_queues is the number of logical queues; each queue is identified by
-  //! an id in the range `[0, nb_queues)` when pushing to the queue. \p
-  //! nb_workers is the number of threads that will be consuming from the
+  //! \p nb_workers is the number of threads that will be consuming from the
   //! queues; they will be identified by an id in the range `[0,
   //! nb_workers)`. \p capacity is the number of objects that each logical queue
   //! can hold. Because we need to be able to map each queue id to a worker id,
   //! the user has to provide a callable object of type `FMap`, \p
   //! map_to_worker, that can do this mapping. See the QueueingLogic class
   //! description for more information about the `FMap` template parameter.
-  QueueingLogic(size_t nb_queues, size_t nb_workers, size_t capacity,
-                FMap map_to_worker)
-      : nb_queues(nb_queues), nb_workers(nb_workers),
-        queues_info(nb_queues), workers_info(nb_workers),
-        map_to_worker(std::move(map_to_worker)) {
-    for (auto &q_info : queues_info)
-      q_info.capacity = capacity;
-  }
+  QueueingLogic(size_t nb_workers, size_t capacity, FMap map_to_worker)
+      : nb_workers(nb_workers),
+        capacity(capacity),
+        workers_info(nb_workers),
+        map_to_worker(std::move(map_to_worker)) { }
 
   //! Makes a copy of \p item and pushes it to the front of the logical queue
   //! with id \p queue_id.
   void push_front(size_t queue_id, const T &item) {
     size_t worker_id = map_to_worker(queue_id);
-    auto &q_info = queues_info.at(queue_id);
+    LockType lock(mutex);
+    auto &q_info = get_queue(queue_id);
     auto &w_info = workers_info.at(worker_id);
-    std::unique_lock<std::mutex> lock(w_info.q_mutex);
     while (q_info.size >= q_info.capacity) {
       q_info.q_not_full.wait(lock);
     }
@@ -104,9 +116,9 @@ class QueueingLogic {
   //! Moves \p item to the front of the logical queue with id \p queue_id.
   void push_front(size_t queue_id, T &&item) {
     size_t worker_id = map_to_worker(queue_id);
-    auto &q_info = queues_info.at(queue_id);
+    LockType lock(mutex);
+    auto &q_info = get_queue(queue_id);
     auto &w_info = workers_info.at(worker_id);
-    std::unique_lock<std::mutex> lock(w_info.q_mutex);
     while (q_info.size >= q_info.capacity) {
       q_info.q_not_full.wait(lock);
     }
@@ -123,37 +135,42 @@ class QueueingLogic {
   //! element `E` was pushed to queue `queue_id`, you need to use the worker id
   //! `map_to_worker(queue_id)` to retrieve it with this function.
   void pop_back(size_t worker_id, size_t *queue_id, T *pItem) {
+    LockType lock(mutex);
     auto &w_info = workers_info.at(worker_id);
     auto &queue = w_info.queue;
-    std::unique_lock<std::mutex> lock(w_info.q_mutex);
     while (queue.size() == 0) {
       w_info.q_not_empty.wait(lock);
     }
     *queue_id = queue.back().queue_id;
     *pItem = std::move(queue.back().e);
     queue.pop_back();
-    auto &q_info = queues_info.at(*queue_id);
+    auto &q_info = get_queue_or_throw(*queue_id);
     q_info.size--;
     q_info.q_not_full.notify_one();
   }
 
   //! Get the occupancy of the logical queue with id \p queue_id.
   size_t size(size_t queue_id) const {
-    size_t worker_id = map_to_worker(queue_id);
-    auto &q_info = queues_info.at(queue_id);
-    auto &w_info = workers_info.at(worker_id);
-    std::unique_lock<std::mutex> lock(w_info.q_mutex);
+    LockType lock(mutex);
+    auto it = queues_info.find(queue_id);
+    if (it == queues_info.end()) return 0;
+    auto &q_info = it->second;
     return q_info.size;
   }
 
   //! Set the capacity of the logical queue with id \p queue_id to \p c
   //! elements.
   void set_capacity(size_t queue_id, size_t c) {
-    size_t worker_id = map_to_worker(queue_id);
-    auto &q_info = queues_info.at(queue_id);
-    auto &w_info = workers_info.at(worker_id);
-    std::unique_lock<std::mutex> lock(w_info.q_mutex);
+    LockType lock(mutex);
+    auto &q_info = get_queue(queue_id);
     q_info.capacity = c;
+  }
+
+  //! Set the capacity of all logical queues to \p c elements.
+  void set_capacity_for_all(size_t c) {
+    LockType lock(mutex);
+    for (auto &p : queues_info) p.second.capacity = c;
+    capacity = c;
   }
 
   //! Deleted copy constructor
@@ -178,6 +195,9 @@ class QueueingLogic {
   using MyQ = std::deque<QE>;
 
   struct QueueInfo {
+    explicit QueueInfo(size_t capacity)
+        : capacity(capacity) { }
+
     size_t size{0};
     size_t capacity{0};
     mutable std::condition_variable q_not_full{};
@@ -185,13 +205,33 @@ class QueueingLogic {
 
   struct WorkerInfo {
     MyQ queue{};
-    mutable std::mutex q_mutex{};
     mutable std::condition_variable q_not_empty{};
   };
 
-  size_t nb_queues;
+  QueueInfo &get_queue(size_t queue_id) {
+    auto it = queues_info.find(queue_id);
+    if (it != queues_info.end()) return it->second;
+    // piecewise_construct because QueueInfo is not copyable (because of mutex
+    // member)
+    auto p = queues_info.emplace(
+        std::piecewise_construct,
+        std::forward_as_tuple(queue_id),
+        std::forward_as_tuple(capacity));
+    return p.first->second;
+  }
+
+  const QueueInfo &get_queue_or_throw(size_t queue_id) const {
+    return queues_info.at(queue_id);
+  }
+
+  QueueInfo &get_queue_or_throw(size_t queue_id) {
+    return queues_info.at(queue_id);
+  }
+
+  mutable MutexType mutex{};
   size_t nb_workers;
-  std::vector<QueueInfo> queues_info;
+  size_t capacity;  // default capacity
+  std::unordered_map<size_t, QueueInfo> queues_info;
   std::vector<WorkerInfo> workers_info;
   FMap map_to_worker;
 };
@@ -210,34 +250,30 @@ class QueueingLogic {
 //! This is the queueing logic used by the standard simple_switch target.
 template <typename T, typename FMap>
 class QueueingLogicRL {
+  using MutexType = std::mutex;
+  using LockType = std::unique_lock<MutexType>;
+
  public:
   //! @copydoc QueueingLogic::QueueingLogic()
   //!
   //! Initially, none of the logical queues will be rate-limited, i.e. the
   //! instance will behave as an instance of QueueingLogic.
-  QueueingLogicRL(size_t nb_queues, size_t nb_workers, size_t capacity,
-                  FMap map_to_worker)
-      : nb_queues(nb_queues), nb_workers(nb_workers),
-        queues_info(nb_queues), workers_info(nb_workers),
-        map_to_worker(std::move(map_to_worker)) {
-    auto now = clock::now();
-    for (auto &q_info : queues_info) {
-      q_info.capacity = capacity;
-      q_info.last_sent = now;
-    }
-  }
+  QueueingLogicRL(size_t nb_workers, size_t capacity, FMap map_to_worker)
+      : nb_workers(nb_workers),
+        capacity(capacity),
+        workers_info(nb_workers),
+        map_to_worker(std::move(map_to_worker)) { }
 
   //! If the logical queue with id \p queue_id is full, the function will return
   //! `0` immediately. Otherwise, \p item will be copied to the front of the
   //! logical queue and the function will return `1`.
   int push_front(size_t queue_id, const T &item) {
     size_t worker_id = map_to_worker(queue_id);
-    auto &q_info = queues_info.at(queue_id);
+    LockType lock(mutex);
+    auto &q_info = get_queue(queue_id);
     auto &w_info = workers_info.at(worker_id);
-    std::unique_lock<std::mutex> lock(w_info.q_mutex);
     if (q_info.size >= q_info.capacity) return 0;
     q_info.last_sent = get_next_tp(q_info);
-    // w_info.queue.emplace(item, queue_id, q_info.last_sent, id++);
     w_info.queue.emplace(item, queue_id, q_info.last_sent);
     q_info.size++;
     w_info.q_not_empty.notify_one();
@@ -248,12 +284,11 @@ class QueueingLogicRL {
   //! instead of copied.
   int push_front(size_t queue_id, T &&item) {
     size_t worker_id = map_to_worker(queue_id);
-    auto &q_info = queues_info.at(queue_id);
+    LockType lock(mutex);
+    auto &q_info = get_queue(queue_id);
     auto &w_info = workers_info.at(worker_id);
-    std::unique_lock<std::mutex> lock(w_info.q_mutex);
     if (q_info.size >= q_info.capacity) return 0;
     q_info.last_sent = get_next_tp(q_info);
-    // w_info.queue.emplace(std::move(item), queue_id, q_info.last_sent, id++);
     w_info.queue.emplace(std::move(item), queue_id, q_info.last_sent);
     q_info.size++;
     w_info.q_not_empty.notify_one();
@@ -266,9 +301,9 @@ class QueueingLogicRL {
   //! will block until 1) an element is available 2) this element is free to
   //! leave the queue according to the rate limiter.
   void pop_back(size_t worker_id, size_t *queue_id, T *pItem) {
+    LockType lock(mutex);
     auto &w_info = workers_info.at(worker_id);
     auto &queue = w_info.queue;
-    std::unique_lock<std::mutex> lock(w_info.q_mutex);
     while (true) {
       if (queue.size() == 0) {
         w_info.q_not_empty.wait(lock);
@@ -282,26 +317,32 @@ class QueueingLogicRL {
     // http://stackoverflow.com/questions/20149471/move-out-element-of-std-priority-queue-in-c11
     *pItem = std::move(const_cast<QE &>(queue.top()).e);
     queue.pop();
-    auto &q_info = queues_info.at(*queue_id);
+    auto &q_info = get_queue_or_throw(*queue_id);
     q_info.size--;
   }
 
   //! @copydoc QueueingLogic::size
   size_t size(size_t queue_id) const {
-    size_t worker_id = map_to_worker(queue_id);
-    auto &q_info = queues_info.at(queue_id);
-    auto &w_info = workers_info.at(worker_id);
-    std::unique_lock<std::mutex> lock(w_info.q_mutex);
+    LockType lock(mutex);
+    auto it = queues_info.find(queue_id);
+    if (it == queues_info.end()) return 0;
+    auto &q_info = it->second;
     return q_info.size;
   }
 
-  //! @copydoc QueueingLogic::set_capacity
+  //! Set the capacity of the logical queue with id \p queue_id to \p c
+  //! elements.
   void set_capacity(size_t queue_id, size_t c) {
-    size_t worker_id = map_to_worker(queue_id);
-    auto &q_info = queues_info.at(queue_id);
-    auto &w_info = workers_info.at(worker_id);
-    std::unique_lock<std::mutex> lock(w_info.q_mutex);
+    LockType lock(mutex);
+    auto &q_info = get_queue(queue_id);
     q_info.capacity = c;
+  }
+
+  //! Set the capacity of all logical queues to \p c elements.
+  void set_capacity_for_all(size_t c) {
+    LockType lock(mutex);
+    for (auto &p : queues_info) p.second.capacity = c;
+    capacity = c;
   }
 
   //! Set the maximum rate of the logical queue with id \p queue_id to \p
@@ -310,12 +351,23 @@ class QueueingLogicRL {
   void set_rate(size_t queue_id, uint64_t pps) {
     using std::chrono::duration;
     using std::chrono::duration_cast;
-    size_t worker_id = map_to_worker(queue_id);
-    auto &q_info = queues_info.at(queue_id);
-    auto &w_info = workers_info.at(worker_id);
-    std::unique_lock<std::mutex> lock(w_info.q_mutex);
+    LockType lock(mutex);
+    auto &q_info = get_queue(queue_id);
     q_info.queue_rate_pps = pps;
     q_info.pkt_delay_ticks = duration_cast<ticks>(duration<double>(1. / pps));
+  }
+
+  //! Set the maximum rate of all logical queues to \p pps.
+  void set_rate_for_all(uint64_t pps) {
+    using std::chrono::duration;
+    using std::chrono::duration_cast;
+    LockType lock(mutex);
+    for (auto &p : queues_info) {
+      auto &q_info = p.second;
+      q_info.queue_rate_pps = pps;
+      q_info.pkt_delay_ticks = duration_cast<ticks>(duration<double>(1. / pps));
+    }
+    queue_rate_pps = pps;
   }
 
   //! Deleted copy constructor
@@ -358,32 +410,51 @@ class QueueingLogicRL {
   // using MyQ = std::priority_queue<QE, std::vector<QE>, QEComp>;
 
   struct QueueInfo {
+    QueueInfo(size_t capacity, uint64_t queue_rate_pps)
+        : capacity(capacity),
+          queue_rate_pps(queue_rate_pps),
+          pkt_delay_ticks(std::chrono::duration_cast<ticks>(
+              std::chrono::duration<double>(1. / queue_rate_pps))),
+          last_sent(clock::now()) { }
+
     size_t size{0};
-    size_t capacity{0};
-    uint64_t queue_rate_pps{};
-    // interesting to note that {0} fails with g++4.8, but not with g++4.9
-    // did not get to the root of it, but could be because of an explicit
-    // constructor somewhere in the std lib implementation used
-    ticks pkt_delay_ticks{ticks::zero()};
-    clock::time_point last_sent{};
+    size_t capacity;
+    uint64_t queue_rate_pps;
+    ticks pkt_delay_ticks;
+    clock::time_point last_sent;
   };
 
   struct WorkerInfo {
     MyQ queue{};
-    mutable std::mutex q_mutex{};
     mutable std::condition_variable q_not_empty{};
   };
+
+  QueueInfo &get_queue(size_t queue_id) {
+    auto it = queues_info.find(queue_id);
+    if (it != queues_info.end()) return it->second;
+    auto p = queues_info.emplace(queue_id, QueueInfo(capacity, queue_rate_pps));
+    return p.first->second;
+  }
+
+  const QueueInfo &get_queue_or_throw(size_t queue_id) const {
+    return queues_info.at(queue_id);
+  }
+
+  QueueInfo &get_queue_or_throw(size_t queue_id) {
+    return queues_info.at(queue_id);
+  }
 
   clock::time_point get_next_tp(const QueueInfo &q_info) {
     return std::max(clock::now(), q_info.last_sent + q_info.pkt_delay_ticks);
   }
 
-  size_t nb_queues;
+  mutable MutexType mutex{};
   size_t nb_workers;
-  std::vector<QueueInfo> queues_info;
+  size_t capacity;  // default capacity
+  uint64_t queue_rate_pps{0};  // default rate
+  std::unordered_map<size_t, QueueInfo> queues_info;
   std::vector<WorkerInfo> workers_info;
   FMap map_to_worker;
-  // size_t id{0};
 };
 
 
@@ -409,23 +480,18 @@ class QueueingLogicPriRL {
 
  public:
   //! See QueueingLogic::QueueingLogicRL() for an introduction. The difference
-  //! here is that each logical queues can receive several priority queues (as
+  //! here is that each logical queue can receive several priority queues (as
   //! determined by \p nb_priorities, which is set to `2` by default). Each of
   //! these priority queues will initially be able to hold \p capacity
   //! elements. The capacity of each priority queue can be changed later by
   //! using set_capacity(size_t queue_id, size_t priority, size_t c).
-  QueueingLogicPriRL(size_t nb_queues, size_t nb_workers, size_t capacity,
+  QueueingLogicPriRL(size_t nb_workers, size_t capacity,
                      FMap map_to_worker, size_t nb_priorities = 2)
-      : nb_queues(nb_queues), nb_workers(nb_workers),
+      : nb_workers(nb_workers),
+        capacity(capacity),
         workers_info(nb_workers),
         map_to_worker(std::move(map_to_worker)),
-        nb_priorities(nb_priorities) {
-    auto now = clock::now();
-    for (size_t i = 0; i < nb_queues; i++) {
-      QueueInfoPri v = {0, capacity, 0, ticks::zero(), now};
-      queues_info.emplace_back(nb_priorities, v);
-    }
-  }
+        nb_priorities(nb_priorities) { }
 
   //! If priority queue \p priority of logical queue \p queue_id is full, the
   //! function will return `0` immediately. Otherwise, \p item will be copied to
@@ -434,10 +500,10 @@ class QueueingLogicPriRL {
   //! if the FMap object provided to the constructor does not behave correctly).
   int push_front(size_t queue_id, size_t priority, const T &item) {
     size_t worker_id = map_to_worker(queue_id);
-    auto &q_info = queues_info.at(queue_id);
+    LockType lock(mutex);
+    auto &q_info = get_queue(queue_id);
     auto &w_info = workers_info.at(worker_id);
     auto &q_info_pri = q_info.at(priority);
-    LockType lock(w_info.q_mutex);
     if (q_info_pri.size >= q_info_pri.capacity) return 0;
     q_info_pri.last_sent = get_next_tp(q_info_pri);
     w_info.queues[priority].emplace(item, queue_id, q_info_pri.last_sent);
@@ -456,10 +522,10 @@ class QueueingLogicPriRL {
   //! \p item is moved instead of copied.
   int push_front(size_t queue_id, size_t priority, T &&item) {
     size_t worker_id = map_to_worker(queue_id);
-    auto &q_info = queues_info.at(queue_id);
+    LockType lock(mutex);
+    auto &q_info = get_queue(queue_id);
     auto &w_info = workers_info.at(worker_id);
     auto &q_info_pri = q_info.at(priority);
-    LockType lock(w_info.q_mutex);
     if (q_info_pri.size >= q_info_pri.capacity) return 0;
     q_info_pri.last_sent = get_next_tp(q_info_pri);
     w_info.queues[priority].emplace(std::move(item), queue_id,
@@ -486,8 +552,8 @@ class QueueingLogicPriRL {
   //! exceeded their rate already), the function will block.
   void pop_back(size_t worker_id, size_t *queue_id, size_t *priority,
                 T *pItem) {
+    LockType lock(mutex);
     auto &w_info = workers_info.at(worker_id);
-    LockType lock(w_info.q_mutex);
     MyQ *queue = nullptr;
     size_t pri;
     while (true) {
@@ -515,7 +581,7 @@ class QueueingLogicPriRL {
     // http://stackoverflow.com/questions/20149471/move-out-element-of-std-priority-queue-in-c11
     *pItem = std::move(const_cast<QE &>(queue->top()).e);
     queue->pop();
-    auto &q_info = queues_info.at(*queue_id);
+    auto &q_info = get_queue_or_throw(*queue_id);
     auto &q_info_pri = q_info.at(*priority);
     q_info_pri.size--;
     q_info.size--;
@@ -534,34 +600,44 @@ class QueueingLogicPriRL {
   //! The occupancies of all the priority queues for this logical queue are
   //! added.
   size_t size(size_t queue_id) const {
-    size_t worker_id = map_to_worker(queue_id);
-    auto &q_info = queues_info.at(queue_id);
-    auto &w_info = workers_info.at(worker_id);
-    LockType lock(w_info.q_mutex);
+    LockType lock(mutex);
+    auto it = queues_info.find(queue_id);
+    if (it == queues_info.end()) return 0;
+    auto &q_info = it->second;
     return q_info.size;
   }
 
   //! Get the occupancy of priority queue \p priority for logical queue with id
   //! \p queue_id.
   size_t size(size_t queue_id, size_t priority) const {
-    size_t worker_id = map_to_worker(queue_id);
-    auto &q_info = queues_info.at(queue_id);
+    LockType lock(mutex);
+    auto it = queues_info.find(queue_id);
+    if (it == queues_info.end()) return 0;
+    auto &q_info = it->second;
     auto &q_info_pri = q_info.at(priority);
-    auto &w_info = workers_info.at(worker_id);
-    LockType lock(w_info.q_mutex);
     return q_info_pri.size;
   }
 
   //! Set the capacity of all the priority queues for logical queue \p queue_id
   //! to \p c elements.
   void set_capacity(size_t queue_id, size_t c) {
+    LockType lock(mutex);
     for_each_q(queue_id, SetCapacityFn(c));
   }
 
   //! Set the capacity of priority queue \p priority for logical queue \p
   //! queue_id to \p c elements.
   void set_capacity(size_t queue_id, size_t priority, size_t c) {
+    LockType lock(mutex);
     for_one_q(queue_id, priority, SetCapacityFn(c));
+  }
+
+  //! Set the capacity of all the priority queues of all logical queues to \p c
+  //! elements.
+  void set_capacity_for_all(size_t c) {
+    LockType lock(mutex);
+    for (auto &p : queues_info) for_each_q(p.first, SetCapacityFn(c));
+    capacity = c;
   }
 
   //! Set the maximum rate of all the priority queues for logical queue \p
@@ -569,13 +645,22 @@ class QueueingLogicPriRL {
   //! second". Until this function is called, there will be no rate limit for
   //! the queue.
   void set_rate(size_t queue_id, uint64_t pps) {
+    LockType lock(mutex);
     for_each_q(queue_id, SetRateFn(pps));
   }
 
   //! Same as set_rate(size_t queue_id, uint64_t pps) but only applies to the
   //! given priority queue.
   void set_rate(size_t queue_id, size_t priority, uint64_t pps) {
+    LockType lock(mutex);
     for_one_q(queue_id, priority, SetRateFn(pps));
+  }
+
+  //! Set the rate of all the priority queues of all logical queues to \p pps.
+  void set_rate_for_all(uint64_t pps) {
+    LockType lock(mutex);
+    for (auto &p : queues_info) for_each_q(p.first, SetRateFn(pps));
+    queue_rate_pps = pps;
   }
 
   //! Deleted copy constructor
@@ -612,7 +697,14 @@ class QueueingLogicPriRL {
   using MyQ = std::priority_queue<QE, std::deque<QE>, QEComp>;
 
   struct QueueInfoPri {
-    size_t size;
+    QueueInfoPri(size_t capacity, uint64_t queue_rate_pps)
+        : capacity(capacity),
+          queue_rate_pps(queue_rate_pps),
+          pkt_delay_ticks(std::chrono::duration_cast<ticks>(
+              std::chrono::duration<double>(1. / queue_rate_pps))),
+          last_sent(clock::now()) { }
+
+    size_t size{0};
     size_t capacity;
     uint64_t queue_rate_pps;
     ticks pkt_delay_ticks;
@@ -620,18 +712,34 @@ class QueueingLogicPriRL {
   };
 
   struct QueueInfo : public std::vector<QueueInfoPri> {
-    QueueInfo(size_t nb_priorities, const QueueInfoPri &v)
-        : std::vector<QueueInfoPri>(nb_priorities, v) { }
+    QueueInfo(size_t capacity, uint64_t queue_rate_pps, size_t nb_priorities)
+        : std::vector<QueueInfoPri>(
+              nb_priorities, QueueInfoPri(capacity, queue_rate_pps)) { }
 
     size_t size{0};
   };
 
   struct WorkerInfo {
-    mutable std::mutex q_mutex{};
     mutable std::condition_variable q_not_empty{};
     size_t size{0};
     std::array<MyQ, 32> queues;
   };
+
+  QueueInfo &get_queue(size_t queue_id) {
+    auto it = queues_info.find(queue_id);
+    if (it != queues_info.end()) return it->second;
+    auto p = queues_info.emplace(
+        queue_id, QueueInfo(capacity, queue_rate_pps, nb_priorities));
+    return p.first->second;
+  }
+
+  const QueueInfo &get_queue_or_throw(size_t queue_id) const {
+    return queues_info.at(queue_id);
+  }
+
+  QueueInfo &get_queue_or_throw(size_t queue_id) {
+    return queues_info.at(queue_id);
+  }
 
   clock::time_point get_next_tp(const QueueInfoPri &q_info_pri) {
     return std::max(clock::now(),
@@ -640,23 +748,15 @@ class QueueingLogicPriRL {
 
   template <typename Function>
   Function for_each_q(size_t queue_id, Function fn) {
-    size_t worker_id = map_to_worker(queue_id);
-    auto &q_info = queues_info.at(queue_id);
-    auto &w_info = workers_info.at(worker_id);
-    LockType lock(w_info.q_mutex);
-    for (auto &q_info_pri : q_info) {
-      fn(q_info_pri);
-    }
+    auto &q_info = get_queue(queue_id);
+    for (auto &q_info_pri : q_info) fn(q_info_pri);
     return std::move(fn);
   }
 
   template <typename Function>
   Function for_one_q(size_t queue_id, size_t priority, Function fn) {
-    size_t worker_id = map_to_worker(queue_id);
-    auto &q_info = queues_info.at(queue_id);
-    auto &w_info = workers_info.at(worker_id);
+    auto &q_info = get_queue(queue_id);
     auto &q_info_pri = q_info.at(priority);
-    LockType lock(w_info.q_mutex);
     fn(q_info_pri);
     return std::move(fn);
   }
@@ -689,9 +789,11 @@ class QueueingLogicPriRL {
     ticks pkt_delay_ticks;
   };
 
-  size_t nb_queues;
+  mutable MutexType mutex;
   size_t nb_workers;
-  std::vector<QueueInfo> queues_info{};
+  size_t capacity;  // default capacity
+  uint64_t queue_rate_pps{0};  // default rate
+  std::unordered_map<size_t, QueueInfo> queues_info{};
   std::vector<WorkerInfo> workers_info{};
   std::vector<MyQ> queues{};
   FMap map_to_worker;

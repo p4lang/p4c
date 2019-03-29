@@ -40,8 +40,7 @@ namespace sswitch {
 
 SimpleSwitchRunner::SimpleSwitchRunner(uint32_t cpu_port)
     : cpu_port(cpu_port),
-      simple_switch(
-          new SimpleSwitch(512 /* max_port */, true /* enable_swap */)) { }
+      simple_switch(new SimpleSwitch(true /* enable_swap */)) { }
 
 SimpleSwitchRunner::~SimpleSwitchRunner() = default;
 

@@ -81,6 +81,9 @@ void validate(boost::any& v,  // NOLINT(runtime/references)
   v = boost::any(interface(tok, port));
 }
 
+/* static */
+constexpr int OptionsParser::default_max_port_count;
+
 void
 OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp,
                      // NOLINTNEXTLINE(runtime/references)
@@ -151,6 +154,11 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp,
        "<major>.<minor>; all bmv2 JSON versions with the same <major> version "
        "number are also supported.")
       ("no-p4", "Enable the switch to start without an inout configuration")
+      ("max-port-count",
+       po::value<int>()->default_value(default_max_port_count),
+       "Maximum number of interfaces that can be bound to the switch; "
+       "this is not an upper bound on each port number, which can be arbitrary."
+       " Depending on the target, this max value may or may not be enforced.")
       ;  // NOLINT(whitespace/semicolon)
 
   po::options_description hidden;
@@ -386,6 +394,16 @@ OptionsParser::parse(int argc, char *argv[], TargetParserIface *tp,
     thrift_port = default_thrift_port;
   }
 #endif
+
+  max_port_count = vm["max-port-count"].as<int>();
+  if (max_port_count < 0) {
+    outstream << "Invalid --max-port-count argument, cannot be negative\n";
+    exit(1);
+  }
+  if (max_port_count == 0) {
+    outstream << "You provided a --max-port-count value of 0, "
+              << "that does not seem quite right\n";
+  }
 
   if (vm.count("restore-state")) {
     state_file_path = vm["restore-state"].as<std::string>();

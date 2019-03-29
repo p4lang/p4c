@@ -31,7 +31,7 @@ int bmi_start_mgr(bmi_port_mgr_t *port_mgr) {
   return 0;
 }
 
-int bmi_port_create_mgr(bmi_port_mgr_t **port_mgr) {
+int bmi_port_create_mgr(bmi_port_mgr_t **port_mgr, int max_port_count) {
   UNUSED(port_mgr);
   return 0;
 }

@@ -184,17 +184,16 @@ class SimpleSwitch::InputBuffer {
   QueueImpl queue_lo;
 };
 
-SimpleSwitch::SimpleSwitch(port_t max_port, bool enable_swap)
+SimpleSwitch::SimpleSwitch(bool enable_swap)
   : Switch(enable_swap),
-    max_port(max_port),
     input_buffer(new InputBuffer(
         1024 /* normal capacity */, 1024 /* resubmit/recirc capacity */)),
 #ifdef SSWITCH_PRIORITY_QUEUEING_ON
-    egress_buffers(max_port, nb_egress_threads,
+    egress_buffers(nb_egress_threads,
                    64, EgressThreadMapper(nb_egress_threads),
                    SSWITCH_PRIORITY_QUEUEING_NB_QUEUES),
 #else
-    egress_buffers(max_port, nb_egress_threads,
+    egress_buffers(nb_egress_threads,
                    64, EgressThreadMapper(nb_egress_threads)),
 #endif
     output_buffer(128),
@@ -329,9 +328,7 @@ SimpleSwitch::set_egress_queue_depth(size_t port, const size_t depth_pkts) {
 
 int
 SimpleSwitch::set_all_egress_queue_depths(const size_t depth_pkts) {
-  for (uint32_t i = 0; i < max_port; i++) {
-    set_egress_queue_depth(i, depth_pkts);
-  }
+  egress_buffers.set_capacity_for_all(depth_pkts);
   return 0;
 }
 
@@ -343,9 +340,7 @@ SimpleSwitch::set_egress_queue_rate(size_t port, const uint64_t rate_pps) {
 
 int
 SimpleSwitch::set_all_egress_queue_rates(const uint64_t rate_pps) {
-  for (uint32_t i = 0; i < max_port; i++) {
-    set_egress_queue_rate(i, rate_pps);
-  }
+  egress_buffers.set_rate_for_all(rate_pps);
   return 0;
 }
 
@@ -386,12 +381,6 @@ SimpleSwitch::get_ts() const {
 
 void
 SimpleSwitch::enqueue(port_t egress_port, std::unique_ptr<Packet> &&packet) {
-    if (egress_port >= max_port) {
-      bm::Logger::get()->error("Invalid egress port %u, dropping packet",
-                               egress_port);
-      return;
-    }
-
     packet->set_egress_port(egress_port);
 
     PHV *phv = packet->get_phv();

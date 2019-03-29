@@ -61,7 +61,7 @@ class SimpleSwitch_SwapP4 : public ::testing::Test {
   static void SetUpTestCase() {
     // bm::Logger::set_logger_console();
 
-    test_switch = new SimpleSwitch(8, true);  // 8 ports, with swapping
+    test_switch = new SimpleSwitch(true);  // with swapping
 
     test_switch->init_objects(json_path_1());
 

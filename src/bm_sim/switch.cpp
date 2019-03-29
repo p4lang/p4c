@@ -258,7 +258,7 @@ SwitchWContexts::init_from_options_parser(
     set_dev_mgr_packet_in(device_id, parser.packet_in_addr, transport);
 #endif
   else
-    set_dev_mgr_bmi(device_id, transport);
+    set_dev_mgr_bmi(device_id, parser.max_port_count, transport);
 
   for (const auto &iface : parser.ifaces) {
     std::cout << "Adding interface " << iface.second
@@ -304,6 +304,8 @@ SwitchWContexts::init_from_options_parser(
   }
 
   dump_packet_data = parser.dump_packet_data;
+
+  max_port_count = parser.max_port_count;
 
   // TODO(unknown): is this the right place to do this?
   set_packet_handler(packet_handler, static_cast<void *>(this));

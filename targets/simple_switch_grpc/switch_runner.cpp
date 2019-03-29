@@ -474,12 +474,11 @@ class NotificationsCapture : public bm::TransportIface {
 };
 
 
-SimpleSwitchGrpcRunner::SimpleSwitchGrpcRunner(bm::DevMgrIface::port_t max_port,
-                                               bool enable_swap,
+SimpleSwitchGrpcRunner::SimpleSwitchGrpcRunner(bool enable_swap,
                                                std::string grpc_server_addr,
                                                bm::DevMgrIface::port_t cpu_port,
                                                std::string dp_grpc_server_addr)
-    : simple_switch(new SimpleSwitch(max_port, enable_swap)),
+    : simple_switch(new SimpleSwitch(enable_swap)),
       grpc_server_addr(grpc_server_addr), cpu_port(cpu_port),
       dp_grpc_server_addr(dp_grpc_server_addr),
       dp_service(nullptr),

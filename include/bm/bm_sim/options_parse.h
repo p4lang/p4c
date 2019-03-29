@@ -59,6 +59,8 @@ class InterfaceList {
 
 class OptionsParser {
  public:
+  static constexpr int default_max_port_count = 512;
+
   void parse(int argc, char *argv[], TargetParserIface *tp,
              // NOLINTNEXTLINE(runtime/references)
              std::ostream &outstream);
@@ -93,6 +95,7 @@ class OptionsParser {
   std::string debugger_addr{};
   std::string state_file_path{};
   size_t dump_packet_data{0};
+  int max_port_count{default_max_port_count};
   std::unordered_set<std::string> options_provided{};
 };
 
