@@ -3011,12 +3011,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         meta.egress_filter_metadata.inner_bd = meta.ingress_metadata.bd ^ meta.egress_metadata.bd;
     }
     @name(".set_egress_filter_drop") action _set_egress_filter_drop_0() {
-        {
-            standard_metadata_t standard_metadata_1 = standard_metadata;
-            standard_metadata_1.egress_spec = 9w511;
-            standard_metadata_1.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_1;
-        }
+        mark_to_drop(standard_metadata);
     }
     @name(".egress_filter") table _egress_filter {
         actions = {
@@ -3041,22 +3036,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".egress_mirror_drop") action _egress_mirror_drop_0(bit<32> session_id) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
         clone3<tuple<bit<32>, bit<16>>>(CloneType.E2E, session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
-        {
-            standard_metadata_t standard_metadata_2 = standard_metadata;
-            standard_metadata_2.egress_spec = 9w511;
-            standard_metadata_2.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_2;
-        }
+        mark_to_drop(standard_metadata);
     }
     @name(".egress_redirect_to_cpu") action _egress_redirect_to_cpu_0(bit<16> reason_code) {
         meta.fabric_metadata.reason_code = reason_code;
         clone3<tuple<bit<16>, bit<16>, bit<16>, bit<9>>>(CloneType.E2E, 32w250, { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port });
-        {
-            standard_metadata_t standard_metadata_3 = standard_metadata;
-            standard_metadata_3.egress_spec = 9w511;
-            standard_metadata_3.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_3;
-        }
+        mark_to_drop(standard_metadata);
     }
     @name(".egress_acl") table _egress_acl {
         actions = {
@@ -4451,12 +4436,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.l2_metadata.l2_nexthop_type = 1w1;
     }
     @name(".dmac_drop") action _dmac_drop_0() {
-        {
-            standard_metadata_t standard_metadata_4 = standard_metadata;
-            standard_metadata_4.egress_spec = 9w511;
-            standard_metadata_4.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_4;
-        }
+        mark_to_drop(standard_metadata);
     }
     @name(".smac_miss") action _smac_miss_0() {
         meta.l2_metadata.l2_src_miss = 1w1;
@@ -5297,12 +5277,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".meter_deny") action _meter_deny_0() {
         _meter_stats.count();
-        {
-            standard_metadata_t standard_metadata_5 = standard_metadata;
-            standard_metadata_5.egress_spec = 9w511;
-            standard_metadata_5.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_5;
-        }
+        mark_to_drop(standard_metadata);
     }
     @name(".meter_action") table _meter_action {
         actions = {
@@ -5605,42 +5580,22 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".redirect_to_cpu") action _redirect_to_cpu_0(bit<16> reason_code) {
         meta.fabric_metadata.reason_code = reason_code;
         clone3<tuple<bit<16>, bit<16>, bit<16>, bit<9>>>(CloneType.I2E, 32w250, { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port });
-        {
-            standard_metadata_t standard_metadata_6 = standard_metadata;
-            standard_metadata_6.egress_spec = 9w511;
-            standard_metadata_6.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_6;
-        }
+        mark_to_drop(standard_metadata);
         meta.fabric_metadata.dst_device = 8w0;
     }
     @name(".copy_to_cpu") action _copy_to_cpu_0() {
         clone3<tuple<bit<16>, bit<16>, bit<16>, bit<9>>>(CloneType.I2E, 32w250, { meta.ingress_metadata.bd, meta.ingress_metadata.ifindex, meta.fabric_metadata.reason_code, meta.ingress_metadata.ingress_port });
     }
     @name(".drop_packet") action _drop_packet_0() {
-        {
-            standard_metadata_t standard_metadata_7 = standard_metadata;
-            standard_metadata_7.egress_spec = 9w511;
-            standard_metadata_7.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_7;
-        }
+        mark_to_drop(standard_metadata);
     }
     @name(".drop_packet_with_reason") action _drop_packet_with_reason_0(bit<32> drop_reason) {
         _drop_stats.count(drop_reason);
-        {
-            standard_metadata_t standard_metadata_8 = standard_metadata;
-            standard_metadata_8.egress_spec = 9w511;
-            standard_metadata_8.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_8;
-        }
+        mark_to_drop(standard_metadata);
     }
     @name(".negative_mirror") action _negative_mirror_0(bit<32> session_id) {
         clone3<tuple<bit<16>, bit<8>>>(CloneType.I2E, session_id, { meta.ingress_metadata.ifindex, meta.ingress_metadata.drop_reason });
-        {
-            standard_metadata_t standard_metadata_9 = standard_metadata;
-            standard_metadata_9.egress_spec = 9w511;
-            standard_metadata_9.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_9;
-        }
+        mark_to_drop(standard_metadata);
     }
     @name(".drop_stats") table _drop_stats_1 {
         actions = {

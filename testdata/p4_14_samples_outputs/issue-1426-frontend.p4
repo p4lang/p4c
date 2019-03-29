@@ -43,20 +43,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.egress_port = port;
     }
     @name(".discard") action discard() {
-        {
-            standard_metadata_t standard_metadata_1 = standard_metadata;
-            standard_metadata_1.egress_spec = 9w511;
-            standard_metadata_1.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_1;
-        }
+        mark_to_drop(standard_metadata);
     }
     @name(".discard") action discard_2() {
-        {
-            standard_metadata_t standard_metadata_2 = standard_metadata;
-            standard_metadata_2.egress_spec = 9w511;
-            standard_metadata_2.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_2;
-        }
+        mark_to_drop(standard_metadata);
     }
     @name(".a1") table a1_0 {
         actions = {
@@ -89,20 +79,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.egress_port = port;
     }
     @name(".discard") action _discard_0() {
-        {
-            standard_metadata_t standard_metadata_4 = standard_metadata;
-            standard_metadata_4.egress_spec = 9w511;
-            standard_metadata_4.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_4;
-        }
+        mark_to_drop(standard_metadata);
     }
     @name(".discard") action _discard_2() {
-        {
-            standard_metadata_t standard_metadata_5 = standard_metadata;
-            standard_metadata_5.egress_spec = 9w511;
-            standard_metadata_5.mcast_grp = 16w0;
-            standard_metadata = standard_metadata_5;
-        }
+        mark_to_drop(standard_metadata);
     }
     @name(".c1") table _c1 {
         actions = {

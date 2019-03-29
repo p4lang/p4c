@@ -144,8 +144,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.tcp.dstPort = meta._meta_tcp_dp7;
     }
     @name("._drop") action _drop() {
-        standard_metadata.egress_spec = 9w511;
-        standard_metadata.mcast_grp = 16w0;
+        mark_to_drop(standard_metadata);
     }
     @name(".do_cpu_encap") action do_cpu_encap() {
         hdr.cpu_header.setValid();
@@ -198,20 +197,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ethernet.dstAddr = dmac;
     }
     @name("._drop") action _drop_2() {
-        standard_metadata.egress_spec = 9w511;
-        standard_metadata.mcast_grp = 16w0;
+        mark_to_drop(standard_metadata);
     }
     @name("._drop") action _drop_6() {
-        standard_metadata.egress_spec = 9w511;
-        standard_metadata.mcast_grp = 16w0;
+        mark_to_drop(standard_metadata);
     }
     @name("._drop") action _drop_7() {
-        standard_metadata.egress_spec = 9w511;
-        standard_metadata.mcast_grp = 16w0;
+        mark_to_drop(standard_metadata);
     }
     @name("._drop") action _drop_8() {
-        standard_metadata.egress_spec = 9w511;
-        standard_metadata.mcast_grp = 16w0;
+        mark_to_drop(standard_metadata);
     }
     @name(".set_if_info") action set_if_info(bit<32> ipv4_addr, bit<48> mac_addr, bit<1> is_ext) {
         meta._meta_if_ipv4_addr9 = ipv4_addr;
@@ -232,9 +227,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         mark_to_drop();
 =======
         meta._meta_do_forward4 = 1w0;
+<<<<<<< 3831bdec3b7692a6f5ce2ab80be5778bb0ee15f2
         standard_metadata.egress_spec = 9w511;
         standard_metadata.mcast_grp = 16w0;
 >>>>>>> Deprecate @mark_to_drop; replace with markToDrop action
+=======
+        mark_to_drop(standard_metadata);
+>>>>>>> Reference outputs for p4-14 programs
     }
     @name(".nat_hit_int_to_ext") action nat_hit_int_to_ext(bit<32> srcAddr, bit<16> srcPort) {
         meta._meta_do_forward3 = 1w1;

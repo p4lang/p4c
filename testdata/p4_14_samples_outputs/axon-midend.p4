@@ -88,12 +88,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".NoAction") action NoAction_3() {
     }
     @name("._drop") action _drop() {
-        standard_metadata.egress_spec = 9w511;
-        standard_metadata.mcast_grp = 16w0;
+        mark_to_drop(standard_metadata);
     }
     @name("._drop") action _drop_2() {
-        standard_metadata.egress_spec = 9w511;
-        standard_metadata.mcast_grp = 16w0;
+        mark_to_drop(standard_metadata);
     }
     @name(".route") action route() {
         standard_metadata.egress_spec = (bit<9>)hdr.axon_fwdHop[0].port;
