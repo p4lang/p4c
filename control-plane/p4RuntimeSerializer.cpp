@@ -632,6 +632,9 @@ getMatchType(cstring matchTypeName) {
     }
 }
 
+// P4Runtime defines sdnB as a 32-bit integer.
+// The APIs in this file for width use an int
+// Thus function returns a signed int.
 static int
 getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
     auto ann = type->getAnnotation("p4runtime_translation");
@@ -642,12 +645,11 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
                     type);
             return -1;
         }
-        if (!sdnB->value.fits_sint_p()) {
-            ::error("P4runtime annotation in serializer has sdn > max int: %1%",
-                    type);
-            return -2;
-        }
-        return static_cast<int>(sdnB->value.get_si());
+        auto value = sdnB->value;
+        auto bitsRequired = static_cast<size_t>(mpz_sizeinbase(value.get_mpz_t(), 2));
+        BUG_CHECK(bitsRequired <= 31,
+                  "Cannot represent %1% on 31 bits, require %2%", value, bitsRequired);
+        return static_cast<int>(value.get_ui());
     }
     return typeMap->minWidthBits(type, type->getNode());
 }

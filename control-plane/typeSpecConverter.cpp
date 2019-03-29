@@ -138,11 +138,12 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
                         type);
                 return false;
             }
-            if (!sdnB->value.fits_sint_p()) {
-                ::error("P4runtime annotation in has sdn > max int: %1%",
-                        type);
-                return false;
-            }
+            auto value = sdnB->value;
+            auto bitsRequired = static_cast<size_t>(
+                                mpz_sizeinbase(value.get_mpz_t(), 2));
+            BUG_CHECK(bitsRequired <= 31,
+                      "Cannot represent %1% on 31 bits, require %2%",
+                      value, bitsRequired);
         }
 
         auto name = std::string(type->controlPlaneName());
@@ -160,7 +161,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
             } else {
                 auto dataType = newTypeSpec->mutable_translated_type();
                 dataType->set_uri(std::string(uri->value));
-                dataType->set_sdn_bitwidth((uint32_t) sdnB->value.get_si());
+                dataType->set_sdn_bitwidth((uint32_t) sdnB->value.get_ui());
             }
             (*types)[name] = *newTypeSpec;
        }
