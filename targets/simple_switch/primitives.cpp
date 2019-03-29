@@ -165,6 +165,47 @@ class drop : public ActionPrimitive<> {
 
 REGISTER_PRIMITIVE(drop);
 
+class mark_to_drop : public ActionPrimitive<Header &> {
+  void operator ()(Header &std_hdr) {
+    if (egress_spec_offset == -1) {
+      const auto &header_type = std_hdr.get_header_type();
+      egress_spec_offset = header_type.get_field_offset("egress_spec");
+      if (egress_spec_offset == -1) {
+        Logger::get()->critical(
+            "Header {} must be of type standard_metadata but it does not have "
+            "an 'egress_spec' field",
+            std_hdr.get_name());
+        return;
+      }
+
+      mcast_grp_offset = header_type.get_field_offset("mcast_grp");
+    }
+    // TODO(antonin): support arbitrary drop port (provided through
+    // command-line)
+    std_hdr.get_field(egress_spec_offset).set(511);
+
+    // This assumes that the P4 program is compiled with p4c and that the
+    // "mcast_grp" field is defined in the same standard metadata header as
+    // "egress_spec" in v1model.p4. That's a reasonnable assumption since
+    // mark_to_drop is a recent primitive and was added specifically for
+    // p4c. Even if the field is aliased as "intrinsic_metadata.mcast_grp" and
+    // that alias is used in other parts of simple_switch, everything should
+    // work fine. We could even consider erroring out if "mcast_grp" is not
+    // found like we do for "egress_spec".
+    if (mcast_grp_offset != -1) std_hdr.get_field(mcast_grp_offset).set(0);
+  }
+
+  // bmv2 creates a new instance of mark_to_drop every time the primitive is
+  // called in the JSON, so it is safe to use data members for this. For a
+  // given P4 program, the offsets should be the same for all instances of
+  // mark_to_drop assuming p4c generates a correct JSON. When loading a new P4
+  // program, the offsets *may* be different (but that's unlikely).
+  int egress_spec_offset{-1};
+  int mcast_grp_offset{-1};
+};
+
+REGISTER_PRIMITIVE(mark_to_drop);
+
 class exit_ : public ActionPrimitive<> {
   void operator ()() {
     get_packet().mark_for_exit();
