@@ -960,8 +960,17 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
     auto program = tlb->getProgram();
     // These passes are logically bmv2-specific
-    PassManager simplify = {
-        new ParseAnnotations(),
+    PassManager simplify = {};
+
+    if (BMV2::BMV2Context::get().options().loadIRFromJson == false) {
+        // ParseAnnotations is added only in case of not using --fromJson flag
+        simplify.addPasses({
+            new ParseAnnotations(),
+        });
+    }
+    simplify.addPasses({
+        // Because --fromJSON flag is used, input sources are empty
+        // and ParseAnnotations should be skipped
         new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
         new P4::SynthesizeActions(refMap, typeMap,
@@ -978,7 +987,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         new P4::RemoveAllUnusedDeclarations(refMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
-    };
+    });
 
     auto hook = options.getDebugHook();
     simplify.addDebugHook(hook);

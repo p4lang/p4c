@@ -170,6 +170,8 @@ class BackendDriver:
                 self.add_command_option('compiler', "--dump {}".format(opts.dump_dir))
             if opts.json:
                 self.add_command_option('compiler', "--toJSON {}".format(opts.json))
+            if opts.json_source:
+                self.add_command_option('compiler', "--fromJSON {}".format(opts.json_source))
             if opts.pretty_print:
                 self.add_command_option('compiler', "--pp {}".format(opts.pretty_print))
 

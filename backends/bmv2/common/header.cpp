@@ -292,7 +292,17 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
         if (auto aliasAnnotation = f->getAnnotation("alias")) {
             auto container = new Util::JsonArray();
             auto alias = new Util::JsonArray();
-            auto target_name = aliasAnnotation->expr.front()->to<IR::StringLiteral>()->value;
+            auto target_name = "";
+            if (BMV2::BMV2Context::get().options().loadIRFromJson == false) {
+                target_name = aliasAnnotation->expr.front()->to<IR::StringLiteral>()->value;
+            } else {
+                if (aliasAnnotation->body.size() != 0) {
+                    target_name = aliasAnnotation->body.at(0)->text;
+                } else {
+                    // aliasAnnotation->body is empty or not saved correctly
+                    ::error("There is no saved data for aliases target_name.");
+                }
+            }
             LOG2("field alias " << target_name);
             container->append(target_name);  // name on target
             // break down the alias into meta . field
