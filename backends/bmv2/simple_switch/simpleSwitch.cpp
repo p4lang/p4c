@@ -607,9 +607,13 @@ void ExternConverter_direct_meter::convertExternInstance(
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto info = ctxt->structure->directMeterMap.getInfo(c);
-    if (info == nullptr || info->table == nullptr)
+    if (info == nullptr)
         // probably meter is unused
         return;
+    if (info->table == nullptr) {
+        ::error(ErrorType::ERR_NOT_FOUND, ".  Meter should be associated to a table", inst);
+        return;
+    }
 
     auto jmtr = new Util::JsonObject();
     jmtr->emplace("name", name);

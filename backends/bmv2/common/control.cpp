@@ -398,21 +398,23 @@ ControlConverter::convertTable(const CFG::TableNode* node,
         // actions are consistent?
         if (ctrs->value->is<IR::ExpressionValue>()) {
             auto expr = ctrs->value->to<IR::ExpressionValue>()->expression;
+            auto type = ctxt->typeMap->getType(expr, true);
+            if (type == nullptr)
+                return result;
+            if (auto ts = type->to<IR::Type_SpecializedCanonical>())
+                type = ts->baseType;
+            auto te = type->to<IR::Type_Extern>();
+            if (!te) {
+                ::error(ErrorType::ERR_UNEXPECTED, "type %2% for property. "
+                        "Must be extern.", ctrs, type);
+                return result;
+            }
+            if (te->name != "direct_counter" && te->name != "counter") {
+                ::error(ErrorType::ERR_UNEXPECTED, "type %2% for property. "
+                        "Must be 'counter' or 'direct_counter'.", ctrs, type);
+                return result;
+            }
             if (expr->is<IR::ConstructorCallExpression>()) {
-                auto type = ctxt->typeMap->getType(expr, true);
-                if (type == nullptr)
-                    return result;
-                if (!type->is<IR::Type_Extern>()) {
-                    ::error(ErrorType::ERR_UNEXPECTED, "Unexpected type %2% for property. "
-                            "Must be extern.", ctrs, type);
-                    return result;
-                }
-                auto te = type->to<IR::Type_Extern>();
-                if (te->name != "direct_counter" && te->name != "counter") {
-                    ::error(ErrorType::ERR_UNEXPECTED, "Unexpected type %2% for property. "
-                            "Must be 'counter' or 'direct_counter'.", ctrs, type);
-                    return result;
-                }
                 auto jctr = new Util::JsonObject();
                 cstring ctrname = ctrs->controlPlaneName("counter");
                 jctr->emplace("name", ctrname);
@@ -444,6 +446,8 @@ ControlConverter::convertTable(const CFG::TableNode* node,
             } else {
                 ::error(ErrorType::ERR_EXPECTED, "a counter", ctrs);
             }
+        } else {
+            ::error(ErrorType::ERR_EXPECTED, "a counter", ctrs);
         }
         result->emplace("with_counters", true);
     } else {
