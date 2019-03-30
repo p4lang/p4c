@@ -625,6 +625,7 @@ void ExternConverter_direct_meter::convertExternInstance(
         ::error(ErrorType::ERR_INVALID,
                 "direct meter is not associated with any table"
                 " via 'meters' table property", inst);
+        return;
     }
     CHECK_NULL(info->destinationField);
 
