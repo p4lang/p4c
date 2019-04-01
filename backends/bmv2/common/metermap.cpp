@@ -94,7 +94,7 @@ void DirectMeterMap::setDestination(const IR::IDeclaration* meter,
 void DirectMeterMap::setSize(const IR::IDeclaration* meter, unsigned size) {
     auto info = getInfo(meter);
     if (info == nullptr) {
-        /* This case may is reached if a table has a direct_meter
+        /* This case may be reached if a table has a direct_meter
          * assigned to its 'meters' property, but none of its actions
          * have a call to the 'read' method of that meter.  An error
          * message is already printed elsewhere in this case, but we
