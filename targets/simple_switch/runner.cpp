@@ -38,9 +38,12 @@ namespace bm {
 
 namespace sswitch {
 
-SimpleSwitchRunner::SimpleSwitchRunner(uint32_t cpu_port)
+/* static */
+constexpr uint32_t SimpleSwitchRunner::default_drop_port;
+
+SimpleSwitchRunner::SimpleSwitchRunner(uint32_t cpu_port, uint32_t drop_port)
     : cpu_port(cpu_port),
-      simple_switch(new SimpleSwitch(true /* enable_swap */)) { }
+      simple_switch(new SimpleSwitch(true /* enable_swap */, drop_port)) { }
 
 SimpleSwitchRunner::~SimpleSwitchRunner() = default;
 

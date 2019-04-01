@@ -52,16 +52,17 @@ Here are the fields:
   recirculated packets, the length of the packet in bytes.  For cloned
   or resubmitted packets, you may need to include this in a list of
   fields to preserve, otherwise its value will become 0.
-- `egress_spec` (sm14, v1m) - Can be assigned a value in ingress code
-  to control which output port a packet will go to.  The P4_14
-  primitive `drop`, and the v1model primitive action `mark_to_drop`,
-  have the side effect of assigning an implementation specific value
-  to this field (511 decimal for simple_switch), such that if
+- `egress_spec` (sm14, v1m) - Can be assigned a value in ingress code to
+  control which output port a packet will go to.  The P4_14 primitive
+  `drop`, and the v1model primitive action `mark_to_drop`, have the side
+  effect of assigning an implementation specific value to this field
+  (511 decimal for simple_switch by default, but can be changed through
+  the `--drop-port` target-specific command-line option), such that if
   `egress_spec` has that value at the end of ingress processing, the
   packet will be dropped and not stored in the packet buffer, nor sent
-  to egress processing.  See the "after-ingress pseudocode" for
-  relative priority of this vs. other possible packet operations at
-  end of ingress.
+  to egress processing.  See the "after-ingress pseudocode" for relative
+  priority of this vs. other possible packet operations at end of
+  ingress.
 - `egress_port` (sm14, v1m) - Only intended to be accessed during
   egress processing, read only.  The output port this packet is
   destined to.

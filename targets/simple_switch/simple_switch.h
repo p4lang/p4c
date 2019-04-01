@@ -78,12 +78,15 @@ class SimpleSwitch : public Switch {
     bool mgid_valid;
   };
 
+  static constexpr port_t default_drop_port = 511;
+
  private:
   using clock = std::chrono::high_resolution_clock;
 
  public:
   // by default, swapping is off
-  explicit SimpleSwitch(bool enable_swap = false);
+  explicit SimpleSwitch(bool enable_swap = false,
+                        port_t drop_port = default_drop_port);
 
   ~SimpleSwitch();
 
@@ -119,6 +122,15 @@ class SimpleSwitch : public Switch {
   }
 
   void set_transmit_fn(TransmitFn fn);
+
+  port_t get_drop_port() const {
+    return drop_port;
+  }
+
+  SimpleSwitch(const SimpleSwitch &) = delete;
+  SimpleSwitch &operator =(const SimpleSwitch &) = delete;
+  SimpleSwitch(SimpleSwitch &&) = delete;
+  SimpleSwitch &&operator =(SimpleSwitch &&) = delete;
 
  private:
   static constexpr size_t nb_egress_threads = 4u;
@@ -169,6 +181,7 @@ class SimpleSwitch : public Switch {
   void multicast(Packet *packet, unsigned int mgid);
 
  private:
+  port_t drop_port;
   std::vector<std::thread> threads_;
   std::unique_ptr<InputBuffer> input_buffer;
   // for these queues, the write operation is non-blocking and we drop the

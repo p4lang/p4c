@@ -30,6 +30,8 @@
 #include <random>
 #include <thread>
 
+#include "simple_switch.h"
+
 template <typename... Args>
 using ActionPrimitive = bm::ActionPrimitive<Args...>;
 
@@ -42,6 +44,10 @@ using bm::RegisterArray;
 using bm::NamedCalculation;
 using bm::HeaderStack;
 using bm::Logger;
+
+namespace {
+SimpleSwitch *simple_switch;
+}  // namespace
 
 class modify_field : public ActionPrimitive<Data &, const Data &> {
   void operator ()(Data &dst, const Data &src) {
@@ -156,7 +162,8 @@ REGISTER_PRIMITIVE(shift_right);
 
 class drop : public ActionPrimitive<> {
   void operator ()() {
-    get_field("standard_metadata.egress_spec").set(511);
+    get_field("standard_metadata.egress_spec").set(
+        simple_switch->get_drop_port());
     if (get_phv().has_field("intrinsic_metadata.mcast_grp")) {
       get_field("intrinsic_metadata.mcast_grp").set(0);
     }
@@ -180,9 +187,8 @@ class mark_to_drop : public ActionPrimitive<Header &> {
 
       mcast_grp_offset = header_type.get_field_offset("mcast_grp");
     }
-    // TODO(antonin): support arbitrary drop port (provided through
-    // command-line)
-    std_hdr.get_field(egress_spec_offset).set(511);
+    std_hdr.get_field(egress_spec_offset).set(
+        simple_switch->get_drop_port());
 
     // This assumes that the P4 program is compiled with p4c and that the
     // "mcast_grp" field is defined in the same standard metadata header as
@@ -462,11 +468,10 @@ class truncate_ : public ActionPrimitive<const Data &> {
 
 REGISTER_PRIMITIVE_W_NAME("truncate", truncate_);
 
-// dummy function, which ensures that this unit is not discarded by the linker
-// it is being called by the constructor of SimpleSwitch
-// the previous alternative was to have all the primitives in a header file (the
-// primitives could also be placed in simple_switch.cpp directly), but I need
-// this dummy function if I want to keep the primitives in their own file
-int import_primitives() {
+// In addition to setting the simple_switch global variable, this function also
+// ensures that this unit is not discarded by the linker. It is being called by
+// the constructor of SimpleSwitch.
+int import_primitives(SimpleSwitch *sswitch) {
+  simple_switch = sswitch;
   return 0;
 }

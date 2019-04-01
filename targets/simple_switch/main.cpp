@@ -24,6 +24,7 @@
 
 #include <bm/SimpleSwitch.h>
 #include <bm/bm_runtime/bm_runtime.h>
+#include <bm/bm_sim/options_parse.h>
 #include <bm/bm_sim/target_parser.h>
 
 #include "simple_switch.h"
@@ -38,20 +39,36 @@ shared_ptr<SimpleSwitchIf> get_handler(SimpleSwitch *sw);
 
 int
 main(int argc, char* argv[]) {
-  simple_switch = new SimpleSwitch();
   bm::TargetParserBasicWithDynModules simple_switch_parser;
-  simple_switch_parser.add_flag_option("enable-swap",
-                                       "enable JSON swapping at runtime");
-  int status = simple_switch->init_from_command_line_options(
-      argc, argv, &simple_switch_parser);
-  if (status != 0) std::exit(status);
+  simple_switch_parser.add_flag_option(
+      "enable-swap",
+      "enable JSON swapping at runtime");
+  simple_switch_parser.add_uint_option(
+      "drop-port",
+      "choose drop port number (default is 511)");
+
+  bm::OptionsParser parser;
+  parser.parse(argc, argv, &simple_switch_parser);
 
   bool enable_swap_flag = false;
   if (simple_switch_parser.get_flag_option("enable-swap", &enable_swap_flag)
       != bm::TargetParserBasic::ReturnCode::SUCCESS) {
     std::exit(1);
   }
-  if (enable_swap_flag) simple_switch->enable_config_swap();
+
+  uint32_t drop_port = 0xffffffff;
+  {
+    auto rc = simple_switch_parser.get_uint_option("drop-port", &drop_port);
+    if (rc == bm::TargetParserBasic::ReturnCode::OPTION_NOT_PROVIDED)
+      drop_port = SimpleSwitch::default_drop_port;
+    else if (rc != bm::TargetParserBasic::ReturnCode::SUCCESS)
+      std::exit(1);
+  }
+
+  simple_switch = new SimpleSwitch(enable_swap_flag, drop_port);
+
+  int status = simple_switch->init_from_options_parser(parser);
+  if (status != 0) std::exit(status);
 
   int thrift_port = simple_switch->get_runtime_port();
   bm_runtime::start_server(simple_switch, thrift_port);

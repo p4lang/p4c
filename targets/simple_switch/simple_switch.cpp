@@ -66,7 +66,7 @@ struct bmv2_hash {
 REGISTER_HASH(hash_ex);
 REGISTER_HASH(bmv2_hash);
 
-extern int import_primitives();
+extern int import_primitives(SimpleSwitch *simple_switch);
 
 packet_id_t SimpleSwitch::packet_id = 0;
 
@@ -184,8 +184,9 @@ class SimpleSwitch::InputBuffer {
   QueueImpl queue_lo;
 };
 
-SimpleSwitch::SimpleSwitch(bool enable_swap)
+SimpleSwitch::SimpleSwitch(bool enable_swap, port_t drop_port)
   : Switch(enable_swap),
+    drop_port(drop_port),
     input_buffer(new InputBuffer(
         1024 /* normal capacity */, 1024 /* resubmit/recirc capacity */)),
 #ifdef SSWITCH_PRIORITY_QUEUEING_ON
@@ -220,7 +221,7 @@ SimpleSwitch::SimpleSwitch(bool enable_swap)
   force_arith_header("queueing_metadata");
   force_arith_header("intrinsic_metadata");
 
-  import_primitives();
+  import_primitives(this);
 }
 
 #define PACKET_LENGTH_REG_IDX 0
@@ -592,7 +593,7 @@ SimpleSwitch::ingress_thread() {
     port_t egress_port = egress_spec;
     BMLOG_DEBUG_PKT(*packet, "Egress port is {}", egress_port);
 
-    if (egress_port == 511) {  // drop packet
+    if (egress_port == drop_port) {  // drop packet
       BMLOG_DEBUG_PKT(*packet, "Dropping packet at the end of ingress");
       continue;
     }
@@ -688,7 +689,7 @@ SimpleSwitch::egress_thread(size_t worker_id) {
 
     // TODO(antonin): should not be done like this in egress pipeline
     port_t egress_spec = f_egress_spec.get_uint();
-    if (egress_spec == 511) {  // drop packet
+    if (egress_spec == drop_port) {  // drop packet
       BMLOG_DEBUG_PKT(*packet, "Dropping packet at the end of egress");
       continue;
     }

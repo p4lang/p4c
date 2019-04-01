@@ -36,7 +36,10 @@ namespace sswitch {
 
 class SimpleSwitchRunner {
  public:
-  explicit SimpleSwitchRunner(uint32_t cpu_port = 0);
+  static constexpr uint32_t default_drop_port = 511;
+
+  explicit SimpleSwitchRunner(uint32_t cpu_port = 0,
+                              uint32_t drop_port = default_drop_port);
   ~SimpleSwitchRunner();
 
   int init_and_start(const bm::OptionsParser &parser);

@@ -36,8 +36,11 @@ main(int argc, char* argv[]) {
       "bind gRPC server to given address [default is 0.0.0.0:50051]");
   simple_switch_parser.add_uint_option(
       "cpu-port",
-      "set non-zero CPU port, will be used for packet-in / packet-out; "
+      "set CPU port, will be used for packet-in / packet-out; "
       "do not add an interface with this port number");
+  simple_switch_parser.add_uint_option(
+      "drop-port",
+      "choose drop port number (default is 511)");
   simple_switch_parser.add_string_option(
       "dp-grpc-server-addr",
       "use a gRPC channel to inject and receive dataplane packets; "
@@ -72,12 +75,21 @@ main(int argc, char* argv[]) {
       std::exit(1);
   }
 
-  uint32_t cpu_port = 0xFFFFFFFF;
+  uint32_t cpu_port = 0xffffffff;
   {
     auto rc = simple_switch_parser.get_uint_option("cpu-port", &cpu_port);
     if (rc == bm::TargetParserBasic::ReturnCode::OPTION_NOT_PROVIDED)
       cpu_port = 0;
     else if (rc != bm::TargetParserBasic::ReturnCode::SUCCESS || cpu_port == 0)
+      std::exit(1);
+  }
+
+  uint32_t drop_port = 0xffffffff;
+  {
+    auto rc = simple_switch_parser.get_uint_option("drop-port", &drop_port);
+    if (rc == bm::TargetParserBasic::ReturnCode::OPTION_NOT_PROVIDED)
+      drop_port = sswitch_grpc::SimpleSwitchGrpcRunner::default_drop_port;
+    else if (rc != bm::TargetParserBasic::ReturnCode::SUCCESS)
       std::exit(1);
   }
 

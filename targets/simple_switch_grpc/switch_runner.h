@@ -48,15 +48,19 @@ class DataplaneInterfaceServiceImpl;
 
 class SimpleSwitchGrpcRunner {
  public:
+  static constexpr bm::DevMgrIface::port_t default_drop_port = 511;
+
   // there is no real need for a singleton here, except for the fact that we use
   // PIGrpcServerRunAddr, ... which uses static state
   static SimpleSwitchGrpcRunner &get_instance(
       bool enable_swap = false,
       std::string grpc_server_addr = "0.0.0.0:50051",
       bm::DevMgrIface::port_t cpu_port = 0,
-      std::string dp_grpc_server_addr = "") {
+      std::string dp_grpc_server_addr = "",
+      bm::DevMgrIface::port_t drop_port = default_drop_port) {
     static SimpleSwitchGrpcRunner instance(
-        enable_swap, grpc_server_addr, cpu_port, dp_grpc_server_addr);
+        enable_swap, grpc_server_addr, cpu_port, dp_grpc_server_addr,
+        drop_port);
     return instance;
   }
 
@@ -77,7 +81,8 @@ class SimpleSwitchGrpcRunner {
   SimpleSwitchGrpcRunner(bool enable_swap = false,
                          std::string grpc_server_addr = "0.0.0.0:50051",
                          bm::DevMgrIface::port_t cpu_port = 0,
-                         std::string dp_grpc_server_addr = "");
+                         std::string dp_grpc_server_addr = "",
+                         bm::DevMgrIface::port_t drop_port = default_drop_port);
   ~SimpleSwitchGrpcRunner();
 
   void port_status_cb(bm::DevMgrIface::port_t port,
