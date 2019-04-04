@@ -134,28 +134,13 @@ AC_LANG_PUSH(C)
 AC_LANG_PUSH(C++)
 
 # Thrift
-want_p4thrift=no
-AC_ARG_WITH([p4thrift],
-    AS_HELP_STRING([--with-p4thrift], [Use p4lang version of Thrift]),
-    [want_p4thrift=yes], [])
-
-AS_IF([test "$want_thrift" = no && test "$want_p4thrift" = yes],
-    [AC_MSG_ERROR(cannot use --with-p4thrift if Thrift is disabled)])
-
 AS_IF([test "$want_thrift" = no && test "$want_pdfixed" = yes],
     [AC_MSG_ERROR(cannot use --with-pdfixed if Thrift is disabled)])
 
 AS_IF([test "$want_thrift" = yes], [
-    AS_IF([test "$want_p4thrift" = yes], [
-        AC_PATH_PROG([THRIFT], [p4thrift], [])
-        AC_SUBST([THRIFT_LIB], ["-lp4thrift"])
-        AC_DEFINE([P4THRIFT], [], [Use P4.org Thrift fork])
-        AC_CHECK_HEADER([p4thrift/P4Thrift.h], [], [AC_MSG_ERROR([P4Thrift headers not found. Install P4Thrift from http://github.com/p4lang/thrift/])])
-    ], [
-        AC_PATH_PROG([THRIFT], [thrift], [])
-        AC_SUBST([THRIFT_LIB], ["-lthrift"])
-        AC_CHECK_HEADER([thrift/Thrift.h], [], [AC_MSG_ERROR([Thrift headers not found. Install Thrift from http://thrift.apache.org/docs/install/])])
-    ])
+    AC_PATH_PROG([THRIFT], [thrift], [])
+    AC_SUBST([THRIFT_LIB], ["-lthrift"])
+    AC_CHECK_HEADER([thrift/Thrift.h], [], [AC_MSG_ERROR([Thrift headers not found. Install Thrift from http://thrift.apache.org/docs/install/])])
     AS_IF([test x"$THRIFT" = x], [AC_MSG_ERROR([cannot find thrift])])
     AC_DEFINE([THRIFT_ON], [], [Enable Thrift support])
     AC_CHECK_HEADER([thrift/stdcxx.h], [
@@ -168,8 +153,6 @@ AS_IF([test "$want_pi" = yes], [
     AC_CHECK_HEADERS([PI/pi.h PI/target/pi_imp.h PI/p4info.h], [],
                      [AC_MSG_ERROR([Cannot find PI headers, did you install $PI_url])])
 ])
-
-AM_CONDITIONAL([P4THRIFT], [test "$want_p4thrift" = yes])
 
 AC_CHECK_HEADERS([algorithm array cassert cmath queue \
 cstdio string sys/stat.h sys/types.h ctime tuple unistd.h unordered_map \
@@ -320,8 +303,5 @@ AS_ECHO("With Nanomsg .................. : $want_nanomsg")
 AS_ECHO("Event logger enabled .......... : $elogger_enabled")
 AS_ECHO("Debugger enabled .............. : $debugger_enabled")
 AS_ECHO("With Thrift ................... : $want_thrift")
-AS_IF([test "$want_thrift" = yes], [
-AS_ECHO("  With p4Thrift ............... : $want_p4thrift")
-])
 AS_ECHO("With pdfixed .................. : $want_pdfixed")
 AS_ECHO("With PI ....................... : $want_pi")

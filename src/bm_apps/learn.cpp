@@ -20,21 +20,12 @@
 
 #include <bm/config.h>
 
-#ifdef BM_P4THRIFT
-#include <p4thrift/protocol/TBinaryProtocol.h>
-#include <p4thrift/transport/TSocket.h>
-#include <p4thrift/transport/TTransportUtils.h>
-#include <p4thrift/protocol/TMultiplexedProtocol.h>
-
-namespace thrift_provider = p4::thrift;
-#else
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TSocket.h>
 #include <thrift/transport/TTransportUtils.h>
 #include <thrift/protocol/TMultiplexedProtocol.h>
 
 namespace thrift_provider = apache::thrift;
-#endif
 
 #include <bm/bm_apps/learn.h>
 #include <bm/thrift/stdcxx.h>

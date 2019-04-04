@@ -1,15 +1,5 @@
 #include <bm/config.h>
 
-#ifdef BM_P4THRIFT
-#include <p4thrift/protocol/TBinaryProtocol.h>
-#include <p4thrift/server/TSimpleServer.h>
-#include <p4thrift/server/TThreadedServer.h>
-#include <p4thrift/transport/TServerSocket.h>
-#include <p4thrift/transport/TBufferTransports.h>
-#include <p4thrift/processor/TMultiplexedProcessor.h>
-
-namespace thrift_provider = p4::thrift;
-#else
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TSimpleServer.h>
 #include <thrift/server/TThreadedServer.h>
@@ -18,7 +8,6 @@ namespace thrift_provider = p4::thrift;
 #include <thrift/processor/TMultiplexedProcessor.h>
 
 namespace thrift_provider = apache::thrift;
-#endif
 
 #ifdef BM_HAVE_THRIFT_STDCXX_H
 #include <thrift/stdcxx.h>

@@ -1,18 +1,9 @@
 #ifndef _BM_RUNTIME_BM_RUNTIME_H_
 #define _BM_RUNTIME_BM_RUNTIME_H_
 
-#include <bm/config.h>
-
-#ifdef BM_P4THRIFT
-#include <p4thrift/processor/TMultiplexedProcessor.h>
-
-namespace thrift_provider = p4::thrift;
-#else
 #include <thrift/processor/TMultiplexedProcessor.h>
 
-namespace thrift_provider = apache::thrift;
-#endif
-
+#include <bm/config.h>
 #include <bm/bm_sim/switch.h>
 #include <bm/thrift/stdcxx.h>
 
