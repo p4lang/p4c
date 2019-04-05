@@ -184,10 +184,18 @@ def main():
         print display_supported_targets(cfg)
         sys.exit(0)
 
-    if not opts.source_file and not opts.json_source:
+    input_specified = False
+    if opts.source_file:
+        input_specified = True
+    if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
+        if opts.json_source:
+            input_specified = True
+    if not input_specified:
         parser.error('No input specified.')
-    elif opts.json_source:
-        opts.source_file = opts.json_source
+
+    if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
+        if opts.json_source:
+            opts.source_file = opts.json_source
 
     if not os.path.isfile(opts.source_file):
         print >> sys.stderr, 'Input file ' + opts.source_file + ' does not exist'
