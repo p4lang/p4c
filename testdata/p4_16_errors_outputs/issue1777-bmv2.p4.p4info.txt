@@ -1,0 +1,48 @@
+pkg_info {
+  arch: "v1model"
+}
+registers {
+  preamble {
+    id: 369104710
+    name: "ingress.reg1"
+    alias: "reg1"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 8
+      }
+    }
+  }
+  size: 16
+}
+registers {
+  preamble {
+    id: 369162436
+    name: "ingress.reg2"
+    alias: "reg2"
+  }
+  type_spec {
+    struct {
+      name: "reg_data2_t"
+    }
+  }
+  size: 16
+}
+type_info {
+  structs {
+    key: "reg_data2_t"
+    value {
+      members {
+        name: "reg_fld1"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 8
+            }
+          }
+        }
+      }
+    }
+  }
+}
