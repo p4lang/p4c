@@ -647,8 +647,11 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
         }
         auto value = sdnB->value;
         auto bitsRequired = static_cast<size_t>(mpz_sizeinbase(value.get_mpz_t(), 2));
-        BUG_CHECK(bitsRequired <= 31,
-                  "Cannot represent %1% on 31 bits, require %2%", value, bitsRequired);
+        if (bitsRequired > 31) {
+            ::error("Cannot represent %1% on 31 bits, require %2%", value.get_ui(),
+                    bitsRequired);
+            return -2;
+        }
         return static_cast<int>(value.get_ui());
     }
     return typeMap->minWidthBits(type, type->getNode());

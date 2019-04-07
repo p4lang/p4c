@@ -1327,6 +1327,44 @@ TEST_F(P4RuntimePkgInfo, ValueNotAString) {
     EXPECT_EQ(pkgInfo.name(), "");
 }
 
+TEST_F(P4Runtime, P4_16_MatchFieldsSize) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+    @p4runtime_translation("mycompany.com/My_Byte2", 0xffffffff)
+    type bit<8> CustomT_t;
+    header Header { CustomT_t headerField; }
+    struct Headers { Header h; }
+    struct Metadata { bit<33> metadataField; }
+    parser parse(packet_in p, out Headers h, inout Metadata m,
+                 inout standard_metadata_t sm) {
+        state start { transition accept; } }
+    control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
+    control egress(inout Headers h, inout Metadata m,
+                   inout standard_metadata_t sm) { apply { } }
+    control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+    control deparse(packet_out p, in Headers h) { apply { } }
+    control ingress(inout Headers h, inout Metadata m,
+                    inout standard_metadata_t sm) {
+        action noop() { }
+
+        table igTable {
+            key = {
+                h.h.headerField : exact;
+            }
+            actions = { noop; }
+        }
+
+        apply {
+            igTable.apply();
+        }
+    }
+    V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+            computeChecksum(), deparse()) main;
+    )"));
+
+    ASSERT_TRUE(test);
+    EXPECT_EQ(1u, ::diagnosticCount());
+}
+
 TEST_F(P4RuntimePkgInfo, DuplicateKey) {
     auto test = createTestCase(R"(@pkginfo(name="aaa", name="bbb"))");
     // kv annotations use an IndexedVector, which does not allow duplicate keys.
