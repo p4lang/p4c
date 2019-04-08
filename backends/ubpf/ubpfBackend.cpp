@@ -5,7 +5,7 @@
 #include "ubpfBackend.h"
 #include "ubpfProgram.h"
 #include "target.h"
-#include "backends/ebpf/ebpfType.h"
+#include "ubpfType.h"
 
 namespace UBPF {
     void run_ubpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* toplevel,
@@ -29,9 +29,9 @@ namespace UBPF {
             return;
         }
 
-        EBPF::EBPFTypeFactory::createFactory(typeMap);
-
+        UBPFTypeFactory::createFactory(typeMap);
         auto prog = new UbpfProgram(options, toplevel->getProgram(), refMap, typeMap, toplevel);
+
         if(!prog->build())
             return;
 
