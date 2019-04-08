@@ -376,6 +376,14 @@ struct ExpectedMatchField {
     p4configv1::MatchField::MatchType matchType;
 };
 
+struct ExpectedMatchFieldP416 {
+    unsigned id;
+    std::string name;
+    int bitWidth;
+    p4configv1::MatchField::MatchType matchType;
+    std::string type_name;
+};
+
 }  // namespace
 
 TEST_F(P4Runtime, P4_16_MatchFields) {
@@ -483,55 +491,55 @@ TEST_F(P4Runtime, P4_16_MatchFields) {
     ASSERT_TRUE(igTable != nullptr);
     EXPECT_EQ(39, igTable->match_fields_size());
 
-    std::vector<ExpectedMatchField> expected = {
-        { 1, "h.h.headerField", 16, MatchField::EXACT },
-        { 2, "m.metadataField", 33, MatchField::EXACT },
-        { 3, "h.hStack[3].headerField", 16, MatchField::EXACT },
-        { 4, "h.h.headerField", 16, MatchField::TERNARY },
-        { 5, "m.metadataField", 33, MatchField::TERNARY },
-        { 6, "h.hStack[3].headerField", 16, MatchField::TERNARY },
-        { 7, "h.h.headerField", 16, MatchField::LPM },
-        { 8, "m.metadataField", 33, MatchField::LPM },
-        { 9, "h.hStack[3].headerField", 16, MatchField::LPM },
-        { 10, "h.h.headerField", 16, MatchField::RANGE },
-        { 11, "m.metadataField", 33, MatchField::RANGE },
-        { 12, "h.hStack[3].headerField", 16, MatchField::RANGE },
-        { 13, "h.h.$valid$", 1, MatchField::EXACT },
-        { 14, "h.h.$valid$", 1, MatchField::TERNARY },
-        { 15, "h.hStack[3].$valid$", 1, MatchField::EXACT },
-        { 16, "h.hStack[3].$valid$", 1, MatchField::TERNARY },
-        { 17, "h.h.headerField & 13", 16, MatchField::EXACT },
-        { 18, "h.h.headerField & 13", 16, MatchField::TERNARY },
-        { 19, "h.h.headerField[13:4]", 10, MatchField::EXACT },
-        { 20, "h.h.headerField[13:4]", 10, MatchField::TERNARY },
-        { 21, "h.hUnion.a.headerField", 16, MatchField::EXACT },
-        { 22, "h.hUnion.a.headerField", 16, MatchField::TERNARY },
-        { 23, "h.hUnion.a.headerField", 16, MatchField::LPM },
-        { 24, "h.hUnion.a.headerField", 16, MatchField::RANGE },
-        { 25, "h.hUnion.b.anotherHeaderField", 8, MatchField::EXACT },
-        { 26, "h.hUnion.b.anotherHeaderField", 8, MatchField::TERNARY },
-        { 27, "h.hUnion.b.anotherHeaderField", 8, MatchField::LPM },
-        { 28, "h.hUnion.b.anotherHeaderField", 8, MatchField::RANGE },
-        { 29, "h.hUnion.a.$valid$", 1, MatchField::EXACT },
-        { 30, "h.hUnion.a.$valid$", 1, MatchField::TERNARY },
-        { 31, "h.hUnion.b.$valid$", 1, MatchField::EXACT },
-        { 32, "h.hUnion.b.$valid$", 1, MatchField::TERNARY },
-        { 33, "h.hUnion.$valid$", 1, MatchField::EXACT },
-        { 34, "h.hUnion.$valid$", 1, MatchField::TERNARY },
-        { 35, "lShift", 16, MatchField::EXACT },
-        { 36, "lShift", 16, MatchField::TERNARY },
-        { 37, "plusSix", 16, MatchField::EXACT },
-        { 38, "plusSix", 16, MatchField::TERNARY },
-        { 39, "h.hUnion.c.yetAnotherHeaderField", 8, MatchField::EXACT },
+    std::vector<ExpectedMatchFieldP416> expected = {
+        { 1, "h.h.headerField", 16, MatchField::EXACT, "" },
+        { 2, "m.metadataField", 33, MatchField::EXACT, ""  },
+        { 3, "h.hStack[3].headerField", 16, MatchField::EXACT, ""  },
+        { 4, "h.h.headerField", 16, MatchField::TERNARY, ""  },
+        { 5, "m.metadataField", 33, MatchField::TERNARY, ""  },
+        { 6, "h.hStack[3].headerField", 16, MatchField::TERNARY, "" },
+        { 7, "h.h.headerField", 16, MatchField::LPM, "" },
+        { 8, "m.metadataField", 33, MatchField::LPM, ""  },
+        { 9, "h.hStack[3].headerField", 16, MatchField::LPM, ""  },
+        { 10, "h.h.headerField", 16, MatchField::RANGE, ""  },
+        { 11, "m.metadataField", 33, MatchField::RANGE, ""  },
+        { 12, "h.hStack[3].headerField", 16, MatchField::RANGE, ""  },
+        { 13, "h.h.$valid$", 1, MatchField::EXACT, ""  },
+        { 14, "h.h.$valid$", 1, MatchField::TERNARY, ""  },
+        { 15, "h.hStack[3].$valid$", 1, MatchField::EXACT, ""  },
+        { 16, "h.hStack[3].$valid$", 1, MatchField::TERNARY, ""  },
+        { 17, "h.h.headerField & 13", 16, MatchField::EXACT, ""  },
+        { 18, "h.h.headerField & 13", 16, MatchField::TERNARY, ""  },
+        { 19, "h.h.headerField[13:4]", 10, MatchField::EXACT, ""  },
+        { 20, "h.h.headerField[13:4]", 10, MatchField::TERNARY, ""  },
+        { 21, "h.hUnion.a.headerField", 16, MatchField::EXACT, ""  },
+        { 22, "h.hUnion.a.headerField", 16, MatchField::TERNARY, ""  },
+        { 23, "h.hUnion.a.headerField", 16, MatchField::LPM, ""  },
+        { 24, "h.hUnion.a.headerField", 16, MatchField::RANGE, ""  },
+        { 25, "h.hUnion.b.anotherHeaderField", 8, MatchField::EXACT, ""  },
+        { 26, "h.hUnion.b.anotherHeaderField", 8, MatchField::TERNARY, ""  },
+        { 27, "h.hUnion.b.anotherHeaderField", 8, MatchField::LPM, ""  },
+        { 28, "h.hUnion.b.anotherHeaderField", 8, MatchField::RANGE, ""  },
+        { 29, "h.hUnion.a.$valid$", 1, MatchField::EXACT, ""  },
+        { 30, "h.hUnion.a.$valid$", 1, MatchField::TERNARY, ""  },
+        { 31, "h.hUnion.b.$valid$", 1, MatchField::EXACT, ""  },
+        { 32, "h.hUnion.b.$valid$", 1, MatchField::TERNARY, ""  },
+        { 33, "h.hUnion.$valid$", 1, MatchField::EXACT, ""  },
+        { 34, "h.hUnion.$valid$", 1, MatchField::TERNARY, ""  },
+        { 35, "lShift", 16, MatchField::EXACT, ""  },
+        { 36, "lShift", 16, MatchField::TERNARY, ""  },
+        { 37, "plusSix", 16, MatchField::EXACT, ""  },
+        { 38, "plusSix", 16, MatchField::TERNARY, ""  },
+        { 39, "h.hUnion.c.yetAnotherHeaderField", 8, MatchField::EXACT, "CustomT_t" },
     };
 
-    // TODO (hemant): check for type_name and see if new_types has the name in p4info.
     for (auto i = 0; i < igTable->match_fields_size(); i++) {
         SCOPED_TRACE(expected[i].id);
         EXPECT_EQ(expected[i].id, igTable->match_fields(i).id());
         EXPECT_EQ(expected[i].name, igTable->match_fields(i).name());
         EXPECT_EQ(expected[i].bitWidth, igTable->match_fields(i).bitwidth());
         EXPECT_EQ(expected[i].matchType, igTable->match_fields(i).match_type());
+        EXPECT_EQ(expected[i].type_name, igTable->match_fields(i).type_name().name());
     }
 }
 
