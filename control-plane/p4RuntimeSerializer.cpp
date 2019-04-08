@@ -741,7 +741,7 @@ class P4RuntimeAnalyzer {
             auto pName = names.insert(pre.name());
             auto pId = ids.insert(pre.id());
             if (!pName.second) {
-                ::error(ErrorType::LEGACY_ERROR,
+                ::error(ErrorType::ERR_DUPLICATE,
                         "Name '%1%' is used for multiple objects in the P4Info message",
                         pre.name());
                 dupCnt++;
@@ -1641,7 +1641,7 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
     // P4Info generation).
     auto dupCnt = analyzer.checkForDuplicates();
     if (dupCnt > 0) {
-        ::error(ErrorType::LEGACY_ERROR, "Found %1% duplicate name(s) in the P4Info", dupCnt);
+        ::error(ErrorType::ERR_DUPLICATE, "Found %1% duplicate name(s) in the P4Info", dupCnt);
     }
 
     analyzer.addPkgInfo(evaluatedProgram, arch);
@@ -1688,9 +1688,9 @@ P4RuntimeSerializer::generateP4Runtime(const IR::P4Program* program, cstring arc
     auto* evaluatedProgram = evaluator->getToplevelBlock();
 
     if (!p4RuntimeProgram || !evaluatedProgram) {
-        ::error(ErrorType::LEGACY_ERROR,
-                "Failed to transform the program into a "
-                "P4Runtime-compatible form");
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "P4 program (cannot apply necessary program transformations)",
+                "Cannot generate P4Info message");
         return P4RuntimeAPI{new p4configv1::P4Info(), new p4v1::WriteRequest()};
     }
 
