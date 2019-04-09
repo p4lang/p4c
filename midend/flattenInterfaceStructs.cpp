@@ -57,7 +57,8 @@ const IR::StructInitializerExpression* StructTypeReplacement::explode(
         }
         vec->push_back(new IR::NamedExpression(f->name, expr));
     }
-    return new IR::StructInitializerExpression(root->srcInfo, fieldType->name, *vec, false);
+    return new IR::StructInitializerExpression(
+        root->srcInfo, fieldType->getP4Type()->to<IR::Type_Name>(), *vec);
 }
 
 static const IR::Type_Struct* isNestedStruct(const P4::TypeMap* typeMap, const IR::Type* type) {

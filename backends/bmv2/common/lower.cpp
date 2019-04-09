@@ -211,7 +211,7 @@ RemoveComplexExpressions::simplifyExpression(const IR::Expression* expression, b
         auto simpl = simplifyExpressions(&si->components);
         if (simpl != &si->components)
             return new IR::StructInitializerExpression(
-                si->srcInfo, si->name, *simpl, si->isHeader);
+                si->srcInfo, si->typeName, *simpl);
         return expression;
     } else {
         ComplexExpression ce;
@@ -316,7 +316,7 @@ RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
             } else if (auto si = arg1->to<IR::StructInitializerExpression>()) {
                 auto list = simplifyExpressions(&si->components);
                 arg1 = new IR::StructInitializerExpression(
-                    si->srcInfo, si->name, *list, si->isHeader);
+                    si->srcInfo, si->typeName, *list);
                 vec->push_back(new IR::Argument(arg1));
             } else {
                 auto tmp = new IR::Argument(
