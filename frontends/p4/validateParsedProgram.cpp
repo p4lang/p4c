@@ -32,19 +32,19 @@ void ValidateParsedProgram::postorder(const IR::Constant* c) {
 /// Check that extern constructor names match the enclosing extern
 void ValidateParsedProgram::postorder(const IR::Method* m) {
     if (m->name.isDontCare())
-        ::error(ErrorType::ERR_INVALID, "method/function name", m->name);
+        ::error(ErrorType::ERR_INVALID, "method/function name.", m->name);
     if (auto ext = findContext<IR::Type_Extern>()) {
         if (m->name == ext->name && m->type->returnType != nullptr)
-            ::error(ErrorType::ERR_INVALID, "type. Constructor cannot have a return type", m);
+            ::error(ErrorType::ERR_INVALID, "type. Constructor cannot have a return type.", m);
         if (m->type->returnType == nullptr) {
             if (m->name != ext->name) {
-                ::error(ErrorType::ERR_INVALID, "type. Method has no return type", m);
+                ::error(ErrorType::ERR_INVALID, "type. Method has no return type.", m);
                 return;
             }
             for (auto p : *m->type->parameters)
                 if (p->direction != IR::Direction::None)
                     ::error(ErrorType::ERR_INVALID,
-                            "call. Constructor parameters cannot have a direction", p);
+                            "call. Constructor parameters cannot have a direction.", p);
         }
     }
 }
@@ -114,8 +114,7 @@ void ValidateParsedProgram::distinctParameters(
     for (auto p : apply->parameters) {
         auto it = found.find(p->getName());
         if (it != found.end())
-            ::error(ErrorType::ERR_INVALID,
-                    "name.  Duplicates %2%",
+            ::error(ErrorType::ERR_DUPLICATE, "%1% duplicates %2%.",
                     it->second, p);
         else
             found.emplace(p->getName(), p);
@@ -123,8 +122,7 @@ void ValidateParsedProgram::distinctParameters(
     for (auto p : constr->parameters) {
         auto it = found.find(p->getName());
         if (it != found.end())
-            ::error(ErrorType::ERR_INVALID,
-                    "name. Duplicates %2%",
+            ::error(ErrorType::ERR_DUPLICATE, "%1% duplicates %2%.",
                     it->second, p);
     }
 }
@@ -134,20 +132,20 @@ void ValidateParsedProgram::postorder(const IR::ConstructorCallExpression* expre
     auto inAction = findContext<IR::P4Action>();
     if (inAction != nullptr)
         ::error(ErrorType::ERR_INVALID,
-                "call. Constructor calls not allowed in actions", expression);
+                "call. Constructor calls not allowed in actions.", expression);
 }
 
 /// Variable names cannot be underscore
 void ValidateParsedProgram::postorder(const IR::Declaration_Variable* decl) {
     if (decl->name.isDontCare())
-        ::error(ErrorType::ERR_INVALID, "variable name", decl);
+        ::error(ErrorType::ERR_INVALID, "variable name.", decl);
 }
 
 /// Instance names cannot be don't care
 /// Do not declare instances in apply {} blocks, parser states or actions
 void ValidateParsedProgram::postorder(const IR::Declaration_Instance* decl) {
     if (decl->name.isDontCare())
-        ::error(ErrorType::ERR_INVALID, "instance name", decl);
+        ::error(ErrorType::ERR_INVALID, "instance name.", decl);
     if (findContext<IR::BlockStatement>() &&  // we're looking for the apply block
         findContext<IR::P4Control>() &&       // of a control
         !findContext<IR::Declaration_Instance>()) {  // but not in an instance initializer
@@ -166,7 +164,7 @@ void ValidateParsedProgram::postorder(const IR::Declaration_Instance* decl) {
 /// Constant names cannot be underscore
 void ValidateParsedProgram::postorder(const IR::Declaration_Constant* decl) {
     if (decl->name.isDontCare())
-        ::error(ErrorType::ERR_INVALID, "constant name", decl);
+        ::error(ErrorType::ERR_INVALID, "constant name.", decl);
 }
 
 /**
@@ -180,11 +178,11 @@ void ValidateParsedProgram::postorder(const IR::EntriesList* l) {
     auto table = findContext<IR::P4Table>();
     if (table == nullptr)
         ::error(ErrorType::ERR_INVALID,
-                "initializer. Table initializers must belong to a table", l);
+                "initializer. Table initializers must belong to a table.", l);
     auto ep = table->properties->getProperty(IR::TableProperties::entriesPropertyName);
     if (!ep->isConstant)
         ::error(ErrorType::ERR_INVALID,
-                "initializer. Table initializers must be constant", l);
+                "initializer. Table initializers must be constant.", l);
 }
 
 /// Switch statements are not allowed in actions.
@@ -193,11 +191,11 @@ void ValidateParsedProgram::postorder(const IR::SwitchStatement* statement) {
     auto inAction = findContext<IR::P4Action>();
     if (inAction != nullptr)
         ::error(ErrorType::ERR_INVALID,
-                "statement. switch statements not allowed in actions", statement);
+                "statement. 'switch' statements not allowed in actions.", statement);
     bool defaultFound = false;
     for (auto c : statement->cases) {
         if (defaultFound) {
-            ::warning(ErrorType::WARN_ORDERING, "%1%: label following default label", c);
+            ::warning(ErrorType::WARN_ORDERING, "%1%: label following default label.", c);
             break;
         }
         if (c->label->is<IR::DefaultExpression>())
@@ -210,7 +208,7 @@ void ValidateParsedProgram::postorder(const IR::ReturnStatement* statement) {
     auto inParser = findContext<IR::P4Parser>();
     if (inParser != nullptr)
         ::error(ErrorType::ERR_INVALID,
-                "statement. return statements not allowed in parsers", statement);
+                "statement. 'return' statements not allowed in parsers.", statement);
 }
 
 /// Exit statements are not allowed in parsers or functions
@@ -218,10 +216,10 @@ void ValidateParsedProgram::postorder(const IR::ExitStatement* statement) {
     auto inParser = findContext<IR::P4Parser>();
     if (inParser != nullptr)
         ::error(ErrorType::ERR_INVALID,
-                "statement. exit statements not allowed in parsers", statement);
+                "statement. 'exit' statements not allowed in parsers.", statement);
     if (findContext<IR::Function>())
         ::error(ErrorType::ERR_INVALID,
-                "statement. exit statements not allowed in functions", statement);
+                "statement. 'exit' statements not allowed in functions.", statement);
 }
 
 void ValidateParsedProgram::postorder(const IR::P4Program* program) {
@@ -231,7 +229,7 @@ void ValidateParsedProgram::postorder(const IR::P4Program* program) {
         auto existing = declarations.getDeclaration(name);
         if (existing != nullptr) {
             if (!existing->is<IR::IFunctional>() || !decl->is<IR::IFunctional>()) {
-                ::error(ErrorType::ERR_INVALID, "declaration.  Duplicates %2%",
+                ::error(ErrorType::ERR_DUPLICATE, "%1% duplicates %2%.",
                         decl->getName(), existing->getName());
             }
         } else {

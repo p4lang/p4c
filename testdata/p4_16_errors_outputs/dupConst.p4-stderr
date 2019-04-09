@@ -1,4 +1,4 @@
-dupConst.p4(17): [--Werror=invalid] error: a: Invalid declaration.  Duplicates a
+dupConst.p4(17): [--Werror=duplicate] error: a duplicates a.
 const bit<4> a = 2;
              ^
 dupConst.p4(16)

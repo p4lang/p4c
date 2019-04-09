@@ -58,5 +58,18 @@ type H2aD_t H2aDT_t; // error
 typedef-and-type-definitions.p4(153): error: h1StackDT_t: `type' can only be applied to base types
 type h1StackD_t h1StackDT_t; // error
                 ^^^^^^^^^^^
-Number of errors exceeded set maximum of 20
-
+typedef-and-type-definitions.p4(154): error: hu1DT_t: `type' can only be applied to base types
+type hu1D_t hu1DT_t; // error
+            ^^^^^^^
+typedef-and-type-definitions.p4(155): error: s1DT_t: `type' can only be applied to base types
+type s1D_t s1DT_t; // error
+           ^^^^^^
+typedef-and-type-definitions.p4(156): error: PointADT_t: `type' can only be applied to base types
+type PointAD_t PointADT_t; // error
+               ^^^^^^^^^^
+typedef-and-type-definitions.p4(157): error: Tuple1DT_t: `type' can only be applied to base types
+type Tuple1D_t Tuple1DT_t; // error
+               ^^^^^^^^^^
+typedef-and-type-definitions.p4(158): error: Tuple2DT_t: `type' can only be applied to base types
+type Tuple2D_t Tuple2DT_t; // error
+               ^^^^^^^^^^
