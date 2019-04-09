@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -121,10 +121,11 @@ struct StringRef {
     const char *findstr(StringRef sub) {
         if (sub.len < 1) return p;
         const char *s = begin(), *e = end();
-        while ((s = static_cast<const char *>(memchr(s, *sub.p, e-s)))) {
+        while (s < e && (s = static_cast<const char *>(memchr(s, *sub.p, e-s)))) {
             if (sub.len > (size_t)(e-s)) return nullptr;
             if (!memcmp(s, sub.p, sub.len))
-                return s; }
+                return s;
+            s++;}
         return nullptr; }
     StringRef before(const char *s) const {
         return (size_t)(s-p) <= len ? StringRef(p, s-p) : StringRef(); }

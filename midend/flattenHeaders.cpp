@@ -50,7 +50,7 @@ FindHeaderTypesToReplace::HeaderTypeReplacement::HeaderTypeReplacement(
     typeMap(typeMap) {
     auto vec = new IR::IndexedVector<IR::StructField>();
     flatten("", type, IR::Annotations::empty, vec, policy);
-    replacementType = new IR::Type_Header(type->name, IR::Annotations::empty, *vec);
+    replacementType = new IR::Type_Header(type->name, type->annotations, *vec);
 }
 
 void FindHeaderTypesToReplace::createReplacement(const IR::Type_Header* type,
