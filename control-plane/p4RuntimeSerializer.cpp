@@ -688,6 +688,18 @@ class ParseAnnotations : public P4::ParseAnnotations {
     }) { }
 };
 
+namespace {
+
+// It must be an iterator type pointing to a p4info.proto message with a
+// 'preamble' field of type p4configv1::Preamble. Fn is an arbitrary function
+// with a single parameter of type p4configv1::Preamble.
+template <typename It, typename Fn> void
+forEachPreamble(It first, It last, Fn fn) {
+    for (It it = first; it != last; it++) fn(it->preamble());
+}
+
+} // namespace
+
 /// An analyzer which translates the information available in the P4 IR into a
 /// representation of the control plane API which is consumed by P4Runtime.
 class P4RuntimeAnalyzer {
@@ -711,6 +723,60 @@ class P4RuntimeAnalyzer {
     const P4Info* getP4Info() const {
         BUG_CHECK(p4Info != nullptr, "Didn't produce a P4Info object?");
         return p4Info;
+    }
+
+    /// Check for objects with duplicate names in the generated P4Info message
+    /// and @return the number of duplicates.
+    size_t checkForDuplicates() const {
+        size_t dupCnt = 0;
+        std::unordered_set<std::string> names;
+        // There is no real need to check for duplicate ids since the
+        // SymbolTable ensures that there are not duplicates. But it certainly
+        // does not hurt to it. Architecture-specific implementations may be
+        // misusing the SymbolTable, or bypassing it and allocating incorrect
+        // ids.
+        std::unordered_set<p4rt_id_t> ids;
+
+        auto checkOne = [&dupCnt, &names, &ids](const p4configv1::Preamble& pre) {
+            auto pName = names.insert(pre.name());
+            auto pId = ids.insert(pre.id());
+            if (!pName.second) {
+                ::error(ErrorType::ERR_DUPLICATE,
+                        "Name '%1%' is used for multiple objects in the P4Info message",
+                        pre.name());
+                dupCnt++;
+                return;
+            }
+            BUG_CHECK(pId.second,
+                      "Id '%1%' is used for multiple objects in the P4Info message",
+                      pre.id());
+        };
+
+        // I considered using Protobuf reflection, but it didn't really make the
+        // code less verbose, and it certainly didn't make it easier to read.
+        forEachPreamble(p4Info->tables().cbegin(), p4Info->tables().cend(), checkOne);
+        forEachPreamble(p4Info->actions().cbegin(), p4Info->actions().cend(), checkOne);
+        forEachPreamble(
+            p4Info->action_profiles().cbegin(), p4Info->action_profiles().cend(), checkOne);
+        forEachPreamble(p4Info->counters().cbegin(), p4Info->counters().cend(), checkOne);
+        forEachPreamble(
+            p4Info->direct_counters().cbegin(), p4Info->direct_counters().cend(), checkOne);
+        forEachPreamble(p4Info->meters().cbegin(), p4Info->meters().cend(), checkOne);
+        forEachPreamble(
+            p4Info->direct_meters().cbegin(), p4Info->direct_meters().cend(), checkOne);
+        forEachPreamble(p4Info->controller_packet_metadata().cbegin(),
+                        p4Info->controller_packet_metadata().cend(),
+                        checkOne);
+        forEachPreamble(p4Info->value_sets().cbegin(), p4Info->value_sets().cend(), checkOne);
+        forEachPreamble(p4Info->registers().cbegin(), p4Info->registers().cend(), checkOne);
+        forEachPreamble(p4Info->digests().cbegin(), p4Info->digests().cend(), checkOne);
+
+        for (const auto& externType : p4Info->externs()) {
+            forEachPreamble(
+                externType.instances().begin(), externType.instances().end(), checkOne);
+        }
+
+        return dupCnt;
     }
 
  public:
@@ -1568,6 +1634,16 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
 
     analyzer.postAdd();
 
+    // Unfortunately we cannot just rely on the SymbolTable to detect
+    // duplicates as it would break existing code. For example, top-level
+    // actions are inlined in every control which uses them and the actions end
+    // up being "added" to the SymbolTable mutiple times (which is harmless for
+    // P4Info generation).
+    auto dupCnt = analyzer.checkForDuplicates();
+    if (dupCnt > 0) {
+        ::error(ErrorType::ERR_DUPLICATE, "Found %1% duplicate name(s) in the P4Info", dupCnt);
+    }
+
     analyzer.addPkgInfo(evaluatedProgram, arch);
 
     P4RuntimeEntriesConverter entriesConverter(symbols);
@@ -1611,9 +1687,12 @@ P4RuntimeSerializer::generateP4Runtime(const IR::P4Program* program, cstring arc
     auto* p4RuntimeProgram = program->apply(p4RuntimeFixups);
     auto* evaluatedProgram = evaluator->getToplevelBlock();
 
-    BUG_CHECK(p4RuntimeProgram && evaluatedProgram,
-              "Failed to transform the program into a "
-              "P4Runtime-compatible form");
+    if (!p4RuntimeProgram || !evaluatedProgram) {
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "P4 program (cannot apply necessary program transformations)",
+                "Cannot generate P4Info message");
+        return P4RuntimeAPI{new p4configv1::P4Info(), new p4v1::WriteRequest()};
+    }
 
     auto archHandler = (*archHandlerBuilderIt->second)(&refMap, &typeMap, evaluatedProgram);
 

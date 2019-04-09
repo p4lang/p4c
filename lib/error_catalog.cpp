@@ -32,6 +32,7 @@ const int ErrorType::ERR_OVERLIMIT     =   9;
 const int ErrorType::ERR_INSUFFICIENT  =  10;
 const int ErrorType::ERR_TYPE_ERROR    =  11;
 const int ErrorType::ERR_UNSUPPORTED_ON_TARGET = 12;
+const int ErrorType::ERR_DUPLICATE = 13;
 // If we specialize for 1000 error types we're good!
 const int ErrorType::ERR_MAX_ERRORS    = 999;
 
@@ -75,6 +76,7 @@ std::map<int, ErrorSig> ErrorCatalog::errorCatalog = {
     { ErrorType::ERR_TYPE_ERROR,         ErrorSig("type-error", "")},
     { ErrorType::ERR_UNSUPPORTED_ON_TARGET, ErrorSig("target-error",
                                                      "%1%: Unsupported on target")},
+    { ErrorType::ERR_DUPLICATE,          ErrorSig("duplicate", "")},
 
     // Warnings
     { ErrorType::LEGACY_WARNING,         ErrorSig("legacy", "")},

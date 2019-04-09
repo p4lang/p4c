@@ -1,0 +1,68 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33580881
+    name: "t0"
+    alias: "t0"
+  }
+  match_fields {
+    id: 1
+    name: "smeta.ingress_port"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16815162
+  }
+  action_refs {
+    id: 16800567
+  }
+  const_default_action_id: 16800567
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33580881
+    name: "t0"
+    alias: "t0"
+  }
+  match_fields {
+    id: 1
+    name: "smeta.ingress_port"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16790297
+  }
+  action_refs {
+    id: 16800567
+  }
+  const_default_action_id: 16800567
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16815162
+    name: "IngressI.c1.drop"
+    alias: "c1.drop"
+  }
+}
+actions {
+  preamble {
+    id: 16790297
+    name: "IngressI.c2.drop"
+    alias: "c2.drop"
+  }
+}
+type_info {
+}

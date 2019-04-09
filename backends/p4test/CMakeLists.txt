@@ -75,9 +75,7 @@ set (P4RUNTIME_EXCLUDE
   testdata/p4_16_samples/issue1304.p4
   testdata/p4_16_samples/issue1062-1-bmv2.p4
 )
-# Do not generate P4Info for tests which are expected to fail P4 compilation.
-p4c_find_test_names ("${P4C_SOURCE_DIR}/testdata/p4_16_errors/*.p4" P4RUNTIME_EXCLUDE_ERRORS)
-list (APPEND P4RUNTIME_EXCLUDE ${P4RUNTIME_EXCLUDE_ERRORS})
+
 set (P4_XFAIL_TESTS
   # issue #13
   testdata/p4_16_samples/cast-call.p4
@@ -85,7 +83,17 @@ set (P4_XFAIL_TESTS
   testdata/p4_16_samples/psa-example-digest-bmv2.p4
   testdata/p4_16_samples/p4rt_digest_complex.p4
   testdata/p4_16_samples/psa-example-counters-bmv2.p4
+  # This program is invalid according to the PSA specification as one direct
+  # counter is shared by multiple match tables: "A DirectCounter instance must
+  # appear as the value of the psa_direct_counter table attribute for at most
+  # one table."
+  testdata/p4_16_samples/psa-counter6.p4
   )
+# we invoke p4c with --p4runtime-files even for programs in p4_16_errors. This
+# enables us to use p4_16_errors even for programs which pass compilation but
+# fail P4Info generation expectedly (see issue 1803). If a program fails
+# compilation, the P4Runtime serializer will not be invoked anyway and there
+# will be no P4Info file.
 p4c_add_tests_w_p4runtime("p4" ${P4TEST_DRIVER} "${P4TEST_SUITES}" "${P4_XFAIL_TESTS}" "${P4RUNTIME_EXCLUDE}" "-a '--maxErrorCount 100'")
 
 set (P4_14_SUITES
