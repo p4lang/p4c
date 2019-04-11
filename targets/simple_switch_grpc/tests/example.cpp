@@ -22,7 +22,6 @@
 
 #include <google/rpc/code.pb.h>
 #include <p4/v1/p4runtime.grpc.pb.h>
-#include <p4/tmp/p4config.grpc.pb.h>
 
 #include <google/protobuf/util/message_differencer.h>
 
@@ -89,12 +88,10 @@ test() {
     set_election_id(request.mutable_election_id());
     auto config = request.mutable_config();
     config->set_allocated_p4info(&p4info);
-    p4::tmp::P4DeviceConfig device_config;
     std::ifstream istream(test_json);
-    device_config.mutable_device_data()->assign(
+    config->mutable_p4_device_config()->assign(
         (std::istreambuf_iterator<char>(istream)),
          std::istreambuf_iterator<char>());
-    device_config.SerializeToString(config->mutable_p4_device_config());
 
     p4v1::SetForwardingPipelineConfigResponse rep;
     ClientContext context;
