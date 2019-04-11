@@ -183,6 +183,11 @@ set (XFAIL_TESTS
   # These test use computations in the verify/update checksum controls - unsupported
   testdata/p4_16_samples/issue1765-bmv2.p4
   testdata/p4_16_samples/issue1765-1-bmv2.p4
+  # These tests require bmv2's psa_switch to support std metadata passing at minimum
+  testdata/p4_16_samples/psa-drop-all-bmv2.p4
+  testdata/p4_16_samples/psa-unicast-or-drop-bmv2.p4
+  testdata/p4_16_samples/psa-ingress-input-meta-bmv2.p4
+  testdata/p4_16_samples/psa-multicast-basic-bmv2.p4
 )
 
 if (HAVE_SIMPLE_SWITCH)
