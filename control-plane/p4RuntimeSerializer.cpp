@@ -725,25 +725,21 @@ class P4RuntimeAnalyzer {
         return p4Info;
     }
 
-    /// Check for objects with duplicate names in the generated P4Info message
-    /// and @return the number of duplicates.
-    size_t checkForDuplicates() const {
+    /// Check for duplicate names among objects of the same type in the
+    /// generated P4Info message and @return the number of duplicates.
+    template <typename T>
+    size_t checkForDuplicatesOfSameType(const T& objs, cstring typeName,
+                                        std::unordered_set<p4rt_id_t>* ids) const {
         size_t dupCnt = 0;
         std::unordered_set<std::string> names;
-        // There is no real need to check for duplicate ids since the
-        // SymbolTable ensures that there are not duplicates. But it certainly
-        // does not hurt to it. Architecture-specific implementations may be
-        // misusing the SymbolTable, or bypassing it and allocating incorrect
-        // ids.
-        std::unordered_set<p4rt_id_t> ids;
 
-        auto checkOne = [&dupCnt, &names, &ids](const p4configv1::Preamble& pre) {
+        auto checkOne = [&dupCnt, &names, &ids, typeName](const p4configv1::Preamble& pre) {
             auto pName = names.insert(pre.name());
-            auto pId = ids.insert(pre.id());
+            auto pId = ids->insert(pre.id());
             if (!pName.second) {
                 ::error(ErrorType::ERR_DUPLICATE,
-                        "Name '%1%' is used for multiple objects in the P4Info message",
-                        pre.name());
+                        "Name '%1%' is used for multiple %2% objects in the P4Info message",
+                        pre.name(), typeName);
                 dupCnt++;
                 return;
             }
@@ -752,28 +748,40 @@ class P4RuntimeAnalyzer {
                       pre.id());
         };
 
+        forEachPreamble(objs.cbegin(), objs.cend(), checkOne);
+
+        return dupCnt;
+    }
+
+    /// Check for objects with duplicate names in the generated P4Info message
+    /// and @return the number of duplicates.
+    size_t checkForDuplicates() const {
+        size_t dupCnt = 0;
+        // There is no real need to check for duplicate ids since the
+        // SymbolTable ensures that there are not duplicates. But it certainly
+        // does not hurt to it. Architecture-specific implementations may be
+        // misusing the SymbolTable, or bypassing it and allocating incorrect
+        // ids.
+        std::unordered_set<p4rt_id_t> ids;
+
         // I considered using Protobuf reflection, but it didn't really make the
         // code less verbose, and it certainly didn't make it easier to read.
-        forEachPreamble(p4Info->tables().cbegin(), p4Info->tables().cend(), checkOne);
-        forEachPreamble(p4Info->actions().cbegin(), p4Info->actions().cend(), checkOne);
-        forEachPreamble(
-            p4Info->action_profiles().cbegin(), p4Info->action_profiles().cend(), checkOne);
-        forEachPreamble(p4Info->counters().cbegin(), p4Info->counters().cend(), checkOne);
-        forEachPreamble(
-            p4Info->direct_counters().cbegin(), p4Info->direct_counters().cend(), checkOne);
-        forEachPreamble(p4Info->meters().cbegin(), p4Info->meters().cend(), checkOne);
-        forEachPreamble(
-            p4Info->direct_meters().cbegin(), p4Info->direct_meters().cend(), checkOne);
-        forEachPreamble(p4Info->controller_packet_metadata().cbegin(),
-                        p4Info->controller_packet_metadata().cend(),
-                        checkOne);
-        forEachPreamble(p4Info->value_sets().cbegin(), p4Info->value_sets().cend(), checkOne);
-        forEachPreamble(p4Info->registers().cbegin(), p4Info->registers().cend(), checkOne);
-        forEachPreamble(p4Info->digests().cbegin(), p4Info->digests().cend(), checkOne);
+        dupCnt += checkForDuplicatesOfSameType(p4Info->tables(), "table", &ids);
+        dupCnt += checkForDuplicatesOfSameType(p4Info->actions(), "action", &ids);
+        dupCnt += checkForDuplicatesOfSameType(p4Info->action_profiles(), "action profile", &ids);
+        dupCnt += checkForDuplicatesOfSameType(p4Info->counters(), "counter", &ids);
+        dupCnt += checkForDuplicatesOfSameType(p4Info->direct_counters(), "direct counter", &ids);
+        dupCnt += checkForDuplicatesOfSameType(p4Info->meters(), "meter", &ids);
+        dupCnt += checkForDuplicatesOfSameType(p4Info->direct_meters(), "direct meter", &ids);
+        dupCnt += checkForDuplicatesOfSameType(
+            p4Info->controller_packet_metadata(), "controller packet metadata", &ids);
+        dupCnt += checkForDuplicatesOfSameType(p4Info->value_sets(), "value set", &ids);
+        dupCnt += checkForDuplicatesOfSameType(p4Info->registers(), "register", &ids);
+        dupCnt += checkForDuplicatesOfSameType(p4Info->digests(), "digest", &ids);
 
         for (const auto& externType : p4Info->externs()) {
-            forEachPreamble(
-                externType.instances().begin(), externType.instances().end(), checkOne);
+            dupCnt += checkForDuplicatesOfSameType(
+                externType.instances(), externType.extern_type_name(), &ids);
         }
 
         return dupCnt;
