@@ -57,14 +57,14 @@ action int_set_header_1() { //ingress_port_id
 action int_set_header_2() { //hop_latency
     add_header(int_hop_latency_header);
     modify_field(int_hop_latency_header.hop_latency,
-                    intrinsic_metadata.deq_timedelta);
+                    queueing_metadata.deq_timedelta);
 }
 /* Instr Bit 3 */
 action int_set_header_3() { //q_occupancy
     add_header(int_q_occupancy_header);
     modify_field(int_q_occupancy_header.q_occupancy1, 0);
     modify_field(int_q_occupancy_header.q_occupancy0,
-                    intrinsic_metadata.enq_qdepth);
+                    queueing_metadata.enq_qdepth);
 }
 /* Instr Bit 4 */
 action int_set_header_4() { //ingress_tstamp

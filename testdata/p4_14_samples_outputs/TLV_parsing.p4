@@ -9,7 +9,6 @@ header ipv4_option_timestamp_t_1 {
 struct intrinsic_metadata_t {
     bit<4>  mcast_grp;
     bit<4>  egress_rid;
-    bit<16> mcast_hash;
     bit<32> lf_field_list;
 }
 
