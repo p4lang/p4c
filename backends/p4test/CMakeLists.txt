@@ -49,10 +49,8 @@ add_dependencies(p4c_driver linkp4test)
 
 set(P4TEST_DRIVER ${P4C_SOURCE_DIR}/backends/p4test/run-p4-sample.py)
 
-set (P4TEST_SUITES
-  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*.p4"
-  "${P4C_SOURCE_DIR}/testdata/p4_16_errors/*.p4"
-  )
+set (P4TEST_SUITES "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*.p4")
+
 # Builds a list of tests for which P4Info generation is not supported. It makes
 # sense not to fail the test just because P4Info generation fails. It probably
 # would not make sense to run all the tests twice (one with and one without
@@ -95,6 +93,9 @@ set (P4_XFAIL_TESTS
 # compilation, the P4Runtime serializer will not be invoked anyway and there
 # will be no P4Info file.
 p4c_add_tests_w_p4runtime("p4" ${P4TEST_DRIVER} "${P4TEST_SUITES}" "${P4_XFAIL_TESTS}" "${P4RUNTIME_EXCLUDE}" "-a '--maxErrorCount 100'")
+
+set (P4TEST_ERRORS "${P4C_SOURCE_DIR}/testdata/p4_16_errors/*.p4")
+p4c_add_tests_w_p4runtime("err" ${P4TEST_DRIVER} "${P4TEST_ERRORS}" "${P4_XFAIL_TESTS}" "${P4RUNTIME_EXCLUDE}" "-a '--maxErrorCount 100'")
 
 set (P4_14_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"
