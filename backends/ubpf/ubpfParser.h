@@ -14,6 +14,8 @@ public:
 
 class UBPFParser : public EBPF::EBPFParser {
 public:
+    std::vector<UBPFParserState*> states;
+
     UBPFParser(const EBPF::EBPFProgram* program, const IR::ParserBlock* block,
                const P4::TypeMap* typeMap) : EBPF::EBPFParser(program, block, typeMap) {}
     bool build();

@@ -2,6 +2,7 @@
 #include "ubpfType.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
+//#include "string.h"
 
 namespace UBPF {
 
@@ -17,7 +18,8 @@ namespace UBPF {
             void compileLookahead(const IR::Expression* destination);
 
         public:
-            explicit StateTranslationVisitor(const UBPFParserState* state) :
+            static cstring currentHeader; // "pkt" is an initial state
+            explicit UBPFStateTranslationVisitor(const UBPFParserState* state) :
                     CodeGenInspector(state->parser->program->refMap, state->parser->program->typeMap),
                     hasDefault(false), p4lib(P4::P4CoreLibrary::instance), state(state) {}
             bool preorder(const IR::ParserState* state) override;
@@ -31,24 +33,121 @@ namespace UBPF {
         };
     }
 
-    bool UBPFStateTranslationVisitor::preorder(const IR::ParserState* state) {
+    cstring UBPFStateTranslationVisitor::currentHeader = "pkt";
+
+    bool UBPFStateTranslationVisitor::preorder(const IR::ParserState* parserState) {
+        std::cout << "Visitor: ParserState." << std::endl;
+        if (parserState->isBuiltin()) return false;
+
+        builder->emitIndent();
+        builder->append(parserState->name.name);
+        builder->append(":");
+        builder->spc();
+        builder->blockStart();
+
+        visit(parserState->components, "components");
+        if (parserState->selectExpression == nullptr) {
+            builder->emitIndent();
+            builder->append("goto ");
+            builder->append(IR::ParserState::reject);
+            builder->endOfStatement(true);
+        } else if (parserState->selectExpression->is<IR::SelectExpression>()) {
+            visit(parserState->selectExpression);
+        } else {
+            // must be a PathExpression which is a state name
+            if (!parserState->selectExpression->is<IR::PathExpression>())
+                BUG("Expected a PathExpression, got a %1%", parserState->selectExpression);
+            builder->emitIndent();
+            builder->append("goto ");
+            visit(parserState->selectExpression);
+            builder->endOfStatement(true);
+        }
+
+        builder->blockEnd(true);
         return false;
     }
 
     bool UBPFStateTranslationVisitor::preorder(const IR::SelectCase* selectCase) {
+        std::cout << "Visitor: SelectCase." << std::endl;
+        builder->emitIndent();
+        if (selectCase->keyset->is<IR::DefaultExpression>()) {
+            hasDefault = true;
+            builder->append("default: ");
+        } else {
+            builder->append("case ");
+            visit(selectCase->keyset);
+            builder->append(": ");
+        }
+        builder->append("goto ");
+        visit(selectCase->state);
+        builder->endOfStatement(true);
         return false;
     }
 
     bool UBPFStateTranslationVisitor::preorder(const IR::SelectExpression* expression) {
+        std::cout << "Visitor: SelectExpression." << std::endl;
+        hasDefault = false;
+        if (expression->select->components.size() != 1) {
+            // TODO: this does not handle correctly tuples
+            ::error("%1%: only supporting a single argument for select", expression->select);
+            return false;
+        }
+        builder->emitIndent();
+        builder->append("switch (");
+        visit(expression->select);
+        builder->append(") ");
+        builder->blockStart();
+
+        for (auto e : expression->selectCases)
+            visit(e);
+
+        if (!hasDefault) {
+            builder->emitIndent();
+            builder->appendFormat("default: goto %s;", IR::ParserState::reject.c_str());
+            builder->newline();
+        }
+
+        builder->blockEnd(true);
         return false;
     }
 
     bool UBPFStateTranslationVisitor::preorder(const IR::Member* expression) {
+        std::cout << "Visitor: Member." << std::endl;
+        if (expression->expr->is<IR::PathExpression>()) {
+            auto pe = expression->expr->to<IR::PathExpression>();
+            auto decl = state->parser->program->refMap->getDeclaration(pe->path, true);
+            if (decl == state->parser->packet) {
+                builder->append(expression->member);
+                return false;
+            }
+        }
+
+        visit(expression->expr);
+        builder->append(".");
+        builder->append(expression->member);
         return false;
     }
 
+    void cstringToLower(const cstring value, char* result) {
+        strcpy(result, value);
+        for(int i = 0; result[i]; i++){
+            result[i] = tolower(result[i]);
+        }
+        std::cout << result << std::endl;
+    }
+
+//    void
+//    UBPFStateTranslationVisitor::compileExtractField(
+//            const IR::Expression* expr, cstring field, unsigned alignment, EBPFType* type) {
+//        unsigned widthToExtract = dynamic_cast<IHasWidth*>(type)->widthInBits();
+//        auto program = state->parser->program;
+//
+//
+//    }
+
     void
     UBPFStateTranslationVisitor::compileExtract(const IR::Expression* destination) {
+        std::cout << "Visitor: Expression." << std::endl;
         auto type = state->parser->typeMap->getType(destination);
         auto ht = type->to<IR::Type_StructLike>();
 
@@ -60,12 +159,20 @@ namespace UBPF {
         unsigned width = ht->width_bits();
         auto program = state->parser->program;
         builder->emitIndent();
-
         // TODO: Check if packet is not too short
+        char headerName[strlen(ht->name.name)];
+        cstringToLower(ht->name.name, headerName);
+        if (currentHeader == "pkt")
+            builder->appendFormat("struct %s *%s = (void *)%s",  ht->name.name, headerName, currentHeader);
+        else
+            builder->appendFormat("struct %s *%s = (void *)(%s + 1)",  ht->name.name, headerName, currentHeader);
 
+        UBPFStateTranslationVisitor::currentHeader = headerName;
+        std::cout << UBPFStateTranslationVisitor::currentHeader << std::endl;
+
+        builder->endOfStatement(true);
         builder->newline();
-        builder->appendFormat("struct %s",  ht->name.name);
-//
+
 //        unsigned alignment = 0;
 //        for (auto f : ht->fields) {
 //            auto ftype = state->parser->typeMap->getType(f);
@@ -79,15 +186,16 @@ namespace UBPF {
 //            alignment += et->widthInBits();
 //            alignment %= 8;
 //        }
-//
-//        if (ht->is<IR::Type_Header>()) {
-//            builder->emitIndent();
-//            visit(destination);
-//            builder->appendLine(".ebpf_valid = 1;");
-//        }
+
+        if (ht->is<IR::Type_Header>()) {
+            builder->emitIndent();
+            visit(destination);
+            builder->appendLine(".ebpf_valid = 1;");
+        }
     }
 
     bool UBPFStateTranslationVisitor::preorder(const IR::MethodCallExpression* expression) {
+        builder->emitIndent();
         builder->append("/* ");
         visit(expression->method);
         builder->append("(");
@@ -133,6 +241,7 @@ namespace UBPF {
     }
 
     void UBPFParserState::emit(EBPF::CodeBuilder* builder) {
+        std::cout << "Emitting UBPFParserState." << std::endl;
         UBPFStateTranslationVisitor visitor(this);
         visitor.setBuilder(builder);
         state->apply(visitor);
@@ -154,7 +263,6 @@ namespace UBPF {
     }
 
     bool UBPFParser::build() {
-        std::cout << "Building ubpf." << std::endl;
         auto pl = parserBlock->container->type->applyParams;
         if (pl->size() != 2) {
             ::error("Expected parser to have exactly 2 parameters");
