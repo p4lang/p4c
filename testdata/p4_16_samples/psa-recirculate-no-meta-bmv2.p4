@@ -62,9 +62,9 @@ control cIngress(inout headers_t hdr,
       default_action = do_recirc;
     }
     apply {
-        if (hdr.ethernet.dstAddr[1:0] == 3) {
+        if (hdr.ethernet.dstAddr[3:0] >= 4) {
           send_to_port(ostd,
-              (PortId_t) ((PortIdUint_t) hdr.ethernet.dstAddr[1:0]));
+              (PortId_t) ((PortIdUint_t) hdr.ethernet.dstAddr[3:0]));
         }
         else{
           send_to_port(ostd, PSA_PORT_RECIRCULATE);
@@ -126,7 +126,6 @@ control EgressDeparserImpl(packet_out buffer,
 {
     CommonDeparserImpl() cp;
     apply {
-        cp.apply(buffer, hdr);
     }
 }
 
