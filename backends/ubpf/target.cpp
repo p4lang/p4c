@@ -7,6 +7,7 @@ namespace UBPF {
                 "#include <stdint.h>\n"
                 "#include <stdbool.h>\n"
                 "#include <stddef.h>\n"
+                "#include \"ubpf_common.h\"\n"
                 "\n");
     }
 

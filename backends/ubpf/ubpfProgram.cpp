@@ -44,15 +44,30 @@ namespace UBPF {
         builder->newline();
 
         builder->target->emitIncludes(builder);
+        emitPreamble(builder);
         emitUbpfHelpers(builder);
 
         builder->emitIndent();
         builder->target->emitMain(builder, "entry", "pkt");
         builder->blockStart();
 
+        emitHeaderInstances(builder);
+        builder->append(" = ");
+        parser->headerType->emitInitializer(builder);
+        builder->endOfStatement(true);
+
+        emitLocalVariables(builder);
+        builder->newline();
+        builder->emitIndent();
+        builder->appendFormat("goto %s;", IR::ParserState::start.c_str());
+        builder->newline();
+
         parser->emit(builder);
 
         emitPipeline(builder);
+
+        builder->emitIndent();
+        builder->appendFormat("return %s;\n", builder->target->forwardReturnCode().c_str());
         builder->blockEnd(true);
     }
 
@@ -77,7 +92,13 @@ namespace UBPF {
         emitTypes(builder);
         builder->newline();
         builder->appendLine("#endif");
-        builder->appendLine("#endif");
+    }
+
+    void UbpfProgram::emitPreamble(EBPF::CodeBuilder* builder) {
+        builder->emitIndent();
+        builder->appendLine("#define BPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)");
+        builder->appendLine("#define BYTES(w) ((w) / 8)");
+        builder->newline();
     }
 
     void UbpfProgram::emitTypes(EBPF::CodeBuilder *builder) {
@@ -96,6 +117,17 @@ namespace UBPF {
                 builder->newline();
             }
         }
+    }
+
+    void UbpfProgram::emitHeaderInstances(EBPF::CodeBuilder* builder) {
+        builder->emitIndent();
+        parser->headerType->declare(builder, parser->headers->name.name, false);
+    }
+
+    void UbpfProgram::emitLocalVariables(EBPF::CodeBuilder* builder) {
+        builder->emitIndent();
+        builder->appendFormat("int %s = 0;", offsetVar.c_str());
+        builder->newline();
     }
 
     void UbpfProgram::emitPipeline(EBPF::CodeBuilder *builder) {

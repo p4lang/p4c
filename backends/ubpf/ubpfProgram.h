@@ -22,13 +22,16 @@ public:
     UbpfProgram(const CompilerOptions &options, const IR::P4Program* program,
                 P4::ReferenceMap* refMap, P4::TypeMap* typeMap, const IR::ToplevelBlock* toplevel) :
                 EBPF::EBPFProgram(options, program, refMap, typeMap, toplevel) {
-
+        packetStartVar = cstring("pkt");
+        offsetVar = cstring("packetOffsetInBits");
     }
-
     bool build() override;
     void emitC(EBPF::CodeBuilder* builder, cstring headerFile) override;
     void emitH(EBPF::CodeBuilder* builder, cstring headerFile) override;
+    void emitPreamble(EBPF::CodeBuilder* builder) override;
     void emitTypes(EBPF::CodeBuilder* builder) override;
+    void emitHeaderInstances(EBPF::CodeBuilder* builder) override;
+    void emitLocalVariables(EBPF::CodeBuilder* builder) override;
     void emitPipeline(EBPF::CodeBuilder* builder) override;
     void emitUbpfHelpers(EBPF::CodeBuilder* builder) const;
 };

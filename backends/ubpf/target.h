@@ -14,6 +14,7 @@ class UbpfTarget : public EBPF::KernelSamplesTarget {
                   cstring argName) const override;
     cstring dropReturnCode() const override { return "1"; }
     cstring abortReturnCode() const override { return "1"; }
+    cstring forwardReturnCode() const override { return "0"; }
 };
 
 }

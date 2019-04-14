@@ -8,7 +8,7 @@ namespace UBPF {
 
         EBPF::EBPFType* result = nullptr;
         if (type->is<IR::Type_Boolean>()) {
-            result = new EBPF::EBPFBoolType();
+            result = new UBPFBoolType();
         } else if (auto bt = type->to<IR::Type_Bits>()) {
             result = new UBPFScalarType(bt); // using UBPF Scalar Type
         } else if (auto st = type->to<IR::Type_StructLike>()) {

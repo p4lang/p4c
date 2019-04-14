@@ -18,7 +18,6 @@ namespace UBPF {
             void compileLookahead(const IR::Expression* destination);
 
         public:
-            static cstring currentHeader; // "pkt" is an initial state
             explicit UBPFStateTranslationVisitor(const UBPFParserState* state) :
                     CodeGenInspector(state->parser->program->refMap, state->parser->program->typeMap),
                     hasDefault(false), p4lib(P4::P4CoreLibrary::instance), state(state) {}
@@ -32,8 +31,6 @@ namespace UBPF {
             bool preorder(const IR::AssignmentStatement* stat) override;
         };
     }
-
-    cstring UBPFStateTranslationVisitor::currentHeader = "pkt";
 
     bool UBPFStateTranslationVisitor::preorder(const IR::ParserState* parserState) {
         std::cout << "Visitor: ParserState." << std::endl;
@@ -128,22 +125,104 @@ namespace UBPF {
         return false;
     }
 
-    void cstringToLower(const cstring value, char* result) {
-        strcpy(result, value);
-        for(int i = 0; result[i]; i++){
-            result[i] = tolower(result[i]);
-        }
-        std::cout << result << std::endl;
-    }
-
-//    void
-//    UBPFStateTranslationVisitor::compileExtractField(
-//            const IR::Expression* expr, cstring field, unsigned alignment, EBPFType* type) {
-//        unsigned widthToExtract = dynamic_cast<IHasWidth*>(type)->widthInBits();
-//        auto program = state->parser->program;
-//
-//
+//    void cstringToLower(const cstring value, char* result) {
+//        strcpy(result, value);
+//        for(int i = 0; result[i]; i++){
+//            result[i] = tolower(result[i]);
+//        }
+//        std::cout << result << std::endl;
 //    }
+
+    void
+    UBPFStateTranslationVisitor::compileExtractField(
+            const IR::Expression* expr, cstring field, unsigned alignment, EBPF::EBPFType* type) {
+        unsigned widthToExtract = dynamic_cast<EBPF::IHasWidth*>(type)->widthInBits();
+        auto program = state->parser->program;
+
+        if (widthToExtract <= 64) {
+            unsigned lastBitIndex = widthToExtract + alignment - 1;
+            unsigned lastWordIndex = lastBitIndex / 8;
+            unsigned wordsToRead = lastWordIndex + 1;
+            unsigned loadSize;
+
+            const char* helper = nullptr;
+            if (wordsToRead <= 1) {
+                helper = "load_byte";
+                loadSize = 8;
+            } else if (widthToExtract <= 16)  {
+                helper = "load_half";
+                loadSize = 16;
+            } else if (widthToExtract <= 32) {
+                helper = "load_word";
+                loadSize = 32;
+            } else {
+                if (widthToExtract > 64) BUG("Unexpected width %d", widthToExtract);
+                helper = "load_dword";
+                loadSize = 64;
+            }
+
+            unsigned shift = loadSize - alignment - widthToExtract;
+            builder->emitIndent();
+            visit(expr);
+            builder->appendFormat(".%s = (", field.c_str());
+            type->emit(builder);
+            builder->appendFormat(")((%s(%s, BYTES(%s))",
+                                  helper,
+                                  program->packetStartVar.c_str(),
+                                  program->offsetVar.c_str());
+            if (shift != 0)
+                builder->appendFormat(" >> %d", shift);
+            builder->append(")");
+
+            if (widthToExtract != loadSize) {
+                builder->append(" & BPF_MASK(");
+                type->emit(builder);
+                builder->appendFormat(", %d)", widthToExtract);
+            }
+
+            builder->append(")");
+            builder->endOfStatement(true);
+        } else {
+            // wide values; read all bytes one by one.
+            unsigned shift;
+            if (alignment == 0)
+                shift = 0;
+            else
+                shift = 8 - alignment;
+
+            const char* helper;
+            if (shift == 0)
+                helper = "load_byte";
+            else
+                helper = "load_half";
+            auto bt = UBPFTypeFactory::instance->create(IR::Type_Bits::get(8));
+            unsigned bytes = ROUNDUP(widthToExtract, 8);
+            for (unsigned i=0; i < bytes; i++) {
+                builder->emitIndent();
+                visit(expr);
+                builder->appendFormat(".%s[%d] = (", field.c_str(), i);
+                bt->emit(builder);
+                builder->appendFormat(")((%s(%s, BYTES(%s) + %d) >> %d)",
+                                      helper,
+                                      program->packetStartVar.c_str(),
+                                      program->offsetVar.c_str(), i, shift);
+
+                if ((i == bytes - 1) && (widthToExtract % 8 != 0)) {
+                    builder->append(" & BPF_MASK(");
+                    bt->emit(builder);
+                    builder->appendFormat(", %d)", widthToExtract % 8);
+                }
+
+                builder->append(")");
+                builder->endOfStatement(true);
+            }
+        }
+
+        builder->emitIndent();
+        builder->appendFormat("%s += %d", program->offsetVar.c_str(), widthToExtract);
+        builder->endOfStatement(true);
+        builder->newline();
+    }
 
     void
     UBPFStateTranslationVisitor::compileExtract(const IR::Expression* destination) {
@@ -160,32 +239,21 @@ namespace UBPF {
         auto program = state->parser->program;
         builder->emitIndent();
         // TODO: Check if packet is not too short
-        char headerName[strlen(ht->name.name)];
-        cstringToLower(ht->name.name, headerName);
-        if (currentHeader == "pkt")
-            builder->appendFormat("struct %s *%s = (void *)%s",  ht->name.name, headerName, currentHeader);
-        else
-            builder->appendFormat("struct %s *%s = (void *)(%s + 1)",  ht->name.name, headerName, currentHeader);
-
-        UBPFStateTranslationVisitor::currentHeader = headerName;
-        std::cout << UBPFStateTranslationVisitor::currentHeader << std::endl;
-
-        builder->endOfStatement(true);
         builder->newline();
 
-//        unsigned alignment = 0;
-//        for (auto f : ht->fields) {
-//            auto ftype = state->parser->typeMap->getType(f);
-//            auto etype = UBPFTypeFactory::instance->create(ftype);
-//            auto et = dynamic_cast<IHasWidth*>(etype);
-//            if (et == nullptr) {
-//                ::error("Only headers with fixed widths supported %1%", f);
-//                return;
-//            }
-//            compileExtractField(destination, f->name, alignment, etype);
-//            alignment += et->widthInBits();
-//            alignment %= 8;
-//        }
+        unsigned alignment = 0;
+        for (auto f : ht->fields) {
+            auto ftype = state->parser->typeMap->getType(f);
+            auto etype = UBPFTypeFactory::instance->create(ftype);
+            auto et = dynamic_cast<EBPF::IHasWidth*>(etype);
+            if (et == nullptr) {
+                ::error("Only headers with fixed widths supported %1%", f);
+                return;
+            }
+            compileExtractField(destination, f->name, alignment, etype);
+            alignment += et->widthInBits();
+            alignment %= 8;
+        }
 
         if (ht->is<IR::Type_Header>()) {
             builder->emitIndent();

@@ -19,6 +19,13 @@ public:
     EBPF::EBPFType* create(const IR::Type* type) override;
 };
 
+class UBPFBoolType : public EBPF::EBPFBoolType {
+public:
+    UBPFBoolType() : EBPF::EBPFBoolType() {}
+    void emit(EBPF::CodeBuilder* builder) override
+    { builder->append("uint8_t"); }
+};
+
 class UBPFScalarType : public EBPF::EBPFScalarType {
 public:
     UBPFScalarType(const IR::Type_Bits* bits) : EBPF::EBPFScalarType(bits) {}
