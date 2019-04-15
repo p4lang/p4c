@@ -63,11 +63,6 @@ add_custom_command(OUTPUT ${P4RUNTIME_GEN_SRCS} ${P4RUNTIME_GEN_HDRS}
   COMMENT "Generating protobuf files"
   )
 
-# Used to parse control plane annotations
-set (CONTROLPLANE_FE_DEPS
-	${P4C_BINARY_DIR}/frontends/parsers/p4/p4parser.hpp)
-set_source_files_properties (${CONTROLPLANE_FE_DEPS} PROPERTIES GENERATED TRUE)
-
 # These macros are much nicer than the custom command, but do not work for generating
 # files in a different directory (e.g. p4/config). If we are ok with just generating
 # the output in ${CMAKE_CURRENT_BINARY_DIR}, then these are fine. Also, for python there
@@ -85,7 +80,6 @@ set (CONTROLPLANE_SRCS
 set (CONTROLPLANE_SOURCES
   ${P4RUNTIME_GEN_SRCS}
   ${CONTROLPLANE_SRCS}
-  ${CONTROLPLANE_FE_DEPS}
   )
 
 set (CONTROLPLANE_HDRS
