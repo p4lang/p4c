@@ -54,13 +54,6 @@ control cIngress(inout headers_t hdr,
                  in    psa_ingress_input_metadata_t  istd,
                  inout psa_ingress_output_metadata_t ostd)
 {   
-    action do_recirc() {
-      hdr.ethernet.dstAddr = hdr.ethernet.dstAddr + hdr.ethernet.srcAddr;
-    }
-    table t {
-      actions = { do_recirc; }
-      default_action = do_recirc;
-    }
     apply {
         if (hdr.ethernet.dstAddr[3:0] >= 4) {
           send_to_port(ostd,
@@ -69,7 +62,6 @@ control cIngress(inout headers_t hdr,
         else{
           send_to_port(ostd, PSA_PORT_RECIRCULATE);
         }
-        t.apply();
     }
 }
 
@@ -82,6 +74,7 @@ parser EgressParserImpl(packet_in buffer,
                         in empty_metadata_t clone_e2e_meta)
 {
     state start {
+      buffer.extract(hdr.ethernet);
         transition accept;
     }
 }
@@ -91,7 +84,16 @@ control cEgress(inout headers_t hdr,
                 in    psa_egress_input_metadata_t  istd,
                 inout psa_egress_output_metadata_t ostd)
 {
-    apply { }
+    action add() {
+      hdr.ethernet.dstAddr = hdr.ethernet.dstAddr + hdr.ethernet.srcAddr;
+    }
+    table e {
+      actions = { add; }
+      default_action = add;
+    }
+    apply { 
+      e.apply();
+    }
 }
 
 control CommonDeparserImpl(packet_out packet,
@@ -126,6 +128,7 @@ control EgressDeparserImpl(packet_out buffer,
 {
     CommonDeparserImpl() cp;
     apply {
+      cp.apply(buffer, hdr);
     }
 }
 
