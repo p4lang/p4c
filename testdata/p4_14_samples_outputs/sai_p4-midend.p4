@@ -51,7 +51,6 @@ struct ingress_metadata_t {
 struct ingress_intrinsic_metadata_t {
     bit<9>  ingress_port;
     bit<32> lf_field_list;
-    bit<9>  ucast_egress_port;
 }
 
 header ethernet_t {
@@ -126,7 +125,6 @@ struct metadata {
     bit<1>  _ingress_metadata_router_mac40;
     bit<9>  _intrinsic_metadata_ingress_port41;
     bit<32> _intrinsic_metadata_lf_field_list42;
-    bit<9>  _intrinsic_metadata_ucast_egress_port43;
 }
 
 struct headers {
@@ -198,7 +196,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".port_counters") direct_counter(CounterType.packets) port_counters_0;
     @name(".fdb_set") action fdb_set(bit<1> type_, bit<9> port_id) {
         meta._ingress_metadata_mac_type21 = type_;
-        meta._intrinsic_metadata_ucast_egress_port43 = port_id;
         standard_metadata.egress_spec = port_id;
         meta._ingress_metadata_routed5 = 1w0;
     }
@@ -210,7 +207,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".set_dmac") action set_dmac(bit<48> dst_mac_address, bit<9> port_id) {
         hdr.eth.dstAddr = dst_mac_address;
         hdr.eth.srcAddr = meta._ingress_metadata_def_smac18;
-        meta._intrinsic_metadata_ucast_egress_port43 = port_id;
         standard_metadata.egress_spec = port_id;
     }
     @name(".set_next_hop") action set_next_hop(bit<8> type_, bit<8> ip, bit<16> router_interface_id) {
@@ -235,7 +231,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".set_router_interface") action set_router_interface(bit<16> virtual_router_id, bit<1> type_, bit<9> port_id, bit<12> vlan_id, bit<48> src_mac_address, bit<1> admin_v4_state, bit<1> admin_v6_state, bit<14> mtu) {
         meta._ingress_metadata_vrf6 = virtual_router_id;
         meta._ingress_metadata_interface_type34 = type_;
-        meta._intrinsic_metadata_ucast_egress_port43 = port_id;
+        standard_metadata.egress_spec = port_id;
         meta._ingress_metadata_vlan_id37 = vlan_id;
         meta._ingress_metadata_def_smac18 = src_mac_address;
         meta._ingress_metadata_v4_enable35 = admin_v4_state;

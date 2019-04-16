@@ -206,7 +206,6 @@ header_type ingress_intrinsic_metadata_t {
     fields {
         ingress_port : 9;               // ingress physical port id.
         lf_field_list : 32;             // hack for learn filter.
-        ucast_egress_port : 9;          // outgoing port
     }
 }
 metadata ingress_intrinsic_metadata_t intrinsic_metadata;
@@ -382,7 +381,6 @@ table learn_notify {
 
 action fdb_set(type_, port_id) {
     modify_field(ingress_metadata.mac_type, type_);
-    modify_field(intrinsic_metadata.ucast_egress_port, port_id);
     modify_field(standard_metadata.egress_spec, port_id);
     modify_field(ingress_metadata.routed, 0);
 }
@@ -556,7 +554,7 @@ table cos_map {
 action set_router_interface(virtual_router_id, type_, port_id, vlan_id, src_mac_address, admin_v4_state, admin_v6_state, mtu) {
     modify_field(ingress_metadata.vrf, virtual_router_id);
     modify_field(ingress_metadata.interface_type, type_);
-    modify_field(intrinsic_metadata.ucast_egress_port, port_id);
+    modify_field(standard_metadata.egress_spec, port_id);
     modify_field(ingress_metadata.vlan_id, vlan_id);
     modify_field(ingress_metadata.def_smac, src_mac_address);
     modify_field(ingress_metadata.v4_enable, admin_v4_state);
@@ -598,7 +596,6 @@ table virtual_router {
 action set_dmac(dst_mac_address, port_id) {
     modify_field(eth.dstAddr, dst_mac_address);
     modify_field(eth.srcAddr, ingress_metadata.def_smac);
-    modify_field(intrinsic_metadata.ucast_egress_port, port_id);
     modify_field(standard_metadata.egress_spec, port_id);
 }
 
