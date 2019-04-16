@@ -188,6 +188,8 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/psa-unicast-or-drop-bmv2.p4
   testdata/p4_16_samples/psa-ingress-input-meta-bmv2.p4
   testdata/p4_16_samples/psa-multicast-basic-bmv2.p4
+  # This test requires bmv2's psa_switch to support recirculating packets
+  testdata/p4_16_samples/psa-recirculate-no-meta-bmv2.p4
 )
 
 if (HAVE_SIMPLE_SWITCH)
