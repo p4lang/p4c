@@ -22,7 +22,7 @@ header_type meta_t {
 // declare the special timestamp metadata
 header_type intrinsic_metadata_t {
     fields {
-        ingress_global_tstamp : 48;
+        ingress_global_timestamp : 48;
     }
 }
 

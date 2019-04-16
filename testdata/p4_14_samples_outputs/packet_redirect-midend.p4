@@ -4,7 +4,6 @@
 struct intrinsic_metadata_t {
     bit<4>  mcast_grp;
     bit<4>  egress_rid;
-    bit<16> mcast_hash;
     bit<32> lf_field_list;
     bit<64> ingress_global_timestamp;
     bit<16> resubmit_flag;
@@ -29,15 +28,14 @@ header hdrA_t {
 struct metadata {
     bit<4>  _intrinsic_metadata_mcast_grp0;
     bit<4>  _intrinsic_metadata_egress_rid1;
-    bit<16> _intrinsic_metadata_mcast_hash2;
-    bit<32> _intrinsic_metadata_lf_field_list3;
-    bit<64> _intrinsic_metadata_ingress_global_timestamp4;
-    bit<16> _intrinsic_metadata_resubmit_flag5;
-    bit<16> _intrinsic_metadata_recirculate_flag6;
-    bit<8>  _metaA_f17;
-    bit<8>  _metaA_f28;
-    bit<8>  _metaB_f19;
-    bit<8>  _metaB_f210;
+    bit<32> _intrinsic_metadata_lf_field_list2;
+    bit<64> _intrinsic_metadata_ingress_global_timestamp3;
+    bit<16> _intrinsic_metadata_resubmit_flag4;
+    bit<16> _intrinsic_metadata_recirculate_flag5;
+    bit<8>  _metaA_f16;
+    bit<8>  _metaA_f27;
+    bit<8>  _metaB_f18;
+    bit<8>  _metaB_f29;
 }
 
 struct headers {
@@ -63,10 +61,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("._nop") action _nop() {
     }
     @name("._recirculate") action _recirculate() {
-        recirculate<tuple_0>({ standard_metadata, {meta._metaA_f17,meta._metaA_f28} });
+        recirculate<tuple_0>({ standard_metadata, {meta._metaA_f16,meta._metaA_f27} });
     }
     @name("._clone_e2e") action _clone_e2e(bit<32> mirror_id) {
-        clone3<tuple_0>(CloneType.E2E, mirror_id, { standard_metadata, {meta._metaA_f17,meta._metaA_f28} });
+        clone3<tuple_0>(CloneType.E2E, mirror_id, { standard_metadata, {meta._metaA_f16,meta._metaA_f27} });
     }
     @name(".t_egress") table t_egress_0 {
         actions = {
@@ -98,16 +96,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("._set_port") action _set_port(bit<9> port) {
         standard_metadata.egress_spec = port;
-        meta._metaA_f17 = 8w1;
+        meta._metaA_f16 = 8w1;
     }
     @name("._multicast") action _multicast(bit<4> mgrp) {
         meta._intrinsic_metadata_mcast_grp0 = mgrp;
     }
     @name("._resubmit") action _resubmit() {
-        resubmit<tuple_0>({ standard_metadata, {meta._metaA_f17,meta._metaA_f28} });
+        resubmit<tuple_0>({ standard_metadata, {meta._metaA_f16,meta._metaA_f27} });
     }
     @name("._clone_i2e") action _clone_i2e(bit<32> mirror_id) {
-        clone3<tuple_0>(CloneType.I2E, mirror_id, { standard_metadata, {meta._metaA_f17,meta._metaA_f28} });
+        clone3<tuple_0>(CloneType.I2E, mirror_id, { standard_metadata, {meta._metaA_f16,meta._metaA_f27} });
     }
     @name(".t_ingress_1") table t_ingress {
         actions = {
@@ -118,7 +116,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         key = {
             hdr.hdrA.f1    : exact @name("hdrA.f1") ;
-            meta._metaA_f17: exact @name("metaA.f1") ;
+            meta._metaA_f16: exact @name("metaA.f1") ;
         }
         size = 128;
         default_action = NoAction_1();

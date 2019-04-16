@@ -242,7 +242,10 @@ control egress {
     } else {
 #endif /* OPENFLOW_ENABLE */
         /* check for -ve mirrored pkt */
-        if ((intrinsic_metadata.deflection_flag == FALSE) and
+        if (
+#ifdef INCLUDE_OLD_INTRINSIC_METADATA_FIELDS
+            (intrinsic_metadata.deflection_flag == FALSE) and
+#endif // INCLUDE_OLD_INTRINSIC_METADATA_FIELDS
             (egress_metadata.bypass == FALSE)) {
 
             /* check if pkt is mirrored */

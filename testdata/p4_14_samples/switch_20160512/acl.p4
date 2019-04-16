@@ -586,7 +586,9 @@ action egress_copy_to_cpu(reason_code) {
 table egress_acl {
     reads {
         standard_metadata.egress_port : ternary;
+#ifdef INCLUDE_OLD_INTRINSIC_METADATA_FIELDS
         intrinsic_metadata.deflection_flag : ternary;
+#endif // INCLUDE_OLD_INTRINSIC_METADATA_FIELDS
         l3_metadata.l3_mtu_check : ternary;
     }
     actions {
