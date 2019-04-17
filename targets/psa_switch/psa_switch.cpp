@@ -155,14 +155,12 @@ PsaSwitch::receive_(port_t port_num, const char *buffer, int len) {
   phv->get_field("psa_ingress_parser_input_metadata.packet_path").set(PKT_INSTANCE_TYPE_NORMAL);
   // using packet register 0 to store length, this register will be updated for
   // each add_header / remove_header primitive call
-   packet->set_register(PACKET_LENGTH_REG_IDX, len);
+  packet->set_register(PACKET_LENGTH_REG_IDX, len);
    // TODO
 //   phv->get_field("standard_metadata.packet_length").set(len);
 
-  if (phv->has_field("intrinsic_metadata.ingress_global_timestamp")) {
-    phv->get_field("intrinsic_metadata.ingress_global_timestamp")
-        .set(get_ts().count());
-  }
+  phv->get_field("psa_ingress_input_metadata.ingress_timestamp")
+    .set(get_ts().count());
 
   input_buffer.push_front(std::move(packet));
   return 0;
@@ -378,6 +376,7 @@ PsaSwitch::ingress_thread() {
 
 void
 PsaSwitch::egress_thread(size_t worker_id) {
+  PHV *phv;
 
   while (1) {
     std::unique_ptr<Packet> packet;
@@ -396,6 +395,28 @@ PsaSwitch::egress_thread(size_t worker_id) {
     Pipeline *egress_mau = this->get_pipeline("egress");
     egress_mau->apply(packet.get());
     deparser->deparse(packet.get());
+    
+    if (port == PSA_PORT_RECIRCULATE) {
+      BMLOG_DEBUG_PKT(*packet, "Recirculating packet");
+      phv = packet->get_phv();
+
+      phv->reset();
+      phv->reset_header_stacks();
+      phv->reset_metadata();
+     
+      phv->get_field("psa_ingress_parser_input_metadata.ingress_port")
+        .set(PSA_PORT_RECIRCULATE);
+      phv->get_field("psa_ingress_parser_input_metadata.packet_path")
+        .set(PKT_INSTANCE_TYPE_RECIRC);
+      phv->get_field("psa_ingress_input_metadata.ingress_port")
+        .set(PSA_PORT_RECIRCULATE);
+      phv->get_field("psa_ingress_input_metadata.packet_path")
+        .set(PKT_INSTANCE_TYPE_RECIRC);
+      phv->get_field("psa_ingress_input_metadata.ingress_timestamp")
+        .set(get_ts().count());
+      input_buffer.push_front(std::move(packet));
+      continue;
+    }
     output_buffer.push_front(std::move(packet));
   }
 }

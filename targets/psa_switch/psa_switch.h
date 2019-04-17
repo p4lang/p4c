@@ -121,6 +121,7 @@ class PsaSwitch : public Switch {
 
  private:
   static constexpr size_t nb_egress_threads = 4u;
+  static constexpr port_t PSA_PORT_RECIRCULATE = 0xfffffffa;
   static packet_id_t packet_id;
 
   enum PktInstanceType {
