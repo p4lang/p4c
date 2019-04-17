@@ -263,7 +263,12 @@ void addAnnotations(Message* message, const IR::IAnnotated* annotated, UnaryPred
 
         if (p(annotation->name)) continue;
 
+        LOG1("Adding annotation: " << annotation);
         message->add_annotations(serializeOneAnnotation(annotation));
+    }
+    if (auto *ke = annotated->to<IR::KeyElement>()) {
+        LOG1("Add expr: " << ke->expression);
+        message->add_annotations(ke->expression->toString());
     }
 }
 
