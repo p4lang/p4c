@@ -18,5 +18,7 @@ control filter<H>(inout H headers, out bool accept);
 package Filter<H>(parse<H> prs,
                       filter<H> filt);
 
+extern void mark_to_drop();
+
 #endif
 

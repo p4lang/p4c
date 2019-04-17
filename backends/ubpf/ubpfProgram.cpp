@@ -1,12 +1,13 @@
-#include "backends/ebpf/ebpfType.h"
-#include "backends/ebpf/ebpfControl.h"
+//#include "backends/ebpf/ebpfType.h"
+//#include "backends/ebpf/ebpfControl.h"
+#include "ubpfControl.h"
 #include "ubpfParser.h"
 #include "ubpfProgram.h"
 #include "ubpfType.h"
 
 namespace UBPF {
 
-    bool UbpfProgram::build() {
+    bool UBPFProgram::build() {
         bool success = true;
         auto pack = toplevel->getMain();
         if (pack->type->name != "Filter")
@@ -26,18 +27,23 @@ namespace UBPF {
         if (!success)
             return success;
 
+        printf("Parser przeszedł");
+
         auto cb = pack->getParameterValue(model.filter.filter.name)
                 ->to<IR::ControlBlock>();
         BUG_CHECK(cb != nullptr, "No control block found");
-        control = new EBPF::EBPFControl(this, cb, parser->headers);
+        control = new UBPFControl(this, cb, parser->headers);
         success = control->build();
+
+        printf("Control przeszedł");
+
         if (!success)
             return success;
 
         return success;
     }
 
-    void UbpfProgram::emitC(EBPF::CodeBuilder *builder, cstring headerFile) {
+    void UBPFProgram::emitC(EBPF::CodeBuilder *builder, cstring headerFile) {
         emitGeneratedComment(builder);
 
         builder->appendFormat("#include \"%s\"", headerFile);
@@ -67,11 +73,25 @@ namespace UBPF {
         emitPipeline(builder);
 
         builder->emitIndent();
+        builder->appendFormat("if (%s)\n", control->accept->name.name.c_str());
+        builder->increaseIndent();
+        builder->emitIndent();
         builder->appendFormat("return %s;\n", builder->target->forwardReturnCode().c_str());
-        builder->blockEnd(true);
+        builder->decreaseIndent();
+        builder->emitIndent();
+        builder->appendLine("else");
+        builder->increaseIndent();
+        builder->emitIndent();
+        builder->appendFormat("return %s;\n", builder->target->dropReturnCode().c_str());
+        builder->decreaseIndent();
+        builder->blockEnd(true);  // end of function
+//
+//        builder->emitIndent();
+//        builder->appendFormat("return %s;\n", builder->target->forwardReturnCode().c_str());
+//        builder->blockEnd(true);
     }
 
-    void UbpfProgram::emitUbpfHelpers(EBPF::CodeBuilder *builder) const {
+    void UBPFProgram::emitUbpfHelpers(EBPF::CodeBuilder *builder) const {
         builder->append(
                 "static void *(*ubpf_map_lookup)(const void *, const void *) = (void *)1;\n"
                 "static int (*ubpf_map_update)(void *, const void *, void *) = (void *)2;\n"
@@ -83,7 +103,7 @@ namespace UBPF {
                 "\n");
     }
 
-    void UbpfProgram::emitH(EBPF::CodeBuilder *builder, cstring headerFile) {
+    void UBPFProgram::emitH(EBPF::CodeBuilder *builder, cstring headerFile) {
         emitGeneratedComment(builder);
         builder->appendLine("#ifndef _P4_GEN_HEADER_");
         builder->appendLine("#define _P4_GEN_HEADER_");
@@ -94,14 +114,14 @@ namespace UBPF {
         builder->appendLine("#endif");
     }
 
-    void UbpfProgram::emitPreamble(EBPF::CodeBuilder* builder) {
+    void UBPFProgram::emitPreamble(EBPF::CodeBuilder* builder) {
         builder->emitIndent();
         builder->appendLine("#define BPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)");
         builder->appendLine("#define BYTES(w) ((w) / 8)");
         builder->newline();
     }
 
-    void UbpfProgram::emitTypes(EBPF::CodeBuilder *builder) {
+    void UBPFProgram::emitTypes(EBPF::CodeBuilder *builder) {
         std::cout << "Emitting Types." << std::endl;
         for (auto d : program->objects) {
             if (d->is<IR::Type>() && !d->is<IR::IContainer>() &&
@@ -119,19 +139,38 @@ namespace UBPF {
         }
     }
 
-    void UbpfProgram::emitHeaderInstances(EBPF::CodeBuilder* builder) {
+    void UBPFProgram::emitHeaderInstances(EBPF::CodeBuilder* builder) {
         builder->emitIndent();
         parser->headerType->declare(builder, parser->headers->name.name, false);
     }
 
-    void UbpfProgram::emitLocalVariables(EBPF::CodeBuilder* builder) {
+    void UBPFProgram::emitLocalVariables(EBPF::CodeBuilder* builder) {
         builder->emitIndent();
         builder->appendFormat("int %s = 0;", offsetVar.c_str());
         builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat("u8 %s = 0;", control->accept->name.name.c_str());
+        builder->newline();
+
+//        builder->emitIndent();
+//        builder->appendFormat("u8 pass = 0;", offsetVar.c_str());
+//        builder->newline();
     }
 
-    void UbpfProgram::emitPipeline(EBPF::CodeBuilder *builder) {
-
+    void UBPFProgram::emitPipeline(EBPF::CodeBuilder *builder) {
+        printf("Wszedłem do pipeline");
+        builder->emitIndent();
+        builder->append(IR::ParserState::accept);
+        builder->append(":");
+        builder->newline();
+        printf("Blok powinien się otworzyć");
+        builder->emitIndent();
+        builder->blockStart();
+        printf("Przed emit");
+        control->emit(builder);
+        printf("Po emit");
+        builder->blockEnd(true);
     }
 
 }

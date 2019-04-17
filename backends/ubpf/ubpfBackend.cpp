@@ -30,7 +30,7 @@ namespace UBPF {
         }
 
         UBPFTypeFactory::createFactory(typeMap);
-        auto prog = new UbpfProgram(options, toplevel->getProgram(), refMap, typeMap, toplevel);
+        auto prog = new UBPFProgram(options, toplevel->getProgram(), refMap, typeMap, toplevel);
 
         if(!prog->build())
             return;
