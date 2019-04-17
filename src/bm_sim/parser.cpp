@@ -259,8 +259,11 @@ void extract_VL(Header *hdr,
 
   VL_expr.eval(*phv, &computed_nbits);
   auto nbits = computed_nbits.get<int>();
-  // TODO(antonin): temporary limitation?
-  _BM_ASSERT(nbits % 8 == 0 && "VL field bitwidth needs to be a multiple of 8");
+  if ((nbits % 8) != 0) {
+      BMLOG_ERROR_PKT(*pkt, "VL field bitwidth {} needs to be a multiple of 8",
+                      nbits);
+      throw parser_exception_core(ErrorCodeMap::Core::ParserInvalidArgument);
+  }
   // get_nbytes_packet counts the VL field in the header as 0 bits
   auto bytes_to_extract = static_cast<size_t>(
       hdr->get_nbytes_packet() + nbits / 8);
@@ -465,9 +468,11 @@ ParserOpAdvance<Data>::operator()(Packet *pkt, const char *data,
   // The JSON should never specify a negative constant as the shift amount.
   assert(shift_bits.sign() >= 0);
   const auto shift_bits_uint = shift_bits.get<size_t>();
-  // TODO(antonin): temporary limitation?
-  _BM_ASSERT(shift_bits_uint % 8 == 0 &&
-             "advance bits amount must be a multiple of 8");
+  if ((shift_bits_uint % 8) != 0) {
+      BMLOG_ERROR_PKT(*pkt, "advance bits amount {} must be a multiple of 8",
+                      shift_bits_uint);
+      throw parser_exception_core(ErrorCodeMap::Core::ParserInvalidArgument);
+  }
   const auto shift_bytes_uint = shift_bits_uint / 8;
   BMLOG_DEBUG_PKT(*pkt, "Advancing by {} bytes", shift_bytes_uint);
   if (pkt->get_ingress_length() - *bytes_parsed < shift_bytes_uint)
@@ -487,9 +492,11 @@ ParserOpAdvance<ArithExpression>::operator()(Packet *pkt, const char *data,
   // evaluate to a negative value, because the shift amount is of type bit<32>.
   assert(shift_bits_data.sign() >= 0);
   const auto shift_bits_uint = shift_bits_data.get<size_t>();
-  // TODO(antonin): temporary limitation?
-  _BM_ASSERT(shift_bits_uint % 8 == 0 &&
-             "advance bits amount must be a multiple of 8");
+  if ((shift_bits_uint % 8) != 0) {
+      BMLOG_ERROR_PKT(*pkt, "advance bits amount {} must be a multiple of 8",
+                      shift_bits_uint);
+      throw parser_exception_core(ErrorCodeMap::Core::ParserInvalidArgument);
+  }
   const auto shift_bytes_uint = shift_bits_uint / 8;
   BMLOG_DEBUG_PKT(*pkt, "Advancing by {} bytes", shift_bytes_uint);
   if (pkt->get_ingress_length() - *bytes_parsed < shift_bytes_uint)
@@ -508,9 +515,11 @@ ParserOpAdvance<field_t>::operator()(Packet *pkt, const char *data,
   // evaluate to a negative value, because the shift amount is of type bit<32>.
   assert(f_shift.sign() >= 0);
   const auto shift_bits_uint = f_shift.get<size_t>();
-  // TODO(antonin): temporary limitation?
-  _BM_ASSERT(shift_bits_uint % 8 == 0 &&
-             "advance bits amount must be a multiple of 8");
+  if ((shift_bits_uint % 8) != 0) {
+      BMLOG_ERROR_PKT(*pkt, "advance bits amount {} must be a multiple of 8",
+                      shift_bits_uint);
+      throw parser_exception_core(ErrorCodeMap::Core::ParserInvalidArgument);
+  }
   const auto shift_bytes_uint = shift_bits_uint / 8;
   BMLOG_DEBUG_PKT(*pkt, "Advancing by {} bytes", shift_bytes_uint);
   if (pkt->get_ingress_length() - *bytes_parsed < shift_bytes_uint)
