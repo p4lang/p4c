@@ -2734,7 +2734,7 @@ control process_vlan_xlate(inout headers hdr, inout metadata meta, inout standar
 
 control process_egress_filter(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".set_egress_filter_drop") action set_egress_filter_drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".set_egress_ifindex") action set_egress_ifindex(bit<16> egress_ifindex) {
         meta.egress_filter_metadata.ifindex = meta.ingress_metadata.ifindex ^ egress_ifindex;
@@ -2775,7 +2775,7 @@ control process_egress_acl(inout headers hdr, inout metadata meta, inout standar
     }
     @name(".egress_mirror_drop") action egress_mirror_drop(bit<32> session_id) {
         egress_mirror(session_id);
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".egress_copy_to_cpu") action egress_copy_to_cpu(bit<16> reason_code) {
         meta.fabric_metadata.reason_code = reason_code;
@@ -2783,7 +2783,7 @@ control process_egress_acl(inout headers hdr, inout metadata meta, inout standar
     }
     @name(".egress_redirect_to_cpu") action egress_redirect_to_cpu(bit<16> reason_code) {
         egress_copy_to_cpu(reason_code);
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".egress_acl") table egress_acl {
         actions = {
@@ -3707,7 +3707,7 @@ control process_mac(inout headers hdr, inout metadata meta, inout standard_metad
         meta.l2_metadata.l2_nexthop_type = 1w1;
     }
     @name(".dmac_drop") action dmac_drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".smac_miss") action smac_miss() {
         meta.l2_metadata.l2_src_miss = 1w1;
@@ -4763,19 +4763,19 @@ control process_system_acl(inout headers hdr, inout metadata meta, inout standar
     }
     @name(".redirect_to_cpu") action redirect_to_cpu(bit<16> reason_code) {
         copy_to_cpu(reason_code);
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
         meta.fabric_metadata.dst_device = 8w0;
     }
     @name(".drop_packet") action drop_packet() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".drop_packet_with_reason") action drop_packet_with_reason(bit<32> drop_reason) {
         drop_stats.count(drop_reason);
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".negative_mirror") action negative_mirror(bit<32> session_id) {
         clone3<tuple<bit<16>, bit<8>>>(CloneType.I2E, session_id, { meta.ingress_metadata.ifindex, meta.ingress_metadata.drop_reason });
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".deflect_on_drop") action deflect_on_drop() {
     }

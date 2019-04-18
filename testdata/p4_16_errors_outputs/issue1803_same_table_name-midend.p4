@@ -20,7 +20,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name(".NoAction") action NoAction_3() {
     }
     @name("IngressI.c1.drop") action c1_drop_0() {
-        mark_to_drop();
+        mark_to_drop(smeta);
     }
     @name(".t0") table _t0 {
         key = {
@@ -33,7 +33,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         const default_action = NoAction_0();
     }
     @name("IngressI.c2.drop") action c2_drop_0() {
-        mark_to_drop();
+        mark_to_drop(smeta);
     }
     @name(".t0") table _t0_0 {
         key = {

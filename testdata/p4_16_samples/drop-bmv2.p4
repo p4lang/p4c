@@ -24,7 +24,7 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
     state start { transition accept; }
 }
 
-action drop(out standard_metadata_t smeta) { mark_to_drop(); } // this global action seems to cause the problem
+action drop(inout standard_metadata_t smeta) { mark_to_drop(smeta); } // this global action seems to cause the problem
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
 

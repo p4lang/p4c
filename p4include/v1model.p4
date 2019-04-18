@@ -134,7 +134,10 @@ enum HashAlgorithm {
     xor16
 }
 
+@deprecated("Please use mark_to_drop(standard_metadata) instead.")
 extern void mark_to_drop();
+extern void mark_to_drop(inout standard_metadata_t standard_metadata);
+
 extern void hash<O, T, D, M>(out O result, in HashAlgorithm algo, in T base, in D data, in M max);
 
 extern action_selector {

@@ -169,7 +169,7 @@ class ProgramStructure {
 
  public:
     // output is constructed here
-    IR::IndexedVector<IR::Node>* declarations;
+    IR::Vector<IR::Node>* declarations;
 
  protected:
     virtual const IR::Statement* convertPrimitive(const IR::Primitive* primitive);

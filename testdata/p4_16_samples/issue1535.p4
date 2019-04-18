@@ -58,8 +58,8 @@ struct headers {
 // You must use 'compound actions', i.e. ones explicitly defined with
 // the 'action' keyword like below.
 
-action my_drop() {
-    mark_to_drop();
+action my_drop(inout standard_metadata_t smeta) {
+    mark_to_drop(smeta);
 }
 
 parser ParserImpl(packet_in packet,

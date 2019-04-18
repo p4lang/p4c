@@ -23,7 +23,7 @@ parser parse(packet_in pk, out parsed_packet_t hdr, inout local_metadata_t local
 
 control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     @hidden action act() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @hidden table tbl_act {
         actions = {

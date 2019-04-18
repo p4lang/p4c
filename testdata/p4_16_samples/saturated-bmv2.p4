@@ -71,7 +71,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         h.h.res_16 = h.h.opr1_16 |-| h.h.opr2_16;
     }
 
-    action drop() { mark_to_drop(); }
+    action drop() { mark_to_drop(standard_meta); }
 
     USat_t ru;
     Sat_t r;

@@ -1120,26 +1120,6 @@ class DetectDuplicates: public Inspector {
     }
 };
 
-// The fields in standard_metadata in v1model.p4 should only be used if
-// the source program is written in P4-16. Therefore we remove those
-// fields from the translated P4-14 program.
-class RemoveAnnotatedFields : public Transform {
- public:
-    RemoveAnnotatedFields() { setName("RemoveAnnotatedFields"); }
-    const IR::Node* postorder(IR::Type_Struct* node) override {
-        if (node->name == "standard_metadata_t") {
-            auto fields = new IR::IndexedVector<IR::StructField>();
-            for (auto f : node->fields) {
-                if (!f->getAnnotation("alias")) {
-                    fields->push_back(f);
-                }
-            }
-            return new IR::Type_Struct(node->srcInfo, node->name, node->annotations, *fields);
-        }
-        return node;
-    }
-};
-
 // If a parser state has a pragma @packet_entry, it is treated as a new entry
 // point to the parser.
 class CheckIfMultiEntryPoint: public Inspector {
@@ -1166,7 +1146,7 @@ class CheckIfMultiEntryPoint: public Inspector {
 // does not use the @packet_entry pragma.
 class InsertCompilerGeneratedStartState: public Transform {
     ProgramStructure* structure;
-    IR::IndexedVector<IR::Node>        allTypeDecls;
+    IR::Vector<IR::Node>               allTypeDecls;
     IR::IndexedVector<IR::Declaration> varDecls;
     IR::Vector<IR::SelectCase>         selCases;
     cstring newStartState;
@@ -1284,7 +1264,6 @@ Converter::Converter() {
     passes.emplace_back(new ComputeTableCallGraph(structure));
     passes.emplace_back(new Rewriter(structure));
     passes.emplace_back(new FixExtracts(structure));
-    passes.emplace_back(new RemoveAnnotatedFields);
     passes.emplace_back(new FixMultiEntryPoint(structure));
 }
 

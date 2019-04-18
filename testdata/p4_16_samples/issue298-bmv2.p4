@@ -147,7 +147,7 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
 
     action _drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
 
     table drop_tbl {

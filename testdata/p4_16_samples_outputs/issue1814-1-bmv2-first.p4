@@ -17,7 +17,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     register<bit<1>>(32w1) testRegister;
     action drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     action forward() {
         standard_metadata.egress_spec = 9w1;

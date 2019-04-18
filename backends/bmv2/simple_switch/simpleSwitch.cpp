@@ -334,12 +334,14 @@ Util::IJson* ExternConverter_mark_to_drop::convertExternFunction(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
-    if (mc->arguments->size() != 0) {
-        modelError("Expected 0 arguments for %1%", mc);
+    if (mc->arguments->size() != 1) {
+        modelError("Expected 1 argument for %1%", mc);
         return nullptr;
     }
-    auto primitive = mkPrimitive("drop");
-    (void)mkParameters(primitive);
+    auto primitive = mkPrimitive("mark_to_drop");
+    auto params = mkParameters(primitive);
+    auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
+    params->append(dest);
     primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
     return primitive;
 }

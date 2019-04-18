@@ -144,7 +144,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.tcp.dstPort = meta._meta_tcp_dp7;
     }
     @name("._drop") action _drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".do_cpu_encap") action do_cpu_encap() {
         hdr.cpu_header.setValid();
@@ -197,16 +197,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ethernet.dstAddr = dmac;
     }
     @name("._drop") action _drop_2() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("._drop") action _drop_6() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("._drop") action _drop_7() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("._drop") action _drop_8() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".set_if_info") action set_if_info(bit<32> ipv4_addr, bit<48> mac_addr, bit<1> is_ext) {
         meta._meta_if_ipv4_addr9 = ipv4_addr;
@@ -223,7 +223,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".nat_miss_ext_to_int") action nat_miss_ext_to_int() {
         meta._meta_do_forward3 = 1w0;
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".nat_hit_int_to_ext") action nat_hit_int_to_ext(bit<32> srcAddr, bit<16> srcPort) {
         meta._meta_do_forward3 = 1w1;

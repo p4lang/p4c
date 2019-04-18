@@ -90,7 +90,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.ethernet.srcAddr = smac;
     }
     @name("egress._drop") action _drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("egress.send_frame") table send_frame_0 {
         actions = {
@@ -123,13 +123,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("ingress.flowlet_id") register<bit<16>>(32w8192) flowlet_id_0;
     @name("ingress.flowlet_lasttime") register<bit<32>>(32w8192) flowlet_lasttime_0;
     @name("ingress._drop") action _drop_2() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("ingress._drop") action _drop_5() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("ingress._drop") action _drop_6() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("ingress.set_ecmp_select") action set_ecmp_select(bit<8> ecmp_base, bit<8> ecmp_count) {
         hash<bit<14>, bit<10>, tuple<bit<32>, bit<32>, bit<8>, bit<16>, bit<16>, bit<16>>, bit<20>>(meta.ingress_metadata.ecmp_offset, HashAlgorithm.crc16, (bit<10>)ecmp_base, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort, meta.ingress_metadata.flowlet_id }, (bit<20>)ecmp_count);

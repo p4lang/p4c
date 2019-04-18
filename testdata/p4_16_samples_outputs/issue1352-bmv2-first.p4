@@ -70,7 +70,7 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     action set_dmac(macAddr_t dstAddr) {
         hdr.ethernet.dstAddr = dstAddr;
