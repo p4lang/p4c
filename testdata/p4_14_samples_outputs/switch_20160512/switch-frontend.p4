@@ -676,13 +676,9 @@ struct metadata {
     @name(".nexthop_metadata") 
     nexthop_metadata_t       nexthop_metadata;
     @name(".qos_metadata") 
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-    qos_metadata_t               qos_metadata;
-    @name(".queueing_metadata") 
-    queueing_metadata_t          queueing_metadata;
-=======
     qos_metadata_t           qos_metadata;
->>>>>>> Handle p4-14 intrinsic_metadata
+    @name(".queueing_metadata") 
+    queueing_metadata_t      queueing_metadata;
     @name(".security_metadata") 
     security_metadata_t      security_metadata;
     @name(".sflow_metadata") 
@@ -1970,32 +1966,18 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".int_set_header_0003_i1") action _int_set_header_0003_i1_0() {
         hdr.int_q_occupancy_header.setValid();
         hdr.int_q_occupancy_header.q_occupancy1 = 7w0;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
         hdr.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta.queueing_metadata.enq_qdepth;
     }
     @name(".int_set_header_0003_i2") action _int_set_header_0003_i2_0() {
         hdr.int_hop_latency_header.setValid();
         hdr.int_hop_latency_header.hop_latency = (bit<31>)meta.queueing_metadata.deq_timedelta;
-=======
-        hdr.int_q_occupancy_header.q_occupancy0 = (bit<24>)standard_metadata.enq_qdepth;
-    }
-    @name(".int_set_header_0003_i2") action _int_set_header_0003_i2_0() {
-        hdr.int_hop_latency_header.setValid();
-        hdr.int_hop_latency_header.hop_latency = (bit<31>)standard_metadata.deq_timedelta;
->>>>>>> Handle p4-14 intrinsic_metadata
     }
     @name(".int_set_header_0003_i3") action _int_set_header_0003_i3_0() {
         hdr.int_q_occupancy_header.setValid();
         hdr.int_q_occupancy_header.q_occupancy1 = 7w0;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
         hdr.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta.queueing_metadata.enq_qdepth;
         hdr.int_hop_latency_header.setValid();
         hdr.int_hop_latency_header.hop_latency = (bit<31>)meta.queueing_metadata.deq_timedelta;
-=======
-        hdr.int_q_occupancy_header.q_occupancy0 = (bit<24>)standard_metadata.enq_qdepth;
-        hdr.int_hop_latency_header.setValid();
-        hdr.int_hop_latency_header.hop_latency = (bit<31>)standard_metadata.deq_timedelta;
->>>>>>> Handle p4-14 intrinsic_metadata
     }
     @name(".int_set_header_0003_i4") action _int_set_header_0003_i4_0() {
         hdr.int_ingress_port_id_header.setValid();
@@ -2005,22 +1987,14 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".int_set_header_0003_i5") action _int_set_header_0003_i5_0() {
         hdr.int_q_occupancy_header.setValid();
         hdr.int_q_occupancy_header.q_occupancy1 = 7w0;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
         hdr.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta.queueing_metadata.enq_qdepth;
-=======
-        hdr.int_q_occupancy_header.q_occupancy0 = (bit<24>)standard_metadata.enq_qdepth;
->>>>>>> Handle p4-14 intrinsic_metadata
         hdr.int_ingress_port_id_header.setValid();
         hdr.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
         hdr.int_ingress_port_id_header.ingress_port_id_0 = meta.ingress_metadata.ifindex;
     }
     @name(".int_set_header_0003_i6") action _int_set_header_0003_i6_0() {
         hdr.int_hop_latency_header.setValid();
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
         hdr.int_hop_latency_header.hop_latency = (bit<31>)meta.queueing_metadata.deq_timedelta;
-=======
-        hdr.int_hop_latency_header.hop_latency = (bit<31>)standard_metadata.deq_timedelta;
->>>>>>> Handle p4-14 intrinsic_metadata
         hdr.int_ingress_port_id_header.setValid();
         hdr.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
         hdr.int_ingress_port_id_header.ingress_port_id_0 = meta.ingress_metadata.ifindex;
@@ -2028,15 +2002,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".int_set_header_0003_i7") action _int_set_header_0003_i7_0() {
         hdr.int_q_occupancy_header.setValid();
         hdr.int_q_occupancy_header.q_occupancy1 = 7w0;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
         hdr.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta.queueing_metadata.enq_qdepth;
         hdr.int_hop_latency_header.setValid();
         hdr.int_hop_latency_header.hop_latency = (bit<31>)meta.queueing_metadata.deq_timedelta;
-=======
-        hdr.int_q_occupancy_header.q_occupancy0 = (bit<24>)standard_metadata.enq_qdepth;
-        hdr.int_hop_latency_header.setValid();
-        hdr.int_hop_latency_header.hop_latency = (bit<31>)standard_metadata.deq_timedelta;
->>>>>>> Handle p4-14 intrinsic_metadata
         hdr.int_ingress_port_id_header.setValid();
         hdr.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
         hdr.int_ingress_port_id_header.ingress_port_id_0 = meta.ingress_metadata.ifindex;
@@ -2048,36 +2016,22 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".int_set_header_0003_i9") action _int_set_header_0003_i9_0() {
         hdr.int_q_occupancy_header.setValid();
         hdr.int_q_occupancy_header.q_occupancy1 = 7w0;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
         hdr.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta.queueing_metadata.enq_qdepth;
-=======
-        hdr.int_q_occupancy_header.q_occupancy0 = (bit<24>)standard_metadata.enq_qdepth;
->>>>>>> Handle p4-14 intrinsic_metadata
         hdr.int_switch_id_header.setValid();
         hdr.int_switch_id_header.switch_id = (bit<31>)meta.int_metadata.switch_id;
     }
     @name(".int_set_header_0003_i10") action _int_set_header_0003_i10_0() {
         hdr.int_hop_latency_header.setValid();
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
         hdr.int_hop_latency_header.hop_latency = (bit<31>)meta.queueing_metadata.deq_timedelta;
-=======
-        hdr.int_hop_latency_header.hop_latency = (bit<31>)standard_metadata.deq_timedelta;
->>>>>>> Handle p4-14 intrinsic_metadata
         hdr.int_switch_id_header.setValid();
         hdr.int_switch_id_header.switch_id = (bit<31>)meta.int_metadata.switch_id;
     }
     @name(".int_set_header_0003_i11") action _int_set_header_0003_i11_0() {
         hdr.int_q_occupancy_header.setValid();
         hdr.int_q_occupancy_header.q_occupancy1 = 7w0;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
         hdr.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta.queueing_metadata.enq_qdepth;
         hdr.int_hop_latency_header.setValid();
         hdr.int_hop_latency_header.hop_latency = (bit<31>)meta.queueing_metadata.deq_timedelta;
-=======
-        hdr.int_q_occupancy_header.q_occupancy0 = (bit<24>)standard_metadata.enq_qdepth;
-        hdr.int_hop_latency_header.setValid();
-        hdr.int_hop_latency_header.hop_latency = (bit<31>)standard_metadata.deq_timedelta;
->>>>>>> Handle p4-14 intrinsic_metadata
         hdr.int_switch_id_header.setValid();
         hdr.int_switch_id_header.switch_id = (bit<31>)meta.int_metadata.switch_id;
     }
@@ -2091,11 +2045,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".int_set_header_0003_i13") action _int_set_header_0003_i13_0() {
         hdr.int_q_occupancy_header.setValid();
         hdr.int_q_occupancy_header.q_occupancy1 = 7w0;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
         hdr.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta.queueing_metadata.enq_qdepth;
-=======
-        hdr.int_q_occupancy_header.q_occupancy0 = (bit<24>)standard_metadata.enq_qdepth;
->>>>>>> Handle p4-14 intrinsic_metadata
         hdr.int_ingress_port_id_header.setValid();
         hdr.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
         hdr.int_ingress_port_id_header.ingress_port_id_0 = meta.ingress_metadata.ifindex;
@@ -2104,11 +2054,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name(".int_set_header_0003_i14") action _int_set_header_0003_i14_0() {
         hdr.int_hop_latency_header.setValid();
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
         hdr.int_hop_latency_header.hop_latency = (bit<31>)meta.queueing_metadata.deq_timedelta;
-=======
-        hdr.int_hop_latency_header.hop_latency = (bit<31>)standard_metadata.deq_timedelta;
->>>>>>> Handle p4-14 intrinsic_metadata
         hdr.int_ingress_port_id_header.setValid();
         hdr.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
         hdr.int_ingress_port_id_header.ingress_port_id_0 = meta.ingress_metadata.ifindex;
@@ -2118,15 +2064,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".int_set_header_0003_i15") action _int_set_header_0003_i15_0() {
         hdr.int_q_occupancy_header.setValid();
         hdr.int_q_occupancy_header.q_occupancy1 = 7w0;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
         hdr.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta.queueing_metadata.enq_qdepth;
         hdr.int_hop_latency_header.setValid();
         hdr.int_hop_latency_header.hop_latency = (bit<31>)meta.queueing_metadata.deq_timedelta;
-=======
-        hdr.int_q_occupancy_header.q_occupancy0 = (bit<24>)standard_metadata.enq_qdepth;
-        hdr.int_hop_latency_header.setValid();
-        hdr.int_hop_latency_header.hop_latency = (bit<31>)standard_metadata.deq_timedelta;
->>>>>>> Handle p4-14 intrinsic_metadata
         hdr.int_ingress_port_id_header.setValid();
         hdr.int_ingress_port_id_header.ingress_port_id_1 = 15w0;
         hdr.int_ingress_port_id_header.ingress_port_id_0 = meta.ingress_metadata.ifindex;
@@ -3110,24 +3050,14 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             @defaultonly NoAction_147();
         }
         key = {
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
             standard_metadata.egress_port: ternary @name("standard_metadata.egress_port") ;
             meta.l3_metadata.l3_mtu_check: ternary @name("l3_metadata.l3_mtu_check") ;
-=======
-            standard_metadata.egress_port    : ternary @name("standard_metadata.egress_port") ;
-            standard_metadata.deflection_flag: ternary @name("standard_metadata.deflection_flag") ;
-            meta.l3_metadata.l3_mtu_check    : ternary @name("l3_metadata.l3_mtu_check") ;
->>>>>>> Handle p4-14 intrinsic_metadata
         }
         size = 512;
         default_action = NoAction_147();
     }
     apply {
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
         if (meta.egress_metadata.bypass == 1w0) {
-=======
-        if (standard_metadata.deflection_flag == 1w0 && meta.egress_metadata.bypass == 1w0) {
->>>>>>> Handle p4-14 intrinsic_metadata
             if (standard_metadata.instance_type != 32w0 && standard_metadata.instance_type != 32w5) 
                 mirror_0.apply();
             else 
@@ -3565,14 +3495,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 512;
         default_action = NoAction_154();
     }
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
     @name(".set_config_parameters") action _set_config_parameters_0(bit<8> enable_dod) {
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-    @name(".set_config_parameters") action _set_config_parameters_0(bit<1> enable_dod) {
-        standard_metadata.deflect_on_drop = enable_dod;
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         meta.ingress_metadata.ingress_port = standard_metadata.ingress_port;
         meta.l2_metadata.same_if_check = meta.ingress_metadata.ifindex;
         standard_metadata.egress_spec = 9w511;
@@ -4568,11 +4492,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".acl_mirror") action _acl_mirror_1(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         meta.acl_metadata.acl_stats_index = acl_stats_index;
         meta.meter_metadata.meter_index = acl_meter_index;
@@ -4647,22 +4567,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".acl_mirror") action _acl_mirror_2(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         meta.acl_metadata.acl_stats_index = acl_stats_index;
         meta.meter_metadata.meter_index = acl_meter_index;
     }
     @name(".acl_mirror") action _acl_mirror_4(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         meta.acl_metadata.acl_stats_index = acl_stats_index;
         meta.meter_metadata.meter_index = acl_meter_index;
@@ -5310,18 +5222,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hash<bit<16>, bit<16>, tuple<bit<16>, bit<48>, bit<48>, bit<16>>, bit<32>>(meta.hash_metadata.hash2, HashAlgorithm.crc16, 16w0, { meta.ingress_metadata.ifindex, meta.l2_metadata.lkp_mac_sa, meta.l2_metadata.lkp_mac_da, meta.l2_metadata.lkp_mac_type }, 32w65536);
     }
     @name(".computed_two_hashes") action _computed_two_hashes_0() {
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-=======
-        standard_metadata.mcast_hash = (bit<13>)meta.hash_metadata.hash1;
->>>>>>> Handle p4-14 intrinsic_metadata
         meta.hash_metadata.entropy_hash = meta.hash_metadata.hash2;
     }
     @name(".computed_one_hash") action _computed_one_hash_0() {
         meta.hash_metadata.hash1 = meta.hash_metadata.hash2;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-=======
-        standard_metadata.mcast_hash = (bit<13>)meta.hash_metadata.hash2;
->>>>>>> Handle p4-14 intrinsic_metadata
         meta.hash_metadata.entropy_hash = meta.hash_metadata.hash2;
     }
     @name(".compute_ipv4_hashes") table _compute_ipv4_hashes {

@@ -676,13 +676,9 @@ struct metadata {
     @name(".nexthop_metadata") 
     nexthop_metadata_t       nexthop_metadata;
     @name(".qos_metadata") 
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-    qos_metadata_t               qos_metadata;
-    @name(".queueing_metadata") 
-    queueing_metadata_t          queueing_metadata;
-=======
     qos_metadata_t           qos_metadata;
->>>>>>> Handle p4-14 intrinsic_metadata
+    @name(".queueing_metadata") 
+    queueing_metadata_t      queueing_metadata;
     @name(".security_metadata") 
     security_metadata_t      security_metadata;
     @name(".sflow_metadata") 
@@ -1953,22 +1949,14 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
     @name(".int_set_header_3") action int_set_header_3() {
         hdr.int_q_occupancy_header.setValid();
         hdr.int_q_occupancy_header.q_occupancy1 = 7w0;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
         hdr.int_q_occupancy_header.q_occupancy0 = (bit<24>)meta.queueing_metadata.enq_qdepth;
-=======
-        hdr.int_q_occupancy_header.q_occupancy0 = (bit<24>)standard_metadata.enq_qdepth;
->>>>>>> Handle p4-14 intrinsic_metadata
     }
     @name(".int_set_header_0003_i1") action int_set_header_0003_i1() {
         int_set_header_3();
     }
     @name(".int_set_header_2") action int_set_header_2() {
         hdr.int_hop_latency_header.setValid();
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
         hdr.int_hop_latency_header.hop_latency = (bit<31>)meta.queueing_metadata.deq_timedelta;
-=======
-        hdr.int_hop_latency_header.hop_latency = (bit<31>)standard_metadata.deq_timedelta;
->>>>>>> Handle p4-14 intrinsic_metadata
     }
     @name(".int_set_header_0003_i2") action int_set_header_0003_i2() {
         int_set_header_2();
@@ -2946,14 +2934,8 @@ control process_egress_acl(inout headers hdr, inout metadata meta, inout standar
             egress_redirect_to_cpu;
         }
         key = {
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
             standard_metadata.egress_port: ternary;
             meta.l3_metadata.l3_mtu_check: ternary;
-=======
-            standard_metadata.egress_port    : ternary;
-            standard_metadata.deflection_flag: ternary;
-            meta.l3_metadata.l3_mtu_check    : ternary;
->>>>>>> Handle p4-14 intrinsic_metadata
         }
         size = 512;
     }
@@ -3031,11 +3013,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".process_egress_filter") process_egress_filter() process_egress_filter_0;
     @name(".process_egress_acl") process_egress_acl() process_egress_acl_0;
     apply {
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
         if (meta.egress_metadata.bypass == 1w0) {
-=======
-        if (standard_metadata.deflection_flag == 1w0 && meta.egress_metadata.bypass == 1w0) {
->>>>>>> Handle p4-14 intrinsic_metadata
             if (standard_metadata.instance_type != 32w0 && standard_metadata.instance_type != 32w5) {
                 mirror.apply();
             }
@@ -3296,20 +3274,11 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
 }
 
 control process_global_params(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
     @name(".deflect_on_drop") action deflect_on_drop(bit<8> enable_dod) {
-=======
-    @name(".deflect_on_drop") action deflect_on_drop(bit<1> enable_dod) {
-        standard_metadata.deflect_on_drop = enable_dod;
->>>>>>> Handle p4-14 intrinsic_metadata
     }
     @name(".set_config_parameters") action set_config_parameters(bit<8> enable_dod) {
         deflect_on_drop(enable_dod);
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         meta.ingress_metadata.ingress_port = standard_metadata.ingress_port;
         meta.l2_metadata.same_if_check = meta.ingress_metadata.ifindex;
         standard_metadata.egress_spec = 9w511;
@@ -4430,11 +4399,7 @@ control process_mac_acl(inout headers hdr, inout metadata meta, inout standard_m
     }
     @name(".acl_mirror") action acl_mirror(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         clone3(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         meta.acl_metadata.acl_stats_index = acl_stats_index;
         meta.meter_metadata.meter_index = acl_meter_index;
@@ -4500,11 +4465,7 @@ control process_ip_acl(inout headers hdr, inout metadata meta, inout standard_me
     }
     @name(".acl_mirror") action acl_mirror(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         clone3(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         meta.acl_metadata.acl_stats_index = acl_stats_index;
         meta.meter_metadata.meter_index = acl_meter_index;
@@ -5259,18 +5220,10 @@ control process_hashes(inout headers hdr, inout metadata meta, inout standard_me
         hash(meta.hash_metadata.hash2, HashAlgorithm.crc16, (bit<16>)0, { meta.ingress_metadata.ifindex, meta.l2_metadata.lkp_mac_sa, meta.l2_metadata.lkp_mac_da, meta.l2_metadata.lkp_mac_type }, (bit<32>)65536);
     }
     @name(".computed_two_hashes") action computed_two_hashes() {
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-=======
-        standard_metadata.mcast_hash = (bit<13>)meta.hash_metadata.hash1;
->>>>>>> Handle p4-14 intrinsic_metadata
         meta.hash_metadata.entropy_hash = meta.hash_metadata.hash2;
     }
     @name(".computed_one_hash") action computed_one_hash() {
         meta.hash_metadata.hash1 = meta.hash_metadata.hash2;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-=======
-        standard_metadata.mcast_hash = (bit<13>)meta.hash_metadata.hash2;
->>>>>>> Handle p4-14 intrinsic_metadata
         meta.hash_metadata.entropy_hash = meta.hash_metadata.hash2;
     }
     @name(".compute_ipv4_hashes") table compute_ipv4_hashes {
