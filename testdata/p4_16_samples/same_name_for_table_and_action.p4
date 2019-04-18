@@ -20,7 +20,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     // through a @name annotation.
 
     @name("do_something")
-    action do_something_0() { mark_to_drop(); }
+    action do_something_0() { mark_to_drop(smeta); }
 
     @name("do_something")
     table do_something {

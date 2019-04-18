@@ -18,7 +18,7 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     @name(".NoAction") action NoAction_0() {
     }
     @name("IngressI.do_something") action do_something() {
-        mark_to_drop();
+        mark_to_drop(smeta);
     }
     @name("IngressI.do_something") table do_something_2 {
         key = {

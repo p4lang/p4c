@@ -27,13 +27,7 @@ header ipv4_t {
 }
 
 struct metadata {
-<<<<<<< 45707c3563244f920d5714e8f7fa43c8ff4d9521
-    @name("routing_metadata") 
-=======
-    @name("intrinsic_metadata")
-    intrinsic_metadata_t intrinsic_metadata;
     @name("routing_metadata")
->>>>>>> Deprecate @mark_to_drop; replace with markToDrop action
     routing_metadata_t   routing_metadata;
 }
 

@@ -222,18 +222,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         clone3<tuple_0>(CloneType.I2E, 32w250, { standard_metadata });
     }
     @name(".nat_miss_ext_to_int") action nat_miss_ext_to_int() {
-<<<<<<< 45707c3563244f920d5714e8f7fa43c8ff4d9521
         meta._meta_do_forward3 = 1w0;
-        mark_to_drop();
-=======
-        meta._meta_do_forward4 = 1w0;
-<<<<<<< 3831bdec3b7692a6f5ce2ab80be5778bb0ee15f2
-        standard_metadata.egress_spec = 9w511;
-        standard_metadata.mcast_grp = 16w0;
->>>>>>> Deprecate @mark_to_drop; replace with markToDrop action
-=======
         mark_to_drop(standard_metadata);
->>>>>>> Reference outputs for p4-14 programs
     }
     @name(".nat_hit_int_to_ext") action nat_hit_int_to_ext(bit<32> srcAddr, bit<16> srcPort) {
         meta._meta_do_forward3 = 1w1;
