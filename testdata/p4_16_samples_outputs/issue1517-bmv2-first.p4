@@ -29,7 +29,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         bit<16> rand_int;
         random<bit<16>>(rand_int, 16w0, 16w49151);
         if (rand_int < 16w32768) 
-            mark_to_drop();
+            mark_to_drop(standard_metadata);
     }
 }
 

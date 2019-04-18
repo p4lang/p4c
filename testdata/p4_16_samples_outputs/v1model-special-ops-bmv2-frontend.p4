@@ -57,11 +57,11 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
 }
 
 control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
-    @name(".my_drop") action my_drop() {
-        mark_to_drop();
+    @name(".my_drop") action my_drop(inout standard_metadata_t smeta) {
+        mark_to_drop(smeta);
     }
-    @name(".my_drop") action my_drop_0() {
-        mark_to_drop();
+    @name(".my_drop") action my_drop_0(inout standard_metadata_t smeta_1) {
+        mark_to_drop(smeta_1);
     }
     bit<32> ipv4_address_0;
     bit<8> byte0_0;
@@ -91,9 +91,9 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
             set_mcast_grp();
             do_resubmit();
             do_clone_i2e();
-            my_drop();
+            my_drop(standard_metadata);
         }
-        default_action = my_drop();
+        default_action = my_drop(standard_metadata);
     }
     @name("ingress.set_bd_dmac_intf") action set_bd_dmac_intf(bit<24> bd, bit<48> dmac, bit<9> intf) {
         meta.fwd.out_bd = bd;
@@ -107,9 +107,9 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         }
         actions = {
             set_bd_dmac_intf();
-            my_drop_0();
+            my_drop_0(standard_metadata);
         }
-        default_action = my_drop_0();
+        default_action = my_drop_0(standard_metadata);
     }
     apply {
         if (standard_metadata.instance_type == 32w6) {
@@ -141,8 +141,8 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
 control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".my_drop") action my_drop_1() {
-        mark_to_drop();
+    @name(".my_drop") action my_drop_1(inout standard_metadata_t smeta_2) {
+        mark_to_drop(smeta_2);
     }
     @name("egress.set_out_bd") action set_out_bd(bit<24> bd) {
         meta.fwd.out_bd = bd;
@@ -177,9 +177,9 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
             rewrite_mac();
             do_recirculate();
             do_clone_e2e();
-            my_drop_1();
+            my_drop_1(standard_metadata);
         }
-        default_action = my_drop_1();
+        default_action = my_drop_1(standard_metadata);
     }
     apply {
         if (standard_metadata.instance_type == 32w1) {

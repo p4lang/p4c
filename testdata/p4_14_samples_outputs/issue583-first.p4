@@ -185,7 +185,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".cnt1") counter(32w32, CounterType.packets) cnt1;
     @name(".drop_pkt") action drop_pkt() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".hop") action hop(inout bit<8> ttl, bit<9> egress_spec) {
         ttl = ttl + 8w255;

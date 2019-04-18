@@ -189,7 +189,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".cnt1") counter(32w32, CounterType.packets) cnt1_0;
     @name(".drop_pkt") action drop_pkt() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".hop_ipv4") action hop_ipv4(bit<9> egress_spec) {
         {

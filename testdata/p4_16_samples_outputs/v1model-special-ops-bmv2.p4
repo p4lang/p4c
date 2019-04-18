@@ -51,8 +51,8 @@ struct headers_t {
     ipv4_t                 ipv4;
 }
 
-action my_drop() {
-    mark_to_drop();
+action my_drop(inout standard_metadata_t smeta) {
+    mark_to_drop(smeta);
 }
 parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
     const bit<16> ETHERTYPE_IPV4 = 16w0x800;
@@ -105,9 +105,9 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
             set_mcast_grp;
             do_resubmit;
             do_clone_i2e;
-            my_drop;
+            my_drop(standard_metadata);
         }
-        default_action = my_drop;
+        default_action = my_drop(standard_metadata);
     }
     action set_bd_dmac_intf(bit<24> bd, bit<48> dmac, bit<9> intf) {
         meta.fwd.out_bd = bd;
@@ -121,9 +121,9 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         }
         actions = {
             set_bd_dmac_intf;
-            my_drop;
+            my_drop(standard_metadata);
         }
-        default_action = my_drop;
+        default_action = my_drop(standard_metadata);
     }
     apply {
         if (standard_metadata.instance_type == BMV2_V1MODEL_INSTANCE_TYPE_RESUBMIT) {
@@ -176,9 +176,9 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
             rewrite_mac;
             do_recirculate;
             do_clone_e2e;
-            my_drop;
+            my_drop(standard_metadata);
         }
-        default_action = my_drop;
+        default_action = my_drop(standard_metadata);
     }
     apply {
         if (standard_metadata.instance_type == BMV2_V1MODEL_INSTANCE_TYPE_INGRESS_CLONE) {

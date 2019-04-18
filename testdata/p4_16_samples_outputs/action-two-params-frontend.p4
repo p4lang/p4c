@@ -40,7 +40,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("MyIngress.drop") action drop_1() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("MyIngress.actTbl") action actTbl(bit<24> id, bit<32> ip) {
     }

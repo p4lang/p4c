@@ -197,7 +197,7 @@ control MyIngress(inout headers hdr,
     }
 
     action operation_drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
 
     table calculate {

@@ -119,8 +119,9 @@ ExternConverter::convertExternFunction(ConversionContext* ctxt,
 
 void
 ExternConverter::modelError(const char* format, const IR::Node* node) const {
-    ::error(format, node);
-    ::error("Are you using an up-to-date v1model.p4?");
+    cstring errMsg = cstring(format) +
+                     ". Are you using an up-to-date v1model.p4?";
+    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, errMsg.c_str(), node);
 }
 
 void

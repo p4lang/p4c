@@ -52,7 +52,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.res_16 = hdr.data.res_16 |-| hdr.data.opr2_16;
     }
     @name("._drop") action _drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".t") table t {
         actions = {
