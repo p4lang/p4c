@@ -82,7 +82,6 @@ header vlan_t {
 }
 
 struct metadata {
-<<<<<<< afcf5fc1f4ecaacbc3e6fb4dba074c329a553ce0
     bit<16> _egress_metadata_mirror_port0;
     bit<10> _ingress_metadata_port_lag1;
     bit<32> _ingress_metadata_ip_src2;
@@ -124,18 +123,6 @@ struct metadata {
     bit<16> _ingress_metadata_srcPort38;
     bit<16> _ingress_metadata_dstPort39;
     bit<1>  _ingress_metadata_router_mac40;
-    bit<9>  _intrinsic_metadata_ingress_port41;
-    bit<32> _intrinsic_metadata_lf_field_list42;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-=======
-    bit<9>  _intrinsic_metadata_ucast_egress_port43;
-=======
-    @name(".egress_metadata") 
-    egress_metadata_t  egress_metadata;
-    @name(".ingress_metadata") 
-    ingress_metadata_t ingress_metadata;
->>>>>>> Handle p4-14 intrinsic_metadata
->>>>>>> Handle p4-14 intrinsic_metadata
 }
 
 struct headers {
@@ -206,40 +193,18 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".port_counters") direct_counter(CounterType.packets) port_counters_0;
     @name(".fdb_set") action fdb_set(bit<1> type_, bit<9> port_id) {
-<<<<<<< afcf5fc1f4ecaacbc3e6fb4dba074c329a553ce0
         meta._ingress_metadata_mac_type21 = type_;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-=======
-        meta._intrinsic_metadata_ucast_egress_port43 = port_id;
-=======
-        meta.ingress_metadata.mac_type = type_;
-        standard_metadata.ucast_egress_port = port_id;
->>>>>>> Handle p4-14 intrinsic_metadata
->>>>>>> Handle p4-14 intrinsic_metadata
         standard_metadata.egress_spec = port_id;
         meta._ingress_metadata_routed5 = 1w0;
     }
     @name(".nop") action nop() {
     }
     @name(".generate_learn_notify") action generate_learn_notify() {
-<<<<<<< afcf5fc1f4ecaacbc3e6fb4dba074c329a553ce0
-        digest<mac_learn_digest>(32w1024, {meta._ingress_metadata_vlan_id37,hdr.eth.srcAddr,meta._intrinsic_metadata_ingress_port41,meta._ingress_metadata_learning33});
+        digest<mac_learn_digest>(32w1024, {meta._ingress_metadata_vlan_id37,hdr.eth.srcAddr,standard_metadata.ingress_port,meta._ingress_metadata_learning33});
     }
     @name(".set_dmac") action set_dmac(bit<48> dst_mac_address, bit<9> port_id) {
         hdr.eth.dstAddr = dst_mac_address;
         hdr.eth.srcAddr = meta._ingress_metadata_def_smac18;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-=======
-        meta._intrinsic_metadata_ucast_egress_port43 = port_id;
-=======
-        digest<mac_learn_digest>(32w1024, {meta.ingress_metadata.vlan_id,hdr.eth.srcAddr,standard_metadata.ingress_port,meta.ingress_metadata.learning});
-    }
-    @name(".set_dmac") action set_dmac(bit<48> dst_mac_address, bit<9> port_id) {
-        hdr.eth.dstAddr = dst_mac_address;
-        hdr.eth.srcAddr = meta.ingress_metadata.def_smac;
-        standard_metadata.ucast_egress_port = port_id;
->>>>>>> Handle p4-14 intrinsic_metadata
->>>>>>> Handle p4-14 intrinsic_metadata
         standard_metadata.egress_spec = port_id;
     }
     @name(".set_next_hop") action set_next_hop(bit<8> type_, bit<8> ip, bit<16> router_interface_id) {
@@ -262,7 +227,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name(".set_router_interface") action set_router_interface(bit<16> virtual_router_id, bit<1> type_, bit<9> port_id, bit<12> vlan_id, bit<48> src_mac_address, bit<1> admin_v4_state, bit<1> admin_v6_state, bit<14> mtu) {
-<<<<<<< afcf5fc1f4ecaacbc3e6fb4dba074c329a553ce0
         meta._ingress_metadata_vrf6 = virtual_router_id;
         meta._ingress_metadata_interface_type34 = type_;
         standard_metadata.egress_spec = port_id;
@@ -272,38 +236,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta._ingress_metadata_v6_enable36 = admin_v6_state;
         meta._ingress_metadata_mtu32 = mtu;
         meta._ingress_metadata_router_mac40 = 1w1;
-=======
-        meta.ingress_metadata.vrf = virtual_router_id;
-        meta.ingress_metadata.interface_type = type_;
-        standard_metadata.ucast_egress_port = port_id;
-        meta.ingress_metadata.vlan_id = vlan_id;
-        meta.ingress_metadata.def_smac = src_mac_address;
-        meta.ingress_metadata.v4_enable = admin_v4_state;
-        meta.ingress_metadata.v6_enable = admin_v6_state;
-        meta.ingress_metadata.mtu = mtu;
-        meta.ingress_metadata.router_mac = 1w1;
->>>>>>> Handle p4-14 intrinsic_metadata
     }
     @name(".router_interface_miss") action router_interface_miss() {
         meta._ingress_metadata_router_mac40 = 1w0;
     }
     @name(".set_switch") action set_switch(bit<8> port_number, bit<16> cpu_port, bit<8> max_virtual_routers, bit<8> fdb_table_size, bit<8> on_link_route_supported, bit<2> oper_status, bit<8> max_temp, bit<8> switching_mode, bit<8> cpu_flood_enable, bit<8> ttl1_action, bit<12> port_vlan_id, bit<48> src_mac_address, bit<8> fdb_aging_time, bit<8> fdb_unicast_miss_action, bit<8> fdb_broadcast_miss_action, bit<8> fdb_multicast_miss_action, bit<8> ecmp_hash_seed, bit<8> ecmp_hash_type, bit<8> ecmp_hash_fields, bit<8> ecmp_max_paths, bit<16> vr_id) {
-<<<<<<< afcf5fc1f4ecaacbc3e6fb4dba074c329a553ce0
         meta._ingress_metadata_def_vlan17 = port_vlan_id;
         meta._ingress_metadata_vrf6 = vr_id;
         meta._ingress_metadata_def_smac18 = src_mac_address;
         meta._ingress_metadata_cpu_port19 = cpu_port;
         meta._ingress_metadata_max_ports20 = port_number;
         meta._ingress_metadata_oper_status22 = oper_status;
-        meta._intrinsic_metadata_ingress_port41 = standard_metadata.ingress_port;
-=======
-        meta.ingress_metadata.def_vlan = port_vlan_id;
-        meta.ingress_metadata.vrf = vr_id;
-        meta.ingress_metadata.def_smac = src_mac_address;
-        meta.ingress_metadata.cpu_port = cpu_port;
-        meta.ingress_metadata.max_ports = port_number;
-        meta.ingress_metadata.oper_status = oper_status;
->>>>>>> Handle p4-14 intrinsic_metadata
     }
     @name(".set_router") action set_router(bit<1> admin_v4_state, bit<1> admin_v6_state, bit<48> src_mac_address, bit<8> violation_ttl1_action, bit<8> violation_ip_options) {
         meta._ingress_metadata_def_smac18 = src_mac_address;
@@ -328,15 +271,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_10();
         }
         key = {
-<<<<<<< afcf5fc1f4ecaacbc3e6fb4dba074c329a553ce0
-            meta._intrinsic_metadata_ingress_port41: exact @name("intrinsic_metadata.ingress_port") ;
-            meta._ingress_metadata_vlan_id37       : exact @name("ingress_metadata.vlan_id") ;
-            hdr.eth.srcAddr                        : exact @name("eth.srcAddr") ;
-=======
-            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
-            meta.ingress_metadata.vlan_id : exact @name("ingress_metadata.vlan_id") ;
-            hdr.eth.srcAddr               : exact @name("eth.srcAddr") ;
->>>>>>> Handle p4-14 intrinsic_metadata
+            standard_metadata.ingress_port  : exact @name("standard_metadata.ingress_port") ;
+            meta._ingress_metadata_vlan_id37: exact @name("ingress_metadata.vlan_id") ;
+            hdr.eth.srcAddr                 : exact @name("eth.srcAddr") ;
         }
         default_action = NoAction_10();
     }
@@ -386,11 +323,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_13();
         }
         key = {
-<<<<<<< afcf5fc1f4ecaacbc3e6fb4dba074c329a553ce0
-            meta._intrinsic_metadata_ingress_port41: exact @name("intrinsic_metadata.ingress_port") ;
-=======
             standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
->>>>>>> Handle p4-14 intrinsic_metadata
         }
         counters = port_counters_0;
         default_action = NoAction_13();

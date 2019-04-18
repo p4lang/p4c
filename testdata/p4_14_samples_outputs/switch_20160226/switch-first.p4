@@ -635,13 +635,9 @@ struct metadata {
     @name(".nexthop_metadata") 
     nexthop_metadata_t       nexthop_metadata;
     @name(".qos_metadata") 
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-    qos_metadata_t               qos_metadata;
-    @name(".queueing_metadata") 
-    queueing_metadata_t          queueing_metadata;
-=======
     qos_metadata_t           qos_metadata;
->>>>>>> Handle p4-14 intrinsic_metadata
+    @name(".queueing_metadata") 
+    queueing_metadata_t      queueing_metadata;
     @name(".security_metadata") 
     security_metadata_t      security_metadata;
     @name(".tunnel_metadata") 
@@ -1780,22 +1776,14 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
     }
     @name(".int_set_header_3") action int_set_header_3() {
         hdr.int_q_occupancy_header.setValid();
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
         hdr.int_q_occupancy_header.q_occupancy = (bit<31>)meta.queueing_metadata.enq_qdepth;
-=======
-        hdr.int_q_occupancy_header.q_occupancy = (bit<31>)standard_metadata.enq_qdepth;
->>>>>>> Handle p4-14 intrinsic_metadata
     }
     @name(".int_set_header_0003_i1") action int_set_header_0003_i1() {
         int_set_header_3();
     }
     @name(".int_set_header_2") action int_set_header_2() {
         hdr.int_hop_latency_header.setValid();
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
         hdr.int_hop_latency_header.hop_latency = (bit<31>)meta.queueing_metadata.deq_timedelta;
-=======
-        hdr.int_hop_latency_header.hop_latency = (bit<31>)standard_metadata.deq_timedelta;
->>>>>>> Handle p4-14 intrinsic_metadata
     }
     @name(".int_set_header_0003_i2") action int_set_header_0003_i2() {
         int_set_header_2();
@@ -2804,14 +2792,8 @@ control process_egress_acl(inout headers hdr, inout metadata meta, inout standar
             @defaultonly NoAction();
         }
         key = {
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
             standard_metadata.egress_port: ternary @name("standard_metadata.egress_port") ;
             meta.l3_metadata.l3_mtu_check: ternary @name("l3_metadata.l3_mtu_check") ;
-=======
-            standard_metadata.egress_port    : ternary @name("standard_metadata.egress_port") ;
-            standard_metadata.deflection_flag: ternary @name("standard_metadata.deflection_flag") ;
-            meta.l3_metadata.l3_mtu_check    : ternary @name("l3_metadata.l3_mtu_check") ;
->>>>>>> Handle p4-14 intrinsic_metadata
         }
         size = 512;
         default_action = NoAction();
@@ -2880,11 +2862,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".process_egress_filter") process_egress_filter() process_egress_filter_0;
     @name(".process_egress_acl") process_egress_acl() process_egress_acl_0;
     apply {
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
         if (meta.egress_metadata.bypass == 1w0) {
-=======
-        if (standard_metadata.deflection_flag == 1w0 && meta.egress_metadata.bypass == 1w0) {
->>>>>>> Handle p4-14 intrinsic_metadata
             if (standard_metadata.instance_type != 32w0 && standard_metadata.instance_type != 32w5) 
                 mirror.apply();
             else 
@@ -3041,11 +3019,7 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
         meta.l2_metadata.lkp_pkt_type = 3w1;
         meta.l2_metadata.lkp_mac_type = hdr.ethernet.etherType;
         standard_metadata.egress_spec = 9w511;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         meta.ingress_metadata.ingress_port = standard_metadata.ingress_port;
         meta.l2_metadata.same_if_check = meta.ingress_metadata.ifindex;
     }
@@ -3053,11 +3027,7 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
         meta.l2_metadata.lkp_pkt_type = 3w1;
         meta.l2_metadata.lkp_mac_type = hdr.vlan_tag_[0].etherType;
         standard_metadata.egress_spec = 9w511;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         meta.ingress_metadata.ingress_port = standard_metadata.ingress_port;
         meta.l2_metadata.same_if_check = meta.ingress_metadata.ifindex;
     }
@@ -3065,11 +3035,7 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
         meta.l2_metadata.lkp_pkt_type = 3w1;
         meta.l2_metadata.lkp_mac_type = hdr.vlan_tag_[1].etherType;
         standard_metadata.egress_spec = 9w511;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         meta.ingress_metadata.ingress_port = standard_metadata.ingress_port;
         meta.l2_metadata.same_if_check = meta.ingress_metadata.ifindex;
     }
@@ -3077,11 +3043,7 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
         meta.l2_metadata.lkp_pkt_type = 3w1;
         meta.l2_metadata.lkp_mac_type = hdr.ethernet.etherType;
         standard_metadata.egress_spec = 9w511;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         meta.ingress_metadata.ingress_port = standard_metadata.ingress_port;
         meta.l2_metadata.same_if_check = meta.ingress_metadata.ifindex;
     }
@@ -3089,11 +3051,7 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
         meta.l2_metadata.lkp_pkt_type = 3w2;
         meta.l2_metadata.lkp_mac_type = hdr.ethernet.etherType;
         standard_metadata.egress_spec = 9w511;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         meta.ingress_metadata.ingress_port = standard_metadata.ingress_port;
         meta.l2_metadata.same_if_check = meta.ingress_metadata.ifindex;
     }
@@ -3101,11 +3059,7 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
         meta.l2_metadata.lkp_pkt_type = 3w2;
         meta.l2_metadata.lkp_mac_type = hdr.vlan_tag_[0].etherType;
         standard_metadata.egress_spec = 9w511;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         meta.ingress_metadata.ingress_port = standard_metadata.ingress_port;
         meta.l2_metadata.same_if_check = meta.ingress_metadata.ifindex;
     }
@@ -3113,11 +3067,7 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
         meta.l2_metadata.lkp_pkt_type = 3w2;
         meta.l2_metadata.lkp_mac_type = hdr.vlan_tag_[1].etherType;
         standard_metadata.egress_spec = 9w511;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         meta.ingress_metadata.ingress_port = standard_metadata.ingress_port;
         meta.l2_metadata.same_if_check = meta.ingress_metadata.ifindex;
     }
@@ -3125,11 +3075,7 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
         meta.l2_metadata.lkp_pkt_type = 3w2;
         meta.l2_metadata.lkp_mac_type = hdr.ethernet.etherType;
         standard_metadata.egress_spec = 9w511;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         meta.ingress_metadata.ingress_port = standard_metadata.ingress_port;
         meta.l2_metadata.same_if_check = meta.ingress_metadata.ifindex;
     }
@@ -3137,11 +3083,7 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
         meta.l2_metadata.lkp_pkt_type = 3w4;
         meta.l2_metadata.lkp_mac_type = hdr.ethernet.etherType;
         standard_metadata.egress_spec = 9w511;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         meta.ingress_metadata.ingress_port = standard_metadata.ingress_port;
         meta.l2_metadata.same_if_check = meta.ingress_metadata.ifindex;
     }
@@ -3149,11 +3091,7 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
         meta.l2_metadata.lkp_pkt_type = 3w4;
         meta.l2_metadata.lkp_mac_type = hdr.vlan_tag_[0].etherType;
         standard_metadata.egress_spec = 9w511;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         meta.ingress_metadata.ingress_port = standard_metadata.ingress_port;
         meta.l2_metadata.same_if_check = meta.ingress_metadata.ifindex;
     }
@@ -3161,11 +3099,7 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
         meta.l2_metadata.lkp_pkt_type = 3w4;
         meta.l2_metadata.lkp_mac_type = hdr.vlan_tag_[1].etherType;
         standard_metadata.egress_spec = 9w511;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         meta.ingress_metadata.ingress_port = standard_metadata.ingress_port;
         meta.l2_metadata.same_if_check = meta.ingress_metadata.ifindex;
     }
@@ -3173,11 +3107,7 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
         meta.l2_metadata.lkp_pkt_type = 3w4;
         meta.l2_metadata.lkp_mac_type = hdr.ethernet.etherType;
         standard_metadata.egress_spec = 9w511;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         meta.ingress_metadata.ingress_port = standard_metadata.ingress_port;
         meta.l2_metadata.same_if_check = meta.ingress_metadata.ifindex;
     }
@@ -3840,11 +3770,7 @@ control process_mac_acl(inout headers hdr, inout metadata meta, inout standard_m
     }
     @name(".acl_mirror") action acl_mirror(bit<32> session_id, bit<16> acl_stats_index) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         meta.ingress_metadata.enable_dod = 1w0;
         clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         meta.acl_metadata.acl_stats_index = acl_stats_index;
@@ -3891,11 +3817,7 @@ control process_ip_acl(inout headers hdr, inout metadata meta, inout standard_me
     }
     @name(".acl_mirror") action acl_mirror(bit<32> session_id, bit<16> acl_stats_index) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_tstamp;
->>>>>>> Handle p4-14 intrinsic_metadata
+        meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
         meta.ingress_metadata.enable_dod = 1w0;
         clone3<tuple<bit<32>, bit<16>>>(CloneType.I2E, session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
         meta.acl_metadata.acl_stats_index = acl_stats_index;
@@ -4493,18 +4415,10 @@ control process_hashes(inout headers hdr, inout metadata meta, inout standard_me
         hash<bit<16>, bit<16>, tuple<bit<16>, bit<48>, bit<48>, bit<16>>, bit<32>>(meta.hash_metadata.hash2, HashAlgorithm.crc16, 16w0, { meta.ingress_metadata.ifindex, meta.l2_metadata.lkp_mac_sa, meta.l2_metadata.lkp_mac_da, meta.l2_metadata.lkp_mac_type }, 32w65536);
     }
     @name(".computed_two_hashes") action computed_two_hashes() {
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-=======
-        standard_metadata.mcast_hash = (bit<13>)meta.hash_metadata.hash1;
->>>>>>> Handle p4-14 intrinsic_metadata
         meta.hash_metadata.entropy_hash = meta.hash_metadata.hash2;
     }
     @name(".computed_one_hash") action computed_one_hash() {
         meta.hash_metadata.hash1 = meta.hash_metadata.hash2;
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-=======
-        standard_metadata.mcast_hash = (bit<13>)meta.hash_metadata.hash2;
->>>>>>> Handle p4-14 intrinsic_metadata
         meta.hash_metadata.entropy_hash = meta.hash_metadata.hash2;
     }
     @name(".compute_ipv4_hashes") table compute_ipv4_hashes {
@@ -4862,10 +4776,6 @@ control process_system_acl(inout headers hdr, inout metadata meta, inout standar
         mark_to_drop(standard_metadata);
     }
     @name(".deflect_on_drop") action deflect_on_drop() {
-<<<<<<< 9535fc1bf08b86a810558c3eff32a8cd35b4a222
-=======
-        standard_metadata.deflect_on_drop = 1w1;
->>>>>>> Handle p4-14 intrinsic_metadata
     }
     @name(".congestion_mirror_set") action congestion_mirror_set() {
         deflect_on_drop();

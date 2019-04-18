@@ -94,33 +94,13 @@ struct standard_metadata_t {
     @alias("intrinsic_metadata.priority")
     bit<3> priority;
 
-    // The following fields are not part of the P4-14 standard, nor are they
-    // recognized and treated specially by BMv2.  The are here solely for the
-    // purpose of supporting the compilation of legacy versions of switch.p4
-    // from the p4c testsuite.
-    @alias("intrinsic_metadata.ucast_egress_port")
-    bit<9> ucast_egress_port;
-    /// global timestamp (ns) taken upon arrival at ingress.
-    @alias("intrinsic_metadata.ingress_global_tstamp")
-    bit<48> ingress_global_tstamp;
-    /// flag indicating whether a packet is deflected due to deflect_on_drop.
-    @alias("intrinsic_metadata.deflection_flag")
-    bit<1> deflection_flag;
+    // Queueing metadata
     /// flag indicating whether a packet can be deflected by TM on congestion drop
     @alias("intrinsic_metadata.deflect_on_drop")
     bit<1> deflect_on_drop;
     /// time snapshot taken when the packet is enqueued (in nsec).
     @alias("intrinsic_metadata.enq_tstamp")
     bit<32> enq_tstamp;
-    // queue congestion status at the packet enqueue time.
-    @alias("intrinsic_metadata.enq_congest_stat")
-    bit<2> enq_congest_stat;
-    /// queue congestion status at the packet dequeue time.
-    @alias("intrinsic_metadata.deq_congest_stat")
-    bit<2> deq_congest_stat;
-    /// multicast hashing
-    @alias("intrinsic_metadata.mcast_hash")
-    bit<13> mcast_hash;
 }
 
 enum CounterType {
