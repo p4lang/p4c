@@ -1236,18 +1236,21 @@ class FixMultiEntryPoint : public PassManager {
 };
 
 /**
-   If the user metadata structure has a field called
-   "intrinsic_metadata" move all its fields to the standard_metadata
-   Change all references appropriately.  We do this because the
-   intrinsic_metadata is handled specially in P4-14 programs - much
-   more like standard_metadata.
+   If the user metadata structure has a fields called
+   "intrinsic_metadata" or "queueing_metadata" move all their fields
+   to the standard_metadata Change all references appropriately.  We
+   do this because the intrinsic_metadata and queueing_metadata are
+   handled specially in P4-14 programs - much more like
+   standard_metadata.
 */
 class MoveIntrinsicMetadata : public Transform {
     ProgramStructure* structure;
     const IR::Type_Struct* stdType = nullptr;
     const IR::Type_Struct* userType = nullptr;
     const IR::Type_Struct* intrType = nullptr;
+    const IR::Type_Struct* queueType = nullptr;
     const IR::StructField* intrField = nullptr;
+    const IR::StructField* queueField = nullptr;
 
  public:
     explicit MoveIntrinsicMetadata(ProgramStructure* structure): structure(structure)
@@ -1266,21 +1269,45 @@ class MoveIntrinsicMetadata : public Transform {
             BUG_CHECK(tn, "%1%: expected a Type_Name", intrTypeName);
             auto nt = program->getDeclsByName(tn->path->name)->nextOrDefault();
             if (nt == nullptr || !nt->is<IR::Type_Struct>()) {
-                ::error("%1%: expected a structure", intrType);
+                ::error("%1%: expected a structure", tn);
                 return program;
             }
             intrType = nt->to<IR::Type_Struct>();
             LOG2("Intrinsic metadata type " << intrType);
         }
+
+        queueField = userType->getField(structure->v1model.queueingMetadata.name);
+        if (queueField != nullptr) {
+            auto queueTypeName = queueField->type;
+            auto tn = queueTypeName->to<IR::Type_Name>();
+            BUG_CHECK(tn, "%1%: expected a Type_Name", queueTypeName);
+            auto nt = program->getDeclsByName(tn->path->name)->nextOrDefault();
+            if (nt == nullptr || !nt->is<IR::Type_Struct>()) {
+                ::error("%1%: expected a structure", tn);
+                return program;
+            }
+            queueType = nt->to<IR::Type_Struct>();
+            LOG2("Queueing metadata type " << queueType);
+        }
         return program;
     }
 
     const IR::Node* postorder(IR::Type_Struct* type) override {
-        if (getOriginal() == stdType && intrType != nullptr) {
-            for (auto f : intrType->fields) {
-                if (type->fields.getDeclaration(f->name) == nullptr) {
-                    ::error("%1%: no such field in standard_metadata", f->name);
-                    LOG2("standard_metadata: " << type);
+        if (getOriginal() == stdType) {
+            if (intrType != nullptr) {
+                for (auto f : intrType->fields) {
+                    if (type->fields.getDeclaration(f->name) == nullptr) {
+                        ::error("%1%: no such field in standard_metadata", f->name);
+                        LOG2("standard_metadata: " << type);
+                    }
+                }
+            }
+            if (queueType != nullptr) {
+                for (auto f : queueType->fields) {
+                    if (type->fields.getDeclaration(f->name) == nullptr) {
+                        ::error("%1%: no such field in standard_metadata", f->name);
+                        LOG2("standard_metadata: " << type);
+                    }
                 }
             }
         }
@@ -1288,7 +1315,7 @@ class MoveIntrinsicMetadata : public Transform {
     }
 
     const IR::Node* postorder(IR::StructField* field) override {
-        if (getOriginal() == intrField)
+        if (getOriginal() == intrField || getOriginal() == queueField)
             // delete it from its parent
             return nullptr;
         return field;
@@ -1298,7 +1325,8 @@ class MoveIntrinsicMetadata : public Transform {
         // We rewrite expressions like meta.intrinsic_metadata.x as
         // standard_metadata.x.  We know that these parameter names
         // are always the same.
-        if (member->member != structure->v1model.intrinsicMetadata.name)
+        if (member->member != structure->v1model.intrinsicMetadata.name &&
+            member->member != structure->v1model.queueingMetadata.name)
             return member;
         auto pe = member->expr->to<IR::PathExpression>();
         if (pe == nullptr || pe->path->absolute)

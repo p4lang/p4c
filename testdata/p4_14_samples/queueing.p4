@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,10 +27,10 @@ header hdr1_t hdr1;
 // choose his own
 header_type queueing_metadata_t {
     fields {
-        enq_timestamp : 48;
-        enq_qdepth : 24;
+        enq_timestamp : 32;
+        enq_qdepth : 19;
         deq_timedelta : 32;
-        deq_qdepth : 24;
+        deq_qdepth : 19;
     }
 }
 

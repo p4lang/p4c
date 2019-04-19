@@ -71,9 +71,12 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         smeta.mcast_grp = standard_metadata.mcast_grp;
         smeta.resubmit_flag = standard_metadata.resubmit_flag;
         smeta.egress_rid = standard_metadata.egress_rid;
-        smeta.checksum_error = standard_metadata.checksum_error;
         smeta.recirculate_flag = standard_metadata.recirculate_flag;
+        smeta.checksum_error = standard_metadata.checksum_error;
         smeta.parser_error = standard_metadata.parser_error;
+        smeta.priority = standard_metadata.priority;
+        smeta.deflect_on_drop = standard_metadata.deflect_on_drop;
+        smeta.enq_tstamp = standard_metadata.enq_tstamp;
         mark_to_drop(smeta);
         standard_metadata.ingress_port = smeta.ingress_port;
         standard_metadata.egress_spec = smeta.egress_spec;
@@ -93,9 +96,12 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         standard_metadata.mcast_grp = smeta.mcast_grp;
         standard_metadata.resubmit_flag = smeta.resubmit_flag;
         standard_metadata.egress_rid = smeta.egress_rid;
-        standard_metadata.checksum_error = smeta.checksum_error;
         standard_metadata.recirculate_flag = smeta.recirculate_flag;
+        standard_metadata.checksum_error = smeta.checksum_error;
         standard_metadata.parser_error = smeta.parser_error;
+        standard_metadata.priority = smeta.priority;
+        standard_metadata.deflect_on_drop = smeta.deflect_on_drop;
+        standard_metadata.enq_tstamp = smeta.enq_tstamp;
     }
     @name(".my_drop") action my_drop_0() {
         smeta_1.ingress_port = standard_metadata.ingress_port;
@@ -116,9 +122,12 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         smeta_1.mcast_grp = standard_metadata.mcast_grp;
         smeta_1.resubmit_flag = standard_metadata.resubmit_flag;
         smeta_1.egress_rid = standard_metadata.egress_rid;
-        smeta_1.checksum_error = standard_metadata.checksum_error;
         smeta_1.recirculate_flag = standard_metadata.recirculate_flag;
+        smeta_1.checksum_error = standard_metadata.checksum_error;
         smeta_1.parser_error = standard_metadata.parser_error;
+        smeta_1.priority = standard_metadata.priority;
+        smeta_1.deflect_on_drop = standard_metadata.deflect_on_drop;
+        smeta_1.enq_tstamp = standard_metadata.enq_tstamp;
         mark_to_drop(smeta_1);
         standard_metadata.ingress_port = smeta_1.ingress_port;
         standard_metadata.egress_spec = smeta_1.egress_spec;
@@ -138,9 +147,12 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         standard_metadata.mcast_grp = smeta_1.mcast_grp;
         standard_metadata.resubmit_flag = smeta_1.resubmit_flag;
         standard_metadata.egress_rid = smeta_1.egress_rid;
-        standard_metadata.checksum_error = smeta_1.checksum_error;
         standard_metadata.recirculate_flag = smeta_1.recirculate_flag;
+        standard_metadata.checksum_error = smeta_1.checksum_error;
         standard_metadata.parser_error = smeta_1.parser_error;
+        standard_metadata.priority = smeta_1.priority;
+        standard_metadata.deflect_on_drop = smeta_1.deflect_on_drop;
+        standard_metadata.enq_tstamp = smeta_1.enq_tstamp;
     }
     @name(".NoAction") action NoAction_0() {
     }
