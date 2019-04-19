@@ -1836,6 +1836,15 @@ TEST_F(ParserShiftTest, AdvanceByData) {
             f.get<unsigned char>());
 }
 
+TEST_F(ParserShiftTest, AdvanceByDataInvalidArgument) {
+  parse_state.add_advance_from_data(Data(11));  // 11-bit, not a multiple of 8
+  parse_state.add_extract(testHeader);
+
+  std::string packet_data("\xab\xcd");
+  auto packet = get_pkt(packet_data);
+  parse_and_check_error(&packet, ErrorCodeMap::Core::ParserInvalidArgument);
+}
+
 TEST_F(ParserShiftTest, AdvanceByExpression) {
   ArithExpression expr;
   expr.push_back_load_const(Data(1 * 8));
@@ -1849,6 +1858,18 @@ TEST_F(ParserShiftTest, AdvanceByExpression) {
   const auto &f = packet.get_phv()->get_field(testHeader, 0);  // f8
   ASSERT_EQ(static_cast<unsigned char>(packet_data.at(1)),
             f.get<unsigned char>());
+}
+
+TEST_F(ParserShiftTest, AdvanceByExpressionInvalidArgument) {
+  ArithExpression expr;
+  expr.push_back_load_const(Data(11));  // 11-bit, not a multiple of 8
+  expr.build();
+  parse_state.add_advance_from_expression(expr);
+  parse_state.add_extract(testHeader);
+
+  std::string packet_data("\xab\xcd");
+  auto packet = get_pkt(packet_data);
+  parse_and_check_error(&packet, ErrorCodeMap::Core::ParserInvalidArgument);
 }
 
 TEST_F(ParserShiftTest, AdvanceByField) {
@@ -1865,6 +1886,19 @@ TEST_F(ParserShiftTest, AdvanceByField) {
   const auto &f = packet.get_phv()->get_field(testHeader, 0);  // f8
   ASSERT_EQ(static_cast<unsigned char>(packet_data.at(1)),
             f.get<unsigned char>());
+}
+
+TEST_F(ParserShiftTest, AdvanceByFieldInvalidArgument) {
+  parse_state.add_advance_from_field(metaHeader, 0);
+  parse_state.add_extract(testHeader);
+
+  std::string packet_data("\xab\xcd");
+  auto packet = get_pkt(packet_data);
+
+  auto &f_shift = packet.get_phv()->get_field(metaHeader, 0);  // f8
+  f_shift.set(11);  // 11-bit, not a multiple of 8
+
+  parse_and_check_error(&packet, ErrorCodeMap::Core::ParserInvalidArgument);
 }
 
 
@@ -1948,6 +1982,14 @@ TEST_F(ParserExtractVLTest, HeaderTooShort) {
   std::string packet_data(packet_bytes, '\xaa');
   auto packet = get_pkt(packet_data);
   parse_and_check_error(&packet, ErrorCodeMap::Core::HeaderTooShort);
+}
+
+TEST_F(ParserExtractVLTest, InvalidArgument) {
+  // computed bitwidth is 11, not a multiple of 8
+  parse_state.add_extract_VL(testHeader, make_expr(11), max_header_bytes);
+  std::string packet_data(16, '\xaa');
+  auto packet = get_pkt(packet_data);
+  parse_and_check_error(&packet, ErrorCodeMap::Core::ParserInvalidArgument);
 }
 
 
