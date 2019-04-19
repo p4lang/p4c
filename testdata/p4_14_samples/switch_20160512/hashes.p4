@@ -143,13 +143,17 @@ table compute_non_ip_hashes {
 }
 
 action computed_two_hashes() {
+#ifdef INCLUDE_OLD_INTRINSIC_METADATA_FIELDS
     modify_field(intrinsic_metadata.mcast_hash, hash_metadata.hash1);
+#endif // INCLUDE_OLD_INTRINSIC_METADATA_FIELDS
     modify_field(hash_metadata.entropy_hash, hash_metadata.hash2);
 }
 
 action computed_one_hash() {
     modify_field(hash_metadata.hash1, hash_metadata.hash2);
+#ifdef INCLUDE_OLD_INTRINSIC_METADATA_FIELDS
     modify_field(intrinsic_metadata.mcast_hash, hash_metadata.hash2);
+#endif // INCLUDE_OLD_INTRINSIC_METADATA_FIELDS
     modify_field(hash_metadata.entropy_hash, hash_metadata.hash2);
 }
 

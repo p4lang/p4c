@@ -88,27 +88,151 @@ enum MeterType {
 
 extern counter {
     counter(bit<32> size, CounterType type);
+    /***
+     * count() causes the counter state with the specified index to be
+     * read, modified, and written back, atomically relative to the
+     * processing of other packets, updating the packet count, byte
+     * count, or both, depending upon the CounterType of the counter
+     * instance used when it was constructed.
+     *
+     * @param index The index of the counter state in the array to be
+     *              updated, normally a value in the range [0,
+     *              size-1].  If index >= size, no counter state will be
+     *              updated.
+     */
     void count(in bit<32> index);
 }
 
 extern direct_counter {
+    /***
+     * A direct_counter object is created by calling its constructor.
+     * You must provide a choice of whether to maintain only a packet
+     * count (CounterType.packets), only a byte count
+     * (CounterType.bytes), or both (CounterType.packets_and_bytes).
+     * After constructing the object, you can associate it with at
+     * most one table, by adding the following table property to the
+     * definition of that table:
+     *
+     *     counters = <object_name>;
+     */
     direct_counter(CounterType type);
+    /***
+     * The count() method is actually unnecessary in the v1model
+     * architecture.  This is because after a direct_counter object
+     * has been associated with a table as described in the
+     * documentation for the direct_counter constructor, every time
+     * the table is applied and a table entry is matched, the counter
+     * state associated with the matching entry is read, modified, and
+     * written back, atomically relative to the processing of other
+     * packets, regardless of whether the count() method is called in
+     * the body of that action.
+     */
     void count();
 }
 
+#define V1MODEL_METER_COLOR_GREEN  0
+#define V1MODEL_METER_COLOR_YELLOW 1
+#define V1MODEL_METER_COLOR_RED    2
+
 extern meter {
     meter(bit<32> size, MeterType type);
+    /***
+     * execute_meter() causes the meter state with the specified index
+     * to be read, modified, and written back, atomically relative to
+     * the processing of other packets, and an integer encoding of one
+     * of the colors green, yellow, or red to be written to the result
+     * out parameter.
+     *
+     * @param index The index of the meter state in the array to be
+     *              updated, normally a value in the range [0,
+     *              size-1].  If index >= size, no meter state will be
+     *              updated.
+     * @param result Type T must be bit<W> with W >= 2.  When index is
+     *              in range, the value of result will be assigned 0
+     *              for color GREEN, 1 for color YELLOW, and 2 for
+     *              color RED (see RFC 2697 and RFC 2698 for the
+     *              meaning of these colors).  When index is out of
+     *              range, the final value of result is not specified,
+     *              and should be ignored by the caller.
+     */
     void execute_meter<T>(in bit<32> index, out T result);
 }
 
 extern direct_meter<T> {
+    /***
+     * A direct_meter object is created by calling its constructor.
+     * You must provide a choice of whether to meter based on the
+     * number of packets, regardless of their size
+     * (MeterType.packets), or based upon the number of bytes the
+     * packets contain (MeterType.bytes).  After constructing the
+     * object, you can associate it with at most one table, by adding
+     * the following table property to the definition of that table:
+     *
+     *     meters = <object_name>;
+     */
     direct_meter(MeterType type);
+    /***
+     * After a direct_meter object has been associated with a table as
+     * described in the documentation for the direct_meter
+     * constructor, every time the table is applied and a table entry
+     * is matched, the meter state associated with the matching entry
+     * is read, modified, and written back, atomically relative to the
+     * processing of other packets, regardless of whether the read()
+     * method is called in the body of that action.
+     *
+     * read() may only be called within an action executed as a result
+     * of matching a table entry, of a table that has a direct_meter
+     * associated with it.  Calling read() causes an integer encoding
+     * of one of the colors green, yellow, or red to be written to the
+     * result out parameter.
+     *
+     * @param result Type T must be bit<W> with W >= 2.  The value of
+     *              result will be assigned 0 for color GREEN, 1 for
+     *              color YELLOW, and 2 for color RED (see RFC 2697
+     *              and RFC 2698 for the meaning of these colors).
+     */
     void read(out T result);
 }
 
 extern register<T> {
     register(bit<32> size);
+    /***
+     * read() reads the state of the register array stored at the
+     * specified index, and returns it as the value written to the
+     * result parameter.
+     *
+     * @param index The index of the register array element to be
+     *              read, normally a value in the range [0, size-1].
+     * @param result Only types T that are bit<W> are currently
+     *              supported.  When index is in range, the value of
+     *              result becomes the value read from the register
+     *              array element.  When index >= size, the final
+     *              value of result is not specified, and should be
+     *              ignored by the caller.
+     */
     void read(out T result, in bit<32> index);
+    /***
+     * write() writes the state of the register array at the specified
+     * index, with the value provided by the value parameter.
+     *
+     * If you wish to perform a read() followed later by a write() to
+     * the same register array element, and you wish the
+     * read-modify-write sequence to be atomic relative to other
+     * processed packets, then there may be parallel implementations
+     * of the v1model architecture for which you must execute them in
+     * a P4_16 block annotated with an @atomic annotation.  See the
+     * P4_16 language specification description of the @atomic
+     * annotation for more details.
+     *
+     * @param index The index of the register array element to be
+     *              written, normally a value in the range [0,
+     *              size-1].  If index >= size, no register state will
+     *              be updated.
+     * @param value Only types T that are bit<W> are currently
+     *              supported.  When index is in range, this
+     *              parameter's value is written into the register
+     *              array element specified by index.
+     */
     void write(in bit<32> index, in T value);
 }
 
@@ -117,8 +241,15 @@ extern action_profile {
     action_profile(bit<32> size);
 }
 
-// Get a random number in the range lo..hi
+/***
+ * Generate a random number in the range lo..hi, inclusive, and write
+ * it to the result parameter.  The value written to result is not
+ * specified if lo > hi.
+ *
+ * @param T          Must be a type bit<W>
+ */
 extern void random<T>(out T result, in T lo, in T hi);
+
 // If the type T is a named struct, the name is used
 // to generate the control-plane API.
 extern void digest<T>(in bit<32> receiver, in T data);
@@ -134,7 +265,39 @@ enum HashAlgorithm {
     xor16
 }
 
+@deprecated("Please use mark_to_drop(standard_metadata) instead.")
 extern void mark_to_drop();
+
+/***
+ * mark_to_drop(standard_metadata) is a primitive action that modifies
+ * standard_metadata.egress_spec to an implementation-specific special
+ * value that in some cases causes the packet to be dropped at the end
+ * of ingress or egress processing.  It also assigns 0 to
+ * standard_metadata.mcast_grp.  Either of those metadata fields may
+ * be changed by executing later P4 code, after calling
+ * mark_to_drop(), and this can change the resulting behavior of the
+ * packet to do something other than drop.
+ *
+ * See
+ * https://github.com/p4lang/behavioral-model/blob/master/docs/simple_switch.md
+ * -- in particular the section "Pseudocode for what happens at the
+ * end of ingress and egress processing" -- for the relative priority
+ * of the different possible things that can happen to a packet when
+ * ingress and egress processing are complete.
+ */
+extern void mark_to_drop(inout standard_metadata_t standard_metadata);
+
+/***
+ * Calculate a hash function of the value specified by the data
+ * parameter.  The value written to the out parameter named result
+ * will always be in the range [base, base+max-1] inclusive, if max >=
+ * 1.  If max=0, the value written to result will always be base.
+ *
+ * @param O          Must be a type bit<W>
+ * @param D          Must be a tuple type where all the fields are bit-fields (type bit<W> or int<W>) or varbits.
+ * @param T          Must be a type bit<W>
+ * @param M          Must be a type bit<W>
+ */
 extern void hash<O, T, D, M>(out O result, in HashAlgorithm algo, in T base, in D data, in M max);
 
 extern action_selector {
@@ -156,7 +319,7 @@ extern Checksum16 {
 Verifies the checksum of the supplied data.
 If this method detects that a checksum of the data is not correct it
 sets the standard_metadata checksum_error bit.
-@param T          Must be a tuple type where all the fields are bit-fields or varbits.
+@param T          Must be a tuple type where all the tuple elements are of type bit<W>, int<W>, or varbit<W>.
                   The total dynamic length of the fields is a multiple of the output size.
 @param O          Checksum type; must be bit<X> type.
 @param condition  If 'false' the verification always succeeds.
@@ -168,7 +331,7 @@ sets the standard_metadata checksum_error bit.
 extern void verify_checksum<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
 /**
 Computes the checksum of the supplied data.
-@param T          Must be a tuple type where all the fields are bit-fields or varbits.
+@param T          Must be a tuple type where all the tuple elements are of type bit<W>, int<W>, or varbit<W>.
                   The total dynamic length of the fields is a multiple of the output size.
 @param O          Output type; must be bit<X> type.
 @param condition  If 'false' the checksum is not changed
@@ -184,7 +347,7 @@ Verifies the checksum of the supplied data including the payload.
 The payload is defined as "all bytes of the packet which were not parsed by the parser".
 If this method detects that a checksum of the data is not correct it
 sets the standard_metadata checksum_error bit.
-@param T          Must be a tuple type where all the fields are bit-fields or varbits.
+@param T          Must be a tuple type where all the tuple elements are of type bit<W>, int<W>, or varbit<W>.
                   The total dynamic length of the fields is a multiple of the output size.
 @param O          Checksum type; must be bit<X> type.
 @param condition  If 'false' the verification always succeeds.
@@ -197,7 +360,7 @@ extern void verify_checksum_with_payload<T, O>(in bool condition, in T data, ino
 /**
 Computes the checksum of the supplied data including the payload.
 The payload is defined as "all bytes of the packet which were not parsed by the parser".
-@param T          Must be a tuple type where all the fields are bit-fields or varbits.
+@param T          Must be a tuple type where all the tuple elements are of type bit<W>, int<W>, or varbit<W>.
                   The total dynamic length of the fields is a multiple of the output size.
 @param O          Output type; must be bit<X> type.
 @param condition  If 'false' the checksum is not changed
@@ -247,6 +410,9 @@ update_checksum and update_checksum_with_payload methods,
 and return statements. */
 control ComputeChecksum<H, M>(inout H hdr,
                               inout M meta);
+
+/* The only legal statements in a Deparser control are: calls to the
+packet_out.emit() method. */
 @deparser
 control Deparser<H>(packet_out b, in H hdr);
 

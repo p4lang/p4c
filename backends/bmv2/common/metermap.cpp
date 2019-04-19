@@ -38,7 +38,13 @@ DirectMeterMap::DirectMeterInfo* DirectMeterMap::getInfo(const IR::IDeclaration*
  */
 void DirectMeterMap::setTable(const IR::IDeclaration* meter, const IR::P4Table* table) {
     auto info = getInfo(meter);
-    CHECK_NULL(info);
+    if (info == nullptr) {
+        ::error(ErrorType::ERR_INVALID,
+                "table with direct meter %2% must have"
+                " at least one action with a read method call",
+                table, meter);
+        return;
+    }
     if (info->table != nullptr)
         ::error(ErrorType::ERR_INVALID,
                 "%1%: Direct meters cannot be attached to multiple tables %2% and %3%",
@@ -87,7 +93,14 @@ void DirectMeterMap::setDestination(const IR::IDeclaration* meter,
  */
 void DirectMeterMap::setSize(const IR::IDeclaration* meter, unsigned size) {
     auto info = getInfo(meter);
-    CHECK_NULL(info);
+    if (info == nullptr) {
+        /* This case may be reached if a table has a direct_meter
+         * assigned to its 'meters' property, but none of its actions
+         * have a call to the 'read' method of that meter.  An error
+         * message is already printed elsewhere in this case, but we
+         * want to avoid a Compiler Bug. */
+        return;
+    }
     info->tableSize = size;
 }
 

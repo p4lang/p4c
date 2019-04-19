@@ -36,7 +36,7 @@ control EmptyIngress(inout headers_t headers, inout metadata_t meta, inout stand
 
 control EmptyEgress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     apply {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
 }
 

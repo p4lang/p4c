@@ -30,7 +30,7 @@ action empty() { }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
 
-    action drop() { mark_to_drop(); }
+    action drop() { mark_to_drop(smeta); }
 
     action_selector (HashAlgorithm.identity, 32w1024, 32w10) as;
 

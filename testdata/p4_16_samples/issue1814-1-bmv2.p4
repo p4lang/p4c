@@ -20,7 +20,7 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
     register<bit<1>>(1) testRegister;
 
     action drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
 
     action forward() {

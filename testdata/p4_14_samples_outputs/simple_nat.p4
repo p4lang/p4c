@@ -4,7 +4,6 @@
 struct intrinsic_metadata_t {
     bit<4>  mcast_grp;
     bit<4>  egress_rid;
-    bit<16> mcast_hash;
     bit<32> lf_field_list;
 }
 
@@ -129,7 +128,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.tcp.dstPort = meta.meta.tcp_dp;
     }
     @name("._drop") action _drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".do_cpu_encap") action do_cpu_encap() {
         hdr.cpu_header.setValid();
@@ -168,7 +167,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ethernet.dstAddr = dmac;
     }
     @name("._drop") action _drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".set_if_info") action set_if_info(bit<32> ipv4_addr, bit<48> mac_addr, bit<1> is_ext) {
         meta.meta.if_ipv4_addr = ipv4_addr;
@@ -185,7 +184,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".nat_miss_ext_to_int") action nat_miss_ext_to_int() {
         meta.meta.do_forward = 1w0;
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".nat_hit_int_to_ext") action nat_hit_int_to_ext(bit<32> srcAddr, bit<16> srcPort) {
         meta.meta.do_forward = 1w1;

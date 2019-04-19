@@ -212,7 +212,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.ing_metadata.egress_port = egress_port;
     }
     @name(".discard") action discard() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".send_packet") action send_packet() {
         standard_metadata.egress_spec = meta.ing_metadata.egress_port;

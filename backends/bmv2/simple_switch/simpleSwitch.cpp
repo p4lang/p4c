@@ -334,12 +334,14 @@ Util::IJson* ExternConverter_mark_to_drop::convertExternFunction(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
-    if (mc->arguments->size() != 0) {
-        modelError("Expected 0 arguments for %1%", mc);
+    if (mc->arguments->size() != 1) {
+        modelError("Expected 1 argument for %1%", mc);
         return nullptr;
     }
-    auto primitive = mkPrimitive("drop");
-    (void)mkParameters(primitive);
+    auto primitive = mkPrimitive("mark_to_drop");
+    auto params = mkParameters(primitive);
+    auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
+    params->append(dest);
     primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
     return primitive;
 }
@@ -607,8 +609,26 @@ void ExternConverter_direct_meter::convertExternInstance(
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto info = ctxt->structure->directMeterMap.getInfo(c);
-    CHECK_NULL(info);
-    CHECK_NULL(info->table);
+    if (info == nullptr) {
+        // This can happen if a direct_meter object is constructed,
+        // but then not associated with any table.  A warning message
+        // is already generated elsewhere regarding this.  We should
+        // not crash here.
+        return;
+    }
+    if (info->table == nullptr) {
+        // This can happen if a direct_meter object is constructed,
+        // and:
+        // + a read call is made in a table's action for the direct
+        //   meter, but the table has no 'meters = my_meter;' table
+        //   property.
+        // + the meter is incorrectly associated with a table via a
+        //   property like 'counters = my_meter;'.
+        ::error(ErrorType::ERR_INVALID,
+                "direct meter is not associated with any table"
+                " via 'meters' table property", inst);
+        return;
+    }
     CHECK_NULL(info->destinationField);
 
     auto jmtr = new Util::JsonObject();
@@ -960,8 +980,17 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
     auto program = tlb->getProgram();
     // These passes are logically bmv2-specific
-    PassManager simplify = {
-        new ParseAnnotations(),
+    PassManager simplify = {};
+
+    if (BMV2::BMV2Context::get().options().loadIRFromJson == false) {
+        // ParseAnnotations is added only in case of not using --fromJson flag
+        simplify.addPasses({
+            new ParseAnnotations(),
+        });
+    }
+    simplify.addPasses({
+        // Because --fromJSON flag is used, input sources are empty
+        // and ParseAnnotations should be skipped
         new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
         new P4::SynthesizeActions(refMap, typeMap,
@@ -978,7 +1007,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         new P4::RemoveAllUnusedDeclarations(refMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
-    };
+    });
 
     auto hook = options.getDebugHook();
     simplify.addDebugHook(hook);

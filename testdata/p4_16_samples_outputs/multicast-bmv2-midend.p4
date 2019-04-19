@@ -1,14 +1,6 @@
 #include <core.p4>
 #include <v1model.p4>
 
-struct intrinsic_metadata_t {
-    bit<16> mcast_grp;
-    bit<16> egress_rid;
-    bit<16> mcast_hash;
-    bit<32> lf_field_list;
-    bit<48> ingress_global_timestamp;
-}
-
 struct routing_metadata_t {
     bit<32> nhop_ipv4;
 }
@@ -35,12 +27,7 @@ header ipv4_t {
 }
 
 struct metadata {
-    bit<16> _intrinsic_metadata_mcast_grp0;
-    bit<16> _intrinsic_metadata_egress_rid1;
-    bit<16> _intrinsic_metadata_mcast_hash2;
-    bit<32> _intrinsic_metadata_lf_field_list3;
-    bit<48> _intrinsic_metadata_ingress_global_timestamp4;
-    bit<32> _routing_metadata_nhop_ipv45;
+    bit<32> _routing_metadata_nhop_ipv40;
 }
 
 struct headers {
@@ -74,7 +61,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.ethernet.srcAddr = smac;
     }
     @name("._drop") action _drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("egress.send_frame") table send_frame_0 {
         actions = {
@@ -101,19 +88,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".NoAction") action NoAction_7() {
     }
     @name(".bcast") action bcast() {
-        meta._intrinsic_metadata_mcast_grp0 = 16w1;
+        standard_metadata.mcast_grp = 16w1;
     }
     @name(".set_dmac") action set_dmac(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
     }
     @name("._drop") action _drop_2() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("._drop") action _drop_4() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
-        meta._routing_metadata_nhop_ipv45 = nhop_ipv4;
+        meta._routing_metadata_nhop_ipv40 = nhop_ipv4;
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
@@ -132,7 +119,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_6();
         }
         key = {
-            meta._routing_metadata_nhop_ipv45: exact @name("meta.routing_metadata.nhop_ipv4") ;
+            meta._routing_metadata_nhop_ipv40: exact @name("meta.routing_metadata.nhop_ipv4") ;
         }
         size = 512;
         default_action = NoAction_6();

@@ -186,8 +186,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-action my_drop() {
-    mark_to_drop();
+action my_drop(inout standard_metadata_t smeta) {
+    mark_to_drop(smeta);
 }
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     action set_l2ptr(bit<32> l2ptr) {
@@ -199,9 +199,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         actions = {
             set_l2ptr();
-            my_drop();
+            my_drop(standard_metadata);
         }
-        default_action = my_drop();
+        default_action = my_drop(standard_metadata);
     }
     action set_bd_dmac_intf(bit<24> bd, bit<48> dmac, bit<9> intf) {
         meta.fwd_metadata.out_bd = bd;
@@ -215,9 +215,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         actions = {
             set_bd_dmac_intf();
-            my_drop();
+            my_drop(standard_metadata);
         }
-        default_action = my_drop();
+        default_action = my_drop(standard_metadata);
     }
     apply {
         ipv4_da_lpm.apply();
@@ -235,9 +235,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         actions = {
             rewrite_mac();
-            my_drop();
+            my_drop(standard_metadata);
         }
-        default_action = my_drop();
+        default_action = my_drop(standard_metadata);
     }
     apply {
         send_frame.apply();

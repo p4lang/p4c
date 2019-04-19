@@ -56,8 +56,8 @@ struct headers_t {
     ipv4_t     ipv4;
 }
 
-action my_drop() {
-    mark_to_drop();
+action my_drop(inout standard_metadata_t smeta) {
+    mark_to_drop(smeta);
 }
 
 parser ParserImpl(packet_in packet,
@@ -96,9 +96,9 @@ control ingress(inout headers_t hdr,
         }
         actions = {
             set_output;
-            my_drop;
+            my_drop(standard_metadata);
         }
-        default_action = my_drop;
+        default_action = my_drop(standard_metadata);
     }
 
     table ipv4_sa_filter {
@@ -106,7 +106,7 @@ control ingress(inout headers_t hdr,
             hdr.ipv4.srcAddr : ternary;
         }
         actions = {
-            my_drop;
+            my_drop(standard_metadata);
             NoAction;
         }
         const default_action = NoAction;

@@ -21,10 +21,10 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     }
     @name("IngressI.ap") action_profile(32w128) ap_0;
     @name("IngressI.drop") action drop_1() {
-        mark_to_drop();
+        mark_to_drop(smeta);
     }
     @name("IngressI.drop") action drop_3() {
-        mark_to_drop();
+        mark_to_drop(smeta);
     }
     @name("IngressI.indirect") table indirect_0 {
         key = {

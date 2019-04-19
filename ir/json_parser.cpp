@@ -32,6 +32,44 @@ std::string JsonObject::get_type() const {
         return *(dynamic_cast<JsonString*>(find("Node_Type")->second));
 }
 
+std::string JsonObject::get_filename() const {
+    if (find("filename") == end())
+        return "";
+    else
+        return *(dynamic_cast<JsonString*>(find("filename")->second));
+}
+
+std::string JsonObject::get_sourceFragment() const {
+    if (find("source_fragment") == end())
+        return "";
+    else
+        return *(dynamic_cast<JsonString*>(find("source_fragment")->second));
+}
+
+int JsonObject::get_line() const {
+    if (find("line") == end())
+        return -1;
+    else
+        return *(find("line")->second->to<JsonNumber>());
+}
+
+int JsonObject::get_column() const {
+    if (find("column") == end())
+        return -1;
+    else
+        return *(find("column")->second->to<JsonNumber>());
+}
+
+JsonObject JsonObject::get_sourceJson() const {
+    if (find("Source_Info") == end()) {
+        JsonObject obj;
+        obj.setSrcInfo(false);
+        return obj;
+    } else {
+        return *(dynamic_cast<JsonObject*>(find("Source_Info")->second));
+    }
+}
+
 // Hack to make << operator work multi-threaded
 static thread_local int level = 0;
 

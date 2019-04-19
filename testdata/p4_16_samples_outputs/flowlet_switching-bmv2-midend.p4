@@ -10,13 +10,6 @@ struct ingress_metadata_t {
     bit<32> nhop_ipv4;
 }
 
-struct intrinsic_metadata_t {
-    bit<48> ingress_global_timestamp;
-    bit<32> lf_field_list;
-    bit<16> mcast_grp;
-    bit<16> egress_rid;
-}
-
 header ethernet_t {
     bit<48> dstAddr;
     bit<48> srcAddr;
@@ -59,10 +52,6 @@ struct metadata {
     bit<32> _ingress_metadata_flowlet_lasttime3;
     bit<14> _ingress_metadata_ecmp_offset4;
     bit<32> _ingress_metadata_nhop_ipv45;
-    bit<48> _intrinsic_metadata_ingress_global_timestamp6;
-    bit<32> _intrinsic_metadata_lf_field_list7;
-    bit<16> _intrinsic_metadata_mcast_grp8;
-    bit<16> _intrinsic_metadata_egress_rid9;
 }
 
 struct headers {
@@ -105,7 +94,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.ethernet.srcAddr = smac;
     }
     @name("egress._drop") action _drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("egress.send_frame") table send_frame_0 {
         actions = {
@@ -155,13 +144,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("ingress.flowlet_id") register<bit<16>>(32w8192) flowlet_id_0;
     @name("ingress.flowlet_lasttime") register<bit<32>>(32w8192) flowlet_lasttime_0;
     @name("ingress._drop") action _drop_2() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("ingress._drop") action _drop_5() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("ingress._drop") action _drop_6() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("ingress.set_ecmp_select") action set_ecmp_select(bit<8> ecmp_base, bit<8> ecmp_count) {
         hash<bit<14>, bit<10>, tuple_0, bit<20>>(meta._ingress_metadata_ecmp_offset4, HashAlgorithm.crc16, (bit<10>)ecmp_base, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort, meta._ingress_metadata_flowlet_id2 }, (bit<20>)ecmp_count);
@@ -174,10 +163,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("ingress.lookup_flowlet_map") action lookup_flowlet_map() {
         hash<bit<13>, bit<13>, tuple_1, bit<26>>(meta._ingress_metadata_flowlet_map_index1, HashAlgorithm.crc16, 13w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort }, 26w13);
         flowlet_id_0.read(meta._ingress_metadata_flowlet_id2, (bit<32>)meta._ingress_metadata_flowlet_map_index1);
-        meta._ingress_metadata_flow_ipg0 = (bit<32>)meta._intrinsic_metadata_ingress_global_timestamp6;
+        meta._ingress_metadata_flow_ipg0 = (bit<32>)standard_metadata.ingress_global_timestamp;
         flowlet_lasttime_0.read(meta._ingress_metadata_flowlet_lasttime3, (bit<32>)meta._ingress_metadata_flowlet_map_index1);
-        meta._ingress_metadata_flow_ipg0 = (bit<32>)meta._intrinsic_metadata_ingress_global_timestamp6 - meta._ingress_metadata_flowlet_lasttime3;
-        flowlet_lasttime_0.write((bit<32>)meta._ingress_metadata_flowlet_map_index1, (bit<32>)meta._intrinsic_metadata_ingress_global_timestamp6);
+        meta._ingress_metadata_flow_ipg0 = (bit<32>)standard_metadata.ingress_global_timestamp - meta._ingress_metadata_flowlet_lasttime3;
+        flowlet_lasttime_0.write((bit<32>)meta._ingress_metadata_flowlet_map_index1, (bit<32>)standard_metadata.ingress_global_timestamp);
     }
     @name("ingress.set_dmac") action set_dmac(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;

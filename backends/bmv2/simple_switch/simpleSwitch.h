@@ -35,6 +35,7 @@ limitations under the License.
 #include "backends/bmv2/common/parser.h"
 #include "backends/bmv2/common/programStructure.h"
 #include "backends/bmv2/common/sharedActionSelectorCheck.h"
+#include "backends/bmv2/common/options.h"
 
 namespace BMV2 {
 
@@ -101,10 +102,15 @@ class SimpleSwitchExpressionConverter : public ExpressionConverter {
     Util::IJson* convertParam(const IR::Parameter* param, cstring fieldName) override {
         if (isStandardMetadataParameter(param)) {
             auto result = new Util::JsonObject();
-            result->emplace("type", "field");
-            auto e = BMV2::mkArrayField(result, "value");
-            e->append("standard_metadata");
-            e->append(fieldName);
+            if (fieldName != "") {
+                result->emplace("type", "field");
+                auto e = BMV2::mkArrayField(result, "value");
+                e->append("standard_metadata");
+                e->append(fieldName);
+            } else {
+                result->emplace("type", "header");
+                result->emplace("value", "standard_metadata");
+            }
             return result;
         }
         return nullptr;

@@ -327,7 +327,7 @@ void setPreamble(::p4::config::v1::Preamble* preamble,
 
 /// Calls setPreamble with a unconditionally false predicate (no annotation
 /// filtered out).
-void setPreamble(::p4::config::v1::Preamble* preamble,
+inline void setPreamble(::p4::config::v1::Preamble* preamble,
                  p4rt_id_t id, cstring name, cstring alias,
                  const IR::IAnnotated* annotated) {
     setPreamble(preamble, id, name, alias, annotated, [](cstring){ return false; });

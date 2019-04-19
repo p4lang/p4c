@@ -1,14 +1,6 @@
 #include <core.p4>
 #include <v1model.p4>
 
-struct intrinsic_metadata_t {
-    bit<16> mcast_grp;
-    bit<16> egress_rid;
-    bit<16> mcast_hash;
-    bit<32> lf_field_list;
-    bit<48> ingress_global_timestamp;
-}
-
 struct routing_metadata_t {
     bit<32> nhop_ipv4;
 }
@@ -35,16 +27,14 @@ header ipv4_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata") 
-    intrinsic_metadata_t intrinsic_metadata;
-    @name("routing_metadata") 
+    @name("routing_metadata")
     routing_metadata_t   routing_metadata;
 }
 
 struct headers {
-    @name("ethernet") 
+    @name("ethernet")
     ethernet_t ethernet;
-    @name("ipv4") 
+    @name("ipv4")
     ipv4_t     ipv4;
 }
 
@@ -70,7 +60,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.ethernet.srcAddr = smac;
     }
     @name("._drop") action _drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("send_frame") table send_frame {
         actions = {
@@ -89,13 +79,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".bcast") action bcast() {
-        meta.intrinsic_metadata.mcast_grp = 1;
+        standard_metadata.mcast_grp = 1;
     }
     @name(".set_dmac") action set_dmac(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
     }
     @name("._drop") action _drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
         meta.routing_metadata.nhop_ipv4 = nhop_ipv4;

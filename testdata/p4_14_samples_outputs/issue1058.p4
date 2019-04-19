@@ -2,7 +2,7 @@
 #include <v1model.p4>
 
 struct intrinsic_metadata_t {
-    bit<48> ingress_global_tstamp;
+    bit<48> ingress_global_timestamp;
 }
 
 struct meta_t {

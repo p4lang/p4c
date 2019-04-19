@@ -1,0 +1,29 @@
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 33603093
+    name: "cEgress.e"
+    alias: "e"
+  }
+  action_refs {
+    id: 16829978
+  }
+  size: 1024
+  idle_timeout_behavior: NOTIFY_CONTROL
+}
+actions {
+  preamble {
+    id: 16833049
+    name: "send_to_port"
+    alias: "send_to_port"
+  }
+}
+actions {
+  preamble {
+    id: 16829978
+    name: "cEgress.add"
+    alias: "add"
+  }
+}

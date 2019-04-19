@@ -263,8 +263,8 @@ parser ParserImpl(packet_in packet,
     }
 }
 
-action my_drop() {
-    mark_to_drop();
+action my_drop(inout standard_metadata_t smeta) {
+    mark_to_drop(smeta);
 }
 
 control ingress(inout headers hdr,
@@ -280,9 +280,9 @@ control ingress(inout headers hdr,
         }
         actions = {
             set_l2ptr;
-            my_drop;
+            my_drop(standard_metadata);
         }
-        default_action = my_drop;
+        default_action = my_drop(standard_metadata);
     }
 
     action set_bd_dmac_intf(bit<24> bd, bit<48> dmac, bit<9> intf) {
@@ -297,9 +297,9 @@ control ingress(inout headers hdr,
         }
         actions = {
             set_bd_dmac_intf;
-            my_drop;
+            my_drop(standard_metadata);
         }
-        default_action = my_drop;
+        default_action = my_drop(standard_metadata);
     }
 
     apply {
@@ -321,9 +321,9 @@ control egress(inout headers hdr,
         }
         actions = {
             rewrite_mac;
-            my_drop;
+            my_drop(standard_metadata);
         }
-        default_action = my_drop;
+        default_action = my_drop(standard_metadata);
     }
 
     apply {

@@ -1,4 +1,4 @@
-dup-param1.p4(17): [--Werror=legacy] error: Duplicated parameter name: p and p
+dup-param1.p4(17): [--Werror=duplicate] error: p duplicates p.
 control MyIngress<p>(inout bit<32> p) {
                   ^
 dup-param1.p4(17)

@@ -4,7 +4,6 @@
 struct intrinsic_metadata_t {
     bit<4>  mcast_grp;
     bit<4>  egress_rid;
-    bit<16> mcast_hash;
     bit<32> lf_field_list;
 }
 
@@ -52,7 +51,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".my_meter") meter(32w16384, MeterType.packets) my_meter_0;
     @name("._drop") action _drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("._nop") action _nop() {
     }

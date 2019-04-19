@@ -20,7 +20,7 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
     }
     @name("IngressImpl.testRegister") register<bit<1>>(32w1) testRegister_0;
     @name("IngressImpl.drop") action drop_1() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("IngressImpl.forward") action forward() {
         standard_metadata.egress_spec = 9w1;

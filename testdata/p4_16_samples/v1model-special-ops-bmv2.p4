@@ -84,8 +84,8 @@ struct headers_t {
     ipv4_t     ipv4;
 }
 
-action my_drop() {
-    mark_to_drop();
+action my_drop(inout standard_metadata_t smeta) {
+    mark_to_drop(smeta);
 }
 
 parser ParserImpl(packet_in packet,
@@ -260,9 +260,9 @@ control ingress(inout headers_t hdr,
             set_mcast_grp;
             do_resubmit;
             do_clone_i2e;
-            my_drop;
+            my_drop(standard_metadata);
         }
-        default_action = my_drop;
+        default_action = my_drop(standard_metadata);
     }
 
     action set_bd_dmac_intf(bit<24> bd, bit<48> dmac, bit<9> intf) {
@@ -277,9 +277,9 @@ control ingress(inout headers_t hdr,
         }
         actions = {
             set_bd_dmac_intf;
-            my_drop;
+            my_drop(standard_metadata);
         }
-        default_action = my_drop;
+        default_action = my_drop(standard_metadata);
     }
 
     apply {
@@ -374,9 +374,9 @@ control egress(inout headers_t hdr,
             rewrite_mac;
             do_recirculate;
             do_clone_e2e;
-            my_drop;
+            my_drop(standard_metadata);
         }
-        default_action = my_drop;
+        default_action = my_drop(standard_metadata);
     }
 
     apply {

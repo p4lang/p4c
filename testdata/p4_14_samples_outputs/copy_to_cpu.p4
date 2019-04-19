@@ -4,7 +4,6 @@
 struct intrinsic_metadata_t {
     bit<4>  mcast_grp;
     bit<4>  egress_rid;
-    bit<16> mcast_hash;
     bit<32> lf_field_list;
 }
 
@@ -50,7 +49,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("._drop") action _drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".do_cpu_encap") action do_cpu_encap() {
         hdr.cpu_header.setValid();

@@ -44,8 +44,8 @@ struct headers {
     ethernet_t ethernet;
 }
 
-action my_drop() {
-    mark_to_drop();
+action my_drop(inout standard_metadata_t smeta) {
+    mark_to_drop(smeta);
 }
 
 parser ParserImpl(packet_in packet,
@@ -79,9 +79,9 @@ control ingress(inout headers hdr,
         }
         actions = {
             set_port;
-            my_drop;
+            my_drop(standard_metadata);
         }
-        default_action = my_drop;
+        default_action = my_drop(standard_metadata);
     }
     apply {
         mac_da.apply();

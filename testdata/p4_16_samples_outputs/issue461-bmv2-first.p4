@@ -36,8 +36,8 @@ struct headers {
     ipv4_t     ipv4;
 }
 
-action my_drop() {
-    mark_to_drop();
+action my_drop(inout standard_metadata_t smeta) {
+    mark_to_drop(smeta);
 }
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     const bit<16> ETHERTYPE_IPV4 = 16w0x800;
@@ -65,7 +65,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     action drop_with_count() {
         ipv4_da_lpm_stats.count();
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     action set_bd_dmac_intf(bit<24> bd, bit<48> dmac, bit<9> intf) {
         meta.fwd_metadata.out_bd = bd;
@@ -87,12 +87,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     table mac_da {
         actions = {
             set_bd_dmac_intf();
-            my_drop();
+            my_drop(standard_metadata);
         }
         key = {
             meta.fwd_metadata.l2ptr: exact @name("meta.fwd_metadata.l2ptr") ;
         }
-        default_action = my_drop();
+        default_action = my_drop(standard_metadata);
     }
     apply {
         ipv4_da_lpm.apply();
@@ -107,12 +107,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     table send_frame {
         actions = {
             rewrite_mac();
-            my_drop();
+            my_drop(standard_metadata);
         }
         key = {
             meta.fwd_metadata.out_bd: exact @name("meta.fwd_metadata.out_bd") ;
         }
-        default_action = my_drop();
+        default_action = my_drop(standard_metadata);
     }
     apply {
         send_frame.apply();
