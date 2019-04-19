@@ -174,6 +174,8 @@ class BackendDriver:
                 self.add_command_option('compiler', "--fromJSON {}".format(opts.json_source))
             if opts.pretty_print:
                 self.add_command_option('compiler', "--pp {}".format(opts.pretty_print))
+            if opts.ndebug_mode:
+                self.add_command_option('compiler', "--ndebug")
 
         if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER") and \
            'assembler' in self._commands and opts.debug:

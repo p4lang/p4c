@@ -54,6 +54,7 @@ limitations under the License.
 #include "midend/tableHit.h"
 #include "midend/midEndLast.h"
 #include "midend/fillEnumMap.h"
+#include "midend/removeAssertAssume.h"
 
 namespace BMV2 {
 
@@ -89,6 +90,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options) : MidEnd(options) {
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     if (BMV2::BMV2Context::get().options().loadIRFromJson == false) {
         addPasses({
+            options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
             new P4::EliminateNewtype(&refMap, &typeMap),
             new P4::EliminateSerEnums(&refMap, &typeMap),
             new P4::RemoveActionParameters(&refMap, &typeMap),

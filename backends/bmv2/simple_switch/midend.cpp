@@ -55,6 +55,7 @@ limitations under the License.
 #include "midend/tableHit.h"
 #include "midend/midEndLast.h"
 #include "midend/fillEnumMap.h"
+#include "midend/removeAssertAssume.h"
 
 namespace BMV2 {
 
@@ -63,6 +64,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options) : MidEnd(option
     if (BMV2::BMV2Context::get().options().loadIRFromJson == false) {
         auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits("v1model.p4"));
         addPasses({
+            options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
             new P4::CheckTableSize(),
             new P4::EliminateNewtype(&refMap, &typeMap),
             new P4::EliminateSerEnums(&refMap, &typeMap),
@@ -109,7 +111,6 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options) : MidEnd(option
             new P4::CompileTimeOperations(),
             new P4::TableHit(&refMap, &typeMap),
             new P4::RemoveLeftSlices(&refMap, &typeMap),
-
             // p4c-bm removed unused action parameters. To produce a compatible
             // control plane API, we remove them as well for P4-14 programs.
             isv1 ? new P4::RemoveUnusedActionParameters(&refMap) : nullptr,

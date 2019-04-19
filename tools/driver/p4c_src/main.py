@@ -151,6 +151,9 @@ def main():
                         choices = ["p4-14", "p4_14", "p4-16", "p4_16"],
                         help="Treat subsequent input files as having type language.",
                         action="store", default="p4-16")
+    parser.add_argument("--ndebug", dest="ndebug_mode",
+                        help="Compile program in non-debug mode.\n",
+                        action="store_true", default=False)
 
     if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
         add_developer_options(parser)

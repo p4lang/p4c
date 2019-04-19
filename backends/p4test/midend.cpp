@@ -51,6 +51,7 @@ limitations under the License.
 #include "midend/simplifySelectCases.h"
 #include "midend/simplifySelectList.h"
 #include "midend/tableHit.h"
+#include "midend/removeAssertAssume.h"
 
 namespace P4Test {
 
@@ -78,6 +79,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
     // TODO: lower errors to integers
     // TODO: handle bit-slices as out arguments
     addPasses({
+        options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
         new P4::EliminateNewtype(&refMap, &typeMap),
         new P4::EliminateSerEnums(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),

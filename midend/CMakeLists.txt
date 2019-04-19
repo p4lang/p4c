@@ -44,6 +44,7 @@ set (MIDEND_SRCS
   tableHit.cpp
   validateProperties.cpp
   fillEnumMap.cpp
+  removeAssertAssume.cpp
   )
 
 set (MIDEND_HDRS
@@ -83,6 +84,7 @@ set (MIDEND_HDRS
   tableHit.h
   validateProperties.h
   fillEnumMap.h
+  removeAssertAssume.h
   )
 
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${MIDEND_SRCS};${MIDEND_HDRS}")
