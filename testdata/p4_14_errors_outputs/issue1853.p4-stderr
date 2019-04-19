@@ -1,0 +1,3 @@
+issue1853.p4(26): [--Werror=type-error] error: hdr.value.last: 'last' and 'next' for stacks can only be used in a parser
+    modify_field(value[last].bos, 0);
+                 ^^^^^^^^^^^
