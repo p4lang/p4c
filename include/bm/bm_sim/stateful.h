@@ -69,7 +69,6 @@ class Register : public Data {
   void export_bytes() override;
 
  private:
-  int nbits;
   Bignum mask{1};
   // keep a pointer to parent RegisterArray so that export_bytes() can notify
   // write operations

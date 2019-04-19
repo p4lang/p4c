@@ -673,8 +673,8 @@ TEST_F(ConditionalsTest, Stacks) {
 
   // DEREFERENCE_STACK
   {
-    auto build_condition = [this, &base_condition](const std::string &name,
-                                                   size_t index) {
+    auto build_condition = [&base_condition](const std::string &name,
+                                             size_t index) {
       auto c = base_condition(name);
       c->push_back_load_const(Data(index));
       c->push_back_op(ExprOpcode::DEREFERENCE_HEADER_STACK);

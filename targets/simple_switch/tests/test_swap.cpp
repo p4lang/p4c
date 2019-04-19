@@ -147,7 +147,8 @@ TEST_F(SimpleSwitch_SwapP4, Swap) {
   bm::RuntimeInterface::ErrorCode rc;
   const auto rc_success = bm::RuntimeInterface::ErrorCode::SUCCESS;
 
-  auto swap_1_check = [this, port_in]() {
+  // port_in is not required to be captured as per standard
+  auto swap_1_check = [this]() {
     int recv_port = -1;
     char recv_buffer[2];
 
@@ -165,7 +166,7 @@ TEST_F(SimpleSwitch_SwapP4, Swap) {
     ASSERT_EQ(port_1_hit, recv_port);
   };
 
-  auto swap_2_check = [this, port_in]() {
+  auto swap_2_check = [this]() {
     int recv_port = -1;
     char recv_buffer[4];
 

@@ -27,7 +27,7 @@
 namespace bm {
 
 Register::Register(int nbits, const RegisterArray *register_array)
-    : nbits(nbits), register_array(register_array) {
+    : register_array(register_array) {
   mask <<= nbits; mask -= 1;
 }
 

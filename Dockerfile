@@ -21,8 +21,9 @@ ARG sswitch_grpc=yes
 ENV BM_DEPS automake \
             build-essential \
             clang-3.8 \
+            clang-6.0 \
             curl \
-            g++-6 \
+            g++-7 \
             git \
             lcov \
             libjudy-dev \
