@@ -1,0 +1,27 @@
+# Parser should get no error, and extract 0-length custom header
+packet 2 ffffffffffff a5a5a5a5a5a5 0000 deadbeef
+expect 1 ffffffffff00 a5a5a5a5a5a5 0000 deadbeef $
+
+# Parser should get no error, and extract 8-bit long custom header
+packet 2 ffffffffffff a5a5a5a5a5a5 0008 5a deadbeef
+expect 1 ffffffffff00 a5a5a5a5a5a5 0008 deadbeef $
+
+# Parser should get no error, and extract 16-bit long custom header
+packet 2 ffffffffffff a5a5a5a5a5a5 0010 5a5a deadbeef
+expect 1 ffffffffff00 a5a5a5a5a5a5 0010 deadbeef $
+
+# Parser should experience error HeaderTooShort.
+packet 2 ffffffffffff a5a5a5a5a5a5 0018 5a5a5a deadbeef
+expect 1 ffffffffff04 a5a5a5a5a5a5 0018 5a5a5a deadbeef $
+
+# Parser should experience error PacketTooShort.
+packet 2 ffffffffffff a5a5a5a5a5a5 0010 5a
+expect 1 ffffffffff01 a5a5a5a5a5a5 0010 5a $
+
+# Parser should experience error ParserInvalidArgument.
+packet 2 ffffffffffff a5a5a5a5a5a5 0001 deadbeef
+expect 1 ffffffffff06 a5a5a5a5a5a5 0001 deadbeef $
+
+# Parser should experience error ParserInvalidArgument.
+packet 2 ffffffffffff a5a5a5a5a5a5 0007 deadbeef
+expect 1 ffffffffff06 a5a5a5a5a5a5 0007 deadbeef $
