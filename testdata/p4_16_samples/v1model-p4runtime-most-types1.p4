@@ -331,10 +331,6 @@ struct valueset1_t {
 struct metadata_t {
 }
 
-action my_drop() {
-    mark_to_drop();
-}
-
 parser ParserImpl(packet_in packet,
                   out headers_t hdr,
                   inout metadata_t meta,
