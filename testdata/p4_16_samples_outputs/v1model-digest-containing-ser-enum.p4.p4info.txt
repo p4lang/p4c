@@ -76,13 +76,6 @@ actions {
 }
 actions {
   preamble {
-    id: 16805608
-    name: "MyIngress.drop"
-    alias: "drop"
-  }
-}
-actions {
-  preamble {
     id: 16837735
     name: "MyIngress.set_dmac"
     alias: "set_dmac"
@@ -91,6 +84,13 @@ actions {
     id: 1
     name: "dstAddr"
     bitwidth: 48
+  }
+}
+actions {
+  preamble {
+    id: 16805608
+    name: "MyIngress.drop"
+    alias: "drop"
   }
 }
 actions {
@@ -252,6 +252,7 @@ type_info {
     members: "StackOutOfBounds"
     members: "HeaderTooShort"
     members: "ParserTimeout"
+    members: "ParserInvalidArgument"
     members: "UnreachableState"
   }
   serializable_enums {

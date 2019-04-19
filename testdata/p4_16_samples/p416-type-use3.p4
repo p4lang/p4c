@@ -143,6 +143,7 @@ control ingress(inout headers_t hdr,
         hdr.custom.ettd = ettd;
         hdr.custom.ettt = ettt;
     }
+    action my_drop() {}
 
     table custom_table {
         key = {

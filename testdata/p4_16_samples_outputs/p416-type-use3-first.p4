@@ -50,9 +50,6 @@ struct headers_t {
     custom_t   custom;
 }
 
-action my_drop() {
-    mark_to_drop();
-}
 parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
     const bit<16> ETHERTYPE_CUSTOM = 16w0xdead;
     state start {
@@ -91,6 +88,8 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         hdr.custom.etdt = etdt;
         hdr.custom.ettd = ettd;
         hdr.custom.ettt = ettt;
+    }
+    action my_drop() {
     }
     table custom_table {
         key = {

@@ -155,9 +155,6 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, in
 }
 
 control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    @name(".my_drop") action my_drop() {
-        mark_to_drop();
-    }
     @name("ingress.set_output") action set_output(bit<9> out_port) {
         stdmeta.egress_spec = out_port;
     }
@@ -188,6 +185,8 @@ control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metad
         hdr.custom.e0020010 = e0020010;
         hdr.custom.e0020020 = e0020020;
         hdr.custom.s0 = s0;
+    }
+    @name("ingress.my_drop") action my_drop() {
     }
     @name("ingress.custom_table") table custom_table_0 {
         key = {

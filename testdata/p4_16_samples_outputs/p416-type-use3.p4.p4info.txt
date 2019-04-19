@@ -119,16 +119,9 @@ tables {
     id: 16797750
   }
   action_refs {
-    id: 16815499
+    id: 16796819
   }
   size: 1024
-}
-actions {
-  preamble {
-    id: 16815499
-    name: "my_drop"
-    alias: "my_drop"
-  }
 }
 actions {
   preamble {
@@ -255,6 +248,13 @@ actions {
     type_name {
       name: "CustomTTT_t"
     }
+  }
+}
+actions {
+  preamble {
+    id: 16796819
+    name: "ingress.my_drop"
+    alias: "my_drop"
   }
 }
 type_info {

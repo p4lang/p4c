@@ -126,9 +126,6 @@ struct valueset1_t {
 struct metadata_t {
 }
 
-action my_drop() {
-    mark_to_drop();
-}
 parser ParserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     const bit<16> ETHERTYPE_CUSTOM = 16w0xdead;
     value_set<valueset1_t>(4) valueset1;
@@ -189,6 +186,8 @@ control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metad
         hdr.custom.e0020010 = e0020010;
         hdr.custom.e0020020 = e0020020;
         hdr.custom.s0 = s0;
+    }
+    action my_drop() {
     }
     table custom_table {
         key = {

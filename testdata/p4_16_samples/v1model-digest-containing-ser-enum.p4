@@ -127,7 +127,8 @@ control MyIngress(inout headers hdr,
     action set_dmac(macAddr_t dstAddr) {
         hdr.ethernet.dstAddr = dstAddr;
     }
-
+    action drop() {}
+    
     table forward {
         key = {
             hdr.ipv4.dstAddr: exact;

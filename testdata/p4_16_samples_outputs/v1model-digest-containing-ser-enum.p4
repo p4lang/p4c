@@ -93,11 +93,10 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action drop() {
-        mark_to_drop();
-    }
     action set_dmac(macAddr_t dstAddr) {
         hdr.ethernet.dstAddr = dstAddr;
+    }
+    action drop() {
     }
     table forward {
         key = {
