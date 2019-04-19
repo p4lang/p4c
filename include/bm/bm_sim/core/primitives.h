@@ -66,6 +66,14 @@ struct pop : public ActionPrimitive<StackIface &, const Data &> {
   void operator ()(StackIface &stack, const Data &num);
 };
 
+struct assert_ : public ActionPrimitive<const Data &> {
+  void operator ()(const Data &src);
+};
+
+struct assume_ : public ActionPrimitive<const Data &> {
+  void operator ()(const Data &src);
+};
+
 }  // namespace core
 
 }  // namespace bm

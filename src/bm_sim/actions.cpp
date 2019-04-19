@@ -283,6 +283,7 @@ void
 ActionPrimitiveCall::execute(ActionEngineState *state,
                              const ActionParam *args) const {
   // TODO(unknown): log source info?
+  primitive->set_source_info(source_info.get());
   primitive->execute(state, args);
 }
 
