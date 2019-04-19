@@ -86,54 +86,63 @@ class PsaEnumOn32Bits : public P4::ChooseEnumRepresentation {
 PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options) : MidEnd(options) {
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new PsaEnumOn32Bits("psa.p4"));
-    addPasses({
-        new P4::EliminateNewtype(&refMap, &typeMap),
-        new P4::EliminateSerEnums(&refMap, &typeMap),
-        new P4::RemoveActionParameters(&refMap, &typeMap),
-        convertEnums,
-        new VisitFunctor([this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); }),
-        new P4::OrderArguments(&refMap, &typeMap),
-        new P4::TypeChecking(&refMap, &typeMap),
-        new P4::SimplifyKey(&refMap, &typeMap,
-                            new P4::OrPolicy(
-                                new P4::IsValid(&refMap, &typeMap),
-                                new P4::IsMask())),
-        new P4::ConstantFolding(&refMap, &typeMap),
-        new P4::StrengthReduction(&refMap, &typeMap),
-        new P4::SimplifySelectCases(&refMap, &typeMap, true),  // require constant keysets
-        new P4::ExpandLookahead(&refMap, &typeMap),
-        new P4::ExpandEmit(&refMap, &typeMap),
-        new P4::SimplifyParsers(&refMap),
-        new P4::StrengthReduction(&refMap, &typeMap),
-        new P4::EliminateTuples(&refMap, &typeMap),
-        new P4::SimplifyComparisons(&refMap, &typeMap),
-        new P4::CopyStructures(&refMap, &typeMap),
-        new P4::NestedStructs(&refMap, &typeMap),
-        new P4::SimplifySelectList(&refMap, &typeMap),
-        new P4::RemoveSelectBooleans(&refMap, &typeMap),
-        new P4::FlattenHeaders(&refMap, &typeMap),
-        new P4::FlattenInterfaceStructs(&refMap, &typeMap),
-        new P4::Predication(&refMap),
-        new P4::MoveDeclarations(),  // more may have been introduced
-        new P4::ConstantFolding(&refMap, &typeMap),
-        new P4::LocalCopyPropagation(&refMap, &typeMap),
-        new P4::ConstantFolding(&refMap, &typeMap),
-        new P4::MoveDeclarations(),
-        new P4::ValidateTableProperties({ "psa_implementation",
-                                          "psa_direct_counter",
-                                          "psa_direct_meter",
-                                          "psa_idle_timeout",
-                                          "size" }),
-        new P4::SimplifyControlFlow(&refMap, &typeMap),
-        new P4::CompileTimeOperations(),
-        new P4::TableHit(&refMap, &typeMap),
-        new P4::MoveActionsToTables(&refMap, &typeMap),
-        new P4::RemoveLeftSlices(&refMap, &typeMap),
-        new P4::TypeChecking(&refMap, &typeMap),
-        new P4::MidEndLast(),
-        evaluator,
-        new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
-    });
+    if (BMV2::BMV2Context::get().options().loadIRFromJson == false) {
+        addPasses({
+            new P4::EliminateNewtype(&refMap, &typeMap),
+            new P4::EliminateSerEnums(&refMap, &typeMap),
+            new P4::RemoveActionParameters(&refMap, &typeMap),
+            convertEnums,
+            new VisitFunctor([this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); }),
+            new P4::OrderArguments(&refMap, &typeMap),
+            new P4::TypeChecking(&refMap, &typeMap),
+            new P4::SimplifyKey(&refMap, &typeMap,
+                                new P4::OrPolicy(
+                                    new P4::IsValid(&refMap, &typeMap),
+                                    new P4::IsMask())),
+            new P4::ConstantFolding(&refMap, &typeMap),
+            new P4::StrengthReduction(&refMap, &typeMap),
+            new P4::SimplifySelectCases(&refMap, &typeMap, true),  // require constant keysets
+            new P4::ExpandLookahead(&refMap, &typeMap),
+            new P4::ExpandEmit(&refMap, &typeMap),
+            new P4::SimplifyParsers(&refMap),
+            new P4::StrengthReduction(&refMap, &typeMap),
+            new P4::EliminateTuples(&refMap, &typeMap),
+            new P4::SimplifyComparisons(&refMap, &typeMap),
+            new P4::CopyStructures(&refMap, &typeMap),
+            new P4::NestedStructs(&refMap, &typeMap),
+            new P4::SimplifySelectList(&refMap, &typeMap),
+            new P4::RemoveSelectBooleans(&refMap, &typeMap),
+            new P4::FlattenHeaders(&refMap, &typeMap),
+            new P4::FlattenInterfaceStructs(&refMap, &typeMap),
+            new P4::Predication(&refMap),
+            new P4::MoveDeclarations(),  // more may have been introduced
+            new P4::ConstantFolding(&refMap, &typeMap),
+            new P4::LocalCopyPropagation(&refMap, &typeMap),
+            new P4::ConstantFolding(&refMap, &typeMap),
+            new P4::MoveDeclarations(),
+            new P4::ValidateTableProperties({ "psa_implementation",
+                                              "psa_direct_counter",
+                                              "psa_direct_meter",
+                                              "psa_idle_timeout",
+                                              "size" }),
+            new P4::SimplifyControlFlow(&refMap, &typeMap),
+            new P4::CompileTimeOperations(),
+            new P4::TableHit(&refMap, &typeMap),
+            new P4::MoveActionsToTables(&refMap, &typeMap),
+            new P4::RemoveLeftSlices(&refMap, &typeMap),
+            new P4::TypeChecking(&refMap, &typeMap),
+            new P4::MidEndLast(),
+            evaluator,
+            new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
+        });
+    } else {
+        addPasses({
+            new P4::ResolveReferences(&refMap),
+            new P4::TypeChecking(&refMap, &typeMap),
+            evaluator,
+            new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
+        });
+    }
 }
 
 }  // namespace BMV2

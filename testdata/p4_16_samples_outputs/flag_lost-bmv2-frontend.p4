@@ -57,10 +57,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".NoAction") action NoAction_0() {
     }
     @name("ingress.drop") action drop_1() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("ingress.drop") action drop_3() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("ingress.ipv4_forward") action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
         meta.test_bool = true;

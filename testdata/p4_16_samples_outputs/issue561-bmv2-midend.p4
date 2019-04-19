@@ -103,8 +103,6 @@ struct Tcp_option_sack_top {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    Tcp_option_stack vec_0;
-    Tcp_option_padding_h padding_0;
     bit<7> Tcp_option_parser_tcp_hdr_bytes_left;
     bit<8> Tcp_option_parser_tmp;
     bit<16> tmp;
@@ -124,57 +122,57 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     state parse_tcp {
         packet.extract<tcp_t>(hdr.tcp);
-        vec_0[0].end.setInvalid();
-        vec_0[0].nop.setInvalid();
-        vec_0[0].ss.setInvalid();
-        vec_0[0].s.setInvalid();
-        vec_0[0].sack.setInvalid();
-        vec_0[1].end.setInvalid();
-        vec_0[1].nop.setInvalid();
-        vec_0[1].ss.setInvalid();
-        vec_0[1].s.setInvalid();
-        vec_0[1].sack.setInvalid();
-        vec_0[2].end.setInvalid();
-        vec_0[2].nop.setInvalid();
-        vec_0[2].ss.setInvalid();
-        vec_0[2].s.setInvalid();
-        vec_0[2].sack.setInvalid();
-        vec_0[3].end.setInvalid();
-        vec_0[3].nop.setInvalid();
-        vec_0[3].ss.setInvalid();
-        vec_0[3].s.setInvalid();
-        vec_0[3].sack.setInvalid();
-        vec_0[4].end.setInvalid();
-        vec_0[4].nop.setInvalid();
-        vec_0[4].ss.setInvalid();
-        vec_0[4].s.setInvalid();
-        vec_0[4].sack.setInvalid();
-        vec_0[5].end.setInvalid();
-        vec_0[5].nop.setInvalid();
-        vec_0[5].ss.setInvalid();
-        vec_0[5].s.setInvalid();
-        vec_0[5].sack.setInvalid();
-        vec_0[6].end.setInvalid();
-        vec_0[6].nop.setInvalid();
-        vec_0[6].ss.setInvalid();
-        vec_0[6].s.setInvalid();
-        vec_0[6].sack.setInvalid();
-        vec_0[7].end.setInvalid();
-        vec_0[7].nop.setInvalid();
-        vec_0[7].ss.setInvalid();
-        vec_0[7].s.setInvalid();
-        vec_0[7].sack.setInvalid();
-        vec_0[8].end.setInvalid();
-        vec_0[8].nop.setInvalid();
-        vec_0[8].ss.setInvalid();
-        vec_0[8].s.setInvalid();
-        vec_0[8].sack.setInvalid();
-        vec_0[9].end.setInvalid();
-        vec_0[9].nop.setInvalid();
-        vec_0[9].ss.setInvalid();
-        vec_0[9].s.setInvalid();
-        vec_0[9].sack.setInvalid();
-        padding_0.setInvalid();
+        hdr.tcp_options_vec[0].end.setInvalid();
+        hdr.tcp_options_vec[0].nop.setInvalid();
+        hdr.tcp_options_vec[0].ss.setInvalid();
+        hdr.tcp_options_vec[0].s.setInvalid();
+        hdr.tcp_options_vec[0].sack.setInvalid();
+        hdr.tcp_options_vec[1].end.setInvalid();
+        hdr.tcp_options_vec[1].nop.setInvalid();
+        hdr.tcp_options_vec[1].ss.setInvalid();
+        hdr.tcp_options_vec[1].s.setInvalid();
+        hdr.tcp_options_vec[1].sack.setInvalid();
+        hdr.tcp_options_vec[2].end.setInvalid();
+        hdr.tcp_options_vec[2].nop.setInvalid();
+        hdr.tcp_options_vec[2].ss.setInvalid();
+        hdr.tcp_options_vec[2].s.setInvalid();
+        hdr.tcp_options_vec[2].sack.setInvalid();
+        hdr.tcp_options_vec[3].end.setInvalid();
+        hdr.tcp_options_vec[3].nop.setInvalid();
+        hdr.tcp_options_vec[3].ss.setInvalid();
+        hdr.tcp_options_vec[3].s.setInvalid();
+        hdr.tcp_options_vec[3].sack.setInvalid();
+        hdr.tcp_options_vec[4].end.setInvalid();
+        hdr.tcp_options_vec[4].nop.setInvalid();
+        hdr.tcp_options_vec[4].ss.setInvalid();
+        hdr.tcp_options_vec[4].s.setInvalid();
+        hdr.tcp_options_vec[4].sack.setInvalid();
+        hdr.tcp_options_vec[5].end.setInvalid();
+        hdr.tcp_options_vec[5].nop.setInvalid();
+        hdr.tcp_options_vec[5].ss.setInvalid();
+        hdr.tcp_options_vec[5].s.setInvalid();
+        hdr.tcp_options_vec[5].sack.setInvalid();
+        hdr.tcp_options_vec[6].end.setInvalid();
+        hdr.tcp_options_vec[6].nop.setInvalid();
+        hdr.tcp_options_vec[6].ss.setInvalid();
+        hdr.tcp_options_vec[6].s.setInvalid();
+        hdr.tcp_options_vec[6].sack.setInvalid();
+        hdr.tcp_options_vec[7].end.setInvalid();
+        hdr.tcp_options_vec[7].nop.setInvalid();
+        hdr.tcp_options_vec[7].ss.setInvalid();
+        hdr.tcp_options_vec[7].s.setInvalid();
+        hdr.tcp_options_vec[7].sack.setInvalid();
+        hdr.tcp_options_vec[8].end.setInvalid();
+        hdr.tcp_options_vec[8].nop.setInvalid();
+        hdr.tcp_options_vec[8].ss.setInvalid();
+        hdr.tcp_options_vec[8].s.setInvalid();
+        hdr.tcp_options_vec[8].sack.setInvalid();
+        hdr.tcp_options_vec[9].end.setInvalid();
+        hdr.tcp_options_vec[9].nop.setInvalid();
+        hdr.tcp_options_vec[9].ss.setInvalid();
+        hdr.tcp_options_vec[9].s.setInvalid();
+        hdr.tcp_options_vec[9].sack.setInvalid();
+        hdr.tcp_options_padding.setInvalid();
         verify(hdr.tcp.dataOffset >= 4w5, error.TcpDataOffsetTooSmall);
         Tcp_option_parser_tcp_hdr_bytes_left = (bit<7>)(hdr.tcp.dataOffset + 4w11) << 2;
         transition Tcp_option_parser_next_option;
@@ -197,26 +195,26 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     state Tcp_option_parser_parse_tcp_option_end {
-        packet.extract<Tcp_option_end_h>(vec_0.next.end);
+        packet.extract<Tcp_option_end_h>(hdr.tcp_options_vec.next.end);
         Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w127;
-        packet.extract<Tcp_option_padding_h>(padding_0, (bit<32>)((bit<9>)Tcp_option_parser_tcp_hdr_bytes_left << 3));
+        packet.extract<Tcp_option_padding_h>(hdr.tcp_options_padding, (bit<32>)((bit<9>)Tcp_option_parser_tcp_hdr_bytes_left << 3));
         transition parse_tcp_0;
     }
     state Tcp_option_parser_parse_tcp_option_nop {
-        packet.extract<Tcp_option_nop_h>(vec_0.next.nop);
+        packet.extract<Tcp_option_nop_h>(hdr.tcp_options_vec.next.nop);
         Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w127;
         transition Tcp_option_parser_next_option;
     }
     state Tcp_option_parser_parse_tcp_option_ss {
         verify(Tcp_option_parser_tcp_hdr_bytes_left >= 7w5, error.TcpOptionTooLongForHeader);
         Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w123;
-        packet.extract<Tcp_option_ss_h>(vec_0.next.ss);
+        packet.extract<Tcp_option_ss_h>(hdr.tcp_options_vec.next.ss);
         transition Tcp_option_parser_next_option;
     }
     state Tcp_option_parser_parse_tcp_option_s {
         verify(Tcp_option_parser_tcp_hdr_bytes_left >= 7w4, error.TcpOptionTooLongForHeader);
         Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left + 7w124;
-        packet.extract<Tcp_option_s_h>(vec_0.next.s);
+        packet.extract<Tcp_option_s_h>(hdr.tcp_options_vec.next.s);
         transition Tcp_option_parser_next_option;
     }
     state Tcp_option_parser_parse_tcp_option_sack {
@@ -224,12 +222,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         verify(tmp[7:0] == 8w10 || tmp[7:0] == 8w18 || tmp[7:0] == 8w26 || tmp[7:0] == 8w34, error.TcpBadSackOptionLength);
         verify(Tcp_option_parser_tcp_hdr_bytes_left >= (bit<7>)tmp[7:0], error.TcpOptionTooLongForHeader);
         Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left - (bit<7>)tmp[7:0];
-        packet.extract<Tcp_option_sack_h>(vec_0.next.sack, (bit<32>)((tmp[7:0] << 3) + 8w240));
+        packet.extract<Tcp_option_sack_h>(hdr.tcp_options_vec.next.sack, (bit<32>)((tmp[7:0] << 3) + 8w240));
         transition Tcp_option_parser_next_option;
     }
     state parse_tcp_0 {
-        hdr.tcp_options_vec = vec_0;
-        hdr.tcp_options_padding = padding_0;
         transition accept;
     }
     state noMatch {
@@ -239,11 +235,97 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    standard_metadata_t smeta;
+    standard_metadata_t smeta_1;
     @name(".my_drop") action my_drop() {
-        mark_to_drop();
+        smeta.ingress_port = standard_metadata.ingress_port;
+        smeta.egress_spec = standard_metadata.egress_spec;
+        smeta.egress_port = standard_metadata.egress_port;
+        smeta.clone_spec = standard_metadata.clone_spec;
+        smeta.instance_type = standard_metadata.instance_type;
+        smeta.drop = standard_metadata.drop;
+        smeta.recirculate_port = standard_metadata.recirculate_port;
+        smeta.packet_length = standard_metadata.packet_length;
+        smeta.enq_timestamp = standard_metadata.enq_timestamp;
+        smeta.enq_qdepth = standard_metadata.enq_qdepth;
+        smeta.deq_timedelta = standard_metadata.deq_timedelta;
+        smeta.deq_qdepth = standard_metadata.deq_qdepth;
+        smeta.ingress_global_timestamp = standard_metadata.ingress_global_timestamp;
+        smeta.egress_global_timestamp = standard_metadata.egress_global_timestamp;
+        smeta.lf_field_list = standard_metadata.lf_field_list;
+        smeta.mcast_grp = standard_metadata.mcast_grp;
+        smeta.resubmit_flag = standard_metadata.resubmit_flag;
+        smeta.egress_rid = standard_metadata.egress_rid;
+        smeta.checksum_error = standard_metadata.checksum_error;
+        smeta.recirculate_flag = standard_metadata.recirculate_flag;
+        smeta.parser_error = standard_metadata.parser_error;
+        mark_to_drop(smeta);
+        standard_metadata.ingress_port = smeta.ingress_port;
+        standard_metadata.egress_spec = smeta.egress_spec;
+        standard_metadata.egress_port = smeta.egress_port;
+        standard_metadata.clone_spec = smeta.clone_spec;
+        standard_metadata.instance_type = smeta.instance_type;
+        standard_metadata.drop = smeta.drop;
+        standard_metadata.recirculate_port = smeta.recirculate_port;
+        standard_metadata.packet_length = smeta.packet_length;
+        standard_metadata.enq_timestamp = smeta.enq_timestamp;
+        standard_metadata.enq_qdepth = smeta.enq_qdepth;
+        standard_metadata.deq_timedelta = smeta.deq_timedelta;
+        standard_metadata.deq_qdepth = smeta.deq_qdepth;
+        standard_metadata.ingress_global_timestamp = smeta.ingress_global_timestamp;
+        standard_metadata.egress_global_timestamp = smeta.egress_global_timestamp;
+        standard_metadata.lf_field_list = smeta.lf_field_list;
+        standard_metadata.mcast_grp = smeta.mcast_grp;
+        standard_metadata.resubmit_flag = smeta.resubmit_flag;
+        standard_metadata.egress_rid = smeta.egress_rid;
+        standard_metadata.checksum_error = smeta.checksum_error;
+        standard_metadata.recirculate_flag = smeta.recirculate_flag;
+        standard_metadata.parser_error = smeta.parser_error;
     }
     @name(".my_drop") action my_drop_0() {
-        mark_to_drop();
+        smeta_1.ingress_port = standard_metadata.ingress_port;
+        smeta_1.egress_spec = standard_metadata.egress_spec;
+        smeta_1.egress_port = standard_metadata.egress_port;
+        smeta_1.clone_spec = standard_metadata.clone_spec;
+        smeta_1.instance_type = standard_metadata.instance_type;
+        smeta_1.drop = standard_metadata.drop;
+        smeta_1.recirculate_port = standard_metadata.recirculate_port;
+        smeta_1.packet_length = standard_metadata.packet_length;
+        smeta_1.enq_timestamp = standard_metadata.enq_timestamp;
+        smeta_1.enq_qdepth = standard_metadata.enq_qdepth;
+        smeta_1.deq_timedelta = standard_metadata.deq_timedelta;
+        smeta_1.deq_qdepth = standard_metadata.deq_qdepth;
+        smeta_1.ingress_global_timestamp = standard_metadata.ingress_global_timestamp;
+        smeta_1.egress_global_timestamp = standard_metadata.egress_global_timestamp;
+        smeta_1.lf_field_list = standard_metadata.lf_field_list;
+        smeta_1.mcast_grp = standard_metadata.mcast_grp;
+        smeta_1.resubmit_flag = standard_metadata.resubmit_flag;
+        smeta_1.egress_rid = standard_metadata.egress_rid;
+        smeta_1.checksum_error = standard_metadata.checksum_error;
+        smeta_1.recirculate_flag = standard_metadata.recirculate_flag;
+        smeta_1.parser_error = standard_metadata.parser_error;
+        mark_to_drop(smeta_1);
+        standard_metadata.ingress_port = smeta_1.ingress_port;
+        standard_metadata.egress_spec = smeta_1.egress_spec;
+        standard_metadata.egress_port = smeta_1.egress_port;
+        standard_metadata.clone_spec = smeta_1.clone_spec;
+        standard_metadata.instance_type = smeta_1.instance_type;
+        standard_metadata.drop = smeta_1.drop;
+        standard_metadata.recirculate_port = smeta_1.recirculate_port;
+        standard_metadata.packet_length = smeta_1.packet_length;
+        standard_metadata.enq_timestamp = smeta_1.enq_timestamp;
+        standard_metadata.enq_qdepth = smeta_1.enq_qdepth;
+        standard_metadata.deq_timedelta = smeta_1.deq_timedelta;
+        standard_metadata.deq_qdepth = smeta_1.deq_qdepth;
+        standard_metadata.ingress_global_timestamp = smeta_1.ingress_global_timestamp;
+        standard_metadata.egress_global_timestamp = smeta_1.egress_global_timestamp;
+        standard_metadata.lf_field_list = smeta_1.lf_field_list;
+        standard_metadata.mcast_grp = smeta_1.mcast_grp;
+        standard_metadata.resubmit_flag = smeta_1.resubmit_flag;
+        standard_metadata.egress_rid = smeta_1.egress_rid;
+        standard_metadata.checksum_error = smeta_1.checksum_error;
+        standard_metadata.recirculate_flag = smeta_1.recirculate_flag;
+        standard_metadata.parser_error = smeta_1.parser_error;
     }
     @name("ingress.set_l2ptr") action set_l2ptr(bit<32> l2ptr) {
         meta._fwd_metadata_l2ptr0 = l2ptr;
@@ -281,8 +363,51 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    standard_metadata_t smeta_2;
     @name(".my_drop") action my_drop_1() {
-        mark_to_drop();
+        smeta_2.ingress_port = standard_metadata.ingress_port;
+        smeta_2.egress_spec = standard_metadata.egress_spec;
+        smeta_2.egress_port = standard_metadata.egress_port;
+        smeta_2.clone_spec = standard_metadata.clone_spec;
+        smeta_2.instance_type = standard_metadata.instance_type;
+        smeta_2.drop = standard_metadata.drop;
+        smeta_2.recirculate_port = standard_metadata.recirculate_port;
+        smeta_2.packet_length = standard_metadata.packet_length;
+        smeta_2.enq_timestamp = standard_metadata.enq_timestamp;
+        smeta_2.enq_qdepth = standard_metadata.enq_qdepth;
+        smeta_2.deq_timedelta = standard_metadata.deq_timedelta;
+        smeta_2.deq_qdepth = standard_metadata.deq_qdepth;
+        smeta_2.ingress_global_timestamp = standard_metadata.ingress_global_timestamp;
+        smeta_2.egress_global_timestamp = standard_metadata.egress_global_timestamp;
+        smeta_2.lf_field_list = standard_metadata.lf_field_list;
+        smeta_2.mcast_grp = standard_metadata.mcast_grp;
+        smeta_2.resubmit_flag = standard_metadata.resubmit_flag;
+        smeta_2.egress_rid = standard_metadata.egress_rid;
+        smeta_2.checksum_error = standard_metadata.checksum_error;
+        smeta_2.recirculate_flag = standard_metadata.recirculate_flag;
+        smeta_2.parser_error = standard_metadata.parser_error;
+        mark_to_drop(smeta_2);
+        standard_metadata.ingress_port = smeta_2.ingress_port;
+        standard_metadata.egress_spec = smeta_2.egress_spec;
+        standard_metadata.egress_port = smeta_2.egress_port;
+        standard_metadata.clone_spec = smeta_2.clone_spec;
+        standard_metadata.instance_type = smeta_2.instance_type;
+        standard_metadata.drop = smeta_2.drop;
+        standard_metadata.recirculate_port = smeta_2.recirculate_port;
+        standard_metadata.packet_length = smeta_2.packet_length;
+        standard_metadata.enq_timestamp = smeta_2.enq_timestamp;
+        standard_metadata.enq_qdepth = smeta_2.enq_qdepth;
+        standard_metadata.deq_timedelta = smeta_2.deq_timedelta;
+        standard_metadata.deq_qdepth = smeta_2.deq_qdepth;
+        standard_metadata.ingress_global_timestamp = smeta_2.ingress_global_timestamp;
+        standard_metadata.egress_global_timestamp = smeta_2.egress_global_timestamp;
+        standard_metadata.lf_field_list = smeta_2.lf_field_list;
+        standard_metadata.mcast_grp = smeta_2.mcast_grp;
+        standard_metadata.resubmit_flag = smeta_2.resubmit_flag;
+        standard_metadata.egress_rid = smeta_2.egress_rid;
+        standard_metadata.checksum_error = smeta_2.checksum_error;
+        standard_metadata.recirculate_flag = smeta_2.recirculate_flag;
+        standard_metadata.parser_error = smeta_2.parser_error;
     }
     @name("egress.rewrite_mac") action rewrite_mac(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;

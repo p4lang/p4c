@@ -4,7 +4,6 @@
 struct intrinsic_metadata_t {
     bit<4>  mcast_grp;
     bit<4>  egress_rid;
-    bit<16> mcast_hash;
     bit<32> lf_field_list;
 }
 
@@ -21,9 +20,8 @@ header ethernet_t {
 struct metadata {
     bit<4>  _intrinsic_metadata_mcast_grp0;
     bit<4>  _intrinsic_metadata_egress_rid1;
-    bit<16> _intrinsic_metadata_mcast_hash2;
-    bit<32> _intrinsic_metadata_lf_field_list3;
-    bit<32> _meta_register_tmp4;
+    bit<32> _intrinsic_metadata_lf_field_list2;
+    bit<32> _meta_register_tmp3;
 }
 
 struct headers {
@@ -54,7 +52,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".m_action") action m_action_0(bit<32> idx) {
         my_direct_counter_0.count();
         my_indirect_counter_0.count(idx);
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("._nop") action _nop_0() {
         my_direct_counter_0.count();

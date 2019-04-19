@@ -482,8 +482,13 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         new InspectPsaProgram(refMap, typeMap, &structure),
         new ConvertPsaToJson(refMap, typeMap, toplevel, json, &structure)
     };
+    for (const auto &pEnum : *enumMap) {
+      auto name = pEnum.first->getName();
+      for (const auto &pEntry : *pEnum.second) {
+        json->add_enum(name, pEntry.first, pEntry.second);
+      }
+    }
     program->apply(toJson);
-
     json->add_program_info(options.file);
     json->add_meta_info();
 }

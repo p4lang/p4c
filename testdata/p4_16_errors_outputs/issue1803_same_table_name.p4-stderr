@@ -1,0 +1,2 @@
+[--Werror=duplicate] error: Name 't0' is used for multiple table objects in the P4Info message
+[--Werror=duplicate] error: Found 1 duplicate name(s) in the P4Info

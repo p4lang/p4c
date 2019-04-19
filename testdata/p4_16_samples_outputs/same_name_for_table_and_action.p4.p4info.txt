@@ -1,0 +1,40 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33608800
+    name: "IngressI.do_something"
+    alias: "do_something"
+  }
+  match_fields {
+    id: 1
+    name: "smeta.ingress_port"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16831584
+  }
+  action_refs {
+    id: 16800567
+  }
+  const_default_action_id: 16800567
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16831584
+    name: "IngressI.do_something"
+    alias: "do_something"
+  }
+}
+type_info {
+}

@@ -330,6 +330,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             return type;
         auto tb = type->to<IR::Type_Bits>();
         auto canon = IR::Type_Bits::get(tb->size, tb->isSigned);
+        if (!typeMap->contains(canon))
+            typeMap->setType(canon, new IR::Type_Type(canon));
         return canon;
     } else if (type->is<IR::Type_Enum>() ||
                type->is<IR::Type_SerEnum>() ||
@@ -2283,7 +2285,7 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
                decl->is<IR::Declaration_Instance>()) {
         setCompileTimeConstant(expression);
         setCompileTimeConstant(getOriginal<IR::Expression>());
-    } else if (decl->is<IR::Method>()) {
+    } else if (decl->is<IR::Method>() || decl->is<IR::Function>()) {
         type = getType(decl->getNode());
         // Each method invocation uses fresh type variables
         type = cloneWithFreshTypeVariables(type->to<IR::Type_MethodBase>());

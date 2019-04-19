@@ -98,7 +98,7 @@ control MyIngress(inout headers hdr,
 				  inout standard_metadata_t standard_metadata) {
 
 	action drop() {
-		mark_to_drop();
+		mark_to_drop(standard_metadata);
 	}
 
 

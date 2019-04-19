@@ -59,6 +59,9 @@ def add_developer_options(parser):
                         help="[Compiler debugging] Folder where P4 programs are dumped.")
     parser.add_argument("--toJson", dest="json", default=None,
                         help="Dump IR to JSON in the specified file.")
+    parser.add_argument("--fromJson", dest="json_source", default=None,
+                        help="Use IR from JSON representation dumped previously. \
+                        the compilation starts with reduced midEnd.")
     parser.add_argument("--pp", dest="pretty_print", default=None,
                         help="Pretty-print the program in the specified file.")
 
@@ -181,8 +184,18 @@ def main():
         print display_supported_targets(cfg)
         sys.exit(0)
 
-    if not opts.source_file:
+    input_specified = False
+    if opts.source_file:
+        input_specified = True
+    if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
+        if opts.json_source:
+            input_specified = True
+    if not input_specified:
         parser.error('No input specified.')
+
+    if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
+        if opts.json_source:
+            opts.source_file = opts.json_source
 
     if not os.path.isfile(opts.source_file):
         print >> sys.stderr, 'Input file ' + opts.source_file + ' does not exist'

@@ -12,9 +12,8 @@ struct headers_t {
 }
 
 parser MyP1(packet_in pkt, out headers_t hdr) {
-    headers_t hdr_0;
     state start {
-        hdr_0.data.setInvalid();
+        hdr.data.setInvalid();
         transition MyP2_start;
     }
     state MyP2_start {

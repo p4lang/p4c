@@ -1,3 +1,6 @@
+issue532.p4(34): [--Werror=legacy] error: Action parameter choices has a type which is not bit<> or int<> or bool
+  action select_entry(choices_t choices) {
+                                ^^^^^^^
 issue532.p4(35): [--Werror=legacy] error: choose_entry: functions or methods returning structures are not supported on this target
     my_meta.entry = choose_entry(choices);
                     ^^^^^^^^^^^^^^^^^^^^^

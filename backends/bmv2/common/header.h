@@ -25,6 +25,7 @@ limitations under the License.
 #include "helpers.h"
 #include "JsonObjects.h"
 #include "programStructure.h"
+#include "backends/bmv2/common/options.h"
 
 namespace BMV2 {
 

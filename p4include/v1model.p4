@@ -265,8 +265,11 @@ enum HashAlgorithm {
     xor16
 }
 
+@deprecated("Please use mark_to_drop(standard_metadata) instead.")
+extern void mark_to_drop();
+
 /***
- * mark_to_drop() is a primitive action that modifies
+ * mark_to_drop(standard_metadata) is a primitive action that modifies
  * standard_metadata.egress_spec to an implementation-specific special
  * value that in some cases causes the packet to be dropped at the end
  * of ingress or egress processing.  It also assigns 0 to
@@ -282,7 +285,7 @@ enum HashAlgorithm {
  * of the different possible things that can happen to a packet when
  * ingress and egress processing are complete.
  */
-extern void mark_to_drop();
+extern void mark_to_drop(inout standard_metadata_t standard_metadata);
 
 /***
  * Calculate a hash function of the value specified by the data

@@ -31,24 +31,20 @@ struct headers_t {
 }
 
 parser OuterParser(packet_in pkt, out headers_t hdr, inout meta_t m, inout standard_metadata_t meta) {
-    eth_h hdr_0_eth;
-    ipv4_h hdr_0_ipv4;
     state start {
-        hdr_0_eth.setInvalid();
-        hdr_0_ipv4.setInvalid();
-        pkt.extract<eth_h>(hdr_0_eth);
-        transition select(hdr_0_eth.type) {
+        hdr.eth.setInvalid();
+        hdr.ipv4.setInvalid();
+        pkt.extract<eth_h>(hdr.eth);
+        transition select(hdr.eth.type) {
             16w0x800: InnerParser_parse_ipv4;
             default: start_0;
         }
     }
     state InnerParser_parse_ipv4 {
-        pkt.extract<ipv4_h>(hdr_0_ipv4);
+        pkt.extract<ipv4_h>(hdr.ipv4);
         transition start_0;
     }
     state start_0 {
-        hdr.eth = hdr_0_eth;
-        hdr.ipv4 = hdr_0_ipv4;
         transition accept;
     }
 }

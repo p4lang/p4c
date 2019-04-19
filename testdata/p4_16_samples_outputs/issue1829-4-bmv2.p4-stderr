@@ -1,0 +1,3 @@
+issue1829-4-bmv2.p4(59): [--Wwarn=unused] warning: da_meter: unused instance
+    direct_meter<bit<2> >(MeterType.packets) da_meter;
+                                             ^^^^^^^^

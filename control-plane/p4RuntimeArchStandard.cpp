@@ -614,10 +614,25 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                                 actionProfile.name);
         setPreamble(profile->mutable_preamble(), id,
                     actionProfile.name, symbols.getAlias(actionProfile.name),
-                    actionProfile.annotations);
+                    actionProfile.annotations,
+                    // exclude @max_group_size if present
+                    [](cstring name) { return name == "max_group_size"; });
         profile->set_with_selector(
             actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR);
         profile->set_size(actionProfile.size);
+        auto maxGroupSizeAnnotation = actionProfile.annotations->getAnnotation("max_group_size");
+        if (maxGroupSizeAnnotation) {
+            if (actionProfile.type == ActionProfileType::INDIRECT_WITH_SELECTOR) {
+                auto maxGroupSizeConstant = maxGroupSizeAnnotation->expr[0]->to<IR::Constant>();
+                CHECK_NULL(maxGroupSizeConstant);
+                profile->set_max_group_size(maxGroupSizeConstant->asInt());
+            } else {
+                ::warning(ErrorType::WARN_IGNORE,
+                          "Ignoring annotation @max_group_size on action profile '%1%', "
+                          "which does not have a selector",
+                          actionProfile.annotations);
+            }
+        }
 
         auto tablesIt = actionProfilesRefs.find(actionProfile.name);
         if (tablesIt != actionProfilesRefs.end()) {

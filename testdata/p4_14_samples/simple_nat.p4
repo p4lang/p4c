@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -181,7 +181,6 @@ header_type intrinsic_metadata_t {
     fields {
         mcast_grp : 4;
         egress_rid : 4;
-        mcast_hash : 16;
         lf_field_list: 32;
     }
 }

@@ -251,7 +251,9 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         result->emplace("type", "hexstr");
         auto decl = type->to<IR::Type_Error>()->getDeclByName(expression->member.name);
         auto errorValue = structure->errorCodesMap.at(decl);
-        result->emplace("value", Util::toString(errorValue));
+        // this generates error constant like hex value
+        auto reprValue = stringRepr(errorValue);
+        result->emplace("value", reprValue);
         mapExpression(expression, result);
         return;
     }
@@ -590,9 +592,13 @@ void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
             structure->nonActionParameters.end()) {
             auto type = typeMap->getType(param, true);
             if (type->is<IR::Type_StructLike>()) {
-                auto result = new Util::JsonObject();
-                result->emplace("type", "header");
-                result->emplace("value", param->name.name);
+                auto result = convertParam(param, "");
+                if (result == nullptr) {
+                    auto r = new Util::JsonObject();
+                    r->emplace("type", "header");
+                    r->emplace("value", param->name.name);
+                    result = r;
+                }
                 mapExpression(expression, result);
             } else {
                 mapExpression(expression, new Util::JsonValue(param->name.name));

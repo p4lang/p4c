@@ -4,7 +4,6 @@
 struct intrinsic_metadata_t {
     bit<4>  mcast_grp;
     bit<4>  egress_rid;
-    bit<16> mcast_hash;
     bit<32> lf_field_list;
 }
 
@@ -50,14 +49,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".my_indirect_counter") counter(32w16384, CounterType.packets) my_indirect_counter;
     @name(".m_action") action m_action(bit<32> idx) {
         my_indirect_counter.count((bit<32>)idx);
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("._nop") action _nop() {
     }
     @name(".m_action") action m_action_0(bit<32> idx) {
         my_direct_counter.count();
         my_indirect_counter.count((bit<32>)idx);
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("._nop") action _nop_0() {
         my_direct_counter.count();

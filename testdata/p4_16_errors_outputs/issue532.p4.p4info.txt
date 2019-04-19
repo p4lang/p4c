@@ -1,0 +1,38 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33614349
+    name: "ingress.t"
+    alias: "t"
+  }
+  action_refs {
+    id: 16842345
+  }
+  action_refs {
+    id: 16800567
+  }
+  const_default_action_id: 16800567
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16842345
+    name: "ingress.select_entry"
+    alias: "select_entry"
+  }
+  params {
+    id: 1
+    name: "choices"
+  }
+}
+type_info {
+}

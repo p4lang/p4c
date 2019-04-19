@@ -2,7 +2,7 @@
 #include <v1model.p4>
 
 struct intrinsic_metadata_t {
-    bit<48> ingress_global_tstamp;
+    bit<48> ingress_global_timestamp;
 }
 
 struct meta_t {
@@ -16,7 +16,7 @@ header ethernet_t {
 }
 
 struct metadata {
-    bit<48> _intrinsic_metadata_ingress_global_tstamp0;
+    bit<48> _intrinsic_metadata_ingress_global_timestamp0;
     bit<16> _meta_val161;
 }
 

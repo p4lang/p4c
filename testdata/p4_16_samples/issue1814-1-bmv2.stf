@@ -1,0 +1,5 @@
+add IngressImpl.debug_table meta.test:0x0 IngressImpl.forward()
+add IngressImpl.debug_table meta.test:0x1 IngressImpl.drop()
+
+packet 1 01010101 01010101
+expect 1 01010101 01010101

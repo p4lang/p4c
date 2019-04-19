@@ -48,7 +48,7 @@ ProgramStructure::ProgramStructure() :
         verifyChecksums(nullptr), updateChecksums(nullptr),
         deparser(nullptr), latest(nullptr) {
     ingress = nullptr;
-    declarations = new IR::IndexedVector<IR::Node>();
+    declarations = new IR::Vector<IR::Node>();
     emptyTypeArguments = new IR::Vector<IR::Type>();
     conversionContext.clear();
     for (auto c : P4::reservedWords)
@@ -264,8 +264,7 @@ void ProgramStructure::createExterns() {
         if (auto et = ExternConverter::cvtExternType(this, it.first, it.second)) {
             if (et != it.first)
                 extern_remap[it.first] = et;
-            if (et != declarations->getDeclaration(et->name))
-                declarations->push_back(et); } }
+            declarations->push_back(et); } }
 }
 
 const IR::Expression* ProgramStructure::paramReference(const IR::Parameter* param) {
@@ -304,7 +303,11 @@ const IR::Statement* ProgramStructure::convertParserStatement(const IR::Expressi
             auto dest = conv.convert(primitive->operands.at(0));
             auto destType = dest->type;
             CHECK_NULL(destType);
-            BUG_CHECK(destType->is<IR::Type_Header>(), "%1%: expected a header", destType);
+            if (!destType->is<IR::Type_Header>()) {
+                ::error(ErrorType::ERR_INVALID, "argument. Expected a header not %2%",
+                        primitive, destType->toString());
+                return nullptr;
+            }
             auto finalDestType = ::get(
                 finalHeaderType, destType->to<IR::Type_Header>()->externalName());
             BUG_CHECK(finalDestType != nullptr, "%1%: could not find final type",
@@ -1347,12 +1350,14 @@ CONVERT_PRIMITIVE(copy_header) {
 
 CONVERT_PRIMITIVE(drop) {
     return new IR::MethodCallStatement(
-        primitive->srcInfo, structure->v1model.drop.Id(), {});
+        primitive->srcInfo, structure->v1model.drop.Id(),
+        { new IR::Argument(structure->conversionContext.standardMetadata->clone()) });
 }
 
 CONVERT_PRIMITIVE(mark_for_drop) {
     return new IR::MethodCallStatement(
-        primitive->srcInfo, structure->v1model.drop.Id(), {});
+        primitive->srcInfo, structure->v1model.drop.Id(),
+        { new IR::Argument(structure->conversionContext.standardMetadata->clone()) });
 }
 
 static const IR::Constant *push_pop_size(ExpressionConverter &conv, const IR::Primitive *prim) {
@@ -2072,9 +2077,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
     for (auto c : registersToDo) {
         auto reg = registers.get(c);
         auto r = convert(reg, registers.get(reg));
-        if (!declarations->getDeclaration(r->name)) {
-            declarations->push_back(r);
-        }
+        declarations->push_back(r);
     }
 
     for (auto c : externsToDo) {

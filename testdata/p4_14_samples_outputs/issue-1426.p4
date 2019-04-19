@@ -27,7 +27,7 @@ control c(inout headers hdr, inout metadata meta, inout standard_metadata_t stan
         standard_metadata.egress_port = port;
     }
     @name(".discard") action discard() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".c1") table c1 {
         actions = {
@@ -69,7 +69,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.egress_port = port;
     }
     @name(".discard") action discard() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name(".a1") table a1 {
         actions = {

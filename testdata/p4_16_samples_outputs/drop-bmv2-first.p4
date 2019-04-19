@@ -13,8 +13,8 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
     }
 }
 
-action drop(out standard_metadata_t smeta) {
-    mark_to_drop();
+action drop(inout standard_metadata_t smeta) {
+    mark_to_drop(smeta);
 }
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
     table forward {

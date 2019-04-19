@@ -1,13 +1,6 @@
 #include <core.p4>
 #include <v1model.p4>
 
-struct intrinsic_metadata_t {
-    bit<4>  mcast_grp;
-    bit<4>  egress_rid;
-    bit<16> mcast_hash;
-    bit<32> lf_field_list;
-}
-
 struct meta_t {
     bit<32> meter_tag;
 }
@@ -19,10 +12,8 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name("intrinsic_metadata") 
-    intrinsic_metadata_t intrinsic_metadata;
     @name("meta") 
-    meta_t               meta;
+    meta_t meta;
 }
 
 struct headers {
@@ -53,7 +44,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".NoAction") action NoAction_3() {
     }
     @name("ingress._drop") action _drop() {
-        mark_to_drop();
+        mark_to_drop(standard_metadata);
     }
     @name("ingress._nop") action _nop() {
     }
