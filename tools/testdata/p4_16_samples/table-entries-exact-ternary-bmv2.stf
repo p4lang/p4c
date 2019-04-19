@@ -1,0 +1,19 @@
+# header hdr { bit<8>  e; bit<16> t; bit<8>  l; bit<8> r; bit<8>  v; }
+
+# t_ternary tests: if packets come on port 0, we missed!
+
+expect 1 01 **** ** ** *
+packet 0 01 1111 00 00 b0
+
+expect 2 02 **** ** ** *
+packet 0 02 1181 00 00 b0
+
+expect 3 03 **** ** ** *
+packet 0 03 1000 00 00 b0
+
+expect 4 04 **** ** ** *
+packet 0 04 1111 00 00 b0
+
+# misses
+expect  0 02 11F1 ** ** *
+packet  0 02 11F1 00 00 b0

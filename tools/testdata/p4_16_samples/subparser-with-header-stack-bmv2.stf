@@ -1,0 +1,22 @@
+# For any of these input packets, the only change from input packet to
+# output packet should be the value of field h1.h2_valid_bits.  It
+# should have a 1 in bit position i if h2[i] was valid after parsing.
+
+# packet with 2 h2 headers should have h2_valid_bits=3 in output.
+
+#           h1_t                h2_t          h2_t         h3_t
+#        /---------------\    /-------\     /--------\    /---\
+#        hdr_type  op3
+#         | op1 op2 | h2_valid_bits
+#         |  |  |   | |  next_hdr_type
+#         |  |  |   | |  |    hdr_type
+#         |  |  |   | |  |    |  f1 f2 next_hdr_type
+#         |  |  |   | |  |    |  |  |  |
+packet 0  01 00 00 00 ff 02   02 de ad 02   02 be ef 03   03 be
+
+# This is what output packet _should_ be.  Both h2 headers in the
+# input packet should be extracted, the first in the sub-parser, the
+# second in the top level parser.  The first should go into h2[0], the
+# second into h2[1].
+
+expect 0  01 00 00 00 03 02   02 de ad 02   02 be ef 03   03 be

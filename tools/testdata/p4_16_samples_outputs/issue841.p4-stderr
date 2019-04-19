@@ -1,0 +1,6 @@
+issue841.p4(39): [--Wwarn=deprecated] warning: Checksum16: Using deprecated feature Checksum16. Please use verify_checksum/update_checksum instead.
+    Checksum16() checksum;
+    ^^^^^^^^^^
+v1model.p4(313)
+extern Checksum16 {
+       ^^^^^^^^^^

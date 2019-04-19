@@ -1,0 +1,3 @@
+constructor3_e.p4(22): [--Werror=legacy] error: e: Cannot unify bool to bit<1>
+    E(true) e;
+            ^

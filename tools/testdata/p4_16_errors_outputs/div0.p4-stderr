@@ -1,0 +1,12 @@
+div0.p4(18): error: /: Division by zero
+    a = a / 0;
+        ^^^^^
+div0.p4(19): error: %: Modulo by zero
+    a = a % 0;
+        ^^^^^
+div0.p4(20): error: /: Division by zero
+    a = a / 8w0;
+        ^^^^^^^
+div0.p4(21): error: %: Modulo by zero
+    a = a % 8w0;
+        ^^^^^^^

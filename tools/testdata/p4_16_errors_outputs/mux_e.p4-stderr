@@ -1,0 +1,4 @@
+[--Werror=type-error] error: Selector of ?: must be bool, not bit<1>
+mux_e.p4(25): [--Werror=legacy] error: ?:: Cannot unify bool to bit<1>
+        d = d ? a : d; // wrong types a <-> d
+            ^^^^^^^^^

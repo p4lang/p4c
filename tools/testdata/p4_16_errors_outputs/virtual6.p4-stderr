@@ -1,0 +1,6 @@
+virtual6.p4(22): [--Werror=type-error] error: cntr: g abstract method not implemented
+    Virtual() cntr = {
+              ^^^^
+virtual6.p4(18)
+    abstract bit<16> g();
+                     ^

@@ -1,0 +1,3 @@
+issue1409-bmv2.p4(32): [--Wwarn=parser-transition] warning: f: implicit transition to `reject'
+  state f {
+        ^

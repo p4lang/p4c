@@ -1,0 +1,72 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33581551
+    name: "ingress.round_tbl"
+    alias: "round_tbl"
+  }
+  action_refs {
+    id: 16780896
+  }
+  size: 8
+}
+tables {
+  preamble {
+    id: 33589471
+    name: "egress.drop_tbl"
+    alias: "drop_tbl"
+  }
+  match_fields {
+    id: 1
+    name: "meta.ingress_metadata.set_drop"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16806759
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 2
+}
+actions {
+  preamble {
+    id: 16780896
+    name: "ingress.read_round"
+    alias: "read_round"
+  }
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16806759
+    name: "egress._drop"
+    alias: "_drop"
+  }
+}
+registers {
+  preamble {
+    id: 369112422
+    name: "ingress.registerRound"
+    alias: "registerRound"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 16
+      }
+    }
+  }
+  size: 65536
+}
+type_info {
+}

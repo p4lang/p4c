@@ -1,0 +1,3 @@
+issue764.p4(8): [--Werror=legacy] error: 5: could not infer a width
+        func(5);
+             ^

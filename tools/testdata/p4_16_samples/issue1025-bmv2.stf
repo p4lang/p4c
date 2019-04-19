@@ -1,0 +1,55 @@
+# The packets in the 'packet' lines below were created using the
+# Python Scapy library.
+#
+# First define these Python functions:
+#
+# def str_to_hex(s):
+#     return ''.join(map(lambda x: '%02x' % (ord(x)), s))
+#
+# import re
+# def hex_to_str(hex_s):
+#     tmp = re.sub('[ \t]', '', hex_s)
+#     return str(bytearray.fromhex(tmp))
+
+# The first packet was created with these Python statements:
+# pkt1=Ether(dst='52:54:00:12:35:02',src='08:00:27:01:8b:bc') / IP(dst='10.2.3.4', options=IPOption('\x83\x03\x10')) / TCP(sport=5501, dport=80)
+# str_to_hex(str(pkt1))
+# Then hand-modifying the resulting ihl field value in the hex string
+# to get the desired hacked-up value for this test case.
+
+# These packets do not contain standard usage of the ihl field in
+# their things that look a lot like IPv4 headers, so cannot be parsed
+# by Scapy.
+
+# pkt1 tests that simple_switch does _not_ cause a HeaderTooShort
+# error during parsing.  All of the headers ethernet, ipv4, and tcp
+# should be valid after parsing, which is reflected in the modified
+# dstAddr field in the output packet's Ethernet header.
+
+packet 0 525400123502 080027018bbc 0800 4400002c000100004006cdb30a00020f0a020304 83031000 157d005000000000000000005002200061010000
+expect 0 000000010101 080027018bbc 0800 4400002c000100004006cdb30a00020f0a020304 83031000 157d005000000000000000005002200061010000
+
+# The second packet was created with these Python statements:
+# pkt2=Ether(dst='52:54:00:12:35:02',src='08:00:27:01:8b:bc') / IP(dst='10.2.3.4', options=IPOption('\x83\x07\x10\x0a\x01\x02\x03')) / TCP(sport=5501, dport=80)
+# str_to_hex(str(pkt2))
+# Then hand-modifying the resulting ihl field value in the hex string
+# to get the desired hacked-up value for this test case.
+
+# This packet _should_ cause simple_switch to detect a HeaderTooShort
+# error during the extract() call in the parse_ipv4 state, and thus
+# never reach the parse_tcp state.  Both the ipv4 and tcp headers
+# should thus be invalid.
+
+packet 0 525400123502 080027018bbc 0800 48000030000100004006c89f0a00020f0a020304 8307100a01020300 157d005000000000000000005002200061010000
+expect 0 000000010000 080027018bbc 0800 48000030000100004006c89f0a00020f0a020304 8307100a01020300 157d005000000000000000005002200061010000
+
+# This packet was created by copying and pasting the previous one, and
+# deleting the last 3 bytes of the things that look something like
+# IPv4 options, and reducing ihl down from 8 to 5.
+
+# Its ihl value should be just 1 too large to avoid a parser
+# HeaderTooShort error, thus the output packet's Ethernet dstAddr is
+# the same as the previous packet.
+
+packet 0 525400123502 080027018bbc 0800 45000030000100004006c89f0a00020f0a020304 8307100a01 157d005000000000000000005002200061010000
+expect 0 000000010000 080027018bbc 0800 45000030000100004006c89f0a00020f0a020304 8307100a01 157d005000000000000000005002200061010000

@@ -1,0 +1,8 @@
+
+add test1 data.f1:0x010001 setb1(val:0x7f, port:2)
+add test1 data.f1:0x020002 setb1(val:7, port:3)
+
+expect 2 01010101 ******** **** 7f 66
+packet 0 01010101 00000202 0303 55 66 77 88
+expect 3 02020202 ******** **** 07 66
+packet 2 02020202 00000303 0404 55 66 77 88

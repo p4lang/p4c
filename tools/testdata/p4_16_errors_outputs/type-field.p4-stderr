@@ -1,0 +1,6 @@
+type-field.p4(59): [--Werror=type-error] error: Cannot extract field d from h which has type Type(struct h)
+    b.emit(h.d);
+             ^
+type-field.p4(59)
+    b.emit(h.d);
+           ^

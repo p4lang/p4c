@@ -1,0 +1,10 @@
+
+class v1HeaderType {
+    ID                  name;
+    Type_Struct         as_metadata;
+    NullOK Type_Header  as_header;
+
+    v1HeaderType(const Type_Struct *m, const Type_Header *h = nullptr)
+    : v1HeaderType(Util::SourceInfo(), m->name, m, h) {}
+    dbprint { out << "header " << name; }
+}

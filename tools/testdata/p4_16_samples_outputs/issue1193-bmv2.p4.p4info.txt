@@ -1,0 +1,35 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33611905
+    name: "MyIngress.t"
+    alias: "t"
+  }
+  action_refs {
+    id: 16812769
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16812769
+    name: "MyIngress.a"
+    alias: "a"
+  }
+}
+type_info {
+}

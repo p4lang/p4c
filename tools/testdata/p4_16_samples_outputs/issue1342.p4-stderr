@@ -1,0 +1,7 @@
+issue1342.p4(3): [--Wwarn=shadow] warning: X shadows X
+bit f<X>() {
+      ^
+issue1342.p4(1)
+const bit X = 1;
+              ^
+warning: Program does not contain a `main' module

@@ -1,0 +1,7 @@
+shadow3.p4(20): [--Wwarn=shadow] warning: p shadows p
+  bit<8> p = 0;
+  ^^^^^^^^^^^^^
+shadow3.p4(19)
+control MyIngress(inout H p) {
+                          ^
+warning: Program does not contain a `main' module

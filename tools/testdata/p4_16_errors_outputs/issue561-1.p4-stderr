@@ -1,0 +1,15 @@
+issue561-1.p4(29): [--Werror=legacy] error: u: Cannot unify Tuple(2) to header_union U
+        U u = { { 10 }, { 20 } }; // illegal to initialize unions
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+issue561-1.p4(29)
+        U u = { { 10 }, { 20 } }; // illegal to initialize unions
+              ^^^^^^^^^^^^^^^^^^
+issue561-1.p4(19)
+header_union U {
+             ^
+issue561-1.p4(30): [--Werror=type-error] error: Field setValid is not a member of structure header_union U
+        u.setValid(); // no such method
+          ^^^^^^^^
+issue561-1.p4(19)
+header_union U {
+             ^

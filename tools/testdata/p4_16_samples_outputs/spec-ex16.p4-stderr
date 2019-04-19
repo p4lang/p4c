@@ -1,0 +1,9 @@
+spec-ex16.p4(32): [--Wwarn=unused] warning: main1: unused instance
+                Map1()) main1;
+                        ^^^^^
+spec-ex16.p4(24): [--Wwarn=uninitialized_out_param] warning: out parameter d may be uninitialized when P terminates
+parser P(packet_in b, out bit<32> d) { state start { transition accept; } }
+                                  ^
+spec-ex16.p4(24)
+parser P(packet_in b, out bit<32> d) { state start { transition accept; } }
+       ^

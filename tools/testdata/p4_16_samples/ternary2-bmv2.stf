@@ -1,0 +1,22 @@
+
+add test1 0 data.f1:0x****0101 ingress.setb1(val:0x7f, port:2)
+add test1 503 data.f1:0x****0202 ingress.setb1(val:7, port:3)
+
+#          f1       f2      h1  b1 b2  h   b1 b2
+expect 2 00000101 ******** **** 7f 66
+packet 0 00000101 00000202 0303 55 66 7777 88 00
+expect 3 00000202 ******** **** 07 66
+packet 2 00000202 00000303 0404 55 66 7777 88 00
+wait
+
+add ex1 100 extra$0.h:0x25** act1(val:0x25)
+add tbl1 100 data.f2:0x0202**** setbyte(val:0x26)
+add ex1 110 extra$0.h:0x2525 act2(val:0x27)
+add tbl2 100 data.f2:0x0202**** setbyte(val:0x28)
+
+#          f1       f2      h1  b1 b2  h   b1 b2 payload
+packet 0 01010101 02020202 0303 55 66 2500 ff 7f 01020304
+expect 2 01010101 02020202 0303 7f 26 2500 25 7f 01020304
+#          f1       f2      h1  b1 b2  h   b1 b2  h   b1 b2 payload
+packet 0 01010101 02020202 0303 55 66 2525 ff ff 3333 ff 7f 01020304
+expect 2 01010101 02020202 0303 7f 66 2525 27 ff 3333 28 7f 01020304

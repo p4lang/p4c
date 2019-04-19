@@ -1,0 +1,15 @@
+header2_e.p4(27): [--Werror=type-error] error: Field field of struct s1 cannot have type parser p
+    p field; // no functor-typed fields allowed
+      ^^^^^
+header2_e.p4(23)
+parser p();
+       ^
+header2_e.p4(32): [--Werror=type-error] error: Field field of header_union u cannot have type struct s
+   s field; // no struct field allowed in header_union
+     ^^^^^
+header2_e.p4(16)
+struct s {}
+       ^
+header2_e.p4(33): [--Werror=type-error] error: Field field1 of header_union u cannot have type bit<1>
+   bit field1; // no non-header field allowed in header_union
+       ^^^^^^

@@ -1,0 +1,3 @@
+issue822.p4(19): [--Wwarn=unused] warning: action_selector: unused instance
+  ActionSelector(r) action_selector;
+                    ^^^^^^^^^^^^^^^

@@ -1,0 +1,69 @@
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package p4.v1;
+
+message P4Data {
+  oneof data {
+    bytes bitstring = 1;  // for bit<W>, int<W>
+    P4Varbit varbit = 2;  // for varbit<W>
+    bool bool = 3;
+    P4StructLike tuple = 4;
+    P4StructLike struct = 5;
+    P4Header header = 6;
+    P4HeaderUnion header_union = 7;
+    P4HeaderStack header_stack = 8;
+    P4HeaderUnionStack header_union_stack = 9;
+    string enum = 10;  // safe (non-serializable) enums only
+    string error = 11;
+    bytes enum_value = 12;  // serializable enums only
+  }
+}
+
+message P4Varbit {
+  bytes bitstring = 1;
+  int32 bitwidth = 2;  // dynamic bitwidth of the field
+}
+
+message P4StructLike {
+  repeated P4Data members = 1;
+}
+
+message P4Header {
+  // If the header is invalid (is_valid is "false"), then the bitstrings
+  // repeated field must be empty.
+  bool is_valid = 1;
+  repeated bytes bitstrings = 2;
+}
+
+message P4HeaderUnion {
+  // An empty string indicates that none of the union members are valid and
+  // valid_header must therefore be unset.
+  string valid_header_name = 1;
+  P4Header valid_header = 2;
+}
+
+message P4HeaderStack {
+  // The length of this repeated field must always be equal to the compile-time
+  // size of the header stack, which is specified in P4Info.
+  repeated P4Header entries = 1;
+}
+
+message P4HeaderUnionStack {
+  // The length of this repeated field must always be equal to the compile-time
+  // size of the header union stack, which is specified in P4Info.
+  repeated P4HeaderUnion entries = 1;
+}

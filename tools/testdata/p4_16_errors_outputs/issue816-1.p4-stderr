@@ -1,0 +1,6 @@
+issue816-1.p4(14): [--Werror=type-error] error: p: parameter cannot be a package
+control MyC1()(P p) {
+                 ^
+issue816-1.p4(18): [--Werror=type-error] error: p: parameter cannot be a package
+control MyC2()(P p) {
+                 ^

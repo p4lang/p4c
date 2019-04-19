@@ -1,0 +1,3 @@
+issue67.p4(1): [--Werror=type-error] error: x: Cannot unify type int with bool
+const bool x = 20; // error
+               ^^

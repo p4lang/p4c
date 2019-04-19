@@ -1,0 +1,105 @@
+{
+    "displayName":    "C++",
+    "name":           "cpp",
+    "mimeTypes":      ["text/cpp","text/c"],
+    "fileExtensions": ["cpp","c++","h","c"],
+
+    "lineComment":      "//",
+    "blockCommentStart": "/*",
+    "blockCommentEnd":   "*/",
+
+    "keywords": [
+        "alignas", "alignof", "and", "and_eq", "asm", "auto", "bitand", "bitor", "bool", "break", "case",
+        "catch", "char", "char16_t", "char32_t", "class", "compl", "const", "constexpr", "const_cast",
+        "continue", "decltype", "default", "delete", "do", "double", "dynamic_cast", "else",
+        "enum", "explicit", "export", "extern", "false", "float", "for", "friend", "goto", "if", "inline",
+        "int", "long", "mutable", "namespace", "new", "noexcept", "not", "not_eq", "nullptr", "operator",
+        "or", "or_eq", "private", "protected", "public", "register", "reinterpret_cast",
+        "return", "short", "signed", "sizeof", "static", "static_assert", "static_cast", "struct",
+        "switch", "template", "this", "thread_local", "throw", "true", "try", "typedef", "typeid",
+        "typename", "union", "unsigned", "using", "virtual", "void", "volatile", "wchar_t", "while",
+        "xor", "xor_eq"
+    ],
+
+    "typeKeywords": [
+        "bool", "double", "byte", "int", "short", "char", "void", "long", "float",
+        "char32_t", "unsigned", "wchar_t", "char16_t"
+    ],
+
+    "directives": [
+        "include","if","endif","ifdef","define","line","warning","error"
+    ],
+
+    "operators": [
+        "=", ">", "<", "!", "~", "?", ":",
+        "==", "<=", ">=", "!=", "&&", "||", "++", "--",
+        "+", "-", "*", "/", "&", "|", "^", "%", "<<",
+        ">>", ">>>", "+=", "-=", "*=", "/=", "&=", "|=",
+        "^=", "%=", "<<=", ">>=", ">>>="
+    ],
+
+    "symbols":  "[=><!~?:&|+\\-*\\/\\^%]+",
+    "escapes":  "\\\\(?:[abfnrtv\\\\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})",
+
+    "tokenizer": {
+        "root": [
+            ["__\\w+", "identifier.predefined"],
+            ["\\w+::(?=\\w)", "namespace" ],
+            ["(namespace)(\\s*)((?:\\w+::)*\\w+)", ["keyword","white","namespace"] ],
+
+            ["[a-z_$][\\w]*",  { "cases": { "@typeKeywords": "keyword.type",
+                                            "@keywords": "keyword",
+                                            "@default": "identifier" } } ],
+            ["(\\.|\\->)([A-Z][\\w]*)", ["keyword", "identifier"] ],
+            ["[A-Z][\\w]*(?!\\s*[\\w\\(])", "type.identifier" ],
+            ["[A-Z][A-Z0-9_]*(?![\\w\\(])", "type.identifier" ],
+
+            ["^(\\s*#)(\\w+)(.*)", { "cases": {
+                "$2@directives": ["namespace","namespace","string"],
+                "@default": ["meta","meta","string"]
+            } } ],
+
+            { "include": "@whitespace" },
+
+            ["[{}()\\[\\]]", "@brackets"],
+            ["[<>](?!@symbols)", "@brackets"],
+            ["@symbols", { "cases": { "@operators": "operator",
+                                      "@default"  : "" } } ],
+
+            ["\\d*\\.\\d+([eE][\\-+]?\\d+)?[fFdD]?", "number.float"],
+            ["0[xX][0-9a-fA-F_]*[0-9a-fA-F][Ll]?", "number.hex"],
+            ["0[0-7_]*[0-7][Ll]?", "number.octal"],
+            ["0[bB][0-1_]*[0-1][Ll]?", "number.binary"],
+            ["\\d+[lL]?", "number"],
+
+            ["[;,.]", "delimiter"],
+
+            ["[lL]\"([^\"\\\\]|\\\\.)*$", "string.invalid" ],
+            ["\"",  "string", "@string" ],
+
+            ["'[^\\\\']'", "string"],
+            ["(')(@escapes)(')", ["string","string.escape","string"]],
+            ["'", "string.invalid"]
+        ],
+
+        "whitespace": [
+            ["[ \\t\\r\\n]+", "white"],
+            ["\\/\\*",       "comment", "@comment" ],
+            ["\\/\\/.*$",    "comment"]
+        ],
+
+        "comment": [
+            ["[^\\/*]+", "comment" ],
+            ["\\/\\*",    "comment.invalid" ],
+            ["\\*/",    "comment", "@pop"  ],
+            ["[\\/*]",   "comment" ]
+        ],
+
+        "string": [
+            ["[^\\\\\"]+",  "string"],
+            ["@escapes", "string.escape"],
+            ["\\\\.",      "string.escape.invalid"],
+            ["\"",        "string", "@pop" ]
+        ]
+    }
+}

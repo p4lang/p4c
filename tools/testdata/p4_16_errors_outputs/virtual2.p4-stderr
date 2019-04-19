@@ -1,0 +1,6 @@
+virtual2.p4(23): [--Werror=type-error] error: return +: return expression in function with void return
+            return (ix + 1);
+            ^^^^^^
+virtual2.p4(21): [--Werror=legacy] error: cntr: Cannot unify void to bit<16>
+    Virtual() cntr = {
+              ^^^^

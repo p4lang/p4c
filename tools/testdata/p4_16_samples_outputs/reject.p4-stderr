@@ -1,0 +1,9 @@
+reject.p4(20): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+    state start {
+          ^^^^^
+reject.p4(19): [--Wwarn=parser-transition] warning: accept state in parser f is unreachable
+parser f() {
+       ^
+reject.p4(19): [--Wwarn=parser-transition] warning: accept state in parser f is unreachable
+parser f() {
+       ^

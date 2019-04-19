@@ -1,0 +1,4 @@
+table-entries-exact-ternary.p4(74):syntax error, unexpected ), expecting ","
+            (0x1111 &&& 0xF )
+                            ^
+error: 1 errors encountered, aborting compilation

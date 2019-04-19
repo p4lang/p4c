@@ -1,0 +1,6 @@
+flowlet_switching.p4(128): [--Wwarn=type-inference] warning: Could not infer type for ecmp_base, using bit<8>
+action set_ecmp_select(ecmp_base, ecmp_count) {
+                       ^^^^^^^^^
+flowlet_switching.p4(128): [--Wwarn=type-inference] warning: Could not infer type for ecmp_count, using bit<8>
+action set_ecmp_select(ecmp_base, ecmp_count) {
+                                  ^^^^^^^^^^

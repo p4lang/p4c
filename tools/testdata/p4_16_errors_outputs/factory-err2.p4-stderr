@@ -1,0 +1,9 @@
+factory-err2.p4(31): error: : not a compile-time constant when binding to a
+    c1<bit<16>>(createWidget(hdr.f1, hdr.f2)) c; // factory args must be constants
+                             ^^^^^^
+factory-err2.p4(20)
+extern widget<T> createWidget<T, U>(U a, T b);
+                                      ^
+factory-err2.p4(31): [--Werror=type-error] error: createWidget: cannot evaluate to a compile-time constant
+    c1<bit<16>>(createWidget(hdr.f1, hdr.f2)) c; // factory args must be constants
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

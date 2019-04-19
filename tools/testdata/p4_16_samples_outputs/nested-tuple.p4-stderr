@@ -1,0 +1,6 @@
+nested-tuple.p4(30): [--Wwarn=shadow] warning: T shadows struct T
+extern void f<T>(in T data);
+              ^
+nested-tuple.p4(17)
+struct T { bit f; }
+       ^

@@ -1,0 +1,43 @@
+
+add tab1 ethernet.dstAddr:0xa1a2a3a4a5a6 act(port:2) = A
+add tab1 ethernet.dstAddr:0xb1b2b3b4b5b6 act(port:3) = B
+add tab1 ethernet.dstAddr:0xc1c2c3c4c5c6 act(port:5) = C
+
+expect 2
+expect 3
+expect 5
+# check_counter cnt($A)
+packet 0 a1a2a3a4a5a6
+wait
+check_counter cnt($A) packets == 1
+packet 0 a1a2a3a4a5a6
+wait
+check_counter cnt($A) packets == 2
+packet 0 a1a2a3a4a5a6
+wait
+check_counter cnt($A) packets == 3
+
+packet 0 b1b2b3b4b5b6 0001
+packet 0 b1b2b3b4b5b6 0002
+packet 0 b1b2b3b4b5b6 0003
+packet 0 b1b2b3b4b5b6 0004
+packet 0 b1b2b3b4b5b6 0005
+packet 0 b1b2b3b4b5b6 0006
+packet 0 b1b2b3b4b5b6 0007
+packet 0 b1b2b3b4b5b6 0008
+packet 0 b1b2b3b4b5b6 0009
+packet 0 b1b2b3b4b5b6 0010
+packet 0 b1b2b3b4b5b6 0011
+packet 0 b1b2b3b4b5b6 0012
+packet 0 b1b2b3b4b5b6 0013
+packet 0 b1b2b3b4b5b6 0014
+packet 0 b1b2b3b4b5b6 0015
+packet 0 b1b2b3b4b5b6 0016
+packet 0 b1b2b3b4b5b6 0017
+packet 0 b1b2b3b4b5b6 0018
+packet 0 b1b2b3b4b5b6 0019
+packet 0 b1b2b3b4b5b6 0020
+
+wait
+check_counter cnt($A) packets == 3
+check_counter cnt($B) packets == 20

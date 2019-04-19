@@ -1,0 +1,9 @@
+wrong-cast.p4(1): error: cast: Only 0 and 1 can be cast to booleans
+const bool b = (bool)3;
+               ^^^^^^^
+wrong-cast.p4(2): error: cast: Cannot cast signed value to boolean
+const bool c = (bool)2s0;
+               ^^^^^^^^^
+wrong-cast.p4(3): error: cast: Only bit<1> values can be cast to bool
+const bool d = (bool)10w0;
+               ^^^^^^^^^^

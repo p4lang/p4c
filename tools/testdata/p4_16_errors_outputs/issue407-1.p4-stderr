@@ -1,0 +1,30 @@
+issue407-1.p4(47): [--Werror=type-error] error: Field x7 of header H cannot have type error
+    error x7;
+          ^^
+core.p4(23)
+error {
+^
+issue407-1.p4(49): [--Werror=type-error] error: Field x9 of header H cannot have type myenum1
+    myenum1 x9;
+            ^^
+issue407-1.p4(32)
+enum myenum1 {
+     ^^^^^^^
+issue407-1.p4(50): [--Werror=type-error] error: Field x10 of header H cannot have type header Ethernet_h
+    Ethernet_h x10;
+               ^^^
+issue407-1.p4(38)
+header Ethernet_h {
+       ^^^^^^^^^^
+issue407-1.p4(51): [--Werror=type-error] error: Field x11 of header H cannot have type header Ethernet_h[]
+    Ethernet_h[4] x11;
+                  ^^^
+issue407-1.p4(51)
+    Ethernet_h[4] x11;
+    ^^^^^^^^^^^^^
+issue407-1.p4(54): [--Werror=type-error] error: Field x14 of header H cannot have type Tuple(2)
+    myTuple0 x14;
+             ^^^
+issue407-1.p4(44)
+typedef tuple<bit<8>, bit<16>> myTuple0;
+        ^^^^^^^^^^^^^^^^^^^^^^

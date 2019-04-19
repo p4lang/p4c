@@ -1,0 +1,109 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33604812
+    name: "cIngress.t0"
+    alias: "t0"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.tcp.dstPort"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16810612
+  }
+  action_refs {
+    id: 16787161
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 8
+}
+tables {
+  preamble {
+    id: 33618272
+    name: "cIngress.t1"
+    alias: "t1"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.tcp.dstPort"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16810612
+  }
+  action_refs {
+    id: 16787161
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 8
+}
+tables {
+  preamble {
+    id: 33574495
+    name: "cIngress.t2"
+    alias: "t2"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.tcp.srcPort"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16810612
+  }
+  action_refs {
+    id: 16787161
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 16
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16810612
+    name: "cIngress.foo1"
+    alias: "foo1"
+  }
+  params {
+    id: 1
+    name: "dstAddr"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 16787161
+    name: "cIngress.foo2"
+    alias: "foo2"
+  }
+  params {
+    id: 1
+    name: "srcAddr"
+    bitwidth: 32
+  }
+}

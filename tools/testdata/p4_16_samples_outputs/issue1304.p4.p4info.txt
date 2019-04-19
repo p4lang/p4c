@@ -1,0 +1,38 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33611905
+    name: "MyIngress.t"
+    alias: "t"
+  }
+  match_fields {
+    id: 1
+    name: "meta.err"
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16777606
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16777606
+    name: "MyIngress.set_data"
+    alias: "set_data"
+  }
+}

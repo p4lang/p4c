@@ -1,0 +1,39 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33558312
+    name: "Ing.tbl_act"
+    alias: "tbl_act"
+  }
+  action_refs {
+    id: 16783513
+  }
+  const_default_action_id: 16783513
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16783513
+    name: "Ing.act"
+    alias: "act"
+  }
+}
+registers {
+  preamble {
+    id: 369100749
+    name: "Ing.debug"
+    alias: "debug"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 8
+      }
+    }
+  }
+  size: 2
+}
+type_info {
+}

@@ -1,0 +1,6 @@
+directionless.p4(18): [--Werror=type-error] error: y0: direction-less action parameters have to be at the end
+    action a(bit x0, out bit y0)
+                             ^^
+directionless.p4(24): [--Werror=type-error] error: y: direction-less action parameters have to be at the end
+    action b(bit x, out bit y)
+                            ^

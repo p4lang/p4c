@@ -1,0 +1,4 @@
+expression_e.p4(21):syntax error, unexpected _
+        b = 32w0 & _
+                   ^
+error: 1 errors encountered, aborting compilation

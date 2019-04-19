@@ -1,0 +1,209 @@
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+package p4.config.v1;
+
+// P4 type specs ---------------------------------------------------------------
+
+// From the P4_16 spec:
+/* |--------------------|--------------------------------------------|
+ * |                    | Container type                             |
+ * | Element type       |-----------|--------------|-----------------|
+ * |                    | header    | header_union | struct or tuple |
+ * |--------------------|-----------|--------------|-----------------|
+ * | bit<W>             | allowed   | error        | allowed         |
+ * | int<W>             | allowed   | error        | allowed         |
+ * | varbit<W>          | allowed   | error        | allowed         |
+ * | int                | error     | error        | error           |
+ * | void               | error     | error        | error           |
+ * | error              | error     | error        | allowed         |
+ * | match_kind         | error     | error        | error           |
+ * | bool               | error     | error        | allowed         |
+ * | enum               | allowed*  | error        | allowed         |
+ * | header             | error     | allowed      | allowed         |
+ * | header stack       | error     | error        | allowed         |
+ * | header_union       | error     | error        | allowed         |
+ * | struct             | error     | error        | allowed         |
+ * | tuple              | error     | error        | allowed         |
+ * |--------------------|-----------|--------------|-----------------|
+ *
+ * *if serializable
+ */
+
+// These P4 types (struct, header_type, header_union and enum) are guaranteed to
+// have a fully-qualified name (e.g. you cannot use an anonymous struct to
+// declare a variable like in C). Instead of duplicating the type spec for these
+// every time the type is used, we include the type spec once in this P4TypeInfo
+// message and refer to the types by name in the P4DataTypeSpec message. We also
+// support annotations for these type specs which can be useful, e.g. to
+// identify well-known headers (such as ipv4).
+message P4TypeInfo {
+  map<string, P4StructTypeSpec> structs = 1;
+  map<string, P4HeaderTypeSpec> headers = 2;
+  map<string, P4HeaderUnionTypeSpec> header_unions = 3;
+  map<string, P4EnumTypeSpec> enums = 4;
+  P4ErrorTypeSpec error = 5;
+  map<string, P4SerializableEnumTypeSpec> serializable_enums = 6;
+  map<string, P4NewTypeSpec> new_types = 7;
+}
+
+// Describes a P4_16 type.
+message P4DataTypeSpec {
+  oneof type_spec {
+    P4BitstringLikeTypeSpec bitstring = 1;
+    P4BoolType bool = 2;
+    P4TupleTypeSpec tuple = 3;
+    P4NamedType struct = 4;
+    P4NamedType header = 5;
+    P4NamedType header_union = 6;
+    P4HeaderStackTypeSpec header_stack = 7;
+    P4HeaderUnionStackTypeSpec header_union_stack = 8;
+    P4NamedType enum = 9;
+    P4ErrorType error = 10;
+    P4NamedType serializable_enum = 11;
+    P4NamedType new_type = 12;
+  }
+}
+
+message P4NamedType {
+  string name = 1;
+}
+
+// Empty message as no type information needed, just used as a placeholder in
+// the oneof to identify boolean types.
+message P4BoolType { }
+
+message P4ErrorType { }
+
+message P4BitstringLikeTypeSpec {
+  oneof type_spec {
+    P4BitTypeSpec bit = 1;  // bit<W>
+    P4IntTypeSpec int = 2;  // int<W>
+    P4VarbitTypeSpec varbit = 3;  // varbit<W>
+  }
+  // Useful to identify well-known types, such as IP address or Ethernet MAC
+  // address.
+  repeated string annotations = 4;
+}
+
+message P4BitTypeSpec {
+  int32 bitwidth = 1;
+}
+
+message P4IntTypeSpec {
+  int32 bitwidth = 1;
+}
+
+message P4VarbitTypeSpec {
+  int32 max_bitwidth = 1;
+}
+
+// From the P4_16 spec: "A tuple is similar to a struct, in that it holds
+// multiple values. Unlike a struct type, tuples have no named fields."
+message P4TupleTypeSpec {
+  repeated P4DataTypeSpec members = 1;
+}
+
+message P4StructTypeSpec {
+  message Member {
+    string name = 1;
+    P4DataTypeSpec type_spec = 2;
+  }
+  repeated Member members = 1;
+  repeated string annotations = 2;
+}
+
+message P4HeaderTypeSpec {
+  message Member {
+    string name = 1;
+    P4BitstringLikeTypeSpec type_spec = 2;
+  }
+  repeated Member members = 1;
+  repeated string annotations = 2;
+}
+
+message P4HeaderUnionTypeSpec {
+  message Member {
+    string name = 1;
+    P4NamedType header = 2;
+  }
+  repeated Member members = 1;
+  repeated string annotations = 2;
+}
+
+message P4HeaderStackTypeSpec {
+  P4NamedType header = 1;
+  int32 size = 2;
+}
+
+message P4HeaderUnionStackTypeSpec {
+  P4NamedType header_union = 1;
+  int32 size = 2;
+}
+
+// For "safe" enums with no underlying representation and no member integer
+// values.
+message P4EnumTypeSpec {
+  message Member {
+    string name = 1;
+    repeated string annotations = 2;
+  }
+  repeated Member members = 1;
+  repeated string annotations = 2;
+}
+
+// For serializable (or "unsafe") enums, which have an underlying type. Note
+// that as per the P4_16 specification, the underlying representation can only
+// be a bit<W> type.
+message P4SerializableEnumTypeSpec {
+  message Member {
+    string name = 1;
+    bytes value = 2;
+    repeated string annotations = 3;
+  }
+  P4BitTypeSpec underlying_type = 1;
+  repeated Member members = 2;
+  repeated string annotations = 3;
+}
+
+// Similar to an enum, but there is always one and only one instance per P4
+// program.
+message P4ErrorTypeSpec {
+  repeated string members = 1;
+}
+
+message P4NewTypeTranslation {
+  // the URI uniquely identifies the translation in order to enable the
+  // P4Runtime agent to perform value-mapping appropriately when required. It is
+  // recommended that the URI includes at least the P4 architecture name and the
+  // type name.
+  string uri = 1;
+  int32 sdn_bitwidth = 2;
+}
+
+// New types introduced with the "type" keyword
+message P4NewTypeSpec {
+  oneof representation {
+    // if no @p4runtime_translation annotation present
+    P4DataTypeSpec original_type = 1;
+    // if @p4runtime_translation annotation present
+    P4NewTypeTranslation translated_type = 2;
+  }
+  // for other annotations (not @p4runtime_translation)
+  repeated string annotations = 3;
+}
+
+// End of P4 type specs --------------------------------------------------------

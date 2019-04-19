@@ -1,0 +1,8 @@
+array_index.p4(30): [--Wwarn=type-inference] warning: Could not infer type for port, using bit<8>
+action a(port, val) {
+         ^^^^
+array_index.p4(31): error: Illegal array index hdr.data[port]: must be a constant, 'last', or 'next'.
+    modify_field(data[port].f1, val);
+                 ^^^^^^^^^^
+error: Cannot locate action noop
+error: 2 errors encountered, aborting compilation

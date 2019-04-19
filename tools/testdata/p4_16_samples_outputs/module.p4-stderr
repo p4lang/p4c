@@ -1,0 +1,22 @@
+module.p4(38): [--Wwarn=unused] warning: main1: unused instance
+switch0(f()) main1;
+             ^^^^^
+module.p4(39): [--Wwarn=unused] warning: main3: unused instance
+switch1<bool>(f()) main3;
+                   ^^^^^
+module.p4(40): [--Wwarn=unused] warning: main4: unused instance
+switch2(f()) main4;
+             ^^^^^
+module.p4(41): [--Wwarn=unused] warning: main5: unused instance
+switch3(f2()) main5;
+              ^^^^^
+module.p4(42): [--Wwarn=unused] warning: main6: unused instance
+switch4<bool>(f2()) main6;
+                    ^^^^^
+module.p4(43): [--Wwarn=unused] warning: main2: unused instance
+switch1(f()) main2;
+             ^^^^^
+module.p4(44): [--Wwarn=unused] warning: main7: unused instance
+switch4(f2()) main7;
+              ^^^^^
+warning: Program does not contain a `main' module

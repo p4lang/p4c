@@ -1,0 +1,3 @@
+psa-counter3.p4(48): [--Wwarn=unused] warning: counter1: unused instance
+    Counter<bit<10>,bit<12>>(1024, PSA_CounterType_t.PACKETS) counter1;
+                                                              ^^^^^^^^

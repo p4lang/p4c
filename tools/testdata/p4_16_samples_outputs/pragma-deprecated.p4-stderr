@@ -1,0 +1,16 @@
+pragma-deprecated.p4(9): [--Wwarn=deprecated] warning: Checksum16: Using deprecated feature Checksum16. Please use verify_checksum/update_checksum instead.
+Checksum16() instance;
+^^^^^^^^^^
+pragma-deprecated.p4(2)
+extern Checksum16 {
+       ^^^^^^^^^^
+pragma-deprecated.p4(13): [--Wwarn=deprecated] warning: wrong: Using deprecated feature wrong. Please don't use this function.
+        bit<6> x = wrong();
+                   ^^^^^
+pragma-deprecated.p4(7)
+extern bit<6> wrong();
+              ^^^^^
+pragma-deprecated.p4(9): [--Wwarn=unused] warning: instance: unused instance
+Checksum16() instance;
+             ^^^^^^^^
+warning: Program does not contain a `main' module

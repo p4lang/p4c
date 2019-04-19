@@ -1,0 +1,51 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33604573
+    name: "IngressI.myc.myt"
+    alias: "myt"
+  }
+  match_fields {
+    id: 1
+    name: "meta.f1"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "meta.f2"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16791916
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+  is_const_table: true
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16791916
+    name: "IngressI.myc.set_eg"
+    alias: "set_eg"
+  }
+  params {
+    id: 1
+    name: "eg"
+    bitwidth: 9
+  }
+}

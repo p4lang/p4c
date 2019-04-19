@@ -1,0 +1,9 @@
+interface.p4(31): [--Wwarn=unused] warning: crc0: unused instance
+    Crc16<bit<32>>() crc0;
+                     ^^^^
+interface.p4(32): [--Wwarn=unused] warning: crc1: unused instance
+    Crc16<int<32>>(32s0) crc1;
+                         ^^^^
+interface.p4(33): [--Wwarn=unused] warning: crc2: unused instance
+    Crc16<int<32>>() crc2;
+                     ^^^^

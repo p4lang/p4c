@@ -1,0 +1,70 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33614349
+    name: "ingress.t"
+    alias: "t"
+  }
+  match_fields {
+    id: 1
+    name: "h.h.op"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16832985
+  }
+  action_refs {
+    id: 16813446
+  }
+  action_refs {
+    id: 16838633
+  }
+  action_refs {
+    id: 16783139
+  }
+  action_refs {
+    id: 16832181
+  }
+  size: 1024
+  is_const_table: true
+}
+actions {
+  preamble {
+    id: 16832985
+    name: "ingress.usat_plus"
+    alias: "usat_plus"
+  }
+}
+actions {
+  preamble {
+    id: 16813446
+    name: "ingress.usat_minus"
+    alias: "usat_minus"
+  }
+}
+actions {
+  preamble {
+    id: 16838633
+    name: "ingress.sat_plus"
+    alias: "sat_plus"
+  }
+}
+actions {
+  preamble {
+    id: 16783139
+    name: "ingress.sat_minus"
+    alias: "sat_minus"
+  }
+}
+actions {
+  preamble {
+    id: 16832181
+    name: "ingress.drop"
+    alias: "drop"
+  }
+}
+type_info {
+}

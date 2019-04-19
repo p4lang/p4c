@@ -1,0 +1,18 @@
+stack_e.p4(23): [--Werror=type-error] error: Header stack struct s[] used with non-header type struct s
+        s[5] stack1; // non-header illegal in header stack
+        ^^^^
+stack_e.p4(26): [--Werror=type-error] error: Index too large: 1231092310293
+        h b = stack[1231092310293];
+                    ^^^^^^^^^^^^^
+stack_e.p4(27): [--Werror=type-error] error: []: Negative array index -2
+        h c = stack[-2];
+              ^^^^^^^^^
+stack_e.p4(27)
+        h c = stack[-2];
+                     ^
+stack_e.p4(28): [--Werror=type-error] error: Array index 6 larger or equal to array size 5
+        h d = stack[6];
+                    ^
+stack_e.p4(22)
+        h[5] stack;
+          ^

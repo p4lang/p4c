@@ -1,0 +1,15 @@
+binary_e.p4(32): [--Werror=type-error] error: Array indexing [] applied to non-array type int<2>
+        c = a[2]; // not an array
+            ^^^^
+binary_e.p4(33): [--Werror=type-error] error: Array index d must be an integer, but it has type bool
+        c = stack[d]; // indexing with bool
+                  ^
+binary_e.p4(35): [--Werror=type-error] error: &: Cannot operate on values with different types bit<2> and bit<4>
+        f = e & f; // different width
+            ^^^^^
+binary_e.p4(38): [--Werror=type-error] error: <: not defined on bool and bool
+        d = d < d; // not defined on bool
+            ^^^^^
+binary_e.p4(39): [--Werror=type-error] error: >: not defined on int<2> and int<4>
+        d = a > c; // different width
+            ^^^^^

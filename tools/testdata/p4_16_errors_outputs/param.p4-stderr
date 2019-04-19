@@ -1,0 +1,3 @@
+param.p4(22): [--Werror=type-error] error: E: Action parameters cannot have extern types
+    action a(E e) { e.call(); }
+             ^

@@ -1,0 +1,6 @@
+tunnel.p4(880): [--Wwarn=mismatch] warning: -14: negative value with unsigned type
+    add(egress_metadata.payload_length, standard_metadata.packet_length, -14);
+                                                                          ^^
+fabric.p4(230): [--Wwarn=type-inference] warning: Could not infer type for fabric_mgid, using bit<8>
+action set_fabric_multicast(fabric_mgid) {
+                            ^^^^^^^^^^^

@@ -1,0 +1,12 @@
+div1.p4(18): [--Werror=type-error] error: /: not defined on negative numbers
+    a = a / -1; // not defined for negative numbers
+        ^^^^^^
+div1.p4(19): [--Werror=type-error] error: /: not defined on negative numbers
+    a = -5 / a;
+        ^^^^^^
+div1.p4(20): [--Werror=type-error] error: %: not defined on negative numbers
+    a = a % -1;
+        ^^^^^^
+div1.p4(21): [--Werror=type-error] error: %: not defined on negative numbers
+    a = -5 % a;
+        ^^^^^^

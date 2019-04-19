@@ -1,0 +1,4 @@
+issue780-4.p4(1): [--Werror=legacy] error: header egress cannot have this name; it can only be used for control
+header_type egress {
+^
+error: 1 errors encountered, aborting compilation

@@ -1,0 +1,93 @@
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33556639
+      match {
+        field_id: 1
+        ternary {
+          value: "\000\001"
+          mask: "\000\017"
+        }
+      }
+      action {
+        action {
+          action_id: 16837978
+          params {
+            param_id: 1
+            value: "\000\001"
+          }
+        }
+      }
+      priority: 4
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33556639
+      match {
+        field_id: 1
+        ternary {
+          value: "\021\207"
+          mask: "\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 16837978
+          params {
+            param_id: 1
+            value: "\000\002"
+          }
+        }
+      }
+      priority: 3
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33556639
+      match {
+        field_id: 1
+        ternary {
+          value: "\020\000"
+          mask: "\360\000"
+        }
+      }
+      action {
+        action {
+          action_id: 16837978
+          params {
+            param_id: 1
+            value: "\000\003"
+          }
+        }
+      }
+      priority: 2
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33556639
+      action {
+        action {
+          action_id: 16837978
+          params {
+            param_id: 1
+            value: "\000\004"
+          }
+        }
+      }
+      priority: 1
+    }
+  }
+}

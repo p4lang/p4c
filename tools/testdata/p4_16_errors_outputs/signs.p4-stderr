@@ -1,0 +1,12 @@
+signs.p4(17): [--Wwarn=shadow] warning: a shadows a
+    bit<8> a = 8w0;
+    ^^^^^^^^^^^^^^^
+signs.p4(16)
+action a() {
+       ^
+signs.p4(18): [--Werror=legacy] error: b: Cannot unify bit<8> to int<8>
+    int<8> b = 8w0;
+    ^^^^^^^^^^^^^^^
+signs.p4(19): [--Werror=type-error] error: -: Cannot operate on values with different signs
+    a = a - b;
+        ^^^^^

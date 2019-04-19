@@ -1,0 +1,86 @@
+{
+    "displayName": "Protobuf",
+    "name": "proto",
+
+    "lineComment":      "//",
+    "blockCommentStart": "/*",
+    "blockCommentEnd":   "*/",
+
+    "keywords": [
+        "syntax", "import", "package", "service",
+        "rpc", "returns",
+        "message", "oneof", "repeated",
+        "reserved",
+        "="
+    ],
+
+    "extraKeywords": ["optimize_for", "cc_enable_arenas", "objc_class_prefix", "deprecated"],
+
+    "typeKeywords": [
+        "enum",
+        "double", "float",
+        "int32", "int64", "uint32", "uint64", "sint32", "sint64",
+        "fixed32", "fixed64", "sfixed32", "sfixed64",
+        "bool",
+        "string", "bytes"
+    ],
+
+    "directives": [],
+
+    "symbols":  "[=><!~?:&|+\\-*\\/\\^%]+",
+    "escapes":  "\\\\(?:[abfnrtv\\\\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})",
+
+    "tokenizer": {
+        "root": [
+            ["__\\w+", "identifier.predefined"],
+
+            ["[a-z_$][\\w]*",  { "cases": {
+                "@typeKeywords": "keyword.type",
+                "@keywords": "keyword",
+                "@extraKeywords": "keyword.extra",
+                "@default": "identifier" } } ],
+
+            { "include": "@whitespace" },
+
+            ["[{}()\\[\\]]", "@brackets"],
+            ["@symbols", { "cases": { "@keywords" : "keyword",
+                                      "@default"  : "" } } ],
+
+            ["\\d*\\.\\d+([eE][\\-+]?\\d+)?[fFdD]?", "number.float"],
+            ["0[xX][0-9a-fA-F_]*[0-9a-fA-F][Ll]?", "number.hex"],
+            ["0[0-7_]*[0-7][Ll]?", "number.octal"],
+            ["0[bB][0-1_]*[0-1][Ll]?", "number.binary"],
+            ["\\d+[lL]?", "number"],
+
+            ["[;,.]", "delimiter"],
+
+
+            ["[lL]\"([^\"\\\\]|\\\\.)*$", "string.invalid"],
+            ["\"",  "string", "@string" ],
+
+            ["'[^\\\\']'", "string"],
+            ["(')(@escapes)(')", ["string","string.escape","string"]],
+            ["'", "string.invalid"]
+        ],
+
+        "whitespace": [
+            ["[ \\t\\r\\n]+", "white"],
+            ["\\/\\*",       "comment", "@comment" ],
+            ["\\/\\/.*$",    "comment"]
+        ],
+
+        "comment": [
+            ["[^\\/*]+", "comment" ],
+            ["\\/\\*",    "comment.invalid" ],
+            ["\\*/",    "comment", "@pop"  ],
+            ["[\\/*]",   "comment" ]
+        ],
+
+        "string": [
+            ["[^\\\\\"]+",  "string"],
+            ["@escapes", "string.escape"],
+            ["\\\\.",      "string.escape.invalid"],
+            ["\"",        "string", "@pop" ]
+        ]
+    }
+}

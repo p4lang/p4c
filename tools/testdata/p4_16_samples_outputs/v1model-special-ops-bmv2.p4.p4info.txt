@@ -1,0 +1,240 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33571396
+    name: "ingress.ipv4_da_lpm"
+    alias: "ipv4_da_lpm"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dstAddr"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 16798847
+  }
+  action_refs {
+    id: 16839149
+  }
+  action_refs {
+    id: 16780718
+  }
+  action_refs {
+    id: 16779407
+  }
+  action_refs {
+    id: 16815499
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33594010
+    name: "ingress.mac_da"
+    alias: "mac_da"
+  }
+  match_fields {
+    id: 1
+    name: "meta.fwd.l2ptr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16832597
+  }
+  action_refs {
+    id: 16815499
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33603625
+    name: "egress.get_multicast_copy_out_bd"
+    alias: "get_multicast_copy_out_bd"
+  }
+  match_fields {
+    id: 1
+    name: "standard_metadata.mcast_grp"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "standard_metadata.egress_rid"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16826665
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33573008
+    name: "egress.send_frame"
+    alias: "send_frame"
+  }
+  match_fields {
+    id: 1
+    name: "meta.fwd.out_bd"
+    bitwidth: 24
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16781737
+  }
+  action_refs {
+    id: 16805783
+  }
+  action_refs {
+    id: 16794299
+  }
+  action_refs {
+    id: 16815499
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16815499
+    name: "my_drop"
+    alias: "my_drop"
+  }
+}
+actions {
+  preamble {
+    id: 16798847
+    name: "ingress.set_l2ptr"
+    alias: "set_l2ptr"
+  }
+  params {
+    id: 1
+    name: "l2ptr"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 16839149
+    name: "ingress.set_mcast_grp"
+    alias: "set_mcast_grp"
+  }
+  params {
+    id: 1
+    name: "mcast_grp"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 16780718
+    name: "ingress.do_resubmit"
+    alias: "do_resubmit"
+  }
+  params {
+    id: 1
+    name: "new_ipv4_dstAddr"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 16779407
+    name: "ingress.do_clone_i2e"
+    alias: "do_clone_i2e"
+  }
+  params {
+    id: 1
+    name: "l2ptr"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 16832597
+    name: "ingress.set_bd_dmac_intf"
+    alias: "set_bd_dmac_intf"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 24
+  }
+  params {
+    id: 2
+    name: "dmac"
+    bitwidth: 48
+  }
+  params {
+    id: 3
+    name: "intf"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16826665
+    name: "egress.set_out_bd"
+    alias: "set_out_bd"
+  }
+  params {
+    id: 1
+    name: "bd"
+    bitwidth: 24
+  }
+}
+actions {
+  preamble {
+    id: 16781737
+    name: "egress.rewrite_mac"
+    alias: "rewrite_mac"
+  }
+  params {
+    id: 1
+    name: "smac"
+    bitwidth: 48
+  }
+}
+actions {
+  preamble {
+    id: 16805783
+    name: "egress.do_recirculate"
+    alias: "do_recirculate"
+  }
+  params {
+    id: 1
+    name: "new_ipv4_dstAddr"
+    bitwidth: 32
+  }
+}
+actions {
+  preamble {
+    id: 16794299
+    name: "egress.do_clone_e2e"
+    alias: "do_clone_e2e"
+  }
+  params {
+    id: 1
+    name: "smac"
+    bitwidth: 48
+  }
+}
+type_info {
+}

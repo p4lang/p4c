@@ -1,0 +1,3 @@
+issue473.p4(70): [--Werror=type-error] error: cast: action argument must be a compile-time constant
+        default_action = b(meta.c, (bit<8>) meta.d);
+                                   ^^^^^^^^^^^^^^^

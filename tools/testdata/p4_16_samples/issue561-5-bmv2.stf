@@ -1,0 +1,7 @@
+packet 0 00 00 00 00
+packet 0 01 00 00 00
+packet 0 02 00 00 00
+
+expect 0 00 FF 00 00$
+expect 0 01 FF FF 00$
+expect 0 02 00 00 00$

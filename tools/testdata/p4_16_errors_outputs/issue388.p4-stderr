@@ -1,0 +1,3 @@
+issue388.p4(29): error: c: cannot instantiate at top-level
+C() c;
+    ^

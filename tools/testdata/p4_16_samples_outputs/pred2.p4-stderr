@@ -1,0 +1,6 @@
+pred2.p4(29): [--Wwarn=uninitialized_use] warning: tmp_1 may be uninitialized
+        tmp_1 = (!true && !true ? false : tmp_1);
+                                          ^^^^^
+pred2.p4(30): [--Wwarn=uninitialized_use] warning: tmp_2 may be uninitialized
+        tmp_2 = (!true && !!true ? a == 32w5 : tmp_2);
+                                               ^^^^^

@@ -1,0 +1,3 @@
+persistent_e.p4(23): [--Werror=type-error] error: z: cannot evaluate to a compile-time constant
+    p(z) p1; // argument is not constant
+      ^

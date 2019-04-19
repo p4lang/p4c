@@ -1,0 +1,12 @@
+default_action1.p4(20): [--Wwarn=shadow] warning: b shadows b
+    action b() {}
+           ^
+default_action1.p4(16)
+action b() {}
+       ^
+default_action1.p4(23): [--Werror=type-error] error: .b and b refer to different actions
+        default_action = .b(); // not the same b
+                         ^^^^
+default_action1.p4(22)
+        actions = { a; b; }
+                       ^

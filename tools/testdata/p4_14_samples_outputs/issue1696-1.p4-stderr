@@ -1,0 +1,3 @@
+issue1696-1.p4(10): [--Wwarn=ordering] warning: []: the order of headers in deparser is not uniquely determined by parser!
+    extract(stack[0]);
+                  ^

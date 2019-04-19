@@ -1,0 +1,6 @@
+const1_e.p4(19): [--Werror=legacy] error: +: operands have different types: bit<32> and bit<16>
+    x = 32w5 + 16w3;
+        ^^^^^^^^^^^
+const1_e.p4(21): error: /: Division by zero
+    x = 5 / 0;
+        ^^^^^

@@ -1,0 +1,12 @@
+newtype-err.p4(10): [--Werror=legacy] error: AssignmentStatement: Cannot unify bit<32> to N32
+        n = b + b;
+          ^
+newtype-err.p4(2)
+type bit<32> N32;
+             ^^^
+newtype-err.p4(11): [--Werror=type-error] error: +: cannot be applied to n of type N32
+        n1 = n + 0;
+             ^
+newtype-err.p4(12): [--Werror=legacy] error: AssignmentStatement: Cannot unify N32 to bit<32>
+        x = n;
+          ^

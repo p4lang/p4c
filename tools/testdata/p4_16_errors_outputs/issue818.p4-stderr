@@ -1,0 +1,6 @@
+issue818.p4(13): [--Werror=type-error] error: c: parameter cannot have type control C
+  WrapControl(C c);
+                ^
+issue818.p4(5)
+control C();
+        ^

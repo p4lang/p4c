@@ -1,0 +1,3 @@
+table-entries-lpm-bmv2.p4(64): [--Wwarn=mismatch] warning: P4Runtime requires that LPM matches have masked-off bits set to 0, updating value 0x11 to conform to the P4Runtime specification
+            0x11 &&& 0xF0 : a_with_control_params(11);
+            ^^^^

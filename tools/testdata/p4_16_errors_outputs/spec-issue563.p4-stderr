@@ -1,0 +1,6 @@
+spec-issue563.p4(12): [--Werror=type-error] error: a: parameter cannot have type control A
+control C()(A a) {
+              ^
+spec-issue563.p4(5)
+control A() {
+        ^

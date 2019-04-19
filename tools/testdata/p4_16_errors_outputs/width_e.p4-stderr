@@ -1,0 +1,4 @@
+width_e.p4(16): [--Werror=legacy] error: 12301923123132: Value too large for int
+const bit<12301923123132>
+          ^^^^^^^^^^^^^^
+error: 1 errors encountered, aborting compilation

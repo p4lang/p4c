@@ -1,0 +1,16 @@
+pkg_info {
+  arch: "v1model"
+}
+counters {
+  preamble {
+    id: 302019703
+    name: "cIngress.E.c1.stats"
+    alias: "stats"
+  }
+  spec {
+    unit: PACKETS
+  }
+  size: 65536
+}
+type_info {
+}

@@ -1,0 +1,6 @@
+named-fail1.p4(8): [--Werror=legacy] error: f: No parameter named z
+        f(z = b, y = b); // No such parameter
+        ^^^^^^^^^^^^^^^
+named-fail1.p4(8)
+        f(z = b, y = b); // No such parameter
+          ^

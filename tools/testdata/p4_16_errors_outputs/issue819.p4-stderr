@@ -1,0 +1,6 @@
+issue819.p4(27): [--Werror=type-error] error: WrapControls<...>: Cannot use control MyC1 as a type parameter
+  WrapControls<MyC1,MyC2>(c1,c2) wc;
+  ^^^^^^^^^^^^^^^^^^^^^^^
+issue819.p4(14)
+control MyC1(WrapControls<_,_> wc) {
+        ^^^^

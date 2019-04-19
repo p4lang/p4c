@@ -1,0 +1,6 @@
+packet 0 00 23 666666
+expect 0 00 23 666666
+packet 0 01 2345 6666
+expect 0 01 FF 6666
+packet 0 01 5432 6666
+expect 0 01 FF 6666

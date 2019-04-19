@@ -1,0 +1,6 @@
+virtual4.p4(22): [--Werror=type-error] error: g: no matching abstract method in Virtual
+        bit<16> g(in bit<16> ix) {
+                ^
+virtual4.p4(16)
+extern Virtual {
+       ^^^^^^^

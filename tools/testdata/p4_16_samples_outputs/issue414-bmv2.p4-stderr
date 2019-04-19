@@ -1,0 +1,3 @@
+issue414-bmv2.p4(64): [--Wwarn=unused] warning: cbar_inst2: unused instance
+    cBar() cbar_inst2;
+           ^^^^^^^^^^

@@ -1,0 +1,110 @@
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 33564006
+    name: "ingress.learned_sources"
+    alias: "learned_sources"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16800567
+  }
+  action_refs {
+    id: 16800063
+  }
+  size: 1024
+  idle_timeout_behavior: NOTIFY_CONTROL
+}
+tables {
+  preamble {
+    id: 33594478
+    name: "ingress.l2_tbl"
+    alias: "l2_tbl"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.dstAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16830849
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+  idle_timeout_behavior: NOTIFY_CONTROL
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16800063
+    name: "ingress.unknown_source"
+    alias: "unknown_source"
+  }
+}
+actions {
+  preamble {
+    id: 16830849
+    name: "ingress.do_L2_forward"
+    alias: "do_L2_forward"
+  }
+  params {
+    id: 1
+    name: "egress_port"
+    bitwidth: 10
+  }
+}
+digests {
+  preamble {
+    id: 385907822
+    name: "IngressDeparserImpl.mac_learn_digest"
+    alias: "mac_learn_digest"
+  }
+  type_spec {
+    struct {
+      name: "mac_learn_digest_t"
+    }
+  }
+}
+type_info {
+  structs {
+    key: "mac_learn_digest_t"
+    value {
+      members {
+        name: "srcAddr"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 48
+            }
+          }
+        }
+      }
+      members {
+        name: "ingress_port"
+        type_spec {
+          bitstring {
+            bit {
+              bitwidth: 10
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,36 @@
+uninit.p4(35): [--Wwarn=uninitialized_use] warning: h may not be completely initialized
+        func(h); // uninitialized
+             ^
+uninit.p4(36): [--Wwarn=uninitialized_use] warning: h.data2 may be uninitialized
+        g(h.data2, g(h.data2, h.data2)); // uninitialized
+                     ^^^^^^^
+uninit.p4(36): [--Wwarn=uninitialized_use] warning: h.data2 may be uninitialized
+        g(h.data2, g(h.data2, h.data2)); // uninitialized
+                              ^^^^^^^
+uninit.p4(41): [--Wwarn=uninitialized_use] warning: h.data3 may be uninitialized
+        h.data2 = h.data3 + 1; // uninitialized
+                  ^^^^^^^
+uninit.p4(42): [--Wwarn=uninitialized_use] warning: [] may not be completely initialized
+        stack[0] = stack[1]; // uninitialized
+                   ^^^^^^^^
+uninit.p4(62): [--Wwarn=uninitialized_use] warning: c may be uninitialized
+        c = !c; // uninitialized;
+             ^
+uninit.p4(82): [--Wwarn=uninitialized_use] warning: b may be uninitialized
+        b = b + 1; // uninitialized
+            ^
+uninit.p4(86): [--Wwarn=uninitialized_use] warning: e may be uninitialized
+        if (e > 0) { // uninitialized
+            ^
+uninit.p4(92): [--Wwarn=uninitialized_use] warning: e may be uninitialized
+        e = e + 1; // uninitialized
+            ^
+uninit.p4(97): [--Wwarn=uninitialized_use] warning: touched may be uninitialized
+        touched = !touched; // uninitialized
+                   ^^^^^^^
+uninit.p4(68): [--Wwarn=uninitialized_out_param] warning: out parameter v may be uninitialized when c terminates
+control c(out bit<32> v) { // uninitialized
+                      ^
+uninit.p4(68)
+control c(out bit<32> v) { // uninitialized
+        ^

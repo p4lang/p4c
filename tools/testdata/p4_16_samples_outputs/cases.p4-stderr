@@ -1,0 +1,4 @@
+cases.p4(31): [--Wwarn=missing] warning: SwitchCase: fallthrough with no statement
+            c:
+            ^
+warning: Program does not contain a `main' module

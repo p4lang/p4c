@@ -1,0 +1,17 @@
+#       bit<32> A bit<32> B
+# In the output B = A if A + A matches in the table
+
+add c.t e:0 c.a()
+add c.t e:4 c.a()
+
+packet 0 00000000 00000000
+expect 0 00000000 00000000
+
+packet 0 00000001 00000000
+expect 0 00000001 00000000
+
+packet 0 00000002 00000000
+expect 0 00000002 00000002
+
+packet 0 00000010 00000000
+expect 0 00000010 00000000

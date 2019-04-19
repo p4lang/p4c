@@ -1,0 +1,6 @@
+interface1_e.p4(25): [--Werror=type-error] error: x.f: extern X does not have method matching this call
+        x.f();
+        ^^^
+interface1_e.p4(16)
+extern X {
+       ^

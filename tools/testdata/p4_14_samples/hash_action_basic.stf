@@ -1,0 +1,20 @@
+add index_setter data.f1:0x11111111 data.f2:0x22222222 set_index(index:9, port:1)
+add index_setter data.f1:0x22222222 data.f2:0x33333333 set_index(index:9, port:2)
+add index_setter data.f1:0x33333333 data.f2:0x44444444 set_index(index:9, port:2)
+add index_setter data.f1:0x44444444 data.f2:0x55555555 set_index(index:8, port:3)
+
+expect 1 11111111 22222222 0101 0202 0303 0404
+packet 0 11111111 22222222 0101 0202 0303 0404
+
+expect 2 22222222 33333333 0202 0303 0404 0505
+packet 0 22222222 33333333 0202 0303 0404 0505
+
+expect 2 33333333 44444444 0303 0404 0505 0606
+packet 0 33333333 44444444 0303 0404 0505 0606
+
+expect 3 44444444 55555555 0404 0505 0606 0707
+packet 0 44444444 55555555 0404 0505 0606 0707
+
+wait
+check_counter count1(8) packets == 1
+check_counter count1(9) packets == 3

@@ -1,0 +1,13 @@
+template_e.p4(16): [--Werror=legacy] error: T: Duplicates declaration T
+package S<T, T
+             ^
+template_e.p4(16)
+package S<T, T
+          ^
+template_e.p4(16): error: Duplicate declaration of T; previous at 
+package S<T, T>
+             ^
+template_e.p4(16)
+package S<T, T>
+          ^
+error: 2 errors encountered, aborting compilation

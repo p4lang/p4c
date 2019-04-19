@@ -1,0 +1,9 @@
+module_e.p4(25): [--Werror=legacy] error: main: Cannot unify parameter x with filter because they have different directions
+top(g()) main;
+         ^^^^
+module_e.p4(20)
+parser g(in bit x) // mismatch in direction
+                ^
+module_e.p4(16)
+parser Filter(out bool filter);
+                       ^^^^^^

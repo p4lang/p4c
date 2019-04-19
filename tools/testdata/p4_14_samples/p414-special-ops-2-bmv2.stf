@@ -1,0 +1,32 @@
+######################################################################
+
+# For details on the behavior of this program with these input
+# packets, and how they should produce these expected output packets,
+# see https://github.com/jafingerhut/p4-guide/tbd/README-p414.md
+
+# test resubmit operation
+
+packet 0 000000000001 000000000000 dead
+expect 0 030000330600 000000000000 e50b
+
+######################################################################
+
+# test recirculate operation
+
+packet 0 000000000002 000000000000 dead
+expect 2 0005005f0400 ffffffffffa1 ec14
+
+######################################################################
+
+# test clone operation from egress to egress
+
+# The mirroring_add command causes packets cloned to clone session id
+# 1, to be copied to egress_port 5.
+mirroring_add 1 5
+
+packet 0 000000000003 000000000000 dead
+expect 3 000000000003 ffffffffffe9 dead
+expect 5 000000000003 ffffffffffd2 dead
+expect 5 000000000003 ffffffffffbb dead
+expect 5 000000000003 ffffffffffa4 dead
+expect 5 0000045c0000 ffffffffffa4 ce2e

@@ -1,0 +1,15 @@
+constant_folding.p4(95): [--Wwarn=overflow] warning: <<: Shifting 8-bit value with 9
+        z = 8w1 << 9;
+            ^^^^^^^^
+constant_folding.p4(95): [--Wwarn=mismatch] warning: 512: value does not fit in 8 bits
+        z = 8w1 << 9;
+            ^^^^^^^^
+constant_folding.p4(88): [--Wwarn=mismatch] warning: 256: value does not fit in 8 bits
+        z = 128 + 128;
+            ^^^^^^^^^
+constant_folding.p4(91): [--Wwarn=mismatch] warning: -128: negative value with unsigned type
+        z = 0 - 128;
+            ^^^^^^^
+constant_folding.p4(94): [--Wwarn=mismatch] warning: 512: value does not fit in 8 bits
+        z = 1 << 9;
+            ^^^^^^

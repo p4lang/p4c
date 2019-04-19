@@ -1,0 +1,11 @@
+add repeater ingress_port:0 my_drop()
+add repeater ingress_port:1 set_egress_port(egress_port:2)
+add repeater ingress_port:2 my_drop()
+add repeater ingress_port:3 set_egress_port(egress_port:1)
+
+expect 2 02020202 02020202
+expect 1 04040404 04040404
+packet 0 01010101 01010101
+packet 1 02020202 02020202
+packet 2 03030303 03030303
+packet 3 04040404 04040404

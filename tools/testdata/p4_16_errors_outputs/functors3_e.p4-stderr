@@ -1,0 +1,6 @@
+functors3_e.p4(18): [--Werror=type-error] error: s1: cannot allocate objects of type struct s
+s() s1;
+    ^^
+functors3_e.p4(16)
+struct s {}
+       ^

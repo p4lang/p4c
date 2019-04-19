@@ -1,0 +1,9 @@
+noMatch.p4(20): [--Wwarn=parser-transition] warning: accept state in parser p is unreachable
+parser p() {
+       ^
+noMatch.p4(23): [--Wwarn=uninitialized_use] warning: x may be uninitialized
+        transition select(x) {
+                          ^
+noMatch.p4(20): [--Wwarn=parser-transition] warning: accept state in parser p is unreachable
+parser p() {
+       ^

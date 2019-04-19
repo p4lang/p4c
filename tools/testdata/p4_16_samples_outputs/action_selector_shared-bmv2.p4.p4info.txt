@@ -1,0 +1,62 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33594274
+    name: "IngressI.indirect_ws"
+    alias: "indirect_ws"
+  }
+  action_refs {
+    id: 16836747
+  }
+  action_refs {
+    id: 16800567
+  }
+  const_default_action_id: 16800567
+  implementation_id: 285230093
+  size: 1024
+}
+tables {
+  preamble {
+    id: 33557881
+    name: "IngressI.indirect_ws_1"
+    alias: "indirect_ws_1"
+  }
+  action_refs {
+    id: 16836747
+  }
+  action_refs {
+    id: 16800567
+  }
+  const_default_action_id: 16800567
+  implementation_id: 285230093
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16836747
+    name: "IngressI.drop"
+    alias: "drop"
+  }
+}
+action_profiles {
+  preamble {
+    id: 285230093
+    name: "IngressI.as"
+    alias: "as"
+  }
+  table_ids: 33594274
+  table_ids: 33557881
+  with_selector: true
+  size: 1024
+}
+type_info {
+}

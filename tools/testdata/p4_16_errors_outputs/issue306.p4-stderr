@@ -1,0 +1,36 @@
+issue306.p4(45): [--Werror=type-error] error: Field stack is not a member of structure struct my_packet
+    b.extract(p.stack.next);
+                ^^^^^
+issue306.p4(30)
+struct my_packet {
+       ^^^^^^^^^
+issue306.p4(46): [--Werror=type-error] error: Field stack is not a member of structure struct my_packet
+    transition select(p.stack.last.op_code) {
+                        ^^^^^
+issue306.p4(30)
+struct my_packet {
+       ^^^^^^^^^
+issue306.p4(53): [--Werror=type-error] error: Field stack is not a member of structure struct my_packet
+    b.extract(p.stack.next);
+                ^^^^^
+issue306.p4(30)
+struct my_packet {
+       ^^^^^^^^^
+issue306.p4(54): [--Werror=type-error] error: Field stack is not a member of structure struct my_packet
+    transition select(p.stack.last.op_code) {
+                        ^^^^^
+issue306.p4(30)
+struct my_packet {
+       ^^^^^^^^^
+issue306.p4(73): [--Werror=type-error] error: Field stack is not a member of structure struct my_packet
+    key = { p.stack[0].op_code : exact; }
+              ^^^^^
+issue306.p4(30)
+struct my_packet {
+       ^^^^^^^^^
+issue306.p4(91): [--Werror=type-error] error: Field stack is not a member of structure struct my_packet
+    b.emit(p.stack);
+             ^^^^^
+issue306.p4(30)
+struct my_packet {
+       ^^^^^^^^^

@@ -1,0 +1,6 @@
+issue604.p4(2): [--Wwarn=unsupported] warning: extern_test: P4_14 extern type not fully supported
+extern_type extern_test {
+^
+issue604.p4(8): [--Wwarn=unsupported] warning: my_extern_inst: P4_14 extern not fully supported
+extern extern_test my_extern_inst {
+                   ^^^^^^^^^^^^^^

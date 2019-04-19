@@ -1,0 +1,6 @@
+inline.p4(25): [--Wwarn=shadow] warning: y shadows y
+    action b(in bit x, out bit y)
+                               ^
+inline.p4(17)
+control p(out bit y)
+                  ^

@@ -1,0 +1,3 @@
+function_e2.p4(4): [--Werror=type-error] error: a: Functions cannot call actions
+    a();
+    ^^^

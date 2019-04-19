@@ -1,0 +1,39 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33578994
+    name: "ingress.someTable"
+    alias: "someTable"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16782834
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16782834
+    name: "ingress.setDest"
+    alias: "setDest"
+  }
+}

@@ -1,0 +1,6 @@
+issue1237.p4(37): [--Wwarn=invalid] warning: 0: zero mask
+    kilometer.flaccidly mask 0 : lpm;
+                             ^
+issue1237.p4(37): [--Wwarn=mismatch] warning: 0: Constant key field
+    kilometer.flaccidly mask 0 : lpm;
+                             ^

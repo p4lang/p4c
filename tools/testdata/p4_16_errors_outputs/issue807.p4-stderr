@@ -1,0 +1,12 @@
+issue807.p4(20): [--Werror=type-error] error: e.get2: illegal return type control C2
+    C2 c2 = e.get2();
+            ^^^^^^^^
+issue807.p4(5)
+control C2();
+        ^^
+issue807.p4(26): [--Werror=type-error] error: e.get1: illegal return type control C1
+    C1 c1 = e.get1();
+            ^^^^^^^^
+issue807.p4(4)
+control C1();
+        ^^

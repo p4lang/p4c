@@ -1,0 +1,21 @@
+setdefault ethertype_match l2_packet()
+add ethertype_match etherType:0x800 ipv4_packet()
+add ethertype_match etherType:0x86dd ipv6_packet()
+add ethertype_match etherType:0x8100 mpls_packet()
+add ethertype_match etherType:0x9100 mim_packet()
+
+add set_egress drop:0 send_packet()
+add set_egress drop:1 discard()
+
+add ipv4_match dstAddr:0xa000002 set_egress_port(egress_port:3)
+add udp_check dstPort:0xaa _drop()
+
+
+#        | ethernet header            | | IPv4 header                                  | | UDP header      | | payload ...
+#        dstAddr      srcAddr      type VL   len  id       ttl    csum                 |  sp   dp  len     | |
+expect 3 aaaaaaaaaaaa bbbbbbbbbbbb 0800 4500 002c 0000 0065 40 11 6c55 01020304 0a000002 0064 0065 0010 0000 000102030405060708090a0b0c0d0e0f
+
+# first packet should be dropped by drop rule
+packet 0 aaaaaaaaaaaa bbbbbbbbbbbb 0800 4500 002c 0000 0065 40 11 6c55 01020304 0a000002 0064 00aa 0010 0000 000102030405060708090a0b0c0d0e0f
+# second packet should be forwarded to port 3
+packet 0 aaaaaaaaaaaa bbbbbbbbbbbb 0800 4500 002c 0000 0065 40 11 6c55 01020304 0a000002 0064 0065 0010 0000 000102030405060708090a0b0c0d0e0f

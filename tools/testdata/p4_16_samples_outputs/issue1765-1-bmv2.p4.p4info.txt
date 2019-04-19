@@ -1,0 +1,122 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33554432
+    name: "MyIngress.v6_addresses"
+    alias: "v6_addresses"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv6.dst_addr"
+    bitwidth: 128
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16789132
+  }
+  action_refs {
+    id: 16807338
+  }
+  action_refs {
+    id: 16795573
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 64
+}
+tables {
+  preamble {
+    id: 33567153
+    name: "MyIngress.v6_networks"
+    alias: "v6_networks"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv6.dst_addr"
+    bitwidth: 128
+    match_type: LPM
+  }
+  action_refs {
+    id: 16777697
+  }
+  action_refs {
+    id: 16789132
+  }
+  action_refs {
+    id: 16807338
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 64
+}
+tables {
+  preamble {
+    id: 33616067
+    name: "MyIngress.v4_networks"
+    alias: "v4_networks"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ipv4.dst_addr"
+    bitwidth: 32
+    match_type: LPM
+  }
+  action_refs {
+    id: 16777697
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 64
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16777697
+    name: "MyIngress.set_egress_port"
+    alias: "set_egress_port"
+  }
+  params {
+    id: 1
+    name: "out_port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 16789132
+    name: "MyIngress.controller_debug"
+    alias: "controller_debug"
+  }
+}
+actions {
+  preamble {
+    id: 16807338
+    name: "MyIngress.controller_reply"
+    alias: "controller_reply"
+  }
+  params {
+    id: 1
+    name: "task"
+    bitwidth: 16
+  }
+}
+actions {
+  preamble {
+    id: 16795573
+    name: "MyIngress.icmp6_echo_reply"
+    alias: "icmp6_echo_reply"
+  }
+}
+type_info {
+}

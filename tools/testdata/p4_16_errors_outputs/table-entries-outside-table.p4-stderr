@@ -1,0 +1,4 @@
+table-entries-outside-table.p4(68):syntax error, unexpected ENTRIES
+    const entries
+          ^^^^^^^
+error: 1 errors encountered, aborting compilation

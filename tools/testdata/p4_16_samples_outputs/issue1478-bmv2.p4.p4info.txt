@@ -1,0 +1,40 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33594939
+    name: "ingress.t1"
+    alias: "t1"
+  }
+  action_refs {
+    id: 16800567
+  }
+  const_default_action_id: 16800567
+  size: 3
+}
+tables {
+  preamble {
+    id: 33618572
+    name: "ingress.t2"
+    alias: "t2"
+  }
+  match_fields {
+    id: 1
+    name: "sm.ingress_port"
+    bitwidth: 9
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 10
+  is_const_table: true
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}

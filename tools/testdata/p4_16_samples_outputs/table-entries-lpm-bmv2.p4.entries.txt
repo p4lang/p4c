@@ -1,0 +1,65 @@
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33555353
+      match {
+        field_id: 1
+        lpm {
+          value: "\020"
+          prefix_len: 4
+        }
+      }
+      action {
+        action {
+          action_id: 16837978
+          params {
+            param_id: 1
+            value: "\000\013"
+          }
+        }
+      }
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33555353
+      match {
+        field_id: 1
+        lpm {
+          value: "\022"
+          prefix_len: 8
+        }
+      }
+      action {
+        action {
+          action_id: 16837978
+          params {
+            param_id: 1
+            value: "\000\014"
+          }
+        }
+      }
+    }
+  }
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33555353
+      action {
+        action {
+          action_id: 16837978
+          params {
+            param_id: 1
+            value: "\000\r"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+shift_e.p4(20): error: Syntax error at shift operator: 
+        int<32> b = a > > 1;
+                      ^
+error: 1 errors encountered, aborting compilation

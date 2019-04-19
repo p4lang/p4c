@@ -1,0 +1,4 @@
+underscore2_e.p4(19):syntax error, unexpected _
+        bit _
+            ^
+error: 1 errors encountered, aborting compilation

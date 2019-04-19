@@ -1,0 +1,3 @@
+table-entries-non-const.p4(68): [--Werror=invalid] error: EntriesList: Invalid initializer. Table initializers must be constant.
+        entries = {
+        ^^^^^^^

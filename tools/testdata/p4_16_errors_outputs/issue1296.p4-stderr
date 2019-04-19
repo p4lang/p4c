@@ -1,0 +1,6 @@
+issue1296.p4(7): [--Werror=type-error] error: test_extern: recursive type specialization
+test_extern<test_extern<bit<32>>>() test;
+            ^^^^^^^^^^^
+issue1296.p4(13): [--Werror=type-error] error: test_extern1: recursive type specialization
+test_extern1<test_extern<test_extern1<bit<32>>>>() test1;
+                         ^^^^^^^^^^^^

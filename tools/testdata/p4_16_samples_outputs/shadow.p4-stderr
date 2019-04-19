@@ -1,0 +1,7 @@
+shadow.p4(22): [--Wwarn=shadow] warning: x shadows x
+            bit x;
+            ^^^^^^
+shadow.p4(20)
+        bit x;
+        ^^^^^^
+warning: Program does not contain a `main' module

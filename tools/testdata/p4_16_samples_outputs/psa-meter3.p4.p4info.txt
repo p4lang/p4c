@@ -1,0 +1,41 @@
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 33610509
+    name: "MyIC.tbl"
+    alias: "tbl"
+  }
+  match_fields {
+    id: 1
+    name: "a.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+  idle_timeout_behavior: NOTIFY_CONTROL
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+meters {
+  preamble {
+    id: 335562780
+    name: "MyIC.meter0"
+    alias: "meter0"
+  }
+  spec {
+    unit: PACKETS
+  }
+  size: 1024
+}
+type_info {
+}

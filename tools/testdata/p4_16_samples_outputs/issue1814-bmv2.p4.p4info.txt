@@ -1,0 +1,44 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33604775
+    name: "IngressImpl.debug_table"
+    alias: "debug_table"
+  }
+  match_fields {
+    id: 1
+    name: "meta.test"
+    bitwidth: 1
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+registers {
+  preamble {
+    id: 369112648
+    name: "IngressImpl.testRegister"
+    alias: "testRegister"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 1
+      }
+    }
+  }
+  size: 1
+}
+type_info {
+}

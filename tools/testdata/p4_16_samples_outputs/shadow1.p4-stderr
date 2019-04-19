@@ -1,0 +1,7 @@
+shadow1.p4(20): [--Wwarn=shadow] warning: counter shadows counter
+  bit<16> counter;
+  ^^^^^^^^^^^^^^^^
+shadow1.p4(17)
+extern counter {}
+       ^^^^^^^
+warning: Program does not contain a `main' module

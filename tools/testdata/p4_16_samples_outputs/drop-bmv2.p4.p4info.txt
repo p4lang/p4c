@@ -1,0 +1,24 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33603375
+    name: "IngressI.forward"
+    alias: "forward"
+  }
+  action_refs {
+    id: 16793508
+  }
+  const_default_action_id: 16793508
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16793508
+    name: "drop"
+    alias: "drop"
+  }
+}
+type_info {
+}

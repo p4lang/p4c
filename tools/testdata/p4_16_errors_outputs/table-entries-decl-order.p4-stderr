@@ -1,0 +1,6 @@
+table-entries-decl-order.p4(56): [--Werror=type-error] error: EntriesList: Entries list must be after table key Key
+        const entries = {
+              ^^^^^^^
+table-entries-decl-order.p4(63)
+   key = {
+          ^

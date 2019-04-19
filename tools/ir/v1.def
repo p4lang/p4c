@@ -1,0 +1,480 @@
+/* -*-C++-*- */
+
+/*
+  This file contains IR classes needed just for the P4 v1.0/v1.1 front-end.
+*/
+
+/** \addtogroup irdefs
+  * @{
+  */
+#emit
+namespace IR {
+enum class CounterType { NONE, PACKETS, BYTES, BOTH };
+}
+
+inline std::ostream& operator<<(std::ostream &out, IR::CounterType d) {
+    switch (d) {
+        case IR::CounterType::NONE:
+            out << "NONE";
+            break;
+        case IR::CounterType::PACKETS:
+            out << "PACKETS";
+            break;
+        case IR::CounterType::BYTES:
+            out << "BYTES";
+            break;
+        case IR::CounterType::BOTH:
+            out << "BOTH";
+            break;
+        default:
+            BUG("Unhandled case");
+    }
+    return out;
+}
+
+inline bool operator>>(cstring s, IR::CounterType &ctr) {
+    if (!s || s == "" || s == "NONE") ctr = IR::CounterType::NONE;
+    else if (s == "PACKETS") ctr = IR::CounterType::PACKETS;
+    else if (s == "BYTES") ctr = IR::CounterType::BYTES;
+    else if (s == "BOTH") ctr = IR::CounterType::BOTH;
+    else return false;
+    return true;
+}
+#end
+
+class Type_Block : Type_Base {
+    toString { return "block"; }
+    static Type_Block get();
+    dbprint { out << "block"; }
+}
+class Type_Counter : Type_Base {
+    toString { return "counter"; }
+    static Type_Counter get();
+    dbprint { out << "counter"; }
+}
+class Type_Expression : Type_Base {
+    toString { return "expression"; }
+    static Type_Expression get();
+    dbprint { out << "expression"; }
+}
+class Type_FieldListCalculation : Type_Base {
+    toString { return "field_list_calculation"; }
+    static Type_FieldListCalculation get();
+    dbprint { out << "field_list_calculation"; }
+}
+class Type_Meter : Type_Base {
+    toString { return "meter"; }
+    static Type_Meter get();
+    dbprint { out << "meter"; }
+}
+class Type_Register : Type_Base {
+    toString { return "register"; }
+    static Type_Register get();
+    dbprint { out << "register"; }
+}
+class Type_AnyTable : Type_Base {
+    toString { return "table"; }
+    static Type_AnyTable get();
+    dbprint { out << "table"; }
+}
+
+abstract HeaderOrMetadata {
+    ID                      type_name;
+    ID                      name;
+    Annotations                 annotations;
+    NullOK Type_StructLike      type = nullptr;
+
+    HeaderOrMetadata(ID n, Type_StructLike t)
+    : type_name(t->name), name(n), annotations(Annotations::empty), type(t) {}
+    dbprint { out << type_name << ' ' << name; }
+}
+
+class Header : HeaderOrMetadata {
+    Header(ID n, Type_Header t) : HeaderOrMetadata(n, t) {}
+#nodbprint
+}
+
+class HeaderStack : HeaderOrMetadata {
+    int size;
+    HeaderStack(ID n, Type_Header t, int sz) : HeaderOrMetadata(n, t), size(sz) {}
+#nodbprint
+}
+
+class Metadata : HeaderOrMetadata {
+    Metadata(ID n, Type_StructLike t) : HeaderOrMetadata(n, t) {}
+#nodbprint
+}
+
+abstract HeaderRef : Expression {
+    virtual HeaderOrMetadata baseRef() const = 0;
+}
+
+class ConcreteHeaderRef : HeaderRef {
+    HeaderOrMetadata    ref;
+    ConcreteHeaderRef { if (type->is<Type::Unknown>() && ref) type = ref->type; }
+    HeaderOrMetadata baseRef() const override { return ref; }
+    toString{ return ref->name; }
+    dbprint{ out << ref->name; }
+}
+
+class HeaderStackItemRef : HeaderRef {
+    Expression      base_;
+    Expression      index_;
+    HeaderStackItemRef {
+        if (type->is<Type::Unknown>() && base_)
+            if (auto *hr = base_->to<HeaderRef>())
+                type = hr->baseRef()->type; }
+    Expression base() const { return base_; }
+    HeaderOrMetadata baseRef() const override { return base_->to<HeaderRef>()->baseRef(); }
+    Expression index() const { return index_; }
+    void set_base(Expression b) { base_ = b; }
+    toString{ return base_->toString() + "[" + index_->toString() + "]"; }
+}
+
+class If :  Expression {
+    Expression            pred;
+    NullOK Vector<Expression>    ifTrue;
+    NullOK Vector<Expression>    ifFalse;
+    visit_children {
+        v.visit(pred, "pred");
+        auto &clone(v.flow_clone());
+        v.visit(ifTrue, "ifTrue");
+        clone.visit(ifFalse, "ifFalse");
+        v.flow_merge(clone);
+        Expression::visit_children(v);
+    }
+}
+
+// an if condition tagged with a name so we can refer to it
+class NamedCond : If {
+    cstring  name = unique_name();
+
+    static cstring unique_name();
+    NamedCond(const If &i) : If(i), name(unique_name()) {}
+    operator== { return If::operator==(static_cast<const If &>(a)); }
+#noconstructor
+#nodbprint
+}
+
+class Apply : Expression {
+    optional ID                         name;
+    inline NameMap<Vector<Expression>, ordered_map>  actions = {};
+    visit_children {
+        auto &clone(v.flow_clone());
+        // HACK -- temp sort actions into program (source) order, so that condition names are
+        // generated in the same order as p4-hlir
+        typedef std::remove_reference<decltype(actions.at("any"))>::type action_t;
+        safe_vector<action_t *> sort_actions;
+        for (auto &p : Values(actions)) sort_actions.push_back(&p);
+        std::sort(sort_actions.begin(), sort_actions.end(),
+            [](action_t *a, action_t *b) {
+                return (*a)->srcInfo.getStart() < (*b)->srcInfo.getStart(); });
+        for (auto p : sort_actions) {
+            auto &clone2(clone.flow_clone());
+            clone2.visit(*p);
+            v.flow_merge(clone2); }
+        Expression::visit_children(v);
+    }
+}
+
+class Primitive : Operation {
+    cstring                     name;
+    inline Vector<Expression>   operands = {};
+
+    Primitive(cstring n, Vector<Expression> l) : name(n) {
+        if (l) for (auto e : *l) operands.push_back(e); }
+    Primitive(Util::SourceInfo si, cstring n, Vector<Expression> l) : Operation(si), name(n) {
+        if (l) for (auto e : *l) operands.push_back(e); }
+    Primitive(cstring n, Expression a1) : name(n) {
+        operands.push_back(a1); }
+    Primitive(Util::SourceInfo si, cstring n, Expression a1) : Operation(si), name(n) {
+        operands.push_back(a1); }
+    Primitive(cstring n, Expression a1, Expression a2) : name(n) {
+        operands.push_back(a1); operands.push_back(a2); }
+    Primitive(Util::SourceInfo si, cstring n, Expression a1, Expression a2)
+    : Operation(si), name(n) {
+        operands.push_back(a1); operands.push_back(a2); }
+    Primitive(cstring n, Expression a1, Vector<Expression> a2) : name(n) {
+        operands.push_back(a1);
+        if (a2) for (auto e : *a2) operands.push_back(e); }
+    Primitive(Util::SourceInfo si, cstring n, Expression a1, Vector<Expression> a2)
+    : Operation(si), name(n) {
+        operands.push_back(a1);
+        if (a2) for (auto e : *a2) operands.push_back(e); }
+    Primitive(cstring n, Expression a1, Expression a2, Expression a3) : name(n) {
+        operands.push_back(a1); operands.push_back(a2); operands.push_back(a3); }
+    Primitive(Util::SourceInfo si, cstring n, Expression a1, Expression a2, Expression a3)
+    : Operation(si), name(n) {
+        operands.push_back(a1); operands.push_back(a2); operands.push_back(a3); }
+    virtual bool isOutput(int operand_index) const;
+    virtual unsigned inferOperandTypes() const;
+    virtual Type inferOperandType(int operand) const;
+    virtual void typecheck() const;
+#apply
+    stringOp = name;
+    precedence = DBPrint::Prec_Postfix;
+}
+
+class FieldList {
+    optional ID                 name;
+    bool                        payload = false;
+    optional Annotations        annotations = Annotations::empty;
+    inline Vector<Expression>   fields = {};
+}
+
+class FieldListCalculation {
+    optional ID          name;
+    NullOK NameList      input = nullptr;
+    NullOK FieldList     input_fields = nullptr;
+    NullOK NameList      algorithm = nullptr;
+    int                  output_width = 0;
+    optional Annotations annotations = Annotations::empty;
+}
+
+class CalculatedField {
+    optional NullOK Expression  field;
+    class update_or_verify {
+        Util::SourceInfo        srcInfo;
+        bool                    update;
+        ID                      name;
+        Expression              cond;
+        //update_or_verify(Util::SourceInfo si, bool u, ID n, const Expression *c)
+        //: srcInfo(si), update(u), name(n), cond(c) {}
+
+        update_or_verify(bool u, ID n, const Expression *c) : update(u), name(n), cond(c) {}
+        update_or_verify() {}
+    }
+    safe_vector<update_or_verify> specs = {};
+    Annotations                 annotations;
+    visit_children {
+        v.visit(field, "field");
+        for (auto &s : specs) v.visit(s.cond, s.name.name);
+        v.visit(annotations, "annotations"); }
+}
+
+class ParserValueSet {
+    ID                          name;
+    optional Annotations        annotations = Annotations::empty;
+    dbprint { out << node_type_name() << " " << name; }
+    toString { return node_type_name() + " " + name; }
+}
+
+class CaseEntry {
+    safe_vector<std::pair<Expression, Constant>>    values = {};
+    optional ID                                     action;
+}
+
+class V1Parser {
+    optional ID                 name;
+    inline Vector<Expression>   stmts = {};
+    NullOK Vector<Expression>   select = nullptr;
+    NullOK Vector<CaseEntry>    cases = nullptr;
+    ID                          default_return = {};
+    ID                          parse_error = {};
+    bool                        drop = false;
+    Annotations                 annotations;
+    toString { return node_type_name() + " " + name; }
+}
+
+class ParserException {}
+
+abstract Attached : IInstance {
+    optional ID                 name;
+    optional Annotations        annotations = Annotations::empty;
+    cstring Name() const override { return name; }
+    virtual const char *kind() const = 0;
+    Type getType() const override { return Type_Unknown::get(); }
+    virtual bool indexed() const { return false; }
+    Attached *clone_rename(const char *ext) const {
+        Attached *rv = clone();
+        rv->name = ID(Util::SourceInfo(), rv->name.name + ext);
+        return rv; }
+    dbprint { out << node_type_name() << " " << name; }
+    toString { return node_type_name() + " " + name; }
+}
+
+abstract Stateful : Attached {
+    ID          table = {};
+    bool        direct = false;
+    bool        saturating = false;
+    int         instance_count = -1;
+    virtual bool indexed() const override { return !direct; }
+}
+
+abstract CounterOrMeter : Stateful {
+    CounterType   type = CounterType::NONE;
+    void settype(cstring t) {
+        if (strcasecmp(t.c_str(), "packets") == 0) type = CounterType::PACKETS;
+        else if (strcasecmp(t.c_str(), "bytes") == 0) type = CounterType::BYTES;
+        else if (strcasecmp(t.c_str(), "packets_and_bytes") == 0 ||
+                 strcasecmp(t.c_str(), "PacketAndBytes") == 0) type = CounterType::BOTH;
+        else error("%s: Unknown type %s", srcInfo, t); }  // NOLINT
+}
+
+class Counter : CounterOrMeter {
+    int         max_width = -1;
+    int         min_width = -1;
+    const char *kind() const override { return "stats"; }
+    const Type *getType() const override { return Type_Counter::get(); }
+}
+
+class Meter : CounterOrMeter {
+    NullOK Expression   result = nullptr;
+    NullOK Expression   pre_color = nullptr;
+    ID                  implementation = {};
+    const char *kind() const override { return "meter"; }
+    Type getType() const override { return Type_Meter::get(); }
+}
+
+class Register : Stateful {
+    ID          layout = {};
+    int         width = -1;
+    bool        signed_ = false;
+ /* bool        saturating = false; */
+    const char *kind() const override { return "register"; }
+    Type getType() const override { return Type_Register::get(); }
+}
+
+class PrimitiveAction {}
+
+class NameList {
+    safe_vector<ID>  names = {};
+    NameList(Util::SourceInfo si, cstring n) { names.emplace_back(si, n); }
+    NameList(Util::SourceInfo si, ID n) { names.emplace_back(si, n); }
+    dump_fields { out << "names=" << names; }
+}
+
+class ActionArg : Expression {
+    cstring     action_name;
+    ID          name;
+    bool        read = false;
+    bool        write = false;
+    ActionArg { if (!srcInfo) srcInfo = name.srcInfo; }
+    dbprint{ out << action_name << ':' << name; }
+    toString{ return name.name; }
+}
+
+// Represents a P4 v1.0 action
+class ActionFunction {
+    optional ID                 name;
+    inline Vector<Primitive>    action = {};
+    safe_vector<ActionArg>      args = {};
+    optional Annotations        annotations = Annotations::empty;
+
+    ActionArg arg(cstring n) const {
+        for (auto a : args)
+            if (a->name == n)
+                return a;
+        return nullptr; }
+    visit_children {
+        v.visit(action, "action");
+        // DANGER -- visiting action first so type inferencing will push types to
+        // DANGER -- action args based on use.  This is immoral.
+        for (auto &a : args) v.visit(a, "arg");
+        v.visit(annotations, "annotations");
+    }
+    toString {
+        return cstring("action ") + name + " {\n" +
+                 cstring::join(action.begin(), action.end(), ";\n") +
+                 " }"; }
+}
+
+class ActionProfile : Attached {
+    ID          selector = {};
+    safe_vector<ID> actions = {};
+    int         size = 0;
+    const char *kind() const override { return "action_profile"; }
+    bool indexed() const override { return true; }
+}
+
+class ActionSelector : Attached {
+    ID key = {};
+    NullOK FieldListCalculation key_fields = nullptr;
+    ID mode = {};
+    ID type = {};
+    const char *kind() const override { return "action_selector"; }
+}
+
+class V1Table : IInstance {
+    optional ID                 name;
+    NullOK Vector<Expression>   reads = 0;
+    safe_vector<ID>             reads_types = {};
+    int                         min_size = 0;
+    int                         max_size = 0;
+    int                         size = 0;
+    ID                          action_profile = {};
+    safe_vector<ID>             actions = {};
+    ID                          default_action = {};
+    bool                        default_action_is_const = false;
+    NullOK Vector<Expression>   default_action_args = 0;
+    inline TableProperties      properties = {};  // non-standard properties
+    optional Annotations        annotations = Annotations::empty;
+
+    void addProperty(Property prop) { properties.push_back(prop); }
+    toString { return node_type_name() + " " + name; }
+    cstring Name() const override { return name; }
+    Type getType() const override { return Type_AnyTable::get(); }
+}
+
+class V1Control {
+    ID                  name;
+    Vector<Expression>  code;
+    Annotations         annotations;
+
+    V1Control(ID n) : name(n), code(new Vector<Expression>()) {}
+    V1Control(Util::SourceInfo si, ID n) : Node(si), name(n), code(new Vector<Expression>()) {}
+#apply
+    toString { return node_type_name() + " " + name; }
+}
+
+class AttribLocal : Expression, IDeclaration {
+    ID  name;
+    ID getName() const override { return name; }
+    dbprint { out << name; }
+}
+
+class AttribLocals : ISimpleNamespace {
+    inline NameMap<AttribLocal> locals = {};
+#nodbprint
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+        return locals.valueEnumerator()->as<const IDeclaration *>(); }
+    IDeclaration getDeclByName(cstring name) const override { return locals[name]; }
+}
+
+class Attribute : Declaration {
+    NullOK Type type = nullptr;
+    NullOK AttribLocals locals = nullptr;
+    bool optional = false;
+    dbprint { if (type) out << type << ' '; out << name; }
+}
+
+class GlobalRef : Expression {
+    Node        obj;            // FIXME -- should be IInstance, but IRgen doesn't allow
+                                // FIXME -- interface references directly in the IR
+    GlobalRef { type = obj->to<IInstance>()->getType(); }
+    validate { obj->is<IInstance>(); }
+    toString { return obj->to<IInstance>()->Name(); }
+    dbprint { out << obj->to<IInstance>()->Name(); }
+}
+
+class AttributeRef : Expression {
+    cstring             extern_name;
+    Type_Extern         extern_type;
+    Attribute           attrib;
+    AttributeRef { type = attrib->type; }
+    toString { return attrib->name; }
+    dbprint { out << attrib->name; }
+}
+
+class V1Program {
+    inline NameMap<Node, std::multimap>         scope;
+
+#noconstructor
+    explicit V1Program();
+#emit
+    template<class T> const T *get(cstring name) const { return scope.get<T>(name); }
+#end
+    void add(cstring name, const Node *n) { scope.add(name, n); }
+#apply
+}
+/** @} *//* end group irdefs */

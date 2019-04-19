@@ -1,0 +1,6 @@
+issue394.p4(19): [--Werror=type-error] error: c: cannot declare variables of type C (consider using an instantiation)
+    C c;
+    ^^^^
+issue394.p4(16)
+extern C { bool get(); }
+       ^

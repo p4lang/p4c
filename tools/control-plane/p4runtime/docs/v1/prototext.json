@@ -1,0 +1,54 @@
+{
+    "displayName": "Protobuf text",
+    "name": "prototext",
+
+    "lineComment":      "#",
+
+    "keywords": [],
+
+    "typeKeywords": [],
+
+    "directives": [],
+
+    "symbols":  "[=><!~?:&|+\\-*\\/\\^%]+",
+    "escapes":  "\\\\(?:[abfnrtv\\\\\"']|x[0-9A-Fa-f]{1,4}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})",
+
+    "tokenizer": {
+        "root": [
+            ["__\\w+", "identifier.predefined"],
+
+            ["[a-z_$][\\w]*",  "identifier"],
+
+            { "include": "@whitespace" },
+
+            ["[{}()\\[\\]]", "@brackets"],
+            ["@symbols", { "cases": { "@keywords" : "keyword",
+                                      "@default"  : "" } } ],
+
+            ["\\d*\\.\\d+([eE][\\-+]?\\d+)?[fFdD]?", "number.float"],
+            ["0[xX][0-9a-fA-F_]*[0-9a-fA-F][Ll]?", "number.hex"],
+            ["0[0-7_]*[0-7][Ll]?", "number.octal"],
+            ["0[bB][0-1_]*[0-1][Ll]?", "number.binary"],
+            ["\\d+[lL]?", "number"],
+
+            ["[lL]\"([^\"\\\\]|\\\\.)*$", "string.invalid"],
+            ["\"",  "string", "@string" ],
+
+            ["'[^\\\\']'", "string"],
+            ["(')(@escapes)(')", ["string","string.escape","string"]],
+            ["'", "string.invalid"]
+        ],
+
+        "whitespace": [
+            ["[ \\t\\r\\n]+", "white"],
+            ["#.*$",    "comment"]
+        ],
+
+        "string": [
+            ["[^\\\\\"]+",  "string"],
+            ["@escapes", "string.escape"],
+            ["\\\\.",      "string.escape.invalid"],
+            ["\"",        "string", "@pop" ]
+        ]
+    }
+}

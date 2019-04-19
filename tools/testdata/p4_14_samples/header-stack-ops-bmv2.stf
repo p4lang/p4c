@@ -1,0 +1,106 @@
+# These tests are similar to those for the corresponding P4_16 test
+# program with the same name, but they were written after all of the
+# changes were made to p4c and behavioral-model that make P4_14
+# operational behavior on header stacks more like P4_16, with the
+# exception that P4_14 push still makes the newly inserted headers
+# valid, whereas P4_16 push_front makes the newly inserted headers
+# invalid.  Thus some of the test cases are different to test that
+# difference in P4_14 push vs. P4_16 push_front behavior difference.
+
+# Relevant changes to behavioral-model and p4c that these tests are
+# only intended to work _after_ those changes were made:
+
+# https://github.com/p4lang/behavioral-model/pull/564
+# https://github.com/p4lang/behavioral-model/pull/515
+# https://github.com/p4lang/p4c/pull/1147
+
+
+# packet with 3 no-ops should pass through unchanged, except for
+# h1.h2_valid_bits in output packet
+
+packet 0  01 00 00 00 00 02   02 de ad 03   03 be
+expect 0  01 00 00 00 01 02   02 de ad 03   03 be
+
+
+# This one has an operation to push 1 header into h2 stack, which in
+# P4_14 makes the new header 0 inserted valid.  Then remove header 0,
+# which should make it invalid.  So 1 header should come out, but
+# internally it should be h2[1], not h2[0], so h1.h2_valid_bits should
+# be slightly different.
+
+packet 0  01 11 40 00 00 02   02 de ad 03   03 be
+expect 0  01 11 40 00 02 02   02 de ad 03   03 be
+
+
+# push_front(1) then fill in new h2[0].  2 h2 headers should come out.
+
+packet 0  01 11 30 00 00 02   02 de ad 03   03 be
+expect 0  01 11 30 00 03 02   02 a0 0a 09   02 de ad 03   03 be
+
+
+# Only operation is to make hdr[2] valid and fill it in.  This
+# intentionally creates a 'hole', but emit should include it in
+# output.
+
+packet 0  01 52 32 00 00 02   02 de ad 03   03 be
+expect 0  01 52 32 00 05 02   02 de ad 03   02 a2 2a 09   03 be
+
+
+# Like previous case, but also do a push_front(1) after
+# hdr.h2[2].setValid().
+
+packet 0  01 52 32 11 00 02   02 de ad 03   03 be
+expect 0  01 52 32 11 0b 02   00 00 00 00   02 de ad 03   02 a2 2a 09   03 be
+
+
+# receive no h2 headers in input packet.  Make h2[0] valid and fill it
+# in.  pop_front(1) should remove it before it goes out.
+
+packet 0  01 50 30 21 00 03   03 be
+expect 0  01 50 30 21 00 03   03 be
+
+
+
+# Receive 5 valid h2 headers, send through without changing
+packet 0  01 00 00 00 00 02   02 12 34 02   02 56 78 02   02 9a bc 02   02 de f1 02   02 23 45 03   03 fe
+expect 0  01 00 00 00 1f 02   02 12 34 02   02 56 78 02   02 9a bc 02   02 de f1 02   02 23 45 03   03 fe
+
+
+# Receive 5 valid h2 headers, push_front(1), fill in new h2[0], 5 valid h2 out
+packet 0  01 11 30 00 00 02   02 12 34 02   02 56 78 02   02 9a bc 02   02 de f1 02   02 23 45 03   03 fe
+expect 0  01 11 30 00 1f 02   02 a0 0a 09   02 12 34 02   02 56 78 02   02 9a bc 02   02 de f1 02   03 fe
+
+
+# Receive 5 valid h2 headers, push_front(4), which are all valid in P4_14, 5 valid h2 out
+packet 0  01 14 00 00 00 02   02 12 34 02   02 56 78 02   02 9a bc 02   02 de f1 02   02 23 45 03   03 fe
+expect 0  01 14 00 00 1f 02   00 00 00 00   00 00 00 00   00 00 00 00   00 00 00 00   02 12 34 02   03 fe
+
+
+# Receive 5 valid h2 headers, push_front(5), which are all valid in P4_14, 5 valid h2 out
+packet 0  01 15 00 00 00 02   02 12 34 02   02 56 78 02   02 9a bc 02   02 de f1 02   02 23 45 03   03 fe
+expect 0  01 15 00 00 1f 02   00 00 00 00   00 00 00 00   00 00 00 00   00 00 00 00   00 00 00 00   03 fe
+
+
+# Receive 5 valid h2 headers, pop_front(1), 4 valid h2 headers out
+packet 0  01 21 00 00 00 02   02 12 34 02   02 56 78 02   02 9a bc 02   02 de f1 02   02 23 45 03   03 fe
+expect 0  01 21 00 00 0f 02   02 56 78 02   02 9a bc 02   02 de f1 02   02 23 45 03   03 fe
+
+
+# Receive 5 valid h2 headers, pop_front(4), 1 valid h2 header out
+packet 0  01 24 00 00 00 02   02 12 34 02   02 56 78 02   02 9a bc 02   02 de f1 02   02 23 45 03   03 fe
+expect 0  01 24 00 00 01 02   02 23 45 03   03 fe
+
+
+# Receive 5 valid h2 headers, pop_front(5), 0 valid h2 headers out
+packet 0  01 25 00 00 00 02   02 12 34 02   02 56 78 02   02 9a bc 02   02 de f1 02   02 23 45 03   03 fe
+expect 0  01 25 00 00 00 02   03 fe
+
+
+# Receive 3 valid h2 headers, make h2[3] valid and fill in, push_front(1), 5 out
+packet 0  01 53 33 11 00 02   02 12 34 02   02 56 78 02   02 23 45 03   03 fe
+expect 0  01 53 33 11 1f 02   00 00 00 00   02 12 34 02   02 56 78 02   02 23 45 03   02 a3 3a 09   03 fe
+
+
+# Receive 3 valid h2 headers, make h2[3] valid and fill in, pop_front(1), 3 out
+packet 0  01 53 33 21 00 02   02 12 34 02   02 56 78 02   02 23 45 03   03 fe
+expect 0  01 53 33 21 07 02   02 56 78 02   02 23 45 03   02 a3 3a 09   03 fe

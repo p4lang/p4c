@@ -1,0 +1,3 @@
+warning: Program does not contain a `main' module
+warning: Program does not contain a main module, so P4Info's 'pkg_info' field will not be set
+warning: Program does not contain a `main' module

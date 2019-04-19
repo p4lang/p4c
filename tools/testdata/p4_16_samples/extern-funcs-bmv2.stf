@@ -1,0 +1,8 @@
+# header = { int<32> a }
+# In the output a = 0x000000ff
+
+packet 0 00000000 00000000
+expect 0 000000ff 00000000
+
+packet 0 beefca0e a5dffd5a
+expect 0 000000ff a5dffd5a

@@ -1,0 +1,18 @@
+parser-arg.p4(18): [--Werror=type-error] error: p: parameter cannot have type parser Parser
+parser MyParser(Parser p);
+                       ^
+parser-arg.p4(17)
+parser Parser();
+       ^^^^^^
+parser-arg.p4(21): [--Werror=type-error] error: p: parameter cannot have type parser Parser
+parser Parser1(Parser p) {
+                      ^
+parser-arg.p4(17)
+parser Parser();
+       ^^^^^^
+parser-arg.p4(28): [--Werror=type-error] error: p: parameter cannot have type parser Parser
+parser Parser2(Parser p) {
+                      ^
+parser-arg.p4(17)
+parser Parser();
+       ^^^^^^

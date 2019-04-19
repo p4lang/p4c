@@ -1,0 +1,3 @@
+extract1.p4(24): [--Werror=type-error] error: h: argument should contain a varbit field
+        p.extract(h, 32); // error: not a variable-sized header
+                  ^

@@ -1,0 +1,4 @@
+issue763-1.p4(7): [--Werror=legacy] error: Header cannot have this name; it can only be used for metadata
+header X standard_metadata;
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+error: 1 errors encountered, aborting compilation

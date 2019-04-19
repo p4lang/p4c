@@ -1,0 +1,6 @@
+virtual1.p4(23): [--Werror=legacy] error: return +: Cannot unify bit<16> to bool
+            return (ix + 1);
+            ^^^^^^
+virtual1.p4(21): [--Werror=legacy] error: cntr: Cannot unify bool to bit<16>
+    Virtual() cntr = {
+              ^^^^

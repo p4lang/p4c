@@ -1,0 +1,3 @@
+typecheck_e.p4(21): [--Werror=legacy] error: f: Cannot unify T to int<32>
+        f(x);
+        ^^^^

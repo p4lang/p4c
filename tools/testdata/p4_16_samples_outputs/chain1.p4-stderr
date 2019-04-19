@@ -1,0 +1,3 @@
+chain1.p4(26): [--Wwarn=uninitialized_use] warning: x may be uninitialized
+        transition select (x) {
+                           ^

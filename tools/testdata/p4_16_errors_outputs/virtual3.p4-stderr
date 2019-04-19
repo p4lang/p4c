@@ -1,0 +1,3 @@
+virtual3.p4(24): [--Werror=type-error] error: return : return with no expression in a function returning bit<16>
+            return;
+            ^^^^^^

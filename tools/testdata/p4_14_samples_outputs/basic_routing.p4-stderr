@@ -1,0 +1,6 @@
+basic_routing.p4(117): [--Wwarn=shadow] warning: bd shadows .bd
+action set_bd(bd) {
+              ^^
+basic_routing.p4(135)
+table bd {
+^

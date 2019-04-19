@@ -1,0 +1,3 @@
+self-call.p4(17): [--Werror=type-error] error: c: Cannot refer to control inside itself
+    c() c_inst;
+    ^

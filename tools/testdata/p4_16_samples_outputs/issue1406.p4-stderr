@@ -1,0 +1,9 @@
+issue1406.p4(17): [--Wwarn=parser-transition] warning: start: implicit transition to `reject'
+  state start {
+        ^^^^^
+issue1406.p4(14): [--Wwarn=parser-transition] warning: accept state in parser TestParser is unreachable
+parser TestParser(packet_in b, out headers_t headers, inout metadata_t meta,
+       ^^^^^^^^^^
+issue1406.p4(14): [--Wwarn=parser-transition] warning: accept state in parser TestParser is unreachable
+parser TestParser(packet_in b, out headers_t headers, inout metadata_t meta,
+       ^^^^^^^^^^

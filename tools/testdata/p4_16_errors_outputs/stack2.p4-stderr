@@ -1,0 +1,15 @@
+stack2.p4(24): [--Werror=legacy] error: AssignmentStatement: cannot unify stacks with different sized header h[] and header h[]
+        stack1 = stack2; // assignment between different stacks
+               ^
+stack2.p4(21)
+        h[5] stack1;
+        ^^^^
+stack2.p4(22)
+        h[3] stack2;
+        ^^^^
+stack2.p4(25): [--Werror=type-error] error: Expression stack1.lastIndex cannot be the target of an assignment
+        stack1.lastIndex = 3; // not an l-value
+        ^^^^^^^^^^^^^^^^
+stack2.p4(26): [--Werror=type-error] error: Expression stack2.size cannot be the target of an assignment
+        stack2.size = 4; // not an l-value
+        ^^^^^^^^^^^

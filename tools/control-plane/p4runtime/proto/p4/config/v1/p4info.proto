@@ -1,0 +1,346 @@
+// Copyright 2013-present Barefoot Networks, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+syntax = "proto3";
+
+import "google/protobuf/any.proto";
+import "p4/config/v1/p4types.proto";
+
+// This package and its contents are a work-in-progress.
+
+package p4.config.v1;
+
+message P4Info {
+  PkgInfo pkg_info = 1;
+  repeated Table tables = 2;
+  repeated Action actions = 3;
+  repeated ActionProfile action_profiles = 4;
+  repeated Counter counters = 5;
+  repeated DirectCounter direct_counters = 6;
+  repeated Meter meters = 7;
+  repeated DirectMeter direct_meters = 8;
+  repeated ControllerPacketMetadata controller_packet_metadata = 9;
+  repeated ValueSet value_sets = 10;
+  repeated Register registers = 11;
+  repeated Digest digests = 12;
+  repeated Extern externs = 100;
+  P4TypeInfo type_info = 200;
+}
+
+message Documentation {
+  // A brief description of something, e.g. one sentence
+  string brief = 1;
+  // A more verbose description of something. Multiline is accepted. Markup
+  // format (if any) is TBD.
+  string description = 2;
+}
+
+// Top-level package documentation describing the forwarding pipeline config
+// Can be used to manage multiple P4 packages.
+message PkgInfo {
+  // a definitive name for this configuration, e.g. switch.p4_v1.0
+  string name = 1;
+  // configuration version, free-format string
+  string version = 2;
+  // brief and detailed descriptions
+  Documentation doc = 3;
+  // Miscellaneous metadata, free-form; a way to extend PkgInfo
+  repeated string annotations = 4;
+  // the target architecture, e.g. "psa"
+  string arch = 5;
+  // organization which produced the configuration, e.g. "p4.org"
+  string organization = 6;
+  // contact info for support,e.g. "tech-support@acme.org"
+  string contact = 7;
+  // url for more information, e.g. "http://support.p4.org/ref/p4/switch.p4_v1.0"
+  string url = 8;
+}
+
+// wrapping the enum in a message to avoid name collisions in C++, where "enum
+// values are siblings of their type, not children of it"
+message P4Ids {
+  // ids are allocated in such a way that it is possible based on an id to
+  // deduce the resource type (e.g. table, action, counter, ...). The
+  // most-significant byte of the 32-bit id encodes the resource type. The
+  // purpose of this enum is to define which value is used as the
+  // most-significant byte for each resource type. The P4 compiler must use
+  // these values when allocating ids for P4 objects. Other users of P4Info can
+  // refer to this enum to identify a resource type based on its id.
+  enum Prefix {
+    UNSPECIFIED = 0;
+
+    // P4 language built-ins
+    ACTION = 0x01;
+    TABLE = 0x02;
+    VALUE_SET = 0x03;
+    CONTROLLER_HEADER = 0x04;
+
+    // PSA externs
+    PSA_EXTERNS_START = 0x10;
+    ACTION_PROFILE = 0x11;
+    COUNTER = 0x12;
+    DIRECT_COUNTER = 0x13;
+    METER = 0x14;
+    DIRECT_METER = 0x15;
+    REGISTER = 0x16;
+    DIGEST = 0x17;
+
+    // externs for other architectures (vendor extensions)
+    OTHER_EXTERNS_START = 0x80;
+
+    // max value for an unsigned 8-bit byte
+    MAX = 0xff;
+    // requires protoc >= 3.5.0
+    // reserved 0x100 to max;
+  }
+}
+
+message Preamble {
+  // ids share the same number-space; e.g. table ids cannot overlap with counter
+  // ids. Even though this is irrelevant to this proto definition, the ids are
+  // allocated in such a way that it is possible based on an id to deduce the
+  // resource type (e.g. table, action, counter, ...). This means that code
+  // using these ids can detect if the wrong resource type is used
+  // somewhere. This also means that ids of different types can be mixed
+  // (e.g. direct resource list for a table) without ambiguity. Note that id 0
+  // is reserved and means "invalid id".
+  uint32 id = 1;
+  // fully qualified name of the P4 object, e.g. c1.c2.ipv4_lpm
+  string name = 2;
+  // an alias (alternative name) for the P4 object, probably shorter than its
+  // fully qualified name. The only constraint is for it to be unique with
+  // respect to other P4 objects of the same type. By default, the compiler uses
+  // the shortest suffix of the name that uniquely identifies the object. For
+  // example if the P4 program contains two tables with names s.c1.t and s.c2.t,
+  // the default aliases will respectively be c1.t and c2.t. In the future, the
+  // P4 programmer may also be able to override the default alias for any P4
+  // object (TBD).
+  string alias = 3;
+  repeated string annotations = 4;
+  // Documentation of the entity
+  Documentation doc = 5;
+}
+
+// used to group all extern instances of the same type in one message
+message Extern {
+  // the extern_type_id is unique for a given architecture and must be in the
+  // range [0x81, 0xfe].
+  uint32 extern_type_id = 1;
+  string extern_type_name = 2;
+  repeated ExternInstance instances = 3;
+}
+
+message ExternInstance {
+  Preamble preamble = 1;
+  // specific to the extern type, declared in a separate vendor-specific proto
+  // file
+  google.protobuf.Any info = 2;
+}
+
+message MatchField {
+  uint32 id = 1;
+  string name = 2;
+  repeated string annotations = 3;
+  int32 bitwidth = 4;
+  enum MatchType {
+    UNSPECIFIED = 0;
+    EXACT = 2;
+    LPM = 3;
+    TERNARY = 4;
+    RANGE = 5;
+  }
+  oneof match {
+    MatchType match_type = 5;
+    // used for architecture-specific match types which are not part of the core
+    // P4 language or of the PSA architecture.
+    string other_match_type = 7;
+  }
+  // Documentation of the match field
+  Documentation doc = 6;
+  // unset if not user-defined type
+  P4NamedType type_name = 8;
+}
+
+message Table {
+  Preamble preamble = 1;
+  repeated MatchField match_fields = 2;
+  // even when the table is indirect (see implementation_id) below, this field
+  // includes all possible actions for the table; by using ActionRef instead of
+  // a repeated field of action ids, each action reference in a P4 table is able
+  // to have its own annotations
+  repeated ActionRef action_refs = 3;
+  // 0 (default value) means that the table does not have a const default action
+  uint32 const_default_action_id = 4;
+  // P4 id of the "implementation" for this table (e.g. action profile id); 0
+  // (default value) means that the table is a regular (direct) match table. As
+  // of today, only action profiles are supported but other table
+  // implementations may be added in the future
+  uint32 implementation_id = 6;
+  // ids of the direct resources (if any) attached to this table; for now this
+  // includes only direct counters and direct meters, but other resources may be
+  // added in the future
+  repeated uint32 direct_resource_ids = 7;
+  int64 size = 8;  // max number of entries in table
+  // this enum can be extended in the future with other behaviors, such as
+  // "HARD_EVICTION"
+  enum IdleTimeoutBehavior {
+    NO_TIMEOUT = 0;
+    NOTIFY_CONTROL = 1;
+  }
+  // is idle timeout supported for this table?
+  IdleTimeoutBehavior idle_timeout_behavior = 9;
+  // table with static P4 entries, cannot be modified at runtime
+  bool is_const_table = 10;
+  // architecture-specific table properties which are not part of the core P4
+  // language or of the PSA architecture.
+  google.protobuf.Any other_properties = 100;
+}
+
+// used to list all possible actions in a Table
+message ActionRef {
+  uint32 id = 1;
+  enum Scope {
+    TABLE_AND_DEFAULT = 0;
+    TABLE_ONLY = 1;
+    DEFAULT_ONLY = 2;
+  }
+  Scope scope = 3;
+  repeated string annotations = 2;
+}
+
+message Action {
+  Preamble preamble = 1;
+  message Param {
+    uint32 id = 1;
+    string name = 2;
+    repeated string annotations = 3;
+    int32 bitwidth = 4;
+    // Documentation of the Param
+    Documentation doc = 5;
+    // unset if not user-defined type
+    P4NamedType type_name = 6;
+  }
+  repeated Param params = 2;
+}
+
+message ActionProfile {
+  Preamble preamble = 1;
+  // the ids of the tables sharing this action profile
+  repeated uint32 table_ids = 2;
+  // true iff the action profile used dynamic selection
+  bool with_selector = 3;
+  // max number of weighted member entries in action profile (across all
+  // selector groups, if the action profile has a selector)
+  int64 size = 4;
+  // max number of weighted member entries in any given selector group, or 0 if
+  // the action profile does not have a selector
+  int32 max_group_size = 5;
+}
+
+message CounterSpec {
+  // Corresponds to 'type' constructor parameter for Counter / DirectCounter in
+  // PSA
+  enum Unit {
+    UNSPECIFIED = 0;
+    BYTES = 1;
+    PACKETS = 2;
+    BOTH = 3;
+  }
+  Unit unit = 1;
+}
+
+message Counter {
+  Preamble preamble = 1;
+  CounterSpec spec = 2;
+  // number of entries in the counter array
+  int64 size = 3;
+  // unset if index is not user-defined type
+  P4NamedType index_type_name = 4;
+}
+
+message DirectCounter {
+  Preamble preamble = 1;
+  CounterSpec spec = 2;
+  // the id of the table to which the counter is attached
+  uint32 direct_table_id = 3;
+}
+
+message MeterSpec {
+  // Corresponds to 'type' constructor parameter for Meter / DirectMeter in PSA
+  enum Unit {
+    UNSPECIFIED = 0;
+    BYTES = 1;
+    PACKETS = 2;
+  }
+  Unit unit = 1;
+}
+
+message Meter {
+  Preamble preamble = 1;
+  MeterSpec spec = 2;
+  // number of entries in the meter array
+  int64 size = 3;
+  // unset if index is not user-defined type
+  P4NamedType index_type_name = 4;
+}
+
+message DirectMeter {
+  Preamble preamble = 1;
+  MeterSpec spec = 2;
+  // the id of the table to which the meter is attached
+  uint32 direct_table_id = 3;
+}
+
+// Any metadata associated with controller Packet-IO (Packet-In or Packet-Out)
+// is modeled as P4 headers carrying special annotations
+// @controller_header("packet_out") and @controller_header("packet_in")
+// respectively. There can be at most one header each with these annotations.
+// This message captures the info contained within these special headers,
+// and used in p4runtime.proto to supply the metadata.
+message ControllerPacketMetadata {
+  // preamble.name and preamble.id will specify header type ("packet_out" or
+  // "packet_in" for now).
+  Preamble preamble = 1;
+  message Metadata {
+    uint32 id = 1;
+    // This is the name of the header field (not fully-qualified), similar
+    // to e.g. Action.Param.name.
+    string name = 2;
+    repeated string annotations = 3;
+    int32 bitwidth = 4;
+  }
+  // Ordered based on header layout.
+  // This is a constraint on the generator of this P4Info.
+  repeated Metadata metadata = 2;
+}
+
+message ValueSet {
+  Preamble preamble = 1;
+  repeated MatchField match = 2;
+  // number of entries in the value_set, as per the P4 constructor call.
+  int32 size = 3;
+}
+
+message Register {
+  Preamble preamble = 1;
+  P4DataTypeSpec type_spec = 2;
+  int32 size = 3;
+  // unset if index is not user-defined type
+  P4NamedType index_type_name = 4;
+}
+
+message Digest {
+  Preamble preamble = 1;
+  P4DataTypeSpec type_spec = 2;
+}

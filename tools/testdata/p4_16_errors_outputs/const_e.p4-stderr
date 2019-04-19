@@ -1,0 +1,3 @@
+const_e.p4(18): [--Werror=type-error] error: x: Cannot declare constants of extern types
+const I x = I(); // illegal constants of extern types
+        ^

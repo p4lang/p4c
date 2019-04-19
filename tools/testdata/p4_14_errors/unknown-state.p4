@@ -1,0 +1,3 @@
+parser start {
+    return ingress;
+}

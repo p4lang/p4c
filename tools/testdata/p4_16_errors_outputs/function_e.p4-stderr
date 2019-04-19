@@ -1,0 +1,15 @@
+function_e.p4(22): [--Werror=legacy] error: f: No argument for parameter x
+        f(); // not enough arguments
+        ^^^
+function_e.p4(16)
+extern void f(in bit x);
+                     ^
+function_e.p4(23): [--Werror=legacy] error: f: Passing 2 arguments when 1 expected
+        f(1w1, 1w0); // too many arguments
+        ^^^^^^^^^^^
+function_e.p4(24): [--Werror=legacy] error: f has 0 type parameters, but is invoked with 1 type arguments
+        f<bit>(1w0); // too many type arguments
+        ^^^^^^^^^^^
+function_e.p4(25): [--Werror=legacy] error: g has 1 type parameters, but is invoked with 2 type arguments
+        g<bit, bit>(); // too many type arguments
+        ^^^^^^^^^^^^^

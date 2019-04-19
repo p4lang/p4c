@@ -1,0 +1,7 @@
+type-shadow.p4(18): [--Wwarn=shadow] warning: D shadows D
+   void f<D>(in D d); // D shadows D
+          ^
+type-shadow.p4(16)
+extern X<D>
+         ^
+warning: Program does not contain a `main' module

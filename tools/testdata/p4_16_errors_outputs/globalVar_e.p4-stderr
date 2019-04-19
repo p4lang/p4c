@@ -1,0 +1,4 @@
+globalVar_e.p4(16):syntax error, unexpected ;, expecting (
+bit x;
+     ^
+error: 1 errors encountered, aborting compilation

@@ -1,0 +1,10 @@
+pkg_info {
+  arch: "v1model"
+}
+actions {
+  preamble {
+    id: 16805137
+    name: "IngressImpl.update_value"
+    alias: "update_value"
+  }
+}

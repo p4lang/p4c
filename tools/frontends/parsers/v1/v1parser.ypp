@@ -1,0 +1,1126 @@
+/*
+Copyright 2013-present Barefoot Networks, Inc.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+// Use Bison's C++ mode.
+%skeleton "lalr1.cc" /* -*-C++-*- */
+%require "3.0.0"
+
+// Set up names.
+%defines
+%define api.namespace {V1}
+%define parser_class_name {V1Parser}
+
+// Use the C++-native variant representation of tokens.
+%define api.token.constructor
+%define api.value.type variant
+
+// Add asserts to ensure that we use the API correctly.
+%define parse.assert true
+
+// Enable verbose error reporting.
+%error-verbose
+
+// Declare dependencies.
+%code requires {
+namespace V1 {
+class V1Lexer;
+class V1ParserDriver;
+
+struct BBoxType {
+    IR::Vector<IR::Method>* methods;
+    IR::NameMap<IR::Attribute, ordered_map>* attribs;
+};
+
+struct HeaderType {
+    IR::Vector<IR::Annotation>* annotations;
+    IR::IndexedVector<IR::StructField>* fields;
+};
+
+struct Attributes {
+    bool signed_ = false;
+    bool saturating = false;
+    IR::Vector<IR::Annotation> annotations;
+    Attributes &merge(const Attributes &a) {
+        signed_ |= a.signed_;
+        saturating |= a.saturating;
+        annotations.append(a.annotations);
+        return *this; }
+};
+
+}  // namespace V1
+
+inline std::ostream& operator<<(std::ostream& out, const V1::BBoxType& bboxType) {
+    out << "BBoxType(" << bboxType.methods << ',' << bboxType.attribs << ')';
+    return out;
+}
+
+inline std::ostream& operator<<(std::ostream& out, const V1::HeaderType& headerType) {
+    out << "HeaderType(" << headerType.annotations << ',' << headerType.fields << ')';
+    return out;
+}
+
+inline std::ostream& operator<<(std::ostream& out, const V1::Attributes& a) {
+    return out << "Attributes(" << (a.signed_ ? "signed," : "") <<
+                  (a.saturating ? "saturating," : "") << a.annotations << ')'; }
+
+typedef std::pair<const IR::Expression*, const IR::Constant*> CaseValue;
+
+inline std::ostream& operator<<(std::ostream& out, const CaseValue& caseValue) {
+    out << "CaseValue(" << caseValue.first << ',' << caseValue.second << ')';
+    return out;
+}
+
+// Bison uses the types you provide to %type to make constructors for the
+// variant type it uses under the hood, but its code generation is a little
+// naive and it always prepends 'const' to the type. This is problematic when
+// the symbol type we want is itself const, since duplicate const qualifiers are
+// forbidden in C++. We avoid the problem using a typedef.
+typedef const IR::Type ConstType;
+
+#ifndef YYDEBUG
+#define YYDEBUG 1
+#endif
+
+#define YY_NULLPTR nullptr
+
+#include "frontends/common/constantParsing.h"
+#include "lib/cstring.h"
+#include "lib/error.h"
+#include "lib/source_file.h"
+}
+
+%param { V1::V1ParserDriver& driver }
+%parse-param { V1::V1Lexer& lexer }
+
+// Use location tracking with our custom location type.
+%locations
+%define api.location.type {Util::SourceInfo}
+
+%{ /* -*-C++-*- */
+#include <iostream>  // NOLINT(build/include_order)
+
+#include "frontends/parsers/parserDriver.h"
+#include "frontends/parsers/v1/v1lexer.hpp"
+#include "frontends/parsers/v1/v1parser.hpp"
+#include "ir/ir.h"
+
+#define YYLLOC_DEFAULT(Cur, Rhs, N)                                             \
+    ((Cur) = (N) ? YYRHSLOC(Rhs, 1) + YYRHSLOC(Rhs, N)                          \
+                 : Util::SourceInfo(driver.sources, YYRHSLOC(Rhs, 0).getEnd()))
+
+#undef yylex
+#define yylex lexer.yylex
+static const IR::Expression *removeRedundantValid(const IR::Expression *e);
+%}
+
+// Use iostreams to print all values. We have a number of semantic actions that
+// produce null pointers, so we need to have two printers: one for non-pointer
+// types, and another with null checking for pointer types.
+%printer { yyoutput << $$; } <BBoxType> <CaseValue> <cstring> <HeaderType>
+                             <IR::Direction> <IR::ID> <UnparsedConstant> <Attributes>
+%printer {
+    auto val = $$;
+    if (val != nullptr) {
+        yyoutput << val;
+    } else {
+        yyoutput << "(null)";
+    }
+} <*>
+
+%define api.token.prefix {TOK_}
+%token      END
+%token      UNEXPECTED_TOKEN
+%token      LE "<="
+%token      GE ">="
+%token      SHL "<<"
+%token      SHR ">>"
+%token      AND "&&"
+%token      OR "||"
+%token      NE "!="
+%token      EQ "=="
+%token      PLUS "+"
+%token      MINUS "-"
+%token      MUL "*"
+%token      DIV "/"
+%token      MOD "%"
+%token      BIT_OR "|"
+%token      BIT_AND "&"
+%token      BIT_XOR "^"
+%token      COMPLEMENT "~"
+%token      L_BRACKET "["
+%token      R_BRACKET "]"
+%token      L_BRACE "{"
+%token      R_BRACE "}"
+%token      L_ANGLE "<"
+%token      R_ANGLE ">"
+%token      L_PAREN "("
+%token      R_PAREN ")"
+%token      NOT "!"
+%token      COLON ":"
+%token      COMMA ","
+%token      DOT "."
+%token      ASSIGN "="
+%token      SEMICOLON ";"
+%token      NEWLINE
+%token<cstring> ACTION ACTIONS ACTION_PROFILE ACTION_SELECTOR ALGORITHM APPLY
+                ATTRIBUTE ATTRIBUTES BIT BLACKBOX BLACKBOX_TYPE BLOCK BOOL
+                CALCULATED_FIELD CONTROL COUNTER CONST CURRENT DEFAULT DEFAULT_ACTION
+                DIRECT DROP DYNAMIC_ACTION_SELECTION ELSE EXTRACT EXPRESSION
+                EXPRESSION_LOCAL_VARIABLES FALSE FIELD_LIST FIELD_LIST_CALCULATION
+                FIELDS HEADER HEADER_TYPE IF IMPLEMENTATION IN INPUT INSTANCE_COUNT
+                INT LATEST LAYOUT LENGTH MASK MAX_LENGTH MAX_SIZE MAX_WIDTH METADATA
+                METER METHOD MIN_SIZE MIN_WIDTH OPTIONAL OUT OUTPUT_WIDTH PARSE_ERROR
+                PARSER PARSER_VALUE_SET PARSER_EXCEPTION PAYLOAD PRAGMA PREFIX PRE_COLOR
+                PRIMITIVE_ACTION READS REGISTER RESULT RETURN SATURATING SELECT
+                SELECTION_KEY SELECTION_MODE SELECTION_TYPE SET_METADATA SIGNED SIZE
+                STATIC STRING TABLE TRUE TYPE UPDATE VALID VERIFY WIDTH WRITES
+%token<cstring> IDENTIFIER STRING_LITERAL
+%token<UnparsedConstant> INTEGER
+
+%left EXPRLIST
+%right ASSIGN
+%left OR
+%left AND
+%left EQ NE
+%left L_ANGLE R_ANGLE LE GE
+%left BIT_OR
+%left BIT_XOR
+%left BIT_AND
+%left SHL SHR
+%left PLUS MINUS
+%left MUL DIV MOD
+%right PREFIX
+%precedence IF
+%precedence ELSE
+
+%type<Attributes>                   opt_field_modifiers attributes attrib
+%type<IR::ID>                       name
+%type<IR::ActionFunction*>          action_function_body action_statement_list
+%type<IR::ActionProfile*>           action_profile_body
+%type<IR::ActionSelector*>          action_selector_body
+%type<IR::Annotations*>             blackbox_method
+%type<IR::Apply*>                   apply_case_list
+%type<IR::Attribute*>               blackbox_attribute
+%type<IR::AttribLocal*>             local_var
+%type<IR::AttribLocals*>            locals_list opt_locals_list
+%type<IR::NameMap<IR::Property>*>   blackbox_config
+%type<BBoxType>                     blackbox_body
+%type<IR::CalculatedField*>         update_verify_spec_list
+%type<CaseValue>                    case_value
+%type<IR::CaseEntry*>               case_value_list
+%type<IR::Vector<IR::CaseEntry>*>   case_entry_list
+%type<IR::Constant*>                const_expression
+%type<IR::Counter*>                 counter_spec_list
+%type<IR::Direction>                inout
+%type<IR::Expression*>              expression header_ref header_or_field_ref
+                                    field_or_masked_ref opt_condition pragma_operand
+%type<IR::Vector<IR::Expression>*>  expression_list opt_expression_list
+                                    control_statement control_statement_list
+                                    field_match_list expressions pragma_operands
+%type<IR::FieldList*>               field_list_entries
+%type<IR::FieldListCalculation*>    field_list_calculation_body
+%type<IR::Member*>                  field_ref
+%type<HeaderType>                   header_dec_body field_declarations
+%type<IR::NameList*>                action_list name_list opt_name_list field_list_list
+%type<IR::Meter*>                   meter_spec_list
+%type<IR::Parameter*>               argument
+%type<IR::ParameterList*>           opt_argument_list argument_list
+%type<IR::V1Parser*>                parser_statement_list
+%type<IR::Register*>                register_spec_list
+%type<IR::V1Table*>                 table_body
+%type<ConstType*>                   bit_width type
+
+%%
+
+program : input END { YYACCEPT; };
+
+input: /* epsilon */
+    | input header_type_declaration
+    | input header_instance
+    | input metadata_instance
+    | input field_list_declaration
+    | input field_list_calculation_declaration
+    | input calculated_field_declaration
+    | input value_set_declaration
+    | input parser_function_declaration
+    | input parser_exception_declaration
+    | input counter_declaration
+    | input meter_declaration
+    | input register_declaration
+    | input primitive_action_declaration
+    | input action_function_declaration
+    | input action_profile_declaration
+    | input action_selector_declaration
+    | input table_declaration
+    | input control_function_declaration
+    | input blackbox_type_declaration
+    | input blackbox_instantiation
+    | input PRAGMA pragma_operands NEWLINE
+          { driver.addPragma(new IR::Annotation(@2, $2, *$3)); }
+    | input error
+          { driver.clearPragmas(); }
+;
+
+/********************************/
+/* 2.1 Header Type Declarations */
+/********************************/
+
+header_type_declaration: HEADER_TYPE name "{" header_dec_body "}"
+      { $4.annotations->append(driver.takePragmasAsVector());
+        driver.global->add($2, new IR::v1HeaderType(@1+@5, $2,
+            new IR::Type_Struct(@1+@5, IR::ID(@2, $2),
+                                new IR::Annotations(*$4.annotations), *$4.fields),
+            new IR::Type_Header(@1+@5, IR::ID(@2, $2),
+                                new IR::Annotations(*$4.annotations), *$4.fields))); }
+    | HEADER_TYPE name "{" header_dec_body error END
+          { driver.clearPragmas(); }
+;
+
+header_dec_body: FIELDS "{" field_declarations "}" opt_length opt_max_length
+      { $$ = $3; }
+    | FIELDS "{" field_declarations error END { $$ = $3; }
+;
+
+field_declarations: /* epsilon */
+      { $$.annotations = new IR::Vector<IR::Annotation>;
+        $$.fields = new IR::IndexedVector<IR::StructField>; }
+    | field_declarations name ":" bit_width opt_field_modifiers ";" {
+        auto *type = $4;
+        if ($5.signed_ && type->is<IR::Type::Bits>())
+            type = IR::Type::Bits::get(type->to<IR::Type::Bits>()->size, true);
+        ($$=$1).fields->push_back(new IR::StructField(@2+@4, IR::ID(@2, $2),
+                new IR::Annotations($5.annotations), type)); }
+    | field_declarations type name ";"
+      { ($$=$1).fields->push_back(new IR::StructField(@2+@4, IR::ID(@3, $3), $2)); }
+;
+
+bit_width:
+      const_expression
+      { if ($1)
+            $$ = IR::Type::Bits::get(@1, $1->asInt());
+        else
+            $$ = IR::Type::Unknown::get(); }
+    | "*"
+      { $$ = IR::Type::Varbits::get(); }
+;
+
+opt_field_modifiers: /* epsilon */ { $$ = Attributes(); }
+    | "(" attributes ")" { $$ = $2; }
+;
+
+attributes:
+      attrib { $$ = $1; }
+    | attributes "," attrib { ($$ = $1).merge($3); }
+;
+
+attrib:
+      SIGNED     { $$.signed_ = true; }
+    | SATURATING { $$.annotations.push_back(new IR::Annotation(@1, IR::ID(@1, $1), {}));
+                   $$.saturating = true; }
+;
+
+opt_length: /* epsilon */
+    | LENGTH ":" expression ";"  /* const_expression or name */
+      { $<HeaderType>-1.annotations->emplace_back(@1+@4, "length",
+              IR::Vector<IR::Expression>($3)); }
+    ;
+
+opt_max_length: /* epsilon */
+    | MAX_LENGTH ":" const_expression ";"
+      { $<HeaderType>-2.annotations->emplace_back(@1+@4, "max_length",
+              IR::Vector<IR::Expression>($3)); }
+    ;
+
+type: BIT { $$ = IR::Type::Bits::get(@1, 1); }
+    | BIT "<" INTEGER ">"
+      { $$ = IR::Type::Bits::get(@3, parseConstant(@3, $3, 0)->asInt()); }
+    | BLOCK { $$ = IR::Type_Block::get(); }
+    | BOOL { $$ = IR::Type_Boolean::get(); }
+    | COUNTER { $$ = IR::Type_Counter::get(); }
+    | EXPRESSION { $$ = IR::Type_Expression::get(); }
+    | FIELD_LIST_CALCULATION { $$ = IR::Type_FieldListCalculation::get(); }
+    | INT { $$ = new IR::Type_InfInt; }
+    | INT "<" INTEGER ">"
+      { $$ = IR::Type::Bits::get(@3, parseConstant(@3, $3, 0)->asInt(), true); }
+    | METER { $$ = IR::Type_Meter::get(); }
+    | STRING { $$ = IR::Type_String::get(); }
+    | REGISTER { $$ = IR::Type_Register::get(); }
+    | TABLE { $$ = IR::Type_AnyTable::get(); }
+;
+
+/************************************/
+/* 2.2 Header and Metadata instance */
+/************************************/
+
+header_instance:
+      HEADER name name ";"
+      { driver.global->add($3, new IR::Header(@1+@4, IR::ID(@2, $2), IR::ID(@3, $3),
+                                              driver.takePragmasAsAnnotations())); }
+    | HEADER name name "[" const_expression "]" ";"
+      { driver.global->add($3, new IR::HeaderStack(@1+@7, IR::ID(@2, $2), IR::ID(@3, $3),
+                                                   driver.takePragmasAsAnnotations(),
+                                                   $5 ? $5->asLong() : 0));
+        $5 = nullptr; }
+    ;
+
+metadata_instance:
+      METADATA name name opt_metadata_initializer ";"
+      { driver.global->add($3, new IR::Metadata(@1+@5, IR::ID(@2, $2), IR::ID(@3, $3),
+                                                driver.takePragmasAsAnnotations())); }
+    ;
+
+opt_metadata_initializer: /* epsilon */
+    | "{" metadata_field_init_list "}"
+    ;
+
+metadata_field_init_list: /* empty */
+    | metadata_field_init_list name ":" const_expression ";"
+      { $4 = nullptr; }
+    ;
+
+/*******************/
+/* 2.4 Field Lists */
+/*******************/
+
+field_list_declaration:
+      FIELD_LIST name "{" field_list_entries "}"
+      { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; driver.global->add($2, $4); }
+    | FIELD_LIST name ";"
+      /* FIXME -- empty field list? or (unneeded) forward declaration? */
+;
+
+field_list_entries:
+      /* epsilon */ { $$ = new IR::FieldList(driver.takePragmasAsAnnotations()); }
+    | field_list_entries expression ";" /* const_expression or field_ref or name */
+      { ($$=$1)->fields.push_back($2); }
+    | field_list_entries PAYLOAD ";"
+      { ($$=$1)->payload = true; }
+    ;
+
+/***************************************************/
+/* 3  Checksums and Hash-based Selection Functions */
+/***************************************************/
+
+field_list_calculation_declaration:
+      FIELD_LIST_CALCULATION name "{" field_list_calculation_body "}"
+      { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; driver.global->add($2, $4); }
+    | FIELD_LIST_CALCULATION name "{" field_list_calculation_body error END
+;
+
+field_list_calculation_body: /* epsilon */
+      { $$ = new IR::FieldListCalculation(driver.takePragmasAsAnnotations()); }
+    | field_list_calculation_body INPUT "{" field_list_list "}"
+      { if ($1->input)
+            ::error("%s: multiple 'input' in field_list_calculation", @2);
+        ($$=$1)->input = $4; }
+    | field_list_calculation_body ALGORITHM ":" name ";"
+      { if ($1->algorithm)
+            ::error("%s: multiple 'algorithm' in field_list_calculation", @2);
+        ($$=$1)->algorithm = new IR::NameList(@4, IR::ID(@4, $4)); }
+    | field_list_calculation_body ALGORITHM "{" action_list "}"
+      { if ($1->algorithm)
+            ::error("%s: multiple 'algorithm' in field_list_calculation", @2);
+        ($$=$1)->algorithm = $4; }
+    | field_list_calculation_body OUTPUT_WIDTH ":" const_expression ";"
+      { if ($1->output_width)
+            ::error("%s: multiple 'output_width' in field_list_calculation", @2);
+        ($$=$1)->output_width = $4 ? $4->asInt() : 0; }
+    | field_list_calculation_body error ";" { $$ = $1; }
+    | field_list_calculation_body error { $$ = $1; }
+;
+
+field_list_list: /* epsilon */
+      { $$ = new IR::NameList; }
+    | field_list_list name ";"
+      { ($$=$1)->names.emplace_back(@2, $2); }
+;
+
+calculated_field_declaration:
+      CALCULATED_FIELD field_ref "{" update_verify_spec_list "}"
+      { $4->field = $2; $4->srcInfo = @1 + @5; driver.global->add($2->toString(), $4); }
+    | CALCULATED_FIELD field_ref "{" update_verify_spec_list error END
+;
+
+update_verify_spec_list: /* epsilon */
+      { $$ = new IR::CalculatedField(driver.takePragmasAsAnnotations()); }
+    | update_verify_spec_list UPDATE name opt_condition ";"
+      { ($$=$1)->specs.emplace_back(@1+@3, true, IR::ID(@3, $3), $4); }
+    | update_verify_spec_list VERIFY name opt_condition ";"
+      { ($$=$1)->specs.emplace_back(@1+@3, false, IR::ID(@3, $3), $4); }
+    | update_verify_spec_list error ";" { $$ = $1; }
+    | update_verify_spec_list error { $$ = $1; }
+;
+
+opt_condition: /* epsilon */ { $$ = nullptr; }
+    | IF "(" expression ")" { $$ = $3; }
+;
+
+/********************************/
+/* 4.3 Value Sets */
+/********************************/
+
+value_set_declaration:
+    PARSER_VALUE_SET name ";"
+    { driver.global->add($2, new IR::ParserValueSet(@1, IR::ID(@2, $2), driver.takePragmasAsAnnotations())); }
+
+/************************/
+/* 4.4 Parser Functions */
+/************************/
+
+parser_function_declaration:
+      PARSER name "{" parser_statement_list "}"
+      { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; driver.global->add($2, $4); }
+    | PARSER name "{" parser_statement_list error END
+;
+
+parser_statement_list: /* epsilon */
+      { $$ = new IR::V1Parser(driver.takePragmasAsAnnotations()); }
+    | parser_statement_list EXTRACT "(" header_ref ")" ";"
+      { ($$=$1)->stmts.push_back(new IR::Primitive(@2+@5, $2, $4)); }
+    | parser_statement_list SET_METADATA "(" expression "," expression ")" ";"
+      { ($$=$1)->stmts.push_back(new IR::Primitive(@2+@7, $2, $4, $6)); }
+    | parser_statement_list expression "=" expression ";"
+      { ($$=$1)->stmts.push_back(new IR::Primitive(@3, "set_metadata", $2, $4)); }
+    | parser_statement_list RETURN name ";"
+      { ($$=$1)->default_return = IR::ID(@3, $3); }
+    | parser_statement_list RETURN SELECT "(" expression_list ")" "{" case_entry_list "}"
+      { ($$=$1)->select = $5; $$->cases = $8; }
+    | parser_statement_list PARSE_ERROR name ";"
+      { ($$=$1)->parse_error = IR::ID(@3, $3); }
+    | parser_statement_list DROP ";"
+      { ($$=$1)->drop = true; }
+    | parser_statement_list error ";" { $$ = $1; }
+    | parser_statement_list error { $$ = $1; }
+;
+
+case_entry_list: /* epsilon */ { $$ = new IR::Vector<IR::CaseEntry>; }
+    | case_entry_list case_value_list ":" name ";"
+      { $2->action = IR::ID(@4, $4); $1->srcInfo += @2 + @4; ($$=$1)->push_back($2); }
+    | case_entry_list case_value_list ":" PARSE_ERROR ";"
+      { $2->action = IR::ID(@4, $4); $1->srcInfo += @2 + @4; ($$=$1)->push_back($2); }
+;
+
+case_value_list:
+      case_value { $$ = new IR::CaseEntry(@1);
+                   $$->values.emplace_back($1); }
+    | case_value_list "," case_value { ($$=$1)->values.emplace_back($3);
+                                       $$->srcInfo += @3; }
+    ;
+
+case_value:
+      expression
+      { $$ = CaseValue($1 ? $1 : new IR::Constant(-1), new IR::Constant(-1)); }
+    | expression MASK const_expression
+      { $$ = CaseValue($1 ? $1 : new IR::Constant(-1), $3 ? $3 : new IR::Constant(0)); }
+    | DEFAULT
+      { $$ = CaseValue(new IR::Constant(0), new IR::Constant(0)); }
+    ;
+
+/*************************/
+/* 4.6 Parser Exceptions */
+/*************************/
+
+parser_exception_declaration:
+      PARSER_EXCEPTION name "{" parser_statement_list "}" {
+          driver.clearPragmas();
+          ::warning(ErrorType::WARN_UNSUPPORTED,
+                    "%1%: parser exception is not translated to P4-16", $1);
+      }
+    | PARSER_EXCEPTION name "{" parser_statement_list error END
+;
+
+/*****************/
+/* 7.1 Counters */
+/*****************/
+
+counter_declaration: COUNTER name "{" counter_spec_list "}"
+      { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; driver.global->add($2, $4); }
+    | COUNTER name "{" counter_spec_list error END
+;
+
+counter_spec_list:
+      TYPE ":" name ";"
+      { ($$ = new IR::Counter(driver.takePragmasAsAnnotations()))->settype($3); }
+    | counter_spec_list DIRECT ":" name ";"
+      { if (($$=$1)->table)
+            ::error("%s: Can't attach counter to two tables", @2+@4);
+        $$->table = IR::ID(@4, $4);
+        $$->direct = true; }
+    | counter_spec_list STATIC ":" name ";"
+      { if (($$=$1)->table)
+            ::error("%s: Can't attach counter to two tables", @2+@4);
+        $$->table = IR::ID(@4, $4);
+        $$->direct = false; }
+    | counter_spec_list INSTANCE_COUNT ":" const_expression ";"
+      { ($$=$1)->instance_count = $4 ? $4->asLong() : 0; $4 = nullptr; }
+    | counter_spec_list MAX_WIDTH ":" const_expression ";"
+      { ($$=$1)->max_width = $4 ? $4->asLong() : 0; $4 = nullptr; }
+    | counter_spec_list MIN_WIDTH ":" const_expression ";"
+      { ($$=$1)->min_width = $4 ? $4->asLong() : 0; $4 = nullptr; }
+    | counter_spec_list SATURATING ";"
+      { ($$=$1)->saturating = true; }
+    | counter_spec_list error ";" { $$ = $1; }
+    | counter_spec_list error { $$ = $1; }
+;
+
+/***************/
+/* 7.2 Meters */
+/***************/
+
+meter_declaration : METER name "{" meter_spec_list "}"
+      { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5;
+        driver.global->add($2, $4); }
+    | METER name "{" meter_spec_list error END
+;
+
+meter_spec_list:
+      TYPE ":" name ";"
+      { ($$ = new IR::Meter(driver.takePragmasAsAnnotations()))->settype($3); }
+    | meter_spec_list RESULT ":" field_ref ";"
+      { ($$=$1)->result = $4; }
+    | meter_spec_list PRE_COLOR ":" field_ref ";"
+      { ($$=$1)->pre_color = $4; }
+    | meter_spec_list DIRECT ":" name ";"
+      { if (($$=$1)->table)
+            ::error("%s: Can't attach meter to two tables", @2+@4);
+        $$->table = IR::ID(@4, $4);
+        $$->direct = true; }
+    | meter_spec_list STATIC ":" name ";"
+      { if (($$=$1)->table)
+            ::error("%s: Can't attach meter to two tables", @2+@4);
+        $$->table = IR::ID(@4, $4);
+        $$->direct = false; }
+    | meter_spec_list INSTANCE_COUNT ":" const_expression ";"
+      { ($$=$1)->instance_count = $4 ? $4->asLong() : 0; $4 = nullptr; }
+    | meter_spec_list IMPLEMENTATION ":" name ";"
+      { ($$=$1)->implementation = IR::ID(@4, $4); }
+    | meter_spec_list error ";" { $$ = $1; }
+    | meter_spec_list error { $$ = $1; }
+;
+
+/******************/
+/* 7.3 Registers */
+/******************/
+
+register_declaration: REGISTER name "{" register_spec_list "}"
+      { $4->name = IR::ID(@2, $2);
+        $4->srcInfo = @1 + @5;
+        driver.global->add($2, $4); }
+    | REGISTER name "{" register_spec_list error END
+;
+
+register_spec_list:
+      WIDTH ":" const_expression ";"
+      { $$ = new IR::Register(driver.takePragmasAsAnnotations());
+        $$->width = $3 ? $3->asLong() : 0;
+        $3 = nullptr; }
+    | LAYOUT ":" name ";"
+      { $$ = new IR::Register(driver.takePragmasAsAnnotations());
+        $$->layout = IR::ID(@3, $3); }
+    | register_spec_list DIRECT ":" name ";"
+      { if (($$=$1)->table)
+            ::error("%s: Can't attach register to two tables", @2+@4);
+        $$->table = IR::ID(@4, $4);
+        $$->direct = true; }
+    | register_spec_list STATIC ":" name ";"
+      { if (($$=$1)->table)
+            ::error("%s: Can't attach register to two tables", @2+@4);
+        $$->table = IR::ID(@4, $4);
+        $$->direct = false; }
+    | register_spec_list INSTANCE_COUNT ":" const_expression ";"
+      { ($$=$1)->instance_count = $4 ? $4->asLong() : 0; $4 = nullptr; }
+    | register_spec_list ATTRIBUTES ":" attributes ";"
+      { ($$=$1)->signed_ = $4.signed_;
+        $1->saturating = $4.saturating; }
+    | register_spec_list error ";" { $$ = $1; }
+    | register_spec_list error { $$ = $1; }
+;
+
+/**************************/
+/* 9.1 Primitive Actions */
+/**************************/
+
+primitive_action_declaration:
+    PRIMITIVE_ACTION name "(" name_list ")" ";"
+      { driver.clearPragmas(); $4 = nullptr; }
+;
+
+name_list: name { $$ = new IR::NameList(@1, $1); }
+    | name_list "," name { ($$=$1)->names.emplace_back(@3, $3);
+                           $$->srcInfo = @1 + @3; }
+    ;
+
+opt_name_list: /* epsilon */ { $$ = nullptr; }
+    | name_list { $$ = $1; }
+    ;
+
+/***************************/
+/* 9.2 Action Definitions */
+/***************************/
+
+action_function_declaration:
+      ACTION name "(" opt_name_list ")" action_function_body
+      { $6->name = IR::ID(@2, $2);
+        if ($4) for (auto &arg : $4->names)
+            $6->args.push_back(new IR::ActionArg($2, arg));
+        $4 = nullptr;
+        $6->srcInfo = @1 + @6;
+        driver.global->add($2, $6); }
+;
+
+action_function_body:
+      "{" action_statement_list "}"        { $$ = $2; }
+    | "{" action_statement_list error END  { $$ = $2; }
+;
+
+action_statement_list: /* epsilon */
+      { $$ = new IR::ActionFunction(driver.takePragmasAsAnnotations()); }
+    | action_statement_list name "(" opt_expression_list ")" ";"
+      { ($$ = $1)->action.push_back(new IR::Primitive(@2+@5, $2, $4)); }
+    | action_statement_list field_ref "=" expression ";"
+      { ($$ = $1)->action.push_back(new IR::Primitive(@3, "modify_field", $2, $4)); }
+    | action_statement_list field_ref "(" opt_expression_list ")" ";"
+      { ($$ = $1)->action.push_back(new IR::Primitive(@2+@5, $2->member, $2->expr, $4)); }
+    | action_statement_list error ";"
+      { $$ = $1; }
+    | action_statement_list error
+      { $$ = $1; }
+;
+
+/***************************/
+/* 10 Action Profile Definitions */
+/***************************/
+
+action_profile_declaration: ACTION_PROFILE name "{" action_profile_body "}"
+      { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; driver.global->add($2, $4); }
+    ;
+
+action_profile_body: /* epsilon */
+      { $$ = new IR::ActionProfile(driver.takePragmasAsAnnotations()); }
+    | action_profile_body ACTIONS "{" action_list "}"
+      { ($$=$1)->actions = $4->names; $4 = nullptr; }
+    | action_profile_body SIZE ":" const_expression ";"
+      { ($$=$1)->size = $4 ? $4->asLong() : 0; $4 = nullptr; }
+    | action_profile_body DYNAMIC_ACTION_SELECTION ":" name ";"
+      { ($$=$1)->selector = IR::ID(@4, $4); }
+    ;
+
+action_selector_declaration: ACTION_SELECTOR name "{" action_selector_body "}"
+      { $4->name = IR::ID(@2, $2); $4->srcInfo = @1 + @5; driver.global->add($2, $4); }
+    ;
+
+action_selector_body: /* epsilon */
+      { $$ = new IR::ActionSelector(driver.takePragmasAsAnnotations()); }
+    | action_selector_body SELECTION_KEY ":" name ";" { ($$=$1)->key = IR::ID(@4, $4); }
+    | action_selector_body SELECTION_MODE ":" name ";" { ($$=$1)->mode = IR::ID(@4, $4); }
+    | action_selector_body SELECTION_TYPE ":" name ";" { ($$=$1)->type = IR::ID(@4, $4); }
+    ;
+
+/*************************/
+/* 11 Table Declarations */
+/*************************/
+
+table_declaration: TABLE name "{" table_body "}"
+      { $4->name = IR::ID(@2, $2);
+        $4->srcInfo = @1 + @5;
+        driver.global->add($2, $4); }
+    | TABLE name "{" table_body error END
+;
+
+table_body: /* epsilon */
+      { $$ = new IR::V1Table(driver.takePragmasAsAnnotations()); }
+    | table_body READS "{" field_match_list "}"
+      { ($$=$1)->reads = $4; }
+    | table_body READS "{" field_match_list error END
+      { ($$=$1)->reads = $4; }
+    | table_body ACTIONS "{" action_list "}"
+      { ($$=$1)->actions = $4->names; $4 = nullptr; }
+    | table_body ACTION_PROFILE ":" name ";"
+      { ($$=$1)->action_profile = IR::ID(@4, $4); }
+    | table_body MIN_SIZE ":" const_expression ";"
+      { ($$=$1)->min_size = $4 ? $4->asLong() : 0; $4 = nullptr; }
+    | table_body MAX_SIZE ":" const_expression ";"
+      { ($$=$1)->max_size = $4 ? $4->asLong() : 0; $4 = nullptr; }
+    | table_body SIZE ":" const_expression ";"
+      { ($$=$1)->size = $4 ? $4->asLong() : 0; $4 = nullptr; }
+    | table_body DEFAULT_ACTION ":" name ";"
+      { ($$=$1)->default_action = IR::ID(@4, $4); }
+    | table_body DEFAULT_ACTION ":" name "(" opt_expression_list ")" ";"
+        { ($$=$1)->default_action = IR::ID(@4, $4);
+          $$->default_action_args = $6; }
+    | table_body CONST DEFAULT_ACTION ":" name ";"
+      { ($$=$1)->default_action = IR::ID(@5, $5);
+          $$->default_action_is_const = true; }
+    | table_body CONST DEFAULT_ACTION ":" name "(" opt_expression_list ")" ";"
+        { ($$=$1)->default_action = IR::ID(@5, $5);
+          $$->default_action_args = $7;
+	  $$->default_action_is_const = true; }
+    | table_body IDENTIFIER ":" expression ";"
+      { auto exp = new IR::ExpressionValue(@4, $4);
+        auto prop = new IR::Property(@2, IR::ID(@2, $2), exp, false);
+        $1->addProperty(prop);
+        $$ = $1; }
+    | table_body error ";" { $$=$1; }
+    | table_body error { $$=$1; }
+;
+
+field_match_list: /* epsilon */ { $$ = new IR::Vector<IR::Expression>(); }
+    | field_match_list field_or_masked_ref ":" name ";"
+      { ($$=$1)->push_back($2);
+        $$->srcInfo += @2 + @4;
+        $<IR::V1Table*>-2->reads_types.push_back(IR::ID(@4, $4)); }
+    | field_match_list header_ref ":" VALID ";"
+      { ($$=$1)->push_back(new IR::Primitive(@2+@4, $4, $2));
+        $$->srcInfo += @2 + @4;
+        $<IR::V1Table*>-2->reads_types.push_back(IR::ID(@4, $4)); }
+    | field_match_list field_or_masked_ref ":" VALID ";"
+      { ($$=$1)->push_back(new IR::Primitive(@2+@4, $4, removeRedundantValid($2)));
+        $$->srcInfo += @2 + @4;
+        $<IR::V1Table*>-2->reads_types.push_back(IR::ID(@4, $4)); }
+    | field_match_list error ";" { $$ = $1; }
+    | field_match_list error { $$ = $1; }
+;
+
+field_or_masked_ref:
+      field_ref { $$ = $1; }
+    | field_ref MASK const_expression
+      { $$ = new IR::Mask(@2, $1, $3); }
+    | header_ref "." VALID
+      { $$ = new IR::Primitive(@1+@3, $3, $1); }
+    | header_ref "." VALID MASK const_expression
+      { $$ = new IR::Mask(@4, new IR::Primitive(@1+@3, $3, $1), $5); }
+;
+
+action_list: /* epsilon */ { $$ = new IR::NameList(); }
+    | action_list name ";" { ($$=$1)->names.emplace_back(@2, $2); }
+;
+
+/*****************************************/
+/* 12 Packet Processing and Control Flow */
+/*****************************************/
+
+control_function_declaration: CONTROL name "{" control_statement_list "}"
+      { driver.global->add($2, new IR::V1Control(@1+@5, IR::ID(@2, $2), $4,
+                                                 driver.takePragmasAsAnnotations())); }
+    | CONTROL name "{" control_statement_list error END
+;
+
+control_statement_list: /* epsilon */ { $$ = new IR::Vector<IR::Expression>; }
+    | control_statement_list control_statement { ($$=$1)->append(*$2); }
+    | control_statement_list error ";" { $$ = $1; }
+    | control_statement_list error { $$ = $1; }
+;
+
+control_statement:
+      APPLY "(" name ")" ";"
+      { $$ = new IR::Vector<IR::Expression>(new IR::Apply(@1+@4, IR::ID(@3, $3))); }
+    | APPLY "(" name ")" "{" apply_case_list "}"
+      { $6->name = IR::ID(@3, $3); $6->srcInfo = @1+@4; $$ = new IR::Vector<IR::Expression>($6); }
+    | IF "(" expression ")" control_statement %prec IF
+      { $$ = new IR::Vector<IR::Expression>(new IR::If(@1+@3, $3, $5, nullptr)); }
+    | IF "(" expression ")" control_statement ELSE control_statement %prec IF
+      { $$ = new IR::Vector<IR::Expression>(new IR::If(@1+@3, $3, $5, $7)); }
+    | name "(" ")" ";"
+      { $$ = new IR::Vector<IR::Expression>(new IR::Primitive(@1+@3, $1)); }
+    | "{" control_statement_list "}"
+      { $$ = $2; }
+;
+
+apply_case_list: /* epsilon */ { $$ = new IR::Apply; }
+    | apply_case_list name_list control_statement
+        { for (auto name : $2->names)
+              $1->actions[name] = $3;
+          $$ = $1; }
+    | apply_case_list DEFAULT control_statement
+        { ($$=$1)->actions["default"] = $3; }
+;
+
+/************/
+/* blackbox */
+/************/
+
+blackbox_type_declaration: BLACKBOX_TYPE name "{" blackbox_body "}"
+      { driver.global->add($2,
+          new IR::Type_Extern(@1+@5, IR::ID(@2, $2), *$4.methods,
+                              *$4.attribs, driver.takePragmasAsAnnotations())); }
+;
+
+blackbox_body: /* epsilon */ {
+            $$.methods = new IR::Vector<IR::Method>;
+            $$.attribs = new IR::NameMap<IR::Attribute, ordered_map>; }
+    | blackbox_body ATTRIBUTE name "{" blackbox_attribute "}"
+          { ($$=$1).attribs->addUnique($3, $5); }
+    | blackbox_body METHOD name "(" opt_argument_list ")" ";"
+          { ($$=$1).methods->push_back(new IR::Method(@2+@3, $3,
+                new IR::Type_Method(@4+@6, IR::Type::Void::get(), $5))); }
+    | blackbox_body METHOD name "(" opt_argument_list ")" "{" blackbox_method "}"
+          { ($$=$1).methods->push_back(new IR::Method(@2+@3, $3,
+                new IR::Type_Method(@4+@6, IR::Type::Void::get(), $5), $8)); }
+    | blackbox_body error { $$ = $1; }
+;
+
+blackbox_attribute: /* epsilon */ { $$ = new IR::Attribute($<IR::ID>-1); }
+    | blackbox_attribute TYPE ":" type ";" { ($$=$1)->type = $4; }
+    | blackbox_attribute EXPRESSION_LOCAL_VARIABLES "{" opt_locals_list "}"
+        { ($$=$1)->locals = $4; }
+    | blackbox_attribute OPTIONAL ";"
+        { ($$=$1)->optional = true; }
+    | blackbox_attribute error ";" { $$ = $1; }
+    | blackbox_attribute error { $$ = $1; }
+;
+
+blackbox_method: { $$ = new IR::Annotations; }
+    | blackbox_method READS "{" opt_name_list "}"
+        { ($$=$1)->add(new IR::Annotation(@2, $2, driver.makeExpressionList($4))); }
+    | blackbox_method WRITES "{" opt_name_list "}"
+        { ($$=$1)->add(new IR::Annotation(@2, $2, driver.makeExpressionList($4))); }
+;
+
+opt_argument_list:
+      /* epsilon */ { $$ = new IR::ParameterList; }
+    | argument_list { $$ = $1; }
+;
+
+argument_list:
+      argument                        { $$ = new IR::ParameterList({$1}); }
+    | argument_list "," argument      { ($$=$1)->push_back($3); }
+;
+
+argument:
+      inout type name
+        { $$ = new IR::Parameter(@3, $3, $1, $2); }
+    | OPTIONAL argument
+        { ($$ = $2)->annotations = $2->annotations->add(new IR::Annotation(@1, $1, {})); }
+;
+
+inout: IN { $$ = IR::Direction::In; } | OUT { $$ = IR::Direction::Out; } ;
+
+opt_locals_list: { $$ = nullptr; } | locals_list ;
+locals_list:
+      local_var                  { ($$ = new IR::AttribLocals())->locals[$1->name] = $1; }
+    | locals_list "," local_var  { ($$ = $1)->locals[$3->name] = $3; }
+;
+local_var:
+      name              { $$ = new IR::AttribLocal(@1, $1); }
+    | type name         { $$ = new IR::AttribLocal(@1+@2, $1, $2); }
+;
+
+blackbox_instantiation:
+      BLACKBOX name name ";"
+        { driver.global->add($3,
+            new IR::Declaration_Instance(@3, $3, driver.takePragmasAsAnnotations(),
+                                         new IR::Type_Name($2),
+                                         new IR::Vector<IR::Argument>)); }
+    | BLACKBOX name name "{" blackbox_config "}"
+        { auto instance =
+            new IR::Declaration_Instance(@3, $3, driver.takePragmasAsAnnotations(),
+                                         new IR::Type_Name($2),
+                                         new IR::Vector<IR::Argument>);
+          instance->properties = std::move(*$5);
+          driver.global->add($3, instance); }
+;
+
+blackbox_config: /* epsilon */ { $$ = new IR::NameMap<IR::Property>; }
+    | blackbox_config name ":" expressions ";"
+          { const IR::PropertyValue *pv;
+            if ($4->size() == 1)
+                pv = new IR::ExpressionValue(@4, $4->front());
+            else
+                pv = new IR::ExpressionListValue(@4, std::move(*$4));
+            ($$=$1)->add($2, new IR::Property(@2+@4, $2, pv, false)); }
+    | blackbox_config name "{" expressions "}"
+          { auto *pv = new IR::ExpressionListValue(std::move(*$4));
+            ($$=$1)->add($2, new IR::Property(@2+@4, $2, pv, false)); }
+    ;
+
+expressions: /* epsilon */
+      { $$ = new IR::Vector<IR::Expression>; }
+    | expressions expression %prec EXPRLIST
+      { ($$=$1)->push_back($2); $$->srcInfo += @2; }
+    | expressions "," expression %prec EXPRLIST
+      { ($$=$1)->push_back($3); $$->srcInfo += @3; }
+;
+
+pragma_operands: /* epsilon */
+      { $$ = new IR::Vector<IR::Expression>; }
+    | pragma_operands pragma_operand
+      { ($$=$1)->push_back($2); $$->srcInfo += @2; }
+    | pragma_operands "," pragma_operand
+      { ($$=$1)->push_back($3); $$->srcInfo += @3; }
+;
+
+pragma_operand:
+      INTEGER { $$ = parseConstant(@1, $1, 0); }
+    | STRING_LITERAL { $$ = new IR::StringLiteral(@1, $1); }
+    | name { $$ = new IR::StringLiteral(@1, $1); }
+    | name "." name { $$ = new IR::StringLiteral(@1+@3, $1 + '.' + $3); }
+;
+
+/***************/
+/* Expressions */
+/***************/
+
+expression:
+      VALID "(" header_or_field_ref ")" { $$ = new IR::Primitive(@1+@4, $1, $3); }
+    | CURRENT "(" const_expression "," const_expression ")"
+        { $$ = new IR::Primitive(@1+@6, $1, $3, $5); }
+    | field_ref { $$ = $1; }
+    | header_ref { $$ = $1; }
+    | header_ref "." VALID { $$ = new IR::Primitive(@1+@3, $3, $1); }
+    | LATEST "." name { $$ = new IR::Member(@1+@3,
+                                            new IR::PathExpression(IR::ID(@1, $1)),
+                                            IR::ID(@3, $3)); }
+    | INTEGER                            { $$ = parseConstant(@1, $1, 0); }
+    | "(" expression ")"                 { $$ = $2; }
+    | "!" expression %prec PREFIX        { $$ = new IR::LNot(@1, $2); }
+    | "~" expression %prec PREFIX        { $$ = new IR::Cmpl(@1, $2); }
+    | "-" expression %prec PREFIX        { $$ = new IR::Neg(@1, $2); }
+    | "+" expression %prec PREFIX        { $$ = $2; }
+    | expression "*" expression          { $$ = new IR::Mul(@2, $1, $3); }
+    | expression "/" expression          { $$ = new IR::Div(@2, $1, $3); }
+    | expression "%" expression          { $$ = new IR::Mod(@2, $1, $3); }
+    | expression "+" expression          { $$ = new IR::Add(@2, $1, $3); }
+    | expression "-" expression          { $$ = new IR::Sub(@2, $1, $3); }
+    | expression "<<" expression         { $$ = new IR::Shl(@2, $1, $3); }
+    | expression ">>" expression         { $$ = new IR::Shr(@2, $1, $3); }
+    | expression "<=" expression         { $$ = new IR::Leq(@2, $1, $3); }
+    | expression ">=" expression         { $$ = new IR::Geq(@2, $1, $3); }
+    | expression "<" expression          { $$ = new IR::Lss(@2, $1, $3); }
+    | expression ">" expression          { $$ = new IR::Grt(@2, $1, $3); }
+    | expression "!=" expression         { $$ = new IR::Neq(@2, $1, $3); }
+    | expression "==" expression         { $$ = new IR::Equ(@2, $1, $3); }
+    | expression "&" expression          { $$ = new IR::BAnd(@2, $1, $3); }
+    | expression "^" expression          { $$ = new IR::BXor(@2, $1, $3); }
+    | expression "|" expression          { $$ = new IR::BOr(@2, $1, $3); }
+    | expression "&&" expression         { $$ = new IR::LAnd(@2, $1, $3); }
+    | expression "||" expression         { $$ = new IR::LOr(@2, $1, $3); }
+    | TRUE                               { $$ = new IR::BoolLiteral(@1, true); }
+    | FALSE                              { $$ = new IR::BoolLiteral(@1, false); }
+;
+
+header_or_field_ref:
+      header_ref { $$ = $1; }
+    | field_ref { $$ = $1; }
+;
+
+header_ref:
+      name                          { $$ = new IR::PathExpression(IR::ID(@1, $1)); }
+    | header_ref "[" expression "]" { $$ = new IR::HeaderStackItemRef(@1+@4, $1, $3); }
+;
+
+field_ref: header_ref "." name
+         { $$ = new IR::Member(@1+@3, $1, IR::ID(@3, $3)); }
+;
+
+const_expression: expression
+        { if (!($$ = driver.constantFold(&*$1)))
+                ::error("%s: Non constant expression", @1); }
+;
+
+expression_list:
+      expression { $$ = new IR::Vector<IR::Expression>($1); $$->srcInfo = @1; }
+    | expression_list "," expression { ($$=$1)->push_back($3); $$->srcInfo += @3; }
+    ;
+
+opt_expression_list: /* epsilon */ { $$ = nullptr; } | expression_list { $$ = $1; }
+
+name: IDENTIFIER { $$ = IR::ID(@1, $1); }
+    | ACTION { $$ = IR::ID(@1, $1); }
+    | ACTIONS { $$ = IR::ID(@1, $1); }
+    | ACTION_PROFILE { $$ = IR::ID(@1, $1); }
+    | ACTION_SELECTOR { $$ = IR::ID(@1, $1); }
+    | ALGORITHM { $$ = IR::ID(@1, $1); }
+    | ATTRIBUTE { $$ = IR::ID(@1, $1); }
+    | ATTRIBUTES { $$ = IR::ID(@1, $1); }
+    | BIT { $$ = IR::ID(@1, $1); }
+    | BLACKBOX { $$ = IR::ID(@1, $1); }
+    | BLACKBOX_TYPE { $$ = IR::ID(@1, $1); }
+    | BLOCK { $$ = IR::ID(@1, $1); }
+    | BOOL { $$ = IR::ID(@1, $1); }
+    | CALCULATED_FIELD { $$ = IR::ID(@1, $1); }
+    | CONTROL { $$ = IR::ID(@1, $1); }
+    | COUNTER { $$ = IR::ID(@1, $1); }
+    | DEFAULT_ACTION { $$ = IR::ID(@1, $1); }
+    | CONST { $$ = IR::ID(@1, $1); }
+    | DIRECT { $$ = IR::ID(@1, $1); }
+    | DROP { $$ = IR::ID(@1, $1); }
+    | DYNAMIC_ACTION_SELECTION { $$ = IR::ID(@1, $1); }
+    | EXPRESSION { $$ = IR::ID(@1, $1); }
+    | EXPRESSION_LOCAL_VARIABLES { $$ = IR::ID(@1, $1); }
+    | EXTRACT { $$ = IR::ID(@1, $1); }
+    | FIELD_LIST { $$ = IR::ID(@1, $1); }
+    | FIELD_LIST_CALCULATION { $$ = IR::ID(@1, $1); }
+    | FIELDS { $$ = IR::ID(@1, $1); }
+    | HEADER { $$ = IR::ID(@1, $1); }
+    | HEADER_TYPE { $$ = IR::ID(@1, $1); }
+    | IMPLEMENTATION { $$ = IR::ID(@1, $1); }
+    | IN { $$ = IR::ID(@1, $1); }
+    | INPUT { $$ = IR::ID(@1, $1); }
+    | INSTANCE_COUNT { $$ = IR::ID(@1, $1); }
+    | INT { $$ = IR::ID(@1, $1); }
+    | LAYOUT { $$ = IR::ID(@1, $1); }
+    | LENGTH { $$ = IR::ID(@1, $1); }
+    | MASK { $$ = IR::ID(@1, $1); }
+    | MAX_LENGTH { $$ = IR::ID(@1, $1); }
+    | MAX_SIZE { $$ = IR::ID(@1, $1); }
+    | MAX_WIDTH { $$ = IR::ID(@1, $1); }
+    | METADATA { $$ = IR::ID(@1, $1); }
+    | METER { $$ = IR::ID(@1, $1); }
+    | METHOD { $$ = IR::ID(@1, $1); }
+    | MIN_SIZE { $$ = IR::ID(@1, $1); }
+    | MIN_WIDTH { $$ = IR::ID(@1, $1); }
+    | OPTIONAL { $$ = IR::ID(@1, $1); }
+    | OUT { $$ = IR::ID(@1, $1); }
+    | OUTPUT_WIDTH { $$ = IR::ID(@1, $1); }
+    | PARSER { $$ = IR::ID(@1, $1); }
+    | PARSER_VALUE_SET { $$ = IR::ID(@1, $1); }
+    | PARSER_EXCEPTION { $$ = IR::ID(@1, $1); }
+    | PRE_COLOR { $$ = IR::ID(@1, $1); }
+    | PRIMITIVE_ACTION { $$ = IR::ID(@1, $1); }
+    | READS { $$ = IR::ID(@1, $1); }
+    | REGISTER { $$ = IR::ID(@1, $1); }
+    | RESULT { $$ = IR::ID(@1, $1); }
+    | RETURN { $$ = IR::ID(@1, $1); }
+    | SATURATING { $$ = IR::ID(@1, $1); }
+    | SELECTION_KEY { $$ = IR::ID(@1, $1); }
+    | SELECTION_MODE { $$ = IR::ID(@1, $1); }
+    | SELECTION_TYPE { $$ = IR::ID(@1, $1); }
+    | SET_METADATA { $$ = IR::ID(@1, $1); }
+    | SIGNED { $$ = IR::ID(@1, $1); }
+    | SIZE { $$ = IR::ID(@1, $1); }
+    | STATIC { $$ = IR::ID(@1, $1); }
+    | STRING { $$ = IR::ID(@1, $1); }
+    | TABLE { $$ = IR::ID(@1, $1); }
+    | TYPE { $$ = IR::ID(@1, $1); }
+    | UPDATE { $$ = IR::ID(@1, $1); }
+    | VERIFY { $$ = IR::ID(@1, $1); }
+    | WIDTH { $$ = IR::ID(@1, $1); }
+    | WRITES { $$ = IR::ID(@1, $1); }
+    ;
+
+%%
+
+void V1::V1Parser::error(const Util::SourceInfo& location,
+                         const std::string& message) {
+    driver.onParseError(location, message);
+}
+
+static const IR::Expression *removeRedundantValid(const IR::Expression *e) {
+    if (auto *prim = e->to<IR::Primitive>()) {
+        if (prim->name == "valid")
+            return prim->operands.at(0); }
+    return e;
+}

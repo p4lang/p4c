@@ -1,0 +1,6 @@
+scope.p4(25): [--Werror=type-error] error: Cannot extract field x from q which has type Type(control q)
+        bit<8> y = .q.x.get(); // should be unreachable
+                      ^
+scope.p4(25)
+        bit<8> y = .q.x.get(); // should be unreachable
+                   ^^

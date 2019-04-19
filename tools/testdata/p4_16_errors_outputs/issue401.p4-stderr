@@ -1,0 +1,6 @@
+issue401.p4(42): [--Werror=legacy] error: cast: Cannot unify Tuple(1) to bit<1>
+    bit<1> b = (bit<1>) { 0 };
+               ^^^^^^^^^^^^^^
+issue401.p4(42): [--Werror=type-error] error: cast: Illegal cast from Tuple(1) to bit<1>
+    bit<1> b = (bit<1>) { 0 };
+               ^^^^^^^^^^^^^^

@@ -1,0 +1,7 @@
+issue747.p4(31): [--Wwarn=type-inference] warning: Could not infer type for local_port, using bit<8>
+action local_recirc(local_port) {
+                    ^^^^^^^^^^
+issue747.p4(31): [--Werror=legacy] error: local_port: expected a field list
+action local_recirc(local_port) {
+                    ^^^^^^^^^^
+error: 1 errors encountered, aborting compilation

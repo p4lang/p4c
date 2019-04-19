@@ -1,0 +1,4 @@
+p_e.p4(17):syntax error, unexpected END
+   x
+    ^
+error: 1 errors encountered, aborting compilation

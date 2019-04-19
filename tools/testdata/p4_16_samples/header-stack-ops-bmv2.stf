@@ -1,0 +1,163 @@
+# Here are abbreviated names for several versions of behavioral-model
+# simple_switch referred to below:
+
+# v1 - The 'original' version.
+
+# v2 - Version 1.10.0 compiled without enabling support for P4_16
+# header stacks, i.e. without supplying the command line option
+# '--enable-WP4-16-stacks' when running 'configure'.
+
+# v3 - Version 1.10.0 compiled _with_ enabling support for P4_16
+# header stacks, i.e.  supplying the command line option
+# '--enable-WP4-16-stacks' when running 'configure'.
+
+######################################################################
+# v1 - The 'original' version, before any changes were made to the
+# behavior of push and pop primitives (those are the names in the BMv2
+# JSON file for the push_front and pop_front methods in the P4_16
+# language spec).
+#
+# Corresponds to this commit of repository
+# https://github.com/p4lang/behavioral-model
+#
+# commit 9e4a70edbd7255cd0e00e92acc2c7e131cedeaf7
+# Author: Antonin Bas <antonin@barefootnetworks.com>
+# Date:   Tue Jan 2 10:33:08 2018 -0800
+# 
+#     Call export_bytes in Data::two_comp_mod operator
+#
+######################################################################
+#
+# v2 and v3 both use this version of the source code of the
+# p4lang/behavioral-model Github repo:
+#
+# commit 6b5d99c54198102d11871a92a71d80e6958a0295
+# Author: Antonin Bas <antonin@barefootnetworks.com>
+# Date:   Thu Jan 4 10:26:42 2018 -0800
+# 
+#     changed VERSION number to 1.10.0 for release
+#
+######################################################################
+
+
+# packet with 3 no-ops should pass through unchanged, except for
+# h1.h2_valid_bits in output packet
+
+packet 0  01 00 00 00 00 02   02 de ad 03   03 be
+# v1 v2 v3
+expect 0  01 00 00 00 01 02   02 de ad 03   03 be
+
+
+# This one has an operation to push 1 header into h2 stack, but not
+# otherwise change any valid bits, so 1 header should come out, but
+# internally it should be h2[1], not h2[0], so h1.h2_valid_bits should
+# be slightly different.
+#
+# Note 1: Due to p4c issue #1128, where it is not copying the 'next'
+# state for header stacks when calling sub-controls, and because of
+# the way bmv2 v1 depends on the value of 'next' in its 'push'
+# primitive behavior, it incorrectly generates h2_valid_bits=1 in the
+# output packet.
+
+packet 0  01 11 00 00 00 02   02 de ad 03   03 be
+# v1 v2
+#expect 0  01 11 00 00 01 02   02 de ad 03   03 be
+# v3
+expect 0  01 11 00 00 02 02   02 de ad 03   03 be
+
+
+# push_front(1) then fill in new h2[0].  2 h2 headers should come out.
+#
+# Incorrect output packet for v1 and v2 because same reason as at Note
+# 1.
+#
+# v3 gives correct output packet according to P4_16 language spec.
+
+packet 0  01 11 30 00 00 02   02 de ad 03   03 be
+# v1
+#expect 0  01 11 30 00 01 02   02 a0 0a 09   03 be
+# v3
+expect 0  01 11 30 00 03 02   02 a0 0a 09   02 de ad 03   03 be
+
+
+# Only operation is to make hdr[2] valid and fill it in.  This
+# intentionally creates a 'hole', but emit should include it in
+# output.
+
+packet 0  01 32 00 00 00 02   02 de ad 03   03 be
+# v1 v2 v3
+expect 0  01 32 00 00 05 02   02 de ad 03   02 a2 2a 09   03 be
+
+
+# Like previous case, but also do a push_front(1) after
+# hdr.h2[2].setValid().
+#
+# Incorrect output packet for v1 and v2 because same reason as at Note
+# 1.
+#
+# v3 gives correct output packet according to P4_16 language spec.
+
+packet 0  01 32 11 00 00 02   02 de ad 03   03 be
+# v1 v2
+#expect 0  01 32 11 00 05 02   02 de ad 03   02 a2 2a 09   03 be
+# v3
+expect 0  01 32 11 00 0a 02   02 de ad 03   02 a2 2a 09   03 be
+
+
+# receive no h2 headers in input packet.  Make h2[0] valid and fill it
+# in.  pop_front(1) should remove it before it goes out.
+#
+# Incorrect output packet for v1 and v2 because same reason as at Note
+# 1.  Because 'next' is 0 instead of 1, pop_front(1) is a no-op.
+
+packet 0  01 30 21 00 00 03   03 be
+# v1 v2
+#expect 0  01 30 21 00 01 03   02 a0 0a 09    03 be
+# v3
+expect 0  01 30 21 00 00 03   03 be
+
+
+
+# Receive 5 valid h2 headers, send through without changing
+packet 0  01 00 00 00 00 02   02 12 34 02   02 56 78 02   02 9a bc 02   02 de f1 02   02 23 45 03   03 fe
+expect 0  01 00 00 00 1f 02   02 12 34 02   02 56 78 02   02 9a bc 02   02 de f1 02   02 23 45 03   03 fe
+
+
+# Receive 5 valid h2 headers, push_front(1), fill in new h2[0], 5 valid h2 out
+packet 0  01 11 30 00 00 02   02 12 34 02   02 56 78 02   02 9a bc 02   02 de f1 02   02 23 45 03   03 fe
+expect 0  01 11 30 00 1f 02   02 a0 0a 09   02 12 34 02   02 56 78 02   02 9a bc 02   02 de f1 02   03 fe
+
+
+# Receive 5 valid h2 headers, push_front(4), make none valid, 1 valid h2 out
+packet 0  01 14 00 00 00 02   02 12 34 02   02 56 78 02   02 9a bc 02   02 de f1 02   02 23 45 03   03 fe
+expect 0  01 14 00 00 10 02   02 12 34 02   03 fe
+
+
+# Receive 5 valid h2 headers, push_front(5), make none valid, 0 valid h2 out
+packet 0  01 15 00 00 00 02   02 12 34 02   02 56 78 02   02 9a bc 02   02 de f1 02   02 23 45 03   03 fe
+expect 0  01 15 00 00 00 02   03 fe
+
+
+# Receive 5 valid h2 headers, pop_front(1), 4 valid h2 headers out
+packet 0  01 21 00 00 00 02   02 12 34 02   02 56 78 02   02 9a bc 02   02 de f1 02   02 23 45 03   03 fe
+expect 0  01 21 00 00 0f 02   02 56 78 02   02 9a bc 02   02 de f1 02   02 23 45 03   03 fe
+
+
+# Receive 5 valid h2 headers, pop_front(4), 1 valid h2 header out
+packet 0  01 24 00 00 00 02   02 12 34 02   02 56 78 02   02 9a bc 02   02 de f1 02   02 23 45 03   03 fe
+expect 0  01 24 00 00 01 02   02 23 45 03   03 fe
+
+
+# Receive 5 valid h2 headers, pop_front(5), 0 valid h2 headers out
+packet 0  01 25 00 00 00 02   02 12 34 02   02 56 78 02   02 9a bc 02   02 de f1 02   02 23 45 03   03 fe
+expect 0  01 25 00 00 00 02   03 fe
+
+
+# Receive 3 valid h2 headers, make h2[3] valid and fill in, push_front(1), 4 out
+packet 0  01 33 11 00 00 02   02 12 34 02   02 56 78 02   02 23 45 03   03 fe
+expect 0  01 33 11 00 1e 02   02 12 34 02   02 56 78 02   02 23 45 03   02 a3 3a 09   03 fe
+
+
+# Receive 3 valid h2 headers, make h2[3] valid and fill in, pop_front(1), 3 out
+packet 0  01 33 21 00 00 02   02 12 34 02   02 56 78 02   02 23 45 03   03 fe
+expect 0  01 33 21 00 07 02   02 56 78 02   02 23 45 03   02 a3 3a 09   03 fe

@@ -1,0 +1,3 @@
+implicit.p4(19): [--Werror=legacy] error: b: Cannot unify int<32> to bit<32>
+    bit<32> b = 32s1;
+    ^^^^^^^^^^^^^^^^^

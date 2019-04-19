@@ -1,0 +1,6 @@
+issue1557-bmv2.p4(19): [--Werror=type-error] error: idx: parameter should be assigned in call rewrite
+    action rewrite(bit<16> idx) { meta.idx = idx; }
+                           ^^^
+issue1557-bmv2.p4(24)
+        default_action = rewrite;
+                         ^^^^^^^

@@ -1,0 +1,9 @@
+div.p4(18): error: /: Division is not defined for negative numbers
+    a = - 8 / -2;
+        ^^^^^^^^
+div.p4(19): error: %: Modulo is not defined for negative numbers
+    a = -10 % 2;
+        ^^^^^^^
+div.p4(20): error: %: Modulo is not defined for negative numbers
+    a = 10 % -2;
+        ^^^^^^^

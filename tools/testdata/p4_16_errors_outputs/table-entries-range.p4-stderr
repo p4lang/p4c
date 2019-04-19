@@ -1,0 +1,3 @@
+table-entries-range.p4(71): [--Werror=legacy] error: Entry: Cannot match tuples with different sizes 1 vs 2
+            (0x18, 0xF) : a_with_control_params(24); // not a range
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
