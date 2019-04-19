@@ -34,9 +34,19 @@ header_type queueing_metadata_t {
     }
 }
 
+header_type queueing_metadata_t_padded {
+    fields {
+        enq_timestamp : 32;
+        enq_qdepth : 19;
+        deq_timedelta : 32;
+        deq_qdepth : 19;
+        pad : 2;
+    }
+}
+
 metadata queueing_metadata_t queueing_metadata;
 
-header queueing_metadata_t queueing_hdr;
+header queueing_metadata_t_padded queueing_hdr;
 
 parser start {
     extract(hdr1);
@@ -75,6 +85,7 @@ action copy_queueing_data() {
     modify_field(queueing_hdr.enq_qdepth, queueing_metadata.enq_qdepth);
     modify_field(queueing_hdr.deq_timedelta, queueing_metadata.deq_timedelta);
     modify_field(queueing_hdr.deq_qdepth, queueing_metadata.deq_qdepth);
+    modify_field(queueing_hdr.pad, 0);
 }
 
 table t_egress {
