@@ -45,3 +45,8 @@ const int<8> l0 = 8s128;
 const int<8> m0 = 8s129;
 const int<8> n0 = 8s255;
 const int<8> o0 = 8s256;
+
+const int<1> zz0 = 0;
+const int<1> zz1 = 1;
+const int<2> zz2 = 2;
+const int<1> zz3 = zz2[0:0];

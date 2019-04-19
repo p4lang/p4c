@@ -57,10 +57,6 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
     apply { }
 }
 
-action my_drop() {
-    mark_to_drop();
-}
-
 control ingressImpl(inout headers_t hdr,
                     inout metadata_t meta,
                     inout standard_metadata_t stdmeta)
