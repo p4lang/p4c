@@ -74,16 +74,16 @@ set (P4RUNTIME_EXCLUDE
   testdata/p4_16_samples/issue1062-1-bmv2.p4
   testdata/p4_16_samples/issue1304.p4
   testdata/p4_16_samples/psa-example-parser-checksum.p4
-  # This program is invalid according to the PSA specification as one direct
-  # counter is shared by multiple match tables: "A DirectCounter instance must
-  # appear as the value of the psa_direct_counter table attribute for at most
-  # one table."
-  testdata/p4_16_samples/psa-counter6.p4  
 )
 
 set (P4_XFAIL_TESTS
   # issue #13
   testdata/p4_16_samples/cast-call.p4
+  # This program is invalid according to the PSA specification as one direct
+  # counter is shared by multiple match tables: "A DirectCounter instance must
+  # appear as the value of the psa_direct_counter table attribute for at most
+  # one table."
+  testdata/p4_16_samples/psa-counter6.p4
   )
 # we invoke p4c with --p4runtime-files even for programs in p4_16_errors. This
 # enables us to use p4_16_errors even for programs which pass compilation but

@@ -189,7 +189,7 @@ struct MatchField {
     const uint32_t bitwidth;  // How wide this field is.
     const IR::IAnnotated* annotations;  // If non-null, any annotations applied
                                         // to this field.
-    const cstring type_name;  // Optional field when field is Type_Newtype.
+    const cstring type_name;  // Optional field used when field is Type_Newtype.
 };
 
 struct ActionRef {
