@@ -41,55 +41,45 @@ struct headers {
 }
 
 parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
-    headers parsed_hdr_0;
-    metadata user_meta_0;
     state start {
-        parsed_hdr_0.ethernet.setInvalid();
-        parsed_hdr_0.ipv4.setInvalid();
-        user_meta_0 = user_meta;
+        parsed_hdr.ethernet.setInvalid();
+        parsed_hdr.ipv4.setInvalid();
         transition CommonParser_start;
     }
     state CommonParser_start {
-        buffer.extract<ethernet_t>(parsed_hdr_0.ethernet);
-        transition select(parsed_hdr_0.ethernet.etherType) {
+        buffer.extract<ethernet_t>(parsed_hdr.ethernet);
+        transition select(parsed_hdr.ethernet.etherType) {
             16w0x800: CommonParser_parse_ipv4;
             default: start_0;
         }
     }
     state CommonParser_parse_ipv4 {
-        buffer.extract<ipv4_t>(parsed_hdr_0.ipv4);
+        buffer.extract<ipv4_t>(parsed_hdr.ipv4);
         transition start_0;
     }
     state start_0 {
-        parsed_hdr = parsed_hdr_0;
-        user_meta = user_meta_0;
         transition accept;
     }
 }
 
 parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata user_meta, in psa_egress_parser_input_metadata_t istd, in empty_metadata_t normal_meta, in empty_metadata_t clone_i2e_meta, in empty_metadata_t clone_e2e_meta) {
-    headers parsed_hdr_1;
-    metadata user_meta_1;
     state start {
-        parsed_hdr_1.ethernet.setInvalid();
-        parsed_hdr_1.ipv4.setInvalid();
-        user_meta_1 = user_meta;
+        parsed_hdr.ethernet.setInvalid();
+        parsed_hdr.ipv4.setInvalid();
         transition CommonParser_start_0;
     }
     state CommonParser_start_0 {
-        buffer.extract<ethernet_t>(parsed_hdr_1.ethernet);
-        transition select(parsed_hdr_1.ethernet.etherType) {
+        buffer.extract<ethernet_t>(parsed_hdr.ethernet);
+        transition select(parsed_hdr.ethernet.etherType) {
             16w0x800: CommonParser_parse_ipv4_0;
             default: start_1;
         }
     }
     state CommonParser_parse_ipv4_0 {
-        buffer.extract<ipv4_t>(parsed_hdr_1.ipv4);
+        buffer.extract<ipv4_t>(parsed_hdr.ipv4);
         transition start_1;
     }
     state start_1 {
-        parsed_hdr = parsed_hdr_1;
-        user_meta = user_meta_1;
         transition accept;
     }
 }
@@ -103,7 +93,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
             psa_ingress_output_metadata_t meta_2 = ostd;
             PortId_t egress_port_1 = oport;
             meta_2.drop = false;
-            meta_2.multicast_group = 10w0;
+            meta_2.multicast_group = (MulticastGroup_t)32w0;
             meta_2.egress_port = egress_port_1;
             ostd = meta_2;
         }
