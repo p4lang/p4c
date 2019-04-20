@@ -76,7 +76,7 @@ class Type_State : Type_Base {
     dbprint { out << "state"; }
 }
 
-/// Represents both bit<> and int<> types in P4 v1.1+
+/// Represents both bit<> and int<> types in P4-14 and P4-16
 class Type_Bits : Type_Base {
     optional int size;
     NullOK optional Expression expression; // only used temporarily

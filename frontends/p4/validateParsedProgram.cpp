@@ -55,16 +55,13 @@ void ValidateParsedProgram::postorder(const IR::StructField* f) {
         ::error(ErrorType::ERR_INVALID, "field name", f->name);
 }
 
-/// Width of a bit<> type is at least 0
-/// Width of an int<> type is at least 1
+/// Width of a bit<> or int<> type is greater than 0
 void ValidateParsedProgram::postorder(const IR::Type_Bits* type) {
     if (type->expression)
         // cannot validate yet
         return;
     if (type->size <= 0)
         ::error(ErrorType::ERR_INVALID, "type size", type);
-    if (type->size == 1 && type->isSigned)
-        ::error(ErrorType::ERR_INVALID, "type size. Signed types cannot be 1-bit wide", type);
 }
 
 void ValidateParsedProgram::postorder(const IR::Type_Varbits* type) {
