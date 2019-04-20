@@ -74,7 +74,7 @@ struct LocationPath : public IHasDbPrint {
 /// We represent a set of location set as a set of LocationPath
 /// objects.
 class SetOfLocations : public IHasDbPrint {
-  public:
+ public:
     std::set<const LocationPath*> paths;
 
     SetOfLocations() = default;
@@ -126,7 +126,7 @@ class ReadsWrites : public Inspector {
     bool noMethodCalls;  /// If this flag is true we do not expect to see
     /// method calls in the expressions - except calls to isValid().
 
-  public:
+ public:
     ReadsWrites(const ReferenceMap* refMap, bool noMethodCalls) :
             refMap(refMap), noMethodCalls(noMethodCalls)
     { setName("ReadsWrites"); }
