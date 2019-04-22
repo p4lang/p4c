@@ -167,7 +167,7 @@ class PsaSwitch : public Switch {
   void copy_field_list_and_set_type(
       const std::unique_ptr<Packet> &packet,
       const std::unique_ptr<Packet> &packet_copy,
-      PktInstanceType copy_type, p4object_id_t field_list_id);
+      p4object_id_t field_list_id);
 
   void check_queueing_metadata();
 

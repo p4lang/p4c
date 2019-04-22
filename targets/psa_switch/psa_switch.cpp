@@ -121,6 +121,14 @@ PsaSwitch::PsaSwitch(bool enable_swap)
 
   add_required_field("psa_egress_deparser_input_metadata", "egress_port");
 
+  force_arith_header("psa_ingress_parser_input_metadata");
+  force_arith_header("psa_ingress_input_metadata");
+  force_arith_header("psa_ingress_output_metadata");
+  force_arith_header("psa_egress_parser_input_metadata");
+  force_arith_header("psa_egress_input_metadata");
+  force_arith_header("psa_egress_output_metadata");
+  force_arith_header("psa_egress_deparser_input_metadata");
+
   import_primitives();
 }
 
@@ -128,11 +136,11 @@ PsaSwitch::PsaSwitch(bool enable_swap)
 
 int
 PsaSwitch::receive_(port_t port_num, const char *buffer, int len) {
-  // this is a good place to call this, because blocking this thread will not
-  // block the processing of existing packet instances, which is a requirement
-  if (do_swap() == 0) {
-    check_queueing_metadata();
-  }
+
+  // for p4runtime program swap - antonin
+  // putting do_swap call here is ok because blocking this thread will not
+  // block processing of existing packet instances, which is a requirement
+  do_swap();
 
   // we limit the packet buffer to original size + 512 bytes, which means we
   // cannot add more than 512 bytes of header data to the packet, which should
@@ -141,23 +149,20 @@ PsaSwitch::receive_(port_t port_num, const char *buffer, int len) {
                                bm::PacketBuffer(len + 512, buffer, len));
 
   BMELOG(packet_in, *packet);
-
   PHV *phv = packet->get_phv();
-  // many current P4 programs assume this
-  // it is also part of the original P4 spec
+
+  // many current p4 programs assume this
+  // from psa spec - PSA does not mandate initialization of user-defined
+  // metadata to known values as given as input to the ingress parser
   phv->reset_metadata();
 
-  // setting standard metadata
-
-  phv->get_field("psa_ingress_parser_input_metadata.ingress_port").set(port_num);
-  // TODO
-  // Use appropriate enum member value in JSON
+  // TODO use appropriate enum member from JSON
   phv->get_field("psa_ingress_parser_input_metadata.packet_path").set(PKT_INSTANCE_TYPE_NORMAL);
+  phv->get_field("psa_ingress_parser_input_metadata.ingress_port").set(port_num);
+
   // using packet register 0 to store length, this register will be updated for
   // each add_header / remove_header primitive call
   packet->set_register(PACKET_LENGTH_REG_IDX, len);
-   // TODO
-//   phv->get_field("standard_metadata.packet_length").set(len);
 
   phv->get_field("psa_ingress_input_metadata.ingress_timestamp")
     .set(get_ts().count());
@@ -168,8 +173,6 @@ PsaSwitch::receive_(port_t port_num, const char *buffer, int len) {
 
 void
 PsaSwitch::start_and_return_() {
-  check_queueing_metadata();
-
   threads_.push_back(std::thread(&PsaSwitch::ingress_thread, this));
   for (size_t i = 0; i < nb_egress_threads; i++) {
     threads_.push_back(std::thread(&PsaSwitch::egress_thread, this, i));
@@ -243,10 +246,12 @@ PsaSwitch::transmit_thread() {
   while (1) {
     std::unique_ptr<Packet> packet;
     output_buffer.pop_back(&packet);
+
     if (packet == nullptr) break;
     BMELOG(packet_out, *packet);
     BMLOG_DEBUG_PKT(*packet, "Transmitting packet of size {} out of port {}",
                     packet->get_data_size(), packet->get_egress_port());
+
     my_transmit_fn(packet->get_egress_port(), packet->get_packet_id(),
                    packet->data(), packet->get_data_size());
   }
@@ -260,14 +265,6 @@ PsaSwitch::get_ts() const {
 void
 PsaSwitch::enqueue(port_t egress_port, std::unique_ptr<Packet> &&packet) {
     packet->set_egress_port(egress_port);
-
-    PHV *phv = packet->get_phv();
-
-    if (with_queueing_metadata) {
-      phv->get_field("queueing_metadata.enq_timestamp").set(get_ts().count());
-      phv->get_field("queueing_metadata.enq_qdepth")
-          .set(egress_buffers.size(egress_port));
-    }
 
 #ifdef SSWITCH_PRIORITY_QUEUEING_ON
     size_t priority = phv->has_field(SSWITCH_PRIORITY_QUEUEING_SRC) ?
@@ -289,28 +286,11 @@ void
 PsaSwitch::copy_field_list_and_set_type(
     const std::unique_ptr<Packet> &packet,
     const std::unique_ptr<Packet> &packet_copy,
-    PktInstanceType copy_type, p4object_id_t field_list_id) {
+    p4object_id_t field_list_id) {
   PHV *phv_copy = packet_copy->get_phv();
   phv_copy->reset_metadata();
   FieldList *field_list = this->get_field_list(field_list_id);
   field_list->copy_fields_between_phvs(phv_copy, packet->get_phv());
-  phv_copy->get_field("standard_metadata.instance_type").set(copy_type);
-}
-
-void
-PsaSwitch::check_queueing_metadata() {
-  // TODO(antonin): add qid in required fields
-  bool enq_timestamp_e = field_exists("queueing_metadata", "enq_timestamp");
-  bool enq_qdepth_e = field_exists("queueing_metadata", "enq_qdepth");
-  bool deq_timedelta_e = field_exists("queueing_metadata", "deq_timedelta");
-  bool deq_qdepth_e = field_exists("queueing_metadata", "deq_qdepth");
-  if (enq_timestamp_e || enq_qdepth_e || deq_timedelta_e || deq_qdepth_e) {
-    if (enq_timestamp_e && enq_qdepth_e && deq_timedelta_e && deq_qdepth_e)
-      with_queueing_metadata = true;
-    else
-      bm::Logger::get()->warn(
-          "Your JSON input defines some but not all queueing metadata fields");
-  }
 }
 
 void
@@ -324,7 +304,6 @@ PsaSwitch::ingress_thread() {
 
     Parser *parser = this->get_parser("ingress_parser");
     Pipeline *ingress_mau = this->get_pipeline("ingress");
-
     phv = packet->get_phv();
 
     port_t ingress_port = packet->get_ingress_port();
@@ -335,7 +314,15 @@ PsaSwitch::ingress_thread() {
     parser->parse(packet.get());
     ingress_mau->apply(packet.get());
 
-    // Handling multicast
+    // prioritize dropping if marked as such - do not move below other checks
+    if (phv->has_field("psa_ingress_output_metadata.drop")) {
+      Field &f_drop = phv->get_field("psa_ingress_output_metadata.drop");
+      if (f_drop.get_int()) {
+        continue;
+      }
+    }
+
+    // handling multicast
     unsigned int mgid = 0u;
     if (phv->has_field("psa_ingress_output_metadata.multicast_group")) {
       Field &f_mgid = phv->get_field("psa_ingress_output_metadata.multicast_group");
@@ -354,8 +341,6 @@ PsaSwitch::ingress_thread() {
       }
     }
 
-
-
     packet->reset_exit();
     Field &f_egress_spec = phv->get_field("psa_ingress_output_metadata.egress_port");
     port_t egress_spec = f_egress_spec.get_uint();
@@ -364,10 +349,6 @@ PsaSwitch::ingress_thread() {
     egress_port = egress_spec;
     BMLOG_DEBUG_PKT(*packet, "Egress port is {}", egress_port);
 
-    if (egress_port == 511) {  // drop packet
-      BMLOG_DEBUG_PKT(*packet, "Dropping packet at the end of ingress");
-      continue;
-    }
     Deparser *deparser = this->get_deparser("ingress_deparser");
     deparser->deparse(packet.get());
     enqueue(egress_port, std::move(packet));
@@ -381,12 +362,14 @@ PsaSwitch::egress_thread(size_t worker_id) {
   while (1) {
     std::unique_ptr<Packet> packet;
     size_t port;
+
 #ifdef SSWITCH_PRIORITY_QUEUEING_ON
     size_t priority;
     egress_buffers.pop_back(worker_id, &port, &priority, &packet);
 #else
     egress_buffers.pop_back(worker_id, &port, &packet);
 #endif
+
     if (packet == nullptr) break;
 
     Parser *parser = this->get_parser("egress_parser");
@@ -395,7 +378,7 @@ PsaSwitch::egress_thread(size_t worker_id) {
     Pipeline *egress_mau = this->get_pipeline("egress");
     egress_mau->apply(packet.get());
     deparser->deparse(packet.get());
-    
+
     if (port == PSA_PORT_RECIRCULATE) {
       BMLOG_DEBUG_PKT(*packet, "Recirculating packet");
       phv = packet->get_phv();
@@ -403,7 +386,7 @@ PsaSwitch::egress_thread(size_t worker_id) {
       phv->reset();
       phv->reset_header_stacks();
       phv->reset_metadata();
-     
+
       phv->get_field("psa_ingress_parser_input_metadata.ingress_port")
         .set(PSA_PORT_RECIRCULATE);
       phv->get_field("psa_ingress_parser_input_metadata.packet_path")
