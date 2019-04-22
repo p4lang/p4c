@@ -49,7 +49,10 @@ add_dependencies(p4c_driver linkp4test)
 
 set(P4TEST_DRIVER ${P4C_SOURCE_DIR}/backends/p4test/run-p4-sample.py)
 
-set (P4TEST_SUITES "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*.p4")
+set (P4TEST_SUITES
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/fabric_*/fabric.p4"
+  )
 
 # Builds a list of tests for which P4Info generation is not supported. It makes
 # sense not to fail the test just because P4Info generation fails. It probably
