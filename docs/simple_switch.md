@@ -55,14 +55,16 @@ Here are the fields:
 - `egress_spec` (sm14, v1m) - Can be assigned a value in ingress code to
   control which output port a packet will go to.  The P4_14 primitive
   `drop`, and the v1model primitive action `mark_to_drop`, have the side
-  effect of assigning an implementation specific value to this field
+  effect of assigning an implementation specific value DROP_PORT to this field
   (511 decimal for simple_switch by default, but can be changed through
   the `--drop-port` target-specific command-line option), such that if
   `egress_spec` has that value at the end of ingress processing, the
   packet will be dropped and not stored in the packet buffer, nor sent
   to egress processing.  See the "after-ingress pseudocode" for relative
   priority of this vs. other possible packet operations at end of
-  ingress.
+  ingress.  If your P4 program assigns a value of DROP_PORT to `egress_spec`, it
+  will still behave according to the "after-ingress pseudocode", even if you
+  never call `mark_to_drop` (P4_16) or `drop` (P4_14).
 - `egress_port` (sm14, v1m) - Only intended to be accessed during
   egress processing, read only.  The output port this packet is
   destined to.
@@ -248,7 +250,7 @@ if (resubmit_flag != 0) {   // because your code called resubmit
     start ingress processing over again for the original packet
 } else if (mcast_grp != 0) {  // because your code assigned a value to mcast_grp
     multicast the packet to the output port(s) configured for group mcast_grp
-} else if (egress_spec == 511) {  // because your code called drop/mark_to_drop
+} else if (egress_spec == DROP_PORT) {  // e.g. because your code called drop/mark_to_drop
     Drop packet.
 } else {
     unicast the packet to the port equal to egress_spec
@@ -315,7 +317,7 @@ if (resubmit_flag != 0) {
     for the mcast_grp value.  Enqueue each one in the appropriate
     packet buffer queue.  The instance_type of each will be
     PKT_INSTANCE_TYPE_REPLICATION.
-} else if (egress_spec == 511) {
+} else if (egress_spec == DROP_PORT) {
     // This condition will be true if your code called the
     // mark_to_drop (P4_16) or drop (P4_14) primitive action during
     // ingress processing.
@@ -332,7 +334,7 @@ After-egress pseudocode - the short version:
 if (clone_spec != 0) {    // because your code called a clone primitive action
     make a clone of the packet with details configured for the clone session
 }
-if (egress_spec == 511) {  // because your code called drop/mark_to_drop
+if (egress_spec == DROP_PORT) {  // e.g. because your code called drop/mark_to_drop
     Drop packet.
 } else if (recirculate_flag != 0) {  // because your code called recirculate
     start ingress processing over again for deparsed packet
@@ -370,7 +372,7 @@ if (clone_spec != 0) {
     your egress code.
     // fall through to code below
 }
-if (egress_spec == 511) {
+if (egress_spec == DROP_PORT) {
     // This condition will be true if your code called the
     // mark_to_drop (P4_16) or drop (P4_14) primitive action during
     // egress processing.
