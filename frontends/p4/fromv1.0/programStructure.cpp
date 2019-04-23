@@ -50,7 +50,6 @@ ProgramStructure::ProgramStructure() :
     ingress = nullptr;
     declarations = new IR::Vector<IR::Node>();
     emptyTypeArguments = new IR::Vector<IR::Type>();
-    conversionContext.clear();
     for (auto c : P4::reservedWords)
         allNames.emplace(c);
 }
@@ -71,6 +70,7 @@ ProgramStructure::addGlobalNameAnnotation(cstring name,
 
 cstring ProgramStructure::makeUniqueName(cstring base) {
     cstring name = cstring::make_unique(allNames, base, '_');
+    LOG3(" make unique name " << name);
     allNames.emplace(name);
     return name;
 }
@@ -130,7 +130,7 @@ void ProgramStructure::createTypes() {
     // Metadata first
     for (auto it : metadata) {
         auto type = it.first->type;
-        if (type->name.name == v1model.standardMetadataType.name)
+        if (systemHeaderTypes.count(type->name.name) != 0)
             continue;
         createType(type, false, &converted);
     }
@@ -166,6 +166,8 @@ void ProgramStructure::createTypes() {
     for (auto it : headers) {
         auto type = it.first->type;
         CHECK_NULL(type);
+        if (systemHeaderTypes.count(type->externalName()) != 0)
+            continue;
         createType(type, true, &converted);
     }
     for (auto it : stacks) {
@@ -240,6 +242,9 @@ void ProgramStructure::createStructures() {
         IR::ID id = it.first->name;
         auto type = it.first->type;
         auto type_name = types.get(type);
+        // XXX(hanw) make this a lambda function
+        if (systemHeaderTypes.count(type_name))
+            continue;
         auto ht = type->to<IR::Type_Header>();
         auto path = new IR::Path(type_name);
         auto tn = new IR::Type_Name(ht->name.srcInfo, path);
@@ -326,9 +331,7 @@ const IR::Statement* ProgramStructure::convertParserStatement(const IR::Expressi
             conv.replaceNextWithLast = true;
             this->latest = conv.convert(primitive->operands.at(0));
             conv.replaceNextWithLast = false;
-            const IR::Expression* method = new IR::Member(
-                paramReference(parserPacketIn),
-                p4lib.packetIn.extract.Id());
+            const IR::Expression* method = new IR::Member(paramReference(parserPacketIn), p4lib.packetIn.extract.Id());
             auto result = new IR::MethodCallStatement(
                 expr->srcInfo, method, { new IR::Argument(dest) });
 
@@ -521,21 +524,21 @@ void ProgramStructure::createParser() {
     parserHeadersOut = new IR::Parameter(v1model.parser.headersParam.Id(),
                                          IR::Direction::Out, headtype);
     paramList->push_back(parserHeadersOut);
-    conversionContext.header = paramReference(parserHeadersOut);
+    conversionContext->header = paramReference(parserHeadersOut);
 
     auto metapath = new IR::Path(v1model.metadataType.Id());
     auto metatype = new IR::Type_Name(metapath);
     auto meta = new IR::Parameter(v1model.parser.metadataParam.Id(),
                                   IR::Direction::InOut, metatype);
     paramList->push_back(meta);
-    conversionContext.userMetadata = paramReference(meta);
+    conversionContext->userMetadata = paramReference(meta);
 
     auto stdMetaPath = new IR::Path(v1model.standardMetadataType.Id());
     auto stdMetaType = new IR::Type_Name(stdMetaPath);
     auto stdmeta = new IR::Parameter(v1model.ingress.standardMetadataParam.Id(),
                                      IR::Direction::InOut, stdMetaType);
     paramList->push_back(stdmeta);
-    conversionContext.standardMetadata = paramReference(stdmeta);
+    conversionContext->standardMetadata = paramReference(stdmeta);
 
     auto type = new IR::Type_Parser(v1model.parser.Id(), new IR::TypeParameters(), paramList);
     IR::IndexedVector<IR::Declaration> stateful;
@@ -551,7 +554,7 @@ void ProgramStructure::createParser() {
         ::error("No parsers specified");
     auto result = new IR::P4Parser(v1model.parser.Id(), type, stateful, states);
     declarations->push_back(result);
-    conversionContext.clear();
+    conversionContext->clear();
 
     if (ingressReference.name.isNullOrEmpty())
         ::error("No transition from a parser to ingress pipeline found");
@@ -587,6 +590,8 @@ void ProgramStructure::include(cstring filename, cstring ppoptions) {
 void ProgramStructure::loadModel() {
     // This includes in turn core.p4
     include("v1model.p4");
+
+    systemHeaderTypes.insert(v1model.standardMetadataType.name);
 }
 
 namespace {
@@ -716,7 +721,7 @@ void ProgramStructure::createDeparser() {
                                        IR::Direction::None, pouttype);
     params->push_back(packetOut);
     params->push_back(headers);
-    conversionContext.header = paramReference(headers);
+    conversionContext->header = paramReference(headers);
 
     auto type = new IR::Type_Control(v1model.deparser.Id(), params);
 
@@ -1821,27 +1826,27 @@ const IR::Type_Control* ProgramStructure::controlType(IR::ID name) {
     auto headers = new IR::Parameter(v1model.ingress.headersParam.Id(),
                                      IR::Direction::InOut, headtype);
     params->push_back(headers);
-    conversionContext.header = paramReference(headers);
+    conversionContext->header = paramReference(headers);
 
     auto metapath = new IR::Path(v1model.metadataType.Id());
     auto metatype = new IR::Type_Name(metapath);
     auto meta = new IR::Parameter(v1model.ingress.metadataParam.Id(),
                                   IR::Direction::InOut, metatype);
     params->push_back(meta);
-    conversionContext.userMetadata = paramReference(meta);
+    conversionContext->userMetadata = paramReference(meta);
 
     auto stdMetaPath = new IR::Path(v1model.standardMetadataType.Id());
     auto stdMetaType = new IR::Type_Name(stdMetaPath);
     auto stdmeta = new IR::Parameter(v1model.ingress.standardMetadataParam.Id(),
                                      IR::Direction::InOut, stdMetaType);
     params->push_back(stdmeta);
-    conversionContext.standardMetadata = paramReference(stdmeta);
+    conversionContext->standardMetadata = paramReference(stdmeta);
 
     auto type = new IR::Type_Control(name, new IR::TypeParameters(), params);
     return type;
 }
 
-const IR::Expression* ProgramStructure::counterType(const IR::CounterOrMeter* cm) const {
+const IR::Expression* ProgramStructure::counterType(const IR::CounterOrMeter* cm) {
     IR::ID kind;
     IR::ID enumName;
     if (cm->is<IR::Counter>()) {
@@ -2294,7 +2299,7 @@ void ProgramStructure::createChecksumVerifications() {
     auto headers = new IR::Parameter(v1model.verify.headersParam.Id(),
                                      IR::Direction::InOut, headtype);
     params->push_back(headers);
-    conversionContext.header = paramReference(headers);
+    conversionContext->header = paramReference(headers);
 
     auto metapath = new IR::Path(v1model.metadataType.Id());
     auto metatype = new IR::Type_Name(metapath);
@@ -2303,8 +2308,8 @@ void ProgramStructure::createChecksumVerifications() {
     auto body = new IR::BlockStatement();
 
     params->push_back(meta);
-    conversionContext.userMetadata = paramReference(meta);
-    conversionContext.standardMetadata = nullptr;
+    conversionContext->userMetadata = paramReference(meta);
+    conversionContext->standardMetadata = nullptr;
     auto type = new IR::Type_Control(v1model.verify.Id(), params);
 
     for (auto cf : calculated_fields) {
@@ -2348,7 +2353,7 @@ void ProgramStructure::createChecksumVerifications() {
     verifyChecksums = new IR::P4Control(
         v1model.verify.Id(), type, *new IR::IndexedVector<IR::Declaration>(), body);
     declarations->push_back(verifyChecksums);
-    conversionContext.clear();
+    conversionContext->clear();
 }
 
 void ProgramStructure::createChecksumUpdates() {
@@ -2359,16 +2364,16 @@ void ProgramStructure::createChecksumUpdates() {
     auto headers = new IR::Parameter(v1model.compute.headersParam.Id(),
                                      IR::Direction::InOut, headtype);
     params->push_back(headers);
-    conversionContext.header = paramReference(headers);
+    conversionContext->header = paramReference(headers);
 
     auto metapath = new IR::Path(v1model.metadataType.Id());
     auto metatype = new IR::Type_Name(metapath);
     auto meta = new IR::Parameter(v1model.parser.metadataParam.Id(),
                                   IR::Direction::InOut, metatype);
     params->push_back(meta);
-    conversionContext.userMetadata = paramReference(meta);
+    conversionContext->userMetadata = paramReference(meta);
 
-    conversionContext.standardMetadata = nullptr;
+    conversionContext->standardMetadata = nullptr;
 
     auto type = new IR::Type_Control(v1model.compute.Id(), params);
     auto body = new IR::BlockStatement;
@@ -2413,7 +2418,7 @@ void ProgramStructure::createChecksumUpdates() {
     updateChecksums = new IR::P4Control(
         v1model.compute.Id(), type, IR::IndexedVector<IR::Declaration>(), body);
     declarations->push_back(updateChecksums);
-    conversionContext.clear();
+    conversionContext->clear();
 }
 
 const IR::P4Program* ProgramStructure::create(Util::SourceInfo info) {

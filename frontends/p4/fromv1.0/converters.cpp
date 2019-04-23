@@ -150,12 +150,16 @@ const IR::Node* ExpressionConverter::postorder(IR::PathExpression *ref) {
 const IR::Node* ExpressionConverter::postorder(IR::ConcreteHeaderRef* nhr) {
     const IR::Expression* ref;
     if (structure->isHeader(nhr)) {
-        ref = structure->conversionContext.header->clone();
+        if (structure->systemHeaderTypes.count(nhr->type->to<IR::Type_Header>()->name)) {
+            auto path = new IR::Path(nhr->ref->name);
+            auto result = new IR::PathExpression(nhr->srcInfo, nhr->type, path);
+            return result; }
+        ref = structure->conversionContext->header->clone();
     } else {
         if (nhr->ref->name == P4V1::V1Model::instance.standardMetadata.name)
-            return structure->conversionContext.standardMetadata->clone();
+            return structure->conversionContext->standardMetadata->clone();
         else
-            ref = structure->conversionContext.userMetadata->clone();
+            ref = structure->conversionContext->userMetadata->clone();
     }
     auto result = new IR::Member(nhr->srcInfo, ref, nhr->ref->name);
     result->type = nhr->type;
@@ -334,11 +338,11 @@ const IR::Node* StatementConverter::preorder(IR::Primitive* primitive) {
         auto method = new IR::Member(ctrl, IR::ID(IR::IApply::applyMethodName));
         auto args = new IR::Vector<IR::Argument>();
         args->push_back(new IR::Argument(
-            structure->conversionContext.header->clone()));
+            structure->conversionContext->header->clone()));
         args->push_back(new IR::Argument(
-            structure->conversionContext.userMetadata->clone()));
+            structure->conversionContext->userMetadata->clone()));
         args->push_back(new IR::Argument(
-            structure->conversionContext.standardMetadata->clone()));
+            structure->conversionContext->standardMetadata->clone()));
         auto call = new IR::MethodCallExpression(primitive->srcInfo, method, args);
         auto stat = new IR::MethodCallStatement(primitive->srcInfo, call);
         return stat;
@@ -1350,11 +1354,19 @@ static ProgramStructure *defaultCreateProgramStructure() {
     return new ProgramStructure();
 }
 
+static ConversionContext *defaultCreateConversionContext() {
+    return new ConversionContext();
+}
+
 ProgramStructure *(*Converter::createProgramStructure)() = defaultCreateProgramStructure;
+
+ConversionContext *(*Converter::createConversionContext)() = defaultCreateConversionContext;
 
 Converter::Converter() {
     setStopOnError(true); setName("Converter");
     structure = createProgramStructure();
+    structure->conversionContext = createConversionContext();
+    structure->conversionContext->clear();
     structure->populateOutputNames();
 
     // Discover types using P4-14 type-checker
