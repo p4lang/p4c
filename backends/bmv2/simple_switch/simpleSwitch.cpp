@@ -144,25 +144,28 @@ Util::IJson* ExternConverter_clone::convertExternFunction(
     return primitive;
 }
 
-static int getRecirculateFieldListId(ConversionContext* ctxt, const IR::Node*) {
+// Returns the id of the Json field list called "field_list<index>".
+static unsigned getFieldListById(ConversionContext* ctxt, unsigned index) {
+    cstring search = cstring("field_list") + Util::toString(index);
     int id = -1;
-    // Find the field list called 'recirculate' (we use the same
-    // annotation as for recirculate)
     for (auto it : *ctxt->json->field_lists) {
         auto j = it->to<Util::JsonObject>();
         CHECK_NULL(j);
         auto name = j->get("name")->to<Util::JsonValue>()->getString();
-        if (name == "recirculate") {
+        if (name == search) {
             id = j->get("id")->to<Util::JsonValue>()->getInt();
             break;
         }
     }
     if (id == -1) {
+        ::warning(ErrorType::WARN_INVALID,
+                  "no user metadata fields tagged with @field_list(%1%)",
+                  index);
         // Create an empty list.
         cstring name = ctxt->refMap->newName("empty");
         id = ctxt->createFieldList(new IR::ListExpression({}), name);
     }
-    return id;
+    return (unsigned)id;
 }
 
 Util::IJson* ExternConverter_clone3::convertExternFunction(
@@ -171,13 +174,8 @@ Util::IJson* ExternConverter_clone3::convertExternFunction(
     UNUSED const bool emitExterns) {
     (void) v1model.clone.clone3.name;
     int id = -1;
-    if (mc->arguments->size() == 3) {
-        ::error("clone3 with 3 arguments is deprecated; please use clone3 with 2 arguments");
-        return nullptr;
-    } else if (mc->arguments->size() == 2) {
-        id = getRecirculateFieldListId(ctxt, mc);
-    } else {
-        ConversionContext::modelError("Expected 2 or 3 arguments for %1%", mc);
+    if (mc->arguments->size() != 3) {
+        ConversionContext::modelError("Expected 3 arguments for %1%", mc);
         return nullptr;
     }
 
@@ -195,12 +193,18 @@ Util::IJson* ExternConverter_clone3::convertExternFunction(
     primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
     parameters->append(session);
 
-    if (id >= 0) {
-        auto cst = new IR::Constant(id);
-        ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
-        auto jcst = ctxt->conv->convert(cst);
-        parameters->append(jcst);
+    auto fl = mc->arguments->at(2);
+    auto cst = fl->expression->to<IR::Constant>();
+    if (cst == nullptr) {
+        ConversionContext::modelError("%1%: Expected a constant", fl);
+        return nullptr;
     }
+
+    id = getFieldListById(ctxt, cst->asUnsigned());
+    cst = new IR::Constant(id);
+    ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
+    auto jcst = ctxt->conv->convert(cst);
+    parameters->append(jcst);
     return primitive;
 }
 
@@ -286,15 +290,18 @@ Util::IJson* ExternConverter_resubmit::convertExternFunction(
     const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
     if (mc->arguments->size() == 1) {
-        ::error("resubmit with 1 argument is deprecated; please use resubmit()");
-        return nullptr;
-    } else if (mc->arguments->size() == 0) {
         auto primitive = mkPrimitive("resubmit");
         auto parameters = mkParameters(primitive);
         primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
-
-        int id = getRecirculateFieldListId(ctxt, mc);
-        auto cst = new IR::Constant(id);
+        auto arg = mc->arguments->at(0);
+        auto cst = arg->expression->to<IR::Constant>();
+        if (cst == nullptr) {
+            ConversionContext::modelError("%1%: expected a constant", arg);
+            return nullptr;
+        }
+        unsigned index = cst->asUnsigned();
+        int id = getFieldListById(ctxt, index);
+        cst = new IR::Constant(id);
         ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
         auto jcst = ctxt->conv->convert(cst);
         parameters->append(jcst);
@@ -309,21 +316,24 @@ Util::IJson* ExternConverter_recirculate::convertExternFunction(
     const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
     if (mc->arguments->size() == 1) {
-        ::error("recirculate with 1 argument is deprecated; please use recirculate()");
-        return nullptr;
-    } else if (mc->arguments->size() == 0) {
         auto primitive = mkPrimitive("recirculate");
         auto parameters = mkParameters(primitive);
         primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
-
-        int id = getRecirculateFieldListId(ctxt, mc);
-        auto cst = new IR::Constant(id);
+        auto arg = mc->arguments->at(0);
+        auto cst = arg->expression->to<IR::Constant>();
+        if (cst == nullptr) {
+            ConversionContext::modelError("%1%: must be a constant", arg);
+            return nullptr;
+        }
+        unsigned index = cst->asUnsigned();
+        int id = getFieldListById(ctxt, index);
+        cst = new IR::Constant(id);
         ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
         auto jcst = ctxt->conv->convert(cst);
         parameters->append(jcst);
         return primitive;
     }
-    ConversionContext::modelError("Expected 0 or 1 arguments for %1%", mc);
+    ConversionContext::modelError("Expected 1 argument for %1%", mc);
     return nullptr;
 }
 
@@ -919,33 +929,52 @@ SimpleSwitchBackend::createRecirculateFieldsList(
     auto userMetaType = paramType->to<IR::Type_Struct>();
     LOG2("User metadata type is " << userMetaType);
 
-    Util::JsonArray* elements = nullptr;
-    LOG2("Scanning user metadata fields for annotations");
+    /// metadata fields may be annotated with e.g.,
+    /// @field_list(0, 1, 4)
+    /// Such a field will be added to fieldLists with indexes 0, 1 and 4.
+    /// These fields lists will be named "field_list0", "field_list1", etc.
+    std::map<unsigned, Util::JsonObject*> fieldLists;
 
+    LOG2("Scanning user metadata fields for annotations");
     for (auto f : userMetaType->fields) {
         LOG3("Scanning field " << f);
-        auto anno = f->getAnnotations()->getSingle("recirculate");
+        auto anno = f->getAnnotations()->getSingle("field_list");
         if (anno == nullptr)
             continue;
 
-        if (elements == nullptr) {
-            LOG2("Creating recirculate field list");
-            // Create the list once an element with an annotation is found
-            auto fl = new Util::JsonObject();
-            ctxt->json->field_lists->append(fl);
-            int id = nextId("field_lists");
-            fl->emplace("id", id);
-            fl->emplace("name", "recirculate");
-            elements = mkArrayField(fl, "elements");
+        for (auto e : anno->expr) {
+            auto cst = e->to<IR::Constant>();
+            if (cst == nullptr) {
+                ::error("%1%: Annotation must be a constant integer", e);
+                continue;
+            }
+
+            unsigned index = cst->asUnsigned();
+            Util::JsonArray* elements;
+            auto fl = ::get(fieldLists, index);
+            if (fl == nullptr) {
+                fl = new Util::JsonObject();
+                ctxt->json->field_lists->append(fl);
+                fieldLists.emplace(index, fl);
+                int id = nextId("field_lists");
+                fl->emplace("id", id);
+                cstring listName = cstring("field_list") + Util::toString(index);
+                fl->emplace("name", listName);
+                elements = mkArrayField(fl, "elements");
+            } else {
+                elements = fl->get("elements")->to<Util::JsonArray>();
+                CHECK_NULL(elements);
+            }
+
+            auto field = new Util::JsonObject();
+            field->emplace("type", "field");
+            auto value = new Util::JsonArray();
+            value->append(scalarName);
+            auto name = ::get(ctxt->structure->scalarMetadataFields, f);
+            value->append(name);
+            field->emplace("value", value);
+            elements->append(field);
         }
-        auto field = new Util::JsonObject();
-        field->emplace("type", "field");
-        auto value = new Util::JsonArray();
-        value->append(scalarName);
-        auto name = ::get(ctxt->structure->scalarMetadataFields, f);
-        value->append(name);
-        field->emplace("value", value);
-        elements->append(field);
     }
 }
 
@@ -964,6 +993,11 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     main->apply(*parseV1Arch);
     if (::errorCount() > 0)
         return;
+
+    /// Declaration which introduces the user metadata.
+    /// We expect this to be a struct type.
+    const IR::Type_Struct* userMetaType = nullptr;
+    cstring userMetaName = refMap->newName("userMetadata");
 
     // Find the user metadata declaration
     auto parser = main->findParameterValue(v1model.sw.parser.name);
@@ -985,7 +1019,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         ::error("%1%: expected the user metadata type to be a struct", paramType);
         return;
     }
-    auto userMetaType = decl->to<IR::Type_Struct>();
+    userMetaType = decl->to<IR::Type_Struct>();
     LOG2("User metadata type is " << userMetaType);
 
     {
@@ -1031,12 +1065,6 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         // and ParseAnnotations should be skipped
         new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
-    PassManager simplify = {
-        new ParseAnnotations(),
-        // One has to clear the type map after parsing annotations
-        // because the annotations on types in the typemap are
-        // not parsed, so they may need to be changed.
-        new P4::ClearTypeMap(typeMap),
         new P4::SynthesizeActions(refMap, typeMap,
                                   new SkipControls(&structure->non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),

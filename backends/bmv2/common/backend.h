@@ -110,6 +110,85 @@ class ProcessControls : public BMV2::RemoveComplexExpressionsPolicy {
     }
 };
 
+/**
+This pass adds @name annotations to all fields of the user metadata
+structure so that they do not clash with fields of the headers
+structure.  This is necessary because both of them become global
+objects in the output json.
+*/
+class RenameUserMetadata : public Transform {
+    P4::ReferenceMap* refMap;
+    const IR::Type_Struct* userMetaType;
+    // Used as a prefix for the fields of the userMetadata structure
+    // and also as a name for the userMetadata type clone.
+    cstring namePrefix;
+
+ public:
+    RenameUserMetadata(P4::ReferenceMap* refMap,
+                       const IR::Type_Struct* userMetaType, cstring namePrefix):
+        refMap(refMap), userMetaType(userMetaType), namePrefix(namePrefix)
+    { setName("RenameUserMetadata"); CHECK_NULL(refMap); }
+
+    const IR::Node* postorder(IR::Type_Struct* type) override {
+        // Clone the user metadata type.  We want this type to be used
+        // only for parameters.  For any other variables we will used
+        // the clone we create.
+        if (userMetaType != getOriginal())
+            return type;
+
+        auto vec = new IR::IndexedVector<IR::Node>();
+        LOG2("Creating clone" << getOriginal());
+        auto clone = type->clone();
+        clone->name = namePrefix;
+        vec->push_back(clone);
+
+        // Rename all fields
+        IR::IndexedVector<IR::StructField> fields;
+        for (auto f : type->fields) {
+            auto anno = f->getAnnotation(IR::Annotation::nameAnnotation);
+            cstring suffix = "";
+            if (anno != nullptr)
+                suffix = IR::Annotation::getName(anno);
+            if (suffix.startsWith(".")) {
+                // We can't change the name of this field.
+                // Hopefully the user knows what they are doing.
+                fields.push_back(f->clone());
+                continue;
+            }
+
+            if (!suffix.isNullOrEmpty())
+                suffix = cstring(".") + suffix;
+            else
+                suffix = cstring(".") + f->name;
+            cstring newName = namePrefix + suffix;
+            auto stringLit = new IR::StringLiteral(newName);
+            LOG2("Renaming " << f << " to " << newName);
+            auto annos = f->annotations->addOrReplace(
+                IR::Annotation::nameAnnotation, stringLit);
+            auto field = new IR::StructField(f->srcInfo, f->name, annos, f->type);
+            fields.push_back(field);
+        }
+
+        auto annotated = new IR::Type_Struct(
+            type->srcInfo, type->name, type->annotations, std::move(fields));
+        vec->push_back(annotated);
+        return vec;
+    }
+
+    const IR::Node* preorder(IR::Type_Name* type) override {
+        // Find any reference to the user metadata type that is used
+        // (but not for parameters or the package instantiation)
+        // and replace it with the cloned type.
+        if (!findContext<IR::Declaration_Variable>())
+            return type;
+        auto decl = refMap->getDeclaration(type->path);
+        if (decl == userMetaType)
+            type->path = new IR::Path(type->path->srcInfo, IR::ID(type->path->srcInfo, namePrefix));
+        LOG2("Replacing reference with " << type);
+        return type;
+    }
+};
+
 }  // namespace BMV2
 
 #endif /* BACKENDS_BMV2_COMMON_BACKEND_H_ */

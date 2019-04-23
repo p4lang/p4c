@@ -42,7 +42,8 @@ bool TypeUnification::unifyCall(const IR::Node* errorPosition,
 
     if (src->typeArguments->size() != 0) {
         if (dest->typeParameters->size() != src->typeArguments->size()) {
-            ::error("%1% has %2% type parameters, but is invoked with %3% type arguments",
+            ::error(ErrorType::ERR_TYPE_ERROR,
+                    "%1% has %2% type parameters, but is invoked with %3% type arguments",
                     errorPosition, (dest->typeParameters ? dest->typeParameters->size() : 0),
                     src->typeArguments->size());
             return false;
@@ -57,7 +58,8 @@ bool TypeUnification::unifyCall(const IR::Node* errorPosition,
 
     if (dest->parameters->size() < src->arguments->size()) {
         if (reportErrors)
-            ::error("%1%: Passing %2% arguments when %3% expected",
+            ::error(ErrorType::ERR_TYPE_ERROR,
+                    "%1%: Passing %2% arguments when %3% expected",
                     errorPosition, src->arguments->size(), dest->parameters->size());
         return false;
     }
@@ -77,13 +79,15 @@ bool TypeUnification::unifyCall(const IR::Node* errorPosition,
             param = dest->parameters->getParameter(argName);
             if (param == nullptr) {
                 if (reportErrors)
-                    ::error("%1%: No parameter named %2%", errorPosition, arg->name);
+                    ::error(ErrorType::ERR_TYPE_ERROR,
+                            "%1%: No parameter named %2%", errorPosition, arg->name);
                 return false;
             }
         } else {
             if (paramIt == dest->parameters->end()) {
                 if (reportErrors)
-                    ::error("%1%: Too many arguments for call", errorPosition);
+                    ::error(ErrorType::ERR_TYPE_ERROR,
+                            "%1%: Too many arguments for call", errorPosition);
                 return false;
             }
             param = *paramIt;
@@ -96,25 +100,27 @@ bool TypeUnification::unifyCall(const IR::Node* errorPosition,
 
         if (arg->type->is<IR::Type_Dontcare>() && param->direction != IR::Direction::Out) {
             if (reportErrors)
-                ::error("%1%: don't care argument only allowed for out parameters", arg->srcInfo);
+                ::error(ErrorType::ERR_TYPE_ERROR,
+                        "%1%: don't care argument only allowed for out parameters", arg->srcInfo);
             return false;
         }
         if ((param->direction == IR::Direction::Out || param->direction == IR::Direction::InOut) &&
             (!arg->leftValue)) {
             if (reportErrors)
-                ::error("%1%: Read-only value used for out/inout parameter %2%",
-                        arg->srcInfo, param);
+                ::error(ErrorType::ERR_TYPE_ERROR,
+                        "%1%: Read-only value used for out/inout parameter %2%", arg, param);
             return false;
         } else if (param->direction == IR::Direction::None && !arg->compileTimeConstant) {
             if (reportErrors)
-                ::error("%1%: not a compile-time constant when binding to %2%",
-                        arg->srcInfo, param);
+                ::error(ErrorType::ERR_TYPE_ERROR,
+                        "%1%: not a compile-time constant when binding to %2%", arg, param);
             return false;
         }
 
         if (param->direction != IR::Direction::None && param->type->is<IR::Type_Extern>()) {
             if (optarg) continue;
-            ::error("%1%: extern values cannot be passed in/out/inout", param);
+            ::error(ErrorType::ERR_TYPE_ERROR,
+                    "%1%: extern values cannot be passed in/out/inout", param);
             return false;
         }
 
@@ -128,7 +134,8 @@ bool TypeUnification::unifyCall(const IR::Node* errorPosition,
         bool opt = p.second->isOptional() || p.second->defaultValue != nullptr;
         if (opt) continue;
         if (reportErrors)
-            ::error("%1%: No argument for parameter %2%", errorPosition, p.second);
+            ::error(ErrorType::ERR_TYPE_ERROR,
+                    "%1%: No argument for parameter %2%", errorPosition, p.second);
         return false;
     }
 
@@ -152,7 +159,8 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
 
     if ((src->returnType == nullptr) != (dest->returnType == nullptr)) {
         if (reportErrors)
-            ::error("%1%: Cannot unify functions with different return types"
+            ::error(ErrorType::ERR_TYPE_ERROR,
+                    "%1%: Cannot unify functions with different return types"
                     " %2% and %3%", errorPosition, dest, src);
         return false;
     }
@@ -167,12 +175,14 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
             if (dit->defaultValue != nullptr)
                 continue;
             if (reportErrors)
-                ::error("%1%: Cannot unify functions with different number of arguments: "
+                ::error(ErrorType::ERR_TYPE_ERROR,
+                        "%1%: Cannot unify functions with different number of arguments: "
                         "%2% to %3%", errorPosition, src, dest);
             return false; }
         if ((*sit)->direction != dit->direction) {
             if (reportErrors)
-                ::error("%1%: Cannot unify parameter %2% with %3% "
+                ::error(ErrorType::ERR_TYPE_ERROR,
+                        "%1%: Cannot unify parameter %2% with %3% "
                         "because they have different directions",
                         errorPosition, *sit, dit);
             return false;
@@ -188,7 +198,8 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
             ++sit;
             continue; }
         if (reportErrors)
-            ::error("%1%: Cannot unify functions with different number of arguments: "
+            ::error(ErrorType::ERR_TYPE_ERROR,
+                    "%1%: Cannot unify functions with different number of arguments: "
                     "%2% to %3%", errorPosition, src, dest);
         return false; }
     return true;
@@ -203,7 +214,8 @@ bool TypeUnification::unifyBlocks(const IR::Node* errorPosition,
     LOG3("Unifying blocks " << dest << " with " << src);
     if (typeid(*dest) != typeid(*src)) {
         if (reportErrors)
-            ::error("%1%: Cannot unify %2% to %3%",
+            ::error(ErrorType::ERR_TYPE_ERROR,
+                    "%1%: Cannot unify %2% to %3%",
                     errorPosition, src->toString(), dest->toString());
         return false;
     }
@@ -218,7 +230,8 @@ bool TypeUnification::unifyBlocks(const IR::Node* errorPosition,
         auto srcPackage = src->to<IR::Type_Package>();
         if (destPackage->name != srcPackage->name) {
             if (reportErrors)
-                ::error("%1%: Cannot unify %2% to %3%",
+                ::error(ErrorType::ERR_TYPE_ERROR,
+                        "%1%: Cannot unify %2% to %3%",
                         errorPosition, src->toString(), dest->toString());
             return false;
         }
@@ -234,7 +247,8 @@ bool TypeUnification::unifyBlocks(const IR::Node* errorPosition,
         bool success = unifyFunctions(errorPosition, destapply, srcapply, reportErrors);
         return success;
     }
-    ::error("%1%: Cannot unify %2% to %3%",
+    ::error(ErrorType::ERR_TYPE_ERROR,
+            "%1%: Cannot unify %2% to %3%",
             errorPosition, src->toString(), dest->toString());
     return false;
 }
@@ -266,7 +280,8 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
     if (dest->is<IR::Type_ArchBlock>()) {
         if (!src->is<IR::Type_ArchBlock>()) {
             if (reportErrors)
-                ::error("%1%: Cannot unify %2% to %3%",
+                ::error(ErrorType::ERR_TYPE_ERROR,
+                        "%1%: Cannot unify %2% to %3%",
                         errorPosition, dest->toString(), src->toString());
             return false;
         }
@@ -282,7 +297,8 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
             return unifyFunctions(errorPosition, destt, srcf, reportErrors);
 
         if (reportErrors)
-            ::error("%1%: Cannot unify non-function type %2% to function type %3%",
+            ::error(ErrorType::ERR_TYPE_ERROR,
+                    "%1%: Cannot unify non-function type %2% to function type %3%",
                     errorPosition, src->toString(), dest->toString());
         return false;
     } else if (dest->is<IR::Type_Tuple>()) {
@@ -292,14 +308,16 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         }
         if (!src->is<IR::Type_Tuple>()) {
             if (reportErrors)
-                ::error("%1%: Cannot unify tuple type %2% with non tuple-type %3%",
+                ::error(ErrorType::ERR_TYPE_ERROR,
+                        "%1%: Cannot unify tuple type %2% with non tuple-type %3%",
                         errorPosition, dest->toString(), src->toString());
             return false;
         }
         auto td = dest->to<IR::Type_Tuple>();
         auto ts = src->to<IR::Type_Tuple>();
         if (td->components.size() != ts->components.size()) {
-            ::error("%1%: Cannot match tuples with different sizes %2% vs %3%",
+            ::error(ErrorType::ERR_TYPE_ERROR,
+                    "%1%: Cannot match tuples with different sizes %2% vs %3%",
                     errorPosition, td->components.size(), ts->components.size());
             return false;
         }
@@ -317,7 +335,8 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         if (auto tpl = src->to<IR::Type_Tuple>()) {
             if (strct->fields.size() != tpl->components.size()) {
                 if (reportErrors)
-                    ::error("%1%: Number of fields %2% in initializer different "
+                    ::error(ErrorType::ERR_TYPE_ERROR,
+                            "%1%: Number of fields %2% in initializer different "
                             "than number of fields in structure %3%: %4% to %5%",
                             errorPosition, tpl->components.size(),
                             strct->fields.size(), tpl, strct);
@@ -340,7 +359,8 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
             // corresponding field of the destination, e.g., a struct containing tuples.
             if (strct->fields.size() != st->fields.size()) {
                 if (reportErrors)
-                    ::error("%1%: Number of fields %2% in initializer different "
+                    ::error(ErrorType::ERR_TYPE_ERROR,
+                            "%1%: Number of fields %2% in initializer different "
                             "than number of fields in structure %3%: %4% to %5%",
                             errorPosition, st->fields.size(),
                             strct->fields.size(), st, strct);
@@ -350,7 +370,8 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
             for (const IR::StructField* f : strct->fields) {
                 auto stField = st->getField(f->name);
                 if (stField == nullptr) {
-                    ::error("%1%: No initializer for field %2%", errorPosition, f);
+                    ::error(ErrorType::ERR_TYPE_ERROR,
+                            "%1%: No initializer for field %2%", errorPosition, f);
                     return false;
                 }
                 bool success = unify(errorPosition, f->type, stField->type, reportErrors);
@@ -361,7 +382,8 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         }
 
         if (reportErrors)
-            ::error("%1%: Cannot unify %2% to %3%",
+            ::error(ErrorType::ERR_TYPE_ERROR,
+                    "%1%: Cannot unify %2% to %3%",
                     errorPosition, src->toString(), dest->toString());
         return false;
     } else if (dest->is<IR::Type_Base>()) {
@@ -372,7 +394,8 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         }
         if (!src->is<IR::Type_Base>()) {
             if (reportErrors)
-                ::error("%1%: Cannot unify %2% to %3%",
+                ::error(ErrorType::ERR_TYPE_ERROR,
+                        "%1%: Cannot unify %2% to %3%",
                         errorPosition, src->toString(), dest->toString());
             return false;
         }
@@ -380,7 +403,8 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         bool success = (*src) == (*dest);
         if (!success) {
             if (reportErrors)
-                ::error("%1%: Cannot unify %2% to %3%",
+                ::error(ErrorType::ERR_TYPE_ERROR,
+                        "%1%: Cannot unify %2% to %3%",
                         errorPosition, src->toString(), dest->toString());
             return false;
         }
@@ -390,7 +414,8 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         bool canUnify = typeid(dest) == typeid(src) &&
             dest->to<IR::Type_Declaration>()->name == src->to<IR::Type_Declaration>()->name;
         if (!canUnify && reportErrors)
-            ::error("%1%: Cannot unify %2% to %3%",
+            ::error(ErrorType::ERR_TYPE_ERROR,
+                    "%1%: Cannot unify %2% to %3%",
                     errorPosition, src->toString(), dest->toString());
         return canUnify;
     } else if (dest->is<IR::Type_Stack>() && src->is<IR::Type_Stack>()) {
@@ -398,7 +423,8 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         auto sstack = src->to<IR::Type_Stack>();
         if (dstack->getSize() != sstack->getSize()) {
             if (reportErrors)
-                ::error("%1%: cannot unify stacks with different sized %2% and %3%",
+                ::error(ErrorType::ERR_TYPE_ERROR,
+                        "%1%: cannot unify stacks with different sized %2% and %3%",
                         errorPosition, dstack, sstack);
             return false;
         }
@@ -407,7 +433,8 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
     }
 
     if (reportErrors)
-        ::error("%1%: Cannot unify %2% to %3%", errorPosition, src, dest);
+        ::error(ErrorType::ERR_TYPE_ERROR,
+                "%1%: Cannot unify %2% to %3%", errorPosition, src, dest);
     return false;
 }
 

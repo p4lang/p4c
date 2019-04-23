@@ -44,7 +44,7 @@ header bitvec_hdr {
 }
 
 struct local_metadata_t {
-    @recirculate
+    @field_list(0)
     row_t row0;
     row_t row1;
     bitvec_hdr bvh0;
@@ -96,7 +96,7 @@ control ingress(inout parsed_packet_t h,
         h.bvh0.row.alt1.type = bh.row.alt1.type;
 
         local_metadata.row0.alt0.useHash = true;
-        clone3(CloneType.I2E, 0);
+        clone3(CloneType.I2E, 0, 0);
     }
 }
 

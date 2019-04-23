@@ -23,10 +23,13 @@ struct col_t {
 }
 
 struct local_metadata_t {
-<<<<<<< 1968b35515ddd4809e438d338481981969628fc8
+    @field_list(0) 
     bit<1>     _row0_alt0_valid0;
+    @field_list(0) 
     bit<7>     _row0_alt0_port1;
+    @field_list(0) 
     bit<1>     _row0_alt1_valid2;
+    @field_list(0) 
     bit<7>     _row0_alt1_port3;
     bit<1>     _row1_alt0_valid4;
     bit<7>     _row1_alt0_port5;
@@ -35,14 +38,6 @@ struct local_metadata_t {
     bitvec_hdr _col_bvh8;
     bitvec_hdr _bvh09;
     bitvec_hdr _bvh110;
-=======
-    @recirculate 
-    row_t      row0;
-    row_t      row1;
-    col_t      col;
-    bitvec_hdr bvh0;
-    bitvec_hdr bvh1;
->>>>>>> Tag metadata fields that need to be recirculated
 }
 
 struct parsed_packet_t {
@@ -85,21 +80,12 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
         default_action = NoAction_0();
     }
     @hidden action act() {
-<<<<<<< 1968b35515ddd4809e438d338481981969628fc8
         local_metadata._col_bvh8._row_alt0_valid0 = 1w0;
         local_metadata._row0_alt0_valid0 = local_metadata._row1_alt1_valid6;
         local_metadata._row0_alt0_port1 = local_metadata._row1_alt1_port7;
         local_metadata._row1_alt0_valid4 = 1w1;
         local_metadata._row1_alt1_port7 = local_metadata._row0_alt1_port3 + 7w1;
-        clone3<row_t>(CloneType.I2E, 32w0, {{local_metadata._row1_alt1_valid6,local_metadata._row0_alt0_port1},{local_metadata._row0_alt1_valid2,local_metadata._row0_alt1_port3}});
-=======
-        local_metadata.col.bvh._row_alt0_valid0 = 1w0;
-        local_metadata.row0.alt0.valid = local_metadata.row1.alt1.valid;
-        local_metadata.row0.alt0.port = local_metadata.row1.alt1.port;
-        local_metadata.row1.alt0.valid = 1w1;
-        local_metadata.row1.alt1.port = local_metadata.row0.alt1.port + 7w1;
-        clone3(CloneType.I2E, 32w0);
->>>>>>> Tag metadata fields that need to be recirculated
+        clone3(CloneType.I2E, 32w0, 8w0);
     }
     @hidden table tbl_act {
         actions = {

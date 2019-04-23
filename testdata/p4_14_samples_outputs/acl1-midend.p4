@@ -133,16 +133,27 @@ header data_t {
 }
 
 struct metadata {
+    @pa_solitary("ingress", "acl_metadata.if_label") 
     bit<1>   _acl_metadata_acl_deny0;
+    @pa_solitary("ingress", "acl_metadata.if_label") 
     bit<1>   _acl_metadata_racl_deny1;
+    @pa_solitary("ingress", "acl_metadata.if_label") 
     bit<16>  _acl_metadata_acl_nexthop2;
+    @pa_solitary("ingress", "acl_metadata.if_label") 
     bit<16>  _acl_metadata_racl_nexthop3;
+    @pa_solitary("ingress", "acl_metadata.if_label") 
     bit<1>   _acl_metadata_acl_nexthop_type4;
+    @pa_solitary("ingress", "acl_metadata.if_label") 
     bit<1>   _acl_metadata_racl_nexthop_type5;
+    @pa_solitary("ingress", "acl_metadata.if_label") 
     bit<1>   _acl_metadata_acl_redirect6;
+    @pa_solitary("ingress", "acl_metadata.if_label") 
     bit<1>   _acl_metadata_racl_redirect7;
+    @pa_solitary("ingress", "acl_metadata.if_label") 
     bit<15>  _acl_metadata_if_label8;
+    @pa_solitary("ingress", "acl_metadata.if_label") 
     bit<16>  _acl_metadata_bd_label9;
+    @pa_solitary("ingress", "acl_metadata.if_label") 
     bit<10>  _acl_metadata_mirror_session_id10;
     bit<3>   _fabric_metadata_packetType11;
     bit<1>   _fabric_metadata_fabric_header_present12;
@@ -205,6 +216,7 @@ struct metadata {
     bit<1>   _l3_metadata_routed69;
     bit<1>   _l3_metadata_outer_routed70;
     bit<8>   _l3_metadata_mtu_index71;
+    @saturating 
     bit<16>  _l3_metadata_l3_mtu_check72;
     bit<1>   _security_metadata_storm_control_color73;
     bit<1>   _security_metadata_ipsg_enabled74;

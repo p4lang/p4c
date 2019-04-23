@@ -391,26 +391,18 @@ The payload is defined as "all bytes of the packet which were not parsed by the 
 */
 extern void update_checksum_with_payload<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
 
-@deprecated("Use resubmit without arguments and the @recirculate annotation on user metadata fields")
-extern void resubmit<T>(in T data);
-@deprecated("Use recirculate without arguments and the @recirculate annotation on user metadata fields")
-extern void recirculate<T>(in T data);
-@deprecated("Use clone3 with 3 arguments the @recirculate annotation on user metadata fields")
-extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
-
-extern void clone(in CloneType type, in bit<32> session);
-
-/// The user metadata fields that are tagged with @recirculate will
+/// The user metadata fields that are tagged with @field_list(index) will
 /// be sent to the parser together with the packet.
 /// May be only invoked in Ingress.  Egress is not executed.
-extern void resubmit();
-/// The user metadata fields that are tagged with @recirculate will be
+extern void resubmit(bit<8> index);
+/// The user metadata fields that are tagged with @field_list(index) will be
 /// sent to the parser together with the packet.
 /// May only be invoked in Egress.
-extern void recirculate();
-/// The user metadata fields that are tagged with @recirculate will be
+extern void recirculate(bit<8> index);
+extern void clone(in CloneType type, in bit<32> session);
+/// The user metadata fields that are tagged with @field_list(index) will be
 /// sent to the parser together with a clone of the packet.
-extern void clone3(in CloneType type, in bit<32> session);
+extern void clone3(in CloneType type, in bit<32> session, bit<8> index);
 
 extern void truncate(in bit<32> length);
 

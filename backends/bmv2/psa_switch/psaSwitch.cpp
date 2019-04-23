@@ -455,7 +455,6 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
     auto program = tlb->getProgram();
     PassManager simplify = {
-        /* TODO */
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
         // new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),

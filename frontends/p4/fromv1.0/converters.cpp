@@ -441,9 +441,9 @@ const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
             }
         }
     }
-    if (structure->isRecirculated(type->name.name, field->name.name))
+    if (auto vec = structure->listIndexes(type->name.name, field->name.name))
         field->annotations = field->annotations->add(
-            new IR::Annotation("recirculate", {}));
+            new IR::Annotation("field_list", *vec));
     return field;
 }
 
@@ -814,6 +814,8 @@ class ComputeTableCallGraph : public Inspector {
     }
 };
 
+/// This visitor finds all field lists that participate in
+/// recirculation, resubmission, and cloning
 class FindRecirculated : public Inspector {
     ProgramStructure* structure;
 
@@ -830,7 +832,7 @@ class FindRecirculated : public Inspector {
             return;
         }
         LOG3("Recirculated " << nr->path->name);
-        structure->recirculatedFieldLists.emplace(fl);
+        structure->allFieldLists.emplace(fl);
     }
 
  public:

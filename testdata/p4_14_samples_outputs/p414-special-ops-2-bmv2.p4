@@ -1,6 +1,12 @@
 #include <core.p4>
 #include <v1model.p4>
 
+enum bit<8> FieldLists {
+    clone_e2e_FL = 0,
+    recirculate_FL = 1,
+    resubmit_FL = 2
+}
+
 struct intrinsic_metadata_t {
     bit<48> ingress_global_timestamp;
     bit<48> egress_global_timestamp;
@@ -12,10 +18,15 @@ struct intrinsic_metadata_t {
 }
 
 struct mymeta_t {
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL) 
     bit<8> resubmit_count;
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL) 
     bit<8> recirculate_count;
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL) 
     bit<8> clone_e2e_count;
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL) 
     bit<8> last_ing_instance_type;
+    @field_list(FieldLists.clone_e2e_FL, FieldLists.recirculate_FL, FieldLists.resubmit_FL) 
     bit<8> f1;
 }
 
@@ -56,13 +67,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr - 48w23;
         meta.mymeta.f1 = meta.mymeta.f1 + 8w23;
         meta.mymeta.clone_e2e_count = meta.mymeta.clone_e2e_count + 8w1;
-        clone3(CloneType.E2E, (bit<32>)32w1, { meta.mymeta });
+        clone3(CloneType.E2E, (bit<32>)32w1, (bit<8>)FieldLists.clone_e2e_FL);
     }
     @name(".do_recirculate") action do_recirculate() {
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr - 48w19;
         meta.mymeta.f1 = meta.mymeta.f1 + 8w19;
         meta.mymeta.recirculate_count = meta.mymeta.recirculate_count + 8w1;
-        recirculate({ meta.mymeta });
+        recirculate((bit<8>)FieldLists.recirculate_FL);
     }
     @name("._nop") action _nop() {
     }
@@ -235,7 +246,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr - 48w17;
         meta.mymeta.f1 = meta.mymeta.f1 + 8w17;
         meta.mymeta.resubmit_count = meta.mymeta.resubmit_count + 8w1;
-        resubmit({ meta.mymeta });
+        resubmit((bit<8>)FieldLists.resubmit_FL);
     }
     @name("._nop") action _nop() {
     }
