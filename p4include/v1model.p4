@@ -93,14 +93,6 @@ struct standard_metadata_t {
     /// set packet priority
     @alias("intrinsic_metadata.priority")
     bit<3> priority;
-
-    // Queueing metadata
-    /// flag indicating whether a packet can be deflected by TM on congestion drop
-    @alias("intrinsic_metadata.deflect_on_drop")
-    bit<1> deflect_on_drop;
-    /// time snapshot taken when the packet is enqueued (in nsec).
-    @alias("intrinsic_metadata.enq_tstamp")
-    bit<32> enq_tstamp;
 }
 
 enum CounterType {
