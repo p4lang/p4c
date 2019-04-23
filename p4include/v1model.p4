@@ -16,6 +16,12 @@ limitations under the License.
 
 /* P4-16 declaration of the P4 v1.0 switch model */
 
+/* Note 1: More details about the definition of v1model architecture
+ * behavior can be found at the location below.
+ *
+ * https://github.com/p4lang/behavioral-model/blob/master/docs/simple_switch.md
+ */
+
 #ifndef _V1_MODEL_P4_
 #define _V1_MODEL_P4_
 
@@ -107,6 +113,16 @@ enum MeterType {
 }
 
 extern counter {
+    /***
+     * A counter object is created by calling its constructor.  This
+     * creates an array of counter states, with the number of counter
+     * states specified by the size parameter.  The array indices are
+     * in the range [0, size-1].
+     *
+     * You must provide a choice of whether to maintain only a packet
+     * count (CounterType.packets), only a byte count
+     * (CounterType.bytes), or both (CounterType.packets_and_bytes).
+     */
     counter(bit<32> size, CounterType type);
     /***
      * count() causes the counter state with the specified index to be
@@ -155,6 +171,17 @@ extern direct_counter {
 #define V1MODEL_METER_COLOR_RED    2
 
 extern meter {
+    /***
+     * A meter object is created by calling its constructor.  This
+     * creates an array of meter states, with the number of meter
+     * states specified by the size parameter.  The array indices are
+     * in the range [0, size-1].
+     *
+     * You must provide a choice of whether to meter based on the
+     * number of packets, regardless of their size
+     * (MeterType.packets), or based upon the number of bytes the
+     * packets contain (MeterType.bytes).
+     */
     meter(bit<32> size, MeterType type);
     /***
      * execute_meter() causes the meter state with the specified index
@@ -270,8 +297,31 @@ extern action_profile {
  */
 extern void random<T>(out T result, in T lo, in T hi);
 
-// If the type T is a named struct, the name is used
-// to generate the control-plane API.
+/***
+ * Calling digest causes a message containing the values specified in
+ * the data parameter to be sent to the control plane software.  It is
+ * similar to sending a clone of the packet to the control plane
+ * software, except that it can be more efficient because the messages
+ * are typically smaller than packets, and many such small messages
+ * are typically coalesced together into a larger "batch" which the
+ * control plane software processes all at once.
+ *
+ * Calling digest is only supported in the ingress control.  There is
+ * no way to undo its effects once it has been called.
+ *
+ * If the type T is a named struct, the name is used to generate the
+ * control plane API.
+ *
+ * TBD: Document how the value receiver is used.  Does the BMv2
+ * implementation support more than one value of receiver in the same
+ * program?
+ *
+ * TBD As of 2019-Apr, the current BMv2 simple_switch implementation
+ * does not use the value of the data parameter at the time of the
+ * call, but instead uses the values of those fields when ingress
+ * processing is complete, like P4_14 does.  This violates P4_16
+ * language sementics.
+ */
 extern void digest<T>(in bit<32> receiver, in T data);
 
 enum HashAlgorithm {
@@ -313,6 +363,10 @@ extern void mark_to_drop(inout standard_metadata_t standard_metadata);
  * will always be in the range [base, base+max-1] inclusive, if max >=
  * 1.  If max=0, the value written to result will always be base.
  *
+ * Note that the types of all of the parameters may be the same as, or
+ * different from, each other, and thus their bit widths are allowed
+ * to be different.
+ *
  * @param O          Must be a type bit<W>
  * @param D          Must be a tuple type where all the fields are bit-fields (type bit<W> or int<W>) or varbits.
  * @param T          Must be a type bit<W>
@@ -335,65 +389,145 @@ extern Checksum16 {
     bit<16> get<D>(in D data);
 }
 
-/**
-Verifies the checksum of the supplied data.
-If this method detects that a checksum of the data is not correct it
-sets the standard_metadata checksum_error bit.
-@param T          Must be a tuple type where all the tuple elements are of type bit<W>, int<W>, or varbit<W>.
-                  The total dynamic length of the fields is a multiple of the output size.
-@param O          Checksum type; must be bit<X> type.
-@param condition  If 'false' the verification always succeeds.
-@param data       Data whose checksum is verified.
-@param checksum   Expected checksum of the data; note that is must be a left-value.
-@param algo       Algorithm to use for checksum (not all algorithms may be supported).
-                  Must be a compile-time constant.
-*/
+/***
+ * Verifies the checksum of the supplied data.  If this method detects
+ * that a checksum of the data is not correct, then the value of the
+ * standard_metadata checksum_error field will be equal to 1 when the
+ * packet begins ingress processing.
+ *
+ * Calling verify_checksum is only supported in the VerifyChecksum
+ * control.
+ *
+ * @param T          Must be a tuple type where all the tuple elements
+ *                   are of type bit<W>, int<W>, or varbit<W>.  The
+ *                   total length of the fields must be a multiple of
+ *                   the output size.
+ * @param O          Checksum type; must be bit<X> type.
+ * @param condition  If 'false' the verification always succeeds.
+ * @param data       Data whose checksum is verified.
+ * @param checksum   Expected checksum of the data; note that it must
+ *                   be a left-value.
+ * @param algo       Algorithm to use for checksum (not all algorithms
+ *                   may be supported).  Must be a compile-time
+ *                   constant.
+ */
 extern void verify_checksum<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
-/**
-Computes the checksum of the supplied data.
-@param T          Must be a tuple type where all the tuple elements are of type bit<W>, int<W>, or varbit<W>.
-                  The total dynamic length of the fields is a multiple of the output size.
-@param O          Output type; must be bit<X> type.
-@param condition  If 'false' the checksum is not changed
-@param data       Data whose checksum is computed.
-@param checksum   Checksum of the data.
-@param algo       Algorithm to use for checksum (not all algorithms may be supported).
-                  Must be a compile-time constant.
-*/
+
+/***
+ * Computes the checksum of the supplied data and writes it to the
+ * checksum parameter.
+ *
+ * Calling update_checksum is only supported in the ComputeChecksum
+ * control.
+ *
+ * @param T          Must be a tuple type where all the tuple elements
+ *                   are of type bit<W>, int<W>, or varbit<W>.  The
+ *                   total length of the fields must be a multiple of
+ *                   the output size.
+ * @param O          Output type; must be bit<X> type.
+ * @param condition  If 'false' the checksum parameter is not changed
+ * @param data       Data whose checksum is computed.
+ * @param checksum   Checksum of the data.
+ * @param algo       Algorithm to use for checksum (not all algorithms
+ *                   may be supported).  Must be a compile-time
+ *                   constant.
+ */
 extern void update_checksum<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
 
-/**
-Verifies the checksum of the supplied data including the payload.
-The payload is defined as "all bytes of the packet which were not parsed by the parser".
-If this method detects that a checksum of the data is not correct it
-sets the standard_metadata checksum_error bit.
-@param T          Must be a tuple type where all the tuple elements are of type bit<W>, int<W>, or varbit<W>.
-                  The total dynamic length of the fields is a multiple of the output size.
-@param O          Checksum type; must be bit<X> type.
-@param condition  If 'false' the verification always succeeds.
-@param data       Data whose checksum is verified.
-@param checksum   Expected checksum of the data; note that is must be a left-value.
-@param algo       Algorithm to use for checksum (not all algorithms may be supported).
-                  Must be a compile-time constant.
-*/
+/***
+ * verify_checksum_with_payload is identical in all ways to
+ * verify_checksum, except that it includes the payload of the packet
+ * in the checksum calculation.  The payload is defined as "all bytes
+ * of the packet which were not parsed by the parser".
+ *
+ * Calling verify_checksum_with_payload is only supported in the
+ * VerifyChecksum control.
+ */
 extern void verify_checksum_with_payload<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
+
 /**
-Computes the checksum of the supplied data including the payload.
-The payload is defined as "all bytes of the packet which were not parsed by the parser".
-@param T          Must be a tuple type where all the tuple elements are of type bit<W>, int<W>, or varbit<W>.
-                  The total dynamic length of the fields is a multiple of the output size.
-@param O          Output type; must be bit<X> type.
-@param condition  If 'false' the checksum is not changed
-@param data       Data whose checksum is computed.
-@param checksum   Checksum of the data.
-@param algo       Algorithm to use for checksum (not all algorithms may be supported).
-                  Must be a compile-time constant.
-*/
+ * update_checksum_with_payload is identical in all ways to
+ * update_checksum, except that it includes the payload of the packet
+ * in the checksum calculation.  The payload is defined as "all bytes
+ * of the packet which were not parsed by the parser".
+ *
+ * Calling update_checksum_with_payload is only supported in the
+ * ComputeChecksum control.
+ */
 extern void update_checksum_with_payload<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
 
+/***
+ * Calling resubmit during execution of the ingress control will,
+ * under certain documented conditions, cause the packet to be
+ * resubmitted, i.e. it will begin processing again with the parser,
+ * with the contents of the packet exactly as they were when it last
+ * began parsing.  The only difference is in the value of the
+ * standard_metadata instance_type field, and any user-defined
+ * metadata fields that the resubmit operation causes to be
+ * "preserved".
+ *
+ * Calling resubmit is only supported in the ingress control.  There
+ * is no way to undo its effects once it has been called.  See the
+ * v1model architecture documentation (Note 1) for more details.
+ */
 extern void resubmit<T>(in T data);
+
+/***
+ * Calling recirculate during execution of the egress control will,
+ * under certain documented conditions, cause the packet to be
+ * recirculated, i.e. it will begin processing again with the parser,
+ * with the contents of the packet as they are created by the
+ * deparser.  Recirculated packets can be distinguished from new
+ * packets in ingress processing by the value of the standard_metadata
+ * instance_type field.  The caller may request that some user-defined
+ * metadata fields be "preserved" with the recirculated packet.
+ *
+ * Calling recirculate is only supported in the egress control.  There
+ * is no way to undo its effects once it has been called.  See the
+ * v1model architecture documentation (Note 1) for more details.
+ */
 extern void recirculate<T>(in T data);
+
+/***
+ * clone is in most ways identical to the clone3 operation, with the
+ * only difference being that it never preserves any user-defined
+ * metadata fields with the cloned packet.  It is equivalent to
+ * calling clone3 with the same type and session parameter values,
+ * with empty data.
+ */
 extern void clone(in CloneType type, in bit<32> session);
+
+/***
+ * Calling clone3 during execution of the ingress or egress control
+ * will cause the packet to be cloned, sometimes also called
+ * mirroring, i.e. zero or more copies of the packet are made, and
+ * each will later begin egress processing as an independent packet
+ * from the original packet.  The original packet continues with its
+ * normal next steps independent of the clone(s).
+ *
+ * The session parameter is an integer identifying a clone session id
+ * (sometimes called a mirror session id).  The control plane software
+ * must configure each session you wish to use, or else no clones will
+ * be made using that session.  Typically this will involve the
+ * control plane software specifying one output port to which the
+ * cloned packet should be sent, or a list of (port, egress_rid) pairs
+ * to which a separate clone should be created for each, similar to
+ * multicast packets.
+ *
+ * Cloned packets can be distinguished from others by the value of the
+ * standard_metadata instance_type field.
+ *
+ * The caller may request that some user-defined metadata field values
+ * from the original packet should be "preserved" with the cloned
+ * packet(s).
+ *
+ * If clone3 is called during ingress processing, the first parameter
+ * must be CloneType.I2E.  If clone3 is called during egress
+ * processing, the first parameter must be CloneType.E2E.
+ *
+ * There is no way to undo its effects once it has been called.  See
+ * the v1model architecture documentation (Note 1) for more details.
+ */
 extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
 
 extern void truncate(in bit<32> length);
