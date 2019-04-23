@@ -1,15 +1,21 @@
 # header hdr { bit<8>  e; bit<16> t; bit<8>  l; bit<8> r; bit<1>  v; }
 
 #t_range
-expect 21 15 **** ** 01 *
+expect 21 15 **** ** 01 ** $
 packet  0 15 0000 00 01 b0
 
 # program order priority
-expect 21 15 **** ** 07 *
+expect 21 15 **** ** 07 ** $
 packet  0 15 0000 00 07 b0
 
-expect 22 16 **** ** 0a *
+expect 22 16 **** ** 0a ** $
 packet  0 16 0000 00 0a b0
 
-expect 23 17 **** ** f0 *
+expect 24 18 **** ** 0f ** $
+packet  0 18 0000 00 0f b0
+
+expect 23 17 **** ** 10 ** $
+packet  0 17 0000 00 10 b0
+
+expect 23 17 **** ** f0 ** $
 packet  0 17 0000 00 f0 b0

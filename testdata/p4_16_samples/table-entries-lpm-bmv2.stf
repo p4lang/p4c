@@ -1,14 +1,14 @@
 # header hdr { bit<8>  e; bit<16> t; bit<8>  l; bit<8> r; bit<1>  v; }
 
 # t_lpm tests
-expect 11 0b **** 11 ** *
+expect 11 0b **** 11 ** ** $
 packet  0 0b 0000 11 00 b0
 
-expect 11 0b **** 10 ** *
+expect 11 0b **** 10 ** ** $
 packet  0 0b 0000 10 00 b0
 
-expect 12 0c **** 12 ** *
+expect 12 0c **** 12 ** ** $
 packet  0 0c 0000 12 00 b0
 
-expect 13 0d **** FF ** *
+expect 13 0d **** FF ** ** $
 packet  0 0d 0000 FF 00 b0
