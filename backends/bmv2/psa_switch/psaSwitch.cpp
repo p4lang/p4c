@@ -733,7 +733,7 @@ void ExternConverter_Counter::convertExternInstance(
     auto extern_obj = new Util::JsonObject();
     extern_obj->emplace("name", name);
     extern_obj->emplace("id", nextId("extern_instances"));
-    extern_obj->emplace("type", eb->getName());
+    extern_obj->emplace("type", "extern)";
     extern_obj->emplace("source_info", inst->sourceInfoJsonObj());
     ctxt->json->externs->append(extern_obj);
     Util::JsonArray *arr = ctxt->json->insert_array_field(extern_obj, "attribute_values");
@@ -791,7 +791,7 @@ void ExternConverter_DirectCounter::convertExternInstance(
         auto extern_obj = new Util::JsonObject();
         extern_obj->emplace("name", name);
         extern_obj->emplace("id", nextId("extern_instances"));
-        extern_obj->emplace("type", eb->getName());
+        extern_obj->emplace("type", "extern");
         extern_obj->emplace("source_info", inst->sourceInfoJsonObj());
         ctxt->json->externs->append(extern_obj);
         Util::JsonArray *arr = ctxt->json->insert_array_field(extern_obj, "attribute_values");
