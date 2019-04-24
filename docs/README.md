@@ -49,11 +49,8 @@ p4c
 
 # Additional documentation
 
-* the P4_14 (P4 v1.0.4) language is described in the P4 spec:
-  https://p4lang.github.io/p4-spec/p4-14/v1.0.4/tex/p4.pdf
-
-* the P4_16 language (v1.1.0) is described in [this pdf
-  document](https://p4.org/p4-spec/docs/P4-16-v1.1.0-draft.pdf)
+* the P4_14 and P4_16 languages are described in their respective
+  specifications, available [here](https://p4.org/specs).
 
 * the core design of the compiler intermediate representation (IR) and
   the visitor patterns are briefly described in [IR](IR.md)
@@ -195,6 +192,25 @@ The testing infrastructure is based on small python and shell scripts.
 * To rerun the tests that failed last time run `make recheck`
 
 * Add unit tests in `test/gtest`
+
+Test programs with file names ending in `-bmv2.p4` or `-ebpf.p4` may
+have an STF (Simple Test Framework) file with file name suffix `.stf`
+associated with them.  If the machine on which you are running has a
+copy of `simple_switch` or the EBPF software switch installed, not
+only will those programs be compiled for those targets, but also table
+entries optionally specified in the STF file will be installed, and
+input packets will be sent to the data plane and output packets
+checked against expected packets in the STF file.
+
+When pull requests are created on the p4c Github repository, the
+changes are built, and the tests executed via `make check -j<number>`
+for some number of CPU cores.  These tests are run with a "recently
+built" version of `simple_switch` from the p4lang/behavioral-model
+repository, but it can be several hours old.  If you are working on
+p4c features that rely on newly committed changes to `simple_switch`
+at the link below:
+
++ [https://hub.docker.com/r/p4lang/behavioral-model/builds](https://hub.docker.com/r/p4lang/behavioral-model/builds)
 
 ## Coding conventions
 
