@@ -315,9 +315,8 @@ extern void random<T>(out T result, in T lo, in T hi);
  * If the type T is a named struct, the name is used to generate the
  * control plane API.
  *
- * TBD: Document how the value receiver is used.  Does the BMv2
- * implementation support more than one value of receiver in the same
- * program?
+ * The BMv2 implementation of the v1model architecture ignores the
+ * value of the receiver parameter.
  *
  * TBD As of 2019-Apr, the current BMv2 simple_switch implementation
  * does not use the value of the data parameter at the time of the
