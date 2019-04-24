@@ -175,7 +175,10 @@ extern meter {
      * A meter object is created by calling its constructor.  This
      * creates an array of meter states, with the number of meter
      * states specified by the size parameter.  The array indices are
-     * in the range [0, size-1].
+     * in the range [0, size-1].  For example, if in your system you
+     * have 128 different "flows" numbered from 0 up to 127, and you
+     * want to meter each of those flows independently of each other,
+     * you could do so by creating a meter object with size=128.
      *
      * You must provide a choice of whether to meter based on the
      * number of packets, regardless of their size
