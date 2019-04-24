@@ -70,13 +70,6 @@ control cIngress(inout headers_t hdr,
         // destination address.
         send_to_port(ostd,
             (PortId_t) ((PortIdUint_t) hdr.ethernet.dstAddr[1:0]));
-        if (hdr.ethernet.dstAddr[1:0] == 0) {
-            // This action should overwrite the ostd.drop field that
-            // was assigned a value via the send_to_port() action
-            // above, causing this packet to be dropped, _not_ sent
-            // out of port 0.
-            ingress_drop(ostd);
-        }
         tbl.apply();
     }
 }
