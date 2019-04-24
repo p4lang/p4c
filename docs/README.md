@@ -203,12 +203,14 @@ input packets will be sent to the data plane and output packets
 checked against expected packets in the STF file.
 
 When pull requests are created on the p4c Github repository, the
-changes are built, and the tests executed via `make check -j<number>`
-for some number of CPU cores.  These tests are run with a "recently
-built" version of `simple_switch` from the p4lang/behavioral-model
+changes are built, and the tests executed via `make check`.  These
+tests are run with a "recently built" version of `simple_switch` from
+the
+[p4lang/behavioral-model](https://github.com/p4lang/behavioral-model)
 repository, but it can be several hours old.  If you are working on
 p4c features that rely on newly committed changes to `simple_switch`
-at the link below:
+you can find out which `simple_switch` version these p4c automated
+tests are using at the link below:
 
 + [https://hub.docker.com/r/p4lang/behavioral-model/builds](https://hub.docker.com/r/p4lang/behavioral-model/builds)
 
