@@ -27,16 +27,17 @@
 #include "psa_switch.h"
 
 namespace {
-PsaSwitch *psa_switch;
+bm::psa::PsaSwitch *psa_switch;
 bm::TargetParserBasic *psa_switch_parser;
 }  // namespace
 
 namespace pswitch_runtime {
-shared_ptr<PsaSwitchIf> get_handler(PsaSwitch *sw);
+shared_ptr<PsaSwitchIf> get_handler(bm::psa::PsaSwitch *sw);
 }  // namespace pswitch_runtime
 
 int
 main(int argc, char* argv[]) {
+  using bm::psa::PsaSwitch;
   psa_switch = new PsaSwitch();
   psa_switch_parser = new bm::TargetParserBasic();
   psa_switch_parser->add_flag_option("enable-swap",

@@ -30,17 +30,9 @@
 #include <random>
 #include <thread>
 
-template <typename... Args>
-using ActionPrimitive = bm::ActionPrimitive<Args...>;
+namespace bm {
 
-using bm::Data;
-using bm::Field;
-using bm::Header;
-using bm::MeterArray;
-using bm::CounterArray;
-using bm::RegisterArray;
-using bm::NamedCalculation;
-using bm::HeaderStack;
+namespace psa {
 
 class modify_field : public ActionPrimitive<Data &, const Data &> {
   void operator ()(Data &dst, const Data &src) {
@@ -397,6 +389,10 @@ class truncate_ : public ActionPrimitive<const Data &> {
 };
 
 REGISTER_PRIMITIVE_W_NAME("truncate", truncate_);
+
+}  // namespace bm::psa
+
+}  // namespace psa
 
 // dummy function, which ensures that this unit is not discarded by the linker
 // it is being called by the constructor of PsaSwitch

@@ -34,6 +34,8 @@ namespace thrift_provider = apache::thrift;
 
 #include "psa_switch.h"
 
+using namespace bm::psa;
+
 namespace pswitch_runtime {
 
 class PsaSwitchHandler : virtual public PsaSwitchIf {
