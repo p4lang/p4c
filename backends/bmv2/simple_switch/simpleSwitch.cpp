@@ -44,7 +44,7 @@ bool ParseV1Architecture::preorder(const IR::PackageBlock* main) {
         modelError("%1%: main package  match the expected model", main);
         return false;
     }
-    structure->block_type.emplace(prsr->to<IR::ParserBlock>()->container, V1_PARSER);
+    structure->parser = prsr->to<IR::ParserBlock>()->container;
 
     auto ingress = main->findParameterValue(v1model.sw.ingress.name);
     if (ingress == nullptr || !ingress->is<IR::ControlBlock>()) {
@@ -52,7 +52,7 @@ bool ParseV1Architecture::preorder(const IR::PackageBlock* main) {
         return false;
     }
     auto ingress_name = ingress->to<IR::ControlBlock>()->container->name;
-    structure->block_type.emplace(ingress->to<IR::ControlBlock>()->container, V1_INGRESS);
+    structure->ingress = ingress->to<IR::ControlBlock>()->container;
     structure->pipeline_controls.emplace(ingress_name);
 
     auto verify = main->findParameterValue(v1model.sw.verify.name);
@@ -60,7 +60,7 @@ bool ParseV1Architecture::preorder(const IR::PackageBlock* main) {
         modelError("%1%: main package does not match the expected model", main);
         return false;
     }
-    structure->block_type.emplace(verify->to<IR::ControlBlock>()->container, V1_VERIFY);
+    structure->verify_checksum = verify->to<IR::ControlBlock>()->container;
     structure->non_pipeline_controls.emplace(verify->to<IR::ControlBlock>()->container->name);
 
     auto egress = main->findParameterValue(v1model.sw.egress.name);
@@ -69,7 +69,7 @@ bool ParseV1Architecture::preorder(const IR::PackageBlock* main) {
         return false;
     }
     auto egress_name = egress->to<IR::ControlBlock>()->container->name;
-    structure->block_type.emplace(egress->to<IR::ControlBlock>()->container, V1_EGRESS);
+    structure->egress = egress->to<IR::ControlBlock>()->container;
     structure->pipeline_controls.emplace(egress_name);
 
     auto compute = main->findParameterValue(v1model.sw.compute.name);
@@ -77,7 +77,7 @@ bool ParseV1Architecture::preorder(const IR::PackageBlock* main) {
         modelError("%1%: main package does not match the expected model", main);
         return false;
     }
-    structure->block_type.emplace(compute->to<IR::ControlBlock>()->container, V1_COMPUTE);
+    structure->compute_checksum = compute->to<IR::ControlBlock>()->container;
     structure->non_pipeline_controls.emplace(compute->to<IR::ControlBlock>()->container->name);
 
     auto deparser = main->findParameterValue(v1model.sw.deparser.name);
@@ -85,7 +85,7 @@ bool ParseV1Architecture::preorder(const IR::PackageBlock* main) {
         modelError("%1%: main package  match the expected model", main);
         return false;
     }
-    structure->block_type.emplace(deparser->to<IR::ControlBlock>()->container, V1_DEPARSER);
+    structure->deparser = deparser->to<IR::ControlBlock>()->container;
     structure->non_pipeline_controls.emplace(deparser->to<IR::ControlBlock>()->container->name);
 
     return false;
@@ -1039,11 +1039,8 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     main = toplevel->getMain();
     if (!main) return;  // no main
     main->apply(*parseV1Arch);
-    PassManager updateStructure {
-        new DiscoverV1Structure(structure),
-    };
     program = toplevel->getProgram();
-    program->apply(updateStructure);
+    program->apply(DiscoverStructure(structure));
 
     /// generate error types
     for (const auto &p : structure->errorCodesMap) {
