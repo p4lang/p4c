@@ -486,6 +486,124 @@ relative order that entries appear in the P4 program is unimportant in
 determining which entry will win.
 
 
+## Specifying match criteria for table entries using `const entries`
+
+The table below shows, for each `match_kind` value of P4_16 table key fields,
+which syntax is allowed for specifying the set of matching field values for a
+table entry in a `const entries` list.
+
+A restriction on all allowed cases is that `lo`, `hi`, `val`, and `mask` must be
+a legal possible value for the field, i.e. not outside of that field's range of
+values. All of them can be arithmetic expressions containing compile time
+constant values.
+
+|                  | `range`      | `ternary`    | `lpm`        | `exact` |
+| ---------------- | ------------ | ------------ | ------------ | ------- |
+| `lo .. hi`       | yes (Note 1) | no           | no           | no      |
+| `val &&& mask`   | no           | yes (Note 2) | yes (Note 3) | no      |
+| `val`            | yes (Note 4) | yes (Note 5) | yes (Note 5) | yes     |
+| `_` or `default` | yes (Note 6) | yes (Note 6) | yes (Note 6) | no      |
+
+Note 1: Restriction: `lo <= hi`. A run time search key value `k` matches if `lo
+<= k <= hi`.
+
+Note 2: Restriction: `val == (val & mask)`. Bit positions of `mask` equal to 1
+are exact match bit positions, and bit positions where `mask` is 0 are "wild
+card" or don't care bit position. A run time search key value `k` matches if `(k
+& mask) == (val & mask)`.
+
+Note 3: Restriction: `val == (val & mask)` and `mask` is a "prefix mask",
+i.e. it has all 1 bit positions consecutive and in the most significant bit
+positions of the field. WARNING: If you attempt to specify a prefix as `val /
+prefix_length` in a P4_16 program (the syntax used by some command line
+interfaces for specifying a prefix, such as `simple_switch_CLI`), that is
+actually an arithmetic expression that divides `val` by `prefix_length`, and
+thus falls into the `val` case, which is exact match. There is no warning from
+the compiler because it is perfectly legal syntax for a division operation.
+
+Note 4: Equivalent to the range `val .. val`, so it behaves as exact match on
+`val`.
+
+Note 5: Equivalent to `val &&& mask` where `mask` is 1 in all bit positions of
+the field, so it behaves as exact match on `val`.
+
+Note 6: Matches any allowed value for the field. Equivalent to
+`min_posible_field_value .. max_possible_field_value` for `range` fields, or `0
+&&& 0` for `ternary` and `lpm` fields.
+
+Below is a portion of a P4_16 program that demonstrates most of the allowed
+combinations of `match_kind` and syntax for specifying matching sets of values.
+
+```
+header h1_t {
+    bit<8> f1;
+}
+
+struct headers_t {
+    h1_t h1;
+}
+
+// ... later ...
+
+control ingress(inout headers_t hdr,
+                inout metadata_t m,
+                inout standard_metadata_t stdmeta)
+{
+    action a(bit<9> x) { stdmeta.egress_spec = x; }
+    table t1 {
+        key = { hdr.h1.f1 : range; }
+        actions = { a; }
+        const entries = {
+             1 ..  8 : a(1);
+             6 .. 12 : a(2);  // ranges are allowed to overlap between entries
+            15 .. 15 : a(3);
+            17       : a(4);  // equivalent to 17 .. 17
+            // It is not required to have a "match anything" rule in a table,
+            // but it is allowed (except for exact match fields), and several of
+            // these examples have one.
+            _        : a(5);
+        }
+    }
+    table t2 {
+        key = { hdr.h1.f1 : ternary; }
+        actions = { a; }
+        // There is no requirement to specify ternary match criteria using
+        // hexadecimal values.  I personally prefer it to make the mask bit
+        // positions more obvious.
+        const entries = {
+            0x04 &&& 0xfc : a(1);
+            0x40 &&& 0x72 : a(2);
+            0x50 &&& 0xff : a(3);
+            0xfe          : a(4);  // equivalent to 0xfe &&& 0xff
+            _             : a(5);
+        }
+    }
+    table t3 {
+        key = { hdr.h1.f1 : lpm; }
+        actions = { a; }
+        const entries = {
+            0x04 &&& 0xfc : a(1);
+            0x40 &&& 0xf8 : a(2);
+            0x04 &&& 0xff : a(3);
+            0xf9          : a(4);  // equivalent to 0xf9 &&& 0xff
+            _             : a(5);
+        }
+    }
+    table t4 {
+        key = { hdr.h1.f1 : exact; }
+        actions = { a; }
+        const entries = {
+            0x04 : a(1);
+            0x40 : a(2);
+            0x05 : a(3);
+            0xf9 : a(4);
+        }
+    }
+    // ... more code here ...
+}
+```
+
+
 ## P4_16 plus v1model architecture notes
 
 This section is an incomplete description of the v1model architecture
