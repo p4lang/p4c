@@ -2,18 +2,18 @@
 
 # t_ternary tests: if packets come on port 0, we missed!
 
-expect 1 01 **** ** ** *
+expect 1 01 **** ** ** ** $
 packet 0 01 1111 00 00 b0
 
 # check that the mask works
-expect 1 02 **** ** ** *
+expect 1 02 **** ** ** ** $
 packet 0 02 0001 00 00 b0
 
-expect 2 03 **** ** ** *
+expect 2 03 **** ** ** ** $
 packet 0 03 1187 00 00 b0
 
-expect 3 04 **** ** ** *
+expect 3 04 **** ** ** ** $
 packet 0 04 1000 00 00 b0
 
-expect 4 04 **** ** ** *
+expect 4 04 **** ** ** ** $
 packet 0 04 aaaa 00 00 b0
