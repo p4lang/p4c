@@ -2,13 +2,13 @@
 
 # t_ternary tests: if packets come on port 0, we missed!
 
-expect 1 01 0001 ** ** *
+expect 1 01 0001 ** ** ** $
 packet 0 01 0001 00 00 b0
 
 # should hit port 3, even though it matches the first entry
-expect 3 02 1001 ** ** *
+expect 3 02 1001 ** ** ** $
 packet 0 02 1001 00 00 b0
 
 # should hit port 3, even though it matches the second entry
-expect 3 03 **** ** ** *
+expect 3 03 **** ** ** ** $
 packet 0 03 1181 00 00 b0
