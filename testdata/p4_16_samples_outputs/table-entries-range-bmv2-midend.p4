@@ -65,6 +65,8 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 
                         8w6 .. 8w12 : a_with_control_params(9w22);
 
+                        8w15 : a_with_control_params(9w24);
+
                         default : a_with_control_params(9w23);
 
         }

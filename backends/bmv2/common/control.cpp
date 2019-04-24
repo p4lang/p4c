@@ -89,6 +89,9 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
                     auto kr = k->to<IR::Range>();
                     key->emplace("start", stringRepr(kr->left->to<IR::Constant>()->value, k8));
                     key->emplace("end", stringRepr(kr->right->to<IR::Constant>()->value, k8));
+                } else if (k->is<IR::Constant>()) {
+                    key->emplace("start", stringRepr(k->to<IR::Constant>()->value, k8));
+                    key->emplace("end", stringRepr(k->to<IR::Constant>()->value, k8));
                 } else if (k->is<IR::DefaultExpression>()) {
                     key->emplace("start", stringRepr(0, k8));
                     key->emplace("end", stringRepr((1 << keyWidth)-1, k8));  // 2^N -1
