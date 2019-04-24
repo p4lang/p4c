@@ -19,9 +19,11 @@ limitations under the License.
 
 /*
  * A simple conservative syntactic alias analysis.  Two things may
- * alias if they refer to objects with the same name.
- * This pass may be run early in the front end, before enough information is present (eg.
- * def-use information) to do a precise alias analysis.
+ * alias if they refer to objects with the same name.  This pass may
+ * be run early in the front end, before enough information is present
+ * (eg.  def-use information) to do a precise alias analysis.  Also,
+ * this pass is safe only if the expressions compared for aliasing are
+ * part of the *same statement*.
  */
 
 #include "ir/ir.h"
@@ -180,6 +182,11 @@ class ReadsWrites : public Inspector {
         auto e1 = ::get(rw, expression->e1);
         auto e2 = ::get(rw, expression->e2);
         rw.emplace(expression, e0->join(e1)->join(e2));
+    }
+
+    void postorder(const IR::Slice* expression) override {
+        auto e = ::get(rw, expression->expr);
+        rw.emplace(expression, e);
     }
 
     void postorder(const IR::MethodCallExpression* expression) override {
