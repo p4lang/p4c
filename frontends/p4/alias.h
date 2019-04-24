@@ -185,7 +185,7 @@ class ReadsWrites : public Inspector {
     }
 
     void postorder(const IR::Slice* expression) override {
-        auto e = ::get(rw, expression->expr);
+        auto e = ::get(rw, expression->e0);
         rw.emplace(expression, e);
     }
 
