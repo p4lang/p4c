@@ -29,6 +29,7 @@ TEST(expr_uses, expr_uses) {
     auto obj2_f11 = new IR::Member(obj2, "f11");
     auto add = new IR::Add(obj1_f1, obj2_f11);
     auto sub = new IR::Sub(obj1_f11, obj2_f1);
+    auto add2 = new IR::Add(obj1_f1, obj1_f11);
 
     EXPECT_TRUE(exprUses(add, "obj1"));
     EXPECT_TRUE(exprUses(add, "obj2"));
@@ -40,4 +41,6 @@ TEST(expr_uses, expr_uses) {
     EXPECT_TRUE(exprUses(add, "obj2.f11"));
     EXPECT_TRUE(exprUses(sub, "obj1"));
     EXPECT_TRUE(exprUses(sub, "obj2"));
+    EXPECT_TRUE(exprUses(add2, "obj1.f1"));
+    EXPECT_TRUE(exprUses(add2, "obj1.f11"));
 }

@@ -28,16 +28,24 @@ class exprUses : public Inspector {
     cstring look_for;
     const char *search_tail = nullptr;  // pointer into look_for for partial match
     bool result = false;
-    bool preorder(const IR::Path *p) override {
-        if (look_for.startsWith(p->name)) {
-            search_tail = look_for.c_str() + p->name.name.size();
+
+    void set_search_tail(const IR::PathExpression *e) {
+        if (look_for.startsWith(e->path->name)) {
+            search_tail = look_for.c_str() + e->path->name.name.size();
             if (*search_tail == 0 || *search_tail == '.' || *search_tail == '[')
-                result = true; }
-        return !result; }
+                result = true; } }
+
+    bool preorder(const IR::Path *) override { return !result; }
     bool preorder(const IR::Primitive *p) override {
         if (p->name == look_for) result = true;
         return !result; }
     bool preorder(const IR::Expression *) override { return !result; }
+    bool preorder(const IR::PathExpression *e) override {
+        set_search_tail(e);
+        return !result; }
+
+    void revisit(const IR::PathExpression *e) override {
+        set_search_tail(e); }
 
     void postorder(const IR::Member *m) override {
         if (result && search_tail && *search_tail) {
