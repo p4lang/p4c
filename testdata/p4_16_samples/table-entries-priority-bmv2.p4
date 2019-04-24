@@ -62,6 +62,17 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 	default_action = a;
 
         // test for priority swap
+        // Note that here the matching entry with the _smallest_
+        // numerical priority will win over any other matching entry,
+        // so the 3rd entry in the list below will win over any
+        // others that the packet matches.
+
+        // Note that the @priority annotation was considered for
+        // inclusion in the P4_16 language specification, but it was
+        // decided against doing so, for simplicity.  It is a
+        // non-standard annotation, and at least as of 2019-Apr-23 it
+        // is implemented by p4c and used by BMv2 simple_switch to
+        // determine the winning entry.
         const entries = {
             0x1111 &&& 0xF    : a_with_control_params(1) @priority(3);
             0x1181            : a_with_control_params(2);
