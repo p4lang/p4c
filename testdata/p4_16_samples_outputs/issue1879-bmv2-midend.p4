@@ -171,6 +171,24 @@ control PROTComputeChecksum(inout headers hdr, inout metadata meta) {
 
 control PROTDeparser(packet_out packet, in headers hdr) {
     apply {
+        packet.emit<preamble_t>(hdr.preamble);
+        packet.emit<prot_common_t>(hdr.prot_common);
+        packet.emit<prot_addr_common_t>(hdr.prot_addr_common);
+        packet.emit<prot_host_addr_ipv4_t>(hdr.prot_host_addr_dst.ipv4);
+        packet.emit<prot_host_addr_ipv4_t>(hdr.prot_host_addr_src.ipv4);
+        packet.emit<prot_host_addr_padding_t>(hdr.prot_host_addr_padding);
+        packet.emit<prot_i_t>(hdr.prot_inf_0);
+        packet.emit<prot_h_t>(hdr.prot_h_0[0]);
+        packet.emit<prot_h_t>(hdr.prot_h_0[1]);
+        packet.emit<prot_h_t>(hdr.prot_h_0[2]);
+        packet.emit<prot_h_t>(hdr.prot_h_0[3]);
+        packet.emit<prot_h_t>(hdr.prot_h_0[4]);
+        packet.emit<prot_h_t>(hdr.prot_h_0[5]);
+        packet.emit<prot_h_t>(hdr.prot_h_0[6]);
+        packet.emit<prot_h_t>(hdr.prot_h_0[7]);
+        packet.emit<prot_h_t>(hdr.prot_h_0[8]);
+        packet.emit<prot_h_t>(hdr.prot_h_0[9]);
+        packet.emit<prot_i_t>(hdr.prot_inf_1);
     }
 }
 
