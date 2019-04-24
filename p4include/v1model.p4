@@ -17,7 +17,7 @@ limitations under the License.
 /* P4-16 declaration of the P4 v1.0 switch model */
 
 /* Note 1: More details about the definition of v1model architecture
- * behavior can be found at the location below.
+ * can be found at the location below.
  *
  * https://github.com/p4lang/behavioral-model/blob/master/docs/simple_switch.md
  */
@@ -302,9 +302,9 @@ extern void random<T>(out T result, in T lo, in T hi);
  * the data parameter to be sent to the control plane software.  It is
  * similar to sending a clone of the packet to the control plane
  * software, except that it can be more efficient because the messages
- * are typically smaller than packets, and many such small messages
- * are typically coalesced together into a larger "batch" which the
- * control plane software processes all at once.
+ * are typically smaller than packets, and many such small digest
+ * messages are typically coalesced together into a larger "batch"
+ * which the control plane software processes all at once.
  *
  * Calling digest is only supported in the ingress control.  There is
  * no way to undo its effects once it has been called.
@@ -464,11 +464,14 @@ extern void update_checksum_with_payload<T, O>(in bool condition, in T data, ino
  * began parsing.  The only difference is in the value of the
  * standard_metadata instance_type field, and any user-defined
  * metadata fields that the resubmit operation causes to be
- * "preserved".
+ * preserved.
  *
  * Calling resubmit is only supported in the ingress control.  There
- * is no way to undo its effects once it has been called.  See the
- * v1model architecture documentation (Note 1) for more details.
+ * is no way to undo its effects once it has been called.  If resubmit
+ * is called multiple times during a single execution of the ingress
+ * control, only one packet is resubmitted, and only the data from the
+ * last such call is preserved.  See the v1model architecture
+ * documentation (Note 1) for more details.
  */
 extern void resubmit<T>(in T data);
 
@@ -480,11 +483,14 @@ extern void resubmit<T>(in T data);
  * deparser.  Recirculated packets can be distinguished from new
  * packets in ingress processing by the value of the standard_metadata
  * instance_type field.  The caller may request that some user-defined
- * metadata fields be "preserved" with the recirculated packet.
+ * metadata fields be preserved with the recirculated packet.
  *
  * Calling recirculate is only supported in the egress control.  There
- * is no way to undo its effects once it has been called.  See the
- * v1model architecture documentation (Note 1) for more details.
+ * is no way to undo its effects once it has been called.  If
+ * recirculate is called multiple times during a single execution of
+ * the egress control, only one packet is recirculated, and only the
+ * data from the last such call is preserved.  See the v1model
+ * architecture documentation (Note 1) for more details.
  */
 extern void recirculate<T>(in T data);
 
@@ -518,15 +524,18 @@ extern void clone(in CloneType type, in bit<32> session);
  * standard_metadata instance_type field.
  *
  * The caller may request that some user-defined metadata field values
- * from the original packet should be "preserved" with the cloned
+ * from the original packet should be preserved with the cloned
  * packet(s).
  *
  * If clone3 is called during ingress processing, the first parameter
  * must be CloneType.I2E.  If clone3 is called during egress
  * processing, the first parameter must be CloneType.E2E.
  *
- * There is no way to undo its effects once it has been called.  See
- * the v1model architecture documentation (Note 1) for more details.
+ * There is no way to undo its effects once it has been called.  If
+ * there are multiple calls to clone3 and/or clone during a single
+ * execution of the same ingress (or egress) control, only the last
+ * clone session and data are used.  See the v1model architecture
+ * documentation (Note 1) for more details.
  */
 extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
 
@@ -534,19 +543,25 @@ extern void truncate(in bit<32> length);
 
 // The name 'standard_metadata' is reserved
 
-// Architecture.
-// M should be a struct of structs
-// H should be a struct of headers, stacks or header_unions
+/*
+ * Architecture.
+ *
+ * M must be a struct.
+ *
+ * H must be a struct where every one if its members is of type
+ * header, header stack, or header_union.
+ */
 
 parser Parser<H, M>(packet_in b,
                     out H parsedHdr,
                     inout M meta,
                     inout standard_metadata_t standard_metadata);
 
-/* The only legal statements in the implementation of the
-VerifyChecksum control are: block statements, calls to the
-verify_checksum and verify_checksum_with_payload methods,
-and return statements. */
+/*
+ * The only legal statements in the body of the VerifyChecksum control
+ * are: block statements, calls to the verify_checksum and
+ * verify_checksum_with_payload methods, and return statements.
+ */
 control VerifyChecksum<H, M>(inout H hdr,
                              inout M meta);
 @pipeline
@@ -558,15 +573,18 @@ control Egress<H, M>(inout H hdr,
                      inout M meta,
                      inout standard_metadata_t standard_metadata);
 
-/* The only legal statements in the implementation of the
-ComputeChecksum control are: block statements, calls to the
-update_checksum and update_checksum_with_payload methods,
-and return statements. */
+/*
+ * The only legal statements in the body of the ComputeChecksum
+ * control are: block statements, calls to the update_checksum and
+ * update_checksum_with_payload methods, and return statements.
+ */
 control ComputeChecksum<H, M>(inout H hdr,
                               inout M meta);
 
-/* The only legal statements in a Deparser control are: calls to the
-packet_out.emit() method. */
+/*
+ * The only legal statements in the body of the Deparser control are:
+ * calls to the packet_out.emit() method.
+ */
 @deparser
 control Deparser<H>(packet_out b, in H hdr);
 
