@@ -59,10 +59,8 @@ header ipv4_option_NOP_t {
 }
 
 struct metadata {
-    @name(".intrinsic_metadata") 
-    intrinsic_metadata_t intrinsic_metadata;
     @name(".my_metadata") 
-    my_metadata_t        my_metadata;
+    my_metadata_t my_metadata;
 }
 
 struct headers {

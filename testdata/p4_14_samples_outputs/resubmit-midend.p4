@@ -19,11 +19,7 @@ header ethernet_t {
 }
 
 struct metadata {
-    bit<4>  _intrinsic_metadata_mcast_grp0;
-    bit<4>  _intrinsic_metadata_egress_rid1;
-    bit<32> _intrinsic_metadata_lf_field_list2;
-    bit<16> _intrinsic_metadata_resubmit_flag3;
-    bit<8>  _mymeta_f14;
+    bit<8> _mymeta_f10;
 }
 
 struct headers {
@@ -64,7 +60,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.egress_spec = port;
     }
     @name("._resubmit") action _resubmit() {
-        meta._mymeta_f14 = 8w1;
+        meta._mymeta_f10 = 8w1;
         resubmit<tuple_0>({ standard_metadata, {8w1} });
     }
     @name(".t_ingress_1") table t_ingress {
@@ -74,7 +70,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_0();
         }
         key = {
-            meta._mymeta_f14: exact @name("mymeta.f1") ;
+            meta._mymeta_f10: exact @name("mymeta.f1") ;
         }
         size = 128;
         default_action = NoAction_0();
@@ -86,7 +82,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_3();
         }
         key = {
-            meta._mymeta_f14: exact @name("mymeta.f1") ;
+            meta._mymeta_f10: exact @name("mymeta.f1") ;
         }
         size = 128;
         default_action = NoAction_3();

@@ -75,10 +75,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("._nop") action _nop_2() {
     }
-    @name(".egr_inc_mymeta_counts") action egr_inc_mymeta_counts() {
-        meta._mymeta_recirculate_count1 = meta._mymeta_recirculate_count1 + 8w1;
-        meta._mymeta_clone_e2e_count2 = meta._mymeta_clone_e2e_count2 + 8w1;
-    }
     @name(".mark_egr_resubmit_packet") action mark_egr_resubmit_packet() {
         hdr.ethernet.dstAddr = 48w0;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_resubmit_count0 << 40;
@@ -206,14 +202,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         default_action = _nop_2();
     }
-    @name(".t_egr_inc_mymeta_counts") table t_egr_inc_mymeta_counts_0 {
-        actions = {
-            egr_inc_mymeta_counts();
-        }
-        key = {
-        }
-        default_action = egr_inc_mymeta_counts();
-    }
     @name(".t_egr_mark_resubmit_packet") table t_egr_mark_resubmit_packet_0 {
         actions = {
             mark_egr_resubmit_packet();
@@ -252,19 +240,18 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             t_egr_mark_resubmit_packet_0.apply();
         else 
             if (hdr.ethernet.dstAddr == 48w0x2) 
-                if (meta._mymeta_recirculate_count1 < 8w10) 
+                if (meta._mymeta_recirculate_count1 < 8w5) 
                     t_do_recirculate_0.apply();
                 else 
                     t_mark_max_recirculate_packet_0.apply();
             else 
                 if (hdr.ethernet.dstAddr == 48w0x3) 
-                    if (meta._mymeta_clone_e2e_count2 < 8w8) 
+                    if (meta._mymeta_clone_e2e_count2 < 8w4) 
                         t_do_clone_e2e_0.apply();
                     else 
                         t_mark_max_clone_e2e_packet_0.apply();
                 else 
                     t_mark_vanilla_packet_0.apply();
-        t_egr_inc_mymeta_counts_0.apply();
         t_egr_debug_table2_0.apply();
     }
 }
@@ -279,9 +266,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._nop") action _nop_5() {
     }
     @name("._nop") action _nop_6() {
-    }
-    @name(".ing_inc_mymeta_counts") action ing_inc_mymeta_counts() {
-        meta._mymeta_resubmit_count0 = meta._mymeta_resubmit_count0 + 8w1;
     }
     @name(".set_port_to_mac_da_lsbs") action set_port_to_mac_da_lsbs() {
         standard_metadata.egress_spec = (bit<9>)hdr.ethernet.dstAddr & 9w0xf;
@@ -356,14 +340,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = _nop_6();
     }
-    @name(".t_ing_inc_mymeta_counts") table t_ing_inc_mymeta_counts_0 {
-        actions = {
-            ing_inc_mymeta_counts();
-        }
-        key = {
-        }
-        default_action = ing_inc_mymeta_counts();
-    }
     @name(".t_ing_mac_da") table t_ing_mac_da_0 {
         actions = {
             set_port_to_mac_da_lsbs();
@@ -391,14 +367,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         t_ing_debug_table1_0.apply();
         if (hdr.ethernet.dstAddr == 48w0x1) 
-            if (meta._mymeta_resubmit_count0 < 8w6) 
+            if (meta._mymeta_resubmit_count0 < 8w3) 
                 t_do_resubmit_0.apply();
             else 
                 t_mark_max_resubmit_packet_0.apply();
         else 
             t_ing_mac_da_0.apply();
         t_save_ing_instance_type_0.apply();
-        t_ing_inc_mymeta_counts_0.apply();
         t_ing_debug_table2_0.apply();
     }
 }

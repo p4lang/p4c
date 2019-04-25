@@ -102,7 +102,7 @@ void ProgramStructure::checkHeaderType(const IR::Type_StructLike* hdr, bool meta
 }
 
 cstring ProgramStructure::createType(const IR::Type_StructLike* type, bool header,
-                                  std::unordered_set<const IR::Type*> *converted) {
+                                     std::unordered_set<const IR::Type*> *converted) {
     if (converted->count(type))
         return type->name;
     converted->emplace(type);
