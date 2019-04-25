@@ -19,7 +19,7 @@ const IR::Node* DoConvertEnums::preorder(IR::Type_Enum* type) {
     repr.emplace(canontype->to<IR::Type_Enum>(), r);
     for (auto d : type->members)
         r->add(d->name.name);
-    return nullptr;  // delete the declaration
+    return type;
 }
 
 const IR::Node* DoConvertEnums::postorder(IR::Type_Name* type) {
