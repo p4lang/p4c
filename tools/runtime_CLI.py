@@ -1820,7 +1820,7 @@ class RuntimeAPI(cmd.Cmd):
 
     @handle_bad_input
     def do_meter_set_rates(self, line):
-        "Configure rates for a meter: meter_set_rates <name> <index> <rate_1>:<burst_1> <rate_2>:<burst_2> ..."
+        "Configure rates for a meter: meter_set_rates <name> <index> <rate_1>:<burst_1> <rate_2>:<burst_2> ...\nRate uses units/microsecond and burst uses units where units is bytes or packets"
         args = line.split()
         self.at_least_n_args(args, 2)
         meter_name = args[0]
