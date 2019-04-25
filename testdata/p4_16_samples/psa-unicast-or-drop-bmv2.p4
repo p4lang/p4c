@@ -79,6 +79,7 @@ parser EgressParserImpl(packet_in buffer,
                         in empty_metadata_t clone_e2e_meta)
 {
     state start {
+        buffer.extract(hdr.ethernet);
         transition accept;
     }
 }
