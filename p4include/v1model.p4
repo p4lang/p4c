@@ -56,23 +56,43 @@ struct standard_metadata_t {
     //
     // flattening fields that exist in bmv2-ss
     // queueing metadata
-    @alias("queueing_metadata.enq_timestamp") bit<32> enq_timestamp;
-    @alias("queueing_metadata.enq_qdepth")    bit<19> enq_qdepth;
-    @alias("queueing_metadata.deq_timedelta") bit<32> deq_timedelta;
-    @alias("queueing_metadata.deq_qdepth")    bit<19> deq_qdepth;
+    @alias("queueing_metadata.enq_timestamp")
+    bit<32> enq_timestamp;
+    @alias("queueing_metadata.enq_qdepth")
+    bit<19> enq_qdepth;
+    @alias("queueing_metadata.deq_timedelta")
+    bit<32> deq_timedelta;
+    /// queue depth at the packet dequeue time.
+    @alias("queueing_metadata.deq_qdepth")
+    bit<19> deq_qdepth;
+
     // intrinsic metadata
-    @alias("intrinsic_metadata.ingress_global_timestamp") bit<48> ingress_global_timestamp;
-    @alias("intrinsic_metadata.egress_global_timestamp") bit<48> egress_global_timestamp;
-    @alias("intrinsic_metadata.lf_field_list") bit<32> lf_field_list;
-    @alias("intrinsic_metadata.mcast_grp")     bit<16> mcast_grp;
-    @alias("intrinsic_metadata.resubmit_flag") bit<32> resubmit_flag;
-    @alias("intrinsic_metadata.egress_rid")    bit<16> egress_rid;
+    @alias("intrinsic_metadata.ingress_global_timestamp")
+    bit<48> ingress_global_timestamp;
+    @alias("intrinsic_metadata.egress_global_timestamp")
+    bit<48> egress_global_timestamp;
+    /// Learn filter field list
+    @alias("intrinsic_metadata.lf_field_list")
+    bit<32> lf_field_list;
+    /// multicast group id (key for the mcast replication table)
+    @alias("intrinsic_metadata.mcast_grp")
+    bit<16> mcast_grp;
+    /// resubmit metadata field list id, or 0 if no resubmit operation has been performed
+    @alias("intrinsic_metadata.resubmit_flag")
+    bit<32> resubmit_flag;
+    /// Replication ID for multicast
+    @alias("intrinsic_metadata.egress_rid")
+    bit<16> egress_rid;
+    @alias("intrinsic_metadata.recirculate_flag")
+    bit<32> recirculate_flag;
     /// Indicates that a verify_checksum() method has failed.
-    // 1 if a checksum error was found, otherwise 0.
+    /// 1 if a checksum error was found, otherwise 0.
     bit<1>  checksum_error;
-    @alias("intrinsic_metadata.recirculate_flag") bit<32> recirculate_flag;
     /// Error produced by parsing
     error parser_error;
+    /// set packet priority
+    @alias("intrinsic_metadata.priority")
+    bit<3> priority;
 }
 
 enum CounterType {

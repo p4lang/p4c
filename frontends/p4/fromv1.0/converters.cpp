@@ -1223,9 +1223,9 @@ class InsertCompilerGeneratedStartState: public Transform {
     }
 };
 
-// Handle @packet_entry pragma in P4-14. A P4-14 program may be extended to
-// support multiple entry points to the parser. This feature does not comply
-// with P4-14 specification, but it is useful in certain use cases.
+/// Handle @packet_entry pragma in P4-14. A P4-14 program may be extended to
+/// support multiple entry points to the parser. This feature does not comply
+/// with P4-14 specification, but it is useful in certain use cases.
 class FixMultiEntryPoint : public PassManager {
  public:
     explicit FixMultiEntryPoint(ProgramStructure* structure) {
@@ -1235,9 +1235,114 @@ class FixMultiEntryPoint : public PassManager {
     }
 };
 
+/**
+   If the user metadata structure has a fields called
+   "intrinsic_metadata" or "queueing_metadata" move all their fields
+   to the standard_metadata Change all references appropriately.  We
+   do this because the intrinsic_metadata and queueing_metadata are
+   handled specially in P4-14 programs - much more like
+   standard_metadata.
+*/
+class MoveIntrinsicMetadata : public Transform {
+    ProgramStructure* structure;
+    const IR::Type_Struct* stdType = nullptr;
+    const IR::Type_Struct* userType = nullptr;
+    const IR::Type_Struct* intrType = nullptr;
+    const IR::Type_Struct* queueType = nullptr;
+    const IR::StructField* intrField = nullptr;
+    const IR::StructField* queueField = nullptr;
+
+ public:
+    explicit MoveIntrinsicMetadata(ProgramStructure* structure): structure(structure)
+    { CHECK_NULL(structure); setName("MoveIntrinsicMetadata"); }
+    const IR::Node* preorder(IR::P4Program* program) override {
+        stdType = program->getDeclsByName(
+            structure->v1model.standardMetadataType.name)->single()->to<IR::Type_Struct>();
+        userType = program->getDeclsByName(
+            structure->v1model.metadataType.name)->single()->to<IR::Type_Struct>();
+        CHECK_NULL(stdType);
+        CHECK_NULL(userType);
+        intrField = userType->getField(structure->v1model.intrinsicMetadata.name);
+        if (intrField != nullptr) {
+            auto intrTypeName = intrField->type;
+            auto tn = intrTypeName->to<IR::Type_Name>();
+            BUG_CHECK(tn, "%1%: expected a Type_Name", intrTypeName);
+            auto nt = program->getDeclsByName(tn->path->name)->nextOrDefault();
+            if (nt == nullptr || !nt->is<IR::Type_Struct>()) {
+                ::error("%1%: expected a structure", tn);
+                return program;
+            }
+            intrType = nt->to<IR::Type_Struct>();
+            LOG2("Intrinsic metadata type " << intrType);
+        }
+
+        queueField = userType->getField(structure->v1model.queueingMetadata.name);
+        if (queueField != nullptr) {
+            auto queueTypeName = queueField->type;
+            auto tn = queueTypeName->to<IR::Type_Name>();
+            BUG_CHECK(tn, "%1%: expected a Type_Name", queueTypeName);
+            auto nt = program->getDeclsByName(tn->path->name)->nextOrDefault();
+            if (nt == nullptr || !nt->is<IR::Type_Struct>()) {
+                ::error("%1%: expected a structure", tn);
+                return program;
+            }
+            queueType = nt->to<IR::Type_Struct>();
+            LOG2("Queueing metadata type " << queueType);
+        }
+        return program;
+    }
+
+    const IR::Node* postorder(IR::Type_Struct* type) override {
+        if (getOriginal() == stdType) {
+            if (intrType != nullptr) {
+                for (auto f : intrType->fields) {
+                    if (type->fields.getDeclaration(f->name) == nullptr) {
+                        ::error("%1%: no such field in standard_metadata", f->name);
+                        LOG2("standard_metadata: " << type);
+                    }
+                }
+            }
+            if (queueType != nullptr) {
+                for (auto f : queueType->fields) {
+                    if (type->fields.getDeclaration(f->name) == nullptr) {
+                        ::error("%1%: no such field in standard_metadata", f->name);
+                        LOG2("standard_metadata: " << type);
+                    }
+                }
+            }
+        }
+        return type;
+    }
+
+    const IR::Node* postorder(IR::StructField* field) override {
+        if (getOriginal() == intrField || getOriginal() == queueField)
+            // delete it from its parent
+            return nullptr;
+        return field;
+    }
+
+    const IR::Node* postorder(IR::Member* member) override {
+        // We rewrite expressions like meta.intrinsic_metadata.x as
+        // standard_metadata.x.  We know that these parameter names
+        // are always the same.
+        if (member->member != structure->v1model.intrinsicMetadata.name &&
+            member->member != structure->v1model.queueingMetadata.name)
+            return member;
+        auto pe = member->expr->to<IR::PathExpression>();
+        if (pe == nullptr || pe->path->absolute)
+            return member;
+        if (pe->path->name == structure->v1model.parser.metadataParam.name) {
+            LOG2("Renaming reference " << member);
+            return new IR::PathExpression(
+                new IR::Path(member->expr->srcInfo,
+                             IR::ID(pe->path->name.srcInfo,
+                                    structure->v1model.standardMetadata.name)));
+        }
+        return member;
+    }
+};
+
 }  // namespace
-
-
 
 ///////////////////////////////////////////////////////////////
 
@@ -1265,6 +1370,7 @@ Converter::Converter() {
     passes.emplace_back(new Rewriter(structure));
     passes.emplace_back(new FixExtracts(structure));
     passes.emplace_back(new FixMultiEntryPoint(structure));
+    passes.emplace_back(new MoveIntrinsicMetadata(structure));
 }
 
 Visitor::profile_t Converter::init_apply(const IR::Node* node) {

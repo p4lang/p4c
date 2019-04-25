@@ -18,10 +18,7 @@ header ethernet_t {
 }
 
 struct metadata {
-    bit<4>  _intrinsic_metadata_mcast_grp0;
-    bit<4>  _intrinsic_metadata_egress_rid1;
-    bit<32> _intrinsic_metadata_lf_field_list2;
-    bit<32> _meta_meter_tag3;
+    bit<32> _meta_meter_tag0;
 }
 
 struct headers {
@@ -62,17 +59,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_0();
         }
         key = {
-            meta._meta_meter_tag3: exact @name("meta.meter_tag") ;
+            meta._meta_meter_tag0: exact @name("meta.meter_tag") ;
         }
         size = 16;
         default_action = NoAction_0();
     }
     @name(".m_action") action m_action_0(bit<9> meter_idx) {
-        my_meter_0.read(meta._meta_meter_tag3);
+        my_meter_0.read(meta._meta_meter_tag0);
         standard_metadata.egress_spec = 9w1;
     }
     @name("._nop") action _nop_0() {
-        my_meter_0.read(meta._meta_meter_tag3);
+        my_meter_0.read(meta._meta_meter_tag0);
     }
     @name(".m_table") table m_table_0 {
         actions = {

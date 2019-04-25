@@ -123,8 +123,6 @@ struct metadata {
     bit<16> _ingress_metadata_srcPort38;
     bit<16> _ingress_metadata_dstPort39;
     bit<1>  _ingress_metadata_router_mac40;
-    bit<9>  _intrinsic_metadata_ingress_port41;
-    bit<32> _intrinsic_metadata_lf_field_list42;
 }
 
 struct headers {
@@ -202,7 +200,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".nop") action nop() {
     }
     @name(".generate_learn_notify") action generate_learn_notify() {
-        digest<mac_learn_digest>(32w1024, {meta._ingress_metadata_vlan_id37,hdr.eth.srcAddr,meta._intrinsic_metadata_ingress_port41,meta._ingress_metadata_learning33});
+        digest<mac_learn_digest>(32w1024, {meta._ingress_metadata_vlan_id37,hdr.eth.srcAddr,standard_metadata.ingress_port,meta._ingress_metadata_learning33});
     }
     @name(".set_dmac") action set_dmac(bit<48> dst_mac_address, bit<9> port_id) {
         hdr.eth.dstAddr = dst_mac_address;
@@ -249,7 +247,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta._ingress_metadata_cpu_port19 = cpu_port;
         meta._ingress_metadata_max_ports20 = port_number;
         meta._ingress_metadata_oper_status22 = oper_status;
-        meta._intrinsic_metadata_ingress_port41 = standard_metadata.ingress_port;
     }
     @name(".set_router") action set_router(bit<1> admin_v4_state, bit<1> admin_v6_state, bit<48> src_mac_address, bit<8> violation_ttl1_action, bit<8> violation_ip_options) {
         meta._ingress_metadata_def_smac18 = src_mac_address;
@@ -274,9 +271,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_10();
         }
         key = {
-            meta._intrinsic_metadata_ingress_port41: exact @name("intrinsic_metadata.ingress_port") ;
-            meta._ingress_metadata_vlan_id37       : exact @name("ingress_metadata.vlan_id") ;
-            hdr.eth.srcAddr                        : exact @name("eth.srcAddr") ;
+            standard_metadata.ingress_port  : exact @name("standard_metadata.ingress_port") ;
+            meta._ingress_metadata_vlan_id37: exact @name("ingress_metadata.vlan_id") ;
+            hdr.eth.srcAddr                 : exact @name("eth.srcAddr") ;
         }
         default_action = NoAction_10();
     }
@@ -326,7 +323,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             @defaultonly NoAction_13();
         }
         key = {
-            meta._intrinsic_metadata_ingress_port41: exact @name("intrinsic_metadata.ingress_port") ;
+            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
         }
         counters = port_counters_0;
         default_action = NoAction_13();

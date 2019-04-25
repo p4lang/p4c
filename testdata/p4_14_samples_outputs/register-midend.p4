@@ -18,10 +18,7 @@ header ethernet_t {
 }
 
 struct metadata {
-    bit<4>  _intrinsic_metadata_mcast_grp0;
-    bit<4>  _intrinsic_metadata_egress_rid1;
-    bit<32> _intrinsic_metadata_lf_field_list2;
-    bit<32> _meta_register_tmp3;
+    bit<32> _meta_register_tmp0;
 }
 
 struct headers {
@@ -50,7 +47,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".NoAction") action NoAction_0() {
     }
     @name(".m_action") action m_action(bit<8> register_idx) {
-        my_register.read(meta._meta_register_tmp3, (bit<32>)register_idx);
+        my_register.read(meta._meta_register_tmp0, (bit<32>)register_idx);
     }
     @name("._nop") action _nop() {
     }
