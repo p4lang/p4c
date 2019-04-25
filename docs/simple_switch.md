@@ -96,14 +96,6 @@ Here are the fields:
   0.  Calls to `verify_checksum` should be in the `VerifyChecksum`
   control in v1model, which is executed after the parser and before
   ingress.
-- `clone_spec` (v1m): should not be accessed directly. It is set by
-  the `clone` and `clone3` primitive actions in P4_16 programs, or the
-  `clone_ingress_pkt_to_egress` and `clone_egress_pkt_to_egress`
-  primitive actions for P4_14 programs, and is required for the packet
-  clone (aka mirror) feature. The "ingress to egress" clone primitive
-  action must be called from the ingress pipeline, and the "egress to
-  egress" clone primitive action must be called from the egress
-  pipeline.
 
 ## Intrinsic metadata
 
@@ -133,11 +125,8 @@ header_type intrinsic_metadata_t {
     fields {
         ingress_global_timestamp : 48;
         egress_global_timestamp : 48;
-        lf_field_list : 8;
         mcast_grp : 16;
         egress_rid : 16;
-        resubmit_flag : 8;
-        recirculate_flag : 8;
     }
 }
 metadata intrinsic_metadata_t intrinsic_metadata;
@@ -150,8 +139,6 @@ not be written to.
 starts egress processing. The clock is the same as for
 `ingress_global_timestamp`. This field should only be read from the egress
 pipeline, but should not be written to.
-- `lf_field_list`: used to store the learn id when calling `generate_digest`; do
-not access directly.
 - `mcast_grp`: needed for the multicast feature. This field needs to be written
 in the ingress pipeline when you wish the packet to be multicast. A value of 0
 means no multicast. This value must be one of a valid multicast group configured
@@ -161,32 +148,6 @@ end of ingress.
 - `egress_rid`: needed for the multicast feature. This field is only valid in
 the egress pipeline and can only be read from. It is used to uniquely identify
 multicast copies of the same ingress packet.
-- `resubmit_flag`: should not be accessed directly. It is set by the
-`resubmit` action primitive and is required for the resubmit
-feature. As a reminder, `resubmit` needs to be called in the ingress
-pipeline. See the "after-ingress pseudocode" for relative priority of
-this vs. other possible packet operations at end of ingress.
-- `recirculate_flag`: should not be accessed directly. It is set by the
-`recirculate` action primitive and is required for the recirculate feature. As a
-reminder, `recirculate` needs to be called from the egress pipeline.
-See the "after-egress pseudocode" for the relative priority of this
-vs. other possible packet operations at the end of egress processing.
-
-Several of these fields should be considered internal implementation
-details for how simple_switch implements some packet processing
-features.  They are: `lf_field_list`, `resubmit_flag`,
-`recirculate_flag`, and `clone_spec`.  They have the following
-properties in common:
-
-- They are initialized to 0, and are assigned a compiler-chosen non-0
-  value when the corresponding primitive action is called.
-- Your P4 program should never assign them a value directly.
-- Reading the values may be helpful for debugging.
-- Reading them may also be useful for knowing whether the
-  corresponding primitive action was called earlier in the
-  execution of the P4 program, but if you want to know whether such a
-  use is portable to P4 implementations other than simple_switch, you
-  will have to check the documentation for that other implementation.
 
 ### `queueing_metadata` header
 
@@ -240,13 +201,13 @@ file](../targets/simple_switch/primitives.cpp).
 After-ingress pseudocode - the short version:
 
 ```
-if (clone_spec != 0) {      // because your code called a clone primitive action
+if (a clone primitive action was called) {
     make a clone of the packet with details configured for the clone session
 }
-if (lf_field_list != 0) {   // because your code called generate_digest
+if (digest to generate) {   // because your code called generate_digest
     send a digest message to the control plane software
 }
-if (resubmit_flag != 0) {   // because your code called resubmit
+if (resubmit was called) {
     start ingress processing over again for the original packet
 } else if (mcast_grp != 0) {  // because your code assigned a value to mcast_grp
     multicast the packet to the output port(s) configured for group mcast_grp
@@ -262,7 +223,7 @@ after ingress processing is complete.  The longer more detailed
 version:
 
 ```
-if (clone_spec != 0) {
+if (a clone primitive action was called) {
     // This condition will be true if your code called the `clone` or
     // `clone3` primitive action from a P4_16 program, or the
     // `clone_ingress_pkt_to_egress` primitive action in a P4_14
@@ -283,29 +244,27 @@ if (clone_spec != 0) {
     If it was a clone3 (P4_16) or clone_ingress_pkt_to_egress (P4_14)
     action, also preserve the final ingress values of the metadata
     fields specified in the field list argument, except assign
-    clone_spec a value of 0 always, and instance_type a value of
-    PKT_INSTANCE_TYPE_INGRESS_CLONE.
+    instance_type a value of PKT_INSTANCE_TYPE_INGRESS_CLONE.
 
     The cloned packet will continue processing at the beginning of
     your egress code.
     // fall through to code below
 }
-if (lf_field_list != 0) {
+if (digest to generate) {
     // This condition will be true if your code called the
     // generate_digest primitive action during ingress processing.
     Send a digest message to the control plane that contains the
     values of the fields in the specified field list.
     // fall through to code below
 }
-if (resubmit_flag != 0) {
+if (resubmit was called) {
     // This condition will be true if your code called the resubmit
     // primitive action during ingress processing.
     Start ingress over again for this packet, with its original
     unmodified packet contents and metadata values.  Preserve the
     final ingress values of any fields specified in the field list
     given as an argument to the last resubmit() primitive operation
-    called, except assign resubmit_flag a value of 0 always, and
-    instance_type a value of PKT_INSTANCE_TYPE_RESUBMIT.
+    called, except assign instance_type a value of PKT_INSTANCE_TYPE_RESUBMIT.
 } else if (mcast_grp != 0) {
     // This condition will be true if your code made an assignment to
     // standard_metadata.mcast_grp during ingress processing.  There
@@ -331,12 +290,12 @@ if (resubmit_flag != 0) {
 After-egress pseudocode - the short version:
 
 ```
-if (clone_spec != 0) {    // because your code called a clone primitive action
+if (a clone primitive action was called) {
     make a clone of the packet with details configured for the clone session
 }
 if (egress_spec == DROP_PORT) {  // e.g. because your code called drop/mark_to_drop
     Drop packet.
-} else if (recirculate_flag != 0) {  // because your code called recirculate
+} else if (recirculate was called) {
     start ingress processing over again for deparsed packet
 } else {
     Send the packet to the port in egress_port.
@@ -348,7 +307,7 @@ after egress processing is complete.  The longer more detailed
 version:
 
 ```
-if (clone_spec != 0) {
+if (a clone primitive action was called) {
     // This condition will be true if your code called the `clone` or
     // `clone3` primitive action from a P4_16 program, or the
     // `clone_egress_pkt_to_egress` primitive action in a P4_14
@@ -365,8 +324,7 @@ if (clone_spec != 0) {
     If it was a clone3 (P4_16) or clone_egress_pkt_to_egress (P4_14)
     action, also preserve the final egress values of the metadata
     fields specified in the field list argument, except assign
-    clone_spec a value of 0 always, and instance_type a value of
-    PKT_INSTANCE_TYPE_EGRESS_CLONE.
+    instance_type a value of PKT_INSTANCE_TYPE_EGRESS_CLONE.
 
     The cloned packet will continue processing at the beginning of
     your egress code.
@@ -377,7 +335,7 @@ if (egress_spec == DROP_PORT) {
     // mark_to_drop (P4_16) or drop (P4_14) primitive action during
     // egress processing.
     Drop packet.
-} else if (recirculate_flag != 0) {
+} else if (recirculate was called) {
     // This condition will be true if your code called the recirculate
     // primitive action during egress processing.
     Start ingress over again, for the packet as constructed by the
@@ -385,8 +343,7 @@ if (egress_spec == DROP_PORT) {
     ingress and egress processing.  Preserve the final egress values
     of any fields specified in the field list given as an argument to
     the last recirculate primitive action called, except assign
-    recirculate_flag a value of 0 always, and instance_type a value of
-    PKT_INSTANCE_TYPE_RECIRC.
+    instance_type a value of PKT_INSTANCE_TYPE_RECIRC.
 } else {
     Send the packet to the port in egress_port.  Since egress_port is
     read only during egress processing, note that its value must have

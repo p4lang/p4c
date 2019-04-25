@@ -31,6 +31,7 @@
 #include <thread>
 
 #include "simple_switch.h"
+#include "register_access.h"
 
 template <typename... Args>
 using ActionPrimitive = bm::ActionPrimitive<Args...>;
@@ -224,7 +225,8 @@ class generate_digest : public ActionPrimitive<const Data &, const Data &> {
   void operator ()(const Data &receiver, const Data &learn_id) {
     // discared receiver for now
     (void) receiver;
-    get_field("intrinsic_metadata.lf_field_list").set(learn_id);
+    auto &packet = get_packet();
+    RegisterAccess::set_lf_field_list(&packet, learn_id.get<uint16_t>());
   }
 };
 
@@ -238,7 +240,9 @@ class add_header : public ActionPrimitive<Header &> {
       hdr.mark_valid();
       // updated the length packet register (register 0)
       auto &packet = get_packet();
-      packet.set_register(0, packet.get_register(0) + hdr.get_nbytes_packet());
+      packet.set_register(RegisterAccess::PACKET_LENGTH_REG_IDX,
+          packet.get_register(RegisterAccess::PACKET_LENGTH_REG_IDX) +
+          hdr.get_nbytes_packet());
     }
   }
 };
@@ -258,7 +262,9 @@ class remove_header : public ActionPrimitive<Header &> {
     if (hdr.is_valid()) {
       // updated the length packet register (register 0)
       auto &packet = get_packet();
-      packet.set_register(0, packet.get_register(0) - hdr.get_nbytes_packet());
+      packet.set_register(RegisterAccess::PACKET_LENGTH_REG_IDX,
+          packet.get_register(RegisterAccess::PACKET_LENGTH_REG_IDX) -
+          hdr.get_nbytes_packet());
       hdr.mark_invalid();
     }
   }
@@ -274,14 +280,20 @@ class copy_header : public ActionPrimitive<Header &, const Header &> {
 
 REGISTER_PRIMITIVE(copy_header);
 
-/* standard_metadata.clone_spec will contain the mirror id (16 LSB) and the
-   field list id to copy (16 MSB) */
 class clone_ingress_pkt_to_egress
   : public ActionPrimitive<const Data &, const Data &> {
-  void operator ()(const Data &clone_spec, const Data &field_list_id) {
-    Field &f_clone_spec = get_field("standard_metadata.clone_spec");
-    f_clone_spec.shift_left(field_list_id, 16);
-    f_clone_spec.add(f_clone_spec, clone_spec);
+  void operator ()(const Data &mirror_session_id, const Data &field_list_id) {
+    auto &packet = get_packet();
+    // We limit mirror_session_id values to small enough values that
+    // we can use one of the bit positions as a "clone was performed"
+    // indicator, making mirror_seesion_id stored here always non-0 if
+    // a clone was done.  This enables cleanly supporting
+    // mirror_session_id == 0, in case that is ever helpful.
+    RegisterAccess::set_clone_mirror_session_id(&packet,
+        mirror_session_id.get<uint16_t>() |
+        RegisterAccess::MIRROR_SESSION_ID_VALID_MASK);
+    RegisterAccess::set_clone_field_list(&packet,
+        field_list_id.get<uint16_t>());
   }
 };
 
@@ -289,10 +301,14 @@ REGISTER_PRIMITIVE(clone_ingress_pkt_to_egress);
 
 class clone_egress_pkt_to_egress
   : public ActionPrimitive<const Data &, const Data &> {
-  void operator ()(const Data &clone_spec, const Data &field_list_id) {
-    Field &f_clone_spec = get_field("standard_metadata.clone_spec");
-    f_clone_spec.shift_left(field_list_id, 16);
-    f_clone_spec.add(f_clone_spec, clone_spec);
+  void operator ()(const Data &mirror_session_id, const Data &field_list_id) {
+    auto &packet = get_packet();
+    // See clone_ingress_pkt_to_egress for why the arithmetic.
+    RegisterAccess::set_clone_mirror_session_id(&packet,
+        mirror_session_id.get<uint16_t>() |
+        RegisterAccess::MIRROR_SESSION_ID_VALID_MASK);
+    RegisterAccess::set_clone_field_list(&packet,
+        field_list_id.get<uint16_t>());
   }
 };
 
@@ -300,10 +316,8 @@ REGISTER_PRIMITIVE(clone_egress_pkt_to_egress);
 
 class resubmit : public ActionPrimitive<const Data &> {
   void operator ()(const Data &field_list_id) {
-    if (get_phv().has_field("intrinsic_metadata.resubmit_flag")) {
-      get_phv().get_field("intrinsic_metadata.resubmit_flag")
-          .set(field_list_id);
-    }
+    auto &packet = get_packet();
+    RegisterAccess::set_resubmit_flag(&packet, field_list_id.get<uint16_t>());
   }
 };
 
@@ -311,10 +325,9 @@ REGISTER_PRIMITIVE(resubmit);
 
 class recirculate : public ActionPrimitive<const Data &> {
   void operator ()(const Data &field_list_id) {
-    if (get_phv().has_field("intrinsic_metadata.recirculate_flag")) {
-      get_phv().get_field("intrinsic_metadata.recirculate_flag")
-          .set(field_list_id);
-    }
+    auto &packet = get_packet();
+    RegisterAccess::set_recirculate_flag(&packet,
+                                         field_list_id.get<uint16_t>());
   }
 };
 

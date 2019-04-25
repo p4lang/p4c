@@ -105,7 +105,7 @@ class Packet final {
   using buffer_state_t = PacketBuffer::state_t;
 
   //! Number of general purpose registers per packet
-  static constexpr size_t nb_registers = 2u;
+  static constexpr size_t nb_registers = 4u;
 
   static constexpr size_t INVALID_ENTRY_INDEX =
       std::numeric_limits<size_t>::max();
