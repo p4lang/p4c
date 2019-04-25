@@ -53,6 +53,7 @@ limitations under the License.
 #include "midend/expandEmit.h"
 #include "midend/tableHit.h"
 #include "midend/midEndLast.h"
+#include "midend/fillEnumMap.h"
 
 namespace BMV2 {
 
@@ -84,8 +85,8 @@ class PsaEnumOn32Bits : public P4::ChooseEnumRepresentation {
 };
 
 PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options) : MidEnd(options) {
-    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new PsaEnumOn32Bits("psa.p4"));
+    auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     if (BMV2::BMV2Context::get().options().loadIRFromJson == false) {
         addPasses({
             new P4::EliminateNewtype(&refMap, &typeMap),
@@ -136,9 +137,12 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options) : MidEnd(options) {
             new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
         });
     } else {
+        auto fillEnumMap = new P4::FillEnumMap(new PsaEnumOn32Bits("psa.p4"), &typeMap);
         addPasses({
             new P4::ResolveReferences(&refMap),
             new P4::TypeChecking(&refMap, &typeMap),
+            fillEnumMap,
+            new VisitFunctor([this, fillEnumMap]() { enumMap = fillEnumMap->repr; }),
             evaluator,
             new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
         });
