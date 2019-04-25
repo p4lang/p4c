@@ -20,6 +20,15 @@ limitations under the License.
  * can be found at the location below.
  *
  * https://github.com/p4lang/behavioral-model/blob/master/docs/simple_switch.md
+ *
+ * Note 2: There are ongoing discussions among P4 working group
+ * members in 2019-Apr regarding exactly how resubmit, recirculate,
+ * clone3, and digest operations can be called anywhere in their
+ * respective controls, but the values of the fields to be preserved
+ * (or sent to the control plane software in the case of digests) is
+ * the value they have when that control is finished executing.  That
+ * is how these operations behave in P4_14, but this requires some
+ * care in making this happen in P4_16.
  */
 
 #ifndef _V1_MODEL_P4_
@@ -309,6 +318,10 @@ extern void random<T>(out T result, in T lo, in T hi);
  * messages are typically coalesced together into a larger "batch"
  * which the control plane software processes all at once.
  *
+ * The value of the fields that are sent in the message to the control
+ * plane is the value they have at the end of ingress processing, not
+ * their values at the time the digest call is made.  See Note 2.
+ *
  * Calling digest is only supported in the ingress control.  There is
  * no way to undo its effects once it has been called.
  *
@@ -317,12 +330,6 @@ extern void random<T>(out T result, in T lo, in T hi);
  *
  * The BMv2 implementation of the v1model architecture ignores the
  * value of the receiver parameter.
- *
- * TBD As of 2019-Apr, the current BMv2 simple_switch implementation
- * does not use the value of the data parameter at the time of the
- * call, but instead uses the values of those fields when ingress
- * processing is complete, like P4_14 does.  This violates P4_16
- * language sementics.
  */
 extern void digest<T>(in bit<32> receiver, in T data);
 
@@ -468,6 +475,11 @@ extern void update_checksum_with_payload<T, O>(in bool condition, in T data, ino
  * metadata fields that the resubmit operation causes to be
  * preserved.
  *
+ * The value of the user-defined metadata fields that are preserved in
+ * resubmitted packets is the value they have at the end of ingress
+ * processing, not their values at the time the resubmit call is made.
+ * See Note 2.
+ *
  * Calling resubmit is only supported in the ingress control.  There
  * is no way to undo its effects once it has been called.  If resubmit
  * is called multiple times during a single execution of the ingress
@@ -486,6 +498,11 @@ extern void resubmit<T>(in T data);
  * packets in ingress processing by the value of the standard_metadata
  * instance_type field.  The caller may request that some user-defined
  * metadata fields be preserved with the recirculated packet.
+ *
+ * The value of the user-defined metadata fields that are preserved in
+ * recirculated packets is the value they have at the end of egress
+ * processing, not their values at the time the recirculate call is
+ * made.  See Note 2.
  *
  * Calling recirculate is only supported in the egress control.  There
  * is no way to undo its effects once it has been called.  If
@@ -527,7 +544,10 @@ extern void clone(in CloneType type, in bit<32> session);
  *
  * The caller may request that some user-defined metadata field values
  * from the original packet should be preserved with the cloned
- * packet(s).
+ * packet(s).  The value of the user-defined metadata fields that are
+ * preserved with cloned packets is the value they have at the end of
+ * ingress or egress processing, not their values at the time the
+ * clone3 call is made.  See Note 2.
  *
  * If clone3 is called during ingress processing, the first parameter
  * must be CloneType.I2E.  If clone3 is called during egress
