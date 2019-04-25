@@ -41,15 +41,12 @@ metadata ingress_intrinsic_metadata_t intrinsic_metadata;
 #define _ingress_global_tstamp_         intrinsic_metadata.ingress_global_timestamp
 #define modify_field_from_rng(_d, _w)   modify_field_rng_uniform(_d, 0, (1<<(_w))-1)
 
-<<<<<<< 5b10de115548717dd47418bece7b7ca011f0df5f:testdata/p4_14_samples/switch_20160512/includes/intrinsic.p4
 action deflect_on_drop(enable_dod) {
 #ifdef INCLUDE_OLD_INTRINSIC_METADATA_FIELDS
     modify_field(intrinsic_metadata.deflect_on_drop, enable_dod);
 #endif // INCLUDE_OLD_INTRINSIC_METADATA_FIELDS
 }
 
-=======
->>>>>>> update reference outputs:testdata/p4_14_samples/switch_20160226/includes/intrinsic.p4
 header_type queueing_metadata_t {
     fields {
         enq_timestamp : 48;             // time snapshot taken when the packet
@@ -62,13 +59,6 @@ header_type queueing_metadata_t {
                                         // time.
     }
 }
-
-action deflect_on_drop() {
-#ifdef INCLUDE_OLD_INTRINSIC_METADATA_FIELDS
-    modify_field(intrinsic_metadata.deflect_on_drop, 1);
-#endif // INCLUDE_OLD_INTRINSIC_METADATA_FIELDS
-}
-
 metadata queueing_metadata_t queueing_metadata;
 
 #define PKT_INSTANCE_TYPE_NORMAL 0

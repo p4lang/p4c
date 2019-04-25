@@ -38,8 +38,6 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         smeta_1.checksum_error = smeta.checksum_error;
         smeta_1.parser_error = smeta.parser_error;
         smeta_1.priority = smeta.priority;
-        smeta_1.deflect_on_drop = smeta.deflect_on_drop;
-        smeta_1.enq_tstamp = smeta.enq_tstamp;
         mark_to_drop(smeta_1);
         smeta.ingress_port = smeta_1.ingress_port;
         smeta.egress_spec = smeta_1.egress_spec;
@@ -63,8 +61,6 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         smeta.checksum_error = smeta_1.checksum_error;
         smeta.parser_error = smeta_1.parser_error;
         smeta.priority = smeta_1.priority;
-        smeta.deflect_on_drop = smeta_1.deflect_on_drop;
-        smeta.enq_tstamp = smeta_1.enq_tstamp;
     }
     @name("IngressI.forward") table forward_0 {
         key = {

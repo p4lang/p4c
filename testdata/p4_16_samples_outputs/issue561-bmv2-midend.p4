@@ -260,8 +260,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         smeta.checksum_error = standard_metadata.checksum_error;
         smeta.parser_error = standard_metadata.parser_error;
         smeta.priority = standard_metadata.priority;
-        smeta.deflect_on_drop = standard_metadata.deflect_on_drop;
-        smeta.enq_tstamp = standard_metadata.enq_tstamp;
         mark_to_drop(smeta);
         standard_metadata.ingress_port = smeta.ingress_port;
         standard_metadata.egress_spec = smeta.egress_spec;
@@ -285,8 +283,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.checksum_error = smeta.checksum_error;
         standard_metadata.parser_error = smeta.parser_error;
         standard_metadata.priority = smeta.priority;
-        standard_metadata.deflect_on_drop = smeta.deflect_on_drop;
-        standard_metadata.enq_tstamp = smeta.enq_tstamp;
     }
     @name(".my_drop") action my_drop_0() {
         smeta_1.ingress_port = standard_metadata.ingress_port;
@@ -311,8 +307,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         smeta_1.checksum_error = standard_metadata.checksum_error;
         smeta_1.parser_error = standard_metadata.parser_error;
         smeta_1.priority = standard_metadata.priority;
-        smeta_1.deflect_on_drop = standard_metadata.deflect_on_drop;
-        smeta_1.enq_tstamp = standard_metadata.enq_tstamp;
         mark_to_drop(smeta_1);
         standard_metadata.ingress_port = smeta_1.ingress_port;
         standard_metadata.egress_spec = smeta_1.egress_spec;
@@ -336,8 +330,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.checksum_error = smeta_1.checksum_error;
         standard_metadata.parser_error = smeta_1.parser_error;
         standard_metadata.priority = smeta_1.priority;
-        standard_metadata.deflect_on_drop = smeta_1.deflect_on_drop;
-        standard_metadata.enq_tstamp = smeta_1.enq_tstamp;
     }
     @name("ingress.set_l2ptr") action set_l2ptr(bit<32> l2ptr) {
         meta._fwd_metadata_l2ptr0 = l2ptr;
@@ -399,8 +391,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         smeta_2.checksum_error = standard_metadata.checksum_error;
         smeta_2.parser_error = standard_metadata.parser_error;
         smeta_2.priority = standard_metadata.priority;
-        smeta_2.deflect_on_drop = standard_metadata.deflect_on_drop;
-        smeta_2.enq_tstamp = standard_metadata.enq_tstamp;
         mark_to_drop(smeta_2);
         standard_metadata.ingress_port = smeta_2.ingress_port;
         standard_metadata.egress_spec = smeta_2.egress_spec;
@@ -424,8 +414,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         standard_metadata.checksum_error = smeta_2.checksum_error;
         standard_metadata.parser_error = smeta_2.parser_error;
         standard_metadata.priority = smeta_2.priority;
-        standard_metadata.deflect_on_drop = smeta_2.deflect_on_drop;
-        standard_metadata.enq_tstamp = smeta_2.enq_tstamp;
     }
     @name("egress.rewrite_mac") action rewrite_mac(bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
