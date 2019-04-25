@@ -1,0 +1,23 @@
+packet 4 000000000001 000000000000 ffff
+expect 1 000000000001 000000000000 ffff $
+
+# At this point, cIngress.counter [256] == 1, this 
+# should be implemented when STF tests can do this
+
+packet 4 000000000001 000000000000 ffff
+expect 1 000000000001 000000000000 ffff $
+
+# At this point, cIngress.counter [256] == 2, this 
+# should be implemented when STF tests can do this
+
+packet 4 000000000001 000000000000 ffff
+expect 1 000000000001 000000000000 ffff $
+
+# At this point, cIngress.counter [256] == 3, this 
+# should be implemented when STF tests can do this
+
+packet 4 000000000001 000000000000 ffff
+expect 1 000000000001 000000000000 ffff $
+
+# At this point, cIngress.counter [256] == 4, this 
+# should be implemented when STF tests can do this

@@ -538,11 +538,12 @@ Util::IJson* ExternConverter_Counter::convertExternObject(
         modelError("Expected 1 argument for %1%", mc);
         return nullptr;
     }
-    auto primitive = mkPrimitive("count");
+    auto primitive = mkPrimitive("_" + em->originalExternType->name +
+                                 "_" + em->method->name);
     auto parameters = mkParameters(primitive);
     primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
     auto ctr = new Util::JsonObject();
-    ctr->emplace("type", "counter_array");
+    ctr->emplace("type", "extern");
     ctr->emplace("value", em->object->controlPlaneName());
     parameters->append(ctr);
     auto index = ctxt->conv->convert(mc->arguments->at(0)->expression);
@@ -732,9 +733,10 @@ void ExternConverter_Counter::convertExternInstance(
     auto extern_obj = new Util::JsonObject();
     extern_obj->emplace("name", name);
     extern_obj->emplace("id", nextId("extern_instances"));
+    extern_obj->emplace("type", eb->getName());
     extern_obj->emplace("source_info", inst->sourceInfoJsonObj());
     ctxt->json->externs->append(extern_obj);
-    Util::JsonArray *arr = ctxt->json->insert_array_field(extern_obj, "attributes");
+    Util::JsonArray *arr = ctxt->json->insert_array_field(extern_obj, "attribute_values");
 
     if (eb->getConstructorParameters()->size() != 2) {
       modelError("%1%: expected two parameters", eb);
@@ -789,9 +791,10 @@ void ExternConverter_DirectCounter::convertExternInstance(
         auto extern_obj = new Util::JsonObject();
         extern_obj->emplace("name", name);
         extern_obj->emplace("id", nextId("extern_instances"));
+        extern_obj->emplace("type", eb->getName());
         extern_obj->emplace("source_info", inst->sourceInfoJsonObj());
         ctxt->json->externs->append(extern_obj);
-        Util::JsonArray *arr = ctxt->json->insert_array_field(extern_obj, "attributes");
+        Util::JsonArray *arr = ctxt->json->insert_array_field(extern_obj, "attribute_values");
 
         // Direct Counter only has a single argument, which is psa metadata
         // converter in conversion context will handle this for us
