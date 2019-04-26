@@ -51,9 +51,6 @@ class V1ProgramStructure : public ProgramStructure {
     const IR::P4Control* verify_checksum;
     const IR::P4Control* deparser;
 
-    // architecture related information
-    ordered_map<const IR::Node*, block_t> block_type;
-
     V1ProgramStructure() { }
 };
 
@@ -126,42 +123,6 @@ class ParseV1Architecture : public Inspector {
         structure(structure), v1model(P4V1::V1Model::instance) { }
     void modelError(const char* format, const IR::Node* node);
     bool preorder(const IR::PackageBlock* block) override;
-};
-
-class DiscoverV1Structure : public DiscoverStructure {
-    V1ProgramStructure* structure;
-
- public:
-    explicit DiscoverV1Structure(V1ProgramStructure* structure)
-        : DiscoverStructure(structure), structure(structure) {
-        CHECK_NULL(structure);
-        setName("InspectV1Program");
-    }
-
-    void postorder(const IR::P4Parser* p) override {
-        if (structure->block_type.count(p)) {
-            auto info = structure->block_type.at(p);
-            if (info == V1_PARSER) {
-                structure->parser = p;
-            }
-        }
-    }
-
-    void postorder(const IR::P4Control* c) override {
-        if (structure->block_type.count(c)) {
-            auto info = structure->block_type.at(c);
-            if (info == V1_INGRESS)
-                structure->ingress = c;
-            else if (info == V1_EGRESS)
-                structure->egress = c;
-            else if (info == V1_COMPUTE)
-                structure->compute_checksum = c;
-            else if (info == V1_VERIFY)
-                structure->verify_checksum = c;
-            else if (info == V1_DEPARSER)
-                structure->deparser = c;
-        }
-    }
 };
 
 class SimpleSwitchBackend : public Backend {
