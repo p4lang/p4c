@@ -65,7 +65,8 @@ class exprUses : public Inspector {
     void postorder(const IR::Expression *) override { search_tail = nullptr; }
 
  public:
-    exprUses(const IR::Expression *e, cstring n) : look_for(n) { e->apply(*this); }
+    exprUses(const IR::Expression *e, cstring n) : look_for(n) {
+        visitDagOnce = false; e->apply(*this); }
     explicit operator bool () const { return result; }
 };
 
