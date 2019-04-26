@@ -1,0 +1,6 @@
+issue1873.p4(7): [--Wwarn=duplicate] warning: header and metadata instances Header with the same name
+metadata test_t test;
+^^^^^^^^^^^^^^^^^^^^^
+issue1873.p4(8)
+header test_t test;
+^^^^^^^^^^^^^^^^^^^
