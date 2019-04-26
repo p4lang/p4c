@@ -61,7 +61,7 @@ class OutputLogPrefix {
 }  // namespace Detail
 
 inline std::ostream &endl(std::ostream &out) {
-    out << std::endl << indent_t::getindent(out);
+    out << std::endl;
     Detail::OutputLogPrefix::indent(out);
     return out; }
 
