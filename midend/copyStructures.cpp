@@ -15,8 +15,45 @@ limitations under the License.
 */
 
 #include "copyStructures.h"
+#include "frontends/p4/alias.h"
 
 namespace P4 {
+
+const IR::Node* RemoveAliases::postorder(IR::AssignmentStatement* statement) {
+    auto type = typeMap->getType(statement->left);
+    if (!type->is<IR::Type_StructLike>())
+        return statement;
+
+    ReadsWrites rw(refMap, false);
+    if (!rw.mayAlias(statement->left, statement->right))
+        return statement;
+    auto tmp = refMap->newName("tmp");
+    auto decl = new IR::Declaration_Variable(IR::ID(tmp), type->getP4Type(), nullptr);
+    declarations.push_back(decl);
+    auto result = new IR::Vector<IR::StatOrDecl>();
+    result->push_back(new IR::AssignmentStatement(
+        statement->srcInfo, new IR::PathExpression(tmp), statement->right));
+    result->push_back(new IR::AssignmentStatement(
+        statement->srcInfo, statement->left, new IR::PathExpression(tmp)));
+    LOG3("Inserted temporary " << decl << " for " << statement);
+    return result;
+}
+
+const IR::Node* RemoveAliases::postorder(IR::P4Parser* parser) {
+    if (!declarations.empty()) {
+        parser->parserLocals.append(declarations);
+        declarations.clear();
+    }
+    return parser;
+}
+
+const IR::Node* RemoveAliases::postorder(IR::P4Control* control) {
+    if (!declarations.empty()) {
+        control->controlLocals.append(declarations);
+        declarations.clear();
+    }
+    return control;
+}
 
 const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) {
     auto ltype = typeMap->getType(statement->left, true);
@@ -51,12 +88,12 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
                 // Leave headers as they are -- copy_header will also copy the valid bit
                 return statement;
 
+            BUG_CHECK(statement->right->is<IR::PathExpression>() ||
+                      statement->right->is<IR::Member>() ||
+                      statement->right->is<IR::ArrayIndex>(),
+                      "%1%: Unexpected operation when eliminating struct copying",
+                      statement->right);
             for (auto f : strct->fields) {
-                BUG_CHECK(statement->right->is<IR::PathExpression>() ||
-                          statement->right->is<IR::Member>() ||
-                          statement->right->is<IR::ArrayIndex>(),
-                          "%1%: Unexpected operation when eliminating struct copying",
-                          statement->right);
                 auto right = new IR::Member(statement->right, f->name);
                 auto left = new IR::Member(statement->left, f->name);
                 retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));

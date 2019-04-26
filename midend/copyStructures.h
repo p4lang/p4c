@@ -66,6 +66,42 @@ class DoCopyStructures : public Transform {
     const IR::Node* postorder(IR::AssignmentStatement* statement) override;
 };
 
+/**
+ * Analyzes an assignment between structures.  If the RHS expression
+ * refers to any of the fields in the LHS then it introduces an
+ * additional copy operation.  For example:
+ * struct S {
+ *    bit<32> a; bit<32> b;
+ * }
+ * S s;
+ * s = { s.b, s.a };
+ *
+ * is replaced by:
+ *
+ * S tmp;
+ * tmp = { s.b, s.a };
+ * s = tmp;
+ *
+ * @pre none
+ * @post no structure assignment refers on the RHS to fields that appear in the LHS.
+ */
+class RemoveAliases : public Transform {
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
+
+    IR::IndexedVector<IR::Declaration> declarations;
+ public:
+    RemoveAliases(ReferenceMap* refMap, TypeMap* typeMap) :
+            refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(refMap); CHECK_NULL(typeMap);
+        setName("RemoveAliases");
+    }
+
+    const IR::Node* postorder(IR::AssignmentStatement* statement) override;
+    const IR::Node* postorder(IR::P4Parser* parser) override;
+    const IR::Node* postorder(IR::P4Control* control) override;
+};
+
 class CopyStructures : public PassRepeated {
  public:
     CopyStructures(ReferenceMap* refMap, TypeMap* typeMap,
@@ -75,6 +111,8 @@ class CopyStructures : public PassRepeated {
         CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("CopyStructures");
         if (!typeChecking)
             typeChecking = new TypeChecking(refMap, typeMap);
+        passes.emplace_back(typeChecking);
+        passes.emplace_back(new RemoveAliases(refMap, typeMap));
         passes.emplace_back(typeChecking);
         passes.emplace_back(new DoCopyStructures(typeMap, errorOnMethodCall));
     }

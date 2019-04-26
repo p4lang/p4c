@@ -73,6 +73,7 @@ set (P4_FRONTEND_SRCS
 
 set (P4_FRONTEND_HDRS
   p4/actionsInlining.h
+  p4/alias.h
   p4/callGraph.h
   p4/checkConstants.h
   p4/checkNamedArgs.h
