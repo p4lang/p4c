@@ -2545,12 +2545,14 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
     }
 
     if (type->is<IR::Type_Stack>()) {
+        auto parser = findContext<IR::P4Parser>();
         if (member == IR::Type_Stack::next ||
             member == IR::Type_Stack::last) {
-            auto control = findContext<IR::P4Control>();
-            if (control != nullptr)
-                typeError("%1%: 'last' and 'next' for stacks cannot be used in a control",
+            if (parser == nullptr) {
+                typeError("%1%: 'last' and 'next' for stacks can only be used in a parser",
                           expression);
+                return expression;
+            }
             auto stack = type->to<IR::Type_Stack>();
             setType(getOriginal(), stack->elementType);
             setType(expression, stack->elementType);
@@ -2569,7 +2571,6 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             return expression;
         } else if (member == IR::Type_Stack::push_front ||
                    member == IR::Type_Stack::pop_front) {
-            auto parser = findContext<IR::P4Parser>();
             if (parser != nullptr)
                 typeError("%1%: '%2%' and '%3%' for stacks cannot be used in a parser",
                           expression, IR::Type_Stack::push_front, IR::Type_Stack::pop_front);
