@@ -214,6 +214,7 @@ Packet::Packet(Packet &&other) noexcept
     : cxt_id(other.cxt_id), ingress_port(other.ingress_port),
       egress_port(other.egress_port), packet_id(other.packet_id),
       copy_id(other.copy_id), ingress_length(other.ingress_length),
+      flags(other.flags),
       signature(other.signature), payload_size(other.payload_size),
       ingress_ts(other.ingress_ts), ingress_ts_ms(other.ingress_ts_ms),
   phv_source(other.phv_source), registers(other.registers) {
@@ -229,6 +230,7 @@ Packet::operator=(Packet &&other) noexcept {
   packet_id = other.packet_id;
   copy_id = other.copy_id;
   ingress_length = other.ingress_length;
+  flags = other.flags;
   signature = other.signature;
   payload_size = other.payload_size;
   ingress_ts = other.ingress_ts;
