@@ -328,10 +328,16 @@ Visitor::profile_t HeaderConverter::init_apply(const IR::Node* node) {
         auto type = ctxt->typeMap->getType(v, true);
         if (auto st = type->to<IR::Type_StructLike>()) {
             auto metadata_type = st->controlPlaneName();
-            if (type->is<IR::Type_Header>())
+            if (type->is<IR::Type_Header>()) {
                 ctxt->json->add_header(metadata_type, v->name);
-            else
+            } else if (type->is<IR::Type_HeaderUnion>()) {
+                auto ut = type->to<IR::Type_HeaderUnion>();
+                cstring union_type = ut->controlPlaneName();
+                auto fields = addHeaderUnionFields(v->name, ut);
+                ctxt->json->add_union(union_type, fields, v->name);
+            } else {
                 ctxt->json->add_metadata(metadata_type, v->name);
+            }
             addHeaderType(st);
         } else if (auto stack = type->to<IR::Type_Stack>()) {
             auto type = ctxt->typeMap->getTypeType(stack->elementType, true);
