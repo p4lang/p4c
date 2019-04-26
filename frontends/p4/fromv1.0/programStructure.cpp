@@ -220,6 +220,11 @@ void ProgramStructure::createStructures() {
             continue;
         IR::ID id = it.first->name;
         auto type = it.first->type;
+        auto h = headers.get(it.first->name);
+        if (h != nullptr)
+            ::warning(ErrorType::ERR_DUPLICATE,
+                      "header and metadata instances %2% with the same name",
+                      it.first, h);
         auto type_name = types.get(type);
         auto ht = type->to<IR::Type_Struct>();
         auto path = new IR::Path(type_name);
