@@ -92,7 +92,6 @@ struct standard_metadata_t {
     /// multicast group id (key for the mcast replication table)
     @alias("intrinsic_metadata.mcast_grp")
     bit<16> mcast_grp;
-    /// resubmit metadata field list id, or 0 if no resubmit operation has been performed
     @alias("intrinsic_metadata.resubmit_flag")
     bit<32> resubmit_flag;
     /// Replication ID for multicast
