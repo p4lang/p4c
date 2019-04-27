@@ -123,6 +123,8 @@ class ParseAnnotations : public Modifier {
     static bool parseExpressionList(IR::Annotation* annotation);
     static bool parseKvList(IR::Annotation* annotation);
 
+    void addHandler(cstring name, Handler h) { handlers.insert({name, h}); }
+
  private:
     /// Whether to warn about unknown annotations.
     const bool warnUnknown;
