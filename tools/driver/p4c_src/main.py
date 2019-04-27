@@ -136,11 +136,11 @@ def main():
                         "description (default is binary). "
                         "[Deprecated; use '--p4runtime-files' instead]",
                         action="store", default="binary")
-    parser.add_argument("--pragmas-help", "--help-pragmas", "--help-pragma", "--help-annotations",
-                        "--annotations-help",
+    parser.add_argument("--help-pragmas", "--pragma-help", "--pragmas-help",
+                        "--help-annotations", "--annotation-help", "--annotations-help",
                         dest="help_pragmas", action="store_true", default=False,
                         help = "Print the documentation about supported annotations/pragmas and exit.")
-    parser.add_argument("--target-help", "--help-targets", "--help-traget",
+    parser.add_argument("--help-targets", "--target-help", "--targets-help",
                         dest="show_target_help",
                         help="Display target specific command line options.",
                         action="store_true", default=False)
