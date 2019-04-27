@@ -136,9 +136,10 @@ def main():
                         "description (default is binary). "
                         "[Deprecated; use '--p4runtime-files' instead]",
                         action="store", default="binary")
-    parser.add_argument("--pragmas-help", "--help-pragmas", "--help-pragma",
+    parser.add_argument("--pragmas-help", "--help-pragmas", "--help-pragma", "--help-annotations",
+                        "--annotations-help",
                         dest="help_pragmas", action="store_true", default=False,
-                        help = "Print the documentation about supported pragmas and exit.")
+                        help = "Print the documentation about supported annotations/pragmas and exit.")
     parser.add_argument("--target-help", "--help-targets", "--help-traget",
                         dest="show_target_help",
                         help="Display target specific command line options.",
@@ -198,7 +199,7 @@ def main():
     # so in that case, we set the input to dummy.p4 and expect that the backend itself
     # will do its printing and ignore the input file.
     # If not, the compiler will error out anyway.
-    checkInput = True if not opts.help_pragmas else False
+    checkInput = not opts.help_pragmas
 
     input_specified = False
     if opts.source_file:
