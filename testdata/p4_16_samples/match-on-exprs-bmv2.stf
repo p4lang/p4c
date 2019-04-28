@@ -1,0 +1,10 @@
+#add t1 hdr.ethernet.srcAddr:0x1f dstAddr_lsbs:0x010101010101 etherType_less_10:0xf00f foo(out_port:3)
+# error: hdr.ethernet.srcAddr not found
+
+#add t1 hdr.ethernet.srcAddr[22:18]:0x1f dstAddr_lsbs:0x010101010101 etherType_less_10:0xf00f foo(out_port:3)
+# error: hdr.ethernet.srcAddr[22 not found
+
+add t1 ethernet.srcAddr.slice:0x1f dstAddr_lsbs:0x010101010101 etherType_less_10:0xf00f ingressImpl.foo(out_port:3)
+
+expect 3 ff01ff7dff01 0000007c003e f019
+packet 1 ff01ff01ff01 0000007c003e f019
