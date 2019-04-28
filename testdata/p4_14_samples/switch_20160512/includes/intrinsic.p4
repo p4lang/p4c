@@ -16,9 +16,6 @@ limitations under the License.
 
 header_type ingress_intrinsic_metadata_t {
     fields {
-        resubmit_flag : 1;              // flag distinguishing original packets
-                                        // from resubmitted packets.
-
         ingress_global_timestamp : 48;  // global timestamp (ns) taken upon
                                         // arrival at ingress.
 
@@ -32,7 +29,6 @@ header_type ingress_intrinsic_metadata_t {
         mcast_hash : 13;                // multicast hashing
 #endif // INCLUDE_OLD_INTRINSIC_METADATA_FIELDS
         egress_rid : 16;                // Replication ID for multicast
-        lf_field_list : 32;             // Learn filter field list
         priority : 3;                   // set packet priority
     }
 }

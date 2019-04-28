@@ -39,7 +39,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("MyIngress.drop") action drop_1() {
+    @name("MyIngress.drop") action drop() {
         mark_to_drop(standard_metadata);
     }
     @name("MyIngress.actTbl") action actTbl(bit<24> id, bit<32> ip) {
@@ -50,9 +50,9 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         }
         actions = {
             actTbl();
-            drop_1();
+            drop();
         }
-        const default_action = drop_1();
+        const default_action = drop();
         const entries = {
                         32w0x20020420 : actTbl(24w42, 32w0x20024200);
 

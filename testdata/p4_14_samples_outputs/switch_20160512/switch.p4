@@ -89,11 +89,9 @@ struct int_metadata_i2e_t {
 }
 
 struct ingress_intrinsic_metadata_t {
-    bit<1>  resubmit_flag;
     bit<48> ingress_global_timestamp;
     bit<16> mcast_grp;
     bit<16> egress_rid;
-    bit<32> lf_field_list;
     bit<3>  priority;
 }
 

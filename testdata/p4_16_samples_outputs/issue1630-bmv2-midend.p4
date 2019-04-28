@@ -70,7 +70,7 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name("MyIngress.drop") action drop_1() {
+    @name("MyIngress.drop") action drop() {
         mark_to_drop(standard_metadata);
     }
     @name("MyIngress.ipv4_forward") action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
@@ -86,7 +86,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         }
         actions = {
             ipv4_forward();
-            drop_1();
+            drop();
             NoAction_0();
         }
         size = 1024;

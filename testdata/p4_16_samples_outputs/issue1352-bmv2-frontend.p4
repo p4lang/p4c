@@ -65,10 +65,10 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @name(".NoAction") action NoAction_1() {
     }
-    @name("MyIngress.drop") action drop_1() {
+    @name("MyIngress.drop") action drop() {
         mark_to_drop(standard_metadata);
     }
-    @name("MyIngress.drop") action drop_3() {
+    @name("MyIngress.drop") action drop_2() {
         mark_to_drop(standard_metadata);
     }
     @name("MyIngress.set_dmac") action set_dmac(macAddr_t dstAddr) {
@@ -80,7 +80,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         }
         actions = {
             set_dmac();
-            drop_1();
+            drop();
             NoAction_0();
         }
         size = 1024;
@@ -96,7 +96,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         }
         actions = {
             set_nhop();
-            drop_3();
+            drop_2();
             NoAction_1();
         }
         size = 1024;

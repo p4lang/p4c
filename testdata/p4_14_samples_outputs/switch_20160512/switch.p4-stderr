@@ -1,7 +1,7 @@
 tunnel.p4(1002): [--Wwarn=mismatch] warning: -14: negative value with unsigned type
     add(egress_metadata.payload_length, standard_metadata.packet_length, -14);
                                                                           ^^
-intrinsic.p4(44): [--Wwarn=type-inference] warning: Could not infer type for enable_dod, using bit<8>
+intrinsic.p4(40): [--Wwarn=type-inference] warning: Could not infer type for enable_dod, using bit<8>
 action deflect_on_drop(enable_dod) {
                        ^^^^^^^^^^
 switch_config.p4(21): [--Wwarn=type-inference] warning: Could not infer type for enable_dod, using bit<8>

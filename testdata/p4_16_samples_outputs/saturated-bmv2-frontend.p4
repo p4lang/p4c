@@ -65,7 +65,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         standard_meta.egress_spec = 9w0;
         h.h.res_16 = h.h.opr1_16 |-| h.h.opr2_16;
     }
-    @name("ingress.drop") action drop_1() {
+    @name("ingress.drop") action drop() {
         mark_to_drop(standard_meta);
     }
     @name("ingress.t") table t_0 {
@@ -77,9 +77,9 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
             usat_minus();
             sat_plus();
             sat_minus();
-            drop_1();
+            drop();
         }
-        default_action = drop_1();
+        default_action = drop();
         const entries = {
                         8w0x1 : usat_plus();
 
