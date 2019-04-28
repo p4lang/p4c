@@ -1,0 +1,10 @@
+add tabA hdrA.f1:0x01010101 act(port:2, idx:10)
+add tabB hdrB.f1:0x01010101 act(port:3, idx:10)
+
+expect 2 aaaa 01010101 02020202 01020304 0506
+expect 3 bbbb 01020304 01010101 02020202 0506
+packet 0 aaaa 01010101 02020202 01020304 0506
+packet 0 bbbb 01020304 01010101 02020202 0506
+
+wait
+check_counter cntDum(10) packets == 2

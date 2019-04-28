@@ -181,6 +181,8 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/psa-drop-all-bmv2.p4
   testdata/p4_16_samples/psa-unicast-or-drop-bmv2.p4
   testdata/p4_16_samples/psa-ingress-input-meta-bmv2.p4
+  # Test that used to work, but broken by recent changes (#1908)
+  testdata/p4_14_samples/counter6.p4
 )
 
 if (HAVE_SIMPLE_SWITCH)
