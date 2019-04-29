@@ -1,4 +1,4 @@
-stack2.p4(24): [--Werror=legacy] error: AssignmentStatement: cannot unify stacks with different sized header h[] and header h[]
+stack2.p4(24): [--Werror=type-error] error: AssignmentStatement: cannot unify stacks with different sized header h[] and header h[]
         stack1 = stack2; // assignment between different stacks
                ^
 stack2.p4(21)

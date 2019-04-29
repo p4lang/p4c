@@ -97,10 +97,15 @@ struct headers {
 }
 
 struct metadata {
+    @field_list(0) 
     port_t  ingress_port;
+    @field_list(0) 
     task_t  task;
+    @field_list(0) 
     bit<16> tcp_length;
+    @field_list(0) 
     bit<32> cast_length;
+    @field_list(0) 
     bit<1>  do_cksum;
 }
 
@@ -193,22 +198,22 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     @name("MyIngress.controller_debug") action controller_debug() {
         meta.task = 16w3;
         meta.ingress_port = standard_metadata.ingress_port;
-        clone3<metadata>(CloneType.I2E, 32w100, meta);
+        clone3(CloneType.I2E, 32w100, 8w0);
     }
     @name("MyIngress.controller_debug") action controller_debug_2() {
         meta.task = 16w3;
         meta.ingress_port = standard_metadata.ingress_port;
-        clone3<metadata>(CloneType.I2E, 32w100, meta);
+        clone3(CloneType.I2E, 32w100, 8w0);
     }
     @name("MyIngress.controller_reply") action controller_reply(task_t task) {
         meta.task = task;
         meta.ingress_port = standard_metadata.ingress_port;
-        clone3<metadata>(CloneType.I2E, 32w100, meta);
+        clone3(CloneType.I2E, 32w100, 8w0);
     }
     @name("MyIngress.controller_reply") action controller_reply_2(task_t task) {
         meta.task = task;
         meta.ingress_port = standard_metadata.ingress_port;
-        clone3<metadata>(CloneType.I2E, 32w100, meta);
+        clone3(CloneType.I2E, 32w100, 8w0);
     }
     @name("MyIngress.icmp6_echo_reply") action icmp6_echo_reply() {
         mac_tmp_0 = hdr.ethernet.dst_addr;

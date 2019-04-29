@@ -82,6 +82,7 @@ bool ParseAnnotations::parseKvList(IR::Annotation* annotation) {
 }
 
 void ParseAnnotations::postorder(IR::Annotation* annotation) {
+    LOG2("Scanning annotation " << annotation);
     if (!annotation->needsParsing) {
         return;
     }
@@ -101,6 +102,7 @@ void ParseAnnotations::postorder(IR::Annotation* annotation) {
         return;
     }
 
+    LOG2("Parsing annotation " << annotation);
     annotation->needsParsing = !handlers[name](annotation);
 }
 
