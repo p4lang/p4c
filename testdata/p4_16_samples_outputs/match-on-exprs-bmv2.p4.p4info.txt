@@ -1,0 +1,67 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33575637
+    name: "ingressImpl.t1"
+    alias: "t1"
+  }
+  match_fields {
+    id: 1
+    name: "ethernet.srcAddr.slice"
+    bitwidth: 5
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "dstAddr_lsbs"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "etherType_less_10"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16814741
+  }
+  action_refs {
+    id: 16788060
+  }
+  action_refs {
+    id: 16800567
+  }
+  const_default_action_id: 16800567
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16788060
+    name: "ingressImpl.my_drop"
+    alias: "my_drop"
+  }
+}
+actions {
+  preamble {
+    id: 16814741
+    name: "ingressImpl.foo"
+    alias: "foo"
+  }
+  params {
+    id: 1
+    name: "out_port"
+    bitwidth: 9
+  }
+}
+type_info {
+}
