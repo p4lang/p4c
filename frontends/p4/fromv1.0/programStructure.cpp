@@ -1990,7 +1990,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
     IR::ID name = newName;
     auto type = controlType(name);
     std::vector<cstring> actionsInTables;
-    IR::IndexedVector<IR::Declaration> stateful;
+    IR::IndexedVector<IR::Declaration> locals;
 
     std::vector<const IR::V1Table*> usedTables;
     tablesReferred(control, usedTables);
@@ -2026,7 +2026,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
             if (std::find(usedTables.begin(), usedTables.end(), tbl) != usedTables.end()) {
                 auto extcounter = convertDirectCounter(c.first, c.second);
                 if (extcounter != nullptr) {
-                    stateful.push_back(extcounter);
+                    locals.push_back(extcounter);
                     directCounters.emplace(c.first->table.name, c.first->name);
                     counterMap.emplace(c.first->name, extcounter);
                 }
@@ -2035,8 +2035,10 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
     }
     for (auto c : countersToDo) {
         auto ctr = counters.get(c);
-        auto counter = convert(ctr, counters.get(ctr));
-        stateful.push_back(counter);
+        if (!globalInstances.count(ctr)) {
+            auto counter = convert(ctr, counters.get(ctr));
+            declarations->push_back(counter);
+            globalInstances[ctr] = counter; }
     }
 
     for (auto m : meters) {
@@ -2054,7 +2056,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
                 auto meter = meters.get(m.second);
                 auto extmeter = convertDirectMeter(meter, m.second);
                 if (extmeter != nullptr) {
-                    stateful.push_back(extmeter);
+                    locals.push_back(extmeter);
                     directMeters.emplace(m.first->table.name, meter);
                     meterMap.emplace(meter, extmeter);
                 }
@@ -2075,21 +2077,26 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
     }
     for (auto c : metersToDo) {
         auto mtr = meters.get(c);
-        auto meter = convert(mtr, meters.get(mtr));
-        stateful.push_back(meter);
+        if (!globalInstances.count(mtr)) {
+            auto meter = convert(mtr, meters.get(mtr));
+            declarations->push_back(meter);
+            globalInstances[mtr] = meter; }
     }
 
     for (auto c : registersToDo) {
         auto reg = registers.get(c);
-        auto r = convert(reg, registers.get(reg));
-        declarations->push_back(r);
+        if (!globalInstances.count(reg)) {
+            auto r = convert(reg, registers.get(reg));
+            declarations->push_back(r);
+            globalInstances[reg] = r; }
     }
 
     for (auto c : externsToDo) {
         auto ext = externs.get(c);
         if (!ExternConverter::cvtAsGlobal(this, ext)) {
-            ext = ExternConverter::cvtExternInstance(this, ext, externs.get(ext), &stateful);
-            stateful.push_back(ext);
+            IR::IndexedVector<IR::Declaration> tmp;
+            ext = ExternConverter::cvtExternInstance(this, ext, externs.get(ext), &locals);
+            locals.push_back(ext);
         }
     }
 
@@ -2100,7 +2107,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
             return nullptr;
         }
         auto action = convertAction(act, actions.get(act), nullptr, nullptr);
-        stateful.push_back(action);
+        locals.push_back(action);
     }
 
     std::set<cstring> tablesDone;
@@ -2108,9 +2115,9 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
     for (auto t : usedTables) {
         if (tablesDone.find(t->name.name) != tablesDone.end())
             continue;
-        auto tbl = convertTable(t, tables.get(t), stateful, instanceNames);
+        auto tbl = convertTable(t, tables.get(t), locals, instanceNames);
         if (tbl != nullptr)
-            stateful.push_back(tbl);
+            locals.push_back(tbl);
         tablesDone.emplace(t->name.name);
     }
 
@@ -2126,7 +2133,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
             auto annos = addGlobalNameAnnotation(cc);
             auto decl = new IR::Declaration_Instance(
                 IR::ID(iname), annos, type, new IR::Vector<IR::Argument>(), nullptr);
-            stateful.push_back(decl);
+            locals.push_back(decl);
         }
     }
 
@@ -2137,7 +2144,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
         body->push_back(s);
     }
 
-    auto result = new IR::P4Control(name, type, stateful, body);
+    auto result = new IR::P4Control(name, type, locals, body);
     conversionContext.clear();
     return result;
 }
