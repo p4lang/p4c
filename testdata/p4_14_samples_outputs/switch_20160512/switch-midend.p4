@@ -714,7 +714,6 @@ struct metadata {
     @field_list(8w3) 
     bit<1>   _int_metadata_i2e_sink54;
     bit<1>   _int_metadata_i2e_source55;
-<<<<<<< e2f4d7dd38c28b1a9d07067e5136a748a68e76b1
     bit<32>  _ipv4_metadata_lkp_ipv4_sa56;
     bit<32>  _ipv4_metadata_lkp_ipv4_da57;
     bit<1>   _ipv4_metadata_ipv4_unicast_enabled58;
@@ -764,6 +763,7 @@ struct metadata {
     bit<1>   _l3_metadata_outer_routed102;
     bit<8>   _l3_metadata_mtu_index103;
     bit<1>   _l3_metadata_l3_copy104;
+    @saturating 
     bit<16>  _l3_metadata_l3_mtu_check105;
     bit<2>   _meter_metadata_meter_color106;
     bit<16>  _meter_metadata_meter_index107;
@@ -813,117 +813,6 @@ struct metadata {
     bit<1>   _tunnel_metadata_tunnel_if_check151;
     bit<4>   _tunnel_metadata_egress_header_count152;
     bit<8>   _tunnel_metadata_inner_ip_proto153;
-=======
-    bit<1>   _intrinsic_metadata_resubmit_flag56;
-    bit<48>  _intrinsic_metadata_ingress_global_timestamp57;
-    bit<16>  _intrinsic_metadata_mcast_grp58;
-    bit<16>  _intrinsic_metadata_egress_rid59;
-    bit<32>  _intrinsic_metadata_lf_field_list60;
-    bit<3>   _intrinsic_metadata_priority61;
-    bit<32>  _ipv4_metadata_lkp_ipv4_sa62;
-    bit<32>  _ipv4_metadata_lkp_ipv4_da63;
-    bit<1>   _ipv4_metadata_ipv4_unicast_enabled64;
-    bit<2>   _ipv4_metadata_ipv4_urpf_mode65;
-    bit<128> _ipv6_metadata_lkp_ipv6_sa66;
-    bit<128> _ipv6_metadata_lkp_ipv6_da67;
-    bit<1>   _ipv6_metadata_ipv6_unicast_enabled68;
-    bit<1>   _ipv6_metadata_ipv6_src_is_link_local69;
-    bit<2>   _ipv6_metadata_ipv6_urpf_mode70;
-    bit<48>  _l2_metadata_lkp_mac_sa71;
-    bit<48>  _l2_metadata_lkp_mac_da72;
-    bit<3>   _l2_metadata_lkp_pkt_type73;
-    bit<16>  _l2_metadata_lkp_mac_type74;
-    bit<16>  _l2_metadata_l2_nexthop75;
-    bit<1>   _l2_metadata_l2_nexthop_type76;
-    bit<1>   _l2_metadata_l2_redirect77;
-    bit<1>   _l2_metadata_l2_src_miss78;
-    bit<16>  _l2_metadata_l2_src_move79;
-    bit<10>  _l2_metadata_stp_group80;
-    bit<3>   _l2_metadata_stp_state81;
-    bit<16>  _l2_metadata_bd_stats_idx82;
-    bit<1>   _l2_metadata_learning_enabled83;
-    bit<1>   _l2_metadata_port_vlan_mapping_miss84;
-    bit<16>  _l2_metadata_same_if_check85;
-    bit<2>   _l3_metadata_lkp_ip_type86;
-    bit<4>   _l3_metadata_lkp_ip_version87;
-    bit<8>   _l3_metadata_lkp_ip_proto88;
-    bit<8>   _l3_metadata_lkp_ip_tc89;
-    bit<8>   _l3_metadata_lkp_ip_ttl90;
-    bit<16>  _l3_metadata_lkp_l4_sport91;
-    bit<16>  _l3_metadata_lkp_l4_dport92;
-    bit<16>  _l3_metadata_lkp_outer_l4_sport93;
-    bit<16>  _l3_metadata_lkp_outer_l4_dport94;
-    bit<16>  _l3_metadata_vrf95;
-    bit<10>  _l3_metadata_rmac_group96;
-    bit<1>   _l3_metadata_rmac_hit97;
-    bit<2>   _l3_metadata_urpf_mode98;
-    bit<1>   _l3_metadata_urpf_hit99;
-    bit<1>   _l3_metadata_urpf_check_fail100;
-    bit<16>  _l3_metadata_urpf_bd_group101;
-    bit<1>   _l3_metadata_fib_hit102;
-    bit<16>  _l3_metadata_fib_nexthop103;
-    bit<1>   _l3_metadata_fib_nexthop_type104;
-    bit<16>  _l3_metadata_same_bd_check105;
-    bit<16>  _l3_metadata_nexthop_index106;
-    bit<1>   _l3_metadata_routed107;
-    bit<1>   _l3_metadata_outer_routed108;
-    bit<8>   _l3_metadata_mtu_index109;
-    bit<1>   _l3_metadata_l3_copy110;
-    @saturating 
-    bit<16>  _l3_metadata_l3_mtu_check111;
-    bit<2>   _meter_metadata_meter_color112;
-    bit<16>  _meter_metadata_meter_index113;
-    bit<1>   _multicast_metadata_ipv4_mcast_key_type114;
-    bit<16>  _multicast_metadata_ipv4_mcast_key115;
-    bit<1>   _multicast_metadata_ipv6_mcast_key_type116;
-    bit<16>  _multicast_metadata_ipv6_mcast_key117;
-    bit<1>   _multicast_metadata_outer_mcast_route_hit118;
-    bit<2>   _multicast_metadata_outer_mcast_mode119;
-    bit<1>   _multicast_metadata_mcast_route_hit120;
-    bit<1>   _multicast_metadata_mcast_bridge_hit121;
-    bit<1>   _multicast_metadata_ipv4_multicast_enabled122;
-    bit<1>   _multicast_metadata_ipv6_multicast_enabled123;
-    bit<1>   _multicast_metadata_igmp_snooping_enabled124;
-    bit<1>   _multicast_metadata_mld_snooping_enabled125;
-    bit<16>  _multicast_metadata_bd_mrpf_group126;
-    bit<16>  _multicast_metadata_mcast_rpf_group127;
-    bit<2>   _multicast_metadata_mcast_mode128;
-    bit<16>  _multicast_metadata_multicast_route_mc_index129;
-    bit<16>  _multicast_metadata_multicast_bridge_mc_index130;
-    bit<1>   _multicast_metadata_inner_replica131;
-    bit<1>   _multicast_metadata_replica132;
-    bit<16>  _multicast_metadata_mcast_grp133;
-    bit<1>   _nexthop_metadata_nexthop_type134;
-    bit<8>   _qos_metadata_outer_dscp135;
-    bit<3>   _qos_metadata_marked_cos136;
-    bit<8>   _qos_metadata_marked_dscp137;
-    bit<3>   _qos_metadata_marked_exp138;
-    bit<48>  _queueing_metadata_enq_timestamp139;
-    bit<16>  _queueing_metadata_enq_qdepth140;
-    bit<32>  _queueing_metadata_deq_timedelta141;
-    bit<16>  _queueing_metadata_deq_qdepth142;
-    bit<1>   _security_metadata_storm_control_color143;
-    bit<1>   _security_metadata_ipsg_enabled144;
-    bit<1>   _security_metadata_ipsg_check_fail145;
-    bit<16>  _sflow_metadata_sflow_session_id146;
-    bit<5>   _tunnel_metadata_ingress_tunnel_type147;
-    bit<24>  _tunnel_metadata_tunnel_vni148;
-    bit<1>   _tunnel_metadata_mpls_enabled149;
-    bit<20>  _tunnel_metadata_mpls_label150;
-    bit<3>   _tunnel_metadata_mpls_exp151;
-    bit<8>   _tunnel_metadata_mpls_ttl152;
-    bit<5>   _tunnel_metadata_egress_tunnel_type153;
-    bit<14>  _tunnel_metadata_tunnel_index154;
-    bit<9>   _tunnel_metadata_tunnel_src_index155;
-    bit<9>   _tunnel_metadata_tunnel_smac_index156;
-    bit<14>  _tunnel_metadata_tunnel_dst_index157;
-    bit<14>  _tunnel_metadata_tunnel_dmac_index158;
-    bit<24>  _tunnel_metadata_vnid159;
-    bit<1>   _tunnel_metadata_tunnel_terminate160;
-    bit<1>   _tunnel_metadata_tunnel_if_check161;
-    bit<4>   _tunnel_metadata_egress_header_count162;
-    bit<8>   _tunnel_metadata_inner_ip_proto163;
->>>>>>> Handle multiple resubmits/recirculate/clone calls
 }
 
 struct headers {
@@ -4583,20 +4472,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         _sflow_ingress_session_pkt_counter.count();
         meta._fabric_metadata_reason_code28 = reason_code;
         meta._i2e_metadata_mirror_session_id36 = (bit<16>)sflow_i2e_mirror_id;
-<<<<<<< e2f4d7dd38c28b1a9d07067e5136a748a68e76b1
-<<<<<<< b59b6f9946a58e016c48d0bd0398b17193ebb138
-        clone3<tuple_3>(CloneType.I2E, sflow_i2e_mirror_id, { { meta._ingress_metadata_bd42, meta._ingress_metadata_ifindex38, reason_code, meta._ingress_metadata_ingress_port37 }, meta._sflow_metadata_sflow_session_id136, (bit<16>)sflow_i2e_mirror_id });
-=======
-        clone3<tuple_3>(CloneType.I2E, sflow_i2e_mirror_id, { { meta._ingress_metadata_bd42, meta._ingress_metadata_ifindex38, reason_code, meta._ingress_metadata_ingress_port37 }, meta._sflow_metadata_sflow_session_id146, (bit<16>)sflow_i2e_mirror_id });
-=======
-        meta.fabric_metadata.reason_code = reason_code;
-        meta.i2e_metadata.mirror_session_id = (bit<16>)sflow_i2e_mirror_id;
-        clone3(CloneType.I2E, sflow_i2e_mirror_id);
->>>>>>> Remove useless back-end pass
->>>>>>> Remove useless back-end pass
-=======
         clone3(CloneType.I2E, sflow_i2e_mirror_id, 8w5);
->>>>>>> Handle multiple resubmits/recirculate/clone calls
     }
     @name(".sflow_ing_take_sample") table _sflow_ing_take_sample {
         actions = {
@@ -4780,32 +4656,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".acl_mirror") action _acl_mirror_1(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
         meta._i2e_metadata_mirror_session_id36 = (bit<16>)session_id;
-<<<<<<< e2f4d7dd38c28b1a9d07067e5136a748a68e76b1
         meta._i2e_metadata_ingress_tstamp35 = (bit<32>)standard_metadata.ingress_global_timestamp;
-        clone3<tuple_0>(CloneType.I2E, session_id, { (bit<32>)standard_metadata.ingress_global_timestamp, (bit<16>)session_id });
-=======
-        meta._i2e_metadata_ingress_tstamp35 = (bit<32>)meta._intrinsic_metadata_ingress_global_timestamp57;
         clone3(CloneType.I2E, session_id, 8w0);
->>>>>>> Handle multiple resubmits/recirculate/clone calls
         meta._acl_metadata_acl_stats_index11 = acl_stats_index;
-<<<<<<< b59b6f9946a58e016c48d0bd0398b17193ebb138
         meta._meter_metadata_meter_index107 = acl_meter_index;
-=======
-        meta._meter_metadata_meter_index113 = acl_meter_index;
-<<<<<<< e2f4d7dd38c28b1a9d07067e5136a748a68e76b1
-=======
-        meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
-        clone3(CloneType.I2E, session_id);
-        meta.acl_metadata.acl_stats_index = acl_stats_index;
-        meta.meter_metadata.meter_index = acl_meter_index;
->>>>>>> Remove useless back-end pass
->>>>>>> Remove useless back-end pass
     }
-<<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch-midend.p4
-=======
-    }
->>>>>>> Handle multiple resubmits/recirculate/clone calls
     @name(".acl_redirect_nexthop") action _acl_redirect_nexthop_1(bit<16> nexthop_index, bit<14> acl_stats_index, bit<16> acl_meter_index, bit<1> acl_copy, bit<16> acl_copy_reason) {
         meta._acl_metadata_acl_redirect7 = 1w1;
         meta._acl_metadata_acl_nexthop3 = nexthop_index;
@@ -4870,96 +4725,23 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".acl_permit") action _acl_permit_4(bit<14> acl_stats_index, bit<16> acl_meter_index, bit<1> acl_copy, bit<16> acl_copy_reason) {
         meta._acl_metadata_acl_stats_index11 = acl_stats_index;
-<<<<<<< e2f4d7dd38c28b1a9d07067e5136a748a68e76b1
-<<<<<<< 43bd696b29be944551572728dfc9ec48437ee961
         meta._meter_metadata_meter_index107 = acl_meter_index;
-=======
-<<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch-midend.p4
-=======
->>>>>>> Handle multiple resubmits/recirculate/clone calls
-        meta._meter_metadata_meter_index113 = acl_meter_index;
->>>>>>> Tag metadata fields that need to be recirculated
         meta._acl_metadata_acl_copy1 = acl_copy;
         meta._fabric_metadata_reason_code28 = acl_copy_reason;
     }
     @name(".acl_mirror") action _acl_mirror_2(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
         meta._i2e_metadata_mirror_session_id36 = (bit<16>)session_id;
-<<<<<<< 43bd696b29be944551572728dfc9ec48437ee961
         meta._i2e_metadata_ingress_tstamp35 = (bit<32>)standard_metadata.ingress_global_timestamp;
-        clone3<tuple_0>(CloneType.I2E, session_id, { (bit<32>)standard_metadata.ingress_global_timestamp, (bit<16>)session_id });
-=======
-        meta._i2e_metadata_ingress_tstamp35 = (bit<32>)meta._intrinsic_metadata_ingress_global_timestamp57;
-<<<<<<< e2f4d7dd38c28b1a9d07067e5136a748a68e76b1
-        clone3<tuple_0>(CloneType.I2E, session_id, { (bit<32>)meta._intrinsic_metadata_ingress_global_timestamp57, (bit<16>)session_id });
-=======
-    }
-    @name(".acl_mirror") action _acl_mirror_2(bit<32> session_id, bit<16> acl_stats_index) {
-<<<<<<< 1968b35515ddd4809e438d338481981969628fc8
-        meta._i2e_metadata_mirror_session_id34 = (bit<16>)session_id;
-        meta._i2e_metadata_ingress_tstamp33 = (bit<32>)meta._intrinsic_metadata_ingress_global_timestamp54;
-        meta._ingress_metadata_enable_dod44 = 1w0;
-        clone3<tuple_0>(CloneType.I2E, session_id, { (bit<32>)meta._intrinsic_metadata_ingress_global_timestamp54, (bit<16>)session_id });
->>>>>>> Tag metadata fields that need to be recirculated:testdata/p4_14_samples_outputs/switch_20160226/switch-midend.p4
->>>>>>> Tag metadata fields that need to be recirculated
-=======
         clone3(CloneType.I2E, session_id, 8w0);
->>>>>>> Handle multiple resubmits/recirculate/clone calls
         meta._acl_metadata_acl_stats_index11 = acl_stats_index;
         meta._meter_metadata_meter_index107 = acl_meter_index;
     }
     @name(".acl_mirror") action _acl_mirror_4(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
         meta._i2e_metadata_mirror_session_id36 = (bit<16>)session_id;
-<<<<<<< e2f4d7dd38c28b1a9d07067e5136a748a68e76b1
         meta._i2e_metadata_ingress_tstamp35 = (bit<32>)standard_metadata.ingress_global_timestamp;
-        clone3<tuple_0>(CloneType.I2E, session_id, { (bit<32>)standard_metadata.ingress_global_timestamp, (bit<16>)session_id });
-        meta._acl_metadata_acl_stats_index11 = acl_stats_index;
-<<<<<<< 43bd696b29be944551572728dfc9ec48437ee961
-        meta._meter_metadata_meter_index107 = acl_meter_index;
-=======
-<<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch-midend.p4
-        meta._meter_metadata_meter_index113 = acl_meter_index;
-=======
-<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
-=======
-        meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
-        meta.ingress_metadata.enable_dod = 1w0;
-        clone3(CloneType.I2E, session_id);
-        meta.acl_metadata.acl_stats_index = acl_stats_index;
-    }
-    @name(".acl_mirror") action _acl_mirror_4(bit<32> session_id, bit<16> acl_stats_index) {
-        meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
-        meta.ingress_metadata.enable_dod = 1w0;
-        clone3(CloneType.I2E, session_id);
-        meta.acl_metadata.acl_stats_index = acl_stats_index;
->>>>>>> Tag metadata fields that need to be recirculated
->>>>>>> Tag metadata fields that need to be recirculated:testdata/p4_14_samples_outputs/switch_20160226/switch-midend.p4
-<<<<<<< b59b6f9946a58e016c48d0bd0398b17193ebb138
->>>>>>> Tag metadata fields that need to be recirculated
-=======
-=======
-        meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
-        clone3(CloneType.I2E, session_id);
-        meta.acl_metadata.acl_stats_index = acl_stats_index;
-        meta.meter_metadata.meter_index = acl_meter_index;
-    }
-    @name(".acl_mirror") action _acl_mirror_4(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
-        meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
-        clone3(CloneType.I2E, session_id);
-        meta.acl_metadata.acl_stats_index = acl_stats_index;
-        meta.meter_metadata.meter_index = acl_meter_index;
->>>>>>> Remove useless back-end pass
->>>>>>> Remove useless back-end pass
->>>>>>> Remove useless back-end pass
-=======
-        meta._i2e_metadata_ingress_tstamp35 = (bit<32>)meta._intrinsic_metadata_ingress_global_timestamp57;
         clone3(CloneType.I2E, session_id, 8w0);
         meta._acl_metadata_acl_stats_index11 = acl_stats_index;
-        meta._meter_metadata_meter_index113 = acl_meter_index;
->>>>>>> Handle multiple resubmits/recirculate/clone calls
+        meta._meter_metadata_meter_index107 = acl_meter_index;
     }
     @name(".acl_redirect_nexthop") action _acl_redirect_nexthop_2(bit<16> nexthop_index, bit<14> acl_stats_index, bit<16> acl_meter_index, bit<1> acl_copy, bit<16> acl_copy_reason) {
         meta._acl_metadata_acl_redirect7 = 1w1;
@@ -5593,74 +5375,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_208();
     }
     @name(".compute_lkp_ipv4_hash") action _compute_lkp_ipv4_hash_0() {
-<<<<<<< e2f4d7dd38c28b1a9d07067e5136a748a68e76b1
-<<<<<<< b59b6f9946a58e016c48d0bd0398b17193ebb138
-<<<<<<< 43bd696b29be944551572728dfc9ec48437ee961
-        hash<bit<16>, bit<16>, tuple_4, bit<32>>(meta._hash_metadata_hash132, HashAlgorithm.crc16, 16w0, { meta._ipv4_metadata_lkp_ipv4_sa56, meta._ipv4_metadata_lkp_ipv4_da57, meta._l3_metadata_lkp_ip_proto82, meta._l3_metadata_lkp_l4_sport85, meta._l3_metadata_lkp_l4_dport86 }, 32w65536);
-        hash<bit<16>, bit<16>, tuple_5, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, { meta._l2_metadata_lkp_mac_sa65, meta._l2_metadata_lkp_mac_da66, meta._ipv4_metadata_lkp_ipv4_sa56, meta._ipv4_metadata_lkp_ipv4_da57, meta._l3_metadata_lkp_ip_proto82, meta._l3_metadata_lkp_l4_sport85, meta._l3_metadata_lkp_l4_dport86 }, 32w65536);
-=======
-=======
-<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
->>>>>>> Remove useless back-end pass
-<<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch-midend.p4
-=======
-<<<<<<< ce1d3691bdb972ba8db166a7109a69422927fddf
->>>>>>> Remove useless back-end pass
-        hash<bit<16>, bit<16>, tuple_4, bit<32>>(meta._hash_metadata_hash132, HashAlgorithm.crc16, 16w0, { meta._ipv4_metadata_lkp_ipv4_sa62, meta._ipv4_metadata_lkp_ipv4_da63, meta._l3_metadata_lkp_ip_proto88, meta._l3_metadata_lkp_l4_sport91, meta._l3_metadata_lkp_l4_dport92 }, 32w65536);
-        hash<bit<16>, bit<16>, tuple_5, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, { meta._l2_metadata_lkp_mac_sa71, meta._l2_metadata_lkp_mac_da72, meta._ipv4_metadata_lkp_ipv4_sa62, meta._ipv4_metadata_lkp_ipv4_da63, meta._l3_metadata_lkp_ip_proto88, meta._l3_metadata_lkp_l4_sport91, meta._l3_metadata_lkp_l4_dport92 }, 32w65536);
-=======
-<<<<<<< 1968b35515ddd4809e438d338481981969628fc8
-        hash<bit<16>, bit<16>, tuple_2, bit<32>>(meta._hash_metadata_hash130, HashAlgorithm.crc16, 16w0, { meta._ipv4_metadata_lkp_ipv4_sa59, meta._ipv4_metadata_lkp_ipv4_da60, meta._l3_metadata_lkp_ip_proto85, meta._l3_metadata_lkp_l4_sport88, meta._l3_metadata_lkp_l4_dport89 }, 32w65536);
-        hash<bit<16>, bit<16>, tuple_3, bit<32>>(meta._hash_metadata_hash231, HashAlgorithm.crc16, 16w0, { meta._l2_metadata_lkp_mac_sa69, meta._l2_metadata_lkp_mac_da70, meta._ipv4_metadata_lkp_ipv4_sa59, meta._ipv4_metadata_lkp_ipv4_da60, meta._l3_metadata_lkp_ip_proto85, meta._l3_metadata_lkp_l4_sport88, meta._l3_metadata_lkp_l4_dport89 }, 32w65536);
->>>>>>> Tag metadata fields that need to be recirculated:testdata/p4_14_samples_outputs/switch_20160226/switch-midend.p4
->>>>>>> Tag metadata fields that need to be recirculated
+        hash<bit<16>, bit<16>, tuple_0, bit<32>>(meta._hash_metadata_hash132, HashAlgorithm.crc16, 16w0, { meta._ipv4_metadata_lkp_ipv4_sa56, meta._ipv4_metadata_lkp_ipv4_da57, meta._l3_metadata_lkp_ip_proto82, meta._l3_metadata_lkp_l4_sport85, meta._l3_metadata_lkp_l4_dport86 }, 32w65536);
+        hash<bit<16>, bit<16>, tuple_1, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, { meta._l2_metadata_lkp_mac_sa65, meta._l2_metadata_lkp_mac_da66, meta._ipv4_metadata_lkp_ipv4_sa56, meta._ipv4_metadata_lkp_ipv4_da57, meta._l3_metadata_lkp_ip_proto82, meta._l3_metadata_lkp_l4_sport85, meta._l3_metadata_lkp_l4_dport86 }, 32w65536);
     }
     @name(".compute_lkp_ipv6_hash") action _compute_lkp_ipv6_hash_0() {
-        hash<bit<16>, bit<16>, tuple_6, bit<32>>(meta._hash_metadata_hash132, HashAlgorithm.crc16, 16w0, { meta._ipv6_metadata_lkp_ipv6_sa60, meta._ipv6_metadata_lkp_ipv6_da61, meta._l3_metadata_lkp_ip_proto82, meta._l3_metadata_lkp_l4_sport85, meta._l3_metadata_lkp_l4_dport86 }, 32w65536);
-        hash<bit<16>, bit<16>, tuple_7, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, { meta._l2_metadata_lkp_mac_sa65, meta._l2_metadata_lkp_mac_da66, meta._ipv6_metadata_lkp_ipv6_sa60, meta._ipv6_metadata_lkp_ipv6_da61, meta._l3_metadata_lkp_ip_proto82, meta._l3_metadata_lkp_l4_sport85, meta._l3_metadata_lkp_l4_dport86 }, 32w65536);
+        hash<bit<16>, bit<16>, tuple_2, bit<32>>(meta._hash_metadata_hash132, HashAlgorithm.crc16, 16w0, { meta._ipv6_metadata_lkp_ipv6_sa60, meta._ipv6_metadata_lkp_ipv6_da61, meta._l3_metadata_lkp_ip_proto82, meta._l3_metadata_lkp_l4_sport85, meta._l3_metadata_lkp_l4_dport86 }, 32w65536);
+        hash<bit<16>, bit<16>, tuple_3, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, { meta._l2_metadata_lkp_mac_sa65, meta._l2_metadata_lkp_mac_da66, meta._ipv6_metadata_lkp_ipv6_sa60, meta._ipv6_metadata_lkp_ipv6_da61, meta._l3_metadata_lkp_ip_proto82, meta._l3_metadata_lkp_l4_sport85, meta._l3_metadata_lkp_l4_dport86 }, 32w65536);
     }
     @name(".compute_lkp_non_ip_hash") action _compute_lkp_non_ip_hash_0() {
-<<<<<<< 43bd696b29be944551572728dfc9ec48437ee961
-        hash<bit<16>, bit<16>, tuple_8, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, { meta._ingress_metadata_ifindex38, meta._l2_metadata_lkp_mac_sa65, meta._l2_metadata_lkp_mac_da66, meta._l2_metadata_lkp_mac_type68 }, 32w65536);
-=======
-<<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch-midend.p4
-        hash<bit<16>, bit<16>, tuple_8, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, { meta._ingress_metadata_ifindex38, meta._l2_metadata_lkp_mac_sa71, meta._l2_metadata_lkp_mac_da72, meta._l2_metadata_lkp_mac_type74 }, 32w65536);
-=======
-<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
-        hash<bit<16>, bit<16>, tuple_6, bit<32>>(meta._hash_metadata_hash231, HashAlgorithm.crc16, 16w0, { meta._ingress_metadata_ifindex36, meta._l2_metadata_lkp_mac_sa69, meta._l2_metadata_lkp_mac_da70, meta._l2_metadata_lkp_mac_type71 }, 32w65536);
-=======
-=======
->>>>>>> Remove useless back-end pass
-        hash<bit<16>, bit<16>, tuple_0, bit<32>>(meta.hash_metadata.hash1, HashAlgorithm.crc16, 16w0, { meta.ipv4_metadata.lkp_ipv4_sa, meta.ipv4_metadata.lkp_ipv4_da, meta.l3_metadata.lkp_ip_proto, meta.l3_metadata.lkp_l4_sport, meta.l3_metadata.lkp_l4_dport }, 32w65536);
-        hash<bit<16>, bit<16>, tuple_1, bit<32>>(meta.hash_metadata.hash2, HashAlgorithm.crc16, 16w0, { meta.l2_metadata.lkp_mac_sa, meta.l2_metadata.lkp_mac_da, meta.ipv4_metadata.lkp_ipv4_sa, meta.ipv4_metadata.lkp_ipv4_da, meta.l3_metadata.lkp_ip_proto, meta.l3_metadata.lkp_l4_sport, meta.l3_metadata.lkp_l4_dport }, 32w65536);
-    }
-    @name(".compute_lkp_ipv6_hash") action _compute_lkp_ipv6_hash_0() {
-        hash<bit<16>, bit<16>, tuple_2, bit<32>>(meta.hash_metadata.hash1, HashAlgorithm.crc16, 16w0, { meta.ipv6_metadata.lkp_ipv6_sa, meta.ipv6_metadata.lkp_ipv6_da, meta.l3_metadata.lkp_ip_proto, meta.l3_metadata.lkp_l4_sport, meta.l3_metadata.lkp_l4_dport }, 32w65536);
-        hash<bit<16>, bit<16>, tuple_3, bit<32>>(meta.hash_metadata.hash2, HashAlgorithm.crc16, 16w0, { meta.l2_metadata.lkp_mac_sa, meta.l2_metadata.lkp_mac_da, meta.ipv6_metadata.lkp_ipv6_sa, meta.ipv6_metadata.lkp_ipv6_da, meta.l3_metadata.lkp_ip_proto, meta.l3_metadata.lkp_l4_sport, meta.l3_metadata.lkp_l4_dport }, 32w65536);
-    }
-    @name(".compute_lkp_non_ip_hash") action _compute_lkp_non_ip_hash_0() {
-        hash<bit<16>, bit<16>, tuple_4, bit<32>>(meta.hash_metadata.hash2, HashAlgorithm.crc16, 16w0, { meta.ingress_metadata.ifindex, meta.l2_metadata.lkp_mac_sa, meta.l2_metadata.lkp_mac_da, meta.l2_metadata.lkp_mac_type }, 32w65536);
-<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
->>>>>>> Tag metadata fields that need to be recirculated
->>>>>>> Tag metadata fields that need to be recirculated:testdata/p4_14_samples_outputs/switch_20160226/switch-midend.p4
-<<<<<<< b59b6f9946a58e016c48d0bd0398b17193ebb138
->>>>>>> Tag metadata fields that need to be recirculated
-=======
-=======
->>>>>>> Remove useless back-end pass
->>>>>>> Remove useless back-end pass
->>>>>>> Remove useless back-end pass
-=======
-        hash<bit<16>, bit<16>, tuple_0, bit<32>>(meta._hash_metadata_hash132, HashAlgorithm.crc16, 16w0, { meta._ipv4_metadata_lkp_ipv4_sa62, meta._ipv4_metadata_lkp_ipv4_da63, meta._l3_metadata_lkp_ip_proto88, meta._l3_metadata_lkp_l4_sport91, meta._l3_metadata_lkp_l4_dport92 }, 32w65536);
-        hash<bit<16>, bit<16>, tuple_1, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, { meta._l2_metadata_lkp_mac_sa71, meta._l2_metadata_lkp_mac_da72, meta._ipv4_metadata_lkp_ipv4_sa62, meta._ipv4_metadata_lkp_ipv4_da63, meta._l3_metadata_lkp_ip_proto88, meta._l3_metadata_lkp_l4_sport91, meta._l3_metadata_lkp_l4_dport92 }, 32w65536);
-    }
-    @name(".compute_lkp_ipv6_hash") action _compute_lkp_ipv6_hash_0() {
-        hash<bit<16>, bit<16>, tuple_2, bit<32>>(meta._hash_metadata_hash132, HashAlgorithm.crc16, 16w0, { meta._ipv6_metadata_lkp_ipv6_sa66, meta._ipv6_metadata_lkp_ipv6_da67, meta._l3_metadata_lkp_ip_proto88, meta._l3_metadata_lkp_l4_sport91, meta._l3_metadata_lkp_l4_dport92 }, 32w65536);
-        hash<bit<16>, bit<16>, tuple_3, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, { meta._l2_metadata_lkp_mac_sa71, meta._l2_metadata_lkp_mac_da72, meta._ipv6_metadata_lkp_ipv6_sa66, meta._ipv6_metadata_lkp_ipv6_da67, meta._l3_metadata_lkp_ip_proto88, meta._l3_metadata_lkp_l4_sport91, meta._l3_metadata_lkp_l4_dport92 }, 32w65536);
-    }
-    @name(".compute_lkp_non_ip_hash") action _compute_lkp_non_ip_hash_0() {
-        hash<bit<16>, bit<16>, tuple_4, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, { meta._ingress_metadata_ifindex38, meta._l2_metadata_lkp_mac_sa71, meta._l2_metadata_lkp_mac_da72, meta._l2_metadata_lkp_mac_type74 }, 32w65536);
->>>>>>> Handle multiple resubmits/recirculate/clone calls
+        hash<bit<16>, bit<16>, tuple_4, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, { meta._ingress_metadata_ifindex38, meta._l2_metadata_lkp_mac_sa65, meta._l2_metadata_lkp_mac_da66, meta._l2_metadata_lkp_mac_type68 }, 32w65536);
     }
     @name(".computed_two_hashes") action _computed_two_hashes_0() {
         meta._hash_metadata_entropy_hash34 = meta._hash_metadata_hash233;

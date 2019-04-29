@@ -35,33 +35,17 @@ header ethernet_t {
 }
 
 struct metadata {
-<<<<<<< e2f4d7dd38c28b1a9d07067e5136a748a68e76b1
+    @field_list(8w0, 8w1, 8w2) 
     bit<8>  _mymeta_resubmit_count0;
+    @field_list(8w0, 8w1, 8w2) 
     bit<8>  _mymeta_recirculate_count1;
+    @field_list(8w0, 8w1, 8w2) 
     bit<8>  _mymeta_clone_e2e_count2;
+    @field_list(8w0, 8w1, 8w2) 
     bit<8>  _mymeta_last_ing_instance_type3;
+    @field_list(8w0, 8w1, 8w2) 
     bit<8>  _mymeta_f14;
     bit<48> _temporaries_temp15;
-=======
-    bit<48> _intrinsic_metadata_ingress_global_timestamp0;
-    bit<48> _intrinsic_metadata_egress_global_timestamp1;
-    bit<8>  _intrinsic_metadata_lf_field_list2;
-    bit<16> _intrinsic_metadata_mcast_grp3;
-    bit<16> _intrinsic_metadata_egress_rid4;
-    bit<8>  _intrinsic_metadata_resubmit_flag5;
-    bit<8>  _intrinsic_metadata_recirculate_flag6;
-    @field_list(8w0, 8w1, 8w2) 
-    bit<8>  _mymeta_resubmit_count7;
-    @field_list(8w0, 8w1, 8w2) 
-    bit<8>  _mymeta_recirculate_count8;
-    @field_list(8w0, 8w1, 8w2) 
-    bit<8>  _mymeta_clone_e2e_count9;
-    @field_list(8w0, 8w1, 8w2) 
-    bit<8>  _mymeta_last_ing_instance_type10;
-    @field_list(8w0, 8w1, 8w2) 
-    bit<8>  _mymeta_f111;
-    bit<48> _temporaries_temp112;
->>>>>>> Handle multiple resubmits/recirculate/clone calls
 }
 
 struct headers {
@@ -82,27 +66,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".do_clone_e2e") action do_clone_e2e() {
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710633;
-<<<<<<< e2f4d7dd38c28b1a9d07067e5136a748a68e76b1
         meta._mymeta_f14 = meta._mymeta_f14 + 8w23;
         meta._mymeta_clone_e2e_count2 = meta._mymeta_clone_e2e_count2 + 8w1;
-        clone3<tuple_0>(CloneType.E2E, 32w1, { {meta._mymeta_resubmit_count0,meta._mymeta_recirculate_count1,meta._mymeta_clone_e2e_count2,meta._mymeta_last_ing_instance_type3,meta._mymeta_f14} });
+        clone3(CloneType.E2E, 32w1, 8w0);
     }
     @name(".do_recirculate") action do_recirculate() {
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710637;
         meta._mymeta_f14 = meta._mymeta_f14 + 8w19;
         meta._mymeta_recirculate_count1 = meta._mymeta_recirculate_count1 + 8w1;
-        recirculate<tuple_0>({ {meta._mymeta_resubmit_count0,meta._mymeta_recirculate_count1,meta._mymeta_clone_e2e_count2,meta._mymeta_last_ing_instance_type3,meta._mymeta_f14} });
-=======
-        meta._mymeta_f111 = meta._mymeta_f111 + 8w23;
-        meta._mymeta_clone_e2e_count9 = meta._mymeta_clone_e2e_count9 + 8w1;
-        clone3(CloneType.E2E, 32w1, 8w0);
-    }
-    @name(".do_recirculate") action do_recirculate() {
-        hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710637;
-        meta._mymeta_f111 = meta._mymeta_f111 + 8w19;
-        meta._mymeta_recirculate_count8 = meta._mymeta_recirculate_count8 + 8w1;
         recirculate(8w1);
->>>>>>> Handle multiple resubmits/recirculate/clone calls
     }
     @name("._nop") action _nop() {
     }
@@ -292,15 +264,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".do_resubmit") action do_resubmit() {
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710639;
-<<<<<<< e2f4d7dd38c28b1a9d07067e5136a748a68e76b1
         meta._mymeta_f14 = meta._mymeta_f14 + 8w17;
         meta._mymeta_resubmit_count0 = meta._mymeta_resubmit_count0 + 8w1;
-        resubmit<tuple_0>({ {meta._mymeta_resubmit_count0,meta._mymeta_recirculate_count1,meta._mymeta_clone_e2e_count2,meta._mymeta_last_ing_instance_type3,meta._mymeta_f14} });
-=======
-        meta._mymeta_f111 = meta._mymeta_f111 + 8w17;
-        meta._mymeta_resubmit_count7 = meta._mymeta_resubmit_count7 + 8w1;
         resubmit(8w2);
->>>>>>> Handle multiple resubmits/recirculate/clone calls
     }
     @name("._nop") action _nop_5() {
     }

@@ -20,16 +20,8 @@ header ethernet_t {
 }
 
 struct metadata {
-<<<<<<< e2f4d7dd38c28b1a9d07067e5136a748a68e76b1
-    bit<8> _mymeta_f10;
-=======
-    bit<4>  _intrinsic_metadata_mcast_grp0;
-    bit<4>  _intrinsic_metadata_egress_rid1;
-    bit<32> _intrinsic_metadata_lf_field_list2;
-    bit<16> _intrinsic_metadata_resubmit_flag3;
     @field_list(8w0) 
-    bit<8>  _mymeta_f14;
->>>>>>> Handle multiple resubmits/recirculate/clone calls
+    bit<8> _mymeta_f10;
 }
 
 struct headers {
@@ -65,22 +57,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.egress_spec = port;
     }
     @name("._resubmit") action _resubmit() {
-<<<<<<< e2f4d7dd38c28b1a9d07067e5136a748a68e76b1
-<<<<<<< 43bd696b29be944551572728dfc9ec48437ee961
         meta._mymeta_f10 = 8w1;
-=======
-<<<<<<< 1968b35515ddd4809e438d338481981969628fc8
-        meta._mymeta_f14 = 8w1;
->>>>>>> Tag metadata fields that need to be recirculated
-        resubmit<tuple_0>({ standard_metadata, {8w1} });
-=======
-        meta.mymeta.f1 = 8w1;
-        resubmit();
->>>>>>> Tag metadata fields that need to be recirculated
-=======
-        meta._mymeta_f14 = 8w1;
         resubmit(8w0);
->>>>>>> Handle multiple resubmits/recirculate/clone calls
     }
     @name(".t_ingress_1") table t_ingress {
         actions = {

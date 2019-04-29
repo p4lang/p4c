@@ -28,25 +28,12 @@ header hdrA_t {
 }
 
 struct metadata {
-<<<<<<< e2f4d7dd38c28b1a9d07067e5136a748a68e76b1
+    @field_list(8w0) 
     bit<8> _metaA_f10;
+    @field_list(8w0) 
     bit<8> _metaA_f21;
     bit<8> _metaB_f12;
     bit<8> _metaB_f23;
-=======
-    bit<4>  _intrinsic_metadata_mcast_grp0;
-    bit<4>  _intrinsic_metadata_egress_rid1;
-    bit<32> _intrinsic_metadata_lf_field_list2;
-    bit<64> _intrinsic_metadata_ingress_global_timestamp3;
-    bit<16> _intrinsic_metadata_resubmit_flag4;
-    bit<16> _intrinsic_metadata_recirculate_flag5;
-    @field_list(8w0) 
-    bit<8>  _metaA_f16;
-    @field_list(8w0) 
-    bit<8>  _metaA_f27;
-    bit<8>  _metaB_f18;
-    bit<8>  _metaB_f29;
->>>>>>> Handle multiple resubmits/recirculate/clone calls
 }
 
 struct headers {
@@ -67,31 +54,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("._nop") action _nop() {
     }
     @name("._recirculate") action _recirculate() {
-<<<<<<< e2f4d7dd38c28b1a9d07067e5136a748a68e76b1
-<<<<<<< 43bd696b29be944551572728dfc9ec48437ee961
-        recirculate<tuple_0>({ standard_metadata, {meta._metaA_f10,meta._metaA_f21} });
-    }
-    @name("._clone_e2e") action _clone_e2e(bit<32> mirror_id) {
-        clone3<tuple_0>(CloneType.E2E, mirror_id, { standard_metadata, {meta._metaA_f10,meta._metaA_f21} });
-=======
-<<<<<<< 1968b35515ddd4809e438d338481981969628fc8
-        recirculate<tuple_0>({ standard_metadata, {meta._metaA_f16,meta._metaA_f27} });
-    }
-    @name("._clone_e2e") action _clone_e2e(bit<32> mirror_id) {
-        clone3<tuple_0>(CloneType.E2E, mirror_id, { standard_metadata, {meta._metaA_f16,meta._metaA_f27} });
-=======
-        recirculate();
-    }
-    @name("._clone_e2e") action _clone_e2e(bit<32> mirror_id) {
-        clone3(CloneType.E2E, mirror_id);
->>>>>>> Tag metadata fields that need to be recirculated
->>>>>>> Tag metadata fields that need to be recirculated
-=======
         recirculate(8w0);
     }
     @name("._clone_e2e") action _clone_e2e(bit<32> mirror_id) {
         clone3(CloneType.E2E, mirror_id, 8w0);
->>>>>>> Handle multiple resubmits/recirculate/clone calls
     }
     @name(".t_egress") table t_egress_0 {
         actions = {
@@ -129,31 +95,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.mcast_grp = mgrp;
     }
     @name("._resubmit") action _resubmit() {
-<<<<<<< e2f4d7dd38c28b1a9d07067e5136a748a68e76b1
-<<<<<<< 43bd696b29be944551572728dfc9ec48437ee961
-        resubmit<tuple_0>({ standard_metadata, {meta._metaA_f10,meta._metaA_f21} });
-    }
-    @name("._clone_i2e") action _clone_i2e(bit<32> mirror_id) {
-        clone3<tuple_0>(CloneType.I2E, mirror_id, { standard_metadata, {meta._metaA_f10,meta._metaA_f21} });
-=======
-<<<<<<< 1968b35515ddd4809e438d338481981969628fc8
-        resubmit<tuple_0>({ standard_metadata, {meta._metaA_f16,meta._metaA_f27} });
-    }
-    @name("._clone_i2e") action _clone_i2e(bit<32> mirror_id) {
-        clone3<tuple_0>(CloneType.I2E, mirror_id, { standard_metadata, {meta._metaA_f16,meta._metaA_f27} });
-=======
-        resubmit();
-    }
-    @name("._clone_i2e") action _clone_i2e(bit<32> mirror_id) {
-        clone3(CloneType.I2E, mirror_id);
->>>>>>> Tag metadata fields that need to be recirculated
->>>>>>> Tag metadata fields that need to be recirculated
-=======
         resubmit(8w0);
     }
     @name("._clone_i2e") action _clone_i2e(bit<32> mirror_id) {
         clone3(CloneType.I2E, mirror_id, 8w0);
->>>>>>> Handle multiple resubmits/recirculate/clone calls
     }
     @name(".t_ingress_1") table t_ingress {
         actions = {

@@ -4414,32 +4414,8 @@ control process_mac_acl(inout headers hdr, inout metadata meta, inout standard_m
     }
     @name(".acl_mirror") action acl_mirror(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-<<<<<<< e2f4d7dd38c28b1a9d07067e5136a748a68e76b1
-<<<<<<< b59b6f9946a58e016c48d0bd0398b17193ebb138
-<<<<<<< 43bd696b29be944551572728dfc9ec48437ee961
         meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
-=======
-=======
-<<<<<<< ce1d3691bdb972ba8db166a7109a69422927fddf
->>>>>>> Remove useless back-end pass
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-<<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch.p4
->>>>>>> Tag metadata fields that need to be recirculated
-        clone3(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
-=======
-<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
-        meta.ingress_metadata.enable_dod = 1w0;
-        clone3(CloneType.I2E, (bit<32>)session_id);
->>>>>>> Tag metadata fields that need to be recirculated:testdata/p4_14_samples_outputs/switch_20160226/switch.p4
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
-        clone3(CloneType.I2E, (bit<32>)session_id);
->>>>>>> Remove useless back-end pass
->>>>>>> Remove useless back-end pass
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
         clone3(CloneType.I2E, (bit<32>)session_id, (bit<8>)FieldLists.i2e_mirror_info);
->>>>>>> Handle multiple resubmits/recirculate/clone calls
         meta.acl_metadata.acl_stats_index = acl_stats_index;
         meta.meter_metadata.meter_index = acl_meter_index;
     }
@@ -4504,32 +4480,8 @@ control process_ip_acl(inout headers hdr, inout metadata meta, inout standard_me
     }
     @name(".acl_mirror") action acl_mirror(bit<32> session_id, bit<14> acl_stats_index, bit<16> acl_meter_index) {
         meta.i2e_metadata.mirror_session_id = (bit<16>)session_id;
-<<<<<<< e2f4d7dd38c28b1a9d07067e5136a748a68e76b1
-<<<<<<< b59b6f9946a58e016c48d0bd0398b17193ebb138
-<<<<<<< 43bd696b29be944551572728dfc9ec48437ee961
         meta.i2e_metadata.ingress_tstamp = (bit<32>)standard_metadata.ingress_global_timestamp;
-=======
-=======
-<<<<<<< ce1d3691bdb972ba8db166a7109a69422927fddf
->>>>>>> Remove useless back-end pass
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
-<<<<<<< feab7f57a1ecbbff311975bf9cc2def5c99fa295:testdata/p4_14_samples_outputs/switch_20160512/switch.p4
->>>>>>> Tag metadata fields that need to be recirculated
-        clone3(CloneType.I2E, (bit<32>)session_id, { meta.i2e_metadata.ingress_tstamp, meta.i2e_metadata.mirror_session_id });
-=======
-<<<<<<< b6acbcb55eeef10c427c99b3776016d7e9204aa1
-        meta.ingress_metadata.enable_dod = 1w0;
-        clone3(CloneType.I2E, (bit<32>)session_id);
->>>>>>> Tag metadata fields that need to be recirculated:testdata/p4_14_samples_outputs/switch_20160226/switch.p4
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_tstamp;
-        clone3(CloneType.I2E, (bit<32>)session_id);
->>>>>>> Remove useless back-end pass
->>>>>>> Remove useless back-end pass
-=======
-        meta.i2e_metadata.ingress_tstamp = (bit<32>)meta.intrinsic_metadata.ingress_global_timestamp;
         clone3(CloneType.I2E, (bit<32>)session_id, (bit<8>)FieldLists.i2e_mirror_info);
->>>>>>> Handle multiple resubmits/recirculate/clone calls
         meta.acl_metadata.acl_stats_index = acl_stats_index;
         meta.meter_metadata.meter_index = acl_meter_index;
     }
