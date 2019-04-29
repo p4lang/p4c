@@ -32,21 +32,23 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
+@name(".count1") @min_width(32) counter(32w16384, CounterType.packets) count1;
+
+@name(".count2") @min_width(32) counter(32w16384, CounterType.packets) count2;
+
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".count1") @min_width(32) counter(32w16384, CounterType.packets) count1_0;
-    @name(".count2") @min_width(32) counter(32w16384, CounterType.packets) count2_0;
     @name(".set_index") action set_index(bit<16> index1, bit<16> index2, bit<9> port) {
         meta.counter_metadata.counter_index_first = index1;
         meta.counter_metadata.counter_index_second = index2;
         standard_metadata.egress_spec = port;
     }
     @name(".count_entries") action count_entries() {
-        count1_0.count((bit<32>)meta.counter_metadata.counter_index_first);
+        count1.count((bit<32>)meta.counter_metadata.counter_index_first);
     }
     @name(".count_entries2") action count_entries2() {
-        count2_0.count((bit<32>)meta.counter_metadata.counter_index_second);
+        count2.count((bit<32>)meta.counter_metadata.counter_index_second);
     }
     @name(".index_setter") table index_setter_0 {
         actions = {

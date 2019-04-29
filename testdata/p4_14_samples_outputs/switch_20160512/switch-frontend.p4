@@ -3125,11 +3125,21 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
+@name(".storm_control_meter") meter(32w1024, MeterType.bytes) storm_control_meter;
+
+@name(".ingress_bd_stats_count") @min_width(32) counter(32w1024, CounterType.packets_and_bytes) ingress_bd_stats_count;
+
+@name(".acl_stats_count") @min_width(16) counter(32w1024, CounterType.packets_and_bytes) acl_stats_count;
+
 @name("mac_learn_digest") struct mac_learn_digest {
     bit<16> bd;
     bit<48> lkp_mac_sa;
     bit<16> ifindex;
 }
+
+@name(".drop_stats") counter(32w1024, CounterType.packets) drop_stats;
+
+@name(".drop_stats_2") counter(32w1024, CounterType.packets) drop_stats_2;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_148() {
@@ -4336,11 +4346,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 512;
         default_action = NoAction_180();
     }
-    @name(".storm_control_meter") meter(32w1024, MeterType.bytes) _storm_control_meter;
     @name(".nop") action _nop_70() {
     }
     @name(".set_storm_control_meter") action _set_storm_control_meter_0(bit<32> meter_idx) {
-        _storm_control_meter.execute_meter<bit<2>>(meter_idx, meta.meter_metadata.meter_color);
+        storm_control_meter.execute_meter<bit<2>>(meter_idx, meta.meter_metadata.meter_color);
         meta.meter_metadata.meter_index = (bit<16>)meter_idx;
     }
     @name(".storm_control") table _storm_control {
@@ -5289,9 +5298,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         counters = _meter_stats;
         default_action = NoAction_213();
     }
-    @min_width(32) @name(".ingress_bd_stats_count") counter(32w1024, CounterType.packets_and_bytes) _ingress_bd_stats_count;
     @name(".update_ingress_bd_stats") action _update_ingress_bd_stats_0() {
-        _ingress_bd_stats_count.count((bit<32>)meta.l2_metadata.bd_stats_idx);
+        ingress_bd_stats_count.count((bit<32>)meta.l2_metadata.bd_stats_idx);
     }
     @name(".ingress_bd_stats") table _ingress_bd_stats {
         actions = {
@@ -5301,9 +5309,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction_214();
     }
-    @min_width(16) @name(".acl_stats_count") counter(32w1024, CounterType.packets_and_bytes) _acl_stats_count;
     @name(".acl_stats_update") action _acl_stats_update_0() {
-        _acl_stats_count.count((bit<32>)meta.acl_metadata.acl_stats_index);
+        acl_stats_count.count((bit<32>)meta.acl_metadata.acl_stats_index);
     }
     @name(".acl_stats") table _acl_stats {
         actions = {
@@ -5562,10 +5569,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         implementation = fabric_lag_action_profile;
         default_action = NoAction_223();
     }
-    @name(".drop_stats") counter(32w1024, CounterType.packets) _drop_stats;
-    @name(".drop_stats_2") counter(32w1024, CounterType.packets) _drop_stats_0;
     @name(".drop_stats_update") action _drop_stats_update_0() {
-        _drop_stats_0.count((bit<32>)meta.ingress_metadata.drop_reason);
+        drop_stats_2.count((bit<32>)meta.ingress_metadata.drop_reason);
     }
     @name(".nop") action _nop_108() {
     }
@@ -5586,14 +5591,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         mark_to_drop(standard_metadata);
     }
     @name(".drop_packet_with_reason") action _drop_packet_with_reason_0(bit<32> drop_reason) {
-        _drop_stats.count(drop_reason);
+        drop_stats.count(drop_reason);
         mark_to_drop(standard_metadata);
     }
     @name(".negative_mirror") action _negative_mirror_0(bit<32> session_id) {
         clone3<tuple<bit<16>, bit<8>>>(CloneType.I2E, session_id, { meta.ingress_metadata.ifindex, meta.ingress_metadata.drop_reason });
         mark_to_drop(standard_metadata);
     }
-    @name(".drop_stats") table _drop_stats_1 {
+    @name(".drop_stats") table _drop_stats {
         actions = {
             _drop_stats_update_0();
             @defaultonly NoAction_224();
@@ -5873,7 +5878,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             if (meta.ingress_metadata.bypass_lookups & 16w0x20 == 16w0) {
                 _system_acl.apply();
                 if (meta.ingress_metadata.drop_flag == 1w1) 
-                    _drop_stats_1.apply();
+                    _drop_stats.apply();
             }
     }
 }
