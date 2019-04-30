@@ -1,0 +1,31 @@
+mc_mgrp_create 1
+mc_node_create 0 6
+mc_node_create 0 7
+mc_node_create 0 8
+mc_node_associate 1 0
+mc_node_associate 1 1
+mc_node_associate 1 2
+
+
+mc_mgrp_create 2
+mc_node_create 0 9
+mc_node_create 0 10
+mc_node_create 0 11
+mc_node_associate 2 3
+mc_node_associate 2 4
+mc_node_associate 2 5
+
+
+#input packet
+packet 2 000000000001 000000000000 ffff
+# expect ports
+expect 6 000000000001 000000000000 ffff $
+expect 7 000000000001 000000000000 ffff $
+expect 8 000000000001 000000000000 ffff $
+
+#input packet
+packet 2 000000000002 000000000000 ffff
+# expect ports
+expect 9 000000000002 000000000000 ffff $
+expect 10 000000000002 000000000000 ffff $
+expect 11 000000000002 000000000000 ffff $
