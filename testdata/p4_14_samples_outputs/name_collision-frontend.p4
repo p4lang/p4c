@@ -34,10 +34,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
+@name(".B") counter(32w1024, CounterType.packets_and_bytes) B_1;
+
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
-    @name(".B") counter(32w1024, CounterType.packets_and_bytes) B_2;
     @name(".A") action A_2(bit<8> val, bit<9> port, bit<10> idx) {
         hdr.A.b1 = val;
         standard_metadata.egress_spec = port;
@@ -45,8 +46,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".noop") action noop() {
     }
-    @name(".B") action B_4() {
-        B_2.count((bit<32>)meta.meta.B);
+    @name(".B") action B_2() {
+        B_1.count((bit<32>)meta.meta.B);
     }
     @name(".A") table A_3 {
         actions = {
@@ -59,15 +60,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_0();
     }
-    @name(".B") table B_5 {
+    @name(".B") table B_4 {
         actions = {
-            B_4();
+            B_2();
         }
-        default_action = B_4();
+        default_action = B_2();
     }
     apply {
         A_3.apply();
-        B_5.apply();
+        B_4.apply();
     }
 }
 

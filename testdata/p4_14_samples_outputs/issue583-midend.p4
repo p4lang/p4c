@@ -189,12 +189,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
+@name(".cnt1") counter(32w32, CounterType.packets) cnt1;
+
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name(".cnt1") counter(32w32, CounterType.packets) cnt1_0;
     @name(".drop_pkt") action drop_pkt() {
         mark_to_drop(standard_metadata);
     }
@@ -203,7 +204,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name(".act") action act() {
-        cnt1_0.count(32w10);
+        cnt1.count(32w10);
     }
     @name(".ipv4_routing") table ipv4_routing_0 {
         actions = {
