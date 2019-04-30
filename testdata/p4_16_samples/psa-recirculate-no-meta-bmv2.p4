@@ -53,7 +53,7 @@ control cIngress(inout headers_t hdr,
                  inout metadata_t user_meta,
                  in    psa_ingress_input_metadata_t  istd,
                  inout psa_ingress_output_metadata_t ostd)
-{   
+{
     apply {
         if (hdr.ethernet.dstAddr[3:0] >= 4) {
           send_to_port(ostd,
@@ -74,7 +74,7 @@ parser EgressParserImpl(packet_in buffer,
                         in empty_metadata_t clone_e2e_meta)
 {
     state start {
-      buffer.extract(hdr.ethernet);
+        buffer.extract(hdr.ethernet);
         transition accept;
     }
 }
@@ -91,7 +91,7 @@ control cEgress(inout headers_t hdr,
       actions = { add; }
       default_action = add;
     }
-    apply { 
+    apply {
       e.apply();
     }
 }
