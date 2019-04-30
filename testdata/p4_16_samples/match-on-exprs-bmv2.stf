@@ -1,0 +1,6 @@
+# Note that table search key field names must be the ones given in
+# @name annotations, if those are used.
+add t1 ethernet.srcAddr.slice:0x1f dstAddr_lsbs:0x010101010101 etherType_less_10:0xf00f ingressImpl.foo(out_port:3)
+
+expect 3 ff01ff7dff01 0000007c003e f019
+packet 1 ff01ff01ff01 0000007c003e f019

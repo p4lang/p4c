@@ -1,11 +1,11 @@
 #include <core.p4>
 #include <v1model.p4>
 
-@name("queueing_metadata_t") struct queueing_metadata_t_0 {
-    bit<48> enq_timestamp;
-    bit<24> enq_qdepth;
+struct queueing_metadata_t {
+    bit<32> enq_timestamp;
+    bit<19> enq_qdepth;
     bit<32> deq_timedelta;
-    bit<24> deq_qdepth;
+    bit<19> deq_qdepth;
 }
 
 header hdr1_t {
@@ -13,28 +13,27 @@ header hdr1_t {
     bit<8> f2;
 }
 
-header queueing_metadata_t {
-    bit<48> enq_timestamp;
-    bit<24> enq_qdepth;
+header queueing_metadata_t_padded {
+    bit<32> enq_timestamp;
+    bit<19> enq_qdepth;
     bit<32> deq_timedelta;
-    bit<24> deq_qdepth;
+    bit<19> deq_qdepth;
+    bit<2>  pad;
 }
 
 struct metadata {
-    @name(".queueing_metadata") 
-    queueing_metadata_t_0 queueing_metadata;
 }
 
 struct headers {
     @name(".hdr1") 
-    hdr1_t              hdr1;
+    hdr1_t                     hdr1;
     @name(".queueing_hdr") 
-    queueing_metadata_t queueing_hdr;
+    queueing_metadata_t_padded queueing_hdr;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".queueing_dummy") state queueing_dummy {
-        packet.extract<queueing_metadata_t>(hdr.queueing_hdr);
+        packet.extract<queueing_metadata_t_padded>(hdr.queueing_hdr);
         transition accept;
     }
     @name(".start") state start {
@@ -49,10 +48,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".copy_queueing_data") action copy_queueing_data() {
         hdr.queueing_hdr.setValid();
-        hdr.queueing_hdr.enq_timestamp = meta.queueing_metadata.enq_timestamp;
-        hdr.queueing_hdr.enq_qdepth = meta.queueing_metadata.enq_qdepth;
-        hdr.queueing_hdr.deq_timedelta = meta.queueing_metadata.deq_timedelta;
-        hdr.queueing_hdr.deq_qdepth = meta.queueing_metadata.deq_qdepth;
+        hdr.queueing_hdr.enq_timestamp = standard_metadata.enq_timestamp;
+        hdr.queueing_hdr.enq_qdepth = standard_metadata.enq_qdepth;
+        hdr.queueing_hdr.deq_timedelta = standard_metadata.deq_timedelta;
+        hdr.queueing_hdr.deq_qdepth = standard_metadata.deq_qdepth;
+        hdr.queueing_hdr.pad = 2w0;
     }
     @name(".t_egress") table t_egress {
         actions = {
@@ -93,7 +93,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
         packet.emit<hdr1_t>(hdr.hdr1);
-        packet.emit<queueing_metadata_t>(hdr.queueing_hdr);
+        packet.emit<queueing_metadata_t_padded>(hdr.queueing_hdr);
     }
 }
 

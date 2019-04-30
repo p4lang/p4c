@@ -18,10 +18,8 @@ header ethernet_t {
 }
 
 struct metadata {
-    @name(".intrinsic_metadata") 
-    intrinsic_metadata_t intrinsic_metadata;
     @name(".meta") 
-    meta_t               meta;
+    meta_t meta;
 }
 
 struct headers {
@@ -44,14 +42,15 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
+@name(".my_indirect_counter") counter(32w16384, CounterType.packets) my_indirect_counter;
+
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".NoAction") action NoAction_0() {
     }
     @name(".my_direct_counter") direct_counter(CounterType.bytes) my_direct_counter_0;
-    @name(".my_indirect_counter") counter(32w16384, CounterType.packets) my_indirect_counter_0;
     @name(".m_action") action m_action_0(bit<32> idx) {
         my_direct_counter_0.count();
-        my_indirect_counter_0.count(idx);
+        my_indirect_counter.count(idx);
         mark_to_drop(standard_metadata);
     }
     @name("._nop") action _nop_0() {

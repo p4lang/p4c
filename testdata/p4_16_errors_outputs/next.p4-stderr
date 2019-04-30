@@ -1,6 +1,3 @@
-next.p4(24): [--Werror=type-error] error: stack.last: 'last' and 'next' for stacks cannot be used in a control
-        stack.last = { 10 };
-        ^^^^^^^^^^
-next.p4(24): [--Werror=type-error] error: Expression stack.last cannot be the target of an assignment
+next.p4(24): [--Werror=type-error] error: stack.last: 'last' and 'next' for stacks can only be used in a parser
         stack.last = { 10 };
         ^^^^^^^^^^

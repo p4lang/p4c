@@ -106,7 +106,8 @@ Util::JsonObject* IR::Node::sourceInfoJsonObj() const {
         json->emplace("filename", fName);
         json->emplace("line", lineNumber);
         json->emplace("column", columnNumber);
-        json->emplace("source_fragment", si.toBriefSourceFragment());
+        json->emplace("source_fragment",
+                      si.toBriefSourceFragment().escapeJson());
         return json;
     }
 }

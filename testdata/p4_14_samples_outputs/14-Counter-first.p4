@@ -27,8 +27,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
+@name(".c1") counter(32w1024, CounterType.packets) c1;
+
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".c1") counter(32w1024, CounterType.packets) c1;
     @name(".count_c1_1") action count_c1_1() {
         c1.count(32w1);
     }

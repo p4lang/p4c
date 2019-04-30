@@ -165,9 +165,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
+@name(".drop_stats") counter(32w256, CounterType.packets) drop_stats;
+
+@name(".drop_stats_2") counter(32w256, CounterType.packets) drop_stats_2;
+
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".drop_stats") counter(32w256, CounterType.packets) drop_stats;
-    @name(".drop_stats_2") counter(32w256, CounterType.packets) drop_stats_2;
     @name(".drop_stats_update") action drop_stats_update() {
         drop_stats_2.count((bit<32>)(bit<32>)meta.ingress_metadata.drop_reason);
     }

@@ -24,7 +24,7 @@ limitations under the License.
 #include <set>
 #include <utility>
 
-// Remembers items intertion order
+// Remembers items in insertion order
 template <class T, class COMP = std::less<T>, class ALLOC = std::allocator<T>>
 class ordered_set {
  public:
@@ -77,6 +77,18 @@ class ordered_set {
     ordered_set &operator=(ordered_set &&a) = default; /* move is ok? */
     bool operator==(const ordered_set &a) const { return data == a.data; }
     bool operator!=(const ordered_set &a) const { return data != a.data; }
+    bool operator<(const ordered_set &a) const {
+        // we define this to work INDEPENDENT of the order -- so it is possible to have
+        // two ordered_sets where !(a < b) && !(b < a) && !(a == b) -- such sets have the
+        // same elements but in a different order.  This is generally what you want if you
+        // have a set of ordered_sets (or use ordered_set as a map key).
+        auto it = a.data_map.begin();
+        for (auto &el : data_map) {
+            if (it == a.data_map.end()) return true;
+            if (mapcmp()(el.first, it->first)) return true;
+            if (mapcmp()(it->first, el.first)) return false;
+            ++it; }
+        return false; }
 
     // FIXME add allocator and comparator ctors...
 
@@ -92,6 +104,9 @@ class ordered_set {
     const_iterator              cend() const noexcept { return data.cend(); }
     const_reverse_iterator      crbegin() const noexcept { return data.crbegin(); }
     const_reverse_iterator      crend() const noexcept { return data.crend(); }
+
+    reference front() const noexcept { return *data.begin(); }
+    reference back() const noexcept { return *data.rbegin(); }
 
     bool        empty() const noexcept { return data.empty(); }
     size_type   size() const noexcept { return data_map.size(); }
@@ -125,6 +140,21 @@ class ordered_set {
             insert(*it);
     }
 
+    void push_back(const T &v) {
+        auto it = find(v);
+        if (it == data.end()) {
+            it = data.insert(data.end(), v);
+            data_map.emplace(&*it, it);
+        } else {
+            data.splice(data.end(), data, it); } }
+    void push_back(T &&v) {
+        auto it = find(v);
+        if (it == data.end()) {
+            it = data.insert(data.end(), std::move(v));
+            data_map.emplace(&*it, it);
+        } else {
+            data.splice(data.end(), data, it); } }
+
     template <class... Args>
     std::pair<iterator, bool> emplace(Args &&... args) {
         auto it = data.emplace(data.end(), std::forward<Args>(args)...);
@@ -135,6 +165,14 @@ class ordered_set {
         } else {
             data.erase(it);
             return std::make_pair(old, false); } }
+
+    template <class... Args>
+    std::pair<iterator, bool> emplace_back(Args &&... args) {
+        auto it = data.emplace(data.end(), std::forward<Args>(args)...);
+        auto old = find(*it);
+        if (old != data.end()) {
+            data.erase(old); }
+        data_map.emplace(&*it, it); }
 
     /* should be erase(const_iterator), but glibc++ std::list::erase is broken */
     iterator erase(iterator pos) {

@@ -59,9 +59,6 @@ set (P4TEST_SUITES
 # would not make sense to run all the tests twice (one with and one without
 # P4Runtime).
 set (P4RUNTIME_EXCLUDE
-  # Two counter instances provided for psa_direct_counter, illegal according to
-  # PSA spec and fails in P4Info generation
-  testdata/p4_16_samples/psa-counter5.p4
   # Need to convert PSA_MeterColor_t to a serializable enum
   testdata/p4_16_samples/psa-meter1.p4
   # error not supported in static entries, not strictly required for P4Info
