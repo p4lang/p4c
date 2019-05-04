@@ -129,11 +129,11 @@ class DoSynthesizeActions : public Transform {
     const IR::Node* preorder(IR::P4Control* control) override;
     const IR::Node* preorder(IR::P4Action* action) override
     { prune(); return action; }  // skip actions
-    // We do not handle return and exit: this pass should be called after
-    // these have been removed
+    // We do not handle return: this pass should be called after it has been removed
     const IR::Node* preorder(IR::BlockStatement* statement) override;
     const IR::Node* preorder(IR::AssignmentStatement* statement) override;
     const IR::Node* preorder(IR::MethodCallStatement* statement) override;
+    const IR::Node* preorder(IR::ExitStatement* statement) override;
     const IR::Node* preorder(IR::Function* function) override
     { prune(); return function; }
 
