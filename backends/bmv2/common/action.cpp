@@ -158,6 +158,7 @@ void ActionConverter::postorder(const IR::P4Action* action) {
     auto body = new Util::JsonArray();
     convertActionBody(&action->body->components, body);
     auto id = ctxt->json->add_action(name, params, body);
+    LOG3("add action with id " << id << " name " << name << " " << action);
     ctxt->structure->ids.emplace(action, id);
 }
 

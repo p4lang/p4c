@@ -20,6 +20,8 @@ limitations under the License.
 
 namespace BMV2 {
 
+static constexpr unsigned INVALID_ACTION_ID = 0xffffffff;
+
 void ControlConverter::convertTableEntries(const IR::P4Table *table,
                                            Util::JsonObject *jsonTable) {
     auto entriesList = table->getEntries();
@@ -114,6 +116,8 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
         auto decl = ctxt->refMap->getDeclaration(method, true);
         auto actionDecl = decl->to<IR::P4Action>();
         unsigned id = get(ctxt->structure->ids, actionDecl);
+        BUG_CHECK(id != INVALID_ACTION_ID,
+                  "Could not find id for %1%", actionDecl);
         action->emplace("action_id", id);
         auto actionData = mkArrayField(action, "action_data");
         for (auto arg : *actionCall->arguments) {
@@ -535,8 +539,9 @@ ControlConverter::convertTable(const CFG::TableNode* node,
         auto decl = ctxt->refMap->getDeclaration(a->getPath(), true);
         BUG_CHECK(decl->is<IR::P4Action>(), "%1%: should be an action name", a);
         auto action = decl->to<IR::P4Action>();
-        unsigned id = get(ctxt->structure->ids, action);
+        unsigned id = get(ctxt->structure->ids, action, INVALID_ACTION_ID);
         LOG3("look up id " << action << " " << id);
+        BUG_CHECK(id != INVALID_ACTION_ID, "Could not find id for %1%", action);
         action_ids->append(id);
         auto name = action->controlPlaneName();
         actions->append(name);
@@ -633,7 +638,10 @@ ControlConverter::convertTable(const CFG::TableNode* node,
             BUG("%1%: unexpected expression", expr);
         }
 
-        unsigned actionid = get(ctxt->structure->ids, action);
+        unsigned actionid = get(ctxt->structure->ids, action,
+                                INVALID_ACTION_ID);
+        BUG_CHECK(actionid != INVALID_ACTION_ID,
+                  "Could not find id for %1%", action);
         auto entry = new Util::JsonObject();
         entry->emplace("action_id", actionid);
         entry->emplace("action_const", defact->isConstant);
