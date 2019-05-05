@@ -21,14 +21,29 @@ limitations under the License.
  *
  * https://github.com/p4lang/behavioral-model/blob/master/docs/simple_switch.md
  *
+
  * Note 2: There are ongoing discussions among P4 working group
  * members in 2019-Apr regarding exactly how resubmit, recirculate,
- * clone3, and digest operations can be called anywhere in their
- * respective controls, but the values of the fields to be preserved
- * (or sent to the control plane software in the case of digests) is
- * the value they have when that control is finished executing.  That
- * is how these operations behave in P4_14, but this requires some
- * care in making this happen in P4_16.
+ * and clone3 operations can be called anywhere in their respective
+ * controls, but the values of the fields to be preserved is the value
+ * they have when that control is finished executing.  That is how
+ * these operations behave in P4_14, but this requires some care in
+ * making this happen in P4_16.
+
+ * Note 3: There are at least some P4_14 implementations where
+ * invoking a generate_digest operation on a field_list will create a
+ * message to the control plane that contains the values of those
+ * fields when the ingress control is finished executing, which can be
+ * different than the values those fields have at the time the
+ * generate_digest operation is invoked in the program, if those field
+ * values are changed later in the execution of the P4_14 ingress
+ * control.
+ *
+ * The P4_16 plus v1model implementation should always create digest
+ * messages that contain the values of the specified fields at the
+ * time that the digest extern function is called.  Thus if a P4_14
+ * program expecting the behavior described above is compiled using
+ * p4c, it may behave differently.
  */
 
 #ifndef _V1_MODEL_P4_
@@ -318,8 +333,9 @@ extern void random<T>(out T result, in T lo, in T hi);
  * which the control plane software processes all at once.
  *
  * The value of the fields that are sent in the message to the control
- * plane is the value they have at the end of ingress processing, not
- * their values at the time the digest call is made.  See Note 2.
+ * plane is the value they have at the time the digest call occurs,
+ * even if those field values are changed by later ingress control
+ * code.  See Note 3.
  *
  * Calling digest is only supported in the ingress control.  There is
  * no way to undo its effects once it has been called.
