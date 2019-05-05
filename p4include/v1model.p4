@@ -21,7 +21,6 @@ limitations under the License.
  *
  * https://github.com/p4lang/behavioral-model/blob/master/docs/simple_switch.md
  *
-
  * Note 2: There are ongoing discussions among P4 working group
  * members in 2019-Apr regarding exactly how resubmit, recirculate,
  * and clone3 operations can be called anywhere in their respective
@@ -29,7 +28,7 @@ limitations under the License.
  * they have when that control is finished executing.  That is how
  * these operations behave in P4_14, but this requires some care in
  * making this happen in P4_16.
-
+ *
  * Note 3: There are at least some P4_14 implementations where
  * invoking a generate_digest operation on a field_list will create a
  * message to the control plane that contains the values of those
