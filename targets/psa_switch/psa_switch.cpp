@@ -309,7 +309,8 @@ PsaSwitch::ingress_thread() {
     if (packet == nullptr) break;
 
     port_t ingress_port = packet->get_ingress_port();
-    BMLOG_DEBUG_PKT(*packet, "Packet received on port {}", ingress_port);
+    BMLOG_DEBUG_PKT(*packet, "Processing packet received on port {}",
+                    ingress_port);
 
     phv = packet->get_phv();
     Parser *parser = this->get_parser("ingress_parser");
@@ -337,7 +338,7 @@ PsaSwitch::ingress_thread() {
     // prioritize dropping if marked as such - do not move below other checks
     Field &f_drop = phv->get_field("psa_ingress_output_metadata.drop");
     if (f_drop.get_int()) {
-      BMLOG_DEBUG_PKT(*packet, "Dropping packet marked as such from ingress");
+      BMLOG_DEBUG_PKT(*packet, "Dropping packet at the end of ingress");
       continue;
     }
 
@@ -350,10 +351,14 @@ PsaSwitch::ingress_thread() {
     mgid = f_mgid.get_uint();
 
     if(mgid != 0){
+      BMLOG_DEBUG_PKT(*packet,
+                      "Multicast requested for packet with multicast group {}",
+                      mgid);
       const auto pre_out = pre->replicate({mgid});
       auto packet_size = packet->get_register(PACKET_LENGTH_REG_IDX);
       for(const auto &out : pre_out){
         auto egress_port = out.egress_port;
+        BMLOG_DEBUG_PKT(*packet, "Replicating packet on port {}", egress_port);
         std::unique_ptr<Packet> packet_copy = packet->clone_with_phv_ptr();
         packet_copy->set_register(PACKET_LENGTH_REG_IDX, packet_size);
         enqueue(egress_port, std::move(packet_copy));
@@ -391,6 +396,8 @@ PsaSwitch::egress_thread(size_t worker_id) {
     // deparses packets after ingress processing - so no guarantees can be made
     // about their existence or validity while entering egress processing
     phv->reset();
+
+    phv->get_field("psa_egress_parser_input_metadata.egress_port").set(port);
 
     Parser *parser = this->get_parser("egress_parser");
     parser->parse(packet.get());
