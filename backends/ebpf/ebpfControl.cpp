@@ -464,7 +464,6 @@ void EBPFControl::scanConstants() {
 }
 
 bool EBPFControl::build() {
-    printf("Wszedłem do build w ebpf\n");
     hitVariable = program->refMap->newName("hit");
     auto pl = controlBlock->container->type->applyParams;
     if (pl->size() != 2) {
@@ -503,7 +502,6 @@ void EBPFControl::emitDeclaration(CodeBuilder* builder, const IR::Declaration* d
 }
 
 void EBPFControl::emit(CodeBuilder* builder) {
-    printf("Emit w ebpf");
     auto hitType = EBPFTypeFactory::instance->create(IR::Type_Boolean::get());
     builder->emitIndent();
     hitType->declare(builder, hitVariable, false);

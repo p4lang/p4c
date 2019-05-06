@@ -53,6 +53,8 @@ namespace UBPF {
         void emitPipeline(EBPF::CodeBuilder *builder) override;
 
         void emitUbpfHelpers(EBPF::CodeBuilder *builder) const;
+
+        void emitPacketCheck(EBPF::CodeBuilder* builder);
     };
 
 } // namespace UBPF

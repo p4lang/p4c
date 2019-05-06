@@ -63,6 +63,8 @@ namespace UBPF {
         void emitAction(EBPF::CodeBuilder *builder, cstring valueName);
 
         void emitInitializer(EBPF::CodeBuilder *builder);
+
+        void emitTableDefinition(EBPF::CodeBuilder *pBuilder);
     };
 
 }

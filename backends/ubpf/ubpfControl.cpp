@@ -93,8 +93,6 @@ namespace UBPF {
     void UBPFControlBodyTranslator::compileEmit(const IR::Vector<IR::Argument>* args) {
         BUG_CHECK(args->size() == 1, "%1%: expected 1 argument for emit", args);
 
-        builder->appendLine("//Compile emit start\n");
-
         auto expr = args->at(0)->expression;
         auto type = typeMap->getType(expr);
         auto ht = type->to<IR::Type_Header>();
@@ -150,7 +148,6 @@ namespace UBPF {
 
         builder->append("process Method start.");
 
-        auto decl = method->object;
         auto declType = method->originalExternType;
 
         if (declType->name.name == p4lib.packetOut.name) {
@@ -178,7 +175,6 @@ namespace UBPF {
             }
         }
         builder->blockStart();
-        builder->appendLine("//Process apply start");
 
         BUG_CHECK(method->expr->arguments->size() == 0, "%1%: table apply with arguments", method);
         cstring keyname = "key";
@@ -201,31 +197,9 @@ namespace UBPF {
             builder->emitIndent();
             builder->appendLine("/* perform lookup */");
             builder->emitIndent();
-            builder->target->emitTableLookup(builder, table->dataMapName, keyname, valueName);
+            builder->target->emitTableLookup(builder, "map_definition", keyname, valueName);
             builder->endOfStatement(true);
         }
-
-        builder->emitIndent();
-        builder->appendFormat("if (%s == NULL) ", valueName.c_str());
-        builder->blockStart();
-
-        builder->emitIndent();
-        builder->appendLine("/* miss; find default action */");
-        builder->emitIndent();
-//        builder->appendFormat("%s = 0", control->hitVariable.c_str());
-//        builder->endOfStatement(true);
-
-        builder->emitIndent();
-        builder->target->emitTableLookup(builder, table->defaultActionMapName,
-                                         control->program->zeroKey, valueName);
-        builder->endOfStatement(true);
-        builder->blockEnd(false);
-//        builder->append(" else ");
-//        builder->blockStart();
-//        builder->emitIndent();
-////        builder->appendFormat("%s = 1", control->hitVariable.c_str());
-//        builder->endOfStatement(true);
-//        builder->blockEnd(true);
 
         builder->newline();
         builder->emitIndent();
@@ -252,7 +226,6 @@ namespace UBPF {
     }
 
     bool UBPFControlBodyTranslator::preorder(const IR::PathExpression* expression) {
-//        builder->appendLine("//Path expression start ");
         auto decl = control->program->refMap->getDeclaration(expression->path, true);
         auto param = decl->getNode()->to<IR::Parameter>();
         if (param != nullptr) {
@@ -269,7 +242,6 @@ namespace UBPF {
     }
 
     bool UBPFControlBodyTranslator::preorder(const IR::MethodCallExpression* expression) {
-        builder->append("//Method call expresion start");
         builder->append("/* ");
         visit(expression->method);
         builder->append("(");
@@ -453,19 +425,8 @@ namespace UBPF {
     }
 
     void UBPFControl::emit(EBPF::CodeBuilder* builder) {
-        printf("Emit w ubpf\n");
-        auto hitType = UBPFTypeFactory::instance->create(IR::Type_Boolean::get());
         builder->emitIndent();
-        builder->appendLine("//Emit w ubpf za emitIdent\n");
-//        hitType->declare(builder, hitVariable, false);
-//        builder->endOfStatement(true);
-// Nie wiem do czego, ale nic to nie dodawało
-//        for (auto a : controlBlock->container->controlLocals)
-//            emitDeclaration(builder, a);
-        builder->emitIndent();
-        printf("Przed code gen ubpf\n");
         codeGen->setBuilder(builder);
-        printf("Po code gen ubpf\n");
         controlBlock->container->body->apply(*codeGen);
         builder->newline();
     }

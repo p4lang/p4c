@@ -63,6 +63,7 @@ namespace UBPF {
         builder->endOfStatement(true);
 
         emitLocalVariables(builder);
+        emitPacketCheck(builder);
         builder->newline();
         builder->emitIndent();
         builder->appendFormat("goto %s;", IR::ParserState::start.c_str());
@@ -85,10 +86,6 @@ namespace UBPF {
         builder->appendFormat("return %s;\n", builder->target->dropReturnCode().c_str());
         builder->decreaseIndent();
         builder->blockEnd(true);  // end of function
-//
-//        builder->emitIndent();
-//        builder->appendFormat("return %s;\n", builder->target->forwardReturnCode().c_str());
-//        builder->blockEnd(true);
     }
 
     void UBPFProgram::emitUbpfHelpers(EBPF::CodeBuilder *builder) const {
@@ -111,6 +108,7 @@ namespace UBPF {
         builder->newline();
         emitTypes(builder);
         builder->newline();
+        control->emitTableTypes(builder);
         builder->appendLine("#endif");
     }
 
@@ -150,26 +148,32 @@ namespace UBPF {
         builder->newline();
 
         builder->emitIndent();
-        builder->appendFormat("u8 %s = 0;", control->accept->name.name.c_str());
+        builder->appendFormat("uint8_t %s = 0;", control->accept->name.name.c_str());
         builder->newline();
+    }
 
-//        builder->emitIndent();
-//        builder->appendFormat("u8 pass = 0;", offsetVar.c_str());
-//        builder->newline();
+    void UBPFProgram::emitPacketCheck(EBPF::CodeBuilder* builder) {
+        auto header_type = parser->headerType->to<EBPF::EBPFStructType>();
+        if (header_type != nullptr) {
+            auto header_type_name = header_type->name;
+            builder->newline();
+            builder->emitIndent();
+            builder->appendFormat("if (sizeof(struct %s) < pkt_len) ", header_type_name);
+            builder->blockStart();
+            builder->emitIndent();
+            builder->appendLine("return 1;");
+            builder->blockEnd(true);
+        }
     }
 
     void UBPFProgram::emitPipeline(EBPF::CodeBuilder *builder) {
-        printf("Wszedłem do pipeline");
         builder->emitIndent();
         builder->append(IR::ParserState::accept);
         builder->append(":");
         builder->newline();
-        printf("Blok powinien się otworzyć");
         builder->emitIndent();
         builder->blockStart();
-        printf("Przed emit");
         control->emit(builder);
-        printf("Po emit");
         builder->blockEnd(true);
     }
 

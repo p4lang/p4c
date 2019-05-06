@@ -181,20 +181,97 @@ namespace UBPF {
         builder->appendFormat("enum %s action;", actionEnumName.c_str());
         builder->newline();
 
-        builder->emitIndent();
-        builder->append("union ");
+//        builder->emitIndent();
+//        builder->append("union ");
+//        builder->blockStart();
+//
+//        for (auto a : actionList->actionList) {
+//            auto adecl = program->refMap->getDeclaration(a->getPath(), true);
+//            auto action = adecl->getNode()->to<IR::P4Action>();
+//            cstring name = EBPFObject::externalName(action);
+//            emitActionArguments(builder, action, name);
+//        }
+//
+//        builder->blockEnd(false);
+//        builder->spc();
+//        builder->appendLine("u;");
+        builder->blockEnd(false);
+        builder->endOfStatement(true);
+    }
+
+    void UBPFTable::emitTableDefinition(EBPF::CodeBuilder *builder) {
+
+        //ubpf maps types
+        builder->append("enum ");
+        builder->append("ubpf_map_type");
+        builder->spc();
         builder->blockStart();
 
-        for (auto a : actionList->actionList) {
-            auto adecl = program->refMap->getDeclaration(a->getPath(), true);
-            auto action = adecl->getNode()->to<IR::P4Action>();
-            cstring name = EBPFObject::externalName(action);
-            emitActionArguments(builder, action, name);
-        }
+        builder->emitIndent();
+        builder->append("UBPF_MAP_TYPE_HASHMAP = 1,");
+        builder->newline();
+
+//        builder->emitIndent();
+//        builder->append("UBPF_MAP_TYPE_ARRAY = 2,");
+//        builder->newline();
 
         builder->blockEnd(false);
+        builder->endOfStatement(true);
+
+        // definition if ubpf map
+        builder->append("struct ");
+        builder->append("ubpf_map_def");
         builder->spc();
-        builder->appendLine("u;");
+        builder->blockStart();
+
+        builder->emitIndent();
+        builder->append("enum ubpf_map_type type;");
+        builder->newline();
+
+        builder->emitIndent();
+        builder->append("unsigned int key_size;");
+        builder->newline();
+
+        builder->emitIndent();
+        builder->append("unsigned int value_size;");
+        builder->newline();
+
+        builder->emitIndent();
+        builder->append("unsigned int max_entries;");
+        builder->newline();
+
+        builder->emitIndent();
+        builder->append("unsigned int nb_hash_functions;");
+        builder->newline();
+
+        builder->blockEnd(false);
+        builder->endOfStatement(true);
+
+        builder->append("struct ");
+        builder->append("ubpf_map_def map_definition = ");
+        builder->spc();
+        builder->blockStart();
+
+        builder->emitIndent();
+        builder->append(".type = UBPF_MAP_TYPE_HASHMAP,");
+        builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat(".key_size = sizeof(struct %s),", keyTypeName.c_str());
+        builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat(".value_size = sizeof(struct %s),", valueTypeName.c_str());
+        builder->newline();
+
+        builder->emitIndent();
+        builder->append(".max_entries = 1024,");
+        builder->newline();
+
+        builder->emitIndent();
+        builder->append(".nb_hash_functions = 0,");
+        builder->newline();
+
         builder->blockEnd(false);
         builder->endOfStatement(true);
     }
@@ -202,6 +279,7 @@ namespace UBPF {
     void UBPFTable::emitTypes(EBPF::CodeBuilder *builder) {
         emitKeyType(builder);
         emitValueType(builder);
+        emitTableDefinition(builder);
     }
 
     void UBPFTable::emitInstance(EBPF::CodeBuilder *builder) {

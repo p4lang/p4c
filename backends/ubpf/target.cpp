@@ -22,9 +22,7 @@ namespace UBPF {
                                      cstring tblName,
                                      cstring key,
                                      cstring value) const {
-        builder->appendFormat("%s = ubpf_map_lookup(%s, &%s)",
+        builder->appendFormat("%s = ubpf_map_lookup(&%s, &%s)",
                               value.c_str(), tblName.c_str(), key.c_str());
-//        KernelSamplesTarget::emitTableLookup(builder, tblName, key, value);
     }
-
 }

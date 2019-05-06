@@ -9,4 +9,4 @@ namespace UBPF {
     cstring UBPFModel::reservedPrefix = "ubpf_";
     UBPFModel UBPFModel::instance;
 
-}  // namespace EBPF
+}  // namespace UBPF
