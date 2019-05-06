@@ -1,5 +1,3 @@
-//#include "backends/ebpf/ebpfType.h"
-//#include "backends/ebpf/ebpfControl.h"
 #include "ubpfControl.h"
 #include "ubpfParser.h"
 #include "ubpfProgram.h"

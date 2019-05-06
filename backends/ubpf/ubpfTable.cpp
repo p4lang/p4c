@@ -7,7 +7,6 @@
 #include "ir/ir.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
-//#include "ubpfProgram.h"
 
 namespace UBPF {
 
@@ -181,20 +180,6 @@ namespace UBPF {
         builder->appendFormat("enum %s action;", actionEnumName.c_str());
         builder->newline();
 
-//        builder->emitIndent();
-//        builder->append("union ");
-//        builder->blockStart();
-//
-//        for (auto a : actionList->actionList) {
-//            auto adecl = program->refMap->getDeclaration(a->getPath(), true);
-//            auto action = adecl->getNode()->to<IR::P4Action>();
-//            cstring name = EBPFObject::externalName(action);
-//            emitActionArguments(builder, action, name);
-//        }
-//
-//        builder->blockEnd(false);
-//        builder->spc();
-//        builder->appendLine("u;");
         builder->blockEnd(false);
         builder->endOfStatement(true);
     }
@@ -210,10 +195,6 @@ namespace UBPF {
         builder->emitIndent();
         builder->append("UBPF_MAP_TYPE_HASHMAP = 1,");
         builder->newline();
-
-//        builder->emitIndent();
-//        builder->append("UBPF_MAP_TYPE_ARRAY = 2,");
-//        builder->newline();
 
         builder->blockEnd(false);
         builder->endOfStatement(true);
@@ -248,7 +229,7 @@ namespace UBPF {
         builder->endOfStatement(true);
 
         builder->append("struct ");
-        builder->append("ubpf_map_def map_definition = ");
+        builder->appendFormat("ubpf_map_def %s = ", dataMapName);
         builder->spc();
         builder->blockStart();
 

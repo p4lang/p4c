@@ -197,7 +197,7 @@ namespace UBPF {
             builder->emitIndent();
             builder->appendLine("/* perform lookup */");
             builder->emitIndent();
-            builder->target->emitTableLookup(builder, "map_definition", keyname, valueName);
+            builder->target->emitTableLookup(builder, table->dataMapName, keyname, valueName);
             builder->endOfStatement(true);
         }
 
