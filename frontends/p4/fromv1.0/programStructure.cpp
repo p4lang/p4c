@@ -421,7 +421,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
     IR::IndexedVector<IR::StatOrDecl> components;
     for (auto e : parser->stmts) {
         auto stmt = convertParserStatement(e);
-        components.push_back(stmt);
+        if (stmt) components.push_back(stmt);
     }
     const IR::Expression* select = nullptr;
     if (parser->select != nullptr) {

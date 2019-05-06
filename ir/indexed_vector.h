@@ -40,7 +40,7 @@ class IndexedVector : public Vector<T> {
     ordered_map<cstring, const IDeclaration*> declarations;
 
     void insertInMap(const T* a) {
-        if (!a->template is<IDeclaration>())
+        if (a == nullptr || !a->template is<IDeclaration>())
             return;
         auto decl = a->template to<IDeclaration>();
         auto name = decl->getName().name;
@@ -50,6 +50,8 @@ class IndexedVector : public Vector<T> {
         else
             declarations[name] = decl; }
     void removeFromMap(const T* a) {
+        if (a == nullptr)
+            return;
         auto decl = a->template to<IDeclaration>();
         if (decl == nullptr)
             return;
