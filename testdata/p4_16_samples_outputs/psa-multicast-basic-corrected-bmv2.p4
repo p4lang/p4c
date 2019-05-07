@@ -27,7 +27,7 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     apply {
-        multicast(ostd, (MulticastGroup_t)hdr.ethernet.dstAddr[31:0]);
+        multicast(ostd, (MulticastGroup_t)(MulticastGroupUint_t)hdr.ethernet.dstAddr);
     }
 }
 

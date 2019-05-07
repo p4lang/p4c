@@ -29,7 +29,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     @name(".send_to_port") action send_to_port() {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
-        ostd.egress_port = (PortIdUint_t)hdr.ethernet.dstAddr[1:0];
+        ostd.egress_port = (PortIdUint_t)hdr.ethernet.dstAddr;
     }
     @name("cIngress.counter") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS) counter_0;
     @name("cIngress.execute") action execute_1() {
