@@ -115,7 +115,7 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
         auto method = actionCall->method->to<IR::PathExpression>()->path;
         auto decl = ctxt->refMap->getDeclaration(method, true);
         auto actionDecl = decl->to<IR::P4Action>();
-        unsigned id = get(ctxt->structure->ids, actionDecl);
+        unsigned id = get(ctxt->structure->ids, actionDecl, INVALID_ACTION_ID);
         BUG_CHECK(id != INVALID_ACTION_ID,
                   "Could not find id for %1%", actionDecl);
         action->emplace("action_id", id);
