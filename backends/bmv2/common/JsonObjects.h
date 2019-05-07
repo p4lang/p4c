@@ -54,7 +54,7 @@ class JsonObjects {
     void add_pipeline();
     void add_extern_attribute(const cstring& name, const cstring& type,
                               const cstring& value, Util::JsonArray* attributes);
-    void add_extern(const cstring& name, const cstring& type, Util::JsonArray*& attributes);
+    void add_extern(const cstring& name, const cstring& type, Util::JsonArray* attributes);
     JsonObjects();
     Util::JsonArray* insert_array_field(Util::JsonObject* parent, cstring name);
     Util::JsonArray* append_array(Util::JsonArray* parent);

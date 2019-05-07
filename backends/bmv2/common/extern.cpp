@@ -88,13 +88,21 @@ ExternConverter::convertExternObject(ConversionContext* ctxt,
     }
 }
 
+/// This method is invoked for all externs that do not have a registered
+/// conversion, i.e., unknown by the architecture.
 void
-ExternConverter::convertExternInstance(ConversionContext* ,
-                                       const IR::Declaration* ,
+ExternConverter::convertExternInstance(ConversionContext* ctxt,
+                                       const IR::Declaration* decl,
                                        const IR::ExternBlock* eb,
                                        const bool& emitExterns) {
     if (!emitExterns)
         ::error(ErrorType::ERR_UNKNOWN, "extern instance", eb->type->name);
+    auto attr = new Util::JsonArray();
+    // TODO: add attributes.  It is not clear how
+    // JsonObjects::add_extern_attribute can be used to insert attributes,
+    // since it does not seem to have enough fields to represent
+    // all the data in an attribute.
+    ctxt->json->add_extern(decl->controlPlaneName(), eb->type->getName(), attr);
 }
 
 Util::IJson*
