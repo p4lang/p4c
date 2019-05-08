@@ -101,7 +101,7 @@ ExternConverter::convertExternInstance(ConversionContext* ctxt,
     // TODO: add attributes.  It is not clear how
     // JsonObjects::add_extern_attribute can be used to insert attributes,
     // since it does not seem to have enough fields to represent
-    // all the data in an attribute.
+    // all the data in an IR::Attribute.
     ctxt->json->add_extern(decl->controlPlaneName(), eb->type->getName(), attr);
 }
 
