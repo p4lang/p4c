@@ -156,7 +156,7 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   //! add_required_field("standard_metadata", "packet_length");
   //! add_required_field("standard_metadata", "instance_type");
   //! add_required_field("standard_metadata", "egress_spec");
-  //! add_required_field("standard_metadata", "clone_spec");
+  //! add_required_field("standard_metadata", "egress_port");
   //! @endcode
   void add_required_field(const std::string &header_name,
                           const std::string &field_name);

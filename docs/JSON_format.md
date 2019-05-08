@@ -704,8 +704,8 @@ this extern instance. Each array item has the following attributes:
 bmv2 target architectures usually require a set of metadata fields to be defined
 in the JSON input. For example, simple_switch requires the following fields:
 `standard_metadata.ingress_port`, `standard_metadata.packet_length`,
-`standard_metadata.instance_type`, `standard_metadata.egress_spec`,
-`standard_metadata.egress_port` and `standard_metadata.clone_spec`. These fields
+`standard_metadata.instance_type`, `standard_metadata.egress_spec`, and
+`standard_metadata.egress_port`. These fields
 happen to be the standard metadata fields described in the P4_14
 specification. In some cases you may want to use different names for these
 fields in a P4 program, which you can accomplish by using field aliases. A field
