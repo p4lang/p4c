@@ -14,6 +14,7 @@ ARG IMAGE_TYPE=build
 ENV P4C_DEPS bison \
              build-essential \
              cmake \
+             curl \
              flex \
              g++ \
              libboost-dev \
@@ -23,9 +24,6 @@ ENV P4C_DEPS bison \
              libgc-dev \
              libgmp-dev \
              pkg-config \
-             python-ipaddr \
-             python-pip \
-             python-setuptools \
              tcpdump
 ENV P4C_EBPF_DEPS libpcap-dev \
              libelf-dev \
@@ -40,14 +38,19 @@ ENV P4C_RUNTIME_DEPS cpp \
                      libgmp10 \
                      libgmpxx4ldbl \
                      python
-ENV P4C_PIP_PACKAGES tenjin \
+ENV P4C_PIP_PACKAGES ipaddr \
                      pyroute2 \
                      ply==3.8 \
                      scapy==2.4.0
+
+# We install pip with get-pip.py (https://pip.pypa.io/en/stable/installing/)
+# since the Ubuntu package manager's version of pip seems to be broken on Ubuntu
+# 16.04.
 COPY . /p4c/
 WORKDIR /p4c/
 RUN apt-get update && \
     apt-get install -y --no-install-recommends $P4C_DEPS $P4C_EBPF_DEPS $P4C_RUNTIME_DEPS && \
+    mkdir /tmp/pip && cd /tmp/pip && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py && cd - && rm -rf /tmp/pip && \
     pip install $P4C_PIP_PACKAGES && \
     mkdir build && \
     cd build && \
