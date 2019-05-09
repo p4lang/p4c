@@ -21,21 +21,12 @@
 #ifndef BM_PDFIXED_INT_PD_CONN_MGR_H_
 #define BM_PDFIXED_INT_PD_CONN_MGR_H_
 
-#include <bm/config.h>
-
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/transport/TSocket.h>
 #include <thrift/transport/TTransportUtils.h>
 #include <thrift/protocol/TMultiplexedProtocol.h>
 
-namespace thrift_provider = apache::thrift;
-
-#ifdef BM_HAVE_THRIFT_STDCXX_H
-#include <thrift/stdcxx.h>
-namespace stdcxx = thrift_provider::stdcxx;
-#else
-namespace stdcxx = boost;
-#endif
+#include <bm/thrift/stdcxx.h>
 
 #include <mutex>
 #include <iostream>

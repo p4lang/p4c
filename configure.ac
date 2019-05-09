@@ -146,6 +146,27 @@ AS_IF([test "$want_thrift" = yes], [
     AC_CHECK_HEADER([thrift/stdcxx.h], [
         AC_DEFINE([HAVE_THRIFT_STDCXX_H], [], [Found Thrift stdcxx wrapper])
     ], [])
+
+    AC_MSG_CHECKING(for thrift version)
+    AC_RUN_IFELSE(
+        [AC_LANG_SOURCE(
+          [[#include <thrift/config.h>
+            #include <stdio.h>
+            int main() {
+              int major, minor, revision;
+              if (sscanf(PACKAGE_VERSION, "%d.%d.%d", &major, &minor, &revision) != 3)
+                return 1;
+              int version = major * 10000 + minor * 100 + revision;
+              printf("%d\n", version);
+              return 0;
+            }
+        ]])],
+        [THRIFT_VERSION=`./conftest$EXEEXT`],
+        [AC_MSG_RESULT(error)
+         AC_MSG_ERROR(Cannot determine thrift version)]
+    )
+    AC_DEFINE_UNQUOTED([THRIFT_VERSION], [$THRIFT_VERSION],
+                       [Thrift version string extracted from thrift/config.h])
 ])
 
 AS_IF([test "$want_pi" = yes], [

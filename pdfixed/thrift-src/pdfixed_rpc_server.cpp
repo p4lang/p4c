@@ -1,5 +1,3 @@
-#include <bm/config.h>
-
 #include <thrift/protocol/TBinaryProtocol.h>
 #include <thrift/server/TSimpleServer.h>
 #include <thrift/server/TThreadedServer.h>
@@ -7,14 +5,7 @@
 #include <thrift/transport/TBufferTransports.h>
 #include <thrift/processor/TMultiplexedProcessor.h>
 
-namespace thrift_provider = apache::thrift;
-
-#ifdef BM_HAVE_THRIFT_STDCXX_H
-#include <thrift/stdcxx.h>
-namespace stdcxx = thrift_provider::stdcxx;
-#else
-namespace stdcxx = boost;
-#endif
+#include <bm/thrift/stdcxx.h>
 
 using namespace ::thrift_provider;
 using namespace ::thrift_provider::protocol;
