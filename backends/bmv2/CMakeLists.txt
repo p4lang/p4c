@@ -179,8 +179,9 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/issue1765-1-bmv2.p4
   # These tests require bmv2's psa_switch to support std metadata passing at minimum
   testdata/p4_16_samples/psa-ingress-input-meta-bmv2.p4
-  # Uses an unknown extern
+  # Next two Use unknown externs
   testdata/p4_16_samples/issue1882-bmv2.p4
+  testdata/p4_16_samples/issue1882-1-bmv2.p4
 )
 
 if (HAVE_SIMPLE_SWITCH)

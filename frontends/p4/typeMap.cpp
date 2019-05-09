@@ -265,6 +265,9 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
 bool TypeMap::implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to) {
     if (TypeMap::equivalent(from, to))
         return true;
+    if (from->is<IR::Type_InfInt>() && to->is<IR::Type_InfInt>())
+        // this case is not caught by the equivalence check
+        return true;
     // We allow implicit casts from tuples to structs
     if (from->is<IR::Type_StructLike>()) {
         if (to->is<IR::Type_Tuple>()) {

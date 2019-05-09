@@ -95,14 +95,29 @@ ExternConverter::convertExternInstance(ConversionContext* ctxt,
                                        const IR::Declaration* decl,
                                        const IR::ExternBlock* eb,
                                        const bool& emitExterns) {
-    if (!emitExterns)
+    if (!emitExterns) {
         ::error(ErrorType::ERR_UNKNOWN, "extern instance", eb->type->name);
-    auto attr = new Util::JsonArray();
-    // TODO: add attributes.  It is not clear how
-    // JsonObjects::add_extern_attribute can be used to insert attributes,
-    // since it does not seem to have enough fields to represent
-    // all the data in an IR::Attribute.
-    ctxt->json->add_extern(decl->controlPlaneName(), eb->type->getName(), attr);
+        return;
+    }
+    auto attrs = new Util::JsonArray();
+    auto params = eb->getConstructorParameters();
+    for (auto param : params->parameters) {
+        auto val = eb->getParameterValue(param->name);
+        cstring type;
+        cstring value;
+        if (auto cst = val->to<IR::Constant>()) {
+            type = "hexstr";
+            value = Util::toString(&cst->value, 16);
+        } else if (auto str = val->to<IR::StringLiteral>()) {
+            type = "string";
+            value = str->value;
+        } else {
+            modelError("%1%: parameter type not unsupported", param->type);
+            continue;
+        }
+        ctxt->json->add_extern_attribute(param->name, type, value, attrs);
+    }
+    ctxt->json->add_extern(decl->controlPlaneName(), eb->type->getName(), attrs);
 }
 
 Util::IJson*

@@ -842,7 +842,8 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
 
         result->push_back(new IR::Argument(arg->srcInfo, arg->name, newArg));
         setType(newArg, paramType);
-        changes = true;
+        if (newArg != arg->expression)
+            changes = true;
     }
     if (changes)
         return result;
