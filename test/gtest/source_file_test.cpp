@@ -18,6 +18,7 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
 #include "lib/source_file.h"
+#include "lib/compile_context.h"
 
 namespace Util {
 
