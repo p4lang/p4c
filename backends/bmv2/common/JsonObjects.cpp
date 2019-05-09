@@ -418,7 +418,7 @@ JsonObjects::add_extern_attribute(const cstring& name, const cstring& type,
 
 void
 JsonObjects::add_extern(const cstring& name, const cstring& type,
-                        Util::JsonArray*& attributes) {
+                        Util::JsonArray* attributes) {
     auto extn = new Util::JsonObject();
     unsigned id = BMV2::nextId("extern_instances");
     extn->emplace("name", name);
