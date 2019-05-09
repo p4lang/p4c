@@ -14,6 +14,7 @@ ARG IMAGE_TYPE=build
 ENV P4C_DEPS bison \
              build-essential \
              cmake \
+             curl \
              flex \
              g++ \
              libboost-dev \
@@ -23,7 +24,6 @@ ENV P4C_DEPS bison \
              libgc-dev \
              libgmp-dev \
              pkg-config \
-             python-pip \
              tcpdump
 ENV P4C_EBPF_DEPS libpcap-dev \
              libelf-dev \
@@ -46,7 +46,7 @@ COPY . /p4c/
 WORKDIR /p4c/
 RUN apt-get update && \
     apt-get install -y --no-install-recommends $P4C_DEPS $P4C_EBPF_DEPS $P4C_RUNTIME_DEPS && \
-    pip install --upgrade setuptools && \
+    mkdir /tmp/pip && cd /tmp/pip && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py && cd - && rm -rf /tmp/pip \
     pip install $P4C_PIP_PACKAGES && \
     mkdir build && \
     cd build && \
