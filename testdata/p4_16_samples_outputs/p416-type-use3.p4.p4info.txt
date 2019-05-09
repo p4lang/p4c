@@ -1,0 +1,261 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33586815
+    name: "ingress.custom_table"
+    alias: "custom_table"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.srcAddr"
+    bitwidth: 48
+    match_type: EXACT
+    type_name {
+      name: "EthT_t"
+    }
+  }
+  match_fields {
+    id: 2
+    name: "hdr.ethernet.dstAddr"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 3
+    name: "hdr.custom.e"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  match_fields {
+    id: 4
+    name: "hdr.custom.ed"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  match_fields {
+    id: 5
+    name: "hdr.custom.et"
+    bitwidth: 8
+    match_type: EXACT
+    type_name {
+      name: "CustomT_t"
+    }
+  }
+  match_fields {
+    id: 6
+    name: "hdr.custom.edd"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  match_fields {
+    id: 7
+    name: "hdr.custom.eddt"
+    bitwidth: 8
+    match_type: EXACT
+    type_name {
+      name: "CustomDDT_t"
+    }
+  }
+  match_fields {
+    id: 8
+    name: "hdr.custom.edtd"
+    bitwidth: 8
+    match_type: EXACT
+    type_name {
+      name: "CustomDT_t"
+    }
+  }
+  match_fields {
+    id: 9
+    name: "hdr.custom.edtt"
+    bitwidth: 8
+    match_type: EXACT
+    type_name {
+      name: "CustomDTT_t"
+    }
+  }
+  match_fields {
+    id: 10
+    name: "hdr.custom.etdd"
+    bitwidth: 8
+    match_type: EXACT
+    type_name {
+      name: "CustomT_t"
+    }
+  }
+  match_fields {
+    id: 11
+    name: "hdr.custom.etdt"
+    bitwidth: 8
+    match_type: EXACT
+    type_name {
+      name: "CustomTDT_t"
+    }
+  }
+  match_fields {
+    id: 12
+    name: "hdr.custom.ettd"
+    bitwidth: 8
+    match_type: EXACT
+    type_name {
+      name: "CustomTT_t"
+    }
+  }
+  match_fields {
+    id: 13
+    name: "hdr.custom.ettt"
+    bitwidth: 8
+    match_type: EXACT
+    type_name {
+      name: "CustomTTT_t"
+    }
+  }
+  action_refs {
+    id: 16829338
+  }
+  action_refs {
+    id: 16797750
+  }
+  action_refs {
+    id: 16796819
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16829338
+    name: "ingress.set_output"
+    alias: "set_output"
+  }
+  params {
+    id: 1
+    name: "out_port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 16797750
+    name: "ingress.set_headers"
+    alias: "set_headers"
+  }
+  params {
+    id: 1
+    name: "e"
+    bitwidth: 8
+  }
+  params {
+    id: 2
+    name: "ed"
+    bitwidth: 8
+  }
+  params {
+    id: 3
+    name: "et"
+    bitwidth: 8
+    type_name {
+      name: "CustomT_t"
+    }
+  }
+  params {
+    id: 4
+    name: "edd"
+    bitwidth: 8
+  }
+  params {
+    id: 5
+    name: "edt"
+    bitwidth: 8
+    type_name {
+      name: "CustomDT_t"
+    }
+  }
+  params {
+    id: 6
+    name: "etd"
+    bitwidth: 8
+    type_name {
+      name: "CustomT_t"
+    }
+  }
+  params {
+    id: 7
+    name: "ett"
+    bitwidth: 8
+    type_name {
+      name: "CustomTT_t"
+    }
+  }
+  params {
+    id: 8
+    name: "eddd"
+    bitwidth: 8
+  }
+  params {
+    id: 9
+    name: "eddt"
+    bitwidth: 8
+    type_name {
+      name: "CustomDDT_t"
+    }
+  }
+  params {
+    id: 10
+    name: "edtd"
+    bitwidth: 8
+    type_name {
+      name: "CustomDT_t"
+    }
+  }
+  params {
+    id: 11
+    name: "edtt"
+    bitwidth: 8
+    type_name {
+      name: "CustomDTT_t"
+    }
+  }
+  params {
+    id: 12
+    name: "etdd"
+    bitwidth: 8
+    type_name {
+      name: "CustomT_t"
+    }
+  }
+  params {
+    id: 13
+    name: "etdt"
+    bitwidth: 8
+    type_name {
+      name: "CustomTDT_t"
+    }
+  }
+  params {
+    id: 14
+    name: "ettd"
+    bitwidth: 8
+    type_name {
+      name: "CustomTT_t"
+    }
+  }
+  params {
+    id: 15
+    name: "ettt"
+    bitwidth: 8
+    type_name {
+      name: "CustomTTT_t"
+    }
+  }
+}
+actions {
+  preamble {
+    id: 16796819
+    name: "ingress.my_drop"
+    alias: "my_drop"
+  }
+}
+type_info {
+}

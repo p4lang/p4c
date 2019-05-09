@@ -10,7 +10,6 @@ typedef bit<PORT_BITWIDTH> PortIdUInt_t;
 
 // request translation by P4Runtime agent of all occurrences of PortId_t exposed
 // to control-plane
-@p4runtime_translate("port")
 type bit<PORT_BITWIDTH> PortId_t;
 
 //const PortId_t PSA_CPU_PORT = (PortId_t) 9w192; // target-specific
@@ -39,12 +38,7 @@ type bit<PORT_BITWIDTH> PortId_t;
 // number space PortId_t values into headers to be sent to the CPU
 // port, or for parsing headers containing PortId_t values in certain
 // headers in packets from the CPU port.
-@p4runtime_translate("port")
 type bit<32> PortIdInHeader_t;
-
-// used to cast between PortId_t and PortIdInHeader_t the programmer needs to be
-// aware that he may be exposing non-translated values to the control-plane,
-// unless he use @p4runtime_translate appropriately
 
 // Note: all of these casts are necessary with the current type
 // code.  Eliminating any one of them results in a compiler error when
@@ -88,8 +82,6 @@ header packet_in_header_t {
     // Translation will occur in agent software for this field,
     // because it is inside of a controller_header, and because
     // PortIdInHeader_t is defined as a type with a
-    // @p4runtime_translate("port") annotation.  No such annotation is
-    // needed here.
     PortIdInHeader_t ingress_port;
 }
 

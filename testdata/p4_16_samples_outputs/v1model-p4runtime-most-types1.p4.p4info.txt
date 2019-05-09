@@ -1,0 +1,638 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33586815
+    name: "ingress.custom_table"
+    alias: "custom_table"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.custom.addr0"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "hdr.custom.addr1"
+    bitwidth: 48
+    match_type: EXACT
+    type_name {
+      name: "Eth1_t"
+    }
+  }
+  match_fields {
+    id: 3
+    name: "hdr.custom.addr2"
+    bitwidth: 49
+    match_type: EXACT
+    type_name {
+      name: "Eth2_t"
+    }
+  }
+  match_fields {
+    id: 4
+    name: "hdr.custom.e"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  match_fields {
+    id: 5
+    name: "hdr.custom.e0"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  match_fields {
+    id: 6
+    name: "hdr.custom.e1"
+    bitwidth: 8
+    match_type: EXACT
+    type_name {
+      name: "Custom1_t"
+    }
+  }
+  match_fields {
+    id: 7
+    name: "hdr.custom.e2"
+    bitwidth: 12
+    match_type: EXACT
+    type_name {
+      name: "Custom2_t"
+    }
+  }
+  match_fields {
+    id: 8
+    name: "hdr.custom.e00"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  match_fields {
+    id: 9
+    name: "hdr.custom.e01"
+    bitwidth: 8
+    match_type: EXACT
+    type_name {
+      name: "Custom01_t"
+    }
+  }
+  match_fields {
+    id: 10
+    name: "hdr.custom.e02"
+    bitwidth: 13
+    match_type: EXACT
+    type_name {
+      name: "Custom02_t"
+    }
+  }
+  match_fields {
+    id: 11
+    name: "hdr.custom.e10"
+    bitwidth: 8
+    match_type: EXACT
+    type_name {
+      name: "Custom1_t"
+    }
+  }
+  match_fields {
+    id: 12
+    name: "hdr.custom.e11"
+    bitwidth: 8
+    match_type: EXACT
+    type_name {
+      name: "Custom11_t"
+    }
+  }
+  match_fields {
+    id: 13
+    name: "hdr.custom.e12"
+    bitwidth: 14
+    match_type: EXACT
+    type_name {
+      name: "Custom12_t"
+    }
+  }
+  match_fields {
+    id: 14
+    name: "hdr.custom.e20"
+    bitwidth: 12
+    match_type: EXACT
+    type_name {
+      name: "Custom2_t"
+    }
+  }
+  match_fields {
+    id: 15
+    name: "hdr.custom.e21"
+    bitwidth: 8
+    match_type: EXACT
+    type_name {
+      name: "Custom21_t"
+    }
+  }
+  match_fields {
+    id: 16
+    name: "hdr.custom.e22"
+    bitwidth: 15
+    match_type: EXACT
+    type_name {
+      name: "Custom22_t"
+    }
+  }
+  match_fields {
+    id: 17
+    name: "hdr.custom.e001"
+    bitwidth: 8
+    match_type: EXACT
+    type_name {
+      name: "Custom001_t"
+    }
+  }
+  match_fields {
+    id: 18
+    name: "hdr.custom.e002"
+    bitwidth: 16
+    match_type: EXACT
+    type_name {
+      name: "Custom002_t"
+    }
+  }
+  match_fields {
+    id: 19
+    name: "hdr.custom.e101"
+    bitwidth: 8
+    match_type: EXACT
+    type_name {
+      name: "Custom101_t"
+    }
+  }
+  match_fields {
+    id: 20
+    name: "hdr.custom.e102"
+    bitwidth: 17
+    match_type: EXACT
+    type_name {
+      name: "Custom102_t"
+    }
+  }
+  match_fields {
+    id: 21
+    name: "hdr.custom.e201"
+    bitwidth: 8
+    match_type: EXACT
+    type_name {
+      name: "Custom201_t"
+    }
+  }
+  match_fields {
+    id: 22
+    name: "hdr.custom.e202"
+    bitwidth: 18
+    match_type: EXACT
+    type_name {
+      name: "Custom202_t"
+    }
+  }
+  match_fields {
+    id: 23
+    name: "hdr.custom.e220"
+    bitwidth: 15
+    match_type: EXACT
+    type_name {
+      name: "Custom22_t"
+    }
+  }
+  match_fields {
+    id: 24
+    name: "hdr.custom.e0020010"
+    bitwidth: 8
+    match_type: EXACT
+    type_name {
+      name: "Custom002001_t"
+    }
+  }
+  match_fields {
+    id: 25
+    name: "hdr.custom.e0020020"
+    bitwidth: 19
+    match_type: EXACT
+    type_name {
+      name: "Custom002002_t"
+    }
+  }
+  match_fields {
+    id: 26
+    name: "hdr.custom.s0"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16829338
+  }
+  action_refs {
+    id: 16797750
+  }
+  action_refs {
+    id: 16796819
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16829338
+    name: "ingress.set_output"
+    alias: "set_output"
+  }
+  params {
+    id: 1
+    name: "out_port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 16797750
+    name: "ingress.set_headers"
+    alias: "set_headers"
+  }
+  params {
+    id: 1
+    name: "addr0"
+    bitwidth: 48
+  }
+  params {
+    id: 2
+    name: "addr1"
+    bitwidth: 48
+    type_name {
+      name: "Eth1_t"
+    }
+  }
+  params {
+    id: 3
+    name: "addr2"
+    bitwidth: 49
+    type_name {
+      name: "Eth2_t"
+    }
+  }
+  params {
+    id: 4
+    name: "e"
+    bitwidth: 8
+  }
+  params {
+    id: 5
+    name: "e0"
+    bitwidth: 8
+  }
+  params {
+    id: 6
+    name: "e1"
+    bitwidth: 8
+    type_name {
+      name: "Custom1_t"
+    }
+  }
+  params {
+    id: 7
+    name: "e2"
+    bitwidth: 12
+    type_name {
+      name: "Custom2_t"
+    }
+  }
+  params {
+    id: 8
+    name: "e00"
+    bitwidth: 8
+  }
+  params {
+    id: 9
+    name: "e01"
+    bitwidth: 8
+    type_name {
+      name: "Custom01_t"
+    }
+  }
+  params {
+    id: 10
+    name: "e02"
+    bitwidth: 13
+    type_name {
+      name: "Custom02_t"
+    }
+  }
+  params {
+    id: 11
+    name: "e10"
+    bitwidth: 8
+    type_name {
+      name: "Custom1_t"
+    }
+  }
+  params {
+    id: 12
+    name: "e11"
+    bitwidth: 8
+    type_name {
+      name: "Custom11_t"
+    }
+  }
+  params {
+    id: 13
+    name: "e12"
+    bitwidth: 14
+    type_name {
+      name: "Custom12_t"
+    }
+  }
+  params {
+    id: 14
+    name: "e20"
+    bitwidth: 12
+    type_name {
+      name: "Custom2_t"
+    }
+  }
+  params {
+    id: 15
+    name: "e21"
+    bitwidth: 8
+    type_name {
+      name: "Custom21_t"
+    }
+  }
+  params {
+    id: 16
+    name: "e22"
+    bitwidth: 15
+    type_name {
+      name: "Custom22_t"
+    }
+  }
+  params {
+    id: 17
+    name: "e001"
+    bitwidth: 8
+    type_name {
+      name: "Custom001_t"
+    }
+  }
+  params {
+    id: 18
+    name: "e002"
+    bitwidth: 16
+    type_name {
+      name: "Custom002_t"
+    }
+  }
+  params {
+    id: 19
+    name: "e101"
+    bitwidth: 8
+    type_name {
+      name: "Custom101_t"
+    }
+  }
+  params {
+    id: 20
+    name: "e102"
+    bitwidth: 17
+    type_name {
+      name: "Custom102_t"
+    }
+  }
+  params {
+    id: 21
+    name: "e201"
+    bitwidth: 8
+    type_name {
+      name: "Custom201_t"
+    }
+  }
+  params {
+    id: 22
+    name: "e202"
+    bitwidth: 18
+    type_name {
+      name: "Custom202_t"
+    }
+  }
+  params {
+    id: 23
+    name: "e220"
+    bitwidth: 15
+    type_name {
+      name: "Custom22_t"
+    }
+  }
+  params {
+    id: 24
+    name: "e0020010"
+    bitwidth: 8
+    type_name {
+      name: "Custom002001_t"
+    }
+  }
+  params {
+    id: 25
+    name: "e0020020"
+    bitwidth: 19
+    type_name {
+      name: "Custom002002_t"
+    }
+  }
+  params {
+    id: 26
+    name: "s0"
+    bitwidth: 8
+  }
+}
+actions {
+  preamble {
+    id: 16796819
+    name: "ingress.my_drop"
+    alias: "my_drop"
+  }
+}
+controller_packet_metadata {
+  preamble {
+    id: 67146229
+    name: "packet_in"
+    alias: "packet_in"
+    annotations: "@controller_header(\"packet_in\")"
+  }
+  metadata {
+    id: 1
+    name: "punt_reason"
+    bitwidth: 8
+  }
+}
+controller_packet_metadata {
+  preamble {
+    id: 67121543
+    name: "packet_out"
+    alias: "packet_out"
+    annotations: "@controller_header(\"packet_out\")"
+  }
+  metadata {
+    id: 1
+    name: "addr0"
+    bitwidth: 48
+  }
+  metadata {
+    id: 2
+    name: "addr1"
+    bitwidth: 48
+  }
+  metadata {
+    id: 3
+    name: "addr2"
+    bitwidth: 49
+  }
+  metadata {
+    id: 4
+    name: "e"
+    bitwidth: 8
+  }
+  metadata {
+    id: 5
+    name: "e0"
+    bitwidth: 8
+  }
+  metadata {
+    id: 6
+    name: "e1"
+    bitwidth: 8
+  }
+  metadata {
+    id: 7
+    name: "e2"
+    bitwidth: 12
+  }
+  metadata {
+    id: 8
+    name: "e00"
+    bitwidth: 8
+  }
+  metadata {
+    id: 9
+    name: "e01"
+    bitwidth: 8
+  }
+  metadata {
+    id: 10
+    name: "e02"
+    bitwidth: 13
+  }
+  metadata {
+    id: 11
+    name: "e10"
+    bitwidth: 8
+  }
+  metadata {
+    id: 12
+    name: "e11"
+    bitwidth: 8
+  }
+  metadata {
+    id: 13
+    name: "e12"
+    bitwidth: 14
+  }
+  metadata {
+    id: 14
+    name: "e20"
+    bitwidth: 12
+  }
+  metadata {
+    id: 15
+    name: "e21"
+    bitwidth: 8
+  }
+  metadata {
+    id: 16
+    name: "e22"
+    bitwidth: 15
+  }
+  metadata {
+    id: 17
+    name: "e001"
+    bitwidth: 8
+  }
+  metadata {
+    id: 18
+    name: "e002"
+    bitwidth: 16
+  }
+  metadata {
+    id: 19
+    name: "e101"
+    bitwidth: 8
+  }
+  metadata {
+    id: 20
+    name: "e102"
+    bitwidth: 17
+  }
+  metadata {
+    id: 21
+    name: "e201"
+    bitwidth: 8
+  }
+  metadata {
+    id: 22
+    name: "e202"
+    bitwidth: 18
+  }
+  metadata {
+    id: 23
+    name: "e220"
+    bitwidth: 15
+  }
+  metadata {
+    id: 24
+    name: "e0020010"
+    bitwidth: 8
+  }
+  metadata {
+    id: 25
+    name: "e0020020"
+    bitwidth: 19
+  }
+}
+value_sets {
+  preamble {
+    id: 50344301
+    name: "ParserImpl.valueset1"
+    alias: "valueset1"
+  }
+  match {
+    id: 1
+    name: "addr0"
+    bitwidth: 48
+    match_type: EXACT
+  }
+  match {
+    id: 2
+    name: "e"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  match {
+    id: 3
+    name: "e0"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  match {
+    id: 4
+    name: "e00"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  size: 4
+}
+type_info {
+}

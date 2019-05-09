@@ -43,6 +43,30 @@ tables {
   size: 1024
   idle_timeout_behavior: NOTIFY_CONTROL
 }
+tables {
+  preamble {
+    id: 33601325
+    name: "ingress.tst_tbl"
+    alias: "tst_tbl"
+  }
+  match_fields {
+    id: 1
+    name: "meta.mac_learn_msg.ingress_port"
+    bitwidth: 32
+    match_type: EXACT
+    type_name {
+      name: "PortId_t"
+    }
+  }
+  action_refs {
+    id: 16797276
+  }
+  action_refs {
+    id: 16800567
+  }
+  size: 1024
+  idle_timeout_behavior: NOTIFY_CONTROL
+}
 actions {
   preamble {
     id: 16800567
@@ -66,7 +90,30 @@ actions {
   params {
     id: 1
     name: "egress_port"
-    bitwidth: 10
+    bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
+  }
+}
+actions {
+  preamble {
+    id: 16797276
+    name: "ingress.do_tst"
+    alias: "do_tst"
+  }
+  params {
+    id: 1
+    name: "egress_port"
+    bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
+  }
+  params {
+    id: 2
+    name: "serEnumT"
+    bitwidth: 16
   }
 }
 digests {
@@ -98,12 +145,19 @@ type_info {
       members {
         name: "ingress_port"
         type_spec {
-          bitstring {
-            bit {
-              bitwidth: 10
-            }
+          new_type {
+            name: "PortId_t"
           }
         }
+      }
+    }
+  }
+  new_types {
+    key: "PortId_t"
+    value {
+      translated_type {
+        uri: "p4.org/psa/v1/PortId_t"
+        sdn_bitwidth: 32
       }
     }
   }

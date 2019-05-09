@@ -39,6 +39,7 @@ limitations under the License.
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/externInstance.h"
+#include "frontends/p4/enumInstance.h"
 // TODO(antonin): this include should go away when we cleanup getMatchFields
 // and tableNeedsPriority implementations.
 #include "frontends/p4/fromv1.0/v1model.h"
@@ -188,6 +189,7 @@ struct MatchField {
     const uint32_t bitwidth;  // How wide this field is.
     const IR::IAnnotated* annotations;  // If non-null, any annotations applied
                                         // to this field.
+    const cstring type_name;  // Optional field used when field is Type_Newtype.
 };
 
 struct ActionRef {
@@ -630,6 +632,45 @@ getMatchType(cstring matchTypeName) {
     }
 }
 
+// P4Runtime defines sdnB as a 32-bit integer.
+// The APIs in this file for width use an int
+// Thus function returns a signed int.
+static int
+getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
+    auto ann = type->getAnnotation("p4runtime_translation");
+    if (ann != nullptr) {
+        auto sdnB = ann->expr[1]->to<IR::Constant>();
+        if (!sdnB) {
+            ::error("P4runtime annotation in serializer does not have sdn: %1%",
+                    type);
+            return -1;
+        }
+        auto value = sdnB->value;
+        auto bitsRequired = static_cast<size_t>(mpz_sizeinbase(value.get_mpz_t(), 2));
+        if (bitsRequired > 31) {
+            ::error("Cannot represent %1% on 31 bits, require %2%", value.get_ui(),
+                    bitsRequired);
+            return -2;
+        }
+        return static_cast<int>(value.get_ui());
+    }
+    return typeMap->minWidthBits(type, type->getNode());
+}
+
+/*
+ * The function returns a cstring for use as type_name for a Type_Newtype.
+*/
+static cstring
+getTypeName(const IR::Type* type, TypeMap* typeMap) {
+    CHECK_NULL(type);
+
+    auto t = typeMap->getTypeType(type, true);
+    if (auto newt = t->to<IR::Type_Newtype>()) {
+        return newt->name;
+    }
+    return nullptr;
+}
+
 /// @return the header instance fields matched against by @table's key. The
 /// fields are represented as a (fully qualified field name, match type) tuple.
 static std::vector<MatchField>
@@ -640,6 +681,7 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
     if (!key) return matchFields;
 
     for (auto keyElement : key->keyElements) {
+        cstring type_name = nullptr;
         auto matchTypeName = getMatchTypeName(keyElement->matchType, refMap);
         auto matchType = getMatchType(matchTypeName);
         if (matchType == boost::none) continue;
@@ -652,13 +694,13 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
           typeMap->getType(keyElement->expression->getNode(), true);
         BUG_CHECK(matchFieldType != nullptr,
                   "Couldn't determine type for key element %1%", keyElement);
-        while (auto mt = matchFieldType->to<IR::Type_Newtype>())
-            matchFieldType = typeMap->getTypeType(mt->type, true);
-        int width = typeMap->minWidthBits(matchFieldType, keyElement);
+        type_name = getTypeName(matchFieldType, typeMap);
+        int width = getTypeWidth(matchFieldType, typeMap);
         if (width < 0)
             return matchFields;
-        matchFields.push_back(MatchField{*matchFieldName, *matchType, matchTypeName,
-                        uint32_t(width), keyElement->to<IR::IAnnotated>()});
+        matchFields.push_back(MatchField{*matchFieldName, *matchType,
+                              matchTypeName, uint32_t(width),
+                              keyElement->to<IR::IAnnotated>(), type_name});
     }
 
     return matchFields;
@@ -684,7 +726,10 @@ class ParseAnnotations : public P4::ParseAnnotations {
         // ParseAnnotations instance, or 2) run a ParseAnnotations pass
         // "locally" (in this case on action profile instances since this
         // annotation is for them).
-        PARSE("max_group_size", Constant)
+        PARSE("max_group_size", Constant),
+        // @p4runtime_translation has two args
+        PARSE_PAIR("p4runtime_translation",
+                   Expression),
     }) { }
 };
 
@@ -846,15 +891,21 @@ class P4RuntimeAnalyzer {
             addDocumentation(param, actionParam->to<IR::IAnnotated>());
 
             auto paramType = typeMap->getType(actionParam, true);
-            if (!paramType->is<IR::Type_Bits>() && !paramType->is<IR::Type_Boolean>()) {
-                ::error("Action parameter %1% has a type which is not bit<> or int<> or bool",
-                        actionParam);
+            if (!paramType->is<IR::Type_Bits>() && !paramType->is<IR::Type_Boolean>()
+                && !paramType->is<IR::Type_Newtype>() &&
+                !paramType->is<IR::Type_SerEnum>()) {
+                ::error("Action parameter %1% has a type which is not "
+                        "bit<>, int<>, bool, type or serializable enum", actionParam);
                 continue;
             }
-            if (paramType->is<IR::Type_Boolean>()) {
-                param->set_bitwidth(1);
-            } else {
-                param->set_bitwidth(paramType->width_bits());
+            int w = getTypeWidth(paramType, typeMap);
+            if (w < 0)
+                return;
+            param->set_bitwidth(w);
+            cstring type_name = getTypeName(paramType, typeMap);
+            if (type_name) {
+                auto namedType = param->mutable_type_name();
+                namedType->set_name(type_name);
             }
         }
     }
@@ -892,10 +943,16 @@ class P4RuntimeAnalyzer {
             addAnnotations(metadata, headerField->to<IR::IAnnotated>());
 
             auto fieldType = typeMap->getType(headerField, true);
-            BUG_CHECK(fieldType->is<IR::Type_Bits>(),
-                      "Header field %1% has a type which is not bit<> or int<>",
+            BUG_CHECK((fieldType->is<IR::Type_Bits>() ||
+                      fieldType->is<IR::Type_Newtype>() ||
+                      fieldType->is<IR::Type_SerEnum>()),
+                      "Header field %1% has a type which is not bit<>, "
+                      "int<>, type, or serializable enum",
                       headerField);
-            metadata->set_bitwidth(fieldType->width_bits());
+            auto w = getTypeWidth(fieldType, typeMap);
+            if (w < 0)
+                return;
+            metadata->set_bitwidth(w);
         }
     }
 
@@ -957,6 +1014,10 @@ class P4RuntimeAnalyzer {
                 match_field->set_match_type(field.type);
             else
                 match_field->set_other_match_type(field.other_match_type);
+            if (field.type_name) {
+                auto namedType = match_field->mutable_type_name();
+                namedType->set_name(field.type_name);
+            }
         }
 
         if (isConstTable) {
@@ -1279,7 +1340,8 @@ class P4RuntimeEntriesConverter {
     }
 
     /// Appends the 'const entries' for the table to the WriteRequest message.
-    void addTableEntries(const IR::TableBlock* tableBlock, ReferenceMap* refMap) {
+    void addTableEntries(const IR::TableBlock* tableBlock, ReferenceMap* refMap,
+                         TypeMap* typeMap) {
         CHECK_NULL(tableBlock);
         auto table = tableBlock->container;
 
@@ -1297,8 +1359,8 @@ class P4RuntimeEntriesConverter {
             auto protoEntity = protoUpdate->mutable_entity();
             auto protoEntry = protoEntity->mutable_table_entry();
             protoEntry->set_table_id(tableId);
-            addMatchKey(protoEntry, table, e->getKeys(), refMap);
-            addAction(protoEntry, e->getAction(), refMap);
+            addMatchKey(protoEntry, table, e->getKeys(), refMap, typeMap);
+            addAction(protoEntry, e->getAction(), refMap, typeMap);
             // According to the P4 specification, "Entries in a table are
             // matched in the program order, stopping at the first matching
             // entry." In P4Runtime, the lowest valid priority value is 1 and
@@ -1333,7 +1395,8 @@ class P4RuntimeEntriesConverter {
 
     void addAction(p4v1::TableEntry* protoEntry,
                    const IR::Expression* actionRef,
-                   ReferenceMap* refMap) const {
+                   ReferenceMap* refMap,
+                   TypeMap* typeMap) const {
         if (!actionRef->is<IR::MethodCallExpression>()) {
             ::error("%1%: invalid action in entries list", actionRef);
             return;
@@ -1353,7 +1416,9 @@ class P4RuntimeEntriesConverter {
             auto protoParam = protoAction->add_params();
             protoParam->set_param_id(parameterId++);
             auto parameter = actionDecl->parameters->parameters.at(parameterIndex++);
-            auto width = parameter->type->width_bits();
+            int width = getTypeWidth(parameter->type, typeMap);
+            if (width < 0)
+                return;
             if (arg->expression->is<IR::Constant>()) {
                 auto value = stringRepr(arg->expression->to<IR::Constant>(), width);
                 protoParam->set_value(*value);
@@ -1370,7 +1435,8 @@ class P4RuntimeEntriesConverter {
     void addMatchKey(p4v1::TableEntry* protoEntry,
                      const IR::P4Table* table,
                      const IR::ListExpression* keyset,
-                     ReferenceMap* refMap) const {
+                     ReferenceMap* refMap,
+                     TypeMap* typeMap) const {
         int keyIndex = 0;
         int fieldId = 1;
         for (auto k : keyset->components) {
@@ -1379,13 +1445,13 @@ class P4RuntimeEntriesConverter {
             auto matchType = getKeyMatchType(tableKey, refMap);
 
             if (matchType == P4CoreLibrary::instance.exactMatch.name) {
-                addExact(protoEntry, fieldId++, k, keyWidth);
+              addExact(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else if (matchType == P4CoreLibrary::instance.lpmMatch.name) {
-                addLpm(protoEntry, fieldId++, k, keyWidth);
+              addLpm(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else if (matchType == P4CoreLibrary::instance.ternaryMatch.name) {
-                addTernary(protoEntry, fieldId++, k, keyWidth);
+              addTernary(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else if (matchType == P4V1::V1Model::instance.rangeMatchType.name) {
-                addRange(protoEntry, fieldId++, k, keyWidth);
+              addRange(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else {
                 if (!k->is<IR::DefaultExpression>())
                     ::error("%1%: match type not supported by P4Runtime serializer", matchType);
@@ -1398,11 +1464,24 @@ class P4RuntimeEntriesConverter {
     /// expression is simple (integer literal or boolean literal) or returns
     /// boost::none otherwise.
     boost::optional<std::string> convertSimpleKeyExpression(
-        const IR::Expression* k, int keyWidth) const {
+        const IR::Expression* k, int keyWidth, TypeMap* typeMap) const {
         if (k->is<IR::Constant>()) {
             return stringRepr(k->to<IR::Constant>(), keyWidth);
         } else if (k->is<IR::BoolLiteral>()) {
             return stringRepr(k->to<IR::BoolLiteral>(), keyWidth);
+        } else if (k->is<IR::Member>()) {
+             // A SerEnum is a member const entries are processed here.
+             auto mem = k->to<IR::Member>();
+             auto se = mem->type->to<IR::Type_SerEnum>();
+             auto ei = EnumInstance::resolve(mem, typeMap);
+             if (!ei) return boost::none;
+             if (auto sei = ei->to<SerEnumInstance>()) {
+                 auto type = sei->value->to<IR::Constant>();
+                 auto w = se->type->width_bits();
+                 return stringRepr(type, w);
+             }
+             ::error("%1% invalid Member key expression", k);
+             return boost::none;
         } else {
             ::error("%1% invalid key expression", k);
             return boost::none;
@@ -1424,17 +1503,19 @@ class P4RuntimeEntriesConverter {
     }
 
     void addExact(p4v1::TableEntry* protoEntry, int fieldId,
-                  const IR::Expression* k, int keyWidth) const {
+                  const IR::Expression* k,
+                  int keyWidth, TypeMap* typeMap) const {
         auto protoMatch = protoEntry->add_match();
         protoMatch->set_field_id(fieldId);
         auto protoExact = protoMatch->mutable_exact();
-        auto value = convertSimpleKeyExpression(k, keyWidth);
+        auto value = convertSimpleKeyExpression(k, keyWidth, typeMap);
         if (value == boost::none) return;
         protoExact->set_value(*value);
     }
 
     void addLpm(p4v1::TableEntry* protoEntry, int fieldId,
-                const IR::Expression* k, int keyWidth) const {
+                const IR::Expression* k,
+                int keyWidth, TypeMap *typeMap) const {
         if (k->is<IR::DefaultExpression>())  // don't care, skip in P4Runtime message
             return;
         int prefixLen;
@@ -1465,7 +1546,7 @@ class P4RuntimeEntriesConverter {
             valueStr = stringReprConstant(*value, keyWidth);
         } else {
             prefixLen = keyWidth;
-            valueStr = convertSimpleKeyExpression(k, keyWidth);
+            valueStr = convertSimpleKeyExpression(k, keyWidth, typeMap);
         }
         if (valueStr == boost::none) return;
         auto protoMatch = protoEntry->add_match();
@@ -1476,7 +1557,8 @@ class P4RuntimeEntriesConverter {
     }
 
     void addTernary(p4v1::TableEntry* protoEntry, int fieldId,
-                    const IR::Expression* k, int keyWidth) const {
+                    const IR::Expression* k, int keyWidth,
+                    TypeMap* typeMap) const {
         if (k->is<IR::DefaultExpression>())  // don't care, skip in P4Runtime message
             return;
         boost::optional<std::string> valueStr;
@@ -1497,7 +1579,7 @@ class P4RuntimeEntriesConverter {
             valueStr = stringReprConstant(*value, keyWidth);
             maskStr = stringReprConstant(*mask, keyWidth);
         } else {
-            valueStr = convertSimpleKeyExpression(k, keyWidth);
+            valueStr = convertSimpleKeyExpression(k, keyWidth, typeMap);
             maskStr = stringReprConstant(Util::mask(keyWidth), keyWidth);
         }
         if (valueStr == boost::none || maskStr == boost::none) return;
@@ -1509,7 +1591,7 @@ class P4RuntimeEntriesConverter {
     }
 
     void addRange(p4v1::TableEntry* protoEntry, int fieldId,
-                  const IR::Expression* k, int keyWidth) const {
+                  const IR::Expression* k, int keyWidth, TypeMap* typeMap) const {
         if (k->is<IR::DefaultExpression>())  // don't care, skip in P4Runtime message
             return;
         boost::optional<std::string> startStr;
@@ -1528,7 +1610,7 @@ class P4RuntimeEntriesConverter {
             startStr = stringReprConstant(*start, keyWidth);
             endStr = stringReprConstant(*end, keyWidth);
         } else {
-            startStr = convertSimpleKeyExpression(k, keyWidth);
+            startStr = convertSimpleKeyExpression(k, keyWidth, typeMap);
             endStr = startStr;
         }
         if (startStr == boost::none || endStr == boost::none) return;
@@ -1657,7 +1739,8 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
     P4RuntimeEntriesConverter entriesConverter(symbols);
     Helpers::forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
         if (block->is<IR::TableBlock>())
-            entriesConverter.addTableEntries(block->to<IR::TableBlock>(), refMap);
+            entriesConverter.addTableEntries(block->to<IR::TableBlock>(), refMap,
+                                             typeMap);
     });
 
     auto* p4Info = analyzer.getP4Info();

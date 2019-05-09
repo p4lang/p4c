@@ -376,15 +376,25 @@ struct ExpectedMatchField {
     p4configv1::MatchField::MatchType matchType;
 };
 
+struct ExpectedMatchFieldP416 {
+    unsigned id;
+    std::string name;
+    int bitWidth;
+    p4configv1::MatchField::MatchType matchType;
+    std::string type_name;
+};
+
 }  // namespace
 
 TEST_F(P4Runtime, P4_16_MatchFields) {
     using MatchField = p4configv1::MatchField;
 
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        type bit<8> CustomT_t;
         header Header { bit<16> headerField; }
         header AnotherHeader { bit<8> anotherHeaderField; }
-        header_union HeaderUnion { Header a; AnotherHeader b; }
+        header YetAnotherHeader { CustomT_t yetAnotherHeaderField; }
+        header_union HeaderUnion { Header a; AnotherHeader b; YetAnotherHeader c;}
         struct Headers { Header h; Header[4] hStack; HeaderUnion hUnion; }
         struct Metadata { bit<33> metadataField; }
         parser parse(packet_in p, out Headers h, inout Metadata m,
@@ -449,6 +459,7 @@ TEST_F(P4Runtime, P4_16_MatchFields) {
                     h.h.headerField << 13 : ternary @name("lShift");  // 36
                     h.h.headerField + 6 : exact @name("plusSix");     // 37
                     h.h.headerField + 6 : ternary @name("plusSix");   // 38
+                    h.hUnion.c.yetAnotherHeaderField : exact;         // 39
 
                     // Action selectors. These won't be included in the list of
                     // match fields; they're just here as a sanity check.
@@ -478,47 +489,48 @@ TEST_F(P4Runtime, P4_16_MatchFields) {
 
     auto* igTable = findTable(*test, "ingress.igTable");
     ASSERT_TRUE(igTable != nullptr);
-    EXPECT_EQ(38, igTable->match_fields_size());
+    EXPECT_EQ(39, igTable->match_fields_size());
 
-    std::vector<ExpectedMatchField> expected = {
-        { 1, "h.h.headerField", 16, MatchField::EXACT },
-        { 2, "m.metadataField", 33, MatchField::EXACT },
-        { 3, "h.hStack[3].headerField", 16, MatchField::EXACT },
-        { 4, "h.h.headerField", 16, MatchField::TERNARY },
-        { 5, "m.metadataField", 33, MatchField::TERNARY },
-        { 6, "h.hStack[3].headerField", 16, MatchField::TERNARY },
-        { 7, "h.h.headerField", 16, MatchField::LPM },
-        { 8, "m.metadataField", 33, MatchField::LPM },
-        { 9, "h.hStack[3].headerField", 16, MatchField::LPM },
-        { 10, "h.h.headerField", 16, MatchField::RANGE },
-        { 11, "m.metadataField", 33, MatchField::RANGE },
-        { 12, "h.hStack[3].headerField", 16, MatchField::RANGE },
-        { 13, "h.h.$valid$", 1, MatchField::EXACT },
-        { 14, "h.h.$valid$", 1, MatchField::TERNARY },
-        { 15, "h.hStack[3].$valid$", 1, MatchField::EXACT },
-        { 16, "h.hStack[3].$valid$", 1, MatchField::TERNARY },
-        { 17, "h.h.headerField & 13", 16, MatchField::EXACT },
-        { 18, "h.h.headerField & 13", 16, MatchField::TERNARY },
-        { 19, "h.h.headerField[13:4]", 10, MatchField::EXACT },
-        { 20, "h.h.headerField[13:4]", 10, MatchField::TERNARY },
-        { 21, "h.hUnion.a.headerField", 16, MatchField::EXACT },
-        { 22, "h.hUnion.a.headerField", 16, MatchField::TERNARY },
-        { 23, "h.hUnion.a.headerField", 16, MatchField::LPM },
-        { 24, "h.hUnion.a.headerField", 16, MatchField::RANGE },
-        { 25, "h.hUnion.b.anotherHeaderField", 8, MatchField::EXACT },
-        { 26, "h.hUnion.b.anotherHeaderField", 8, MatchField::TERNARY },
-        { 27, "h.hUnion.b.anotherHeaderField", 8, MatchField::LPM },
-        { 28, "h.hUnion.b.anotherHeaderField", 8, MatchField::RANGE },
-        { 29, "h.hUnion.a.$valid$", 1, MatchField::EXACT },
-        { 30, "h.hUnion.a.$valid$", 1, MatchField::TERNARY },
-        { 31, "h.hUnion.b.$valid$", 1, MatchField::EXACT },
-        { 32, "h.hUnion.b.$valid$", 1, MatchField::TERNARY },
-        { 33, "h.hUnion.$valid$", 1, MatchField::EXACT },
-        { 34, "h.hUnion.$valid$", 1, MatchField::TERNARY },
-        { 35, "lShift", 16, MatchField::EXACT },
-        { 36, "lShift", 16, MatchField::TERNARY },
-        { 37, "plusSix", 16, MatchField::EXACT },
-        { 38, "plusSix", 16, MatchField::TERNARY },
+    std::vector<ExpectedMatchFieldP416> expected = {
+        { 1, "h.h.headerField", 16, MatchField::EXACT, "" },
+        { 2, "m.metadataField", 33, MatchField::EXACT, ""  },
+        { 3, "h.hStack[3].headerField", 16, MatchField::EXACT, ""  },
+        { 4, "h.h.headerField", 16, MatchField::TERNARY, ""  },
+        { 5, "m.metadataField", 33, MatchField::TERNARY, ""  },
+        { 6, "h.hStack[3].headerField", 16, MatchField::TERNARY, "" },
+        { 7, "h.h.headerField", 16, MatchField::LPM, "" },
+        { 8, "m.metadataField", 33, MatchField::LPM, ""  },
+        { 9, "h.hStack[3].headerField", 16, MatchField::LPM, ""  },
+        { 10, "h.h.headerField", 16, MatchField::RANGE, ""  },
+        { 11, "m.metadataField", 33, MatchField::RANGE, ""  },
+        { 12, "h.hStack[3].headerField", 16, MatchField::RANGE, ""  },
+        { 13, "h.h.$valid$", 1, MatchField::EXACT, ""  },
+        { 14, "h.h.$valid$", 1, MatchField::TERNARY, ""  },
+        { 15, "h.hStack[3].$valid$", 1, MatchField::EXACT, ""  },
+        { 16, "h.hStack[3].$valid$", 1, MatchField::TERNARY, ""  },
+        { 17, "h.h.headerField & 13", 16, MatchField::EXACT, ""  },
+        { 18, "h.h.headerField & 13", 16, MatchField::TERNARY, ""  },
+        { 19, "h.h.headerField[13:4]", 10, MatchField::EXACT, ""  },
+        { 20, "h.h.headerField[13:4]", 10, MatchField::TERNARY, ""  },
+        { 21, "h.hUnion.a.headerField", 16, MatchField::EXACT, ""  },
+        { 22, "h.hUnion.a.headerField", 16, MatchField::TERNARY, ""  },
+        { 23, "h.hUnion.a.headerField", 16, MatchField::LPM, ""  },
+        { 24, "h.hUnion.a.headerField", 16, MatchField::RANGE, ""  },
+        { 25, "h.hUnion.b.anotherHeaderField", 8, MatchField::EXACT, ""  },
+        { 26, "h.hUnion.b.anotherHeaderField", 8, MatchField::TERNARY, ""  },
+        { 27, "h.hUnion.b.anotherHeaderField", 8, MatchField::LPM, ""  },
+        { 28, "h.hUnion.b.anotherHeaderField", 8, MatchField::RANGE, ""  },
+        { 29, "h.hUnion.a.$valid$", 1, MatchField::EXACT, ""  },
+        { 30, "h.hUnion.a.$valid$", 1, MatchField::TERNARY, ""  },
+        { 31, "h.hUnion.b.$valid$", 1, MatchField::EXACT, ""  },
+        { 32, "h.hUnion.b.$valid$", 1, MatchField::TERNARY, ""  },
+        { 33, "h.hUnion.$valid$", 1, MatchField::EXACT, ""  },
+        { 34, "h.hUnion.$valid$", 1, MatchField::TERNARY, ""  },
+        { 35, "lShift", 16, MatchField::EXACT, ""  },
+        { 36, "lShift", 16, MatchField::TERNARY, ""  },
+        { 37, "plusSix", 16, MatchField::EXACT, ""  },
+        { 38, "plusSix", 16, MatchField::TERNARY, ""  },
+        { 39, "h.hUnion.c.yetAnotherHeaderField", 8, MatchField::EXACT, "CustomT_t" },
     };
 
     for (auto i = 0; i < igTable->match_fields_size(); i++) {
@@ -527,6 +539,7 @@ TEST_F(P4Runtime, P4_16_MatchFields) {
         EXPECT_EQ(expected[i].name, igTable->match_fields(i).name());
         EXPECT_EQ(expected[i].bitWidth, igTable->match_fields(i).bitwidth());
         EXPECT_EQ(expected[i].matchType, igTable->match_fields(i).match_type());
+        EXPECT_EQ(expected[i].type_name, igTable->match_fields(i).type_name().name());
     }
 }
 
@@ -1320,6 +1333,44 @@ TEST_F(P4RuntimePkgInfo, ValueNotAString) {
     EXPECT_EQ(1u, ::diagnosticCount());
     const auto& pkgInfo = test->p4Info->pkg_info();
     EXPECT_EQ(pkgInfo.name(), "");
+}
+
+TEST_F(P4Runtime, P4_16_MatchFieldsSize) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+    @p4runtime_translation("mycompany.com/My_Byte2", 0xffffffff)
+    type bit<8> CustomT_t;
+    header Header { CustomT_t headerField; }
+    struct Headers { Header h; }
+    struct Metadata { bit<33> metadataField; }
+    parser parse(packet_in p, out Headers h, inout Metadata m,
+                 inout standard_metadata_t sm) {
+        state start { transition accept; } }
+    control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
+    control egress(inout Headers h, inout Metadata m,
+                   inout standard_metadata_t sm) { apply { } }
+    control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+    control deparse(packet_out p, in Headers h) { apply { } }
+    control ingress(inout Headers h, inout Metadata m,
+                    inout standard_metadata_t sm) {
+        action noop() { }
+
+        table igTable {
+            key = {
+                h.h.headerField : exact;
+            }
+            actions = { noop; }
+        }
+
+        apply {
+            igTable.apply();
+        }
+    }
+    V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+            computeChecksum(), deparse()) main;
+    )"));
+
+    ASSERT_TRUE(test);
+    EXPECT_EQ(1u, ::diagnosticCount());
 }
 
 TEST_F(P4RuntimePkgInfo, DuplicateKey) {

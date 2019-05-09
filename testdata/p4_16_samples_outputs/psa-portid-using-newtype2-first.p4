@@ -1,8 +1,8 @@
 #include <core.p4>
 
 typedef bit<9> PortIdUInt_t;
-@p4runtime_translate("port") type bit<9> PortId_t;
-@p4runtime_translate("port") type bit<32> PortIdInHeader_t;
+type bit<9> PortId_t;
+type bit<32> PortIdInHeader_t;
 match_kind {
     range,
     selector
