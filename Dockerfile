@@ -23,9 +23,7 @@ ENV P4C_DEPS bison \
              libgc-dev \
              libgmp-dev \
              pkg-config \
-             python-ipaddr \
              python-pip \
-             python-setuptools \
              tcpdump
 ENV P4C_EBPF_DEPS libpcap-dev \
              libelf-dev \
@@ -40,14 +38,15 @@ ENV P4C_RUNTIME_DEPS cpp \
                      libgmp10 \
                      libgmpxx4ldbl \
                      python
-ENV P4C_PIP_PACKAGES pyroute2 \
+ENV P4C_PIP_PACKAGES ipaddr \
+                     pyroute2 \
                      ply==3.8 \
                      scapy==2.4.0
 COPY . /p4c/
 WORKDIR /p4c/
 RUN apt-get update && \
     apt-get install -y --no-install-recommends $P4C_DEPS $P4C_EBPF_DEPS $P4C_RUNTIME_DEPS && \
-    pip install --upgrade pip && \
+    pip install --upgrade setuptools && \
     pip install $P4C_PIP_PACKAGES && \
     mkdir build && \
     cd build && \
