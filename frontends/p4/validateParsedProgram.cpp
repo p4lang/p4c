@@ -225,7 +225,8 @@ void ValidateParsedProgram::postorder(const IR::P4Program* program) {
         cstring name = decl->getName();
         auto existing = declarations.getDeclaration(name);
         if (existing != nullptr) {
-            if (!existing->is<IR::IFunctional>() || !decl->is<IR::IFunctional>()) {
+            if (!existing->is<IR::IFunctional>() || !decl->is<IR::IFunctional>()
+                || typeid(*existing) != typeid(*decl)) {
                 ::error(ErrorType::ERR_DUPLICATE, "%1% duplicates %2%.",
                         decl->getName(), existing->getName());
             }
