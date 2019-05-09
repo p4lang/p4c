@@ -20,8 +20,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 
 control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    action act(test_t a) { }    // does not work
-    // action act(bit<8> a) { } // works
+    action act(test_t a) { }    // did not work before PR #1792 was merged
+    // action act(bit<8> a) { } // worked before and after PR #1792 was merged
 
     table test_table {
         key = {
