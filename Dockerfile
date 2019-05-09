@@ -40,8 +40,7 @@ ENV P4C_RUNTIME_DEPS cpp \
                      libgmp10 \
                      libgmpxx4ldbl \
                      python
-ENV P4C_PIP_PACKAGES tenjin \
-                     pyroute2 \
+ENV P4C_PIP_PACKAGES pyroute2 \
                      ply==3.8 \
                      scapy==2.4.0
 COPY . /p4c/
