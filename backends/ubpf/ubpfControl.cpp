@@ -315,22 +315,9 @@ namespace UBPF {
 
     bool UBPFControlBodyTranslator::preorder(const IR::IfStatement* statement) {
         builder->appendLine("If statement start\n");
-        bool isHit = P4::TableApplySolver::isHit(statement->condition, control->program->refMap,
-                                                 control->program->typeMap);
-        if (isHit) {
-            // visit first the table, and then the conditional
-            auto member = statement->condition->to<IR::Member>();
-            CHECK_NULL(member);
-            visit(member->expr);  // table application.  Sets 'hitVariable'
-            builder->emitIndent();
-        }
 
-        // This is almost the same as the base class method
         builder->append("if (");
-        if (isHit)
-            builder->append(control->hitVariable);
-        else
-            visit(statement->condition);
+        visit(statement->condition);
         builder->append(") ");
         if (!statement->ifTrue->is<IR::BlockStatement>()) {
             builder->increaseIndent();
@@ -404,7 +391,7 @@ namespace UBPF {
     UBPFControl::UBPFControl(const UBPFProgram* program, const IR::ControlBlock* block,
                              const IR::Parameter* parserHeaders) :
             program(program), controlBlock(block), headers(nullptr),
-            accept(nullptr), parserHeaders(parserHeaders), codeGen(nullptr) {}
+            parserHeaders(parserHeaders), codeGen(nullptr) {}
 
     void UBPFControl::scanConstants() {
         for (auto c : controlBlock->constantValue) {
@@ -461,17 +448,15 @@ namespace UBPF {
     }
 
     bool UBPFControl::build() {
-        hitVariable = program->refMap->newName("hit");
+        passVariable = program->refMap->newName("pass");
         auto pl = controlBlock->container->type->applyParams;
-        if (pl->size() != 2) {
-            ::error("Expected control block to have exactly 2 parameters");
+        if (pl->size() != 1) {
+            ::error("Expected control block to have exactly 1 parameter");
             return false;
         }
 
         auto it = pl->parameters.begin();
         headers = *it;
-        ++it;
-        accept = *it;
 
         codeGen = new UBPFControlBodyTranslator(this);
         codeGen->substitute(headers, parserHeaders);

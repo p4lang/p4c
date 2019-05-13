@@ -68,7 +68,7 @@ namespace UBPF {
         emitPipeline(builder);
 
         builder->emitIndent();
-        builder->appendFormat("if (%s)\n", control->accept->name.name.c_str());
+        builder->appendFormat("if (%s)\n", control->passVariable);
         builder->increaseIndent();
         builder->emitIndent();
         builder->appendFormat("return %s;\n", builder->target->forwardReturnCode().c_str());
@@ -142,7 +142,7 @@ namespace UBPF {
         builder->newline();
 
         builder->emitIndent();
-        builder->appendFormat("uint8_t %s = 0;", control->accept->name.name.c_str());
+        builder->appendFormat("uint8_t %s = 0;", control->passVariable);
         builder->newline();
     }
 

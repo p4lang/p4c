@@ -13,7 +13,7 @@ extern hash_table {
 }
 
 parser parse<H>(packet_in packet, out H headers);
-control filter<H>(inout H headers, out bool accept);
+control filter<H>(inout H headers);
 
 package Filter<H>(parse<H> prs,
                       filter<H> filt);

@@ -54,10 +54,9 @@ namespace UBPF {
         const UBPFProgram *program;
         const IR::ControlBlock *controlBlock;
         const IR::Parameter *headers;
-        const IR::Parameter *accept;
         const IR::Parameter *parserHeaders;
         // replace references to headers with references to parserHeaders
-        cstring hitVariable;
+        cstring passVariable;
         UBPFControlBodyTranslator *codeGen;
 
         std::set<const IR::Parameter *> toDereference;
