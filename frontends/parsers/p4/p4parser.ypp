@@ -479,6 +479,7 @@ annotationToken
     | RETURN           { $$ = $1; }
     | SELECT           { $$ = $1; }
     | STATE            { $$ = $1; }
+    | STRING           { $$ = $1; }
     | STRUCT           { $$ = $1; }
     | SWITCH           { $$ = $1; }
     | TABLE            { $$ = $1; }

@@ -263,6 +263,7 @@ class V1Model : public ::Model::Model {
             update_checksum("update_checksum"),
             verify_checksum_with_payload("verify_checksum_with_payload"),
             update_checksum_with_payload("update_checksum_with_payload"),
+            log_msg("log_msg"),
             directMeter(), directCounter()
     {}
 
@@ -303,6 +304,7 @@ class V1Model : public ::Model::Model {
     ::Model::Elem       update_checksum;
     ::Model::Elem       verify_checksum_with_payload;
     ::Model::Elem       update_checksum_with_payload;
+    ::Model::Elem       log_msg;
     DirectMeter_Model   directMeter;
     DirectCounter_Model directCounter;
 

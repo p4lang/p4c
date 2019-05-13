@@ -254,6 +254,14 @@ cstring InputSources::getBriefSourceFragment(const SourceInfo &position) const {
     } else {
         end = position.getEnd().getColumnNumber();
     }
+
+    // Adding escape character in front of '"' character to properly store
+    // quote marks as part of JSON properties, they must be escaped.
+    if (result.find('"') != nullptr) {
+        cstring out = result.replace("\"", "\\\"");
+        return out.substr(0, out.size()-1);
+    }
+
     return result.substr(start, end - start) + toadd;
 }
 

@@ -20,11 +20,11 @@ limitations under the License.
 namespace BMV2 {
 
 void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body,
-                                          Util::JsonArray* result) {
+                                          Util::JsonArray* order, Util::JsonArray* primitives) {
     ctxt->conv->simpleExpressionsOnly = true;
     for (auto s : *body) {
         if (auto block = s->to<IR::BlockStatement>()) {
-            convertDeparserBody(&block->components, result);
+            convertDeparserBody(&block->components, order, primitives);
             continue;
         } else if (s->is<IR::ReturnStatement>() || s->is<IR::ExitStatement>()) {
             break;
@@ -44,7 +44,7 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
                         if (type->is<IR::Type_Header>()) {
                             auto j = ctxt->conv->convert(arg->expression);
                             auto val = j->to<Util::JsonObject>()->get("value");
-                            result->append(val);
+                            order->append(val);
                         } else {
                             // We don't need to handle other types,
                             // like header unions or stacks; they were
@@ -56,6 +56,15 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
                     }
                     continue;
                 }
+            } else if (mi->is<P4::ExternFunction>()) {
+                auto ef = mi->to<P4::ExternFunction>();
+                ctxt->conv->simpleExpressionsOnly = false;
+                auto json = ExternConverter::cvtExternFunction(ctxt, ef, mc,
+                                                                s, /* emitExterns */ true);
+                ctxt->conv->simpleExpressionsOnly = true;
+                if (json)
+                    primitives->append(json);
+                continue;
             }
         }
         ::error(ErrorType::ERR_UNSUPPORTED, "within a deparser on this target", s);
@@ -69,7 +78,8 @@ Util::IJson* DeparserConverter::convertDeparser(const IR::P4Control* ctrl) {
     result->emplace("id", nextId("deparser"));
     result->emplace_non_null("source_info", ctrl->sourceInfoJsonObj());
     auto order = mkArrayField(result, "order");
-    convertDeparserBody(&ctrl->body->components, order);
+    auto primitives = mkArrayField(result, "primitives");
+    convertDeparserBody(&ctrl->body->components, order, primitives);
     return result;
 }
 

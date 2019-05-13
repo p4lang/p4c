@@ -619,6 +619,14 @@ extern void assert(in bool check);
  */
 extern void assume(in bool check);
 
+/*
+ * Log user defined messages
+ * Example: log_msg("User defined message");
+ * or log_msg("Value1 = {}, Value2 = {}",{value1, value2});
+ */
+extern void log_msg(string msg);
+extern void log_msg<T>(string msg, in T data);
+
 // The name 'standard_metadata' is reserved
 
 /*
