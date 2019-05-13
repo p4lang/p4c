@@ -33,7 +33,7 @@ namespace UBPF {
         UBPFModel() : Model("0.1"),
                       hash_table("hash_table"),
                       tableImplProperty("implementation"),
-                      CPacketName("skb"),
+                      CPacketName("pkt"),
                       packet("packet", P4::P4CoreLibrary::instance.packetIn, 0),
                       filter(), drop("mark_to_drop") {}
 

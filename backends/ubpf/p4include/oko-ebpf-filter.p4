@@ -51,7 +51,6 @@ parser prs(packet_in p, out Headers_t headers) {
 
 control pipe(inout Headers_t headers, out bool pass) {
     action Reject() {
-        //pass = false;
         mark_to_drop();
     }
 
@@ -67,7 +66,6 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
 
     apply {
-        //pass = true;
         filter_tbl.apply();
     }
 }

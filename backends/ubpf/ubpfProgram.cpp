@@ -25,15 +25,11 @@ namespace UBPF {
         if (!success)
             return success;
 
-        printf("Parser przeszedł");
-
         auto cb = pack->getParameterValue(model.filter.filter.name)
                 ->to<IR::ControlBlock>();
         BUG_CHECK(cb != nullptr, "No control block found");
         control = new UBPFControl(this, cb, parser->headers);
         success = control->build();
-
-        printf("Control przeszedł");
 
         if (!success)
             return success;
@@ -52,7 +48,7 @@ namespace UBPF {
         emitUbpfHelpers(builder);
 
         builder->emitIndent();
-        builder->target->emitMain(builder, "entry", "pkt");
+        builder->target->emitMain(builder, "entry", model.CPacketName.str());
         builder->blockStart();
 
         emitHeaderInstances(builder);

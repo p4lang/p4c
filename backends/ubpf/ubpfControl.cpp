@@ -208,7 +208,6 @@ namespace UBPF {
         builder->emitIndent();
         builder->appendLine("/* run action */");
         table->emitAction(builder, valueName);
-        printf("Action name:  %s", valueName.c_str());
         if (!actionVariableName.isNullOrEmpty()) {
             builder->emitIndent();
             builder->appendFormat("%s = %s->action",
@@ -315,12 +314,10 @@ namespace UBPF {
     }
 
     bool UBPFControlBodyTranslator::preorder(const IR::IfStatement* statement) {
-        printf("Wszedłem do if statement \n");
         builder->appendLine("If statement start\n");
         bool isHit = P4::TableApplySolver::isHit(statement->condition, control->program->refMap,
                                                  control->program->typeMap);
         if (isHit) {
-            printf("isHit jest true\n");
             // visit first the table, and then the conditional
             auto member = statement->condition->to<IR::Member>();
             CHECK_NULL(member);
@@ -410,7 +407,6 @@ namespace UBPF {
             accept(nullptr), parserHeaders(parserHeaders), codeGen(nullptr) {}
 
     void UBPFControl::scanConstants() {
-        printf("Skan w ubpf");
         for (auto c : controlBlock->constantValue) {
             auto b = c.second;
             if (!b->is<IR::Block>()) continue;
@@ -465,7 +461,6 @@ namespace UBPF {
     }
 
     bool UBPFControl::build() {
-        printf("Wszedłem do build w ubpf\n");
         hitVariable = program->refMap->newName("hit");
         auto pl = controlBlock->container->type->applyParams;
         if (pl->size() != 2) {

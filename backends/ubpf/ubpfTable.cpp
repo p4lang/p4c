@@ -68,8 +68,6 @@ namespace UBPF {
                          EBPF::CodeGenInspector *codeGen) :
             UBPFTableBase(program, EBPFObject::externalName(table->container), codeGen), table(table) {
 
-        printf("Konstruktor UBPFTable");
-
         cstring base = instanceName + "_defaultAction";
         defaultActionMapName = program->refMap->newName(base);
 

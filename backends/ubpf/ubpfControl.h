@@ -80,7 +80,6 @@ namespace UBPF {
         bool build();
 
         UBPFTable *getTable(cstring name) const {
-            printf("Tables size: %lu \n", tables.size());
             auto result = ::get(tables, name);
             BUG_CHECK(result != nullptr, "No table named %1%", name);
             return result;
