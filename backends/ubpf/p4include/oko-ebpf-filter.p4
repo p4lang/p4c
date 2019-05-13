@@ -55,7 +55,9 @@ control pipe(inout Headers_t headers) {
     }
 
     table filter_tbl {
-        key = { }
+        key = {
+            headers.ipv4.srcAddr : exact;
+        }
         actions = {
             Reject;
             NoAction;

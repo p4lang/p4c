@@ -93,7 +93,9 @@ namespace UBPF {
             for (auto c : keyGenerator->keyElements) {
                 auto type = program->typeMap->getType(c->expression);
                 auto ebpfType = UBPFTypeFactory::instance->create(type);
-                cstring fieldName = cstring("field") + Util::toString(fieldNumber);
+                cstring fieldName = keyTypeName.c_str();
+                cstring keyName = c->expression->toString().replace('.', '_');
+                fieldName += "_" + keyName;
                 if (!ebpfType->is<EBPF::IHasWidth>()) {
                     ::error("%1%: illegal type %2% for key field", c, type);
                     return;
