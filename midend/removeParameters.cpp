@@ -76,6 +76,41 @@ void FindActionParameters::postorder(const IR::MethodCallExpression* expression)
     }
 }
 
+bool check_replace_param(IR::P4Action* action, const IR::Parameter* p) {
+    int p_uses = 0;
+    int mark_to_drop = 0;
+    bool replace = true;
+    for (auto abc: action->body->components) {
+        /* iterate thought all statements, and find the uses of smeta */
+        /* if the only use is in mark_to_drop -- that's not a use! */
+        if (abc->is<IR::AssignmentStatement>()) {
+            auto as = abc->to<IR::AssignmentStatement>();
+            if (p->name == as->left->toString()) {
+                p_uses++;
+            }
+            else if (p->name == as->right->toString()) {
+                p_uses++;
+            }
+        }
+        else if (abc->is<IR::MethodCallStatement>()) {
+            auto mcs = abc->to<IR::MethodCallStatement>();
+            auto mc = mcs->methodCall;
+            auto mce = mc->to<IR::MethodCallExpression>();
+            if ("mark_to_drop" == mce->toString()) {
+                mark_to_drop++;
+            }
+        }
+        else {
+            LOG3("not handling statement: " << abc);
+        }
+
+    }
+    if (mark_to_drop > 0 && p_uses == 0) {
+        replace = false;
+    }
+    return replace;
+}
+
 const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
     LOG1("Visiting " << dbp(action));
     BUG_CHECK(getParent<IR::P4Control>() || getParent<IR::P4Program>(),
@@ -93,37 +128,71 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
     substitution.populate(action->parameters, args);
 
     bool removeAll = invocations->removeAllParameters(getOriginal<IR::P4Action>());
+    int dontReplaceActionParam = 0;
     for (auto p : action->parameters->parameters) {
+        bool replaceActionParam = check_replace_param(action, p);
         if (p->direction == IR::Direction::None && !removeAll) {
             leftParams->push_back(p);
         } else {
-            auto decl = new IR::Declaration_Variable(p->srcInfo, p->name,
+            if (replaceActionParam) {
+                auto decl = new IR::Declaration_Variable(p->srcInfo, p->name,
                                                      p->annotations, p->type, nullptr);
-            LOG3("Added declaration " << decl << " annotations " << p->annotations);
-            result->push_back(decl);
-            auto arg = substitution.lookup(p);
-            if (arg == nullptr) {
-                ::error("action %1%: parameter %2% must be bound", invocation, p);
-                continue;
-            }
+                LOG3("Added declaration " << decl << " annotations " << p->annotations);
+                result->push_back(decl);
 
-            if (p->direction == IR::Direction::In ||
-                p->direction == IR::Direction::InOut ||
-                p->direction == IR::Direction::None) {
-                auto left = new IR::PathExpression(p->name);
-                auto assign = new IR::AssignmentStatement(arg->srcInfo, left, arg->expression);
-                initializers->push_back(assign);
-            }
-            if (p->direction == IR::Direction::Out ||
-                p->direction == IR::Direction::InOut) {
-                auto right = new IR::PathExpression(p->name);
-                auto assign = new IR::AssignmentStatement(arg->srcInfo, arg->expression, right);
-                postamble->push_back(assign);
+                auto arg = substitution.lookup(p);
+                if (arg == nullptr) {
+                    ::error("action %1%: parameter %2% must be bound", invocation, p);
+                    continue;
+                }
+
+                if (p->direction == IR::Direction::In ||
+                    p->direction == IR::Direction::InOut ||
+                    p->direction == IR::Direction::None) {
+                    auto left = new IR::PathExpression(p->name);
+                    auto assign = new IR::AssignmentStatement(arg->srcInfo, left, arg->expression);
+                    LOG3("left assign: " << assign);
+                    initializers->push_back(assign);
+                }
+
+                if (p->direction == IR::Direction::Out ||
+                    p->direction == IR::Direction::InOut) {
+                    auto right = new IR::PathExpression(p->name);
+                    auto assign = new IR::AssignmentStatement(arg->srcInfo, arg->expression, right);
+                    LOG3("right assign: " << assign);
+                    postamble->push_back(assign);
+                }
+            } else {
+                dontReplaceActionParam++;
             }
         }
     }
-    if (result->empty())
-        return action;
+    if (result->empty()) {
+        if (dontReplaceActionParam > 0) {
+            for (auto abc: action->body->components) {
+                if (abc->is<IR::MethodCallStatement>()) {
+                    auto mcs = abc->to<IR::MethodCallStatement>();
+                    auto mc = mcs->methodCall;
+                    auto mce = mc->to<IR::MethodCallExpression>();
+                    if ("mark_to_drop" == mce->toString()) {
+                        auto new_mce = new IR::MethodCallExpression(mce->method, args);
+                        auto new_stat = new IR::MethodCallStatement(new_mce);
+                        initializers->push_back(new_stat);
+                    } else {
+                        initializers->push_back(abc);
+                    }
+                } else {
+                    initializers->push_back(abc);
+                }
+            }
+            action->parameters = new IR::ParameterList(action->parameters->srcInfo, *leftParams);
+            action->body = new IR::BlockStatement(action->body->srcInfo, *initializers);
+            result->push_back(action);
+            return result;
+        } else {
+            return action;
+        }
+    }
 
     initializers->append(action->body->components);
     initializers->append(*postamble);
