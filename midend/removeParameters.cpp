@@ -143,7 +143,6 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
                     p->direction == IR::Direction::None) {
                     auto left = new IR::PathExpression(p->name);
                     auto assign = new IR::AssignmentStatement(arg->srcInfo, left, arg->expression);
-                    LOG3("left assign: " << assign);
                     initializers->push_back(assign);
                 }
 
@@ -151,7 +150,6 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
                     p->direction == IR::Direction::InOut) {
                     auto right = new IR::PathExpression(p->name);
                     auto assign = new IR::AssignmentStatement(arg->srcInfo, arg->expression, right);
-                    LOG3("right assign: " << assign);
                     postamble->push_back(assign);
                 }
             } else {
