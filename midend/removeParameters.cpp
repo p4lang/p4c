@@ -76,28 +76,26 @@ void FindActionParameters::postorder(const IR::MethodCallExpression* expression)
     }
 }
 
+// Check if there is a mark_to_drop action and don't replace parameters
 bool DoCheckReplaceParam(IR::P4Action* action, const IR::Parameter* p) {
     int paramUses = 0;
     int num_mark_to_drop = 0;
     bool replace = true;
-    for (auto abc: action->body->components) {
+    for (auto abc : action->body->components) {
         /* iterate thought all statements, and find the uses of smeta */
         /* if the only use is in mark_to_drop -- that's not a use! */
         if (abc->is<IR::AssignmentStatement>()) {
             auto as = abc->to<IR::AssignmentStatement>();
             if (p->name == as->left->toString()) paramUses++;
             else if (p->name == as->right->toString()) paramUses++;
-        }
-        else if (abc->is<IR::MethodCallStatement>()) {
+        } else if (abc->is<IR::MethodCallStatement>()) {
             auto mcs = abc->to<IR::MethodCallStatement>();
             auto mc = mcs->methodCall;
             auto mce = mc->to<IR::MethodCallExpression>();
             if ("mark_to_drop" == mce->toString()) num_mark_to_drop++;
-        }
-        else {
+        } else {
             LOG3("not handling statement: " << abc);
         }
-
     }
     if (num_mark_to_drop > 0 && paramUses == 0) {
         replace = false;
@@ -164,11 +162,12 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
 
     if (result->empty()) {
         if (numParamsNotReplaced > 0) {
-            for (auto abc: action->body->components) {
+            for (auto abc : action->body->components) {
                 if (abc->is<IR::MethodCallStatement>()) {
                     auto mcs = abc->to<IR::MethodCallStatement>();
                     auto mc = mcs->methodCall;
                     auto mce = mc->to<IR::MethodCallExpression>();
+                    // Add mark_to_drop action component with standard_metadata arg
                     if ("mark_to_drop" == mce->toString()) {
                         auto new_mce = new IR::MethodCallExpression(mce->method, args);
                         abc = new IR::MethodCallStatement(new_mce);
