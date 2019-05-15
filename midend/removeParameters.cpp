@@ -171,30 +171,22 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
                     auto mce = mc->to<IR::MethodCallExpression>();
                     if ("mark_to_drop" == mce->toString()) {
                         auto new_mce = new IR::MethodCallExpression(mce->method, args);
-                        auto new_stat = new IR::MethodCallStatement(new_mce);
-                        initializers->push_back(new_stat);
-                    } else {
-                        initializers->push_back(abc);
+                        abc = new IR::MethodCallStatement(new_mce);
                     }
-                } else {
-                    initializers->push_back(abc);
                 }
+                initializers->push_back(abc);
             }
-            action->parameters = new IR::ParameterList(action->parameters->srcInfo, *leftParams);
-            action->body = new IR::BlockStatement(action->body->srcInfo, *initializers);
-            result->push_back(action);
-            return result;
         } else {
             return action;
         }
+    } else {
+        LOG1("To replace " << dbp(action));
+        initializers->append(action->body->components);
+        initializers->append(*postamble);
     }
-
-    initializers->append(action->body->components);
-    initializers->append(*postamble);
 
     action->parameters = new IR::ParameterList(action->parameters->srcInfo, *leftParams);
     action->body = new IR::BlockStatement(action->body->srcInfo, *initializers);
-    LOG1("To replace " << dbp(action));
     result->push_back(action);
     return result;
 }
