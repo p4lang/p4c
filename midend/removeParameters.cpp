@@ -76,36 +76,30 @@ void FindActionParameters::postorder(const IR::MethodCallExpression* expression)
     }
 }
 
-bool check_replace_param(IR::P4Action* action, const IR::Parameter* p) {
-    int p_uses = 0;
-    int mark_to_drop = 0;
+bool DoCheckReplaceParam(IR::P4Action* action, const IR::Parameter* p) {
+    int paramUses = 0;
+    int num_mark_to_drop = 0;
     bool replace = true;
     for (auto abc: action->body->components) {
         /* iterate thought all statements, and find the uses of smeta */
         /* if the only use is in mark_to_drop -- that's not a use! */
         if (abc->is<IR::AssignmentStatement>()) {
             auto as = abc->to<IR::AssignmentStatement>();
-            if (p->name == as->left->toString()) {
-                p_uses++;
-            }
-            else if (p->name == as->right->toString()) {
-                p_uses++;
-            }
+            if (p->name == as->left->toString()) paramUses++;
+            else if (p->name == as->right->toString()) paramUses++;
         }
         else if (abc->is<IR::MethodCallStatement>()) {
             auto mcs = abc->to<IR::MethodCallStatement>();
             auto mc = mcs->methodCall;
             auto mce = mc->to<IR::MethodCallExpression>();
-            if ("mark_to_drop" == mce->toString()) {
-                mark_to_drop++;
-            }
+            if ("mark_to_drop" == mce->toString()) num_mark_to_drop++;
         }
         else {
             LOG3("not handling statement: " << abc);
         }
 
     }
-    if (mark_to_drop > 0 && p_uses == 0) {
+    if (num_mark_to_drop > 0 && paramUses == 0) {
         replace = false;
     }
     return replace;
@@ -128,13 +122,13 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
     substitution.populate(action->parameters, args);
 
     bool removeAll = invocations->removeAllParameters(getOriginal<IR::P4Action>());
-    int dontReplaceActionParam = 0;
+    int numParamsNotReplaced = 0;
     for (auto p : action->parameters->parameters) {
-        bool replaceActionParam = check_replace_param(action, p);
+        bool replaceParam = DoCheckReplaceParam(action, p);
         if (p->direction == IR::Direction::None && !removeAll) {
             leftParams->push_back(p);
         } else {
-            if (replaceActionParam) {
+            if (replaceParam) {
                 auto decl = new IR::Declaration_Variable(p->srcInfo, p->name,
                                                      p->annotations, p->type, nullptr);
                 LOG3("Added declaration " << decl << " annotations " << p->annotations);
@@ -163,12 +157,13 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
                     postamble->push_back(assign);
                 }
             } else {
-                dontReplaceActionParam++;
+                numParamsNotReplaced++;
             }
         }
     }
+
     if (result->empty()) {
-        if (dontReplaceActionParam > 0) {
+        if (numParamsNotReplaced > 0) {
             for (auto abc: action->body->components) {
                 if (abc->is<IR::MethodCallStatement>()) {
                     auto mcs = abc->to<IR::MethodCallStatement>();
