@@ -74,7 +74,7 @@ ExternConverter::convertExternObject(ConversionContext* ctxt,
         primitive->emplace_non_null("source_info", mc->sourceInfoJsonObj());
         auto etr = new Util::JsonObject();
         etr->emplace("type", "extern");
-        etr->emplace("value", em->object->getName());
+        etr->emplace("value", em->object->controlPlaneName());
         parameters->append(etr);
         for (auto arg : *mc->arguments) {
             auto args = ctxt->conv->convert(arg->expression);
