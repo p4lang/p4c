@@ -122,6 +122,9 @@ class DoRemoveActionParameters : public Transform {
     const IR::Node* postorder(IR::P4Action* table) override;
     const IR::Node* postorder(IR::ActionListElement* element) override;
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
+    ActionInvocation* getInvocations() {
+        return invocations;
+    }
 };
 
 class RemoveActionParameters : public PassManager {
