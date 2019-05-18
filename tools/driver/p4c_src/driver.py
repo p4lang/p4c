@@ -288,3 +288,5 @@ class BackendDriver:
             # backends that override run can chose what to do on error
             if rc != 0:
                 return rc
+
+        return 0
