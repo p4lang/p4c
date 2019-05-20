@@ -1949,8 +1949,8 @@ TEST_F(TableIndirectWS, CustomGroupSelection) {
   };
 
   ASSERT_EQ(&action_profile, table->get_action_profile());
-  GroupSelection selector(mbrs, grp);
-  action_profile.set_group_selector(&selector);
+  auto selector = std::make_shared<GroupSelection>(mbrs, grp);
+  action_profile.set_group_selector(selector);
 
   grp_hdl_t grp_1;
   mbr_hdl_t mbr_1, mbr_2;

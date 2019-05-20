@@ -49,13 +49,14 @@
 #ifndef BM_BM_SIM_CONTEXT_H_
 #define BM_BM_SIM_CONTEXT_H_
 
-#include <iosfwd>
-#include <mutex>
 #include <atomic>
-#include <string>
-#include <vector>
+#include <iosfwd>
+#include <memory>
+#include <mutex>
 #include <set>
+#include <string>
 #include <typeindex>
+#include <vector>
 
 #include "P4Objects.h"
 #include "action_profile.h"
@@ -401,6 +402,10 @@ class Context final {
   set_crc_custom_parameters(
       const std::string &calc_name,
       const typename CustomCrcMgr<T>::crc_config_t &crc_config);
+
+  bool set_group_selector(
+      const std::string &act_prof_name,
+      std::shared_ptr<ActionProfile::GroupSelectionIface> selector);
 
   // ---------- End runtime interfaces ----------
 

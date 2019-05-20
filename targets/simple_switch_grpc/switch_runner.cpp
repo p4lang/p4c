@@ -132,6 +132,7 @@ class DataplaneInterfaceServiceImpl
       if (!pkt_handler) continue;
       {
         Lock lock(mutex);
+        add_port_if_new(request.port());
         pkt_handler(request.port(), packet.data(), packet.size(), pkt_cookie);
         // Get the packet id of newly created packet and save it in
         // packet_id_translation map. The map will be used to populate the id
@@ -161,16 +162,36 @@ class DataplaneInterfaceServiceImpl
       p4::bm::SetPortOperStatusResponse *response) override {
     (void) context;
     (void) response;
+    using PortStatus = bm::DevMgrIface::PortStatus;
     Lock lock(mutex);
     if (request->device_id() != device_id)
       return Status(StatusCode::INVALID_ARGUMENT, "Invalid device id");
-    if (request->oper_status() == p4::bm::PortOperStatus::OPER_STATUS_DOWN)
+    if (request->oper_status() ==
+        p4::bm::PortOperStatus::OPER_STATUS_DOWN) {
+      add_port_if_new(request->port());
       ports_oper_status[request->port()] = false;
-    else if (request->oper_status() == p4::bm::PortOperStatus::OPER_STATUS_UP)
+      p_monitor->notify(request->port(), PortStatus::PORT_DOWN);
+    } else if (request->oper_status() ==
+               p4::bm::PortOperStatus::OPER_STATUS_UP) {
+      add_port_if_new(request->port());
       ports_oper_status[request->port()] = true;
-    else
+      p_monitor->notify(request->port(), PortStatus::PORT_UP);
+    } else {
       return Status(StatusCode::INVALID_ARGUMENT, "Invalid oper status");
+    }
     return Status::OK;
+  }
+
+  // Needs to be called with exclusive lock.
+  // This is required to ensure that notifications get sent to the PortMonitor
+  // in a valid order.
+  void add_port_if_new(port_t port_num) {
+    using PortStatus = bm::DevMgrIface::PortStatus;
+    auto it = ports_oper_status.find(port_num);
+    if (it != ports_oper_status.end()) return;
+    p_monitor->notify(port_num, PortStatus::PORT_ADDED);
+    p_monitor->notify(port_num, PortStatus::PORT_UP);
+    ports_oper_status[port_num] = true;
   }
 
   ReturnCode port_add_(const std::string &iface_name, port_t port_num,

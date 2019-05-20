@@ -134,6 +134,14 @@ SwitchWContexts::force_arith_header(const std::string &header_name) {
   arith_objects.add_header(header_name);
 }
 
+bool
+SwitchWContexts::set_group_selector(
+    cxt_id_t cxt_id,
+    const std::string &act_prof_name,
+    std::shared_ptr<ActionProfile::GroupSelectionIface> selector) {
+  return contexts.at(cxt_id).set_group_selector(act_prof_name, selector);
+}
+
 int
 SwitchWContexts::init_objects(std::istream *is, device_id_t dev_id,
                               std::shared_ptr<TransportIface> transport) {

@@ -38,7 +38,8 @@ test_counter.cpp test_meter.cpp \
 test_ternary.cpp \
 test_pre.cpp \
 test_digest.cpp \
-test_idle_timeout.cpp
+test_idle_timeout.cpp \
+test_action_profile.cpp
 if WITH_SYSREPO
 test_gtest_SOURCES += test_gnmi.cpp
 endif
@@ -60,4 +61,5 @@ meter.p4 meter.json meter.proto.txt \
 ternary.p4 ternary.json ternary.proto.txt \
 multicast.p4 multicast.json multicast.proto.txt \
 clone.p4 clone.json clone.proto.txt \
-digest.p4 digest.json digest.proto.txt
+digest.p4 digest.json digest.proto.txt \
+action_profile.p4 action_profile.json action_profile.proto.txt

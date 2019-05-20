@@ -24,6 +24,7 @@
 #include <bm/bm_sim/packet.h>
 
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -515,9 +516,11 @@ ActionProfile::get_num_groups() const {
 }
 
 void
-ActionProfile::set_group_selector(GroupSelectionIface *selector) {
+ActionProfile::set_group_selector(
+    std::shared_ptr<GroupSelectionIface> selector) {
   WriteLock lock = lock_write();
-  grp_selector = selector;
+  grp_selector_ = selector;
+  grp_selector = grp_selector_.get();
 }
 
 bool

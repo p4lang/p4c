@@ -25,6 +25,7 @@
 #include <boost/thread/shared_mutex.hpp>
 
 #include <iosfwd>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -121,7 +122,7 @@ class ActionProfile : public NamedP4Object {
   }
 
   // give the target some control over the member selection process
-  void set_group_selector(GroupSelectionIface *selector);
+  void set_group_selector(std::shared_ptr<GroupSelectionIface> selector);
 
   // runtime interface
 
@@ -302,6 +303,7 @@ class ActionProfile : public NamedP4Object {
   size_t num_members{0};
   size_t num_groups{0};
   GroupMgr grp_mgr{};
+  std::shared_ptr<GroupSelectionIface> grp_selector_{nullptr};
   GroupSelectionIface *grp_selector{&grp_mgr};
   std::unique_ptr<Calculation> hash{nullptr};
 };

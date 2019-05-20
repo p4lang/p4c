@@ -1,0 +1,57 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33586946
+    name: "IndirectWS"
+    alias: "IndirectWS"
+  }
+  match_fields {
+    id: 1
+    name: "h.hdr.in_"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16811746
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  implementation_id: 285237193
+  size: 512
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16811746
+    name: "send"
+    alias: "send"
+  }
+  params {
+    id: 1
+    name: "eg_port"
+    bitwidth: 9
+  }
+}
+action_profiles {
+  preamble {
+    id: 285237193
+    name: "ActProfWS"
+    alias: "ActProfWS"
+  }
+  table_ids: 33586946
+  with_selector: true
+  size: 128
+}
+type_info {
+}

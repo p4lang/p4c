@@ -78,6 +78,7 @@
 #include <iosfwd>
 #include <condition_variable>
 
+#include "action_profile.h"
 #include "context.h"
 #include "device_id.h"
 #include "queue.h"
@@ -187,6 +188,14 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   //! force_arith_field() on all fields in the header. See force_arith_field()
   //! for more information.
   void force_arith_header(const std::string &header_name);
+
+  //! Use a custom GroupSelectionIface implementation for dataplane member
+  //! selection for action profile with name \p action_profile_name. Returns
+  //! false in case of failure (if the action profile name is not valid).
+  bool set_group_selector(
+      cxt_id_t cxt_id,
+      const std::string &act_prof_name,
+      std::shared_ptr<ActionProfile::GroupSelectionIface> selector);
 
   //! Get the number of contexts included in this switch
   size_t get_nb_cxts() { return nb_cxts; }

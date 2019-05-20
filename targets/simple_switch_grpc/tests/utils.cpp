@@ -83,6 +83,15 @@ int get_digest_id(const p4::config::v1::P4Info &p4info,
   return 0;
 }
 
+int get_act_prof_id(const p4configv1::P4Info &p4info,
+                    const std::string &act_prof_name) {
+  for (const auto &act_prof : p4info.action_profiles()) {
+    const auto &pre = act_prof.preamble();
+    if (pre.name() == act_prof_name) return pre.id();
+  }
+  return 0;
+}
+
 p4configv1::P4Info parse_p4info(const char *path) {
   p4configv1::P4Info p4info;
   std::ifstream istream(path);

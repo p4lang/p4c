@@ -50,6 +50,9 @@ int get_param_id(const p4::config::v1::P4Info &p4info,
 int get_digest_id(const p4::config::v1::P4Info &p4info,
                   const std::string &digest_name);
 
+int get_act_prof_id(const p4::config::v1::P4Info &p4info,
+                    const std::string &act_prof_name);
+
 p4::config::v1::P4Info parse_p4info(const char *path);
 
 template <typename StreamType, typename MessageType>

@@ -31,6 +31,7 @@
 
 #include "action_helpers.h"
 #include "common.h"
+#include "device_state.h"
 
 using mbr_hdl_t = bm::RuntimeInterface::mbr_hdl_t;
 using grp_hdl_t = bm::RuntimeInterface::grp_hdl_t;
@@ -182,15 +183,49 @@ pi_status_t _pi_act_prof_grp_set_mbrs(pi_session_handle_t session_handle,
                                       pi_p4_id_t act_prof_id,
                                       pi_indirect_handle_t grp_handle,
                                       size_t num_mbrs,
-                                      const pi_indirect_handle_t *mbr_handles) {
+                                      const pi_indirect_handle_t *mbr_handles,
+                                      const bool *activate) {
   _BM_UNUSED(session_handle);
   _BM_UNUSED(dev_id);
   _BM_UNUSED(act_prof_id);
   _BM_UNUSED(grp_handle);
   _BM_UNUSED(num_mbrs);
   _BM_UNUSED(mbr_handles);
+  _BM_UNUSED(activate);
   // TODO(antonin)
   return PI_STATUS_NOT_IMPLEMENTED_BY_TARGET;
+}
+
+pi_status_t _pi_act_prof_grp_activate_mbr(pi_session_handle_t session_handle,
+                                          pi_dev_id_t dev_id,
+                                          pi_p4_id_t act_prof_id,
+                                          pi_indirect_handle_t grp_handle,
+                                          pi_indirect_handle_t mbr_handle) {
+  _BM_UNUSED(session_handle);
+  _BM_UNUSED(dev_id);
+  grp_handle = pibmv2::IndirectHMgr::clear_grp_h(grp_handle);
+  auto lock = pibmv2::device_lock->shared_lock();
+  auto error_code = pibmv2::device_state->act_prof_selection.at(act_prof_id)
+      ->activate_member(grp_handle, mbr_handle);
+  if (error_code != bm::MatchErrorCode::SUCCESS)
+    return pibmv2::convert_error_code(error_code);
+  return PI_STATUS_SUCCESS;
+}
+
+pi_status_t _pi_act_prof_grp_deactivate_mbr(pi_session_handle_t session_handle,
+                                            pi_dev_id_t dev_id,
+                                            pi_p4_id_t act_prof_id,
+                                            pi_indirect_handle_t grp_handle,
+                                            pi_indirect_handle_t mbr_handle) {
+  _BM_UNUSED(session_handle);
+  _BM_UNUSED(dev_id);
+  grp_handle = pibmv2::IndirectHMgr::clear_grp_h(grp_handle);
+  auto lock = pibmv2::device_lock->shared_lock();
+  auto error_code = pibmv2::device_state->act_prof_selection.at(act_prof_id)
+      ->deactivate_member(grp_handle, mbr_handle);
+  if (error_code != bm::MatchErrorCode::SUCCESS)
+    return pibmv2::convert_error_code(error_code);
+  return PI_STATUS_SUCCESS;
 }
 
 pi_status_t _pi_act_prof_entries_fetch(pi_session_handle_t session_handle,
