@@ -70,7 +70,7 @@ std::map<int, ErrorSig> ErrorCatalog::errorCatalog = {
     { ErrorType::ERR_NOT_FOUND,          ErrorSig("not-found", "%1%: Not found")},
     { ErrorType::ERR_INVALID,            ErrorSig("invalid", "%1%: Invalid")},
     { ErrorType::ERR_EXPRESSION,         ErrorSig("expr", "%1%: Expression")},
-    { ErrorType::ERR_OVERLIMIT,          ErrorSig("overlimit", "%1%: Target supports")},
+    { ErrorType::ERR_OVERLIMIT,          ErrorSig("overlimit", "")},
     { ErrorType::ERR_INSUFFICIENT,       ErrorSig("insufficient", "%1%: Target requires")},
     { ErrorType::ERR_UNINITIALIZED,      ErrorSig("uninitialized", "%1%: Uninitialized")},
     { ErrorType::ERR_TYPE_ERROR,         ErrorSig("type-error", "")},

@@ -68,3 +68,14 @@ IR::Constant* parseConstant(const Util::SourceInfo& srcInfo,
         return new IR::Constant(srcInfo, defaultValue);
     return result;
 }
+
+int parseConstantChecked(const Util::SourceInfo& srcInfo,
+                         const UnparsedConstant& constant) {
+
+    auto cst = parseConstant(srcInfo, constant, 0);
+    if (!cst->fitsInt()) {
+        ::error(ErrorType::ERR_OVERLIMIT, "%1$x: value too large for type width", srcInfo);
+        return 8; // this is a fine value for a width; compilation will stop anyway
+    }
+    return cst->asInt();
+}
