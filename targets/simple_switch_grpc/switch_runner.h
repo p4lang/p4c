@@ -70,10 +70,6 @@ class SimpleSwitchGrpcRunner {
   int get_dp_grpc_server_port() {
     return dp_grpc_server_port;
   }
-  // TODO(dushyantarora): Remove this API once P4Runtime supports configuring
-  // mirroring sessions
-  int mirroring_mapping_add(int mirror_id,
-                            bm::DevMgrIface::port_t egress_port);
   void block_until_all_packets_processed();
   bool is_dp_service_active();
 

@@ -665,15 +665,6 @@ SimpleSwitchGrpcRunner::shutdown() {
   PIGrpcServerShutdown();
 }
 
-int
-SimpleSwitchGrpcRunner::mirroring_mapping_add(int mirror_id,
-  bm::DevMgrIface::port_t egress_port) {
-  SimpleSwitch::MirroringSessionConfig config = {};
-  config.egress_port = egress_port;
-  config.egress_port_valid = true;
-  return simple_switch->mirroring_add_session(mirror_id, config);
-}
-
 void
 SimpleSwitchGrpcRunner::block_until_all_packets_processed() {
   simple_switch->block_until_no_more_packets();
