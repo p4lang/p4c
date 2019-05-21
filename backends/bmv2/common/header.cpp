@@ -260,7 +260,8 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
     unsigned padding = max_length % 8;
     if (padding != 0) {
         if (st->is<IR::Type_Header>()) {
-            ::error(ErrorType::ERR_OVERLIMIT, "%1%: Found header with fields totaling %2% bits."
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "Found header with fields totaling %2% bits."
                     "  BMv2 target only supports headers with fields"
                     " totaling a multiple of 8 bits.",
                     st, max_length);

@@ -22,12 +22,12 @@ cstring Annotation::getName(const IR::Annotation* annotation) {
     BUG_CHECK(annotation->name == IR::Annotation::nameAnnotation,
               "%1%: Only works on name annotations", annotation);
     if (annotation->expr.size() != 1) {
-        ::error("%1% should contain a string", annotation);
+        ::error(ErrorType::ERR_INVALID, "should contain a string", annotation);
         return "";
     }
     auto str = annotation->expr[0]->to<IR::StringLiteral>();
     if (str == nullptr) {
-        ::error("%1% should contain a string", annotation);
+        ::error(ErrorType::ERR_INVALID, "should contain a string", annotation);
         return "";
     }
     return str->value;

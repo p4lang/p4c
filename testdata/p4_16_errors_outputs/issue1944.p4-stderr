@@ -1,0 +1,4 @@
+issue1944.p4(1): [--Werror=overlimit] error: 2147483648: this implementation does not support bitstrings so large
+const bit<2147483648>
+          ^^^^^^^^^^
+error: 1 errors encountered, aborting compilation

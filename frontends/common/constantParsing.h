@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -56,7 +56,7 @@ class SourceInfo;
  *         |   numeric value in base @base    |       w
  *         |                                   \___
  *         \___
- *   
+ *
  * Simple numeric constants like '5' are specified by setting @hasWidth to
  * false and providing a @skip length of 0.
  */
@@ -80,5 +80,12 @@ std::ostream& operator<<(std::ostream& out, const UnparsedConstant& constant);
 IR::Constant* parseConstant(const Util::SourceInfo& srcInfo,
                             const UnparsedConstant& constant,
                             long defaultValue);
+
+/**
+ * Parses a constant that should fit in an int value.
+ * Reports an error if it does not.
+ */
+int parseConstantChecked(const Util::SourceInfo& srcInfo,
+                         const UnparsedConstant& constant);
 
 #endif /* _FRONTENDS_COMMON_CONSTANTPARSING_H_ */

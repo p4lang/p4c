@@ -871,11 +871,11 @@ baseType
     | BIT    { $$ = IR::Type::Bits::get(@1, 1); }
     | INT    { $$ = new IR::Type_InfInt(); }
     | BIT "<" INTEGER ">"
-      { $$ = IR::Type::Bits::get(@1+@4, parseConstant(@3, $3, 0)->asInt(), false); }
+      { $$ = IR::Type::Bits::get(@1+@4, parseConstantChecked(@3, $3), false); }
     | INT "<" INTEGER ">"
-      { $$ = IR::Type::Bits::get(@1+@4, parseConstant(@3, $3, 0)->asInt(), true); }
+      { $$ = IR::Type::Bits::get(@1+@4, parseConstantChecked(@3, $3), true); }
     | VARBIT "<" INTEGER ">"
-      { $$ = IR::Type::Varbits::get(@1+@4, parseConstant(@3, $3, 0)->asInt()); }
+      { $$ = IR::Type::Varbits::get(@1+@4, parseConstantChecked(@3, $3)); }
 
     | BIT "<" "(" expression ")" ">"
       { $$ = new IR::Type_Bits(@1+@6, $4, false); }
@@ -978,7 +978,7 @@ enumDeclaration
         "{" identifierList "}" { $$ = new IR::Type_Enum(@3, *$3, *$6); }
     | optAnnotations ENUM BIT "<" INTEGER ">" name { driver.structure->declareType(*$7); }
         "{" specifiedIdentifierList "}" {
-            auto type = IR::Type::Bits::get(@3+@6, parseConstant(@5, $5, 0)->asInt());
+            auto type = IR::Type::Bits::get(@3+@6, parseConstantChecked(@5, $5));
             $$ = new IR::Type_SerEnum(@7, *$7, type, *$10); }
     ;
 

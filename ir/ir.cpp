@@ -93,7 +93,8 @@ void IGeneralNamespace::checkDuplicateDeclarations() const {
         IR::ID name = decl->getName();
         auto f = seen.find(name.name);
         if (f != seen.end()) {
-            ::error("Duplicate declaration of %1%: previous declaration at %2%",
+            ::error(ErrorType::ERR_DUPLICATE,
+                    "Duplicate declaration of %1%: previous declaration at %2%",
                     name, f->second.srcInfo);
         }
         seen.emplace(name.name, name);
@@ -104,7 +105,8 @@ void P4Parser::checkDuplicates() const {
     for (auto decl : states) {
         auto prev = parserLocals.getDeclaration(decl->getName().name);
         if (prev != nullptr)
-            ::error("State %1% has same name as %2%", decl, prev);
+            ::error(ErrorType::ERR_DUPLICATE,
+                    "State %1% has same name as %2%", decl, prev);
     }
 }
 
@@ -115,12 +117,12 @@ unsigned Type_Stack::getSize() const {
         BUG("%1%: Size not yet known", size);
     auto cst = size->to<IR::Constant>();
     if (!cst->fitsInt()) {
-        ::error("Index too large: %1%", cst);
+        ::error(ErrorType::ERR_OVERLIMIT, "Index too large: %1%", cst);
         return 0;
     }
     int size = cst->asInt();
     if (size <= 0)
-        ::error("Illegal array size: %1%", cst);
+        ::error(ErrorType::ERR_OVERLIMIT, "Illegal array size: %1%", cst);
     return static_cast<unsigned>(size);
 }
 
@@ -133,12 +135,12 @@ const Method* Type_Extern::lookupMethod(IR::ID name, const Vector<Argument>* arg
             if (result == nullptr) {
                 result = m;
             } else {
-                ::error("Ambiguous method %1%", name);
+                ::error(ErrorType::ERR_DUPLICATE, "Ambiguous method %1%", name);
                 if (!reported) {
-                    ::error("Candidate is %1%", result);
+                    ::error(ErrorType::ERR_DUPLICATE, "Candidate is %1%", result);
                     reported = true;
                 }
-                ::error("Candidate is %1%", m);
+                ::error(ErrorType::ERR_DUPLICATE, "Candidate is %1%", m);
                 return nullptr;
             }
         }
@@ -170,7 +172,7 @@ P4Table::getApplyMethodType() const {
     // Synthesize a new type for the return
     auto actions = properties->getProperty(IR::TableProperties::actionsPropertyName);
     if (actions == nullptr) {
-        ::error("Table %1% does not contain a list of actions", this);
+        ::error(ErrorType::ERR_INVALID, "table does not contain a list of actions", this);
         return nullptr;
     }
     if (!actions->value->is<IR::ActionList>())
@@ -247,12 +249,12 @@ const IR::PackageBlock* ToplevelBlock::getMain() const {
     }
     auto main = mainDecls->at(0);
     if (mainDecls->size() > 1) {
-        ::error("Program has multiple `%s' modules: %1%, %2%",
+        ::error(ErrorType::ERR_DUPLICATE, "Program has multiple `%s' instances: %1%, %2%",
                 IR::P4Program::main, main->getNode(), mainDecls->at(1)->getNode());
         return nullptr;
     }
     if (!main->is<IR::Declaration_Instance>()) {
-        ::error("%s must be a package declaration", main->getNode());
+        ::error(ErrorType::ERR_INVALID, "must be a package declaration", main->getNode());
         return nullptr;
     }
     auto block = getValue(main->getNode());
