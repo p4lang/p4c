@@ -42,7 +42,6 @@ namespace UBPF {
         static cstring reservedPrefix;
 
         TableImpl_Model hash_table;
-        //TODO what exactly those below three parameters do?
         ::Model::Elem tableImplProperty;
         ::Model::Elem CPacketName;
         ::Model::Param_Model packet;

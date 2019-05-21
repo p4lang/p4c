@@ -8,8 +8,8 @@ namespace UBPF {
     bool UBPFProgram::build() {
         bool success = true;
         auto pack = toplevel->getMain();
-        if (pack->type->name != "Filter")
-            ::warning(ErrorType::WARN_INVALID, "%1%: the main ebpf package should be called ebpfFilter"
+        if (pack->type->name != "ubpfFilter")
+            ::warning(ErrorType::WARN_INVALID, "%1%: the main ubpf package should be called ubpfFilter"
                                                "; are you using the wrong architecture?", pack->type->name);
 
         if (pack->getConstructorParameters()->size() != 2) {
@@ -114,13 +114,11 @@ namespace UBPF {
     }
 
     void UBPFProgram::emitTypes(EBPF::CodeBuilder *builder) {
-        std::cout << "Emitting Types." << std::endl;
         for (auto d : program->objects) {
             if (d->is<IR::Type>() && !d->is<IR::IContainer>() &&
                 !d->is<IR::Type_Extern>() && !d->is<IR::Type_Parser>() &&
                 !d->is<IR::Type_Control>() && !d->is<IR::Type_Typedef>() &&
                 !d->is<IR::Type_Error>()) {
-                std::cout << "Creating instance." << std::endl;
                 CHECK_NULL(UBPFTypeFactory::instance);
                 auto type = UBPFTypeFactory::instance->create(d->to<IR::Type>());
                 if (type == nullptr)
@@ -142,7 +140,7 @@ namespace UBPF {
         builder->newline();
 
         builder->emitIndent();
-        builder->appendFormat("uint8_t %s = 0;", control->passVariable);
+        builder->appendFormat("uint8_t %s = 1;", control->passVariable);
         builder->newline();
     }
 
@@ -155,7 +153,7 @@ namespace UBPF {
             builder->appendFormat("if (sizeof(struct %s) < pkt_len) ", header_type_name);
             builder->blockStart();
             builder->emitIndent();
-            builder->appendLine("return 1;");
+            builder->appendLine("return 0;");
             builder->blockEnd(true);
         }
     }

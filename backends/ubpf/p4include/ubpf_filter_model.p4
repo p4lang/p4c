@@ -15,7 +15,7 @@ extern hash_table {
 parser parse<H>(packet_in packet, out H headers);
 control filter<H>(inout H headers);
 
-package Filter<H>(parse<H> prs,
+package ubpfFilter<H>(parse<H> prs,
                       filter<H> filt);
 
 extern void mark_to_drop();

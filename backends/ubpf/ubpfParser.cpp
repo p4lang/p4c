@@ -33,7 +33,6 @@ namespace UBPF {
     }
 
     bool UBPFStateTranslationVisitor::preorder(const IR::ParserState* parserState) {
-        std::cout << "Visitor: ParserState." << std::endl;
         if (parserState->isBuiltin()) return false;
 
         builder->emitIndent();
@@ -65,7 +64,6 @@ namespace UBPF {
     }
 
     bool UBPFStateTranslationVisitor::preorder(const IR::SelectCase* selectCase) {
-        std::cout << "Visitor: SelectCase." << std::endl;
         builder->emitIndent();
         if (selectCase->keyset->is<IR::DefaultExpression>()) {
             hasDefault = true;
@@ -82,7 +80,6 @@ namespace UBPF {
     }
 
     bool UBPFStateTranslationVisitor::preorder(const IR::SelectExpression* expression) {
-        std::cout << "Visitor: SelectExpression." << std::endl;
         hasDefault = false;
         if (expression->select->components.size() != 1) {
             // TODO: this does not handle correctly tuples
@@ -109,7 +106,6 @@ namespace UBPF {
     }
 
     bool UBPFStateTranslationVisitor::preorder(const IR::Member* expression) {
-        std::cout << "Visitor: Member." << std::endl;
         if (expression->expr->is<IR::PathExpression>()) {
             auto pe = expression->expr->to<IR::PathExpression>();
             auto decl = state->parser->program->refMap->getDeclaration(pe->path, true);
@@ -124,14 +120,6 @@ namespace UBPF {
         builder->append(expression->member);
         return false;
     }
-
-//    void cstringToLower(const cstring value, char* result) {
-//        strcpy(result, value);
-//        for(int i = 0; result[i]; i++){
-//            result[i] = tolower(result[i]);
-//        }
-//        std::cout << result << std::endl;
-//    }
 
     void
     UBPFStateTranslationVisitor::compileExtractField(
@@ -226,7 +214,6 @@ namespace UBPF {
 
     void
     UBPFStateTranslationVisitor::compileExtract(const IR::Expression* destination) {
-        std::cout << "Visitor: Expression." << std::endl;
         auto type = state->parser->typeMap->getType(destination);
         auto ht = type->to<IR::Type_StructLike>();
 
@@ -309,7 +296,6 @@ namespace UBPF {
     }
 
     void UBPFParserState::emit(EBPF::CodeBuilder* builder) {
-        std::cout << "Emitting UBPFParserState." << std::endl;
         UBPFStateTranslationVisitor visitor(this);
         visitor.setBuilder(builder);
         state->apply(visitor);

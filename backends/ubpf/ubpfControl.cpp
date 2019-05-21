@@ -1,7 +1,6 @@
 
 #include "ubpfType.h"
 #include "ubpfControl.h"
-//#include "ubpfTable.h"
 #include "lib/error.h"
 #include "frontends/p4/tableApply.h"
 #include "frontends/p4/typeMap.h"
@@ -380,7 +379,7 @@ namespace UBPF {
             visit(c->statement);
             builder->newline();
             builder->emitIndent();
-            builder->appendLine("break2;");
+            builder->appendLine("break;");
         }
         builder->blockEnd(false);
         saveAction.pop_back();

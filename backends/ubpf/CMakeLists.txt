@@ -31,7 +31,7 @@ set(P4C_UBPF_HEADERS
         target.h
         ubpfBackend.h)
 
-set (P4C_UBPF_DIST_HEADERS p4include/filter_model.p4)
+set (P4C_UBPF_DIST_HEADERS p4include/ubpf_filter_model.p4)
 
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "$(P4C_UBPF_SOURCES)")
 

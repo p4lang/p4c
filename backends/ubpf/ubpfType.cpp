@@ -38,8 +38,6 @@ namespace UBPF {
     //////////////////////////////////////////////////////////////////////////////
 
     void UBPFScalarType::emit(EBPF::CodeBuilder* builder) {
-        // TODO: Note that it will handle only 8, 16, 32, or 64 width of header fields.
-        //  Need to write method to parse custom width (e.g. 3 bits in MPLS header).
         if (width <= 8)
             builder->appendFormat("uint8_t");
         else if (width <= 16)

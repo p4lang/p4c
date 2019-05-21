@@ -191,7 +191,7 @@ namespace UBPF {
         builder->blockStart();
 
         builder->emitIndent();
-        builder->append("UBPF_MAP_TYPE_HASHMAP = 1,");
+        builder->append("UBPF_MAP_TYPE_HASHMAP = 4,");
         builder->newline();
 
         builder->blockEnd(false);

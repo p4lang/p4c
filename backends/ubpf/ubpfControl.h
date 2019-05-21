@@ -1,20 +1,12 @@
 #ifndef P4C_UBPFCONTROL_H
 #define P4C_UBPFCONTROL_H
 
-//#include "backends/ebpf/ebpfControl.h"
 #include "backends/ebpf/ebpfObject.h"
-//#include "backends/ebpf/ebpfTable.h"
 #include "ubpfTable.h"
-//#include "ir/ir.h"
-//#include "backends/ebpf/codeGen.h"
-
-//#include "ubpfProgram.h"
 
 namespace UBPF {
 
     class UBPFControl;
-
-//    class UBPFProgram;
 
     class UBPFControlBodyTranslator : public EBPF::CodeGenInspector {
     public:
