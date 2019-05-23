@@ -105,19 +105,25 @@ endif()
 
 # Check if we have the right llvm version
 set (MIN_LLVM 3.7.1)
-
-# If you get an error here see
-# https://stackoverflow.com/questions/38171543/error-when-using-cmake-with-llvm
-find_package(LLVM QUIET)
-if (LLVM_PACKAGE_VERSION)
+# Grab the LLVM version, do not use find_package because it is unstable
+# https://github.com/p4lang/p4c/issues/1376
+set(LLVM_CMD "llvm-config --version")
+message(STATUS "Check LLVM version with '${LLVM_CMD}'")
+exec_program(${LLVM_CMD}
+    RETURN_VALUE LLVM_RET
+    OUTPUT_VARIABLE LLVM_PACKAGE_VERSION)
+if (NOT LLVM_RET)
   message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
   if (${LLVM_PACKAGE_VERSION} VERSION_LESS ${MIN_LLVM})
-    MESSAGE(WARNING "LLVM version ${LLVM_PACKAGE_VERSION} too small, expected ${MIN_LLVM}.
+    message(WARNING "LLVM version ${LLVM_PACKAGE_VERSION} too small, expected ${MIN_LLVM}.
     Ignoring ebpf tests...")
     set (SUPPORTS_KERNEL False)
   endif()
 else()
-  message(STATUS "LLVM missing, disabling kernel tests...")
+  message(WARNING
+    "Did not find an LLVM version that can compile the eBPF kernel tests...\n"
+    "'llvm-config' reason: ${LLVM_PACKAGE_VERSION}\n"
+    "'llvm-config' return value: ${LLVM_RET}" )
   set (SUPPORTS_KERNEL False)
 endif()
 
