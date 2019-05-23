@@ -110,8 +110,8 @@ set (MIN_LLVM 3.7.1)
 set(LLVM_CMD "llvm-config --version")
 message(STATUS "Check LLVM version with '${LLVM_CMD}'")
 exec_program(${LLVM_CMD}
-	 RETURN_VALUE LLVM_RET
-	 OUTPUT_VARIABLE LLVM_PACKAGE_VERSION)
+    RETURN_VALUE LLVM_RET
+    OUTPUT_VARIABLE LLVM_PACKAGE_VERSION)
 if (NOT LLVM_RET)
   message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
   if (${LLVM_PACKAGE_VERSION} VERSION_LESS ${MIN_LLVM})
@@ -121,8 +121,9 @@ if (NOT LLVM_RET)
   endif()
 else()
   message(WARNING
-	 "Problem with LLVM, disabling kernel tests...\n"
-	 "Return Value: " ${LLVM_RET} " Reason: " ${LLVM_PACKAGE_VERSION})
+    "Did not find an LLVM version that can compile the eBPF kernel tests...\n"
+    "'llvm-config' reason: ${LLVM_PACKAGE_VERSION}\n"
+    "'llvm-config' return value: ${LLVM_RET}" )
   set (SUPPORTS_KERNEL False)
 endif()
 
