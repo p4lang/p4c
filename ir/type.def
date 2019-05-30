@@ -251,6 +251,13 @@ class Type_Struct : Type_StructLike {
     toString{ return cstring("struct ") + externalName(); }
 }
 
+/// This is the type of a struct-valued expression whose
+/// exact struct type is yet unknown; we only know the field names
+/// and some information about their types.
+class Type_UnknownStruct : Type_StructLike {
+#nodbprint
+}
+
 class Type_HeaderUnion : Type_StructLike {
 #nodbprint
     toString{ return cstring("header_union ") + externalName(); }

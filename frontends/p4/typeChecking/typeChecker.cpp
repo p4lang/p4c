@@ -1773,9 +1773,8 @@ const IR::Node* TypeInference::postorder(IR::StructInitializerExpression* expres
     if (expression->typeName != nullptr) {
         structType = getType(expression->typeName);
     } else {
-        // TODO: this could be a header type
-        structType = new IR::Type_Struct(
-            expression->srcInfo, expression->typeName->path->name, *components);
+        structType = new IR::Type_UnknownStruct(
+            expression->srcInfo, "unknown", *components);
     }
     auto type = canonicalize(structType);
     if (type == nullptr)
