@@ -1,0 +1,3 @@
+issue1937.p4(14): [--Wwarn=uninitialized_use] warning: hdr.f1 may be uninitialized
+        foo.apply(hdr.f1, hdr.f1);
+                          ^^^^^^

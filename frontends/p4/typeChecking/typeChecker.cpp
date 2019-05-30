@@ -955,6 +955,8 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
             decl, decl->arguments, simpleType->to<IR::IContainer>());
         auto type = typeAndArgs.first;
         auto args = typeAndArgs.second;
+        auto *learn = clone();
+        (void)type->apply(*learn);
         if (type == nullptr || args == nullptr) {
             prune();
             return decl;
@@ -2779,7 +2781,8 @@ TypeInference::actionCall(bool inActionList,
     // Check remaining parameters: they must be all non-directional
     bool error = false;
     for (auto p : left) {
-        if (p.second->direction != IR::Direction::None) {
+        if (p.second->direction != IR::Direction::None &&
+            p.second->defaultValue == nullptr) {
             typeError("%1%: Parameter %2% must be bound", actionCall, p.second);
             error = true;
         }
