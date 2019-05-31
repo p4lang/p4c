@@ -19,6 +19,7 @@
  */
 
 #include <bm/bm_sim/_assert.h>
+#include <bm/bm_sim/logger.h>
 #include <bm/bm_sim/switch.h>
 
 #include <PI/p4info.h>
@@ -95,6 +96,13 @@ pi_status_t _pi_meter_read_direct(pi_session_handle_t session_handle,
                                   pi_meter_spec_t *meter_spec) {
   _BM_UNUSED(session_handle);
 
+  // bmv2 currently does not support direct neters for default entries
+  if (entry_handle == pibmv2::get_default_handle()) {
+    bm::Logger::get()->error(
+        "[PI] bmv2 does not support direct meters for default entries");
+    return PI_STATUS_NOT_IMPLEMENTED_BY_TARGET;
+  }
+
   const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
   assert(p4info != nullptr);
   std::string t_name = get_direct_t_name(p4info, meter_id);
@@ -114,6 +122,13 @@ pi_status_t _pi_meter_set_direct(pi_session_handle_t session_handle,
                                  pi_entry_handle_t entry_handle,
                                  const pi_meter_spec_t *meter_spec) {
   _BM_UNUSED(session_handle);
+
+  // bmv2 currently does not support direct neters for default entries
+  if (entry_handle == pibmv2::get_default_handle()) {
+    bm::Logger::get()->error(
+        "[PI] bmv2 does not support direct meters for default entries");
+    return PI_STATUS_NOT_IMPLEMENTED_BY_TARGET;
+  }
 
   const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
   assert(p4info != nullptr);

@@ -19,6 +19,7 @@
  */
 
 #include <bm/bm_sim/_assert.h>
+#include <bm/bm_sim/logger.h>
 #include <bm/bm_sim/switch.h>
 
 #include <PI/p4info.h>
@@ -126,6 +127,13 @@ pi_status_t _pi_counter_read_direct(pi_session_handle_t session_handle,
   _BM_UNUSED(session_handle);
   _BM_UNUSED(flags);
 
+  // bmv2 currently does not support direct counters for default entries
+  if (entry_handle == pibmv2::get_default_handle()) {
+    bm::Logger::get()->error(
+        "[PI] bmv2 does not support direct counters for default entries");
+    return PI_STATUS_NOT_IMPLEMENTED_BY_TARGET;
+  }
+
   const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
   assert(p4info != nullptr);
   std::string t_name = get_direct_t_name(p4info, counter_id);
@@ -145,6 +153,13 @@ pi_status_t _pi_counter_write_direct(pi_session_handle_t session_handle,
                                      pi_entry_handle_t entry_handle,
                                      const pi_counter_data_t *counter_data) {
   _BM_UNUSED(session_handle);
+
+  // bmv2 currently does not support direct counters for default entries
+  if (entry_handle == pibmv2::get_default_handle()) {
+    bm::Logger::get()->error(
+        "[PI] bmv2 does not support direct counters for default entries");
+    return PI_STATUS_NOT_IMPLEMENTED_BY_TARGET;
+  }
 
   const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
   assert(p4info != nullptr);

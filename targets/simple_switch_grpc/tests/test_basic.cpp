@@ -47,16 +47,31 @@ constexpr char simple_router_proto[] = TESTDATADIR "/simple_router.proto.txt";
 class SimpleSwitchGrpcTest_Basic : public SimpleSwitchGrpcBaseTest {
  protected:
   SimpleSwitchGrpcTest_Basic()
-      : SimpleSwitchGrpcBaseTest(simple_router_proto) { }
+      : SimpleSwitchGrpcBaseTest(simple_router_proto) {
+    t_id = get_table_id(p4info, "ipv4_lpm");
+  }
 
   void SetUp() override {
     SimpleSwitchGrpcBaseTest::SetUp();
     update_json(simple_router_json);
   }
+
+  p4v1::ReadResponse read_one(const p4v1::Entity &entity) const {
+    p4v1::ReadResponse rep;
+    EXPECT_TRUE(read(entity, &rep).ok());
+    return rep;
+  }
+
+  p4v1::ReadResponse read_one(const p4v1::TableEntry &table_entry) const {
+    p4v1::Entity entity;
+    entity.mutable_table_entry()->CopyFrom(table_entry);
+    return read_one(entity);
+  }
+
+  int t_id;
 };
 
 TEST_F(SimpleSwitchGrpcTest_Basic, Entries) {
-  auto t_id = get_table_id(p4info, "ipv4_lpm");
   auto mf_id = get_mf_id(p4info, "ipv4_lpm", "ipv4.dstAddr");
   auto a_id = get_action_id(p4info, "set_nhop");
   auto p0_id = get_param_id(p4info, "set_nhop", "nhop_ipv4");
@@ -85,60 +100,57 @@ TEST_F(SimpleSwitchGrpcTest_Basic, Entries) {
   }
 
   // add entry
-  {
-    p4v1::WriteRequest request;
-    request.set_device_id(device_id);
-    auto update = request.add_updates();
-    update->set_type(p4v1::Update_Type_INSERT);
-    update->set_allocated_entity(&entity);
-    ClientContext context;
-    p4v1::WriteResponse rep;
-    auto status = Write(&context, request, &rep);
-    EXPECT_TRUE(status.ok());
-    update->release_entity();
-  }
-
-  auto read_one = [this, &table_entry] () {
-    p4v1::ReadRequest request;
-    request.set_device_id(device_id);
-    auto entity = request.add_entities();
-    entity->set_allocated_table_entry(table_entry);
-    ClientContext context;
-    std::unique_ptr<grpc::ClientReader<p4v1::ReadResponse> > reader(
-        p4runtime_stub->Read(&context, request));
-    p4v1::ReadResponse rep;
-    reader->Read(&rep);
-    auto status = reader->Finish();
-    EXPECT_TRUE(status.ok());
-    entity->release_table_entry();
-    return rep;
-  };
+  EXPECT_TRUE(insert(entity).ok());
 
   // get entry, check it is the one we added
   {
-    auto rep = read_one();
-    EXPECT_EQ(1u, rep.entities().size());
+    auto rep = read_one(entity);
+    ASSERT_EQ(1u, rep.entities().size());
+    EXPECT_TRUE(MessageDifferencer::Equals(entity, rep.entities().Get(0)));
+  }
+
+  // read the entry again, this time using a wildcard read
+  {
+    p4v1::TableEntry table_entry;
+    table_entry.set_table_id(t_id);
+    auto rep = read_one(table_entry);
+    ASSERT_EQ(1u, rep.entities().size());
     EXPECT_TRUE(MessageDifferencer::Equals(entity, rep.entities().Get(0)));
   }
 
   // remove entry
-  {
-    p4v1::WriteRequest request;
-    request.set_device_id(device_id);
-    auto update = request.add_updates();
-    update->set_type(p4v1::Update_Type_DELETE);
-    update->set_allocated_entity(&entity);
-    ClientContext context;
-    p4v1::WriteResponse rep;
-    auto status = Write(&context, request, &rep);
-    EXPECT_TRUE(status.ok());
-    update->release_entity();
-  }
+  EXPECT_TRUE(remove(entity).ok());
 
   // check entry is indeed gone
   {
-    auto rep = read_one();
+    auto rep = read_one(entity);
     EXPECT_EQ(0u, rep.entities().size());
+  }
+}
+
+TEST_F(SimpleSwitchGrpcTest_Basic, DefaultEntry) {
+  auto NoAction_id = get_action_id(p4info, "NoAction");
+  p4v1::Entity entity;
+  auto table_entry = entity.mutable_table_entry();
+  table_entry->set_table_id(t_id);
+  table_entry->set_is_default_action(true);
+  {
+    auto rep = read_one(entity);
+    ASSERT_EQ(1u, rep.entities().size());
+    // as per the P4 program default entry should be set to NoACtion() by
+    // default
+    table_entry->mutable_action()->mutable_action()->set_action_id(NoAction_id);
+    EXPECT_TRUE(MessageDifferencer::Equals(entity, rep.entities().Get(0)));
+  }
+
+  // change default entry to _drop
+  auto drop_id = get_action_id(p4info, "_drop");
+  table_entry->mutable_action()->mutable_action()->set_action_id(drop_id);
+  EXPECT_TRUE(modify(entity).ok());
+  {  // read back default entry
+    auto rep = read_one(entity);
+    ASSERT_EQ(1u, rep.entities().size());
+    EXPECT_TRUE(MessageDifferencer::Equals(entity, rep.entities().Get(0)));
   }
 }
 

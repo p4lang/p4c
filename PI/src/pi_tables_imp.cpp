@@ -28,6 +28,7 @@
 #include <PI/target/pi_tables_imp.h>
 
 #include <algorithm>
+#include <iterator>  // std::distance
 #include <limits>
 #include <string>
 #include <vector>
@@ -356,6 +357,10 @@ typename M::Entry get_default_entry_common(
   } else {
     build_action_entry(p4info, entry, table_entry);
   }
+  table_entry->entry_properties = nullptr;
+  // TODO(antonin): bmv2 currently does not support direct resources for default
+  // entries
+  table_entry->direct_res_config = nullptr;
   return entry;
 }
 
@@ -464,17 +469,12 @@ void emit_match_key(const std::vector<bm::MatchKeyParam> &match_key,
   }
 }
 
-template <
-  typename M,
-  typename std::vector<typename M::Entry> (bm::RuntimeInterface::*GetFn)(
-      bm::cxt_id_t, const std::string &) const>
-void get_entries_common(const pi_p4info_t *p4info, pi_p4_id_t table_id,
-                        pi_table_fetch_res_t *res) {
+template <typename It>
+void emit_entries(const pi_p4info_t *p4info, pi_p4_id_t table_id,
+                  const It first, const It last, pi_table_fetch_res_t *res) {
   std::string t_name(pi_p4info_table_name_from_id(p4info, table_id));
 
-  const auto entries = std::bind(GetFn, pibmv2::switch_, 0, t_name)();
-
-  res->num_entries = entries.size();
+  res->num_entries = std::distance(first, last);
   res->mkey_nbytes = pi_p4info_table_match_key_size(p4info, table_id);
 
   size_t num_direct_resources;
@@ -488,7 +488,8 @@ void get_entries_common(const pi_p4info_t *p4info, pi_p4_id_t table_id,
   }
 
   Buffer buffer;
-  for (const auto &e : entries) {
+  for (auto it = first; it != last; it++) {
+    const auto &e = *it;
     emit_entry_handle(buffer.extend(sizeof(s_pi_entry_handle_t)), e.handle);
     // TODO(antonin): temporary hack; for match types which do not require a
     // priority, bmv2 returns -1, but the PI tends to expect 0, which is a
@@ -561,6 +562,17 @@ void get_entries_common(const pi_p4info_t *p4info, pi_p4_id_t table_id,
   res->entries = buffer.copy();
 }
 
+template <
+  typename M,
+  typename std::vector<typename M::Entry> (bm::RuntimeInterface::*GetFn)(
+      bm::cxt_id_t, const std::string &) const>
+void get_entries_common(const pi_p4info_t *p4info, pi_p4_id_t table_id,
+                        pi_table_fetch_res_t *res) {
+  std::string t_name(pi_p4info_table_name_from_id(p4info, table_id));
+  const auto entries = std::bind(GetFn, pibmv2::switch_, 0, t_name)();
+  emit_entries(p4info, table_id, entries.begin(), entries.end(), res);
+}
+
 void get_entries(const pi_p4info_t *p4info, pi_p4_id_t table_id,
                  pi_table_fetch_res_t *res) {
   std::string t_name(pi_p4info_table_name_from_id(p4info, table_id));
@@ -582,6 +594,43 @@ void get_entries(const pi_p4info_t *p4info, pi_p4_id_t table_id,
                          &bm::RuntimeInterface::mt_indirect_ws_get_entries>(
                              p4info, table_id, res);
       break;
+  }
+}
+
+void get_entry(const pi_p4info_t *p4info, pi_p4_id_t table_id,
+               pi_entry_handle_t handle, pi_table_fetch_res_t *res) {
+  std::string t_name(pi_p4info_table_name_from_id(p4info, table_id));
+
+  switch (pibmv2::switch_->mt_get_type(0, t_name)) {
+    case bm::MatchTableType::NONE:
+      throw bm_exception(bm::MatchErrorCode::INVALID_TABLE_NAME);
+    case bm::MatchTableType::SIMPLE: {
+      bm::MatchTable::Entry entry;
+      auto error_code = pibmv2::switch_->mt_get_entry(
+          0, t_name, handle, &entry);
+      if (error_code != bm::MatchErrorCode::SUCCESS)
+        throw bm_exception(error_code);
+      emit_entries(p4info, table_id, &entry, &entry + 1, res);
+      break;
+    }
+    case bm::MatchTableType::INDIRECT: {
+      bm::MatchTableIndirect::Entry entry;
+      auto error_code = pibmv2::switch_->mt_indirect_get_entry(
+          0, t_name, handle, &entry);
+      if (error_code != bm::MatchErrorCode::SUCCESS)
+        throw bm_exception(error_code);
+      emit_entries(p4info, table_id, &entry, &entry + 1, res);
+      break;
+    }
+    case bm::MatchTableType::INDIRECT_WS: {
+      bm::MatchTableIndirectWS::Entry entry;
+      auto error_code = pibmv2::switch_->mt_indirect_ws_get_entry(
+          0, t_name, handle, &entry);
+      if (error_code != bm::MatchErrorCode::SUCCESS)
+        throw bm_exception(error_code);
+      emit_entries(p4info, table_id, &entry, &entry + 1, res);
+      break;
+    }
   }
 }
 
@@ -825,12 +874,12 @@ pi_status_t _pi_table_default_action_reset(pi_session_handle_t session_handle,
 }
 
 pi_status_t _pi_table_default_action_get(pi_session_handle_t session_handle,
-                                         pi_dev_id_t dev_id,
+                                         pi_dev_tgt_t dev_tgt,
                                          pi_p4_id_t table_id,
                                          pi_table_entry_t *table_entry) {
   _BM_UNUSED(session_handle);
 
-  const auto *p4info = pibmv2::get_device_info(dev_id);
+  const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
   assert(p4info != nullptr);
 
   std::string t_name(pi_p4info_table_name_from_id(p4info, table_id));
@@ -853,6 +902,16 @@ pi_status_t _pi_table_default_action_done(pi_session_handle_t session_handle,
     if (action_data) delete[] action_data;
   }
 
+  return PI_STATUS_SUCCESS;
+}
+
+pi_status_t _pi_table_default_action_get_handle(
+    pi_session_handle_t session_handle, pi_dev_tgt_t dev_tgt,
+    pi_p4_id_t table_id, pi_entry_handle_t *entry_handle) {
+  _BM_UNUSED(session_handle);
+  _BM_UNUSED(dev_tgt);
+  _BM_UNUSED(table_id);
+  *entry_handle = pibmv2::get_default_handle();
   return PI_STATUS_SUCCESS;
 }
 
@@ -881,13 +940,14 @@ pi_status_t _pi_table_entry_delete(pi_session_handle_t session_handle,
 // the 2, which may not be ideal. This can be improved later if needed.
 
 pi_status_t _pi_table_entry_delete_wkey(pi_session_handle_t session_handle,
-                                        pi_dev_id_t dev_id, pi_p4_id_t table_id,
+                                        pi_dev_tgt_t dev_tgt,
+                                        pi_p4_id_t table_id,
                                         const pi_match_key_t *match_key) {
   if (match_key->priority > BM_MAX_PRIORITY)
     return PI_STATUS_UNSUPPORTED_ENTRY_PRIORITY;
   try {
-    auto h = get_entry_handle_from_key(dev_id, table_id, match_key);
-    return _pi_table_entry_delete(session_handle, dev_id, table_id, h);
+    auto h = get_entry_handle_from_key(dev_tgt.dev_id, table_id, match_key);
+    return _pi_table_entry_delete(session_handle, dev_tgt.dev_id, table_id, h);
   } catch (const bm_exception &e) {
     return e.get();
   }
@@ -927,14 +987,15 @@ pi_status_t _pi_table_entry_modify(pi_session_handle_t session_handle,
 }
 
 pi_status_t _pi_table_entry_modify_wkey(pi_session_handle_t session_handle,
-                                        pi_dev_id_t dev_id, pi_p4_id_t table_id,
+                                        pi_dev_tgt_t dev_tgt,
+                                        pi_p4_id_t table_id,
                                         const pi_match_key_t *match_key,
                                         const pi_table_entry_t *table_entry) {
   if (match_key->priority > BM_MAX_PRIORITY)
     return PI_STATUS_UNSUPPORTED_ENTRY_PRIORITY;
   try {
-    auto h = get_entry_handle_from_key(dev_id, table_id, match_key);
-    return _pi_table_entry_modify(session_handle, dev_id, table_id, h,
+    auto h = get_entry_handle_from_key(dev_tgt.dev_id, table_id, match_key);
+    return _pi_table_entry_modify(session_handle, dev_tgt.dev_id, table_id, h,
                                   table_entry);
   } catch (const bm_exception &e) {
     return e.get();
@@ -942,12 +1003,12 @@ pi_status_t _pi_table_entry_modify_wkey(pi_session_handle_t session_handle,
 }
 
 pi_status_t _pi_table_entries_fetch(pi_session_handle_t session_handle,
-                                    pi_dev_id_t dev_id,
+                                    pi_dev_tgt_t dev_tgt,
                                     pi_p4_id_t table_id,
                                     pi_table_fetch_res_t *res) {
   _BM_UNUSED(session_handle);
 
-  const auto *p4info = pibmv2::get_device_info(dev_id);
+  const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
   assert(p4info != nullptr);
 
   try {
@@ -959,11 +1020,58 @@ pi_status_t _pi_table_entries_fetch(pi_session_handle_t session_handle,
   return PI_STATUS_SUCCESS;
 }
 
+pi_status_t _pi_table_entries_fetch_one(pi_session_handle_t session_handle,
+                                        pi_dev_id_t dev_id, pi_p4_id_t table_id,
+                                        pi_entry_handle_t entry_handle,
+                                        pi_table_fetch_res_t *res) {
+  _BM_UNUSED(session_handle);
+
+  const auto *p4info = pibmv2::get_device_info(dev_id);
+  assert(p4info != nullptr);
+
+  try {
+    get_entry(p4info, table_id, entry_handle, res);
+  } catch (const bm_exception &e) {
+    return e.get();
+  }
+
+  return PI_STATUS_SUCCESS;
+}
+
+pi_status_t _pi_table_entries_fetch_wkey(pi_session_handle_t session_handle,
+                                         pi_dev_tgt_t dev_tgt,
+                                         pi_p4_id_t table_id,
+                                         const pi_match_key_t *match_key,
+                                         pi_table_fetch_res_t *res) {
+  _BM_UNUSED(session_handle);
+
+  const auto *p4info = pibmv2::get_device_info(dev_tgt.dev_id);
+  assert(p4info != nullptr);
+
+  pi_entry_handle_t entry_handle;
+  try {
+    entry_handle = get_entry_handle_from_key(
+        dev_tgt.dev_id, table_id, match_key);
+  } catch (const bm_exception &e) {
+    // match key does not correspond to any entry
+    res->num_entries = 0;
+    return PI_STATUS_SUCCESS;
+  }
+
+  try {
+    get_entry(p4info, table_id, entry_handle, res);
+  } catch (const bm_exception &e) {
+    return e.get();
+  }
+
+  return PI_STATUS_SUCCESS;
+}
+
 pi_status_t _pi_table_entries_fetch_done(pi_session_handle_t session_handle,
                                          pi_table_fetch_res_t *res) {
   _BM_UNUSED(session_handle);
 
-  delete[] res->entries;
+  if (res->num_entries > 0) delete[] res->entries;
   return PI_STATUS_SUCCESS;
 }
 

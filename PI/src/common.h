@@ -85,6 +85,14 @@ class Buffer {
   std::vector<char> data_{};
 };
 
+// We return a dummy value (0xff..ff) for the default handle. bmv2 currently
+// does not support direct resources (direct counter / direct meter) for default
+// entries so we will return an error if this handle is used to read / write
+// direct resource configurations.
+static inline constexpr pi_entry_handle_t get_default_handle() {
+  return static_cast<pi_entry_handle_t>(-1);
+}
+
 }  // namespace pibmv2
 
 #endif  // SRC_COMMON_H_
