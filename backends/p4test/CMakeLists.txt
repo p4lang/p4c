@@ -84,6 +84,8 @@ set (P4_XFAIL_TESTS
   # appear as the value of the psa_direct_counter table attribute for at most
   # one table."
   testdata/p4_16_samples/psa-counter6.p4
+
+  testdata/p4_16_samples/inline-parser2.p4
   )
 # we invoke p4c with --p4runtime-files even for programs in p4_16_errors. This
 # enables us to use p4_16_errors even for programs which pass compilation but

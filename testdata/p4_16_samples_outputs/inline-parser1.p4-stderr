@@ -1,0 +1,3 @@
+inline-parser1.p4(30): [--Wwarn=uninitialized_use] warning: hdr.data1 may not be completely initialized
+    subparser.apply(pkt, hdr.data1);
+                         ^^^^^^^^^
