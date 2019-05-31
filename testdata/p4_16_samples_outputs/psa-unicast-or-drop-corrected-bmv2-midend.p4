@@ -48,7 +48,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     }
     apply {
         tbl_send_to_port.apply();
-        if (hdr.ethernet.dstAddr == 48w0) 
+        if (hdr.ethernet.dstAddr == 48w0)
             tbl_ingress_drop.apply();
     }
 }
@@ -100,4 +100,3 @@ IngressPipeline<headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty
 EgressPipeline<headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), cEgress(), EgressDeparserImpl()) ep;
 
 PSA_Switch<headers_t, metadata_t, headers_t, metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

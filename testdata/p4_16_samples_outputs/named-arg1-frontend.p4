@@ -29,7 +29,7 @@ control c(out bool b) {
     }
     apply {
         a(bi = 16w3, mb = xv_0);
-        a_2(mb = xv_0, bi = 16w0);
+        a_2(mb_1 = xv_0, bi_1 = 16w0);
         x_1 = xv_0;
         b_0 = x_1 == 16w0;
         b = b_0;

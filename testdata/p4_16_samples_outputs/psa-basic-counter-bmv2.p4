@@ -79,4 +79,3 @@ IngressPipeline(IngressParserImpl(), cIngress(), IngressDeparserImpl()) ip;
 EgressPipeline(EgressParserImpl(), cEgress(), EgressDeparserImpl()) ep;
 
 PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

@@ -26,7 +26,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         tmp_0 = hdr.h1.f1;
         foo(tmp, tmp_0);
         hdr.h1.f1 = tmp;
-        foo_0(x = hdr.h1.f2, y = 8w5);
+        foo_0(x_1 = hdr.h1.f2, y_1 = 8w5);
     }
 }
 
