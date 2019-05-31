@@ -955,12 +955,12 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
             decl, decl->arguments, simpleType->to<IR::IContainer>());
         auto type = typeAndArgs.first;
         auto args = typeAndArgs.second;
-        auto *learn = clone();
-        (void)type->apply(*learn);
         if (type == nullptr || args == nullptr) {
             prune();
             return decl;
         }
+        auto *learn = clone();
+        (void)type->apply(*learn);
         if (args != decl->arguments)
             decl->arguments = args;
         setType(decl, type);
