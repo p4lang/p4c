@@ -206,8 +206,10 @@ TypeVariableSubstitution* TypeInference::unify(const IR::Node* errorPosition,
     return tvs;
 }
 
-const IR::IndexedVector<IR::StructField>*
-TypeInference::canonicalizeFields(const IR::Type_StructLike* type) {
+const IR::Type*
+TypeInference::canonicalizeFields(
+    const IR::Type_StructLike* type,
+    std::function<const IR::Type*(const IR::IndexedVector<IR::StructField>*)> constructor) {
     bool changes = false;
     auto fields = new IR::IndexedVector<IR::StructField>();
     for (auto field : type->fields) {
@@ -221,9 +223,9 @@ TypeInference::canonicalizeFields(const IR::Type_StructLike* type) {
         fields->push_back(newField);
     }
     if (changes)
-        return fields;
+        return constructor(fields);
     else
-        return &type->fields;
+        return type;
 }
 
 const IR::ParameterList* TypeInference::canonicalizeParameters(const IR::ParameterList* params) {
@@ -492,39 +494,22 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         if (changes)
             resultType = new IR::Type_Method(mt->getSourceInfo(), tps, res, pl);
         return resultType;
-    } else if (type->is<IR::Type_Header>()) {
-        auto hdr = type->to<IR::Type_Header>();
-        auto fields = canonicalizeFields(hdr);
-        if (fields == nullptr)
-            return nullptr;
-        const IR::Type* canon;
-        if (fields != &hdr->fields)
-            canon = new IR::Type_Header(hdr->srcInfo, hdr->name, hdr->annotations, *fields);
-        else
-            canon = hdr;
-        return canon;
-    } else if (type->is<IR::Type_Struct>()) {
-        auto str = type->to<IR::Type_Struct>();
-        auto fields = canonicalizeFields(str);
-        if (fields == nullptr)
-            return nullptr;
-        const IR::Type* canon;
-        if (fields != &str->fields)
-            canon = new IR::Type_Struct(str->srcInfo, str->name, str->annotations, *fields);
-        else
-            canon = str;
-        return canon;
-    } else if (type->is<IR::Type_HeaderUnion>()) {
-        auto str = type->to<IR::Type_HeaderUnion>();
-        auto fields = canonicalizeFields(str);
-        if (fields == nullptr)
-            return nullptr;
-        const IR::Type* canon;
-        if (fields != &str->fields)
-            canon = new IR::Type_HeaderUnion(str->srcInfo, str->name, str->annotations, *fields);
-        else
-            canon = str;
-        return canon;
+    } else if (auto hdr = type->to<IR::Type_Header>()) {
+        return canonicalizeFields(hdr, [hdr](const IR::IndexedVector<IR::StructField>* fields) {
+                return new IR::Type_Header(hdr->srcInfo, hdr->name, hdr->annotations, *fields);
+            });
+    } else if (auto str = type->to<IR::Type_Struct>()) {
+        return canonicalizeFields(str, [str](const IR::IndexedVector<IR::StructField>* fields) {
+                return new IR::Type_Struct(str->srcInfo, str->name, str->annotations, *fields);
+            });
+    } else if (auto hu = type->to<IR::Type_HeaderUnion>()) {
+        return canonicalizeFields(hu, [hu](const IR::IndexedVector<IR::StructField>* fields) {
+                return new IR::Type_HeaderUnion(hu->srcInfo, hu->name, hu->annotations, *fields);
+            });
+    } else if (auto su = type->to<IR::Type_UnknownStruct>()) {
+        return canonicalizeFields(su, [su](const IR::IndexedVector<IR::StructField>* fields) {
+                return new IR::Type_UnknownStruct(su->srcInfo, su->name, su->annotations, *fields);
+            });
     } else if (type->is<IR::Type_Specialized>()) {
         auto st = type->to<IR::Type_Specialized>();
         auto baseCanon = canonicalize(st->baseType);
@@ -752,6 +737,19 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
         setType(sourceExpression, destType);
         setCompileTimeConstant(sourceExpression);
     }
+    if (initType->is<IR::Type_UnknownStruct>()) {
+        if (auto ts = destType->to<IR::Type_StructLike>()) {
+            auto si = sourceExpression->to<IR::StructInitializerExpression>();
+            CHECK_NULL(si);
+            bool cst = isCompileTimeConstant(sourceExpression);
+            sourceExpression = new IR::StructInitializerExpression(
+                new IR::Type_Name(ts->name), si->components);
+            setType(sourceExpression, destType);
+            if (cst)
+                setCompileTimeConstant(sourceExpression);
+        }
+    }
+
     return sourceExpression;
 }
 
@@ -1522,6 +1520,53 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
             }
             defined = true;
         } else {
+            auto ls = ltype->to<IR::Type_UnknownStruct>();
+            auto rs = rtype->to<IR::Type_UnknownStruct>();
+            if (ls != nullptr || rs != nullptr) {
+                if (ls != nullptr && rs != nullptr) {
+                    typeError("%1%: cannot compare initializers with unknown types", expression);
+                    return expression;
+                }
+
+                bool lcst = isCompileTimeConstant(expression->left);
+                bool rcst = isCompileTimeConstant(expression->right);
+
+                auto tvs = unify(expression, ltype, rtype);
+                if (tvs == nullptr)
+                    // error already signalled
+                    return expression;
+                if (!tvs->isIdentity()) {
+                    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+                    expression->left = cts.convert(expression->left);
+                    expression->right = cts.convert(expression->right);
+                }
+
+                if (ls != nullptr) {
+                    auto l = expression->left->to<IR::StructInitializerExpression>();
+                    CHECK_NULL(l);  // struct initializers are the only expressions that can
+                                    // have StructUnknown types
+                    BUG_CHECK(rtype->is<IR::Type_StructLike>(), "%1%: expected a struct", rtype);
+                    expression->left = new IR::StructInitializerExpression(
+                        new IR::Type_Name(rtype->to<IR::Type_StructLike>()->name),
+                        l->components);
+                    setType(expression->left, rtype);
+                    if (lcst)
+                        setCompileTimeConstant(expression->left);
+                } else {
+                    auto r = expression->right->to<IR::StructInitializerExpression>();
+                    CHECK_NULL(r);  // struct initializers are the only expressions that can
+                                    // have StructUnknown types
+                    BUG_CHECK(ltype->is<IR::Type_StructLike>(), "%1%: expected a struct", ltype);
+                    expression->right = new IR::StructInitializerExpression(
+                        new IR::Type_Name(ltype->to<IR::Type_StructLike>()->name),
+                        r->components);
+                    setType(expression->right, rtype);
+                    if (rcst)
+                        setCompileTimeConstant(expression->right);
+                }
+                defined = true;
+            }
+
             // comparison between structs and list expressions is allowed only
             // if the expression with tuple type is a list expression
             if ((ltype->is<IR::Type_StructLike>() &&

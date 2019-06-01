@@ -859,6 +859,10 @@ bool ToP4::preorder(const IR::NamedExpression* e) {
 }
 
 bool ToP4::preorder(const IR::StructInitializerExpression* e) {
+    if (e->typeName != nullptr) {
+        visit(e->typeName);
+        builder.append(" ");
+    }
     builder.append("{");
     int prec = expressionPrecedence;
     expressionPrecedence = DBPrint::Prec_Low;
