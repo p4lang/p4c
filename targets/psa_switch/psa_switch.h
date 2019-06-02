@@ -122,7 +122,7 @@ class PsaSwitch : public Switch {
     auto *ex = context->get_extern_instance(counter_name).get();
     if (!ex) return Counter::CounterErrorCode::INVALID_COUNTER_NAME;
     auto *counter = static_cast<PSA_Counter*>(ex);
-    if (index >= counter->size()) 
+    if (index >= counter->size())
       return Counter::CounterErrorCode::INVALID_INDEX;
     counter->get_counter(index).query_counter(bytes, packets);
     return Counter::CounterErrorCode::SUCCESS;
@@ -154,7 +154,7 @@ class PsaSwitch : public Switch {
     return counter->reset_counters();
   }
 
-  // TODO(derek): override RuntimeInterface methods not yet supported 
+  // TODO(derek): override RuntimeInterface methods not yet supported
   //              by psa_switch and log an error msg / return error code
 
  private:
@@ -163,13 +163,13 @@ class PsaSwitch : public Switch {
   static packet_id_t packet_id;
 
   enum PktInstanceType {
-    PKT_INSTANCE_TYPE_NORMAL,
-    PKT_INSTANCE_TYPE_INGRESS_CLONE,
-    PKT_INSTANCE_TYPE_EGRESS_CLONE,
-    PKT_INSTANCE_TYPE_COALESCED,
-    PKT_INSTANCE_TYPE_RECIRC,
-    PKT_INSTANCE_TYPE_REPLICATION,
-    PKT_INSTANCE_TYPE_RESUBMIT,
+    PACKET_PATH_NORMAL,
+    PACKET_PATH_NORMAL_UNICAST,
+    PACKET_PATH_NORMAL_MULTICAST,
+    PACKET_PATH_CLONE_I2E,
+    PACKET_PATH_CLONE_E2E,
+    PACKET_PATH_RESUBMIT,
+    PACKET_PATH_RECIRCULATE,
   };
 
   struct EgressThreadMapper {
@@ -201,11 +201,6 @@ class PsaSwitch : public Switch {
 
   // TODO(antonin): switch to pass by value?
   void enqueue(port_t egress_port, std::unique_ptr<Packet> &&packet);
-
-  void copy_field_list_and_set_type(
-      const std::unique_ptr<Packet> &packet,
-      const std::unique_ptr<Packet> &packet_copy,
-      p4object_id_t field_list_id);
 
   void check_queueing_metadata();
 

@@ -163,7 +163,7 @@ PsaSwitch::receive_(port_t port_num, const char *buffer, int len) {
   phv->reset_metadata();
 
   // TODO use appropriate enum member from JSON
-  phv->get_field("psa_ingress_parser_input_metadata.packet_path").set(PKT_INSTANCE_TYPE_NORMAL);
+  phv->get_field("psa_ingress_parser_input_metadata.packet_path").set(PACKET_PATH_NORMAL);
   phv->get_field("psa_ingress_parser_input_metadata.ingress_port").set(port_num);
 
   // using packet register 0 to store length, this register will be updated for
@@ -287,18 +287,6 @@ PsaSwitch::enqueue(port_t egress_port, std::unique_ptr<Packet> &&packet) {
 #endif
 }
 
-// used for ingress cloning, resubmit
-void
-PsaSwitch::copy_field_list_and_set_type(
-    const std::unique_ptr<Packet> &packet,
-    const std::unique_ptr<Packet> &packet_copy,
-    p4object_id_t field_list_id) {
-  PHV *phv_copy = packet_copy->get_phv();
-  phv_copy->reset_metadata();
-  FieldList *field_list = this->get_field_list(field_list_id);
-  field_list->copy_fields_between_phvs(phv_copy, packet->get_phv());
-}
-
 void
 PsaSwitch::ingress_thread() {
   PHV *phv;
@@ -313,6 +301,17 @@ PsaSwitch::ingress_thread() {
                     ingress_port);
 
     phv = packet->get_phv();
+
+    /* Ingress cloning and resubmitting work on the packet before parsing.
+       `buffer_state` contains the `data_size` field which tracks how many
+       bytes are parsed by the parser ("lifted" into p4 headers). Here, we
+       track the buffer_state prior to parsing so that we can put it back
+       for packets that are cloned or resubmitted, same as in simple_switch.cpp
+
+       TODO */
+
+    const Packet::buffer_state_t packet_in_state = packet->save_buffer_state();
+
     Parser *parser = this->get_parser("ingress_parser");
     parser->parse(packet.get());
 
@@ -336,9 +335,23 @@ PsaSwitch::ingress_thread() {
     packet->reset_exit();
 
     // prioritize dropping if marked as such - do not move below other checks
-    Field &f_drop = phv->get_field("psa_ingress_output_metadata.drop");
+    const auto &f_drop = phv->get_field("psa_ingress_output_metadata.drop");
     if (f_drop.get_int()) {
       BMLOG_DEBUG_PKT(*packet, "Dropping packet at the end of ingress");
+      continue;
+    }
+
+    // resubmit - these packets get immediately resub'd to ingress, and skip
+    //            deparsing, do not move below multicast or deparse
+    const auto &f_resubmit = phv->get_field("psa_ingress_output_metadata.resubmit");
+    if (f_resubmit.get_int()) {
+      BMLOG_DEBUG_PKT(*packet, "Resubmitting packet");
+
+      packet->restore_buffer_state(packet_in_state);
+      phv->reset_metadata();
+      phv->get_field("psa_ingress_parser_input_metadata.packet_path").set(5);
+
+      input_buffer.push_front(std::move(packet));
       continue;
     }
 
@@ -347,7 +360,7 @@ PsaSwitch::ingress_thread() {
 
     // handling multicast
     unsigned int mgid = 0u;
-    Field &f_mgid = phv->get_field("psa_ingress_output_metadata.multicast_group");
+    const auto &f_mgid = phv->get_field("psa_ingress_output_metadata.multicast_group");
     mgid = f_mgid.get_uint();
 
     if(mgid != 0){
@@ -366,7 +379,7 @@ PsaSwitch::ingress_thread() {
       continue;
     }
 
-    Field &f_egress_port = phv->get_field("psa_ingress_output_metadata.egress_port");
+    const auto &f_egress_port = phv->get_field("psa_ingress_output_metadata.egress_port");
     port_t egress_port = f_egress_port.get_uint();
     BMLOG_DEBUG_PKT(*packet, "Egress port is {}", egress_port);
 
@@ -432,11 +445,11 @@ PsaSwitch::egress_thread(size_t worker_id) {
       phv->get_field("psa_ingress_parser_input_metadata.ingress_port")
         .set(PSA_PORT_RECIRCULATE);
       phv->get_field("psa_ingress_parser_input_metadata.packet_path")
-        .set(PKT_INSTANCE_TYPE_RECIRC);
+        .set(PACKET_PATH_RECIRCULATE);
       phv->get_field("psa_ingress_input_metadata.ingress_port")
         .set(PSA_PORT_RECIRCULATE);
       phv->get_field("psa_ingress_input_metadata.packet_path")
-        .set(PKT_INSTANCE_TYPE_RECIRC);
+        .set(PACKET_PATH_RECIRCULATE);
       phv->get_field("psa_ingress_input_metadata.ingress_timestamp")
         .set(get_ts().count());
       input_buffer.push_front(std::move(packet));
