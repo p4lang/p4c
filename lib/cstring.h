@@ -169,9 +169,16 @@ class cstring {
     bool isNull() const { return str == nullptr; }
     bool isNullOrEmpty() const { return str == nullptr ? true : str[0] == 0; }
 
+    // iterate over characters
+    const char *begin() const { return str; }
+    const char *end() const { return str ? str + strlen(str) : str; }
+
     // Search for characters. Linear time.
     const char *find(int c) const { return str ? strchr(str, c) : nullptr; }
     const char *findlast(int c) const { return str ? strrchr(str, c) : str; }
+
+    // Search for substring
+    const char *find(const char *s) const { return str ? strstr(str, s) : nullptr; }
 
     // Equality tests with other cstrings. Constant time.
     bool operator==(cstring a) const { return str == a.str; }
@@ -219,6 +226,14 @@ class cstring {
     cstring replace(char find, char replace) const;
     cstring replace(cstring find, cstring replace) const;
     cstring exceptLast(size_t count) { return substr(0, size() - count); }
+
+    // trim leading and trailing whitespace (or other)
+    cstring trim(const char *ws = " \t\r\n") const {
+        if (!str) return *this;
+        const char *start = str + strspn(str, ws);
+        size_t len = strlen(start);
+        while (len > 0 && strchr(ws, start[len-1])) --len;
+        return cstring(start, len); }
 
     // Useful singletons.
     static cstring newline;

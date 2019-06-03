@@ -19,7 +19,7 @@ import sys
 # p4c is supposed to work in two environments:
 #  - installed mode: in ${prefix}/bin, with artifacts in ${datadir}/p4c/*
 #  - developer mode: in the build dir with artifacts rooted also in the build dir
-install_dir = os.path.abspath(os.path.dirname(sys.argv[0]))
+install_dir = os.path.abspath(os.path.dirname(os.path.realpath(sys.argv[0])))
 if not os.path.exists(os.path.join(install_dir, 'p4c_src')):
     # this is the installed configuration
     build_type = "INSTALLED"
