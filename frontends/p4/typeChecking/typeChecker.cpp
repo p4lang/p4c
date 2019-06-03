@@ -1814,23 +1814,32 @@ const IR::Node* TypeInference::postorder(IR::StructInitializerExpression* expres
         components->push_back(new IR::StructField(c->name, type));
     }
 
-    const IR::Type* structType;
+    const IR::Type* structType = new IR::Type_UnknownStruct(
+        expression->srcInfo, "unknown struct", *components);
+    structType = canonicalize(structType);
+
+    const IR::Expression* result = expression;
     if (expression->typeName != nullptr) {
-        structType = getType(expression->typeName);
-    } else {
-        structType = new IR::Type_UnknownStruct(
-            expression->srcInfo, "unknown", *components);
+        // We know the exact type of the initializer
+        auto desired = getTypeType(expression->typeName);
+        if (desired == nullptr)
+            return expression;
+        auto tvs = unify(expression, desired, structType);
+        if (tvs == nullptr)
+            return expression;
+        if (!tvs->isIdentity()) {
+            ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+            result = cts.convert(expression);
+        }
+        structType = desired;
     }
-    auto type = canonicalize(structType);
-    if (type == nullptr)
-        return expression;
-    setType(getOriginal(), type);
-    setType(expression, type);
+    setType(getOriginal(), structType);
+    setType(expression, structType);
     if (constant) {
         setCompileTimeConstant(expression);
         setCompileTimeConstant(getOriginal<IR::Expression>());
     }
-    return expression;
+    return result;
 }
 
 const IR::Node* TypeInference::postorder(IR::ArrayIndex* expression) {
