@@ -55,6 +55,7 @@ limitations under the License.
 #include "midend/midEndLast.h"
 #include "midend/fillEnumMap.h"
 #include "midend/removeAssertAssume.h"
+#include "backends/bmv2/psa_switch/options.h"
 
 namespace BMV2 {
 
@@ -85,11 +86,12 @@ class PsaEnumOn32Bits : public P4::ChooseEnumRepresentation {
     explicit PsaEnumOn32Bits(cstring filename) : filename(filename) { }
 };
 
-PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options) : MidEnd(options) {
+PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options, std::ostream* outStream)
+                                : MidEnd(options) {
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new PsaEnumOn32Bits("psa.p4"));
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
-    if (BMV2::BMV2Context::get().options().loadIRFromJson == false) {
-        addPasses({
+    if (BMV2::PsaSwitchContext::get().options().loadIRFromJson == false) {
+        std::initializer_list<Visitor *> midendPasses = {
             options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
             new P4::EliminateNewtype(&refMap, &typeMap),
             new P4::EliminateSerEnums(&refMap, &typeMap),
@@ -137,7 +139,19 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options) : MidEnd(options) {
             new P4::MidEndLast(),
             evaluator,
             new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
-        });
+        };
+        if (options.listMidendPasses) {
+            for (auto it : midendPasses) {
+                if (it != nullptr) {
+                    *outStream << it->name() <<'\n';
+                }
+            }
+            return;
+        }
+        addPasses(midendPasses);
+        if (options.excludeMidendPasses) {
+            removePasses(options.passesToExcludeMidend);
+        }
     } else {
         auto fillEnumMap = new P4::FillEnumMap(new PsaEnumOn32Bits("psa.p4"), &typeMap);
         addPasses({

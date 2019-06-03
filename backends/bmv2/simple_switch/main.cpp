@@ -32,14 +32,15 @@ limitations under the License.
 #include "backends/bmv2/simple_switch/midend.h"
 #include "backends/bmv2/simple_switch/simpleSwitch.h"
 #include "backends/bmv2/simple_switch/version.h"
+#include "backends/bmv2/simple_switch/options.h"
 #include "ir/json_loader.h"
 #include "fstream"
 
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
 
-    AutoCompileContext autoBMV2Context(new BMV2::BMV2Context);
-    auto& options = BMV2::BMV2Context::get().options();
+    AutoCompileContext autoBMV2Context(new BMV2::SimpleSwitchContext);
+    auto& options = BMV2::SimpleSwitchContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = BMV2_SIMPLESWITCH_VERSION_STRING;
 
@@ -116,6 +117,8 @@ int main(int argc, char *const argv[]) {
     auto backend = new BMV2::SimpleSwitchBackend(options, &midEnd.refMap,
                                                  &midEnd.typeMap, &midEnd.enumMap);
 
+    // Necessary because BMV2Context is expected at the top of stack in further processing
+    AutoCompileContext autoContext(new BMV2::BMV2Context(BMV2::SimpleSwitchContext::get()));
     try {
         backend->convert(toplevel);
     } catch (const Util::P4CExceptionBase &bug) {

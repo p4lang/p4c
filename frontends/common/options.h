@@ -73,6 +73,15 @@ class CompilerOptions : public Util::Options {
     cstring prettyPrintFile = nullptr;
     // Compiler version.
     cstring compilerVersion;
+    // if true skip frontend passes witch names are contained in passesToExcludeFrontend vector
+    bool excludeFrontendPasses = false;
+    bool listFrontendPasses = false;
+
+    // if true skip midend passes witch names are contained in passesToExcludeMidend vector
+    bool excludeMidendPasses = false;
+    bool listMidendPasses = false;
+    // if true skip backend passes witch names are contained in passesToExcludeBackend vector
+    bool excludeBackendPasses = false;
 
     // Dump a JSON representation of the IR in the file
     cstring dumpJsonFile = nullptr;
@@ -106,6 +115,15 @@ class CompilerOptions : public Util::Options {
 
     // if this flag is true, compile program in non-debug mode
     bool ndebug = false;
+
+    // strings matched against pass names that should be excluded from Frontend passes
+    std::vector<cstring> passesToExcludeFrontend;
+
+    // strings matched against pass names that should be excluded from Midend passes
+    std::vector<cstring> passesToExcludeMidend;
+
+    // strings matched against pass names that should be excluded from Backend passes
+    std::vector<cstring> passesToExcludeBackend;
 
     // Expect that the only remaining argument is the input file.
     void setInputFile();
@@ -176,6 +194,13 @@ class P4CContextWithOptions final : public P4CContext {
     /// P4CContextWithOptions<OptionsType>.
     static P4CContextWithOptions& get() {
         return CompileContextStack::top<P4CContextWithOptions>();
+    }
+
+    P4CContextWithOptions() {}
+
+    template <typename OptionsDerivedType>
+    P4CContextWithOptions(P4CContextWithOptions<OptionsDerivedType>& context) {
+        optionsInstance = context.options();
     }
 
     /// @return the compiler options for this compilation context.

@@ -27,6 +27,7 @@ set (BMV2_SIMPLE_SWITCH_SRCS
     simple_switch/midend.h
     simple_switch/simpleSwitch.cpp
     simple_switch/simpleSwitch.h
+    simple_switch/options.h
     )
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_SIMPLE_SWITCH_SRCS}")
 
@@ -36,6 +37,7 @@ set (BMV2_PSA_SWITCH_SRCS
     psa_switch/midend.h
     psa_switch/psaSwitch.cpp
     psa_switch/psaSwitch.h
+    psa_switch/options.h
     )
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_PSA_SWITCH_SRCS}")
 

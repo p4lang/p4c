@@ -27,6 +27,7 @@ limitations under the License.
 #include "lib/path.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "ir/json_generator.h"
+#include "frontends/p4/frontend.h"
 
 const char* p4includePath = CONFIG_PKGDATADIR "/p4include";
 const char* p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
@@ -205,6 +206,35 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("--ndebug", nullptr,
                    [this](const char*) { ndebug = true; return true; },
                   "Compile program in non-debug mode.\n");
+    registerOption("--excludeFrontendPasses", "pass1[,pass2]",
+                   [this](const char* arg) {
+                      excludeFrontendPasses = true;
+                      auto copy = strdup(arg);
+                      while (auto pass = strsep(&copy, ","))
+                          passesToExcludeFrontend.push_back(pass);
+                      return true;
+                   },
+                   "Exclude passes from frontend passes whose name is equal\n"
+                   "to one of `passX' strings.\n");
+    registerOption("--excludeMidendPasses", "pass1[,pass2]",
+                   [this](const char* arg) {
+                      excludeMidendPasses = true;
+                      auto copy = strdup(arg);
+                      while (auto pass = strsep(&copy, ","))
+                          passesToExcludeMidend.push_back(pass);
+                      return true;
+                   },
+                   "Exclude passes from midend passes whose name is equal\n"
+                   "to one of `passX' strings.\n");
+    registerOption("--listFrontendPasses", nullptr,
+                   [this](const char*) {
+                      listFrontendPasses = true;
+                      P4::FrontEnd frontend;
+                      frontend.run(*this, nullptr, false, outStream);
+                      exit(0);
+                      return false;
+                   },
+                   "List exact names of all frontend passes\n");
 }
 
 void CompilerOptions::setInputFile() {

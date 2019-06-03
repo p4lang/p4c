@@ -56,14 +56,17 @@ limitations under the License.
 #include "midend/midEndLast.h"
 #include "midend/fillEnumMap.h"
 #include "midend/removeAssertAssume.h"
+#include "backends/bmv2/simple_switch/options.h"
+
 
 namespace BMV2 {
 
-SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options) : MidEnd(options) {
+SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options, std::ostream* outStream)
+: MidEnd(options) {
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
-    if (BMV2::BMV2Context::get().options().loadIRFromJson == false) {
+    if (BMV2::SimpleSwitchContext::get().options().loadIRFromJson == false) {
         auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits("v1model.p4"));
-        addPasses({
+        std::initializer_list<Visitor *> midendPasses = {
             options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
             new P4::CheckTableSize(),
             new P4::EliminateNewtype(&refMap, &typeMap),
@@ -114,12 +117,23 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options) : MidEnd(option
             // p4c-bm removed unused action parameters. To produce a compatible
             // control plane API, we remove them as well for P4-14 programs.
             isv1 ? new P4::RemoveUnusedActionParameters(&refMap) : nullptr,
-
             new P4::TypeChecking(&refMap, &typeMap),
             new P4::MidEndLast(),
             evaluator,
             new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
-        });
+        };
+        if (options.listMidendPasses) {
+            for (auto it : midendPasses) {
+                if (it != nullptr) {
+                    *outStream << it->name() <<'\n';
+                }
+            }
+            return;
+        }
+        addPasses(midendPasses);
+        if (options.excludeMidendPasses) {
+            removePasses(options.passesToExcludeMidend);
+        }
     } else {
         auto fillEnumMap = new P4::FillEnumMap(new EnumOn32Bits("v1model.p4"), &typeMap);
         addPasses({
