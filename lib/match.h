@@ -46,6 +46,7 @@ struct match_t {
         word1 |= mask; }
     match_t(int size, uintmax_t val, uintmax_t mask) : word0(~val&mask), word1(val&mask)
         { setwidth(size); }
+    static match_t dont_care(int size) { return match_t(size, 0, 0); }
 };
 
 std::ostream &operator <<(std::ostream &, match_t);

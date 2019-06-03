@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <assert.h>
 #include "match.h"
 
 static int chkmask(const match_t &m, int maskbits) {
@@ -29,6 +28,10 @@ static int chkmask(const match_t &m, int maskbits) {
 }
 
 std::ostream &operator<<(std::ostream &out, match_t m) {
+    if (!m) {
+        out << "*";
+        return out;
+    }
     int shift, bits;
     if ((shift = chkmask(m, (bits = 4))) >= 0)
         out << "0x";
@@ -49,7 +52,7 @@ std::ostream &operator<<(std::ostream &out, match_t m) {
 
 bool operator>>(const char *p, match_t &m) {
     if (!p) return false;
-    match_t rv(0, 0);
+    match_t rv;
     unsigned base = 10;
     if (*p == '0') {
         switch (p[1]) {
