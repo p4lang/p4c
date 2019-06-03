@@ -27,7 +27,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h.c = (bit<8>)(16w0 ++ h.h.a[15:8]);
     }
     @name("ingress.case3") action case3() {
-        h.h.c = (bit<8>)((int<32>)(int<16>)h.h.a)[14:2][10:3];
+        h.h.c = ((int<32>)(int<16>)h.h.a)[14:2][10:3];
     }
     @name("ingress.t") table t_0 {
         actions = {

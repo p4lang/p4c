@@ -2353,7 +2353,7 @@ const IR::Node* TypeInference::postorder(IR::Slice* expression) {
         return expression;
     }
 
-    const IR::Type* result = IR::Type_Bits::get(bst->srcInfo, m - l + 1, bst->isSigned);
+    const IR::Type* result = IR::Type_Bits::get(bst->srcInfo, m - l + 1, false);
     result = canonicalize(result);
     if (result == nullptr)
         return expression;
