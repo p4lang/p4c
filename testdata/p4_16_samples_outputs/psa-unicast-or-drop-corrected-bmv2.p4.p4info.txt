@@ -1,0 +1,17 @@
+pkg_info {
+  arch: "psa"
+}
+actions {
+  preamble {
+    id: 16833049
+    name: "send_to_port"
+    alias: "send_to_port"
+  }
+}
+actions {
+  preamble {
+    id: 16829615
+    name: "ingress_drop"
+    alias: "ingress_drop"
+  }
+}

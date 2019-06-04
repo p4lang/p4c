@@ -1,0 +1,42 @@
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 33578158
+    name: "cIngress.tbl"
+    alias: "tbl"
+  }
+  action_refs {
+    id: 16801940
+  }
+  size: 1024
+  idle_timeout_behavior: NOTIFY_CONTROL
+}
+actions {
+  preamble {
+    id: 16833049
+    name: "send_to_port"
+    alias: "send_to_port"
+  }
+}
+actions {
+  preamble {
+    id: 16801940
+    name: "cIngress.execute"
+    alias: "execute"
+  }
+}
+counters {
+  preamble {
+    id: 301992253
+    name: "cIngress.counter"
+    alias: "counter"
+  }
+  spec {
+    unit: PACKETS
+  }
+  size: 1024
+}
+type_info {
+}
