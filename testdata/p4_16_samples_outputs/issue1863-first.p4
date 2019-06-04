@@ -6,7 +6,7 @@ struct S {
 control c(out bit<1> b) {
     apply {
         S s = { 1w0, 1w1 };
-        s = {s.b,s.a};
+        s = S {a = s.b,b = s.a};
         b = s.a;
     }
 }

@@ -200,7 +200,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".nop") action nop() {
     }
     @name(".generate_learn_notify") action generate_learn_notify() {
-        digest<mac_learn_digest>(32w1024, {meta._ingress_metadata_vlan_id37,hdr.eth.srcAddr,standard_metadata.ingress_port,meta._ingress_metadata_learning33});
+        digest<mac_learn_digest>(32w1024, mac_learn_digest {vlan_id = meta._ingress_metadata_vlan_id37,srcAddr = hdr.eth.srcAddr,ingress_port = standard_metadata.ingress_port,learning = meta._ingress_metadata_learning33});
     }
     @name(".set_dmac") action set_dmac(bit<48> dst_mac_address, bit<9> port_id) {
         hdr.eth.dstAddr = dst_mac_address;

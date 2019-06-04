@@ -409,12 +409,10 @@ class ListExpression : Expression {
 /// IR representation of an initializer for a struct.
 /// Currently it does not have a direct representation as P4 source.
 class StructInitializerExpression : Expression {
-    /// Name of the struct type that is being intialized.
-    /// May only be known after type checking; so it can be empty.
-    ID name;
+    /// The struct or header type that is being intialized.
+    /// May only be known after type checking; so it can be nullptr.
+    NullOK optional Type_Name typeName;
     inline IndexedVector<NamedExpression> components;
-    /// If true this represents a header.
-    bool isHeader;
     validate { components.check_null(); }
     size_t size() const { return components.size(); }
 }

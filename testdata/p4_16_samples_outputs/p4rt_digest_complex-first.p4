@@ -50,7 +50,7 @@ struct digest_t {
 control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout headers hdr, in EMPTY e, in psa_ingress_output_metadata_t f) {
     Digest<digest_t>() digest;
     apply {
-        digest.pack({hdr.h,f.egress_port});
+        digest.pack(digest_t {h = hdr.h,port = f.egress_port});
     }
 }
 

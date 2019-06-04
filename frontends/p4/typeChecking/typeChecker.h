@@ -90,11 +90,6 @@ class TypeInference : public Transform {
     bool isCompileTimeConstant(const IR::Expression* expression) const
     { return typeMap->isCompileTimeConstant(expression); }
 
-    template<typename... T>
-    void typeError(const char* format, T... args) const {
-        ::error(ErrorType::ERR_TYPE_ERROR, format, args...);
-    }
-
     // This is needed because sometimes we invoke visitors recursively on subtrees explicitly.
     // (visitDagOnce cannot take care of this).
     bool done() const;
@@ -123,8 +118,9 @@ class TypeInference : public Transform {
      *  Made virtual to enable private midend passes to extend standard IR with custom IR classes.
      */
     virtual const IR::Type* canonicalize(const IR::Type* type);
-    virtual const IR::IndexedVector<IR::StructField>*
-        canonicalizeFields(const IR::Type_StructLike* type);
+    const IR::Type* canonicalizeFields(
+        const IR::Type_StructLike* type,
+        std::function<const IR::Type*(const IR::IndexedVector<IR::StructField>*)> constructor);
     virtual const IR::ParameterList* canonicalizeParameters(const IR::ParameterList* params);
 
     // various helpers
@@ -173,6 +169,10 @@ class TypeInference : public Transform {
     using Transform::postorder;
     using Transform::preorder;
 
+    template<typename... T>
+    static void typeError(const char* format, T... args) {
+        ::error(ErrorType::ERR_TYPE_ERROR, format, args...);
+    }
     static const IR::Type* specialize(const IR::IMayBeGenericType* type,
                                       const IR::Vector<IR::Type>* arguments);
     const IR::Node* pruneIfDone(const IR::Node* node)

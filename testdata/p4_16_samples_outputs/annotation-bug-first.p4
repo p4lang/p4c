@@ -21,7 +21,7 @@ extern bit<16> get<T>(in T data);
 control cc() {
     headers hdr;
     apply {
-        get<headers>({hdr.ipv4_option_timestamp});
+        get<headers>(headers {ipv4_option_timestamp = hdr.ipv4_option_timestamp});
     }
 }
 

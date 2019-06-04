@@ -35,8 +35,9 @@ convert(const IR::Expression* expression, const IR::Type* type) {
                 si->push_back(ne);
                 index++;
             }
+            auto type = st->getP4Type()->to<IR::Type_Name>();
             auto result = new IR::StructInitializerExpression(
-                expression->srcInfo, st->name, *si, st->is<IR::Type_Header>());
+                expression->srcInfo, type, type, *si);
             return result;
         } else if (auto sli = expression->to<IR::StructInitializerExpression>()) {
             for (auto f : st->fields) {
@@ -49,8 +50,9 @@ convert(const IR::Expression* expression, const IR::Type* type) {
                 si->push_back(ne);
             }
             if (modified) {
+                auto type = st->getP4Type()->to<IR::Type_Name>();
                 auto result = new IR::StructInitializerExpression(
-                    expression->srcInfo, st->name, *si, st->is<IR::Type_Header>());
+                    expression->srcInfo, type, type, *si);
                 return result;
             }
         }

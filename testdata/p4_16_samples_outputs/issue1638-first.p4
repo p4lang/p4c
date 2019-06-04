@@ -37,7 +37,7 @@ control MyC2(in meta_t meta={ 0, 0, 0 }) {
 control MyC(inout hdr_t hdr, inout meta_t meta, in intrinsic_metadata_t intr_md) {
     MyC2() c2;
     apply {
-        c2.apply(meta = {8w0,8w0,8w0});
+        c2.apply(meta = meta_t {f0 = 8w0,f1 = 8w0,f2 = 8w0});
     }
 }
 

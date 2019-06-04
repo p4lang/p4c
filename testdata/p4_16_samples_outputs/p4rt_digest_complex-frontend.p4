@@ -51,7 +51,7 @@ control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout hea
     digest_t tmp;
     @name("MyID.digest") Digest<digest_t>() digest_0;
     apply {
-        tmp = {hdr.h,f.egress_port};
+        tmp = digest_t {h = hdr.h,port = f.egress_port};
         digest_0.pack(tmp);
     }
 }

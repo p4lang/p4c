@@ -5531,7 +5531,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".nop") action _nop_106() {
     }
     @name(".generate_learn_notify") action _generate_learn_notify_0() {
-        digest<mac_learn_digest>(32w1024, {meta.ingress_metadata.bd,meta.l2_metadata.lkp_mac_sa,meta.ingress_metadata.ifindex});
+        digest<mac_learn_digest>(32w1024, mac_learn_digest {bd = meta.ingress_metadata.bd,lkp_mac_sa = meta.l2_metadata.lkp_mac_sa,ifindex = meta.ingress_metadata.ifindex});
     }
     @name(".learn_notify") table _learn_notify {
         actions = {
