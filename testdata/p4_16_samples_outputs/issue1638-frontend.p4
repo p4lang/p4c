@@ -24,7 +24,7 @@ control MyC(inout hdr_t hdr, inout meta_t meta, in intrinsic_metadata_t intr_md)
     }
     @name("MyC.c2.a") table c2_a {
         key = {
-            {8w0,8w0,8w0}.f0: exact @name("meta.f0") ;
+            meta_t {f0 = 8w0,f1 = 8w0,f2 = 8w0}.f0: exact @name("meta.f0") ;
         }
         actions = {
             NoAction_0();

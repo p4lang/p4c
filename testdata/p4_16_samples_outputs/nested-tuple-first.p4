@@ -18,7 +18,7 @@ control c(inout bit<1> r) {
     apply {
         S s = { { { 1w0 }, { 1w1 } }, { 1w0 }, 1w1 };
         f<tuple<T, T>>(s.f1);
-        f<tuple_0>({{1w0},{1w1}});
+        f<tuple_0>(tuple_0 {field = T {f = 1w0},field_0 = T {f = 1w1}});
         r = s.f2.f & s.z;
     }
 }

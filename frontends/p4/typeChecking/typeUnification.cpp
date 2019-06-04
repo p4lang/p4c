@@ -171,8 +171,9 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
             if (dit->defaultValue != nullptr)
                 continue;
             if (reportErrors)
-                TypeInference::typeError("%1%: Cannot unify functions with different number of arguments: "
-                                         "%2% to %3%", errorPosition, src, dest);
+                TypeInference::typeError(
+                    "%1%: Cannot unify functions with different number of arguments: "
+                    "%2% to %3%", errorPosition, src, dest);
             return false; }
         if ((*sit)->direction != dit->direction) {
             if (reportErrors)
@@ -403,8 +404,9 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         auto sstack = src->to<IR::Type_Stack>();
         if (dstack->getSize() != sstack->getSize()) {
             if (reportErrors)
-                TypeInference::typeError("%1%: cannot unify stacks with different sized %2% and %3%",
-                                         errorPosition, dstack, sstack);
+                TypeInference::typeError(
+                    "%1%: cannot unify stacks with different sized %2% and %3%",
+                    errorPosition, dstack, sstack);
             return false;
         }
         constraints->addEqualityConstraint(dstack->elementType, sstack->elementType);

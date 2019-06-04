@@ -16,7 +16,7 @@ control test(out bool zout) {
         tuple<bit<32>, bit<32>> p = { 32w4, 32w5 };
         S q = { 32w2, 32w3 };
         zout = p == { 32w4, 32w5 };
-        zout = zout && q == {32w2,32w3};
+        zout = zout && q == S {l = 32w2,r = 32w3};
     }
 }
 

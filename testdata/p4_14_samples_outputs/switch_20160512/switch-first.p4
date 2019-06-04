@@ -5727,7 +5727,7 @@ control process_mac_learning(inout headers hdr, inout metadata meta, inout stand
     @name(".nop") action nop() {
     }
     @name(".generate_learn_notify") action generate_learn_notify() {
-        digest<mac_learn_digest>(32w1024, {meta.ingress_metadata.bd,meta.l2_metadata.lkp_mac_sa,meta.ingress_metadata.ifindex});
+        digest<mac_learn_digest>(32w1024, mac_learn_digest {bd = meta.ingress_metadata.bd,lkp_mac_sa = meta.l2_metadata.lkp_mac_sa,ifindex = meta.ingress_metadata.ifindex});
     }
     @name(".learn_notify") table learn_notify {
         actions = {

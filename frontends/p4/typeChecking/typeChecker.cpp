@@ -743,7 +743,7 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
             CHECK_NULL(si);
             bool cst = isCompileTimeConstant(sourceExpression);
             sourceExpression = new IR::StructInitializerExpression(
-                new IR::Type_Name(ts->name), si->components);
+                nullptr, new IR::Type_Name(ts->name), si->components);
             setType(sourceExpression, destType);
             if (cst)
                 setCompileTimeConstant(sourceExpression);
@@ -1547,6 +1547,7 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
                                     // have StructUnknown types
                     BUG_CHECK(rtype->is<IR::Type_StructLike>(), "%1%: expected a struct", rtype);
                     expression->left = new IR::StructInitializerExpression(
+                        expression->left->srcInfo, nullptr,
                         new IR::Type_Name(rtype->to<IR::Type_StructLike>()->name),
                         l->components);
                     setType(expression->left, rtype);
@@ -1558,6 +1559,7 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
                                     // have StructUnknown types
                     BUG_CHECK(ltype->is<IR::Type_StructLike>(), "%1%: expected a struct", ltype);
                     expression->right = new IR::StructInitializerExpression(
+                        expression->right->srcInfo, nullptr,
                         new IR::Type_Name(ltype->to<IR::Type_StructLike>()->name),
                         r->components);
                     setType(expression->right, rtype);
