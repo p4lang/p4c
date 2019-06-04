@@ -151,6 +151,7 @@ void Visitor::end_apply() {}
 void Visitor::end_apply(const IR::Node*) {}
 
 static indent_t profile_indent;
+static uint64_t first_start = 0;
 Visitor::profile_t::profile_t(Visitor &v_) : v(v_) {
     struct timespec ts;
 #ifdef CLOCK_MONOTONIC
@@ -161,6 +162,8 @@ Visitor::profile_t::profile_t(Visitor &v_) : v(v_) {
 #endif
     start = ts.tv_sec*1000000000UL + ts.tv_nsec + 1;
     assert(start);
+    LOG3(profile_indent << v.name() << " statrting at +" <<
+         (first_start ? start - first_start : (first_start = start, 0UL))/1000000.0 << " msec");
     ++profile_indent;
 }
 Visitor::profile_t::profile_t(profile_t &&a) : v(a.v), start(a.start) {
