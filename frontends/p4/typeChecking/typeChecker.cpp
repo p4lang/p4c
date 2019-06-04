@@ -742,8 +742,9 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
             auto si = sourceExpression->to<IR::StructInitializerExpression>();
             CHECK_NULL(si);
             bool cst = isCompileTimeConstant(sourceExpression);
+            auto type = new IR::Type_Name(ts->name);
             sourceExpression = new IR::StructInitializerExpression(
-                nullptr, new IR::Type_Name(ts->name), si->components);
+                type, type, si->components);
             setType(sourceExpression, destType);
             if (cst)
                 setCompileTimeConstant(sourceExpression);
@@ -1546,10 +1547,9 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
                     CHECK_NULL(l);  // struct initializers are the only expressions that can
                                     // have StructUnknown types
                     BUG_CHECK(rtype->is<IR::Type_StructLike>(), "%1%: expected a struct", rtype);
+                    auto type = new IR::Type_Name(rtype->to<IR::Type_StructLike>()->name);
                     expression->left = new IR::StructInitializerExpression(
-                        expression->left->srcInfo, nullptr,
-                        new IR::Type_Name(rtype->to<IR::Type_StructLike>()->name),
-                        l->components);
+                        expression->left->srcInfo, type, type, l->components);
                     setType(expression->left, rtype);
                     if (lcst)
                         setCompileTimeConstant(expression->left);
@@ -1558,10 +1558,9 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
                     CHECK_NULL(r);  // struct initializers are the only expressions that can
                                     // have StructUnknown types
                     BUG_CHECK(ltype->is<IR::Type_StructLike>(), "%1%: expected a struct", ltype);
+                    auto type = new IR::Type_Name(ltype->to<IR::Type_StructLike>()->name);
                     expression->right = new IR::StructInitializerExpression(
-                        expression->right->srcInfo, nullptr,
-                        new IR::Type_Name(ltype->to<IR::Type_StructLike>()->name),
-                        r->components);
+                        expression->right->srcInfo, type, type, r->components);
                     setType(expression->right, rtype);
                     if (rcst)
                         setCompileTimeConstant(expression->right);
