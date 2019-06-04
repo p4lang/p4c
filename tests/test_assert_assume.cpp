@@ -23,7 +23,7 @@
 
 using namespace bm;
 
-class AssertAssume_DeathTest : public ::testing::Test {
+class AssertAssumeTest : public ::testing::TestWithParam<const char *> {
  protected:
   PHVFactory phv_factory;
 
@@ -33,7 +33,7 @@ class AssertAssume_DeathTest : public ::testing::Test {
   std::unique_ptr<PHVSourceIface> phv_source{nullptr};
   std::unique_ptr<Packet> pkt{nullptr};
 
-  AssertAssume_DeathTest()
+  AssertAssumeTest()
       : testActionFn("test_primitive", 0, 1),
         testActionFnEntry(&testActionFn),
         phv_source(PHVSourceIface::make_phv_source()) { }
@@ -44,38 +44,44 @@ class AssertAssume_DeathTest : public ::testing::Test {
         Packet::make_new(phv_source.get())));
   }
 
-  virtual void TearDown() { }
-
-  ArithExpression* build_expression(bool value) {
+  ArithExpression *build_expression(bool value) {
     ArithExpression* condition = new ArithExpression();
     condition->push_back_load_bool(value);
     condition->push_back_op(ExprOpcode::BOOL_TO_DATA);
     condition->build();
     return condition;
   }
-
-  void verify_test(bool isAssert, bool withError) {
-    std::unique_ptr<ActionPrimitive_> primitive;
-    if (isAssert) {
-      primitive = ActionOpcodesMap::get_instance()->get_primitive("assert");
-    } else {
-      primitive = ActionOpcodesMap::get_instance()->get_primitive("assume");
-    }
-    ASSERT_NE(nullptr, primitive);
-
-    testActionFn.push_back_primitive(primitive.get());
-    auto expr = build_expression(!withError);
-    std::unique_ptr<ArithExpression> condition(expr);
-    testActionFn.parameter_push_back_expression(std::move(condition));
-
-    EXPECT_DEATH(testActionFnEntry(pkt.get()), "");
-  }
 };
 
-TEST_F(AssertAssume_DeathTest, AssumeBoolConstError) {
-  verify_test(false, true);
+TEST_P(AssertAssumeTest, ConditionTrue) {
+  auto primitive = ActionOpcodesMap::get_instance()->get_primitive(GetParam());
+  ASSERT_NE(nullptr, primitive);
+
+  testActionFn.push_back_primitive(primitive.get());
+  auto expr = build_expression(true);
+  std::unique_ptr<ArithExpression> condition(expr);
+  testActionFn.parameter_push_back_expression(std::move(condition));
+
+  testActionFnEntry(pkt.get());
 }
 
-TEST_F(AssertAssume_DeathTest, AssertBoolConstError) {
-  verify_test(true, true);
+using AssertAssumeDeathTest = AssertAssumeTest;
+
+TEST_P(AssertAssumeDeathTest, ConditionFalse) {
+  auto primitive = ActionOpcodesMap::get_instance()->get_primitive(GetParam());
+  ASSERT_NE(nullptr, primitive);
+
+  testActionFn.push_back_primitive(primitive.get());
+  auto expr = build_expression(false);
+  std::unique_ptr<ArithExpression> condition(expr);
+  testActionFn.parameter_push_back_expression(std::move(condition));
+
+  EXPECT_DEATH(testActionFnEntry(pkt.get()), "");
 }
+
+INSTANTIATE_TEST_CASE_P(AssertAssumeTest,
+                        AssertAssumeTest,
+                        ::testing::Values("assert", "assume"));
+INSTANTIATE_TEST_CASE_P(AssertAssumeDeathTest,
+                        AssertAssumeDeathTest,
+                        ::testing::Values("assert", "assume"));

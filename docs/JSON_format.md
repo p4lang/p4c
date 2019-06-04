@@ -10,7 +10,7 @@ on each attribute.
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.19*.
+The version described in this document is *2.20*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -482,6 +482,15 @@ in the enclosing action.
 must both resolve to integral values, which we call respectively `cond` and
 `offset`. If `cond` is 0, the primitive behaves exactly like `_jump` and we jump
 to the primitive call at index `offset`; otherwise the primitive is a no-op.
+- `assume` and `assert`: these 2 statements are used in P4 for formal program
+verification. They both take a single parameter (a boolean expression) and they
+share the same implementation in bmv2 (the switch will log an error message and
+abort), but they mean different things: *assume* statements are essentially
+inputs to the formal verification tool, while *assert* statements are conditions
+that need to be proven true (see
+[this](https://github.com/p4lang/p4c/issues/1548) Github issue for more
+details). Given their bmv2 implementation, `assert` and `assume` statements are
+also useful when tetsing / debugging P4 programs with bmv2.
 
 Support for additional primitives depends on the architecture being used.
 
