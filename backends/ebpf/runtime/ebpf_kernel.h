@@ -216,7 +216,7 @@ struct bpf_map_def SEC("maps") NAME = {          \
     .type       = TYPE,             \
     .key_size   = KEY_SIZE,         \
     .value_size = VALUE_SIZE,       \
-    .pinning = 2,                   \
+    .pinning = 1,                   \
     .max_entries = MAX_ENTRIES,     \
     .map_flags = 0,                 \
 };
