@@ -208,6 +208,7 @@ class ComputeNewNames : public Inspector {
         renameMap->setNewName(decl, newName, extName);
     }
     void postorder(const IR::P4Table* table) override { rename(table); }
+    void postorder(const IR::P4ValueSet* set) override { rename(set); }
     void postorder(const IR::P4Action* action) override { rename(action); }
     void postorder(const IR::Declaration_Instance* instance) override { rename(instance); }
     void postorder(const IR::Declaration_Variable* decl) override { rename(decl); }
@@ -248,6 +249,16 @@ class Substitutions : public SubstituteParameters {
         auto annos = setNameAnnotation(extName, table->annotations);
         auto result = new IR::P4Table(table->srcInfo, newName, annos,
                                       table->properties);
+        return result;
+    }
+    const IR::Node* postorder(IR::P4ValueSet* set) override {
+        auto orig = getOriginal<IR::IDeclaration>();
+        cstring newName = renameMap->getName(orig);
+        cstring extName = renameMap->getExtName(orig);
+        LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
+        auto annos = setNameAnnotation(extName, set->annotations);
+        auto result = new IR::P4ValueSet(set->srcInfo, newName, annos,
+                                         set->elementType, set->size);
         return result;
     }
     const IR::Node* postorder(IR::P4Action* action) override {
@@ -455,7 +466,7 @@ Visitor::profile_t GeneralInliner::init_apply(const IR::Node* node) {
  * P4Block here may be either P4Control or P4Parser */
 template<class P4Block>
 void GeneralInliner::inline_subst(P4Block *caller,
-                          IR::IndexedVector<IR::Declaration> P4Block::*blockLocals) {
+                                  IR::IndexedVector<IR::Declaration> P4Block::*blockLocals) {
     LOG3("Analyzing " << dbp(caller));
     IR::IndexedVector<IR::Declaration> locals;
     for (auto s : caller->*blockLocals) {

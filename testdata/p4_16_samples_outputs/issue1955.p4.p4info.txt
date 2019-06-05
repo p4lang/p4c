@@ -1,0 +1,29 @@
+pkg_info {
+  arch: "v1model"
+}
+value_sets {
+  preamble {
+    id: 50343090
+    name: "parserImpl.p1.ipv4_ethertypes"
+    alias: "p1.ipv4_ethertypes"
+  }
+  match {
+    id: 1
+    bitwidth: 16
+    match_type: EXACT
+  }
+  size: 8
+}
+value_sets {
+  preamble {
+    id: 50350911
+    name: "parserImpl.p2.ipv4_ethertypes"
+    alias: "p2.ipv4_ethertypes"
+  }
+  match {
+    id: 1
+    bitwidth: 16
+    match_type: EXACT
+  }
+  size: 8
+}
