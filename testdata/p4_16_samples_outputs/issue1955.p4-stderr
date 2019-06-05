@@ -1,0 +1,12 @@
+issue1955.p4(84): [--Wwarn=uninitialized_use] warning: hdr.ethernet_1 may not be completely initialized
+        p1.apply(packet, hdr.ethernet_1, hdr.ipv4_1);
+                         ^^^^^^^^^^^^^^
+issue1955.p4(84): [--Wwarn=uninitialized_use] warning: hdr.ipv4_1 may not be completely initialized
+        p1.apply(packet, hdr.ethernet_1, hdr.ipv4_1);
+                                         ^^^^^^^^^^
+issue1955.p4(85): [--Wwarn=uninitialized_use] warning: hdr.ethernet_2 may not be completely initialized
+        p2.apply(packet, hdr.ethernet_2, hdr.ipv4_2);
+                         ^^^^^^^^^^^^^^
+issue1955.p4(85): [--Wwarn=uninitialized_use] warning: hdr.ipv4_2 may not be completely initialized
+        p2.apply(packet, hdr.ethernet_2, hdr.ipv4_2);
+                                         ^^^^^^^^^^
