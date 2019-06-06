@@ -179,6 +179,8 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/issue1765-1-bmv2.p4
   # These tests require bmv2's psa_switch to support std metadata passing at minimum
   testdata/p4_16_samples/psa-ingress-input-meta-bmv2.p4
+  # This test should always fail because resbumit packets should not carry changes from ingress
+  testdata/p4_16_samples/psa-resubmit-loop-bmv2.p4
 )
 
 if (HAVE_SIMPLE_SWITCH)
