@@ -56,6 +56,8 @@ control cIngress(inout headers_t hdr,
 {
 
     action resubmit() {
+        // this write should not make it to the output packet
+        hdr.ethernet.dstAddr = 48w256;
         ostd.resubmit = true;
     }
 
