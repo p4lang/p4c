@@ -129,6 +129,9 @@ class TestTarget : public EBPF::KernelSamplesTarget {
  public:
     TestTarget() : KernelSamplesTarget("Userspace Test") {}
     void emitIncludes(Util::SourceCodeBuilder* builder) const override;
+    void emitTableDecl(Util::SourceCodeBuilder* builder,
+                       cstring tblName, TableKind tableKind,
+                       cstring keyType, cstring valueType, unsigned size) const override;
     cstring dataOffset(cstring base) const override
     { return cstring("((void*)(long)")+ base + "->data)"; }
     cstring dataEnd(cstring base) const override

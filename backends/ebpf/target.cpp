@@ -87,6 +87,16 @@ void TestTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
     builder->newline();
 }
 
+void TestTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
+                               cstring tblName, TableKind,
+                               cstring keyType, cstring valueType,
+                               unsigned size) const {
+    builder->appendFormat("REGISTER_TABLE(%s, 0 /* unused */,", tblName.c_str());
+    builder->appendFormat("sizeof(%s), sizeof(%s), %d)",
+                          keyType.c_str(), valueType.c_str(), size);
+    builder->newline();
+}
+
 //////////////////////////////////////////////////////////////
 
 void BccTarget::emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
