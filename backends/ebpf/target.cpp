@@ -44,10 +44,18 @@ void KernelSamplesTarget::emitUserTableUpdate(Util::SourceCodeBuilder* builder, 
 }
 
 void KernelSamplesTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
-                                        cstring tblName, bool isHash,
+                                        cstring tblName, TableKind tableKind,
                                         cstring keyType, cstring valueType,
                                         unsigned size) const {
-    cstring kind = isHash ? "BPF_MAP_TYPE_HASH" : "BPF_MAP_TYPE_ARRAY";
+    cstring kind;
+    if (tableKind == TableHash)
+        kind = "BPF_MAP_TYPE_HASH";
+    else if (tableKind == TableArray)
+        kind = "BPF_MAP_TYPE_ARRAY";
+    else if (tableKind == TableLPMTrie)
+        kind = "BPF_MAP_TYPE_LPM_TRIE";
+    else
+        BUG("%1%: unsupported table kind", tableKind);
     builder->appendFormat("REGISTER_TABLE(%s, %s, ", tblName.c_str(), kind.c_str());
     builder->appendFormat("sizeof(%s), sizeof(%s), %d)",
                           keyType.c_str(), valueType.c_str(), size);
@@ -109,9 +117,18 @@ void BccTarget::emitIncludes(Util::SourceCodeBuilder* builder) const {
 }
 
 void BccTarget::emitTableDecl(Util::SourceCodeBuilder* builder,
-                              cstring tblName, bool isHash,
+                              cstring tblName, TableKind tableKind,
                               cstring keyType, cstring valueType, unsigned size) const {
-    cstring kind = isHash ? "hash" : "array";
+    cstring kind;
+    if (tableKind == TableHash)
+        kind = "hash";
+    else if (tableKind == TableArray)
+        kind = "array";
+    else if (tableKind == TableLPMTrie)
+        kind = "lpm_trie";
+    else
+        BUG("%1%: unsupported table kind", tableKind);
+
     builder->appendFormat("BPF_TABLE(\"%s\", %s, %s, %s, %d);",
                           kind.c_str(), keyType.c_str(), valueType.c_str(), tblName.c_str(), size);
     builder->newline();

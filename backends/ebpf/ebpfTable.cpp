@@ -119,7 +119,8 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
 
             auto mtdecl = program->refMap->getDeclaration(c->matchType->path, true);
             auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
-            if (matchType->name.name != P4::P4CoreLibrary::instance.exactMatch.name)
+            if (matchType->name.name != P4::P4CoreLibrary::instance.exactMatch.name &&
+                matchType->name.name != P4::P4CoreLibrary::instance.lpmMatch.name)
                 ::error("Match of type %1% not supported", c->matchType);
         }
     }
@@ -228,40 +229,55 @@ void EBPFTable::emitInstance(CodeBuilder* builder) {
             return;
         }
 
-        bool isHash;
+        TableKind tableKind;
         auto extBlock = block->to<IR::ExternBlock>();
         if (extBlock->type->name.name == program->model.array_table.name) {
-            isHash = false;
+            tableKind = TableHash;
         } else if (extBlock->type->name.name == program->model.hash_table.name) {
-            isHash = true;
+            tableKind = TableArray;
         } else {
             ::error("%1%: implementation must be one of %2% or %3%",
                     impl, program->model.array_table.name, program->model.hash_table.name);
             return;
         }
 
+        // If any key field is LPM we will generate an LPM table
+        for (auto it : keyGenerator->keyElements) {
+            auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
+            auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
+            if (matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name) {
+                if (tableKind == TableLPMTrie) {
+                    ::error(ErrorType::ERR_UNSUPPORTED,
+                            "only one LPM field allowed", it->matchType);
+                    return;
+                }
+                tableKind = TableLPMTrie;
+            }
+        }
+
         auto sz = extBlock->getParameterValue(program->model.array_table.size.name);
         if (sz == nullptr || !sz->is<IR::Constant>()) {
-            ::error("Expected an integer argument for %1%; is the model corrupted?", expr);
+            ::error(ErrorType::ERR_UNSUPPORTED,
+                    "Expected an integer argument; is the model corrupted?", expr);
             return;
         }
         auto cst = sz->to<IR::Constant>();
         if (!cst->fitsInt()) {
-            ::error("%1%: size too large", cst);
+            ::error(ErrorType::ERR_UNSUPPORTED, "size too large", cst);
             return;
         }
         int size = cst->asInt();
         if (size <= 0) {
-            ::error("%1%: negative size", cst);
+            ::error(ErrorType::ERR_INVALID, "negative size", cst);
             return;
         }
 
         cstring name = EBPFObject::externalName(table->container);
-        builder->target->emitTableDecl(builder, name, isHash,
+        builder->target->emitTableDecl(builder, name, tableKind,
                                        cstring("struct ") + keyTypeName,
                                        cstring("struct ") + valueTypeName, size);
     }
-    builder->target->emitTableDecl(builder, defaultActionMapName, false,
+    builder->target->emitTableDecl(builder, defaultActionMapName, TableArray,
                                    program->arrayIndexType,
                                    cstring("struct ") + valueTypeName, 1);
 }
@@ -471,24 +487,26 @@ EBPFCounterTable::EBPFCounterTable(const EBPFProgram* program, const IR::ExternB
         EBPFTableBase(program, name, codeGen) {
     auto sz = block->getParameterValue(program->model.counterArray.max_index.name);
     if (sz == nullptr || !sz->is<IR::Constant>()) {
-        ::error("Expected an integer argument for parameter %1% or %2%; is the model corrupted?",
+        ::error(ErrorType::ERR_INVALID,
+                "(%2%): expected an integer argument; is the model corrupted?",
                 program->model.counterArray.max_index, name);
         return;
     }
     auto cst = sz->to<IR::Constant>();
     if (!cst->fitsInt()) {
-        ::error("%1%: size too large", cst);
+        ::error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", cst);
         return;
     }
     size = cst->asInt();
     if (size <= 0) {
-        ::error("%1%: negative size", cst);
+        ::error(ErrorType::ERR_OVERLIMIT, "%1%: negative size", cst);
         return;
     }
 
     auto sprs = block->getParameterValue(program->model.counterArray.sparse.name);
     if (sprs == nullptr || !sprs->is<IR::BoolLiteral>()) {
-        ::error("Expected an integer argument for parameter %1% or %2%; is the model corrupted?",
+        ::error(ErrorType::ERR_INVALID,
+                "(%2%): Expected an integer argument; is the model corrupted?",
                 program->model.counterArray.sparse, name);
         return;
     }
@@ -497,8 +515,9 @@ EBPFCounterTable::EBPFCounterTable(const EBPFProgram* program, const IR::ExternB
 }
 
 void EBPFCounterTable::emitInstance(CodeBuilder* builder) {
+    TableKind kind = isHash ? TableHash : TableArray;
     builder->target->emitTableDecl(
-        builder, dataMapName, isHash, keyTypeName, valueTypeName, size);
+        builder, dataMapName, kind, keyTypeName, valueTypeName, size);
 }
 
 void EBPFCounterTable::emitCounterIncrement(CodeBuilder* builder,
@@ -558,7 +577,8 @@ EBPFCounterTable::emitMethodInvocation(CodeBuilder* builder, const P4::ExternMet
         emitCounterIncrement(builder, method->expr);
         return;
     }
-    ::error("%1%: Unexpected method for %2%", method->expr, program->model.counterArray.name);
+    ::error(ErrorType::ERR_UNSUPPORTED,
+            "Unexpected method for %2%", method->expr, program->model.counterArray.name);
 }
 
 void EBPFCounterTable::emitTypes(CodeBuilder* builder) {
