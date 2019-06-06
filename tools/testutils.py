@@ -27,7 +27,7 @@ import os
 TIMEOUT = 10 * 60
 SUCCESS = 0
 FAILURE = 1
-SKIPPED = 2  # used occasionally to indicate that a test was not executed
+SKIPPED = 999  # used occasionally to indicate that a test was not executed
 
 
 def is_err(p4filename):
