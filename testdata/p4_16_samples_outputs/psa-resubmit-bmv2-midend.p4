@@ -29,7 +29,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     @name(".send_to_port") action send_to_port() {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
-        ostd.egress_port = (PortIdUint_t)hdr.ethernet.dstAddr[3:0];
+        ostd.egress_port = (PortIdUint_t)hdr.ethernet.dstAddr;
     }
     @name("cIngress.resubmit") action resubmit_1() {
         hdr.ethernet.srcAddr = 48w256;
