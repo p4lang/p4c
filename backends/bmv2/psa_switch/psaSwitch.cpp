@@ -234,6 +234,8 @@ bool ParsePsaArchitecture::preorder(const IR::PackageBlock* block) {
         structure->block_type.emplace(parser->container, std::make_pair(INGRESS, PARSER));
         structure->block_type.emplace(pipeline->container, std::make_pair(INGRESS, PIPELINE));
         structure->block_type.emplace(deparser->container, std::make_pair(INGRESS, DEPARSER));
+        structure->pipeline_controls.emplace(pipeline->container->name);
+        structure->non_pipeline_controls.emplace(deparser->container->name);
     }
     pkg = block->getParameterValue("egress");
     if (auto egress = pkg->to<IR::PackageBlock>()) {
@@ -243,6 +245,8 @@ bool ParsePsaArchitecture::preorder(const IR::PackageBlock* block) {
         structure->block_type.emplace(parser->container, std::make_pair(EGRESS, PARSER));
         structure->block_type.emplace(pipeline->container, std::make_pair(EGRESS, PIPELINE));
         structure->block_type.emplace(deparser->container, std::make_pair(EGRESS, DEPARSER));
+        structure->pipeline_controls.emplace(pipeline->container->name);
+        structure->non_pipeline_controls.emplace(deparser->container->name);
     }
     return false;
 }
@@ -458,24 +462,33 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         /* TODO */
         // new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
-        // new P4::SynthesizeActions(refMap, typeMap, new SkipControls(&non_pipeline_controls)),
+        new P4::SynthesizeActions(refMap, typeMap,
+                new SkipControls(&structure.non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new LowerExpressions(typeMap),
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
-        // new RemoveComplexExpressions(refMap, typeMap, new ProcessControls(&pipeline_controls)),
+        new RemoveComplexExpressions(refMap, typeMap, 
+                new ProcessControls(&structure.pipeline_controls)),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
         evaluator,
         new VisitFunctor([this, evaluator, structure]() {
             toplevel = evaluator->getToplevelBlock(); }),
     };
+    auto hook = options.getDebugHook();
+    simplify.addDebugHook(hook);
     program->apply(simplify);
 
     // map IR node to compile-time allocated resource blocks.
     toplevel->apply(*new BMV2::BuildResourceMap(&structure.resourceMap));
+
+    main = toplevel->getMain();
+    if (!main) return;  // no main
+    main->apply(*parsePsaArch);
+    program = toplevel->getProgram();
 
     PassManager toJson = {
         new DiscoverStructure(&structure),
