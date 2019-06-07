@@ -1,0 +1,24 @@
+pkg_info {
+  arch: "psa"
+}
+actions {
+  preamble {
+    id: 16833049
+    name: "send_to_port"
+    alias: "send_to_port"
+  }
+}
+actions {
+  preamble {
+    id: 16783561
+    name: "cIngress.resubmit"
+    alias: "resubmit"
+  }
+}
+actions {
+  preamble {
+    id: 16820544
+    name: "cIngress.pkt_write"
+    alias: "pkt_write"
+  }
+}
