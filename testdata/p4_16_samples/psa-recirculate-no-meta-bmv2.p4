@@ -56,11 +56,9 @@ control cIngress(inout headers_t hdr,
 {   
     apply {
         if (hdr.ethernet.dstAddr[3:0] >= 4) {
-          send_to_port(ostd,
-              (PortId_t) ((PortIdUint_t) hdr.ethernet.dstAddr[3:0]));
-        }
-        else{
-          send_to_port(ostd, PSA_PORT_RECIRCULATE);
+            send_to_port(ostd, (PortId_t) (PortIdUint_t) hdr.ethernet.dstAddr);
+        } else {
+            send_to_port(ostd, PSA_PORT_RECIRCULATE);
         }
     }
 }

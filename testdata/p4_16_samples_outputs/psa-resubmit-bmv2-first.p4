@@ -39,7 +39,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         if (istd.packet_path != PSA_PacketPath_t.RESUBMIT) 
             resubmit();
         else 
-            send_to_port(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr[3:0]);
+            send_to_port(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr);
     }
 }
 

@@ -55,12 +55,13 @@ control cIngress(inout headers_t hdr,
                  inout psa_ingress_output_metadata_t ostd)
 {
     apply {
-        // Direct packets out of ports 0 through 3, based
-        // upon the 2 least significant bits of the Ethernet
-        // destination address.
-        send_to_port(ostd,
-            (PortId_t) ((PortIdUint_t) hdr.ethernet.dstAddr[1:0]));
-        if (hdr.ethernet.dstAddr[1:0] == 0) {
+        // Direct packets out of a port number equal to the least
+        // significant bits of the Ethernet destination address.  On
+        // the BMv2 PSA implementation, type PortIdUint_t is 32 bits
+        // wide, so the least significant 32 bits are significant, and
+        // the upper 16 bits are always ignored.
+        send_to_port(ostd, (PortId_t) (PortIdUint_t) hdr.ethernet.dstAddr);
+        if (hdr.ethernet.dstAddr == 0) {
             // This action should overwrite the ostd.drop field that
             // was assigned a value via the send_to_port() action
             // above, causing this packet to be dropped, _not_ sent

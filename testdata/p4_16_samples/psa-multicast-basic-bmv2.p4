@@ -55,8 +55,9 @@ control cIngress(inout headers_t hdr,
                  inout psa_ingress_output_metadata_t ostd)
 {
     apply {
-	    multicast( ostd,(MulticastGroup_t) hdr.ethernet.dstAddr[31:0] );
-          }
+	multicast(ostd,
+            (MulticastGroup_t) (MulticastGroupUint_t) hdr.ethernet.dstAddr);
+    }
 }
 
 parser EgressParserImpl(packet_in buffer,
@@ -125,4 +126,3 @@ EgressPipeline(EgressParserImpl(),
                EgressDeparserImpl()) ep;
 
 PSA_Switch(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

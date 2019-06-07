@@ -37,7 +37,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         default_action = execute;
     }
     apply {
-        send_to_port(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr[1:0]);
+        send_to_port(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr);
         tbl.apply();
     }
 }
