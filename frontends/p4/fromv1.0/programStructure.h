@@ -176,6 +176,9 @@ class ProgramStructure {
     /// system header type
     std::set<cstring> systemHeaderTypes;
 
+    /// extra local instances to control created by primitive translation
+    std::vector<const IR::Declaration*> localInstances;
+
     ConversionContext* conversionContext;
 
     IR::Vector<IR::Type>* emptyTypeArguments;
@@ -244,6 +247,8 @@ class ProgramStructure {
                        std::unordered_set<const IR::Type*> *converted);
     virtual void createParser();
     virtual void createControls();
+    void createDeparserInternal(IR::ID hdrType, IR::ID hdrParam, IR::ID pktParam, IR::ID deparserId,
+            std::vector<IR::Parameter*>, IR::Direction);
     virtual void createDeparser();
     virtual void createMain();
 
@@ -268,6 +273,8 @@ class ProgramStructure {
     void tablesReferred(const IR::V1Control* control, std::vector<const IR::V1Table*> &out);
     bool isHeader(const IR::ConcreteHeaderRef* nhr) const;
     cstring makeUniqueName(cstring base);
+
+    virtual IR::Vector<IR::Argument>* createApplyArguments(cstring n);
 
     const IR::V1Control* ingress;
     IR::ID ingressReference;

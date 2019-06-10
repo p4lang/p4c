@@ -242,7 +242,7 @@ void ProgramStructure::createStructures() {
         IR::ID id = it.first->name;
         auto type = it.first->type;
         auto type_name = types.get(type);
-        // XXX(hanw) make this a lambda function
+        // filter out headers defined in architecture
         if (systemHeaderTypes.count(type_name))
             continue;
         auto ht = type->to<IR::Type_Header>();
@@ -653,11 +653,13 @@ class HeaderRepresentation {
 };
 }  // namespace
 
-void ProgramStructure::createDeparser() {
-    auto headpath = new IR::Path(v1model.headersType.Id());
+void ProgramStructure::createDeparserInternal(IR::ID hdrType,
+        IR::ID hdrParam, IR::ID pktParam, IR::ID deparserId,
+        std::vector<IR::Parameter*> extraParams = {},
+        IR::Direction hdrDirection = IR::Direction::In) {
+    auto headpath = new IR::Path(hdrType);
     auto headtype = new IR::Type_Name(headpath);
-    auto headers = new IR::Parameter(v1model.deparser.headersParam.Id(),
-                                     IR::Direction::In, headtype);
+    auto headers = new IR::Parameter(hdrParam, hdrDirection, headtype);
     auto hdrsParam = paramReference(headers);
     HeaderRepresentation hr(hdrsParam);
 
@@ -717,13 +719,15 @@ void ProgramStructure::createDeparser() {
     auto params = new IR::ParameterList;
     auto poutpath = new IR::Path(p4lib.packetOut.Id());
     auto pouttype = new IR::Type_Name(poutpath);
-    auto packetOut = new IR::Parameter(v1model.deparser.packetParam.Id(),
-                                       IR::Direction::None, pouttype);
+    auto packetOut = new IR::Parameter(pktParam, IR::Direction::None, pouttype);
     params->push_back(packetOut);
     params->push_back(headers);
     conversionContext->header = paramReference(headers);
 
-    auto type = new IR::Type_Control(v1model.deparser.Id(), params);
+    for (auto p : extraParams)
+        params->push_back(p);
+
+    auto type = new IR::Type_Control(deparserId, params);
 
     ExpressionConverter conv(this);
 
@@ -747,8 +751,15 @@ void ProgramStructure::createDeparser() {
         auto stat = new IR::MethodCallStatement(mce);
         body->push_back(stat);
     }
-    deparser = new IR::P4Control(v1model.deparser.Id(), type, body);
+    deparser = new IR::P4Control(deparserId, type, body);
     declarations->push_back(deparser);
+}
+
+void ProgramStructure::createDeparser() {
+    createDeparserInternal(v1model.headersType.Id(),
+                           v1model.deparser.headersParam.Id(),
+                           v1model.deparser.packetParam.Id(),
+                           v1model.deparser.Id());
 }
 
 const IR::Declaration_Instance*
@@ -1361,13 +1372,13 @@ CONVERT_PRIMITIVE(copy_header) {
 CONVERT_PRIMITIVE(drop) {
     return new IR::MethodCallStatement(
         primitive->srcInfo, structure->v1model.drop.Id(),
-        { new IR::Argument(structure->conversionContext.standardMetadata->clone()) });
+        { new IR::Argument(structure->conversionContext->standardMetadata->clone()) });
 }
 
 CONVERT_PRIMITIVE(mark_for_drop) {
     return new IR::MethodCallStatement(
         primitive->srcInfo, structure->v1model.drop.Id(),
-        { new IR::Argument(structure->conversionContext.standardMetadata->clone()) });
+        { new IR::Argument(structure->conversionContext->standardMetadata->clone()) });
 }
 
 static const IR::Constant *push_pop_size(ExpressionConverter &conv, const IR::Primitive *prim) {
@@ -1554,6 +1565,7 @@ CONVERT_PRIMITIVE(resubmit) {
 }
 
 CONVERT_PRIMITIVE(execute_meter) {
+    LOG3("convert execute meter" << primitive);
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 3);
     auto ref = primitive->operands.at(0);
@@ -1990,8 +2002,18 @@ ProgramStructure::convertDirectCounter(const IR::Counter* c, cstring newName) {
     return decl;
 }
 
+IR::Vector<IR::Argument>*
+ProgramStructure::createApplyArguments(cstring /* name unused */) {
+    auto args = new IR::Vector<IR::Argument>();
+    args->push_back(new IR::Argument(conversionContext->header->clone()));
+    args->push_back(new IR::Argument(conversionContext->userMetadata->clone()));
+    args->push_back(new IR::Argument(conversionContext->standardMetadata->clone()));
+    return args;
+}
+
 const IR::P4Control*
 ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) {
+    LOG3("Converting frontend " << control->name);
     IR::ID name = newName;
     auto type = controlType(name);
     std::vector<cstring> actionsInTables;
@@ -2150,7 +2172,7 @@ ProgramStructure::convertControl(const IR::V1Control* control, cstring newName) 
     }
 
     auto result = new IR::P4Control(name, type, locals, body);
-    conversionContext.clear();
+    conversionContext->clear();
     return result;
 }
 
@@ -2437,8 +2459,8 @@ const IR::P4Program* ProgramStructure::create(Util::SourceInfo info) {
     createMain();
     if (::errorCount())
         return nullptr;
-    auto result = new IR::P4Program(info, *declarations);
-    return result;
+    auto program = new IR::P4Program(info, *declarations);
+    return program;
 }
 
 void
