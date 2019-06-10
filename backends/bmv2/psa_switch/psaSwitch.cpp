@@ -470,7 +470,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         new LowerExpressions(typeMap),
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
-        new RemoveComplexExpressions(refMap, typeMap, 
+        new RemoveComplexExpressions(refMap, typeMap,
                 new ProcessControls(&structure.pipeline_controls)),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
