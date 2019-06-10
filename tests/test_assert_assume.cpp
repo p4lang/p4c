@@ -38,7 +38,7 @@ class AssertAssumeTest : public ::testing::TestWithParam<const char *> {
         testActionFnEntry(&testActionFn),
         phv_source(PHVSourceIface::make_phv_source()) { }
 
-  virtual void SetUp() {
+  void SetUp() override {
     phv_source->set_phv_factory(0, &phv_factory);
     pkt = std::unique_ptr<Packet>(new Packet(
         Packet::make_new(phv_source.get())));

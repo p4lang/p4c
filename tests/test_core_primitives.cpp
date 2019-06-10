@@ -21,15 +21,43 @@
 #include <gtest/gtest.h>
 
 #include <bm/bm_sim/core/primitives.h>
+#include <bm/bm_sim/packet.h>
 #include <bm/bm_sim/phv.h>
+#include <bm/bm_sim/phv_source.h>
 
 #include <string>
 
 using namespace bm;
 
-class AssignPrimitivesTest : public ::testing::Test {
+class CorePrimitivesTest : public ::testing::Test {
  protected:
   PHVFactory phv_factory;
+  std::unique_ptr<PHVSourceIface> phv_source{nullptr};
+
+  CorePrimitivesTest()
+      : phv_source(PHVSourceIface::make_phv_source()) { }
+
+  void SetUp() override {
+    phv_source->set_phv_factory(0, &phv_factory);
+  }
+};
+
+TEST_F(CorePrimitivesTest, Exit) {
+  auto primitive = ActionOpcodesMap::get_instance()->get_primitive("exit");
+  ASSERT_NE(nullptr, primitive);
+
+  ActionFn testActionFn("test_primitive", 0, 1);
+  ActionFnEntry testActionFnEntry(&testActionFn);
+  testActionFn.push_back_primitive(primitive.get());
+  auto pkt = std::unique_ptr<Packet>(new Packet(
+      Packet::make_new(phv_source.get())));
+  EXPECT_FALSE(pkt->is_marked_for_exit());
+  testActionFnEntry(pkt.get());
+  EXPECT_TRUE(pkt->is_marked_for_exit());
+}
+
+class AssignPrimitivesTest : public CorePrimitivesTest {
+ protected:
   std::unique_ptr<PHV> phv;
 
   HeaderType testHeaderType1, testHeaderType2;
@@ -50,7 +78,7 @@ class AssignPrimitivesTest : public ::testing::Test {
     phv_factory.push_back_header("test21", testHeader21, testHeaderType2);
   }
 
-  virtual void SetUp() {
+  void SetUp() override {
     phv = phv_factory.create();
   }
 

@@ -74,6 +74,10 @@ struct assume_ : public ActionPrimitive<const Data &> {
   void operator ()(const Data &src);
 };
 
+class exit_ : public ActionPrimitive<> {
+  void operator ()();
+};
+
 }  // namespace core
 
 }  // namespace bm

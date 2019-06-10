@@ -10,7 +10,7 @@ on each attribute.
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.20*.
+The version described in this document is *2.21*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -482,6 +482,9 @@ in the enclosing action.
 must both resolve to integral values, which we call respectively `cond` and
 `offset`. If `cond` is 0, the primitive behaves exactly like `_jump` and we jump
 to the primitive call at index `offset`; otherwise the primitive is a no-op.
+- `exit`: implements the P4 built-in `exit` statement. The packet will be
+"marked for exit" by setting a dedicated flag; it is currently the
+responsibility of the target to reset the flag between pipelines if so desired.
 - `assume` and `assert`: these 2 statements are used in P4 for formal program
 verification. They both take a single parameter (a boolean expression) and they
 share the same implementation in bmv2 (the switch will log an error message and
