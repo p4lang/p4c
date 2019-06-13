@@ -31,15 +31,23 @@ P4 program you supplied, and the following suffixes instead of the
 
 + a file with suffix `.p4i`, which is the output from running the
   preprocessor on your P4 program.
-+ a file with suffix `.p4rt`, which is a binary format containing a
-  description of the tables and other objects in your P4 program that
-  have an auto-generated control plane API.
 + a file with suffix `.json` that is the JSON file format expected by
   BMv2 behavioral model `simple_switch`.
 
 ```bash
 p4c --target bmv2 --arch v1model my-p4-16-prog.p4
 p4c --target bmv2 --arch v1model --std p4-14 my-p4-14-prog.p4
+```
+
+By adding the option `--p4runtime-files <filename>.txt` as shown in
+the example commands below, p4c will also create a file
+`<filename>.txt`.  This is a text format "P4Info" file, containing a
+description of the tables and other objects in your P4 program that
+have an auto-generated control plane API.
+
+```
+p4c --target bmv2 --arch v1model --p4runtime-files my-p4-16-prog.p4info.txt my-p4-16-prog.p4
+p4c --target bmv2 --arch v1model --p4runtime-files my-p4-14-prog.p4info.txt --std p4-14 my-p4-14-prog.p4
 ```
 
 All of these commands take the `--help` argument to show documentation
