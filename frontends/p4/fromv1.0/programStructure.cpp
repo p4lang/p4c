@@ -656,7 +656,10 @@ class HeaderRepresentation {
 void ProgramStructure::createDeparserInternal(IR::ID hdrType,
         IR::ID hdrParam, IR::ID pktParam, IR::ID deparserId,
         std::vector<IR::Parameter*> extraParams = {},
-        IR::Direction hdrDirection = IR::Direction::In) {
+        IR::Direction hdrDirection = IR::Direction::In,
+        IR::IndexedVector<IR::Declaration> controlLocals = {},
+        std::function<IR::BlockStatement*(IR::BlockStatement*)> fn =
+        [](IR::BlockStatement* b){ return b; }) {
     auto headpath = new IR::Path(hdrType);
     auto headtype = new IR::Type_Name(headpath);
     auto headers = new IR::Parameter(hdrParam, hdrDirection, headtype);
@@ -751,7 +754,11 @@ void ProgramStructure::createDeparserInternal(IR::ID hdrType,
         auto stat = new IR::MethodCallStatement(mce);
         body->push_back(stat);
     }
-    deparser = new IR::P4Control(deparserId, type, body);
+
+    // post-processing generated deparser statements
+    body = fn(body);
+
+    deparser = new IR::P4Control(deparserId, type, controlLocals, body);
     declarations->push_back(deparser);
 }
 

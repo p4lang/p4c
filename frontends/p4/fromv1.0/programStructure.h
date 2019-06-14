@@ -248,7 +248,9 @@ class ProgramStructure {
     virtual void createParser();
     virtual void createControls();
     void createDeparserInternal(IR::ID hdrType, IR::ID hdrParam, IR::ID pktParam, IR::ID deparserId,
-            std::vector<IR::Parameter*>, IR::Direction);
+            std::vector<IR::Parameter*>, IR::Direction,
+            IR::IndexedVector<IR::Declaration> controlLocals,
+            std::function<IR::BlockStatement*(IR::BlockStatement*)>);
     virtual void createDeparser();
     virtual void createMain();
 
