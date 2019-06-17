@@ -1380,7 +1380,9 @@ Converter::Converter() {
     passes.emplace_back(new ComputeTableCallGraph(structure));
     passes.emplace_back(new Rewriter(structure));
     passes.emplace_back(new FixExtracts(structure));
-    if (CompilerOptions().arch == "v1model") {
+    // Following two passes assume the architecture is v1model.
+    // We should find out a way to remove them from frontend.
+    if (P4CContext::get().options().arch == "v1model") {
         passes.emplace_back(new FixMultiEntryPoint(structure));
         passes.emplace_back(new MoveIntrinsicMetadata(structure));
     }
