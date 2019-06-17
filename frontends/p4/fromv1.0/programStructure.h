@@ -88,6 +88,12 @@ class ProgramStructure {
         bool contains(cstring name) const { return nameToObject.find(name) != nameToObject.end(); }
         iterator begin() { return iterator(nameToObject.begin(), objectToNewName); }
         iterator end() { return iterator(nameToObject.end(), objectToNewName); }
+        void erase(cstring name) {
+            allNames->erase(name);
+            auto obj = get(name);
+            objectToNewName.erase(obj);
+            nameToObject.erase(name);
+        }
     };
 
     std::set<cstring>   included_files;
