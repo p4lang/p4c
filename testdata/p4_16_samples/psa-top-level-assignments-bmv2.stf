@@ -1,0 +1,11 @@
+expect 3 cafed00dbead 1234567890ab ffff $
+packet 0 cafed00dbead 1234567890ab ffff
+
+expect 3 a5a5a5a5a5a5 1b1b1b1b1b1b ffff $
+packet 1 a5a5a5a5a5a5 1b1b1b1b1b1b ffff
+
+expect 3 314159265358 271828182845 ffff $
+packet 2 314159265358 271828182845 ffff
+
+expect 3 0000ffff0000 ffff0000ffff ffff $
+packet 3 0000ffff0000 ffff0000ffff ffff
