@@ -151,10 +151,14 @@ const IR::Node* ExpressionConverter::postorder(IR::PathExpression *ref) {
 const IR::Node* ExpressionConverter::postorder(IR::ConcreteHeaderRef* nhr) {
     const IR::Expression* ref;
     if (structure->isHeader(nhr)) {
-        if (structure->systemHeaderTypes.count(nhr->type->to<IR::Type_Header>()->name)) {
-            auto path = new IR::Path(nhr->ref->name);
-            auto result = new IR::PathExpression(nhr->srcInfo, nhr->type, path);
-            return result; }
+        if (nhr->type->is<IR::Type_Header>()) {
+            auto type = nhr->type->to<IR::Type_Header>();
+            if (structure->systemHeaderTypes.count(type->name)) {
+                auto path = new IR::Path(nhr->ref->name);
+                auto result = new IR::PathExpression(nhr->srcInfo, nhr->type, path);
+                return result;
+            }
+        }
         ref = structure->conversionContext->header->clone();
     } else {
         if (nhr->ref->name == P4V1::V1Model::instance.standardMetadata.name)
