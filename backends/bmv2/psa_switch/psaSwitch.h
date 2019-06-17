@@ -167,6 +167,9 @@ class PsaProgramStructure : public ProgramStructure {
     void createDeparsers(ConversionContext* ctxt);
     void createGlobals();
 
+    std::set<cstring> non_pipeline_controls;
+    std::set<cstring> pipeline_controls;
+
     bool hasVisited(const IR::Type_StructLike* st) {
         if (auto h = st->to<IR::Type_Header>())
             return header_types.count(h->getName());
