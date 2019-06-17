@@ -398,6 +398,10 @@ extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
 
 extern void truncate(in bit<32> length);
 
+
+extern void assert(in bool check);
+extern void assume(in bool check);
+
 // The name 'standard_metadata' is reserved
 
 // Architecture.

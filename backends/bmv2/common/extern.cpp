@@ -276,4 +276,39 @@ ExternConverter::convertHashAlgorithm(cstring algorithm) {
     return result;
 }
 
+ExternConverter_assert ExternConverter_assert::singleton;
+ExternConverter_assume ExternConverter_assume::singleton;
+
+Util::IJson*
+ExternConverter::convertAssertAssume(ConversionContext* ctxt,
+    const IR::MethodCallExpression* methodCall, const P4::ExternFunction* ef) {
+     if (methodCall->arguments->size() != 1) {
+        ::error("Expected 1 arguments for %1%", methodCall);
+        return nullptr;
+    }
+    auto primitive = mkPrimitive(ef->method->name.name);
+    auto parameters = mkParameters(primitive);
+    auto cond = methodCall->arguments->at(0);
+    // wrap expression in an additional JSON expression block
+    // cast the result of expression to b2d
+    auto jsonExpr = ctxt->conv->convert(cond->expression, true, true, true);
+    parameters->append(jsonExpr);
+    primitive->emplace_non_null("source_info", methodCall->sourceInfoJsonObj());
+    return primitive;
+}
+
+Util::IJson* ExternConverter_assert::convertExternFunction(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    UNUSED const bool emitExterns) {
+    return convertAssertAssume(ctxt, mc, ef);
+}
+
+Util::IJson* ExternConverter_assume::convertExternFunction(
+    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
+    UNUSED const bool emitExterns) {
+    return ExternConverter::convertAssertAssume(ctxt, mc, ef);
+}
+
 }  // namespace BMV2

@@ -202,6 +202,9 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                   "  sourceFile:level,...,sourceFile:level\n"
                   "where 'sourceFile' is a compiler source file and\n"
                   "'level' is the verbosity level for LOG messages in that file");
+    registerOption("--ndebug", nullptr,
+                   [this](const char*) { ndebug = true; return true; },
+                  "Compile program in non-debug mode.\n");
 }
 
 void CompilerOptions::setInputFile() {

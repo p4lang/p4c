@@ -70,6 +70,9 @@ class ExternConverter {
     cstring createCalculation(ConversionContext* ctxt, cstring algo, const IR::Expression* fields,
                               Util::JsonArray* calculations, bool usePayload, const IR::Node* node);
     static cstring convertHashAlgorithm(cstring algorithm);
+    Util::IJson*
+    convertAssertAssume(ConversionContext* ctxt, const IR::MethodCallExpression* methodCall,
+                        const P4::ExternFunction* ef);
 };
 
 #define EXTERN_CONVERTER_W_FUNCTION_AND_MODEL(extern_name, model_type, model_name)  \
@@ -137,6 +140,9 @@ class ExternConverter {
         Util::IJson* convertExternObject(ConversionContext* ctxt,               \
             const P4::ExternMethod* em, const IR::MethodCallExpression* mc,     \
             const IR::StatOrDecl* s, const bool& emitExterns) override; };
+
+EXTERN_CONVERTER_W_FUNCTION(assert)
+EXTERN_CONVERTER_W_FUNCTION(assume)
 
 }  // namespace BMV2
 

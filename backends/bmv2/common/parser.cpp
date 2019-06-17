@@ -169,7 +169,8 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
             }
         } else if (minst->is<P4::ExternFunction>()) {
             auto extfn = minst->to<P4::ExternFunction>();
-            if (extfn->method->name.name == IR::ParserState::verify) {
+            auto extFuncName = extfn->method->name.name;
+            if (extFuncName == IR::ParserState::verify) {
                 result->emplace("op", "verify");
                 BUG_CHECK(mce->arguments->size() == 2, "%1%: Expected 2 arguments", mce);
                 {
@@ -186,6 +187,19 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                     auto jexpr = ctxt->conv->convert(error->expression, true, false);
                     params->append(jexpr);
                 }
+                return result;
+            } else if (extFuncName == "assert"
+                       || extFuncName == "assume") {
+                BUG_CHECK(mce->arguments->size() == 1, "%1%: Expected 1 argument ", mce);
+                result->emplace("op", "primitive");
+                auto paramValue = new Util::JsonObject();
+                params->append(paramValue);
+                auto paramsArray = mkArrayField(paramValue, "parameters");
+                auto cond = mce->arguments->at(0);
+                auto expr = ctxt->conv->convert(cond->expression, true, true, true);
+                paramsArray->append(expr);
+                paramValue->emplace("op", extFuncName);
+                paramValue->emplace_non_null("source_info", mce->sourceInfoJsonObj());
                 return result;
             }
         } else if (minst->is<P4::BuiltInMethod>()) {
