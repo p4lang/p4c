@@ -331,7 +331,8 @@ const IR::Statement* ProgramStructure::convertParserStatement(const IR::Expressi
             conv.replaceNextWithLast = true;
             this->latest = conv.convert(primitive->operands.at(0));
             conv.replaceNextWithLast = false;
-            const IR::Expression* method = new IR::Member(paramReference(parserPacketIn), p4lib.packetIn.extract.Id());
+            const IR::Expression* method = new IR::Member(paramReference(parserPacketIn),
+                    p4lib.packetIn.extract.Id());
             auto result = new IR::MethodCallStatement(
                 expr->srcInfo, method, { new IR::Argument(dest) });
 
