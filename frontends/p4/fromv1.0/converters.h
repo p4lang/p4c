@@ -164,6 +164,7 @@ class Converter : public PassManager {
 
  public:
     static ProgramStructure *(*createProgramStructure)();
+    static ConversionContext *(*createConversionContext)();
     Converter();
     void loadModel() { structure->loadModel(); }
     Visitor::profile_t init_apply(const IR::Node* node) override;

@@ -376,6 +376,10 @@ bool CompilerOptions::isv1() const {
     return langVersion == CompilerOptions::FrontendVersion::P4_14;
 }
 
+bool CompilerOptions::enable_intrinsic_metadata_fix() {
+    return true;
+}
+
 void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pass,
                                const IR::Node* node) const {
     if (strncmp(pass, "P4::", 4) == 0) pass += 4;

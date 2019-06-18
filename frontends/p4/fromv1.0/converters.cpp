@@ -20,6 +20,7 @@ limitations under the License.
 #include "lib/gmputil.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/common/constantFolding.h"
+#include "frontends/common/options.h"
 #include "frontends/p4-14/header_type.h"
 #include "frontends/p4-14/typecheck.h"
 
@@ -150,12 +151,20 @@ const IR::Node* ExpressionConverter::postorder(IR::PathExpression *ref) {
 const IR::Node* ExpressionConverter::postorder(IR::ConcreteHeaderRef* nhr) {
     const IR::Expression* ref;
     if (structure->isHeader(nhr)) {
-        ref = structure->conversionContext.header->clone();
+        if (nhr->type->is<IR::Type_Header>()) {
+            auto type = nhr->type->to<IR::Type_Header>();
+            if (structure->systemHeaderTypes.count(type->name)) {
+                auto path = new IR::Path(nhr->ref->name);
+                auto result = new IR::PathExpression(nhr->srcInfo, nhr->type, path);
+                return result;
+            }
+        }
+        ref = structure->conversionContext->header->clone();
     } else {
         if (nhr->ref->name == P4V1::V1Model::instance.standardMetadata.name)
-            return structure->conversionContext.standardMetadata->clone();
+            return structure->conversionContext->standardMetadata->clone();
         else
-            ref = structure->conversionContext.userMetadata->clone();
+            ref = structure->conversionContext->userMetadata->clone();
     }
     auto result = new IR::Member(nhr->srcInfo, ref, nhr->ref->name);
     result->type = nhr->type;
@@ -332,13 +341,7 @@ const IR::Node* StatementConverter::preorder(IR::Primitive* primitive) {
         auto instanceName = ::get(renameMap, control->name);
         auto ctrl = new IR::PathExpression(IR::ID(instanceName));
         auto method = new IR::Member(ctrl, IR::ID(IR::IApply::applyMethodName));
-        auto args = new IR::Vector<IR::Argument>();
-        args->push_back(new IR::Argument(
-            structure->conversionContext.header->clone()));
-        args->push_back(new IR::Argument(
-            structure->conversionContext.userMetadata->clone()));
-        args->push_back(new IR::Argument(
-            structure->conversionContext.standardMetadata->clone()));
+        auto args = structure->createApplyArguments(control->name);
         auto call = new IR::MethodCallExpression(primitive->srcInfo, method, args);
         auto stat = new IR::MethodCallStatement(primitive->srcInfo, call);
         return stat;
@@ -1350,11 +1353,19 @@ static ProgramStructure *defaultCreateProgramStructure() {
     return new ProgramStructure();
 }
 
+static ConversionContext *defaultCreateConversionContext() {
+    return new ConversionContext();
+}
+
 ProgramStructure *(*Converter::createProgramStructure)() = defaultCreateProgramStructure;
+
+ConversionContext *(*Converter::createConversionContext)() = defaultCreateConversionContext;
 
 Converter::Converter() {
     setStopOnError(true); setName("Converter");
     structure = createProgramStructure();
+    structure->conversionContext = createConversionContext();
+    structure->conversionContext->clear();
     structure->populateOutputNames();
 
     // Discover types using P4-14 type-checker
@@ -1369,8 +1380,10 @@ Converter::Converter() {
     passes.emplace_back(new ComputeTableCallGraph(structure));
     passes.emplace_back(new Rewriter(structure));
     passes.emplace_back(new FixExtracts(structure));
-    passes.emplace_back(new FixMultiEntryPoint(structure));
-    passes.emplace_back(new MoveIntrinsicMetadata(structure));
+    if (P4CContext::get().options().enable_intrinsic_metadata_fix()) {
+        passes.emplace_back(new FixMultiEntryPoint(structure));
+        passes.emplace_back(new MoveIntrinsicMetadata(structure));
+    }
 }
 
 Visitor::profile_t Converter::init_apply(const IR::Node* node) {

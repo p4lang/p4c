@@ -120,6 +120,8 @@ class CompilerOptions : public Util::Options {
     // Get a debug hook function suitable for insertion
     // in the pass managers that are executed.
     DebugHook getDebugHook() const;
+
+    virtual bool enable_intrinsic_metadata_fix();
 };
 
 

@@ -29,6 +29,19 @@ limitations under the License.
 
 namespace P4V1 {
 
+class ConversionContext {
+ public:
+    ConversionContext() {}
+    const IR::Expression* header;
+    const IR::Expression* userMetadata;
+    const IR::Expression* standardMetadata;
+    virtual void clear() {
+        header = nullptr;
+        userMetadata = nullptr;
+        standardMetadata = nullptr;
+    }
+};
+
 /// Information about the structure of a P4-14 program, used to convert it to a P4-16 program.
 class ProgramStructure {
     // In P4-14 one can have multiple objects with different types with the same name
@@ -61,9 +74,11 @@ class ProgramStructure {
      public:
         explicit NamedObjectInfo(std::unordered_set<cstring>* allNames) : allNames(allNames) {}
         void emplace(T obj) {
-            if (objectToNewName.find(obj) != objectToNewName.end())
+            if (objectToNewName.find(obj) != objectToNewName.end()) {
                 // Already done
+                LOG3(" already emplaced obj " << obj);
                 return;
+            }
 
             nameToObject.emplace(obj->name, obj);
             cstring newName;
@@ -158,18 +173,14 @@ class ProgramStructure {
 
     std::map<cstring, const IR::ParserState*> parserEntryPoints;
 
-    struct ConversionContext {
-        const IR::Expression* header;
-        const IR::Expression* userMetadata;
-        const IR::Expression* standardMetadata;
-        void clear() {
-            header = nullptr;
-            userMetadata = nullptr;
-            standardMetadata = nullptr;
-        }
-    };
+    /// system header type
+    std::set<cstring> systemHeaderTypes;
 
-    ConversionContext conversionContext;
+    /// extra local instances to control created by primitive translation
+    std::vector<const IR::Declaration*> localInstances;
+
+    ConversionContext* conversionContext;
+
     IR::Vector<IR::Type>* emptyTypeArguments;
     const IR::Parameter* parserPacketIn;
     const IR::Parameter* parserHeadersOut;
@@ -226,9 +237,9 @@ class ProgramStructure {
     virtual const IR::P4Action*
         convertAction(const IR::ActionFunction* action, cstring newName,
                       const IR::Meter* meterToAccess, cstring counterToAccess);
-    const IR::Type_Control* controlType(IR::ID name);
+    virtual const IR::Type_Control* controlType(IR::ID name);
     const IR::PathExpression* getState(IR::ID dest);
-    const IR::Expression* counterType(const IR::CounterOrMeter* cm) const;
+    virtual const IR::Expression* counterType(const IR::CounterOrMeter* cm);
     virtual void createChecksumVerifications();
     virtual void createChecksumUpdates();
     virtual void createStructures();
@@ -236,6 +247,10 @@ class ProgramStructure {
                        std::unordered_set<const IR::Type*> *converted);
     virtual void createParser();
     virtual void createControls();
+    void createDeparserInternal(IR::ID hdrType, IR::ID hdrParam, IR::ID pktParam, IR::ID deparserId,
+            std::vector<IR::Parameter*>, IR::Direction,
+            IR::IndexedVector<IR::Declaration> controlLocals,
+            std::function<IR::BlockStatement*(IR::BlockStatement*)>);
     virtual void createDeparser();
     virtual void createMain();
 
@@ -261,6 +276,8 @@ class ProgramStructure {
     bool isHeader(const IR::ConcreteHeaderRef* nhr) const;
     cstring makeUniqueName(cstring base);
 
+    virtual IR::Vector<IR::Argument>* createApplyArguments(cstring n);
+
     const IR::V1Control* ingress;
     IR::ID ingressReference;
 
@@ -271,10 +288,10 @@ class ProgramStructure {
     const IR::Expression* latest;
     const int defaultRegisterWidth = 32;
 
-    void loadModel();
+    virtual void loadModel();
     void createExterns();
     void createTypes();
-    const IR::P4Program* create(Util::SourceInfo info);
+    virtual const IR::P4Program* create(Util::SourceInfo info);
 };
 
 }  // namespace P4V1
