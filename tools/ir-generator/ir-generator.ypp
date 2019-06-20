@@ -79,7 +79,7 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
 %token<str>     BLOCK COMMENTBLOCK IDENTIFIER INTEGER NO STRING ZERO
 %token<emit>    EMITBLOCK
 
-%type<type>                     type nonRefType
+%type<type>                     type nonRefType type_arg
 %type<irClass>                  irclass partList
 %type<irElement>                part
 %type<irField>                  irField
@@ -88,7 +88,7 @@ static IrNamespace *current_namespace = LookupScope().resolve(0);
 %type<irNamespace>              scope
 %type<constFieldInit>           constFieldInit
 %type<kind>                     kind
-%type<types>                    parentList nonEmptyParentList type_args
+%type<types>                    parentList nonEmptyParentList type_args optTypeList typeList
 %type<str>                      name expression optInitializer fieldName methodName body
 %type<lookup>                   lookup_scope
 
@@ -356,9 +356,23 @@ type: nonRefType
     ;
 
 type_args
-    : type                              { $$ = new std::vector<const Type *>{$1}; }
-    | type_args ',' type                { ($$ = $1)->push_back($3); }
+    : type_arg                          { $$ = new std::vector<const Type *>{$1}; }
+    | type_args ',' type_arg            { ($$ = $1)->push_back($3); }
     ;
+
+type_arg
+    : type                              { $$ = $1; }
+    | type '(' optTypeList ')'          { $$ = new FunctionType($1, *$3); }
+    ;
+
+optTypeList
+    :                                   { $$ = new std::vector<const Type *>(); }
+    | typeList                          { $$ = $1; }
+    ;
+
+typeList
+    : type                              { $$ = new std::vector<const Type *>{$1}; }
+    | typeList ',' type                 { ($$ = $1)->push_back($3); }
 
 constFieldInit
     : modifiers IDENTIFIER '=' expression ';'
