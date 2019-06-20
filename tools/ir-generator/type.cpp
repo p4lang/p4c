@@ -152,3 +152,24 @@ cstring ArrayType::declSuffix() const {
     snprintf(buf, sizeof(buf), "[%d]", size);
     return buf;
 }
+
+const IrClass* FunctionType::resolve(const IrNamespace *ns) const {
+    ret->resolve(ns);
+    for (auto arg : args) arg->resolve(ns);
+    return nullptr;
+}
+
+cstring FunctionType::toString() const {
+    cstring result = ret->toString();
+    result += "(";
+    const char* sep = "";
+    for (auto arg : args) {
+        result += sep;
+        if (arg->isResolved()) result += "const ";
+        result += arg->toString().c_str();
+        if (arg->isResolved()) result += "*";
+        sep = ", ";
+    }
+    result += ")";
+    return result;
+}

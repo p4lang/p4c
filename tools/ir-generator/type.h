@@ -25,7 +25,7 @@ class IrClass;
 class IrNamespace;
 
 #define ALL_TYPES(M) M(NamedType) M(TemplateInstantiation) M(ReferenceType) \
-                     M(PointerType) M(ArrayType)
+                     M(PointerType) M(ArrayType) M(FunctionType)
 #define FORWARD_DECLARE(T) class T;
 ALL_TYPES(FORWARD_DECLARE)
 #undef FORWARD_DECLARE
@@ -174,6 +174,30 @@ class ArrayType : public Type {
     bool operator==(const Type &t) const override { return t == *this; }
     bool operator==(const ArrayType &t) const override {
         return size == t.size && *base == *t.base; }
+};
+
+class FunctionType : public Type {
+ public:
+    const Type                       *ret;
+    const std::vector<const Type *>   args;
+
+    FunctionType(const Type* ret, const std::vector<const Type*>& args) : ret(ret), args(args) { }
+
+    bool isResolved() const override { return false; }
+    const IrClass *resolve(const IrNamespace *ns) const override;
+    cstring toString() const override;
+    bool operator==(const Type &t) const override { return t == *this; }
+    bool operator==(const FunctionType &t) const override {
+        if (!(*ret == *t.ret)) return false;
+        if (args.size() != t.args.size()) return false;
+        for (auto i(args.begin()), j(t.args.begin());
+                i != args.end() && j != t.args.end();
+                ++i, ++j) {
+            if (!(**i == **j)) return false;
+        }
+
+        return true;
+    }
 };
 
 #endif /* _TOOLS_IR_GENERATOR_TYPE_H_ */
