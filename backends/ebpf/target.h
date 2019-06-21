@@ -26,6 +26,12 @@ limitations under the License.
 
 namespace EBPF {
 
+enum TableKind {
+    TableHash,
+    TableArray,
+    TableLPMTrie  // longest prefix match trie
+};
+
 class Target {
  protected:
     explicit Target(cstring name) : name(name) {}
@@ -45,7 +51,7 @@ class Target {
     virtual void emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                                      cstring key, cstring value) const = 0;
     virtual void emitTableDecl(Util::SourceCodeBuilder* builder,
-                               cstring tblName, bool isHash,
+                               cstring tblName, TableKind tableKind,
                                cstring keyType, cstring valueType, unsigned size) const = 0;
     virtual void emitMain(Util::SourceCodeBuilder* builder,
                           cstring functionName,
@@ -74,7 +80,7 @@ class KernelSamplesTarget : public Target {
     void emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                              cstring key, cstring value) const override;
     void emitTableDecl(Util::SourceCodeBuilder* builder,
-                       cstring tblName, bool isHash,
+                       cstring tblName, TableKind tableKind,
                        cstring keyType, cstring valueType, unsigned size) const override;
     void emitMain(Util::SourceCodeBuilder* builder,
                   cstring functionName,
@@ -103,7 +109,7 @@ class BccTarget : public Target {
     void emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                              cstring key, cstring value) const override;
     void emitTableDecl(Util::SourceCodeBuilder* builder,
-                       cstring tblName, bool isHash,
+                       cstring tblName, TableKind tableKind,
                        cstring keyType, cstring valueType, unsigned size) const override;
     void emitMain(Util::SourceCodeBuilder* builder,
                   cstring functionName,
@@ -123,6 +129,9 @@ class TestTarget : public EBPF::KernelSamplesTarget {
  public:
     TestTarget() : KernelSamplesTarget("Userspace Test") {}
     void emitIncludes(Util::SourceCodeBuilder* builder) const override;
+    void emitTableDecl(Util::SourceCodeBuilder* builder,
+                       cstring tblName, TableKind tableKind,
+                       cstring keyType, cstring valueType, unsigned size) const override;
     cstring dataOffset(cstring base) const override
     { return cstring("((void*)(long)")+ base + "->data)"; }
     cstring dataEnd(cstring base) const override

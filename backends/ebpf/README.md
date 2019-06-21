@@ -182,7 +182,11 @@ dataplane/control-plane APIs.
 Our eBPF programs require a Linux kernel with version 4.15 or newer.
 In addition the following packages and programs are required to run the full test suite:
 
-- Clang 3.3 and llvm 3.7.1 or later are required. (Note: In some versions of Ubuntu Xenial (16.04.4) CMake crashes when checking for llvm. Until the bugfix is committed upstream, workarounds are available in the following issue: https://github.com/p4lang/p4c/issues/1376
+- Clang 3.3 and llvm 3.7.1 or later are required. (Note: In some
+  versions of Ubuntu Xenial (16.04.4) CMake crashes when checking for
+  llvm. Until the bugfix is committed upstream, workarounds are
+  available in the following issue:
+  https://github.com/p4lang/p4c/issues/1376
 
 - libpcap-dev to parse and generate .pcap files.
 
@@ -224,7 +228,7 @@ Here are some limitations imposed on the P4 programs:
 
 * arithmetic on data wider than 32 bits is not supported
 
-* eBPF does not offer support for ternary or LPM tables
+* eBPF does not offer support for ternary table matches
 
 ### Translating P4 to C
 

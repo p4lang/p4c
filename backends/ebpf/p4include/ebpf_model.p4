@@ -42,7 +42,8 @@ extern CounterArray {
 
 /**
  Implementation property for tables indicating that tables must be implemented
- using EBPF array map.
+ using EBPF array map.  However, if a table uses an LPM match type, the implementation
+ is only used for the size, and the table used is an LPM trie.
 */
 extern array_table {
     /// @param size: maximum number of entries in table
