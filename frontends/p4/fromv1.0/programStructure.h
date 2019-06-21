@@ -191,7 +191,7 @@ class ProgramStructure {
 
  protected:
     virtual const IR::Statement* convertPrimitive(const IR::Primitive* primitive);
-    void checkHeaderType(const IR::Type_StructLike* hrd, bool toStruct);
+    virtual void checkHeaderType(const IR::Type_StructLike* hrd, bool toStruct);
 
     /**
      * Extend the provided set of annotations with an '@name' annotation for the
@@ -237,6 +237,10 @@ class ProgramStructure {
     virtual const IR::P4Action*
         convertAction(const IR::ActionFunction* action, cstring newName,
                       const IR::Meter* meterToAccess, cstring counterToAccess);
+    virtual const IR::Statement*
+        convertMeterCall(const IR::Meter* meterToAccess);
+    virtual const IR::Statement*
+        convertCounterCall(cstring counterToAccess);
     virtual const IR::Type_Control* controlType(IR::ID name);
     const IR::PathExpression* getState(IR::ID dest);
     virtual const IR::Expression* counterType(const IR::CounterOrMeter* cm);

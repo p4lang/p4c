@@ -1774,6 +1774,35 @@ CONVERT_PRIMITIVE(funnel_shift_right) {
     return structure->assign(primitive->srcInfo, dest, src, primitive->operands.at(0)->type);
 }
 
+const IR::Statement*
+ProgramStructure::convertMeterCall(const IR::Meter* meterToAccess) {
+    ExpressionConverter conv(this);
+    // add a writeback to the meter field
+    auto decl = get(meterMap, meterToAccess);
+    CHECK_NULL(decl);
+    auto extObj = new IR::PathExpression(decl->name);
+    auto method = new IR::Member(extObj, v1model.directMeter.read.Id());
+    auto args = new IR::Vector<IR::Argument>();
+    auto arg = conv.convert(meterToAccess->result);
+    if (arg != nullptr)
+        args->push_back(new IR::Argument(arg));
+    auto mc = new IR::MethodCallExpression(method, args);
+    auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
+    return stat;
+}
+
+const IR::Statement*
+ProgramStructure::convertCounterCall(cstring counterToAccess) {
+    ExpressionConverter conv(this);
+    auto decl = get(counterMap, counterToAccess);
+    CHECK_NULL(decl);
+    auto extObj = new IR::PathExpression(decl->name);
+    auto method = new IR::Member(extObj, v1model.directCounter.count.Id());
+    auto mc = new IR::MethodCallExpression(method, new IR::Vector<IR::Argument>());
+    auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
+    return stat;
+}
+
 const IR::P4Action*
 ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newName,
                                 const IR::Meter* meterToAccess,
@@ -1802,28 +1831,11 @@ ProgramStructure::convertAction(const IR::ActionFunction* action, cstring newNam
         params->push_back(param); }
 
     if (meterToAccess != nullptr) {
-        ExpressionConverter conv(this);
-        // add a writeback to the meter field
-        auto decl = get(meterMap, meterToAccess);
-        CHECK_NULL(decl);
-        auto extObj = new IR::PathExpression(decl->name);
-        auto method = new IR::Member(extObj, v1model.directMeter.read.Id());
-        auto args = new IR::Vector<IR::Argument>();
-        auto arg = conv.convert(meterToAccess->result);
-        if (arg != nullptr)
-            args->push_back(new IR::Argument(arg));
-        auto mc = new IR::MethodCallExpression(method, args);
-        auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
+        auto stat = convertMeterCall(meterToAccess);
         body->push_back(stat); }
 
     if (counterToAccess != nullptr) {
-        ExpressionConverter conv(this);
-        auto decl = get(counterMap, counterToAccess);
-        CHECK_NULL(decl);
-        auto extObj = new IR::PathExpression(decl->name);
-        auto method = new IR::Member(extObj, v1model.directCounter.count.Id());
-        auto mc = new IR::MethodCallExpression(method, new IR::Vector<IR::Argument>());
-        auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
+        auto stat = convertCounterCall(counterToAccess);
         body->push_back(stat); }
 
     for (auto p : action->action) {
