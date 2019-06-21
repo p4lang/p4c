@@ -218,7 +218,7 @@ const IR::Type_Struct* ProgramStructure::createFieldListType(const IR::Expressio
 void ProgramStructure::createStructures() {
     auto metadata = new IR::Type_Struct(v1model.metadataType.Id());
     for (auto it : this->metadata) {
-        if (it.first->name == v1model.standardMetadata.name)
+        if (systemHeaderTypes.count(it.first->type->name))
             continue;
         IR::ID id = it.first->name;
         auto type = it.first->type;
