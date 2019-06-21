@@ -92,7 +92,7 @@ control deparser(packet_out b, in parsed_packet_t h) {
     }
 }
 
-control verify_checksum(inout parsed_packet_t hdr, inout local_metadata_t local_metadata) {
+control verifyChecksum(inout parsed_packet_t hdr, inout local_metadata_t local_metadata) {
     apply {
     }
 }
@@ -102,5 +102,5 @@ control compute_checksum(inout parsed_packet_t hdr, inout local_metadata_t local
     }
 }
 
-V1Switch(parse(), verify_checksum(), ingress(), egress(), compute_checksum(), deparser()) main;
+V1Switch(parse(), verifyChecksum(), ingress(), egress(), compute_checksum(), deparser()) main;
 

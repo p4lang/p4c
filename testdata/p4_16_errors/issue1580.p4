@@ -78,13 +78,13 @@ control egress(inout headers_t hdr, inout user_metadata_t meta,
     apply { }
 }
 
-control verify_checksum(inout headers_t hdr, inout user_metadata_t meta) {
+control verifyChecksum(inout headers_t hdr, inout user_metadata_t meta) {
     apply { }
 }
 
-control compute_checksum(inout headers_t hdr, inout user_metadata_t meta) {
+control computeChecksum(inout headers_t hdr, inout user_metadata_t meta) {
     apply { }
 }
 
-V1Switch(myParser(), verify_checksum(), ingress(), egress(),
-         compute_checksum(), MyDeparser()) main;
+V1Switch(myParser(), verifyChecksum(), ingress(), egress(),
+         computeChecksum(), MyDeparser()) main;

@@ -1,0 +1,7 @@
+issue1932-1.p4(10): [--Werror=legacy] error: foo: Duplicates declaration foo
+    action foo (inout bit<8> x) { x = (x >> 3); }
+           ^^^
+issue1932-1.p4(9)
+    action foo (in bit<8> x, out bit<8> y) { y = (x >> 2); }
+           ^^^
+error: 1 errors encountered, aborting compilation

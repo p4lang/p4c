@@ -1,0 +1,6 @@
+issue1932-2.p4(9): [--Werror=duplicate] error: foo duplicates foo.
+action foo (inout bit<8> x) { x = (x >> 3); }
+       ^^^
+issue1932-2.p4(8)
+action foo (in bit<8> x, out bit<8> y) { y = (x >> 2); }
+       ^^^

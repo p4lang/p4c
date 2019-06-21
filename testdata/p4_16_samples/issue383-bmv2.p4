@@ -46,13 +46,13 @@ struct local_metadata_t {
 
 struct parsed_packet_t {
     bitvec_hdr bvh0;
-    bitvec_hdr bvh1;   
+    bitvec_hdr bvh1;
 };
 
 struct tst_t {
   row_t row0;
   row_t row1;
-  col_t col;  
+  col_t col;
   bitvec_hdr bvh0;
   bitvec_hdr bvh1;
 }
@@ -76,9 +76,9 @@ control ingress(inout parsed_packet_t h,
 
     action do_act() {
         h.bvh1.row.alt1.valid = 0;
-        local_metadata.col.bvh.row.alt0.valid = 0;	
+        local_metadata.col.bvh.row.alt0.valid = 0;
     }
-    
+
     table tns {
         key = {
             h.bvh1.row.alt1.valid : exact;
@@ -88,7 +88,7 @@ control ingress(inout parsed_packet_t h,
             do_act;
         }
     }
-    
+
     apply {
 
         tns.apply();
@@ -128,7 +128,7 @@ control deparser(packet_out b, in parsed_packet_t h) {
     }
 }
 
-control verify_checksum(inout parsed_packet_t hdr,
+control verifyChecksum(inout parsed_packet_t hdr,
                         inout local_metadata_t local_metadata) {
     apply { }
 }
@@ -138,5 +138,5 @@ control compute_checksum(inout parsed_packet_t hdr,
     apply { }
 }
 
-V1Switch(parse(), verify_checksum(), ingress(), egress(),
+V1Switch(parse(), verifyChecksum(), ingress(), egress(),
          compute_checksum(), deparser()) main;
