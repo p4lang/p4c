@@ -127,6 +127,15 @@ else()
   set (SUPPORTS_KERNEL False)
 endif()
 
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/usr/include/bpf")
+  message(STATUS "Found libbpf")
+else()
+  message(WARNING "Missing the libbpf dependency, disabling kernel tests."
+  " You can install libbpf by running './build_libbpf' in the "
+  "${CMAKE_CURRENT_SOURCE_DIR}/runtime folder.")
+  set (SUPPORTS_KERNEL False)
+endif()
+
 # Only add the kernel tests if the two requirements are met
 if (SUPPORTS_KERNEL)
   p4c_add_tests("ebpf-kernel" ${EBPF_DRIVER_KERNEL} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_KERNEL}")

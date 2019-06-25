@@ -4,7 +4,7 @@ BPFOBJ=
 # Get the source name of the object to match targets
 BPFNAME=$(basename $(BPFOBJ))
 BPFDIR=$(dir $(BPFOBJ))
-override INCLUDES+= -I$(dir $(BPFOBJ))
+override INCLUDES+= -I$(dir $(BPFOBJ)) -I$(ROOT_DIR)usr/include/bpf/ -I$(ROOT_DIR)contrib/libbpf/include/uapi/
 
 # Arguments for the P4 Compiler
 P4INCLUDE=-I./p4include
@@ -23,7 +23,7 @@ BUILDDIR:= $(BPFDIR)build
 override INCLUDES+= -I./$(SRCDIR) -include ebpf_runtime_$(TARGET).h
 # Optimization flags to save space
 override CFLAGS+=-O2 -g # -Wall -Werror
-LIBS+=-lpcap
+LIBS+=-lpcap $(ROOT_DIR)usr/lib64/libbpf.a
 SOURCES=$(SRCDIR)/ebpf_registry.c  $(SRCDIR)/ebpf_map.c $(BPFNAME).c
 SRC_BASE+=$(SRCDIR)/ebpf_runtime.c $(SRCDIR)/pcap_util.c $(SOURCES)
 SRC_BASE+=$(SRCDIR)/ebpf_runtime_$(TARGET).c
@@ -49,7 +49,7 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.c
 	@echo "Creating folder: $(dir $(OBJECTS))"
 	@mkdir -p $(dir $(OBJECTS))
 	@echo "Compiling: $< -> $@"
-	$(GCC) $(CFLAGS) $(INCLUDES) $(LIBS) -MP -MMD -c $< -o $@
+	$(GCC) $(CFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
 
 # If the target file is missing, generate .c files with the P4 compiler
 $(BPFNAME).c: $(P4FILE)

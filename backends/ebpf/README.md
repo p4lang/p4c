@@ -192,7 +192,9 @@ In addition the following packages and programs are required to run the full tes
 
 - libelf-dev to compile C-programs to eBPF byte code.
 
-- iproute2 to use tc/ip commands to load eBPF programs.
+- zlib1g as libelf dependency.
+
+- a recent version of iproute2 that supports `clsact` to load eBPF programs via `tc` and `ip`.
 
 - net-tools (if not installed already)
 
@@ -206,8 +208,8 @@ Additionally, the eBPF compiler test suite has the following python dependencies
 
 You can install these using:
 ```
-$ sudo apt-get install clang llvm libpcap-dev libelf-dev iproute2 net-tools
-$ sudo pip install pyroute2 ply scapy==2.4.0
+$ sudo apt-get install clang llvm libpcap-dev zlib1g libelf-dev iproute2 net-tools
+$ pip install --user pyroute2 ply scapy==2.4.0
 ```
 
 ### Supported capabilities
