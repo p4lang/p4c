@@ -25,7 +25,8 @@ ENV P4C_DEPS bison \
              libgmp-dev \
              pkg-config \
              tcpdump
-ENV P4C_EBPF_DEPS libpcap-dev \
+ENV P4C_EBPF_DEPS git \
+             libpcap-dev \
              libelf-dev \
              llvm \
              clang \
