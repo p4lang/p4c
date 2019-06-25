@@ -1,5 +1,8 @@
 # Travis CI integration for p4c using Docker.
 
+sudo: required
+dist: xenial
+
 branches:
   only:
   - master
