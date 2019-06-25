@@ -30,7 +30,8 @@ ENV P4C_EBPF_DEPS libpcap-dev \
              llvm \
              clang \
              iproute2 \
-             net-tools
+             net-tools \
+             iptables
 ENV P4C_RUNTIME_DEPS cpp \
                      libboost-graph1.58.0 \
                      libboost-iostreams1.58.0 \
@@ -48,11 +49,16 @@ ENV P4C_PIP_PACKAGES ipaddr \
 # 16.04.
 COPY . /p4c/
 WORKDIR /p4c/
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends $P4C_DEPS $P4C_EBPF_DEPS $P4C_RUNTIME_DEPS && \
     mkdir /tmp/pip && cd /tmp/pip && curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python get-pip.py && cd - && rm -rf /tmp/pip && \
     pip install $P4C_PIP_PACKAGES && \
-    ./backends/ebpf/build_libbpf && \
+    git clone git://git.kernel.org/pub/scm/network/iproute2/iproute2.git /tmp/ && cd /tmp/iproute2 && ./configure && \
+    make -j `getconf _NPROCESSORS_ONLN` && \
+    make install && \
+    cd /p4c/ && \
+    /p4c/backends/ebpf/build_libbpf && \
     mkdir build && \
     cd build && \
     cmake .. '-DCMAKE_CXX_FLAGS:STRING=-O3' && \
