@@ -232,9 +232,9 @@ void EBPFTable::emitInstance(CodeBuilder* builder) {
         TableKind tableKind;
         auto extBlock = block->to<IR::ExternBlock>();
         if (extBlock->type->name.name == program->model.array_table.name) {
-            tableKind = TableHash;
-        } else if (extBlock->type->name.name == program->model.hash_table.name) {
             tableKind = TableArray;
+        } else if (extBlock->type->name.name == program->model.hash_table.name) {
+            tableKind = TableHash;
         } else {
             ::error("%1%: implementation must be one of %2% or %3%",
                     impl, program->model.array_table.name, program->model.hash_table.name);
