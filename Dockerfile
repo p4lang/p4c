@@ -28,6 +28,7 @@ ENV P4C_DEPS bison \
 ENV P4C_EBPF_DEPS git \
              libpcap-dev \
              libelf-dev \
+             zlib1g-dev \
              llvm \
              clang \
              iproute2 \
@@ -58,7 +59,7 @@ RUN mkdir /tmp/pip && cd /tmp/pip && \
     curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && \
     python get-pip.py && cd - && rm -rf /tmp/pip && \
     pip install $P4C_PIP_PACKAGES && \
-    git clone git://git.kernel.org/pub/scm/network/iproute2/iproute2.git /tmp/iproute2 && cd /tmp/iproute2 && ./configure && \
+    git clone git://git.kernel.org/pub/scm/linux/kernel/git/iproute2/iproute2.git /tmp/iproute2 && cd /tmp/iproute2 && ./configure && \
     make -j `getconf _NPROCESSORS_ONLN` && \
     make install && \
     cd /p4c/ && \
