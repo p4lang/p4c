@@ -129,7 +129,8 @@ Evaluator::evaluateArguments(
         CHECK_NULL(folded);
         visit(folded);  // recursive evaluation
         if (!hasValue(folded)) {
-            ::error("%1%: Cannot evaluate to a compile-time constant", arg->expression);
+            if (!typeMap->isCompileTimeConstantCheckDisabled())
+                error("%1%: Cannot evaluate to a compile-time constant", arg->expression);
             popBlock(context);
             return nullptr;
         } else {

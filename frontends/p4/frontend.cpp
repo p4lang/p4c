@@ -114,7 +114,8 @@ class FrontEndDump : public PassManager {
 
 // TODO: remove skipSideEffectOrdering flag
 const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program,
-                                   bool skipSideEffectOrdering) {
+                                   bool skipSideEffectOrdering,
+                                   bool disableCompileTimeConstantCheck) {
     if (program == nullptr)
         return nullptr;
 
@@ -122,6 +123,10 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     ReferenceMap  refMap;
     TypeMap       typeMap;
     refMap.setIsV1(isv1);
+    // XXX(hanw) experimental feature
+    // set true if constructor parameter does not have to be compile-time
+    // constant.
+    typeMap.disableCompileTimeConstantCheck(disableCompileTimeConstantCheck);
 
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
 

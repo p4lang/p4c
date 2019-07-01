@@ -40,7 +40,8 @@ class FrontEnd {
     }
     void addDebugHook(DebugHook hook) { hooks.push_back(hook); }
     const IR::P4Program* run(const CompilerOptions& options, const IR::P4Program* program,
-                             bool skipSideEffectOrdering = false);
+                             bool skipSideEffectOrdering = false,
+                             bool disableCompileTimeConstantCheck = false);
 };
 
 }  // namespace P4

@@ -59,8 +59,13 @@ class TypeMap final : public ProgramMap {
     // checks some preconditions before setting the type
     void checkPrecondition(const IR::Node* element, const IR::Type* type) const;
 
+    // if `constructorParamMustBeConstant` is false, then
+    // the frontend will not enforce the rule that a constructor
+    // parameter must be compile time constant.
+    bool noCompileTimeConstantCheck;
+
  public:
-    TypeMap() : ProgramMap("TypeMap") {}
+    TypeMap() : ProgramMap("TypeMap"), noCompileTimeConstantCheck(true) {}
 
     bool contains(const IR::Node* element) { return typeMap.count(element) != 0; }
     void setType(const IR::Node* element, const IR::Type* type);
@@ -72,6 +77,9 @@ class TypeMap final : public ProgramMap {
     bool isLeftValue(const IR::Expression* expression) const
     { return leftValues.count(expression) > 0; }
     bool isCompileTimeConstant(const IR::Expression* expression) const;
+    void disableCompileTimeConstantCheck(bool disable);
+    bool isCompileTimeConstantCheckDisabled() const
+    { return noCompileTimeConstantCheck; }
     size_t size() const
     { return typeMap.size(); }
 

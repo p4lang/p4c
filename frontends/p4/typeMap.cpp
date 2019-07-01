@@ -47,7 +47,11 @@ void TypeMap::setCompileTimeConstant(const IR::Expression* expression) {
 bool TypeMap::isCompileTimeConstant(const IR::Expression* expression) const {
     bool result = constants.find(expression) != constants.end();
     LOG3(dbp(expression) << (result ? " constant" : " not constant"));
-    return result;
+    return result || noCompileTimeConstantCheck;
+}
+
+void TypeMap::disableCompileTimeConstantCheck(bool noCheck) {
+    noCompileTimeConstantCheck = noCheck;
 }
 
 void TypeMap::clear() {
