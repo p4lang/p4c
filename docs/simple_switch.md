@@ -670,6 +670,61 @@ impose this same restriction, because the restriction can be imposed
 by the design of the hardware.
 
 
+### Restrictions on code within actions
+
+These restrictions are actually restrictions of the `p4c` compiler, not of
+`simple_switch`.  Anyone interested in enhancing `p4c` to remove these
+restrictions should see the issues below.
+
+The P4_16 language specification v1.1.0 permits `if` statements within action
+declarations.  `p4c`, when compiling for the target BMv2 simple_switch, supports
+some kinds of `if` statements, in particular ones that can be transformed into
+assignments using the ternary `condition ? true_expr : false_expr` operator.
+This is supported:
+
+```
+    action foo() {
+        meta.b = meta.b + 5;
+        if (hdr.ethernet.etherType == 7) {
+            hdr.ethernet.dstAddr = 1;
+        } else {
+            hdr.ethernet.dstAddr = 2;
+        }
+    }
+```
+
+but this is not, as of 2019-Jul-01:
+
+```
+    action foo() {
+        meta.b = meta.b + 5;
+        if (hdr.ethernet.etherType == 7) {
+            hdr.ethernet.dstAddr = 1;
+        } else {
+	    mark_to_drop(standard_metadata);
+        }
+    }
+```
+
+Given the following text from the P4_16 language specification, it is likely
+that there are other P4 implementations that have limited or no support for `if`
+statements within actions:
+
+    No `switch` statements are allowed within an action --- the grammar permits
+    them, but a semantic check should reject them.  Some targets may impose
+    additional restrictions on action bodies --- e.g., only allowing
+    straight-line code, with no conditional statements or expressions.
+
+Thus P4 programs using `if` statements within actions are likely to be less
+portable than programs that avoid doing so.
+
+As mentioned above, enhancing `p4c` would enable a larger variety of `if`
+statements within actions to be supported.
+
+* [p4c issue #644](https://github.com/p4lang/p4c/issues/644)
+* [behavioral-model issue #379](https://github.com/p4lang/behavioral-model/pull/379)
+
+
 ### Restrictions on code in the `ComputeChecksum` control
 
 The `ComputeChecksum` control is executed just after the `Egress`
