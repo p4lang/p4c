@@ -1341,14 +1341,14 @@ class P4RuntimeEntriesConverter {
 
     /// Appends the 'const entries' for the table to the WriteRequest message.
     void addTableEntries(const IR::TableBlock* tableBlock, ReferenceMap* refMap,
-                         TypeMap* typeMap) {
+                         TypeMap* typeMap, P4RuntimeArchHandlerIface* archHandler) {
         CHECK_NULL(tableBlock);
         auto table = tableBlock->container;
 
         auto entriesList = table->getEntries();
         if (entriesList == nullptr) return;
 
-        auto tableName = table->controlPlaneName();
+        auto tableName = archHandler->getControlPlaneName(tableBlock);
         auto tableId = symbols.getId(P4RuntimeSymbolType::TABLE(), tableName);
 
         int entryPriority = entriesList->entries.size();
@@ -1740,7 +1740,7 @@ P4RuntimeAnalyzer::analyze(const IR::P4Program* program,
     Helpers::forAllEvaluatedBlocks(evaluatedProgram, [&](const IR::Block* block) {
         if (block->is<IR::TableBlock>())
             entriesConverter.addTableEntries(block->to<IR::TableBlock>(), refMap,
-                                             typeMap);
+                                             typeMap, archHandler);
     });
 
     auto* p4Info = analyzer.getP4Info();
