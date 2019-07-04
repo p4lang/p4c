@@ -121,7 +121,7 @@ class ProgramStructure {
 
     std::unordered_set<cstring>                 allNames;
     NamedObjectInfo<const IR::Type_StructLike*> types;
-    NamedObjectInfo<const IR::Metadata*>        metadata;
+    NamedObjectInfo<const IR::HeaderOrMetadata*> metadata;
     NamedObjectInfo<const IR::Header*>          headers;
     NamedObjectInfo<const IR::HeaderStack*>     stacks;
     NamedObjectInfo<const IR::V1Control*>       controls;

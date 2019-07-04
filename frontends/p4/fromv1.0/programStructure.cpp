@@ -228,7 +228,7 @@ void ProgramStructure::createStructures() {
             ::warning(ErrorType::ERR_DUPLICATE,
                       "header and metadata instances %2% with the same name",
                       it.first, h);
-        auto ht = type->to<IR::Type_Struct>();
+        auto ht = type->to<IR::Type_StructLike>();
         auto path = new IR::Path(type_name);
         auto tn = new IR::Type_Name(ht->name.srcInfo, path);
         auto annos = addGlobalNameAnnotation(id, it.first->annotations);
@@ -244,7 +244,7 @@ void ProgramStructure::createStructures() {
         auto type_name = types.get(type);
         if (headerInstanceExclusionList.count(type_name))
             continue;
-        auto ht = type->to<IR::Type_Header>();
+        auto ht = type->to<IR::Type_StructLike>();
         auto path = new IR::Path(type_name);
         auto tn = new IR::Type_Name(ht->name.srcInfo, path);
         auto annos = addGlobalNameAnnotation(id, it.first->annotations);
