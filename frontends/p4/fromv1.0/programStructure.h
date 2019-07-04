@@ -174,7 +174,10 @@ class ProgramStructure {
     std::map<cstring, const IR::ParserState*> parserEntryPoints;
 
     /// system header type
-    std::set<cstring> systemHeaderTypes;
+    std::set<cstring> metadataInstanceExclusionList;
+    std::set<cstring> headerInstanceExclusionList;
+    std::set<cstring> metadataTypeExclusionList;
+    std::set<cstring> headerTypeExclusionList;
 
     /// extra local instances to control created by primitive translation
     std::vector<const IR::Declaration*> localInstances;

@@ -130,7 +130,7 @@ void ProgramStructure::createTypes() {
     // Metadata first
     for (auto it : metadata) {
         auto type = it.first->type;
-        if (systemHeaderTypes.count(type->name.name) != 0)
+        if (metadataTypeExclusionList.count(type->externalName()))
             continue;
         createType(type, false, &converted);
     }
@@ -166,7 +166,7 @@ void ProgramStructure::createTypes() {
     for (auto it : headers) {
         auto type = it.first->type;
         CHECK_NULL(type);
-        if (systemHeaderTypes.count(type->externalName()) != 0)
+        if (headerTypeExclusionList.count(type->externalName()))
             continue;
         createType(type, true, &converted);
     }
@@ -218,16 +218,16 @@ const IR::Type_Struct* ProgramStructure::createFieldListType(const IR::Expressio
 void ProgramStructure::createStructures() {
     auto metadata = new IR::Type_Struct(v1model.metadataType.Id());
     for (auto it : this->metadata) {
-        if (systemHeaderTypes.count(it.first->type->name))
-            continue;
         IR::ID id = it.first->name;
         auto type = it.first->type;
+        auto type_name = types.get(type);
+        if (metadataInstanceExclusionList.count(type_name))
+            continue;
         auto h = headers.get(it.first->name);
         if (h != nullptr)
             ::warning(ErrorType::ERR_DUPLICATE,
                       "header and metadata instances %2% with the same name",
                       it.first, h);
-        auto type_name = types.get(type);
         auto ht = type->to<IR::Type_Struct>();
         auto path = new IR::Path(type_name);
         auto tn = new IR::Type_Name(ht->name.srcInfo, path);
@@ -242,8 +242,7 @@ void ProgramStructure::createStructures() {
         IR::ID id = it.first->name;
         auto type = it.first->type;
         auto type_name = types.get(type);
-        // filter out headers defined in architecture
-        if (systemHeaderTypes.count(type_name))
+        if (headerInstanceExclusionList.count(type_name))
             continue;
         auto ht = type->to<IR::Type_Header>();
         auto path = new IR::Path(type_name);
@@ -592,7 +591,10 @@ void ProgramStructure::loadModel() {
     // This includes in turn core.p4
     include("v1model.p4");
 
-    systemHeaderTypes.insert(v1model.standardMetadataType.name);
+    metadataInstanceExclusionList.insert(v1model.standardMetadataType.name);
+    metadataTypeExclusionList.insert(v1model.standardMetadataType.name);
+    headerInstanceExclusionList.insert(v1model.standardMetadataType.name);
+    headerTypeExclusionList.insert(v1model.standardMetadataType.name);
 }
 
 namespace {
