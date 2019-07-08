@@ -70,9 +70,9 @@ class bitvec {
  private:
     template<class T> class bitref {
         friend class bitvec;
-        T               &self;
+        T               self;
         int             idx;
-        bitref(T &s, int i) : self(s), idx(i) {}
+        bitref(T s, int i) : self(s), idx(i) {}
 
      public:
         bitref(const bitref &a) = default;
@@ -115,11 +115,11 @@ class bitvec {
     };
 
  public:
-    class nonconst_bitref : public bitref<bitvec> {
+    class nonconst_bitref : public bitref<bitvec &> {
         friend class bitvec;
         nonconst_bitref(bitvec &s, int i) : bitref(s, i) {}
      public:
-        nonconst_bitref(const bitref<bitvec> &a) : bitref(a) {}  // NOLINT(runtime/explicit)
+        nonconst_bitref(const bitref<bitvec &> &a) : bitref(a) {}  // NOLINT(runtime/explicit)
         nonconst_bitref(const nonconst_bitref &a) = default;
         nonconst_bitref(nonconst_bitref &&a) = default;
         bool operator=(bool b) const {
@@ -133,15 +133,20 @@ class bitvec {
     };
     typedef nonconst_bitref     iterator;
 
-    class const_bitref : public bitref<const bitvec> {
+    class const_bitref : public bitref<const bitvec &> {
         friend class bitvec;
         const_bitref(const bitvec &s, int i) : bitref(s, i) {}
      public:
-        const_bitref(const bitref<const bitvec> &a) : bitref(a) {}  // NOLINT(runtime/explicit)
+        const_bitref(const bitref<const bitvec &> &a) : bitref(a) {}  // NOLINT(runtime/explicit)
         const_bitref(const const_bitref &a) = default;
         const_bitref(const_bitref &&a) = default;
     };
     typedef const_bitref        const_iterator;
+
+    // when we take a bitref from an unnamed temp, we need to make a copy of it; if we kept
+    // a reference it would dangle.  That needs to be after the bitvec class def to avoid
+    // incomplete type errors
+    class copy_bitref;
 
     bitvec() : size(1), data(0) {}
     explicit bitvec(uintptr_t v) : size(1), data(v) {}
@@ -304,15 +309,20 @@ class bitvec {
     bool operator[](int idx) const { return getbit(idx); }
     int ffs(unsigned start = 0) const;
     unsigned ffz(unsigned start = 0) const;
-    const_bitref min() const { return const_bitref(*this, ffs()); }
-    const_bitref max() const {
+    const_bitref min() const & { return const_bitref(*this, ffs()); }
+    const_bitref max() const & {
         return --const_bitref(*this, size * bits_per_unit); }
-    const_bitref begin() const { return min(); }
-    const_bitref end() const { return const_bitref(*this, -1); }
-    nonconst_bitref min() { return nonconst_bitref(*this, ffs()); }
-    nonconst_bitref max() { return --nonconst_bitref(*this, size * bits_per_unit); }
-    nonconst_bitref begin() { return min(); }
-    nonconst_bitref end() { return nonconst_bitref(*this, -1); }
+    const_bitref begin() const & { return min(); }
+    const_bitref end() const & { return const_bitref(*this, -1); }
+    // not safe to keep a ref to a temp bitvec -- need to make a copy.
+    copy_bitref min() &&;
+    copy_bitref max() &&;
+    copy_bitref begin() &&;
+    copy_bitref end() &&;
+    nonconst_bitref min() & { return nonconst_bitref(*this, ffs()); }
+    nonconst_bitref max() & { return --nonconst_bitref(*this, size * bits_per_unit); }
+    nonconst_bitref begin() & { return min(); }
+    nonconst_bitref end() & { return nonconst_bitref(*this, -1); }
     bool empty() const {
         for (size_t i = 0; i < size; i++)
             if (word(i) != 0) return false;
@@ -480,6 +490,21 @@ class bitvec {
  public:
     friend std::ostream &operator<<(std::ostream &, const bitvec &);
 };
+
+class bitvec::copy_bitref : public bitvec::bitref<const bitvec> {
+    friend class bitvec;
+    copy_bitref(const bitvec &s, int i) : bitref(s, i) {}
+ public:
+    copy_bitref(const bitref<const bitvec> &a) : bitref(a) {}  // NOLINT(runtime/explicit)
+    copy_bitref(const copy_bitref &a) = default;
+    copy_bitref(copy_bitref &&a) = default;
+    bool operator==(const bitref &a) const { return idx == a.idx && self == a.self; }
+    bool operator!=(const bitref &a) const { return idx != a.idx || self != a.self; }
+};
+inline bitvec::copy_bitref bitvec::min() && { return copy_bitref(*this, ffs()); }
+inline bitvec::copy_bitref bitvec::max() && { return --copy_bitref(*this, size * bits_per_unit); }
+inline bitvec::copy_bitref bitvec::begin() && { return copy_bitref(*this, ffs()); }
+inline bitvec::copy_bitref bitvec::end() && { return copy_bitref(*this, -1); }
 
 inline bitvec operator|(bitvec &&a, const bitvec &b) {
     bitvec rv(std::move(a)); rv |= b; return rv; }

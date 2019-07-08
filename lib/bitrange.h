@@ -43,6 +43,7 @@ class bitranges {
 
  public:
     explicit bitranges(const bitvec &b) : bits(b) {}
+    explicit bitranges(bitvec &&b) : tmp(b), bits(tmp) {}
     explicit bitranges(uintptr_t b) : tmp(b), bits(tmp) {}
     iter begin() const { return iter(bits.begin()); }
     iter end() const { return iter(bits.end()); }

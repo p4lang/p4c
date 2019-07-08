@@ -3808,7 +3808,7 @@ def CheckRValueReference(filename, clean_lines, linenum, nesting_state, error):
   line = clean_lines.elided[linenum]
   match = Match(r'^(.*\S)&&', line)
   if not match:
-    match = Match(r'(.*)&&[^,\s]', line)
+    match = Match(r'(.*)&&[^,;\s]', line)
   if (not match) or '(&&)' in line or Search(r'\boperator\s*$', match.group(1)):
     return
 
