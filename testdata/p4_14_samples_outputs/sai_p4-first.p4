@@ -49,8 +49,7 @@ struct ingress_metadata_t {
 }
 
 struct ingress_intrinsic_metadata_t {
-    bit<9>  ingress_port;
-    bit<32> lf_field_list;
+    bit<9> ingress_port;
 }
 
 header ethernet_t {

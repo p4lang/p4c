@@ -19,7 +19,7 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
     @name(".NoAction") action NoAction_0() {
     }
     @name("IngressImpl.testRegister") register<bit<1>>(32w1) testRegister_0;
-    @name("IngressImpl.drop") action drop_1() {
+    @name("IngressImpl.drop") action drop() {
         mark_to_drop(standard_metadata);
     }
     @name("IngressImpl.forward") action forward() {
@@ -30,7 +30,7 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
             meta.test: exact @name("meta.test") ;
         }
         actions = {
-            drop_1();
+            drop();
             forward();
             @defaultonly NoAction_0();
         }

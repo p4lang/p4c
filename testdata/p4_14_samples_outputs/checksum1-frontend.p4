@@ -72,7 +72,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_3() {
     }
-    @name(".drop") action drop_1() {
+    @name(".drop") action drop() {
     }
     @name(".forward") action forward(bit<48> to) {
         hdr.ethernet.dstAddr = to;
@@ -82,7 +82,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".route") table route_0 {
         actions = {
-            drop_1();
+            drop();
             forward();
             @defaultonly NoAction_0();
         }

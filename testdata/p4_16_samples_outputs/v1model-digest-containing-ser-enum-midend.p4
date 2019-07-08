@@ -89,9 +89,9 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     @name("MyIngress.set_dmac") action set_dmac(macAddr_t dstAddr) {
         hdr.ethernet.dstAddr = dstAddr;
     }
-    @name("MyIngress.drop") action drop_1() {
+    @name("MyIngress.drop") action drop() {
     }
-    @name("MyIngress.drop") action drop_3() {
+    @name("MyIngress.drop") action drop_2() {
     }
     @name("MyIngress.forward") table forward_0 {
         key = {
@@ -99,7 +99,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         }
         actions = {
             set_dmac();
-            drop_1();
+            drop();
             NoAction_0();
         }
         size = 1024;
@@ -115,7 +115,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         }
         actions = {
             set_nhop();
-            drop_3();
+            drop_2();
             NoAction_1();
         }
         size = 1024;

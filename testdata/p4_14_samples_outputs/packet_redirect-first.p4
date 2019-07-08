@@ -4,10 +4,7 @@
 struct intrinsic_metadata_t {
     bit<16> mcast_grp;
     bit<4>  egress_rid;
-    bit<32> lf_field_list;
     bit<64> ingress_global_timestamp;
-    bit<16> resubmit_flag;
-    bit<16> recirculate_flag;
 }
 
 struct metaA_t {

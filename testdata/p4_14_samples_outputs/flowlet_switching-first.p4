@@ -12,7 +12,6 @@ struct ingress_metadata_t {
 
 struct intrinsic_metadata_t {
     bit<48> ingress_global_timestamp;
-    bit<32> lf_field_list;
     bit<16> mcast_grp;
     bit<16> egress_rid;
 }

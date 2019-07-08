@@ -4,11 +4,8 @@
 struct intrinsic_metadata_t {
     bit<48> ingress_global_timestamp;
     bit<48> egress_global_timestamp;
-    bit<8>  lf_field_list;
     bit<16> mcast_grp;
     bit<16> egress_rid;
-    bit<8>  resubmit_flag;
-    bit<8>  recirculate_flag;
 }
 
 struct mymeta_t {
@@ -126,11 +123,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             standard_metadata.instance_type           : exact @name("standard_metadata.instance_type") ;
             standard_metadata.ingress_global_timestamp: exact @name("standard_metadata.ingress_global_timestamp") ;
             standard_metadata.egress_global_timestamp : exact @name("standard_metadata.egress_global_timestamp") ;
-            standard_metadata.lf_field_list           : exact @name("standard_metadata.lf_field_list") ;
             standard_metadata.mcast_grp               : exact @name("standard_metadata.mcast_grp") ;
             standard_metadata.egress_rid              : exact @name("standard_metadata.egress_rid") ;
-            standard_metadata.resubmit_flag           : exact @name("standard_metadata.resubmit_flag") ;
-            standard_metadata.recirculate_flag        : exact @name("standard_metadata.recirculate_flag") ;
             meta.mymeta.resubmit_count                : exact @name("mymeta.resubmit_count") ;
             meta.mymeta.recirculate_count             : exact @name("mymeta.recirculate_count") ;
             meta.mymeta.clone_e2e_count               : exact @name("mymeta.clone_e2e_count") ;
@@ -154,11 +148,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
             standard_metadata.instance_type           : exact @name("standard_metadata.instance_type") ;
             standard_metadata.ingress_global_timestamp: exact @name("standard_metadata.ingress_global_timestamp") ;
             standard_metadata.egress_global_timestamp : exact @name("standard_metadata.egress_global_timestamp") ;
-            standard_metadata.lf_field_list           : exact @name("standard_metadata.lf_field_list") ;
             standard_metadata.mcast_grp               : exact @name("standard_metadata.mcast_grp") ;
             standard_metadata.egress_rid              : exact @name("standard_metadata.egress_rid") ;
-            standard_metadata.resubmit_flag           : exact @name("standard_metadata.resubmit_flag") ;
-            standard_metadata.recirculate_flag        : exact @name("standard_metadata.recirculate_flag") ;
             meta.mymeta.resubmit_count                : exact @name("mymeta.resubmit_count") ;
             meta.mymeta.recirculate_count             : exact @name("mymeta.recirculate_count") ;
             meta.mymeta.clone_e2e_count               : exact @name("mymeta.clone_e2e_count") ;
@@ -274,11 +265,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             standard_metadata.instance_type           : exact @name("standard_metadata.instance_type") ;
             standard_metadata.ingress_global_timestamp: exact @name("standard_metadata.ingress_global_timestamp") ;
             standard_metadata.egress_global_timestamp : exact @name("standard_metadata.egress_global_timestamp") ;
-            standard_metadata.lf_field_list           : exact @name("standard_metadata.lf_field_list") ;
             standard_metadata.mcast_grp               : exact @name("standard_metadata.mcast_grp") ;
             standard_metadata.egress_rid              : exact @name("standard_metadata.egress_rid") ;
-            standard_metadata.resubmit_flag           : exact @name("standard_metadata.resubmit_flag") ;
-            standard_metadata.recirculate_flag        : exact @name("standard_metadata.recirculate_flag") ;
             meta.mymeta.resubmit_count                : exact @name("mymeta.resubmit_count") ;
             meta.mymeta.recirculate_count             : exact @name("mymeta.recirculate_count") ;
             meta.mymeta.clone_e2e_count               : exact @name("mymeta.clone_e2e_count") ;
@@ -302,11 +290,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             standard_metadata.instance_type           : exact @name("standard_metadata.instance_type") ;
             standard_metadata.ingress_global_timestamp: exact @name("standard_metadata.ingress_global_timestamp") ;
             standard_metadata.egress_global_timestamp : exact @name("standard_metadata.egress_global_timestamp") ;
-            standard_metadata.lf_field_list           : exact @name("standard_metadata.lf_field_list") ;
             standard_metadata.mcast_grp               : exact @name("standard_metadata.mcast_grp") ;
             standard_metadata.egress_rid              : exact @name("standard_metadata.egress_rid") ;
-            standard_metadata.resubmit_flag           : exact @name("standard_metadata.resubmit_flag") ;
-            standard_metadata.recirculate_flag        : exact @name("standard_metadata.recirculate_flag") ;
             meta.mymeta.resubmit_count                : exact @name("mymeta.resubmit_count") ;
             meta.mymeta.recirculate_count             : exact @name("mymeta.recirculate_count") ;
             meta.mymeta.clone_e2e_count               : exact @name("mymeta.clone_e2e_count") ;

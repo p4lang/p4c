@@ -2,9 +2,8 @@
 #include <v1model.p4>
 
 struct intrinsic_metadata_t {
-    bit<4>  mcast_grp;
-    bit<4>  egress_rid;
-    bit<32> lf_field_list;
+    bit<4> mcast_grp;
+    bit<4> egress_rid;
 }
 
 struct meta_t {

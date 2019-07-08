@@ -205,7 +205,6 @@ metadata egress_metadata_t egress_metadata;
 header_type ingress_intrinsic_metadata_t {
     fields {
         ingress_port : 9;               // ingress physical port id.
-        lf_field_list : 32;             // hack for learn filter.
     }
 }
 metadata ingress_intrinsic_metadata_t intrinsic_metadata;

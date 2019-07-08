@@ -44,10 +44,7 @@ header_type intrinsic_metadata_t {
     fields {
         mcast_grp : 16;
         egress_rid : 4;
-        lf_field_list: 32;
         ingress_global_timestamp : 64;
-        resubmit_flag : 16;
-        recirculate_flag : 16;
     }
 }
 
