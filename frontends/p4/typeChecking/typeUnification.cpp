@@ -305,24 +305,43 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         }
         auto td = dest->to<IR::Type_Tuple>();
         auto ts = src->to<IR::Type_Tuple>();
-        if (td->components.size() != ts->components.size()) {
+        if ((td->components.size() != ts->components.size()) && (ts->components.size() != 0)) {
             TypeInference::typeError("%1%: Cannot match tuples with different sizes %2% vs %3%",
                                      errorPosition, td->components.size(), ts->components.size());
             return false;
         }
-
-        for (size_t i=0; i < td->components.size(); i++) {
-            auto si = ts->components.at(i);
-            auto di = td->components.at(i);
-            bool success = unify(errorPosition, di, si, reportErrors);
-            if (!success)
-                return false;
+        if (ts->components.size() != 0) {
+            for (size_t i=0; i < td->components.size(); i++) {
+                auto si = ts->components.at(i);
+                auto di = td->components.at(i);
+                bool success = unify(errorPosition, di, si, reportErrors);
+                if (!success)
+                    return false;
+            }
+        } else {
+            for (size_t i=0; i < td->components.size(); i++) {
+                auto di = td->components.at(i);
+                if (di->is<IR::Type_Varbits>() || di->is<IR::Type_Enum>()
+                    || di->is<IR::Type_Error>() || di->is<IR::Type_Stack>()
+                    || di->is<IR::Type_HeaderUnion>()) {
+                    TypeInference::typeError("%1%: Structs, headers and tuples containing %2% data "
+                                             "type as a lief field cannot be zero initialized "
+                                             "with empty tuple: %3% = { }.",
+                                             errorPosition, td->components.at(i), td);
+                    return false;
+                } else if (di->is<IR::Type_Struct>() || di->is<IR::Type_Header>()
+                           || di->is<IR::Type_Tuple>()) {
+                    bool success = unify(errorPosition, di, src, reportErrors);
+                    if (!success)
+                        return false;
+                }
+            }
         }
         return true;
     } else if (dest->is<IR::Type_Struct>() || dest->is<IR::Type_Header>()) {
         auto strct = dest->to<IR::Type_StructLike>();
         if (auto tpl = src->to<IR::Type_Tuple>()) {
-            if (strct->fields.size() != tpl->components.size()) {
+            if ((strct->fields.size() != tpl->components.size()) && (tpl->components.size() != 0)) {
                 if (reportErrors)
                     TypeInference::typeError("%1%: Number of fields %2% in initializer different "
                                              "than number of fields in structure %3%: %4% to %5%",
@@ -330,16 +349,35 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
                                              strct->fields.size(), tpl, strct);
                 return false;
             }
+            if (tpl->components.size() != 0) {
+                int index = 0;
+                for (const IR::StructField* f : strct->fields) {
+                    const IR::Type* tplField = tpl->components.at(index);
+                    const IR::Type* destt = f->type;
 
-            int index = 0;
-            for (const IR::StructField* f : strct->fields) {
-                const IR::Type* tplField = tpl->components.at(index);
-                const IR::Type* destt = f->type;
-
-                bool success = unify(errorPosition, destt, tplField, reportErrors);
-                if (!success)
-                    return false;
-                index++;
+                    bool success = unify(errorPosition, destt, tplField, reportErrors);
+                    if (!success)
+                        return false;
+                    index++;
+                }
+            } else {
+                for (const IR::StructField* f : strct->fields) {
+                    if (f->type->is<IR::Type_Varbits>() || f->type->is<IR::Type_Enum>()
+                        || f->type->is<IR::Type_Error>() || f->type->is<IR::Type_Stack>()
+                        || f->type->is<IR::Type_HeaderUnion>()) {
+                        TypeInference::typeError("%1%: Structs, headers and tuples "
+                                                 "containing %2% data type as a lief "
+                                                 "field cannot be zero initialized "
+                                                 "with empty tuple: %3% = { }.",
+                                                 errorPosition, f->type, strct);
+                        return false;
+                    } else if (f->type->is<IR::Type_Struct>() || f->type->is<IR::Type_Header>()
+                               || f->type->is<IR::Type_Tuple>()) {
+                        bool success = unify(errorPosition, f->type, src, reportErrors);
+                        if (!success)
+                            return false;
+                    }
+                }
             }
             return true;
         } else if (auto st = src->to<IR::Type_StructLike>()) {
