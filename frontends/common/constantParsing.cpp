@@ -40,10 +40,10 @@ parseConstantWithWidth(Util::SourceInfo srcInfo, const char* text,
     if (sep == nullptr || !*sep)
        BUG("Expected to find separator %1%", text);
     if (size <= 0) {
-        ::error("%1%: Non-positive size %2%", srcInfo, size);
+        ::error(ErrorType::ERR_INVALID, "width; must be positive %2%", srcInfo, size);
         return nullptr; }
     if (size > P4CConfiguration::MaximumWidthSupported) {
-        ::error("%1%: %2% size too large", srcInfo, size);
+        ::error(ErrorType::ERR_OVERLIMIT, "%1%: %2% size too large", srcInfo, size);
         return nullptr; }
 
     bool isSigned = *sep++ == 's';
@@ -64,7 +64,7 @@ IR::Constant* parseConstant(const Util::SourceInfo& srcInfo,
 
     auto result = parseConstantWithWidth(srcInfo, constant.text.c_str(),
                                          constant.skip, constant.base);
-    if (result == nullptr && defaultValue)
+    if (result == nullptr)
         return new IR::Constant(srcInfo, defaultValue);
     return result;
 }
@@ -74,7 +74,7 @@ int parseConstantChecked(const Util::SourceInfo& srcInfo,
     auto cst = parseConstant(srcInfo, constant, 0);
     if (!cst->fitsInt()) {
         ::error(ErrorType::ERR_OVERLIMIT,
-                "%1$x: this implementation does not support bitstrings so large",
+                "%1$x: this implementation does not support bitstrings this large",
                 cst);
         return 8;  // this is a fine value for a width; compilation will stop anyway
     }

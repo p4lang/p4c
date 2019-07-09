@@ -1,0 +1,4 @@
+issue1986-1.p4(22): [--Werror=invalid] error: : Invalid width; must be positive 0
+         transition select(2w0) {0w0
+                                 ^^^
+error: 1 errors encountered, aborting compilation
