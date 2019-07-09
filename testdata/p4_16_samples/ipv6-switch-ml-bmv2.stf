@@ -1,0 +1,58 @@
+#
+# Copyright 2019, MNK Consulting
+# http://mnkcg.com
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# ipv6-switch-ml-bmv2.stf
+#
+# Ether(src='00:ae:f3:52:aa:d1')/IPv6(src='fe80::2878:42c6:2586:65de', dst='FF02:0:0:0:0:0:1:8')/UDP()
+#
+### IPv6 Mcast-destined test ########################
+add ipv6_tbl mcast_key:0x1 ingress.set_mcast_grp(mcast_grp:1113, port:0x2)
+#
+mc_mgrp_create 1113
+#
+mc_node_create 400 6
+mc_node_create 401 7
+mc_node_create 402 8
+#
+mc_node_associate 1113 0
+mc_node_associate 1113 1
+mc_node_associate 1113 2
+#
+# first copy of packet through egress
+###    table_add get_multicast_copy_out_bd set_out_bd 1113 400 => 10
+add get_multicast_copy_out_bd mcast_grp:1113 egress_rid:400 egress.set_out_bd(bd:10)
+###    table_add send_frame rewrite_mac 10 => 00:11:22:33:0a:55
+add send_frame fwd.out_bd:10 rewrite_mac(smac:0x001122330a55)
+
+# second copy of packet through egress
+###    table_add get_multicast_copy_out_bd set_out_bd 1113 401 => 11
+add get_multicast_copy_out_bd mcast_grp:1113 egress_rid:401 egress.set_out_bd(bd:11)
+###    table_add send_frame rewrite_mac 11 => 00:11:22:33:0b:55
+add send_frame fwd.out_bd:11 rewrite_mac(smac:0x001122330b55)
+
+# third copy of packet through egress
+###    table_add get_multicast_copy_out_bd set_out_bd 1113 402 => 12
+add get_multicast_copy_out_bd mcast_grp:1113 egress_rid:402 egress.set_out_bd(bd:12)
+###    table_add send_frame rewrite_mac 12 => 00:11:22:33:0c:55
+add send_frame fwd.out_bd:12 rewrite_mac(smac:0x001122330c55)
+#
+packet 0 33330001000800aef352aad186dd6000000000081140fe80000000000000287842c6258665deff0200000000000000000000000100080035003500080b45
+#
+expect 6 333300010008001122330a5586dd6000000000081140fe80000000000000287842c6258665deff0200000000000000000000000100080035003500080b45
+#
+expect 7 333300010008001122330b5586dd6000000000081140fe80000000000000287842c6258665deff0200000000000000000000000100080035003500080b45
+#
+expect 8 333300010008001122330c5586dd6000000000081140fe80000000000000287842c6258665deff0200000000000000000000000100080035003500080b45
