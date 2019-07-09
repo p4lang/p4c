@@ -117,4 +117,17 @@ TEST(Bitvec, rotate) {
     EXPECT_EQ(bv, bv_verify3);
 }
 
+TEST(Bitvec, rvalue) {
+    bitvec a(0x1ffff);
+    bitvec b(0xfff0000);
+
+    for (auto it = (a & b).begin(); it != (a & b).end(); ++it) {
+        EXPECT_EQ(it.index(), 16);
+        EXPECT_TRUE(it);
+    }
+    for (auto it = (a | b).begin(); it != (a | b).end(); ++it) {
+        EXPECT_TRUE(it);
+    }
+}
+
 }  // namespace Test
