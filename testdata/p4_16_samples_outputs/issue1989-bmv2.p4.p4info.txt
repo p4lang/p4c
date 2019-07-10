@@ -1,0 +1,39 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33585498
+    name: "ingress.acl_table"
+    alias: "acl_table"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.ethernet.etherType"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16790071
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16790071
+    name: "ingress.assign_non_const_array_index"
+    alias: "assign_non_const_array_index"
+  }
+}

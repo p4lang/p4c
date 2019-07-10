@@ -103,6 +103,9 @@ class Vector : public VectorBase {
     template<typename Container>
     iterator append(const Container &toAppend)
     { return insert(end(), toAppend.begin(), toAppend.end()); }
+    template<typename Container>
+    iterator prepend(const Container &toAppend)
+    { return insert(begin(), toAppend.begin(), toAppend.end()); }
 
     /**
      * Appends the provided node or vector of nodes to the end of this Vector.

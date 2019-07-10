@@ -1,4 +1,4 @@
-/*
+ /*
 Copyright 2016 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -49,7 +49,9 @@ const IR::Node* RemoveAliases::postorder(IR::P4Parser* parser) {
 
 const IR::Node* RemoveAliases::postorder(IR::P4Control* control) {
     if (!declarations.empty()) {
-        control->controlLocals.append(declarations);
+        // prepend declarations: they must come before any actions
+        // that may have been modified
+        control->controlLocals.prepend(declarations);
         declarations.clear();
     }
     return control;
