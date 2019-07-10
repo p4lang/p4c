@@ -31,8 +31,7 @@ control c(out bool x) {
         tmp = t1_0.apply().hit;
         if (!tmp) {
             tmp_0 = false;
-        }
-        else {
+        } else {
             tmp_1 = t2_0.apply().hit;
             tmp_0 = tmp_1;
         }

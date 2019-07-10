@@ -52,8 +52,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         if (hdr.data.b2 > 8w49) {
             test1.apply();
-        }
-        else {
+        } else {
             test2.apply();
         }
     }

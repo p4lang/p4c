@@ -20,24 +20,14 @@ control c(out bit<1> x) {
     apply {
         if (a_0 == b_0) {
             x = 1w1;
-        }
-        else {
-            if (h1_0 == h2_0) {
-                x = 1w1;
-            }
-            else {
-                if (s1_0 == s2_0) {
-                    x = 1w1;
-                }
-                else {
-                    if (a1_0 == a2_0) {
-                        x = 1w1;
-                    }
-                    else {
-                        x = 1w0;
-                    }
-                }
-            }
+        } else if (h1_0 == h2_0) {
+            x = 1w1;
+        } else if (s1_0 == s2_0) {
+            x = 1w1;
+        } else if (a1_0 == a2_0) {
+            x = 1w1;
+        } else {
+            x = 1w0;
         }
     }
 }

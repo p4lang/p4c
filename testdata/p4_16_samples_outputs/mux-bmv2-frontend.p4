@@ -26,8 +26,7 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
         _sub_0 = val[31:0];
         if (p_1) {
             tmp = _sub_0;
-        }
-        else {
+        } else {
             tmp = 32w1;
         }
         _sub_0 = tmp;

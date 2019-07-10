@@ -95,8 +95,7 @@ control process_port_vlan_mapping(inout headers hdr, inout metadata meta, inout 
     apply {
         if (port_vlan_to_bd_mapping.apply().hit) {
             ;
-        }
-        else {
+        } else {
             vlan_to_bd_mapping.apply();
         }
     }

@@ -108,8 +108,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
             debug_table_0.apply();
             if (meta._mystruct1_hash_drop1) {
                 tbl_act.apply();
-            }
-            else {
+            } else {
                 tbl_act_0.apply();
             }
         }

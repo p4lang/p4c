@@ -14,8 +14,7 @@ action a(in C c1, in C c2) {
     r.flip();
     if (r.get()) {
         c1.apply();
-    }
-    else {
+    } else {
         c2.apply();
     }
 }

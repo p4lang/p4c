@@ -10,8 +10,7 @@ control Ing() {
         b = true;
         if (b) {
             a = 5;
-        }
-        else {
+        } else {
             a = 10;
         }
     }

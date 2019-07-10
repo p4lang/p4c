@@ -4,8 +4,7 @@ control c(out bool b) {
         emptyTuple t = {  };
         if (t == {  }) {
             b = true;
-        }
-        else {
+        } else {
             b = false;
         }
     }

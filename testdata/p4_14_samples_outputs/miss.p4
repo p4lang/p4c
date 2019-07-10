@@ -59,8 +59,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         if (test1.apply().hit) {
             ;
-        }
-        else {
+        } else {
             test3.apply();
         }
         test4.apply();

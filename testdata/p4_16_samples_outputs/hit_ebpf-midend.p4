@@ -109,8 +109,7 @@ control pipe(inout Headers_t headers, out bool pass) {
         if (!hasReturned) {
             if (Check_src_ip_0.apply().hit) {
                 tbl_act_1.apply();
-            }
-            else {
+            } else {
                 tbl_act_2.apply();
             }
         }

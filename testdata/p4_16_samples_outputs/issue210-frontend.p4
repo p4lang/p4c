@@ -5,8 +5,7 @@ control Ing(out bit<32> a) {
     @name("Ing.cond") action cond() {
         if (b_0) {
             a = 32w5;
-        }
-        else {
+        } else {
             a = 32w10;
         }
     }

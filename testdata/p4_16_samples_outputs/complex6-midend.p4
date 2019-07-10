@@ -53,12 +53,10 @@ control c(inout bit<32> r) {
             tbl_act_0.apply();
             if (tmp < 32w2) {
                 tbl_act_1.apply();
-            }
-            else {
+            } else {
                 tbl_act_2.apply();
             }
-        }
-        else {
+        } else {
             tbl_act_3.apply();
         }
     }

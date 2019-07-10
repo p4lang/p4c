@@ -71,8 +71,7 @@ control c(out bit<32> v) {
         d_1 = 32w1;
         if (e_0 > 32w0) {
             e_0 = 32w1;
-        }
-        else {
+        } else {
             ;
         }
         e_0 = e_0 + 32w1;
@@ -84,8 +83,7 @@ control c(out bit<32> v) {
 
         if (e_0 > 32w0) {
             t_0.apply();
-        }
-        else {
+        } else {
             a1_2();
         }
     }

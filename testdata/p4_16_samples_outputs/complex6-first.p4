@@ -4,12 +4,10 @@ control c(inout bit<32> r) {
         if (f(32w2) > 32w0) {
             if (f(32w2) < 32w2) {
                 r = 32w1;
-            }
-            else {
+            } else {
                 r = 32w3;
             }
-        }
-        else {
+        } else {
             r = 32w2;
         }
     }

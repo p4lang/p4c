@@ -4,8 +4,7 @@
 bit<16> sometimes_dec(in bit<16> x) {
     if (x > 5) {
         return x - 1;
-    }
-    else {
+    } else {
         return x;
     }
 }

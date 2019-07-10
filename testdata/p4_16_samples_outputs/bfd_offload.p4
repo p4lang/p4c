@@ -14,8 +14,7 @@ BFD_Offload(32768) bfd_session_liveness_tracker = {
         bit<8> c = this.getTx(index) + 1;
         if (c >= 4) {
             return true;
-        }
-        else {
+        } else {
             this.setTx(index, c);
             return false;
         }

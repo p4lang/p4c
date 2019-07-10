@@ -30,8 +30,7 @@ control c(inout bit<32> x) {
     apply {
         if (x > x) {
             tbl_act.apply();
-        }
-        else {
+        } else {
             tbl_act_0.apply();
         }
         tbl_act_1.apply();

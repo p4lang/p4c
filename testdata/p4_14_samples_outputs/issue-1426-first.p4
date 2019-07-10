@@ -104,8 +104,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         if (standard_metadata.ingress_port & 9w0x1 == 9w1) {
             a1.apply();
             c_0.apply(hdr, meta, standard_metadata);
-        }
-        else {
+        } else {
             b1.apply();
             c_0.apply(hdr, meta, standard_metadata);
         }

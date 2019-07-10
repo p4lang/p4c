@@ -130,14 +130,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         if (_port_vlan_to_bd_mapping.apply().hit) {
             tbl_act.apply();
-        }
-        else {
+        } else {
             tbl_act_0.apply();
         }
         if (_process_port_vlan_mapping_tmp) {
             ;
-        }
-        else {
+        } else {
             _vlan_to_bd_mapping.apply();
         }
     }

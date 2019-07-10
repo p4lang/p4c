@@ -159,8 +159,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             if (meta._ing_metadata_f23 == hdr.vag.f2) {
                 i_t3_0.apply();
             }
-        }
-        else {
+        } else {
             i_t4_0.apply();
         }
     }

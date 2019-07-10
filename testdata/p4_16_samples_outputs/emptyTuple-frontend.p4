@@ -5,8 +5,7 @@ control c(out bool b) {
         t_0 = {  };
         if (t_0 == {  }) {
             b = true;
-        }
-        else {
+        } else {
             b = false;
         }
     }

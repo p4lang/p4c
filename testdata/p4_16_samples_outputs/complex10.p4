@@ -3,8 +3,7 @@ control c(inout bit<32> r) {
     apply {
         if (f(2) > 0 && f(3) < 0 || f(5) == 2) {
             r = 1;
-        }
-        else {
+        } else {
             r = 2;
         }
     }

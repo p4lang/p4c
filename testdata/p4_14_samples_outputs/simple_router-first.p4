@@ -127,8 +127,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 8w0) {
             ipv4_lpm.apply();
             forward.apply();
-        }
-        else {
+        } else {
             drop_all.apply();
         }
     }

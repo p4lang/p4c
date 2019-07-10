@@ -12,12 +12,10 @@ control c(inout bit<32> r) {
             tmp_0 = tmp < 32w2;
             if (tmp_0) {
                 r = 32w1;
-            }
-            else {
+            } else {
                 r = 32w3;
             }
-        }
-        else {
+        } else {
             r = 32w2;
         }
     }

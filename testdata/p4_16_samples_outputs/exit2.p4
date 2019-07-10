@@ -14,8 +14,7 @@ control ctrl(out bit<32> c) {
             b = 2;
             e();
             c = 3;
-        }
-        else {
+        } else {
             b = 3;
             e();
             c = 4;

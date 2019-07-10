@@ -68,20 +68,17 @@ control c(inout bit<32> x) {
     apply {
         if (x > x + 32w1) {
             tbl_act.apply();
-        }
-        else {
+        } else {
             tbl_act_0.apply();
         }
         if (x > x + 32w4294967295) {
             tbl_act_1.apply();
-        }
-        else {
+        } else {
             tbl_act_2.apply();
         }
         if (tmp_4 > tmp_11) {
             tbl_act_3.apply();
-        }
-        else {
+        } else {
             tbl_act_4.apply();
         }
         tbl_act_5.apply();

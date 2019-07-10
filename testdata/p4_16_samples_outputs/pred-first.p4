@@ -10,8 +10,7 @@ control Ing() {
         b = true;
         if (b) {
             a = 32w5;
-        }
-        else {
+        } else {
             a = 32w10;
         }
     }

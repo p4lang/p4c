@@ -5,8 +5,7 @@ control p(in bit<1> y_0) {
         if (x == 1w0) {
             bit<1> y;
             y = 1w1;
-        }
-        else {
+        } else {
             bit<1> y;
             y = y_0;
             {

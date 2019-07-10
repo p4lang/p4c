@@ -50,8 +50,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         if (m.b == 1w0) {
             t1.apply();
-        }
-        else {
+        } else {
             t1.apply();
         }
         t2.apply();

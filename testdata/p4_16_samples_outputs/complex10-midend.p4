@@ -74,20 +74,17 @@ control c(inout bit<32> r) {
         tbl_act.apply();
         if (!(tmp > 32w0)) {
             tbl_act_0.apply();
-        }
-        else {
+        } else {
             tbl_act_1.apply();
         }
         if (tmp_1) {
             tbl_act_2.apply();
-        }
-        else {
+        } else {
             tbl_act_3.apply();
         }
         if (tmp_4) {
             tbl_act_4.apply();
-        }
-        else {
+        } else {
             tbl_act_5.apply();
         }
     }

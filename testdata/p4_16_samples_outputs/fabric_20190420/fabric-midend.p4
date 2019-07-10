@@ -862,8 +862,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
             tbl_act_1.apply();
             if (hdr.inner_udp.isValid()) {
                 tbl_act_2.apply();
-            }
-            else {
+            } else {
                 tbl_act_3.apply();
             }
         }
@@ -883,8 +882,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
             if (hdr.gtpu.isValid()) {
                 if (spgw_ingress_s1u_filter_table.apply().hit) {
                     tbl_act_8.apply();
-                }
-                else {
+                } else {
                     tbl_act_9.apply();
                 }
                 if (!spgw_ingress_tmp) {
@@ -892,18 +890,15 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
                 }
                 tbl_act_11.apply();
                 tbl_spgw_ingress_gtpu_decap.apply();
-            }
-            else {
+            } else {
                 if (spgw_ingress_dl_sess_lookup.apply().hit) {
                     tbl_act_12.apply();
-                }
-                else {
+                } else {
                     tbl_act_13.apply();
                 }
                 if (spgw_ingress_tmp_0) {
                     tbl_act_14.apply();
-                }
-                else {
+                } else {
                     tbl_act_15.apply();
                 }
             }
@@ -913,16 +908,10 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
             if (fabric_metadata._skip_forwarding7 == false) {
                 if (fabric_metadata._fwd_type9 == 3w0) {
                     forwarding_bridging.apply();
-                }
-                else {
-                    if (fabric_metadata._fwd_type9 == 3w1) {
-                        forwarding_mpls.apply();
-                    }
-                    else {
-                        if (fabric_metadata._fwd_type9 == 3w2) {
-                            forwarding_routing_v4.apply();
-                        }
-                    }
+                } else if (fabric_metadata._fwd_type9 == 3w1) {
+                    forwarding_mpls.apply();
+                } else if (fabric_metadata._fwd_type9 == 3w2) {
+                    forwarding_routing_v4.apply();
                 }
             }
             acl_acl.apply();
@@ -1163,14 +1152,12 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
                 if (hdr.mpls.isValid()) {
                     tbl_egress_next_pop_mpls_if_present.apply();
                 }
-            }
-            else {
+            } else {
                 tbl_egress_next_set_mpls.apply();
             }
             if (egress_next_egress_vlan.apply().hit) {
                 tbl_act_24.apply();
-            }
-            else {
+            } else {
                 tbl_act_25.apply();
             }
             if (!egress_next_tmp) {
@@ -1183,13 +1170,10 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
                 if (hdr.mpls.ttl == 8w0) {
                     tbl_act_27.apply();
                 }
-            }
-            else {
-                if (hdr.ipv4.isValid()) {
-                    tbl_act_28.apply();
-                    if (hdr.ipv4.ttl == 8w0) {
-                        tbl_act_29.apply();
-                    }
+            } else if (hdr.ipv4.isValid()) {
+                tbl_act_28.apply();
+                if (hdr.ipv4.ttl == 8w0) {
+                    tbl_act_29.apply();
                 }
             }
             if (fabric_metadata._spgw_direction17 == 2w2) {

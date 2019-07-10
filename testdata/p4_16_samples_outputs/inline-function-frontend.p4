@@ -16,8 +16,7 @@ control c(inout bit<32> x) {
                 bit<32> tmp_2;
                 if (a_1 > b_1) {
                     tmp_2 = b_1;
-                }
-                else {
+                } else {
                     tmp_2 = a_1;
                 }
                 hasReturned_0 = true;

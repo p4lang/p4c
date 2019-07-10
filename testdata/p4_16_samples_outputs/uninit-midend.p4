@@ -84,8 +84,7 @@ control c(out bit<32> v) {
     apply {
         if (e_0 > 32w0) {
             tbl_act.apply();
-        }
-        else {
+        } else {
             ;
         }
         tbl_act_0.apply();
@@ -96,8 +95,7 @@ control c(out bit<32> v) {
 
         if (e_0 > 32w0) {
             t_0.apply();
-        }
-        else {
+        } else {
             tbl_a1.apply();
         }
     }

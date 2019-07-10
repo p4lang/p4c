@@ -344,8 +344,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             }
             if (meta.ingress_metadata.router_mac == 1w0) {
                 fdb.apply();
-            }
-            else {
+            } else {
                 virtual_router.apply();
                 if (hdr.ipv4.isValid() && meta.ingress_metadata.v4_enable != 1w0) {
                     route.apply();

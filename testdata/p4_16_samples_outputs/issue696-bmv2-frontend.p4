@@ -70,15 +70,13 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
         _pred_0 = val_0.field1 != 32w0;
         if (_pred_0) {
             tmp = 32w1;
-        }
-        else {
+        } else {
             tmp = 32w0;
         }
         inc_0 = tmp;
         if (_pred_0) {
             tmp_0 = 32w1;
-        }
-        else {
+        } else {
             tmp_0 = 32w0;
         }
         debug.write(32w0, tmp_0);

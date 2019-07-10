@@ -3,8 +3,7 @@ control p() {
         bit<1> b;
         if (b) {
             ;
-        }
-        else {
+        } else {
             ;
         }
     }

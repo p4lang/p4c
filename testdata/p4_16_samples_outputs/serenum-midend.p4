@@ -68,8 +68,7 @@ control c(inout Headers h) {
         if (!hasReturned) {
             if (h.eth.type == 16w0x800) {
                 tbl_act_1.apply();
-            }
-            else {
+            } else {
                 tbl_act_2.apply();
             }
         }

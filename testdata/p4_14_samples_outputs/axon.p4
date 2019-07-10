@@ -114,8 +114,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         if (hdr.axon_head.axonLength != meta.my_metadata.headerLen) {
             drop_pkt.apply();
-        }
-        else {
+        } else {
             route_pkt.apply();
         }
     }

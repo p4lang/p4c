@@ -120,20 +120,16 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
             ipv4_address_0 = byte0_0 ++ byte1_0 ++ byte2_0 ++ byte3_0;
             hdr.ipv4.srcAddr = ipv4_address_0;
             meta.fwd.l2ptr = 32w0xe50b;
-        }
-        else {
-            if (standard_metadata.instance_type == 32w4) {
-                byte0_0 = 8w10;
-                byte1_0 = 8w199;
-                byte2_0 = 8w86;
-                byte3_0 = 8w99;
-                ipv4_address_0 = byte0_0 ++ byte1_0 ++ byte2_0 ++ byte3_0;
-                hdr.ipv4.srcAddr = ipv4_address_0;
-                meta.fwd.l2ptr = 32w0xec1c;
-            }
-            else {
-                ipv4_da_lpm_0.apply();
-            }
+        } else if (standard_metadata.instance_type == 32w4) {
+            byte0_0 = 8w10;
+            byte1_0 = 8w199;
+            byte2_0 = 8w86;
+            byte3_0 = 8w99;
+            ipv4_address_0 = byte0_0 ++ byte1_0 ++ byte2_0 ++ byte3_0;
+            hdr.ipv4.srcAddr = ipv4_address_0;
+            meta.fwd.l2ptr = 32w0xec1c;
+        } else {
+            ipv4_da_lpm_0.apply();
         }
         if (meta.fwd.l2ptr != 32w0) {
             mac_da_0.apply();
@@ -189,19 +185,15 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
             hdr.switch_to_cpu.setValid();
             hdr.switch_to_cpu.word0 = 32w0x12e012e;
             hdr.switch_to_cpu.word1 = 32w0x5a5a5a5a;
-        }
-        else {
-            if (standard_metadata.instance_type == 32w2) {
-                hdr.switch_to_cpu.setValid();
-                hdr.switch_to_cpu.word0 = 32w0xe2e0e2e;
-                hdr.switch_to_cpu.word1 = 32w0x5a5a5a5a;
+        } else if (standard_metadata.instance_type == 32w2) {
+            hdr.switch_to_cpu.setValid();
+            hdr.switch_to_cpu.word0 = 32w0xe2e0e2e;
+            hdr.switch_to_cpu.word1 = 32w0x5a5a5a5a;
+        } else {
+            if (standard_metadata.instance_type == 32w5) {
+                get_multicast_copy_out_bd_0.apply();
             }
-            else {
-                if (standard_metadata.instance_type == 32w5) {
-                    get_multicast_copy_out_bd_0.apply();
-                }
-                send_frame_0.apply();
-            }
+            send_frame_0.apply();
         }
     }
 }

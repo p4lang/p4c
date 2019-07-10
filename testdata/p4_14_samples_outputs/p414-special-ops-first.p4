@@ -193,29 +193,20 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         t_egr_debug_table1.apply();
         if (hdr.ethernet.dstAddr == 48w0x1) {
             t_egr_mark_resubmit_packet.apply();
-        }
-        else {
-            if (hdr.ethernet.dstAddr == 48w0x2) {
-                if (meta.mymeta.recirculate_count < 8w5) {
-                    t_do_recirculate.apply();
-                }
-                else {
-                    t_mark_max_recirculate_packet.apply();
-                }
+        } else if (hdr.ethernet.dstAddr == 48w0x2) {
+            if (meta.mymeta.recirculate_count < 8w5) {
+                t_do_recirculate.apply();
+            } else {
+                t_mark_max_recirculate_packet.apply();
             }
-            else {
-                if (hdr.ethernet.dstAddr == 48w0x3) {
-                    if (meta.mymeta.clone_e2e_count < 8w4) {
-                        t_do_clone_e2e.apply();
-                    }
-                    else {
-                        t_mark_max_clone_e2e_packet.apply();
-                    }
-                }
-                else {
-                    t_mark_vanilla_packet.apply();
-                }
+        } else if (hdr.ethernet.dstAddr == 48w0x3) {
+            if (meta.mymeta.clone_e2e_count < 8w4) {
+                t_do_clone_e2e.apply();
+            } else {
+                t_mark_max_clone_e2e_packet.apply();
             }
+        } else {
+            t_mark_vanilla_packet.apply();
         }
         t_egr_debug_table2.apply();
     }
@@ -326,12 +317,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         if (hdr.ethernet.dstAddr == 48w0x1) {
             if (meta.mymeta.resubmit_count < 8w3) {
                 t_do_resubmit.apply();
-            }
-            else {
+            } else {
                 t_mark_max_resubmit_packet.apply();
             }
-        }
-        else {
+        } else {
             t_ing_mac_da.apply();
         }
         t_save_ing_instance_type.apply();

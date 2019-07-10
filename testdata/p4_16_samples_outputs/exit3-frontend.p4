@@ -14,8 +14,7 @@ control ctrl(out bit<32> c) {
         c = 32w2;
         if (a_0 == 32w0) {
             t_0.apply();
-        }
-        else {
+        } else {
             t_0.apply();
         }
         c = 32w5;

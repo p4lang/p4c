@@ -1777,8 +1777,7 @@ control process_rewrite(inout headers hdr, inout metadata meta, inout standard_m
     apply {
         if (meta.egress_metadata.routed == 1w0 || meta.l3_metadata.nexthop_index != 16w0) {
             rewrite.apply();
-        }
-        else {
+        } else {
             rewrite_multicast.apply();
         }
     }
@@ -3070,8 +3069,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         if (meta.egress_metadata.bypass == 1w0) {
             if (standard_metadata.instance_type != 32w0 && standard_metadata.instance_type != 32w5) {
                 mirror.apply();
-            }
-            else {
+            } else {
                 process_replication_0.apply(hdr, meta, standard_metadata);
             }
             switch (egress_port_mapping.apply().action_run) {
@@ -3322,16 +3320,10 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
             default: {
                 if (hdr.ipv4.isValid()) {
                     validate_outer_ipv4_header_0.apply(hdr, meta, standard_metadata);
-                }
-                else {
-                    if (hdr.ipv6.isValid()) {
-                        validate_outer_ipv6_header_0.apply(hdr, meta, standard_metadata);
-                    }
-                    else {
-                        if (hdr.mpls[0].isValid()) {
-                            validate_mpls_header_0.apply(hdr, meta, standard_metadata);
-                        }
-                    }
+                } else if (hdr.ipv6.isValid()) {
+                    validate_outer_ipv6_header_0.apply(hdr, meta, standard_metadata);
+                } else if (hdr.mpls[0].isValid()) {
+                    validate_mpls_header_0.apply(hdr, meta, standard_metadata);
                 }
             }
         }
@@ -3584,8 +3576,7 @@ control process_int_endpoint(inout headers hdr, inout metadata meta, inout stand
     apply {
         if (!hdr.int_header.isValid()) {
             int_source.apply();
-        }
-        else {
+        } else {
             int_terminate.apply();
             int_sink_update_outer.apply();
         }
@@ -3885,11 +3876,8 @@ control process_outer_multicast(inout headers hdr, inout metadata meta, inout st
     apply {
         if (hdr.ipv4.isValid()) {
             process_outer_ipv4_multicast_0.apply(hdr, meta, standard_metadata);
-        }
-        else {
-            if (hdr.ipv6.isValid()) {
-                process_outer_ipv6_multicast_0.apply(hdr, meta, standard_metadata);
-            }
+        } else if (hdr.ipv6.isValid()) {
+            process_outer_ipv6_multicast_0.apply(hdr, meta, standard_metadata);
         }
         process_outer_multicast_rpf_0.apply(hdr, meta, standard_metadata);
     }
@@ -4260,16 +4248,10 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
                 default: {
                     if (hdr.ipv4.isValid()) {
                         process_ipv4_vtep_0.apply(hdr, meta, standard_metadata);
-                    }
-                    else {
-                        if (hdr.ipv6.isValid()) {
-                            process_ipv6_vtep_0.apply(hdr, meta, standard_metadata);
-                        }
-                        else {
-                            if (hdr.mpls[0].isValid()) {
-                                process_mpls_0.apply(hdr, meta, standard_metadata);
-                            }
-                        }
+                    } else if (hdr.ipv6.isValid()) {
+                        process_ipv6_vtep_0.apply(hdr, meta, standard_metadata);
+                    } else if (hdr.mpls[0].isValid()) {
+                        process_mpls_0.apply(hdr, meta, standard_metadata);
                     }
                 }
             }
@@ -4282,8 +4264,7 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
                 }
             }
 
-        }
-        else {
+        } else {
             tunnel_miss.apply();
         }
     }
@@ -4669,11 +4650,8 @@ control process_ip_acl(inout headers hdr, inout metadata meta, inout standard_me
         if (meta.ingress_metadata.bypass_lookups & 16w0x4 == 16w0) {
             if (meta.l3_metadata.lkp_ip_type == 2w1) {
                 ip_acl.apply();
-            }
-            else {
-                if (meta.l3_metadata.lkp_ip_type == 2w2) {
-                    ipv6_acl.apply();
-                }
+            } else if (meta.l3_metadata.lkp_ip_type == 2w2) {
+                ipv6_acl.apply();
             }
         }
     }
@@ -5010,11 +4988,8 @@ control process_multicast(inout headers hdr, inout metadata meta, inout standard
     apply {
         if (meta.l3_metadata.lkp_ip_type == 2w1) {
             process_ipv4_multicast_0.apply(hdr, meta, standard_metadata);
-        }
-        else {
-            if (meta.l3_metadata.lkp_ip_type == 2w2) {
-                process_ipv6_multicast_0.apply(hdr, meta, standard_metadata);
-            }
+        } else if (meta.l3_metadata.lkp_ip_type == 2w2) {
+            process_ipv6_multicast_0.apply(hdr, meta, standard_metadata);
         }
         process_multicast_rpf_0.apply(hdr, meta, standard_metadata);
     }
@@ -5445,14 +5420,10 @@ control process_hashes(inout headers hdr, inout metadata meta, inout standard_me
     apply {
         if (meta.tunnel_metadata.tunnel_terminate == 1w0 && hdr.ipv4.isValid() || meta.tunnel_metadata.tunnel_terminate == 1w1 && hdr.inner_ipv4.isValid()) {
             compute_ipv4_hashes.apply();
-        }
-        else {
-            if (meta.tunnel_metadata.tunnel_terminate == 1w0 && hdr.ipv6.isValid() || meta.tunnel_metadata.tunnel_terminate == 1w1 && hdr.inner_ipv6.isValid()) {
-                compute_ipv6_hashes.apply();
-            }
-            else {
-                compute_non_ip_hashes.apply();
-            }
+        } else if (meta.tunnel_metadata.tunnel_terminate == 1w0 && hdr.ipv6.isValid() || meta.tunnel_metadata.tunnel_terminate == 1w1 && hdr.inner_ipv6.isValid()) {
+            compute_ipv6_hashes.apply();
+        } else {
+            compute_non_ip_hashes.apply();
         }
         compute_other_hashes.apply();
     }
@@ -5715,8 +5686,7 @@ control process_nexthop(inout headers hdr, inout metadata meta, inout standard_m
     apply {
         if (meta.nexthop_metadata.nexthop_type == 1w1) {
             ecmp_group.apply();
-        }
-        else {
+        } else {
             nexthop.apply();
         }
     }
@@ -6004,8 +5974,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                 process_mac_0.apply(hdr, meta, standard_metadata);
                 if (meta.l3_metadata.lkp_ip_type == 2w0) {
                     process_mac_acl_0.apply(hdr, meta, standard_metadata);
-                }
-                else {
+                } else {
                     process_ip_acl_0.apply(hdr, meta, standard_metadata);
                 }
                 process_qos_0.apply(hdr, meta, standard_metadata);
@@ -6019,13 +5988,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                                 process_ipv4_racl_0.apply(hdr, meta, standard_metadata);
                                 process_ipv4_urpf_0.apply(hdr, meta, standard_metadata);
                                 process_ipv4_fib_0.apply(hdr, meta, standard_metadata);
-                            }
-                            else {
-                                if (meta.l3_metadata.lkp_ip_type == 2w2 && meta.ipv6_metadata.ipv6_unicast_enabled == 1w1) {
-                                    process_ipv6_racl_0.apply(hdr, meta, standard_metadata);
-                                    process_ipv6_urpf_0.apply(hdr, meta, standard_metadata);
-                                    process_ipv6_fib_0.apply(hdr, meta, standard_metadata);
-                                }
+                            } else if (meta.l3_metadata.lkp_ip_type == 2w2 && meta.ipv6_metadata.ipv6_unicast_enabled == 1w1) {
+                                process_ipv6_racl_0.apply(hdr, meta, standard_metadata);
+                                process_ipv6_urpf_0.apply(hdr, meta, standard_metadata);
+                                process_ipv6_fib_0.apply(hdr, meta, standard_metadata);
                             }
                             process_urpf_bd_0.apply(hdr, meta, standard_metadata);
                         }
@@ -6045,8 +6011,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             process_nexthop_0.apply(hdr, meta, standard_metadata);
             if (meta.ingress_metadata.egress_ifindex == 16w65535) {
                 process_multicast_flooding_0.apply(hdr, meta, standard_metadata);
-            }
-            else {
+            } else {
                 process_lag_0.apply(hdr, meta, standard_metadata);
             }
             process_mac_learning_0.apply(hdr, meta, standard_metadata);

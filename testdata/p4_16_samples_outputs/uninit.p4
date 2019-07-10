@@ -69,8 +69,7 @@ control c(out bit<32> v) {
         if (e > 0) {
             e = 1;
             f = 2;
-        }
-        else {
+        } else {
             f = 3;
         }
         e = e + 1;
@@ -84,8 +83,7 @@ control c(out bit<32> v) {
         touched = !touched;
         if (e > 0) {
             t.apply();
-        }
-        else {
+        } else {
             a1();
         }
         setByAction = setByAction + 1;

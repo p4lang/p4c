@@ -65,8 +65,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         if (m.b == 1w0) {
             t1_0.apply();
             tbl_act.apply();
-        }
-        else {
+        } else {
             t1_0.apply();
             tbl_act_0.apply();
         }

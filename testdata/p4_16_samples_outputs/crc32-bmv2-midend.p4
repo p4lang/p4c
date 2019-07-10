@@ -178,8 +178,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     apply {
         if (hdr.p4calc.isValid()) {
             calculate_0.apply();
-        }
-        else {
+        } else {
             tbl_operation_drop.apply();
         }
     }

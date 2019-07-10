@@ -104,11 +104,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         if (hdr.hdrA.isValid()) {
             processA_0.apply(hdr, meta, standard_metadata);
-        }
-        else {
-            if (hdr.hdrB.isValid()) {
-                processB_0.apply(hdr, meta, standard_metadata);
-            }
+        } else if (hdr.hdrB.isValid()) {
+            processB_0.apply(hdr, meta, standard_metadata);
         }
     }
 }

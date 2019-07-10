@@ -58,8 +58,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".action_4") action action_4(bit<32> param0) {
         if (hdr.pkt.field_d_32 <= param0) {
             tmp = hdr.pkt.field_d_32;
-        }
-        else {
+        } else {
             tmp = param0;
         }
         hdr.pkt.field_a_32 = tmp;
@@ -67,8 +66,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".action_5") action action_5(bit<32> param0) {
         if (param0 >= hdr.pkt.field_d_32) {
             tmp_0 = param0;
-        }
-        else {
+        } else {
             tmp_0 = hdr.pkt.field_d_32;
         }
         hdr.pkt.field_a_32 = tmp_0;
@@ -76,8 +74,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".action_6") action action_6() {
         if ((int<32>)hdr.pkt.field_d_32 <= 32s7) {
             tmp_1 = (int<32>)hdr.pkt.field_d_32;
-        }
-        else {
+        } else {
             tmp_1 = 32s7;
         }
         hdr.pkt.field_b_32 = tmp_1;
@@ -85,8 +82,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".action_7") action action_7(int<32> param0) {
         if (param0 >= (int<32>)hdr.pkt.field_d_32) {
             tmp_2 = param0;
-        }
-        else {
+        } else {
             tmp_2 = (int<32>)hdr.pkt.field_d_32;
         }
         hdr.pkt.field_b_32 = tmp_2;
@@ -94,8 +90,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".action_8") action action_8(int<32> param0) {
         if (hdr.pkt.field_x_32 >= param0) {
             tmp_3 = hdr.pkt.field_x_32;
-        }
-        else {
+        } else {
             tmp_3 = param0;
         }
         hdr.pkt.field_x_32 = tmp_3;

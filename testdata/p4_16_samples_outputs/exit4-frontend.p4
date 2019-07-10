@@ -13,8 +13,7 @@ control ctrl() {
         tmp = t_0.apply().hit;
         if (tmp) {
             t_0.apply();
-        }
-        else {
+        } else {
             t_0.apply();
         }
     }

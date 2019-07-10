@@ -48,8 +48,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             if (x_0 > 16w5) {
                 hasReturned = true;
                 retval = x_0 + 16w65535;
-            }
-            else {
+            } else {
                 hasReturned = true;
                 retval = x_0;
             }

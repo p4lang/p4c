@@ -203,8 +203,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         set_heavy_hitter_count_table_0.apply();
         if (meta._custom_metadata_count_val13 > 16w100 && meta._custom_metadata_count_val24 > 16w100) {
             drop_heavy_hitter_table_0.apply();
-        }
-        else {
+        } else {
             ipv4_lpm_0.apply();
             forward_0.apply();
         }

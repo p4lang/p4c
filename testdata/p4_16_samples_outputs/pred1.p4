@@ -10,12 +10,10 @@ control Ing() {
         b = true;
         if (b) {
             a = 5;
-        }
-        else {
+        } else {
             if (b && a == 5) {
                 a = 10;
-            }
-            else {
+            } else {
                 a = 20;
             }
         }

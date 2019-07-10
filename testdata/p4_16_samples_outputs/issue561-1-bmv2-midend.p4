@@ -81,11 +81,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         debug_hdr_0.apply();
         if (hdr.u.short.isValid()) {
             tbl_act.apply();
-        }
-        else {
-            if (hdr.u.byte.isValid()) {
-                tbl_act_0.apply();
-            }
+        } else if (hdr.u.byte.isValid()) {
+            tbl_act_0.apply();
         }
     }
 }

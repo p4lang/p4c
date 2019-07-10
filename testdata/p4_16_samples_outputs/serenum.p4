@@ -39,8 +39,7 @@ control c(inout Headers h) {
         }
         if (h.eth.type == EthTypes.IPv4) {
             h.eth.setInvalid();
-        }
-        else {
+        } else {
             h.eth.type = (EthTypes)(bit<16>)0;
         }
     }

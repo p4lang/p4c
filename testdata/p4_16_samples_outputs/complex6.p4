@@ -4,12 +4,10 @@ control c(inout bit<32> r) {
         if (f(2) > 0) {
             if (f(2) < 2) {
                 r = 1;
-            }
-            else {
+            } else {
                 r = 3;
             }
-        }
-        else {
+        } else {
             r = 2;
         }
     }

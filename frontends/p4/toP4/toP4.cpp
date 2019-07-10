@@ -1064,17 +1064,15 @@ bool ToP4::preorder(const IR::IfStatement* s) {
         builder.append("}");
     }
     if (s->ifFalse != nullptr) {
-        builder.newline();
-        builder.emitIndent();
-        builder.append("else ");
-        if (!s->ifFalse->is<IR::BlockStatement>()) {
+        builder.append(" else ");
+        if (!s->ifFalse->is<IR::BlockStatement>() && !s->ifFalse->is<IR::IfStatement>()) {
             builder.append("{");
             builder.increaseIndent();
             builder.newline();
             builder.emitIndent();
         }
         visit(s->ifFalse);
-        if (!s->ifFalse->is<IR::BlockStatement>()) {
+        if (!s->ifFalse->is<IR::BlockStatement>() && !s->ifFalse->is<IR::IfStatement>()) {
             builder.newline();
             builder.decreaseIndent();
             builder.emitIndent();

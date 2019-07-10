@@ -4,8 +4,7 @@ control ctrl() {
         a_0 = 32w0;
         if (a_0 == 32w0) {
             exit;
-        }
-        else {
+        } else {
             exit;
         }
     }

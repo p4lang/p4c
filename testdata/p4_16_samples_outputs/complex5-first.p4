@@ -3,8 +3,7 @@ control c(inout bit<32> r) {
     apply {
         if (f(32w2) > 32w0) {
             r = 32w1;
-        }
-        else {
+        } else {
             r = 32w2;
         }
     }

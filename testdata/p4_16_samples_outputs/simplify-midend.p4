@@ -102,18 +102,15 @@ control c(out bool x) {
         tbl_act.apply();
         if (t1_0.apply().hit) {
             tbl_act_0.apply();
-        }
-        else {
+        } else {
             tbl_act_1.apply();
         }
         if (!tmp) {
             tbl_act_2.apply();
-        }
-        else {
+        } else {
             if (t2_0.apply().hit) {
                 tbl_act_3.apply();
-            }
-            else {
+            } else {
                 tbl_act_4.apply();
             }
             tbl_act_5.apply();

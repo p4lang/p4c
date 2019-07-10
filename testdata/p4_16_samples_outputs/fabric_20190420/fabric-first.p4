@@ -376,16 +376,10 @@ control Forwarding(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_me
     apply {
         if (fabric_metadata.fwd_type == 3w0) {
             bridging.apply();
-        }
-        else {
-            if (fabric_metadata.fwd_type == 3w1) {
-                mpls.apply();
-            }
-            else {
-                if (fabric_metadata.fwd_type == 3w2) {
-                    routing_v4.apply();
-                }
-            }
+        } else if (fabric_metadata.fwd_type == 3w1) {
+            mpls.apply();
+        } else if (fabric_metadata.fwd_type == 3w2) {
+            routing_v4.apply();
         }
     }
 }
@@ -614,8 +608,7 @@ control EgressNextControl(inout parsed_headers_t hdr, inout fabric_metadata_t fa
             if (hdr.mpls.isValid()) {
                 pop_mpls_if_present();
             }
-        }
-        else {
+        } else {
             set_mpls();
         }
         if (!egress_vlan.apply().hit) {
@@ -628,13 +621,10 @@ control EgressNextControl(inout parsed_headers_t hdr, inout fabric_metadata_t fa
             if (hdr.mpls.ttl == 8w0) {
                 mark_to_drop(standard_metadata);
             }
-        }
-        else {
-            if (hdr.ipv4.isValid()) {
-                hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
-                if (hdr.ipv4.ttl == 8w0) {
-                    mark_to_drop(standard_metadata);
-                }
+        } else if (hdr.ipv4.isValid()) {
+            hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
+            if (hdr.ipv4.ttl == 8w0) {
+                mark_to_drop(standard_metadata);
             }
         }
     }
@@ -677,8 +667,7 @@ control spgw_normalizer(in bool is_gtpu_encapped, out ipv4_t gtpu_ipv4, out udp_
         gtpu_udp = udp;
         if (inner_udp.isValid()) {
             udp = inner_udp;
-        }
-        else {
+        } else {
             udp.setInvalid();
         }
     }
@@ -724,15 +713,11 @@ control spgw_ingress(inout ipv4_t gtpu_ipv4, inout udp_t gtpu_udp, inout gtpu_t 
             }
             fabric_meta.spgw.direction = 2w1;
             gtpu_decap();
-        }
-        else {
-            if (dl_sess_lookup.apply().hit) {
-                fabric_meta.spgw.direction = 2w2;
-            }
-            else {
-                fabric_meta.spgw.direction = 2w0;
-                return;
-            }
+        } else if (dl_sess_lookup.apply().hit) {
+            fabric_meta.spgw.direction = 2w2;
+        } else {
+            fabric_meta.spgw.direction = 2w0;
+            return;
         }
         fabric_meta.spgw.ipv4_len = ipv4.total_len;
     }

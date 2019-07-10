@@ -81,8 +81,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     apply {
         if (headers.ipv4.isValid()) {
             tbl_act.apply();
-        }
-        else {
+        } else {
             t_0.apply();
             tbl_act_0.apply();
         }

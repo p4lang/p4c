@@ -51,8 +51,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     apply {
         if (hdr.ethernet.dstAddr[3:0] >= 4w4) {
             tbl_send_to_port.apply();
-        }
-        else {
+        } else {
             tbl_send_to_port_0.apply();
         }
     }
