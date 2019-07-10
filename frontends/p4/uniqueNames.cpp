@@ -203,6 +203,7 @@ const IR::Node* RenameSymbols::postorder(IR::Argument* arg) {
     if (!renameMap->toRename(origParam))
         return arg;
     auto newName = renameMap->getName(origParam);
+    LOG2("Renamed argument " << arg << " to " << newName);
     arg->name = IR::ID(arg->name.srcInfo, newName, arg->name.originalName);
     return arg;
 }

@@ -254,7 +254,7 @@ bool ToP4::preorder(const IR::Type_Specialized* t) {
 
 bool ToP4::preorder(const IR::Argument* arg) {
     if (!arg->name.name.isNullOrEmpty()) {
-        builder.append(arg->name.toString());
+        builder.append(arg->name.name);
         builder.append(" = ");
     }
     visit(arg->expression);

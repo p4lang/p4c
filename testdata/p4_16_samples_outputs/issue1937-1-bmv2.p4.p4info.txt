@@ -1,0 +1,10 @@
+pkg_info {
+  arch: "v1model"
+}
+actions {
+  preamble {
+    id: 16808157
+    name: "foo"
+    alias: "foo"
+  }
+}

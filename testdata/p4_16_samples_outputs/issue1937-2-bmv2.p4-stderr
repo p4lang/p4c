@@ -1,0 +1,3 @@
+issue1937-2-bmv2.p4(33): [--Wwarn=uninitialized_use] warning: hdr.h1.f1 may be uninitialized
+        foo.apply(hdr.h1.f1, hdr.h1.f1);
+                             ^^^^^^^^^
