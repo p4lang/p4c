@@ -295,7 +295,7 @@ const IR::Type* TypeInference::specialize(const IR::IMayBeGenericType* type,
 
     LOG2("Translation map\n" << bindings);
 
-    TypeVariableSubstitutionVisitor tsv(bindings);
+    TypeVariableSubstitutionVisitor tsv(bindings, true);
     const IR::Node* result = type->getNode()->apply(tsv);
     if (result == nullptr)
         return nullptr;
