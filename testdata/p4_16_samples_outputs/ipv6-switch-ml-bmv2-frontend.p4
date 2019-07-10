@@ -234,7 +234,7 @@ control egress(inout headers hdr, inout metadata_t meta, inout standard_metadata
         }
         default_action = NoAction_1();
     }
-    @name("egress.drop") action drop_1() {
+    @name("egress.drop") action drop() {
         mark_to_drop(standard_metadata);
     }
     @name("egress.rewrite_mac") action rewrite_mac(bit<48> smac) {
@@ -246,9 +246,9 @@ control egress(inout headers hdr, inout metadata_t meta, inout standard_metadata
         }
         actions = {
             rewrite_mac();
-            drop_1();
+            drop();
         }
-        default_action = drop_1();
+        default_action = drop();
     }
     apply {
         if (standard_metadata.instance_type == 32w5) {
