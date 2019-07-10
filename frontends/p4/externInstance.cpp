@@ -68,6 +68,7 @@ ExternInstance::resolve(const IR::PathExpression* path,
 
     return ExternInstance{instance->controlPlaneName(), path,
                           externInstantiation->type,
+                          externInstantiation->typeArguments,
                           instance->arguments,
                           externInstantiation->substitution,
                           instance->to<IR::IAnnotated>()};
@@ -88,6 +89,7 @@ ExternInstance::resolve(const IR::ConstructorCallExpression* constructorCallExpr
 
     auto type = constructorCall->to<P4::ExternConstructorCall>()->type;
     return ExternInstance{name, constructorCallExpr, type,
+                          constructorCall->typeArguments,
                           constructorCallExpr->arguments,
                           constructorCall->substitution,
                           constructorCallExpr->to<IR::IAnnotated>()};

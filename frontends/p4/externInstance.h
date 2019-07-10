@@ -50,6 +50,7 @@ struct ExternInstance final {
     const boost::optional<cstring> name;  // The instance's name, if any.
     const IR::Expression* expression;     // The original expression passed to resolve().
     const IR::Type_Extern* type;          // The type of the instance.
+    const IR::Vector<IR::Type>* typeArguments;  // The instance's type arguments;
     const IR::Vector<IR::Argument>* arguments;  // The instance's constructor arguments.
     ParameterSubstitution substitution;   // Mapping from parameter names to arguments
     const IR::IAnnotated* annotations;    // If non-null, the instance's annotations.
