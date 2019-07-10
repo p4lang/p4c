@@ -23,6 +23,7 @@ limitations under the License.
 #include "log.h"
 #include "gc.h"
 #include "cstring.h"
+#include "n4.h"
 
 /* glibc++ requires defining global delete with this exception spec to avoid warnings.
  * If it's not defined, probably not using glibc++ and don't need anything */
@@ -57,28 +58,33 @@ void operator delete[](void *p) _GLIBCXX_USE_NOEXCEPT { return gc::operator dele
 extern "C" int GC_print_stats;
 #endif /* HAVE_GC_PRINT_STATS */
 
+static int gc_logging_level;
+
 static void gc_callback() {
-    if (Log::verbosity() >= 2) {
-        std::clog << "****** GC called ****** (heap size " << GC_get_heap_size() << ")";
-        size_t count;
-        std::clog << "cstring cache size " << cstring::cache_size(count)
-                  << " (count=" << count << ")";
+    if (gc_logging_level >= 1) {
+        std::clog << "****** GC called ****** (heap size " << n4(GC_get_heap_size()) << ")";
+        size_t count, size = cstring::cache_size(count);
+        std::clog << " cstring cache size " << n4(size) << " (count " << n4(count) << ")"
+                  << std::endl;
     }
-#if HAVE_GC_PRINT_STATS
-    // Maybe print GC statistics. Unfortunately they go directly to stderr!
-    GC_print_stats = Log::verbosity() >= 2 ? 1 : 0;
-#endif /* HAVE_GC_PRINT_STATS */
 }
 
 void silent(char *, GC_word) {}
+
+void reset_gc_logging() {
+    gc_logging_level = Log::Detail::fileLogLevel(__FILE__);
+#if HAVE_GC_PRINT_STATS
+    GC_print_stats = gc_logging_level >= 2;  // unfortunately goes directly to stderr!
+#endif /* HAVE_GC_PRINT_STATS */
+}
+
 #endif  /* HAVE_LIBGC */
 
 void setup_gc_logging() {
 #if HAVE_LIBGC
-#if HAVE_GC_PRINT_STATS
-    GC_print_stats = LOGGING(2) ? 1 : 0;  // unfortunately goes directly to stderr!
-#endif /* HAVE_GC_PRINT_STATS */
     GC_set_start_callback(gc_callback);
+    reset_gc_logging();
+    Log::Detail::addInvalidateCallback(reset_gc_logging);
     GC_set_warn_proc(&silent);
 #endif  /* HAVE_LIBGC */
 }
