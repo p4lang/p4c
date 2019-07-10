@@ -51,9 +51,7 @@ const IR::Node* RemoveAliases::postorder(IR::P4Control* control) {
     if (!declarations.empty()) {
         // prepend declarations: they must come before any actions
         // that may have been modified
-        auto vec = new IR::IndexedVector<IR::Declaration>(declarations);
-        vec->append(control->controlLocals);
-        control->controlLocals = *vec;
+        control->controlLocals.prepend(declarations);
         declarations.clear();
     }
     return control;
