@@ -58,6 +58,8 @@ class OutputLogPrefix {
     ~OutputLogPrefix();
     static void indent(std::ostream &out);
 };
+
+void addInvalidateCallback(void (*)(void));
 }  // namespace Detail
 
 inline std::ostream &endl(std::ostream &out) {

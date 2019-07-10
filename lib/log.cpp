@@ -64,6 +64,8 @@ static std::vector<std::string> debugSpecs;
 // Each logfile will only be opened once, and will close when we exit.
 static std::unordered_map<std::string, std::unique_ptr<std::ostream>> logfiles;
 
+static std::vector<void (*)(void)> invalidateCallbacks;
+
 int OutputLogPrefix::ostream_xalloc = -1;
 void OutputLogPrefix::setup_ostream_xalloc(std::ostream &out) {
     if (ostream_xalloc < 0) {
@@ -270,6 +272,11 @@ void invalidateCaches(int possibleNewMaxLogLevel) {
     mostRecentInfo = nullptr;
     logLevelCache.clear();
     maximumLogLevel = std::max(maximumLogLevel, possibleNewMaxLogLevel);
+    for (auto fn : invalidateCallbacks) fn();
+}
+
+void addInvalidateCallback(void (*fn)(void)) {
+    invalidateCallbacks.push_back(fn);
 }
 
 }  // namespace Detail
