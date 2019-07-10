@@ -84,10 +84,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     apply {
         E1_0.apply();
-        if (hdr.data.f1 == 32w0) 
+        if (hdr.data.f1 == 32w0) {
             EA_0.apply();
-        else 
+        } else {
             EB_0.apply();
+        }
     }
 }
 

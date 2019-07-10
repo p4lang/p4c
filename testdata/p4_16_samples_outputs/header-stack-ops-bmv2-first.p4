@@ -62,103 +62,81 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 
 control cDoOneOp(inout headers hdr, in bit<8> op) {
     apply {
-        if (op == 8w0x0) 
+        if (op == 8w0x0) {
             ;
-        else 
-            if (op[7:4] == 4w1) 
-                if (op[3:0] == 4w1) 
-                    hdr.h2.push_front(1);
-                else 
-                    if (op[3:0] == 4w2) 
-                        hdr.h2.push_front(2);
-                    else 
-                        if (op[3:0] == 4w3) 
-                            hdr.h2.push_front(3);
-                        else 
-                            if (op[3:0] == 4w4) 
-                                hdr.h2.push_front(4);
-                            else 
-                                if (op[3:0] == 4w5) 
-                                    hdr.h2.push_front(5);
-                                else 
-                                    if (op[3:0] == 4w6) 
-                                        hdr.h2.push_front(6);
-            else 
-                if (op[7:4] == 4w2) 
-                    if (op[3:0] == 4w1) 
-                        hdr.h2.pop_front(1);
-                    else 
-                        if (op[3:0] == 4w2) 
-                            hdr.h2.pop_front(2);
-                        else 
-                            if (op[3:0] == 4w3) 
-                                hdr.h2.pop_front(3);
-                            else 
-                                if (op[3:0] == 4w4) 
-                                    hdr.h2.pop_front(4);
-                                else 
-                                    if (op[3:0] == 4w5) 
-                                        hdr.h2.pop_front(5);
-                                    else 
-                                        if (op[3:0] == 4w6) 
-                                            hdr.h2.pop_front(6);
-                else 
-                    if (op[7:4] == 4w3) 
-                        if (op[3:0] == 4w0) {
-                            hdr.h2[0].setValid();
-                            hdr.h2[0].hdr_type = 8w2;
-                            hdr.h2[0].f1 = 8w0xa0;
-                            hdr.h2[0].f2 = 8w0xa;
-                            hdr.h2[0].next_hdr_type = 8w9;
-                        }
-                        else 
-                            if (op[3:0] == 4w1) {
-                                hdr.h2[1].setValid();
-                                hdr.h2[1].hdr_type = 8w2;
-                                hdr.h2[1].f1 = 8w0xa1;
-                                hdr.h2[1].f2 = 8w0x1a;
-                                hdr.h2[1].next_hdr_type = 8w9;
-                            }
-                            else 
-                                if (op[3:0] == 4w2) {
-                                    hdr.h2[2].setValid();
-                                    hdr.h2[2].hdr_type = 8w2;
-                                    hdr.h2[2].f1 = 8w0xa2;
-                                    hdr.h2[2].f2 = 8w0x2a;
-                                    hdr.h2[2].next_hdr_type = 8w9;
-                                }
-                                else 
-                                    if (op[3:0] == 4w3) {
-                                        hdr.h2[3].setValid();
-                                        hdr.h2[3].hdr_type = 8w2;
-                                        hdr.h2[3].f1 = 8w0xa3;
-                                        hdr.h2[3].f2 = 8w0x3a;
-                                        hdr.h2[3].next_hdr_type = 8w9;
-                                    }
-                                    else 
-                                        if (op[3:0] == 4w4) {
-                                            hdr.h2[4].setValid();
-                                            hdr.h2[4].hdr_type = 8w2;
-                                            hdr.h2[4].f1 = 8w0xa4;
-                                            hdr.h2[4].f2 = 8w0x4a;
-                                            hdr.h2[4].next_hdr_type = 8w9;
-                                        }
-                    else 
-                        if (op[7:4] == 4w4) 
-                            if (op[3:0] == 4w0) 
-                                hdr.h2[0].setInvalid();
-                            else 
-                                if (op[3:0] == 4w1) 
-                                    hdr.h2[1].setInvalid();
-                                else 
-                                    if (op[3:0] == 4w2) 
-                                        hdr.h2[2].setInvalid();
-                                    else 
-                                        if (op[3:0] == 4w3) 
-                                            hdr.h2[3].setInvalid();
-                                        else 
-                                            if (op[3:0] == 4w4) 
-                                                hdr.h2[4].setInvalid();
+        } else if (op[7:4] == 4w1) {
+            if (op[3:0] == 4w1) {
+                hdr.h2.push_front(1);
+            } else if (op[3:0] == 4w2) {
+                hdr.h2.push_front(2);
+            } else if (op[3:0] == 4w3) {
+                hdr.h2.push_front(3);
+            } else if (op[3:0] == 4w4) {
+                hdr.h2.push_front(4);
+            } else if (op[3:0] == 4w5) {
+                hdr.h2.push_front(5);
+            } else if (op[3:0] == 4w6) {
+                hdr.h2.push_front(6);
+            }
+        } else if (op[7:4] == 4w2) {
+            if (op[3:0] == 4w1) {
+                hdr.h2.pop_front(1);
+            } else if (op[3:0] == 4w2) {
+                hdr.h2.pop_front(2);
+            } else if (op[3:0] == 4w3) {
+                hdr.h2.pop_front(3);
+            } else if (op[3:0] == 4w4) {
+                hdr.h2.pop_front(4);
+            } else if (op[3:0] == 4w5) {
+                hdr.h2.pop_front(5);
+            } else if (op[3:0] == 4w6) {
+                hdr.h2.pop_front(6);
+            }
+        } else if (op[7:4] == 4w3) {
+            if (op[3:0] == 4w0) {
+                hdr.h2[0].setValid();
+                hdr.h2[0].hdr_type = 8w2;
+                hdr.h2[0].f1 = 8w0xa0;
+                hdr.h2[0].f2 = 8w0xa;
+                hdr.h2[0].next_hdr_type = 8w9;
+            } else if (op[3:0] == 4w1) {
+                hdr.h2[1].setValid();
+                hdr.h2[1].hdr_type = 8w2;
+                hdr.h2[1].f1 = 8w0xa1;
+                hdr.h2[1].f2 = 8w0x1a;
+                hdr.h2[1].next_hdr_type = 8w9;
+            } else if (op[3:0] == 4w2) {
+                hdr.h2[2].setValid();
+                hdr.h2[2].hdr_type = 8w2;
+                hdr.h2[2].f1 = 8w0xa2;
+                hdr.h2[2].f2 = 8w0x2a;
+                hdr.h2[2].next_hdr_type = 8w9;
+            } else if (op[3:0] == 4w3) {
+                hdr.h2[3].setValid();
+                hdr.h2[3].hdr_type = 8w2;
+                hdr.h2[3].f1 = 8w0xa3;
+                hdr.h2[3].f2 = 8w0x3a;
+                hdr.h2[3].next_hdr_type = 8w9;
+            } else if (op[3:0] == 4w4) {
+                hdr.h2[4].setValid();
+                hdr.h2[4].hdr_type = 8w2;
+                hdr.h2[4].f1 = 8w0xa4;
+                hdr.h2[4].f2 = 8w0x4a;
+                hdr.h2[4].next_hdr_type = 8w9;
+            }
+        } else if (op[7:4] == 4w4) {
+            if (op[3:0] == 4w0) {
+                hdr.h2[0].setInvalid();
+            } else if (op[3:0] == 4w1) {
+                hdr.h2[1].setInvalid();
+            } else if (op[3:0] == 4w2) {
+                hdr.h2[2].setInvalid();
+            } else if (op[3:0] == 4w3) {
+                hdr.h2[3].setInvalid();
+            } else if (op[3:0] == 4w4) {
+                hdr.h2[4].setInvalid();
+            }
+        }
     }
 }
 
@@ -169,16 +147,21 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         do_one_op.apply(hdr, hdr.h1.op2);
         do_one_op.apply(hdr, hdr.h1.op3);
         hdr.h1.h2_valid_bits = 8w0;
-        if (hdr.h2[0].isValid()) 
+        if (hdr.h2[0].isValid()) {
             hdr.h1.h2_valid_bits[0:0] = 1w1;
-        if (hdr.h2[1].isValid()) 
+        }
+        if (hdr.h2[1].isValid()) {
             hdr.h1.h2_valid_bits[1:1] = 1w1;
-        if (hdr.h2[2].isValid()) 
+        }
+        if (hdr.h2[2].isValid()) {
             hdr.h1.h2_valid_bits[2:2] = 1w1;
-        if (hdr.h2[3].isValid()) 
+        }
+        if (hdr.h2[3].isValid()) {
             hdr.h1.h2_valid_bits[3:3] = 1w1;
-        if (hdr.h2[4].isValid()) 
+        }
+        if (hdr.h2[4].isValid()) {
             hdr.h1.h2_valid_bits[4:4] = 1w1;
+        }
     }
 }
 

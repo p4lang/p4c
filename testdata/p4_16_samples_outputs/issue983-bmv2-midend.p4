@@ -135,16 +135,21 @@ control ingress(inout headers hdr, inout metadata user_meta, inout standard_meta
     }
     apply {
         tbl_act.apply();
-        if (hdr.ethernet.etherType != 16w0x800) 
+        if (hdr.ethernet.etherType != 16w0x800) {
             tbl_act_0.apply();
-        if ((bit<32>)~hdr.ethernet.etherType != 32w0xf7ff) 
+        }
+        if ((bit<32>)~hdr.ethernet.etherType != 32w0xf7ff) {
             tbl_act_1.apply();
-        if (((bit<32>)~hdr.ethernet.etherType)[31:16] + ((bit<32>)~hdr.ethernet.etherType)[15:0] != 16w0xf7ff) 
+        }
+        if (((bit<32>)~hdr.ethernet.etherType)[31:16] + ((bit<32>)~hdr.ethernet.etherType)[15:0] != 16w0xf7ff) {
             tbl_act_2.apply();
-        if ((bit<32>)~hdr.ethernet.etherType != 32w0xf7ff) 
+        }
+        if ((bit<32>)~hdr.ethernet.etherType != 32w0xf7ff) {
             tbl_act_3.apply();
-        if (~(bit<32>)hdr.ethernet.etherType != 32w0xfffff7ff) 
+        }
+        if (~(bit<32>)hdr.ethernet.etherType != 32w0xfffff7ff) {
             tbl_act_4.apply();
+        }
         debug_table_cksum1_0.apply();
     }
 }

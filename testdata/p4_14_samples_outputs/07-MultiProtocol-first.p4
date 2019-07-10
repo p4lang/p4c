@@ -284,14 +284,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             }
         }
 
-        if (hdr.tcp.isValid()) 
+        if (hdr.tcp.isValid()) {
             tcp_check.apply();
-        else 
-            if (hdr.udp.isValid()) 
-                udp_check.apply();
-            else 
-                if (hdr.icmp.isValid()) 
-                    icmp_check.apply();
+        } else if (hdr.udp.isValid()) {
+            udp_check.apply();
+        } else if (hdr.icmp.isValid()) {
+            icmp_check.apply();
+        }
         set_egress.apply();
     }
 }

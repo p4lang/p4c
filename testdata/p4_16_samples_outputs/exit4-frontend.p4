@@ -11,10 +11,11 @@ control ctrl() {
     }
     apply {
         tmp = t_0.apply().hit;
-        if (tmp) 
+        if (tmp) {
             t_0.apply();
-        else 
+        } else {
             t_0.apply();
+        }
     }
 }
 

@@ -19,8 +19,7 @@ control ctrl() {
             b = 2;
             t.apply();
             c = 3;
-        }
-        else {
+        } else {
             b = 3;
             t.apply();
             c = 4;

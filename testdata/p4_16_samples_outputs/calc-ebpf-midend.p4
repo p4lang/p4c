@@ -158,10 +158,11 @@ control Ingress(inout headers hdr, out bool xout) {
     }
     apply {
         tbl_act.apply();
-        if (hdr.p4calc.isValid()) 
+        if (hdr.p4calc.isValid()) {
             calculate_0.apply();
-        else 
+        } else {
             tbl_operation_drop.apply();
+        }
     }
 }
 

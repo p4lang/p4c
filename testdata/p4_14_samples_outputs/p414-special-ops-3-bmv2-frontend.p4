@@ -232,22 +232,23 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     apply {
         t_egr_debug_table1_0.apply();
-        if (hdr.ethernet.dstAddr == 48w0x1) 
+        if (hdr.ethernet.dstAddr == 48w0x1) {
             t_egr_mark_resubmit_packet_0.apply();
-        else 
-            if (hdr.ethernet.dstAddr == 48w0x2) 
-                if (meta.mymeta.recirculate_count < 8w10) 
-                    t_do_recirculate_0.apply();
-                else 
-                    t_mark_max_recirculate_packet_0.apply();
-            else 
-                if (hdr.ethernet.dstAddr == 48w0x3) 
-                    if (meta.mymeta.clone_e2e_count < 8w8) 
-                        t_do_clone_e2e_0.apply();
-                    else 
-                        t_mark_max_clone_e2e_packet_0.apply();
-                else 
-                    t_mark_vanilla_packet_0.apply();
+        } else if (hdr.ethernet.dstAddr == 48w0x2) {
+            if (meta.mymeta.recirculate_count < 8w10) {
+                t_do_recirculate_0.apply();
+            } else {
+                t_mark_max_recirculate_packet_0.apply();
+            }
+        } else if (hdr.ethernet.dstAddr == 48w0x3) {
+            if (meta.mymeta.clone_e2e_count < 8w8) {
+                t_do_clone_e2e_0.apply();
+            } else {
+                t_mark_max_clone_e2e_packet_0.apply();
+            }
+        } else {
+            t_mark_vanilla_packet_0.apply();
+        }
         t_egr_inc_mymeta_counts_0.apply();
         t_egr_debug_table2_0.apply();
     }
@@ -368,13 +369,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         t_ing_debug_table1_0.apply();
-        if (hdr.ethernet.dstAddr == 48w0x1) 
-            if (meta.mymeta.resubmit_count < 8w6) 
+        if (hdr.ethernet.dstAddr == 48w0x1) {
+            if (meta.mymeta.resubmit_count < 8w6) {
                 t_do_resubmit_0.apply();
-            else 
+            } else {
                 t_mark_max_resubmit_packet_0.apply();
-        else 
+            }
+        } else {
             t_ing_mac_da_0.apply();
+        }
         t_save_ing_instance_type_0.apply();
         t_ing_inc_mymeta_counts_0.apply();
         t_ing_debug_table2_0.apply();

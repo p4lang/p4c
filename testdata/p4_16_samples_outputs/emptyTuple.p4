@@ -2,10 +2,11 @@ typedef tuple<> emptyTuple;
 control c(out bool b) {
     apply {
         emptyTuple t = {  };
-        if (t == {  }) 
+        if (t == {  }) {
             b = true;
-        else 
+        } else {
             b = false;
+        }
     }
 }
 

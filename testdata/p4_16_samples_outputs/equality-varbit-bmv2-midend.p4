@@ -43,8 +43,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         tbl_act.apply();
-        if (hdr.h.v == h_0.v) 
+        if (hdr.h.v == h_0.v) {
             tbl_act_0.apply();
+        }
     }
 }
 

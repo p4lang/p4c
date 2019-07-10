@@ -280,13 +280,14 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         default_action = controller_debug();
     }
     action icmp6_answer() {
-        if (hdr.icmp6.isValid()) 
+        if (hdr.icmp6.isValid()) {
             if (hdr.icmp6.code == 8w128) {
                 ipv6_addr_t tmp = hdr.ipv6.src_addr;
                 hdr.ipv6.src_addr = hdr.ipv6.dst_addr;
                 hdr.ipv6.dst_addr = tmp;
                 hdr.icmp6.code = 8w129;
             }
+        }
     }
     table v6_addresses {
         key = {
@@ -330,8 +331,9 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
             v6_addresses.apply();
             v6_networks.apply();
         }
-        if (hdr.ipv4.isValid()) 
+        if (hdr.ipv4.isValid()) {
             v4_networks.apply();
+        }
     }
 }
 

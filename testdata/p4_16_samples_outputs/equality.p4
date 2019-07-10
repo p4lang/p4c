@@ -20,22 +20,15 @@ control c(out bit<1> x) {
     apply {
         if (a == b) {
             x = 1;
+        } else if (h1 == h2) {
+            x = 1;
+        } else if (s1 == s2) {
+            x = 1;
+        } else if (a1 == a2) {
+            x = 1;
+        } else {
+            x = 0;
         }
-        else 
-            if (h1 == h2) {
-                x = 1;
-            }
-            else 
-                if (s1 == s2) {
-                    x = 1;
-                }
-                else 
-                    if (a1 == a2) {
-                        x = 1;
-                    }
-                    else {
-                        x = 0;
-                    }
     }
 }
 

@@ -78,8 +78,9 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         default_action = NoAction();
     }
     apply {
-        if (hdr.ipv4.isValid()) 
+        if (hdr.ipv4.isValid()) {
             ipv4_lpm.apply();
+        }
     }
 }
 

@@ -1,6 +1,7 @@
 bit<16> max(in bit<16> left, in bit<16> right) {
-    if (left > right) 
+    if (left > right) {
         return left;
+    }
 }
 control c(out bit<16> b) {
     apply {

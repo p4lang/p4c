@@ -21,30 +21,19 @@ control c(out bit<1> x) {
     apply {
         if (a == h1) {
             x = 1;
+        } else if (h1 == s2) {
+            x = 1;
+        } else if (s1 == a2) {
+            x = 1;
+        } else if (a1 == h1.a) {
+            x = 1;
+        } else if (a == h1.a) {
+            x = 1;
+        } else if (a1 == a3) {
+            x = 1;
+        } else {
+            x = 0;
         }
-        else 
-            if (h1 == s2) {
-                x = 1;
-            }
-            else 
-                if (s1 == a2) {
-                    x = 1;
-                }
-                else 
-                    if (a1 == h1.a) {
-                        x = 1;
-                    }
-                    else 
-                        if (a == h1.a) {
-                            x = 1;
-                        }
-                        else 
-                            if (a1 == a3) {
-                                x = 1;
-                            }
-                            else {
-                                x = 0;
-                            }
     }
 }
 

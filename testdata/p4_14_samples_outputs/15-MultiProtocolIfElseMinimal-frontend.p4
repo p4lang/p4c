@@ -115,10 +115,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_3();
     }
     apply {
-        if (hdr.ethernet.etherType == 16w0x800) 
+        if (hdr.ethernet.etherType == 16w0x800) {
             ipv4_match_0.apply();
-        else 
+        } else {
             l2_match_0.apply();
+        }
     }
 }
 

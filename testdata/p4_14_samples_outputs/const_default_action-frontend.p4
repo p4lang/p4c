@@ -104,10 +104,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         _process_port_vlan_mapping_tmp = _port_vlan_to_bd_mapping.apply().hit;
-        if (_process_port_vlan_mapping_tmp) 
+        if (_process_port_vlan_mapping_tmp) {
             ;
-        else 
+        } else {
             _vlan_to_bd_mapping.apply();
+        }
     }
 }
 

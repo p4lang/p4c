@@ -59,10 +59,11 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     }
     apply {
         tbl_pkt_write.apply();
-        if (istd.packet_path != PSA_PacketPath_t.RESUBMIT) 
+        if (istd.packet_path != PSA_PacketPath_t.RESUBMIT) {
             tbl_resubmit.apply();
-        else 
+        } else {
             tbl_send_to_port.apply();
+        }
     }
 }
 

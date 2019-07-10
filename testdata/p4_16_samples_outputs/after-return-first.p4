@@ -10,8 +10,7 @@ control ctrl() {
             b = 32w2;
             return;
             c = 32w3;
-        }
-        else {
+        } else {
             b = 32w3;
             return;
             c = 32w4;

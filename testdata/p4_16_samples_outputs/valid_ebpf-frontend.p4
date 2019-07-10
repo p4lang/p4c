@@ -63,8 +63,7 @@ control pipe(inout Headers_t headers, out bool pass) {
         if (headers.ipv4.isValid()) {
             counters_0.increment(headers.ipv4.dstAddr);
             pass = true;
-        }
-        else {
+        } else {
             t_0.apply();
             pass = false;
         }

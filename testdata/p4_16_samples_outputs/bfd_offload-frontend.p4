@@ -17,9 +17,9 @@ BFD_Offload(16w32768) bfd_session_liveness_tracker = {
         tmp = this.getTx(index);
         tmp_0 = tmp + 8w1;
         c_0 = tmp_0;
-        if (c_0 >= 8w4) 
+        if (c_0 >= 8w4) {
             return true;
-        else {
+        } else {
             this.setTx(index, c_0);
             return false;
         }

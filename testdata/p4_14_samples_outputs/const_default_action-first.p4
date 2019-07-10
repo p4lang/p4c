@@ -93,10 +93,11 @@ control process_port_vlan_mapping(inout headers hdr, inout metadata meta, inout 
         implementation = bd_action_profile;
     }
     apply {
-        if (port_vlan_to_bd_mapping.apply().hit) 
+        if (port_vlan_to_bd_mapping.apply().hit) {
             ;
-        else 
+        } else {
             vlan_to_bd_mapping.apply();
+        }
     }
 }
 

@@ -37,8 +37,9 @@ control MyIngress(inout my_headers_t hdr, inout my_metadata_t meta, inout standa
         const default_action = act();
     }
     apply {
-        if (meta.parser_error == error.NoMatch) 
+        if (meta.parser_error == error.NoMatch) {
             tbl_act.apply();
+        }
     }
 }
 

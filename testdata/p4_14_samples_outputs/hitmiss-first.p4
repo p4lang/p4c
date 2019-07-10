@@ -67,10 +67,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        if (test1.apply().hit) 
+        if (test1.apply().hit) {
             test2.apply();
-        else 
+        } else {
             test3.apply();
+        }
     }
 }
 

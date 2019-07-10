@@ -135,9 +135,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         if (hdr.ipv4.isValid()) {
             ipv4_lpm.apply();
             forward.apply();
-        }
-        else 
+        } else {
             broadcast.apply();
+        }
     }
 }
 

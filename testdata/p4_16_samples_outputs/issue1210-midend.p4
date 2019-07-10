@@ -39,10 +39,12 @@ control IngressImpl(inout parsed_headers_t hdr, inout metadata_t meta, inout sta
         const default_action = act_0();
     }
     apply {
-        if (meta._foo__v0 == meta._bar__v1) 
+        if (meta._foo__v0 == meta._bar__v1) {
             tbl_act.apply();
-        if (meta._foo__v0 == 9w192) 
+        }
+        if (meta._foo__v0 == 9w192) {
             tbl_act_0.apply();
+        }
     }
 }
 

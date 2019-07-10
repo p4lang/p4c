@@ -9,8 +9,9 @@ struct metadata_t {
 
 control I(inout metadata_t meta) {
     apply {
-        if (meta.foo == { 9w192 }) 
+        if (meta.foo == { 9w192 }) {
             meta.foo._v = meta.foo._v + 9w1;
+        }
     }
 }
 

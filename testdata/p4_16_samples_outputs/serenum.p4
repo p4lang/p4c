@@ -34,12 +34,14 @@ parser prs(packet_in p, out Headers h) {
 
 control c(inout Headers h) {
     apply {
-        if (!h.eth.isValid()) 
+        if (!h.eth.isValid()) {
             return;
-        if (h.eth.type == EthTypes.IPv4) 
+        }
+        if (h.eth.type == EthTypes.IPv4) {
             h.eth.setInvalid();
-        else 
+        } else {
             h.eth.type = (EthTypes)(bit<16>)0;
+        }
     }
 }
 

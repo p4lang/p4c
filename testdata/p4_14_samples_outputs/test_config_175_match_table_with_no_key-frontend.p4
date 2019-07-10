@@ -74,8 +74,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         table_3.apply();
         table_4.apply();
-        if (hdr.pkt.field_i_8 == 8w0) 
+        if (hdr.pkt.field_i_8 == 8w0) {
             table_5.apply();
+        }
     }
 }
 

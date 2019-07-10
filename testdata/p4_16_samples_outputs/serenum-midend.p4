@@ -62,13 +62,16 @@ control c(inout Headers h) {
     }
     apply {
         tbl_act.apply();
-        if (!h.eth.isValid()) 
+        if (!h.eth.isValid()) {
             tbl_act_0.apply();
-        if (!hasReturned) 
-            if (h.eth.type == 16w0x800) 
+        }
+        if (!hasReturned) {
+            if (h.eth.type == 16w0x800) {
                 tbl_act_1.apply();
-            else 
+            } else {
                 tbl_act_2.apply();
+            }
+        }
     }
 }
 

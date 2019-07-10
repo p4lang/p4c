@@ -39,15 +39,18 @@ control ctrl() {
     }
     apply {
         tbl_act.apply();
-        if (t_0.apply().hit) 
+        if (t_0.apply().hit) {
             tbl_act_0.apply();
-        else 
+        } else {
             tbl_act_1.apply();
-        if (!hasExited) 
-            if (tmp) 
+        }
+        if (!hasExited) {
+            if (tmp) {
                 t_0.apply();
-            else 
+            } else {
                 t_0.apply();
+            }
+        }
     }
 }
 

@@ -219,8 +219,9 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         default_action = NoAction();
     }
     apply {
-        if (hdr.ipv6.isValid()) 
+        if (hdr.ipv6.isValid()) {
             ipv6_tbl.apply();
+        }
     }
 }
 

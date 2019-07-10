@@ -28,8 +28,9 @@ control c(in my_packet hdr) {
         default_action = NoAction_0();
     }
     apply {
-        if (hdr.data.da == 32w1) 
+        if (hdr.data.da == 32w1) {
             t_0.apply();
+        }
     }
 }
 

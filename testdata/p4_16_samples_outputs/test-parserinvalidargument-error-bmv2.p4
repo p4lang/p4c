@@ -42,34 +42,21 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         stdmeta.egress_spec = 1;
         if (stdmeta.parser_error == error.NoError) {
             error_as_int = 0;
+        } else if (stdmeta.parser_error == error.PacketTooShort) {
+            error_as_int = 1;
+        } else if (stdmeta.parser_error == error.NoMatch) {
+            error_as_int = 2;
+        } else if (stdmeta.parser_error == error.StackOutOfBounds) {
+            error_as_int = 3;
+        } else if (stdmeta.parser_error == error.HeaderTooShort) {
+            error_as_int = 4;
+        } else if (stdmeta.parser_error == error.ParserTimeout) {
+            error_as_int = 5;
+        } else if (stdmeta.parser_error == error.ParserInvalidArgument) {
+            error_as_int = 6;
+        } else {
+            error_as_int = 7;
         }
-        else 
-            if (stdmeta.parser_error == error.PacketTooShort) {
-                error_as_int = 1;
-            }
-            else 
-                if (stdmeta.parser_error == error.NoMatch) {
-                    error_as_int = 2;
-                }
-                else 
-                    if (stdmeta.parser_error == error.StackOutOfBounds) {
-                        error_as_int = 3;
-                    }
-                    else 
-                        if (stdmeta.parser_error == error.HeaderTooShort) {
-                            error_as_int = 4;
-                        }
-                        else 
-                            if (stdmeta.parser_error == error.ParserTimeout) {
-                                error_as_int = 5;
-                            }
-                            else 
-                                if (stdmeta.parser_error == error.ParserInvalidArgument) {
-                                    error_as_int = 6;
-                                }
-                                else {
-                                    error_as_int = 7;
-                                }
         hdr.ethernet.dstAddr[7:0] = error_as_int;
     }
 }

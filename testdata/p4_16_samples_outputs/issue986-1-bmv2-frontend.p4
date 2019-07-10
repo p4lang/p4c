@@ -52,10 +52,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         default_action = NoAction_3();
     }
     apply {
-        if (m.b == 1w0) 
+        if (m.b == 1w0) {
             t1_0.apply();
-        else 
+        } else {
             t1_0.apply();
+        }
         t2_0.apply();
     }
 }

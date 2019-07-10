@@ -3,10 +3,11 @@ control c(out bool b) {
     emptyTuple t_0;
     apply {
         t_0 = {  };
-        if (t_0 == {  }) 
+        if (t_0 == {  }) {
             b = true;
-        else 
+        } else {
             b = false;
+        }
     }
 }
 

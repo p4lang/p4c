@@ -3,10 +3,11 @@
 control Ing(out bit<32> a) {
     bool b_0;
     @name("Ing.cond") action cond() {
-        if (b_0) 
+        if (b_0) {
             a = 32w5;
-        else 
+        } else {
             a = 32w10;
+        }
     }
     apply {
         b_0 = true;

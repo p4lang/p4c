@@ -19,10 +19,12 @@ control c(inout bit<16> p) {
             data ix_0;
             ix_0.a = x.a;
             ix_0.b = x.b;
-            if (x.a < x.b) 
+            if (x.a < x.b) {
                 x.a = x.a + 16w1;
-            if (ix_0.a > x.b) 
+            }
+            if (ix_0.a > x.b) {
                 x.a = ix_0.a + 16w65535;
+            }
         }
     };
     @hidden action act() {

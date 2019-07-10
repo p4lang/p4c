@@ -38,8 +38,9 @@ control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_m
             meta.b = meta.b ^ 4w5;
             hasReturned = true;
         }
-        if (!hasReturned) 
+        if (!hasReturned) {
             meta.b = meta.b + 4w5;
+        }
     }
     @name("cIngress.guh") table guh_0 {
         key = {

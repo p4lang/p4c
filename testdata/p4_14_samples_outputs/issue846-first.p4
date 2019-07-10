@@ -101,14 +101,18 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction();
     }
     apply {
-        if (hdr.hdr0.isValid()) 
+        if (hdr.hdr0.isValid()) {
             t0.apply();
-        if (!hdr.hdr0.isValid()) 
+        }
+        if (!hdr.hdr0.isValid()) {
             t1.apply();
-        if (hdr.hdr0.isValid() || hdr.hdr0.isValid()) 
+        }
+        if (hdr.hdr0.isValid() || hdr.hdr0.isValid()) {
             t2.apply();
-        if (hdr.hdr0.isValid()) 
+        }
+        if (hdr.hdr0.isValid()) {
             t3.apply();
+        }
     }
 }
 

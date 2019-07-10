@@ -154,8 +154,9 @@ control PROTIngress(inout headers hdr, inout metadata meta, inout standard_metad
         const default_action = act();
     }
     apply {
-        if (meta._currenti_upDirection4 == 1w0) 
+        if (meta._currenti_upDirection4 == 1w0) {
             tbl_act.apply();
+        }
     }
 }
 

@@ -99,8 +99,9 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     apply {
         port_bytes_in.count(istd.ingress_port);
-        if (hdr.ipv4.isValid()) 
+        if (hdr.ipv4.isValid()) {
             ipv4_da_lpm.apply();
+        }
     }
 }
 

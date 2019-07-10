@@ -11,10 +11,11 @@ control c(inout bit<32> x) {
             bool hasReturned = false;
             bit<32> retval;
             bit<32> tmp_4;
-            if (a_0 > b_0) 
+            if (a_0 > b_0) {
                 tmp_4 = b_0;
-            else 
+            } else {
                 tmp_4 = a_0;
+            }
             hasReturned = true;
             retval = tmp_4;
             tmp = retval;
@@ -26,10 +27,11 @@ control c(inout bit<32> x) {
             bool hasReturned_1 = false;
             bit<32> retval_1;
             bit<32> tmp_11;
-            if (a_1 > b_1) 
+            if (a_1 > b_1) {
                 tmp_11 = b_1;
-            else 
+            } else {
                 tmp_11 = a_1;
+            }
             hasReturned_1 = true;
             retval_1 = tmp_11;
             tmp_1 = retval_1;
@@ -41,10 +43,11 @@ control c(inout bit<32> x) {
             bool hasReturned_2 = false;
             bit<32> retval_2;
             bit<32> tmp_12;
-            if (a_2 > b_2) 
+            if (a_2 > b_2) {
                 tmp_12 = b_2;
-            else 
+            } else {
                 tmp_12 = a_2;
+            }
             hasReturned_2 = true;
             retval_2 = tmp_12;
             tmp_3 = retval_2;

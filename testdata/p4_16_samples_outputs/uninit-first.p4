@@ -69,9 +69,9 @@ control c(out bit<32> v) {
         if (e > 32w0) {
             e = 32w1;
             f = 32w2;
-        }
-        else 
+        } else {
             f = 32w3;
+        }
         e = e + 32w1;
         bool touched;
         switch (t.apply().action_run) {
@@ -81,10 +81,11 @@ control c(out bit<32> v) {
         }
 
         touched = !touched;
-        if (e > 32w0) 
+        if (e > 32w0) {
             t.apply();
-        else 
+        } else {
             a1();
+        }
         setByAction = setByAction + 32w1;
     }
 }

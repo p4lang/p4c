@@ -28,10 +28,11 @@ control c(inout bit<32> x) {
         const default_action = act_1();
     }
     apply {
-        if (x > x) 
+        if (x > x) {
             tbl_act.apply();
-        else 
+        } else {
             tbl_act_0.apply();
+        }
         tbl_act_1.apply();
     }
 }

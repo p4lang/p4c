@@ -136,11 +136,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         i_t1.apply();
         if (meta.ing_metadata.f1 == hdr.vag.f1) {
             i_t2.apply();
-            if (meta.ing_metadata.f2 == hdr.vag.f2) 
+            if (meta.ing_metadata.f2 == hdr.vag.f2) {
                 i_t3.apply();
-        }
-        else 
+            }
+        } else {
             i_t4.apply();
+        }
     }
 }
 

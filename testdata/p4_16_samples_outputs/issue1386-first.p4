@@ -8,10 +8,12 @@ header hdr {
 control compute(inout hdr h) {
     bit<8> n = 8w0;
     apply {
-        if (!h.isValid()) 
+        if (!h.isValid()) {
             return;
-        if (n > 8w0) 
+        }
+        if (n > 8w0) {
             h.setValid();
+        }
     }
 }
 

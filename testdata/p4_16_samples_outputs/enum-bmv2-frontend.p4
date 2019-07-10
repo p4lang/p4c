@@ -51,10 +51,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     Choice c_c;
     apply {
         c_c = Choice.First;
-        if (c_c == Choice.Second) 
+        if (c_c == Choice.Second) {
             h.h.c = h.h.a;
-        else 
+        } else {
             h.h.c = h.h.b;
+        }
         sm.egress_spec = 9w0;
     }
 }

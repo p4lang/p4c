@@ -4,8 +4,7 @@ control c(inout bit<32> x) {
         if (x == 10) {
             x = x + 2;
             x = x - 6;
-        }
-        else {
+        } else {
             x = x << 2;
         }
     }

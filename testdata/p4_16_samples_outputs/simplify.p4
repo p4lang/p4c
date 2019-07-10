@@ -21,8 +21,9 @@ control c(out bool x) {
     }
     apply {
         x = true;
-        if (t1.apply().hit && t2.apply().hit) 
+        if (t1.apply().hit && t2.apply().hit) {
             x = false;
+        }
     }
 }
 

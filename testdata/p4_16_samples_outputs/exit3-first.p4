@@ -18,8 +18,7 @@ control ctrl(out bit<32> c) {
             b = 32w2;
             t.apply();
             c = 32w3;
-        }
-        else {
+        } else {
             b = 32w3;
             t.apply();
             c = 32w4;

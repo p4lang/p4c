@@ -154,10 +154,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         default_action = NoAction();
     }
     apply {
-        if (standard_metadata.instance_type == 32w0) 
+        if (standard_metadata.instance_type == 32w0) {
             send_frame.apply();
-        else 
+        } else {
             send_to_cpu.apply();
+        }
     }
 }
 

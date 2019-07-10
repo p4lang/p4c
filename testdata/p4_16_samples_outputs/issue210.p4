@@ -3,10 +3,11 @@
 control Ing(out bit<32> a) {
     bool b;
     action cond() {
-        if (b) 
+        if (b) {
             a = 5;
-        else 
+        } else {
             a = 10;
+        }
     }
     apply {
         b = true;

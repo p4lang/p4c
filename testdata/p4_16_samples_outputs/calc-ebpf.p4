@@ -109,8 +109,7 @@ control Ingress(inout headers hdr, out bool xout) {
         xout = true;
         if (hdr.p4calc.isValid()) {
             calculate.apply();
-        }
-        else {
+        } else {
             operation_drop();
         }
     }

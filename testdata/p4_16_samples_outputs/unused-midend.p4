@@ -38,8 +38,9 @@ control c(inout S s) {
         const default_action = act_0();
     }
     apply {
-        if (s.h.isValid()) 
+        if (s.h.isValid()) {
             tbl_act.apply();
+        }
         if (s.h.data2 == 32w0) {
             tbl_act_0.apply();
         }

@@ -96,12 +96,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         const default_action = act_0();
     }
     apply {
-        if (test1_0.apply().hit) 
+        if (test1_0.apply().hit) {
             tbl_act.apply();
-        else 
+        } else {
             tbl_act_0.apply();
-        if (tmp) 
+        }
+        if (tmp) {
             test2_0.apply();
+        }
         test4_0.apply();
     }
 }

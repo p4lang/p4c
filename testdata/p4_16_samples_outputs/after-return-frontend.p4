@@ -3,10 +3,11 @@ control ctrl() {
     apply {
         bool hasReturned = false;
         a_0 = 32w0;
-        if (a_0 == 32w0) 
+        if (a_0 == 32w0) {
             hasReturned = true;
-        else 
+        } else {
             hasReturned = true;
+        }
     }
 }
 

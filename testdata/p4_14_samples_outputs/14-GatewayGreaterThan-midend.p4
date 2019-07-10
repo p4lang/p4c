@@ -46,8 +46,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_0();
     }
     apply {
-        if (hdr.h.f1 > 16w1) 
+        if (hdr.h.f1 > 16w1) {
             t1_0.apply();
+        }
     }
 }
 

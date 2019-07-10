@@ -100,21 +100,24 @@ control c(out bool x) {
     }
     apply {
         tbl_act.apply();
-        if (t1_0.apply().hit) 
+        if (t1_0.apply().hit) {
             tbl_act_0.apply();
-        else 
+        } else {
             tbl_act_1.apply();
-        if (!tmp) 
+        }
+        if (!tmp) {
             tbl_act_2.apply();
-        else {
-            if (t2_0.apply().hit) 
+        } else {
+            if (t2_0.apply().hit) {
                 tbl_act_3.apply();
-            else 
+            } else {
                 tbl_act_4.apply();
+            }
             tbl_act_5.apply();
         }
-        if (tmp_0) 
+        if (tmp_0) {
             tbl_act_6.apply();
+        }
     }
 }
 

@@ -70,17 +70,17 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     apply {
         tbl_act.apply();
-        if (hdr.h1.op1 == 8w0x0) 
+        if (hdr.h1.op1 == 8w0x0) {
             ;
-        else 
-            if (hdr.h1.op1[7:4] == 4w1) 
-                tbl_act_0.apply();
+        } else if (hdr.h1.op1[7:4] == 4w1) {
+            tbl_act_0.apply();
+        }
         tbl_act_1.apply();
-        if (hdr.h1.op2 == 8w0x0) 
+        if (hdr.h1.op2 == 8w0x0) {
             ;
-        else 
-            if (hdr.h1.op2[7:4] == 4w1) 
-                tbl_act_2.apply();
+        } else if (hdr.h1.op2[7:4] == 4w1) {
+            tbl_act_2.apply();
+        }
         tbl_act_3.apply();
     }
 }

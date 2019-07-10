@@ -92,10 +92,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         routing.apply();
-        if (hdr.data.f5 != hdr.data.f6) 
+        if (hdr.data.f5 != hdr.data.f6) {
             test1.apply();
-        else 
+        } else {
             test2.apply();
+        }
     }
 }
 

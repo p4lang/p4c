@@ -29,14 +29,15 @@ control c(out bool x) {
     apply {
         x = true;
         tmp = t1_0.apply().hit;
-        if (!tmp) 
+        if (!tmp) {
             tmp_0 = false;
-        else {
+        } else {
             tmp_1 = t2_0.apply().hit;
             tmp_0 = tmp_1;
         }
-        if (tmp_0) 
+        if (tmp_0) {
             x = false;
+        }
     }
 }
 

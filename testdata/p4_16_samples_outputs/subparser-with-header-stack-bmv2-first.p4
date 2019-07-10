@@ -82,16 +82,21 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     apply {
         hdr.h1.h2_valid_bits = 8w0;
-        if (hdr.h2[0].isValid()) 
+        if (hdr.h2[0].isValid()) {
             hdr.h1.h2_valid_bits[0:0] = 1w1;
-        if (hdr.h2[1].isValid()) 
+        }
+        if (hdr.h2[1].isValid()) {
             hdr.h1.h2_valid_bits[1:1] = 1w1;
-        if (hdr.h2[2].isValid()) 
+        }
+        if (hdr.h2[2].isValid()) {
             hdr.h1.h2_valid_bits[2:2] = 1w1;
-        if (hdr.h2[3].isValid()) 
+        }
+        if (hdr.h2[3].isValid()) {
             hdr.h1.h2_valid_bits[3:3] = 1w1;
-        if (hdr.h2[4].isValid()) 
+        }
+        if (hdr.h2[4].isValid()) {
             hdr.h1.h2_valid_bits[4:4] = 1w1;
+        }
     }
 }
 

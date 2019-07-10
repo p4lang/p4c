@@ -65,8 +65,9 @@ control pipe(inout Headers_t headers, out bool pass) {
             pass = false;
             return;
         }
-        if (Check_src_ip.apply().hit) 
+        if (Check_src_ip.apply().hit) {
             pass = pass;
+        }
     }
 }
 

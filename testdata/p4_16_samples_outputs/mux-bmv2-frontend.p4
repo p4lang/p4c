@@ -24,10 +24,11 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     bit<32> tmp;
     @name("Eg.update") action update(in bool p_1, inout bit<64> val) {
         _sub_0 = val[31:0];
-        if (p_1) 
+        if (p_1) {
             tmp = _sub_0;
-        else 
+        } else {
             tmp = 32w1;
+        }
         _sub_0 = tmp;
         val[31:0] = _sub_0;
     }

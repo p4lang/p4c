@@ -85,8 +85,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = act_0();
     }
     apply {
-        if (h.u.h2.isValid()) 
+        if (h.u.h2.isValid()) {
             tbl_act_0.apply();
+        }
     }
 }
 

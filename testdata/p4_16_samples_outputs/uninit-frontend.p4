@@ -69,10 +69,11 @@ control c(out bit<32> v) {
     }
     apply {
         d_1 = 32w1;
-        if (e_0 > 32w0) 
+        if (e_0 > 32w0) {
             e_0 = 32w1;
-        else 
+        } else {
             ;
+        }
         e_0 = e_0 + 32w1;
         switch (t_0.apply().action_run) {
             a1: {
@@ -80,10 +81,11 @@ control c(out bit<32> v) {
             }
         }
 
-        if (e_0 > 32w0) 
+        if (e_0 > 32w0) {
             t_0.apply();
-        else 
+        } else {
             a1_2();
+        }
     }
 }
 

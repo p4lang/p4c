@@ -43,8 +43,9 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     apply {
         tbl_act.apply();
-        if (rand_int_0 < 16w32768) 
+        if (rand_int_0 < 16w32768) {
             tbl_act_0.apply();
+        }
     }
 }
 

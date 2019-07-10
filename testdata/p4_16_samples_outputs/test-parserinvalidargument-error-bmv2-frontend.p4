@@ -37,28 +37,23 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     bit<8> error_as_int_0;
     apply {
         stdmeta.egress_spec = 9w1;
-        if (stdmeta.parser_error == error.NoError) 
+        if (stdmeta.parser_error == error.NoError) {
             error_as_int_0 = 8w0;
-        else 
-            if (stdmeta.parser_error == error.PacketTooShort) 
-                error_as_int_0 = 8w1;
-            else 
-                if (stdmeta.parser_error == error.NoMatch) 
-                    error_as_int_0 = 8w2;
-                else 
-                    if (stdmeta.parser_error == error.StackOutOfBounds) 
-                        error_as_int_0 = 8w3;
-                    else 
-                        if (stdmeta.parser_error == error.HeaderTooShort) 
-                            error_as_int_0 = 8w4;
-                        else 
-                            if (stdmeta.parser_error == error.ParserTimeout) 
-                                error_as_int_0 = 8w5;
-                            else 
-                                if (stdmeta.parser_error == error.ParserInvalidArgument) 
-                                    error_as_int_0 = 8w6;
-                                else 
-                                    error_as_int_0 = 8w7;
+        } else if (stdmeta.parser_error == error.PacketTooShort) {
+            error_as_int_0 = 8w1;
+        } else if (stdmeta.parser_error == error.NoMatch) {
+            error_as_int_0 = 8w2;
+        } else if (stdmeta.parser_error == error.StackOutOfBounds) {
+            error_as_int_0 = 8w3;
+        } else if (stdmeta.parser_error == error.HeaderTooShort) {
+            error_as_int_0 = 8w4;
+        } else if (stdmeta.parser_error == error.ParserTimeout) {
+            error_as_int_0 = 8w5;
+        } else if (stdmeta.parser_error == error.ParserInvalidArgument) {
+            error_as_int_0 = 8w6;
+        } else {
+            error_as_int_0 = 8w7;
+        }
         hdr.ethernet.dstAddr[7:0] = error_as_int_0;
     }
 }

@@ -25,12 +25,14 @@ control ctrl() {
         tbl_act.apply();
         switch (t_0.apply().action_run) {
             e: {
-                if (!hasExited) 
+                if (!hasExited) {
                     t_0.apply();
+                }
             }
             f: {
-                if (!hasExited) 
+                if (!hasExited) {
                     t_0.apply();
+                }
             }
         }
 

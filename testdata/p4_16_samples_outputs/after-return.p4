@@ -10,8 +10,7 @@ control ctrl() {
             b = 2;
             return;
             c = 3;
-        }
-        else {
+        } else {
             b = 3;
             return;
             c = 4;

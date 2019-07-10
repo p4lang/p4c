@@ -89,8 +89,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         set_default_behavior_drop_0.apply();
-        if (hdr.data2.isValid()) 
+        if (hdr.data2.isValid()) {
             test1_0.apply();
+        }
         test2_0.apply();
     }
 }

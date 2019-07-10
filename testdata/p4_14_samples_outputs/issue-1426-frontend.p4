@@ -111,17 +111,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         if (standard_metadata.ingress_port & 9w0x1 == 9w1) {
             a1_0.apply();
-            if (standard_metadata.ingress_port & 9w0x2 == 9w1) 
+            if (standard_metadata.ingress_port & 9w0x2 == 9w1) {
                 _c1.apply();
-            if (standard_metadata.ingress_port & 9w0x4 == 9w1) 
+            }
+            if (standard_metadata.ingress_port & 9w0x4 == 9w1) {
                 _c2.apply();
-        }
-        else {
+            }
+        } else {
             b1_0.apply();
-            if (standard_metadata.ingress_port & 9w0x2 == 9w1) 
+            if (standard_metadata.ingress_port & 9w0x2 == 9w1) {
                 _c1.apply();
-            if (standard_metadata.ingress_port & 9w0x4 == 9w1) 
+            }
+            if (standard_metadata.ingress_port & 9w0x4 == 9w1) {
                 _c2.apply();
+            }
         }
     }
 }

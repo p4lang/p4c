@@ -16,10 +16,12 @@ control c(inout bit<16> p) {
         }
         void g(inout data x) {
             data ix = x;
-            if (ix.a < ix.b) 
+            if (ix.a < ix.b) {
                 x.a = ix.a + 16w1;
-            if (ix.a > ix.b) 
+            }
+            if (ix.a > ix.b) {
                 x.a = ix.a + 16w65535;
+            }
         }
     };
     apply {

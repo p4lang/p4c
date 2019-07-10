@@ -46,11 +46,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         {
             bool c_hasReturned = false;
             c_n = 8w0;
-            if (!h.h.isValid()) 
+            if (!h.h.isValid()) {
                 c_hasReturned = true;
-            if (!c_hasReturned) 
-                if (c_n > 8w0) 
+            }
+            if (!c_hasReturned) {
+                if (c_n > 8w0) {
                     h.h.setValid();
+                }
+            }
         }
         sm.egress_spec = 9w0;
     }

@@ -14,10 +14,11 @@ control c(inout bit<32> x) {
                 bool hasReturned_0 = false;
                 bit<32> retval_0;
                 bit<32> tmp_2;
-                if (a_1 > b_1) 
+                if (a_1 > b_1) {
                     tmp_2 = b_1;
-                else 
+                } else {
                     tmp_2 = a_1;
+                }
                 hasReturned_0 = true;
                 retval_0 = tmp_2;
                 tmp_0 = retval_0;

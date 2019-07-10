@@ -146,9 +146,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = read_round();
     }
     apply {
-        if (hdr.ipv4.isValid()) 
-            if (hdr.myhdr.isValid()) 
+        if (hdr.ipv4.isValid()) {
+            if (hdr.myhdr.isValid()) {
                 round_tbl.apply();
+            }
+        }
     }
 }
 

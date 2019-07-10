@@ -84,12 +84,15 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     apply {
         stdmeta.egress_spec = 9w0;
-        if (stdmeta.checksum_error == 1w1) 
+        if (stdmeta.checksum_error == 1w1) {
             hdr.ethernet.srcAddr = 48w0xbad;
-        if (stdmeta.parser_error != error.NoError) 
+        }
+        if (stdmeta.parser_error != error.NoError) {
             hdr.ethernet.dstAddr = 48w0xbad;
-        if (hdr.ipv4.isValid()) 
+        }
+        if (hdr.ipv4.isValid()) {
             hdr.ipv4.ttl = hdr.ipv4.ttl |-| 8w1;
+        }
     }
 }
 

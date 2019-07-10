@@ -262,8 +262,9 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
             v6_addresses_0.apply();
             v6_networks_0.apply();
         }
-        if (hdr.ipv4.isValid()) 
+        if (hdr.ipv4.isValid()) {
             v4_networks_0.apply();
+        }
     }
 }
 

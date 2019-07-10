@@ -32,8 +32,9 @@ control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata
         const default_action = act();
     }
     apply {
-        if (local_metadata._test_test_error0 == error.Unused) 
+        if (local_metadata._test_test_error0 == error.Unused) {
             tbl_act.apply();
+        }
     }
 }
 

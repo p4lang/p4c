@@ -65,8 +65,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         index_setter_0.apply();
-        if (meta._counter_metadata_counter_run1 == 4w1) 
+        if (meta._counter_metadata_counter_run1 == 4w1) {
             stats_0.apply();
+        }
     }
 }
 

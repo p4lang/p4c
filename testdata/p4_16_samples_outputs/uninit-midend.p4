@@ -82,20 +82,22 @@ control c(out bit<32> v) {
         const default_action = a1_2();
     }
     apply {
-        if (e_0 > 32w0) 
+        if (e_0 > 32w0) {
             tbl_act.apply();
-        else 
+        } else {
             ;
+        }
         tbl_act_0.apply();
         switch (t_0.apply().action_run) {
             a1: {
             }
         }
 
-        if (e_0 > 32w0) 
+        if (e_0 > 32w0) {
             t_0.apply();
-        else 
+        } else {
             tbl_a1.apply();
+        }
     }
 }
 

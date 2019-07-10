@@ -60,8 +60,9 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
 
     }
     apply {
-        if (hdr.ipv4.isValid()) 
+        if (hdr.ipv4.isValid()) {
             ingress_tbl_0.apply();
+        }
     }
 }
 

@@ -8,10 +8,11 @@ control Ing() {
     bit<32> a;
     action cond() {
         b = true;
-        if (b) 
+        if (b) {
             a = 5;
-        else 
+        } else {
             a = 10;
+        }
     }
     apply {
         cond();

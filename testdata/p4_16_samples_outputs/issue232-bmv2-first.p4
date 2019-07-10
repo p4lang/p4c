@@ -39,8 +39,9 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
         Value val = { 32w0 };
         bool done = false;
         bool ok = !done && same;
-        if (ok) 
+        if (ok) {
             update(val);
+        }
     }
     apply {
         test();

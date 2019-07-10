@@ -800,250 +800,189 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     apply {
         tbl_act.apply();
-        if (hdr.h1.op1 == 8w0x0) 
+        if (hdr.h1.op1 == 8w0x0) {
             ;
-        else 
-            if (hdr.h1.op1[7:4] == 4w1) 
-                if (hdr.h1.op1[3:0] == 4w1) 
-                    tbl_act_0.apply();
-                else 
-                    if (hdr.h1.op1[3:0] == 4w2) 
-                        tbl_act_1.apply();
-                    else 
-                        if (hdr.h1.op1[3:0] == 4w3) 
-                            tbl_act_2.apply();
-                        else 
-                            if (hdr.h1.op1[3:0] == 4w4) 
-                                tbl_act_3.apply();
-                            else 
-                                if (hdr.h1.op1[3:0] == 4w5) 
-                                    tbl_act_4.apply();
-                                else 
-                                    if (hdr.h1.op1[3:0] == 4w6) 
-                                        tbl_act_5.apply();
-            else 
-                if (hdr.h1.op1[7:4] == 4w2) 
-                    if (hdr.h1.op1[3:0] == 4w1) 
-                        tbl_act_6.apply();
-                    else 
-                        if (hdr.h1.op1[3:0] == 4w2) 
-                            tbl_act_7.apply();
-                        else 
-                            if (hdr.h1.op1[3:0] == 4w3) 
-                                tbl_act_8.apply();
-                            else 
-                                if (hdr.h1.op1[3:0] == 4w4) 
-                                    tbl_act_9.apply();
-                                else 
-                                    if (hdr.h1.op1[3:0] == 4w5) 
-                                        tbl_act_10.apply();
-                                    else 
-                                        if (hdr.h1.op1[3:0] == 4w6) 
-                                            tbl_act_11.apply();
-                else 
-                    if (hdr.h1.op1[7:4] == 4w3) 
-                        if (hdr.h1.op1[3:0] == 4w0) {
-                            tbl_act_12.apply();
-                        }
-                        else 
-                            if (hdr.h1.op1[3:0] == 4w1) {
-                                tbl_act_13.apply();
-                            }
-                            else 
-                                if (hdr.h1.op1[3:0] == 4w2) {
-                                    tbl_act_14.apply();
-                                }
-                                else 
-                                    if (hdr.h1.op1[3:0] == 4w3) {
-                                        tbl_act_15.apply();
-                                    }
-                                    else 
-                                        if (hdr.h1.op1[3:0] == 4w4) {
-                                            tbl_act_16.apply();
-                                        }
-                    else 
-                        if (hdr.h1.op1[7:4] == 4w4) 
-                            if (hdr.h1.op1[3:0] == 4w0) 
-                                tbl_act_17.apply();
-                            else 
-                                if (hdr.h1.op1[3:0] == 4w1) 
-                                    tbl_act_18.apply();
-                                else 
-                                    if (hdr.h1.op1[3:0] == 4w2) 
-                                        tbl_act_19.apply();
-                                    else 
-                                        if (hdr.h1.op1[3:0] == 4w3) 
-                                            tbl_act_20.apply();
-                                        else 
-                                            if (hdr.h1.op1[3:0] == 4w4) 
-                                                tbl_act_21.apply();
+        } else if (hdr.h1.op1[7:4] == 4w1) {
+            if (hdr.h1.op1[3:0] == 4w1) {
+                tbl_act_0.apply();
+            } else if (hdr.h1.op1[3:0] == 4w2) {
+                tbl_act_1.apply();
+            } else if (hdr.h1.op1[3:0] == 4w3) {
+                tbl_act_2.apply();
+            } else if (hdr.h1.op1[3:0] == 4w4) {
+                tbl_act_3.apply();
+            } else if (hdr.h1.op1[3:0] == 4w5) {
+                tbl_act_4.apply();
+            } else if (hdr.h1.op1[3:0] == 4w6) {
+                tbl_act_5.apply();
+            }
+        } else if (hdr.h1.op1[7:4] == 4w2) {
+            if (hdr.h1.op1[3:0] == 4w1) {
+                tbl_act_6.apply();
+            } else if (hdr.h1.op1[3:0] == 4w2) {
+                tbl_act_7.apply();
+            } else if (hdr.h1.op1[3:0] == 4w3) {
+                tbl_act_8.apply();
+            } else if (hdr.h1.op1[3:0] == 4w4) {
+                tbl_act_9.apply();
+            } else if (hdr.h1.op1[3:0] == 4w5) {
+                tbl_act_10.apply();
+            } else if (hdr.h1.op1[3:0] == 4w6) {
+                tbl_act_11.apply();
+            }
+        } else if (hdr.h1.op1[7:4] == 4w3) {
+            if (hdr.h1.op1[3:0] == 4w0) {
+                tbl_act_12.apply();
+            } else if (hdr.h1.op1[3:0] == 4w1) {
+                tbl_act_13.apply();
+            } else if (hdr.h1.op1[3:0] == 4w2) {
+                tbl_act_14.apply();
+            } else if (hdr.h1.op1[3:0] == 4w3) {
+                tbl_act_15.apply();
+            } else if (hdr.h1.op1[3:0] == 4w4) {
+                tbl_act_16.apply();
+            }
+        } else if (hdr.h1.op1[7:4] == 4w4) {
+            if (hdr.h1.op1[3:0] == 4w0) {
+                tbl_act_17.apply();
+            } else if (hdr.h1.op1[3:0] == 4w1) {
+                tbl_act_18.apply();
+            } else if (hdr.h1.op1[3:0] == 4w2) {
+                tbl_act_19.apply();
+            } else if (hdr.h1.op1[3:0] == 4w3) {
+                tbl_act_20.apply();
+            } else if (hdr.h1.op1[3:0] == 4w4) {
+                tbl_act_21.apply();
+            }
+        }
         tbl_act_22.apply();
-        if (hdr.h1.op2 == 8w0x0) 
+        if (hdr.h1.op2 == 8w0x0) {
             ;
-        else 
-            if (hdr.h1.op2[7:4] == 4w1) 
-                if (hdr.h1.op2[3:0] == 4w1) 
-                    tbl_act_23.apply();
-                else 
-                    if (hdr.h1.op2[3:0] == 4w2) 
-                        tbl_act_24.apply();
-                    else 
-                        if (hdr.h1.op2[3:0] == 4w3) 
-                            tbl_act_25.apply();
-                        else 
-                            if (hdr.h1.op2[3:0] == 4w4) 
-                                tbl_act_26.apply();
-                            else 
-                                if (hdr.h1.op2[3:0] == 4w5) 
-                                    tbl_act_27.apply();
-                                else 
-                                    if (hdr.h1.op2[3:0] == 4w6) 
-                                        tbl_act_28.apply();
-            else 
-                if (hdr.h1.op2[7:4] == 4w2) 
-                    if (hdr.h1.op2[3:0] == 4w1) 
-                        tbl_act_29.apply();
-                    else 
-                        if (hdr.h1.op2[3:0] == 4w2) 
-                            tbl_act_30.apply();
-                        else 
-                            if (hdr.h1.op2[3:0] == 4w3) 
-                                tbl_act_31.apply();
-                            else 
-                                if (hdr.h1.op2[3:0] == 4w4) 
-                                    tbl_act_32.apply();
-                                else 
-                                    if (hdr.h1.op2[3:0] == 4w5) 
-                                        tbl_act_33.apply();
-                                    else 
-                                        if (hdr.h1.op2[3:0] == 4w6) 
-                                            tbl_act_34.apply();
-                else 
-                    if (hdr.h1.op2[7:4] == 4w3) 
-                        if (hdr.h1.op2[3:0] == 4w0) {
-                            tbl_act_35.apply();
-                        }
-                        else 
-                            if (hdr.h1.op2[3:0] == 4w1) {
-                                tbl_act_36.apply();
-                            }
-                            else 
-                                if (hdr.h1.op2[3:0] == 4w2) {
-                                    tbl_act_37.apply();
-                                }
-                                else 
-                                    if (hdr.h1.op2[3:0] == 4w3) {
-                                        tbl_act_38.apply();
-                                    }
-                                    else 
-                                        if (hdr.h1.op2[3:0] == 4w4) {
-                                            tbl_act_39.apply();
-                                        }
-                    else 
-                        if (hdr.h1.op2[7:4] == 4w4) 
-                            if (hdr.h1.op2[3:0] == 4w0) 
-                                tbl_act_40.apply();
-                            else 
-                                if (hdr.h1.op2[3:0] == 4w1) 
-                                    tbl_act_41.apply();
-                                else 
-                                    if (hdr.h1.op2[3:0] == 4w2) 
-                                        tbl_act_42.apply();
-                                    else 
-                                        if (hdr.h1.op2[3:0] == 4w3) 
-                                            tbl_act_43.apply();
-                                        else 
-                                            if (hdr.h1.op2[3:0] == 4w4) 
-                                                tbl_act_44.apply();
+        } else if (hdr.h1.op2[7:4] == 4w1) {
+            if (hdr.h1.op2[3:0] == 4w1) {
+                tbl_act_23.apply();
+            } else if (hdr.h1.op2[3:0] == 4w2) {
+                tbl_act_24.apply();
+            } else if (hdr.h1.op2[3:0] == 4w3) {
+                tbl_act_25.apply();
+            } else if (hdr.h1.op2[3:0] == 4w4) {
+                tbl_act_26.apply();
+            } else if (hdr.h1.op2[3:0] == 4w5) {
+                tbl_act_27.apply();
+            } else if (hdr.h1.op2[3:0] == 4w6) {
+                tbl_act_28.apply();
+            }
+        } else if (hdr.h1.op2[7:4] == 4w2) {
+            if (hdr.h1.op2[3:0] == 4w1) {
+                tbl_act_29.apply();
+            } else if (hdr.h1.op2[3:0] == 4w2) {
+                tbl_act_30.apply();
+            } else if (hdr.h1.op2[3:0] == 4w3) {
+                tbl_act_31.apply();
+            } else if (hdr.h1.op2[3:0] == 4w4) {
+                tbl_act_32.apply();
+            } else if (hdr.h1.op2[3:0] == 4w5) {
+                tbl_act_33.apply();
+            } else if (hdr.h1.op2[3:0] == 4w6) {
+                tbl_act_34.apply();
+            }
+        } else if (hdr.h1.op2[7:4] == 4w3) {
+            if (hdr.h1.op2[3:0] == 4w0) {
+                tbl_act_35.apply();
+            } else if (hdr.h1.op2[3:0] == 4w1) {
+                tbl_act_36.apply();
+            } else if (hdr.h1.op2[3:0] == 4w2) {
+                tbl_act_37.apply();
+            } else if (hdr.h1.op2[3:0] == 4w3) {
+                tbl_act_38.apply();
+            } else if (hdr.h1.op2[3:0] == 4w4) {
+                tbl_act_39.apply();
+            }
+        } else if (hdr.h1.op2[7:4] == 4w4) {
+            if (hdr.h1.op2[3:0] == 4w0) {
+                tbl_act_40.apply();
+            } else if (hdr.h1.op2[3:0] == 4w1) {
+                tbl_act_41.apply();
+            } else if (hdr.h1.op2[3:0] == 4w2) {
+                tbl_act_42.apply();
+            } else if (hdr.h1.op2[3:0] == 4w3) {
+                tbl_act_43.apply();
+            } else if (hdr.h1.op2[3:0] == 4w4) {
+                tbl_act_44.apply();
+            }
+        }
         tbl_act_45.apply();
-        if (hdr.h1.op3 == 8w0x0) 
+        if (hdr.h1.op3 == 8w0x0) {
             ;
-        else 
-            if (hdr.h1.op3[7:4] == 4w1) 
-                if (hdr.h1.op3[3:0] == 4w1) 
-                    tbl_act_46.apply();
-                else 
-                    if (hdr.h1.op3[3:0] == 4w2) 
-                        tbl_act_47.apply();
-                    else 
-                        if (hdr.h1.op3[3:0] == 4w3) 
-                            tbl_act_48.apply();
-                        else 
-                            if (hdr.h1.op3[3:0] == 4w4) 
-                                tbl_act_49.apply();
-                            else 
-                                if (hdr.h1.op3[3:0] == 4w5) 
-                                    tbl_act_50.apply();
-                                else 
-                                    if (hdr.h1.op3[3:0] == 4w6) 
-                                        tbl_act_51.apply();
-            else 
-                if (hdr.h1.op3[7:4] == 4w2) 
-                    if (hdr.h1.op3[3:0] == 4w1) 
-                        tbl_act_52.apply();
-                    else 
-                        if (hdr.h1.op3[3:0] == 4w2) 
-                            tbl_act_53.apply();
-                        else 
-                            if (hdr.h1.op3[3:0] == 4w3) 
-                                tbl_act_54.apply();
-                            else 
-                                if (hdr.h1.op3[3:0] == 4w4) 
-                                    tbl_act_55.apply();
-                                else 
-                                    if (hdr.h1.op3[3:0] == 4w5) 
-                                        tbl_act_56.apply();
-                                    else 
-                                        if (hdr.h1.op3[3:0] == 4w6) 
-                                            tbl_act_57.apply();
-                else 
-                    if (hdr.h1.op3[7:4] == 4w3) 
-                        if (hdr.h1.op3[3:0] == 4w0) {
-                            tbl_act_58.apply();
-                        }
-                        else 
-                            if (hdr.h1.op3[3:0] == 4w1) {
-                                tbl_act_59.apply();
-                            }
-                            else 
-                                if (hdr.h1.op3[3:0] == 4w2) {
-                                    tbl_act_60.apply();
-                                }
-                                else 
-                                    if (hdr.h1.op3[3:0] == 4w3) {
-                                        tbl_act_61.apply();
-                                    }
-                                    else 
-                                        if (hdr.h1.op3[3:0] == 4w4) {
-                                            tbl_act_62.apply();
-                                        }
-                    else 
-                        if (hdr.h1.op3[7:4] == 4w4) 
-                            if (hdr.h1.op3[3:0] == 4w0) 
-                                tbl_act_63.apply();
-                            else 
-                                if (hdr.h1.op3[3:0] == 4w1) 
-                                    tbl_act_64.apply();
-                                else 
-                                    if (hdr.h1.op3[3:0] == 4w2) 
-                                        tbl_act_65.apply();
-                                    else 
-                                        if (hdr.h1.op3[3:0] == 4w3) 
-                                            tbl_act_66.apply();
-                                        else 
-                                            if (hdr.h1.op3[3:0] == 4w4) 
-                                                tbl_act_67.apply();
+        } else if (hdr.h1.op3[7:4] == 4w1) {
+            if (hdr.h1.op3[3:0] == 4w1) {
+                tbl_act_46.apply();
+            } else if (hdr.h1.op3[3:0] == 4w2) {
+                tbl_act_47.apply();
+            } else if (hdr.h1.op3[3:0] == 4w3) {
+                tbl_act_48.apply();
+            } else if (hdr.h1.op3[3:0] == 4w4) {
+                tbl_act_49.apply();
+            } else if (hdr.h1.op3[3:0] == 4w5) {
+                tbl_act_50.apply();
+            } else if (hdr.h1.op3[3:0] == 4w6) {
+                tbl_act_51.apply();
+            }
+        } else if (hdr.h1.op3[7:4] == 4w2) {
+            if (hdr.h1.op3[3:0] == 4w1) {
+                tbl_act_52.apply();
+            } else if (hdr.h1.op3[3:0] == 4w2) {
+                tbl_act_53.apply();
+            } else if (hdr.h1.op3[3:0] == 4w3) {
+                tbl_act_54.apply();
+            } else if (hdr.h1.op3[3:0] == 4w4) {
+                tbl_act_55.apply();
+            } else if (hdr.h1.op3[3:0] == 4w5) {
+                tbl_act_56.apply();
+            } else if (hdr.h1.op3[3:0] == 4w6) {
+                tbl_act_57.apply();
+            }
+        } else if (hdr.h1.op3[7:4] == 4w3) {
+            if (hdr.h1.op3[3:0] == 4w0) {
+                tbl_act_58.apply();
+            } else if (hdr.h1.op3[3:0] == 4w1) {
+                tbl_act_59.apply();
+            } else if (hdr.h1.op3[3:0] == 4w2) {
+                tbl_act_60.apply();
+            } else if (hdr.h1.op3[3:0] == 4w3) {
+                tbl_act_61.apply();
+            } else if (hdr.h1.op3[3:0] == 4w4) {
+                tbl_act_62.apply();
+            }
+        } else if (hdr.h1.op3[7:4] == 4w4) {
+            if (hdr.h1.op3[3:0] == 4w0) {
+                tbl_act_63.apply();
+            } else if (hdr.h1.op3[3:0] == 4w1) {
+                tbl_act_64.apply();
+            } else if (hdr.h1.op3[3:0] == 4w2) {
+                tbl_act_65.apply();
+            } else if (hdr.h1.op3[3:0] == 4w3) {
+                tbl_act_66.apply();
+            } else if (hdr.h1.op3[3:0] == 4w4) {
+                tbl_act_67.apply();
+            }
+        }
         tbl_act_68.apply();
-        if (hdr.h2[0].isValid()) 
+        if (hdr.h2[0].isValid()) {
             tbl_act_69.apply();
-        if (hdr.h2[1].isValid()) 
+        }
+        if (hdr.h2[1].isValid()) {
             tbl_act_70.apply();
-        if (hdr.h2[2].isValid()) 
+        }
+        if (hdr.h2[2].isValid()) {
             tbl_act_71.apply();
-        if (hdr.h2[3].isValid()) 
+        }
+        if (hdr.h2[3].isValid()) {
             tbl_act_72.apply();
-        if (hdr.h2[4].isValid()) 
+        }
+        if (hdr.h2[4].isValid()) {
             tbl_act_73.apply();
+        }
     }
 }
 

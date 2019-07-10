@@ -39,8 +39,9 @@ control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_m
             hdr.ethernet.srcAddr = 48w0xdeadbeeff00d;
             hasReturned = true;
         }
-        if (!hasReturned) 
+        if (!hasReturned) {
             hdr.ethernet.srcAddr = 48w0x215241100ff2;
+        }
     }
     @name("cIngress.tbl1") table tbl1_0 {
         key = {
