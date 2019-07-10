@@ -46,10 +46,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             bool hasReturned = false;
             bit<16> retval;
             bit<16> tmp_0;
-            if (x_0 > 16w5) 
+            if (x_0 > 16w5) {
                 tmp_0 = x_0 + 16w65535;
-            else 
+            }
+            else {
                 tmp_0 = x_0;
+            }
             hasReturned = true;
             retval = tmp_0;
             tmp = retval;

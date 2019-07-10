@@ -374,14 +374,19 @@ control Forwarding(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_me
         size = 1024;
     }
     apply {
-        if (fabric_metadata.fwd_type == FWD_BRIDGING) 
+        if (fabric_metadata.fwd_type == FWD_BRIDGING) {
             bridging.apply();
-        else 
-            if (fabric_metadata.fwd_type == FWD_MPLS) 
+        }
+        else {
+            if (fabric_metadata.fwd_type == FWD_MPLS) {
                 mpls.apply();
-            else 
-                if (fabric_metadata.fwd_type == FWD_IPV4_UNICAST) 
+            }
+            else {
+                if (fabric_metadata.fwd_type == FWD_IPV4_UNICAST) {
                     routing_v4.apply();
+                }
+            }
+        }
     }
 }
 
@@ -606,8 +611,9 @@ control EgressNextControl(inout parsed_headers_t hdr, inout fabric_metadata_t fa
             mark_to_drop(standard_metadata);
         }
         if (fabric_metadata.mpls_label == 0) {
-            if (hdr.mpls.isValid()) 
+            if (hdr.mpls.isValid()) {
                 pop_mpls_if_present();
+            }
         }
         else {
             set_mpls();
@@ -619,14 +625,16 @@ control EgressNextControl(inout parsed_headers_t hdr, inout fabric_metadata_t fa
         }
         if (hdr.mpls.isValid()) {
             hdr.mpls.ttl = hdr.mpls.ttl - 1;
-            if (hdr.mpls.ttl == 0) 
+            if (hdr.mpls.ttl == 0) {
                 mark_to_drop(standard_metadata);
+            }
         }
         else {
             if (hdr.ipv4.isValid()) {
                 hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
-                if (hdr.ipv4.ttl == 0) 
+                if (hdr.ipv4.ttl == 0) {
                     mark_to_drop(standard_metadata);
+                }
             }
         }
     }
@@ -661,8 +669,9 @@ control PacketIoEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabri
 
 control spgw_normalizer(in bool is_gtpu_encapped, out ipv4_t gtpu_ipv4, out udp_t gtpu_udp, inout ipv4_t ipv4, inout udp_t udp, in ipv4_t inner_ipv4, in udp_t inner_udp) {
     apply {
-        if (!is_gtpu_encapped) 
+        if (!is_gtpu_encapped) {
             return;
+        }
         gtpu_ipv4 = ipv4;
         ipv4 = inner_ipv4;
         gtpu_udp = udp;
@@ -716,7 +725,7 @@ control spgw_ingress(inout ipv4_t gtpu_ipv4, inout udp_t gtpu_udp, inout gtpu_t 
             fabric_meta.spgw.direction = SPGW_DIR_UPLINK;
             gtpu_decap();
         }
-        else 
+        else {
             if (dl_sess_lookup.apply().hit) {
                 fabric_meta.spgw.direction = SPGW_DIR_DOWNLINK;
             }
@@ -724,6 +733,7 @@ control spgw_ingress(inout ipv4_t gtpu_ipv4, inout udp_t gtpu_udp, inout gtpu_t 
                 fabric_meta.spgw.direction = SPGW_DIR_UNKNOWN;
                 return;
             }
+        }
         fabric_meta.spgw.ipv4_len = ipv4.total_len;
     }
 }

@@ -159,21 +159,25 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         }
         if (!hasReturned) {
             ipv4_match_0.apply();
-            if (outCtrl.outputPort == 4w0xf) 
+            if (outCtrl.outputPort == 4w0xf) {
                 hasReturned = true;
+            }
         }
         if (!hasReturned) {
             check_ttl_0.apply();
-            if (outCtrl.outputPort == 4w0xe) 
+            if (outCtrl.outputPort == 4w0xe) {
                 hasReturned = true;
+            }
         }
         if (!hasReturned) {
             dmac_0.apply();
-            if (outCtrl.outputPort == 4w0xf) 
+            if (outCtrl.outputPort == 4w0xf) {
                 hasReturned = true;
+            }
         }
-        if (!hasReturned) 
+        if (!hasReturned) {
             smac_0.apply();
+        }
     }
 }
 

@@ -93,8 +93,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             stats.apply();
             test1.apply();
         }
-        else 
+        else {
             test2.apply();
+        }
     }
 }
 

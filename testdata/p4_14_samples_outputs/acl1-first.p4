@@ -243,8 +243,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         system_acl.apply();
-        if (meta.ingress_metadata.drop_flag == 1w1) 
+        if (meta.ingress_metadata.drop_flag == 1w1) {
             drop_stats_0.apply();
+        }
     }
 }
 

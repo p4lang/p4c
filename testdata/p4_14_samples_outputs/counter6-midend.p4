@@ -97,11 +97,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_3();
     }
     apply {
-        if (hdr.hdrA.isValid()) 
+        if (hdr.hdrA.isValid()) {
             _tabA.apply();
-        else 
-            if (hdr.hdrB.isValid()) 
+        }
+        else {
+            if (hdr.hdrB.isValid()) {
                 _tabB.apply();
+            }
+        }
     }
 }
 

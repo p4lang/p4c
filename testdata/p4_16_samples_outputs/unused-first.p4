@@ -18,10 +18,12 @@ extern E {
 control c(inout S s) {
     E() e;
     apply {
-        if (s.h.isValid()) 
+        if (s.h.isValid()) {
             s.h.data3 = 32w0;
-        if (s.h.data2 == 32w0) 
+        }
+        if (s.h.data2 == 32w0) {
             s.h.data1 = e.get<bit<32>>(s.h.data2);
+        }
     }
 }
 

@@ -64,59 +64,69 @@ control cDoOneOp(inout headers hdr, in bit<8> op) {
     apply {
         if (op == 0x0) {
         }
-        else 
+        else {
             if (op[7:4] == 1) {
                 if (op[3:0] == 1) {
                     hdr.h2.push_front(1);
                 }
-                else 
+                else {
                     if (op[3:0] == 2) {
                         hdr.h2.push_front(2);
                     }
-                    else 
+                    else {
                         if (op[3:0] == 3) {
                             hdr.h2.push_front(3);
                         }
-                        else 
+                        else {
                             if (op[3:0] == 4) {
                                 hdr.h2.push_front(4);
                             }
-                            else 
+                            else {
                                 if (op[3:0] == 5) {
                                     hdr.h2.push_front(5);
                                 }
-                                else 
+                                else {
                                     if (op[3:0] == 6) {
                                         hdr.h2.push_front(6);
                                     }
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            else 
+            else {
                 if (op[7:4] == 2) {
                     if (op[3:0] == 1) {
                         hdr.h2.pop_front(1);
                     }
-                    else 
+                    else {
                         if (op[3:0] == 2) {
                             hdr.h2.pop_front(2);
                         }
-                        else 
+                        else {
                             if (op[3:0] == 3) {
                                 hdr.h2.pop_front(3);
                             }
-                            else 
+                            else {
                                 if (op[3:0] == 4) {
                                     hdr.h2.pop_front(4);
                                 }
-                                else 
+                                else {
                                     if (op[3:0] == 5) {
                                         hdr.h2.pop_front(5);
                                     }
-                                    else 
+                                    else {
                                         if (op[3:0] == 6) {
                                             hdr.h2.pop_front(6);
                                         }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
-                else 
+                else {
                     if (op[7:4] == 3) {
                         if (op[3:0] == 0) {
                             hdr.h2[0].setValid();
@@ -125,7 +135,7 @@ control cDoOneOp(inout headers hdr, in bit<8> op) {
                             hdr.h2[0].f2 = 0xa;
                             hdr.h2[0].next_hdr_type = 9;
                         }
-                        else 
+                        else {
                             if (op[3:0] == 1) {
                                 hdr.h2[1].setValid();
                                 hdr.h2[1].hdr_type = 2;
@@ -133,7 +143,7 @@ control cDoOneOp(inout headers hdr, in bit<8> op) {
                                 hdr.h2[1].f2 = 0x1a;
                                 hdr.h2[1].next_hdr_type = 9;
                             }
-                            else 
+                            else {
                                 if (op[3:0] == 2) {
                                     hdr.h2[2].setValid();
                                     hdr.h2[2].hdr_type = 2;
@@ -141,7 +151,7 @@ control cDoOneOp(inout headers hdr, in bit<8> op) {
                                     hdr.h2[2].f2 = 0x2a;
                                     hdr.h2[2].next_hdr_type = 9;
                                 }
-                                else 
+                                else {
                                     if (op[3:0] == 3) {
                                         hdr.h2[3].setValid();
                                         hdr.h2[3].hdr_type = 2;
@@ -149,7 +159,7 @@ control cDoOneOp(inout headers hdr, in bit<8> op) {
                                         hdr.h2[3].f2 = 0x3a;
                                         hdr.h2[3].next_hdr_type = 9;
                                     }
-                                    else 
+                                    else {
                                         if (op[3:0] == 4) {
                                             hdr.h2[4].setValid();
                                             hdr.h2[4].hdr_type = 2;
@@ -157,29 +167,41 @@ control cDoOneOp(inout headers hdr, in bit<8> op) {
                                             hdr.h2[4].f2 = 0x4a;
                                             hdr.h2[4].next_hdr_type = 9;
                                         }
+                                    }
+                                }
+                            }
+                        }
                     }
-                    else 
+                    else {
                         if (op[7:4] == 4) {
                             if (op[3:0] == 0) {
                                 hdr.h2[0].setInvalid();
                             }
-                            else 
+                            else {
                                 if (op[3:0] == 1) {
                                     hdr.h2[1].setInvalid();
                                 }
-                                else 
+                                else {
                                     if (op[3:0] == 2) {
                                         hdr.h2[2].setInvalid();
                                     }
-                                    else 
+                                    else {
                                         if (op[3:0] == 3) {
                                             hdr.h2[3].setInvalid();
                                         }
-                                        else 
+                                        else {
                                             if (op[3:0] == 4) {
                                                 hdr.h2[4].setInvalid();
                                             }
+                                        }
+                                    }
+                                }
+                            }
                         }
+                    }
+                }
+            }
+        }
     }
 }
 

@@ -71,8 +71,9 @@ control pipe(inout Headers_t headers, out bool pass) {
         }
         if (!hasReturned) {
             tmp = Check_src_ip_0.apply().hit;
-            if (tmp) 
+            if (tmp) {
                 pass = pass;
+            }
         }
     }
 }

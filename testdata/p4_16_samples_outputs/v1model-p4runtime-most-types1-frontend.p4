@@ -225,8 +225,9 @@ control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metad
         default_action = my_drop();
     }
     apply {
-        if (hdr.custom.isValid()) 
+        if (hdr.custom.isValid()) {
             custom_table_0.apply();
+        }
     }
 }
 

@@ -23,8 +23,9 @@ parser parse(packet_in pk, out parsed_packet_t hdr, inout local_metadata_t local
 
 control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     apply {
-        if (local_metadata.test.test_error == error.Unused) 
+        if (local_metadata.test.test_error == error.Unused) {
             mark_to_drop(standard_metadata);
+        }
     }
 }
 

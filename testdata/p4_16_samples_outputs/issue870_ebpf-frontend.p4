@@ -68,8 +68,9 @@ control pipe(inout Headers_t headers, out bool pass) {
             pass = false;
             hasReturned = true;
         }
-        if (!hasReturned) 
+        if (!hasReturned) {
             Check_src_ip_0.apply();
+        }
     }
 }
 

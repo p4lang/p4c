@@ -35,13 +35,15 @@ control c(out B32 x) {
         k = n;
         x = (B32)n;
         n1 = (N32)32w1;
-        if (n == n1) 
+        if (n == n1) {
             x = 32w2;
+        }
         s.b = b;
         s.n = n;
         t.apply();
-        if (s.b == (B32)s.n) 
+        if (s.b == (B32)s.n) {
             x = 32w3;
+        }
     }
 }
 

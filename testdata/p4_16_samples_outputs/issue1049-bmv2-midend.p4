@@ -106,10 +106,12 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         if (hdr.ipv4.isValid()) {
             guh_0.apply();
             debug_table_0.apply();
-            if (meta._mystruct1_hash_drop1) 
+            if (meta._mystruct1_hash_drop1) {
                 tbl_act.apply();
-            else 
+            }
+            else {
                 tbl_act_0.apply();
+            }
         }
     }
 }

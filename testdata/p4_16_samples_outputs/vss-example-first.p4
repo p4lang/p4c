@@ -146,14 +146,17 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
             return;
         }
         ipv4_match.apply();
-        if (outCtrl.outputPort == 4w0xf) 
+        if (outCtrl.outputPort == 4w0xf) {
             return;
+        }
         check_ttl.apply();
-        if (outCtrl.outputPort == 4w0xe) 
+        if (outCtrl.outputPort == 4w0xe) {
             return;
+        }
         dmac.apply();
-        if (outCtrl.outputPort == 4w0xf) 
+        if (outCtrl.outputPort == 4w0xf) {
             return;
+        }
         smac.apply();
     }
 }

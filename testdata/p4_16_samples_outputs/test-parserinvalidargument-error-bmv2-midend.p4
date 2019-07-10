@@ -127,28 +127,42 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     apply {
         tbl_act.apply();
-        if (stdmeta.parser_error == error.NoError) 
+        if (stdmeta.parser_error == error.NoError) {
             tbl_act_0.apply();
-        else 
-            if (stdmeta.parser_error == error.PacketTooShort) 
+        }
+        else {
+            if (stdmeta.parser_error == error.PacketTooShort) {
                 tbl_act_1.apply();
-            else 
-                if (stdmeta.parser_error == error.NoMatch) 
+            }
+            else {
+                if (stdmeta.parser_error == error.NoMatch) {
                     tbl_act_2.apply();
-                else 
-                    if (stdmeta.parser_error == error.StackOutOfBounds) 
+                }
+                else {
+                    if (stdmeta.parser_error == error.StackOutOfBounds) {
                         tbl_act_3.apply();
-                    else 
-                        if (stdmeta.parser_error == error.HeaderTooShort) 
+                    }
+                    else {
+                        if (stdmeta.parser_error == error.HeaderTooShort) {
                             tbl_act_4.apply();
-                        else 
-                            if (stdmeta.parser_error == error.ParserTimeout) 
+                        }
+                        else {
+                            if (stdmeta.parser_error == error.ParserTimeout) {
                                 tbl_act_5.apply();
-                            else 
-                                if (stdmeta.parser_error == error.ParserInvalidArgument) 
+                            }
+                            else {
+                                if (stdmeta.parser_error == error.ParserInvalidArgument) {
                                     tbl_act_6.apply();
-                                else 
+                                }
+                                else {
                                     tbl_act_7.apply();
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
         tbl_act_8.apply();
     }
 }

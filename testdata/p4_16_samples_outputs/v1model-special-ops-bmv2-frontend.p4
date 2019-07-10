@@ -121,7 +121,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
             hdr.ipv4.srcAddr = ipv4_address_0;
             meta.fwd.l2ptr = 32w0xe50b;
         }
-        else 
+        else {
             if (standard_metadata.instance_type == 32w4) {
                 byte0_0 = 8w10;
                 byte1_0 = 8w199;
@@ -131,10 +131,13 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
                 hdr.ipv4.srcAddr = ipv4_address_0;
                 meta.fwd.l2ptr = 32w0xec1c;
             }
-            else 
+            else {
                 ipv4_da_lpm_0.apply();
-        if (meta.fwd.l2ptr != 32w0) 
+            }
+        }
+        if (meta.fwd.l2ptr != 32w0) {
             mac_da_0.apply();
+        }
     }
 }
 
@@ -187,17 +190,19 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
             hdr.switch_to_cpu.word0 = 32w0x12e012e;
             hdr.switch_to_cpu.word1 = 32w0x5a5a5a5a;
         }
-        else 
+        else {
             if (standard_metadata.instance_type == 32w2) {
                 hdr.switch_to_cpu.setValid();
                 hdr.switch_to_cpu.word0 = 32w0xe2e0e2e;
                 hdr.switch_to_cpu.word1 = 32w0x5a5a5a5a;
             }
             else {
-                if (standard_metadata.instance_type == 32w5) 
+                if (standard_metadata.instance_type == 32w5) {
                     get_multicast_copy_out_bd_0.apply();
+                }
                 send_frame_0.apply();
             }
+        }
     }
 }
 

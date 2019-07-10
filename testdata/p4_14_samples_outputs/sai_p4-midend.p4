@@ -373,18 +373,22 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         port_0.apply();
         if (meta._ingress_metadata_oper_status22 == 2w1) {
             router_interface_0.apply();
-            if (meta._ingress_metadata_learning33 != 2w0) 
+            if (meta._ingress_metadata_learning33 != 2w0) {
                 learn_notify_0.apply();
-            if (meta._ingress_metadata_router_mac40 == 1w0) 
+            }
+            if (meta._ingress_metadata_router_mac40 == 1w0) {
                 fdb_0.apply();
+            }
             else {
                 virtual_router_0.apply();
-                if (hdr.ipv4.isValid() && meta._ingress_metadata_v4_enable35 != 1w0) 
+                if (hdr.ipv4.isValid() && meta._ingress_metadata_v4_enable35 != 1w0) {
                     route_0.apply();
+                }
                 next_hop_0.apply();
             }
-            if (meta._ingress_metadata_routed5 != 1w0) 
+            if (meta._ingress_metadata_routed5 != 1w0) {
                 neighbor_0.apply();
+            }
         }
     }
 }

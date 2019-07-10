@@ -25,8 +25,9 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        if (standard_metadata.parser_error != error.NoError) 
+        if (standard_metadata.parser_error != error.NoError) {
             mark_to_drop(standard_metadata);
+        }
     }
 }
 

@@ -87,8 +87,9 @@ control pipe(inout Headers_t headers, out bool pass) {
         if (!headers.ipv4.isValid()) {
             tbl_act_0.apply();
         }
-        if (!hasReturned) 
+        if (!hasReturned) {
             Check_src_ip_0.apply();
+        }
     }
 }
 

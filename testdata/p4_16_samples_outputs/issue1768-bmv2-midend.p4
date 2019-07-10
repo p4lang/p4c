@@ -34,8 +34,9 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         const default_action = act();
     }
     apply {
-        if (standard_metadata.parser_error != error.NoError) 
+        if (standard_metadata.parser_error != error.NoError) {
             tbl_act.apply();
+        }
     }
 }
 

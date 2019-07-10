@@ -138,8 +138,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             ipv4_lpm_0.apply();
             forward_0.apply();
         }
-        else 
+        else {
             drop_all_0.apply();
+        }
     }
 }
 

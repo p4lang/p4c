@@ -21,21 +21,24 @@ control c(out bit<1> x) {
         if (a == b) {
             x = 1;
         }
-        else 
+        else {
             if (h1 == h2) {
                 x = 1;
             }
-            else 
+            else {
                 if (s1 == s2) {
                     x = 1;
                 }
-                else 
+                else {
                     if (a1 == a2) {
                         x = 1;
                     }
                     else {
                         x = 0;
                     }
+                }
+            }
+        }
     }
 }
 

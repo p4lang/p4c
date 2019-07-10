@@ -50,8 +50,9 @@ control pipe(inout Headers_t headers, out bool pass) {
             counters_0.increment(headers.ipv4.dstAddr);
             pass = true;
         }
-        else 
+        else {
             pass = false;
+        }
     }
 }
 

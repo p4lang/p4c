@@ -174,8 +174,9 @@ control egress(inout headers hdr, inout metadata meta, in psa_egress_input_metad
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
     @name("IngressDeparserImpl.mac_learn_digest") Digest<mac_learn_digest_t>() mac_learn_digest_0;
     apply {
-        if (meta.send_mac_learn_msg) 
+        if (meta.send_mac_learn_msg) {
             mac_learn_digest_0.pack(meta.mac_learn_msg);
+        }
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
     }

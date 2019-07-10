@@ -2,10 +2,12 @@
 #include <v1model.p4>
 
 bit<16> sometimes_dec(in bit<16> x) {
-    if (x > 16w5) 
+    if (x > 16w5) {
         return x + 16w65535;
-    else 
+    }
+    else {
         return x;
+    }
 }
 struct metadata {
 }

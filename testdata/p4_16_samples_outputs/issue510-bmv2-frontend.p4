@@ -28,8 +28,9 @@ control MyVerifyChecksum(inout my_headers_t hdr, inout my_metadata_t meta) {
 
 control MyIngress(inout my_headers_t hdr, inout my_metadata_t meta, inout standard_metadata_t standard_metadata) {
     apply {
-        if (meta.parser_error == error.NoMatch) 
+        if (meta.parser_error == error.NoMatch) {
             hdr.s.setInvalid();
+        }
     }
 }
 

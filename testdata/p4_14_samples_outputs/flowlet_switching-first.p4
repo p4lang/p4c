@@ -196,8 +196,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         flowlet.apply();
-        if (meta.ingress_metadata.flow_ipg > 32w50000) 
+        if (meta.ingress_metadata.flow_ipg > 32w50000) {
             new_flowlet.apply();
+        }
         ecmp_group.apply();
         ecmp_nhop.apply();
         forward.apply();

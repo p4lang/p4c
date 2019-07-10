@@ -40,8 +40,9 @@ control MyComputeChecksum(inout my_packet p, inout my_metadata m) {
 
 control MyDeparser(packet_out b, in my_packet p) {
     apply {
-        if (p.data[0].isValid()) 
+        if (p.data[0].isValid()) {
             b.emit<mpls[8]>(p.data);
+        }
     }
 }
 

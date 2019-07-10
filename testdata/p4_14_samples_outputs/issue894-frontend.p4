@@ -190,8 +190,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         set_heavy_hitter_count_table_0.apply();
-        if (meta.custom_metadata.count_val1 > 16w100 && meta.custom_metadata.count_val2 > 16w100) 
+        if (meta.custom_metadata.count_val1 > 16w100 && meta.custom_metadata.count_val2 > 16w100) {
             drop_heavy_hitter_table_0.apply();
+        }
         else {
             ipv4_lpm_0.apply();
             forward_0.apply();

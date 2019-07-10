@@ -42,8 +42,9 @@ control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t 
     apply {
         tmp = meter0_0.execute(12w0);
         tmp_0 = tmp == PSA_MeterColor_t.GREEN;
-        if (tmp_0) 
+        if (tmp_0) {
             tbl_0.apply();
+        }
     }
 }
 

@@ -200,14 +200,17 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         if (standard_metadata.instance_type == 32w6) {
             tbl_act.apply();
         }
-        else 
+        else {
             if (standard_metadata.instance_type == 32w4) {
                 tbl_act_0.apply();
             }
-            else 
+            else {
                 ipv4_da_lpm_0.apply();
-        if (meta._fwd_l2ptr0 != 32w0) 
+            }
+        }
+        if (meta._fwd_l2ptr0 != 32w0) {
             mac_da_0.apply();
+        }
     }
 }
 
@@ -313,15 +316,17 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
         if (standard_metadata.instance_type == 32w1) {
             tbl_act_1.apply();
         }
-        else 
+        else {
             if (standard_metadata.instance_type == 32w2) {
                 tbl_act_2.apply();
             }
             else {
-                if (standard_metadata.instance_type == 32w5) 
+                if (standard_metadata.instance_type == 32w5) {
                     get_multicast_copy_out_bd_0.apply();
+                }
                 send_frame_0.apply();
             }
+        }
     }
 }
 

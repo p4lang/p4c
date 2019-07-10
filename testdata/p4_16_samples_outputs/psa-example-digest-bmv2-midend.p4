@@ -177,8 +177,9 @@ control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_me
         const default_action = act_1();
     }
     apply {
-        if (meta._send_mac_learn_msg0) 
+        if (meta._send_mac_learn_msg0) {
             tbl_act_0.apply();
+        }
         tbl_act_1.apply();
     }
 }

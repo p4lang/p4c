@@ -27,8 +27,9 @@ control IngressImpl(inout headers_t hdr, inout metadata meta, inout standard_met
 
 control EgressImpl(inout headers_t hdr, inout metadata meta, inout standard_metadata_t ostd) {
     action set_true() {
-        if (meta.field == 8w0) 
+        if (meta.field == 8w0) {
             meta.cond = true;
+        }
     }
     table change_cond {
         key = {

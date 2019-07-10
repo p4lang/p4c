@@ -164,8 +164,9 @@ control PROTVerifyChecksum(inout headers hdr, inout metadata meta) {
 
 control PROTIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
-        if (meta.currenti.upDirection == 1w0) 
+        if (meta.currenti.upDirection == 1w0) {
             mark_to_drop(standard_metadata);
+        }
     }
 }
 

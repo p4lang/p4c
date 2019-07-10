@@ -18,10 +18,12 @@ extern E {
 control c(inout S s) {
     E() e;
     apply {
-        if (s.h.isValid()) 
+        if (s.h.isValid()) {
             s.h.data3 = 0;
-        if (s.h.data2 == 0) 
+        }
+        if (s.h.data2 == 0) {
             s.h.data1 = e.get(s.h.data2);
+        }
     }
 }
 

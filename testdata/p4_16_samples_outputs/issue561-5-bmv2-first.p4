@@ -59,10 +59,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         debug_hdr.apply();
-        if (hdr.u[0].short.isValid()) 
+        if (hdr.u[0].short.isValid()) {
             hdr.u[0].short.data = 16w0xffff;
-        if (hdr.u[0].byte.isValid()) 
+        }
+        if (hdr.u[0].byte.isValid()) {
             hdr.u[0].byte.data = 8w0xff;
+        }
     }
 }
 

@@ -25,8 +25,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         stdmeta.egress_spec = 9w0;
         h_0 = hdr.h;
-        if (hdr.h.v == h_0.v) 
+        if (hdr.h.v == h_0.v) {
             stdmeta.egress_spec = 9w1;
+        }
     }
 }
 

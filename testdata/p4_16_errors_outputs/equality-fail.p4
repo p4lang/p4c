@@ -22,29 +22,34 @@ control c(out bit<1> x) {
         if (a == h1) {
             x = 1;
         }
-        else 
+        else {
             if (h1 == s2) {
                 x = 1;
             }
-            else 
+            else {
                 if (s1 == a2) {
                     x = 1;
                 }
-                else 
+                else {
                     if (a1 == h1.a) {
                         x = 1;
                     }
-                    else 
+                    else {
                         if (a == h1.a) {
                             x = 1;
                         }
-                        else 
+                        else {
                             if (a1 == a3) {
                                 x = 1;
                             }
                             else {
                                 x = 0;
                             }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

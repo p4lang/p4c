@@ -36,8 +36,9 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     }
     apply {
         send_to_port(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr);
-        if (hdr.ethernet.dstAddr == 48w0) 
+        if (hdr.ethernet.dstAddr == 48w0) {
             ingress_drop(ostd);
+        }
     }
 }
 

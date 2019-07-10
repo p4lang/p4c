@@ -17,8 +17,9 @@ control I(inout metadata_t meta) {
         const default_action = act();
     }
     apply {
-        if (meta._foo__v0 == 9w192) 
+        if (meta._foo__v0 == 9w192) {
             tbl_act.apply();
+        }
     }
 }
 

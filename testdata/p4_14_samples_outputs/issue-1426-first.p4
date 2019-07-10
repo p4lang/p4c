@@ -54,10 +54,12 @@ control c(inout headers hdr, inout metadata meta, inout standard_metadata_t stan
         default_action = NoAction();
     }
     apply {
-        if (standard_metadata.ingress_port & 9w0x2 == 9w1) 
+        if (standard_metadata.ingress_port & 9w0x2 == 9w1) {
             c1.apply();
-        if (standard_metadata.ingress_port & 9w0x4 == 9w1) 
+        }
+        if (standard_metadata.ingress_port & 9w0x4 == 9w1) {
             c2.apply();
+        }
     }
 }
 

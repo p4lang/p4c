@@ -48,8 +48,9 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     }
     apply {
         tbl_send_to_port.apply();
-        if (hdr.ethernet.dstAddr == 48w0) 
+        if (hdr.ethernet.dstAddr == 48w0) {
             tbl_ingress_drop.apply();
+        }
     }
 }
 

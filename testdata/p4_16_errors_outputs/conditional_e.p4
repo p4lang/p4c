@@ -1,10 +1,12 @@
 control p() {
     apply {
         bit<1> b;
-        if (b) 
+        if (b) {
             ;
-        else 
+        }
+        else {
             ;
+        }
     }
 }
 

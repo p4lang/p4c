@@ -145,8 +145,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         setup_0.apply();
-        if (meta.egress_metadata.routed == 1w1) 
+        if (meta.egress_metadata.routed == 1w1) {
             _mac_rewrite.apply();
+        }
     }
 }
 

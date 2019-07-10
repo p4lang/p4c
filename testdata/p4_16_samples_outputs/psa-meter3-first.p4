@@ -36,8 +36,9 @@ control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t 
         default_action = NoAction();
     }
     apply {
-        if (meter0.execute(12w0) == PSA_MeterColor_t.GREEN) 
+        if (meter0.execute(12w0) == PSA_MeterColor_t.GREEN) {
             tbl.apply();
+        }
     }
 }
 

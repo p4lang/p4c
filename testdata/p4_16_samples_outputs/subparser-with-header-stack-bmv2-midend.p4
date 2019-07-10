@@ -126,16 +126,21 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     apply {
         tbl_act.apply();
-        if (hdr.h2[0].isValid()) 
+        if (hdr.h2[0].isValid()) {
             tbl_act_0.apply();
-        if (hdr.h2[1].isValid()) 
+        }
+        if (hdr.h2[1].isValid()) {
             tbl_act_1.apply();
-        if (hdr.h2[2].isValid()) 
+        }
+        if (hdr.h2[2].isValid()) {
             tbl_act_2.apply();
-        if (hdr.h2[3].isValid()) 
+        }
+        if (hdr.h2[3].isValid()) {
             tbl_act_3.apply();
-        if (hdr.h2[4].isValid()) 
+        }
+        if (hdr.h2[4].isValid()) {
             tbl_act_4.apply();
+        }
     }
 }
 

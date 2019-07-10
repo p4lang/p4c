@@ -212,21 +212,25 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         }
         if (!hasReturned) {
             ipv4_match_0.apply();
-            if (outCtrl.outputPort == 4w0xf) 
+            if (outCtrl.outputPort == 4w0xf) {
                 tbl_act_1.apply();
+            }
         }
         if (!hasReturned) {
             check_ttl_0.apply();
-            if (outCtrl.outputPort == 4w0xe) 
+            if (outCtrl.outputPort == 4w0xe) {
                 tbl_act_2.apply();
+            }
         }
         if (!hasReturned) {
             dmac_0.apply();
-            if (outCtrl.outputPort == 4w0xf) 
+            if (outCtrl.outputPort == 4w0xf) {
                 tbl_act_3.apply();
+            }
         }
-        if (!hasReturned) 
+        if (!hasReturned) {
             smac_0.apply();
+        }
     }
 }
 

@@ -29,8 +29,9 @@ control EgressImpl(inout headers_t hdr, inout metadata meta, inout standard_meta
     @name(".NoAction") action NoAction_0() {
     }
     @name("EgressImpl.set_true") action set_true() {
-        if (meta.field == 8w0) 
+        if (meta.field == 8w0) {
             meta.cond = true;
+        }
     }
     @name("EgressImpl.change_cond") table change_cond_0 {
         key = {

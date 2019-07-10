@@ -54,12 +54,15 @@ control IngressP(inout Parsed_packet hdr, inout Meta m, inout standard_metadata_
         const default_action = act_1();
     }
     apply {
-        if (m.metafield) 
+        if (m.metafield) {
             tbl_act.apply();
-        if (m.metafield == false) 
+        }
+        if (m.metafield == false) {
             tbl_act_0.apply();
-        if (!m.metafield) 
+        }
+        if (!m.metafield) {
             tbl_act_1.apply();
+        }
     }
 }
 

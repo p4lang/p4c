@@ -71,8 +71,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         tbl_act.apply();
-        if (!h.h.isValid()) 
+        if (!h.h.isValid()) {
             tbl_act_0.apply();
+        }
         tbl_act_1.apply();
     }
 }

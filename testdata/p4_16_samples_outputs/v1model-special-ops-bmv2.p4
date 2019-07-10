@@ -130,7 +130,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
             c_fill_ipv4_address.apply(hdr.ipv4.srcAddr, 10, 252, 129, 2);
             meta.fwd.l2ptr = RESUBMITTED_PKT_L2PTR;
         }
-        else 
+        else {
             if (standard_metadata.instance_type == BMV2_V1MODEL_INSTANCE_TYPE_RECIRC) {
                 c_fill_ipv4_address.apply(hdr.ipv4.srcAddr, 10, 199, 86, 99);
                 meta.fwd.l2ptr = RECIRCULATED_PKT_L2PTR;
@@ -138,6 +138,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
             else {
                 ipv4_da_lpm.apply();
             }
+        }
         if (meta.fwd.l2ptr != 0) {
             mac_da.apply();
         }
@@ -186,7 +187,7 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
             hdr.switch_to_cpu.word0 = 0x12e012e;
             hdr.switch_to_cpu.word1 = 0x5a5a5a5a;
         }
-        else 
+        else {
             if (standard_metadata.instance_type == BMV2_V1MODEL_INSTANCE_TYPE_EGRESS_CLONE) {
                 hdr.switch_to_cpu.setValid();
                 hdr.switch_to_cpu.word0 = 0xe2e0e2e;
@@ -198,6 +199,7 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
                 }
                 send_frame.apply();
             }
+        }
     }
 }
 

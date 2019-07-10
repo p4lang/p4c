@@ -125,8 +125,9 @@ control process_mac_rewrite(inout headers hdr, inout metadata meta, inout standa
         default_action = NoAction();
     }
     apply {
-        if (meta.egress_metadata.routed == 1w1) 
+        if (meta.egress_metadata.routed == 1w1) {
             mac_rewrite.apply();
+        }
     }
 }
 

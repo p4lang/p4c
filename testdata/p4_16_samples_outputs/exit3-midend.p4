@@ -31,8 +31,9 @@ control ctrl(out bit<32> c) {
     apply {
         tbl_act.apply();
         t_0.apply();
-        if (!hasExited) 
+        if (!hasExited) {
             tbl_act_0.apply();
+        }
     }
 }
 

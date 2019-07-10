@@ -5,8 +5,9 @@ control c(inout bit<32> x) {
             x = x + 32w2;
             x = x + 32w4294967290;
         }
-        else 
+        else {
             x = x << 2;
+        }
     }
 }
 

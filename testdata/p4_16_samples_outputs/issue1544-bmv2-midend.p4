@@ -101,10 +101,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     apply {
         mac_da_0.apply();
-        if (hdr.ethernet.srcAddr[15:0] > 16w5) 
+        if (hdr.ethernet.srcAddr[15:0] > 16w5) {
             tbl_act.apply();
-        else 
+        }
+        else {
             tbl_act_0.apply();
+        }
         tbl_act_1.apply();
     }
 }

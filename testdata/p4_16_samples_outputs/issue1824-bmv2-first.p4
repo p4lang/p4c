@@ -36,8 +36,9 @@ parser MyParser(packet_in pkt, out headers hdr, inout metadata meta, inout stand
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     apply {
-        if (stdmeta.parser_error != error.NoError) 
+        if (stdmeta.parser_error != error.NoError) {
             hdr.h1.dstAddr = 48w0xbad;
+        }
     }
 }
 
