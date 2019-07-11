@@ -56,7 +56,7 @@ JsonObjects::get_field_list_contents(unsigned id) const {
     for (auto e : *field_lists) {
         auto obj = e->to<Util::JsonObject>();
         auto val = obj->get("id")->to<Util::JsonValue>();
-        if (val != nullptr && val->isNumber() && val->getInt() == (int)id) {
+        if (val != nullptr && val->isNumber() && val->getInt() == static_cast<int>(id)) {
             return obj->get("elements")->to<Util::JsonArray>();
         }
     }
