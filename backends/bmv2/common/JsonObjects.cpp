@@ -51,6 +51,18 @@ JsonObjects::JsonObjects() {
     field_aliases = insert_array_field(toplevel, "field_aliases");
 }
 
+Util::JsonArray*
+JsonObjects::get_field_list_contents(unsigned id) const {
+    for (auto e : *field_lists) {
+        auto obj = e->to<Util::JsonObject>();
+        auto val = obj->get("id")->to<Util::JsonValue>();
+        if (val != nullptr && val->isNumber() && val->getInt() == (int)id) {
+            return obj->get("elements")->to<Util::JsonArray>();
+        }
+    }
+    return nullptr;
+}
+
 Util::JsonObject*
 JsonObjects::find_object_by_name(Util::JsonArray* array, const cstring& name) {
     for (auto e : *array) {
