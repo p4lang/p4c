@@ -151,7 +151,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Declaration_Constant* d) {
                     (cst->type->is<IR::Type_Bits>() &&
                      !(*d->type->to<IR::Type_Bits>() == *cst->type->to<IR::Type_Bits>())))
                     init = new IR::Constant(init->srcInfo, d->type, cst->value, cst->base);
-            } else {
+            } else if (!d->type->is<IR::Type_InfInt>()) {
                 // Don't fold this yet, we can't evaluate the cast.
                 return d;
             }

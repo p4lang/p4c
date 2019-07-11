@@ -1,0 +1,3 @@
+signed.p4(5): [--Werror=type-error] error: AssignmentStatement: Cannot unify int<8> to bit<8>
+        signed_int1[7:0] = signed_int2;
+                         ^
