@@ -176,6 +176,12 @@ Util::IJson* ExternConverter_clone3::convertExternFunction(
         ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
         auto jcst = ctxt->conv->convert(cst);
         parameters->append(jcst);
+
+        // clone with a non-empty field list is not correctly implemented; give a warning
+        auto arr = ctxt->json->get_field_list_contents(id);
+        if (arr != nullptr && !arr->empty())
+            ::warning(ErrorType::WARN_UNSUPPORTED,
+                      "%1%: clone with non-empty argument not supported", mc);
     }
     return primitive;
 }
@@ -287,6 +293,11 @@ Util::IJson* ExternConverter_resubmit::convertExternFunction(
     }
     int id = createFieldList(ctxt, mc->arguments->at(0)->expression, "field_lists",
                              listName, ctxt->json->field_lists);
+    // resubmit with a non-empty field list is not correctly implemented; give a warning
+    auto arr = ctxt->json->get_field_list_contents(id);
+    if (arr != nullptr && !arr->empty())
+        ::warning(ErrorType::WARN_UNSUPPORTED,
+                  "%1%: resubmit with non-empty argument not supported", mc);
     auto cst = new IR::Constant(id);
     ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
     auto jcst = ctxt->conv->convert(cst);
@@ -323,6 +334,12 @@ Util::IJson* ExternConverter_recirculate::convertExternFunction(
     }
     int id = createFieldList(ctxt, mc->arguments->at(0)->expression, "field_lists",
                              listName, ctxt->json->field_lists);
+    // recirculate with a non-empty field list is not correctly implemented; give a warning
+    auto arr = ctxt->json->get_field_list_contents(id);
+    if (arr != nullptr && !arr->empty())
+        ::warning(ErrorType::WARN_UNSUPPORTED,
+                  "%1%: recirculate with non-empty argument not supported", mc);
+
     auto cst = new IR::Constant(id);
     ctxt->typeMap->setType(cst, IR::Type_Bits::get(32));
     auto jcst = ctxt->conv->convert(cst);
