@@ -55,8 +55,15 @@
 #define htonl(d) __constant_htonl(d)
 #define htons(d) __constant_htons(d)
 #define htonll(d) __constant_htonll(d)
+#define ntohl(d) __constant_ntohl(d)
+#define ntohs(d) __constant_ntohs(d)
+#define ntohll(d) __constant_ntohll(d)
 
 #define load_byte(data, b) (*(((uint8_t*)(data)) + (b)))
 #define load_half(data, b) __constant_ntohs(*(uint16_t *)((uint8_t*)(data) + (b)))
 #define load_word(data, b) __constant_ntohl(*(uint32_t *)((uint8_t*)(data) + (b)))
 #define load_dword(data, b) __constant_ntohll(*(uint64_t *)((uint8_t*)(data) + (b)))
+
+#define load_half_ptr(data, b) (*(uint16_t *)((uint8_t*)(data) + (b)))
+#define load_word_ptr(data, b) (*(uint32_t *)((uint8_t*)(data) + (b)))
+#define load_dword_ptr(data, b) (*(uint64_t *)((uint8_t*)(data) + (b)))

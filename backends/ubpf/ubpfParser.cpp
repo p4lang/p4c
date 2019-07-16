@@ -222,6 +222,10 @@ namespace UBPF {
         }
 
         builder->emitIndent();
+        visit(expr);
+        builder->appendFormat(".%sOffset = %s",  field.c_str(), program->offsetVar.c_str());
+        builder->endOfStatement(true);
+        builder->emitIndent();
         builder->appendFormat("%s += %d", program->offsetVar.c_str(), widthToExtract);
         builder->endOfStatement(true);
         builder->newline();

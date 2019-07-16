@@ -108,6 +108,21 @@ namespace UBPF {
                 "static uint64_t (*ubpf_time_get_ns)() = (void *)5;\n"
                 "static void (*ubpf_printf)(const char *fmt, ...) = (void *)7;\n"
                 "\n");
+        builder->append("static uint32_t\n"
+                        "bpf_htonl(uint32_t val) {\n"
+                        "    return htonl(val);\n"
+                        "}");
+        builder->newline();
+        builder->append("static uint16_t\n"
+                        "bpf_htons(uint16_t val) {\n"
+                        "    return htons(val);\n"
+                        "}");
+        builder->newline();
+        builder->append("static uint64_t\n"
+                        "bpf_htonll(uint64_t val) {\n"
+                        "    return htonll(val);\n"
+                        "}\n");
+        builder->newline();
     }
 
     void UBPFProgram::emitH(EBPF::CodeBuilder *builder, cstring headerFile) {
@@ -126,6 +141,8 @@ namespace UBPF {
         builder->emitIndent();
         builder->appendLine("#define BPF_MASK(t, w) ((((t)(1)) << (w)) - (t)1)");
         builder->appendLine("#define BYTES(w) ((w) / 8)");
+        builder->newline();
+        builder->appendLine("void* memcpy(void* dest, const void* src, size_t num);");
         builder->newline();
     }
 

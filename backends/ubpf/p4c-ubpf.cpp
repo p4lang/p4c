@@ -18,7 +18,6 @@ limitations under the License.
 #include <string>
 #include <iostream>
 
-#include "backends/ebpf/version.h"
 #include "ir/ir.h"
 #include "lib/log.h"
 #include "lib/gc.h"

@@ -49,6 +49,9 @@ However, we introduced some modifications, which are listed below:
 
 ### How to use?
 
+The sample P4 programs are located in `examples/` directory. We have tested them on the [Oko](https://github.com/Orange-OpenSource/oko) switch - 
+the Open vSwitch that can be extended with BPF programs at runtime. See [the detailed tutorial](./docs/EXAMPLES.md) on how to run and test those examples.
+
 The P4 programs for P4-to-uBPF compiler must be written for the `ubpf_filter_model.p4`.
 
 In order to generate the C code use the following command:
@@ -62,6 +65,11 @@ Once the C program is generated it can be compiled using:
 `clang -O2 -target bpf -c out.c -o /tmp/out.o`
 
 The output file (`out.o`) can be injected to the uBPF VM. 
+
+### Known limitations
+
+* The modification of wide packet's fields has not been tested extensively. Hence, it can not work properly.
+
 
 ### Contact
 

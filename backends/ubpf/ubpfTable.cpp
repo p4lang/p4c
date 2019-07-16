@@ -16,14 +16,15 @@ limitations under the License.
 
 #include "ubpfTable.h"
 #include "ubpfType.h"
+#include "ubpfParser.h"
 #include "ir/ir.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
 
 namespace UBPF {
 
-
     namespace {
+
         class UbpfActionTranslationVisitor : public EBPF::CodeGenInspector {
         protected:
             const UBPFProgram *program;
@@ -33,7 +34,13 @@ namespace UBPF {
         public:
             UbpfActionTranslationVisitor(cstring valueName, const UBPFProgram *program) :
                     EBPF::CodeGenInspector(program->refMap, program->typeMap), program(program),
-                    action(nullptr), valueName(valueName) { CHECK_NULL(program); }
+                    action(nullptr), valueName(valueName) {
+                CHECK_NULL(program);
+            }
+
+            cstring createTmpVariable() {
+                return program->refMap->newName("tmp");
+            }
 
             bool preorder(const IR::PathExpression *expression) {
                 auto decl = program->refMap->getDeclaration(expression->path, true);
@@ -50,7 +57,7 @@ namespace UBPF {
                         return false;
                     }
                 }
-                printf("Visit expression w path expression: %s \n", expression->path->name.name);
+
                 visit(expression->path);
                 return false;
             }
@@ -60,7 +67,6 @@ namespace UBPF {
                 auto ef = mi->to<P4::ExternFunction>();
                 if (ef != nullptr) {
                     if (ef->method->name.name == program->model.drop.name) {
-                        builder->emitIndent();
                         builder->append("pass = false");
                         return false;
                     }
@@ -68,9 +74,230 @@ namespace UBPF {
                 CodeGenInspector::preorder(expression);
             }
 
+            void emitPacketModification(const IR::Expression *left, const IR::Expression *right) {
+                builder->newline();
+                builder->emitIndent();
+
+                auto ltype = typeMap->getType(left);
+                auto ubpfType = UBPFTypeFactory::instance->create(ltype);
+
+                bool isWide = false;
+                UBPFScalarType *scalar = nullptr;
+                unsigned width = 0, widthToExtract = 0;
+                if (ubpfType->is<UBPFScalarType>()) {
+                    scalar = ubpfType->to<UBPFScalarType>();
+                    width = scalar->implementationWidthInBits();
+                    isWide = !UBPFScalarType::generatesScalar(width);
+                    widthToExtract = scalar->widthInBits();
+                }
+
+                auto header_type = program->parser->headerType->to<UBPFStructType>();
+
+                unsigned packetOffsetInBits = 0;
+                unsigned alignment = 0;
+                bool finished = false;
+                for (auto f : header_type->fields) {
+                    if (finished)
+                        break;
+                    auto ftype = typeMap->getType(f->field);
+                    auto etype = UBPFTypeFactory::instance->create(ftype);
+                    auto et = dynamic_cast<UBPFStructType *>(etype);
+                    for (auto inf : et->fields) {
+
+                        if (left->is<IR::Member>()) {
+                            if (inf->field->name.name == left->to<IR::Member>()->member.name) {
+                                finished = true;
+                                break;
+                            }
+                        }
+
+                        auto in_et = dynamic_cast<EBPF::IHasWidth *>(inf->type);
+                        alignment += in_et->widthInBits();
+                        packetOffsetInBits += in_et->widthInBits();
+                        alignment %= 8;
+                    }
+                }
+
+
+                if (isWide) {
+                    // wide values; read all bytes one by one.
+                    unsigned shift;
+                    if (alignment == 0)
+                        shift = 0;
+                    else
+                        shift = 8 - alignment;
+
+                    const char *helper;
+                    const char *scalarType = "uint8_t";
+                    if (shift == 0)
+                        helper = "load_byte";
+                    else {
+                        helper = "load_half"; // TODO: why it is needed?
+                        scalarType = "uint16_t";
+                    }
+                    auto bt = UBPFTypeFactory::instance->create(IR::Type_Bits::get(8));
+                    unsigned bytes = ROUNDUP(widthToExtract, 8);
+
+                    bool first = true;
+                    for (unsigned i = 0; i < bytes; i++) {
+                        if (!first)
+                            builder->emitIndent();
+                        first = false;
+
+                        cstring var = createTmpVariable();
+                        scalar->emit(builder);
+                        builder->spc();
+                        builder->append(var);
+                        builder->append(" = &");
+                        builder->appendFormat("%s(%s, BYTES(%sOffset) + %d)",
+                                              helper,
+                                              program->packetStartVar.c_str(),
+                                              left->toString(), i);
+                        builder->endOfStatement(true);
+                        builder->emitIndent();
+                        builder->append(scalarType);
+                        cstring tmp = createTmpVariable();
+                        builder->appendFormat(" %s = ", tmp);
+                        visit(right);
+                        builder->appendFormat("[%d]", i);
+                        builder->endOfStatement(true);
+
+                        builder->emitIndent();
+                        builder->appendFormat("*%s = ((*%s) & ~(BPF_MASK(",
+                                              var, var);
+                        builder->appendFormat("%s, %d)", scalarType, 8);
+
+                        if (shift != 0)
+                            builder->appendFormat(" << %d", shift);
+                        builder->appendFormat(")) | (%s", tmp);
+
+                        if (shift != 0)
+                            builder->appendFormat(" << %d", shift);
+                        builder->append(")");
+                        builder->endOfStatement(true);
+                    }
+                } else {
+
+                    const char *var = left->toString().replace('.', '_');
+                    scalar->emit(builder);
+                    builder->append("*");
+                    builder->spc();
+                    builder->append(var);
+                    builder->append(" = &");
+                    unsigned lastBitIndex = widthToExtract + alignment - 1;
+                    unsigned lastWordIndex = lastBitIndex / 8;
+                    unsigned wordsToRead = lastWordIndex + 1;
+                    unsigned loadSize;
+
+                    const char *helper = nullptr;
+                    cstring swapToHost = "";
+                    cstring swapToNetwork = "";
+                    if (wordsToRead <= 1) {
+                        helper = "load_byte";
+                        loadSize = 8;
+                    } else if (widthToExtract <= 16) {
+                        helper = "load_half_ptr";
+                        swapToHost = "ntohs";
+                        swapToNetwork = "bpf_htons";
+                        loadSize = 16;
+                    } else if (widthToExtract <= 32) {
+                        helper = "load_word_ptr";
+                        swapToHost = "ntohl";
+                        swapToNetwork = "bpf_htonl";
+                        loadSize = 32;
+                    } else {
+                        if (widthToExtract > 64) BUG("Unexpected width %d", widthToExtract);
+                        helper = "load_dword_ptr";
+                        swapToHost = "ntohll";
+                        swapToNetwork = "bpf_htonll";
+                        loadSize = 64;
+                    }
+
+                    unsigned shift = loadSize - alignment - widthToExtract;
+                    builder->appendFormat("%s(%s, BYTES(%sOffset))",
+                                          helper,
+                                          program->packetStartVar.c_str(),
+                                          left->toString());
+                    builder->endOfStatement(true);
+                    builder->emitIndent();
+                    scalar->emit(builder);
+                    cstring tmp = createTmpVariable();
+                    builder->appendFormat(" %s = ", tmp);
+                    visit(right);
+                    builder->endOfStatement(true);
+
+                    builder->emitIndent();
+                    builder->appendFormat("*%s = %s((%s(*%s) & ~(BPF_MASK(",
+                                          var, swapToNetwork, swapToHost, var);
+                    scalar->emit(builder);
+                    builder->appendFormat(", %d)", widthToExtract);
+
+                    if (shift != 0)
+                        builder->appendFormat(" << %d", shift);
+                    builder->appendFormat(")) | (%s", tmp);
+
+                    if (shift != 0)
+                        builder->appendFormat(" << %d", shift);
+                    builder->append("))");
+                    builder->endOfStatement(true);
+                }
+            }
+
+            void convertActionBody(const IR::Vector<IR::StatOrDecl> *body) {
+                for (auto s : *body) {
+                    if (!s->is<IR::Statement>()) {
+                        continue;
+                    } else if (auto block = s->to<IR::BlockStatement>()) {
+                        builder->blockStart();
+                        bool first = true;
+                        for (auto a : block->components) {
+                            if (!first) {
+                                builder->newline();
+                                builder->emitIndent();
+                            }
+                            first = false;
+                            convertActionBody(&block->components);
+                            builder->blockEnd(true);
+                        }
+                        if (!block->components.empty())
+                            builder->newline();
+                        builder->blockEnd(false);
+                        continue;
+                    } else if (s->is<IR::ReturnStatement>()) {
+                        break;
+                    } else if (s->is<IR::AssignmentStatement>()) {
+
+                        auto assignment = s->to<IR::AssignmentStatement>();
+
+                        const IR::Expression *left = assignment->left;
+                        const IR::Expression *right = assignment->right;
+
+                        if (left->is<IR::Member>()) { // writing to packet
+                            emitPacketModification(left, right);
+                        } else { // local variable
+                            auto ltype = typeMap->getType(left);
+                            auto ubpfType = UBPFTypeFactory::instance->create(ltype);
+                            ubpfType->emit(builder);
+                            builder->spc();
+                            visit(left);
+                            builder->append(" = ");
+                            visit(right);
+                            builder->endOfStatement(true);
+                        }
+                        continue;
+                    } else {
+                        visit(body);
+                    }
+                }
+            }
+
+            void convertAction() {
+                convertActionBody(&action->body->components);
+            }
+
             bool preorder(const IR::P4Action *act) {
                 action = act;
-                visit(action->body);
+                convertAction();
                 return false;
             }
         };  // UbpfActionTranslationVisitor
@@ -189,6 +416,22 @@ namespace UBPF {
         builder->emitIndent();
         builder->appendFormat("enum %s action;", actionEnumName.c_str());
         builder->newline();
+
+        builder->emitIndent();
+        builder->append("union ");
+        builder->blockStart();
+
+        for (auto a : actionList->actionList) {
+            auto adecl = program->refMap->getDeclaration(a->getPath(), true);
+            auto action = adecl->getNode()->to<IR::P4Action>();
+            cstring name = EBPFObject::externalName(action);
+            emitActionArguments(builder, action, name);
+        }
+
+        builder->blockEnd(false);
+        builder->spc();
+        builder->appendLine("u;");
+
 
         builder->blockEnd(false);
         builder->endOfStatement(true);
@@ -379,6 +622,8 @@ namespace UBPF {
             builder->appendFormat("case %s: ", name.c_str());
             builder->newline();
             builder->emitIndent();
+            builder->blockStart();
+            builder->emitIndent();
 
             UbpfActionTranslationVisitor visitor(valueName, program);
             visitor.setBuilder(builder);
@@ -386,6 +631,7 @@ namespace UBPF {
 
             action->apply(visitor);
             builder->newline();
+            builder->blockEnd(true);
             builder->emitIndent();
             builder->appendLine("break;");
         }

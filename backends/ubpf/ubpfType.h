@@ -45,7 +45,13 @@ class UBPFScalarType : public EBPF::EBPFScalarType {
 public:
     UBPFScalarType(const IR::Type_Bits* bits) : EBPF::EBPFScalarType(bits) {}
     void emit(EBPF::CodeBuilder* builder) override;
-//    void declare(CodeBuilder* builder, cstring id, bool asPointer) override;
+    void declare(EBPF::CodeBuilder* builder, cstring id, bool asPointer) override;
+};
+
+class UBPFStructType : public EBPF::EBPFStructType {
+public:
+    UBPFStructType(const IR::Type_StructLike* strct) : EBPF::EBPFStructType(strct) {}
+    void emit(EBPF::CodeBuilder* builder) override;
 };
 
 

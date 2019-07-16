@@ -28,7 +28,7 @@ namespace UBPF {
         } else if (auto bt = type->to<IR::Type_Bits>()) {
             result = new UBPFScalarType(bt); // using UBPF Scalar Type
         } else if (auto st = type->to<IR::Type_StructLike>()) {
-            result = new EBPF::EBPFStructType(st);
+            result = new UBPFStructType(st);
         } else if (auto tt = type->to<IR::Type_Typedef>()) {
             auto canon = typeMap->getTypeType(type, true);
             result = create(canon);
@@ -67,7 +67,67 @@ namespace UBPF {
 
     }
 
+    void UBPFScalarType::declare(EBPF::CodeBuilder* builder, cstring id, bool asPointer) {
+        if (EBPFScalarType::generatesScalar(width)) {
+            emit(builder);
+            if (asPointer)
+                builder->append("*");
+            builder->spc();
+            builder->append(id);
+        } else {
+            if (asPointer)
+                builder->append("uint8_t*");
+            else
+                builder->appendFormat("uint8_t %s[%d]", id.c_str(), bytesRequired());
+        }
+    }
 
+    //////////////////////////////////////////////////////////////////////////////
+
+    void UBPFStructType::emit(EBPF::CodeBuilder* builder) {
+        builder->emitIndent();
+        builder->append(kind);
+        builder->spc();
+        builder->append(name);
+        builder->spc();
+        builder->blockStart();
+
+        for (auto f : fields) {
+            auto ltype = f->type;
+
+            builder->emitIndent();
+
+            ltype->declare(builder, f->field->name, false);
+            builder->append("; ");
+            builder->append("/* ");
+            builder->append(ltype->type->toString());
+            if (f->comment != nullptr) {
+                builder->append(" ");
+                builder->append(f->comment);
+            }
+            builder->append(" */");
+            builder->newline();
+
+            if (type->is<IR::Type_Header>()) {
+                // add offset field
+                builder->emitIndent();
+                builder->appendFormat("int %sOffset;", f->field->name.name);
+                builder->newline();
+            }
+        }
+
+        if (type->is<IR::Type_Header>()) {
+            builder->emitIndent();
+            auto type = UBPFTypeFactory::instance->create(IR::Type_Boolean::get());
+            if (type != nullptr) {
+                type->declare(builder, "ebpf_valid", false);
+                builder->endOfStatement(true);
+            }
+        }
+
+        builder->blockEnd(false);
+        builder->endOfStatement(true);
+    }
 
 
 
