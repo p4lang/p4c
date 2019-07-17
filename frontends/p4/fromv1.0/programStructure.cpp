@@ -988,7 +988,7 @@ const IR::Expression* ProgramStructure::convertHashAlgorithm(
         result = v1model.algorithm.random.Id();
     } else if (algorithm == "identity") {
         result = v1model.algorithm.identity.Id();
-    } else if (algorithm == "csum16") {
+    } else if (algorithm == "csum16" || algorithm == "csum16_udp") {
         result = v1model.algorithm.csum16.Id();
     } else if (algorithm == "xor16") {
         result = v1model.algorithm.xor16.Id();
@@ -2445,7 +2445,14 @@ void ProgramStructure::createChecksumUpdates() {
             args->push_back(new IR::Argument(le));
             args->push_back(new IR::Argument(dest));
             args->push_back(new IR::Argument(algo));
-            auto mc = new IR::MethodCallStatement(new IR::MethodCallExpression(method, args));
+            auto methodCallExpression = new IR::MethodCallExpression(method, args);
+            IR::Annotation* zeros_as_ones_annot  = nullptr;
+            if (flc->algorithm->names[0] == "csum16_udp") {
+                zeros_as_ones_annot = new IR::Annotation(IR::ID("zeros_as_ones"),
+                              {methodCallExpression});
+                body->annotations = body->annotations->add(zeros_as_ones_annot);
+            }
+            auto mc = new IR::MethodCallStatement(methodCallExpression);
             body->push_back(mc);
 
             for (auto annot : cf->annotations->annotations)
