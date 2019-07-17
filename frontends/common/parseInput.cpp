@@ -29,68 +29,12 @@ limitations under the License.
 
 namespace P4 {
 
-template <typename Input>
-static const IR::P4Program*
-parseV1Program(Input& stream, const char* sourceFile, unsigned sourceLine,
-               boost::optional<DebugHook> debugHook = boost::none) {
-    // We load the model before parsing the input file, so that the SourceInfo
-    // in the model comes first.
-    P4V1::Converter converter;
-    if (debugHook) converter.addDebugHook(*debugHook);
-    converter.loadModel();
-
-    // Parse.
-    const IR::Node* v1 = V1::V1ParserDriver::parse(stream, sourceFile,
-                                                   sourceLine);
-    if (::errorCount() > 0 || v1 == nullptr)
-        return nullptr;
-
-    // Convert to P4-16.
-    if (Log::verbose())
-        std::cerr << "Converting to P4-16" << std::endl;
-    v1 = v1->apply(converter);
-    if (::errorCount() > 0 || v1 == nullptr)
-        return nullptr;
-    BUG_CHECK(v1->is<IR::P4Program>(), "Conversion returned %1%", v1);
-    return v1->to<IR::P4Program>();
-}
-
-const IR::P4Program* parseP4File(CompilerOptions& options) {
-    BUG_CHECK(&options == &P4CContext::get().options(),
-              "Parsing using options that don't match the current "
-              "compiler context");
-    FILE* in = nullptr;
-    if (options.doNotPreprocess) {
-        in = fopen(options.file, "r");
-        if (in == nullptr) {
-            ::error("%s: No such file or directory.", options.file);
-            return nullptr;
-        }
-    } else {
-        in = options.preprocess();
-        if (::errorCount() > 0 || in == nullptr)
-            return nullptr;
-    }
-
-    auto result = options.isv1()
-                ? parseV1Program(in, options.file, 1, options.getDebugHook())
-                : P4ParserDriver::parse(in, options.file);
-    options.closeInput(in);
-
-    if (::errorCount() > 0) {
-        ::error("%1% errors encountered, aborting compilation", ::errorCount());
-        return nullptr;
-    }
-    BUG_CHECK(result != nullptr, "Parsing failed, but we didn't report an error");
-    return result;
-}
-
 const IR::P4Program* parseP4String(const char* sourceFile, unsigned sourceLine,
                                    const std::string& input,
                                    CompilerOptions::FrontendVersion version) {
     std::istringstream stream(input);
     auto result = version == CompilerOptions::FrontendVersion::P4_14
-                ? parseV1Program(stream, sourceFile, sourceLine)
+                ? parseV1Program<std::istringstream, P4V1::Converter>(stream, sourceFile, sourceLine)
                 : P4ParserDriver::parse(stream, sourceFile, sourceLine);
 
     if (::errorCount() > 0) {
