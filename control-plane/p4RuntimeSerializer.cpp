@@ -1441,7 +1441,7 @@ class P4RuntimeEntriesConverter {
         int fieldId = 1;
         for (auto k : keyset->components) {
             auto tableKey = table->getKey()->keyElements.at(keyIndex++);
-            auto keyWidth = tableKey->expression->type->width_bits();
+            auto keyWidth = getTypeWidth(tableKey->expression->type, typeMap);
             auto matchType = getKeyMatchType(tableKey, refMap);
 
             if (matchType == P4CoreLibrary::instance.exactMatch.name) {
@@ -1469,8 +1469,7 @@ class P4RuntimeEntriesConverter {
             return stringRepr(k->to<IR::Constant>(), keyWidth);
         } else if (k->is<IR::BoolLiteral>()) {
             return stringRepr(k->to<IR::BoolLiteral>(), keyWidth);
-        } else if (k->is<IR::Member>()) {
-             // A SerEnum is a member const entries are processed here.
+        } else if (k->is<IR::Member>()) {  // handle SerEnum members
              auto mem = k->to<IR::Member>();
              auto se = mem->type->to<IR::Type_SerEnum>();
              auto ei = EnumInstance::resolve(mem, typeMap);
@@ -1478,10 +1477,13 @@ class P4RuntimeEntriesConverter {
              if (auto sei = ei->to<SerEnumInstance>()) {
                  auto type = sei->value->to<IR::Constant>();
                  auto w = se->type->width_bits();
+                 BUG_CHECK(w == keyWidth, "SerEnum bitwidth mismatch");
                  return stringRepr(type, w);
              }
              ::error("%1% invalid Member key expression", k);
              return boost::none;
+        } else if (k->is<IR::Cast>()) {
+            return convertSimpleKeyExpression(k->to<IR::Cast>()->expr, keyWidth, typeMap);
         } else {
             ::error("%1% invalid key expression", k);
             return boost::none;
@@ -1491,11 +1493,23 @@ class P4RuntimeEntriesConverter {
     /// Convert a key expression to the mpz_class integer value if the
     /// expression is simple (integer literal or boolean literal) or returns
     /// boost::none otherwise.
-    boost::optional<mpz_class> simpleKeyExpressionValue(const IR::Expression* k) const {
+    boost::optional<mpz_class> simpleKeyExpressionValue(
+        const IR::Expression* k, TypeMap* typeMap) const {
         if (k->is<IR::Constant>()) {
             return k->to<IR::Constant>()->value;
         } else if (k->is<IR::BoolLiteral>()) {
             return static_cast<mpz_class>(k->to<IR::BoolLiteral>()->value ? 1 : 0);
+        } else if (k->is<IR::Member>()) {  // handle SerEnum members
+             auto mem = k->to<IR::Member>();
+             auto ei = EnumInstance::resolve(mem, typeMap);
+             if (!ei) return boost::none;
+             if (auto sei = ei->to<SerEnumInstance>()) {
+                 return simpleKeyExpressionValue(sei->value, typeMap);
+             }
+             ::error("%1% invalid Member key expression", k);
+             return boost::none;
+        } else if (k->is<IR::Cast>()) {
+            return simpleKeyExpressionValue(k->to<IR::Cast>()->expr, typeMap);
         } else {
             ::error("%1% invalid key expression", k);
             return boost::none;
@@ -1522,7 +1536,7 @@ class P4RuntimeEntriesConverter {
         boost::optional<std::string> valueStr;
         if (k->is<IR::Mask>()) {
             auto km = k->to<IR::Mask>();
-            auto value = simpleKeyExpressionValue(km->left);
+            auto value = simpleKeyExpressionValue(km->left, typeMap);
             if (value == boost::none) return;
             auto trailing_zeros = [keyWidth](const mpz_class& n) -> int {
                 return (n == 0) ? keyWidth : mpz_scan1(n.get_mpz_t(), 0); };
@@ -1565,8 +1579,8 @@ class P4RuntimeEntriesConverter {
         boost::optional<std::string> maskStr;
         if (k->is<IR::Mask>()) {
             auto km = k->to<IR::Mask>();
-            auto value = simpleKeyExpressionValue(km->left);
-            auto mask = simpleKeyExpressionValue(km->right);
+            auto value = simpleKeyExpressionValue(km->left, typeMap);
+            auto mask = simpleKeyExpressionValue(km->right, typeMap);
             if (value == boost::none || mask == boost::none) return;
             if ((*value & *mask) != *value) {
                 ::warning(ErrorType::WARN_MISMATCH,
@@ -1598,8 +1612,8 @@ class P4RuntimeEntriesConverter {
         boost::optional<std::string> endStr;
         if (k->is<IR::Range>()) {
             auto kr = k->to<IR::Range>();
-            auto start = simpleKeyExpressionValue(kr->left);
-            auto end = simpleKeyExpressionValue(kr->right);
+            auto start = simpleKeyExpressionValue(kr->left, typeMap);
+            auto end = simpleKeyExpressionValue(kr->right, typeMap);
             if (start == boost::none || end == boost::none) return;
             mpz_class maxValue = (mpz_class(1) << keyWidth) - 1;
             // These should be guaranteed by the frontend
