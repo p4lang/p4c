@@ -92,21 +92,34 @@ To run the unit tests, simply do:
 
 ## Running your P4 program
 
-To run your own P4 programs in bmv2, you first need to transform the P4 code
+To run your own P4 programs in bmv2, you first need to compile the P4 code
 into a json representation which can be consumed by the software switch. This
 representation will tell bmv2 which tables to initialize, how to configure the
-parser, ... It is produced by the [p4c-bm](https://github.com/p4lang/p4c-bm)
-tool. Please take a look at the
-[README](https://github.com/p4lang/p4c-bm/blob/master/README.rst) for this repo
-to find out how to install it. Once this is done, you can obtain the json file
-as follows:
+parser, ...
 
-    p4c-bm --json <path to JSON file> <path to P4 file>
+There are currently 2 P4 compilers available for bmv2 on p4lang:
+ * [p4c](https://github.com/p4lang/p4c) includes a bmv2 backend and is the
+   recommended compiler to use, as it supports both P4_14 and P4_16
+   programs. Refer to the
+   [README](https://github.com/p4lang/p4c/blob/master/README.md) for information
+   on how to install and use p4c. At the moment, the bmv2 p4c backend supports
+   the v1model architecture, with some tentative support for the PSA
+   architecture. P4_16 programs written for v1model can be executed with the
+   `simple_switch` binary, while programs written for PSA can be executed with
+   the `psa_switch` binary. See [here](targets/README.md) for more details on
+   the differences between these.
+ * [p4c-bm](https://github.com/p4lang/p4c-bm) is the legacy compiler for bmv2
+   (no longer actively maintained) and only supports P4_14 programs.
 
-The json file can now be 'fed' to bmv2. Assuming you are using the
-*simple_switch* target:
+Assuming you have installed the p4c compiler, you can obtain the json file for a
+P4_16 v1model program as follows:
 
-    sudo ./simple_switch -i 0@<iface0> -i 1@<iface1> <path to JSON file>
+    p4c --target bmv2 --arch v1model --std p4-16 <prog>.p4
+
+This will create a `<prog>.json` output file which can now be 'fed' to the bmv2
+`simple_switch` binary:
+
+    sudo ./simple_switch -i 0@<iface0> -i 1@<iface1> <prog>.json
 
 In this example \<iface0\> and \<iface1\> are the interfaces which are bound to
 the switch (as ports 0 and 1).
@@ -211,7 +224,7 @@ the above example), just provide the appropriate `simple_switch` binary to
   becomes very easy and very fast to change your P4 program and test it
   again. The whole P4 development process becomes more efficient. Every time you
   change your P4 program, you simply need to produce the json for it using
-  p4c-bm and feed it to the bmv2 executable.
+  the p4c compiler and feed it to the bmv2 executable.
 - Because the bmv2 code is not auto-generated, we hope it is easier to
   understand. We hope this will encourage the community to contribute even more
   to the P4 software switch.
