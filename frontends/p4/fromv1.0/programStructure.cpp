@@ -1146,41 +1146,12 @@ CONVERT_PRIMITIVE(bit_xor) {
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
-CONVERT_PRIMITIVE(min) {
-    OPS_CK(primitive, 3);
-    auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
-        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
-    auto op = new IR::Mux(primitive->srcInfo,
-                          new IR::Leq(primitive->srcInfo, args[1], args[2]), args[1], args[2]);
-    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
-}
-
-CONVERT_PRIMITIVE(max) {
-    OPS_CK(primitive, 3);
-    auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
-        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
-    auto op = new IR::Mux(primitive->srcInfo,
-                          new IR::Geq(primitive->srcInfo, args[1], args[2]), args[1], args[2]);
-    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
-}
-
 CONVERT_PRIMITIVE(bit_or) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
     if (!sameBitsType(primitive, args[1]->type, args[2]->type))
         args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
     auto op = new IR::BOr(primitive->srcInfo, args[1], args[2]);
-    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
-}
-
-CONVERT_PRIMITIVE(bit_xnor) {
-    OPS_CK(primitive, 3);
-    auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
-        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
-    auto op = new IR::Cmpl(primitive->srcInfo, new IR::BXor(primitive->srcInfo, args[1], args[2]));
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
@@ -1198,60 +1169,6 @@ CONVERT_PRIMITIVE(add) {
     else
         op = new IR::Add(primitive->srcInfo, args[1], args[2]);
     LOG3("add: isSaturated " << isSaturated << ", op: " << op);
-    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
-}
-
-CONVERT_PRIMITIVE(bit_nor) {
-    OPS_CK(primitive, 3);
-    auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
-        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
-    auto op = new IR::Cmpl(primitive->srcInfo, new IR::BOr(primitive->srcInfo, args[1], args[2]));
-    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
-}
-
-CONVERT_PRIMITIVE(bit_nand) {
-    OPS_CK(primitive, 3);
-    auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
-        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
-    auto op = new IR::Cmpl(primitive->srcInfo, new IR::BAnd(primitive->srcInfo, args[1], args[2]));
-    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
-}
-
-CONVERT_PRIMITIVE(bit_orca) {
-    OPS_CK(primitive, 3);
-    auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
-        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
-    auto op = new IR::BOr(primitive->srcInfo, new IR::Cmpl(primitive->srcInfo, args[1]), args[2]);
-    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
-}
-
-CONVERT_PRIMITIVE(bit_orcb) {
-    OPS_CK(primitive, 3);
-    auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
-        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
-    auto op = new IR::BOr(primitive->srcInfo, args[1], new IR::Cmpl(primitive->srcInfo, args[2]));
-    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
-}
-
-CONVERT_PRIMITIVE(bit_andca) {
-    OPS_CK(primitive, 3);
-    auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
-        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
-    auto op = new IR::BAnd(primitive->srcInfo, new IR::Cmpl(primitive->srcInfo, args[1]), args[2]);
-    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
-}
-
-CONVERT_PRIMITIVE(bit_andcb) {
-    OPS_CK(primitive, 3);
-    auto args = convertArgs(structure, primitive);
-    if (!sameBitsType(primitive, args[1]->type, args[2]->type))
-        args[2] = new IR::Cast(args[2]->srcInfo, args[1]->type, args[2]);
-    auto op = new IR::BAnd(primitive->srcInfo, args[1], new IR::Cmpl(primitive->srcInfo, args[2]));
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
@@ -1292,13 +1209,6 @@ CONVERT_PRIMITIVE(shift_right) {
     OPS_CK(primitive, 3);
     auto args = convertArgs(structure, primitive);
     auto op = new IR::Shr(primitive->srcInfo, args[1], args[2]);
-    return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
-}
-
-CONVERT_PRIMITIVE(bit_not) {
-    OPS_CK(primitive, 2);
-    auto args = convertArgs(structure, primitive);
-    auto op = new IR::Cmpl(primitive->srcInfo, args[1]);
     return structure->assign(primitive->srcInfo, args[0], op, primitive->operands.at(0)->type);
 }
 
@@ -1378,12 +1288,6 @@ CONVERT_PRIMITIVE(copy_header) {
 }
 
 CONVERT_PRIMITIVE(drop) {
-    return new IR::MethodCallStatement(
-        primitive->srcInfo, structure->v1model.drop.Id(),
-        { new IR::Argument(structure->conversionContext->standardMetadata->clone()) });
-}
-
-CONVERT_PRIMITIVE(mark_for_drop) {
     return new IR::MethodCallStatement(
         primitive->srcInfo, structure->v1model.drop.Id(),
         { new IR::Argument(structure->conversionContext->standardMetadata->clone()) });
@@ -1635,29 +1539,6 @@ CONVERT_PRIMITIVE(modify_field_with_hash_based_offset) {
     return result;
 }
 
-CONVERT_PRIMITIVE(modify_field_conditionally) {
-    ExpressionConverter conv(structure);
-    OPS_CK(primitive, 3);
-    auto dest = conv.convert(primitive->operands.at(0));
-    auto cond = conv.convert(primitive->operands.at(1));
-    auto src = conv.convert(primitive->operands.at(2));
-    if (!cond->type->is<IR::Type::Boolean>())
-        cond = new IR::Neq(cond, new IR::Constant(0));
-    src = new IR::Mux(primitive->srcInfo, cond, src, dest);
-    return structure->assign(primitive->srcInfo, dest, src, primitive->operands.at(0)->type);
-}
-
-CONVERT_PRIMITIVE(modify_field_with_shift) {
-    ExpressionConverter conv(structure);
-    OPS_CK(primitive, 4);
-    auto dest = conv.convert(primitive->operands.at(0));
-    auto src = conv.convert(primitive->operands.at(1));
-    auto shift = conv.convert(primitive->operands.at(2));
-    auto mask = conv.convert(primitive->operands.at(3));
-    auto result = structure->sliceAssign(primitive, dest, new IR::Shr(src, shift), mask);
-    return result;
-}
-
 CONVERT_PRIMITIVE(generate_digest) {
     ExpressionConverter conv(structure);
     OPS_CK(primitive, 2);
@@ -1755,23 +1636,6 @@ CONVERT_PRIMITIVE(truncate) {
     args->push_back(new IR::Argument(arg0));
     auto mc = new IR::MethodCallExpression(primitive->srcInfo, method, args);
     return new IR::MethodCallStatement(mc->srcInfo, mc);
-}
-
-CONVERT_PRIMITIVE(exit) {
-    ExpressionConverter conv(structure);
-    OPS_CK(primitive, 0);
-    return new IR::ExitStatement(primitive->srcInfo);
-}
-
-CONVERT_PRIMITIVE(funnel_shift_right) {
-    ExpressionConverter conv(structure);
-    OPS_CK(primitive, 4);
-    auto dest = conv.convert(primitive->operands.at(0));
-    auto hi = conv.convert(primitive->operands.at(1));
-    auto lo = conv.convert(primitive->operands.at(2));
-    auto shift = conv.convert(primitive->operands.at(3));
-    auto src = new IR::Shr(new IR::Concat(hi, lo), shift);
-    return structure->assign(primitive->srcInfo, dest, src, primitive->operands.at(0)->type);
 }
 
 const IR::Statement*
