@@ -33,6 +33,8 @@ extern CounterArray {
     CounterArray(bit<32> max_index, bool sparse);
     /** Increment counter with specified index. */
     void increment(in bit<32> index);
+    /** Add value to counter with specified index. */
+    void add(in bit<32> index, in bit<32> value);
 }
 
 /*
