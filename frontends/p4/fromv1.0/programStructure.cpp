@@ -794,6 +794,10 @@ ProgramStructure::convertActionProfile(const IR::ActionProfile* action_profile, 
             annos = annos->addAnnotation("mode", new IR::StringLiteral(action_selector->mode));
         if (action_selector->type)
             annos = annos->addAnnotation("type", new IR::StringLiteral(action_selector->type));
+        auto fl = getFieldLists(flc);
+        for (auto annot : fl->annotations->annotations) {
+            annos = annos->add(annot);
+        }
     } else {
         type = new IR::Type_Name(new IR::Path(v1model.action_profile.Id()));
         auto size = new IR::Constant(
@@ -2328,6 +2332,9 @@ const IR::FieldList* ProgramStructure::getFieldLists(const IR::FieldListCalculat
         }
         result->fields.insert(result->fields.end(), fl->fields.begin(), fl->fields.end());
         result->payload = result->payload || fl->payload;
+        for (auto annot : fl->annotations->annotations) {
+            result->annotations = result->annotations->add(annot);
+        }
     }
     return result;
 }
