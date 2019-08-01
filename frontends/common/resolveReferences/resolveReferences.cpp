@@ -233,6 +233,10 @@ void ResolveReferences::checkShadowing(const IR::INamespace* ns) const {
         if (node->is<IR::StructField>())
             continue;
 
+        if (node->is<IR::Parameter>() && findContext<IR::Type_Extern>() != nullptr)
+            // do not give shadowing warnings for parameters of extern methods
+            continue;
+
         auto prev = context->resolve(decl->getName(), ResolutionType::Any, anyOrder);
         if (prev->empty()) continue;
 
