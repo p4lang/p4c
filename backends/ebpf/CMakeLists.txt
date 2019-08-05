@@ -25,6 +25,7 @@ set (P4C_EBPF_SRCS
   ebpfTable.cpp
   ebpfControl.cpp
   ebpfParser.cpp
+  ebpfOptions.cpp
   target.cpp
   ebpfType.cpp
   codeGen.cpp

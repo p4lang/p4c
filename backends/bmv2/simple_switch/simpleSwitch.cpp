@@ -24,6 +24,7 @@ limitations under the License.
 #include "backends/bmv2/common/annotations.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "simpleSwitch.h"
+#include "backends/bmv2/simple_switch/options.h"
 
 using BMV2::mkArrayField;
 using BMV2::mkParameters;

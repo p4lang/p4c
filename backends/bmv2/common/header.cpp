@@ -294,7 +294,7 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
             auto container = new Util::JsonArray();
             auto alias = new Util::JsonArray();
             auto target_name = "";
-            if (BMV2::BMV2Context::get().options().loadIRFromJson == false) {
+            if (BMV2Context::get().options().loadIRFromJson == false) {
                 target_name = aliasAnnotation->expr.front()->to<IR::StringLiteral>()->value;
             } else {
                 if (aliasAnnotation->body.size() != 0) {

@@ -63,8 +63,9 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     { return 32; }
 };
 
-const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* program) {
-    if (program == nullptr)
+const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
+    const IR::P4Program* program, std::ostream* outStream) {
+    if (program == nullptr && options.listMidendPasses == 0)
         return nullptr;
 
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
@@ -73,7 +74,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
 
     PassManager midEnd = {};
     if (options.loadIRFromJson == false) {
-        midEnd = {
+        std::initializer_list<Visitor *> midendPasses = {
             new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
             new P4::ClearTypeMap(&typeMap),
             new P4::EliminateNewtype(&refMap, &typeMap),
@@ -104,7 +105,19 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options, const IR::P4Program* 
             new EBPF::Lower(&refMap, &typeMap),
             evaluator,
             new P4::MidEndLast()
-       };
+        };
+        if (options.listMidendPasses) {
+            for (auto it : midendPasses) {
+                if (it != nullptr) {
+                    *outStream << it->name() <<'\n';
+                }
+            }
+            return nullptr;
+        }
+        midEnd = midendPasses;
+        if (options.excludeMidendPasses) {
+            midEnd.removePasses(options.passesToExcludeMidend);
+        }
     } else {
         midEnd = {
             new P4::ResolveReferences(&refMap),

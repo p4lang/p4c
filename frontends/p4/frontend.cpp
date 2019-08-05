@@ -114,8 +114,8 @@ class FrontEndDump : public PassManager {
 
 // TODO: remove skipSideEffectOrdering flag
 const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program,
-                                   bool skipSideEffectOrdering) {
-    if (program == nullptr)
+                                   bool skipSideEffectOrdering, std::ostream* outStream) {
+    if (program == nullptr && options.listFrontendPasses == 0)
         return nullptr;
 
     bool isv1 = options.isv1();
@@ -124,8 +124,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     refMap.setIsV1(isv1);
 
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
-
-    PassManager passes = {
+    std::initializer_list<Visitor *> frontendPasses = {
         // Parse annotations
         new ParseAnnotationBodies(&parseAnnotations, &typeMap),
         new PrettyPrint(options),
@@ -193,10 +192,25 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new HierarchicalNames(),
         new FrontEndLast(),
     };
+    if (options.listFrontendPasses) {
+        for (auto it : frontendPasses) {
+            if (it != nullptr) {
+                *outStream << it->name() <<'\n';
+            }
+        }
+        return nullptr;
+    }
+
+    PassManager passes(frontendPasses);
+
+    if (options.excludeFrontendPasses) {
+       passes.removePasses(options.passesToExcludeFrontend);
+    }
 
     passes.setName("FrontEnd");
     passes.setStopOnError(true);
     passes.addDebugHooks(hooks);
+
     const IR::P4Program* result = program->apply(passes);
     return result;
 }
