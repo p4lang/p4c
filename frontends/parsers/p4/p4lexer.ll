@@ -130,6 +130,7 @@ using Parser = P4::P4Parser;
 "return"        { BEGIN(driver.saveState); return makeToken(RETURN); }
 "select"        { BEGIN(driver.saveState); return makeToken(SELECT); }
 "state"         { BEGIN(driver.saveState); return makeToken(STATE); }
+"string"        { BEGIN(driver.saveState); return makeToken(STRING); }
 "struct"        { BEGIN(driver.saveState); return makeToken(STRUCT); }
 "switch"        { BEGIN(driver.saveState); return makeToken(SWITCH); }
 "table"         { BEGIN(driver.saveState); return makeToken(TABLE); }
