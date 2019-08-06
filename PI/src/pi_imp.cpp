@@ -21,6 +21,7 @@
 #include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/switch.h>
 
+#include <PI/int/pi_int.h>
 #include <PI/pi.h>
 #include <PI/target/pi_imp.h>
 
@@ -61,9 +62,10 @@ void register_port_status_cb(pi_dev_id_t dev_id) {
 
 extern "C" {
 
-pi_status_t _pi_init(void *extra) {
+pi_status_t _pi_init(int *abi_version, void *extra) {
   _BM_UNUSED(extra);
   pibmv2::device_lock = new pibmv2::DeviceLock();
+  *abi_version = PI_ABI_VERSION;
   return PI_STATUS_SUCCESS;
 }
 
