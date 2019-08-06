@@ -125,6 +125,7 @@ class ToP4 : public Inspector {
     bool preorder(const IR::Type_Varbits* t) override;
     bool preorder(const IR::Type_Bits* t) override;
     bool preorder(const IR::Type_InfInt* t) override;
+    bool preorder(const IR::Type_String* t) override;
     bool preorder(const IR::Type_Var* t) override;
     bool preorder(const IR::Type_Dontcare* t) override;
     bool preorder(const IR::Type_Void* t) override;

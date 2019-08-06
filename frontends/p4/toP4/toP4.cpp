@@ -202,6 +202,11 @@ bool ToP4::preorder(const IR::Type_Bits* t) {
     return false;
 }
 
+bool ToP4::preorder(const IR::Type_String* t) {
+    builder.append(t->toString());
+    return false;
+}
+
 bool ToP4::preorder(const IR::Type_InfInt* t) {
     builder.append(t->toString());
     return false;
