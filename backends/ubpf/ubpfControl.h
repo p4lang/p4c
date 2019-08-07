@@ -18,7 +18,7 @@ limitations under the License.
 #define P4C_UBPFCONTROL_H
 
 #include "backends/ebpf/ebpfObject.h"
-#include "ubpfTable.h"
+#include "ubpfRegister.h"
 
 namespace UBPF {
 
@@ -30,6 +30,10 @@ namespace UBPF {
         std::set<const IR::Parameter *> toDereference;
         std::vector<cstring> saveAction;
         P4::P4CoreLibrary &p4lib;
+
+        std::vector<UBPFRegister *> registersLookups;
+        std::vector<cstring> registerKeys;
+        std::vector<cstring> pointerVariables;
 
         explicit UBPFControlBodyTranslator(const UBPFControl *control);
 
@@ -46,7 +50,13 @@ namespace UBPF {
 
         bool preorder(const IR::PathExpression *expression) override;
 
+        bool preorder(const IR::MethodCallStatement *s) override;
+
         bool preorder(const IR::MethodCallExpression *expression) override;
+
+        bool preorder(const IR::AssignmentStatement *a) override;
+
+        bool preorder(const IR::BlockStatement *s) override;
 
         bool preorder(const IR::ExitStatement *) override;
 
@@ -55,6 +65,10 @@ namespace UBPF {
         bool preorder(const IR::IfStatement *statement) override;
 
         bool preorder(const IR::SwitchStatement *statement) override;
+
+        bool preorder(const IR::Operation_Binary *b) override;
+
+        bool preorder(const IR::Member *expression) override;
     };
 
     class UBPFControl : public EBPF::EBPFObject {
@@ -69,14 +83,15 @@ namespace UBPF {
 
         std::set<const IR::Parameter *> toDereference;
         std::map<cstring, UBPFTable *> tables;
+        std::map<cstring, UBPFRegister *> registers;
 
         UBPFControl(const UBPFProgram *program, const IR::ControlBlock *block,
                     const IR::Parameter *parserHeaders);
 
-
         void emit(EBPF::CodeBuilder *builder);
 
-        void emitDeclaration(EBPF::CodeBuilder *builder, const IR::Declaration *decl);
+        void emitDeclaration(EBPF::CodeBuilder *builder,
+                             const IR::Declaration *decl);
 
         void emitTableTypes(EBPF::CodeBuilder *builder);
 
@@ -92,8 +107,21 @@ namespace UBPF {
             return result;
         }
 
+        UBPFRegister *getRegister(cstring name) const {
+            auto result = ::get(registers, name);
+            BUG_CHECK(result != nullptr, "No register named %1%", name);
+            return result;
+        }
+
     protected:
         void scanConstants();
+
+        bool variableIsUsedAsPointer(const IR::Declaration_Variable *vd,
+                                     const IR::AssignmentStatement *assiStat) const;
+
+        const IR::Statement *findStatementWhereVariableIsNotUsedAsPointer(
+                const IR::Statement *statement,
+                const IR::Declaration_Variable *vd);
     };
 
 }

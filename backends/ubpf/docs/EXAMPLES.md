@@ -76,7 +76,38 @@ $ sudo ovs-ofctl update-map br0 1 0 key 254 128 0 0 0 0 0 0 10 0 39 255 254 21 1
 
 ## Registers
 
-TBD
+This section presents P4 program, which uses registers.   
+Register can be declared this way:  
+`Register<value_type, key_type>(number_of_elements) register_t;`  
+where:  
+`value_type` - is bit array type (i.e. bit<32>) or struct like type  
+`key_type` - is bit array type (i.e. bit<32>) or struct like type  
+`number_of_elements` - the maximum number of key-value pairs  
+
+### Rate limiter (rate-limiter.p4)
+
+The rate limiter uses two registers. First which counts the number of packets and second which holds timestamps.
+
+This rate limiter limits the number of packets per second. 
+Responsible for that are two variables BUCKET_SIZE and WINDOW_SIZE placed in rate-limiter.p4 file. 
+For instance now BUCKET_SIZE has value of 10 and WINDOW_SIZE has value of 100. 
+It means that 10 packets are passed in 100 ms window. It also means 100 packets per second. 
+If you send 1470 Bytes width packets the bit rate should not exceed 1.176 Mbit/s (1470B * 8 * (10/100ms)).
+
+For measuring the bandwidth use for instance iperf:  
+  
+Start a iperf UDP server
+```
+iperf -s -u
+```
+Then run iperf client
+```
+iperf -c <server_ip> -b 10M -l 1470
+```
+
+### Rate limiter (rate-limiter-structs.p4)
+
+The same rate limiter as above but implemented with structs.
 
 ## Counters
 

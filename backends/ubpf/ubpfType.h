@@ -52,6 +52,7 @@ class UBPFStructType : public EBPF::EBPFStructType {
 public:
     UBPFStructType(const IR::Type_StructLike* strct) : EBPF::EBPFStructType(strct) {}
     void emit(EBPF::CodeBuilder* builder) override;
+    void declare(EBPF::CodeBuilder* builder, cstring id, bool asPointer) override;
 };
 
 

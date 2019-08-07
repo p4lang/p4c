@@ -38,7 +38,28 @@ namespace UBPF {
                                      cstring tblName,
                                      cstring key,
                                      cstring value) const {
-        builder->appendFormat("%s = ubpf_map_lookup(&%s, &%s)",
-                              value.c_str(), tblName.c_str(), key.c_str());
+        builder->appendFormat("ubpf_map_lookup(&%s, &%s)",
+                              tblName.c_str(), key.c_str());
+    }
+
+    void UbpfTarget::emitTableUpdate(Util::SourceCodeBuilder *builder,
+                                     cstring tblName,
+                                     cstring key,
+                                     cstring value) const {
+        builder->appendFormat("ubpf_map_update(&%s, &%s, %s)",
+                              tblName.c_str(), key.c_str(), value.c_str());
+    }
+
+    void UbpfTarget::emitTableUpdate(EBPF::CodeGenInspector *codeGen,
+                                     Util::SourceCodeBuilder *builder,
+                                     cstring tblName, cstring key,
+                                     const IR::Expression *value) const {
+        builder->appendFormat("ubpf_map_update(&%s, ",
+                              tblName.c_str());
+        builder->append("&");
+        builder->append(key);
+        builder->append(", ");
+        codeGen->visit(value);
+        builder->append(")");
     }
 }

@@ -55,6 +55,8 @@ namespace UBPF {
 
         void emitTypes(EBPF::CodeBuilder *builder) override;
 
+        void emitTableDefinition(EBPF::CodeBuilder *builder) const;
+
         void emitHeaderInstances(EBPF::CodeBuilder *builder) override;
 
         void emitLocalVariables(EBPF::CodeBuilder *builder) override;

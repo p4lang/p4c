@@ -8,6 +8,7 @@ set(P4C_UBPF_SOURCES
         ubpfControl.cpp
         ubpfType.cpp
         ubpfTable.cpp
+        ubpfRegister.cpp
         ubpfModel.cpp
         target.cpp
         ../../backends/ebpf/ebpfProgram.cpp
@@ -26,7 +27,7 @@ set(P4C_UBPF_HEADERS
         ubpfType.h
         ubpfParser.h
         ubpfControl.h
-        ubpfTable.h
+        ubpfRegister.h
         ubpfModel.h
         target.h
         ubpfBackend.h)

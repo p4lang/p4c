@@ -17,8 +17,6 @@ limitations under the License.
 #ifndef P4C_UBPFTABLE_H
 #define P4C_UBPFTABLE_H
 
-#endif //P4C_UBPFTABLE_H
-
 #include "backends/ebpf/ebpfObject.h"
 #include "ubpfProgram.h"
 #include "frontends/p4/methodInstance.h"
@@ -33,8 +31,13 @@ namespace UBPF {
         cstring instanceName;
         cstring keyTypeName;
         cstring valueTypeName;
+        const IR::Type* keyType;
+        const IR::Type* valueType;
         cstring dataMapName;
+        size_t size;
         EBPF::CodeGenInspector *codeGen;
+
+        virtual void emitInstance(EBPF::CodeBuilder *pBuilder);
 
     protected:
         UBPFTableBase(const UBPFProgram *program, cstring instanceName,
@@ -45,6 +48,8 @@ namespace UBPF {
             keyTypeName = program->refMap->newName(instanceName + "_key");
             valueTypeName = program->refMap->newName(instanceName + "_value");
             dataMapName = instanceName;
+            //TODO: determine from where take this value for simple table
+            size = 1024;
         }
     };
 
@@ -58,13 +63,13 @@ namespace UBPF {
         std::map<const IR::KeyElement *, cstring> keyFieldNames;
         std::map<const IR::KeyElement *, EBPF::EBPFType *> keyTypes;
 
-        UBPFTable(const UBPFProgram *program, const IR::TableBlock *table, EBPF::CodeGenInspector *codeGen);
+        UBPFTable(const UBPFProgram *program, const IR::TableBlock *table,
+                  EBPF::CodeGenInspector *codeGen);
 
         void emitTypes(EBPF::CodeBuilder *builder);
 
-        void emitInstance(EBPF::CodeBuilder *builder);
-
-        void emitActionArguments(EBPF::CodeBuilder *builder, const IR::P4Action *action, cstring name);
+        void emitActionArguments(EBPF::CodeBuilder *builder,
+                                 const IR::P4Action *action, cstring name);
 
         void emitKeyType(EBPF::CodeBuilder *builder);
 
@@ -75,8 +80,8 @@ namespace UBPF {
         void emitAction(EBPF::CodeBuilder *builder, cstring valueName);
 
         void emitInitializer(EBPF::CodeBuilder *builder);
-
-        void emitTableDefinition(EBPF::CodeBuilder *pBuilder);
     };
 
 }
+
+#endif //P4C_UBPFTABLE_H

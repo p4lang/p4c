@@ -37,7 +37,7 @@ namespace UBPF {
             return;
         }
 
-        EBPF::Target* target;
+        UbpfTarget* target;
         if (options.target.isNullOrEmpty() || options.target == "ubpf") {
             target = new UbpfTarget();
         } else {

@@ -18,8 +18,11 @@ limitations under the License.
 #define P4C_TARGET_H
 
 #include "backends/ebpf/target.h"
+#include "backends/ebpf/ebpfObject.h"
 
 namespace UBPF {
+
+class UBPFControlBodyTranslator;
 
 class UbpfTarget : public EBPF::Target {
  public:
@@ -30,7 +33,9 @@ class UbpfTarget : public EBPF::Target {
     void emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
                          cstring key, cstring value) const override;
     void emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
-                         cstring key, cstring value) const override {};
+                         cstring key, cstring value) const override;
+    void emitTableUpdate(EBPF::CodeGenInspector* codeGen, Util::SourceCodeBuilder* builder, cstring tblName,
+                         cstring key, const IR::Expression* value) const;
     void emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
                              cstring key, cstring value) const override {};
     void emitTableDecl(Util::SourceCodeBuilder* builder,

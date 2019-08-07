@@ -63,18 +63,25 @@ namespace UBPF {
             }
 
             bool preorder(const IR::MethodCallExpression *expression) {
-                auto mi = P4::MethodInstance::resolve(expression, refMap, typeMap);
+                auto mi = P4::MethodInstance::resolve(expression, refMap,
+                                                      typeMap);
                 auto ef = mi->to<P4::ExternFunction>();
                 if (ef != nullptr) {
                     if (ef->method->name.name == program->model.drop.name) {
                         builder->append("pass = false");
+                        return false;
+                    } else if (ef->method->name.name ==
+                               program->model.ubpf_time_get_ns.name) {
+                        builder->emitIndent();
+                        builder->append("ubpf_time_get_ns()");
                         return false;
                     }
                 }
                 CodeGenInspector::preorder(expression);
             }
 
-            void emitPacketModification(const IR::Expression *left, const IR::Expression *right) {
+            void emitPacketModification(const IR::Expression *left,
+                                        const IR::Expression *right) {
                 builder->newline();
                 builder->emitIndent();
 
@@ -105,7 +112,8 @@ namespace UBPF {
                     for (auto inf : et->fields) {
 
                         if (left->is<IR::Member>()) {
-                            if (inf->field->name.name == left->to<IR::Member>()->member.name) {
+                            if (inf->field->name.name ==
+                                left->to<IR::Member>()->member.name) {
                                 finished = true;
                                 break;
                             }
@@ -135,7 +143,8 @@ namespace UBPF {
                         helper = "load_half"; // TODO: why it is needed?
                         scalarType = "uint16_t";
                     }
-                    auto bt = UBPFTypeFactory::instance->create(IR::Type_Bits::get(8));
+                    auto bt = UBPFTypeFactory::instance->create(
+                            IR::Type_Bits::get(8));
                     unsigned bytes = ROUNDUP(widthToExtract, 8);
 
                     bool first = true;
@@ -206,7 +215,8 @@ namespace UBPF {
                         swapToNetwork = "bpf_htonl";
                         loadSize = 32;
                     } else {
-                        if (widthToExtract > 64) BUG("Unexpected width %d", widthToExtract);
+                        if (widthToExtract > 64)
+                            BUG("Unexpected width %d", widthToExtract);
                         helper = "load_dword_ptr";
                         swapToHost = "ntohll";
                         swapToNetwork = "bpf_htonll";
@@ -276,7 +286,8 @@ namespace UBPF {
                             emitPacketModification(left, right);
                         } else { // local variable
                             auto ltype = typeMap->getType(left);
-                            auto ubpfType = UBPFTypeFactory::instance->create(ltype);
+                            auto ubpfType = UBPFTypeFactory::instance->create(
+                                    ltype);
                             ubpfType->emit(builder);
                             builder->spc();
                             visit(left);
@@ -303,9 +314,59 @@ namespace UBPF {
         };  // UbpfActionTranslationVisitor
     }  // namespace
 
-    UBPFTable::UBPFTable(const UBPFProgram *program, const IR::TableBlock *table,
+    void UBPFTableBase::emitInstance(EBPF::CodeBuilder *builder) {
+        builder->append("struct ");
+        builder->appendFormat("ubpf_map_def %s = ", dataMapName);
+        builder->spc();
+        builder->blockStart();
+
+        builder->emitIndent();
+        builder->append(".type = UBPF_MAP_TYPE_HASHMAP,");
+        builder->newline();
+
+        builder->emitIndent();
+        if (keyType->is<IR::Type_Bits>()) {
+            auto tb = keyType->to<IR::Type_Bits>();
+            auto scalar = new UBPFScalarType(tb);
+            builder->append(".key_size = sizeof(");
+            scalar->emit(builder);
+            builder->append("),");
+        } else {
+            builder->appendFormat(".key_size = sizeof(struct %s),",
+                                  keyTypeName.c_str());
+        }
+        builder->newline();
+
+        builder->emitIndent();
+        if (valueType->is<IR::Type_Bits>()) {
+            auto tb = valueType->to<IR::Type_Bits>();
+            auto scalar = new UBPFScalarType(tb);
+            builder->append(".value_size = sizeof(");
+            scalar->emit(builder);
+            builder->append("),");
+        } else {
+            builder->appendFormat(".value_size = sizeof(struct %s),",
+                                  valueTypeName.c_str());
+        }
+        builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat(".max_entries = %d,", size);
+        builder->newline();
+
+        builder->emitIndent();
+        builder->append(".nb_hash_functions = 0,");
+        builder->newline();
+
+        builder->blockEnd(false);
+        builder->endOfStatement(true);
+    }
+
+    UBPFTable::UBPFTable(const UBPFProgram *program,
+                         const IR::TableBlock *table,
                          EBPF::CodeGenInspector *codeGen) :
-            UBPFTableBase(program, EBPFObject::externalName(table->container), codeGen), table(table) {
+            UBPFTableBase(program, EBPFObject::externalName(table->container),
+                          codeGen), table(table) {
 
         cstring base = instanceName + "_defaultAction";
         defaultActionMapName = program->refMap->newName(base);
@@ -357,9 +418,11 @@ namespace UBPF {
                 builder->append(" */");
                 builder->newline();
 
-                auto mtdecl = program->refMap->getDeclaration(c->matchType->path, true);
+                auto mtdecl = program->refMap->getDeclaration(
+                        c->matchType->path, true);
                 auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
-                if (matchType->name.name != P4::P4CoreLibrary::instance.exactMatch.name)
+                if (matchType->name.name !=
+                    P4::P4CoreLibrary::instance.exactMatch.name)
                     ::error("Match of type %1% not supported", c->matchType);
             }
         }
@@ -369,7 +432,8 @@ namespace UBPF {
     }
 
     void UBPFTable::emitActionArguments(EBPF::CodeBuilder *builder,
-                                        const IR::P4Action *action, cstring name) {
+                                        const IR::P4Action *action,
+                                        cstring name) {
         builder->emitIndent();
         builder->append("struct ");
         builder->blockStart();
@@ -437,147 +501,9 @@ namespace UBPF {
         builder->endOfStatement(true);
     }
 
-    void UBPFTable::emitTableDefinition(EBPF::CodeBuilder *builder) {
-
-        //ubpf maps types
-        builder->append("enum ");
-        builder->append("ubpf_map_type");
-        builder->spc();
-        builder->blockStart();
-
-        builder->emitIndent();
-        builder->append("UBPF_MAP_TYPE_HASHMAP = 4,");
-        builder->newline();
-
-        builder->blockEnd(false);
-        builder->endOfStatement(true);
-
-        // definition if ubpf map
-        builder->append("struct ");
-        builder->append("ubpf_map_def");
-        builder->spc();
-        builder->blockStart();
-
-        builder->emitIndent();
-        builder->append("enum ubpf_map_type type;");
-        builder->newline();
-
-        builder->emitIndent();
-        builder->append("unsigned int key_size;");
-        builder->newline();
-
-        builder->emitIndent();
-        builder->append("unsigned int value_size;");
-        builder->newline();
-
-        builder->emitIndent();
-        builder->append("unsigned int max_entries;");
-        builder->newline();
-
-        builder->emitIndent();
-        builder->append("unsigned int nb_hash_functions;");
-        builder->newline();
-
-        builder->blockEnd(false);
-        builder->endOfStatement(true);
-
-        builder->append("struct ");
-        builder->appendFormat("ubpf_map_def %s = ", dataMapName);
-        builder->spc();
-        builder->blockStart();
-
-        builder->emitIndent();
-        builder->append(".type = UBPF_MAP_TYPE_HASHMAP,");
-        builder->newline();
-
-        builder->emitIndent();
-        builder->appendFormat(".key_size = sizeof(struct %s),", keyTypeName.c_str());
-        builder->newline();
-
-        builder->emitIndent();
-        builder->appendFormat(".value_size = sizeof(struct %s),", valueTypeName.c_str());
-        builder->newline();
-
-        builder->emitIndent();
-        builder->append(".max_entries = 1024,");
-        builder->newline();
-
-        builder->emitIndent();
-        builder->append(".nb_hash_functions = 0,");
-        builder->newline();
-
-        builder->blockEnd(false);
-        builder->endOfStatement(true);
-    }
-
     void UBPFTable::emitTypes(EBPF::CodeBuilder *builder) {
         emitKeyType(builder);
         emitValueType(builder);
-        emitTableDefinition(builder);
-    }
-
-    void UBPFTable::emitInstance(EBPF::CodeBuilder *builder) {
-        if (keyGenerator != nullptr) {
-            auto impl = table->container->properties->getProperty(
-                    program->model.tableImplProperty.name);
-            if (impl == nullptr) {
-                ::error("Table %1% does not have an %2% property",
-                        table->container, program->model.tableImplProperty.name);
-                return;
-            }
-
-            // Some type checking...
-            if (!impl->value->is<IR::ExpressionValue>()) {
-                ::error("%1%: Expected property to be an `extern` block", impl);
-                return;
-            }
-
-            auto expr = impl->value->to<IR::ExpressionValue>()->expression;
-            if (!expr->is<IR::ConstructorCallExpression>()) {
-                ::error("%1%: Expected property to be an `extern` block", impl);
-                return;
-            }
-
-            auto block = table->getValue(expr);
-            if (block == nullptr || !block->is<IR::ExternBlock>()) {
-                ::error("%1%: Expected property to be an `extern` block", impl);
-                return;
-            }
-
-            bool isHash;
-            auto extBlock = block->to<IR::ExternBlock>();
-            if (extBlock->type->name.name == program->model.hash_table.name) {
-                isHash = true;
-            } else {
-                ::error("%1%: implementation must be one of %2%",
-                        impl, program->model.hash_table.name);
-                return;
-            }
-
-            auto sz = extBlock->getParameterValue(program->model.hash_table.size.name);
-            if (sz == nullptr || !sz->is<IR::Constant>()) {
-                ::error("Expected an integer argument for %1%; is the model corrupted?", expr);
-                return;
-            }
-            auto cst = sz->to<IR::Constant>();
-            if (!cst->fitsInt()) {
-                ::error("%1%: size too large", cst);
-                return;
-            }
-            int size = cst->asInt();
-            if (size <= 0) {
-                ::error("%1%: negative size", cst);
-                return;
-            }
-
-            cstring name = EBPFObject::externalName(table->container);
-            builder->target->emitTableDecl(builder, name, isHash,
-                                           cstring("struct ") + keyTypeName,
-                                           cstring("struct ") + valueTypeName, size);
-        }
-        builder->target->emitTableDecl(builder, defaultActionMapName, false,
-                                       program->arrayIndexType,
-                                       cstring("struct ") + valueTypeName, 1);
     }
 
     void UBPFTable::emitKey(EBPF::CodeBuilder *builder, cstring keyName) {
@@ -598,11 +524,13 @@ namespace UBPF {
 
             builder->emitIndent();
             if (memcpy) {
-                builder->appendFormat("memcpy(&%s.%s, &", keyName.c_str(), fieldName.c_str());
+                builder->appendFormat("memcpy(&%s.%s, &", keyName.c_str(),
+                                      fieldName.c_str());
                 codeGen->visit(c->expression);
                 builder->appendFormat(", %d)", scalar->bytesRequired());
             } else {
-                builder->appendFormat("%s.%s = ", keyName.c_str(), fieldName.c_str());
+                builder->appendFormat("%s.%s = ", keyName.c_str(),
+                                      fieldName.c_str());
                 codeGen->visit(c->expression);
             }
             builder->endOfStatement(true);
@@ -637,7 +565,8 @@ namespace UBPF {
         }
 
         builder->emitIndent();
-        builder->appendFormat("default: return %s", builder->target->abortReturnCode().c_str());
+        builder->appendFormat("default: return %s",
+                              builder->target->abortReturnCode().c_str());
         builder->endOfStatement(true);
 
         builder->blockEnd(true);
@@ -650,7 +579,8 @@ namespace UBPF {
         BUG_CHECK(defaultAction->is<IR::MethodCallExpression>(),
                   "%1%: expected an action call", defaultAction);
         auto mce = defaultAction->to<IR::MethodCallExpression>();
-        auto mi = P4::MethodInstance::resolve(mce, program->refMap, program->typeMap);
+        auto mi = P4::MethodInstance::resolve(mce, program->refMap,
+                                              program->typeMap);
 
         auto ac = mi->to<P4::ActionCall>();
         BUG_CHECK(ac != nullptr, "%1%: expected an action call", mce);
@@ -668,12 +598,14 @@ namespace UBPF {
                               fd.c_str(), defaultTable.c_str());
         builder->endOfStatement(true);
         builder->emitIndent();
-        builder->appendFormat("if (%s < 0) { fprintf(stderr, \"map %s not loaded\\n\"); exit(1); }",
-                              fd.c_str(), defaultTable.c_str());
+        builder->appendFormat(
+                "if (%s < 0) { fprintf(stderr, \"map %s not loaded\\n\"); exit(1); }",
+                fd.c_str(), defaultTable.c_str());
         builder->newline();
 
         builder->emitIndent();
-        builder->appendFormat("struct %s %s = ", valueTypeName.c_str(), value.c_str());
+        builder->appendFormat("struct %s %s = ", valueTypeName.c_str(),
+                              value.c_str());
         builder->blockStart();
         builder->emitIndent();
         builder->appendFormat(".action = %s,", name.c_str());
@@ -696,7 +628,8 @@ namespace UBPF {
 
         builder->emitIndent();
         builder->append("int ok = ");
-        builder->target->emitUserTableUpdate(builder, fd, program->zeroKey, value);
+        builder->target->emitUserTableUpdate(builder, fd, program->zeroKey,
+                                             value);
         builder->newline();
 
         builder->emitIndent();
@@ -718,8 +651,9 @@ namespace UBPF {
                               fd.c_str(), dataMapName.c_str());
         builder->endOfStatement(true);
         builder->emitIndent();
-        builder->appendFormat("if (%s < 0) { fprintf(stderr, \"map %s not loaded\\n\"); exit(1); }",
-                              fd.c_str(), dataMapName.c_str());
+        builder->appendFormat(
+                "if (%s < 0) { fprintf(stderr, \"map %s not loaded\\n\"); exit(1); }",
+                fd.c_str(), dataMapName.c_str());
         builder->newline();
 
         for (auto e : entries->entries) {
@@ -728,7 +662,8 @@ namespace UBPF {
 
             auto entryAction = e->getAction();
             builder->emitIndent();
-            builder->appendFormat("struct %s %s = {", keyTypeName.c_str(), key.c_str());
+            builder->appendFormat("struct %s %s = {", keyTypeName.c_str(),
+                                  key.c_str());
             e->getKeys()->apply(cg);
             builder->append("}");
             builder->endOfStatement(true);
@@ -736,7 +671,8 @@ namespace UBPF {
             BUG_CHECK(entryAction->is<IR::MethodCallExpression>(),
                       "%1%: expected an action call", defaultAction);
             auto mce = entryAction->to<IR::MethodCallExpression>();
-            auto mi = P4::MethodInstance::resolve(mce, program->refMap, program->typeMap);
+            auto mi = P4::MethodInstance::resolve(mce, program->refMap,
+                                                  program->typeMap);
 
             auto ac = mi->to<P4::ActionCall>();
             BUG_CHECK(ac != nullptr, "%1%: expected an action call", mce);
@@ -780,5 +716,6 @@ namespace UBPF {
         }
         builder->blockEnd(true);
     }
+
 }
 

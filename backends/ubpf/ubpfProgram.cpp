@@ -133,7 +133,11 @@ namespace UBPF {
         builder->newline();
         emitTypes(builder);
         builder->newline();
+        emitTableDefinition(builder);
+        builder->newline();
         control->emitTableTypes(builder);
+        builder->newline();
+        control->emitTableInstances(builder);
         builder->appendLine("#endif");
     }
 
@@ -160,6 +164,50 @@ namespace UBPF {
                 builder->newline();
             }
         }
+    }
+
+    void UBPFProgram::emitTableDefinition(EBPF::CodeBuilder *builder) const {
+        //ubpf maps types
+        builder->append("enum ");
+        builder->append("ubpf_map_type");
+        builder->spc();
+        builder->blockStart();
+
+        builder->emitIndent();
+        builder->append("UBPF_MAP_TYPE_HASHMAP = 4,");
+        builder->newline();
+
+        builder->blockEnd(false);
+        builder->endOfStatement(true);
+
+        // definition of ubpf map
+        builder->append("struct ");
+        builder->append("ubpf_map_def");
+        builder->spc();
+        builder->blockStart();
+
+        builder->emitIndent();
+        builder->append("enum ubpf_map_type type;");
+        builder->newline();
+
+        builder->emitIndent();
+        builder->append("unsigned int key_size;");
+        builder->newline();
+
+        builder->emitIndent();
+        builder->append("unsigned int value_size;");
+        builder->newline();
+
+        builder->emitIndent();
+        builder->append("unsigned int max_entries;");
+        builder->newline();
+
+        builder->emitIndent();
+        builder->append("unsigned int nb_hash_functions;");
+        builder->newline();
+
+        builder->blockEnd(false);
+        builder->endOfStatement(true);
     }
 
     void UBPFProgram::emitHeaderInstances(EBPF::CodeBuilder* builder) {

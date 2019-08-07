@@ -129,6 +129,12 @@ namespace UBPF {
         builder->endOfStatement(true);
     }
 
-
-
+    void
+    UBPFStructType::declare(EBPF::CodeBuilder* builder, cstring id, bool asPointer) {
+        builder->append(kind);
+        builder->appendFormat(" %s ", name.c_str());
+        if (asPointer)
+            builder->append("*");
+        builder->appendFormat("%s", id.c_str());
+    }
 }

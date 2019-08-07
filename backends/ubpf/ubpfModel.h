@@ -24,14 +24,6 @@ limitations under the License.
 
 namespace UBPF {
 
-    struct TableImpl_Model : public ::Model::Extern_Model {
-        explicit TableImpl_Model(cstring name) :
-                Extern_Model(name),
-                size("size") {}
-
-        ::Model::Elem size;
-    };
-
     struct Filter_Model : public ::Model::Elem {
         Filter_Model() : Elem("Filter"),
                          parser("prs"), filter("filt") {}
@@ -40,29 +32,43 @@ namespace UBPF {
         ::Model::Elem filter;
     };
 
+    struct Register_Model : public ::Model::Extern_Model {
+        Register_Model() : Extern_Model("Register"),
+                           sizeParam("size"), read("read"), write("write"),
+                           initial_value("initial_value"),
+                           index("index"),
+                           value("value") {}
+
+        ::Model::Elem sizeParam;
+        ::Model::Elem read;
+        ::Model::Elem write;
+        ::Model::Elem initial_value;
+        ::Model::Elem index;
+        ::Model::Elem value;
+    };
+
     class UBPFModel : public ::Model::Model {
     protected:
         UBPFModel() : Model("0.1"),
-                      hash_table("hash_table"),
-                      tableImplProperty("implementation"),
                       CPacketName("pkt"),
                       packet("packet", P4::P4CoreLibrary::instance.packetIn, 0),
-                      filter(), drop("mark_to_drop") {}
+                      filter(), registerModel(),
+                      drop("mark_to_drop"), ubpf_time_get_ns("ubpf_time_get_ns") {}
 
     public:
         static UBPFModel instance;
         static cstring reservedPrefix;
 
-        TableImpl_Model hash_table;
-        ::Model::Elem tableImplProperty;
         ::Model::Elem CPacketName;
         ::Model::Param_Model packet;
         Filter_Model filter;
+        Register_Model registerModel;
         ::Model::Elem drop;
+        ::Model::Elem ubpf_time_get_ns;
 
         static cstring reserved(cstring name) { return reservedPrefix + name; }
     };
 
-}  // namespace EBPF
+}  // namespace UBPF
 
 #endif /* P4C_UBPFMODEL_H */
