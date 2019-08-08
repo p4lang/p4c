@@ -48,12 +48,12 @@ namespace UBPF {
             keyTypeName = program->refMap->newName(instanceName + "_key");
             valueTypeName = program->refMap->newName(instanceName + "_value");
             dataMapName = instanceName;
-            //TODO: determine from where take this value for simple table
-            size = 1024;
         }
     };
 
     class UBPFTable final : public UBPFTableBase {
+    private:
+        void setTableSize(const IR::TableBlock *table);
     public:
         const IR::Key *keyGenerator;
         const IR::ActionList *actionList;
