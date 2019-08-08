@@ -376,6 +376,21 @@ namespace UBPF {
 
         keyGenerator = table->container->getKey();
         actionList = table->container->getActionList();
+
+        setTableSize(table);
+    }
+
+    void UBPFTable::setTableSize(const IR::TableBlock *table) {
+        auto properties = table->container->properties->properties;
+        size = std::numeric_limits<int>::max();// Default value
+        for (auto property : properties) {
+            if (property->name.name == table->container->properties->sizePropertyName && property->value->is<IR::ExpressionValue>()) {
+                auto pExpressionValue = property->value->to<IR::ExpressionValue>();
+                auto pConstant = pExpressionValue->expression->to<IR::Constant>();
+                this->size = pConstant->asInt();
+                break;
+            }
+        }
     }
 
     void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
