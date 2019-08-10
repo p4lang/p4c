@@ -78,7 +78,7 @@ const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr)
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::PathExpression* e) {
-    if (refMap == nullptr)
+    if (refMap == nullptr /*|| leftValue*/)
         return e;
     auto decl = refMap->getDeclaration(e->path);
     if (decl == nullptr)
@@ -162,6 +162,25 @@ const IR::Node* DoConstantFolding::postorder(IR::Declaration_Constant* d) {
     LOG3("Constant " << d << " set to " << init);
     constants.emplace(getOriginal<IR::Declaration_Constant>(), init);
     return d;
+}
+
+const IR::Node* DoConstantFolding::preorder(IR::AssignmentStatement* statement) {
+    leftValue = true;
+    visit(statement->left);
+    leftValue = false;
+    visit(statement->right);
+    prune();
+    return statement;
+}
+
+const IR::Node* DoConstantFolding::preorder(IR::ArrayIndex* e) {
+    visit(e->left);
+    bool save = leftValue;
+    leftValue = false;
+    visit(e->right);
+    leftValue = save;
+    prune();
+    return e;
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Cmpl* e) {
