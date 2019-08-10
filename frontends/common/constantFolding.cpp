@@ -78,7 +78,7 @@ const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr)
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::PathExpression* e) {
-    if (refMap == nullptr /*|| leftValue*/)
+    if (refMap == nullptr || leftValue)
         return e;
     auto decl = refMap->getDeclaration(e->path);
     if (decl == nullptr)
