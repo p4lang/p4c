@@ -10,17 +10,17 @@ struct M {
 control Ingress(inout M sm);
 package V1Switch(Ingress ig);
 control FabricIngress(inout M sm) {
-    @hidden action act() {
+    @hidden action newtype2l16() {
         sm.es = (PortIdUInt_t)sm.e;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_newtype2l16 {
         actions = {
-            act();
+            newtype2l16();
         }
-        const default_action = act();
+        const default_action = newtype2l16();
     }
     apply {
-        tbl_act.apply();
+        tbl_newtype2l16.apply();
     }
 }
 

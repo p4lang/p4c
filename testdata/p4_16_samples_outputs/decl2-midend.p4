@@ -2,14 +2,14 @@ control p() {
     bit<1> x_3;
     @name("p.b") action b() {
     }
-    @hidden action act() {
+    @hidden action decl2l32() {
         x_3 = 1w0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_decl2l32 {
         actions = {
-            act();
+            decl2l32();
         }
-        const default_action = act();
+        const default_action = decl2l32();
     }
     @hidden table tbl_b {
         actions = {
@@ -18,7 +18,7 @@ control p() {
         const default_action = b();
     }
     apply {
-        tbl_act.apply();
+        tbl_decl2l32.apply();
         tbl_b.apply();
     }
 }

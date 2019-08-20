@@ -380,59 +380,59 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
 
 control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd, out psa_ingress_deparser_output_metadata_t ostd) {
     clone_union_t clone_md_0_data;
-    @hidden action act() {
+    @hidden action issue982l420() {
         ostd.clone_metadata.type = 3w0;
         ostd.clone_metadata.data.h0 = clone_md_0_data.h0;
         ostd.clone_metadata.data.h1 = clone_md_0_data.h1;
     }
-    @hidden action act_0() {
+    @hidden action issue982l417() {
         clone_md_0_data.h1.setValid();
         clone_md_0_data.h1.data = 32w0;
     }
-    @hidden action act_1() {
+    @hidden action issue982l422() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue982l417 {
         actions = {
-            act_0();
+            issue982l417();
         }
-        const default_action = act_0();
+        const default_action = issue982l417();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_issue982l420 {
         actions = {
-            act();
+            issue982l420();
         }
-        const default_action = act();
+        const default_action = issue982l420();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_issue982l422 {
         actions = {
-            act_1();
+            issue982l422();
         }
-        const default_action = act_1();
+        const default_action = issue982l422();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue982l417.apply();
         if (meta._custom_clone_id1 == 3w1) {
-            tbl_act_0.apply();
+            tbl_issue982l420.apply();
         }
-        tbl_act_1.apply();
+        tbl_issue982l422.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out packet, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, out psa_egress_deparser_output_metadata_t ostd) {
-    @hidden action act_2() {
+    @hidden action issue982l429() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_act_2 {
+    @hidden table tbl_issue982l429 {
         actions = {
-            act_2();
+            issue982l429();
         }
-        const default_action = act_2();
+        const default_action = issue982l429();
     }
     apply {
-        tbl_act_2.apply();
+        tbl_issue982l429.apply();
     }
 }
 

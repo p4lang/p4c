@@ -23,7 +23,7 @@ control ingress(inout H pkt_hdr, in Metadata metadata) {
     @name("ingress.input_traffic_bytes") Register<bit<32>>(32w1) input_traffic_bytes_0;
     @name("ingress.sum_rtt_Tr") Register<bit<32>>(32w1) sum_rtt_Tr_0;
     @name("ingress.num_pkts_with_rtt") Register<bit<32>>(32w1) num_pkts_with_rtt_0;
-    @hidden action act() {
+    @hidden action rcp55() {
         sum_rtt_Tr_0.read(32w0, sum_rtt_Tr_tmp_0);
         sum_rtt_Tr_tmp_0 = sum_rtt_Tr_tmp_0 + pkt_hdr.rtt;
         sum_rtt_Tr_0.write(sum_rtt_Tr_tmp_0, 32w0);
@@ -31,28 +31,28 @@ control ingress(inout H pkt_hdr, in Metadata metadata) {
         num_pkts_with_rtt_tmp_0 = num_pkts_with_rtt_tmp_0 + 32w1;
         num_pkts_with_rtt_0.write(num_pkts_with_rtt_tmp_0, 32w0);
     }
-    @hidden action act_0() {
+    @hidden action rcp50() {
         input_traffic_bytes_0.read(32w0, input_traffic_bytes_tmp_0);
         input_traffic_bytes_tmp_0 = input_traffic_bytes_tmp_0 + metadata.pkt_len;
         input_traffic_bytes_0.write(input_traffic_bytes_tmp_0, 32w0);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_rcp50 {
         actions = {
-            act_0();
+            rcp50();
         }
-        const default_action = act_0();
+        const default_action = rcp50();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_rcp55 {
         actions = {
-            act();
+            rcp55();
         }
-        const default_action = act();
+        const default_action = rcp55();
     }
     apply {
         @atomic {
-            tbl_act.apply();
+            tbl_rcp50.apply();
             if (pkt_hdr.rtt < 32w2500) {
-                tbl_act_0.apply();
+                tbl_rcp55.apply();
             }
         }
     }

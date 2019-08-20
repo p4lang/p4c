@@ -272,18 +272,18 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         }
         default_action = NoAction_0();
     }
-    @hidden action act() {
+    @hidden action ipv6switchmlbmv2l66() {
         key_0 = hdr.ipv6.dstAddr[127:120] == 8w0xff;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_ipv6switchmlbmv2l66 {
         actions = {
-            act();
+            ipv6switchmlbmv2l66();
         }
-        const default_action = act();
+        const default_action = ipv6switchmlbmv2l66();
     }
     apply {
         if (hdr.ipv6.isValid()) {
-            tbl_act.apply();
+            tbl_ipv6switchmlbmv2l66.apply();
             ipv6_tbl_0.apply();
         }
     }

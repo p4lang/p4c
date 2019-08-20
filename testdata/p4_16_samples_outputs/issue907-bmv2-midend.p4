@@ -20,18 +20,18 @@ parser P(packet_in b, out Headers p, inout Metadata meta, inout standard_metadat
 control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_t standard_meta) {
     S s_0;
     @name("Ing.r") register<S>(32w100) r_0;
-    @hidden action act() {
+    @hidden action issue907bmv2l22() {
         s_0.f = 32w0;
         r_0.write(32w0, s_0);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue907bmv2l22 {
         actions = {
-            act();
+            issue907bmv2l22();
         }
-        const default_action = act();
+        const default_action = issue907bmv2l22();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue907bmv2l22.apply();
     }
 }
 

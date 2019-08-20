@@ -1,17 +1,17 @@
 control c(inout bit<32> x) {
-    @hidden action act() {
+    @hidden action synthaction19() {
         x = 32w10;
         x = 32w12;
         x = 32w6;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_synthaction19 {
         actions = {
-            act();
+            synthaction19();
         }
-        const default_action = act();
+        const default_action = synthaction19();
     }
     apply {
-        tbl_act.apply();
+        tbl_synthaction19.apply();
     }
 }
 

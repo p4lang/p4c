@@ -63,27 +63,27 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         tmp = s;
     }
     @name("ingress.port_pkt_ip_bytes_in") Register<PacketByteCountState_t, PortId_t>(32w512) port_pkt_ip_bytes_in_0;
-    @hidden action act() {
+    @hidden action psaexampleregister2bmv2l127() {
         tmp_0 = port_pkt_ip_bytes_in_0.read(istd.ingress_port);
         tmp = tmp_0;
     }
-    @hidden action act_0() {
+    @hidden action psaexampleregister2bmv2l129() {
         port_pkt_ip_bytes_in_0.write(istd.ingress_port, tmp);
     }
-    @hidden action act_1() {
+    @hidden action psaexampleregister2bmv2l123() {
         ostd.egress_port = 32w0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_psaexampleregister2bmv2l123 {
         actions = {
-            act_1();
+            psaexampleregister2bmv2l123();
         }
-        const default_action = act_1();
+        const default_action = psaexampleregister2bmv2l123();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_psaexampleregister2bmv2l127 {
         actions = {
-            act();
+            psaexampleregister2bmv2l127();
         }
-        const default_action = act();
+        const default_action = psaexampleregister2bmv2l127();
     }
     @hidden table tbl_update_pkt_ip_byte_count {
         actions = {
@@ -91,18 +91,18 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         }
         const default_action = update_pkt_ip_byte_count();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_psaexampleregister2bmv2l129 {
         actions = {
-            act_0();
+            psaexampleregister2bmv2l129();
         }
-        const default_action = act_0();
+        const default_action = psaexampleregister2bmv2l129();
     }
     apply {
-        tbl_act.apply();
+        tbl_psaexampleregister2bmv2l123.apply();
         if (hdr.ipv4.isValid()) @atomic {
-            tbl_act_0.apply();
+            tbl_psaexampleregister2bmv2l127.apply();
             tbl_update_pkt_ip_byte_count.apply();
-            tbl_act_1.apply();
+            tbl_psaexampleregister2bmv2l129.apply();
         }
     }
 }
@@ -119,34 +119,34 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
 }
 
 control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action act_2() {
+    @hidden action psaexampleregister2bmv2l161() {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_act_2 {
+    @hidden table tbl_psaexampleregister2bmv2l161 {
         actions = {
-            act_2();
+            psaexampleregister2bmv2l161();
         }
-        const default_action = act_2();
+        const default_action = psaexampleregister2bmv2l161();
     }
     apply {
-        tbl_act_2.apply();
+        tbl_psaexampleregister2bmv2l161.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action act_3() {
+    @hidden action psaexampleregister2bmv2l161_0() {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_act_3 {
+    @hidden table tbl_psaexampleregister2bmv2l161_0 {
         actions = {
-            act_3();
+            psaexampleregister2bmv2l161_0();
         }
-        const default_action = act_3();
+        const default_action = psaexampleregister2bmv2l161_0();
     }
     apply {
-        tbl_act_3.apply();
+        tbl_psaexampleregister2bmv2l161_0.apply();
     }
 }
 

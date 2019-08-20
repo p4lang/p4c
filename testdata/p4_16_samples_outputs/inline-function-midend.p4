@@ -1,39 +1,39 @@
 control c(inout bit<32> x) {
     bit<32> tmp_2;
-    @hidden action act() {
+    @hidden action inlinefunction2() {
         tmp_2 = x;
     }
-    @hidden action act_0() {
+    @hidden action inlinefunction2_0() {
         tmp_2 = x;
     }
-    @hidden action act_1() {
+    @hidden action inlinefunction11() {
         x = x + tmp_2;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_inlinefunction2 {
         actions = {
-            act();
+            inlinefunction2();
         }
-        const default_action = act();
+        const default_action = inlinefunction2();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_inlinefunction2_0 {
         actions = {
-            act_0();
+            inlinefunction2_0();
         }
-        const default_action = act_0();
+        const default_action = inlinefunction2_0();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_inlinefunction11 {
         actions = {
-            act_1();
+            inlinefunction11();
         }
-        const default_action = act_1();
+        const default_action = inlinefunction11();
     }
     apply {
         if (x > x) {
-            tbl_act.apply();
+            tbl_inlinefunction2.apply();
         } else {
-            tbl_act_0.apply();
+            tbl_inlinefunction2_0.apply();
         }
-        tbl_act_1.apply();
+        tbl_inlinefunction11.apply();
     }
 }
 

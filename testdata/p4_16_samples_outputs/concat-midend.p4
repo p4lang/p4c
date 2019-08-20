@@ -1,17 +1,17 @@
 control proto(out bit<32> x);
 package top(proto _c);
 control c(out bit<32> x) {
-    @hidden action act() {
+    @hidden action concat24() {
         x = 32w0xf0f1e1e;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_concat24 {
         actions = {
-            act();
+            concat24();
         }
-        const default_action = act();
+        const default_action = concat24();
     }
     apply {
-        tbl_act.apply();
+        tbl_concat24.apply();
     }
 }
 

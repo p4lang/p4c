@@ -53,17 +53,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_0();
     }
-    @hidden action act() {
+    @hidden action issue1237l37() {
         key_0 = 48w0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue1237l37 {
         actions = {
-            act();
+            issue1237l37();
         }
-        const default_action = act();
+        const default_action = issue1237l37();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue1237l37.apply();
         conceptualization_0.apply();
     }
 }

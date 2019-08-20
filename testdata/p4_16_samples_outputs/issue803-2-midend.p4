@@ -55,34 +55,34 @@ parser ing_parse(packet_in buffer, out ing_in_headers parsed_hdr) {
 }
 
 control ingress(in ing_in_headers ihdr, in InControl inCtrl, out ing_out_headers ohdr, out ing_to_egr toEgress, out OutControl outCtrl) {
-    @hidden action act() {
+    @hidden action issue8032l95() {
         ohdr.ethernet = ihdr.ethernet;
         toEgress.x = inCtrl.inputPort;
         outCtrl.outputPort = inCtrl.inputPort;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue8032l95 {
         actions = {
-            act();
+            issue8032l95();
         }
-        const default_action = act();
+        const default_action = issue8032l95();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue8032l95.apply();
     }
 }
 
 control ing_deparse(in ing_out_headers ohdr, packet_out b) {
-    @hidden action act_0() {
+    @hidden action issue8032l104() {
         b.emit<ethernet_t>(ohdr.ethernet);
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_issue8032l104 {
         actions = {
-            act_0();
+            issue8032l104();
         }
-        const default_action = act_0();
+        const default_action = issue8032l104();
     }
     apply {
-        tbl_act_0.apply();
+        tbl_issue8032l104.apply();
     }
 }
 
@@ -94,33 +94,33 @@ parser egr_parse(packet_in buffer, out egr_in_headers parsed_hdr) {
 }
 
 control egress(in egr_in_headers ihdr, in InControl inCtrl, in ing_to_egr fromIngress, out egr_out_headers ohdr, out OutControl outCtrl) {
-    @hidden action act_1() {
+    @hidden action issue8032l123() {
         ohdr.ethernet = ihdr.ethernet;
         outCtrl.outputPort = fromIngress.x;
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_issue8032l123 {
         actions = {
-            act_1();
+            issue8032l123();
         }
-        const default_action = act_1();
+        const default_action = issue8032l123();
     }
     apply {
-        tbl_act_1.apply();
+        tbl_issue8032l123.apply();
     }
 }
 
 control egr_deparse(in egr_out_headers ohdr, packet_out b) {
-    @hidden action act_2() {
+    @hidden action issue8032l131() {
         b.emit<ethernet_t>(ohdr.ethernet);
     }
-    @hidden table tbl_act_2 {
+    @hidden table tbl_issue8032l131 {
         actions = {
-            act_2();
+            issue8032l131();
         }
-        const default_action = act_2();
+        const default_action = issue8032l131();
     }
     apply {
-        tbl_act_2.apply();
+        tbl_issue8032l131.apply();
     }
 }
 

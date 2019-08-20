@@ -1,17 +1,17 @@
 control ctrl(out bit<3> _x);
 package top(ctrl c);
 control c_0(out bit<3> x) {
-    @hidden action act() {
+    @hidden action issue754l1() {
         x = 3w1;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue754l1 {
         actions = {
-            act();
+            issue754l1();
         }
-        const default_action = act();
+        const default_action = issue754l1();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue754l1.apply();
     }
 }
 

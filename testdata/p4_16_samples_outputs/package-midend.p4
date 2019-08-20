@@ -1,17 +1,17 @@
 control proto(out bit<32> o);
 package top(proto _c, bool parameter);
 control c(out bit<32> o) {
-    @hidden action act() {
+    @hidden action package21() {
         o = 32w0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_package21 {
         actions = {
-            act();
+            package21();
         }
-        const default_action = act();
+        const default_action = package21();
     }
     apply {
-        tbl_act.apply();
+        tbl_package21.apply();
     }
 }
 

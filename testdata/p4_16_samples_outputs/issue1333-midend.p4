@@ -10,18 +10,18 @@ control ctrl();
 package top(ctrl _c);
 control c_0() {
     @name("c_0.e") E(x = 32w0) e_0;
-    @hidden action act() {
+    @hidden action issue1333l12() {
         f(a = 32w0, b = 32w4);
         e_0.f(z = 16w2);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue1333l12 {
         actions = {
-            act();
+            issue1333l12();
         }
-        const default_action = act();
+        const default_action = issue1333l12();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue1333l12.apply();
     }
 }
 

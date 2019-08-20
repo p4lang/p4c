@@ -26,18 +26,18 @@ parser ingressParserImpl(packet_in packet, out headers_t hdr, inout metadata_t m
 }
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @hidden action act() {
+    @hidden action psatoplevelassignmentsbmv2l57() {
         ostd.drop = false;
         ostd.egress_port = 32w3;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_psatoplevelassignmentsbmv2l57 {
         actions = {
-            act();
+            psatoplevelassignmentsbmv2l57();
         }
-        const default_action = act();
+        const default_action = psatoplevelassignmentsbmv2l57();
     }
     apply {
-        tbl_act.apply();
+        tbl_psatoplevelassignmentsbmv2l57.apply();
     }
 }
 
@@ -53,32 +53,32 @@ control egressImpl(inout headers_t hdr, inout metadata_t meta, in psa_egress_inp
 }
 
 control ingressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action act_0() {
+    @hidden action psatoplevelassignmentsbmv2l87() {
         packet.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_psatoplevelassignmentsbmv2l87 {
         actions = {
-            act_0();
+            psatoplevelassignmentsbmv2l87();
         }
-        const default_action = act_0();
+        const default_action = psatoplevelassignmentsbmv2l87();
     }
     apply {
-        tbl_act_0.apply();
+        tbl_psatoplevelassignmentsbmv2l87.apply();
     }
 }
 
 control egressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action act_1() {
+    @hidden action psatoplevelassignmentsbmv2l87_0() {
         packet.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_psatoplevelassignmentsbmv2l87_0 {
         actions = {
-            act_1();
+            psatoplevelassignmentsbmv2l87_0();
         }
-        const default_action = act_1();
+        const default_action = psatoplevelassignmentsbmv2l87_0();
     }
     apply {
-        tbl_act_1.apply();
+        tbl_psatoplevelassignmentsbmv2l87_0.apply();
     }
 }
 

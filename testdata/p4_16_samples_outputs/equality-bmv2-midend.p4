@@ -30,77 +30,77 @@ parser p(packet_in b, out headers hdr, inout metadata meta, inout standard_metad
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     H[2] tmp_0;
-    @hidden action act() {
+    @hidden action equalitybmv2l42() {
         hdr.same.same = 8w1;
     }
-    @hidden action act_0() {
+    @hidden action equalitybmv2l37() {
         hdr.same.setValid();
         hdr.same.same = 8w0;
         stdmeta.egress_spec = 9w0;
     }
-    @hidden action act_1() {
+    @hidden action equalitybmv2l45() {
         hdr.same.same = hdr.same.same | 8w2;
     }
-    @hidden action act_2() {
+    @hidden action equalitybmv2l48() {
         hdr.same.same = hdr.same.same | 8w4;
     }
-    @hidden action act_3() {
+    @hidden action equalitybmv2l55() {
         hdr.same.same = hdr.same.same | 8w8;
     }
-    @hidden action act_4() {
+    @hidden action equalitybmv2l52() {
         tmp_0[0] = hdr.h;
         tmp_0[1] = hdr.a[0];
     }
-    @hidden table tbl_act {
+    @hidden table tbl_equalitybmv2l37 {
         actions = {
-            act_0();
+            equalitybmv2l37();
         }
-        const default_action = act_0();
+        const default_action = equalitybmv2l37();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_equalitybmv2l42 {
         actions = {
-            act();
+            equalitybmv2l42();
         }
-        const default_action = act();
+        const default_action = equalitybmv2l42();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_equalitybmv2l45 {
         actions = {
-            act_1();
+            equalitybmv2l45();
         }
-        const default_action = act_1();
+        const default_action = equalitybmv2l45();
     }
-    @hidden table tbl_act_2 {
+    @hidden table tbl_equalitybmv2l48 {
         actions = {
-            act_2();
+            equalitybmv2l48();
         }
-        const default_action = act_2();
+        const default_action = equalitybmv2l48();
     }
-    @hidden table tbl_act_3 {
+    @hidden table tbl_equalitybmv2l52 {
         actions = {
-            act_4();
+            equalitybmv2l52();
         }
-        const default_action = act_4();
+        const default_action = equalitybmv2l52();
     }
-    @hidden table tbl_act_4 {
+    @hidden table tbl_equalitybmv2l55 {
         actions = {
-            act_3();
+            equalitybmv2l55();
         }
-        const default_action = act_3();
+        const default_action = equalitybmv2l55();
     }
     apply {
-        tbl_act.apply();
+        tbl_equalitybmv2l37.apply();
         if (hdr.h.s == hdr.a[0].s) {
-            tbl_act_0.apply();
+            tbl_equalitybmv2l42.apply();
         }
         if (hdr.h.v == hdr.a[0].v) {
-            tbl_act_1.apply();
+            tbl_equalitybmv2l45.apply();
         }
         if (!hdr.h.isValid() && !hdr.a[0].isValid() || hdr.h.isValid() && hdr.a[0].isValid() && hdr.h.s == hdr.a[0].s && hdr.h.v == hdr.a[0].v) {
-            tbl_act_2.apply();
+            tbl_equalitybmv2l48.apply();
         }
-        tbl_act_3.apply();
+        tbl_equalitybmv2l52.apply();
         if ((!tmp_0[0].isValid() && !hdr.a[0].isValid() || tmp_0[0].isValid() && hdr.a[0].isValid() && tmp_0[0].s == hdr.a[0].s && tmp_0[0].v == hdr.a[0].v) && (!tmp_0[1].isValid() && !hdr.a[1].isValid() || tmp_0[1].isValid() && hdr.a[1].isValid() && tmp_0[1].s == hdr.a[1].s && tmp_0[1].v == hdr.a[1].v)) {
-            tbl_act_4.apply();
+            tbl_equalitybmv2l55.apply();
         }
     }
 }

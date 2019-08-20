@@ -22,18 +22,18 @@ parser parse(packet_in pk, out parsed_packet_t hdr, inout local_metadata_t local
 }
 
 control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    @hidden action act() {
+    @hidden action issue1325bmv2l31() {
         mark_to_drop(standard_metadata);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue1325bmv2l31 {
         actions = {
-            act();
+            issue1325bmv2l31();
         }
-        const default_action = act();
+        const default_action = issue1325bmv2l31();
     }
     apply {
         if (local_metadata._test_test_error0 == error.Unused) {
-            tbl_act.apply();
+            tbl_issue1325bmv2l31.apply();
         }
     }
 }

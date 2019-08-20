@@ -277,22 +277,22 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
 }
 
 control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @hidden action act() {
+    @hidden action issue17651bmv2l343() {
         hdr.cpu.setValid();
         hdr.cpu.task = meta.task;
         hdr.cpu.ethertype = hdr.ethernet.ethertype;
         hdr.cpu.ingress_port = (bit<16>)meta.ingress_port;
         hdr.ethernet.ethertype = 16w0x4242;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue17651bmv2l343 {
         actions = {
-            act();
+            issue17651bmv2l343();
         }
-        const default_action = act();
+        const default_action = issue17651bmv2l343();
     }
     apply {
         if (standard_metadata.instance_type == 32w1) {
-            tbl_act.apply();
+            tbl_issue17651bmv2l343.apply();
         }
     }
 }

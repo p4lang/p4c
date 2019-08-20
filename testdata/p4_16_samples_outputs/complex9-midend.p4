@@ -3,63 +3,63 @@ control c(inout bit<32> r) {
     bit<32> tmp;
     bool tmp_1;
     bit<32> tmp_2;
-    @hidden action act() {
+    @hidden action complex9l21() {
         tmp_1 = false;
     }
-    @hidden action act_0() {
+    @hidden action complex9l21_0() {
         tmp_2 = f(32w3);
         tmp_1 = tmp_2 < 32w0;
     }
-    @hidden action act_1() {
+    @hidden action act() {
         tmp = f(32w2);
     }
-    @hidden action act_2() {
+    @hidden action complex9l22() {
         r = 32w1;
     }
-    @hidden action act_3() {
+    @hidden action complex9l24() {
         r = 32w2;
     }
     @hidden table tbl_act {
-        actions = {
-            act_1();
-        }
-        const default_action = act_1();
-    }
-    @hidden table tbl_act_0 {
         actions = {
             act();
         }
         const default_action = act();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_complex9l21 {
         actions = {
-            act_0();
+            complex9l21();
         }
-        const default_action = act_0();
+        const default_action = complex9l21();
     }
-    @hidden table tbl_act_2 {
+    @hidden table tbl_complex9l21_0 {
         actions = {
-            act_2();
+            complex9l21_0();
         }
-        const default_action = act_2();
+        const default_action = complex9l21_0();
     }
-    @hidden table tbl_act_3 {
+    @hidden table tbl_complex9l22 {
         actions = {
-            act_3();
+            complex9l22();
         }
-        const default_action = act_3();
+        const default_action = complex9l22();
+    }
+    @hidden table tbl_complex9l24 {
+        actions = {
+            complex9l24();
+        }
+        const default_action = complex9l24();
     }
     apply {
         tbl_act.apply();
         if (!(tmp > 32w0)) {
-            tbl_act_0.apply();
+            tbl_complex9l21.apply();
         } else {
-            tbl_act_1.apply();
+            tbl_complex9l21_0.apply();
         }
         if (tmp_1) {
-            tbl_act_2.apply();
+            tbl_complex9l22.apply();
         } else {
-            tbl_act_3.apply();
+            tbl_complex9l24.apply();
         }
     }
 }

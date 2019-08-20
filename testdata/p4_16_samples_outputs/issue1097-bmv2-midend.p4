@@ -17,17 +17,17 @@ register<bit<8>>(32w2) r;
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bit<8> x_0;
-    @hidden action act() {
+    @hidden action issue1097bmv2l19() {
         r.read(x_0, 32w0);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue1097bmv2l19 {
         actions = {
-            act();
+            issue1097bmv2l19();
         }
-        const default_action = act();
+        const default_action = issue1097bmv2l19();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue1097bmv2l19.apply();
     }
 }
 

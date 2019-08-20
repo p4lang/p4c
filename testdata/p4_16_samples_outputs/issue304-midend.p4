@@ -1,16 +1,16 @@
 control t(inout bit<32> b) {
-    @hidden action act() {
+    @hidden action issue304l19() {
         b = b + 32w1;
         b = b + 32w1;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue304l19 {
         actions = {
-            act();
+            issue304l19();
         }
-        const default_action = act();
+        const default_action = issue304l19();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue304l19.apply();
     }
 }
 

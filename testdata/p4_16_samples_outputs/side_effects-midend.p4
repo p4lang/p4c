@@ -18,7 +18,7 @@ control my() {
     bit<1> tmp_8;
     bit<1> tmp_9;
     bit<1> tmp_10;
-    @hidden action act() {
+    @hidden action side_effects27() {
         a_0 = 1w0;
         tmp = g(a_0);
         tmp_1 = f(a_0, tmp);
@@ -37,14 +37,14 @@ control my() {
         a_0[0:0] = tmp_10;
         g(a_0);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_side_effects27 {
         actions = {
-            act();
+            side_effects27();
         }
-        const default_action = act();
+        const default_action = side_effects27();
     }
     apply {
-        tbl_act.apply();
+        tbl_side_effects27.apply();
     }
 }
 

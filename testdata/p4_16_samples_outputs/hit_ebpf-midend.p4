@@ -63,54 +63,54 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w1024);
         const default_action = NoAction_0();
     }
-    @hidden action act() {
+    @hidden action hit_ebpf63() {
         pass = false;
         hasReturned = true;
     }
-    @hidden action act_0() {
+    @hidden action hit_ebpf60() {
         hasReturned = false;
         pass = true;
     }
-    @hidden action act_1() {
+    @hidden action act() {
         tmp = true;
     }
-    @hidden action act_2() {
+    @hidden action act_0() {
         tmp = false;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_hit_ebpf60 {
         actions = {
-            act_0();
+            hit_ebpf60();
         }
-        const default_action = act_0();
+        const default_action = hit_ebpf60();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_hit_ebpf63 {
+        actions = {
+            hit_ebpf63();
+        }
+        const default_action = hit_ebpf63();
+    }
+    @hidden table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_act_0 {
         actions = {
-            act_1();
+            act_0();
         }
-        const default_action = act_1();
-    }
-    @hidden table tbl_act_2 {
-        actions = {
-            act_2();
-        }
-        const default_action = act_2();
+        const default_action = act_0();
     }
     apply {
-        tbl_act.apply();
+        tbl_hit_ebpf60.apply();
         if (!headers.ipv4.isValid()) {
-            tbl_act_0.apply();
+            tbl_hit_ebpf63.apply();
         }
         if (!hasReturned) {
             if (Check_src_ip_0.apply().hit) {
-                tbl_act_1.apply();
+                tbl_act.apply();
             } else {
-                tbl_act_2.apply();
+                tbl_act_0.apply();
             }
         }
     }

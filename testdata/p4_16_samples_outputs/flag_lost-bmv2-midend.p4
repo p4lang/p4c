@@ -77,14 +77,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction_0();
     }
-    @hidden action act() {
+    @hidden action flag_lostbmv2l86() {
         meta.test_bool = false;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_flag_lostbmv2l86 {
         actions = {
-            act();
+            flag_lostbmv2l86();
         }
-        const default_action = act();
+        const default_action = flag_lostbmv2l86();
     }
     @hidden table tbl_drop {
         actions = {
@@ -93,7 +93,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         const default_action = drop_2();
     }
     apply {
-        tbl_act.apply();
+        tbl_flag_lostbmv2l86.apply();
         if (hdr.ipv4.isValid()) {
             ipv4_lpm_0.apply();
         }

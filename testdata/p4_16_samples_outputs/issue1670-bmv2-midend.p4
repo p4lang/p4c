@@ -23,18 +23,18 @@ parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_m
 }
 
 control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    @hidden action act() {
+    @hidden action issue1670bmv2l29() {
         h.mirrored_md.setValid();
         h.mirrored_md._meta_port0 = 8w0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue1670bmv2l29 {
         actions = {
-            act();
+            issue1670bmv2l29();
         }
-        const default_action = act();
+        const default_action = issue1670bmv2l29();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue1670bmv2l29.apply();
     }
 }
 

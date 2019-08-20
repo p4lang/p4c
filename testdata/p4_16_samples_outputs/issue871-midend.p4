@@ -5,17 +5,17 @@ extern lpf<I> {
 
 control c() {
     @name("c.lpf_0") lpf<bit<32>>(32w32) lpf_1;
-    @hidden action act() {
+    @hidden action issue871l11() {
         lpf_1.execute<bit<8>>(8w0, 32w0);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue871l11 {
         actions = {
-            act();
+            issue871l11();
         }
-        const default_action = act();
+        const default_action = issue871l11();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue871l11.apply();
     }
 }
 

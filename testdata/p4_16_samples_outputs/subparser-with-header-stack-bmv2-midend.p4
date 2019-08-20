@@ -70,76 +70,76 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    @hidden action act() {
+    @hidden action subparserwithheaderstackbmv2l117() {
         hdr.h1.h2_valid_bits[0:0] = 1w1;
     }
-    @hidden action act_0() {
+    @hidden action subparserwithheaderstackbmv2l115() {
         hdr.h1.h2_valid_bits = 8w0;
     }
-    @hidden action act_1() {
+    @hidden action subparserwithheaderstackbmv2l120() {
         hdr.h1.h2_valid_bits[1:1] = 1w1;
     }
-    @hidden action act_2() {
+    @hidden action subparserwithheaderstackbmv2l123() {
         hdr.h1.h2_valid_bits[2:2] = 1w1;
     }
-    @hidden action act_3() {
+    @hidden action subparserwithheaderstackbmv2l126() {
         hdr.h1.h2_valid_bits[3:3] = 1w1;
     }
-    @hidden action act_4() {
+    @hidden action subparserwithheaderstackbmv2l129() {
         hdr.h1.h2_valid_bits[4:4] = 1w1;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_subparserwithheaderstackbmv2l115 {
         actions = {
-            act_0();
+            subparserwithheaderstackbmv2l115();
         }
-        const default_action = act_0();
+        const default_action = subparserwithheaderstackbmv2l115();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_subparserwithheaderstackbmv2l117 {
         actions = {
-            act();
+            subparserwithheaderstackbmv2l117();
         }
-        const default_action = act();
+        const default_action = subparserwithheaderstackbmv2l117();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_subparserwithheaderstackbmv2l120 {
         actions = {
-            act_1();
+            subparserwithheaderstackbmv2l120();
         }
-        const default_action = act_1();
+        const default_action = subparserwithheaderstackbmv2l120();
     }
-    @hidden table tbl_act_2 {
+    @hidden table tbl_subparserwithheaderstackbmv2l123 {
         actions = {
-            act_2();
+            subparserwithheaderstackbmv2l123();
         }
-        const default_action = act_2();
+        const default_action = subparserwithheaderstackbmv2l123();
     }
-    @hidden table tbl_act_3 {
+    @hidden table tbl_subparserwithheaderstackbmv2l126 {
         actions = {
-            act_3();
+            subparserwithheaderstackbmv2l126();
         }
-        const default_action = act_3();
+        const default_action = subparserwithheaderstackbmv2l126();
     }
-    @hidden table tbl_act_4 {
+    @hidden table tbl_subparserwithheaderstackbmv2l129 {
         actions = {
-            act_4();
+            subparserwithheaderstackbmv2l129();
         }
-        const default_action = act_4();
+        const default_action = subparserwithheaderstackbmv2l129();
     }
     apply {
-        tbl_act.apply();
+        tbl_subparserwithheaderstackbmv2l115.apply();
         if (hdr.h2[0].isValid()) {
-            tbl_act_0.apply();
+            tbl_subparserwithheaderstackbmv2l117.apply();
         }
         if (hdr.h2[1].isValid()) {
-            tbl_act_1.apply();
+            tbl_subparserwithheaderstackbmv2l120.apply();
         }
         if (hdr.h2[2].isValid()) {
-            tbl_act_2.apply();
+            tbl_subparserwithheaderstackbmv2l123.apply();
         }
         if (hdr.h2[3].isValid()) {
-            tbl_act_3.apply();
+            tbl_subparserwithheaderstackbmv2l126.apply();
         }
         if (hdr.h2[4].isValid()) {
-            tbl_act_4.apply();
+            tbl_subparserwithheaderstackbmv2l129.apply();
         }
     }
 }

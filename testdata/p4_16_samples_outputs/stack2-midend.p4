@@ -4,17 +4,17 @@ header h {
 }
 
 control c(out bit<32> x) {
-    @hidden action act() {
+    @hidden action stack2l7() {
         x = 32w4;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_stack2l7 {
         actions = {
-            act();
+            stack2l7();
         }
-        const default_action = act();
+        const default_action = stack2l7();
     }
     apply {
-        tbl_act.apply();
+        tbl_stack2l7.apply();
     }
 }
 

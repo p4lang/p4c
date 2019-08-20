@@ -86,18 +86,18 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action act() {
+    @hidden action bvec_unionbmv2l88() {
         h.u.h2.setInvalid();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_bvec_unionbmv2l88 {
         actions = {
-            act();
+            bvec_unionbmv2l88();
         }
-        const default_action = act();
+        const default_action = bvec_unionbmv2l88();
     }
     apply {
         if (h.u.h2.isValid()) {
-            tbl_act.apply();
+            tbl_bvec_unionbmv2l88.apply();
         }
     }
 }

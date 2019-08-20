@@ -72,17 +72,17 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = a_1();
     }
-    @hidden action act() {
+    @hidden action unionvalidbmv2l76() {
         key_0 = h.u.isValid();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_unionvalidbmv2l76 {
         actions = {
-            act();
+            unionvalidbmv2l76();
         }
-        const default_action = act();
+        const default_action = unionvalidbmv2l76();
     }
     apply {
-        tbl_act.apply();
+        tbl_unionvalidbmv2l76.apply();
         t_0.apply();
     }
 }

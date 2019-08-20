@@ -9,30 +9,30 @@ control ctrl(out bit<32> c) {
         }
         default_action = e();
     }
-    @hidden action act() {
+    @hidden action exit3l33() {
         hasExited = false;
         c = 32w2;
     }
-    @hidden action act_0() {
+    @hidden action exit3l43() {
         c = 32w5;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_exit3l33 {
         actions = {
-            act();
+            exit3l33();
         }
-        const default_action = act();
+        const default_action = exit3l33();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_exit3l43 {
         actions = {
-            act_0();
+            exit3l43();
         }
-        const default_action = act_0();
+        const default_action = exit3l43();
     }
     apply {
-        tbl_act.apply();
+        tbl_exit3l33.apply();
         t_0.apply();
         if (!hasExited) {
-            tbl_act_0.apply();
+            tbl_exit3l43.apply();
         }
     }
 }

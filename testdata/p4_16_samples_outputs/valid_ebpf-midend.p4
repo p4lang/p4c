@@ -59,31 +59,31 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = array_table(32w1);
         default_action = NoAction_0();
     }
-    @hidden action act() {
+    @hidden action valid_ebpf49() {
         counters_0.increment(headers.ipv4.dstAddr);
         pass = true;
     }
-    @hidden action act_0() {
+    @hidden action valid_ebpf54() {
         pass = false;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_valid_ebpf49 {
         actions = {
-            act();
+            valid_ebpf49();
         }
-        const default_action = act();
+        const default_action = valid_ebpf49();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_valid_ebpf54 {
         actions = {
-            act_0();
+            valid_ebpf54();
         }
-        const default_action = act_0();
+        const default_action = valid_ebpf54();
     }
     apply {
         if (headers.ipv4.isValid()) {
-            tbl_act.apply();
+            tbl_valid_ebpf49.apply();
         } else {
             t_0.apply();
-            tbl_act_0.apply();
+            tbl_valid_ebpf54.apply();
         }
     }
 }

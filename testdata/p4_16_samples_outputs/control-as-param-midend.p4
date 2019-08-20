@@ -2,18 +2,18 @@
 
 control E(out bit<1> b);
 control Ingress(out bit<1> b) {
-    @hidden action act() {
+    @hidden action controlasparam7() {
         b = 1w1;
         b = 1w0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_controlasparam7 {
         actions = {
-            act();
+            controlasparam7();
         }
-        const default_action = act();
+        const default_action = controlasparam7();
     }
     apply {
-        tbl_act.apply();
+        tbl_controlasparam7.apply();
     }
 }
 

@@ -52,17 +52,17 @@ control update(inout Headers h, inout Meta m) {
 }
 
 control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action act() {
+    @hidden action headerboolbmv2l67() {
         h.u.h1.x = true;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_headerboolbmv2l67 {
         actions = {
-            act();
+            headerboolbmv2l67();
         }
-        const default_action = act();
+        const default_action = headerboolbmv2l67();
     }
     apply {
-        tbl_act.apply();
+        tbl_headerboolbmv2l67.apply();
     }
 }
 
@@ -75,18 +75,18 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action act_0() {
+    @hidden action headerboolbmv2l81() {
         h.u.h2.setInvalid();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_headerboolbmv2l81 {
         actions = {
-            act_0();
+            headerboolbmv2l81();
         }
-        const default_action = act_0();
+        const default_action = headerboolbmv2l81();
     }
     apply {
         if (h.u.h2.isValid()) {
-            tbl_act_0.apply();
+            tbl_headerboolbmv2l81.apply();
         }
     }
 }

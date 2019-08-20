@@ -5,87 +5,87 @@ control c(inout bit<32> r) {
     bit<32> tmp_2;
     bool tmp_4;
     bit<32> tmp_5;
-    @hidden action act() {
+    @hidden action complex10l21() {
         tmp_1 = false;
     }
-    @hidden action act_0() {
+    @hidden action complex10l21_0() {
         tmp_2 = f(32w3);
         tmp_1 = tmp_2 < 32w0;
     }
-    @hidden action act_1() {
+    @hidden action act() {
         tmp = f(32w2);
     }
-    @hidden action act_2() {
+    @hidden action complex10l21_1() {
         tmp_4 = true;
     }
-    @hidden action act_3() {
+    @hidden action complex10l21_2() {
         tmp_5 = f(32w5);
         tmp_4 = tmp_5 == 32w2;
     }
-    @hidden action act_4() {
+    @hidden action complex10l22() {
         r = 32w1;
     }
-    @hidden action act_5() {
+    @hidden action complex10l24() {
         r = 32w2;
     }
     @hidden table tbl_act {
-        actions = {
-            act_1();
-        }
-        const default_action = act_1();
-    }
-    @hidden table tbl_act_0 {
         actions = {
             act();
         }
         const default_action = act();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_complex10l21 {
         actions = {
-            act_0();
+            complex10l21();
         }
-        const default_action = act_0();
+        const default_action = complex10l21();
     }
-    @hidden table tbl_act_2 {
+    @hidden table tbl_complex10l21_0 {
         actions = {
-            act_2();
+            complex10l21_0();
         }
-        const default_action = act_2();
+        const default_action = complex10l21_0();
     }
-    @hidden table tbl_act_3 {
+    @hidden table tbl_complex10l21_1 {
         actions = {
-            act_3();
+            complex10l21_1();
         }
-        const default_action = act_3();
+        const default_action = complex10l21_1();
     }
-    @hidden table tbl_act_4 {
+    @hidden table tbl_complex10l21_2 {
         actions = {
-            act_4();
+            complex10l21_2();
         }
-        const default_action = act_4();
+        const default_action = complex10l21_2();
     }
-    @hidden table tbl_act_5 {
+    @hidden table tbl_complex10l22 {
         actions = {
-            act_5();
+            complex10l22();
         }
-        const default_action = act_5();
+        const default_action = complex10l22();
+    }
+    @hidden table tbl_complex10l24 {
+        actions = {
+            complex10l24();
+        }
+        const default_action = complex10l24();
     }
     apply {
         tbl_act.apply();
         if (!(tmp > 32w0)) {
-            tbl_act_0.apply();
+            tbl_complex10l21.apply();
         } else {
-            tbl_act_1.apply();
+            tbl_complex10l21_0.apply();
         }
         if (tmp_1) {
-            tbl_act_2.apply();
+            tbl_complex10l21_1.apply();
         } else {
-            tbl_act_3.apply();
+            tbl_complex10l21_2.apply();
         }
         if (tmp_4) {
-            tbl_act_4.apply();
+            tbl_complex10l22.apply();
         } else {
-            tbl_act_5.apply();
+            tbl_complex10l24.apply();
         }
     }
 }

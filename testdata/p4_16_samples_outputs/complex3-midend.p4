@@ -2,19 +2,19 @@ extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
     bit<32> tmp;
     bit<32> tmp_0;
-    @hidden action act() {
+    @hidden action complex3l21() {
         tmp = f(32w4);
         tmp_0 = f(32w5);
         r = tmp + tmp_0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_complex3l21 {
         actions = {
-            act();
+            complex3l21();
         }
-        const default_action = act();
+        const default_action = complex3l21();
     }
     apply {
-        tbl_act.apply();
+        tbl_complex3l21.apply();
     }
 }
 

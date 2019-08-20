@@ -23,28 +23,28 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
 
 control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
     bit<16> rand_int_0;
-    @hidden action act() {
+    @hidden action issue1517bmv2l62() {
         mark_to_drop(standard_metadata);
     }
-    @hidden action act_0() {
+    @hidden action issue1517bmv2l56() {
         random<bit<16>>(rand_int_0, 16w0, 16w49151);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue1517bmv2l56 {
         actions = {
-            act_0();
+            issue1517bmv2l56();
         }
-        const default_action = act_0();
+        const default_action = issue1517bmv2l56();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_issue1517bmv2l62 {
         actions = {
-            act();
+            issue1517bmv2l62();
         }
-        const default_action = act();
+        const default_action = issue1517bmv2l62();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue1517bmv2l56.apply();
         if (rand_int_0 < 16w32768) {
-            tbl_act_0.apply();
+            tbl_issue1517bmv2l62.apply();
         }
     }
 }

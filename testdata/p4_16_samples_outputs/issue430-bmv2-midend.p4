@@ -29,17 +29,17 @@ struct tuple_0 {
 
 control MyIngress(inout my_packet p, inout my_metadata m, inout standard_metadata_t s) {
     bit<32> x_0;
-    @hidden action act() {
+    @hidden action issue430bmv2l40() {
         hash<bit<32>, bit<32>, tuple_0, bit<32>>(x_0, HashAlgorithm.crc32, 32w0, { p.h.f ^ 32w0xffff }, 32w65536);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue430bmv2l40 {
         actions = {
-            act();
+            issue430bmv2l40();
         }
-        const default_action = act();
+        const default_action = issue430bmv2l40();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue430bmv2l40.apply();
     }
 }
 

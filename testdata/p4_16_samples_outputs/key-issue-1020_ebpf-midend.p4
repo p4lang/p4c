@@ -68,18 +68,18 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w10);
         default_action = drop();
     }
-    @hidden action act() {
+    @hidden action keyissue1020_ebpf37() {
         key_0 = headers.ipv4.srcAddr + 32w1;
         key_1 = headers.ipv4.dstAddr + 32w1;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_keyissue1020_ebpf37 {
         actions = {
-            act();
+            keyissue1020_ebpf37();
         }
-        const default_action = act();
+        const default_action = keyissue1020_ebpf37();
     }
     apply {
-        tbl_act.apply();
+        tbl_keyissue1020_ebpf37.apply();
         t_0.apply();
     }
 }

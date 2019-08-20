@@ -22,21 +22,21 @@ parser parse(packet_in pk, out parsed_packet_t hdr, inout local_metadata_t local
 }
 
 control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    @hidden action act() {
+    @hidden action parser_errorbmv2l30() {
         hdr.eth.setValid();
         hdr.eth.type = 16w0;
         hdr.eth.src = 48w0;
         hdr.eth.dst = 48w0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_parser_errorbmv2l30 {
         actions = {
-            act();
+            parser_errorbmv2l30();
         }
-        const default_action = act();
+        const default_action = parser_errorbmv2l30();
     }
     apply {
         if (standard_metadata.parser_error == error.PacketTooShort) {
-            tbl_act.apply();
+            tbl_parser_errorbmv2l30.apply();
         }
     }
 }

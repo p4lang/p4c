@@ -3,17 +3,17 @@ typedef Narrow_t Narrow;
 typedef bit<32> Wide_t;
 typedef Wide_t Wide;
 control c(out bool b) {
-    @hidden action act() {
+    @hidden action newtype1l12() {
         b = false;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_newtype1l12 {
         actions = {
-            act();
+            newtype1l12();
         }
-        const default_action = act();
+        const default_action = newtype1l12();
     }
     apply {
-        tbl_act.apply();
+        tbl_newtype1l12.apply();
     }
 }
 

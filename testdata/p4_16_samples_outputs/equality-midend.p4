@@ -19,62 +19,62 @@ control c(out bit<1> x) {
     H s2_0_h;
     H[2] a1_0;
     H[2] a2_0;
-    @hidden action act() {
+    @hidden action equality23() {
         x = 1w1;
     }
-    @hidden action act_0() {
+    @hidden action equality25() {
         x = 1w1;
     }
-    @hidden action act_1() {
+    @hidden action equality27() {
         x = 1w1;
     }
-    @hidden action act_2() {
+    @hidden action equality29() {
         x = 1w1;
     }
-    @hidden action act_3() {
+    @hidden action equality31() {
         x = 1w0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_equality23 {
         actions = {
-            act();
+            equality23();
         }
-        const default_action = act();
+        const default_action = equality23();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_equality25 {
         actions = {
-            act_0();
+            equality25();
         }
-        const default_action = act_0();
+        const default_action = equality25();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_equality27 {
         actions = {
-            act_1();
+            equality27();
         }
-        const default_action = act_1();
+        const default_action = equality27();
     }
-    @hidden table tbl_act_2 {
+    @hidden table tbl_equality29 {
         actions = {
-            act_2();
+            equality29();
         }
-        const default_action = act_2();
+        const default_action = equality29();
     }
-    @hidden table tbl_act_3 {
+    @hidden table tbl_equality31 {
         actions = {
-            act_3();
+            equality31();
         }
-        const default_action = act_3();
+        const default_action = equality31();
     }
     apply {
         if (a_0 == b_0) {
-            tbl_act.apply();
+            tbl_equality23.apply();
         } else if (!h1_0.isValid() && !h2_0.isValid() || h1_0.isValid() && h2_0.isValid() && h1_0.a == h2_0.a && h1_0.b == h2_0.b) {
-            tbl_act_0.apply();
+            tbl_equality25.apply();
         } else if (s1_0_a == s2_0_a && (!s1_0_h.isValid() && !s2_0_h.isValid() || s1_0_h.isValid() && s2_0_h.isValid() && s1_0_h.a == s2_0_h.a && s1_0_h.b == s2_0_h.b)) {
-            tbl_act_1.apply();
+            tbl_equality27.apply();
         } else if ((!a1_0[0].isValid() && !a2_0[0].isValid() || a1_0[0].isValid() && a2_0[0].isValid() && a1_0[0].a == a2_0[0].a && a1_0[0].b == a2_0[0].b) && (!a1_0[1].isValid() && !a2_0[1].isValid() || a1_0[1].isValid() && a2_0[1].isValid() && a1_0[1].a == a2_0[1].a && a1_0[1].b == a2_0[1].b)) {
-            tbl_act_2.apply();
+            tbl_equality29.apply();
         } else {
-            tbl_act_3.apply();
+            tbl_equality31.apply();
         }
     }
 }

@@ -20,17 +20,17 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @hidden action act() {
+    @hidden action issue955l33() {
         hdr.h.isValid();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue955l33 {
         actions = {
-            act();
+            issue955l33();
         }
-        const default_action = act();
+        const default_action = issue955l33();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue955l33.apply();
     }
 }
 

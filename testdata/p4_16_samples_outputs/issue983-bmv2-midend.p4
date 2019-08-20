@@ -69,10 +69,10 @@ control ingress(inout headers hdr, inout metadata user_meta, inout standard_meta
         }
         default_action = NoAction_0();
     }
-    @hidden action act() {
+    @hidden action issue983bmv2l108() {
         hdr.ethernet.dstAddr[47:40] = 8w1;
     }
-    @hidden action act_0() {
+    @hidden action issue983bmv2l92() {
         user_meta._fwd_meta_tmp0 = ~hdr.ethernet.etherType;
         user_meta._fwd_meta_x11 = (bit<32>)~hdr.ethernet.etherType;
         user_meta._fwd_meta_x22 = ((bit<32>)~hdr.ethernet.etherType)[31:16] + ((bit<32>)~hdr.ethernet.etherType)[15:0];
@@ -85,70 +85,70 @@ control ingress(inout headers hdr, inout metadata user_meta, inout standard_meta
         user_meta._fwd_meta_exp_x49 = 32w0xfffff7ff;
         hdr.ethernet.dstAddr = 48w0;
     }
-    @hidden action act_1() {
+    @hidden action issue983bmv2l111() {
         hdr.ethernet.dstAddr[39:32] = 8w1;
     }
-    @hidden action act_2() {
+    @hidden action issue983bmv2l114() {
         hdr.ethernet.dstAddr[31:24] = 8w1;
     }
-    @hidden action act_3() {
+    @hidden action issue983bmv2l117() {
         hdr.ethernet.dstAddr[23:16] = 8w1;
     }
-    @hidden action act_4() {
+    @hidden action issue983bmv2l120() {
         hdr.ethernet.dstAddr[15:8] = 8w1;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue983bmv2l92 {
         actions = {
-            act_0();
+            issue983bmv2l92();
         }
-        const default_action = act_0();
+        const default_action = issue983bmv2l92();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_issue983bmv2l108 {
         actions = {
-            act();
+            issue983bmv2l108();
         }
-        const default_action = act();
+        const default_action = issue983bmv2l108();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_issue983bmv2l111 {
         actions = {
-            act_1();
+            issue983bmv2l111();
         }
-        const default_action = act_1();
+        const default_action = issue983bmv2l111();
     }
-    @hidden table tbl_act_2 {
+    @hidden table tbl_issue983bmv2l114 {
         actions = {
-            act_2();
+            issue983bmv2l114();
         }
-        const default_action = act_2();
+        const default_action = issue983bmv2l114();
     }
-    @hidden table tbl_act_3 {
+    @hidden table tbl_issue983bmv2l117 {
         actions = {
-            act_3();
+            issue983bmv2l117();
         }
-        const default_action = act_3();
+        const default_action = issue983bmv2l117();
     }
-    @hidden table tbl_act_4 {
+    @hidden table tbl_issue983bmv2l120 {
         actions = {
-            act_4();
+            issue983bmv2l120();
         }
-        const default_action = act_4();
+        const default_action = issue983bmv2l120();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue983bmv2l92.apply();
         if (hdr.ethernet.etherType != 16w0x800) {
-            tbl_act_0.apply();
+            tbl_issue983bmv2l108.apply();
         }
         if ((bit<32>)~hdr.ethernet.etherType != 32w0xf7ff) {
-            tbl_act_1.apply();
+            tbl_issue983bmv2l111.apply();
         }
         if (((bit<32>)~hdr.ethernet.etherType)[31:16] + ((bit<32>)~hdr.ethernet.etherType)[15:0] != 16w0xf7ff) {
-            tbl_act_2.apply();
+            tbl_issue983bmv2l114.apply();
         }
         if ((bit<32>)~hdr.ethernet.etherType != 32w0xf7ff) {
-            tbl_act_3.apply();
+            tbl_issue983bmv2l117.apply();
         }
         if (~(bit<32>)hdr.ethernet.etherType != 32w0xfffff7ff) {
-            tbl_act_4.apply();
+            tbl_issue983bmv2l120.apply();
         }
         debug_table_cksum1_0.apply();
     }

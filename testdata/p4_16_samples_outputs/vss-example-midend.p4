@@ -153,26 +153,26 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         size = 16;
         default_action = Drop_action_5();
     }
-    @hidden action act() {
+    @hidden action vssexample191() {
         hasReturned = true;
     }
-    @hidden action act_0() {
+    @hidden action act() {
         hasReturned = false;
     }
-    @hidden action act_1() {
+    @hidden action vssexample195() {
         hasReturned = true;
     }
-    @hidden action act_2() {
+    @hidden action vssexample198() {
         hasReturned = true;
     }
-    @hidden action act_3() {
+    @hidden action vssexample201() {
         hasReturned = true;
     }
     @hidden table tbl_act {
         actions = {
-            act_0();
+            act();
         }
-        const default_action = act_0();
+        const default_action = act();
     }
     @hidden table tbl_Drop_action {
         actions = {
@@ -180,52 +180,52 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         }
         const default_action = Drop_action_6();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_vssexample191 {
         actions = {
-            act();
+            vssexample191();
         }
-        const default_action = act();
+        const default_action = vssexample191();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_vssexample195 {
         actions = {
-            act_1();
+            vssexample195();
         }
-        const default_action = act_1();
+        const default_action = vssexample195();
     }
-    @hidden table tbl_act_2 {
+    @hidden table tbl_vssexample198 {
         actions = {
-            act_2();
+            vssexample198();
         }
-        const default_action = act_2();
+        const default_action = vssexample198();
     }
-    @hidden table tbl_act_3 {
+    @hidden table tbl_vssexample201 {
         actions = {
-            act_3();
+            vssexample201();
         }
-        const default_action = act_3();
+        const default_action = vssexample201();
     }
     apply {
         tbl_act.apply();
         if (parseError != error.NoError) {
             tbl_Drop_action.apply();
-            tbl_act_0.apply();
+            tbl_vssexample191.apply();
         }
         if (!hasReturned) {
             ipv4_match_0.apply();
             if (outCtrl.outputPort == 4w0xf) {
-                tbl_act_1.apply();
+                tbl_vssexample195.apply();
             }
         }
         if (!hasReturned) {
             check_ttl_0.apply();
             if (outCtrl.outputPort == 4w0xe) {
-                tbl_act_2.apply();
+                tbl_vssexample198.apply();
             }
         }
         if (!hasReturned) {
             dmac_0.apply();
             if (outCtrl.outputPort == 4w0xf) {
-                tbl_act_3.apply();
+                tbl_vssexample201.apply();
             }
         }
         if (!hasReturned) {
@@ -237,43 +237,43 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
 control TopDeparser(inout Parsed_packet p, packet_out b) {
     bit<16> tmp_2;
     @name("TopDeparser.ck") Ck16() ck_1;
-    @hidden action act_4() {
+    @hidden action vssexample213() {
         ck_1.clear();
         p.ip.hdrChecksum = 16w0;
         ck_1.update<Ipv4_h>(p.ip);
         tmp_2 = ck_1.get();
         p.ip.hdrChecksum = tmp_2;
     }
-    @hidden action act_5() {
+    @hidden action vssexample211() {
         b.emit<Ethernet_h>(p.ethernet);
     }
-    @hidden action act_6() {
+    @hidden action vssexample218() {
         b.emit<Ipv4_h>(p.ip);
     }
-    @hidden table tbl_act_4 {
+    @hidden table tbl_vssexample211 {
         actions = {
-            act_5();
+            vssexample211();
         }
-        const default_action = act_5();
+        const default_action = vssexample211();
     }
-    @hidden table tbl_act_5 {
+    @hidden table tbl_vssexample213 {
         actions = {
-            act_4();
+            vssexample213();
         }
-        const default_action = act_4();
+        const default_action = vssexample213();
     }
-    @hidden table tbl_act_6 {
+    @hidden table tbl_vssexample218 {
         actions = {
-            act_6();
+            vssexample218();
         }
-        const default_action = act_6();
+        const default_action = vssexample218();
     }
     apply {
-        tbl_act_4.apply();
+        tbl_vssexample211.apply();
         if (p.ip.isValid()) {
-            tbl_act_5.apply();
+            tbl_vssexample213.apply();
         }
-        tbl_act_6.apply();
+        tbl_vssexample218.apply();
     }
 }
 

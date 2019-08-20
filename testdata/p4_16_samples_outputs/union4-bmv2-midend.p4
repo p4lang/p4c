@@ -66,22 +66,22 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action act() {
+    @hidden action union4bmv2l77() {
         h.h2.setValid();
         h.h2.b = h.u.h2.b;
         h.u.h1.setValid();
         h.u.h1.a = h.u.h2.b[7:0];
         h.u.h2.setInvalid();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_union4bmv2l77 {
         actions = {
-            act();
+            union4bmv2l77();
         }
-        const default_action = act();
+        const default_action = union4bmv2l77();
     }
     apply {
         if (h.u.h2.isValid()) {
-            tbl_act.apply();
+            tbl_union4bmv2l77.apply();
         }
     }
 }

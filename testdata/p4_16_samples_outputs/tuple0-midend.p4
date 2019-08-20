@@ -8,20 +8,20 @@ control proto();
 package top(proto _p);
 control c() {
     tuple_0 x_0;
-    @hidden action act() {
+    @hidden action tuple0l23() {
         x_0.field = 32w10;
         x_0.field_0 = false;
         f(x_0);
         f({ 32w20, true });
     }
-    @hidden table tbl_act {
+    @hidden table tbl_tuple0l23 {
         actions = {
-            act();
+            tuple0l23();
         }
-        const default_action = act();
+        const default_action = tuple0l23();
     }
     apply {
-        tbl_act.apply();
+        tbl_tuple0l23.apply();
     }
 }
 

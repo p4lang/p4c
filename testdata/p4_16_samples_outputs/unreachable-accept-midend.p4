@@ -18,17 +18,17 @@ parser Parser(packet_in pkt_in, out headers_t hdr) {
 }
 
 control Deparser(in headers_t hdr, packet_out pkt_out) {
-    @hidden action act() {
+    @hidden action unreachableaccept38() {
         pkt_out.emit<ethernet_h>(hdr.ethernet);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_unreachableaccept38 {
         actions = {
-            act();
+            unreachableaccept38();
         }
-        const default_action = act();
+        const default_action = unreachableaccept38();
     }
     apply {
-        tbl_act.apply();
+        tbl_unreachableaccept38.apply();
     }
 }
 

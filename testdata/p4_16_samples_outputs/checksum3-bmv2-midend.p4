@@ -81,52 +81,52 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    @hidden action act() {
+    @hidden action checksum3bmv2l130() {
         hdr.ethernet.srcAddr = 48w0xbad;
     }
-    @hidden action act_0() {
+    @hidden action checksum3bmv2l126() {
         stdmeta.egress_spec = 9w0;
     }
-    @hidden action act_1() {
+    @hidden action checksum3bmv2l134() {
         hdr.ethernet.dstAddr = 48w0xbad;
     }
-    @hidden action act_2() {
+    @hidden action checksum3bmv2l141() {
         hdr.ipv4.ttl = hdr.ipv4.ttl |-| 8w1;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_checksum3bmv2l126 {
         actions = {
-            act_0();
+            checksum3bmv2l126();
         }
-        const default_action = act_0();
+        const default_action = checksum3bmv2l126();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_checksum3bmv2l130 {
         actions = {
-            act();
+            checksum3bmv2l130();
         }
-        const default_action = act();
+        const default_action = checksum3bmv2l130();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_checksum3bmv2l134 {
         actions = {
-            act_1();
+            checksum3bmv2l134();
         }
-        const default_action = act_1();
+        const default_action = checksum3bmv2l134();
     }
-    @hidden table tbl_act_2 {
+    @hidden table tbl_checksum3bmv2l141 {
         actions = {
-            act_2();
+            checksum3bmv2l141();
         }
-        const default_action = act_2();
+        const default_action = checksum3bmv2l141();
     }
     apply {
-        tbl_act.apply();
+        tbl_checksum3bmv2l126.apply();
         if (stdmeta.checksum_error == 1w1) {
-            tbl_act_0.apply();
+            tbl_checksum3bmv2l130.apply();
         }
         if (stdmeta.parser_error != error.NoError) {
-            tbl_act_1.apply();
+            tbl_checksum3bmv2l134.apply();
         }
         if (hdr.ipv4.isValid()) {
-            tbl_act_2.apply();
+            tbl_checksum3bmv2l141.apply();
         }
     }
 }

@@ -6,18 +6,18 @@ header H {
 control c(inout bit<32> r) {
     H[2] h_0;
     bit<32> tmp;
-    @hidden action act() {
+    @hidden action complex2l25() {
         tmp = f(32w2);
         h_0[tmp].setValid();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_complex2l25 {
         actions = {
-            act();
+            complex2l25();
         }
-        const default_action = act();
+        const default_action = complex2l25();
     }
     apply {
-        tbl_act.apply();
+        tbl_complex2l25.apply();
     }
 }
 
