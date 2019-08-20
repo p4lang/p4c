@@ -656,16 +656,14 @@ class HeaderRepresentation {
 };
 }  // namespace
 
-void ProgramStructure::createDeparserInternal(IR::ID hdrType,
-        IR::ID hdrParam, IR::ID pktParam, IR::ID deparserId,
+void ProgramStructure::createDeparserInternal(
+        IR::ID deparserId,
+        IR::Parameter* packetOut,
+        IR::Parameter* headers,
         std::vector<IR::Parameter*> extraParams = {},
-        IR::Direction hdrDirection = IR::Direction::In,
         IR::IndexedVector<IR::Declaration> controlLocals = {},
         std::function<IR::BlockStatement*(IR::BlockStatement*)> fn =
         [](IR::BlockStatement* b){ return b; }) {
-    auto headpath = new IR::Path(hdrType);
-    auto headtype = new IR::Type_Name(headpath);
-    auto headers = new IR::Parameter(hdrParam, hdrDirection, headtype);
     auto hdrsParam = paramReference(headers);
     HeaderRepresentation hr(hdrsParam);
 
@@ -723,12 +721,8 @@ void ProgramStructure::createDeparserInternal(IR::ID hdrType,
                   startHeader);
 
     auto params = new IR::ParameterList;
-    auto poutpath = new IR::Path(p4lib.packetOut.Id());
-    auto pouttype = new IR::Type_Name(poutpath);
-    auto packetOut = new IR::Parameter(pktParam, IR::Direction::None, pouttype);
     params->push_back(packetOut);
     params->push_back(headers);
-    conversionContext->header = paramReference(headers);
 
     for (auto p : extraParams)
         params->push_back(p);
@@ -766,10 +760,18 @@ void ProgramStructure::createDeparserInternal(IR::ID hdrType,
 }
 
 void ProgramStructure::createDeparser() {
-    createDeparserInternal(v1model.headersType.Id(),
-                           v1model.deparser.headersParam.Id(),
-                           v1model.deparser.packetParam.Id(),
-                           v1model.deparser.Id());
+    auto poutpath = new IR::Path(p4lib.packetOut.Id());
+    auto pouttype = new IR::Type_Name(poutpath);
+    auto packetOut = new IR::Parameter(
+            v1model.deparser.packetParam.Id(), IR::Direction::None, pouttype);
+
+    auto headpath = new IR::Path(v1model.headersType.Id());
+    auto headtype = new IR::Type_Name(headpath);
+    auto headers = new IR::Parameter(
+            v1model.deparser.headersParam.Id(), IR::Direction::InOut, headtype);
+    conversionContext->header = paramReference(headers);
+
+    createDeparserInternal(v1model.deparser.Id(), packetOut, headers);
 }
 
 const IR::Declaration_Instance*

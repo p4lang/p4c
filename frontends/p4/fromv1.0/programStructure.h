@@ -254,8 +254,10 @@ class ProgramStructure {
                        std::unordered_set<const IR::Type*> *converted);
     virtual void createParser();
     virtual void createControls();
-    void createDeparserInternal(IR::ID hdrType, IR::ID hdrParam, IR::ID pktParam, IR::ID deparserId,
-            std::vector<IR::Parameter*>, IR::Direction,
+    void createDeparserInternal(IR::ID deparserId,
+            IR::Parameter* packetOut,
+            IR::Parameter* headers,
+            std::vector<IR::Parameter*>,
             IR::IndexedVector<IR::Declaration> controlLocals,
             std::function<IR::BlockStatement*(IR::BlockStatement*)>);
     virtual void createDeparser();

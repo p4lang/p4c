@@ -37,7 +37,7 @@ parseV1Program(Input& stream, const char* sourceFile, unsigned sourceLine,
     // We load the model before parsing the input file, so that the SourceInfo
     // in the model comes first.
     C converter;
-    if (debugHook) converter.addDebugHook(*debugHook);
+    if (debugHook) converter.addDebugHook(*debugHook, true);
     converter.loadModel();
 
     // Parse.
