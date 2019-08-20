@@ -1,17 +1,17 @@
 control c(out bit<32> x);
 package top(c _c);
 control my(out bit<32> x) {
-    @hidden action act() {
+    @hidden action overwrite24() {
         x = 32w2;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_overwrite24 {
         actions = {
-            act();
+            overwrite24();
         }
-        const default_action = act();
+        const default_action = overwrite24();
     }
     apply {
-        tbl_act.apply();
+        tbl_overwrite24.apply();
     }
 }
 

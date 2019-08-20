@@ -36,18 +36,18 @@ parser MyParser(packet_in pkt, out headers hdr, inout metadata meta, inout stand
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    @hidden action act() {
+    @hidden action issue1824bmv2l52() {
         hdr.h1.dstAddr = 48w0xbad;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue1824bmv2l52 {
         actions = {
-            act();
+            issue1824bmv2l52();
         }
-        const default_action = act();
+        const default_action = issue1824bmv2l52();
     }
     apply {
         if (stdmeta.parser_error != error.NoError) {
-            tbl_act.apply();
+            tbl_issue1824bmv2l52.apply();
         }
     }
 }

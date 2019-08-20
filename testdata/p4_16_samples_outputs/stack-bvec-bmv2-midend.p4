@@ -55,19 +55,19 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action act() {
+    @hidden action stackbvecbmv2l40() {
         h.h._f0 = h.h._f0 + 32w1;
         h.h._row_alt1_valid3 = 1w1;
         sm.egress_spec = 9w0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_stackbvecbmv2l40 {
         actions = {
-            act();
+            stackbvecbmv2l40();
         }
-        const default_action = act();
+        const default_action = stackbvecbmv2l40();
     }
     apply {
-        tbl_act.apply();
+        tbl_stackbvecbmv2l40.apply();
     }
 }
 

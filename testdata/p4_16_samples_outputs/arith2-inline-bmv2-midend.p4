@@ -43,40 +43,40 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @hidden action act() {
+    @hidden action arith2inlinebmv2l29() {
         h.h.c = 8w0;
     }
-    @hidden action act_0() {
+    @hidden action arith2inlinebmv2l31() {
         h.h.c = 8w1;
     }
-    @hidden action act_1() {
+    @hidden action arithinlineskeleton51() {
         sm.egress_spec = 9w0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_arith2inlinebmv2l29 {
         actions = {
-            act();
+            arith2inlinebmv2l29();
         }
-        const default_action = act();
+        const default_action = arith2inlinebmv2l29();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_arith2inlinebmv2l31 {
         actions = {
-            act_0();
+            arith2inlinebmv2l31();
         }
-        const default_action = act_0();
+        const default_action = arith2inlinebmv2l31();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_arithinlineskeleton51 {
         actions = {
-            act_1();
+            arithinlineskeleton51();
         }
-        const default_action = act_1();
+        const default_action = arithinlineskeleton51();
     }
     apply {
         if (h.h.a < h.h.b) {
-            tbl_act.apply();
+            tbl_arith2inlinebmv2l29.apply();
         } else {
-            tbl_act_0.apply();
+            tbl_arith2inlinebmv2l31.apply();
         }
-        tbl_act_1.apply();
+        tbl_arithinlineskeleton51.apply();
     }
 }
 

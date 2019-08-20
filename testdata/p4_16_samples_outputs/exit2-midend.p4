@@ -6,18 +6,18 @@ control ctrl(out bit<32> c) {
     @name("ctrl.e") action e_2() {
         hasExited = true;
     }
-    @hidden action act() {
+    @hidden action exit2l31() {
         hasExited = false;
         c = 32w2;
     }
-    @hidden action act_0() {
+    @hidden action exit2l41() {
         c = 32w5;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_exit2l31 {
         actions = {
-            act();
+            exit2l31();
         }
-        const default_action = act();
+        const default_action = exit2l31();
     }
     @hidden table tbl_e {
         actions = {
@@ -25,17 +25,17 @@ control ctrl(out bit<32> c) {
         }
         const default_action = e();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_exit2l41 {
         actions = {
-            act_0();
+            exit2l41();
         }
-        const default_action = act_0();
+        const default_action = exit2l41();
     }
     apply {
-        tbl_act.apply();
+        tbl_exit2l31.apply();
         tbl_e.apply();
         if (!hasExited) {
-            tbl_act_0.apply();
+            tbl_exit2l41.apply();
         }
     }
 }

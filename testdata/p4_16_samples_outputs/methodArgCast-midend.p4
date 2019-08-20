@@ -5,17 +5,17 @@ extern E {
 
 control c() {
     @name("c.e") E() e_0;
-    @hidden action act() {
+    @hidden action methodArgCast24() {
         e_0.setValue(32w10);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_methodArgCast24 {
         actions = {
-            act();
+            methodArgCast24();
         }
-        const default_action = act();
+        const default_action = methodArgCast24();
     }
     apply {
-        tbl_act.apply();
+        tbl_methodArgCast24.apply();
     }
 }
 

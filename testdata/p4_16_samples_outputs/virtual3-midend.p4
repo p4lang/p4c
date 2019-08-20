@@ -35,17 +35,17 @@ control c(inout bit<16> p) {
         }
         default_action = NoAction_0();
     }
-    @hidden action act() {
+    @hidden action virtual3l47() {
         local_0 = 16w4;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_virtual3l47 {
         actions = {
-            act();
+            virtual3l47();
         }
-        const default_action = act();
+        const default_action = virtual3l47();
     }
     apply {
-        tbl_act.apply();
+        tbl_virtual3l47.apply();
         run_ctr_0.apply();
     }
 }

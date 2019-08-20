@@ -25,37 +25,37 @@ register<bit<8>>(32w256) r;
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bit<8> x_0;
-    @hidden action act() {
+    @hidden action issue10972bmv2l51() {
         r.read(x_0, (bit<32>)h.myhdr.reg_idx_to_update);
         r.write((bit<32>)h.myhdr.reg_idx_to_update, 8w0x2a);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue10972bmv2l51 {
         actions = {
-            act();
+            issue10972bmv2l51();
         }
-        const default_action = act();
+        const default_action = issue10972bmv2l51();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue10972bmv2l51.apply();
     }
 }
 
 control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bit<8> tmp_0;
-    @hidden action act_0() {
+    @hidden action issue10972bmv2l62() {
         r.read(tmp_0, (bit<32>)h.myhdr.reg_idx_to_update);
         tmp_0 = tmp_0 + h.myhdr.value_to_add;
         r.write((bit<32>)h.myhdr.reg_idx_to_update, tmp_0);
         h.myhdr.debug_last_reg_value_written = tmp_0;
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_issue10972bmv2l62 {
         actions = {
-            act_0();
+            issue10972bmv2l62();
         }
-        const default_action = act_0();
+        const default_action = issue10972bmv2l62();
     }
     apply {
-        tbl_act_0.apply();
+        tbl_issue10972bmv2l62.apply();
     }
 }
 

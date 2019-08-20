@@ -62,30 +62,30 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w1024);
         const default_action = NoAction_0();
     }
-    @hidden action act() {
+    @hidden action test_ebpf72() {
         pass = false;
         hasReturned = true;
     }
-    @hidden action act_0() {
+    @hidden action test_ebpf68() {
         hasReturned = false;
         pass = true;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_test_ebpf68 {
         actions = {
-            act_0();
+            test_ebpf68();
         }
-        const default_action = act_0();
+        const default_action = test_ebpf68();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_test_ebpf72 {
         actions = {
-            act();
+            test_ebpf72();
         }
-        const default_action = act();
+        const default_action = test_ebpf72();
     }
     apply {
-        tbl_act.apply();
+        tbl_test_ebpf68.apply();
         if (!headers.ipv4.isValid()) {
-            tbl_act_0.apply();
+            tbl_test_ebpf72.apply();
         }
         if (!hasReturned) {
             Check_src_ip_0.apply();

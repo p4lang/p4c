@@ -22,17 +22,17 @@ parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_m
 }
 
 control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    @hidden action act() {
+    @hidden action issue1653bmv2l49() {
         clone3<parsed_packet_t>(CloneType.I2E, 32w0, h);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue1653bmv2l49 {
         actions = {
-            act();
+            issue1653bmv2l49();
         }
-        const default_action = act();
+        const default_action = issue1653bmv2l49();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue1653bmv2l49.apply();
     }
 }
 

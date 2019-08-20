@@ -88,20 +88,20 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     bit<1> eth_valid_0;
     bit<1> ipv4_valid_0;
     bit<1> tcp_valid_0;
-    @hidden action act() {
+    @hidden action issue1025bmv2l132() {
         eth_valid_0 = (bit<1>)hdr.ethernet.isValid();
         ipv4_valid_0 = (bit<1>)hdr.ipv4.isValid();
         tcp_valid_0 = (bit<1>)hdr.tcp.isValid();
         hdr.ethernet.dstAddr = 31w0 ++ eth_valid_0 ++ 7w0 ++ ipv4_valid_0 ++ 7w0 ++ tcp_valid_0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue1025bmv2l132 {
         actions = {
-            act();
+            issue1025bmv2l132();
         }
-        const default_action = act();
+        const default_action = issue1025bmv2l132();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue1025bmv2l132.apply();
     }
 }
 

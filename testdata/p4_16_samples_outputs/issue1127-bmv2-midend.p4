@@ -23,65 +23,65 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     h1_t hdr_0_h1;
+    @hidden action issue1127bmv2l53() {
+        hdr_0_h1.out1 = 8w4;
+    }
     @hidden action act() {
+        hdr_0_h1 = hdr.h1;
+    }
+    @hidden action issue1127bmv2l53_0() {
         hdr_0_h1.out1 = 8w4;
     }
     @hidden action act_0() {
-        hdr_0_h1 = hdr.h1;
-    }
-    @hidden action act_1() {
-        hdr_0_h1.out1 = 8w4;
-    }
-    @hidden action act_2() {
         hdr.h1 = hdr_0_h1;
     }
-    @hidden action act_3() {
+    @hidden action act_1() {
         hdr.h1 = hdr_0_h1;
     }
     @hidden table tbl_act {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
-    }
-    @hidden table tbl_act_0 {
         actions = {
             act();
         }
         const default_action = act();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_issue1127bmv2l53 {
         actions = {
-            act_2();
+            issue1127bmv2l53();
         }
-        const default_action = act_2();
+        const default_action = issue1127bmv2l53();
     }
-    @hidden table tbl_act_2 {
+    @hidden table tbl_act_0 {
+        actions = {
+            act_0();
+        }
+        const default_action = act_0();
+    }
+    @hidden table tbl_issue1127bmv2l53_0 {
+        actions = {
+            issue1127bmv2l53_0();
+        }
+        const default_action = issue1127bmv2l53_0();
+    }
+    @hidden table tbl_act_1 {
         actions = {
             act_1();
         }
         const default_action = act_1();
-    }
-    @hidden table tbl_act_3 {
-        actions = {
-            act_3();
-        }
-        const default_action = act_3();
     }
     apply {
         tbl_act.apply();
         if (hdr.h1.op1 == 8w0x0) {
             ;
         } else if (hdr.h1.op1[7:4] == 4w1) {
-            tbl_act_0.apply();
+            tbl_issue1127bmv2l53.apply();
         }
-        tbl_act_1.apply();
+        tbl_act_0.apply();
         if (hdr.h1.op2 == 8w0x0) {
             ;
         } else if (hdr.h1.op2[7:4] == 4w1) {
-            tbl_act_2.apply();
+            tbl_issue1127bmv2l53_0.apply();
         }
-        tbl_act_3.apply();
+        tbl_act_1.apply();
     }
 }
 

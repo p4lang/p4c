@@ -144,18 +144,18 @@ control PROTVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control PROTIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @hidden action act() {
+    @hidden action issue1879bmv2l206() {
         mark_to_drop(standard_metadata);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue1879bmv2l206 {
         actions = {
-            act();
+            issue1879bmv2l206();
         }
-        const default_action = act();
+        const default_action = issue1879bmv2l206();
     }
     apply {
         if (meta._currenti_upDirection4 == 1w0) {
-            tbl_act.apply();
+            tbl_issue1879bmv2l206.apply();
         }
     }
 }

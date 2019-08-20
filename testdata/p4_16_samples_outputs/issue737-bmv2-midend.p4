@@ -26,42 +26,42 @@ control VeryChecksum(inout Parsed_packet hdr, inout Meta meta) {
 }
 
 control IngressP(inout Parsed_packet hdr, inout Meta m, inout standard_metadata_t standard_metadata) {
-    @hidden action act() {
+    @hidden action issue737bmv2l35() {
         hdr.h.field = 64w3;
     }
-    @hidden action act_0() {
+    @hidden action issue737bmv2l38() {
         hdr.h.field = 64w5;
     }
-    @hidden action act_1() {
+    @hidden action issue737bmv2l41() {
         hdr.h.field = 64w4;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue737bmv2l35 {
         actions = {
-            act();
+            issue737bmv2l35();
         }
-        const default_action = act();
+        const default_action = issue737bmv2l35();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_issue737bmv2l38 {
         actions = {
-            act_0();
+            issue737bmv2l38();
         }
-        const default_action = act_0();
+        const default_action = issue737bmv2l38();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_issue737bmv2l41 {
         actions = {
-            act_1();
+            issue737bmv2l41();
         }
-        const default_action = act_1();
+        const default_action = issue737bmv2l41();
     }
     apply {
         if (m.metafield) {
-            tbl_act.apply();
+            tbl_issue737bmv2l35.apply();
         }
         if (m.metafield == false) {
-            tbl_act_0.apply();
+            tbl_issue737bmv2l38.apply();
         }
         if (!m.metafield) {
-            tbl_act_1.apply();
+            tbl_issue737bmv2l41.apply();
         }
     }
 }

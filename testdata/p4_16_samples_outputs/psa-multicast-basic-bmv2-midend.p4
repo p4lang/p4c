@@ -53,32 +53,32 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
 }
 
 control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action act() {
+    @hidden action psamulticastbasicbmv2l88() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_psamulticastbasicbmv2l88 {
         actions = {
-            act();
+            psamulticastbasicbmv2l88();
         }
-        const default_action = act();
+        const default_action = psamulticastbasicbmv2l88();
     }
     apply {
-        tbl_act.apply();
+        tbl_psamulticastbasicbmv2l88.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action act_0() {
+    @hidden action psamulticastbasicbmv2l88_0() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_psamulticastbasicbmv2l88_0 {
         actions = {
-            act_0();
+            psamulticastbasicbmv2l88_0();
         }
-        const default_action = act_0();
+        const default_action = psamulticastbasicbmv2l88_0();
     }
     apply {
-        tbl_act_0.apply();
+        tbl_psamulticastbasicbmv2l88_0.apply();
     }
 }
 

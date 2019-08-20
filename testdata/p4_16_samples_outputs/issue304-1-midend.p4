@@ -19,18 +19,18 @@ control t(inout bit<32> b) {
             arg = arg + c2_tmp;
         }
     };
-    @hidden action act() {
+    @hidden action issue3041l28() {
         c1_x.a(b);
         c2_x.a(b);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue3041l28 {
         actions = {
-            act();
+            issue3041l28();
         }
-        const default_action = act();
+        const default_action = issue3041l28();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue3041l28.apply();
     }
 }
 

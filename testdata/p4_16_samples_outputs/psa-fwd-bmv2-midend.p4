@@ -48,32 +48,32 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
 }
 
 control IngressDeparserImpl(packet_out buffer, out empty_t clone_i2e_meta, out empty_t resubmit_meta, out empty_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action act() {
+    @hidden action psafwdbmv2l102() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_psafwdbmv2l102 {
         actions = {
-            act();
+            psafwdbmv2l102();
         }
-        const default_action = act();
+        const default_action = psafwdbmv2l102();
     }
     apply {
-        tbl_act.apply();
+        tbl_psafwdbmv2l102.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_t clone_e2e_meta, out empty_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action act_0() {
+    @hidden action psafwdbmv2l102_0() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_psafwdbmv2l102_0 {
         actions = {
-            act_0();
+            psafwdbmv2l102_0();
         }
-        const default_action = act_0();
+        const default_action = psafwdbmv2l102_0();
     }
     apply {
-        tbl_act_0.apply();
+        tbl_psafwdbmv2l102_0.apply();
     }
 }
 

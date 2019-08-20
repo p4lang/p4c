@@ -51,18 +51,18 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = c_add_0(32w10);
     }
-    @hidden action act() {
+    @hidden action arithinlineskeleton51() {
         sm.egress_spec = 9w0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_arithinlineskeleton51 {
         actions = {
-            act();
+            arithinlineskeleton51();
         }
-        const default_action = act();
+        const default_action = arithinlineskeleton51();
     }
     apply {
         c_t.apply();
-        tbl_act.apply();
+        tbl_arithinlineskeleton51.apply();
     }
 }
 

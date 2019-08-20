@@ -141,14 +141,14 @@ control Ingress(inout headers hdr, out bool xout) {
 
         implementation = hash_table(32w8);
     }
-    @hidden action act() {
+    @hidden action calcebpf152() {
         xout = true;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_calcebpf152 {
         actions = {
-            act();
+            calcebpf152();
         }
-        const default_action = act();
+        const default_action = calcebpf152();
     }
     @hidden table tbl_operation_drop {
         actions = {
@@ -157,7 +157,7 @@ control Ingress(inout headers hdr, out bool xout) {
         const default_action = operation_drop_2();
     }
     apply {
-        tbl_act.apply();
+        tbl_calcebpf152.apply();
         if (hdr.p4calc.isValid()) {
             calculate_0.apply();
         } else {

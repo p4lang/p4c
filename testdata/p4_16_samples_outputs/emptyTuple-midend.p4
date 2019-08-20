@@ -3,17 +3,17 @@ struct tuple_0 {
 
 typedef tuple_0 emptyTuple;
 control c(out bool b) {
-    @hidden action act() {
+    @hidden action emptyTuple7() {
         b = true;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_emptyTuple7 {
         actions = {
-            act();
+            emptyTuple7();
         }
-        const default_action = act();
+        const default_action = emptyTuple7();
     }
     apply {
-        tbl_act.apply();
+        tbl_emptyTuple7.apply();
     }
 }
 

@@ -15,17 +15,17 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout SM smeta) {
 }
 
 control IngressI(inout H hdr, inout M meta, inout SM smeta) {
-    @hidden action act() {
+    @hidden action issue677bmv2l19() {
         smeta.egress_spec = 9w1;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue677bmv2l19 {
         actions = {
-            act();
+            issue677bmv2l19();
         }
-        const default_action = act();
+        const default_action = issue677bmv2l19();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue677bmv2l19.apply();
     }
 }
 

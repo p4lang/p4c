@@ -69,17 +69,17 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @hidden action act() {
+    @hidden action issue1000bmv2l88() {
         hdr.ethernet.etherType = meta.transition_taken;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue1000bmv2l88 {
         actions = {
-            act();
+            issue1000bmv2l88();
         }
-        const default_action = act();
+        const default_action = issue1000bmv2l88();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue1000bmv2l88.apply();
     }
 }
 

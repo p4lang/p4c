@@ -35,116 +35,116 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     bit<8> error_as_int_0;
-    @hidden action act() {
+    @hidden action testparserinvalidargumenterrorbmv2l68() {
         error_as_int_0 = 8w0;
     }
-    @hidden action act_0() {
+    @hidden action testparserinvalidargumenterrorbmv2l70() {
         error_as_int_0 = 8w1;
     }
-    @hidden action act_1() {
+    @hidden action testparserinvalidargumenterrorbmv2l72() {
         error_as_int_0 = 8w2;
     }
-    @hidden action act_2() {
+    @hidden action testparserinvalidargumenterrorbmv2l74() {
         error_as_int_0 = 8w3;
     }
-    @hidden action act_3() {
+    @hidden action testparserinvalidargumenterrorbmv2l76() {
         error_as_int_0 = 8w4;
     }
-    @hidden action act_4() {
+    @hidden action testparserinvalidargumenterrorbmv2l78() {
         error_as_int_0 = 8w5;
     }
-    @hidden action act_5() {
+    @hidden action testparserinvalidargumenterrorbmv2l80() {
         error_as_int_0 = 8w6;
     }
-    @hidden action act_6() {
+    @hidden action testparserinvalidargumenterrorbmv2l85() {
         error_as_int_0 = 8w7;
     }
-    @hidden action act_7() {
+    @hidden action testparserinvalidargumenterrorbmv2l66() {
         stdmeta.egress_spec = 9w1;
     }
-    @hidden action act_8() {
+    @hidden action testparserinvalidargumenterrorbmv2l87() {
         hdr.ethernet.dstAddr[7:0] = error_as_int_0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_testparserinvalidargumenterrorbmv2l66 {
         actions = {
-            act_7();
+            testparserinvalidargumenterrorbmv2l66();
         }
-        const default_action = act_7();
+        const default_action = testparserinvalidargumenterrorbmv2l66();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_testparserinvalidargumenterrorbmv2l68 {
         actions = {
-            act();
+            testparserinvalidargumenterrorbmv2l68();
         }
-        const default_action = act();
+        const default_action = testparserinvalidargumenterrorbmv2l68();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_testparserinvalidargumenterrorbmv2l70 {
         actions = {
-            act_0();
+            testparserinvalidargumenterrorbmv2l70();
         }
-        const default_action = act_0();
+        const default_action = testparserinvalidargumenterrorbmv2l70();
     }
-    @hidden table tbl_act_2 {
+    @hidden table tbl_testparserinvalidargumenterrorbmv2l72 {
         actions = {
-            act_1();
+            testparserinvalidargumenterrorbmv2l72();
         }
-        const default_action = act_1();
+        const default_action = testparserinvalidargumenterrorbmv2l72();
     }
-    @hidden table tbl_act_3 {
+    @hidden table tbl_testparserinvalidargumenterrorbmv2l74 {
         actions = {
-            act_2();
+            testparserinvalidargumenterrorbmv2l74();
         }
-        const default_action = act_2();
+        const default_action = testparserinvalidargumenterrorbmv2l74();
     }
-    @hidden table tbl_act_4 {
+    @hidden table tbl_testparserinvalidargumenterrorbmv2l76 {
         actions = {
-            act_3();
+            testparserinvalidargumenterrorbmv2l76();
         }
-        const default_action = act_3();
+        const default_action = testparserinvalidargumenterrorbmv2l76();
     }
-    @hidden table tbl_act_5 {
+    @hidden table tbl_testparserinvalidargumenterrorbmv2l78 {
         actions = {
-            act_4();
+            testparserinvalidargumenterrorbmv2l78();
         }
-        const default_action = act_4();
+        const default_action = testparserinvalidargumenterrorbmv2l78();
     }
-    @hidden table tbl_act_6 {
+    @hidden table tbl_testparserinvalidargumenterrorbmv2l80 {
         actions = {
-            act_5();
+            testparserinvalidargumenterrorbmv2l80();
         }
-        const default_action = act_5();
+        const default_action = testparserinvalidargumenterrorbmv2l80();
     }
-    @hidden table tbl_act_7 {
+    @hidden table tbl_testparserinvalidargumenterrorbmv2l85 {
         actions = {
-            act_6();
+            testparserinvalidargumenterrorbmv2l85();
         }
-        const default_action = act_6();
+        const default_action = testparserinvalidargumenterrorbmv2l85();
     }
-    @hidden table tbl_act_8 {
+    @hidden table tbl_testparserinvalidargumenterrorbmv2l87 {
         actions = {
-            act_8();
+            testparserinvalidargumenterrorbmv2l87();
         }
-        const default_action = act_8();
+        const default_action = testparserinvalidargumenterrorbmv2l87();
     }
     apply {
-        tbl_act.apply();
+        tbl_testparserinvalidargumenterrorbmv2l66.apply();
         if (stdmeta.parser_error == error.NoError) {
-            tbl_act_0.apply();
+            tbl_testparserinvalidargumenterrorbmv2l68.apply();
         } else if (stdmeta.parser_error == error.PacketTooShort) {
-            tbl_act_1.apply();
+            tbl_testparserinvalidargumenterrorbmv2l70.apply();
         } else if (stdmeta.parser_error == error.NoMatch) {
-            tbl_act_2.apply();
+            tbl_testparserinvalidargumenterrorbmv2l72.apply();
         } else if (stdmeta.parser_error == error.StackOutOfBounds) {
-            tbl_act_3.apply();
+            tbl_testparserinvalidargumenterrorbmv2l74.apply();
         } else if (stdmeta.parser_error == error.HeaderTooShort) {
-            tbl_act_4.apply();
+            tbl_testparserinvalidargumenterrorbmv2l76.apply();
         } else if (stdmeta.parser_error == error.ParserTimeout) {
-            tbl_act_5.apply();
+            tbl_testparserinvalidargumenterrorbmv2l78.apply();
         } else if (stdmeta.parser_error == error.ParserInvalidArgument) {
-            tbl_act_6.apply();
+            tbl_testparserinvalidargumenterrorbmv2l80.apply();
         } else {
-            tbl_act_7.apply();
+            tbl_testparserinvalidargumenterrorbmv2l85.apply();
         }
-        tbl_act_8.apply();
+        tbl_testparserinvalidargumenterrorbmv2l87.apply();
     }
 }
 

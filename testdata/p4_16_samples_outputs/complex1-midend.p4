@@ -4,21 +4,21 @@ control c(inout bit<32> r) {
     bit<32> tmp_1;
     bit<32> tmp_3;
     bit<32> tmp_5;
-    @hidden action act() {
+    @hidden action complex1l21() {
         tmp = f(32w5, 32w2);
         tmp_1 = f(32w2, 32w3);
         tmp_3 = f(32w6, tmp_1);
         tmp_5 = f(tmp, tmp_3);
         r = tmp_5;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_complex1l21 {
         actions = {
-            act();
+            complex1l21();
         }
-        const default_action = act();
+        const default_action = complex1l21();
     }
     apply {
-        tbl_act.apply();
+        tbl_complex1l21.apply();
     }
 }
 

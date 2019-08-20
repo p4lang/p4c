@@ -157,6 +157,7 @@ const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
             actbody = new IR::BlockStatement;
         }
         left->push_back(c);
+        left->srcInfo += c->srcInfo;
     }
     if (!actbody->components.empty()) {
         auto action = createAction(actbody);
@@ -172,9 +173,26 @@ const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
     return statement;
 }
 
+static cstring createName(const Util::SourceInfo &si) {
+    if (!si.isValid()) return "act";
+    auto pos = si.toPosition();
+    if (pos.fileName.isNullOrEmpty() || pos.sourceLine == 0) return "act";
+    std::string name;
+    const char *p = pos.fileName.findlast('/');
+    p = p ? p + 1 : pos.fileName.c_str();
+    while (*p && !isalpha(*p)) ++p;
+    while (*p && *p != '.') {
+        if (isalnum(*p) || *p == '_')
+            name += *p;
+        ++p; }
+    if (name.empty()) return "act";
+    if (isdigit(name.back())) name += 'l';
+    return name + std::to_string(pos.sourceLine);
+}
+
 const IR::Statement* DoSynthesizeActions::createAction(const IR::Statement* toAdd) {
     changes = true;
-    auto name = refMap->newName("act");
+    auto name = refMap->newName(createName(toAdd->srcInfo));
     const IR::BlockStatement* body;
     if (toAdd->is<IR::BlockStatement>()) {
         body = toAdd->to<IR::BlockStatement>();

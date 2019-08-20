@@ -39,17 +39,17 @@ control EmptyIngress(inout headers_t headers, inout metadata_t meta, inout stand
 }
 
 control EmptyEgress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @hidden action act() {
+    @hidden action issue1079bmv2l47() {
         mark_to_drop(standard_metadata);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue1079bmv2l47 {
         actions = {
-            act();
+            issue1079bmv2l47();
         }
-        const default_action = act();
+        const default_action = issue1079bmv2l47();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue1079bmv2l47.apply();
     }
 }
 

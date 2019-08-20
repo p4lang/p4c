@@ -59,30 +59,30 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         const default_action = NoAction_0();
     }
-    @hidden action act() {
+    @hidden action issue5617bmv2l66() {
         hdr.u[0].short.setInvalid();
     }
-    @hidden action act_0() {
+    @hidden action issue5617bmv2l70() {
         hdr.u[0].byte.setInvalid();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue5617bmv2l66 {
         actions = {
-            act();
+            issue5617bmv2l66();
         }
-        const default_action = act();
+        const default_action = issue5617bmv2l66();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_issue5617bmv2l70 {
         actions = {
-            act_0();
+            issue5617bmv2l70();
         }
-        const default_action = act_0();
+        const default_action = issue5617bmv2l70();
     }
     apply {
         debug_hdr_0.apply();
         if (hdr.u[0].short.isValid()) {
-            tbl_act.apply();
+            tbl_issue5617bmv2l66.apply();
         } else if (hdr.u[0].byte.isValid()) {
-            tbl_act_0.apply();
+            tbl_issue5617bmv2l70.apply();
         }
     }
 }

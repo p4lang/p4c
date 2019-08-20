@@ -43,17 +43,17 @@ extern ExternCounter {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.extr") ExternCounter() extr_0;
-    @hidden action act() {
+    @hidden action issue1882bmv2l33() {
         extr_0.increment();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue1882bmv2l33 {
         actions = {
-            act();
+            issue1882bmv2l33();
         }
-        const default_action = act();
+        const default_action = issue1882bmv2l33();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue1882bmv2l33.apply();
     }
 }
 

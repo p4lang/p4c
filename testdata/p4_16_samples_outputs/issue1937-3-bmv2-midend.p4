@@ -14,18 +14,18 @@ struct metadata_t {
 }
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    @hidden action act() {
+    @hidden action issue19373bmv2l26() {
         hdr.h1.f1 = hdr.h1.f1 >> 2;
         hdr.h1.f2 = 8w1;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue19373bmv2l26 {
         actions = {
-            act();
+            issue19373bmv2l26();
         }
-        const default_action = act();
+        const default_action = issue19373bmv2l26();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue19373bmv2l26.apply();
     }
 }
 

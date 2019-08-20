@@ -27,17 +27,17 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     @name("MyIC.counter0") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS) counter0_0;
     @name("MyIC.counter1") Counter<bit<10>, bit<12>>(32w1024, PSA_CounterType_t.PACKETS) counter1_0;
-    @hidden action act() {
+    @hidden action psacounter3l51() {
         counter0_0.count(12w1024);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_psacounter3l51 {
         actions = {
-            act();
+            psacounter3l51();
         }
-        const default_action = act();
+        const default_action = psacounter3l51();
     }
     apply {
-        tbl_act.apply();
+        tbl_psacounter3l51.apply();
     }
 }
 

@@ -7,18 +7,18 @@ struct metadata_t {
 }
 
 control I(inout metadata_t meta) {
-    @hidden action act() {
+    @hidden action struct_init12() {
         meta._foo__v0 = meta._foo__v0 + 9w1;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_struct_init12 {
         actions = {
-            act();
+            struct_init12();
         }
-        const default_action = act();
+        const default_action = struct_init12();
     }
     apply {
         if (meta._foo__v0 == 9w192) {
-            tbl_act.apply();
+            tbl_struct_init12.apply();
         }
     }
 }

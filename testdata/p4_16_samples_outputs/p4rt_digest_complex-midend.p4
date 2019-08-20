@@ -33,17 +33,17 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 }
 
 control MyIC(inout headers hdr, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @hidden action act() {
+    @hidden action p4rt_digest_complex51() {
         d.egress_port = c.ingress_port;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_p4rt_digest_complex51 {
         actions = {
-            act();
+            p4rt_digest_complex51();
         }
-        const default_action = act();
+        const default_action = p4rt_digest_complex51();
     }
     apply {
-        tbl_act.apply();
+        tbl_p4rt_digest_complex51.apply();
     }
 }
 
@@ -59,17 +59,17 @@ struct digest_t {
 
 control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout headers hdr, in EMPTY e, in psa_ingress_output_metadata_t f) {
     @name("MyID.digest") Digest<digest_t>() digest_0;
-    @hidden action act_0() {
+    @hidden action p4rt_digest_complex78() {
         digest_0.pack({ hdr.h, f.egress_port });
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_p4rt_digest_complex78 {
         actions = {
-            act_0();
+            p4rt_digest_complex78();
         }
-        const default_action = act_0();
+        const default_action = p4rt_digest_complex78();
     }
     apply {
-        tbl_act_0.apply();
+        tbl_p4rt_digest_complex78.apply();
     }
 }
 

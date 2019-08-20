@@ -1,17 +1,17 @@
 control proto(out bit<32> x);
 package top(proto _c);
 control c(out bit<32> x) {
-    @hidden action act() {
+    @hidden action constant_folding59() {
         x = 32w17;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_constant_folding59 {
         actions = {
-            act();
+            constant_folding59();
         }
-        const default_action = act();
+        const default_action = constant_folding59();
     }
     apply {
-        tbl_act.apply();
+        tbl_constant_folding59.apply();
     }
 }
 

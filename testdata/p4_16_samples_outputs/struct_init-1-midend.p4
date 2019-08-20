@@ -12,41 +12,41 @@ struct metadata_t {
 
 control I(inout metadata_t meta) {
     H h_0;
-    @hidden action act() {
+    @hidden action struct_init1l18() {
         h_0.setValid();
     }
-    @hidden action act_0() {
+    @hidden action struct_init1l15() {
         meta._foo__v0 = meta._foo__v0 + 9w1;
         h_0.setValid();
         h_0.b = 32w2;
     }
-    @hidden action act_1() {
+    @hidden action struct_init1l13() {
         h_0.setValid();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_struct_init1l13 {
         actions = {
-            act_1();
+            struct_init1l13();
         }
-        const default_action = act_1();
+        const default_action = struct_init1l13();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_struct_init1l15 {
         actions = {
-            act_0();
+            struct_init1l15();
         }
-        const default_action = act_0();
+        const default_action = struct_init1l15();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_struct_init1l18 {
         actions = {
-            act();
+            struct_init1l18();
         }
-        const default_action = act();
+        const default_action = struct_init1l18();
     }
     apply {
-        tbl_act.apply();
+        tbl_struct_init1l13.apply();
         if (meta._foo__v0 == 9w192) {
-            tbl_act_0.apply();
+            tbl_struct_init1l15.apply();
             if (!h_0.isValid() && false || h_0.isValid() && true && false) {
-                tbl_act_1.apply();
+                tbl_struct_init1l18.apply();
             }
         }
     }

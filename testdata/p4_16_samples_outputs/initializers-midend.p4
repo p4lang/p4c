@@ -15,17 +15,17 @@ parser P() {
 
 control C() {
     @name("C.fake") Fake() fake_1;
-    @hidden action act() {
+    @hidden action initializers38() {
         fake_1.call(32w1);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_initializers38 {
         actions = {
-            act();
+            initializers38();
         }
-        const default_action = act();
+        const default_action = initializers38();
     }
     apply {
-        tbl_act.apply();
+        tbl_initializers38.apply();
     }
 }
 

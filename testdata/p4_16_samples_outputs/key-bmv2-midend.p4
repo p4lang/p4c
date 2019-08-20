@@ -58,28 +58,28 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_0();
     }
-    @hidden action act() {
+    @hidden action keybmv2l28() {
         key_0 = h.h.a + h.h.a;
     }
-    @hidden action act_0() {
+    @hidden action arithinlineskeleton51() {
         sm.egress_spec = 9w0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_keybmv2l28 {
         actions = {
-            act();
+            keybmv2l28();
         }
-        const default_action = act();
+        const default_action = keybmv2l28();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_arithinlineskeleton51 {
         actions = {
-            act_0();
+            arithinlineskeleton51();
         }
-        const default_action = act_0();
+        const default_action = arithinlineskeleton51();
     }
     apply {
-        tbl_act.apply();
+        tbl_keybmv2l28.apply();
         c_t.apply();
-        tbl_act_0.apply();
+        tbl_arithinlineskeleton51.apply();
     }
 }
 

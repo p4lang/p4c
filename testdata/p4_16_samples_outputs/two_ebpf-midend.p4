@@ -63,36 +63,48 @@ control pipe(inout Headers_t headers, out bool pass) {
         implementation = hash_table(32w1024);
         const default_action = NoAction_0();
     }
-    @hidden action act() {
+    @hidden action two_ebpf69() {
         pass = false;
         hasReturned = true;
     }
-    @hidden action act_0() {
+    @hidden action two_ebpf66() {
         hasReturned = false;
         pass = true;
     }
-    @hidden action act_1() {
+    @hidden action act() {
         address_0 = headers.ipv4.srcAddr;
         pass_0 = pass;
     }
-    @hidden action act_2() {
+    @hidden action act_0() {
         pass = pass_0;
         address_0 = headers.ipv4.dstAddr;
     }
-    @hidden action act_3() {
+    @hidden action act_1() {
         pass = pass_0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_two_ebpf66 {
         actions = {
-            act_0();
+            two_ebpf66();
         }
-        const default_action = act_0();
+        const default_action = two_ebpf66();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_two_ebpf69 {
+        actions = {
+            two_ebpf69();
+        }
+        const default_action = two_ebpf69();
+    }
+    @hidden table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
+    }
+    @hidden table tbl_act_0 {
+        actions = {
+            act_0();
+        }
+        const default_action = act_0();
     }
     @hidden table tbl_act_1 {
         actions = {
@@ -100,29 +112,17 @@ control pipe(inout Headers_t headers, out bool pass) {
         }
         const default_action = act_1();
     }
-    @hidden table tbl_act_2 {
-        actions = {
-            act_2();
-        }
-        const default_action = act_2();
-    }
-    @hidden table tbl_act_3 {
-        actions = {
-            act_3();
-        }
-        const default_action = act_3();
-    }
     apply {
-        tbl_act.apply();
+        tbl_two_ebpf66.apply();
         if (!headers.ipv4.isValid()) {
-            tbl_act_0.apply();
+            tbl_two_ebpf69.apply();
         }
         if (!hasReturned) {
+            tbl_act.apply();
+            c1_Check_ip.apply();
+            tbl_act_0.apply();
+            c1_Check_ip.apply();
             tbl_act_1.apply();
-            c1_Check_ip.apply();
-            tbl_act_2.apply();
-            c1_Check_ip.apply();
-            tbl_act_3.apply();
         }
     }
 }

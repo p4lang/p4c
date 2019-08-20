@@ -20,17 +20,17 @@ struct tuple_0 {
 extern bit<16> get<T>(in T data);
 control cc() {
     ipv4_option_timestamp_t hdr_0_ipv4_option_timestamp;
-    @hidden action act() {
+    @hidden action annotationbug24() {
         get<headers>({ hdr_0_ipv4_option_timestamp });
     }
-    @hidden table tbl_act {
+    @hidden table tbl_annotationbug24 {
         actions = {
-            act();
+            annotationbug24();
         }
-        const default_action = act();
+        const default_action = annotationbug24();
     }
     apply {
-        tbl_act.apply();
+        tbl_annotationbug24.apply();
     }
 }
 

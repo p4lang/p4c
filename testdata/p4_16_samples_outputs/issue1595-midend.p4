@@ -58,57 +58,57 @@ control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_
         }
         default_action = NoAction_0();
     }
-    @hidden action act() {
+    @hidden action issue1595l76() {
         hdr.ethernet.srcAddr[39:32] = 8w2;
     }
-    @hidden action act_0() {
+    @hidden action issue1595l77() {
         hdr.ethernet.srcAddr[39:32] = 8w3;
     }
-    @hidden action act_1() {
+    @hidden action issue1595l78() {
         hdr.ethernet.srcAddr[39:32] = 8w4;
     }
-    @hidden action act_2() {
+    @hidden action issue1595l79() {
         hdr.ethernet.srcAddr[39:32] = 8w5;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue1595l76 {
         actions = {
-            act();
+            issue1595l76();
         }
-        const default_action = act();
+        const default_action = issue1595l76();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_issue1595l77 {
         actions = {
-            act_0();
+            issue1595l77();
         }
-        const default_action = act_0();
+        const default_action = issue1595l77();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_issue1595l78 {
         actions = {
-            act_1();
+            issue1595l78();
         }
-        const default_action = act_1();
+        const default_action = issue1595l78();
     }
-    @hidden table tbl_act_2 {
+    @hidden table tbl_issue1595l79 {
         actions = {
-            act_2();
+            issue1595l79();
         }
-        const default_action = act_2();
+        const default_action = issue1595l79();
     }
     apply {
         switch (t1_0.apply().action_run) {
             a1: {
             }
             a2: {
-                tbl_act.apply();
+                tbl_issue1595l76.apply();
             }
             a3: {
-                tbl_act_0.apply();
+                tbl_issue1595l77.apply();
             }
             a4: {
-                tbl_act_1.apply();
+                tbl_issue1595l78.apply();
             }
             NoAction_0: {
-                tbl_act_2.apply();
+                tbl_issue1595l79.apply();
             }
         }
 

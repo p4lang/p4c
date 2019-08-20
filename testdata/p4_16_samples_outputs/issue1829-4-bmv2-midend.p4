@@ -40,17 +40,17 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         const default_action = do_meter();
     }
-    @hidden action act() {
+    @hidden action issue18294bmv2l74() {
         stdmeta.egress_spec = 9w1;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue18294bmv2l74 {
         actions = {
-            act();
+            issue18294bmv2l74();
         }
-        const default_action = act();
+        const default_action = issue18294bmv2l74();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue18294bmv2l74.apply();
         mac_da_0.apply();
     }
 }

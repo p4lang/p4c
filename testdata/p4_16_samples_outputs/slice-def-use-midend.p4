@@ -41,20 +41,20 @@ parser P(packet_in b, out Headers p, inout Metadata meta, inout standard_metadat
 control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_t standard_meta) {
     bit<8> n_0;
     @name("Ing.debug") register<bit<8>>(32w2) debug_0;
-    @hidden action act() {
+    @hidden action slicedefuse79() {
         n_0 = 8w0b11111111;
         n_0[7:4] = 4w0;
         debug_0.write(32w1, n_0);
         standard_meta.egress_spec = 9w0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_slicedefuse79 {
         actions = {
-            act();
+            slicedefuse79();
         }
-        const default_action = act();
+        const default_action = slicedefuse79();
     }
     apply {
-        tbl_act.apply();
+        tbl_slicedefuse79.apply();
     }
 }
 

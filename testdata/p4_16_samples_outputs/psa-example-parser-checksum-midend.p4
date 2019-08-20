@@ -138,17 +138,17 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
 
         psa_direct_counter = parser_error_counts_0;
     }
-    @hidden action act() {
+    @hidden action psaexampleparserchecksum184() {
         hasExited = true;
     }
-    @hidden action act_0() {
+    @hidden action act() {
         hasExited = false;
     }
     @hidden table tbl_act {
         actions = {
-            act_0();
+            act();
         }
-        const default_action = act_0();
+        const default_action = act();
     }
     @hidden table tbl_ingress_drop {
         actions = {
@@ -156,18 +156,18 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         }
         const default_action = ingress_drop();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_psaexampleparserchecksum184 {
         actions = {
-            act();
+            psaexampleparserchecksum184();
         }
-        const default_action = act();
+        const default_action = psaexampleparserchecksum184();
     }
     apply {
         tbl_act.apply();
         if (istd.parser_error != error.NoError) {
             parser_error_count_and_convert_0.apply();
             tbl_ingress_drop.apply();
-            tbl_act_0.apply();
+            tbl_psaexampleparserchecksum184.apply();
         }
     }
 }
@@ -184,26 +184,26 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
 }
 
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action act_1() {
+    @hidden action psaexampleparserchecksum221() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
         packet.emit<tcp_t>(hdr.tcp);
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_psaexampleparserchecksum221 {
         actions = {
-            act_1();
+            psaexampleparserchecksum221();
         }
-        const default_action = act_1();
+        const default_action = psaexampleparserchecksum221();
     }
     apply {
-        tbl_act_1.apply();
+        tbl_psaexampleparserchecksum221.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
     bit<16> tmp_2;
     @name("EgressDeparserImpl.ck") InternetChecksum() ck_1;
-    @hidden action act_2() {
+    @hidden action psaexampleparserchecksum238() {
         ck_1.clear();
         ck_1.add<tuple_0>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
         tmp_2 = ck_1.get();
@@ -212,14 +212,14 @@ control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_met
         packet.emit<ipv4_t>(hdr.ipv4);
         packet.emit<tcp_t>(hdr.tcp);
     }
-    @hidden table tbl_act_2 {
+    @hidden table tbl_psaexampleparserchecksum238 {
         actions = {
-            act_2();
+            psaexampleparserchecksum238();
         }
-        const default_action = act_2();
+        const default_action = psaexampleparserchecksum238();
     }
     apply {
-        tbl_act_2.apply();
+        tbl_psaexampleparserchecksum238.apply();
     }
 }
 

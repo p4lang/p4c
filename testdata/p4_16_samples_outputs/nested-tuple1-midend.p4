@@ -17,20 +17,20 @@ extern void f<D>(in D data);
 control c(inout bit<1> r) {
     T s_f1_field;
     T s_f1_field_0;
-    @hidden action act() {
+    @hidden action nestedtuple1l32() {
         s_f1_field.f = 1w0;
         s_f1_field_0.f = 1w1;
         f<tuple_0>({ s_f1_field, s_f1_field_0 });
         r = 1w0;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_nestedtuple1l32 {
         actions = {
-            act();
+            nestedtuple1l32();
         }
-        const default_action = act();
+        const default_action = nestedtuple1l32();
     }
     apply {
-        tbl_act.apply();
+        tbl_nestedtuple1l32.apply();
     }
 }
 

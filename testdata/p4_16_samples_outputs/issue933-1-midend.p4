@@ -6,17 +6,17 @@ struct headers {
 
 extern void f(headers h);
 control c() {
-    @hidden action act() {
+    @hidden action issue9331l13() {
         f(headers {x = 32w5});
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue9331l13 {
         actions = {
-            act();
+            issue9331l13();
         }
-        const default_action = act();
+        const default_action = issue9331l13();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue9331l13.apply();
     }
 }
 

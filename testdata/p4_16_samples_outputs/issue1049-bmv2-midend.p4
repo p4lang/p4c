@@ -84,32 +84,32 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         }
         default_action = NoAction_0();
     }
-    @hidden action act() {
+    @hidden action issue1049bmv2l109() {
         hdr.ethernet.dstAddr = meta._mystruct1_hash10 ++ 7w0 ++ (bit<1>)meta._mystruct1_hash_drop1 ++ 8w0 ++ 16w0xdead;
     }
-    @hidden action act_0() {
+    @hidden action issue1049bmv2l111() {
         hdr.ethernet.dstAddr = meta._mystruct1_hash10 ++ 7w0 ++ (bit<1>)meta._mystruct1_hash_drop1 ++ 8w0 ++ 16w0xc001;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue1049bmv2l109 {
         actions = {
-            act();
+            issue1049bmv2l109();
         }
-        const default_action = act();
+        const default_action = issue1049bmv2l109();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_issue1049bmv2l111 {
         actions = {
-            act_0();
+            issue1049bmv2l111();
         }
-        const default_action = act_0();
+        const default_action = issue1049bmv2l111();
     }
     apply {
         if (hdr.ipv4.isValid()) {
             guh_0.apply();
             debug_table_0.apply();
             if (meta._mystruct1_hash_drop1) {
-                tbl_act.apply();
+                tbl_issue1049bmv2l109.apply();
             } else {
-                tbl_act_0.apply();
+                tbl_issue1049bmv2l111.apply();
             }
         }
     }

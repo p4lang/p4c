@@ -12,7 +12,7 @@ extern Overloaded {
 
 control c() {
     @name("c.o") Overloaded() o_0;
-    @hidden action act() {
+    @hidden action issue1334l31() {
         f();
         f(a = 32w2);
         f(b = 16w1);
@@ -24,14 +24,14 @@ control c() {
         o_0.f(a = 32w1, b = 16w2);
         o_0.f(b = 16w2, a = 32w1);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue1334l31 {
         actions = {
-            act();
+            issue1334l31();
         }
-        const default_action = act();
+        const default_action = issue1334l31();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue1334l31.apply();
     }
 }
 

@@ -32,41 +32,53 @@ control c(out bool x) {
     @hidden action act_0() {
         tmp = false;
     }
-    @hidden action act_1() {
+    @hidden action simplify31() {
         x = true;
     }
-    @hidden action act_2() {
+    @hidden action simplify32() {
         tmp_0 = false;
     }
-    @hidden action act_3() {
+    @hidden action act_1() {
         tmp_1 = true;
     }
-    @hidden action act_4() {
+    @hidden action act_2() {
         tmp_1 = false;
     }
-    @hidden action act_5() {
+    @hidden action simplify32_0() {
         tmp_0 = tmp_1;
     }
-    @hidden action act_6() {
+    @hidden action simplify33() {
         x = false;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_simplify31 {
         actions = {
-            act_1();
+            simplify31();
         }
-        const default_action = act_1();
+        const default_action = simplify31();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_act {
         actions = {
             act();
         }
         const default_action = act();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_act_0 {
         actions = {
             act_0();
         }
         const default_action = act_0();
+    }
+    @hidden table tbl_simplify32 {
+        actions = {
+            simplify32();
+        }
+        const default_action = simplify32();
+    }
+    @hidden table tbl_act_1 {
+        actions = {
+            act_1();
+        }
+        const default_action = act_1();
     }
     @hidden table tbl_act_2 {
         actions = {
@@ -74,49 +86,37 @@ control c(out bool x) {
         }
         const default_action = act_2();
     }
-    @hidden table tbl_act_3 {
+    @hidden table tbl_simplify32_0 {
         actions = {
-            act_3();
+            simplify32_0();
         }
-        const default_action = act_3();
+        const default_action = simplify32_0();
     }
-    @hidden table tbl_act_4 {
+    @hidden table tbl_simplify33 {
         actions = {
-            act_4();
+            simplify33();
         }
-        const default_action = act_4();
-    }
-    @hidden table tbl_act_5 {
-        actions = {
-            act_5();
-        }
-        const default_action = act_5();
-    }
-    @hidden table tbl_act_6 {
-        actions = {
-            act_6();
-        }
-        const default_action = act_6();
+        const default_action = simplify33();
     }
     apply {
-        tbl_act.apply();
+        tbl_simplify31.apply();
         if (t1_0.apply().hit) {
-            tbl_act_0.apply();
+            tbl_act.apply();
         } else {
-            tbl_act_1.apply();
+            tbl_act_0.apply();
         }
         if (!tmp) {
-            tbl_act_2.apply();
+            tbl_simplify32.apply();
         } else {
             if (t2_0.apply().hit) {
-                tbl_act_3.apply();
+                tbl_act_1.apply();
             } else {
-                tbl_act_4.apply();
+                tbl_act_2.apply();
             }
-            tbl_act_5.apply();
+            tbl_simplify32_0.apply();
         }
         if (tmp_0) {
-            tbl_act_6.apply();
+            tbl_simplify33.apply();
         }
     }
 }

@@ -193,63 +193,63 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         }
         default_action = NoAction_3();
     }
-    @hidden action act() {
+    @hidden action psaportidusingnewtype2l132() {
         standard_metadata.egress_spec = (PortIdUInt_t)(bit<32>)hdr.packet_out.egress_port;
         hdr.packet_out.setInvalid();
         hasExited = true;
     }
-    @hidden action act_0() {
+    @hidden action act() {
         hasExited = false;
     }
-    @hidden action act_1() {
+    @hidden action psaportidusingnewtype2l213() {
         standard_metadata.egress_spec = (PortIdUInt_t)standard_metadata.egress_spec + 9w1;
         standard_metadata.egress_spec = (PortIdUInt_t)standard_metadata.egress_spec & 9w0xf;
     }
     @hidden table tbl_act {
         actions = {
-            act_0();
-        }
-        const default_action = act_0();
-    }
-    @hidden table tbl_act_0 {
-        actions = {
             act();
         }
         const default_action = act();
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_psaportidusingnewtype2l132 {
         actions = {
-            act_1();
+            psaportidusingnewtype2l132();
         }
-        const default_action = act_1();
+        const default_action = psaportidusingnewtype2l132();
+    }
+    @hidden table tbl_psaportidusingnewtype2l213 {
+        actions = {
+            psaportidusingnewtype2l213();
+        }
+        const default_action = psaportidusingnewtype2l213();
     }
     apply {
         tbl_act.apply();
         if (hdr.packet_out.isValid()) {
-            tbl_act_0.apply();
+            tbl_psaportidusingnewtype2l132.apply();
         }
         if (!hasExited) {
             filtering_t.apply();
             forwarding_t.apply();
-            tbl_act_1.apply();
+            tbl_psaportidusingnewtype2l213.apply();
         }
     }
 }
 
 control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata, inout standard_metadata_t standard_metadata) {
-    @hidden action act_2() {
+    @hidden action psaportidusingnewtype2l147() {
         hdr.packet_in.setValid();
         hdr.packet_in.ingress_port = (bit<32>)(PortIdUInt_t)standard_metadata.ingress_port;
     }
-    @hidden table tbl_act_2 {
+    @hidden table tbl_psaportidusingnewtype2l147 {
         actions = {
-            act_2();
+            psaportidusingnewtype2l147();
         }
-        const default_action = act_2();
+        const default_action = psaportidusingnewtype2l147();
     }
     apply {
         if (standard_metadata.egress_port == 9w192) {
-            tbl_act_2.apply();
+            tbl_psaportidusingnewtype2l147.apply();
         }
     }
 }

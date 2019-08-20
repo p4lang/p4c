@@ -27,18 +27,18 @@ control MyVerifyChecksum(inout my_headers_t hdr, inout my_metadata_t meta) {
 }
 
 control MyIngress(inout my_headers_t hdr, inout my_metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @hidden action act() {
+    @hidden action issue510bmv2l59() {
         hdr.s.setInvalid();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue510bmv2l59 {
         actions = {
-            act();
+            issue510bmv2l59();
         }
-        const default_action = act();
+        const default_action = issue510bmv2l59();
     }
     apply {
         if (meta.parser_error == error.NoMatch) {
-            tbl_act.apply();
+            tbl_issue510bmv2l59.apply();
         }
     }
 }

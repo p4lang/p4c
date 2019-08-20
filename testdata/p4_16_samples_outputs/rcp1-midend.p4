@@ -31,20 +31,20 @@ control ingress(inout H pkt_hdr, in Metadata metadata) {
     @name("ingress.input_traffic_bytes") Counter<bit<32>>(CounterType.packets_and_bytes) input_traffic_bytes_0;
     @name("ingress.sum_rtt_Tr") ConditionalAccumulator<bit<32>>(32w1) sum_rtt_Tr_0;
     @name("ingress.num_pkts_with_rtt") ConditionalAccumulator<bit<32>>(32w1) num_pkts_with_rtt_0;
-    @hidden action act() {
+    @hidden action rcp1l61() {
         input_traffic_bytes_0.count();
         sum_rtt_Tr_0.write(pkt_hdr.rtt, pkt_hdr.rtt < 32w2500);
         num_pkts_with_rtt_0.write(32w1, pkt_hdr.rtt < 32w2500);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_rcp1l61 {
         actions = {
-            act();
+            rcp1l61();
         }
-        const default_action = act();
+        const default_action = rcp1l61();
     }
     apply {
         @atomic {
-            tbl_act.apply();
+            tbl_rcp1l61.apply();
         }
     }
 }

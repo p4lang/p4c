@@ -74,20 +74,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = my_drop();
     }
-    @hidden action act() {
+    @hidden action issue1538l90() {
         hdr.ethernet.srcAddr[15:0] = hdr.ethernet.srcAddr[15:0] + (hdr.ethernet.srcAddr[15:0] + 16w1);
         hdr.ethernet.srcAddr[15:0] = hdr.ethernet.srcAddr[15:0] + 16w1;
         hdr.ethernet.etherType = hdr.ethernet.etherType + 16w1;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue1538l90 {
         actions = {
-            act();
+            issue1538l90();
         }
-        const default_action = act();
+        const default_action = issue1538l90();
     }
     apply {
         mac_da_0.apply();
-        tbl_act.apply();
+        tbl_issue1538l90.apply();
     }
 }
 

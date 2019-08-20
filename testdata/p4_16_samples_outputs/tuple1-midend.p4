@@ -8,19 +8,19 @@ struct tuple_0 {
 
 control c() {
     tuple_0 x_0;
-    @hidden action act() {
+    @hidden action tuple1l23() {
         x_0.field = 32w10;
         x_0.field_0 = false;
         f<tuple_0>(x_0);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_tuple1l23 {
         actions = {
-            act();
+            tuple1l23();
         }
-        const default_action = act();
+        const default_action = tuple1l23();
     }
     apply {
-        tbl_act.apply();
+        tbl_tuple1l23.apply();
     }
 }
 

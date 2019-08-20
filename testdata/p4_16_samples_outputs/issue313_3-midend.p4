@@ -19,7 +19,7 @@ control ctrl(inout struct_t input, out bit<8> out1, out header_h out2) {
         input.hdr.setInvalid();
         tmp3_0 = tmp2_0;
     }
-    @hidden action act_0() {
+    @hidden action issue313_3l41() {
         out1 = tmp1_0;
         out2 = tmp3_0;
     }
@@ -29,15 +29,15 @@ control ctrl(inout struct_t input, out bit<8> out1, out header_h out2) {
         }
         const default_action = act();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_issue313_3l41 {
         actions = {
-            act_0();
+            issue313_3l41();
         }
-        const default_action = act_0();
+        const default_action = issue313_3l41();
     }
     apply {
         tbl_act.apply();
-        tbl_act_0.apply();
+        tbl_issue313_3l41.apply();
     }
 }
 

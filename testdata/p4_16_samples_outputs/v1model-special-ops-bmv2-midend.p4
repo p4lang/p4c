@@ -176,31 +176,31 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         }
         default_action = my_drop_0();
     }
-    @hidden action act() {
+    @hidden action v1modelspecialopsbmv2l312() {
         hdr.ipv4.srcAddr = 32w184320258;
         meta._fwd_l2ptr0 = 32w0xe50b;
     }
-    @hidden action act_0() {
+    @hidden action v1modelspecialopsbmv2l315() {
         hdr.ipv4.srcAddr = 32w180835939;
         meta._fwd_l2ptr0 = 32w0xec1c;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_v1modelspecialopsbmv2l312 {
         actions = {
-            act();
+            v1modelspecialopsbmv2l312();
         }
-        const default_action = act();
+        const default_action = v1modelspecialopsbmv2l312();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_v1modelspecialopsbmv2l315 {
         actions = {
-            act_0();
+            v1modelspecialopsbmv2l315();
         }
-        const default_action = act_0();
+        const default_action = v1modelspecialopsbmv2l315();
     }
     apply {
         if (standard_metadata.instance_type == 32w6) {
-            tbl_act.apply();
+            tbl_v1modelspecialopsbmv2l312.apply();
         } else if (standard_metadata.instance_type == 32w4) {
-            tbl_act_0.apply();
+            tbl_v1modelspecialopsbmv2l315.apply();
         } else {
             ipv4_da_lpm_0.apply();
         }
@@ -286,33 +286,33 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
         }
         default_action = my_drop_1();
     }
-    @hidden action act_1() {
+    @hidden action v1modelspecialopsbmv2l385() {
         hdr.switch_to_cpu.setValid();
         hdr.switch_to_cpu.word0 = 32w0x12e012e;
         hdr.switch_to_cpu.word1 = 32w0x5a5a5a5a;
     }
-    @hidden action act_2() {
+    @hidden action v1modelspecialopsbmv2l391() {
         hdr.switch_to_cpu.setValid();
         hdr.switch_to_cpu.word0 = 32w0xe2e0e2e;
         hdr.switch_to_cpu.word1 = 32w0x5a5a5a5a;
     }
-    @hidden table tbl_act_1 {
+    @hidden table tbl_v1modelspecialopsbmv2l385 {
         actions = {
-            act_1();
+            v1modelspecialopsbmv2l385();
         }
-        const default_action = act_1();
+        const default_action = v1modelspecialopsbmv2l385();
     }
-    @hidden table tbl_act_2 {
+    @hidden table tbl_v1modelspecialopsbmv2l391 {
         actions = {
-            act_2();
+            v1modelspecialopsbmv2l391();
         }
-        const default_action = act_2();
+        const default_action = v1modelspecialopsbmv2l391();
     }
     apply {
         if (standard_metadata.instance_type == 32w1) {
-            tbl_act_1.apply();
+            tbl_v1modelspecialopsbmv2l385.apply();
         } else if (standard_metadata.instance_type == 32w2) {
-            tbl_act_2.apply();
+            tbl_v1modelspecialopsbmv2l391.apply();
         } else {
             if (standard_metadata.instance_type == 32w5) {
                 get_multicast_copy_out_bd_0.apply();

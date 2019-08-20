@@ -5,17 +5,17 @@ control p();
 package top(p _p);
 control c() {
     bit<16> var_0;
-    @hidden action act() {
+    @hidden action issue5841l28() {
         hash<bit<16>, bit<16>, bit<32>, bit<16>>(var_0, HashAlgorithm.crc16, 16w0, 32w0, 16w0xffff);
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue5841l28 {
         actions = {
-            act();
+            issue5841l28();
         }
-        const default_action = act();
+        const default_action = issue5841l28();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue5841l28.apply();
     }
 }
 
