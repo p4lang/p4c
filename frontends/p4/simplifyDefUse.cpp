@@ -131,12 +131,17 @@ class FindUninitialized : public Inspector {
     void checkOutParameters(const IR::IDeclaration* block,
                             const IR::ParameterList* parameters,
                             Definitions* defs, bool checkReturn = false) {
+        LOG1("   Called checkOutParameter ");
         for (auto p : parameters->parameters) {
+            LOG1("     Working with parameter " << p);
             if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
+                LOG1("      Correct direction");
                 auto storage = definitions->storageMap->getStorage(p);
                 if (storage == nullptr)
                     continue;
+                LOG1("      Storage not empty");
 
+                LOG1("   Adding for parameter " << p);
                 const LocationSet* loc = new LocationSet(storage);
                 auto points = defs->getPoints(loc);
                 hasUses->add(points);
@@ -170,6 +175,7 @@ class FindUninitialized : public Inspector {
                 // visit virtual Function implementation if any
                 visit(d);
         visit(control->body);
+        LOG1("   After visiting body");
         checkOutParameters(
             control, control->getApplyMethodType()->parameters, getCurrentDefinitions());
         return false;
@@ -216,7 +222,7 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::MethodCallStatement* statement) override {
-        LOG3("FU Visiting " << statement);
+        LOG3("FU Visiting mcs " << statement);
         visit(statement->methodCall);
         return setCurrent(statement);
     }
@@ -297,11 +303,14 @@ class FindUninitialized : public Inspector {
 
     // Keeps track of which expression producers have uses in the given expression
     void registerUses(const IR::Expression* expression, bool reportUninitialized = true) {
+        LOG1("   Called register uses " << expression);
         if (!isFinalRead(getContext(), expression))
             return;
+        LOG1("     Is final read");
         const LocationSet* read = getReads(expression);
         if (read == nullptr || read->isEmpty())
             return;
+        LOG1("     Is read non-empty");
         auto currentDefinitions = getCurrentDefinitions();
         auto points = currentDefinitions->getPoints(read);
         if (reportUninitialized && !lhs && points->containsBeforeStart()) {
@@ -316,6 +325,7 @@ class FindUninitialized : public Inspector {
                 message = "%1% may not be completely initialized";
             DIAGNOSE_WARN("uninitialized_use", message, expression);
         }
+        LOG1("     Adding the expression " << expression);
         hasUses->add(points);
     }
 
@@ -365,7 +375,7 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::MethodCallExpression* expression) override {
-        LOG3("FU Visiting [" << expression->id << "]: " << expression);
+        LOG3("FU Visiting mce [" << expression->id << "]: " << expression);
         visit(expression->method);
         auto mi = MethodInstance::resolve(expression, refMap, typeMap);
         if (auto bim = mi->to<BuiltInMethod>()) {
@@ -575,7 +585,7 @@ class ProcessDefUse : public PassManager {
 
 const IR::Node* DoSimplifyDefUse::process(const IR::Node* node) {
     ProcessDefUse process(refMap, typeMap);
-    LOG5("ProcessDefUse of:\n" << node);
+    LOG1("ProcessDefUse of:\n" << node);
     return node->apply(process);
 }
 

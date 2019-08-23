@@ -413,7 +413,7 @@ void ComputeWriteSet::enterScope(const IR::ParameterList* parameters,
     }
     allDefinitions->setDefinitionsAt(entryPoint, defs);
     currentDefinitions = defs;
-    LOG3("Definitions at " << entryPoint << ":" << currentDefinitions);
+    LOG3("\tDefinitions at " << entryPoint << ":" << currentDefinitions);
 }
 
 void ComputeWriteSet::exitScope(const IR::ParameterList* parameters,
@@ -462,7 +462,7 @@ bool ComputeWriteSet::setDefinitions(Definitions* defs, const IR::Node* node) {
     currentDefinitions = defs;
     auto point = getProgramPoint(node);
     allDefinitions->setDefinitionsAt(point, currentDefinitions);
-    LOG3("Definitions at " << point << " are " << std::endl << defs);
+    LOG3("\tDefinitions at " << point << " are " << std::endl << defs);
     return false;  // always returns false
 }
 
@@ -624,7 +624,7 @@ bool ComputeWriteSet::preorder(const IR::Operation_Unary* expression) {
 }
 
 bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
-    LOG3("CWS Visiting " << dbp(expression));
+    LOG2("\tCWS Visiting " << dbp(expression));
     bool save = lhs;
     lhs = true;
     // The method call may modify the object, which is part of the method
@@ -670,14 +670,14 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
         // symbolically call all the methods that might be called via this extern method
         callee = em->mayCall(); }
     if (!callee.empty()) {
-        LOG3("Analyzing " << DBPrint::Brief << callee << DBPrint::Reset);
+        LOG3("\tAnalyzing " << DBPrint::Brief << callee << DBPrint::Reset);
         ProgramPoint pt(callingContext, expression);
         ComputeWriteSet cw(this, pt, currentDefinitions);
         for (auto c : callee)
             (void)c->getNode()->apply(cw);
         currentDefinitions = cw.currentDefinitions;
         exitDefinitions = exitDefinitions->joinDefinitions(cw.exitDefinitions);
-        LOG3("Definitions after call of " << DBPrint::Brief << expression << ": " <<
+        LOG3("\tDefinitions after call of " << DBPrint::Brief << expression << ": " <<
              currentDefinitions << DBPrint::Reset);
     }
 
@@ -704,7 +704,7 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
 
 // Symbolic execution of the parser
 bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
-    LOG3("CWS Visiting " << dbp(parser));
+    LOG2("\tCWS Visiting " << dbp(parser));
     auto startState = parser->getDeclByName(IR::ParserState::start)->to<IR::ParserState>();
     auto startPoint = ProgramPoint(startState);
     enterScope(parser->getApplyParameters(), &parser->parserLocals, startPoint);
@@ -723,7 +723,7 @@ bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
     while (!toRun.empty()) {
         auto state = *toRun.begin();
         toRun.erase(state);
-        LOG3("Traversing " << dbp(state));
+        LOG3("\tTraversing " << dbp(state));
 
         // We need a new visitor to visit the state,
         // but we use the same data structures
@@ -750,7 +750,7 @@ bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
 }
 
 bool ComputeWriteSet::preorder(const IR::P4Control* control) {
-    LOG3("CWS Visiting " << dbp(control));
+    LOG2("\tCWS Visiting " << dbp(control));
     auto startPoint = ProgramPoint(control);
     enterScope(control->getApplyParameters(), &control->controlLocals, startPoint);
     exitDefinitions = new Definitions();
@@ -789,13 +789,13 @@ bool ComputeWriteSet::preorder(const IR::ReturnStatement* statement) {
     if (statement->expression != nullptr)
         visit(statement->expression);
     returnedDefinitions = returnedDefinitions->joinDefinitions(currentDefinitions);
-    LOG3("Return definitions " << returnedDefinitions);
+    LOG3("\tReturn definitions " << returnedDefinitions);
     return setDefinitions(new Definitions());
 }
 
 bool ComputeWriteSet::preorder(const IR::ExitStatement*) {
     exitDefinitions = exitDefinitions->joinDefinitions(currentDefinitions);
-    LOG3("Exit definitions " << exitDefinitions);
+    LOG3("\tExit definitions " << exitDefinitions);
     return setDefinitions(new Definitions());
 }
 
@@ -804,7 +804,7 @@ bool ComputeWriteSet::preorder(const IR::EmptyStatement*) {
 }
 
 bool ComputeWriteSet::preorder(const IR::AssignmentStatement* statement) {
-    LOG3("CWS Visiting " << dbp(statement) << " " << statement);
+    LOG2("\tCWS Visiting " << dbp(statement) << " " << statement);
     lhs = true;
     visit(statement->left);
     lhs = false;
@@ -818,7 +818,7 @@ bool ComputeWriteSet::preorder(const IR::AssignmentStatement* statement) {
 }
 
 bool ComputeWriteSet::preorder(const IR::SwitchStatement* statement) {
-    LOG3("CWS Visiting " << dbp(statement));
+    LOG2("\tCWS Visiting " << dbp(statement));
     visit(statement->expression);
     auto locs = getWrites(statement->expression);
     auto defs = currentDefinitions->writes(getProgramPoint(statement->expression), locs);
@@ -845,7 +845,7 @@ bool ComputeWriteSet::preorder(const IR::SwitchStatement* statement) {
 }
 
 bool ComputeWriteSet::preorder(const IR::P4Action* action) {
-    LOG3("CWS Visiting " << dbp(action));
+    LOG2("\tCWS Visiting " << dbp(action));
     auto saveReturned = returnedDefinitions;
     returnedDefinitions = new Definitions();
 
@@ -883,7 +883,7 @@ class GetDeclarations : public Inspector {
 }  // namespace
 
 bool ComputeWriteSet::preorder(const IR::Function* function) {
-    LOG3("CWS Visiting " << dbp(function));
+    LOG2("\tCWS Visiting " << dbp(function));
     auto point = ProgramPoint(function);
     auto locals = GetDeclarations::get(function->body);
     auto saveReturned = returnedDefinitions;
@@ -901,12 +901,12 @@ bool ComputeWriteSet::preorder(const IR::Function* function) {
     exitScope(function->type->parameters, locals);
 
     returnedDefinitions = saveReturned;
-    LOG3("Done " << dbp(function));
+    LOG2("\tDone " << dbp(function));
     return false;
 }
 
 bool ComputeWriteSet::preorder(const IR::P4Table* table) {
-    LOG3("CWS Visiting " << dbp(table));
+    LOG2("\tCWS Visiting " << dbp(table));
     ProgramPoint pt(callingContext, table);
     enterScope(nullptr, nullptr, pt, false);
 

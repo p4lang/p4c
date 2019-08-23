@@ -355,7 +355,7 @@ class Definitions : public IHasDbPrint {
         for (auto d : definitions) {
             if (!first)
                 out << std::endl;
-            out << "  " << *d.first << "=>" << *d.second;
+            out << "\t  " << *d.first << "=>" << *d.second;
             first = false;
         }
     }
@@ -390,7 +390,7 @@ class AllDefinitions : public IHasDbPrint {
     { atPoint[point] = defs; }
     void dbprint(std::ostream& out) const {
         for (auto e : atPoint)
-            out << e.first << " => " << e.second << std::endl;
+            out << "\t    " << e.first << " => " << e.second << std::endl;
     }
 };
 
