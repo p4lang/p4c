@@ -837,19 +837,23 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         } else {
             newname = actions.get(action);
         }
-        auto ale = new IR::ActionListElement(a.srcInfo, new IR::PathExpression(newname));
-        actionList->push_back(ale);
         if (table->default_action.name == action->name.name) {
             default_action = newname;
+            // constant default action may or may not be present in the list of
+            // actions. So we skip it here to add it once later
+            if (table->default_action_is_const) continue;
         }
+        auto ale = new IR::ActionListElement(a.srcInfo, new IR::PathExpression(newname));
+        actionList->push_back(ale);
     }
+    // Add constant default action if present
     if (!table->default_action.name.isNullOrEmpty() &&
-        !actionList->getDeclaration(default_action)) {
+        table->default_action_is_const) {
         actionList->push_back(
             new IR::ActionListElement(
-                new IR::Annotations(
-                    {new IR::Annotation(IR::Annotation::defaultOnlyAnnotation, {})}),
-                new IR::PathExpression(default_action))); }
+                new IR::Annotations({new IR::Annotation(IR::ID(IR::Annotation::defaultOnlyAnnotation), { })}),
+                new IR::PathExpression(default_action)));
+    }
     props->push_back(new IR::Property(IR::ID(IR::TableProperties::actionsPropertyName),
                                       actionList, false));
 
