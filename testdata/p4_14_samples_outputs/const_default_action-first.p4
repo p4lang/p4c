@@ -65,10 +65,14 @@ control process_port_vlan_mapping(inout headers hdr, inout metadata meta, inout 
     @name(".port_vlan_mapping_miss") action port_vlan_mapping_miss() {
         meta.ingress_metadata.drop_flag = 1w1;
     }
+    @name(".send") action send(bit<9> port) {
+        meta.ingress_metadata.ingress_port = port;
+    }
     @name(".port_vlan_to_bd_mapping") table port_vlan_to_bd_mapping {
         actions = {
             set_bd_properties();
             port_vlan_mapping_miss();
+            send();
             @defaultonly no_op();
         }
         key = {
@@ -83,13 +87,13 @@ control process_port_vlan_mapping(inout headers hdr, inout metadata meta, inout 
         actions = {
             set_bd_properties();
             port_vlan_mapping_miss();
-            @defaultonly no_op();
+            @defaultonly send();
         }
         key = {
             hdr.vlan_tag_[0].vid: exact @name("vlan_tag_[0].vid") ;
         }
         size = 1024;
-        const default_action = no_op();
+        const default_action = send(9w64);
         implementation = bd_action_profile;
     }
     apply {

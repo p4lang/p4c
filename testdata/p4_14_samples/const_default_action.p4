@@ -53,10 +53,15 @@ action port_vlan_mapping_miss() {
     modify_field(ingress_metadata.drop_flag, 1);
 }
 
+action send(port) {
+    modify_field(ingress_metadata.ingress_port, port);
+}
+
 action_profile bd_action_profile {
     actions {
         set_bd_properties;
         port_vlan_mapping_miss;
+        send;
     }
     size : 1024;
 }
@@ -78,7 +83,7 @@ table vlan_to_bd_mapping {
         vlan_tag_[0].vid : exact;
     }
     action_profile: bd_action_profile;
-    const default_action: no_op();
+    const default_action: send(64);
     size : 1024;
 }
 

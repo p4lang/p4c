@@ -66,8 +66,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     bool _process_port_vlan_mapping_tmp;
     @name(".no_op") action _no_op_0() {
     }
-    @name(".no_op") action _no_op_2() {
-    }
     @name(".set_bd_properties") action _set_bd_properties_0(bit<14> bd, bit<14> ingress_rid) {
         meta._ingress_metadata_bd1 = bd;
         meta._ingress_metadata_rid2 = ingress_rid;
@@ -82,10 +80,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".port_vlan_mapping_miss") action _port_vlan_mapping_miss_2() {
         meta._ingress_metadata_drop_flag3 = 1w1;
     }
+    @name(".send") action _send_0(bit<9> port) {
+        meta._ingress_metadata_ingress_port0 = port;
+    }
+    @name(".send") action _send_2(bit<9> port) {
+        meta._ingress_metadata_ingress_port0 = port;
+    }
     @name(".port_vlan_to_bd_mapping") table _port_vlan_to_bd_mapping {
         actions = {
             _set_bd_properties_0();
             _port_vlan_mapping_miss_0();
+            _send_0();
             @defaultonly _no_op_0();
         }
         key = {
@@ -100,13 +105,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _set_bd_properties_2();
             _port_vlan_mapping_miss_2();
-            @defaultonly _no_op_2();
+            @defaultonly _send_2();
         }
         key = {
             hdr.vlan_tag_[0].vid: exact @name("vlan_tag_[0].vid") ;
         }
         size = 1024;
-        const default_action = _no_op_2();
+        const default_action = _send_2(9w64);
         implementation = bd_action_profile;
     }
     @hidden action act() {
