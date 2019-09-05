@@ -150,7 +150,7 @@ const IR::Node* ExpressionConverter::postorder(IR::PathExpression *ref) {
 
 const IR::Node* ExpressionConverter::postorder(IR::ConcreteHeaderRef* nhr) {
     const IR::Expression* ref;
-    if(nhr->type->is<IR::Type_Header>()) {
+    if (nhr->type->is<IR::Type_Header>()) {
         auto type = nhr->type->to<IR::Type_Header>();
         if (structure->headerTypeExclusionList.count(type->name)) {
             auto path = new IR::Path(nhr->ref->name);
