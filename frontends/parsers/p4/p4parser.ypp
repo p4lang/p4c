@@ -1367,29 +1367,29 @@ expression
     ;
 
 intOrStr
-    : INTEGER                { $$ = parseConstant(@1, $1, 0); }
-    | STRING_LITERAL         { $$ = new IR::StringLiteral(@1, $1); }
+    : INTEGER                    { $$ = parseConstant(@1, $1, 0); }
+    | STRING_LITERAL             { $$ = new IR::StringLiteral(@1, $1); }
     ;
 
 intList
-    : INTEGER                { $$ = new IR::Vector<IR::Expression>();
-                               $$->push_back(parseConstant(@1, $1, 0)); }
-    | intList INTEGER        { $$ = $1;
-                               $$->push_back(parseConstant(@2, $2, 0)); }
+    : INTEGER                    { $$ = new IR::Vector<IR::Expression>();
+                                   $$->push_back(parseConstant(@1, $1, 0)); }
+    | intList "," INTEGER        { $$ = $1;
+                                   $$->push_back(parseConstant(@3, $3, 0)); }
     ;
 
 intOrStrList
-    : intOrStr               { $$ = new IR::Vector<IR::Expression>();
-                               $$->push_back($1); }
-    | intOrStrList intOrStr  { $$ = $1;
-                               $$->push_back($2); }
+    : intOrStr                   { $$ = new IR::Vector<IR::Expression>();
+                                   $$->push_back($1); }
+    | intOrStrList "," intOrStr  { $$ = $1;
+                                   $$->push_back($3); }
     ;
 
 strList
-    : STRING_LITERAL         { $$ = new IR::Vector<IR::Expression>();
-                               $$->push_back(new IR::StringLiteral(@1, $1)); }
-    | strList STRING_LITERAL { $$ = $1;
-                               $$->push_back(new IR::StringLiteral(@2, $2)); }
+    : STRING_LITERAL             { $$ = new IR::Vector<IR::Expression>();
+                                   $$->push_back(new IR::StringLiteral(@1, $1)); }
+    | strList "," STRING_LITERAL { $$ = $1;
+                                   $$->push_back(new IR::StringLiteral(@3, $3)); }
     ;
 
 /*****************************************************************************/
