@@ -193,6 +193,30 @@ P4ParserDriver::parseKvList(const Util::SourceInfo& srcInfo,
             P4AnnotationLexer::KV_LIST, srcInfo, body);
 }
 
+/* static */ const IR::Vector<IR::Expression>*
+P4ParserDriver::parseConstantList(const Util::SourceInfo& srcInfo,
+                                  const IR::Vector<IR::AnnotationToken>& body) {
+    P4ParserDriver driver;
+    return driver.parse<IR::Vector<IR::Expression>>(
+            P4AnnotationLexer::INTEGER_LIST, srcInfo, body);
+}
+
+/* static */ const IR::Vector<IR::Expression>*
+P4ParserDriver::parseConstantOrStringLiteralList(const Util::SourceInfo& srcInfo,
+                                                 const IR::Vector<IR::AnnotationToken>& body) {
+    P4ParserDriver driver;
+    return driver.parse<IR::Vector<IR::Expression>>(
+            P4AnnotationLexer::INTEGER_OR_STRING_LITERAL_LIST, srcInfo, body);
+}
+
+/* static */ const IR::Vector<IR::Expression>*
+P4ParserDriver::parseStringLiteralList(const Util::SourceInfo& srcInfo,
+                                       const IR::Vector<IR::AnnotationToken>& body) {
+    P4ParserDriver driver;
+    return driver.parse<IR::Vector<IR::Expression>>(
+            P4AnnotationLexer::STRING_LITERAL_LIST, srcInfo, body);
+}
+
 /* static */ const IR::Expression*
 P4ParserDriver::parseExpression(const Util::SourceInfo& srcInfo,
                                 const IR::Vector<IR::AnnotationToken>& body) {
@@ -207,6 +231,14 @@ P4ParserDriver::parseConstant(const Util::SourceInfo& srcInfo,
     P4ParserDriver driver;
     return driver.parse<IR::Constant>(
             P4AnnotationLexer::INTEGER, srcInfo, body);
+}
+
+/* static */ const IR::Expression*
+P4ParserDriver::parseConstantOrStringLiteral(const Util::SourceInfo& srcInfo,
+                                             const IR::Vector<IR::AnnotationToken>& body) {
+    P4ParserDriver driver;
+    return driver.parse<IR::Expression>(
+            P4AnnotationLexer::INTEGER_OR_STRING_LITERAL, srcInfo, body);
 }
 
 /* static */ const IR::StringLiteral*

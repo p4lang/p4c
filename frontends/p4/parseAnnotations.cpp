@@ -81,6 +81,39 @@ bool ParseAnnotations::parseKvList(IR::Annotation* annotation) {
     return parsed != nullptr;
 }
 
+bool ParseAnnotations::parseConstantList(IR::Annotation* annotation) {
+    const IR::Vector<IR::Expression>* parsed =
+        P4::P4ParserDriver::parseConstantList(annotation->srcInfo,
+                                              annotation->body);
+    if (parsed != nullptr) {
+        annotation->expr.append(*parsed);
+    }
+
+    return parsed != nullptr;
+}
+
+bool ParseAnnotations::parseConstantOrStringLiteralList(IR::Annotation* annotation) {
+    const IR::Vector<IR::Expression>* parsed =
+        P4::P4ParserDriver::parseConstantOrStringLiteralList(annotation->srcInfo,
+                                                             annotation->body);
+    if (parsed != nullptr) {
+        annotation->expr.append(*parsed);
+    }
+
+    return parsed != nullptr;
+}
+
+bool ParseAnnotations::parseStringLiteralList(IR::Annotation* annotation) {
+    const IR::Vector<IR::Expression>* parsed =
+        P4::P4ParserDriver::parseStringLiteralList(annotation->srcInfo,
+                                                   annotation->body);
+    if (parsed != nullptr) {
+        annotation->expr.append(*parsed);
+    }
+
+    return parsed != nullptr;
+}
+
 void ParseAnnotations::postorder(IR::Annotation* annotation) {
     if (!annotation->needsParsing) {
         return;

@@ -12,10 +12,15 @@ class P4AnnotationLexer : public AbstractP4Lexer {
         // Lists
         EXPRESSION_LIST = P4Parser::token_type::TOK_START_EXPRESSION_LIST,
         KV_LIST = P4Parser::token_type::TOK_START_KV_LIST,
+        INTEGER_LIST = P4Parser::token_type::TOK_START_INTEGER_LIST,
+        INTEGER_OR_STRING_LITERAL_LIST =
+            P4Parser::token_type::TOK_START_INTEGER_OR_STRING_LITERAL_LIST,
+        STRING_LITERAL_LIST = P4Parser::token_type::TOK_START_STRING_LITERAL_LIST,
 
         // Singletons
         EXPRESSION = P4Parser::token_type::TOK_START_EXPRESSION,
         INTEGER = P4Parser::token_type::TOK_START_INTEGER,
+        INTEGER_OR_STRING_LITERAL = P4Parser::token_type::TOK_START_INTEGER_OR_STRING_LITERAL,
         STRING_LITERAL = P4Parser::token_type::TOK_START_STRING_LITERAL,
 
         // Pairs
