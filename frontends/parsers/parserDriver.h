@@ -131,12 +131,28 @@ class P4ParserDriver final : public AbstractParserDriver {
         const Util::SourceInfo& srcInfo,
         const IR::Vector<IR::AnnotationToken>& body);
 
+    static const IR::Vector<IR::Expression>* parseConstantList(
+        const Util::SourceInfo& srcInfo,
+        const IR::Vector<IR::AnnotationToken>& body);
+
+    static const IR::Vector<IR::Expression>* parseConstantOrStringLiteralList(
+        const Util::SourceInfo& srcInfo,
+        const IR::Vector<IR::AnnotationToken>& body);
+
+    static const IR::Vector<IR::Expression>* parseStringLiteralList(
+        const Util::SourceInfo& srcInfo,
+        const IR::Vector<IR::AnnotationToken>& body);
+
     // Singletons ////////////////////////////////////////////////////////////
     static const IR::Expression* parseExpression(
         const Util::SourceInfo& srcInfo,
         const IR::Vector<IR::AnnotationToken>& body);
 
     static const IR::Constant* parseConstant(
+        const Util::SourceInfo& srcInfo,
+        const IR::Vector<IR::AnnotationToken>& body);
+
+    static const IR::Expression* parseConstantOrStringLiteral(
         const Util::SourceInfo& srcInfo,
         const IR::Vector<IR::AnnotationToken>& body);
 

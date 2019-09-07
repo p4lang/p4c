@@ -132,12 +132,30 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 
 %define api.token.prefix {TOK_}
 %token             START_PROGRAM
-                   START_EXPRESSION_LIST START_KV_LIST
-                   START_EXPRESSION START_INTEGER START_STRING_LITERAL
-                   START_EXPRESSION_PAIR START_INTEGER_PAIR
+
+                   // Lists
+                   START_EXPRESSION_LIST
+                   START_KV_LIST
+                   START_INTEGER_LIST
+                   START_INTEGER_OR_STRING_LITERAL_LIST
+                   START_STRING_LITERAL_LIST
+
+                   // Singletons
+                   START_EXPRESSION
+                   START_INTEGER
+                   START_INTEGER_OR_STRING_LITERAL
+                   START_STRING_LITERAL
+
+                   // Pairs
+                   START_EXPRESSION_PAIR
+                   START_INTEGER_PAIR
                    START_STRING_LITERAL_PAIR
-                   START_EXPRESSION_TRIPLE START_INTEGER_TRIPLE
+
+                   // Triples
+                   START_EXPRESSION_TRIPLE
+                   START_INTEGER_TRIPLE
                    START_STRING_LITERAL_TRIPLE
+
 %token             END END_ANNOTATION
 
 
@@ -272,6 +290,10 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %type<IR::MethodCallExpression*>  actionBinding
 %type<IR::IndexedVector<IR::NamedExpression>*> kvList
 %type<IR::NamedExpression*> kvPair
+%type<IR::Vector<IR::Expression>*> intList
+%type<IR::Vector<IR::Expression>*> intOrStrList
+%type<IR::Vector<IR::Expression>*> strList
+%type<IR::Expression*> intOrStr
 
 %left COMMA
 %nonassoc QUESTION
@@ -312,13 +334,17 @@ start
 
 fragment
       // Lists
-    : START_EXPRESSION_LIST expressionList { $$ = $2; }
-    | START_KV_LIST kvList                 { $$ = $2; }
+    : START_EXPRESSION_LIST expressionList              { $$ = $2; }
+    | START_KV_LIST kvList                              { $$ = $2; }
+    | START_INTEGER_LIST intList                        { $$ = $2; }
+    | START_INTEGER_OR_STRING_LITERAL_LIST intOrStrList { $$ = $2; }
+    | START_STRING_LITERAL_LIST strList                 { $$ = $2; }
 
       // Singletons
-    | START_EXPRESSION expression          { $$ = $2; }
-    | START_INTEGER INTEGER                { $$ = parseConstant(@2, $2, 0); }
-    | START_STRING_LITERAL STRING_LITERAL  { $$ = new IR::StringLiteral(@2, $2); }
+    | START_EXPRESSION expression                       { $$ = $2; }
+    | START_INTEGER INTEGER                             { $$ = parseConstant(@2, $2, 0); }
+    | START_INTEGER_OR_STRING_LITERAL intOrStr          { $$ = $2; }
+    | START_STRING_LITERAL STRING_LITERAL               { $$ = new IR::StringLiteral(@2, $2); }
 
       // Pairs
     | START_EXPRESSION_PAIR expression "," expression
@@ -1338,6 +1364,32 @@ expression
     | namedType "(" argumentList ")"
         { $$ = new IR::ConstructorCallExpression(@1 + @4, $1, $3); }
     | "(" typeRef ")" expression %prec PREFIX { $$ = new IR::Cast(@1 + @4, $2, $4); }
+    ;
+
+intOrStr
+    : INTEGER                { $$ = parseConstant(@1, $1, 0); }
+    | STRING_LITERAL         { $$ = new IR::StringLiteral(@1, $1); }
+    ;
+
+intList
+    : INTEGER                { $$ = new IR::Vector<IR::Expression>();
+                               $$->push_back(parseConstant(@1, $1, 0)); }
+    | intList INTEGER        { $$ = $1;
+                               $$->push_back(parseConstant(@2, $2, 0)); }
+    ;
+
+intOrStrList
+    : intOrStr               { $$ = new IR::Vector<IR::Expression>();
+                               $$->push_back($1); }
+    | intOrStrList intOrStr  { $$ = $1;
+                               $$->push_back($2); }
+    ;
+
+strList
+    : STRING_LITERAL         { $$ = new IR::Vector<IR::Expression>();
+                               $$->push_back(new IR::StringLiteral(@1, $1)); }
+    | strList STRING_LITERAL { $$ = $1;
+                               $$->push_back(new IR::StringLiteral(@2, $2)); }
     ;
 
 /*****************************************************************************/
