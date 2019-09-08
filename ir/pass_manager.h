@@ -86,6 +86,15 @@ class PassRepeatUntil : virtual public PassManager {
     const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
 };
 
+class PassIf : virtual public PassManager {
+    std::function<bool()>       cond;
+ public:
+    explicit PassIf(std::function<bool()> cond) : cond(cond) {}
+    PassIf(std::function<bool()> cond, const std::initializer_list<Visitor *> &init)
+    : PassManager(init), cond(cond) {}
+    const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
+};
+
 // Converts a function Node* -> Node* into a visitor
 class VisitFunctor : virtual public Visitor {
     std::function<const IR::Node *(const IR::Node *)>       fn;

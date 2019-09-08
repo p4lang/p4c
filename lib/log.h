@@ -102,6 +102,18 @@ void increaseVerbosity();
 #define LOG8(X) LOGN(8, X)
 #define LOG9(X) LOGN(9, X)
 
+#define LOGN_UNINDENT(N) (LOGGING(N) ? ::Log::Detail::fileLogOutput(__FILE__)   \
+                                        << IndentCtl::unindent : std::clog)
+#define LOG1_UNINDENT   LOGN_UNINDENT(1)
+#define LOG2_UNINDENT   LOGN_UNINDENT(2)
+#define LOG3_UNINDENT   LOGN_UNINDENT(3)
+#define LOG4_UNINDENT   LOGN_UNINDENT(4)
+#define LOG5_UNINDENT   LOGN_UNINDENT(5)
+#define LOG6_UNINDENT   LOGN_UNINDENT(6)
+#define LOG7_UNINDENT   LOGN_UNINDENT(7)
+#define LOG8_UNINDENT   LOGN_UNINDENT(8)
+#define LOG9_UNINDENT   LOGN_UNINDENT(9)
+
 #define LOG_FEATURE(TAG, N, X) (::Log::fileLogLevelIsAtLeast(TAG, N)            \
                       ? std::clog << ::Log::Detail::OutputLogPrefix(TAG, N)     \
                                   << X << std::endl                             \
