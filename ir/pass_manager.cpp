@@ -123,3 +123,11 @@ const IR::Node *PassRepeatUntil::apply_visitor(const IR::Node *program, const ch
     } while (!done());
     return program;
 }
+
+const IR::Node *PassIf::apply_visitor(const IR::Node *program, const char *name) {
+    if (cond()) {
+        running = true;
+        program = PassManager::apply_visitor(program, name);
+    }
+    return program;
+}
