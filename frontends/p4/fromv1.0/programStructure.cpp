@@ -372,8 +372,8 @@ const IR::PathExpression* ProgramStructure::getState(IR::ID dest) {
     }
 }
 
-static const IR::Expression*
-explodeLabel(const IR::Constant* value, const IR::Constant* mask,
+const IR::Expression*
+ProgramStructure::explodeLabel(const IR::Constant* value, const IR::Constant* mask,
              const std::vector<const IR::Type::Bits *> &fieldTypes) {
     if (mask->value == 0)
         return new IR::DefaultExpression(value->srcInfo);
@@ -399,8 +399,8 @@ explodeLabel(const IR::Constant* value, const IR::Constant* mask,
     return rv;
 }
 
-static const IR::Type*
-explodeType(const std::vector<const IR::Type::Bits *> &fieldTypes) {
+const IR::Type*
+ProgramStructure::explodeType(const std::vector<const IR::Type::Bits *> &fieldTypes) {
     auto rv = new IR::Vector<IR::Type>();
     for (auto it = fieldTypes.begin(); it != fieldTypes.end(); ++it) {
         rv->push_back(*it);
@@ -482,7 +482,6 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                 }
                 auto annos = addGlobalNameAnnotation(value_set->name, value_set->annotations);
                 auto decl = new IR::P4ValueSet(value_set->name, annos, type, sizeConstant);
-                LOG1(decl);
                 stateful->push_back(decl);
             }
             for (auto v : c->values) {

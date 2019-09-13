@@ -285,6 +285,10 @@ class ProgramStructure {
     bool isHeader(const IR::ConcreteHeaderRef* nhr) const;
     cstring makeUniqueName(cstring base);
 
+    const IR::Type* explodeType(const std::vector<const IR::Type::Bits *> &fieldTypes);
+    const IR::Expression* explodeLabel(const IR::Constant* value, const IR::Constant* mask,
+            const std::vector<const IR::Type::Bits *> &fieldTypes);
+
     virtual IR::Vector<IR::Argument>* createApplyArguments(cstring n);
 
     const IR::V1Control* ingress;
