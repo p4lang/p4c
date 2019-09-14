@@ -150,19 +150,35 @@ const IR::Node* ExpressionConverter::postorder(IR::PathExpression *ref) {
 
 const IR::Node* ExpressionConverter::postorder(IR::ConcreteHeaderRef* nhr) {
     const IR::Expression* ref;
+
+    // convert types defined by the target system
     if (nhr->type->is<IR::Type_Header>()) {
         auto type = nhr->type->to<IR::Type_Header>();
-        if (structure->headerTypeExclusionList.count(type->name)) {
+        if (structure->parameterTypes.count(type->name)) {
             auto path = new IR::Path(nhr->ref->name);
             auto result = new IR::PathExpression(nhr->srcInfo, nhr->type, path);
-            return result; }
+            result->type = nhr->type;
+            return result;
+        } else if (structure->headerTypes.count(type->name)) {
+            ref = structure->conversionContext->header->clone();
+            auto result = new IR::Member(nhr->srcInfo, ref, nhr->ref->name);
+            result->type = nhr->type;
+            return result;
+        }
     } else if (nhr->type->is<IR::Type_Struct>()) {
         auto type = nhr->type->to<IR::Type_Struct>();
-        if (structure->metadataTypeExclusionList.count(type->name)) {
+        if (structure->parameterTypes.count(type->name)) {
             auto path = new IR::Path(nhr->ref->name);
             auto result = new IR::PathExpression(nhr->srcInfo, nhr->type, path);
-            return result; } }
+            return result;
+        } else if (structure->metadataTypes.count(type->name)) {
+            ref = structure->conversionContext->header->clone();
+            auto result = new IR::Member(nhr->srcInfo, ref, nhr->ref->name);
+            return result;
+        }
+    }
 
+    // convert types defined by user program
     if (structure->isHeader(nhr)) {
         ref = structure->conversionContext->header->clone();
     } else {

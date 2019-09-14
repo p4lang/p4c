@@ -130,7 +130,8 @@ void ProgramStructure::createTypes() {
     // Metadata first
     for (auto it : metadata) {
         auto type = it.first->type;
-        if (metadataTypeExclusionList.count(type->externalName()))
+        if (metadataTypes.count(type->externalName()) ||
+            parameterTypes.count(type->externalName()))
             continue;
         createType(type, false, &converted);
     }
@@ -166,7 +167,8 @@ void ProgramStructure::createTypes() {
     for (auto it : headers) {
         auto type = it.first->type;
         CHECK_NULL(type);
-        if (headerTypeExclusionList.count(type->externalName()))
+        if (headerTypes.count(type->externalName()) ||
+            parameterTypes.count(type->externalName()))
             continue;
         createType(type, true, &converted);
     }
@@ -221,7 +223,7 @@ void ProgramStructure::createStructures() {
         IR::ID id = it.first->name;
         auto type = it.first->type;
         auto type_name = types.get(type);
-        if (metadataInstanceExclusionList.count(type_name))
+        if (metadataInstances.count(type_name))
             continue;
         auto h = headers.get(it.first->name);
         if (h != nullptr)
@@ -242,7 +244,7 @@ void ProgramStructure::createStructures() {
         IR::ID id = it.first->name;
         auto type = it.first->type;
         auto type_name = types.get(type);
-        if (headerInstanceExclusionList.count(type_name))
+        if (headerInstances.count(type_name))
             continue;
         auto ht = type->to<IR::Type_StructLike>();
         auto path = new IR::Path(type_name);
@@ -590,10 +592,10 @@ void ProgramStructure::loadModel() {
     // This includes in turn core.p4
     include("v1model.p4");
 
-    metadataInstanceExclusionList.insert(v1model.standardMetadataType.name);
-    metadataTypeExclusionList.insert(v1model.standardMetadataType.name);
-    headerInstanceExclusionList.insert(v1model.standardMetadataType.name);
-    headerTypeExclusionList.insert(v1model.standardMetadataType.name);
+    metadataInstances.insert(v1model.standardMetadataType.name);
+    metadataTypes.insert(v1model.standardMetadataType.name);
+    headerInstances.insert(v1model.standardMetadataType.name);
+    headerTypes.insert(v1model.standardMetadataType.name);
 }
 
 namespace {

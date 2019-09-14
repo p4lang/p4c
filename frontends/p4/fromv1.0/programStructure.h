@@ -173,11 +173,19 @@ class ProgramStructure {
 
     std::map<cstring, const IR::ParserState*> parserEntryPoints;
 
-    /// system header type
-    std::set<cstring> metadataInstanceExclusionList;
-    std::set<cstring> headerInstanceExclusionList;
-    std::set<cstring> metadataTypeExclusionList;
-    std::set<cstring> headerTypeExclusionList;
+    // P4-14 struct/header type can be converted to three types
+    // of struct/header in P4-16.
+    // 1) as part of the 'hdr' struct
+    // 2) as part of the 'meta' struct
+    // 3) as the parameters of a parser/control block
+    // In case 1 and 2, the converter needs to fix the path
+    // by prepending 'hdr.' or 'meta.' to the ConcreteHeaderRef.
+    // In case 3. the converter only needs to convert headerRef to PathExpression
+    std::set<cstring> headerTypes;
+    std::set<cstring> metadataTypes;
+    std::set<cstring> parameterTypes;
+    std::set<cstring> metadataInstances;
+    std::set<cstring> headerInstances;
 
     /// extra local instances to control created by primitive translation
     std::vector<const IR::Declaration*> localInstances;
