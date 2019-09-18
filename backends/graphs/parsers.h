@@ -18,6 +18,7 @@
 #ifndef _BACKENDS_GRAPHS_PARSERS_H_
 #define _BACKENDS_GRAPHS_PARSERS_H_
 
+#include "frontends/common/resolveReferences/referenceMap.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/nullstream.h"
