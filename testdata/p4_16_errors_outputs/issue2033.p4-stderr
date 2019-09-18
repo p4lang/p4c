@@ -1,0 +1,3 @@
+issue2033.p4(10): [--Werror=type-error] error: nop: action invocation should be after the `actions` list
+     default_action = nop;
+                      ^^^

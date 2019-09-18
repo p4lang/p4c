@@ -3451,6 +3451,11 @@ const IR::ActionListElement* TypeInference::validateActionInitializer(
     // the actions list.
     auto actionListCall = elem->expression->to<IR::MethodCallExpression>();
     CHECK_NULL(actionListCall);
+    auto type = typeMap->getType(actionListCall->method);
+    if (type == nullptr) {
+        typeError("%1%: action invocation should be after the `actions` list", actionCall);
+        return nullptr;
+    }
 
     if (actionListCall->arguments->size() > call->arguments->size()) {
         typeError("%1%: not enough arguments", call);
