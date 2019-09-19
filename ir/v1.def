@@ -78,12 +78,13 @@ class Type_AnyTable : Type_Base {
     dbprint { out << "table"; }
 }
 
-abstract HeaderOrMetadata {
+abstract HeaderOrMetadata : IAnnotated {
     ID                      type_name;
     ID                      name;
     Annotations                 annotations;
     NullOK Type_StructLike      type = nullptr;
 
+    Annotations getAnnotations() const override { return annotations; }
     HeaderOrMetadata(ID n, Type_StructLike t)
     : type_name(t->name), name(n), annotations(Annotations::empty), type(t) {}
     dbprint { out << type_name << ' ' << name; }
@@ -215,23 +216,25 @@ class Primitive : Operation {
     precedence = DBPrint::Prec_Postfix;
 }
 
-class FieldList {
+class FieldList : IAnnotated {
     optional ID                 name;
     bool                        payload = false;
     optional Annotations        annotations = Annotations::empty;
     inline Vector<Expression>   fields = {};
+    Annotations getAnnotations() const override { return annotations; }
 }
 
-class FieldListCalculation {
+class FieldListCalculation : IAnnotated {
     optional ID          name;
     NullOK NameList      input = nullptr;
     NullOK FieldList     input_fields = nullptr;
     NullOK NameList      algorithm = nullptr;
     int                  output_width = 0;
     optional Annotations annotations = Annotations::empty;
+    Annotations getAnnotations() const override { return annotations; }
 }
 
-class CalculatedField {
+class CalculatedField : IAnnotated {
     optional NullOK Expression  field;
     class update_or_verify {
         Util::SourceInfo        srcInfo;
@@ -246,15 +249,17 @@ class CalculatedField {
     }
     safe_vector<update_or_verify> specs = {};
     Annotations                 annotations;
+    Annotations getAnnotations() const override { return annotations; }
     visit_children {
         v.visit(field, "field");
         for (auto &s : specs) v.visit(s.cond, s.name.name);
         v.visit(annotations, "annotations"); }
 }
 
-class ParserValueSet {
+class ParserValueSet : IAnnotated {
     ID                          name;
     optional Annotations        annotations = Annotations::empty;
+    Annotations getAnnotations() const override { return annotations; }
     dbprint { out << node_type_name() << " " << name; }
     toString { return node_type_name() + " " + name; }
 }
@@ -264,7 +269,7 @@ class CaseEntry {
     optional ID                                     action;
 }
 
-class V1Parser {
+class V1Parser :IAnnotated {
     optional ID                 name;
     inline Vector<Expression>   stmts = {};
     NullOK Vector<Expression>   select = nullptr;
@@ -273,17 +278,19 @@ class V1Parser {
     ID                          parse_error = {};
     bool                        drop = false;
     Annotations                 annotations;
+    Annotations getAnnotations() const override { return annotations; }
     toString { return node_type_name() + " " + name; }
 }
 
 class ParserException {}
 
-abstract Attached : IInstance {
+abstract Attached : IInstance, IAnnotated {
     optional ID                 name;
     optional Annotations        annotations = Annotations::empty;
     cstring Name() const override { return name; }
     virtual const char *kind() const = 0;
     Type getType() const override { return Type_Unknown::get(); }
+    Annotations getAnnotations() const override { return annotations; }
     virtual bool indexed() const { return false; }
     Attached *clone_rename(const char *ext) const {
         Attached *rv = clone();
@@ -355,12 +362,13 @@ class ActionArg : Expression {
 }
 
 // Represents a P4 v1.0 action
-class ActionFunction {
+class ActionFunction : IAnnotated {
     optional ID                 name;
     inline Vector<Primitive>    action = {};
     safe_vector<ActionArg>      args = {};
     optional Annotations        annotations = Annotations::empty;
 
+    Annotations getAnnotations() const override { return annotations; }
     ActionArg arg(cstring n) const {
         for (auto a : args)
             if (a->name == n)
@@ -395,7 +403,7 @@ class ActionSelector : Attached {
     const char *kind() const override { return "action_selector"; }
 }
 
-class V1Table : IInstance {
+class V1Table : IInstance, IAnnotated {
     optional ID                 name;
     NullOK Vector<Expression>   reads = 0;
     safe_vector<ID>             reads_types = {};
@@ -411,12 +419,13 @@ class V1Table : IInstance {
     optional Annotations        annotations = Annotations::empty;
 
     void addProperty(Property prop) { properties.push_back(prop); }
+    Annotations getAnnotations() const override { return annotations; }
     toString { return node_type_name() + " " + name; }
     cstring Name() const override { return name; }
     Type getType() const override { return Type_AnyTable::get(); }
 }
 
-class V1Control {
+class V1Control : IAnnotated {
     ID                  name;
     Vector<Expression>  code;
     Annotations         annotations;
@@ -424,6 +433,7 @@ class V1Control {
     V1Control(ID n) : name(n), code(new Vector<Expression>()) {}
     V1Control(Util::SourceInfo si, ID n) : Node(si), name(n), code(new Vector<Expression>()) {}
 #apply
+    Annotations getAnnotations() const override { return annotations; }
     toString { return node_type_name() + " " + name; }
 }
 
