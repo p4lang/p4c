@@ -1,0 +1,179 @@
+{
+  "header_types" : [
+    {
+      "name" : "test_header_t",
+      "id" : 0,
+      "fields" : [
+        ["test_field_1", 48, false],
+        ["test_field_2", 48, false]
+      ]
+    }
+  ],
+  "headers" : [
+    {
+      "name" : "test_header[0]",
+      "id" : 0,
+      "header_type" : "test_header_t",
+      "metadata" : false,
+      "pi_omit" : true
+    },
+    {
+      "name" : "test_header[1]",
+      "id" : 1,
+      "header_type" : "test_header_t",
+      "metadata" : false,
+      "pi_omit" : true
+    }
+  ],
+  "header_stacks" : [
+    {
+      "name" : "test_header",
+      "id" : 0,
+      "header_type" : "test_header_t",
+      "size" : 2,
+      "header_ids" : [0, 1]
+    }
+  ],
+  "parsers" : [
+    {
+      "name" : "parser",
+      "id" : 0,
+      "init_state" : "start",
+      "parse_states" : [
+        {
+          "name" : "start",
+          "id" : 0,
+          "parser_ops" : [
+            {
+              "parameters" : [
+                {
+                  "type" : "stack",
+                  "value" : "test_header"
+                }
+              ],
+              "op" : "extract"
+            },
+            {
+              "parameters" : [
+                {
+                  "op" : "log_msg",
+                  "parameters" : [
+                    {
+                      "type" : "string",
+                      "value" : "Logging stack_field {}"
+                    },
+                    {
+                      "type" : "parameters_vector",
+                      "value" : [
+                        {
+                          "type" : "stack_field",
+                          "value" : ["test_header", "test_field_1"]
+                        }
+                      ]
+                    }
+                  ],
+                  "source_info" : {
+                    "filename" : "test.p4",
+                    "line" : 63,
+                    "column" : 8,
+                    "source_fragment" : "        log_msg(\\\"Logging stack_field {}\\\", {test_header.last.test_field_1});"
+                  }
+                }
+              ],
+              "op" : "primitive"
+            }
+          ],
+          "transitions" : [
+            {
+              "value" : "default",
+              "mask" : null,
+              "next_state" : null
+            }
+          ],
+          "transition_key" : []
+        }
+      ]
+    }
+  ],
+  "deparsers" : [
+    {
+      "name" : "deparser",
+      "id" : 0,
+      "source_info" : {
+        "filename" : "test.p4",
+        "line" : 123,
+        "column" : 4,
+        "source_fragment" : "TestDeparser"
+      },
+      "order" : [],
+      "primitives" : [
+        {
+          "op" : "log_msg",
+          "parameters" : [
+            {
+              "type" : "string",
+              "value" : "Logging field {}"
+            },
+            {
+              "type" : "parameters_vector",
+              "value" : [
+                {
+                  "type" : "field",
+                  "value" : ["test_header[0]", "test_field_1"]
+                }
+              ]
+            }
+          ],
+          "source_info" : {
+            "filename" : "test.p4",
+            "line" : 128,
+            "column" : 7,
+            "source_fragment" : "        log_msg(\\\"Logging field {}\\\", {test_header[0].test_field_1});"
+          }
+        }
+      ]
+    }
+  ],
+  "actions" : [
+    {
+      "name" : "test_action",
+      "id" : 0,
+      "runtime_data" : [
+        {
+          "name" : "parameter_1",
+          "bitwidth" : 48
+        },
+        {
+          "name" : "parameter_2",
+          "bitwidth" : 9
+        }
+      ],
+      "primitives" : [
+        {
+          "op" : "log_msg",
+          "parameters" : [
+            {
+              "type" : "string",
+              "value" : "Logging action data {}"
+            },
+            {
+              "type" : "parameters_vector",
+              "value" : [
+                {
+                  "type" : "runtime_data",
+                  "value" : 1
+                }
+              ]
+            }
+          ],
+          "source_info" : {
+            "filename" : "test.p4",
+            "line" : 105,
+            "column" : 8,
+            "source_fragment" : "        log_msg(\\\"Logging action data {}\\\", {parameter_2});"
+          }
+        }
+      ]
+    }
+  ]
+}

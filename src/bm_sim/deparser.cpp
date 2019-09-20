@@ -25,8 +25,31 @@
 #include <bm/bm_sim/packet.h>
 #include <bm/bm_sim/checksums.h>
 #include <bm/bm_sim/phv.h>
+#include <bm/bm_sim/actions.h>
+
+#include <string>
 
 namespace bm {
+
+struct DeparserOp {
+  virtual ~DeparserOp() {}
+  virtual void operator()(Packet *pkt) const = 0;
+};
+
+struct DeparserOpMethodCall : DeparserOp {
+  ActionFnEntry action;
+
+  explicit DeparserOpMethodCall(ActionFn *action_fn)
+      : action(action_fn) { }
+
+  void operator()(Packet *pkt) const override {
+    action.execute(pkt);
+  }
+};
+
+Deparser::Deparser(const std::string &name, p4object_id_t id)
+    : NamedP4Object(name, id) {}
+Deparser::~Deparser() {}
 
 size_t
 Deparser::get_headers_size(const PHV &phv) const {
@@ -53,6 +76,13 @@ Deparser::deparse(Packet *pkt) const {
   update_checksums(pkt);
   char *data = pkt->prepend(get_headers_size(*phv));
   int bytes_parsed = 0;
+  {
+    RegisterSync::RegisterLocks RL;
+    register_sync.lock(&RL);
+
+    for (auto &deparser_op : deparser_ops)
+      (*deparser_op)(pkt);
+  }
   // invalidating headers, and resetting header stacks is done in the Packet
   // destructor, when the PHV is released
   for (auto it = headers.begin(); it != headers.end(); ++it) {
@@ -77,6 +107,12 @@ Deparser::update_checksums(Packet *pkt) const {
     checksum->update(pkt);
     BMELOG(checksum_update, *pkt, *checksum);
   }
+}
+
+void
+Deparser::add_method_call(ActionFn *action_fn) {
+  action_fn->grab_register_accesses(&register_sync);
+  deparser_ops.emplace_back(new DeparserOpMethodCall(action_fn));
 }
 
 }  // namespace bm

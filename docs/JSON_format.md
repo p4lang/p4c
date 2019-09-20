@@ -494,6 +494,12 @@ that need to be proven true (see
 [this](https://github.com/p4lang/p4c/issues/1548) Github issue for more
 details). Given their bmv2 implementation, `assert` and `assume` statements are
 also useful when tetsing / debugging P4 programs with bmv2.
+- `log_msg`: used for logging user defined messages that can be printed in
+console later using --log-console option. It takes either one argument (string)
+or two arguments (string and list of arguments in curly brackets separated by
+comma). In first case function logs plain string, in second case function logs
+list of arguments in the format specified by the string. Format is a string
+containing one or more curly braces '{}' that is replaced by values of list.
 
 Support for additional primitives depends on the architecture being used.
 

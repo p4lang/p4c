@@ -159,15 +159,19 @@ struct ActionData {
   std::vector<Data> action_data{};
 };
 
+struct ActionParam;
+
 struct ActionEngineState {
   Packet &pkt;
   PHV &phv;
   const ActionData &action_data;
   const std::vector<Data> &const_values;
+  const std::vector<ActionParam> &parameters_vector;
 
   ActionEngineState(Packet *pkt,
                     const ActionData &action_data,
-                    const std::vector<Data> &const_values);
+                    const std::vector<Data> &const_values,
+                    const std::vector<ActionParam> &parameters_vector);
 };
 
 class ExternType;
@@ -186,7 +190,7 @@ struct ActionParam {
         EXPRESSION,
         EXTERN_INSTANCE,
         STRING,
-        HEADER_UNION, HEADER_UNION_STACK} tag;
+        HEADER_UNION, HEADER_UNION_STACK, PARAMS_VECTOR} tag;
 
   union {
     unsigned int const_offset;
@@ -215,6 +219,11 @@ struct ActionParam {
     } register_gen;
 
     header_stack_id_t header_stack;
+
+    struct {
+      unsigned int start;
+      unsigned int end;
+    } params_vector;
 
     // special case when trying to access a field in the last header of a stack
     struct {
@@ -317,6 +326,39 @@ const Data &ActionParam::to<const Data &>(ActionEngineState *state) const {
     default:
       _BM_UNREACHABLE("Default switch case should not be reachable");
   }
+}
+
+template <> inline
+const std::vector<Data>
+ActionParam::to<const std::vector<Data>>(ActionEngineState *state) const {
+  std::vector<Data> result{};
+
+  for (auto i = params_vector.start ; i < params_vector.end ; i++) {
+  switch (state->parameters_vector[i].tag) {
+    case ActionParam::CONST:
+      result.push_back(
+            state->const_values[state->parameters_vector[i].const_offset]);
+      break;
+    case ActionParam::FIELD:
+      result.push_back(
+            state->phv.get_field(state->parameters_vector[i].field.header,
+            state->parameters_vector[i].field.field_offset));
+      break;
+    case ActionParam::ACTION_DATA:
+      result.push_back(
+            state->action_data.get(
+                          state->parameters_vector[i].action_data_offset));
+      break;
+    case ActionParam::LAST_HEADER_STACK_FIELD:
+      result.push_back(
+            state->phv.get_header_stack(stack_field.header_stack).get_last()
+            .get_field(stack_field.field_offset));
+      break;
+    default:
+      _BM_UNREACHABLE("Default switch case should not be reachable");
+    }
+  }
+  return result;
 }
 
 // TODO(antonin): maybe I should use meta-programming for const type handling,
@@ -647,16 +689,16 @@ class ActionFn :  public NamedP4Object {
   // these parameter_push_back_* methods are not very well named. They are used
   // to push arguments to the primitives; and are independent of the actual
   // parameters for the P4 action
-  void parameter_push_back_field(header_id_t header, int field_offset);
+  virtual void parameter_push_back_field(header_id_t header, int field_offset);
   void parameter_push_back_header(header_id_t header);
   void parameter_push_back_header_stack(header_stack_id_t header_stack);
-  void parameter_push_back_last_header_stack_field(
+  virtual void parameter_push_back_last_header_stack_field(
       header_stack_id_t header_stack, int field_offset);
   void parameter_push_back_header_union(header_union_id_t header_union);
   void parameter_push_back_header_union_stack(
       header_union_stack_id_t header_union_stack);
-  void parameter_push_back_const(const Data &data);
-  void parameter_push_back_action_data(int action_data_offset);
+  virtual void parameter_push_back_const(const Data &data);
+  virtual void parameter_push_back_action_data(int action_data_offset);
   void parameter_push_back_register_ref(RegisterArray *register_array,
                                         unsigned int idx);
   void parameter_push_back_register_gen(RegisterArray *register_array,
@@ -668,19 +710,22 @@ class ActionFn :  public NamedP4Object {
   void parameter_push_back_expression(std::unique_ptr<ArithExpression> expr);
   void parameter_push_back_extern_instance(ExternType *extern_instance);
   void parameter_push_back_string(const std::string &str);
+  void parameter_push_back_param_vector(std::vector<ActionParam> &param_vector);
+  int push_back_const(const Data &data);
 
   void push_back_primitive(ActionPrimitive_ *primitive,
                            std::unique_ptr<SourceInfo> source_info = nullptr);
 
   void grab_register_accesses(RegisterSync *register_sync) const;
 
-  size_t get_num_params() const;
+  virtual size_t get_num_params() const;
 
  private:
   std::vector<ActionPrimitiveCall> primitives{};
   std::vector<ActionParam> params{};
   RegisterSync register_sync{};
   std::vector<Data> const_values{};
+  std::vector<ActionParam> parameters_vector{};
   // should I store the objects in the vector, instead of pointers?
   std::vector<std::unique_ptr<ArithExpression> > expressions{};
   std::vector<std::string> strings{};
@@ -749,6 +794,24 @@ class ActionFnEntry {
   ActionData action_data{};
 };
 
+class ActionParamVectorFn : public ActionFn {
+ public:
+  ActionParamVectorFn(ActionFn *action_fn, std::string &primitive_name)
+          : ActionFn(primitive_name, 0, 0), af(action_fn) { }
+
+  void parameter_push_back_action_data(int offset);
+  void parameter_push_back_const(const Data &data);
+  void parameter_push_back_last_header_stack_field(
+      header_stack_id_t header_stack, int field_offset);
+  void parameter_push_back_field(header_id_t h_id, int offset);
+  void parameter_push_back_param_vector();
+
+  size_t get_num_params() const { return af->get_num_params(); }
+
+ private:
+  std::vector<ActionParam> param_vector;
+  ActionFn *af;
+};
 }  // namespace bm
 
 #endif  // BM_BM_SIM_ACTIONS_H_

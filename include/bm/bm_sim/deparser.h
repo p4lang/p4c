@@ -23,11 +23,16 @@
 #ifndef BM_BM_SIM_DEPARSER_H_
 #define BM_BM_SIM_DEPARSER_H_
 
+#include <bm/bm_sim/actions.h>
+#include <bm/bm_sim/packet.h>
+#include <bm/bm_sim/phv.h>
+
 #include <vector>
 #include <string>
 
 #include "named_p4object.h"
 #include "phv_forward.h"
+#include "stateful.h"
 
 namespace bm {
 
@@ -35,13 +40,14 @@ class Packet;
 
 class Checksum;
 
+struct DeparserOp;
+
 //! Implements a P4 deparser. Since there are no deparser objects per se in the
 //! P4 language yet, the deparser logic is obtained by generating a topological
 //! sorting of the parse graph.
 class Deparser : public NamedP4Object {
  public:
-  Deparser(const std::string &name, p4object_id_t id)
-    : NamedP4Object(name, id) {}
+  Deparser(const std::string &name, p4object_id_t id);
 
   void push_back_header(header_id_t header_id) {
     headers.push_back(header_id);
@@ -50,6 +56,8 @@ class Deparser : public NamedP4Object {
   void add_checksum(const Checksum *checksum) {
     checksums.push_back(checksum);
   }
+
+  ~Deparser();
 
   //! Deparse all valid headers (including headers in stacks) in the correct
   //! order, in front of the packet data; the packet data being everything that
@@ -60,6 +68,8 @@ class Deparser : public NamedP4Object {
   //! Packet::get_data_size().
   void deparse(Packet *pkt) const;
 
+  void add_method_call(ActionFn *action_fn);
+
  private:
   size_t get_headers_size(const PHV &phv) const;
 
@@ -68,6 +78,8 @@ class Deparser : public NamedP4Object {
  private:
   std::vector<header_id_t> headers{};
   std::vector<const Checksum *> checksums{};
+  RegisterSync register_sync{};
+  std::vector<std::unique_ptr<DeparserOp> > deparser_ops;
 };
 
 }  // namespace bm

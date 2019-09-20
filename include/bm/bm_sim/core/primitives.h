@@ -23,6 +23,9 @@
 
 #include <bm/bm_sim/actions.h>
 
+#include <string>
+#include <vector>
+
 namespace bm {
 
 namespace core {
@@ -76,6 +79,12 @@ struct assume_ : public ActionPrimitive<const Data &> {
 
 class exit_ : public ActionPrimitive<> {
   void operator ()();
+};
+
+struct log_msg : public ActionPrimitive<const std::string &,
+                                       const std::vector<Data>> {
+  void operator ()(const std::string &format,
+                   const std::vector<Data> data_vector);
 };
 
 }  // namespace core

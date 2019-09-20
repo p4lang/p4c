@@ -33,10 +33,12 @@
 namespace bm {
 
 ActionEngineState::ActionEngineState(Packet *pkt,
-                                     const ActionData &action_data,
-                                     const std::vector<Data> &const_values)
+                            const ActionData &action_data,
+                            const std::vector<Data> &const_values,
+                            const std::vector<ActionParam> &parameters_vector)
     : pkt(*pkt), phv(*pkt->get_phv()),
-      action_data(action_data), const_values(const_values) { }
+      action_data(action_data), const_values(const_values),
+      parameters_vector(parameters_vector) { }
 
 // the first tmp data register is reserved for internal engine use (register
 // index evaluation)
@@ -99,6 +101,12 @@ ActionFn::parameter_push_back_const(const Data &data) {
   param.tag = ActionParam::CONST;
   param.const_offset = const_values.size() - 1;;
   params.push_back(param);
+}
+
+int
+ActionFn::push_back_const(const Data &data) {
+  const_values.push_back(data);
+  return const_values.size();
 }
 
 void
@@ -218,6 +226,21 @@ ActionFn::parameter_push_back_string(const std::string &str) {
 }
 
 void
+ActionFn::parameter_push_back_param_vector(std::vector<ActionParam>
+                                                 &params_vector) {
+  unsigned int params_vector_size = params_vector.size();
+  unsigned int start = parameters_vector.size();
+  for (unsigned int i = 0; i < params_vector_size; i++) {
+    parameters_vector.push_back(params_vector.at(i));
+  }
+  unsigned int end = parameters_vector.size();
+  ActionParam param;
+  param.tag = ActionParam::PARAMS_VECTOR;
+  param.params_vector = {start, end};
+  params.push_back(param);
+}
+
+void
 ActionFn::push_back_primitive(ActionPrimitive_ *primitive,
                               std::unique_ptr<SourceInfo> source_info) {
   size_t param_offset = 0;
@@ -309,7 +332,8 @@ ActionFnEntry::push_back_action_data(const char *bytes, int nbytes) {
 
 void
 ActionFnEntry::execute(Packet *pkt) const {
-  ActionEngineState state(pkt, action_data, action_fn->const_values);
+  ActionEngineState state(pkt, action_data, action_fn->const_values,
+                          action_fn->parameters_vector);
 
   auto &primitives = action_fn->primitives;
   size_t param_offset = 0;
@@ -390,6 +414,45 @@ ActionFnEntry::deserialize(std::istream *in, const P4Objects &objs) {
     std::string data_hex; (*in) >> data_hex;
     push_back_action_data(Data(data_hex));
   }
+}
+
+void
+ActionParamVectorFn::parameter_push_back_action_data(int offset) {
+  ActionParam param;
+  param.tag = ActionParam::ACTION_DATA;
+  param.action_data_offset = offset;
+  param_vector.push_back(param);
+}
+
+void
+ActionParamVectorFn::parameter_push_back_const(const Data &data) {
+  int const_value_size = af->push_back_const(data);
+  ActionParam param;
+  param.tag = ActionParam::CONST;
+  param.const_offset = const_value_size - 1;;
+  param_vector.push_back(param);
+}
+
+void
+ActionParamVectorFn::parameter_push_back_field(header_id_t h_id, int offset) {
+  ActionParam param;
+  param.tag = ActionParam::FIELD;
+  param.field = {h_id, offset};
+  param_vector.push_back(param);
+}
+
+void
+ActionParamVectorFn::parameter_push_back_last_header_stack_field(
+    header_stack_id_t header_stack, int field_offset) {
+  ActionParam param;
+  param.tag = ActionParam::LAST_HEADER_STACK_FIELD;
+  param.stack_field = {header_stack, field_offset};
+  param_vector.push_back(param);
+}
+
+void
+ActionParamVectorFn::parameter_push_back_param_vector() {
+  af->parameter_push_back_param_vector(param_vector);
 }
 
 thread_local Packet *ActionPrimitive_::pkt = nullptr;

@@ -216,6 +216,11 @@ class Data {
     return s;
   }
 
+  std::string get_string_repr() const {
+    assert(arith);
+    return value.convert_to<std::string>();
+  }
+
   bool get_arith() const { return arith; }
 
   // TODO(antonin): overload operators for those ?
