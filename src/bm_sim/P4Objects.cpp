@@ -31,7 +31,6 @@
 #include <set>
 #include <unordered_set>
 #include <exception>
-#include <typeinfo>
 
 #include "jsoncpp/json.h"
 #include "crc_map.h"
@@ -391,7 +390,7 @@ P4Objects::build_expression(const Json::Value &json_expression,
   }
 }
 
-int
+void
 P4Objects::add_primitive_to_action(const Json::Value &cfg_primitive,
                                    ActionFn *action_fn) {
   const auto primitive_name = cfg_primitive["op"].asString();
@@ -419,37 +418,25 @@ P4Objects::add_primitive_to_action(const Json::Value &cfg_primitive,
   }
 
   for (const auto &cfg_parameter : cfg_primitive_parameters) {
-    if (process_single_param(action_fn, cfg_parameter, primitive_name) == 1) {
-      return 1;
-    }
+    process_single_param(action_fn, cfg_parameter, primitive_name);
   }
-  return 0;
 }
 
-int
+void
 P4Objects::process_single_param(ActionFn* action_fn,
-                const Json::Value &cfg_parameter, std::string primitive_name) {
+                                const Json::Value &cfg_parameter,
+                                const std::string &primitive_name) {
   const auto type = cfg_parameter["type"].asString();
-
-  if (typeid(*action_fn) == typeid(ActionParamVectorFn)
-            && type != "hexstr" && type != "runtime_data" && type != "field"
-            && type != "stack_field") {
-    throw json_exception(
-              EFormat() << "Parameter type '"
-              << type << "' not supported",
-              cfg_parameter);
-    return 1;
-  }
 
   if (type == "hexstr") {
     const auto value_hexstr = cfg_parameter["value"].asString();
     action_fn->parameter_push_back_const(Data(value_hexstr));
   } else if (type == "parameters_vector") {
-    ActionParamVectorFn params_vector(action_fn, primitive_name);
+    action_fn->parameter_start_vector();
     for (const auto &cfg_parameter_value : cfg_parameter["value"]) {
-      process_single_param(&params_vector, cfg_parameter_value, primitive_name);
+      process_single_param(action_fn, cfg_parameter_value, primitive_name);
     }
-    params_vector.parameter_push_back_param_vector();
+    action_fn->parameter_end_vector();
   } else if (type == "runtime_data") {
     auto action_data_offset = cfg_parameter["value"].asUInt();
     auto runtime_data_size = action_fn->get_num_params();
@@ -560,9 +547,7 @@ P4Objects::process_single_param(ActionFn* action_fn,
     throw json_exception(
         EFormat() << "Parameter type '" << type << "' not supported",
         cfg_parameter);
-    return 1;
   }
-  return 0;
 }
 
 void

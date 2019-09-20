@@ -67,7 +67,16 @@ TEST_P(AssertAssumeTest, ConditionTrue) {
 
 using AssertAssumeDeathTest = AssertAssumeTest;
 
+extern bool WITH_VALGRIND;  // defined in main.cpp
+
 TEST_P(AssertAssumeDeathTest, ConditionFalse) {
+  // TODO(antonin): use GTEST_SKIP once we update the version of googletest used
+  // by bmv2.
+  if (WITH_VALGRIND) {
+    SUCCEED();
+    return;
+  }
+
   auto primitive = ActionOpcodesMap::get_instance()->get_primitive(GetParam());
   ASSERT_NE(nullptr, primitive);
 

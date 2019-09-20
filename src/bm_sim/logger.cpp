@@ -22,6 +22,7 @@
 
 #include <bm/spdlog/sinks/null_sink.h>
 
+#include <iosfwd>
 #include <memory>
 #include <string>
 
@@ -43,6 +44,17 @@ Logger::set_logger_file(const std::string &filename, bool force_flush) {
   unset_logger();
   auto logger_ = spdlog::rotating_logger_mt("bmv2", filename,
                                             1024 * 1024 * 5, 3, force_flush);
+  logger = logger_.get();
+  set_pattern();
+  logger_->set_level(to_spd_level(LogLevel::DEBUG));
+}
+
+void
+Logger::set_logger_ostream(std::ostream &os) {
+  unset_logger();
+  auto sink = std::make_shared<spdlog::sinks::ostream_sink_mt>(os);
+  auto logger_ = std::make_shared<spdlog::logger>("bmv2", sink);
+  spdlog::register_logger(logger_);
   logger = logger_.get();
   set_pattern();
   logger_->set_level(to_spd_level(LogLevel::DEBUG));

@@ -10,7 +10,7 @@ on each attribute.
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.21*.
+The version described in this document is *2.22*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -76,6 +76,8 @@ in which the parent expression is evaluated. In the case of an expression being
 evaluated inside of an action function belonging to a match-action table, the
 local integral values correspond to the runtime data available for a given table
 entry (see the [actions](#actions) section for more details on runtime data).
+- if `type` is `parameters_vector`, `value` is a JSON array containing an
+arbitrary number of "type value objects".
 
 For an expression, `left` and `right` will themselves be JSON objects, where the
 `value` attribute can be one of `field`, `hexstr`, `header`, `expression`,
@@ -494,12 +496,13 @@ that need to be proven true (see
 [this](https://github.com/p4lang/p4c/issues/1548) Github issue for more
 details). Given their bmv2 implementation, `assert` and `assume` statements are
 also useful when tetsing / debugging P4 programs with bmv2.
-- `log_msg`: used for logging user defined messages that can be printed in
-console later using --log-console option. It takes either one argument (string)
-or two arguments (string and list of arguments in curly brackets separated by
-comma). In first case function logs plain string, in second case function logs
-list of arguments in the format specified by the string. Format is a string
-containing one or more curly braces '{}' that is replaced by values of list.
+- `log_msg`: used for logging user-defined messages that will be output to the
+console when using the `--log-console` option. It takes two parameters: a format
+string (which may contain one or more curly braces '{}') and a vector of
+parameters (`parameters_vector`), which is a list of values to substitute to the
+curly braces included in the format string when outputting the log message. See
+[here](#the-type-value-object) for more information on `parameters_vector`. The
+objects in the `parameters_vector` must resolve to integral values.
 
 Support for additional primitives depends on the architecture being used.
 

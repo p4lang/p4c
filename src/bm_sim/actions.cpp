@@ -44,6 +44,14 @@ ActionEngineState::ActionEngineState(Packet *pkt,
 // index evaluation)
 size_t ActionFn::nb_data_tmps = 1;
 
+ActionFn::ActionFn(const std::string &name, p4object_id_t id, size_t num_params)
+    : NamedP4Object(name, id), num_params(num_params) { }
+
+ActionFn::ActionFn(const std::string &name, p4object_id_t id, size_t num_params,
+                   std::unique_ptr<SourceInfo> source_info)
+    : NamedP4Object(name, id, std::move(source_info)),
+      num_params(num_params) { }
+
 void
 ActionFn::parameter_push_back_field(header_id_t header, int field_offset) {
   ActionParam param;
@@ -101,12 +109,6 @@ ActionFn::parameter_push_back_const(const Data &data) {
   param.tag = ActionParam::CONST;
   param.const_offset = const_values.size() - 1;;
   params.push_back(param);
-}
-
-int
-ActionFn::push_back_const(const Data &data) {
-  const_values.push_back(data);
-  return const_values.size();
 }
 
 void
@@ -226,18 +228,26 @@ ActionFn::parameter_push_back_string(const std::string &str) {
 }
 
 void
-ActionFn::parameter_push_back_param_vector(std::vector<ActionParam>
-                                                 &params_vector) {
-  unsigned int params_vector_size = params_vector.size();
-  unsigned int start = parameters_vector.size();
-  for (unsigned int i = 0; i < params_vector_size; i++) {
-    parameters_vector.push_back(params_vector.at(i));
-  }
-  unsigned int end = parameters_vector.size();
+ActionFn::parameter_start_vector() {
   ActionParam param;
   param.tag = ActionParam::PARAMS_VECTOR;
-  param.params_vector = {start, end};
+  auto start = static_cast<unsigned int>(sub_params.size());
+  // end will be adjusted correctly when parameter_end_vector is called
+  param.params_vector = {start, start /* end */};
   params.push_back(param);
+
+  // we swap the 2 vectors so that subsequent calls to parameter_push_back_*
+  // methods append parameters to the end of sub_params (instead of params)
+  params.swap(sub_params);
+}
+
+void
+ActionFn::parameter_end_vector() {
+  params.swap(sub_params);
+  assert(params.back().tag == ActionParam::PARAMS_VECTOR &&
+         "no vector was started");
+  auto end = static_cast<unsigned int>(sub_params.size());
+  params.back().params_vector.end = end;
 }
 
 void
@@ -333,7 +343,7 @@ ActionFnEntry::push_back_action_data(const char *bytes, int nbytes) {
 void
 ActionFnEntry::execute(Packet *pkt) const {
   ActionEngineState state(pkt, action_data, action_fn->const_values,
-                          action_fn->parameters_vector);
+                          action_fn->sub_params);
 
   auto &primitives = action_fn->primitives;
   size_t param_offset = 0;
@@ -414,45 +424,6 @@ ActionFnEntry::deserialize(std::istream *in, const P4Objects &objs) {
     std::string data_hex; (*in) >> data_hex;
     push_back_action_data(Data(data_hex));
   }
-}
-
-void
-ActionParamVectorFn::parameter_push_back_action_data(int offset) {
-  ActionParam param;
-  param.tag = ActionParam::ACTION_DATA;
-  param.action_data_offset = offset;
-  param_vector.push_back(param);
-}
-
-void
-ActionParamVectorFn::parameter_push_back_const(const Data &data) {
-  int const_value_size = af->push_back_const(data);
-  ActionParam param;
-  param.tag = ActionParam::CONST;
-  param.const_offset = const_value_size - 1;;
-  param_vector.push_back(param);
-}
-
-void
-ActionParamVectorFn::parameter_push_back_field(header_id_t h_id, int offset) {
-  ActionParam param;
-  param.tag = ActionParam::FIELD;
-  param.field = {h_id, offset};
-  param_vector.push_back(param);
-}
-
-void
-ActionParamVectorFn::parameter_push_back_last_header_stack_field(
-    header_stack_id_t header_stack, int field_offset) {
-  ActionParam param;
-  param.tag = ActionParam::LAST_HEADER_STACK_FIELD;
-  param.stack_field = {header_stack, field_offset};
-  param_vector.push_back(param);
-}
-
-void
-ActionParamVectorFn::parameter_push_back_param_vector() {
-  af->parameter_push_back_param_vector(param_vector);
 }
 
 thread_local Packet *ActionPrimitive_::pkt = nullptr;

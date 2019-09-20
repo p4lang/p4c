@@ -70,7 +70,7 @@ test_enums \
 test_core_primitives \
 test_control_flow \
 test_assert_assume \
-test_logging
+test_log_msg
 
 check_PROGRAMS = $(TESTS) test_all
 
@@ -111,7 +111,7 @@ test_enums_SOURCES           = $(common_source) test_enums.cpp
 test_core_primitives_SOURCES = $(common_source) test_core_primitives.cpp
 test_control_flow_SOURCES    = $(common_source) test_control_flow.cpp
 test_assert_assume_SOURCES   = $(common_source) test_assert_assume.cpp
-test_logging_SOURCES		 = $(common_source) test_logging.cpp
+test_log_msg_SOURCES         = $(common_source) test_log_msg.cpp
 
 test_all_SOURCES = $(common_source) \
 test_actions.cpp \
@@ -150,7 +150,7 @@ test_enums.cpp \
 test_core_primitives.cpp \
 test_control_flow.cpp \
 test_assert_assume.cpp \
-test_logging.cpp
+test_log_msg.cpp
 
 EXTRA_DIST = \
 testdata/en0.pcap \

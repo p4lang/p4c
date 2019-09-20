@@ -36,6 +36,7 @@
 #include <bm/config.h>
 #include <bm/spdlog/spdlog.h>
 
+#include <iosfwd>
 #include <string>
 
 namespace bm {
@@ -92,14 +93,18 @@ class Logger {
   static void set_logger_file(const std::string &filename,
                               bool force_flush = false);
 
+  //! Log all messages to the given output stream. Mostly used for testing.
+  // NOLINTNEXTLINE(runtime/references)
+  static void set_logger_ostream(std::ostream &os);
+
+  static void unset_logger();
+
  private:
   static spdlog::logger *init_logger();
 
   static spdlog::level::level_enum to_spd_level(LogLevel level);
 
   static void set_pattern();
-
-  static void unset_logger();
 
  private:
   static spdlog::logger *logger;
