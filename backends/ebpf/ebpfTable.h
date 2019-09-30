@@ -74,6 +74,7 @@ class EBPFCounterTable final : public EBPFTableBase {
     void emitTypes(CodeBuilder*);
     void emitInstance(CodeBuilder* builder);
     void emitCounterIncrement(CodeBuilder* builder, const IR::MethodCallExpression* expression);
+    void emitCounterAdd(CodeBuilder* builder, const IR::MethodCallExpression* expression);
     void emitMethodInvocation(CodeBuilder* builder, const P4::ExternMethod* method);
 };
 
