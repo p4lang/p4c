@@ -157,7 +157,7 @@ const IR::Type *IR::Primitive::inferOperandType(int operand) const {
     if ((name == "execute") && operand == 2)
         return IR::Type::Bits::get(32);
     if (name == "modify_field_conditionally" && operand == 1)
-        return IR::Type::Boolean::get();
+        return IR::Type::Bits::get(1);
     if (name == "shift_left" && operand == 1) {
         if (operands.at(0)->type->width_bits() > operands.at(1)->type->width_bits())
             return operands.at(0)->type;
