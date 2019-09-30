@@ -215,7 +215,7 @@ namespace UBPF {
 
     void UBPFProgram::emitHeaderInstances(EBPF::CodeBuilder* builder) {
         builder->emitIndent();
-        parser->headerType->declare(builder, parser->headers->name.name, false);
+        parser->headerType->declare(builder, parser->headers->name.name, true);
     }
 
     void UBPFProgram::emitLocalVariables(EBPF::CodeBuilder* builder) {

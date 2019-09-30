@@ -18,6 +18,7 @@ limitations under the License.
 #include <string>
 #include <iostream>
 
+#include "control-plane/p4RuntimeSerializer.h"
 #include "ir/ir.h"
 #include "lib/log.h"
 #include "lib/gc.h"
@@ -47,6 +48,10 @@ void compile(EbpfOptions& options) {
     P4::FrontEnd frontend;
     frontend.addDebugHook(hook);
     program = frontend.run(options, program);
+    if (::errorCount() > 0)
+        return;
+
+    P4::serializeP4RuntimeIfRequired(program, options);
     if (::errorCount() > 0)
         return;
 

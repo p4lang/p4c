@@ -1768,7 +1768,6 @@ P4RuntimeSerializer::generateP4Runtime(const IR::P4Program* program, cstring arc
         ::error("Arch '%1%' not supported by P4Runtime serializer", arch);
         return P4RuntimeAPI{new p4configv1::P4Info(), new p4v1::WriteRequest()};
     }
-
     // Generate a new version of the program that satisfies the prerequisites of
     // the P4Runtime analysis code.
     P4::ReferenceMap refMap;
@@ -1948,6 +1947,8 @@ P4RuntimeSerializer::serializeP4RuntimeIfRequired(const P4RuntimeAPI& p4Runtime,
 P4RuntimeSerializer::P4RuntimeSerializer() {
     registerArch("v1model", new ControlPlaneAPI::Standard::V1ModelArchHandlerBuilder());
     registerArch("psa", new ControlPlaneAPI::Standard::PSAArchHandlerBuilder());
+    // FIXME: this is really temporary solution. There should be a way to extend control plane outside of p4runtime files.
+    registerArch("ubpfFilter", new ControlPlaneAPI::Standard::V1ModelArchHandlerBuilder());
 }
 
 P4RuntimeSerializer*
