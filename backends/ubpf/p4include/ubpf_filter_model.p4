@@ -10,6 +10,7 @@ package ubpfFilter<H>(parse<H> prs,
                       filter<H> filt);
 
 extern void mark_to_drop();
+extern void mark_to_pass();
 
 extern Register<T, S> {
   Register(bit<32> size);
@@ -19,6 +20,12 @@ extern Register<T, S> {
 }
 
 extern bit<48> ubpf_time_get_ns();
+
+enum HashAlgorithm {
+    lookup3
+}
+
+extern void hash<D>(out bit<32> result, in HashAlgorithm algo, in D data);
 
 #endif
 

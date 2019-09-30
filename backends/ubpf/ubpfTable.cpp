@@ -70,6 +70,9 @@ namespace UBPF {
                     if (ef->method->name.name == program->model.drop.name) {
                         builder->append("pass = false");
                         return false;
+                    } else if (ef->method->name.name == program->model.pass.name) {
+                        builder->append("pass = true");
+                        return false;
                     } else if (ef->method->name.name ==
                                program->model.ubpf_time_get_ns.name) {
                         builder->emitIndent();

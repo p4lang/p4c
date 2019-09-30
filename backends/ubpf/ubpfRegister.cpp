@@ -19,6 +19,7 @@ limitations under the License.
 namespace UBPF {
 
     static int const_value_counter = 0;
+    static int register_read_counter = 0;
 
     UBPFRegister::UBPFRegister(const UBPFProgram *program,
                                const IR::ExternBlock *block,
@@ -144,6 +145,13 @@ namespace UBPF {
             return;
         }
 
+        if (arg_value->expression->is<IR::Member>()) {
+            auto variableName = arg_value->expression->toString();
+            target->emitTableUpdate(builder, dataMapName, keyName,
+                                    "&(" + variableName + ")");
+            return;
+        }
+
         target->emitTableUpdate(codeGen, builder, dataMapName, keyName,
                                 arg_value->expression);
     }
@@ -166,7 +174,10 @@ namespace UBPF {
                                                                        1);
         }
 
-        const_value_counter++;
+        if (register_read_counter % 2 == 1) {
+            const_value_counter++;
+        }
+        register_read_counter++;
         target->emitTableLookup(builder, dataMapName, keyName, "");
     }
 }

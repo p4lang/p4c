@@ -47,13 +47,25 @@ namespace UBPF {
         ::Model::Elem value;
     };
 
+    struct Algorithm_Model : public ::Model::Enum_Model {
+        Algorithm_Model() : ::Model::Enum_Model("HashAlgorithm"),
+                            lookup3("lookup3") {}
+
+        ::Model::Elem lookup3;
+    };
+
     class UBPFModel : public ::Model::Model {
     protected:
         UBPFModel() : Model("0.1"),
                       CPacketName("pkt"),
                       packet("packet", P4::P4CoreLibrary::instance.packetIn, 0),
-                      filter(), registerModel(),
-                      drop("mark_to_drop"), ubpf_time_get_ns("ubpf_time_get_ns") {}
+                      filter(),
+                      registerModel(),
+                      drop("mark_to_drop"),
+                      pass("mark_to_pass"),
+                      ubpf_time_get_ns("ubpf_time_get_ns"),
+                      hashAlgorithm(),
+                      hash("hash") {}
 
     public:
         static UBPFModel instance;
@@ -64,7 +76,10 @@ namespace UBPF {
         Filter_Model filter;
         Register_Model registerModel;
         ::Model::Elem drop;
+        ::Model::Elem pass;
         ::Model::Elem ubpf_time_get_ns;
+        Algorithm_Model hashAlgorithm;
+        ::Model::Elem hash;
 
         static cstring reserved(cstring name) { return reservedPrefix + name; }
     };

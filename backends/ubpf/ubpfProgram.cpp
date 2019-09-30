@@ -156,6 +156,9 @@ namespace UBPF {
                 !d->is<IR::Type_Extern>() && !d->is<IR::Type_Parser>() &&
                 !d->is<IR::Type_Control>() && !d->is<IR::Type_Typedef>() &&
                 !d->is<IR::Type_Error>()) {
+                if (d->toString().startsWith("struct tuple")) {
+                    continue;
+                }
                 CHECK_NULL(UBPFTypeFactory::instance);
                 auto type = UBPFTypeFactory::instance->create(d->to<IR::Type>());
                 if (type == nullptr)

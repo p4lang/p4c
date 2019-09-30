@@ -68,7 +68,13 @@ namespace UBPF {
 
         bool preorder(const IR::Operation_Binary *b) override;
 
+        bool comparison(const IR::Operation_Relation* b) override;
+
         bool preorder(const IR::Member *expression) override;
+
+        void addPadding(std::vector<cstring> &paddingInitializers, unsigned int remainingBits, int paddingIndex) const;
+
+        cstring createHashKeyInstance(const P4::ExternFunction *function);
     };
 
     class UBPFControl : public EBPF::EBPFObject {
@@ -119,7 +125,7 @@ namespace UBPF {
         bool variableIsUsedAsPointer(const IR::Declaration_Variable *vd,
                                      const IR::AssignmentStatement *assiStat) const;
 
-        const IR::Statement *findStatementWhereVariableIsNotUsedAsPointer(
+        const IR::Statement *findFirstStatementWhereVariableIsUsedAsPointer(
                 const IR::Statement *statement,
                 const IR::Declaration_Variable *vd);
     };
