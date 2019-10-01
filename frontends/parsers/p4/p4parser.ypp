@@ -1192,12 +1192,10 @@ actionList
     ;
 
 actionRef
-    : optAnnotations name                { auto expr = new IR::PathExpression(*$2);
-                                           $$ = new IR::ActionListElement(@2, $1, expr);}
-    | optAnnotations name "(" argumentList ")"
-                                         { auto method = new IR::PathExpression(*$2);
-                                           auto mce = new IR::MethodCallExpression(
-                                               @2+@4, method, $4);
+    : optAnnotations prefixedNonTypeName { $$ = new IR::ActionListElement(@2, $1, new IR::PathExpression($2));}
+    | optAnnotations prefixedNonTypeName "(" argumentList ")"
+                                         { auto mce = new IR::MethodCallExpression(
+                                             @2+@4, new IR::PathExpression($2), $4);
                                            $$ = new IR::ActionListElement(@2, $1, mce); }
     ;
 
