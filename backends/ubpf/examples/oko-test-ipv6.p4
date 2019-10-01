@@ -54,7 +54,9 @@ struct Headers_t
     IPv6_h     ipv6;
 }
 
-parser prs(packet_in p, out Headers_t headers) {
+struct metadata { }
+
+parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
     state start {
         p.extract(headers.ethernet);
         transition select(headers.ethernet.etherType) {
@@ -82,7 +84,7 @@ parser prs(packet_in p, out Headers_t headers) {
 
 }
 
-control pipe(inout Headers_t headers) {
+control pipe(inout Headers_t headers, inout metadata meta) {
 
     action Reject() {
         mark_to_drop();
@@ -122,4 +124,4 @@ control pipe(inout Headers_t headers) {
     }
 }
 
-ubpfFilter(prs(), pipe()) main;
+ubpf(prs(), pipe()) main;

@@ -59,6 +59,8 @@ namespace UBPF {
 
         void emitHeaderInstances(EBPF::CodeBuilder *builder) override;
 
+        void emitMetadataInstance(EBPF::CodeBuilder *builder) const;
+
         void emitLocalVariables(EBPF::CodeBuilder *builder) override;
 
         void emitPipeline(EBPF::CodeBuilder *builder) override;

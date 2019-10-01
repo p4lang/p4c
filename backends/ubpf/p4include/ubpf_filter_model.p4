@@ -3,11 +3,11 @@
 
 #include <core.p4>
 
-parser parse<H>(packet_in packet, out H headers);
-control filter<H>(inout H headers);
+parser parse<H, M>(packet_in packet, out H headers, inout M meta);
+control filter<H, M>(inout H headers, inout M meta);
 
-package ubpfFilter<H>(parse<H> prs,
-                      filter<H> filt);
+package ubpf<H, M>(parse<H, M> prs,
+                      filter<H, M> filt);
 
 extern void mark_to_drop();
 extern void mark_to_pass();

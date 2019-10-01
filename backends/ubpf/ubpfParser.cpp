@@ -337,14 +337,15 @@ namespace UBPF {
 
     bool UBPFParser::build() {
         auto pl = parserBlock->container->type->applyParams;
-        if (pl->size() != 2) {
-            ::error("Expected parser to have exactly 2 parameters");
+        if (pl->size() != 3) {
+            ::error("Expected parser to have exactly 3 parameters");
             return false;
         }
 
         auto it = pl->parameters.begin();
         packet = *it; ++it;
-        headers = *it;
+        headers = *it; ++it;
+        metadata = *it;
         for (auto state : parserBlock->container->states) {
             auto ps = new UBPFParserState(state, this);
             states.push_back(ps);
@@ -354,6 +355,11 @@ namespace UBPF {
         if (ht == nullptr)
             return false;
         headerType = UBPFTypeFactory::instance->create(ht);
+
+        auto md = typeMap->getType(metadata);
+        if (md == nullptr)
+            return false;
+        metadataType = UBPFTypeFactory::instance->create(md);
         return true;
     }
 

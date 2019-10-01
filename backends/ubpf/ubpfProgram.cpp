@@ -24,8 +24,8 @@ namespace UBPF {
     bool UBPFProgram::build() {
         bool success = true;
         auto pack = toplevel->getMain();
-        if (pack->type->name != "ubpfFilter")
-            ::warning(ErrorType::WARN_INVALID, "%1%: the main ubpf package should be called ubpfFilter"
+        if (pack->type->name != "ubpf")
+            ::warning(ErrorType::WARN_INVALID, "%1%: the main ubpf package should be called ubpf"
                                                "; are you using the wrong architecture?", pack->type->name);
 
         if (pack->getConstructorParameters()->size() != 2) {
@@ -70,6 +70,11 @@ namespace UBPF {
         emitHeaderInstances(builder);
         builder->append(" = ");
         parser->headerType->emitInitializer(builder);
+        builder->endOfStatement(true);
+
+        emitMetadataInstance(builder);
+        builder->append(" = ");
+        parser->metadataType->emitInitializer(builder);
         builder->endOfStatement(true);
 
         emitLocalVariables(builder);
@@ -218,6 +223,11 @@ namespace UBPF {
         parser->headerType->declare(builder, parser->headers->name.name, true);
     }
 
+    void UBPFProgram::emitMetadataInstance(EBPF::CodeBuilder* builder) const {
+        builder->emitIndent();
+        parser->metadataType->declare(builder, parser->metadata->name.name, false);
+    }
+
     void UBPFProgram::emitLocalVariables(EBPF::CodeBuilder* builder) {
         builder->emitIndent();
         builder->appendFormat("int %s = 0;", offsetVar.c_str());
@@ -252,5 +262,5 @@ namespace UBPF {
         control->emit(builder);
         builder->blockEnd(true);
     }
-
+    
 }

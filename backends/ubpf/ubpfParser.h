@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "backends/ebpf/ebpfParser.h"
+#include "ubpfType.h"
 
 namespace UBPF {
 
@@ -31,6 +32,8 @@ public:
 class UBPFParser : public EBPF::EBPFParser {
 public:
     std::vector<UBPFParserState*> states;
+    const IR::Parameter*          metadata;
+    EBPF::EBPFType*               metadataType;
 
     UBPFParser(const EBPF::EBPFProgram* program, const IR::ParserBlock* block,
                const P4::TypeMap* typeMap) : EBPF::EBPFParser(program, block, typeMap) {}

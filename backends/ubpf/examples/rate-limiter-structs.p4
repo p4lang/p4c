@@ -53,4 +53,4 @@ control pipe(inout Headers_t hdr) {
     }
 }
 
-ubpfFilter(prs(), pipe()) main;
+ubpf(prs(), pipe()) main;

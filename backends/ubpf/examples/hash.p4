@@ -69,8 +69,9 @@ struct metadata_t {
     bit<32> conn_id;
 }
 
+struct metadata { }
 
-parser prs(packet_in packet, out headers_t hdr) {
+parser prs(packet_in packet, out headers_t hdr, inout metadata meta) {
     state start {
         transition parse_ethernet;
     }
@@ -91,7 +92,7 @@ parser prs(packet_in packet, out headers_t hdr) {
     }
 }
 
-control pipe(inout headers_t hdr) {
+control pipe(inout headers_t hdr, inout metadata meta) {
     metadata_t meta;
 
     Register<bit<32>, bit<32>>(65536) conn_state;
@@ -167,4 +168,4 @@ control pipe(inout headers_t hdr) {
     }
 }
 
-ubpfFilter(prs(), pipe()) main;
+ubpf(prs(), pipe()) main;

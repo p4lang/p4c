@@ -42,7 +42,11 @@ struct Headers_t
     IPv4_h     ipv4;
 }
 
-parser prs(packet_in p, out Headers_t headers) {
+struct metadata {
+
+}
+
+parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
     state start {
         p.extract(headers.ethernet);
         transition select(headers.ethernet.etherType) {
@@ -65,7 +69,7 @@ parser prs(packet_in p, out Headers_t headers) {
 
 }
 
-control pipe(inout Headers_t headers) {
+control pipe(inout Headers_t headers, inout metadata meta) {
 
     action ip_modify_saddr(bit<32> srcAddr) {
         headers.ipv4.srcAddr = srcAddr;
@@ -137,4 +141,4 @@ control pipe(inout Headers_t headers) {
     }
 }
 
-ubpfFilter(prs(), pipe()) main;
+ubpf(prs(), pipe()) main;

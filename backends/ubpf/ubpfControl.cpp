@@ -915,8 +915,8 @@ namespace UBPF {
     bool UBPFControl::build() {
         passVariable = program->refMap->newName("pass");
         auto pl = controlBlock->container->type->applyParams;
-        if (pl->size() != 1) {
-            ::error("Expected control block to have exactly 1 parameter");
+        if (pl->size() != 2) {
+            ::error("Expected control block to have exactly 2 parameter");
             return false;
         }
 
