@@ -62,6 +62,9 @@ class DoConstantFolding : public Transform {
 
     /// Maps declaration constants to constant expressions
     std::map<const IR::Declaration_Constant*, const IR::Expression*> constants;
+    // True if we are processing a left side of an assignment; we should not
+    // we substituting constants there.
+    bool assignmentTarget;
 
  protected:
     /// @returns a constant equivalent to @p expr or `nullptr`
@@ -104,6 +107,7 @@ class DoConstantFolding : public Transform {
     DoConstantFolding(const ReferenceMap* refMap, TypeMap* typeMap, bool warnings = true) :
             refMap(refMap), typeMap(typeMap), typesKnown(typeMap != nullptr), warnings(warnings) {
         visitDagOnce = true; setName("DoConstantFolding");
+        assignmentTarget = false;
     }
 
     const IR::Node* postorder(IR::Declaration_Constant* d) override;
@@ -140,6 +144,8 @@ class DoConstantFolding : public Transform {
     const IR::Node* postorder(IR::Type_Varbits* type) override;
     const IR::Node* postorder(IR::SelectExpression* e) override;
     const IR::Node* postorder(IR::IfStatement* statement) override;
+    const IR::Node* preorder(IR::AssignmentStatement* statement) override;
+    const IR::Node* preorder(IR::ArrayIndex* e) override;
 };
 
 /** Optionally runs @ref TypeChecking if @p typeMap is not
