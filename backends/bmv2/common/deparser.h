@@ -33,7 +33,8 @@ class DeparserConverter : public Inspector {
 
  protected:
     Util::IJson* convertDeparser(const IR::P4Control* ctrl);
-    void convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body, Util::JsonArray* result);
+    void convertDeparserBody(const IR::Vector<IR::StatOrDecl>* body,
+                            Util::JsonArray* order, Util::JsonArray* primitives);
  public:
     bool preorder(const IR::P4Control* ctrl);
 

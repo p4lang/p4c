@@ -665,6 +665,13 @@ void ExpressionConverter::postorder(const IR::PathExpression* expression)  {
     }
 }
 
+void ExpressionConverter::postorder(const IR::StringLiteral* expression)   {
+    auto result = new Util::JsonObject();
+    result->emplace("type", "string");
+    result->emplace("value", expression->value);
+    mapExpression(expression, result);
+}
+
 void ExpressionConverter::postorder(const IR::TypeNameExpression* expression)  {
     (void)expression;
 }

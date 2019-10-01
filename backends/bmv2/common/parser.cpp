@@ -17,6 +17,8 @@ limitations under the License.
 #include "parser.h"
 #include "JsonObjects.h"
 #include "backend.h"
+#include "extern.h"
+#include "frontends/p4/fromv1.0/v1model.h"
 
 namespace BMV2 {
 
@@ -200,6 +202,13 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                 paramsArray->append(expr);
                 paramValue->emplace("op", extFuncName);
                 paramValue->emplace_non_null("source_info", mce->sourceInfoJsonObj());
+            } else if (extFuncName == P4V1::V1Model::instance.log_msg.name) {
+                BUG_CHECK(mce->arguments->size() == 2 || mce->arguments->size() == 1,
+                            "%1%: Expected 1 or 2 arguments", mce);
+                result->emplace("op", "primitive");
+                auto ef = minst->to<P4::ExternFunction>();
+                auto ijson = ExternConverter::cvtExternFunction(ctxt, ef, mce, stat, false);
+                params->append(ijson);
                 return result;
             }
         } else if (minst->is<P4::BuiltInMethod>()) {
