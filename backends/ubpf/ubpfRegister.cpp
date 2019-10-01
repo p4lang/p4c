@@ -174,9 +174,7 @@ namespace UBPF {
                                                                        1);
         }
 
-        if (register_read_counter % 2 == 1) {
-            const_value_counter++;
-        }
+        const_value_counter++;
         register_read_counter++;
         target->emitTableLookup(builder, dataMapName, keyName, "");
     }

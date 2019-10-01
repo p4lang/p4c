@@ -1,4 +1,4 @@
-#include "../p4include/ubpf_filter_model.p4"
+#include "ubpf_filter_model.p4"
 #include <core.p4>
 
 #define SYNSENT 1
