@@ -99,6 +99,11 @@ class Pattern {
         Pattern operator^(const Pattern &a) { return Pattern(*this) ^ a; }
         Pattern operator&&(const Pattern &a) { return Pattern(*this) && a; }
         Pattern operator||(const Pattern &a) { return Pattern(*this) || a; }
+        // avoid ambiguous overloads with operator const T * above
+        Pattern operator+(int a) { return Pattern(*this) + Pattern(a); }
+        Pattern operator-(int a) { return Pattern(*this) - Pattern(a); }
+        Pattern operator==(int a) { return Pattern(*this) == Pattern(a); }
+        Pattern operator!=(int a) { return Pattern(*this) != Pattern(a); }
     };
 
     template <class T> Pattern(const T*&m) : pattern(new MatchExt<T>(m)) {}
