@@ -28,6 +28,7 @@
 namespace P4 {
 // Forward declaration to avoid includes
 class TypeMap;
+class ReferenceMap;
 }  // end namespace P4
 
 namespace graphs {

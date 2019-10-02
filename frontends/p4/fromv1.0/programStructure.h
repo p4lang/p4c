@@ -121,7 +121,7 @@ class ProgramStructure {
 
     std::unordered_set<cstring>                 allNames;
     NamedObjectInfo<const IR::Type_StructLike*> types;
-    NamedObjectInfo<const IR::Metadata*>        metadata;
+    NamedObjectInfo<const IR::HeaderOrMetadata*> metadata;
     NamedObjectInfo<const IR::Header*>          headers;
     NamedObjectInfo<const IR::HeaderStack*>     stacks;
     NamedObjectInfo<const IR::V1Control*>       controls;
@@ -173,8 +173,19 @@ class ProgramStructure {
 
     std::map<cstring, const IR::ParserState*> parserEntryPoints;
 
-    /// system header type
-    std::set<cstring> systemHeaderTypes;
+    // P4-14 struct/header type can be converted to three types
+    // of struct/header in P4-16.
+    // 1) as part of the 'hdr' struct
+    // 2) as part of the 'meta' struct
+    // 3) as the parameters of a parser/control block
+    // In case 1 and 2, the converter needs to fix the path
+    // by prepending 'hdr.' or 'meta.' to the ConcreteHeaderRef.
+    // In case 3. the converter only needs to convert headerRef to PathExpression
+    std::set<cstring> headerTypes;
+    std::set<cstring> metadataTypes;
+    std::set<cstring> parameterTypes;
+    std::set<cstring> metadataInstances;
+    std::set<cstring> headerInstances;
 
     /// extra local instances to control created by primitive translation
     std::vector<const IR::Declaration*> localInstances;
@@ -251,8 +262,10 @@ class ProgramStructure {
                        std::unordered_set<const IR::Type*> *converted);
     virtual void createParser();
     virtual void createControls();
-    void createDeparserInternal(IR::ID hdrType, IR::ID hdrParam, IR::ID pktParam, IR::ID deparserId,
-            std::vector<IR::Parameter*>, IR::Direction,
+    void createDeparserInternal(IR::ID deparserId,
+            IR::Parameter* packetOut,
+            IR::Parameter* headers,
+            std::vector<IR::Parameter*>,
             IR::IndexedVector<IR::Declaration> controlLocals,
             std::function<IR::BlockStatement*(IR::BlockStatement*)>);
     virtual void createDeparser();
@@ -279,6 +292,10 @@ class ProgramStructure {
     void tablesReferred(const IR::V1Control* control, std::vector<const IR::V1Table*> &out);
     bool isHeader(const IR::ConcreteHeaderRef* nhr) const;
     cstring makeUniqueName(cstring base);
+
+    const IR::Type* explodeType(const std::vector<const IR::Type::Bits *> &fieldTypes);
+    const IR::Expression* explodeLabel(const IR::Constant* value, const IR::Constant* mask,
+            const std::vector<const IR::Type::Bits *> &fieldTypes);
 
     virtual IR::Vector<IR::Argument>* createApplyArguments(cstring n);
 

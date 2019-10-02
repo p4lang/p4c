@@ -209,8 +209,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
 
     passes.setName("FrontEnd");
     passes.setStopOnError(true);
-    passes.addDebugHooks(hooks);
-
+    passes.addDebugHooks(hooks, true);
     const IR::P4Program* result = program->apply(passes);
     return result;
 }
