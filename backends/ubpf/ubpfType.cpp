@@ -39,7 +39,7 @@ namespace UBPF {
             result = create(canon);
             result = new EBPF::EBPFTypeName(tn, result);
         } else if (auto te = type->to<IR::Type_Enum>()) {
-            result = new EBPF::EBPFEnumType(te);
+            result = new UBPFEnumType(te);
         } else if (auto ts = type->to<IR::Type_Stack>()) {
             auto et = create(ts->elementType);
             if (et == nullptr)
@@ -136,5 +136,20 @@ namespace UBPF {
         if (asPointer)
             builder->append("*");
         builder->appendFormat("%s", id.c_str());
+    }
+
+    //////////////////////////////////////////////////////////////////////////////
+
+    void UBPFEnumType::emit(EBPF::CodeBuilder* builder) {
+        builder->append("enum ");
+        auto et = getType();
+        builder->append(et->name);
+        builder->blockStart();
+        for (auto m : et->members) {
+            builder->append(m->name);
+            builder->appendLine(",");
+        }
+        builder->blockEnd(false);
+        builder->endOfStatement(true);
     }
 }

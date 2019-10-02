@@ -55,6 +55,12 @@ public:
     void declare(EBPF::CodeBuilder* builder, cstring id, bool asPointer) override;
 };
 
+class UBPFEnumType : public EBPF::EBPFEnumType {
+public:
+    explicit UBPFEnumType(const IR::Type_Enum* type) : EBPF::EBPFEnumType(type) {}
+    void emit(EBPF::CodeBuilder* builder) override;
+};
+
 
 }
 
