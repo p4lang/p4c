@@ -97,7 +97,7 @@ TEST_F(Diagnostics, P4_16_Error) {
     EXPECT_EQ(1u, ::errorCount());
 }
 
-TEST_F(Diagnostics, P4_14_Disable) {
+TEST_F(Diagnostics, DISABLED_P4_14_Disable) {
     auto test = createP4_14DiagnosticsTestCase(P4_SOURCE(R"(
         @pragma diagnostic uninitialized_use disable
     )"));
@@ -105,7 +105,7 @@ TEST_F(Diagnostics, P4_14_Disable) {
     EXPECT_EQ(0u, ::diagnosticCount());
 }
 
-TEST_F(Diagnostics, P4_14_Warn) {
+TEST_F(Diagnostics, DISABLED_P4_14_Warn) {
     auto test = createP4_14DiagnosticsTestCase(P4_SOURCE(R"(
         @pragma diagnostic uninitialized_use warn
     )"));
@@ -114,7 +114,7 @@ TEST_F(Diagnostics, P4_14_Warn) {
     EXPECT_EQ(0u, ::errorCount());
 }
 
-TEST_F(Diagnostics, P4_14_Error) {
+TEST_F(Diagnostics, DISABLED_P4_14_Error) {
     auto test = createP4_14DiagnosticsTestCase(P4_SOURCE(R"(
         @pragma diagnostic uninitialized_use error
     )"));
