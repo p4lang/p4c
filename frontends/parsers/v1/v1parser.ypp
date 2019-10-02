@@ -190,7 +190,8 @@ static const IR::Expression *removeRedundantValid(const IR::Expression *e);
 %token<cstring> IDENTIFIER STRING_LITERAL
 %token<UnparsedConstant> INTEGER
 
-%left EXPRLIST
+%precedence IDENTIFIER
+%left EXPRLIST COMMA R_PAREN
 %right ASSIGN
 %left OR
 %left AND
@@ -202,7 +203,7 @@ static const IR::Expression *removeRedundantValid(const IR::Expression *e);
 %left SHL SHR
 %left PLUS MINUS
 %left MUL DIV MOD
-%right PREFIX
+%right PREFIX L_PAREN
 %precedence IF
 %precedence ELSE
 
@@ -947,12 +948,14 @@ blackbox_config: /* epsilon */ { $$ = new IR::NameMap<IR::Property>; }
             ($$=$1)->add($2, new IR::Property(@2+@4, $2, pv, false)); }
     ;
 
-expressions: /* epsilon */
+expressions: /* epsilon */ %prec EXPRLIST
       { $$ = new IR::Vector<IR::Expression>; }
     | expressions expression %prec EXPRLIST
       { ($$=$1)->push_back($2); $$->srcInfo += @2; }
     | expressions "," expression %prec EXPRLIST
       { ($$=$1)->push_back($3); $$->srcInfo += @3; }
+    | expressions IDENTIFIER "(" expressions ")" %prec EXPRLIST
+      { ($$=$1)->push_back(new IR::Primitive(@2, $2, $4)); $$->srcInfo += @5; }
 ;
 
 pragma_operands: /* epsilon */
