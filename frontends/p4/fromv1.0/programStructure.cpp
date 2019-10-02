@@ -596,6 +596,7 @@ void ProgramStructure::loadModel() {
     metadataTypes.insert(v1model.standardMetadataType.name);
     headerInstances.insert(v1model.standardMetadataType.name);
     headerTypes.insert(v1model.standardMetadataType.name);
+    parameterTypes.insert(v1model.standardMetadataType.name);
 }
 
 namespace {
@@ -769,7 +770,7 @@ void ProgramStructure::createDeparser() {
     auto headpath = new IR::Path(v1model.headersType.Id());
     auto headtype = new IR::Type_Name(headpath);
     auto headers = new IR::Parameter(
-            v1model.deparser.headersParam.Id(), IR::Direction::InOut, headtype);
+            v1model.deparser.headersParam.Id(), IR::Direction::In, headtype);
     conversionContext->header = paramReference(headers);
 
     createDeparserInternal(v1model.deparser.Id(), packetOut, headers);
