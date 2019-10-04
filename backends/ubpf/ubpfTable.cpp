@@ -385,7 +385,7 @@ namespace UBPF {
 
     void UBPFTable::setTableSize(const IR::TableBlock *table) {
         auto properties = table->container->properties->properties;
-        size = std::numeric_limits<int>::max();// Default value
+        size = UINT16_MAX;// Default value 2^16. Next power is too big for ubpf vm. For instance 2^30 causes error while loading program.
         for (auto property : properties) {
             if (property->name.name == table->container->properties->sizePropertyName && property->value->is<IR::ExpressionValue>()) {
                 auto pExpressionValue = property->value->to<IR::ExpressionValue>();
