@@ -39,6 +39,7 @@ limitations under the License.
 #include <iostream>  // NOLINT(build/include_order)
 
 #include "frontends/common/constantParsing.h"
+#include "frontends/common/options.h"
 #include "ir/ir.h"
 #include "lib/cstring.h"
 #include "lib/source_file.h"
@@ -440,8 +441,14 @@ optAnnotations
     ;
 
 annotations
-    : annotation  { $$ = new IR::Vector<IR::Annotation>(); $$->push_back($1); }
-    | annotations annotation { $$ = $1; $$->push_back($2); }
+    : annotation  {
+       $$ = new IR::Vector<IR::Annotation>();
+       if (! P4CContext::get().options().isAnnotationDisabled($1))
+         $$->push_back($1); }
+    | annotations annotation {
+       $$ = $1;
+       if (! P4CContext::get().options().isAnnotationDisabled($2))
+          $$->push_back($2); }
     ;
 
 annotation

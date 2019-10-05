@@ -132,6 +132,16 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                        return true; },
                    "Choose output format for the P4Runtime API description (default is binary).\n"
                    "[Deprecated; use '--p4runtime-files' instead].");
+    registerOption("--disable-annotations", "annotations",
+                   [this](const char *arg) {
+                      auto copy = strdup(arg);
+                      while (auto name = strsep(&copy, ","))
+                          disabledAnnotations.insert(name);
+                      return true;
+                   },
+                   "Specify a (comma separated) list of annotations that should be ignored by\n"
+                   "the compiler. A warning will be printed that the annotation is ignored",
+                   OptionFlags::OptionalArgument);
     registerOption("--Wdisable", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
@@ -436,6 +446,15 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
             break;
         }
     }
+}
+
+bool CompilerOptions::isAnnotationDisabled(const IR::Annotation *a) const {
+    if (disabledAnnotations.count(a->name.name) > 0) {
+        ::warning(ErrorType::WARN_IGNORE,
+                  "%1% is ignored because it was explicitly disabled", a);
+        return true;
+    }
+    return false;
 }
 
 DebugHook CompilerOptions::getDebugHook() const {

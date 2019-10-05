@@ -158,6 +158,10 @@ class BackendDriver:
             self.add_command_option('compiler',
                                     "--p4runtime-files {}".format(opts.p4runtime_files))
 
+        # disable annotations
+        if opts.disabled_annos is not None:
+            self.add_command_option('compiler',
+                                    '--disable-annotations={}'.format(opts.disabled_annos))
         # set developer options
         if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
             for option in opts.log_levels:
