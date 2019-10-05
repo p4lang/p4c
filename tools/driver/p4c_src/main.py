@@ -98,7 +98,7 @@ def main():
     parser.add_argument("-a", "--arch", dest="arch",
                         help="specify target architecture",
                         action="store", default="v1model")
-    parser.add_argument("-c", dest="run_all",
+    parser.add_argument("-c", "--compile", dest="run_all",
                         help="Only run preprocess, compile, and assemble steps",
                         action="store_true", default=True)
     parser.add_argument("-D", dest="preprocessor_defines",
@@ -144,6 +144,9 @@ def main():
                         dest="show_target_help",
                         help="Display target specific command line options.",
                         action="store_true", default=False)
+    parser.add_argument("--disable-annotations", "--disable-pragmas",
+                        dest="disabled_annos", action="store",
+                        help="List of annotations (comma separated) that should be ignored by the compiler.")
     parser.add_argument("-S", dest="run_till_assembler",
                         help="Only run the preprocess and compilation steps",
                         action="store_true", default=False)

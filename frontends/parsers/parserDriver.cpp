@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 
+#include "frontends/common/options.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/parsers/p4/p4lexer.hpp"
 #include "frontends/parsers/p4/p4AnnotationLexer.hpp"
@@ -374,7 +375,8 @@ void V1ParserDriver::clearPragmas() {
 }
 
 void V1ParserDriver::addPragma(IR::Annotation* pragma) {
-    currentPragmas.push_back(pragma);
+    if (!P4CContext::get().options().isAnnotationDisabled(pragma))
+        currentPragmas.push_back(pragma);
 }
 
 IR::Vector<IR::Annotation> V1ParserDriver::takePragmasAsVector() {

@@ -19,6 +19,7 @@ limitations under the License.
 #ifndef FRONTENDS_COMMON_OPTIONS_H_
 #define FRONTENDS_COMMON_OPTIONS_H_
 
+#include <set>
 #include <unordered_map>
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
@@ -38,6 +39,9 @@ extern const char* p4_14includePath;
 class CompilerOptions : public Util::Options {
     bool close_input = false;
     static const char* defaultMessage;
+
+    // annotation names that are to be ignored by the compiler
+    std::set<cstring> disabledAnnotations;
 
     // Checks if parsed options make sense with respect to each-other.
     void validateOptions() const;
@@ -138,6 +142,8 @@ class CompilerOptions : public Util::Options {
     // Get a debug hook function suitable for insertion
     // in the pass managers that are executed.
     DebugHook getDebugHook() const;
+
+    bool isAnnotationDisabled(const IR::Annotation *) const;
 
     virtual bool enable_intrinsic_metadata_fix();
 };
