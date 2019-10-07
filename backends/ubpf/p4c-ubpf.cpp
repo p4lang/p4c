@@ -18,6 +18,7 @@ limitations under the License.
 #include <string>
 #include <iostream>
 
+#include "backends/ubpf/version.h"
 #include "control-plane/p4RuntimeSerializer.h"
 #include "ir/ir.h"
 #include "lib/log.h"
@@ -73,7 +74,7 @@ int main(int argc, char *const argv[]) {
 
     AutoCompileContext autoEbpfContext(new EbpfContext);
     auto& options = EbpfContext::get().options();
-    options.compilerVersion = "0.0.1-beta";
+    options.compilerVersion = P4C_UBPF_VERSION_STRING;
 
     if (options.process(argc, argv) != nullptr) {
         options.setInputFile();

@@ -101,8 +101,6 @@ namespace UBPF {
 
         void emitTableTypes(EBPF::CodeBuilder *builder);
 
-        void emitTableInitializers(EBPF::CodeBuilder *builder);
-
         void emitTableInstances(EBPF::CodeBuilder *builder);
 
         bool build();

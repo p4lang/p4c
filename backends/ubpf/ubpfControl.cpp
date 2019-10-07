@@ -907,11 +907,6 @@ namespace UBPF {
             it.second->emitInstance(builder);
     }
 
-    void UBPFControl::emitTableInitializers(EBPF::CodeBuilder *builder) {
-        for (auto it : tables)
-            it.second->emitInitializer(builder);
-    }
-
     bool UBPFControl::build() {
         passVariable = program->refMap->newName("pass");
         auto pl = controlBlock->container->type->applyParams;
