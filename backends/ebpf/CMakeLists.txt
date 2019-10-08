@@ -50,6 +50,19 @@ set (P4C_EBPF_HDRS
   lower.h
   )
 
+# determine the kernel version
+execute_process(COMMAND uname -r
+  OUTPUT_VARIABLE P4C_EBPF_KERNEL_VER
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  RESULT_VARIABLE rc)
+message(STATUS "Detected kernel version: ${P4C_EBPF_KERNEL_VER}")
+if (EXISTS /usr/src/linux-headers-${P4C_EBPF_KERNEL_VER}/include/uapi/linux)
+  include_directories(/usr/src/linux-headers-${P4C_EBPF_KERNEL_VER}/include/uapi/linux)
+  set (SUPPORTS_KERNEL True)
+else()
+  set (SUPPORTS_KERNEL False)
+endif()
+
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_EBPF_SRCS};${P4C_EBPF_HDRS}")
 
 set (P4C_EBPF_DIST_HEADERS p4include/ebpf_model.p4)
@@ -93,8 +106,6 @@ set (XFAIL_TESTS_TEST)
 set (EBPF_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*_ebpf.p4"
   )
-
-set (SUPPORTS_KERNEL True)
 
 # Check if the kernel version is new enough to support ebpf features
 set (MIN_KERNEL 4.15.0)
