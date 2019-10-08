@@ -144,7 +144,8 @@ def main():
                         dest="show_target_help",
                         help="Display target specific command line options.",
                         action="store_true", default=False)
-    parser.add_argument("--disable-annotations", "--disable-pragmas",
+    parser.add_argument("--disable-annotations", "--disable-annotation",
+                        "--disable-pragmas", "--disable-pragma",
                         dest="disabled_annos", action="store",
                         help="List of annotations (comma separated) that should be ignored by the compiler.")
     parser.add_argument("-S", dest="run_till_assembler",
