@@ -100,5 +100,5 @@ set_source_files_properties (${CONTROLPLANE_SOURCES} PROPERTIES COMPILE_FLAGS "-
 set_source_files_properties (${P4RUNTIME_GEN_SRCS} PROPERTIES GENERATED TRUE)
 build_unified(CONTROLPLANE_SOURCES)
 add_library (controlplane STATIC ${CONTROLPLANE_SOURCES} )
-target_link_libraries (controlplane ${PROTOBUF_LIBRARY})
+target_link_libraries (controlplane ${PROTOBUF_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
 add_dependencies (controlplane mkP4configdir genIR frontend)
