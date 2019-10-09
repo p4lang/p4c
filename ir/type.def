@@ -446,6 +446,7 @@ class Type_Table : Type, IApply {
     /// names for the fields of the struct returned
     /// by applying a table
     static const ID hit;
+    static const ID miss;
     static const ID action_run;
     const IR::Type* getP4Type() const override { return nullptr; }
     dbprint { out << table->name; }

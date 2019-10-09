@@ -180,8 +180,9 @@ P4Table::getApplyMethodType() const {
             actions);
     auto alv = actions->value->to<IR::ActionList>();
     auto hit = new IR::StructField(IR::Type_Table::hit, IR::Type_Boolean::get());
+    auto miss = new IR::StructField(IR::Type_Table::miss, IR::Type_Boolean::get());
     auto label = new IR::StructField(IR::Type_Table::action_run, new IR::Type_ActionEnum(alv));
-    auto rettype = new IR::Type_Struct(ID(name), { hit, label });
+    auto rettype = new IR::Type_Struct(ID(name), { hit, miss, label });
     auto applyMethod = new IR::Type_Method(rettype, new IR::ParameterList());
     return applyMethod;
 }
