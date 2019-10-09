@@ -56,8 +56,8 @@ execute_process(COMMAND uname -r
   OUTPUT_STRIP_TRAILING_WHITESPACE
   RESULT_VARIABLE rc)
 message(STATUS "Detected kernel version: ${P4C_EBPF_KERNEL_VER}")
-if (EXISTS /usr/src/linux-headers-${P4C_EBPF_KERNEL_VER}/include/uapi/linux)
-  include_directories(/usr/src/linux-headers-${P4C_EBPF_KERNEL_VER}/include/uapi/linux)
+if (EXISTS /usr/src/linux-headers-${P4C_EBPF_KERNEL_VER}/include)
+  include_directories(/usr/src/linux-headers-${P4C_EBPF_KERNEL_VER}/include)
   set (SUPPORTS_KERNEL True)
 else()
   set (SUPPORTS_KERNEL False)
