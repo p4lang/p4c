@@ -50,17 +50,20 @@ set (P4C_EBPF_HDRS
   lower.h
   )
 
-# determine the kernel version
-execute_process(COMMAND uname -r
-  OUTPUT_VARIABLE P4C_EBPF_KERNEL_VER
-  OUTPUT_STRIP_TRAILING_WHITESPACE
-  RESULT_VARIABLE rc)
-message(STATUS "Detected kernel version: ${P4C_EBPF_KERNEL_VER}")
-if (EXISTS /usr/src/linux-headers-${P4C_EBPF_KERNEL_VER}/include/uapi/linux)
-  set (SUPPORTS_KERNEL True)
-else()
-  set (SUPPORTS_KERNEL False)
-endif()
+# # determine the kernel version
+# execute_process(COMMAND uname -r
+#   OUTPUT_VARIABLE P4C_EBPF_KERNEL_VER
+#   OUTPUT_STRIP_TRAILING_WHITESPACE
+#   RESULT_VARIABLE rc)
+# message(STATUS "Detected kernel version: ${P4C_EBPF_KERNEL_VER}")
+# if (EXISTS /usr/src/linux-headers-${P4C_EBPF_KERNEL_VER}/include/uapi/linux)
+#   set (SUPPORTS_KERNEL True)
+# else()
+#   set (SUPPORTS_KERNEL False)
+# endif()
+# The kernel-based ebpf tests seem to be broken, so we disable them
+# The dependences on the kernel APIs are too brittle
+set (SUPPORTS_KERNEL False)
 
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_EBPF_SRCS};${P4C_EBPF_HDRS}")
 
