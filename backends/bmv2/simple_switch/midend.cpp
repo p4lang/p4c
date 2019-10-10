@@ -40,6 +40,7 @@ limitations under the License.
 #include "midend/local_copyprop.h"
 #include "midend/nestedStructs.h"
 #include "midend/removeLeftSlices.h"
+#include "midend/removeMiss.h"
 #include "midend/removeParameters.h"
 #include "midend/removeUnusedParameters.h"
 #include "midend/simplifyKey.h"
@@ -69,6 +70,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options, std::ostream* o
         std::initializer_list<Visitor *> midendPasses = {
             options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
             new P4::CheckTableSize(),
+            new P4::RemoveMiss(&refMap, &typeMap),
             new P4::EliminateNewtype(&refMap, &typeMap),
             new P4::EliminateSerEnums(&refMap, &typeMap),
             new P4::RemoveActionParameters(&refMap, &typeMap),

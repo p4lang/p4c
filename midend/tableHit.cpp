@@ -21,16 +21,25 @@ namespace P4 {
 
 const IR::Node* DoTableHit::postorder(IR::AssignmentStatement* statement) {
     LOG3("Visiting " << getOriginal());
-    if (!TableApplySolver::isHit(statement->right, refMap, typeMap))
+    auto right = statement->right;
+    bool negated = false;
+    if (auto neg = right->to<IR::LNot>()) {
+        // We handle !hit, which may have been created by the removal of miss
+        negated = true;
+        right = neg->expr;
+    }
+
+    if (!TableApplySolver::isHit(right, refMap, typeMap))
         return statement;
 
     auto tstat = new IR::AssignmentStatement(
         statement->left->clone(), new IR::BoolLiteral(true));
     auto fstat = new IR::AssignmentStatement(
         statement->left->clone(), new IR::BoolLiteral(false));
-    auto ifStatement = new IR::IfStatement(
-        statement->right, tstat, fstat);
-    return ifStatement;
+    if (negated)
+        return new IR::IfStatement(right, fstat, tstat);
+    else
+        return new IR::IfStatement(right, tstat, fstat);
 }
 
 }  // namespace P4
