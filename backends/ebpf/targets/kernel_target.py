@@ -42,9 +42,9 @@ class Target(EBPFTarget):
         # Input eBPF byte code
         args += self.template + ".o "
         # The bpf program to attach to the interface
-        args += "BPFOBJ=" + self.template + ".o "
+        args += "BPFOBJ=" + self.template + ".o"
         # add the folder local to the P4 file to the list of includes
-        args += "INCLUDES+=-I" + os.path.dirname(self.options.p4filename)
+        args += " INCLUDES+=-I" + os.path.dirname(self.options.p4filename)
         errmsg = "Failed to compile the eBPF byte code:"
         return run_timeout(self.options.verbose, args, TIMEOUT,
                            self.outputs, errmsg)
