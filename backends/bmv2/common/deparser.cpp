@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "backend.h"
 #include "deparser.h"
+#include "extern.h"
 
 namespace BMV2 {
 
