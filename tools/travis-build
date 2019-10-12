@@ -43,7 +43,8 @@ apt-get update
 apt-get install -y --no-install-recommends \
   ${P4C_DEPS} \
   ${P4C_EBPF_DEPS} \
-  ${P4C_RUNTIME_DEPS}
+  ${P4C_RUNTIME_DEPS} \
+  git
 
 # We install pip with get-pip.py (https://pip.pypa.io/en/stable/installing/)
 # since the Ubuntu package manager's version of pip seems to be broken on
@@ -83,7 +84,7 @@ make install
 /usr/local/bin/ccache -p -s
 
 if [[ "${IMAGE_TYPE}" == "build" ]] ; then
-  apt-get purge -y ${P4C_DEPS}
+  apt-get purge -y ${P4C_DEPS} git
   apt-get autoremove --purge -y
   rm -rf /p4c /var/cache/apt/* /var/lib/apt/lists/*
   echo 'Build image ready'
