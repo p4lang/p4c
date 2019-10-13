@@ -14,6 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <limits>
+
 #include "gtest/gtest.h"
 #include "helpers.h"
 #include "ir/ir.h"
@@ -72,12 +74,7 @@ TEST_F(ConstantExpr, TestLong) {
     auto res = c.asLong();
     EXPECT_EQ(res, val);
 
-    /* long is inconsistent! */
-#if __WORDSIZE == 64
-    val = INT64_MAX;
-#else
-    val = INT32_MAX;
-#endif
+    val = std::numeric_limits<decltype(val)>::max();
     IR::Constant m(val);
     res = m.asLong();
     EXPECT_EQ(res, val);
