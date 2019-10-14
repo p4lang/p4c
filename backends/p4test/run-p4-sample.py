@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # Copyright 2013-present Barefoot Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,7 @@
 
 # Runs the compiler on a sample P4 V1.2 program
 
-from __future__ import print_function
+
 from subprocess import Popen,PIPE
 from threading import Thread
 import errno
@@ -196,7 +196,7 @@ def process_file(options, argv):
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
     ppfile = tmpdir + "/" + basename                  # after parsing
-    referenceOutputs = ",".join(rename.keys())
+    referenceOutputs = ",".join(list(rename.keys()))
     stderr = tmpdir + "/" + basename + "-stderr"
     p4runtimeFile = tmpdir + "/" + basename + ".p4info.txt"
     p4runtimeEntriesFile = tmpdir + "/" + basename + ".entries.txt"

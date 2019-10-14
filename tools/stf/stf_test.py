@@ -1,4 +1,4 @@
-#! /usr/bin/env python2
+#! /usr/bin/env python3
 #
 # Copyright 2013-present Barefoot Networks, Inc.
 #
@@ -25,8 +25,8 @@ import re
 import time
 import traceback
 import unittest
-from stf_parser import STFParser
-from stf_runner import STFRunner
+from .stf_parser import STFParser
+from .stf_runner import STFRunner
 
 class STFTest (STFRunner):
     def __init__(self, ast, testname):

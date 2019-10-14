@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # Copyright 2013-present Barefoot Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,6 @@
 
 # Runs the BMv2 behavioral model simulator with input from an stf file
 
-from __future__ import print_function
 from subprocess import Popen
 from threading import Thread
 from glob import glob
@@ -33,7 +32,6 @@ import time
 import random
 import errno
 import socket
-from string import maketrans
 from collections import OrderedDict
 try:
     from scapy.layers.all import *
@@ -46,7 +44,7 @@ FAILURE = 1
 
 class TimeoutException(Exception): pass
 def signal_handler(signum, frame):
-    raise TimeoutException, "Timed out!"
+    raise TimeoutException("Timed out!")
 signal.signal(signal.SIGALRM, signal_handler)
 
 class Options(object):
@@ -73,14 +71,19 @@ def ByteToHex(byteStr):
     return ''.join( [ "%02X " % ord( x ) for x in byteStr ] ).strip()
 
 def HexToByte(hexStr):
-    bytes = []
+    print(bytes.fromhex(hexStr))
+    return bytes.fromhex(hexStr)
+    byteArray = []
     hexStr = ''.join( hexStr.split(" ") )
     for i in range(0, len(hexStr), 2):
-        bytes.append( chr( int (hexStr[i:i+2], 16 ) ) )
-    return ''.join( bytes )
+        byteArray.append( chr( int (hexStr[i:i+2], 16 ) ) )
+    # return ''.join( byteArray )
+    return bytes(''.join(byteArray), encoding='utf8')
 
 def convert_packet_bin2hexstr(pkt_bin):
-    return ''.join(ByteToHex(str(pkt_bin)).split()).upper()
+    # return ''.join(ByteToHex(str(pkt_bin)).split()).upper()
+    # return ''.join([ bytes.hex(x).upper() for x in pkt_bin ])
+    return bytes.hex(str(pkt_bin).encode())
 
 def convert_packet_stf2hexstr(pkt_stf_text):
     return ''.join(pkt_stf_text.split()).upper()
@@ -191,7 +194,7 @@ class TableKeyInstance(object):
         assert isinstance(tableKey, TableKey)
         self.values = {}
         self.key = tableKey
-        for f,t in tableKey.fields.iteritems():
+        for f,t in tableKey.fields.items():
             if t == "ternary":
                 self.values[f] = "0&&&0"
             elif t == "lpm":
@@ -262,7 +265,7 @@ class TableKeyInstance(object):
             return value
         values = "0123456789abcdefABCDEF*"
         replacements = (mask * 22) + "0"
-        trans = maketrans(values, replacements)
+        trans = str.maketrans(values, replacements)
         m = value.translate(trans)
         return prefix + value.replace("*", "0") + "&&&" + prefix + m
     def makeLpm(self, value):
@@ -390,7 +393,7 @@ class RunBMV2(object):
     def do_cli_command(self, cmd):
         if self.options.verbose:
             print(cmd)
-        self.cli_stdin.write(cmd + "\n")
+        self.cli_stdin.write(bytes(cmd + "\n", encoding='utf8'))
         self.cli_stdin.flush()
         self.packetDelay = 1
     def do_command(self, cmd):
@@ -417,7 +420,7 @@ class RunBMV2(object):
             data = ''.join(data.split())
             time.sleep(self.packetDelay)
             try:
-                self.interfaces[interface]._write_packet(HexToByte(data))
+                self.interfaces[interface]._write_packet(bytes.fromhex(data))
             except ValueError:
                 reportError("Invalid packet data", data)
                 return FAILURE
@@ -607,7 +610,7 @@ class RunBMV2(object):
             # could mean the system is very slow for some reason). If one of the
             # 2 conditions above is met, the test is considered a FAILURE.
             start = time.time()
-            sw_timeout = 60
+            sw_timeout = 60000
             # open input interfaces
             # DANGER -- it is critical that we open these fifos in the same
             # order as bmv2, as otherwise we'll deadlock.  Would be nice if we
@@ -649,7 +652,7 @@ class RunBMV2(object):
                         line, comment = nextWord(line, "#")
                         self.do_command(line)
                 cli.stdin.close()
-                for interface, fp in self.interfaces.iteritems():
+                for interface, fp in self.interfaces.items():
                     fp.close()
                 # Give time to the model to execute
                 time.sleep(2)
@@ -776,7 +779,8 @@ class RunBMV2(object):
                 del self.expected[interface]
         if len(self.expected) != 0:
             # didn't find all the expects we were expecting
-            reportError("Expected packects on ports", self.expected.keys(), "not received")
+            reportError("Expected packets on ports",
+                        list(self.expected.keys()), "not received")
             return FAILURE
         else:
             return SUCCESS

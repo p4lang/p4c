@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # Copyright 2013-present Barefoot Networks, Inc.
 # Copyright 2018 VMware, Inc.
 #
@@ -23,7 +23,6 @@
    5. Evaluates the output with the expected result from the .stf file
 """
 
-from __future__ import print_function
 import sys
 import os
 import tempfile

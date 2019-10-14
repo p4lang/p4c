@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
+
 import sys
 import os
 
@@ -40,7 +40,7 @@ class Config(object):
         try:
             data = f.read()
         except:
-            print "error", path
+            print("error", path)
         f.close()
 
         try:
@@ -51,4 +51,4 @@ class Config(object):
                 raise
         except:
             import traceback
-            print traceback.format_exc()
+            print(traceback.format_exc())

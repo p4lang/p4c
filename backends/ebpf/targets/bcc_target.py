@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # Copyright 2013-present Barefoot Networks, Inc.
 # Copyright 2018 VMware, Inc.
 #
@@ -16,7 +16,7 @@
 
 import os
 import sys
-from target import EBPFTarget
+from .target import EBPFTarget
 sys.path.insert(0, os.path.dirname(
     os.path.realpath(__file__)) + '/../../../tools')
 from testutils import *

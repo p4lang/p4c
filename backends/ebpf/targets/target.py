@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # Copyright 2013-present Barefoot Networks, Inc.
 # Copyright 2018 VMware, Inc.
 #
@@ -28,7 +28,7 @@ import sys
 from glob import glob
 from scapy.utils import rdpcap, RawPcapWriter
 from scapy.layers.all import *
-from ebpfstf import create_table_file, parse_stf_file
+from .ebpfstf import create_table_file, parse_stf_file
 # path to the tools folder of the compiler
 sys.path.insert(0, os.path.dirname(
     os.path.realpath(__file__)) + '/../../../tools')
@@ -124,7 +124,7 @@ class EBPFTarget(object):
             fp._write_header(None)
             for pkt_data in pkts:
                 try:
-                    fp._write_packet(pkt_data)
+                    fp._write_packet(bytes(pkt_data))
                 except ValueError:
                     report_err(self.outputs["stderr"],
                                "Invalid packet data", pkt_data)

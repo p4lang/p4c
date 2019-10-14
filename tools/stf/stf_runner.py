@@ -18,7 +18,6 @@
 # the STF statements.
 
 import logging
-from string import maketrans
 
 class STFNamedEntry:
     """
@@ -40,7 +39,7 @@ class STFRunner(object):
     def __init__(self, ast, testname):
         testNameEscapeChars = "-"
         testNameEscapes = "_"*len(testNameEscapeChars)
-        self._transTable = maketrans(testNameEscapeChars,testNameEscapes)
+        self._transTable = str.maketrans(testNameEscapeChars,testNameEscapes)
         self._testname = testname.translate(self._transTable)
         logging.basicConfig(level=logging.INFO)
         self._logger = logging.getLogger(self._testname)

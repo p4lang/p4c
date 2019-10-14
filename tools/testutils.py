@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # Copyright 2013-present Barefoot Networks, Inc.
 # Copyright 2018 VMware, Inc.
 #
@@ -17,7 +17,6 @@
 """ Defines helper functions for a general testing framework. Used by multiple
     Python testing scripts in the backends folder."""
 
-from __future__ import print_function
 import subprocess
 from subprocess import Popen
 from threading import Timer

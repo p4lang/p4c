@@ -17,6 +17,10 @@ export P4C_DEPS="bison \
              libgc-dev \
              libgmp-dev \
              pkg-config \
+             python \
+             python3 \
+             python3-pip \
+             python3-setuptools \
              tcpdump"
 
 export P4C_EBPF_DEPS="libpcap-dev \
@@ -32,7 +36,7 @@ export P4C_RUNTIME_DEPS="cpp \
                      libgc1c2 \
                      libgmp10 \
                      libgmpxx4ldbl \
-                     python"
+                     python3"
 
 export P4C_PIP_PACKAGES="ipaddr \
                      pyroute2 \
@@ -46,6 +50,8 @@ apt-get install -y --no-install-recommends \
   ${P4C_RUNTIME_DEPS} \
   git
 
+# ! ------- BEGIN Python2 -------------------------------------------------
+# ! ------- Should be deleted when conversion to Python3 is finalized -----
 # We install pip with get-pip.py (https://pip.pypa.io/en/stable/installing/)
 # since the Ubuntu package manager's version of pip seems to be broken on
 # Ubuntu 16.04.
@@ -56,7 +62,12 @@ python get-pip.py
 cd -
 rm -rf /tmp/pip
 
+# just to make sure we don't break other downstream projects that have
+# not yet converted, we still install python2 and the modules
 pip install $P4C_PIP_PACKAGES
+# ! ------  END Python2 ----------------------------------------------------
+
+pip3 install $P4C_PIP_PACKAGES
 
 function build() {
   mkdir build

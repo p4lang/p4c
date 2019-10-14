@@ -79,18 +79,18 @@ def find_file(directory, filename, binary=True):
         if check_file(executable): return executable
 
     # find the file up the hierarchy
-    dir	= os.path.abspath(get_script_dir())
+    dir = os.path.abspath(get_script_dir())
     if os.path.basename(filename) != filename:
         directory = os.path.join(directory, os.path.dirname(filename))
         filename = os.path.basename(filename)
     while dir != "/":
         path_to_file = os.path.join(dir, directory)
         if os.path.isdir(path_to_file):
-	    files = os.listdir(path_to_file)
+            files = os.listdir(path_to_file)
             if filename in files:
                 executable = os.path.join(path_to_file, filename)
                 if check_file(executable): return executable
 
-	dir = os.path.dirname(dir)
-    print 'File', filename, 'Not found'
+        dir = os.path.dirname(dir)
+    print('File {} not found'.format(filename))
     sys.exit(1)
