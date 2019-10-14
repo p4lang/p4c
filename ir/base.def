@@ -295,10 +295,8 @@ class Annotations {
     // Add this annotation.
     Annotations addOrReplace(cstring name, Expression expr) const {
         auto rv = clone();
-        auto &vec = rv->annotations;
-        vec.resize(std::remove_if(vec.begin(), vec.end(),
-            [name](const Annotation *a)->bool { return a->name == name; }) - vec.begin());
-        vec.push_back(new Annotation(name, Vector<Expression>(expr)));
+        remove_if(rv->annotations, [name](const Annotation *a)->bool { return a->name == name; });
+        rv->annotations.push_back(new Annotation(name, Vector<Expression>(expr)));
         return rv; }
 #emit
     typedef std::function<bool(const IR::Annotation*)> Filter;

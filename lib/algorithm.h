@@ -35,19 +35,18 @@ template<class C, class Pred>
 inline bool contains_if(C &c, Pred pred) {
     return std::find_if(c.begin(), c.end(), pred) != c.end(); }
 
-template<class Pred, class Key, class Compare = std::less<Key>, class Alloc = std::allocator<Key>>
-inline void remove_if(std::set<Key, Compare, Alloc> &set, Pred pred) {
-    auto it = set.begin();
-    while (it != set.end())
+template<class C, class Pred>
+inline void erase_if(C &c, Pred pred) {
+    for (auto it = c.begin(); it != c.end();) {
         if (pred(*it))
-            it = set.erase(it);
+            it = c.erase(it);
         else
-            ++it;
+            ++it; }
 }
 
 template<class C, class Pred>
-inline typename C::iterator remove_if(C &c, Pred pred) {
-    return std::remove_if(c.begin(), c.end(), pred); }
+inline void remove_if(C &c, Pred pred) {
+    c.erase(std::remove_if(c.begin(), c.end(), pred), c.end()); }
 
 template<class C, class T>
 inline typename C::iterator find(C &c, const T &val) {
