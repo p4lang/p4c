@@ -26,8 +26,8 @@
 import os
 import sys
 from glob import glob
-from scapy.utils import rdpcap
-from scapy.layers.all import RawPcapWriter
+from scapy.utils import rdpcap, RawPcapWriter
+from scapy.layers.all import *
 from ebpfstf import create_table_file, parse_stf_file
 # path to the tools folder of the compiler
 sys.path.insert(0, os.path.dirname(
