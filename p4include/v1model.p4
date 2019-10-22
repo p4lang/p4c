@@ -415,7 +415,7 @@ extern Checksum16 {
  *                   may be supported).  Must be a compile-time
  *                   constant.
  */
-extern void verify_checksum<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
+extern void verify_checksum<T, O>(in bool condition, in T data, in O checksum, HashAlgorithm algo);
 
 /***
  * Computes the checksum of the supplied data and writes it to the
@@ -447,7 +447,7 @@ extern void update_checksum<T, O>(in bool condition, in T data, inout O checksum
  * Calling verify_checksum_with_payload is only supported in the
  * VerifyChecksum control.
  */
-extern void verify_checksum_with_payload<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
+extern void verify_checksum_with_payload<T, O>(in bool condition, in T data, in O checksum, HashAlgorithm algo);
 
 /**
  * update_checksum_with_payload is identical in all ways to
