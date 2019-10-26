@@ -17,7 +17,7 @@ fields.
 
 The P4_16 language also now has a Portable Switch Architecture (PSA)
 defined in [its own specification](https://p4.org/specs).  As of
-September 2018, a partial implementation of the PSA architecture has
+October 2019, a partial implementation of the PSA architecture has
 been done, but it is not yet complete.  It will be implemented in a
 separate executable program named `psa_switch`, separate from the
 `simple_switch` program described here.
@@ -559,6 +559,106 @@ control ingress(inout headers_t hdr,
     // ... more code here ...
 }
 ```
+
+
+## Restrictions on recirculate, resubmit, and clone operations
+
+Recirculate, resubmit, and clone operations _that do not preserve
+metadata_, i.e. they have an empty list of fields whose value should
+be preserved, work as expected when using p4c and simple_switch, with
+either P4_14 as the source language, or P4_16 plus the v1model
+architecture.
+
+Unfortunately, at least some of these operations that attempt to
+preserve metadata _do not work correctly_ -- they still cause the
+packet to be recirculated, resubmitted, or cloned, but they do not
+preserve the desired metadata field values.
+
+This is a known issue that has been discussed at length by the p4c
+developers and P4 language design work group, and the decision made
+is:
+
+* Long term, the P4_16 [Portable Switch
+  Architecture](https://p4.org/specs/) uses a different mechanism for
+  specifying metadata to preserve than the v1model architecture uses,
+  and should work correctly.  As of October 2019 the implementation of
+  PSA is not complete, so this does not help one write working code
+  today.
+* If someone wishes to volunteer to make changes to p4c and/or
+  simple_switch for improving this situation, please contact the P4
+  language design work group and coordinate with them.
+  * The preferred form of help would be to complete the Portable
+    Switch Architecture implementation.
+  * Another possibility would be enhancing the v1model architecture
+    implementation.  Several approaches for doing so that have been
+    discussed are described
+    [here](https://github.com/jafingerhut/p4-guide/blob/master/v1model-special-ops/README-resubmit-examples.md).
+
+Note that this issue affects not only P4_16 programs using the v1model
+architecture, but also P4_14 programs compiled using the `p4c`
+compiler, because internally `p4c` translates P4_14 to P4_16 code
+before the part of the compiler that causes the problem to occur.
+
+The fundamental issue is that P4_14 has the `field_list` construct,
+which is a restricted kind of _named reference_ to other fields.  When
+these field lists are used in P4_14 for recirculate, resubmit, and
+clone operations that preserve metadata, they direct the target not
+only to read those field values, but also later write them (for the
+packet after recirculating, resubmitting, or cloning).  P4_16 field
+lists using the syntax `{field_1, field_2, ...}` are restricted to
+accessing the current values of the fields at the time the statement
+or expression is executed, but do not represent any kind of reference,
+and by the P4_16 language specification cannot cause the values of
+those fields to change at another part of the program.
+
+
+### Hints on distinguishing when metadata is preserved correctly
+
+Below are some details for anyone trying, by hook or by crook, to make
+preservation of metadata work with the current p4c implementation,
+without the future improvements mentioned above.
+
+There is no known simple rule to determine which invocations of these
+operations will preserve metadata correctly and which will not.  If
+you want at least some indication, examine the BMv2 JSON file produced
+as output from the compiler.
+
+The Python program
+[bmv2-json-check.py](https://github.com/p4pktgen/p4pktgen/blob/master/tools/bmv2-json-check.py)
+attempts to determine whether any field list used to preserve metadata
+fields for recirculate, resubmit, or clone operations looks like it
+has the name of a compiler-generated temporary variable.  Warning: its
+methods are fairly basic, and thus there is no guarantee that if the
+script says there is no problem, metadata preservation will work
+correctly, or conversely that if the script says there are suspicious
+things found, metadata preservation will not work correctly.  It
+automates what is described below.
+
+Every recirculate, resubmit, and clone operation is represented in
+JSON data inside the BMv2 JSON file.  Search for one of these strings,
+_with_ the double quote marks around them:
+
+* `"recirculate"` - only parameter is a field_list id
+* `"resubmit"` - only parameter is a field_list id
+* `"clone_ingress_pkt_to_egress"` - second parameter is a field_list id
+* `"clone_egress_pkt_to_egress"` - second parameter is a field_list id
+
+You can find the fields in each field list in the section of the BMv2
+JSON file with the key `"field_lists"`.  Whatever the field names are
+there, simple_switch _will preserve the values of fields with those
+names_.  The primary issue is whether those fields correspond to the
+same storage locations that the compiler uses to represent the fields
+you want to preserve.
+
+In some cases they are, which is often the case if the field names in
+the BMv2 JSON file look the same as, or similar to, the field names in
+your P4 source code.
+
+In some cases they represent different storage locations,
+e.g. compiler-generated temporary variables used to hold a copy of the
+field you want to preserve.  A field name beginning with `tmp.` is a
+hint of this as of p4c 2019-Oct, but this is a p4c implementation
+detail that could change.
 
 
 ## P4_16 plus v1model architecture notes
