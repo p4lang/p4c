@@ -848,6 +848,75 @@ code you want near the end of the `Egress` control.
 
 ### BMv2 `register` implementation notes
 
+Both p4c and simple_switch support register arrays with elements that
+are arbitrary values of type `bit<W>` or `int<W>`, but not other
+types, e.g. structs would be convenient for this purpose in some
+programs, but this is not supported.
+
+As an example of a way to work around this limitation, suppose you
+wanted a struct with three fields x, y, and z with types `bit<8>`,
+`bit<3>`, and `bit<6>`.  You can emulate this by making a register
+array with elements of type `bit<17>` (the total width of all 3
+fields), and use P4_16 bit slicing operations to separate the 3 fields
+from the 17-bit value after reading from the register array, and P4_16
+bit vector concatenation operations to combine 3 fields together,
+forming a 17-bit result, before writing the 17-bit value to the
+register array.
+
+```
+    register< bit<17> >(512) my_register_array;
+    bit<9> index;
+
+    // ... other code here ...
+
+    // This example action is written assuming that some code executed
+    // earlier (not shown here) has assigned a correct desired value
+    // to the variable 'index'.
+
+    action update_fields() {
+        bit<17> tmp;
+        bit<8> x;
+        bit<3> y;
+        bit<6> z;
+
+        my_register_array.read(tmp, (bit<32>) index);
+        // Use bit slicing to extract out the logically separate parts
+        // of the 17-bit register entry value.
+	x = tmp[16:9];
+	y = tmp[8:6];
+	z = tmp[5:0];
+
+	// Whatever modifications you wish to make to x, y, and z go
+	// here.  This is just an example code snippet, not known to
+	// do anything useful for packet processing.
+	if (y == 0) {
+            x = x + 1;
+            y = 7;
+            z = z ^ hdr.ethernet.etherType[3:0];
+	} else {
+            // leave x unchanged
+            y = y - 1;
+            z = z << 1;
+	}
+
+        // Concatenate the updated values of x, y, and z back into a
+        // 17-bit value for writing back to the register.
+	tmp = x ++ y ++ z;
+        my_register_array.write((bit<32>) index, tmp);
+    }
+```
+
+While p4c and simple_switch support as wide a bit width W as you wish
+for array elements for packet processing, the Thrift API (used by
+`simple_switch_CLI`, and perhaps some switch controller software) only
+supports control plane read and write operations for array elements up
+to 64 bits wide (see the type `BmRegisterValue` in file
+[`standard.thrift`](https://github.com/p4lang/behavioral-model/blob/master/thrift_src/standard.thrift),
+which is a 64-bit integer as of October 2019).  The P4Runtime API does
+not have this limitation, but there is no P4Runtime implementation of
+register read and write operations yet for simple_switch:
+[p4lang/PI#376](https://github.com/p4lang/PI/issues/376)
+
 The BMv2 v1model implementation supports parallel execution.  It uses
 locking of all register objects accessed within an action to guarantee
 that the execution of all steps within an action are atomic, relative
@@ -856,10 +925,10 @@ accesses some of the same register objects.  You need not use the
 `@atomic` annotation in your P4_16 program in order for this level of
 atomicity to be guaranteed for you.
 
-It is still recommended to use the `@atomic` annotation in your P4_16
-code to mark blocks of code containing multiple register accesses that
-you wish to be atomic relative to other packets being processed, but
-as of March 2019, the BMv2 implementation ignores such annotations.
+BMv2 v1model as of October 2019 _ignores_ `@atomic` annotations in
+your P4_16 programs.  Thus even if you use such annotations, this does
+not cause BMv2 to treat any block of code larger than one action call
+as an atomic transaction.
 
 
 ### BMv2 `random` implementation notes
