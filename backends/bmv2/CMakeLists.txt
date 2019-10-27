@@ -186,6 +186,8 @@ set (XFAIL_TESTS
   testdata/p4_16_samples/issue1882-1-bmv2.p4
   # Uses non-constant array index
   testdata/p4_16_samples/issue1989-bmv2.p4
+  # Use unknown extern, test should be added with args
+  testdata/p4_16_samples/extern-funcs-bmv2.p4
 )
 
 if (HAVE_SIMPLE_SWITCH)
