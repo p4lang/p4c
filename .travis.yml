@@ -25,7 +25,12 @@ before_install:
 
 install:
   - if [[ $TRAVIS_OS_NAME == 'linux' ]] ; then tools/start_ccache; fi
-  - if [[ $TRAVIS_OS_NAME == 'linux' ]] ; then docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test . ; fi
+  # To flush out issues with unified vs. non-unified builds, do a non-unified
+  # build before continuing with the rest, which produces a unified build.
+  # This is done here on MacOS; for Linux, this is done in Dockerfile.
+  - if [[ $TRAVIS_OS_NAME == 'linux' ]] ; then docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=OFF . ; fi
+  - if [[ $TRAVIS_OS_NAME == 'linux' ]] ; then docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON . ; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]] ; then ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=OFF && cd build && make -j2 && cd .. && git clean -xfd ; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' ]] ; then ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE && cd build && make -j 2 ; fi
 
 script:
