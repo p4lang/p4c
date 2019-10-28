@@ -3002,15 +3002,26 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), nullptr));
         auto args = new IR::Vector<IR::ArgumentInfo>();
         bool constArgs = true;
+        size_t i = 0;
         for (auto aarg : *expression->arguments) {
             auto arg = aarg->expression;
             auto argType = getType(arg);
             if (argType == nullptr)
                 return expression;
+            // Unification allows tuples to be assigned to headers and structs.
+            // We should only allow this if the source expression is a ListExpression.
+            if (argType->is<IR::Type_Tuple>() && ft->parameters->size() > i) {
+                auto paramType = ft->parameters->parameters.at(i)->type;
+                if (paramType->is<IR::Type_StructLike>() && !arg->is<IR::ListExpression>()) {
+                    typeError("%1%: Cannot assign a %2% to a %3%", expression, argType, paramType);
+                    return expression;
+                }
+            }
             auto argInfo = new IR::ArgumentInfo(arg->srcInfo, isLeftValue(arg),
                                                 isCompileTimeConstant(arg), argType, aarg->name);
             args->push_back(argInfo);
             constArgs &= isCompileTimeConstant(arg);
+            i++;
         }
         auto typeArgs = new IR::Vector<IR::Type>();
         for (auto ta : *expression->typeArguments) {

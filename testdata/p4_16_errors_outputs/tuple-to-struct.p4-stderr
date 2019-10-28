@@ -1,0 +1,9 @@
+tuple-to-struct.p4(22): [--Werror=type-error] error: d.apply: Cannot assign a Tuple(1) to a struct s
+    d.apply(a);
+    ^^^^^^^^^^
+tuple-to-struct.p4(19)
+  tuple<bit<8>> a = { 0 };
+  ^^^^^^^^^^^^^
+tuple-to-struct.p4(8)
+struct s {
+       ^
