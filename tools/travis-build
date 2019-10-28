@@ -66,19 +66,7 @@ function build() {
   make
 }
 
-if [[ "${BUILD_NON_UNIFIED}" == 1 ]] ; then
-  build '-DENABLE_UNIFIED_COMPILATION=OFF'
-
-  if [[ "${BUILD_UNIFIED}" == 1 ]] ; then
-    # Clean up for the unified build.
-    cd ..
-    git clean -xfd
-  fi
-fi
-
-if [[ "${BUILD_UNIFIED}" == 1 || "${BUILD_NON_UNIFIED}" != 1 ]] ; then
-  build
-fi
+build "-DENABLE_UNIFIED_COMPILATION=${ENABLE_UNIFIED_COMPILATION}"
 
 make install
 /usr/local/bin/ccache -p -s

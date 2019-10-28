@@ -11,12 +11,8 @@ ARG MAKEFLAGS=-j2
 # removed from the image.
 ARG IMAGE_TYPE=build
 
-# Whether to do a unified and/or non-unified build. These are not mutually
-# exclusive. If both are enabled, then a non-unified build will be done first.
-# On success, the results are thrown away before doing a unified build. If
-# neither is enabled, a unified build will be made by default.
-ARG BUILD_UNIFIED=1
-ARG BUILD_NON_UNIFIED=0
+# Whether to do a unified build.
+ARG ENABLE_UNIFIED_COMPILATION=ON
 
 # Delegate the build to tools/travis-build.
 COPY . /p4c/
