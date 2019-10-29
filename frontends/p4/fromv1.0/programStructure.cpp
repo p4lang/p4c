@@ -2459,27 +2459,19 @@ void ProgramStructure::createChecksumUpdates() {
             args->push_back(new IR::Argument(dest));
             args->push_back(new IR::Argument(algo));
             auto methodCallExpression = new IR::MethodCallExpression(method, args);
+            auto mc = new IR::MethodCallStatement(methodCallExpression);
             IR::Annotation* zeros_as_ones_annot  = nullptr;
             if (flc->algorithm->names[0] == "csum16_udp") {
-                zeros_as_ones_annot = new IR::Annotation(IR::ID("zeros_as_ones"),
-                              {methodCallExpression});
-                body->annotations = body->annotations->add(zeros_as_ones_annot);
+                zeros_as_ones_annot = new IR::Annotation(IR::ID("zeros_as_ones"), {});
+                mc->annotations = mc->annotations->add(zeros_as_ones_annot);
             }
-            auto mc = new IR::MethodCallStatement(methodCallExpression);
+            for (auto annot : flc->annotations->annotations) {
+                mc->annotations = mc->annotations->add(annot);
+            }
             body->push_back(mc);
 
             for (auto annot : cf->annotations->annotations)
                 body->annotations = body->annotations->add(annot);
-
-            IR::Vector<IR::Expression> annotExpr;
-            for (auto annot : flc->annotations->annotations) {
-                for (auto e : annot->expr) {
-                    annotExpr.push_back(e);
-                }
-                annotExpr.push_back(new IR::StringLiteral(IR::ID(dest->toString())));
-                auto newAnnot = new IR::Annotation(annot->name, annotExpr);
-                body->annotations = body->annotations->add(newAnnot);
-            }
 
             LOG3("Converted " << flc);
         }
