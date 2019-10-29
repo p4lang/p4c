@@ -2471,8 +2471,15 @@ void ProgramStructure::createChecksumUpdates() {
             for (auto annot : cf->annotations->annotations)
                 body->annotations = body->annotations->add(annot);
 
-            for (auto annot : flc->annotations->annotations)
-                body->annotations = body->annotations->add(annot);
+            IR::Vector<IR::Expression> annotExpr;
+            for (auto annot : flc->annotations->annotations) {
+                for (auto e : annot->expr) {
+                    annotExpr.push_back(e);
+                }
+                annotExpr.push_back(new IR::StringLiteral(IR::ID(dest->toString())));
+                auto newAnnot = new IR::Annotation(annot->name, annotExpr);
+                body->annotations = body->annotations->add(newAnnot);
+            }
 
             LOG3("Converted " << flc);
         }
