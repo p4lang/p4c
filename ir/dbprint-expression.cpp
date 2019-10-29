@@ -89,7 +89,7 @@ void IR::NamedExpression::dbprint(std::ostream &out) const {
 void IR::StructInitializerExpression::dbprint(std::ostream& out) const {
     out << "{" << indent;
     for (auto &field : components)
-        out << endl << field << ';';
+        out << Log::endl << field << ';';
     out << " }" << unindent;
 }
 
@@ -110,7 +110,7 @@ void IR::If::dbprint(std::ostream &out) const {
         out << "if (" << setprec(Prec_Low) << pred << ") {" << indent << setprec(0) << ifTrue;
         if (ifFalse) {
             if (!ifFalse->empty())
-                out << unindent << endl << "} else {" << indent;
+                out << unindent << Log::endl << "} else {" << indent;
             out << ifFalse; }
         out << " }" << unindent;
     }
@@ -122,7 +122,7 @@ void IR::Apply::dbprint(std::ostream &out) const {
     if (!actions.empty()) {
         out << " {" << indent << setprec(0);
         for (auto act : actions)
-            out << endl << act.first << " {" << indent << act.second << unindent << " }";
+            out << Log::endl << act.first << " {" << indent << act.second << unindent << " }";
         out << setprec(prec) << " }" << unindent;
     } else if (prec == 0) {
         out << ';'; }
@@ -251,6 +251,6 @@ void IR::SelectExpression::dbprint(std::ostream &out) const {
     int prec = getprec(out);
     out << "select" << setprec(Prec_Low) << select << " {" << indent;
     for (auto c : selectCases)
-        out << endl << c;
+        out << Log::endl << c;
     out << " }" << unindent << setprec(prec);
 }

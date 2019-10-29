@@ -115,7 +115,7 @@ void IR::Type_Extern::dbprint(std::ostream& out) const {
         out << typeParameters;
     out << " {" << indent << clrflag(Brief);
     for (auto &method : methods)
-        out << endl << method << ';';
+        out << Log::endl << method << ';';
     out << " }" << unindent;
 }
 
@@ -142,7 +142,7 @@ void IR::Type_StructLike::dbprint(std::ostream &out) const {
         return; }
     out << toString() << " " << annotations << "{" << indent;
     for (auto &field : fields)
-        out << endl << field << ';';
+        out << Log::endl << field << ';';
     out << " }" << unindent;
 }
 
