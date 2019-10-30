@@ -32,9 +32,9 @@ void IR::HeaderStackItemRef::dbprint(std::ostream &out) const {
 void IR::FieldList::dbprint(std::ostream &out) const {
     out << "field_list " << name << " {" << indent;
     for (auto f : fields)
-        out << endl << f;
+        out << Log::endl << f;
     if (payload)
-        out << endl << "payload;";
+        out << Log::endl << "payload;";
     out << unindent << " }";
 }
 void IR::FieldListCalculation::dbprint(std::ostream &out) const {
@@ -49,7 +49,7 @@ void IR::CalculatedField::dbprint(std::ostream &out) const {
     }
     out << indent;
     for (auto &spec : specs) {
-        out << endl << (spec.update ? "update " : "verify ") << spec.name;
+        out << Log::endl << (spec.update ? "update " : "verify ") << spec.name;
         if (spec.cond) out << " if " << spec.cond; }
     out << unindent;
 }
@@ -74,35 +74,35 @@ void IR::CaseEntry::dbprint(std::ostream &out) const {
 void IR::V1Parser::dbprint(std::ostream &out) const {
     out << "parser " << name << " {" << indent;
     for (auto &stmt : stmts)
-        out << endl << *stmt;
+        out << Log::endl << *stmt;
     if (select) {
         int prec = getprec(out);
         const char *sep = "";
-        out << endl << "select (" << setprec(Prec_Low);
+        out << Log::endl << "select (" << setprec(Prec_Low);
         for (auto e : *select) {
             out << sep << *e;
             sep = ", "; }
         out << ") {" << indent << setprec(prec); }
     if (cases)
         for (auto c : *cases)
-            out << endl << *c;
+            out << Log::endl << *c;
     if (select)
         out << " }" << unindent;
     if (default_return)
-        out << endl << "return " << default_return << ";";
+        out << Log::endl << "return " << default_return << ";";
     if (parse_error)
-        out << endl << "error " << parse_error << ";";
+        out << Log::endl << "error " << parse_error << ";";
     if (drop)
-        out << endl << "drop;";
+        out << Log::endl << "drop;";
     out << " }" << unindent;
 }
 void IR::ParserException::dbprint(std::ostream &out) const { out << "IR::ParserException"; }
 void IR::ParserState::dbprint(std::ostream &out) const {
     out << "state " << name << " " << annotations << "{" << indent;
     for (auto s : components)
-        out << endl << s;
+        out << Log::endl << s;
     if (selectExpression)
-        out << endl << selectExpression;
+        out << Log::endl << selectExpression;
     out << " }" << unindent;
 }
 void IR::P4Parser::dbprint(std::ostream &out) const {
@@ -114,9 +114,9 @@ void IR::P4Parser::dbprint(std::ostream &out) const {
         out << '(' << constructorParams << ')';
     out << " " << type->annotations << "{" << indent;
     for (auto d : parserLocals)
-        out << endl << d;
+        out << Log::endl << d;
     for (auto s : states)
-        out << endl << s;
+        out << Log::endl << s;
     out << " }" << unindent;
 }
 
@@ -134,7 +134,7 @@ void IR::ActionFunction::dbprint(std::ostream &out) const {
         sep = ", "; }
     out << ") {" << indent;
     for (auto &p : action)
-        out << endl << p;
+        out << Log::endl << p;
     out << unindent << " }";
 }
 
@@ -147,7 +147,7 @@ void IR::P4Action::dbprint(std::ostream &out) const {
     out << ") {" << indent;
     if (body)
         for (auto p : body->components)
-            out << endl << p;
+            out << Log::endl << p;
     out << unindent << " }";
 }
 
@@ -159,7 +159,7 @@ void IR::BlockStatement::dbprint(std::ostream &out) const {
             out << ' ' << p;
             first = false;
         } else {
-            out << endl << p; } }
+            out << Log::endl << p; } }
     out << unindent << " }";
 }
 
@@ -174,7 +174,7 @@ void IR::ActionList::dbprint(std::ostream &out) const {
         if (first)
             out << ' ' << el;
         else
-            out << endl << el;
+            out << Log::endl << el;
         first = false; }
     out << unindent << " }";
 }
@@ -190,7 +190,7 @@ void IR::Key::dbprint(std::ostream &out) const {
         if (first)
             out << ' ' << el;
         else
-            out << endl << el;
+            out << Log::endl << el;
         first = false; }
     out << unindent << " }";
 }
@@ -198,7 +198,7 @@ void IR::P4Table::dbprint(std::ostream &out) const {
     out << "table " << name;
     out << " " << annotations << "{" << indent;
     for (auto p : properties->properties)
-        out << endl << p;
+        out << Log::endl << p;
     out << " }" << unindent;
 }
 
@@ -220,20 +220,20 @@ void IR::P4Control::dbprint(std::ostream &out) const {
         out << '(' << constructorParams << ')';
     out << " " << type->annotations << "{" << indent;
     for (auto d : controlLocals)
-        out << endl << d;
+        out << Log::endl << d;
     for (auto s : body->components)
-        out << endl << s;
+        out << Log::endl << s;
     out << " }" << unindent;
 }
 
 void IR::V1Program::dbprint(std::ostream &out) const {
     for (auto &obj : Values(scope))
-        out << obj << endl;
+        out << obj << Log::endl;
 }
 
 void IR::P4Program::dbprint(std::ostream &out) const {
     for (auto obj : objects)
-        out << obj << endl;
+        out << obj << Log::endl;
 }
 
 void IR::Type_Error::dbprint(std::ostream &out) const {
@@ -267,6 +267,6 @@ void IR::Declaration_Instance::dbprint(std::ostream &out) const {
     if (!properties.empty()) {
         out << " {" << indent;
         for (auto &obj : properties)
-            out << endl << obj.second;
+            out << Log::endl << obj.second;
         out << " }" << unindent; }
 }

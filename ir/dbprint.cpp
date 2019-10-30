@@ -64,12 +64,12 @@ void IR::Block::dbprint_recursive(std::ostream& out) const {
     out << indent;
     for (auto it : constantValue) {
         if (it.second == nullptr) {
-            out << endl << dbp(it.first) << " => null";
+            out << Log::endl << dbp(it.first) << " => null";
             continue;
         }
         if (it.second->is<IR::Block>() && it.first->is<IR::IDeclaration>()) {
             auto block = it.second->to<IR::Block>();
-            out << endl << dbp(it.first) << " => ";
+            out << Log::endl << dbp(it.first) << " => ";
             block->dbprint_recursive(out);
         }
     }
@@ -84,7 +84,7 @@ std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> &v)
             return out; }
         out << "{"; }
     for (auto e : v)
-        out << endl << setprec(0) << e << setprec(prec);
+        out << Log::endl << setprec(0) << e << setprec(prec);
     if (prec)
         out << " }";
     return out;
@@ -99,6 +99,6 @@ void dbprint(const IR::Node &n) {
 void dbprint(const std::set<const IR::Expression *> s) {
     std::cout << indent << " {";
     int i = 0;
-    for (auto el : s) std::cout << endl << '[' << i++ << "] " << el;
-    std::cout << " }" << unindent << std::endl;
+    for (auto el : s) std::cout << Log::endl << '[' << i++ << "] " << el;
+    std::cout << " }" << unindent << Log::endl;
 }
