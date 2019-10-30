@@ -86,7 +86,12 @@ void increaseVerbosity();
 
 }  // namespace Log
 
-#define LOGGING(N) (::Log::fileLogLevelIsAtLeast(__FILE__, N))
+#ifndef MAX_LOGGING_LEVEL
+// can be set on build command line and disables higher logging levels at compile time
+#define MAX_LOGGING_LEVEL 10
+#endif
+
+#define LOGGING(N) ((N) <= MAX_LOGGING_LEVEL && ::Log::fileLogLevelIsAtLeast(__FILE__, N))
 #define LOGN(N, X) (LOGGING(N)                                                  \
                       ? ::Log::Detail::fileLogOutput(__FILE__)                  \
                           << ::Log::Detail::OutputLogPrefix(__FILE__, N)        \
@@ -114,7 +119,7 @@ void increaseVerbosity();
 #define LOG8_UNINDENT   LOGN_UNINDENT(8)
 #define LOG9_UNINDENT   LOGN_UNINDENT(9)
 
-#define LOG_FEATURE(TAG, N, X) (::Log::fileLogLevelIsAtLeast(TAG, N)            \
+#define LOG_FEATURE(TAG, N, X) ((N) <= MAX_LOGGING_LEVEL && ::Log::fileLogLevelIsAtLeast(TAG, N) \
                       ? ::Log::Detail::fileLogOutput(TAG)                       \
                           << ::Log::Detail::OutputLogPrefix(TAG, N)             \
                           << X << std::endl                                     \

@@ -38,6 +38,10 @@ OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
 OPTION (ENABLE_GC "Use libgc" ON)
 OPTION (ENABLE_MULTITHREAD "Use multithreading" OFF)
 
+set(MAX_LOGGING_LEVEL 10 CACHE STRING "Control the maximum logging level for -T logs")
+set_property(CACHE MAX_LOGGING_LEVEL PROPERTY STRINGS 0 1 2 3 4 5 6 7 8 9 10)
+add_definitions(-DMAX_LOGGING_LEVEL=${MAX_LOGGING_LEVEL})
+
 if (NOT CMAKE_BUILD_TYPE)
   set (CMAKE_BUILD_TYPE "RELEASE")
 endif()
