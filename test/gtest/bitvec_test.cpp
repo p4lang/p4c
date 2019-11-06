@@ -130,4 +130,15 @@ TEST(Bitvec, rvalue) {
     }
 }
 
+TEST(Bitvec, io) {
+    bitvec a(0xde10fe1f);
+    bitvec b;
+    "DE10fe1f" >> b;
+    EXPECT_EQ(a, b);
+    std::stringstream tmp;
+    tmp << a;
+    tmp >> b;
+    EXPECT_EQ(a, b);
+}
+
 }  // namespace Test

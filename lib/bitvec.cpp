@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <ctype.h>
 #include "bitvec.h"
 #include "hex.h"
 
@@ -33,6 +34,38 @@ std::ostream &operator<<(std::ostream &os, const bitvec &bv) {
             os << '0';
     }
     return os;
+}
+
+std::istream &operator>>(std::istream &is, bitvec &bv) {
+    char ch;
+    while (is && isspace((ch = is.get()))) {}
+    if (!is) return is;
+    if (!isxdigit(ch)) {
+        is.unget();
+        is.setstate(std::ios_base::failbit);
+    } else {
+        bv.clear();
+        do {
+            bv <<= 4;
+            if (isdigit(ch)) bv |= ch - '0';
+            if (islower(ch)) bv |= ch - 'a' + 10;
+            if (isupper(ch)) bv |= ch - 'A' + 10;
+            ch = is.get();
+        } while (is && isxdigit(ch));
+        if (is) is.unget(); }
+    return is;
+}
+
+bool operator>>(const char *s, bitvec &bv) {
+    bv.clear();
+    while (*s) {
+        if (!isxdigit(*s)) return false;
+        bv <<= 4;
+        if (isdigit(*s)) bv |= *s - '0';
+        if (islower(*s)) bv |= *s - 'a' + 10;
+        if (isupper(*s)) bv |= *s - 'A' + 10;
+        s++; }
+    return true;
 }
 
 bitvec &bitvec::operator>>=(size_t count) {
