@@ -51,4 +51,4 @@ class RemoveMiss : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_REMOVEEXITS_H_ */
+#endif /* _MIDEND_REMOVEMISS_H_ */
