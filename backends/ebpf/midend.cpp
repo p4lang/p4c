@@ -37,6 +37,7 @@ limitations under the License.
 #include "midend/noMatch.h"
 #include "midend/removeExits.h"
 #include "midend/removeLeftSlices.h"
+#include "midend/removeMiss.h"
 #include "midend/removeParameters.h"
 #include "midend/removeSelectBooleans.h"
 #include "midend/simplifyKey.h"
@@ -76,6 +77,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
     if (options.loadIRFromJson == false) {
         std::initializer_list<Visitor *> midendPasses = {
             new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
+            new P4::RemoveMiss(&refMap, &typeMap),
             new P4::ClearTypeMap(&typeMap),
             new P4::EliminateNewtype(&refMap, &typeMap),
             new P4::SimplifyControlFlow(&refMap, &typeMap),

@@ -28,13 +28,16 @@ limitations under the License.
 namespace P4 {
 
 // These are used to figure out whether an expression has the form:
-// table.apply().hit
+// table.apply().hit,
+// table.apply().miss,
 // or
 // table.apply().action_run
 class TableApplySolver {
  public:
     static const IR::P4Table* isHit(const IR::Expression* expression,
                                     ReferenceMap* refMap, TypeMap* typeMap);
+    static const IR::P4Table* isMiss(const IR::Expression* expression,
+                                     ReferenceMap* refMap, TypeMap* typeMap);
     static const IR::P4Table* isActionRun(const IR::Expression* expression,
                                           ReferenceMap* refMap, TypeMap* typeMap);
 };

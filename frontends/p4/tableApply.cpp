@@ -42,6 +42,28 @@ TableApplySolver::isHit(const IR::Expression* expression,
 }
 
 const IR::P4Table*
+TableApplySolver::isMiss(const IR::Expression* expression,
+                         ReferenceMap* refMap,
+                         TypeMap* typeMap) {
+    if (!expression->is<IR::Member>())
+        return nullptr;
+    auto mem = expression->to<IR::Member>();
+    if (!mem->expr->is<IR::MethodCallExpression>())
+        return nullptr;
+    if (mem->member != IR::Type_Table::miss)
+        return nullptr;
+    auto mce = mem->expr->to<IR::MethodCallExpression>();
+    auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
+    if (!mi->isApply())
+        return nullptr;
+
+    auto am = mi->to<P4::ApplyMethod>();
+    if (!am->object->is<IR::P4Table>())
+        return nullptr;
+    return am->object->to<IR::P4Table>();
+}
+
+const IR::P4Table*
 TableApplySolver::isActionRun(const IR::Expression* expression,
                               ReferenceMap* refMap,
                               TypeMap* typeMap) {

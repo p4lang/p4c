@@ -168,9 +168,10 @@ class DismantleExpression : public Transform {
             if (leftValue)
                 typeMap->setLeftValue(result->final);
 
-            // Special case for table.apply().hit, which is not dismantled by
+            // Special case for table.apply().hit/miss, which is not dismantled by
             // the MethodCallExpression.
-            if (TableApplySolver::isHit(expression, refMap, typeMap)) {
+            if (TableApplySolver::isHit(expression, refMap, typeMap) ||
+                TableApplySolver::isMiss(expression, refMap, typeMap)) {
                 BUG_CHECK(type->is<IR::Type_Boolean>(), "%1%: not boolean", type);
                 auto tmp = result->createTemporary(type);
                 auto path = new IR::PathExpression(IR::ID(tmp, nullptr));
@@ -479,7 +480,8 @@ class DismantleExpression : public Transform {
         if (auto mmbr = getParent<IR::Member>()) {
             auto tbl = TableApplySolver::isActionRun(mmbr, refMap, typeMap);
             auto tbl1 = TableApplySolver::isHit(mmbr, refMap, typeMap);
-            tbl_apply = tbl != nullptr || tbl1 != nullptr;
+            auto tbl2 = TableApplySolver::isMiss(mmbr, refMap, typeMap);
+            tbl_apply = tbl != nullptr || tbl1 != nullptr || tbl2 != nullptr;
         }
         // Simplified method call, with arguments substituted
         auto simplified = new IR::MethodCallExpression(

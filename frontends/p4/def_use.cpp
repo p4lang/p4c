@@ -527,6 +527,7 @@ bool ComputeWriteSet::preorder(const IR::Member* expression) {
     if (type->is<IR::Type_Method>())
         return false;
     if (TableApplySolver::isHit(expression, storageMap->refMap, storageMap->typeMap) ||
+        TableApplySolver::isMiss(expression, storageMap->refMap, storageMap->typeMap) ||
         TableApplySolver::isActionRun(expression, storageMap->refMap, storageMap->typeMap))
         return false;
     auto storage = getWrites(expression->expr);

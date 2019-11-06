@@ -1,0 +1,95 @@
+#include <core.p4>
+#include <v1model.p4>
+
+header hdr {
+    bit<32> b;
+}
+
+struct Headers {
+    hdr h;
+}
+
+struct Meta {
+}
+
+parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
+    state start {
+        transition accept;
+    }
+}
+
+control vrfy(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
+
+control update(inout Headers h, inout Meta m) {
+    apply {
+    }
+}
+
+control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    apply {
+    }
+}
+
+control deparser(packet_out b, in Headers h) {
+    apply {
+        b.emit<hdr>(h.h);
+    }
+}
+
+control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    bool tmp;
+    @name(".NoAction") action NoAction_0() {
+    }
+    @name("ingress.t") table t_0 {
+        key = {
+            h.h.b: exact @name("h.h.b") ;
+        }
+        actions = {
+            NoAction_0();
+        }
+        default_action = NoAction_0();
+    }
+    @hidden action act() {
+        tmp = false;
+    }
+    @hidden action act_0() {
+        tmp = true;
+    }
+    @hidden action issue2044bmv2l37() {
+        h.h.setInvalid();
+    }
+    @hidden table tbl_act {
+        actions = {
+            act();
+        }
+        const default_action = act();
+    }
+    @hidden table tbl_act_0 {
+        actions = {
+            act_0();
+        }
+        const default_action = act_0();
+    }
+    @hidden table tbl_issue2044bmv2l37 {
+        actions = {
+            issue2044bmv2l37();
+        }
+        const default_action = issue2044bmv2l37();
+    }
+    apply {
+        if (t_0.apply().hit) {
+            tbl_act.apply();
+        } else {
+            tbl_act_0.apply();
+        }
+        if (tmp) {
+            tbl_issue2044bmv2l37.apply();
+        }
+    }
+}
+
+V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+
