@@ -506,7 +506,7 @@ SimpleSwitchGrpcRunner::SimpleSwitchGrpcRunner(
       dp_grpc_server_addr(dp_grpc_server_addr),
       dp_service(nullptr),
       dp_grpc_server(nullptr) {
-  DeviceMgr::init(256);
+  DeviceMgr::init();
 }
 
 int
