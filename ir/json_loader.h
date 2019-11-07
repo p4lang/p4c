@@ -205,6 +205,10 @@ class JSONLoader {
         if (auto *s = json->to<std::string>())
             s->c_str() >> m; }
 
+    void unpack_json(bitvec &v) {
+        if (auto *s = json->to<std::string>())
+            s->c_str() >> v; }
+
     template<typename T> typename std::enable_if<std::is_enum<T>::value>::type
     unpack_json(T &v) {
         if (auto *s = json->to<std::string>())

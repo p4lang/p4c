@@ -22,6 +22,7 @@ limitations under the License.
 #include <gmpxx.h>
 #include <string>
 #include <unordered_set>
+#include "lib/bitvec.h"
 #include "lib/cstring.h"
 #include "lib/indent.h"
 #include "lib/match.h"
@@ -185,6 +186,10 @@ class JSONGenerator {
                 std::is_same<T, LTBitMatrix>::value ||
                 std::is_enum<T>::value>::type
     generate(T v) {
+        out << "\"" << v << "\"";
+    }
+
+    void generate(const bitvec &v) {
         out << "\"" << v << "\"";
     }
 

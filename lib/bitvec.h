@@ -489,6 +489,8 @@ class bitvec {
 
  public:
     friend std::ostream &operator<<(std::ostream &, const bitvec &);
+    friend std::istream &operator>>(std::istream &, bitvec &);
+    friend bool operator>>(const char *, bitvec &);
 };
 
 class bitvec::copy_bitref : public bitvec::bitref<const bitvec> {
