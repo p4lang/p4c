@@ -1,23 +1,25 @@
-# BEHAVIORAL MODEL REPOSITORY
+# BEHAVIORAL MODEL (bmv2)
 
 [![Build Status](https://travis-ci.org/p4lang/behavioral-model.svg?branch=master)](https://travis-ci.org/p4lang/behavioral-model)
 
-This is the second version of the P4 software switch (aka behavioral model),
-nicknamed bmv2. It is meant to replace the original version, p4c-behavioral, in
-the long run, although we do not have feature equivalence yet. Unlike
-p4c-behavioral, this new version is static (i.e. we do not need to auto-generate
-new code and recompile every time a modification is done to the P4 program) and
-written in C++11. For information on why we decided to write a new version of
-the behavioral model, please look at the FAQ below.
+This is the second version of the reference P4 software switch, nicknamed bmv2
+(for behavioral model version 2). The software switch is written in C++11. It
+takes as input a JSON file generated from your P4 program by a [P4
+compiler](https://github.com/p4lang/p4c) and interprets it to implement the
+packet-processing behavior specified by that P4 program.
 
 This repository contains code for several variations of the behavioral
 model, e.g. `simple_switch`, `simple_switch_grpc`, `psa_switch`, etc.
 See [here](targets/README.md) for more details on the differences
 between these.
 
+bmv2 is not meant to be a production-grade software switch. It is meant to be
+used as a tool for developing, testing and debugging P4 data planes and control
+plane software written for them.
+
 ## Dependencies
 
-On Ubuntu 14.04, the following packages are required:
+On Ubuntu 16.04, the following packages are required:
 
 - automake
 - cmake
@@ -218,7 +220,7 @@ the above example), just provide the appropriate `simple_switch` binary to
 
 ## FAQ
 
-### Why did we need bmv2 ?
+### Why did we replace p4c-behavioral with bmv2 ?
 
 - The new C++ code is not auto-generated for each P4 program. This means that it
   becomes very easy and very fast to change your P4 program and test it
@@ -247,7 +249,7 @@ want to implement their own switch model using the bmv2 building blocks. You can
 generate this documentation yourself (if you have doxygen installed) by running
 `doxygen Doxyfile`. The output can be found under the `doxygen-out`
 directory. You can also browse this documentation
-[online](http://104.236.137.35/).
+[online](http://bmv2.org).
 
 ### What else is new in bmv2 ?
 
