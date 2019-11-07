@@ -1,4 +1,4 @@
-# SimpleSwitchGrpc - a version of SimpleSwitch with P4 Runtime support
+# SimpleSwitchGrpc - a version of SimpleSwitch with P4Runtime support
 
 This is an alternative version of the simple_switch target, which does not use
 the Thrift runtime server for table programming (unless required, see below).
@@ -38,8 +38,8 @@ Github or the p4-dev mailing list.
 
 ## Tentative gNMI support with sysrepo
 
-We are working on supporting gNMI and OpenConfig YANG models as part of the P4
-Runtime server. We are using [sysrepo](https://github.com/sysrepo/sysrepo) as
+We are working on supporting gNMI and OpenConfig YANG models as part of the
+P4Runtime server. We are using [sysrepo](https://github.com/sysrepo/sysrepo) as
 our YANG configuration data store and operational state manager. See [this
 README](https://github.com/p4lang/PI/blob/master/proto/README.md) for more
 information on how to try it out. After installing sysrepo, building and
@@ -47,7 +47,7 @@ installing the PI project with sysrepo support enabled, you will need to
 configure simple_switch_grpc with `--with-sysrepo` and build it again.
 
 This directory includes a Python script, [gnmi_sub_once.py](gnmi_sub_once.py),
-which you can run to issue a gNMI ONCE subscription request to the P4 Runtime
+which you can run to issue a gNMI ONCE subscription request to the P4Runtime
 gRPC server running in the simple_switch_grpc process.
 
 ### OpenConfig support
@@ -129,12 +129,12 @@ The Thrift server can be enabled by passing the `--with-thrift` argument to
 `configure`.
 
 **Warning:** because the capabilities of the Thrift server overlap with those of
-the gRPC/P4 Runtime one (e.g. a table management API is exposed by both), there
+the gRPC/P4Runtime one (e.g. a table management API is exposed by both), there
 could be inconsistency issues when using both servers to write state to the
 switch. For example, if one tries to insert a table entry using Thrift, the same
-cannot be read using P4 Runtime. In general, to avoid such issues, we suggest to
+cannot be read using P4Runtime. In general, to avoid such issues, we suggest to
 use the Thrift server only to read state, or to write state that is not managed
-by P4 Runtime.
+by P4Runtime.
 
 ## FAQ
 
