@@ -64,7 +64,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             B_2();
         }
-        default_action = B_2();
+        const default_action = B_2();
     }
     apply {
         A_3.apply();
