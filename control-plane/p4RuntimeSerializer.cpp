@@ -1147,7 +1147,7 @@ class P4RuntimeAnalyzer {
                     [](cstring name) { return name == IR::Annotation::matchAnnotation; });
                 addDocumentation(match, f);
             }
-        } else if (et->is<IR::Type_Tuple>()) {
+        } else if (et->is<IR::Type_BaseList>()) {
             ::error(ErrorType::ERR_UNSUPPORTED,
                     "type parameter for Value Set; "
                     "this version of P4Runtime requires the type parameter of a Value Set "

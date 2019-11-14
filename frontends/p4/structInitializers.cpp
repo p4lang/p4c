@@ -56,7 +56,7 @@ convert(const IR::Expression* expression, const IR::Type* type) {
                 return result;
             }
         }
-    } else if (auto tup = type->to<IR::Type_Tuple>()) {
+    } else if (auto tup = type->to<IR::Type_BaseList>()) {
         auto le = expression->to<IR::ListExpression>();
         if (le == nullptr)
             return expression;
@@ -117,9 +117,9 @@ const IR::Node* CreateStructInitializers::postorder(IR::MethodCallExpression* ex
 const IR::Node* CreateStructInitializers::postorder(IR::Operation_Relation* expression) {
     auto ltype = typeMap->getType(expression->left);
     auto rtype = typeMap->getType(expression->right);
-    if (ltype->is<IR::Type_StructLike>() && rtype->is<IR::Type_Tuple>())
+    if (ltype->is<IR::Type_StructLike>() && rtype->is<IR::Type_List>())
         expression->right = convert(expression->right, ltype);
-    if (rtype->is<IR::Type_StructLike>() && ltype->is<IR::Type_Tuple>())
+    if (rtype->is<IR::Type_StructLike>() && ltype->is<IR::Type_List>())
         expression->left = convert(expression->left, rtype);
     return expression;
 }

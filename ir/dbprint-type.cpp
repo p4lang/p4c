@@ -106,6 +106,17 @@ void IR::Type_Tuple::dbprint(std::ostream& out) const {
     dbsetflags(out, flags);
 }
 
+void IR::Type_List::dbprint(std::ostream& out) const {
+    int flags = dbgetflags(out);
+    out << Brief << "list<";
+    const char *sep = "";
+    for (auto t : components) {
+        out << sep << t;
+        sep = ", "; }
+    out << ">";
+    dbsetflags(out, flags);
+}
+
 void IR::Type_Extern::dbprint(std::ostream& out) const {
     if (dbgetflags(out) & Brief) {
         out << name;

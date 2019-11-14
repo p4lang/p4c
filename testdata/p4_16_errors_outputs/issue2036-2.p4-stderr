@@ -1,0 +1,3 @@
+issue2036-2.p4(10): [--Werror=type-error] error: f: Cannot unify Tuple(1) to struct s
+        f(b);
+        ^^^^

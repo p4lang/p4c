@@ -292,21 +292,20 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
             TypeInference::typeError("%1%: Cannot unify non-function type %2% to function type %3%",
                                      errorPosition, src->toString(), dest->toString());
         return false;
-    } else if (dest->is<IR::Type_Tuple>()) {
+    } else if (auto td = dest->to<IR::Type_BaseList>()) {
         if (src->is<IR::Type_Struct>() || src->is<IR::Type_Header>()) {
             // swap and try again: handled below
             return unify(errorPosition, src, dest, reportErrors);
         }
-        if (!src->is<IR::Type_Tuple>()) {
+        if (!src->is<IR::Type_BaseList>()) {
             if (reportErrors)
-                TypeInference::typeError("%1%: Cannot unify tuple type %2% with non tuple-type %3%",
+                TypeInference::typeError("%1%: Cannot unify type %2% with %3%",
                                          errorPosition, dest->toString(), src->toString());
             return false;
         }
-        auto td = dest->to<IR::Type_Tuple>();
-        auto ts = src->to<IR::Type_Tuple>();
+        auto ts = src->to<IR::Type_BaseList>();
         if (td->components.size() != ts->components.size()) {
-            TypeInference::typeError("%1%: Cannot match tuples with different sizes %2% vs %3%",
+            TypeInference::typeError("%1%: tuples with different sizes %2% vs %3%",
                                      errorPosition, td->components.size(), ts->components.size());
             return false;
         }
@@ -321,7 +320,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         return true;
     } else if (dest->is<IR::Type_Struct>() || dest->is<IR::Type_Header>()) {
         auto strct = dest->to<IR::Type_StructLike>();
-        if (auto tpl = src->to<IR::Type_Tuple>()) {
+        if (auto tpl = src->to<IR::Type_List>()) {
             if (strct->fields.size() != tpl->components.size()) {
                 if (reportErrors)
                     TypeInference::typeError("%1%: Number of fields %2% in initializer different "

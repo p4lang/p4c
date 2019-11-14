@@ -121,7 +121,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
 bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
     if (p4RtTypeInfo) {
         bool orig_type = true;
-        const IR::StringLiteral* uri;
+        const IR::StringLiteral* uri = nullptr;
         const IR::Constant* sdnB;
         auto ann = type->getAnnotation("p4runtime_translation");
         if (ann != nullptr) {
@@ -170,7 +170,7 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
     return false;
 }
 
-bool TypeSpecConverter::preorder(const IR::Type_Tuple* type) {
+bool TypeSpecConverter::preorder(const IR::Type_BaseList* type) {
     auto typeSpec = new P4DataTypeSpec();
     auto tupleTypeSpec = typeSpec->mutable_tuple();
     for (auto cType : type->components) {

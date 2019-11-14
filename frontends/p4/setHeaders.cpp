@@ -45,7 +45,7 @@ void DoSetHeaders::generateSetValid(
 
     // Recurse on fields of structType
     if (list != nullptr) {
-        auto tt = srcType->to<IR::Type_Tuple>();
+        auto tt = srcType->to<IR::Type_BaseList>();
         CHECK_NULL(tt);
         auto it = list->components.begin();
         for (auto f : structType->fields) {

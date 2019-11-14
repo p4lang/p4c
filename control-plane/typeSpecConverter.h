@@ -61,7 +61,7 @@ class TypeSpecConverter : public Inspector {
     bool preorder(const IR::Type_Bits* type) override;
     bool preorder(const IR::Type_Varbits* type) override;
     bool preorder(const IR::Type_Boolean* type) override;
-    bool preorder(const IR::Type_Tuple* type) override;
+    bool preorder(const IR::Type_BaseList* type) override;
     bool preorder(const IR::Type_Stack* type) override;
 
     bool preorder(const IR::Type_Name* type) override;

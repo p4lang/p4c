@@ -288,7 +288,7 @@ bool ToP4::preorder(const IR::Type_Newtype* t) {
     return false;
 }
 
-bool ToP4::preorder(const IR::Type_Tuple* t) {
+bool ToP4::preorder(const IR::Type_BaseList* t) {
     dump(3);
     builder.append("tuple<");
     bool first = true;

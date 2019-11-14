@@ -25,7 +25,7 @@ const IR::Expression* RemoveComplexComparisons::explode(
 
     // we allow several cases
     // header == header
-    // header == list (tuple)
+    // header == list
     // list == header
     // list == list
     // struct == struct
@@ -33,8 +33,8 @@ const IR::Expression* RemoveComplexComparisons::explode(
     // struct == list
     // list == struct
 
-    auto rightTuple = rightType->to<IR::Type_Tuple>();
-    auto leftTuple = leftType->to<IR::Type_Tuple>();
+    auto rightTuple = rightType->to<IR::Type_BaseList>();
+    auto leftTuple = leftType->to<IR::Type_BaseList>();
     if (leftTuple && !rightTuple)
         // put the tuple on the right if it is the only one,
         // so we handle fewer cases
@@ -155,7 +155,7 @@ const IR::Node* RemoveComplexComparisons::postorder(IR::Operation_Binary* expres
     auto ltype = typeMap->getType(expression->left, true);
     auto rtype = typeMap->getType(expression->right, true);
     if (!ltype->is<IR::Type_StructLike>() && !ltype->is<IR::Type_Stack>() &&
-        !ltype->is<IR::Type_Tuple>())
+        !ltype->is<IR::Type_BaseList>())
         return expression;
     auto result = explode(expression->srcInfo, ltype, expression->left, rtype, expression->right);
     if (expression->is<IR::Neq>())
