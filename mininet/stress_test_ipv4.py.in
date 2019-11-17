@@ -26,6 +26,7 @@ from time import sleep
 import subprocess
 import os
 import re
+import sys
 
 parser = argparse.ArgumentParser(description='Mininet demo')
 parser.add_argument('--thrift-port',
@@ -82,7 +83,20 @@ def run_measurement(net, client_name, server_name):
     res = re.findall(r"(\d+) Mbits/sec", out)
     return res[-1]
 
+def check_deps():
+    try:
+        _ = subprocess.check_output(["/sbin/ethtool", "--version"],
+                                    stderr=subprocess.STDOUT)
+    except:
+        print "ethtool not available"
+        print
+        print "On Debian systems you can install it with:"
+        print "sudo apt install ethtool"
+        sys.exit(1)
+
 def main():
+    check_deps()
+
     thrift_port = args.thrift_port
     num_hosts = 2
 
