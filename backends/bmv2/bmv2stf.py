@@ -77,13 +77,10 @@ def HexToByte(hexStr):
     hexStr = ''.join( hexStr.split(" ") )
     for i in range(0, len(hexStr), 2):
         byteArray.append( chr( int (hexStr[i:i+2], 16 ) ) )
-    # return ''.join( byteArray )
     return bytes(''.join(byteArray), encoding='utf8')
 
 def convert_packet_bin2hexstr(pkt_bin):
-    # return ''.join(ByteToHex(str(pkt_bin)).split()).upper()
-    # return ''.join([ bytes.hex(x).upper() for x in pkt_bin ])
-    return bytes.hex(str(pkt_bin).encode())
+    return pkt_bin.convert_to(Raw).load.hex().upper()
 
 def convert_packet_stf2hexstr(pkt_stf_text):
     return ''.join(pkt_stf_text.split()).upper()
@@ -610,7 +607,7 @@ class RunBMV2(object):
             # could mean the system is very slow for some reason). If one of the
             # 2 conditions above is met, the test is considered a FAILURE.
             start = time.time()
-            sw_timeout = 60000
+            sw_timeout = 60
             # open input interfaces
             # DANGER -- it is critical that we open these fifos in the same
             # order as bmv2, as otherwise we'll deadlock.  Would be nice if we
