@@ -13,9 +13,13 @@ model, e.g. `simple_switch`, `simple_switch_grpc`, `psa_switch`, etc.
 See [here](targets/README.md) for more details on the differences
 between these.
 
-bmv2 is not meant to be a production-grade software switch. It is meant to be
-used as a tool for developing, testing and debugging P4 data planes and control
-plane software written for them.
+**bmv2 is not meant to be a production-grade software switch**. It is meant to
+be used as a tool for developing, testing and debugging P4 data planes and
+control plane software written for them. As such, the performance of bmv2 - in
+terms of throughput and latency - is significantly less than that of a
+production-grade software switch like [Open
+vSwitch](https://www.openvswitch.org/). For more information about the
+performance of bmv2, refer to this [document](docs/performance.md).
 
 ## Dependencies
 
@@ -220,7 +224,12 @@ the above example), just provide the appropriate `simple_switch` binary to
 
 ## FAQ
 
-### Why did we replace p4c-behavioral with bmv2 ?
+### Why is throughput so low / why are so many packets dropped?
+
+bmv2 is not meant to be a production-grade software switch. For more information
+on bmv2 performance, please refer to this [document](docs/performance.md).
+
+### Why did we replace p4c-behavioral with bmv2?
 
 - The new C++ code is not auto-generated for each P4 program. This means that it
   becomes very easy and very fast to change your P4 program and test it
@@ -241,7 +250,7 @@ the above example), just provide the appropriate `simple_switch` binary to
   programming your device (parser, match-action pipeline, deparser) with P4, you
   can use bmv2 to reproduce the behavior of your device.
 
-### How do program my own target / switch architecture using bmv2 ?
+### How do program my own target / switch architecture using bmv2?
 
 You can take a look at the `targets/ directory` first. We have also started
 writing some doxygen documentation specifically targetted at programmers who
@@ -251,7 +260,7 @@ generate this documentation yourself (if you have doxygen installed) by running
 directory. You can also browse this documentation
 [online](http://bmv2.org).
 
-### What else is new in bmv2 ?
+### What else is new in bmv2?
 
 - Arithmetic is now possible on arbitrarily wide fields (no more limited to <=
   32-bit fields) and **variable-length fields are now supported**.
@@ -261,7 +270,7 @@ directory. You can also browse this documentation
   parser transition,...) a message is broadcast on a nanomsg channel and any
   client can consume it.
 
-### Are all features supported yet ?
+### Are all features supported yet?
 
 At this time, we are aware of the following unsupported P4_14 features:
 - direct registers
@@ -272,11 +281,11 @@ submit an issue with the appropriate label on
 [Github](https://github.com/p4lang/behavioral-model/issues). Do not hesitate to
 contribute code yourself!
 
-### How do I signal a bug ?
+### How do I signal a bug?
 
 Please submit an issue with the appropriate label on
 [Github](https://github.com/p4lang/behavioral-model/issues).
 
-### How can I contribute ?
+### How can I contribute?
 
 See [CONTRIBUTING.md](CONTRIBUTING.md).
