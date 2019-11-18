@@ -219,7 +219,7 @@ def process_file(options, argv):
     def getArch(path):
         v1Pattern = re.compile('include.*v1model\.p4')
         psaPattern = re.compile('include.*psa\.p4')
-        with open(path, 'r') as f:
+        with open(path, 'r', encoding='utf-8') as f:
             for line in f:
                 if v1Pattern.search(line):
                     return "v1model"

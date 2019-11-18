@@ -43,12 +43,19 @@ export P4C_PIP_PACKAGES="ipaddr \
                      ply==3.8 \
                      scapy==2.4.0"
 
+export P4C_PIP3_PACKAGES="ipaddr \
+                          pyroute2 \
+                          ply==3.8 \
+                          scapy"
+
 apt-get update
 apt-get install -y --no-install-recommends \
   ${P4C_DEPS} \
   ${P4C_EBPF_DEPS} \
   ${P4C_RUNTIME_DEPS} \
   git
+
+pip3 install $P4C_PIP3_PACKAGES
 
 # ! ------- BEGIN Python2 -------------------------------------------------
 # ! ------- Should be deleted when conversion to Python3 is finalized -----
@@ -58,7 +65,7 @@ apt-get install -y --no-install-recommends \
 mkdir /tmp/pip
 cd /tmp/pip
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-python get-pip.py
+python2 get-pip.py
 cd -
 rm -rf /tmp/pip
 
@@ -67,10 +74,9 @@ rm -rf /tmp/pip
 pip install $P4C_PIP_PACKAGES
 # ! ------  END Python2 ----------------------------------------------------
 
-pip3 install $P4C_PIP_PACKAGES
-
 function build() {
-  mkdir build
+  if [ -e build ]; then /bin/rm -rf build; fi
+  mkdir -p build
   cd build
 
   cmake .. '-DCMAKE_CXX_FLAGS:STRING=-O3' "$@"

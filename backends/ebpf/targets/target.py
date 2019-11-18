@@ -124,7 +124,7 @@ class EBPFTarget(object):
             fp._write_header(None)
             for pkt_data in pkts:
                 try:
-                    fp._write_packet(bytes(pkt_data))
+                    fp._write_packet(bytes(pkt_data.encode()))
                 except ValueError:
                     report_err(self.outputs["stderr"],
                                "Invalid packet data", pkt_data)
@@ -210,7 +210,7 @@ class EBPFTarget(object):
         if len(self.expected) != 0:
             # Didn't find all the expects we were expecting
             report_err(self.outputs["stderr"], "Expected packets on port(s)",
-                       self.expected.keys(), "not received")
+                       list(self.expected.keys()), "not received")
             return FAILURE
         report_output(self.outputs["stdout"],
                       self.options.verbose, "All went well.")

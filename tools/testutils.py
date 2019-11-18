@@ -55,11 +55,6 @@ def report_output(file, verbose, *message):
         out_file.close()
 
 
-def byte_to_hex(byteStr):
-    """ Convert byte sequences to a hex string. """
-    return ''.join(["%02X " % ord(x) for x in byteStr]).strip()
-
-
 def hex_to_byte(hexStr):
     """ Convert hex strings to bytes. """
     bytes = []
@@ -72,7 +67,7 @@ def hex_to_byte(hexStr):
 def compare_pkt(outputs, expected, received):
     """  Compare two given byte sequences and check if they are the same.
          Report errors if this is not the case. """
-    received = ''.join(byte_to_hex(str(received)).split()).upper()
+    received = pkt_bin.convert_to(Raw).load.hex().upper()
     expected = ''.join(expected.split()).upper()
     if len(received) < len(expected):
         report_err(outputs["stderr"], "Received packet too short",
