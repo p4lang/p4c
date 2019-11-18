@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "p4/config/v1/p4types.pb.h"
 
+#include "bytestrings.h"
 #include "flattenHeader.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeMap.h"
@@ -308,11 +309,18 @@ bool TypeSpecConverter::preorder(const IR::Type_SerEnum* type) {
         if (enums->find(name) == enums->end()) {
             auto enumTypeSpec = new p4configv1::P4SerializableEnumTypeSpec();
             auto bitTypeSpec = enumTypeSpec->mutable_underlying_type();
-            bitTypeSpec->set_bitwidth(type->type->width_bits());
+            auto width = type->type->width_bits();
+            bitTypeSpec->set_bitwidth(width);
             for (auto m : type->members) {
                 auto member = enumTypeSpec->add_members();
                 member->set_name(m->controlPlaneName());
-                member->set_value(std::string(m->value->toString()));
+                if (!m->value->is<IR::Constant>()) {
+                    ::error("%1% unsupported SerEnum member value", m->value);
+                    continue;
+                }
+                auto value = stringRepr(m->value->to<IR::Constant>(), width);
+                if (!value) continue;  // error already logged by stringRepr
+                member->set_value(*value);
             }
             (*enums)[name] = *enumTypeSpec;
         }
