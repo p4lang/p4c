@@ -124,11 +124,19 @@ class EBPFTarget(object):
             fp._write_header(None)
             for pkt_data in pkts:
                 try:
-                    fp._write_packet(bytes(pkt_data.encode()))
+                    fp._write_packet(pkt_data)
                 except ValueError:
                     report_err(self.outputs["stderr"],
                                "Invalid packet data", pkt_data)
                     return FAILURE
+            fp.flush()
+            fp.close()
+            # debug -- the bytes in the pcap file should be identical to the
+            # hex strings in the STF file
+            # packets = rdpcap(infile)
+            # for p in packets:
+            #     print(p.convert_to(Raw).show())
+
         return SUCCESS
 
     def generate_model_inputs(self, stffile):

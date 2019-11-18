@@ -22,6 +22,7 @@ from subprocess import Popen
 from threading import Timer
 import sys
 import os
+from scapy.packet import Raw
 
 TIMEOUT = 10 * 60
 SUCCESS = 0
@@ -67,7 +68,7 @@ def hex_to_byte(hexStr):
 def compare_pkt(outputs, expected, received):
     """  Compare two given byte sequences and check if they are the same.
          Report errors if this is not the case. """
-    received = pkt_bin.convert_to(Raw).load.hex().upper()
+    received = received.convert_to(Raw).load.hex().upper()
     expected = ''.join(expected.split()).upper()
     if len(received) < len(expected):
         report_err(outputs["stderr"], "Received packet too short",
