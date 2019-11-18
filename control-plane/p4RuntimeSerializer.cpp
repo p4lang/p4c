@@ -58,6 +58,7 @@ limitations under the License.
 #include "p4RuntimeArchHandler.h"
 #include "p4RuntimeArchStandard.h"
 #include "flattenHeader.h"
+#include "bytestrings.h"
 
 namespace p4v1 = ::p4::v1;
 namespace p4configv1 = ::p4::config::v1;
@@ -1640,40 +1641,6 @@ class P4RuntimeEntriesConverter {
         auto mt = refMap->getDeclaration(path, true)->to<IR::Declaration_ID>();
         BUG_CHECK(mt != nullptr, "%1%: could not find declaration", ke->matchType);
         return mt->name.name;
-    }
-
-    boost::optional<std::string> stringReprConstant(mpz_class value, int width) const {
-        if (value < 0) {
-            ::error("%1%: P4Runtime does not support negative values in match key", value);
-            return boost::none;
-        }
-        BUG_CHECK(width > 0, "Cannot have match fields with width 0");
-        auto bitsRequired = static_cast<size_t>(mpz_sizeinbase(value.get_mpz_t(), 2));
-        BUG_CHECK(static_cast<size_t>(width) >= bitsRequired,
-                  "Cannot represent %1% on %2% bits", value, width);
-        // TODO(antonin): P4Runtime defines the canonical representation for
-        // bit<W> value as the smallest binary string required to represent the
-        // value (no 0 padding). Unfortunately the reference P4Runtime
-        // implementation (https://github.com/p4lang/PI) does not currently
-        // support the canonical representation, so instead we use a padded
-        // binary string, which according to the P4Runtime specification is also
-        // valid (but not the canonical representation, which means no RW
-        // symmetry).
-        // auto bytes = ROUNDUP(mpz_sizeinbase(value.get_mpz_t(), 2), 8);
-        auto bytes = ROUNDUP(width, 8);
-        std::vector<char> data(bytes);
-        mpz_export(data.data(), NULL, 1 /* big endian word */, bytes,
-                   1 /* big endian bytes */, 0 /* full words */, value.get_mpz_t());
-        return std::string(data.begin(), data.end());
-    }
-
-    boost::optional<std::string> stringRepr(const IR::Constant* constant, int width) const {
-        return stringReprConstant(constant->value, width);
-    }
-
-    boost::optional<std::string> stringRepr(const IR::BoolLiteral* constant, int width) const {
-        auto v = static_cast<mpz_class>(constant->value ? 1 : 0);
-        return stringReprConstant(v, width);
     }
 
     /// We represent all static table entries as one P4Runtime WriteRequest object

@@ -263,15 +263,15 @@ type_info {
       }
       members {
         name: "foo"
-        value: "28"
+        value: "\034"
       }
       members {
         name: "bar"
-        value: "17"
+        value: "\021"
       }
       members {
         name: "gah"
-        value: "42"
+        value: "*"
       }
     }
   }

@@ -1,0 +1,35 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33595561
+    name: "c.t"
+    alias: "t"
+  }
+  action_refs {
+    id: 16782098
+  }
+  action_refs {
+    id: 16800567
+    annotations: "@defaultonly"
+    scope: DEFAULT_ONLY
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16782098
+    name: "c.a"
+    alias: "a"
+  }
+}
+type_info {
+}

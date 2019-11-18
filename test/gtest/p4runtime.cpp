@@ -34,6 +34,7 @@ limitations under the License.
 #include "control-plane/typeSpecConverter.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/parseAnnotations.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
@@ -1406,7 +1407,8 @@ class P4RuntimeDataTypeSpec : public P4Runtime {
         auto pgm = P4::parseP4String(programStr, CompilerOptions::FrontendVersion::P4_16);
         if (pgm == nullptr) return nullptr;
         PassManager  passes({
-            new P4::TypeChecking(&refMap, &typeMap)
+            new P4::ResolveReferences(&refMap),
+            new P4::TypeInference(&refMap, &typeMap, false)
         });
         pgm = pgm->apply(passes);
         return pgm;
@@ -1658,6 +1660,31 @@ TEST_F(P4RuntimeDataTypeSpec, Enum) {
     ASSERT_EQ(2, it->second.members_size());
     EXPECT_EQ("MBR_1", it->second.members(0).name());
     EXPECT_EQ("MBR_2", it->second.members(1).name());
+}
+
+TEST_F(P4RuntimeDataTypeSpec, SerEnum) {
+    std::string program = P4_SOURCE(R"(
+        enum bit<8> my_enum { MBR_1 = 1, MBR_2 = 2}
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<my_enum>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
+
+    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &refMap, &typeMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_serializable_enum());
+    EXPECT_EQ("my_enum", typeSpec->serializable_enum().name());
+
+    auto it = typeInfo.serializable_enums().find("my_enum");
+    ASSERT_TRUE(it != typeInfo.serializable_enums().end());
+    ASSERT_EQ(2, it->second.members_size());
+    EXPECT_EQ("MBR_1", it->second.members(0).name());
+    EXPECT_EQ("\x01", it->second.members(0).value());
+    EXPECT_EQ("MBR_2", it->second.members(1).name());
+    EXPECT_EQ("\x02", it->second.members(1).value());
 }
 
 TEST_F(P4RuntimeDataTypeSpec, Error) {
