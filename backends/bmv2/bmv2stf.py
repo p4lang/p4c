@@ -70,15 +70,6 @@ def nextWord(text, sep = None):
 def ByteToHex(byteStr):
     return ''.join( [ "%02X " % ord( x ) for x in byteStr ] ).strip()
 
-def HexToByte(hexStr):
-    print(bytes.fromhex(hexStr))
-    return bytes.fromhex(hexStr)
-    byteArray = []
-    hexStr = ''.join( hexStr.split(" ") )
-    for i in range(0, len(hexStr), 2):
-        byteArray.append( chr( int (hexStr[i:i+2], 16 ) ) )
-    return bytes(''.join(byteArray), encoding='utf8')
-
 def convert_packet_bin2hexstr(pkt_bin):
     return pkt_bin.convert_to(Raw).load.hex().upper()
 
