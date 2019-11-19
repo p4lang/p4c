@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # Copyright 2013-present Barefoot Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,6 @@
 # Runs the compiler on a sample P4 program generating code for the BMv2
 # behavioral model simulator
 
-from __future__ import print_function
 from subprocess import Popen
 from threading import Thread
 import json
@@ -31,7 +30,6 @@ import subprocess
 import time
 import random
 import errno
-from string import maketrans
 try:
     from scapy.layers.all import *
     from scapy.utils import *

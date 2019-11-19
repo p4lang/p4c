@@ -56,7 +56,7 @@ class BackendDriver:
         If the command was previously set, it is overwritten
         """
         if cmd_name in self._commands:
-            print >> sys.stderr, "Warning: overwriting command", cmd_name
+            print("Warning: overwriting command", cmd_name, file=sys.stderr)
         self._commands[cmd_name] = []
         self._commands[cmd_name].append(cmd)
 
@@ -65,8 +65,8 @@ class BackendDriver:
         """
         if cmd_name not in self._commands:
             if self._verbose:
-                print >> sys.stderr, "Command", "'" + cmd_name + "'", \
-                    "was not set for target", self._backend
+                print("Command", "'" + cmd_name + "'", \
+                    "was not set for target", self._backend, file=sys.stderr)
             return
         self._commands[cmd_name].append(option)
 
@@ -147,8 +147,8 @@ class BackendDriver:
 
         # P4Runtime options
         if opts.p4runtime_file:
-            print >> sys.stderr, "'--p4runtime-file' and '--p4runtime-format'", \
-                "are deprecated, consider using '--p4runtime-files'"
+            print("'--p4runtime-file' and '--p4runtime-format'", \
+                "are deprecated, consider using '--p4runtime-files'", file=sys.stderr)
             self.add_command_option('compiler',
                                     "--p4runtime-file {}".format(opts.p4runtime_file))
             self.add_command_option('compiler',
@@ -220,7 +220,7 @@ class BackendDriver:
         Also exit with the command error code if failed
         """
         if self._dry_run:
-            print '{}:\n{}'.format(step, ' '.join(cmd))
+            print('{}:\n{}'.format(step, ' '.join(cmd)))
             return 0
 
         args = shlex.split(" ".join(cmd))
@@ -228,11 +228,11 @@ class BackendDriver:
             p = subprocess.Popen(args)
         except:
             import traceback
-            print >> sys.stderr, "error invoking {}".format(" ".join(cmd))
-            print >> sys.stderr, traceback.format_exc()
+            print("error invoking {}".format(" ".join(cmd)), file=sys.stderr)
+            print(traceback.format_exc(), file=sys.stderr)
             return 1
 
-        if self._verbose: print 'running {}'.format(' '.join(cmd))
+        if self._verbose: print('running {}'.format(' '.join(cmd)))
         p.communicate() # now wait
         return p.returncode
 
@@ -282,7 +282,7 @@ class BackendDriver:
             # run the command
             cmd = self._commands[c]
             if cmd[0].find('/') != 0 and (util.find_bin(cmd[0]) == None):
-                print >> sys.stderr, "{}: command not found".format(cmd[0])
+                print("{}: command not found".format(cmd[0]), file=sys.stderr)
                 sys.exit(1)
 
             rc = self.runCmd(c, cmd)

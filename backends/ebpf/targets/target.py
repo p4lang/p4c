@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # Copyright 2013-present Barefoot Networks, Inc.
 # Copyright 2018 VMware, Inc.
 #
@@ -28,7 +28,7 @@ import sys
 from glob import glob
 from scapy.utils import rdpcap, RawPcapWriter
 from scapy.layers.all import *
-from ebpfstf import create_table_file, parse_stf_file
+from .ebpfstf import create_table_file, parse_stf_file
 # path to the tools folder of the compiler
 sys.path.insert(0, os.path.dirname(
     os.path.realpath(__file__)) + '/../../../tools')
@@ -129,6 +129,14 @@ class EBPFTarget(object):
                     report_err(self.outputs["stderr"],
                                "Invalid packet data", pkt_data)
                     return FAILURE
+            fp.flush()
+            fp.close()
+            # debug -- the bytes in the pcap file should be identical to the
+            # hex strings in the STF file
+            # packets = rdpcap(infile)
+            # for p in packets:
+            #     print(p.convert_to(Raw).show())
+
         return SUCCESS
 
     def generate_model_inputs(self, stffile):
@@ -210,7 +218,7 @@ class EBPFTarget(object):
         if len(self.expected) != 0:
             # Didn't find all the expects we were expecting
             report_err(self.outputs["stderr"], "Expected packets on port(s)",
-                       self.expected.keys(), "not received")
+                       list(self.expected.keys()), "not received")
             return FAILURE
         report_output(self.outputs["stdout"],
                       self.options.verbose, "All went well.")

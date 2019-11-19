@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # Copyright 2013-present Barefoot Networks, Inc.
 # Copyright 2018 VMware, Inc.
 #
@@ -17,12 +17,12 @@
 """ Defines helper functions for a general testing framework. Used by multiple
     Python testing scripts in the backends folder."""
 
-from __future__ import print_function
 import subprocess
 from subprocess import Popen
 from threading import Timer
 import sys
 import os
+from scapy.packet import Raw
 
 TIMEOUT = 10 * 60
 SUCCESS = 0
@@ -56,11 +56,6 @@ def report_output(file, verbose, *message):
         out_file.close()
 
 
-def byte_to_hex(byteStr):
-    """ Convert byte sequences to a hex string. """
-    return ''.join(["%02X " % ord(x) for x in byteStr]).strip()
-
-
 def hex_to_byte(hexStr):
     """ Convert hex strings to bytes. """
     bytes = []
@@ -73,7 +68,7 @@ def hex_to_byte(hexStr):
 def compare_pkt(outputs, expected, received):
     """  Compare two given byte sequences and check if they are the same.
          Report errors if this is not the case. """
-    received = ''.join(byte_to_hex(str(received)).split()).upper()
+    received = received.convert_to(Raw).load.hex().upper()
     expected = ''.join(expected.split()).upper()
     if len(received) < len(expected):
         report_err(outputs["stderr"], "Received packet too short",

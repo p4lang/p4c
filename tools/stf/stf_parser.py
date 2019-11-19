@@ -19,7 +19,7 @@
 # -----------------------------------------------------------------------------
 
 import ply.yacc as yacc
-from stf_lexer import STFLexer
+from .stf_lexer import STFLexer
 
 # PARSER GRAMMAR --------------------------------------------------------------
 
@@ -90,7 +90,7 @@ class STFParser:
 
     def parse(self, data = None, filename=''):
         if data is None and filename == '':
-            raise "Please specify either a filename or data"
+            raise ValueError("Please specify either a filename or data")
 
         # if we specified only the filename, initialize the data
         if data is None:
@@ -105,11 +105,11 @@ class STFParser:
 
     def print_error(self, lineno, lexpos, msg):
         self.errors_cnt += 1
-        print "parse error (%s%s:%s): %s" % (
+        print("parse error (%s%s:%s): %s" % (
             '%s:' % self.lexer.filename if self.lexer.filename else '',
             lineno,
             lexpos,
-            msg)
+            msg))
 
     def get_filename(self):
         return self.lexer.filename
@@ -342,4 +342,4 @@ if __name__ == '__main__':
     parser = STFParser()
     stf, errs = parser.parse(data)
     if errs == 0:
-        print '\n'.join(map(str, stf))
+        print('\n'.join(map(str, stf)))

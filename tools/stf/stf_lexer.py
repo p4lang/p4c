@@ -64,7 +64,7 @@ class STFLexer:
         self.lexer.begin('keyword')
 
     def _error(self, s, token):
-        print s, "in file", self.filename, "at line", self.get_lineno()
+        print(s, "in file", self.filename, "at line", self.get_lineno())
         self.errors_cnt += 1
 
     states = (
