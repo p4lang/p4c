@@ -59,8 +59,8 @@ const IR::Expression* DoExpandLookahead::expand(
         const IR::Expression* expression =
                 new IR::Slice(base->clone(), *offset - 1, *offset - size);
         auto tb = type->to<IR::Type_Bits>();
-        if (tb && tb->isSigned)
-            expression = new IR::Cast(tb, expression);
+        if (!tb || tb->isSigned)
+            expression = new IR::Cast(type, expression);
         *offset -= size;
         return expression;
     } else {

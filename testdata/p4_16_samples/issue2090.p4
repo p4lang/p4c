@@ -22,6 +22,8 @@ struct Tcp_option_sack_top
 {
     int<8> kind;
     bit<8> length;
+    bool   f;
+    bit<7> padding;
 }
 parser Tcp_option_parser(packet_in b,
                          out Tcp_option_stack vec)

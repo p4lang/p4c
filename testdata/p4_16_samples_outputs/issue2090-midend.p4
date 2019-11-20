@@ -43,11 +43,13 @@ typedef Tcp_option_h[10] Tcp_option_stack;
 struct Tcp_option_sack_top {
     int<8> kind;
     bit<8> length;
+    bool   f;
+    bit<7> padding;
 }
 
 parser Tcp_option_parser(packet_in b, out Tcp_option_stack vec) {
     bit<8> tmp;
-    bit<16> tmp_4;
+    bit<24> tmp_4;
     state start {
         tmp = b.lookahead<bit<8>>();
         transition select(tmp) {
@@ -76,8 +78,8 @@ parser Tcp_option_parser(packet_in b, out Tcp_option_stack vec) {
         transition start;
     }
     state parse_tcp_option_sack {
-        tmp_4 = b.lookahead<bit<16>>();
-        b.extract<Tcp_option_sack_h>(vec.next.sack, (bit<32>)((tmp_4[7:0] << 3) + 8w240));
+        tmp_4 = b.lookahead<bit<24>>();
+        b.extract<Tcp_option_sack_h>(vec.next.sack, (bit<32>)((tmp_4[15:8] << 3) + 8w240));
         transition start;
     }
     state noMatch {
