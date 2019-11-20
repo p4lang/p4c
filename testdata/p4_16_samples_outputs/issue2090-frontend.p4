@@ -41,7 +41,7 @@ header_union Tcp_option_h {
 
 typedef Tcp_option_h[10] Tcp_option_stack;
 struct Tcp_option_sack_top {
-    bit<8> kind;
+    int<8> kind;
     bit<8> length;
 }
 
