@@ -56,7 +56,11 @@ const IR::Expression* DoExpandLookahead::expand(
     } else if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>()) {
         unsigned size = type->width_bits();
         BUG_CHECK(size > 0, "%1%: unexpected size %2%", type, size);
-        auto expression = new IR::Slice(base->clone(), *offset - 1, *offset - size);
+        const IR::Expression* expression =
+                new IR::Slice(base->clone(), *offset - 1, *offset - size);
+        auto tb = type->to<IR::Type_Bits>();
+        if (!tb || tb->isSigned)
+            expression = new IR::Cast(type, expression);
         *offset -= size;
         return expression;
     } else {
