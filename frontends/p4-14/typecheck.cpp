@@ -315,6 +315,10 @@ class TypeCheck::InferExpressionsBottomUp : public Modifier {
     void postorder(IR::LNot *op) override {
         logic_operand(op->expr);
         setType(op, IR::Type::Boolean::get()); }
+    void postorder(IR::Neg *op) override {
+        setType(op, op->expr->type); }
+    void postorder(IR::Cmpl *op) override {
+        setType(op, op->expr->type); }
     void postorder(IR::Operation_Relation *op) override {
         setType(op, IR::Type::Boolean::get()); }
 };
