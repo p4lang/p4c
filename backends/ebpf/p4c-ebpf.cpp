@@ -101,7 +101,7 @@ int main(int argc, char *const argv[]) {
 
     try {
         compile(options);
-    } catch (const Util::P4CExceptionBase &bug) {
+    } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }

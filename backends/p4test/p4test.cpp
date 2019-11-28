@@ -114,7 +114,7 @@ int main(int argc, char *const argv[]) {
                     P4::FrontEnd fe;
                     fe.addDebugHook(hook);
                     program = fe.run(options, program);
-                } catch (const Util::P4CExceptionBase &bug) {
+                } catch (const std::exception &bug) {
                     std::cerr << bug.what() << std::endl;
                     return 1;
                 }
@@ -142,7 +142,7 @@ int main(int argc, char *const argv[]) {
             const IR::ToplevelBlock *top = nullptr;
             try {
                 top = midEnd.process(program);
-            } catch (const Util::P4CExceptionBase &bug) {
+            } catch (const std::exception &bug) {
                 std::cerr << bug.what() << std::endl;
                 return 1;
             }

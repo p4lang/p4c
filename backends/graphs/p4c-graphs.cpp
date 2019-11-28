@@ -128,7 +128,7 @@ int main(int argc, char *const argv[]) {
             P4::FrontEnd fe;
             fe.addDebugHook(hook);
             program = fe.run(options, program);
-        } catch (const Util::P4CExceptionBase &bug) {
+        } catch (const std::exception &bug) {
             std::cerr << bug.what() << std::endl;
             return 1;
         }
@@ -143,7 +143,7 @@ int main(int argc, char *const argv[]) {
         top = midEnd.process(program);
         if (options.dumpJsonFile)
             JSONGenerator(*openFile(options.dumpJsonFile, true)) << program << std::endl;
-    } catch (const Util::P4CExceptionBase &bug) {
+    } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
