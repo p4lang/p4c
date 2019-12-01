@@ -72,7 +72,7 @@ int main(int argc, char *const argv[]) {
             P4::FrontEnd frontend;
             frontend.addDebugHook(hook);
             program = frontend.run(options, program);
-        } catch (const Util::P4CExceptionBase &bug) {
+        } catch (const std::exception &bug) {
             std::cerr << bug.what() << std::endl;
             return 1;
         }
@@ -107,7 +107,7 @@ int main(int argc, char *const argv[]) {
             return 1;
         if (options.dumpJsonFile && !options.loadIRFromJson)
             JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
-    } catch (const Util::P4CExceptionBase &bug) {
+    } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
@@ -121,7 +121,7 @@ int main(int argc, char *const argv[]) {
     AutoCompileContext autoContext(new BMV2::BMV2Context(BMV2::SimpleSwitchContext::get()));
     try {
         backend->convert(toplevel);
-    } catch (const Util::P4CExceptionBase &bug) {
+    } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }

@@ -13,6 +13,7 @@
 # limitations under the License.
 
 set (LIBP4CTOOLKIT_SRCS
+	backtrace.cpp
 	bitvec.cpp
 	compile_context.cpp
 	crash.cpp

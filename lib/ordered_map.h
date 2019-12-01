@@ -144,14 +144,8 @@ class ordered_map {
             it = data.emplace(data.end(), std::move(x), V());
             data_map.emplace(&it->first, it); }
         return it->second; }
-    V& at(const K &x) {
-        auto it = find(x);
-        if (it == data.end()) throw std::out_of_range("ordered_map");
-        return it->second; }
-    const V& at(const K &x) const {
-        auto it = find(x);
-        if (it == data.end()) throw std::out_of_range("ordered_map");
-        return it->second; }
+    V& at(const K &x) { return data_map.at(&x)->second; }
+    const V& at(const K &x) const { return data_map.at(&x)->second; }
 
     template<typename KK, typename... VV>
     std::pair<iterator, bool> emplace(KK &&k, VV &&... v) {
