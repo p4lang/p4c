@@ -20,7 +20,7 @@ limitations under the License.
 #define P4C_LIB_STRINGIFY_H_
 
 #include <stdint.h>
-#include <gmpxx.h>  // for mpz_class
+#include "gmputil.h"
 #include "cstring.h"
 #include "stringref.h"
 
@@ -63,7 +63,7 @@ cstring toString(std::string value);
 cstring toString(const char* value);
 cstring toString(cstring value);
 cstring toString(StringRef value);
-cstring toString(const mpz_class* value, unsigned int base = 10);
+cstring toString(const big_int* value, unsigned int base = 10);
 cstring toString(const void* value);
 
 // printf into a string

@@ -2010,14 +2010,14 @@ const IR::Node* TypeInference::unsBinaryArith(const IR::Operation_Binary* expres
 
     auto cleft = expression->left->to<IR::Constant>();
     if (cleft != nullptr) {
-        if (sgn(cleft->value) < 0) {
+        if (cleft->value < 0) {
             typeError("%1%: not defined on negative numbers", expression);
             return expression;
         }
     }
     auto cright = expression->right->to<IR::Constant>();
     if (cright != nullptr) {
-        if (sgn(cright->value) < 0) {
+        if (cright->value < 0) {
             typeError("%1%: not defined on negative numbers", expression);
             return expression;
         }

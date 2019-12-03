@@ -19,7 +19,6 @@ limitations under the License.
 
 #include <assert.h>
 #include <boost/optional.hpp>
-#include <gmpxx.h>
 #include <string>
 #include <unordered_set>
 #include "lib/bitvec.h"
@@ -173,7 +172,9 @@ class JSONGenerator {
     typename std::enable_if<std::is_integral<T>::value>::type
     generate(T v) { out << std::to_string(v); }
     void generate(double v) { out << std::to_string(v); }
-    void generate(const mpz_class &v) { out << v; }
+    template<typename T>
+    typename std::enable_if<std::is_same<T, big_int>::value>::type
+    generate(const T &v) { out << v; }
 
     void generate(cstring v) {
         if (v)

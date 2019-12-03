@@ -24,7 +24,7 @@ const IR::Node* DoRemoveLeftSlices::postorder(IR::AssignmentStatement* stat) {
     auto ls = stat->left->to<IR::Slice>();
     int h = ls->getH();
     int l = ls->getL();
-    mpz_class m = Util::maskFromSlice(h, l);
+    big_int m = Util::maskFromSlice(h, l);
     auto type = typeMap->getType(ls->e0, true);
     auto mask = new IR::Constant(ls->srcInfo, type, m, 16);
 

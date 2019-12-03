@@ -43,7 +43,7 @@ const IR::Node* ExpressionConverter::postorder(IR::Mask* expression) {
 
     auto exp = expression->left;
     auto cst = expression->right->to<IR::Constant>();
-    mpz_class value = cst->value;
+    big_int value = cst->value;
     if (value == 0) {
         ::warning(ErrorType::WARN_INVALID, "%1%: zero mask", expression->right);
         return cst;

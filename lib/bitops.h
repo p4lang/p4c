@@ -27,8 +27,7 @@ static inline unsigned bitcount(unsigned v) {
     unsigned rv = 0;
     while (v) { v &= v-1; ++rv; }
 #endif
-    return rv;
-}
+    return rv; }
 
 static inline int floor_log2(unsigned v) {
     int rv = -1;
@@ -37,8 +36,7 @@ static inline int floor_log2(unsigned v) {
 #else
     while (v) { rv++; v >>= 1; }
 #endif
-    return rv;
-}
+    return rv; }
 
 static inline int ceil_log2(unsigned v) {
     return v ? floor_log2(v-1) + 1 : -1;

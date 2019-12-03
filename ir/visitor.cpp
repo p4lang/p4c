@@ -474,6 +474,7 @@ IRNODE_ALL_NON_TEMPLATE_CLASSES(DEFINE_APPLY_FUNCTIONS, , , )
 std::ostream &operator<<(std::ostream &out, const IR::Vector<IR::Expression> *v) {
     return v ? out << *v : out << "<null>"; }
 
+#include <config.h>
 #if HAVE_CXXABI_H
 #include <cxxabi.h>
 

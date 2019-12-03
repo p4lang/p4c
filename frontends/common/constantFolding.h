@@ -17,8 +17,7 @@ limitations under the License.
 #ifndef _COMMON_CONSTANTFOLDING_H_
 #define _COMMON_CONSTANTFOLDING_H_
 
-#include <gmpxx.h>
-
+#include "lib/gmputil.h"
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
@@ -76,7 +75,7 @@ class DoConstantFolding : public Transform {
 
     /// Statically evaluate binary operation @p e implemented by @p func.
     const IR::Node* binary(const IR::Operation_Binary* op,
-                           std::function<mpz_class(mpz_class, mpz_class)> func,
+                           std::function<big_int(big_int, big_int)> func,
                            bool saturating = false);
     /// Statically evaluate comparison operation @p e.
     /// Note that this only handles the case where @p e represents `==` or `!=`.

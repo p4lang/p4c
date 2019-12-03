@@ -136,7 +136,7 @@ abstract Literal : Expression, CompileTimeValue {
 
 /// This is an integer literal on arbitrary-precision.
 class Constant : Literal {
-    mpz_class value;
+    big_int value;
     optional unsigned  base;  /// base used when reading/writing
 #noconstructor
     /// if noWarning is true, no warning is emitted
@@ -158,53 +158,44 @@ class Constant : Literal {
     Constant(unsigned long v, unsigned base = 10) :
         Literal(new Type_InfInt()), value(v), base(base) {}
     Constant(intmax_t v, unsigned base = 10) :
-        Literal(new Type_InfInt()), base(base) {
-        mpz_import(value.get_mpz_t(), /* word count */1, /* msb first */0,
-                   /* word size */sizeof(v), /* native endian */0, /* nails */0, &v); }
+        Literal(new Type_InfInt()), value(v), base(base) {}
 #endif
 #end
     Constant(uint64_t v, unsigned base = 10) :
-        Literal(new Type_InfInt()), base(base) {
-        mpz_import(value.get_mpz_t(), /* word count */1, /* msb first */0,
-                   /* word size */sizeof(v), /* native endian */0, /* nails */0, &v); }
-    Constant(mpz_class v, unsigned base = 10) :
-            Literal(new Type_InfInt()), value(v), base(base) {}
-    Constant(Util::SourceInfo si, mpz_class v, unsigned base = 10) :
-            Literal(si, new Type_InfInt()), value(v), base(base) {}
-    Constant(const Type *t, mpz_class v, unsigned base = 10, bool noWarning = false) :
-            Literal(t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
-    Constant(Util::SourceInfo si, const Type *t, mpz_class v,
+        Literal(new Type_InfInt()), value(v), base(base) {}
+    Constant(big_int v, unsigned base = 10) :
+        Literal(new Type_InfInt()), value(v), base(base) {}
+    Constant(Util::SourceInfo si, big_int v, unsigned base = 10) :
+        Literal(si, new Type_InfInt()), value(v), base(base) {}
+    Constant(const Type *t, big_int v, unsigned base = 10, bool noWarning = false) :
+        Literal(t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
+    Constant(Util::SourceInfo si, const Type *t, big_int v,
              unsigned base = 10, bool noWarning = false) :
-            Literal(si, t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
+        Literal(si, t), value(v), base(base) { CHECK_NULL(t); handleOverflow(noWarning); }
 #emit
     static Constant GetMask(unsigned width);
 #end
-    bool fitsInt() const { return value.fits_sint_p(); }
-    bool fitsLong() const { return value.fits_slong_p(); }
-    bool fitsUint() const { return value.fits_uint_p(); }
-    bool fitsUint64() const { return mpz_sizeinbase(value.get_mpz_t(), 2) < 65; }
+    bool fitsInt() const { return value >= INT_MIN && value <= INT_MAX; }
+    bool fitsLong() const { return value >= LONG_MIN && value <= LONG_MAX; }
+    bool fitsUint() const { return value >= 0 && value <= UINT_MAX; }
+    bool fitsUint64() const { return value >= 0 && value <= UINT64_MAX; }
     long asLong() const {
         if (!fitsLong())
             ::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for long", this);
-        return value.get_si(); }
+        return static_cast<long>(value); }
     int asInt() const {
         if (!fitsInt())
             ::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for int", this);
-        return value.get_si(); }
+        return static_cast<int>(value); }
     unsigned asUnsigned() const {
         if (!fitsUint())
             ::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for unsigned int", this);
-        return value.get_ui();
+        return static_cast<unsigned>(value);
     }
     uint64_t asUint64() const {
         if (!fitsUint64())
             ::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for uint64", this);
-        uint64_t res = UINT64_C(0);
-        size_t nWords = 0;
-        mpz_export(&res, &nWords, /* msb first */0, /* word size */8,
-                   /* native endian */0, /* nails */0,
-                   value.get_mpz_t());
-        return res;
+        return static_cast<uint64_t>(value);
     }
     // The following operators are only used in special circumstances.
     // They do not look at the type when operating.  There are separate

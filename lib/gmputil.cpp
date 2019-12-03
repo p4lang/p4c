@@ -19,49 +19,45 @@ limitations under the License.
 
 namespace Util {
 
-mpz_class shift_left(const mpz_class &v, unsigned bits) {
-    mpz_class exp;
-    mpz_class two(2);
-    mpz_pow_ui(exp.get_mpz_t(), two.get_mpz_t(), bits);
-    return v * exp;
+using namespace boost::multiprecision;
+
+big_int shift_left(const big_int &v, unsigned bits) {
+    return v << bits;
 }
-mpz_class shift_right(const mpz_class &v, unsigned bits) {
-    mpz_class result;
-    mpz_fdiv_q_2exp(result.get_mpz_t(), v.get_mpz_t(), bits);
-    return result;
+big_int shift_right(const big_int &v, unsigned bits) {
+    return v >> bits;
 }
 
 // Returns last 'bits' of value
 // value is shifted right by this many bits
-mpz_class ripBits(mpz_class &value, int bits) {
-    mpz_class last;
-    mpz_class rest;
-
-    mpz_fdiv_r_2exp(last.get_mpz_t(), value.get_mpz_t(), bits);
-    mpz_fdiv_q_2exp(rest.get_mpz_t(), value.get_mpz_t(), bits);
-    value = rest;
-    return last;
+big_int ripBits(big_int &value, int bits) {
+    big_int rv = 1;
+    rv <<= bits;
+    rv -= 1;
+    rv &= value;
+    value >>= bits;
+    return rv;
 }
 
-mpz_class mask(unsigned bits) {
-    mpz_class one = 1;
-    mpz_class result = shift_left(one, bits);
+big_int mask(unsigned bits) {
+    big_int one = 1;
+    big_int result = shift_left(one, bits);
     return result - 1;
 }
 
-mpz_class maskFromSlice(unsigned m, unsigned l) {
+big_int maskFromSlice(unsigned m, unsigned l) {
     if (m < l)
         throw std::logic_error("wrong argument order in maskFromSlice");
-    mpz_class result = mask(m+1) - mask(l);
+    big_int result = mask(m+1) - mask(l);
     return result;
 }
 
 /// Find a consecutive scan of 1 bits
-BitRange findOnes(const mpz_class &value) {
+BitRange findOnes(const big_int &value) {
     BitRange result;
     if (value != 0) {
-        result.lowIndex = mpz_scan1(value.get_mpz_t(), 0);
-        result.highIndex = mpz_scan0(value.get_mpz_t(), result.lowIndex) - 1;
+        result.lowIndex = scan1(value, 0);
+        result.highIndex = scan0(value, result.lowIndex) - 1;
         result.value = maskFromSlice(result.highIndex, result.lowIndex);
     } else {
         result.lowIndex = -1;
@@ -71,8 +67,8 @@ BitRange findOnes(const mpz_class &value) {
     return result;
 }
 
-mpz_class cvtInt(const char *s, unsigned base) {
-    mpz_class rv;
+big_int cvtInt(const char *s, unsigned base) {
+    big_int rv;
 
     while (*s) {
         switch (*s) {

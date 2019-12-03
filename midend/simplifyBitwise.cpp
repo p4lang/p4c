@@ -3,17 +3,17 @@
 
 namespace P4 {
 
-void SimplifyBitwise::assignSlices(const IR::Expression *expr, mpz_class mask) {
-    int one_pos = mpz_scan1(mask.get_mpz_t(), 0);
+void SimplifyBitwise::assignSlices(const IR::Expression *expr, big_int mask) {
+    int one_pos = Util::scan1(mask, 0);
 
     // Calculate the slices for this particular mask
     while (one_pos >= 0) {
-        int zero_pos = mpz_scan0(mask.get_mpz_t(), one_pos);
+        int zero_pos = Util::scan0(mask, one_pos);
         auto left_slice = IR::Slice::make(changing_as->left, one_pos, zero_pos - 1);
         auto right_slice = IR::Slice::make(expr, one_pos, zero_pos - 1);
         auto new_as = new IR::AssignmentStatement(changing_as->srcInfo, left_slice, right_slice);
         slice_statements->push_back(new_as);
-        one_pos = mpz_scan1(mask.get_mpz_t(), zero_pos);
+        one_pos = Util::scan1(mask, zero_pos);
     }
 }
 
@@ -30,7 +30,7 @@ const IR::Node *SimplifyBitwise::preorder(IR::AssignmentStatement *as) {
     slice_statements = new IR::Vector<IR::StatOrDecl>();
     assignSlices(a, maskA->value);
     assignSlices(b, maskB->value);
-    mpz_class parameter_mask = (mpz_class(1) << (as->left->type->width_bits())) - 1;
+    big_int parameter_mask = (big_int(1) << (as->left->type->width_bits())) - 1;
     parameter_mask &= ~maskA->value;
     parameter_mask &= ~maskB->value;
     if (parameter_mask != 0)

@@ -41,10 +41,10 @@ cstring toString(const void* value) {
     return result.str();
 }
 
-cstring toString(const mpz_class* value, unsigned int base) {
+cstring toString(const big_int* value, unsigned int base) {
     if (value == nullptr)
         return cstring::literal("<nullptr>");
-    mpz_class v = *value;
+    big_int v = *value;
     std::ostringstream oss;
     if (v < 0) {
         oss << "-";
@@ -52,20 +52,20 @@ cstring toString(const mpz_class* value, unsigned int base) {
     }
     switch (base) {
         case 2:
-            oss << "0b";
+            oss << "0x" << std::hex;
             break;
         case 8:
-            oss << "0o";
+            oss << "0o" << std::oct;
             break;
         case 16:
-            oss << "0x";
+            oss << "0x" << std::hex;
             break;
         case 10:
             break;
         default:
             throw std::runtime_error("Unexpected base");
     }
-    oss << v.get_str(static_cast<int>(base));
+    oss << v;
     return oss.str();
 }
 

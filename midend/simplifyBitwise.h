@@ -26,7 +26,7 @@ class SimplifyBitwise : public Transform {
     IR::Vector<IR::StatOrDecl> *slice_statements;
     const IR::AssignmentStatement *changing_as;
 
-    void assignSlices(const IR::Expression *expr, mpz_class mask);
+    void assignSlices(const IR::Expression *expr, big_int mask);
 
  public:
     const IR::Node *preorder(IR::AssignmentStatement *as) override;

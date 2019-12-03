@@ -34,7 +34,7 @@ void IJson::dump() const {
 
 JsonValue* JsonValue::null = new JsonValue();
 
-mpz_class JsonValue::makeValue(long long v) {
+big_int JsonValue::makeValue(long long v) {
     if (v >= 0) {
         return makeValue(static_cast<unsigned long long>(v));
     } else {
@@ -45,9 +45,8 @@ mpz_class JsonValue::makeValue(long long v) {
     }
 }
 
-mpz_class JsonValue::makeValue(unsigned long long v) {
-    mpz_class tmp;
-    mpz_import(tmp.get_mpz_t(), 1, 1, sizeof(v), 0, 0, &v);
+big_int JsonValue::makeValue(unsigned long long v) {
+    big_int tmp = v;
     return tmp;
 }
 
@@ -85,12 +84,12 @@ void JsonValue::serialize(std::ostream& out) const {
     }
 }
 
-bool JsonValue::operator==(const mpz_class& v) const
+bool JsonValue::operator==(const big_int& v) const
 { return tag == Kind::Number ? v == value : false; }
 bool JsonValue::operator==(const double& v) const
-{ return tag == Kind::Number ? v == value : false; }
+{ return tag == Kind::Number ? big_int(v) == value : false; }
 bool JsonValue::operator==(const float& v) const
-{ return tag == Kind::Number ? v == value : false; }
+{ return tag == Kind::Number ? big_int(v) == value : false; }
 bool JsonValue::operator==(const cstring& s) const
 { return tag == Kind::String ? s == str : false; }
 bool JsonValue::operator==(const std::string& s) const
@@ -154,17 +153,17 @@ cstring JsonValue::getString() const {
     return str;
 }
 
-mpz_class JsonValue::getValue() const {
+big_int JsonValue::getValue() const {
     if (!isNumber())
         throw std::logic_error("Incorrect json value kind");
     return value;
 }
 
 int JsonValue::getInt() const {
-    auto val = getValue();
-    if (!value.fits_sint_p())
+    big_int val = getValue();
+    if (val < INT_MIN || val > INT_MAX)
         throw std::logic_error("Value too large for an int");
-    return val.get_si();
+    return int(val);
 }
 
 JsonArray* JsonArray::append(IJson* value) {

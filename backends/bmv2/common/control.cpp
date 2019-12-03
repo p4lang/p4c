@@ -71,7 +71,7 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
                     key->emplace("key", stringRepr(km->left->to<IR::Constant>()->value, k8));
                     auto trailing_zeros = [](unsigned long n) { return n ? __builtin_ctzl(n) : 0; };
                     auto count_ones = [](unsigned long n) { return n ? __builtin_popcountl(n) : 0;};
-                    unsigned long mask = km->right->to<IR::Constant>()->value.get_ui();
+                    auto mask = static_cast<unsigned long>(km->right->to<IR::Constant>()->value);
                     auto len = trailing_zeros(mask);
                     if (len + count_ones(mask) != keyWidth)  // any remaining 0s in the prefix?
                         ::error(ErrorType::ERR_INVALID, "mask for LPM key", k);
@@ -336,7 +336,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
                 ::error(ErrorType::ERR_UNSUPPORTED, "multiple LPM keys in table %1%", table);
             }
 
-            mpz_class mask;
+            big_int mask;
             if (auto mexp = expr->to<IR::BAnd>()) {
                 if (mexp->right->is<IR::Constant>()) {
                     mask = mexp->right->to<IR::Constant>()->value;

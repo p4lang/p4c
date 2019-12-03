@@ -23,9 +23,9 @@ class JsonData {
 
 class JsonNumber : public JsonData {
  public:
-    JsonNumber(mpz_class v) : val(v) {}   // NOLINT(runtime/explicit)
-    operator int() const { return val.get_si(); }  // Does not handle overflow
-    mpz_class val;
+    JsonNumber(big_int v) : val(v) {}   // NOLINT(runtime/explicit)
+    operator int() const { return int(val); }  // Does not handle overflow
+    big_int val;
 };
 
 class JsonBoolean : public JsonData {
