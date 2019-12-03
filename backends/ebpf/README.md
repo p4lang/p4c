@@ -207,7 +207,7 @@ Additionally, the eBPF compiler test suite has the following python dependencies
 You can install these using:
 ```
 $ sudo apt-get install clang llvm libpcap-dev libelf-dev iproute2 net-tools
-$ sudo pip install pyroute2 ply scapy==2.4.0
+$ sudo pip3 install pyroute2 ply==3.8 scapy==2.4.0
 ```
 
 ### Supported capabilities
@@ -332,3 +332,7 @@ The following tests run ebpf programs:
 - `make check-ebpf-bcc`: runs the user-space tests using bcc to compile ebpf
 - `sudo make check-ebpf-kernel`: runs the kernel-level tests.
    Requires root privileges to install the ebpf program in the Linux kernel.
+   Note: by default the kernel ebpf tests are disabled; if you want to enable them
+   you can modify the file `backends/ebpf/CMakeLists.txt` by setting this variable to `True`:
+   `set (SUPPORTS_KERNEL True)`
+   
