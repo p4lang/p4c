@@ -699,8 +699,8 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
                 return true;
         } else if (dest->is<IR::Type_Boolean>()) {
             return f->size == 1 && !f->isSigned;
-        } else if (auto se = dest->to<IR::Type_SerEnum>()) {
-            return TypeMap::equivalent(src, se->type);
+        } else if (auto de = dest->to<IR::Type_SerEnum>()) {
+            return TypeMap::equivalent(src, de->type);
         }
     } else if (src->is<IR::Type_Boolean>()) {
         if (dest->is<IR::Type_Bits>()) {
@@ -708,15 +708,16 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
             return b->size == 1 && !b->isSigned;
         }
     } else if (src->is<IR::Type_InfInt>()) {
-        if (dest->is<IR::Type_Bits>()) return true;
-        if (auto se = dest->to<IR::Type_SerEnum>())
-            return canCastBetween(se->type, src);
+        return dest->is<IR::Type_Bits>();
     } else if (src->is<IR::Type_Newtype>()) {
         auto st = getTypeType(src->to<IR::Type_Newtype>()->type);
         return TypeMap::equivalent(dest, st);
     } else if (auto se = src->to<IR::Type_SerEnum>()) {
         if (auto db = dest->to<IR::Type_Bits>()) {
             return TypeMap::equivalent(se->type, db);
+        }
+        if (auto de = dest->to<IR::Type_SerEnum>()) {
+            return TypeMap::equivalent(se->type, de->type);
         }
     }
     return false;
@@ -730,7 +731,6 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
     const IR::Type* initType = getType(sourceExpression);
     if (initType == nullptr)
         return sourceExpression;
-
     if (initType == destType)
         return sourceExpression;
 
@@ -742,6 +742,11 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
         ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
         sourceExpression = cts.convert(sourceExpression);  // sets type
     }
+    if (destType->is<IR::Type_SerEnum>() && !TypeMap::equivalent(destType, initType)) {
+        typeError("%1%: No implicit casts to %2%", errorPosition, destType);
+        return sourceExpression;
+    }
+
     if (initType->is<IR::Type_InfInt>() && !destType->is<IR::Type_InfInt>()) {
         auto toType = destType->getP4Type();
         sourceExpression = new IR::Cast(toType, sourceExpression);
@@ -1526,6 +1531,10 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
         return expression;
 
     bool equTest = expression->is<IR::Equ>() || expression->is<IR::Neq>();
+    if (auto l = ltype->to<IR::Type_SerEnum>())
+        ltype = l->type;
+    if (auto r = rtype->to<IR::Type_SerEnum>())
+        rtype = r->type;
 
     if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_InfInt>()) {
         // This can happen because we are replacing some constant functions with
@@ -2392,10 +2401,15 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
         const IR::Type* destType = castType;
         while (destType->is<IR::Type_Newtype>())
             destType = getTypeType(destType->to<IR::Type_Newtype>()->type);
-        auto rhs = assignment(expression, destType, expression->expr);
-        if (rhs == nullptr)
-            // error
+
+        auto tvs = unify(expression, destType, sourceType);
+        if (tvs == nullptr)
             return expression;
+        const IR::Expression* rhs = expression;
+        if (!tvs->isIdentity()) {
+            ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+            rhs = cts.convert(expression->expr);  // sets type
+        }
         if (rhs != expression->expr) {
             // if we are here we have performed a substitution on the rhs
             expression = new IR::Cast(expression->srcInfo, expression->destType, rhs);

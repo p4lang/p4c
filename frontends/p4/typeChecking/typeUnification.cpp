@@ -418,10 +418,10 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         }
         constraints->addEqualityConstraint(dstack->elementType, sstack->elementType);
         return true;
-    } else if (dest->is<IR::Type_SerEnum>() && src->is<IR::Type_Bits>()) {
-        auto denum = dest->to<IR::Type_SerEnum>();
+    } else if (src->is<IR::Type_SerEnum>() && dest->is<IR::Type_Bits>()) {
+        auto senum = src->to<IR::Type_SerEnum>();
         // unify with enum's underlying type
-        return unify(errorPosition, denum->type, src, reportErrors);
+        return unify(errorPosition, senum->type, dest, reportErrors);
     }
 
     if (reportErrors)
