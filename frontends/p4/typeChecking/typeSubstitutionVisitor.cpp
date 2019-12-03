@@ -69,11 +69,4 @@ const IR::Node* TypeVariableSubstitutionVisitor::replacement(
     return replacement;
 }
 
-const IR::Node* TypeNameSubstitutionVisitor::preorder(IR::Type_Name* typeName) {
-    auto type = bindings->lookup(typeName);
-    if (type == nullptr)
-        return typeName;
-    return type;
-}
-
 }  // namespace P4

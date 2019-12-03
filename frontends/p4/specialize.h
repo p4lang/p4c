@@ -112,6 +112,11 @@ class FindSpecializations : public Inspector {
     /// specialize.
     bool noParameters(const IR::IContainer* container);
 
+    // skip packages; we only specialize package instantiations.
+    // (packages can contain constructor call expressions for
+    // default argument values).
+    bool preorder(const IR::Type_Package*) override
+    { return false; }
     bool preorder(const IR::P4Parser* parser) override
     { return noParameters(parser); }
     bool preorder(const IR::P4Control* control) override
@@ -163,6 +168,9 @@ class Specialize : public Transform {
     { CHECK_NULL(specMap); setName("Specialize"); }
     const IR::Node* postorder(IR::P4Parser* parser) override
     { return instantiate(parser); }
+    // skip packages
+    const IR::Node* preorder(IR::Type_Package* package) override
+    { prune(); return package; }
     const IR::Node* postorder(IR::P4Control* control) override
     { return instantiate(control); }
     const IR::Node* postorder(IR::ConstructorCallExpression* expression) override;

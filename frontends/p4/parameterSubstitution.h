@@ -89,8 +89,13 @@ class ParameterSubstitution : public IHasDbPrint {
     }
 
     void dbprint(std::ostream& out) const {
-        for (auto s : parametersByName)
-            out << dbp(s.second) << "=>" << dbp(lookupByName(s.first)) << std::endl;
+        if (paramList != nullptr) {
+            for (auto s : *paramList->getEnumerator())
+                out << dbp(s) << "=>" << dbp(lookup(s)) << std::endl;
+        } else {
+            for (auto s : parametersByName)
+                out << dbp(s.second) << "=>" << dbp(lookupByName(s.first)) << std::endl;
+        }
     }
 };
 

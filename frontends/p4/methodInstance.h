@@ -300,8 +300,9 @@ class PackageInstantiation : public Instantiation {
                          const IR::Type_Package* package) :
             Instantiation(instance, typeArguments), package(package) {
         constructorParameters = package->getConstructorParameters();
-        substitute(); }
-    const IR::Type_Package* package;
+        substitute();
+    }
+    const IR::Type_Package*  package;
 };
 
 class ParserInstantiation : public Instantiation {

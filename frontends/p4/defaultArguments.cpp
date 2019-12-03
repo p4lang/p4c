@@ -19,10 +19,31 @@ limitations under the License.
 
 namespace P4 {
 
+class SubstituteTypeArguments : public Transform {
+    TypeMap *typeMap;
+
+ public:
+    SubstituteTypeArguments(TypeMap* typeMap): typeMap(typeMap) {
+        CHECK_NULL(typeMap); setName("SubstituteTypeArguments");
+    }
+
+    const IR::Node* preorder(IR::Type_Name* type) override {
+        auto t = typeMap->getTypeType(getOriginal(), true);
+        if (auto tv = t->to<IR::Type_Var>()) {
+            auto subst = typeMap->getType(tv);
+            if (subst != nullptr)
+                return subst->getP4Type();
+        }
+        return type;
+    }
+};
+
 /// Scans a parameter substitution and returns the new arguments to use if some
 /// parameters have default values.
 /// Returns nullptr if no arguments need to be changed.
-static const IR::Vector<IR::Argument>* fillDefaults(const ParameterSubstitution* subst) {
+static const IR::Vector<IR::Argument>* fillDefaults(
+    TypeMap* typeMap,
+    const ParameterSubstitution* subst) {
     auto args = new IR::Vector<IR::Argument>();
     bool changed = false;
     for (auto param : *subst->getParametersInOrder()) {
@@ -34,8 +55,13 @@ static const IR::Vector<IR::Argument>* fillDefaults(const ParameterSubstitution*
                 arg = new IR::Argument(arg->srcInfo, param->name, arg->expression);
         } else if (param->defaultValue != nullptr) {
             // Parameter with default value: add a corresponding argument
-            arg = new IR::Argument(param->srcInfo, param->name, param->defaultValue);
-            changed = true;
+            const IR::Expression* value = param->defaultValue;
+            SubstituteTypeArguments sta(typeMap);
+            value = param->defaultValue->apply(sta);
+            if (value != param->defaultValue) {
+                arg = new IR::Argument(param->srcInfo, param->name, value);
+                changed = true;
+            }
         }
         args->push_back(arg);
     }
@@ -47,7 +73,7 @@ static const IR::Vector<IR::Argument>* fillDefaults(const ParameterSubstitution*
 
 const IR::Node* DoDefaultArguments::postorder(IR::MethodCallExpression* mce) {
     auto mi = MethodInstance::resolve(mce, refMap, typeMap);
-    auto args = fillDefaults(&mi->substitution);
+    auto args = fillDefaults(typeMap, &mi->substitution);
     if (args != nullptr)
         mce->arguments = args;
     return mce;
@@ -55,7 +81,7 @@ const IR::Node* DoDefaultArguments::postorder(IR::MethodCallExpression* mce) {
 
 const IR::Node* DoDefaultArguments::postorder(IR::ConstructorCallExpression* cce) {
     auto cc = ConstructorCall::resolve(cce, refMap, typeMap);
-    auto args = fillDefaults(&cc->substitution);
+    auto args = fillDefaults(typeMap, &cc->substitution);
     if (args != nullptr)
         cce->arguments = args;
     return cce;
@@ -63,7 +89,7 @@ const IR::Node* DoDefaultArguments::postorder(IR::ConstructorCallExpression* cce
 
 const IR::Node* DoDefaultArguments::postorder(IR::Declaration_Instance* inst) {
     auto ii = Instantiation::resolve(inst, refMap, typeMap);
-    auto args = fillDefaults(&ii->substitution);
+    auto args = fillDefaults(typeMap, &ii->substitution);
     if (args != nullptr)
         inst->arguments = args;
     return inst;

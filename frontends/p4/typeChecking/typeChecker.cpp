@@ -961,10 +961,9 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
 
     auto simpleType = type;
     if (type->is<IR::Type_SpecializedCanonical>())
-        simpleType = type->to<IR::Type_SpecializedCanonical>()->substituted;
+        simpleType = getTypeType(type->to<IR::Type_SpecializedCanonical>()->baseType);
 
-    if (simpleType->is<IR::Type_Extern>()) {
-        auto et = simpleType->to<IR::Type_Extern>();
+    if (auto et = simpleType->to<IR::Type_Extern>()) {
         setType(orig, type);
         setType(decl, type);
 
@@ -984,7 +983,7 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
         }
         if (args != decl->arguments)
             decl->arguments = args;
-    } else if (simpleType->is<IR::IContainer>()) {
+    } else if (auto cont = simpleType->to<IR::IContainer>()) {
         if (decl->initializer != nullptr) {
             typeError("%1%: initializers only allowed for extern instances", decl->initializer);
             prune();
@@ -994,8 +993,7 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
             ::error("%1%: cannot instantiate at top-level", decl);
             return decl;
         }
-        auto typeAndArgs = containerInstantiation(
-            decl, decl->arguments, simpleType->to<IR::IContainer>());
+        auto typeAndArgs = containerInstantiation(decl, decl->arguments, cont);
         auto type = typeAndArgs.first;
         auto args = typeAndArgs.second;
         if (type == nullptr || args == nullptr) {

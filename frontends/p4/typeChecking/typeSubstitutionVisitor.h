@@ -57,15 +57,5 @@ class TypeVariableSubstitutionVisitor : public Transform {
     { return replacement(getOriginal<IR::Type_InfInt>(), ti); }
 };
 
-/* Replaces TypeNames with other Types. */
-class TypeNameSubstitutionVisitor : public Transform {
- protected:
-    const TypeNameSubstitution* bindings;
- public:
-    explicit TypeNameSubstitutionVisitor(const TypeNameSubstitution* bindings) :
-            bindings(bindings) { setName("TypeNameSubstitution"); }
-    const IR::Node* preorder(IR::Type_Name* typeName) override;
-};
-
 }  // namespace P4
 #endif /* _TYPECHECKING_TYPESUBSTITUTIONVISITOR_H_ */

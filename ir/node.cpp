@@ -43,9 +43,13 @@ cstring IR::dbp(const IR::INode* node) {
     if (node == nullptr) {
         str << "<nullptr>";
     } else {
-        if (node->is<IR::IDeclaration>()) {
+        if (auto idecl = node->to<IR::IDeclaration>()) {
             node->getNode()->Node::dbprint(str);
-            str << " " << node->to<IR::IDeclaration>()->getName();
+            str << " " << idecl->getName();
+            if (auto decl = idecl->to<IR::Declaration>())
+                str << "/" << decl->declid;
+            else if (auto decl = idecl->to<IR::Type_Declaration>())
+                str << "/" << decl->declid;
         } else if (node->is<IR::Member>()) {
             node->getNode()->Node::dbprint(str);
             str << " ." << node->to<IR::Member>()->member;
