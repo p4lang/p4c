@@ -198,10 +198,14 @@ included with `p4c` are documented here:
 
 Most dependencies can be installed using `apt-get install`:
 
-`sudo apt-get install cmake g++ git automake libtool libgc-dev bison flex
+```bash
+$ sudo apt-get install cmake g++ git automake libtool libgc-dev bison flex
 libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev
-libboost-graph-dev llvm pkg-config python python-scapy python-ipaddr python-ply
-tcpdump`
+libboost-graph-dev llvm pkg-config python python-scapy python-ipaddr python-ply python3-pip
+tcpdump
+
+$ pip3 install scapy
+```
 
 For documentation building:
 `sudo apt-get install -y doxygen graphviz texlive-full`
