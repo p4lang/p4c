@@ -26,8 +26,7 @@
 import os
 import sys
 from glob import glob
-from scapy.utils import rdpcap, RawPcapWriter
-from scapy.layers.all import *
+import scapy.utils as scapy_util
 from .ebpfstf import create_table_file, parse_stf_file
 # path to the tools folder of the compiler
 sys.path.insert(0, os.path.dirname(
@@ -120,7 +119,7 @@ class EBPFTarget(object):
             direction = "in"
             infile = self.filename(iface, direction)
             # Linktype 1 the Ethernet Link Type, see also 'man pcap-linktype'
-            fp = RawPcapWriter(infile, linktype=1)
+            fp = scapy_util.RawPcapWriter(infile, linktype=1)
             fp._write_header(None)
             for pkt_data in pkts:
                 try:
@@ -181,7 +180,7 @@ class EBPFTarget(object):
                 packets = []
             else:
                 try:
-                    packets = rdpcap(file)
+                    packets = scapy_util.rdpcap(file)
                 except Exception as e:
                     report_err(self.outputs["stderr"],
                                "Corrupt pcap file", file, e)
