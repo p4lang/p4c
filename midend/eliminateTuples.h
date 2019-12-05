@@ -24,7 +24,7 @@ limitations under the License.
 namespace P4 {
 
 /**
- * Maintains for each type that may contain a tuple (or be a tuple) the
+ * Maintains for each type that may contain a tuple (or is a tuple) the
  * corresponding struct replacement.
 */
 class ReplacementMap {
@@ -37,7 +37,7 @@ class ReplacementMap {
 
     ReplacementMap(NameGenerator* ng, TypeMap* typeMap) : ng(ng), typeMap(typeMap)
     { CHECK_NULL(ng); CHECK_NULL(typeMap); }
-    const IR::Type_Struct* getReplacement(const IR::Type_Tuple* tt);
+    const IR::Type_Struct* getReplacement(const IR::Type_BaseList* tt);
     IR::IndexedVector<IR::Node>* getNewReplacements();
 };
 
@@ -69,7 +69,7 @@ class DoReplaceTuples final : public Transform {
  public:
     explicit DoReplaceTuples(ReplacementMap* replMap) : repl(replMap)
     { CHECK_NULL(repl); setName("DoReplaceTuples"); }
-    const IR::Node* postorder(IR::Type_Tuple* type) override;
+    const IR::Node* postorder(IR::Type_BaseList* type) override;
     const IR::Node* insertReplacements(const IR::Node* before);
     const IR::Node* postorder(IR::Type_Struct* type) override
     { return insertReplacements(type); }

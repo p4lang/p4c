@@ -341,8 +341,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
                type->is<IR::Type_ActionEnum>() ||
                type->is<IR::Type_MatchKind>()) {
         return type;
-    } else if (type->is<IR::Type_Set>()) {
-        auto set = type->to<IR::Type_Set>();
+    } else if (auto set = type->to<IR::Type_Set>()) {
         auto et = canonicalize(set->elementType);
         if (et == nullptr)
             return nullptr;
@@ -353,8 +352,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             return type;
         const IR::Type *canon = new IR::Type_Set(type->srcInfo, et);
         return canon;
-    } else if (type->is<IR::Type_Stack>()) {
-        auto stack = type->to<IR::Type_Stack>();
+    } else if (auto stack = type->to<IR::Type_Stack>()) {
         auto et = canonicalize(stack->elementType);
         if (et == nullptr)
             return nullptr;
@@ -365,14 +363,13 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             canon = new IR::Type_Stack(stack->srcInfo, et, stack->size);
         canon = typeMap->getCanonical(canon);
         return canon;
-    } else if (type->is<IR::Type_Tuple>()) {
-        auto tuple = type->to<IR::Type_Tuple>();
+    } else if (auto list = type->to<IR::Type_List>()) {
         auto fields = new IR::Vector<IR::Type>();
-        // tuple<set<a>, b> = set<tuple<a, b>>
+        // list<set<a>, b> = set<tuple<a, b>>
         // TODO: this should not be done here.
         bool anySet = false;
         bool anyChange = false;
-        for (auto t : tuple->components) {
+        for (auto t : list->components) {
             if (t->is<IR::Type_Set>()) {
                 anySet = true;
                 t = t->to<IR::Type_Set>()->elementType;
@@ -384,16 +381,34 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             fields->push_back(t1);
         }
         const IR::Type *canon;
-        if (anyChange || anySet)
+        if (anySet)
             canon = new IR::Type_Tuple(type->srcInfo, *fields);
+        else if (anyChange)
+            canon = new IR::Type_List(type->srcInfo, *fields);
         else
             canon = type;
         canon = typeMap->getCanonical(canon);
         if (anySet)
             canon = new IR::Type_Set(type->srcInfo, canon);
         return canon;
-    } else if (type->is<IR::Type_Parser>()) {
-        auto tp = type->to<IR::Type_Parser>();
+    } else if (auto tuple = type->to<IR::Type_Tuple>()) {
+        auto fields = new IR::Vector<IR::Type>();
+        bool anyChange = false;
+        for (auto t : tuple->components) {
+            auto t1 = canonicalize(t);
+            anyChange = anyChange || t != t1;
+            if (t1 == nullptr)
+                return nullptr;
+            fields->push_back(t1);
+        }
+        const IR::Type *canon;
+        if (anyChange)
+            canon = new IR::Type_Tuple(type->srcInfo, *fields);
+        else
+            canon = type;
+        canon = typeMap->getCanonical(canon);
+        return canon;
+    } else if (auto tp = type->to<IR::Type_Parser>()) {
         auto pl = canonicalizeParameters(tp->applyParams);
         auto tps = tp->typeParameters;
         if (pl == nullptr || tps == nullptr)
@@ -403,8 +418,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         if (pl != tp->applyParams || tps != tp->typeParameters)
             return new IR::Type_Parser(tp->srcInfo, tp->name, tp->annotations, tps, pl);
         return type;
-    } else if (type->is<IR::Type_Control>()) {
-        auto tp = type->to<IR::Type_Control>();
+    } else if (auto tp = type->to<IR::Type_Control>()) {
         auto pl = canonicalizeParameters(tp->applyParams);
         auto tps = tp->typeParameters;
         if (pl == nullptr || tps == nullptr)
@@ -414,8 +428,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         if (pl != tp->applyParams || tps != tp->typeParameters)
             return new IR::Type_Control(tp->srcInfo, tp->name, tp->annotations, tps, pl);
         return type;
-    } else if (type->is<IR::Type_Package>()) {
-        auto tp = type->to<IR::Type_Package>();
+    } else if (auto tp = type->to<IR::Type_Package>()) {
         auto pl = canonicalizeParameters(tp->constructorParams);
         auto tps = tp->typeParameters;
         if (pl == nullptr || tps == nullptr)
@@ -423,8 +436,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         if (pl != tp->constructorParams || tps != tp->typeParameters)
             return new IR::Type_Package(tp->srcInfo, tp->name, tp->annotations, tps, pl);
         return type;
-    } else if (type->is<IR::P4Control>()) {
-        auto cont = type->to<IR::P4Control>();
+    } else if (auto cont = type->to<IR::P4Control>()) {
         auto ctype0 = getTypeType(cont->type);
         if (ctype0 == nullptr)
             return nullptr;
@@ -436,8 +448,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             return new IR::P4Control(cont->srcInfo, cont->name,
                                      ctype, pl, cont->controlLocals, cont->body);
         return type;
-    } else if (type->is<IR::P4Parser>()) {
-        auto p = type->to<IR::P4Parser>();
+    } else if (auto p = type->to<IR::P4Parser>()) {
         auto ctype0 = getTypeType(p->type);
         if (ctype0 == nullptr)
             return nullptr;
@@ -449,8 +460,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             return new IR::P4Parser(p->srcInfo, p->name, ctype,
                                     pl, p->parserLocals, p->states);
         return type;
-    } else if (type->is<IR::Type_Extern>()) {
-        auto te = type->to<IR::Type_Extern>();
+    } else if (auto te = type->to<IR::Type_Extern>()) {
         bool changes = false;
         auto methods = new IR::Vector<IR::Method>();
         for (auto method : te->methods) {
@@ -475,8 +485,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         if (changes || tps != te->typeParameters)
             resultType = new IR::Type_Extern(te->srcInfo, te->name, tps, *methods);
         return resultType;
-    } else if (type->is<IR::Type_Method>()) {
-        auto mt = type->to<IR::Type_Method>();
+    } else if (auto mt = type->to<IR::Type_Method>()) {
         const IR::Type* res = nullptr;
         if (mt->returnType != nullptr) {
             res = canonicalize(mt->returnType);
@@ -511,8 +520,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         return canonicalizeFields(su, [su](const IR::IndexedVector<IR::StructField>* fields) {
                 return new IR::Type_UnknownStruct(su->srcInfo, su->name, su->annotations, *fields);
             });
-    } else if (type->is<IR::Type_Specialized>()) {
-        auto st = type->to<IR::Type_Specialized>();
+    } else if (auto st = type->to<IR::Type_Specialized>()) {
         auto baseCanon = canonicalize(st->baseType);
         if (baseCanon == nullptr)
             return nullptr;
@@ -721,14 +729,6 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
 
     if (initType == destType)
         return sourceExpression;
-
-    // Unification allows tuples to be assigned to headers and structs.
-    // We should only allow this if the source expression is a ListExpression.
-    if (destType->is<IR::Type_StructLike>() && initType->is<IR::Type_Tuple>() &&
-        !sourceExpression->is<IR::ListExpression>()) {
-        typeError("%1%: Cannot assign a %2% to a %3%", errorPosition, initType, destType);
-        return sourceExpression;
-    }
 
     auto tvs = unify(errorPosition, destType, initType);
     if (tvs == nullptr)
@@ -1215,6 +1215,11 @@ const IR::Node* TypeInference::postorder(IR::Type_Var* typeVar) {
     return typeVar;
 }
 
+const IR::Node* TypeInference::postorder(IR::Type_List* type) {
+    (void)setTypeType(type);
+    return type;
+}
+
 const IR::Node* TypeInference::postorder(IR::Type_Tuple* type) {
     (void)setTypeType(type);
     return type;
@@ -1517,7 +1522,7 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
         } else if (ltype->is<IR::Type_Base>() && rtype->is<IR::Type_Base>() &&
                  TypeMap::equivalent(ltype, rtype)) {
             defined = true;
-        } else if (ltype->is<IR::Type_Tuple>() && rtype->is<IR::Type_Tuple>()) {
+        } else if (ltype->is<IR::Type_BaseList>() && rtype->is<IR::Type_BaseList>()) {
             auto tvs = unify(expression, ltype, rtype);
             if (tvs == nullptr)
                 // error already signalled
@@ -1576,12 +1581,9 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
                 defined = true;
             }
 
-            // comparison between structs and list expressions is allowed only
-            // if the expression with tuple type is a list expression
-            if ((ltype->is<IR::Type_StructLike>() &&
-                 rtype->is<IR::Type_Tuple>() && expression->right->is<IR::ListExpression>()) ||
-                 (ltype->is<IR::Type_Tuple>() && expression->left->is<IR::ListExpression>()
-                  && rtype->is<IR::Type_StructLike>())) {
+            // comparison between structs and list expressions is allowed
+            if ((ltype->is<IR::Type_StructLike>() && rtype->is<IR::Type_List>()) ||
+                 (ltype->is<IR::Type_List>() && rtype->is<IR::Type_StructLike>())) {
                 if (!ltype->is<IR::Type_StructLike>()) {
                     // swap
                     auto type = ltype;
@@ -1742,7 +1744,7 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
         entryKeyType = entryKeyType->to<IR::Type_Set>()->elementType;
 
     auto keyset = entry->getKeys();
-    if (keyset == nullptr || !keyset->is<IR::ListExpression>()) {
+    if (keyset == nullptr || !(keyset->is<IR::ListExpression>())) {
         typeError("%1%: key expression must be tuple", keyset);
         return entry;
     } else if (keyset->components.size() < key->keyElements.size()) {
@@ -1797,7 +1799,7 @@ const IR::Node* TypeInference::postorder(IR::ListExpression* expression) {
         components->push_back(type);
     }
 
-    auto tupleType = new IR::Type_Tuple(expression->srcInfo, *components);
+    auto tupleType = new IR::Type_List(expression->srcInfo, *components);
     auto type = canonicalize(tupleType);
     if (type == nullptr)
         return expression;
@@ -2873,8 +2875,8 @@ void TypeInference::checkEmitType(const IR::Expression* emit, const IR::Type* ty
         return;
     }
 
-    if (type->is<IR::Type_Tuple>()) {
-        for (auto f : type->to<IR::Type_Tuple>()->components) {
+    if (auto list = type->to<IR::Type_BaseList>()) {
+        for (auto f : list->components) {
             auto ftype = typeMap->getType(f);
             if (ftype == nullptr)
                 continue;
@@ -3163,7 +3165,7 @@ static void convertStructToTuple(const IR::Type_StructLike* structType, IR::Type
 }
 
 const IR::SelectCase*
-TypeInference::matchCase(const IR::SelectExpression* select, const IR::Type_Tuple* selectType,
+TypeInference::matchCase(const IR::SelectExpression* select, const IR::Type_BaseList* selectType,
                          const IR::SelectCase* selectCase, const IR::Type* caseType) {
     // The selectType is always a tuple
     // If the caseType is a set type, we unify the type of the set elements
@@ -3179,7 +3181,7 @@ TypeInference::matchCase(const IR::SelectExpression* select, const IR::Type_Tupl
         caseType = tupleType;
     }
     const IR::Type* useSelType = selectType;
-    if (!caseType->is<IR::Type_Tuple>()) {
+    if (!caseType->is<IR::Type_BaseList>()) {
         if (selectType->components.size() != 1) {
             typeError("Type mismatch %1% (%2%) vs %3% (%4%)",
                       select->select, selectType->toString(), selectCase, caseType->toString());
@@ -3241,10 +3243,10 @@ const IR::Node* TypeInference::postorder(IR::SelectExpression* expression) {
         return expression;
 
     // Check that the selectType is determined
-    if (!selectType->is<IR::Type_Tuple>())
+    if (!selectType->is<IR::Type_BaseList>())
         BUG("%1%: Expected a tuple type for the select expression, got %2%",
             expression, selectType);
-    auto tuple = selectType->to<IR::Type_Tuple>();
+    auto tuple = selectType->to<IR::Type_BaseList>();
     for (auto ct : tuple->components) {
         if (ct->is<IR::ITypeVar>()) {
             typeError("Cannot infer type for %1%", ct);

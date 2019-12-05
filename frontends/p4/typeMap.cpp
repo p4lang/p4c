@@ -116,17 +116,15 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
     // Below we are sure that it's the same Node class
     if (left->is<IR::Type_Base>() || left->is<IR::Type_Newtype>())
         return *left == *right;
-    if (left->is<IR::Type_Type>())
-        return equivalent(left->to<IR::Type_Type>()->type, right->to<IR::Type_Type>()->type);
+    if (auto tt = left->to<IR::Type_Type>())
+        return equivalent(tt->type, right->to<IR::Type_Type>()->type);
     if (left->is<IR::Type_Error>())
         return true;
-    if (left->is<IR::ITypeVar>()) {
-        auto lv = left->to<IR::ITypeVar>();
+    if (auto lv = left->to<IR::ITypeVar>()) {
         auto rv = right->to<IR::ITypeVar>();
         return lv->getVarName() == rv->getVarName() && lv->getDeclId() == rv->getDeclId();
     }
-    if (left->is<IR::Type_Stack>()) {
-        auto ls = left->to<IR::Type_Stack>();
+    if (auto ls = left->to<IR::Type_Stack>()) {
         auto rs = right->to<IR::Type_Stack>();
         if (!ls->sizeKnown()) {
             ::error(ErrorType::ERR_TYPE_ERROR,
@@ -149,8 +147,7 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         auto re = right->to<IR::Type_SerEnum>();
         return le->name == re->name;
     }
-    if (left->is<IR::Type_StructLike>()) {
-        auto sl = left->to<IR::Type_StructLike>();
+    if (auto sl = left->to<IR::Type_StructLike>()) {
         auto sr = right->to<IR::Type_StructLike>();
         if (sl->fields.size() != sr->fields.size())
             return false;
@@ -164,8 +161,7 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         }
         return true;
     }
-    if (left->is<IR::Type_Tuple>()) {
-        auto lt = left->to<IR::Type_Tuple>();
+    if (auto lt = left->to<IR::Type_Tuple>()) {
         auto rt = right->to<IR::Type_Tuple>();
         if (lt->components.size() != rt->components.size())
             return false;
@@ -177,13 +173,23 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         }
         return true;
     }
-    if (left->is<IR::Type_Set>()) {
-        auto lt = left->to<IR::Type_Set>();
+    if (auto lt = left->to<IR::Type_List>()) {
+        auto rt = right->to<IR::Type_List>();
+        if (lt->components.size() != rt->components.size())
+            return false;
+        for (size_t i = 0; i < lt->components.size(); i++) {
+            auto l = lt->components.at(i);
+            auto r = rt->components.at(i);
+            if (!equivalent(l, r))
+                return false;
+        }
+        return true;
+    }
+    if (auto lt = left->to<IR::Type_Set>()) {
         auto rt = right->to<IR::Type_Set>();
         return equivalent(lt->elementType, rt->elementType);
     }
-    if (left->is<IR::Type_Package>()) {
-        auto lp = left->to<IR::Type_Package>();
+    if (auto lp = left->to<IR::Type_Package>()) {
         auto rp = right->to<IR::Type_Package>();
         // The following gets into an infinite loop, since the return type of the
         // constructor is the Type_Package itself.
@@ -212,17 +218,15 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         }
         return true;
     }
-    if (left->is<IR::IApply>()) {
-        return equivalent(left->to<IR::IApply>()->getApplyMethodType(),
+    if (auto a = left->to<IR::IApply>()) {
+        return equivalent(a->getApplyMethodType(),
                           right->to<IR::IApply>()->getApplyMethodType());
     }
-    if (left->is<IR::Type_SpecializedCanonical>()) {
-        auto ls = left->to<IR::Type_SpecializedCanonical>();
+    if (auto ls = left->to<IR::Type_SpecializedCanonical>()) {
         auto rs = right->to<IR::Type_SpecializedCanonical>();
         return equivalent(ls->substituted, rs->substituted);
     }
-    if (left->is<IR::Type_ActionEnum>()) {
-        auto la = left->to<IR::Type_ActionEnum>();
+    if (auto la = left->to<IR::Type_ActionEnum>()) {
         auto ra = right->to<IR::Type_ActionEnum>();
         return la->actionList == ra->actionList;  // pointer comparison
     }
@@ -251,8 +255,7 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         }
         return true;
     }
-    if (left->is<IR::Type_Extern>()) {
-        auto le = left->to<IR::Type_Extern>();
+    if (auto le = left->to<IR::Type_Extern>()) {
         auto re = right->to<IR::Type_Extern>();
         return le->name == re->name;
     }
@@ -268,11 +271,9 @@ bool TypeMap::implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to) 
     if (from->is<IR::Type_InfInt>() && to->is<IR::Type_InfInt>())
         // this case is not caught by the equivalence check
         return true;
-    // We allow implicit casts from tuples to structs
-    if (from->is<IR::Type_StructLike>()) {
-        if (to->is<IR::Type_Tuple>()) {
-            auto sl = from->to<IR::Type_StructLike>();
-            auto rt = to->to<IR::Type_Tuple>();
+    if (auto rt = to->to<IR::Type_BaseList>()) {
+        if (auto sl = from->to<IR::Type_StructLike>()) {
+            // We allow implicit casts from list types to structs
             if (sl->fields.size() != rt->components.size())
                 return false;
             for (size_t i = 0; i < rt->components.size(); i++) {
@@ -282,12 +283,23 @@ bool TypeMap::implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to) 
                     return false;
             }
             return true;
+        } else if (auto sl = from->to<IR::Type_Tuple>()) {
+            // We allow implicit casts from list types to tuples
+            if (sl->components.size() != rt->components.size())
+                return false;
+            for (size_t i = 0; i < rt->components.size(); i++) {
+                auto f = sl->components.at(i);
+                auto r = rt->components.at(i);
+                if (!TypeMap::implicitlyConvertibleTo(f, r))
+                    return false;
+            }
+            return true;
         }
     }
     return false;
 }
 
-// Used for tuples and stacks only
+// Used for tuples, stacks and lists only
 const IR::Type* TypeMap::getCanonical(const IR::Type* type) {
     // Currently a linear search; hopefully this won't be too expensive in practice
     std::vector<const IR::Type*>* searchIn;
@@ -295,6 +307,8 @@ const IR::Type* TypeMap::getCanonical(const IR::Type* type) {
         searchIn = &canonicalStacks;
     else if (type->is<IR::Type_Tuple>())
         searchIn = &canonicalTuples;
+    else if (type->is<IR::Type_List>())
+        searchIn = &canonicalLists;
     else
         BUG("%1%: unexpected type", type);
 

@@ -106,7 +106,7 @@ class TypeInference : public Transform {
     const IR::Expression* assignment(const IR::Node* errorPosition, const IR::Type* destType,
                                      const IR::Expression* sourceExpression);
     const IR::SelectCase* matchCase(const IR::SelectExpression* select,
-                                    const IR::Type_Tuple* selectType,
+                                    const IR::Type_BaseList* selectType,
                                     const IR::SelectCase* selectCase,
                                     const IR::Type* caseType);
     bool canCastBetween(const IR::Type* dest, const IR::Type* src) const;
@@ -217,6 +217,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Type_Specialized* type) override;
     const IR::Node* postorder(IR::Type_SpecializedCanonical* type) override;
     const IR::Node* postorder(IR::Type_Tuple* type) override;
+    const IR::Node* postorder(IR::Type_List* type) override;
     const IR::Node* postorder(IR::Type_Set* type) override;
     const IR::Node* postorder(IR::Type_ArchBlock* type) override;
     const IR::Node* postorder(IR::Type_Newtype* type) override;

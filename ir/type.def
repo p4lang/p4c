@@ -288,20 +288,31 @@ class Type_Set : Type {
         return elementType->width_bits(); }
 }
 
-/// The type of an expressionList
-class Type_Tuple : Type {
+/// Base class for Type_List and Type_Tuple
+abstract Type_BaseList : Type {
     optional inline Vector<Type> components;
-    toString{ return "Tuple(" + Util::toString(components.size()) + ")"; }
     validate{ components.check_null(); }
-    const Type* getP4Type() const override;
     size_t size() const { return components.size(); }
     int width_bits() const override {
-        /// returning sum of the width of the tuple elements
+        /// returning sum of the width of the elements
         int rv = 0;
         for (auto f : components) {
             rv += f->width_bits();
         }
         return rv; }
+}
+
+/// The type of an expressionList; can be unified with both Type_Tuple and Type_Struct
+class Type_List : Type_BaseList {
+    // In error messages this is shown as if it is a Tuple
+    toString{ return "Tuple(" + Util::toString(components.size()) + ")"; }
+    const Type* getP4Type() const override;
+}
+
+/// The type of a tuple.
+class Type_Tuple : Type_BaseList {
+    toString{ return "Tuple(" + Util::toString(components.size()) + ")"; }
+    const Type* getP4Type() const override;
 }
 
 /// The type of an architectural block.
