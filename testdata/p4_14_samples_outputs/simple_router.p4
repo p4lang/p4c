@@ -96,7 +96,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         key = {
         }
         size = 1;
-        default_action = _drop();
+        const default_action = _drop();
     }
     @name(".forward") table forward {
         actions = {
@@ -117,7 +117,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ipv4.dstAddr: lpm;
         }
         size = 1024;
-        default_action = _drop();
+        const default_action = _drop();
     }
     apply {
         if (hdr.ipv4.isValid() && hdr.ipv4.ttl > 8w0) {

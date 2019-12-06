@@ -760,6 +760,7 @@ table_body: /* epsilon */
       { ($$=$1)->default_action = IR::ID(@4, $4); }
     | table_body DEFAULT_ACTION ":" name "(" opt_expression_list ")" ";"
         { ($$=$1)->default_action = IR::ID(@4, $4);
+          if ($6 == nullptr) $$->default_action_is_const = true;
           $$->default_action_args = $6; }
     | table_body CONST DEFAULT_ACTION ":" name ";"
       { ($$=$1)->default_action = IR::ID(@5, $5);
