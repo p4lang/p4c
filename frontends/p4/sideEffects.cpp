@@ -53,6 +53,7 @@ struct EvaluationOrder {
 
     cstring createTemporary(const IR::Type* type) {
         type = type->getP4Type();
+        BUG_CHECK(!type->is<IR::Type_Dontcare>(), "Can't create don't-care temps");
         auto tmp = refMap->newName("tmp");
         auto decl = new IR::Declaration_Variable(IR::ID(tmp, nullptr), type);
         temporaries->push_back(decl);
@@ -172,6 +173,15 @@ class DismantleExpression : public Transform {
             // the MethodCallExpression.
             if (TableApplySolver::isHit(expression, refMap, typeMap) ||
                 TableApplySolver::isMiss(expression, refMap, typeMap)) {
+                if (!getContext()) {
+                    /* if the hit/miss test is at the top level, don't both cloning it
+                     * as that will just create a redundant table later
+                     * FIXME -- should be looking at the parent to see if it is an
+                     * IfStatement, but the context is lost due to the way this pass is
+                     * structured.  Should make DismantleExpression part of the
+                     * DoSimplifyExpressions pass rather than applying it separately */
+                    prune();
+                    return result->final; }
                 BUG_CHECK(type->is<IR::Type_Boolean>(), "%1%: not boolean", type);
                 auto tmp = result->createTemporary(type);
                 auto path = new IR::PathExpression(IR::ID(tmp, nullptr));
@@ -436,7 +446,6 @@ class DismantleExpression : public Transform {
                 leftValue = false;
             else
                 leftValue = true;
-            auto paramtype = typeMap->getType(p, true);
             const IR::Expression* argValue;
             visit(arg);  // May mutate arg!  Recursively simplifies arg.
             auto newarg = result->final;
@@ -444,11 +453,11 @@ class DismantleExpression : public Transform {
 
             if (useTemp) {
                 // declare temporary variable
-                auto tmp = refMap->newName("tmp");
+                auto paramtype = typeMap->getType(p, true);
+                if (paramtype->is<IR::Type_Dontcare>())
+                    paramtype = typeMap->getType(arg, true);
+                auto tmp = result->createTemporary(paramtype);
                 argValue = new IR::PathExpression(IR::ID(tmp, nullptr));
-                auto decl = new IR::Declaration_Variable(
-                    IR::ID(tmp, nullptr), paramtype->getP4Type());
-                result->temporaries->push_back(decl);
                 if (p->direction != IR::Direction::Out) {
                     auto clone = argValue->clone();
                     auto stat = new IR::AssignmentStatement(clone, newarg);
@@ -492,9 +501,7 @@ class DismantleExpression : public Transform {
         if (!type->is<IR::Type_Void>() &&  // no return type
             !tbl_apply &&                  // not a table.apply call
             !resultNotUsed) {              // result of call is not used
-            auto tmp = refMap->newName("tmp");
-            auto decl = new IR::Declaration_Variable(IR::ID(tmp, nullptr), type);
-            result->temporaries->push_back(decl);
+            auto tmp = result->createTemporary(type);
             auto left = new IR::PathExpression(IR::ID(tmp, nullptr));
             auto stat = new IR::AssignmentStatement(left, simplified);
             result->statements->push_back(stat);
@@ -503,7 +510,8 @@ class DismantleExpression : public Transform {
             LOG3(mce << " replaced with " << left << " = " << simplified);
         } else {
             if (tbl_apply) {
-                result->final = simplified;
+                typeMap->setType(mce, type);
+                result->final = mce;
             } else {
                 result->statements->push_back(
                     new IR::MethodCallStatement(mce->srcInfo, simplified));
@@ -527,8 +535,9 @@ class DismantleExpression : public Transform {
         LOG3("Dismantling " << dbp(expression) << (isLeftValue ? " on left" : " on right"));
         leftValue = isLeftValue;
         this->resultNotUsed = resultNotUsed;
-        (void)expression->apply(*this);
-        LOG3("Result is " << result->final);
+        auto *res = expression->apply(*this);
+        BUG_CHECK(IR::equiv(res, result->final), "mismatch in apply(DismantleExpression)");
+        LOG3("Result is " << result->final << (res != result->final ? " (wasteful clone)" : ""));
         return result;
     }
 };
@@ -600,6 +609,8 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::AssignmentStatement* statem
     auto right = parts->final;
     CHECK_NULL(right);
     parts->statements->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
+    if (parts->statements->size() == 1)
+        return parts->statements->front();
     auto block = new IR::BlockStatement(*parts->statements);
     return block;
 }
@@ -611,6 +622,8 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::MethodCallStatement* statem
     if (parts->simple())
         return statement;
     toInsert.append(*parts->temporaries);
+    if (parts->statements->size() == 1)
+        return parts->statements->front();
     auto block = new IR::BlockStatement(*parts->statements);
     return block;
 }
@@ -626,6 +639,8 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::ReturnStatement* statement)
     toInsert.append(*parts->temporaries);
     auto expr = parts->final;
     parts->statements->push_back(new IR::ReturnStatement(statement->srcInfo, expr));
+    if (parts->statements->size() == 1)
+        return parts->statements->front();
     auto block = new IR::BlockStatement(*parts->statements);
     return block;
 }
@@ -640,6 +655,8 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::IfStatement* statement) {
     auto expr = parts->final;
     parts->statements->push_back(new IR::IfStatement(statement->srcInfo, expr,
                                                      statement->ifTrue, statement->ifFalse));
+    if (parts->statements->size() == 1)
+        return parts->statements->front();
     auto block = new IR::BlockStatement(*parts->statements);
     return block;
 }
@@ -654,6 +671,8 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::SwitchStatement* statement)
     auto expr = parts->final;
     parts->statements->push_back(
         new IR::SwitchStatement(statement->srcInfo, expr, std::move(statement->cases)));
+    if (parts->statements->size() == 1)
+        return parts->statements->front();
     auto block = new IR::BlockStatement(*parts->statements);
     return block;
 }
