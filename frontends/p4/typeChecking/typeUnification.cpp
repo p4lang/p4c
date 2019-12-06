@@ -21,6 +21,7 @@ limitations under the License.
 
 namespace P4 {
 
+
 /// Unifies a call with a prototype.
 bool TypeUnification::unifyCall(const IR::Node* errorPosition,
                                 const IR::Type_MethodBase* dest,
@@ -53,7 +54,10 @@ bool TypeUnification::unifyCall(const IR::Node* errorPosition,
         size_t i = 0;
         for (auto tv : dest->typeParameters->parameters) {
             auto type = src->typeArguments->at(i++);
-            constraints->addEqualityConstraint(tv, type);
+            // variable type represents type of formal method argument
+            // written beetween angle brackets, and tv should be replaced
+            // with type of an actual argument
+            constraints->addEqualityConstraint(type /*dst */, tv /* src */);
         }
     }
 
@@ -293,10 +297,6 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
                                      errorPosition, src->toString(), dest->toString());
         return false;
     } else if (auto td = dest->to<IR::Type_BaseList>()) {
-        if (src->is<IR::Type_Struct>() || src->is<IR::Type_Header>()) {
-            // swap and try again: handled below
-            return unify(errorPosition, src, dest, reportErrors);
-        }
         if (!src->is<IR::Type_BaseList>()) {
             if (reportErrors)
                 TypeInference::typeError("%1%: Cannot unify type %2% with %3%",
