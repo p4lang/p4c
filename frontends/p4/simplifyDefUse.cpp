@@ -237,10 +237,11 @@ class FindUninitialized : public Inspector {
 
     bool preorder(const IR::BlockStatement* statement) override {
         LOG3("FU Visiting " << statement);
-        if (!unreachable)
+        if (!unreachable) {
             visit(statement->components, "components");
-         else
+        } else {
             LOG3("Unreachable");
+        }
         return setCurrent(statement);
     }
 
