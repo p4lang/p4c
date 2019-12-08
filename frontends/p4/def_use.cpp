@@ -304,6 +304,8 @@ Definitions* Definitions::joinDefinitions(const Definitions* other) const {
             result->definitions.emplace(loc, defs);
         // otherwise have have already done it in the loop above
     }
+    if (unreachable && other->unreachable)
+        result->setUnreachable();
     return result;
 }
 
@@ -767,6 +769,9 @@ bool ComputeWriteSet::preorder(const IR::P4Control* control) {
 }
 
 bool ComputeWriteSet::preorder(const IR::IfStatement* statement) {
+    LOG3("CWS Visiting " << dbp(statement));
+    if (currentDefinitions->isUnreachable())
+        return setDefinitions(currentDefinitions);
     visit(statement->condition);
     auto cond = getWrites(statement->condition);
     // defs are the definitions after evaluating the condition
@@ -782,6 +787,8 @@ bool ComputeWriteSet::preorder(const IR::IfStatement* statement) {
 }
 
 bool ComputeWriteSet::preorder(const IR::BlockStatement* statement) {
+    if (currentDefinitions->isUnreachable())
+        return setDefinitions(currentDefinitions);
     visit(statement->components, "components");
     return setDefinitions(currentDefinitions);
 }
@@ -791,13 +798,19 @@ bool ComputeWriteSet::preorder(const IR::ReturnStatement* statement) {
         visit(statement->expression);
     returnedDefinitions = returnedDefinitions->joinDefinitions(currentDefinitions);
     LOG3("Return definitions " << returnedDefinitions);
-    return setDefinitions(new Definitions());
+    auto defs = currentDefinitions->cloneDefinitions();
+    defs->setUnreachable();
+    return setDefinitions(defs);
 }
 
 bool ComputeWriteSet::preorder(const IR::ExitStatement*) {
+    if (currentDefinitions->isUnreachable())
+        return setDefinitions(currentDefinitions);
     exitDefinitions = exitDefinitions->joinDefinitions(currentDefinitions);
     LOG3("Exit definitions " << exitDefinitions);
-    return setDefinitions(new Definitions());
+    auto defs = currentDefinitions->cloneDefinitions();
+    defs->setUnreachable();
+    return setDefinitions(defs);
 }
 
 bool ComputeWriteSet::preorder(const IR::EmptyStatement*) {
@@ -806,6 +819,8 @@ bool ComputeWriteSet::preorder(const IR::EmptyStatement*) {
 
 bool ComputeWriteSet::preorder(const IR::AssignmentStatement* statement) {
     LOG3("CWS Visiting " << dbp(statement) << " " << statement);
+    if (currentDefinitions->isUnreachable())
+        return setDefinitions(currentDefinitions);
     lhs = true;
     visit(statement->left);
     lhs = false;
@@ -820,6 +835,8 @@ bool ComputeWriteSet::preorder(const IR::AssignmentStatement* statement) {
 
 bool ComputeWriteSet::preorder(const IR::SwitchStatement* statement) {
     LOG3("CWS Visiting " << dbp(statement));
+    if (currentDefinitions->isUnreachable())
+        return setDefinitions(currentDefinitions);
     visit(statement->expression);
     auto locs = getWrites(statement->expression);
     auto defs = currentDefinitions->writes(getProgramPoint(statement->expression), locs);
@@ -928,6 +945,8 @@ bool ComputeWriteSet::preorder(const IR::P4Table* table) {
 }
 
 bool ComputeWriteSet::preorder(const IR::MethodCallStatement* statement) {
+    if (currentDefinitions->isUnreachable())
+        return setDefinitions(currentDefinitions);
     lhs = false;
     visit(statement->methodCall);
     auto locs = getWrites(statement->methodCall);

@@ -212,7 +212,7 @@ class StorageMap {
     StorageLocation* add(const IR::IDeclaration* decl) {
         CHECK_NULL(decl);
         auto type = typeMap->getType(decl->getNode(), true);
-        auto loc = factory.create(type, decl->getName());
+        auto loc = factory.create(type, decl->externalName());
         if (loc != nullptr)
             storage.emplace(decl, loc);
         return loc;
@@ -329,10 +329,14 @@ class Definitions : public IHasDbPrint {
     /// Set of program points that have written last to each location
     /// (conservative approximation).
     std::map<const BaseLocation*, const ProgramPoints*> definitions;
+    /// If true the current program point is actually unreachable and
+    /// it's definitions should not matter.
+    bool unreachable;
 
  public:
     Definitions() = default;
-    Definitions(const Definitions& other) : definitions(other.definitions) {}
+    Definitions(const Definitions& other) :
+            definitions(other.definitions), unreachable(other.unreachable) {}
     Definitions* joinDefinitions(const Definitions* other) const;
     /// Point writes the specified LocationSet.
     Definitions* writes(ProgramPoint point, const LocationSet* locations) const;
@@ -340,6 +344,8 @@ class Definitions : public IHasDbPrint {
     { CHECK_NULL(loc); CHECK_NULL(point); definitions[loc] = point; }
     void setDefinition(const StorageLocation* loc, const ProgramPoints* point);
     void setDefinition(const LocationSet* loc, const ProgramPoints* point);
+    Definitions* setUnreachable() { unreachable = true; return this; }
+    bool isUnreachable() const { return unreachable; }
     bool hasLocation(const BaseLocation* location) const
     { return definitions.find(location) != definitions.end(); }
     const ProgramPoints* getPoints(const BaseLocation* location) const {
@@ -349,6 +355,10 @@ class Definitions : public IHasDbPrint {
     const ProgramPoints* getPoints(const LocationSet* locations) const;
     bool operator==(const Definitions& other) const;
     void dbprint(std::ostream& out) const {
+        if (unreachable) {
+            out << "  Unreachable";
+            return;
+        }
         if (definitions.empty())
             out << "  Empty definitions";
         bool first = true;
