@@ -515,6 +515,19 @@ class FindUninitialized : public Inspector {
         return false;
     }
 
+    bool preorder(const IR::Mux* expression) override {
+        LOG3("FU Visiting [" << expression->id << "]: " << expression);
+        visit(expression->e0);
+        visit(expression->e1);
+        visit(expression->e2);
+        // This expression in fact reads the result of the operation,
+        // which is a temporary storage location, which we do not model
+        // in the def-use analysis.
+        reads(expression, LocationSet::empty);
+        registerUses(expression);
+        return false;
+    }
+
     bool preorder(const IR::ArrayIndex* expression) override {
         LOG3("FU Visiting [" << expression->id << "]: " << expression);
         if (expression->right->is<IR::Constant>()) {
