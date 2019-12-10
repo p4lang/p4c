@@ -32,10 +32,8 @@ namespace {
 struct EvaluationOrder {
     ReferenceMap* refMap;
 
-    /// Output: An expression whose evaluation will produce the same result as
-    /// the original one, but where side-effects have been factored out such
-    /// that each statement produces at most one side-effect.
-    const IR::Expression* final;
+    // FIXME -- should go away
+    const IR::Expression *final;
 
     // Declaration instead of Declaration_Variable so it can be more easily inserted
     // in the program IR.
@@ -114,12 +112,10 @@ class DismantleExpression : public Transform {
             typeMap->setLeftValue(expression);
         if (typeMap->isCompileTimeConstant(orig))
             typeMap->setCompileTimeConstant(expression);
-        result->final = expression;
-        return result->final;
+        return expression;
     }
 
     const IR::Node* preorder(IR::Literal* expression) override {
-        result->final = expression;
         prune();
         return expression;
     }
@@ -127,16 +123,14 @@ class DismantleExpression : public Transform {
     const IR::Node* preorder(IR::ArrayIndex* expression) override {
         LOG3("Visiting " << dbp(expression));
         auto type = typeMap->getType(getOriginal(), true);
-        if (!SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
-            result->final = expression;
-        } else {
+        if (SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
             visit(expression->left);
-            auto left = result->final;
+            auto left = expression->left;
             CHECK_NULL(left);
             bool save = leftValue;
             leftValue = false;
             visit(expression->right);
-            auto right = result->final;
+            auto right = expression->right;
             CHECK_NULL(right);
             leftValue = save;
             if (!right->is<IR::Constant>()) {
@@ -146,65 +140,57 @@ class DismantleExpression : public Transform {
                 typeMap->setType(right, indexType);
             }
 
-            result->final = new IR::ArrayIndex(expression->srcInfo, left, right);
+            expression = new IR::ArrayIndex(expression->srcInfo, left, right);
         }
-        typeMap->setType(result->final, type);
+        typeMap->setType(expression, type);
         if (leftValue)
-            typeMap->setLeftValue(result->final);
+            typeMap->setLeftValue(expression);
         prune();
-        return result->final;
+        return expression;
     }
 
     const IR::Node* preorder(IR::Member* expression) override {
         LOG3("Visiting " << dbp(expression));
         auto type = typeMap->getType(getOriginal(), true);
-        if (!SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
-            result->final = expression;
-        } else {
+        const IR::Expression *rv = expression;
+        if (SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
             visit(expression->expr);
-            auto left = result->final;
+            auto left = expression->expr;
             CHECK_NULL(left);
-            result->final = new IR::Member(expression->srcInfo, left, expression->member);
-            typeMap->setType(result->final, type);
-            if (leftValue)
-                typeMap->setLeftValue(result->final);
+            expression = new IR::Member(expression->srcInfo, left, expression->member);
 
             // Special case for table.apply().hit/miss, which is not dismantled by
             // the MethodCallExpression.
             if (TableApplySolver::isHit(expression, refMap, typeMap) ||
                 TableApplySolver::isMiss(expression, refMap, typeMap)) {
-                if (!getContext()) {
-                    /* if the hit/miss test is at the top level, don't both cloning it
+                if (getContext()) {
+                    /* if the hit/miss test is at the top level, don't bother cloning it
                      * as that will just create a redundant table later
                      * FIXME -- should be looking at the parent to see if it is an
                      * IfStatement, but the context is lost due to the way this pass is
                      * structured.  Should make DismantleExpression part of the
                      * DoSimplifyExpressions pass rather than applying it separately */
-                    prune();
-                    return result->final; }
-                BUG_CHECK(type->is<IR::Type_Boolean>(), "%1%: not boolean", type);
-                auto tmp = result->createTemporary(type);
-                auto path = new IR::PathExpression(IR::ID(tmp, nullptr));
-                auto stat = new IR::AssignmentStatement(path, result->final);
-                result->statements->push_back(stat);
-                result->final = path->clone();
-                typeMap->setType(result->final, type);
+                    BUG_CHECK(type->is<IR::Type_Boolean>(), "%1%: not boolean", type);
+                    auto tmp = result->createTemporary(type);
+                    auto path = new IR::PathExpression(IR::ID(tmp, nullptr));
+                    auto stat = new IR::AssignmentStatement(path, expression);
+                    result->statements->push_back(stat);
+                    typeMap->setType(expression, type);
+                    rv = path->clone();;
+                }
             }
-            prune();
-            return result->final;
         }
-        typeMap->setType(result->final, type);
+        typeMap->setType(rv, type);
         if (leftValue)
-            typeMap->setLeftValue(result->final);
+            typeMap->setLeftValue(rv);
         prune();
-        return result->final;
+        return rv;
     }
 
     const IR::Node* preorder(IR::SelectExpression* expression) override {
         LOG3("Visiting " << dbp(expression));
         visit(expression->select);
         prune();
-        result->final = expression;
         return expression;
     }
 
@@ -212,48 +198,45 @@ class DismantleExpression : public Transform {
         LOG3("Visiting " << dbp(expression));
         auto type = typeMap->getType(getOriginal(), true);
         visit(expression->expr);
-        auto left = result->final;
+        auto left = expression->expr;
         CHECK_NULL(left);
         auto clone = expression->clone();
         clone->expr = left;
         typeMap->setType(clone, type);
-        result->final = clone;
         prune();
-        return result->final;
+        return clone;
     }
 
     const IR::Node* preorder(IR::Operation_Binary* expression) override {
         LOG3("Visiting " << dbp(expression));
         auto type = typeMap->getType(getOriginal(), true);
-        if (!SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
-            result->final = expression;
-        } else {
+        if (SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
             visit(expression->left);
-            auto left = result->final;
+            auto left = expression->left;
             CHECK_NULL(left);
             visit(expression->right);
-            auto right = result->final;
+            auto right = expression->right;
             auto clone = expression->clone();
             clone->left = left;
             clone->right = right;
             typeMap->setType(clone, type);
             auto tmp = result->createTemporary(type);
             auto path = result->addAssignment(expression->srcInfo, tmp, clone);
-            result->final = path;
+            typeMap->setType(path, type);
+            prune();
+            return path;
         }
-        typeMap->setType(result->final, type);
+        typeMap->setType(expression, type);
         prune();
-        return result->final;
+        return expression;
     }
 
     const IR::Node* shortCircuit(IR::Operation_Binary* expression) {
         LOG3("Visiting " << dbp(expression));
         auto type = typeMap->getType(getOriginal(), true);
-        if (!SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
-            result->final = expression;
-        } else {
+        if (SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
             visit(expression->left);
-            auto cond = result->final;
+            auto cond = expression->left;
             CHECK_NULL(cond);
 
             // e1 && e2
@@ -273,7 +256,7 @@ class DismantleExpression : public Transform {
             auto save = result->statements;
             result->statements = ifFalse;
             visit(expression->right);
-            auto path = result->addAssignment(expression->srcInfo, tmp, result->final);
+            auto path = result->addAssignment(expression->srcInfo, tmp, expression->right);
             result->statements = save;
             if (land) {
                 cond = new IR::LNot(cond);
@@ -282,11 +265,13 @@ class DismantleExpression : public Transform {
             auto block = new IR::BlockStatement(*ifFalse);
             auto ifStatement = new IR::IfStatement(expression->srcInfo, cond, ifTrue, block);
             result->statements->push_back(ifStatement);
-            result->final = path->clone();
+            typeMap->setType(path, type);
+            prune();
+            return path;
         }
-        typeMap->setType(result->final, type);
+        typeMap->setType(expression, type);
         prune();
-        return result->final;
+        return expression;
     }
 
     const IR::Node* preorder(IR::Mux* expression) override {
@@ -294,7 +279,7 @@ class DismantleExpression : public Transform {
         LOG3("Visiting " << dbp(expression));
         auto type = typeMap->getType(getOriginal(), true);
         visit(expression->e0);
-        auto e0 = result->final;
+        auto e0 = expression->e0;
         CHECK_NULL(e0);
         auto tmp = result->createTemporary(type);
 
@@ -302,21 +287,20 @@ class DismantleExpression : public Transform {
         auto ifTrue = new IR::IndexedVector<IR::StatOrDecl>();
         result->statements = ifTrue;
         visit(expression->e1);
-        (void)result->addAssignment(expression->srcInfo, tmp, result->final);
+        (void)result->addAssignment(expression->srcInfo, tmp, expression->e1);
 
         auto ifFalse = new IR::IndexedVector<IR::StatOrDecl>();
         result->statements = ifFalse;
         visit(expression->e2);
-        auto path = result->addAssignment(expression->srcInfo, tmp, result->final);
+        auto path = result->addAssignment(expression->srcInfo, tmp, expression->e2);
         result->statements = save;
 
         auto ifStatement = new IR::IfStatement(
             e0, new IR::BlockStatement(*ifTrue), new IR::BlockStatement(*ifFalse));
         result->statements->push_back(ifStatement);
-        result->final = path->clone();
-        typeMap->setType(result->final, type);
+        typeMap->setType(path, type);
         prune();
-        return result->final;
+        return path;
     }
 
     const IR::Node* preorder(IR::LAnd* expression) override { return shortCircuit(expression); }
@@ -349,7 +333,6 @@ class DismantleExpression : public Transform {
         auto orig = getOriginal<IR::MethodCallExpression>();
         auto type = typeMap->getType(orig, true);
         if (!SideEffects::check(orig, refMap, typeMap)) {
-            result->final = mce;
             return mce;
         }
 
@@ -428,7 +411,7 @@ class DismantleExpression : public Transform {
         }
 
         visit(mce->method);
-        auto method = result->final;
+        auto method = mce->method;
 
         ClonePathExpressions cloner;  // a cheap version of deep copy
         for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
@@ -448,7 +431,7 @@ class DismantleExpression : public Transform {
                 leftValue = true;
             const IR::Expression* argValue;
             visit(arg);  // May mutate arg!  Recursively simplifies arg.
-            auto newarg = result->final;
+            auto newarg = arg->expression;
             CHECK_NULL(newarg);
 
             if (useTemp) {
@@ -496,7 +479,7 @@ class DismantleExpression : public Transform {
         auto simplified = new IR::MethodCallExpression(
             mce->srcInfo, method, mce->typeArguments, args);
         typeMap->setType(simplified, type);
-        result->final = simplified;
+        const IR::Expression *rv = simplified;
         // See whether we assign the result of the call to a temporary
         if (!type->is<IR::Type_Void>() &&  // no return type
             !tbl_apply &&                  // not a table.apply call
@@ -505,22 +488,22 @@ class DismantleExpression : public Transform {
             auto left = new IR::PathExpression(IR::ID(tmp, nullptr));
             auto stat = new IR::AssignmentStatement(left, simplified);
             result->statements->push_back(stat);
-            result->final = left->clone();
-            typeMap->setType(result->final, type);
+            rv = left->clone();
+            typeMap->setType(rv, type);
             LOG3(mce << " replaced with " << left << " = " << simplified);
         } else {
             if (tbl_apply) {
                 typeMap->setType(mce, type);
-                result->final = mce;
+                rv = mce;
             } else {
                 result->statements->push_back(
                     new IR::MethodCallStatement(mce->srcInfo, simplified));
-                result->final = nullptr;
+                rv = nullptr;
             }
         }
         result->statements->append(*copyBack);
         prune();
-        return result->final;
+        return rv;
     }
 
  public:
@@ -535,9 +518,8 @@ class DismantleExpression : public Transform {
         LOG3("Dismantling " << dbp(expression) << (isLeftValue ? " on left" : " on right"));
         leftValue = isLeftValue;
         this->resultNotUsed = resultNotUsed;
-        auto *res = expression->apply(*this);
-        BUG_CHECK(IR::equiv(res, result->final), "mismatch in apply(DismantleExpression)");
-        LOG3("Result is " << result->final << (res != result->final ? " (wasteful clone)" : ""));
+        result->final = expression->apply(*this);
+        LOG3("Result is " << result->final);
         return result;
     }
 };
