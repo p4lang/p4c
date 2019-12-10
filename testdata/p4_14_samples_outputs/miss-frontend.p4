@@ -33,7 +33,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".NoAction") action NoAction_5() {
     }
-    bool tmp;
     @name(".setb1") action setb1(bit<8> val, bit<9> port) {
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
@@ -78,8 +77,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_5();
     }
     apply {
-        tmp = test1_0.apply().hit;
-        if (tmp) {
+        if (test1_0.apply().hit) {
             ;
         } else {
             test3_0.apply();

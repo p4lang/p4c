@@ -27,7 +27,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bool tmp;
     @name(".NoAction") action NoAction_0() {
     }
     @name(".NoAction") action NoAction_4() {
@@ -77,31 +76,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_5();
     }
-    @hidden action act() {
-        tmp = true;
-    }
-    @hidden action act_0() {
-        tmp = false;
-    }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
-    @hidden table tbl_act_0 {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
-    }
     apply {
         if (test1_0.apply().hit) {
-            tbl_act.apply();
-        } else {
-            tbl_act_0.apply();
-        }
-        if (tmp) {
             test2_0.apply();
         }
         test4_0.apply();

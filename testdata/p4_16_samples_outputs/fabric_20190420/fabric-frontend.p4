@@ -350,7 +350,6 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     @name(".nop") action nop_17() {
     }
     bool spgw_ingress_tmp;
-    bool spgw_ingress_tmp_0;
     @name("FabricIngress.spgw_ingress.ue_counter") direct_counter(CounterType.packets_and_bytes) spgw_ingress_ue_counter;
     @hidden @name("FabricIngress.spgw_ingress.gtpu_decap") action spgw_ingress_gtpu_decap_0() {
         hdr.gtpu_ipv4.setInvalid();
@@ -708,14 +707,11 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
                 }
                 fabric_metadata.spgw.direction = 2w1;
                 spgw_ingress_gtpu_decap_0();
+            } else if (spgw_ingress_dl_sess_lookup.apply().hit) {
+                fabric_metadata.spgw.direction = 2w2;
             } else {
-                spgw_ingress_tmp_0 = spgw_ingress_dl_sess_lookup.apply().hit;
-                if (spgw_ingress_tmp_0) {
-                    fabric_metadata.spgw.direction = 2w2;
-                } else {
-                    fabric_metadata.spgw.direction = 2w0;
-                    spgw_ingress_hasReturned = true;
-                }
+                fabric_metadata.spgw.direction = 2w0;
+                spgw_ingress_hasReturned = true;
             }
             if (!spgw_ingress_hasReturned) {
                 fabric_metadata.spgw.ipv4_len = hdr.ipv4.total_len;

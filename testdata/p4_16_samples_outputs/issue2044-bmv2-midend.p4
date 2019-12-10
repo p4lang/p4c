@@ -40,7 +40,6 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bool tmp;
     @name(".NoAction") action NoAction_0() {
     }
     @name("ingress.t") table t_0 {
@@ -52,26 +51,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_0();
     }
-    @hidden action act() {
-        tmp = false;
-    }
-    @hidden action act_0() {
-        tmp = true;
-    }
     @hidden action issue2044bmv2l37() {
         h.h.setInvalid();
-    }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
-    @hidden table tbl_act_0 {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
     }
     @hidden table tbl_issue2044bmv2l37 {
         actions = {
@@ -80,12 +61,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = issue2044bmv2l37();
     }
     apply {
-        if (t_0.apply().hit) {
-            tbl_act.apply();
-        } else {
-            tbl_act_0.apply();
-        }
-        if (tmp) {
+        if (!t_0.apply().hit) {
             tbl_issue2044bmv2l37.apply();
         }
     }

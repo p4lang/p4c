@@ -56,7 +56,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bool _process_port_vlan_mapping_tmp;
     @name(".no_op") action _no_op_0() {
     }
     @name(".no_op") action _no_op_2() {
@@ -103,8 +102,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         implementation = bd_action_profile;
     }
     apply {
-        _process_port_vlan_mapping_tmp = _port_vlan_to_bd_mapping.apply().hit;
-        if (_process_port_vlan_mapping_tmp) {
+        if (_port_vlan_to_bd_mapping.apply().hit) {
             ;
         } else {
             _vlan_to_bd_mapping.apply();

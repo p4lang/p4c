@@ -43,6 +43,7 @@ class Options(object):
         self.dumpToJson = False
         self.compilerOptions = []
         self.runDebugger = False
+        self.runDebugger_skip = 0
         self.generateP4Runtime = False
 
 def usage(options):
@@ -144,6 +145,12 @@ def recompile_file(options, produced, mustBeIdentical):
     secondFile = produced + "-x";
     args = ["./p4test", "-I.", "--pp", secondFile, "--std", "p4-16", produced] + \
             options.compilerOptions
+    if options.runDebugger:
+        if options.runDebugger_skip > 0:
+            options.runDebugger_skip = options.runDebugger_skip - 1
+        else:
+            args[0:0] = options.runDebugger.split()
+            os.execvp(args[0], args)
     result = run_timeout(options, args, timeout, None)
     if result != SUCCESS:
         return result
@@ -245,8 +252,11 @@ def process_file(options, argv):
         args.extend(["--std", "p4-14"]);
     args.extend(argv)
     if options.runDebugger:
-        args[0:0] = options.runDebugger.split()
-        os.execvp(args[0], args)
+        if options.runDebugger_skip > 0:
+            options.runDebugger_skip = options.runDebugger_skip - 1
+        else:
+            args[0:0] = options.runDebugger.split()
+            os.execvp(args[0], args)
     result = run_timeout(options, args, timeout, stderr)
 
     if result != SUCCESS:
@@ -336,8 +346,10 @@ def main(argv):
                 argv = argv[1:]
         elif argv[0][1] == 'D' or argv[0][1] == 'I' or argv[0][1] == 'T':
             options.compilerOptions.append(argv[0])
-        elif argv[0] == "-gdb":
+        elif argv[0][0:4] == "-gdb":
             options.runDebugger = "gdb --args"
+            if len(argv[0]) > 4:
+                options.runDebugger_skip = int(argv[0][4:]) - 1
         elif argv[0] == "--p4runtime":
             options.generateP4Runtime = True
         else:
