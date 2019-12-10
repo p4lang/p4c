@@ -30,13 +30,13 @@ const IR::Node* RemoveAliases::postorder(IR::AssignmentStatement* statement) {
     auto tmp = refMap->newName("tmp");
     auto decl = new IR::Declaration_Variable(IR::ID(tmp), type->getP4Type(), nullptr);
     declarations.push_back(decl);
-    auto result = new IR::Vector<IR::StatOrDecl>();
+    auto result = new IR::IndexedVector<IR::StatOrDecl>();
     result->push_back(new IR::AssignmentStatement(
         statement->srcInfo, new IR::PathExpression(tmp), statement->right));
     result->push_back(new IR::AssignmentStatement(
         statement->srcInfo, statement->left, new IR::PathExpression(tmp)));
     LOG3("Inserted temporary " << decl << " for " << statement);
-    return result;
+    return new IR::BlockStatement(statement->srcInfo, *result);
 }
 
 const IR::Node* RemoveAliases::postorder(IR::P4Parser* parser) {
