@@ -515,17 +515,18 @@ class FindUninitialized : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::Mux* expression) override {
+    void otherExpression(const IR::Expression* expression) {
+        BUG_CHECK(!lhs, "%1%: unexpected operation on LHS", expression);
         LOG3("FU Visiting [" << expression->id << "]: " << expression);
-        visit(expression->e0);
-        visit(expression->e1);
-        visit(expression->e2);
         // This expression in fact reads the result of the operation,
         // which is a temporary storage location, which we do not model
         // in the def-use analysis.
         reads(expression, LocationSet::empty);
         registerUses(expression);
-        return false;
+    }
+
+    void postorder(const IR::Mux* expression) override {
+        otherExpression(expression);
     }
 
     bool preorder(const IR::ArrayIndex* expression) override {
@@ -556,27 +557,12 @@ class FindUninitialized : public Inspector {
         return false;
     }
 
-    bool preorder(const IR::Operation_Unary* expression) override {
-        BUG_CHECK(!lhs, "%1%: Unary operation on LHS?", expression);
-        visit(expression->expr);
-        // This expression in fact reads the result of the operation,
-        // which is a temporary storage location, which we do not model
-        // in the def-use analysis.
-        reads(expression, LocationSet::empty);
-        registerUses(expression);
-        return false;
+    void postorder(const IR::Operation_Unary* expression) override {
+        otherExpression(expression);
     }
 
-    bool preorder(const IR::Operation_Binary* expression) override {
-        BUG_CHECK(!lhs, "%1%: Binary operation on LHS?", expression);
-        visit(expression->left);
-        visit(expression->right);
-        // This expression in fact reads the result of the operation,
-        // which is a temporary storage location, which we do not model
-        // in the def-use analysis.
-        reads(expression, LocationSet::empty);
-        registerUses(expression);
-        return false;
+    void postorder(const IR::Operation_Binary* expression) override {
+        otherExpression(expression);
     }
 };
 
