@@ -68,19 +68,15 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::ArrayIndex* expression) {
     auto type = typeMap->getType(getOriginal(), true);
     if (SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
         visit(expression->left);
-        auto left = expression->left;
-        CHECK_NULL(left);
+        CHECK_NULL(expression->left);
         visit(expression->right);
-        auto right = expression->right;
-        CHECK_NULL(right);
-        if (!right->is<IR::Constant>()) {
+        CHECK_NULL(expression->right);
+        if (!expression->right->is<IR::Constant>()) {
             auto indexType = typeMap->getType(expression->right, true);
             auto tmp = createTemporary(indexType);
-            right = addAssignment(expression->srcInfo, tmp, right);
-            typeMap->setType(right, indexType);
+            expression->right = addAssignment(expression->srcInfo, tmp, expression->right);
+            typeMap->setType(expression->right, indexType);
         }
-
-        expression = new IR::ArrayIndex(expression->srcInfo, left, right);
     }
     typeMap->setType(expression, type);
     if (isWrite())
@@ -101,9 +97,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::Member* expression) {
     const IR::Expression *rv = expression;
     if (SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
         visit(expression->expr);
-        auto left = expression->expr;
-        CHECK_NULL(left);
-        expression = new IR::Member(expression->srcInfo, left, expression->member);
+        CHECK_NULL(expression->expr);
 
         // Special case for table.apply().hit/miss, which is not dismantled by
         // the MethodCallExpression.
@@ -143,13 +137,10 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::Operation_Unary* expression)
     LOG3("Visiting " << dbp(expression));
     auto type = typeMap->getType(getOriginal(), true);
     visit(expression->expr);
-    auto left = expression->expr;
-    CHECK_NULL(left);
-    auto clone = expression->clone();
-    clone->expr = left;
-    typeMap->setType(clone, type);
+    CHECK_NULL(expression->expr);
+    typeMap->setType(expression, type);
     prune();
-    return clone;
+    return expression;
 }
 
 const IR::Node* DoSimplifyExpressions::preorder(IR::Operation_Binary* expression) {
@@ -157,16 +148,11 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::Operation_Binary* expression
     auto type = typeMap->getType(getOriginal(), true);
     if (SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
         visit(expression->left);
-        auto left = expression->left;
-        CHECK_NULL(left);
+        CHECK_NULL(expression->left);
         visit(expression->right);
-        auto right = expression->right;
-        auto clone = expression->clone();
-        clone->left = left;
-        clone->right = right;
-        typeMap->setType(clone, type);
+        typeMap->setType(expression, type);
         auto tmp = createTemporary(type);
-        auto path = addAssignment(expression->srcInfo, tmp, clone);
+        auto path = addAssignment(expression->srcInfo, tmp, expression);
         typeMap->setType(path, type);
         prune();
         return path;
@@ -181,8 +167,7 @@ const IR::Node* DoSimplifyExpressions::shortCircuit(IR::Operation_Binary* expres
     auto type = typeMap->getType(getOriginal(), true);
     if (SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
         visit(expression->left);
-        auto cond = expression->left;
-        CHECK_NULL(cond);
+        CHECK_NULL(expression->left);
 
         // e1 && e2
         // becomes roughly:
@@ -204,11 +189,12 @@ const IR::Node* DoSimplifyExpressions::shortCircuit(IR::Operation_Binary* expres
         auto ifFalse = statements;
         statements = save;
         if (land) {
-            cond = new IR::LNot(cond);
-            typeMap->setType(cond, type);
+            expression->left = new IR::LNot(expression->left);
+            typeMap->setType(expression->left, type);
         }
         auto block = new IR::BlockStatement(ifFalse);
-        auto ifStatement = new IR::IfStatement(expression->srcInfo, cond, ifTrue, block);
+        auto ifStatement = new IR::IfStatement(expression->srcInfo,
+                                               expression->left, ifTrue, block);
         statements.push_back(ifStatement);
         typeMap->setType(path, type);
         prune();
@@ -224,8 +210,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::Mux* expression) {
     LOG3("Visiting " << dbp(expression));
     auto type = typeMap->getType(getOriginal(), true);
     visit(expression->e0);
-    auto e0 = expression->e0;
-    CHECK_NULL(e0);
+    CHECK_NULL(expression->e0);
     auto tmp = createTemporary(type);
 
     auto save = statements;
@@ -241,7 +226,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::Mux* expression) {
     statements = save;
 
     auto ifStatement = new IR::IfStatement(
-        e0, new IR::BlockStatement(ifTrue), new IR::BlockStatement(ifFalse));
+        expression->e0, new IR::BlockStatement(ifTrue), new IR::BlockStatement(ifFalse));
     statements.push_back(ifStatement);
     typeMap->setType(path, type);
     prune();
@@ -415,53 +400,31 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
         tbl_apply = tbl != nullptr || tbl1 != nullptr || tbl2 != nullptr;
     }
     // Simplified method call, with arguments substituted
-    auto simplified = new IR::MethodCallExpression(
-        mce->srcInfo, method, mce->typeArguments, args);
-    typeMap->setType(simplified, type);
-    const IR::Expression *rv = simplified;
+    if (!IR::equiv(mce->arguments, args))
+        mce->arguments = args;
+    typeMap->setType(mce, type);
+    const IR::Expression *rv = mce;
     // See whether we assign the result of the call to a temporary
-    if (!type->is<IR::Type_Void>() &&               // no return type
-        !tbl_apply &&                               // not a table.apply call
-        !getParent<IR::MethodCallStatement>()) {    // result of call is not used
+    if (type->is<IR::Type_Void>() ||               // no return type
+        getParent<IR::MethodCallStatement>()) {    // result of call is not used
+        statements.push_back(new IR::MethodCallStatement(mce->srcInfo, mce));
+        rv = nullptr;
+    } else if (tbl_apply) {
+        typeMap->setType(mce, type);
+        rv = mce;
+    } else {
         auto tmp = createTemporary(type);
         auto left = new IR::PathExpression(IR::ID(tmp, nullptr));
-        auto stat = new IR::AssignmentStatement(left, simplified);
+        auto stat = new IR::AssignmentStatement(left, mce);
         statements.push_back(stat);
         rv = left->clone();
         typeMap->setType(rv, type);
-        LOG3(mce << " replaced with " << left << " = " << simplified);
-    } else {
-        if (tbl_apply) {
-            typeMap->setType(mce, type);
-            rv = mce;
-        } else {
-            statements.push_back(new IR::MethodCallStatement(mce->srcInfo, simplified));
-            rv = nullptr;
-        }
+        LOG3(orig << " replaced with " << left << " = " << mce);
     }
     statements.append(*copyBack);
     prune();
     return rv;
 }
-
-#if 0
-public:
-DismantleExpression(ReferenceMap* refMap, TypeMap* typeMap) :
-        refMap(refMap), typeMap(typeMap), leftValue(false) {
-    CHECK_NULL(refMap); CHECK_NULL(typeMap);
-    result = new EvaluationOrder(refMap);
-    setName("DismantleExpressions");
-}
-EvaluationOrder* dismantle(const IR::Expression* expression,
-                           bool isLeftValue, bool resultNotUsed = false) {
-    LOG3("Dismantling " << dbp(expression) << (isLeftValue ? " on left" : " on right"));
-    leftValue = isLeftValue;
-    this->resultNotUsed = resultNotUsed;
-    result->final = expression->apply(*this);
-    LOG3("Result is " << result->final);
-    return result;
-}
-#endif
 
 const IR::Node* DoSimplifyExpressions::postorder(IR::Function* function) {
     if (toInsert.empty())
