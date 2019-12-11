@@ -5,12 +5,12 @@ control c(inout bit<32> r) {
     bit<32> tmp_1;
     bool tmp_2;
     apply {
-        tmp_1 = f(32w2);
-        tmp_2 = tmp_1 > 32w0;
-        if (tmp_2) {
-            tmp = f(32w2);
-            tmp_0 = tmp < 32w2;
-            if (tmp_0) {
+        tmp = f(32w2);
+        tmp_0 = tmp > 32w0;
+        if (tmp_0) {
+            tmp_1 = f(32w2);
+            tmp_2 = tmp_1 < 32w2;
+            if (tmp_2) {
                 r = 32w1;
             } else {
                 r = 32w3;
