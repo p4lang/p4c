@@ -43,25 +43,23 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     ipv4_t_1 tmp_hdr_0;
-    ipv4_t_1 tmp;
-    bit<160> tmp_0;
+    bit<160> tmp;
     @name(".start") state start {
-        tmp_0 = packet.lookahead<bit<160>>();
-        tmp.setValid();
-        tmp.version = tmp_0[159:156];
-        tmp.ihl = tmp_0[155:152];
-        tmp.diffserv = tmp_0[151:144];
-        tmp.totalLen = tmp_0[143:128];
-        tmp.id = tmp_0[127:112];
-        tmp.flags = tmp_0[111:109];
-        tmp.fragOffset = tmp_0[108:96];
-        tmp.ttl = tmp_0[95:88];
-        tmp.protocol = tmp_0[87:80];
-        tmp.hdrChecksum = tmp_0[79:64];
-        tmp.srcAddr = tmp_0[63:32];
-        tmp.dstAddr = tmp_0[31:0];
-        tmp_hdr_0 = tmp;
-        packet.extract<ipv4_t>(hdr.h, ((bit<32>)tmp_hdr_0.ihl << 2 << 3) + 32w4294967136);
+        tmp = packet.lookahead<bit<160>>();
+        tmp_hdr_0.setValid();
+        tmp_hdr_0.version = tmp[159:156];
+        tmp_hdr_0.ihl = tmp[155:152];
+        tmp_hdr_0.diffserv = tmp[151:144];
+        tmp_hdr_0.totalLen = tmp[143:128];
+        tmp_hdr_0.id = tmp[127:112];
+        tmp_hdr_0.flags = tmp[111:109];
+        tmp_hdr_0.fragOffset = tmp[108:96];
+        tmp_hdr_0.ttl = tmp[95:88];
+        tmp_hdr_0.protocol = tmp[87:80];
+        tmp_hdr_0.hdrChecksum = tmp[79:64];
+        tmp_hdr_0.srcAddr = tmp[63:32];
+        tmp_hdr_0.dstAddr = tmp[31:0];
+        packet.extract<ipv4_t>(hdr.h, ((bit<32>)tmp[155:152] << 2 << 3) + 32w4294967136);
         transition accept;
     }
 }

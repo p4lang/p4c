@@ -11,15 +11,13 @@ control c(inout bit<16> p) {
     @name(".NoAction") action NoAction_0() {
     }
     bit<16> local_0;
-    bit<16> tmp;
     @name("c.cntr") Virtual() cntr_0 = {
         bit<16> f(in bit<16> ix) {
             return ix + local_0;
         }
     };
     @name("c.final_ctr") action final_ctr() {
-        tmp = cntr_0.total();
-        p = tmp;
+        p = cntr_0.total();
     }
     @name("c.add_ctr") action add_ctr() {
         cntr_0.increment();

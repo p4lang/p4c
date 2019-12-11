@@ -1,5 +1,4 @@
 control c(out bit<16> b) {
-    bit<16> tmp;
     apply {
         {
             bit<16> left_0 = 16w10;
@@ -14,9 +13,8 @@ control c(out bit<16> b) {
                 hasReturned = true;
                 retval = right_0;
             }
-            tmp = retval;
+            b = retval;
         }
-        b = tmp;
     }
 }
 

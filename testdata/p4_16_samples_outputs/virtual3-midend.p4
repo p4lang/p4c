@@ -9,7 +9,6 @@ extern Virtual {
 
 control c(inout bit<16> p) {
     bit<16> local_0;
-    bit<16> tmp;
     @name(".NoAction") action NoAction_0() {
     }
     @name("c.cntr") Virtual() cntr_0 = {
@@ -18,8 +17,7 @@ control c(inout bit<16> p) {
         }
     };
     @name("c.final_ctr") action final_ctr() {
-        tmp = cntr_0.total();
-        p = tmp;
+        p = cntr_0.total();
     }
     @name("c.add_ctr") action add_ctr() {
         cntr_0.increment();

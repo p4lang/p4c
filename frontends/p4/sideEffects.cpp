@@ -341,7 +341,6 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
     }
 
     visit(mce->method);
-    auto method = mce->method;
 
     ClonePathExpressions cloner;  // a cheap version of deep copy
     for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
@@ -410,6 +409,10 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
         statements.push_back(new IR::MethodCallStatement(mce->srcInfo, mce));
         rv = nullptr;
     } else if (tbl_apply) {
+        typeMap->setType(mce, type);
+        rv = mce;
+    } else if (getParent<IR::AssignmentStatement>() && copyBack->empty()) {
+        /* no need for an extra copy as there's no out args to copy back afterwards */
         typeMap->setType(mce, type);
         rv = mce;
     } else {
@@ -491,6 +494,10 @@ const IR::Node* DoSimplifyExpressions::postorder(IR::MethodCallStatement* statem
         return statement; }
     if (statement->methodCall)
         statements.push_back(statement);
+    if (statements.size() == 1) {
+        auto rv = statements.front();
+        statements.clear();
+        return rv; }
     auto block = new IR::BlockStatement(statements);
     statements.clear();
     return block;

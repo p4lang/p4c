@@ -15,17 +15,14 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     bit<32> value_0;
-    bit<32> tmp;
-    bit<32> tmp_0;
     @name("IngressImpl.update_value") action update_value(out bit<32> value_2) {
         {
             bool hasReturned = false;
             bit<32> retval;
             hasReturned = true;
             retval = 32w1;
-            tmp = retval;
+            value_2 = retval;
         }
-        value_2 = tmp;
     }
     apply {
         {
@@ -33,7 +30,6 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
             bit<32> retval_1;
             hasReturned_1 = true;
             retval_1 = 32w1;
-            tmp_0 = retval_1;
         }
         update_value(value_0);
     }

@@ -61,16 +61,12 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     ipv4_t_1 tmp_hdr_1;
     ipv4_t_1 tmp_hdr_2;
-    ipv4_t_1 tmp;
-    ipv4_t_1 tmp_0;
     @name(".start") state start {
         packet.extract<simpleipv4_t>(hdr.sh.next);
         packet.extract<simpleipv4_t>(hdr.sh.next);
-        tmp = packet.lookahead<ipv4_t_1>();
-        tmp_hdr_1 = tmp;
+        tmp_hdr_1 = packet.lookahead<ipv4_t_1>();
         packet.extract<ipv4_t>(hdr.h.next, ((bit<32>)tmp_hdr_1.ihl << 2 << 3) + 32w4294967136);
-        tmp_0 = packet.lookahead<ipv4_t_1>();
-        tmp_hdr_2 = tmp_0;
+        tmp_hdr_2 = packet.lookahead<ipv4_t_1>();
         packet.extract<ipv4_t>(hdr.h.next, ((bit<32>)tmp_hdr_2.ihl << 2 << 3) + 32w4294967136);
         transition accept;
     }
