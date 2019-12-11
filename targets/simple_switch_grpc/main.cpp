@@ -30,20 +30,30 @@ main(int argc, char* argv[]) {
   bm::TargetParserBasicWithDynModules simple_switch_parser;
   simple_switch_parser.add_flag_option(
       "disable-swap",
-      "disable JSON swapping at runtime");
+      "Disable JSON swapping at runtime; this is not recommended when using "
+      "P4Runtime!");
   simple_switch_parser.add_string_option(
       "grpc-server-addr",
-      "bind gRPC server to given address [default is 0.0.0.0:50051]");
+      "Bind gRPC server to given address [default is 0.0.0.0:50051]");
   simple_switch_parser.add_uint_option(
       "cpu-port",
-      "set CPU port, will be used for packet-in / packet-out; "
-      "do not add an interface with this port number");
+      "Choose a numerical value for the CPU port, it will be used for "
+      "packet-in / packet-out. Do not add an interface with this port number, "
+      "and 0 is not a valid value. "
+      "When using standard v1model.p4, this value must fit within 9 bits. "
+      "If you do not use this command-line option, "
+      "P4Runtime packet IO functionality will not be available: you will not "
+      "be able to receive / send packets using the P4Runtime StreamChannel "
+      "bi-directional stream.");
   simple_switch_parser.add_uint_option(
       "drop-port",
-      "choose drop port number (default is 511)");
+      "Choose a numerical value for the drop port (default is 511). "
+      "When using standard v1model.p4, this value must fit within 9 bits. "
+      "You will need to use this command-line option when you wish to use port "
+      "511 as a valid dataplane port or as the CPU port.");
   simple_switch_parser.add_string_option(
       "dp-grpc-server-addr",
-      "use a gRPC channel to inject and receive dataplane packets; "
+      "Use a gRPC channel to inject and receive dataplane packets; "
       "bind this gRPC server to given address, e.g. 0.0.0.0:50052");
 
   bm::OptionsParser parser;

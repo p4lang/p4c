@@ -184,7 +184,9 @@ TargetParserBasic::get_flag_option(const std::string &name, bool *v) const {
 TargetParserBasicWithDynModules::TargetParserBasicWithDynModules() {
 #ifdef BM_ENABLE_MODULES
     add_string_option(load_modules_option,
-                      "Load the given .so files (comma-separated) as modules.");
+                      "Load the given .so files (comma-separated) as modules. "
+                      "This is useful when you want to use dynamic libraries "
+                      "to provide extern type implementations at runtime.");
 #endif  // BM_ENABLE_MODULES
 }
 

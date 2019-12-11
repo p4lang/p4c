@@ -42,10 +42,10 @@ main(int argc, char* argv[]) {
   bm::TargetParserBasicWithDynModules simple_switch_parser;
   simple_switch_parser.add_flag_option(
       "enable-swap",
-      "enable JSON swapping at runtime");
+      "Enable JSON swapping at runtime");
   simple_switch_parser.add_uint_option(
       "drop-port",
-      "choose drop port number (default is 511)");
+      "Choose drop port number (default is 511)");
 
   bm::OptionsParser parser;
   parser.parse(argc, argv, &simple_switch_parser);
