@@ -19,6 +19,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "has_side_effects.h"
 
 namespace P4 {
 
@@ -80,6 +81,8 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     bool name_overlap(cstring, cstring);
     void forOverlapAvail(cstring, std::function<void(cstring, VarInfo *)>);
     void dropValuesUsing(cstring);
+    bool hasSideEffects(const IR::Expression *e) {
+        return bool(::hasSideEffects(refMap, typeMap, e)); }
 
     void visit_local_decl(const IR::Declaration_Variable *);
     const IR::Node *postorder(IR::Declaration_Variable *) override;

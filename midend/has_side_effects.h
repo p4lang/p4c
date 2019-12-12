@@ -18,18 +18,39 @@ limitations under the License.
 #define MIDEND_HAS_SIDE_EFFECTS_H_
 
 #include "ir/ir.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 
-/* Should this be a method on IR::Expression? */
+/* Should this be a method on IR::Expression?  Maybe after the refMap/typeMap go away */
 
 class hasSideEffects : public Inspector {
+    P4::ReferenceMap    *refMap = nullptr;
+    P4::TypeMap         *typeMap = nullptr;
+
     bool result = false;
-    bool preorder(const IR::AssignmentStatement *) override { return !(result = true); }
-    /* FIXME -- currently assuming all calls and primitves have side effects */
-    bool preorder(const IR::MethodCallExpression *) override { return !(result = true); }
-    bool preorder(const IR::Primitive *) override { return !(result = true); }
+    bool preorder(const IR::AssignmentStatement *) override { result = true; return false; }
+    bool preorder(const IR::MethodCallExpression *mc) override {
+        if (result) return false;
+        /* assume has side effects if we can't look it up */
+        if (refMap && typeMap) {
+            auto *mi = P4::MethodInstance::resolve(mc, refMap, typeMap, true);
+            if (auto *em = mi->to<P4::ExternMethod>()) {
+                if (em->method->getAnnotation(IR::Annotation::noSideEffectsAnnotation))
+                    return true; } }
+        result = true;
+        return false; }
+    bool preorder(const IR::Primitive *) override { result = true; return false; }
     bool preorder(const IR::Expression *) override { return !result; }
+
  public:
     explicit hasSideEffects(const IR::Expression *e) { e->apply(*this); }
+    hasSideEffects(P4::ReferenceMap *rm, P4::TypeMap *tm) : refMap(rm), typeMap(tm) {}
+    hasSideEffects(P4::ReferenceMap *rm, P4::TypeMap *tm, const IR::Expression *e)
+    : refMap(rm), typeMap(tm) { e->apply(*this); }
+    bool operator()(const IR::Expression *e) {
+        result = false;
+        e->apply(*this);
+        return result; }
     explicit operator bool () { return result; }
 };
 

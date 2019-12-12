@@ -80,7 +80,7 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
             if (auto var = ::getref(self.available, dest->path->name)) {
                 if (var->local && !var->live) {
                     LOG3("  removing dead assignment to " << dest->path->name);
-                    if (hasSideEffects(as->right))
+                    if (self.hasSideEffects(as->right))
                         return makeSideEffectStatement(as->right);
                     return nullptr;
                 } else if (var->local) {
@@ -93,7 +93,7 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
             /* can't leave ifTrue == nullptr, as that will fail validation -- fold away
              * the if statement as needed */
             if (s->ifFalse == nullptr) {
-                if (!hasSideEffects(s->condition)) {
+                if (!self.hasSideEffects(s->condition)) {
                     return nullptr;
                 } else {
                     s->ifTrue = new IR::EmptyStatement();
