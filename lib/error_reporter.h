@@ -138,6 +138,10 @@ class ErrorReporter final {
 
         std::string prefix;
         if (action == DiagnosticAction::Warn) {
+            // Avoid burying errors in a pile of warnings: don't emit any more warnings if we've
+            // emitted errors.
+            if (errorCount > 0) return;
+
             warningCount++;
             if (diagnosticName != nullptr) {
                 prefix.append("[--Wwarn=");
