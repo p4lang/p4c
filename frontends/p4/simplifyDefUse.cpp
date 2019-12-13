@@ -249,6 +249,7 @@ class FindUninitialized : public Inspector {
         LOG3("FU Visiting " << statement);
         if (!unreachable) {
             visit(statement->condition);
+            currentPoint = ProgramPoint(context, statement->condition);
             auto saveCurrent = currentPoint;
             auto saveUnreachable = unreachable;
             visit(statement->ifTrue);
