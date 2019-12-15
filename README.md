@@ -204,7 +204,7 @@ libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev
 libboost-graph-dev llvm pkg-config python python-scapy python-ipaddr python-ply python3-pip
 tcpdump
 
-$ pip3 install scapy
+$ pip3 install scapy ply
 ```
 
 For documentation building:
