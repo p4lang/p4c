@@ -1095,6 +1095,7 @@ bool ToP4::preorder(const IR::IfStatement* s) {
 
 bool ToP4::preorder(const IR::MethodCallStatement* s) {
     dump(3);
+    visit(s->annotations);
     visit(s->methodCall);
     builder.endOfStatement();
     return false;

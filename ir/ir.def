@@ -453,7 +453,8 @@ class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
     Annotations getAnnotations() const override { return annotations; }
 }
 
-class MethodCallStatement : Statement {
+class MethodCallStatement : Statement, IAnnotated {
+    optional Annotations                        annotations = Annotations::empty;
     MethodCallExpression methodCall;
     MethodCallStatement { if (!srcInfo) srcInfo = methodCall->srcInfo; }
     MethodCallStatement(Util::SourceInfo si, IR::ID m, const std::initializer_list<Argument> &a)
@@ -461,6 +462,7 @@ class MethodCallStatement : Statement {
     MethodCallStatement(Util::SourceInfo si, Expression m,
                         const std::initializer_list<Argument> &a)
     : Statement(si), methodCall(new MethodCallExpression(si, m, a)) {}
+    Annotations getAnnotations() const override { return annotations; }
 }
 
 class SwitchCase {

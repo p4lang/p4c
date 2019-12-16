@@ -2459,21 +2459,20 @@ void ProgramStructure::createChecksumUpdates() {
             args->push_back(new IR::Argument(dest));
             args->push_back(new IR::Argument(algo));
             auto methodCallExpression = new IR::MethodCallExpression(method, args);
-            IR::Annotation* zeros_as_ones_annot  = nullptr;
-            if (flc->algorithm->names[0] == "csum16_udp") {
-                zeros_as_ones_annot = new IR::Annotation(IR::ID("zeros_as_ones"),
-                              {methodCallExpression});
-                body->annotations = body->annotations->add(zeros_as_ones_annot);
-            }
             auto mc = new IR::MethodCallStatement(methodCallExpression);
-            body->push_back(mc);
+            if (flc->algorithm->names[0] == "csum16_udp") {
+                auto zeros_as_ones_annot = new IR::Annotation(IR::ID("zeros_as_ones"),
+                                            {methodCallExpression});
+                mc->annotations->add(zeros_as_ones_annot);
+            }
 
             for (auto annot : cf->annotations->annotations)
-                body->annotations = body->annotations->add(annot);
+                mc->annotations = body->annotations->add(annot);
 
             for (auto annot : flc->annotations->annotations)
-                body->annotations = body->annotations->add(annot);
+                mc->annotations = body->annotations->add(annot);
 
+            body->push_back(mc);
             LOG3("Converted " << flc);
         }
     }

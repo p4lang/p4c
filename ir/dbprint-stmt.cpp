@@ -45,7 +45,7 @@ void IR::IfStatement::dbprint(std::ostream &out) const {
 
 void IR::MethodCallStatement::dbprint(std::ostream &out) const {
     int prec = getprec(out);
-    out << Prec_Low << methodCall << setprec(prec);
+    out << Prec_Low << annotations << methodCall << setprec(prec);
     if (!prec) out << ';';
 }
 
