@@ -26,10 +26,11 @@ namespace UBPF {
 
     struct Filter_Model : public ::Model::Elem {
         Filter_Model() : Elem("Filter"),
-                         parser("prs"), filter("filt") {}
+                         parser("prs"), control("filt"), deparser("dprs") {}
 
         ::Model::Elem parser;
-        ::Model::Elem filter;
+        ::Model::Elem control;
+        ::Model::Elem deparser;
     };
 
     struct Register_Model : public ::Model::Extern_Model {
@@ -84,6 +85,6 @@ namespace UBPF {
         static cstring reserved(cstring name) { return reservedPrefix + name; }
     };
 
-}  // namespace UBPF
+}
 
-#endif /* P4C_UBPFMODEL_H */
+#endif

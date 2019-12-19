@@ -20,12 +20,13 @@ limitations under the License.
 
 #include "ubpfBackend.h"
 #include "ubpfProgram.h"
+#include "codeGen.h"
 #include "target.h"
 #include "ubpfType.h"
 
 namespace UBPF {
-    void run_ubpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* toplevel,
-                          P4::ReferenceMap* refMap, P4::TypeMap* typeMap) {
+    void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *toplevel,
+                          P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
         if (toplevel == nullptr)
             return;
 
@@ -37,7 +38,7 @@ namespace UBPF {
             return;
         }
 
-        UbpfTarget* target;
+        UbpfTarget *target;
         if (options.target.isNullOrEmpty() || options.target == "ubpf") {
             target = new UbpfTarget();
         } else {
@@ -48,7 +49,7 @@ namespace UBPF {
         UBPFTypeFactory::createFactory(typeMap);
         auto prog = new UBPFProgram(options, toplevel->getProgram(), refMap, typeMap, toplevel);
 
-        if(!prog->build())
+        if (!prog->build())
             return;
 
         if (options.outputFile.isNullOrEmpty())
@@ -60,7 +61,7 @@ namespace UBPF {
             return;
 
         cstring hfile;
-        const char* dot = cfile.findlast('.');
+        const char *dot = cfile.findlast('.');
         if (dot == nullptr)
             hfile = cfile + ".h";
         else
@@ -69,15 +70,20 @@ namespace UBPF {
         if (hstream == nullptr)
             return;
 
-        EBPF::CodeBuilder c(target);
-        EBPF::CodeBuilder h(target);
+        UbpfCodeBuilder c(target);
+        UbpfCodeBuilder h(target);
 
         prog->emitH(&h, hfile);
-        prog->emitC(&c, hfile);
+        prog->emitC(&c, UBPF::extract_file_name(hfile.c_str()));
 
         *cstream << c.toString();
         *hstream << h.toString();
         cstream->flush();
         hstream->flush();
+    }
+
+    std::string extract_file_name(const std::string &fullPath) {
+        const size_t lastSlashIndex = fullPath.find_last_of("/\\");
+        return fullPath.substr(lastSlashIndex + 1);
     }
 }

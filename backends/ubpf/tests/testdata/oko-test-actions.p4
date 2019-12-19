@@ -28,17 +28,6 @@ header IPv4_h {
     IPv4Address  dstAddr;
 }
 
-header IPv6_h {
-    bit<4>       version;
-    bit<8>       trafficClass;
-    bit<20>      flowLabel;
-    bit<16>      payloadLen;
-    bit<8>       nextHdr;
-    bit<8>       hopLimit;
-    bit<128>     srcAddr;
-    bit<128>     dstAddr;
-}
-
 header mpls_h {
     bit<20> label;
     bit<3>  tc;
@@ -51,17 +40,15 @@ struct Headers_t
     Ethernet_h ethernet;
     mpls_h     mpls;
     IPv4_h     ipv4;
-    IPv6_h     ipv6;
 }
 
-struct metadata { }
+struct metadata {}
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
     state start {
         p.extract(headers.ethernet);
         transition select(headers.ethernet.etherType) {
             16w0x800 : ipv4;
-            0x86DD   : ipv6;
             0x8847   : mpls;
             default : reject;
         }
@@ -77,41 +64,69 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
         transition accept;
     }
 
-    state ipv6 {
-        p.extract(headers.ipv6);
-        transition accept;
-    }
 
 }
 
 control pipe(inout Headers_t headers, inout metadata meta) {
 
+    action ip_modify_saddr(bit<32> srcAddr) {
+        headers.ipv4.srcAddr = srcAddr;
+    }
+
+    action mpls_modify_tc(bit<3> tc) {
+        headers.mpls.tc = tc;
+    }
+
+    action mpls_set_label(bit<20> label) {
+        headers.mpls.label = label;
+    }
+
+    action mpls_set_label_tc(bit<20> label, bit<3> tc) {
+        headers.mpls.label = label;
+        headers.mpls.tc = tc;
+    }
+
+    action mpls_decrement_ttl() {
+        headers.mpls.ttl = headers.mpls.ttl - 1;
+    }
+
+    action mpls_set_label_decrement_ttl(bit<20> label) {
+            headers.mpls.label = label;
+            mpls_decrement_ttl();
+    }
+
+    action mpls_modify_stack(bit<1> stack) {
+        headers.mpls.stack = stack;
+    }
+
+    action change_ip_ver() {
+        headers.ipv4.version = 6;
+    }
+
+    action ip_swap_addrs() {
+        bit<32> tmp = headers.ipv4.dstAddr;
+        headers.ipv4.dstAddr = headers.ipv4.srcAddr;
+        headers.ipv4.srcAddr = tmp;
+    }
+
     action Reject() {
         mark_to_drop();
     }
 
-    action ipv6_modify_dstAddr(bit<128> dstAddr) {
-        headers.ipv6.dstAddr = dstAddr;
-    }
-
-    action ipv6_swap_addr() {
-        bit<128> tmp = headers.ipv6.dstAddr;
-        headers.ipv6.dstAddr = headers.ipv6.srcAddr;
-        headers.ipv6.srcAddr = tmp;
-    }
-
-    action set_flowlabel(bit<20> label) {
-        headers.ipv6.flowLabel = label;
-    }
-
     table filter_tbl {
         key = {
-            headers.ipv6.srcAddr : exact;
+            headers.ipv4.dstAddr : exact;
         }
         actions = {
-            ipv6_modify_dstAddr;
-            ipv6_swap_addr;
-            set_flowlabel;
+            mpls_decrement_ttl;
+            mpls_set_label;
+            mpls_set_label_decrement_ttl;
+            mpls_modify_tc;
+            mpls_set_label_tc;
+            mpls_modify_stack;
+            change_ip_ver;
+            ip_swap_addrs;
+            ip_modify_saddr;
             Reject;
             NoAction;
         }
@@ -128,7 +143,6 @@ control dprs(packet_out packet, in Headers_t headers) {
     apply {
         packet.emit(headers.ethernet);
         packet.emit(headers.mpls);
-        packet.emit(headers.ipv6);
         packet.emit(headers.ipv4);
     }
 }

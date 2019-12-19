@@ -18,8 +18,7 @@ limitations under the License.
 
 namespace UBPF {
 
-    static int const_value_counter = 0;
-    static int register_read_counter = 0;
+    static cstring last_key_name;
 
     UBPFRegister::UBPFRegister(const UBPFProgram *program,
                                const IR::ExternBlock *block,
@@ -60,10 +59,9 @@ namespace UBPF {
         }
     }
 
-    void
-    UBPFRegister::emitMethodInvocation(EBPF::CodeBuilder *builder,
-                                       const P4::ExternMethod *method,
-                                       const std::vector<cstring> pointerVariables) {
+    void UBPFRegister::emitMethodInvocation(EBPF::CodeBuilder *builder,
+                                            const P4::ExternMethod *method,
+                                            const std::vector<cstring> &pointerVariables) {
         if (method->method->name.name ==
             program->model.registerModel.read.name) {
             emitRegisterRead(builder, method->expr);
@@ -79,26 +77,16 @@ namespace UBPF {
 
     void UBPFRegister::emitRegisterWrite(EBPF::CodeBuilder *builder,
                                          const IR::MethodCallExpression *expression,
-                                         const std::vector<cstring> pointerVariables) {
+                                         const std::vector<cstring> &pointerVariables) {
         BUG_CHECK(expression->arguments->size() == 2,
                   "Expected just 2 argument for %1%", expression);
 
         auto arg_value = expression->arguments->at(1);
         auto target = (UbpfTarget *) builder->target;
-        cstring keyName = "";
-        auto arg_key = expression->arguments->at(0);
 
-        if (arg_key->expression->is<IR::PathExpression>()) {
-            keyName = arg_key->expression->to<IR::PathExpression>()->path->name.name;
-        } else {
-            keyName =
-                    const_value_counter == 0 ? "const_value" : "const_value_" +
-                                                               std::to_string(
-                                                                       const_value_counter -
-                                                                       1);
-        }
+        cstring valueVariableName = nullptr;
+        valueVariableName = emitValueInstanceIfNeeded(builder, arg_value);
 
-        const_value_counter++;
         if (arg_value->expression->is<IR::PathExpression>()) {
             auto name = arg_value->expression->to<IR::PathExpression>()->path->name.name;
             if (std::find(
@@ -107,53 +95,40 @@ namespace UBPF {
                     name) ==
                 pointerVariables.end()) {
 
-                target->emitTableUpdate(builder, dataMapName, keyName,
-                                        "&" + name);
-                return;
+                valueVariableName = name;
             }
         }
 
-        if (arg_value->expression->is<IR::Constant>()) {
+        if (valueVariableName != nullptr) {
+            target->emitTableUpdate(builder, dataMapName, last_key_name,
+                                    "&" + valueVariableName);
+        } else {
+            target->emitTableUpdate(codeGen, builder, dataMapName, last_key_name,
+                                    arg_value->expression);
+        }
+    }
+
+    cstring UBPFRegister::emitValueInstanceIfNeeded(EBPF::CodeBuilder *builder,
+                                                    const IR::Argument *arg_value) {
+
+        cstring valueVariableName = nullptr;
+
+        if (arg_value->expression->is<IR::Constant>() ||
+            arg_value->expression->is<IR::Operation_Binary>() ||
+            arg_value->expression->is<IR::Member>()) {
+
             auto scalarInstance = UBPFTypeFactory::instance->create(
                     valueType);
-            auto scalarName = program->refMap->newName(
-                    "tmp_value");
-            scalarInstance->declare(builder, scalarName, false);
+            valueVariableName = program->refMap->newName(
+                    "value_local_var");
+            scalarInstance->declare(builder, valueVariableName, false);
             builder->append(" = ");
             codeGen->visit(arg_value->expression);
             builder->endOfStatement(true);
             builder->emitIndent();
-
-            target->emitTableUpdate(builder, dataMapName, keyName,
-                                    "&" + scalarName);
-            return;
         }
 
-        if (arg_value->expression->is<IR::Operation_Binary>()) {
-            auto scalarInstance = UBPFTypeFactory::instance->create(
-                    valueType);
-            auto scalarName = program->refMap->newName(
-                    "tmp_value");
-            scalarInstance->declare(builder, scalarName, false);
-            builder->append(" = ");
-            codeGen->visit(arg_value->expression);
-            builder->endOfStatement(true);
-            builder->emitIndent();
-
-            target->emitTableUpdate(builder, dataMapName, keyName,
-                                    "&" + scalarName);
-            return;
-        }
-
-        if (arg_value->expression->is<IR::Member>()) {
-            auto variableName = arg_value->expression->toString();
-            target->emitTableUpdate(builder, dataMapName, keyName,
-                                    "&(" + variableName + ")");
-            return;
-        }
-
-        target->emitTableUpdate(codeGen, builder, dataMapName, keyName,
-                                arg_value->expression);
+        return valueVariableName;
     }
 
     void UBPFRegister::emitRegisterRead(EBPF::CodeBuilder *builder,
@@ -161,22 +136,38 @@ namespace UBPF {
         BUG_CHECK(expression->arguments->size() == 1,
                   "Expected 1 argument for %1%", expression);
         auto target = (UbpfTarget *) builder->target;
-        cstring keyName = "";
+
+        target->emitTableLookup(builder, dataMapName, last_key_name, "");
+    }
+
+    void UBPFRegister::emitKeyInstance(EBPF::CodeBuilder *builder, const IR::MethodCallExpression *expression) {
         auto arg_key = expression->arguments->at(0);
+
+        cstring keyName = "";
 
         if (arg_key->expression->is<IR::PathExpression>()) {
             keyName = arg_key->expression->to<IR::PathExpression>()->path->name.name;
-        } else {
-            keyName =
-                    const_value_counter == 0 ? "const_value" : "const_value_" +
-                                                               std::to_string(
-                                                                       const_value_counter -
-                                                                       1);
         }
 
-        const_value_counter++;
-        register_read_counter++;
-        target->emitTableLookup(builder, dataMapName, keyName, "");
+        auto type = arg_key->expression->type;
+        if (type->is<IR::Type_Bits>()) {
+            auto keyType = type->to<IR::Type_Bits>();
+            auto tb = keyType->to<IR::Type_Bits>();
+            auto scalarType = new UBPFScalarType(tb);
+            auto scalarInstance = UBPFTypeFactory::instance->create(
+                    scalarType->type);
+            keyName = program->refMap->newName(
+                    "key_local_var");
+            scalarInstance->declare(builder, keyName, false);
+            builder->append(" = ");
+            codeGen->visit(arg_key->expression);
+            builder->endOfStatement(true);
+            builder->emitIndent();
+        } else if (type->is<IR::Type_StructLike>()) {
+            keyName = arg_key->expression->to<IR::PathExpression>()->path->name.name;
+        }
+
+        last_key_name = keyName;
     }
 }
 

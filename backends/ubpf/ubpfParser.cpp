@@ -27,10 +27,9 @@ namespace UBPF {
             P4::P4CoreLibrary& p4lib;
             const UBPFParserState* state;
 
-            void compileExtractField(const IR::Expression* expr, cstring name,
+            void compileExtractField(const IR::Expression* expr, cstring field,
                                      unsigned alignment, EBPF::EBPFType* type);
             void compileExtract(const IR::Expression* destination);
-            void compileLookahead(const IR::Expression* destination);
 
         public:
             explicit UBPFStateTranslationVisitor(const UBPFParserState* state) :
@@ -208,7 +207,7 @@ namespace UBPF {
                 builder->appendFormat(")((%s(%s, BYTES(%s) + %d) >> %d)",
                                       helper,
                                       program->packetStartVar.c_str(),
-                                      program->offsetVar.c_str(), i, shift);
+                                      program->offsetVar.c_str(), bytes - i - 1, shift);
 
                 if ((i == bytes - 1) && (widthToExtract % 8 != 0)) {
                     builder->append(" & BPF_MASK(");
@@ -221,10 +220,6 @@ namespace UBPF {
             }
         }
 
-        builder->emitIndent();
-        visit(expr);
-        builder->appendFormat(".%sOffset = %s",  field.c_str(), program->offsetVar.c_str());
-        builder->endOfStatement(true);
         builder->emitIndent();
         builder->appendFormat("%s += %d", program->offsetVar.c_str(), widthToExtract);
         builder->endOfStatement(true);
@@ -314,7 +309,7 @@ namespace UBPF {
         return false;
     }
 
-    void UBPFParserState::emit(EBPF::CodeBuilder* builder) {
+    void UBPF::UBPFParserState::emit(EBPF::CodeBuilder* builder) {
         UBPFStateTranslationVisitor visitor(this);
         visitor.setBuilder(builder);
         state->apply(visitor);
@@ -335,7 +330,7 @@ namespace UBPF {
         builder->newline();
     }
 
-    bool UBPFParser::build() {
+    bool UBPF::UBPFParser::build() {
         auto pl = parserBlock->container->type->applyParams;
         if (pl->size() != 3) {
             ::error("Expected parser to have exactly 3 parameters");

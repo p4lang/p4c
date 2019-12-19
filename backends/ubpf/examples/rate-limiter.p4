@@ -6,7 +6,17 @@
 //WINDOW_SIZE is in nanoseconds
 #define WINDOW_SIZE 100
 
-control pipe(inout Headers_t hdr) {
+struct Headers_t {}
+
+struct metadata {}
+
+parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
+    state start {
+        transition accept;
+    }
+}
+
+control pipe(inout Headers_t headers, inout metadata meta) {
     Register<bit<48>, bit<32>>(1) timestamp_r;
     Register<bit<32>, bit<32>>(1) count_r;
 
@@ -35,4 +45,8 @@ control pipe(inout Headers_t hdr) {
     }
 }
 
-ubpf(prs(), pipe()) main;
+control dprs(packet_out packet, in Headers_t headers) {
+    apply { }
+}
+
+ubpf(prs(), pipe(), dprs()) main;

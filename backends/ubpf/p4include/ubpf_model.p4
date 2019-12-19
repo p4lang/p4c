@@ -5,9 +5,12 @@
 
 parser parse<H, M>(packet_in packet, out H headers, inout M meta);
 control filter<H, M>(inout H headers, inout M meta);
+@deparser
+control deparser<H>(packet_out b, in H headers);
 
 package ubpf<H, M>(parse<H, M> prs,
-                      filter<H, M> filt);
+                filter<H, M> filt,
+                deparser<H> dprs);
 
 extern void mark_to_drop();
 extern void mark_to_pass();

@@ -31,10 +31,10 @@ namespace UBPF {
         cstring instanceName;
         cstring keyTypeName;
         cstring valueTypeName;
-        const IR::Type* keyType;
-        const IR::Type* valueType;
+        const IR::Type *keyType{};
+        const IR::Type *valueType{};
         cstring dataMapName;
-        size_t size;
+        size_t size{};
         EBPF::CodeGenInspector *codeGen;
 
         virtual void emitInstance(EBPF::CodeBuilder *pBuilder);
@@ -54,17 +54,21 @@ namespace UBPF {
     class UBPFTable final : public UBPFTableBase {
     private:
         void setTableSize(const IR::TableBlock *table);
+
     public:
         const IR::Key *keyGenerator;
         const IR::ActionList *actionList;
         const IR::TableBlock *table;
         cstring defaultActionMapName;
         cstring actionEnumName;
+        cstring noActionName;
         std::map<const IR::KeyElement *, cstring> keyFieldNames;
         std::map<const IR::KeyElement *, EBPF::EBPFType *> keyTypes;
 
         UBPFTable(const UBPFProgram *program, const IR::TableBlock *table,
                   EBPF::CodeGenInspector *codeGen);
+
+        cstring generateActionName(const IR::P4Action *action);
 
         void emitTypes(EBPF::CodeBuilder *builder);
 
@@ -79,7 +83,7 @@ namespace UBPF {
 
         void emitAction(EBPF::CodeBuilder *builder, cstring valueName);
 
-        void emitInitializer(EBPF::CodeBuilder *builder);
+        void emitInitializer(EBPF::CodeBuilder *builder) {};
     };
 
 }

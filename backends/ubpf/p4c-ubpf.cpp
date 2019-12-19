@@ -35,7 +35,7 @@ limitations under the License.
 #include "ir/json_loader.h"
 #include "fstream"
 
-void compile(EbpfOptions& options) {
+void compile(EbpfOptions &options) {
     auto hook = options.getDebugHook();
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     if (isv1) {
@@ -73,14 +73,14 @@ int main(int argc, char *const argv[]) {
     setup_signals();
 
     AutoCompileContext autoEbpfContext(new EbpfContext);
-    auto& options = EbpfContext::get().options();
+    auto &options = EbpfContext::get().options();
     options.compilerVersion = P4C_UBPF_VERSION_STRING;
 
     if (options.process(argc, argv) != nullptr) {
         options.setInputFile();
     }
 
-    if(::errorCount() > 0)
+    if (::errorCount() > 0)
         exit(1);
 
     try {
@@ -90,10 +90,9 @@ int main(int argc, char *const argv[]) {
         return 1;
     }
 
-    if(Log::verbose())
-        std::cerr << "Done." << std::endl;
+    if (Log::verbose())
+        std::cout << "Done." << std::endl;
 
     return ::errorCount() > 0;
-
 }
 

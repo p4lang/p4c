@@ -22,7 +22,7 @@ limitations under the License.
 
 namespace UBPF {
 
-    class UBPFRegister final: public UBPFTableBase {
+    class UBPFRegister final : public UBPFTableBase {
     public:
         UBPFRegister(const UBPFProgram *program, const IR::ExternBlock *block,
                      cstring name, EBPF::CodeGenInspector *codeGen);
@@ -32,11 +32,18 @@ namespace UBPF {
 
         void emitRegisterWrite(EBPF::CodeBuilder *builder,
                                const IR::MethodCallExpression *expression,
-                               const std::vector<cstring> pointerVariables);
+                               const std::vector<cstring> &pointerVariables);
 
         void emitMethodInvocation(EBPF::CodeBuilder *builder,
                                   const P4::ExternMethod *method,
-                                  const std::vector<cstring> pointerVariables);
+                                  const std::vector<cstring> &pointerVariables);
+
+        void emitKeyInstance(EBPF::CodeBuilder *builder,
+                             const IR::MethodCallExpression *expression);
+
+        cstring emitValueInstanceIfNeeded(EBPF::CodeBuilder *builder,
+                                          const IR::Argument *arg_value);
+
     };
 }
 

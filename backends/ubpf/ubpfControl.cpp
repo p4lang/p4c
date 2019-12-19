@@ -44,7 +44,7 @@ namespace UBPF {
             return;
         } else if (function->method->name.name ==
                    control->program->model.ubpf_time_get_ns.name) {
-            builder->append("ubpf_time_get_ns()");
+            builder->append(control->program->model.ubpf_time_get_ns.name + "()");
             return;
         } else if (function->method->name.name == control->program->model.hash.name) {
             cstring hashKeyInstanceName = createHashKeyInstance(function);
@@ -110,8 +110,8 @@ namespace UBPF {
         auto hashKeyInstance = control->program->refMap->newName("hash_key_instance");
         builder->appendFormat("struct %s %s = ", hashKey, hashKeyInstance);
         builder->blockStart();
-        unsigned int i = 0;
-        for (auto component : dataArgument->components) {
+        for (unsigned int i = 0; i < dataArgument->components.size(); i++) {
+            auto component = dataArgument->components[i];
             builder->emitIndent();
             builder->appendFormat(".%s = %s", component->toString().replace(".", "_"), component->toString());
             auto paddingInitializer = paddingInitializers.at(i);
@@ -125,7 +125,6 @@ namespace UBPF {
             if (i < dataArgument->components.size() - 1) {
                 builder->append(",");
             }
-            i++;
             builder->newline();
         }
         builder->blockEnd(false);
@@ -148,139 +147,6 @@ namespace UBPF {
         builder->endOfStatement(true);
     }
 
-    void UBPFControlBodyTranslator::compileEmitField(const IR::Expression *expr,
-                                                     cstring field,
-                                                     unsigned alignment,
-                                                     EBPF::EBPFType *type) {
-
-        unsigned widthToEmit = dynamic_cast<EBPF::IHasWidth *>(type)->widthInBits();
-        cstring swap = "";
-        if (widthToEmit == 16)
-            swap = "htons";
-        else if (widthToEmit == 32)
-            swap = "htonl";
-        if (!swap.isNullOrEmpty()) {
-            builder->emitIndent();
-            visit(expr);
-            builder->appendFormat(".%s = %s(", field.c_str(), swap);
-            visit(expr);
-            builder->appendFormat(".%s)", field.c_str());
-            builder->endOfStatement(true);
-        }
-
-        auto program = control->program;
-        unsigned bitsInFirstByte = widthToEmit % 8;
-        if (bitsInFirstByte == 0) bitsInFirstByte = 8;
-        unsigned bitsInCurrentByte = bitsInFirstByte;
-        unsigned left = widthToEmit;
-
-        for (unsigned i = 0; i < (widthToEmit + 7) / 8; i++) {
-            builder->emitIndent();
-            builder->appendFormat("%s = ((char*)(&", program->byteVar.c_str());
-            visit(expr);
-            builder->appendFormat(".%s))[%d]", field.c_str(), i);
-            builder->endOfStatement(true);
-
-            unsigned freeBits = alignment == 0 ? (8 - alignment) : 8;
-            unsigned bitsToWrite =
-                    bitsInCurrentByte > freeBits ? freeBits : bitsInCurrentByte;
-
-            BUG_CHECK((bitsToWrite > 0) && (bitsToWrite <= 8),
-                      "invalid bitsToWrite %d", bitsToWrite);
-            builder->emitIndent();
-            if (alignment == 0)
-                builder->appendFormat(
-                        "write_byte(%s, BYTES(%s) + %d, (%s) << %d)",
-                        program->packetStartVar.c_str(),
-                        program->offsetVar.c_str(), i,
-                        program->byteVar.c_str(), 8 - bitsToWrite);
-            else
-                builder->appendFormat(
-                        "write_partial(%s + BYTES(%s) + %d, %d, (%s) << %d)",
-                        program->packetStartVar.c_str(),
-                        program->offsetVar.c_str(), i,
-                        alignment,
-                        program->byteVar.c_str(), 8 - bitsToWrite);
-            builder->endOfStatement(true);
-            left -= bitsToWrite;
-            bitsInCurrentByte -= bitsToWrite;
-
-            if (bitsInCurrentByte > 0) {
-                builder->emitIndent();
-                builder->appendFormat(
-                        "write_byte(%s, BYTES(%s) + %d + 1, (%s << %d))",
-                        program->packetStartVar.c_str(),
-                        program->offsetVar.c_str(), i, program->byteVar.c_str(),
-                        8 - alignment % 8);
-                builder->endOfStatement(true);
-                left -= bitsInCurrentByte;
-            }
-
-            alignment = (alignment + bitsToWrite) % 8;
-            bitsInCurrentByte = left >= 8 ? 8 : left;
-        }
-
-        builder->emitIndent();
-        builder->appendFormat("%s += %d", program->offsetVar.c_str(),
-                              widthToEmit);
-        builder->endOfStatement(true);
-    }
-
-    void UBPFControlBodyTranslator::compileEmit(
-            const IR::Vector<IR::Argument> *args) {
-        BUG_CHECK(args->size() == 1, "%1%: expected 1 argument for emit", args);
-
-        auto expr = args->at(0)->expression;
-        auto type = typeMap->getType(expr);
-        auto ht = type->to<IR::Type_Header>();
-        if (ht == nullptr) {
-            ::error("Cannot emit a non-header type %1%", expr);
-            return;
-        }
-
-        auto program = control->program;
-        builder->emitIndent();
-        builder->append("if (");
-        visit(expr);
-        builder->append(".ebpf_valid) ");
-        builder->blockStart();
-
-        unsigned width = ht->width_bits();
-        builder->emitIndent();
-        builder->appendFormat("if (%s < %s + BYTES(%s + %d)) ",
-                              program->packetEndVar.c_str(),
-                              program->packetStartVar.c_str(),
-                              program->offsetVar.c_str(), width);
-        builder->blockStart();
-
-        builder->emitIndent();
-        builder->appendFormat("%s = %s;", program->errorVar.c_str(),
-                              p4lib.packetTooShort.str());
-        builder->newline();
-
-        builder->emitIndent();
-        builder->appendFormat("return %s;",
-                              builder->target->abortReturnCode().c_str());
-        builder->newline();
-        builder->blockEnd(true);
-
-        unsigned alignment = 0;
-        for (auto f : ht->fields) {
-            auto ftype = typeMap->getType(f);
-            auto etype = UBPFTypeFactory::instance->create(ftype);
-            auto et = dynamic_cast<EBPF::IHasWidth *>(etype);
-            if (et == nullptr) {
-                ::error("Only headers with fixed widths supported %1%", f);
-                return;
-            }
-            compileEmitField(expr, f->name, alignment, etype);
-            alignment += et->widthInBits();
-            alignment %= 8;
-        }
-
-        builder->blockEnd(true);
-    }
-
     void
     UBPFControlBodyTranslator::processMethod(const P4::ExternMethod *method) {
         auto decl = method->object;
@@ -288,33 +154,22 @@ namespace UBPF {
 
         if (declType->name.name == p4lib.packetOut.name) {
             if (method->method->name.name == p4lib.packetOut.emit.name) {
-                compileEmit(method->expr->arguments);
+                ::error("Emit extern not supported in control block");
                 return;
             }
         } else if (declType->name.name ==
                    UBPFModel::instance.registerModel.name) {
-            if (method->method->name.name ==
-                UBPFModel::instance.registerModel.write.name) {
-                auto arg_key = method->expr->arguments->at(0);
-                auto type = arg_key->expression->type;
-                if (type->is<IR::Type_Bits>()) {
-                    auto keyType = type->to<IR::Type_Bits>();
-                    auto scalar = new UBPFScalarType(keyType);
-                    auto scalarType = UBPFTypeFactory::instance->create(
-                            scalar->type);
-                    auto scalarName = control->program->refMap->newName(
-                            "const_value");
-                    scalarType->declare(builder, scalarName, false);
-                    builder->append(" = ");
-                    control->codeGen->visit(arg_key->expression);
-                    builder->endOfStatement(true);
-                    builder->emitIndent();
-                }
-            }
 
             cstring name = decl->getName().name;
-            auto registerMap = control->getRegister(name);
-            registerMap->emitMethodInvocation(builder, method, pointerVariables);
+            auto pRegister = control->getRegister(name);
+
+            if (method->method->name.name ==
+                UBPFModel::instance.registerModel.write.name) {
+
+                pRegister->emitKeyInstance(builder, method->expr);
+            }
+
+            pRegister->emitMethodInvocation(builder, method, pointerVariables);
             return;
         }
         ::error("%1%: Unexpected method call", method->expr);
@@ -339,7 +194,7 @@ namespace UBPF {
         }
         builder->blockStart();
 
-        BUG_CHECK(method->expr->arguments->size() == 0,
+        BUG_CHECK(method->expr->arguments->empty(),
                   "%1%: table apply with arguments", method);
         cstring keyname = "key";
         if (table->keyGenerator != nullptr) {
@@ -441,16 +296,20 @@ namespace UBPF {
         }
         auto bim = mi->to<P4::BuiltInMethod>();
         if (bim != nullptr) {
-            builder->emitIndent();
+//            builder->emitIndent();
             if (bim->name == IR::Type_Header::isValid) {
                 visit(bim->appliedTo);
                 builder->append(".ebpf_valid");
                 return false;
             } else if (bim->name == IR::Type_Header::setValid) {
+                adjustPacketHead(bim->appliedTo, true);
+                builder->emitIndent();
                 visit(bim->appliedTo);
                 builder->append(".ebpf_valid = true");
                 return false;
             } else if (bim->name == IR::Type_Header::setInvalid) {
+                adjustPacketHead(bim->appliedTo, false);
+                builder->emitIndent();
                 visit(bim->appliedTo);
                 builder->append(".ebpf_valid = false");
                 return false;
@@ -459,7 +318,7 @@ namespace UBPF {
         auto ac = mi->to<P4::ActionCall>();
         if (ac != nullptr) {
             // Action arguments have been eliminated by the mid-end.
-            BUG_CHECK(expression->arguments->size() == 0,
+            BUG_CHECK(expression->arguments->empty(),
                       "%1%: unexpected arguments for action call", expression);
             visit(ac->action->body);
             return false;
@@ -469,96 +328,73 @@ namespace UBPF {
         return false;
     }
 
+    void UBPFControlBodyTranslator::adjustPacketHead(const IR::Expression *expression, bool add) {
+        auto ltype = control->program->typeMap->getType(expression);
+        auto ubpfType = UBPFTypeFactory::instance->create(ltype);
+        unsigned int width = dynamic_cast<EBPF::IHasWidth *>(ubpfType)->widthInBits();
+        unsigned int widthInBytes = width / 8;  // divide by 8 to get number of bytes.
+        // len(packet_header) always gives % 8 = 0.
+        char op = add ? '+' : '-';
+        builder->emitIndent();
+        builder->appendFormat("%s %c= %d", control->program->headLengthVar.c_str(),
+                              op, widthInBytes);
+        builder->endOfStatement(true);
+    }
+
     bool UBPFControlBodyTranslator::preorder(const IR::AssignmentStatement *a) {
-        auto ltype = typeMap->getType(a->left);
-        auto ebpfType = UBPFTypeFactory::instance->create(ltype);
-        bool memcpy = false;
-        UBPFScalarType *scalar = nullptr;
-        unsigned width = 0;
-        if (ebpfType->is<UBPFScalarType>()) {
-            scalar = ebpfType->to<UBPFScalarType>();
-            width = scalar->implementationWidthInBits();
-            memcpy = !UBPFScalarType::generatesScalar(width);
-        }
-
-        cstring keyName = "";
-        if (a->right->is<IR::MethodCallExpression>()) {
-            auto method = a->right->to<IR::MethodCallExpression>();
-            if (method->method->is<IR::Member>()) {
-                auto arg_key = method->arguments->at(0);
-                keyName = arg_key->name.name;
-
-                auto methodName = method->method->to<IR::Member>()->member.name;
-
-                if (methodName == UBPFModel::instance.registerModel.read.name ||
-                    methodName == UBPFModel::instance.registerModel.write.name) {
-                    auto type = arg_key->expression->type;
-                    if (type->is<IR::Type_Bits>()) {
-                        auto keyType = type->to<IR::Type_Bits>();
-                        auto tb = keyType->to<IR::Type_Bits>();
-                        auto scalarType = new UBPFScalarType(tb);
-                        auto scalarInstance = UBPFTypeFactory::instance->create(
-                                scalarType->type);
-                        auto scalarName = control->program->refMap->newName(
-                                "const_value");
-                        keyName = scalarName;
-                        scalarInstance->declare(builder, scalarName, false);
-                        builder->append(" = ");
-                        control->codeGen->visit(arg_key->expression);
-                        builder->endOfStatement(true);
-                        builder->emitIndent();
-                    } else if (type->is<IR::Type_StructLike>()) {
-                        keyName = arg_key->expression->to<IR::PathExpression>()->path->name.name;
-                    }
-                }
-            }
-        }
-
-
-        if (memcpy) {
-            builder->append("memcpy(&");
-            visit(a->left);
-            builder->append(", &");
-            visit(a->right);
-            builder->appendFormat(", %d)", scalar->bytesRequired());
-        } else {
-            visit(a->left);
-            builder->append(" = ");
-            if (a->right->is<IR::PathExpression>()) {
-                auto name = a->right->to<IR::PathExpression>()->path->name.name;
-                if (std::find(pointerVariables.begin(), pointerVariables.end(), name) !=
-                    pointerVariables.end()) {
-                    builder->append("*");
-                }
-            }
-            visit(a->right);
-        }
-        builder->endOfStatement();
-
 
         if (a->right->is<IR::MethodCallExpression>()) {
             auto method = a->right->to<IR::MethodCallExpression>();
             if (method->method->is<IR::Member>()) {
                 auto methodName = method->method->to<IR::Member>()->member.name;
                 if (methodName == UBPFModel::instance.registerModel.read.name) {
-                    builder->newline();
-
-                    auto registerName = method->method->to<IR::Member>()->expr->to<IR::PathExpression>()->path->name.name;
-                    auto pRegister = control->registers.find(
-                            registerName)->second;
-
-                    builder->emitIndent();
-                    auto valueName = a->left->to<IR::PathExpression>()->path->name.name;
-                    builder->appendFormat("if (%s != NULL) ", valueName);
-                    builder->blockStart();
-
-                    registersLookups.push_back(pRegister);
-                    registerKeys.push_back(keyName);
+                    return emitRegisterRead(a, method);
                 }
             }
         }
 
+        emitAssignmentStatement(a);
+
         return false;
+    }
+
+    bool
+    UBPFControlBodyTranslator::emitRegisterRead(const IR::AssignmentStatement *a,
+                                                const IR::MethodCallExpression *method) {
+        auto registerName = method->method->to<IR::Member>()->expr->to<IR::PathExpression>()->path->name.name;
+        auto pRegister = control->getRegister(registerName);
+        pRegister->emitKeyInstance(builder, method);
+
+        emitAssignmentStatement(a);
+
+        builder->newline();
+
+        builder->emitIndent();
+        auto valueName = a->left->to<IR::PathExpression>()->path->name.name;
+        builder->appendFormat("if (%s != NULL) ", valueName);
+        builder->blockStart();
+
+        registersLookups.push_back(pRegister);
+
+        return false;
+    }
+
+    void UBPFControlBodyTranslator::emitAssignmentStatement(const IR::AssignmentStatement *a) {
+        visit(a->left);
+        builder->append(" = ");
+        appendValueAtOperator(a);
+        visit(a->right);
+        builder->endOfStatement();
+    }
+
+    void UBPFControlBodyTranslator::appendValueAtOperator(const IR::AssignmentStatement *a) const {
+        if (a->right->is<IR::PathExpression>()) {
+            auto name = a->right->to<IR::PathExpression>()->path->name.name;
+            if (std::find(pointerVariables.begin(), pointerVariables.end(), name) !=
+                pointerVariables.end()) {
+                builder->append("*");
+            }
+        }
     }
 
     bool UBPFControlBodyTranslator::preorder(const IR::BlockStatement *s) {
@@ -621,16 +457,18 @@ namespace UBPF {
                   statement->expression);
         visit(mem->expr);
         saveAction.pop_back();
-        saveAction.push_back(nullptr);
+        saveAction.emplace_back(nullptr);
         builder->emitIndent();
         builder->append("switch (");
         builder->append(newName);
         builder->append(") ");
         builder->blockStart();
-        builder->appendLine("Switch statement start block \n");
+        builder->emitIndent();
+        builder->appendLine("/* Switch statement start block */\n");
         for (auto c : statement->cases) {
             builder->emitIndent();
-            builder->appendLine("Statement case \n");
+            builder->appendLine("/* Statement case */");
+            builder->emitIndent();
             if (c->label->is<IR::DefaultExpression>()) {
                 builder->append("default");
             } else {
@@ -641,7 +479,9 @@ namespace UBPF {
                 BUG_CHECK(decl->is<IR::P4Action>(), "%1%: expected an action",
                           pe);
                 auto act = decl->to<IR::P4Action>();
-                cstring name = EBPF::EBPFObject::externalName(act);
+                auto table = (UBPFTable *) control->getTable(
+                        mem->to<IR::Operation_Unary>()->expr->to<IR::Expression>()->type->to<IR::Type_StructLike>()->getName().name);
+                cstring name = table->generateActionName(act);
                 builder->append(name);
             }
             builder->append(":");
@@ -651,6 +491,7 @@ namespace UBPF {
             builder->newline();
             builder->emitIndent();
             builder->appendLine("break;");
+
         }
         builder->blockEnd(false);
         saveAction.pop_back();
@@ -684,7 +525,7 @@ namespace UBPF {
     }
 
     bool
-    UBPFControlBodyTranslator::comparison(const IR::Operation_Relation* b) {
+    UBPFControlBodyTranslator::comparison(const IR::Operation_Relation *b) {
         auto type = typeMap->getType(b->left);
         auto et = UBPFTypeFactory::instance->create(type);
 
@@ -775,13 +616,15 @@ namespace UBPF {
     }
 
     void UBPFControl::emit(EBPF::CodeBuilder *builder) {
-        for (auto a : controlBlock->container->controlLocals)
+        for (auto a : controlBlock->container->controlLocals) {
             emitDeclaration(builder, a);
+        }
+
         codeGen->setBuilder(builder);
         builder->emitIndent();
         controlBlock->container->body->apply(*codeGen);
 
-        for (auto reg : codeGen->registersLookups) {
+        for (size_t i = 0; i < codeGen->registersLookups.size(); i++) {
             builder->newline();
             builder->blockEnd(true);
         }
@@ -828,36 +671,8 @@ namespace UBPF {
             auto vd = decl->to<IR::Declaration_Variable>();
             auto etype = UBPFTypeFactory::instance->create(vd->type);
             builder->emitIndent();
-            bool pointerType = true;
 
-            auto comps = controlBlock->container->body->components;
-            for (auto comp : comps) {
-                if (comp->is<IR::AssignmentStatement>()) {
-                    auto assiStat = comp->to<IR::AssignmentStatement>();
-                    pointerType = variableIsUsedAsPointer(vd, assiStat);
-                    if (pointerType) {
-                        break;
-                    }
-                } else {
-                    if (comp->is<IR::Statement>()) {
-                        auto result = findFirstStatementWhereVariableIsUsedAsPointer(
-                                comp->to<IR::Statement>(), vd);
-                        if (result == nullptr) {
-                            pointerType = false;
-                        } else {
-                            pointerType = true;
-                            break;
-                        }
-                    }
-                }
-            }
-            for (auto it : registers) {
-                if (etype->type->is<IR::Type_Name>() &&
-                    it.second->keyTypeName ==
-                    etype->type->to<IR::Type_Name>()->path->name.name) {
-                    pointerType = false;
-                }
-            }
+            bool pointerType = determineIfVariableIsPointer(vd, etype);
 
             if (pointerType) {
                 codeGen->pointerVariables.push_back(vd->name.name);
@@ -875,6 +690,39 @@ namespace UBPF {
             return;
         }
         BUG("%1%: not yet handled", decl);
+    }
+
+    bool UBPFControl::determineIfVariableIsPointer(const IR::Declaration_Variable *vd, const EBPF::EBPFType *etype) {
+        bool pointerType = false;
+        auto comps = controlBlock->container->body->components;
+        for (auto comp : comps) {
+            if (comp->is<IR::AssignmentStatement>()) {
+                auto assiStat = comp->to<IR::AssignmentStatement>();
+                pointerType = variableIsUsedAsPointer(vd, assiStat);
+                if (pointerType) {
+                    break;
+                }
+            } else {
+                if (comp->is<IR::Statement>()) {
+                    auto result = findFirstStatementWhereVariableIsUsedAsPointer(
+                            comp->to<IR::Statement>(), vd);
+                    if (result == nullptr) {
+                        pointerType = false;
+                    } else {
+                        pointerType = true;
+                        break;
+                    }
+                }
+            }
+        }
+        for (auto it : registers) {
+            if (etype->type->is<IR::Type_Name>() &&
+                it.second->keyTypeName ==
+                etype->type->to<IR::Type_Name>()->path->name.name) {
+                pointerType = false;
+            }
+        }
+        return pointerType;
     }
 
     bool

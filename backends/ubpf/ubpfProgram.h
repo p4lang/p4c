@@ -23,31 +23,38 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "backends/ebpf/ebpfProgram.h"
+#include "codeGen.h"
 
 
 namespace UBPF {
 
     class UBPFControl;
     class UBPFParser;
+    class UBPFDeparser;
     class UBPFTable;
     class UBPFType;
 
     class UBPFProgram : public EBPF::EBPFProgram {
     public:
-        UBPFParser *parser;
-        UBPFControl *control;
+        UBPFParser *parser{};
+        UBPFControl *control{};
+        UBPFDeparser *deparser{};
         UBPFModel &model;
+
+        cstring headLengthVar, contextVar;
 
         UBPFProgram(const CompilerOptions &options, const IR::P4Program *program,
                     P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const IR::ToplevelBlock *toplevel) :
                 EBPF::EBPFProgram(options, program, refMap, typeMap, toplevel), model(UBPFModel::instance) {
             packetStartVar = cstring("pkt");
             offsetVar = cstring("packetOffsetInBits");
+            headLengthVar = cstring("head_len");
+            contextVar = cstring("ctx");
         }
 
         bool build() override;
 
-        void emitC(EBPF::CodeBuilder *builder, cstring headerFile) override;
+        void emitC(UbpfCodeBuilder *builder, cstring headerFile);
 
         void emitH(EBPF::CodeBuilder *builder, cstring headerFile) override;
 
@@ -56,6 +63,8 @@ namespace UBPF {
         void emitTypes(EBPF::CodeBuilder *builder) override;
 
         void emitTableDefinition(EBPF::CodeBuilder *builder) const;
+        
+        void emitPktVariable(UbpfCodeBuilder *builder) const;
 
         void emitHeaderInstances(EBPF::CodeBuilder *builder) override;
 
@@ -70,6 +79,6 @@ namespace UBPF {
         void emitPacketCheck(EBPF::CodeBuilder* builder);
     };
 
-} // namespace UBPF
+}
 
-#endif //P4C_UBPFPROGRAM_H
+#endif

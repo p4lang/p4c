@@ -23,24 +23,28 @@ limitations under the License.
 
 namespace UBPF {
 
-class UBPFParserState : public EBPF::EBPFParserState {
-public:
-    UBPFParserState(const IR::ParserState* state, EBPF::EBPFParser* parser) : EBPF::EBPFParserState(state, parser) {}
-    void emit(EBPF::CodeBuilder* builder);
-};
+    class UBPFParserState : public EBPF::EBPFParserState {
+    public:
+        UBPFParserState(const IR::ParserState *state, EBPF::EBPFParser *parser) : EBPF::EBPFParserState(state,
+                                                                                                        parser) {}
 
-class UBPFParser : public EBPF::EBPFParser {
-public:
-    std::vector<UBPFParserState*> states;
-    const IR::Parameter*          metadata;
-    EBPF::EBPFType*               metadataType;
+        void emit(EBPF::CodeBuilder *builder);
+    };
 
-    UBPFParser(const EBPF::EBPFProgram* program, const IR::ParserBlock* block,
-               const P4::TypeMap* typeMap) : EBPF::EBPFParser(program, block, typeMap) {}
-    bool build();
-    void emit(EBPF::CodeBuilder* builder);
-};
+    class UBPFParser : public EBPF::EBPFParser {
+    public:
+        std::vector<UBPFParserState *> states;
+        const IR::Parameter *metadata;
+        EBPF::EBPFType *metadataType;
+
+        UBPFParser(const EBPF::EBPFProgram *program, const IR::ParserBlock *block,
+                   const P4::TypeMap *typeMap) : EBPF::EBPFParser(program, block, typeMap) {}
+
+        void emit(EBPF::CodeBuilder *builder);
+
+        bool build();
+    };
 
 }
 
-#endif //P4C_UBPFPARSER_H
+#endif

@@ -1,0 +1,208 @@
+#include "ubpf_model.p4"
+#include <core.p4>
+
+@ethernetaddress typedef bit<48> EthernetAddress;
+@ipv4address     typedef bit<32>     IPv4Address;
+
+#define UDP_PORT_GTP 2152
+#define UDP_PROTO 17
+#define IPV4_ETHTYPE 0x800
+#define ETH_HDR_SIZE 14
+#define IPV4_HDR_SIZE 20
+#define UDP_HDR_SIZE 8
+#define GTP_HDR_SIZE 8
+#define IP_VERSION_4 4
+#define IPV4_MIN_IHL 5
+
+// standard Ethernet header
+header Ethernet_h
+{
+    EthernetAddress dstAddr;
+    EthernetAddress srcAddr;
+    bit<16> etherType;
+}
+
+// IPv4 header without options
+header IPv4_h {
+    bit<4>       version;
+    bit<4>       ihl;
+    bit<8>       diffserv;
+    bit<16>      totalLen;
+    bit<16>      identification;
+    bit<3>       flags;
+    bit<13>      fragOffset;
+    bit<8>       ttl;
+    bit<8>       protocol;
+    bit<16>      hdrChecksum;
+    IPv4Address  srcAddr;
+    IPv4Address  dstAddr;
+}
+
+header udp_t {
+    bit<16> srcPort;
+    bit<16> dstPort;
+    bit<16> length;
+    bit<16> checksum;
+}
+
+header gtp_t {
+    bit<3>  version;
+    bit<1>  ptFlag;
+    bit<1>  spare;
+    bit<1>  extHdrFlag;
+    bit<1>  seqNumberFlag;
+    bit<1>  npduFlag;
+    bit<8>  msgType;
+    bit<16> len;
+    bit<32> tunnelEndID;
+}
+
+
+struct Headers_t {
+    @name("ethernet")
+    Ethernet_h ethernet;
+    @name("ipv4")
+    IPv4_h     ipv4;
+    @name("udp")
+    udp_t      udp;
+    @name("gtp")
+    gtp_t      gtp;
+
+    IPv4_h     inner_ipv4;
+}
+
+struct metadata {}
+
+parser prs(packet_in packet, out Headers_t hdr, inout metadata meta) {
+    state start {
+        transition parse_ethernet;
+    }
+    state parse_ethernet {
+        packet.extract(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            IPV4_ETHTYPE: parse_ipv4;
+            default: accept;
+        }
+    }
+
+    state parse_ipv4 {
+        packet.extract(hdr.ipv4);
+        transition select(hdr.ipv4.protocol) {
+            UDP_PROTO: parse_udp;
+            default: accept;
+        }
+    }
+    state parse_udp {
+        packet.extract(hdr.udp);
+        transition select(hdr.udp.dstPort) {
+            UDP_PORT_GTP: parse_gtp;
+            default: accept;
+         }
+    }
+    state parse_gtp {
+        packet.extract(hdr.gtp);
+        transition parse_inner_ipv4;
+    }
+
+    state parse_inner_ipv4 {
+        packet.extract(hdr.inner_ipv4);
+        transition accept;
+    }
+}
+
+control pipe(inout Headers_t hdr, inout metadata meta) {
+
+    action gtp_decap() {
+        // as simple as set outer headers as invalid
+        hdr.ipv4.setInvalid();
+        hdr.udp.setInvalid();
+        hdr.gtp.setInvalid();
+    }
+
+    table upstream_tbl {
+        key = {
+            hdr.gtp.tunnelEndID : exact;
+        }
+        actions = {
+            gtp_decap;
+            NoAction;
+        }
+
+        //const default_action = NoAction();
+    }
+
+    action gtp_encap(bit<32> tunnelId) {
+        hdr.inner_ipv4 = hdr.ipv4;
+
+        hdr.ipv4.setValid();
+        hdr.ipv4.version = IP_VERSION_4;
+        hdr.ipv4.ihl = IPV4_MIN_IHL;
+        hdr.ipv4.diffserv = 0;
+        hdr.ipv4.totalLen = hdr.ipv4.totalLen
+                            + (IPV4_HDR_SIZE + UDP_HDR_SIZE + GTP_HDR_SIZE);
+        hdr.ipv4.identification = 0x1513; /* From NGIC */
+        hdr.ipv4.flags = 0;
+        hdr.ipv4.fragOffset = 0;
+        hdr.ipv4.ttl = 64;
+        hdr.ipv4.protocol = UDP_PROTO;
+        hdr.ipv4.dstAddr = hdr.inner_ipv4.dstAddr;
+        hdr.ipv4.srcAddr = hdr.inner_ipv4.srcAddr;
+        hdr.ipv4.hdrChecksum = 0;
+
+        hdr.udp.setValid();
+
+        hdr.udp.srcPort = 15221; // random port
+        hdr.udp.dstPort = UDP_PORT_GTP;
+        hdr.udp.length = hdr.inner_ipv4.totalLen + (UDP_HDR_SIZE + GTP_HDR_SIZE);
+        hdr.udp.checksum = 0;
+
+        hdr.gtp.setValid();
+        hdr.gtp.tunnelEndID = tunnelId;
+        hdr.gtp.version = 0x01;
+        hdr.gtp.ptFlag = 0x01;
+        hdr.gtp.spare =0;
+        hdr.gtp.extHdrFlag =0;
+        hdr.gtp.seqNumberFlag =0;
+        hdr.gtp.npduFlag = 0;
+        hdr.gtp.msgType = 0xff;
+        hdr.gtp.len = hdr.inner_ipv4.totalLen;
+
+    }
+
+
+    table downstream_tbl {
+        key = {
+            hdr.ipv4.dstAddr : exact;
+        }
+        actions = {
+            gtp_encap;
+            NoAction;
+        }
+
+        //const default_action = NoAction();
+    }
+
+
+    apply {
+        if (hdr.gtp.isValid()) {
+            upstream_tbl.apply();
+        } else {
+            if (hdr.ipv4.isValid()) {
+                downstream_tbl.apply();
+            }
+        }
+
+    }
+}
+
+control dprs(packet_out packet, in Headers_t hdr) {
+    apply {
+        packet.emit(hdr.ethernet);
+        packet.emit(hdr.ipv4);
+        packet.emit(hdr.udp);
+        packet.emit(hdr.gtp);
+        packet.emit(hdr.inner_ipv4);
+    }
+}
+
+ubpf(prs(), pipe(), dprs()) main;

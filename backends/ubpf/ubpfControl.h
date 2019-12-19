@@ -32,15 +32,11 @@ namespace UBPF {
         P4::P4CoreLibrary &p4lib;
 
         std::vector<UBPFRegister *> registersLookups;
-        std::vector<cstring> registerKeys;
         std::vector<cstring> pointerVariables;
 
         explicit UBPFControlBodyTranslator(const UBPFControl *control);
 
-        virtual void compileEmitField(const IR::Expression *expr, cstring field,
-                                      unsigned alignment, EBPF::EBPFType *type);
-
-        virtual void compileEmit(const IR::Vector<IR::Argument> *args);
+        virtual void adjustPacketHead(const IR::Expression *expression, bool add);
 
         virtual void processMethod(const P4::ExternMethod *method);
 
@@ -68,13 +64,19 @@ namespace UBPF {
 
         bool preorder(const IR::Operation_Binary *b) override;
 
-        bool comparison(const IR::Operation_Relation* b) override;
+        bool comparison(const IR::Operation_Relation *b) override;
 
         bool preorder(const IR::Member *expression) override;
 
         void addPadding(std::vector<cstring> &paddingInitializers, unsigned int remainingBits, int paddingIndex) const;
 
         cstring createHashKeyInstance(const P4::ExternFunction *function);
+
+        void appendValueAtOperator(const IR::AssignmentStatement *a) const;
+
+        void emitAssignmentStatement(const IR::AssignmentStatement *a);
+
+        bool emitRegisterRead(const IR::AssignmentStatement *a, const IR::MethodCallExpression *method);
     };
 
     class UBPFControl : public EBPF::EBPFObject {
@@ -126,6 +128,8 @@ namespace UBPF {
         const IR::Statement *findFirstStatementWhereVariableIsUsedAsPointer(
                 const IR::Statement *statement,
                 const IR::Declaration_Variable *vd);
+
+        bool determineIfVariableIsPointer(const IR::Declaration_Variable *vd, const EBPF::EBPFType *etype);
     };
 
 }

@@ -22,37 +22,53 @@ limitations under the License.
 
 namespace UBPF {
 
-class UBPFControlBodyTranslator;
+    class UBPFControlBodyTranslator;
 
-class UbpfTarget : public EBPF::Target {
- public:
-    explicit UbpfTarget() : EBPF::Target("UBPF") {}
-    void emitLicense(Util::SourceCodeBuilder*, cstring) const override {};
-    void emitCodeSection(Util::SourceCodeBuilder*, cstring) const override {};
-    void emitIncludes(Util::SourceCodeBuilder* builder) const override;
-    void emitTableLookup(Util::SourceCodeBuilder* builder, cstring tblName,
-                         cstring key, cstring value) const override;
-    void emitTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
-                         cstring key, cstring value) const override;
-    void emitTableUpdate(EBPF::CodeGenInspector* codeGen, Util::SourceCodeBuilder* builder, cstring tblName,
-                         cstring key, const IR::Expression* value) const;
-    void emitUserTableUpdate(Util::SourceCodeBuilder* builder, cstring tblName,
-                             cstring key, cstring value) const override {};
-    void emitTableDecl(Util::SourceCodeBuilder* builder,
-                       cstring tblName, bool isHash,
-                       cstring keyType, cstring valueType, unsigned size) const override {};
-    void emitMain(Util::SourceCodeBuilder* builder,
-                  cstring functionName,
-                  cstring argName) const override;
-    cstring dataOffset(cstring base) const override
-    { return cstring(""); }
-    cstring dataEnd(cstring base) const override
-    { return cstring(""); }
-    cstring dropReturnCode() const override { return "0"; }
-    cstring abortReturnCode() const override { return "0"; }
-    cstring forwardReturnCode() const override { return "1"; }
-    cstring sysMapPath() const override { return ""; }
-};
+    class UbpfTarget : public EBPF::Target {
+    public:
+        explicit UbpfTarget() : EBPF::Target("UBPF") {}
+
+        void emitLicense(Util::SourceCodeBuilder *, cstring) const override {};
+
+        void emitCodeSection(Util::SourceCodeBuilder *, cstring) const override {};
+
+        void emitIncludes(Util::SourceCodeBuilder *builder) const override;
+
+        void emitTableLookup(Util::SourceCodeBuilder *builder, cstring tblName,
+                             cstring key, cstring value) const override;
+
+        void emitTableUpdate(Util::SourceCodeBuilder *builder, cstring tblName,
+                             cstring key, cstring value) const override;
+
+        void emitTableUpdate(EBPF::CodeGenInspector *codeGen, Util::SourceCodeBuilder *builder, cstring tblName,
+                             cstring key, const IR::Expression *value) const;
+
+        void emitGetPacketData(Util::SourceCodeBuilder *builder,
+                               cstring ctxVar) const;
+
+        void emitUserTableUpdate(Util::SourceCodeBuilder *builder, cstring tblName,
+                                 cstring key, cstring value) const override {};
+
+        void emitTableDecl(Util::SourceCodeBuilder *builder,
+                           cstring tblName, bool isHash,
+                           cstring keyType, cstring valueType, unsigned size) const override {};
+
+        void emitMain(Util::SourceCodeBuilder *builder,
+                      cstring functionName,
+                      cstring argName) const override;
+
+        cstring dataOffset(cstring base) const override { return cstring(""); }
+
+        cstring dataEnd(cstring base) const override { return cstring(""); }
+
+        cstring dropReturnCode() const override { return "0"; }
+
+        cstring abortReturnCode() const override { return "0"; }
+
+        cstring forwardReturnCode() const override { return "1"; }
+
+        cstring sysMapPath() const override { return ""; }
+    };
 
 }
 

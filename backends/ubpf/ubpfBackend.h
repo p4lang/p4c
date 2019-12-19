@@ -22,8 +22,10 @@ limitations under the License.
 #include "frontends/p4/evaluator/evaluator.h"
 
 namespace UBPF {
-    void run_ubpf_backend(const EbpfOptions& options, const IR::ToplevelBlock* toplevel,
-                          P4::ReferenceMap* refMap, P4::TypeMap* typeMap);
+    void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *toplevel,
+                          P4::ReferenceMap *refMap, P4::TypeMap *typeMap);
+
+    std::string extract_file_name(const std::string &fullPath);
 } // namespace UBPF
 
 #endif //P4C_UBPFBACKEND_H

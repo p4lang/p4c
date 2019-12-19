@@ -141,4 +141,13 @@ control pipe(inout Headers_t headers, inout metadata meta) {
     }
 }
 
-ubpf(prs(), pipe()) main;
+control dprs(packet_out packet, in Headers_t headers) {
+    apply {
+        packet.emit(headers.ethernet);
+        packet.emit(headers.mpls);
+        packet.emit(headers.ipv4);
+    }
+}
+
+
+ubpf(prs(), pipe(), dprs()) main;

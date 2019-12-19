@@ -22,31 +22,36 @@ limitations under the License.
 
 namespace UBPF {
 
-class UBPFTypeFactory : public EBPF::EBPFTypeFactory {
-public:
-    UBPFTypeFactory(const P4::TypeMap* typeMap) : EBPF::EBPFTypeFactory(typeMap) {}
-    static void createFactory(const P4::TypeMap* typeMap) {
-        EBPF::EBPFTypeFactory::instance = new UBPFTypeFactory(typeMap);
-    }
-    static EBPFTypeFactory* getInstance() {
-        return EBPF::EBPFTypeFactory::instance;
-    }
-    EBPF::EBPFType* create(const IR::Type* type) override;
-};
+    class UBPFTypeFactory : public EBPF::EBPFTypeFactory {
+    public:
+        UBPFTypeFactory(const P4::TypeMap *typeMap) : EBPF::EBPFTypeFactory(typeMap) {}
 
-class UBPFBoolType : public EBPF::EBPFBoolType {
-public:
-    UBPFBoolType() : EBPF::EBPFBoolType() {}
-    void emit(EBPF::CodeBuilder* builder) override
-    { builder->append("uint8_t"); }
-};
+        static void createFactory(const P4::TypeMap *typeMap) {
+            EBPF::EBPFTypeFactory::instance = new UBPFTypeFactory(typeMap);
+        }
 
-class UBPFScalarType : public EBPF::EBPFScalarType {
-public:
-    UBPFScalarType(const IR::Type_Bits* bits) : EBPF::EBPFScalarType(bits) {}
-    void emit(EBPF::CodeBuilder* builder) override;
-    void declare(EBPF::CodeBuilder* builder, cstring id, bool asPointer) override;
-};
+        static EBPFTypeFactory *getInstance() {
+            return EBPF::EBPFTypeFactory::instance;
+        }
+
+        EBPF::EBPFType *create(const IR::Type *type) override;
+    };
+
+    class UBPFBoolType : public EBPF::EBPFBoolType {
+    public:
+        UBPFBoolType() : EBPF::EBPFBoolType() {}
+
+        void emit(EBPF::CodeBuilder *builder) override { builder->append("uint8_t"); }
+    };
+
+    class UBPFScalarType : public EBPF::EBPFScalarType {
+    public:
+        UBPFScalarType(const IR::Type_Bits *bits) : EBPF::EBPFScalarType(bits) {}
+
+        void emit(EBPF::CodeBuilder *builder) override;
+
+        void declare(EBPF::CodeBuilder *builder, cstring id, bool asPointer) override;
+    };
 
 class UBPFStructType : public EBPF::EBPFStructType {
 public:
@@ -55,11 +60,12 @@ public:
     void declare(EBPF::CodeBuilder* builder, cstring id, bool asPointer) override;
 };
 
-class UBPFEnumType : public EBPF::EBPFEnumType {
-public:
-    explicit UBPFEnumType(const IR::Type_Enum* type) : EBPF::EBPFEnumType(type) {}
-    void emit(EBPF::CodeBuilder* builder) override;
-};
+    class UBPFEnumType : public EBPF::EBPFEnumType {
+    public:
+        UBPFEnumType(const IR::Type_Enum *strct) : EBPF::EBPFEnumType(strct) {}
+
+        void emit(EBPF::CodeBuilder *builder) override;
+    };
 
 
 }

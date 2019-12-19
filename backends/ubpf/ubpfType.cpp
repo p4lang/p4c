@@ -18,15 +18,15 @@ limitations under the License.
 
 namespace UBPF {
 
-    EBPF::EBPFTypeFactory* instance = UBPFTypeFactory::getInstance();
+    EBPF::EBPFTypeFactory *instance = UBPFTypeFactory::getInstance();
 
-    EBPF::EBPFType* UBPFTypeFactory::create(const IR::Type *type) {
+    EBPF::EBPFType *UBPFTypeFactory::create(const IR::Type *type) {
 
-        EBPF::EBPFType* result = nullptr;
+        EBPF::EBPFType *result = nullptr;
         if (type->is<IR::Type_Boolean>()) {
             result = new UBPFBoolType();
         } else if (auto bt = type->to<IR::Type_Bits>()) {
-            result = new UBPFScalarType(bt); // using UBPF Scalar Type
+            result = new UBPFScalarType(bt);
         } else if (auto st = type->to<IR::Type_StructLike>()) {
             result = new UBPFStructType(st);
         } else if (auto tt = type->to<IR::Type_Typedef>()) {
@@ -51,9 +51,7 @@ namespace UBPF {
         return result;
     }
 
-    //////////////////////////////////////////////////////////////////////////////
-
-    void UBPFScalarType::emit(EBPF::CodeBuilder* builder) {
+    void UBPFScalarType::emit(EBPF::CodeBuilder *builder) {
         if (width <= 8)
             builder->appendFormat("uint8_t");
         else if (width <= 16)
@@ -67,7 +65,7 @@ namespace UBPF {
 
     }
 
-    void UBPFScalarType::declare(EBPF::CodeBuilder* builder, cstring id, bool asPointer) {
+    void UBPFScalarType::declare(EBPF::CodeBuilder *builder, cstring id, bool asPointer) {
         if (EBPFScalarType::generatesScalar(width)) {
             emit(builder);
             if (asPointer)
@@ -82,9 +80,7 @@ namespace UBPF {
         }
     }
 
-    //////////////////////////////////////////////////////////////////////////////
-
-    void UBPFStructType::emit(EBPF::CodeBuilder* builder) {
+    void UBPFStructType::emit(EBPF::CodeBuilder *builder) {
         builder->emitIndent();
         builder->append(kind);
         builder->spc();
@@ -107,13 +103,6 @@ namespace UBPF {
             }
             builder->append(" */");
             builder->newline();
-
-            if (type->is<IR::Type_Header>()) {
-                // add offset field
-                builder->emitIndent();
-                builder->appendFormat("int %sOffset;", f->field->name.name);
-                builder->newline();
-            }
         }
 
         if (type->is<IR::Type_Header>()) {
@@ -129,8 +118,7 @@ namespace UBPF {
         builder->endOfStatement(true);
     }
 
-    void
-    UBPFStructType::declare(EBPF::CodeBuilder* builder, cstring id, bool asPointer) {
+    void UBPFStructType::declare(EBPF::CodeBuilder *builder, cstring id, bool asPointer) {
         builder->append(kind);
         builder->appendFormat(" %s ", name.c_str());
         if (asPointer)
@@ -138,9 +126,7 @@ namespace UBPF {
         builder->appendFormat("%s", id.c_str());
     }
 
-    //////////////////////////////////////////////////////////////////////////////
-
-    void UBPFEnumType::emit(EBPF::CodeBuilder* builder) {
+    void UBPFEnumType::emit(EBPF::CodeBuilder *builder) {
         builder->append("enum ");
         auto et = getType();
         builder->append(et->name);

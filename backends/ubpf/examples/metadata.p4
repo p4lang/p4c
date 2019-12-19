@@ -1,5 +1,5 @@
 #include <core.p4>
-#include "ubpf_filter_model.p4"
+#include "ubpf_model.p4"
 
 @ethernetaddress typedef bit<48> EthernetAddress;
 
@@ -69,5 +69,11 @@ control pipe(inout Headers_t headers, inout metadata meta) {
 
 }
 
-ubpf(prs(), pipe()) main;
+control DeparserImpl(packet_out packet, in Headers_t headers) {
+    apply {
+        packet.emit(headers.ethernet);
+    }
+}
+
+ubpf(prs(), pipe(), DeparserImpl()) main;
 

@@ -62,4 +62,10 @@ namespace UBPF {
         codeGen->visit(value);
         builder->append(")");
     }
+
+    void UbpfTarget::emitGetPacketData(Util::SourceCodeBuilder *builder,
+                                       cstring ctxVar) const {
+        builder->appendFormat("ubpf_packet_data(%s)", ctxVar.c_str());
+    }
+
 }

@@ -1,8 +1,10 @@
 # Introduction to uBPF Backend
 
-This is a back-end, which generates the code to be consumed by the userspace BPF VM - https://github.com/iovisor/ubpf .
+This repository implements the uBPF (Userspace BPF) backend for the P4 compiler (https://github.com/p4lang/p4c).
 
-The P4-to-uBPF compiler accepts only the P4_16 programs written for the `ubpf_filter_model.p4` architecture model.
+The **p4c-ubpf** compiler allows to translate P4 programs into the uBPF programs. We use the uBPF implementation provided by [the ubpf project](https://github.com/iovisor/ubpf). 
+
+The P4-to-uBPF compiler accepts only the P4_16 programs written for the `ubpf_model.p4` architecture model.
 
 The backend for uBPF is mostly based on [P4-to-eBPF compiler](../ebpf/README.md). In fact, it implements the same concepts, but
 generates the C code, which is compatible with the user-space BPF implementation. 
@@ -68,8 +70,8 @@ The output file (`out.o`) can be injected to the uBPF VM.
 
 ### Known limitations
 
-* The modification of wide packet's fields has not been tested extensively. Hence, it can not work properly.
-
+* No support for some P4 constructs (meters, counters, etc.)
+* No support for checksum computation.
 
 ### Contact
 

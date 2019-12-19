@@ -8,13 +8,13 @@
 typedef bit<48>  EthernetAddress;
 typedef bit<9> egressSpec_t;
 
-header ethernet_t {
+header Ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
     bit<16>         etherType;
 }
 
-header ipv4_t {
+header Ipv4_t {
     bit<4>  version;
     bit<4>  ihl;
     bit<8>  diffserv;
@@ -29,7 +29,7 @@ header ipv4_t {
     bit<32> dstAddr;
 }
 
-header tcp_t {
+header Tcp_t {
     bit<16> srcPort;
     bit<16> dstPort;
     bit<32> seqNo;
@@ -37,7 +37,6 @@ header tcp_t {
     bit<4>  dataOffset;
     bit<3>  res;
     bit<3>  ecn;
-    //bit<6>  ctrl;
     bit<1> urgent;
     bit<1> ack;
     bit<1> psh;
@@ -49,14 +48,10 @@ header tcp_t {
     bit<16> urgentPtr;
 }
 
-struct headers_t {
-    ethernet_t       ethernet;
-    ipv4_t           ipv4;
-    tcp_t            tcp;
-}
-
-struct ingress_metadata_t {
-    bit<32> nhop_ipv4;
+struct Headers_t {
+    Ethernet_t       ethernet;
+    Ipv4_t           ipv4;
+    Tcp_t            tcp;
 }
 
 struct ConnectionInfo_t {
@@ -64,14 +59,12 @@ struct ConnectionInfo_t {
     bit<32> srv_addr;
 }
 
-struct metadata_t {
+struct metadata {
     ConnectionInfo_t connInfo;
     bit<32> conn_id;
 }
 
-struct metadata { }
-
-parser prs(packet_in packet, out headers_t hdr, inout metadata meta) {
+parser prs(packet_in packet, out Headers_t hdr, inout metadata meta) {
     state start {
         transition parse_ethernet;
     }
@@ -92,8 +85,7 @@ parser prs(packet_in packet, out headers_t hdr, inout metadata meta) {
     }
 }
 
-control pipe(inout headers_t hdr, inout metadata meta) {
-    metadata_t meta;
+control pipe(inout Headers_t hdr, inout metadata meta) {
 
     Register<bit<32>, bit<32>>(65536) conn_state;
     Register<bit<32>, bit<32>>(65536) conn_srv_addr;
@@ -112,13 +104,13 @@ control pipe(inout headers_t hdr, inout metadata meta) {
     }
 
     apply {
-        //_drop();
+
         if (hdr.tcp.isValid()) {
             @atomic {
                 if (hdr.ipv4.srcAddr < hdr.ipv4.dstAddr) {
-                    hash(meta.conn_id, HashAlgorithm.lookup3, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort });
+                    hash(meta.conn_id, HashAlgorithm.lookup3, { headers.ipv4.srcAddr, headers.ipv4.dstAddr });
                 } else {
-                    hash(meta.conn_id, HashAlgorithm.lookup3, { hdr.ipv4.dstAddr, hdr.ipv4.srcAddr, hdr.ipv4.protocol, hdr.tcp.dstPort, hdr.tcp.srcPort });
+                    hash(meta.conn_id, HashAlgorithm.lookup3, { headers.ipv4.dstAddr, headers.ipv4.srcAddr });
                 }
 
                 meta.connInfo.s = conn_state.read(meta.conn_id);
@@ -128,14 +120,12 @@ control pipe(inout headers_t hdr, inout metadata meta) {
                         // It's a SYN
                         update_conn_info(SYNSENT, hdr.ipv4.dstAddr);
                     }
-                    //_drop();
                 } else if (meta.connInfo.srv_addr == hdr.ipv4.srcAddr) {
                     if (meta.connInfo.s == SYNSENT) {
                         if (hdr.tcp.syn == 1 && hdr.tcp.ack == 1) {
                             // It's a SYN-ACK
                             update_conn_state(SYNACKED);
                         }
-                        //_drop();
                     } else if (meta.connInfo.s == SYNACKED) {
                         _drop();
                         return;
@@ -143,7 +133,6 @@ control pipe(inout headers_t hdr, inout metadata meta) {
                         if (hdr.tcp.fin == 1 && hdr.tcp.ack == 1) {
                             update_conn_info(0, 0);  // clear register entry
                         }
-                        //mark_to_pass();
                     }
                 } else {
                     if (meta.connInfo.s == SYNSENT) {
@@ -153,14 +142,11 @@ control pipe(inout headers_t hdr, inout metadata meta) {
                         if (hdr.tcp.syn == 0 && hdr.tcp.ack == 1) {
                             // It's a ACK
                             update_conn_state(ESTABLISHED);
-                            //mark_to_pass();
                         }
-                        //_drop();
                     } else if (meta.connInfo.s == ESTABLISHED) {
                         if (hdr.tcp.fin == 1 && hdr.tcp.ack == 1) {
                             update_conn_info(0, 0); // clear register entry
                         }
-                        //mark_to_pass();
                     }
                 }
             }
@@ -168,4 +154,12 @@ control pipe(inout headers_t hdr, inout metadata meta) {
     }
 }
 
-ubpf(prs(), pipe()) main;
+control dprs(packet_out packet, in Headers_t headers) {
+    apply {
+        packet.emit(headers.ethernet);
+        packet.emit(headers.ipv4);
+        packet.emit(headers.tcp);
+    }
+}
+
+ubpf(prs(), pipe(), dprs()) main;

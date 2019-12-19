@@ -16,8 +16,10 @@ limitations under the License.
 
 #include "ubpfControl.h"
 #include "ubpfParser.h"
+#include "ubpfDeparser.h"
 #include "ubpfProgram.h"
 #include "ubpfType.h"
+#include "codeGen.h"
 
 namespace UBPF {
 
@@ -28,8 +30,8 @@ namespace UBPF {
             ::warning(ErrorType::WARN_INVALID, "%1%: the main ubpf package should be called ubpf"
                                                "; are you using the wrong architecture?", pack->type->name);
 
-        if (pack->getConstructorParameters()->size() != 2) {
-            ::error("Expected toplevel package %1% to have 2 parameters", pack->type);
+        if (pack->getConstructorParameters()->size() != 3) {
+            ::error("Expected toplevel package %1% to have 3 parameters", pack->type);
             return false;
         }
 
@@ -41,7 +43,7 @@ namespace UBPF {
         if (!success)
             return success;
 
-        auto cb = pack->getParameterValue(model.filter.filter.name)
+        auto cb = pack->getParameterValue(model.filter.control.name)
                 ->to<IR::ControlBlock>();
         BUG_CHECK(cb != nullptr, "No control block found");
         control = new UBPFControl(this, cb, parser->headers);
@@ -50,10 +52,16 @@ namespace UBPF {
         if (!success)
             return success;
 
+        auto dpb = pack->getParameterValue(model.filter.deparser.name)
+                ->to<IR::ControlBlock>();
+        BUG_CHECK(dpb != nullptr, "No deparser block found");
+        deparser = new UBPFDeparser(this, dpb, parser->headers);
+        success = deparser->build();
+
         return success;
     }
 
-    void UBPFProgram::emitC(EBPF::CodeBuilder *builder, cstring headerFile) {
+    void UBPFProgram::emitC(UbpfCodeBuilder *builder, cstring headerFile) {
         emitGeneratedComment(builder);
 
         builder->appendFormat("#include \"%s\"", headerFile);
@@ -64,8 +72,10 @@ namespace UBPF {
         emitUbpfHelpers(builder);
 
         builder->emitIndent();
-        builder->target->emitMain(builder, "entry", model.CPacketName.str());
+        builder->target->emitMain(builder, "entry", contextVar.c_str());
         builder->blockStart();
+
+        emitPktVariable(builder);
 
         emitHeaderInstances(builder);
         builder->append(" = ");
@@ -88,6 +98,8 @@ namespace UBPF {
 
         emitPipeline(builder);
 
+        deparser->emit(builder);
+
         builder->emitIndent();
         builder->appendFormat("if (%s)\n", control->passVariable);
         builder->increaseIndent();
@@ -100,7 +112,7 @@ namespace UBPF {
         builder->emitIndent();
         builder->appendFormat("return %s;\n", builder->target->dropReturnCode().c_str());
         builder->decreaseIndent();
-        builder->blockEnd(true);  // end of function
+        builder->blockEnd(true);
     }
 
     void UBPFProgram::emitUbpfHelpers(EBPF::CodeBuilder *builder) const {
@@ -109,10 +121,20 @@ namespace UBPF {
                 "static int (*ubpf_map_update)(void *, const void *, void *) = (void *)2;\n"
                 "static int (*ubpf_map_delete)(void *, const void *) = (void *)3;\n"
                 "static int (*ubpf_map_add)(void *, const void *) = (void *)4;\n"
-                "static uint32_t (*ubpf_hash)(const void *, uint64_t) = (void *)6;\n"
                 "static uint64_t (*ubpf_time_get_ns)() = (void *)5;\n"
+                "static uint32_t (*ubpf_hash)(const void *, uint64_t) = (void *)6;\n"
                 "static void (*ubpf_printf)(const char *fmt, ...) = (void *)7;\n"
+                "static void *(*ubpf_packet_data)(const void *) = (void *)9;\n"
+                "static void *(*ubpf_adjust_head)(const void *, uint64_t) = (void *)8;\n"
                 "\n");
+        builder->newline();
+        builder->appendLine(
+                "#define write_partial(a, w, s, v) do { *((uint8_t*)a) = ((*((uint8_t*)a)) "
+                "& ~(BPF_MASK(uint8_t, w) << s)) | (v << s) ; } while (0)");
+        builder->appendLine("#define write_byte(base, offset, v) do { "
+                            "*(uint8_t*)((base) + (offset)) = (v); "
+                            "} while (0)");
+        builder->newline();
         builder->append("static uint32_t\n"
                         "bpf_htonl(uint32_t val) {\n"
                         "    return htonl(val);\n"
@@ -130,7 +152,7 @@ namespace UBPF {
         builder->newline();
     }
 
-    void UBPFProgram::emitH(EBPF::CodeBuilder *builder, cstring headerFile) {
+    void UBPFProgram::emitH(EBPF::CodeBuilder *builder, cstring) {
         emitGeneratedComment(builder);
         builder->appendLine("#ifndef _P4_GEN_HEADER_");
         builder->appendLine("#define _P4_GEN_HEADER_");
@@ -218,6 +240,13 @@ namespace UBPF {
         builder->endOfStatement(true);
     }
 
+    void UBPFProgram::emitPktVariable(UbpfCodeBuilder *builder) const {
+        builder->emitIndent();
+        builder->appendFormat("void *%s = ", packetStartVar.c_str());
+        builder->target->emitGetPacketData(builder, contextVar);
+        builder->endOfStatement(true);
+    }
+
     void UBPFProgram::emitHeaderInstances(EBPF::CodeBuilder* builder) {
         builder->emitIndent();
         parser->headerType->declare(builder, parser->headers->name.name, false);
@@ -235,6 +264,14 @@ namespace UBPF {
 
         builder->emitIndent();
         builder->appendFormat("uint8_t %s = 1;", control->passVariable);
+        builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat("unsigned char %s;", byteVar.c_str());
+        builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat("int %s = 0;", headLengthVar.c_str());
         builder->newline();
     }
 
@@ -262,5 +299,5 @@ namespace UBPF {
         control->emit(builder);
         builder->blockEnd(true);
     }
-    
+
 }

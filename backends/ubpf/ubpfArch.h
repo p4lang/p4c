@@ -7,8 +7,8 @@
 
 /// The architecture handler builder implementation for ubpfFilter.
 struct UbpfFilterArchHandlerBuilder : public P4RuntimeArchHandlerBuilderIface {
-    P4RuntimeArchHandlerIface* operator()(
-            ReferenceMap* refMap,
-            TypeMap* typeMap,
-            const IR::ToplevelBlock* evaluatedProgram) const override;
+    P4RuntimeArchHandlerIface *operator()(
+            ReferenceMap *refMap,
+            TypeMap *typeMap,
+            const IR::ToplevelBlock *evaluatedProgram) const override;
 };

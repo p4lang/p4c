@@ -54,7 +54,7 @@ struct Headers_t
     IPv6_h     ipv6;
 }
 
-struct metadata { }
+struct metadata {}
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
     state start {
@@ -104,6 +104,27 @@ control pipe(inout Headers_t headers, inout metadata meta) {
         headers.ipv6.flowLabel = label;
     }
 
+    action set_traffic_class(bit<8> trafficClass) {
+        headers.ipv6.trafficClass = trafficClass;
+    }
+
+    action set_traffic_class_flow_label(bit<8> trafficClass, bit<20> label) {
+        headers.ipv6.trafficClass = trafficClass;
+        headers.ipv6.flowLabel = label;
+    }
+
+    action set_ipv6_version(bit<4> version) {
+        headers.ipv6.version = version;
+    }
+
+    action set_next_hdr(bit<8> nextHdr) {
+        headers.ipv6.nextHdr = nextHdr;
+    }
+
+    action set_hop_limit(bit<8> hopLimit) {
+        headers.ipv6.hopLimit = hopLimit;
+    }
+
     table filter_tbl {
         key = {
             headers.ipv6.srcAddr : exact;
@@ -112,6 +133,10 @@ control pipe(inout Headers_t headers, inout metadata meta) {
             ipv6_modify_dstAddr;
             ipv6_swap_addr;
             set_flowlabel;
+            set_traffic_class_flow_label;
+            set_ipv6_version;
+            set_next_hdr;
+            set_hop_limit;
             Reject;
             NoAction;
         }
