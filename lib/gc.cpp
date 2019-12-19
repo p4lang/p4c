@@ -19,6 +19,7 @@ limitations under the License.
 #include <gc/gc_cpp.h>
 #include <gc/gc_mark.h>
 #endif  /* HAVE_LIBGC */
+#include <unistd.h>
 #include <new>
 #include "log.h"
 #include "gc.h"
@@ -33,25 +34,65 @@ limitations under the License.
 
 // One can disable the GC, e.g., to run under Valgrind, by editing config.h
 #if HAVE_LIBGC
-static bool done_init;
+static bool done_init, started_init;
 void *operator new(std::size_t size) {
     /* DANGER -- on OSX, can't safely call the garbage collector allocation
      * routines from a static global constructor without manually initializing
      * it first.  Since we have global constructors that want to allocate
      * memory, we need to force initialization */
     if (!done_init) {
+        started_init = true;
         GC_INIT();
         done_init = true; }
     return ::operator new(size, UseGC, 0, 0);
 }
 void *operator new[](std::size_t size) {
     if (!done_init) {
+        started_init = true;
         GC_INIT();
         done_init = true; }
     return ::operator new(size, UseGC, 0, 0);
 }
 void operator delete(void *p) _GLIBCXX_USE_NOEXCEPT { return gc::operator delete(p); }
 void operator delete[](void *p) _GLIBCXX_USE_NOEXCEPT { return gc::operator delete(p); }
+
+void *realloc(void *ptr, size_t size) {
+    if (!done_init) {
+        if (started_init) {
+            // called from within GC_INIT, so we can't call it again.  Fall back to using
+            // sbrk and let it leak.
+            size = (size + 0xf) & ~0xf;
+            void *rv = sbrk(size);
+            if (ptr) {
+                size_t max = reinterpret_cast<char *>(rv) - reinterpret_cast<char *>(ptr);
+                memcpy(rv, ptr, max < size ? max : size); }
+            return rv;
+        } else {
+            started_init = true;
+            GC_INIT();
+            done_init = true; } }
+    if (ptr) {
+        if (GC_is_heap_ptr(ptr))
+            return GC_realloc(ptr, size);
+        size_t max = reinterpret_cast<char *>(sbrk(0)) - reinterpret_cast<char *>(ptr);
+        void *rv = GC_malloc(size);
+        memcpy(rv, ptr, max < size ? max : size);
+        return rv;
+    } else {
+        return GC_malloc(size);
+    }
+}
+void *malloc(size_t size) { return realloc(nullptr, size); }
+void free(void *ptr) {
+    if (done_init && GC_is_heap_ptr(ptr))
+        GC_free(ptr);
+}
+void *calloc(size_t size, size_t elsize) {
+    size *= elsize;
+    void *rv = malloc(size);
+    if (rv) memset(rv, 0, size);
+    return rv;
+}
 
 #if HAVE_GC_PRINT_STATS
 /* GC_print_stats is not exported as an API symbol and cannot be used on some systems */
