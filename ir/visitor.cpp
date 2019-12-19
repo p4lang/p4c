@@ -530,3 +530,38 @@ cstring Visitor::demangle(const char *str) {
     return str;
 }
 #endif
+
+#if HAVE_LIBGC
+/** There's a bad interaction between the garbage collector and gcc's exception handling --
+ * the exception support code in glibstdc++ (specifically __cxa_allocate_exception) allocates
+ * space for exceptions being throw with malloc (NOT with ::operrator new for some reason),
+ * and the garbage collector does not scan the malloc heap for roots when garbage collecting
+ * (it knows nothing of its existance).  As a result, if you throw an exception AND that
+ * exception object contains pointers to things on the GC heap, AND GC is triggered while
+ * the exception is being thrown, AND those are the only pointers to those things, then
+ * the objects might be garbage collected, leaving danglins pointers in the exception object.
+ *
+ * To avoid this problem, at least for backtracking exceptions, we track exception objects that
+ * get created NOT on the GC heap and treat them as roots.
+ */
+
+static std::map<const Backtrack::trigger *, size_t> trigger_gc_roots;
+#endif /* HAVE_LIBGC */
+
+void Backtrack::trigger::register_for_gc(size_t sz) {
+#if HAVE_LIBGC
+    if (!GC_is_heap_ptr(this)) {
+        trigger_gc_roots[this] = sz;
+        GC_add_roots(this, reinterpret_cast<char *>(this) + sz);
+    }
+#endif /* HAVE_LIBGC */
+}
+
+Backtrack::trigger::~trigger() {
+#if HAVE_LIBGC
+    if (auto sz = ::get(trigger_gc_roots, this)) {
+        GC_remove_roots(this, reinterpret_cast<char *>(this) + sz);
+        trigger_gc_roots.erase(this);
+    }
+#endif /* HAVE_LIBGC */
+}

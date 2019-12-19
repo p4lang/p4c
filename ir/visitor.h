@@ -404,11 +404,17 @@ class Backtrack : public virtual Visitor {
     struct trigger {
         enum type_t { OK, OTHER }       type;
         explicit trigger(type_t t) : type(t) {}
+        virtual ~trigger();
         virtual void dbprint(std::ostream &out) const { out << demangle(typeid(*this).name()); }
         template<class T> T *to() { return dynamic_cast<T *>(this); }
         template<class T> const T *to() const { return dynamic_cast<const T *>(this); }
         template<class T> bool is() { return to<T>() != nullptr; }
         template<class T> bool is() const { return to<T>() != nullptr; }
+
+     protected:
+        // must call this from the constructor if a trigger subclass contains pointers
+        // or references to GC objects
+        void register_for_gc(size_t);
     };
     virtual bool backtrack(trigger &trig) = 0;
     virtual bool never_backtracks() { return false; }  // generally not overridden
