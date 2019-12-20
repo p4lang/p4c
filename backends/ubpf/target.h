@@ -50,7 +50,7 @@ namespace UBPF {
                                  cstring key, cstring value) const override {};
 
         void emitTableDecl(Util::SourceCodeBuilder *builder,
-                           cstring tblName, bool isHash,
+                           cstring tblName, EBPF::TableKind tableKind,
                            cstring keyType, cstring valueType, unsigned size) const override {};
 
         void emitMain(Util::SourceCodeBuilder *builder,

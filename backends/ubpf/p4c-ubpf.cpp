@@ -31,11 +31,12 @@ limitations under the License.
 #include "backends/ebpf/ebpfOptions.h"
 #include "ubpfBackend.h"
 #include "frontends/p4/frontend.h"
+#include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/parseInput.h"
 #include "ir/json_loader.h"
 #include "fstream"
 
-void compile(EbpfOptions &options) {
+void compile(EbpfOptions& options) {
     auto hook = options.getDebugHook();
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     if (isv1) {
@@ -85,7 +86,7 @@ int main(int argc, char *const argv[]) {
 
     try {
         compile(options);
-    } catch (const Util::P4CExceptionBase &bug) {
+    } catch (const std::exception &bug) {
         std::cerr << bug.what() << std::endl;
         return 1;
     }
