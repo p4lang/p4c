@@ -44,7 +44,6 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    bool tmp;
     @name("pipe.invalidate") action invalidate() {
         headers.ipv4.setInvalid();
         headers.ethernet.setInvalid();
@@ -68,7 +67,7 @@ control pipe(inout Headers_t headers, out bool pass) {
         default_action = drop();
     }
     apply {
-        tmp = t_0.apply().hit;
+        t_0.apply();
     }
 }
 

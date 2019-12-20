@@ -31,11 +31,9 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 control MyIC(inout ethernet_t a, inout user_meta_t b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     @name(".NoAction") action NoAction_0() {
     }
-    bit<16> tmp;
     @name("MyIC.rand") Random<bit<16>>(16w200, 16w400) rand_0;
     @name("MyIC.execute_random") action execute_random() {
-        tmp = rand_0.read();
-        b.data = tmp;
+        b.data = rand_0.read();
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {

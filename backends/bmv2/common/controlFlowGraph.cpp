@@ -223,6 +223,10 @@ class CFGBuilder : public Inspector {
         // If the expression is more complex it should have been
         // simplified by prior passes.
         auto tc = P4::TableApplySolver::isHit(statement->condition, refMap, typeMap);
+        bool condition = true;
+        if (auto *lnot = statement->condition->to<IR::LNot>()) {
+            if ((tc = P4::TableApplySolver::isHit(lnot->expr, refMap, typeMap))) {
+                condition = false; } }
         CFG::Node* node;
         if (tc != nullptr) {
             // hit-miss case.
@@ -233,7 +237,7 @@ class CFGBuilder : public Inspector {
 
         node->addPredecessors(live);
         // If branch
-        live = new CFG::EdgeSet(new CFG::Edge(node, true));
+        live = new CFG::EdgeSet(new CFG::Edge(node, condition));
         visit(statement->ifTrue);
         auto afterTrue = live;
         if (afterTrue == nullptr)
@@ -242,12 +246,12 @@ class CFGBuilder : public Inspector {
         auto result = new CFG::EdgeSet(afterTrue);
         // Else branch
         if (statement->ifFalse != nullptr) {
-            live = new CFG::EdgeSet(new CFG::Edge(node, false));
+            live = new CFG::EdgeSet(new CFG::Edge(node, !condition));
             visit(statement->ifFalse);
             result->mergeWith(live);
         } else {
             // no else branch
-            result->mergeWith(new CFG::EdgeSet(new CFG::Edge(node, false)));
+            result->mergeWith(new CFG::EdgeSet(new CFG::Edge(node, !condition)));
         }
         live = result;
         return false;

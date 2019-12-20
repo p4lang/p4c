@@ -117,13 +117,20 @@ a[tmp1].x = tmp4;        // assign result of call of f to actual left value
  * For assignment statements ```e = e1;``` the left hand side is evaluated
  * first.
  */
-class DoSimplifyExpressions : public Transform {
+class DoSimplifyExpressions : public Transform, P4WriteContext {
     // FIXME: does not handle select labels
 
     ReferenceMap*        refMap;
     TypeMap*             typeMap;
 
-    IR::IndexedVector<IR::Declaration> toInsert;
+    IR::IndexedVector<IR::Declaration> toInsert;  // temporaries
+    IR::IndexedVector<IR::StatOrDecl> statements;
+
+    cstring createTemporary(const IR::Type* type);
+    const IR::Expression* addAssignment(Util::SourceInfo srcInfo, cstring varName,
+                                        const IR::Expression* expression);
+    bool mayAlias(const IR::Expression* left, const IR::Expression* right) const;
+    bool containsHeaderType(const IR::Type* type);
 
  public:
     DoSimplifyExpressions(ReferenceMap* refMap, TypeMap* typeMap)
@@ -131,6 +138,23 @@ class DoSimplifyExpressions : public Transform {
         CHECK_NULL(refMap); CHECK_NULL(typeMap);
         setName("DoSimplifyExpressions");
     }
+
+    const IR::Node* postorder(IR::Expression* expression) override;
+    const IR::Node* preorder(IR::Literal* expression) override;
+    const IR::Node* preorder(IR::ArrayIndex* expression) override;
+    const IR::Node* preorder(IR::Member* expression) override;
+    const IR::Node* preorder(IR::SelectExpression* expression) override;
+    const IR::Node* preorder(IR::Operation_Unary* expression) override;
+    const IR::Node* preorder(IR::Operation_Binary* expression) override;
+    const IR::Node* shortCircuit(IR::Operation_Binary* expression);
+    const IR::Node* preorder(IR::Mux* expression) override;
+    const IR::Node* preorder(IR::LAnd* expression) override;
+    const IR::Node* preorder(IR::LOr* expression) override;
+    const IR::Node* preorder(IR::MethodCallExpression* mce) override;
+
+    const IR::Node* preorder(IR::ConstructorCallExpression* cce) override { prune(); return cce; }
+    const IR::Node* preorder(IR::Property* prop) override { prune(); return prop; }
+    const IR::Node* preorder(IR::Annotation* anno) override { prune(); return anno; }
 
     const IR::Node* postorder(IR::P4Parser* parser) override;
     const IR::Node* postorder(IR::Function* function) override;
@@ -140,8 +164,10 @@ class DoSimplifyExpressions : public Transform {
     const IR::Node* postorder(IR::AssignmentStatement* statement) override;
     const IR::Node* postorder(IR::MethodCallStatement* statement) override;
     const IR::Node* postorder(IR::ReturnStatement* statement) override;
-    const IR::Node* postorder(IR::SwitchStatement* statement) override;
-    const IR::Node* postorder(IR::IfStatement* statement) override;
+    const IR::Node* preorder(IR::SwitchStatement* statement) override;
+    const IR::Node* preorder(IR::IfStatement* statement) override;
+
+    void end_apply(const IR::Node *) override;
 };
 
 class SideEffectOrdering : public PassManager {

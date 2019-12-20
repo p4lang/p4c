@@ -43,10 +43,8 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     ipv4_t_1 tmp_hdr_0;
-    ipv4_t_1 tmp;
     @name(".start") state start {
-        tmp = packet.lookahead<ipv4_t_1>();
-        tmp_hdr_0 = tmp;
+        tmp_hdr_0 = packet.lookahead<ipv4_t_1>();
         packet.extract<ipv4_t>(hdr.h, ((bit<32>)tmp_hdr_0.ihl << 2 << 3) + 32w4294967136);
         transition accept;
     }

@@ -44,7 +44,6 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    bool tmp;
     bool hasReturned;
     @name(".NoAction") action NoAction_0() {
     }
@@ -71,12 +70,6 @@ control pipe(inout Headers_t headers, out bool pass) {
         hasReturned = false;
         pass = true;
     }
-    @hidden action act() {
-        tmp = true;
-    }
-    @hidden action act_0() {
-        tmp = false;
-    }
     @hidden table tbl_hit_ebpf60 {
         actions = {
             hit_ebpf60();
@@ -89,18 +82,6 @@ control pipe(inout Headers_t headers, out bool pass) {
         }
         const default_action = hit_ebpf63();
     }
-    @hidden table tbl_act {
-        actions = {
-            act();
-        }
-        const default_action = act();
-    }
-    @hidden table tbl_act_0 {
-        actions = {
-            act_0();
-        }
-        const default_action = act_0();
-    }
     apply {
         tbl_hit_ebpf60.apply();
         if (!headers.ipv4.isValid()) {
@@ -108,9 +89,7 @@ control pipe(inout Headers_t headers, out bool pass) {
         }
         if (!hasReturned) {
             if (Check_src_ip_0.apply().hit) {
-                tbl_act.apply();
-            } else {
-                tbl_act_0.apply();
+                ;
             }
         }
     }

@@ -1,27 +1,27 @@
 control c(inout bit<32> x) {
-    bit<32> tmp_4;
-    bit<32> tmp_11;
-    bit<32> tmp_12;
+    bit<32> tmp_3;
+    bit<32> tmp_9;
+    bit<32> tmp_10;
     @hidden action issue15442l2() {
-        tmp_4 = x + 32w1;
+        tmp_3 = x + 32w1;
     }
     @hidden action issue15442l2_0() {
-        tmp_4 = x;
+        tmp_3 = x;
     }
     @hidden action issue15442l2_1() {
-        tmp_11 = x + 32w4294967295;
+        tmp_9 = x + 32w4294967295;
     }
     @hidden action issue15442l2_2() {
-        tmp_11 = x;
+        tmp_9 = x;
     }
     @hidden action issue15442l2_3() {
-        tmp_12 = tmp_11;
+        tmp_10 = tmp_9;
     }
     @hidden action issue15442l2_4() {
-        tmp_12 = tmp_4;
+        tmp_10 = tmp_3;
     }
     @hidden action issue15442l7() {
-        x = tmp_12;
+        x = tmp_10;
     }
     @hidden table tbl_issue15442l2 {
         actions = {
@@ -76,7 +76,7 @@ control c(inout bit<32> x) {
         } else {
             tbl_issue15442l2_2.apply();
         }
-        if (tmp_4 > tmp_11) {
+        if (tmp_3 > tmp_9) {
             tbl_issue15442l2_3.apply();
         } else {
             tbl_issue15442l2_4.apply();

@@ -137,6 +137,10 @@ inline bool equal(const Node *a, const Node *b) {
     return a == b || (a && b && *a == *b); }
 inline bool equal(const INode *a, const INode *b) {
     return a == b || (a && b && *a->getNode() == *b->getNode()); }
+inline bool equiv(const Node *a, const Node *b) {
+    return a == b || (a && b && a->equiv(*b)); }
+inline bool equiv(const INode *a, const INode *b) {
+    return a == b || (a && b && a->getNode()->equiv(*b->getNode())); }
 
 /* common things that ALL Node subclasses must define */
 #define IRNODE_SUBCLASS(T)                                              \

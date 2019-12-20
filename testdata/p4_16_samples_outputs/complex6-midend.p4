@@ -9,13 +9,13 @@ control c(inout bit<32> r) {
         r = 32w3;
     }
     @hidden action act() {
-        tmp = f(32w2);
+        tmp_1 = f(32w2);
     }
     @hidden action complex6l27() {
         r = 32w2;
     }
     @hidden action act_0() {
-        tmp_1 = f(32w2);
+        tmp = f(32w2);
     }
     @hidden table tbl_act {
         actions = {
@@ -49,9 +49,9 @@ control c(inout bit<32> r) {
     }
     apply {
         tbl_act.apply();
-        if (tmp_1 > 32w0) {
+        if (tmp > 32w0) {
             tbl_act_0.apply();
-            if (tmp < 32w2) {
+            if (tmp_1 < 32w2) {
                 tbl_complex6l23.apply();
             } else {
                 tbl_complex6l25.apply();

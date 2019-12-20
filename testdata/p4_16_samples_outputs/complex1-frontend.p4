@@ -6,7 +6,6 @@ control c(inout bit<32> r) {
     bit<32> tmp_2;
     bit<32> tmp_3;
     bit<32> tmp_4;
-    bit<32> tmp_5;
     apply {
         tmp = f(32w5, 32w2);
         tmp_0 = tmp;
@@ -14,8 +13,7 @@ control c(inout bit<32> r) {
         tmp_2 = tmp_1;
         tmp_3 = f(32w6, tmp_2);
         tmp_4 = tmp_3;
-        tmp_5 = f(tmp_0, tmp_4);
-        r = tmp_5;
+        r = f(tmp_0, tmp_4);
     }
 }
 

@@ -68,13 +68,13 @@ void DoSetHeaders::generateSetValid(
 }
 
 const IR::Node* DoSetHeaders::postorder(IR::AssignmentStatement* statement) {
-    auto vec = new IR::Vector<IR::StatOrDecl>();
+    auto vec = new IR::IndexedVector<IR::StatOrDecl>();
     auto destType = typeMap->getType(statement->left, true);
     generateSetValid(statement->left, statement->right, destType, vec);
     if (vec->empty())
         return statement;
     vec->push_back(statement);
-    return vec;
+    return new IR::BlockStatement(statement->srcInfo, *vec);
 }
 
 }  // namespace P4

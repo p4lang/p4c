@@ -235,14 +235,12 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
 }
 
 control TopDeparser(inout Parsed_packet p, packet_out b) {
-    bit<16> tmp_2;
     @name("TopDeparser.ck") Ck16() ck_1;
     @hidden action vssexample213() {
         ck_1.clear();
         p.ip.hdrChecksum = 16w0;
         ck_1.update<Ipv4_h>(p.ip);
-        tmp_2 = ck_1.get();
-        p.ip.hdrChecksum = tmp_2;
+        p.ip.hdrChecksum = ck_1.get();
     }
     @hidden action vssexample211() {
         b.emit<Ethernet_h>(p.ethernet);

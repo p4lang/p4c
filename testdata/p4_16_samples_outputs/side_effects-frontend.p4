@@ -17,32 +17,23 @@ control my() {
     bit<1> tmp_4;
     bit<1> tmp_5;
     bit<1> tmp_6;
-    bit<1> tmp_7;
-    bit<1> tmp_8;
-    bit<1> tmp_9;
-    bit<1> tmp_10;
-    bit<1> tmp_11;
     apply {
         a_0 = 1w0;
         tmp = g(a_0);
         tmp_0 = tmp;
-        tmp_1 = f(a_0, tmp_0);
-        a_0 = tmp_1;
-        tmp_2 = g(a_0);
-        tmp_3 = tmp_2;
-        tmp_4 = f(s_0[a_0].z, tmp_3);
-        a_0 = tmp_4;
-        tmp_5 = g(a_0);
-        tmp_6 = tmp_5;
-        tmp_7 = s_0[tmp_6].z;
-        tmp_8 = f(tmp_7, a_0);
-        s_0[tmp_6].z = tmp_7;
-        a_0 = tmp_8;
-        tmp_9 = g(a_0);
-        a_0 = tmp_9;
-        tmp_10 = g(a_0[0:0]);
-        a_0[0:0] = tmp_10;
-        tmp_11 = g(a_0);
+        a_0 = f(a_0, tmp_0);
+        tmp_1 = g(a_0);
+        tmp_2 = tmp_1;
+        a_0 = f(s_0[a_0].z, tmp_2);
+        tmp_3 = g(a_0);
+        tmp_4 = tmp_3;
+        tmp_5 = s_0[tmp_4].z;
+        tmp_6 = f(tmp_5, a_0);
+        s_0[tmp_4].z = tmp_5;
+        a_0 = tmp_6;
+        a_0 = g(a_0);
+        a_0[0:0] = g(a_0[0:0]);
+        g(a_0);
     }
 }
 

@@ -4,21 +4,21 @@ extern Y {
 }
 
 control d(out bit<32> x) {
-    bit<32> cinst_tmp;
+    bit<32> x_0;
     @name("d.cinst.y") Y(32w16) cinst_y;
-    @hidden action act() {
-        cinst_tmp = cinst_y.get();
-        x = cinst_tmp;
-        cinst_tmp = cinst_y.get();
+    @hidden action inlinecontrol1l24() {
+        x_0 = cinst_y.get();
+        x = x_0;
+        x_0 = cinst_y.get();
     }
-    @hidden table tbl_act {
+    @hidden table tbl_inlinecontrol1l24 {
         actions = {
-            act();
+            inlinecontrol1l24();
         }
-        const default_action = act();
+        const default_action = inlinecontrol1l24();
     }
     apply {
-        tbl_act.apply();
+        tbl_inlinecontrol1l24.apply();
     }
 }
 
