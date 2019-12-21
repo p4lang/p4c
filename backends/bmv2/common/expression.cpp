@@ -15,6 +15,7 @@ limitations under the License.
 
 #include "expression.h"
 #include "helpers.h"
+#include <iostream>
 
 namespace BMV2 {
 
@@ -184,8 +185,8 @@ void ExpressionConverter::postorder(const IR::Constant* expression)  {
 
 void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
     auto result = new Util::JsonObject();
-    result->emplace("type", "header");
     cstring elementAccess;
+    std::cout << "exp:" << expression << std::endl;
 
     // This is can be either a header, which is part of the "headers" parameter
     // or a temporary array.
@@ -204,12 +205,46 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
     }
 
     if (!expression->right->is<IR::Constant>()) {
-        ::error(ErrorType::ERR_INVALID, "all array indexes must be constant", expression->right);
+        std::cout << "ele:" << elementAccess << std::endl;
+
+        const IR::Expression* ex = expression->right;
+        std::vector<cstring> cv;
+        while (auto rmem = ex->to<IR::Member>()) {
+            ex = rmem->expr;
+            cv.push_back(rmem->member.toString());
+        }
+
+        auto pt = ex->to<IR::PathExpression>();
+        cv.push_back(pt->path->name);
+        std::reverse(cv.begin(), cv.end());
+
+        auto ai = new Util::JsonObject();
+        // create a DEREFERENCE_HEADER_STACK json node
+        auto e = new Util::JsonObject();
+        e->emplace("op", "DEREFERENCE_STACK");
+        auto l = new Util::JsonObject();
+        l->emplace("type", "stack");
+        l->emplace("value", elementAccess);
+        e->emplace("left", l);
+
+        auto r = new Util::JsonObject();
+        r->emplace("type", "field");
+        auto v = new Util::JsonArray();
+        for (cstring n : cv) {
+            v->append(n);
+        }
+        r->emplace("value", v);
+        e->emplace("right", r);
+
+        ai->emplace("value", e);
+        ai->emplace("type", "expression");
+        result->emplace("value", ai);
     } else {
         int index = expression->right->to<IR::Constant>()->asInt();
         elementAccess += "[" + Util::toString(index) + "]";
+        result->emplace("type", "header");
+        result->emplace("value", elementAccess);
     }
-    result->emplace("value", elementAccess);
     mapExpression(expression, result);
 }
 
@@ -404,7 +439,9 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                     e->append(lv);
                     e->append(fieldName);
                 } else {
-                    BUG("%1%: Unexpected json", lv);
+				  auto jo = l->to<Util::JsonObject>();
+				  std::cout << jo->toString() << std::endl;
+				  BUG("%1%: Unexpected json", lv);
                 }
             } else {
                 e->append(l);
