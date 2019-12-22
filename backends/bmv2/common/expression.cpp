@@ -186,8 +186,8 @@ void ExpressionConverter::postorder(const IR::Constant* expression)  {
 void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
     auto result = new Util::JsonObject();
     cstring elementAccess;
-    std::cout << "exp:" << expression << std::endl;
 
+    result->emplace("type", "header");
     // This is can be either a header, which is part of the "headers" parameter
     // or a temporary array.
     if (expression->left->is<IR::Member>()) {
@@ -205,8 +205,6 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
     }
 
     if (!expression->right->is<IR::Constant>()) {
-        std::cout << "ele:" << elementAccess << std::endl;
-
         const IR::Expression* ex = expression->right;
         std::vector<cstring> cv;
         while (auto rmem = ex->to<IR::Member>()) {
@@ -242,7 +240,6 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
     } else {
         int index = expression->right->to<IR::Constant>()->asInt();
         elementAccess += "[" + Util::toString(index) + "]";
-        result->emplace("type", "header");
         result->emplace("value", elementAccess);
     }
     mapExpression(expression, result);
@@ -438,10 +435,13 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 } else if (lv->is<Util::JsonValue>()) {
                     e->append(lv);
                     e->append(fieldName);
+                } else if (l->is<Util::JsonObject>()) {
+                    auto jo = l->to<Util::JsonObject>();
+                    auto lv = isArrayIndexExpr(l->to<Util::JsonObject>());
+                    if (lv != nullptr)
+                        e->append(jo);
                 } else {
-				  auto jo = l->to<Util::JsonObject>();
-				  std::cout << jo->toString() << std::endl;
-				  BUG("%1%: Unexpected json", lv);
+                    BUG("%1%: Unexpected json", lv);
                 }
             } else {
                 e->append(l);
@@ -806,6 +806,23 @@ Util::IJson* ExpressionConverter::convertWithConstantWidths(const IR::Expression
     auto result = convert(e);
     withConstantWidths = false;
     return result;
+}
+
+Util::IJson* ExpressionConverter::isArrayIndexExpr(Util::IJson *l) {
+    if (l == nullptr)
+        return nullptr;
+    auto jo = l->to<Util::JsonObject>();
+    auto jt = jo->to<Util::JsonObject>()->get("type");
+    if (jt != nullptr && jt->to<Util::JsonValue>() != nullptr &&
+        (*jt->to<Util::JsonValue>()) == "header") {
+        auto lv = jo->to<Util::JsonObject>()->get("value");
+        if (lv && !lv->is<Util::JsonObject>()) return nullptr;
+		auto lt = lv->to<Util::JsonObject>()->get("type");
+		if ((*lt->to<Util::JsonValue>()) == "expression") {
+            return lv;
+        }
+    }
+	return nullptr;
 }
 
 }  // namespace BMV2
