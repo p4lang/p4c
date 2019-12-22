@@ -15,7 +15,6 @@ limitations under the License.
 
 #include "expression.h"
 #include "helpers.h"
-#include <iostream>
 
 namespace BMV2 {
 
@@ -817,12 +816,12 @@ Util::IJson* ExpressionConverter::isArrayIndexExpr(Util::IJson *l) {
         (*jt->to<Util::JsonValue>()) == "header") {
         auto lv = jo->to<Util::JsonObject>()->get("value");
         if (lv && !lv->is<Util::JsonObject>()) return nullptr;
-		auto lt = lv->to<Util::JsonObject>()->get("type");
-		if ((*lt->to<Util::JsonValue>()) == "expression") {
+        auto lt = lv->to<Util::JsonObject>()->get("type");
+        if ((*lt->to<Util::JsonValue>()) == "expression") {
             return lv;
         }
     }
-	return nullptr;
+    return nullptr;
 }
 
 }  // namespace BMV2
