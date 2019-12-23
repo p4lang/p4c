@@ -49,14 +49,29 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta,
     }
     state parse_udp {
         packet.extract(hdr.udp);
-        transition accept;	
+        transition parse_ml;
     }
+    state parse_ml {
+        packet.extract(hdr.ml);
+	transition parse_ml_vector;
+    }
+    state parse_ml_vector {
+        packet.extract(hdr.vector.next);
+	transition select(hdr.vector.last.e) {
+            _: accept;
+        }
+    }
+
 }
 
 // Our switch table comprises of IPv6 addresses vs. egress_port.
 // This is the table we setup here.
 control ingress(inout headers hdr, inout metadata_t meta,
                 inout standard_metadata_t standard_metadata) {
+
+    aggregator_t[S] pool;
+    count_t[S]      count;
+
     action set_mcast_grp(bit<16> mcast_grp, bit<9> port) {
         standard_metadata.mcast_grp = mcast_grp;
 	meta.egress_port = port;
@@ -67,56 +82,31 @@ control ingress(inout headers hdr, inout metadata_t meta,
 	}
 	actions = {set_mcast_grp;}
     }
-
+    /* TODO: The paper does not mention what IP (unicast or multicast is a
+     * worker update sent to the switch. Once it's known, this table should
+     * be activated.
+    table ipv6_rx {
+	key = {
+            (hdr.ipv6.srcAddr[127:120] == 8w0xff) : exact @name("rx_key");
+	}
+	actions = {set_mcast_grp;}
+    }
+    */
     apply {
         if (hdr.ipv6.isValid()) {
 	    ipv6_tbl.apply();
         }
+        hdr.vector[0].e = pool[hdr.ml.idx].val;
     }
 }
 
 control egress(inout headers hdr, inout metadata_t meta,
                inout standard_metadata_t standard_metadata) {
-    action set_out_bd (bit<24> bd) {
-        meta.fwd.out_bd = bd;
-    }
-    table get_multicast_copy_out_bd {
-        key = {
-            standard_metadata.mcast_grp  : exact;
-            standard_metadata.egress_rid : exact;
-        }
-        actions = { set_out_bd; }
-    }
-
-    action drop() {
-        mark_to_drop(standard_metadata);
-    }
-    action rewrite_mac(bit<48> smac) {
-        hdr.ethernet.srcAddr = smac;
-    }
-    table send_frame {
-        key = {
-            meta.fwd.out_bd: exact;
-        }
-        actions = {rewrite_mac; drop;}
-        default_action = drop;
-    }
-
-    apply {
-        if (IS_REPLICATED(standard_metadata)) {
-            get_multicast_copy_out_bd.apply();
-	    send_frame.apply();
-	}
-    }
+    apply {}
 }
 
 control MyDeparser(packet_out packet, in headers hdr) {
-    apply {
-        packet.emit(hdr.ethernet);
-        packet.emit(hdr.ipv6);
-        packet.emit(hdr.icmp6);
-        packet.emit(hdr.udp);
-    }
+    apply {}
 }
 
 control MyVerifyChecksum(inout headers hdr, inout metadata_t meta) {
@@ -125,8 +115,7 @@ control MyVerifyChecksum(inout headers hdr, inout metadata_t meta) {
 }
 
 control MyComputeChecksum(inout headers hdr, inout metadata_t meta) {
-    apply {
-    }
+    apply {}
 }
 
 V1Switch(MyParser(), MyVerifyChecksum(), ingress(), egress(),

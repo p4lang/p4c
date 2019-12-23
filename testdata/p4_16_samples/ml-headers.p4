@@ -78,6 +78,31 @@ header icmp6_t {
     bit<16>  checksum;
 }
 
+//
+// Data structs to implement Algorithm 1 of Switch ML
+// from page 4 of https://arxiv.org/pdf/1903.06701.pdf
+//
+// Number of elements in packet vector.
+const bit<8> K = 2;
+// Number of integer aggregators
+const bit<8> S = 2; // for 10G switch ports
+
+header count_t {
+    bit<8> cnt;
+}
+
+header ml_hdr_t {
+    int<8> idx;
+}
+
+header vec_e_t {
+    bit<32> e;
+}
+
+header aggregator_t {
+    bit<32> val;
+}
+
 struct headers {
     ethernet_t inner_ethernet;
     icmp6_t    inner_icmp6;
@@ -89,6 +114,8 @@ struct headers {
     ipv6_t     ipv6;
     tcp_t      tcp;
     udp_t      udp;
+    ml_hdr_t   ml;
+    vec_e_t[K] vector;
 }
 
 struct l3_metadata_t {
