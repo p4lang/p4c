@@ -184,9 +184,9 @@ void ExpressionConverter::postorder(const IR::Constant* expression)  {
 
 void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
     auto result = new Util::JsonObject();
+    result->emplace("type", "header");
     cstring elementAccess;
 
-    result->emplace("type", "header");
     // This is can be either a header, which is part of the "headers" parameter
     // or a temporary array.
     if (expression->left->is<IR::Member>()) {
@@ -216,9 +216,10 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
         std::reverse(cv.begin(), cv.end());
 
         auto ai = new Util::JsonObject();
+        ai->emplace("type", "expression");
         // create a DEREFERENCE_HEADER_STACK json node
         auto e = new Util::JsonObject();
-        e->emplace("op", "DEREFERENCE_STACK");
+        e->emplace("op", "dereference_header_stack");
         auto l = new Util::JsonObject();
         l->emplace("type", "stack");
         l->emplace("value", elementAccess);
@@ -232,9 +233,7 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
         }
         r->emplace("value", v);
         e->emplace("right", r);
-
         ai->emplace("value", e);
-        ai->emplace("type", "expression");
         result->emplace("value", ai);
     } else {
         int index = expression->right->to<IR::Constant>()->asInt();
@@ -415,7 +414,11 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
             e->emplace("right", l);
         } else {
             const char* fieldRef = parentType->is<IR::Type_Stack>() ? "stack_field" : "field";
-            result->emplace("type", fieldRef);
+            auto lv = isArrayIndexExpr(l->to<Util::JsonObject>());
+            if (lv != nullptr)
+                result->emplace("type", "expression");
+            else
+                result->emplace("type", fieldRef);
             auto e = mkArrayField(result, "value");
             if (l->is<Util::JsonObject>()) {
                 auto lv = l->to<Util::JsonObject>()->get("value");
