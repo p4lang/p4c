@@ -211,8 +211,6 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
             cv.push_back(rmem->member.toString());
         }
 
-        auto pt = ex->to<IR::PathExpression>();
-        cv.push_back(pt->path->name);
         std::reverse(cv.begin(), cv.end());
 
         auto ai = new Util::JsonObject();
@@ -440,8 +438,10 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 } else if (l->is<Util::JsonObject>()) {
                     auto jo = l->to<Util::JsonObject>();
                     auto lv = isArrayIndexExpr(l->to<Util::JsonObject>());
-                    if (lv != nullptr)
-                        e->append(jo);
+                    if (lv != nullptr) {
+                        e->append(lv);
+                        e->append(fieldName);
+                    }
                 } else {
                     BUG("%1%: Unexpected json", lv);
                 }

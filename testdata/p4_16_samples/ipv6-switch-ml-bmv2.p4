@@ -96,7 +96,9 @@ control ingress(inout headers hdr, inout metadata_t meta,
         if (hdr.ipv6.isValid()) {
 	    ipv6_tbl.apply();
         }
-        hdr.vector[0].e = pool[hdr.ml.idx].val;
+//        hdr.vector[0].e = pool[hdr.ml.idx].val;
+        hdr.vector[0].e = pool[1].val + 2;
+//          hdr.ipv6.version = hdr.ipv6.version + 2;
     }
 }
 
