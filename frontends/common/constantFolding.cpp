@@ -711,7 +711,7 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
         value = Util::shift_left(value, shift);
     else
         value = Util::shift_right(value, shift);
-    return new IR::Constant(e->srcInfo, left->type, value, cl->base);
+    return new IR::Constant(e->srcInfo, left->type, value, cl->base, !warnings);
 }
 
 const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
