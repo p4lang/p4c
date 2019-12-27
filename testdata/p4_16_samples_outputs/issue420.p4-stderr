@@ -1,0 +1,3 @@
+issue420.p4(53): [--Wwarn=mismatch] warning: -0xdeadbeeff00e: negative value with unsigned type
+        hdr.ethernet.srcAddr = ~48w0xdeadbeeff00d;
+                                ^^^^^^^^^^^^^^^^^

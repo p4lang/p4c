@@ -1,0 +1,3 @@
+synth-action.p4(22): [--Wwarn=mismatch] warning: 4294967302: value does not fit in 32 bits
+            x = x - 6;
+                ^^^^^

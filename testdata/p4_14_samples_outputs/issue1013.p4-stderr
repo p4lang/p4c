@@ -1,0 +1,3 @@
+issue1013.p4(13): [--Wwarn=mismatch] warning: -0x1: negative value with unsigned type
+    modify_field(h.x, h.x, 0x0);
+                           ^^^

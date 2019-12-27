@@ -54,6 +54,8 @@ control c(out bit<32> x) {
         z = 8w0;
         z = 8w0;
         z = 8w0;
+        z = 8w0;
+        z = 8w0;
     }
 }
 

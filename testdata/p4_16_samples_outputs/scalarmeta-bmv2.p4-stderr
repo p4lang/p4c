@@ -1,0 +1,3 @@
+scalarmeta-bmv2.p4(36): [--Wwarn=mismatch] warning: 11: value does not fit in 3 bits
+    meta.counter = meta.counter - 1;
+                   ^^^^^^^^^^^^^^^^

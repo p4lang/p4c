@@ -43,6 +43,9 @@ const int<8> n = 255;
 constsigned.p4(31): [--Wwarn=overflow] warning: 256: signed value does not fit in 8 bits
 const int<8> o = 256;
                  ^^^
+constsigned.p4(37): [--Wwarn=overflow] warning: 128: signed value does not fit in 8 bits
+const int<8> e0 = -8s128;
+                   ^^^^^
 constsigned.p4(50): [--Wwarn=overflow] warning: 1: signed value does not fit in 1 bits
 const int<1> zz1 = 1;
                    ^

@@ -1,0 +1,3 @@
+named-arg1.p4(36): [--Wwarn=mismatch] warning: -3: negative value with unsigned type
+        a(bi = 3, mb = xv);
+               ^

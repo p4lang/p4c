@@ -1,0 +1,12 @@
+issue983-bmv2.p4(99): [--Wwarn=mismatch] warning: -0x801: negative value with unsigned type
+        user_meta.fwd_meta.exp_x1 = (bit<32>) (~16w0x0800);
+                                                ^^^^^^^^^
+issue983-bmv2.p4(100): [--Wwarn=mismatch] warning: -0x801: negative value with unsigned type
+        user_meta.fwd_meta.exp_x2 = (~16w0x0800);
+                                      ^^^^^^^^^
+issue983-bmv2.p4(101): [--Wwarn=mismatch] warning: -0x801: negative value with unsigned type
+        user_meta.fwd_meta.exp_x3 = (bit<32>) (~16w0x0800);
+                                                ^^^^^^^^^
+issue983-bmv2.p4(102): [--Wwarn=mismatch] warning: -0x801: negative value with unsigned type
+        user_meta.fwd_meta.exp_x4 = (~32w0x0800);
+                                      ^^^^^^^^^

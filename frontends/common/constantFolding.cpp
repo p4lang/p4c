@@ -577,7 +577,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
     if (type->is<IR::Type_Stack>() && e->member == IR::Type_Stack::arraySize) {
         auto st = type->to<IR::Type_Stack>();
         auto size = st->getSize();
-        result = new IR::Constant(st->size->srcInfo, origtype, size, !warnings);
+        result = new IR::Constant(st->size->srcInfo, origtype, size, 10, !warnings);
     } else {
         auto expr = getConstant(e->expr);
         if (expr == nullptr)

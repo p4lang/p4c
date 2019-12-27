@@ -1,0 +1,3 @@
+issue1334.p4(28): [--Wwarn=mismatch] warning: -2: negative value with unsigned type
+    d(b = 2) dinst;
+          ^
