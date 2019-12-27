@@ -1,5 +1,3 @@
-# Doxygen ignores the first line
-
 # IMPLEMENTING YOUR SWITCH TARGET WITH BMv2
 
 This guide and the accompanying doxygen documentation are targetted at

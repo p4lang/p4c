@@ -9,12 +9,33 @@ language: generic
 services:
   - docker
 
+stages:
+  - test
+  - name: deploy
+    if: repo = p4lang/behavioral-model AND branch = master
+
 matrix:
   include:
     - env: CXX=g++ CC=gcc sswitch_grpc=yes
     - env: CXX=g++-7 CC=gcc-7 GCOV=gcov-7 sswitch_grpc=no
     - env: CXX=clang++-3.8 CC=clang-3.8 sswitch_grpc=no
     - env: CXX=clang++-6.0 CC=clang-6.0 sswitch_grpc=no
+    - stage: deploy
+      install: skip
+      script: docker run --rm -v $(pwd):/data -it hrektts/doxygen doxygen
+      deploy:
+        provider: s3
+        access_key_id: AKIAIVZMKWSQVOPRXWCQ
+        secret_access_key:
+          secure: IBR2S1glm2bahs6/i0ltHfd/S5AOO0/0xmpW+Mk0T7y82xaj1Y45ivBfRDo9o5rSRShYX7mkuVXNckLrY3XOPVacr8Kxbe8Sz3L+Q3J4bYXl0pbwhOGsT/Nd2NUDiUA7eqwTlYH0UpURxCyPbFXl4IFakqTilOywKfi8OepNNTSrALYBg/ahbJqxSArT749/wsY+vVV3zSlBeVk4pWOJVvRF8Qqfmhwkx7jZeemWl6AmTA6Dw8JbBVYLMmgXIkrVhVXOAUb09Ree8eqZWMrvMLmTP2GcdvfoqNDErxD9u/M3reYjpq99wjA/jYuzrbCcgFnNcOa/VPhCehIkb9e3ysrQ5B0zW7+jfqPuEDi/GFycrB9h4uKEcBz5zOZp8Z20BE335lakj2vRbycURvfo8GZFeZ6MLCugZJjgv8aiDwDQ7pNSCmEFQQTwk9aiUVCyM6X7za+BwoQpEkHQb+Xt0mA8cl/m4Xmcx1iRo4PZHoQRnyarajcM4WftSBZt6qGWDgmEsSTEkzfJNlt/1AlNU09Yt2JC/SieIVYREDCYP2d1anR1/G94Ns4LtkDaFqgq3XJjaDWb4BFjJ9EUhInphOt9EbHjBm739x1musVfw2wPy6YgRd3Z9Fwj4mWztSB+NOFBEtE8iixa52Lvr+jGoUz32TlicEdo6eQMEUVPnRA=
+        bucket: bmv2.org
+        local-dir: doxygen-out/html
+        acl: public_read
+        region: us-west-2
+        skip_cleanup: true
+        on:
+          repo: p4lang/behavioral-model
+          branch: master
 
 addons:
   apt:
