@@ -150,7 +150,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Declaration_Constant* d) {
                 if (cst->type->is<IR::Type_InfInt>() ||
                     (cst->type->is<IR::Type_Bits>() &&
                      !(*d->type->to<IR::Type_Bits>() == *cst->type->to<IR::Type_Bits>())))
-                    init = new IR::Constant(init->srcInfo, d->type, cst->value, cst->base);
+                    init = new IR::Constant(init->srcInfo, d->type, cst->value, cst->base, !warnings);
             } else if (!d->type->is<IR::Type_InfInt>()) {
                 // Don't fold this yet, we can't evaluate the cast.
                 return d;
@@ -207,7 +207,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Cmpl* e) {
     }
 
     big_int value = ~cst->value;
-    return new IR::Constant(cst->srcInfo, t, value, cst->base, true);
+    return new IR::Constant(cst->srcInfo, t, value, cst->base, !warnings);
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Neg* e) {
@@ -222,7 +222,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Neg* e) {
     }
     const IR::Type* t = op->type;
     if (t->is<IR::Type_InfInt>())
-        return new IR::Constant(cst->srcInfo, t, -cst->value, cst->base);
+        return new IR::Constant(cst->srcInfo, t, -cst->value, cst->base, !warnings);
 
     auto tb = t->to<IR::Type_Bits>();
     if (tb == nullptr) {
@@ -232,12 +232,12 @@ const IR::Node* DoConstantFolding::postorder(IR::Neg* e) {
     }
 
     big_int value = -cst->value;
-    return new IR::Constant(cst->srcInfo, t, value, cst->base, true);
+    return new IR::Constant(cst->srcInfo, t, value, cst->base, !warnings);
 }
 
 const IR::Constant*
 DoConstantFolding::cast(const IR::Constant* node, unsigned base, const IR::Type_Bits* type) const {
-    return new IR::Constant(node->srcInfo, type, node->value, base);
+    return new IR::Constant(node->srcInfo, type, node->value, base, !warnings);
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Add* e) {
@@ -479,7 +479,7 @@ DoConstantFolding::binary(const IR::Operation_Binary* e,
     if (e->is<IR::Operation_Relation>())
         return new IR::BoolLiteral(e->srcInfo, value != 0);
     else
-        return new IR::Constant(e->srcInfo, resultType, value, left->base, true);
+        return new IR::Constant(e->srcInfo, resultType, value, left->base, !warnings);
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::LAnd* e) {
@@ -563,7 +563,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
     auto resultType = typeMap->getType(getOriginal(), true);
     if (!resultType->is<IR::Type_Bits>())
         BUG("Type of slice is not Type_Bits, but %1%", resultType);
-    return new IR::Constant(e->srcInfo, resultType, value, cbase->base, true);
+    return new IR::Constant(e->srcInfo, resultType, value, cbase->base, !warnings);
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
@@ -577,7 +577,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
     if (type->is<IR::Type_Stack>() && e->member == IR::Type_Stack::arraySize) {
         auto st = type->to<IR::Type_Stack>();
         auto size = st->getSize();
-        result = new IR::Constant(st->size->srcInfo, origtype, size);
+        result = new IR::Constant(st->size->srcInfo, origtype, size, !warnings);
     } else {
         auto expr = getConstant(e->expr);
         if (expr == nullptr)
@@ -638,7 +638,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Concat* e) {
 
     auto resultType = IR::Type_Bits::get(lt->size + rt->size, lt->isSigned);
     big_int value = Util::shift_left(left->value, static_cast<unsigned>(rt->size)) + right->value;
-    return new IR::Constant(e->srcInfo, resultType, value, left->base);
+    return new IR::Constant(e->srcInfo, resultType, value, left->base, !warnings);
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::LNot* e) {
@@ -733,7 +733,7 @@ const IR::Node *DoConstantFolding::postorder(IR::Cast *e) {
         } else if (expr -> is<IR::BoolLiteral>()) {
             auto arg = expr->to<IR::BoolLiteral>();
             int v = arg->value ? 1 : 0;
-            return new IR::Constant(e->srcInfo, type, v, 10);
+            return new IR::Constant(e->srcInfo, type, v, 10, !warnings);
         } else {
             return e;
         }
