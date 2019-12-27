@@ -123,8 +123,14 @@ const IR::Node* ExpressionConverter::postorder(IR::Primitive* primitive) {
         auto result = new IR::MethodCallExpression(primitive->srcInfo, IR::Type::Boolean::get(),
                                                    method);
         return result;
+    } else {
+        auto func = new IR::PathExpression(IR::ID(primitive->srcInfo, primitive->name));
+        auto args = new IR::Vector<IR::Argument>;
+        for (auto *op : primitive->operands)
+            args->push_back(new IR::Argument(op));
+        auto result = new IR::MethodCallExpression(primitive->srcInfo, func, args);
+        return result;
     }
-    BUG("Unexpected primitive %1%", primitive);
 }
 
 const IR::Node* ExpressionConverter::postorder(IR::PathExpression *ref) {

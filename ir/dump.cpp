@@ -27,7 +27,7 @@ class IRDumper : public Inspector {
         if (auto ctxt = getContext()) {
             if (unsigned(ctxt->depth) > maxdepth)
                 return false;
-            if (ctxt->child_name && ignore == ctxt->child_name)
+            if (ctxt->parent && ctxt->parent->child_name && ignore == ctxt->parent->child_name)
                 return false;
             out << indent_t(ctxt->depth);
             if (ctxt->child_name)
