@@ -285,11 +285,14 @@ class Annotation {
     static const cstring synchronousAnnotation;  /// Synchronous annotation.
     static const cstring pureAnnotation;  /// extern function/method annotation.
     static const cstring noSideEffectsAnnotation;  /// extern function/method annotation.
-    static const cstring noWarnAnnotation;  /// noWarn annotation.
+    static const cstring localStateAnnotation;  /// extern function/method annotation.
+    static const cstring packetStateAnnotation;  /// extern function/method annotation.
+    static const cstring localIndexedStateAnnotation;  /// extern function/method annotation.
     static const cstring matchAnnotation;  /// Match annotation (for value sets).
     static const cstring fieldListAnnotation;  /// Used for recirculate, etc.
     static const cstring debugLoggingAnnotation;  /// Used by compiler implementer to limit debug log to the annotated IR context.
     static const cstring disableOptimizationAnnotation; /// annotation to disable certain optimization
+    static const cstring noWarnAnnotation;  /// noWarn annotation.
 
     toString{ return absl::StrCat("@", name); }
     validate{

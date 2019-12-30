@@ -371,6 +371,7 @@ extern bool psa_recirculate(in psa_egress_output_metadata_t istd,
  * because, if you follow this advice, your program will behave the
  * same way when assert statements are removed.
  */
+@localState
 extern void assert(in bool check);
 
 /***
@@ -407,6 +408,7 @@ extern void assert(in bool check);
  * condition ever evaluates to false when operating in a network, it
  * is likely that your assumption was wrong, and should be reexamined.
  */
+@localState
 extern void assume(in bool check);
 
 // BEGIN:Match_kinds
@@ -542,13 +544,15 @@ extern Checksum<W> {
   /// time the object is instantiated, that is, whenever the parser or control
   /// containing the Checksum object are applied.
   /// All state maintained by the Checksum object is independent per packet.
+  @packetState
   void clear();
 
   /// Add data to checksum
+  @packetState
   void update<T>(in T data);
 
   /// Get checksum for data added (and not removed) since last clear
-  @noSideEffects
+  @packetState @noSideEffects
   W    get();
 }
 // END:Checksum_extern
@@ -566,29 +570,33 @@ extern InternetChecksum {
   /// initialized as if clear() had been called on it, once for each
   /// time the parser or control it is instantiated within is
   /// executed.  All state maintained by it is independent per packet.
+  @packetState
   void clear();
 
   /// Add data to checksum.  data must be a multiple of 16 bits long.
+  @packetState
   void add<T>(in T data);
 
   /// Subtract data from existing checksum.  data must be a multiple of
   /// 16 bits long.
+  @packetState
   void subtract<T>(in T data);
 
   /// Get checksum for data added (and not removed) since last clear
-  @noSideEffects
+  @packetState @noSideEffects
   bit<16> get();
 
   /// Get current state of checksum computation.  The return value is
   /// only intended to be used for a future call to the set_state
   /// method.
-  @noSideEffects
+  @packetState @noSideEffects
   bit<16> get_state();
 
   /// Restore the state of the InternetChecksum instance to one
   /// returned from an earlier call to the get_state method.  This
   /// state could have been returned from the same instance of the
   /// InternetChecksum extern, or a different one.
+  @packetState
   void set_state(in bit<16> checksum_state);
 }
 // END:InternetChecksum_extern
@@ -608,6 +616,7 @@ enum PSA_CounterType_t {
 @noWarn("unused")
 extern Counter<W, S> {
   Counter(bit<32> n_counters, PSA_CounterType_t type);
+  @localIndexedState(index)
   void count(in S index);
 }
 // END:Counter_extern
@@ -616,6 +625,7 @@ extern Counter<W, S> {
 @noWarn("unused")
 extern DirectCounter<W> {
   DirectCounter(PSA_CounterType_t type);
+  @localState
   void count();
 }
 // END:DirectCounter_extern
@@ -640,11 +650,13 @@ extern Meter<S> {
   // Use this method call to perform a color aware meter update (see
   // RFC 2698). The color of the packet before the method call was
   // made is specified by the color parameter.
+  @localIndexedState(index)
   PSA_MeterColor_t execute(in S index, in PSA_MeterColor_t color);
 
   // Use this method call to perform a color blind meter update (see
   // RFC 2698).  It may be implemented via a call to execute(index,
   // MeterColor_t.GREEN), which has the same behavior.
+  @localIndexedState(index)
   PSA_MeterColor_t execute(in S index);
 }
 // END:Meter_extern
@@ -653,7 +665,9 @@ extern Meter<S> {
 extern DirectMeter {
   DirectMeter(PSA_MeterType_t type);
   // See the corresponding methods for extern Meter.
+  @localState
   PSA_MeterColor_t execute(in PSA_MeterColor_t color);
+  @localState
   PSA_MeterColor_t execute();
 }
 // END:DirectMeter_extern
@@ -667,8 +681,9 @@ extern Register<T, S> {
   /// initial_value.
   Register(bit<32> size, T initial_value);
 
-  @noSideEffects
+  @localIndexedState(index) @noSideEffects
   T    read  (in S index);
+  @localIndexedState(index)
   void write (in S index, in T value);
 }
 // END:Register_extern
@@ -682,6 +697,7 @@ extern Random<T> {
   /// arguments to such values if they wish to maximize portability.
 
   Random(T min, T max);
+  @localState
   T read();
 }
 // END:Random_extern
@@ -706,6 +722,7 @@ extern ActionSelector {
 // BEGIN:Digest_extern
 extern Digest<T> {
   Digest();                       /// define a digest stream to the control plane
+  @localState
   void pack(in T data);           /// emit data into the stream
 }
 // END:Digest_extern

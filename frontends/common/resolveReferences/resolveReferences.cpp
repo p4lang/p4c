@@ -448,7 +448,11 @@ bool ResolveReferences::preorder(const IR::P4Parser *p) {
 
 bool ResolveReferences::preorder(const IR::Function *function) {
     refMap->usedName(function->name.name);
-    checkShadowing(function);
+    return true;
+}
+
+bool ResolveReferences::preorder(const IR::Method *method) {
+    refMap->usedName(method->name.name);
     return true;
 }
 

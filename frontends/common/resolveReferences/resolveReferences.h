@@ -150,6 +150,7 @@ class ResolveReferences : public Inspector, private ResolutionContext {
     bool preorder(const IR::P4Parser *t) override;
     bool preorder(const IR::P4Action *t) override;
     bool preorder(const IR::Function *t) override;
+    bool preorder(const IR::Method *t) override;
     bool preorder(const IR::TableProperties *t) override;
     bool preorder(const IR::Type_Method *t) override;
     bool preorder(const IR::ParserState *t) override;

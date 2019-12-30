@@ -159,6 +159,7 @@ extern counter
      *              size-1].  If index >= size, no counter state will be
      *              updated.
      */
+    @localIndexedState(index)
 #if V1MODEL_VERSION >= 20200408
     void count(in I index);
 #else
@@ -195,6 +196,7 @@ extern direct_counter {
      * packets, regardless of whether the count() method is called in
      * the body of that action.
      */
+    @localState
     void count();
 }
 
@@ -243,6 +245,7 @@ extern meter
      *              range, the final value of result is not specified,
      *              and should be ignored by the caller.
      */
+    @localIndexedState(index)
 #if V1MODEL_VERSION >= 20200408
     void execute_meter<T>(in I index, out T result);
 #else
@@ -283,6 +286,7 @@ extern direct_meter<T> {
      *              color YELLOW, and 2 for color RED (see RFC 2697
      *              and RFC 2698 for the meaning of these colors).
      */
+    @noSideEffects @localState
     void read(out T result);
 }
 
@@ -317,7 +321,7 @@ extern register<T>
      *              value of result is not specified, and should be
      *              ignored by the caller.
      */
-    @noSideEffects
+    @noSideEffects @localIndexedState(index)
 #if V1MODEL_VERSION >= 20200408
     void read(out T result, in I index);
 #else
@@ -345,6 +349,7 @@ extern register<T>
      *              parameter's value is written into the register
      *              array element specified by index.
      */
+    @localIndexedState(index)
 #if V1MODEL_VERSION >= 20200408
     void write(in I index, in T value);
 #else
@@ -364,6 +369,7 @@ extern action_profile {
  *
  * @param T          Must be a type bit<W>
  */
+@localState
 extern void random<T>(out T result, in T lo, in T hi);
 
 /***
@@ -389,6 +395,7 @@ extern void random<T>(out T result, in T lo, in T hi);
  * The BMv2 implementation of the v1model architecture ignores the
  * value of the receiver parameter.
  */
+@packetState
 extern void digest<T>(in bit<32> receiver, in T data);
 
 enum HashAlgorithm {
@@ -403,6 +410,7 @@ enum HashAlgorithm {
 }
 
 @deprecated("Please use mark_to_drop(standard_metadata) instead.")
+@packetState
 extern void mark_to_drop();
 
 /***
@@ -480,6 +488,7 @@ extern Checksum16 {
  *                   may be supported).  Must be a compile-time
  *                   constant.
  */
+@packetState
 extern void verify_checksum<T, O>(in bool condition, in T data, in O checksum, HashAlgorithm algo);
 
 /***
@@ -513,6 +522,7 @@ extern void update_checksum<T, O>(in bool condition, in T data, inout O checksum
  * Calling verify_checksum_with_payload is only supported in the
  * VerifyChecksum control.
  */
+@packetState
 extern void verify_checksum_with_payload<T, O>(in bool condition, in T data, in O checksum, HashAlgorithm algo);
 
 /**
@@ -524,7 +534,7 @@ extern void verify_checksum_with_payload<T, O>(in bool condition, in T data, in 
  * Calling update_checksum_with_payload is only supported in the
  * ComputeChecksum control.
  */
-@noSideEffects
+@noSideEffects @packetState
 extern void update_checksum_with_payload<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
 
 /***
@@ -536,6 +546,7 @@ extern void update_checksum_with_payload<T, O>(in bool condition, in T data, ino
  */
 extern void clone(in CloneType type, in bit<32> session);
 
+@packetState
 @deprecated("Please use 'resubmit_preserving_field_list' instead")
 extern void resubmit<T>(in T data);
 /***
@@ -572,8 +583,10 @@ extern void resubmit<T>(in T data);
  * and preserve fields x and y of the user metadata.  Calling
  * resubmit_preserving_field_list(2) will only preserve field y.
  */
+@packetState
 extern void resubmit_preserving_field_list(bit<8> index);
 
+@packetState
 @deprecated("Please use 'recirculate_preserving_field_list' instead")
 extern void recirculate<T>(in T data);
 /***
@@ -598,8 +611,10 @@ extern void recirculate<T>(in T data);
  * are preserved.  See the v1model architecture documentation (Note 1)
  * for more details.
  */
+@packetState
 extern void recirculate_preserving_field_list(bit<8> index);
 
+@packetState
 @deprecated("Please use 'clone_preserving_field_list' instead")
 extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
 
@@ -637,8 +652,10 @@ extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
  * control, only the last clone session and index are used.  See the
  * v1model architecture documentation (Note 1) for more details.
  */
+@packetState
 extern void clone_preserving_field_list(in CloneType type, in bit<32> session, bit<8> index);
 
+@packetState
 extern void truncate(in bit<32> length);
 
 /***
@@ -665,6 +682,7 @@ extern void truncate(in bit<32> length);
  * because, if you follow this advice, your program will behave the
  * same way when assert statements are removed.
  */
+@localState
 extern void assert(in bool check);
 
 /***
@@ -700,6 +718,7 @@ extern void assert(in bool check);
  * condition ever evaluates to false when operating in a network, it
  * is likely that your assumption was wrong, and should be reexamined.
  */
+@localState
 extern void assume(in bool check);
 
 /*
@@ -707,7 +726,9 @@ extern void assume(in bool check);
  * Example: log_msg("User defined message");
  * or log_msg("Value1 = {}, Value2 = {}",{value1, value2});
  */
+@localState
 extern void log_msg(string msg);
+@localState
 extern void log_msg<T>(string msg, in T data);
 
 // The name 'standard_metadata' is reserved
