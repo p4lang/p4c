@@ -27,7 +27,11 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
             PARSE_EMPTY(IR::Annotation::hiddenAnnotation),
             PARSE_EMPTY(IR::Annotation::atomicAnnotation),
             PARSE_EMPTY(IR::Annotation::optionalAnnotation),
+            PARSE_EMPTY(IR::Annotation::pureAnnotation),
             PARSE_EMPTY(IR::Annotation::noSideEffectsAnnotation),
+            PARSE_EMPTY(IR::Annotation::localStateAnnotation),
+            PARSE_EMPTY(IR::Annotation::packetStateAnnotation),
+            PARSE(IR::Annotation::localIndexedStateAnnotation, Expression),
 
             // @name and @deprecated have a string literal argument.
             PARSE(IR::Annotation::nameAnnotation, StringLiteral),

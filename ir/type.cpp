@@ -45,7 +45,11 @@ const cstring IR::Annotation::optionalAnnotation = "optional";
 const cstring IR::Annotation::pkginfoAnnotation = "pkginfo";
 const cstring IR::Annotation::deprecatedAnnotation = "deprecated";
 const cstring IR::Annotation::synchronousAnnotation = "synchronous";
+const cstring IR::Annotation::pureAnnotation = "pure";
 const cstring IR::Annotation::noSideEffectsAnnotation = "noSideEffects";
+const cstring IR::Annotation::localStateAnnotation = "localState";
+const cstring IR::Annotation::packetStateAnnotation = "packetState";
+const cstring IR::Annotation::localIndexedStateAnnotation = "localIndexedState";
 const cstring IR::Annotation::matchAnnotation = "match";
 
 int Type_Declaration::nextId = 0;
