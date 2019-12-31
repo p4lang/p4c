@@ -24,6 +24,9 @@
 #include <bm/bm_sim/expressions.h>
 #include <bm/bm_sim/phv.h>
 
+#include <memory>
+#include <stdexcept>
+
 // expressions are mostly tested in test_conditionals.cpp. This file is only
 // used for some edge case testing.
 
@@ -107,4 +110,17 @@ TEST_F(ExpressionsTest, FieldRef) {
 
   auto &data = expr.eval_arith_lvalue(phv.get());
   EXPECT_EQ(&phv->get_field(testHeader2, 3), &data);
+}
+
+TEST_F(ExpressionsTest, OutOfBoundsStackAccess) {
+  Expression expr;
+  expr.push_back_load_header_stack(testHeaderStack);
+  expr.push_back_load_const(Data(2));  // out-of-bounds access
+  expr.push_back_op(ExprOpcode::DEREFERENCE_HEADER_STACK);
+  expr.build();
+
+  // At the moment, we simply throw an exception which should crash the bmv2
+  // process unless it is caught somewhere (e.g. in the target code). In the
+  // future, we may log an error message as well.
+  EXPECT_THROW(expr.eval_header(phv.get()), std::out_of_range);
 }
