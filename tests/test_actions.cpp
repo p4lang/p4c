@@ -1,4 +1,5 @@
-/* Copyright 2013-present Barefoot Networks, Inc.
+/* Copyright 2013-2019 Barefoot Networks, Inc.
+ * Copyright 2019 VMware, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  */
 
 /*
- * Antonin Bas (antonin@barefootnetworks.com)
+ * Antonin Bas
  *
  */
 
@@ -630,6 +631,47 @@ TEST_F(ActionsTest, HeaderUnion) {
   testActionFnEntry(pkt.get());
 
   EXPECT_EQ("test_union", primitive.get_union_name());
+}
+
+TEST_F(ActionsTest, ExpressionHeader) {
+  RemoveHeader primitive;
+  testActionFn.push_back_primitive(&primitive);
+
+  std::unique_ptr<Expression> expr(new Expression());
+  expr->push_back_load_header(testHeader2);
+  expr->build();
+  testActionFn.parameter_push_back_expression(
+      std::move(expr), ExprType::HEADER);
+
+  auto &hdr2 = phv->get_header(testHeader2);
+  hdr2.mark_valid();
+  ASSERT_TRUE(hdr2.is_valid());
+
+  testActionFnEntry(pkt.get());
+  EXPECT_FALSE(hdr2.is_valid());
+}
+
+TEST_F(ActionsTest, ExpressionDataLV) {
+  const uint64_t v = 12345u;
+
+  Set primitive;
+  testActionFn.push_back_primitive(&primitive);
+
+  std::unique_ptr<Expression> expr(new Expression());
+  expr->push_back_load_header_stack(testHeaderStack);
+  expr->push_back_load_const(Data(1));  // testHeaderS1
+  expr->push_back_op(ExprOpcode::DEREFERENCE_HEADER_STACK);
+  expr->push_back_access_field(3);  // f16
+  expr->build();
+  testActionFn.parameter_push_back_expression(std::move(expr), ExprType::DATA);
+
+  testActionFn.parameter_push_back_const(Data(v));
+
+  const auto &f = phv->get_field(testHeaderS1, 3);  // testHeaderS1.f16
+  ASSERT_NE(f.get<uint64_t>(), v);
+
+  testActionFnEntry(pkt.get());
+  EXPECT_EQ(f.get<uint64_t>(), v);
 }
 
 TEST_F(ActionsTest, Jump) {

@@ -1,4 +1,5 @@
-/* Copyright 2013-present Barefoot Networks, Inc.
+/* Copyright 2013-2019 Barefoot Networks, Inc.
+ * Copyright 2019 VMware, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  */
 
 /*
- * Antonin Bas (antonin@barefootnetworks.com)
+ * Antonin Bas
  *
  */
 
@@ -175,7 +176,8 @@ struct ActionParam {
         HEADER_STACK, LAST_HEADER_STACK_FIELD,
         CALCULATION,
         METER_ARRAY, COUNTER_ARRAY, REGISTER_ARRAY,
-        EXPRESSION,
+        EXPRESSION, EXPRESSION_HEADER, EXPRESSION_HEADER_STACK,
+        EXPRESSION_HEADER_UNION, EXPRESSION_HEADER_UNION_STACK,
         EXTERN_INSTANCE,
         STRING,
         HEADER_UNION, HEADER_UNION_STACK, PARAMS_VECTOR} tag;
@@ -234,17 +236,17 @@ struct ActionParam {
     RegisterArray *register_array;
 
     struct {
-      unsigned int offset;
+      unsigned int offset;  // only used for arithmetic ("Data") expressions
       // non owning pointer
       // in theory, could be an owning pointer, but the union makes this
       // complicated, so instead the ActionFn keeps a vector of owning pointers
-      ArithExpression *ptr;
+      Expression *ptr;
     } expression;
 
     ExternType *extern_instance;
 
     // I use a pointer here to avoid complications with the union; the string
-    // memory is owned by ActionFn (just like for ArithExpression above)
+    // memory is owned by ActionFn (just like for Expression above)
     const std::string *str;
 
     header_union_stack_id_t header_union_stack;
@@ -273,7 +275,6 @@ struct ActionEngineState {
 // they have to be declared outside of the class declaration, and "inline" is
 // necessary to avoid linker errors
 
-// can only be a field or a register reference
 template <> inline
 Data &ActionParam::to<Data &>(ActionEngineState *state) const {
   static thread_local Data data_temp;
@@ -284,9 +285,12 @@ Data &ActionParam::to<Data &>(ActionEngineState *state) const {
     case ActionParam::REGISTER_REF:
       return register_ref.array->at(register_ref.idx);
     case ActionParam::REGISTER_GEN:
-      register_gen.idx->eval(state->phv, &data_temp,
-                             state->action_data.action_data);
+      register_gen.idx->eval_arith(state->phv, &data_temp,
+                                   state->action_data.action_data);
       return register_ref.array->at(data_temp.get<size_t>());
+    case ActionParam::EXPRESSION:
+      return expression.ptr->eval_arith_lvalue(&state->phv,
+                                               state->action_data.action_data);
     case ActionParam::LAST_HEADER_STACK_FIELD:
       return state->phv.get_header_stack(stack_field.header_stack).get_last()
           .get_field(stack_field.field_offset);
@@ -312,16 +316,16 @@ const Data &ActionParam::to<const Data &>(ActionEngineState *state) const {
     case ActionParam::REGISTER_REF:
       return register_ref.array->at(register_ref.idx);
     case ActionParam::REGISTER_GEN:
-      register_gen.idx->eval(state->phv, &data_temps[0],
-                             state->action_data.action_data);
+      register_gen.idx->eval_arith(state->phv, &data_temps[0],
+                                   state->action_data.action_data);
       return register_ref.array->at(data_temps[0].get<size_t>());
     case ActionParam::EXPRESSION:
       while (data_temps_size <= expression.offset) {
         data_temps.emplace_back();
         data_temps_size++;
       }
-      expression.ptr->eval(state->phv, &data_temps[expression.offset],
-                              state->action_data.action_data);
+      expression.ptr->eval_arith(state->phv, &data_temps[expression.offset],
+                                 state->action_data.action_data);
       return data_temps[expression.offset];
     case ActionParam::LAST_HEADER_STACK_FIELD:
       return state->phv.get_header_stack(stack_field.header_stack).get_last()
@@ -347,8 +351,15 @@ const Field &ActionParam::to<const Field &>(ActionEngineState *state) const {
 
 template <> inline
 Header &ActionParam::to<Header &>(ActionEngineState *state) const {
-  assert(tag == ActionParam::HEADER);
-  return state->phv.get_header(header);
+  switch (tag) {
+    case ActionParam::HEADER:
+      return state->phv.get_header(header);
+    case ActionParam::EXPRESSION_HEADER:
+      return expression.ptr->eval_header(&state->phv,
+                                         state->action_data.action_data);
+    default:
+      _BM_UNREACHABLE("Default switch case should not be reachable");
+  }
 }
 
 template <> inline
@@ -358,8 +369,15 @@ const Header &ActionParam::to<const Header &>(ActionEngineState *state) const {
 
 template <> inline
 HeaderStack &ActionParam::to<HeaderStack &>(ActionEngineState *state) const {
-  assert(tag == ActionParam::HEADER_STACK);
-  return state->phv.get_header_stack(header_stack);
+  switch (tag) {
+    case ActionParam::HEADER_STACK:
+      return state->phv.get_header_stack(header_stack);
+    case ActionParam::EXPRESSION_HEADER_STACK:
+      return expression.ptr->eval_header_stack(&state->phv,
+                                               state->action_data.action_data);
+    default:
+      _BM_UNREACHABLE("Default switch case should not be reachable");
+  }
 }
 
 template <> inline
@@ -373,8 +391,14 @@ StackIface &ActionParam::to<StackIface &>(ActionEngineState *state) const {
   switch (tag) {
     case HEADER_STACK:
       return state->phv.get_header_stack(header_stack);
+    case ActionParam::EXPRESSION_HEADER_STACK:
+      return expression.ptr->eval_header_stack(
+          &state->phv, state->action_data.action_data);
     case HEADER_UNION_STACK:
       return state->phv.get_header_union_stack(header_union_stack);
+    case ActionParam::EXPRESSION_HEADER_UNION_STACK:
+      return expression.ptr->eval_header_union_stack(
+          &state->phv, state->action_data.action_data);
     default:
       _BM_UNREACHABLE("Default switch case should not be reachable");
   }
@@ -388,8 +412,15 @@ const StackIface &ActionParam::to<const StackIface &>(
 
 template <> inline
 HeaderUnion &ActionParam::to<HeaderUnion &>(ActionEngineState *state) const {
-  assert(tag == ActionParam::HEADER_UNION);
-  return state->phv.get_header_union(header_union);
+  switch (tag) {
+    case ActionParam::HEADER_UNION:
+      return state->phv.get_header_union(header_union);
+    case ActionParam::EXPRESSION_HEADER_UNION:
+      return expression.ptr->eval_header_union(&state->phv,
+                                               state->action_data.action_data);
+    default:
+      _BM_UNREACHABLE("Default switch case should not be reachable");
+  }
 }
 
 template <> inline
@@ -401,8 +432,15 @@ const HeaderUnion &ActionParam::to<const HeaderUnion &>(
 template <> inline
 HeaderUnionStack &ActionParam::to<HeaderUnionStack &>(
     ActionEngineState *state) const {
-  assert(tag == ActionParam::HEADER_UNION_STACK);
-  return state->phv.get_header_union_stack(header_union_stack);
+  switch (tag) {
+    case ActionParam::HEADER_UNION_STACK:
+      return state->phv.get_header_union_stack(header_union_stack);
+    case ActionParam::EXPRESSION_HEADER_UNION_STACK:
+      return expression.ptr->eval_header_union_stack(
+          &state->phv, state->action_data.action_data);
+    default:
+      _BM_UNREACHABLE("Default switch case should not be reachable");
+  }
 }
 
 template <> inline
@@ -698,7 +736,9 @@ class ActionFn :  public NamedP4Object {
   void parameter_push_back_meter_array(MeterArray *meter_array);
   void parameter_push_back_counter_array(CounterArray *counter_array);
   void parameter_push_back_register_array(RegisterArray *register_array);
-  void parameter_push_back_expression(std::unique_ptr<ArithExpression> expr);
+  void parameter_push_back_expression(std::unique_ptr<Expression> expr);
+  void parameter_push_back_expression(std::unique_ptr<Expression> expr,
+                                      ExprType expr_type);
   void parameter_push_back_extern_instance(ExternType *extern_instance);
   void parameter_push_back_string(const std::string &str);
 
@@ -727,7 +767,7 @@ class ActionFn :  public NamedP4Object {
   RegisterSync register_sync{};
   std::vector<Data> const_values{};
   // should I store the objects in the vector, instead of pointers?
-  std::vector<std::unique_ptr<ArithExpression> > expressions{};
+  std::vector<std::unique_ptr<Expression> > expressions{};
   std::vector<std::string> strings{};
   size_t num_params;
 

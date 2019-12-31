@@ -1,4 +1,5 @@
-/* Copyright 2013-present Barefoot Networks, Inc.
+/* Copyright 2013-2019 Barefoot Networks, Inc.
+ * Copyright 2019 VMware, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  */
 
 /*
- * Antonin Bas (antonin@barefootnetworks.com)
+ * Antonin Bas
  *
  */
 
@@ -43,7 +44,7 @@ using std::string;
 namespace {
 
 constexpr int required_major_version = 2;
-constexpr int max_minor_version = 21;
+constexpr int max_minor_version = 23;
 // not needed for now
 // constexpr int min_minor_version = 0;
 
@@ -117,10 +118,6 @@ using EFormat = ExceptionFormatter;
 }  // namespace
 
 
-enum class P4Objects::ExprType {
-  UNKNOWN, DATA, HEADER, HEADER_STACK, BOOL, UNION, UNION_STACK
-};
-
 std::string
 P4Objects::get_json_version_string() {
   return get_version_str(required_major_version, max_minor_version);
@@ -129,115 +126,11 @@ P4Objects::get_json_version_string() {
 void
 P4Objects::build_expression(const Json::Value &json_expression,
                             Expression *expr) {
-  ExprType expr_type(ExprType::UNKNOWN);
+  ExprType expr_type;
   build_expression(json_expression, expr, &expr_type);
 }
 
 namespace {
-
-using ExprType = P4Objects::ExprType;
-
-ExprOpcode get_eq_opcode(ExprType expr_type) {
-  switch (expr_type) {
-    case ExprType::DATA:
-      return ExprOpcode::EQ_DATA;
-    case ExprType::HEADER:
-      return ExprOpcode::EQ_HEADER;
-    case ExprType::BOOL:
-      return ExprOpcode::EQ_BOOL;
-    case ExprType::UNION:
-      return ExprOpcode::EQ_UNION;
-    default:
-      break;
-  }
-  assert(0);
-  return ExprOpcode::EQ_DATA;
-}
-
-ExprOpcode get_neq_opcode(ExprType expr_type) {
-  switch (expr_type) {
-    case ExprType::DATA:
-      return ExprOpcode::NEQ_DATA;
-    case ExprType::HEADER:
-      return ExprOpcode::NEQ_HEADER;
-    case ExprType::BOOL:
-      return ExprOpcode::NEQ_BOOL;
-    case ExprType::UNION:
-      return ExprOpcode::NEQ_UNION;
-    default:
-      break;
-  }
-  assert(0);
-  return ExprOpcode::NEQ_DATA;
-}
-
-// TODO(antonin): should this information be in expressions.h?
-ExprType get_opcode_type(ExprOpcode opcode) {
-  switch (opcode) {
-    case ExprOpcode::LOAD_FIELD:
-    case ExprOpcode::LOAD_CONST:
-    case ExprOpcode::LOAD_LOCAL:
-    case ExprOpcode::LOAD_REGISTER_REF:
-    case ExprOpcode::LOAD_REGISTER_GEN:
-    case ExprOpcode::LOAD_LAST_HEADER_STACK_FIELD:
-    case ExprOpcode::ADD:
-    case ExprOpcode::SUB:
-    case ExprOpcode::MOD:
-    case ExprOpcode::DIV:
-    case ExprOpcode::MUL:
-    case ExprOpcode::SHIFT_LEFT:
-    case ExprOpcode::SHIFT_RIGHT:
-    case ExprOpcode::BIT_AND:
-    case ExprOpcode::BIT_OR:
-    case ExprOpcode::BIT_XOR:
-    case ExprOpcode::BIT_NEG:
-    case ExprOpcode::TWO_COMP_MOD:
-    case ExprOpcode::USAT_CAST:
-    case ExprOpcode::SAT_CAST:
-    case ExprOpcode::BOOL_TO_DATA:
-    case ExprOpcode::LAST_STACK_INDEX:
-    case ExprOpcode::SIZE_STACK:
-    case ExprOpcode::ACCESS_FIELD:
-      return ExprType::DATA;
-    case ExprOpcode::LOAD_BOOL:
-    case ExprOpcode::EQ_DATA:
-    case ExprOpcode::NEQ_DATA:
-    case ExprOpcode::GT_DATA:
-    case ExprOpcode::LT_DATA:
-    case ExprOpcode::GET_DATA:
-    case ExprOpcode::LET_DATA:
-    case ExprOpcode::EQ_HEADER:
-    case ExprOpcode::NEQ_HEADER:
-    case ExprOpcode::EQ_UNION:
-    case ExprOpcode::NEQ_UNION:
-    case ExprOpcode::EQ_BOOL:
-    case ExprOpcode::NEQ_BOOL:
-    case ExprOpcode::AND:
-    case ExprOpcode::OR:
-    case ExprOpcode::NOT:
-    case ExprOpcode::VALID_HEADER:
-    case ExprOpcode::VALID_UNION:
-    case ExprOpcode::DATA_TO_BOOL:
-      return ExprType::BOOL;
-    case ExprOpcode::LOAD_HEADER:
-    case ExprOpcode::DEREFERENCE_HEADER_STACK:
-    case ExprOpcode::ACCESS_UNION_HEADER:
-      return ExprType::HEADER;
-    case ExprOpcode::LOAD_HEADER_STACK:
-      return ExprType::HEADER_STACK;
-    case ExprOpcode::LOAD_UNION:
-    case ExprOpcode::DEREFERENCE_UNION_STACK:
-      return ExprType::UNION;
-    case ExprOpcode::LOAD_UNION_STACK:
-      return ExprType::UNION_STACK;
-    case ExprOpcode::TERNARY_OP:
-      return ExprType::UNKNOWN;
-    case ExprOpcode::SKIP:
-      break;
-  }
-  assert(0);
-  return ExprType::UNKNOWN;
-}
 
 std::unique_ptr<SourceInfo> object_source_info(const Json::Value &cfg_object) {
   std::string filename = "";
@@ -297,7 +190,9 @@ P4Objects::build_expression(const Json::Value &json_expression,
       build_expression(json_right, expr, &typeR);
       assert(typeL == typeR);
       assert(typeL != ExprType::UNKNOWN);
-      auto opcode = (op == "==") ? get_eq_opcode(typeL) : get_neq_opcode(typeL);
+      auto opcode = (op == "==") ?
+          ExprOpcodesUtils::get_eq_opcode(typeL) :
+          ExprOpcodesUtils::get_neq_opcode(typeL);
       expr->push_back_op(opcode);
       *expr_type = ExprType::BOOL;
     } else if (op == "access_field") {
@@ -313,7 +208,7 @@ P4Objects::build_expression(const Json::Value &json_expression,
 
       auto opcode = ExprOpcodesMap::get_opcode(op);
       expr->push_back_op(opcode);
-      *expr_type = get_opcode_type(opcode);
+      *expr_type = ExprOpcodesUtils::get_opcode_type(opcode);
     }
   } else if (type == "header") {
     auto header_id = get_header_id_cfg(json_value.asString());
@@ -491,11 +386,12 @@ P4Objects::process_single_param(ActionFn* action_fn,
   } else if (type == "expression") {
     // TODO(Antonin): should this make the field case (and other) obsolete
     // maybe if we can optimize this case
-    auto expr = new ArithExpression();
-    build_expression(cfg_parameter["value"], expr);
+    auto expr = new Expression();
+    ExprType expr_type;
+    build_expression(cfg_parameter["value"], expr, &expr_type);
     expr->build();
     action_fn->parameter_push_back_expression(
-        std::unique_ptr<ArithExpression>(expr));
+        std::unique_ptr<Expression>(expr));
   } else if (type == "register") {
     // TODO(antonin): cheap optimization
     // this may not be worth doing, and probably does not belong here

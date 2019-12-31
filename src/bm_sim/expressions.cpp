@@ -1,4 +1,5 @@
-/* Copyright 2013-present Barefoot Networks, Inc.
+/* Copyright 2013-2019 Barefoot Networks, Inc.
+ * Copyright 2019 VMware, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  */
 
 /*
- * Antonin Bas (antonin@barefootnetworks.com)
+ * Antonin Bas
  *
  */
 
@@ -101,6 +102,112 @@ ExprOpcodesMap::get_opcode(std::string expr_name) {
   ExprOpcodesMap *instance = get_instance();
   return instance->opcodes_map[expr_name];
 }
+
+/* static */ ExprOpcode
+ExprOpcodesUtils::get_eq_opcode(ExprType expr_type) {
+  switch (expr_type) {
+    case ExprType::DATA:
+      return ExprOpcode::EQ_DATA;
+    case ExprType::HEADER:
+      return ExprOpcode::EQ_HEADER;
+    case ExprType::BOOL:
+      return ExprOpcode::EQ_BOOL;
+    case ExprType::UNION:
+      return ExprOpcode::EQ_UNION;
+    default:
+      break;
+  }
+  assert(0);
+  return ExprOpcode::EQ_DATA;
+}
+
+/* static */ ExprOpcode
+ExprOpcodesUtils::get_neq_opcode(ExprType expr_type) {
+  switch (expr_type) {
+    case ExprType::DATA:
+      return ExprOpcode::NEQ_DATA;
+    case ExprType::HEADER:
+      return ExprOpcode::NEQ_HEADER;
+    case ExprType::BOOL:
+      return ExprOpcode::NEQ_BOOL;
+    case ExprType::UNION:
+      return ExprOpcode::NEQ_UNION;
+    default:
+      break;
+  }
+  assert(0);
+  return ExprOpcode::NEQ_DATA;
+}
+
+/* static */
+ExprType
+ExprOpcodesUtils::get_opcode_type(ExprOpcode opcode) {
+  switch (opcode) {
+    case ExprOpcode::LOAD_FIELD:
+    case ExprOpcode::LOAD_CONST:
+    case ExprOpcode::LOAD_LOCAL:
+    case ExprOpcode::LOAD_REGISTER_REF:
+    case ExprOpcode::LOAD_REGISTER_GEN:
+    case ExprOpcode::LOAD_LAST_HEADER_STACK_FIELD:
+    case ExprOpcode::ADD:
+    case ExprOpcode::SUB:
+    case ExprOpcode::MOD:
+    case ExprOpcode::DIV:
+    case ExprOpcode::MUL:
+    case ExprOpcode::SHIFT_LEFT:
+    case ExprOpcode::SHIFT_RIGHT:
+    case ExprOpcode::BIT_AND:
+    case ExprOpcode::BIT_OR:
+    case ExprOpcode::BIT_XOR:
+    case ExprOpcode::BIT_NEG:
+    case ExprOpcode::TWO_COMP_MOD:
+    case ExprOpcode::USAT_CAST:
+    case ExprOpcode::SAT_CAST:
+    case ExprOpcode::BOOL_TO_DATA:
+    case ExprOpcode::LAST_STACK_INDEX:
+    case ExprOpcode::SIZE_STACK:
+    case ExprOpcode::ACCESS_FIELD:
+      return ExprType::DATA;
+    case ExprOpcode::LOAD_BOOL:
+    case ExprOpcode::EQ_DATA:
+    case ExprOpcode::NEQ_DATA:
+    case ExprOpcode::GT_DATA:
+    case ExprOpcode::LT_DATA:
+    case ExprOpcode::GET_DATA:
+    case ExprOpcode::LET_DATA:
+    case ExprOpcode::EQ_HEADER:
+    case ExprOpcode::NEQ_HEADER:
+    case ExprOpcode::EQ_UNION:
+    case ExprOpcode::NEQ_UNION:
+    case ExprOpcode::EQ_BOOL:
+    case ExprOpcode::NEQ_BOOL:
+    case ExprOpcode::AND:
+    case ExprOpcode::OR:
+    case ExprOpcode::NOT:
+    case ExprOpcode::VALID_HEADER:
+    case ExprOpcode::VALID_UNION:
+    case ExprOpcode::DATA_TO_BOOL:
+      return ExprType::BOOL;
+    case ExprOpcode::LOAD_HEADER:
+    case ExprOpcode::DEREFERENCE_HEADER_STACK:
+    case ExprOpcode::ACCESS_UNION_HEADER:
+      return ExprType::HEADER;
+    case ExprOpcode::LOAD_HEADER_STACK:
+      return ExprType::HEADER_STACK;
+    case ExprOpcode::LOAD_UNION:
+    case ExprOpcode::DEREFERENCE_UNION_STACK:
+      return ExprType::UNION;
+    case ExprOpcode::LOAD_UNION_STACK:
+      return ExprType::UNION_STACK;
+    case ExprOpcode::TERNARY_OP:
+      return ExprType::UNKNOWN;
+    case ExprOpcode::SKIP:
+      break;
+  }
+  assert(0);
+  return ExprType::UNKNOWN;
+}
+
 
 Expression::Expression() {
   // trick so that empty expressions can still be executed
@@ -291,64 +398,110 @@ Expression::grab_register_accesses(RegisterSync *register_sync) const {
   }
 }
 
-/* I have made this function more efficient by using thread_local variables
-   instead of dynamic allocation at each call. Maybe it would be better to just
-   try to use a stack allocator */
+struct ExpressionTemps {
+  ExpressionTemps()
+      : data_temps_size(4), data_temps(data_temps_size) { }
+
+  void prepare(int data_registers_cnt) {
+    while (data_temps_size < data_registers_cnt) {
+      data_temps.emplace_back();
+      data_temps_size++;
+    }
+
+    bool_temps_stack.clear();
+    data_temps_stack.clear();
+    header_temps_stack.clear();
+    stack_temps_stack.clear();
+    union_temps_stack.clear();
+  }
+
+  void push_bool(bool b) {
+    bool_temps_stack.push_back(b);
+  }
+
+  bool pop_bool() {
+    auto r = bool_temps_stack.back();
+    bool_temps_stack.pop_back();
+    return r;
+  }
+
+  void push_data(const Data *data) {
+    data_temps_stack.push_back(data);
+  }
+
+  const Data *pop_data() {
+    auto *r = data_temps_stack.back();
+    data_temps_stack.pop_back();
+    return r;
+  }
+
+  void push_header(const Header *hdr) {
+    header_temps_stack.push_back(hdr);
+  }
+
+  const Header *pop_header() {
+    auto *r = header_temps_stack.back();
+    header_temps_stack.pop_back();
+    return r;
+  }
+
+  void push_stack(const StackIface *stack) {
+    stack_temps_stack.push_back(stack);
+  }
+
+  const StackIface *pop_stack() {
+    auto *r = stack_temps_stack.back();
+    stack_temps_stack.pop_back();
+    return r;
+  }
+
+  const HeaderStack *pop_header_stack() {
+    return static_cast<const HeaderStack *>(pop_stack());
+  }
+
+  const HeaderUnionStack *pop_union_stack() {
+    return static_cast<const HeaderUnionStack *>(pop_stack());
+  }
+
+  void push_union(const HeaderUnion *hdr_union) {
+    union_temps_stack.push_back(hdr_union);
+  }
+
+  const HeaderUnion *pop_union() {
+    auto *r = union_temps_stack.back();
+    union_temps_stack.pop_back();
+    return r;
+  }
+
+  static ExpressionTemps &get_instance() {
+    // using a static thread-local variable to avoid allocation new memory every
+    // time an expression needs to be evaluated. An alternative could be a
+    // custom stack allocator.
+    static thread_local ExpressionTemps instance;
+    return instance;
+  }
+
+  int data_temps_size;
+  std::vector<Data> data_temps;
+
+  // Logically, I am using these as stacks but experiments showed that using
+  // vectors directly was more efficient.
+  std::vector<bool> bool_temps_stack;
+  std::vector<const Data *> data_temps_stack;
+  std::vector<const Header *> header_temps_stack;
+  std::vector<const StackIface *> stack_temps_stack;
+  std::vector<const HeaderUnion *> union_temps_stack;
+};
+
 void
-Expression::eval_(const PHV &phv, ExprType expr_type,
+Expression::eval_(const PHV &phv,
                   const std::vector<Data> &locals,
-                  bool *b_res, Data *d_res) const {
+                  ExpressionTemps *temps) const {
   assert(built);
 
-  if (ops.empty()) {
-    // special case, where the expression is empty
-    // not sure if this is the best way to handle this case, maybe the compiler
-    // should make sure this never happens instead and we should treat this as
-    // an error
-    switch (expr_type) {
-      case ExprType::EXPR_BOOL:
-        *b_res = false;
-        return;
-      case ExprType::EXPR_DATA:
-        d_res->set(0);
-        return;
-    }
-  }
+  temps->prepare(data_registers_cnt);
 
-  static thread_local int data_temps_size = 4;
-  // std::vector<Data> data_temps(data_registers_cnt);
-  static thread_local std::vector<Data> data_temps(data_temps_size);
-  while (data_temps_size < data_registers_cnt) {
-    data_temps.emplace_back();
-    data_temps_size++;
-  }
-
-  /* Logically, I am using these as stacks but experiments showed that using
-     vectors directly was more efficient (also I can call reserve to avoid
-     multiple calls to malloc */
-
-  /* 4 is arbitrary, it is possible to do an analysis on the Expression to find
-     the exact number needed, but I don't think it is worth it... */
-
-  static thread_local std::vector<bool> bool_temps_stack;
-  bool_temps_stack.clear();
-  // bool_temps_stack.reserve(4);
-
-  static thread_local std::vector<const Data *> data_temps_stack;
-  data_temps_stack.clear();
-  // data_temps_stack.reserve(4);
-
-  static thread_local std::vector<const Header *> header_temps_stack;
-  header_temps_stack.clear();
-  // header_temps_stack.reserve(4);
-
-  static thread_local std::vector<const StackIface *> stack_temps_stack;
-  stack_temps_stack.clear();
-  // stack_temps_stack.reserve(2);
-
-  static thread_local std::vector<const HeaderUnion *> union_temps_stack;
-  union_temps_stack.clear();
-  // union_temps_stack.reserve(2);
+  auto &data_temps = temps->data_temps;
 
   bool lb, rb;
   const Data *ld, *rd;
@@ -361,245 +514,241 @@ Expression::eval_(const PHV &phv, ExprType expr_type,
     const auto &op = ops[i];
     switch (op.opcode) {
       case ExprOpcode::LOAD_FIELD:
-        data_temps_stack.push_back(
-            &(phv.get_field(op.field.header, op.field.field_offset)));
+        temps->push_data(
+            &phv.get_field(op.field.header, op.field.field_offset));
         break;
 
       case ExprOpcode::LOAD_HEADER:
-        header_temps_stack.push_back(&(phv.get_header(op.header)));
+        temps->push_header(&phv.get_header(op.header));
         break;
 
       case ExprOpcode::LOAD_HEADER_STACK:
-        stack_temps_stack.push_back(&(phv.get_header_stack(op.header_stack)));
+        temps->push_stack(&phv.get_header_stack(op.header_stack));
         break;
 
       case ExprOpcode::LOAD_LAST_HEADER_STACK_FIELD:
-        data_temps_stack.push_back(
-            &(phv.get_header_stack(op.stack_field.header_stack).get_last()
-              .get_field(op.stack_field.field_offset)));
+        temps->push_data(
+            &phv.get_header_stack(op.stack_field.header_stack).get_last()
+              .get_field(op.stack_field.field_offset));
         break;
 
       case ExprOpcode::LOAD_UNION:
-        union_temps_stack.push_back(&(phv.get_header_union(op.header_union)));
+        temps->push_union(&phv.get_header_union(op.header_union));
         break;
 
       case ExprOpcode::LOAD_UNION_STACK:
-        stack_temps_stack.push_back(
-            &(phv.get_header_union_stack(op.header_union_stack)));
+        temps->push_stack(&phv.get_header_union_stack(op.header_union_stack));
         break;
 
       case ExprOpcode::LOAD_BOOL:
-        bool_temps_stack.push_back(op.bool_value);
+        temps->push_bool(op.bool_value);
         break;
 
       case ExprOpcode::LOAD_CONST:
-        data_temps_stack.push_back(&const_values[op.const_offset]);
+        temps->push_data(&const_values[op.const_offset]);
         break;
 
       case ExprOpcode::LOAD_LOCAL:
-        data_temps_stack.push_back(&locals[op.local_offset]);
+        temps->push_data(&locals[op.local_offset]);
         break;
 
       case ExprOpcode::LOAD_REGISTER_REF:
-        data_temps_stack.push_back(
-            &op.register_ref.array->at(op.register_ref.idx));
+        temps->push_data(&op.register_ref.array->at(op.register_ref.idx));
         break;
 
       case ExprOpcode::LOAD_REGISTER_GEN:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        data_temps_stack.push_back(&op.register_array->at(rd->get<size_t>()));
+        rd = temps->pop_data();
+        temps->push_data(&op.register_array->at(rd->get<size_t>()));
         break;
 
       case ExprOpcode::ACCESS_FIELD:
-        data_temps_stack.push_back(
-            &(header_temps_stack.back()->get_field(op.field_offset)));
-        header_temps_stack.pop_back();
+        rh = temps->pop_header();
+        temps->push_data(&rh->get_field(op.field_offset));
         break;
 
       case ExprOpcode::ACCESS_UNION_HEADER:
-        ru = union_temps_stack.back(); union_temps_stack.pop_back();
-        header_temps_stack.push_back(&ru->at(op.header_offset));
+        ru = temps->pop_union();
+        temps->push_header(&ru->at(op.header_offset));
         break;
 
       case ExprOpcode::ADD:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        rd = temps->pop_data();
+        ld = temps->pop_data();
         data_temps[op.data_dest_index].add(*ld, *rd);
-        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        temps->push_data(&data_temps[op.data_dest_index]);
         break;
 
       case ExprOpcode::SUB:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        rd = temps->pop_data();
+        ld = temps->pop_data();
         data_temps[op.data_dest_index].sub(*ld, *rd);
-        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        temps->push_data(&data_temps[op.data_dest_index]);
         break;
 
       case ExprOpcode::MOD:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        rd = temps->pop_data();
+        ld = temps->pop_data();
         data_temps[op.data_dest_index].mod(*ld, *rd);
-        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        temps->push_data(&data_temps[op.data_dest_index]);
         break;
 
       case ExprOpcode::DIV:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        rd = temps->pop_data();
+        ld = temps->pop_data();
         data_temps[op.data_dest_index].divide(*ld, *rd);
-        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        temps->push_data(&data_temps[op.data_dest_index]);
         break;
 
       case ExprOpcode::MUL:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        rd = temps->pop_data();
+        ld = temps->pop_data();
         data_temps[op.data_dest_index].multiply(*ld, *rd);
-        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        temps->push_data(&data_temps[op.data_dest_index]);
         break;
 
       case ExprOpcode::SHIFT_LEFT:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        rd = temps->pop_data();
+        ld = temps->pop_data();
         data_temps[op.data_dest_index].shift_left(*ld, *rd);
-        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        temps->push_data(&data_temps[op.data_dest_index]);
         break;
 
       case ExprOpcode::SHIFT_RIGHT:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        rd = temps->pop_data();
+        ld = temps->pop_data();
         data_temps[op.data_dest_index].shift_right(*ld, *rd);
-        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        temps->push_data(&data_temps[op.data_dest_index]);
         break;
 
       case ExprOpcode::EQ_DATA:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
-        bool_temps_stack.push_back(*ld == *rd);
+        rd = temps->pop_data();
+        ld = temps->pop_data();
+        temps->push_bool(*ld == *rd);
         break;
 
       case ExprOpcode::NEQ_DATA:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
-        bool_temps_stack.push_back(*ld != *rd);
+        rd = temps->pop_data();
+        ld = temps->pop_data();
+        temps->push_bool(*ld != *rd);
         break;
 
       case ExprOpcode::GT_DATA:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
-        bool_temps_stack.push_back(*ld > *rd);
+        rd = temps->pop_data();
+        ld = temps->pop_data();
+        temps->push_bool(*ld > *rd);
         break;
 
       case ExprOpcode::LT_DATA:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
-        bool_temps_stack.push_back(*ld < *rd);
+        rd = temps->pop_data();
+        ld = temps->pop_data();
+        temps->push_bool(*ld < *rd);
         break;
 
       case ExprOpcode::GET_DATA:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
-        bool_temps_stack.push_back(*ld >= *rd);
+        rd = temps->pop_data();
+        ld = temps->pop_data();
+        temps->push_bool(*ld >= *rd);
         break;
 
       case ExprOpcode::LET_DATA:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
-        bool_temps_stack.push_back(*ld <= *rd);
+        rd = temps->pop_data();
+        ld = temps->pop_data();
+        temps->push_bool(*ld <= *rd);
         break;
 
       case ExprOpcode::EQ_HEADER:
-        rh = header_temps_stack.back(); header_temps_stack.pop_back();
-        lh = header_temps_stack.back(); header_temps_stack.pop_back();
-        bool_temps_stack.push_back(lh->cmp(*rh));
+        rh = temps->pop_header();
+        lh = temps->pop_header();
+        temps->push_bool(lh->cmp(*rh));
         break;
 
       case ExprOpcode::NEQ_HEADER:
-        rh = header_temps_stack.back(); header_temps_stack.pop_back();
-        lh = header_temps_stack.back(); header_temps_stack.pop_back();
-        bool_temps_stack.push_back(!lh->cmp(*rh));
+        rh = temps->pop_header();
+        lh = temps->pop_header();
+        temps->push_bool(!lh->cmp(*rh));
         break;
 
       case ExprOpcode::EQ_UNION:
-        ru = union_temps_stack.back(); union_temps_stack.pop_back();
-        lu = union_temps_stack.back(); union_temps_stack.pop_back();
-        bool_temps_stack.push_back(lu->cmp(*ru));
+        ru = temps->pop_union();
+        lu = temps->pop_union();
+        temps->push_bool(lu->cmp(*ru));
         break;
 
       case ExprOpcode::NEQ_UNION:
-        ru = union_temps_stack.back(); union_temps_stack.pop_back();
-        lu = union_temps_stack.back(); union_temps_stack.pop_back();
-        bool_temps_stack.push_back(!lu->cmp(*ru));
+        ru = temps->pop_union();
+        lu = temps->pop_union();
+        temps->push_bool(!lu->cmp(*ru));
         break;
 
       case ExprOpcode::EQ_BOOL:
-        rb = bool_temps_stack.back(); bool_temps_stack.pop_back();
-        lb = bool_temps_stack.back(); bool_temps_stack.pop_back();
-        bool_temps_stack.push_back(lb == rb);
+        rb = temps->pop_bool();
+        lb = temps->pop_bool();
+        temps->push_bool(lb == rb);
         break;
 
       case ExprOpcode::NEQ_BOOL:
-        rb = bool_temps_stack.back(); bool_temps_stack.pop_back();
-        lb = bool_temps_stack.back(); bool_temps_stack.pop_back();
-        bool_temps_stack.push_back(lb != rb);
+        rb = temps->pop_bool();
+        lb = temps->pop_bool();
+        temps->push_bool(lb != rb);
         break;
 
       case ExprOpcode::AND:
-        rb = bool_temps_stack.back(); bool_temps_stack.pop_back();
-        lb = bool_temps_stack.back(); bool_temps_stack.pop_back();
-        bool_temps_stack.push_back(lb && rb);
+        rb = temps->pop_bool();
+        lb = temps->pop_bool();
+        temps->push_bool(lb && rb);
         break;
 
       case ExprOpcode::OR:
-        rb = bool_temps_stack.back(); bool_temps_stack.pop_back();
-        lb = bool_temps_stack.back(); bool_temps_stack.pop_back();
-        bool_temps_stack.push_back(lb || rb);
+        rb = temps->pop_bool();
+        lb = temps->pop_bool();
+        temps->push_bool(lb || rb);
         break;
 
       case ExprOpcode::NOT:
-        rb = bool_temps_stack.back(); bool_temps_stack.pop_back();
-        bool_temps_stack.push_back(!rb);
+        rb = temps->pop_bool();
+        temps->push_bool(!rb);
         break;
 
       case ExprOpcode::BIT_AND:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        rd = temps->pop_data();
+        ld = temps->pop_data();
         data_temps[op.data_dest_index].bit_and(*ld, *rd);
-        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        temps->push_data(&data_temps[op.data_dest_index]);
         break;
 
       case ExprOpcode::BIT_OR:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        rd = temps->pop_data();
+        ld = temps->pop_data();
         data_temps[op.data_dest_index].bit_or(*ld, *rd);
-        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        temps->push_data(&data_temps[op.data_dest_index]);
         break;
 
       case ExprOpcode::BIT_XOR:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        rd = temps->pop_data();
+        ld = temps->pop_data();
         data_temps[op.data_dest_index].bit_xor(*ld, *rd);
-        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        temps->push_data(&data_temps[op.data_dest_index]);
         break;
 
       case ExprOpcode::BIT_NEG:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
+        rd = temps->pop_data();
         data_temps[op.data_dest_index].bit_neg(*rd);
-        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        temps->push_data(&data_temps[op.data_dest_index]);
         break;
 
       case ExprOpcode::VALID_HEADER:
-        bool_temps_stack.push_back(header_temps_stack.back()->is_valid());
-        header_temps_stack.pop_back();
+        rh = temps->pop_header();
+        temps->push_bool(rh->is_valid());
         break;
 
       case ExprOpcode::VALID_UNION:
-        bool_temps_stack.push_back(union_temps_stack.back()->is_valid());
-        union_temps_stack.pop_back();
+        ru = temps->pop_union();
+        temps->push_bool(ru->is_valid());
         break;
 
       case ExprOpcode::TERNARY_OP:
-        if (bool_temps_stack.back())
-          i += 1;
-        bool_temps_stack.pop_back();
+        rb = temps->pop_bool();
+        if (rb) i += 1;
         break;
 
       case ExprOpcode::SKIP:
@@ -607,65 +756,61 @@ Expression::eval_(const PHV &phv, ExprType expr_type,
         break;
 
       case ExprOpcode::TWO_COMP_MOD:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        rd = temps->pop_data();
+        ld = temps->pop_data();
         data_temps[op.data_dest_index].two_comp_mod(*ld, *rd);
-        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        temps->push_data(&data_temps[op.data_dest_index]);
         break;
 
       case ExprOpcode::USAT_CAST:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        rd = temps->pop_data();
+        ld = temps->pop_data();
         data_temps[op.data_dest_index].usat_cast(*ld, *rd);
-        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        temps->push_data(&data_temps[op.data_dest_index]);
         break;
 
       case ExprOpcode::SAT_CAST:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        ld = data_temps_stack.back(); data_temps_stack.pop_back();
+        rd = temps->pop_data();
+        ld = temps->pop_data();
         data_temps[op.data_dest_index].sat_cast(*ld, *rd);
-        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        temps->push_data(&data_temps[op.data_dest_index]);
         break;
 
       case ExprOpcode::DATA_TO_BOOL:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        bool_temps_stack.push_back(!rd->test_eq(0));
+        rd = temps->pop_data();
+        temps->push_bool(!rd->test_eq(0));
         break;
 
       case ExprOpcode::BOOL_TO_DATA:
-        rb = bool_temps_stack.back(); bool_temps_stack.pop_back();
+        rb = temps->pop_bool();
         data_temps[op.data_dest_index].set(static_cast<int>(rb));
-        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        temps->push_data(&data_temps[op.data_dest_index]);
         break;
 
       case ExprOpcode::DEREFERENCE_HEADER_STACK:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        hs = static_cast<const HeaderStack *>(stack_temps_stack.back());
-        header_temps_stack.push_back(&hs->at(rd->get<size_t>()));
-        stack_temps_stack.pop_back();
+        rd = temps->pop_data();
+        hs = temps->pop_header_stack();
+        temps->push_header(&hs->at(rd->get<size_t>()));
         break;
 
       // LAST_STACK_INDEX seems a little redundant given SIZE_STACK, but I don't
       // exclude in the future to do some sanity checking for LAST_STACK_INDEX
       case ExprOpcode::LAST_STACK_INDEX:
-        data_temps[op.data_dest_index].set(
-            stack_temps_stack.back()->get_count() - 1);
-        stack_temps_stack.pop_back();
-        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        hs = temps->pop_header_stack();
+        data_temps[op.data_dest_index].set(hs->get_count() - 1);
+        temps->push_data(&data_temps[op.data_dest_index]);
         break;
 
       case ExprOpcode::SIZE_STACK:
-        data_temps[op.data_dest_index].set(
-            stack_temps_stack.back()->get_count());
-        stack_temps_stack.pop_back();
-        data_temps_stack.push_back(&data_temps[op.data_dest_index]);
+        hs = temps->pop_header_stack();
+        data_temps[op.data_dest_index].set(hs->get_count());
+        temps->push_data(&data_temps[op.data_dest_index]);
         break;
 
       case ExprOpcode::DEREFERENCE_UNION_STACK:
-        rd = data_temps_stack.back(); data_temps_stack.pop_back();
-        hus = static_cast<const HeaderUnionStack *>(stack_temps_stack.back());
-        union_temps_stack.push_back(&hus->at(rd->get<size_t>()));
-        stack_temps_stack.pop_back();
+        rd = temps->pop_data();
+        hus = temps->pop_union_stack();
+        temps->push_union(&hus->at(rd->get<size_t>()));
         break;
 
       default:
@@ -673,35 +818,86 @@ Expression::eval_(const PHV &phv, ExprType expr_type,
         break;
     }
   }
-
-  switch (expr_type) {
-    case ExprType::EXPR_BOOL:
-      *b_res = bool_temps_stack.back();
-      break;
-    case ExprType::EXPR_DATA:
-      d_res->set(*(data_temps_stack.back()));
-      break;
-  }
 }
 
 bool
 Expression::eval_bool(const PHV &phv, const std::vector<Data> &locals) const {
-  bool result;
-  eval_(phv, ExprType::EXPR_BOOL, locals, &result, nullptr);
-  return result;
+  // special case, where the expression is empty
+  // not sure if this is the best way to handle this case, maybe the compiler
+  // should make sure this never happens instead and we should treat this as
+  // an error
+  if (ops.empty()) return false;
+  auto &temps = ExpressionTemps::get_instance();
+  eval_(phv, locals, &temps);
+  return temps.pop_bool();
 }
 
 Data
 Expression::eval_arith(const PHV &phv, const std::vector<Data> &locals) const {
-  Data result_ptr;
-  eval_(phv, ExprType::EXPR_DATA, locals, nullptr, &result_ptr);
-  return result_ptr;
+  if (ops.empty()) return Data(0);
+  auto &temps = ExpressionTemps::get_instance();
+  eval_(phv, locals, &temps);
+  return *temps.pop_data();
 }
 
 void
 Expression::eval_arith(const PHV &phv, Data *data,
                        const std::vector<Data> &locals) const {
-  eval_(phv, ExprType::EXPR_DATA, locals, nullptr, data);
+  if (ops.empty()) {
+    data->set(0);
+    return;
+  }
+  auto &temps = ExpressionTemps::get_instance();
+  eval_(phv, locals, &temps);
+  data->set(*temps.pop_data());
+}
+
+// Unfortunately all the methods use a const_cast. I wanted to avoid having to
+// change the interface for existing methods (eval_arith and eval_bool), for
+// which the expectation is that the PHV will not be modified during
+// evaluation. This meant that changing the private eval_ method was
+// difficult. I haven't found a good solution, which doesn't make the code more
+// complex. yet.
+
+Data &
+Expression::eval_arith_lvalue(PHV *phv, const std::vector<Data> &locals) const {
+  assert(!ops.empty());
+  auto &temps = ExpressionTemps::get_instance();
+  eval_(*phv, locals, &temps);
+  return const_cast<Data &>(*temps.pop_data());
+}
+
+Header &
+Expression::eval_header(PHV *phv, const std::vector<Data> &locals) const {
+  assert(!ops.empty());
+  auto &temps = ExpressionTemps::get_instance();
+  eval_(*phv, locals, &temps);
+  return const_cast<Header &>(*temps.pop_header());
+}
+
+HeaderStack &
+Expression::eval_header_stack(PHV *phv, const std::vector<Data> &locals) const {
+  assert(!ops.empty());
+  auto &temps = ExpressionTemps::get_instance();
+  eval_(*phv, locals, &temps);
+  return const_cast<HeaderStack &>(*temps.pop_header_stack());
+}
+
+HeaderUnion &
+Expression::eval_header_union(PHV *phv, const std::vector<Data> &locals) const {
+  assert(!ops.empty());
+  auto &temps = ExpressionTemps::get_instance();
+  eval_(*phv, locals, &temps);
+  return const_cast<HeaderUnion &>(*temps.pop_union());
+}
+
+HeaderUnionStack &
+Expression::eval_header_union_stack(
+      PHV *phv, const std::vector<Data> &locals) const {
+  assert(!ops.empty());
+  auto &temps = ExpressionTemps::get_instance();
+  eval_(*phv, locals, &temps);
+  return const_cast<HeaderUnionStack &>(*temps.pop_union_stack());
 }
 
 // TODO(antonin): If there is a ternary op, we will over-estimate this number,

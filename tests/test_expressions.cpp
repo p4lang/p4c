@@ -1,4 +1,5 @@
-/* Copyright 2013-present Barefoot Networks, Inc.
+/* Copyright 2013-2019 Barefoot Networks, Inc.
+ * Copyright 2019 VMware, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  */
 
 /*
- * Antonin Bas (antonin@barefootnetworks.com)
+ * Antonin Bas
  *
  */
 
@@ -36,6 +37,8 @@ class ExpressionsTest : public ::testing::Test {
   HeaderType testHeaderType;
   header_id_t testHeader1{0}, testHeader2{1};
 
+  header_stack_id_t testHeaderStack{0};
+
   ExpressionsTest()
       : testHeaderType("test_t", 0) {
     testHeaderType.push_back_field("f32", 32);
@@ -45,6 +48,10 @@ class ExpressionsTest : public ::testing::Test {
     testHeaderType.push_back_field("f128", 128);
     phv_factory.push_back_header("test1", testHeader1, testHeaderType);
     phv_factory.push_back_header("test2", testHeader2, testHeaderType);
+
+    phv_factory.push_back_header_stack(
+        "test_stack", testHeaderStack, testHeaderType,
+        {testHeader1, testHeader2});
   }
 
   virtual void SetUp() {
@@ -59,7 +66,7 @@ TEST_F(ExpressionsTest, EmptyArith) {
   expr.build();
   ASSERT_TRUE(expr.empty());
   const auto data = expr.eval_arith(*phv.get());
-  ASSERT_EQ(0, data.get<int>());
+  EXPECT_EQ(0, data.get<int>());
 }
 
 TEST_F(ExpressionsTest, EmptyBool) {
@@ -67,5 +74,37 @@ TEST_F(ExpressionsTest, EmptyBool) {
   expr.build();
   ASSERT_TRUE(expr.empty());
   const auto b = expr.eval_bool(*phv.get());
-  ASSERT_FALSE(b);
+  EXPECT_FALSE(b);
+}
+
+// TODO(antonin): test the union variants
+
+TEST_F(ExpressionsTest, HeaderRef) {
+  Expression expr;
+  expr.push_back_load_header(testHeader1);
+  expr.build();
+
+  auto &hdr = expr.eval_header(phv.get());
+  EXPECT_EQ(&phv->get_header(testHeader1), &hdr);
+}
+
+TEST_F(ExpressionsTest, HeaderStackRef) {
+  Expression expr;
+  expr.push_back_load_header_stack(testHeaderStack);
+  expr.build();
+
+  auto &stack = expr.eval_header_stack(phv.get());
+  EXPECT_EQ(&phv->get_header_stack(testHeaderStack), &stack);
+}
+
+TEST_F(ExpressionsTest, FieldRef) {
+  Expression expr;
+  expr.push_back_load_header_stack(testHeaderStack);
+  expr.push_back_load_const(Data(1));  // testHeader2
+  expr.push_back_op(ExprOpcode::DEREFERENCE_HEADER_STACK);
+  expr.push_back_access_field(3);  // f16
+  expr.build();
+
+  auto &data = expr.eval_arith_lvalue(phv.get());
+  EXPECT_EQ(&phv->get_field(testHeader2, 3), &data);
 }

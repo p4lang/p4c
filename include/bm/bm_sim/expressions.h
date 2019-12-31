@@ -1,4 +1,5 @@
-/* Copyright 2013-present Barefoot Networks, Inc.
+/* Copyright 2013-2019 Barefoot Networks, Inc.
+ * Copyright 2019 VMware, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  */
 
 /*
- * Antonin Bas (antonin@barefootnetworks.com)
+ * Antonin Bas
  *
  */
 
@@ -26,12 +27,17 @@
 #include <vector>
 
 #include "data.h"
+#include "headers.h"
+#include "header_unions.h"
 #include "phv_forward.h"
+#include "stacks.h"
 
 namespace bm {
 
 class RegisterArray;
 class RegisterSync;
+
+struct ExpressionTemps;
 
 enum class ExprOpcode {
   LOAD_FIELD, LOAD_HEADER, LOAD_HEADER_STACK, LOAD_LAST_HEADER_STACK_FIELD,
@@ -56,6 +62,10 @@ enum class ExprOpcode {
   ACCESS_UNION_HEADER,
 };
 
+enum class ExprType {
+  UNKNOWN, DATA, HEADER, HEADER_STACK, BOOL, UNION, UNION_STACK
+};
+
 class ExprOpcodesMap {
  public:
   static ExprOpcode get_opcode(std::string expr_name);
@@ -67,6 +77,14 @@ class ExprOpcodesMap {
 
  private:
   std::unordered_map<std::string, ExprOpcode> opcodes_map{};
+};
+
+class ExprOpcodesUtils {
+ public:
+  static ExprOpcode get_eq_opcode(ExprType expr_type);
+  static ExprOpcode get_neq_opcode(ExprType expr_type);
+
+  static ExprType get_opcode_type(ExprOpcode opcode);
 };
 
 struct Op {
@@ -122,6 +140,8 @@ class Expression {
  public:
   Expression();
 
+  virtual ~Expression() { }
+
   void push_back_load_field(header_id_t header, int field_offset);
   void push_back_load_bool(bool value);
   void push_back_load_header(header_id_t header);
@@ -149,6 +169,14 @@ class Expression {
   Data eval_arith(const PHV &phv, const std::vector<Data> &locals = {}) const;
   void eval_arith(const PHV &phv, Data *data,
                   const std::vector<Data> &locals = {}) const;
+  Data &eval_arith_lvalue(PHV *phv, const std::vector<Data> &locals = {}) const;
+  Header &eval_header(PHV *phv, const std::vector<Data> &locals = {}) const;
+  HeaderStack &eval_header_stack(
+      PHV *phv, const std::vector<Data> &locals = {}) const;
+  HeaderUnion &eval_header_union(
+      PHV *phv, const std::vector<Data> &locals = {}) const;
+  HeaderUnionStack &eval_header_union_stack(
+      PHV *phv, const std::vector<Data> &locals = {}) const;
 
   bool empty() const;
 
@@ -160,13 +188,10 @@ class Expression {
   Expression &operator=(Expression &&other) /*noexcept*/ = default;
 
  private:
-  enum class ExprType {EXPR_BOOL, EXPR_DATA};
-
- private:
   int assign_dest_registers();
-  void eval_(const PHV &phv, ExprType expr_type,
+  void eval_(const PHV &phv,
              const std::vector<Data> &locals,
-             bool *b_res, Data *d_res) const;
+             ExpressionTemps *temps) const;
   size_t get_num_ops() const;
   void append_expression(const Expression &e);
 
@@ -185,6 +210,10 @@ class ArithExpression : public Expression {
   void eval(const PHV &phv, Data *data,
             const std::vector<Data> &locals = {}) const {
     eval_arith(phv, data, locals);
+  }
+
+  Data &eval_lvalue(PHV *phv, const std::vector<Data> &locals = {}) const {
+    return eval_arith_lvalue(phv, locals);
   }
 };
 

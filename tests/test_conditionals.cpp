@@ -1,4 +1,5 @@
-/* Copyright 2013-present Barefoot Networks, Inc.
+/* Copyright 2013-2019 Barefoot Networks, Inc.
+ * Copyright 2019 VMware, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  */
 
 /*
- * Antonin Bas (antonin@barefootnetworks.com)
+ * Antonin Bas
  *
  */
 
@@ -46,7 +47,6 @@ class ConditionalsTest : public ::testing::Test {
   header_id_t testHeader1{0}, testHeader2{1};
 
   header_stack_id_t testHeaderStack{0};
-  size_t stack_depth{2};
 
   ConditionalsTest()
     : testHeaderType("test_t", 0) {
@@ -793,7 +793,6 @@ class ConditionalsUnionTest : public ConditionalsTest {
   header_union_id_t testHeaderUnion1{1};
 
   header_union_stack_id_t testHeaderUnionStack{0};
-  size_t union_stack_depth{2};
 
   ConditionalsUnionTest() {
     phv_factory.push_back_header("test3", testHeader3, testHeaderType);

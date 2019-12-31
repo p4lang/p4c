@@ -10,7 +10,7 @@ on each attribute.
 
 ## Current bmv2 JSON format version
 
-The version described in this document is *2.22*.
+The version described in this document is *2.23*.
 
 The major version number will be increased by the compiler only when
 backward-compatibility of the JSON format is broken. After a major version
@@ -463,6 +463,65 @@ call, with the following attributes:
     this is an integer representing an index into the `runtime_data` (attribute
     of action) array. If `type` is `extern`, this is the name of the extern
     instance. See [here](#the-type-value-object) for other types.
+
+An `expression` can either correspond to an lvalue expression or an rvalue
+expression. For example, the P4 expression `hdr.h2[hdr.h1.idx].v = hdr.h1.v + 7`
+corresponds to the following JSON object (which would be an entry in the
+`primitives` JSON array for the action to which the expression belongs):
+```json
+{
+    "op" : "assign",
+    "parameters" : [
+        {
+            "type" : "expression",
+            "value": {
+                "type": "expression",
+                "value": {
+                    "op": "access_field",
+                    "left": {
+                        "type": "expression",
+                        "value": {
+                            "op": "dereference_header_stack",
+                            "left": {
+                                "type": "header_stack",
+                                "value": "h2"
+                            },
+                            "right": {
+                                "type": "field",
+                                "value": ["h1", "idx"]
+                            }
+                        }
+                    },
+                    "right": 0
+                }
+            }
+        },
+        {
+            "type" : "expression",
+            "value": {
+                "type": "expression",
+                "value": {
+                    "op": "+",
+                    "left": {
+                        "type" : "field",
+                        "value" : ["h1", "v"]
+                    },
+                    "right": {
+                        "type" : "hexstr",
+                        "value" : "0x0000004d"
+                    }
+                }
+            }
+        }
+    ]
+}
+```
+In this case, the left-hand side of the assignment (`hdr.h2[hdr.h1.idx].v`) is
+an lvalue, while the right-hand side is an rvalue (`hdr.h1.v + 77`). However,
+this information does not need to appear *explicitly* in the JSON. The bmv2
+implementation of the `assign` primitive requires the first parameter to be a
+lvalue expression, and we assume that the compiler will not generate a JSON that
+violates this requirement. An invalid JSON will lead to undefined behavior.
 
 *Important note about extern instance methods*: even though in P4 these are
 invoked using object-oriented style, bmv2 treats them as regular primitives for

@@ -1,4 +1,5 @@
-/* Copyright 2013-present Barefoot Networks, Inc.
+/* Copyright 2013-2019 Barefoot Networks, Inc.
+ * Copyright 2019 VMware, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  */
 
 /*
- * Antonin Bas (antonin@barefootnetworks.com)
+ * Antonin Bas
  *
  */
 
@@ -140,9 +141,11 @@ ActionFn::parameter_push_back_register_gen(
 
   idx->grab_register_accesses(&register_sync);
 
-  expressions.push_back(std::move(idx));
-  param.register_gen.idx = expressions.back().get();
+  param.register_gen.idx = idx.get();
   params.push_back(param);
+
+  // does not invalidate param.register_gen.idx
+  expressions.push_back(std::move(idx));
 
   register_sync.add_register_array(register_array);
 }
@@ -182,9 +185,7 @@ ActionFn::parameter_push_back_register_array(RegisterArray *register_array) {
 }
 
 void
-ActionFn::parameter_push_back_expression(
-  std::unique_ptr<ArithExpression> expr
-) {
+ActionFn::parameter_push_back_expression(std::unique_ptr<Expression> expr) {
   size_t nb_expression_params = 1;
   for (const auto &p : params)
     if (p.tag == ActionParam::EXPRESSION) nb_expression_params += 1;
@@ -200,6 +201,37 @@ ActionFn::parameter_push_back_expression(
   param.tag = ActionParam::EXPRESSION;
   param.expression = {static_cast<unsigned int>(nb_expression_params),
                       expressions.back().get()};
+  params.push_back(param);
+}
+
+void
+ActionFn::parameter_push_back_expression(std::unique_ptr<Expression> expr,
+                                         ExprType expr_type) {
+  if (expr_type == ExprType::DATA) {
+    parameter_push_back_expression(std::move(expr));
+    return;
+  }
+
+  expressions.push_back(std::move(expr));
+  ActionParam param;
+  switch (expr_type) {
+    case ExprType::HEADER:
+      param.tag = ActionParam::EXPRESSION_HEADER;
+      break;
+    case ExprType::HEADER_STACK:
+      param.tag = ActionParam::EXPRESSION_HEADER_STACK;
+      break;
+    case ExprType::UNION:
+      param.tag = ActionParam::EXPRESSION_HEADER_UNION;
+      break;
+    case ExprType::UNION_STACK:
+      param.tag = ActionParam::EXPRESSION_HEADER_UNION_STACK;
+      break;
+    default:
+      assert(0 && "Invalid expression type");
+      return;
+  }
+  param.expression = {static_cast<unsigned int>(-1), expressions.back().get()};
   params.push_back(param);
 }
 

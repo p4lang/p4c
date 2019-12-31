@@ -92,8 +92,6 @@ class P4Objects {
     std::set<std::string> headers;
   };
 
-  enum class ExprType;  // forward declaration
-
  public:
   // NOLINTNEXTLINE(runtime/references)
   explicit P4Objects(std::ostream &outstream, bool verbose_output = false);
