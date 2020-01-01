@@ -42,11 +42,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         packet.extract(hdr = hdr.ethernet);
         transition select(true, hdr.ethernet.etherType) {
             (true, 16w0x800 .. 16w0x806): parse_ipv4;
+            (true, 16w0x806 .. 16w0x800): parse_x;
             default: accept;
         }
     }
     state parse_ipv4 {
         packet.extract(hdr = hdr.ipv4);
+        transition accept;
+    }
+    state parse_x {
         transition accept;
     }
     state start {
