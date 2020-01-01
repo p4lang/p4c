@@ -283,6 +283,20 @@ void ParserConverter::convertSimpleKey(const IR::Expression* keySet,
     } else if (keySet->is<IR::DefaultExpression>()) {
         value = 0;
         mask = 0;
+    } else if (keySet->is<IR::Range>()) {
+        auto range = keySet->to<IR::Range>();
+        if (!range->left->is<IR::Constant>()) {
+            ::error(ErrorType::ERR_INVALID, "must evaluate to a compile-time "
+                  "constant", range->left);
+            return;
+        }
+        if (!range->right->is<IR::Constant>()) {
+            ::error(ErrorType::ERR_INVALID, "must evaluate to a compile-time "
+            "constant", range->right);
+            return;
+        }
+        value = range->left->to<IR::Constant>()->value;
+        mask = range->right->to<IR::Constant>()->value;
     } else {
         ::error(ErrorType::ERR_INVALID, "must evaluate to a compile-time constant", keySet);
         value = 0;
