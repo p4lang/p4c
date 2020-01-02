@@ -297,7 +297,7 @@ void ParserConverter::convertSimpleKey(const IR::Expression* keySet,
             return;
         }
         auto right = range->right->to<IR::Constant>()->value;
-        if (right <= left) {
+        if (right < left) {
             ::error(ErrorType::ERR_INVALID, "Range end is %1% "
                     "<= to start %2%", right, left);
             return;
