@@ -284,7 +284,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %type<IR::IndexedVector<IR::Property>*>  tablePropertyList
 %type<IR::KeyElement*>      keyElement
 %type<IR::Vector<IR::KeyElement>*>  keyElementList
-%type<IR::ActionListElement*>  actionRef
+%type<IR::Expression*>  actionRef
 %type<IR::IndexedVector<IR::ActionListElement>*>  actionList
 %type<IR::Entry*>           entry
 %type<IR::Vector<IR::Entry>*>  entriesList
@@ -1196,15 +1196,15 @@ keyElement
 
 actionList
     : /* empty */                        { $$ = new IR::IndexedVector<IR::ActionListElement>(); }
-    | actionList actionRef ";"           { $$ = $1; $$->push_back($2); }
+    | actionList optAnnotations actionRef ";" 
+        { $$ = $1; $$->push_back(new IR::ActionListElement(@3, $2, $3)); }
     ;
 
 actionRef
-    : optAnnotations prefixedNonTypeName { $$ = new IR::ActionListElement(@2, $1, new IR::PathExpression($2));}
-    | optAnnotations prefixedNonTypeName "(" argumentList ")"
-                                         { auto mce = new IR::MethodCallExpression(
-                                             @2+@4, new IR::PathExpression($2), $4);
-                                           $$ = new IR::ActionListElement(@2, $1, mce); }
+    : prefixedNonTypeName 
+        { $$ = new IR::PathExpression($1);}
+    | prefixedNonTypeName "(" argumentList ")"
+        { $$ = new IR::MethodCallExpression(@1+@3, new IR::PathExpression($1), $3); }
     ;
 
 entry
