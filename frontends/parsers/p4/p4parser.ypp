@@ -1223,7 +1223,11 @@ entry
     ;
 
 actionBinding
-    : lvalue "(" argumentList ")"
+    : lvalue
+        { $$ = new IR::MethodCallExpression(@1, $1,
+                                            new IR::Vector<IR::Type>(),
+                                            new IR::Vector<IR::Argument>()); }
+    | lvalue "(" argumentList ")"
         { $$ = new IR::MethodCallExpression(@1 + @4, $1,
                                             new IR::Vector<IR::Type>(), $3); }
     | lvalue "<" typeArgumentList ">" "(" argumentList ")"
