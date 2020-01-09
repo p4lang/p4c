@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,12 +21,13 @@ std::ostream* openFile(cstring name, bool nullOnError) {
     if (name.isNullOrEmpty()) {
         if (nullOnError)
             return new nullstream();
-        ::error("Empty name for openFile");
+        ::error(ErrorType::ERR_INVALID, "Empty name for openFile", name);
         return nullptr;
     }
     std::ofstream *file = new std::ofstream(name);
     if (!file->good()) {
-        ::error("Error writing output to file %1%: %2%", name, strerror(errno));
+        ::error(ErrorType::ERR_IO,
+                "Error writing output to file %1%: %2%", name, strerror(errno));
         if (nullOnError)
             return new nullstream();
         return nullptr;

@@ -92,12 +92,12 @@ set (P4_XFAIL_TESTS
 # will be no P4Info file.
 p4c_add_tests_w_p4runtime("p4" ${P4TEST_DRIVER} "${P4TEST_SUITES}" "${P4_XFAIL_TESTS}" "${P4RUNTIME_EXCLUDE}" "-a '--maxErrorCount 100'")
 
-set (P4TEST_ERRORS "${P4C_SOURCE_DIR}/testdata/p4_16_errors/*.p4")
+set (P4TEST_ERRORS
+  "${P4C_SOURCE_DIR}/testdata/p4_16_errors/*.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_14_errors/*.p4")
 p4c_add_tests_w_p4runtime("err" ${P4TEST_DRIVER} "${P4TEST_ERRORS}" "${P4_XFAIL_TESTS}" "${P4RUNTIME_EXCLUDE}" "-a '--maxErrorCount 100'")
 
 set (P4_14_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_14_samples/*.p4"
-  "${P4C_SOURCE_DIR}/testdata/p4_14_samples/switch_*/switch.p4"
-  "${P4C_SOURCE_DIR}/testdata/p4_14_errors/*.p4"
-  )
+  "${P4C_SOURCE_DIR}/testdata/p4_14_samples/switch_*/switch.p4")
 p4c_add_tests("p14_to_16" ${P4TEST_DRIVER} "${P4_14_SUITES}" "")
