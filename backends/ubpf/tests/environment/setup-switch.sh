@@ -1,59 +1,69 @@
 #!/usr/bin/env bash
 
+# Dependencies
 sudo apt-get -y install libnuma-dev clang-6.0 libc6-dev-i386
 sudo apt-get -y install flex bison
 sudo python -m pip install scapy
 
-#P4c dependencies
+# P4c dependencies
 sudo apt-get -y install cmake g++ git automake libtool libgc-dev bison flex libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev libboost-graph-dev llvm pkg-config python python-scapy python-ipaddr python-ply tcpdump
 
 # Protobuf
-git clone https://github.com/google/protobuf.git
-cd protobuf
-git checkout v3.2.0
-export CFLAGS="-Os"
-export CXXFLAGS="-Os"
-export LDFLAGS="-Wl,-s"
-./autogen.sh
-./configure
-make clean
-make
-sudo make install
-sudo ldconfig
-unset CFLAGS CXXFLAGS LDFLAGS
-cd python
-sudo python setup.py install
-cd ../..
-
-
-#Install clang-10
 cd /vagrant
-git clone https://github.com/P4-Research/llvm-project
-cd llvm-project
-mkdir build
-cd build
-cmake -DLLVM_TARGETS_TO_BUILD=BPF -DLLVM_ENABLE_PROJECTS=clang -G "Unix Makefiles" ../llvm
-make
-sudo make install
+if [ ! -d "/vagrant/protobuf" ]
+then
+  git clone https://github.com/google/protobuf.git
+  cd protobuf
+  git checkout v3.2.0
+  export CFLAGS="-Os"
+  export CXXFLAGS="-Os"
+  export LDFLAGS="-Wl,-s"
+  ./autogen.sh
+  ./configure
+  make
+  sudo make install
+  sudo ldconfig
+  unset CFLAGS CXXFLAGS LDFLAGS
+  cd python
+  sudo python setup.py install
+  cd ../..
+fi
 
+# Install clang-10
+if ! type "/vagrant/llvm-project/build/bin/clang" > /dev/null; then
+  cd /vagrant
+  git clone https://github.com/P4-Research/llvm-project
+  cd llvm-project
+  mkdir build
+  cd build
+  cmake -DLLVM_TARGETS_TO_BUILD=BPF -DLLVM_ENABLE_PROJECTS=clang -G "Unix Makefiles" ../llvm
+  make
+  sudo make install
+fi
 
-# Clone ovs
-cd /home/vagrant
-git clone http://10.254.188.33/diaas/ovs.git
-cd ovs/
-git checkout bpf-actions
-git submodule update --init
+# Clone oko
+if [ ! -d "/home/vagrant/oko" ]
+then
+ cd /home/vagrant
+ git clone -b p4rt-ovs https://github.com/Orange-OpenSource/oko.git
+ cd oko/
+ git submodule update --init
+fi
 
 # Download & Build DPDK
-cd /home/vagrant/
-wget http://fast.dpdk.org/rel/dpdk-18.11.2.tar.xz
-tar xf dpdk-18.11.2.tar.xz
 export DPDK_DIR=/home/vagrant/dpdk-stable-18.11.2
 export RTE_SDK=$DPDK_DIR
 export RTE_TARGET=x86_64-native-linuxapp-gcc
 export DPDK_BUILD=$DPDK_DIR/$RTE_TARGET/
-cd $DPDK_DIR
-make install T=$RTE_TARGET DESTDIR=install
+
+if [ ! -d "/home/vagrant/dpdk-stable-18.11.2" ]
+then
+ cd /home/vagrant/
+ wget http://fast.dpdk.org/rel/dpdk-18.11.2.tar.xz
+ tar xf dpdk-18.11.2.tar.xz
+ cd $DPDK_DIR
+ make install T=$RTE_TARGET DESTDIR=install
+fi
 
 # Setup DPDK kernel modules
 cd /home/vagrant
@@ -79,8 +89,8 @@ echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepag
 # Note: you can verify if huge pages are configured properly using the following command:
 # grep -i huge /proc/meminfo
 
-# Build OVS (first time only)
-cd /home/vagrant/ovs/
+# Build OVS
+cd /home/vagrant/oko/
 ./boot.sh
 ./configure --with-dpdk=$DPDK_BUILD CFLAGS="-g -O2 -Wno-cast-align"
 make -j 2
@@ -89,7 +99,7 @@ sudo make install
 # Create OVS database files and folders
 sudo mkdir -p /usr/local/etc/openvswitch
 sudo mkdir -p /usr/local/var/run/openvswitch
-cd /home/vagrant/ovs/ovsdb/
+cd /home/vagrant/oko/ovsdb/
 sudo ./ovsdb-tool create /usr/local/etc/openvswitch/conf.db ../vswitchd/vswitch.ovsschema
 
 sudo ovsdb-server --remote=punix:/usr/local/var/run/openvswitch/db.sock --remote=db:Open_vSwitch,Open_vSwitch,manager_options     --pidfile --detach
@@ -107,37 +117,53 @@ sudo ovs-vsctl add-port br0 enp0s9 -- set Interface enp0s9 type=dpdk \
             ofport_request=2
 
 
-# Clone PTF
-cd /home/vagrant
-git clone https://github.com/p4lang/ptf.git
-cd ptf/
-sudo python setup.py install
+# Clone and install PTF
+if ! type "ptf" > /dev/null; then
+ cd /home/vagrant
+ git clone https://github.com/p4lang/ptf.git
+ cd ptf/
+ sudo python setup.py install
+fi
 
-#Install nanomsg
-cd /home/vagrant
-git clone https://github.com/nanomsg/nanomsg.git
-cd nanomsg
-mkdir build
-cd build
-cmake ..
-cmake --build .
-ctest .
-sudo cmake --build . --target install
-sudo ldconfig
+# Install nanomsg and nnpy
+if [ ! -d "/home/vagrant/nanomsg" ]
+then
+ cd /home/vagrant
+ git clone https://github.com/nanomsg/nanomsg.git
+ cd nanomsg
+ mkdir build
+ cd build
+ cmake ..
+ cmake --build .
+ ctest .
+ sudo cmake --build . --target install
+ sudo ldconfig
 
-sudo cp /home/vagrant/nanomsg/build/*.* /usr/lib
+ sudo cp /home/vagrant/nanomsg/build/*.* /usr/lib
 
-cd /home/vagrant/ptf/ptf_nn
-sudo python -m pip install nnpy
-./check-nnpy.py
+ cd /home/vagrant/ptf/ptf_nn
+ sudo python -m pip install nnpy
+ ./check-nnpy.py
+fi
 
+# Install P4c
+if [ ! -d "/home/vagrant/p4c" ]
+then
+ cd /home/vagrant
+ git clone -b master https://github.com/P4-Research/p4c.git
+ cd p4c
+ git submodule update --init --recursive
+ mkdir build
+ cd build
+ cmake ..
+ make -j4
+ sudo make install
+fi
 
-cd /home/vagrant
-git clone https://github.com/P4-Research/p4c.git
-cd p4c
-git checkout origin/tests
-
-#Install scapy
-git clone https://github.com/secdev/scapy.git
-cd scapy
-sudo python setup.py install
+# Install scapy
+if ! type "scapy" > /dev/null; then
+ cd /home/vagrant
+ git clone https://github.com/secdev/scapy.git
+ cd scapy
+ sudo python setup.py install
+fi

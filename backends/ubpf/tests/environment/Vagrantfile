@@ -17,6 +17,8 @@ PKTGEN_SCRIPT
 
 Vagrant.configure("2") do |config|
 
+    config.vm.boot_timeout = 600
+
     # Configure switch, i.e., device under test (DUT)
     config.vm.define "switch" do |switch|
         switch.vm.box = "ubuntu/xenial64"
