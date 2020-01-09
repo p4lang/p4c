@@ -176,7 +176,7 @@ class DiscoverStructure : public Inspector {
             return;
         if (it->second != kind)
             ::error(ErrorType::ERR_INVALID,
-                    "cannot have this name; it can only be used for %2%", node, it->second);
+                    "name; it can only be used for %2%", node, it->second);
     }
     void checkReserved(const IR::Node* node, cstring nodeName) const {
         checkReserved(node, nodeName, nullptr);
@@ -687,7 +687,7 @@ class DetectDuplicates: public Inspector {
                             ::error(ErrorType::ERR_DUPLICATE, "%1%: same name as %2%", e1, e2);
                         else
                             // This name is probably standard_metadata_t, a built-in declaration
-                            ::error(ErrorType::ERR_INVALID, "name %2% is reserved", e2, key);
+                            ::error(ErrorType::ERR_INVALID, "; name %2% is reserved", e2, key);
                     }
                 }
             }
