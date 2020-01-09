@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,16 +23,15 @@ control MyC(inout bit<2> x) {
     action a() { }
     action b() { }
     table t {
-	key = { x : exact; }
-	actions = {a; b;}
-	const entries = {
-	    { 0 } : a;
-	    { 1 } : b;
+        key = { x : exact; }
+        actions = {a; b;}
+        const entries = {
+            { 0 } : a;
+            { 1 } : b;
             { 2 } : a();
             { 3 } : b();
-	}
+        }
     }
-
     apply {
         t.apply();
     }
