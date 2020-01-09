@@ -67,7 +67,9 @@ set (SUPPORTS_KERNEL False)
 
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_EBPF_SRCS};${P4C_EBPF_HDRS}")
 
-set (P4C_EBPF_DIST_HEADERS p4include/ebpf_model.p4)
+# Commented-out since the file has been moved to toplevel p4include to enable
+# p4test to compile all ebpf programs.
+# set (P4C_EBPF_DIST_HEADERS p4include/ebpf_model.p4)
 
 build_unified(P4C_EBPF_SRCS)
 add_executable(p4c-ebpf ${P4C_EBPF_SRCS})
