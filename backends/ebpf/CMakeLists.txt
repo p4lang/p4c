@@ -92,9 +92,6 @@ add_custom_target(linkp4cebpf
 
 add_dependencies(p4c_driver linkp4cebpf)
 
-# needs to be installed
-# p4include_HEADERS += $(srcdir)/%reldir%/p4include/ebpf_model.p4
-
 # Tests
 
 set(EBPF_DRIVER_KERNEL "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t kernel -c \"${P4C_BINARY_DIR}/p4c-ebpf\"")
@@ -106,7 +103,7 @@ set (XFAIL_TESTS_BCC)
 set (XFAIL_TESTS_TEST)
 
 set (EBPF_TEST_SUITES
-  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*_ebpf.p4"
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*ebpf.p4"
   )
 
 # Check if the kernel version is new enough to support ebpf features
