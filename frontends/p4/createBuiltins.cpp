@@ -47,6 +47,13 @@ void CreateBuiltins::postorder(IR::ExpressionValue* expression) {
             new IR::Vector<IR::Type>(), new IR::Vector<IR::Argument>());
 }
 
+void CreateBuiltins::postorder(IR::Entry* entry) {
+  // convert a const table entry with action "a;" into "a();"
+  if(entry->action->is<IR::PathExpression>())
+    entry->action = new IR::MethodCallExpression(
+      entry->action->srcInfo, entry->action,
+      new IR::Vector<IR::Type>(), new IR::Vector<IR::Argument>());                                      }
+
 void CreateBuiltins::postorder(IR::ParserState* state) {
     if (state->selectExpression == nullptr) {
         warning(ErrorType::WARN_PARSER_TRANSITION, "%1%: implicit transition to `reject'", state);

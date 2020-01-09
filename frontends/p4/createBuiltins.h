@@ -35,6 +35,7 @@ class CreateBuiltins final : public Modifier {
     void postorder(IR::P4Parser* parser) override;
     void postorder(IR::ActionListElement* element) override;
     void postorder(IR::ExpressionValue* property) override;
+    void postorder(IR::Entry* property) override;
     bool preorder(IR::P4Table* table) override;
     void postorder(IR::ActionList* actions) override;
     void postorder(IR::TableProperties* properties) override;
