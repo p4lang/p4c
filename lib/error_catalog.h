@@ -42,6 +42,7 @@ class ErrorType {
     static const int ERR_TYPE_ERROR;          // P4 type checking errors
     static const int ERR_UNSUPPORTED_ON_TARGET;  // target can not handle construct
     static const int ERR_DUPLICATE;           // duplicate objects
+    static const int ERR_IO;                  // IO error
 
     // If we specialize for 1000 error types we're good!
     static const int ERR_MAX_ERRORS;

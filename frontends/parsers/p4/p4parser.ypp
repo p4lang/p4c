@@ -719,8 +719,8 @@ parserStatement
     ;
 
 parserBlockStatement
-    : optAnnotations "{" parserStatements "}"
-      { $$ = new IR::BlockStatement(@1+@4, $1, *$3); }
+    : optAnnotations "{" { driver.structure->pushNamespace(@2, false); }
+      parserStatements "}" { driver.structure->pop(); $$ = new IR::BlockStatement(@1+@5, $1, *$4); }
     ;
 
 transitionStatement
