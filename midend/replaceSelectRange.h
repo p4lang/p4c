@@ -42,6 +42,7 @@ P4::TypeMap* typeMap;
         CHECK_NULL(typeMap);
     }
     const IR::Node* postorder(IR::SelectCase* p) override;
+    bool checkRange(const IR::Range* range);
     std::vector<const IR::Mask *> rangeToMasks(const IR::Range *);
     std::vector<IR::Vector<IR::Expression>> cartesianAppend(
                std::vector<IR::Vector<IR::Expression>> vecs,

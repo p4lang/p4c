@@ -31,8 +31,35 @@ static int trailingZeros(big_int n, int width) {
     return (zeros < width) ? zeros : width;
 }
 
+bool DoReplaceSelectRange::checkRange(const IR::Range* range) {
+    if (range == nullptr)
+        return false;
+
+    if (!range->left->is<IR::Constant>()) {
+        std::cout << "must evaluate to a compile-time "
+                  << "constant" << range->left << std::endl;
+        return false;
+    }
+    auto left = range->left->to<IR::Constant>()->value;
+    if (!range->right->is<IR::Constant>()) {
+        std::cout << "must evaluate to a compile-time "
+                  << "constant" << range->right <<  std::endl;
+        return false;
+    }
+    auto right = range->right->to<IR::Constant>()->value;
+    if (right < left) {
+        std::cout << "Range end " << std::hex << std::showbase << right
+        << " is less than start " << left << std::endl;
+        return false;
+    }
+    return true;
+}
+
 std::vector<const IR::Mask *>
 DoReplaceSelectRange::rangeToMasks(const IR::Range *r) {
+    bool st = checkRange(r);
+    BUG_CHECK(st, "Range check failed");
+
     int width = typeMap->getType(r, true)->width_bits();
     big_int min = r->left->to<IR::Constant>()->value;
     big_int max = r->right->to<IR::Constant>()->value;
