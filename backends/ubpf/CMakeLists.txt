@@ -60,7 +60,6 @@ add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "$(P4C_UBPF_SOURCES)")
 #build_unified(P4C_UBPF_SOURCES ALL)
 add_executable(p4c-ubpf ${P4C_UBPF_SOURCES})
 target_link_libraries (p4c-ubpf ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
-install(TARGETS p4c-ubpf RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 #add_dependencies(p4c-ubpf genIR frontend)
 
 install (TARGETS p4c-ubpf
