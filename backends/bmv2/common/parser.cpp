@@ -261,8 +261,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
 
 // Operates on a select keyset
 void ParserConverter::convertSimpleKey(const IR::Expression* keySet,
-                                       big_int& value, big_int& mask,
-                                       bool& is_range) const {
+                                       big_int& value, big_int& mask) const {
     if (keySet->is<IR::Mask>()) {
         auto mk = keySet->to<IR::Mask>();
         if (!mk->left->is<IR::Constant>()) {
@@ -284,28 +283,6 @@ void ParserConverter::convertSimpleKey(const IR::Expression* keySet,
     } else if (keySet->is<IR::DefaultExpression>()) {
         value = 0;
         mask = 0;
-    } else if (keySet->is<IR::Range>()) {
-        auto range = keySet->to<IR::Range>();
-        if (!range->left->is<IR::Constant>()) {
-            ::error(ErrorType::ERR_INVALID, "must evaluate to a compile-time "
-                    "constant", range->left);
-            return;
-        }
-        auto left = range->left->to<IR::Constant>()->value;
-        if (!range->right->is<IR::Constant>()) {
-            ::error(ErrorType::ERR_INVALID, "must evaluate to a compile-time"
-                    "constant", range->right);
-            return;
-        }
-        auto right = range->right->to<IR::Constant>()->value;
-        if (right < left) {
-            ::error(ErrorType::ERR_INVALID, "Range end is %1% "
-                    "<= to start %2%", right, left);
-            return;
-        }
-        value = left;
-        mask  = right;
-        is_range = true;
     } else {
         ::error(ErrorType::ERR_INVALID, "must evaluate to a compile-time constant", keySet);
         value = 0;
@@ -314,10 +291,9 @@ void ParserConverter::convertSimpleKey(const IR::Expression* keySet,
 }
 
 unsigned ParserConverter::combine(const IR::Expression* keySet,
-                                  const IR::ListExpression* select,
-                                  big_int& value, big_int& mask,
-                                  bool& is_vset, cstring& vset_name,
-                                  bool& is_range) const {
+                                const IR::ListExpression* select,
+                                big_int& value, big_int& mask,
+                                bool& is_vset, cstring& vset_name) const {
     // From the BMv2 spec: For values and masks, make sure that you
     // use the correct format. They need to be the concatenation (in
     // the right order) of all byte padded fields (padded with 0
@@ -350,7 +326,7 @@ unsigned ParserConverter::combine(const IR::Expression* keySet,
             BUG_CHECK(width > 0, "%1%: unknown width", e);
 
             big_int key_value, mask_value;
-            convertSimpleKey(keyElement, key_value, mask_value, is_range);
+            convertSimpleKey(keyElement, key_value, mask_value);
             unsigned w = 8 * ROUNDUP(width, 8);
             totalWidth += ROUNDUP(width, 8);
             value = Util::shift_left(value, w) + key_value;
@@ -382,7 +358,7 @@ unsigned ParserConverter::combine(const IR::Expression* keySet,
         return totalWidth;
     } else {
         BUG_CHECK(select->components.size() == 1, "%1%: mismatched select/label", select);
-        convertSimpleKey(keySet, value, mask, is_range);
+        convertSimpleKey(keySet, value, mask);
         auto type = ctxt->typeMap->getType(select->components.at(0), true);
         return ROUNDUP(type->width_bits(), 8);
     }
@@ -408,19 +384,13 @@ ParserConverter::convertSelectExpression(const IR::SelectExpression* expr) {
     for (auto sc : se->selectCases) {
         auto trans = new Util::JsonObject();
         big_int value, mask;
-        bool is_vset, is_range;
+        bool is_vset;
         cstring vset_name;
-        unsigned bytes = combine(sc->keyset, se->select, value, mask, is_vset,
-                                 vset_name, is_range);
+        unsigned bytes = combine(sc->keyset, se->select, value, mask, is_vset, vset_name);
         if (is_vset) {
             trans->emplace("type", "parse_vset");
             trans->emplace("value", vset_name);
             trans->emplace("mask", mask);
-            trans->emplace("next_state", stateName(sc->state->path->name));
-        } else if (is_range) {
-            trans->emplace("type", "parse_range");
-            trans->emplace("value", stringRepr(value, bytes));
-            trans->emplace("end", stringRepr(mask, bytes));
             trans->emplace("next_state", stateName(sc->state->path->name));
         } else {
             if (mask == 0) {

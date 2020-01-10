@@ -1,20 +1,4 @@
-/*
-* Copyright 2020, MNK Labs & Consulting
-* http://mnkcg.com
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-*/
+#include <core.p4>
 #include <v1model.p4>
 
 struct ingress_metadata_t {
@@ -56,24 +40,20 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state parse_ethernet {
         packet.extract(hdr = hdr.ethernet);
-
-        transition select(hdr.ethernet.etherType, hdr.ethernet.srcAddr[7:0],  hdr.ethernet.dstAddr[7:0]) {
-            // Test three ranges for cartesian product.
-            (0x0800 .. 0x0806, 0x08 .. 0x11, 0x08 .. 0x10): parse_ipv4;
-            // Test a constant, range, and ternary op in one keyset.
-	    (0x0800, 0x08 .. 0x10, 0x06 &&& 0x11): parse_ipv4;
+        transition select(hdr.ethernet.etherType, hdr.ethernet.srcAddr[7:0], hdr.ethernet.dstAddr[7:0]) {
+            (0x800 .. 0x806, 0x8 .. 0x11, 0x8 .. 0x10): parse_ipv4;
+            (0x800, 0x8 .. 0x10, 0x6 &&& 0x11): parse_ipv4;
             default: accept;
         }
     }
     state parse_ipv4 {
         packet.extract(hdr = hdr.ipv4);
         transition select(hdr.ipv4.ihl, hdr.ipv4.protocol) {
-             // Cases added to test if new code does not mess up exisitng
-             // cases for constants keyset.
-	     (4w0x5, 8w0x1): parse_icmp;
-             (4w0x5, 8w0x6): parse_tcp;
-             (4w0x5, 8w0x11): parse_udp;
-             (_, _): accept; }
+            (4w0x5, 8w0x1): parse_icmp;
+            (4w0x5, 8w0x6): parse_tcp;
+            (4w0x5, 8w0x11): parse_udp;
+            (default, default): accept;
+        }
     }
     state parse_icmp {
         transition accept;
@@ -84,7 +64,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state parse_udp {
         transition accept;
     }
-
     state parse_x {
         transition accept;
     }
@@ -205,27 +184,15 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        verify_checksum(
-        data = { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr },
-        checksum = hdr.ipv4.hdrChecksum,
-        condition = true,
-        algo = HashAlgorithm.csum16);
+        verify_checksum(data = { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, checksum = hdr.ipv4.hdrChecksum, condition = true, algo = HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum(
-        condition = true,
-        data = { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr },
-        algo = HashAlgorithm.csum16,
-        checksum = hdr.ipv4.hdrChecksum);
+        update_checksum(condition = true, data = { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, algo = HashAlgorithm.csum16, checksum = hdr.ipv4.hdrChecksum);
     }
 }
 
-V1Switch(p = ParserImpl(),
-         ig = ingress(),
-         vr = verifyChecksum(),
-         eg = egress(),
-         ck = computeChecksum(),
-         dep = DeparserImpl()) main;
+V1Switch(p = ParserImpl(), ig = ingress(), vr = verifyChecksum(), eg = egress(), ck = computeChecksum(), dep = DeparserImpl()) main;
+

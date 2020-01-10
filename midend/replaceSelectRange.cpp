@@ -1,0 +1,150 @@
+/*
+* Copyright 2020, MNK Labs & Consulting
+* http://mnkcg.com
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*
+*/
+
+#include "replaceSelectRange.h"
+
+namespace P4 {
+
+static int trailingZeros(big_int n, int width) {
+    int zeros = 0;
+
+    while (n > 0 && (n & 1) == 0) {
+        zeros += 1;
+        n >>= 1;
+    }
+
+    return (zeros < width) ? zeros : width;
+}
+
+std::vector<const IR::Mask *>
+DoReplaceSelectRange::rangeToMasks(const IR::Range *r) {
+    int width = typeMap->getType(r, true)->width_bits();
+    big_int min = r->left->to<IR::Constant>()->value;
+    big_int max = r->right->to<IR::Constant>()->value;
+    std::vector<const IR::Mask *> masks;
+    big_int range_size_remaining = max - min + 1;
+
+    while (range_size_remaining > 0) {
+        big_int range_size = ((big_int) 1) << trailingZeros(min, width);
+
+        while (range_size > range_size_remaining)
+            range_size >>= 1;
+
+        auto constType = typeMap->getType(r->left, true);
+        auto valConst = new IR::Constant(constType, min, 16, true);
+        auto mask = ~(range_size - 1) & ((((big_int) 1) << width) - 1);
+        auto maskConst = new IR::Constant(constType, mask, 16, true);
+        auto m = new IR::Mask(r->srcInfo, valConst, maskConst);
+
+        masks.push_back(m);
+        range_size_remaining -= range_size;
+        min += range_size;
+    }
+
+    return masks;
+}
+
+std::vector<IR::Vector<IR::Expression>>
+DoReplaceSelectRange::cartesianAppend(std::vector<IR::Vector<IR::Expression>> vecs,
+                                      std::vector<const IR::Mask *> masks) {
+    std::vector<IR::Vector<IR::Expression>> newVecs;
+
+    if (vecs.empty()) {
+        for (auto mask : masks) {
+            IR::Vector<IR::Expression> v;
+
+            v.push_back(mask);
+            newVecs.push_back(v);
+        }
+    } else {
+        for (auto v : vecs) {
+            for (auto mask : masks) {
+                auto copy(v);
+
+                copy.push_back(mask);
+                newVecs.push_back(copy);
+            }
+        }
+    }
+
+    return newVecs;
+}
+
+std::vector<IR::Vector<IR::Expression>>
+DoReplaceSelectRange::cartesianAppend(std::vector<IR::Vector<IR::Expression>> vecs,
+                                    const IR::Expression *e) {
+    std::vector<IR::Vector<IR::Expression>> newVecs;
+
+    if (vecs.empty()) {
+        IR::Vector<IR::Expression> v;
+
+        v.push_back(e);
+        newVecs.push_back(v);
+    } else {
+        for (auto v : vecs) {
+            auto copy(v);
+
+            copy.push_back(e);
+            newVecs.push_back(copy);
+        }
+    }
+
+    return newVecs;
+}
+
+const IR::Node*  DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
+    auto newCases = new IR::Vector<IR::SelectCase>();
+    auto keySet = sc->keyset;
+
+    if (keySet->is<IR::Range>()) {
+        auto r = keySet->to<IR::Range>();
+        auto masks = rangeToMasks(r);
+
+        for (auto mask : masks) {
+            auto c = new IR::SelectCase(sc->srcInfo, mask, sc->state);
+            newCases->push_back(c);
+        }
+
+        return newCases;
+    } else if (keySet->is<IR::ListExpression>()) {
+        auto oldList = keySet->to<IR::ListExpression>();
+        std::vector<IR::Vector<IR::Expression>> newVectors;
+
+        for (auto key : oldList->components) {
+            if (key->is<IR::Range>()) {
+                auto r = key->to<IR::Range>();
+                auto masks = rangeToMasks(r);
+
+                newVectors = cartesianAppend(newVectors, masks);
+            } else {
+                newVectors = cartesianAppend(newVectors, key);
+            }
+        }
+
+        for (auto v : newVectors) {
+            auto le = new IR::ListExpression(oldList->srcInfo, v);
+            newCases->push_back(new IR::SelectCase(sc->srcInfo, le, sc->state));
+        }
+
+        return newCases;
+    }
+
+    return sc;
+}
+
+}   // namespace P4

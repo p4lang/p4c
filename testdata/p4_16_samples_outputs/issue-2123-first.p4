@@ -1,20 +1,4 @@
-/*
-* Copyright 2020, MNK Labs & Consulting
-* http://mnkcg.com
-*
-* Licensed under the Apache License, Version 2.0 (the "License");
-* you may not use this file except in compliance with the License.
-* You may obtain a copy of the License at
-*
-*    http://www.apache.org/licenses/LICENSE-2.0
-*
-* Unless required by applicable law or agreed to in writing, software
-* distributed under the License is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-* See the License for the specific language governing permissions and
-* limitations under the License.
-*
-*/
+#include <core.p4>
 #include <v1model.p4>
 
 struct ingress_metadata_t {
@@ -55,25 +39,21 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state parse_ethernet {
-        packet.extract(hdr = hdr.ethernet);
-
-        transition select(hdr.ethernet.etherType, hdr.ethernet.srcAddr[7:0],  hdr.ethernet.dstAddr[7:0]) {
-            // Test three ranges for cartesian product.
-            (0x0800 .. 0x0806, 0x08 .. 0x11, 0x08 .. 0x10): parse_ipv4;
-            // Test a constant, range, and ternary op in one keyset.
-	    (0x0800, 0x08 .. 0x10, 0x06 &&& 0x11): parse_ipv4;
+        packet.extract<ethernet_t>(hdr = hdr.ethernet);
+        transition select(hdr.ethernet.etherType, hdr.ethernet.srcAddr[7:0], hdr.ethernet.dstAddr[7:0]) {
+            (16w0x800 .. 16w0x806, 8w0x8 .. 8w0x11, 8w0x8 .. 8w0x10): parse_ipv4;
+            (16w0x800, 8w0x8 .. 8w0x10, 8w0x6 &&& 8w0x11): parse_ipv4;
             default: accept;
         }
     }
     state parse_ipv4 {
-        packet.extract(hdr = hdr.ipv4);
+        packet.extract<ipv4_t>(hdr = hdr.ipv4);
         transition select(hdr.ipv4.ihl, hdr.ipv4.protocol) {
-             // Cases added to test if new code does not mess up exisitng
-             // cases for constants keyset.
-	     (4w0x5, 8w0x1): parse_icmp;
-             (4w0x5, 8w0x6): parse_tcp;
-             (4w0x5, 8w0x11): parse_udp;
-             (_, _): accept; }
+            (4w0x5, 8w0x1): parse_icmp;
+            (4w0x5, 8w0x6): parse_tcp;
+            (4w0x5, 8w0x11): parse_udp;
+            (default, default): accept;
+        }
     }
     state parse_icmp {
         transition accept;
@@ -84,7 +64,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state parse_udp {
         transition accept;
     }
-
     state parse_x {
         transition accept;
     }
@@ -102,13 +81,15 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     table rewrite_mac {
         actions = {
-            on_miss;
-            rewrite_src_dst_mac;
+            on_miss();
+            rewrite_src_dst_mac();
+            @defaultonly NoAction();
         }
         key = {
-            meta.ingress_metadata.nexthop_index: exact;
+            meta.ingress_metadata.nexthop_index: exact @name("meta.ingress_metadata.nexthop_index") ;
         }
         size = 32768;
+        default_action = NoAction();
     }
     apply {
         rewrite_mac.apply();
@@ -123,7 +104,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     action fib_hit_nexthop(bit<16> nexthop_index) {
         meta.ingress_metadata.nexthop_index = nexthop_index;
-        hdr.ipv4.ttl = hdr.ipv4.ttl - 8w1;
+        hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     action set_egress_details(bit<9> egress_spec) {
         standard_metadata.egress_spec = egress_spec;
@@ -133,53 +114,63 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     table bd {
         actions = {
-            set_vrf;
+            set_vrf();
+            @defaultonly NoAction();
         }
         key = {
-            meta.ingress_metadata.bd: exact;
+            meta.ingress_metadata.bd: exact @name("meta.ingress_metadata.bd") ;
         }
         size = 65536;
+        default_action = NoAction();
     }
     table ipv4_fib {
         actions = {
-            on_miss;
-            fib_hit_nexthop;
+            on_miss();
+            fib_hit_nexthop();
+            @defaultonly NoAction();
         }
         key = {
-            meta.ingress_metadata.vrf: exact;
-            hdr.ipv4.dstAddr         : exact;
+            meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
+            hdr.ipv4.dstAddr         : exact @name("hdr.ipv4.dstAddr") ;
         }
         size = 131072;
+        default_action = NoAction();
     }
     table ipv4_fib_lpm {
         actions = {
-            on_miss;
-            fib_hit_nexthop;
+            on_miss();
+            fib_hit_nexthop();
+            @defaultonly NoAction();
         }
         key = {
-            meta.ingress_metadata.vrf: exact;
-            hdr.ipv4.dstAddr         : lpm;
+            meta.ingress_metadata.vrf: exact @name("meta.ingress_metadata.vrf") ;
+            hdr.ipv4.dstAddr         : lpm @name("hdr.ipv4.dstAddr") ;
         }
         size = 16384;
+        default_action = NoAction();
     }
     table nexthop {
         actions = {
-            on_miss;
-            set_egress_details;
+            on_miss();
+            set_egress_details();
+            @defaultonly NoAction();
         }
         key = {
-            meta.ingress_metadata.nexthop_index: exact;
+            meta.ingress_metadata.nexthop_index: exact @name("meta.ingress_metadata.nexthop_index") ;
         }
         size = 32768;
+        default_action = NoAction();
     }
     table port_mapping {
         actions = {
-            set_bd;
+            set_bd();
+            @defaultonly NoAction();
         }
         key = {
-            standard_metadata.ingress_port: exact;
+            standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
         }
         size = 32768;
+        default_action = NoAction();
     }
     apply {
         if (hdr.ipv4.isValid()) {
@@ -198,34 +189,22 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
-        packet.emit(hdr = hdr.ethernet);
-        packet.emit(hdr = hdr.ipv4);
+        packet.emit<ethernet_t>(hdr = hdr.ethernet);
+        packet.emit<ipv4_t>(hdr = hdr.ipv4);
     }
 }
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        verify_checksum(
-        data = { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr },
-        checksum = hdr.ipv4.hdrChecksum,
-        condition = true,
-        algo = HashAlgorithm.csum16);
+        verify_checksum<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>, bit<16>>(data = { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, checksum = hdr.ipv4.hdrChecksum, condition = true, algo = HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum(
-        condition = true,
-        data = { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr },
-        algo = HashAlgorithm.csum16,
-        checksum = hdr.ipv4.hdrChecksum);
+        update_checksum<tuple<bit<4>, bit<4>, bit<8>, bit<16>, bit<16>, bit<3>, bit<13>, bit<8>, bit<8>, bit<32>, bit<32>>, bit<16>>(condition = true, data = { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, algo = HashAlgorithm.csum16, checksum = hdr.ipv4.hdrChecksum);
     }
 }
 
-V1Switch(p = ParserImpl(),
-         ig = ingress(),
-         vr = verifyChecksum(),
-         eg = egress(),
-         ck = computeChecksum(),
-         dep = DeparserImpl()) main;
+V1Switch<headers, metadata>(p = ParserImpl(), ig = ingress(), vr = verifyChecksum(), eg = egress(), ck = computeChecksum(), dep = DeparserImpl()) main;
+
