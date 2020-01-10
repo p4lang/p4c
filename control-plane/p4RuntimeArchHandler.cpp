@@ -39,16 +39,20 @@ namespace ControlPlaneAPI {
 namespace Helpers {
 
 boost::optional<ExternInstance>
-getExternInstanceFromProperty(const IR::P4Table* table,
+getExternInstanceFromProperty(P4RuntimeArchHandlerIface* archHandler,
+                              const IR::TableBlock* tableBlock,
                               const cstring& propertyName,
                               ReferenceMap* refMap,
                               TypeMap* typeMap,
                               bool *isConstructedInPlace) {
+    const IR::P4Table* table = tableBlock->container;
+    CHECK_NULL(table);
+    auto tableName = archHandler->getControlPlaneName(tableBlock);
     auto property = table->properties->getProperty(propertyName);
     if (property == nullptr) return boost::none;
     if (!property->value->is<IR::ExpressionValue>()) {
         ::error("Expected %1% property value for table %2% to be an expression: %3%",
-                propertyName, table->controlPlaneName(), property);
+                propertyName, tableName, property);
         return boost::none;
     }
 
@@ -57,28 +61,31 @@ getExternInstanceFromProperty(const IR::P4Table* table,
     if (expr->is<IR::ConstructorCallExpression>()
         && property->getAnnotation(IR::Annotation::nameAnnotation) == nullptr) {
         ::error("Table '%1%' has an anonymous table property '%2%' with no name annotation, "
-                "which is not supported by P4Runtime", table->controlPlaneName(), propertyName);
+                "which is not supported by P4Runtime", tableName, propertyName);
         return boost::none;
     }
     auto name = property->controlPlaneName();
     auto externInstance = ExternInstance::resolve(expr, refMap, typeMap, name);
     if (!externInstance) {
         ::error("Expected %1% property value for table %2% to resolve to an "
-                "extern instance: %3%", propertyName, table->controlPlaneName(),
-                property);
+                "extern instance: %3%", propertyName, tableName, property);
         return boost::none;
     }
 
     return externInstance;
 }
 
-bool isExternPropertyConstructedInPlace(const IR::P4Table* table,
+bool isExternPropertyConstructedInPlace(P4RuntimeArchHandlerIface* archHandler,
+                                        const IR::TableBlock* tableBlock,
                                         const cstring& propertyName) {
+    const IR::P4Table* table = tableBlock->container; 
+    CHECK_NULL(table);
+    auto tableName = archHandler->getControlPlaneName(tableBlock);
     auto property = table->properties->getProperty(propertyName);
     if (property == nullptr) return false;
     if (!property->value->is<IR::ExpressionValue>()) {
         ::error("Expected %1% property value for table %2% to be an expression: %3%",
-                propertyName, table->controlPlaneName(), property);
+                propertyName, tableName, property);
         return false;
     }
 
