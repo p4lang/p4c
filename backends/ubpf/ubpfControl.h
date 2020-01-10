@@ -64,7 +64,7 @@ namespace UBPF {
 
         bool preorder(const IR::Operation_Binary *b) override;
 
-        bool comparison(const IR::Operation_Relation *b) override;
+        bool comparison(const IR::Operation_Relation *b);
 
         bool preorder(const IR::Member *expression) override;
 

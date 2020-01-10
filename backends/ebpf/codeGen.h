@@ -88,7 +88,7 @@ class CodeGenInspector : public Inspector {
     bool preorder(const IR::Mux* a) override;
     bool preorder(const IR::Member* e) override;
     bool preorder(const IR::MethodCallExpression* expression) override;
-    virtual bool comparison(const IR::Operation_Relation* comp);
+    bool comparison(const IR::Operation_Relation* comp);
     bool preorder(const IR::Equ* e) override { return comparison(e); }
     bool preorder(const IR::Neq* e) override { return comparison(e); }
     bool preorder(const IR::Path* path) override;
