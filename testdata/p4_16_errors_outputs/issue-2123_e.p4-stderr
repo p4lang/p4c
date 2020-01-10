@@ -1,4 +1,3 @@
-Range end 0x800 is less than start 0x806
 In file: /home/hemant/p4c/midend/replaceSelectRange.cpp:61
-Compiler Bug: Range check failed
+[31mCompiler Bug[0m: Range check failed
 

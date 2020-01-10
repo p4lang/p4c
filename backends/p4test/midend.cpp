@@ -36,6 +36,7 @@ limitations under the License.
 #include "midend/eliminateSerEnums.h"
 #include "midend/flattenHeaders.h"
 #include "midend/flattenInterfaceStructs.h"
+#include "midend/replaceSelectRange.h"
 #include "midend/expandEmit.h"
 #include "midend/expandLookahead.h"
 #include "midend/local_copyprop.h"
@@ -105,6 +106,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::RemoveSelectBooleans(&refMap, &typeMap),
         new P4::FlattenHeaders(&refMap, &typeMap),
         new P4::FlattenInterfaceStructs(&refMap, &typeMap),
+        new P4::ReplaceSelectRange(&refMap, &typeMap),
         new P4::Predication(&refMap),
         new P4::MoveDeclarations(),  // more may have been introduced
         new P4::ConstantFolding(&refMap, &typeMap),
