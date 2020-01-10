@@ -1,7 +1,8 @@
 # Introduction
 
 This file contains description of the basic P4 programs, which were used to test the functionality of the P4-to-uBPF compiler.
-All tests have been run on the [Oko](https://github.com/Orange-OpenSource/oko) switch using [Vagrant prepared for Oko](https://github.com/P4-Research/vagrant-oko).
+All tests have been run on the [Oko](https://github.com/Orange-OpenSource/oko/tree/p4rt-ovs) switch.
+You can use [Vagrantfile](../tests/environment/Vagrantfile) to set up a test environment.
 
 Before any experiment the following commands need to be invoked:
 
@@ -48,6 +49,7 @@ This section presents P4 program, which modifies the packet's fields.
 Sample usage:
 
 ```bash
+# Template: ovs-ofctl update-bpf-map <BRIDGE> <PROGRAM-ID> <MAP-ID> key <KEY-DATA> value <VALUE-DATA>
 $ sudo ovs-ofctl update-bpf-map br0 1 0 key 14 0 16 172 value 0 0 0 0 0 0 0 0 0 0 0 0 # decrements MPLS TTL
 $ sudo ovs-ofctl update-bpf-map br0 1 0 key 14 0 16 172 value 1 0 0 0 24 0 0 0 0 0 0 0 # sets MPLS label to 24
 $ sudo ovs-ofctl update-bpf-map br0 1 0 key 14 0 16 172 value 2 0 0 0 24 0 0 0 0 0 0 0 # sets MPLS label to 24 and decrements TTL
@@ -81,15 +83,17 @@ $ sudo ovs-ofctl update-bpf-map br0 1 0 key 254 128 0 0 0 0 0 0 10 0 39 255 254 
 
 ## Registers
 
-This section presents P4 programs, which use registers.   
-Register can be declared this way:  
+This section presents P4 programs, which use registers. Register can be declared this way:
+  
 `Register<value_type, key_type>(number_of_elements) register_t;`  
-where:  
-`value_type` - is bit array type (i.e. bit<32>) or struct like type  
-`key_type` - is bit array type (i.e. bit<32>) or struct like type  
-`number_of_elements` - the maximum number of key-value pairs
 
-Currently registers have a limitation - they are not being initialized automatically. Initialization has to be done by control plane. 
+The parameters are as follows:
+
+- `value_type` - is bit array type (i.e. bit<32>) or struct like type  
+- `key_type` - is bit array type (i.e. bit<32>) or struct like type  
+- `number_of_elements` - the maximum number of key-value pairs
+
+Currently registers have a limitation - they are not being initialized with default values. Initialization has to be done by a control plane. 
 
 ### Rate limiter (rate-limiter.p4)
 
@@ -102,6 +106,7 @@ It means that 10 packets are passed in 100 ms window. It also means 100 packets 
 If you send 1470 Bytes width packets the bit rate should not exceed 1.176 Mbit/s (1470B * 8 * (10/100ms)).
 
 Due to registers limitation before starting your own tests initialize rate limiter registers with zeros:
+
 ```bash
 # Initalizes timestamp_r register
 $ sudo ovs-ofctl update-bpf-map br0 1 0 key 0 0 0 0 value 0 0 0 0
@@ -109,13 +114,16 @@ $ sudo ovs-ofctl update-bpf-map br0 1 0 key 0 0 0 0 value 0 0 0 0
 $ sudo ovs-ofctl update-bpf-map br0 1 1 key 0 0 0 0 value 0 0 0 0
 ```
 
-For measuring the bandwidth use for instance iperf tool:  
+To measure the bandwidth use the `iperf` tool:  
   
 Start a iperf UDP server
+
 ```bash
 $ iperf -s -u
 ```
-Then run iperf client
+
+Then, run `iperf` client:
+
 ```bash
 $ iperf -c <server_ip> -b 10M -l 1470
 ```
@@ -152,6 +160,7 @@ This section presents more complex examples of packet tunneling operations. Ther
 To run example compile `vxlan.p4` with `p4c` and then `clang-6.0`. 
 
 Sample usage:
+
 ```bash
 # Sets action vxlan_decap() (value 0) for packets matching rule VNI=25 (key 25) 
 # handled by the table upstream_tbl (map id 0) and BPF prog 1.
@@ -166,15 +175,17 @@ sudo ovs-ofctl update-bpf-map br0 1 1 key 14 0 16 172 value 0 0 0 0
 To run example compile `gtp.p4` with `p4c` and then `clang-6.0`. 
 
 To test encapsulation:
+
 ```bash
 # For downstream_tbl (ID 1) sets action gtp_encap() (value 0) and GTP TEID=3 for packets with destination IP address 172.16.0.14.
-$ sudo ovs-ofctl update-bpf-map br0 10 1 key 14 0 16 172 value 0 0 0 0 3 0 0 0
+$ sudo ovs-ofctl update-bpf-map br0 1 1 key 14 0 16 172 value 0 0 0 0 3 0 0 0
 ```
 
 To test decapsulation:
+
 ```bash
 # For upstream_tbl (ID 0) sets action gtp_decap() for packets matching GTP TEID=3.
-$ sudo ovs-ofctl update-bpf-map br0 10 0 key 3 0 0 0 value 0 0 0 0
+$ sudo ovs-ofctl update-bpf-map br0 1 0 key 3 0 0 0 value 0 0 0 0
 ```
 
 Scapy can be used to easily test GTP protocol:

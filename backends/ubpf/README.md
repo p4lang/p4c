@@ -2,12 +2,14 @@
 
 This repository implements the uBPF (Userspace BPF) backend for the P4 compiler (https://github.com/p4lang/p4c).
 
-The **p4c-ubpf** compiler allows to translate P4 programs into the uBPF programs. We use the uBPF implementation provided by [the ubpf project](https://github.com/iovisor/ubpf). 
+The **p4c-ubpf** compiler allows to translate P4 programs into the uBPF programs. We use the uBPF implementation provided 
+by [the Oko/P4rt-OVS switch](https://github.com/Orange-OpenSource/oko/tree/p4rt-ovs). The Oko's uBPF VM is based on the
+open-source implementation provided by [IOVisor](https://github.com/iovisor/ubpf).
 
 The P4-to-uBPF compiler accepts only the P4_16 programs written for the `ubpf_model.p4` architecture model.
 
 The backend for uBPF is mostly based on [P4-to-eBPF compiler](../ebpf/README.md). In fact, it implements the same concepts, but
-generates the C code, which is compatible with the user-space BPF implementation. 
+generates the C code, which is compatible with the user space BPF implementation. 
 
 ## Background
 
@@ -28,13 +30,12 @@ Apache License, version 2.0.
 
 ## Compiling P4 to uBPF
 
-The scope of the uBPF backend is similar to the scope of the eBPF backend. It means that initially P4-to-uBPF compiler
-supports only simple packet filtering. 
+The scope of the uBPF backend is wider than the scope of the eBPF backend. Except for simple packet filtering the 
+P4-to-uBPF compiler supports also P4 registers and programmable actions including packet's modifications and tunneling. For further details
+refer to [uBPF architecture model](p4include/ubpf_model.p4).
 
-We will continuously work to provide wider range of functionalities for P4-to-uBPF.
-
-The current version of the P4-to-uBPF compiler translaters P4_16 programs to programs written in the C language. This
-program is compatible with the uBPF VM and the clang compiler can be used to generate uBPF bytecode.
+The current version of the P4-to-uBPF compiler translates P4_16 programs to programs written in the C language. This
+program is compatible with the uBPF VM and the `clang` compiler can be used to generate uBPF bytecode.
 
 ### Translation between P4 and C
 
@@ -47,14 +48,15 @@ However, we introduced some modifications, which are listed below:
 * There are user-space data types used (e.g. uint8_t, etc.). 
 * Methods to extract packet fields (e.g. load_dword, etc.) has been re-implemented to use user-space data types.
 * The uBPF helpers are imported into the C programs.
-* We have added `mark_to_drop()` extern to the `ubpfFilter` model, so that packets to drop are marked in the P4-native way.
+* We have added `mark_to_drop()` extern to the `ubpf` model, so that packets to drop are marked in the P4-native way.
+* We have added support for P4 registers implemented as BPF maps
 
 ### How to use?
 
-The sample P4 programs are located in `examples/` directory. We have tested them on the [Oko](https://github.com/Orange-OpenSource/oko) switch - 
+The sample P4 programs are located in `examples/` directory. We have tested them with the [Oko/P4rt-OVS](https://github.com/Orange-OpenSource/oko/tree/p4rt-ovs) switch - 
 the Open vSwitch that can be extended with BPF programs at runtime. See [the detailed tutorial](./docs/EXAMPLES.md) on how to run and test those examples.
 
-The P4 programs for P4-to-uBPF compiler must be written for the `ubpf_filter_model.p4`.
+The P4 programs for P4-to-uBPF compiler must be written for the `ubpf_model.p4`.
 
 In order to generate the C code use the following command:
 

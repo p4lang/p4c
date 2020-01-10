@@ -25,6 +25,7 @@ limitations under the License.
 #include "ubpfType.h"
 
 namespace UBPF {
+
     void run_ubpf_backend(const EbpfOptions &options, const IR::ToplevelBlock *toplevel,
                           P4::ReferenceMap *refMap, P4::TypeMap *typeMap) {
         if (toplevel == nullptr)

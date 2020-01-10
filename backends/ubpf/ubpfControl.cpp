@@ -25,7 +25,6 @@ limitations under the License.
 
 namespace UBPF {
 
-
     UBPFControlBodyTranslator::UBPFControlBodyTranslator(
             const UBPFControl *control) :
             CodeGenInspector(control->program->refMap,
@@ -165,7 +164,6 @@ namespace UBPF {
 
             if (method->method->name.name ==
                 UBPFModel::instance.registerModel.write.name) {
-
                 pRegister->emitKeyInstance(builder, method->expr);
             }
 
@@ -296,7 +294,6 @@ namespace UBPF {
         }
         auto bim = mi->to<P4::BuiltInMethod>();
         if (bim != nullptr) {
-//            builder->emitIndent();
             if (bim->name == IR::Type_Header::isValid) {
                 visit(bim->appliedTo);
                 builder->append(".ebpf_valid");
@@ -368,7 +365,6 @@ namespace UBPF {
         emitAssignmentStatement(a);
 
         builder->newline();
-
         builder->emitIndent();
         auto valueName = a->left->to<IR::PathExpression>()->path->name.name;
         builder->appendFormat("if (%s != NULL) ", valueName);

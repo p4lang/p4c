@@ -9,10 +9,7 @@ namespace UBPF {
     class UbpfCodeBuilder : public EBPF::CodeBuilder {
     public:
         const UbpfTarget *target;
-
-        explicit UbpfCodeBuilder(const UbpfTarget *target) : EBPF::CodeBuilder(target), target(target) {
-
-        }
+        explicit UbpfCodeBuilder(const UbpfTarget *target) : EBPF::CodeBuilder(target), target(target) {}
     };
 }
 
