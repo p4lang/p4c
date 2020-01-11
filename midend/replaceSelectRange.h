@@ -57,7 +57,6 @@ class ReplaceSelectRange final : public PassManager {
         ReplaceSelectRange(ReferenceMap* refMap, TypeMap* typeMap) {
             passes.push_back(new TypeChecking(refMap, typeMap));
             passes.push_back(new DoReplaceSelectRange(typeMap));
-            passes.push_back(new ClearTypeMap(typeMap));
             setName("ReplaceSelectRange");
         }
 };

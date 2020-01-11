@@ -1,3 +1,2 @@
-In file: /home/hemant/p4c/midend/replaceSelectRange.cpp:61
-[31mCompiler Bug[0m: Range check failed
-
+error: 2054-2048: Range end is less than start.
+error: Range check failed

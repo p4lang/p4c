@@ -36,20 +36,20 @@ bool DoReplaceSelectRange::checkRange(const IR::Range* range) {
         return false;
 
     if (!range->left->is<IR::Constant>()) {
-        std::cout << "must evaluate to a compile-time "
-                  << "constant" << range->left << std::endl;
+        ::error("%1%: must evaluate to a compile-time constant.",
+                range->left);
         return false;
     }
     auto left = range->left->to<IR::Constant>()->value;
     if (!range->right->is<IR::Constant>()) {
-        std::cout << "must evaluate to a compile-time "
-                  << "constant" << range->right <<  std::endl;
+        ::error("%1%: must evaluate to a compile-time constant.",
+                range->right);
         return false;
     }
     auto right = range->right->to<IR::Constant>()->value;
     if (right < left) {
-        std::cout << "Range end " << std::hex << std::showbase << right
-        << " is less than start " << left << std::endl;
+        ::error("%1%-%2%: Range end is less than start.",
+                left, right);
         return false;
     }
     return true;
@@ -58,7 +58,8 @@ bool DoReplaceSelectRange::checkRange(const IR::Range* range) {
 std::vector<const IR::Mask *>
 DoReplaceSelectRange::rangeToMasks(const IR::Range *r) {
     bool st = checkRange(r);
-    BUG_CHECK(st, "Range check failed");
+    if (!st)
+        ::error("Range check failed");
 
     int width = typeMap->getType(r, true)->width_bits();
     big_int min = r->left->to<IR::Constant>()->value;
@@ -91,21 +92,12 @@ DoReplaceSelectRange::cartesianAppend(std::vector<IR::Vector<IR::Expression>> ve
                                       std::vector<const IR::Mask *> masks) {
     std::vector<IR::Vector<IR::Expression>> newVecs;
 
-    if (vecs.empty()) {
+    for (auto v : vecs) {
         for (auto mask : masks) {
-            IR::Vector<IR::Expression> v;
+            auto copy(v);
 
-            v.push_back(mask);
-            newVecs.push_back(v);
-        }
-    } else {
-        for (auto v : vecs) {
-            for (auto mask : masks) {
-                auto copy(v);
-
-                copy.push_back(mask);
-                newVecs.push_back(copy);
-            }
+            copy.push_back(mask);
+            newVecs.push_back(copy);
         }
     }
 
@@ -117,18 +109,11 @@ DoReplaceSelectRange::cartesianAppend(std::vector<IR::Vector<IR::Expression>> ve
                                     const IR::Expression *e) {
     std::vector<IR::Vector<IR::Expression>> newVecs;
 
-    if (vecs.empty()) {
-        IR::Vector<IR::Expression> v;
+    for (auto v : vecs) {
+        auto copy(v);
 
-        v.push_back(e);
-        newVecs.push_back(v);
-    } else {
-        for (auto v : vecs) {
-            auto copy(v);
-
-            copy.push_back(e);
-            newVecs.push_back(copy);
-        }
+        copy.push_back(e);
+        newVecs.push_back(copy);
     }
 
     return newVecs;
@@ -151,6 +136,9 @@ const IR::Node*  DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
     } else if (keySet->is<IR::ListExpression>()) {
         auto oldList = keySet->to<IR::ListExpression>();
         std::vector<IR::Vector<IR::Expression>> newVectors;
+        IR::Vector<IR::Expression> first;
+
+        newVectors.push_back(first);
 
         for (auto key : oldList->components) {
             if (key->is<IR::Range>()) {
