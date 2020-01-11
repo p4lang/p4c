@@ -61,7 +61,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             // Test three ranges for cartesian product.
             (0x0800 .. 0x0806, 0x08 .. 0x11, 0x08 .. 0x10): parse_ipv4;
             // Test a constant, range, and ternary op in one keyset.
-	    (0x0800, 0x08 .. 0x10, 0x06 &&& 0x11): parse_ipv4;
+            (0x0800, 0x08 .. 0x10, 0x06 &&& 0x11): parse_ipv4;
             default: accept;
         }
     }
