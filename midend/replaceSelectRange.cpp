@@ -76,8 +76,6 @@ DoReplaceSelectRange::rangeToMasks(const IR::Range *r) {
         auto constType = typeMap->getType(r->left, true);
         auto valConst = new IR::Constant(constType, min, 16, true);
         big_int mask = ~(range_size - 1) & ((((big_int) 1) << width) - 1);
-        if (mask == 0)
-            std::cout << "mask: " << mask << " " << width << " " << range_size << std::endl;
         auto maskConst = new IR::Constant(constType, mask, 16, true);
         auto m = new IR::Mask(r->srcInfo, valConst, maskConst);
 
