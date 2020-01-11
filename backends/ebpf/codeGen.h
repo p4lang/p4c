@@ -64,7 +64,8 @@ class CodeGenInspector : public Inspector {
     }
 
     bool notSupported(const IR::Expression* expression)
-    { ::error("%1%: not yet implemented", expression); return false; }
+    { ::error(ErrorType::ERR_UNSUPPORTED,
+              "not yet implemented", expression); return false; }
 
     bool preorder(const IR::Expression* expression) override
     { return notSupported(expression); }

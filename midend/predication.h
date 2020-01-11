@@ -70,7 +70,8 @@ class Predication final : public Transform {
         return new IR::PathExpression(IR::ID(predicateName.back())); }
     const IR::Statement* error(const IR::Statement* statement) const {
         if (inside_action && ifNestingLevel > 0)
-            ::error("%1%: Conditional execution in actions is not supported on this target",
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "Conditional execution in actions",
                     statement);
         return statement;
     }

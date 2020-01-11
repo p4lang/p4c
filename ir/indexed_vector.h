@@ -46,7 +46,8 @@ class IndexedVector : public Vector<T> {
         auto name = decl->getName().name;
         auto previous = declarations.find(name);
         if (previous != declarations.end())
-            ::error("%1%: Duplicates declaration %2%", a, previous->second);
+            ::error(ErrorType::ERR_DUPLICATE,
+                    "%1%: Duplicates declaration %2%", a, previous->second);
         else
             declarations[name] = decl; }
     void removeFromMap(const T* a) {

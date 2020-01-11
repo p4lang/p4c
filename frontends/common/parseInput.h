@@ -73,7 +73,8 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
     if (options.doNotPreprocess) {
         in = fopen(options.file, "r");
         if (in == nullptr) {
-            ::error("%s: No such file or directory.", options.file);
+            ::error(ErrorType::ERR_NOT_FOUND,
+                    "No such file or directory.", options.file);
             return nullptr;
         }
     } else {
@@ -88,7 +89,8 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
     options.closeInput(in);
 
     if (::errorCount() > 0) {
-        ::error("%1% errors encountered, aborting compilation", ::errorCount());
+        ::error(ErrorType::ERR_OVERLIMIT,
+                "%1% errors encountered, aborting compilation", ::errorCount());
         return nullptr;
     }
     BUG_CHECK(result != nullptr, "Parsing failed, but we didn't report an error");

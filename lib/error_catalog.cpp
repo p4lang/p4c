@@ -32,7 +32,8 @@ const int ErrorType::ERR_OVERLIMIT     =   9;
 const int ErrorType::ERR_INSUFFICIENT  =  10;
 const int ErrorType::ERR_TYPE_ERROR    =  11;
 const int ErrorType::ERR_UNSUPPORTED_ON_TARGET = 12;
-const int ErrorType::ERR_DUPLICATE = 13;
+const int ErrorType::ERR_DUPLICATE     =  13;
+const int ErrorType::ERR_IO            =  14;
 // If we specialize for 1000 error types we're good!
 const int ErrorType::ERR_MAX_ERRORS    = 999;
 
@@ -63,7 +64,7 @@ using ErrorSig = std::pair<const char *, const std::string>;
 std::map<int, ErrorSig> ErrorCatalog::errorCatalog = {
     // Errors
     { ErrorType::LEGACY_ERROR,           ErrorSig("legacy", "")},
-    { ErrorType::ERR_UNKNOWN,            ErrorSig("unknown", "%1%: Unknown error")},
+    { ErrorType::ERR_UNKNOWN,            ErrorSig("unknown", "%1%: Unknown")},
     { ErrorType::ERR_UNSUPPORTED,        ErrorSig("unsupported", "%1%: Unsupported")},
     { ErrorType::ERR_UNEXPECTED,         ErrorSig("unexpected", "%1%: Unexpected")},
     { ErrorType::ERR_EXPECTED,           ErrorSig("expected", "%1%: Expected")},
@@ -77,6 +78,7 @@ std::map<int, ErrorSig> ErrorCatalog::errorCatalog = {
     { ErrorType::ERR_UNSUPPORTED_ON_TARGET, ErrorSig("target-error",
                                                      "%1%: Unsupported on target")},
     { ErrorType::ERR_DUPLICATE,          ErrorSig("duplicate", "")},
+    { ErrorType::ERR_IO,                 ErrorSig("I/O error", "")},
 
     // Warnings
     { ErrorType::LEGACY_WARNING,         ErrorSig("legacy", "")},

@@ -5,4 +5,4 @@ array_index.p4(31): error: Illegal array index hdr.data[port]: must be a constan
     modify_field(data[port].f1, val);
                  ^^^^^^^^^^
 error: Cannot locate action noop
-error: 2 errors encountered, aborting compilation
+[--Werror=overlimit] error: 2 errors encountered, aborting compilation
