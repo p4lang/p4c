@@ -54,11 +54,11 @@ bool DoReplaceSelectRange::checkRange(const IR::Range* range) {
             bufferL << std::hex << std::showbase << left;
             std::stringstream bufferR;
             bufferR << std::hex << std::showbase << right;
-            ::error(ErrorType::ERR_INVALID, "%1%-%2%: Range end is less than start.",
-                    bufferL.str(), bufferR.str());
+            ::error(ErrorType::ERR_INVALID, "%2% -%3%: Range end is less than start.",
+                    range, bufferL.str(), bufferR.str());
         } else {
-            ::error(ErrorType::ERR_INVALID, "%1%-%2%: Range end is less than start.",
-            left, right);
+            ::error(ErrorType::ERR_INVALID, "%2% -%3%: Range end is less than start.",
+                    range, left, right);
         }
         return false;
     }
