@@ -20,42 +20,39 @@
 
 namespace P4 {
 
-bool DoReplaceSelectRange::checkRange(const IR::Range* range) {
-    if (range == nullptr)
-        return false;
-
-    if (!range->left->is<IR::Constant>()) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%2%: Range min must be a compile-time constant.",
-                range, range->left);
-        return false;
-    }
-    auto left = range->left->to<IR::Constant>()->value;
-    if (!range->right->is<IR::Constant>()) {
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%2%: Range max must be a compile-time constant.",
-                range, range->right);
-        return false;
-    }
-    auto right = range->right->to<IR::Constant>()->value;
-    if (right < left) {
-        ::error(ErrorType::ERR_INVALID, "%2% -%3%: Range end is less than start.",
-                range, range->left, range->right);
-        return false;
-    }
-    return true;
-}
-
 std::vector<const IR::Mask *>
 DoReplaceSelectRange::rangeToMasks(const IR::Range *r) {
     std::vector<const IR::Mask *> masks;
 
-    if (!checkRange(r))
+    if (!r)
         return masks;
 
+    auto l = r->left->to<IR::Constant>();
+    if (!l) {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "%2%: Range min must be a compile-time constant.",
+                r, r->left);
+        return masks;
+    }
+    auto left = r->left->to<IR::Constant>()->value;
+
+    auto ri = r->right->to<IR::Constant>();
+    if (!ri) {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "%2%: Range max must be a compile-time constant.",
+                r, r->right);
+        return masks;
+    }
+    auto right = r->right->to<IR::Constant>()->value;
+    if (right < left) {
+        ::error(ErrorType::ERR_INVALID, "%2% -%3%: Range end is less than start.",
+                r, r->left, r->right);
+        return masks;
+    }
+
     int width = r->type->width_bits();
-    big_int min = r->left->to<IR::Constant>()->value;
-    big_int max = r->right->to<IR::Constant>()->value;
+    big_int min = left;
+    big_int max = right;
     big_int range_size_remaining = max - min + 1;
 
     while (range_size_remaining > 0) {
