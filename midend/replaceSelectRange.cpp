@@ -24,9 +24,6 @@ std::vector<const IR::Mask *>
 DoReplaceSelectRange::rangeToMasks(const IR::Range *r) {
     std::vector<const IR::Mask *> masks;
 
-    if (!r)
-        return masks;
-
     auto l = r->left->to<IR::Constant>();
     if (!l) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
@@ -123,16 +120,14 @@ const IR::Node*  DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
         }
 
         return newCases;
-    } else if (keySet->is<IR::ListExpression>()) {
-        auto oldList = keySet->to<IR::ListExpression>();
+    } else if (auto oldList = keySet->to<IR::ListExpression>()) {
         std::vector<IR::Vector<IR::Expression>> newVectors;
         IR::Vector<IR::Expression> first;
 
         newVectors.push_back(first);
 
         for (auto key : oldList->components) {
-            if (key->is<IR::Range>()) {
-                auto r = key->to<IR::Range>();
+            if (auto r = key->to<IR::Range>()) {
                 auto masks = rangeToMasks(r);
                 if (masks.empty())
                     return sc;
