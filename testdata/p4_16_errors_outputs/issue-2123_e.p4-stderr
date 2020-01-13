@@ -1,4 +1,4 @@
 [--Werror=invalid] error: 0x806: Invalid 0x806-0x800: Range end is less than start.
 error: Range check failed
-error: 2054-2048: Range end is less than start.
+[--Werror=invalid] error: 2054: Invalid 2054-2048: Range end is less than start.
 error: Range check failed
