@@ -34,7 +34,7 @@ DoReplaceSelectRange::rangeToMasks(const IR::Range *r) {
                 r, r->left);
         return masks;
     }
-    auto left = r->left->to<IR::Constant>()->value;
+    auto left = l->value;
 
     auto ri = r->right->to<IR::Constant>();
     if (!ri) {
@@ -43,9 +43,9 @@ DoReplaceSelectRange::rangeToMasks(const IR::Range *r) {
                 r, r->right);
         return masks;
     }
-    auto right = r->right->to<IR::Constant>()->value;
+    auto right = ri->value;
     if (right < left) {
-        ::error(ErrorType::ERR_INVALID, "%2% -%3%: Range end is less than start.",
+        ::error(ErrorType::ERR_INVALID, "%2%-%3%: Range end is less than start.",
                 r, r->left, r->right);
         return masks;
     }
@@ -62,7 +62,7 @@ DoReplaceSelectRange::rangeToMasks(const IR::Range *r) {
             range_size >>= 1;
 
         auto constType = r->left->type;
-        auto base = r->left->to<IR::Constant>()->base;
+        auto base = l->base;
         auto valConst = new IR::Constant(constType, min, base, true);
         big_int mask = ~(range_size - 1) & ((((big_int) 1) << width) - 1);
         auto maskConst = new IR::Constant(constType, mask, base, true);
