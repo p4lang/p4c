@@ -1,8 +1,36 @@
+issue-2123_e.p4(63): [--Wwarn=uninitialized_use] warning: hdr.ipv4.totalLen may be uninitialized
+            hdr.ipv4.totalLen .. 0x0800 : parse_ipv4;
+            ^^^^^^^^^^^^^^^^^
+issue-2123_e.p4(64): [--Wwarn=uninitialized_use] warning: hdr.ipv4.totalLen may be uninitialized
+            0x0800 .. hdr.ipv4.totalLen : parse_ipv4;
+                      ^^^^^^^^^^^^^^^^^
 issue-2123_e.p4(61): [--Werror=invalid] error: ..: Invalid 0x806 -0x800: Range end is less than start.
             0x0806 .. 0x0800 : parse_ipv4;
             ^^^^^^^^^^^^^^^^
-error: Range check failed
+issue-2123_e.p4(61)
+            0x0806 .. 0x0800 : parse_ipv4;
+            ^^^^^^
+issue-2123_e.p4(61)
+            0x0806 .. 0x0800 : parse_ipv4;
+                      ^^^^^^
 issue-2123_e.p4(62): [--Werror=invalid] error: ..: Invalid 2054 -2048: Range end is less than start.
             2054 .. 2048 : parse_ipv4;
             ^^^^^^^^^^^^
-error: Range check failed
+issue-2123_e.p4(62)
+            2054 .. 2048 : parse_ipv4;
+            ^^^^
+issue-2123_e.p4(62)
+            2054 .. 2048 : parse_ipv4;
+                    ^^^^
+issue-2123_e.p4(63): [--Werror=target-error] error: ..: Unsupported on target hdr.ipv4.totalLen: Range min must be a compile-time constant.
+            hdr.ipv4.totalLen .. 0x0800 : parse_ipv4;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue-2123_e.p4(63)
+            hdr.ipv4.totalLen .. 0x0800 : parse_ipv4;
+            ^^^^^^^^^^^^^^^^^
+issue-2123_e.p4(64): [--Werror=target-error] error: ..: Unsupported on target hdr.ipv4.totalLen: Range max must be a compile-time constant.
+            0x0800 .. hdr.ipv4.totalLen : parse_ipv4;
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue-2123_e.p4(64)
+            0x0800 .. hdr.ipv4.totalLen : parse_ipv4;
+                      ^^^^^^^^^^^^^^^^^

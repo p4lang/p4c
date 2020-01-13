@@ -20,46 +20,27 @@
 
 namespace P4 {
 
-static int trailingZeros(big_int n, int width) {
-    int zeros = 0;
-
-    while (n > 0 && (n & 1) == 0) {
-        zeros += 1;
-        n >>= 1;
-    }
-
-    return (zeros < width) ? zeros : width;
-}
-
 bool DoReplaceSelectRange::checkRange(const IR::Range* range) {
     if (range == nullptr)
         return false;
 
     if (!range->left->is<IR::Constant>()) {
-        ::error("%1%: must evaluate to a compile-time constant.",
-                range->left);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "%2%: Range min must be a compile-time constant.",
+                range, range->left);
         return false;
     }
     auto left = range->left->to<IR::Constant>()->value;
-    auto base = range->left->to<IR::Constant>()->base;
     if (!range->right->is<IR::Constant>()) {
-        ::error("%1%: must evaluate to a compile-time constant.",
-                range->right);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "%2%: Range max must be a compile-time constant.",
+                range, range->right);
         return false;
     }
     auto right = range->right->to<IR::Constant>()->value;
     if (right < left) {
-        if (base == 16) {
-            std::stringstream bufferL;
-            bufferL << std::hex << std::showbase << left;
-            std::stringstream bufferR;
-            bufferR << std::hex << std::showbase << right;
-            ::error(ErrorType::ERR_INVALID, "%2% -%3%: Range end is less than start.",
-                    range, bufferL.str(), bufferR.str());
-        } else {
-            ::error(ErrorType::ERR_INVALID, "%2% -%3%: Range end is less than start.",
-                    range, left, right);
-        }
+        ::error(ErrorType::ERR_INVALID, "%2% -%3%: Range end is less than start.",
+                range, range->left, range->right);
         return false;
     }
     return true;
@@ -67,26 +48,27 @@ bool DoReplaceSelectRange::checkRange(const IR::Range* range) {
 
 std::vector<const IR::Mask *>
 DoReplaceSelectRange::rangeToMasks(const IR::Range *r) {
-    bool st = checkRange(r);
-    if (!st)
-        ::error("Range check failed");
+    std::vector<const IR::Mask *> masks;
 
-    int width = typeMap->getType(r, true)->width_bits();
+    if (!checkRange(r))
+        return masks;
+
+    int width = r->type->width_bits();
     big_int min = r->left->to<IR::Constant>()->value;
     big_int max = r->right->to<IR::Constant>()->value;
-    std::vector<const IR::Mask *> masks;
     big_int range_size_remaining = max - min + 1;
 
     while (range_size_remaining > 0) {
-        big_int range_size = ((big_int) 1) << trailingZeros(min, width);
+        big_int range_size = ((big_int) 1) << ffs(min);
 
         while (range_size > range_size_remaining)
             range_size >>= 1;
 
-        auto constType = typeMap->getType(r->left, true);
-        auto valConst = new IR::Constant(constType, min, 16, true);
+        auto constType = r->left->type;
+        auto base = r->left->to<IR::Constant>()->base;
+        auto valConst = new IR::Constant(constType, min, base, true);
         big_int mask = ~(range_size - 1) & ((((big_int) 1) << width) - 1);
-        auto maskConst = new IR::Constant(constType, mask, 16, true);
+        auto maskConst = new IR::Constant(constType, mask, base, true);
         auto m = new IR::Mask(r->srcInfo, valConst, maskConst);
 
         masks.push_back(m);
@@ -133,9 +115,10 @@ const IR::Node*  DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
     auto newCases = new IR::Vector<IR::SelectCase>();
     auto keySet = sc->keyset;
 
-    if (keySet->is<IR::Range>()) {
-        auto r = keySet->to<IR::Range>();
+    if (auto r = keySet->to<IR::Range>()) {
         auto masks = rangeToMasks(r);
+        if (masks.empty())
+            return sc;
 
         for (auto mask : masks) {
             auto c = new IR::SelectCase(sc->srcInfo, mask, sc->state);
@@ -154,6 +137,8 @@ const IR::Node*  DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
             if (key->is<IR::Range>()) {
                 auto r = key->to<IR::Range>();
                 auto masks = rangeToMasks(r);
+                if (masks.empty())
+                    return sc;
 
                 newVectors = cartesianAppend(newVectors, masks);
             } else {

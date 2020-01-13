@@ -19,8 +19,6 @@
 #define _MIDEND_REPLACESELECTRANGE_H_
 
 #include <iostream>
-#include <string>
-#include <sstream>
 #include <iomanip>
 #include <vector>
 #include <utility>
@@ -36,12 +34,9 @@ namespace P4 {
   Call pass after the flattenInterfaceStructs pass.
   */
 class DoReplaceSelectRange : public Transform {
-P4::TypeMap* typeMap;
-
  public:
-    explicit DoReplaceSelectRange(TypeMap* typeMap): typeMap(typeMap) {
+    DoReplaceSelectRange() {
         setName("DoReplaceSelectRange");
-        CHECK_NULL(typeMap);
     }
     const IR::Node* postorder(IR::SelectCase* p) override;
     bool checkRange(const IR::Range* range);
@@ -58,7 +53,7 @@ class ReplaceSelectRange final : public PassManager {
  public:
         ReplaceSelectRange(ReferenceMap* refMap, TypeMap* typeMap) {
             passes.push_back(new TypeChecking(refMap, typeMap));
-            passes.push_back(new DoReplaceSelectRange(typeMap));
+            passes.push_back(new DoReplaceSelectRange());
             setName("ReplaceSelectRange");
         }
 };

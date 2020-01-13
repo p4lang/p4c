@@ -43,6 +43,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition select(hdr.ethernet.etherType) {
             16w0x806 .. 16w0x800: parse_ipv4;
             16w2054 .. 16w2048: parse_ipv4;
+            hdr.ipv4.totalLen .. 16w0x800: parse_ipv4;
+            16w0x800 .. hdr.ipv4.totalLen: parse_ipv4;
             default: accept;
         }
     }
