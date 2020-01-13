@@ -41,6 +41,7 @@ bool DoReplaceSelectRange::checkRange(const IR::Range* range) {
         return false;
     }
     auto left = range->left->to<IR::Constant>()->value;
+    auto base = range->left->to<IR::Constant>()->base;
     if (!range->right->is<IR::Constant>()) {
         ::error("%1%: must evaluate to a compile-time constant.",
                 range->right);
@@ -48,8 +49,17 @@ bool DoReplaceSelectRange::checkRange(const IR::Range* range) {
     }
     auto right = range->right->to<IR::Constant>()->value;
     if (right < left) {
-        ::error("%1%-%2%: Range end is less than start.",
-                left, right);
+        if (base == 16) {
+            std::stringstream bufferL;
+            bufferL << std::hex << std::showbase << left;
+            std::stringstream bufferR;
+            bufferR << std::hex << std::showbase << right;
+            ::error(ErrorType::ERR_INVALID, "%1%-%2%: Range end is less than start.",
+                    bufferL.str(), bufferR.str());
+        } else {
+            ::error(ErrorType::ERR_INVALID, "%1%-%2%: Range end is less than start.",
+            left, right);
+        }
         return false;
     }
     return true;

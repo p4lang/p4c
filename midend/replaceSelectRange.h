@@ -19,6 +19,8 @@
 #define _MIDEND_REPLACESELECTRANGE_H_
 
 #include <iostream>
+#include <string>
+#include <sstream>
 #include <iomanip>
 #include <vector>
 #include <utility>
