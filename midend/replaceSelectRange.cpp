@@ -147,7 +147,7 @@ const IR::Node* DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
                       "select key set expression with a range expands into %2% "
                       "ternary key set expressions, which may lead to run-time "
                       "performance or parser configuration space issues in some"
-                      " targets.", sc, MAX_CASES);
+                      " targets.", sc, newCases->size());
         }
 
         return newCases;
