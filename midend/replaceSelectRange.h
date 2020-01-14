@@ -36,7 +36,7 @@ namespace P4 {
 class DoReplaceSelectRange : public Transform {
  public:
     const uint MAX_CASES;
-    DoReplaceSelectRange(uint max) : MAX_CASES(max) {
+    explicit DoReplaceSelectRange(uint max) : MAX_CASES(max) {
         setName("DoReplaceSelectRange");
     }
     const IR::Node* postorder(IR::SelectCase* p) override;
