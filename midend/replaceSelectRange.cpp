@@ -74,8 +74,8 @@ DoReplaceSelectRange::rangeToMasks(const IR::Range *r) {
 }
 
 std::vector<IR::Vector<IR::Expression>>
-DoReplaceSelectRange::cartesianAppend(std::vector<IR::Vector<IR::Expression>> vecs,
-                                      std::vector<const IR::Mask *> masks) {
+DoReplaceSelectRange::cartesianAppend(const std::vector<IR::Vector<IR::Expression>>& vecs,
+                                      const std::vector<const IR::Mask *>& masks) {
     std::vector<IR::Vector<IR::Expression>> newVecs;
 
     for (auto v : vecs) {
@@ -91,8 +91,8 @@ DoReplaceSelectRange::cartesianAppend(std::vector<IR::Vector<IR::Expression>> ve
 }
 
 std::vector<IR::Vector<IR::Expression>>
-DoReplaceSelectRange::cartesianAppend(std::vector<IR::Vector<IR::Expression>> vecs,
-                                    const IR::Expression *e) {
+DoReplaceSelectRange::cartesianAppend(const std::vector<IR::Vector<IR::Expression>>& vecs,
+                                      const IR::Expression *e) {
     std::vector<IR::Vector<IR::Expression>> newVecs;
 
     for (auto v : vecs) {
@@ -105,7 +105,7 @@ DoReplaceSelectRange::cartesianAppend(std::vector<IR::Vector<IR::Expression>> ve
     return newVecs;
 }
 
-const IR::Node*  DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
+const IR::Node* DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
     auto newCases = new IR::Vector<IR::SelectCase>();
     auto keySet = sc->keyset;
 
