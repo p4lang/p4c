@@ -35,7 +35,10 @@ namespace P4 {
   */
 class DoReplaceSelectRange : public Transform {
  public:
+    // number of new cases generated for ternary operations due to a range
+    // Each case is a key set expression.
     const uint MAX_CASES;
+
     explicit DoReplaceSelectRange(uint max) : MAX_CASES(max) {
         setName("DoReplaceSelectRange");
     }

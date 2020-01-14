@@ -143,9 +143,11 @@ const IR::Node* DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
             newCases->push_back(new IR::SelectCase(sc->srcInfo, le, sc->state));
         }
         if (newCases->size() > MAX_CASES) {
-            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "Case expands over %2%", sc, MAX_CASES);
-            return sc;
+            ::warning(ErrorType::ERR_OVERLIMIT,
+                      "select key set expression with a range expands into %2% "
+                      "ternary key set expressions, which may lead to run-time "
+                      "performance or parser configuration space issues in some"
+                      " targets.", sc, MAX_CASES);
         }
 
         return newCases;
