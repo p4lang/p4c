@@ -38,6 +38,7 @@ set (MIDEND_SRCS
   removeMiss.cpp
   removeParameters.cpp
   removeSelectBooleans.cpp
+  replaceSelectRange.cpp
   removeUnusedParameters.cpp
   simplifyBitwise.cpp
   simplifyKey.cpp
@@ -80,6 +81,7 @@ set (MIDEND_HDRS
   removeParameters.h
   removeSelectBooleans.h
   removeUnusedParameters.h
+  replaceSelectRange.h
   simplifyBitwise.h
   simplifyKey.h
   simplifySelectCases.h
