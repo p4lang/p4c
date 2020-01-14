@@ -35,7 +35,8 @@ namespace P4 {
   */
 class DoReplaceSelectRange : public Transform {
  public:
-    DoReplaceSelectRange() {
+    const uint MAX_CASES;
+    DoReplaceSelectRange(uint max) : MAX_CASES(max) {
         setName("DoReplaceSelectRange");
     }
     const IR::Node* postorder(IR::SelectCase* p) override;
@@ -52,7 +53,7 @@ class ReplaceSelectRange final : public PassManager {
  public:
         ReplaceSelectRange(ReferenceMap* refMap, TypeMap* typeMap) {
             passes.push_back(new TypeChecking(refMap, typeMap));
-            passes.push_back(new DoReplaceSelectRange());
+            passes.push_back(new DoReplaceSelectRange(100));
             setName("ReplaceSelectRange");
         }
 };

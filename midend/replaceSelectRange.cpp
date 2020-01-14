@@ -142,6 +142,11 @@ const IR::Node* DoReplaceSelectRange::postorder(IR::SelectCase* sc) {
             auto le = new IR::ListExpression(oldList->srcInfo, v);
             newCases->push_back(new IR::SelectCase(sc->srcInfo, le, sc->state));
         }
+        if (newCases->size() > MAX_CASES) {
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "Case expands over %2%", sc, MAX_CASES);
+            return sc;
+        }
 
         return newCases;
     }
