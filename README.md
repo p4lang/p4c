@@ -215,17 +215,17 @@ which is not available until Ubuntu 16.10. For earlier releases of Ubuntu,
 you'll need to install from source. You can find instructions
 [here](https://github.com/google/protobuf/blob/master/src/README.md). **We
 recommend that you use version
-[3.2.0](https://github.com/google/protobuf/releases/tag/v3.2.0)**. Earlier
+[3.6.1](https://github.com/google/protobuf/releases/tag/v3.6.1)**. Earlier
 versions in the 3 series may not be supported by other p4lang projects, such as
 [p4lang/PI](https://github.com/p4lang/PI). More recent versions may work as
-well, but all our CI testing is done with version 3.2.0. After cloning protobuf
-and before you build, check-out version 3.2.0:
+well, but all our CI testing is done with version 3.6.1. After cloning protobuf
+and before you build, check-out version 3.6.1:
 
-`git checkout v3.2.0`
+`git checkout v3.6.1`
 
 Please note that while all protobuf versions newer than 3.0 should work for
 `p4c` itself, you may run into trouble with some extensions and other p4lang
-projects unless you install version 3.2.0, so you may want to install from
+projects unless you install version 3.6.1, so you may want to install from
 source even on newer releases of Ubuntu.
 
 ## macOS dependencies
