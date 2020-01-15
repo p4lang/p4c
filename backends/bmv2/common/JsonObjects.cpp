@@ -97,16 +97,6 @@ JsonObjects::create_parameters(Util::JsonObject* object) {
     return insert_array_field(object, "parameters");
 }
 
-/// Append a json object r to a parent json array,
-/// insert a field 'op' with 'name' to parent.
-Util::JsonObject*
-JsonObjects::create_primitive(Util::JsonArray* parent, cstring name) {
-    auto result = new Util::JsonObject();
-    result->emplace("op", name);
-    parent->append(result);
-    return result;
-}
-
 void
 JsonObjects::add_program_info(const cstring& name) {
     toplevel->emplace("program", name);

@@ -44,7 +44,7 @@ boilerplate removed, which the ir-generator generates.
         |   |   +-- Operation_Relation
         |   |   |   \-- Equ, New, Lss, Leq, Grt, Geq
         |   |   +-- BAnd, BOr, BXor, LAnd, LOr
-        |   |   \-- Concat, ArrayIndex, Rnage, Mask
+        |   |   \-- Concat, ArrayIndex, Range, Mask
         |   +-- Operation_Trinary
         |   |   \-- Slice, Mux
         |   \-- Primitive

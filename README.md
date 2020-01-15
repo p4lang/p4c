@@ -221,7 +221,7 @@ versions in the 3 series may not be supported by other p4lang projects, such as
 well, but all our CI testing is done with version 3.2.0. After cloning protobuf
 and before you build, check-out version 3.2.0:
 
-`git checkout v3.2.0`
+`git checkout v3.6.1`
 
 Please note that while all protobuf versions newer than 3.0 should work for
 `p4c` itself, you may run into trouble with some extensions and other p4lang
