@@ -187,29 +187,57 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
     result->emplace("type", "header");
     cstring elementAccess;
 
+    LOG2("left: " << expression->left << " right: " << expression->right);
     // This is can be either a header, which is part of the "headers" parameter
     // or a temporary array.
-    if (expression->left->is<IR::Member>()) {
+    if (auto mem = expression->left->to<IR::Member>()) {
         // This is a header part of the parameters
-        auto mem = expression->left->to<IR::Member>();
         auto parentType = typeMap->getType(mem->expr, true);
         BUG_CHECK(parentType->is<IR::Type_StructLike>(), "%1%: expected a struct", parentType);
         auto st = parentType->to<IR::Type_StructLike>();
         auto field = st->getField(mem->member);
         elementAccess = field->controlPlaneName();
-    } else if (expression->left->is<IR::PathExpression>()) {
+    } else if (auto path = expression->left->to<IR::PathExpression>()) {
         // This is a temporary variable with type stack.
-        auto path = expression->left->to<IR::PathExpression>();
         elementAccess = path->path->name;
     }
 
     if (!expression->right->is<IR::Constant>()) {
-        ::error(ErrorType::ERR_INVALID, "all array indexes must be constant", expression->right);
+        const IR::Expression* ex = expression->right;
+        std::vector<cstring> cv;
+        while (auto rmem = ex->to<IR::Member>()) {
+            ex = rmem->expr;
+            cv.push_back(rmem->member.toString());
+        }
+
+        std::reverse(cv.begin(), cv.end());
+
+        auto ai = new Util::JsonObject();
+        ai->emplace("type", "expression");
+        // create a DEREFERENCE_HEADER_STACK json node
+        auto e = new Util::JsonObject();
+        e->emplace("op", "dereference_header_stack");
+        auto l = new Util::JsonObject();
+        l->emplace("type", "header_stack");
+        l->emplace("value", elementAccess);
+        e->emplace("left", l);
+
+        auto r = new Util::JsonObject();
+        r->emplace("type", "field");
+        auto v = new Util::JsonArray();
+        for (cstring n : cv) {
+            v->append(n);
+        }
+        r->emplace("value", v);
+        e->emplace("right", r);
+        ai->emplace("value", e);
+        result->emplace("value", ai);
     } else {
         int index = expression->right->to<IR::Constant>()->asInt();
         elementAccess += "[" + Util::toString(index) + "]";
+        result->emplace("value", elementAccess);
     }
-    result->emplace("value", elementAccess);
+    LOG2("result: " << result->toString());
     mapExpression(expression, result);
 }
 
@@ -237,8 +265,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
     cstring fieldName = expression->member.name;
     auto type = typeMap->getType(expression, true);
 
-    if (parentType->is<IR::Type_StructLike>()) {
-        auto st = parentType->to<IR::Type_StructLike>();
+    if (auto st = parentType->to<IR::Type_StructLike>()) {
         auto field = st->getField(expression->member);
         if (field != nullptr)
             // field could be a method call, i.e., isValid.
@@ -279,8 +306,8 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         } else if (parentType->is<IR::Type_HeaderUnion>()) {
             auto l = get(expression->expr);
             cstring nestedField = fieldName;
-            if (l->is<Util::JsonObject>()) {
-                auto lv = l->to<Util::JsonObject>()->get("value");
+            if (auto lv = l->to<Util::JsonObject>()) {
+                lv->get("value");
                 if (lv->is<Util::JsonValue>()) {
                     // header in union reference ["u", "f"] => "u.f"
                     cstring prefix = lv->to<Util::JsonValue>()->getString();
@@ -384,7 +411,11 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
             e->emplace("right", l);
         } else {
             const char* fieldRef = parentType->is<IR::Type_Stack>() ? "stack_field" : "field";
-            result->emplace("type", fieldRef);
+            auto lv = isArrayIndexExpr(l->to<Util::JsonObject>());
+            if (lv != nullptr)
+                result->emplace("type", "expression");
+            else
+                result->emplace("type", fieldRef);
             auto e = mkArrayField(result, "value");
             if (l->is<Util::JsonObject>()) {
                 auto lv = l->to<Util::JsonObject>()->get("value");
@@ -403,6 +434,12 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 } else if (lv->is<Util::JsonValue>()) {
                     e->append(lv);
                     e->append(fieldName);
+                } else if (auto jo = l->to<Util::JsonObject>()) {
+                    auto lv = isArrayIndexExpr(jo);
+                    if (lv != nullptr) {
+                        e->append(lv);
+                        e->append(fieldName);
+                    }
                 } else {
                     BUG("%1%: Unexpected json", lv);
                 }
@@ -426,8 +463,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
 }
 
 Util::IJson* ExpressionConverter::fixLocal(Util::IJson* json) {
-    if (json->is<Util::JsonObject>()) {
-        auto jo = json->to<Util::JsonObject>();
+    if (auto jo = json->to<Util::JsonObject>()) {
         auto to = jo->get("type");
         if (to != nullptr && to->to<Util::JsonValue>() != nullptr &&
             (*to->to<Util::JsonValue>()) == "runtime_data") {
@@ -769,6 +805,23 @@ Util::IJson* ExpressionConverter::convertWithConstantWidths(const IR::Expression
     auto result = convert(e);
     withConstantWidths = false;
     return result;
+}
+
+Util::IJson* ExpressionConverter::isArrayIndexExpr(Util::IJson *l) {
+    if (l == nullptr)
+        return nullptr;
+    auto jo = l->to<Util::JsonObject>();
+    auto jt = jo->to<Util::JsonObject>()->get("type");
+    if (jt != nullptr && jt->to<Util::JsonValue>() != nullptr &&
+        (*jt->to<Util::JsonValue>()) == "header") {
+        auto lv = jo->to<Util::JsonObject>()->get("value");
+        if (lv && !lv->is<Util::JsonObject>()) return nullptr;
+        auto lt = lv->to<Util::JsonObject>()->get("type");
+        if ((*lt->to<Util::JsonValue>()) == "expression") {
+            return lv;
+        }
+    }
+    return nullptr;
 }
 
 }  // namespace BMV2
