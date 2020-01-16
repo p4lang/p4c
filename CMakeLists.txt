@@ -323,10 +323,19 @@ add_custom_command (OUTPUT ${IR_GENERATED_SRCS}
 add_custom_target(genIR DEPENDS ${IR_GENERATED_SRCS})
 
 # Header files
+# p4test needs all the backend include files, whether the backend is enabled or not
+# Note that we only provide the headers for the build env, they are only installed by the
+# backend specific target.
+set (OTHER_HEADERS
+  backends/ebpf/p4include/ebpf_model.p4
+  )
 add_custom_target(update_includes ALL
-  #FIXME -- should only run this when headers change -- how to accomplish that?
-  COMMAND ${CMAKE_COMMAND} -E copy_directory ${P4C_SOURCE_DIR}/p4include ${P4C_BINARY_DIR}/p4include
-)
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/*.p4 ${P4C_BINARY_DIR}/p4include
+  COMMAND for h in ${OTHER_HEADERS} \; do
+    ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/\$$h ${P4C_BINARY_DIR}/p4include \;
+  done
+  )
 
 # Installation
 # Targets install themselves. Here we install the core headers
