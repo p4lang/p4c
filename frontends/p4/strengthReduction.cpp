@@ -310,6 +310,10 @@ const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
         return new IR::Slice(e, hi, lo);
     }
 
+    auto slice_width = expr->getH() - expr->getL() + 1;
+    if (slice_width == expr->e0->type->width_bits())
+        return expr->e0;
+
     return expr;
 }
 
