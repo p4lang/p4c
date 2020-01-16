@@ -178,10 +178,10 @@ Of course, all of these fields can only be accessed from the egress pipeline and
 they are read-only.
 - `enq_timestamp`: a timestamp, in microseconds, set when the packet is first
 enqueued.
-- `enq_qdepth`: the depth of the queue when the packet was first enqueued.
+- `enq_qdepth`: the depth of the queue when the packet was first enqueued, in units of number of packets (not the total size of packets).
 - `deq_timedelta`: the time, in microseconds, that the packet spent in the
 queue.
-- `deq_qdepth`: the depth of queue when the packet was dequeued.
+- `deq_qdepth`: the depth of queue when the packet was dequeued, in units of number of packets (not the total size of packets).
 - `qid`: when there are multiple queues servicing each egress port (e.g. when
 priority queueing is enabled), each queue is assigned a fixed unique id, which
 is written to this field. Otherwise, this field is set to 0.
