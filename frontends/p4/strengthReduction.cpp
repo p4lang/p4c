@@ -303,6 +303,13 @@ const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
         }
     }
 
+    if (auto sl = expr->e0->to<IR::Slice>()) {
+        auto e = sl->e0;
+        auto hi = expr->getH() - expr->getL() + sl->getL();
+        auto lo = expr->getL() + sl->getL();
+        return new IR::Slice(e, hi, lo);
+    }
+
     return expr;
 }
 
