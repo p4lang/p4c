@@ -37,7 +37,6 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout 
         packet.extract<vec_e_t>(hdr.vector[0]);
         packet.extract<vec_e_t>(hdr.vector[1]);
         packet.extract<vec_e_t>(hdr.vector[2]);
-        packet.extract<vec_e_t>(hdr.vector[0]);
         packet.extract<aggregator_t>(hdr.pool[0]);
         packet.extract<aggregator_t>(hdr.pool[1]);
         packet.extract<aggregator_t>(hdr.pool[2]);

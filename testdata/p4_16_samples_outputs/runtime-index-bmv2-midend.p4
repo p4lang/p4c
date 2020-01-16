@@ -37,7 +37,6 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout 
         packet.extract<vec_e_t>(hdr.vector[0]);
         packet.extract<vec_e_t>(hdr.vector[1]);
         packet.extract<vec_e_t>(hdr.vector[2]);
-        packet.extract<vec_e_t>(hdr.vector[0]);
         packet.extract<aggregator_t>(hdr.pool[0]);
         packet.extract<aggregator_t>(hdr.pool[1]);
         packet.extract<aggregator_t>(hdr.pool[2]);
@@ -46,20 +45,20 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @hidden action runtimeindexbmv2l68() {
+    @hidden action runtimeindexbmv2l67() {
         hdr.vector[0].e = hdr.pool[1].val;
         hdr.pool[hdr.ml.idx].val = hdr.pool[1].val;
         hdr.pool[hdr.ml.idx].val = hdr.pool[hdr.ml.idx].val + 8w1;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
-    @hidden table tbl_runtimeindexbmv2l68 {
+    @hidden table tbl_runtimeindexbmv2l67 {
         actions = {
-            runtimeindexbmv2l68();
+            runtimeindexbmv2l67();
         }
-        const default_action = runtimeindexbmv2l68();
+        const default_action = runtimeindexbmv2l67();
     }
     apply {
-        tbl_runtimeindexbmv2l68.apply();
+        tbl_runtimeindexbmv2l67.apply();
     }
 }
 
