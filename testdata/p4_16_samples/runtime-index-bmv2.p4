@@ -54,7 +54,6 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta,
         packet.extract(hdr.vector[0]);
         packet.extract(hdr.vector[1]);
         packet.extract(hdr.vector[2]);
-        packet.extract(hdr.vector[0]);
         packet.extract(hdr.pool[0]);
         packet.extract(hdr.pool[1]);
         packet.extract(hdr.pool[2]);
