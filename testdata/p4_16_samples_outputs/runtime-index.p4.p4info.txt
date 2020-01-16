@@ -1,3 +1,0 @@
-pkg_info {
-  arch: "v1model"
-}
