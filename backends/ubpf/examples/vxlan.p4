@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ubpf_model.p4"
+#include <ubpf_model.p4>
 #include <core.p4>
 
 #define UDP_PORT_VXLAN 4789
@@ -69,13 +69,9 @@ header vxlan_t {
 }
 
 struct Headers_t {
-    @name("ethernet")
     Ethernet_h ethernet;
-    @name("ipv4")
     IPv4_h     ipv4;
-    @name("udp")
     udp_t      udp;
-    @name("vxlan")
     vxlan_t    vxlan;
 
     Ethernet_h inner_ethernet;

@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 #include <core.p4>
-#include "ubpf_model.p4"
+#include <ubpf_model.p4>
 
 @ethernetaddress typedef bit<48> EthernetAddress;
 

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ubpf_model.p4"
+#include <ubpf_model.p4>
 #include <core.p4>
 
 //BUCKET_SIZE is a number of packets passed in a time window that has WINDOW_SIZE size

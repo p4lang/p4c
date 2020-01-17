@@ -1,7 +1,5 @@
 # Introduction to uBPF Backend
 
-This repository implements the uBPF (Userspace BPF) backend for the P4 compiler (https://github.com/p4lang/p4c).
-
 The **p4c-ubpf** compiler allows to translate P4 programs into the uBPF programs. We use the uBPF implementation provided 
 by [the Oko/P4rt-OVS switch](https://github.com/Orange-OpenSource/oko/tree/p4rt-ovs). The Oko's uBPF VM is based on the
 open-source implementation provided by [IOVisor](https://github.com/iovisor/ubpf).

@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ubpf_model.p4"
+#include <ubpf_model.p4>
 #include <core.p4>
 
 #define SYNSENT 1
@@ -122,50 +122,50 @@ control pipe(inout Headers_t hdr, inout metadata meta) {
     apply {
 
         if (hdr.tcp.isValid()) {
-            @atomic {
-                if (hdr.ipv4.srcAddr < hdr.ipv4.dstAddr) {
-                    hash(meta.conn_id, HashAlgorithm.lookup3, { headers.ipv4.srcAddr, headers.ipv4.dstAddr });
-                } else {
-                    hash(meta.conn_id, HashAlgorithm.lookup3, { headers.ipv4.dstAddr, headers.ipv4.srcAddr });
-                }
 
-                meta.connInfo.s = conn_state.read(meta.conn_id);
-                meta.connInfo.srv_addr = conn_srv_addr.read(meta.conn_id);
-                if (meta.connInfo.s == 0 || meta.connInfo.srv_addr == 0) {
-                    if (hdr.tcp.syn == 1 && hdr.tcp.ack == 0) {
-                        // It's a SYN
-                        update_conn_info(SYNSENT, hdr.ipv4.dstAddr);
+            if (hdr.ipv4.srcAddr < hdr.ipv4.dstAddr) {
+                hash(meta.conn_id, HashAlgorithm.lookup3, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+            } else {
+                hash(meta.conn_id, HashAlgorithm.lookup3, { hdr.ipv4.dstAddr, hdr.ipv4.srcAddr });
+            }
+
+            meta.connInfo.s = conn_state.read(meta.conn_id);
+            meta.connInfo.srv_addr = conn_srv_addr.read(meta.conn_id);
+            if (meta.connInfo.s == 0 || meta.connInfo.srv_addr == 0) {
+                if (hdr.tcp.syn == 1 && hdr.tcp.ack == 0) {
+                    // It's a SYN
+                    update_conn_info(SYNSENT, hdr.ipv4.dstAddr);
+                }
+            } else if (meta.connInfo.srv_addr == hdr.ipv4.srcAddr) {
+                if (meta.connInfo.s == SYNSENT) {
+                    if (hdr.tcp.syn == 1 && hdr.tcp.ack == 1) {
+                        // It's a SYN-ACK
+                        update_conn_state(SYNACKED);
                     }
-                } else if (meta.connInfo.srv_addr == hdr.ipv4.srcAddr) {
-                    if (meta.connInfo.s == SYNSENT) {
-                        if (hdr.tcp.syn == 1 && hdr.tcp.ack == 1) {
-                            // It's a SYN-ACK
-                            update_conn_state(SYNACKED);
-                        }
-                    } else if (meta.connInfo.s == SYNACKED) {
-                        _drop();
-                        return;
-                    } else if (meta.connInfo.s == ESTABLISHED) {
-                        if (hdr.tcp.fin == 1 && hdr.tcp.ack == 1) {
-                            update_conn_info(0, 0);  // clear register entry
-                        }
+                } else if (meta.connInfo.s == SYNACKED) {
+                    _drop();
+                    return;
+                } else if (meta.connInfo.s == ESTABLISHED) {
+                    if (hdr.tcp.fin == 1 && hdr.tcp.ack == 1) {
+                        update_conn_info(0, 0);  // clear register entry
                     }
-                } else {
-                    if (meta.connInfo.s == SYNSENT) {
-                        _drop();
-                        return;
-                    } else if (meta.connInfo.s == SYNACKED) {
-                        if (hdr.tcp.syn == 0 && hdr.tcp.ack == 1) {
-                            // It's a ACK
-                            update_conn_state(ESTABLISHED);
-                        }
-                    } else if (meta.connInfo.s == ESTABLISHED) {
-                        if (hdr.tcp.fin == 1 && hdr.tcp.ack == 1) {
-                            update_conn_info(0, 0); // clear register entry
-                        }
+                }
+            } else {
+                if (meta.connInfo.s == SYNSENT) {
+                    _drop();
+                    return;
+                } else if (meta.connInfo.s == SYNACKED) {
+                    if (hdr.tcp.syn == 0 && hdr.tcp.ack == 1) {
+                        // It's a ACK
+                        update_conn_state(ESTABLISHED);
+                    }
+                } else if (meta.connInfo.s == ESTABLISHED) {
+                    if (hdr.tcp.fin == 1 && hdr.tcp.ack == 1) {
+                        update_conn_info(0, 0); // clear register entry
                     }
                 }
             }
+
         }
     }
 }
