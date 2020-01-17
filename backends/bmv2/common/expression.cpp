@@ -184,7 +184,6 @@ void ExpressionConverter::postorder(const IR::Constant* expression)  {
 
 void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
     auto result = new Util::JsonObject();
-    result->emplace("type", "header");
     cstring elementAccess;
 
     LOG2("left: " << expression->left << " right: " << expression->right);
@@ -203,6 +202,7 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
     }
 
     if (!expression->right->is<IR::Constant>()) {
+        result->emplace("type", "expression");
         const IR::Expression* ex = expression->right;
         std::vector<cstring> cv;
         while (auto rmem = ex->to<IR::Member>()) {
@@ -212,8 +212,6 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
 
         std::reverse(cv.begin(), cv.end());
 
-        auto ai = new Util::JsonObject();
-        ai->emplace("type", "expression");
         // create a DEREFERENCE_HEADER_STACK json node
         auto e = new Util::JsonObject();
         e->emplace("op", "dereference_header_stack");
@@ -230,9 +228,9 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
         }
         r->emplace("value", v);
         e->emplace("right", r);
-        ai->emplace("value", e);
-        result->emplace("value", ai);
+        result->emplace("value", e);
     } else {
+        result->emplace("type", "header");
         int index = expression->right->to<IR::Constant>()->asInt();
         elementAccess += "[" + Util::toString(index) + "]";
         result->emplace("value", elementAccess);
@@ -411,12 +409,17 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
             e->emplace("right", l);
         } else {
             const char* fieldRef = parentType->is<IR::Type_Stack>() ? "stack_field" : "field";
-            auto lv = isArrayIndexExpr(l->to<Util::JsonObject>());
-            if (lv != nullptr)
+            auto st = isArrayIndexExpr(l->to<Util::JsonObject>());
+            Util::JsonArray* e;
+            Util::JsonObject* eo;
+            if (st) {
                 result->emplace("type", "expression");
-            else
+                eo = result;
+            } else {
                 result->emplace("type", fieldRef);
-            auto e = mkArrayField(result, "value");
+                e = mkArrayField(result, "value");
+            }
+
             if (l->is<Util::JsonObject>()) {
                 auto lv = l->to<Util::JsonObject>()->get("value");
                 if (lv->is<Util::JsonArray>()) {
@@ -435,11 +438,8 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                     e->append(lv);
                     e->append(fieldName);
                 } else if (auto jo = l->to<Util::JsonObject>()) {
-                    auto lv = isArrayIndexExpr(jo);
-                    if (lv != nullptr) {
-                        e->append(lv);
-                        e->append(fieldName);
-                    }
+                    auto jr = riai(jo, 0);
+                    eo->emplace("value", jr);
                 } else {
                     BUG("%1%: Unexpected json", lv);
                 }
@@ -569,6 +569,22 @@ void ExpressionConverter::saturated_binary(const IR::Operation_Binary* expressio
     cstring repr = stringRepr(eType->width_bits());
     r->emplace("value", repr);
     e->emplace("right", r);
+}
+
+// Runtime Index Array Index post-processing.
+// The "right" arg is offset of the field in the header.
+// Computing offset is TODO.
+Util::IJson* ExpressionConverter::riai(Util::IJson* left, uint right) {
+    auto result = new Util::JsonObject();
+    result->emplace("type", "expression");
+    auto e = new Util::JsonObject();
+    result->emplace("value", e);
+    cstring op = "access_field";
+
+    e->emplace("op", op);
+    e->emplace("left", left);
+    e->emplace("right", right);
+    return result;
 }
 
 void ExpressionConverter::postorder(const IR::ListExpression* expression)  {
@@ -807,21 +823,20 @@ Util::IJson* ExpressionConverter::convertWithConstantWidths(const IR::Expression
     return result;
 }
 
-Util::IJson* ExpressionConverter::isArrayIndexExpr(Util::IJson *l) {
+bool ExpressionConverter::isArrayIndexExpr(Util::IJson *l) {
     if (l == nullptr)
-        return nullptr;
+        return false;
     auto jo = l->to<Util::JsonObject>();
     auto jt = jo->to<Util::JsonObject>()->get("type");
-    if (jt != nullptr && jt->to<Util::JsonValue>() != nullptr &&
-        (*jt->to<Util::JsonValue>()) == "header") {
+    if ((jt != nullptr) && (jt->to<Util::JsonValue>() != nullptr) &&
+        (*jt->to<Util::JsonValue>() == "expression")) {
         auto lv = jo->to<Util::JsonObject>()->get("value");
-        if (lv && !lv->is<Util::JsonObject>()) return nullptr;
-        auto lt = lv->to<Util::JsonObject>()->get("type");
-        if ((*lt->to<Util::JsonValue>()) == "expression") {
-            return lv;
-        }
+        if (lv && !lv->is<Util::JsonObject>())
+            return false;
+    } else {
+        return false;
     }
-    return nullptr;
+    return true;
 }
 
 }  // namespace BMV2

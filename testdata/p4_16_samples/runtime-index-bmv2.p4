@@ -66,7 +66,8 @@ control ingress(inout headers hdr, inout metadata_t meta,
     apply {
         hdr.vector[0].e = hdr.pool[1].val;
         hdr.pool[hdr.ml.idx].val = hdr.vector[0].e;
-        hdr.pool[hdr.ml.idx].val = hdr.pool[hdr.ml.idx].val + 1;
+        // TODO: The line below does not work for JSON output yet.
+//      hdr.pool[hdr.ml.idx].val = hdr.pool[hdr.ml.idx].val + 1;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
 }
