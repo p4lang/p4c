@@ -42,7 +42,11 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
     register<bit<8>>(32w2) debug;
     apply {
         bit<8> n = 8w0b11111111;
+        bit<8> m = 8w0b11111111;
+        bit<8> x = 8w0b11111111;
         n[7:4][3:0][3:0] = 4w0;
+        m[7:4][3:1] = 3w0;
+        x[5:4][1:1] = 1w0;
         debug.write(1, n);
         standard_meta.egress_spec = 0;
     }
