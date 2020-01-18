@@ -80,7 +80,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_mpls_bos") state parse_mpls_bos {
         packet.extract<mpls_t>(hdr.mpls_bos);
-        transition select((packet.lookahead<bit<4>>())[3:0]) {
+        transition select(packet.lookahead<bit<4>>()) {
             4w0x4: parse_ipv4;
             default: accept;
         }

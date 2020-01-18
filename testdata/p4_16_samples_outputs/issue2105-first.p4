@@ -13,7 +13,7 @@ control c() {
     apply {
         bit<8> x = 8w0;
         bit<8> y = 8w0;
-        y = (x < 8w4 ? 8w2 : 8w1)[7:0] | 8w8;
+        y = (x < 8w4 ? 8w2 : 8w1) | 8w8;
     }
 }
 

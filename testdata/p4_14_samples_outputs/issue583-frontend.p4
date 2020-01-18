@@ -196,7 +196,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         {
             bit<8> ttl_1 = hdr.ipv4.ttl;
             ttl_1 = ttl_1 + 8w255;
-            standard_metadata.egress_spec[8:0] = egress_spec[8:0];
+            standard_metadata.egress_spec = egress_spec;
             hdr.ipv4.ttl = ttl_1;
         }
     }

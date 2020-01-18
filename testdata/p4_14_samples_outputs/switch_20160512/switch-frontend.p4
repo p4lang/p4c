@@ -1074,7 +1074,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_mpls_bos") state parse_mpls_bos {
         tmp = packet.lookahead<bit<4>>();
-        transition select(tmp[3:0]) {
+        transition select(tmp) {
             4w0x4: parse_mpls_inner_ipv4;
             4w0x6: parse_mpls_inner_ipv6;
             default: parse_eompls;
@@ -2461,7 +2461,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.gre.S = 1w0;
         hdr.gre.s = 1w0;
         hdr.nvgre.tni = meta.tunnel_metadata.vnid;
-        hdr.nvgre.flow_id[7:0] = ((bit<8>)meta.hash_metadata.entropy_hash)[7:0];
+        hdr.nvgre.flow_id = (bit<8>)meta.hash_metadata.entropy_hash;
         hdr.ipv4.setValid();
         hdr.ipv4.protocol = 8w47;
         hdr.ipv4.ttl = 8w64;
@@ -2554,7 +2554,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.gre.S = 1w0;
         hdr.gre.s = 1w0;
         hdr.nvgre.tni = meta.tunnel_metadata.vnid;
-        hdr.nvgre.flow_id[7:0] = ((bit<8>)meta.hash_metadata.entropy_hash)[7:0];
+        hdr.nvgre.flow_id = (bit<8>)meta.hash_metadata.entropy_hash;
         hdr.ipv6.setValid();
         hdr.ipv6.version = 4w0x6;
         hdr.ipv6.nextHdr = 8w47;

@@ -116,7 +116,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition parse_ipv4_options;
     }
     @name(".parse_ipv4_options") state parse_ipv4_options {
-        transition select(meta.my_metadata.parse_ipv4_counter, (packet.lookahead<bit<8>>())[7:0]) {
+        transition select(meta.my_metadata.parse_ipv4_counter, packet.lookahead<bit<8>>()) {
             (8w0x0 &&& 8w0xff, 8w0x0 &&& 8w0x0): accept;
             (8w0x0 &&& 8w0x0, 8w0x0 &&& 8w0xff): parse_ipv4_option_EOL;
             (8w0x0 &&& 8w0x0, 8w0x1 &&& 8w0xff): parse_ipv4_option_NOP;

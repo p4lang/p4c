@@ -26,7 +26,7 @@ control my() {
         s_0[tmp_3].z = tmp_5;
         a_0 = tmp_6;
         a_0 = g(a_0);
-        a_0[0:0] = g(a_0[0:0]);
+        a_0 = g(a_0);
         g(a_0);
     }
     @hidden table tbl_side_effects27 {

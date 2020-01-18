@@ -14,7 +14,7 @@ control my() {
         a = f(s[a].z, g(a));
         a = f(s[g(a)].z, a);
         a = g(a);
-        a[0:0] = g(a[0:0]);
+        a = g(a);
         s[a].z = g(a);
     }
 }

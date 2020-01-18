@@ -21,13 +21,13 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h.c = ((bit<12>)h.h.a)[11:4];
     }
     action case1() {
-        h.h.c = (bit<8>)h.h.a[14:3][8:4];
+        h.h.c = (bit<8>)h.h.a[11:7];
     }
     action case2() {
         h.h.c = (bit<8>)(16w0[15:0] ++ h.h.a[15:8]);
     }
     action case3() {
-        h.h.c = ((int<32>)(int<16>)h.h.a)[14:2][10:3];
+        h.h.c = ((int<32>)(int<16>)h.h.a)[12:5];
     }
     table t {
         actions = {
