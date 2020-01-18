@@ -108,7 +108,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".start") state start {
         meta.meta.if_index = (bit<8>)standard_metadata.ingress_port;
-        transition select((packet.lookahead<bit<64>>())[63:0]) {
+        transition select(packet.lookahead<bit<64>>()) {
             64w0: parse_cpu_header;
             default: parse_ethernet;
         }

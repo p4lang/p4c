@@ -18,10 +18,10 @@ struct Meta {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.case0") action case0() {
-        h.h.c = (bit<8>)(h.h.a[15:0] ++ 16w0);
+        h.h.c = (bit<8>)(h.h.a ++ 16w0);
     }
     @name("ingress.case1") action case1() {
-        h.h.c = (bit<8>)h.h.a[15:0];
+        h.h.c = (bit<8>)h.h.a;
     }
     @name("ingress.case2") action case2() {
         h.h.c = 8w0;
@@ -30,7 +30,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h.c = h.h.a[7:0];
     }
     @name("ingress.case4") action case4() {
-        h.h.c = (bit<8>)(8w0 ++ h.h.a[15:0]);
+        h.h.c = (bit<8>)(8w0 ++ h.h.a);
     }
     @name("ingress.case5") action case5() {
         h.h.c = (bit<8>)(8w0 ++ h.h.a[15:8]);

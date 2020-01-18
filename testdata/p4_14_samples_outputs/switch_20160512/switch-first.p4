@@ -1076,7 +1076,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".parse_lisp") state parse_lisp {
         packet.extract<lisp_t>(hdr.lisp);
-        transition select((packet.lookahead<bit<4>>())[3:0]) {
+        transition select(packet.lookahead<bit<4>>()) {
             4w0x4: parse_inner_ipv4;
             4w0x6: parse_inner_ipv6;
             default: accept;
@@ -1099,7 +1099,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name(".parse_mpls_bos") state parse_mpls_bos {
-        transition select((packet.lookahead<bit<4>>())[3:0]) {
+        transition select(packet.lookahead<bit<4>>()) {
             4w0x4: parse_mpls_inner_ipv4;
             4w0x6: parse_mpls_inner_ipv6;
             default: parse_eompls;
@@ -2437,7 +2437,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         hdr.gre.S = 1w0;
         hdr.gre.s = 1w0;
         hdr.nvgre.tni = meta.tunnel_metadata.vnid;
-        hdr.nvgre.flow_id[7:0] = ((bit<8>)meta.hash_metadata.entropy_hash)[7:0];
+        hdr.nvgre.flow_id = (bit<8>)meta.hash_metadata.entropy_hash;
     }
     @name(".ipv4_nvgre_rewrite") action ipv4_nvgre_rewrite() {
         f_insert_nvgre_header();

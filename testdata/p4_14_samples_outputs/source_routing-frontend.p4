@@ -35,7 +35,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
     @name(".start") state start {
         tmp = packet.lookahead<bit<64>>();
-        transition select(tmp[63:0]) {
+        transition select(tmp) {
             64w0: parse_head;
             default: accept;
         }

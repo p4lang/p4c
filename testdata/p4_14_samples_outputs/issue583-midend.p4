@@ -200,7 +200,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         mark_to_drop(standard_metadata);
     }
     @name(".hop_ipv4") action hop_ipv4(bit<9> egress_spec) {
-        standard_metadata.egress_spec[8:0] = egress_spec[8:0];
+        standard_metadata.egress_spec = egress_spec;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name(".act") action act() {

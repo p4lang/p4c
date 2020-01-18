@@ -28,7 +28,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition accept;
     }
     @packet_entry @name(".start_e2e_mirrored") state start_e2e_mirrored {
-        transition select((packet.lookahead<bit<32>>())[31:0]) {
+        transition select(packet.lookahead<bit<32>>()) {
             default: accept;
             32w0xab00: Cowles;
         }

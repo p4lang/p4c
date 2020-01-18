@@ -48,7 +48,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     @name("pipe.Reject") action Reject(IPv4Address add) {
         pass = false;
-        headers.ipv4.srcAddr[31:0] = add[31:16] ++ add[15:0];
+        headers.ipv4.srcAddr = add[31:16] ++ add[15:0];
     }
     @name("pipe.Check_src_ip") table Check_src_ip_0 {
         key = {
