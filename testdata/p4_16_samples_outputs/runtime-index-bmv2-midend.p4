@@ -46,8 +46,9 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout 
 
 control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     @hidden action runtimeindexbmv2l67() {
-        hdr.vector[0].e = hdr.pool[1].val;
-        hdr.pool[hdr.ml.idx].val = hdr.pool[1].val;
+        hdr.vector[0].e = hdr.pool[1].val + 8w1;
+        hdr.pool[hdr.ml.idx].val = hdr.pool[1].val + 8w1;
+        hdr.vector[0].e = hdr.pool[hdr.ml.idx].val;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
     @hidden table tbl_runtimeindexbmv2l67 {

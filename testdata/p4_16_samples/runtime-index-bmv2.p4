@@ -64,10 +64,13 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta,
 control ingress(inout headers hdr, inout metadata_t meta,
                 inout standard_metadata_t standard_metadata) {
     apply {
-        hdr.vector[0].e = hdr.pool[1].val;
+        hdr.vector[0].e = hdr.pool[1].val + 1;
+        // Test runtime index as l-value.
         hdr.pool[hdr.ml.idx].val = hdr.vector[0].e;
-        // TODO: The line below does not work for JSON output yet.
-//      hdr.pool[hdr.ml.idx].val = hdr.pool[hdr.ml.idx].val + 1;
+        // Test runtime index as r-value.
+        hdr.vector[0].e = hdr.pool[hdr.ml.idx].val;
+        // TODO: Test runtime index as l- and r-values.
+        // hdr.pool[hdr.ml.idx].val = hdr.pool[hdr.ml.idx].val + 1;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
 }

@@ -235,7 +235,6 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
         elementAccess += "[" + Util::toString(index) + "]";
         result->emplace("value", elementAccess);
     }
-    LOG2("result: " << result->toString());
     mapExpression(expression, result);
 }
 
@@ -409,9 +408,9 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
             e->emplace("right", l);
         } else {
             const char* fieldRef = parentType->is<IR::Type_Stack>() ? "stack_field" : "field";
-            auto st = isArrayIndexExpr(l->to<Util::JsonObject>());
             Util::JsonArray* e;
             Util::JsonObject* eo;
+            bool st = IsArrayIndexRuntime(expression);
             if (st) {
                 result->emplace("type", "expression");
                 eo = result;
@@ -438,8 +437,10 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                     e->append(lv);
                     e->append(fieldName);
                 } else if (auto jo = l->to<Util::JsonObject>()) {
-                    auto jr = riai(jo, 0);
-                    eo->emplace("value", jr);
+                    if (st) {
+                        auto jr = riai(jo, 0);
+                        eo->emplace("value", jr);
+                    }
                 } else {
                     BUG("%1%: Unexpected json", lv);
                 }
@@ -751,6 +752,18 @@ void ExpressionConverter::postorder(const IR::Expression* expression)  {
     BUG("%1%: Unhandled case", expression);
 }
 
+bool ExpressionConverter::IsArrayIndexRuntime(const IR::Expression* e) {
+    if (auto mem = e->to<IR::Member>()) {
+        if (auto ai = mem->expr->to<IR::ArrayIndex>()) {
+            auto right = ai->right;
+            if (!right->is<IR::Constant>()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 // doFixup = true -> insert masking operations for proper arithmetic implementation
 // see below for wrap
 Util::IJson*
@@ -787,7 +800,8 @@ ExpressionConverter::convert(const IR::Expression* e, bool doFixup, bool wrap, b
         if (auto ro = result->to<Util::JsonObject>()) {
             if (auto to = ro->get("type")) {
                 if (auto jv = to->to<Util::JsonValue>()) {
-                    if (jv->isString() && to_wrap.find(jv->getString()) != to_wrap.end()) {
+                    if (jv->isString() && to_wrap.find(jv->getString()) != to_wrap.end()
+                        && !IsArrayIndexRuntime(e)) {
                         auto rwrap = new Util::JsonObject();
                         rwrap->emplace("type", "expression");
                         rwrap->emplace("value", result);
@@ -821,22 +835,6 @@ Util::IJson* ExpressionConverter::convertWithConstantWidths(const IR::Expression
     auto result = convert(e);
     withConstantWidths = false;
     return result;
-}
-
-bool ExpressionConverter::isArrayIndexExpr(Util::IJson *l) {
-    if (l == nullptr)
-        return false;
-    auto jo = l->to<Util::JsonObject>();
-    auto jt = jo->to<Util::JsonObject>()->get("type");
-    if ((jt != nullptr) && (jt->to<Util::JsonValue>() != nullptr) &&
-        (*jt->to<Util::JsonValue>() == "expression")) {
-        auto lv = jo->to<Util::JsonObject>()->get("value");
-        if (lv && !lv->is<Util::JsonObject>())
-            return false;
-    } else {
-        return false;
-    }
-    return true;
 }
 
 }  // namespace BMV2
