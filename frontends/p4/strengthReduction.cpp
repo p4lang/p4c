@@ -303,6 +303,7 @@ const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
         }
     }
 
+    // out-of-bound error has been caught in type checking
     if (auto sl = expr->e0->to<IR::Slice>()) {
         auto e = sl->e0;
         auto hi = expr->getH() - expr->getL() + sl->getL();
