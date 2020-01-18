@@ -625,6 +625,8 @@ getMatchType(cstring matchTypeName) {
         return MatchField::MatchTypes::TERNARY;
     } else if (matchTypeName == P4V1::V1Model::instance.rangeMatchType.name) {
         return MatchField::MatchTypes::RANGE;
+    } else if (matchTypeName == P4V1::V1Model::instance.optionalMatchType.name) {
+        return MatchField::MatchTypes::OPTIONAL;
     } else if (matchTypeName == P4V1::V1Model::instance.selectorMatchType.name) {
         // Nothing to do here, we cannot even perform some sanity-checking.
         return boost::none;
@@ -1381,13 +1383,14 @@ class P4RuntimeEntriesConverter {
     }
 
     /// Checks if the @table entries need to be assigned a priority, i.e. does
-    /// the match key for the table includes a ternary or range match?
+    /// the match key for the table includes a ternary, range, or optional match?
     bool tableNeedsPriority(const IR::P4Table* table, ReferenceMap* refMap) const {
       for (auto e : table->getKey()->keyElements) {
           auto matchType = getKeyMatchType(e, refMap);
           // TODO(antonin): remove dependency on v1model.
           if (matchType == P4CoreLibrary::instance.ternaryMatch.name ||
-              matchType == P4V1::V1Model::instance.rangeMatchType.name) {
+              matchType == P4V1::V1Model::instance.rangeMatchType.name ||
+              matchType == P4V1::V1Model::instance.optionalMatchType.name) {
               return true;
           }
       }
@@ -1453,6 +1456,8 @@ class P4RuntimeEntriesConverter {
               addTernary(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else if (matchType == P4V1::V1Model::instance.rangeMatchType.name) {
               addRange(protoEntry, fieldId++, k, keyWidth, typeMap);
+            } else if (matchType == P4V1::V1Model::instance.optionalMatchType.name) {
+              addOptional(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else {
                 if (!k->is<IR::DefaultExpression>())
                     ::error("%1%: match type not supported by P4Runtime serializer", matchType);
@@ -1634,6 +1639,49 @@ class P4RuntimeEntriesConverter {
         auto protoRange = protoMatch->mutable_range();
         protoRange->set_low(*startStr);
         protoRange->set_high(*endStr);
+    }
+
+    void addOptional(p4v1::TableEntry* protoEntry, int fieldId,
+                     const IR::Expression* k, int keyWidth,
+                     TypeMap* typeMap) const {
+        if (k->is<IR::DefaultExpression>())  // don't care, skip in P4Runtime message
+            return;
+        boost::optional<std::string> valueStr;
+        if (k->is<IR::Mask>()) {
+            auto km = k->to<IR::Mask>();
+            auto value = simpleKeyExpressionValue(km->left, typeMap);
+            if (value == boost::none) return;
+            auto count_ones = [](const big_int& n) -> int {
+                return bitcount(n); };
+            auto mask = km->right->to<IR::Constant>()->value;
+            if (! ((mask == 0) ||
+                   ((count_ones(mask) == keyWidth) &&
+                    // The condition below is only true if all 1 bits
+                    // are consecutive and in the least significant
+                    // bit positions of mask.
+                    ((mask & (mask + 1)) == 0)))) {
+                ::error("%1% invalid mask for key with match_kind optional", k);
+                return;
+            }
+            if ((*value & mask) != *value) {
+                ::warning(ErrorType::WARN_MISMATCH,
+                          "P4Runtime requires that Optional matches have masked-off bits set to 0, "
+                          "updating value %1% to conform to the P4Runtime specification", km->left);
+                *value &= mask;
+            }
+            if (mask == 0)  // don't care
+                return;
+            valueStr = stringReprConstant(*value, keyWidth);
+        } else {
+            valueStr = convertSimpleKeyExpression(k, keyWidth, typeMap);
+        }
+        if (valueStr == boost::none) return;
+        auto protoMatch = protoEntry->add_match();
+        protoMatch->set_field_id(fieldId);
+        // TODO(jafingerhut): Should there be a mutable_optional()
+        // method, or is using mutable_exact() OK?
+        auto protoOptional = protoMatch->mutable_exact();
+        protoOptional->set_value(*valueStr);
     }
 
     cstring getKeyMatchType(const IR::KeyElement* ke, ReferenceMap* refMap) const {

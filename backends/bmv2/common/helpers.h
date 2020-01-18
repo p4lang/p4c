@@ -48,6 +48,7 @@ class MatchImplementation {
  public:
     static const cstring selectorMatchTypeName;
     static const cstring rangeMatchTypeName;
+    static const cstring optionalMatchTypeName;
 };
 
 class TableAttributes {

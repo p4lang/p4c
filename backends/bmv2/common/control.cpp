@@ -100,6 +100,45 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
                 } else {
                     ::error(ErrorType::ERR_UNSUPPORTED, "range key expression", k);
                 }
+            } else if (matchType == "optional") {
+                // TODO(jafingerhut): How should const entries of
+                // table keys with match_kind optional be represented
+                // in BMv2 JSON file?  Created issue here to ask:
+                // https://github.com/p4lang/behavioral-model/issues/844
+                // Implement the decision here.
+
+                // For now, creating the same JSON keys and values as
+                // used for a field with match_kind ternary, with mask
+                // values restricted to 0 for wildcard or all 1s for
+                // exact match.
+                if (k->is<IR::Mask>()) {
+                    auto km = k->to<IR::Mask>();
+                    auto count_ones = [](unsigned long n) { return n ? __builtin_popcountl(n) : 0;};
+                    auto mask = static_cast<unsigned long>(km->right->to<IR::Constant>()->value);
+                    if (! ((mask == 0) ||
+                           ((count_ones(mask) == keyWidth) &&
+                            // The condition below is only true if all 1 bits
+                            // are consecutive and in the least significant
+                            // bit positions of mask.
+                            ((mask & (mask + 1)) == 0)))) {
+                        ::error(ErrorType::ERR_INVALID, "mask for key with match_kind optional", k);
+                    } else {
+                        key->emplace("key", stringRepr(km->left->to<IR::Constant>()->value, k8));
+                        if (mask == 0) {
+                            key->emplace("mask", stringRepr(0, k8));
+                        } else {
+                            key->emplace("mask", stringRepr(Util::mask(keyWidth), k8));
+                        }
+                    }
+                } else if (k->is<IR::Constant>()) {
+                    key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
+                    key->emplace("mask", stringRepr(Util::mask(keyWidth), k8));
+                } else if (k->is<IR::DefaultExpression>()) {
+                    key->emplace("key", stringRepr(0, k8));
+                    key->emplace("mask", stringRepr(0, k8));
+                } else {
+                    ::error(ErrorType::ERR_UNSUPPORTED, "optional key expression", k);
+                }
             } else {
                 ::error(ErrorType::ERR_UNKNOWN, "key match type '%2%' for key %1%", k, matchType);
             }
@@ -320,13 +359,14 @@ ControlConverter::convertTable(const CFG::TableNode* node,
             // Decreasing order of precedence (bmv2 specification):
             // 0) more than one LPM field is an error
             // 1) if there is at least one RANGE field, then the table is RANGE
-            // 2) if there is at least one TERNARY field, then the table is TERNARY
+            // 2) if there is at least one TERNARY or OPTIONAL field, then the table is TERNARY
             // 3) if there is a LPM field, then the table is LPM
             // 4) otherwise the table is EXACT
             if (match_type != table_match_type) {
                 if (match_type == BMV2::MatchImplementation::rangeMatchTypeName)
                     table_match_type = BMV2::MatchImplementation::rangeMatchTypeName;
-                if (match_type == corelib.ternaryMatch.name &&
+                if ((match_type == corelib.ternaryMatch.name ||
+                     match_type == BMV2::MatchImplementation::optionalMatchTypeName) &&
                     table_match_type != BMV2::MatchImplementation::rangeMatchTypeName)
                     table_match_type = corelib.ternaryMatch.name;
                 if (match_type == corelib.lpmMatch.name &&

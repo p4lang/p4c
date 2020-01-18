@@ -255,7 +255,7 @@ class V1Model : public ::Model::Model {
             ingress("ingress", headersType, metadataType, standardMetadataType),
             sw(), counterOrMeter("$"), counter(), meter(), random(), action_profile(),
             action_selector(), clone(), resubmit("resubmit"),
-            tableAttributes(), rangeMatchType("range"), selectorMatchType("selector"),
+            tableAttributes(), rangeMatchType("range"), optionalMatchType("optional"), selectorMatchType("selector"),
             verify("verifyChecksum", headersType), compute("computeChecksum", headersType),
             digest_receiver(), hash(), algorithm(),
             registers(), drop("mark_to_drop"),
@@ -291,6 +291,7 @@ class V1Model : public ::Model::Model {
     ::Model::Elem       resubmit;
     TableAttributes_Model tableAttributes;
     ::Model::Elem       rangeMatchType;
+    ::Model::Elem       optionalMatchType;
     ::Model::Elem       selectorMatchType;
     VerifyUpdate_Model  verify;
     VerifyUpdate_Model  compute;
