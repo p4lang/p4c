@@ -63,15 +63,14 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 	default_action = a;
 
         const entries = {
-            // Test that p4c gives error if one attempts to use a mask
-            // for an optional field that is neither a complete
-            // wildcard (all 0s), nor complete exact match (all 1s in
-            // every position for the bit width of the field).
-            (0xaa &&& 0x7f, 0x1111 &&& 0xffff) : a_with_control_params(1);
-            (            _, 0x1111 &&& 0x8000) : a_with_control_params(2);
-            (0xaa &&& 0x08,                 _) : a_with_control_params(3);
-            (0xaa &&& 0xf7,                 _) : a_with_control_params(4);
-            (            _, 0x1111 &&& 0x10000) : a_with_control_params(5);
+            // Test that p4c gives error if one attempts to use an
+            // explicit mask for an optional field at all.  Only
+            // support an exact value without a mask, or _ / default.
+            (0xaa &&& 0xff, 0x1111 &&& 0xffff) : a_with_control_params(1);
+            // value too large
+            (0x100, default): a_with_control_params(2);
+            // other value too large
+            (default, 0x10000): a_with_control_params(3);
         }
     }
 

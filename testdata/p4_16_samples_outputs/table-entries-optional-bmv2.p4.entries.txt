@@ -5,13 +5,13 @@ updates {
       table_id: 33609018
       match {
         field_id: 1
-        exact {
+        optional {
           value: "\252"
         }
       }
       match {
         field_id: 2
-        exact {
+        optional {
           value: "\021\021"
         }
       }
@@ -35,7 +35,7 @@ updates {
       table_id: 33609018
       match {
         field_id: 2
-        exact {
+        optional {
           value: "\021\021"
         }
       }
@@ -59,7 +59,7 @@ updates {
       table_id: 33609018
       match {
         field_id: 1
-        exact {
+        optional {
           value: "\252"
         }
       }

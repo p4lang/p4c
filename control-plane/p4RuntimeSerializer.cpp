@@ -1646,42 +1646,12 @@ class P4RuntimeEntriesConverter {
                      TypeMap* typeMap) const {
         if (k->is<IR::DefaultExpression>())  // don't care, skip in P4Runtime message
             return;
-        boost::optional<std::string> valueStr;
-        if (k->is<IR::Mask>()) {
-            auto km = k->to<IR::Mask>();
-            auto value = simpleKeyExpressionValue(km->left, typeMap);
-            if (value == boost::none) return;
-            auto count_ones = [](const big_int& n) -> int {
-                return bitcount(n); };
-            auto mask = km->right->to<IR::Constant>()->value;
-            if (! ((mask == 0) ||
-                   ((count_ones(mask) == keyWidth) &&
-                    // The condition below is only true if all 1 bits
-                    // are consecutive and in the least significant
-                    // bit positions of mask.
-                    ((mask & (mask + 1)) == 0)))) {
-                ::error("%1% invalid mask for key with match_kind optional", k);
-                return;
-            }
-            if ((*value & mask) != *value) {
-                ::warning(ErrorType::WARN_MISMATCH,
-                          "P4Runtime requires that Optional matches have masked-off bits set to 0, "
-                          "updating value %1% to conform to the P4Runtime specification", km->left);
-                *value &= mask;
-            }
-            if (mask == 0)  // don't care
-                return;
-            valueStr = stringReprConstant(*value, keyWidth);
-        } else {
-            valueStr = convertSimpleKeyExpression(k, keyWidth, typeMap);
-        }
-        if (valueStr == boost::none) return;
         auto protoMatch = protoEntry->add_match();
         protoMatch->set_field_id(fieldId);
-        // TODO(jafingerhut): Should there be a mutable_optional()
-        // method, or is using mutable_exact() OK?
-        auto protoOptional = protoMatch->mutable_exact();
-        protoOptional->set_value(*valueStr);
+        auto protoOptional = protoMatch->mutable_optional();
+        auto value = convertSimpleKeyExpression(k, keyWidth, typeMap);
+        if (value == boost::none) return;
+        protoOptional->set_value(*value);
     }
 
     cstring getKeyMatchType(const IR::KeyElement* ke, ReferenceMap* refMap) const {

@@ -4,9 +4,13 @@ updates {
     table_entry {
       table_id: 33609018
       match {
+        field_id: 1
+        optional {
+        }
+      }
+      match {
         field_id: 2
-        exact {
-          value: "\021\021"
+        optional {
         }
       }
       action {
@@ -15,42 +19,6 @@ updates {
           params {
             param_id: 1
             value: "\000\001"
-          }
-        }
-      }
-      priority: 5
-    }
-  }
-}
-updates {
-  type: INSERT
-  entity {
-    table_entry {
-      table_id: 33609018
-      action {
-        action {
-          action_id: 16837978
-          params {
-            param_id: 1
-            value: "\000\002"
-          }
-        }
-      }
-      priority: 4
-    }
-  }
-}
-updates {
-  type: INSERT
-  entity {
-    table_entry {
-      table_id: 33609018
-      action {
-        action {
-          action_id: 16837978
-          params {
-            param_id: 1
-            value: "\000\003"
           }
         }
       }
@@ -63,12 +31,18 @@ updates {
   entity {
     table_entry {
       table_id: 33609018
+      match {
+        field_id: 1
+        optional {
+          value: "\000"
+        }
+      }
       action {
         action {
           action_id: 16837978
           params {
             param_id: 1
-            value: "\000\004"
+            value: "\000\002"
           }
         }
       }
@@ -81,12 +55,18 @@ updates {
   entity {
     table_entry {
       table_id: 33609018
+      match {
+        field_id: 2
+        optional {
+          value: "\000\000"
+        }
+      }
       action {
         action {
           action_id: 16837978
           params {
             param_id: 1
-            value: "\000\005"
+            value: "\000\003"
           }
         }
       }

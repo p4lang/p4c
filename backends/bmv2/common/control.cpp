@@ -112,29 +112,10 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
                 // "const entries" in the P4 source code will be
                 // represented using the same "key" and "mask" keys in
                 // the BMv2 JSON file as table key fields with
-                // match_kind ternary.  We will perform here the more
-                // strict checking of the allowed masks that optional
-                // imposes.
-                if (k->is<IR::Mask>()) {
-                    auto km = k->to<IR::Mask>();
-                    auto count_ones = [](unsigned long n) { return n ? __builtin_popcountl(n) : 0;};
-                    auto mask = static_cast<unsigned long>(km->right->to<IR::Constant>()->value);
-                    if (!((mask == 0) ||
-                          ((count_ones(mask) == keyWidth) &&
-                           // The condition below is only true if all 1 bits
-                           // are consecutive and in the least significant
-                           // bit positions of mask.
-                           ((mask & (mask + 1)) == 0)))) {
-                        ::error(ErrorType::ERR_INVALID, "mask for key with match_kind optional", k);
-                    } else {
-                        key->emplace("key", stringRepr(km->left->to<IR::Constant>()->value, k8));
-                        if (mask == 0) {
-                            key->emplace("mask", stringRepr(0, k8));
-                        } else {
-                            key->emplace("mask", stringRepr(Util::mask(keyWidth), k8));
-                        }
-                    }
-                } else if (k->is<IR::Constant>()) {
+                // match_kind ternary.  In the P4 source code we only
+                // allow exact values or a DefaultExpression (_ or
+                // default), no &&& expression.
+                if (k->is<IR::Constant>()) {
                     key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
                     key->emplace("mask", stringRepr(Util::mask(keyWidth), k8));
                 } else if (k->is<IR::DefaultExpression>()) {
