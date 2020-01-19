@@ -265,10 +265,11 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
 
     if (auto st = parentType->to<IR::Type_StructLike>()) {
         auto field = st->getField(expression->member);
-        if (field != nullptr)
+        if (field != nullptr) {
             // field could be a method call, i.e., isValid.
             fieldName = field->controlPlaneName();
             offset = st->getOffset(fieldName);
+        }
     }
 
     // handle error
@@ -435,14 +436,14 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                     e->append(lv);
                     e->append(fieldName);
                 } else if (auto jo = l->to<Util::JsonObject>()) {
-		    if (st) {
+                    if (st) {
                         result->emplace("type", "expression");
                         auto e = new Util::JsonObject();
                         result->emplace("value", e);
                         e->emplace("op", "access_field");
                         e->emplace("left", jo);
                         e->emplace("right", offset);
-		    }
+                    }
                 } else {
                     BUG("%1%: Unexpected json", lv);
                 }

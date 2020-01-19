@@ -71,7 +71,12 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
             auto parameters = mkParameters(primitive);
             primitive->emplace_non_null("source_info", assign->sourceInfoJsonObj());
             bool convertBool = type->is<IR::Type_Boolean>();
-            auto left = ctxt->conv->convert(l, true, true, convertBool);
+            Util::IJson* left;
+            if (ctxt->conv->IsArrayIndexRuntime(l)) {
+                left = ctxt->conv->convert(l, true, true, convertBool);
+            } else {
+                left = ctxt->conv->convertLeftValue(l);
+            }
             parameters->append(left);
             auto right = ctxt->conv->convert(r, true, true, convertBool);
             parameters->append(right);
