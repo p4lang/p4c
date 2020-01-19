@@ -11,5 +11,5 @@ packet 0 ab 1111 00 00 b0
 expect 3 aa **** ** ** ** $
 packet 0 aa 1112 00 00 b0
 
-expect 4 04 **** ** ** ** $
+expect 4 a9 **** ** ** ** $
 packet 0 a9 1110 00 00 b0
