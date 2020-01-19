@@ -119,12 +119,12 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
                     auto km = k->to<IR::Mask>();
                     auto count_ones = [](unsigned long n) { return n ? __builtin_popcountl(n) : 0;};
                     auto mask = static_cast<unsigned long>(km->right->to<IR::Constant>()->value);
-                    if (! ((mask == 0) ||
-                           ((count_ones(mask) == keyWidth) &&
-                            // The condition below is only true if all 1 bits
-                            // are consecutive and in the least significant
-                            // bit positions of mask.
-                            ((mask & (mask + 1)) == 0)))) {
+                    if (!((mask == 0) ||
+                          ((count_ones(mask) == keyWidth) &&
+                           // The condition below is only true if all 1 bits
+                           // are consecutive and in the least significant
+                           // bit positions of mask.
+                           ((mask & (mask + 1)) == 0)))) {
                         ::error(ErrorType::ERR_INVALID, "mask for key with match_kind optional", k);
                     } else {
                         key->emplace("key", stringRepr(km->left->to<IR::Constant>()->value, k8));
