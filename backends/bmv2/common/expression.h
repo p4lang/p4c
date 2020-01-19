@@ -128,7 +128,6 @@ class ExpressionConverter : public Inspector {
  private:
     void binary(const IR::Operation_Binary* expression);
     void saturated_binary(const IR::Operation_Binary* expression);
-    Util::IJson* riai(Util::IJson* left, uint right);
 };
 
 }  // namespace BMV2

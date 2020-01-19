@@ -28,6 +28,7 @@ struct headers {
 }
 
 struct metadata_t {
+    int<8> counter;
 }
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
@@ -40,15 +41,18 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout 
         packet.extract(hdr.pool[0]);
         packet.extract(hdr.pool[1]);
         packet.extract(hdr.pool[2]);
+        meta.counter = 0;
         transition accept;
     }
 }
 
 control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     apply {
+        meta.counter = meta.counter + 1;
         hdr.vector[0].e = hdr.pool[1].val + 1;
         hdr.pool[hdr.ml.idx].val = hdr.vector[0].e;
         hdr.vector[0].e = hdr.pool[hdr.ml.idx].val;
+        hdr.pool[hdr.ml.idx].val = hdr.pool[hdr.ml.idx].val + 1;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
 }

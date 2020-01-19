@@ -28,6 +28,7 @@ struct headers {
 }
 
 struct metadata_t {
+    int<8> counter;
 }
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
@@ -40,25 +41,28 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout 
         packet.extract<aggregator_t>(hdr.pool[0]);
         packet.extract<aggregator_t>(hdr.pool[1]);
         packet.extract<aggregator_t>(hdr.pool[2]);
+        meta.counter = 8s0;
         transition accept;
     }
 }
 
 control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @hidden action runtimeindexbmv2l67() {
+    @hidden action runtimeindexbmv2l71() {
+        meta.counter = meta.counter + 8s1;
         hdr.vector[0].e = hdr.pool[1].val + 8w1;
         hdr.pool[hdr.ml.idx].val = hdr.pool[1].val + 8w1;
         hdr.vector[0].e = hdr.pool[hdr.ml.idx].val;
+        hdr.pool[hdr.ml.idx].val = hdr.pool[hdr.ml.idx].val + 8w1;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
-    @hidden table tbl_runtimeindexbmv2l67 {
+    @hidden table tbl_runtimeindexbmv2l71 {
         actions = {
-            runtimeindexbmv2l67();
+            runtimeindexbmv2l71();
         }
-        const default_action = runtimeindexbmv2l67();
+        const default_action = runtimeindexbmv2l71();
     }
     apply {
-        tbl_runtimeindexbmv2l67.apply();
+        tbl_runtimeindexbmv2l71.apply();
     }
 }
 

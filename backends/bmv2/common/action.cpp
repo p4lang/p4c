@@ -70,9 +70,9 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
             auto primitive = mkPrimitive(operation, result);
             auto parameters = mkParameters(primitive);
             primitive->emplace_non_null("source_info", assign->sourceInfoJsonObj());
-            auto left = ctxt->conv->convertLeftValue(l);
-            parameters->append(left);
             bool convertBool = type->is<IR::Type_Boolean>();
+            auto left = ctxt->conv->convert(l, true, true, convertBool);
+            parameters->append(left);
             auto right = ctxt->conv->convert(r, true, true, convertBool);
             parameters->append(right);
             continue;

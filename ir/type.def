@@ -233,6 +233,14 @@ abstract Type_StructLike : Type_Declaration, ISimpleNamespace, IAnnotated {
         return fields.getDeclarations(); }
     StructField getField(cstring name) const {
         return fields.getDeclaration<StructField>(name); }
+    int getOffset(cstring name) const {
+        int offset = 0;
+        for (auto f : fields) {
+            if (f->name == name)
+                return offset;
+	    offset += f->type->width_bits();
+	}
+    }
     int width_bits() const override {
         int rv = 0;
         for (auto f : fields) {

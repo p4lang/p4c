@@ -257,6 +257,7 @@ ExpressionConverter::enclosingParamReference(const IR::Expression* expression) {
 
 void ExpressionConverter::postorder(const IR::Member* expression)  {
     auto result = new Util::JsonObject();
+    int offset = 0;
 
     auto parentType = typeMap->getType(expression->expr, true);
     cstring fieldName = expression->member.name;
@@ -267,6 +268,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         if (field != nullptr)
             // field could be a method call, i.e., isValid.
             fieldName = field->controlPlaneName();
+            offset = st->getOffset(fieldName);
     }
 
     // handle error
@@ -409,12 +411,8 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         } else {
             const char* fieldRef = parentType->is<IR::Type_Stack>() ? "stack_field" : "field";
             Util::JsonArray* e;
-            Util::JsonObject* eo;
             bool st = IsArrayIndexRuntime(expression);
-            if (st) {
-                result->emplace("type", "expression");
-                eo = result;
-            } else {
+            if (!st) {
                 result->emplace("type", fieldRef);
                 e = mkArrayField(result, "value");
             }
@@ -437,10 +435,14 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                     e->append(lv);
                     e->append(fieldName);
                 } else if (auto jo = l->to<Util::JsonObject>()) {
-                    if (st) {
-                        auto jr = riai(jo, 0);
-                        eo->emplace("value", jr);
-                    }
+		    if (st) {
+                        result->emplace("type", "expression");
+                        auto e = new Util::JsonObject();
+                        result->emplace("value", e);
+                        e->emplace("op", "access_field");
+                        e->emplace("left", jo);
+                        e->emplace("right", offset);
+		    }
                 } else {
                     BUG("%1%: Unexpected json", lv);
                 }
@@ -570,22 +572,6 @@ void ExpressionConverter::saturated_binary(const IR::Operation_Binary* expressio
     cstring repr = stringRepr(eType->width_bits());
     r->emplace("value", repr);
     e->emplace("right", r);
-}
-
-// Runtime Index Array Index post-processing.
-// The "right" arg is offset of the field in the header.
-// Computing offset is TODO.
-Util::IJson* ExpressionConverter::riai(Util::IJson* left, uint right) {
-    auto result = new Util::JsonObject();
-    result->emplace("type", "expression");
-    auto e = new Util::JsonObject();
-    result->emplace("value", e);
-    cstring op = "access_field";
-
-    e->emplace("op", op);
-    e->emplace("left", left);
-    e->emplace("right", right);
-    return result;
 }
 
 void ExpressionConverter::postorder(const IR::ListExpression* expression)  {
@@ -800,8 +786,7 @@ ExpressionConverter::convert(const IR::Expression* e, bool doFixup, bool wrap, b
         if (auto ro = result->to<Util::JsonObject>()) {
             if (auto to = ro->get("type")) {
                 if (auto jv = to->to<Util::JsonValue>()) {
-                    if (jv->isString() && to_wrap.find(jv->getString()) != to_wrap.end()
-                        && !IsArrayIndexRuntime(e)) {
+                    if (jv->isString() && to_wrap.find(jv->getString()) != to_wrap.end()) {
                         auto rwrap = new Util::JsonObject();
                         rwrap->emplace("type", "expression");
                         rwrap->emplace("value", result);
