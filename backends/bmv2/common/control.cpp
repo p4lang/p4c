@@ -42,7 +42,14 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
             auto keyWidth = tableKey->expression->type->width_bits();
             auto k8 = ROUNDUP(keyWidth, 8);
             auto matchType = getKeyMatchType(tableKey);
-            key->emplace("match_type", matchType);
+            // Table key fields with match_kind optional will be
+            // represented in the BMv2 JSON file the same as a ternary
+            // field would be.
+            if (matchType == "optional") {
+                key->emplace("match_type", "ternary");
+            } else {
+                key->emplace("match_type", matchType);
+            }
             if (matchType == corelib.exactMatch.name) {
                 if (k->is<IR::Constant>())
                     key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
@@ -101,16 +108,13 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
                     ::error(ErrorType::ERR_UNSUPPORTED, "range key expression", k);
                 }
             } else if (matchType == "optional") {
-                // TODO(jafingerhut): How should const entries of
-                // table keys with match_kind optional be represented
-                // in BMv2 JSON file?  Created issue here to ask:
-                // https://github.com/p4lang/behavioral-model/issues/844
-                // Implement the decision here.
-
-                // For now, creating the same JSON keys and values as
-                // used for a field with match_kind ternary, with mask
-                // values restricted to 0 for wildcard or all 1s for
-                // exact match.
+                // Table key fields with match_kind optional with
+                // "const entries" in the P4 source code will be
+                // represented using the same "key" and "mask" keys in
+                // the BMv2 JSON file as table key fields with
+                // match_kind ternary.  We will perform here the more
+                // strict checking of the allowed masks that optional
+                // imposes.
                 if (k->is<IR::Mask>()) {
                     auto km = k->to<IR::Mask>();
                     auto count_ones = [](unsigned long n) { return n ? __builtin_popcountl(n) : 0;};
@@ -394,7 +398,14 @@ ControlConverter::convertTable(const CFG::TableNode* node,
             }
 
             auto keyelement = new Util::JsonObject();
-            keyelement->emplace("match_type", match_type);
+            // Table key fields with match_kind optional will be
+            // represented in the BMv2 JSON file the same as a ternary
+            // field would be.
+            if (match_type == BMV2::MatchImplementation::optionalMatchTypeName) {
+                keyelement->emplace("match_type", corelib.ternaryMatch.name);
+            } else {
+                keyelement->emplace("match_type", match_type);
+            }
             if (auto na = ke->getAnnotation(IR::Annotation::nameAnnotation)) {
                 BUG_CHECK(na->expr.size() == 1, "%1%: expected 1 name", na);
                 auto name = na->expr[0]->to<IR::StringLiteral>();
