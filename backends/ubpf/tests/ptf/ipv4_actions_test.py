@@ -28,7 +28,7 @@ class Ipv4Test(P4rtOVSBaseTest):
 
         self.del_flows()
         self.unload_bpf_program()
-        self.load_bpf_program(path_to_program="build/oko-test-ipv4.o")
+        self.load_bpf_program(path_to_program="build/test-ipv4-actions.o")
         self.add_bpf_prog_flow(1,2)
         self.add_bpf_prog_flow(2,1)
 

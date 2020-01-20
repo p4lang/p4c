@@ -14,13 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "ubpf_model.p4"
+#include <ubpf_model.p4>
 #include <core.p4>
 
 @ethernetaddress typedef bit<48> EthernetAddress;
 @ipv4address     typedef bit<32>     IPv4Address;
 
-// standard Ethernet header
 header Ethernet_h
 {
     EthernetAddress dstAddr;
@@ -28,7 +27,6 @@ header Ethernet_h
     bit<16> etherType;
 }
 
-// IPv4 header without options
 header IPv4_h {
     bit<4>       version;
     bit<4>       ihl;
@@ -44,30 +42,10 @@ header IPv4_h {
     IPv4Address  dstAddr;
 }
 
-header IPv6_h {
-    bit<4>       version;
-    bit<8>       trafficClass;
-    bit<20>      flowLabel;
-    bit<16>      payloadLen;
-    bit<8>       nextHdr;
-    bit<8>       hopLimit;
-    bit<128>     srcAddr;
-    bit<128>     dstAddr;
-}
-
-header mpls_h {
-    bit<20> label;
-    bit<3>  tc;
-    bit<1>  stack;
-    bit<8>  ttl;
-}
-
 struct Headers_t
 {
     Ethernet_h ethernet;
-    mpls_h     mpls;
     IPv4_h     ipv4;
-    IPv6_h     ipv6;
 }
 
 struct metadata {}
@@ -77,27 +55,14 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
         p.extract(headers.ethernet);
         transition select(headers.ethernet.etherType) {
             16w0x800 : ipv4;
-            0x86DD   : ipv6;
-            0x8847   : mpls;
             default : reject;
         }
-    }
-
-    state mpls {
-            p.extract(headers.mpls);
-            transition ipv4;
     }
 
     state ipv4 {
         p.extract(headers.ipv4);
         transition accept;
     }
-
-    state ipv6 {
-        p.extract(headers.ipv6);
-        transition accept;
-    }
-
 }
 
 control pipe(inout Headers_t headers, inout metadata meta) {
@@ -106,53 +71,91 @@ control pipe(inout Headers_t headers, inout metadata meta) {
         mark_to_drop();
     }
 
-    action ipv6_modify_dstAddr(bit<128> dstAddr) {
-        headers.ipv6.dstAddr = dstAddr;
+    action set_ipv4_version(bit<4> version) {
+        headers.ipv4.version = version;
     }
 
-    action ipv6_swap_addr() {
-        bit<128> tmp = headers.ipv6.dstAddr;
-        headers.ipv6.dstAddr = headers.ipv6.srcAddr;
-        headers.ipv6.srcAddr = tmp;
+    action set_ihl(bit<4> ihl) {
+        headers.ipv4.ihl = ihl;
     }
 
-    action set_flowlabel(bit<20> label) {
-        headers.ipv6.flowLabel = label;
+    action set_diffserv(bit<8> diffserv) {
+        headers.ipv4.diffserv = diffserv;
     }
 
-    action set_traffic_class(bit<8> trafficClass) {
-        headers.ipv6.trafficClass = trafficClass;
+    action set_identification(bit<16> identification) {
+        headers.ipv4.identification = identification;
     }
 
-    action set_traffic_class_flow_label(bit<8> trafficClass, bit<20> label) {
-        headers.ipv6.trafficClass = trafficClass;
-        headers.ipv6.flowLabel = label;
+    action set_flags(bit<3> flags) {
+        headers.ipv4.flags = flags;
     }
 
-    action set_ipv6_version(bit<4> version) {
-        headers.ipv6.version = version;
+    action set_fragOffset(bit<13> fragOffset) {
+        headers.ipv4.fragOffset = fragOffset;
     }
 
-    action set_next_hdr(bit<8> nextHdr) {
-        headers.ipv6.nextHdr = nextHdr;
+    action set_ttl(bit<8> ttl) {
+        headers.ipv4.ttl = ttl;
     }
 
-    action set_hop_limit(bit<8> hopLimit) {
-        headers.ipv6.hopLimit = hopLimit;
+    action set_protocol(bit<8> protocol) {
+        headers.ipv4.protocol = protocol;
+    }
+
+    action set_srcAddr(bit<32> srcAddr) {
+        headers.ipv4.srcAddr = srcAddr;
+    }
+
+    action set_dstAddr(bit<32> dstAddr) {
+        headers.ipv4.dstAddr = dstAddr;
+    }
+
+    action set_srcAddr_dstAddr(bit<32> srcAddr, bit<32> dstAddr) {
+        headers.ipv4.srcAddr = srcAddr;
+        headers.ipv4.dstAddr = dstAddr;
+    }
+
+    action set_ihl_diffserv(bit<4> ihl, bit<8> diffserv) {
+        headers.ipv4.ihl = ihl;
+        headers.ipv4.diffserv = diffserv;
+    }
+
+    action set_fragOffset_flags(bit<13> fragOffset, bit<3> flags) {
+        headers.ipv4.flags = flags;
+        headers.ipv4.fragOffset = fragOffset;
+    }
+
+    action set_flags_ttl(bit<3> flags, bit<8> ttl) {
+        headers.ipv4.flags = flags;
+        headers.ipv4.ttl = ttl;
+    }
+
+    action set_fragOffset_srcAddr(bit<13> fragOffset, bit<32> srcAddr) {
+        headers.ipv4.fragOffset = fragOffset;
+        headers.ipv4.srcAddr = srcAddr;
     }
 
     table filter_tbl {
         key = {
-            headers.ipv6.srcAddr : exact;
+            headers.ipv4.srcAddr : exact;
         }
         actions = {
-            ipv6_modify_dstAddr;
-            ipv6_swap_addr;
-            set_flowlabel;
-            set_traffic_class_flow_label;
-            set_ipv6_version;
-            set_next_hdr;
-            set_hop_limit;
+            set_ipv4_version;
+            set_ihl;
+            set_diffserv;
+            set_identification;
+            set_flags;
+            set_fragOffset;
+            set_ttl;
+            set_protocol;
+            set_srcAddr;
+            set_dstAddr;
+            set_srcAddr_dstAddr;
+            set_ihl_diffserv;
+            set_fragOffset_flags;
+            set_flags_ttl;
+            set_fragOffset_srcAddr;
             Reject;
             NoAction;
         }
@@ -168,8 +171,6 @@ control pipe(inout Headers_t headers, inout metadata meta) {
 control dprs(packet_out packet, in Headers_t headers) {
     apply {
         packet.emit(headers.ethernet);
-        packet.emit(headers.mpls);
-        packet.emit(headers.ipv6);
         packet.emit(headers.ipv4);
     }
 }

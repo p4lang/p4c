@@ -1,7 +1,7 @@
 # Introduction
 
 This file contains description of the basic P4 programs, which were used to test the functionality of the P4-to-uBPF compiler.
-All tests have been run on the [Oko](https://github.com/Orange-OpenSource/oko/tree/p4rt-ovs) switch.
+All tests have been run on the [P4rt-OVS](https://github.com/Orange-OpenSource/p4rt-ovs) switch.
 You can use [Vagrantfile](../tests/environment/Vagrantfile) to set up a test environment.
 
 Before any experiment the following commands need to be invoked:
@@ -19,7 +19,7 @@ $ sudo ovs-ofctl add-flow br0 in_port=2,actions=prog:1,output:1
 $ sudo ovs-ofctl add-flow br0 in_port=1,actions=prog:1,output:2
 ```
 
-**Note!** The P4-uBPF compiler and Oko work properly with `clang-6.0`. We noticed some problems when using older versions of clang (e.g. 3.9).
+**Note!** The P4-uBPF compiler works properly with `clang-6.0`. We noticed some problems when using older versions of clang (e.g. 3.9).
 
 # Examples
 
@@ -29,7 +29,7 @@ This section presents how to run and test the P4-uBPF compiler.
 
 This section presents P4 program, which modifies the packet's fields.
 
-### IPv4 + MPLS (oko-test-actions.p4)
+### IPv4 + MPLS (simple-actions.p4)
 
 **Key:** Source IPv4 address
 
@@ -61,7 +61,7 @@ $ sudo ovs-ofctl update-bpf-map br0 1 0 key 14 0 16 172 value 7 0 0 0 0 0 0 0 0 
 $ sudo ovs-ofctl update-bpf-map br0 1 0 key 14 0 16 172 value 8 0 0 0 1 0 16 172 0 0 0 0 # sets source IP address to 172.16.0.1
 ```
 
-### IPv6 (oko-test-ipv6.p4)
+### IPv6 (ipv6-actions.p4)
 
 The aim of this example is to test modification of wider packet's fields. Thus, we have used the IPv6 headers.
 
@@ -116,7 +116,7 @@ $ sudo ovs-ofctl update-bpf-map br0 1 1 key 0 0 0 0 value 0 0 0 0
 
 To measure the bandwidth use the `iperf` tool:  
   
-Start a iperf UDP server
+Start a `iperf` UDP server
 
 ```bash
 $ iperf -s -u
@@ -130,15 +130,32 @@ $ iperf -c <server_ip> -b 10M -l 1470
 
 ### Rate limiter (rate-limiter-structs.p4)
 
-The same rate limiter as above, but implemented using structs.
+The same rate limiter as above, but implemented using structs.  
 
-### Simple firewall
+### Packet counter (packet-counter.p4)
+
+The packet counter counts every packet passed via the program.
+Before tests initialize packet counter register with zeros:  
+
+```bash
+# Initalizes packet_counter_reg register
+$ sudo ovs-ofctl update-bpf-map br0 1 0 key 0 0 0 0 value 0 0 0 0
+```
+
+Then generate any network traffic. To check if the program counts packets use i.e.  
+
+```bash
+$ watch sudo ovs-ofctl dump-bpf-map br0 1 0
+```
+
+### Simple firewall (simple-firewall.p4)
 
 This is very simple example of stateful firewall. Every TCP packet is analyzed to track the state of the TCP connection. 
 If the traffic belongs to known connection it is passed. Otherwise, it is dropped.  
 Notice that the example program uses hash function which is constrained to hash only 64 bit values - that's why TCP connection is identified via IP source and destination address.  
                         
 Due to registers limitation before starting your own tests initialize simple firewall registers with zeros:
+
 ```bash
 # Initalizes conn_state register (key is a output from a hash function for client(192.168.1.10) and server (192.168.1.1))
 $ sudo ovs-ofctl update-bpf-map br0 1 0 key 172 192 20 5 value 0 0 0 0
@@ -146,7 +163,7 @@ $ sudo ovs-ofctl update-bpf-map br0 1 0 key 172 192 20 5 value 0 0 0 0
 $ sudo ovs-ofctl update-bpf-map br0 1 1 key 172 192 20 5 value 0 0 0 0
 ```  
 
-To test simple firewall you can use as an example `ptf/stateful_test.py` test.
+To test simple firewall you can use as an example `ptf/simple-firewall-test.py` test.
 
 ## Tunneling
 

@@ -55,12 +55,12 @@ if ! type "/vagrant/llvm-project/build/bin/clang" > /dev/null; then
   sudo make install
 fi
 
-# Clone oko
-if [ ! -d "/home/vagrant/oko" ]
+# Clone P4rt-OVS
+if [ ! -d "/home/vagrant/p4rt-ovs" ]
 then
  cd /home/vagrant
- git clone -b p4rt-ovs https://github.com/Orange-OpenSource/oko.git
- cd oko/
+ git clone https://github.com/Orange-OpenSource/p4rt-ovs.git
+ cd p4rt-ovs/
  git submodule update --init
 fi
 
@@ -104,7 +104,7 @@ echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepag
 # grep -i huge /proc/meminfo
 
 # Build OVS
-cd /home/vagrant/oko/
+cd /home/vagrant/p4rt-ovs/
 ./boot.sh
 ./configure --with-dpdk=$DPDK_BUILD CFLAGS="-g -O2 -Wno-cast-align"
 make -j 2
@@ -113,7 +113,7 @@ sudo make install
 # Create OVS database files and folders
 sudo mkdir -p /usr/local/etc/openvswitch
 sudo mkdir -p /usr/local/var/run/openvswitch
-cd /home/vagrant/oko/ovsdb/
+cd /home/vagrant/p4rt-ovs/ovsdb/
 sudo ./ovsdb-tool create /usr/local/etc/openvswitch/conf.db ../vswitchd/vswitch.ovsschema
 
 sudo ovsdb-server --remote=punix:/usr/local/var/run/openvswitch/db.sock --remote=db:Open_vSwitch,Open_vSwitch,manager_options     --pidfile --detach

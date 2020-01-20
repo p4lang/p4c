@@ -1,7 +1,7 @@
 # Introduction to uBPF Backend
 
 The **p4c-ubpf** compiler allows to translate P4 programs into the uBPF programs. We use the uBPF implementation provided 
-by [the Oko/P4rt-OVS switch](https://github.com/Orange-OpenSource/oko/tree/p4rt-ovs). The Oko's uBPF VM is based on the
+by [the P4rt-OVS switch](https://github.com/Orange-OpenSource/p4rt-ovs). The uBPF VM is based on the
 open-source implementation provided by [IOVisor](https://github.com/iovisor/ubpf).
 
 The P4-to-uBPF compiler accepts only the P4_16 programs written for the `ubpf_model.p4` architecture model.
@@ -51,7 +51,7 @@ However, we introduced some modifications, which are listed below:
 
 ### How to use?
 
-The sample P4 programs are located in `examples/` directory. We have tested them with the [Oko/P4rt-OVS](https://github.com/Orange-OpenSource/oko/tree/p4rt-ovs) switch - 
+The sample P4 programs are located in `examples/` directory. We have tested them with the [P4rt-OVS](https://github.com/Orange-OpenSource/p4rt-ovs) switch - 
 the Open vSwitch that can be extended with BPF programs at runtime. See [the detailed tutorial](./docs/EXAMPLES.md) on how to run and test those examples.
 
 The P4 programs for P4-to-uBPF compiler must be written for the `ubpf_model.p4`.

@@ -58,9 +58,8 @@ struct Headers_t
     IPv4_h     ipv4;
 }
 
-struct metadata {
+struct metadata {}
 
-}
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
     state start {
@@ -87,65 +86,38 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
 
 control pipe(inout Headers_t headers, inout metadata meta) {
 
-    action ip_modify_saddr(bit<32> srcAddr) {
-        headers.ipv4.srcAddr = srcAddr;
+    action mpls_encap() {
+        headers.mpls.setValid();
+        headers.ethernet.etherType = 0x8847;
+        headers.mpls.label = 20;
+        headers.mpls.tc = 5;
+        headers.mpls.stack = 1;
+        headers.mpls.ttl = 64;
     }
 
-    action mpls_modify_tc(bit<3> tc) {
-        headers.mpls.tc = tc;
+    action mpls_decap() {
+        headers.mpls.setInvalid();
+        headers.ethernet.etherType = 0x0800;
     }
 
-    action mpls_set_label(bit<20> label) {
-        headers.mpls.label = label;
+    table upstream_tbl {
+        key = {
+            headers.mpls.label : exact;
+        }
+        actions = {
+            mpls_decap();
+            NoAction;
+        }
+
+        const default_action = NoAction;
     }
 
-    action mpls_set_label_tc(bit<20> label, bit<3> tc) {
-        headers.mpls.label = label;
-        headers.mpls.tc = tc;
-    }
-
-    action mpls_decrement_ttl() {
-        headers.mpls.ttl = headers.mpls.ttl - 1;
-    }
-
-    action mpls_set_label_decrement_ttl(bit<20> label) {
-            headers.mpls.label = label;
-            mpls_decrement_ttl();
-    }
-
-    action mpls_modify_stack(bit<1> stack) {
-        headers.mpls.stack = stack;
-    }
-
-    action change_ip_ver() {
-        headers.ipv4.version = 6;
-    }
-
-    action ip_swap_addrs() {
-        bit<32> tmp = headers.ipv4.dstAddr;
-        headers.ipv4.dstAddr = headers.ipv4.srcAddr;
-        headers.ipv4.srcAddr = tmp;
-    }
-
-    action Reject() {
-        mark_to_drop();
-    }
-
-    table filter_tbl {
+    table downstream_tbl {
         key = {
             headers.ipv4.dstAddr : exact;
         }
         actions = {
-            mpls_decrement_ttl;
-            mpls_set_label;
-            mpls_set_label_decrement_ttl;
-            mpls_modify_tc;
-            mpls_set_label_tc;
-            mpls_modify_stack;
-            change_ip_ver;
-            ip_swap_addrs;
-            ip_modify_saddr;
-            Reject;
+            mpls_encap;
             NoAction;
         }
 
@@ -153,7 +125,11 @@ control pipe(inout Headers_t headers, inout metadata meta) {
     }
 
     apply {
-        filter_tbl.apply();
+        if (headers.mpls.isValid()) {
+            upstream_tbl.apply();
+        } else {
+            downstream_tbl.apply();
+        }
     }
 }
 
@@ -164,6 +140,5 @@ control dprs(packet_out packet, in Headers_t headers) {
         packet.emit(headers.ipv4);
     }
 }
-
 
 ubpf(prs(), pipe(), dprs()) main;

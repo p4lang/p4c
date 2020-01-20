@@ -20,7 +20,14 @@ set -ex
 sudo apt-get -y install libnuma-dev clang-6.0 libc6-dev-i386 python python-pip python-dev libffi-dev tcpdump
 sudo apt-get -y install flex bison
 sudo apt-get -y install cmake g++ git automake libtool libgc-dev bison flex libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev libboost-graph-dev llvm pkg-config python python-scapy python-ipaddr python-ply tcpdump
-sudo python -m pip install scapy
+
+# Install scapy
+if ! type "scapy" > /dev/null; then
+ cd /home/vagrant
+ git clone https://github.com/secdev/scapy.git
+ cd scapy
+ sudo python setup.py install
+fi
 
 # Clone and install PTF
 if ! type "ptf" > /dev/null; then
@@ -31,7 +38,7 @@ if ! type "ptf" > /dev/null; then
 fi
 
 # Install nanomsg and nnpy
-if [ ! -d "/home/vagrant/oko" ]
+if [ ! -d "/home/vagrant/nanomsg" ]
 then
  cd /home/vagrant
  git clone https://github.com/nanomsg/nanomsg.git

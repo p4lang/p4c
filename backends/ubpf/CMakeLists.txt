@@ -76,3 +76,8 @@ add_custom_target(linkp4cubpf
         )
 
 add_dependencies(p4c_driver linkp4cubpf)
+
+set(UBPF_DRIVER "${CMAKE_CURRENT_SOURCE_DIR}/run-ubpf-test.py -c \"${P4C_BINARY_DIR}/p4c-ubpf\"")
+set (UBPF_TEST_SUITES ${P4C_SOURCE_DIR}/testdata/p4_16_samples/*_ubpf.p4)
+set (UBPF_XFAIL_TESTS)
+p4c_add_tests("ubpf" ${UBPF_DRIVER} "${UBPF_TEST_SUITES}" "${UBPF_XFAIL_TESTS}")

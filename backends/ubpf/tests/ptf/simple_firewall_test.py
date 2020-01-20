@@ -20,14 +20,14 @@ from base_test import P4rtOVSBaseTest
 from ptf.testutils import send_packet, verify_packets, verify_no_packet
 
 
-class StatefulTest(P4rtOVSBaseTest):
+class SimpleFirewallTest(P4rtOVSBaseTest):
 
     def setUp(self):
         P4rtOVSBaseTest.setUp(self)
 
         self.del_flows()
         self.unload_bpf_program()
-        self.load_bpf_program(path_to_program="build/oko-test-stateful.o")
+        self.load_bpf_program(path_to_program="build/test-simple-firewall.o")
         self.add_bpf_prog_flow(1, 2)
         self.add_bpf_prog_flow(2, 1)
 
@@ -64,10 +64,10 @@ class StatefulTest(P4rtOVSBaseTest):
         assert (conn_srv in conn_srv_value)
 
 
-class TcpSynStateTest(StatefulTest):
+class TcpSynStateTest(SimpleFirewallTest):
 
     def setUp(self):
-        StatefulTest.setUp(self)
+        SimpleFirewallTest.setUp(self)
 
         self.update_bpf_map(map_id=0, key="172 192 20 5", value="0 0 0 0")
         self.update_bpf_map(map_id=1, key="172 192 20 5", value="0 0 0 0")
@@ -82,10 +82,10 @@ class TcpSynStateTest(StatefulTest):
         self.verify_connection_state(conn_state=1)
 
 
-class TcpSynAckStateTest(StatefulTest):
+class TcpSynAckStateTest(SimpleFirewallTest):
 
     def setUp(self):
-        StatefulTest.setUp(self)
+        SimpleFirewallTest.setUp(self)
 
         self.update_bpf_map(map_id=0, key="172 192 20 5", value="0 0 0 0")
         self.update_bpf_map(map_id=1, key="172 192 20 5", value="0 0 0 0")
@@ -104,10 +104,10 @@ class TcpSynAckStateTest(StatefulTest):
         self.verify_connection_state(conn_state=2)
 
 
-class TcpEstablishedStateTest(StatefulTest):
+class TcpEstablishedStateTest(SimpleFirewallTest):
 
     def setUp(self):
-        StatefulTest.setUp(self)
+        SimpleFirewallTest.setUp(self)
 
         self.update_bpf_map(map_id=0, key="172 192 20 5", value="0 0 0 0")
         self.update_bpf_map(map_id=1, key="172 192 20 5", value="0 0 0 0")
@@ -129,10 +129,10 @@ class TcpEstablishedStateTest(StatefulTest):
         self.verify_connection_state(conn_state=3)
 
 
-class TcpServerFinAckStateTest(StatefulTest):
+class TcpServerFinAckStateTest(SimpleFirewallTest):
 
     def setUp(self):
-        StatefulTest.setUp(self)
+        SimpleFirewallTest.setUp(self)
 
         self.update_bpf_map(map_id=0, key="172 192 20 5", value="0 0 0 0")
         self.update_bpf_map(map_id=1, key="172 192 20 5", value="0 0 0 0")
@@ -157,10 +157,10 @@ class TcpServerFinAckStateTest(StatefulTest):
         self.verify_connection_state(conn_state=0, conn_srv="0 0 0 0")
 
 
-class SimpleTcpConnectionFlowTest(StatefulTest):
+class SimpleTcpConnectionFlowTest(SimpleFirewallTest):
 
     def setUp(self):
-        StatefulTest.setUp(self)
+        SimpleFirewallTest.setUp(self)
 
         self.update_bpf_map(map_id=0, key="172 192 20 5", value="0 0 0 0")
         self.update_bpf_map(map_id=1, key="172 192 20 5", value="0 0 0 0")
@@ -202,10 +202,10 @@ class SimpleTcpConnectionFlowTest(StatefulTest):
         self.send_client_packet(packet=pkt)
 
 
-class SimpleTcpAckAttackFlowTest(StatefulTest):
+class SimpleTcpAckAttackFlowTest(SimpleFirewallTest):
 
     def setUp(self):
-        StatefulTest.setUp(self)
+        SimpleFirewallTest.setUp(self)
 
         self.update_bpf_map(map_id=0, key="172 192 20 5", value="0 0 0 0")
         self.update_bpf_map(map_id=1, key="172 192 20 5", value="0 0 0 0")
@@ -227,10 +227,10 @@ class SimpleTcpAckAttackFlowTest(StatefulTest):
         self.send_client_packet_no_receive(packet=pkt)
 
 
-class SimpleTcpSynAttackFlowTest(StatefulTest):
+class SimpleTcpSynAttackFlowTest(SimpleFirewallTest):
 
     def setUp(self):
-        StatefulTest.setUp(self)
+        SimpleFirewallTest.setUp(self)
 
         self.update_bpf_map(map_id=0, key="107 114 46 7", value="0 0 0 0")
         self.update_bpf_map(map_id=1, key="107 114 46 7", value="0 0 0 0")

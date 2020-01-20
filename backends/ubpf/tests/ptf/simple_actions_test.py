@@ -21,22 +21,22 @@ from base_test import P4rtOVSBaseTest
 from ptf.testutils import send_packet, verify_packets, simple_mpls_packet, simple_ip_only_packet, simple_ip_packet
 
 
-class BaseActionsTest(P4rtOVSBaseTest):
+class SimpleActionsTest(P4rtOVSBaseTest):
 
     def setUp(self):
         P4rtOVSBaseTest.setUp(self)
 
         self.del_flows()
         self.unload_bpf_program()
-        self.load_bpf_program(path_to_program="build/oko-test-actions.o")
+        self.load_bpf_program(path_to_program="build/test-simple-actions.o")
         self.add_bpf_prog_flow(1,2)
         self.add_bpf_prog_flow(2,1)
 
 
-class IpModifySrcAddressTest(BaseActionsTest):
+class IpModifySrcAddressTest(SimpleActionsTest):
 
     def setUp(self):
-        BaseActionsTest.setUp(self)
+        SimpleActionsTest.setUp(self)
 
         self.update_bpf_map(map_id=0, key="1 1 168 192", value="8 0 0 0 5 1 168 192 0 0 0 0")
 
@@ -52,10 +52,10 @@ class IpModifySrcAddressTest(BaseActionsTest):
         verify_packets(self, mask, device_number=0, ports=[2])
 
 
-class MplsModifyStackTest(BaseActionsTest):
+class MplsModifyStackTest(SimpleActionsTest):
 
     def setUp(self):
-        BaseActionsTest.setUp(self)
+        SimpleActionsTest.setUp(self)
 
         self.update_bpf_map(map_id=0, key="1 1 168 192", value="5 0 0 0 1 0 0 0 0 0 0 0")
 
@@ -73,10 +73,10 @@ class MplsModifyStackTest(BaseActionsTest):
         verify_packets(self, mask, device_number=0, ports=[2])
 
 
-class MplsDecrementTtlTest(BaseActionsTest):
+class MplsDecrementTtlTest(SimpleActionsTest):
 
     def setUp(self):
-        BaseActionsTest.setUp(self)
+        SimpleActionsTest.setUp(self)
 
         self.update_bpf_map(map_id=0, key="1 1 168 192", value="0 0 0 0 0 0 0 0 0 0 0 0")
 
@@ -94,10 +94,10 @@ class MplsDecrementTtlTest(BaseActionsTest):
         verify_packets(self, mask, device_number=0, ports=[2])
 
 
-class MplsSetLabelTest(BaseActionsTest):
+class MplsSetLabelTest(SimpleActionsTest):
 
     def setUp(self):
-        BaseActionsTest.setUp(self)
+        SimpleActionsTest.setUp(self)
 
         self.update_bpf_map(map_id=0, key="1 1 168 192", value="1 0 0 0 1 0 0 0 0 0 0 0")
 
@@ -113,10 +113,10 @@ class MplsSetLabelTest(BaseActionsTest):
         verify_packets(self, mask, device_number=0, ports=[2])
 
 
-class MplsSetLabelDecrementTtlTest(BaseActionsTest):
+class MplsSetLabelDecrementTtlTest(SimpleActionsTest):
 
     def setUp(self):
-        BaseActionsTest.setUp(self)
+        SimpleActionsTest.setUp(self)
 
         self.update_bpf_map(map_id=0, key="1 1 168 192", value="2 0 0 0 1 0 0 0 0 0 0 0")
 
@@ -134,10 +134,10 @@ class MplsSetLabelDecrementTtlTest(BaseActionsTest):
         verify_packets(self, mask, device_number=0, ports=[2])
 
 
-class MplsSetModifyTcTest(BaseActionsTest):
+class MplsSetModifyTcTest(SimpleActionsTest):
 
     def setUp(self):
-        BaseActionsTest.setUp(self)
+        SimpleActionsTest.setUp(self)
 
         self.update_bpf_map(map_id=0, key="1 1 168 192", value="3 0 0 0 1 0 0 0 0 0 0 0")
 
@@ -155,10 +155,10 @@ class MplsSetModifyTcTest(BaseActionsTest):
         verify_packets(self, mask, device_number=0, ports=[2])
 
 
-class MplsSetLabelTcTest(BaseActionsTest):
+class MplsSetLabelTcTest(SimpleActionsTest):
 
     def setUp(self):
-        BaseActionsTest.setUp(self)
+        SimpleActionsTest.setUp(self)
 
         self.update_bpf_map(map_id=0, key="1 1 168 192", value="4 0 0 0 2 0 0 0 2 0 0 0")
 
@@ -176,10 +176,10 @@ class MplsSetLabelTcTest(BaseActionsTest):
         verify_packets(self, mask, device_number=0, ports=[2])
 
 
-class ChangeIpVersionTest(BaseActionsTest):
+class ChangeIpVersionTest(SimpleActionsTest):
 
     def setUp(self):
-        BaseActionsTest.setUp(self)
+        SimpleActionsTest.setUp(self)
 
         self.update_bpf_map(map_id=0, key="1 1 168 192", value="6 0 0 0 0 0 0 0 0 0 0 0")
 
@@ -195,10 +195,10 @@ class ChangeIpVersionTest(BaseActionsTest):
         verify_packets(self, mask, device_number=0, ports=[2])
 
 
-class IpSwapAddressTest(BaseActionsTest):
+class IpSwapAddressTest(SimpleActionsTest):
 
     def setUp(self):
-        BaseActionsTest.setUp(self)
+        SimpleActionsTest.setUp(self)
 
         self.update_bpf_map(map_id=0, key="1 1 168 192", value="7 0 0 0 0 0 0 0 0 0 0 0")
 
@@ -214,10 +214,10 @@ class IpSwapAddressTest(BaseActionsTest):
         verify_packets(self, mask, device_number=0, ports=[2])
 
 
-class NoActionPacketTest(BaseActionsTest):
+class NoActionPacketTest(SimpleActionsTest):
 
     def setUp(self):
-        BaseActionsTest.setUp(self)
+        SimpleActionsTest.setUp(self)
 
         self.update_bpf_map(map_id=0, key="1 1 168 192", value="10 0 0 0 0 0 0 0 0 0 0 0")
 
