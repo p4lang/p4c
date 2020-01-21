@@ -3,6 +3,10 @@
 
 typedef bit<48> mac_addr_t;
 header aggregator_t {
+    bit<8> base0;
+    bit<8> base1;
+    bit<8> base2;
+    bit<8> base3;
     bit<8> val;
 }
 
@@ -47,22 +51,23 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @hidden action runtimeindexbmv2l71() {
+    @hidden action runtimeindexbmv2l75() {
         meta.counter = meta.counter + 8s1;
         hdr.vector[0].e = hdr.pool[1].val + 8w1;
         hdr.pool[hdr.ml.idx].val = hdr.pool[1].val + 8w1;
+        hdr.pool[hdr.ml.idx].base2 = hdr.vector[0].e;
         hdr.vector[0].e = hdr.pool[hdr.ml.idx].val;
         hdr.pool[hdr.ml.idx].val = hdr.pool[hdr.ml.idx].val + 8w1;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
-    @hidden table tbl_runtimeindexbmv2l71 {
+    @hidden table tbl_runtimeindexbmv2l75 {
         actions = {
-            runtimeindexbmv2l71();
+            runtimeindexbmv2l75();
         }
-        const default_action = runtimeindexbmv2l71();
+        const default_action = runtimeindexbmv2l75();
     }
     apply {
-        tbl_runtimeindexbmv2l71.apply();
+        tbl_runtimeindexbmv2l75.apply();
     }
 }
 

@@ -234,11 +234,11 @@ abstract Type_StructLike : Type_Declaration, ISimpleNamespace, IAnnotated {
     StructField getField(cstring name) const {
         return fields.getDeclaration<StructField>(name); }
     int getOffset(cstring name) const {
-        int offset = 0;
+        int offset_pos = 0;
         for (auto f : fields) {
             if (f->name == name)
-                return offset;
-	    offset += f->type->width_bits();
+                return offset_pos;
+	    offset_pos++;
 	}
     }
     int width_bits() const override {

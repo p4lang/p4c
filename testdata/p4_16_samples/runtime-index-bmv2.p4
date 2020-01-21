@@ -21,6 +21,10 @@
 typedef bit<48> mac_addr_t;
 
 header aggregator_t {
+    bit<8> base0;
+    bit<8> base1;
+    bit<8> base2;
+    bit<8> base3;
     bit<8> val;
 }
 header vec_e_t {
@@ -74,6 +78,7 @@ control ingress(inout headers hdr, inout metadata_t meta,
 
         // Test runtime index as l-value.
         hdr.pool[hdr.ml.idx].val = hdr.vector[0].e;
+        hdr.pool[hdr.ml.idx].base2 = hdr.vector[0].e;
         // Test runtime index as r-value.
         hdr.vector[0].e = hdr.pool[hdr.ml.idx].val;
         // Test runtime index as l- and r-values.
