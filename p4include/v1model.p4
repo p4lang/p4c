@@ -139,6 +139,7 @@ extern counter {
      *              size-1].  If index >= size, no counter state will be
      *              updated.
      */
+    @localIndexedState(index)
     void count(in bit<32> index);
 }
 
@@ -166,6 +167,7 @@ extern direct_counter {
      * packets, regardless of whether the count() method is called in
      * the body of that action.
      */
+    @localState
     void count();
 }
 
@@ -208,6 +210,7 @@ extern meter {
      *              range, the final value of result is not specified,
      *              and should be ignored by the caller.
      */
+    @localIndexedState(index)
     void execute_meter<T>(in bit<32> index, out T result);
 }
 
@@ -244,6 +247,7 @@ extern direct_meter<T> {
      *              color YELLOW, and 2 for color RED (see RFC 2697
      *              and RFC 2698 for the meaning of these colors).
      */
+    @noSideEffects @localState
     void read(out T result);
 }
 
@@ -263,6 +267,7 @@ extern register<T> {
      *              value of result is not specified, and should be
      *              ignored by the caller.
      */
+    @noSideEffects @localIndexedState(index)
     void read(out T result, in bit<32> index);
     /***
      * write() writes the state of the register array at the specified
@@ -286,6 +291,7 @@ extern register<T> {
      *              parameter's value is written into the register
      *              array element specified by index.
      */
+    @localIndexedState(index)
     void write(in bit<32> index, in T value);
 }
 
@@ -301,6 +307,7 @@ extern action_profile {
  *
  * @param T          Must be a type bit<W>
  */
+@localState
 extern void random<T>(out T result, in T lo, in T hi);
 
 /***
@@ -326,6 +333,7 @@ extern void random<T>(out T result, in T lo, in T hi);
  * The BMv2 implementation of the v1model architecture ignores the
  * value of the receiver parameter.
  */
+@packetState
 extern void digest<T>(in bit<32> receiver, in T data);
 
 enum HashAlgorithm {
@@ -340,6 +348,7 @@ enum HashAlgorithm {
 }
 
 @deprecated("Please use mark_to_drop(standard_metadata) instead.")
+@packetState
 extern void mark_to_drop();
 
 /***
@@ -359,6 +368,7 @@ extern void mark_to_drop();
  * of the different possible things that can happen to a packet when
  * ingress and egress processing are complete.
  */
+@pure
 extern void mark_to_drop(inout standard_metadata_t standard_metadata);
 
 /***
@@ -376,6 +386,7 @@ extern void mark_to_drop(inout standard_metadata_t standard_metadata);
  * @param T          Must be a type bit<W>
  * @param M          Must be a type bit<W>
  */
+@pure
 extern void hash<O, T, D, M>(out O result, in HashAlgorithm algo, in T base, in D data, in M max);
 
 extern action_selector {
@@ -415,6 +426,7 @@ extern Checksum16 {
  *                   may be supported).  Must be a compile-time
  *                   constant.
  */
+@packetState
 extern void verify_checksum<T, O>(in bool condition, in T data, in O checksum, HashAlgorithm algo);
 
 /***
@@ -436,6 +448,7 @@ extern void verify_checksum<T, O>(in bool condition, in T data, in O checksum, H
  *                   may be supported).  Must be a compile-time
  *                   constant.
  */
+@pure
 extern void update_checksum<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
 
 /***
@@ -447,6 +460,7 @@ extern void update_checksum<T, O>(in bool condition, in T data, inout O checksum
  * Calling verify_checksum_with_payload is only supported in the
  * VerifyChecksum control.
  */
+@packetState
 extern void verify_checksum_with_payload<T, O>(in bool condition, in T data, in O checksum, HashAlgorithm algo);
 
 /**
@@ -458,6 +472,7 @@ extern void verify_checksum_with_payload<T, O>(in bool condition, in T data, in 
  * Calling update_checksum_with_payload is only supported in the
  * ComputeChecksum control.
  */
+@noSideEffects @packetState
 extern void update_checksum_with_payload<T, O>(in bool condition, in T data, inout O checksum, HashAlgorithm algo);
 
 /***
@@ -482,6 +497,7 @@ extern void update_checksum_with_payload<T, O>(in bool condition, in T data, ino
  * last such call is preserved.  See the v1model architecture
  * documentation (Note 1) for more details.
  */
+@packetState
 extern void resubmit<T>(in T data);
 
 /***
@@ -506,6 +522,7 @@ extern void resubmit<T>(in T data);
  * data from the last such call is preserved.  See the v1model
  * architecture documentation (Note 1) for more details.
  */
+@packetState
 extern void recirculate<T>(in T data);
 
 /***
@@ -515,6 +532,7 @@ extern void recirculate<T>(in T data);
  * calling clone3 with the same type and session parameter values,
  * with empty data.
  */
+@packetState
 extern void clone(in CloneType type, in bit<32> session);
 
 /***
@@ -554,8 +572,10 @@ extern void clone(in CloneType type, in bit<32> session);
  * clone session and data are used.  See the v1model architecture
  * documentation (Note 1) for more details.
  */
+@packetState
 extern void clone3<T>(in CloneType type, in bit<32> session, in T data);
 
+@packetState
 extern void truncate(in bit<32> length);
 
 /***
@@ -582,6 +602,7 @@ extern void truncate(in bit<32> length);
  * because, if you follow this advice, your program will behave the
  * same way when assert statements are removed.
  */
+@localState
 extern void assert(in bool check);
 
 /***
@@ -617,6 +638,7 @@ extern void assert(in bool check);
  * condition ever evaluates to false when operating in a network, it
  * is likely that your assumption was wrong, and should be reexamined.
  */
+@localState
 extern void assume(in bool check);
 
 /*
@@ -624,7 +646,9 @@ extern void assume(in bool check);
  * Example: log_msg("User defined message");
  * or log_msg("Value1 = {}, Value2 = {}",{value1, value2});
  */
+@localState
 extern void log_msg(string msg);
+@localState
 extern void log_msg<T>(string msg, in T data);
 
 // The name 'standard_metadata' is reserved
