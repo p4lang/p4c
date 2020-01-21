@@ -1,1 +1,1 @@
-backends/ubpf/tests/testdata/test-simple-actions.p4
+../../backends/ubpf/tests/testdata/test-simple-actions.p4

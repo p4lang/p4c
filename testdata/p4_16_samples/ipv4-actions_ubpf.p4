@@ -1,1 +1,1 @@
-backends/ubpf/tests/testdata/test-ipv4-actions.p4
+../../backends/ubpf/tests/testdata/test-ipv4-actions.p4

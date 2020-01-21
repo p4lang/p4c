@@ -1,1 +1,1 @@
-backends/ubpf/tests/testdata/test-tunneling.p4
+../../backends/ubpf/tests/testdata/test-tunneling.p4

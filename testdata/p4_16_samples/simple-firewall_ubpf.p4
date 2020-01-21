@@ -1,1 +1,1 @@
-backends/ubpf/tests/testdata/test-simple-firewall.p4
+../../backends/ubpf/tests/testdata/test-simple-firewall.p4
