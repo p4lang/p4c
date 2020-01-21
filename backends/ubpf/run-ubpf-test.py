@@ -20,16 +20,6 @@ from pathlib import Path
 import sys
 import os
 
-try:
-    from scapy.layers.all import *
-    from scapy.utils import *
-except ImportError:
-    pass
-
-sys.path.insert(0, os.path.dirname(
-    os.path.realpath(__file__)) + '/../../tools')
-from testutils import *
-
 SUCCESS = 0
 FAILURE = 1
 
