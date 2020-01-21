@@ -80,9 +80,9 @@ control ingress(inout headers hdr, inout metadata_t meta,
         hdr.pool[hdr.ml.idx].val = hdr.vector[0].e;
         hdr.pool[hdr.ml.idx].base2 = hdr.vector[0].e;
         // Test runtime index as r-value.
-        hdr.vector[0].e = hdr.pool[hdr.ml.idx].val;
+        hdr.vector[1].e = hdr.pool[hdr.ml.idx].base0;
         // Test runtime index as l- and r-values.
-        hdr.pool[hdr.ml.idx].val = hdr.pool[hdr.ml.idx].val + 1;
+        hdr.pool[hdr.ml.idx].base0 = hdr.pool[hdr.ml.idx].base1 + 1;
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
 }
@@ -108,3 +108,4 @@ control MyDeparser(packet_out packet, in headers hdr) {
 
 V1Switch(MyParser(), MyVerifyChecksum(), ingress(), egress(),
 MyComputeChecksum(), MyDeparser()) main;
+
