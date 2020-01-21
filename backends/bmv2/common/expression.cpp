@@ -412,7 +412,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         } else {
             const char* fieldRef = parentType->is<IR::Type_Stack>() ? "stack_field" : "field";
             Util::JsonArray* e;
-            bool st = IsArrayIndexRuntime(expression);
+            bool st = isArrayIndexRuntime(expression);
             if (!st) {
                 result->emplace("type", fieldRef);
                 e = mkArrayField(result, "value");
@@ -739,7 +739,7 @@ void ExpressionConverter::postorder(const IR::Expression* expression)  {
     BUG("%1%: Unhandled case", expression);
 }
 
-bool ExpressionConverter::IsArrayIndexRuntime(const IR::Expression* e) {
+bool ExpressionConverter::isArrayIndexRuntime(const IR::Expression* e) {
     if (auto mem = e->to<IR::Member>()) {
         if (auto ai = mem->expr->to<IR::ArrayIndex>()) {
             auto right = ai->right;
