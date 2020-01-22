@@ -576,8 +576,7 @@ class RunBMV2(object):
             pass
         try:
             runswitch = [FindExe("behavioral-model", switch),
-#                         "--log-file", self.switchLogFile, "--log-flush",
-                         "--log-console",
+                         "--log-file", self.switchLogFile, "--log-flush",
                          "--use-files", str(wait), "--thrift-port", thriftPort,
                          "--device-id", str(rand)] + self.interfaceArgs() + ["../" + self.jsonfile]
             if self.cmd_line_args:
