@@ -439,6 +439,7 @@ class IfStatement : Statement {
         clone.visit(ifFalse, "ifFalse");
         v.flow_merge(clone);
     }
+    validate{ CHECK_NULL(ifTrue); }
 }
 
 class BlockStatement : Statement, ISimpleNamespace, IAnnotated {

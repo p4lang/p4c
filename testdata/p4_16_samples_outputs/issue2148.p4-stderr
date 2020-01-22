@@ -1,0 +1,3 @@
+issue2148.p4(19): [--Wwarn=uninitialized_use] warning: not_initialized.a may be uninitialized
+    if (not_initialized.a < 6) {
+        ^^^^^^^^^^^^^^^^^

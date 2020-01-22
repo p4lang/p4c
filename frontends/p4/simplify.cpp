@@ -20,7 +20,7 @@ limitations under the License.
 namespace P4 {
 
 const IR::Node* DoSimplifyControlFlow::postorder(IR::BlockStatement* statement) {
-    LOG1("Visiting " << dbp(getOriginal()));
+    LOG3("Visiting " << dbp(getOriginal()));
     if (statement->annotations->size() > 0)
         return statement;
     auto parent = getContext()->node;
@@ -60,7 +60,7 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::BlockStatement* statement) 
 }
 
 const IR::Node* DoSimplifyControlFlow::postorder(IR::IfStatement* statement)  {
-    LOG1("Visiting " << dbp(getOriginal()));
+    LOG3("Visiting " << dbp(getOriginal()));
     if (SideEffects::check(statement->condition, refMap, typeMap))
         return statement;
     if (statement->ifTrue->is<IR::EmptyStatement>() &&
@@ -70,7 +70,7 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::IfStatement* statement)  {
 }
 
 const IR::Node* DoSimplifyControlFlow::postorder(IR::EmptyStatement* statement)  {
-    LOG1("Visiting " << dbp(getOriginal()));
+    LOG3("Visiting " << dbp(getOriginal()));
     auto parent = findContext<IR::Statement>();
     if (parent == nullptr ||  // in a ParserState or P4Action
         parent->is<IR::BlockStatement>())
@@ -80,7 +80,7 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::EmptyStatement* statement) 
 }
 
 const IR::Node* DoSimplifyControlFlow::postorder(IR::SwitchStatement* statement)  {
-    LOG1("Visiting " << dbp(getOriginal()));
+    LOG3("Visiting " << dbp(getOriginal()));
     if (statement->cases.empty()) {
         // The P4_16 spec prohibits expressions other than table application as
         // switch conditions.  The parser should have rejected programs for
