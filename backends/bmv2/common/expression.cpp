@@ -206,7 +206,7 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
         auto res = map.find(ex);
         Util::JsonObject* fres;
         if (res != map.end()) {
-            if (fres = res->second->to<Util::JsonObject>()) {
+            if ((fres = res->second->to<Util::JsonObject>())) {
                 LOG2("found result: " << fres->toString());
             } else {
                 ::error("Failure in ArrayIndex runtime processing");
@@ -495,9 +495,6 @@ void ExpressionConverter::postorder(const IR::Mux* expression)  {
 }
 
 void ExpressionConverter::postorder(const IR::IntMod* expression)  {
-    if (auto im = expression->to<IR::IntMod>()) {
-        std::cout << "IntMod:" << im->expr << std::endl;
-    }
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     result->emplace("type", "expression");
