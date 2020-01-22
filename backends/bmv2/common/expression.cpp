@@ -202,15 +202,17 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
     }
 
     if (!expression->right->is<IR::Constant>()) {
-        result->emplace("type", "expression");
         const IR::Expression* ex = expression->right;
-        std::vector<cstring> cv;
-        while (auto rmem = ex->to<IR::Member>()) {
-            ex = rmem->expr;
-            cv.push_back(rmem->member.toString());
+        auto res = map.find(ex);
+        Util::JsonObject* fres;
+        if (res != map.end()) {
+            if (fres = res->second->to<Util::JsonObject>()) {
+                LOG2("found result: " << fres->toString());
+            } else {
+                ::error("Failure in ArrayIndex runtime processing");
+            }
         }
-
-        std::reverse(cv.begin(), cv.end());
+        result->emplace("type", "expression");
 
         // create a DEREFERENCE_HEADER_STACK json node
         auto e = new Util::JsonObject();
@@ -219,15 +221,7 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
         l->emplace("type", "header_stack");
         l->emplace("value", elementAccess);
         e->emplace("left", l);
-
-        auto r = new Util::JsonObject();
-        r->emplace("type", "field");
-        auto v = new Util::JsonArray();
-        for (cstring n : cv) {
-            v->append(n);
-        }
-        r->emplace("value", v);
-        e->emplace("right", r);
+        e->emplace("right", fres);
         result->emplace("value", e);
     } else {
         result->emplace("type", "header");
@@ -501,6 +495,9 @@ void ExpressionConverter::postorder(const IR::Mux* expression)  {
 }
 
 void ExpressionConverter::postorder(const IR::IntMod* expression)  {
+    if (auto im = expression->to<IR::IntMod>()) {
+        std::cout << "IntMod:" << im->expr << std::endl;
+    }
     auto result = new Util::JsonObject();
     mapExpression(expression, result);
     result->emplace("type", "expression");
