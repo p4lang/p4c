@@ -203,18 +203,17 @@ void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
 
     if (!expression->right->is<IR::Constant>()) {
         const IR::Expression* ex = expression->right;
-        auto res = map.find(ex);
-        Util::JsonObject* fres;
-        if (res != map.end()) {
-            if ((fres = res->second->to<Util::JsonObject>())) {
-                LOG2("found result: " << fres->toString());
-            } else {
-                ::error("Failure in ArrayIndex runtime processing");
+        auto fresult = ::get(map, ex);
+        if (fresult == nullptr) {
+            LOG2("Looking up " << ex);
+            for (auto it : map) {
+                LOG3(" " << it.first << " " << it.second);
             }
         }
+        BUG_CHECK(fresult, "%1%: Runtime array index json generation failed", ex);
+        Util::JsonObject* fres = fresult->to<Util::JsonObject>();
         result->emplace("type", "expression");
 
-        // create a DEREFERENCE_HEADER_STACK json node
         auto e = new Util::JsonObject();
         e->emplace("op", "dereference_header_stack");
         auto l = new Util::JsonObject();
