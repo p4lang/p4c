@@ -29,7 +29,7 @@ packet 0 ca0107fc001c111111111111f00d 0805 01234567 89abcdef
 #                                        changed VV
 #        ca0107fc001c111111111111f045 0805 012345ca 89abf7ef
 
-expect 0 ca0107fc001c111111111111f045 0805 01234567 89abf7ef $
+expect 0  ca0107fc001c111111111111f045 0805 012345ca 89abf7ef $
 
 ######################################################################
 
@@ -62,5 +62,5 @@ packet 0 cafa07fc001c111111111111cafe 61b8 01234567 89abcdef
 #                                             changed VV
 #        cafa07fc001c111111111111caef 61b8 01234567 89cacdef
 
-expect 0 cafa07fc001c111111111111caef 61b8 01234567 89d1cdef $
+expect 0 cafa07fc001c111111111111caef 61b8 01234567 89cacdef $
 
