@@ -27,8 +27,8 @@ header ethernet_t {
 }
 
 header ml_hdr_t {
-    int<8> idx1;
-    int<8> idx2;
+    bit<8> idx1;
+    bit<8> idx2;
 }
 
 header vec_e_t {
@@ -69,7 +69,7 @@ control ingress(inout headers hdr, inout metadata_t meta,
         hdr.vector[hdr.ml.idx1 - (hdr.ml.idx2 >> 8w1)].e =
             hdr.ethernet.etherType[15:8] + 7;
         // similar, but with runtime index as R-value.
-        hdr.ethernet.etherType[7:0] = hdr.vector[(hdr.ml.idx2 ^ 0x07) & 0x7].e;
+        hdr.ethernet.etherType[7:0] = hdr.vector[(hdr.ml.idx2 ^ 8w0x07) & 8w0x7].e;
 
         // TODO: Line does not compile with latest p4c.
 	// Test runtime index with arithmetic expression as index,

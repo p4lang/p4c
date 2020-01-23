@@ -9,8 +9,8 @@ header ethernet_t {
 }
 
 header ml_hdr_t {
-    int<8> idx1;
-    int<8> idx2;
+    bit<8> idx1;
+    bit<8> idx2;
 }
 
 header vec_e_t {
@@ -45,7 +45,7 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata_t meta, inout 
 control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
     apply {
         hdr.vector[hdr.ml.idx1 - (hdr.ml.idx2 >> 8w1)].e = hdr.ethernet.etherType[15:8] + 8w7;
-        hdr.ethernet.etherType[7:0] = hdr.vector[(hdr.ml.idx2 ^ 8s0x7) & 8s0x7].e;
+        hdr.ethernet.etherType[7:0] = hdr.vector[(hdr.ml.idx2 ^ 8w0x7) & 8w0x7].e;
     }
 }
 
