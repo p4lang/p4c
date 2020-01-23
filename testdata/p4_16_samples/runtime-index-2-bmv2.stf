@@ -29,7 +29,7 @@ packet 0 ca0107fc001c111111111111f00d 0805 01234567 89abcdef
 #                                        changed VV
 #        ca0107fc001c111111111111f045 0805 012345ca 89abf7ef
 
-expect 0  CA0107FC001C111111111111F04508050123456789ABF7EF $
+expect 0 ca0107fc001c111111111111f045 0805 01234567 89abf7ef $
 
 ######################################################################
 
@@ -49,10 +49,10 @@ packet 0 cafa07fc001c111111111111cafe 61b8 01234567 89abcdef
 
 # Just before assignment:
 #       hdr.ethernet.etherType[7:0] = hdr.vector[(hdr.ml.idx2 ^ 0x07) & 0x7].e;
-#       (hdr.ml.idx2 ^ 0x07) & 0x7 = (0xb8 ^ 0x07) & 0x7 = 0xb8 & 0x7 = 0
+#       (hdr.ml.idx2 ^ 0x07) & 0x7 = (0xb8 ^ 0x07) & 0x7 = 0xbf & 0x7 = 7
 # After assignment:
 #                          changed VV
-#        cafa07fc001c111111111111ca01 61b8 01234567 89d1cdef
+#        cafa07fc001c111111111111caef 61b8 01234567 89d1cdef
 
 # Just before assignment:
 #       hdr.vector[hdr.vector[hdr.ethernet.dstAddr[39:32] & 0x7].e & 0x7].e =
@@ -60,6 +60,7 @@ packet 0 cafa07fc001c111111111111cafe 61b8 01234567 89abcdef
 #       hdr.ethernet.dstAddr[39:32] & 0x7 = 0xfa & 0x7 = 2
 #       hdr.vector[2].e & 0x7 = 0x45 & 0x7 = 5
 #                                             changed VV
-#        cafa07fc001c111111111111ca01 61b8 01234567 89cacdef
+#        cafa07fc001c111111111111caef 61b8 01234567 89cacdef
 
-expect 0 CAFA07FC001C111111111111CAEF61B80123456789D1CDEF $
+expect 0 cafa07fc001c111111111111caef 61b8 01234567 89d1cdef $
+
