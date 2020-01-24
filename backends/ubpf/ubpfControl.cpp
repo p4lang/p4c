@@ -226,8 +226,12 @@ namespace UBPF {
                 return false;
             }
         }
-        builder->append(
-                expression->path->name);  // each identifier should be unique
+        auto name = expression->path->name.name;
+        if (std::find(pointerVariables.begin(), pointerVariables.end(), name) !=
+            pointerVariables.end()) {
+            builder->append("*");
+        }
+        builder->append(expression->path->name);  // each identifier should be unique
         return false;
     }
 
@@ -242,7 +246,6 @@ namespace UBPF {
         auto mi = P4::MethodInstance::resolve(expression,
                                               control->program->refMap,
                                               control->program->typeMap);
-        
         if (auto apply = mi->to<P4::ApplyMethod>()) {
             processApply(apply);
             return false;
@@ -343,19 +346,8 @@ namespace UBPF {
     void UBPFControlBodyTranslator::emitAssignmentStatement(const IR::AssignmentStatement *a) {
         visit(a->left);
         builder->append(" = ");
-        appendValueAtOperator(a);
         visit(a->right);
         builder->endOfStatement();
-    }
-
-    void UBPFControlBodyTranslator::appendValueAtOperator(const IR::AssignmentStatement *a) const {
-        if (a->right->is<IR::PathExpression>()) {
-            auto name = a->right->to<IR::PathExpression>()->path->name.name;
-            if (std::find(pointerVariables.begin(), pointerVariables.end(), name) !=
-                pointerVariables.end()) {
-                builder->append("*");
-            }
-        }
     }
 
     bool UBPFControlBodyTranslator::preorder(const IR::BlockStatement *s) {
@@ -463,23 +455,10 @@ namespace UBPF {
     UBPFControlBodyTranslator::preorder(const IR::Operation_Binary *b) {
         widthCheck(b);
         builder->append("(");
-        if (b->left->is<IR::PathExpression>()) {
-            auto name = b->left->to<IR::PathExpression>()->path->name.name;
-            if (std::find(pointerVariables.begin(), pointerVariables.end(), name) !=
-                pointerVariables.end()) {
-                builder->append("*");
-            }
-        }
         visit(b->left);
         builder->spc();
         builder->append(b->getStringOp());
         builder->spc();
-        if (b->right->is<IR::PathExpression>()) {
-            auto name = b->right->to<IR::PathExpression>()->path->name.name;
-            if (std::find(pointerVariables.begin(), pointerVariables.end(), name) != pointerVariables.end()) {
-                builder->append("*");
-            }
-        }
         visit(b->right);
         builder->append(")");
         return false;
@@ -495,24 +474,11 @@ namespace UBPF {
                       || et->is<UBPFBoolType>();
         if (scalar) {
             builder->append("(");
-            if (b->left->is<IR::PathExpression>()) {
-                auto name = b->left->to<IR::PathExpression>()->path->name.name;
-                if (std::find(pointerVariables.begin(), pointerVariables.end(), name) !=
-                    pointerVariables.end()) {
-                    builder->append("*");
-                }
-            }
             visit(b->left);
             builder->spc();
             builder->append(b->getStringOp());
             builder->spc();
             visit(b->right);
-            if (b->right->is<IR::PathExpression>()) {
-                auto name = b->right->to<IR::PathExpression>()->path->name.name;
-                if (std::find(pointerVariables.begin(), pointerVariables.end(), name) != pointerVariables.end()) {
-                    builder->append("*");
-                }
-            }
             builder->append(")");
         } else {
             if (!et->is<EBPF::IHasWidth>())
