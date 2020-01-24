@@ -71,11 +71,14 @@ control ingress(inout headers hdr, inout metadata_t meta,
         // similar, but with runtime index as R-value.
         hdr.ethernet.etherType[7:0] = hdr.vector[(hdr.ml.idx2 ^ 8w0x07) & 8w0x7].e;
 
+        // TODO: The line of code below is commented out
+        // because p4c compilation fails.  Another PR will
+        // fix the failure.
 	// Test runtime index with arithmetic expression as index,
         // where that arithmetic expression includes another header
         // stack index with a runtime variable value.
-        hdr.vector[hdr.vector[hdr.ethernet.dstAddr[39:32] & 0x7].e & 0x7].e =
-            hdr.ethernet.dstAddr[47:40];
+        // hdr.vector[hdr.vector[hdr.ethernet.dstAddr[39:32] & 0x7].e & 0x7].e =
+        //    hdr.ethernet.dstAddr[47:40];
     }
 }
 

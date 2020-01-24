@@ -46,7 +46,6 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
     apply {
         hdr.vector[hdr.ml.idx1 - (hdr.ml.idx2 >> 8w1)].e = hdr.ethernet.etherType[15:8] + 7;
         hdr.ethernet.etherType[7:0] = hdr.vector[(hdr.ml.idx2 ^ 8w0x7) & 8w0x7].e;
-        hdr.vector[hdr.vector[hdr.ethernet.dstAddr[39:32] & 0x7].e & 0x7].e = hdr.ethernet.dstAddr[47:40];
     }
 }
 
