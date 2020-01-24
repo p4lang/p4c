@@ -26,7 +26,7 @@ limitations under the License.
 #include "lib/exceptions.h"
 #include "lib/nullstream.h"
 
-#include "backends/ebpf/midend.h"
+#include "backends/ubpf/midend.h"
 #include "backends/ebpf/ebpfOptions.h"
 #include "ubpfBackend.h"
 #include "frontends/p4/frontend.h"
@@ -52,7 +52,7 @@ void compile(EbpfOptions& options) {
     if (::errorCount() > 0)
         return;
 
-    EBPF::MidEnd midend;
+    UBPF::MidEnd midend;
     midend.addDebugHook(hook);
     auto toplevel = midend.run(options, program);
     if (::errorCount() > 0)

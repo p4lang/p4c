@@ -36,10 +36,10 @@ namespace UBPF {
     void UBPFControlBodyTranslator::processFunction(
             const P4::ExternFunction *function) {
         if (function->method->name.name == control->program->model.drop.name) {
-            builder->append("pass = false");
+            builder->appendFormat("%s = false", control->passVariable);
             return;
         } else if (function->method->name.name == control->program->model.pass.name) {
-            builder->append("pass = true");
+            builder->appendFormat("%s = true", control->passVariable);
             return;
         } else if (function->method->name.name ==
                    control->program->model.ubpf_time_get_ns.name) {
@@ -64,70 +64,37 @@ namespace UBPF {
 
     cstring UBPFControlBodyTranslator::createHashKeyInstance(const P4::ExternFunction *function) {
         auto dataArgument = function->expr->arguments->at(2)->expression->to<IR::ListExpression>();
-        auto hashKey = control->program->refMap->newName("hash_key");
-        builder->appendFormat("struct %s ", hashKey);
+
+        auto atype = UBPFTypeFactory::instance->create(dataArgument->type);
+        if (!atype->is<UBPFListType>()) {
+            ::error("%1%: Unsupported argument type", dataArgument->type);
+        }
+        auto ubpfList = atype->to<UBPFListType>();
+        ubpfList->name = this->refMap->newName("tuple");
+
+        atype->declare(builder, "", false);
         builder->blockStart();
-
-        unsigned int struct_size = 0;
-        for (auto component : dataArgument->components) {
-            auto etype = UBPFTypeFactory::instance->create(component->type);
-            auto widthType = etype->to<EBPF::IHasWidth>();
-            struct_size += widthType->implementationWidthInBits();
-        }
-        unsigned int overallPadding = 32 - struct_size % 32;
-
-        std::vector<cstring> paddingInitializers(dataArgument->components.size());
-        int paddingIndex = 0;
-        for (auto component : dataArgument->components) {
-            builder->emitIndent();
-            auto etype = UBPFTypeFactory::instance->create(component->type);
-            auto fieldName = component->toString().replace(".", "_");
-            etype->declare(builder, fieldName, false);
-            builder->endOfStatement(true);
-
-            auto widthType = etype->to<EBPF::IHasWidth>();
-            auto remainingBits = std::min(32 - widthType->implementationWidthInBits() % 32, overallPadding);
-            if (remainingBits < 32 && remainingBits != 0 && widthType->implementationWidthInBits() % 32 != 0) {
-                if (remainingBits == 8) {
-                    addPadding(paddingInitializers, remainingBits, paddingIndex);
-                    overallPadding -= remainingBits;
-                } else if (remainingBits == 16) {
-                    addPadding(paddingInitializers, remainingBits, paddingIndex);
-                    overallPadding -= remainingBits;
-                } else if (remainingBits == 24) {
-                    addPadding(paddingInitializers, remainingBits, paddingIndex);
-                    overallPadding -= remainingBits;
-                } else {
-                    error("Not supported bitwidth");
-                }
-            }
-            paddingIndex++;
-        }
+        atype->emit(builder);
         builder->blockEnd(false);
         builder->endOfStatement(true);
-        builder->emitIndent();
+
         auto hashKeyInstance = control->program->refMap->newName("hash_key_instance");
-        builder->appendFormat("struct %s %s = ", hashKey, hashKeyInstance);
-        builder->blockStart();
-        for (unsigned int i = 0; i < dataArgument->components.size(); i++) {
-            auto component = dataArgument->components[i];
-            builder->emitIndent();
-            builder->appendFormat(".%s = %s", component->toString().replace(".", "_"), component->toString());
-            auto paddingInitializer = paddingInitializers.at(i);
-            if (paddingInitializer) {
-                builder->append(",");
-                builder->newline();
-                builder->emitIndent();
-                builder->append(".");
-                builder->append(paddingInitializer);
-            }
-            if (i < dataArgument->components.size() - 1) {
-                builder->append(",");
-            }
-            builder->newline();
-        }
-        builder->blockEnd(false);
+        builder->emitIndent();
+        atype->declare(builder, hashKeyInstance, false);
+        builder->append(" = ");
+        atype->emitInitializer(builder);
         builder->endOfStatement(true);
+        unsigned idx = 0;
+        for (auto f : ubpfList->elements) {
+            if (!f->type)  // If nullptr it's a padding.
+                continue;
+            builder->emitIndent();
+            builder->appendFormat("%s.%s = ", hashKeyInstance, f->name);
+            auto c = dataArgument->components.at(idx);
+            visit(c);
+            builder->endOfStatement(true);
+            idx++;
+        }
 
         auto destination = function->expr->arguments->at(0);
         builder->emitIndent();
@@ -153,7 +120,7 @@ namespace UBPF {
 
         if (declType->name.name == p4lib.packetOut.name) {
             if (method->method->name.name == p4lib.packetOut.emit.name) {
-                ::error("Emit extern not supported in control block");
+                ::error("%1%: Emit extern not supported in control block", method->expr);
                 return;
             }
         } else if (declType->name.name ==
@@ -175,11 +142,9 @@ namespace UBPF {
 
     void
     UBPFControlBodyTranslator::processApply(const P4::ApplyMethod *method) {
-        auto table = (UBPFTable *) control->getTable(
-                method->object->getName().name);
+        auto table = control->getTable(method->object->getName().name);
         BUG_CHECK(table != nullptr, "No table for %1%", method->expr);
 
-        P4::ParameterSubstitution binding;
         cstring actionVariableName;
         if (!saveAction.empty()) {
             actionVariableName = saveAction.at(saveAction.size() - 1);
@@ -277,23 +242,23 @@ namespace UBPF {
         auto mi = P4::MethodInstance::resolve(expression,
                                               control->program->refMap,
                                               control->program->typeMap);
-        auto apply = mi->to<P4::ApplyMethod>();
-        if (apply != nullptr) {
+        
+        if (auto apply = mi->to<P4::ApplyMethod>()) {
             processApply(apply);
             return false;
         }
-        auto ef = mi->to<P4::ExternFunction>();
-        if (ef != nullptr) {
+
+        if (auto ef = mi->to<P4::ExternFunction>()) {
             processFunction(ef);
             return false;
         }
-        auto ext = mi->to<P4::ExternMethod>();
-        if (ext != nullptr) {
+
+        if (auto ext = mi->to<P4::ExternMethod>()) {
             processMethod(ext);
             return false;
         }
-        auto bim = mi->to<P4::BuiltInMethod>();
-        if (bim != nullptr) {
+
+        if (auto bim = mi->to<P4::BuiltInMethod>()) {
             if (bim->name == IR::Type_Header::isValid) {
                 visit(bim->appliedTo);
                 builder->append(".ebpf_valid");
@@ -312,8 +277,8 @@ namespace UBPF {
                 return false;
             }
         }
-        auto ac = mi->to<P4::ActionCall>();
-        if (ac != nullptr) {
+
+        if (auto ac = mi->to<P4::ActionCall>()) {
             // Action arguments have been eliminated by the mid-end.
             BUG_CHECK(expression->arguments->empty(),
                       "%1%: unexpected arguments for action call", expression);

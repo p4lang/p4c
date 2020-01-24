@@ -46,6 +46,8 @@ namespace UBPF {
             if (et == nullptr)
                 return nullptr;
             result = new EBPF::EBPFStackType(ts, et);
+        } else if (auto tpl = type->to<IR::Type_List>()) {
+            result = new UBPFListType(tpl);
         } else {
             ::error("Type %1% not supported", type);
         }
@@ -91,7 +93,6 @@ namespace UBPF {
 
         for (auto f : fields) {
             auto ltype = f->type;
-
             builder->emitIndent();
 
             ltype->declare(builder, f->field->name, false);
@@ -104,6 +105,8 @@ namespace UBPF {
             }
             builder->append(" */");
             builder->newline();
+
+
         }
 
         if (type->is<IR::Type_Header>()) {
@@ -127,6 +130,8 @@ namespace UBPF {
         builder->appendFormat("%s", id.c_str());
     }
 
+    //////////////////////////////////////////////////////////
+
     void UBPFEnumType::emit(EBPF::CodeBuilder *builder) {
         builder->append("enum ");
         auto et = getType();
@@ -139,4 +144,91 @@ namespace UBPF {
         builder->blockEnd(false);
         builder->endOfStatement(true);
     }
+
+    //////////////////////////////////////////////////////////
+
+    UBPFListType::UBPFListType(const IR::Type_List *lst) : EBPFType(lst) {
+        kind = "struct";
+        width = 0;
+        implWidth = 0;
+        // The first iteration is to compute total width of Type_List.
+        for (auto el : lst->components) {
+            auto ltype = UBPFTypeFactory::instance->create(el);
+            auto wt = dynamic_cast<IHasWidth*>(ltype);
+            if (wt == nullptr) {
+                ::error("UBPF: Unsupported type in Type_List: %s", el->getP4Type());
+            } else {
+                width += wt->widthInBits();
+                implWidth += wt->implementationWidthInBits();
+            }
+        }
+        unsigned int overallPadding = 16 - implWidth % 16;
+        implWidth += overallPadding;  // The total implementation width equals the total
+                                      // width of all fields + padding.
+
+        unsigned idx = 0, paddingIndex = 0;
+        // The second iteration converts list's elements to UBPFListElement or Padding.
+        for (auto el : lst->components) {
+            auto etype = UBPFTypeFactory::instance->create(el);
+            cstring fname = "field_" + std::to_string(idx);
+            elements.push_back(new UBPFListElement(etype, fname));
+
+            auto typeWidth = etype->to<EBPF::IHasWidth>();
+            auto remainingBits = std::min(16 - typeWidth->implementationWidthInBits() % 16, overallPadding);
+            if (remainingBits <= 16 && remainingBits != 0 && typeWidth->implementationWidthInBits() % 16 != 0) {
+                if (remainingBits == 8 || remainingBits == 16) {
+                    cstring name = "pad" + std::to_string(paddingIndex);
+                    unsigned widthInBytes = remainingBits / 8;
+                    auto pad = new Padding(name, widthInBytes);
+                    elements.push_back(pad);
+                    paddingIndex++;
+                } else {
+                    ::error("Not supported bitwidth in %1$", this->type->getNode());
+                }
+            }
+            idx++;
+        }
+    }
+
+    void
+    UBPFListType::declare(EBPF::CodeBuilder* builder, cstring id, UNUSED bool asPointer) {
+        builder->append(kind);
+        builder->spc();
+        builder->append(name);
+        builder->spc();
+        builder->append(id.c_str());
+    }
+
+    void UBPFListType::emitInitializer(EBPF::CodeBuilder* builder) {
+        builder->blockStart();
+        for (auto f : elements) {
+            if (!f->is<Padding>())
+                continue;
+            builder->emitIndent();
+            builder->appendFormat(".%s = {0},", f->to<Padding>()->name);
+            builder->newline();
+        }
+        builder->blockEnd(false);
+    }
+
+    void UBPFListType::emitPadding(EBPF::CodeBuilder *builder, UBPF::UBPFListType::Padding* pad) {
+        builder->appendFormat("uint8_t %s[%u]", pad->name, pad->widthInBytes);
+    }
+
+    /***
+     * This method emits uBPF code for Type_List (tuples). As the implementation of
+     * hash() extern requires n-byte aligned structs, this method appends paddings between fields.
+     */
+    void UBPFListType::emit(EBPF::CodeBuilder* builder) {
+        for (auto f : elements) {
+            builder->emitIndent();
+            if (!f->is<Padding>())
+                f->type->declare(builder, f->name, false);
+            else
+                emitPadding(builder, f->to<Padding>());
+            builder->append("; ");
+            builder->newline();
+        }
+    }
+
 }

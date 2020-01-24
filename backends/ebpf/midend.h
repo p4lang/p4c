@@ -25,8 +25,8 @@ limitations under the License.
 namespace EBPF {
 
 class MidEnd {
-    std::vector<DebugHook> hooks;
  public:
+    std::vector<DebugHook> hooks;
     P4::ReferenceMap       refMap;
     P4::TypeMap            typeMap;
 

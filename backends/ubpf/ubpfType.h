@@ -53,18 +53,55 @@ namespace UBPF {
         void declare(EBPF::CodeBuilder *builder, cstring id, bool asPointer) override;
     };
 
-class UBPFStructType : public EBPF::EBPFStructType {
-public:
-    UBPFStructType(const IR::Type_StructLike* strct) : EBPF::EBPFStructType(strct) {}
-    void emit(EBPF::CodeBuilder* builder) override;
-    void declare(EBPF::CodeBuilder* builder, cstring id, bool asPointer) override;
-};
+    class UBPFStructType : public EBPF::EBPFStructType {
+    public:
+        UBPFStructType(const IR::Type_StructLike* strct) : EBPF::EBPFStructType(strct) {}
+        void emit(EBPF::CodeBuilder* builder) override;
+        void declare(EBPF::CodeBuilder* builder, cstring id, bool asPointer) override;
+    };
 
     class UBPFEnumType : public EBPF::EBPFEnumType {
     public:
         UBPFEnumType(const IR::Type_Enum *strct) : EBPF::EBPFEnumType(strct) {}
 
         void emit(EBPF::CodeBuilder *builder) override;
+    };
+
+    class UBPFListType : public EBPF::EBPFType, public EBPF::IHasWidth {
+
+        class UBPFListElement {
+        public:
+            EBPFType* type;
+            const cstring name;
+
+            UBPFListElement(EBPFType* type, const cstring name) : type(type), name(name) {}
+            virtual ~UBPFListElement() {}  // to make UBPFListElement polymorphic.
+            template<typename T> bool is() const { return dynamic_cast<const T*>(this) != nullptr; }
+            template<typename T> T *to() { return dynamic_cast<T*>(this); }
+        };
+
+        class Padding : public UBPFListElement {
+        public:
+            unsigned widthInBytes;
+
+            Padding(const cstring name, unsigned widthInBytes) : UBPFListElement(nullptr, name),
+                                              widthInBytes(widthInBytes) {}
+        };
+
+    public:
+        cstring  kind;
+        cstring  name;
+        std::vector<UBPFListElement*>  elements;
+        unsigned width;
+        unsigned implWidth;
+
+        explicit UBPFListType(const IR::Type_List *lst);
+        void emitPadding(EBPF::CodeBuilder* builder, Padding* padding);
+        void declare(EBPF::CodeBuilder* builder, cstring id, bool asPointer) override;
+        void emitInitializer(EBPF::CodeBuilder* builder) override;
+        unsigned widthInBits() override { return width; }
+        unsigned implementationWidthInBits() override { return implWidth; }
+        void emit(EBPF::CodeBuilder* builder) override;
     };
 
 

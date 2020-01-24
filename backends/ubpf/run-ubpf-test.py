@@ -88,13 +88,16 @@ class UbpfTest(object):
         differences = []
         with open(compiled_file, 'r') as cf:
             with open(reference_file, 'r') as rf:
-                expected_lines = rf.readlines()
-                compiled_lines = cf.readlines()
+                expected_lines = [line.rstrip() for line in rf.readlines()]
+                compiled_lines = [line.rstrip() for line in cf.readlines()]
                 self.extract_differences(compiled_lines, differences, expected_lines)
 
         if differences:
+            print("The compiled file does not match the reference file:")
+            for line in differences:
+                print(line)
             with open(self.options.stderrpath, 'a') as file:
-                file.write("Output file (%s) does not match with reference file (%s) \n" %
+                file.write("Output file (%s) does not match the reference file (%s) \n" %
                            (compiled_file, reference_file))
                 file.writelines(differences)
 
@@ -113,8 +116,8 @@ class UbpfTest(object):
             elif is_line_comment:
                 continue
             if compiled_lines[i] != expected_lines[i]:
-                differences.append("Compiled: %s" % compiled_lines[i])
-                differences.append("Expected: %s" % expected_lines[i])
+                differences.append("Compiled (line %d): %s" % (i+1, compiled_lines[i]))
+                differences.append("Expected (line %d): %s" % (i+1, expected_lines[i]))
                 break
 
 
