@@ -96,8 +96,7 @@ class TypeInference : public Transform {
     }
 
     bool isLeftValue(const IR::Expression* expression) const
-    { return typeMap->isLeftValue(expression) || expression->is<IR::DefaultExpression>()
-      || isArrayIndexRuntime(expression); }
+    { return typeMap->isLeftValue(expression) || expression->is<IR::DefaultExpression>(); }
     void setCompileTimeConstant(const IR::Expression* expression)
     { typeMap->setCompileTimeConstant(expression); }
     bool isCompileTimeConstant(const IR::Expression* expression) const
