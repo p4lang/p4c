@@ -83,8 +83,13 @@ const IR::Node* LowerExpressions::postorder(IR::Cast* expression) {
 
 const IR::Node* LowerExpressions::postorder(IR::Expression* expression) {
     // Just update the typeMap incrementally.
-    auto type = typeMap->getType(getOriginal(), true);
+    auto orig = getOriginal<IR::Expression>();
+    auto type = typeMap->getType(orig, true);
     typeMap->setType(expression, type);
+    if (typeMap->isCompileTimeConstant(orig))
+        typeMap->setCompileTimeConstant(expression);
+    if (typeMap->isLeftValue(orig))
+        typeMap->setLeftValue(expression);
     return expression;
 }
 
