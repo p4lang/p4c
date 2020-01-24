@@ -74,7 +74,6 @@ control pipe(inout Headers_t headers, inout metadata meta) {
             count_r.write(r_k, last_count);
         } else {
             mark_to_drop();
-            return;
         }
     }
 }

@@ -529,9 +529,13 @@ namespace UBPF {
                 auto node = ctrblk->node;
                 if (node->is<IR::Declaration_Instance>()) {
                     auto di = node->to<IR::Declaration_Instance>();
-                    cstring name = di->name.name;
-                    auto ctr = new UBPFRegister(program, ctrblk, name, codeGen);
-                    registers.emplace(name, ctr);
+                    auto type = di->type->to<IR::Type_Specialized>();
+                    auto externTypeName = type->baseType->path->name.name;
+                    if (externTypeName == UBPFModel::instance.registerModel.name) {
+                        cstring name = di->name.name;
+                        auto ctr = new UBPFRegister(program, ctrblk, name, codeGen);
+                        registers.emplace(name, ctr);
+                    }
                 }
             } else if (!b->is<IR::Block>()) {
                 continue;
