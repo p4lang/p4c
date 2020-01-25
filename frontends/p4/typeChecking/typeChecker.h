@@ -83,18 +83,6 @@ class TypeInference : public Transform {
     void setType(const IR::Node* element, const IR::Type* type);
     void setLeftValue(const IR::Expression* expression)
     { typeMap->setLeftValue(expression); }
-    bool isArrayIndexRuntime(const IR::Expression* e) const {
-        if (auto mem = e->to<IR::Member>()) {
-            if (auto ai = mem->expr->to<IR::ArrayIndex>()) {
-                auto right = ai->right;
-                if (!right->is<IR::Constant>()) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
     bool isLeftValue(const IR::Expression* expression) const
     { return typeMap->isLeftValue(expression) || expression->is<IR::DefaultExpression>(); }
     void setCompileTimeConstant(const IR::Expression* expression)
