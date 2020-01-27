@@ -262,6 +262,10 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
             // field could be a method call, i.e., isValid.
             fieldName = field->controlPlaneName();
             index_pos = st->getFieldIndex(fieldName);
+            if (index_pos < 0) {
+                ::error(ErrorType::ERR_INVALID, "Bmv2: Struct has no field "
+                        "for runtime index computation %1%", st);
+            }
         }
     }
 
