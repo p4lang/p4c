@@ -250,7 +250,7 @@ ExpressionConverter::enclosingParamReference(const IR::Expression* expression) {
 
 void ExpressionConverter::postorder(const IR::Member* expression)  {
     auto result = new Util::JsonObject();
-    int offset = 0;
+    int index_pos = 0;
 
     auto parentType = typeMap->getType(expression->expr, true);
     cstring fieldName = expression->member.name;
@@ -261,7 +261,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         if (field != nullptr) {
             // field could be a method call, i.e., isValid.
             fieldName = field->controlPlaneName();
-            offset = st->getOffset(fieldName);
+            index_pos = st->getFieldIndex(fieldName);
         }
     }
 
@@ -435,7 +435,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                         result->emplace("value", e);
                         e->emplace("op", "access_field");
                         e->emplace("left", jo);
-                        e->emplace("right", offset);
+                        e->emplace("right", index_pos);
                     }
                 } else {
                     BUG("%1%: Unexpected json", lv);
