@@ -262,10 +262,6 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
             // field could be a method call, i.e., isValid.
             fieldName = field->controlPlaneName();
             index_pos = st->getFieldIndex(fieldName);
-            if (index_pos < 0) {
-                ::error(ErrorType::ERR_INVALID, "Bmv2: Struct has no field "
-                        "for runtime index computation %1%", st);
-            }
         }
     }
 
@@ -434,6 +430,10 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                     e->append(fieldName);
                 } else if (auto jo = l->to<Util::JsonObject>()) {
                     if (st) {
+                        if (index_pos < 0) {
+                            ::error(ErrorType::ERR_INVALID, "Bmv2: Struct has no field "
+                            "for runtime index computation %1%", st);
+                        }
                         result->emplace("type", "expression");
                         auto e = new Util::JsonObject();
                         result->emplace("value", e);
