@@ -193,21 +193,6 @@ class P4ParserDriver final : public AbstractParserDriver {
     /// Notify that the parser parsed a P4 `error` declaration.
     void onReadErrorDeclaration(IR::Type_Error* error);
 
-    /**
-     * There's a lexical ambiguity in P4 between the right shift operator `>>`
-     * and nested template arguments. (e.g. `A<B<C>>`) We resolve this at the
-     * parser level; from the lexer's perspective, both cases are just a
-     * sequence of R_ANGLE tokens. Whitespace is allowed between the R_ANGLEs of
-     * nested template arguments, but in the right shift operator case that
-     * isn't permitted, and the parser calls this function to detect when that
-     * happens and report and error.
-     *
-     * @param l  The location of the first R_ANGLE token.
-     * @param r  The location of the second R_ANGLE token.
-     */
-    static void checkShift(const Util::SourceInfo& l, const Util::SourceInfo& r);
-
-
     ////////////////////////////////////////////////////////////////////////////
     // Shared state manipulated directly by the lexer and parser.
     ////////////////////////////////////////////////////////////////////////////

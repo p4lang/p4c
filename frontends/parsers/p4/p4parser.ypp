@@ -193,6 +193,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %token<Token>      R_BRACE "}"
 %token<Token>      L_ANGLE "<"
 %token<Token>      R_ANGLE ">"
+%token<Token>      R_ANGLE_SHIFT   // > immediately followed by another >
 %token<Token>      L_PAREN "("
 %token<Token>      R_PAREN ")"
 %token<Token>      NOT "!"
@@ -305,7 +306,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %left BIT_OR
 %left BIT_XOR
 %left BIT_AND
-%left SHL
+%left SHL R_ANGLE_SHIFT
 %left PP PLUS MINUS PLUS_SAT MINUS_SAT
 %left MUL DIV MOD
 %right PREFIX
@@ -565,6 +566,7 @@ annotationToken
     | "}"              { $$ = $1; }
     | "<"              { $$ = $1; }
     | ">"              { $$ = $1; }
+    | R_ANGLE_SHIFT    { $$ = $1; }
 
     | "!"              { $$ = $1; }
     | ":"              { $$ = $1; }
@@ -776,13 +778,13 @@ simpleKeysetExpression
 
 valueSetDeclaration
     : optAnnotations
-        VALUESET "<" baseType ">" "(" expression ")" name ";"
+        VALUESET "<" baseType r_angle "(" expression ")" name ";"
         { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
     | optAnnotations
-        VALUESET "<" tupleType ">" "(" expression ")" name ";"
+        VALUESET "<" tupleType r_angle "(" expression ")" name ";"
         { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
     | optAnnotations
-        VALUESET "<" typeName ">" "(" expression ")" name ";"
+        VALUESET "<" typeName r_angle "(" expression ")" name ";"
         { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
     ;
 
@@ -888,7 +890,7 @@ typeName
     ;
 
 tupleType
-    : TUPLE "<" typeArgumentList ">"    { $$ = new IR::Type_Tuple(@1+@4, *$3); }
+    : TUPLE "<" typeArgumentList r_angle    { $$ = new IR::Type_Tuple(@1+@4, *$3); }
     ;
 
 headerStackType
@@ -896,7 +898,7 @@ headerStackType
     ;
 
 specializedType
-    : typeName "<" typeArgumentList ">" { $$ = new IR::Type_Specialized(@1 + @4, $1, $3); }
+    : typeName "<" typeArgumentList r_angle { $$ = new IR::Type_Specialized(@1 + @4, $1, $3); }
     ;
 
 baseType
@@ -905,18 +907,18 @@ baseType
     | BIT    { $$ = IR::Type::Bits::get(@1, 1); }
     | STRING { $$ = IR::Type::String::get(); }
     | INT    { $$ = new IR::Type_InfInt(); }
-    | BIT "<" INTEGER ">"
+    | BIT "<" INTEGER r_angle
       { $$ = IR::Type::Bits::get(@1+@4, parseConstantChecked(@3, $3), false); }
-    | INT "<" INTEGER ">"
+    | INT "<" INTEGER r_angle
       { $$ = IR::Type::Bits::get(@1+@4, parseConstantChecked(@3, $3), true); }
-    | VARBIT "<" INTEGER ">"
+    | VARBIT "<" INTEGER r_angle
       { $$ = IR::Type::Varbits::get(@1+@4, parseConstantChecked(@3, $3)); }
 
-    | BIT "<" "(" expression ")" ">"
+    | BIT "<" "(" expression ")" r_angle
       { $$ = new IR::Type_Bits(@1+@6, $4, false); }
-    | INT "<" "(" expression ")" ">"
+    | INT "<" "(" expression ")" r_angle
       { $$ = new IR::Type_Bits(@1+@6, $4, true); }
-    | VARBIT "<" "(" expression ")" ">"
+    | VARBIT "<" "(" expression ")" r_angle
       { $$ = new IR::Type_Varbits(@1+@6, $4); }
     ;
 
@@ -929,7 +931,7 @@ typeOrVoid
 
 optTypeParameters
     : /* empty */               { $$ = new IR::TypeParameters(); }
-    | "<" typeParameterList ">" { $$ = new IR::TypeParameters(@1+@3, *$2); }
+    | "<" typeParameterList r_angle { $$ = new IR::TypeParameters(@1+@3, *$2); }
     ;
 
 typeParameterList
@@ -1011,7 +1013,7 @@ enumDeclaration
     : optAnnotations
         ENUM name { driver.structure->declareType(*$3); }
         "{" identifierList "}" { $$ = new IR::Type_Enum(@3, *$3, *$6); }
-    | optAnnotations ENUM BIT "<" INTEGER ">" name { driver.structure->declareType(*$7); }
+    | optAnnotations ENUM BIT "<" INTEGER r_angle name { driver.structure->declareType(*$7); }
         "{" specifiedIdentifierList "}" {
             auto type = IR::Type::Bits::get(@3+@6, parseConstantChecked(@5, $5));
             $$ = new IR::Type_SerEnum(@7, *$7, type, *$10); }
@@ -1062,7 +1064,7 @@ assignmentOrMethodCallStatement
                                                  new IR::Vector<IR::Type>(), $3);
           $$ = new IR::MethodCallStatement(@1 + @4, mc); }
 
-    | lvalue "<" typeArgumentList ">" "(" argumentList ")" ";"
+    | lvalue "<" typeArgumentList r_angle "(" argumentList ")" ";"
         { auto mc = new IR::MethodCallExpression(@1 + @7,
                                                  $1, $3, $6);
           $$ = new IR::MethodCallStatement(@1 + @7, mc); }
@@ -1337,8 +1339,8 @@ expression
     | expression "|+|" expression        { $$ = new IR::AddSat(@1 + @3, $1, $3); }
     | expression "|-|" expression        { $$ = new IR::SubSat(@1 + @3, $1, $3); }
     | expression "<<" expression         { $$ = new IR::Shl(@1 + @3, $1, $3); }
-    | expression ">" ">" expression
-        { driver.checkShift(@2, @3); $$ = new IR::Shr(@1 + @4, $1, $4); }
+    | expression R_ANGLE_SHIFT ">" expression
+        { $$ = new IR::Shr(@1 + @4, $1, $4); }
     | expression "<=" expression         { $$ = new IR::Leq(@1 + @3, $1, $3); }
     | expression ">=" expression         { $$ = new IR::Geq(@1 + @3, $1, $3); }
     | expression "<" expression          { $$ = new IR::Lss(@1 + @3, $1, $3); }
@@ -1352,7 +1354,7 @@ expression
     | expression "&&" expression         { $$ = new IR::LAnd(@1 + @2 + @3, $1, $3); }
     | expression "||" expression         { $$ = new IR::LOr(@1 + @2 + @3, $1, $3); }
     | expression "?" expression ":" expression { $$ = new IR::Mux(@1 + @5, $1, $3, $5); }
-    | expression "<" realTypeArgumentList ">" "(" argumentList ")"
+    | expression "<" realTypeArgumentList r_angle "(" argumentList ")"
         { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3, $6); }
     // FIXME: the previous rule has the wrong precedence, and parses with
     // precedence weaker than casts.  There is no easy way to fix this in bison.
@@ -1388,6 +1390,8 @@ strList
     | strList "," STRING_LITERAL { $$ = $1;
                                    $$->push_back(new IR::StringLiteral(@3, $3)); }
     ;
+
+r_angle : ">" | R_ANGLE_SHIFT ;
 
 /*****************************************************************************/
 
