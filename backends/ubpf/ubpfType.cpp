@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "ubpfType.h"
+#include "ubpfHelpers.h"
 
 namespace UBPF {
 

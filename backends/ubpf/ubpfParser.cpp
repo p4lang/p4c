@@ -16,8 +16,10 @@ limitations under the License.
 
 #include "ubpfParser.h"
 #include "ubpfType.h"
+#include "ubpfHelpers.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
+
 
 namespace UBPF {
 

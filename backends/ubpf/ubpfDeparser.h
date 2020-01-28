@@ -20,6 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "ubpfProgram.h"
 #include "ebpf/ebpfObject.h"
+#include "ubpfHelpers.h"
 
 namespace UBPF {
 

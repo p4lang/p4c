@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "backends/ebpf/target.h"
 #include "backends/ebpf/ebpfObject.h"
+#include "ubpfHelpers.h"
 
 namespace UBPF {
 
@@ -46,27 +47,24 @@ namespace UBPF {
         void emitGetPacketData(Util::SourceCodeBuilder *builder,
                                cstring ctxVar) const;
 
-        void emitUserTableUpdate(Util::SourceCodeBuilder *builder, cstring tblName,
-                                 cstring key, cstring value) const override {};
+        void emitUserTableUpdate(UNUSED Util::SourceCodeBuilder *builder, UNUSED cstring tblName,
+                                 UNUSED cstring key, UNUSED cstring value) const override {};
 
-        void emitTableDecl(Util::SourceCodeBuilder *builder,
-                           cstring tblName, EBPF::TableKind tableKind,
-                           cstring keyType, cstring valueType, unsigned size) const override {};
+        void emitTableDecl(UNUSED Util::SourceCodeBuilder *builder,
+                           UNUSED cstring tblName, UNUSED EBPF::TableKind tableKind,
+                           UNUSED cstring keyType, UNUSED cstring valueType, UNUSED unsigned size) const override {};
 
         void emitMain(Util::SourceCodeBuilder *builder,
                       cstring functionName,
                       cstring argName) const override;
 
-        cstring dataOffset(cstring base) const override { return cstring(""); }
+        void emitUbpfHelpers(EBPF::CodeBuilder *builder) const;
 
-        cstring dataEnd(cstring base) const override { return cstring(""); }
-
+        cstring dataOffset(UNUSED cstring base) const override { return cstring(""); }
+        cstring dataEnd(UNUSED cstring base) const override { return cstring(""); }
         cstring dropReturnCode() const override { return "0"; }
-
         cstring abortReturnCode() const override { return "0"; }
-
         cstring forwardReturnCode() const override { return "1"; }
-
         cstring sysMapPath() const override { return ""; }
     };
 
