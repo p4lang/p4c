@@ -25,7 +25,7 @@ limitations under the License.
 namespace P4 {
 
 /** @brief Replace complex control flow nodes with simpler ones where possible.
- * 
+ *
  * Simplify the IR in the following ways:
  *
  * 1. Remove empty statements from within parser states, actions, and block
@@ -42,7 +42,7 @@ namespace P4 {
  * 5. If a block statement is within another block or a parser state, and (a)
  * is empty, then replace it with an empty statement, or (b) does not contain
  * declarations, then move its component statements to the enclosing block.
- * 
+ *
  * 6. If a block statement in an if statement branch only contains a single
  * statement, replace the block with the statement it contains.
  *
@@ -53,8 +53,13 @@ class DoSimplifyControlFlow : public Transform {
     TypeMap*      typeMap;
  public:
     DoSimplifyControlFlow(ReferenceMap* refMap, TypeMap* typeMap) :
-            refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("DoSimplifyControlFlow"); }
+            refMap(refMap), typeMap(typeMap) {
+        CHECK_NULL(refMap); CHECK_NULL(typeMap);
+        setName("DoSimplifyControlFlow");
+        // We may want to replace the same statement with different things
+        // in different places.
+        visitDagOnce = false;
+    }
     const IR::Node* postorder(IR::BlockStatement* statement) override;
     const IR::Node* postorder(IR::IfStatement* statement) override;
     const IR::Node* postorder(IR::EmptyStatement* statement) override;
