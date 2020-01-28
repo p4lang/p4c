@@ -298,17 +298,6 @@ P4ParserDriver::parseStringLiteralTriple(const Util::SourceInfo& srcInfo,
             P4AnnotationLexer::STRING_LITERAL_TRIPLE, srcInfo, body);
 }
 
-/* static */ void P4ParserDriver::checkShift(const Util::SourceInfo& l,
-                                             const Util::SourceInfo& r) {
-    if (!l.isValid() || !r.isValid())
-        BUG("Source position not available!");
-    const Util::SourcePosition& f = l.getStart();
-    const Util::SourcePosition& s = r.getStart();
-    if (f.getLineNumber() != s.getLineNumber() ||
-        f.getColumnNumber() != s.getColumnNumber() - 1)
-        ::error("Syntax error at shift operator: %1%", l);
-}
-
 void P4ParserDriver::onReadErrorDeclaration(IR::Type_Error* error) {
     if (allErrors == nullptr) {
         nodes->push_back(error);

@@ -1,4 +1,4 @@
-shift_e.p4(20): error: Syntax error at shift operator: 
-        int<32> b = a > > 1;
-                      ^
+shift_e.p4(20):syntax error, unexpected >
+        int<32> b = a > >
+                        ^
 [--Werror=overlimit] error: 1 errors encountered, aborting compilation

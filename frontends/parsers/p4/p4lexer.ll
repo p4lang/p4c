@@ -224,6 +224,7 @@ using Parser = P4::P4Parser;
 "{"            { BEGIN(driver.saveState); return makeToken(L_BRACE); }
 "}"            { BEGIN(driver.saveState); return makeToken(R_BRACE); }
 "<"            { BEGIN(driver.saveState); return makeToken(L_ANGLE); }
+">"/">"        { BEGIN(driver.saveState); return makeToken(R_ANGLE_SHIFT); }
 ">"            { BEGIN(driver.saveState); return makeToken(R_ANGLE); }
 
 "!"            { BEGIN(driver.saveState); return makeToken(NOT); }
