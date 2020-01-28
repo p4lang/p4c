@@ -165,11 +165,12 @@ class FindUninitialized : public Inspector {
         LOG3("FU Visiting control " << control->name << "[" << control->id << "]");
         BUG_CHECK(context.isBeforeStart(), "non-empty context in FindUnitialized::P4Control");
         currentPoint = ProgramPoint(control);
-        unreachable = false;
         for (auto d : control->controlLocals)
-            if (d->is<IR::Declaration_Instance>())
+            if (d->is<IR::Declaration_Instance>()) {
                 // visit virtual Function implementation if any
                 visit(d);
+            }
+        unreachable = false;
         visit(control->body);
         checkOutParameters(
             control, control->getApplyMethodType()->parameters, getCurrentDefinitions());
@@ -177,11 +178,13 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::Function* func) override {
-        if (findContext<IR::P4Program>() != nullptr) {
-            LOG3("FU skip function " << func->name << "[" << func->id << "]");
-            return false;
+        if (findContext<IR::Declaration_Instance>() != nullptr) {
+            // virtual methods.  These are traversed individually at the beginning
+            // before the control body.  We mark each as reachable.
+            unreachable = false;
         }
-        LOG3("FU Visiting called function " << func->name << "[" << func->id << "]");
+        BUG_CHECK(findContext<IR::P4Program>() == nullptr, "Unexpected function");
+        LOG3("FU Visiting function " << func->name << "[" << func->id << "]");
         LOG5(func);
         currentPoint = ProgramPoint(func);
         visit(func->body);
@@ -385,13 +388,8 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::P4Action* action) override {
-        if (findContext<IR::P4Program>() != nullptr) {
-            // We want to visit an action only if invoked by a new
-            // visitor created from MethodCallExpression.
-            LOG3("FU skip action " << action);
-            return false;
-        }
-        LOG3("FU Visiting called action " << action);
+        BUG_CHECK(findContext<IR::P4Program>() == nullptr, "Unexpected action");
+        LOG3("FU Visiting action " << action);
         unreachable = false;
         currentPoint = ProgramPoint(context, action);
         visit(action->body);
