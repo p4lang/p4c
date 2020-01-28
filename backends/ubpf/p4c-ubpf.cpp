@@ -39,7 +39,7 @@ void compile(EbpfOptions& options) {
     auto hook = options.getDebugHook();
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     if (isv1) {
-        ::error("This compiler only handles P4-16");
+        ::error(ErrorType::ERR_UNSUPPORTED, "- this compiler only handles P4-16");
         return;
     }
     auto program = P4::parseP4File(options);

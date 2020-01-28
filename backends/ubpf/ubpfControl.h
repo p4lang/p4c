@@ -35,47 +35,26 @@ namespace UBPF {
         std::vector<cstring> pointerVariables;
 
         explicit UBPFControlBodyTranslator(const UBPFControl *control);
-
         virtual void adjustPacketHead(const IR::Expression *expression, bool add);
-
         virtual void processMethod(const P4::ExternMethod *method);
-
         virtual void processApply(const P4::ApplyMethod *method);
-
         virtual void processFunction(const P4::ExternFunction *function);
-
         bool preorder(const IR::PathExpression *expression) override;
-
         bool preorder(const IR::MethodCallStatement *s) override;
-
         bool preorder(const IR::MethodCallExpression *expression) override;
-
         bool preorder(const IR::AssignmentStatement *a) override;
-
         bool preorder(const IR::BlockStatement *s) override;
-
         bool preorder(const IR::ExitStatement *) override;
-
         bool preorder(const IR::ReturnStatement *) override;
-
         bool preorder(const IR::IfStatement *statement) override;
-
         bool preorder(const IR::SwitchStatement *statement) override;
-
         bool preorder(const IR::Operation_Binary *b) override;
-
         bool comparison(const IR::Operation_Relation *b);
-
         bool preorder(const IR::Member *expression) override;
-
         void addPadding(std::vector<cstring> &paddingInitializers, unsigned int remainingBits, int paddingIndex) const;
-
         cstring createHashKeyInstance(const P4::ExternFunction *function);
-
         void appendValueAtOperator(const IR::AssignmentStatement *a) const;
-
         void emitAssignmentStatement(const IR::AssignmentStatement *a);
-
         bool emitRegisterRead(const IR::AssignmentStatement *a, const IR::MethodCallExpression *method);
     };
 

@@ -138,8 +138,6 @@ control pipe(inout Headers_t hdr, inout metadata meta) {
             gtp_decap;
             NoAction;
         }
-
-        //const default_action = NoAction();
     }
 
     action gtp_encap(bit<32> tunnelId) {
@@ -189,8 +187,6 @@ control pipe(inout Headers_t hdr, inout metadata meta) {
             gtp_encap;
             NoAction;
         }
-
-        //const default_action = NoAction();
     }
 
 

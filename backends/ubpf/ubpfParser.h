@@ -41,7 +41,6 @@ namespace UBPF {
                    const P4::TypeMap *typeMap) : EBPF::EBPFParser(program, block, typeMap) {}
 
         void emit(EBPF::CodeBuilder *builder);
-
         bool build();
     };
 

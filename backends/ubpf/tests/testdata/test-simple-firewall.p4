@@ -121,47 +121,45 @@ control pipe(inout Headers_t headers, inout metadata meta) {
 
     apply {
         if (headers.tcp.isValid()) {
-            @atomic {
-                if (headers.ipv4.srcAddr < headers.ipv4.dstAddr) {
-                    hash(meta.conn_id, HashAlgorithm.lookup3, { headers.ipv4.srcAddr, headers.ipv4.dstAddr });
-                } else {
-                    hash(meta.conn_id, HashAlgorithm.lookup3, { headers.ipv4.dstAddr, headers.ipv4.srcAddr });
-                }
+            if (headers.ipv4.srcAddr < headers.ipv4.dstAddr) {
+                hash(meta.conn_id, HashAlgorithm.lookup3, { headers.ipv4.srcAddr, headers.ipv4.dstAddr });
+            } else {
+                hash(meta.conn_id, HashAlgorithm.lookup3, { headers.ipv4.dstAddr, headers.ipv4.srcAddr });
+            }
 
-                meta.connInfo.s = conn_state.read(meta.conn_id);
-                meta.connInfo.srv_addr = conn_srv_addr.read(meta.conn_id);
-                if (meta.connInfo.s == 0 || meta.connInfo.srv_addr == 0) {
-                    if (headers.tcp.syn == 1 && headers.tcp.ack == 0) {
-                        // It's a SYN
-                        update_conn_info(SYNSENT, headers.ipv4.dstAddr);
+            meta.connInfo.s = conn_state.read(meta.conn_id);
+            meta.connInfo.srv_addr = conn_srv_addr.read(meta.conn_id);
+            if (meta.connInfo.s == 0 || meta.connInfo.srv_addr == 0) {
+                if (headers.tcp.syn == 1 && headers.tcp.ack == 0) {
+                    // It's a SYN
+                    update_conn_info(SYNSENT, headers.ipv4.dstAddr);
+                }
+            } else if (meta.connInfo.srv_addr == headers.ipv4.srcAddr) {
+                if (meta.connInfo.s == SYNSENT) {
+                    if (headers.tcp.syn == 1 && headers.tcp.ack == 1) {
+                        // It's a SYN-ACK
+                        update_conn_state(SYNACKED);
                     }
-                } else if (meta.connInfo.srv_addr == headers.ipv4.srcAddr) {
-                    if (meta.connInfo.s == SYNSENT) {
-                        if (headers.tcp.syn == 1 && headers.tcp.ack == 1) {
-                            // It's a SYN-ACK
-                            update_conn_state(SYNACKED);
-                        }
-                    } else if (meta.connInfo.s == SYNACKED) {
-                        _drop();
-                        return;
-                    } else if (meta.connInfo.s == ESTABLISHED) {
-                        if (headers.tcp.fin == 1 && headers.tcp.ack == 1) {
-                            update_conn_info(0, 0);  // clear register entry
-                        }
+                } else if (meta.connInfo.s == SYNACKED) {
+                    _drop();
+                    return;
+                } else if (meta.connInfo.s == ESTABLISHED) {
+                    if (headers.tcp.fin == 1 && headers.tcp.ack == 1) {
+                        update_conn_info(0, 0);  // clear register entry
                     }
-                } else {
-                    if (meta.connInfo.s == SYNSENT) {
-                        _drop();
-                        return;
-                    } else if (meta.connInfo.s == SYNACKED) {
-                        if (headers.tcp.syn == 0 && headers.tcp.ack == 1) {
-                            // It's a ACK
-                            update_conn_state(ESTABLISHED);
-                        }
-                    } else if (meta.connInfo.s == ESTABLISHED) {
-                        if (headers.tcp.fin == 1 && headers.tcp.ack == 1) {
-                            update_conn_info(0, 0); // clear register entry
-                        }
+                }
+            } else {
+                if (meta.connInfo.s == SYNSENT) {
+                    _drop();
+                    return;
+                } else if (meta.connInfo.s == SYNACKED) {
+                    if (headers.tcp.syn == 0 && headers.tcp.ack == 1) {
+                        // It's a ACK
+                        update_conn_state(ESTABLISHED);
+                    }
+                } else if (meta.connInfo.s == ESTABLISHED) {
+                    if (headers.tcp.fin == 1 && headers.tcp.ack == 1) {
+                        update_conn_info(0, 0); // clear register entry
                     }
                 }
             }

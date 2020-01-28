@@ -79,8 +79,8 @@ class UbpfTest(object):
         c_differences = self.compare(options.cfilepath, reference_c_filepath)
 
         reference_h_filepath = os.path.join(options.referencedir, options.cfilename).replace(".c", ".h")
-        compiled_c_filepath = options.cfilepath.replace(".c", ".h")
-        h_differences = self.compare(compiled_c_filepath, reference_h_filepath)
+        compiled_h_filepath = options.cfilepath.replace(".c", ".h")
+        h_differences = self.compare(compiled_h_filepath, reference_h_filepath)
 
         return not c_differences and not h_differences
 

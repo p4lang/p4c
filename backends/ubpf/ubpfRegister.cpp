@@ -135,7 +135,7 @@ namespace UBPF {
                                         const IR::MethodCallExpression *expression) {
         BUG_CHECK(expression->arguments->size() == 1,
                   "Expected 1 argument for %1%", expression);
-        auto target = (UbpfTarget *) builder->target;
+        auto target = builder->target;
 
         target->emitTableLookup(builder, dataMapName, last_key_name, "");
     }

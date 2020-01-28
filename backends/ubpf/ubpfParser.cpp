@@ -42,7 +42,7 @@ namespace UBPF {
             bool preorder(const IR::MethodCallExpression* expression) override;
             bool preorder(const IR::MethodCallStatement* stat) override
             { visit(stat->methodCall); return false; }
-            bool preorder(const IR::AssignmentStatement* stat) override;
+            bool preorder(UNUSED const IR::AssignmentStatement* stat) override { return false; }
         };
     }
 
@@ -158,7 +158,6 @@ namespace UBPF {
                 helper = "load_word";
                 loadSize = 32;
             } else {
-                if (widthToExtract > 64) BUG("Unexpected width %d", widthToExtract);
                 helper = "load_dword";
                 loadSize = 64;
             }
@@ -236,10 +235,7 @@ namespace UBPF {
             return;
         }
 
-        unsigned width = ht->width_bits();
-        auto program = state->parser->program;
         builder->emitIndent();
-        // TODO: Check if packet is not too short
         builder->newline();
 
         unsigned alignment = 0;
@@ -302,10 +298,6 @@ namespace UBPF {
 
         ::error("Unexpected method call in parser %1%", expression);
 
-        return false;
-    }
-
-    bool UBPFStateTranslationVisitor::preorder(const IR::AssignmentStatement* stat) {
         return false;
     }
 

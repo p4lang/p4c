@@ -37,7 +37,7 @@ namespace UBPF {
     void UbpfTarget::emitTableLookup(Util::SourceCodeBuilder *builder,
                                      cstring tblName,
                                      cstring key,
-                                     cstring value) const {
+                                     UNUSED cstring value) const {
         builder->appendFormat("ubpf_map_lookup(&%s, &%s)",
                               tblName.c_str(), key.c_str());
     }
@@ -66,6 +66,43 @@ namespace UBPF {
     void UbpfTarget::emitGetPacketData(Util::SourceCodeBuilder *builder,
                                        cstring ctxVar) const {
         builder->appendFormat("ubpf_packet_data(%s)", ctxVar.c_str());
+    }
+
+    void UbpfTarget::emitUbpfHelpers(EBPF::CodeBuilder *builder) const {
+        builder->append(
+                "static void *(*ubpf_map_lookup)(const void *, const void *) = (void *)1;\n"
+                "static int (*ubpf_map_update)(void *, const void *, void *) = (void *)2;\n"
+                "static int (*ubpf_map_delete)(void *, const void *) = (void *)3;\n"
+                "static int (*ubpf_map_add)(void *, const void *) = (void *)4;\n"
+                "static uint64_t (*ubpf_time_get_ns)() = (void *)5;\n"
+                "static uint32_t (*ubpf_hash)(const void *, uint64_t) = (void *)6;\n"
+                "static void (*ubpf_printf)(const char *fmt, ...) = (void *)7;\n"
+                "static void *(*ubpf_packet_data)(const void *) = (void *)9;\n"
+                "static void *(*ubpf_adjust_head)(const void *, uint64_t) = (void *)8;\n"
+                "\n");
+        builder->newline();
+        builder->appendLine(
+                "#define write_partial(a, w, s, v) do { *((uint8_t*)a) = ((*((uint8_t*)a)) "
+                "& ~(BPF_MASK(uint8_t, w) << s)) | (v << s) ; } while (0)");
+        builder->appendLine("#define write_byte(base, offset, v) do { "
+                            "*(uint8_t*)((base) + (offset)) = (v); "
+                            "} while (0)");
+        builder->newline();
+        builder->append("static uint32_t\n"
+                        "bpf_htonl(uint32_t val) {\n"
+                        "    return htonl(val);\n"
+                        "}");
+        builder->newline();
+        builder->append("static uint16_t\n"
+                        "bpf_htons(uint16_t val) {\n"
+                        "    return htons(val);\n"
+                        "}");
+        builder->newline();
+        builder->append("static uint64_t\n"
+                        "bpf_htonll(uint64_t val) {\n"
+                        "    return htonll(val);\n"
+                        "}\n");
+        builder->newline();
     }
 
 }

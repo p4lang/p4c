@@ -24,9 +24,9 @@ limitations under the License.
 
 namespace UBPF {
 
-    struct Filter_Model : public ::Model::Elem {
-        Filter_Model() : Elem("Filter"),
-                         parser("prs"), control("filt"), deparser("dprs") {}
+    struct Pipeline_Model : public ::Model::Elem {
+        Pipeline_Model() : Elem("Pipeline"),
+                         parser("prs"), control("p"), deparser("dprs") {}
 
         ::Model::Elem parser;
         ::Model::Elem control;
@@ -55,18 +55,22 @@ namespace UBPF {
         ::Model::Elem lookup3;
     };
 
+    struct Hash_Model : public ::Model::Elem {
+        Hash_Model() : ::Model::Elem("hash") {}
+    };
+
     class UBPFModel : public ::Model::Model {
     protected:
         UBPFModel() : Model("0.1"),
                       CPacketName("pkt"),
                       packet("packet", P4::P4CoreLibrary::instance.packetIn, 0),
-                      filter(),
+                      pipeline(),
                       registerModel(),
                       drop("mark_to_drop"),
                       pass("mark_to_pass"),
                       ubpf_time_get_ns("ubpf_time_get_ns"),
                       hashAlgorithm(),
-                      hash("hash") {}
+                      hash() {}
 
     public:
         static UBPFModel instance;
@@ -74,13 +78,13 @@ namespace UBPF {
 
         ::Model::Elem CPacketName;
         ::Model::Param_Model packet;
-        Filter_Model filter;
+        Pipeline_Model pipeline;
         Register_Model registerModel;
         ::Model::Elem drop;
         ::Model::Elem pass;
         ::Model::Elem ubpf_time_get_ns;
         Algorithm_Model hashAlgorithm;
-        ::Model::Elem hash;
+        Hash_Model hash;
 
         static cstring reserved(cstring name) { return reservedPrefix + name; }
     };

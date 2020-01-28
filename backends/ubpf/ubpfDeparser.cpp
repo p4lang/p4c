@@ -34,7 +34,8 @@ namespace UBPF {
                                                           EBPF::EBPFType *type) {
 
         unsigned widthToEmit = dynamic_cast<EBPF::IHasWidth *>(type)->widthInBits();
-        unsigned loadSize;
+
+        unsigned loadSize = 0;
         cstring swap = "";
         if (widthToEmit <= 8) {
             loadSize = 8;
@@ -153,7 +154,6 @@ namespace UBPF {
             return;
         }
 
-        auto program = deparser->program;
         builder->emitIndent();
         builder->append("if (");
         visit(expr);
@@ -202,7 +202,7 @@ namespace UBPF {
     bool UBPFDeparser::build() {
         auto pl = controlBlock->container->type->applyParams;
         if (pl->size() != 2) {
-            ::error("Expected deparser to have exactly 2 parameters");
+            ::error("%1%: Expected deparser to have exactly 2 parameters", controlBlock->getNode());
             return false;
         }
 

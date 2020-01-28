@@ -65,10 +65,10 @@ namespace UBPF {
                 auto ef = mi->to<P4::ExternFunction>();
                 if (ef != nullptr) {
                     if (ef->method->name.name == program->model.drop.name) {
-                        builder->append("pass = false");
+                        builder->appendFormat("%s = false", program->control->passVariable);
                         return false;
                     } else if (ef->method->name.name == program->model.pass.name) {
-                        builder->append("pass = true");
+                        builder->appendFormat("%s = true", program->control->passVariable);
                         return false;
                     } else if (ef->method->name.name ==
                                program->model.ubpf_time_get_ns.name) {
@@ -78,6 +78,7 @@ namespace UBPF {
                     }
                 }
                 program->control->codeGen->preorder(expression);
+                return false;
             }
 
             void convertActionBody(const IR::Vector<IR::StatOrDecl> *body) {
@@ -190,16 +191,24 @@ namespace UBPF {
 
     void UBPFTable::setTableSize(const IR::TableBlock *table) {
         auto properties = table->container->properties->properties;
-        size = UINT16_MAX; // Default value 2^16. Next power is too big for ubpf vm.
+        this->size = UINT16_MAX; // Default value 2^16. Next power is too big for ubpf vm.
                            // For instance, 2^17 causes error while loading program.
-        for (auto property : properties) {
-            if (property->name.name == table->container->properties->sizePropertyName &&
-                property->value->is<IR::ExpressionValue>()) {
-                auto pExpressionValue = property->value->to<IR::ExpressionValue>();
-                auto pConstant = pExpressionValue->expression->to<IR::Constant>();
-                this->size = pConstant->asInt();
-                break;
-            }
+
+        auto sz = table->container->getSizeProperty();
+        if (sz == nullptr)
+            return;
+
+        auto pConstant = sz->to<IR::Constant>();
+        if (pConstant->asInt() <= 0) {
+            ::error(ErrorType::ERR_INVALID, "negative size", pConstant);
+            return;
+        }
+
+        this->size = pConstant->asInt();
+        if (this->size > UINT16_MAX) {
+            ::error(ErrorType::ERR_UNSUPPORTED, "size too large. Using default value (%2%).",
+                    pConstant, UINT16_MAX);
+            return;
         }
     }
 

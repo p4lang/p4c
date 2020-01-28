@@ -34,24 +34,22 @@ namespace UBPF {
 
         virtual void compileEmitField(const IR::Expression *expr, cstring field,
                                       unsigned alignment, EBPF::EBPFType *type);
-
         virtual void compileEmit(const IR::Vector<IR::Argument> *args);
 
+        bool notSupported(const IR::Expression* expression)
+        { ::error("%1%: not supported in Deparser", expression); return false; }
+
+        bool notSupported(const IR::StatOrDecl* statOrDecl)
+        { ::error("%1%: not supported in Deparser", statOrDecl); return false; }
+
         bool preorder(const IR::MethodCallExpression *expression) override;
-
-        bool preorder(const IR::AssignmentStatement *a) override {};
-
-        bool preorder(const IR::ExitStatement *) override {};
-
-        bool preorder(const IR::BlockStatement *) override {};
-
-        bool preorder(const IR::ReturnStatement *) override {};
-
-        bool preorder(const IR::IfStatement *statement) override {};
-
-        bool preorder(const IR::SwitchStatement *statement) override {};
-
-        bool preorder(const IR::Operation_Binary *b) override {};
+        bool preorder(const IR::AssignmentStatement *a) override { return notSupported(a); };
+        bool preorder(const IR::ExitStatement *s) override { return notSupported(s); };
+        bool preorder(UNUSED const IR::BlockStatement *s) override { return true; };
+        bool preorder(const IR::ReturnStatement *s) override { return notSupported(s); };
+        bool preorder(const IR::IfStatement *statement) override { return notSupported(statement); };
+        bool preorder(const IR::SwitchStatement *statement) override { return notSupported(statement); };
+        bool preorder(const IR::Operation_Binary *b) override { return notSupported(b); };
 
     };
 
@@ -72,7 +70,6 @@ namespace UBPF {
                 parserHeaders(parserHeaders) {}
 
         bool build();
-
         void emit(EBPF::CodeBuilder *builder);
     };
 

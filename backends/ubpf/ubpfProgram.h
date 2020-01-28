@@ -53,29 +53,16 @@ namespace UBPF {
         }
 
         bool build() override;
-
         void emitC(UbpfCodeBuilder *builder, cstring headerFile);
-
         void emitH(EBPF::CodeBuilder *builder, cstring headerFile) override;
-
         void emitPreamble(EBPF::CodeBuilder *builder) override;
-
         void emitTypes(EBPF::CodeBuilder *builder) override;
-
         void emitTableDefinition(EBPF::CodeBuilder *builder) const;
-        
         void emitPktVariable(UbpfCodeBuilder *builder) const;
-
         void emitHeaderInstances(EBPF::CodeBuilder *builder) override;
-
         void emitMetadataInstance(EBPF::CodeBuilder *builder) const;
-
         void emitLocalVariables(EBPF::CodeBuilder *builder) override;
-
         void emitPipeline(EBPF::CodeBuilder *builder) override;
-
-        void emitUbpfHelpers(EBPF::CodeBuilder *builder) const;
-
         void emitPacketCheck(EBPF::CodeBuilder* builder);
     };
 

@@ -69,21 +69,14 @@ namespace UBPF {
                   EBPF::CodeGenInspector *codeGen);
 
         cstring generateActionName(const IR::P4Action *action);
-
         void emitTypes(EBPF::CodeBuilder *builder);
-
         void emitActionArguments(EBPF::CodeBuilder *builder,
                                  const IR::P4Action *action, cstring name);
-
         void emitKeyType(EBPF::CodeBuilder *builder);
-
         void emitValueType(EBPF::CodeBuilder *builder);
-
         void emitKey(EBPF::CodeBuilder *builder, cstring keyName);
-
         void emitAction(EBPF::CodeBuilder *builder, cstring valueName);
-
-        void emitInitializer(EBPF::CodeBuilder *builder) {};
+        void emitInitializer(UNUSED EBPF::CodeBuilder *builder) {};
     };
 
 }

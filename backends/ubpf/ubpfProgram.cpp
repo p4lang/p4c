@@ -35,7 +35,7 @@ namespace UBPF {
             return false;
         }
 
-        auto pb = pack->getParameterValue(model.filter.parser.name)
+        auto pb = pack->getParameterValue(model.pipeline.parser.name)
                 ->to<IR::ParserBlock>();
         BUG_CHECK(pb != nullptr, "No parser block found");
         parser = new UBPFParser(this, pb, typeMap);
@@ -43,7 +43,7 @@ namespace UBPF {
         if (!success)
             return success;
 
-        auto cb = pack->getParameterValue(model.filter.control.name)
+        auto cb = pack->getParameterValue(model.pipeline.control.name)
                 ->to<IR::ControlBlock>();
         BUG_CHECK(cb != nullptr, "No control block found");
         control = new UBPFControl(this, cb, parser->headers);
@@ -52,7 +52,7 @@ namespace UBPF {
         if (!success)
             return success;
 
-        auto dpb = pack->getParameterValue(model.filter.deparser.name)
+        auto dpb = pack->getParameterValue(model.pipeline.deparser.name)
                 ->to<IR::ControlBlock>();
         BUG_CHECK(dpb != nullptr, "No deparser block found");
         deparser = new UBPFDeparser(this, dpb, parser->headers);
@@ -69,7 +69,7 @@ namespace UBPF {
 
         builder->target->emitIncludes(builder);
         emitPreamble(builder);
-        emitUbpfHelpers(builder);
+        builder->target->emitUbpfHelpers(builder);
 
         builder->emitIndent();
         builder->target->emitMain(builder, "entry", contextVar.c_str());
@@ -113,43 +113,6 @@ namespace UBPF {
         builder->appendFormat("return %s;\n", builder->target->dropReturnCode().c_str());
         builder->decreaseIndent();
         builder->blockEnd(true);
-    }
-
-    void UBPFProgram::emitUbpfHelpers(EBPF::CodeBuilder *builder) const {
-        builder->append(
-                "static void *(*ubpf_map_lookup)(const void *, const void *) = (void *)1;\n"
-                "static int (*ubpf_map_update)(void *, const void *, void *) = (void *)2;\n"
-                "static int (*ubpf_map_delete)(void *, const void *) = (void *)3;\n"
-                "static int (*ubpf_map_add)(void *, const void *) = (void *)4;\n"
-                "static uint64_t (*ubpf_time_get_ns)() = (void *)5;\n"
-                "static uint32_t (*ubpf_hash)(const void *, uint64_t) = (void *)6;\n"
-                "static void (*ubpf_printf)(const char *fmt, ...) = (void *)7;\n"
-                "static void *(*ubpf_packet_data)(const void *) = (void *)9;\n"
-                "static void *(*ubpf_adjust_head)(const void *, uint64_t) = (void *)8;\n"
-                "\n");
-        builder->newline();
-        builder->appendLine(
-                "#define write_partial(a, w, s, v) do { *((uint8_t*)a) = ((*((uint8_t*)a)) "
-                "& ~(BPF_MASK(uint8_t, w) << s)) | (v << s) ; } while (0)");
-        builder->appendLine("#define write_byte(base, offset, v) do { "
-                            "*(uint8_t*)((base) + (offset)) = (v); "
-                            "} while (0)");
-        builder->newline();
-        builder->append("static uint32_t\n"
-                        "bpf_htonl(uint32_t val) {\n"
-                        "    return htonl(val);\n"
-                        "}");
-        builder->newline();
-        builder->append("static uint16_t\n"
-                        "bpf_htons(uint16_t val) {\n"
-                        "    return htons(val);\n"
-                        "}");
-        builder->newline();
-        builder->append("static uint64_t\n"
-                        "bpf_htonll(uint64_t val) {\n"
-                        "    return htonll(val);\n"
-                        "}\n");
-        builder->newline();
     }
 
     void UBPFProgram::emitH(EBPF::CodeBuilder *builder, cstring) {

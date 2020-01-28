@@ -93,7 +93,8 @@ The parameters are as follows:
 - `key_type` - is bit array type (i.e. bit<32>) or struct like type  
 - `number_of_elements` - the maximum number of key-value pairs
 
-Currently registers have a limitation - they are not being initialized with default values. Initialization has to be done by a control plane. 
+Currently, the `ubpf` architecture model does not allow to initialize registers with default values. 
+Initialization has to be done by a control plane. 
 
 ### Rate limiter (rate-limiter.p4)
 
@@ -152,7 +153,8 @@ $ watch sudo ovs-ofctl dump-bpf-map br0 1 0
 
 This is very simple example of stateful firewall. Every TCP packet is analyzed to track the state of the TCP connection. 
 If the traffic belongs to known connection it is passed. Otherwise, it is dropped.  
-Notice that the example program uses hash function which is constrained to hash only 64 bit values - that's why TCP connection is identified via IP source and destination address.  
+Notice that the example program uses hash function which is constrained to hash only 64 bit values - that's why TCP connection is identified via IP source and destination address. 
+This is the known limitation of the `uBPF` backend used in P4rt-OVS (to be fixed in the future).
                         
 Due to registers limitation before starting your own tests initialize simple firewall registers with zeros:
 
