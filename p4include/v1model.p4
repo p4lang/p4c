@@ -21,13 +21,14 @@ limitations under the License.
  *
  * https://github.com/p4lang/behavioral-model/blob/master/docs/simple_switch.md
  *
- * Note 2: There are ongoing discussions among P4 working group
- * members in 2019-Apr regarding exactly how resubmit, recirculate,
+ * Note 2: There were several discussions among P4 working group
+ * members in early 2019 regarding exactly how resubmit, recirculate,
  * and clone3 operations can be called anywhere in their respective
  * controls, but the values of the fields to be preserved is the value
  * they have when that control is finished executing.  That is how
- * these operations behave in P4_14, but this requires some care in
- * making this happen in P4_16.
+ * these operations are defined in P4_14.  See
+ * https://github.com/p4lang/behavioral-model/blob/master/docs/simple_switch.md#restrictions-on-recirculate-resubmit-and-clone-operations
+ * for more details on the current state of affairs.
  *
  * Note 3: There are at least some P4_14 implementations where
  * invoking a generate_digest operation on a field_list will create a
@@ -56,7 +57,6 @@ match_kind {
     selector
 }
 
-// Are these correct?
 @metadata @name("standard_metadata")
 struct standard_metadata_t {
     bit<9>  ingress_port;
@@ -125,6 +125,11 @@ extern counter {
      * You must provide a choice of whether to maintain only a packet
      * count (CounterType.packets), only a byte count
      * (CounterType.bytes), or both (CounterType.packets_and_bytes).
+     *
+     * Counters can be updated from your P4 program, but can only be
+     * read from the control plane.  If you need something that can be
+     * both read and written from the P4 program, consider using a
+     * register.
      */
     counter(bit<32> size, CounterType type);
     /***
@@ -153,6 +158,11 @@ extern direct_counter {
      * definition of that table:
      *
      *     counters = <object_name>;
+     *
+     * Counters can be updated from your P4 program, but can only be
+     * read from the control plane.  If you need something that can be
+     * both read and written from the P4 program, consider using a
+     * register.
      */
     direct_counter(CounterType type);
     /***
@@ -248,6 +258,16 @@ extern direct_meter<T> {
 }
 
 extern register<T> {
+    /***
+     * A register object is created by calling its constructor.  This
+     * creates an array of 'size' identical elements, each with type
+     * T.  The array indices are in the range [0, size-1].  For
+     * example, this constructor call:
+     *
+     *     register<bit<32>>(512) my_reg;
+     *
+     * allocates storage for 512 values, each with type bit<32>.
+     */
     register(bit<32> size);
     /***
      * read() reads the state of the register array stored at the
@@ -473,7 +493,7 @@ extern void update_checksum_with_payload<T, O>(in bool condition, in T data, ino
  * The value of the user-defined metadata fields that are preserved in
  * resubmitted packets is the value they have at the end of ingress
  * processing, not their values at the time the resubmit call is made.
- * See Note 2.
+ * See Note 2 for issues with this.
  *
  * Calling resubmit is only supported in the ingress control.  There
  * is no way to undo its effects once it has been called.  If resubmit
@@ -497,7 +517,7 @@ extern void resubmit<T>(in T data);
  * The value of the user-defined metadata fields that are preserved in
  * recirculated packets is the value they have at the end of egress
  * processing, not their values at the time the recirculate call is
- * made.  See Note 2.
+ * made.  See Note 2 for issues with this.
  *
  * Calling recirculate is only supported in the egress control.  There
  * is no way to undo its effects once it has been called.  If
@@ -542,7 +562,7 @@ extern void clone(in CloneType type, in bit<32> session);
  * packet(s).  The value of the user-defined metadata fields that are
  * preserved with cloned packets is the value they have at the end of
  * ingress or egress processing, not their values at the time the
- * clone3 call is made.  See Note 2.
+ * clone3 call is made.  See Note 2 for issues with this.
  *
  * If clone3 is called during ingress processing, the first parameter
  * must be CloneType.I2E.  If clone3 is called during egress
