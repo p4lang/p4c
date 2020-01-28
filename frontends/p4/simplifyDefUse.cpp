@@ -177,16 +177,16 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::Function* func) override {
-        LOG3("FU Visiting function " << func->name << "[" << func->id << "]");
+        if (findContext<IR::P4Program>() != nullptr) {
+            LOG3("FU skip function " << func->name << "[" << func->id << "]");
+            return false;
+        }
+        LOG3("FU Visiting called function " << func->name << "[" << func->id << "]");
         LOG5(func);
-        // FIXME -- this throws away the context of the current point, which seems wrong,
-        // FIXME -- but otherwise analysis fails
-        unreachable = false;
         currentPoint = ProgramPoint(func);
         visit(func->body);
         bool checkReturn = !func->type->returnType->is<IR::Type_Void>();
         checkOutParameters(func, func->type->parameters, getCurrentDefinitions(), checkReturn);
-        unreachable = false;  // not inherited across function calls
         return false;
     }
 
@@ -222,6 +222,13 @@ class FindUninitialized : public Inspector {
         else
             LOG3("Unreachable");
         unreachable = true;
+        return setCurrent(statement);
+    }
+
+    bool preorder(const IR::ExitStatement* statement) override {
+        LOG3("FU Visiting " << statement);
+        unreachable = true;
+        LOG3("Unreachable");
         return setCurrent(statement);
     }
 
@@ -378,7 +385,13 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::P4Action* action) override {
-        LOG3("FU Visiting " << action);
+        if (findContext<IR::P4Program>() != nullptr) {
+            // We want to visit an action only if invoked by a new
+            // visitor created from MethodCallExpression.
+            LOG3("FU skip action " << action);
+            return false;
+        }
+        LOG3("FU Visiting called action " << action);
         unreachable = false;
         currentPoint = ProgramPoint(context, action);
         visit(action->body);
