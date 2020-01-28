@@ -330,7 +330,10 @@ namespace UBPF {
         auto pRegister = control->getRegister(registerName);
         pRegister->emitKeyInstance(builder, method);
 
-        emitAssignmentStatement(a);
+        builder->append(a->left->to<IR::PathExpression>()->path->name);
+        builder->append(" = ");
+        visit(a->right);
+        builder->endOfStatement();
 
         builder->newline();
         builder->emitIndent();
