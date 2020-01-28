@@ -102,6 +102,7 @@ class ExpressionConverter : public Inspector {
                          bool wrap = true, bool convertBool = false);
     Util::IJson* convertLeftValue(const IR::Expression* e);
     Util::IJson* convertWithConstantWidths(const IR::Expression* e);
+    bool isArrayIndexRuntime(const IR::Expression* e);
 
     void postorder(const IR::BoolLiteral* expression) override;
     void postorder(const IR::MethodCallExpression* expression) override;

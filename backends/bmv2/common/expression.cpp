@@ -184,32 +184,50 @@ void ExpressionConverter::postorder(const IR::Constant* expression)  {
 
 void ExpressionConverter::postorder(const IR::ArrayIndex* expression)  {
     auto result = new Util::JsonObject();
-    result->emplace("type", "header");
     cstring elementAccess;
 
+    LOG2("left: " << expression->left << " right: " << expression->right);
     // This is can be either a header, which is part of the "headers" parameter
     // or a temporary array.
-    if (expression->left->is<IR::Member>()) {
+    if (auto mem = expression->left->to<IR::Member>()) {
         // This is a header part of the parameters
-        auto mem = expression->left->to<IR::Member>();
         auto parentType = typeMap->getType(mem->expr, true);
         BUG_CHECK(parentType->is<IR::Type_StructLike>(), "%1%: expected a struct", parentType);
         auto st = parentType->to<IR::Type_StructLike>();
         auto field = st->getField(mem->member);
         elementAccess = field->controlPlaneName();
-    } else if (expression->left->is<IR::PathExpression>()) {
+    } else if (auto path = expression->left->to<IR::PathExpression>()) {
         // This is a temporary variable with type stack.
-        auto path = expression->left->to<IR::PathExpression>();
         elementAccess = path->path->name;
     }
 
     if (!expression->right->is<IR::Constant>()) {
-        ::error(ErrorType::ERR_INVALID, "all array indexes must be constant", expression->right);
+        const IR::Expression* ex = expression->right;
+        auto fresult = ::get(map, ex);
+        if (fresult == nullptr) {
+            LOG2("Looking up " << ex);
+            for (auto it : map) {
+                LOG3(" " << it.first << " " << it.second);
+            }
+        }
+        BUG_CHECK(fresult, "%1%: Runtime array index json generation failed", ex);
+        Util::JsonObject* fres = fresult->to<Util::JsonObject>();
+        result->emplace("type", "expression");
+
+        auto e = new Util::JsonObject();
+        e->emplace("op", "dereference_header_stack");
+        auto l = new Util::JsonObject();
+        l->emplace("type", "header_stack");
+        l->emplace("value", elementAccess);
+        e->emplace("left", l);
+        e->emplace("right", fres);
+        result->emplace("value", e);
     } else {
+        result->emplace("type", "header");
         int index = expression->right->to<IR::Constant>()->asInt();
         elementAccess += "[" + Util::toString(index) + "]";
+        result->emplace("value", elementAccess);
     }
-    result->emplace("value", elementAccess);
     mapExpression(expression, result);
 }
 
@@ -232,17 +250,19 @@ ExpressionConverter::enclosingParamReference(const IR::Expression* expression) {
 
 void ExpressionConverter::postorder(const IR::Member* expression)  {
     auto result = new Util::JsonObject();
+    int index_pos = 0;
 
     auto parentType = typeMap->getType(expression->expr, true);
     cstring fieldName = expression->member.name;
     auto type = typeMap->getType(expression, true);
 
-    if (parentType->is<IR::Type_StructLike>()) {
-        auto st = parentType->to<IR::Type_StructLike>();
+    if (auto st = parentType->to<IR::Type_StructLike>()) {
         auto field = st->getField(expression->member);
-        if (field != nullptr)
+        if (field != nullptr) {
             // field could be a method call, i.e., isValid.
             fieldName = field->controlPlaneName();
+            index_pos = st->getFieldIndex(fieldName);
+        }
     }
 
     // handle error
@@ -279,8 +299,8 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
         } else if (parentType->is<IR::Type_HeaderUnion>()) {
             auto l = get(expression->expr);
             cstring nestedField = fieldName;
-            if (l->is<Util::JsonObject>()) {
-                auto lv = l->to<Util::JsonObject>()->get("value");
+            if (auto lv = l->to<Util::JsonObject>()) {
+                lv->get("value");
                 if (lv->is<Util::JsonValue>()) {
                     // header in union reference ["u", "f"] => "u.f"
                     cstring prefix = lv->to<Util::JsonValue>()->getString();
@@ -384,8 +404,13 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
             e->emplace("right", l);
         } else {
             const char* fieldRef = parentType->is<IR::Type_Stack>() ? "stack_field" : "field";
-            result->emplace("type", fieldRef);
-            auto e = mkArrayField(result, "value");
+            Util::JsonArray* e;
+            bool st = isArrayIndexRuntime(expression);
+            if (!st) {
+                result->emplace("type", fieldRef);
+                e = mkArrayField(result, "value");
+            }
+
             if (l->is<Util::JsonObject>()) {
                 auto lv = l->to<Util::JsonObject>()->get("value");
                 if (lv->is<Util::JsonArray>()) {
@@ -403,6 +428,19 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                 } else if (lv->is<Util::JsonValue>()) {
                     e->append(lv);
                     e->append(fieldName);
+                } else if (auto jo = l->to<Util::JsonObject>()) {
+                    if (st) {
+                        if (index_pos < 0) {
+                            ::error(ErrorType::ERR_INVALID, "Bmv2: Struct has no field "
+                            "for runtime index computation %1%", st);
+                        }
+                        result->emplace("type", "expression");
+                        auto e = new Util::JsonObject();
+                        result->emplace("value", e);
+                        e->emplace("op", "access_field");
+                        e->emplace("left", jo);
+                        e->emplace("right", index_pos);
+                    }
                 } else {
                     BUG("%1%: Unexpected json", lv);
                 }
@@ -426,8 +464,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
 }
 
 Util::IJson* ExpressionConverter::fixLocal(Util::IJson* json) {
-    if (json->is<Util::JsonObject>()) {
-        auto jo = json->to<Util::JsonObject>();
+    if (auto jo = json->to<Util::JsonObject>()) {
         auto to = jo->get("type");
         if (to != nullptr && to->to<Util::JsonValue>() != nullptr &&
             (*to->to<Util::JsonValue>()) == "runtime_data") {
@@ -697,6 +734,18 @@ void ExpressionConverter::postorder(const IR::Slice *expression) {
 
 void ExpressionConverter::postorder(const IR::Expression* expression)  {
     BUG("%1%: Unhandled case", expression);
+}
+
+bool ExpressionConverter::isArrayIndexRuntime(const IR::Expression* e) {
+    if (auto mem = e->to<IR::Member>()) {
+        if (auto ai = mem->expr->to<IR::ArrayIndex>()) {
+            auto right = ai->right;
+            if (!right->is<IR::Constant>()) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 // doFixup = true -> insert masking operations for proper arithmetic implementation

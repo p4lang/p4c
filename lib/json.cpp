@@ -192,8 +192,12 @@ JsonObject* JsonObject::emplace(cstring label, IJson* value) {
     if (label.isNullOrEmpty())
         throw std::logic_error("Empty label");
     auto j = get(label);
-    if (j != nullptr)
-        throw std::logic_error(cstring("Duplicate label in json object ") + label.c_str());
+    if (j != nullptr) {
+      cstring s = value->toString();
+      throw std::logic_error(cstring("Attempt to add to json object a value "
+                                     "for a label which already exists ")
+                             + label.c_str() + " " + s.c_str());
+    }
     ordered_map<cstring, IJson*>::emplace(label, value);
     return this;
 }
