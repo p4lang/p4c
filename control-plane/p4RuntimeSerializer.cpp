@@ -1616,10 +1616,15 @@ class P4RuntimeEntriesConverter {
             auto start = simpleKeyExpressionValue(kr->left, typeMap);
             auto end = simpleKeyExpressionValue(kr->right, typeMap);
             if (start == boost::none || end == boost::none) return;
+            // Error on invalid range values
             big_int maxValue = (big_int(1) << keyWidth) - 1;
-            // These should be guaranteed by the frontend
-            BUG_CHECK(*start <= *end, "Invalid range with start greater than end");
-            BUG_CHECK(*end <= maxValue, "End of range is too large");
+            // NOTE: If end value is > max allowed for keyWidth, value gets
+            // wrapped around. A warning is issued in this case by the frontend
+            // earlier.
+            // For e.g. 16 bit key has a max value of 65535, Range of (1..65536)
+            // will be converted to (1..0) and will fail below check.
+            if (*start > *end)
+                ::error("%s Invalid range for table entry", kr->srcInfo);
             if (*start == 0 && *end == maxValue)  // don't care
                 return;
             startStr = stringReprConstant(*start, keyWidth);
