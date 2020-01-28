@@ -1623,9 +1623,8 @@ class P4RuntimeEntriesConverter {
             // earlier.
             // For e.g. 16 bit key has a max value of 65535, Range of (1..65536)
             // will be converted to (1..0) and will fail below check.
-	    if (*start > *end)
-                ::error(ErrorType::ERR_INVALID, "%2% Invalid range for table entry",
-                        k, kr->srcInfo);
+            if (*start > *end)
+                ::error("%s Invalid range for table entry", kr->srcInfo);
             if (*start == 0 && *end == maxValue)  // don't care
                 return;
             startStr = stringReprConstant(*start, keyWidth);
