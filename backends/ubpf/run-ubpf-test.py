@@ -22,6 +22,7 @@ import os
 
 SUCCESS = 0
 FAILURE = 1
+SKIPPED = 999
 
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument("rootdir", help="the root directory of "
@@ -47,11 +48,15 @@ class UbpfTest(object):
         self.options = options
 
     def run(self):
-        if not self.compile_file():
-            sys.exit(FAILURE)
+        result = self.compile_file()
+        if result != SUCCESS:
+            sys.exit(result)
 
-        if not self.compare_output():
-            sys.exit(FAILURE)
+        result = self.compare_output()
+        if result == SKIPPED:
+            sys.exit(SUCCESS)
+        if result != SUCCESS:
+            sys.exit(result)
 
         sys.exit(SUCCESS)
 
@@ -67,31 +72,40 @@ class UbpfTest(object):
         proc = Popen(cmd, stderr=procstderr, stdout=procstdout)
         output, error = proc.communicate()
 
-        return not error
+        if error:
+            print("Error while compiling: %s" % str(error))
+            return FAILURE
+        return SUCCESS
 
     def compare_output(self):
         """
         Compares generated output from p4c-ubpf compiler with reference C programs.
-        :return: True if no differences.
+        :return: SUCCESS if no differences.
         """
 
         reference_c_filepath = os.path.join(options.referencedir, options.cfilename)
-        c_differences = self.compare(options.cfilepath, reference_c_filepath)
+        status = self.compare(options.cfilepath, reference_c_filepath)
 
         reference_h_filepath = os.path.join(options.referencedir, options.cfilename).replace(".c", ".h")
         compiled_h_filepath = options.cfilepath.replace(".c", ".h")
-        h_differences = self.compare(compiled_h_filepath, reference_h_filepath)
+        status = self.compare(compiled_h_filepath, reference_h_filepath)
 
-        return not c_differences and not h_differences
+        return status
 
     def compare(self, compiled_file, reference_file):
-        differences = []
         with open(compiled_file, 'r') as cf:
-            with open(reference_file, 'r') as rf:
-                expected_lines = [line.rstrip() for line in rf.readlines()]
-                compiled_lines = [line.rstrip() for line in cf.readlines()]
-                self.extract_differences(compiled_lines, differences, expected_lines)
+            compiled_lines = [line.rstrip() for line in cf.readlines()]
+        with open(reference_file, 'r') as rf:
+            expected_lines = [line.rstrip() for line in rf.readlines()]
 
+        if not compiled_lines:
+            print("Cannot compare files, compiled file is empty. Skipping..")
+            return SKIPPED
+        if not expected_lines:
+            print("Cannot compare files, reference file is empty. Skipping..")
+            return SKIPPED
+
+        differences = self.extract_differences(compiled_lines, expected_lines)
         if differences:
             print("The compiled file does not match the reference file:")
             for line in differences:
@@ -100,10 +114,12 @@ class UbpfTest(object):
                 file.write("Output file (%s) does not match the reference file (%s) \n" %
                            (compiled_file, reference_file))
                 file.writelines(differences)
+            return FAILURE
 
-        return differences
+        return SUCCESS
 
-    def extract_differences(self, compiled_lines, differences, expected_lines):
+    def extract_differences(self, compiled_lines, expected_lines):
+        differences = []
         expected_nr_of_lines = len(expected_lines)
         is_line_comment = False
         for i in range(0, expected_nr_of_lines):
@@ -119,6 +135,7 @@ class UbpfTest(object):
                 differences.append("Compiled (line %d): %s" % (i+1, compiled_lines[i]))
                 differences.append("Expected (line %d): %s" % (i+1, expected_lines[i]))
                 break
+        return differences
 
 
 def check_path(path):

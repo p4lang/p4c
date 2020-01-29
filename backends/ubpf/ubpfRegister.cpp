@@ -26,7 +26,7 @@ namespace UBPF {
             UBPFTableBase(program, name, codeGen) {
 
         auto di = block->node->to<IR::Declaration_Instance>();
-        auto type = di->type->to<IR::Type_Specialized>();
+        auto type = program->typeMap->getType(di, true)->to<IR::Type_SpecializedCanonical>();
         auto valueType = type->arguments->operator[](0);
         auto keyType = type->arguments->operator[](1);
 

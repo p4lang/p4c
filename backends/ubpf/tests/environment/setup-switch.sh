@@ -15,7 +15,7 @@
 # limitations under the License.
 
 # Dependencies
-sudo apt-get -y install libnuma-dev clang-6.0 libc6-dev-i386
+sudo apt-get -y install libnuma-dev clang-6.0 libc6-dev-i386 unzip
 sudo apt-get -y install flex bison
 sudo python -m pip install scapy
 
