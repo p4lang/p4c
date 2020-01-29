@@ -82,16 +82,7 @@ namespace UBPF {
         auto arg_value = expression->arguments->at(1);
         auto target = (UbpfTarget *) builder->target;
 
-        cstring valueVariableName = nullptr;
-        valueVariableName = emitValueInstanceIfNeeded(builder, arg_value);
-
-        if (arg_value->expression->is<IR::PathExpression>()) {
-            auto name = arg_value->expression->to<IR::PathExpression>()->path->name.name;
-            if (program->control->isPointer(name)) {
-                valueVariableName = name;
-            }
-        }
-
+        cstring valueVariableName = emitValueInstanceIfNeeded(builder, arg_value);
         if (valueVariableName != nullptr) {
             target->emitTableUpdate(builder, dataMapName, last_key_name,
                                     "&" + valueVariableName);
