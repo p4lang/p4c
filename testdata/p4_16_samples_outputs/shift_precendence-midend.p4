@@ -1,6 +1,7 @@
-control i(out bit<4> a) {
+control i(out bit<4> a, out bit<16> x) {
     @hidden action shift_precendence5() {
         a = 4w0;
+        x = 16w0xfff;
     }
     @hidden table tbl_shift_precendence5 {
         actions = {
@@ -13,7 +14,7 @@ control i(out bit<4> a) {
     }
 }
 
-control c(out bit<4> a);
+control c(out bit<4> a, out bit<16> x);
 package top(c _c);
 top(i()) main;
 
