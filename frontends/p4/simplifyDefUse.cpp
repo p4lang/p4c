@@ -165,11 +165,12 @@ class FindUninitialized : public Inspector {
         LOG3("FU Visiting control " << control->name << "[" << control->id << "]");
         BUG_CHECK(context.isBeforeStart(), "non-empty context in FindUnitialized::P4Control");
         currentPoint = ProgramPoint(control);
-        unreachable = false;
         for (auto d : control->controlLocals)
-            if (d->is<IR::Declaration_Instance>())
+            if (d->is<IR::Declaration_Instance>()) {
                 // visit virtual Function implementation if any
                 visit(d);
+            }
+        unreachable = false;
         visit(control->body);
         checkOutParameters(
             control, control->getApplyMethodType()->parameters, getCurrentDefinitions());
@@ -177,16 +178,18 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::Function* func) override {
+        if (findContext<IR::Declaration_Instance>() != nullptr) {
+            // virtual methods.  These are traversed individually at the beginning
+            // before the control body.  We mark each as reachable.
+            unreachable = false;
+        }
+        BUG_CHECK(findContext<IR::P4Program>() == nullptr, "Unexpected function");
         LOG3("FU Visiting function " << func->name << "[" << func->id << "]");
         LOG5(func);
-        // FIXME -- this throws away the context of the current point, which seems wrong,
-        // FIXME -- but otherwise analysis fails
-        unreachable = false;
         currentPoint = ProgramPoint(func);
         visit(func->body);
         bool checkReturn = !func->type->returnType->is<IR::Type_Void>();
         checkOutParameters(func, func->type->parameters, getCurrentDefinitions(), checkReturn);
-        unreachable = false;  // not inherited across function calls
         return false;
     }
 
@@ -222,6 +225,13 @@ class FindUninitialized : public Inspector {
         else
             LOG3("Unreachable");
         unreachable = true;
+        return setCurrent(statement);
+    }
+
+    bool preorder(const IR::ExitStatement* statement) override {
+        LOG3("FU Visiting " << statement);
+        unreachable = true;
+        LOG3("Unreachable");
         return setCurrent(statement);
     }
 
@@ -378,7 +388,8 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::P4Action* action) override {
-        LOG3("FU Visiting " << action);
+        BUG_CHECK(findContext<IR::P4Program>() == nullptr, "Unexpected action");
+        LOG3("FU Visiting action " << action);
         unreachable = false;
         currentPoint = ProgramPoint(context, action);
         visit(action->body);
