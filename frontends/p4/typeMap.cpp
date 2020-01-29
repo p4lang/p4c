@@ -50,6 +50,16 @@ bool TypeMap::isCompileTimeConstant(const IR::Expression* expression) const {
     return result;
 }
 
+void TypeMap::setLeftValue(const IR::Expression* expression,
+                           const IR::Expression* orig, TypeMap* tm) {
+    auto type = tm->getType(orig, true);
+    tm->setType(expression, type);
+    if (tm->isLeftValue(orig))
+        tm->setLeftValue(expression);
+    if (tm->isCompileTimeConstant(orig))
+        tm->setCompileTimeConstant(expression);
+}
+
 void TypeMap::clear() {
     LOG3("Clearing typeMap");
     typeMap.clear(); leftValues.clear(); constants.clear(); allTypeVariables.clear();
