@@ -78,7 +78,7 @@ class TypeMap final : public ProgramMap {
 
     void setLeftValue(const IR::Expression* expression);
     void setLeftValue(const IR::Expression* expression,
-                      const IR::Expression* orig, TypeMap* tm);
+                      const IR::Expression* orig);
     void setCompileTimeConstant(const IR::Expression* expression);
     void addSubstitutions(const TypeVariableSubstitution* tvs);
     const IR::Type* getSubstitution(const IR::Type_Var* var)
