@@ -60,15 +60,14 @@ namespace UBPF {
     }
 
     void UBPFRegister::emitMethodInvocation(EBPF::CodeBuilder *builder,
-                                            const P4::ExternMethod *method,
-                                            const std::vector<cstring> &pointerVariables) {
+                                            const P4::ExternMethod *method) {
         if (method->method->name.name ==
             program->model.registerModel.read.name) {
             emitRegisterRead(builder, method->expr);
             return;
         } else if (method->method->name.name ==
                    program->model.registerModel.write.name) {
-            emitRegisterWrite(builder, method->expr, pointerVariables);
+            emitRegisterWrite(builder, method->expr);
             return;
         }
         error("%1%: Unexpected method for %2%", method->expr,
@@ -76,8 +75,7 @@ namespace UBPF {
     }
 
     void UBPFRegister::emitRegisterWrite(EBPF::CodeBuilder *builder,
-                                         const IR::MethodCallExpression *expression,
-                                         const std::vector<cstring> &pointerVariables) {
+                                         const IR::MethodCallExpression *expression) {
         BUG_CHECK(expression->arguments->size() == 2,
                   "Expected just 2 argument for %1%", expression);
 
@@ -89,12 +87,7 @@ namespace UBPF {
 
         if (arg_value->expression->is<IR::PathExpression>()) {
             auto name = arg_value->expression->to<IR::PathExpression>()->path->name.name;
-            if (std::find(
-                    pointerVariables.begin(),
-                    pointerVariables.end(),
-                    name) ==
-                pointerVariables.end()) {
-
+            if (program->control->isPointer(name)) {
                 valueVariableName = name;
             }
         }

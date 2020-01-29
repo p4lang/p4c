@@ -33,7 +33,13 @@ namespace UBPF {
                                                           unsigned alignment,
                                                           EBPF::EBPFType *type) {
 
-        unsigned widthToEmit = dynamic_cast<EBPF::IHasWidth *>(type)->widthInBits();
+        auto et = dynamic_cast<EBPF::IHasWidth *>(type);
+        if (et == nullptr) {
+            ::error("Only headers with fixed widths supported %1%", expr);
+            return;
+        }
+
+        unsigned widthToEmit = et->widthInBits();
 
         unsigned loadSize = 0;
         cstring swap = "";

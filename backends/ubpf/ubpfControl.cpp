@@ -103,17 +103,6 @@ namespace UBPF {
     }
 
     void
-    UBPFControlBodyTranslator::addPadding(std::vector<cstring> &paddingInitializers, unsigned int remainingBits,
-                                          int paddingIndex) const {
-        builder->emitIndent();
-        auto padding = control->program->refMap->newName("padding");
-        auto paddingInitializer = padding + " = {0}";
-        paddingInitializers[paddingIndex] = paddingInitializer;
-        builder->appendFormat("uint8_t %s[%u]", padding, remainingBits / 8);
-        builder->endOfStatement(true);
-    }
-
-    void
     UBPFControlBodyTranslator::processMethod(const P4::ExternMethod *method) {
         auto decl = method->object;
         auto declType = method->originalExternType;
@@ -134,7 +123,7 @@ namespace UBPF {
                 pRegister->emitKeyInstance(builder, method->expr);
             }
 
-            pRegister->emitMethodInvocation(builder, method, pointerVariables);
+            pRegister->emitMethodInvocation(builder, method);
             return;
         }
         ::error("%1%: Unexpected method call", method->expr);
@@ -227,8 +216,7 @@ namespace UBPF {
             }
         }
         auto name = expression->path->name.name;
-        if (std::find(pointerVariables.begin(), pointerVariables.end(), name) !=
-            pointerVariables.end()) {
+        if (control->isPointer(name)) {
             builder->append("*");
         }
         builder->append(expression->path->name);  // each identifier should be unique
@@ -435,8 +423,8 @@ namespace UBPF {
                 BUG_CHECK(decl->is<IR::P4Action>(), "%1%: expected an action",
                           pe);
                 auto act = decl->to<IR::P4Action>();
-                auto table = (UBPFTable *) control->getTable(
-                        mem->to<IR::Operation_Unary>()->expr->to<IR::Expression>()->type->to<IR::Type_StructLike>()->getName().name);
+                auto table = control->getTable(mem->to<IR::Operation_Unary>()->expr->to<IR::Expression>()
+                        ->type->to<IR::Type_StructLike>()->getName().name);
                 cstring name = table->generateActionName(act);
                 builder->append(name);
             }
@@ -503,7 +491,7 @@ namespace UBPF {
             name = expression->expr->to<IR::PathExpression>()->path->name.name;
         }
         auto ei = P4::EnumInstance::resolve(expression, typeMap);
-        if (std::find(pointerVariables.begin(), pointerVariables.end(), name) != pointerVariables.end()) {
+        if (control->isPointer(name)) {
             visit(expression->expr);
             builder->append("->");
         } else if (ei == nullptr) {
@@ -549,19 +537,67 @@ namespace UBPF {
         }
     }
 
-    void UBPFControl::emit(EBPF::CodeBuilder *builder) {
+    void UBPFControl::scanPointerVariables() {
         for (auto a : controlBlock->container->controlLocals) {
-            emitDeclaration(builder, a);
+            if (a->is<IR::Declaration_Variable>()) {
+                auto vd = a->to<IR::Declaration_Variable>();
+                auto etype = UBPFTypeFactory::instance->create(vd->type);
+                if (determineIfVariableIsPointer(vd, etype)) {
+                    pointerVariables.push_back(vd->name.name);
+                }
+            }
         }
+    }
 
-        codeGen->setBuilder(builder);
-        builder->emitIndent();
-        controlBlock->container->body->apply(*codeGen);
-
-        for (size_t i = 0; i < codeGen->registersLookups.size(); i++) {
-            builder->newline();
-            builder->blockEnd(true);
+    bool UBPFControl::determineIfVariableIsPointer(const IR::Declaration_Variable *vd, const EBPF::EBPFType *etype) {
+        bool isPointer = false;
+        auto comps = controlBlock->container->body->components;
+        for (auto comp : comps) {
+            if (comp->is<IR::AssignmentStatement>()) {
+                auto assiStat = comp->to<IR::AssignmentStatement>();
+                isPointer = variableIsUsedAsPointer(vd, assiStat);
+                if (isPointer) {
+                    break;
+                }
+            } else {
+                if (comp->is<IR::Statement>()) {
+                    auto result = findFirstStatementWhereVariableIsUsedAsPointer(
+                            comp->to<IR::Statement>(), vd);
+                    if (result == nullptr) {
+                        isPointer = false;
+                    } else {
+                        isPointer = true;
+                        break;
+                    }
+                }
+            }
         }
+        for (auto it : registers) {
+            if (etype->type->is<IR::Type_Name>() &&
+                it.second->keyTypeName ==
+                etype->type->to<IR::Type_Name>()->path->name.name) {
+                isPointer = false;
+            }
+        }
+        return isPointer;
+    }
+
+    bool
+    UBPFControl::variableIsUsedAsPointer(const IR::Declaration_Variable *vd,
+                                         const IR::AssignmentStatement *assiStat) const {
+        bool isUsedAsPointer = false;
+        if (assiStat->right->is<IR::MethodCallExpression>()) {
+            auto methCall = assiStat->right->to<IR::MethodCallExpression>();
+            if (methCall->method->is<IR::Member>() &&
+                methCall->method->to<IR::Member>()->member.name == UBPFModel::instance.registerModel.read.name &&
+                assiStat->left->is<IR::PathExpression>()) {
+                auto variable = assiStat->left->to<IR::PathExpression>();
+                if (variable->path->name.name == vd->name.name) {
+                    isUsedAsPointer = true;
+                }
+            }
+        }
+        return isUsedAsPointer;
     }
 
     const IR::Statement *UBPFControl::findFirstStatementWhereVariableIsUsedAsPointer(
@@ -599,20 +635,28 @@ namespace UBPF {
         return nullptr;
     }
 
+    void UBPFControl::emit(EBPF::CodeBuilder *builder) {
+        for (auto a : controlBlock->container->controlLocals) {
+            emitDeclaration(builder, a);
+        }
+
+        codeGen->setBuilder(builder);
+        builder->emitIndent();
+        controlBlock->container->body->apply(*codeGen);
+
+        for (size_t i = 0; i < codeGen->registersLookups.size(); i++) {
+            builder->newline();
+            builder->blockEnd(true);
+        }
+    }
+
     void UBPFControl::emitDeclaration(EBPF::CodeBuilder *builder,
                                       const IR::Declaration *decl) {
         if (decl->is<IR::Declaration_Variable>()) {
             auto vd = decl->to<IR::Declaration_Variable>();
             auto etype = UBPFTypeFactory::instance->create(vd->type);
             builder->emitIndent();
-
-            bool pointerType = determineIfVariableIsPointer(vd, etype);
-
-            if (pointerType) {
-                codeGen->pointerVariables.push_back(vd->name.name);
-            }
-
-            etype->declare(builder, vd->name, pointerType);
+            etype->declare(builder, vd->name, isPointer(vd->name.name));
             builder->endOfStatement(true);
             BUG_CHECK(vd->initializer == nullptr,
                       "%1%: declarations with initializers not supported",
@@ -624,57 +668,6 @@ namespace UBPF {
             return;
         }
         BUG("%1%: not yet handled", decl);
-    }
-
-    bool UBPFControl::determineIfVariableIsPointer(const IR::Declaration_Variable *vd, const EBPF::EBPFType *etype) {
-        bool pointerType = false;
-        auto comps = controlBlock->container->body->components;
-        for (auto comp : comps) {
-            if (comp->is<IR::AssignmentStatement>()) {
-                auto assiStat = comp->to<IR::AssignmentStatement>();
-                pointerType = variableIsUsedAsPointer(vd, assiStat);
-                if (pointerType) {
-                    break;
-                }
-            } else {
-                if (comp->is<IR::Statement>()) {
-                    auto result = findFirstStatementWhereVariableIsUsedAsPointer(
-                            comp->to<IR::Statement>(), vd);
-                    if (result == nullptr) {
-                        pointerType = false;
-                    } else {
-                        pointerType = true;
-                        break;
-                    }
-                }
-            }
-        }
-        for (auto it : registers) {
-            if (etype->type->is<IR::Type_Name>() &&
-                it.second->keyTypeName ==
-                etype->type->to<IR::Type_Name>()->path->name.name) {
-                pointerType = false;
-            }
-        }
-        return pointerType;
-    }
-
-    bool
-    UBPFControl::variableIsUsedAsPointer(const IR::Declaration_Variable *vd,
-                                         const IR::AssignmentStatement *assiStat) const {
-        bool pointerType = false;
-        if (assiStat->right->is<IR::MethodCallExpression>()) {
-            auto methCall = assiStat->right->to<IR::MethodCallExpression>();
-            if (methCall->method->is<IR::Member>() &&
-                methCall->method->to<IR::Member>()->member.name == UBPFModel::instance.registerModel.read.name &&
-                assiStat->left->is<IR::PathExpression>()) {
-                auto variable = assiStat->left->to<IR::PathExpression>();
-                if (variable->path->name.name == vd->name.name) {
-                    pointerType = true;
-                }
-            }
-        }
-        return pointerType;
     }
 
     void UBPFControl::emitTableTypes(EBPF::CodeBuilder *builder) {
@@ -704,6 +697,7 @@ namespace UBPF {
         codeGen->substitute(headers, parserHeaders);
 
         scanConstants();
+        scanPointerVariables();
         return ::errorCount() == 0;
     }
 

@@ -32,7 +32,6 @@ namespace UBPF {
         P4::P4CoreLibrary &p4lib;
 
         std::vector<UBPFRegister *> registersLookups;
-        std::vector<cstring> pointerVariables;
 
         explicit UBPFControlBodyTranslator(const UBPFControl *control);
         virtual void adjustPacketHead(const IR::Expression *expression, bool add);
@@ -51,9 +50,7 @@ namespace UBPF {
         bool preorder(const IR::Operation_Binary *b) override;
         bool comparison(const IR::Operation_Relation *b);
         bool preorder(const IR::Member *expression) override;
-        void addPadding(std::vector<cstring> &paddingInitializers, unsigned int remainingBits, int paddingIndex) const;
         cstring createHashKeyInstance(const P4::ExternFunction *function);
-        void appendValueAtOperator(const IR::AssignmentStatement *a) const;
         void emitAssignmentStatement(const IR::AssignmentStatement *a);
         bool emitRegisterRead(const IR::AssignmentStatement *a, const IR::MethodCallExpression *method);
     };
@@ -76,14 +73,9 @@ namespace UBPF {
                     const IR::Parameter *parserHeaders);
 
         void emit(EBPF::CodeBuilder *builder);
-
-        void emitDeclaration(EBPF::CodeBuilder *builder,
-                             const IR::Declaration *decl);
-
+        void emitDeclaration(EBPF::CodeBuilder *builder, const IR::Declaration *decl);
         void emitTableTypes(EBPF::CodeBuilder *builder);
-
         void emitTableInstances(EBPF::CodeBuilder *builder);
-
         bool build();
 
         UBPFTable *getTable(cstring name) const {
@@ -98,9 +90,16 @@ namespace UBPF {
             return result;
         }
 
-    protected:
-        void scanConstants();
+        bool isPointer(const cstring name) const {
+            return std::find(pointerVariables.begin(), pointerVariables.end(), name)
+                   != pointerVariables.end();
+        }
 
+    protected:
+        std::vector<cstring> pointerVariables;
+
+        void scanConstants();
+        void scanPointerVariables();
         bool variableIsUsedAsPointer(const IR::Declaration_Variable *vd,
                                      const IR::AssignmentStatement *assiStat) const;
 

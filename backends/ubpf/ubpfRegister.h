@@ -29,18 +29,12 @@ namespace UBPF {
 
         void emitRegisterRead(EBPF::CodeBuilder *builder,
                               const IR::MethodCallExpression *expression);
-
         void emitRegisterWrite(EBPF::CodeBuilder *builder,
-                               const IR::MethodCallExpression *expression,
-                               const std::vector<cstring> &pointerVariables);
-
+                               const IR::MethodCallExpression *expression);
         void emitMethodInvocation(EBPF::CodeBuilder *builder,
-                                  const P4::ExternMethod *method,
-                                  const std::vector<cstring> &pointerVariables);
-
+                                  const P4::ExternMethod *method);
         void emitKeyInstance(EBPF::CodeBuilder *builder,
                              const IR::MethodCallExpression *expression);
-
         cstring emitValueInstanceIfNeeded(EBPF::CodeBuilder *builder,
                                           const IR::Argument *arg_value);
 
