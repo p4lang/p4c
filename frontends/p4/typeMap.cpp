@@ -50,8 +50,10 @@ bool TypeMap::isCompileTimeConstant(const IR::Expression* expression) const {
     return result;
 }
 
-void TypeMap::setLeftValue(const IR::Expression* expression,
-                           const IR::Expression* orig) {
+// Method sets left value of expression arg if orig arg
+// is a left value.
+void TypeMap::copyIfOrigLeftValue(const IR::Expression* expression,
+                                  const IR::Expression* orig) {
     auto type = getType(orig, true);
     setType(expression, type);
     if (isLeftValue(orig))

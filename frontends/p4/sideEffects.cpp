@@ -49,7 +49,7 @@ const IR::Expression* DoSimplifyExpressions::addAssignment(
 const IR::Node* DoSimplifyExpressions::postorder(IR::Expression* expression) {
     LOG3("Visiting " << dbp(expression));
     auto orig = getOriginal<IR::Expression>();
-    typeMap->setLeftValue(expression, orig);
+    typeMap->copyIfOrigLeftValue(expression, orig);
     return expression;
 }
 

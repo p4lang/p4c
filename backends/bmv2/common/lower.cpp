@@ -84,7 +84,7 @@ const IR::Node* LowerExpressions::postorder(IR::Cast* expression) {
 const IR::Node* LowerExpressions::postorder(IR::Expression* expression) {
     // Just update the typeMap incrementally.
     auto orig = getOriginal<IR::Expression>();
-    typeMap->setLeftValue(expression, orig);
+    typeMap->copyIfOrigLeftValue(expression, orig);
     return expression;
 }
 
