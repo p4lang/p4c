@@ -280,6 +280,7 @@ uint64_t entry(void *ctx, uint64_t pkt_len){
 ;
 
         }    }
+    deparser:
     packetOffsetInBits = 0;
     pkt = ubpf_adjust_head(ctx, head_len);
     if (headers.ethernet.ebpf_valid) {

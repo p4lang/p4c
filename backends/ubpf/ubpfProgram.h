@@ -50,6 +50,7 @@ namespace UBPF {
             offsetVar = cstring("packetOffsetInBits");
             headLengthVar = cstring("head_len");
             contextVar = cstring("ctx");
+            endLabel = cstring("deparser");
         }
 
         bool build() override;

@@ -98,6 +98,9 @@ namespace UBPF {
 
         emitPipeline(builder);
 
+        builder->emitIndent();
+        builder->appendFormat("%s:\n", endLabel.c_str());
+
         deparser->emit(builder);
 
         builder->emitIndent();

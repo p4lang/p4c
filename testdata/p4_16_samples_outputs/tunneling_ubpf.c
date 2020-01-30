@@ -214,6 +214,7 @@ headers.ethernet.etherType = 0x8847;headers.mpls.label = 20;headers.mpls.tc = 5;
             }
 
         }    }
+    deparser:
     packetOffsetInBits = 0;
     pkt = ubpf_adjust_head(ctx, head_len);
     if (headers.ethernet.ebpf_valid) {

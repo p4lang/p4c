@@ -92,19 +92,14 @@ namespace UBPF {
                         break;
                     } else if (s->is<IR::ExitStatement>()) {
                         break;
-                    } else if (s->is<IR::AssignmentStatement>()) {
-                        visit(s);
-                        continue;
                     } else if (s->is<IR::EmptyStatement>()) {
                         continue;
                     } else if (s->is<IR::MethodCallStatement>()) {
                         visit(s);
                         builder->newline();
-                        continue;
                     } else {
-                        visit(body);
+                        visit(s);
                     }
-                    ::error(ErrorType::ERR_UNSUPPORTED, "%1% not yet supported on this target", s);
                 }
             }
 

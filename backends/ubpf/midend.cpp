@@ -35,7 +35,6 @@ limitations under the License.
 #include "midend/local_copyprop.h"
 #include "midend/midEndLast.h"
 #include "midend/noMatch.h"
-#include "midend/removeExits.h"
 #include "midend/removeLeftSlices.h"
 #include "midend/removeMiss.h"
 #include "midend/removeParameters.h"
@@ -86,7 +85,6 @@ namespace UBPF {
                                         new P4::OrPolicy(
                                                 new P4::IsValid(&refMap, &typeMap),
                                                 new P4::IsLikeLeftValue())),
-                    new P4::RemoveExits(&refMap, &typeMap),
                     new P4::ConstantFolding(&refMap, &typeMap),
                     new P4::SimplifySelectCases(&refMap, &typeMap, false),  // accept non-constant keysets
                     new P4::HandleNoMatch(&refMap),

@@ -84,13 +84,18 @@ class UbpfTest(object):
         """
 
         reference_c_filepath = os.path.join(options.referencedir, options.cfilename)
-        status = self.compare(options.cfilepath, reference_c_filepath)
+        c_status = self.compare(options.cfilepath, reference_c_filepath)
 
         reference_h_filepath = os.path.join(options.referencedir, options.cfilename).replace(".c", ".h")
         compiled_h_filepath = options.cfilepath.replace(".c", ".h")
-        status = self.compare(compiled_h_filepath, reference_h_filepath)
+        h_status = self.compare(compiled_h_filepath, reference_h_filepath)
 
-        return status
+        if c_status == SKIPPED or h_status == SKIPPED:
+            return SKIPPED
+
+        if c_status != SUCCESS or h_status != SUCCESS:
+            return FAILURE
+        return SUCCESS
 
     def compare(self, compiled_file, reference_file):
         with open(compiled_file, 'r') as cf:
