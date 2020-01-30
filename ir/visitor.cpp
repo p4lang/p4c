@@ -62,7 +62,7 @@ class Visitor::ChangeTracker {
      * If @final is a new node, that node is marked as finished as well, as if
      * `start(@final); finish(@final);` were invoked.
      *
-     * @return true if the node has changed or been removed.
+     * @return true if the node has changed or been removed or coalesced.
      * 
      * @exception Util::CompilerBug This method fails if `start(@orig)` has not
      * previously been invoked.
@@ -80,6 +80,11 @@ class Visitor::ChangeTracker {
         } else if (final != orig && *final != *orig) {
             orig_visit_info->result = final;
             visited.emplace(final, visit_info_t{false, orig_visit_info->visitOnce, final});
+            return true;
+        } else if (visited.count(final)) {
+            // coalescing with some previously visited node, so we don't want to undo
+            // the coalesce
+            orig_visit_info->result = final;
             return true;
         } else {
             // FIXME -- not safe if the visitor resurrects the node (which it shouldn't)
