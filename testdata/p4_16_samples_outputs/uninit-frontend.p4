@@ -79,6 +79,8 @@ control c(out bit<32> v) {
             a1: {
                 touched_0 = true;
             }
+            default: {
+            }
         }
 
         if (e_0 > 32w0) {

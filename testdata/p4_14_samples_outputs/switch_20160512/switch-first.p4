@@ -2266,6 +2266,8 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
                 }
                 int_meta_header_update.apply();
             }
+            default: {
+            }
         }
 
     }
@@ -3085,6 +3087,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
                     process_int_insertion_0.apply(hdr, meta, standard_metadata);
                     process_egress_bd_stats_0.apply(hdr, meta, standard_metadata);
                 }
+                default: {
+                }
             }
 
             process_tunnel_encap_0.apply(hdr, meta, standard_metadata);
@@ -3466,6 +3470,8 @@ control process_ip_sourceguard(inout headers hdr, inout metadata meta, inout sta
                 on_miss: {
                     ipsg_permit_special.apply();
                 }
+                default: {
+                }
             }
 
         }
@@ -3781,6 +3787,8 @@ control process_outer_ipv4_multicast(inout headers hdr, inout metadata meta, ino
             on_miss: {
                 outer_ipv4_multicast_star_g.apply();
             }
+            default: {
+            }
         }
 
     }
@@ -3859,6 +3867,8 @@ control process_outer_ipv6_multicast(inout headers hdr, inout metadata meta, ino
             on_miss: {
                 outer_ipv6_multicast_star_g.apply();
             }
+            default: {
+            }
         }
 
     }
@@ -3932,6 +3942,8 @@ control process_ipv4_vtep(inout headers hdr, inout metadata meta, inout standard
             src_vtep_hit: {
                 ipv4_dest_vtep.apply();
             }
+            default: {
+            }
         }
 
     }
@@ -3985,6 +3997,8 @@ control process_ipv6_vtep(inout headers hdr, inout metadata meta, inout standard
         switch (ipv6_src_vtep.apply().action_run) {
             src_vtep_hit: {
                 ipv6_dest_vtep.apply();
+            }
+            default: {
             }
         }
 
@@ -4261,6 +4275,8 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
             switch (tunnel.apply().action_run) {
                 tunnel_lookup_miss: {
                     tunnel_lookup_miss_0.apply();
+                }
+                default: {
                 }
             }
 
@@ -4821,6 +4837,8 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
                 on_miss: {
                     ipv4_multicast_bridge_star_g.apply();
                 }
+                default: {
+                }
             }
 
         }
@@ -4828,6 +4846,8 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
             switch (ipv4_multicast_route.apply().action_run) {
                 on_miss_0: {
                     ipv4_multicast_route_star_g.apply();
+                }
+                default: {
                 }
             }
 
@@ -4962,6 +4982,8 @@ control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout sta
                 on_miss: {
                     ipv6_multicast_bridge_star_g.apply();
                 }
+                default: {
+                }
             }
 
         }
@@ -4969,6 +4991,8 @@ control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout sta
             switch (ipv6_multicast_route.apply().action_run) {
                 on_miss_1: {
                     ipv6_multicast_route_star_g.apply();
+                }
+                default: {
                 }
             }
 
@@ -5093,6 +5117,8 @@ control process_ipv4_urpf(inout headers hdr, inout metadata meta, inout standard
                 on_miss: {
                     ipv4_urpf_lpm.apply();
                 }
+                default: {
+                }
             }
 
         }
@@ -5144,6 +5170,8 @@ control process_ipv4_fib(inout headers hdr, inout metadata meta, inout standard_
         switch (ipv4_fib.apply().action_run) {
             on_miss: {
                 ipv4_fib_lpm.apply();
+            }
+            default: {
             }
         }
 
@@ -5248,6 +5276,8 @@ control process_ipv6_urpf(inout headers hdr, inout metadata meta, inout standard
                 on_miss: {
                     ipv6_urpf_lpm.apply();
                 }
+                default: {
+                }
             }
 
         }
@@ -5299,6 +5329,8 @@ control process_ipv6_fib(inout headers hdr, inout metadata meta, inout standard_
         switch (ipv6_fib.apply().action_run) {
             on_miss: {
                 ipv6_fib_lpm.apply();
+            }
+            default: {
             }
         }
 

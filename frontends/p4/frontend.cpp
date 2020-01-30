@@ -55,6 +55,7 @@ limitations under the License.
 #include "specialize.h"
 #include "strengthReduction.h"
 #include "structInitializers.h"
+#include "switchAddDefault.h"
 #include "tableKeyNames.h"
 #include "toP4/toP4.h"
 #include "typeChecking/typeChecker.h"
@@ -155,6 +156,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new StrengthReduction(&refMap, &typeMap),
         new UselessCasts(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
+        new SwitchAddDefault,
         new FrontEndDump(),  // used for testing the program at this point
         new RemoveAllUnusedDeclarations(&refMap, true),
         new SimplifyParsers(&refMap),

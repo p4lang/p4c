@@ -1,0 +1,37 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 33563505
+    name: "ingress.simple_table"
+    alias: "simple_table"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.h.b"
+    bitwidth: 8
+    match_type: EXACT
+  }
+  action_refs {
+    id: 16800567
+  }
+  action_refs {
+    id: 16830231
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16800567
+    name: "NoAction"
+    alias: "NoAction"
+  }
+}
+actions {
+  preamble {
+    id: 16830231
+    name: "ingress.do_something"
+    alias: "do_something"
+  }
+}

@@ -180,6 +180,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                 on_miss: {
                     ipv4_fib_lpm.apply();
                 }
+                default: {
+                }
             }
 
             nexthop.apply();
