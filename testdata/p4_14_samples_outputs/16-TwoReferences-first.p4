@@ -96,6 +96,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             do_e: {
                 E.apply();
             }
+            default: {
+            }
         }
 
         F.apply();

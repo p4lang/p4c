@@ -121,6 +121,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                     on_hit: {
                         A4.apply();
                     }
+                    default: {
+                    }
                 }
 
             }

@@ -194,6 +194,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                 on_miss_2: {
                     ipv4_fib_lpm_0.apply();
                 }
+                default: {
+                }
             }
 
             nexthop_0.apply();

@@ -3093,9 +3093,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
                             }
                             _int_meta_header_update.apply();
                         }
+                        default: {
+                        }
                     }
 
                     _egress_bd_stats_0.apply();
+                }
+                default: {
                 }
             }
 
@@ -5682,6 +5686,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                 _on_miss: {
                     _ipsg_permit_special.apply();
                 }
+                default: {
+                }
             }
 
         }
@@ -5710,12 +5716,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                             _on_miss_1: {
                                 _outer_ipv4_multicast_star_g_0.apply();
                             }
+                            default: {
+                            }
                         }
 
                     } else if (hdr.ipv6.isValid()) {
                         switch (_outer_ipv6_multicast_0.apply().action_run) {
                             _on_miss_2: {
                                 _outer_ipv6_multicast_star_g_0.apply();
+                            }
+                            default: {
                             }
                         }
 
@@ -5727,12 +5737,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                             _src_vtep_hit: {
                                 _ipv4_dest_vtep_0.apply();
                             }
+                            default: {
+                            }
                         }
 
                     } else if (hdr.ipv6.isValid()) {
                         switch (_ipv6_src_vtep_0.apply().action_run) {
                             _src_vtep_hit_0: {
                                 _ipv6_dest_vtep_0.apply();
+                            }
+                            default: {
                             }
                         }
 
@@ -5747,6 +5761,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             switch (_tunnel.apply().action_run) {
                 _tunnel_lookup_miss_0: {
                     _tunnel_lookup_miss_1.apply();
+                }
+                default: {
                 }
             }
 
@@ -5789,6 +5805,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                                     _on_miss_5: {
                                         _ipv4_multicast_bridge_star_g_0.apply();
                                     }
+                                    default: {
+                                    }
                                 }
 
                             }
@@ -5796,6 +5814,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                                 switch (_ipv4_multicast_route_0.apply().action_run) {
                                     _on_miss_6: {
                                         _ipv4_multicast_route_star_g_0.apply();
+                                    }
+                                    default: {
                                     }
                                 }
 
@@ -5806,6 +5826,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                                     _on_miss_7: {
                                         _ipv6_multicast_bridge_star_g_0.apply();
                                     }
+                                    default: {
+                                    }
                                 }
 
                             }
@@ -5813,6 +5835,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                                 switch (_ipv6_multicast_route_0.apply().action_run) {
                                     _on_miss_8: {
                                         _ipv6_multicast_route_star_g_0.apply();
+                                    }
+                                    default: {
                                     }
                                 }
 
@@ -5828,12 +5852,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                                         _on_miss_23: {
                                             _ipv4_urpf_lpm.apply();
                                         }
+                                        default: {
+                                        }
                                     }
 
                                 }
                                 switch (_ipv4_fib.apply().action_run) {
                                     _on_miss_24: {
                                         _ipv4_fib_lpm.apply();
+                                    }
+                                    default: {
                                     }
                                 }
 
@@ -5844,12 +5872,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                                         _on_miss_26: {
                                             _ipv6_urpf_lpm.apply();
                                         }
+                                        default: {
+                                        }
                                     }
 
                                 }
                                 switch (_ipv6_fib.apply().action_run) {
                                     _on_miss_29: {
                                         _ipv6_fib_lpm.apply();
+                                    }
+                                    default: {
                                     }
                                 }
 

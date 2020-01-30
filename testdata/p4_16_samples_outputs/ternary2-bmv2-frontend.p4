@@ -148,6 +148,8 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
             act3: {
                 tbl3_0.apply();
             }
+            default: {
+            }
         }
 
     }

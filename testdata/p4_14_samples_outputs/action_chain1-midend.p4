@@ -155,6 +155,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             act3: {
                 tbl3_0.apply();
             }
+            default: {
+            }
         }
 
     }

@@ -91,6 +91,8 @@ control c(out bit<32> v) {
         switch (t_0.apply().action_run) {
             a1: {
             }
+            default: {
+            }
         }
 
         if (e_0 > 32w0) {

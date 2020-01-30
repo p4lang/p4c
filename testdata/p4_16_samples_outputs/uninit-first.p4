@@ -78,6 +78,8 @@ control c(out bit<32> v) {
             a1: {
                 touched = true;
             }
+            default: {
+            }
         }
 
         touched = !touched;
