@@ -58,7 +58,8 @@ bool TypeSpecConverter::preorder(const IR::Type_Bits* type) {
     auto bitTypeSpec = typeSpec->mutable_bitstring();
     auto bw = type->width_bits();
     if (type->isSigned) bitTypeSpec->mutable_int_()->set_bitwidth(bw);
-    else bitTypeSpec->mutable_bit()->set_bitwidth(bw);
+    else
+        bitTypeSpec->mutable_bit()->set_bitwidth(bw);
     map.emplace(type, typeSpec);
     return false;
 }

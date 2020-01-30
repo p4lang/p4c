@@ -83,19 +83,25 @@ set (CONTROLPLANE_SOURCES
   ${CONTROLPLANE_SRCS}
   )
 
-set (CONTROLPLANE_HDRS
+set (CONTROLPLANE_SRCS
   bytestrings.h
   flattenHeader.h
   p4RuntimeArchHandler.h
   p4RuntimeArchStandard.h
   p4RuntimeSerializer.h
   typeSpecConverter.h
+  bytestrings.cpp
+  flattenHeader.cpp
+  p4RuntimeArchHandler.cpp
+  p4RuntimeArchStandard.cpp
+  p4RuntimeSerializer.cpp
+  typeSpecConverter.cpp
   )
 
 # exclude p4RuntimeSerializer.cpp because it is has issues with
 # include order. It would be nice to implement region-based NOLINT to
 # handle this case.
-add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${CONTROLPLANE_HDRS}")
+add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${CONTROLPLANE_SRCS}")
 
 include_directories (${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 set_source_files_properties (${CONTROLPLANE_SOURCES} PROPERTIES COMPILE_FLAGS "-Wno-unused-parameter")
