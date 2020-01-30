@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <boost/optional.hpp>
+
 #include <set>
 #include <unordered_map>
-
-#include <boost/optional.hpp>
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/fromv1.0/v1model.h"
@@ -869,7 +869,8 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
 
         // Convert the generic type for the digest method call to a P4DataTypeSpec
         auto* typeSpec = TypeSpecConverter::convert(refMap, typeMap, typeArg, p4RtTypeInfo);
-        BUG_CHECK(typeSpec != nullptr, "P4 type %1% could not be converted to P4Info P4DataTypeSpec");
+        BUG_CHECK(typeSpec != nullptr, "P4 type %1% could not "
+                  "be converted to P4Info P4DataTypeSpec");
         return Digest{controlPlaneName, typeSpec, nullptr};
     }
 
