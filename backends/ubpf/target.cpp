@@ -29,9 +29,10 @@ namespace UBPF {
 
     void UbpfTarget::emitMain(Util::SourceCodeBuilder *builder,
                               cstring functionName,
-                              cstring argName) const {
-        builder->appendFormat("uint64_t %s(void *%s, uint64_t pkt_len)",
-                              functionName.c_str(), argName.c_str());
+                              cstring argName,
+                              cstring pktLen) const {
+        builder->appendFormat("uint64_t %s(void *%s, uint64_t %s)",
+                              functionName.c_str(), argName.c_str(), pktLen.c_str());
     }
 
     void UbpfTarget::emitTableLookup(Util::SourceCodeBuilder *builder,

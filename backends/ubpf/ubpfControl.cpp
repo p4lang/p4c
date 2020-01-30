@@ -290,13 +290,11 @@ namespace UBPF {
                 builder->append(".ebpf_valid");
                 return false;
             } else if (bim->name == IR::Type_Header::setValid) {
-                adjustPacketHead(bim->appliedTo, true);
                 builder->emitIndent();
                 visit(bim->appliedTo);
                 builder->append(".ebpf_valid = true");
                 return false;
             } else if (bim->name == IR::Type_Header::setInvalid) {
-                adjustPacketHead(bim->appliedTo, false);
                 builder->emitIndent();
                 visit(bim->appliedTo);
                 builder->append(".ebpf_valid = false");
@@ -314,19 +312,6 @@ namespace UBPF {
 
         ::error("Unsupported method invocation %1%", expression);
         return false;
-    }
-
-    void UBPFControlBodyTranslator::adjustPacketHead(const IR::Expression *expression, bool add) {
-        auto ltype = control->program->typeMap->getType(expression);
-        auto ubpfType = UBPFTypeFactory::instance->create(ltype);
-        unsigned int width = dynamic_cast<EBPF::IHasWidth *>(ubpfType)->widthInBits();
-        unsigned int widthInBytes = width / 8;  // divide by 8 to get number of bytes.
-        // len(packet_header) always gives % 8 = 0.
-        char op = add ? '+' : '-';
-        builder->emitIndent();
-        builder->appendFormat("%s %c= %d", control->program->headLengthVar.c_str(),
-                              op, widthInBytes);
-        builder->endOfStatement(true);
     }
 
     bool UBPFControlBodyTranslator::preorder(const IR::AssignmentStatement *a) {

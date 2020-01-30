@@ -80,11 +80,6 @@ uint64_t entry(void *ctx, uint64_t pkt_len){
     int packetOffsetInBits = 0;
     uint8_t pass = 1;
     unsigned char ebpf_byte;
-    int head_len = 0;
-
-    if (sizeof(struct Headers_t) < pkt_len) {
-        return 0;
-    }
 
     goto start;
     start: {
@@ -131,8 +126,14 @@ uint64_t entry(void *ctx, uint64_t pkt_len){
             goto deparser;
         }    }
     deparser:
-    packetOffsetInBits = 0;
-    pkt = ubpf_adjust_head(ctx, head_len);
+    {
+        int outHeaderLength = 0;
+
+        int outHeaderOffset = BYTES(packetOffsetInBits) - BYTES(outHeaderLength);
+        pkt = ubpf_adjust_head(ctx, outHeaderOffset);
+        pkt_len += outHeaderOffset;
+        packetOffsetInBits = 0;
+    }
     if (pass)
         return 1;
     else

@@ -84,15 +84,13 @@ uint64_t entry(void *ctx, uint64_t pkt_len){
     int packetOffsetInBits = 0;
     uint8_t pass = 1;
     unsigned char ebpf_byte;
-    int head_len = 0;
-
-    if (sizeof(struct Headers_t) < pkt_len) {
-        return 0;
-    }
 
     goto start;
     start: {
         /* extract(headers.ethernet)*/
+        if (pkt_len < BYTES(packetOffsetInBits + 112)) {
+            goto reject;
+        }
         
         headers.ethernet.dstAddr = (uint64_t)((load_dword(pkt, BYTES(packetOffsetInBits)) >> 16) & BPF_MASK(uint64_t, 48));
         packetOffsetInBits += 48;
@@ -156,7 +154,7 @@ uint64_t entry(void *ctx, uint64_t pkt_len){
                     switch (value->action) {
                         case pipe_change_etherType: 
                         {
-                            headers.ethernet.etherType = 0x86dd;
+                            headers.ethernet.etherType = 0x86DD;
                         }
                         break;
                         case pipe_meta_based_tbl_NoAction: 
@@ -173,48 +171,60 @@ uint64_t entry(void *ctx, uint64_t pkt_len){
 
         }    }
     deparser:
-    packetOffsetInBits = 0;
-    pkt = ubpf_adjust_head(ctx, head_len);
-    if (headers.ethernet.ebpf_valid) {
-        headers.ethernet.dstAddr = htonll(headers.ethernet.dstAddr << 16);
-        ebpf_byte = ((char*)(&headers.ethernet.dstAddr))[0];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.dstAddr))[1];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.dstAddr))[2];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 2, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.dstAddr))[3];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 3, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.dstAddr))[4];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 4, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.dstAddr))[5];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 5, (ebpf_byte));
-        packetOffsetInBits += 48;
+    {
+        int outHeaderLength = 0;
+        if (headers.ethernet.ebpf_valid)
+        outHeaderLength += 112;
 
-        headers.ethernet.srcAddr = htonll(headers.ethernet.srcAddr << 16);
-        ebpf_byte = ((char*)(&headers.ethernet.srcAddr))[0];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.srcAddr))[1];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.srcAddr))[2];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 2, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.srcAddr))[3];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 3, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.srcAddr))[4];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 4, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.srcAddr))[5];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 5, (ebpf_byte));
-        packetOffsetInBits += 48;
+        int outHeaderOffset = BYTES(packetOffsetInBits) - BYTES(outHeaderLength);
+        pkt = ubpf_adjust_head(ctx, outHeaderOffset);
+        pkt_len += outHeaderOffset;
+        packetOffsetInBits = 0;
+        if (headers.ethernet.ebpf_valid) {
+            if (pkt_len < BYTES(packetOffsetInBits + 112)) {
+                goto reject;
+            }
 
-        headers.ethernet.etherType = bpf_htons(headers.ethernet.etherType);
-        ebpf_byte = ((char*)(&headers.ethernet.etherType))[0];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.etherType))[1];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
-        packetOffsetInBits += 16;
+            headers.ethernet.dstAddr = htonll(headers.ethernet.dstAddr << 16);
+            ebpf_byte = ((char*)(&headers.ethernet.dstAddr))[0];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.dstAddr))[1];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.dstAddr))[2];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.dstAddr))[3];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.dstAddr))[4];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.dstAddr))[5];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 5, (ebpf_byte));
+            packetOffsetInBits += 48;
 
-    }
-;    if (pass)
+            headers.ethernet.srcAddr = htonll(headers.ethernet.srcAddr << 16);
+            ebpf_byte = ((char*)(&headers.ethernet.srcAddr))[0];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.srcAddr))[1];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.srcAddr))[2];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.srcAddr))[3];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.srcAddr))[4];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.srcAddr))[5];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 5, (ebpf_byte));
+            packetOffsetInBits += 48;
+
+            headers.ethernet.etherType = bpf_htons(headers.ethernet.etherType);
+            ebpf_byte = ((char*)(&headers.ethernet.etherType))[0];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.etherType))[1];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
+            packetOffsetInBits += 16;
+
+        }
+;    }
+    if (pass)
         return 1;
     else
         return 0;

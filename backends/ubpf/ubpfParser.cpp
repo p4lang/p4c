@@ -237,6 +237,18 @@ namespace UBPF {
             return;
         }
 
+        unsigned width = ht->width_bits();
+        auto program = state->parser->program;
+        builder->emitIndent();
+        builder->appendFormat("if (%s < BYTES(%s + %d)) ",
+                              program->lengthVar.c_str(),
+                              program->offsetVar.c_str(), width);
+        builder->blockStart();
+        builder->emitIndent();
+        builder->appendFormat("goto %s;", IR::ParserState::reject.c_str());
+        builder->newline();
+        builder->blockEnd(true);
+
         builder->emitIndent();
         builder->newline();
 

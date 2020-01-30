@@ -34,7 +34,6 @@ namespace UBPF {
         std::vector<UBPFRegister *> registersLookups;
 
         explicit UBPFControlBodyTranslator(const UBPFControl *control);
-        virtual void adjustPacketHead(const IR::Expression *expression, bool add);
         virtual void processMethod(const P4::ExternMethod *method);
         virtual void processApply(const P4::ApplyMethod *method);
         virtual void processFunction(const P4::ExternFunction *function);

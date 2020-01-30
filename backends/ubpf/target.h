@@ -45,12 +45,15 @@ namespace UBPF {
         void emitTableDecl(UNUSED Util::SourceCodeBuilder *builder,
                            UNUSED cstring tblName, UNUSED EBPF::TableKind tableKind,
                            UNUSED cstring keyType, UNUSED cstring valueType, UNUSED unsigned size) const override {};
+        void emitMain(UNUSED Util::SourceCodeBuilder *builder,
+                      UNUSED cstring functionName,
+                      UNUSED cstring argName) const override {};
         void emitMain(Util::SourceCodeBuilder *builder,
                       cstring functionName,
-                      cstring argName) const override;
+                      cstring argName,
+                      cstring pktLen) const;
         void emitUbpfHelpers(EBPF::CodeBuilder *builder) const;
         void emitChecksumHelpers(EBPF::CodeBuilder *builder) const;
-
 
         cstring dataOffset(UNUSED cstring base) const override { return cstring(""); }
         cstring dataEnd(UNUSED cstring base) const override { return cstring(""); }

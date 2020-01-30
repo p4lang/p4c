@@ -20,6 +20,85 @@ limitations under the License.
 
 namespace UBPF {
 
+    class OutHeaderSize final : public EBPF::CodeGenInspector {
+        P4::ReferenceMap*  refMap;
+        P4::TypeMap*       typeMap;
+        const UBPFProgram*  program;
+
+        std::map<const IR::Parameter*, const IR::Parameter*> substitution;
+
+        bool illegal(const IR::Statement* statement)
+        { ::error("%1%: not supported in deparser", statement); return false; }
+
+    public:
+        OutHeaderSize(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                      const UBPFProgram* program):
+                EBPF::CodeGenInspector(refMap, typeMap), refMap(refMap), typeMap(typeMap),
+                program(program) {
+            CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(program);
+            setName("OutHeaderSize"); }
+        bool preorder(const IR::PathExpression* expression) override {
+            auto decl = refMap->getDeclaration(expression->path, true);
+            auto param = decl->getNode()->to<IR::Parameter>();
+            if (param != nullptr) {
+                auto subst = ::get(substitution, param);
+                if (subst != nullptr) {
+                    builder->append(subst->name);
+                    return false;
+                }
+            }
+            builder->append(expression->path->name);
+            return false;
+        }
+        bool preorder(const IR::SwitchStatement* statement) override
+        { return illegal(statement); }
+        bool preorder(const IR::IfStatement* statement) override
+        { return illegal(statement); }
+        bool preorder(const IR::AssignmentStatement* statement) override
+        { return illegal(statement); }
+        bool preorder(const IR::ReturnStatement* statement) override
+        { return illegal(statement); }
+        bool preorder(const IR::ExitStatement* statement) override
+        { return illegal(statement); }
+        bool preorder(const IR::BlockStatement* statement) override {}
+        bool preorder(const IR::MethodCallStatement* statement) override {
+            auto &p4lib = P4::P4CoreLibrary::instance;
+
+            auto mi = P4::MethodInstance::resolve(statement->methodCall, refMap, typeMap);
+            auto method = mi->to<P4::ExternMethod>();
+            if (method == nullptr)
+                return illegal(statement);
+
+            auto declType = method->originalExternType;
+            if (declType->name.name != p4lib.packetOut.name ||
+                method->method->name.name != p4lib.packetOut.emit.name ||
+                method->expr->arguments->size() != 1) {
+                return illegal(statement);
+            }
+
+            auto h = method->expr->arguments->at(0);
+            auto type = typeMap->getType(h);
+            auto ht = type->to<IR::Type_Header>();
+            if (ht == nullptr) {
+                ::error("Cannot emit a non-header type %1%", h);
+                return false;
+            }
+            unsigned width = ht->width_bits();
+
+            builder->append("if (");
+            visit(h);
+            builder->append(".ebpf_valid) ");
+            builder->newline();
+            builder->emitIndent();
+            builder->appendFormat("%s += %d;", program->outerHdrLengthVar.c_str(), width);
+            builder->newline();
+            return false;
+        }
+
+        void substitute(const IR::Parameter* p, const IR::Parameter* with)
+        { substitution.emplace(p, with); }
+    };
+
     UBPFDeparserTranslationVisitor::UBPFDeparserTranslationVisitor(
             const UBPFDeparser *deparser) :
             CodeGenInspector(deparser->program->refMap,
@@ -166,6 +245,21 @@ namespace UBPF {
         builder->append(".ebpf_valid) ");
         builder->blockStart();
 
+        auto program = deparser->program;
+        unsigned width = ht->width_bits();
+        builder->emitIndent();
+        builder->appendFormat("if (%s < BYTES(%s + %d)) ",
+                              program->lengthVar.c_str(),
+                              program->offsetVar.c_str(), width);
+        builder->blockStart();
+        builder->emitIndent();
+        builder->appendFormat("goto %s;", IR::ParserState::reject.c_str());
+        builder->newline();
+        builder->blockEnd(true);
+
+        builder->emitIndent();
+        builder->newline();
+
         unsigned alignment = 0;
         for (auto f : ht->fields) {
             auto ftype = typeMap->getType(f);
@@ -225,13 +319,35 @@ namespace UBPF {
 
     void UBPFDeparser::emit(EBPF::CodeBuilder *builder) {
         builder->emitIndent();
-        builder->appendFormat("%s = 0", program->offsetVar.c_str());
+        builder->appendFormat("int %s = 0", program->outerHdrLengthVar.c_str());
+        builder->endOfStatement(true);
+
+        OutHeaderSize ohs(program->refMap, program->typeMap,
+                          static_cast<const UBPFProgram*>(program));
+        ohs.substitute(headers, parserHeaders);
+        ohs.setBuilder(builder);
+
+        builder->emitIndent();
+        (void)controlBlock->container->body->apply(ohs);
+        builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat("int %s = BYTES(%s) - BYTES(%s)", program->outerHdrOffsetVar.c_str(),
+                              program->offsetVar.c_str(), program->outerHdrLengthVar.c_str());
         builder->endOfStatement(true);
 
         builder->emitIndent();
         builder->appendFormat("%s = ubpf_adjust_head(%s, %s)", program->packetStartVar.c_str(),
                               program->contextVar.c_str(),
-                              program->headLengthVar.c_str());
+                              program->outerHdrOffsetVar.c_str());
+        builder->endOfStatement(true);
+
+        builder->emitIndent();
+        builder->appendFormat("%s += %s", program->lengthVar.c_str(), program->outerHdrOffsetVar.c_str());
+        builder->endOfStatement(true);
+
+        builder->emitIndent();
+        builder->appendFormat("%s = 0", program->offsetVar.c_str());
         builder->endOfStatement(true);
 
         codeGen->setBuilder(builder);

@@ -89,15 +89,13 @@ uint64_t entry(void *ctx, uint64_t pkt_len){
     int packetOffsetInBits = 0;
     uint8_t pass = 1;
     unsigned char ebpf_byte;
-    int head_len = 0;
-
-    if (sizeof(struct Headers_t) < pkt_len) {
-        return 0;
-    }
 
     goto start;
     start: {
         /* extract(headers.ethernet)*/
+        if (pkt_len < BYTES(packetOffsetInBits + 112)) {
+            goto reject;
+        }
 
         headers.ethernet.destination = (uint64_t)((load_dword(pkt, BYTES(packetOffsetInBits)) >> 16) & BPF_MASK(uint64_t, 48));
         packetOffsetInBits += 48;
@@ -116,6 +114,9 @@ uint64_t entry(void *ctx, uint64_t pkt_len){
     }
     ipv4: {
         /* extract(headers.ipv4)*/
+        if (pkt_len < BYTES(packetOffsetInBits + 160)) {
+            goto reject;
+        }
 
         headers.ipv4.version = (uint8_t)((load_byte(pkt, BYTES(packetOffsetInBits)) >> 4) & BPF_MASK(uint8_t, 4));
         packetOffsetInBits += 4;
@@ -155,6 +156,9 @@ uint64_t entry(void *ctx, uint64_t pkt_len){
 
         headers.ipv4.ebpf_valid = 1;
         /* extract(headers.udp)*/
+        if (pkt_len < BYTES(packetOffsetInBits + 64)) {
+            goto reject;
+        }
 
         headers.udp.srcPort = (uint16_t)((load_half(pkt, BYTES(packetOffsetInBits))));
         packetOffsetInBits += 16;
@@ -192,155 +196,179 @@ uint64_t entry(void *ctx, uint64_t pkt_len){
             headers.udp.checksum = tmp_0;
         }    }
     deparser:
-    packetOffsetInBits = 0;
-    pkt = ubpf_adjust_head(ctx, head_len);
-    if (headers.ethernet.ebpf_valid) {
-        headers.ethernet.destination = htonll(headers.ethernet.destination << 16);
-        ebpf_byte = ((char*)(&headers.ethernet.destination))[0];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.destination))[1];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.destination))[2];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 2, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.destination))[3];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 3, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.destination))[4];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 4, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.destination))[5];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 5, (ebpf_byte));
-        packetOffsetInBits += 48;
+    {
+        int outHeaderLength = 0;
+        if (headers.ethernet.ebpf_valid)
+        outHeaderLength += 112;
+if (headers.ipv4.ebpf_valid)
+        outHeaderLength += 160;
+if (headers.udp.ebpf_valid)
+        outHeaderLength += 64;
 
-        headers.ethernet.source = htonll(headers.ethernet.source << 16);
-        ebpf_byte = ((char*)(&headers.ethernet.source))[0];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.source))[1];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.source))[2];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 2, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.source))[3];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 3, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.source))[4];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 4, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.source))[5];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 5, (ebpf_byte));
-        packetOffsetInBits += 48;
+        int outHeaderOffset = BYTES(packetOffsetInBits) - BYTES(outHeaderLength);
+        pkt = ubpf_adjust_head(ctx, outHeaderOffset);
+        pkt_len += outHeaderOffset;
+        packetOffsetInBits = 0;
+        if (headers.ethernet.ebpf_valid) {
+            if (pkt_len < BYTES(packetOffsetInBits + 112)) {
+                goto reject;
+            }
 
-        headers.ethernet.etherType = bpf_htons(headers.ethernet.etherType);
-        ebpf_byte = ((char*)(&headers.ethernet.etherType))[0];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ethernet.etherType))[1];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
-        packetOffsetInBits += 16;
+            headers.ethernet.destination = htonll(headers.ethernet.destination << 16);
+            ebpf_byte = ((char*)(&headers.ethernet.destination))[0];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.destination))[1];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.destination))[2];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.destination))[3];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.destination))[4];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.destination))[5];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 5, (ebpf_byte));
+            packetOffsetInBits += 48;
 
-    }
-;    if (headers.ipv4.ebpf_valid) {
-        ebpf_byte = ((char*)(&headers.ipv4.version))[0];
-        write_partial(pkt + BYTES(packetOffsetInBits) + 0, 4, 4, (ebpf_byte >> 0));
-        packetOffsetInBits += 4;
+            headers.ethernet.source = htonll(headers.ethernet.source << 16);
+            ebpf_byte = ((char*)(&headers.ethernet.source))[0];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.source))[1];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.source))[2];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.source))[3];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 3, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.source))[4];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 4, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.source))[5];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 5, (ebpf_byte));
+            packetOffsetInBits += 48;
 
-        ebpf_byte = ((char*)(&headers.ipv4.ihl))[0];
-        write_partial(pkt + BYTES(packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 0));
-        packetOffsetInBits += 4;
+            headers.ethernet.etherType = bpf_htons(headers.ethernet.etherType);
+            ebpf_byte = ((char*)(&headers.ethernet.etherType))[0];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ethernet.etherType))[1];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
+            packetOffsetInBits += 16;
 
-        ebpf_byte = ((char*)(&headers.ipv4.diffserv))[0];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
-        packetOffsetInBits += 8;
+        }
+;        if (headers.ipv4.ebpf_valid) {
+            if (pkt_len < BYTES(packetOffsetInBits + 160)) {
+                goto reject;
+            }
 
-        headers.ipv4.totalLen = bpf_htons(headers.ipv4.totalLen);
-        ebpf_byte = ((char*)(&headers.ipv4.totalLen))[0];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ipv4.totalLen))[1];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
-        packetOffsetInBits += 16;
+            ebpf_byte = ((char*)(&headers.ipv4.version))[0];
+            write_partial(pkt + BYTES(packetOffsetInBits) + 0, 4, 4, (ebpf_byte >> 0));
+            packetOffsetInBits += 4;
 
-        headers.ipv4.identification = bpf_htons(headers.ipv4.identification);
-        ebpf_byte = ((char*)(&headers.ipv4.identification))[0];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ipv4.identification))[1];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
-        packetOffsetInBits += 16;
+            ebpf_byte = ((char*)(&headers.ipv4.ihl))[0];
+            write_partial(pkt + BYTES(packetOffsetInBits) + 0, 4, 0, (ebpf_byte >> 0));
+            packetOffsetInBits += 4;
 
-        ebpf_byte = ((char*)(&headers.ipv4.flags))[0];
-        write_partial(pkt + BYTES(packetOffsetInBits) + 0, 3, 5, (ebpf_byte >> 0));
-        packetOffsetInBits += 3;
+            ebpf_byte = ((char*)(&headers.ipv4.diffserv))[0];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
+            packetOffsetInBits += 8;
 
-        headers.ipv4.fragOffset = bpf_htons(headers.ipv4.fragOffset << 3);
-        ebpf_byte = ((char*)(&headers.ipv4.fragOffset))[0];
-        write_partial(pkt + BYTES(packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
-        write_partial(pkt + BYTES(packetOffsetInBits) + 0 + 1, 3, 5, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ipv4.fragOffset))[1];
-        write_partial(pkt + BYTES(packetOffsetInBits) + 1, 5, 0, (ebpf_byte >> 3));
-        packetOffsetInBits += 13;
+            headers.ipv4.totalLen = bpf_htons(headers.ipv4.totalLen);
+            ebpf_byte = ((char*)(&headers.ipv4.totalLen))[0];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ipv4.totalLen))[1];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
+            packetOffsetInBits += 16;
 
-        ebpf_byte = ((char*)(&headers.ipv4.ttl))[0];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
-        packetOffsetInBits += 8;
+            headers.ipv4.identification = bpf_htons(headers.ipv4.identification);
+            ebpf_byte = ((char*)(&headers.ipv4.identification))[0];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ipv4.identification))[1];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
+            packetOffsetInBits += 16;
 
-        ebpf_byte = ((char*)(&headers.ipv4.protocol))[0];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
-        packetOffsetInBits += 8;
+            ebpf_byte = ((char*)(&headers.ipv4.flags))[0];
+            write_partial(pkt + BYTES(packetOffsetInBits) + 0, 3, 5, (ebpf_byte >> 0));
+            packetOffsetInBits += 3;
 
-        headers.ipv4.checksum = bpf_htons(headers.ipv4.checksum);
-        ebpf_byte = ((char*)(&headers.ipv4.checksum))[0];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ipv4.checksum))[1];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
-        packetOffsetInBits += 16;
+            headers.ipv4.fragOffset = bpf_htons(headers.ipv4.fragOffset << 3);
+            ebpf_byte = ((char*)(&headers.ipv4.fragOffset))[0];
+            write_partial(pkt + BYTES(packetOffsetInBits) + 0, 5, 0, (ebpf_byte >> 3));
+            write_partial(pkt + BYTES(packetOffsetInBits) + 0 + 1, 3, 5, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ipv4.fragOffset))[1];
+            write_partial(pkt + BYTES(packetOffsetInBits) + 1, 5, 0, (ebpf_byte >> 3));
+            packetOffsetInBits += 13;
 
-        headers.ipv4.srcAddr = htonl(headers.ipv4.srcAddr);
-        ebpf_byte = ((char*)(&headers.ipv4.srcAddr))[0];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ipv4.srcAddr))[1];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ipv4.srcAddr))[2];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 2, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ipv4.srcAddr))[3];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 3, (ebpf_byte));
-        packetOffsetInBits += 32;
+            ebpf_byte = ((char*)(&headers.ipv4.ttl))[0];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
+            packetOffsetInBits += 8;
 
-        headers.ipv4.dstAddr = htonl(headers.ipv4.dstAddr);
-        ebpf_byte = ((char*)(&headers.ipv4.dstAddr))[0];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ipv4.dstAddr))[1];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ipv4.dstAddr))[2];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 2, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.ipv4.dstAddr))[3];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 3, (ebpf_byte));
-        packetOffsetInBits += 32;
+            ebpf_byte = ((char*)(&headers.ipv4.protocol))[0];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
+            packetOffsetInBits += 8;
 
-    }
-;    if (headers.udp.ebpf_valid) {
-        headers.udp.srcPort = bpf_htons(headers.udp.srcPort);
-        ebpf_byte = ((char*)(&headers.udp.srcPort))[0];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.udp.srcPort))[1];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
-        packetOffsetInBits += 16;
+            headers.ipv4.checksum = bpf_htons(headers.ipv4.checksum);
+            ebpf_byte = ((char*)(&headers.ipv4.checksum))[0];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ipv4.checksum))[1];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
+            packetOffsetInBits += 16;
 
-        headers.udp.dstPort = bpf_htons(headers.udp.dstPort);
-        ebpf_byte = ((char*)(&headers.udp.dstPort))[0];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.udp.dstPort))[1];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
-        packetOffsetInBits += 16;
+            headers.ipv4.srcAddr = htonl(headers.ipv4.srcAddr);
+            ebpf_byte = ((char*)(&headers.ipv4.srcAddr))[0];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ipv4.srcAddr))[1];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ipv4.srcAddr))[2];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ipv4.srcAddr))[3];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 3, (ebpf_byte));
+            packetOffsetInBits += 32;
 
-        headers.udp.length_ = bpf_htons(headers.udp.length_);
-        ebpf_byte = ((char*)(&headers.udp.length_))[0];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.udp.length_))[1];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
-        packetOffsetInBits += 16;
+            headers.ipv4.dstAddr = htonl(headers.ipv4.dstAddr);
+            ebpf_byte = ((char*)(&headers.ipv4.dstAddr))[0];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ipv4.dstAddr))[1];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ipv4.dstAddr))[2];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 2, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.ipv4.dstAddr))[3];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 3, (ebpf_byte));
+            packetOffsetInBits += 32;
 
-        headers.udp.checksum = bpf_htons(headers.udp.checksum);
-        ebpf_byte = ((char*)(&headers.udp.checksum))[0];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
-        ebpf_byte = ((char*)(&headers.udp.checksum))[1];
-        write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
-        packetOffsetInBits += 16;
+        }
+;        if (headers.udp.ebpf_valid) {
+            if (pkt_len < BYTES(packetOffsetInBits + 64)) {
+                goto reject;
+            }
 
-    }
-;    if (pass)
+            headers.udp.srcPort = bpf_htons(headers.udp.srcPort);
+            ebpf_byte = ((char*)(&headers.udp.srcPort))[0];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.udp.srcPort))[1];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
+            packetOffsetInBits += 16;
+
+            headers.udp.dstPort = bpf_htons(headers.udp.dstPort);
+            ebpf_byte = ((char*)(&headers.udp.dstPort))[0];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.udp.dstPort))[1];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
+            packetOffsetInBits += 16;
+
+            headers.udp.length_ = bpf_htons(headers.udp.length_);
+            ebpf_byte = ((char*)(&headers.udp.length_))[0];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.udp.length_))[1];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
+            packetOffsetInBits += 16;
+
+            headers.udp.checksum = bpf_htons(headers.udp.checksum);
+            ebpf_byte = ((char*)(&headers.udp.checksum))[0];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 0, (ebpf_byte));
+            ebpf_byte = ((char*)(&headers.udp.checksum))[1];
+            write_byte(pkt, BYTES(packetOffsetInBits) + 1, (ebpf_byte));
+            packetOffsetInBits += 16;
+
+        }
+;    }
+    if (pass)
         return 1;
     else
         return 0;

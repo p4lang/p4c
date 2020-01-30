@@ -41,15 +41,17 @@ namespace UBPF {
         UBPFDeparser *deparser{};
         UBPFModel &model;
 
-        cstring headLengthVar, contextVar;
+        cstring contextVar, outerHdrOffsetVar, outerHdrLengthVar;
 
         UBPFProgram(const CompilerOptions &options, const IR::P4Program *program,
                     P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const IR::ToplevelBlock *toplevel) :
                 EBPF::EBPFProgram(options, program, refMap, typeMap, toplevel), model(UBPFModel::instance) {
             packetStartVar = cstring("pkt");
             offsetVar = cstring("packetOffsetInBits");
-            headLengthVar = cstring("head_len");
+            outerHdrOffsetVar = cstring("outHeaderOffset");
+            outerHdrLengthVar = cstring("outHeaderLength");
             contextVar = cstring("ctx");
+            lengthVar = cstring("pkt_len");
             endLabel = cstring("deparser");
         }
 
@@ -64,7 +66,6 @@ namespace UBPF {
         void emitMetadataInstance(EBPF::CodeBuilder *builder) const;
         void emitLocalVariables(EBPF::CodeBuilder *builder) override;
         void emitPipeline(EBPF::CodeBuilder *builder) override;
-        void emitPacketCheck(EBPF::CodeBuilder* builder);
     };
 
 }

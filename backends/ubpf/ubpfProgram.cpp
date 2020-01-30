@@ -75,7 +75,7 @@ namespace UBPF {
         builder->target->emitChecksumHelpers(builder);
 
         builder->emitIndent();
-        builder->target->emitMain(builder, "entry", contextVar.c_str());
+        builder->target->emitMain(builder, "entry", contextVar.c_str(), lengthVar.c_str());
         builder->blockStart();
 
         emitPktVariable(builder);
@@ -91,7 +91,6 @@ namespace UBPF {
         builder->endOfStatement(true);
 
         emitLocalVariables(builder);
-        emitPacketCheck(builder);
         builder->newline();
         builder->emitIndent();
         builder->appendFormat("goto %s;", IR::ParserState::start.c_str());
@@ -103,8 +102,10 @@ namespace UBPF {
 
         builder->emitIndent();
         builder->appendFormat("%s:\n", endLabel.c_str());
-
+        builder->emitIndent();
+        builder->blockStart();
         deparser->emit(builder);
+        builder->blockEnd(true);
 
         builder->emitIndent();
         builder->appendFormat("if (%s)\n", control->passVariable);
@@ -235,24 +236,6 @@ namespace UBPF {
         builder->emitIndent();
         builder->appendFormat("unsigned char %s;", byteVar.c_str());
         builder->newline();
-
-        builder->emitIndent();
-        builder->appendFormat("int %s = 0;", headLengthVar.c_str());
-        builder->newline();
-    }
-
-    void UBPFProgram::emitPacketCheck(EBPF::CodeBuilder* builder) {
-        auto header_type = parser->headerType->to<EBPF::EBPFStructType>();
-        if (header_type != nullptr) {
-            auto header_type_name = header_type->name;
-            builder->newline();
-            builder->emitIndent();
-            builder->appendFormat("if (sizeof(struct %s) < pkt_len) ", header_type_name);
-            builder->blockStart();
-            builder->emitIndent();
-            builder->appendLine("return 0;");
-            builder->blockEnd(true);
-        }
     }
 
     void UBPFProgram::emitPipeline(EBPF::CodeBuilder *builder) {
