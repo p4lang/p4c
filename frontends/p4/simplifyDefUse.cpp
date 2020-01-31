@@ -84,6 +84,7 @@ class FindUninitialized : public Inspector {
     }
     // 'expression' is reading the 'loc' location set
     void reads(const IR::Expression* expression, const LocationSet* loc) {
+        BUG_CHECK(!unreachable, "reached an unreachable expression in FindUninitialized");
         LOG3(expression << " reads " << loc);
         CHECK_NULL(expression);
         CHECK_NULL(loc);
@@ -92,6 +93,10 @@ class FindUninitialized : public Inspector {
     bool setCurrent(const IR::Statement* statement) {
         currentPoint = ProgramPoint(context, statement);
         return false;
+    }
+    profile_t init_apply(const IR::Node *root) {
+        unreachable = false;  // assume not unreachable at the start of any apply
+        return Inspector::init_apply(root);
     }
 
     FindUninitialized(FindUninitialized* parent, ProgramPoint context) :
