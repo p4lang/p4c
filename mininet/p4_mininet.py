@@ -99,9 +99,9 @@ class P4Switch(Switch):
         while True:
             if not os.path.exists(os.path.join("/proc", str(pid))):
                 return False
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(0.5)
-            result = sock.connect_ex(("localhost", self.thrift_port))
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(0.5)
+                result = sock.connect_ex(("localhost", self.thrift_port))
             if result == 0:
                 return  True
 
