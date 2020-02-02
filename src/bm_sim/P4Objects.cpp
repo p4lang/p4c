@@ -1238,9 +1238,18 @@ P4Objects::init_parsers(const Json::Value &cfg_root, InitState *init_state) {
           if (cfg_mask.isNull()) {
             parse_state->add_switch_case_vset(vset, next_state);
           } else {
-            const string mask_hexstr = cfg_mask.asString();
+            ByteContainer mask(cfg_mask.asString());
+            auto expected_width = (vset->get_compressed_bitwidth() + 7) / 8;
+            if (mask.size() != expected_width) {
+              throw json_exception(
+                  EFormat() << "Parser transition mask for value set has "
+                            << "incorrect width, expected width is "
+                            << expected_width << " bytes "
+                            << "but actual width is " << mask.size()
+                            << " bytes", cfg_transition);
+            }
             parse_state->add_switch_case_vset_with_mask(
-                vset, ByteContainer(mask_hexstr), next_state);
+                vset, ByteContainer(mask), next_state);
           }
         }
       }

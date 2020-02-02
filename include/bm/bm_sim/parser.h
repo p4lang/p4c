@@ -159,6 +159,8 @@ class ParseVSetIface {
   virtual size_t size() const = 0;
 };
 
+class ParseVSetBase;  // forward declaration
+
 // Note that as of today, all parse states using a vset have to be configured
 // before any value can be added to a vset (otherwise the value won't be present
 // in the shadow copies). This can be easily changed if the need arises in the
@@ -173,6 +175,8 @@ class ParseVSet : public NamedP4Object, public ParseVSetIface {
   ParseVSet(const std::string &name, p4object_id_t id,
             size_t compressed_bitwidth);
 
+  ~ParseVSet();
+
   void add(const ByteContainer &v) override;
 
   void remove(const ByteContainer &v) override;
@@ -185,6 +189,8 @@ class ParseVSet : public NamedP4Object, public ParseVSetIface {
 
   size_t get_compressed_bitwidth() const;
 
+  std::vector<ByteContainer> get() const;
+
  private:
   void add_shadow(ParseVSetIface *shadow);
 
@@ -194,7 +200,7 @@ class ParseVSet : public NamedP4Object, public ParseVSetIface {
   // (each shadow has its own).
   mutable std::mutex shadows_mutex{};
   std::vector<ParseVSetIface *> shadows{};
-  std::unique_ptr<ParseVSetIface> base{nullptr};
+  std::unique_ptr<ParseVSetBase> base;
 };
 
 class ParseSwitchCaseIface {

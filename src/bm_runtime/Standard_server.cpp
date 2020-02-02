@@ -1059,6 +1059,32 @@ public:
     }
   }
 
+  void bm_parse_vset_get(std::vector<BmParseVSetValue> & _return, const int32_t cxt_id, const std::string& parse_vset_name) {
+    Logger::get()->trace("bm_parse_vset_get");
+    std::vector<ByteContainer> entries;
+    ParseVSet::ErrorCode error_code = switch_->parse_vset_get(
+        cxt_id, parse_vset_name, &entries);
+    if(error_code != ParseVSet::ErrorCode::SUCCESS) {
+      InvalidParseVSetOperation ipo;
+      ipo.code = (ParseVSetOperationErrorCode::type) error_code;
+      throw ipo;
+    }
+    for (const auto &entry: entries) {
+      _return.emplace_back(entry.data(), entry.size());
+    }
+  }
+
+  void bm_parse_vset_clear(const int32_t cxt_id, const std::string& parse_vset_name) {
+    Logger::get()->trace("bm_parse_vset_clear");
+    ParseVSet::ErrorCode error_code = switch_->parse_vset_clear(
+        cxt_id, parse_vset_name);
+    if(error_code != ParseVSet::ErrorCode::SUCCESS) {
+      InvalidParseVSetOperation ipo;
+      ipo.code = (ParseVSetOperationErrorCode::type) error_code;
+      throw ipo;
+    }
+  }
+
   void bm_dev_mgr_add_port(const std::string& iface_name, const int32_t port_num, const std::string& pcap_path) {
     Logger::get()->trace("bm_dev_mgr_add_port");
     DevMgrIface::PortExtras port_extras;

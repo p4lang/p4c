@@ -1,0 +1,467 @@
+{
+  "header_types" : [
+    {
+      "name" : "scalars_0",
+      "id" : 0,
+      "fields" : [
+        ["tmp", 16, false],
+        ["tmp_0", 3, false],
+        ["key_0", 32, false],
+        ["_padding_0", 5, false]
+      ]
+    },
+    {
+      "name" : "standard_metadata",
+      "id" : 1,
+      "fields" : [
+        ["ingress_port", 9, false],
+        ["egress_spec", 9, false],
+        ["egress_port", 9, false],
+        ["instance_type", 32, false],
+        ["packet_length", 32, false],
+        ["enq_timestamp", 32, false],
+        ["enq_qdepth", 19, false],
+        ["deq_timedelta", 32, false],
+        ["deq_qdepth", 19, false],
+        ["ingress_global_timestamp", 48, false],
+        ["egress_global_timestamp", 48, false],
+        ["mcast_grp", 16, false],
+        ["egress_rid", 16, false],
+        ["checksum_error", 1, false],
+        ["parser_error", 32, false],
+        ["priority", 3, false],
+        ["_padding", 3, false]
+      ]
+    },
+    {
+      "name" : "data_h",
+      "id" : 2,
+      "fields" : [
+        ["da", 32, false],
+        ["db", 32, false]
+      ]
+    }
+  ],
+  "headers" : [
+    {
+      "name" : "scalars",
+      "id" : 0,
+      "header_type" : "scalars_0",
+      "metadata" : true,
+      "pi_omit" : true
+    },
+    {
+      "name" : "standard_metadata",
+      "id" : 1,
+      "header_type" : "standard_metadata",
+      "metadata" : true,
+      "pi_omit" : true
+    },
+    {
+      "name" : "data",
+      "id" : 2,
+      "header_type" : "data_h",
+      "metadata" : false,
+      "pi_omit" : true
+    },
+    {
+      "name" : "userMetadata.data[0]",
+      "id" : 3,
+      "header_type" : "data_h",
+      "metadata" : false,
+      "pi_omit" : true
+    },
+    {
+      "name" : "userMetadata.data[1]",
+      "id" : 4,
+      "header_type" : "data_h",
+      "metadata" : false,
+      "pi_omit" : true
+    }
+  ],
+  "header_stacks" : [
+    {
+      "name" : "userMetadata.data",
+      "id" : 0,
+      "header_type" : "data_h",
+      "size" : 2,
+      "header_ids" : [3, 4]
+    }
+  ],
+  "header_union_types" : [],
+  "header_unions" : [],
+  "header_union_stacks" : [],
+  "field_lists" : [],
+  "errors" : [
+    ["NoError", 0],
+    ["PacketTooShort", 1],
+    ["NoMatch", 2],
+    ["StackOutOfBounds", 3],
+    ["HeaderTooShort", 4],
+    ["ParserTimeout", 5],
+    ["ParserInvalidArgument", 6]
+  ],
+  "enums" : [],
+  "parsers" : [
+    {
+      "name" : "parser",
+      "id" : 0,
+      "init_state" : "start",
+      "parse_states" : [
+        {
+          "name" : "start",
+          "id" : 0,
+          "parser_ops" : [
+            {
+              "parameters" : [
+                {
+                  "type" : "regular",
+                  "value" : "data"
+                }
+              ],
+              "op" : "extract"
+            },
+            {
+              "parameters" : [
+                {
+                  "type" : "field",
+                  "value" : ["scalars", "tmp"]
+                },
+                {
+                  "type" : "expression",
+                  "value" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "field",
+                            "value" : ["data", "da"]
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0xffff"
+                      }
+                    }
+                  }
+                }
+              ],
+              "op" : "set"
+            },
+            {
+              "parameters" : [
+                {
+                  "type" : "field",
+                  "value" : ["scalars", "tmp_0"]
+                },
+                {
+                  "type" : "expression",
+                  "value" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : "&",
+                              "left" : {
+                                "type" : "expression",
+                                "value" : {
+                                  "op" : ">>",
+                                  "left" : {
+                                    "type" : "field",
+                                    "value" : ["data", "db"]
+                                  },
+                                  "right" : {
+                                    "type" : "hexstr",
+                                    "value" : "0x5"
+                                  }
+                                }
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0xffffffff"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0x07"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0x07"
+                      }
+                    }
+                  }
+                }
+              ],
+              "op" : "set"
+            }
+          ],
+          "transitions" : [
+            {
+              "type" : "parse_vset",
+              "value" : "MyParser.pvs",
+              "mask" : null,
+              "next_state" : null
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x081001",
+              "mask" : null,
+              "next_state" : "foo"
+            }
+          ],
+          "transition_key" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp"]
+            },
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp_0"]
+            }
+          ]
+        },
+        {
+          "name" : "foo",
+          "id" : 1,
+          "parser_ops" : [],
+          "transitions" : [
+            {
+              "value" : "default",
+              "mask" : null,
+              "next_state" : null
+            }
+          ],
+          "transition_key" : []
+        }
+      ]
+    }
+  ],
+  "parse_vsets" : [
+    {
+      "name" : "MyParser.pvs",
+      "id" : 0,
+      "compressed_bitwidth" : 19
+    }
+  ],
+  "deparsers" : [
+    {
+      "name" : "deparser",
+      "id" : 0,
+      "source_info" : {
+        "filename" : "tests/testdata/pvs_struct_2.p4",
+        "line" : 67,
+        "column" : 8,
+        "source_fragment" : "MyDeparser"
+      },
+      "order" : [],
+      "primitives" : []
+    }
+  ],
+  "meter_arrays" : [],
+  "counter_arrays" : [],
+  "register_arrays" : [],
+  "calculations" : [],
+  "learn_lists" : [],
+  "actions" : [
+    {
+      "name" : "NoAction",
+      "id" : 0,
+      "runtime_data" : [],
+      "primitives" : []
+    },
+    {
+      "name" : "MyIngress.set_data",
+      "id" : 1,
+      "runtime_data" : [],
+      "primitives" : []
+    },
+    {
+      "name" : "pvs_struct_2l51",
+      "id" : 2,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "key_0"]
+            },
+            {
+              "type" : "field",
+              "value" : ["userMetadata.data[0]", "da"]
+            }
+          ],
+          "source_info" : {
+            "filename" : "tests/testdata/pvs_struct_2.p4",
+            "line" : 51,
+            "column" : 16,
+            "source_fragment" : "meta.data[0].da"
+          }
+        }
+      ]
+    }
+  ],
+  "pipelines" : [
+    {
+      "name" : "ingress",
+      "id" : 0,
+      "source_info" : {
+        "filename" : "tests/testdata/pvs_struct_2.p4",
+        "line" : 46,
+        "column" : 8,
+        "source_fragment" : "MyIngress"
+      },
+      "init_table" : "tbl_pvs_struct_2l51",
+      "tables" : [
+        {
+          "name" : "tbl_pvs_struct_2l51",
+          "id" : 0,
+          "source_info" : {
+            "filename" : "tests/testdata/pvs_struct_2.p4",
+            "line" : 51,
+            "column" : 16,
+            "source_fragment" : "meta.data[0].da"
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [2],
+          "actions" : ["pvs_struct_2l51"],
+          "base_default_next" : "MyIngress.t",
+          "next_tables" : {
+            "pvs_struct_2l51" : "MyIngress.t"
+          },
+          "default_entry" : {
+            "action_id" : 2,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "MyIngress.t",
+          "id" : 1,
+          "source_info" : {
+            "filename" : "tests/testdata/pvs_struct_2.p4",
+            "line" : 49,
+            "column" : 10,
+            "source_fragment" : "t"
+          },
+          "key" : [
+            {
+              "match_type" : "exact",
+              "name" : "meta.data[0].da",
+              "target" : ["scalars", "key_0"],
+              "mask" : null
+            }
+          ],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [1, 0],
+          "actions" : ["MyIngress.set_data", "NoAction"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "MyIngress.set_data" : null,
+            "NoAction" : null
+          },
+          "default_entry" : {
+            "action_id" : 0,
+            "action_const" : false,
+            "action_data" : [],
+            "action_entry_const" : false
+          }
+        }
+      ],
+      "action_profiles" : [],
+      "conditionals" : []
+    },
+    {
+      "name" : "egress",
+      "id" : 1,
+      "source_info" : {
+        "filename" : "tests/testdata/pvs_struct_2.p4",
+        "line" : 58,
+        "column" : 8,
+        "source_fragment" : "MyEgress"
+      },
+      "init_table" : null,
+      "tables" : [],
+      "action_profiles" : [],
+      "conditionals" : []
+    }
+  ],
+  "checksums" : [],
+  "force_arith" : [],
+  "extern_instances" : [],
+  "field_aliases" : [
+    [
+      "queueing_metadata.enq_timestamp",
+      ["standard_metadata", "enq_timestamp"]
+    ],
+    [
+      "queueing_metadata.enq_qdepth",
+      ["standard_metadata", "enq_qdepth"]
+    ],
+    [
+      "queueing_metadata.deq_timedelta",
+      ["standard_metadata", "deq_timedelta"]
+    ],
+    [
+      "queueing_metadata.deq_qdepth",
+      ["standard_metadata", "deq_qdepth"]
+    ],
+    [
+      "intrinsic_metadata.ingress_global_timestamp",
+      ["standard_metadata", "ingress_global_timestamp"]
+    ],
+    [
+      "intrinsic_metadata.egress_global_timestamp",
+      ["standard_metadata", "egress_global_timestamp"]
+    ],
+    [
+      "intrinsic_metadata.mcast_grp",
+      ["standard_metadata", "mcast_grp"]
+    ],
+    [
+      "intrinsic_metadata.egress_rid",
+      ["standard_metadata", "egress_rid"]
+    ],
+    [
+      "intrinsic_metadata.priority",
+      ["standard_metadata", "priority"]
+    ]
+  ],
+  "program" : "./pvs_struct_2.p4i",
+  "__meta__" : {
+    "version" : [2, 18],
+    "compiler" : "https://github.com/p4lang/p4c"
+  }
+}

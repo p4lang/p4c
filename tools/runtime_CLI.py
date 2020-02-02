@@ -61,7 +61,7 @@ PreType = enum('PreType', 'None', 'SimplePre', 'SimplePreLAG')
 MeterType = enum('MeterType', 'packets', 'bytes')
 TableType = enum('TableType', 'simple', 'indirect', 'indirect_ws')
 ResType = enum('ResType', 'table', 'action_prof', 'action', 'meter_array',
-               'counter_array', 'register_array')
+               'counter_array', 'register_array', 'parse_vset')
 
 def bytes_to_string(byte_array):
     form = 'B' * len(byte_array)
@@ -106,6 +106,7 @@ METER_ARRAYS = {}
 COUNTER_ARRAYS = {}
 REGISTER_ARRAYS = {}
 CUSTOM_CRC_CALCS = {}
+PARSE_VSETS = {}
 
 # maps (object type, unique suffix) to object
 SUFFIX_LOOKUP_MAP = {}
@@ -235,6 +236,18 @@ class RegisterArray:
     def register_str(self):
         return "{0:30} [{1}]".format(self.name, self.size)
 
+class ParseVSet:
+    def __init__(self, name, id_):
+        self.name = name
+        self.id_ = id_
+        self.bitwidth = None
+
+        PARSE_VSETS[name] = self
+
+    def parse_vset_str(self):
+        return "{0:30} [compressed bitwidth:{1}]".format(
+            self.name, self.bitwidth)
+
 def reset_config():
     TABLES.clear()
     ACTION_PROFS.clear()
@@ -243,10 +256,12 @@ def reset_config():
     COUNTER_ARRAYS.clear()
     REGISTER_ARRAYS.clear()
     CUSTOM_CRC_CALCS.clear()
+    PARSE_VSETS.clear()
 
     SUFFIX_LOOKUP_MAP.clear()
 
 def load_json_str(json_str):
+
     def get_header_type(header_name, j_headers):
         for h in j_headers:
             if h["name"] == header_name:
@@ -348,6 +363,10 @@ def load_json_str(json_str):
         elif j_calc["algo"] == "crc32_custom":
             CUSTOM_CRC_CALCS[calc_name] = 32
 
+    for j_parse_vset in get_json_key("parse_vsets"):
+        parse_vset = ParseVSet(j_parse_vset["name"], j_parse_vset["id"])
+        parse_vset.bitwidth = j_parse_vset["compressed_bitwidth"]
+
     # Builds a dictionary mapping (object type, unique suffix) to the object
     # (Table, Action, etc...). In P4_16 the object name is the fully-qualified
     # name, which can be quite long, which is why we accept unique suffixes as
@@ -359,7 +378,8 @@ def load_json_str(json_str):
             (ResType.table, TABLES), (ResType.action_prof, ACTION_PROFS),
             (ResType.action, ACTIONS), (ResType.meter_array, METER_ARRAYS),
             (ResType.counter_array, COUNTER_ARRAYS),
-            (ResType.register_array, REGISTER_ARRAYS)]:
+            (ResType.register_array, REGISTER_ARRAYS),
+            (ResType.parse_vset, PARSE_VSETS)]:
         for name, res in res_dict.items():
             suffix = None
             for s in reversed(name.split('.')):
@@ -634,6 +654,27 @@ BmMatchParamTernary.to_str = BmMatchParamTernary_to_str
 BmMatchParamValid.to_str = BmMatchParamValid_to_str
 BmMatchParamRange.to_str = BmMatchParamRange_to_str
 
+def parse_pvs_value(input_str, bitwidth):
+    try:
+        input_ = int(input_str, 0)
+    except:
+        raise UIn_BadParamError(
+            "Invalid input, could not cast to integer, try in hex with 0x prefix"
+        )
+    max_v = (1 << bitwidth) - 1
+    # bmv2 does not perform this check when receiving the value (and does not
+    # truncate values which are too large), so we perform this check
+    # client-side.
+    if input_ > max_v:
+        raise UIn_BadParamError(
+            "Input is too large, it should fit within {} bits".format(bitwidth))
+    try:
+        v = int_to_bytes(input_, (bitwidth + 7) / 8)
+    except UIn_BadParamError:
+        # should not happen because of check above
+        raise
+    return bytes_to_string(v)
+
 # services is [(service_name, client_class), ...]
 def thrift_connect(thrift_ip, thrift_port, services):
     return utils.thrift_connect(thrift_ip, thrift_port, services)
@@ -651,28 +692,31 @@ def handle_bad_input(f):
             print "Error:", e
         except InvalidTableOperation as e:
             error = TableOperationErrorCode._VALUES_TO_NAMES[e.code]
-            print "Invalid table operation (%s)" % error
+            print "Invalid table operation ({})".format(error)
         except InvalidCounterOperation as e:
             error = CounterOperationErrorCode._VALUES_TO_NAMES[e.code]
-            print "Invalid counter operation (%s)" % error
+            print "Invalid counter operation ({})".format(error)
         except InvalidMeterOperation as e:
             error = MeterOperationErrorCode._VALUES_TO_NAMES[e.code]
-            print "Invalid meter operation (%s)" % error
+            print "Invalid meter operation ({})".format(error)
         except InvalidRegisterOperation as e:
             error = RegisterOperationErrorCode._VALUES_TO_NAMES[e.code]
-            print "Invalid register operation (%s)" % error
+            print "Invalid register operation ({})".format(error)
         except InvalidLearnOperation as e:
             error = LearnOperationErrorCode._VALUES_TO_NAMES[e.code]
-            print "Invalid learn operation (%s)" % error
+            print "Invalid learn operation ({})".format(error)
         except InvalidSwapOperation as e:
             error = SwapOperationErrorCode._VALUES_TO_NAMES[e.code]
-            print "Invalid swap operation (%s)" % error
+            print "Invalid swap operation ({})".format(error)
         except InvalidDevMgrOperation as e:
             error = DevMgrErrorCode._VALUES_TO_NAMES[e.code]
-            print "Invalid device manager operation (%s)" % error
+            print "Invalid device manager operation ({})".format(error)
         except InvalidCrcOperation as e:
             error = CrcErrorCode._VALUES_TO_NAMES[e.code]
-            print "Invalid crc operation (%s)" % error
+            print "Invalid crc operation ({})".format(error)
+        except InvalidParseVSetOperation as e:
+            error = ParseVSetOperationErrorCode._VALUES_TO_NAMES[e.code]
+            print "Invalid parser value set operation ({})".format(error)
     return handle
 
 def handle_bad_input_mc(f):
@@ -765,6 +809,9 @@ def parse_bool(s):
     except:
         pass
     raise UIn_Error("Invalid bool parameter")
+
+def hexstr(v):
+    return "".join("{:02x}".format(ord(c)) for c in v)
 
 class RuntimeAPI(cmd.Cmd):
     prompt = 'RuntimeCmd: '
@@ -2026,9 +2073,6 @@ class RuntimeAPI(cmd.Cmd):
         return self._complete_res(REGISTER_ARRAYS, text)
 
     def dump_action_and_data(self, action_name, action_data):
-        def hexstr(v):
-            return "".join("{:02x}".format(ord(c)) for c in v)
-
         print "Action entry: {} - {}".format(
             action_name, ", ".join([hexstr(a) for a in action_data]))
 
@@ -2065,8 +2109,6 @@ class RuntimeAPI(cmd.Cmd):
         if table.key:
             out_name_w = max(20, max([len(t[0]) for t in table.key]))
 
-        def hexstr(v):
-            return "".join("{:02x}".format(ord(c)) for c in v)
         def dump_exact(p):
              return hexstr(p.exact.key)
         def dump_lpm(p):
@@ -2272,6 +2314,83 @@ class RuntimeAPI(cmd.Cmd):
 
     def complete_table_dump_entry_from_key(self, text, line, start_index, end_index):
         return self._complete_tables(text)
+
+    def _complete_pvs(self, text):
+        return self._complete_res(PARSE_VSETS, text)
+
+    @handle_bad_input
+    def do_show_pvs(self, line):
+        "List parser value sets defined in the P4 program: show_pvs"
+        self.exactly_n_args(line.split(), 0)
+        for pvs_name in sorted(PARSE_VSETS):
+            print PARSE_VSETS[pvs_name].parse_vset_str()
+
+    @handle_bad_input
+    def do_pvs_add(self, line):
+        """
+        Add a value to a parser value set: pvs_add <pvs_name> <value>
+        bmv2 will not report an error if the value already exists.
+        """
+        args = line.split()
+        self.exactly_n_args(args, 2)
+        pvs_name = args[0]
+        pvs = self.get_res("parser value set", pvs_name, ResType.parse_vset)
+
+        v = parse_pvs_value(args[1], pvs.bitwidth)
+        self.client.bm_parse_vset_add(0, pvs_name, v)
+
+    def complete_pvs_add(self, text, line, start_index, end_index):
+        return self._complete_pvs(text)
+
+    @handle_bad_input
+    def do_pvs_remove(self, line):
+        """
+        Remove a value from a parser value set: pvs_remove <pvs_name> <value>
+        bmv2 will not report an error if the value does not exist.
+        """
+        args = line.split()
+        self.exactly_n_args(args, 2)
+        pvs_name = args[0]
+        pvs = self.get_res("parser value set", pvs_name, ResType.parse_vset)
+
+        v = parse_pvs_value(args[1], pvs.bitwidth)
+        self.client.bm_parse_vset_remove(0, pvs_name, v)
+
+    def complete_pvs_remove(self, text, line, start_index, end_index):
+        return self._complete_pvs(text)
+
+    @handle_bad_input
+    def do_pvs_get(self, line):
+        """
+        Print all values from a parser value set: pvs_get <pvs_name>
+        Values are displayed in no particular order, one per line.
+        """
+        args = line.split()
+        self.exactly_n_args(args, 1)
+        pvs_name = args[0]
+        pvs = self.get_res("parser value set", pvs_name, ResType.parse_vset)
+
+        values = self.client.bm_parse_vset_get(0, pvs_name)
+        for v in values:
+            print hexstr(v)
+
+    def complete_pvs_get(self, text, line, start_index, end_index):
+        return self._complete_pvs(text)
+
+    @handle_bad_input
+    def do_pvs_clear(self, line):
+        """
+        Remove all values from a parser value set: pvs_clear <pvs_name>
+        """
+        args = line.split()
+        self.exactly_n_args(args, 1)
+        pvs_name = args[0]
+        pvs = self.get_res("parser value set", pvs_name, ResType.parse_vset)
+
+        self.client.bm_parse_vset_clear(0, pvs_name)
+
+    def complete_pvs_clear(self, text, line, start_index, end_index):
+        return self._complete_pvs(text)
 
     @handle_bad_input
     def do_port_add(self, line):

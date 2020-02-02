@@ -170,4 +170,6 @@ testdata/config_options.json \
 testdata/one_extern.json \
 testdata/unions_e2e_options_bos.json \
 testdata/unions_e2e_options_count.json \
-testdata/test_logging.json
+testdata/test_logging.json \
+testdata/pvs_struct_2.p4 \
+testdata/pvs_struct_2.json

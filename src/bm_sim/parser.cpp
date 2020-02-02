@@ -610,6 +610,11 @@ class ParseVSetCommon : public ParseVSetIface {
     (void) v;
   }
 
+  std::vector<ByteContainer> get() const {
+    Lock lock(set_mutex);
+    return std::vector<ByteContainer>(set.begin(), set.end());
+  }
+
  private:
   void transform_input(ByteContainer &v) const {  // NOLINT(runtime/references)
     static_cast<const P *>(this)->transform_imp(v);
@@ -637,6 +642,10 @@ class ParseVSetBase : public ParseVSetCommon<ParseVSetBase, false> {
  public:
   explicit ParseVSetBase(size_t width)
       : ParseVSetCommon<ParseVSetBase, false>(width) { }
+
+  std::vector<ByteContainer> get() const {
+    return ParseVSetCommon<ParseVSetBase, false>::get();
+  }
 };
 
 class ParseVSetNoMask : public ParseVSetCommon<ParseVSetNoMask> {
@@ -671,6 +680,8 @@ ParseVSet::ParseVSet(const std::string &name, p4object_id_t id,
       base(new ParseVSetBase(compressed_bitwidth)) {
   add_shadow(base.get());
 }
+
+ParseVSet::~ParseVSet() = default;
 
 void
 ParseVSet::add_shadow(ParseVSetIface *shadow) {
@@ -708,6 +719,12 @@ ParseVSet::size() const {
 size_t
 ParseVSet::get_compressed_bitwidth() const {
   return compressed_bitwidth;
+}
+
+std::vector<ByteContainer>
+ParseVSet::get() const {
+  // only the base has a get() method, as it stores values unmodified
+  return base->get();
 }
 
 class ParseSwitchCase : public ParseSwitchCaseIface {

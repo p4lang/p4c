@@ -418,6 +418,50 @@ configuration of a clone session.
 ```
 TODO: port_add
 TODO: port_remove
+```
+
+### pvs_add, pvs_clear, pvs_get, pvs_remove
+
+These commands are used to control an instance of a P4 parser value
+set. `pvs_add` is used to add an entry to a value set, `pvs_remove` is used to
+remove an entry, `pvs_clear` is used to remove *all* entries, and `pvs_get` is
+used to list all entries.
+
+P4 allows a value_set to take a struct as the type parameter, such as in the
+following example:
+```
+struct vsk_t {
+    bit<16> f1;
+    bit<7> f2;
+}
+value_set<vsk_t>(4) pvs;
+select (<X>) {
+    pvs: accept;
+    _: reject;
+}
+```
+When adding or removing an entry, you must provide a single integer value, which
+must fit within the value set's "compressed bitwidth", or the CLI will display
+an error. When a value set's entries consist of multiple individual fields, as
+is the case in the example above, the "compressed bitwidth" is defined as the
+sum of the bitwidths of all these individual fields, without padding. When the
+type parameter for the value set is an integer (signed or unsigned), or a struct
+with a single field, the "compressed bitwidth" is simply the bitwidth of the
+integer / field.
+
+In the future, the CLI may provide a more intuitive interface and enable you to
+provide individual integer values for the different fields which constitute the
+value set entry. However, at the moment, you need to concatenate them yourself.
+
+Note that `pvs_add` will not warn you if the value you are adding already
+exists, and neither will `pvs_remove` if the value you want to remove does not
+exist in the value set.
+
+The bmv2 value set implementation does *not* support match types other than
+exact.
+
+
+```
 TODO: register_read
 TODO: register_reset
 TODO: register_write
@@ -441,6 +485,14 @@ shown.
 
 No parameters.  Shows the port numbers, the interface names they are associated
 with, and their status (e.g. up or down).
+
+
+### show_pvs
+
+No parameters.  For every parser value set in the currently loaded P4 program,
+shows the name and the expected bitwidth of entries.  When adding entries with
+the `pvs_add` command, the user must provide integer values no larger than this
+bitwidth.
 
 
 ### show_tables

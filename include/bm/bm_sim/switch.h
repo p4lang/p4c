@@ -788,6 +788,18 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
     return contexts.at(cxt_id).parse_vset_remove(parse_vset_name, value);
   }
 
+  ParseVSet::ErrorCode
+  parse_vset_get(cxt_id_t cxt_id, const std::string &parse_vset_name,
+                 std::vector<ByteContainer> *values) override {
+    return contexts.at(cxt_id).parse_vset_get(parse_vset_name, values);
+  }
+
+  ParseVSet::ErrorCode
+  parse_vset_clear(cxt_id_t cxt_id,
+                   const std::string &parse_vset_name) override {
+    return contexts.at(cxt_id).parse_vset_clear(parse_vset_name);
+  }
+
   RuntimeInterface::ErrorCode
   reset_state() override;
 

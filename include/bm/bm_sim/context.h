@@ -393,6 +393,13 @@ class Context final {
   parse_vset_remove(const std::string &parse_vset_name,
                     const ByteContainer &value);
 
+  ParseVSet::ErrorCode
+  parse_vset_get(const std::string &parse_vset_name,
+                 std::vector<ByteContainer> *values);
+
+  ParseVSet::ErrorCode
+  parse_vset_clear(const std::string &parse_vset_name);
+
   P4Objects::IdLookupErrorCode p4objects_id_from_name(
       P4Objects::ResourceType type, const std::string &name,
       p4object_id_t *id) const;

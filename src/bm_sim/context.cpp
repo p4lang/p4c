@@ -659,9 +659,28 @@ ParseVSet::ErrorCode
 Context::parse_vset_remove(const std::string &parse_vset_name,
                            const ByteContainer &value) {
   boost::shared_lock<boost::shared_mutex> lock(request_mutex);
-  ParseVSet *parse_vset = p4objects_rt->get_parse_vset_rt(parse_vset_name);
+  auto *parse_vset = p4objects_rt->get_parse_vset_rt(parse_vset_name);
   if (!parse_vset) return ParseVSet::ErrorCode::INVALID_PARSE_VSET_NAME;
   parse_vset->remove(value);
+  return ParseVSet::ErrorCode::SUCCESS;
+}
+
+ParseVSet::ErrorCode
+Context::parse_vset_get(const std::string &parse_vset_name,
+                        std::vector<ByteContainer> *values) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  auto *parse_vset = p4objects_rt->get_parse_vset_rt(parse_vset_name);
+  if (!parse_vset) return ParseVSet::ErrorCode::INVALID_PARSE_VSET_NAME;
+  *values = parse_vset->get();
+  return ParseVSet::ErrorCode::SUCCESS;
+}
+
+ParseVSet::ErrorCode
+Context::parse_vset_clear(const std::string &parse_vset_name) {
+  boost::shared_lock<boost::shared_mutex> lock(request_mutex);
+  auto *parse_vset = p4objects_rt->get_parse_vset_rt(parse_vset_name);
+  if (!parse_vset) return ParseVSet::ErrorCode::INVALID_PARSE_VSET_NAME;
+  parse_vset->clear();
   return ParseVSet::ErrorCode::SUCCESS;
 }
 

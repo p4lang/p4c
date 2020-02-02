@@ -670,6 +670,16 @@ service Standard {
     3:BmParseVSetValue value
   ) throws (1:InvalidParseVSetOperation ouch)
 
+  list<BmParseVSetValue> bm_parse_vset_get(
+    1:i32 cxt_id,
+    2:string parse_vset_name
+  ) throws (1:InvalidParseVSetOperation ouch)
+
+  void bm_parse_vset_clear(
+    1:i32 cxt_id,
+    2:string parse_vset_name
+  ) throws (1:InvalidParseVSetOperation ouch)
+
 
   // device manager
 
