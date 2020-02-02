@@ -103,6 +103,7 @@ std::vector<bm::MatchKeyParam> build_key(pi_p4_id_t table_id,
         }
         break;
       case PI_P4INFO_MATCH_TYPE_TERNARY:
+      case PI_P4INFO_MATCH_TYPE_OPTIONAL:
         {
           std::string k(mk_data, nbytes);
           mk_data += nbytes;
