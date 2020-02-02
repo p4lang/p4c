@@ -202,7 +202,7 @@ After-ingress pseudocode - the short version:
 
 ```
 if (a clone primitive action was called) {
-    make a clone of the packet with details configured for the clone session
+    create clone(s) of the packet with details configured for the clone session
 }
 if (digest to generate) {   // because your code called generate_digest
     send a digest message to the control plane software
@@ -229,25 +229,38 @@ if (a clone primitive action was called) {
     // `clone_ingress_pkt_to_egress` primitive action in a P4_14
     // program, during ingress processing.
 
-    Make a clone of the packet destined for the egress_port configured
-    in the clone (aka mirror) session id number that was given when the
-    last clone primitive action was called.
+    Create zero or more clones of the packet.  The cloned packet(s)
+    will be enqueued in the packet buffer, destined for the egress
+    port(s) configured in the clone session whose numeric id was given
+    as the value of the `session` parameter when the last clone
+    primitive action was called.
 
-    The packet contents will be the same as when it most recently
-    began the ingress processing, where the clone operation was
-    performed, without any modifications that may have been made
-    during the execution of that ingress code.  (That may not be the
-    packet as originally received by the switch, if the packet reached
-    this occurrence of ingress processing via a recirculate operation,
-    for example.)
+    Each cloned packet will later perform egress processing,
+    independently from whatever the original packet does next, and if
+    multiple cloned packets are created via the same clone operation,
+    independently from each other.
+
+    The contents of the cloned packet(s) will be the same as the
+    packet when it most recently began ingress processing, where the
+    clone operation was performed, without any modifications that may
+    have been made during the execution of that ingress code.  (That
+    may not be the packet as originally received by the switch, if the
+    packet reached this occurrence of ingress processing via a
+    recirculate operation, for example.)
 
     If it was a clone3 (P4_16) or clone_ingress_pkt_to_egress (P4_14)
     action, also preserve the final ingress values of the metadata
     fields specified in the field list argument, except assign
     instance_type a value of PKT_INSTANCE_TYPE_INGRESS_CLONE.
 
-    The cloned packet will continue processing at the beginning of
-    your egress code.
+    Each cloned packet will be processed by your parser code again.
+    In many cases this will result in exactly the same headers being
+    parsed as when the packet was most recently parsed, but if your
+    parser code uses the value of standard_metadata.instance_type to
+    affect its behavior, it could be different.
+
+    After this parsing is done, each clone will continue processing at
+    the beginning of your egress code.
     // fall through to code below
 }
 if (digest to generate) {
@@ -291,7 +304,7 @@ After-egress pseudocode - the short version:
 
 ```
 if (a clone primitive action was called) {
-    make a clone of the packet with details configured for the clone session
+    create clone(s) of the packet with details configured for the clone session
 }
 if (egress_spec == DROP_PORT) {  // e.g. because your code called drop/mark_to_drop
     Drop packet.
@@ -313,20 +326,33 @@ if (a clone primitive action was called) {
     // `clone_egress_pkt_to_egress` primitive action in a P4_14
     // program, during egress processing.
 
-    Make a clone of the packet destined for the egress_port configured
-    in the clone (aka mirror) session id number that was given when the
-    last clone or clone3 primitive action was called.
+    Create zero or more clones of the packet.  The cloned packet(s)
+    will be enqueued in the packet buffer, destined for the egress
+    port(s) configured in the clone session whose numeric id was given
+    as the value of the `session` parameter when the last clone
+    primitive action was called.
 
-    The packet contents will be as constructed by the deparser after
-    egress processing, with any modifications made to the packet
-    during both ingress and egress processing.
+    Each cloned packet will later perform egress processing,
+    independently from whatever the original packet does next, and if
+    multiple cloned packets are created via the same clone operation,
+    independently from each other.
+
+    The contents of the cloned packet(s) will be as they are at the
+    end of egress processing, including any changes made to the values
+    of fields in headers, and whether headers were made valid or
+    invalid.  Your deparser code will _not_ be executed for
+    egress-to-egress cloned packets, nor will your parser code be
+    executed for them.
 
     If it was a clone3 (P4_16) or clone_egress_pkt_to_egress (P4_14)
     action, also preserve the final egress values of the metadata
     fields specified in the field list argument, except assign
-    instance_type a value of PKT_INSTANCE_TYPE_EGRESS_CLONE.
+    instance_type a value of PKT_INSTANCE_TYPE_EGRESS_CLONE.  Each
+    cloned packet will have the same standard_metadata fields
+    overwritten that all packets that begin egress processing do,
+    e.g. egress_port, egress_spec, egress_global_timestamp, etc.
 
-    The cloned packet will continue processing at the beginning of
+    Each cloned packet will continue processing at the beginning of
     your egress code.
     // fall through to code below
 }

@@ -1,3 +1,7 @@
+Most of the commands in here are common to runtime_CLI and
+simple_switch_CLI, but a few exist only in simple_switch_CLI.  Those
+are marked [simple_switch_CLI only].
+
 ```
 TODO: act_prof_add_member_to_group
 TODO: act_prof_create_group
@@ -11,6 +15,9 @@ TODO: act_prof_modify_member
 TODO: act_prof_remove_member_from_group
 TODO: counter_read
 TODO: counter_reset
+TODO: counter_write
+TODO: get_time_elapsed [simple_switch_CLI only]
+TODO: get_time_since_epoch [simple_switch_CLI only]
 TODO: help
 TODO: load_new_config_file
 ```
@@ -22,7 +29,7 @@ ingress P4 code can assign values to a few fields in standard_metadata
 that control whether the packet is dropped, sent via unicast to one
 output port, or multicast replicated to a list of 0 or more output
 ports.  See
-[here](https://github.com/p4lang/behavioral-model/blob/master/docs/simple_switch.md#pseudocode-for-what-happens-at-the-end-of-ingress-and-egress-processing)
+[here](simple_switch.md#pseudocode-for-what-happens-at-the-end-of-ingress-and-egress-processing)
 for more details on how `simple_switch` decides between these
 alternatives.
 
@@ -164,7 +171,7 @@ LAGS
 Here we see that group 1113 has one node associated with it.  `L1h` is
 an abbreviation for `L1 handle`, which you may see in the
 simple_switch log messages, and means the same thing as a node handle.
-We see the rid value of 5, where rid is an abbrevation of
+We see the rid value of 5, where rid is an abbreviation of
 `egress_rid`, and we see the list of ports 0 and 3.
 
 In the current configuration of simple_switch, sending a packet to be
@@ -317,6 +324,97 @@ the meter type is packets, the rate is entered in packets/microsecond and
 burst_size is the number of packets.
 
 
+### mirroring_add, mirroring_add_mc, mirroring_delete, mirroring_get
+
+[simple_switch_CLI only]
+
+When any of these events happened during packet processing:
+
++ Your P4_16 v1model architecture program called `clone` or `clone3`
+  extern functions during ingress or egress processing, and now
+  ingress or egress processing has completed
++ Your P4_14 program called `clone_ingress_pkt_to_egress` during
+  ingress processing, which is now complete
++ Your P4_14 program called `clone_egress_pkt_to_egress` during egress
+  processing, which is now complete
+
+then not only will the current "original" packet continue with
+whatever it normally does, as if your program had not called a clone
+operation, but the PRE (Packet Replication Engine) part of
+`simple_switch` will also create zero or more copies, or clones, of
+the current packet, and cause them to be enqueued in the packet buffer
+such that later each of the cloned packet(s) will perform egress
+processing.  Each of the clones is processed independently from each
+other, and independently from the original packet.
+
+Search for occurrences of the word "clone" in [this
+article](simple_switch.md#pseudocode-for-what-happens-at-the-end-of-ingress-and-egress-processing)
+for more details on how `simple_switch` deals with cloned packets.
+
+`simple_switch` supports 32,768 independent clone sessions, numbered
+from 0 up to 32,767, also called mirroring sessions.  When a packet is
+cloned, you specify which clone session you want it to use in the P4
+program call of the clone operation.
+
+The purpose of the `mirroring` commands is to configure which port or
+ports the cloned packets are sent to.  This state is configured
+independently for each clone session numeric id.
+
+By default, when `simple_switch` starts, every clone session id is in
+an unconfigured state.  Any clone operation done for a clone session
+id that is in this unconfigured state will create 0 clone packets,
+i.e. the packet processing behavior will be the same as if you did not
+call a clone operation at all.
+
+If you use the command `mirroring_add 5 7`, the configuration of clone
+session id number 5 is changed such that future clone operations that
+use clone session 5 will create a single clone packet destined for
+egress port 7.
+
+```
+RuntimeCmd: help mirroring_add
+Add mirroring session to unicast port: mirroring_add <mirror_id> <egress_port>
+
+RuntimeCmd: mirroring_add 5 7
+
+RuntimeCmd: mirroring_get 5
+MirroringSessionConfig(mgid=None, port=7)
+```
+
+Using the command `mirroring_add_mc 5 22` modifies the configuration
+of clone session id number 5 such that future clone operations that
+use clone session 5 will create as many clones as the multicast group
+id 22 is configured to create.  See the `mc_mgrp_create` and related
+multicast group configuration commands for how to configure a
+multicast group.
+
+```
+RuntimeCmd: help mirroring_add_mc
+Add mirroring session to multicast group: mirroring_add_mc <mirror_id> <mgrp>
+
+RuntimeCmd: mirroring_add_mc 5 22
+
+RuntimeCmd: mirroring_get 5
+MirroringSessionConfig(mgid=22, port=None)
+```
+
+The command `mirroring_delete 5` returns the clone session id number 5
+to its original unconfigured state.
+
+```
+RuntimeCmd: help mirroring_delete
+Delete mirroring session: mirroring_delete <mirror_id>
+
+RuntimeCmd: mirroring_delete 5
+
+RuntimeCmd: mirroring_get 5
+Invalid mirroring operation (SESSION_NOT_FOUND)
+```
+
+The `mirroring_get` command can be used to show the current
+configuration of a clone session.
+
+
 ```
 TODO: port_add
 TODO: port_remove
@@ -327,6 +425,8 @@ TODO: reset_state
 TODO: serialize_state
 TODO: set_crc16_parameters
 TODO: set_crc32_parameters
+TODO: set_queue_depth [simple_switch_CLI only]
+TODO: set_queue_rate [simple_switch_CLI only]
 TODO: shell
 ```
 
