@@ -45,6 +45,14 @@ namespace UBPF {
                    control->program->model.ubpf_time_get_ns.name) {
             builder->append(control->program->model.ubpf_time_get_ns.name + "()");
             return;
+        } else if (function->method->name.name ==
+                   control->program->model.csum_replace2.name) {
+            processChecksumReplace2(function);
+            return;
+        } else if (function->method->name.name ==
+                   control->program->model.csum_replace4.name) {
+            processChecksumReplace4(function);
+            return;
         } else if (function->method->name.name == control->program->model.hash.name) {
             cstring hashKeyInstanceName = createHashKeyInstance(function);
 
@@ -59,7 +67,34 @@ namespace UBPF {
 
             return;
         }
+
         ::error("%1%: Not supported", function->method);
+    }
+
+    void UBPFControlBodyTranslator::processChecksumReplace2(const P4::ExternFunction *function) {
+        builder->append(control->program->model.csum_replace2.name + "(");
+        auto v = function->expr->arguments;
+        bool first = true;
+        for (auto arg : *v) {
+            if (!first)
+                builder->append(", ");
+            first = false;
+            visit(arg);
+        }
+        builder->append(")");
+    }
+
+    void UBPFControlBodyTranslator::processChecksumReplace4(const P4::ExternFunction *function) {
+        builder->append(control->program->model.csum_replace4.name + "(");
+        auto v = function->expr->arguments;
+        bool first = true;
+        for (auto arg : *v) {
+            if (!first)
+                builder->append(", ");
+            first = false;
+            visit(arg);
+        }
+        builder->append(")");
     }
 
     cstring UBPFControlBodyTranslator::createHashKeyInstance(const P4::ExternFunction *function) {

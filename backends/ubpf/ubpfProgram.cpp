@@ -72,6 +72,9 @@ namespace UBPF {
         builder->target->emitUbpfHelpers(builder);
 
         builder->emitIndent();
+        builder->target->emitChecksumHelpers(builder);
+
+        builder->emitIndent();
         builder->target->emitMain(builder, "entry", contextVar.c_str());
         builder->blockStart();
 

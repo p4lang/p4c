@@ -105,4 +105,39 @@ namespace UBPF {
         builder->newline();
     }
 
+    void UbpfTarget::emitChecksumHelpers(EBPF::CodeBuilder *builder) const {
+        builder->appendLine("inline uint16_t csum16_add(uint16_t csum, uint16_t addend) {\n"
+                            "    uint16_t res = csum;\n"
+                            "    res += addend;\n"
+                            "    return (res + (res < addend));\n"
+                            "}\n"
+                            "inline uint16_t csum16_sub(uint16_t csum, uint16_t addend) {\n"
+                            "    return csum16_add(csum, ~addend);\n"
+                            "}\n"
+                            "inline uint16_t csum_replace2(uint16_t csum, uint16_t old, uint16_t new) {\n"
+                            "    return (~csum16_add(csum16_sub(~csum, old), new));\n"
+                            "}\n");
+        builder->appendLine("inline uint16_t csum_fold(uint32_t csum) {\n"
+                            "    uint32_t r = csum << 16 | csum >> 16;\n"
+                            "    csum = ~csum;\n"
+                            "    csum -= r;\n"
+                            "    return (uint16_t)(csum >> 16);\n"
+                            "}\n"
+                            "inline uint32_t csum_unfold(uint16_t csum) {\n"
+                            "    return (uint32_t)csum;\n"
+                            "}\n"
+                            "inline uint32_t csum32_add(uint32_t csum, uint32_t addend) {\n"
+                            "    uint32_t res = csum;\n"
+                            "    res += addend;\n"
+                            "    return (res + (res < addend));\n"
+                            "}\n"
+                            "inline uint32_t csum32_sub(uint32_t csum, uint32_t addend) {\n"
+                            "    return csum32_add(csum, ~addend);\n"
+                            "}\n"
+                            "inline uint16_t csum_replace4(uint16_t csum, uint32_t from, uint32_t to) {\n"
+                            "    uint32_t tmp = csum32_sub(~csum_unfold(csum), from);\n"
+                            "    return csum_fold(csum32_add(tmp, to));\n"
+                            "}");
+    }
+
 }

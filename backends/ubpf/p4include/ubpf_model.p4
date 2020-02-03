@@ -94,6 +94,22 @@ enum HashAlgorithm {
  */
 extern void hash<D>(out bit<32> result, in HashAlgorithm algo, in D data);
 
+/***
+ * Compute the checksum via Incremental Update (RFC 1624).
+ * This function implements checksum computation for 16-bit wide fields.
+ */
+extern bit<16> csum_replace2(in bit<16> csum,  // current csum
+                             in bit<16> old,   // old value of the field
+                             in bit<16> new);
+
+/***
+ * Compute the checksum via Incremental Update (RFC 1624).
+ * This function implements checksum computation for 32-bit wide fields.
+ */
+extern bit<16> csum_replace4(in bit<16> csum,
+                             in bit<32> old,
+                             in bit<32> new);
+
 /*
  * Architecture.
  *

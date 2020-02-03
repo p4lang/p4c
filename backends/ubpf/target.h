@@ -30,35 +30,27 @@ namespace UBPF {
         explicit UbpfTarget() : EBPF::Target("UBPF") {}
 
         void emitLicense(Util::SourceCodeBuilder *, cstring) const override {};
-
         void emitCodeSection(Util::SourceCodeBuilder *, cstring) const override {};
-
         void emitIncludes(Util::SourceCodeBuilder *builder) const override;
-
         void emitTableLookup(Util::SourceCodeBuilder *builder, cstring tblName,
                              cstring key, cstring value) const override;
-
         void emitTableUpdate(Util::SourceCodeBuilder *builder, cstring tblName,
                              cstring key, cstring value) const override;
-
         void emitTableUpdate(EBPF::CodeGenInspector *codeGen, Util::SourceCodeBuilder *builder, cstring tblName,
                              cstring key, const IR::Expression *value) const;
-
         void emitGetPacketData(Util::SourceCodeBuilder *builder,
                                cstring ctxVar) const;
-
         void emitUserTableUpdate(UNUSED Util::SourceCodeBuilder *builder, UNUSED cstring tblName,
                                  UNUSED cstring key, UNUSED cstring value) const override {};
-
         void emitTableDecl(UNUSED Util::SourceCodeBuilder *builder,
                            UNUSED cstring tblName, UNUSED EBPF::TableKind tableKind,
                            UNUSED cstring keyType, UNUSED cstring valueType, UNUSED unsigned size) const override {};
-
         void emitMain(Util::SourceCodeBuilder *builder,
                       cstring functionName,
                       cstring argName) const override;
-
         void emitUbpfHelpers(EBPF::CodeBuilder *builder) const;
+        void emitChecksumHelpers(EBPF::CodeBuilder *builder) const;
+
 
         cstring dataOffset(UNUSED cstring base) const override { return cstring(""); }
         cstring dataEnd(UNUSED cstring base) const override { return cstring(""); }

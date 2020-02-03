@@ -71,7 +71,6 @@ The output file (`out.o`) can be injected to the uBPF VM.
 ### Known limitations
 
 * No support for some P4 constructs (meters, counters, etc.)
-* No support for checksum computation.
 
 ### Contact
 

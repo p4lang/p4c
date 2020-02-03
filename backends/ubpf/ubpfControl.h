@@ -38,6 +38,8 @@ namespace UBPF {
         virtual void processMethod(const P4::ExternMethod *method);
         virtual void processApply(const P4::ApplyMethod *method);
         virtual void processFunction(const P4::ExternFunction *function);
+        void processChecksumReplace2(const P4::ExternFunction *function);
+        void processChecksumReplace4(const P4::ExternFunction *function);
         bool preorder(const IR::PathExpression *expression) override;
         bool preorder(const IR::MethodCallStatement *s) override;
         bool preorder(const IR::MethodCallExpression *expression) override;

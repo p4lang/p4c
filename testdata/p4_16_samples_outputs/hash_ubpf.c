@@ -38,6 +38,39 @@ bpf_htonll(uint64_t val) {
     return htonll(val);
 }
 
+inline uint16_t csum16_add(uint16_t csum, uint16_t addend) {
+    uint16_t res = csum;
+    res += addend;
+    return (res + (res < addend));
+}
+inline uint16_t csum16_sub(uint16_t csum, uint16_t addend) {
+    return csum16_add(csum, ~addend);
+}
+inline uint16_t csum_replace2(uint16_t csum, uint16_t old, uint16_t new) {
+    return (~csum16_add(csum16_sub(~csum, old), new));
+}
+
+inline uint16_t csum_fold(uint32_t csum) {
+    uint32_t r = csum << 16 | csum >> 16;
+    csum = ~csum;
+    csum -= r;
+    return (uint16_t)(csum >> 16);
+}
+inline uint32_t csum_unfold(uint16_t csum) {
+    return (uint32_t)csum;
+}
+inline uint32_t csum32_add(uint32_t csum, uint32_t addend) {
+    uint32_t res = csum;
+    res += addend;
+    return (res + (res < addend));
+}
+inline uint32_t csum32_sub(uint32_t csum, uint32_t addend) {
+    return csum32_add(csum, ~addend);
+}
+inline uint16_t csum_replace4(uint16_t csum, uint32_t from, uint32_t to) {
+    uint32_t tmp = csum32_sub(~csum_unfold(csum), from);
+    return csum_fold(csum32_add(tmp, to));
+}
 uint64_t entry(void *ctx, uint64_t pkt_len){
     void *pkt = ubpf_packet_data(ctx);
     struct Headers_t headers = {
