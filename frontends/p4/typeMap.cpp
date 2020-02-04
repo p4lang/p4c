@@ -50,8 +50,7 @@ bool TypeMap::isCompileTimeConstant(const IR::Expression* expression) const {
     return result;
 }
 
-// Method sets left value of expression arg if orig arg
-// is a left value.
+// Method copies properties from expression to "to" expression.
 void TypeMap::cloneExpressionProperties(const IR::Expression* to,
                                         const IR::Expression* from) {
     auto type = getType(from, true);
