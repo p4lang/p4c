@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <algorithm>
 #include "gtest/gtest.h"
 #include "lib/ordered_set.h"
 
@@ -81,5 +82,15 @@ TEST(ordered_set, set_not_equal) {
     EXPECT_TRUE(a != b);
 }
 
+TEST(ordered_set, set_intersect) {
+    ordered_set<unsigned> a = { 5, 8, 1, 10, 4 };
+    ordered_set<unsigned> b = { 4, 2, 9, 5, 1 };
+    ordered_set<unsigned> expect = { 1, 4, 5 };
+    ordered_set<unsigned> res;
+    std::set_intersection(a.sorted_begin(), a.sorted_end(), b.sorted_begin(), b.sorted_end(),
+                          std::inserter(res, res.end()));
+
+    EXPECT_EQ(res, expect);
+}
 
 }  // namespace Test

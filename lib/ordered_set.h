@@ -68,6 +68,21 @@ class ordered_set {
 
  public:
     typedef typename map_type::size_type        size_type;
+    class sorted_iterator : public std::iterator<std::bidirectional_iterator_tag, T> {
+        friend class ordered_set;
+        typename map_type::const_iterator       iter;
+        sorted_iterator(typename map_type::const_iterator it)    // NOLINT(runtime/explicit)
+        : iter(it) {}
+     public:
+        const T &operator*() const { return *iter->first; }
+        const T *operator->() const { return iter->first; }
+        sorted_iterator operator++() { ++iter; return *this; }
+        sorted_iterator operator--() { --iter; return *this; }
+        sorted_iterator operator++(int) { auto copy = *this; ++iter; return copy; }
+        sorted_iterator operator--(int) { auto copy = *this; --iter; return copy; }
+        bool operator==(const sorted_iterator i) const { return iter == i.iter; }
+        bool operator!=(const sorted_iterator i) const { return iter != i.iter; }
+    };
 
     ordered_set() {}
     ordered_set(const ordered_set &a) : data(a.data) { init_data_map(); }
@@ -104,6 +119,8 @@ class ordered_set {
     const_iterator              cend() const noexcept { return data.cend(); }
     const_reverse_iterator      crbegin() const noexcept { return data.crbegin(); }
     const_reverse_iterator      crend() const noexcept { return data.crend(); }
+    sorted_iterator             sorted_begin() const noexcept { return data_map.begin(); }
+    sorted_iterator             sorted_end() const noexcept { return data_map.end(); }
 
     reference front() const noexcept { return *data.begin(); }
     reference back() const noexcept { return *data.rbegin(); }
@@ -138,6 +155,22 @@ class ordered_set {
     void insert(ordered_set::const_iterator begin, ordered_set::const_iterator end) {
         for (auto it = begin; it != end; ++it)
             insert(*it);
+    }
+    iterator insert(const_iterator pos, const T &v) {
+        auto it = find(v);
+        if (it == data.end()) {
+            it = data.insert(pos, v);
+            data_map.emplace(&*it, it);
+            return it; }
+        return it;
+    }
+    iterator insert(const_iterator pos, T &&v) {
+        auto it = find(v);
+        if (it == data.end()) {
+            it = data.insert(pos, std::move(v));
+            data_map.emplace(&*it, it);
+            return it; }
+        return it;
     }
 
     void push_back(const T &v) {
