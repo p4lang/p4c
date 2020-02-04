@@ -1262,7 +1262,6 @@ const IR::Node* TypeInference::postorder(IR::P4ValueSet* decl) {
             (void)canon->apply(*tc);
             if (::errorCount() > e)
                 return nullptr;
-            decl->elementType = getTypeType(canon);
         }
         auto tt = new IR::Type_Set(canon);
         setType(getOriginal(), tt);
