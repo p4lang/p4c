@@ -393,7 +393,7 @@ ParserConverter::convertSelectExpression(const IR::SelectExpression* expr) {
         if (is_vset) {
             trans->emplace("type", "parse_vset");
             trans->emplace("value", vset_name);
-            trans->emplace("mask", stringRepr(mask, bytes));
+            trans->emplace("mask", Util::JsonValue::null);
             trans->emplace("next_state", stateName(sc->state->path->name));
         } else {
             if (mask == 0) {
