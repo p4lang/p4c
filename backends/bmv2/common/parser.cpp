@@ -446,7 +446,8 @@ bool ParserConverter::preorder(const IR::P4Parser* parser) {
 
     for (auto s : parser->parserLocals) {
         if (auto inst = s->to<IR::P4ValueSet>()) {
-            auto bitwidth = inst->elementType->width_bits();
+            auto etype = ctxt->typeMap->getTypeType(inst->elementType, true);
+            auto bitwidth = etype->width_bits();
             auto name = inst->controlPlaneName();
             ctxt->json->add_parse_vset(name, bitwidth);
         }
