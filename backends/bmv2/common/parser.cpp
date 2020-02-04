@@ -445,7 +445,9 @@ bool ParserConverter::preorder(const IR::P4Parser* parser) {
         if (auto inst = s->to<IR::P4ValueSet>()) {
             auto bitwidth = inst->elementType->width_bits();
             auto name = inst->controlPlaneName();
-            ctxt->json->add_parse_vset(name, bitwidth);
+            auto size = inst->size;
+            auto n = size->to<IR::Constant>()->value;
+            ctxt->json->add_parse_vset(name, bitwidth, n);
         }
     }
 
