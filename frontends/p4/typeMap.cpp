@@ -50,6 +50,17 @@ bool TypeMap::isCompileTimeConstant(const IR::Expression* expression) const {
     return result;
 }
 
+// Method copies properties from expression to "to" expression.
+void TypeMap::cloneExpressionProperties(const IR::Expression* to,
+                                        const IR::Expression* from) {
+    auto type = getType(from, true);
+    setType(to, type);
+    if (isLeftValue(from))
+        setLeftValue(to);
+    if (isCompileTimeConstant(from))
+        setCompileTimeConstant(to);
+}
+
 void TypeMap::clear() {
     LOG3("Clearing typeMap");
     typeMap.clear(); leftValues.clear(); constants.clear(); allTypeVariables.clear();
