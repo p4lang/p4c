@@ -52,14 +52,14 @@ bool TypeMap::isCompileTimeConstant(const IR::Expression* expression) const {
 
 // Method sets left value of expression arg if orig arg
 // is a left value.
-void TypeMap::copyIfOrigLeftValue(const IR::Expression* expression,
-                                  const IR::Expression* orig) {
-    auto type = getType(orig, true);
-    setType(expression, type);
-    if (isLeftValue(orig))
-        setLeftValue(expression);
-    if (isCompileTimeConstant(orig))
-        setCompileTimeConstant(expression);
+void TypeMap::cloneExpressionProperties(const IR::Expression* to,
+                                        const IR::Expression* from) {
+    auto type = getType(from, true);
+    setType(to, type);
+    if (isLeftValue(from))
+        setLeftValue(to);
+    if (isCompileTimeConstant(from))
+        setCompileTimeConstant(to);
 }
 
 void TypeMap::clear() {
