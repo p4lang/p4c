@@ -315,13 +315,10 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
         for (auto p1 : *mi->substitution.getParametersInArgumentOrder()) {
             auto arg1 = mi->substitution.lookup(p1);
             for (auto p2 : *mi->substitution.getParametersInArgumentOrder()) {
+                LOG3("p1=" << dbp(p1) << " p2=" << dbp(p2));
                 if (p2 == p1)
                     break;
                 if (!p1->hasOut() && !p2->hasOut())
-                    continue;
-                if (useTemporary.find(p1) != useTemporary.end())
-                    continue;
-                if (useTemporary.find(p2) != useTemporary.end())
                     continue;
                 auto arg2 = mi->substitution.lookup(p2);
                 if (mayAlias(arg1->expression, arg2->expression)) {
