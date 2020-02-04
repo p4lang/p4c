@@ -184,6 +184,12 @@ set (XFAIL_TESTS
   # Next two use unknown externs
   testdata/p4_16_samples/issue1882-bmv2.p4
   testdata/p4_16_samples/issue1882-1-bmv2.p4
+  # Next four are broken tests due to behavioral model checkin on
+  # 03/02/2020 via b2b8666.
+  testdata/p4_14_samples/parser_value_set1.p4
+  testdata/p4_14_samples/parser_value_set0.p4
+  testdata/p4_14_samples/issue946.p4
+  testdata/p4_14_samples/parser_value_set2.p4
 )
 
 if (HAVE_SIMPLE_SWITCH)
