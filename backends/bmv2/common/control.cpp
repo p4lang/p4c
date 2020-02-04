@@ -42,7 +42,14 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
             auto keyWidth = tableKey->expression->type->width_bits();
             auto k8 = ROUNDUP(keyWidth, 8);
             auto matchType = getKeyMatchType(tableKey);
-            key->emplace("match_type", matchType);
+            // Table key fields with match_kind optional will be
+            // represented in the BMv2 JSON file the same as a ternary
+            // field would be.
+            if (matchType == "optional") {
+                key->emplace("match_type", "ternary");
+            } else {
+                key->emplace("match_type", matchType);
+            }
             if (matchType == corelib.exactMatch.name) {
                 if (k->is<IR::Constant>())
                     key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
@@ -99,6 +106,23 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
                     key->emplace("end", stringRepr((1 << keyWidth)-1, k8));  // 2^N -1
                 } else {
                     ::error(ErrorType::ERR_UNSUPPORTED, "range key expression", k);
+                }
+            } else if (matchType == "optional") {
+                // Table key fields with match_kind optional with
+                // "const entries" in the P4 source code will be
+                // represented using the same "key" and "mask" keys in
+                // the BMv2 JSON file as table key fields with
+                // match_kind ternary.  In the P4 source code we only
+                // allow exact values or a DefaultExpression (_ or
+                // default), no &&& expression.
+                if (k->is<IR::Constant>()) {
+                    key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
+                    key->emplace("mask", stringRepr(Util::mask(keyWidth), k8));
+                } else if (k->is<IR::DefaultExpression>()) {
+                    key->emplace("key", stringRepr(0, k8));
+                    key->emplace("mask", stringRepr(0, k8));
+                } else {
+                    ::error(ErrorType::ERR_UNSUPPORTED, "optional key expression", k);
                 }
             } else {
                 ::error(ErrorType::ERR_UNKNOWN, "key match type '%2%' for key %1%", k, matchType);
@@ -320,13 +344,14 @@ ControlConverter::convertTable(const CFG::TableNode* node,
             // Decreasing order of precedence (bmv2 specification):
             // 0) more than one LPM field is an error
             // 1) if there is at least one RANGE field, then the table is RANGE
-            // 2) if there is at least one TERNARY field, then the table is TERNARY
+            // 2) if there is at least one TERNARY or OPTIONAL field, then the table is TERNARY
             // 3) if there is a LPM field, then the table is LPM
             // 4) otherwise the table is EXACT
             if (match_type != table_match_type) {
                 if (match_type == BMV2::MatchImplementation::rangeMatchTypeName)
                     table_match_type = BMV2::MatchImplementation::rangeMatchTypeName;
-                if (match_type == corelib.ternaryMatch.name &&
+                if ((match_type == corelib.ternaryMatch.name ||
+                     match_type == BMV2::MatchImplementation::optionalMatchTypeName) &&
                     table_match_type != BMV2::MatchImplementation::rangeMatchTypeName)
                     table_match_type = corelib.ternaryMatch.name;
                 if (match_type == corelib.lpmMatch.name &&
@@ -354,7 +379,14 @@ ControlConverter::convertTable(const CFG::TableNode* node,
             }
 
             auto keyelement = new Util::JsonObject();
-            keyelement->emplace("match_type", match_type);
+            // Table key fields with match_kind optional will be
+            // represented in the BMv2 JSON file the same as a ternary
+            // field would be.
+            if (match_type == BMV2::MatchImplementation::optionalMatchTypeName) {
+                keyelement->emplace("match_type", corelib.ternaryMatch.name);
+            } else {
+                keyelement->emplace("match_type", match_type);
+            }
             if (auto na = ke->getAnnotation(IR::Annotation::nameAnnotation)) {
                 BUG_CHECK(na->expr.size() == 1, "%1%: expected 1 name", na);
                 auto name = na->expr[0]->to<IR::StringLiteral>();

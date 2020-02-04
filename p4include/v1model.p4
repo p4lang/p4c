@@ -53,6 +53,8 @@ limitations under the License.
 
 match_kind {
     range,
+    // Either an exact match, or a wildcard (matching any value).
+    optional,
     // Used for implementing dynamic_action_selection
     selector
 }

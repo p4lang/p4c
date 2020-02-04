@@ -23,6 +23,7 @@ const cstring TableImplementation::actionProfileName = "action_profile";
 const cstring TableImplementation::actionSelectorName = "action_selector";
 const cstring MatchImplementation::selectorMatchTypeName = "selector";
 const cstring MatchImplementation::rangeMatchTypeName = "range";
+const cstring MatchImplementation::optionalMatchTypeName = "optional";
 const unsigned TableAttributes::defaultTableSize = 1024;
 const cstring V1ModelProperties::jsonMetadataParameterName = "standard_metadata";
 const cstring V1ModelProperties::validField = "$valid$";

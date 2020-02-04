@@ -625,6 +625,8 @@ getMatchType(cstring matchTypeName) {
         return MatchField::MatchTypes::TERNARY;
     } else if (matchTypeName == P4V1::V1Model::instance.rangeMatchType.name) {
         return MatchField::MatchTypes::RANGE;
+    } else if (matchTypeName == P4V1::V1Model::instance.optionalMatchType.name) {
+        return MatchField::MatchTypes::OPTIONAL;
     } else if (matchTypeName == P4V1::V1Model::instance.selectorMatchType.name) {
         // Nothing to do here, we cannot even perform some sanity-checking.
         return boost::none;
@@ -1381,13 +1383,14 @@ class P4RuntimeEntriesConverter {
     }
 
     /// Checks if the @table entries need to be assigned a priority, i.e. does
-    /// the match key for the table includes a ternary or range match?
+    /// the match key for the table includes a ternary, range, or optional match?
     bool tableNeedsPriority(const IR::P4Table* table, ReferenceMap* refMap) const {
       for (auto e : table->getKey()->keyElements) {
           auto matchType = getKeyMatchType(e, refMap);
           // TODO(antonin): remove dependency on v1model.
           if (matchType == P4CoreLibrary::instance.ternaryMatch.name ||
-              matchType == P4V1::V1Model::instance.rangeMatchType.name) {
+              matchType == P4V1::V1Model::instance.rangeMatchType.name ||
+              matchType == P4V1::V1Model::instance.optionalMatchType.name) {
               return true;
           }
       }
@@ -1453,6 +1456,8 @@ class P4RuntimeEntriesConverter {
               addTernary(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else if (matchType == P4V1::V1Model::instance.rangeMatchType.name) {
               addRange(protoEntry, fieldId++, k, keyWidth, typeMap);
+            } else if (matchType == P4V1::V1Model::instance.optionalMatchType.name) {
+              addOptional(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else {
                 if (!k->is<IR::DefaultExpression>())
                     ::error("%1%: match type not supported by P4Runtime serializer", matchType);
@@ -1639,6 +1644,19 @@ class P4RuntimeEntriesConverter {
         auto protoRange = protoMatch->mutable_range();
         protoRange->set_low(*startStr);
         protoRange->set_high(*endStr);
+    }
+
+    void addOptional(p4v1::TableEntry* protoEntry, int fieldId,
+                     const IR::Expression* k, int keyWidth,
+                     TypeMap* typeMap) const {
+        if (k->is<IR::DefaultExpression>())  // don't care, skip in P4Runtime message
+            return;
+        auto protoMatch = protoEntry->add_match();
+        protoMatch->set_field_id(fieldId);
+        auto protoOptional = protoMatch->mutable_optional();
+        auto value = convertSimpleKeyExpression(k, keyWidth, typeMap);
+        if (value == boost::none) return;
+        protoOptional->set_value(*value);
     }
 
     cstring getKeyMatchType(const IR::KeyElement* ke, ReferenceMap* refMap) const {
