@@ -291,9 +291,9 @@ void ParserConverter::convertSimpleKey(const IR::Expression* keySet,
 }
 
 unsigned ParserConverter::combine(const IR::Expression* keySet,
-                                const IR::ListExpression* select,
-                                big_int& value, big_int& mask,
-                                bool& is_vset, cstring& vset_name) const {
+                                  const IR::ListExpression* select,
+                                  big_int& value, big_int& mask,
+                                  bool& is_vset, cstring& vset_name) const {
     // From the BMv2 spec: For values and masks, make sure that you
     // use the correct format. They need to be the concatenation (in
     // the right order) of all byte padded fields (padded with 0
@@ -355,7 +355,10 @@ unsigned ParserConverter::combine(const IR::Expression* keySet,
         auto decl = ctxt->refMap->getDeclaration(pe->path, true);
         vset_name = decl->controlPlaneName();
         is_vset = true;
-        return totalWidth;
+        auto vset = decl->to<IR::P4ValueSet>();
+        CHECK_NULL(vset);
+        auto type = ctxt->typeMap->getTypeType(vset->elementType, true);
+        return ROUNDUP(type->width_bits(), 8);
     } else {
         BUG_CHECK(select->components.size() == 1, "%1%: mismatched select/label", select);
         convertSimpleKey(keySet, value, mask);
@@ -390,7 +393,7 @@ ParserConverter::convertSelectExpression(const IR::SelectExpression* expr) {
         if (is_vset) {
             trans->emplace("type", "parse_vset");
             trans->emplace("value", vset_name);
-            trans->emplace("mask", mask);
+            trans->emplace("mask", Util::JsonValue::null);
             trans->emplace("next_state", stateName(sc->state->path->name));
         } else {
             if (mask == 0) {
