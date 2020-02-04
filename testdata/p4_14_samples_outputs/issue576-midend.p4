@@ -29,7 +29,7 @@ header ipv4_t {
     bit<16>     hdrChecksum;
     bit<32>     srcAddr;
     bit<32>     dstAddr;
-    @length(((bit<32>)ihl << 2 << 3) + 32w4294967136) 
+    @length(((bit<32>)ihl << 5) + 32w4294967136) 
     varbit<320> options_ipv4;
 }
 
@@ -80,7 +80,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         tmp_hdr_1.hdrChecksum = tmp[79:64];
         tmp_hdr_1.srcAddr = tmp[63:32];
         tmp_hdr_1.dstAddr = tmp[31:0];
-        packet.extract<ipv4_t>(hdr.h.next, ((bit<32>)tmp[155:152] << 2 << 3) + 32w4294967136);
+        packet.extract<ipv4_t>(hdr.h.next, ((bit<32>)tmp[155:152] << 5) + 32w4294967136);
         tmp_0 = packet.lookahead<bit<160>>();
         tmp_hdr_2.setValid();
         tmp_hdr_2.version = tmp_0[159:156];
@@ -95,7 +95,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         tmp_hdr_2.hdrChecksum = tmp_0[79:64];
         tmp_hdr_2.srcAddr = tmp_0[63:32];
         tmp_hdr_2.dstAddr = tmp_0[31:0];
-        packet.extract<ipv4_t>(hdr.h.next, ((bit<32>)tmp_0[155:152] << 2 << 3) + 32w4294967136);
+        packet.extract<ipv4_t>(hdr.h.next, ((bit<32>)tmp_0[155:152] << 5) + 32w4294967136);
         transition accept;
     }
 }

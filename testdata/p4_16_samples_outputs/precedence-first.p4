@@ -69,7 +69,7 @@ action ac() {
     e = a < b == e;
     e = e == a < b;
     e = a < b == e;
-    a = a << b << c;
+    a = a << b + c;
     a = a << (b << c);
     a = a << b >> c;
     a = a << (b >> c);
