@@ -228,8 +228,7 @@ class JSONLoader {
         load("base", base);
         load("hasWidth", hasWidth);
 
-        UnparsedConstant result {text, skip, base, hasWidth};
-        v = &result;
+        v = new UnparsedConstant({text, skip, base, hasWidth});
     }
 
     template<typename T>

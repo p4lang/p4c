@@ -771,7 +771,7 @@ void ExternConverter_Counter::convertExternInstance(
     // in conversion context will handle that for us
     auto tp = eb->findParameterValue("type");
     if (!tp || !tp->is<IR::Declaration_ID>()) {
-      modelError("%1%: expected a declaration_id", tp->getNode());
+      modelError("%1%: expected a declaration_id", tp ? tp->getNode() : eb->getNode());
       return;
     }
     auto arg2 = tp->to<IR::Declaration_ID>();
@@ -813,7 +813,7 @@ void ExternConverter_DirectCounter::convertExternInstance(
         // converter in conversion context will handle this for us
         auto tp = eb->findParameterValue("type");
         if (!tp || !tp->is<IR::Declaration_ID>()) {
-          modelError("%1%: expected a declaration_id", tp->getNode());
+          modelError("%1%: expected a declaration_id", tp ? tp->getNode() : eb->getNode());
           return;
         }
         if (eb->getConstructorParameters()->size() < 2) {
@@ -993,6 +993,7 @@ void ExternConverter_ActionSelector::convertExternInstance(
     auto sz = eb->findParameterValue("size");
     if (!sz->is<IR::Constant>()) {
         ::error(ErrorType::ERR_EXPECTED, "a constant", sz);
+        return;
     }
     action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
 

@@ -46,8 +46,7 @@ bool TypeUnification::unifyCall(const IR::Node* errorPosition,
         if (dest->typeParameters->size() != src->typeArguments->size()) {
             TypeInference::typeError(
                 "%1% has %2% type parameters, but is invoked with %3% type arguments",
-                errorPosition, (dest->typeParameters ? dest->typeParameters->size() : 0),
-                src->typeArguments->size());
+                errorPosition, dest->typeParameters->size(), src->typeArguments->size());
             return false;
         }
 
