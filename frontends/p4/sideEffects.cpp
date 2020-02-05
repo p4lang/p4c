@@ -275,6 +275,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
     // large structs.  We want to avoid copying these large
     // structs if possible.
     std::set<const IR::Parameter*> useTemporary;
+    std::set<const IR::Expression*> hasSideEffects;
 
     bool anyOut = false;
     for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
@@ -289,6 +290,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
             LOG3("Using temporary for " << dbp(mce) <<
                  " param " << dbp(p) << " arg side effect");
             useTemporary.emplace(p);
+            hasSideEffects.emplace(arg->expression);
             continue;
         }
         // If the parameter contains header values and the
@@ -314,6 +316,8 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
         // least one of them is out or inout.
         for (auto p1 : *mi->substitution.getParametersInArgumentOrder()) {
             auto arg1 = mi->substitution.lookup(p1);
+            if (hasSideEffects.count(arg1->expression))
+                continue;
             for (auto p2 : *mi->substitution.getParametersInArgumentOrder()) {
                 LOG3("p1=" << dbp(p1) << " p2=" << dbp(p2));
                 if (p2 == p1)
@@ -321,6 +325,8 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
                 if (!p1->hasOut() && !p2->hasOut())
                     continue;
                 auto arg2 = mi->substitution.lookup(p2);
+                if (hasSideEffects.count(arg2->expression))
+                    continue;
                 if (mayAlias(arg1->expression, arg2->expression)) {
                     LOG3("Using temporary for " << dbp(mce) <<
                          " param " << dbp(p1) << " aliasing" << dbp(p2));

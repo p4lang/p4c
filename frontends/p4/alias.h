@@ -195,7 +195,8 @@ class ReadsWrites : public Inspector {
             BUG_CHECK(member, "%1%: Expected isValid()", expression);
             auto obj = member->expr;
             auto e = ::get(rw, obj);
-            BUG_CHECK(member->member == "isValid", "%1%: expected isValid()", expression);
+            BUG_CHECK(member->member == IR::Type_Header::isValid,
+                      "%1%: expected isValid()", expression);
             rw.emplace(expression, e->append("$valid"));
         } else {
             auto e = ::get(rw, expression->method);
