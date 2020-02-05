@@ -60,7 +60,7 @@ template<class T> void IR::Vector<T>::visit_children(Visitor &v) {
                         *i++ = e;
                     else
                         BUG("visitor returned invalid type %s for Vector<%s>",
-                            e->node_type_name(), T::static_type_name()); } }
+                            el->node_type_name(), T::static_type_name()); } }
         } else if (auto e = dynamic_cast<const T *>(n)) {
             *i++ = e;
         } else {
@@ -97,7 +97,7 @@ template<class T> void IR::Vector<T>::parallel_visit_children(Visitor &v) {
                         *i++ = e;
                     else
                         BUG("visitor returned invalid type %s for Vector<%s>",
-                            e->node_type_name(), T::static_type_name()); } }
+                            el->node_type_name(), T::static_type_name()); } }
         } else if (auto e = dynamic_cast<const T *>(n)) {
             *i++ = e;
         } else {

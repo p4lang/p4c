@@ -659,8 +659,9 @@ const IR::Node* DoConstantFolding::postorder(IR::Mux* e) {
     if (cond == nullptr)
         return e;
     auto b = cond->to<IR::BoolLiteral>();
-    if (b == nullptr)
+    if (b == nullptr) {
         ::error("%1%: expected a Boolean", cond);
+        return e; }
     if (b->value)
         return e->e1;
     else
