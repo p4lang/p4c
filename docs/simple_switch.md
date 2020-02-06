@@ -389,6 +389,7 @@ values:
 + `exact` - from P4_16 language specification
 + `lpm` - from P4_16 language specification
 + `ternary` - from P4_16 language specification
++ `optional` - defined in `v1model.p4`
 + `range` - defined in `v1model.p4`
 + `selector` - defined in `v1model.p4`
 
@@ -403,7 +404,7 @@ restriction is in place as of the January 2019 version of `p4c`.
 ### Range tables
 
 If a table has at least one `range` field, it is implemented internally as a
-`range` table in BMv2. Because a single search key could match mutiple entries,
+`range` table in BMv2. Because a single search key could match multiple entries,
 every entry must be assigned a numeric priority by the control plane software
 when it is installed. If multiple installed table entries match the same search
 key, one among them with the maximum numeric priority will "win", and its action
@@ -419,7 +420,7 @@ determine whether a search key matches the entry, but the prefix length does
 _not_ determine the relative priority among multiple matching table
 entries. Only the numeric priority supplied by the control plane software
 determines that. Because of this, it would be reasonable for a `range` table to
-support multiple `lpm` key fields, but as of January 2019 this is not supported.
+support multiple `lpm` key fields, but as of January 2020 this is not supported.
 
 If a range table has entries defined via a `const entries` table property, then
 the relative priority of the entries are highest priority first, to lowest
@@ -428,26 +429,26 @@ priority last, based upon the order they appear in the P4 program.
 
 ### Ternary tables
 
-If a table has no `range` field, but at least one `ternary` field, it is
-implemented internally as a `ternary` table in BMv2. As for `range` tables, a
-single search key can be matched by multiple table entries, and thus every entry
-must have a numeric priority assigned by the control plane software. The same
-note about `lpm` fields described above for `range` tables also applied to
-`ternary` tables, as well as the note about entries specified via `const
-entries`.
+If a table has no `range` field, but at least one `ternary` or `optional` field,
+it is implemented internally as a `ternary` table in BMv2. As for `range`
+tables, a single search key can be matched by multiple table entries, and thus
+every entry must have a numeric priority assigned by the control plane
+software. The same note about `lpm` fields described above for `range` tables
+also applied to `ternary` tables, as well as the note about entries specified
+via `const entries`.
 
 
 ### Longest prefix match tables
 
-If a table has neither `range` nor `ternary` fields, but at least one `lpm`
-field, there must be exactly one `lpm` field. There can be 0 or more `exact`
-fields. While there can be multiple installed table entries that match a single
-search key, with these restrictions there can be at most one matching table
-entry of each possible prefix length of the `lpm` field (because no two table
-entries installed at the same time are allowed to have the same search key). The
-matching entry with the longest prefix length is always the winner. The control
-plane cannot specify a priority when installing entries for such a table -- it
-is always determined by the prefix length.
+If a table has no `range`, `ternary`, nor `optional` fields, but at least one
+`lpm` field, there must be exactly one `lpm` field. There can be 0 or more
+`exact` fields. While there can be multiple installed table entries that match a
+single search key, with these restrictions there can be at most one matching
+table entry of each possible prefix length of the `lpm` field (because no two
+table entries installed at the same time are allowed to have the same search
+key). The matching entry with the longest prefix length is always the
+winner. The control plane cannot specify a priority when installing entries for
+such a table -- it is always determined by the prefix length.
 
 If a longest prefix match table has entries defined via a `const entries` table
 property, then the relative priority of the entries are determined by the prefix
@@ -480,12 +481,12 @@ a legal possible value for the field, i.e. not outside of that field's range of
 values. All of them can be arithmetic expressions containing compile time
 constant values.
 
-|                  | `range`      | `ternary`    | `lpm`        | `exact` |
-| ---------------- | ------------ | ------------ | ------------ | ------- |
-| `lo .. hi`       | yes (Note 1) | no           | no           | no      |
-| `val &&& mask`   | no           | yes (Note 2) | yes (Note 3) | no      |
-| `val`            | yes (Note 4) | yes (Note 5) | yes (Note 5) | yes     |
-| `_` or `default` | yes (Note 6) | yes (Note 6) | yes (Note 6) | no      |
+|                  | `range`      | `ternary`    | `optional`   | `lpm`        | `exact` |
+| ---------------- | ------------ | ------------ | ------------ | ------------ | ------- |
+| `lo .. hi`       | yes (Note 1) | no           | no           | no           | no      |
+| `val &&& mask`   | no           | yes (Note 2) | no           | yes (Note 3) | no      |
+| `val`            | yes (Note 4) | yes (Note 5) | yes          | yes (Note 5) | yes     |
+| `_` or `default` | yes (Note 6) | yes (Note 6) | yes (Note 6) | yes (Note 6) | no      |
 
 Note 1: Restriction: `lo <= hi`. A run time search key value `k` matches if `lo
 <= k <= hi`.
@@ -520,6 +521,7 @@ combinations of `match_kind` and syntax for specifying matching sets of values.
 ```
 header h1_t {
     bit<8> f1;
+    bit<8> f2;
 }
 
 struct headers_t {
@@ -562,6 +564,23 @@ control ingress(inout headers_t hdr,
         }
     }
     table t3 {
+        key = {
+            hdr.h1.f1 : optional;
+            hdr.h1.f2 : optional;
+        }
+        actions = { a; }
+        const entries = {
+            // Note that when there are two or more fields in the key of a
+            // table, const entries key select expressions must be surrounded by
+            // parentheses.
+            (47, 72) : a(1);
+            ( _, 72) : a(2);
+            ( _, 75) : a(3);
+            (49,  _) : a(4);
+            _        : a(5);
+        }
+    }
+    table t4 {
         key = { hdr.h1.f1 : lpm; }
         actions = { a; }
         const entries = {
@@ -572,7 +591,7 @@ control ingress(inout headers_t hdr,
             _             : a(5);
         }
     }
-    table t4 {
+    table t5 {
         key = { hdr.h1.f1 : exact; }
         actions = { a; }
         const entries = {
@@ -827,7 +846,7 @@ but this is not, as of 2019-Jul-01:
         if (hdr.ethernet.etherType == 7) {
             hdr.ethernet.dstAddr = 1;
         } else {
-	    mark_to_drop(standard_metadata);
+            mark_to_drop(standard_metadata);
         }
     }
 ```
@@ -908,26 +927,26 @@ register array.
         my_register_array.read(tmp, (bit<32>) index);
         // Use bit slicing to extract out the logically separate parts
         // of the 17-bit register entry value.
-	x = tmp[16:9];
-	y = tmp[8:6];
-	z = tmp[5:0];
+        x = tmp[16:9];
+        y = tmp[8:6];
+        z = tmp[5:0];
 
-	// Whatever modifications you wish to make to x, y, and z go
-	// here.  This is just an example code snippet, not known to
-	// do anything useful for packet processing.
-	if (y == 0) {
+        // Whatever modifications you wish to make to x, y, and z go
+        // here.  This is just an example code snippet, not known to
+        // do anything useful for packet processing.
+        if (y == 0) {
             x = x + 1;
             y = 7;
             z = z ^ hdr.ethernet.etherType[3:0];
-	} else {
+        } else {
             // leave x unchanged
             y = y - 1;
             z = z << 1;
-	}
+        }
 
         // Concatenate the updated values of x, y, and z back into a
         // 17-bit value for writing back to the register.
-	tmp = x ++ y ++ z;
+        tmp = x ++ y ++ z;
         my_register_array.write((bit<32>) index, tmp);
     }
 ```

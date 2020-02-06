@@ -501,8 +501,9 @@ No parameters.  For every table in the currently loaded P4 program, shows the
 name, implementation (often `None`, but can be an action profile or action
 selector for tables created with those options), and a list of table search key
 fields, giving for each such field its name, match kind (e.g. `exact`, `lpm`,
-`ternary`, `range`), and width in bits.
-
+`ternary`, `range`), and width in bits.  Note that fields with match kind
+`optional` in the P4 source code are represented as `ternary` in the BMv2 JSON
+file.
 
 ```
 TODO: swap_configs
@@ -525,7 +526,9 @@ with the name of a control that the table or action is defined within.
 Match fields must appear in the same order as the table search key fields are
 specified in the P4 program, without names.  The output of `show_tables` also
 shows the names, match kinds (`ternary`, `range`, `lpm`, or `exact`), and bit
-widths for every table, after the `mk=` string.
+widths for every table, after the `mk=` string.  Fields with match kind
+`optional` are represented as `ternary` in the BMv2 JSON file, and as far as the
+simple_switch_CLI goes are in all ways identical to `ternary`.
 
 Numeric values can be specified in decimal, or hexadecimal prefixed with `0x`.
 
@@ -554,18 +557,26 @@ That is, the table entry `value&&&mask` will match the search key value `k` if
 `(k & mask) == (value & mask)`, where `&` is bit-wise logical and like in P4.
 To match any value of a ternary search key, you can specify `0&&&0`.
 
+Table search key fields with match kind `optional` in the P4 source code are
+specified the same way as those with match kind `ternary`, as described in the
+previous paragraph.  Note that there is no checking in the runtime CLI that the
+mask must be either 0 or all 1s, and thus it allows you to do arbitrary ternary
+masks, even though this should not be allowed.  It would be nice if it
+restricted the match specifications appropriately for `optional`, but this would
+require significant changes to behavioral-model code to support it.
+
 Table search key fields with match kind `range` are specified as a minimum
 numeric value, then `->`, then a maximum numeric value, with no white space
 between the numbers and the `->`.  To match any value of a range search key, you
 can specify `0->255` for an 8-bit field, or `0->0xffffffff` for a 32-bit field,
 etc.
 
-If any of the search key fields of a table have match kind `ternary` or `range`,
-then a numeric `priority` value must be specified.  For any other kind of table,
-it is an error to specify a `priority` value.  If a search key matches multiple
-table entries, then among the ones that match the search key, one with the
-smallest numeric priority value will be the winner, meaning that its action will
-be executed.
+If any of the search key fields of a table have match kind `ternary`,
+`optional`, or `range`, then a numeric `priority` value must be specified.  For
+any other kind of table, it is an error to specify a `priority` value.  If a
+search key matches multiple table entries, then among the ones that match the
+search key, one with the smallest numeric priority value will be the winner,
+meaning that its action will be executed.
 
 Action parameters must appear in the same order as they appear in the P4
 program, without names.  The output of the `show_actions` command shows the name
