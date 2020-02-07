@@ -238,11 +238,11 @@ auto operator&=(ordered_set<T, C1, A1> &a, U &b) -> decltype(b.begin(), a) {
     return a; }
 
 template<class T, class C1, class A1, class U> inline
-auto contains(ordered_set<T, C1, A1> &a, U &b) -> decltype(b.begin(), true) {
+auto contains(const ordered_set<T, C1, A1> &a, const U &b) -> decltype(b.begin(), true) {
     for (auto &el : b) if (!a.count(el)) return false;
     return true; }
 template<class T, class C1, class A1, class U> inline
-auto intersects(ordered_set<T, C1, A1> &a, U &b) -> decltype(b.begin(), true) {
+auto intersects(const ordered_set<T, C1, A1> &a, const U &b) -> decltype(b.begin(), true) {
     for (auto &el : b) if (a.count(el)) return true;
     return false; }
 
