@@ -64,8 +64,8 @@ Vagrant.configure("2") do |config|
 
         generator.vm.provider "virtualbox" do |virtualbox|
             # Customize the amount of memory on the VM:
-            virtualbox.memory = "2048"
-            virtualbox.cpus = "2"
+            virtualbox.memory = "4096"
+            virtualbox.cpus = "4"
             # Enable promiscuous mode
             virtualbox.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
             virtualbox.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]

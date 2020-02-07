@@ -23,8 +23,8 @@ sudo python -m pip install scapy
 sudo apt-get -y install cmake g++ git automake libtool libgc-dev bison flex libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev libboost-graph-dev llvm pkg-config python python-scapy python-ipaddr python-ply tcpdump
 
 # Protobuf
-cd /vagrant
-if [ ! -d "/vagrant/protobuf" ]
+cd /home/vagrant
+if [ ! -d "/home/vagrant/protobuf" ]
 then
   git clone https://github.com/google/protobuf.git
   cd protobuf
@@ -34,7 +34,7 @@ then
   export LDFLAGS="-Wl,-s"
   ./autogen.sh
   ./configure
-  make
+  make -j$(nproc)
   sudo make install
   sudo ldconfig
   unset CFLAGS CXXFLAGS LDFLAGS
@@ -44,15 +44,34 @@ then
 fi
 
 # Install clang-10
-if ! type "/vagrant/llvm-project/build/bin/clang" > /dev/null; then
-  cd /vagrant
-  git clone https://github.com/P4-Research/llvm-project
+if ! type "/home/vagrant/llvm-project/build/bin/clang" > /dev/null; then
+  cd /home/vagrant
+  git clone --depth=50 https://github.com/P4-Research/llvm-project
   cd llvm-project
   mkdir build
   cd build
-  cmake -DLLVM_TARGETS_TO_BUILD=BPF -DLLVM_ENABLE_PROJECTS=clang -G "Unix Makefiles" ../llvm
-  make
+  cmake -G "Unix Makefiles" \
+  -DCMAKE_BUILD_TYPE=MinSizeRel \
+  -DLLVM_BUILD_TOOLS=Off \
+  -DLLVM_BUILD_RUNTIME=Off \
+  -DLLVM_INCLUDE_TESTS=Off \
+  -DLLVM_INCLUDE_EXAMPLES=Off \
+  -DLLVM_ENABLE_BACKTRACES=Off \
+  -DLLVM_TARGETS_TO_BUILD=X86 \
+  -DLLVM_ENABLE_OCAMLDOC=Off \
+  -DLLVM_BUILD_UTILS=Off \
+  -DLLVM_BUILD_DOCS=Off \
+  -DLLVM_TARGETS_TO_BUILD=BPF \
+  -DLLVM_ENABLE_PROJECTS="clang" \
+  -DLLVM_OPTIMIZED_TABLEGEN=On \
+  -DCLANG_ENABLE_ARCMT=Off \
+  -DCLANG_ENABLE_STATIC_ANALYZER=Off \
+  -DCLANG_INCLUDE_TESTS=Off \
+  -DCLANG_BUILD_EXAMPLES=Off \
+  ../llvm
+  make -j$(nproc) clang
   sudo make install
+  export CLANG_DIR=$(pwd)
 fi
 
 # Clone P4rt-OVS
@@ -107,7 +126,7 @@ echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-2048kB/nr_hugepag
 cd /home/vagrant/p4rt-ovs/
 ./boot.sh
 ./configure --with-dpdk=$DPDK_BUILD CFLAGS="-g -O2 -Wno-cast-align"
-make -j 2
+make -j$(nproc)
 sudo make install
 
 # Create OVS database files and folders
@@ -149,7 +168,6 @@ then
  cd build
  cmake ..
  cmake --build .
- ctest .
  sudo cmake --build . --target install
  sudo ldconfig
 
@@ -171,7 +189,7 @@ then
  mkdir build
  cd build
  cmake ..
- make -j4
+ make -j$(nproc)
  sudo make install
 fi
 

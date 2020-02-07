@@ -48,7 +48,7 @@ def compile_c_to_o(filename):
     file = filename + ".c"
     c_file_path = os.path.join("build", file)
     output_file_path = os.path.join("build", filename + ".o")
-    cmd = ["/vagrant/llvm-project/build/bin/clang", "-O2", "-target", "bpf", "-c", c_file_path, "-o", output_file_path,
+    cmd = ["$CLANG_DIR/build/bin/clang", "-O2", "-target", "bpf", "-c", c_file_path, "-o", output_file_path,
            "-I../runtime"]
     print "Command: ", ' '.join(str(x) for x in cmd)
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
