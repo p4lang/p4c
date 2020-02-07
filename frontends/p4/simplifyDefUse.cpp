@@ -191,10 +191,14 @@ class FindUninitialized : public Inspector {
         BUG_CHECK(findContext<IR::P4Program>() == nullptr, "Unexpected function");
         LOG3("FU Visiting function " << func->name << "[" << func->id << "]");
         LOG5(func);
+        auto callingContext = currentPoint;
         currentPoint = ProgramPoint(func);
         visit(func->body);
         bool checkReturn = !func->type->returnType->is<IR::Type_Void>();
-        checkOutParameters(func, func->type->parameters, getCurrentDefinitions(), checkReturn);
+        currentPoint = callingContext;  // We want the definitions after the function has completed,
+                                        // not after the last statement.
+        auto current = getCurrentDefinitions();
+        checkOutParameters(func, func->type->parameters, current, checkReturn);
         return false;
     }
 

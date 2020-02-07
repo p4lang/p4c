@@ -329,8 +329,7 @@ class Definitions : public IHasDbPrint {
     /// Set of program points that have written last to each location
     /// (conservative approximation).
     std::map<const BaseLocation*, const ProgramPoints*> definitions;
-    /// If true the current program point is actually unreachable and
-    /// it's definitions should not matter.
+    /// If true the current program point is actually unreachable.
     bool unreachable;
 
  public:
@@ -357,7 +356,6 @@ class Definitions : public IHasDbPrint {
     void dbprint(std::ostream& out) const {
         if (unreachable) {
             out << "  Unreachable";
-            return;
         }
         if (definitions.empty())
             out << "  Empty definitions";
@@ -414,6 +412,7 @@ class AllDefinitions : public IHasDbPrint {
  * @pre Must be executed after variable initializers have been removed.
  *
  */
+
 class ComputeWriteSet : public Inspector {
  protected:
     AllDefinitions*     allDefinitions;  /// Result computed by this pass.
