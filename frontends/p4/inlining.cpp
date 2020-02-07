@@ -258,7 +258,7 @@ class Substitutions : public SubstituteParameters {
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
         auto annos = setNameAnnotation(extName, set->annotations);
         auto result = new IR::P4ValueSet(set->srcInfo, newName, annos,
-                                         set->elementType, set->size);
+                                         set->elementType, set->size, set->wasP414);
         return result;
     }
     const IR::Node* postorder(IR::P4Action* action) override {

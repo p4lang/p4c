@@ -483,7 +483,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     sizeConstant = new IR::Constant(4);
                 }
                 auto annos = addGlobalNameAnnotation(value_set->name, value_set->annotations);
-                auto decl = new IR::P4ValueSet(value_set->name, annos, type, sizeConstant);
+                auto decl = new IR::P4ValueSet(value_set->name, annos, type, sizeConstant, true);
                 stateful->push_back(decl);
             }
             for (auto v : c->values) {

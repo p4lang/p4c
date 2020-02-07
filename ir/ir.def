@@ -344,7 +344,8 @@ class P4Table : Declaration, IAnnotated, IApply {
 class P4ValueSet : Declaration, IAnnotated {
     optional Annotations        annotations = Annotations::empty;
     Type                        elementType;
-    Expression                  size; // number of elements in set.
+    Expression                  size;
+    bool                        wasP414;
     Annotations getAnnotations() const override { return annotations; }
 }
 
