@@ -349,7 +349,7 @@ PsaSwitch::ingress_thread() {
 
       packet->restore_buffer_state(packet_in_state);
       phv->reset_metadata();
-      phv->get_field("psa_ingress_parser_input_metadata.packet_path").set(5);
+      phv->get_field("psa_ingress_parser_input_metadata.packet_path").set(PACKET_PATH_RESUBMIT);
 
       input_buffer.push_front(std::move(packet));
       continue;
