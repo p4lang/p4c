@@ -29,9 +29,6 @@ control deparser(packet_out packet, in Parsed_packet hdr) {
 parser p(packet_in pkt, out Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
     state start {
         pkt.extract(hdr.eth);
-        transition parse_h;
-    }
-    state parse_h {
         pkt.extract(hdr.h);
         transition accept;
     }
