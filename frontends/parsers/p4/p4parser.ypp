@@ -779,13 +779,13 @@ simpleKeysetExpression
 valueSetDeclaration
     : optAnnotations
         VALUESET "<" baseType r_angle "(" expression ")" name ";"
-        { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7, false); }
+        { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7, false, $7); }
     | optAnnotations
         VALUESET "<" tupleType r_angle "(" expression ")" name ";"
-        { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7, false); }
+        { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7, false, $7); }
     | optAnnotations
         VALUESET "<" typeName r_angle "(" expression ")" name ";"
-        { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7, false); }
+        { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7, false, $7); }
     ;
 
 /*************************** CONTROL ************************/

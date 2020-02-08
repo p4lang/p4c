@@ -265,6 +265,9 @@ class ParserValueSet : IAnnotated {
 }
 
 class CaseEntry {
+    // With mask keyword, e.g. "pvs0 mask 0x0ff0", the Constant
+    // is the value after mask. Without mask keyword, the
+    // Constant is -1.
     safe_vector<std::pair<Expression, Constant>>    values = {};
     optional ID                                     action;
 }

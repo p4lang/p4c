@@ -345,7 +345,8 @@ class P4ValueSet : Declaration, IAnnotated {
     optional Annotations        annotations = Annotations::empty;
     Type                        elementType;
     Expression                  size; // number of elements in set.
-    bool                        wasP414;
+    bool                        wasV1;
+    Expression                  maskV1;
     Annotations getAnnotations() const override { return annotations; }
 }
 
