@@ -358,11 +358,12 @@ unsigned ParserConverter::combine(const IR::Expression* keySet,
         auto vset = decl->to<IR::P4ValueSet>();
         CHECK_NULL(vset);
         auto type = ctxt->typeMap->getTypeType(vset->elementType, true);
-        // TODO: Temporary code below because it is not known
-        // how does p4-14 send mask in IR.
+        // Supports either a zero mask, finite number mask,
+        // and -1 for no mask from V1.
         if (vset->wasV1) {
-            auto m = vset->maskV1->to<IR::Constant>()->value;
-            mask = m;
+            mask = vset->maskV1->to<IR::Constant>()->value;
+        } else {
+            mask = -2;  // is p4-16
         }
         return ROUNDUP(type->width_bits(), 8);
     } else {
@@ -400,9 +401,9 @@ ParserConverter::convertSelectExpression(const IR::SelectExpression* expr) {
             trans->emplace("type", "parse_vset");
             trans->emplace("value", vset_name);
             if (!mask)
-                trans->emplace("mask", Util::JsonValue::null);
-            else if (mask == -1)
                 trans->emplace("mask", stringRepr(0, bytes));
+            else if ((mask == -1) || (mask == -2))
+                trans->emplace("mask", Util::JsonValue::null);
             else
                 trans->emplace("mask", stringRepr(mask, bytes));
             trans->emplace("next_state", stateName(sc->state->path->name));
