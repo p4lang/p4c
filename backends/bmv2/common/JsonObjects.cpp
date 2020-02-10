@@ -392,7 +392,7 @@ JsonObjects::add_parse_vset(const cstring& name, const unsigned bitwidth,
     parse_vset->emplace("name", name);
     parse_vset->emplace("id", id);
     parse_vset->emplace("compressed_bitwidth", bitwidth);
-    parse_vset->emplace("size", size);
+    parse_vset->emplace("max_size", size);
     parse_vsets->append(parse_vset);
 }
 
