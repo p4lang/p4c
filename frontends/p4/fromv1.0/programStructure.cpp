@@ -493,12 +493,10 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     cases.push_back(sc);
                 } else {
                     auto c = v.second->to<IR::Constant>();
-                    if (c == nullptr) {
-                        ::error(ErrorType::ERR_INVALID, ": mask", v.second);
-                        continue;
-                    }
+                    CHECK_NULL(c);  // this is enforced elsewhere
                     if (!c->fitsInt() || c->asInt() != 0) {
-                        ::error(ErrorType::ERR_INVALID, ": masks not supported for value sets", v.second);
+                        ::error(ErrorType::ERR_INVALID,
+                                ": masks not supported for value sets", c);
                         continue;
                     }
                     auto sc = new IR::SelectCase(c->srcInfo, v.first, deststate);
