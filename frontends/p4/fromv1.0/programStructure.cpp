@@ -494,7 +494,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                 } else {
                     auto c = v.second->to<IR::Constant>();
                     CHECK_NULL(c);  // this is enforced elsewhere
-                    if (!c->fitsInt() || c->asInt() != 0) {
+                    if (!c->fitsInt() || c->asInt() != -1) {
                         ::error(ErrorType::ERR_INVALID,
                                 ": masks not supported for value sets", c);
                         continue;
