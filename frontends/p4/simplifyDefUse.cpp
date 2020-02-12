@@ -137,7 +137,7 @@ class FindUninitialized : public Inspector {
 
     void checkOutParameters(const IR::IDeclaration* block,
                             const IR::ParameterList* parameters,
-                            Definitions* defs, bool checkReturn = false) {
+                            Definitions* defs) {
         for (auto p : parameters->parameters) {
             if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
                 auto storage = definitions->storageMap->getStorage(p);
@@ -156,13 +156,6 @@ class FindUninitialized : public Inspector {
                                   "out parameter %1% may be uninitialized when "
                                   "%2% terminates", p, block->getName());
             }
-        }
-
-        if (checkReturn) {
-            // The final definitions should be unreachable, otherwise
-            // we have not returned on all paths.
-            if (!defs->isUnreachable())
-                ::error("Function %1% does not return a value on all paths", block);
         }
     }
 
@@ -195,10 +188,17 @@ class FindUninitialized : public Inspector {
         currentPoint = ProgramPoint(func);
         visit(func->body);
         bool checkReturn = !func->type->returnType->is<IR::Type_Void>();
+        if (checkReturn) {
+            // The final definitions should be unreachable, otherwise
+            // we have not returned on all paths.
+            if (!getCurrentDefinitions()->isUnreachable())
+                ::error("Function '%1%' does not return a value on all paths", func);
+        }
+
         currentPoint = callingContext;  // We want the definitions after the function has completed,
                                         // not after the last statement.
         auto current = getCurrentDefinitions();
-        checkOutParameters(func, func->type->parameters, current, checkReturn);
+        checkOutParameters(func, func->type->parameters, current);
         return false;
     }
 
