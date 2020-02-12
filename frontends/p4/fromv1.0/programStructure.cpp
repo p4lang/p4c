@@ -228,7 +228,7 @@ void ProgramStructure::createStructures() {
         auto h = headers.get(it.first->name);
         if (h != nullptr)
             ::warning(ErrorType::ERR_DUPLICATE,
-                      "header and metadata instances %2% with the same name",
+                      "%1%: header and metadata instances %2% with the same name",
                       it.first, h);
         auto ht = type->to<IR::Type_StructLike>();
         auto path = new IR::Path(type_name);
@@ -315,7 +315,7 @@ const IR::Statement* ProgramStructure::convertParserStatement(const IR::Expressi
             auto destType = dest->type;
             CHECK_NULL(destType);
             if (!destType->is<IR::Type_Header>()) {
-                ::error(ErrorType::ERR_INVALID, "argument. Expected a header not %2%",
+                ::error(ErrorType::ERR_INVALID, "%1%: invalid argument. Expected a header not %2%",
                         primitive, destType->toString());
                 return nullptr;
             }

@@ -34,7 +34,7 @@ class CompileTimeOperations : public Inspector {
     CompileTimeOperations() { setName("CompileTimeOperations"); }
     void err(const IR::Node* expression)
     { ::error(ErrorType::ERR_INVALID,
-              "could not evaluate at compilation time", expression); }
+              "%1%: could not evaluate expression at compilation time", expression); }
     void postorder(const IR::Mod* expression) override
     { err(expression); }
     void postorder(const IR::Div* expression) override

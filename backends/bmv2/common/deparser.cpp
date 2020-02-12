@@ -68,7 +68,8 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
                 continue;
             }
         }
-        ::error(ErrorType::ERR_UNSUPPORTED, "within a deparser on this target", s);
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "%1%: not supported within a deparser on this target", s);
     }
     ctxt->conv->simpleExpressionsOnly = false;
 }

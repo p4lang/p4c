@@ -438,11 +438,11 @@ install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/driver/p4c.mybackend.cfg
 
 # Known issues
 
-The P4C compiler is in early development. Issues with the compiler are
-tracked on [GitHub](https://github.com/p4lang/p4c/issues). Before
-opening a new issue, please check whether a similar issue is already
-opened. Opening issues and submitting a pull request with fixes for
-those issues is much appreciated.
+Issues with the compiler are tracked on
+[GitHub](https://github.com/p4lang/p4c/issues). Before opening a new
+issue, please check whether a similar issue is already opened. Opening
+issues and submitting a pull request with fixes for those issues is
+much appreciated.
 
 In addition to the list of issues on Github, there are a number of
 currently unsupported features listed below:
@@ -457,7 +457,7 @@ access them from the IR
 
 * Nonstandard extension primitives from P4_14
   * Execute_meter extra arguments
-  * Recirculate variants
+  * Recirculate/clone/resubmit variants
   * Bypass_egress
   * Sample_ primitives
   * invalidate

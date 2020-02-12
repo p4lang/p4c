@@ -104,15 +104,13 @@ const IR::Node* DoConstantFolding::postorder(IR::Type_Bits* type) {
             type->size = cst->asInt();
             type->expression = nullptr;
             if (type->size <= 0) {
-                ::error(ErrorType::ERR_INVALID, "type size", type);
+                ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
                 // Convert it to something legal so we don't get
                 // weird errors elsewhere.
                 type->size = 64;
             }
-            if (type->size == 1 && type->isSigned)
-                ::error(ErrorType::ERR_INVALID, "signed type which is 1-bit wide", type);
         } else {
-            ::error(ErrorType::ERR_EXPECTED, "to evaluate to a constant", type->expression);
+            ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", type->expression);
         }
     }
     return type;
@@ -124,9 +122,9 @@ const IR::Node* DoConstantFolding::postorder(IR::Type_Varbits* type) {
             type->size = cst->asInt();
             type->expression = nullptr;
             if (type->size <= 0)
-                ::error(ErrorType::ERR_INVALID, "type size", type);
+                ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
         } else {
-            ::error(ErrorType::ERR_EXPECTED, "to evaluate to a constant", type->expression);
+            ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", type->expression);
         }
     }
     return type;
@@ -190,7 +188,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Cmpl* e) {
 
     auto cst = op->to<IR::Constant>();
     if (cst == nullptr) {
-        ::error(ErrorType::ERR_EXPECTED, "an integer value", op);
+        ::error(ErrorType::ERR_EXPECTED, "%1%: expected an integer value", op);
         return e;
     }
     const IR::Type* t = op->type;
@@ -217,7 +215,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Neg* e) {
 
     auto cst = op->to<IR::Constant>();
     if (cst == nullptr) {
-        ::error(ErrorType::ERR_EXPECTED, "an integer value", op);
+        ::error(ErrorType::ERR_EXPECTED, "%1%: expected an integer value", op);
         return e;
     }
     const IR::Type* t = op->type;
@@ -530,17 +528,17 @@ const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
 
     auto cmsb = msb->to<IR::Constant>();
     if (cmsb == nullptr) {
-        ::error(ErrorType::ERR_EXPECTED, "an integer value", msb);
+        ::error(ErrorType::ERR_EXPECTED, "%1%: expected an integer value", msb);
         return e;
     }
     auto clsb = lsb->to<IR::Constant>();
     if (clsb == nullptr) {
-        ::error(ErrorType::ERR_EXPECTED, "an integer value", lsb);
+        ::error(ErrorType::ERR_EXPECTED, "%1%: expected an integer value", lsb);
         return e;
     }
     auto cbase = e0->to<IR::Constant>();
     if (cbase == nullptr) {
-        ::error(ErrorType::ERR_EXPECTED, "an integer value", e->e0);
+        ::error(ErrorType::ERR_EXPECTED, "%1%: expected an integer value", e->e0);
         return e;
     }
 
@@ -675,7 +673,7 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
 
     auto cr = right->to<IR::Constant>();
     if (cr == nullptr) {
-        ::error(ErrorType::ERR_EXPECTED, "an integer value", right);
+        ::error(ErrorType::ERR_EXPECTED, "%1%: expected an integer value", right);
         return e;
     }
     if (cr->value < 0) {
@@ -694,7 +692,7 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
 
     auto cl = left->to<IR::Constant>();
     if (cl == nullptr) {
-        ::error(ErrorType::ERR_EXPECTED, "an integer value", left);
+        ::error(ErrorType::ERR_EXPECTED, "%1%: expected an integer value", left);
         return e;
     }
 

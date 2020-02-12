@@ -59,7 +59,7 @@ void PsaProgramStructure::createStructLike(ConversionContext* ctxt, const IR::Ty
             field->append("*");
             if (varbitFound)
                 ::error(ErrorType::ERR_UNSUPPORTED,
-                        "headers with multiple varbit fields are not supported", st);
+                        "%1%: headers with multiple varbit fields are not supported", st);
             varbitFound = true;
         } else if (ftype->is<IR::Type_Error>()) {
             field->append(f->name.name);
@@ -861,7 +861,7 @@ void ExternConverter_Meter::convertExternInstance(
     else if (mkind_name == "BYTES")
         type = "bytes";
     else
-        ::error(ErrorType::ERR_UNEXPECTED, "meter type", mkind->getNode());
+        ::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected meter type", mkind->getNode());
     jmtr->emplace("type", type);
     ctxt->json->meter_arrays->append(jmtr);
 }
@@ -923,7 +923,7 @@ void ExternConverter_Register::convertExternInstance(
         return;
     }
     if (sz->to<IR::Constant>()->value == 0)
-        error(ErrorType::ERR_UNSUPPORTED, "direct registers", inst);
+        error(ErrorType::ERR_UNSUPPORTED, "%1%: direct registers are not supported", inst);
     jreg->emplace("size", sz->to<IR::Constant>()->value);
     if (!eb->instanceType->is<IR::Type_SpecializedCanonical>()) {
         modelError("%1%: Expected a generic specialized type", eb->instanceType);
@@ -936,12 +936,13 @@ void ExternConverter_Register::convertExternInstance(
     }
     auto regType = st->arguments->at(0);
     if (!regType->is<IR::Type_Bits>()) {
-        ::error(ErrorType::ERR_UNSUPPORTED, "registers with types other than bit or int", eb);
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "%1%: registers with types other than bit<> or int<> are not suppoted", eb);
         return;
     }
     unsigned width = regType->width_bits();
     if (width == 0) {
-        ::error(ErrorType::ERR_UNKNOWN, "width", st->arguments->at(0));
+        ::error(ErrorType::ERR_UNKNOWN, "%1%: unknown width", st->arguments->at(0));
         return;
     }
     jreg->emplace("bitwidth", width);
@@ -969,7 +970,7 @@ void ExternConverter_ActionProfile::convertExternInstance(
 
     auto sz = eb->findParameterValue("size");
     if (!sz->is<IR::Constant>()) {
-        ::error(ErrorType::ERR_EXPECTED, "a constant", sz);
+        ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
     }
     action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
 
@@ -992,7 +993,7 @@ void ExternConverter_ActionSelector::convertExternInstance(
 
     auto sz = eb->findParameterValue("size");
     if (!sz->is<IR::Constant>()) {
-        ::error(ErrorType::ERR_EXPECTED, "a constant", sz);
+        ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
         return;
     }
     action_profile->emplace("max_size", sz->to<IR::Constant>()->value);

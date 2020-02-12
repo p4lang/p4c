@@ -176,7 +176,7 @@ class DiscoverStructure : public Inspector {
             return;
         if (it->second != kind)
             ::error(ErrorType::ERR_INVALID,
-                    "name; it can only be used for %2%", node, it->second);
+                    "%1%: invalid name; it can only be used for %2%", node, it->second);
     }
     void checkReserved(const IR::Node* node, cstring nodeName) const {
         checkReserved(node, nodeName, nullptr);
@@ -279,7 +279,7 @@ class ComputeCallGraph : public Inspector {
             else if (auto nr = ctrref->to<IR::PathExpression>())
                 ctr = structure->counters.get(nr->path->name);
             if (ctr == nullptr)
-                ::error(ErrorType::ERR_NOT_FOUND, "Cannot find counter", ctrref);
+                ::error(ErrorType::ERR_NOT_FOUND, "%1%: Cannot find counter", ctrref);
             auto parent = findContext<IR::ActionFunction>();
             BUG_CHECK(parent != nullptr, "%1%: Counter call not within action", primitive);
             structure->calledCounters.calls(parent->name, ctr->name.name);
@@ -292,7 +292,7 @@ class ComputeCallGraph : public Inspector {
             else if (auto nr = mtrref->to<IR::PathExpression>())
                 mtr = structure->meters.get(nr->path->name);
             if (mtr == nullptr)
-                ::error(ErrorType::ERR_NOT_FOUND, "Cannot find meter", mtrref);
+                ::error(ErrorType::ERR_NOT_FOUND, "%1%: Cannot find meter", mtrref);
             auto parent = findContext<IR::ActionFunction>();
             BUG_CHECK(parent != nullptr,
                       "%1%: not within action", primitive);
@@ -310,7 +310,7 @@ class ComputeCallGraph : public Inspector {
             else if (auto nr = regref->to<IR::PathExpression>())
                 reg = structure->registers.get(nr->path->name);
             if (reg == nullptr)
-                ::error(ErrorType::ERR_NOT_FOUND, "Cannot find register", regref);
+                ::error(ErrorType::ERR_NOT_FOUND, "%1%: Cannot find register", regref);
             auto parent = findContext<IR::ActionFunction>();
             BUG_CHECK(parent != nullptr,
                       "%1%: not within action", primitive);
@@ -361,7 +361,7 @@ class ComputeTableCallGraph : public Inspector {
         LOG3("Scanning " << apply->name);
         auto tbl = structure->tables.get(apply->name.name);
         if (tbl == nullptr)
-            ::error(ErrorType::ERR_NOT_FOUND, "Could not find table", apply->name);
+            ::error(ErrorType::ERR_NOT_FOUND, "%1%: Could not find table", apply->name);
         auto parent = findContext<IR::V1Control>();
         ERROR_CHECK(parent != nullptr, "%1%: Apply not within a control block?", apply);
 
@@ -376,7 +376,7 @@ class ComputeTableCallGraph : public Inspector {
         if (ctrl != nullptr && ctrl != parent) {
             auto previous = get(structure->tableInvocation, tbl);
             ::error(ErrorType::ERR_INVALID,
-                    "Table invoked from two different controls: %2% and %3%",
+                    "%1%: Table invoked from two different controls: %2% and %3%",
                     tbl, apply, previous);
         }
         LOG3("Invoking " << tbl << " in " << parent->name);
@@ -477,7 +477,7 @@ class FixExtracts final : public Transform {
                 cstring hname = structure->makeUniqueName(type->name);
                 if (fixedHeaderType != nullptr) {
                     ::error(ErrorType::ERR_INVALID,
-                            "header types with multiple varbit fields are not supported",
+                            "%1%: header types with multiple varbit fields are not supported",
                             type);
                     return nullptr;
                 }
@@ -687,7 +687,8 @@ class DetectDuplicates: public Inspector {
                             ::error(ErrorType::ERR_DUPLICATE, "%1%: same name as %2%", e1, e2);
                         else
                             // This name is probably standard_metadata_t, a built-in declaration
-                            ::error(ErrorType::ERR_INVALID, "; name %2% is reserved", e2, key);
+                            ::error(ErrorType::ERR_INVALID,
+                                    "%1% is invalid; name %2% is reserved", e2, key);
                     }
                 }
             }
@@ -847,7 +848,7 @@ class MoveIntrinsicMetadata : public Transform {
             BUG_CHECK(tn, "%1%: expected a Type_Name", intrTypeName);
             auto nt = program->getDeclsByName(tn->path->name)->nextOrDefault();
             if (nt == nullptr || !nt->is<IR::Type_Struct>()) {
-                ::error(ErrorType::ERR_INVALID, "expected a structure", tn);
+                ::error(ErrorType::ERR_INVALID, "%1%: expected a structure", tn);
                 return program;
             }
             intrType = nt->to<IR::Type_Struct>();
@@ -861,7 +862,7 @@ class MoveIntrinsicMetadata : public Transform {
             BUG_CHECK(tn, "%1%: expected a Type_Name", queueTypeName);
             auto nt = program->getDeclsByName(tn->path->name)->nextOrDefault();
             if (nt == nullptr || !nt->is<IR::Type_Struct>()) {
-                ::error(ErrorType::ERR_INVALID, "expected a structure", tn);
+                ::error(ErrorType::ERR_INVALID, "%1%: expected a structure", tn);
                 return program;
             }
             queueType = nt->to<IR::Type_Struct>();
@@ -876,7 +877,7 @@ class MoveIntrinsicMetadata : public Transform {
                 for (auto f : intrType->fields) {
                     if (type->fields.getDeclaration(f->name) == nullptr) {
                         ::error(ErrorType::ERR_NOT_FOUND,
-                                "no such field in standard_metadata", f->name);
+                                "%1%: no such field in standard_metadata", f->name);
                         LOG2("standard_metadata: " << type);
                     }
                 }
@@ -885,7 +886,7 @@ class MoveIntrinsicMetadata : public Transform {
                 for (auto f : queueType->fields) {
                     if (type->fields.getDeclaration(f->name) == nullptr) {
                         ::error(ErrorType::ERR_NOT_FOUND,
-                                "no such field in standard_metadata", f->name);
+                                "%1%: no such field in standard_metadata", f->name);
                         LOG2("standard_metadata: " << type);
                     }
                 }

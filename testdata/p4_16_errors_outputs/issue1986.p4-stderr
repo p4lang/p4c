@@ -1,4 +1,2 @@
-issue1986.p4(18): [--Werror=invalid] error: : Invalid width; must be positive 0
-            {0w0
-             ^^^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation
+terminate called after throwing an instance of 'boost::exception_detail::clone_impl<boost::exception_detail::error_info_injector<boost::io::bad_format_string> >'
+  what():  boost::bad_format_string: format-string is ill-formed

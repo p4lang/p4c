@@ -46,7 +46,8 @@ void HeaderConverter::addTypesAndInstances(const IR::Type_StructLike* type, bool
             // The headers struct can not contain nested structures.
             if (!meta && ft->is<IR::Type_Struct>()) {
                 ::error(ErrorType::ERR_INVALID,
-                        "type should only contain headers, header stacks, or header unions", type);
+                        "%1%: type should only contain headers, header stacks, or header unions",
+                        type);
                 return;
             }
             auto st = ft->to<IR::Type_StructLike>();
@@ -240,7 +241,8 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
             max_length += type->size;
             field->append("*");
             if (varbitFound)
-                ::error(ErrorType::ERR_UNSUPPORTED, "headers with multiple varbit fields", st);
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "%1%: headers with multiple varbit fields not supported", st);
             varbitFound = true;
         } else if (ftype->is<IR::Type_Error>()) {
             // treat as bit<32>
@@ -261,7 +263,7 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
     if (padding != 0) {
         if (st->is<IR::Type_Header>()) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "Found header with fields totaling %2% bits."
+                    "%1%: Found header with fields totaling %2% bits."
                     "  BMv2 target only supports headers with fields"
                     " totaling a multiple of 8 bits.",
                     st, max_length);

@@ -40,7 +40,7 @@ void DirectMeterMap::setTable(const IR::IDeclaration* meter, const IR::P4Table* 
     auto info = getInfo(meter);
     if (info == nullptr) {
         ::error(ErrorType::ERR_INVALID,
-                "table with direct meter %2% must have"
+                "%1%: table with direct meter %2% must have"
                 " at least one action with a read method call",
                 table, meter);
         return;

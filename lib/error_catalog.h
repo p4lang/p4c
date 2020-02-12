@@ -83,42 +83,26 @@ class ErrorCatalog {
     /// returns false if the code already exists and forceReplace was not set to true
     /// @param errorCode - integer value for the error/warning
     /// @param name      - name for the error. Used to enable/disable all errors of that type
-    /// @param fmt       - error string format
     /// @param forceReplace - override an existing error type in the catalog
-    bool add(int errorCode, const char *name, const std::string fmt, bool forceReplace = false) {
+    bool add(int errorCode, const char *name, bool forceReplace = false) {
         if (forceReplace)
             errorCatalog.erase(errorCode);
-        auto it = errorCatalog.emplace(errorCode, std::pair<const char *, std::string>(name, fmt));
+        auto it = errorCatalog.emplace(errorCode, name);
         return it.second;
     }
 
-    /// add to the catalog
-    /// returns false if the code already exists and forceReplace was not set to true
-    bool add(int errorCode, const char *name, const char *fmt, bool forceReplace = false) {
-        return add(errorCode, name, std::string(fmt), forceReplace);
-    }
-
     /// retrieve the name for errorCode
-    const char *getName(int errorCode) {
+    const cstring getName(int errorCode) {
         if (errorCatalog.count(errorCode))
-            return errorCatalog.at(errorCode).first;
+            return errorCatalog.at(errorCode);
         return "--unknown--";
-    }
-
-    /// retrieve the message format for errorCode
-    const char *getFormat(int errorCode) {
-        if (errorCatalog.count(errorCode))
-            return errorCatalog.at(errorCode).second.c_str();
-        static std::string msg("errorCatalog message not set for error code ");
-        msg += std::to_string(errorCode);
-        return msg.c_str();
     }
 
  private:
     ErrorCatalog() {}
 
-    /// map from errorCode to pairs of (name, format)
-    static std::map<int, std::pair<const char *, const std::string>> errorCatalog;
+    /// map from errorCode to name
+    static std::map<int, cstring> errorCatalog;
 };
 
 #endif  // P4C_LIB_ERROR_CATALOG_H_

@@ -27,8 +27,8 @@ DoReplaceSelectRange::rangeToMasks(const IR::Range *r) {
     auto l = r->left->to<IR::Constant>();
     if (!l) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%2%: Range min must be a compile-time constant.",
-                r, r->left);
+                "%1%: Range boundaries must be a compile-time constants.",
+                r->left);
         return masks;
     }
     auto left = l->value;
@@ -36,14 +36,14 @@ DoReplaceSelectRange::rangeToMasks(const IR::Range *r) {
     auto ri = r->right->to<IR::Constant>();
     if (!ri) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%2%: Range max must be a compile-time constant.",
-                r, r->right);
+                "%1%: Range bundaries must be a compile-time constants.",
+                r->right);
         return masks;
     }
     auto right = ri->value;
     if (right < left) {
-        ::error(ErrorType::ERR_INVALID, "%2%-%3%: Range end is less than start.",
-                r, r->left, r->right);
+        ::error(ErrorType::ERR_INVALID, "%1%-%2%: Range end is less than start.",
+                r->left, r->right);
         return masks;
     }
 

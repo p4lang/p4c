@@ -57,10 +57,6 @@ class ErrorReporter final {
     }
 
     /// retrieve the format from the error catalog
-    const char *get_format(int errorCode) {
-        return ErrorCatalog::getCatalog().getFormat(errorCode);
-    }
-    /// retrieve the format from the error catalog
     const char *get_error_name(int errorCode) {
         return ErrorCatalog::getCatalog().getName(errorCode);
     }
@@ -95,15 +91,12 @@ class ErrorReporter final {
     void diagnose(DiagnosticAction action, const int errorCode, const char *format, const T *node,
                   Args... args) {
         if (!error_reported(errorCode, node->getSourceInfo())) {
-            std::string fmt = std::string(get_format(errorCode));
-            if (!fmt.empty()) fmt += std::string(" ") + format;
-            else              fmt += format;
             const char *name = get_error_name(errorCode);
             auto da = getDiagnosticAction(name, action);
             if (name)
-                diagnose(da, name, fmt.c_str(), node, args...);
+                diagnose(da, name, format, node, args...);
             else
-                diagnose(action, nullptr, fmt.c_str(), node, std::forward<Args>(args)...);
+                diagnose(action, nullptr, format, node, std::forward<Args>(args)...);
         }
     }
 
@@ -118,15 +111,12 @@ class ErrorReporter final {
 
     template <typename... Args>
     void diagnose(DiagnosticAction action, const int errorCode, const char *format, Args... args) {
-        std::string fmt = std::string(get_format(errorCode));
-        if (!fmt.empty()) fmt += std::string(" ") + format;
-        else              fmt += format;
         const char *name = get_error_name(errorCode);
         auto da = getDiagnosticAction(name, action);
         if (name)
-            diagnose(da, name, fmt.c_str(), args...);
+            diagnose(da, name, format, args...);
         else
-            diagnose(action, nullptr, fmt.c_str(), std::forward<Args>(args)...);
+            diagnose(action, nullptr, format, std::forward<Args>(args)...);
     }
 
     /// The sink of all the diagnostic functions. Here the error gets printed

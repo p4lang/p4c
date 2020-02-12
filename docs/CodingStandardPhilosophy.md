@@ -133,13 +133,14 @@ SourceInfo objects smartly.  Here is an example:
 
 ```C++
 IR::NamedRef *ref;
-error("%1%: No header or metadata named '%2%'", ref->srcInfo, ref->name);
+error(ErrorType::ERR_INVALID,
+      "%1%: No header or metadata named '%2%'", ref->srcInfo, ref->name);
 ```
 
 output:
 
 ```
-../testdata/v1_errors/missing_decls1.p4(6): Error: No header or metadata named 'data'
+missing_decls1.p4(6): [-Werror=invalid] Error: No header or metadata named 'data'
     if (data.b2 == 0) {
         ^^^^
 ```
