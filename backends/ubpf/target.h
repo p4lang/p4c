@@ -58,7 +58,7 @@ namespace UBPF {
         cstring dataOffset(UNUSED cstring base) const override { return cstring(""); }
         cstring dataEnd(UNUSED cstring base) const override { return cstring(""); }
         cstring dropReturnCode() const override { return "0"; }
-        cstring abortReturnCode() const override { return "0"; }
+        cstring abortReturnCode() const override { return "1"; }
         cstring forwardReturnCode() const override { return "1"; }
         cstring sysMapPath() const override { return ""; }
     };

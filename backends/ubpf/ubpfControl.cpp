@@ -338,7 +338,7 @@ namespace UBPF {
         auto pRegister = control->getRegister(registerName);
         pRegister->emitKeyInstance(builder, method);
 
-        builder->append(a->left->to<IR::PathExpression>()->path->name);
+        builder->append(a->left->to<IR::PathExpression>()->path->name.name);
         builder->append(" = ");
         visit(a->right);
         builder->endOfStatement();

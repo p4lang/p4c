@@ -333,7 +333,7 @@ namespace UBPF {
 
         builder->emitIndent();
         builder->appendFormat("int %s = BYTES(%s) - BYTES(%s)", program->outerHdrOffsetVar.c_str(),
-                              program->offsetVar.c_str(), program->outerHdrLengthVar.c_str());
+                              program->outerHdrLengthVar.c_str(), program->offsetVar.c_str());
         builder->endOfStatement(true);
 
         builder->emitIndent();

@@ -72,6 +72,9 @@ namespace UBPF {
         builder->target->emitUbpfHelpers(builder);
 
         builder->emitIndent();
+        control->emitTableInstances(builder);
+
+        builder->emitIndent();
         builder->target->emitChecksumHelpers(builder);
 
         builder->emitIndent();
@@ -133,8 +136,6 @@ namespace UBPF {
         emitTableDefinition(builder);
         builder->newline();
         control->emitTableTypes(builder);
-        builder->newline();
-        control->emitTableInstances(builder);
         builder->appendLine("#endif");
     }
 

@@ -52,7 +52,7 @@ control pipe(inout Headers_t headers, inout metadata meta) {
         bit<48> tmp = ubpf_time_get_ns();  // this should not be invoked.
     }
 
-    table test_tbl {
+    table tbl_a {
         actions = { RejectConditional();
                     act_return();
                     act_exit();}
@@ -60,7 +60,7 @@ control pipe(inout Headers_t headers, inout metadata meta) {
     }
 
     apply {
-        test_tbl.apply();
+        tbl_a.apply();
 
         exit;
         return;
