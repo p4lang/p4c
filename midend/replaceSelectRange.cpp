@@ -36,7 +36,7 @@ DoReplaceSelectRange::rangeToMasks(const IR::Range *r) {
     auto ri = r->right->to<IR::Constant>();
     if (!ri) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%: Range bundaries must be a compile-time constants.",
+                "%1%: Range boundaries must be a compile-time constants.",
                 r->right);
         return masks;
     }
