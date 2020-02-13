@@ -248,7 +248,7 @@ void EBPFTable::emitInstance(CodeBuilder* builder) {
             if (matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name) {
                 if (tableKind == TableLPMTrie) {
                     ::error(ErrorType::ERR_UNSUPPORTED,
-                            "only one LPM field allowed", it->matchType);
+                            "%1%: only one LPM field allowed", it->matchType);
                     return;
                 }
                 tableKind = TableLPMTrie;
@@ -258,17 +258,17 @@ void EBPFTable::emitInstance(CodeBuilder* builder) {
         auto sz = extBlock->getParameterValue(program->model.array_table.size.name);
         if (sz == nullptr || !sz->is<IR::Constant>()) {
             ::error(ErrorType::ERR_UNSUPPORTED,
-                    "Expected an integer argument; is the model corrupted?", expr);
+                    "%1%: Expected an integer argument; is the model corrupted?", expr);
             return;
         }
         auto cst = sz->to<IR::Constant>();
         if (!cst->fitsInt()) {
-            ::error(ErrorType::ERR_UNSUPPORTED, "size too large", cst);
+            ::error(ErrorType::ERR_UNSUPPORTED, "%1%: size too large", cst);
             return;
         }
         int size = cst->asInt();
         if (size <= 0) {
-            ::error(ErrorType::ERR_INVALID, "negative size", cst);
+            ::error(ErrorType::ERR_INVALID, "%1%: negative size", cst);
             return;
         }
 
@@ -488,7 +488,7 @@ EBPFCounterTable::EBPFCounterTable(const EBPFProgram* program, const IR::ExternB
     auto sz = block->getParameterValue(program->model.counterArray.max_index.name);
     if (sz == nullptr || !sz->is<IR::Constant>()) {
         ::error(ErrorType::ERR_INVALID,
-                "(%2%): expected an integer argument; is the model corrupted?",
+                "%1% (%2%): expected an integer argument; is the model corrupted?",
                 program->model.counterArray.max_index, name);
         return;
     }
@@ -506,7 +506,7 @@ EBPFCounterTable::EBPFCounterTable(const EBPFProgram* program, const IR::ExternB
     auto sprs = block->getParameterValue(program->model.counterArray.sparse.name);
     if (sprs == nullptr || !sprs->is<IR::BoolLiteral>()) {
         ::error(ErrorType::ERR_INVALID,
-                "(%2%): Expected an integer argument; is the model corrupted?",
+                "%1% (%2%): Expected an integer argument; is the model corrupted?",
                 program->model.counterArray.sparse, name);
         return;
     }
@@ -645,7 +645,7 @@ EBPFCounterTable::emitMethodInvocation(CodeBuilder* builder, const P4::ExternMet
         return;
     }
     ::error(ErrorType::ERR_UNSUPPORTED,
-            "Unexpected method for %2%", method->expr, program->model.counterArray.name);
+            "Unexpected method %1% for %2%", method->expr, program->model.counterArray.name);
 }
 
 void EBPFCounterTable::emitTypes(CodeBuilder* builder) {

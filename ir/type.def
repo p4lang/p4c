@@ -169,7 +169,19 @@ class Type_InfInt : Type, ITypeVar {
     dbprint { out << "int/" << declid; }
     toString { return "int"; }
     operator== { return declid == a.declid; }
-    equiv { return true; /* ignore declid */ }
+    equiv {
+ #if __llvm__
+ #pragma unused (a)
+ #endif
+ #if __GNUC__
+ #pragma GCC diagnostic push
+ #pragma GCC diagnostic ignored "-Wunused-variable"
+ #endif
+        return true; /* ignore declid */
+ #if __GNUC__
+ #pragma GCC diagnostic pop
+ #endif
+    }
     const Type* getP4Type() const override { return this; }
 }
 

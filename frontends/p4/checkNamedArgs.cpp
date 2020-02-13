@@ -32,7 +32,7 @@ bool CheckNamedArgs::checkArguments(const IR::Vector<IR::Argument>* arguments) {
         } else {
             if (argHasName != hasName)
                 ::error(ErrorType::ERR_INVALID,
-                        "either all or none of the arguments of a call must be named", arg);
+                        "%1%: either all or none of the arguments of a call must be named", arg);
             if (argHasName) {
                 auto it = found.find(argName);
                 if (it != found.end())

@@ -209,7 +209,7 @@ class CFGBuilder : public Inspector {
             return false;
         auto am = instance->to<P4::ApplyMethod>();
         if (!am->object->is<IR::P4Table>()) {
-            ::error(ErrorType::ERR_INVALID, "apply method must be on a table", statement);
+            ::error(ErrorType::ERR_INVALID, "%1%: apply method must be on a table", statement);
             return false;
         }
         auto tc = am->object->to<IR::P4Table>();

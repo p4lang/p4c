@@ -172,7 +172,7 @@ P4Table::getApplyMethodType() const {
     // Synthesize a new type for the return
     auto actions = properties->getProperty(IR::TableProperties::actionsPropertyName);
     if (actions == nullptr) {
-        ::error(ErrorType::ERR_INVALID, "table does not contain a list of actions", this);
+        ::error(ErrorType::ERR_INVALID, "%1%: table does not contain a list of actions", this);
         return nullptr;
     }
     if (!actions->value->is<IR::ActionList>())
@@ -255,7 +255,7 @@ const IR::PackageBlock* ToplevelBlock::getMain() const {
         return nullptr;
     }
     if (!main->is<IR::Declaration_Instance>()) {
-        ::error(ErrorType::ERR_INVALID, "must be a package declaration", main->getNode());
+        ::error(ErrorType::ERR_INVALID, "%1$: must be a package declaration", main->getNode());
         return nullptr;
     }
     auto block = getValue(main->getNode());

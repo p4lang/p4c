@@ -71,7 +71,7 @@ class Predication final : public Transform {
     const IR::Statement* error(const IR::Statement* statement) const {
         if (inside_action && ifNestingLevel > 0)
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "Conditional execution in actions",
+                    "%1%: Conditional execution in actions unsupported on this target",
                     statement);
         return statement;
     }

@@ -138,13 +138,13 @@ ResolutionContext::resolveUnique(IR::ID name,
     }
 
     if (decls->empty()) {
-        ::error(ErrorType::ERR_NOT_FOUND, "declaration", name);
+        ::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", name);
         return nullptr;
     }
     if (decls->size() == 1)
         return decls->at(0);
 
-    ::error(ErrorType::ERR_INVALID, "multiple matching declarations", name);
+    ::error(ErrorType::ERR_INVALID, "%1%: multiple matching declarations", name);
     for (auto a : *decls)
         ::error("Candidate: %1%", a);
     return nullptr;

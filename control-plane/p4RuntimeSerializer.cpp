@@ -1110,7 +1110,7 @@ class P4RuntimeAnalyzer {
             auto matchType = getMatchType(matchTypeName);
             if (matchType == boost::none) {
                 ::error(ErrorType::ERR_UNSUPPORTED,
-                        "match type for Value Set '@match' annotation",
+                        "unsupported match type %1% for Value Set '@match' annotation",
                         matchAnnotation);
                 return;
             }
@@ -1135,7 +1135,7 @@ class P4RuntimeAnalyzer {
                 auto fType = f->type;
                 if (!fType->is<IR::Type_Bits>()) {
                     ::error(ErrorType::ERR_UNSUPPORTED,
-                            "type parameter for Value Set; "
+                            "unsupported type argument for Value Set; "
                             "this version of P4Runtime requires that when the type parameter "
                             "of a Value Set is a struct, all the fields of the struct "
                             "must be of type bit<W>, but %1% is not", f);
@@ -1154,13 +1154,14 @@ class P4RuntimeAnalyzer {
             }
         } else if (et->is<IR::Type_BaseList>()) {
             ::error(ErrorType::ERR_UNSUPPORTED,
-                    "type parameter for Value Set; "
+                    "type argument for for Value Set; "
                     "this version of P4Runtime requires the type parameter of a Value Set "
                     "to be a bit<W> or a struct of bit<W> fields",
                     inst);
         } else {
             ::error(ErrorType::ERR_INVALID,
-                    "type parameter for Value Set; it must be one of bit<W>, struct or tuple",
+                    "%1%: invalid type parameter for Value Set; "
+                    "it must be one of bit<W>, struct or tuple",
                     inst);
         }
     }
@@ -1788,7 +1789,7 @@ P4RuntimeSerializer::generateP4Runtime(const IR::P4Program* program, cstring arc
 
     if (!p4RuntimeProgram || !evaluatedProgram) {
         ::error(ErrorType::ERR_UNSUPPORTED,
-                "P4 program (cannot apply necessary program transformations)",
+                "%1%: unsupported P4 program (cannot apply necessary program transformations)",
                 "Cannot generate P4Info message");
         return P4RuntimeAPI{new p4configv1::P4Info(), new p4v1::WriteRequest()};
     }

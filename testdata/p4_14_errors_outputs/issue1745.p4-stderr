@@ -4,4 +4,4 @@ issue1745.p4(6): [--Werror=legacy] error: length_: header length must depend onl
 issue1745.p4(3)
         options : *;
         ^^^^^^^^^^^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation
+error: 1 errors encountered, aborting compilation

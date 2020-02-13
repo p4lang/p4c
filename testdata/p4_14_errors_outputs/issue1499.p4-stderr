@@ -4,4 +4,4 @@ issue1499.p4(18): error: latest: latest not yet defined
 issue1499.p4(21): [--Werror=legacy] error: ingress: unknown state
     1024 : ingress;
            ^^^^^^^
-[--Werror=overlimit] error: 2 errors encountered, aborting compilation
+error: 2 errors encountered, aborting compilation

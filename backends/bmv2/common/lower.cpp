@@ -301,7 +301,7 @@ RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
             // one knew of this feature, since it was not very clearly
             // documented.
             if (expression->arguments->size() != 2) {
-                ::error(ErrorType::ERR_EXPECTED, "2 arguments", expression);
+                ::error(ErrorType::ERR_EXPECTED, "%1%: expected 2 arguments", expression);
                 return expression;
             }
             auto vec = new IR::Vector<IR::Argument>();

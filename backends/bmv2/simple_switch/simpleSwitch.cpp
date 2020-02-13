@@ -35,8 +35,9 @@ using BMV2::stringRepr;
 namespace BMV2 {
 
 void ParseV1Architecture::modelError(const char* format, const IR::Node* node) {
-    ::error(ErrorType::ERR_UNSUPPORTED, format, node);
-    ::error("Are you using an up-to-date v1model.p4?");
+    ::error(ErrorType::ERR_UNSUPPORTED,
+            (cstring("%1%") + format +
+             "\nAre you using an up-to-date v1model.p4?").c_str(), node);
 }
 
 bool ParseV1Architecture::preorder(const IR::PackageBlock* main) {
@@ -644,7 +645,7 @@ void ExternConverter_direct_meter::convertExternInstance(
         // + the meter is incorrectly associated with a table via a
         //   property like 'counters = my_meter;'.
         ::error(ErrorType::ERR_INVALID,
-                "direct meter is not associated with any table"
+                "%1%: direct meter is not associated with any table"
                 " via 'meters' table property", inst);
         return;
     }

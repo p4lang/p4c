@@ -96,7 +96,7 @@ ExternConverter::convertExternInstance(ConversionContext* ctxt,
                                        const IR::ExternBlock* eb,
                                        const bool& emitExterns) {
     if (!emitExterns) {
-        ::error(ErrorType::ERR_UNKNOWN, "extern instance", eb->type->name);
+        ::error(ErrorType::ERR_UNKNOWN, "%1%: unknown extern instance", eb->type->name);
         return;
     }
     auto attrs = new Util::JsonArray();
@@ -127,7 +127,7 @@ ExternConverter::convertExternFunction(ConversionContext* ctxt,
                                        const IR::StatOrDecl* s,
                                        const bool emitExterns) {
     if (!emitExterns) {
-        ::error(ErrorType::ERR_UNKNOWN, "extern function", ef->method->name);
+        ::error(ErrorType::ERR_UNKNOWN, "%1%: unknown extern function", ef->method->name);
         return nullptr;
     }
     auto primitive = mkPrimitive(ef->method->name);

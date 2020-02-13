@@ -1,4 +1,4 @@
-issue1986.p4(18): [--Werror=invalid] error: : Invalid width; must be positive 0
+issue1986.p4(18): [--Werror=invalid] error: : invalid width; 0 must be positive
             {0w0
              ^^^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation
+error: 1 errors encountered, aborting compilation

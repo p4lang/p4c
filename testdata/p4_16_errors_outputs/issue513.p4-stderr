@@ -4,6 +4,6 @@ issue513.p4(60): [--Wwarn=deprecated] warning: mark_to_drop: Using deprecated fe
 v1model.p4(365)
 extern void mark_to_drop();
             ^^^^^^^^^^^^
-issue513.p4(60): [--Werror=target-error] error: MethodCallStatement: Unsupported on target Conditional execution in actions
+issue513.p4(60): [--Werror=target-error] error: MethodCallStatement: Conditional execution in actions unsupported on this target
             mark_to_drop();
             ^^^^^^^^^^^^^^
