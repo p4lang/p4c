@@ -19,6 +19,6 @@ issue-2123_e.p4(62)
 issue-2123_e.p4(63): [--Werror=target-error] error: hdr.ipv4.totalLen: Range boundaries must be a compile-time constants.
             hdr.ipv4.totalLen .. 0x0800 : parse_ipv4;
             ^^^^^^^^^^^^^^^^^
-issue-2123_e.p4(64): [--Werror=target-error] error: hdr.ipv4.totalLen: Range bundaries must be a compile-time constants.
+issue-2123_e.p4(64): [--Werror=target-error] error: hdr.ipv4.totalLen: Range boundaries must be a compile-time constants.
             0x0800 .. hdr.ipv4.totalLen : parse_ipv4;
                       ^^^^^^^^^^^^^^^^^

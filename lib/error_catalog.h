@@ -19,6 +19,7 @@ limitations under the License.
 
 #include <map>
 #include <string>
+#include "cstring.h"
 
 /// enumerate supported errors
 /// Backends should extend this class with additional errors in the range 500-999 and
