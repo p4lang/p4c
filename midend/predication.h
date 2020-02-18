@@ -23,22 +23,17 @@ limitations under the License.
 namespace P4 {
 
 /**
-
 This pass operates on action bodies.  It converts 'if' statements to
 '?:' expressions, if possible.  Otherwise this pass will signal an
 error.  This pass should be used only on architectures that do not
 support conditionals in actions.
-
 For this to work all statements must be assignments or other ifs.
-
 if (e)
    a = f(b);
 else
    c = f(d);
 x = y;
-
 becomes (actual implementatation is slightly optimized):
-
 bool cond;
 bool predicate = true;
 {
@@ -51,17 +46,16 @@ bool predicate = true;
   c = predicate ? f(d) : c;
 }
 x = predicate ? y : x;
-
 Not the most efficient conversion currently.
 This could be made better by looking on both the "then" and "else"
 branches, but in this way we cannot have two side-effects in the same
 conditional statement.
-
 */
 class Predication final : public Transform {
     NameGenerator* generator;
     bool inside_action;
     std::vector<cstring> predicateName;
+    std::vector<const IR::Expression *> conditions;
     unsigned ifNestingLevel;
 
     const IR::Expression* predicate() const {
@@ -69,12 +63,14 @@ class Predication final : public Transform {
             return nullptr;
         return new IR::PathExpression(IR::ID(predicateName.back())); }
     const IR::Statement* error(const IR::Statement* statement) const {
-        if (inside_action && ifNestingLevel > 0)
+        if (inside_action && ifNestingLevel > 0) 
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "%1%: Conditional execution in actions unsupported on this target",
                     statement);
         return statement;
     }
+
+    const IR::Expression * aggregate() const;
 
  public:
     explicit Predication(NameGenerator* generator) : generator(generator),
