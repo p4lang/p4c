@@ -126,7 +126,7 @@ namespace UBPF {
         builder->newline();
 
         builder->emitIndent();
-        if (keyType->is<IR::Type_Bits>()) {
+        if (keyType != nullptr && keyType->is<IR::Type_Bits>()) {
             auto tb = keyType->to<IR::Type_Bits>();
             auto scalar = new UBPFScalarType(tb);
             builder->append(".key_size = sizeof(");
@@ -139,7 +139,7 @@ namespace UBPF {
         builder->newline();
 
         builder->emitIndent();
-        if (valueType->is<IR::Type_Bits>()) {
+        if (valueType != nullptr && valueType->is<IR::Type_Bits>()) {
             auto tb = valueType->to<IR::Type_Bits>();
             auto scalar = new UBPFScalarType(tb);
             builder->append(".value_size = sizeof(");
