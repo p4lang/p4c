@@ -80,8 +80,6 @@ struct tuple_0 {
 }
 
 control pipe(inout Headers_t headers, inout metadata meta) {
-    bit<32> tmp;
-    bit<32> tmp_0;
     @name("pipe.conn_state") Register<bit<32>, bit<32>>(32w65536) conn_state_0;
     @name("pipe.conn_srv_addr") Register<bit<32>, bit<32>>(32w65536) conn_srv_addr_0;
     @name("pipe.update_conn_state") action update_conn_state() {
@@ -115,10 +113,8 @@ control pipe(inout Headers_t headers, inout metadata meta) {
         hash<tuple_0>(meta._conn_id2, HashAlgorithm.lookup3, { headers.ipv4.dstAddr, headers.ipv4.srcAddr });
     }
     @hidden action simplefirewall_ubpf130() {
-        tmp = conn_state_0.read(meta._conn_id2);
-        meta._connInfo_s0 = tmp;
-        tmp_0 = conn_srv_addr_0.read(meta._conn_id2);
-        meta._connInfo_srv_addr1 = tmp_0;
+        meta._connInfo_s0 = conn_state_0.read(meta._conn_id2);
+        meta._connInfo_srv_addr1 = conn_srv_addr_0.read(meta._conn_id2);
     }
     @hidden table tbl_simplefirewall_ubpf125 {
         actions = {
@@ -188,29 +184,29 @@ control pipe(inout Headers_t headers, inout metadata meta) {
                 tbl_simplefirewall_ubpf127.apply();
             }
             tbl_simplefirewall_ubpf130.apply();
-            if (tmp == 32w0 || tmp_0 == 32w0) {
+            if (meta._connInfo_s0 == 32w0 || meta._connInfo_srv_addr1 == 32w0) {
                 if (headers.tcp.syn == 1w1 && headers.tcp.ack == 1w0) {
                     tbl_update_conn_info.apply();
                 }
-            } else if (tmp_0 == headers.ipv4.srcAddr) {
-                if (tmp == 32w1) {
+            } else if (meta._connInfo_srv_addr1 == headers.ipv4.srcAddr) {
+                if (meta._connInfo_s0 == 32w1) {
                     if (headers.tcp.syn == 1w1 && headers.tcp.ack == 1w1) {
                         tbl_update_conn_state.apply();
                     }
-                } else if (tmp == 32w2) {
+                } else if (meta._connInfo_s0 == 32w2) {
                     tbl__drop.apply();
-                } else if (tmp == 32w3) {
+                } else if (meta._connInfo_s0 == 32w3) {
                     if (headers.tcp.fin == 1w1 && headers.tcp.ack == 1w1) {
                         tbl_update_conn_info_0.apply();
                     }
                 }
-            } else if (tmp == 32w1) {
+            } else if (meta._connInfo_s0 == 32w1) {
                 tbl__drop_0.apply();
-            } else if (tmp == 32w2) {
+            } else if (meta._connInfo_s0 == 32w2) {
                 if (headers.tcp.syn == 1w0 && headers.tcp.ack == 1w1) {
                     tbl_update_conn_state_0.apply();
                 }
-            } else if (tmp == 32w3) {
+            } else if (meta._connInfo_s0 == 32w3) {
                 if (headers.tcp.fin == 1w1 && headers.tcp.ack == 1w1) {
                     tbl_update_conn_info_1.apply();
                 }

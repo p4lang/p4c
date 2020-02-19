@@ -74,8 +74,6 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
 }
 
 control pipe(inout Headers_t headers, inout metadata meta) {
-    bit<32> tmp;
-    bit<32> tmp_0;
     @name("pipe.conn_state") Register<bit<32>, bit<32>>(32w65536) conn_state_0;
     @name("pipe.conn_srv_addr") Register<bit<32>, bit<32>>(32w65536) conn_srv_addr_0;
     @name("pipe.update_conn_state") action update_conn_state(bit<32> s_2) {
@@ -110,10 +108,8 @@ control pipe(inout Headers_t headers, inout metadata meta) {
             } else {
                 hash<tuple<bit<32>, bit<32>>>(meta.conn_id, HashAlgorithm.lookup3, { headers.ipv4.dstAddr, headers.ipv4.srcAddr });
             }
-            tmp = conn_state_0.read(meta.conn_id);
-            meta.connInfo.s = tmp;
-            tmp_0 = conn_srv_addr_0.read(meta.conn_id);
-            meta.connInfo.srv_addr = tmp_0;
+            meta.connInfo.s = conn_state_0.read(meta.conn_id);
+            meta.connInfo.srv_addr = conn_srv_addr_0.read(meta.conn_id);
             if (meta.connInfo.s == 32w0 || meta.connInfo.srv_addr == 32w0) {
                 if (headers.tcp.syn == 1w1 && headers.tcp.ack == 1w0) {
                     update_conn_info(32w1, headers.ipv4.dstAddr);
