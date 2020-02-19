@@ -55,22 +55,32 @@ class Predication final : public Transform {
     NameGenerator* generator;
     bool inside_action;
     std::vector<cstring> predicateName;
-    std::vector<const IR::Expression *> conditions;
+    // cstring predicateName;
+    unsigned conditionsNumber = 0;
     unsigned ifNestingLevel;
+    const IR::Expression * nestedCondition = nullptr;
+    
 
     const IR::Expression* predicate() const {
         if (predicateName.empty())
             return nullptr;
         return new IR::PathExpression(IR::ID(predicateName.back())); }
+
+    const IR::Expression* predicateBeforeLast() const {
+        if (predicateName.size() < 2)
+            return nullptr;
+        auto beforeLast = predicateName.rbegin()[1];
+        return new IR::PathExpression(IR::ID(beforeLast)); }
     const IR::Statement* error(const IR::Statement* statement) const {
-        if (inside_action && ifNestingLevel > 0) 
+        if (inside_action && ifNestingLevel > 0)
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                     "%1%: Conditional execution in actions unsupported on this target",
                     statement);
         return statement;
     }
 
-    const IR::Expression * aggregate() const;
+    void pushCondition(const IR::Expression *);
+    void popCondition();
 
  public:
     explicit Predication(NameGenerator* generator) : generator(generator),

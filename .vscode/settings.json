@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "*.tcc": "cpp",
+        "functional": "cpp",
+        "memory": "cpp",
+        "__functional_base": "cpp",
+        "istream": "cpp",
+        "thread": "cpp",
+        "tuple": "cpp"
+    }
+}
