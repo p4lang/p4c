@@ -51,19 +51,6 @@ namespace UBPF {
                               tblName.c_str(), key.c_str(), value.c_str());
     }
 
-    void UbpfTarget::emitTableUpdate(EBPF::CodeGenInspector *codeGen,
-                                     Util::SourceCodeBuilder *builder,
-                                     cstring tblName, cstring key,
-                                     const IR::Expression *value) const {
-        builder->appendFormat("ubpf_map_update(&%s, ",
-                              tblName.c_str());
-        builder->append("&");
-        builder->append(key);
-        builder->append(", ");
-        codeGen->visit(value);
-        builder->append(")");
-    }
-
     void UbpfTarget::emitGetPacketData(Util::SourceCodeBuilder *builder,
                                        cstring ctxVar) const {
         builder->appendFormat("ubpf_packet_data(%s)", ctxVar.c_str());

@@ -83,13 +83,11 @@ namespace UBPF {
         auto target = (UbpfTarget *) builder->target;
 
         cstring valueVariableName = emitValueInstanceIfNeeded(builder, arg_value);
-        if (valueVariableName != nullptr) {
-            target->emitTableUpdate(builder, dataMapName, last_key_name,
-                                    "&" + valueVariableName);
-        } else {
-            target->emitTableUpdate(codeGen, builder, dataMapName, last_key_name,
-                                    arg_value->expression);
+        if (valueVariableName == nullptr) {
+            valueVariableName = arg_value->expression->toString();
         }
+        target->emitTableUpdate(builder, dataMapName, last_key_name,
+                                "&" + valueVariableName);
     }
 
     cstring UBPFRegister::emitValueInstanceIfNeeded(EBPF::CodeBuilder *builder,

@@ -36,8 +36,6 @@ namespace UBPF {
                              cstring key, cstring value) const override;
         void emitTableUpdate(Util::SourceCodeBuilder *builder, cstring tblName,
                              cstring key, cstring value) const override;
-        void emitTableUpdate(EBPF::CodeGenInspector *codeGen, Util::SourceCodeBuilder *builder, cstring tblName,
-                             cstring key, const IR::Expression *value) const;
         void emitGetPacketData(Util::SourceCodeBuilder *builder,
                                cstring ctxVar) const;
         void emitUserTableUpdate(UNUSED Util::SourceCodeBuilder *builder, UNUSED cstring tblName,

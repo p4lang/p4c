@@ -91,24 +91,8 @@ namespace UBPF {
             return result;
         }
 
-        bool isPointer(const cstring name) const {
-            return std::find(pointerVariables.begin(), pointerVariables.end(), name)
-                   != pointerVariables.end();
-        }
-
     protected:
-        std::vector<cstring> pointerVariables;
-
         void scanConstants();
-        void scanPointerVariables();
-        bool variableIsUsedAsPointer(const IR::Declaration_Variable *vd,
-                                     const IR::AssignmentStatement *assiStat) const;
-
-        const IR::Statement *findFirstStatementWhereVariableIsUsedAsPointer(
-                const IR::Statement *statement,
-                const IR::Declaration_Variable *vd);
-
-        bool determineIfVariableIsPointer(const IR::Declaration_Variable *vd, const EBPF::EBPFType *etype);
     };
 
 }
