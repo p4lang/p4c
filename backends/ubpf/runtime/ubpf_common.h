@@ -67,11 +67,17 @@ limitations under the License.
 # error "Fix your compiler's __BYTE_ORDER__?!"
 #endif
 
+#undef htonl
 #define htonl(d) __constant_htonl(d)
+#undef htons
 #define htons(d) __constant_htons(d)
+#undef htonll
 #define htonll(d) __constant_htonll(d)
+#undef ntohl
 #define ntohl(d) __constant_ntohl(d)
+#undef ntohs
 #define ntohs(d) __constant_ntohs(d)
+#undef ntohll
 #define ntohll(d) __constant_ntohll(d)
 
 #define load_byte(data, b) (*(((uint8_t*)(data)) + (b)))
