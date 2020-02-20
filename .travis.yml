@@ -41,4 +41,4 @@ install:
 
 script:
   - if [[ $TRAVIS_OS_NAME == 'linux' && $UNIFIED == ON ]] ; then docker run -w /p4c/build -e CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random ; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' && $UNIFIED == ON ]] ; then ctest --output-on-failure -j 2 --schedule-random -LE "ebpf$" ; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' && $UNIFIED == ON ]] ; then ctest --output-on-failure -j 2 --schedule-random -LE "bpf$" ; fi
