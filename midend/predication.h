@@ -52,25 +52,33 @@ branches, but in this way we cannot have two side-effects in the same
 conditional statement.
 */
 class Predication final : public Transform {
+    class ExpressionReplacer final : public Transform {
+    private: 
+        IR::AssignmentStatement * statement;
+        const std::vector<bool>& traversePath;
+        std::vector<bool> currentIfPath;
+    public:
+        explicit ExpressionReplacer(IR::AssignmentStatement * assignment, std::vector<bool>& traverse, bool insideThen) 
+        : statement(assignment), traversePath(traverse)
+        {
+            currentIfPath.reserve(traversePath.size()); // optimization to not exted vector
+            currentIfPath.push_back(insideThen);
+            CHECK_NULL(statement);
+        }
+        const IR::Mux * preorder(IR::Mux * mux);
+        const IR::Expression* clone(const IR::Expression* expression);
+    };
+
+
     NameGenerator* generator;
     bool inside_action;
-    std::vector<cstring> predicateName;
-    // cstring predicateName;
-    unsigned conditionsNumber = 0;
+    bool insideElse;
     unsigned ifNestingLevel;
-    const IR::Expression * nestedCondition = nullptr;
-    
+    std::vector<bool> traversePath;
+    std::vector<IR::Mux *> nestedMuxes;
+    IR::Mux * currentMuxCondition = nullptr;
+    IR::Mux * rootMuxCondition = nullptr;
 
-    const IR::Expression* predicate() const {
-        if (predicateName.empty())
-            return nullptr;
-        return new IR::PathExpression(IR::ID(predicateName.back())); }
-
-    const IR::Expression* predicateBeforeLast() const {
-        if (predicateName.size() < 2)
-            return nullptr;
-        auto beforeLast = predicateName.rbegin()[1];
-        return new IR::PathExpression(IR::ID(beforeLast)); }
     const IR::Statement* error(const IR::Statement* statement) const {
         if (inside_action && ifNestingLevel > 0)
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
@@ -91,7 +99,9 @@ class Predication final : public Transform {
     const IR::Node* preorder(IR::IfStatement* statement) override;
     const IR::Node* preorder(IR::P4Action* action) override;
     const IR::Node* postorder(IR::P4Action* action) override;
-    const IR::Node* postorder(IR::AssignmentStatement* statement) override;
+    const IR::Node* preorder(IR::AssignmentStatement* statement) override;
+
+    // const IR::Node* postorder(IR::AssignmentStatement* statement) override;
     // The presence of other statements makes predication impossible to apply
     const IR::Node* postorder(IR::MethodCallStatement* statement) override
     { return error(statement); }

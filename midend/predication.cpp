@@ -16,8 +16,52 @@ limitations under the License.
 
 #include "predication.h"
 #include "frontends/p4/cloner.h"
-
+#include <iostream>
 namespace P4 {
+
+const IR::Mux * Predication::ExpressionReplacer::preorder(IR::Mux * mux){
+    if (currentIfPath == traversePath) {
+        if (currentIfPath.back()) {
+            mux->e1 = statement->right;
+            mux->e2 = clone(statement->left);
+        } else {
+            mux->e1 = clone(statement->left);
+            mux->e2 = statement->right;
+        }
+    }
+
+    // checking then branch in Mux
+    if (mux->e1->equiv(*(mux->e0))) {
+        mux->e1 = clone(statement->left);
+    } else if (mux->e1->is<IR::Mux>()) {
+        currentIfPath.push_back(true);
+        visit(mux->e1);
+        currentIfPath.pop_back();
+
+    }
+
+
+    // checking then branch in Mux
+    if (mux->e2->equiv(*(mux->e0))) {
+        mux->e2 = clone(statement->left);
+    } else if(mux->e2->is<IR::Mux>()) {
+        currentIfPath.push_back(false);
+        visit(mux->e2);
+        currentIfPath.pop_back();
+    }
+
+    return mux;
+}
+
+const IR::Expression* Predication::ExpressionReplacer::clone(const IR::Expression* expression) {
+    // We often need to clone expressions.  This is necessary because
+    // in the end we will generate different code for the different clones of
+    // an expression.  This is most obvious if one clone is on the LHS and one
+    // on the RHS of an assigment.
+    ClonePathExpressions cloner;
+    return expression->apply(cloner);
+}
+
 
 const IR::Expression* Predication::clone(const IR::Expression* expression) {
     // We often need to clone expressions.  This is necessary because
@@ -28,34 +72,52 @@ const IR::Expression* Predication::clone(const IR::Expression* expression) {
     return expression->apply(cloner);
 }
 
-const IR::Node* Predication::postorder(IR::AssignmentStatement* statement) {
-    if (!inside_action || ifNestingLevel == 0)
+
+const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
+    if (!inside_action || ifNestingLevel == 0 || nestedMuxes.empty())
         return statement;
 
-    auto right = new IR::Mux(predicate(), statement->right, clone(statement->left));
-    statement->right = right;
+    auto emplacer = new ExpressionReplacer(statement, traversePath, !insideElse);
+    auto right = clone(rootMuxCondition);
+    statement->right = right->apply(*emplacer);
+    
     return statement;
 }
 
 void Predication::pushCondition(const IR::Expression * condition) {
-    if (nestedCondition == nullptr) {
-        nestedCondition = condition;
+    auto prevMuxCondition = currentMuxCondition;
+    currentMuxCondition = new IR::Mux(condition, condition, condition); // replace e1, e2 with neutral expression
+    if (rootMuxCondition == nullptr) {
+        rootMuxCondition = currentMuxCondition;
     } else {
-        nestedCondition = new IR::LAnd(condition, nestedCondition);
+        if(insideElse){
+            prevMuxCondition->e2 = currentMuxCondition;
+        } else {
+            prevMuxCondition->e1 = currentMuxCondition;
+        }
     }
-    conditionsNumber++;
+    nestedMuxes.push_back(currentMuxCondition);
+
 }
 
 void Predication::popCondition() {
-    if (conditionsNumber == 1) {
-        nestedCondition = nullptr;
-    } else {
-        auto rightAndExpression = nestedCondition->to<IR::LAnd>()->right;
-        nestedCondition = rightAndExpression;
-    }
+    nestedMuxes.pop_back();
 
-    conditionsNumber--;
+    if (nestedMuxes.empty()) {
+        rootMuxCondition = nullptr;
+        currentMuxCondition = nullptr;
+    } else {
+        currentMuxCondition = nestedMuxes.back();
+        if (insideElse) {
+            currentMuxCondition->e2 = currentMuxCondition->e0;
+        } else {
+            currentMuxCondition->e1 = currentMuxCondition->e0;
+        }
+    }
 }
+
+   
+
 
 
 const IR::Node* Predication::preorder(IR::IfStatement* statement) {
@@ -65,57 +127,27 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
     ++ifNestingLevel;
     auto rv = new IR::BlockStatement;
 
-    // This evaluates the if condition.
-    // We are careful not to evaluate any conditional more times
-    // than in the original program, since the evaluation may have side-effects.
+    insideElse = false;
     pushCondition(statement->condition);
-    cstring newPredName = generator->newName("pred");
-    predicateName.push_back(newPredName);
-    auto decl = new IR::Declaration_Variable(newPredName, IR::Type::Boolean::get());
-    rv->push_back(decl);
-
-
-    IR::AssignmentStatement * truePred;
-    if (ifNestingLevel > 1) {
-        truePred = new IR::AssignmentStatement(predicate(), new IR::LAnd(predicateBeforeLast(), statement->condition));
-    } else {
-        truePred = new IR::AssignmentStatement(predicate(), statement->condition);
-    }
-    rv->push_back(truePred);
+    traversePath.push_back(!insideElse);
 
     visit(statement->ifTrue);
     rv->push_back(statement->ifTrue);
 
-  
+    traversePath.pop_back();
 
     // This evaluates else branch
     if (statement->ifFalse != nullptr) {
-        popCondition();
-        auto neg = new IR::LNot(clone(statement->condition));
-        pushCondition(neg);
-
-        IR::AssignmentStatement * falsePred;
-        if (ifNestingLevel > 1) {
-            falsePred = new IR::AssignmentStatement(predicate(), new IR::LAnd(predicateBeforeLast(), neg));
-        } else {
-            falsePred = new IR::AssignmentStatement(predicate(), neg);
-        }
-        rv->push_back(falsePred);
+        insideElse = true;
+        traversePath.push_back(!insideElse);
 
         visit(statement->ifFalse);
         rv->push_back(statement->ifFalse);
+
+        traversePath.pop_back();
     }
 
     popCondition();
-
-    if (nestedCondition != nullptr) {
-        auto restoreIfPred = new IR::AssignmentStatement(predicate(), predicateBeforeLast());
-        rv->push_back(restoreIfPred);
-    }
-
-
-
-    predicateName.pop_back();
     --ifNestingLevel;
     prune();
     return rv;
