@@ -555,13 +555,14 @@ bool ToP4::preorder(const IR::Type_Control* t) {
 
 bool ToP4::preorder(const IR::Constant* c) {
     big_int value = c->value;
+    big_int zero = 0;
+    if (value < zero) {
+        builder.append("-");
+        value = -value;
+    }
+
     const IR::Type_Bits* tb = dynamic_cast<const IR::Type_Bits*>(c->type);
     if (tb != nullptr) {
-        big_int zero = 0;
-        if (value < zero) {
-            builder.append("-");
-            value = -value;
-        }
         builder.appendFormat("%d", tb->size);
         builder.append(tb->isSigned ? "s" : "w");
     }
