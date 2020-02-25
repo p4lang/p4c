@@ -16,40 +16,30 @@ limitations under the License.
 
 #include "predication.h"
 #include "frontends/p4/cloner.h"
-#include <iostream>
 namespace P4 {
 
-const IR::Mux * Predication::ExpressionReplacer::preorder(IR::Mux * mux){
-    if (currentIfPath == traversePath) {
-        if (currentIfPath.back()) {
+const IR::Mux * Predication::ExpressionReplacer::preorder(IR::Mux * mux) {
+    bool thenElsePass = travesalPath[ifNestingLevel];
+    ++ifNestingLevel;
+
+    if (ifNestingLevel == travesalPath.size()) {
+        if (thenElsePass) {
             mux->e1 = statement->right;
             mux->e2 = clone(statement->left);
         } else {
             mux->e1 = clone(statement->left);
             mux->e2 = statement->right;
         }
+
+    } else {
+        if (thenElsePass) {
+            mux->e2 = clone(statement->left);
+            visit(mux->e1);
+        } else {
+            mux->e1 = clone(statement->left);
+            visit(mux->e2);
+        }
     }
-
-    // checking then branch in Mux
-    if (mux->e1->equiv(*(mux->e0))) {
-        mux->e1 = clone(statement->left);
-    } else if (mux->e1->is<IR::Mux>()) {
-        currentIfPath.push_back(true);
-        visit(mux->e1);
-        currentIfPath.pop_back();
-
-    }
-
-
-    // checking then branch in Mux
-    if (mux->e2->equiv(*(mux->e0))) {
-        mux->e2 = clone(statement->left);
-    } else if(mux->e2->is<IR::Mux>()) {
-        currentIfPath.push_back(false);
-        visit(mux->e2);
-        currentIfPath.pop_back();
-    }
-
     return mux;
 }
 
@@ -74,30 +64,29 @@ const IR::Expression* Predication::clone(const IR::Expression* expression) {
 
 
 const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
-    if (!inside_action || ifNestingLevel == 0 || nestedMuxes.empty())
+    if (!inside_action || ifNestingLevel == 0)
         return statement;
 
-    auto emplacer = new ExpressionReplacer(statement, traversePath, !insideElse);
+    auto replacer = new ExpressionReplacer(statement, travesalPath);
     auto right = clone(rootMuxCondition);
-    statement->right = right->apply(*emplacer);
-    
+    statement->right = right->apply(*replacer);
+
     return statement;
 }
 
-void Predication::pushCondition(const IR::Expression * condition) {
+void Predication::pushThenCondition(const IR::Expression * condition) {
     auto prevMuxCondition = currentMuxCondition;
-    currentMuxCondition = new IR::Mux(condition, condition, condition); // replace e1, e2 with neutral expression
+    currentMuxCondition = new IR::Mux(condition, condition, condition);
     if (rootMuxCondition == nullptr) {
         rootMuxCondition = currentMuxCondition;
     } else {
-        if(insideElse){
-            prevMuxCondition->e2 = currentMuxCondition;
-        } else {
+        if (travesalPath.empty() || travesalPath.back()) {
             prevMuxCondition->e1 = currentMuxCondition;
+        } else {
+            prevMuxCondition->e2 = currentMuxCondition;
         }
     }
     nestedMuxes.push_back(currentMuxCondition);
-
 }
 
 void Predication::popCondition() {
@@ -108,17 +97,10 @@ void Predication::popCondition() {
         currentMuxCondition = nullptr;
     } else {
         currentMuxCondition = nestedMuxes.back();
-        if (insideElse) {
-            currentMuxCondition->e2 = currentMuxCondition->e0;
-        } else {
-            currentMuxCondition->e1 = currentMuxCondition->e0;
-        }
+        currentMuxCondition->e1 = currentMuxCondition->e0;
+        currentMuxCondition->e2 = currentMuxCondition->e0;
     }
 }
-
-   
-
-
 
 const IR::Node* Predication::preorder(IR::IfStatement* statement) {
     if (!inside_action)
@@ -127,26 +109,21 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
     ++ifNestingLevel;
     auto rv = new IR::BlockStatement;
 
-    insideElse = false;
-    pushCondition(statement->condition);
-    traversePath.push_back(!insideElse);
+    pushThenCondition(statement->condition);
+    travesalPath.push_back(true);  // pushing after to enable root else branch
 
     visit(statement->ifTrue);
     rv->push_back(statement->ifTrue);
 
-    traversePath.pop_back();
-
     // This evaluates else branch
     if (statement->ifFalse != nullptr) {
-        insideElse = true;
-        traversePath.push_back(!insideElse);
+        travesalPath.back() = false;
 
         visit(statement->ifFalse);
         rv->push_back(statement->ifFalse);
-
-        traversePath.pop_back();
     }
 
+    travesalPath.pop_back();
     popCondition();
     --ifNestingLevel;
     prune();

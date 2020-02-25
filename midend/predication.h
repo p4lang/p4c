@@ -34,47 +34,44 @@ else
    c = f(d);
 x = y;
 becomes (actual implementatation is slightly optimized):
-bool cond;
-bool predicate = true;
 {
-  bool predicate1;
-  cond = e;
-  predicate1 = predicate && cond;
-  a = predicate1 ? f(b) : a;
-  cond = !cond;
-  predicate1 = predicate && cond;
-  c = predicate ? f(d) : c;
+    a = e ? f(b) : a;
+    c = e ? c : f(d);
 }
-x = predicate ? y : x;
+x = y;
 Not the most efficient conversion currently.
 This could be made better by looking on both the "then" and "else"
 branches, but in this way we cannot have two side-effects in the same
 conditional statement.
 */
 class Predication final : public Transform {
+    /**
+     * Private Transformer only for Predication pass.
+     * This pass operates on nested Mux expressions(?:). 
+     * It replaces then and else expressions in mux with 
+     * the appropriate expression from assignment.
+     */
     class ExpressionReplacer final : public Transform {
-    private: 
+     private:
         IR::AssignmentStatement * statement;
-        const std::vector<bool>& traversePath;
-        std::vector<bool> currentIfPath;
-    public:
-        explicit ExpressionReplacer(IR::AssignmentStatement * assignment, std::vector<bool>& traverse, bool insideThen) 
-        : statement(assignment), traversePath(traverse)
-        {
-            currentIfPath.reserve(traversePath.size()); // optimization to not exted vector
-            currentIfPath.push_back(insideThen);
-            CHECK_NULL(statement);
-        }
+        const std::vector<bool>& travesalPath;
+        unsigned ifNestingLevel = 0;
+     public:
+        explicit ExpressionReplacer(IR::AssignmentStatement * as, std::vector<bool>& t)
+        : statement(as), travesalPath(t)
+        { CHECK_NULL(statement); }
         const IR::Mux * preorder(IR::Mux * mux);
         const IR::Expression* clone(const IR::Expression* expression);
     };
 
-
     NameGenerator* generator;
     bool inside_action;
-    bool insideElse;
     unsigned ifNestingLevel;
-    std::vector<bool> traversePath;
+    // Traverse path of nested if-else statements
+    // true at the end of the vector means that you are currently visiting 'then' branch'
+    // false at the end of the vector means that you are in the else branch of the if statement.
+    // Size of this vector is the current if nesting level.
+    std::vector<bool> travesalPath;
     std::vector<IR::Mux *> nestedMuxes;
     IR::Mux * currentMuxCondition = nullptr;
     IR::Mux * rootMuxCondition = nullptr;
@@ -87,7 +84,7 @@ class Predication final : public Transform {
         return statement;
     }
 
-    void pushCondition(const IR::Expression *);
+    void pushThenCondition(const IR::Expression * cond);
     void popCondition();
 
  public:
@@ -100,8 +97,6 @@ class Predication final : public Transform {
     const IR::Node* preorder(IR::P4Action* action) override;
     const IR::Node* postorder(IR::P4Action* action) override;
     const IR::Node* preorder(IR::AssignmentStatement* statement) override;
-
-    // const IR::Node* postorder(IR::AssignmentStatement* statement) override;
     // The presence of other statements makes predication impossible to apply
     const IR::Node* postorder(IR::MethodCallStatement* statement) override
     { return error(statement); }
