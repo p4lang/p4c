@@ -1,6 +1,9 @@
 #include <core.p4>
 #include <ubpf_model.p4>
 
+const bit<32> SYNSENT = 1;
+const bit<32> SYNACKED = 2;
+const bit<32> ESTABLISHED = 3;
 typedef bit<48> EthernetAddress;
 typedef bit<9> egressSpec_t;
 header Ethernet_t {
@@ -104,30 +107,30 @@ control pipe(inout Headers_t headers, inout metadata meta) {
             meta.connInfo.srv_addr = conn_srv_addr.read(meta.conn_id);
             if (meta.connInfo.s == 0 || meta.connInfo.srv_addr == 0) {
                 if (headers.tcp.syn == 1 && headers.tcp.ack == 0) {
-                    update_conn_info(1, headers.ipv4.dstAddr);
+                    update_conn_info(SYNSENT, headers.ipv4.dstAddr);
                 }
             } else if (meta.connInfo.srv_addr == headers.ipv4.srcAddr) {
-                if (meta.connInfo.s == 1) {
+                if (meta.connInfo.s == SYNSENT) {
                     if (headers.tcp.syn == 1 && headers.tcp.ack == 1) {
-                        update_conn_state(2);
+                        update_conn_state(SYNACKED);
                     }
-                } else if (meta.connInfo.s == 2) {
+                } else if (meta.connInfo.s == SYNACKED) {
                     _drop();
                     return;
-                } else if (meta.connInfo.s == 3) {
+                } else if (meta.connInfo.s == ESTABLISHED) {
                     if (headers.tcp.fin == 1 && headers.tcp.ack == 1) {
                         update_conn_info(0, 0);
                     }
                 }
             } else {
-                if (meta.connInfo.s == 1) {
+                if (meta.connInfo.s == SYNSENT) {
                     _drop();
                     return;
-                } else if (meta.connInfo.s == 2) {
+                } else if (meta.connInfo.s == SYNACKED) {
                     if (headers.tcp.syn == 0 && headers.tcp.ack == 1) {
-                        update_conn_state(3);
+                        update_conn_state(ESTABLISHED);
                     }
-                } else if (meta.connInfo.s == 3) {
+                } else if (meta.connInfo.s == ESTABLISHED) {
                     if (headers.tcp.fin == 1 && headers.tcp.ack == 1) {
                         update_conn_info(0, 0);
                     }

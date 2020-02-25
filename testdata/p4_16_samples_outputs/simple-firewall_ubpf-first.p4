@@ -1,6 +1,9 @@
 #include <core.p4>
 #include <ubpf_model.p4>
 
+const bit<32> SYNSENT = 32w1;
+const bit<32> SYNACKED = 32w2;
+const bit<32> ESTABLISHED = 32w3;
 typedef bit<48> EthernetAddress;
 typedef bit<9> egressSpec_t;
 header Ethernet_t {

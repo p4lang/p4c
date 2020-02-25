@@ -4,10 +4,10 @@ The **p4c-ubpf** compiler allows to translate P4 programs into the uBPF programs
 by [the P4rt-OVS switch](https://github.com/Orange-OpenSource/p4rt-ovs). The uBPF VM is based on the
 open-source implementation provided by [IOVisor](https://github.com/iovisor/ubpf).
 
-The P4-to-uBPF compiler accepts only the P4_16 programs written for the `ubpf_model.p4` architecture model.
+The P4-to-uBPF compiler accepts only the P4_16 programs written for the [ubpf_model.p4](../ubpf/p4include/ubpf_model.p4) architecture model.
 
 The backend for uBPF is mostly based on [P4-to-eBPF compiler](../ebpf/README.md). In fact, it implements the same concepts, but
-generates the C code, which is compatible with the user space BPF implementation. 
+generates C code, which is compatible with the user space BPF implementation. 
 
 ## Background
 
@@ -43,8 +43,8 @@ in the [Translating match-action pipelines](../ebpf#translating-match-action-pip
 
 However, we introduced some modifications, which are listed below:
 
-* There are user-space data types used (e.g. uint8_t, etc.). 
-* Methods to extract packet fields (e.g. load_dword, etc.) has been re-implemented to use user-space data types.
+* The generated code uses user-level data types (e.g. uint8_t, etc.). 
+* Methods to extract packet fields (e.g. load_dword, etc.) have been re-implemented to use user-space data types.
 * The uBPF helpers are imported into the C programs.
 * We have added `mark_to_drop()` extern to the `ubpf` model, so that packets to drop are marked in the P4-native way.
 * We have added support for P4 registers implemented as BPF maps
@@ -53,8 +53,6 @@ However, we introduced some modifications, which are listed below:
 
 The sample P4 programs are located in `examples/` directory. We have tested them with the [P4rt-OVS](https://github.com/Orange-OpenSource/p4rt-ovs) switch - 
 the Open vSwitch that can be extended with BPF programs at runtime. See [the detailed tutorial](./docs/EXAMPLES.md) on how to run and test those examples.
-
-The P4 programs for P4-to-uBPF compiler must be written for the `ubpf_model.p4`.
 
 In order to generate the C code use the following command:
 

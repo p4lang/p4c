@@ -17,18 +17,18 @@ limitations under the License.
 #include <ubpf_model.p4>
 #include <core.p4>
 
-@ethernetaddress typedef bit<48> EthernetAddress;
-@ipv4address     typedef bit<32>     IPv4Address;
+typedef bit<48> EthernetAddress;
+typedef bit<32>     IPv4Address;
 
-#define UDP_PORT_GTP 2152
-#define UDP_PROTO 17
-#define IPV4_ETHTYPE 0x800
-#define ETH_HDR_SIZE 14
-#define IPV4_HDR_SIZE 20
-#define UDP_HDR_SIZE 8
-#define GTP_HDR_SIZE 8
-#define IP_VERSION_4 4
-#define IPV4_MIN_IHL 5
+const bit<16> UDP_PORT_GTP  = 2152;
+const bit<8> UDP_PROTO      = 17;
+const bit<16> IPV4_ETHTYPE  = 0x800;
+const bit<16> ETH_HDR_SIZE  = 14;
+const bit<16> IPV4_HDR_SIZE = 20;
+const bit<16> UDP_HDR_SIZE  = 8;
+const bit<16> GTP_HDR_SIZE  = 8;
+const bit<4> IP_VERSION_4   = 4;
+const bit<4> IPV4_MIN_IHL   = 5;
 
 // standard Ethernet header
 header Ethernet_h

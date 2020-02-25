@@ -17,9 +17,9 @@ limitations under the License.
 #include <ubpf_model.p4>
 #include <core.p4>
 
-#define SYNSENT 1
-#define SYNACKED 2
-#define ESTABLISHED 3
+const bit<32> SYNSENT = 1;
+const bit<32> SYNACKED = 2;
+const bit<32> ESTABLISHED = 3;
 
 typedef bit<48>  EthernetAddress;
 typedef bit<9> egressSpec_t;

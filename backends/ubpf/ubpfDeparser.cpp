@@ -28,7 +28,7 @@ namespace UBPF {
         std::map<const IR::Parameter*, const IR::Parameter*> substitution;
 
         bool illegal(const IR::Statement* statement)
-        { ::error("%1%: not supported in deparser", statement); return false; }
+        { ::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported in deparser", statement); return false; }
 
     public:
         OutHeaderSize(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,

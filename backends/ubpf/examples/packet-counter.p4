@@ -1,8 +1,8 @@
 #include <ubpf_model.p4>
 #include <core.p4>
 
-@ethernetaddress typedef bit<48> EthernetAddress;
-@ipv4address     typedef bit<32>     IPv4Address;
+typedef bit<48> EthernetAddress;
+typedef bit<32>     IPv4Address;
 
 #define IPV4_ETHTYPE 0x800
 #define ETH_HDR_SIZE 14

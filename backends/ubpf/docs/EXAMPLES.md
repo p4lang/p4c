@@ -27,7 +27,7 @@ This section presents how to run and test the P4-uBPF compiler.
 
 ## Packet modification
 
-This section presents P4 program, which modifies the packet's fields.
+This section presents a P4 program, which modifies the packet's fields.
 
 ### IPv4 + MPLS (simple-actions.p4)
 

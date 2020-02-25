@@ -17,18 +17,18 @@ limitations under the License.
 #include <ubpf_model.p4>
 #include <core.p4>
 
-#define UDP_PORT_VXLAN 4789
-#define UDP_PROTO 17
-#define IPV4_ETHTYPE 0x800
-#define ETH_HDR_SIZE 14
-#define IPV4_HDR_SIZE 20
-#define UDP_HDR_SIZE 8
-#define VXLAN_HDR_SIZE 8
-#define IP_VERSION_4 4
-#define IPV4_MIN_IHL 5
+const bit<16> UDP_PORT_VXLAN  = 4789;
+const bit<8>  UDP_PROTO = 17;
+const bit<16> IPV4_ETHTYPE = 0x800;
+const bit<16> ETH_HDR_SIZE = 14;
+const bit<16> IPV4_HDR_SIZE = 20;
+const bit<16> UDP_HDR_SIZE = 8;
+const bit<16> VXLAN_HDR_SIZE = 8;
+const bit<4>  IP_VERSION_4 = 4;
+const bit<4>  IPV4_MIN_IHL = 5;
 
-@ethernetaddress typedef bit<48> EthernetAddress;
-@ipv4address     typedef bit<32>     IPv4Address;
+typedef bit<48> EthernetAddress;
+typedef bit<32>     IPv4Address;
 
 // standard Ethernet header
 header Ethernet_h
@@ -147,7 +147,6 @@ control pipe(inout Headers_t hdr, inout metadata meta) {
             NoAction;
         }
 
-        //const default_action = NoAction();
     }
 
     action vxlan_encap() {
@@ -195,7 +194,6 @@ control pipe(inout Headers_t hdr, inout metadata meta) {
             NoAction;
         }
 
-        //const default_action = NoAction();
     }
 
     apply {
