@@ -404,7 +404,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
             e->emplace("right", l);
         } else {
             const char* fieldRef = parentType->is<IR::Type_Stack>() ? "stack_field" : "field";
-            Util::JsonArray* e;
+            Util::JsonArray* e = nullptr;
             bool st = isArrayIndexRuntime(expression);
             if (!st) {
                 result->emplace("type", fieldRef);
@@ -421,11 +421,13 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                     auto first = array->at(0);
                     auto second = array->at(1);
                     BUG_CHECK(second->is<Util::JsonValue>(), "expected a value");
+                    CHECK_NULL(e);
                     e->append(first);
                     cstring nestedField = second->to<Util::JsonValue>()->getString();
                     nestedField += "." + fieldName;
                     e->append(nestedField);
                 } else if (lv->is<Util::JsonValue>()) {
+                    CHECK_NULL(e);
                     e->append(lv);
                     e->append(fieldName);
                 } else if (auto jo = l->to<Util::JsonObject>()) {
@@ -445,6 +447,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
                     BUG("%1%: Unexpected json", lv);
                 }
             } else {
+                CHECK_NULL(e);
                 e->append(l);
                 e->append(fieldName);
             }
