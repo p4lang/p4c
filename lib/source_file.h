@@ -56,6 +56,7 @@ class SourcePosition final {
               columnNumber(0) {}
 
     SourcePosition(unsigned lineNumber, unsigned columnNumber);
+    SourcePosition& operator=(const SourcePosition&) = default;
 
     SourcePosition(const SourcePosition& other)
             : lineNumber(other.lineNumber),

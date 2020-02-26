@@ -276,7 +276,8 @@ static void convertToAbsPath(const char* const relPath, char (&output)[N]) {
 
     // Construct an absolute path. We're assuming that @relPath is relative to
     // the current working directory.
-    snprintf(output, N, "%s%s%s", cwd, separator, relPath);
+    int n = snprintf(output, N, "%s%s%s", cwd, separator, relPath);
+    BUG_CHECK(n >= 0, "Pathname too long");
 }
 
 bool setIncludePathIfExists(const char*& includePathOut,
