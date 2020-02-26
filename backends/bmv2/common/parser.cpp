@@ -18,6 +18,7 @@ limitations under the License.
 #include "JsonObjects.h"
 #include "backend.h"
 #include "extern.h"
+#include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 
 namespace BMV2 {
@@ -444,19 +445,45 @@ ParserConverter::createDefaultTransition() {
     return trans;
 }
 
+void ParserConverter::addValueSets(const IR::P4Parser* parser) {
+    auto isExactMatch = [this](const IR::StructField* sf) {
+        auto matchAnnotation = sf->getAnnotation(IR::Annotation::matchAnnotation);
+        if (!matchAnnotation) return true;  // default (missing annotation) is exact
+        auto matchPathExpr = matchAnnotation->expr[0]->to<IR::PathExpression>();
+        CHECK_NULL(matchPathExpr);
+        auto matchTypeDecl = ctxt->refMap->getDeclaration(matchPathExpr->path, true)
+            ->to<IR::Declaration_ID>();
+        BUG_CHECK(matchTypeDecl != nullptr, "No declaration for match type '%1%'", matchPathExpr);
+        return (matchTypeDecl->name.name == P4::P4CoreLibrary::instance.exactMatch.name);
+    };
+
+    for (auto s : parser->parserLocals) {
+        if (!s->is<IR::P4ValueSet>()) continue;
+
+        auto inst = s->to<IR::P4ValueSet>();
+        auto etype = ctxt->typeMap->getTypeType(inst->elementType, true);
+
+        if (auto st = etype->to<IR::Type_Struct>()) {
+            for (auto f : st->fields) {
+                if (isExactMatch(f)) continue;
+                ::warning(ErrorType::WARN_UNSUPPORTED,
+                          "This backend only supports exact matches in value_sets but the match "
+                          "on '%1%' is not exact; the annotation will be ignored", f);
+            }
+        }
+
+        auto bitwidth = etype->width_bits();
+        auto name = inst->controlPlaneName();
+        auto size = inst->size;
+        auto n = size->to<IR::Constant>()->value;
+        ctxt->json->add_parse_vset(name, bitwidth, n);
+    }
+}
+
 bool ParserConverter::preorder(const IR::P4Parser* parser) {
     auto parser_id = ctxt->json->add_parser(name);
 
-    for (auto s : parser->parserLocals) {
-        if (auto inst = s->to<IR::P4ValueSet>()) {
-            auto etype = ctxt->typeMap->getTypeType(inst->elementType, true);
-            auto bitwidth = etype->width_bits();
-            auto name = inst->controlPlaneName();
-            auto size = inst->size;
-            auto n = size->to<IR::Constant>()->value;
-            ctxt->json->add_parse_vset(name, bitwidth, n);
-        }
-    }
+    addValueSets(parser);
 
     // convert parse state
     for (auto state : parser->states) {

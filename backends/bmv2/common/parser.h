@@ -44,6 +44,7 @@ class ParserConverter : public Inspector {
     Util::IJson* createDefaultTransition();
     cstring jsonAssignment(const IR::Type* type, bool inParser);
     std::vector<Util::IJson*> convertSelectExpression(const IR::SelectExpression* expr);
+    void addValueSets(const IR::P4Parser* parser);
 
  public:
     bool preorder(const IR::P4Parser* p) override;
