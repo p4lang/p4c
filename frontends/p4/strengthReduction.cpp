@@ -189,9 +189,14 @@ const IR::Node* DoStrengthReduction::postorder(IR::Shl* expr) {
     if (isZero(expr->right) || isZero(expr->left))
         return expr->left;
     if (auto sh2 = expr->left->to<IR::Shl>()) {
-        // (a << b) << c is a << (b + c)
-        return new IR::Shl(expr->srcInfo, sh2->left,
-                           new IR::Add(expr->srcInfo, sh2->right, expr->right));
+        if (sh2->right->type->is<IR::Type_InfInt>() &&
+            expr->right->type->is<IR::Type_InfInt>()) {
+            // (a << b) << c is a << (b + c)
+            auto result = new IR::Shl(expr->srcInfo, sh2->left,
+                                      new IR::Add(expr->srcInfo, sh2->right, expr->right));
+            LOG3("Replace " << expr << " with " << result);
+            return result;
+        }
     }
     return expr;
 }
@@ -200,9 +205,14 @@ const IR::Node* DoStrengthReduction::postorder(IR::Shr* expr) {
     if (isZero(expr->right) || isZero(expr->left))
         return expr->left;
     if (auto sh2 = expr->left->to<IR::Shr>()) {
-        // (a >> b) >> c is a >> (b + c)
-        return new IR::Shr(expr->srcInfo, sh2->left,
-                           new IR::Add(expr->srcInfo, sh2->right, expr->right));
+        if (sh2->right->type->is<IR::Type_InfInt>() &&
+            expr->right->type->is<IR::Type_InfInt>()) {
+            // (a >> b) >> c is a >> (b + c)
+            auto result = new IR::Shr(expr->srcInfo, sh2->left,
+                                      new IR::Add(expr->srcInfo, sh2->right, expr->right));
+            LOG3("Replace " << expr << " with " << result);
+            return result;
+        }
     }
     return expr;
 }

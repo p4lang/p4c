@@ -29,7 +29,7 @@ header ipv4_t {
     bit<16>     hdrChecksum;
     bit<32>     srcAddr;
     bit<32>     dstAddr;
-    @length(((bit<32>)ihl << 2 << 3) + 32w4294967136) 
+    @length(((bit<32>)ihl << 5) + 32w4294967136) 
     varbit<320> options_ipv4;
 }
 
@@ -45,7 +45,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     ipv4_t_1 tmp_hdr_0;
     @name(".start") state start {
         tmp_hdr_0 = packet.lookahead<ipv4_t_1>();
-        packet.extract<ipv4_t>(hdr.h, ((bit<32>)tmp_hdr_0.ihl << 2 << 3) + 32w4294967136);
+        packet.extract<ipv4_t>(hdr.h, ((bit<32>)tmp_hdr_0.ihl << 5) + 32w4294967136);
         transition accept;
     }
 }
