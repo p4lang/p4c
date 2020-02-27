@@ -65,6 +65,7 @@ namespace UBPF {
         // replace references to headers with references to parserHeaders
         cstring passVariable;
         UBPFControlBodyTranslator *codeGen;
+        const bool emitExterns;
 
         std::set<const IR::Parameter *> toDereference;
         std::map<cstring, UBPFTable *> tables;

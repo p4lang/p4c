@@ -58,6 +58,7 @@ class EBPFControl : public EBPFObject {
     // replace references to headers with references to parserHeaders
     cstring                 hitVariable;
     ControlBodyTranslator*  codeGen;
+    const bool              emitExterns;
 
     std::set<const IR::Parameter*> toDereference;
     std::map<cstring, EBPFTable*>  tables;

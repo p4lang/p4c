@@ -1,0 +1,81 @@
+#include <core.p4>
+#include <ubpf_model.p4>
+
+typedef bit<48> EthernetAddress;
+typedef bit<32> IPv4Address;
+header IPv4_h {
+    bit<4>      version;
+    bit<4>      ihl;
+    bit<8>      diffserv;
+    bit<16>     totalLen;
+    bit<16>     identification;
+    bit<3>      flags;
+    bit<13>     fragOffset;
+    bit<8>      ttl;
+    bit<8>      protocol;
+    bit<16>     hdrChecksum;
+    IPv4Address srcAddr;
+    IPv4Address dstAddr;
+}
+
+header Ethernet_h {
+    EthernetAddress dstAddr;
+    EthernetAddress srcAddr;
+    bit<16>         etherType;
+}
+
+struct Headers_t {
+    Ethernet_h ethernet;
+    IPv4_h     ipv4;
+}
+
+struct metadata {
+}
+
+struct tuple_0 {
+    bit<32> field;
+    bit<32> field_0;
+}
+
+extern bit<16> compute_hash(in tuple_0 data);
+parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
+    state start {
+        p.extract<Ethernet_h>(headers.ethernet);
+        p.extract<IPv4_h>(headers.ipv4);
+        transition accept;
+    }
+}
+
+control pipe(inout Headers_t headers, inout metadata meta) {
+    @hidden action ubpf_hash_extern52() {
+        headers.ipv4.hdrChecksum = compute_hash({ headers.ipv4.srcAddr, headers.ipv4.dstAddr });
+    }
+    @hidden table tbl_ubpf_hash_extern52 {
+        actions = {
+            ubpf_hash_extern52();
+        }
+        const default_action = ubpf_hash_extern52();
+    }
+    apply {
+        tbl_ubpf_hash_extern52.apply();
+    }
+}
+
+control dprs(packet_out packet, in Headers_t headers) {
+    @hidden action ubpf_hash_extern59() {
+        packet.emit<Ethernet_h>(headers.ethernet);
+        packet.emit<IPv4_h>(headers.ipv4);
+    }
+    @hidden table tbl_ubpf_hash_extern59 {
+        actions = {
+            ubpf_hash_extern59();
+        }
+        const default_action = ubpf_hash_extern59();
+    }
+    apply {
+        tbl_ubpf_hash_extern59.apply();
+    }
+}
+
+ubpf<Headers_t, metadata>(prs(), pipe(), dprs()) main;
+

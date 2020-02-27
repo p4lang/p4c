@@ -66,6 +66,13 @@ Once the C program is generated it can be compiled using:
 
 The output file (`out.o`) can be injected to the uBPF VM. 
 
+#### Custom C extern functions
+
+The P4 to uBPF compiler allows to define custom C extern functions and call them from P4 program as P4 action.
+
+The design of this feature is identical to `p4c-ebpf`. See [the P4 to eBPF documentation](../ebpf/README.md#how-to-inject-custom-extern-function-to-the-generated-ebpf-program) 
+to learn how to use this feature. Note that the C extern function written for `p4c-ubpf` must be compatible with userspace BPF VM.
+
 ### Known limitations
 
 * No support for some P4 constructs (meters, counters, etc.)

@@ -68,7 +68,33 @@ namespace UBPF {
             return;
         }
 
-        ::error("%1%: Not supported", function->method);
+        if (!control->emitExterns)
+            ::error("%1%: Not supported", function->method);
+
+        builder->emitIndent();
+        visit(function->expr->method);
+        builder->append("(");
+        bool first = true;
+
+        for (auto p : *function->substitution.getParametersInArgumentOrder()) {
+            if (!first)
+                builder->append(", ");
+            first = false;
+            auto arg = function->substitution.lookup(p);
+            if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut)
+                builder->append("&");
+            else if (p->direction == IR::Direction::In) {
+                auto type = typeMap->getType(arg);
+                auto ubpfType = UBPFTypeFactory::instance->create(type);
+                builder->append("(const ");
+                ubpfType->declare(builder, "", false);
+                builder->append(") ");
+            }
+            visit(arg);
+        }
+
+        builder->append(")");
+        builder->endOfStatement(true);
     }
 
     void UBPFControlBodyTranslator::processChecksumReplace2(const P4::ExternFunction *function) {
@@ -531,7 +557,7 @@ namespace UBPF {
                              const IR::ControlBlock *block,
                              const IR::Parameter *parserHeaders) :
             program(program), controlBlock(block), headers(nullptr),
-            parserHeaders(parserHeaders), codeGen(nullptr) {}
+            parserHeaders(parserHeaders), codeGen(nullptr), emitExterns(program->options.emitExterns) {}
 
     void UBPFControl::scanConstants() {
         for (auto c : controlBlock->constantValue) {

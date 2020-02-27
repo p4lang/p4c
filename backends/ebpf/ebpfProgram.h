@@ -36,7 +36,7 @@ class EBPFType;
 
 class EBPFProgram : public EBPFObject {
  public:
-    const CompilerOptions& options;
+    const EbpfOptions& options;
     const IR::P4Program* program;
     const IR::ToplevelBlock*  toplevel;
     P4::ReferenceMap*    refMap;
@@ -54,7 +54,7 @@ class EBPFProgram : public EBPFObject {
 
     virtual bool build();  // return 'true' on success
 
-    EBPFProgram(const CompilerOptions &options, const IR::P4Program* program,
+    EBPFProgram(const EbpfOptions &options, const IR::P4Program* program,
                 P4::ReferenceMap* refMap, P4::TypeMap* typeMap, const IR::ToplevelBlock* toplevel) :
             options(options), program(program), toplevel(toplevel),
             refMap(refMap), typeMap(typeMap),
