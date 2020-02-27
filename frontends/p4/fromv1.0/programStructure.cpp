@@ -496,7 +496,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                     CHECK_NULL(c);  // this is enforced elsewhere
                     if (!c->fitsInt() || c->asInt() != -1) {
                         ::error(ErrorType::ERR_INVALID,
-                                ": masks not supported for value sets", c);
+                                "%1%: masks not supported for value sets", c);
                         continue;
                     }
                     auto sc = new IR::SelectCase(c->srcInfo, v.first, deststate);

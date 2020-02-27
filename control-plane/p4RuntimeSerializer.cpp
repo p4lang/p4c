@@ -1135,7 +1135,7 @@ class P4RuntimeAnalyzer {
                 auto fType = f->type;
                 if (!fType->is<IR::Type_Bits>()) {
                     ::error(ErrorType::ERR_UNSUPPORTED,
-                            "unsupported type argument for Value Set; "
+                            "Unsupported type argument for Value Set; "
                             "this version of P4Runtime requires that when the type parameter "
                             "of a Value Set is a struct, all the fields of the struct "
                             "must be of type bit<W>, but %1% is not", f);
@@ -1154,7 +1154,7 @@ class P4RuntimeAnalyzer {
             }
         } else if (et->is<IR::Type_BaseList>()) {
             ::error(ErrorType::ERR_UNSUPPORTED,
-                    "type argument for for Value Set; "
+                    "%1%: Unsupported type argument for Value Set; "
                     "this version of P4Runtime requires the type parameter of a Value Set "
                     "to be a bit<W> or a struct of bit<W> fields",
                     inst);
