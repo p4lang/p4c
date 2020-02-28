@@ -285,9 +285,6 @@ bool setIncludePathIfExists(const char*& includePathOut,
     struct stat st;
     char buffer[PATH_MAX];
     int len;
-    if ((len = readlink(possiblePath, buffer, sizeof(buffer))) > 0) {
-        buffer[len] = 0;
-        possiblePath = buffer; }
     if (!(stat(possiblePath, &st) >= 0 && S_ISDIR(st.st_mode))) return false;
     includePathOut = strdup(possiblePath);
     return true;
@@ -322,13 +319,11 @@ std::vector<const char*>* CompilerOptions::process(int argc, char* const argv[])
         snprintf(p, buffer + sizeof(buffer) - p, "p4include");
         if (!setIncludePathIfExists(p4includePath, buffer)) {
             snprintf(p, buffer + sizeof(buffer) - p, "../p4include");
-            setIncludePathIfExists(p4includePath, buffer);
-        }
+            setIncludePathIfExists(p4includePath, buffer); }
         snprintf(p, buffer + sizeof(buffer) - p, "p4_14include");
         if (!setIncludePathIfExists(p4_14includePath, buffer)) {
             snprintf(p, buffer + sizeof(buffer) - p, "../p4_14include");
-            setIncludePathIfExists(p4_14includePath, buffer);
-        }
+            setIncludePathIfExists(p4_14includePath, buffer); }
     }
 
     auto remainingOptions = Util::Options::process(argc, argv);
