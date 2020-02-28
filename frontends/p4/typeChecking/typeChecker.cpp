@@ -2068,6 +2068,11 @@ const IR::Node* TypeInference::shift(const IR::Operation_Binary* expression) {
         return expression;
     }
 
+    if (ltype->is<IR::Type_InfInt>() && !rtype->is<IR::Type_InfInt>()) {
+        typeError("%1%: width of left operand of shift needs to be specified", expression);
+        return expression;
+    }
+
     setType(expression, ltype);
     setType(getOriginal(), ltype);
     if (isCompileTimeConstant(expression->left) && isCompileTimeConstant(expression->right)) {
