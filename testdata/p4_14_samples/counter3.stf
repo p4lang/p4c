@@ -7,13 +7,13 @@ expect 3
 expect 5
 packet 0 a1a2a3a4a5a6 0000
 wait
-check_counter cnt($A) bytes == 8
+check_counter cnt($A) bytes == 12
 packet 0 a1a2a3a4a5a6 000100
 wait
-check_counter cnt($A) bytes == 17
+check_counter cnt($A) bytes == 25
 packet 0 a1a2a3a4a5a6 00020000
 wait
-check_counter cnt($A) bytes == 27
+check_counter cnt($A) bytes == 39
 
 packet 0 b1b2b3b4b5b6 0001
 packet 0 b1b2b3b4b5b6 0002
@@ -37,5 +37,5 @@ packet 0 b1b2b3b4b5b6 0019
 packet 0 b1b2b3b4b5b6 0020
 
 wait
-check_counter cnt($A) bytes == 27
-check_counter cnt($B) bytes == 160
+check_counter cnt($A) bytes == 39
+check_counter cnt($B) bytes == 240
