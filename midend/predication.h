@@ -45,6 +45,23 @@ branches, but in this way we cannot have two side-effects in the same
 conditional statement.
 */
 class Predication final : public Transform {
+
+    class ReplaceChecker final : public Inspector {
+        const IR::AssignmentStatement * assignmentStatement;
+        bool conflictDetected = false;
+        unsigned currentNestingLevel = 0;
+        const std::vector<bool>& travesalPath;
+    public:
+
+        explicit ReplaceChecker(std::vector<bool>& t)
+        : travesalPath(t)
+        { }
+
+        const bool& isConflictDetected() const{ return conflictDetected; }
+        bool preorder(const IR::Mux * mux) override;
+        bool preorder(const IR::AssignmentStatement * statement) override;
+    };
+
     /**
      * Private Transformer only for Predication pass.
      * This pass operates on nested Mux expressions(?:). 
@@ -54,14 +71,16 @@ class Predication final : public Transform {
     class ExpressionReplacer final : public Transform {
      private:
         IR::AssignmentStatement * statement;
+        const IR::Expression * rightExpression;
         const std::vector<bool>& travesalPath;
-        unsigned ifNestingLevel = 0;
+        const std::vector<const IR::Expression *>& conditions;
+        unsigned currentNestingLevel = 0;
      public:
-        explicit ExpressionReplacer(IR::AssignmentStatement * as, std::vector<bool>& t)
-        : statement(as), travesalPath(t)
-        { CHECK_NULL(statement); }
-        const IR::Mux * preorder(IR::Mux * mux);
-        const IR::Expression* clone(const IR::Expression* expression);
+        explicit ExpressionReplacer(const IR::Expression * e, std::vector<bool>& t, std::vector<const IR::Expression *>& conds)
+        : rightExpression(e), travesalPath(t), conditions(conds)
+        { CHECK_NULL(e); }
+        const IR::Mux * preorder(IR::Mux * mux) override;
+        const IR::AssignmentStatement * preorder(IR::AssignmentStatement * statement) override;
     };
 
     NameGenerator* generator;
@@ -72,9 +91,9 @@ class Predication final : public Transform {
     // false at the end of the vector means that you are in the else branch of the if statement.
     // Size of this vector is the current if nesting level.
     std::vector<bool> travesalPath;
-    std::vector<IR::Mux *> nestedMuxes;
-    IR::Mux * currentMuxCondition = nullptr;
-    IR::Mux * rootMuxCondition = nullptr;
+    std::vector<const IR::Expression *> nestedConditions;
+    std::map<cstring, const IR::AssignmentStatement *> liveAssignments;
+    std::map<cstring, const IR::Expression *> assignments;
 
     const IR::Statement* error(const IR::Statement* statement) const {
         if (inside_action && ifNestingLevel > 0)
@@ -83,9 +102,6 @@ class Predication final : public Transform {
                     statement);
         return statement;
     }
-
-    void pushThenCondition(const IR::Expression * cond);
-    void popCondition();
 
  public:
     explicit Predication(NameGenerator* generator) : generator(generator),

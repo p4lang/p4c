@@ -16,41 +16,138 @@ limitations under the License.
 
 #include "predication.h"
 #include "frontends/p4/cloner.h"
+
 namespace P4 {
+/// convert an expression into a string that uniqely identifies the value referenced
+/// return null cstring if not a reference to a constant thing.
+static cstring expr_name(const IR::Expression *exp) {
+    if (auto p = exp->to<IR::PathExpression>())
+        return p->path->name;
+    if (auto m = exp->to<IR::Member>()) {
+        if (auto base = expr_name(m->expr))
+            return base + "." + m->member;
+    } else if (auto a = exp->to<IR::ArrayIndex>()) {
+        if (auto k = a->right->to<IR::Constant>())
+            if (auto base = expr_name(a->left))
+                return base + "." + std::to_string(k->asInt()); }
+    return cstring();
+}
 
-const IR::Mux * Predication::ExpressionReplacer::preorder(IR::Mux * mux) {
-    bool thenElsePass = travesalPath[ifNestingLevel];
-    ++ifNestingLevel;
+bool Predication::ReplaceChecker::preorder(const IR::AssignmentStatement * statement){
+    if (!statement->right->is<IR::Mux>() ) {
+        conflictDetected = true;
+        return false;
+    } 
+    assignmentStatement = statement;
+    visit(statement->right);
+    return false;
+}
 
-    if (ifNestingLevel == travesalPath.size()) {
+bool Predication::ReplaceChecker::preorder(const IR::Mux * mux){
+    ++currentNestingLevel;
+
+    bool thenElsePass = travesalPath[currentNestingLevel - 1];
+
+    if (currentNestingLevel == travesalPath.size()) {
         if (thenElsePass) {
-            mux->e1 = statement->right;
-            mux->e2 = clone(statement->left);
+            conflictDetected = expr_name(mux->e1) != expr_name(assignmentStatement->left);
         } else {
-            mux->e1 = clone(statement->left);
-            mux->e2 = statement->right;
+            conflictDetected = expr_name(mux->e2) != expr_name(assignmentStatement->left);
         }
 
+        return false;
+    }
+    
+    
+    if (thenElsePass) {
+        if ( expr_name(mux->e1) == expr_name(assignmentStatement->left) ) {
+            return false;
+        }
+
+        if ( !mux->e1->is<IR::Mux>() ) {
+            conflictDetected = true;
+            return false;
+        }
+
+        visit(mux->e1);
     } else {
+        if ( expr_name(mux->e2) == expr_name(assignmentStatement->left) ) {
+            return false;
+        }
+
+        if ( !mux->e2->is<IR::Mux>() ) {
+            conflictDetected = true;
+            return false; 
+        }
+
+        visit(mux->e2);
+    }
+    --currentNestingLevel;
+
+    return false;
+
+}
+
+
+
+
+const IR::AssignmentStatement * Predication::ExpressionReplacer::preorder(IR::AssignmentStatement * assignmentStatement){
+    statement = assignmentStatement;
+
+    if (!assignmentStatement->right->is<IR::Mux>() ) {
+        assignmentStatement->right = new IR::Mux(conditions.front(), assignmentStatement->left, assignmentStatement->left);
+    } 
+
+    visit(assignmentStatement->right);
+
+    return assignmentStatement;
+}
+
+
+const IR::Mux * Predication::ExpressionReplacer::preorder(IR::Mux * mux) {
+
+    ++currentNestingLevel;
+
+    bool thenElsePass = travesalPath[currentNestingLevel - 1];
+    const IR::Expression * condition = conditions[currentNestingLevel - 1];
+
+    if (currentNestingLevel == travesalPath.size()) {
+        mux->e0 = condition;
         if (thenElsePass) {
-            mux->e2 = clone(statement->left);
-            visit(mux->e1);
+            mux->e1 = rightExpression;
         } else {
-            mux->e1 = clone(statement->left);
+            mux->e2 = rightExpression;
+        }
+    } else if (thenElsePass) {
+        if (expr_name(mux->e2) == expr_name(statement->left)) {
+            mux->e2 = statement->left;
+        }
+
+        if (mux->e1->is<IR::Mux>() || expr_name(mux->e1) == nullptr || expr_name(mux->e1) == expr_name(statement->left)) {
+            if(!mux->e1->is<IR::Mux>()) {
+                mux->e1 = new IR::Mux(condition, statement->left, statement->left);
+            }
+            visit(mux->e1);
+        }
+    } else {
+        if (expr_name(mux->e1) == expr_name(statement->left)){
+            mux->e1 = statement->left; 
+        }
+
+        if (mux->e2->is<IR::Mux>() || expr_name(mux->e2) == nullptr || expr_name(mux->e2) == expr_name(statement->left)) {
+            if (!mux->e2->is<IR::Mux>()) {
+                mux->e2 = new IR::Mux(condition, statement->left, statement->left);
+            }
             visit(mux->e2);
         }
     }
+    --currentNestingLevel;
+    
+
+
     return mux;
 }
 
-const IR::Expression* Predication::ExpressionReplacer::clone(const IR::Expression* expression) {
-    // We often need to clone expressions.  This is necessary because
-    // in the end we will generate different code for the different clones of
-    // an expression.  This is most obvious if one clone is on the LHS and one
-    // on the RHS of an assigment.
-    ClonePathExpressions cloner;
-    return expression->apply(cloner);
-}
 
 
 const IR::Expression* Predication::clone(const IR::Expression* expression) {
@@ -63,54 +160,51 @@ const IR::Expression* Predication::clone(const IR::Expression* expression) {
 }
 
 
+
 const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
-    if (!inside_action || ifNestingLevel == 0)
+    if (!inside_action || ifNestingLevel == 0 || nestedConditions.empty())
         return statement;
 
-    auto replacer = new ExpressionReplacer(statement, travesalPath);
-    auto right = clone(rootMuxCondition);
-    statement->right = right->apply(*replacer);
+    const IR::Node * returningStatement = new IR::EmptyStatement();
 
-    return statement;
-}
+    ExpressionReplacer replacer(clone(statement->right), travesalPath, nestedConditions);
+    ReplaceChecker replaceChecker(travesalPath);
+    
+    auto statementName = expr_name(statement->left);
+    auto foundedAssignment = assignments.find(statementName);
 
-void Predication::pushThenCondition(const IR::Expression * condition) {
-    auto prevMuxCondition = currentMuxCondition;
-    currentMuxCondition = new IR::Mux(condition, condition, condition);
-    if (rootMuxCondition == nullptr) {
-        rootMuxCondition = currentMuxCondition;
-    } else {
-        if (travesalPath.empty() || travesalPath.back()) {
-            prevMuxCondition->e1 = currentMuxCondition;
-        } else {
-            prevMuxCondition->e2 = currentMuxCondition;
+    if (foundedAssignment != assignments.end()) {
+        auto oldExpressionRight = statement->right;
+
+        statement->right = foundedAssignment->second;
+        statement->apply(replaceChecker);
+
+        if ( replaceChecker.isConflictDetected()) {
+            returningStatement  = new IR::AssignmentStatement(statement->left, foundedAssignment->second);
+            statement->right = oldExpressionRight;
         }
     }
-    nestedMuxes.push_back(currentMuxCondition);
+
+    auto updatedStatement = statement->apply(replacer);
+
+    assignments[statementName] = updatedStatement->to<IR::AssignmentStatement>()->right;
+    liveAssignments[statementName] = new IR::AssignmentStatement(clone(statement->left), clone(updatedStatement->to<IR::AssignmentStatement>()->right));
+
+    return returningStatement;
 }
 
-void Predication::popCondition() {
-    nestedMuxes.pop_back();
 
-    if (nestedMuxes.empty()) {
-        rootMuxCondition = nullptr;
-        currentMuxCondition = nullptr;
-    } else {
-        currentMuxCondition = nestedMuxes.back();
-        currentMuxCondition->e1 = currentMuxCondition->e0;
-        currentMuxCondition->e2 = currentMuxCondition->e0;
-    }
-}
 
 const IR::Node* Predication::preorder(IR::IfStatement* statement) {
     if (!inside_action)
         return statement;
+    
 
     ++ifNestingLevel;
     auto rv = new IR::BlockStatement;
-
-    pushThenCondition(statement->condition);
-    travesalPath.push_back(true);  // pushing after to enable root else branch
+    
+    nestedConditions.push_back(statement->condition);
+    travesalPath.push_back(true);
 
     visit(statement->ifTrue);
     rv->push_back(statement->ifTrue);
@@ -123,8 +217,14 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
         rv->push_back(statement->ifFalse);
     }
 
+    for ( auto assignmentPair: liveAssignments ) {
+        rv->push_back( assignmentPair.second);
+    }
+    assignments.clear();
+    liveAssignments.clear();
+
+    nestedConditions.pop_back();
     travesalPath.pop_back();
-    popCondition();
     --ifNestingLevel;
     prune();
     return rv;
