@@ -47,6 +47,7 @@ class Options(object):
         self.cleanupTmp = True          # if false do not remote tmp folder created
         self.p4Filename = ""            # file that is being compiled
         self.compilerSrcDir = ""        # path to compiler source tree
+        self.compilerBuildDir = "build"  # the build subfolder
         self.verbose = False
         self.replace = False            # replace previous outputs
         self.compilerOptions = []
@@ -126,6 +127,7 @@ def usage(options):
     print("          --pp file: pass this option to the compiler")
     print("          -observation-log <file>: save packet output to <file>")
     print("          --init <cmd>: Run <cmd> before the start of the test")
+    print("          -bd folder: Specify the build folder in the compiler source directory")
 
 
 def isError(p4filename):
@@ -235,9 +237,11 @@ def process_file(options, argv):
         raise Exception("No such file " + options.p4filename)
 
     if options.usePsa:
-        binary = options.compilerSrcDir + "/build/p4c-bm2-psa"
+        binary = options.compilerSrcDir + "/" + \
+            options.compilerBuildDir + "/p4c-bm2-psa"
     else:
-        binary = options.compilerSrcDir + "/build/p4c-bm2-ss"
+        binary = options.compilerSrcDir + "/" + \
+            options.compilerBuildDir + "/p4c-bm2-ss"
 
     args = [binary, "-o", jsonfile] + options.compilerOptions
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
@@ -348,13 +352,17 @@ def main(argv):
             else:
                 options.initCommands.append(argv[1])
                 argv = argv[1:]
+        elif argv[0] == "-bd":
+            print(argv)
+            options.compilerBuildDir = argv[1]
+            argv = argv[1:]
         else:
             reportError("Unknown option ", argv[0])
             usage(options)
             sys.exit(FAILURE)
         argv = argv[1:]
-
-    config = ConfigH(options.compilerSrcDir + "/build/config.h")
+    config = ConfigH(options.compilerSrcDir + "/" +
+                     options.compilerBuildDir + "/config.h")
     if not config.ok:
         print("Error parsing config.h")
         sys.exit(FAILURE)
