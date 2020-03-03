@@ -40,6 +40,7 @@ import pdb
 SUCCESS = 0
 FAILURE = 1
 
+
 class Options(object):
     def __init__(self):
         self.binary = ""                # this program's name
@@ -54,19 +55,22 @@ class Options(object):
         self.hasBMv2 = False            # Is the behavioral model installed?
         self.usePsa = False             # Use the psa switch behavioral model?
         self.runDebugger = False
-        self.observationLog = None           # Log packets produced by the BMV2 model if path to log is supplied
+        # Log packets produced by the BMV2 model if path to log is supplied
+        self.observationLog = None
         self.initCommands = []
 
-def nextWord(text, sep = " "):
+
+def nextWord(text, sep=" "):
     # Split a text at the indicated separator.
     # Note that the separator can be a string.
     # Separator is discarded.
     pos = text.find(sep)
     if pos < 0:
         return text, ""
-    l, r = text[0:pos].strip(), text[pos+len(sep):len(text)].strip()
+    l, r = text[0:pos].strip(), text[pos + len(sep):len(text)].strip()
     # print(text, "/", sep, "->", l, "#", r)
     return l, r
+
 
 class ConfigH(object):
     # Represents an autoconf config.h file
@@ -78,6 +82,7 @@ class ConfigH(object):
             self.text = a.read()
         self.ok = False
         self.parse()
+
     def parse(self):
         while self.text != "":
             self.text = self.text.strip()
@@ -86,7 +91,7 @@ class ConfigH(object):
                 if end < 1:
                     reportError("Unterminated comment in config file")
                     return
-                self.text = self.text[end+2:len(self.text)]
+                self.text = self.text[end + 2:len(self.text)]
             elif self.text.startswith("#define"):
                 define, self.text = nextWord(self.text)
                 macro, self.text = nextWord(self.text)
@@ -98,8 +103,10 @@ class ConfigH(object):
                 reportError("Unexpected text:", self.text)
                 return
         self.ok = True
+
     def __str__(self):
         return str(self.vars)
+
 
 def usage(options):
     name = options.binary
@@ -125,18 +132,22 @@ def isError(p4filename):
     # True if the filename represents a p4 program that should fail
     return "_errors" in p4filename
 
+
 def reportError(*message):
     print("***", *message)
+
 
 class Local(object):
     # object to hold local vars accessable to nested functions
     pass
+
 
 def run_timeout(options, args, timeout, stderr):
     if options.verbose:
         print("Executing ", " ".join(args))
     local = Local()
     local.process = None
+
     def target():
         procstderr = None
         if stderr is not None:
@@ -158,7 +169,9 @@ def run_timeout(options, args, timeout, stderr):
         print("Exit code ", local.process.returncode)
     return local.process.returncode
 
+
 timeout = 10 * 60
+
 
 def run_model(options, tmpdir, jsonfile):
     if not options.hasBMv2:
@@ -187,6 +200,7 @@ def run_model(options, tmpdir, jsonfile):
     result = bmv2.checkOutputs()
     return result
 
+
 def run_init_commands(options):
     if not options.initCommands:
         return SUCCESS
@@ -196,6 +210,7 @@ def run_init_commands(options):
         if result != SUCCESS:
             return FAILURE
     return SUCCESS
+
 
 def process_file(options, argv):
     assert isinstance(options, Options)
@@ -220,13 +235,13 @@ def process_file(options, argv):
         raise Exception("No such file " + options.p4filename)
 
     if options.usePsa:
-        binary = "./p4c-bm2-psa"
+        binary = options.compilerSrcDir + "/build/p4c-bm2-psa"
     else:
-        binary = "./p4c-bm2-ss"
+        binary = options.compilerSrcDir + "/build/p4c-bm2-ss"
 
     args = [binary, "-o", jsonfile] + options.compilerOptions
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
-        args.extend(["--std", "p4-14"]);
+        args.extend(["--std", "p4-14"])
     args.extend(argv)  # includes p4filename
     if options.runDebugger:
         args[0:0] = options.runDebugger.split()
@@ -250,7 +265,7 @@ def process_file(options, argv):
             result = SUCCESS
 
     if result == SUCCESS and not expected_error:
-        result = run_model(options, tmpdir, jsonfile);
+        result = run_model(options, tmpdir, jsonfile)
 
     if options.cleanupTmp:
         if options.verbose:
@@ -290,7 +305,7 @@ def main(argv):
                 usage(options)
                 sys.exit(FAILURE)
             else:
-                options.compilerOptions += argv[1].split();
+                options.compilerOptions += argv[1].split()
                 argv = argv[1:]
         elif argv[0] == "--switch-arg":
             if len(argv) == 0:
@@ -298,15 +313,16 @@ def main(argv):
                 usage(options)
                 sys.exit(FAILURE)
             else:
-                options.switchOptions += argv[1].split();
+                options.switchOptions += argv[1].split()
                 argv = argv[1:]
         elif argv[0] == "--target-specific-switch-arg":
             if len(argv) == 0:
-                reportError("Missing argument for --target-specific-switch-arg option")
+                reportError(
+                    "Missing argument for --target-specific-switch-arg option")
                 usage(options)
                 sys.exit(FAILURE)
             else:
-                options.switchTargetSpecificOptions += argv[1].split();
+                options.switchTargetSpecificOptions += argv[1].split()
                 argv = argv[1:]
         elif argv[0][1] == 'D' or argv[0][1] == 'I' or argv[0][1] == 'T':
             options.compilerOptions.append(argv[0])
@@ -338,16 +354,17 @@ def main(argv):
             sys.exit(FAILURE)
         argv = argv[1:]
 
-    config = ConfigH("config.h")
+    config = ConfigH(options.compilerSrcDir + "/build/config.h")
     if not config.ok:
         print("Error parsing config.h")
         sys.exit(FAILURE)
 
     options.hasBMv2 = "HAVE_SIMPLE_SWITCH" in config.vars
     if not options.hasBMv2:
-        reportError("config.h indicates that BMv2 is not installed; will skip running BMv2 tests")
+        reportError(
+            "config.h indicates that BMv2 is not installed; will skip running BMv2 tests")
 
-    options.p4filename=argv[-1]
+    options.p4filename = argv[-1]
     options.testName = None
     if options.p4filename.startswith(options.compilerSrcDir):
         options.testName = options.p4filename[len(options.compilerSrcDir):];
@@ -375,6 +392,7 @@ def main(argv):
     if result != SUCCESS:
         reportError("Test failed")
     sys.exit(result)
+
 
 if __name__ == "__main__":
     main(sys.argv)
