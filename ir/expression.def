@@ -384,6 +384,18 @@ class ConstructorCallExpression : Expression {
 
 /// Represents a list of expressions separated by commas
 class ListExpression : Expression {
+    bool defaultInitializer = false;
+    ListExpression(Util::SourceInfo srcInfo, IR::Vector<IR::Expression>& components, bool convenientInit) : Expression(srcInfo), components(components){
+        defaultInitializer = convenientInit;
+        validate();
+        if (type->is<Type::Unknown>()) {
+            Vector<Type> tuple;
+            for (auto e : components)
+                tuple.push_back(e->type);
+            type = new Type_List(tuple, defaultInitializer);
+        }
+    }
+
     inline Vector<Expression> components;
     ListExpression {
         validate();
@@ -391,7 +403,9 @@ class ListExpression : Expression {
             Vector<Type> tuple;
             for (auto e : components)
                 tuple.push_back(e->type);
-            type = new Type_List(tuple); } }
+            type = new Type_List(tuple);
+        }
+    }
     validate { components.check_null(); }
     size_t size() const { return components.size(); }
     void push_back(Expression e) { components.push_back(e); }
@@ -400,6 +414,19 @@ class ListExpression : Expression {
 /// IR representation of an initializer for a struct.
 /// Currently it does not have a direct representation as P4 source.
 class StructInitializerExpression : Expression {
+    bool defaultInitializer = false;
+    StructInitializerExpression(Util::SourceInfo srcInfo, const IR::Type* type, const IR::Type_Name* typeName, IR::IndexedVector<IR::NamedExpression>& components, bool convenientInit)
+                                : StructInitializerExpression(srcInfo, type, typeName, components) {
+        defaultInitializer = convenientInit;
+
+    }
+
+    StructInitializerExpression(const IR::Type* type, const IR::Type_Name* typeName, const IR::IndexedVector<IR::NamedExpression>& components, bool convenientInit)
+                                : StructInitializerExpression(type, typeName, components) {
+        defaultInitializer = convenientInit;
+
+    }
+
     /// The struct or header type that is being intialized.
     /// May only be known after type checking; so it can be nullptr.
     NullOK optional Type_Name typeName;

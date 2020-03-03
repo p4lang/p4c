@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
 #include "typeUnification.h"
 #include "typeConstraints.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -303,24 +302,49 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
             return false;
         }
         auto ts = src->to<IR::Type_BaseList>();
-        if (td->components.size() != ts->components.size()) {
+        bool convenient;
+        if (auto lst = src->to<IR::Type_List>()) {
+            convenient = lst->fromDefaultInitializer;
+        }
+        if (td->components.size() != ts->components.size() && !convenient) {
             TypeInference::typeError("%1%: tuples with different sizes %2% vs %3%",
                                      errorPosition, td->components.size(), ts->components.size());
             return false;
         }
-
-        for (size_t i=0; i < td->components.size(); i++) {
-            auto si = ts->components.at(i);
-            auto di = td->components.at(i);
-            bool success = unify(errorPosition, di, si, reportErrors);
-            if (!success)
-                return false;
+        if (!convenient) {
+            for (size_t i=0; i < td->components.size(); i++) {
+                auto si = ts->components.at(i);
+                auto di = td->components.at(i);
+                bool success = unify(errorPosition, di, si, reportErrors);
+                if (!success)
+                    return false;
+            }
+        } else {
+            for (size_t i=0; i < td->components.size(); i++) {
+                auto di = td->components.at(i);
+                if (di->is<IR::Type_Varbits>() || di->is<IR::Type_Stack>()
+                    || di->is<IR::Type_HeaderUnion>()) {
+                    TypeInference::typeError("%1%: Structs, headers and tuples containing %2% data "
+                                             "type as a lief field cannot be zero initialized with "
+                                             "convenient initializer: %3% = {...}.",
+                                             errorPosition, td->components.at(i), td);
+                    return false;
+                } else if (di->is<IR::Type_Struct>() || di->is<IR::Type_Header>()
+                           || di->is<IR::Type_Tuple>()) {
+                    IR::Type_List* src_tmp =
+                                       new IR::Type_List(*(new IR::Vector<IR::Type>()), true);
+                    bool success = unify(errorPosition, di, src_tmp, reportErrors);
+                    if (!success)
+                        return false;
+                }
+            }
         }
         return true;
     } else if (dest->is<IR::Type_Struct>() || dest->is<IR::Type_Header>()) {
         auto strct = dest->to<IR::Type_StructLike>();
         if (auto tpl = src->to<IR::Type_List>()) {
-            if (strct->fields.size() != tpl->components.size()) {
+            if ((strct->fields.size() != tpl->components.size()) &&
+                (tpl->fromDefaultInitializer == false)) {
                 if (reportErrors)
                     TypeInference::typeError("%1%: Number of fields %2% in initializer different "
                                              "than number of fields in structure %3%: %4% to %5%",
@@ -328,22 +352,46 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
                                              strct->fields.size(), tpl, strct);
                 return false;
             }
+            if (tpl->fromDefaultInitializer  == false) {
+                int index = 0;
+                for (const IR::StructField* f : strct->fields) {
+                    const IR::Type* tplField = tpl->components.at(index);
+                    const IR::Type* destt = f->type;
 
-            int index = 0;
-            for (const IR::StructField* f : strct->fields) {
-                const IR::Type* tplField = tpl->components.at(index);
-                const IR::Type* destt = f->type;
-
-                bool success = unify(errorPosition, destt, tplField, reportErrors);
-                if (!success)
-                    return false;
-                index++;
+                    bool success = unify(errorPosition, destt, tplField, reportErrors);
+                    if (!success)
+                        return false;
+                    index++;
+                }
+            } else {
+                for (const IR::StructField* f : strct->fields) {
+                    if (f->type->is<IR::Type_Varbits>() || f->type->is<IR::Type_Stack>()
+                        || f->type->is<IR::Type_HeaderUnion>()) {
+                        TypeInference::typeError("%1%: Structs, headers and tuples "
+                                                 "containing %2% data type as a lief "
+                                                 "field cannot be zero initialized with "
+                                                 "convenient initializer: %3% = {...}.",
+                                                 errorPosition, f->type, strct);
+                        return false;
+                    } else if (f->type->is<IR::Type_Struct>() || f->type->is<IR::Type_Header>()
+                               || f->type->is<IR::Type_Tuple>()) {
+                        IR::Type_List* src_tmp =
+                                       new IR::Type_List(*(new IR::Vector<IR::Type>()), true);
+                        bool success = unify(errorPosition, f->type, src_tmp, reportErrors);
+                        if (!success)
+                            return false;
+                    }
+                }
             }
             return true;
         } else if (auto st = src->to<IR::Type_StructLike>()) {
             // There is another case, in which each field of the source is unifiable with the
             // corresponding field of the destination, e.g., a struct containing tuples.
-            if (strct->fields.size() != st->fields.size()) {
+            bool convenient = false;
+            if (auto unkn = src->to<IR::Type_UnknownStruct>()) {
+                convenient = unkn->fromDefaultInitializer;
+            }
+            if ((strct->fields.size() != st->fields.size()) && !convenient) {
                 if (reportErrors)
                     TypeInference::typeError("%1%: Number of fields %2% in initializer different "
                                              "than number of fields in structure %3%: %4% to %5%",
@@ -351,16 +399,45 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
                                              strct->fields.size(), st, strct);
                 return false;
             }
-
-            for (const IR::StructField* f : strct->fields) {
-                auto stField = st->getField(f->name);
-                if (stField == nullptr) {
-                    TypeInference::typeError("%1%: No initializer for field %2%", errorPosition, f);
-                    return false;
+            if (!convenient) {
+                for (const IR::StructField* f : strct->fields) {
+                    auto stField = st->getField(f->name);
+                    if (stField == nullptr) {
+                        TypeInference::typeError("%1%: No initializer for field %2%",
+                                                 errorPosition, f);
+                        return false;
+                    }
+                    bool success = unify(errorPosition, f->type, stField->type, reportErrors);
+                    if (!success)
+                        return false;
                 }
-                bool success = unify(errorPosition, f->type, stField->type, reportErrors);
-                if (!success)
-                    return false;
+            } else {
+                for (const IR::StructField* f : st->fields) {
+                    auto strctField = strct->getField(f->name);
+                    if (strctField == nullptr) {
+                        TypeInference::typeError("%1%: No field named %2% in structure %3%",
+                                                 errorPosition, f->name, strct);
+                        return false;
+                    }
+                }
+                for (const IR::StructField* f : strct->fields) {
+                    if (f->type->is<IR::Type_Varbits>() || f->type->is<IR::Type_Stack>()
+                        || f->type->is<IR::Type_HeaderUnion>()) {
+                        TypeInference::typeError("%1%: Structs, headers and tuples "
+                                                 "containing %2% data type as a lief "
+                                                 "field cannot be zero initialized with "
+                                                 "convenient initializer: %3% = {...}.",
+                                                 errorPosition, f->type, strct);
+                        return false;
+                    } else if (f->type->is<IR::Type_Struct>() || f->type->is<IR::Type_Header>()
+                               || f->type->is<IR::Type_Tuple>()) {
+                        IR::Type_List* src_tmp =
+                                       new IR::Type_List(*(new IR::Vector<IR::Type>()), true);
+                        bool success = unify(errorPosition, f->type, src_tmp, reportErrors);
+                        if (!success)
+                            return false;
+                    }
+                }
             }
             return true;
         }
@@ -381,7 +458,6 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
                                          errorPosition, src->toString(), dest->toString());
             return false;
         }
-
         bool success = (*src) == (*dest);
         if (!success) {
             if (reportErrors)

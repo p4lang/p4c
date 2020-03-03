@@ -859,6 +859,13 @@ bool ToP4::preorder(const IR::ListExpression* e) {
     doneList();
     expressionPrecedence = prec;
     doneVec();
+    if (e->defaultInitializer) {
+        if (e->components.empty()) {
+            builder.append("...");
+        } else {
+            builder.append(", ...");
+        }
+    }
     builder.append(end);
     return false;
 }
@@ -886,6 +893,13 @@ bool ToP4::preorder(const IR::StructInitializerExpression* e) {
         builder.append(c->name.name);
         builder.append(" = ");
         visit(c->expression);
+    }
+    if (e->defaultInitializer) {
+        if (e->components.empty()) {
+            builder.append("...");
+        } else {
+            builder.append(", ... ");
+        }
     }
     expressionPrecedence = prec;
     builder.append("}");
