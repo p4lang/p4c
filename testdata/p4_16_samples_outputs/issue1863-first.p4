@@ -5,8 +5,8 @@ struct S {
 
 control c(out bit<1> b) {
     apply {
-        S s = (S){a = 1w0,b = 1w1};
-        s = (S){a = s.b,b = s.a};
+        S s = { 1w0, 1w1 };
+        s = { s.b, s.a };
         b = s.a;
     }
 }

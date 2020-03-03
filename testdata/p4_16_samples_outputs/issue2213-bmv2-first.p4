@@ -46,7 +46,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         meta.s1 = (mystruct1_t){f1 = 16w2,f2 = 8w3};
         meta.s2.s1 = meta.s1;
         meta.s2 = (mystruct2_t){s1 = meta.s1,f3 = 16w5,f4 = 32w8};
-        meta.s2 = (mystruct2_t){s1 = (mystruct1_t){f1 = 16w2,f2 = 8w3},f3 = 16w5,f4 = 32w8};
+        meta.s2 = (mystruct2_t){s1 = {f1 = 16w2,f2 = 8w3},f3 = 16w5,f4 = 32w8};
         stdmeta.egress_spec = (bit<9>)meta.s2.s1.f2;
     }
 }
