@@ -47,12 +47,12 @@ to be separated from standard bmv2 options using `--`.
 
 Most users will invoke simple_switch_grpc as follows:
 ```
-simple_switch_grpc --skip-p4 \
+simple_switch_grpc --no-p4 \
     -i <PORT1>@<IFACE1> -i <PORT2>@<IFACE2> <more ports> \
     -- --grpc-server-addr <IP>:<TCP PORT> --cpu-port <CPU_PORT>
 ```
 
-* `--skip-p4` is a standard bmv2 command-line option. It means that no JSON file
+* `--no-p4` is a standard bmv2 command-line option. It means that no JSON file
   is provided when starting simple_switch_grpc and bmv2 will not initially be
   able to process packets (i.e. all packets will be dropped). You will need to
   provide a P4 "pipeline" (including a JSON file and a P4Info message) with the
