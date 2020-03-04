@@ -2466,21 +2466,29 @@ void ProgramStructure::createChecksumUpdates() {
             args->push_back(new IR::Argument(dest));
             args->push_back(new IR::Argument(algo));
             auto methodCallExpression = new IR::MethodCallExpression(method, args);
-            IR::Annotation* zeros_as_ones_annot  = nullptr;
+            auto mc = new IR::MethodCallStatement(methodCallExpression);
             if (flc->algorithm->names[0] == "csum16_udp") {
-                zeros_as_ones_annot = new IR::Annotation(IR::ID("zeros_as_ones"),
-                              {methodCallExpression});
+                auto zeros_as_ones_annot = new IR::Annotation(IR::ID("zeros_as_ones"),
+                                            {methodCallExpression});
                 body->annotations = body->annotations->add(zeros_as_ones_annot);
             }
-            auto mc = new IR::MethodCallStatement(methodCallExpression);
+
+            for (auto annot : cf->annotations->annotations) {
+                auto newAnnot = new IR::Annotation(annot->name, {});
+                for (auto expr : annot->expr)
+                    newAnnot->expr.push_back(expr);
+                newAnnot->expr.push_back(methodCallExpression);
+                body->annotations = body->annotations->add(newAnnot);
+            }
+            for (auto annot : flc->annotations->annotations) {
+                auto newAnnot = new IR::Annotation(annot->name, {});
+                for (auto expr : annot->expr)
+                    newAnnot->expr.push_back(expr);
+                newAnnot->expr.push_back(methodCallExpression);
+                body->annotations = body->annotations->add(newAnnot);
+            }
+
             body->push_back(mc);
-
-            for (auto annot : cf->annotations->annotations)
-                body->annotations = body->annotations->add(annot);
-
-            for (auto annot : flc->annotations->annotations)
-                body->annotations = body->annotations->add(annot);
-
             LOG3("Converted " << flc);
         }
     }
