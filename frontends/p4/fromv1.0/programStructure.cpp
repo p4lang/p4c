@@ -2482,14 +2482,14 @@ void ProgramStructure::createChecksumUpdates() {
             }
 
             for (auto annot : cf->annotations->annotations) {
-                auto newAnnot = new IR::Annotation(annot->name, {});
+                auto newAnnot = new IR::Annotation(annot->name, {}, false);
                 for (auto expr : annot->expr)
                     newAnnot->expr.push_back(expr);
                 newAnnot->expr.push_back(methodCallExpression);
                 body->annotations = body->annotations->add(newAnnot);
             }
             for (auto annot : flc->annotations->annotations) {
-                auto newAnnot = new IR::Annotation(annot->name, {});
+                auto newAnnot = new IR::Annotation(annot->name, {}, false);
                 for (auto expr : annot->expr)
                     newAnnot->expr.push_back(expr);
                 newAnnot->expr.push_back(methodCallExpression);
