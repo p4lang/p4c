@@ -280,6 +280,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::KeyElement* elem) override;
     const IR::Node* postorder(IR::Property* elem) override;
     const IR::Node* postorder(IR::SelectCase* elem) override;
+    const IR::Node* postorder(IR::Annotation* annotation) override;
 
     Visitor::profile_t init_apply(const IR::Node* node) override;
     void end_apply(const IR::Node* Node) override;

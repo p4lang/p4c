@@ -162,7 +162,7 @@ class RenameUserMetadata : public Transform {
             auto stringLit = new IR::StringLiteral(newName);
             LOG2("Renaming " << f << " to " << newName);
             auto annos = f->annotations->addOrReplace(
-                IR::Annotation::nameAnnotation, stringLit);
+                IR::Annotation::nameAnnotation, stringLit, false);
             auto field = new IR::StructField(f->srcInfo, f->name, annos, f->type);
             fields.push_back(field);
         }

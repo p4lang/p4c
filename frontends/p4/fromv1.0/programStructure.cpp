@@ -59,7 +59,7 @@ ProgramStructure::addNameAnnotation(cstring name, const IR::Annotations* annos) 
     if (annos == nullptr)
         annos = IR::Annotations::empty;
     return annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
-                                     new IR::StringLiteral(name));
+                                     new IR::StringLiteral(name), false);
 }
 
 const IR::Annotations*
@@ -810,9 +810,11 @@ ProgramStructure::convertActionProfile(const IR::ActionProfile* action_profile, 
         auto width = new IR::Constant(v1model.action_selector.widthType, flc->output_width);
         args->push_back(new IR::Argument(width));
         if (action_selector->mode)
-            annos = annos->addAnnotation("mode", new IR::StringLiteral(action_selector->mode));
+            annos = annos->addAnnotation(
+                "mode", new IR::StringLiteral(action_selector->mode), false);
         if (action_selector->type)
-            annos = annos->addAnnotation("type", new IR::StringLiteral(action_selector->type));
+            annos = annos->addAnnotation(
+                "type", new IR::StringLiteral(action_selector->type), false);
         auto fl = getFieldLists(flc);
         for (auto annot : fl->annotations->annotations) {
             annos = annos->add(annot);
@@ -867,7 +869,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         actionList->push_back(
             new IR::ActionListElement(
                 new IR::Annotations(
-                    {new IR::Annotation(IR::Annotation::defaultOnlyAnnotation, {})}),
+                    {new IR::Annotation(IR::Annotation::defaultOnlyAnnotation, {}, false)}),
                 new IR::PathExpression(default_action))); }
     props->push_back(new IR::Property(IR::ID(IR::TableProperties::actionsPropertyName),
                                       actionList, false));
@@ -1987,9 +1989,9 @@ ProgramStructure::convert(const IR::CounterOrMeter* cm, cstring newName) {
     auto annos = addGlobalNameAnnotation(cm->name, cm->annotations);
     if (auto *c = cm->to<IR::Counter>()) {
         if (c->min_width >= 0)
-            annos = annos->addAnnotation("min_width", new IR::Constant(c->min_width));
+            annos = annos->addAnnotation("min_width", new IR::Constant(c->min_width), false);
         if (c->max_width >= 0)
-            annos = annos->addAnnotation("max_width", new IR::Constant(c->max_width));
+            annos = annos->addAnnotation("max_width", new IR::Constant(c->max_width), false);
     }
     auto decl = new IR::Declaration_Instance(
         newName, annos, type, args, nullptr);
@@ -2020,7 +2022,7 @@ ProgramStructure::convertDirectMeter(const IR::Meter* m, cstring newName) {
     if (m->pre_color != nullptr) {
         auto meterPreColor = ExpressionConverter(this).convert(m->pre_color);
         if (meterPreColor != nullptr)
-            annos = annos->addAnnotation("pre_color", meterPreColor);
+            annos = annos->addAnnotation("pre_color", meterPreColor, false);
     }
     auto decl = new IR::Declaration_Instance(newName, annos, specType, args, nullptr);
     return decl;
@@ -2038,9 +2040,9 @@ ProgramStructure::convertDirectCounter(const IR::Counter* c, cstring newName) {
     args->push_back(new IR::Argument(kindarg));
     auto annos = addGlobalNameAnnotation(c->name, c->annotations);
     if (c->min_width >= 0)
-        annos = annos->addAnnotation("min_width", new IR::Constant(c->min_width));
+        annos = annos->addAnnotation("min_width", new IR::Constant(c->min_width), false);
     if (c->max_width >= 0)
-        annos = annos->addAnnotation("max_width", new IR::Constant(c->max_width));
+        annos = annos->addAnnotation("max_width", new IR::Constant(c->max_width), false);
     auto decl = new IR::Declaration_Instance(newName, annos, type, args, nullptr);
     return decl;
 }
@@ -2475,7 +2477,7 @@ void ProgramStructure::createChecksumUpdates() {
             auto mc = new IR::MethodCallStatement(methodCallExpression);
             if (flc->algorithm->names[0] == "csum16_udp") {
                 auto zeros_as_ones_annot = new IR::Annotation(IR::ID("zeros_as_ones"),
-                                            {methodCallExpression});
+                                                              {methodCallExpression}, false);
                 body->annotations = body->annotations->add(zeros_as_ones_annot);
             }
 

@@ -760,6 +760,29 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
     return sourceExpression;
 }
 
+const IR::Node* TypeInference::postorder(IR::Annotation* annotation) {
+    auto checkAnnotation = [this] (const IR::Expression* e) {
+        if (!isCompileTimeConstant(e))
+            typeError("%1%: structured annotation must be compile-time constant values", e);
+        auto t = getType(e);
+        if (!t->is<IR::Type_InfInt>() &&
+            !t->is<IR::Type_String>() &&
+            !t->is<IR::Type_Boolean>())
+            typeError("%1%: illegal type for structured annotation; must be int, string or bool", e);
+    };
+
+    if (annotation->structured) {
+        // If it happens here it was created in the compiler, so it's a bug, not an error.
+        BUG_CHECK(annotation->expr.empty() || annotation->kv.empty(),
+                  "%1%: structured annotations cannot contain both lists and kv-pairs", annotation);
+        for (auto e: annotation->expr)
+            checkAnnotation(e);
+        for (auto e: annotation->kv)
+            checkAnnotation(e->expression);
+    }
+    return annotation;
+}
+
 const IR::Node* TypeInference::postorder(IR::Declaration_Constant* decl) {
     if (done()) return decl;
     auto type = getTypeType(decl->type);

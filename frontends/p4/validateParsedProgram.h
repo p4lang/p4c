@@ -59,6 +59,7 @@ class ValidateParsedProgram final : public Inspector {
  public:
     ValidateParsedProgram()
     { setName("ValidateParsedProgram"); }
+    void postorder(const IR::Annotations* annotations) override;
     void postorder(const IR::P4Program* program) override;
     void postorder(const IR::Constant* c) override;
     void postorder(const IR::SwitchStatement* statement) override;

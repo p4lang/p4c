@@ -76,7 +76,7 @@ addNameAnnotation(cstring name, const IR::Annotations* annos) {
     if (annos == nullptr)
         annos = IR::Annotations::empty;
     return annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
-                                     new IR::StringLiteral(name));
+                                     new IR::StringLiteral(name), false);
 }
 
 UniqueNames::UniqueNames(ReferenceMap* refMap) : renameMap(new RenameMap) {

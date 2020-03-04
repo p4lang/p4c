@@ -50,6 +50,20 @@ void ValidateParsedProgram::postorder(const IR::Method* m) {
     }
 }
 
+/// Structured annotations cannot reuse names
+void ValidateParsedProgram::postorder(const IR::Annotations* annotations) {
+    std::set<cstring> namesUsed;
+
+    for (auto a: annotations->annotations) {
+        if (!a->structured)
+            continue;
+        auto it = namesUsed.find(a->name);
+        if (it != namesUsed.end())
+            ::error(ErrorType::ERR_DUPLICATE, "%1%: duplicate name for structured annotation", a);
+        namesUsed.emplace(a->name);
+    }
+}
+
 /// Struct field names cannot be underscore
 void ValidateParsedProgram::postorder(const IR::StructField* f) {
     if (f->name.isDontCare())

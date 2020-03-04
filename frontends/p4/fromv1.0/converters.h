@@ -776,8 +776,9 @@ class InsertCompilerGeneratedStartState: public Transform {
                 new IR::PathExpression(new IR::Path(p.second->name))));
         }
         auto instAnnos = new IR::Annotations();
-        instAnnos->add(new IR::Annotation(IR::Annotation::nameAnnotation,
-                                          {new IR::StringLiteral(IR::ID(".$InstanceType"))}));
+        instAnnos->add(new IR::Annotation(
+            IR::Annotation::nameAnnotation,
+            {new IR::StringLiteral(IR::ID(".$InstanceType"))}, false));
         auto instEnum =
             new IR::Type_SerEnum(newInstanceType, instAnnos, IR::Type_Bits::get(32), members);
         allTypeDecls.push_back(instEnum);
@@ -790,7 +791,7 @@ class InsertCompilerGeneratedStartState: public Transform {
         auto selects = new IR::SelectExpression(new IR::ListExpression(selExpr), selCases);
         auto annos = new IR::Annotations();
         annos->add(new IR::Annotation(IR::Annotation::nameAnnotation,
-                                      {new IR::StringLiteral(IR::ID(".$start"))}));
+                                      {new IR::StringLiteral(IR::ID(".$start"))}, false));
         auto startState = new IR::ParserState(IR::ParserState::start, annos, selects);
         varDecls.push_back(startState);
 

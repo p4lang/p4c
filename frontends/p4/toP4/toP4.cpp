@@ -1126,15 +1126,17 @@ bool ToP4::preorder(const IR::SwitchStatement* s) {
 bool ToP4::preorder(const IR::Annotation * a) {
     builder.append("@");
     builder.append(a->name);
+    char open = a->structured ? '[' : '(';
+    char close = a->structured ? ']' : ')';
     if (!a->expr.empty()) {
-        builder.append("(");
+        builder.append(open);
         setVecSep(", ");
         preorder(&a->expr);
         doneVec();
-        builder.append(")");
+        builder.append(close);
     }
     if (!a->kv.empty()) {
-        builder.append("(");
+        builder.append(open);
         bool first = true;
         for (auto kvp : a->kv) {
             if (!first)
@@ -1144,13 +1146,16 @@ bool ToP4::preorder(const IR::Annotation * a) {
             builder.append("=");
             visit(kvp->expression);
         }
-        builder.append(")");
+        builder.append(close);
+    }
+    if (a->expr.empty() && a->kv.empty() && a->structured) {
+        builder.append("[]");
     }
     if (!a->body.empty() && a->expr.empty() && a->kv.empty()) {
         // Have an unparsed annotation.
         // We could be prettier here with smarter logic, but let's do the easy
         // thing by separating every token with a space.
-        builder.append("(");
+        builder.append(open);
         bool first = true;
         for (auto tok : a->body) {
             if (!first) builder.append(" ");
@@ -1162,7 +1167,7 @@ bool ToP4::preorder(const IR::Annotation * a) {
             builder.append(tok->text);
             if (haveStringLiteral) builder.append("\"");
         }
-        builder.append(")");
+        builder.append(close);
     }
     builder.spc();
     return false;
