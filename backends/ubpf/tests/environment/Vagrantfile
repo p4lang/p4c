@@ -1,0 +1,80 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# Copyright 2019 Orange
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+$script = <<SCRIPT
+    sudo apt-get update
+    sudo apt-get upgrade
+    sudo apt-get -y install git python-pip fuse libfuse-dev dh-autoreconf openssl libssl-dev cmake libpcap-dev python-yaml
+SCRIPT
+
+$switch_script = <<SWITCH_SCRIPT
+    /vagrant/setup-switch.sh
+SWITCH_SCRIPT
+
+$pktgen_script = <<PKTGEN_SCRIPT
+    /vagrant/setup-pktgen.sh
+PKTGEN_SCRIPT
+
+Vagrant.configure("2") do |config|
+
+    config.vm.boot_timeout = 600
+
+    # Configure switch, i.e., device under test (DUT)
+    config.vm.define "switch" do |switch|
+        switch.vm.box = "ubuntu/xenial64"
+
+        switch.vm.network "private_network", ip: "172.16.0.10", netmask: "255.255.255.0", virtualbox__intnet: "sw-up"
+        switch.vm.network "private_network", ip: "172.16.0.11", netmask: "255.255.255.0", virtualbox__intnet: "sw-down"
+        switch.vm.network "private_network", ip: "192.168.100.10"
+
+        switch.vm.provider "virtualbox" do |virtualbox|
+            # Customize the amount of memory on the VM:
+            virtualbox.memory = "16296"
+            virtualbox.cpus = "4"
+            # Enable promiscuous mode
+            virtualbox.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+            virtualbox.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+        end
+
+        # Setup switch
+        switch.vm.provision "shell", inline: $switch_script
+    end
+
+    # Configure generator
+    config.vm.define "generator" do |generator|
+        generator.vm.box = "ubuntu/xenial64"
+
+        generator.vm.network "private_network", ip: "172.16.0.12", netmask: "255.255.255.0", virtualbox__intnet: "sw-up"
+        generator.vm.network "private_network", ip: "172.16.0.13", netmask: "255.255.255.0", virtualbox__intnet: "sw-down"
+        generator.vm.network "private_network", ip: "192.168.100.20"
+
+        generator.vm.provider "virtualbox" do |virtualbox|
+            # Customize the amount of memory on the VM:
+            virtualbox.memory = "4096"
+            virtualbox.cpus = "4"
+            # Enable promiscuous mode
+            virtualbox.customize ["modifyvm", :id, "--nicpromisc2", "allow-all"]
+            virtualbox.customize ["modifyvm", :id, "--nicpromisc3", "allow-all"]
+        end
+
+        # Setup generator
+        generator.vm.provision "shell", inline: $pktgen_script
+    end
+
+    # Install essentials
+    config.vm.provision "shell", inline: $script
+end
