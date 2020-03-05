@@ -54,7 +54,7 @@ std::vector<const char*>* Util::Options::process(int argc, char* const argv[]) {
             if (!option && (arg = opt.find('=')))
                 option = get(options, opt.before(arg++));
             if (option == nullptr) {
-                ::error(ErrorType::ERR_UNKNOWN, "option", opt);
+                ::error(ErrorType::ERR_UNKNOWN, "Unknown option %1%", opt);
                 usage();
                 return nullptr; }
         } else if (opt.startsWith("-")) {
@@ -63,7 +63,7 @@ std::vector<const char*>* Util::Options::process(int argc, char* const argv[]) {
                 opt = opt.substr(0, 2); }
             option = get(options, opt);
             if (option == nullptr) {
-                ::error(ErrorType::ERR_UNKNOWN, "option", opt);
+                ::error(ErrorType::ERR_UNKNOWN, "Unknown option %1%", opt);
                 usage();
                 return nullptr; }
             if ((option->flags & OptionFlags::OptionalArgument) &&
