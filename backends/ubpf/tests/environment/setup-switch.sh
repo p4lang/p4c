@@ -182,8 +182,7 @@ fi
 if [ ! -d "/home/vagrant/p4c" ]
 then
  cd /home/vagrant
- # TODO: it should be replaced with https://github.com/p4lang/p4c after merge
- git clone -b master https://github.com/P4-Research/p4c.git
+ git clone https://github.com/p4lang/p4c.git
  cd p4c
  git submodule update --init --recursive
  mkdir build
