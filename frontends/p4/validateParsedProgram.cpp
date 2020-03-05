@@ -54,7 +54,7 @@ void ValidateParsedProgram::postorder(const IR::Method* m) {
 void ValidateParsedProgram::postorder(const IR::Annotations* annotations) {
     std::set<cstring> namesUsed;
 
-    for (auto a: annotations->annotations) {
+    for (auto a : annotations->annotations) {
         if (!a->structured)
             continue;
         auto it = namesUsed.find(a->name);
