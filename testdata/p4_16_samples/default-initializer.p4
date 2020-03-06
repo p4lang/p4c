@@ -26,18 +26,17 @@ struct S {
 
 extern void f<D>(in D data);
 control c(inout bit<1> r) {
-    S s_0;
-    H h_0;
+    S sa;
     bit<1> tmp;
     apply {
-        S s_1;
-        s_1 = { b = false, h={3, true, ...}, ...};
-        H h = ...;
-        s_1.h = h;
-        s_0 = s_1;
+        S sb;
+        sb = { b = false, h={3, true, ...}, ...};
+        H hb = ...;
+        sb.h = hb;
+        sa = sb;
         tuple<int<8>, bool, error, myEnum1, myEnum, H, S> x = { 0, true, ... };
         f<tuple<int<8>, bool, error, myEnum1, myEnum, H, S>>(x);
-        tmp = s_0.z;
+        tmp = sa.z;
         r = tmp;
     }
 }

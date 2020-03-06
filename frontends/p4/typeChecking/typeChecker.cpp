@@ -384,7 +384,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         if (anySet)
             canon = new IR::Type_Tuple(type->srcInfo, *fields);
         else if (anyChange)
-            canon = new IR::Type_List(type->srcInfo, *fields, list->fromDefaultInitializer);
+            canon = new IR::Type_List(type->srcInfo, *fields, list->defaultInitializer);
         else
             canon = type;
         canon = typeMap->getCanonical(canon);
@@ -519,7 +519,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
     } else if (auto su = type->to<IR::Type_UnknownStruct>()) {
         return canonicalizeFields(su, [su](const IR::IndexedVector<IR::StructField>* fields) {
                 return new IR::Type_UnknownStruct(su->srcInfo, su->name, su->annotations,
-                                                  *fields, su->fromDefaultInitializer);
+                                                  *fields, su->defaultInitializer);
             });
     } else if (auto st = type->to<IR::Type_Specialized>()) {
         auto baseCanon = canonicalize(st->baseType);

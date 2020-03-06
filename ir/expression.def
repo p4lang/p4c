@@ -385,9 +385,19 @@ class ConstructorCallExpression : Expression {
 /// Represents a list of expressions separated by commas
 class ListExpression : Expression {
     bool defaultInitializer = false;
-    ListExpression(Util::SourceInfo srcInfo, IR::Vector<IR::Expression>& components, bool convenientInit) : Expression(srcInfo), components(components){
-        defaultInitializer = convenientInit;
+    ListExpression(Util::SourceInfo srcInfo, IR::Vector<IR::Expression>& components, bool defaultInitializer)
+                   : Expression(srcInfo), defaultInitializer(defaultInitializer), components(components) {
         validate();
+        initUnknown();
+    }
+
+    inline Vector<Expression> components;
+    ListExpression {
+        validate();
+        initUnknown();
+    }
+
+    void initUnknown(){
         if (type->is<Type::Unknown>()) {
             Vector<Type> tuple;
             for (auto e : components)
@@ -396,16 +406,6 @@ class ListExpression : Expression {
         }
     }
 
-    inline Vector<Expression> components;
-    ListExpression {
-        validate();
-        if (type->is<Type::Unknown>()) {
-            Vector<Type> tuple;
-            for (auto e : components)
-                tuple.push_back(e->type);
-            type = new Type_List(tuple);
-        }
-    }
     validate { components.check_null(); }
     size_t size() const { return components.size(); }
     void push_back(Expression e) { components.push_back(e); }
@@ -415,16 +415,14 @@ class ListExpression : Expression {
 /// Currently it does not have a direct representation as P4 source.
 class StructInitializerExpression : Expression {
     bool defaultInitializer = false;
-    StructInitializerExpression(Util::SourceInfo srcInfo, const IR::Type* type, const IR::Type_Name* typeName, IR::IndexedVector<IR::NamedExpression>& components, bool convenientInit)
-                                : StructInitializerExpression(srcInfo, type, typeName, components) {
-        defaultInitializer = convenientInit;
-
+    StructInitializerExpression(Util::SourceInfo srcInfo, const IR::Type* type, const IR::Type_Name* typeName, IR::IndexedVector<IR::NamedExpression>& components, bool defaultInitializer)
+                                : Expression(srcInfo, type), defaultInitializer(defaultInitializer), typeName(typeName), components(components) {
+        validate();
     }
 
-    StructInitializerExpression(const IR::Type* type, const IR::Type_Name* typeName, const IR::IndexedVector<IR::NamedExpression>& components, bool convenientInit)
-                                : StructInitializerExpression(type, typeName, components) {
-        defaultInitializer = convenientInit;
-
+    StructInitializerExpression(const IR::Type* type, const IR::Type_Name* typeName, const IR::IndexedVector<IR::NamedExpression>& components, bool defaultInitializer)
+                                : Expression(type), defaultInitializer(defaultInitializer), typeName(typeName), components(components) {
+        validate();
     }
 
     /// The struct or header type that is being intialized.

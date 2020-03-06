@@ -194,7 +194,7 @@ using Parser = P4::P4Parser;
                           return Parser::make_INTEGER(constant, driver.yylloc); }
 
 "&&&"           { BEGIN(driver.saveState); return makeToken(MASK); }
-"..."           { BEGIN(driver.saveState); return makeToken(CONVINIENT_INITIALIZER); }
+"..."           { BEGIN(driver.saveState); return makeToken(DOTS); }
 ".."            { BEGIN(driver.saveState); return makeToken(RANGE); }
 "<<"            { BEGIN(driver.saveState); return makeToken(SHL); }
 "&&"            { BEGIN(driver.saveState); return makeToken(AND); }

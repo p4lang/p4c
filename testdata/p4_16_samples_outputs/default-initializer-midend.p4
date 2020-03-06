@@ -35,22 +35,22 @@ struct tuple_0 {
 }
 
 control c(inout bit<1> r) {
-    H s_2_h;
-    H h_0;
+    H sb_0_h;
+    H hb_0;
     H x_0_field_4;
     H x_0_field_5_h;
-    @hidden action convenient_init34() {
-        s_2_h.setValid();
-        s_2_h.i = 8s3;
-        s_2_h.b = true;
-        s_2_h.l = 14w0;
-        s_2_h.b1 = 1w0;
-        h_0.setValid();
-        h_0.i = 8s0;
-        h_0.b = false;
-        h_0.l = 14w0;
-        h_0.b1 = 1w0;
-        s_2_h = h_0;
+    @hidden action defaultinitializer33() {
+        sb_0_h.setValid();
+        sb_0_h.i = 8s3;
+        sb_0_h.b = true;
+        sb_0_h.l = 14w0;
+        sb_0_h.b1 = 1w0;
+        hb_0.setValid();
+        hb_0.i = 8s0;
+        hb_0.b = false;
+        hb_0.l = 14w0;
+        hb_0.b1 = 1w0;
+        sb_0_h = hb_0;
         x_0_field_4.i = 8s0;
         x_0_field_4.b = false;
         x_0_field_4.l = 14w0;
@@ -62,14 +62,14 @@ control c(inout bit<1> r) {
         f<tuple_0>({ 8s0, true, error.NoError, myEnum1.e1, 8w0, x_0_field_4, { 8w0, myEnum1.e1, error.NoError, x_0_field_5_h, 1w0, false, 8s0 } });
         r = 1w0;
     }
-    @hidden table tbl_convenient_init34 {
+    @hidden table tbl_defaultinitializer33 {
         actions = {
-            convenient_init34();
+            defaultinitializer33();
         }
-        const default_action = convenient_init34();
+        const default_action = defaultinitializer33();
     }
     apply {
-        tbl_convenient_init34.apply();
+        tbl_defaultinitializer33.apply();
     }
 }
 

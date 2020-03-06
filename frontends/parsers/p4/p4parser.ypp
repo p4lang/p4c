@@ -207,7 +207,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %token<Token>      PP "++"
 %token<Token>      DONTCARE "_"
 %token<Token>      MASK "&&&"
-%token<Token>      CONVINIENT_INITIALIZER "..."
+%token<Token>      DOTS "..."
 %token<Token>      RANGE ".."
 %token<Token>      TRUE FALSE THIS
 %token<Token>      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DEFAULT

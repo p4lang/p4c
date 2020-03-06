@@ -18,6 +18,37 @@ limitations under the License.
 namespace P4 {
 const IR::Expression*
 convert(const IR::Expression* expression, const IR::Type* type);
+
+const IR::Expression* defaultValue(const IR::Type* type, const Util::SourceInfo srcInfo) {
+    IR::Expression* expr;
+    if (type->is<IR::Type_Bits>()) {
+        expr = new IR::Constant(type, 0);
+    } else if (type->is<IR::Type_Boolean>()) {
+        expr = new IR::BoolLiteral(false);
+    } else if (type->is<IR::Type_Error>()) {
+        auto path = new IR::Path(IR::ID(srcInfo, "error"));
+        auto typeName =  new IR::Type_Name(srcInfo, path);
+        auto id = new IR::ID(srcInfo, "NoError");
+        auto tne = new IR::TypeNameExpression(srcInfo, typeName);
+        expr = new IR::Member(srcInfo, tne, *id);
+    } else if (auto t = type->to<IR::Type_Enum>()) {
+        BUG_CHECK(t->members.size(), "unknown default value for enum with no members");
+        auto tne = new IR::TypeNameExpression(srcInfo,
+                                               new IR::Type_Name(t->name));
+        expr = new IR::Member(srcInfo, tne, t->members.at(0)->name);
+    } else if (auto t = type->to<IR::Type_SerEnum>()) {
+        expr = new IR::Constant(t->type, 0);
+    } else if (type->is<IR::Type_StructLike>() || type->is<IR::Type_BaseList>()) {
+        auto vec = new IR::Vector<IR::Expression>();
+        auto conv = convert(new IR::ListExpression(srcInfo, *vec, true), type);
+        return conv;
+    } else {
+        ::error(ErrorType::ERR_TYPE_ERROR,
+                "%1%: Unknown default value for type %2%", srcInfo, type);
+    }
+    return expr;
+}
+
 /// Given an expression and a destination type, convert ListExpressions
 /// that occur within expression to StructInitializerExpression if the
 /// destination type matches.
@@ -40,48 +71,13 @@ convert(const IR::Expression* expression, const IR::Type* type) {
                 index++;
             }
             if (le->defaultInitializer) {
+                const IR::Expression* expr;
                 modified = true;
-                IR::Expression* expr;
                 for (; index < st->fields.size(); index++) {
                     auto f = st->fields.at(index);
-                    if (f->type->is<IR::Type_Bits>()) {
-                        auto conv = new IR::Constant(0);
-                        expr = conv;
-                        auto ne = new IR::NamedExpression(expression->srcInfo, f->name, expr);
-                        si->push_back(ne);
-                    } else if (f->type->is<IR::Type_Boolean>()) {
-                        auto conv = new IR::BoolLiteral(false);
-                        expr = conv;
-                        auto ne = new IR::NamedExpression(expression->srcInfo, f->name, expr);
-                        si->push_back(ne);
-                    } else if (f->type->is<IR::Type_Error>()) {
-                        auto path = new IR::Path(IR::ID(expression->srcInfo, "error"));
-                        auto typeName =  new IR::Type_Name(expression->srcInfo, path);
-                        auto id = new IR::ID(expression->srcInfo, "NoError");
-                        auto tne = new IR::TypeNameExpression(expression->srcInfo, typeName);
-                        expr = new IR::Member(expression->srcInfo, tne, *id);
-                        auto ne = new IR::NamedExpression(expression->srcInfo, f->name, expr);
-                        si->push_back(ne);
-                    } else if (auto t = f->type->to<IR::Type_Enum>()) {
-                        auto tne =  new IR::TypeNameExpression(expression->srcInfo,
-                                                               new IR::Type_Name(t->name));
-                        expr = new IR::Member(expression->srcInfo, tne, t->members.at(0)->name);
-                        auto ne = new IR::NamedExpression(expression->srcInfo, f->name, expr);
-                        si->push_back(ne);
-
-                    } else if (auto t = f->type->to<IR::Type_SerEnum>()) {
-                        int size = t->type->size;
-                        auto conv = new IR::Constant(new IR::Type_Bits(size, false), 0);
-                        expr = conv;
-                        auto ne = new IR::NamedExpression(expression->srcInfo, f->name, expr);
-                        si->push_back(ne);
-                    } else {
-                        auto vec = new IR::Vector<IR::Expression>();
-                        auto conv = convert(new IR::ListExpression(expression->srcInfo, *vec, true),
-                                            f->type);
-                        auto ne = new IR::NamedExpression(expression->srcInfo, f->name, conv);
-                        si->push_back(ne);
-                    }
+                    expr = defaultValue(f->type, expression->srcInfo);
+                    auto ne = new IR::NamedExpression(expression->srcInfo, f->name, expr);
+                    si->push_back(ne);
                 }
             }
             auto type = st->getP4Type()->to<IR::Type_Name>();
@@ -100,49 +96,14 @@ convert(const IR::Expression* expression, const IR::Type* type) {
                     si->push_back(ne);
                 }
             } else {
+                const IR::Expression* expr;
                 modified = true;
-                IR::Expression* expr;
                 for (auto f : st->fields) {
                     auto ne = sli->components.getDeclaration<IR::NamedExpression>(f->name.name);
                     if (ne == nullptr) {
-                        if (f->type->is<IR::Type_Bits>()) {
-                            auto conv = new IR::Constant(0);
-                            expr = conv;
-                            ne = new IR::NamedExpression(expression->srcInfo, f->name, expr);
-                            si->push_back(ne);
-                        } else if (f->type->is<IR::Type_Boolean>()) {
-                            auto conv = new IR::BoolLiteral(false);
-                            expr = conv;
-                            ne = new IR::NamedExpression(expression->srcInfo, f->name, expr);
-                            si->push_back(ne);
-                        } else if (f->type->is<IR::Type_Error>()) {
-                            auto path = new IR::Path(IR::ID(expression->srcInfo, "error"));
-                            auto typeName =  new IR::Type_Name(expression->srcInfo, path);
-                            auto id = new IR::ID(expression->srcInfo, "NoError");
-                            auto tne = new IR::TypeNameExpression(expression->srcInfo, typeName);
-                            expr = new IR::Member(expression->srcInfo, tne, *id);
-                            auto ne = new IR::NamedExpression(expression->srcInfo, f->name, expr);
-                            si->push_back(ne);
-                        } else if (auto t = f->type->to<IR::Type_Enum>()) {
-                            auto tne =  new IR::TypeNameExpression(expression->srcInfo,
-                                                                   new IR::Type_Name(t->name));
-                            expr = new IR::Member(expression->srcInfo, tne, t->members.at(0)->name);
-                            auto ne = new IR::NamedExpression(expression->srcInfo, f->name, expr);
-                            si->push_back(ne);
-
-                        } else if (auto t = f->type->to<IR::Type_SerEnum>()) {
-                            int size = t->type->size;
-                            auto conv = new IR::Constant(new IR::Type_Bits(size, false), 0);
-                            expr = conv;
-                            auto ne = new IR::NamedExpression(expression->srcInfo, f->name, expr);
-                            si->push_back(ne);
-                        } else {
-                            auto vec = new IR::Vector<IR::Expression>();
-                            auto conv_le = new IR::ListExpression(expression->srcInfo, *vec, true);
-                            auto conv = convert(conv_le, f->type);
-                            ne = new IR::NamedExpression(expression->srcInfo, f->name, conv);
-                            si->push_back(ne);
-                        }
+                        expr = defaultValue(f->type, expression->srcInfo);
+                        auto ne = new IR::NamedExpression(expression->srcInfo, f->name, expr);
+                        si->push_back(ne);
                     } else {
                         auto convNe = convert(ne->expression, f->type);
                         if (convNe != ne->expression)
@@ -152,7 +113,7 @@ convert(const IR::Expression* expression, const IR::Type* type) {
                     }
                 }
             }
-            if (modified || sli->type->is<IR::Type_Unknown>()) {
+            if (modified || sli->type->is<IR::Type_UnknownStruct>()) {
                 auto type = st->getP4Type()->to<IR::Type_Name>();
                 auto result = new IR::StructInitializerExpression(
                     expression->srcInfo, type, type, *si);
@@ -163,7 +124,6 @@ convert(const IR::Expression* expression, const IR::Type* type) {
         auto le = expression->to<IR::ListExpression>();
         if (le == nullptr)
             return expression;
-
         auto vec = new IR::Vector<IR::Expression>();
         size_t index = 0;
         auto l = le->size();
@@ -175,37 +135,12 @@ convert(const IR::Expression* expression, const IR::Type* type) {
             modified |= (conv != expr);
         }
         if (le->defaultInitializer) {
+            const IR::Expression* expr;
             modified = true;
             for ( ; index < tup->components.size(); index++) {
                 auto f = tup->components.at(index);
-                if (f->is<IR::Type_Bits>()) {
-                    auto conv = new IR::Constant(0);
-                    vec->push_back(conv);
-                } else if (f->is<IR::Type_Boolean>()) {
-                    auto conv = new IR::BoolLiteral(false);
-                    vec->push_back(conv);
-                } else if (f->is<IR::Type_Error>()) {
-                    auto path = new IR::Path(IR::ID(expression->srcInfo, "error"));
-                    auto typeName =  new IR::Type_Name(expression->srcInfo, path);
-                    auto tne = new IR::TypeNameExpression(expression->srcInfo, typeName);
-                    auto conv = new IR::Member(expression->srcInfo, tne,
-                                               *(new IR::ID(expression->srcInfo, "NoError")));
-                    vec->push_back(conv);
-                } else if (auto t = f->to<IR::Type_Enum>()) {
-                    auto tne = new IR::TypeNameExpression(expression->srcInfo,
-                                                          new IR::Type_Name(t->name));
-                    auto conv = new IR::Member(expression->srcInfo, tne, t->members.at(0)->name);
-                    vec->push_back(conv);
-                } else if (auto t = f->to<IR::Type_SerEnum>()) {
-                    int size = t->type->size;
-                    auto conv = new IR::Constant(new IR::Type_Bits(size, false), 0);
-                    vec->push_back(conv);
-                } else {
-                    auto vect = new IR::Vector<IR::Expression>();
-                    auto conv_le = new IR::ListExpression(expression->srcInfo, *vect, true);
-                    auto conv = convert(conv_le, f);
-                    vec->push_back(conv);
-                }
+                expr = defaultValue(f, expression->srcInfo);
+                vec->push_back(expr);
             }
         }
         if (modified) {
