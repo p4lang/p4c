@@ -84,6 +84,7 @@
         "locale": "cpp",
         "queue": "cpp",
         "stack": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "cassert": "cpp"
     }
 }
