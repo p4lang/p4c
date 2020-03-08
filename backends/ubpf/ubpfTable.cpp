@@ -39,6 +39,24 @@ class UbpfActionTranslationVisitor : public EBPF::CodeGenInspector {
         CHECK_NULL(program);
     }
 
+    bool preorder(const IR::Member* expression) override {
+        cstring name = "";
+        if (expression->expr->is<IR::PathExpression>()) {
+            name = expression->expr->to<IR::PathExpression>()->path->name.name;
+        }
+        auto ei = P4::EnumInstance::resolve(expression, typeMap);
+        if (ei == nullptr) {
+            visit(expression->expr);
+            if (name == program->stdMetadataVar) {
+                builder->append("->");
+            } else {
+                builder->append(".");
+            }
+        }
+        builder->append(expression->member);
+        return false;
+    }
+
     bool preorder(const IR::PathExpression *expression) override {
         auto decl = program->refMap->getDeclaration(expression->path, true);
         if (decl->is<IR::Parameter>()) {

@@ -19,6 +19,22 @@ limitations under the License.
 
 #include <core.p4>
 
+enum ubpf_action {
+    ABORT,
+    DROP,
+    PASS,
+    REDIRECT
+}
+
+struct standard_metadata {
+    bit<32>     input_port;
+    bit<32>     packet_length;
+    ubpf_action output_action;
+    bit<32>     output_port;
+    bool        clone;
+    bit<32>     clone_port;
+}
+
 /*
  * The uBPF target can currently pass the packet or drop it.
  * By default, all packets are passed.
@@ -119,8 +135,8 @@ extern bit<16> csum_replace4(in bit<16> csum,
  * header, header stack, or header_union.
  */
 
-parser parse<H, M>(packet_in packet, out H headers, inout M meta);
-control pipeline<H, M>(inout H headers, inout M meta);
+parser parse<H, M>(packet_in packet, out H headers, inout M meta, inout standard_metadata std);
+control pipeline<H, M>(inout H headers, inout M meta, inout standard_metadata std);
 
 /*
  * The only legal statements in the body of the deparser control are:
