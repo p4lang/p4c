@@ -32,17 +32,11 @@ if (e)
    a = f(b);
 else
    c = f(d);
-x = y;
 becomes (actual implementatation is slightly optimized):
 {
     a = e ? f(b) : a;
     c = e ? c : f(d);
 }
-x = y;
-Not the most efficient conversion currently.
-This could be made better by looking on both the "then" and "else"
-branches, but in this way we cannot have two side-effects in the same
-conditional statement.
 */
 class Predication final : public Transform {
     /**
@@ -61,7 +55,6 @@ class Predication final : public Transform {
         explicit ReplaceChecker(std::vector<bool>& t)
         : travesalPath(t)
         { }
-
         const bool& isConflictDetected() const { return conflictDetected; }
         bool preorder(const IR::Mux * mux) override;
         bool preorder(const IR::AssignmentStatement * statement) override;
@@ -70,7 +63,6 @@ class Predication final : public Transform {
     class EmptyStatementRemover final : public Transform {
      public:
         EmptyStatementRemover() {}
-
         IR::BlockStatement* preorder(IR::BlockStatement * block) override;
     };
 
@@ -95,7 +87,6 @@ class Predication final : public Transform {
         { CHECK_NULL(e); }
         const IR::Mux * preorder(IR::Mux * mux) override;
         const IR::AssignmentStatement * preorder(IR::AssignmentStatement * statement) override;
-
         void emplaceExpression(IR::Mux * mux);
         void visitThen(IR::Mux * mux);
         void visitElse(IR::Mux * mux);
@@ -112,7 +103,7 @@ class Predication final : public Transform {
     std::vector<bool> travesalPath;
     std::vector<const IR::Expression *> nestedConditions;
     std::vector<cstring> orderedNames;
-    std::vector<cstring> dependecies;
+    std::vector<cstring> dependencies;
     std::map<cstring, const IR::AssignmentStatement *> liveAssignments;
 
     const IR::Statement* error(const IR::Statement* statement) const {
@@ -127,14 +118,12 @@ class Predication final : public Transform {
     explicit Predication(NameGenerator* generator) :
         inside_action(false), ifNestingLevel(0)
     { CHECK_NULL(generator); setName("Predication"); }
-
     const IR::Expression* clone(const IR::Expression* expression);
     const IR::AssignmentStatement* clone(const IR::AssignmentStatement* statement);
     const IR::Node* preorder(IR::IfStatement* statement) override;
     const IR::Node* preorder(IR::P4Action* action) override;
     const IR::Node* postorder(IR::P4Action* action) override;
     const IR::Node* preorder(IR::AssignmentStatement* statement) override;
-
     // Assignment dependecy checkers
     const IR::Node* preorder(IR::PathExpression* pathExpr) override;
     const IR::Node* preorder(IR::Member* member) override;

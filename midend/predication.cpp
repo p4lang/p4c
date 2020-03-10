@@ -56,7 +56,6 @@ bool Predication::ReplaceChecker::preorder(const IR::Mux * mux) {
         } else {
             conflictDetected = expr_name(mux->e2) != leftAssignmentName;
         }
-
         return false;
     }
 
@@ -65,28 +64,23 @@ bool Predication::ReplaceChecker::preorder(const IR::Mux * mux) {
         if (expr_name(mux->e1) == leftAssignmentName) {
             return false;
         }
-
-        if ( !mux->e1->is<IR::Mux>() ) {
+        if (!mux->e1->is<IR::Mux>()) {
             conflictDetected = true;
             return false;
         }
-
         visit(mux->e1);
     } else {
         // Visiting else
         if (expr_name(mux->e2) == leftAssignmentName) {
             return false;
         }
-
         if (!mux->e2->is<IR::Mux>()) {
             conflictDetected = true;
             return false;
         }
-
         visit(mux->e2);
     }
     --currentNestingLevel;
-
     return false;
 }
 
@@ -101,27 +95,22 @@ IR::BlockStatement* Predication::EmptyStatementRemover::preorder(IR::BlockStatem
             }
         }
     }
-
     return block;
 }
 
 const IR::AssignmentStatement *
 Predication::ExpressionReplacer::preorder(IR::AssignmentStatement * as) {
     statement = as;
-
     if (!as->right->is<IR::Mux>()) {
         as->right = new IR::Mux(conditions.front(), as->left, as->left);
     }
-
     visit(as->right);
-
     return as;
 }
 
 void Predication::ExpressionReplacer::emplaceExpression(IR::Mux * mux) {
     const IR::Expression * condition = conditions[currentNestingLevel - 1];
     bool thenElsePass = travesalPath[currentNestingLevel - 1];
-
     mux->e0 = condition;
     if (thenElsePass) {
         mux->e1 = rightExpression;
@@ -134,7 +123,6 @@ void Predication::ExpressionReplacer::visitThen(IR::Mux * mux) {
     const IR::Expression * condition = conditions[currentNestingLevel - 1];
     auto leftName = expr_name(statement->left);
     auto thenExprName = expr_name(mux->e1);
-
     if (expr_name(mux->e2) == expr_name(statement->left)) {
         mux->e2 = statement->left;
     }
@@ -150,7 +138,6 @@ void Predication::ExpressionReplacer::visitElse(IR::Mux * mux) {
     const IR::Expression * condition = conditions[currentNestingLevel - 1];
     auto leftName = expr_name(statement->left);
     auto elseExprName = expr_name(mux->e2);
-
     if (expr_name(mux->e1) == leftName) {
         mux->e1 = statement->left;
             mux->e1 = statement->left;
@@ -168,7 +155,6 @@ void Predication::ExpressionReplacer::visitElse(IR::Mux * mux) {
 const IR::Mux * Predication::ExpressionReplacer::preorder(IR::Mux * mux) {
     ++currentNestingLevel;
     bool thenElsePass = travesalPath[currentNestingLevel - 1];
-
     if (currentNestingLevel == travesalPath.size()) {
         emplaceExpression(mux);
     } else if (thenElsePass) {
@@ -177,7 +163,6 @@ const IR::Mux * Predication::ExpressionReplacer::preorder(IR::Mux * mux) {
         visitElse(mux);
     }
     --currentNestingLevel;
-
     return mux;
 }
 
@@ -191,10 +176,9 @@ const IR::Expression* Predication::clone(const IR::Expression* expression) {
 }
 
 const IR::AssignmentStatement* Predication::clone(const IR::AssignmentStatement* statement) {
-    // We often need to clone expressions.  This is necessary because
+    // We often need to clone assignments.  This is necessary because
     // in the end we will generate different code for the different clones of
-    // an expression.  This is most obvious if one clone is on the LHS and one
-    // on the RHS of an assigment.
+    // an assignments.
     ClonePathExpressions cloner;
     auto clonedAsssignment = new IR::AssignmentStatement(*statement);
     clonedAsssignment->left->apply(cloner);
@@ -205,16 +189,13 @@ const IR::AssignmentStatement* Predication::clone(const IR::AssignmentStatement*
 const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
     if (!inside_action || ifNestingLevel == 0 || nestedConditions.empty())
         return statement;
-
     ExpressionReplacer replacer(clone(statement->right), travesalPath, nestedConditions);
     ReplaceChecker replaceChecker(travesalPath);
-
     // Referenced lvalue is not appeard before
-    dependecies.clear();
+    dependencies.clear();
     visit(statement->right);
-
-    // print out dependecies
-    for (auto dependency : dependecies) {
+    // print out dependencies
+    for (auto dependency : dependencies) {
         if (liveAssignments.find(dependency) != liveAssignments.end()) {
             // print out dependecy
             currentBlock->push_back(liveAssignments[dependency]);
@@ -223,46 +204,38 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
             liveAssignments.erase(dependency);
         }
     }
-
     auto statementName = expr_name(statement->left);
     auto foundedAssignment = liveAssignments.find(statementName);
-
     if (foundedAssignment != liveAssignments.end()) {
         auto oldExpressionRight = statement->right;
-
         statement->right = foundedAssignment->second->right;
         statement->apply(replaceChecker);
-
         if (replaceChecker.isConflictDetected()) {
             currentBlock->push_back(clone(statement));
             statement->right = oldExpressionRight;
         }
-
         // move the lvalue assignment to the back
         orderedNames.erase(std::remove(orderedNames.begin(), orderedNames.end(), statementName));
     }
-
     orderedNames.push_back(statementName);
-
     auto updatedStatement = statement->apply(replacer);
     auto rightStatement = clone(updatedStatement->to<IR::AssignmentStatement>()->right);
     liveAssignments[statementName] = new IR::AssignmentStatement(statement->left, rightStatement);
-
     return new IR::EmptyStatement();
 }
 
 const IR::Node* Predication::preorder(IR::PathExpression * pathExpr) {
-    dependecies.push_back(expr_name(pathExpr));
+    dependencies.push_back(expr_name(pathExpr));
     return pathExpr;
 }
 const IR::Node* Predication::preorder(IR::Member * member) {
     visit(member->expr);
-    dependecies.push_back(expr_name(member));
+    dependencies.push_back(expr_name(member));
     return member;
 }
 const IR::Node* Predication::preorder(IR::ArrayIndex * arrInd) {
     visit(arrInd->left);
-    dependecies.push_back(expr_name(arrInd));
+    dependencies.push_back(expr_name(arrInd));
     return arrInd;
 }
 
@@ -273,17 +246,14 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
     ++ifNestingLevel;
     auto rv = new IR::BlockStatement;
     currentBlock = rv;
-
     nestedConditions.push_back(statement->condition);
     travesalPath.push_back(true);
-
     visit(statement->ifTrue);
     rv->push_back(statement->ifTrue);
 
     // This evaluates else branch
     if (statement->ifFalse != nullptr) {
         travesalPath.back() = false;
-
         visit(statement->ifFalse);
         rv->push_back(statement->ifFalse);
     }
@@ -293,7 +263,6 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
     }
     liveAssignments.clear();
     orderedNames.clear();
-
     nestedConditions.pop_back();
     travesalPath.pop_back();
     --ifNestingLevel;
