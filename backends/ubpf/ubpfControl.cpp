@@ -27,8 +27,7 @@ namespace UBPF {
 
     UBPFControlBodyTranslator::UBPFControlBodyTranslator(
             const UBPFControl *control) :
-            CodeGenInspector(control->program->refMap,
-                             control->program->typeMap), control(control),
+            EBPF::ControlBodyTranslator(control), control(control),
             p4lib(P4::P4CoreLibrary::instance) {
         setName("UBPFControlBodyTranslator");
     }
@@ -67,34 +66,7 @@ namespace UBPF {
 
             return;
         }
-
-        if (!control->emitExterns)
-            ::error("%1%: Not supported", function->method);
-
-        builder->emitIndent();
-        visit(function->expr->method);
-        builder->append("(");
-        bool first = true;
-
-        for (auto p : *function->substitution.getParametersInArgumentOrder()) {
-            if (!first)
-                builder->append(", ");
-            first = false;
-            auto arg = function->substitution.lookup(p);
-            if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut)
-                builder->append("&");
-            else if (p->direction == IR::Direction::In) {
-                auto type = typeMap->getType(arg);
-                auto ubpfType = UBPFTypeFactory::instance->create(type);
-                builder->append("(const ");
-                ubpfType->declare(builder, "", false);
-                builder->append(") ");
-            }
-            visit(arg);
-        }
-
-        builder->append(")");
-        builder->endOfStatement(true);
+        processCustomExternFunction(function, UBPFTypeFactory::instance);
     }
 
     void UBPFControlBodyTranslator::processChecksumReplace2(const P4::ExternFunction *function) {
@@ -555,9 +527,9 @@ namespace UBPF {
 
     UBPFControl::UBPFControl(const UBPFProgram *program,
                              const IR::ControlBlock *block,
-                             const IR::Parameter *parserHeaders) :
-            program(program), controlBlock(block), headers(nullptr),
-            parserHeaders(parserHeaders), codeGen(nullptr), emitExterns(program->options.emitExterns) {}
+                             const IR::Parameter *parserHeaders) : EBPF::EBPFControl(program, block, parserHeaders),
+                             program(program), controlBlock(block), headers(nullptr),
+                             parserHeaders(parserHeaders), codeGen(nullptr) {}
 
     void UBPFControl::scanConstants() {
         for (auto c : controlBlock->constantValue) {

@@ -32,12 +32,7 @@ struct Headers_t {
 struct metadata {
 }
 
-struct tuple_0 {
-    bit<32> field;
-    bit<32> field_0;
-}
-
-extern bit<16> compute_hash(in tuple_0 data);
+extern bit<16> compute_hash(in bit<32> srcAddr, in bit<32> dstAddr);
 parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
     state start {
         p.extract<Ethernet_h>(headers.ethernet);
@@ -48,7 +43,7 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
 
 control pipe(inout Headers_t headers, inout metadata meta) {
     @hidden action ubpf_hash_extern52() {
-        headers.ipv4.hdrChecksum = compute_hash({ headers.ipv4.srcAddr, headers.ipv4.dstAddr });
+        headers.ipv4.hdrChecksum = compute_hash(headers.ipv4.srcAddr, headers.ipv4.dstAddr);
     }
     @hidden table tbl_ubpf_hash_extern52 {
         actions = {

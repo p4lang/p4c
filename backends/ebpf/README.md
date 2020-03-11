@@ -348,8 +348,6 @@ described below.
 
 The C extern function can effectively enhance the functionality of P4 program. A programmer should be able to write own function, declare it in the P4 program and invoke from within P4 action or P4 control block. 
 
-A definition of the C extern function should follow the strict rules, which we call a calling convention. The calling convention describes how basic data types are passed between P4 and C, how data types are converted, how direction of P4 extern’s parameter is handled in C, etc.
-
 The C extern can use BPF helpers in order to make syscalls to eBPF subsystem. In particular, the C extern can define and have control over its own set of BPF maps. However, the C extern must not read or write to BPF maps implementing P4 tables and used by the main P4 program. 
 
 The C extern could be also allowed to access packet’s payload, but this feature is not implemented in the first version of the C Custom Externs feature.
@@ -380,8 +378,6 @@ clang -O2 -include C-EXTERN-FILE.c -target bpf -c OUTPUT.c -o OUTPUT.o
 ```
 
 ## Calling convention
-
-Developer should follow the below rules while writing C extern function for P4:
 
 * Basic types are converted from P4 representation to C representation as follows:
 
