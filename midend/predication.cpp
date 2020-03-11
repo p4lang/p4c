@@ -161,7 +161,7 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
             // print out dependecy
             currentBlock->push_back(liveAssignments[dependency]);
             // remove from names to not duplicate
-            orderedNames.erase(std::remove(orderedNames.begin(), orderedNames.end(), dependency));
+            orderedNames.erase(dependency);
             liveAssignments.erase(dependency);
         }
     }
@@ -170,7 +170,7 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
     if (foundedAssignment != liveAssignments.end()) {
         statement->right = foundedAssignment->second->right;
         // move the lvalue assignment to the back
-        orderedNames.erase(std::remove(orderedNames.begin(), orderedNames.end(), statementName));
+        orderedNames.erase(statementName);
     }
     orderedNames.push_back(statementName);
     auto updatedStatement = statement->apply(replacer);
