@@ -49,7 +49,7 @@ convert(const IR::Expression* expression, const IR::Type* type) {
                 ne = new IR::NamedExpression(ne->srcInfo, f->name, convNe);
                 si->push_back(ne);
             }
-            if (modified) {
+            if (modified || sli->type->is<IR::Type_Unknown>()) {
                 auto type = st->getP4Type()->to<IR::Type_Name>();
                 auto result = new IR::StructInitializerExpression(
                     expression->srcInfo, type, type, *si);
