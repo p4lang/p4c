@@ -94,7 +94,7 @@ class FindUninitialized : public Inspector {
         currentPoint = ProgramPoint(context, statement);
         return false;
     }
-    profile_t init_apply(const IR::Node *root) {
+    profile_t init_apply(const IR::Node *root) override {
         unreachable = false;  // assume not unreachable at the start of any apply
         return Inspector::init_apply(root);
     }

@@ -341,6 +341,13 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
             }
             return true;
         } else if (auto st = src->to<IR::Type_StructLike>()) {
+            if (strct->name != st->name &&
+                !st->is<IR::Type_UnknownStruct>() &&
+                !strct->is<IR::Type_UnknownStruct>())
+                if (reportErrors)
+                    TypeInference::typeError("%1%: Cannot unify %2% with %3%",
+                                             errorPosition, st->name, strct->name);
+                return false;
             // There is another case, in which each field of the source is unifiable with the
             // corresponding field of the destination, e.g., a struct containing tuples.
             if (strct->fields.size() != st->fields.size()) {

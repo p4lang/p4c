@@ -160,6 +160,10 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
     }
     if (auto sl = left->to<IR::Type_StructLike>()) {
         auto sr = right->to<IR::Type_StructLike>();
+        if (sl->name != sr->name &&
+            !sl->is<IR::Type_UnknownStruct>() &&
+            !sr->is<IR::Type_UnknownStruct>())
+            return false;
         if (sl->fields.size() != sr->fields.size())
             return false;
         for (size_t i = 0; i < sl->fields.size(); i++) {
