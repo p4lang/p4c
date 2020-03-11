@@ -418,8 +418,9 @@ ProgramStructure::explodeType(const std::vector<const IR::Type::Bits *> &fieldTy
  * @param stateful   If any declaration is created during the conversion, save to 'stateful'
  * @returns          The P4-16 parser state corresponding to the P4-14 parser
  */
-const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parser,
-                                    IR::IndexedVector<IR::Declaration>* stateful) {
+const IR::ParserState*
+ProgramStructure::convertParser(const IR::V1Parser* parser,
+                                IR::IndexedVector<IR::Declaration>* stateful) {
     ExpressionConverter conv(this);
 
     latest = nullptr;
@@ -444,6 +445,7 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
             }
         }
         BUG_CHECK(list->components.size() > 0, "No select expression in %1%", parser);
+
         // select always expects a ListExpression
         IR::Vector<IR::SelectCase> cases;
         for (auto c : *parser->cases) {
@@ -462,6 +464,10 @@ const IR::ParserState* ProgramStructure::convertParser(const IR::V1Parser* parse
                             first->path->name);
                     return nullptr;
                 }
+
+                if (value_sets_implemented.count(first->path->name))
+                    continue;
+                value_sets_implemented.emplace(first->path->name);
 
                 auto type = explodeType(fieldTypes);
                 auto sizeAnnotation = value_set->annotations->getSingle("parser_value_set_size");

@@ -139,6 +139,7 @@ class ProgramStructure {
     std::map<const IR::Type_Extern *, const IR::Type_Extern *>  extern_remap;
     NamedObjectInfo<const IR::Declaration_Instance *>  externs;
     NamedObjectInfo<const IR::ParserValueSet*>  value_sets;
+    std::set<cstring>                           value_sets_implemented;
     std::vector<const IR::CalculatedField*>     calculated_fields;
     std::map<const IR::Node *, const IR::Declaration_Instance *>        globalInstances;
     P4::CallGraph<cstring> calledActions;
