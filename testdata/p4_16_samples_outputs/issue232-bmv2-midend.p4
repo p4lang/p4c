@@ -30,7 +30,6 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     Value val_0;
     @name("Eg.test") action test() {
         val_0.field1 = val_0.field1;
-        val_0.field1 = val_0.field1;
     }
     @hidden table tbl_test {
         actions = {

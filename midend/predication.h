@@ -39,31 +39,10 @@ becomes (actual implementatation is slightly optimized):
 }
 */
 class Predication final : public Transform {
-    /**
-     * Private Visitor only for Predication pass.
-     * This pass checks nested Mux expressions(?:)
-     * in assignment statement. 
-     * It checks if the right assignment expression
-     * can be placed in the nested Mux DAG.
-     */
-    class ReplaceChecker final : public Inspector {
-        const IR::AssignmentStatement * assignmentStatement;
-        bool conflictDetected = false;
-        unsigned currentNestingLevel = 0;
-        const std::vector<bool>& travesalPath;
-     public:
-        explicit ReplaceChecker(std::vector<bool>& t)
-        : travesalPath(t)
-        { }
-        const bool& isConflictDetected() const { return conflictDetected; }
-        bool preorder(const IR::Mux * mux) override;
-        bool preorder(const IR::AssignmentStatement * statement) override;
-    };
-
-    class EmptyStatementRemover final : public Transform {
+    class EmptyStatementRemover final : public Modifier {
      public:
         EmptyStatementRemover() {}
-        IR::BlockStatement* preorder(IR::BlockStatement * block) override;
+        bool preorder(IR::BlockStatement * block) override;
     };
 
     /**
@@ -74,16 +53,16 @@ class Predication final : public Transform {
      */
     class ExpressionReplacer final : public Transform {
      private:
-        IR::AssignmentStatement * statement;
         const IR::Expression * rightExpression;
         const std::vector<bool>& travesalPath;
-        const std::vector<const IR::Expression *>& conditions;
+        const Visitor::Context * context;
+        std::vector<const IR::Expression*> conditions;
         unsigned currentNestingLevel = 0;
      public:
         explicit ExpressionReplacer(const IR::Expression * e,
                                     std::vector<bool>& t,
-                                    std::vector<const IR::Expression *>& c)
-        : rightExpression(e), travesalPath(t), conditions(c)
+                                    const Visitor::Context * c)
+        : rightExpression(e), travesalPath(t), context(c)
         { CHECK_NULL(e); }
         const IR::Mux * preorder(IR::Mux * mux) override;
         const IR::AssignmentStatement * preorder(IR::AssignmentStatement * statement) override;
@@ -101,8 +80,7 @@ class Predication final : public Transform {
     // false at the end of the vector means that you are in the else branch of the if statement.
     // Size of this vector is the current if nesting level.
     std::vector<bool> travesalPath;
-    std::vector<const IR::Expression *> nestedConditions;
-    std::vector<cstring> orderedNames;
+    ordered_set<cstring> orderedNames;
     std::vector<cstring> dependencies;
     std::map<cstring, const IR::AssignmentStatement *> liveAssignments;
 
@@ -119,7 +97,7 @@ class Predication final : public Transform {
         inside_action(false), ifNestingLevel(0)
     { CHECK_NULL(generator); setName("Predication"); }
     const IR::Expression* clone(const IR::Expression* expression);
-    const IR::AssignmentStatement* clone(const IR::AssignmentStatement* statement);
+    const IR::Node* clone(const IR::AssignmentStatement* statement);
     const IR::Node* preorder(IR::IfStatement* statement) override;
     const IR::Node* preorder(IR::P4Action* action) override;
     const IR::Node* postorder(IR::P4Action* action) override;
