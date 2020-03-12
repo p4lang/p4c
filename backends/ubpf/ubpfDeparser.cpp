@@ -62,6 +62,7 @@ namespace UBPF {
         { return illegal(statement); }
         bool preorder(const IR::BlockStatement* statement) override {}
         bool preorder(const IR::MethodCallStatement* statement) override {
+            LOG5("Calculate OutHeaderSize");
             auto &p4lib = P4::P4CoreLibrary::instance;
 
             auto mi = P4::MethodInstance::resolve(statement->methodCall, refMap, typeMap);
@@ -322,13 +323,13 @@ namespace UBPF {
         builder->appendFormat("int %s = 0", program->outerHdrLengthVar.c_str());
         builder->endOfStatement(true);
 
-        OutHeaderSize ohs(program->refMap, program->typeMap,
-                          static_cast<const UBPFProgram*>(program));
-        ohs.substitute(headers, parserHeaders);
-        ohs.setBuilder(builder);
+        auto ohs = new OutHeaderSize(program->refMap, program->typeMap,
+                                      static_cast<const UBPFProgram*>(program));
+        ohs->substitute(headers, parserHeaders);
+        ohs->setBuilder(builder);
 
         builder->emitIndent();
-        (void)controlBlock->container->body->apply(ohs);
+        controlBlock->container->body->apply(*ohs);
         builder->newline();
 
         builder->emitIndent();
