@@ -775,7 +775,7 @@ const IR::Node* TypeInference::postorder(IR::Annotation* annotation) {
     if (annotation->structured) {
         // If it happens here it was created in the compiler, so it's a bug, not an error.
         BUG_CHECK(annotation->expr.empty() || annotation->kv.empty(),
-                  "%1%: structured annotations cannot contain both lists and kv-pairs", annotation);
+                  "%1%: structured annotations cannot contain expressions and kv-pairs", annotation);
         for (auto e : annotation->expr)
             checkAnnotation(e);
         for (auto e : annotation->kv)
