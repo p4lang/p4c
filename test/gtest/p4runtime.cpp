@@ -1336,44 +1336,6 @@ TEST_F(P4RuntimePkgInfo, ValueNotAString) {
     EXPECT_EQ(pkgInfo.name(), "");
 }
 
-TEST_F(P4Runtime, P4_16_MatchFieldsSize) {
-    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
-    @p4runtime_translation("mycompany.com/My_Byte2", 0xffffffff)
-    type bit<8> CustomT_t;
-    header Header { CustomT_t headerField; }
-    struct Headers { Header h; }
-    struct Metadata { bit<33> metadataField; }
-    parser parse(packet_in p, out Headers h, inout Metadata m,
-                 inout standard_metadata_t sm) {
-        state start { transition accept; } }
-    control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
-    control egress(inout Headers h, inout Metadata m,
-                   inout standard_metadata_t sm) { apply { } }
-    control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
-    control deparse(packet_out p, in Headers h) { apply { } }
-    control ingress(inout Headers h, inout Metadata m,
-                    inout standard_metadata_t sm) {
-        action noop() { }
-
-        table igTable {
-            key = {
-                h.h.headerField : exact;
-            }
-            actions = { noop; }
-        }
-
-        apply {
-            igTable.apply();
-        }
-    }
-    V1Switch(parse(), verifyChecksum(), ingress(), egress(),
-            computeChecksum(), deparse()) main;
-    )"));
-
-    ASSERT_TRUE(test);
-    EXPECT_EQ(1u, ::diagnosticCount());
-}
-
 TEST_F(P4RuntimePkgInfo, DuplicateKey) {
     auto test = createTestCase(R"(@pkginfo(name="aaa", name="bbb"))");
     // kv annotations use an IndexedVector, which does not allow duplicate keys.
@@ -1407,6 +1369,10 @@ class P4RuntimeDataTypeSpec : public P4Runtime {
         auto pgm = P4::parseP4String(programStr, CompilerOptions::FrontendVersion::P4_16);
         if (pgm == nullptr) return nullptr;
         PassManager  passes({
+            new P4::ParseAnnotations("P4RuntimeDataTypeSpecTest", false, {
+                // @p4runtime_translation has two args
+                PARSE_PAIR("p4runtime_translation", Expression),
+            }),
             new P4::ResolveReferences(&refMap),
             new P4::TypeInference(&refMap, &typeMap, false)
         });
@@ -1730,13 +1696,91 @@ TEST_F(P4RuntimeDataTypeSpec, StructWithTypedef) {
     ASSERT_EQ(2, it->second.members_size());
     auto check_member = [&](cstring name, int index) {
       EXPECT_EQ(name, it->second.members(index).name());
-      const auto &memberTypeSpec = it->second.members(0).type_spec();
+      const auto &memberTypeSpec = it->second.members(index).type_spec();
       ASSERT_TRUE(memberTypeSpec.has_bitstring());
       ASSERT_TRUE(memberTypeSpec.bitstring().has_bit());
       EXPECT_EQ(8, memberTypeSpec.bitstring().bit().bitwidth());
     };
     check_member("f", 0);
     check_member("f2", 1);
+}
+
+TEST_F(P4RuntimeDataTypeSpec, NewType) {
+    std::string program = P4_SOURCE(R"(
+        type bit<8> my_type_t;
+        @p4runtime_translation("p4.org/myArch/v1/Type2", 32)
+        type bit<8> my_type2_t;
+        struct my_struct { my_type_t f; my_type2_t f2; }
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<my_struct>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
+
+    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &refMap, &typeMap, type, &typeInfo);
+    ASSERT_TRUE(typeSpec->has_struct_());
+    EXPECT_EQ("my_struct", typeSpec->struct_().name());
+
+    auto it = typeInfo.structs().find("my_struct");
+    ASSERT_TRUE(it != typeInfo.structs().end());
+    ASSERT_EQ(2, it->second.members_size());
+
+    auto check_member = [&](cstring memberName, int index, cstring newTypeName) {
+      EXPECT_EQ(memberName, it->second.members(index).name());
+      const auto &memberTypeSpec = it->second.members(index).type_spec();
+      ASSERT_TRUE(memberTypeSpec.has_new_type());
+      EXPECT_EQ(newTypeName, memberTypeSpec.new_type().name());
+    };
+    check_member("f", 0, "my_type_t");
+    check_member("f2", 1, "my_type2_t");
+
+    // non-translated
+    {
+        auto it = typeInfo.new_types().find("my_type_t");
+        ASSERT_TRUE(it != typeInfo.new_types().end());
+        ASSERT_TRUE(it->second.has_original_type());
+        const auto &typeSpec = it->second.original_type();
+        ASSERT_TRUE(typeSpec.has_bitstring());
+        EXPECT_EQ(8, typeSpec.bitstring().bit().bitwidth());
+    }
+
+    // translated
+    {
+        auto it = typeInfo.new_types().find("my_type2_t");
+        ASSERT_TRUE(it != typeInfo.new_types().end());
+        ASSERT_TRUE(it->second.has_translated_type());
+        const auto &translatedType = it->second.translated_type();
+        EXPECT_EQ("p4.org/myArch/v1/Type2", translatedType.uri());
+        EXPECT_EQ(32, translatedType.sdn_bitwidth());
+    }
+}
+
+TEST_F(P4RuntimeDataTypeSpec, NewTypeInvalidTranslation) {
+    std::string program = P4_SOURCE(R"(
+        @p4runtime_translation("p4.org/myArch/v1/Type", 0xffffffff)
+        type bit<8> my_type_t;
+        @p4runtime_translation("p4.org/myArch/v1/Type2", -1)
+        type bit<8> my_type2_t;
+        @p4runtime_translation(1, 32)
+        type bit<8> my_type3_t;
+        @p4runtime_translation("p4.org/myArch/v1/Type4", 32)
+        type bool my_type4_t;
+        struct my_struct { my_type_t f; my_type2_t f2; my_type3_t f3; my_type4_t f4; }
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<my_struct>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
+
+    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &refMap, &typeMap, type, &typeInfo);
+    // expect 4 errors, one for each invalid @p4runtime_translation annotation above.
+    EXPECT_EQ(4u, ::errorCount());
 }
 
 }  // namespace Test

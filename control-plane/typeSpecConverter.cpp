@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <limits>
 #include <map>
 #include <string>
 
@@ -39,6 +40,35 @@ using p4configv1::P4TypeInfo;
 namespace P4 {
 
 namespace ControlPlaneAPI {
+
+bool hasTranslationAnnotation(const IR::Type* type, std::string* uri, int* sdnB) {
+    auto ann = type->getAnnotation("p4runtime_translation");
+    if (!ann) return false;
+    auto uriL = ann->expr[0]->to<IR::StringLiteral>();
+    if (!uriL) {
+        ::error(ErrorType::ERR_INVALID,
+                "%1%: the first argument to @p4runtime_translation must be a string literal",
+                type);
+        return false;
+    }
+    *uri = static_cast<std::string>(uriL->value);
+    auto sdnBL = ann->expr[1]->to<IR::Constant>();
+    if (!sdnBL) {
+        ::error(ErrorType::ERR_INVALID,
+                "%1%: the second argument to @p4runtime_translation must be a positive constant",
+                type);
+        return false;
+    }
+    if (sdnBL->value <= 0 || sdnBL->value > std::numeric_limits<int32_t>::max()) {
+        ::error(ErrorType::ERR_INVALID,
+                "%1%: the second argument to @p4runtime_translation must be positive integer that "
+                "fits in 32 bits",
+                type);
+        return false;
+    }
+    *sdnB = static_cast<int32_t>(sdnBL->value);
+    return true;
+}
 
 TypeSpecConverter::TypeSpecConverter(
     const P4::ReferenceMap* refMap, const P4::TypeMap* typeMap, P4TypeInfo* p4RtTypeInfo)
@@ -117,52 +147,40 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
     return false;
 }
 
-// This function is invoked if an architecure's model .p4 file has a Newtype.
-// The function is not invoked for user-defined NewType.
-// TODO(team): investigate and fix.
 bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
     if (p4RtTypeInfo) {
-        bool orig_type = true;
-        const IR::StringLiteral* uri = nullptr;
-        const IR::Constant* sdnB;
-        auto ann = type->getAnnotation("p4runtime_translation");
-        if (ann != nullptr) {
-            orig_type = false;
-            uri = ann->expr[0]->to<IR::StringLiteral>();
-            if (!uri) {
-                ::error("P4runtime annotation does not have uri: %1%",
-                        type);
-                return false;
-            }
-            sdnB = ann->expr[1]->to<IR::Constant>();
-            if (!sdnB) {
-                ::error("P4runtime annotation does not have sdn: %1%",
-                        type);
-                return false;
-            }
-            auto value = sdnB->value;
-            auto bitsRequired = floor_log2(value) + 1;
-            BUG_CHECK(bitsRequired <= 31,
-                      "Cannot represent %1% on 31 bits, require %2%",
-                      value, bitsRequired);
-        }
+        std::string uri;
+        int sdnB;
+        auto isTranslatedType = hasTranslationAnnotation(type, &uri, &sdnB);
 
         auto name = std::string(type->controlPlaneName());
         auto types = p4RtTypeInfo->mutable_new_types();
         if (types->find(name) == types->end()) {
             auto newTypeSpec = new p4configv1::P4NewTypeSpec();
-            auto newType = type->type;
-            auto n = newType->to<IR::Type_Name>();
-            visit(n);
-            auto typeSpec = map.at(n);
-            if (orig_type) {
-                auto dataType = newTypeSpec->mutable_original_type();
-                if (typeSpec->has_bitstring())
-                    dataType->mutable_bitstring()->CopyFrom(typeSpec->bitstring());
+
+            // walk the chain of new types
+            const IR::Type* underlyingType = type;
+            while (underlyingType->is<IR::Type_Newtype>()) {
+                underlyingType = typeMap->getTypeType(
+                    underlyingType->to<IR::Type_Newtype>()->type, true);
+            }
+            if (isTranslatedType && !underlyingType->is<IR::Type_Bits>()) {
+                ::error(ErrorType::ERR_INVALID,
+                        "%1%: P4Runtime requires the underlying type for a user-defined type with "
+                        "the @p4runtime_translation annotation to be bit<W>; it cannot be '%2%'",
+                        type, underlyingType);
+                // no need to return early here
+            }
+            visit(underlyingType);
+            auto typeSpec = map.at(underlyingType);
+            CHECK_NULL(typeSpec);
+
+            if (isTranslatedType) {
+                auto translatedType = newTypeSpec->mutable_translated_type();
+                translatedType->set_uri(uri);
+                translatedType->set_sdn_bitwidth(sdnB);
             } else {
-                auto dataType = newTypeSpec->mutable_translated_type();
-                dataType->set_uri(std::string(uri->value));
-                dataType->set_sdn_bitwidth((uint32_t) sdnB->value);
+                newTypeSpec->mutable_original_type()->CopyFrom(*typeSpec);
             }
             (*types)[name] = *newTypeSpec;
        }

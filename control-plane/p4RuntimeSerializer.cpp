@@ -55,11 +55,12 @@ limitations under the License.
 #include "lib/ordered_set.h"
 #include "midend/removeParameters.h"
 
+#include "bytestrings.h"
+#include "flattenHeader.h"
 #include "p4RuntimeSerializer.h"
 #include "p4RuntimeArchHandler.h"
 #include "p4RuntimeArchStandard.h"
-#include "flattenHeader.h"
-#include "bytestrings.h"
+#include "typeSpecConverter.h"
 
 namespace p4v1 = ::p4::v1;
 namespace p4configv1 = ::p4::config::v1;
@@ -636,29 +637,15 @@ getMatchType(cstring matchTypeName) {
     }
 }
 
-// P4Runtime defines sdnB as a 32-bit integer.
-// The APIs in this file for width use an int
-// Thus function returns a signed int.
+// getTypeWidth returns the width in bits for the @type, except if it is a user-defined type with a
+// @p4runtime_translation annotation, in which case it returns the SDN bitwidth specified by the
+// user.
 static int
 getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
-    auto ann = type->getAnnotation("p4runtime_translation");
-    if (ann != nullptr) {
-        auto sdnB = ann->expr[1]->to<IR::Constant>();
-        if (!sdnB) {
-            ::error("P4runtime annotation in serializer does not have sdn: %1%",
-                    type);
-            return -1;
-        }
-        auto value = sdnB->value;
-        auto bitsRequired = floor_log2(value) + 1;
-        if (bitsRequired > 31) {
-            ::error("Cannot represent %1% on 31 bits, require %2%", value,
-                    bitsRequired);
-            return -2;
-        }
-        return static_cast<int>(value);
-    }
-    return typeMap->minWidthBits(type, type->getNode());
+    std::string uri;
+    int sdnB;
+    auto isTranslatedType = hasTranslationAnnotation(type, &uri, &sdnB);
+    return isTranslatedType ? sdnB : typeMap->minWidthBits(type, type->getNode());
 }
 
 /*
@@ -700,8 +687,6 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
                   "Couldn't determine type for key element %1%", keyElement);
         type_name = getTypeName(matchFieldType, typeMap);
         int width = getTypeWidth(matchFieldType, typeMap);
-        if (width < 0)
-            return matchFields;
         matchFields.push_back(MatchField{*matchFieldName, *matchType,
                               matchTypeName, uint32_t(width),
                               keyElement->to<IR::IAnnotated>(), type_name});
@@ -903,8 +888,6 @@ class P4RuntimeAnalyzer {
                 continue;
             }
             int w = getTypeWidth(paramType, typeMap);
-            if (w < 0)
-                return;
             param->set_bitwidth(w);
             cstring type_name = getTypeName(paramType, typeMap);
             if (type_name) {
@@ -954,8 +937,6 @@ class P4RuntimeAnalyzer {
                       "int<>, type, or serializable enum",
                       headerField);
             auto w = getTypeWidth(fieldType, typeMap);
-            if (w < 0)
-                return;
             metadata->set_bitwidth(w);
         }
     }
@@ -1424,8 +1405,6 @@ class P4RuntimeEntriesConverter {
             protoParam->set_param_id(parameterId++);
             auto parameter = actionDecl->parameters->parameters.at(parameterIndex++);
             int width = getTypeWidth(parameter->type, typeMap);
-            if (width < 0)
-                return;
             if (arg->expression->is<IR::Constant>()) {
                 auto value = stringRepr(arg->expression->to<IR::Constant>(), width);
                 protoParam->set_value(*value);

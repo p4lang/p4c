@@ -18,6 +18,7 @@ limitations under the License.
 #define CONTROL_PLANE_TYPESPECCONVERTER_H_
 
 #include <map>
+#include <string>
 
 #include "p4/config/v1/p4types.pb.h"
 
@@ -84,6 +85,11 @@ class TypeSpecConverter : public Inspector {
         const P4::ReferenceMap* refMap, const P4::TypeMap* typeMap,
         const IR::Type* type, ::p4::config::v1::P4TypeInfo* typeInfo);
 };
+
+// hasTranslationAnnotation returns true iff the type is annotated by a *valid*
+// p4runtime_translation annotation, in which case it also sets @uri and @sdnB based on the
+// annotation's two arguments.
+bool hasTranslationAnnotation(const IR::Type* type, std::string* uri, int* sdnB);
 
 }  // namespace ControlPlaneAPI
 
