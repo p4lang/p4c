@@ -248,7 +248,6 @@ namespace UBPF {
                 return false;
             }
         }
-        auto name = expression->path->name.name;
         builder->append(expression->path->name);  // each identifier should be unique
         return false;
     }
