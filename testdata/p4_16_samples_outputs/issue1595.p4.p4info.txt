@@ -65,3 +65,5 @@ actions {
     alias: "a4"
   }
 }
+type_info {
+}

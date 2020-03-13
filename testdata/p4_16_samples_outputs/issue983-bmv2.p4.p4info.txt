@@ -97,3 +97,5 @@ actions {
     alias: "NoAction"
   }
 }
+type_info {
+}

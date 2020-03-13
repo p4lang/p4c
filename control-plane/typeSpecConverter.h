@@ -86,10 +86,14 @@ class TypeSpecConverter : public Inspector {
         const IR::Type* type, ::p4::config::v1::P4TypeInfo* typeInfo);
 };
 
-// hasTranslationAnnotation returns true iff the type is annotated by a *valid*
-// p4runtime_translation annotation, in which case it also sets @uri and @sdnB based on the
-// annotation's two arguments.
+/// hasTranslationAnnotation returns true iff the type is annotated by a *valid*
+/// p4runtime_translation annotation, in which case it also sets @uri and @sdnB based on the
+/// annotation's two arguments.
 bool hasTranslationAnnotation(const IR::Type* type, std::string* uri, int* sdnB);
+
+/// getTypeName returns a cstring for use as type_name for a Type_Newtype. It
+/// returns nullptr if @type is not a Type_Newtype.
+cstring getTypeName(const IR::Type* type, const TypeMap* typeMap);
 
 }  // namespace ControlPlaneAPI
 

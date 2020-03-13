@@ -107,6 +107,7 @@ template<> struct RegisterTraits<Arch::V1MODEL> {
     // the index of the type parameter for the data stored in the register, in
     // the type parameter list of the extern type declaration
     static size_t dataTypeParamIdx() { return 0; }
+    static boost::optional<size_t> indexTypeParamIdx() { return boost::none; }
 };
 
 template<> struct RegisterTraits<Arch::PSA> {
@@ -116,6 +117,9 @@ template<> struct RegisterTraits<Arch::PSA> {
     }
     static const cstring sizeParamName() { return "size"; }
     static size_t dataTypeParamIdx() { return 0; }
+    // the index of the type parameter for the register index, in the type
+    // parameter list of the extern type declaration.
+    static boost::optional<size_t> indexTypeParamIdx() { return 1; }
 };
 
 template <Arch arch> struct CounterExtern { };
@@ -161,6 +165,7 @@ template<> struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MO
         else if (name == "packets_and_bytes") return CounterSpec::BOTH;
         return CounterSpec::UNSPECIFIED;
     }
+    static boost::optional<size_t> indexTypeParamIdx() { return boost::none; }
 };
 
 /// @ref CounterlikeTraits<> specialization for @ref CounterExtern for PSA
@@ -185,6 +190,9 @@ template<> struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::PSA>
         else if (name == "PACKETS_AND_BYTES") return CounterSpec::BOTH;
         return CounterSpec::UNSPECIFIED;
     }
+    // the index of the type parameter for the counter index, in the type
+    // parameter list of the extern type declaration.
+    static boost::optional<size_t> indexTypeParamIdx() { return 1; }
 };
 
 /// @ref CounterlikeTraits<> specialization for @ref MeterExtern for v1model
@@ -208,6 +216,7 @@ template<> struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODE
         else if (name == "bytes") return MeterSpec::BYTES;
         return MeterSpec::UNSPECIFIED;
     }
+    static boost::optional<size_t> indexTypeParamIdx() { return boost::none; }
 };
 
 /// @ref CounterlikeTraits<> specialization for @ref MeterExtern for PSA
@@ -231,6 +240,9 @@ template<> struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PSA> >
         else if (name == "BYTES") return MeterSpec::BYTES;
         return MeterSpec::UNSPECIFIED;
     }
+    // the index of the type parameter for the meter index, in the type
+    // parameter list of the extern type declaration.
+    static boost::optional<size_t> indexTypeParamIdx() { return 0; }
 };
 
 }  // namespace Helpers
@@ -282,6 +294,9 @@ struct Register {
                                         // to this field.
     const int64_t size;
     const p4configv1::P4DataTypeSpec* typeSpec;  // The format of the stored data.
+    // If the type of the index is a user-defined type, this is the name of the type. Otherwise it
+    // is nullptr.
+    const cstring index_type_name;
 
     /// @return the information required to serialize an @instance of register
     /// or boost::none in case of error.
@@ -316,10 +331,29 @@ struct Register {
         auto typeSpec = TypeSpecConverter::convert(refMap, typeMap, typeArg, p4RtTypeInfo);
         CHECK_NULL(typeSpec);
 
+        cstring index_type_name = nullptr;
+        auto indexTypeParamIdx = RegisterTraits<arch>::indexTypeParamIdx();
+        // In v1model, the index is a bit<32>, in PSA it is determined by a type parameter.
+        if (indexTypeParamIdx != boost::none) {
+            // retrieve type parameter for the index.
+            BUG_CHECK(declaration->type->is<IR::Type_Specialized>(),
+                      "%1%: expected Type_Specialized", declaration->type);
+            auto type = declaration->type->to<IR::Type_Specialized>();
+            BUG_CHECK(type->arguments->size() > *indexTypeParamIdx,
+                      "%1%: expected at least %2% type arguments",
+                      instance, *indexTypeParamIdx + 1);
+            auto typeArg = type->arguments->at(*indexTypeParamIdx);
+            // We ignore the return type on purpose, but the call is required to update p4RtTypeInfo
+            // if the index has a user-defined type.
+            TypeSpecConverter::convert(refMap, typeMap, typeArg, p4RtTypeInfo);
+            index_type_name = getTypeName(typeArg, typeMap);
+        }
+
         return Register{declaration->controlPlaneName(),
                         declaration->to<IR::IAnnotated>(),
                         int(size->value),
-                        typeSpec};
+                        typeSpec,
+                        index_type_name};
     }
 };
 
@@ -523,10 +557,12 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
 
         auto p4RtTypeInfo = p4info->mutable_type_info();
         if (externBlock->type->name == CounterTraits::typeName()) {
-            auto counter = Helpers::Counterlike<ArchCounterExtern>::from(externBlock);
+            auto counter = Helpers::Counterlike<ArchCounterExtern>::from(
+                externBlock, refMap, typeMap, p4RtTypeInfo);
             if (counter) addCounter(symbols, p4info, *counter);
         } else if (externBlock->type->name == MeterTraits::typeName()) {
-            auto meter = Helpers::Counterlike<ArchMeterExtern>::from(externBlock);
+            auto meter = Helpers::Counterlike<ArchMeterExtern>::from(
+                externBlock, refMap, typeMap, p4RtTypeInfo);
             if (meter) addMeter(symbols, p4info, *meter);
         } else if (externBlock->type->name == RegisterTraits<arch>::typeName()) {
             auto register_ = Register::from<arch>(externBlock, refMap, typeMap, p4RtTypeInfo);
@@ -668,6 +704,9 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                                     counterInstance.name);
             setCounterCommon(symbols, counter, id, counterInstance);
             counter->set_size(counterInstance.size);
+            if (counterInstance.index_type_name) {
+                counter->mutable_index_type_name()->set_name(counterInstance.index_type_name);
+            }
         }
     }
 
@@ -698,6 +737,9 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                                     meterInstance.name);
             setMeterCommon(symbols, meter, id, meterInstance);
             meter->set_size(meterInstance.size);
+            if (meterInstance.index_type_name) {
+                meter->mutable_index_type_name()->set_name(meterInstance.index_type_name);
+            }
         }
     }
 
@@ -712,6 +754,9 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                     registerInstance.annotations);
         register_->set_size(registerInstance.size);
         register_->mutable_type_spec()->CopyFrom(*registerInstance.typeSpec);
+        if (registerInstance.index_type_name) {
+            register_->mutable_index_type_name()->set_name(registerInstance.index_type_name);
+        }
     }
 
     void addDigest(const P4RuntimeSymbolTableIface& symbols,

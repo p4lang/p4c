@@ -37,3 +37,5 @@ actions {
     alias: "setDest"
   }
 }
+type_info {
+}

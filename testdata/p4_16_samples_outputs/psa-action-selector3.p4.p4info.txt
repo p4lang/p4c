@@ -46,3 +46,5 @@ actions {
     alias: "a2"
   }
 }
+type_info {
+}

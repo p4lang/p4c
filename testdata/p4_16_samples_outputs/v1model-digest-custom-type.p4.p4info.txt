@@ -223,6 +223,15 @@ type_info {
     }
   }
   new_types {
+    key: "IPv4Addr_t"
+    value {
+      translated_type {
+        uri: "com.fingerhutpress/andysp4arch/v1/IPv4Addr_t"
+        sdn_bitwidth: 32
+      }
+    }
+  }
+  new_types {
     key: "bar_t"
     value {
       original_type {

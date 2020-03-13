@@ -37,3 +37,5 @@ actions {
     alias: "assign_non_const_array_index"
   }
 }
+type_info {
+}

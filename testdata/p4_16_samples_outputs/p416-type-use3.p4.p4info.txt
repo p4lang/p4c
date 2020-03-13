@@ -258,4 +258,97 @@ actions {
   }
 }
 type_info {
+  new_types {
+    key: "CustomDDT_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 8
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "CustomDTT_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 8
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "CustomDT_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 8
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "CustomTDT_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 8
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "CustomTTT_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 8
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "CustomTT_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 8
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "CustomT_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 8
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "EthT_t"
+    value {
+      translated_type {
+        uri: "p4.org/psa/v1/EthT_t"
+        sdn_bitwidth: 48
+      }
+    }
+  }
 }

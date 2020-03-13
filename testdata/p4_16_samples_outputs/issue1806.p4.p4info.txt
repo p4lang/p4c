@@ -37,3 +37,5 @@ actions {
     alias: "do_act"
   }
 }
+type_info {
+}

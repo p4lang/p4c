@@ -48,3 +48,37 @@ actions {
     bitwidth: 9
   }
 }
+type_info {
+  serializable_enums {
+    key: "MyEnum1B"
+    value {
+      underlying_type {
+        bitwidth: 8
+      }
+      members {
+        name: "MBR1"
+        value: "\000"
+      }
+      members {
+        name: "MBR2"
+        value: "\377"
+      }
+    }
+  }
+  serializable_enums {
+    key: "MyEnum2B"
+    value {
+      underlying_type {
+        bitwidth: 16
+      }
+      members {
+        name: "MBR1"
+        value: "\000\n"
+      }
+      members {
+        name: "MBR2"
+        value: "\253\000"
+      }
+    }
+  }
+}

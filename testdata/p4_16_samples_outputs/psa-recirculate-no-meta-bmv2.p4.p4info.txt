@@ -27,3 +27,5 @@ actions {
     alias: "add"
   }
 }
+type_info {
+}

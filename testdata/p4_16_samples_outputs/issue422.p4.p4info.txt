@@ -29,3 +29,5 @@ actions {
     alias: "foo"
   }
 }
+type_info {
+}
