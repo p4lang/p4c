@@ -37,3 +37,5 @@ actions {
     alias: "set_true"
   }
 }
+type_info {
+}

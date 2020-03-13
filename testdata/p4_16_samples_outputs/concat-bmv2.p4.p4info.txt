@@ -20,3 +20,5 @@ actions {
     alias: "concat"
   }
 }
+type_info {
+}

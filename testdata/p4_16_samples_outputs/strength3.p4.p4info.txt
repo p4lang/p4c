@@ -90,3 +90,5 @@ actions {
     alias: "case7"
   }
 }
+type_info {
+}

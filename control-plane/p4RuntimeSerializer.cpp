@@ -648,31 +648,19 @@ getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
     return isTranslatedType ? sdnB : typeMap->minWidthBits(type, type->getNode());
 }
 
-/*
- * The function returns a cstring for use as type_name for a Type_Newtype.
-*/
-static cstring
-getTypeName(const IR::Type* type, TypeMap* typeMap) {
-    CHECK_NULL(type);
-
-    auto t = typeMap->getTypeType(type, true);
-    if (auto newt = t->to<IR::Type_Newtype>()) {
-        return newt->name;
-    }
-    return nullptr;
-}
-
 /// @return the header instance fields matched against by @table's key. The
 /// fields are represented as a (fully qualified field name, match type) tuple.
 static std::vector<MatchField>
-getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap) {
+getMatchFields(const IR::P4Table* table,
+               ReferenceMap* refMap,
+               TypeMap* typeMap,
+               p4configv1::P4TypeInfo* p4RtTypeInfo) {
     std::vector<MatchField> matchFields;
 
     auto key = table->getKey();
     if (!key) return matchFields;
 
     for (auto keyElement : key->keyElements) {
-        cstring type_name = nullptr;
         auto matchTypeName = getMatchTypeName(keyElement->matchType, refMap);
         auto matchType = getMatchType(matchTypeName);
         if (matchType == boost::none) continue;
@@ -685,7 +673,10 @@ getMatchFields(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap)
           typeMap->getType(keyElement->expression->getNode(), true);
         BUG_CHECK(matchFieldType != nullptr,
                   "Couldn't determine type for key element %1%", keyElement);
-        type_name = getTypeName(matchFieldType, typeMap);
+        // We ignore the return type on purpose, but the call is required to update p4RtTypeInfo if
+        // the match field has a user-defined type.
+        TypeSpecConverter::convert(refMap, typeMap, matchFieldType, p4RtTypeInfo);
+        auto type_name = getTypeName(matchFieldType, typeMap);
         int width = getTypeWidth(matchFieldType, typeMap);
         matchFields.push_back(MatchField{*matchFieldName, *matchType,
                               matchTypeName, uint32_t(width),
@@ -889,7 +880,10 @@ class P4RuntimeAnalyzer {
             }
             int w = getTypeWidth(paramType, typeMap);
             param->set_bitwidth(w);
-            cstring type_name = getTypeName(paramType, typeMap);
+            // We ignore the return type on purpose, but the call is required to update p4RtTypeInfo
+            // if the action parameter has a user-defined type.
+            TypeSpecConverter::convert(refMap, typeMap, paramType, p4Info->mutable_type_info());
+            auto type_name = getTypeName(paramType, typeMap);
             if (type_name) {
                 auto namedType = param->mutable_type_name();
                 namedType->set_name(type_name);
@@ -938,6 +932,14 @@ class P4RuntimeAnalyzer {
                       headerField);
             auto w = getTypeWidth(fieldType, typeMap);
             metadata->set_bitwidth(w);
+            // We ignore the return type on purpose, but the call is required to update p4RtTypeInfo
+            // if the header field has a user-defined type.
+            TypeSpecConverter::convert(refMap, typeMap, fieldType, p4Info->mutable_type_info());
+            auto type_name = getTypeName(fieldType, typeMap);
+            if (type_name) {
+                auto namedType = metadata->mutable_type_name();
+                namedType->set_name(type_name);
+            }
         }
     }
 
@@ -949,7 +951,8 @@ class P4RuntimeAnalyzer {
 
         auto tableSize = Helpers::getTableSize(tableDeclaration);
         auto defaultAction = getDefaultAction(tableDeclaration, refMap, typeMap);
-        auto matchFields = getMatchFields(tableDeclaration, refMap, typeMap);
+        auto matchFields = getMatchFields(
+            tableDeclaration, refMap, typeMap, p4Info->mutable_type_info());
         auto actions = getActionRefs(tableDeclaration, refMap);
 
         bool isConstTable = getConstTable(tableDeclaration);

@@ -75,4 +75,28 @@ actions {
   }
 }
 type_info {
+  new_types {
+    key: "IPv4Address2_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 32
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "IPv4Address_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 32
+          }
+        }
+      }
+    }
+  }
 }

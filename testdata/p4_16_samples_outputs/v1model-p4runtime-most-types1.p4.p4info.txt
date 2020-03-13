@@ -485,11 +485,17 @@ controller_packet_metadata {
     id: 2
     name: "addr1"
     bitwidth: 48
+    type_name {
+      name: "Eth1_t"
+    }
   }
   metadata {
     id: 3
     name: "addr2"
     bitwidth: 49
+    type_name {
+      name: "Eth2_t"
+    }
   }
   metadata {
     id: 4
@@ -505,11 +511,17 @@ controller_packet_metadata {
     id: 6
     name: "e1"
     bitwidth: 8
+    type_name {
+      name: "Custom1_t"
+    }
   }
   metadata {
     id: 7
     name: "e2"
     bitwidth: 12
+    type_name {
+      name: "Custom2_t"
+    }
   }
   metadata {
     id: 8
@@ -520,86 +532,137 @@ controller_packet_metadata {
     id: 9
     name: "e01"
     bitwidth: 8
+    type_name {
+      name: "Custom01_t"
+    }
   }
   metadata {
     id: 10
     name: "e02"
     bitwidth: 13
+    type_name {
+      name: "Custom02_t"
+    }
   }
   metadata {
     id: 11
     name: "e10"
     bitwidth: 8
+    type_name {
+      name: "Custom1_t"
+    }
   }
   metadata {
     id: 12
     name: "e11"
     bitwidth: 8
+    type_name {
+      name: "Custom11_t"
+    }
   }
   metadata {
     id: 13
     name: "e12"
     bitwidth: 14
+    type_name {
+      name: "Custom12_t"
+    }
   }
   metadata {
     id: 14
     name: "e20"
     bitwidth: 12
+    type_name {
+      name: "Custom2_t"
+    }
   }
   metadata {
     id: 15
     name: "e21"
     bitwidth: 8
+    type_name {
+      name: "Custom21_t"
+    }
   }
   metadata {
     id: 16
     name: "e22"
     bitwidth: 15
+    type_name {
+      name: "Custom22_t"
+    }
   }
   metadata {
     id: 17
     name: "e001"
     bitwidth: 8
+    type_name {
+      name: "Custom001_t"
+    }
   }
   metadata {
     id: 18
     name: "e002"
     bitwidth: 16
+    type_name {
+      name: "Custom002_t"
+    }
   }
   metadata {
     id: 19
     name: "e101"
     bitwidth: 8
+    type_name {
+      name: "Custom101_t"
+    }
   }
   metadata {
     id: 20
     name: "e102"
     bitwidth: 17
+    type_name {
+      name: "Custom102_t"
+    }
   }
   metadata {
     id: 21
     name: "e201"
     bitwidth: 8
+    type_name {
+      name: "Custom201_t"
+    }
   }
   metadata {
     id: 22
     name: "e202"
     bitwidth: 18
+    type_name {
+      name: "Custom202_t"
+    }
   }
   metadata {
     id: 23
     name: "e220"
     bitwidth: 15
+    type_name {
+      name: "Custom22_t"
+    }
   }
   metadata {
     id: 24
     name: "e0020010"
     bitwidth: 8
+    type_name {
+      name: "Custom002001_t"
+    }
   }
   metadata {
     id: 25
     name: "e0020020"
     bitwidth: 19
+    type_name {
+      name: "Custom002002_t"
+    }
   }
 }
 value_sets {
@@ -635,4 +698,209 @@ value_sets {
   size: 4
 }
 type_info {
+  serializable_enums {
+    key: "serenum_t"
+    value {
+      underlying_type {
+        bitwidth: 8
+      }
+      members {
+        name: "A"
+        value: "\001"
+      }
+      members {
+        name: "B"
+        value: "\003"
+      }
+    }
+  }
+  new_types {
+    key: "Custom001_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 8
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "Custom002001_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 8
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "Custom002002_t"
+    value {
+      translated_type {
+        uri: "mycompany.com/My_Byte9"
+        sdn_bitwidth: 19
+      }
+    }
+  }
+  new_types {
+    key: "Custom002_t"
+    value {
+      translated_type {
+        uri: "mycompany.com/My_Byte6"
+        sdn_bitwidth: 16
+      }
+    }
+  }
+  new_types {
+    key: "Custom01_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 8
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "Custom02_t"
+    value {
+      translated_type {
+        uri: "mycompany.com/My_Byte3"
+        sdn_bitwidth: 13
+      }
+    }
+  }
+  new_types {
+    key: "Custom101_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 8
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "Custom102_t"
+    value {
+      translated_type {
+        uri: "mycompany.com/My_Byte7"
+        sdn_bitwidth: 17
+      }
+    }
+  }
+  new_types {
+    key: "Custom11_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 8
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "Custom12_t"
+    value {
+      translated_type {
+        uri: "mycompany.com/My_Byte4"
+        sdn_bitwidth: 14
+      }
+    }
+  }
+  new_types {
+    key: "Custom1_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 8
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "Custom201_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 8
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "Custom202_t"
+    value {
+      translated_type {
+        uri: "mycompany.com/My_Byte8"
+        sdn_bitwidth: 18
+      }
+    }
+  }
+  new_types {
+    key: "Custom21_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 8
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "Custom22_t"
+    value {
+      translated_type {
+        uri: "mycompany.com/My_Byte5"
+        sdn_bitwidth: 15
+      }
+    }
+  }
+  new_types {
+    key: "Custom2_t"
+    value {
+      translated_type {
+        uri: "mycompany.com/My_Byte2"
+        sdn_bitwidth: 12
+      }
+    }
+  }
+  new_types {
+    key: "Eth1_t"
+    value {
+      original_type {
+        bitstring {
+          bit {
+            bitwidth: 48
+          }
+        }
+      }
+    }
+  }
+  new_types {
+    key: "Eth2_t"
+    value {
+      translated_type {
+        uri: "mycompany.com/EthernetAddress"
+        sdn_bitwidth: 49
+      }
+    }
+  }
 }

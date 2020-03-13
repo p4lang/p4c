@@ -50,3 +50,5 @@ value_sets {
   }
   size: 4
 }
+type_info {
+}

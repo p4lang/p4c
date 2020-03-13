@@ -35,3 +35,5 @@ actions {
     alias: "do_something"
   }
 }
+type_info {
+}

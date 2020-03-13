@@ -19,3 +19,5 @@ actions {
     alias: "a"
   }
 }
+type_info {
+}

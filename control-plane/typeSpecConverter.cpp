@@ -70,6 +70,16 @@ bool hasTranslationAnnotation(const IR::Type* type, std::string* uri, int* sdnB)
     return true;
 }
 
+cstring getTypeName(const IR::Type* type, const TypeMap* typeMap) {
+    CHECK_NULL(type);
+
+    auto t = typeMap->getTypeType(type, true);
+    if (auto newt = t->to<IR::Type_Newtype>()) {
+        return newt->name;
+    }
+    return nullptr;
+}
+
 TypeSpecConverter::TypeSpecConverter(
     const P4::ReferenceMap* refMap, const P4::TypeMap* typeMap, P4TypeInfo* p4RtTypeInfo)
     : refMap(refMap), typeMap(typeMap), p4RtTypeInfo(p4RtTypeInfo) {

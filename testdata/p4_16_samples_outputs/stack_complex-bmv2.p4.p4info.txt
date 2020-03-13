@@ -20,3 +20,5 @@ actions {
     alias: "set_port"
   }
 }
+type_info {
+}
