@@ -23,6 +23,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "backends/ebpf/ebpfProgram.h"
+#include "backends/ebpf/ebpfOptions.h"
 #include "codeGen.h"
 
 
@@ -43,7 +44,7 @@ namespace UBPF {
 
         cstring contextVar, outerHdrOffsetVar, outerHdrLengthVar;
 
-        UBPFProgram(const CompilerOptions &options, const IR::P4Program *program,
+        UBPFProgram(const EbpfOptions &options, const IR::P4Program *program,
                     P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const IR::ToplevelBlock *toplevel) :
                 EBPF::EBPFProgram(options, program, refMap, typeMap, toplevel), model(UBPFModel::instance) {
             packetStartVar = cstring("pkt");

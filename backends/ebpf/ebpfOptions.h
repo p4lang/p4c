@@ -27,6 +27,8 @@ class EbpfOptions : public CompilerOptions {
     cstring outputFile = nullptr;
     // read from json
     bool loadIRFromJson = false;
+    // Externs generation
+    bool emitExterns = false;
     EbpfOptions();
 };
 

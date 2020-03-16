@@ -45,6 +45,9 @@ class Target(EBPFTarget):
         args += "BPFOBJ=" + self.template + ".o"
         # add the folder local to the P4 file to the list of includes
         args += " INCLUDES+=-I" + os.path.dirname(self.options.p4filename)
+        if self.options.extern:
+            args += " INCLUDES+=-include" + self.options.extern + " "
+            args += " INCLUDES+=-I" + self.tmpdir + " "
         errmsg = "Failed to compile the eBPF byte code:"
         return run_timeout(self.options.verbose, args, TIMEOUT,
                            self.outputs, errmsg)

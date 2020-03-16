@@ -25,6 +25,8 @@ class Target(EBPFTarget):
         # List of bpf programs to attach to the interface
         args += "BPFOBJ=" + self.template + " "
         args += "CFLAGS+=-DCONTROL_PLANE "
+        args += "EXTERNOBJ=" + self.options.extern + " "
+
         errmsg = "Failed to build the filter:"
         return run_timeout(self.options.verbose, args, TIMEOUT,
                            self.outputs, errmsg)

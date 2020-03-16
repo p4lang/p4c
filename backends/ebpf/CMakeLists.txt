@@ -144,8 +144,10 @@ endif()
 # Only add the kernel tests if the two requirements are met
 if (SUPPORTS_KERNEL)
   p4c_add_tests("ebpf-kernel" ${EBPF_DRIVER_KERNEL} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_KERNEL}")
+  p4c_add_test_with_args("ebpf" ${EBPF_DRIVER_KERNEL} FALSE "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-conntrack-ebpf.c" "")
 endif()
 # ToDo Add check which verifies that BCC is installed
 # Ideally, this is done via check for the python package
 p4c_add_tests("ebpf-bcc" ${EBPF_DRIVER_BCC} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_BCC}")
 p4c_add_tests("ebpf" ${EBPF_DRIVER_TEST} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_TEST}")
+p4c_add_test_with_args("ebpf" ${EBPF_DRIVER_TEST} FALSE "testdata/p4_16_samples/ebpf_checksum_extern.p4" "testdata/p4_16_samples/ebpf_checksum_extern.p4" "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-checksum-ebpf.c" "")

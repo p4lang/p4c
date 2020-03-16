@@ -17,14 +17,14 @@ limitations under the License.
 #ifndef P4C_UBPFCONTROL_H
 #define P4C_UBPFCONTROL_H
 
-#include "backends/ebpf/ebpfObject.h"
+#include "backends/ebpf/ebpfControl.h"
 #include "ubpfRegister.h"
 
 namespace UBPF {
 
     class UBPFControl;
 
-    class UBPFControlBodyTranslator : public EBPF::CodeGenInspector {
+    class UBPFControlBodyTranslator : public EBPF::ControlBodyTranslator {
     public:
         const UBPFControl *control;
         std::set<const IR::Parameter *> toDereference;
@@ -56,7 +56,7 @@ namespace UBPF {
         bool emitRegisterRead(const IR::AssignmentStatement *a, const IR::MethodCallExpression *method);
     };
 
-    class UBPFControl : public EBPF::EBPFObject {
+    class UBPFControl : public EBPF::EBPFControl {
     public:
         const UBPFProgram *program;
         const IR::ControlBlock *controlBlock;

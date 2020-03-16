@@ -49,6 +49,8 @@ PARSER.add_argument("-f", "--replace", action="store_true",
 PARSER.add_argument("-t", "--target", dest="target", default="test",
                     help="Specify the compiler backend target, "
                     "default is test")
+PARSER.add_argument("-e", "--extern-file", dest="extern", default="",
+                    help="Specify path additional file with C extern function definition")
 
 
 def import_from(module, name):
@@ -86,6 +88,7 @@ class Options(object):
         self.target = "test"            # The name of the target compiler
         # Actual location of the test framework
         self.testdir = os.path.dirname(os.path.realpath(__file__))
+        self.extern = ""                # Path to C file with extern definition
 
 
 def check_path(path):
@@ -146,6 +149,10 @@ def run_test(options, argv):
     ebpf = EBPFFactory.create(tmpdir, options, template, output)
     if ebpf is None:
         return FAILURE
+
+    # If extern file is passed, --emit-externs flag is added by default to the p4 compiler
+    if options.extern:
+        argv.append("--emit-externs")
     # Compile the p4 file to the specified target
     result, expected_error = ebpf.compile_p4(argv)
 
@@ -182,6 +189,7 @@ if __name__ == '__main__':
     options.replace = args.replace
     options.cleanupTmp = args.nocleanup
     options.target = args.target
+    options.extern = args.extern
 
     # All args after '--' are intended for the p4 compiler
     argv = argv[1:]

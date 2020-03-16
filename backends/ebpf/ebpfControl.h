@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "ebpfObject.h"
 #include "ebpfTable.h"
+#include "ebpfType.h"
 
 namespace EBPF {
 
@@ -39,6 +40,8 @@ class ControlBodyTranslator : public CodeGenInspector {
     virtual void processMethod(const P4::ExternMethod* method);
     virtual void processApply(const P4::ApplyMethod* method);
     virtual void processFunction(const P4::ExternFunction* function);
+    void processCustomExternFunction(const P4::ExternFunction* function,
+                                     EBPFTypeFactory *typeFactory);
 
     bool preorder(const IR::PathExpression* expression) override;
     bool preorder(const IR::MethodCallExpression* expression) override;
@@ -58,6 +61,7 @@ class EBPFControl : public EBPFObject {
     // replace references to headers with references to parserHeaders
     cstring                 hitVariable;
     ControlBodyTranslator*  codeGen;
+    const bool              emitExterns;
 
     std::set<const IR::Parameter*> toDereference;
     std::map<cstring, EBPFTable*>  tables;

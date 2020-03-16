@@ -36,6 +36,7 @@ if __name__ == "__main__":
     options.target = args.target
     # Switch test directory based on path to run-ubpf-test.py
     options.testdir = os.path.dirname(os.path.realpath(__file__))
+    options.extern = args.extern
 
     # All args after '--' are intended for the p4 compiler
     argv = argv[1:]

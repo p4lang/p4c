@@ -46,8 +46,40 @@ bool ControlBodyTranslator::preorder(const IR::PathExpression* expression) {
     return false;
 }
 
+void ControlBodyTranslator::processCustomExternFunction(const P4::ExternFunction* function,
+                                                        EBPFTypeFactory *typeFactory) {
+    if (!control->emitExterns)
+        ::error("%1%: Not supported", function->method);
+
+    visit(function->expr->method);
+    builder->append("(");
+    bool first = true;
+
+    for (auto p : *function->substitution.getParametersInArgumentOrder()) {
+        if (!first)
+            builder->append(", ");
+        first = false;
+        auto arg = function->substitution.lookup(p);
+        if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
+            builder->append("&");
+        } else if (p->direction == IR::Direction::In) {
+            builder->append("(const ");
+            auto type = typeMap->getType(arg);
+            auto ebpfType = typeFactory->create(type);
+            ebpfType->declare(builder, "", false);
+            builder->append(") ");
+        }
+        visit(arg);
+    }
+
+    builder->append(")");
+    builder->endOfStatement(true);
+}
+
 void ControlBodyTranslator::processFunction(const P4::ExternFunction* function) {
-    ::error("%1%: Not supported", function->method);
+    if (!control->emitExterns)
+        ::error("%1%: Not supported", function->method);
+    processCustomExternFunction(function, EBPFTypeFactory::instance);
 }
 
 bool ControlBodyTranslator::preorder(const IR::MethodCallExpression* expression) {
@@ -438,7 +470,8 @@ bool ControlBodyTranslator::preorder(const IR::SwitchStatement* statement) {
 EBPFControl::EBPFControl(const EBPFProgram* program, const IR::ControlBlock* block,
                          const IR::Parameter* parserHeaders) :
         program(program), controlBlock(block), headers(nullptr),
-        accept(nullptr), parserHeaders(parserHeaders), codeGen(nullptr) {}
+        accept(nullptr), parserHeaders(parserHeaders), codeGen(nullptr),
+        emitExterns(program->options.emitExterns) {}
 
 void EBPFControl::scanConstants() {
     for (auto c : controlBlock->constantValue) {
