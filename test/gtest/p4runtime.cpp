@@ -189,6 +189,12 @@ TEST_F(P4Runtime, IdAssignment) {
                 default_action = noop;
             }
 
+            @id(0xffffff)
+            table igTableWithLargestId {
+                actions = { noop; }
+                default_action = noop;
+            }
+
             @id(0x02000133)
             table igTableWithPrefixedId {
                 actions = { noop; }
@@ -224,6 +230,7 @@ TEST_F(P4Runtime, IdAssignment) {
                 igTable.apply();
                 igTableWithoutName.apply();
                 igTableWithId.apply();
+                igTableWithLargestId.apply();
                 igTableWithPrefixedId.apply();
                 igTableWithoutNameAndId.apply();
                 conflictingTableA.apply();
@@ -254,7 +261,7 @@ TEST_F(P4Runtime, IdAssignment) {
         // Check that the rest of the id matches the hash value that we expect.
         // (If we were to ever change the hash algorithm we use when mapping P4
         // names to P4Runtime ids, we'd need to change this test.)
-        EXPECT_EQ(16119u, igTable->preamble().id() & 0x00ffffff);
+        EXPECT_EQ(14761719u, igTable->preamble().id() & 0x00ffffff);
     }
 
     {
@@ -268,7 +275,7 @@ TEST_F(P4Runtime, IdAssignment) {
         // Check that the id of 'igTableWithName' was computed based on its
         // @name annotation. (See above for caveat re: the hash algorithm.)
         EXPECT_EQ(unsigned(P4Ids::TABLE), igTableWithName->preamble().id() >> 24);
-        EXPECT_EQ(59806u, igTableWithName->preamble().id() & 0x00ffffff);
+        EXPECT_EQ(1108382u, igTableWithName->preamble().id() & 0x00ffffff);
     }
 
     {
@@ -279,6 +286,14 @@ TEST_F(P4Runtime, IdAssignment) {
         ASSERT_TRUE(igTableWithId != nullptr);
         auto expectedId = 1234u | (unsigned(P4Ids::TABLE) << 24);
         EXPECT_EQ(expectedId, igTableWithId->preamble().id());
+    }
+
+    {
+        // Same as above, but with the largest possible id (0xffffff).
+        auto* igTableWithLargestId = findTable(*test, "ingress.igTableWithLargestId");
+        ASSERT_TRUE(igTableWithLargestId != nullptr);
+        auto expectedId = 0xffffffu | (unsigned(P4Ids::TABLE) << 24);
+        EXPECT_EQ(expectedId, igTableWithLargestId->preamble().id());
     }
 
     {

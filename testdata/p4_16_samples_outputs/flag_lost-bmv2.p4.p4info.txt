@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33593274
+    id: 43030458
     name: "ingress.ipv4_lpm"
     alias: "ipv4_lpm"
   }
@@ -14,33 +14,33 @@ tables {
     match_type: LPM
   }
   action_refs {
-    id: 16800567
+    id: 21257015
   }
   action_refs {
-    id: 16785927
+    id: 30548487
   }
   action_refs {
-    id: 16832181
+    id: 33281717
   }
   size: 1024
 }
 actions {
   preamble {
-    id: 16800567
+    id: 21257015
     name: "NoAction"
     alias: "NoAction"
   }
 }
 actions {
   preamble {
-    id: 16832181
+    id: 33281717
     name: "ingress.drop"
     alias: "drop"
   }
 }
 actions {
   preamble {
-    id: 16785927
+    id: 30548487
     name: "ingress.ipv4_forward"
     alias: "ipv4_forward"
   }

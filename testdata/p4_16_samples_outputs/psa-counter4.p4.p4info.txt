@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33610509
+    id: 39967501
     name: "MyIC.tbl"
     alias: "tbl"
   }
@@ -14,29 +14,29 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16800567
+    id: 21257015
   }
-  direct_resource_ids: 318800813
+  direct_resource_ids: 319980461
   size: 1024
   idle_timeout_behavior: NOTIFY_CONTROL
 }
 actions {
   preamble {
-    id: 16800567
+    id: 21257015
     name: "NoAction"
     alias: "NoAction"
   }
 }
 direct_counters {
   preamble {
-    id: 318800813
+    id: 319980461
     name: "MyIC.counter0"
     alias: "counter0"
   }
   spec {
     unit: PACKETS
   }
-  direct_table_id: 33610509
+  direct_table_id: 39967501
 }
 type_info {
 }

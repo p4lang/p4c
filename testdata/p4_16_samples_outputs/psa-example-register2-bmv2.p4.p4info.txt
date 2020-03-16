@@ -3,14 +3,14 @@ pkg_info {
 }
 actions {
   preamble {
-    id: 16780617
+    id: 25103689
     name: "update_pkt_ip_byte_count"
     alias: "update_pkt_ip_byte_count"
   }
 }
 registers {
   preamble {
-    id: 369133592
+    id: 383813656
     name: "ingress.port_pkt_ip_bytes_in"
     alias: "port_pkt_ip_bytes_in"
   }

@@ -2,7 +2,7 @@ updates {
   type: INSERT
   entity {
     table_entry {
-      table_id: 33609018
+      table_id: 38131002
       match {
         field_id: 1
         optional {
@@ -15,7 +15,7 @@ updates {
       }
       action {
         action {
-          action_id: 16837978
+          action_id: 17165658
           params {
             param_id: 1
             value: "\000\001"
@@ -30,7 +30,7 @@ updates {
   type: INSERT
   entity {
     table_entry {
-      table_id: 33609018
+      table_id: 38131002
       match {
         field_id: 1
         optional {
@@ -39,7 +39,7 @@ updates {
       }
       action {
         action {
-          action_id: 16837978
+          action_id: 17165658
           params {
             param_id: 1
             value: "\000\002"
@@ -54,7 +54,7 @@ updates {
   type: INSERT
   entity {
     table_entry {
-      table_id: 33609018
+      table_id: 38131002
       match {
         field_id: 2
         optional {
@@ -63,7 +63,7 @@ updates {
       }
       action {
         action {
-          action_id: 16837978
+          action_id: 17165658
           params {
             param_id: 1
             value: "\000\003"

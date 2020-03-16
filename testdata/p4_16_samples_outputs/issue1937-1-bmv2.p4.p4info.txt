@@ -3,7 +3,7 @@ pkg_info {
 }
 actions {
   preamble {
-    id: 16808157
+    id: 25589981
     name: "foo"
     alias: "foo"
   }

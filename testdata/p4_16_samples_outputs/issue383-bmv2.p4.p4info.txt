@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33555551
+    id: 46138463
     name: "ingress.tns"
     alias: "tns"
   }
@@ -20,10 +20,10 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16810128
+    id: 22708368
   }
   action_refs {
-    id: 16800567
+    id: 21257015
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
@@ -31,14 +31,14 @@ tables {
 }
 actions {
   preamble {
-    id: 16800567
+    id: 21257015
     name: "NoAction"
     alias: "NoAction"
   }
 }
 actions {
   preamble {
-    id: 16810128
+    id: 22708368
     name: "ingress.do_act"
     alias: "do_act"
   }

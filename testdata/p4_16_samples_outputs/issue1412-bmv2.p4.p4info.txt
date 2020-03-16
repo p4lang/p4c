@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33598117
+    id: 49261221
     name: "EgressImpl.change_cond"
     alias: "change_cond"
   }
@@ -14,10 +14,10 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16804174
+    id: 28272974
   }
   action_refs {
-    id: 16800567
+    id: 21257015
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
@@ -25,14 +25,14 @@ tables {
 }
 actions {
   preamble {
-    id: 16800567
+    id: 21257015
     name: "NoAction"
     alias: "NoAction"
   }
 }
 actions {
   preamble {
-    id: 16804174
+    id: 28272974
     name: "EgressImpl.set_true"
     alias: "set_true"
   }

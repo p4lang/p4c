@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33606302
+    id: 45337246
     name: "ingress.ipv6_tbl"
     alias: "ipv6_tbl"
   }
@@ -14,10 +14,10 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16839149
+    id: 21164525
   }
   action_refs {
-    id: 16800567
+    id: 21257015
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
@@ -25,7 +25,7 @@ tables {
 }
 tables {
   preamble {
-    id: 33603625
+    id: 34324521
     name: "egress.get_multicast_copy_out_bd"
     alias: "get_multicast_copy_out_bd"
   }
@@ -42,10 +42,10 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16826665
+    id: 22004009
   }
   action_refs {
-    id: 16800567
+    id: 21257015
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
@@ -53,7 +53,7 @@ tables {
 }
 tables {
   preamble {
-    id: 33573008
+    id: 49367184
     name: "egress.send_frame"
     alias: "send_frame"
   }
@@ -64,23 +64,23 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16781737
+    id: 23531945
   }
   action_refs {
-    id: 16842696
+    id: 20119496
   }
   size: 1024
 }
 actions {
   preamble {
-    id: 16800567
+    id: 21257015
     name: "NoAction"
     alias: "NoAction"
   }
 }
 actions {
   preamble {
-    id: 16839149
+    id: 21164525
     name: "ingress.set_mcast_grp"
     alias: "set_mcast_grp"
   }
@@ -97,7 +97,7 @@ actions {
 }
 actions {
   preamble {
-    id: 16826665
+    id: 22004009
     name: "egress.set_out_bd"
     alias: "set_out_bd"
   }
@@ -109,14 +109,14 @@ actions {
 }
 actions {
   preamble {
-    id: 16842696
+    id: 20119496
     name: "egress.drop"
     alias: "drop"
   }
 }
 actions {
   preamble {
-    id: 16781737
+    id: 23531945
     name: "egress.rewrite_mac"
     alias: "rewrite_mac"
   }

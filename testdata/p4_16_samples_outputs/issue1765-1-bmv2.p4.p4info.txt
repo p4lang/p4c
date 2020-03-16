@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33554432
+    id: 33947648
     name: "MyIngress.v6_addresses"
     alias: "v6_addresses"
   }
@@ -14,22 +14,22 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16789132
+    id: 23604876
   }
   action_refs {
-    id: 16807338
+    id: 32142762
   }
   action_refs {
-    id: 16795573
+    id: 24332213
   }
   action_refs {
-    id: 16800567
+    id: 21257015
   }
   size: 64
 }
 tables {
   preamble {
-    id: 33567153
+    id: 38089137
     name: "MyIngress.v6_networks"
     alias: "v6_networks"
   }
@@ -40,22 +40,22 @@ tables {
     match_type: LPM
   }
   action_refs {
-    id: 16777697
+    id: 27787745
   }
   action_refs {
-    id: 16789132
+    id: 23604876
   }
   action_refs {
-    id: 16807338
+    id: 32142762
   }
   action_refs {
-    id: 16800567
+    id: 21257015
   }
   size: 64
 }
 tables {
   preamble {
-    id: 33616067
+    id: 37875907
     name: "MyIngress.v4_networks"
     alias: "v4_networks"
   }
@@ -66,23 +66,23 @@ tables {
     match_type: LPM
   }
   action_refs {
-    id: 16777697
+    id: 27787745
   }
   action_refs {
-    id: 16800567
+    id: 21257015
   }
   size: 64
 }
 actions {
   preamble {
-    id: 16800567
+    id: 21257015
     name: "NoAction"
     alias: "NoAction"
   }
 }
 actions {
   preamble {
-    id: 16777697
+    id: 27787745
     name: "MyIngress.set_egress_port"
     alias: "set_egress_port"
   }
@@ -94,14 +94,14 @@ actions {
 }
 actions {
   preamble {
-    id: 16789132
+    id: 23604876
     name: "MyIngress.controller_debug"
     alias: "controller_debug"
   }
 }
 actions {
   preamble {
-    id: 16807338
+    id: 32142762
     name: "MyIngress.controller_reply"
     alias: "controller_reply"
   }
@@ -113,7 +113,7 @@ actions {
 }
 actions {
   preamble {
-    id: 16795573
+    id: 24332213
     name: "MyIngress.icmp6_echo_reply"
     alias: "icmp6_echo_reply"
   }

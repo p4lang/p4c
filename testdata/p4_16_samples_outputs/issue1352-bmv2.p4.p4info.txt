@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33615889
+    id: 46460945
     name: "MyIngress.forward"
     alias: "forward"
   }
@@ -14,19 +14,19 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16837735
+    id: 33025127
   }
   action_refs {
-    id: 16805608
+    id: 25652968
   }
   action_refs {
-    id: 16800567
+    id: 21257015
   }
   size: 1024
 }
 tables {
   preamble {
-    id: 33574068
+    id: 37375156
     name: "MyIngress.ipv4_lpm"
     alias: "ipv4_lpm"
   }
@@ -37,19 +37,19 @@ tables {
     match_type: LPM
   }
   action_refs {
-    id: 16826124
+    id: 24952588
   }
   action_refs {
-    id: 16805608
+    id: 25652968
   }
   action_refs {
-    id: 16800567
+    id: 21257015
   }
   size: 1024
 }
 tables {
   preamble {
-    id: 33604441
+    id: 49202009
     name: "MyEgress.send_frame"
     alias: "send_frame"
   }
@@ -60,30 +60,30 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16828148
+    id: 22398708
   }
   action_refs {
-    id: 16800567
+    id: 21257015
   }
   size: 1024
 }
 actions {
   preamble {
-    id: 16800567
+    id: 21257015
     name: "NoAction"
     alias: "NoAction"
   }
 }
 actions {
   preamble {
-    id: 16805608
+    id: 25652968
     name: "MyIngress.drop"
     alias: "drop"
   }
 }
 actions {
   preamble {
-    id: 16837735
+    id: 33025127
     name: "MyIngress.set_dmac"
     alias: "set_dmac"
   }
@@ -95,7 +95,7 @@ actions {
 }
 actions {
   preamble {
-    id: 16826124
+    id: 24952588
     name: "MyIngress.set_nhop"
     alias: "set_nhop"
   }
@@ -112,14 +112,14 @@ actions {
 }
 actions {
   preamble {
-    id: 16842278
+    id: 23592486
     name: "MyIngress.send_digest"
     alias: "send_digest"
   }
 }
 actions {
   preamble {
-    id: 16828148
+    id: 22398708
     name: "MyEgress.rewrite_mac"
     alias: "rewrite_mac"
   }
@@ -131,7 +131,7 @@ actions {
 }
 digests {
   preamble {
-    id: 385901477
+    id: 387015589
     name: "test_digest_t"
     alias: "test_digest_t"
   }

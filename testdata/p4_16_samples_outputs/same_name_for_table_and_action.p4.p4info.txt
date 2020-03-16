@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33608800
+    id: 46322784
     name: "IngressI.do_something"
     alias: "do_something"
   }
@@ -14,24 +14,24 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16831584
+    id: 29545568
   }
   action_refs {
-    id: 16800567
+    id: 21257015
   }
-  const_default_action_id: 16800567
+  const_default_action_id: 21257015
   size: 1024
 }
 actions {
   preamble {
-    id: 16800567
+    id: 21257015
     name: "NoAction"
     alias: "NoAction"
   }
 }
 actions {
   preamble {
-    id: 16831584
+    id: 29545568
     name: "IngressI.do_something"
     alias: "do_something"
   }

@@ -457,8 +457,8 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
     void computeIdsForSymbols(P4RuntimeSymbolType type) {
         // The id for most resources follows a standard format:
         //
-        //   [resource type] [zero byte] [name hash value]
-        //    \____8_b____/   \__8_b__/   \_____16_b____/
+        //   [resource type] [name hash value]
+        //    \____8_b____/   \_____24_b____/
         auto& symbolTable = symbolTables.at(type);
         auto resourceType = static_cast<p4rt_id_t>(type);
 
@@ -483,7 +483,7 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
             // resolve hash collisions, the id that we select depends on the order in
             // which the names are hashed. This is why we sort the names above.
             boost::optional<p4rt_id_t> id = probeForId(nameId, [=](uint32_t nameId) {
-                return (resourceType << 24) | (nameId & 0xffff);
+                return (resourceType << 24) | (nameId & 0xffffff);
             });
 
             if (!id) {
