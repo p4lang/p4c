@@ -1,3 +1,0 @@
-structured-annotation-e3.p4(1): [--Werror=duplicate] error: @x: duplicate name for structured annotation
-@x[2]
-^
