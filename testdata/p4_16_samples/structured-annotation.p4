@@ -1,6 +1,8 @@
 #define TEXT_CONST "hello"
 #define NUM_CONST 6
 
+@number(3)
+@number(4)
 @number[2]
 @empty[]
 @kv[k1=1,k2=2]
