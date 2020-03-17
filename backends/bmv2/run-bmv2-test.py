@@ -352,7 +352,6 @@ def main(argv):
                 options.initCommands.append(argv[1])
                 argv = argv[1:]
         elif argv[0] == "-bd":
-            print(argv)
             options.compilerBuildDir = argv[1]
             argv = argv[1:]
         else:
