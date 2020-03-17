@@ -3,15 +3,15 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33611905
+    id: 44621953
     name: "MyIngress.t"
     alias: "t"
   }
   action_refs {
-    id: 16812769
+    id: 17271521
   }
   action_refs {
-    id: 16800567
+    id: 21257015
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
@@ -19,14 +19,14 @@ tables {
 }
 actions {
   preamble {
-    id: 16800567
+    id: 21257015
     name: "NoAction"
     alias: "NoAction"
   }
 }
 actions {
   preamble {
-    id: 16812769
+    id: 17271521
     name: "MyIngress.a"
     alias: "a"
   }

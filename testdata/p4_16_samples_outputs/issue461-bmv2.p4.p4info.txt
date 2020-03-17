@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33571396
+    id: 35996228
     name: "ingress.ipv4_da_lpm"
     alias: "ipv4_da_lpm"
   }
@@ -14,17 +14,17 @@ tables {
     match_type: LPM
   }
   action_refs {
-    id: 16798847
+    id: 26563711
   }
   action_refs {
-    id: 16806421
+    id: 20279829
   }
-  direct_resource_ids: 318821195
+  direct_resource_ids: 323801931
   size: 1024
 }
 tables {
   preamble {
-    id: 33594010
+    id: 43424410
     name: "ingress.mac_da"
     alias: "mac_da"
   }
@@ -35,16 +35,16 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16832597
+    id: 28039253
   }
   action_refs {
-    id: 16815499
+    id: 32609675
   }
   size: 1024
 }
 tables {
   preamble {
-    id: 33573008
+    id: 49367184
     name: "egress.send_frame"
     alias: "send_frame"
   }
@@ -55,23 +55,23 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16781737
+    id: 23531945
   }
   action_refs {
-    id: 16815499
+    id: 32609675
   }
   size: 1024
 }
 actions {
   preamble {
-    id: 16815499
+    id: 32609675
     name: "my_drop"
     alias: "my_drop"
   }
 }
 actions {
   preamble {
-    id: 16798847
+    id: 26563711
     name: "ingress.set_l2ptr"
     alias: "set_l2ptr"
   }
@@ -83,14 +83,14 @@ actions {
 }
 actions {
   preamble {
-    id: 16806421
+    id: 20279829
     name: "ingress.drop_with_count"
     alias: "drop_with_count"
   }
 }
 actions {
   preamble {
-    id: 16832597
+    id: 28039253
     name: "ingress.set_bd_dmac_intf"
     alias: "set_bd_dmac_intf"
   }
@@ -112,7 +112,7 @@ actions {
 }
 actions {
   preamble {
-    id: 16781737
+    id: 23531945
     name: "egress.rewrite_mac"
     alias: "rewrite_mac"
   }
@@ -124,14 +124,14 @@ actions {
 }
 direct_counters {
   preamble {
-    id: 318821195
+    id: 323801931
     name: "ingress.ipv4_da_lpm_stats"
     alias: "ipv4_da_lpm_stats"
   }
   spec {
     unit: PACKETS
   }
-  direct_table_id: 33571396
+  direct_table_id: 35996228
 }
 type_info {
 }

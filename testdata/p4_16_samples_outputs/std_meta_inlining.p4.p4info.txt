@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33600455
+    id: 35959751
     name: "ingress.t0"
     alias: "t0"
   }
@@ -14,10 +14,10 @@ tables {
     match_type: TERNARY
   }
   action_refs {
-    id: 16829080
+    id: 24562328
   }
   action_refs {
-    id: 16800567
+    id: 21257015
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
@@ -25,14 +25,14 @@ tables {
 }
 actions {
   preamble {
-    id: 16829080
+    id: 24562328
     name: "send_to_cpu"
     alias: "send_to_cpu"
   }
 }
 actions {
   preamble {
-    id: 16800567
+    id: 21257015
     name: "NoAction"
     alias: "NoAction"
   }

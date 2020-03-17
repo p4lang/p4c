@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33595553
+    id: 42311841
     name: "cIngress.t"
     alias: "t"
   }
@@ -32,13 +32,13 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16808330
+    id: 25131402
   }
   size: 1024
 }
 actions {
   preamble {
-    id: 16808330
+    id: 25131402
     name: "cIngress.foo"
     alias: "foo"
   }

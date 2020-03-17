@@ -3,7 +3,7 @@ pkg_info {
 }
 value_sets {
   preamble {
-    id: 50343090
+    id: 59321522
     name: "parserImpl.p1.ipv4_ethertypes"
     alias: "p1.ipv4_ethertypes"
   }
@@ -16,7 +16,7 @@ value_sets {
 }
 value_sets {
   preamble {
-    id: 50350911
+    id: 55724863
     name: "parserImpl.p2.ipv4_ethertypes"
     alias: "p2.ipv4_ethertypes"
   }

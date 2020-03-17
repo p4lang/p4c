@@ -3,7 +3,7 @@ pkg_info {
 }
 counters {
   preamble {
-    id: 302023597
+    id: 303203245
     name: "MyIC.counter0"
     alias: "counter0"
   }
@@ -14,7 +14,7 @@ counters {
 }
 counters {
   preamble {
-    id: 302034433
+    id: 305966593
     name: "MyIC.counter1"
     alias: "counter1"
   }

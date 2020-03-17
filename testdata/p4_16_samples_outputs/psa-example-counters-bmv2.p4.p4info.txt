@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33571396
+    id: 35996228
     name: "ingress.ipv4_da_lpm"
     alias: "ipv4_da_lpm"
   }
@@ -14,18 +14,18 @@ tables {
     match_type: LPM
   }
   action_refs {
-    id: 16786796
+    id: 27207020
   }
   action_refs {
-    id: 16801000
+    id: 25648360
   }
-  direct_resource_ids: 318780894
+  direct_resource_ids: 332805598
   size: 1024
   idle_timeout_behavior: NOTIFY_CONTROL
 }
 actions {
   preamble {
-    id: 16786796
+    id: 27207020
     name: "ingress.next_hop"
     alias: "next_hop"
   }
@@ -40,14 +40,14 @@ actions {
 }
 actions {
   preamble {
-    id: 16801000
+    id: 25648360
     name: "ingress.default_route_drop"
     alias: "default_route_drop"
   }
 }
 counters {
   preamble {
-    id: 302004348
+    id: 306657404
     name: "ingress.port_bytes_in"
     alias: "port_bytes_in"
   }
@@ -61,7 +61,7 @@ counters {
 }
 counters {
   preamble {
-    id: 302054690
+    id: 309984546
     name: "egress.port_bytes_out"
     alias: "port_bytes_out"
   }
@@ -75,14 +75,14 @@ counters {
 }
 direct_counters {
   preamble {
-    id: 318780894
+    id: 332805598
     name: "ingress.per_prefix_pkt_byte_count"
     alias: "per_prefix_pkt_byte_count"
   }
   spec {
     unit: BOTH
   }
-  direct_table_id: 33571396
+  direct_table_id: 35996228
 }
 type_info {
   new_types {

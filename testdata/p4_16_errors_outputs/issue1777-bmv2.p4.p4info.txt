@@ -3,7 +3,7 @@ pkg_info {
 }
 registers {
   preamble {
-    id: 369104710
+    id: 369563462
     name: "ingress.reg1"
     alias: "reg1"
   }
@@ -18,7 +18,7 @@ registers {
 }
 registers {
   preamble {
-    id: 369162436
+    id: 382138564
     name: "ingress.reg2"
     alias: "reg2"
   }

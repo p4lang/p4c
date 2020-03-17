@@ -3,15 +3,15 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33595561
+    id: 38772905
     name: "c.t"
     alias: "t"
   }
   action_refs {
-    id: 16782098
+    id: 23991058
   }
   action_refs {
-    id: 16800567
+    id: 21257015
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
@@ -19,14 +19,14 @@ tables {
 }
 actions {
   preamble {
-    id: 16800567
+    id: 21257015
     name: "NoAction"
     alias: "NoAction"
   }
 }
 actions {
   preamble {
-    id: 16782098
+    id: 23991058
     name: "c.a"
     alias: "a"
   }

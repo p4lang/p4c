@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33585498
+    id: 46102874
     name: "ingress.acl_table"
     alias: "acl_table"
   }
@@ -14,10 +14,10 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16790071
+    id: 24130103
   }
   action_refs {
-    id: 16800567
+    id: 21257015
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
@@ -25,14 +25,14 @@ tables {
 }
 actions {
   preamble {
-    id: 16800567
+    id: 21257015
     name: "NoAction"
     alias: "NoAction"
   }
 }
 actions {
   preamble {
-    id: 16790071
+    id: 24130103
     name: "ingress.assign_non_const_array_index"
     alias: "assign_non_const_array_index"
   }

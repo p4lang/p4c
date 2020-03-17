@@ -201,10 +201,11 @@ struct ActionRef {
                                         // reference in the table declaration.
 };
 
-/// @return the value of any P4 '@id' annotation @declaration may have. The name
-/// 'externalId' is in analogy with externalName().
+/// @return the value of any P4 '@id' annotation @declaration may have, and
+/// ensure that the value is correct with respect to the P4Runtime
+/// specification. The name 'externalId' is in analogy with externalName().
 static boost::optional<p4rt_id_t>
-externalId(const IR::IDeclaration* declaration) {
+externalId(P4RuntimeSymbolType type, const IR::IDeclaration* declaration) {
     CHECK_NULL(declaration);
     if (!declaration->is<IR::IAnnotated>()) {
         return boost::none;  // Assign an id later; see below.
@@ -215,11 +216,22 @@ externalId(const IR::IDeclaration* declaration) {
         auto idConstant = idAnnotation->expr[0]->to<IR::Constant>();
         CHECK_NULL(idConstant);
         if (!idConstant->fitsInt()) {
-            ::error("@id should be an integer for declaration %1%", declaration);
+            ::error(ErrorType::ERR_INVALID, "%1%: @id should be an integer", declaration);
             return boost::none;
         }
 
-        const uint32_t id = static_cast<uint32_t>(idConstant->value);
+        auto id = static_cast<p4rt_id_t>(idConstant->value);
+
+        // If the id already has an 8-bit type prefix, make sure it is correct
+        // for the resource type; otherwise assign the correct prefix.
+        const auto typePrefix = static_cast<p4rt_id_t>(type) << 24;
+        const auto prefixMask = static_cast<p4rt_id_t>(0xff) << 24;
+        if ((id & prefixMask) != 0 && (id & prefixMask) != typePrefix) {
+            ::error(ErrorType::ERR_INVALID, "%1%: @id has the wrong 8-bit prefix", declaration);
+            return boost::none;
+        }
+        id |= typePrefix;
+
         return id;
     }
 
@@ -372,7 +384,7 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
     /// Add a @type symbol, extracting the name and id from @declaration.
     void add(P4RuntimeSymbolType type, const IR::IDeclaration* declaration) override {
         CHECK_NULL(declaration);
-        add(type, declaration->controlPlaneName(), externalId(declaration));
+        add(type, declaration->controlPlaneName(), externalId(type, declaration));
     }
 
     /// Add a @type symbol with @name and possibly an explicit P4 '@id'.
@@ -445,8 +457,8 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
     void computeIdsForSymbols(P4RuntimeSymbolType type) {
         // The id for most resources follows a standard format:
         //
-        //   [resource type] [zero byte] [name hash value]
-        //    \____8_b____/   \__8_b__/   \_____16_b____/
+        //   [resource type] [name hash value]
+        //    \____8_b____/   \_____24_b____/
         auto& symbolTable = symbolTables.at(type);
         auto resourceType = static_cast<p4rt_id_t>(type);
 
@@ -471,7 +483,7 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
             // resolve hash collisions, the id that we select depends on the order in
             // which the names are hashed. This is why we sort the names above.
             boost::optional<p4rt_id_t> id = probeForId(nameId, [=](uint32_t nameId) {
-                return (resourceType << 24) | (nameId & 0xffff);
+                return (resourceType << 24) | (nameId & 0xffffff);
             });
 
             if (!id) {
@@ -1280,7 +1292,7 @@ static void collectTableSymbols(P4RuntimeSymbolTable& symbols,
                                 const IR::TableBlock* tableBlock) {
     CHECK_NULL(tableBlock);
     auto name = archHandler->getControlPlaneName(tableBlock);
-    auto id = externalId(tableBlock->container);
+    auto id = externalId(P4RuntimeSymbolType::TABLE(), tableBlock->container);
     symbols.add(P4RuntimeSymbolType::TABLE(), name, id);
     archHandler->collectTableProperties(&symbols, tableBlock);
 }

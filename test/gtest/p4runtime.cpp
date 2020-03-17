@@ -189,6 +189,18 @@ TEST_F(P4Runtime, IdAssignment) {
                 default_action = noop;
             }
 
+            @id(0xffffff)
+            table igTableWithLargestId {
+                actions = { noop; }
+                default_action = noop;
+            }
+
+            @id(0x02000133)
+            table igTableWithPrefixedId {
+                actions = { noop; }
+                default_action = noop;
+            }
+
             @id(5678)
             @name("igTableWithNameAndId")
             table igTableWithoutNameAndId {
@@ -196,14 +208,20 @@ TEST_F(P4Runtime, IdAssignment) {
                 default_action = noop;
             }
 
-            @id(4321)
+            @id(0x02000134)
             table conflictingTableA {
                 actions = { noop; }
                 default_action = noop;
             }
 
-            @id(4321)
+            @id(0x02000134)
             table conflictingTableB {
+                actions = { noop; }
+                default_action = noop;
+            }
+
+            @id(0x03000133)
+            table igTableWithIdInvalidPrefix {
                 actions = { noop; }
                 default_action = noop;
             }
@@ -212,9 +230,12 @@ TEST_F(P4Runtime, IdAssignment) {
                 igTable.apply();
                 igTableWithoutName.apply();
                 igTableWithId.apply();
+                igTableWithLargestId.apply();
+                igTableWithPrefixedId.apply();
                 igTableWithoutNameAndId.apply();
                 conflictingTableA.apply();
                 conflictingTableB.apply();
+                igTableWithIdInvalidPrefix.apply();
             }
         }
 
@@ -224,9 +245,10 @@ TEST_F(P4Runtime, IdAssignment) {
 
     ASSERT_TRUE(test);
 
-    // We expect exactly one error:
-    //   error: @id 4321 is assigned to multiple declarations
-    EXPECT_EQ(1u, ::diagnosticCount());
+    // We expect exactly two errors:
+    //   error: @id 33554740 is assigned to multiple declarations
+    //   error: ingress.igTableWithIdInvalidPrefix: @id has the wrong 8-bit prefix
+    EXPECT_EQ(2u, ::diagnosticCount());
 
     {
         // Check that 'igTable' ended up in the P4Info output.
@@ -239,7 +261,7 @@ TEST_F(P4Runtime, IdAssignment) {
         // Check that the rest of the id matches the hash value that we expect.
         // (If we were to ever change the hash algorithm we use when mapping P4
         // names to P4Runtime ids, we'd need to change this test.)
-        EXPECT_EQ(16119u, igTable->preamble().id() & 0x00ffffff);
+        EXPECT_EQ(14761719u, igTable->preamble().id() & 0x00ffffff);
     }
 
     {
@@ -253,15 +275,34 @@ TEST_F(P4Runtime, IdAssignment) {
         // Check that the id of 'igTableWithName' was computed based on its
         // @name annotation. (See above for caveat re: the hash algorithm.)
         EXPECT_EQ(unsigned(P4Ids::TABLE), igTableWithName->preamble().id() >> 24);
-        EXPECT_EQ(59806u, igTableWithName->preamble().id() & 0x00ffffff);
+        EXPECT_EQ(1108382u, igTableWithName->preamble().id() & 0x00ffffff);
     }
 
     {
         // Check that 'igTableWithId' ended up in the P4Info output, and that
-        // its id matches the one set by its @id annotation.
+        // its id matches the one set by its @id annotation, with the required
+        // 8-bit type prefix (which is 0x2 for tables).
         auto* igTableWithId = findTable(*test, "ingress.igTableWithId");
         ASSERT_TRUE(igTableWithId != nullptr);
-        EXPECT_EQ(1234u, igTableWithId->preamble().id());
+        auto expectedId = 1234u | (unsigned(P4Ids::TABLE) << 24);
+        EXPECT_EQ(expectedId, igTableWithId->preamble().id());
+    }
+
+    {
+        // Same as above, but with the largest possible id (0xffffff).
+        auto* igTableWithLargestId = findTable(*test, "ingress.igTableWithLargestId");
+        ASSERT_TRUE(igTableWithLargestId != nullptr);
+        auto expectedId = 0xffffffu | (unsigned(P4Ids::TABLE) << 24);
+        EXPECT_EQ(expectedId, igTableWithLargestId->preamble().id());
+    }
+
+    {
+        // Check that 'igTableWithPrefixedId' ended up in the P4Info output, and
+        // that its id matches the one set by its @id annotation.
+        auto* igTableWithPrefixedId = findTable(*test, "ingress.igTableWithPrefixedId");
+        ASSERT_TRUE(igTableWithPrefixedId != nullptr);
+        auto expectedId = 0x02000133u;
+        EXPECT_EQ(expectedId, igTableWithPrefixedId->preamble().id());
     }
 
     {
@@ -271,7 +312,8 @@ TEST_F(P4Runtime, IdAssignment) {
         EXPECT_TRUE(findTable(*test, "ingress.igTableWithoutNameAndId") == nullptr);
         auto* igTableWithNameAndId = findTable(*test, "ingress.igTableWithNameAndId");
         ASSERT_TRUE(igTableWithNameAndId != nullptr);
-        EXPECT_EQ(5678u, igTableWithNameAndId->preamble().id());
+        auto expectedId = 5678u | (unsigned(P4Ids::TABLE) << 24);
+        EXPECT_EQ(expectedId, igTableWithNameAndId->preamble().id());
     }
 
     {
@@ -281,8 +323,8 @@ TEST_F(P4Runtime, IdAssignment) {
         ASSERT_TRUE(conflictingTableA != nullptr);
         auto* conflictingTableB = findTable(*test, "ingress.conflictingTableB");
         ASSERT_TRUE(conflictingTableB != nullptr);
-        EXPECT_TRUE(conflictingTableA->preamble().id() == 4321 ||
-                    conflictingTableB->preamble().id() == 4321);
+        EXPECT_TRUE(conflictingTableA->preamble().id() == 0x02000134 ||
+                    conflictingTableB->preamble().id() == 0x02000134);
         EXPECT_NE(conflictingTableA->preamble().id(),
                   conflictingTableB->preamble().id());
     }

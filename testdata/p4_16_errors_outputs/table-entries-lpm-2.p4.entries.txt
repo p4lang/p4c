@@ -2,7 +2,7 @@ updates {
   type: INSERT
   entity {
     table_entry {
-      table_id: 33555353
+      table_id: 42140569
       match {
         field_id: 1
         lpm {
@@ -12,7 +12,7 @@ updates {
       }
       action {
         action {
-          action_id: 16837978
+          action_id: 17165658
           params {
             param_id: 1
             value: "\000\013"
@@ -26,7 +26,7 @@ updates {
   type: INSERT
   entity {
     table_entry {
-      table_id: 33555353
+      table_id: 42140569
       match {
         field_id: 1
         lpm {
@@ -36,7 +36,7 @@ updates {
       }
       action {
         action {
-          action_id: 16837978
+          action_id: 17165658
           params {
             param_id: 1
             value: "\000\014"
@@ -50,10 +50,10 @@ updates {
   type: INSERT
   entity {
     table_entry {
-      table_id: 33555353
+      table_id: 42140569
       action {
         action {
-          action_id: 16837978
+          action_id: 17165658
           params {
             param_id: 1
             value: "\000\r"
@@ -67,10 +67,10 @@ updates {
   type: INSERT
   entity {
     table_entry {
-      table_id: 33555353
+      table_id: 42140569
       action {
         action {
-          action_id: 16837978
+          action_id: 17165658
           params {
             param_id: 1
             value: "\000\016"
@@ -84,7 +84,7 @@ updates {
   type: INSERT
   entity {
     table_entry {
-      table_id: 33555353
+      table_id: 42140569
       match {
         field_id: 1
         lpm {
@@ -94,7 +94,7 @@ updates {
       }
       action {
         action {
-          action_id: 16837978
+          action_id: 17165658
           params {
             param_id: 1
             value: "\000\017"

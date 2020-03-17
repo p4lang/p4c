@@ -3,7 +3,7 @@ pkg_info {
 }
 digests {
   preamble {
-    id: 385929834
+    id: 387633770
     name: "MyID.digest"
     alias: "digest"
   }

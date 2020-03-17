@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33593625
+    id: 47159577
     name: "ingress.debug_hdr"
     alias: "debug_hdr"
   }
@@ -26,14 +26,14 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16800567
+    id: 21257015
   }
-  const_default_action_id: 16800567
+  const_default_action_id: 21257015
   size: 1024
 }
 actions {
   preamble {
-    id: 16800567
+    id: 21257015
     name: "NoAction"
     alias: "NoAction"
   }

@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33610813
+    id: 39967805
     name: "IngressImpl.test_table"
     alias: "test_table"
   }
@@ -14,10 +14,10 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16836940
+    id: 30009676
   }
   action_refs {
-    id: 16800567
+    id: 21257015
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
@@ -26,14 +26,14 @@ tables {
 }
 actions {
   preamble {
-    id: 16800567
+    id: 21257015
     name: "NoAction"
     alias: "NoAction"
   }
 }
 actions {
   preamble {
-    id: 16836940
+    id: 30009676
     name: "IngressImpl.act"
     alias: "act"
   }

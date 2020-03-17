@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33611905
+    id: 44621953
     name: "MyIngress.t"
     alias: "t"
   }
@@ -14,10 +14,10 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16777606
+    id: 29884806
   }
   action_refs {
-    id: 16800567
+    id: 21257015
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
   }
@@ -25,21 +25,21 @@ tables {
 }
 actions {
   preamble {
-    id: 16800567
+    id: 21257015
     name: "NoAction"
     alias: "NoAction"
   }
 }
 actions {
   preamble {
-    id: 16777606
+    id: 29884806
     name: "MyIngress.set_data"
     alias: "set_data"
   }
 }
 value_sets {
   preamble {
-    id: 50332118
+    id: 56033750
     name: "MyParser.pvs"
     alias: "pvs"
   }

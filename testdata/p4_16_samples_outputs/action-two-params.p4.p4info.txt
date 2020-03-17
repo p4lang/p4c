@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33567740
+    id: 46478332
     name: "MyIngress.ingress_tbl"
     alias: "ingress_tbl"
   }
@@ -14,25 +14,25 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16780658
+    id: 23137650
   }
   action_refs {
-    id: 16805608
+    id: 25652968
   }
-  const_default_action_id: 16805608
+  const_default_action_id: 25652968
   size: 1024
   is_const_table: true
 }
 actions {
   preamble {
-    id: 16805608
+    id: 25652968
     name: "MyIngress.drop"
     alias: "drop"
   }
 }
 actions {
   preamble {
-    id: 16780658
+    id: 23137650
     name: "MyIngress.actTbl"
     alias: "actTbl"
   }

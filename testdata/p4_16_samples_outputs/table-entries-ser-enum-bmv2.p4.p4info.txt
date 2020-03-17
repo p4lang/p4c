@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33556639
+    id: 44370079
     name: "ingress.t_ternary"
     alias: "t_ternary"
   }
@@ -20,25 +20,25 @@ tables {
     match_type: TERNARY
   }
   action_refs {
-    id: 16795253
+    id: 21186165
   }
   action_refs {
-    id: 16837978
+    id: 17165658
   }
-  const_default_action_id: 16795253
+  const_default_action_id: 21186165
   size: 1024
   is_const_table: true
 }
 actions {
   preamble {
-    id: 16795253
+    id: 21186165
     name: "ingress.a"
     alias: "a"
   }
 }
 actions {
   preamble {
-    id: 16837978
+    id: 17165658
     name: "ingress.a_with_control_params"
     alias: "a_with_control_params"
   }

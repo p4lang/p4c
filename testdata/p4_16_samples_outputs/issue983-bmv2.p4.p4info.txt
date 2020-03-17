@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33564422
+    id: 48768774
     name: "ingress.debug_table_cksum1"
     alias: "debug_table_cksum1"
   }
@@ -86,13 +86,13 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16800567
+    id: 21257015
   }
   size: 1024
 }
 actions {
   preamble {
-    id: 16800567
+    id: 21257015
     name: "NoAction"
     alias: "NoAction"
   }

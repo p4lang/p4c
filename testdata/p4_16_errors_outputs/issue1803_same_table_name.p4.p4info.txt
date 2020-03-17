@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33580881
+    id: 33777489
     name: "t0"
     alias: "t0"
   }
@@ -14,17 +14,17 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16815162
+    id: 24155194
   }
   action_refs {
-    id: 16800567
+    id: 21257015
   }
-  const_default_action_id: 16800567
+  const_default_action_id: 21257015
   size: 1024
 }
 tables {
   preamble {
-    id: 33580881
+    id: 33777489
     name: "t0"
     alias: "t0"
   }
@@ -35,31 +35,31 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16790297
+    id: 29700889
   }
   action_refs {
-    id: 16800567
+    id: 21257015
   }
-  const_default_action_id: 16800567
+  const_default_action_id: 21257015
   size: 1024
 }
 actions {
   preamble {
-    id: 16800567
+    id: 21257015
     name: "NoAction"
     alias: "NoAction"
   }
 }
 actions {
   preamble {
-    id: 16815162
+    id: 24155194
     name: "IngressI.c1.drop"
     alias: "c1.drop"
   }
 }
 actions {
   preamble {
-    id: 16790297
+    id: 29700889
     name: "IngressI.c2.drop"
     alias: "c2.drop"
   }

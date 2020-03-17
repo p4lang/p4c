@@ -3,7 +3,7 @@ pkg_info {
 }
 tables {
   preamble {
-    id: 33563863
+    id: 35792087
     name: "MyIngress.calculate"
     alias: "calculate"
   }
@@ -14,75 +14,75 @@ tables {
     match_type: EXACT
   }
   action_refs {
-    id: 16789700
+    id: 24785092
   }
   action_refs {
-    id: 16838158
+    id: 22867470
   }
   action_refs {
-    id: 16807127
+    id: 32601303
   }
   action_refs {
-    id: 16815851
+    id: 17405675
   }
   action_refs {
-    id: 16797152
+    id: 31935968
   }
   action_refs {
-    id: 16805060
+    id: 24997060
   }
   action_refs {
-    id: 16786411
+    id: 32121835
   }
-  const_default_action_id: 16786411
+  const_default_action_id: 32121835
   size: 1024
   is_const_table: true
 }
 actions {
   preamble {
-    id: 16789700
+    id: 24785092
     name: "MyIngress.operation_add"
     alias: "operation_add"
   }
 }
 actions {
   preamble {
-    id: 16838158
+    id: 22867470
     name: "MyIngress.operation_sub"
     alias: "operation_sub"
   }
 }
 actions {
   preamble {
-    id: 16807127
+    id: 32601303
     name: "MyIngress.operation_and"
     alias: "operation_and"
   }
 }
 actions {
   preamble {
-    id: 16815851
+    id: 17405675
     name: "MyIngress.operation_or"
     alias: "operation_or"
   }
 }
 actions {
   preamble {
-    id: 16797152
+    id: 31935968
     name: "MyIngress.operation_xor"
     alias: "operation_xor"
   }
 }
 actions {
   preamble {
-    id: 16805060
+    id: 24997060
     name: "MyIngress.operation_crc"
     alias: "operation_crc"
   }
 }
 actions {
   preamble {
-    id: 16786411
+    id: 32121835
     name: "MyIngress.operation_drop"
     alias: "operation_drop"
   }
