@@ -130,9 +130,7 @@ class RenameUserMetadata : public Transform {
     { setName("RenameUserMetadata"); CHECK_NULL(refMap); }
 
     const IR::Node* postorder(IR::Type_Struct* type) override {
-        // Clone the user metadata type.  We want this type to be used
-        // only for parameters.  For any other variables we will used
-        // the clone we create.
+        // Clone the user metadata type
         if (userMetaType != getOriginal())
             return type;
 
@@ -176,11 +174,7 @@ class RenameUserMetadata : public Transform {
     }
 
     const IR::Node* preorder(IR::Type_Name* type) override {
-        // Find any reference to the user metadata type that is used
-        // (but not for parameters or the package instantiation)
-        // and replace it with the cloned type.
-        if (!findContext<IR::Declaration_Variable>())
-            return type;
+        // Find any reference to the user metadata type that is used and replace them
         auto decl = refMap->getDeclaration(type->path);
         if (decl == userMetaType)
             type->path = new IR::Path(type->path->srcInfo, IR::ID(type->path->srcInfo, namePrefix));
