@@ -138,6 +138,7 @@ class FindUninitialized : public Inspector {
     void checkOutParameters(const IR::IDeclaration* block,
                             const IR::ParameterList* parameters,
                             Definitions* defs) {
+        LOG2("Checking output parameters; definitions are " << defs);
         for (auto p : parameters->parameters) {
             if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
                 auto storage = definitions->storageMap->getStorage(p);
@@ -168,6 +169,7 @@ class FindUninitialized : public Inspector {
                 // visit virtual Function implementation if any
                 visit(d);
             }
+        currentPoint = ProgramPoint(control);
         unreachable = false;
         visit(control->body);
         checkOutParameters(
@@ -176,13 +178,19 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::Function* func) override {
-        if (findContext<IR::Declaration_Instance>() != nullptr) {
+        if (auto decl = findContext<IR::Declaration_Instance>()) {
             // virtual methods.  These are traversed individually at the beginning
-            // before the control body.  We mark each as reachable.
+            // before the control/parser body.  We mark each as reachable.
+            if (findContext<IR::P4Control>() != nullptr ||
+                findContext<IR::P4Control>() != nullptr ||
+                findContext<IR::P4Program>() != nullptr)  // toplevel instantiation
+                currentPoint = ProgramPoint(func);
+            else
+                BUG("%1%: unexpected instantiation", decl);
             unreachable = false;
         }
-        BUG_CHECK(findContext<IR::P4Program>() == nullptr, "Unexpected function");
-        LOG3("FU Visiting function " << func->name << "[" << func->id << "]");
+        LOG3("FU Visiting function " << func->name << "[" << func->id <<
+             "] called by " << currentPoint);
         LOG5(func);
         auto callingContext = currentPoint;
         currentPoint = ProgramPoint(func);
@@ -197,6 +205,7 @@ class FindUninitialized : public Inspector {
 
         currentPoint = callingContext;  // We want the definitions after the function has completed,
                                         // not after the last statement.
+        LOG3("Calling context " << currentPoint);
         auto current = getCurrentDefinitions();
         checkOutParameters(func, func->type->parameters, current);
         return false;
@@ -204,6 +213,12 @@ class FindUninitialized : public Inspector {
 
     bool preorder(const IR::P4Parser* parser) override {
         LOG3("FU Visiting parser " << parser->name << "[" << parser->id << "]");
+        currentPoint = ProgramPoint(parser);
+        for (auto d : parser->parserLocals)
+            if (d->is<IR::Declaration_Instance>()) {
+                // visit virtual Function implementation if any
+                visit(d);
+            }
         visit(parser->states, "states");
         unreachable = false;
         auto accept = ProgramPoint(parser->getDeclByName(IR::ParserState::accept)->getNode());

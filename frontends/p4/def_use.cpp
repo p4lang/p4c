@@ -901,16 +901,11 @@ class GetDeclarations : public Inspector {
 }  // namespace
 
 bool ComputeWriteSet::preorder(const IR::Function* function) {
-    LOG3("CWS Visiting " << dbp(function));
+    LOG3("CWS Visiting " << dbp(function) << " called from " << callingContext);
     auto point = ProgramPoint(function);
     auto locals = GetDeclarations::get(function->body);
     auto saveReturned = returnedDefinitions;
     enterScope(function->type->parameters, locals, point, false);
-
-    // The return value is uninitialized
-    auto uninit = new ProgramPoints(ProgramPoint::beforeStart);
-    auto retVal = allDefinitions->storageMap->addRetVal();
-    currentDefinitions->setDefinition(retVal, uninit);
 
     returnedDefinitions = new Definitions();
     visit(function->body);
