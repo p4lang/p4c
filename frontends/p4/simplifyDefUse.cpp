@@ -184,7 +184,7 @@ class FindUninitialized : public Inspector {
             if (findContext<IR::P4Control>() != nullptr ||
                 findContext<IR::P4Control>() != nullptr ||
                 findContext<IR::P4Program>() != nullptr)  // toplevel instantiation
-                currentPoint = ProgramPoint(func);
+                currentPoint = ProgramPoint();  // beforeStart: similar to a global function
             else
                 BUG("%1%: unexpected instantiation", decl);
             unreachable = false;
