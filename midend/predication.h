@@ -23,51 +23,67 @@ limitations under the License.
 namespace P4 {
 
 /**
-
 This pass operates on action bodies.  It converts 'if' statements to
 '?:' expressions, if possible.  Otherwise this pass will signal an
 error.  This pass should be used only on architectures that do not
 support conditionals in actions.
-
 For this to work all statements must be assignments or other ifs.
-
 if (e)
    a = f(b);
 else
    c = f(d);
-x = y;
-
 becomes (actual implementatation is slightly optimized):
-
-bool cond;
-bool predicate = true;
 {
-  bool predicate1;
-  cond = e;
-  predicate1 = predicate && cond;
-  a = predicate1 ? f(b) : a;
-  cond = !cond;
-  predicate1 = predicate && cond;
-  c = predicate ? f(d) : c;
+    a = e ? f(b) : a;
+    c = e ? c : f(d);
 }
-x = predicate ? y : x;
-
-Not the most efficient conversion currently.
-This could be made better by looking on both the "then" and "else"
-branches, but in this way we cannot have two side-effects in the same
-conditional statement.
-
 */
 class Predication final : public Transform {
-    NameGenerator* generator;
-    bool inside_action;
-    std::vector<cstring> predicateName;
-    unsigned ifNestingLevel;
+    class EmptyStatementRemover final : public Modifier {
+     public:
+        EmptyStatementRemover() {}
+        bool preorder(IR::BlockStatement * block) override;
+    };
 
-    const IR::Expression* predicate() const {
-        if (predicateName.empty())
-            return nullptr;
-        return new IR::PathExpression(IR::ID(predicateName.back())); }
+    /**
+     * Private Transformer only for Predication pass.
+     * This pass operates on nested Mux expressions(?:). 
+     * It replaces then and else expressions in Mux with 
+     * the appropriate expression from assignment.
+     */
+    class ExpressionReplacer final : public Transform {
+     private:
+        const IR::Expression * rightExpression;
+        const std::vector<bool>& travesalPath;
+        const Visitor::Context * context;
+        std::vector<const IR::Expression*> conditions;
+        unsigned currentNestingLevel = 0;
+     public:
+        explicit ExpressionReplacer(const IR::Expression * e,
+                                    std::vector<bool>& t,
+                                    const Visitor::Context * c)
+        : rightExpression(e), travesalPath(t), context(c)
+        { CHECK_NULL(e); }
+        const IR::Mux * preorder(IR::Mux * mux) override;
+        const IR::AssignmentStatement * preorder(IR::AssignmentStatement * statement) override;
+        void emplaceExpression(IR::Mux * mux);
+        void visitThen(IR::Mux * mux);
+        void visitElse(IR::Mux * mux);
+    };
+
+    EmptyStatementRemover remover;
+    IR::BlockStatement * currentBlock;
+    bool inside_action;
+    unsigned ifNestingLevel;
+    // Traverse path of nested if-else statements
+    // true at the end of the vector means that you are currently visiting 'then' branch'
+    // false at the end of the vector means that you are in the else branch of the if statement.
+    // Size of this vector is the current if nesting level.
+    std::vector<bool> travesalPath;
+    ordered_set<cstring> orderedNames;
+    std::vector<cstring> dependencies;
+    std::map<cstring, const IR::AssignmentStatement *> liveAssignments;
+
     const IR::Statement* error(const IR::Statement* statement) const {
         if (inside_action && ifNestingLevel > 0)
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
@@ -77,15 +93,19 @@ class Predication final : public Transform {
     }
 
  public:
-    explicit Predication(NameGenerator* generator) : generator(generator),
-            inside_action(false), ifNestingLevel(0)
+    explicit Predication(NameGenerator* generator) :
+        inside_action(false), ifNestingLevel(0)
     { CHECK_NULL(generator); setName("Predication"); }
-
     const IR::Expression* clone(const IR::Expression* expression);
+    const IR::Node* clone(const IR::AssignmentStatement* statement);
     const IR::Node* preorder(IR::IfStatement* statement) override;
     const IR::Node* preorder(IR::P4Action* action) override;
     const IR::Node* postorder(IR::P4Action* action) override;
-    const IR::Node* postorder(IR::AssignmentStatement* statement) override;
+    const IR::Node* preorder(IR::AssignmentStatement* statement) override;
+    // Assignment dependecy checkers
+    const IR::Node* preorder(IR::PathExpression* pathExpr) override;
+    const IR::Node* preorder(IR::Member* member) override;
+    const IR::Node* preorder(IR::ArrayIndex* arrInd) override;
     // The presence of other statements makes predication impossible to apply
     const IR::Node* postorder(IR::MethodCallStatement* statement) override
     { return error(statement); }
