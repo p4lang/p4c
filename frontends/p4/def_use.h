@@ -341,7 +341,7 @@ class Definitions : public IHasDbPrint {
     bool operator==(const Definitions& other) const;
     void dbprint(std::ostream& out) const {
         if (unreachable) {
-            out << "  Unreachable";
+            out << "  Unreachable" << std::endl;
         }
         if (definitions.empty())
             out << "  Empty definitions";
@@ -411,15 +411,18 @@ class ComputeWriteSet : public Inspector {
     bool                lhs;
     /// For each expression the location set it writes
     std::map<const IR::Expression*, const LocationSet*> writes;
+    bool                virtualMethod;  /// True if we are analyzing a virtual method
 
     /// Creates new visitor, but with same underlying data structures.
     /// Needed to visit some program fragments repeatedly.
     ComputeWriteSet(const ComputeWriteSet* source, ProgramPoint context, Definitions* definitions) :
             allDefinitions(source->allDefinitions), currentDefinitions(definitions),
             returnedDefinitions(nullptr), exitDefinitions(source->exitDefinitions),
-            callingContext(context), storageMap(source->storageMap), lhs(false) {
+            callingContext(context), storageMap(source->storageMap), lhs(false),
+            virtualMethod(false) {
         visitDagOnce = false;
     }
+    void visitVirtualMethods(const IR::IndexedVector<IR::Declaration> &locals);
     void enterScope(const IR::ParameterList* parameters,
                     const IR::IndexedVector<IR::Declaration>* locals,
                     ProgramPoint startPoint, bool clear = true);
@@ -442,7 +445,7 @@ class ComputeWriteSet : public Inspector {
     explicit ComputeWriteSet(AllDefinitions* allDefinitions) :
             allDefinitions(allDefinitions), currentDefinitions(nullptr),
             returnedDefinitions(nullptr), exitDefinitions(new Definitions()),
-            storageMap(allDefinitions->storageMap), lhs(false)
+            storageMap(allDefinitions->storageMap), lhs(false), virtualMethod(false)
     { CHECK_NULL(allDefinitions); visitDagOnce = false; }
 
     // expressions

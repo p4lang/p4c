@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2017 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,31 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-struct data {
-    bit<16>     a;
-};
-
-extern Virtual {
-    Virtual();
-    abstract bit<16> f();
-    abstract void g(inout data ix);
+extern X {
+    X();
+    abstract void a(inout bit<32> arg);
 }
 
-// User code
-control c(inout bit<16> p) {
-    Virtual() cntr = {
-        bit<16> f() {
-            return 1;
-        }
-        void g(inout data x) {
+control c(inout bit<32> y) {
+    X() x = {
+        void a(inout bit<32> arg) {
+            arg = arg + 1;
         }
     };
-
     apply {
+        x.a(y);
     }
 }
 
-control ctr(inout bit<16> x);
-package top(ctr ctrl);
+control cs(inout bit<32> arg);
+package top(cs _ctrl);
 
 top(c()) main;

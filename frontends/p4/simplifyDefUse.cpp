@@ -75,6 +75,7 @@ class FindUninitialized : public Inspector {
     HasUses*        hasUses;  // output
     /// If true the current statement is unreachable
     bool            unreachable;
+    bool            virtualMethod;
 
     const LocationSet* getReads(const IR::Expression* expression, bool nonNull = false) const {
         auto result = ::get(readLocations, expression);
@@ -103,14 +104,14 @@ class FindUninitialized : public Inspector {
             context(context), refMap(parent->definitions->storageMap->refMap),
             typeMap(parent->definitions->storageMap->typeMap),
             definitions(parent->definitions), lhs(false), currentPoint(context),
-            hasUses(parent->hasUses) { visitDagOnce = false; }
+            hasUses(parent->hasUses), virtualMethod(false) { visitDagOnce = false; }
 
  public:
     FindUninitialized(AllDefinitions* definitions, HasUses* hasUses) :
             refMap(definitions->storageMap->refMap),
             typeMap(definitions->storageMap->typeMap),
             definitions(definitions), lhs(false), currentPoint(),
-            hasUses(hasUses) {
+            hasUses(hasUses), virtualMethod(false) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(definitions);
         CHECK_NULL(hasUses);
         visitDagOnce = false; }
@@ -130,8 +131,8 @@ class FindUninitialized : public Inspector {
     }
 
     Definitions* getCurrentDefinitions() const {
-        LOG3("FU Current point is (after) " << currentPoint);
         auto defs = definitions->getDefinitions(currentPoint, true);
+        LOG3("FU Current point is (after) " << currentPoint << " definitions are " << defs);
         return defs;
     }
 
@@ -164,12 +165,7 @@ class FindUninitialized : public Inspector {
         LOG3("FU Visiting control " << control->name << "[" << control->id << "]");
         BUG_CHECK(context.isBeforeStart(), "non-empty context in FindUnitialized::P4Control");
         currentPoint = ProgramPoint(control);
-        for (auto d : control->controlLocals)
-            if (d->is<IR::Declaration_Instance>()) {
-                // visit virtual Function implementation if any
-                visit(d);
-            }
-        currentPoint = ProgramPoint(control);
+        visitVirtualMethods(control->controlLocals);
         unreachable = false;
         visit(control->body);
         checkOutParameters(
@@ -178,47 +174,59 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::Function* func) override {
-        if (auto decl = findContext<IR::Declaration_Instance>()) {
-            // virtual methods.  These are traversed individually at the beginning
-            // before the control/parser body.  We mark each as reachable.
-            if (findContext<IR::P4Control>() != nullptr ||
-                findContext<IR::P4Control>() != nullptr ||
-                findContext<IR::P4Program>() != nullptr)  // toplevel instantiation
-                currentPoint = ProgramPoint();  // beforeStart: similar to a global function
-            else
-                BUG("%1%: unexpected instantiation", decl);
+        auto originalContext = context;
+        if (virtualMethod) {
+            LOG3("Virtual method");
+            context = ProgramPoint(func);
             unreachable = false;
         }
         LOG3("FU Visiting function " << func->name << "[" << func->id <<
-             "] called by " << currentPoint);
+             "] called by " << context);
         LOG5(func);
-        auto callingContext = currentPoint;
         currentPoint = ProgramPoint(func);
         visit(func->body);
         bool checkReturn = !func->type->returnType->is<IR::Type_Void>();
         if (checkReturn) {
-            // The final definitions should be unreachable, otherwise
-            // we have not returned on all paths.
-            if (!getCurrentDefinitions()->isUnreachable())
-                ::error("Function '%1%' does not return a value on all paths", func);
+            auto defs = getCurrentDefinitions();
+            // The definitions after the body of the function should
+            // contain "unreachable", otherwise it means that we have
+            // not executed a 'return' on all possible paths.
+            if (!defs->isUnreachable())
+                ::error(ErrorType::ERR_INSUFFICIENT,
+                        "Function '%1%' does not return a value on all paths", func);
         }
 
-        currentPoint = callingContext;  // We want the definitions after the function has completed,
-                                        // not after the last statement.
-        LOG3("Calling context " << currentPoint);
+        currentPoint = context;
+        // We now check the out parameters using the definitions
+        // produced *after* the function has completed.
+        LOG3("Context after function " << currentPoint);
         auto current = getCurrentDefinitions();
         checkOutParameters(func, func->type->parameters, current);
+        context = originalContext;
         return false;
+    }
+
+    void visitVirtualMethods(const IR::IndexedVector<IR::Declaration> &locals) {
+        // We don't really know when virtual methods may be called, so
+        // we visit them proactively once as if they are top-level functions.
+        // During this visit the 'virtualMethod' flag is 'true'.
+        // We may visit them also when they are invoked by a callee, but
+        // at that time the 'virtualMethod' flag will be false.
+        auto saveContext = context;
+        for (auto l : locals) {
+            if (auto li = l->to<IR::Declaration_Instance>()) {
+                if (li->initializer) {
+                    virtualMethod = true;
+                    visit(li->initializer);
+                    virtualMethod = false;
+                }}}
+        context = saveContext;
     }
 
     bool preorder(const IR::P4Parser* parser) override {
         LOG3("FU Visiting parser " << parser->name << "[" << parser->id << "]");
         currentPoint = ProgramPoint(parser);
-        for (auto d : parser->parserLocals)
-            if (d->is<IR::Declaration_Instance>()) {
-                // visit virtual Function implementation if any
-                visit(d);
-            }
+        visitVirtualMethods(parser->parserLocals);
         visit(parser->states, "states");
         unreachable = false;
         auto accept = ProgramPoint(parser->getDeclByName(IR::ParserState::accept)->getNode());
@@ -469,7 +477,9 @@ class FindUninitialized : public Inspector {
                 auto table = am->object->to<IR::P4Table>();
                 callee.push_back(table);
             }
-            // skip control apply calls...
+            // skip control apply calls; we summarize their
+            // effects by assuming they write all out parameters
+            // and read all in parameters
         } else if (auto em = mi->to<ExternMethod>()) {
             LOG4("##call to extern " << expression);
             callee = em->mayCall(); }
@@ -481,6 +491,7 @@ class FindUninitialized : public Inspector {
                 (void)c->getNode()->apply(fu);
         }
 
+        LOG3("Summarizing call effect on arguments at " << currentPoint);
         for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
             auto expr = mi->substitution.lookup(p);
             if (p->direction == IR::Direction::Out) {

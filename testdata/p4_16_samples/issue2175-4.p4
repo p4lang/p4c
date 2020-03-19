@@ -14,21 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+// In arch file
 struct data {
     bit<16>     a;
 };
-
 extern Virtual {
     Virtual();
-    abstract bit<16> f();
+    // abstract methods must be implemented
+    // by the users
+    abstract bit<16> f(in bit<16> ix);
     abstract void g(inout data ix);
 }
 
 // User code
 control c(inout bit<16> p) {
-    Virtual() cntr = {
-        bit<16> f() {
-            return 1;
+    Virtual() cntr = {  // implementation
+        bit<16> f(in bit<16> ix) {  // abstract method implementation
+            return (ix + 1);
         }
         void g(inout data x) {
         }

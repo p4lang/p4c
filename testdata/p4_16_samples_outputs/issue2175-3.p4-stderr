@@ -1,0 +1,6 @@
+issue2175-3.p4(7): [--Wwarn=unused] warning: c1_x: unused instance
+    X() c1_x = {
+        ^^^^
+issue2175-3.p4(12): [--Wwarn=unused] warning: c2_x: unused instance
+    X() c2_x = {
+        ^^^^
