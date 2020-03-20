@@ -196,7 +196,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::IfStatement* statement) {
 const IR::Node* DoRemoveReturns::preorder(IR::SwitchStatement* statement) {
     auto r = Returns::No;
     push();
-    for (auto swCase: statement->cases) {
+    for (auto &swCase: statement->cases) {
         push();
         visit(swCase);
         if (hasReturned() != Returns::No)

@@ -36,6 +36,7 @@ parser p(packet_in pkt, out Parsed_packet hdr, inout Metadata meta, inout standa
 }
 
 control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
+    bool hasReturned;
     @name(".NoAction") action NoAction_0() {
     }
     @name("ingress.do_something") action do_something() {
@@ -51,8 +52,26 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
         }
         default_action = NoAction_0();
     }
+    @hidden action issue2170bmv2l73() {
+        hasReturned = true;
+    }
+    @hidden action act() {
+        hasReturned = false;
+    }
     @hidden action issue2170bmv2l77() {
         hdr.h.a = 8w0;
+    }
+    @hidden table tbl_act {
+        actions = {
+            act();
+        }
+        const default_action = act();
+    }
+    @hidden table tbl_issue2170bmv2l73 {
+        actions = {
+            issue2170bmv2l73();
+        }
+        const default_action = issue2170bmv2l73();
     }
     @hidden table tbl_issue2170bmv2l77 {
         actions = {
@@ -61,15 +80,18 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
         const default_action = issue2170bmv2l77();
     }
     apply {
+        tbl_act.apply();
         switch (simple_table_0.apply().action_run) {
             NoAction_0: {
-                return;
+                tbl_issue2170bmv2l73.apply();
             }
             default: {
             }
         }
 
-        tbl_issue2170bmv2l77.apply();
+        if (!hasReturned) {
+            tbl_issue2170bmv2l77.apply();
+        }
     }
 }
 
