@@ -21,6 +21,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
+#include "frontends/p4/sideEffects.h"
 
 namespace P4 {
 
@@ -58,6 +59,12 @@ class DoStrengthReduction final : public Transform {
 
     const IR::Node* simplifyShift(IR::Slice* expr);
     const IR::Node* simplifyConcat(IR::Slice* expr);
+    /// Used to determine conservatively if an expression
+    /// has side-effects.  If we had a refMap or a typeMap
+    /// we could use them here.
+    bool hasSideEffects(const IR::Expression* expr) const {
+        return SideEffects::check(expr, nullptr, nullptr);
+    }
 
  public:
     DoStrengthReduction() { visitDagOnce = true; setName("StrengthReduction"); }
