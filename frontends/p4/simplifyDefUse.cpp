@@ -204,9 +204,11 @@ class FindUninitialized : public Inspector {
         unreachable = false;
         auto accept = ProgramPoint(parser->getDeclByName(IR::ParserState::accept)->getNode());
         auto acceptdefs = definitions->getDefinitions(accept, true);
-        if (!acceptdefs->empty())
-            // acceptdefs is empty when the accept state is unreachable
-            checkOutParameters(parser, parser->getApplyMethodType()->parameters, acceptdefs);
+        auto reject = ProgramPoint(parser->getDeclByName(IR::ParserState::reject)->getNode());
+        auto rejectdefs = definitions->getDefinitions(reject, true);
+
+        auto outputDefs = acceptdefs->joinDefinitions(rejectdefs);
+        checkOutParameters(parser, parser->getApplyMethodType()->parameters, outputDefs);
         return false;
     }
 
