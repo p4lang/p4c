@@ -7,7 +7,7 @@ struct headers {
 extern void f(headers h);
 control c() {
     apply {
-        f(headers {x = 32w5});
+        f((headers){x = 32w5});
     }
 }
 

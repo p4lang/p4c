@@ -5,8 +5,13 @@ struct S {
 
 control c(out bit<1> b) {
     apply {
+<<<<<<< HEAD
         S s = S {a = 1w0,b = 1w1};
         s = S {a = s.b,b = s.a};
+=======
+        S s = (S){a = 1w0,b = 1w1};
+        s = (S){a = s.b,b = s.a};
+>>>>>>> Change struct-valued expression to use type-cast syntax
         b = s.a;
     }
 }

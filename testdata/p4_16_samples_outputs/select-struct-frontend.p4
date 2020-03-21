@@ -10,7 +10,11 @@ parser p() {
     S s_0;
     state start {
         x_0 = 8w5;
+<<<<<<< HEAD
         s_0 = S {f0 = 8w0,f1 = 8w0};
+=======
+        s_0 = (S){f0 = 8w0,f1 = 8w0};
+>>>>>>> Change struct-valued expression to use type-cast syntax
         transition select(x_0, x_0, { x_0, x_0 }, x_0) {
             (8w0, 8w0, { 8w0, 8w0 }, 8w0): accept;
             (8w1, 8w1, default, 8w1): accept;

@@ -20,7 +20,11 @@ parser P(packet_in b, out Headers p, inout Metadata meta, inout standard_metadat
 control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_t standard_meta) {
     register<S>(32w100) r;
     apply {
+<<<<<<< HEAD
         S s = S {f = 32w0};
+=======
+        S s = (S){f = 32w0};
+>>>>>>> Change struct-valued expression to use type-cast syntax
         r.write(32w0, s);
     }
 }

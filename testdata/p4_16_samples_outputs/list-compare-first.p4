@@ -14,9 +14,13 @@ package top(c _c);
 control test(out bool zout) {
     apply {
         tuple<bit<32>, bit<32>> p = { 32w4, 32w5 };
+<<<<<<< HEAD
         S q = S {l = 32w2,r = 32w3};
+=======
+        S q = (S){l = 32w2,r = 32w3};
+>>>>>>> Change struct-valued expression to use type-cast syntax
         zout = p == { 32w4, 32w5 };
-        zout = zout && q == S {l = 32w2,r = 32w3};
+        zout = zout && q == (S){l = 32w2,r = 32w3};
     }
 }
 

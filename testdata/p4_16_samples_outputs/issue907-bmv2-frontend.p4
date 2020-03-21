@@ -21,7 +21,11 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
     S s_0;
     @name("Ing.r") register<S>(32w100) r_0;
     apply {
+<<<<<<< HEAD
         s_0 = S {f = 32w0};
+=======
+        s_0 = (S){f = 32w0};
+>>>>>>> Change struct-valued expression to use type-cast syntax
         r_0.write(32w0, s_0);
     }
 }

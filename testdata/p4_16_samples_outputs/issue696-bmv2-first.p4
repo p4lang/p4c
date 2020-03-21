@@ -61,7 +61,11 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
 
 control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t standard_meta) {
     action test() {
+<<<<<<< HEAD
         Value val = Value {field1 = 32w0};
+=======
+        Value val = (Value){field1 = 32w0};
+>>>>>>> Change struct-valued expression to use type-cast syntax
         bool _pred = val.field1 != 32w0;
         bit<32> inc = (_pred ? 32w1 : 32w0);
         debug.write(32w0, (_pred ? 32w1 : 32w0));
