@@ -36,6 +36,7 @@ class CreateStructInitializers : public Transform {
     const IR::Node* postorder(IR::AssignmentStatement* statement) override;
     const IR::Node* postorder(IR::MethodCallExpression* expression) override;
     const IR::Node* postorder(IR::Operation_Relation* expression) override;
+    const IR::Node* postorder(IR::Declaration_Variable* statement) override;
 };
 
 class StructInitializers : public PassManager {
