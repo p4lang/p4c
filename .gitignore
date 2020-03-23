@@ -25,6 +25,7 @@ build/
 .cproject
 .project
 .settings
+.vscode
 
 #vim swaps
 .*.swp
