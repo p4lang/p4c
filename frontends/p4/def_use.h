@@ -198,8 +198,6 @@ class LocationSet : public IHasDbPrint {
 class StorageMap {
     /// Storage location for each declaration.
     std::map<const IR::IDeclaration*, StorageLocation*> storage;
-    /// Storage location for the return value in the current function
-    StorageLocation* retVal;
     StorageFactory factory;
 
  public:
@@ -207,7 +205,7 @@ class StorageMap {
     TypeMap*       typeMap;
 
     StorageMap(ReferenceMap* refMap, TypeMap* typeMap) :
-            retVal(nullptr), factory(typeMap), refMap(refMap), typeMap(typeMap)
+            factory(typeMap), refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
     StorageLocation* add(const IR::IDeclaration* decl) {
         CHECK_NULL(decl);
@@ -216,16 +214,6 @@ class StorageMap {
         if (loc != nullptr)
             storage.emplace(decl, loc);
         return loc;
-    }
-    /// Creates a storage location representing the returned
-    /// value from a function.  The actual type does not really matter,
-    /// since this value is always returned entirely.
-    StorageLocation* addRetVal() {
-        return retVal = factory.create(IR::Type::Boolean::get(), "$retval");
-    }
-    const BaseLocation* getRetVal() const {
-        CHECK_NULL(retVal);
-        return retVal->to<BaseLocation>();
     }
     StorageLocation* getOrAdd(const IR::IDeclaration* decl) {
         auto s = getStorage(decl);
@@ -241,8 +229,6 @@ class StorageMap {
     virtual void dbprint(std::ostream& out) const {
         for (auto &it : storage)
             out << it.first << ": " << it.second << std::endl;
-        if (retVal)
-            out << "retVal: " << retVal << std::endl;
     }
 };
 
@@ -329,8 +315,7 @@ class Definitions : public IHasDbPrint {
     /// Set of program points that have written last to each location
     /// (conservative approximation).
     std::map<const BaseLocation*, const ProgramPoints*> definitions;
-    /// If true the current program point is actually unreachable and
-    /// it's definitions should not matter.
+    /// If true the current program point is actually unreachable.
     bool unreachable;
 
  public:
@@ -350,14 +335,13 @@ class Definitions : public IHasDbPrint {
     { return definitions.find(location) != definitions.end(); }
     const ProgramPoints* getPoints(const BaseLocation* location) const {
         auto r = ::get(definitions, location);
-        BUG_CHECK(r != nullptr, "%1%: no definitions", location);
+        BUG_CHECK(r != nullptr, "no definitions found for %1%", location);
         return r; }
     const ProgramPoints* getPoints(const LocationSet* locations) const;
     bool operator==(const Definitions& other) const;
     void dbprint(std::ostream& out) const {
         if (unreachable) {
-            out << "  Unreachable";
-            return;
+            out << "  Unreachable" << std::endl;
         }
         if (definitions.empty())
             out << "  Empty definitions";
@@ -414,6 +398,7 @@ class AllDefinitions : public IHasDbPrint {
  * @pre Must be executed after variable initializers have been removed.
  *
  */
+
 class ComputeWriteSet : public Inspector {
  protected:
     AllDefinitions*     allDefinitions;  /// Result computed by this pass.
@@ -426,15 +411,18 @@ class ComputeWriteSet : public Inspector {
     bool                lhs;
     /// For each expression the location set it writes
     std::map<const IR::Expression*, const LocationSet*> writes;
+    bool                virtualMethod;  /// True if we are analyzing a virtual method
 
     /// Creates new visitor, but with same underlying data structures.
     /// Needed to visit some program fragments repeatedly.
     ComputeWriteSet(const ComputeWriteSet* source, ProgramPoint context, Definitions* definitions) :
             allDefinitions(source->allDefinitions), currentDefinitions(definitions),
             returnedDefinitions(nullptr), exitDefinitions(source->exitDefinitions),
-            callingContext(context), storageMap(source->storageMap), lhs(false) {
+            callingContext(context), storageMap(source->storageMap), lhs(false),
+            virtualMethod(false) {
         visitDagOnce = false;
     }
+    void visitVirtualMethods(const IR::IndexedVector<IR::Declaration> &locals);
     void enterScope(const IR::ParameterList* parameters,
                     const IR::IndexedVector<IR::Declaration>* locals,
                     ProgramPoint startPoint, bool clear = true);
@@ -457,7 +445,7 @@ class ComputeWriteSet : public Inspector {
     explicit ComputeWriteSet(AllDefinitions* allDefinitions) :
             allDefinitions(allDefinitions), currentDefinitions(nullptr),
             returnedDefinitions(nullptr), exitDefinitions(new Definitions()),
-            storageMap(allDefinitions->storageMap), lhs(false)
+            storageMap(allDefinitions->storageMap), lhs(false), virtualMethod(false)
     { CHECK_NULL(allDefinitions); visitDagOnce = false; }
 
     // expressions

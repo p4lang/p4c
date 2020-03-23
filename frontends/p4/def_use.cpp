@@ -464,7 +464,7 @@ bool ComputeWriteSet::setDefinitions(Definitions* defs, const IR::Node* node) {
     currentDefinitions = defs;
     auto point = getProgramPoint(node);
     allDefinitions->setDefinitionsAt(point, currentDefinitions);
-    LOG3("Definitions at " << point << " are " << std::endl << defs);
+    LOG3("CWS Definitions at " << point << " are " << std::endl << defs);
     return false;  // always returns false
 }
 
@@ -705,16 +705,24 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
 //////////////////////////
 /// Statements and other control structures
 
+void ComputeWriteSet::visitVirtualMethods(const IR::IndexedVector<IR::Declaration> &locals) {
+    for (auto l : locals) {
+        if (auto li = l->to<IR::Declaration_Instance>()) {
+            if (li->initializer) {
+                virtualMethod = true;
+                // This is a blockStatement that contains all abstract method implementations
+                visit(li->initializer);
+                virtualMethod = false;
+            }}}
+}
+
 // Symbolic execution of the parser
 bool ComputeWriteSet::preorder(const IR::P4Parser* parser) {
     LOG3("CWS Visiting " << dbp(parser));
     auto startState = parser->getDeclByName(IR::ParserState::start)->to<IR::ParserState>();
     auto startPoint = ProgramPoint(startState);
     enterScope(parser->getApplyParameters(), &parser->parserLocals, startPoint);
-    for (auto l : parser->parserLocals) {
-        if (l->is<IR::Declaration_Instance>())
-            visit(l);  // process virtual Functions if any
-    }
+    visitVirtualMethods(parser->parserLocals);
 
     ParserCallGraph transitions("transitions");
     ComputeParserCG pcg(storageMap->refMap, &transitions);
@@ -758,10 +766,7 @@ bool ComputeWriteSet::preorder(const IR::P4Control* control) {
     enterScope(control->getApplyParameters(), &control->controlLocals, startPoint);
     exitDefinitions = new Definitions();
     returnedDefinitions = new Definitions();
-    for (auto l : control->controlLocals) {
-        if (l->is<IR::Declaration_Instance>())
-            visit(l);  // process virtual Functions if any
-    }
+    visitVirtualMethods(control->controlLocals);
     visit(control->body);
     auto returned = currentDefinitions->joinDefinitions(returnedDefinitions);
     auto exited = returned->joinDefinitions(exitDefinitions);
@@ -901,24 +906,25 @@ class GetDeclarations : public Inspector {
 }  // namespace
 
 bool ComputeWriteSet::preorder(const IR::Function* function) {
-    LOG3("CWS Visiting " << dbp(function));
+    auto originalContext = callingContext;
+    if (virtualMethod)
+        callingContext = ProgramPoint(function);
+
+    LOG3("CWS Visiting " << dbp(function) << " called from " << callingContext);
     auto point = ProgramPoint(function);
     auto locals = GetDeclarations::get(function->body);
     auto saveReturned = returnedDefinitions;
     enterScope(function->type->parameters, locals, point, false);
 
-    // The return value is uninitialized
-    auto uninit = new ProgramPoints(ProgramPoint::beforeStart);
-    auto retVal = allDefinitions->storageMap->addRetVal();
-    currentDefinitions->setDefinition(retVal, uninit);
-
     returnedDefinitions = new Definitions();
     visit(function->body);
     currentDefinitions = currentDefinitions->joinDefinitions(returnedDefinitions);
+    LOG3("CWS @ " << callingContext << "=" << currentDefinitions);
     allDefinitions->setDefinitionsAt(callingContext, currentDefinitions);
     exitScope(function->type->parameters, locals);
 
     returnedDefinitions = saveReturned;
+    callingContext = originalContext;
     LOG3("Done " << dbp(function));
     return false;
 }

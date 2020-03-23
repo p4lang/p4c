@@ -1,0 +1,3 @@
+issue2175-1.p4(29): [--Wwarn=unused] warning: cntr: unused instance
+    Virtual() cntr = {
+              ^^^^
