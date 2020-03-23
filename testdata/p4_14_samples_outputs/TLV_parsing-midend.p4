@@ -101,7 +101,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition parse_ipv4_options;
     }
     @name(".parse_ipv4_option_NOP") state parse_ipv4_option_NOP {
-        packet.extract<ipv4_option_EOL_t>(hdr.ipv4_option_NOP.next);
+        packet.extract<ipv4_option_NOP_t>(hdr.ipv4_option_NOP.next);
         meta._my_metadata_parse_ipv4_counter0 = meta._my_metadata_parse_ipv4_counter0 + 8w255;
         transition parse_ipv4_options;
     }
@@ -196,9 +196,9 @@ control DeparserImpl(packet_out packet, in headers hdr) {
         packet.emit<ipv4_option_EOL_t>(hdr.ipv4_option_EOL[0]);
         packet.emit<ipv4_option_EOL_t>(hdr.ipv4_option_EOL[1]);
         packet.emit<ipv4_option_EOL_t>(hdr.ipv4_option_EOL[2]);
-        packet.emit<ipv4_option_EOL_t>(hdr.ipv4_option_NOP[0]);
-        packet.emit<ipv4_option_EOL_t>(hdr.ipv4_option_NOP[1]);
-        packet.emit<ipv4_option_EOL_t>(hdr.ipv4_option_NOP[2]);
+        packet.emit<ipv4_option_NOP_t>(hdr.ipv4_option_NOP[0]);
+        packet.emit<ipv4_option_NOP_t>(hdr.ipv4_option_NOP[1]);
+        packet.emit<ipv4_option_NOP_t>(hdr.ipv4_option_NOP[2]);
         packet.emit<ipv4_option_security_t>(hdr.ipv4_option_security);
         packet.emit<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp);
     }
@@ -222,7 +222,7 @@ struct tuple_0 {
     bit<32>                 field_8;
     bit<32>                 field_9;
     ipv4_option_security_t  field_10;
-    ipv4_option_EOL_t       field_11;
+    ipv4_option_NOP_t       field_11;
     ipv4_option_timestamp_t field_12;
 }
 

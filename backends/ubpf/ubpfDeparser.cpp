@@ -60,7 +60,6 @@ namespace UBPF {
         { return illegal(statement); }
         bool preorder(const IR::ExitStatement* statement) override
         { return illegal(statement); }
-        bool preorder(const IR::BlockStatement* statement) override {}
         bool preorder(const IR::MethodCallStatement* statement) override {
             LOG5("Calculate OutHeaderSize");
             auto &p4lib = P4::P4CoreLibrary::instance;
@@ -355,4 +354,3 @@ namespace UBPF {
         controlBlock->container->body->apply(*codeGen);
     }
 }
-

@@ -21,7 +21,6 @@ EbpfOptions::EbpfOptions() {
                 "Use IR representation from JsonFile dumped previously,"
                 "the compilation starts with reduced midEnd.");
         registerOption("--emit-externs", nullptr,
-                [this](const char* arg) { emitExterns = true; return true; },
+                [this](const char*) { emitExterns = true; return true; },
                 "[ebpf back-end] Allow for user-provided implementation of extern functions.");
 }
-
