@@ -2317,7 +2317,7 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
                 setType(type, new IR::Type_Type(st));
                 auto sie = new IR::StructInitializerExpression(
                     se->srcInfo, type, se->components);
-                auto result = postorder(sie); // may insert casts
+                auto result = postorder(sie);  // may insert casts
                 setType(result, st);
                 return result;
             } else {
