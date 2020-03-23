@@ -196,10 +196,14 @@ const IR::Node* DoRemoveReturns::preorder(IR::IfStatement* statement) {
 const IR::Node* DoRemoveReturns::preorder(IR::SwitchStatement* statement) {
     auto r = Returns::No;
     push();
-    parallel_visit(statement->cases, "cases", 1);
-    if (hasReturned() != Returns::No)
-        // this is conservative: we don't check if we cover all labels.
-        r = Returns::Maybe;
+    for (auto &swCase : statement->cases) {
+        push();
+        visit(swCase);
+        if (hasReturned() != Returns::No)
+            // this is conservative: we don't check if we cover all labels.
+            r = Returns::Maybe;
+        pop();
+    }
     pop();
     set(r);
     prune();
