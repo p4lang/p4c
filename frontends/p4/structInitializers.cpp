@@ -85,6 +85,16 @@ const IR::Node* CreateStructInitializers::postorder(IR::AssignmentStatement* sta
     return statement;
 }
 
+const IR::Node* CreateStructInitializers::postorder(IR::Declaration_Variable* decl) {
+    if (decl->initializer == nullptr)
+        return decl;
+    auto type = typeMap->getTypeType(decl->type, true);
+    auto init = convert(decl->initializer, type);
+    if (init != decl->initializer)
+        decl->initializer = init;
+    return decl;
+}
+
 const IR::Node* CreateStructInitializers::postorder(IR::MethodCallExpression* expression) {
     auto mi = MethodInstance::resolve(expression, refMap, typeMap);
     auto result = expression;
