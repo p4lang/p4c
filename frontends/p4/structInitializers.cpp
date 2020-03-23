@@ -13,10 +13,41 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
 #include "structInitializers.h"
 
 namespace P4 {
+const IR::Expression*
+convert(const IR::Expression* expression, const IR::Type* type);
+
+const IR::Expression* defaultValue(const IR::Type* type, const Util::SourceInfo srcInfo) {
+    IR::Expression* expr;
+    if (type->is<IR::Type_Bits>()) {
+        expr = new IR::Constant(type, 0);
+    } else if (type->is<IR::Type_Boolean>()) {
+        expr = new IR::BoolLiteral(false);
+    } else if (type->is<IR::Type_Error>()) {
+        auto path = new IR::Path(IR::ID(srcInfo, "error"));
+        auto typeName =  new IR::Type_Name(srcInfo, path);
+        auto id = new IR::ID(srcInfo, "NoError");
+        auto tne = new IR::TypeNameExpression(srcInfo, typeName);
+        expr = new IR::Member(srcInfo, tne, *id);
+    } else if (auto t = type->to<IR::Type_Enum>()) {
+        BUG_CHECK(t->members.size(), "unknown default value for enum with no members");
+        auto tne = new IR::TypeNameExpression(srcInfo,
+                                               new IR::Type_Name(t->name));
+        expr = new IR::Member(srcInfo, tne, t->members.at(0)->name);
+    } else if (auto t = type->to<IR::Type_SerEnum>()) {
+        expr = new IR::Constant(t->type, 0);
+    } else if (type->is<IR::Type_StructLike>() || type->is<IR::Type_BaseList>()) {
+        auto vec = new IR::Vector<IR::Expression>();
+        auto conv = convert(new IR::ListExpression(srcInfo, *vec, true), type);
+        return conv;
+    } else {
+        ::error(ErrorType::ERR_TYPE_ERROR,
+                "%1%: Unknown default value for type %2%", srcInfo, type);
+    }
+    return expr;
+}
 
 /// Given an expression and a destination type, convert ListExpressions
 /// that occur within expression to StructInitializerExpression if the
@@ -28,28 +59,61 @@ convert(const IR::Expression* expression, const IR::Type* type) {
         auto si = new IR::IndexedVector<IR::NamedExpression>();
         if (auto le = expression->to<IR::ListExpression>()) {
             size_t index = 0;
+            auto l = le->size();
             for (auto f : st->fields) {
+                if (index >= l) {
+                    break;
+                }
                 auto expr = le->components.at(index);
                 auto conv = convert(expr, f->type);
                 auto ne = new IR::NamedExpression(conv->srcInfo, f->name, conv);
                 si->push_back(ne);
                 index++;
             }
+            if (le->defaultInitializer) {
+                const IR::Expression* expr;
+                modified = true;
+                for (; index < st->fields.size(); index++) {
+                    auto f = st->fields.at(index);
+                    expr = defaultValue(f->type, expression->srcInfo);
+                    auto ne = new IR::NamedExpression(expression->srcInfo, f->name, expr);
+                    si->push_back(ne);
+                }
+            }
             auto type = st->getP4Type()->to<IR::Type_Name>();
             auto result = new IR::StructInitializerExpression(
                 expression->srcInfo, type, type, *si);
             return result;
         } else if (auto sli = expression->to<IR::StructInitializerExpression>()) {
-            for (auto f : st->fields) {
-                auto ne = sli->components.getDeclaration<IR::NamedExpression>(f->name.name);
-                BUG_CHECK(ne != nullptr, "%1%: no initializer for %2%", expression, f);
-                auto convNe = convert(ne->expression, f->type);
-                if (convNe != ne->expression)
-                    modified = true;
-                ne = new IR::NamedExpression(ne->srcInfo, f->name, convNe);
-                si->push_back(ne);
+            if (!sli->defaultInitializer) {
+                for (auto f : st->fields) {
+                    auto ne = sli->components.getDeclaration<IR::NamedExpression>(f->name.name);
+                    BUG_CHECK(ne != nullptr, "%1%: no initializer for %2%", expression, f);
+                    auto convNe = convert(ne->expression, f->type);
+                    if (convNe != ne->expression)
+                        modified = true;
+                    ne = new IR::NamedExpression(ne->srcInfo, f->name, convNe);
+                    si->push_back(ne);
+                }
+            } else {
+                const IR::Expression* expr;
+                modified = true;
+                for (auto f : st->fields) {
+                    auto ne = sli->components.getDeclaration<IR::NamedExpression>(f->name.name);
+                    if (ne == nullptr) {
+                        expr = defaultValue(f->type, expression->srcInfo);
+                        auto ne = new IR::NamedExpression(expression->srcInfo, f->name, expr);
+                        si->push_back(ne);
+                    } else {
+                        auto convNe = convert(ne->expression, f->type);
+                        if (convNe != ne->expression)
+                            modified = true;
+                        ne = new IR::NamedExpression(ne->srcInfo, f->name, convNe);
+                        si->push_back(ne);
+                    }
+                }
             }
-            if (modified || sli->type->is<IR::Type_Unknown>()) {
+            if (modified || sli->type->is<IR::Type_UnknownStruct>()) {
                 auto type = st->getP4Type()->to<IR::Type_Name>();
                 auto result = new IR::StructInitializerExpression(
                     expression->srcInfo, type, type, *si);
@@ -60,14 +124,24 @@ convert(const IR::Expression* expression, const IR::Type* type) {
         auto le = expression->to<IR::ListExpression>();
         if (le == nullptr)
             return expression;
-
         auto vec = new IR::Vector<IR::Expression>();
-        for (size_t i = 0; i < le->size(); i++) {
-            auto expr = le->components.at(i);
-            auto type = tup->components.at(i);
+        size_t index = 0;
+        auto l = le->size();
+        for ( ; index < l; index++) {
+            auto expr = le->components.at(index);
+            auto type = tup->components.at(index);
             auto conv = convert(expr, type);
             vec->push_back(conv);
             modified |= (conv != expr);
+        }
+        if (le->defaultInitializer) {
+            const IR::Expression* expr;
+            modified = true;
+            for ( ; index < tup->components.size(); index++) {
+                auto f = tup->components.at(index);
+                expr = defaultValue(f, expression->srcInfo);
+                vec->push_back(expr);
+            }
         }
         if (modified) {
             auto result = new IR::ListExpression(expression->srcInfo, *vec);
@@ -75,14 +149,6 @@ convert(const IR::Expression* expression, const IR::Type* type) {
         }
     }
     return expression;
-}
-
-const IR::Node* CreateStructInitializers::postorder(IR::AssignmentStatement* statement) {
-    auto type = typeMap->getType(statement->left);
-    auto init = convert(statement->right, type);
-    if (init != statement->right)
-        statement->right = init;
-    return statement;
 }
 
 const IR::Node* CreateStructInitializers::postorder(IR::MethodCallExpression* expression) {
@@ -122,6 +188,14 @@ const IR::Node* CreateStructInitializers::postorder(IR::Operation_Relation* expr
     if (rtype->is<IR::Type_StructLike>() && ltype->is<IR::Type_List>())
         expression->left = convert(expression->left, rtype);
     return expression;
+}
+
+const IR::Node* CreateStructAssignInitializers::postorder(IR::AssignmentStatement* statement) {
+    auto type = typeMap->getType(statement->left);
+    auto init = convert(statement->right, type);
+    if (init != statement->right)
+        statement->right = init;
+    return statement;
 }
 
 }  // namespace P4

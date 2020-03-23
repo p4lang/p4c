@@ -1,0 +1,28 @@
+default-initializer-err.p4(35): [--Werror=type-error] error: AssignmentStatement: Structs, headers and tuples containing varbit<8> fields cannot be initialized using ...: header H = {...}.
+        sb = { b = false, h={3, true, ...}, ...};
+           ^
+default-initializer-err.p4(13)
+    varbit<8> v;
+    ^^^^^^^^^
+default-initializer-err.p4(8)
+header H {
+       ^
+default-initializer-err.p4(36): [--Werror=type-error] error: hb: Structs, headers and tuples containing varbit<8> fields cannot be initialized using ...: header H = {...}.
+        H hb = ...;
+        ^^^^^^^^^^^
+default-initializer-err.p4(13)
+    varbit<8> v;
+    ^^^^^^^^^
+default-initializer-err.p4(8)
+header H {
+       ^
+default-initializer-err.p4(39): [--Werror=type-error] error: x: Structs, headers and tuples containing varbit<8> fields cannot be initialized using ...: header H = {...}.
+        tuple<int<8>, bool, error, myEnum1, myEnum, H, S> x = { 0, true, ... };
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+default-initializer-err.p4(13)
+    varbit<8> v;
+    ^^^^^^^^^
+default-initializer-err.p4(8)
+header H {
+       ^
+

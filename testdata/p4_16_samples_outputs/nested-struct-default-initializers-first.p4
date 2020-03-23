@@ -42,16 +42,19 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     apply {
-        meta.s1 = mystruct1_t {f1 = 16w2,f2 = 8w3};
+        meta.s1 = { ... };
         meta.s2.s1 = meta.s1;
-        meta.s2 = mystruct2_t {s1 = meta.s1,f3 = 16w5,f4 = 32w8};
-        meta.s2 = mystruct2_t {s1 = {f1 = 16w2,f2 = 8w3},f3 = 16w5,f4 = 32w8};
+        meta.s2 = mystruct2_t {s1 = {f1 = 2, ... }, ... };
         stdmeta.egress_spec = (bit<9>)meta.s2.s1.f2;
     }
 }
 
 control egressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
+    metadata_t meta_a = { ... };
+    ethernet_t eth_a = { 0, ... };
     apply {
+        hdr.ethernet = eth_a;
+        meta = meta_a;
     }
 }
 

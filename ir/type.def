@@ -268,6 +268,16 @@ class Type_Struct : Type_StructLike {
 /// and some information about their types.
 class Type_UnknownStruct : Type_StructLike {
 #nodbprint
+    bool defaultInitializer = false;
+    Type_UnknownStruct(Util::SourceInfo srcInfo, IR::ID name, IR::IndexedVector<IR::StructField>& fields, bool defaultInitializer)
+                       : Type_StructLike(srcInfo, name, fields), defaultInitializer(defaultInitializer) {
+        validate();
+    }
+
+    Type_UnknownStruct(Util::SourceInfo srcInfo, IR::ID name, const IR::Annotations* annotations, const IR::IndexedVector<IR::StructField>& fields, bool defaultInitializer)
+                       : Type_StructLike(srcInfo, name, annotations, fields), defaultInitializer(defaultInitializer) {
+        validate();
+    }
 }
 
 class Type_HeaderUnion : Type_StructLike {
@@ -316,6 +326,16 @@ abstract Type_BaseList : Type {
 
 /// The type of an expressionList; can be unified with both Type_Tuple and Type_Struct
 class Type_List : Type_BaseList {
+    bool defaultInitializer = false;
+
+    Type_List(IR::Vector<IR::Type>& components, bool defaultInitializer) : Type_BaseList(components), defaultInitializer(defaultInitializer) {
+        validate();
+    }
+
+    Type_List(Util::SourceInfo srcInfo, IR::Vector<IR::Type>& components, bool defaultInitializer) : Type_BaseList(srcInfo, components), defaultInitializer(defaultInitializer) {
+        validate();
+    }
+
     // In error messages this is shown as if it is a Tuple
     toString{ return "Tuple(" + Util::toString(components.size()) + ")"; }
     const Type* getP4Type() const override;

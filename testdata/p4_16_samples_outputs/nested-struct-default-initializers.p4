@@ -1,7 +1,8 @@
 #include <core.p4>
 #include <v1model.p4>
 
-typedef bit<48> EthernetAddress;
+typedef bit<48>  EthernetAddress;
+
 header ethernet_t {
     EthernetAddress dstAddr;
     EthernetAddress srcAddr;
@@ -9,7 +10,7 @@ header ethernet_t {
 }
 
 struct headers_t {
-    ethernet_t ethernet;
+    ethernet_t    ethernet;
 }
 
 struct mystruct1_t {
@@ -19,8 +20,8 @@ struct mystruct1_t {
 
 struct mystruct2_t {
     mystruct1_t s1;
-    bit<16>     f3;
-    bit<32>     f4;
+    bit<16> f3;
+    bit<32> f4;
 }
 
 struct metadata_t {
@@ -30,7 +31,7 @@ struct metadata_t {
 
 parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     state start {
-        packet.extract<ethernet_t>(hdr.ethernet);
+        packet.extract(hdr.ethernet);
         transition accept;
     }
 }
@@ -42,17 +43,20 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     apply {
-        meta.s1 = mystruct1_t {f1 = 16w2,f2 = 8w3};
+        meta.s1 = {...};
         meta.s2.s1 = meta.s1;
-        meta.s2 = mystruct2_t {s1 = meta.s1,f3 = 16w5,f4 = 32w8};
-        meta.s2 = mystruct2_t {s1 = {f1 = 16w2,f2 = 8w3},f3 = 16w5,f4 = 32w8};
-        stdmeta.egress_spec = (bit<9>)meta.s2.s1.f2;
+        meta.s2 = {s1={f1=2, ... }, ...};
+        stdmeta.egress_spec = (bit<9>) meta.s2.s1.f2;
     }
 }
 
 control egressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
+    metadata_t meta_a = { ... };
+    ethernet_t eth_a = {0, ...};
     apply {
-    }
+	hdr.ethernet = eth_a;
+	meta = meta_a;
+     }
 }
 
 control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
@@ -62,9 +66,8 @@ control updateChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control deparserImpl(packet_out packet, in headers_t hdr) {
     apply {
-        packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit(hdr.ethernet);
     }
 }
 
-V1Switch<headers_t, metadata_t>(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
-
+V1Switch(parserImpl(), verifyChecksum(), ingressImpl(), egressImpl(), updateChecksum(), deparserImpl()) main;
