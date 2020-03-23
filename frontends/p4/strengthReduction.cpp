@@ -80,10 +80,6 @@ const IR::Node* DoStrengthReduction::postorder(IR::Cmpl* expr) {
 }
 
 const IR::Node* DoStrengthReduction::postorder(IR::BAnd* expr) {
-    if (isZero(expr->left))
-        return expr->left;
-    if (isZero(expr->right))
-        return expr->right;
     if (isAllOnes(expr->left))
         return expr->right;
     if (isAllOnes(expr->right))
@@ -92,6 +88,13 @@ const IR::Node* DoStrengthReduction::postorder(IR::BAnd* expr) {
     auto r = expr->right->to<IR::Cmpl>();
     if (l && r)
         return new IR::Cmpl(new IR::BOr(expr->srcInfo, l->expr, r->expr));
+
+    if (hasSideEffects(expr))
+        return expr;
+    if (isZero(expr->left))
+        return expr->left;
+    if (isZero(expr->right))
+        return expr->right;
     return expr;
 }
 
@@ -186,7 +189,7 @@ const IR::Node* DoStrengthReduction::postorder(IR::Add* expr) {
 }
 
 const IR::Node* DoStrengthReduction::postorder(IR::Shl* expr) {
-    if (isZero(expr->right) || isZero(expr->left))
+    if (isZero(expr->right))
         return expr->left;
     if (auto sh2 = expr->left->to<IR::Shl>()) {
         if (sh2->right->type->is<IR::Type_InfInt>() &&
@@ -198,11 +201,14 @@ const IR::Node* DoStrengthReduction::postorder(IR::Shl* expr) {
             return result;
         }
     }
+
+    if (!hasSideEffects(expr->right) && isZero(expr->left))
+        return expr->left;
     return expr;
 }
 
 const IR::Node* DoStrengthReduction::postorder(IR::Shr* expr) {
-    if (isZero(expr->right) || isZero(expr->left))
+    if (isZero(expr->right))
         return expr->left;
     if (auto sh2 = expr->left->to<IR::Shr>()) {
         if (sh2->right->type->is<IR::Type_InfInt>() &&
@@ -214,14 +220,12 @@ const IR::Node* DoStrengthReduction::postorder(IR::Shr* expr) {
             return result;
         }
     }
+    if (!hasSideEffects(expr->right) && isZero(expr->left))
+        return expr->left;
     return expr;
 }
 
 const IR::Node* DoStrengthReduction::postorder(IR::Mul* expr) {
-    if (isZero(expr->left))
-        return expr->left;
-    if (isZero(expr->right))
-        return expr->right;
     if (isOne(expr->left))
         return expr->right;
     if (isOne(expr->right))
@@ -238,6 +242,12 @@ const IR::Node* DoStrengthReduction::postorder(IR::Mul* expr) {
         auto sh = new IR::Shl(expr->srcInfo, expr->left, amt);
         return sh;
     }
+    if (hasSideEffects(expr))
+        return expr;
+    if (isZero(expr->left))
+        return expr->left;
+    if (isZero(expr->right))
+        return expr->right;
     return expr;
 }
 
@@ -246,8 +256,6 @@ const IR::Node* DoStrengthReduction::postorder(IR::Div* expr) {
         ::error("%1%: Division by zero", expr);
         return expr;
     }
-    if (isZero(expr->left))
-        return expr->left;
     if (isOne(expr->right))
         return expr->left;
     auto exp = isPowerOf2(expr->right);
@@ -256,6 +264,8 @@ const IR::Node* DoStrengthReduction::postorder(IR::Div* expr) {
         auto sh = new IR::Shr(expr->srcInfo, expr->left, amt);
         return sh;
     }
+    if (isZero(expr->left) && !hasSideEffects(expr->right))
+        return expr->left;
     return expr;
 }
 
@@ -264,7 +274,7 @@ const IR::Node* DoStrengthReduction::postorder(IR::Mod* expr) {
         ::error("%1%: Modulo by zero", expr);
         return expr;
     }
-    if (isZero(expr->left))
+    if (isZero(expr->left) && !hasSideEffects(expr->right))
         return expr->left;
     auto exp = isPowerOf2(expr->right);
     if (exp >= 0) {
