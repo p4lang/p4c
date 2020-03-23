@@ -28,8 +28,9 @@ namespace P4 {
 class DoEliminateSerEnums final : public Transform {
     const TypeMap* typeMap;
  public:
-    explicit DoEliminateSerEnums(const TypeMap* typeMap): typeMap(typeMap)
-    { setName("DoEliminateSerEnums"); }
+    explicit DoEliminateSerEnums(const TypeMap* typeMap): typeMap(typeMap) {
+        setName("DoEliminateSerEnums");
+        visitDagOnce = false; }
     const IR::Node* preorder(IR::Type_SerEnum* type) override;
     const IR::Node* postorder(IR::Type_Name* type) override;
     const IR::Node* postorder(IR::Member* expression) override;
