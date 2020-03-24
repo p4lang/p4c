@@ -892,7 +892,9 @@ bool ComputeWriteSet::preorder(const IR::P4Action* action) {
 namespace {
 class GetDeclarations : public Inspector {
     IR::IndexedVector<IR::Declaration> *declarations;
-    bool preorder(const IR::Declaration* declaration) override
+    bool preorder(const IR::Declaration_Variable* declaration) override
+    { declarations->push_back(declaration); return true; }
+    bool preorder(const IR::Declaration_Instance* declaration) override
     { declarations->push_back(declaration); return true; }
  public:
     GetDeclarations() : declarations(new IR::IndexedVector<IR::Declaration>())
