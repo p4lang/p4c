@@ -52,14 +52,15 @@ void ValidateParsedProgram::postorder(const IR::Method* m) {
 
 /// Structured annotations cannot reuse names
 void ValidateParsedProgram::postorder(const IR::Annotations* annotations) {
-    std::set<cstring> namesUsed;
+    std::multiset<cstring> namesUsed;
+    for (auto a : annotations->annotations)
+        namesUsed.emplace(a->name);
+
     for (auto a : annotations->annotations) {
         if (!a->structured)
             continue;
-        auto it = namesUsed.find(a->name);
-        if (it != namesUsed.end())
+        if (namesUsed.count(a->name) > 1)
             ::error(ErrorType::ERR_DUPLICATE, "%1%: duplicate name for structured annotation", a);
-        namesUsed.emplace(a->name);
     }
 }
 
