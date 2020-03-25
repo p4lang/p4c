@@ -42,7 +42,7 @@ struct FunctionSpecialization {
 struct FunctionSpecializationMap {
     ReferenceMap* refMap;
     TypeMap* typeMap;
-    std::map<const IR::MethodCallExpression*, FunctionSpecialization*> map;
+    ordered_map<const IR::MethodCallExpression*, FunctionSpecialization*> map;
 
     void add(const IR::MethodCallExpression* mce, const IR::Function* func) {
         cstring name = refMap->newName(func->name);
