@@ -70,14 +70,13 @@ struct clrflag : public setflags_helper {
     explicit clrflag(int fl) : setflags_helper(0, fl) {}
 };
 
-
-}  // end namespace DBPrint
-
 inline std::ostream &operator<<(std::ostream &out, const DBPrint::setflags_helper &p) {
     p.set(out); return out; }
 
 inline std::ostream &operator<<(std::ostream &out, const DBPrint::dbprint_flags fl) {
     DBPrint::dbsetflags(out, fl, fl ? fl : ~0);
     return out; }
+
+}  // end namespace DBPrint
 
 #endif /* _IR_DBPRINT_H_ */
