@@ -53,6 +53,7 @@ limitations under the License.
 #include "simplifyDefUse.h"
 #include "simplifyParsers.h"
 #include "specialize.h"
+#include "specializeGenericFunctions.h"
 #include "strengthReduction.h"
 #include "structInitializers.h"
 #include "switchAddDefault.h"
@@ -150,6 +151,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
         new BindTypeVariables(&refMap, &typeMap),
         new StructInitializers(&refMap, &typeMap),
+        new SpecializeGenericFunctions(&refMap, &typeMap),
         new TableKeyNames(&refMap, &typeMap),
         new PassRepeated({
             new ConstantFolding(&refMap, &typeMap),

@@ -1,0 +1,3 @@
+issue2260-1.p4(8): [--Werror=type-error] error: f: Cannot unify type int with return type
+        bit<8> y = f(255);
+                   ^^^^^^
