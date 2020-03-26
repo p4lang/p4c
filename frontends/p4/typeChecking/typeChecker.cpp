@@ -1702,7 +1702,7 @@ const IR::Node* TypeInference::preorder(IR::EntriesList* el) {
     if (keyTuple == nullptr) {
         // The keys have to be before the entries list.  If they are not,
         // at this point they have not yet been type-checked.
-        if (key->srcInfo.isValid() && el->srcInfo.isValid() && key->srcInfo >= el->srcInfo) {
+        if (key->srcInfo.isValid() && el->srcInfo.isValid() && el->srcInfo <= key->srcInfo) {
             typeError("%1%: Entries list must be after table key %2%",
                       el, key);
             prune();

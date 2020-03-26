@@ -28,7 +28,7 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK)
 
     for (auto it = toTry.rbegin(); it != toTry.rend(); ++it) {
         const IR::INamespace* current = *it;
-        LOG3("Trying to resolve in " << current->toString());
+        LOG3("Trying to resolve in " << current->toString() << " " << dbp(current));
 
         if (current->is<IR::IGeneralNamespace>()) {
             auto gen = current->to<IR::IGeneralNamespace>();
@@ -61,7 +61,8 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK)
                     Util::SourceInfo nsi = name.srcInfo;
                     Util::SourceInfo dsi = d->getNode()->srcInfo;
                     bool before = dsi <= nsi;
-                    LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
+                    LOG3("\tPosition test for " << dbp(d->getNode()) << ":"
+                         << dsi << "<=" << nsi << "=" << before);
                     return before;
                 };
                 decls = decls->where(locationFilter);
@@ -100,7 +101,8 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK)
                 Util::SourceInfo nsi = name.srcInfo;
                 Util::SourceInfo dsi = decl->getNode()->srcInfo;
                 bool before = dsi <= nsi;
-                LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
+                LOG3("\tPosition test for " << dbp(decl) << ":"
+                     << dsi << "<=" << nsi << "=" << before);
                 if (!before)
                     continue;
             }
@@ -208,7 +210,7 @@ void ResolveReferences::removeFromContext(const IR::INamespace* ns) {
 }
 
 void ResolveReferences::resolvePath(const IR::Path* path, bool isType) const {
-    LOG2("Resolving " << path << " " << (isType ? "as type" : "as identifier"));
+    LOG2("Resolving " << path << " " << dbp(path) << " " << (isType ? "as type" : "as identifier"));
     ResolutionContext* ctx = context;
     if (path->absolute)
         ctx = new ResolutionContext(rootNamespace);

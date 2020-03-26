@@ -37,7 +37,7 @@ const IR::Node* DoInstantiateCalls::postorder(IR::MethodCallExpression* expressi
     annos->add(new IR::Annotation(IR::Annotation::nameAnnotation,
                                   { new IR::StringLiteral(tn->typeName->path->toString()) }));
     auto inst = new IR::Declaration_Instance(
-        expression->srcInfo, IR::ID(name), annos,
+        ref->getNode()->srcInfo, IR::ID(name), annos,
         tn->typeName->clone(), new IR::Vector<IR::Argument>());
     insert.push_back(inst);
 

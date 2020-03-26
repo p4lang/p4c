@@ -59,7 +59,7 @@ const IR::Type* DoBindTypeVariables::getVarValue(
     if (type == nullptr)
         return new IR::Type_Dontcare;
     auto result = validateType(type, typeMap, errorPosition);
-    LOG2("Replacing " << var << " with " << result);
+    LOG2("Replacing " << var << " with " << result << " pos " << result->srcInfo);
     return result;
 }
 
@@ -85,7 +85,7 @@ const IR::Node* DoBindTypeVariables::postorder(IR::Declaration_Instance* decl) {
         auto type = getVarValue(p, getOriginal());
         if (type == nullptr)
             return decl;
-        typeArgs->push_back(type);
+        typeArgs->push_back(type->getP4Type());
     }
     decl->type = new IR::Type_Specialized(
         decl->type->srcInfo, decl->type->to<IR::Type_Name>(), typeArgs);
@@ -110,7 +110,7 @@ const IR::Node* DoBindTypeVariables::postorder(IR::MethodCallExpression* express
         auto type = getVarValue(p, getOriginal());
         if (type == nullptr)
             return expression;
-        typeArgs->push_back(type);
+        typeArgs->push_back(type->getP4Type());
     }
     expression->typeArguments = typeArgs;
     return expression;
@@ -130,7 +130,7 @@ const IR::Node* DoBindTypeVariables::postorder(IR::ConstructorCallExpression* ex
         auto type = getVarValue(p, getOriginal());
         if (type == nullptr)
             return expression;
-        typeArgs->push_back(type);
+        typeArgs->push_back(type->getP4Type());
     }
     expression->constructedType = new IR::Type_Specialized(
         expression->constructedType->srcInfo,
