@@ -30,11 +30,12 @@ template <class T>
 class TypeSubstitution : public IHasDbPrint {
  protected:
     std::map<T, const IR::Type*> binding;
-    /* True if this is the empty substitution, which does not replace anything. */
+
  public:
     TypeSubstitution() = default;
     TypeSubstitution(const TypeSubstitution& other) : binding(other.binding) {}
 
+    /** True if this is the empty substitution, which does not replace anything. */
     bool isIdentity() const { return binding.size() == 0; }
     const IR::Type* lookup(T t) const
     { return ::get(binding, t); }

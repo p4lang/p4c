@@ -3006,7 +3006,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
 
         // We build a type for the callExpression and unify it with the method expression
         // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
-        auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), nullptr));
+        auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), "return type"));
         auto args = new IR::Vector<IR::ArgumentInfo>();
         bool constArgs = true;
         for (auto aarg : *expression->arguments) {
@@ -3058,7 +3058,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
 
         auto returnType = tvs->lookup(rettype);
         if (returnType == nullptr) {
-            typeError("Cannot infer return type %1%", expression);
+            typeError("Cannot infer a concrete return type for this call of %1%", expression);
             return expression;
         }
         if (returnType->is<IR::Type_Control>() ||
