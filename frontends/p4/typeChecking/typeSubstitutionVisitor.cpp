@@ -47,9 +47,10 @@ const IR::Node* TypeVariableSubstitutionVisitor::preorder(IR::TypeParameters *tp
     return tps;
 }
 
-const IR::Node* TypeVariableSubstitutionVisitor::replacement(IR::ITypeVar* typeVariable) {
-    LOG3("Visiting " << dbp(getOriginal()));
-    const IR::ITypeVar* current = getOriginal<IR::ITypeVar>();
+const IR::Node* TypeVariableSubstitutionVisitor::replacement(
+    const IR::ITypeVar* original, const IR::Node* node) {
+    LOG3("Visiting " << dbp(original));
+    const IR::ITypeVar* current = original;
     const IR::Type* replacement = nullptr;
     while (true) {
         // This will end because there should be no circular chain of variables pointing
@@ -63,7 +64,7 @@ const IR::Node* TypeVariableSubstitutionVisitor::replacement(IR::ITypeVar* typeV
         current = type->to<IR::ITypeVar>();
     }
     if (replacement == nullptr)
-        return typeVariable->getNode();
+        return node;
     LOG2("Replacing " << getOriginal() << " with " << replacement);
     return replacement;
 }
