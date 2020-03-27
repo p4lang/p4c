@@ -151,6 +151,14 @@ const p4configv1::Digest* findDigest(const P4::P4RuntimeAPI& analysis,
     return findP4InfoObject(digests.begin(), digests.end(), name);
 }
 
+/// @return the P4Runtime representation of the "controller header" with the
+/// given name, or null if none is found.
+const p4configv1::ControllerPacketMetadata* findControllerHeader(const P4::P4RuntimeAPI& analysis,
+                                                                 const std::string& name) {
+    auto& headers = analysis.p4Info->controller_packet_metadata();
+    return findP4InfoObject(headers.begin(), headers.end(), name);
+}
+
 }  // namespace
 
 class P4Runtime : public P4CTest { };
@@ -327,6 +335,116 @@ TEST_F(P4Runtime, IdAssignment) {
                     conflictingTableB->preamble().id() == 0x02000134);
         EXPECT_NE(conflictingTableA->preamble().id(),
                   conflictingTableB->preamble().id());
+    }
+}
+
+TEST_F(P4Runtime, FieldIdAssignment) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        @controller_header("packet_in")
+        header Header { bit<32> f1; @id(1) bit<32> f2; }
+        struct Headers { Header hdr; }
+        struct Metadata { bit<32> f1; bit<32> f2; bit<32> f3; }
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm) {
+            state start { p.extract(h.hdr); transition accept; } }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) {
+            action a(@id(99) bit<32> p1, bit<32> p2) {
+                m.f1 = p1;
+                m.f2 = p2;
+            }
+
+            @name("igTable")
+            table t1 {
+                key = {
+                    m.f1: exact @id(99);
+                    m.f2: exact;
+                }
+                actions = { a; }
+            }
+
+            @name("igTableInvalid")
+            table t2 {
+                key = {
+                    m.f1: exact @id(99);
+                    m.f2: exact @id(99);
+                    m.f3: exact @id(0);
+                }
+                actions = { NoAction; }
+            }
+
+            @name("igTableNoAnno")
+            table t3 {
+                key = {
+                    m.f1: exact;
+                    m.f2: exact;
+                }
+                actions = { a; }
+            }
+
+            apply {
+                t1.apply();
+                t2.apply();
+                t3.apply();
+            }
+        }
+
+        V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )"));
+
+    ASSERT_TRUE(test);
+
+    // We expect exactly two errors:
+    //   error: KeyElement: @id 99 is used multiple times
+    //   error: KeyElement: 0 is not a valid @id value
+    EXPECT_EQ(2u, ::diagnosticCount());
+
+    {
+        // Check the ids for igTable's match fields.
+        auto* igTable = findTable(*test, "ingress.igTable");
+        ASSERT_TRUE(igTable != nullptr);
+        const auto &mf1 = igTable->match_fields(0);
+        const auto &mf2 = igTable->match_fields(1);
+        EXPECT_EQ(99u, mf1.id());
+        EXPECT_NE(99u, mf2.id());
+    }
+
+    {
+        // Check the ids for action a's parameters.
+        auto* aAction = findAction(*test, "ingress.a");
+        ASSERT_TRUE(aAction != nullptr);
+        const auto &ap1 = aAction->params(0);
+        const auto &ap2 = aAction->params(1);
+        EXPECT_EQ(99u, ap1.id());
+        EXPECT_NE(99u, ap2.id());
+    }
+
+    {
+        // Check the ids for the packet-in header fields.
+        auto* packetInHeader = findControllerHeader(*test, "packet_in");
+        ASSERT_TRUE(packetInHeader != nullptr);
+        const auto &m1 = packetInHeader->metadata(0);
+        const auto &m2 = packetInHeader->metadata(1);
+        EXPECT_NE(1u, m1.id());
+        EXPECT_EQ(1u, m2.id());
+    }
+
+    {
+        // Check the ids for igTableNoAnno's match fields. Without @id
+        // annotations, the ids should be assigned sequentially, starting at 1.
+        auto* igTable = findTable(*test, "ingress.igTableNoAnno");
+        ASSERT_TRUE(igTable != nullptr);
+        const auto &mf1 = igTable->match_fields(0);
+        const auto &mf2 = igTable->match_fields(1);
+        EXPECT_EQ(1u, mf1.id());
+        EXPECT_EQ(2u, mf2.id());
     }
 }
 
