@@ -106,6 +106,22 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK)
                 if (!before)
                     continue;
             }
+            // Check to see whether decl is a parent in the IR DAG; in this
+            // case we cannot resolve to it.  An example would be:
+            // table t { key = { t: exact }}
+            bool nested = false;
+            auto ctx = getContext();
+            while (ctx->parent) {
+                if (ctx->node == d->getNode()) {
+                    nested = true;
+                    break;
+                }
+                ctx = ctx->parent;
+            }
+            if (nested) {
+                LOG3("\tDeclaration is a parent; skipping:" << decl);
+                continue;
+            }
 
             LOG3("Resolved in " << dbp(current->getNode()));
             auto result = new std::vector<const IR::IDeclaration*>();
