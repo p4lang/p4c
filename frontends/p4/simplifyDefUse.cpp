@@ -200,8 +200,11 @@ class FindUninitialized : public Inspector {
         // We now check the out parameters using the definitions
         // produced *after* the function has completed.
         LOG3("Context after function " << currentPoint);
+#if 0
+        // FIXME -- doesn't work in the presence of abstract functions
         auto current = getCurrentDefinitions();
         checkOutParameters(func, func->type->parameters, current);
+#endif
         context = originalContext;
         return false;
     }
