@@ -1,13 +1,15 @@
-#include <core.p4>
+bit<8> test1(inout bit<8> x) {
+    return x;
+}
 
-// adding the inout qualifier leads to a compiler crash
-bit<8> test(inout bit<8> x) {
+bit<8> test2(inout bit<8> x) {
     return x;
 }
 
 control c(inout bit<8> a) {
     apply {
-        test(a);
+        test1(a);
+        test2(a);
     }
 }
 

@@ -1,5 +1,4 @@
 #include <core.p4>
-#include <v1model.p4>
 
 bit<8> test(inout bit<8> x) {
     return x;

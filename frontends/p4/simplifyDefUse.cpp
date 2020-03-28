@@ -174,16 +174,15 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::Function* func) override {
-        auto originalContext = context;
         if (virtualMethod) {
             LOG3("Virtual method");
-            context = ProgramPoint(func);
+            context = ProgramPoint::beforeStart;
             unreachable = false;
         }
-        LOG3("FU Visiting function " << func->name << "[" << func->id <<
-             "] called by " << context);
+        LOG3("FU Visiting function " << dbp(func) << " called by " << context);
         LOG5(func);
-        currentPoint = ProgramPoint(func);
+        auto point = ProgramPoint(context, func);
+        currentPoint = point;
         visit(func->body);
         bool checkReturn = !func->type->returnType->is<IR::Type_Void>();
         if (checkReturn) {
@@ -196,13 +195,12 @@ class FindUninitialized : public Inspector {
                         "Function '%1%' does not return a value on all paths", func);
         }
 
-        currentPoint = context;
+        currentPoint = point.after();
         // We now check the out parameters using the definitions
         // produced *after* the function has completed.
         LOG3("Context after function " << currentPoint);
         auto current = getCurrentDefinitions();
         checkOutParameters(func, func->type->parameters, current);
-        context = originalContext;
         return false;
     }
 
