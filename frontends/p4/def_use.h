@@ -17,6 +17,8 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_DEF_USE_H_
 #define _FRONTENDS_P4_DEF_USE_H_
 
+#include "lib/ordered_map.h"
+#include "lib/ordered_set.h"
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
@@ -81,7 +83,7 @@ class BaseLocation : public StorageLocation {
 
 /** Represents the locations for element of a struct, header or union */
 class StructLocation : public StorageLocation {
-    std::map<cstring, const StorageLocation*> fieldLocations;
+    ordered_map<cstring, const StorageLocation*> fieldLocations;
     friend class StorageFactory;
 
     void addField(cstring name, StorageLocation* field)
@@ -95,7 +97,7 @@ class StructLocation : public StorageLocation {
         BUG_CHECK(type->is<IR::Type_StructLike>(),
                   "%1%: unexpected type", type);
     }
-    IterValues<std::map<cstring, const StorageLocation*>::const_iterator> fields() const
+    IterValues<ordered_map<cstring, const StorageLocation*>::const_iterator> fields() const
     { return Values(fieldLocations); }
     void dbprint(std::ostream& out) const override {
         for (auto f : fieldLocations)
@@ -157,11 +159,11 @@ class StorageFactory {
 /// A set of locations that may be read or written by a computation.
 /// In general this is a conservative approximation of the actual location set.
 class LocationSet : public IHasDbPrint {
-    std::set<const StorageLocation*> locations;
+    ordered_set<const StorageLocation*> locations;
 
  public:
     LocationSet() = default;
-    explicit LocationSet(const std::set<const StorageLocation*> &other) : locations(other) {}
+    explicit LocationSet(const ordered_set<const StorageLocation*> &other) : locations(other) {}
     explicit LocationSet(const StorageLocation* location)
     { CHECK_NULL(location); locations.emplace(location); }
     static const LocationSet* empty;
@@ -179,8 +181,8 @@ class LocationSet : public IHasDbPrint {
     /// e.g., a StructLocation is expanded in all its fields.
     const LocationSet* canonicalize() const;
     void addCanonical(const StorageLocation* location);
-    std::set<const StorageLocation*>::const_iterator begin() const { return locations.cbegin(); }
-    std::set<const StorageLocation*>::const_iterator end()   const { return locations.cend(); }
+    ordered_set<const StorageLocation*>::const_iterator begin() const { return locations.cbegin(); }
+    ordered_set<const StorageLocation*>::const_iterator end()   const { return locations.cend(); }
     virtual void dbprint(std::ostream& out) const {
         if (locations.empty())
             out << "LocationSet::empty";
@@ -197,7 +199,7 @@ class LocationSet : public IHasDbPrint {
 /// Maps a declaration to its associated storage.
 class StorageMap {
     /// Storage location for each declaration.
-    std::map<const IR::IDeclaration*, StorageLocation*> storage;
+    ordered_map<const IR::IDeclaration*, StorageLocation*> storage;
     StorageFactory factory;
 
  public:
@@ -236,15 +238,22 @@ class StorageMap {
 class ProgramPoint : public IHasDbPrint {
     /// The stack is for representing calls for context-sensitive analyses: i.e.,
     /// table.apply() -> table -> action.
-    /// The empty stack represents "beforeStart" (see below).
+    /// An empty stack represents "beforeStart"
+    /// A nullptr on the stack represents a node *after* the termination of
+    /// the previous context.  E.g., a stack [Function] is the context before
+    /// the function, while [Function, nullptr] is the context after the
+    /// function terminates.
     std::vector<const IR::Node*> stack;
 
  public:
     ProgramPoint() = default;
     ProgramPoint(const ProgramPoint& other) : stack(other.stack) {}
-    explicit ProgramPoint(const IR::Node* node) { stack.push_back(node); }
+    explicit ProgramPoint(const IR::Node* node) { CHECK_NULL(node); stack.push_back(node); }
     ProgramPoint(const ProgramPoint& context, const IR::Node* node);
-    static ProgramPoint beforeStart;  /// A point logically before the program start.
+    /// A point logically before the function/control/action start.
+    static ProgramPoint beforeStart;
+    /// We use a nullptr to indicate a point *after* the previous context
+    ProgramPoint after() { return ProgramPoint(*this, nullptr); }
     bool operator==(const ProgramPoint& other) const;
     std::size_t hash() const;
     void dbprint(std::ostream& out) const {
@@ -255,12 +264,16 @@ class ProgramPoint : public IHasDbPrint {
             for (auto n : stack) {
                 if (!first)
                     out << "//";
-                out << dbp(n);
+                if (!n)
+                    out << "After end";
+                else
+                    out << dbp(n);
                 first = false;
             }
             auto l = stack.back();
-            if (l->is<IR::AssignmentStatement>() ||
-                l->is<IR::MethodCallStatement>())
+            if (l != nullptr &&
+                (l->is<IR::AssignmentStatement>() ||
+                 l->is<IR::MethodCallStatement>()))
                 out << "[[" << l << "]]";
         }
     }
@@ -314,7 +327,7 @@ class ProgramPoints : public IHasDbPrint {
 class Definitions : public IHasDbPrint {
     /// Set of program points that have written last to each location
     /// (conservative approximation).
-    std::map<const BaseLocation*, const ProgramPoints*> definitions;
+    ordered_map<const BaseLocation*, const ProgramPoints*> definitions;
     /// If true the current program point is actually unreachable.
     bool unreachable;
 
@@ -360,8 +373,9 @@ class Definitions : public IHasDbPrint {
 
 class AllDefinitions : public IHasDbPrint {
     /// These are the definitions available AFTER each ProgramPoint.
-    /// However, for ProgramPoints representing P4Control, P4Action, and P4Table
-    /// the definitions are BEFORE the ProgramPoint.
+    /// However, for ProgramPoints representing P4Control, P4Action,
+    /// P4Table, P4Function -- the definitions are BEFORE the
+    /// ProgramPoint.
     std::unordered_map<ProgramPoint, Definitions*> atPoint;
 
  public:
@@ -373,15 +387,24 @@ class AllDefinitions : public IHasDbPrint {
         if (it == atPoint.end()) {
             if (emptyIfNotFound) {
                 auto defs = new Definitions();
-                setDefinitionsAt(point, defs);
+                setDefinitionsAt(point, defs, false);
                 return defs;
             }
             BUG("Unknown point %1% for definitions", &point);
         }
         return it->second;
     }
-    void setDefinitionsAt(ProgramPoint point, Definitions* defs)
-    { atPoint[point] = defs; }
+    void setDefinitionsAt(ProgramPoint point, Definitions* defs, bool overwrite) {
+        if (!overwrite) {
+            auto it = atPoint.find(point);
+            if (it != atPoint.end()) {
+                LOG2("Overwriting definitions at " << point << ": " <<
+                     it->second << " with " << defs);
+                BUG_CHECK(false, "Overwriting definitions");
+            }
+        }
+        atPoint[point] = defs;
+    }
     void dbprint(std::ostream& out) const {
         for (auto e : atPoint)
             out << e.first << " => " << e.second << std::endl;
@@ -410,7 +433,7 @@ class ComputeWriteSet : public Inspector {
     /// if true we are processing an expression on the lhs of an assignment
     bool                lhs;
     /// For each expression the location set it writes
-    std::map<const IR::Expression*, const LocationSet*> writes;
+    ordered_map<const IR::Expression*, const LocationSet*> writes;
     bool                virtualMethod;  /// True if we are analyzing a virtual method
 
     /// Creates new visitor, but with same underlying data structures.
@@ -429,7 +452,7 @@ class ComputeWriteSet : public Inspector {
     void exitScope(const IR::ParameterList* parameters,
                    const IR::IndexedVector<IR::Declaration>* locals);
     Definitions* getDefinitionsAfter(const IR::ParserState* state);
-    bool setDefinitions(Definitions* defs, const IR::Node* who = nullptr);
+    bool setDefinitions(Definitions* defs, const IR::Node* who = nullptr, bool overwrite = false);
     ProgramPoint getProgramPoint(const IR::Node* node = nullptr) const;
     const LocationSet* getWrites(const IR::Expression* expression) const {
         auto result = ::get(writes, expression);
