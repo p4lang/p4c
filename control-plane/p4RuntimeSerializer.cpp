@@ -1206,8 +1206,12 @@ class P4RuntimeAnalyzer {
             match->set_bitwidth(et->width_bits());
             match->set_match_type(MatchField::MatchTypes::EXACT);
         } else if (et->is<IR::Type_Struct>()) {
-            int fieldId = 1;
-            for (auto f : et->to<IR::Type_Struct>()->fields) {
+            auto fields = et->to<IR::Type_Struct>()->fields;
+            // Allocate ids for all match fields, taking into account
+            // user-provided @id annotations if any.
+            FieldIdAllocator<decltype(fields)::value_type> idAllocator(
+                fields.begin(), fields.end());
+            for (auto f : fields) {
                 auto fType = f->type;
                 if (!fType->is<IR::Type_Bits>()) {
                     ::error(ErrorType::ERR_UNSUPPORTED,
@@ -1218,7 +1222,8 @@ class P4RuntimeAnalyzer {
                     continue;
                 }
                 auto* match = vs->add_match();
-                match->set_id(fieldId++);
+                auto fieldId = idAllocator.getId(f);
+                match->set_id(fieldId);
                 match->set_name(f->controlPlaneName());
                 match->set_bitwidth(fType->width_bits());
                 setMatchType(f, match);

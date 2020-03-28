@@ -344,9 +344,20 @@ TEST_F(P4Runtime, FieldIdAssignment) {
         header Header { bit<32> f1; @id(1) bit<32> f2; }
         struct Headers { Header hdr; }
         struct Metadata { bit<32> f1; bit<32> f2; bit<32> f3; }
+        struct pvs_t {
+            @id(33) bit<32> f1;
+            bit<32> f2;
+        }
+
         parser parse(packet_in p, out Headers h, inout Metadata m,
                      inout standard_metadata_t sm) {
-            state start { p.extract(h.hdr); transition accept; } }
+            value_set<pvs_t>(16) pvs;
+            state start {
+                p.extract(h.hdr);
+                transition select(h.hdr.f1, h.hdr.f2) {
+                    pvs: accept;
+                    default: reject; } } }
+
         control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
         control egress(inout Headers h, inout Metadata m,
                         inout standard_metadata_t sm) { apply { } }
@@ -410,8 +421,8 @@ TEST_F(P4Runtime, FieldIdAssignment) {
         // Check the ids for igTable's match fields.
         auto* igTable = findTable(*test, "ingress.igTable");
         ASSERT_TRUE(igTable != nullptr);
-        const auto &mf1 = igTable->match_fields(0);
-        const auto &mf2 = igTable->match_fields(1);
+        const auto& mf1 = igTable->match_fields(0);
+        const auto& mf2 = igTable->match_fields(1);
         EXPECT_EQ(99u, mf1.id());
         EXPECT_NE(99u, mf2.id());
     }
@@ -420,8 +431,8 @@ TEST_F(P4Runtime, FieldIdAssignment) {
         // Check the ids for action a's parameters.
         auto* aAction = findAction(*test, "ingress.a");
         ASSERT_TRUE(aAction != nullptr);
-        const auto &ap1 = aAction->params(0);
-        const auto &ap2 = aAction->params(1);
+        const auto& ap1 = aAction->params(0);
+        const auto& ap2 = aAction->params(1);
         EXPECT_EQ(99u, ap1.id());
         EXPECT_NE(99u, ap2.id());
     }
@@ -430,8 +441,8 @@ TEST_F(P4Runtime, FieldIdAssignment) {
         // Check the ids for the packet-in header fields.
         auto* packetInHeader = findControllerHeader(*test, "packet_in");
         ASSERT_TRUE(packetInHeader != nullptr);
-        const auto &m1 = packetInHeader->metadata(0);
-        const auto &m2 = packetInHeader->metadata(1);
+        const auto& m1 = packetInHeader->metadata(0);
+        const auto& m2 = packetInHeader->metadata(1);
         EXPECT_NE(1u, m1.id());
         EXPECT_EQ(1u, m2.id());
     }
@@ -441,10 +452,19 @@ TEST_F(P4Runtime, FieldIdAssignment) {
         // annotations, the ids should be assigned sequentially, starting at 1.
         auto* igTable = findTable(*test, "ingress.igTableNoAnno");
         ASSERT_TRUE(igTable != nullptr);
-        const auto &mf1 = igTable->match_fields(0);
-        const auto &mf2 = igTable->match_fields(1);
+        const auto& mf1 = igTable->match_fields(0);
+        const auto& mf2 = igTable->match_fields(1);
         EXPECT_EQ(1u, mf1.id());
         EXPECT_EQ(2u, mf2.id());
+    }
+
+    {
+        auto vset = findValueSet(*test, "parse.pvs");
+        ASSERT_TRUE(vset != nullptr);
+        const auto& mf1 = vset->match(0);
+        const auto& mf2 = vset->match(1);
+        EXPECT_EQ(33u, mf1.id());
+        EXPECT_NE(33u, mf2.id());
     }
 }
 
