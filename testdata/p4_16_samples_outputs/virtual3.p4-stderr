@@ -1,0 +1,3 @@
+virtual3.p4(34): [--Wwarn=uninitialized_use] warning: local may be uninitialized
+            return (ix + local);
+                         ^^^^^
