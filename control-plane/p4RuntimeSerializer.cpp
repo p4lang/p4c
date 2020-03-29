@@ -24,6 +24,7 @@ limitations under the License.
 
 #include <algorithm>
 #include <iostream>
+#include <iterator>
 #include <set>
 #include <typeinfo>
 #include <unordered_map>
@@ -88,6 +89,20 @@ static bool isHidden(const IR::Node* node) {
 /// @return true if @type has an @controller_header annotation.
 static bool isControllerHeader(const IR::Type_Header* type) {
     return type->getAnnotation("controller_header") != nullptr;
+}
+
+/// @return the id allocated to the object through the @id annotation if any, or
+/// boost::none.
+static boost::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated* node) {
+    auto idAnnotation = node->getAnnotation("id");
+    if (!idAnnotation) return boost::none;
+    auto idConstant = idAnnotation->expr[0]->to<IR::Constant>();
+    CHECK_NULL(idConstant);
+    if (!idConstant->fitsInt()) {
+        ::error(ErrorType::ERR_INVALID, "%1%: @id should be an integer", node);
+        return boost::none;
+    }
+    return static_cast<p4rt_id_t>(idConstant->value);
 }
 
 /// @return the value of @item's explicit name annotation, if it has one. We use
@@ -186,6 +201,7 @@ struct MatchField {
     using MatchTypes = p4configv1::MatchField;  // Make short enum names visible.
 
     const cstring name;       // The fully qualified external name of this field.
+    const p4rt_id_t id;       // The id for this field - either user-provided or auto-allocated.
     const MatchType type;     // The match algorithm - exact, ternary, range, etc.
     const cstring other_match_type;  // If the match type is an arch-specific one
                                      // in this case, type must be MatchTypes::UNSPECIFIED
@@ -212,31 +228,21 @@ externalId(P4RuntimeSymbolType type, const IR::IDeclaration* declaration) {
     }
 
     // If the user specified an @id annotation, use that.
-    if (auto idAnnotation = declaration->getAnnotation("id")) {
-        auto idConstant = idAnnotation->expr[0]->to<IR::Constant>();
-        CHECK_NULL(idConstant);
-        if (!idConstant->fitsInt()) {
-            ::error(ErrorType::ERR_INVALID, "%1%: @id should be an integer", declaration);
-            return boost::none;
-        }
+    auto idOrNone = getIdAnnotation(declaration->to<IR::IAnnotated>());
+    if (!idOrNone) return boost::none;  // the user didn't assign an id
+    auto id = *idOrNone;
 
-        auto id = static_cast<p4rt_id_t>(idConstant->value);
-
-        // If the id already has an 8-bit type prefix, make sure it is correct
-        // for the resource type; otherwise assign the correct prefix.
-        const auto typePrefix = static_cast<p4rt_id_t>(type) << 24;
-        const auto prefixMask = static_cast<p4rt_id_t>(0xff) << 24;
-        if ((id & prefixMask) != 0 && (id & prefixMask) != typePrefix) {
-            ::error(ErrorType::ERR_INVALID, "%1%: @id has the wrong 8-bit prefix", declaration);
-            return boost::none;
-        }
-        id |= typePrefix;
-
-        return id;
+    // If the id already has an 8-bit type prefix, make sure it is correct for
+    // the resource type; otherwise assign the correct prefix.
+    const auto typePrefix = static_cast<p4rt_id_t>(type) << 24;
+    const auto prefixMask = static_cast<p4rt_id_t>(0xff) << 24;
+    if ((id & prefixMask) != 0 && (id & prefixMask) != typePrefix) {
+        ::error(ErrorType::ERR_INVALID, "%1%: @id has the wrong 8-bit prefix", declaration);
+        return boost::none;
     }
+    id |= typePrefix;
 
-    // The user didn't assign an id.
-    return boost::none;
+    return id;
 }
 
 /**
@@ -551,6 +557,65 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
     P4SymbolSuffixSet suffixSet;
 };
 
+/// FieldIdAllocator is used to allocate ids for non top-level P4Info objects
+/// that need them (match fields, action parameters, packet IO metadata
+/// fields). Some of these ids can come from the P4 program (@id annotation),
+/// the rest is auto-generated.
+template <typename T>
+class FieldIdAllocator {
+ public:
+    // Parameters must be iterators of Ts.
+    // All the user allocated ids must be provided in one-shot, which is why we
+    // require all objects to be provided in the constructor.
+    template <typename It>
+    FieldIdAllocator(It begin, It end,
+                     typename std::enable_if<
+                         std::is_same<typename std::iterator_traits<It>::value_type, T>::value>
+                             ::type* = 0) {
+        // first pass: user-assigned ids
+        for (auto it = begin; it != end; ++it) {
+            auto id = getIdAnnotation(*it);
+            if (!id) continue;
+            if (*id == 0) {
+                ::error(ErrorType::ERR_INVALID,
+                        "%1%: 0 is not a valid @id value", *it);
+            } else if (assignedIds.count(*id) > 0) {
+                ::error(ErrorType::ERR_DUPLICATE,
+                        "%1%: @id %2% is used multiple times", *it, *id);
+            }
+            idMapping[*it] = *id;
+            assignedIds.insert(*id);
+        }
+
+        // second pass: allocate missing ids
+        // in the absence of any user-provided @id, ids will be allocated
+        // sequentially, starting at 1.
+        p4rt_id_t index = 1;
+        for (auto it = begin; it != end; ++it) {
+            if (idMapping.find(*it) != idMapping.end()) {
+              index++;
+              continue;
+            }
+            while (assignedIds.count(index) > 0) {
+                index++;
+                BUG_CHECK(index > 0, "Cannot allocate default id for field");
+            }
+            idMapping[*it] = index;
+            assignedIds.insert(index);
+        }
+    }
+
+    p4rt_id_t getId(T v) {
+        auto it = idMapping.find(v);
+        BUG_CHECK(it != idMapping.end(), "Missing id allocation");
+        return it->second;
+    }
+
+ private:
+    std::set<p4rt_id_t> assignedIds;
+    std::map<T, p4rt_id_t> idMapping;
+};
+
 /// @return @table's default action, if it has one, or boost::none otherwise.
 static boost::optional<DefaultAction>
 getDefaultAction(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMap) {
@@ -672,10 +737,15 @@ getMatchFields(const IR::P4Table* table,
     auto key = table->getKey();
     if (!key) return matchFields;
 
+    FieldIdAllocator<decltype(key->keyElements)::value_type> idAllocator(
+        key->keyElements.begin(), key->keyElements.end());
+
     for (auto keyElement : key->keyElements) {
         auto matchTypeName = getMatchTypeName(keyElement->matchType, refMap);
         auto matchType = getMatchType(matchTypeName);
         if (matchType == boost::none) continue;
+
+        auto id = idAllocator.getId(keyElement);
 
         auto matchFieldName = explicitNameAnnotation(keyElement);
         BUG_CHECK(bool(matchFieldName), "Table '%1%': Match field '%2%' has no "
@@ -690,7 +760,7 @@ getMatchFields(const IR::P4Table* table,
         TypeSpecConverter::convert(refMap, typeMap, matchFieldType, p4RtTypeInfo);
         auto type_name = getTypeName(matchFieldType, typeMap);
         int width = getTypeWidth(matchFieldType, typeMap);
-        matchFields.push_back(MatchField{*matchFieldName, *matchType,
+        matchFields.push_back(MatchField{*matchFieldName, id, *matchType,
                               matchTypeName, uint32_t(width),
                               keyElement->to<IR::IAnnotated>(), type_name});
     }
@@ -873,11 +943,19 @@ class P4RuntimeAnalyzer {
         auto action = p4Info->add_actions();
         setPreamble(action->mutable_preamble(), id, name, symbols.getAlias(name), annotations);
 
-        size_t index = 1;
+        // Allocate ids for all action parameters.
+        std::vector<const IR::Parameter *> actionParams;
         for (auto actionParam : *actionDeclaration->parameters->getEnumerator()) {
+            actionParams.push_back(actionParam);
+        }
+        FieldIdAllocator<decltype(actionParams)::value_type> idAllocator(
+            actionParams.begin(), actionParams.end());
+
+        for (auto actionParam : actionParams) {
             auto param = action->add_params();
             auto paramName = actionParam->controlPlaneName();
-            param->set_id(index++);
+            auto id = idAllocator.getId(actionParam);
+            param->set_id(id);
             param->set_name(paramName);
             addAnnotations(param, actionParam->to<IR::IAnnotated>());
             addDocumentation(param, actionParam->to<IR::IAnnotated>());
@@ -926,12 +1004,15 @@ class P4RuntimeAnalyzer {
         setPreamble(header->mutable_preamble(), id,
                     controllerName /* name */, controllerName /* alias */, annotations);
 
-        size_t index = 1;
+        FieldIdAllocator<decltype(flattenedHeaderType->fields)::value_type> idAllocator(
+            flattenedHeaderType->fields.begin(), flattenedHeaderType->fields.end());
+
         for (auto headerField : flattenedHeaderType->fields) {
             if (isHidden(headerField)) continue;
             auto metadata = header->add_metadata();
             auto fieldName = headerField->controlPlaneName();
-            metadata->set_id(index++);
+            auto id = idAllocator.getId(headerField);
+            metadata->set_id(id);
             metadata->set_name(fieldName);
             addAnnotations(metadata, headerField->to<IR::IAnnotated>());
 
@@ -1003,10 +1084,9 @@ class P4RuntimeAnalyzer {
                 action_ref->set_scope(p4configv1::ActionRef::TABLE_AND_DEFAULT);
         }
 
-        size_t index = 1;
         for (const auto& field : matchFields) {
             auto match_field = table->add_match_fields();
-            match_field->set_id(index++);
+            match_field->set_id(field.id);
             match_field->set_name(field.name);
             addAnnotations(match_field, field.annotations);
             addDocumentation(match_field, field.annotations);
@@ -1126,8 +1206,12 @@ class P4RuntimeAnalyzer {
             match->set_bitwidth(et->width_bits());
             match->set_match_type(MatchField::MatchTypes::EXACT);
         } else if (et->is<IR::Type_Struct>()) {
-            int fieldId = 1;
-            for (auto f : et->to<IR::Type_Struct>()->fields) {
+            auto fields = et->to<IR::Type_Struct>()->fields;
+            // Allocate ids for all match fields, taking into account
+            // user-provided @id annotations if any.
+            FieldIdAllocator<decltype(fields)::value_type> idAllocator(
+                fields.begin(), fields.end());
+            for (auto f : fields) {
                 auto fType = f->type;
                 if (!fType->is<IR::Type_Bits>()) {
                     ::error(ErrorType::ERR_UNSUPPORTED,
@@ -1138,7 +1222,8 @@ class P4RuntimeAnalyzer {
                     continue;
                 }
                 auto* match = vs->add_match();
-                match->set_id(fieldId++);
+                auto fieldId = idAllocator.getId(f);
+                match->set_id(fieldId);
                 match->set_name(f->controlPlaneName());
                 match->set_bitwidth(fType->width_bits());
                 setMatchType(f, match);
