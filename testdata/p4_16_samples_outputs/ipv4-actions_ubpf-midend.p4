@@ -47,7 +47,7 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
 }
 
 control pipe(inout Headers_t headers, inout metadata meta) {
-    @name(".NoAction") action NoAction_0() {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
     @name("pipe.Reject") action Reject() {
         mark_to_drop();

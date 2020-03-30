@@ -92,7 +92,7 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @name(".ingress_drop") action ingress_drop(inout psa_ingress_output_metadata_t meta_1) {
+    @noWarnUnused @name(".ingress_drop") action ingress_drop(inout psa_ingress_output_metadata_t meta_1) {
         meta_1.drop = true;
     }
     @name("ingress.parser_error_counts") DirectCounter<PacketCounter_t>(PSA_CounterType_t.PACKETS) parser_error_counts_0;

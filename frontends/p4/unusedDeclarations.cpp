@@ -27,6 +27,9 @@ Visitor::profile_t RemoveUnusedDeclarations::init_apply(const IR::Node* node) {
 bool RemoveUnusedDeclarations::giveWarning(const IR::Node* node) {
     if (warned == nullptr)
         return false;
+    if (auto anno = node->to<IR::IAnnotated>())
+        if (anno->getAnnotation(IR::Annotation::noWarnUnusedAnnotation))
+            return false;
     auto p = warned->emplace(node);
     LOG3("Warn about " << dbp(node) << " " << p.second);
     return p.second;

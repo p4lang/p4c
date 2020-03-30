@@ -37,7 +37,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 @name(".B") counter(32w1024, CounterType.packets_and_bytes) B_1;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".NoAction") action NoAction_0() {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
     @name(".A") action A_2(bit<8> val, bit<9> port, bit<10> idx) {
         hdr.A.b1 = val;

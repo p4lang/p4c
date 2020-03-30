@@ -12,7 +12,7 @@ header H {
 }
 
 control c(out B32 x) {
-    @name(".NoAction") action NoAction_0() {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
     N32 k_0;
     bit<32> b_0;

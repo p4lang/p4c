@@ -151,21 +151,21 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".NoAction") action NoAction_0() {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
-    @name(".NoAction") action NoAction_9() {
+    @noWarnUnused @name(".NoAction") action NoAction_9() {
     }
-    @name(".NoAction") action NoAction_10() {
+    @noWarnUnused @name(".NoAction") action NoAction_10() {
     }
-    @name(".NoAction") action NoAction_11() {
+    @noWarnUnused @name(".NoAction") action NoAction_11() {
     }
-    @name(".NoAction") action NoAction_12() {
+    @noWarnUnused @name(".NoAction") action NoAction_12() {
     }
-    @name(".NoAction") action NoAction_13() {
+    @noWarnUnused @name(".NoAction") action NoAction_13() {
     }
-    @name(".NoAction") action NoAction_14() {
+    @noWarnUnused @name(".NoAction") action NoAction_14() {
     }
-    @name(".NoAction") action NoAction_15() {
+    @noWarnUnused @name(".NoAction") action NoAction_15() {
     }
     @name(".l2_packet") action l2_packet() {
         meta._ing_metadata_packet_type2 = 4w0;

@@ -54,7 +54,7 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".NoAction") action NoAction_0() {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
     @name("MyIngress.ipv4_forward") action ipv4_forward() {
         hdr.ipv4.totalLen = (hdr.ipv4.identification > 16w0 ? (hdr.ipv4.identification > 16w0 ? (hdr.ipv4.identification > 16w0 ? 16w1 : hdr.ipv4.identification) + (hdr.ipv4.identification > 16w0 ? 16w2 : hdr.ipv4.hdrChecksum) + 16w3 : hdr.ipv4.totalLen) + (hdr.ipv4.identification > 16w0 ? 16w5 : (hdr.ipv4.identification > 16w0 ? 16w1 : hdr.ipv4.identification)) + (hdr.ipv4.identification > 16w0 ? 16w4 : (hdr.ipv4.identification > 16w0 ? 16w2 : hdr.ipv4.hdrChecksum)) + 16w13 : (hdr.ipv4.identification > 16w0 ? (hdr.ipv4.identification > 16w0 ? 16w1 : hdr.ipv4.identification) + (hdr.ipv4.identification > 16w0 ? 16w2 : hdr.ipv4.hdrChecksum) + 16w3 : hdr.ipv4.totalLen)) + (hdr.ipv4.identification > 16w0 ? 16w5 : (hdr.ipv4.identification > 16w0 ? 16w1 : hdr.ipv4.identification)) + (hdr.ipv4.identification > 16w0 ? 16w4 : (hdr.ipv4.identification > 16w0 ? 16w2 : hdr.ipv4.hdrChecksum));

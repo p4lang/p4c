@@ -252,8 +252,9 @@ class Annotation {
     static const cstring optionalAnnotation;  /// Optional parameter annotation
     static const cstring pkginfoAnnotation;  /// Package documentation annotation.
     static const cstring deprecatedAnnotation;  /// Deprecation annotation.
-    static const cstring synchronousAnnotation;  /// noSideEffects annotation.
-    static const cstring noSideEffectsAnnotation;  /// Synchronous annotation.
+    static const cstring synchronousAnnotation;  /// synchronous annotation.
+    static const cstring noSideEffectsAnnotation;  /// noSideEffects annotation.
+    static const cstring noWarnUnusedAnnotation;  /// noWarnUnused annotation.
     static const cstring matchAnnotation;  /// Match annotation (for value sets).
     toString{ return cstring("@") + name; }
     validate{

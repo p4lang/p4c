@@ -9,7 +9,7 @@ extern Virtual {
 
 control c(inout bit<16> p) {
     bit<16> local_0;
-    @name(".NoAction") action NoAction_0() {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
     @name("c.cntr") Virtual() cntr_0 = {
         bit<16> f(in bit<16> ix) {

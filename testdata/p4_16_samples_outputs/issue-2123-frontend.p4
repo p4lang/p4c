@@ -67,7 +67,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".NoAction") action NoAction_0() {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
     @name("egress.on_miss") action on_miss() {
     }
@@ -93,15 +93,15 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".NoAction") action NoAction_1() {
+    @noWarnUnused @name(".NoAction") action NoAction_1() {
     }
-    @name(".NoAction") action NoAction_8() {
+    @noWarnUnused @name(".NoAction") action NoAction_8() {
     }
-    @name(".NoAction") action NoAction_9() {
+    @noWarnUnused @name(".NoAction") action NoAction_9() {
     }
-    @name(".NoAction") action NoAction_10() {
+    @noWarnUnused @name(".NoAction") action NoAction_10() {
     }
-    @name(".NoAction") action NoAction_11() {
+    @noWarnUnused @name(".NoAction") action NoAction_11() {
     }
     @name("ingress.set_vrf") action set_vrf(bit<12> vrf) {
         meta.ingress_metadata.vrf = vrf;

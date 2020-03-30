@@ -76,6 +76,7 @@ actions {
     id: 21257015
     name: "NoAction"
     alias: "NoAction"
+    annotations: "@noWarnUnused"
   }
 }
 actions {
