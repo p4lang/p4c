@@ -67,8 +67,7 @@ class Predication final : public Transform {
         const IR::Mux * preorder(IR::Mux * mux) override;
         const IR::AssignmentStatement * preorder(IR::AssignmentStatement * statement) override;
         void emplaceExpression(IR::Mux * mux);
-        void visitThen(IR::Mux * mux);
-        void visitElse(IR::Mux * mux);
+        void visitBranch(IR::Mux * mux, bool then);
     };
 
     EmptyStatementRemover remover;
@@ -93,9 +92,9 @@ class Predication final : public Transform {
     }
 
  public:
-    explicit Predication(NameGenerator* generator) :
+    Predication() :
         inside_action(false), ifNestingLevel(0)
-    { CHECK_NULL(generator); setName("Predication"); }
+    { setName("Predication"); }
     const IR::Expression* clone(const IR::Expression* expression);
     const IR::Node* clone(const IR::AssignmentStatement* statement);
     const IR::Node* preorder(IR::IfStatement* statement) override;

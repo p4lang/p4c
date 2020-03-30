@@ -15,21 +15,26 @@ limitations under the License.
 */
 #include "predication.h"
 #include "frontends/p4/cloner.h"
-
-
 namespace P4 {
-/// convert an expression into a string that uniqely identifies the value referenced
-/// return null cstring if not a reference to a constant thing.
-static cstring expr_name(const IR::Expression *exp) {
+/// convert an expression into a string that uniqely identifies the lvalue referenced
+/// return null cstring if not a reference to a lvalue.
+static cstring lvalue_name(const IR::Expression *exp) {
     if (auto p = exp->to<IR::PathExpression>())
         return p->path->name;
     if (auto m = exp->to<IR::Member>()) {
-        if (auto base = expr_name(m->expr))
+        if (auto base = lvalue_name(m->expr))
             return base + "." + m->member;
     } else if (auto a = exp->to<IR::ArrayIndex>()) {
         if (auto k = a->right->to<IR::Constant>())
-            if (auto base = expr_name(a->left))
-                return base + "." + std::to_string(k->asInt()); }
+            if (auto base = lvalue_name(a->left))
+                return base + "." + std::to_string(k->asInt());
+    } else if (auto s = exp->to<IR::Slice>()) {
+        if (auto base = lvalue_name(s->e0))
+            if (auto h = s->e1->to<IR::Constant>())
+                if (auto l = s->e2->to<IR::Constant>())
+                    return base + "." +
+                        std::to_string(h->asInt()) + ":" + std::to_string(l->asInt());
+    }
     return cstring();
 }
 
@@ -79,37 +84,39 @@ void Predication::ExpressionReplacer::emplaceExpression(IR::Mux * mux) {
     }
 }
 
-void Predication::ExpressionReplacer::visitThen(IR::Mux * mux) {
+void Predication::ExpressionReplacer::visitBranch(IR::Mux * mux, bool then) {
     auto condition = conditions[conditions.size() - currentNestingLevel];
     auto statement = findContext<IR::AssignmentStatement>();
-    auto leftName = expr_name(statement->left);
-    auto thenExprName = expr_name(mux->e1);
-    if (expr_name(mux->e2) == expr_name(statement->left)) {
-        mux->e2 = statement->left;
-    }
-    if (mux->e1->is<IR::Mux>() || thenExprName.isNullOrEmpty() || thenExprName == leftName) {
-        if (!mux->e1->is<IR::Mux>()) {
-            mux->e1 = new IR::Mux(condition, statement->left, statement->left);
-        }
-        visit(mux->e1);
-    }
-}
+    auto leftName = lvalue_name(statement->left);
+    auto thenExprName = lvalue_name(mux->e1);
+    auto elseExprName = lvalue_name(mux->e2);
 
-void Predication::ExpressionReplacer::visitElse(IR::Mux * mux) {
-    auto condition = conditions[conditions.size() - currentNestingLevel];
-    auto statement = findContext<IR::AssignmentStatement>();
-    auto leftName = expr_name(statement->left);
-    auto elseExprName = expr_name(mux->e2);
-    if (expr_name(mux->e1) == leftName) {
-        mux->e1 = statement->left;
-            mux->e1 = statement->left;
+    if (leftName.isNullOrEmpty()) {
+        ::error(ErrorType::ERR_EXPRESSION,
+                "%1%: Assignment inside if statement can't be transformed to condition expression",
+                statement);
+    }
+
+    if (then && elseExprName == leftName) {
+        mux->e2 = statement->left;
+    } else if (!then && thenExprName == leftName) {
         mux->e1 = statement->left;
     }
-    if (mux->e2->is<IR::Mux>() || elseExprName.isNullOrEmpty() || elseExprName == leftName) {
-        if (!mux->e2->is<IR::Mux>()) {
-            mux->e2 = new IR::Mux(condition, statement->left, statement->left);
+
+    if (then) {
+        if (mux->e1->is<IR::Mux>() || thenExprName.isNullOrEmpty() || thenExprName == leftName) {
+            if (!mux->e1->is<IR::Mux>()) {
+                mux->e1 = new IR::Mux(condition, statement->left, statement->left);
+            }
+            visit(mux->e1);
         }
-        visit(mux->e2);
+    } else {
+        if (mux->e2->is<IR::Mux>() || elseExprName.isNullOrEmpty() || elseExprName == leftName) {
+            if (!mux->e2->is<IR::Mux>()) {
+                mux->e2 = new IR::Mux(condition, statement->left, statement->left);
+            }
+            visit(mux->e2);
+        }
     }
 }
 
@@ -119,10 +126,8 @@ const IR::Mux * Predication::ExpressionReplacer::preorder(IR::Mux * mux) {
     bool thenElsePass = travesalPath[currentNestingLevel - 1];
     if (currentNestingLevel == travesalPath.size()) {
         emplaceExpression(mux);
-    } else if (thenElsePass) {
-        visitThen(mux);
     } else {
-        visitElse(mux);
+        visitBranch(mux, thenElsePass);
     }
     --currentNestingLevel;
     return mux;
@@ -162,7 +167,7 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
             liveAssignments.erase(dependency);
         }
     }
-    auto statementName = expr_name(statement->left);
+    auto statementName = lvalue_name(statement->left);
     auto foundedAssignment = liveAssignments.find(statementName);
     if (foundedAssignment != liveAssignments.end()) {
         statement->right = foundedAssignment->second->right;
@@ -177,17 +182,17 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
 }
 
 const IR::Node* Predication::preorder(IR::PathExpression * pathExpr) {
-    dependencies.push_back(expr_name(pathExpr));
+    dependencies.push_back(lvalue_name(pathExpr));
     return pathExpr;
 }
 const IR::Node* Predication::preorder(IR::Member * member) {
     visit(member->expr);
-    dependencies.push_back(expr_name(member));
+    dependencies.push_back(lvalue_name(member));
     return member;
 }
 const IR::Node* Predication::preorder(IR::ArrayIndex * arrInd) {
     visit(arrInd->left);
-    dependencies.push_back(expr_name(arrInd));
+    dependencies.push_back(lvalue_name(arrInd));
     return arrInd;
 }
 
@@ -218,7 +223,6 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
     --ifNestingLevel;
 
     prune();
-
     return rv->apply(remover);
 }
 
