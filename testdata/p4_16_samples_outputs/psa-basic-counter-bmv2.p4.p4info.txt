@@ -18,6 +18,7 @@ actions {
     id: 27646489
     name: "send_to_port"
     alias: "send_to_port"
+    annotations: "@noWarnUnused"
   }
 }
 actions {

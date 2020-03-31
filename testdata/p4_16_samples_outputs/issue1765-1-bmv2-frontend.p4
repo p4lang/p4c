@@ -176,11 +176,11 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".NoAction") action NoAction_0() {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
-    @name(".NoAction") action NoAction_4() {
+    @noWarnUnused @name(".NoAction") action NoAction_4() {
     }
-    @name(".NoAction") action NoAction_5() {
+    @noWarnUnused @name(".NoAction") action NoAction_5() {
     }
     mac_addr_t mac_tmp_0;
     ipv6_addr_t addr_tmp_0;

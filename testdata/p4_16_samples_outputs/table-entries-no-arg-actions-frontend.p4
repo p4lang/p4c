@@ -3,7 +3,7 @@
 control C(inout bit<2> x);
 package S(C c);
 control MyC(inout bit<2> x) {
-    @name(".NoAction") action NoAction_0() {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
     @name("MyC.a") action a() {
     }

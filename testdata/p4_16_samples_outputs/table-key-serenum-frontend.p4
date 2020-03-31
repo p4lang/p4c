@@ -34,7 +34,7 @@ parser prs(packet_in p, out Headers h) {
 }
 
 control c(inout Headers h, inout standard_metadata_t sm) {
-    @name(".NoAction") action NoAction_0() {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
     @name("c.do_act") action do_act(bit<32> type) {
         sm.instance_type = type;

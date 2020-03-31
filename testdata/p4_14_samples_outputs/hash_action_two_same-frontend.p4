@@ -45,9 +45,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 @name(".meter1") meter(32w1024, MeterType.bytes) meter1;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".NoAction") action NoAction_0() {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
-    @name(".NoAction") action NoAction_3() {
+    @noWarnUnused @name(".NoAction") action NoAction_3() {
     }
     @name(".set_index") action set_index(bit<16> index, bit<9> port) {
         meta.counter_metadata.counter_index = index;

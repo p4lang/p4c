@@ -60,7 +60,7 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
 }
 
 control pipe(inout Headers_t headers, inout metadata meta) {
-    @name(".NoAction") action NoAction_0() {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
     bit<32> tmp_0;
     @name("pipe.ip_modify_saddr") action ip_modify_saddr(bit<32> srcAddr) {

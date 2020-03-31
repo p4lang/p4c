@@ -7,7 +7,7 @@ struct tuple_0 {
 }
 
 control c(inout bit<32> x, inout bit<32> y) {
-    @name(".NoAction") action NoAction_0() {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
     @name("c.a") action a() {
         log_msg("Logging message.");

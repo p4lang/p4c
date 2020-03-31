@@ -18,7 +18,7 @@ struct Headers {
 }
 
 control c(in Headers h) {
-    @name(".NoAction") action NoAction_0() {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
     @name("c.a") action a() {
     }

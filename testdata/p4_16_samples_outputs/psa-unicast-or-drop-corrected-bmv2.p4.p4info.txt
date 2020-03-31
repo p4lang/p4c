@@ -6,6 +6,7 @@ actions {
     id: 27646489
     name: "send_to_port"
     alias: "send_to_port"
+    annotations: "@noWarnUnused"
   }
 }
 actions {
@@ -13,5 +14,6 @@ actions {
     id: 30788783
     name: "ingress_drop"
     alias: "ingress_drop"
+    annotations: "@noWarnUnused"
   }
 }

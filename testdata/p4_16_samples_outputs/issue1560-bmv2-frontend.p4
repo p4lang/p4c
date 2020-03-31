@@ -98,11 +98,11 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    @name(".NoAction") action NoAction_0() {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
-    @name(".NoAction") action NoAction_4() {
+    @noWarnUnused @name(".NoAction") action NoAction_4() {
     }
-    @name(".NoAction") action NoAction_5() {
+    @noWarnUnused @name(".NoAction") action NoAction_5() {
     }
     @name("cIngress.foo1") action foo1(IPv4Address dstAddr) {
         hdr.ipv4.dstAddr = dstAddr;

@@ -27,7 +27,7 @@ parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standar
 }
 
 control MyIngress(inout my_packet p, inout my_metadata meta, inout standard_metadata_t s) {
-    @name(".NoAction") action NoAction_0() {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
     @name("MyIngress.set_data") action set_data() {
     }

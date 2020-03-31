@@ -27,7 +27,7 @@ parser parse(packet_in pk, out parsed_packet_t hdr, inout my_meta_t my_metadata,
 
 extern s1_t choose_entry(in choices_t choices);
 control ingress(inout parsed_packet_t hdr, inout my_meta_t my_meta, inout standard_metadata_t standard_metadata) {
-    @name(".NoAction") action NoAction_0() {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
     @name("ingress.select_entry") action select_entry(choices_t choices) {
         my_meta.entry = choose_entry(choices);

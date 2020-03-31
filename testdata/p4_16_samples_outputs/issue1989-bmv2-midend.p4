@@ -53,7 +53,7 @@ control compute_checksum_stub(inout headers hdr, inout test_metadata_t meta) {
 }
 
 control ingress(inout headers hdr, inout test_metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @name(".NoAction") action NoAction_0() {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
     @name("ingress.assign_non_const_array_index") action assign_non_const_array_index() {
         hdr.ethernet_stack[1] = hdr.ethernet_stack[meta.color];
