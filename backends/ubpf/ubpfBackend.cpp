@@ -87,4 +87,4 @@ namespace UBPF {
         const size_t lastSlashIndex = fullPath.find_last_of("/\\");
         return fullPath.substr(lastSlashIndex + 1);
     }
-}
+}  // namespace UBPF
