@@ -489,7 +489,7 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
             // resolve hash collisions, the id that we select depends on the order in
             // which the names are hashed. This is why we sort the names above.
             boost::optional<p4rt_id_t> id = probeForId(nameId, [=](uint32_t nameId) {
-                return (resourceType << 24) | (nameId & 0xffffff);
+                return (resourceType << 24) | (nameId & 0xffff);
             });
 
             if (!id) {

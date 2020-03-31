@@ -403,8 +403,9 @@ struct Counterlike {
             auto typeArg = type->arguments->at(*indexTypeParamIdx);
             // We ignore the return type on purpose, but the call is required to update p4RtTypeInfo
             // if the index has a user-defined type.
-            TypeSpecConverter::convert(refMap, typeMap, typeArg, p4RtTypeInfo);
-            index_type_name = getTypeName(typeArg, typeMap);
+            if (!dynamic_cast<const IR::Type_Dontcare *>(typeArg)) {
+                TypeSpecConverter::convert(refMap, typeMap, typeArg, p4RtTypeInfo);
+                index_type_name = getTypeName(typeArg, typeMap); }
         }
 
         return Counterlike<Kind>{declaration->controlPlaneName(),
