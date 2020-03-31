@@ -1,3 +1,3 @@
-self-call.p4(17): [--Werror=type-error] error: c: Cannot refer to control inside itself
+self-call.p4(17): [--Werror=not-found] error: c: declaration not found
     c() c_inst;
     ^
