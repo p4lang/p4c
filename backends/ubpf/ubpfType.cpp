@@ -22,7 +22,6 @@ namespace UBPF {
     EBPF::EBPFTypeFactory *instance = UBPFTypeFactory::getInstance();
 
     EBPF::EBPFType *UBPFTypeFactory::create(const IR::Type *type) {
-
         EBPF::EBPFType *result = nullptr;
         if (type->is<IR::Type_Boolean>()) {
             result = new UBPFBoolType();
@@ -65,7 +64,6 @@ namespace UBPF {
             builder->appendFormat("uint64_t");
         else
             builder->appendFormat("uint8_t*");
-
     }
 
     void UBPFScalarType::declare(EBPF::CodeBuilder *builder, cstring id, bool asPointer) {
@@ -105,8 +103,6 @@ namespace UBPF {
             }
             builder->append(" */");
             builder->newline();
-
-
         }
 
         if (type->is<IR::Type_Header>()) {
@@ -174,8 +170,10 @@ namespace UBPF {
             elements.push_back(new UBPFListElement(etype, fname));
 
             auto typeWidth = etype->to<EBPF::IHasWidth>();
-            auto remainingBits = std::min(16 - typeWidth->implementationWidthInBits() % 16, overallPadding);
-            if (remainingBits <= 16 && remainingBits != 0 && typeWidth->implementationWidthInBits() % 16 != 0) {
+            auto remainingBits = std::min(16 - typeWidth->implementationWidthInBits() % 16,
+                    overallPadding);
+            if (remainingBits <= 16 && remainingBits != 0
+                && typeWidth->implementationWidthInBits() % 16 != 0) {
                 if (remainingBits == 8 || remainingBits == 16) {
                     cstring name = "pad" + std::to_string(paddingIndex);
                     unsigned widthInBytes = remainingBits / 8;
@@ -231,4 +229,4 @@ namespace UBPF {
         }
     }
 
-}
+}  // namespace UBPF

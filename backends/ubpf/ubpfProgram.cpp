@@ -28,7 +28,8 @@ namespace UBPF {
         auto pack = toplevel->getMain();
         if (pack->type->name != "ubpf")
             ::warning(ErrorType::WARN_INVALID, "%1%: the main ubpf package should be called ubpf"
-                                               "; are you using the wrong architecture?", pack->type->name);
+                                               "; are you using the wrong architecture?",
+                                               pack->type->name);
 
         if (pack->getConstructorParameters()->size() != 3) {
             ::error("Expected toplevel package %1% to have 3 parameters", pack->type);
@@ -165,7 +166,6 @@ namespace UBPF {
     }
 
     void UBPFProgram::emitTableDefinition(EBPF::CodeBuilder *builder) const {
-        //ubpf maps types
         builder->append("enum ");
         builder->append("ubpf_map_type");
         builder->spc();
@@ -250,4 +250,4 @@ namespace UBPF {
         builder->blockEnd(true);
     }
 
-}
+}  // namespace UBPF

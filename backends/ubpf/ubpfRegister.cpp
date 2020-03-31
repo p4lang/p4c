@@ -24,7 +24,6 @@ namespace UBPF {
                                const IR::ExternBlock *block,
                                cstring name, EBPF::CodeGenInspector *codeGen) :
             UBPFTableBase(program, name, codeGen) {
-
         auto di = block->node->to<IR::Declaration_Instance>();
         auto type = program->typeMap->getType(di, true)->to<IR::Type_SpecializedCanonical>();
         auto valueType = type->arguments->operator[](0);
@@ -80,7 +79,7 @@ namespace UBPF {
                   "Expected just 2 argument for %1%", expression);
 
         auto arg_value = expression->arguments->at(1);
-        auto target = (UbpfTarget *) builder->target;
+        auto target = reinterpret_cast<const UbpfTarget *>(builder->target);
 
         cstring valueVariableName = emitValueInstanceIfNeeded(builder, arg_value);
         if (valueVariableName == nullptr) {
@@ -92,13 +91,11 @@ namespace UBPF {
 
     cstring UBPFRegister::emitValueInstanceIfNeeded(EBPF::CodeBuilder *builder,
                                                     const IR::Argument *arg_value) {
-
         cstring valueVariableName = nullptr;
 
         if (arg_value->expression->is<IR::Constant>() ||
             arg_value->expression->is<IR::Operation_Binary>() ||
             arg_value->expression->is<IR::Member>()) {
-
             auto scalarInstance = UBPFTypeFactory::instance->create(
                     valueType);
             valueVariableName = program->refMap->newName(
@@ -122,7 +119,8 @@ namespace UBPF {
         target->emitTableLookup(builder, dataMapName, last_key_name, "");
     }
 
-    void UBPFRegister::emitKeyInstance(EBPF::CodeBuilder *builder, const IR::MethodCallExpression *expression) {
+    void UBPFRegister::emitKeyInstance(EBPF::CodeBuilder *builder,
+                                       const IR::MethodCallExpression *expression) {
         auto arg_key = expression->arguments->at(0);
 
         cstring keyName = "";
@@ -151,6 +149,6 @@ namespace UBPF {
 
         last_key_name = keyName;
     }
-}
+}  // namespace UBPF
 
 
