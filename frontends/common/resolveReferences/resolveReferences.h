@@ -88,15 +88,14 @@ class ResolutionContext : public IHasDbPrint {
     /// Resolve references for @p name, restricted to @p type declarations.
     /// If @p forwardOK is `false`, the referenced location must precede the location of @p name.
     std::vector<const IR::IDeclaration*>*
-    resolve(IR::ID name, ResolutionType type, bool forwardOK) const;
+    resolve(IR::ID name, ResolutionType type, bool forwardOK,
+            const Visitor::Context* context) const;
 
     /// Resolve reference for @p name, restricted to @p type declarations, and expect one result.
     /// If @p forwardOK is `false`, the referenced location must precede the location of @p name.
     const IR::IDeclaration*
-    resolveUnique(IR::ID name, ResolutionType type, bool forwardOK) const;
-
-    // Resolve a refrence to a type @p type.
-    const IR::Type *resolveType(const IR::Type *type) const;
+    resolveUnique(IR::ID name, ResolutionType type,
+                  bool forwardOK, const Visitor::Context* context) const;
 };
 
 /** Inspector that computes `refMap`: a map from paths to declarations.

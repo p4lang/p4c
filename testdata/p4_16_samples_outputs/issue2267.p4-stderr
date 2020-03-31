@@ -1,0 +1,7 @@
+issue2267.p4(4): [--Wwarn=shadow] warning: t shadows t
+  table t {
+        ^
+issue2267.p4(3)
+control MyC(bit<8> t) {
+                   ^
+warning: Program does not contain a `main' module

@@ -31,7 +31,7 @@ limitations under the License.
 %define parse.assert true
 
 // Enable verbose error reporting.
-%error-verbose
+%define parse.error verbose
 
 // Declare dependencies.
 %code requires {

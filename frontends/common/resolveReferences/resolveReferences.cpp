@@ -20,7 +20,8 @@ limitations under the License.
 namespace P4 {
 
 std::vector<const IR::IDeclaration*>*
-ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK) const {
+ResolutionContext::resolve(
+    IR::ID name, P4::ResolutionType type, bool forwardOK, const Visitor::Context* context) const {
     static std::vector<const IR::IDeclaration*> empty;
 
     std::vector<const IR::INamespace*> toTry(stack);
@@ -29,6 +30,40 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK)
     for (auto it = toTry.rbegin(); it != toTry.rend(); ++it) {
         const IR::INamespace* current = *it;
         LOG3("Trying to resolve in " << current->toString() << " " << dbp(current));
+
+        // Return true if a declaration satisfies several criteria:
+        // - it comes before the name in the source
+        // - it is not enclosed within the namespace itself (unless the namespace isRecursive).
+        std::function<bool(const IR::IDeclaration*)> filter =
+                [name, forwardOK, context](const IR::IDeclaration* d) {
+            if (name.srcInfo.isValid() && !forwardOK) {
+                Util::SourceInfo nsi = name.srcInfo;
+                Util::SourceInfo dsi = d->getNode()->srcInfo;
+                bool before = dsi <= nsi;
+                LOG3("\tPosition test for " << dbp(d->getNode()) << ":"
+                     << dsi << "<=" << nsi << "=" << before);
+                if (!before) return false;
+            }
+
+            auto ns = d->to<IR::INamespace>();
+            if (!ns || !ns->isRecursive()) {
+                // Check to see whether d is a parent of the current
+                // node in the IR DAG; in this case we cannot resolve
+                // to it.  An example would be: table t { key = { t: exact }}
+                // However, we allow "recursive" namespaces resolve to identifiers
+                // within their context; this is necessary for example to allow
+                // transitions from a state to itself.
+                auto ctx = context;
+                while (ctx->parent) {
+                    if (ctx->node == d->getNode()) {
+                        LOG3("\tDeclaration is a parent:" << d);
+                        return false;
+                    }
+                    ctx = ctx->parent;
+                }
+            }
+            return true;
+        };
 
         if (current->is<IR::IGeneralNamespace>()) {
             auto gen = current->to<IR::IGeneralNamespace>();
@@ -55,19 +90,7 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK)
                 BUG("Unexpected enumeration value %1%", static_cast<int>(type));
             }
 
-            if (!forwardOK && name.srcInfo.isValid()) {
-                std::function<bool(const IR::IDeclaration*)> locationFilter =
-                        [name](const IR::IDeclaration* d) {
-                    Util::SourceInfo nsi = name.srcInfo;
-                    Util::SourceInfo dsi = d->getNode()->srcInfo;
-                    bool before = dsi <= nsi;
-                    LOG3("\tPosition test for " << dbp(d->getNode()) << ":"
-                         << dsi << "<=" << nsi << "=" << before);
-                    return before;
-                };
-                decls = decls->where(locationFilter);
-            }
-
+            decls = decls->where(filter);
             auto vector = decls->toVector();
             if (!vector->empty()) {
                 LOG3("Resolved in " << dbp(current->getNode()));
@@ -97,31 +120,8 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK)
                 BUG("Unexpected enumeration value %1%", static_cast<int>(type));
             }
 
-            if (!forwardOK && name.srcInfo.isValid()) {
-                Util::SourceInfo nsi = name.srcInfo;
-                Util::SourceInfo dsi = decl->getNode()->srcInfo;
-                bool before = dsi <= nsi;
-                LOG3("\tPosition test for " << dbp(decl) << ":"
-                     << dsi << "<=" << nsi << "=" << before);
-                if (!before)
-                    continue;
-            }
-            // Check to see whether decl is a parent in the IR DAG; in this
-            // case we cannot resolve to it.  An example would be:
-            // table t { key = { t: exact }}
-            bool nested = false;
-            auto ctx = getContext();
-            while (ctx->parent) {
-                if (ctx->node == d->getNode()) {
-                    nested = true;
-                    break;
-                }
-                ctx = ctx->parent;
-            }
-            if (nested) {
-                LOG3("\tDeclaration is a parent; skipping:" << decl);
-                continue;
-            }
+            auto ok = filter(decl);
+            if (!ok) continue;
 
             LOG3("Resolved in " << dbp(current->getNode()));
             auto result = new std::vector<const IR::IDeclaration*>();
@@ -141,8 +141,9 @@ void ResolutionContext::done() {
 const IR::IDeclaration*
 ResolutionContext::resolveUnique(IR::ID name,
                                  P4::ResolutionType type,
-                                 bool forwardOK) const {
-    const std::vector<const IR::IDeclaration*> *decls = resolve(name, type, forwardOK);
+                                 bool forwardOK,
+                                 const Visitor::Context* context) const {
+    const std::vector<const IR::IDeclaration*> *decls = resolve(name, type, forwardOK, context);
     // Check overloaded symbols.
     if (!argumentStack.empty() && decls->size() > 1) {
         auto arguments = argumentStack.back();
@@ -166,15 +167,6 @@ ResolutionContext::resolveUnique(IR::ID name,
     for (auto a : *decls)
         ::error("Candidate: %1%", a);
     return nullptr;
-}
-
-const IR::Type *
-ResolutionContext::resolveType(const IR::Type *type) const {
-    // We allow lookups forward for type variables, which are declared after they are used
-    // in function returns.  forwardOK = true below.
-    if (auto tname = type->to<IR::Type_Name>())
-        return resolveUnique(tname->path->name, ResolutionType::Type, true)->to<IR::Type>();
-    return type;
 }
 
 void ResolutionContext::dbprint(std::ostream& out) const {
@@ -235,7 +227,7 @@ void ResolveReferences::resolvePath(const IR::Path* path, bool isType) const {
     BUG_CHECK(!resolveForward.empty(), "Empty resolveForward");
     bool forwardOK = resolveForward.back();
 
-    const IR::IDeclaration* decl = ctx->resolveUnique(path->name, k, forwardOK);
+    const IR::IDeclaration* decl = ctx->resolveUnique(path->name, k, forwardOK, getContext());
     if (decl == nullptr) {
         refMap->usedName(path->name.name);
         return;
@@ -255,7 +247,7 @@ void ResolveReferences::checkShadowing(const IR::INamespace* ns) const {
             // do not give shadowing warnings for parameters of extern methods
             continue;
 
-        auto prev = context->resolve(decl->getName(), ResolutionType::Any, anyOrder);
+        auto prev = context->resolve(decl->getName(), ResolutionType::Any, anyOrder, getContext());
         if (prev->empty()) continue;
 
         for (auto p : *prev) {

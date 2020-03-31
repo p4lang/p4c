@@ -66,6 +66,8 @@ class ParserState : ISimpleNamespace, Declaration, IAnnotated {
         return components.getDeclarations(); }
     const IDeclaration* getDeclByName(cstring name) const override {
         return components.getDeclaration(name); }
+    /// Paths inside the parser state are allowed to resolve to the state itself.
+    virtual bool isRecursive() const { return true; }
 
     static const cstring accept;
     static const cstring reject;

@@ -54,11 +54,15 @@ interface IApply {
 /// base class for namespaces
 interface INamespace {
     virtual Util::Enumerator<IDeclaration> *getDeclarations() const = 0;
+    /// If true elements in this namespace can resolve to the
+    /// namespace itself
+    virtual bool isRecursive() const = 0;
 }
 
 /// Does not allow two declarations with the same name
 interface ISimpleNamespace : INamespace {
     virtual IDeclaration getDeclByName(cstring name) const = 0;
+    virtual bool isRecursive() const { return false; }
 }
 
 /// A general namespace can have multiple declarations with the same name
@@ -68,6 +72,7 @@ interface IGeneralNamespace : INamespace {
     /// prints an error if it finds duplicate names
     void checkDuplicateDeclarations() const;
     validate{ checkDuplicateDeclarations(); }
+    virtual bool isRecursive() const { return false; }
 }
 
 /// Interface implemented by something that can be called
