@@ -41,7 +41,7 @@ void FlattenHeader::doFlatten(const IR::Type* type) {
         auto originalName = makeName(".");
         auto annotations = mergeAnnotations();
         annotations = annotations->addOrReplace(
-            IR::Annotation::nameAnnotation, new IR::StringLiteral(originalName));
+            IR::Annotation::nameAnnotation, new IR::StringLiteral(originalName), false);
         newFields.push_back(new IR::StructField(IR::ID(newName), annotations, type));
     }
 }

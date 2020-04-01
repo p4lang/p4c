@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,13 +24,13 @@ HeaderTypeMaxLengthCalculator::preorder(IR::Type_StructLike *hdr_type) {
         unsigned len = 0;
         for (auto field : hdr_type->fields)
             len += field->type->width_bits();
-        max_length = new IR::Annotation("max_length", len);
+        max_length = new IR::Annotation("max_length", len, false);
         if (!annot) annot = hdr_type->annotations->clone();
         annot->annotations.push_back(max_length); }
     auto *length = hdr_type->getAnnotation("length");
     if (!length) {
         if (!annot) annot = hdr_type->annotations->clone();
-        length = new IR::Annotation("length", max_length->expr);
+        length = new IR::Annotation("length", max_length->expr, false);
         annot->annotations.push_back(length); }
     if (annot) hdr_type->annotations = annot;
     return false;

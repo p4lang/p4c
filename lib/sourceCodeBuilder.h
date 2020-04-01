@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -60,6 +60,10 @@ class SourceCodeBuilder {
             return;
         endsInSpace = ::isspace(str.at(str.size() - 1));
         buffer << str;
+    }
+    void append(char c) {
+        endsInSpace = ::isspace(c);
+        buffer << c;
     }
     void append(const char* str) {
         if (str == nullptr)

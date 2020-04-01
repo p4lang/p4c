@@ -1,0 +1,6 @@
+structured-annotation-e1.p4(1): [--Werror=duplicate] error: @dup: duplicate name for structured annotation
+@dup[]
+^
+structured-annotation-e1.p4(2): [--Werror=duplicate] error: @dup: duplicate name for structured annotation
+@dup[]
+^

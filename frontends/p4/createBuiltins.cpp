@@ -70,7 +70,8 @@ void CreateBuiltins::postorder(IR::ActionList* actions) {
         return;
     actions->push_back(
         new IR::ActionListElement(
-            new IR::Annotations({new IR::Annotation(IR::Annotation::defaultOnlyAnnotation, {})}),
+            new IR::Annotations(
+                {new IR::Annotation(IR::Annotation::defaultOnlyAnnotation, {}, false)}),
             new IR::MethodCallExpression(
                 new IR::PathExpression(P4::P4CoreLibrary::instance.noAction.Id(actions->srcInfo)),
                 new IR::Vector<IR::Type>(), new IR::Vector<IR::Argument>())));

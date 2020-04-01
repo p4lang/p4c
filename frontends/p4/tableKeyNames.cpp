@@ -137,7 +137,7 @@ const IR::Node* DoTableKeyNames::postorder(IR::KeyElement* keyElement) {
         return keyElement;
     keyElement->annotations = keyElement->annotations->addAnnotation(
         IR::Annotation::nameAnnotation,
-        new IR::StringLiteral(keyElement->expression->srcInfo, name));
+        new IR::StringLiteral(keyElement->expression->srcInfo, name), false);
     return keyElement;
 }
 
