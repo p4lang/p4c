@@ -179,6 +179,7 @@ class Constant : Literal {
     bool fitsLong() const { return value >= LONG_MIN && value <= LONG_MAX; }
     bool fitsUint() const { return value >= 0 && value <= UINT_MAX; }
     bool fitsUint64() const { return value >= 0 && value <= UINT64_MAX; }
+    bool fitsInt64() const { return value >= INT64_MIN && value <= INT64_MAX; }
     long asLong() const {
         if (!fitsLong())
             ::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for long", this);
@@ -196,6 +197,11 @@ class Constant : Literal {
         if (!fitsUint64())
             ::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for uint64", this);
         return static_cast<uint64_t>(value);
+    }
+    int64_t asInt64() const {
+        if (!fitsInt64())
+            ::error(ErrorType::ERR_OVERLIMIT, "%1$x: Value too large for int64", this);
+        return static_cast<int64_t>(value);
     }
     // The following operators are only used in special circumstances.
     // They do not look at the type when operating.  There are separate

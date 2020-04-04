@@ -29,6 +29,8 @@ limitations under the License.
 
 #include "p4RuntimeArchHandler.h"
 
+namespace p4configv1 = ::p4::config::v1;
+
 namespace P4 {
 
 /** \addtogroup control_plane
@@ -123,6 +125,59 @@ std::string serializeOneAnnotation(const IR::Annotation* annotation) {
     // remove the whitespace added by ToP4.
     serializedAnnnotation.pop_back();
     return serializedAnnnotation;
+}
+
+void serializeStructuredExpression(const IR::Expression* expr, p4configv1::Expression *sExpr) {
+    BUG_CHECK(expr->is<IR::Literal>(),
+              "%1%: structured annotation expression should be a literal", expr);
+    if (expr->is<IR::Constant>()) {
+        auto *constant = expr->to<IR::Constant>();
+        if (!constant->fitsInt64()) {
+            ::error(ErrorType::ERR_OVERLIMIT,
+                    "%1%: integer literal in structured annotation must fit in int64, "
+                    "consider using a string literal for larger values",
+                    expr);
+            return;
+        }
+        sExpr->set_int64_value(constant->asInt64());
+    } else if (expr->is<IR::BoolLiteral>()) {
+        sExpr->set_bool_value(expr->to<IR::BoolLiteral>()->value);
+    } else if (expr->is<IR::StringLiteral>()) {
+        sExpr->set_string_value(expr->to<IR::StringLiteral>()->value);
+    } else {
+        // guaranteed by the type checker.
+        BUG("%1%: structured annotation expression must be a compile-time value", expr);
+    }
+}
+
+void serializeStructuredKVPair(const IR::NamedExpression* kv, p4configv1::KeyValuePair *sKV) {
+    sKV->set_key(kv->name.name);
+    serializeStructuredExpression(kv->expression, sKV->mutable_value());
+}
+
+void serializeOneStructuredAnnotation(
+    const IR::Annotation* annotation,
+    p4configv1::StructuredAnnotation* structuredAnnotation) {
+    structuredAnnotation->set_name(annotation->name.name);
+    switch (annotation->annotationKind()) {
+        case IR::Annotation::Kind::StructuredEmpty:
+            // nothing to do, body oneof should be empty.
+            return;
+        case IR::Annotation::Kind::StructuredExpressionList:
+            for (auto* expr : annotation->expr) {
+                serializeStructuredExpression(
+                    expr, structuredAnnotation->mutable_expression_list()->add_expressions());
+            }
+            return;
+        case IR::Annotation::Kind::StructuredKVList:
+            for (auto* kv : annotation->kv) {
+                serializeStructuredKVPair(
+                    kv, structuredAnnotation->mutable_kv_pair_list()->add_kv_pairs());
+            }
+            return;
+        default:
+            BUG("%1%: not a structured annotation", annotation);
+    }
 }
 
 }  // namespace Helpers

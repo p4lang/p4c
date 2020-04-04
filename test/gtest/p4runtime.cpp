@@ -1542,6 +1542,79 @@ TEST_F(P4RuntimePkgInfo, UnknownAnnotations) {
     EXPECT_EQ(annotations.Get(3), "@my_annotation_4(\"test\")");
 }
 
+TEST_F(P4RuntimePkgInfo, UnknownStructuredAnnotations) {
+    auto test = createTestCase(R"(
+        @my_annotation_1[]
+        @my_annotation_2[1,"hello",true,1==2,5+6]
+        @my_annotation_3[label="text", my_bool=true, int_val=2*3])");
+    ASSERT_TRUE(test);
+    EXPECT_EQ(0u, ::diagnosticCount());
+    const auto& pkgInfo = test->p4Info->pkg_info();
+    const auto& annotations = pkgInfo.structured_annotations();
+    ASSERT_EQ(annotations.size(), 3);
+    // P4 order is preserved when building the IR and generating P4Info
+    {
+        const auto& annotation = annotations.Get(0);
+        EXPECT_EQ(annotation.name(), "my_annotation_1");
+        EXPECT_EQ(annotation.body_case(), p4configv1::StructuredAnnotation::BODY_NOT_SET);
+    }
+    {
+        const auto& annotation = annotations.Get(1);
+        EXPECT_EQ(annotation.name(), "my_annotation_2");
+        const auto& expressions = annotation.expression_list().expressions();
+        ASSERT_EQ(expressions.size(), 5);
+        EXPECT_EQ(expressions.Get(0).int64_value(), 1);
+        EXPECT_EQ(expressions.Get(1).string_value(), "hello");
+        EXPECT_EQ(expressions.Get(2).bool_value(), true);
+        EXPECT_EQ(expressions.Get(3).bool_value(), false);
+        EXPECT_EQ(expressions.Get(4).int64_value(), 11);
+    }
+    {
+        const auto& annotation = annotations.Get(2);
+        EXPECT_EQ(annotation.name(), "my_annotation_3");
+        const auto& kvpairs = annotation.kv_pair_list().kv_pairs();
+        ASSERT_EQ(kvpairs.size(), 3);
+        {
+            const auto& kvpair = kvpairs.Get(0);
+            EXPECT_EQ(kvpair.key(), "label");
+            EXPECT_EQ(kvpair.value().string_value(), "text");
+        }
+        {
+            const auto& kvpair = kvpairs.Get(1);
+            EXPECT_EQ(kvpair.key(), "my_bool");
+            EXPECT_EQ(kvpair.value().bool_value(), true);
+        }
+        {
+            const auto& kvpair = kvpairs.Get(2);
+            EXPECT_EQ(kvpair.key(), "int_val");
+            EXPECT_EQ(kvpair.value().int64_value(), 6);
+        }
+    }
+}
+
+TEST_F(P4RuntimePkgInfo, StructuredAnnotationDuplicate) {
+    auto test = createTestCase(R"(
+        @my_annotation_1[]
+        @my_annotation_1[1])");
+    // error is in p4c frontend
+    ASSERT_FALSE(test);
+}
+
+TEST_F(P4RuntimePkgInfo, StructuredAnnotationDuplicateKey) {
+    auto test = createTestCase(R"(
+        @my_annotation_1[foo=bar,foo=barAgain])");
+    // error is in p4c frontend
+    ASSERT_FALSE(test);
+}
+
+TEST_F(P4RuntimePkgInfo, StructuredAnnotationLargeInt) {
+    auto test = createTestCase(R"(
+        @my_annotation_1[foo=6666666666666666666666666666666])");
+    // error is in P4Info serializer
+    ASSERT_TRUE(test);
+    EXPECT_EQ(1u, ::diagnosticCount());
+}
+
 
 class P4RuntimeDataTypeSpec : public P4Runtime {
  protected:
