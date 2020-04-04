@@ -239,11 +239,19 @@ void forAllEvaluatedBlocks(const IR::Block* block, Func function) {
     }
 }
 
+/// Serialize an unstructured @annotation to a string.
 std::string serializeOneAnnotation(const IR::Annotation* annotation);
 
+/// Serialize a structured @annotation to the appropriate Protobuf message.
+void serializeOneStructuredAnnotation(
+    const IR::Annotation* annotation,
+    ::p4::config::v1::StructuredAnnotation* structuredAnnotation);
+
 /// Serialize @annotated's P4 annotations and attach them to a P4Info message
-/// with an 'annotations' field. '@name', '@id' and documentation annotations
-/// are ignored, as well as annotations whose name satisfies predicate @p.
+/// with an 'annotations' and a 'structured_annotations" field. All structured
+/// annotations are included. '@name', '@id' and documentation unstructured
+/// annotations are ignored, as well as annotations whose name satisfies
+/// predicate @p.
 template <typename Message, typename UnaryPredicate>
 void addAnnotations(Message* message, const IR::IAnnotated* annotated, UnaryPredicate p) {
     CHECK_NULL(message);
@@ -252,6 +260,11 @@ void addAnnotations(Message* message, const IR::IAnnotated* annotated, UnaryPred
     if (annotated == nullptr) return;
 
     for (const IR::Annotation* annotation : annotated->getAnnotations()->annotations) {
+        // Always add all structured annotations.
+        if (annotation->annotationKind() != IR::Annotation::Kind::Unstructured) {
+            serializeOneStructuredAnnotation(annotation, message->add_structured_annotations());
+            continue;
+        }
         // Don't output the @name or @id annotations; they're represented
         // elsewhere in P4Info messages.
         if (annotation->name == IR::Annotation::nameAnnotation) continue;

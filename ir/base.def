@@ -204,14 +204,6 @@ class AnnotationToken {
     dbprint { out << text; }
 }
 
-#emit
-enum class AnnotationKind {
-    Unstructured,
-    StructuredKVList,
-    StructuredExpressionList
-};
-#end
-
 /// Annotations are used to provide additional information to the compiler
 /// Most P4 entities can be optionally annotated
 class Annotation {
@@ -287,13 +279,24 @@ class Annotation {
     /// Useful helper: extracts name value from a name annotation
     static cstring getName(const Annotation* annotation);
 
-    AnnotationKind annotationKind() const {
+#emit
+    enum class Kind {
+        Unstructured,
+        StructuredEmpty,
+        StructuredKVList,
+        StructuredExpressionList
+    };
+
+    Kind annotationKind() const {
         if (!structured)
-            return AnnotationKind::Unstructured;
+            return Kind::Unstructured;
         if (expr.size())
-            return AnnotationKind::StructuredExpressionList;
-        return AnnotationKind::StructuredKVList;
+            return Kind::StructuredExpressionList;
+        if (kv.size())
+            return Kind::StructuredKVList;
+        return Kind::StructuredEmpty;
     }
+#end
 }
 
 /// There can be several annotations with the same "name", so this is a vector.
