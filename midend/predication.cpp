@@ -161,7 +161,7 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
     for (auto dependency : dependencies) {
         if (liveAssignments.find(dependency) != liveAssignments.end()) {
             // print out dependecy
-            currentBlock->push_back(liveAssignments[dependency]);
+            blocks.back()->push_back(liveAssignments[dependency]);
             // remove from names to not duplicate
             orderedNames.erase(dependency);
             liveAssignments.erase(dependency);
@@ -202,7 +202,7 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
 
     ++ifNestingLevel;
     auto rv = new IR::BlockStatement;
-    currentBlock = rv;
+    blocks.push_back(new IR::BlockStatement);
     travesalPath.push_back(true);
     visit(statement->ifTrue);
     rv->push_back(statement->ifTrue);
@@ -214,12 +214,14 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
         rv->push_back(statement->ifFalse);
     }
 
+    rv->push_back(blocks.back());
     for (auto exprName : orderedNames) {
         rv->push_back(liveAssignments[exprName]);
     }
     liveAssignments.clear();
     orderedNames.clear();
     travesalPath.pop_back();
+    blocks.pop_back();
     --ifNestingLevel;
 
     prune();

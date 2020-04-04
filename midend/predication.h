@@ -71,7 +71,7 @@ class Predication final : public Transform {
     };
 
     EmptyStatementRemover remover;
-    IR::BlockStatement * currentBlock;
+    std::vector<IR::BlockStatement*> blocks;
     bool inside_action;
     unsigned ifNestingLevel;
     // Traverse path of nested if-else statements
