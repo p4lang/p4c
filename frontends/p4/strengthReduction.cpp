@@ -321,11 +321,18 @@ const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
     while (auto cat = expr->e0->to<IR::Concat>()) {
         unsigned rwidth = cat->right->type->width_bits();
         if (expr->getL() >= rwidth) {
-            expr->e0 = cat->left;
-            expr->e1 = new IR::Constant(expr->getH() - rwidth);
-            expr->e2 = new IR::Constant(expr->getL() - rwidth);
+            if (!hasSideEffects(cat->right)) {
+                expr->e0 = cat->left;
+                expr->e1 = new IR::Constant(expr->getH() - rwidth);
+                expr->e2 = new IR::Constant(expr->getL() - rwidth);
+            } else {
+                break;
+            }
         } else if (expr->getH() < rwidth) {
-            expr->e0 = cat->right;
+            if (!hasSideEffects(cat->left))
+                expr->e0 = cat->right;
+            else
+                break;
         } else {
             return new IR::Concat(expr->type,
                     new IR::Slice(cat->left, expr->getH() - rwidth, 0),
@@ -342,7 +349,8 @@ const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
     }
 
     auto slice_width = expr->getH() - expr->getL() + 1;
-    if (slice_width == (unsigned)expr->e0->type->width_bits())
+    if (slice_width == (unsigned)expr->e0->type->width_bits() &&
+        !hasSideEffects(expr->e1))
         return expr->e0;
 
     return expr;
