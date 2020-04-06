@@ -67,7 +67,7 @@ class Bridge(object):
 
     def ns_proc_open(self):
         """ Open a bash process in the namespace and return the handle """
-        cmd = self.get_ns_prefix() + " /bin/bash "
+        cmd = self.get_ns_prefix() + " /usr/bin/env bash "
         return open_process(self.verbose, cmd, self.outputs)
 
     def ns_proc_write(self, proc, cmd):

@@ -83,7 +83,7 @@ endmacro(p4c_test_set_name)
 #
 macro(p4c_add_test_with_args tag driver isXfail alias p4test test_args cmake_args)
   set(__testfile "${P4C_BINARY_DIR}/${tag}/${p4test}.test")
-  file (WRITE  ${__testfile} "#! /bin/bash\n")
+  file (WRITE  ${__testfile} "#! /usr/bin/env bash\n")
   file (APPEND ${__testfile} "# Generated file, modify with care\n\n")
   file (APPEND ${__testfile} "cd ${P4C_BINARY_DIR}\n")
   file (APPEND ${__testfile} "${driver} ${P4C_SOURCE_DIR} ${test_args} \"$@\" ${P4C_SOURCE_DIR}/${p4test}")
