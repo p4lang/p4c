@@ -62,6 +62,7 @@ const IR::StructInitializerExpression* StructTypeReplacement::explode(
         root->srcInfo, type, type, *vec);
 }
 
+namespace {
 static const IR::Type_Struct* isNestedStruct(const P4::TypeMap* typeMap, const IR::Type* type) {
     if (auto st = type->to<IR::Type_Struct>()) {
         for (auto f : st->fields) {
@@ -72,6 +73,7 @@ static const IR::Type_Struct* isNestedStruct(const P4::TypeMap* typeMap, const I
     }
     return nullptr;
 }
+}  // namespace
 
 void NestedStructMap::createReplacement(const IR::Type_Struct* type) {
     auto repl = ::get(replacement, type);

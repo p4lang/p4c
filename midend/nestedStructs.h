@@ -77,8 +77,9 @@ class ComplexValues final {
     /// Helper function that test if a struct is nested
     bool isNestedStruct(const IR::Type* type);
     /// Flatten a nested struct to only contain field declaration or non-nested struct
+    template <class T>
     void explode(cstring prefix, const IR::Type_Struct* type,
-                 FieldsMap* map, IR::Vector<IR::Declaration>* result);
+                 FieldsMap* map, IR::Vector<T>* result);
     Component* getTranslation(const IR::IDeclaration* decl) {
         auto dv = decl->to<IR::Declaration_Variable>();
         if (dv == nullptr)
