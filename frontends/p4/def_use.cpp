@@ -678,7 +678,8 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
         // symbolically call all the methods that might be called via this extern method
         callees = em->mayCall(); }
     if (!callees.empty()) {
-        LOG3("Analyzing callees of " << expression << DBPrint::Brief << callees << DBPrint::Reset);
+        LOG3("Analyzing callees of " << expression << DBPrint::Brief << callees <<
+             DBPrint::Reset << IndentCtl::indent);
         ProgramPoint pt(callingContext, expression);
         ComputeWriteSet cw(this, pt, currentDefinitions);
         for (auto c : callees)
@@ -686,7 +687,7 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
         currentDefinitions = cw.currentDefinitions;
         exitDefinitions = exitDefinitions->joinDefinitions(cw.exitDefinitions);
         LOG3("Definitions after call of " << DBPrint::Brief << expression << ": " <<
-             currentDefinitions << DBPrint::Reset);
+             currentDefinitions << DBPrint::Reset << IndentCtl::unindent);
     }
 
     auto result = LocationSet::empty;
