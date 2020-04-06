@@ -399,10 +399,19 @@ TEST_F(P4Runtime, FieldIdAssignment) {
                 actions = { a; }
             }
 
+            @name("igTableLargeId")
+            table t4 {
+                key = {
+                    m.f1: exact @id(0xffffffff);
+                }
+                actions = { a; }
+            }
+
             apply {
                 t1.apply();
                 t2.apply();
                 t3.apply();
+                t4.apply();
             }
         }
 
@@ -456,6 +465,16 @@ TEST_F(P4Runtime, FieldIdAssignment) {
         const auto& mf2 = igTable->match_fields(1);
         EXPECT_EQ(1u, mf1.id());
         EXPECT_EQ(2u, mf2.id());
+    }
+
+    {
+        // Check the ids for igTableLargeId's match fields. The compiler should
+        // be able to handle all unsigned 32-bit integers greater than 0,
+        // including 0xffffffff.
+        auto* igTable = findTable(*test, "ingress.igTableLargeId");
+        ASSERT_TRUE(igTable != nullptr);
+        const auto& mf1 = igTable->match_fields(0);
+        EXPECT_EQ(0xffffffff, mf1.id());
     }
 
     {

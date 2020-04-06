@@ -98,8 +98,8 @@ static boost::optional<p4rt_id_t> getIdAnnotation(const IR::IAnnotated* node) {
     if (!idAnnotation) return boost::none;
     auto idConstant = idAnnotation->expr[0]->to<IR::Constant>();
     CHECK_NULL(idConstant);
-    if (!idConstant->fitsInt()) {
-        ::error(ErrorType::ERR_INVALID, "%1%: @id should be an integer", node);
+    if (!idConstant->fitsUint()) {
+        ::error(ErrorType::ERR_INVALID, "%1%: @id should be an unsigned integer", node);
         return boost::none;
     }
     return static_cast<p4rt_id_t>(idConstant->value);
