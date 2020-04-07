@@ -129,7 +129,7 @@ class TypeInference : public Transform {
     void checkCorelibMethods(const ExternMethod* em) const;
     void checkEmitType(const IR::Expression* emit, const IR::Type* type) const;
     bool containsHeader(const IR::Type* canonType);
-    void validateFields(const IR::Type* type,
+    bool validateFields(const IR::Type* type,
                         std::function<bool(const IR::Type*)> checker) const;
     const IR::Node* binaryBool(const IR::Operation_Binary* op);
     const IR::Node* binaryArith(const IR::Operation_Binary* op);
