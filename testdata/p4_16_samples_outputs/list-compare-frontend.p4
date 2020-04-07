@@ -10,11 +10,7 @@ control test(out bool zout) {
     S q_0;
     apply {
         p_0 = { 32w4, 32w5 };
-<<<<<<< HEAD
-        q_0 = S {l = 32w2,r = 32w3};
-=======
         q_0 = (S){l = 32w2,r = 32w3};
->>>>>>> Change struct-valued expression to use type-cast syntax
         zout = p_0 == { 32w4, 32w5 };
         zout = zout && q_0 == (S){l = 32w2,r = 32w3};
     }
