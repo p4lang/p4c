@@ -43,7 +43,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta._counter_metadata_counter_run1 = 4w1;
     }
     @name(".count_entries") action count_entries() {
-        count1.count((bit<32>)meta._counter_metadata_counter_index0);
+        count1.count((bit<32>)(bit<14>)meta._counter_metadata_counter_index0);
     }
     @name(".index_setter") table index_setter_0 {
         actions = {

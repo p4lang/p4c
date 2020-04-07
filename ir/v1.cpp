@@ -130,6 +130,19 @@ unsigned IR::Primitive::inferOperandTypes() const {
     return 0;
 }
 
+// infer the index width of a meter/counter/register based on the instance count
+// default to 32 bits if we can't figure it out
+int IR::Stateful::index_width() const {
+    return instance_count > 1 ? ceil_log2(instance_count) : 32;
+}
+
+static int inferIndexWidth(const IR::Expression *obj) {
+    if (auto *glob = obj->to<IR::GlobalRef>())
+        if (auto *sful = glob->obj->to<IR::Stateful>())
+            return sful->index_width();
+    return 32;
+}
+
 const IR::Type *IR::Primitive::inferOperandType(int operand) const {
     const IR::Type *rv = IR::Type::Unknown::get();
     unsigned infer = 0;
@@ -147,7 +160,7 @@ const IR::Type *IR::Primitive::inferOperandType(int operand) const {
     if (name == "truncate")
         return IR::Type::Bits::get(32);
     if ((name == "count" || name == "execute_meter") && operand == 1)
-        return IR::Type::Bits::get(32);
+        return IR::Type::Bits::get(inferIndexWidth(operands.at(0)));
     if (name.startsWith("execute_stateful") && operand == 1)
         return IR::Type::Bits::get(32);
     if ((name == "clone_ingress_pkt_to_egress" || name == "clone_i2e" ||
@@ -155,9 +168,13 @@ const IR::Type *IR::Primitive::inferOperandType(int operand) const {
         operand == 0) {
         return IR::Type::Bits::get(32); }
     if ((name == "execute") && operand == 2)
-        return IR::Type::Bits::get(32);
+        return IR::Type::Bits::get(inferIndexWidth(operands.at(0)));
     if (name == "modify_field_conditionally" && operand == 1)
         return IR::Type::Bits::get(1);
+    if (name == "register_read" && operand == 2)
+        return IR::Type::Bits::get(inferIndexWidth(operands.at(1)));
+    if (name == "register_write" && operand == 1)
+        return IR::Type::Bits::get(inferIndexWidth(operands.at(0)));
     if (name == "shift_left" && operand == 1) {
         if (operands.at(0)->type->width_bits() > operands.at(1)->type->width_bits())
             return operands.at(0)->type;

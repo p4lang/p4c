@@ -59,7 +59,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 @name(".cntDum") @min_width(64) counter(32w4096, CounterType.packets) cntDum;
 
 control processA(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".act") action act(bit<9> port, bit<32> idx) {
+    @name(".act") action act(bit<9> port, bit<12> idx) {
         standard_metadata.egress_spec = port;
         cntDum.count((bit<32>)idx);
     }
@@ -77,7 +77,7 @@ control processA(inout headers hdr, inout metadata meta, inout standard_metadata
 }
 
 control processB(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".act") action act(bit<9> port, bit<32> idx) {
+    @name(".act") action act(bit<9> port, bit<12> idx) {
         standard_metadata.egress_spec = port;
         cntDum.count((bit<32>)idx);
     }

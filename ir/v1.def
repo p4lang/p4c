@@ -306,6 +306,7 @@ abstract Stateful : Attached {
     bool        saturating = false;
     int         instance_count = -1;
     virtual bool indexed() const override { return !direct; }
+    int index_width() const;  // width of index in bits
 }
 
 abstract CounterOrMeter : Stateful {

@@ -4534,9 +4534,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".nop") action _nop_70() {
     }
-    @name(".set_storm_control_meter") action _set_storm_control_meter_0(bit<32> meter_idx) {
-        storm_control_meter.execute_meter<bit<2>>(meter_idx, meta._meter_metadata_meter_color106);
-        meta._meter_metadata_meter_index107 = (bit<16>)meter_idx;
+    @name(".set_storm_control_meter") action _set_storm_control_meter_0(bit<16> meter_idx) {
+        storm_control_meter.execute_meter<bit<2>>((bit<32>)(bit<10>)meter_idx, meta._meter_metadata_meter_color106);
+        meta._meter_metadata_meter_index107 = meter_idx;
     }
     @name(".storm_control") table _storm_control {
         actions = {
@@ -5485,7 +5485,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_213();
     }
     @name(".update_ingress_bd_stats") action _update_ingress_bd_stats_0() {
-        ingress_bd_stats_count.count((bit<32>)meta._l2_metadata_bd_stats_idx76);
+        ingress_bd_stats_count.count((bit<32>)(bit<10>)meta._l2_metadata_bd_stats_idx76);
     }
     @name(".ingress_bd_stats") table _ingress_bd_stats {
         actions = {
@@ -5496,7 +5496,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_214();
     }
     @name(".acl_stats_update") action _acl_stats_update_0() {
-        acl_stats_count.count((bit<32>)meta._acl_metadata_acl_stats_index11);
+        acl_stats_count.count((bit<32>)(bit<10>)meta._acl_metadata_acl_stats_index11);
     }
     @name(".acl_stats") table _acl_stats {
         actions = {
@@ -5756,7 +5756,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_223();
     }
     @name(".drop_stats_update") action _drop_stats_update_0() {
-        drop_stats_2.count((bit<32>)meta._ingress_metadata_drop_reason44);
+        drop_stats_2.count((bit<32>)(bit<10>)meta._ingress_metadata_drop_reason44);
     }
     @name(".nop") action _nop_108() {
     }
@@ -5776,8 +5776,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".drop_packet") action _drop_packet_0() {
         mark_to_drop(standard_metadata);
     }
-    @name(".drop_packet_with_reason") action _drop_packet_with_reason_0(bit<32> drop_reason) {
-        drop_stats.count(drop_reason);
+    @name(".drop_packet_with_reason") action _drop_packet_with_reason_0(bit<10> drop_reason) {
+        drop_stats.count((bit<32>)drop_reason);
         mark_to_drop(standard_metadata);
     }
     @name(".negative_mirror") action _negative_mirror_0(bit<32> session_id) {

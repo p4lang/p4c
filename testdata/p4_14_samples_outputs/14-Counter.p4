@@ -31,7 +31,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".count_c1_1") action count_c1_1() {
-        c1.count((bit<32>)32w1);
+        c1.count((bit<32>)10w1);
     }
     @name(".t1") table t1 {
         actions = {

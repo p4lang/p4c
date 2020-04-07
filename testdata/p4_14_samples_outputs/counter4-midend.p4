@@ -33,9 +33,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name(".act") action act(bit<9> port, bit<32> idx) {
+    @name(".act") action act(bit<9> port, bit<8> idx) {
         standard_metadata.egress_spec = port;
-        cntDum.count(idx);
+        cntDum.count((bit<32>)idx);
     }
     @name(".tab1") table tab1_0 {
         actions = {
