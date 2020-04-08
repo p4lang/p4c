@@ -3,9 +3,9 @@
 
 typedef bit<48> EthernetAddress;
 typedef bit<32> IPv4Address;
-register<bit<32>>(32w100) debug;
+register<bit<32>, bit<7>>(32w100) debug;
 
-register<bit<32>>(32w1) reg;
+register<bit<32>, bit<1>>(32w1) reg;
 
 header ethernet_t {
     EthernetAddress dstAddr;
@@ -75,10 +75,10 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
 
 control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t standard_meta) {
     @name("Eg.test") action test() {
-        debug.write(32w0, 32w0);
-        debug.write(32w1, 32w0);
-        debug.write(32w2, 32w0);
-        reg.write(32w0, 32w1);
+        debug.write(7w0, 32w0);
+        debug.write(7w1, 32w0);
+        debug.write(7w2, 32w0);
+        reg.write(1w0, 32w1);
     }
     @hidden table tbl_test {
         actions = {

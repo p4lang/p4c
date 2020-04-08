@@ -166,7 +166,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    register<bit<ROUND_SIZE>>(INSTANCE_COUNT) registerRound;
+    register<bit<ROUND_SIZE>,bit<INSTANCE_SIZE>>(INSTANCE_COUNT) registerRound;
 
     action read_round() {
         registerRound.read(meta.local_metadata.round, hdr.myhdr.inst);

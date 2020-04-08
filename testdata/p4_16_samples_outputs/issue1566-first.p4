@@ -19,10 +19,10 @@ struct metadata_t {
 
 control my_control_type(inout bit<16> x);
 control C1(inout bit<16> x) {
-    counter(32w65536, CounterType.packets) stats;
+    counter<bit<16>>(32w65536, CounterType.packets) stats;
     apply {
         x = x + 16w1;
-        stats.count((bit<32>)x);
+        stats.count(x);
     }
 }
 

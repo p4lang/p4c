@@ -18,7 +18,7 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
     bit<1> registerData_0;
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name("IngressImpl.testRegister") register<bit<1>>(32w1) testRegister_0;
+    @name("IngressImpl.testRegister") register<bit<1>, bit<1>>(32w1) testRegister_0;
     @name("IngressImpl.drop") action drop() {
         mark_to_drop(standard_metadata);
     }
@@ -37,7 +37,7 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
         default_action = NoAction_0();
     }
     @hidden action issue18141bmv2l42() {
-        testRegister_0.read(registerData_0, 32w0);
+        testRegister_0.read(registerData_0, 1w0);
         meta.test = (bool)registerData_0;
     }
     @hidden table tbl_issue18141bmv2l42 {

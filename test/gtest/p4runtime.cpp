@@ -522,12 +522,12 @@ TEST_F(P4Runtime, IdAssignmentCounters) {
             }
 
             @name(".myCounter")
-            counter(32w1024, CounterType.packets) myCounter;
+            counter<bit<10>>(32w1024, CounterType.packets) myCounter;
 
             apply {
                 myTable1.apply();
                 myTable2.apply();
-                myCounter.count(32w128);
+                myCounter.count(128);
             }
         }
 
@@ -1361,11 +1361,11 @@ TEST_F(P4Runtime, Register) {
         control ingress(inout Headers h, inout Metadata m,
                         inout standard_metadata_t sm) {
             @my_anno("This is an annotation!")
-            register<tuple<bit<16>, bit<8> > >(128) my_register_1;
-            register<Header>(128) my_register_2;
+            register<tuple<bit<16>, bit<8> >, bit<7>>(128) my_register_1;
+            register<Header, bit<7>>(128) my_register_2;
             apply {
-                my_register_1.write(32w10, {16w1, 8w2});
-                my_register_2.write(32w10, h.h); } }
+                my_register_1.write(7w10, {16w1, 8w2});
+                my_register_2.write(7w10, h.h); } }
         V1Switch(parse(), verifyChecksum(), ingress(), egress(),
                  computeChecksum(), deparse()) main;
     )"), ParseAnnotations());

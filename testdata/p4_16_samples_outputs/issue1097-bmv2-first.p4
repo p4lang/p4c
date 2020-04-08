@@ -13,12 +13,12 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
     }
 }
 
-register<bit<8>>(32w2) r;
+register<bit<8>, bit<1>>(32w2) r;
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         bit<8> x;
-        r.read(x, 32w0);
+        r.read(x, 1w0);
     }
 }
 

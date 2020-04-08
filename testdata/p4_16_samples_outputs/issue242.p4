@@ -56,8 +56,8 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
 }
 
 control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    register<bit<32>>(32w100) debug;
-    register<bit<32>>(32w1) reg;
+    register<bit<32>, bit<7>>(32w100) debug;
+    register<bit<32>, bit<1>>(32w1) reg;
     action test() {
         Value val = { 0 };
         bool _pred = val.field1 != 0;
@@ -66,7 +66,7 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
         debug.write(1, inc);
         val.field1 = 32w1;
         debug.write(2, inc);
-        reg.write(32w0, val.field1);
+        reg.write(0, val.field1);
     }
     apply {
         test();

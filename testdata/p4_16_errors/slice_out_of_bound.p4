@@ -73,7 +73,7 @@ control Ing(inout Headers headers,
             inout Metadata meta,
             inout standard_metadata_t standard_meta) {
 
-    register<bit<8>>(32w2) debug;
+    register<bit<8>, bit<1>>(32w2) debug;
 
     apply {
         bit<8> n = 8w0b11111111;

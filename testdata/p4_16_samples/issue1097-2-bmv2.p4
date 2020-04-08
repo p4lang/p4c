@@ -40,7 +40,7 @@ parser p(packet_in b,
     }
 }
 
-register<bit<8>>(256) r;
+register<bit<8>, bit<8>>(256) r;
 
 control ingress(inout Headers h,
     inout Meta m,
@@ -48,8 +48,8 @@ control ingress(inout Headers h,
 {
     apply {
         bit<8> x;
-        r.read(x, (bit<32>) h.myhdr.reg_idx_to_update);
-        r.write((bit<32>) h.myhdr.reg_idx_to_update, 0x2a);
+        r.read(x, h.myhdr.reg_idx_to_update);
+        r.write(h.myhdr.reg_idx_to_update, 0x2a);
     }
 }
 
@@ -59,9 +59,9 @@ control egress(inout Headers h,
 {
     apply {
         bit<8> tmp;
-        r.read(tmp, (bit<32>) h.myhdr.reg_idx_to_update);
+        r.read(tmp, h.myhdr.reg_idx_to_update);
         tmp = tmp + h.myhdr.value_to_add;
-        r.write((bit<32>) h.myhdr.reg_idx_to_update, tmp);
+        r.write(h.myhdr.reg_idx_to_update, tmp);
         h.myhdr.debug_last_reg_value_written = tmp;
     }
 }

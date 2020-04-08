@@ -59,13 +59,15 @@ match_kind {
     selector
 }
 
+typedef bit<9>  PortId_t;       // should not be a constant size?
+
 @metadata @name("standard_metadata")
 struct standard_metadata_t {
-    bit<9>  ingress_port;
-    bit<9>  egress_spec;
-    bit<9>  egress_port;
-    bit<32> instance_type;
-    bit<32> packet_length;
+    PortId_t    ingress_port;
+    PortId_t    egress_spec;
+    PortId_t    egress_port;
+    bit<32>     instance_type;
+    bit<32>     packet_length;
     //
     // @alias is used to generate the field_alias section of the BMV2 JSON.
     // Field alias creates a mapping from the metadata name in P4 program to
@@ -117,7 +119,7 @@ enum MeterType {
     bytes
 }
 
-extern counter {
+extern counter<I> {
     /***
      * A counter object is created by calling its constructor.  This
      * creates an array of counter states, with the number of counter
@@ -134,6 +136,8 @@ extern counter {
      * register.
      */
     counter(bit<32> size, CounterType type);
+    // FIXME -- size arg should be `int` but that breaks typechecking
+
     /***
      * count() causes the counter state with the specified index to be
      * read, modified, and written back, atomically relative to the
@@ -146,7 +150,7 @@ extern counter {
      *              size-1].  If index >= size, no counter state will be
      *              updated.
      */
-    void count(in bit<32> index);
+    void count(in I index);
 }
 
 extern direct_counter {
@@ -185,7 +189,7 @@ extern direct_counter {
 #define V1MODEL_METER_COLOR_YELLOW 1
 #define V1MODEL_METER_COLOR_RED    2
 
-extern meter {
+extern meter<I> {
     /***
      * A meter object is created by calling its constructor.  This
      * creates an array of meter states, with the number of meter
@@ -201,6 +205,8 @@ extern meter {
      * packets contain (MeterType.bytes).
      */
     meter(bit<32> size, MeterType type);
+    // FIXME -- size arg should be `int` but that breaks typechecking
+
     /***
      * execute_meter() causes the meter state with the specified index
      * to be read, modified, and written back, atomically relative to
@@ -220,7 +226,7 @@ extern meter {
      *              range, the final value of result is not specified,
      *              and should be ignored by the caller.
      */
-    void execute_meter<T>(in bit<32> index, out T result);
+    void execute_meter<T>(in I index, out T result);
 }
 
 extern direct_meter<T> {
@@ -259,7 +265,7 @@ extern direct_meter<T> {
     void read(out T result);
 }
 
-extern register<T> {
+extern register<T, I> {
     /***
      * A register object is created by calling its constructor.  This
      * creates an array of 'size' identical elements, each with type
@@ -270,7 +276,7 @@ extern register<T> {
      *
      * allocates storage for 512 values, each with type bit<32>.
      */
-    register(bit<32> size);
+    register(bit<32> size);  // FIXME -- arg should be `int` but that breaks typechecking
     /***
      * read() reads the state of the register array stored at the
      * specified index, and returns it as the value written to the
@@ -286,7 +292,7 @@ extern register<T> {
      *              ignored by the caller.
      */
     @noSideEffects
-    void read(out T result, in bit<32> index);
+    void read(out T result, in I index);
     /***
      * write() writes the state of the register array at the specified
      * index, with the value provided by the value parameter.
@@ -309,7 +315,7 @@ extern register<T> {
      *              parameter's value is written into the register
      *              array element specified by index.
      */
-    void write(in bit<32> index, in T value);
+    void write(in I index, in T value);
 }
 
 // used as table implementation attribute

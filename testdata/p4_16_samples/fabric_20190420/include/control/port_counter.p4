@@ -23,15 +23,15 @@ control PortCountersControl(inout parsed_headers_t hdr,
                             inout fabric_metadata_t fabric_metadata,
                             inout standard_metadata_t standard_metadata) {
 
-    counter(MAX_PORTS, CounterType.packets_and_bytes) egress_port_counter;
-    counter(MAX_PORTS, CounterType.packets_and_bytes) ingress_port_counter;
+    counter<PortId_t>(MAX_PORTS, CounterType.packets_and_bytes) egress_port_counter;
+    counter<PortId_t>(MAX_PORTS, CounterType.packets_and_bytes) ingress_port_counter;
 
     apply {
         if (standard_metadata.egress_spec < MAX_PORTS) {
-            egress_port_counter.count((bit<32>)standard_metadata.egress_spec);
+            egress_port_counter.count(standard_metadata.egress_spec);
         }
         if (standard_metadata.ingress_port < MAX_PORTS) {
-            ingress_port_counter.count((bit<32>)standard_metadata.ingress_port);
+            ingress_port_counter.count(standard_metadata.ingress_port);
         }
     }
 }

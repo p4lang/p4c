@@ -3,9 +3,9 @@
 
 typedef bit<48> EthernetAddress;
 typedef bit<32> IPv4Address;
-register<bit<32>>(32w100) debug;
+register<bit<32>, bit<7>>(32w100) debug;
 
-register<bit<32>>(32w1) reg;
+register<bit<32>, bit<1>>(32w1) reg;
 
 header ethernet_t {
     EthernetAddress dstAddr;
@@ -64,11 +64,11 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
         Value val = (Value){field1 = 32w0};
         bool _pred = val.field1 != 32w0;
         bit<32> inc = (_pred ? 32w1 : 32w0);
-        debug.write(32w0, (_pred ? 32w1 : 32w0));
-        debug.write(32w1, inc);
+        debug.write(7w0, (_pred ? 32w1 : 32w0));
+        debug.write(7w1, inc);
         val.field1 = 32w1;
-        debug.write(32w2, inc);
-        reg.write(32w0, val.field1);
+        debug.write(7w2, inc);
+        reg.write(1w0, val.field1);
     }
     apply {
         test();

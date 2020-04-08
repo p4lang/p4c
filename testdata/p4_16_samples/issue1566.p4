@@ -39,10 +39,10 @@ control my_control_type(inout bit<16> x);
 
 control C1(inout bit<16> x)
 {
-    counter((bit<32>) 65536, CounterType.packets) stats;
+    counter<bit<16>>((bit<32>) 65536, CounterType.packets) stats;
     apply {
         x = x + 1;
-        stats.count((bit<32>) x);
+        stats.count(x);
     }
 };
 

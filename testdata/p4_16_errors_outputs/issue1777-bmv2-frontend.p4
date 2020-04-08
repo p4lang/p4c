@@ -29,16 +29,16 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, in
 
 control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     bit<4> reg_idx_0;
-    @name("ingress.reg1") register<bit<8>>(32w16) reg1_0;
-    @name("ingress.reg2") register<reg_data2_t>(32w16) reg2_0;
+    @name("ingress.reg1") register<bit<8>, bit<4>>(32w16) reg1_0;
+    @name("ingress.reg2") register<reg_data2_t, bit<4>>(32w16) reg2_0;
     apply {
         reg_idx_0 = hdr.ethernet.dstAddr[3:0];
-        reg1_0.read(meta.reg_data1, (bit<32>)reg_idx_0);
+        reg1_0.read(meta.reg_data1, reg_idx_0);
         meta.reg_data1 = meta.reg_data1 + 8w1;
-        reg1_0.write((bit<32>)reg_idx_0, meta.reg_data1);
-        reg2_0.read(meta.reg_data2, (bit<32>)reg_idx_0);
+        reg1_0.write(reg_idx_0, meta.reg_data1);
+        reg2_0.read(meta.reg_data2, reg_idx_0);
         meta.reg_data2.reg_fld1 = meta.reg_data2.reg_fld1 + 8w1;
-        reg2_0.write((bit<32>)reg_idx_0, meta.reg_data2);
+        reg2_0.write(reg_idx_0, meta.reg_data2);
     }
 }
 

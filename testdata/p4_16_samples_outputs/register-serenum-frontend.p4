@@ -34,9 +34,9 @@ parser prs(packet_in p, out Headers h) {
 }
 
 control c(inout Headers h, inout standard_metadata_t sm) {
-    @name("c.reg") register<EthTypes>(32w1) reg_0;
+    @name("c.reg") register<EthTypes, bit<1>>(32w1) reg_0;
     apply {
-        reg_0.write(32w0, h.eth.type);
+        reg_0.write(1w0, h.eth.type);
     }
 }
 

@@ -1,7 +1,7 @@
 #include <core.p4>
 #include <v1model.p4>
 
-struct PortId_t {
+struct _PortId_t {
     bit<9> _v;
 }
 
