@@ -32,7 +32,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             bit<16> retval;
             nested_struct tmp_struct_0;
             tmp_struct_0.eth_hdr.setValid();
-            tmp_struct_0 = nested_struct {eth_hdr = ethernet_t {dst_addr = 48w0,src_addr = 48w0,eth_type = 16w0}};
+            tmp_struct_0 = (nested_struct){eth_hdr = (ethernet_t){dst_addr = 48w0,src_addr = 48w0,eth_type = 16w0}};
             hasReturned = true;
             retval = tmp_struct_0.eth_hdr.eth_type;
             h.eth_hdr.eth_type = retval;
