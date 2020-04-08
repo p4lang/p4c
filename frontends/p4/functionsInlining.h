@@ -86,7 +86,7 @@ class FunctionsInliner : public AbstractInliner<FunctionsInlineList, FunctionsIn
 
 typedef InlineDriver<FunctionsInlineList, FunctionsInlineWorkList> InlineFunctionsDriver;
 
-class InlineFunctions : public PassManager {
+class InlineFunctions : public PassRepeated {
     FunctionsInlineList functionsToInline;
 
  public:
