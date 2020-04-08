@@ -604,7 +604,9 @@ void ProgramStructure::include(cstring filename, cstring ppoptions) {
 
 void ProgramStructure::loadModel() {
     // This includes in turn core.p4
-    include("v1model.p4");
+    std::stringstream versionArg;
+    versionArg << "-DV1MODEL_VERSION=" << V1Model::instance.version;
+    include(V1Model::instance.file.name, versionArg.str());
 
     metadataInstances.insert(v1model.standardMetadataType.name);
     metadataTypes.insert(v1model.standardMetadataType.name);

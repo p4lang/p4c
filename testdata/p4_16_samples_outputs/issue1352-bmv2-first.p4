@@ -2,6 +2,7 @@ error {
     UnreachableState
 }
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 const bit<16> TYPE_IPV4 = 16w0x800;

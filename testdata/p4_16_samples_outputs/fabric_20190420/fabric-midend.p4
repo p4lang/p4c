@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 typedef bit<3> fwd_type_t;
@@ -651,8 +652,8 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         const default_action = nop_17();
         size = 1024;
     }
-    @name("FabricIngress.port_counters_control.egress_port_counter") counter<PortId_t>(32w511, CounterType.packets_and_bytes) port_counters_control_egress_port_counter;
-    @name("FabricIngress.port_counters_control.ingress_port_counter") counter<PortId_t>(32w511, CounterType.packets_and_bytes) port_counters_control_ingress_port_counter;
+    @name("FabricIngress.port_counters_control.egress_port_counter") counter(32w511, CounterType.packets_and_bytes) port_counters_control_egress_port_counter;
+    @name("FabricIngress.port_counters_control.ingress_port_counter") counter(32w511, CounterType.packets_and_bytes) port_counters_control_ingress_port_counter;
     @hidden action spgw30() {
         spgw_normalizer_hasReturned = true;
     }
@@ -708,10 +709,10 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         fabric_metadata._spgw_ipv4_len18 = hdr.ipv4.total_len;
     }
     @hidden action port_counter31() {
-        port_counters_control_egress_port_counter.count(standard_metadata.egress_spec);
+        port_counters_control_egress_port_counter.count((bit<32>)standard_metadata.egress_spec);
     }
     @hidden action port_counter34() {
-        port_counters_control_ingress_port_counter.count(standard_metadata.ingress_port);
+        port_counters_control_ingress_port_counter.count((bit<32>)standard_metadata.ingress_port);
     }
     @hidden table tbl_fabric78 {
         actions = {

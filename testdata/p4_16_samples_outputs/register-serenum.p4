@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 enum bit<16> EthTypes {
@@ -34,7 +35,7 @@ parser prs(packet_in p, out Headers h) {
 }
 
 control c(inout Headers h, inout standard_metadata_t sm) {
-    register<EthTypes, bit<1>>(1) reg;
+    register<EthTypes>(1) reg;
     apply {
         reg.write(0, h.eth.type);
     }

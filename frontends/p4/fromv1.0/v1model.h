@@ -265,6 +265,7 @@ class V1Model : public ::Model::Model {
     {}
 
  public:
+    unsigned      version = 20200408;
     ::Model::Elem       file;
     ::Model::Elem       standardMetadata;
     ::Model::Elem       intrinsicMetadata;
@@ -306,7 +307,18 @@ class V1Model : public ::Model::Model {
     DirectMeter_Model   directMeter;
     DirectCounter_Model directCounter;
 
+    bool haveIndexTypeParam() const { return version >= 20200408; }  // depends on version
+
     static V1Model instance;
+};
+
+class getV1ModelVersion : public Inspector {
+    bool preorder(const IR::Declaration_Constant *dc) override {
+        if (dc->name == "__v1model_version") {
+            auto val = dc->initializer->to<IR::Constant>();
+            V1Model::instance.version = static_cast<unsigned>(val->value); }
+        return false; }
+    bool preorder(const IR::Declaration *) override { return false; }
 };
 
 }  // namespace P4V1

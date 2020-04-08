@@ -17,16 +17,16 @@ limitations under the License.
 #include "core.p4"
 #include "v1model.p4"
 
-struct _PortId_t { bit<9> _v; }
+struct PortId_t { bit<9> _v; }
 
-const _PortId_t PSA_CPU_PORT = {9w192};
+const PortId_t PSA_CPU_PORT = {9w192};
 
 struct parsed_headers_t {
 }
 
 struct metadata_t {
-    _PortId_t foo;
-    _PortId_t bar;
+    PortId_t foo;
+    PortId_t bar;
 }
 
 parser ParserImpl (packet_in packet,
@@ -53,7 +53,7 @@ control IngressImpl (inout parsed_headers_t hdr,
         // Latest p4test and p4c-bm2-ss as of Apr 3, 2018 gives an
         // error for the == comparison below:
 
-        // struct-variable-to-constant-compare-error.p4(58): error: ==: not defined on struct _PortId_t and Tuple(1)
+        // struct-variable-to-constant-compare-error.p4(58): error: ==: not defined on struct PortId_t and Tuple(1)
 
         if (meta.foo == PSA_CPU_PORT) {
             meta.foo._v = meta.foo._v + 1;

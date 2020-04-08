@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 header Header {
@@ -25,11 +26,11 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("MyIngress.h.c1.r") register<bit<16>, bit<3>>(32w8) h_c1_r;
-    @name("MyIngress.h.c2.r") register<bit<16>, bit<3>>(32w8) h_c2_r;
+    @name("MyIngress.h.c1.r") register<bit<16>>(32w8) h_c1_r;
+    @name("MyIngress.h.c2.r") register<bit<16>>(32w8) h_c2_r;
     apply {
-        h_c1_r.read(hdr.h.x, 3w0);
-        h_c2_r.read(hdr.h.x, 3w0);
+        h_c1_r.read(hdr.h.x, 32w0);
+        h_c2_r.read(hdr.h.x, 32w0);
     }
 }
 

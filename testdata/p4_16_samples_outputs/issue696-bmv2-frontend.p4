@@ -1,11 +1,12 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 typedef bit<48> EthernetAddress;
 typedef bit<32> IPv4Address;
-register<bit<32>, bit<7>>(32w100) debug;
+register<bit<32>>(32w100) debug;
 
-register<bit<32>, bit<1>>(32w1) reg;
+register<bit<32>>(32w1) reg;
 
 header ethernet_t {
     EthernetAddress dstAddr;
@@ -79,11 +80,11 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
         } else {
             tmp_0 = 32w0;
         }
-        debug.write(7w0, tmp_0);
-        debug.write(7w1, inc_0);
+        debug.write(32w0, tmp_0);
+        debug.write(32w1, inc_0);
         val_0.field1 = 32w1;
-        debug.write(7w2, inc_0);
-        reg.write(1w0, val_0.field1);
+        debug.write(32w2, inc_0);
+        reg.write(32w0, val_0.field1);
     }
     apply {
         test();

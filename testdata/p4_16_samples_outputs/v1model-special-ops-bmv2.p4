@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_NORMAL = 0;

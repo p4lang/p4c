@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 header myhdr_t {
@@ -21,13 +22,13 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
     }
 }
 
-register<bit<8>, bit<8>>(32w256) r;
+register<bit<8>>(32w256) r;
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bit<8> x_0;
     @hidden action issue10972bmv2l51() {
-        r.read(x_0, h.myhdr.reg_idx_to_update);
-        r.write(h.myhdr.reg_idx_to_update, 8w0x2a);
+        r.read(x_0, (bit<32>)h.myhdr.reg_idx_to_update);
+        r.write((bit<32>)h.myhdr.reg_idx_to_update, 8w0x2a);
     }
     @hidden table tbl_issue10972bmv2l51 {
         actions = {
@@ -43,9 +44,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bit<8> tmp_0;
     @hidden action issue10972bmv2l62() {
-        r.read(tmp_0, h.myhdr.reg_idx_to_update);
+        r.read(tmp_0, (bit<32>)h.myhdr.reg_idx_to_update);
         tmp_0 = tmp_0 + h.myhdr.value_to_add;
-        r.write(h.myhdr.reg_idx_to_update, tmp_0);
+        r.write((bit<32>)h.myhdr.reg_idx_to_update, tmp_0);
         h.myhdr.debug_last_reg_value_written = tmp_0;
     }
     @hidden table tbl_issue10972bmv2l62 {

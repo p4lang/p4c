@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 header Ethernet {
@@ -24,9 +25,9 @@ parser prs(packet_in p, out Headers h) {
 }
 
 control c(inout Headers h, inout standard_metadata_t sm) {
-    @name("c.reg") register<bit<16>, bit<1>>(32w1) reg_0;
+    @name("c.reg") register<bit<16>>(32w1) reg_0;
     @hidden action registerserenum40() {
-        reg_0.write(1w0, h.eth.type);
+        reg_0.write(32w0, h.eth.type);
     }
     @hidden table tbl_registerserenum40 {
         actions = {

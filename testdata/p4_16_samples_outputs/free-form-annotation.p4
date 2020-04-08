@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 @scrabble(- What do you get if you multiply six by nine ? - Six by nine . Forty two . - That ' s it . That ' s all there is . - I always thought there was something fundamentally wrong with the universe . 0xdeadbeef) header hdr {

@@ -51,19 +51,19 @@ control ingress(inout headers_t hdr,
                 inout metadata_t meta,
                 inout standard_metadata_t stdmeta)
 {
-    register<bit<8>, bit<4>>(16) reg1;
-    register<reg_data2_t, bit<4>>(16) reg2;
+    register<bit<8> >(16) reg1;
+    register<reg_data2_t>(16) reg2;
 
     apply {
         bit<4> reg_idx = hdr.ethernet.dstAddr[3:0];
 
-        reg1.read(meta.reg_data1, reg_idx);
+        reg1.read(meta.reg_data1, (bit<32>) reg_idx);
         meta.reg_data1 = meta.reg_data1 + 1;
-        reg1.write(reg_idx, meta.reg_data1);
+        reg1.write((bit<32>) reg_idx, meta.reg_data1);
 
-        reg2.read(meta.reg_data2, reg_idx);
+        reg2.read(meta.reg_data2, (bit<32>) reg_idx);
         meta.reg_data2.reg_fld1 = meta.reg_data2.reg_fld1 + 1;
-        reg2.write(reg_idx, meta.reg_data2);
+        reg2.write((bit<32>) reg_idx, meta.reg_data2);
     }
 }
 

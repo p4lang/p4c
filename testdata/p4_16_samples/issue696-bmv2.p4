@@ -9,8 +9,8 @@ typedef bit<48>  EthernetAddress;
 typedef bit<32>  IPv4Address;
 
 
-register<bit<32>, bit<7>>(32w100) debug;
-register<bit<32>, bit<1>>(32w1) reg;
+register<bit<32>>(32w100) debug;
+register<bit<32>>(32w1) reg;
 // standard Ethernet header
 header ethernet_t {
     EthernetAddress dstAddr;
@@ -94,7 +94,7 @@ control Eg(inout Headers hdrs,
     val.field1 = 32w1;
         debug.write(2, inc); // Print inc again
 
-        reg.write(0, val.field1);
+        reg.write(32w0, val.field1);
     }
 
     apply {

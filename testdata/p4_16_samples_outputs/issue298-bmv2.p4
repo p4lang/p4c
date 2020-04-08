@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 typedef bit<48> EthernetAddress;
@@ -132,7 +133,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    register<bit<16>, bit<32>>(65536) registerRound;
+    register<bit<16>>(65536) registerRound;
     action read_round() {
         registerRound.read(meta.local_metadata.round, hdr.myhdr.inst);
     }

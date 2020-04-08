@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 typedef bit<48> EthernetAddress;
@@ -40,11 +41,11 @@ parser P(packet_in b, out Headers p, inout Metadata meta, inout standard_metadat
 
 control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_t standard_meta) {
     bit<8> n;
-    @name("debug") register<bit<8>, bit<1>>(32w2) debug;
+    @name("debug") register<bit<8>>(32w2) debug;
     action act() {
         n = 8w0b11111111;
         n[7:4] = 4w0;
-        debug.write(1, n);
+        debug.write(32w1, n);
         standard_meta.egress_spec = 9w0;
     }
     table tbl_act {

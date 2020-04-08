@@ -78,8 +78,8 @@ control Eg(inout Headers hdrs,
            inout Metadata meta,
            inout standard_metadata_t standard_meta) {
 
-    register<bit<32>, bit<7>>(32w100) debug;
-    register<bit<32>, bit<1>>(32w1) reg;
+    register<bit<32>>(32w100) debug;
+    register<bit<32>>(32w1) reg;
 
     // Using register regKeys, regValues.
     action test() {
@@ -92,7 +92,7 @@ control Eg(inout Headers hdrs,
 	val.field1 = 32w1;
         debug.write(2, inc); // Print inc again
 
-        reg.write(0, val.field1);
+        reg.write(32w0, val.field1);
     }
 
     apply {

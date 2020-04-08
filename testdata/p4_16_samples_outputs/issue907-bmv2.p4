@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 struct Headers {
@@ -18,7 +19,7 @@ parser P(packet_in b, out Headers p, inout Metadata meta, inout standard_metadat
 }
 
 control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    register<S, bit<7>>(32w100) r;
+    register<S>(32w100) r;
     apply {
         S s = { 0 };
         r.write(0, s);

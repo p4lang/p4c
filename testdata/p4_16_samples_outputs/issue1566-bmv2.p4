@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 typedef bit<48> EthernetAddress;
@@ -19,10 +20,10 @@ struct metadata_t {
 
 control my_control_type(inout bit<16> x);
 control C1(inout bit<16> x) {
-    counter<bit<16>>((bit<32>)65536, CounterType.packets) stats;
+    counter((bit<32>)65536, CounterType.packets) stats;
     apply {
         x = x + 1;
-        stats.count(x);
+        stats.count((bit<32>)x);
     }
 }
 

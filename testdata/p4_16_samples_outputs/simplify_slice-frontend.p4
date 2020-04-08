@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 typedef bit<48> EthernetAddress;
@@ -42,13 +43,13 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
     bit<8> n_0;
     bit<8> m_0;
     bit<8> x_0;
-    @name("Ing.debug") register<bit<8>, bit<1>>(32w2) debug_0;
+    @name("Ing.debug") register<bit<8>>(32w2) debug_0;
     apply {
         n_0 = 8w0b11111111;
         m_0 = 8w0b11111111;
         x_0 = 8w0b11111111;
         n_0[7:4] = 4w0;
-        debug_0.write(1w1, n_0);
+        debug_0.write(32w1, n_0);
         standard_meta.egress_spec = 9w0;
     }
 }

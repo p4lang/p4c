@@ -1,7 +1,8 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-struct _PortId_t {
+struct PortId_t {
     bit<9> _v;
 }
 
@@ -9,8 +10,8 @@ struct parsed_headers_t {
 }
 
 struct metadata_t {
-    _PortId_t foo;
-    _PortId_t bar;
+    PortId_t foo;
+    PortId_t bar;
 }
 
 parser ParserImpl(packet_in packet, out parsed_headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {

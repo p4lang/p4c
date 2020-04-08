@@ -17,7 +17,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 
 control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    register<bit<1>, bit<1>>(1) testRegister;
+    register<bit<1>>(1) testRegister;
 
     table debug_table {
         key = {

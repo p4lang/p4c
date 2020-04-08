@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 header ethernet_t {
@@ -28,16 +29,16 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, in
 }
 
 control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    register<bit<8>, bit<4>>(32w16) reg1;
-    register<reg_data2_t, bit<4>>(32w16) reg2;
+    register<bit<8>>(32w16) reg1;
+    register<reg_data2_t>(32w16) reg2;
     apply {
         bit<4> reg_idx = hdr.ethernet.dstAddr[3:0];
-        reg1.read(meta.reg_data1, reg_idx);
+        reg1.read(meta.reg_data1, (bit<32>)reg_idx);
         meta.reg_data1 = meta.reg_data1 + 8w1;
-        reg1.write(reg_idx, meta.reg_data1);
-        reg2.read(meta.reg_data2, reg_idx);
+        reg1.write((bit<32>)reg_idx, meta.reg_data1);
+        reg2.read(meta.reg_data2, (bit<32>)reg_idx);
         meta.reg_data2.reg_fld1 = meta.reg_data2.reg_fld1 + 8w1;
-        reg2.write(reg_idx, meta.reg_data2);
+        reg2.write((bit<32>)reg_idx, meta.reg_data2);
     }
 }
 

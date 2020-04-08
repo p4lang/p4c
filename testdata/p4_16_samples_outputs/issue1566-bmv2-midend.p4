@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 typedef bit<48> EthernetAddress;
@@ -25,14 +26,14 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout metadata_t meta, inou
 }
 
 control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    @name("cIngress.E.c1.stats") counter<bit<16>>(32w65536, CounterType.packets) E_c1_stats;
+    @name("cIngress.E.c1.stats") counter(32w65536, CounterType.packets) E_c1_stats;
     @hidden action issue1566bmv2l44() {
         hdr.ethernet.etherType = hdr.ethernet.etherType << 1;
         hdr.ethernet.etherType = hdr.ethernet.etherType + 16w1;
-        E_c1_stats.count(hdr.ethernet.etherType);
+        E_c1_stats.count((bit<32>)hdr.ethernet.etherType);
         hdr.ethernet.etherType = hdr.ethernet.etherType << 3;
         hdr.ethernet.etherType = hdr.ethernet.etherType + 16w1;
-        E_c1_stats.count(hdr.ethernet.etherType);
+        E_c1_stats.count((bit<32>)hdr.ethernet.etherType);
     }
     @hidden table tbl_issue1566bmv2l44 {
         actions = {

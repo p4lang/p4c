@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 typedef bit<3> fwd_type_t;
@@ -659,8 +660,8 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         const default_action = nop_17();
         size = 1024;
     }
-    @name("FabricIngress.port_counters_control.egress_port_counter") counter<PortId_t>(32w511, CounterType.packets_and_bytes) port_counters_control_egress_port_counter;
-    @name("FabricIngress.port_counters_control.ingress_port_counter") counter<PortId_t>(32w511, CounterType.packets_and_bytes) port_counters_control_ingress_port_counter;
+    @name("FabricIngress.port_counters_control.egress_port_counter") counter(32w511, CounterType.packets_and_bytes) port_counters_control_egress_port_counter;
+    @name("FabricIngress.port_counters_control.ingress_port_counter") counter(32w511, CounterType.packets_and_bytes) port_counters_control_ingress_port_counter;
     apply {
         {
             hdr.gtpu_ipv4.setInvalid();
@@ -731,10 +732,10 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
             next_multicast.apply();
             next_next_vlan.apply();
             if (standard_metadata.egress_spec < 9w511) {
-                port_counters_control_egress_port_counter.count(standard_metadata.egress_spec);
+                port_counters_control_egress_port_counter.count((bit<32>)standard_metadata.egress_spec);
             }
             if (standard_metadata.ingress_port < 9w511) {
-                port_counters_control_ingress_port_counter.count(standard_metadata.ingress_port);
+                port_counters_control_ingress_port_counter.count((bit<32>)standard_metadata.ingress_port);
             }
         }
     }
