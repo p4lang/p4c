@@ -97,11 +97,11 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
 }
 
 control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarnUnused @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_4() {
+    @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_5() {
+    @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
     @name("ingress.unknown_source") action unknown_source() {
         meta.send_mac_learn_msg = true;
@@ -119,7 +119,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
         default_action = unknown_source();
     }
     @name("ingress.do_L2_forward") action do_L2_forward(PortId_t egress_port) {
-        {
+        @noWarnUnused {
             psa_ingress_output_metadata_t meta_1 = ostd;
             PortId_t egress_port_1 = egress_port;
             meta_1.drop = false;
@@ -129,7 +129,7 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
         }
     }
     @name("ingress.do_tst") action do_tst(PortId_t egress_port, EthTypes serEnumT) {
-        {
+        @noWarnUnused {
             psa_ingress_output_metadata_t meta_2 = ostd;
             PortId_t egress_port_2 = egress_port;
             meta_2.drop = false;

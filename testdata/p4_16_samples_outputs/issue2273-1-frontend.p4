@@ -26,9 +26,9 @@ struct headers {
 }
 
 control ingress(inout headers hdr) {
-    @noWarnUnused @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
     @name("ingress.stack") Stack<bit<16>>(2048) stack_0;
     @name("ingress.write") StackAction<bit<16>, bit<16>>(stack_0) write_0 = {

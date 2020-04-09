@@ -47,7 +47,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     IPv4Address address_0;
     bool pass_0;
     bool hasReturned;
-    @noWarnUnused @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("pipe.c1.Reject") action c1_Reject_0() {
         pass_0 = false;

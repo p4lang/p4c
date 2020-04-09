@@ -89,7 +89,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     @name("ingress.per_prefix_pkt_byte_count") DirectCounter<PacketByteCounter_t>(PSA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_byte_count_0;
     @name("ingress.next_hop") action next_hop(PortId_t oport) {
         per_prefix_pkt_byte_count_0.count();
-        {
+        @noWarnUnused {
             psa_ingress_output_metadata_t meta_2 = ostd;
             PortId_t egress_port_1 = oport;
             meta_2.drop = false;
@@ -100,7 +100,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     @name("ingress.default_route_drop") action default_route_drop() {
         per_prefix_pkt_byte_count_0.count();
-        {
+        @noWarnUnused {
             psa_ingress_output_metadata_t meta_3 = ostd;
             meta_3.drop = true;
             ostd = meta_3;

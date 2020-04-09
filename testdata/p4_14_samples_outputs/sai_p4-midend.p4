@@ -172,23 +172,23 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarnUnused @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_10() {
+    @noWarn("unused") @name(".NoAction") action NoAction_10() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_11() {
+    @noWarn("unused") @name(".NoAction") action NoAction_11() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_12() {
+    @noWarn("unused") @name(".NoAction") action NoAction_12() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_13() {
+    @noWarn("unused") @name(".NoAction") action NoAction_13() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_14() {
+    @noWarn("unused") @name(".NoAction") action NoAction_14() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_15() {
+    @noWarn("unused") @name(".NoAction") action NoAction_15() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_16() {
+    @noWarn("unused") @name(".NoAction") action NoAction_16() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_17() {
+    @noWarn("unused") @name(".NoAction") action NoAction_17() {
     }
     @name(".port_counters") direct_counter(CounterType.packets) port_counters_0;
     @name(".fdb_set") action fdb_set(bit<1> type_, bit<9> port_id) {

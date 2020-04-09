@@ -60,9 +60,9 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
 }
 
 control pipe(inout Headers_t headers, inout metadata meta) {
-    @noWarnUnused @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
     @name("pipe.mpls_encap") action mpls_encap() {
         headers.mpls.setValid();

@@ -1,9 +1,9 @@
 #include <core.p4>
 
 control c(out bool x) {
-    @noWarnUnused @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
     bool tmp;
     bool tmp_0;

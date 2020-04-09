@@ -31,7 +31,7 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout metadata_t meta, inou
 }
 
 control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    @noWarnUnused @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("cIngress.a1") action a1() {
         hdr.ethernet.srcAddr = 48w1;

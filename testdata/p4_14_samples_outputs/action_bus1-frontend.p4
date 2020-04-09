@@ -60,21 +60,21 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarnUnused @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_9() {
+    @noWarn("unused") @name(".NoAction") action NoAction_9() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_10() {
+    @noWarn("unused") @name(".NoAction") action NoAction_10() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_11() {
+    @noWarn("unused") @name(".NoAction") action NoAction_11() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_12() {
+    @noWarn("unused") @name(".NoAction") action NoAction_12() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_13() {
+    @noWarn("unused") @name(".NoAction") action NoAction_13() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_14() {
+    @noWarn("unused") @name(".NoAction") action NoAction_14() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_15() {
+    @noWarn("unused") @name(".NoAction") action NoAction_15() {
     }
     @name(".set1") action set1(bit<32> v1, bit<32> v2, bit<32> v3, bit<32> v4, bit<32> v5) {
         hdr.data.f1_1 = v1;

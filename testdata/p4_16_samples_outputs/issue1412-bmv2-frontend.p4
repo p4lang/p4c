@@ -26,7 +26,7 @@ control IngressImpl(inout headers_t hdr, inout metadata meta, inout standard_met
 }
 
 control EgressImpl(inout headers_t hdr, inout metadata meta, inout standard_metadata_t ostd) {
-    @noWarnUnused @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("EgressImpl.set_true") action set_true() {
         if (meta.field == 8w0) {

@@ -35,7 +35,7 @@ struct Packet_data {
 }
 
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
-    @noWarnUnused @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("Q_pipe.p1.thost.B_action") action p1_thost_B_action_0(out bit<9> barg, BParamType bData) {
         barg = bData;

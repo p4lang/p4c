@@ -57,7 +57,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarnUnused @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name(".route_eth") action route_eth(bit<9> egress_spec, bit<48> src_addr) {
         standard_metadata.egress_spec = egress_spec;

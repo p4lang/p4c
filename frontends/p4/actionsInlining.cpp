@@ -130,11 +130,10 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
         }
     }
 
-    std::set<cstring> annotToRemove = {
-        IR::Annotation::nameAnnotation,
-        IR::Annotation::noWarnUnusedAnnotation, };
     auto annotations = callee->annotations->where(
-        [&](const IR::Annotation* a) { return !annotToRemove.count(a->name); });
+        [&](const IR::Annotation* a) { return !(a->name == IR::Annotation::nameAnnotation ||
+                                                (a->name == IR::Annotation::noWarnAnnotation &&
+                                                 a->getSingleString() == "unused")); });
     auto result = new IR::BlockStatement(statement->srcInfo, annotations, body);
     LOG2("Replacing " << orig << " with " << result);
     return result;

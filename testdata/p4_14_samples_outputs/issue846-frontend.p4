@@ -39,13 +39,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarnUnused @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_5() {
+    @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_6() {
+    @noWarn("unused") @name(".NoAction") action NoAction_6() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_7() {
+    @noWarn("unused") @name(".NoAction") action NoAction_7() {
     }
     @name(".do_nothing") action do_nothing() {
     }

@@ -257,15 +257,15 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarnUnused @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_6() {
+    @noWarn("unused") @name(".NoAction") action NoAction_6() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_7() {
+    @noWarn("unused") @name(".NoAction") action NoAction_7() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_8() {
+    @noWarn("unused") @name(".NoAction") action NoAction_8() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_9() {
+    @noWarn("unused") @name(".NoAction") action NoAction_9() {
     }
     @name(".a1") action a1() {
         meta.m.field_8_01 = 8w1;
