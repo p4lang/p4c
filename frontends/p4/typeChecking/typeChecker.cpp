@@ -2307,11 +2307,35 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
     if (sourceType == nullptr || castType == nullptr)
         return expression;
 
+    if (auto st = castType->to<IR::Type_StructLike>()) {
+        if (auto se = expression->expr->to<IR::StructInitializerExpression>()) {
+            // Interpret (S) { kvpairs } as a struct initializer expression
+            // instead of a cast to a struct.
+            if (se->type == nullptr || se->type->is<IR::Type_Unknown>() ||
+                se->type->is<IR::Type_UnknownStruct>()) {
+                auto type = new IR::Type_Name(st->name);
+                setType(type, new IR::Type_Type(st));
+                auto sie = new IR::StructInitializerExpression(
+                    se->srcInfo, type, se->components);
+                auto result = postorder(sie);  // may insert casts
+                setType(result, st);
+                return result;
+            } else {
+                auto sit = getTypeType(se->type);
+                if (TypeMap::equivalent(st, sit))
+                    return expression->expr;
+                else
+                    typeError("%1%: cast not supported", expression->destType);
+                return expression;
+            }
+        }
+    }
+
     if (!castType->is<IR::Type_Bits>() &&
         !castType->is<IR::Type_Boolean>() &&
         !castType->is<IR::Type_Newtype>() &&
         !castType->is<IR::Type_SerEnum>()) {
-        ::error("%1%: cast not supported", expression->destType);
+        typeError("%1%: cast not supported", expression->destType);
         return expression;
     }
 

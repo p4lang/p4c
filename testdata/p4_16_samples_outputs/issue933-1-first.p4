@@ -8,7 +8,7 @@ extern void f(headers h);
 control c() {
     apply {
         headers h;
-        f(headers {x = 32w5});
+        f((headers){x = 32w5});
     }
 }
 

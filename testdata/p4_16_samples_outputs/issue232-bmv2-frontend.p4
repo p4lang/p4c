@@ -34,10 +34,10 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     bool done_0;
     bool ok_0;
     @name("Eg.test") action test() {
-        inKey_0 = Key {field1 = 32w1};
-        defaultKey_0 = Key {field1 = 32w0};
+        inKey_0 = (Key){field1 = 32w1};
+        defaultKey_0 = (Key){field1 = 32w0};
         same_0 = inKey_0 == defaultKey_0;
-        val = Value {field1 = 32w0};
+        val = (Value){field1 = 32w0};
         done_0 = false;
         ok_0 = !done_0 && same_0;
         if (ok_0) {
