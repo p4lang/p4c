@@ -19,7 +19,7 @@ limitations under the License.
 namespace P4 {
 
 /// Given an expression and a destination type, convert ListExpressions
-/// that occur within expression to StructInitializerExpression if the
+/// that occur within expression to StructExpression if the
 /// destination type matches.
 const IR::Expression*
 convert(const IR::Expression* expression, const IR::Type* type) {
@@ -36,10 +36,10 @@ convert(const IR::Expression* expression, const IR::Type* type) {
                 index++;
             }
             auto type = st->getP4Type()->to<IR::Type_Name>();
-            auto result = new IR::StructInitializerExpression(
+            auto result = new IR::StructExpression(
                 expression->srcInfo, type, type, *si);
             return result;
-        } else if (auto sli = expression->to<IR::StructInitializerExpression>()) {
+        } else if (auto sli = expression->to<IR::StructExpression>()) {
             for (auto f : st->fields) {
                 auto ne = sli->components.getDeclaration<IR::NamedExpression>(f->name.name);
                 BUG_CHECK(ne != nullptr, "%1%: no initializer for %2%", expression, f);
@@ -51,7 +51,7 @@ convert(const IR::Expression* expression, const IR::Type* type) {
             }
             if (modified || sli->type->is<IR::Type_Unknown>()) {
                 auto type = st->getP4Type()->to<IR::Type_Name>();
-                auto result = new IR::StructInitializerExpression(
+                auto result = new IR::StructExpression(
                     expression->srcInfo, type, type, *si);
                 return result;
             }

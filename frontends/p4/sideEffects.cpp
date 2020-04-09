@@ -303,7 +303,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
             continue;
 
         if (arg->expression->is<IR::ListExpression>() ||
-            arg->expression->is<IR::StructInitializerExpression>()) {
+            arg->expression->is<IR::StructExpression>()) {
             LOG3("Using temporary for " << dbp(mce) <<
                  " param " << dbp(p) << " assigning tuple to header");
             useTemporary.emplace(p);

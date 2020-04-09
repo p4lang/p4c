@@ -155,7 +155,7 @@ ExternConverter::addToFieldList(ConversionContext* ctxt,
             addToFieldList(ctxt, e, fl);
         }
         return;
-    } else if (auto si = expr->to<IR::StructInitializerExpression>()) {
+    } else if (auto si = expr->to<IR::StructExpression>()) {
         for (auto e : si->components) {
             addToFieldList(ctxt, e->expression, fl);
         }

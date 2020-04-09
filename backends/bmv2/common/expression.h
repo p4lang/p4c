@@ -117,7 +117,7 @@ class ExpressionConverter : public Inspector {
     void postorder(const IR::IntMod* expression) override;
     void postorder(const IR::Operation_Binary* expression) override;
     void postorder(const IR::ListExpression* expression) override;
-    void postorder(const IR::StructInitializerExpression* expression) override;
+    void postorder(const IR::StructExpression* expression) override;
     void postorder(const IR::Operation_Unary* expression) override;
     void postorder(const IR::PathExpression* expression) override;
     void postorder(const IR::StringLiteral* expression) override;

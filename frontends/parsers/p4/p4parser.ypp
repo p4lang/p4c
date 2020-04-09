@@ -1321,7 +1321,7 @@ expression
     | expression "[" expression "]"      { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
     | expression "[" expression ":" expression "]" { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
     | "{" expressionList "}"             { $$ = new IR::ListExpression(@1 + @3, *$2); }
-    | "{" kvList "}"                     { $$ = new IR::StructInitializerExpression(
+    | "{" kvList "}"                     { $$ = new IR::StructExpression(
                                                   @1 + @3, IR::Type::Unknown::get(), (IR::Type_Name*)nullptr, *$2); }  // experimental
     | "(" expression ")"                 { $$ = $2; }
     | "!" expression %prec PREFIX        { $$ = new IR::LNot(@1 + @2, $2); }

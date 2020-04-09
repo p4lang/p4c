@@ -86,7 +86,7 @@ void IR::NamedExpression::dbprint(std::ostream &out) const {
     out << name << ":" << expression;
 }
 
-void IR::StructInitializerExpression::dbprint(std::ostream& out) const {
+void IR::StructExpression::dbprint(std::ostream& out) const {
     out << "{" << indent;
     for (auto &field : components)
         out << Log::endl << field << ';';

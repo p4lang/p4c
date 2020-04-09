@@ -207,10 +207,10 @@ RemoveComplexExpressions::simplifyExpression(const IR::Expression* expression, b
         if (simpl != &list->components)
             return new IR::ListExpression(expression->srcInfo, *simpl);
         return expression;
-    } else if (auto si = expression->to<IR::StructInitializerExpression>()) {
+    } else if (auto si = expression->to<IR::StructExpression>()) {
         auto simpl = simplifyExpressions(&si->components);
         if (simpl != &si->components)
-            return new IR::StructInitializerExpression(
+            return new IR::StructExpression(
                 si->srcInfo, si->typeName, si->typeName, *simpl);
         return expression;
     } else {
@@ -313,9 +313,9 @@ RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
                 auto simplified = simplifyExpressions(&list->components, true);
                 arg1 = new IR::ListExpression(arg1->srcInfo, *simplified);
                 vec->push_back(new IR::Argument(arg1));
-            } else if (auto si = arg1->to<IR::StructInitializerExpression>()) {
+            } else if (auto si = arg1->to<IR::StructExpression>()) {
                 auto list = simplifyExpressions(&si->components);
-                arg1 = new IR::StructInitializerExpression(
+                arg1 = new IR::StructExpression(
                     si->srcInfo, si->typeName, si->typeName, *list);
                 vec->push_back(new IR::Argument(arg1));
             } else {
