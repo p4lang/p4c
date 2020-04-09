@@ -163,6 +163,7 @@ class ResolveReferences : public Inspector {
     DECLARE(P4Parser)
     DECLARE(P4Action)
     DECLARE(Function)
+    DECLARE(Method)
     DECLARE(TableProperties)
     DECLARE(Type_Method)
     DECLARE(ParserState)
