@@ -356,7 +356,7 @@ void ResolveReferences::postorder(const IR::P4Parser *p) {
 bool ResolveReferences::preorder(const IR::Function* function) {
     refMap->usedName(function->name.name);
     addToContext(function->type->parameters);
-    resolveForward.push_back(true); // annotations may refer to arguments
+    resolveForward.push_back(true);  // annotations may refer to arguments
     return true;
 }
 
@@ -368,7 +368,7 @@ void ResolveReferences::postorder(const IR::Function* function) {
 bool ResolveReferences::preorder(const IR::Method* method) {
     refMap->usedName(method->name.name);
     addToContext(method->type->parameters);
-    resolveForward.push_back(true); // annotations may refer to arguments
+    resolveForward.push_back(true);  // annotations may refer to arguments
     return true;
 }
 
