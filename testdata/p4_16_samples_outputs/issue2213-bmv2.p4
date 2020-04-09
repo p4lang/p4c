@@ -43,10 +43,10 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     apply {
-        meta.s1 = {f1 = 2,f2 = 3};
+        meta.s1 = ({f1 = 2,f2 = 3});
         meta.s2.s1 = meta.s1;
-        meta.s2 = {s1 = meta.s1,f3 = 5,f4 = 8};
-        meta.s2 = {s1 = {f1 = 2,f2 = 3},f3 = 5,f4 = 8};
+        meta.s2 = ({s1 = meta.s1,f3 = 5,f4 = 8});
+        meta.s2 = ({s1 = ({f1 = 2,f2 = 3}),f3 = 5,f4 = 8});
         stdmeta.egress_spec = (bit<9>)meta.s2.s1.f2;
     }
 }

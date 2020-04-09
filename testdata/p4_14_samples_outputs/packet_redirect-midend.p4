@@ -53,10 +53,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("._nop") action _nop() {
     }
     @name("._recirculate") action _recirculate() {
-        recirculate<tuple_0>({ standard_metadata, (metaA_t){f1 = meta._metaA_f10,f2 = meta._metaA_f21} });
+        recirculate<tuple_0>({ standard_metadata, ((metaA_t){f1 = meta._metaA_f10,f2 = meta._metaA_f21}) });
     }
     @name("._clone_e2e") action _clone_e2e(bit<32> mirror_id) {
-        clone3<tuple_0>(CloneType.E2E, mirror_id, { standard_metadata, (metaA_t){f1 = meta._metaA_f10,f2 = meta._metaA_f21} });
+        clone3<tuple_0>(CloneType.E2E, mirror_id, { standard_metadata, ((metaA_t){f1 = meta._metaA_f10,f2 = meta._metaA_f21}) });
     }
     @name(".t_egress") table t_egress_0 {
         actions = {
@@ -94,10 +94,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.mcast_grp = mgrp;
     }
     @name("._resubmit") action _resubmit() {
-        resubmit<tuple_0>({ standard_metadata, (metaA_t){f1 = meta._metaA_f10,f2 = meta._metaA_f21} });
+        resubmit<tuple_0>({ standard_metadata, ((metaA_t){f1 = meta._metaA_f10,f2 = meta._metaA_f21}) });
     }
     @name("._clone_i2e") action _clone_i2e(bit<32> mirror_id) {
-        clone3<tuple_0>(CloneType.I2E, mirror_id, { standard_metadata, (metaA_t){f1 = meta._metaA_f10,f2 = meta._metaA_f21} });
+        clone3<tuple_0>(CloneType.I2E, mirror_id, { standard_metadata, ((metaA_t){f1 = meta._metaA_f10,f2 = meta._metaA_f21}) });
     }
     @name(".t_ingress_1") table t_ingress {
         actions = {

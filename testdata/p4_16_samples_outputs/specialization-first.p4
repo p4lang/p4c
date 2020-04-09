@@ -11,8 +11,8 @@ struct S1 {
 action a() {
     S x;
     S1 y;
-    f<S>((S){f = 32w0});
+    f<S>(((S){f = 32w0}));
     f<S>(x);
     f<S1>(y);
-    f<S1>((S1){f = 32w0,g = 32w1});
+    f<S1>(((S1){f = 32w0,g = 32w1}));
 }

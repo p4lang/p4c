@@ -116,7 +116,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         meta._test_digest_my_parser_error1 = error.PacketTooShort;
         meta._test_digest_pkt_type2 = MyPacketTypes.IPv4;
         meta._test_digest_bar3 = 32w777;
-        digest<test_digest_t>(32w1, (test_digest_t){in_mac_srcAddr = hdr.ethernet.srcAddr,my_parser_error = error.PacketTooShort,pkt_type = MyPacketTypes.IPv4,bar = 32w777});
+        digest<test_digest_t>(32w1, ((test_digest_t){in_mac_srcAddr = hdr.ethernet.srcAddr,my_parser_error = error.PacketTooShort,pkt_type = MyPacketTypes.IPv4,bar = 32w777}));
     }
     @hidden table tbl_send_digest {
         actions = {

@@ -12,7 +12,7 @@ struct metadata_t {
 }
 
 control ingressImpl(inout metadata_t meta) {
-    mystruct2_t helper = {s1 = {f1 = 2}};
+    mystruct2_t helper = ({s1 = ({f1 = 2})});
     apply {
         meta.s2 = helper;
     }
