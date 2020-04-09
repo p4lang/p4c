@@ -344,6 +344,7 @@ struct psa_egress_output_metadata_t {
 /// allows those assignments to execute if psa_clone_i2e(istd) returns
 /// true.  psa_clone_i2e can be implemented by returning istd.clone
 
+@pure
 extern bool psa_clone_i2e(in psa_ingress_output_metadata_t istd);
 
 /// During the IngressDeparser execution, psa_resubmit returns true if
@@ -354,6 +355,7 @@ extern bool psa_clone_i2e(in psa_ingress_output_metadata_t istd);
 /// true.  psa_resubmit can be implemented by returning (!istd.drop &&
 /// istd.resubmit)
 
+@pure
 extern bool psa_resubmit(in psa_ingress_output_metadata_t istd);
 
 /// During the IngressDeparser execution, psa_normal returns true if
@@ -364,6 +366,7 @@ extern bool psa_resubmit(in psa_ingress_output_metadata_t istd);
 /// psa_normal(istd) returns true.  psa_normal can be implemented by
 /// returning (!istd.drop && !istd.resubmit)
 
+@pure
 extern bool psa_normal(in psa_ingress_output_metadata_t istd);
 
 /// During the EgressDeparser execution, psa_clone_e2e returns true if
@@ -374,6 +377,7 @@ extern bool psa_normal(in psa_ingress_output_metadata_t istd);
 /// execute if psa_clone_e2e(istd) returns true.  psa_clone_e2e can be
 /// implemented by returning istd.clone
 
+@pure
 extern bool psa_clone_e2e(in psa_egress_output_metadata_t istd);
 
 /// During the EgressDeparser execution, psa_recirculate returns true
@@ -384,6 +388,7 @@ extern bool psa_clone_e2e(in psa_egress_output_metadata_t istd);
 /// can be implemented by returning (!istd.drop && (edstd.egress_port
 /// == PSA_PORT_RECIRCULATE))
 
+@pure
 extern bool psa_recirculate(in psa_egress_output_metadata_t istd,
                             in psa_egress_deparser_input_metadata_t edstd);
 
@@ -494,6 +499,7 @@ extern Hash<O> {
   /// Compute the hash for data.
   /// @param data The data over which to calculate the hash.
   /// @return The hash value.
+  @pure
   O get_hash<D>(in D data);
 
   /// Compute the hash for data, with modulo by max, then add base.
@@ -506,6 +512,7 @@ extern Hash<O> {
   ///        limit their choice to such values if they wish to
   ///        maximize portability.
   /// @return (base + (h % max)) where h is the hash value.
+  @pure
   O get_hash<T, D>(in T base, in D data, in T max);
 }
 // END:Hash_extern
@@ -527,6 +534,7 @@ extern Checksum<W> {
   void update<T>(in T data);
 
   /// Get checksum for data added (and not removed) since last clear
+  @noSideEffects
   W    get();
 }
 // END:Checksum_extern
@@ -554,11 +562,13 @@ extern InternetChecksum {
   void subtract<T>(in T data);
 
   /// Get checksum for data added (and not removed) since last clear
+  @noSideEffects
   bit<16> get();
 
   /// Get current state of checksum computation.  The return value is
   /// only intended to be used for a future call to the set_state
   /// method.
+  @noSideEffects
   bit<16> get_state();
 
   /// Restore the state of the InternetChecksum instance to one
@@ -693,6 +703,7 @@ extern Register<T, S> {
   /// initial_value.
   Register(bit<32> size, T initial_value);
 
+  @noSideEffects
   T    read  (in S index);
   void write (in S index, in T value);
 

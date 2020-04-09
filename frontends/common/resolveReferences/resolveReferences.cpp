@@ -356,11 +356,25 @@ void ResolveReferences::postorder(const IR::P4Parser *p) {
 bool ResolveReferences::preorder(const IR::Function* function) {
     refMap->usedName(function->name.name);
     addToContext(function->type->parameters);
+    resolveForward.push_back(true);  // annotations may refer to arguments
     return true;
 }
 
 void ResolveReferences::postorder(const IR::Function* function) {
+    resolveForward.pop_back();
     removeFromContext(function->type->parameters);
+}
+
+bool ResolveReferences::preorder(const IR::Method* method) {
+    refMap->usedName(method->name.name);
+    addToContext(method->type->parameters);
+    resolveForward.push_back(true);  // annotations may refer to arguments
+    return true;
+}
+
+void ResolveReferences::postorder(const IR::Method* method) {
+    resolveForward.pop_back();
+    removeFromContext(method->type->parameters);
 }
 
 bool ResolveReferences::preorder(const IR::P4Table* t) {
