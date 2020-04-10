@@ -41,7 +41,6 @@ class SubstituteParameters : public TypeVariableSubstitutionVisitor {
             TypeVariableSubstitutionVisitor(tvs), refMap(refMap), subst(subst) {
         CHECK_NULL(refMap); CHECK_NULL(subst); CHECK_NULL(tvs);
         visitDagOnce = true;
-        setName("SubstituteParameters");
         LOG1("Will substitute " << std::endl << subst << bindings); }
     using TypeVariableSubstitutionVisitor::postorder;
     const IR::Node* postorder(IR::PathExpression* expr) override;

@@ -48,7 +48,7 @@ class TypeVariableSubstitutionVisitor : public Transform {
  public:
     explicit TypeVariableSubstitutionVisitor(const TypeVariableSubstitution *bindings,
                                              bool replace = false)
-            : bindings(bindings), replace(replace) { setName("TypeVariableSubstitution"); }
+            : bindings(bindings), replace(replace) {}
 
     const IR::Node* preorder(IR::TypeParameters *tps) override;
     const IR::Node* preorder(IR::Type_Var* tv) override
