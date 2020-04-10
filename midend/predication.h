@@ -70,6 +70,7 @@ class Predication final : public Transform {
         void visitBranch(IR::Mux * mux, bool then);
     };
 
+    NameGenerator* generator;
     EmptyStatementRemover remover;
     std::vector<IR::BlockStatement*> blocks;
     bool inside_action;
@@ -92,8 +93,8 @@ class Predication final : public Transform {
     }
 
  public:
-    Predication() :
-        inside_action(false), ifNestingLevel(0)
+    Predication(NameGenerator* gen) :
+        generator(gen), inside_action(false), ifNestingLevel(0)
     { setName("Predication"); }
     const IR::Expression* clone(const IR::Expression* expression);
     const IR::Node* clone(const IR::AssignmentStatement* statement);

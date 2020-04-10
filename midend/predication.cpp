@@ -202,6 +202,16 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
 
     ++ifNestingLevel;
     auto rv = new IR::BlockStatement;
+
+    if (!statement->condition->is<IR::PathExpression>()) {
+        cstring conditionName = generator->newName("cond");
+        auto condDecl = new IR::Declaration_Variable(conditionName, IR::Type::Boolean::get());
+        rv->push_back(condDecl);
+        auto condition = new IR::PathExpression(IR::ID(conditionName));
+        rv->push_back(new IR::AssignmentStatement(clone(condition), statement->condition));
+        statement->condition = condition; // replace with variable cond
+    }
+
     blocks.push_back(new IR::BlockStatement);
     travesalPath.push_back(true);
     visit(statement->ifTrue);
