@@ -20,8 +20,7 @@ namespace P4 {
 
 ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
     return {
-            // @tableonly, @defaultonly, @hidden, @atomic, and @optional have
-            // empty bodies.
+            // These annotations have empty bodies.
             PARSE_EMPTY(IR::Annotation::tableOnlyAnnotation),
             PARSE_EMPTY(IR::Annotation::defaultOnlyAnnotation),
             PARSE_EMPTY(IR::Annotation::hiddenAnnotation),
@@ -29,11 +28,11 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
             PARSE_EMPTY(IR::Annotation::optionalAnnotation),
             PARSE_EMPTY(IR::Annotation::pureAnnotation),
             PARSE_EMPTY(IR::Annotation::noSideEffectsAnnotation),
-            PARSE_EMPTY(IR::Annotation::noWarnUnusedAnnotation),
 
-            // @name and @deprecated have a string literal argument.
+            // string literal argument.
             PARSE(IR::Annotation::nameAnnotation, StringLiteral),
             PARSE(IR::Annotation::deprecatedAnnotation, StringLiteral),
+            PARSE(IR::Annotation::noWarnAnnotation, StringLiteral),
 
             // @length has an expression argument.
             PARSE(IR::Annotation::lengthAnnotation, Expression),

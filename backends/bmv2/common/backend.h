@@ -146,7 +146,7 @@ class RenameUserMetadata : public Transform {
             auto anno = f->getAnnotation(IR::Annotation::nameAnnotation);
             cstring suffix = "";
             if (anno != nullptr)
-                suffix = IR::Annotation::getName(anno);
+                suffix = anno->getName();
             if (suffix.startsWith(".")) {
                 // We can't change the name of this field.
                 // Hopefully the user knows what they are doing.

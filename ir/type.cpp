@@ -47,7 +47,7 @@ const cstring IR::Annotation::deprecatedAnnotation = "deprecated";
 const cstring IR::Annotation::synchronousAnnotation = "synchronous";
 const cstring IR::Annotation::pureAnnotation = "pure";
 const cstring IR::Annotation::noSideEffectsAnnotation = "noSideEffects";
-const cstring IR::Annotation::noWarnUnusedAnnotation = "noWarnUnused";
+const cstring IR::Annotation::noWarnAnnotation = "noWarn";
 const cstring IR::Annotation::matchAnnotation = "match";
 
 int Type_Declaration::nextId = 0;

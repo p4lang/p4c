@@ -163,9 +163,9 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     @name(".nop") action nop() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
     @name("FabricIngress.filtering.t") table filtering_t {
         key = {

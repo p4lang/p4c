@@ -13,7 +13,7 @@ header H {
 
 control c(out B32 x) {
     N32 k_0;
-    @noWarnUnused @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("c.t") table t_0 {
         actions = {

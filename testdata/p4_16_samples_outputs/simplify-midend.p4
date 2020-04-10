@@ -4,9 +4,9 @@ control c(out bool x) {
     bool tmp;
     bool tmp_0;
     bool tmp_1;
-    @noWarnUnused @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @noWarnUnused @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
     @name("c.t1") table t1_0 {
         key = {

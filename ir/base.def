@@ -266,7 +266,7 @@ class Annotation {
     static const cstring synchronousAnnotation;  /// Synchronous annotation.
     static const cstring pureAnnotation;  /// extern function/method annotation.
     static const cstring noSideEffectsAnnotation;  /// extern function/method annotation.
-    static const cstring noWarnUnusedAnnotation;  /// noWarnUnused annotation.
+    static const cstring noWarnAnnotation;  /// noWarn annotation.
     static const cstring matchAnnotation;  /// Match annotation (for value sets).
     toString{ return cstring("@") + name; }
     validate{
@@ -277,8 +277,10 @@ class Annotation {
             "unparsed annotation body with non-empty kv");
     }
 
-    /// Useful helper: extracts name value from a name annotation
-    static cstring getName(const Annotation* annotation);
+    /// Extracts name value from a name annotation
+    cstring getName() const;
+    /// Extracts a single string argument; error if the argument is not a string
+    cstring getSingleString() const;
 
 #emit
     enum class Kind {
