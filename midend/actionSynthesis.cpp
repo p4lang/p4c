@@ -72,7 +72,7 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
     cstring tblName = IR::ID(refMap->newName(cstring("tbl_") + ac->action->name.name), nullptr);
 
     auto annos = new IR::Annotations();
-    annos->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}, false));
+    annos->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
     auto tbl = new IR::P4Table(statement->srcInfo, tblName, annos, props);
     tables.push_back(tbl);
 
@@ -202,7 +202,7 @@ const IR::Statement* DoSynthesizeActions::createAction(const IR::Statement* toAd
     LOG3("Adding new action " << name << body);
 
     auto annos = new IR::Annotations();
-    annos->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}, false));
+    annos->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
     auto action = new IR::P4Action(name, annos, new IR::ParameterList(), body);
     actions.push_back(action);
     auto actpath = new IR::PathExpression(name);

@@ -464,7 +464,7 @@ const IR::StructField *TypeConverter::postorder(IR::StructField *field) {
                 auto fieldlen = new IR::Sub(
                     scale->srcInfo, scale, new IR::Constant(type->width_bits()));
                 field->annotations = field->annotations->add(
-                    new IR::Annotation("length", { fieldlen }, false));
+                    new IR::Annotation("length", { fieldlen }));
             }
         }
     }

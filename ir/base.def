@@ -240,19 +240,23 @@ class Annotation {
 
     // The remaining constructors are for compiler-generated annotations.
     Annotation(Util::SourceInfo si, ID n,
-               const std::initializer_list<const Expression *> &a, bool structured)
+               const std::initializer_list<const Expression *> &a, bool structured = false)
     : Node(si), name(n), needsParsing(false), expr(a), structured(structured) {}
-    Annotation(Util::SourceInfo si, ID n, const IR::Vector<Expression> &a, bool structured)
+    Annotation(Util::SourceInfo si, ID n, const IR::Vector<Expression> &a, bool structured = false)
     : Node(si), name(n), needsParsing(false), expr(a), structured(structured) {}
-    Annotation(Util::SourceInfo si, ID n, const IndexedVector<NamedExpression> &kv, bool structured)
+    Annotation(Util::SourceInfo si, ID n, const IndexedVector<NamedExpression> &kv,
+               bool structured = false)
     : Node(si), name(n), needsParsing(false), kv(kv), structured(structured) {}
-    Annotation(ID n, const std::initializer_list<const Expression *> &a, bool structured)
+    Annotation(ID n, const std::initializer_list<const Expression *> &a, bool structured = false)
     : name(n), needsParsing(false), expr(a), structured(structured) {}
-    Annotation(ID n, const IR::Vector<Expression> &a, bool structured)
+    Annotation(ID n, const IR::Vector<Expression> &a, bool structured = false)
     : name(n), needsParsing(false), expr(a), structured(structured) {}
-    Annotation(ID n, intmax_t v, bool structured)
+    Annotation(ID n, intmax_t v, bool structured = false)
     : name(n), needsParsing(false), structured(structured) {
         expr.push_back(new Constant(v)); }
+    Annotation(ID n, cstring v, bool structured = false)
+    : name(n), needsParsing(false), structured(structured) {
+        expr.push_back(new StringLiteral(v)); }
 
     static const cstring nameAnnotation;  /// Indicates the control-plane name.
     static const cstring tableOnlyAnnotation;  /// Action cannot be a default_action.
