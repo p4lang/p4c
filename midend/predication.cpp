@@ -56,21 +56,18 @@ bool Predication::EmptyStatementRemover::preorder(IR::BlockStatement * block) {
     return false;
 }
 
-const IR::AssignmentStatement *
-Predication::ExpressionReplacer::preorder(IR::AssignmentStatement * statement) {
-    // fill the conditions from context
-    while (context != nullptr) {
-        if (context->node->is<IR::IfStatement>()) {
-            conditions.push_back(context->node->to<IR::IfStatement>()->condition);
-        }
-        context = context->parent;
+const IR::Mux * Predication::ExpressionReplacer::preorder(IR::Mux * mux) {
+    ++currentNestingLevel;
+    bool thenElsePass = travesalPath[currentNestingLevel - 1];
+    if (currentNestingLevel == travesalPath.size()) {
+        emplaceExpression(mux);
+    } else if (currentNestingLevel < travesalPath.size()) {
+        visitBranch(mux, thenElsePass);
     }
-
-    if (!statement->right->is<IR::Mux>()) {
-        statement->right = new IR::Mux(conditions.back(), statement->left, statement->left);
-    }
-    visit(statement->right);
-    return statement;
+    visit(mux->e1);
+    visit(mux->e2);
+    --currentNestingLevel;
+    return mux;
 }
 
 void Predication::ExpressionReplacer::emplaceExpression(IR::Mux * mux) {
@@ -78,15 +75,14 @@ void Predication::ExpressionReplacer::emplaceExpression(IR::Mux * mux) {
     bool thenElsePass = travesalPath[currentNestingLevel - 1];
     mux->e0 = condition;
     if (thenElsePass) {
-        mux->e1 = rightExpression;
+        mux->e1 = statement->right;
     } else {
-        mux->e2 = rightExpression;
+        mux->e2 = statement->right;
     }
 }
 
 void Predication::ExpressionReplacer::visitBranch(IR::Mux * mux, bool then) {
     auto condition = conditions[conditions.size() - currentNestingLevel];
-    auto statement = findContext<IR::AssignmentStatement>();
     auto leftName = lvalue_name(statement->left);
     auto thenExprName = lvalue_name(mux->e1);
     auto elseExprName = lvalue_name(mux->e2);
@@ -120,19 +116,6 @@ void Predication::ExpressionReplacer::visitBranch(IR::Mux * mux, bool then) {
     }
 }
 
-
-const IR::Mux * Predication::ExpressionReplacer::preorder(IR::Mux * mux) {
-    ++currentNestingLevel;
-    bool thenElsePass = travesalPath[currentNestingLevel - 1];
-    if (currentNestingLevel == travesalPath.size()) {
-        emplaceExpression(mux);
-    } else {
-        visitBranch(mux, thenElsePass);
-    }
-    --currentNestingLevel;
-    return mux;
-}
-
 const IR::Expression* Predication::clone(const IR::Expression* expression) {
     // We often need to clone expressions.  This is necessary because
     // in the end we will generate different code for the different clones of
@@ -153,7 +136,16 @@ const IR::Node* Predication::clone(const IR::AssignmentStatement* statement) {
 const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
     if (!inside_action || ifNestingLevel == 0)
         return statement;
-    ExpressionReplacer replacer(clone(statement->right), travesalPath, getContext());
+    auto context = getContext();
+    std::vector<const IR::Expression*> conditions;
+    while (context != nullptr) {
+        if (context->node->is<IR::IfStatement>()) {
+            conditions.push_back(context->node->to<IR::IfStatement>()->condition);
+        }
+        context = context->parent;
+    }
+    auto clonedStatement = clone(statement)->to<IR::AssignmentStatement>();
+    ExpressionReplacer replacer(clonedStatement, travesalPath, conditions);
     // Referenced lvalue is not appeard before
     dependencies.clear();
     visit(statement->right);
@@ -173,10 +165,12 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
         statement->right = foundedAssignment->second->right;
         // move the lvalue assignment to the back
         orderedNames.erase(statementName);
+    } else if (!statement->right->is<IR::Mux>()) {
+        auto clonedLeft = clone(statement->left);
+        statement->right = new IR::Mux(conditions.back(), clonedLeft, clonedLeft);
     }
     orderedNames.push_back(statementName);
-    auto updatedStatement = statement->apply(replacer);
-    auto rightStatement = clone(updatedStatement->to<IR::AssignmentStatement>()->right);
+    auto rightStatement = clone(statement->right)->apply(replacer);
     liveAssignments[statementName] = new IR::AssignmentStatement(statement->left, rightStatement);
     return new IR::EmptyStatement();
 }
@@ -209,7 +203,7 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
         rv->push_back(condDecl);
         auto condition = new IR::PathExpression(IR::ID(conditionName));
         rv->push_back(new IR::AssignmentStatement(clone(condition), statement->condition));
-        statement->condition = condition; // replace with variable cond
+        statement->condition = condition;  // replace with variable cond
     }
 
     blocks.push_back(new IR::BlockStatement);

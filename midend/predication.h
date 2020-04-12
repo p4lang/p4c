@@ -53,19 +53,17 @@ class Predication final : public Transform {
      */
     class ExpressionReplacer final : public Transform {
      private:
-        const IR::Expression * rightExpression;
+        const IR::AssignmentStatement * statement;
         const std::vector<bool>& travesalPath;
-        const Visitor::Context * context;
-        std::vector<const IR::Expression*> conditions;
+        std::vector<const IR::Expression*>& conditions;
         unsigned currentNestingLevel = 0;
      public:
-        explicit ExpressionReplacer(const IR::Expression * e,
+        explicit ExpressionReplacer(const IR::AssignmentStatement * a,
                                     std::vector<bool>& t,
-                                    const Visitor::Context * c)
-        : rightExpression(e), travesalPath(t), context(c)
-        { CHECK_NULL(e); }
+                                    std::vector<const IR::Expression*>& c)
+        : statement(a), travesalPath(t), conditions(c)
+        { CHECK_NULL(a); }
         const IR::Mux * preorder(IR::Mux * mux) override;
-        const IR::AssignmentStatement * preorder(IR::AssignmentStatement * statement) override;
         void emplaceExpression(IR::Mux * mux);
         void visitBranch(IR::Mux * mux, bool then);
     };
@@ -93,7 +91,7 @@ class Predication final : public Transform {
     }
 
  public:
-    Predication(NameGenerator* gen) :
+    explicit Predication(NameGenerator* gen) :
         generator(gen), inside_action(false), ifNestingLevel(0)
     { setName("Predication"); }
     const IR::Expression* clone(const IR::Expression* expression);
