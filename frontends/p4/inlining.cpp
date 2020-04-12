@@ -219,8 +219,7 @@ static const IR::Annotations*
 setNameAnnotation(cstring name, const IR::Annotations* annos) {
     if (annos == nullptr)
         annos = IR::Annotations::empty;
-    return annos->addOrReplace(IR::Annotation::nameAnnotation,
-                               new IR::StringLiteral(name), false);
+    return annos->addOrReplace(IR::Annotation::nameAnnotation, new IR::StringLiteral(name));
 }
 
 /**
