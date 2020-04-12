@@ -270,7 +270,7 @@ input: /* epsilon */
     | input blackbox_type_declaration
     | input blackbox_instantiation
     | input PRAGMA pragma_operands NEWLINE
-          { driver.addPragma(new IR::Annotation(@2, $2, *$3, false)); }
+          { driver.addPragma(new IR::Annotation(@2, $2, *$3)); }
     | input error
           { driver.clearPragmas(); }
 ;
@@ -329,20 +329,20 @@ attributes:
 
 attrib:
       SIGNED     { $$.signed_ = true; }
-    | SATURATING { $$.annotations.push_back(new IR::Annotation(@1, IR::ID(@1, $1), {}, false));
+    | SATURATING { $$.annotations.push_back(new IR::Annotation(@1, IR::ID(@1, $1), {}));
                    $$.saturating = true; }
 ;
 
 opt_length: /* epsilon */
     | LENGTH ":" expression ";"  /* const_expression or name */
       { $<HeaderType>-1.annotations->emplace_back(
-          IR::Annotation(@1+@4, "length", IR::Vector<IR::Expression>($3), false)); }
+          IR::Annotation(@1+@4, "length", IR::Vector<IR::Expression>($3))); }
     ;
 
 opt_max_length: /* epsilon */
     | MAX_LENGTH ":" const_expression ";"
       { $<HeaderType>-2.annotations->emplace_back(
-          IR::Annotation(@1+@4, "max_length", IR::Vector<IR::Expression>($3), false)); }
+          IR::Annotation(@1+@4, "max_length", IR::Vector<IR::Expression>($3))); }
     ;
 
 type: BIT { $$ = IR::Type::Bits::get(@1, 1); }
@@ -886,9 +886,9 @@ blackbox_attribute: /* epsilon */ { $$ = new IR::Attribute($<IR::ID>-1); }
 
 blackbox_method: { $$ = new IR::Annotations; }
     | blackbox_method READS "{" opt_name_list "}"
-       { ($$=$1)->add(new IR::Annotation(@2, $2, driver.makeExpressionList($4), false)); }
+       { ($$=$1)->add(new IR::Annotation(@2, $2, driver.makeExpressionList($4))); }
     | blackbox_method WRITES "{" opt_name_list "}"
-       { ($$=$1)->add(new IR::Annotation(@2, $2, driver.makeExpressionList($4), false)); }
+       { ($$=$1)->add(new IR::Annotation(@2, $2, driver.makeExpressionList($4))); }
 ;
 
 opt_argument_list:
@@ -905,7 +905,7 @@ argument:
       inout type name
         { $$ = new IR::Parameter(@3, $3, $1, $2); }
     | OPTIONAL argument
-        { ($$ = $2)->annotations = $2->annotations->add(new IR::Annotation(@1, $1, {}, false)); }
+        { ($$ = $2)->annotations = $2->annotations->add(new IR::Annotation(@1, $1, {})); }
 ;
 
 inout: IN { $$ = IR::Direction::In; } | OUT { $$ = IR::Direction::Out; } ;

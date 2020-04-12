@@ -24,13 +24,13 @@ HeaderTypeMaxLengthCalculator::preorder(IR::Type_StructLike *hdr_type) {
         unsigned len = 0;
         for (auto field : hdr_type->fields)
             len += field->type->width_bits();
-        max_length = new IR::Annotation("max_length", len, false);
+        max_length = new IR::Annotation("max_length", len);
         if (!annot) annot = hdr_type->annotations->clone();
         annot->annotations.push_back(max_length); }
     auto *length = hdr_type->getAnnotation("length");
     if (!length) {
         if (!annot) annot = hdr_type->annotations->clone();
-        length = new IR::Annotation("length", max_length->expr, false);
+        length = new IR::Annotation("length", max_length->expr);
         annot->annotations.push_back(length); }
     if (annot) hdr_type->annotations = annot;
     return false;

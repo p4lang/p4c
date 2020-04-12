@@ -869,7 +869,7 @@ ProgramStructure::convertTable(const IR::V1Table* table, cstring newName,
         actionList->push_back(
             new IR::ActionListElement(
                 new IR::Annotations(
-                    {new IR::Annotation(IR::Annotation::defaultOnlyAnnotation, {}, false)}),
+                    {new IR::Annotation(IR::Annotation::defaultOnlyAnnotation, {})}),
                 new IR::PathExpression(default_action))); }
     props->push_back(new IR::Property(IR::ID(IR::TableProperties::actionsPropertyName),
                                       actionList, false));
