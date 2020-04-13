@@ -18,8 +18,9 @@ bool ComplexValues::isNestedStruct(const IR::Type* type) {
     return false;
 }
 
+template <class T>
 void ComplexValues::explode(cstring prefix, const IR::Type_Struct* type,
-                            FieldsMap* map, IR::Vector<IR::Declaration>* result) {
+                            FieldsMap* map, IR::Vector<T>* result) {
     CHECK_NULL(type);
     for (auto f : type->fields) {
         cstring fname = prefix + "_" + f->name;
@@ -47,11 +48,19 @@ const IR::Node* RemoveNestedStructs::postorder(IR::Declaration_Variable* decl) {
     BUG_CHECK(decl->initializer == nullptr, "%1%: did not expect an initializer", decl);
     BUG_CHECK(decl->annotations->size() == 0,
               "%1%: don't know how to handle variable annotations", decl);
-    auto result = new IR::Vector<IR::Declaration>();
     auto map = new ComplexValues::FieldsMap();
     values->values.emplace(getOriginal<IR::Declaration_Variable>(), map);
-    values->explode(decl->getName().name, type->to<IR::Type_Struct>(), map, result);
-    return result;
+    if (findContext<IR::Function>()) {
+        auto result = new IR::IndexedVector<IR::StatOrDecl>();
+        values->explode(decl->getName().name, type->to<IR::Type_Struct>(),
+                        map, result);
+        return result;
+    } else {
+        auto result = new IR::Vector<IR::Declaration>();
+        values->explode(decl->getName().name, type->to<IR::Type_Struct>(),
+                        map, result);
+        return result;
+    }
 }
 
 const IR::Node* RemoveNestedStructs::postorder(IR::Member* expression) {
