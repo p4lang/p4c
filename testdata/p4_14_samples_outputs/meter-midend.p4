@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
 struct intrinsic_metadata_t {
@@ -40,7 +41,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-@name(".my_meter") meter(32w16384, MeterType.packets) my_meter;
+@name(".my_meter") meter<bit<14>>(32w16384, MeterType.packets) my_meter;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
@@ -54,7 +55,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("._nop") action _nop_2() {
     }
-    @name(".m_action") action m_action(bit<32> meter_idx) {
+    @name(".m_action") action m_action(bit<14> meter_idx) {
         my_meter.execute_meter<bit<32>>(meter_idx, meta._meta_meter_tag0);
         standard_metadata.egress_spec = 9w1;
     }

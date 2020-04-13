@@ -4,6 +4,7 @@ error {
     IPv4ChecksumError
 }
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 typedef bit<48> EthernetAddress;

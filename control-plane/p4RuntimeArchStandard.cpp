@@ -107,7 +107,9 @@ template<> struct RegisterTraits<Arch::V1MODEL> {
     // the index of the type parameter for the data stored in the register, in
     // the type parameter list of the extern type declaration
     static size_t dataTypeParamIdx() { return 0; }
-    static boost::optional<size_t> indexTypeParamIdx() { return boost::none; }
+    static boost::optional<size_t> indexTypeParamIdx() {
+        if (P4V1::V1Model::instance.haveIndexTypeParam()) return 1;
+        return boost::none; }
 };
 
 template<> struct RegisterTraits<Arch::PSA> {
@@ -165,7 +167,9 @@ template<> struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MO
         else if (name == "packets_and_bytes") return CounterSpec::BOTH;
         return CounterSpec::UNSPECIFIED;
     }
-    static boost::optional<size_t> indexTypeParamIdx() { return boost::none; }
+    static boost::optional<size_t> indexTypeParamIdx() {
+        if (P4V1::V1Model::instance.haveIndexTypeParam()) return 0;
+        return boost::none; }
 };
 
 /// @ref CounterlikeTraits<> specialization for @ref CounterExtern for PSA
@@ -216,7 +220,9 @@ template<> struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODE
         else if (name == "bytes") return MeterSpec::BYTES;
         return MeterSpec::UNSPECIFIED;
     }
-    static boost::optional<size_t> indexTypeParamIdx() { return boost::none; }
+    static boost::optional<size_t> indexTypeParamIdx() {
+        if (P4V1::V1Model::instance.haveIndexTypeParam()) return 0;
+        return boost::none; }
 };
 
 /// @ref CounterlikeTraits<> specialization for @ref MeterExtern for PSA

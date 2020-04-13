@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
 @name("A_t") header A_t_0 {
@@ -61,14 +62,14 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-@name(".cntDum") @min_width(64) counter(32w4096, CounterType.packets) cntDum;
+@name(".cntDum") @min_width(64) counter<bit<12>>(32w4096, CounterType.packets) cntDum;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @name(".act") action _act_1(bit<9> port, bit<32> idx) {
+    @name(".act") action _act_1(bit<9> port, bit<12> idx) {
         standard_metadata.egress_spec = port;
         cntDum.count(idx);
     }
@@ -82,7 +83,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_0();
     }
-    @name(".act") action _act_2(bit<9> port, bit<32> idx) {
+    @name(".act") action _act_2(bit<9> port, bit<12> idx) {
         standard_metadata.egress_spec = port;
         cntDum.count(idx);
     }

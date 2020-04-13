@@ -4,6 +4,7 @@ header ipv4_option_timestamp_t_1 {
 }
 
 #include <core.p4>
+#define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
 struct intrinsic_metadata_t {

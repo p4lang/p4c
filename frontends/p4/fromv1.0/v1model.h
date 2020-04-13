@@ -123,12 +123,10 @@ class Truncate : public Model::Extern_Model {
 struct CounterOrMeter_Model : public ::Model::Extern_Model {
     explicit CounterOrMeter_Model(cstring name) : Extern_Model(name),
                       sizeParam("size"), typeParam("type"),
-                      size_type(IR::Type_Bits::get(32)),
-                      index_type(IR::Type_Bits::get(32)), counterType() {}
+                      size_type(IR::Type_Bits::get(32)), counterType() {}
     ::Model::Elem sizeParam;
     ::Model::Elem typeParam;
     const IR::Type* size_type;
-    const IR::Type* index_type;
     CounterType_Model counterType;
     MeterType_Model meterType;
 };
@@ -136,13 +134,11 @@ struct CounterOrMeter_Model : public ::Model::Extern_Model {
 struct Register_Model : public ::Model::Extern_Model {
     Register_Model() : Extern_Model("register"),
                        sizeParam("size"), read("read"), write("write"),
-                       size_type(IR::Type_Bits::get(32)),
-                       index_type(IR::Type_Bits::get(32)) {}
+                       size_type(IR::Type_Bits::get(32)) {}
     ::Model::Elem sizeParam;
     ::Model::Elem read;
     ::Model::Elem write;
     const IR::Type* size_type;
-    const IR::Type* index_type;
 };
 
 struct DigestReceiver_Model : public ::Model::Elem {
@@ -269,6 +265,7 @@ class V1Model : public ::Model::Model {
     {}
 
  public:
+    unsigned      version = 20200408;
     ::Model::Elem       file;
     ::Model::Elem       standardMetadata;
     ::Model::Elem       intrinsicMetadata;
@@ -310,7 +307,18 @@ class V1Model : public ::Model::Model {
     DirectMeter_Model   directMeter;
     DirectCounter_Model directCounter;
 
+    bool haveIndexTypeParam() const { return version >= 20200408; }  // depends on version
+
     static V1Model instance;
+};
+
+class getV1ModelVersion : public Inspector {
+    bool preorder(const IR::Declaration_Constant *dc) override {
+        if (dc->name == "__v1model_version") {
+            auto val = dc->initializer->to<IR::Constant>();
+            V1Model::instance.version = static_cast<unsigned>(val->value); }
+        return false; }
+    bool preorder(const IR::Declaration *) override { return false; }
 };
 
 }  // namespace P4V1

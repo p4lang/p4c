@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 const bit<6> TYPE_ADDR_IPV4 = 6w0x1;

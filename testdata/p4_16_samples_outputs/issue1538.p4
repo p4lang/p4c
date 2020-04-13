@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 bit<16> incr(in bit<16> x) {

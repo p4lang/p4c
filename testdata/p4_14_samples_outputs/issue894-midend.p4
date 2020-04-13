@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
 struct custom_metadata_t {
@@ -111,9 +112,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-@name(".heavy_hitter_counter1") register<bit<16>>(32w16) heavy_hitter_counter1;
+@name(".heavy_hitter_counter1") register<bit<16>, bit<4>>(32w16) heavy_hitter_counter1;
 
-@name(".heavy_hitter_counter2") register<bit<16>>(32w16) heavy_hitter_counter2;
+@name(".heavy_hitter_counter2") register<bit<16>, bit<4>>(32w16) heavy_hitter_counter2;
 
 struct tuple_0 {
     bit<32> field;
@@ -151,13 +152,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".set_heavy_hitter_count") action set_heavy_hitter_count() {
         hash<bit<16>, bit<16>, tuple_0, bit<32>>(meta._custom_metadata_hash_val11, HashAlgorithm.csum16, 16w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort }, 32w16);
-        heavy_hitter_counter1.read(meta._custom_metadata_count_val13, (bit<32>)meta._custom_metadata_hash_val11);
+        heavy_hitter_counter1.read(meta._custom_metadata_count_val13, (bit<4>)meta._custom_metadata_hash_val11);
         meta._custom_metadata_count_val13 = meta._custom_metadata_count_val13 + 16w1;
-        heavy_hitter_counter1.write((bit<32>)meta._custom_metadata_hash_val11, meta._custom_metadata_count_val13);
+        heavy_hitter_counter1.write((bit<4>)meta._custom_metadata_hash_val11, meta._custom_metadata_count_val13);
         hash<bit<16>, bit<16>, tuple_0, bit<32>>(meta._custom_metadata_hash_val22, HashAlgorithm.crc16, 16w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort }, 32w16);
-        heavy_hitter_counter2.read(meta._custom_metadata_count_val24, (bit<32>)meta._custom_metadata_hash_val22);
+        heavy_hitter_counter2.read(meta._custom_metadata_count_val24, (bit<4>)meta._custom_metadata_hash_val22);
         meta._custom_metadata_count_val24 = meta._custom_metadata_count_val24 + 16w1;
-        heavy_hitter_counter2.write((bit<32>)meta._custom_metadata_hash_val22, meta._custom_metadata_count_val24);
+        heavy_hitter_counter2.write((bit<4>)meta._custom_metadata_hash_val22, meta._custom_metadata_count_val24);
     }
     @name(".drop_heavy_hitter_table") table drop_heavy_hitter_table_0 {
         actions = {

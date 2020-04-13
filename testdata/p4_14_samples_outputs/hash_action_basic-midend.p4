@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
 struct counter_metadata_t {
@@ -30,7 +31,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     }
 }
 
-@name(".count1") @min_width(32) counter(32w16384, CounterType.packets) count1;
+@name(".count1") @min_width(32) counter<bit<14>>(32w16384, CounterType.packets) count1;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
@@ -40,7 +41,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.egress_spec = port;
     }
     @name(".count_entries") action count_entries() {
-        count1.count((bit<32>)meta._counter_metadata_counter_index0);
+        count1.count((bit<14>)meta._counter_metadata_counter_index0);
     }
     @name(".index_setter") table index_setter_0 {
         actions = {

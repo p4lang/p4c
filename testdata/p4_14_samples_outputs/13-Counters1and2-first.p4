@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
 header ethernet_t {
@@ -27,14 +28,14 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-@name(".c1") counter(32w1024, CounterType.packets) c1;
+@name(".c1") counter<bit<10>>(32w1024, CounterType.packets) c1;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".count_c1_1") action count_c1_1() {
-        c1.count(32w1);
+        c1.count(10w1);
     }
     @name(".count_c1_2") action count_c1_2() {
-        c1.count(32w2);
+        c1.count(10w2);
     }
     @name(".t1") table t1 {
         actions = {

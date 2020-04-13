@@ -39,7 +39,6 @@ std::string makeP4Source(const char* file, unsigned line,
             source << P4CTestEnvironment::get()->coreP4();
             break;
         case P4Headers::V1MODEL:
-            source << P4CTestEnvironment::get()->coreP4();
             source << P4CTestEnvironment::get()->v1Model();
             break;
         case P4Headers::PSA:
@@ -78,15 +77,20 @@ std::string makeP4Source(const char* file, unsigned line, const char* rawSource)
 }
 
 P4CTestEnvironment::P4CTestEnvironment() {
-    auto readHeader = [](const char* filename, bool preprocess = false) {
+    auto readHeader = [](const char* filename, bool preprocess = false,
+                         const char *macro = nullptr, int macro_val = 1) {
         if (preprocess) {
+            std::stringstream cmd;
 #ifdef __clang__
-            std::string cmd("cc -E -x c -Wno-comment");
+            cmd << "cc -E -x c -Wno-comment";
 #else
-            std::string cmd("cpp");
+            cmd << "cpp";
 #endif
-            cmd += cstring(" -C -undef -nostdinc") + " " +  "-Ip4include" + " " + filename;
-            FILE* in = popen(cmd.c_str(), "r");
+            cmd << " -C -undef -nostdinc -Ip4include";
+            if (macro)
+                cmd << " -D" << macro << "=" << macro_val;
+            cmd << " " <<  filename;
+            FILE* in = popen(cmd.str().c_str(), "r");
             if (in == nullptr)
                 throw std::runtime_error(std::string("Couldn't invoke preprocessor"));
             std::stringstream buffer;
@@ -111,6 +115,8 @@ P4CTestEnvironment::P4CTestEnvironment() {
             // ensures that any errors we encounter in this header will
             // reference the correct file and line.
             std::stringstream buffer;
+            if (macro)
+                buffer << "#define " << macro << " " << macro_val << std::endl;
             buffer << "#line 1 \"" << filename << "\"" << std::endl;
 
             // Read the header into the buffer and return it.
@@ -121,7 +127,8 @@ P4CTestEnvironment::P4CTestEnvironment() {
 
     // XXX(seth): We should find a more robust way to locate these headers.
     _coreP4 = readHeader("p4include/core.p4");
-    _v1Model = readHeader("p4include/v1model.p4");
+    _v1Model = readHeader("p4include/v1model.p4", true,
+                          "V1MODEL_VERSION", P4V1::V1Model::instance.version);
     _psaP4 = readHeader("p4include/psa.p4", true);
 }
 

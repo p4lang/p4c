@@ -23,6 +23,7 @@ limitations under the License.
 #include <algorithm>
 
 #include "lib/path.h"
+#include "lib/bitops.h"
 #include "lib/gmputil.h"
 #include "converters.h"
 
@@ -602,7 +603,9 @@ void ProgramStructure::include(cstring filename, cstring ppoptions) {
 
 void ProgramStructure::loadModel() {
     // This includes in turn core.p4
-    include("v1model.p4");
+    std::stringstream versionArg;
+    versionArg << "-DV1MODEL_VERSION=" << V1Model::instance.version;
+    include(V1Model::instance.file.name, versionArg.str());
 
     metadataInstances.insert(v1model.standardMetadataType.name);
     metadataTypes.insert(v1model.standardMetadataType.name);
@@ -1475,7 +1478,7 @@ CONVERT_PRIMITIVE(count) {
     auto counterref = new IR::PathExpression(newname);
     auto methodName = structure->v1model.counter.increment.Id();
     auto method = new IR::Member(counterref, methodName);
-    auto arg = new IR::Cast(structure->v1model.counter.index_type,
+    auto arg = new IR::Cast(IR::Type::Bits::get(counter->index_width()),
                             conv.convert(primitive->operands.at(1)));
     return new IR::MethodCallStatement(
         primitive->srcInfo, method, { new IR::Argument(arg) });
@@ -1615,7 +1618,7 @@ CONVERT_PRIMITIVE(execute_meter) {
     auto methodName = structure->v1model.meter.executeMeter.Id();
     auto method = new IR::Member(meterref, methodName);
     auto args = new IR::Vector<IR::Argument>();
-    auto arg = new IR::Cast(structure->v1model.meter.index_type,
+    auto arg = new IR::Cast(IR::Type::Bits::get(meter->index_width()),
                             conv.convert(primitive->operands.at(1)));
     args->push_back(new IR::Argument(arg));
     auto dest = conv.convert(primitive->operands.at(2));
@@ -1721,7 +1724,7 @@ CONVERT_PRIMITIVE(register_read) {
     auto methodName = structure->v1model.registers.read.Id();
     auto method = new IR::Member(registerref, methodName);
     auto args = new IR::Vector<IR::Argument>();
-    auto arg = new IR::Cast(structure->v1model.registers.index_type,
+    auto arg = new IR::Cast(IR::Type::Bits::get(reg->index_width()),
                             conv.convert(primitive->operands.at(2)));
     args->push_back(new IR::Argument(left));
     args->push_back(new IR::Argument(arg));
@@ -1754,7 +1757,7 @@ CONVERT_PRIMITIVE(register_write) {
     auto method = new IR::Member(registerref, methodName);
     auto args = new IR::Vector<IR::Argument>();
     auto arg0 = new IR::Cast(primitive->operands.at(1)->srcInfo,
-                             structure->v1model.registers.index_type,
+                             IR::Type::Bits::get(reg->index_width()),
                              conv.convert(primitive->operands.at(1)));
     const IR::Expression* arg1 = conv.convert(primitive->operands.at(2));
     if (castType != nullptr)
@@ -1951,8 +1954,8 @@ ProgramStructure::convert(const IR::Register* reg, cstring newName,
     IR::ID ext = v1model.registers.Id();
     auto typepath = new IR::Path(ext);
     auto type = new IR::Type_Name(typepath);
-    auto typeargs = new IR::Vector<IR::Type>();
-    typeargs->push_back(regElementType);
+    auto typeargs = new IR::Vector<IR::Type>({ regElementType,
+                                               IR::Type::Bits::get(reg->index_width()) });
     auto spectype = new IR::Type_Specialized(type, typeargs);
     auto args = new IR::Vector<IR::Argument>();
     if (reg->direct) {
@@ -1976,7 +1979,8 @@ ProgramStructure::convert(const IR::CounterOrMeter* cm, cstring newName) {
     else
         ext = v1model.meter.Id();
     auto typepath = new IR::Path(ext);
-    auto type = new IR::Type_Name(typepath);
+    auto type = new IR::Type_Specialized(new IR::Type_Name(typepath),
+        new IR::Vector<IR::Type>({ IR::Type_Bits::get(cm->index_width()) }));
     auto args = new IR::Vector<IR::Argument>();
     args->push_back(
         new IR::Argument(cm->srcInfo,

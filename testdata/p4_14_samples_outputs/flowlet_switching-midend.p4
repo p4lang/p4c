@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
 struct ingress_metadata_t {
@@ -119,9 +120,9 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-@name(".flowlet_id") register<bit<16>>(32w8192) flowlet_id;
+@name(".flowlet_id") register<bit<16>, bit<13>>(32w8192) flowlet_id;
 
-@name(".flowlet_lasttime") register<bit<32>>(32w8192) flowlet_lasttime;
+@name(".flowlet_lasttime") register<bit<32>, bit<13>>(32w8192) flowlet_lasttime;
 
 struct tuple_0 {
     bit<32> field;
@@ -170,18 +171,18 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".lookup_flowlet_map") action lookup_flowlet_map() {
         hash<bit<13>, bit<13>, tuple_1, bit<26>>(meta._ingress_metadata_flowlet_map_index1, HashAlgorithm.crc16, 13w0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort }, 26w13);
-        flowlet_id.read(meta._ingress_metadata_flowlet_id2, (bit<32>)meta._ingress_metadata_flowlet_map_index1);
+        flowlet_id.read(meta._ingress_metadata_flowlet_id2, meta._ingress_metadata_flowlet_map_index1);
         meta._ingress_metadata_flow_ipg0 = (bit<32>)standard_metadata.ingress_global_timestamp;
-        flowlet_lasttime.read(meta._ingress_metadata_flowlet_lasttime3, (bit<32>)meta._ingress_metadata_flowlet_map_index1);
+        flowlet_lasttime.read(meta._ingress_metadata_flowlet_lasttime3, meta._ingress_metadata_flowlet_map_index1);
         meta._ingress_metadata_flow_ipg0 = (bit<32>)standard_metadata.ingress_global_timestamp - meta._ingress_metadata_flowlet_lasttime3;
-        flowlet_lasttime.write((bit<32>)meta._ingress_metadata_flowlet_map_index1, (bit<32>)standard_metadata.ingress_global_timestamp);
+        flowlet_lasttime.write(meta._ingress_metadata_flowlet_map_index1, (bit<32>)standard_metadata.ingress_global_timestamp);
     }
     @name(".set_dmac") action set_dmac(bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
     }
     @name(".update_flowlet_id") action update_flowlet_id() {
         meta._ingress_metadata_flowlet_id2 = meta._ingress_metadata_flowlet_id2 + 16w1;
-        flowlet_id.write((bit<32>)meta._ingress_metadata_flowlet_map_index1, meta._ingress_metadata_flowlet_id2);
+        flowlet_id.write(meta._ingress_metadata_flowlet_map_index1, meta._ingress_metadata_flowlet_id2);
     }
     @name(".ecmp_group") table ecmp_group_0 {
         actions = {

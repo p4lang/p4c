@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
 struct intrinsic_metadata_t {
@@ -41,11 +42,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-@name(".my_register") register<bit<32>>(32w16384) my_register;
+@name(".my_register") register<bit<32>, bit<14>>(32w16384) my_register;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".m_action") action m_action(bit<8> register_idx) {
-        my_register.read(meta.meta.register_tmp, (bit<32>)register_idx);
+    @name(".m_action") action m_action(bit<14> register_idx) {
+        my_register.read(meta.meta.register_tmp, register_idx);
     }
     @name("._nop") action _nop() {
     }

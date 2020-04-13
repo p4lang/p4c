@@ -560,8 +560,8 @@ void ExternConverter_register::convertExternInstance(
         return;
     }
     auto st = eb->instanceType->to<IR::Type_SpecializedCanonical>();
-    if (st->arguments->size() != 1) {
-        modelError("%1%: expected 1 type argument", st);
+    if (st->arguments->size() < 1 || st->arguments->size() > 2) {
+        modelError("%1%: expected 1 or 2 type arguments", st);
         return;
     }
     auto regType = st->arguments->at(0);

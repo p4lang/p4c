@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20200408
 #include <v1model.p4>
 
 header ethernet_t {
@@ -28,10 +29,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
 }
 
-@name(".cntDum") counter(32w200, CounterType.packets) cntDum;
+@name(".cntDum") counter<bit<8>>(32w200, CounterType.packets) cntDum;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".act") action act(bit<9> port, bit<32> idx) {
+    @name(".act") action act(bit<9> port, bit<8> idx) {
         standard_metadata.egress_spec = port;
         cntDum.count(idx);
     }

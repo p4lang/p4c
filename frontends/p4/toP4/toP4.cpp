@@ -20,6 +20,7 @@ limitations under the License.
 #include "toP4.h"
 #include "frontends/common/options.h"
 #include "frontends/parsers/p4/p4parser.hpp"
+#include "frontends/p4/fromv1.0/v1model.h"
 
 namespace P4 {
 
@@ -165,15 +166,18 @@ bool ToP4::preorder(const IR::P4Program* program) {
              * we ignore mainFile and don't emit #includes for any non-system header */
 
             if (includesEmitted.find(sourceFile) == includesEmitted.end()) {
-                builder.append("#include ");
                 if (sourceFile.startsWith(p4includePath)) {
                     const char *p = sourceFile.c_str() + strlen(p4includePath);
                     if (*p == '/') p++;
-                    builder.append("<");
+                    if (P4V1::V1Model::instance.file.name == p) {
+                        std::stringstream buf;
+                        buf << "#define V1MODEL_VERSION " << P4V1::V1Model::instance.version;
+                        builder.appendLine(buf.str()); }
+                    builder.append("#include <");
                     builder.append(p);
                     builder.appendLine(">");
                 } else {
-                    builder.append("\"");
+                    builder.append("#include \"");
                     builder.append(sourceFile);
                     builder.appendLine("\"");
                 }

@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 package Pipeline<H, M>(Parser<H, M> p, Ingress<H, M> ig, Egress<H, M> eg, Deparser<H> dp);
