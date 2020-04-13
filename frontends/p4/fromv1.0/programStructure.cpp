@@ -58,8 +58,7 @@ const IR::Annotations*
 ProgramStructure::addNameAnnotation(cstring name, const IR::Annotations* annos) {
     if (annos == nullptr)
         annos = IR::Annotations::empty;
-    return annos->addAnnotationIfNew(IR::Annotation::nameAnnotation,
-                                     new IR::StringLiteral(name), false);
+    return annos->addAnnotationIfNew(IR::Annotation::nameAnnotation, new IR::StringLiteral(name));
 }
 
 const IR::Annotations*
@@ -810,11 +809,9 @@ ProgramStructure::convertActionProfile(const IR::ActionProfile* action_profile, 
         auto width = new IR::Constant(v1model.action_selector.widthType, flc->output_width);
         args->push_back(new IR::Argument(width));
         if (action_selector->mode)
-            annos = annos->addAnnotation(
-                "mode", new IR::StringLiteral(action_selector->mode), false);
+            annos = annos->addAnnotation( "mode", new IR::StringLiteral(action_selector->mode));
         if (action_selector->type)
-            annos = annos->addAnnotation(
-                "type", new IR::StringLiteral(action_selector->type), false);
+            annos = annos->addAnnotation( "type", new IR::StringLiteral(action_selector->type));
         auto fl = getFieldLists(flc);
         for (auto annot : fl->annotations->annotations) {
             annos = annos->add(annot);
@@ -1989,9 +1986,9 @@ ProgramStructure::convert(const IR::CounterOrMeter* cm, cstring newName) {
     auto annos = addGlobalNameAnnotation(cm->name, cm->annotations);
     if (auto *c = cm->to<IR::Counter>()) {
         if (c->min_width >= 0)
-            annos = annos->addAnnotation("min_width", new IR::Constant(c->min_width), false);
+            annos = annos->addAnnotation("min_width", new IR::Constant(c->min_width));
         if (c->max_width >= 0)
-            annos = annos->addAnnotation("max_width", new IR::Constant(c->max_width), false);
+            annos = annos->addAnnotation("max_width", new IR::Constant(c->max_width));
     }
     auto decl = new IR::Declaration_Instance(
         newName, annos, type, args, nullptr);
@@ -2022,7 +2019,7 @@ ProgramStructure::convertDirectMeter(const IR::Meter* m, cstring newName) {
     if (m->pre_color != nullptr) {
         auto meterPreColor = ExpressionConverter(this).convert(m->pre_color);
         if (meterPreColor != nullptr)
-            annos = annos->addAnnotation("pre_color", meterPreColor, false);
+            annos = annos->addAnnotation("pre_color", meterPreColor);
     }
     auto decl = new IR::Declaration_Instance(newName, annos, specType, args, nullptr);
     return decl;
@@ -2040,9 +2037,9 @@ ProgramStructure::convertDirectCounter(const IR::Counter* c, cstring newName) {
     args->push_back(new IR::Argument(kindarg));
     auto annos = addGlobalNameAnnotation(c->name, c->annotations);
     if (c->min_width >= 0)
-        annos = annos->addAnnotation("min_width", new IR::Constant(c->min_width), false);
+        annos = annos->addAnnotation("min_width", new IR::Constant(c->min_width));
     if (c->max_width >= 0)
-        annos = annos->addAnnotation("max_width", new IR::Constant(c->max_width), false);
+        annos = annos->addAnnotation("max_width", new IR::Constant(c->max_width));
     auto decl = new IR::Declaration_Instance(newName, annos, type, args, nullptr);
     return decl;
 }

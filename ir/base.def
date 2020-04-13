@@ -322,17 +322,17 @@ class Annotations {
         annotations.push_back(annot);
         return this; }
     Annotations add(Annotation annot) const { return clone()->add(annot); }
-    Annotations addAnnotation(cstring name, Expression expr, bool structured) {
+    Annotations addAnnotation(cstring name, Expression expr, bool structured = false) {
         return add(new Annotation(name, Vector<Expression>(expr), structured)); }
-    Annotations addAnnotation(cstring name, Expression expr, bool structured) const {
+    Annotations addAnnotation(cstring name, Expression expr, bool structured = false) const {
         return add(new Annotation(name, Vector<Expression>(expr), structured)); }
     // Add annotation if another annotation with the same name is not
     // already present.
-    Annotations addAnnotationIfNew(cstring name, Expression expr, bool structured) const {
+    Annotations addAnnotationIfNew(cstring name, Expression expr, bool structured = false) const {
         return getSingle(name) ? this : addAnnotation(name, expr, structured); }
     // If annotations with the same name are already present, remove them.
     // Add this annotation.
-    Annotations addOrReplace(cstring name, Expression expr, bool structured) const {
+    Annotations addOrReplace(cstring name, Expression expr, bool structured = false) const {
         auto rv = clone();
         remove_if(rv->annotations, [name](const Annotation *a)->bool { return a->name == name; });
         rv->annotations.push_back(new Annotation(name, Vector<Expression>(expr), structured));
