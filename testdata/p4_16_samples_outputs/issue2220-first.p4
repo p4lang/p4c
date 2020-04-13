@@ -10,7 +10,7 @@ struct S {
 
 control c(out S s) {
     apply {
-        S s1 = ((S){val = 8w0});
+        S s1 = (S){val = 8w0};
         s = s1;
     }
 }

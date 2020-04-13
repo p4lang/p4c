@@ -17,9 +17,9 @@ extern void f<T>(in T data);
 control c(inout bit<1> r) {
     S s_0;
     apply {
-        s_0 = ((S){f1 = { ((T){f = 1w0}), ((T){f = 1w1}) },f2 = ((T){f = 1w0}),z = 1w1});
+        s_0 = (S){f1 = { (T){f = 1w0}, (T){f = 1w1} },f2 = (T){f = 1w0},z = 1w1};
         f<tuple<T, T>>(s_0.f1);
-        f<tuple_0>(((tuple_0){field = ((T){f = 1w0}),field_0 = ((T){f = 1w1})}));
+        f<tuple_0>((tuple_0){field = (T){f = 1w0},field_0 = (T){f = 1w1}});
         r = s_0.f2.f & s_0.z;
     }
 }

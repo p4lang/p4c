@@ -162,7 +162,7 @@ control egress(inout headers hdr, inout metadata meta, in psa_egress_input_metad
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
     @name("IngressDeparserImpl.mac_learn_digest") Digest<mac_learn_digest_t>() mac_learn_digest_0;
     @hidden action psaexampledigestbmv2l236() {
-        mac_learn_digest_0.pack(((mac_learn_digest_t){srcAddr = meta._mac_learn_msg_srcAddr1,ingress_port = meta._mac_learn_msg_ingress_port2}));
+        mac_learn_digest_0.pack((mac_learn_digest_t){srcAddr = meta._mac_learn_msg_srcAddr1,ingress_port = meta._mac_learn_msg_ingress_port2});
     }
     @hidden action psaexampledigestbmv2l218() {
         packet.emit<ethernet_t>(hdr.ethernet);

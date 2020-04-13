@@ -7,7 +7,7 @@ struct headers {
 
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
-        packet.emit<headers>(((headers){}));
+        packet.emit<headers>((headers){});
     }
 }
 

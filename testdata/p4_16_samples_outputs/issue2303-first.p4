@@ -42,7 +42,7 @@ control MyC2(inout H h, in Meta meta={ 0, 0, 0 }) {
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     MyC2() c2;
     apply {
-        c2.apply(h = h.h, meta = ((Meta){f0 = 8w0,f1 = 8w0,f2 = 8w0}));
+        c2.apply(h = h.h, meta = (Meta){f0 = 8w0,f1 = 8w0,f2 = 8w0});
     }
 }
 

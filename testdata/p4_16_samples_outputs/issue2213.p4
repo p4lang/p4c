@@ -13,7 +13,7 @@ struct metadata_t {
 
 control ingressImpl(inout metadata_t meta) {
     apply {
-        meta.s2 = ({s1 = ({f1 = 2})});
+        meta.s2 = {s1 = {f1 = 2}};
     }
 }
 

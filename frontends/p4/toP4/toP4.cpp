@@ -875,7 +875,8 @@ bool ToP4::preorder(const IR::NamedExpression* e) {
 }
 
 bool ToP4::preorder(const IR::StructExpression* e) {
-    builder.append("(");
+    if (expressionPrecedence > DBPrint::Prec_Prefix)
+        builder.append("(");
     if (e->typeName != nullptr) {
         builder.append("(");
         visit(e->typeName);
@@ -895,7 +896,8 @@ bool ToP4::preorder(const IR::StructExpression* e) {
     }
     expressionPrecedence = prec;
     builder.append("}");
-    builder.append(")");
+    if (expressionPrecedence > DBPrint::Prec_Prefix)
+        builder.append(")");
     return false;
 }
 
