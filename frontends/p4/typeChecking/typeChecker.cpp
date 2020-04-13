@@ -569,7 +569,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         (void)result->apply(*tc);
         return result;
     } else {
-        BUG("Unexpected type %1%", dbp(type));
+        BUG_CHECK(::errorCount(), "Unexpected type %1%", dbp(type));
     }
 
     // If we reach this point some type error must have occurred, because
@@ -1367,20 +1367,27 @@ const IR::Node* TypeInference::postorder(IR::Type_Stack* type) {
     return type;
 }
 
-void TypeInference::validateFields(const IR::Type* type,
+/// Validate the fields of a struct type using the supplied checker.
+/// The checker returns "false" when a field is invalid.
+/// Return true on success
+bool TypeInference::validateFields(const IR::Type* type,
                                    std::function<bool(const IR::Type*)> checker) const {
     if (type == nullptr)
-        return;
+        return false;
     BUG_CHECK(type->is<IR::Type_StructLike>(), "%1%; expected a Struct-like", type);
     auto strct = type->to<IR::Type_StructLike>();
+    bool err = false;
     for (auto field : strct->fields) {
         auto ftype = getType(field);
         if (ftype == nullptr)
-            return;
-        if (!checker(ftype))
+            return false;
+        if (!checker(ftype)) {
             typeError("Field %1% of %2% cannot have type %3%",
                       field, type->toString(), field->type);
+            err = true;
+        }
     }
+    return !err;
 }
 
 const IR::Node* TypeInference::postorder(IR::StructField* field) {
@@ -1404,7 +1411,8 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
                // Experimental feature - see Issue 383.
                (t->is<IR::Type_Struct>() && onlyBitsOrBitStructs(t)) ||
                t->is<IR::Type_SerEnum>() || t->is<IR::Type_Boolean>(); };
-    validateFields(canon, validator);
+    if (!validateFields(canon, validator))
+        return type;
 
     const IR::StructField* varbit = nullptr;
     for (auto field : type->fields) {
@@ -1435,14 +1443,14 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
         t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() ||
         t->is<IR::Type_Varbits>() || t->is<IR::Type_ActionEnum>() ||
         t->is<IR::Type_Tuple>() || t->is<IR::Type_SerEnum>(); };
-    validateFields(canon, validator);
+    (void)validateFields(canon, validator);
     return type;
 }
 
 const IR::Node* TypeInference::postorder(IR::Type_HeaderUnion *type) {
     auto canon = setTypeType(type);
     auto validator = [] (const IR::Type* t) { return t->is<IR::Type_Header>(); };
-    validateFields(canon, validator);
+    (void)validateFields(canon, validator);
     return type;
 }
 
