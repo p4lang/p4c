@@ -23,19 +23,22 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/exceptions.h"
 
+// declare this outside of Visitor so it can be forward declared in node.h
+struct Visitor_Context {
+    // We maintain a linked list of Context structures on the stack
+    // in the Visitor::apply_visitor functions as we do the recursive
+    // descent traversal.  pre/postorder function can access this
+    // context via getContext/findContext
+    const Visitor_Context       *parent;
+    const IR::Node              *node, *original;
+    mutable int                 child_index;
+    mutable const char          *child_name;
+    int                         depth;
+};
+
 class Visitor {
  public:
-    struct Context {
-        // We maintain a linked list of Context structures on the stack
-        // in the Visitor::apply_visitor functions as we do the recursive
-        // descent traversal.  pre/postorder function can access this
-        // context via getContext/findContext
-        const Context   *parent;
-        const IR::Node  *node, *original;
-        mutable int     child_index;
-        mutable const char *child_name;
-        int             depth;
-    };
+    typedef Visitor_Context Context;
     class profile_t {
         // for profiling -- a profile_t object is created when a pass
         // starts and destroyed when it ends.  Moveable but not copyable.
@@ -61,6 +64,7 @@ class Visitor {
     // to do any additional initialization they need.  They should call their
     // parent's init_apply to do further initialization
     virtual profile_t init_apply(const IR::Node *root);
+    profile_t init_apply(const IR::Node *root, const Context *parent_context);
     // End_apply is called symmetrically with init_apply, after the visit
     // is completed.  Both functions will be called in the event of a normal
     // completion, but only the 0-argument version will be called in the event

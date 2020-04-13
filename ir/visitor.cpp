@@ -135,10 +135,14 @@ class Visitor::ChangeTracker {
 };
 
 Visitor::profile_t Visitor::init_apply(const IR::Node *root) {
-    if (ctxt) BUG("previous use of visitor did not clean up properly");
     ctxt = nullptr;
     if (joinFlows) init_join_flows(root);
     return profile_t(*this);
+}
+Visitor::profile_t Visitor::init_apply(const IR::Node *root, const Context *parent_ctxt) {
+    auto rv = init_apply(root);
+    ctxt = parent_ctxt;
+    return rv;
 }
 Visitor::profile_t Modifier::init_apply(const IR::Node *root) {
     auto rv = Visitor::init_apply(root);

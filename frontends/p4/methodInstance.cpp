@@ -22,8 +22,8 @@ namespace P4 {
 
 // If useExpressionType is true trust the type in mce->type
 MethodInstance*
-MethodInstance::resolve(const IR::MethodCallExpression* mce, ReferenceMap* refMap,
-                        TypeMap* typeMap, bool useExpressionType) {
+MethodInstance::resolve(const IR::MethodCallExpression* mce, DeclarationLookup* refMap,
+                        TypeMap* typeMap, bool useExpressionType, const Visitor::Context *ctxt) {
     auto mt = typeMap->getType(mce->method);
     if (mt == nullptr && useExpressionType)
         mt = mce->method->type;
@@ -35,8 +35,9 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, ReferenceMap* refMa
         auto t = TypeInference::specialize(originalType, mce->typeArguments);
         CHECK_NULL(t);
         actualType = t->to<IR::Type_MethodBase>();
-        TypeInference tc(refMap, typeMap, true);
-        (void)actualType->apply(tc);  // may need to learn new type components
+        // FIXME -- currently refMap is always a ReferenceMap, but this arg should soon go away
+        TypeInference tc(dynamic_cast<ReferenceMap*>(refMap), typeMap, true);
+        (void)actualType->apply(tc, ctxt);  // may need to learn new type components
         CHECK_NULL(actualType);
     }
     // mt can be Type_Method or Type_Action
@@ -124,7 +125,7 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, ReferenceMap* refMa
 
 ConstructorCall*
 ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
-                         ReferenceMap* refMap, TypeMap* typeMap) {
+                         DeclarationLookup* refMap, TypeMap* typeMap) {
     auto ct = typeMap->getTypeType(cce->constructedType, true);
     ConstructorCall* result;
     const IR::Vector<IR::Type>* typeArguments;
@@ -168,7 +169,7 @@ ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
 }
 
 Instantiation* Instantiation::resolve(const IR::Declaration_Instance* instance,
-                                      ReferenceMap* ,
+                                      DeclarationLookup* ,
                                       TypeMap* typeMap) {
     auto type = typeMap->getTypeType(instance->type, true);
     auto simpleType = type;

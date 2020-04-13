@@ -71,6 +71,7 @@ TEST_F(P4CMidend, convertEnums_used_before_declare) {
         const bool a = E.A == E.B;
         enum E { A, B, C, D };
     )");
+    P4CContext::get().options().langVersion = CompilerOptions::FrontendVersion::P4_16;
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
     ASSERT_TRUE(pgm && ::errorCount() == 0);
 

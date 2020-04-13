@@ -84,11 +84,17 @@ class MethodInstance : public InstanceBase {
         and then mce->type is used.  For some technical reasons
         neither the refMap or the typeMap are const here.  */
     static MethodInstance* resolve(const IR::MethodCallExpression* mce,
-                                   ReferenceMap* refMap, TypeMap* typeMap,
-                                   bool useExpressionType = false);
+                                   DeclarationLookup* refMap, TypeMap* typeMap,
+                                   bool useExpressionType = false,
+                                   const Visitor::Context *ctxt = nullptr);
+    static MethodInstance* resolve(const IR::MethodCallExpression* mce,
+                                   DeclarationLookup* refMap, TypeMap* typeMap,
+                                   const Visitor::Context *ctxt)
+    { return resolve(mce, refMap, typeMap, false, ctxt); }
     static MethodInstance* resolve(const IR::MethodCallStatement* mcs,
-                                   ReferenceMap* refMap, TypeMap* typeMap)
-    { return resolve(mcs->methodCall, refMap, typeMap); }
+                                   DeclarationLookup* refMap, TypeMap* typeMap,
+                                   const Visitor::Context *ctxt = nullptr)
+    { return resolve(mcs->methodCall, refMap, typeMap, false, ctxt); }
     const IR::ParameterList* getOriginalParameters() const
     { return originalMethodType->parameters; }
     const IR::ParameterList* getActualParameters() const
@@ -220,7 +226,7 @@ class ConstructorCall : public InstanceBase {
     const IR::Vector<IR::Type>*          typeArguments;
     const IR::ParameterList*             constructorParameters;
     static ConstructorCall* resolve(const IR::ConstructorCallExpression* cce,
-                                    ReferenceMap* refMap,
+                                    DeclarationLookup* refMap,
                                     TypeMap* typeMap);
 };
 
@@ -269,7 +275,7 @@ class Instantiation : public InstanceBase {
     const IR::ParameterList*       constructorParameters;
     ParameterSubstitution          substitution;
     static Instantiation* resolve(const IR::Declaration_Instance* instance,
-                                  ReferenceMap* refMap,
+                                  DeclarationLookup* refMap,
                                   TypeMap* typeMap);
 };
 

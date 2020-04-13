@@ -16,118 +16,152 @@ limitations under the License.
 
 #include "resolveReferences.h"
 #include <sstream>
+#include "frontends/common/options.h"
 
 namespace P4 {
 
-std::vector<const IR::IDeclaration*>*
-ResolutionContext::resolve(IR::ID name, P4::ResolutionType type, bool forwardOK) const {
-    static std::vector<const IR::IDeclaration*> empty;
+static const std::vector<const IR::IDeclaration*> empty;
 
-    std::vector<const IR::INamespace*> toTry(stack);
-    toTry.insert(toTry.end(), globals.begin(), globals.end());
+ResolutionContext::ResolutionContext() {
+    isv1 = P4CContext::get().options().isv1();
+}
 
-    for (auto it = toTry.rbegin(); it != toTry.rend(); ++it) {
-        const IR::INamespace* current = *it;
-        LOG3("Trying to resolve in " << current->toString());
-
-        if (current->is<IR::IGeneralNamespace>()) {
-            auto gen = current->to<IR::IGeneralNamespace>();
-            Util::Enumerator<const IR::IDeclaration*>* decls = gen->getDeclsByName(name);
-            switch (type) {
-                case P4::ResolutionType::Any:
-                    break;
-                case P4::ResolutionType::Type: {
-                    std::function<bool(const IR::IDeclaration*)> kindFilter =
-                            [](const IR::IDeclaration* d) {
-                        return d->is<IR::Type>();
-                    };
-                    decls = decls->where(kindFilter);
-                    break;
-                }
-                case P4::ResolutionType::TypeVariable: {
-                    std::function<bool(const IR::IDeclaration*)> kindFilter =
-                            [](const IR::IDeclaration* d) {
-                    return d->is<IR::Type_Var>(); };
-                    decls = decls->where(kindFilter);
-                    break;
-                }
-            default:
-                BUG("Unexpected enumeration value %1%", static_cast<int>(type));
-            }
-
-            if (!forwardOK && name.srcInfo.isValid()) {
-                std::function<bool(const IR::IDeclaration*)> locationFilter =
-                        [name](const IR::IDeclaration* d) {
-                    Util::SourceInfo nsi = name.srcInfo;
-                    Util::SourceInfo dsi = d->getNode()->srcInfo;
-                    bool before = dsi <= nsi;
-                    LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
-                    return before;
-                };
-                decls = decls->where(locationFilter);
-            }
-
-            auto vector = decls->toVector();
-            if (!vector->empty()) {
-                LOG3("Resolved in " << dbp(current->getNode()));
-                return vector;
-            } else {
-                continue;
-            }
-        } else {
-            auto simple = current->to<IR::ISimpleNamespace>();
-            auto decl = simple->getDeclByName(name);
-            if (decl == nullptr)
-                continue;
-            switch (type) {
-                case P4::ResolutionType::Any:
-                    break;
-                case P4::ResolutionType::Type: {
-                    if (!decl->is<IR::Type>())
-                        continue;
-                    break;
-                }
-                case P4::ResolutionType::TypeVariable: {
-                    if (!decl->is<IR::Type_Var>())
-                        continue;
-                    break;
-                }
-            default:
-                BUG("Unexpected enumeration value %1%", static_cast<int>(type));
-            }
-
-            if (!forwardOK && name.srcInfo.isValid()) {
-                Util::SourceInfo nsi = name.srcInfo;
-                Util::SourceInfo dsi = decl->getNode()->srcInfo;
-                bool before = dsi <= nsi;
-                LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
-                if (!before)
-                    continue;
-            }
-
-            LOG3("Resolved in " << dbp(current->getNode()));
-            auto result = new std::vector<const IR::IDeclaration*>();
-            result->push_back(decl);
-            return result;
-        }
-    }
-
+const std::vector<const IR::IDeclaration*>*
+ResolutionContext::resolve(IR::ID name, P4::ResolutionType type) const {
+    const Context *ctxt = nullptr;
+    while (auto scope = findContext<IR::INamespace>(ctxt)) {
+        auto *rv = lookup(scope, name, type);
+        if (!rv->empty()) return rv; }
     return &empty;
 }
 
-void ResolutionContext::done() {
-    pop(rootNamespace);
-    BUG_CHECK(stack.empty(), "ResolutionContext::stack not empty");
+const std::vector<const IR::IDeclaration*>*
+ResolutionContext::lookup(const IR::INamespace *current, IR::ID name,
+                          P4::ResolutionType type) const {
+    LOG2("Trying to resolve in " << current->toString());
+
+    if (current->is<IR::IGeneralNamespace>()) {
+        auto gen = current->to<IR::IGeneralNamespace>();
+        Util::Enumerator<const IR::IDeclaration*> *decls = gen->getDeclsByName(name);
+        switch (type) {
+            case P4::ResolutionType::Any:
+                break;
+            case P4::ResolutionType::Type: {
+                std::function<bool(const IR::IDeclaration*)> kindFilter =
+                        [](const IR::IDeclaration *d) {
+                    return d->is<IR::Type>(); };
+                decls = decls->where(kindFilter);
+                break; }
+            case P4::ResolutionType::TypeVariable: {
+                std::function<bool(const IR::IDeclaration*)> kindFilter =
+                        [](const IR::IDeclaration *d) {
+                return d->is<IR::Type_Var>(); };
+                decls = decls->where(kindFilter);
+                break; }
+        default:
+            BUG("Unexpected enumeration value %1%", static_cast<int>(type)); }
+
+        if (!isv1 && name.srcInfo.isValid()) {
+            std::function<bool(const IR::IDeclaration*)> locationFilter =
+                    [name](const IR::IDeclaration *d) {
+                if (d->is<IR::Type_Var>() || d->is<IR::ParserState>())
+                    // type vars and parser states may be used before their definitions
+                    return true;
+                Util::SourceInfo nsi = name.srcInfo;
+                Util::SourceInfo dsi = d->getNode()->srcInfo;
+                bool before = dsi <= nsi;
+                LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
+                return before; };
+            decls = decls->where(locationFilter); }
+
+        auto vector = decls->toVector();
+        if (!vector->empty()) {
+            LOG3("Resolved in " << dbp(current->getNode()));
+            return vector; }
+    } else {
+        auto simple = current->to<IR::ISimpleNamespace>();
+        auto decl = simple->getDeclByName(name);
+        if (decl == nullptr)
+            return &empty;
+        switch (type) {
+            case P4::ResolutionType::Any:
+                break;
+            case P4::ResolutionType::Type: {
+                if (!decl->is<IR::Type>())
+                    return &empty;
+                break; }
+            case P4::ResolutionType::TypeVariable: {
+                if (!decl->is<IR::Type_Var>())
+                    return &empty;
+                break; }
+        default:
+            BUG("Unexpected enumeration value %1%", static_cast<int>(type)); }
+
+        if (!isv1 && name.srcInfo.isValid() &&
+            !current->is<IR::Method>() &&  // method params may be referenced in annotations
+                                           // before the method
+            !decl->is<IR::Type_Var>() && !decl->is<IR::ParserState>()
+            // type vars and parser states may be used before their definitions
+        ) {
+            Util::SourceInfo nsi = name.srcInfo;
+            Util::SourceInfo dsi = decl->getNode()->srcInfo;
+            bool before = dsi <= nsi;
+            LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
+            if (!before)
+                return &empty; }
+
+        LOG3("Resolved in " << dbp(current->getNode()));
+        auto result = new std::vector<const IR::IDeclaration*>();
+        result->push_back(decl);
+        return result;
+    }
+    if (type == P4::ResolutionType::Any)
+        return lookupMatchKind(name);
+    return &empty;
+}
+
+const std::vector<const IR::IDeclaration*> *ResolutionContext::lookupMatchKind(IR::ID name) const {
+    if (auto *global = findContext<IR::P4Program>()) {
+        for (auto *obj : global->objects) {
+            if (auto *match_kind = obj->to<IR::Declaration_MatchKind>()) {
+                auto *rv = lookup(match_kind, name, ResolutionType::Any);
+                if (!rv->empty()) return rv; } } }
+    return &empty;
+}
+
+const IR::Vector<IR::Argument> *ResolutionContext::methodArguments(cstring name) const {
+    const Context *ctxt = getChildContext();
+    while (ctxt) {
+        if (auto mc = ctxt->node->to<IR::MethodCallExpression>()) {
+            if (auto mem = mc->method->to<IR::Member>()) {
+                if (mem->member == name)
+                    return mc->arguments; }
+            if (auto path = mc->method->to<IR::PathExpression>()) {
+                if (path->path->name == name)
+                    return mc->arguments; }
+            break; }
+        if (auto decl = ctxt->node->to<IR::Declaration_Instance>()) {
+            if (decl->name == name)
+                return decl->arguments;
+            if (auto type = decl->type->to<IR::Type_Name>()) {
+                if (type->path->name == name)
+                    return decl->arguments; }
+            break; }
+        if (ctxt->node->is<IR::Expression>() || ctxt->node->is<IR::Type>())
+            ctxt = ctxt->parent;
+        else
+            break; }
+    return nullptr;
 }
 
 const IR::IDeclaration*
 ResolutionContext::resolveUnique(IR::ID name,
                                  P4::ResolutionType type,
-                                 bool forwardOK) const {
-    const std::vector<const IR::IDeclaration*> *decls = resolve(name, type, forwardOK);
+                                 const IR::INamespace *ns) const {
+    auto decls = ns ? lookup(ns, name, type) : resolve(name, type);
     // Check overloaded symbols.
-    if (!argumentStack.empty() && decls->size() > 1) {
-        auto arguments = argumentStack.back();
+    const IR::Vector<IR::Argument> *arguments;
+    if (decls->size() > 1 && (arguments = methodArguments(name))) {
         decls = Util::Enumerator<const IR::IDeclaration*>::createEnumerator(*decls)->
                 where([arguments](const IR::IDeclaration* d) {
                         auto func = d->to<IR::IFunctional>();
@@ -150,38 +184,55 @@ ResolutionContext::resolveUnique(IR::ID name,
     return nullptr;
 }
 
+const IR::IDeclaration*
+ResolutionContext::getDeclaration(const IR::Path *path, bool notNull) const {
+    const IR::IDeclaration *result = nullptr;
+    const Context *ctxt = nullptr;
+    if (findContext<IR::KeyElement>(ctxt) && ctxt->child_index == 2) {
+        // looking up a matchType in a key, so need to do a special lookup
+        auto *decls = lookupMatchKind(path->name);
+        if (decls->empty()) {
+            ::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", path->name);
+        } else if (decls->size() != 1) {
+            ::error(ErrorType::ERR_INVALID, "%1%: multiple matching declarations", path->name);
+            for (auto a : *decls)
+                ::error("Candidate: %1%", a);
+        } else {
+            result = decls->at(0); }
+    } else {
+        ResolutionType rtype = ResolutionType::Any;
+        if (getParent<IR::Type_Name>() || getOriginal()->is<IR::Type_Name>())
+            rtype = ResolutionType::Type;
+        const IR::INamespace *ns = nullptr;
+        if (path->absolute)
+            ns = findContext<IR::P4Program>();
+        result = resolveUnique(path->name, rtype, ns); }
+    if (notNull)
+        BUG_CHECK(result != nullptr, "Cannot find declaration for %1%", path);
+    return result;
+}
+
+const IR::IDeclaration*
+ResolutionContext::getDeclaration(const IR::This *pointer, bool notNull) const {
+    auto result = findContext<IR::Declaration_Instance>();
+    if (findContext<IR::Function>() == nullptr || result == nullptr)
+        ::error(ErrorType::ERR_INVALID,
+                "%1% can only be used in the definition of an abstract method", pointer);
+    if (notNull)
+        BUG_CHECK(result != nullptr, "Cannot find declaration for %1%", pointer);
+    return result;
+}
+
 const IR::Type *
 ResolutionContext::resolveType(const IR::Type *type) const {
-    // We allow lookups forward for type variables, which are declared after they are used
-    // in function returns.  forwardOK = true below.
     if (auto tname = type->to<IR::Type_Name>())
-        return resolveUnique(tname->path->name, ResolutionType::Type, true)->to<IR::Type>();
+        return resolveUnique(tname->path->name, ResolutionType::Type)->to<IR::Type>();
     return type;
 }
 
-void ResolutionContext::dbprint(std::ostream& out) const {
-    out << "Context stack[" << stack.size() << "]" << std::endl;
-    for (auto it = stack.begin(); it != stack.end(); it++) {
-        const IR::INamespace* ns = *it;
-        const IR::Node* node = ns->getNode();
-        node->dbprint(out);
-        out << std::endl;
-    }
-    out << "Globals[" << stack.size() << "]" << std::endl;
-    for (auto it = globals.begin(); it != globals.end(); it++) {
-        const IR::INamespace* ns = *it;
-        const IR::Node* node = ns->getNode();
-        node->dbprint(out);
-        out << std::endl;
-    }
-    out << "----------" << std::endl;
-}
-
-ResolveReferences::ResolveReferences(ReferenceMap* refMap,
+ResolveReferences::ResolveReferences(ReferenceMap *refMap,
                                      bool checkShadow) :
         refMap(refMap),
-        context(nullptr),
-        rootNamespace(nullptr),
         anyOrder(false),
         checkShadow(checkShadow) {
     CHECK_NULL(refMap);
@@ -189,35 +240,14 @@ ResolveReferences::ResolveReferences(ReferenceMap* refMap,
     visitDagOnce = false;
 }
 
-void ResolveReferences::addToContext(const IR::INamespace* ns) {
-    LOG2("Adding to context " << dbp(ns));
-    BUG_CHECK(context != nullptr, "No resolution context; did not start at P4Program?");
-    checkShadowing(ns);
-    context->push(ns);
-}
-
-void ResolveReferences::addToGlobals(const IR::INamespace* ns) {
-    BUG_CHECK(context != nullptr, "No resolution context; did not start at P4Program?");
-    context->addGlobal(ns);
-}
-
-void ResolveReferences::removeFromContext(const IR::INamespace* ns) {
-    LOG2("Removing from context " << dbp(ns));
-    BUG_CHECK(context != nullptr, "No resolution context; did not start at P4Program?");
-    context->pop(ns);
-}
-
-void ResolveReferences::resolvePath(const IR::Path* path, bool isType) const {
+void ResolveReferences::resolvePath(const IR::Path *path, bool isType) const {
     LOG2("Resolving " << path << " " << (isType ? "as type" : "as identifier"));
-    ResolutionContext* ctx = context;
+    const IR::INamespace *ctxt = nullptr;
     if (path->absolute)
-        ctx = new ResolutionContext(rootNamespace);
+        ctxt = findContext<IR::P4Program>();
     ResolutionType k = isType ? ResolutionType::Type : ResolutionType::Any;
 
-    BUG_CHECK(!resolveForward.empty(), "Empty resolveForward");
-    bool forwardOK = resolveForward.back();
-
-    const IR::IDeclaration* decl = ctx->resolveUnique(path->name, k, forwardOK);
+    const IR::IDeclaration *decl = resolveUnique(path->name, k, ctxt);
     if (decl == nullptr) {
         refMap->usedName(path->name.name);
         return;
@@ -226,22 +256,28 @@ void ResolveReferences::resolvePath(const IR::Path* path, bool isType) const {
     refMap->setDeclaration(path, decl);
 }
 
-void ResolveReferences::checkShadowing(const IR::INamespace* ns) const {
+void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
     if (!checkShadow) return;
-    for (auto decl : *ns->getDeclarations()) {
-        const IR::Node* node = decl->getNode();
+    std::map<cstring, const IR::Node *> prev_in_scope;  // check for shadowing within a scope
+    for (auto *decl : *ns->getDeclarations()) {
+        const IR::Node *node = decl->getNode();
         if (node->is<IR::StructField>())
             continue;
 
-        if (node->is<IR::Parameter>() && findContext<IR::Type_Extern>() != nullptr)
+        if (node->is<IR::Parameter>() && findContext<IR::Method>() != nullptr)
             // do not give shadowing warnings for parameters of extern methods
             continue;
 
-        auto prev = context->resolve(decl->getName(), ResolutionType::Any, anyOrder);
+        if (prev_in_scope.count(decl->getName()))
+            ::warning(ErrorType::WARN_SHADOWING, "%1% shadows %2%", node,
+                      prev_in_scope.at(decl->getName()));
+        else if (!node->is<IR::Method>() && !node->is<IR::Function>())
+            prev_in_scope[decl->getName()] = node;
+        auto prev = resolve(decl->getName(), ResolutionType::Any);
         if (prev->empty()) continue;
 
         for (auto p : *prev) {
-            const IR::Node* pnode = p->getNode();
+            const IR::Node *pnode = p->getNode();
             if (pnode == node) continue;
             if ((pnode->is<IR::Method>() || pnode->is<IR::Type_Extern>() ||
                  pnode->is<IR::P4Program>()) &&
@@ -260,41 +296,30 @@ void ResolveReferences::checkShadowing(const IR::INamespace* ns) const {
     }
 }
 
-Visitor::profile_t ResolveReferences::init_apply(const IR::Node* node) {
+Visitor::profile_t ResolveReferences::init_apply(const IR::Node *node) {
     anyOrder = refMap->isV1();
     if (!refMap->checkMap(node))
         refMap->clear();
     return Inspector::init_apply(node);
 }
 
-void ResolveReferences::end_apply(const IR::Node* node) {
+void ResolveReferences::end_apply(const IR::Node *node) {
     refMap->updateMap(node);
 }
 
 // Visitor methods
 
-bool ResolveReferences::preorder(const IR::P4Program* program) {
+bool ResolveReferences::preorder(const IR::P4Program *program) {
     if (refMap->checkMap(program))
         return false;
-
-    BUG_CHECK(resolveForward.empty(), "Expected empty resolvePath");
-    resolveForward.push_back(anyOrder);
-    BUG_CHECK(rootNamespace == nullptr, "Root namespace already set");
-    rootNamespace = program;
-    context = new ResolutionContext(rootNamespace);
     return true;
 }
 
-void ResolveReferences::postorder(const IR::P4Program*) {
-    rootNamespace = nullptr;
-    context->done();
-    resolveForward.pop_back();
-    BUG_CHECK(resolveForward.empty(), "Expected empty resolvePath");
-    context = nullptr;
+void ResolveReferences::postorder(const IR::P4Program *) {
     LOG2("Reference map " << refMap);
 }
 
-bool ResolveReferences::preorder(const IR::This* pointer) {
+bool ResolveReferences::preorder(const IR::This *pointer) {
     auto decl = findContext<IR::Declaration_Instance>();
     if (findContext<IR::Function>() == nullptr || decl == nullptr)
         ::error(ErrorType::ERR_INVALID,
@@ -303,78 +328,50 @@ bool ResolveReferences::preorder(const IR::This* pointer) {
     return true;
 }
 
-bool ResolveReferences::preorder(const IR::MethodCallExpression* call) {
-    LOG2("Adding to context " << dbp(call));
-    BUG_CHECK(context != nullptr, "No resolution context; did not start at P4Program?");
-    context->enterMethodCall(call->arguments);
-    visit(call->method);
-    LOG2("Removing from context " << dbp(call));
-    context->exitMethodCall();
-    visit(call->typeArguments);
-    visit(call->arguments);
+bool ResolveReferences::preorder(const IR::KeyElement *ke) {
+    visit(ke->annotations, "annotations");
+    visit(ke->expression, "expression");
+    auto *decls = lookupMatchKind(ke->matchType->path->name);
+    if (decls->empty()) {
+        ::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", ke->matchType->path->name);
+        refMap->usedName(ke->matchType->path->name.name);
+    } else if (decls->size() != 1) {
+        ::error(ErrorType::ERR_INVALID, "%1%: multiple matching declarations",
+                ke->matchType->path->name);
+        for (auto a : *decls)
+            ::error("Candidate: %1%", a);
+    } else {
+        refMap->setDeclaration(ke->matchType->path, decls->at(0));
+    }
     return false;
 }
 
-bool ResolveReferences::preorder(const IR::PathExpression* path) {
-    resolvePath(path->path, false); return true; }
-
-bool ResolveReferences::preorder(const IR::Type_Name* type) {
-    resolvePath(type->path, true); return true; }
-
-bool ResolveReferences::preorder(const IR::P4Control *c) {
-    refMap->usedName(c->name.name);
-    addToContext(c->getTypeParameters());
-    addToContext(c->getApplyParameters());
-    addToContext(c->getConstructorParameters());
-    addToContext(c);  // add the locals
+bool ResolveReferences::preorder(const IR::PathExpression *path) {
+    resolvePath(path->path, false);
     return true;
 }
 
-void ResolveReferences::postorder(const IR::P4Control *c) {
-    removeFromContext(c);
-    removeFromContext(c->getConstructorParameters());
-    removeFromContext(c->getApplyParameters());
-    removeFromContext(c->getTypeParameters());
+bool ResolveReferences::preorder(const IR::Type_Name *type) {
+    resolvePath(type->path, true);
+    return true;
+}
+
+bool ResolveReferences::preorder(const IR::P4Control *c) {
+    refMap->usedName(c->name.name);
+    checkShadowing(c);
+    return true;
 }
 
 bool ResolveReferences::preorder(const IR::P4Parser *p) {
     refMap->usedName(p->name.name);
-    addToContext(p->getTypeParameters());
-    addToContext(p->getApplyParameters());
-    addToContext(p->getConstructorParameters());
-    addToContext(p);
+    checkShadowing(p);
     return true;
 }
 
-void ResolveReferences::postorder(const IR::P4Parser *p) {
-    removeFromContext(p);
-    removeFromContext(p->getConstructorParameters());
-    removeFromContext(p->getApplyParameters());
-    removeFromContext(p->getTypeParameters());
-}
-
-bool ResolveReferences::preorder(const IR::Function* function) {
+bool ResolveReferences::preorder(const IR::Function *function) {
     refMap->usedName(function->name.name);
-    addToContext(function->type->parameters);
-    resolveForward.push_back(true);  // annotations may refer to arguments
+    checkShadowing(function);
     return true;
-}
-
-void ResolveReferences::postorder(const IR::Function* function) {
-    resolveForward.pop_back();
-    removeFromContext(function->type->parameters);
-}
-
-bool ResolveReferences::preorder(const IR::Method* method) {
-    refMap->usedName(method->name.name);
-    addToContext(method->type->parameters);
-    resolveForward.push_back(true);  // annotations may refer to arguments
-    return true;
-}
-
-void ResolveReferences::postorder(const IR::Method* method) {
-    resolveForward.pop_back();
-    removeFromContext(method->type->parameters);
 }
 
 bool ResolveReferences::preorder(const IR::P4Table* t) {
@@ -383,110 +380,56 @@ bool ResolveReferences::preorder(const IR::P4Table* t) {
 }
 
 bool ResolveReferences::preorder(const IR::TableProperties *p) {
-    addToContext(p);
+    checkShadowing(p);
     return true;
-}
-
-void ResolveReferences::postorder(const IR::TableProperties *p) {
-    removeFromContext(p);
 }
 
 bool ResolveReferences::preorder(const IR::P4Action *c) {
     refMap->usedName(c->name.name);
-    addToContext(c->parameters);
-    addToContext(c);
+    checkShadowing(c);
     return true;
-}
-
-void ResolveReferences::postorder(const IR::P4Action *c) {
-    removeFromContext(c);
-    removeFromContext(c->parameters);
 }
 
 bool ResolveReferences::preorder(const IR::Type_Method *t) {
-    // Function return values in generic functions may depend on the type arguments:
-    // T f<T>()
-    // where T is declared *after* its first use
-    resolveForward.push_back(true);
-    if (t->typeParameters != nullptr)
-        addToContext(t->typeParameters);
-    addToContext(t->parameters);
+    checkShadowing(t);
     return true;
-}
-
-void ResolveReferences::postorder(const IR::Type_Method *t) {
-    removeFromContext(t->parameters);
-    if (t->typeParameters != nullptr)
-        removeFromContext(t->typeParameters);
-    resolveForward.pop_back();
 }
 
 bool ResolveReferences::preorder(const IR::Type_Extern *t) {
     refMap->usedName(t->name.name);
-    // FIXME -- should the typeParamters be part of the extern's scope?
-    addToContext(t->typeParameters);
-    addToContext(t);
-    return true; }
-
-void ResolveReferences::postorder(const IR::Type_Extern *t) {
-    removeFromContext(t);
-    removeFromContext(t->typeParameters);
-    }
+    checkShadowing(t); return true; }
 
 bool ResolveReferences::preorder(const IR::ParserState *s) {
     refMap->usedName(s->name.name);
-    // State references may be resolved forward
-    resolveForward.push_back(true);
-    addToContext(s);
+    checkShadowing(s);
     return true;
 }
 
-void ResolveReferences::postorder(const IR::ParserState *s) {
-    removeFromContext(s);
-    resolveForward.pop_back();
-}
-
-bool ResolveReferences::preorder(const IR::Declaration_MatchKind *d)
-{ addToGlobals(d); return true; }
-
 bool ResolveReferences::preorder(const IR::Type_ArchBlock *t) {
-    resolveForward.push_back(anyOrder);
-    addToContext(t->typeParameters);
+    if (!t->is<IR::Type_Package>()) {
+        // don't check shadowing in packages as they have no body
+        checkShadowing(t); }
     return true;
 }
 
 void ResolveReferences::postorder(const IR::Type_ArchBlock *t) {
     refMap->usedName(t->name.name);
-    removeFromContext(t->typeParameters);
-    resolveForward.pop_back();
 }
 
-bool ResolveReferences::preorder(const IR::Type_StructLike *t)
-{ refMap->usedName(t->name.name); addToContext(t); return true; }
+bool ResolveReferences::preorder(const IR::Type_StructLike *t) {
+    refMap->usedName(t->name.name);
+    checkShadowing(t);
+    return true;
+}
 
-void ResolveReferences::postorder(const IR::Type_StructLike *t)
-{ removeFromContext(t); }
-
-bool ResolveReferences::preorder(const IR::BlockStatement *b)
-{ addToContext(b); return true; }
-
-void ResolveReferences::postorder(const IR::BlockStatement *b)
-{ removeFromContext(b); }
+bool ResolveReferences::preorder(const IR::BlockStatement *b) {
+    checkShadowing(b);
+    return true;
+}
 
 bool ResolveReferences::preorder(const IR::Declaration_Instance *decl) {
-    visit(decl->annotations);
     refMap->usedName(decl->name.name);
-
-    // This looks a lot like a method call
-    BUG_CHECK(context != nullptr, "No resolution context; did not start at P4Program?");
-    context->enterMethodCall(decl->arguments);
-    visit(decl->type);
-    context->exitMethodCall();
-    visit(decl->arguments);
-    visit(decl->properties);
-    if (decl->initializer)
-        visit(decl->initializer);
-    return false;
+    return true;
 }
 
 #undef PROCESS_NAMESPACE
