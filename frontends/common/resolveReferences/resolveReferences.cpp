@@ -23,7 +23,7 @@ namespace P4 {
 static const std::vector<const IR::IDeclaration*> empty;
 
 ResolutionContext::ResolutionContext() {
-    isv1 = P4CContext::get().options().isv1();
+    anyOrder = P4CContext::get().options().isv1();
 }
 
 const std::vector<const IR::IDeclaration*>*
@@ -61,7 +61,7 @@ ResolutionContext::lookup(const IR::INamespace *current, IR::ID name,
         default:
             BUG("Unexpected enumeration value %1%", static_cast<int>(type)); }
 
-        if (!isv1 && name.srcInfo.isValid()) {
+        if (!anyOrder && name.srcInfo.isValid()) {
             std::function<bool(const IR::IDeclaration*)> locationFilter =
                     [name](const IR::IDeclaration *d) {
                 if (d->is<IR::Type_Var>() || d->is<IR::ParserState>())
@@ -97,7 +97,7 @@ ResolutionContext::lookup(const IR::INamespace *current, IR::ID name,
         default:
             BUG("Unexpected enumeration value %1%", static_cast<int>(type)); }
 
-        if (!isv1 && name.srcInfo.isValid() &&
+        if (!anyOrder && name.srcInfo.isValid() &&
             !current->is<IR::Method>() &&  // method params may be referenced in annotations
                                            // before the method
             !decl->is<IR::Type_Var>() && !decl->is<IR::ParserState>()
@@ -230,11 +230,8 @@ ResolutionContext::resolveType(const IR::Type *type) const {
     return type;
 }
 
-ResolveReferences::ResolveReferences(ReferenceMap *refMap,
-                                     bool checkShadow) :
-        refMap(refMap),
-        anyOrder(false),
-        checkShadow(checkShadow) {
+ResolveReferences::ResolveReferences(ReferenceMap *refMap, bool checkShadow)
+: refMap(refMap), checkShadow(checkShadow) {
     CHECK_NULL(refMap);
     setName("ResolveReferences");
     visitDagOnce = false;

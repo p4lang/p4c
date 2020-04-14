@@ -48,10 +48,13 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
 
     // P4_14 allows things to be used before their declaration while P4_16 (generally)
     // does not, so we will resolve names to things declared later only when translating
-    // from P4_14 or Type_Vars or ParserStates
-    bool isv1;
+    // from P4_14 or Type_Vars or ParserStates, or after code transforms that may reorder
+    // the code.
+    bool anyOrder;
 
     ResolutionContext();
+    explicit ResolutionContext(bool ao) : anyOrder(ao) {}
+
 
     /// We are resolving a method call.  Find the arguments from the context.
     const IR::Vector<IR::Argument> *methodArguments(cstring name) const;
@@ -79,12 +82,11 @@ class ResolutionContext : virtual public Visitor, public DeclarationLookup {
  * @post: produces an up-to-date `refMap`
  *
  */
-class ResolveReferences : public Inspector, virtual public ResolutionContext {
+class ResolveReferences : public Inspector, private ResolutionContext {
     /// Reference map -- essentially from paths to declarations.
     ReferenceMap *refMap;
 
     /// Indicates if _all_ forward references are allowed
-    bool anyOrder;
 
     /// If @true, then warn if one declaration shadows another.
     bool checkShadow;
@@ -95,8 +97,7 @@ class ResolveReferences : public Inspector, virtual public ResolutionContext {
     void resolvePath(const IR::Path *path, bool isType) const;
 
  public:
-    explicit ResolveReferences(/* out */ P4::ReferenceMap *refMap,
-                               bool checkShadow = false);
+    explicit ResolveReferences(/* out */ P4::ReferenceMap *refMap, bool checkShadow = false);
 
     Visitor::profile_t init_apply(const IR::Node *node) override;
     void end_apply(const IR::Node *node) override;
