@@ -74,11 +74,11 @@ struct StructTypeReplacement : public IHasDbPrint {
                  const IR::Type* type,
                  IR::IndexedVector<IR::StructField> *fields);
 
-    /// Returns a StructInitializerExpression suitable for
+    /// Returns a StructExpression suitable for
     /// initializing a struct for the fields that start with the
     /// given prefix.  For example, for prefix .t and root R this returns
     /// { .s = { .a = R._t_s_a0, .b = R._t_s_b1 }, .y = R._t_y2 }
-    const IR::StructInitializerExpression* explode(
+    const IR::StructExpression* explode(
         const IR::Expression* root, cstring prefix);
 };
 

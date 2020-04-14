@@ -57,7 +57,7 @@ const IR::Expression* DoConstantFolding::getConstant(const IR::Expression* expr)
             if (getConstant(e) == nullptr)
                 return nullptr;
         return expr;
-    } else if (auto si = expr->to<IR::StructInitializerExpression>()) {
+    } else if (auto si = expr->to<IR::StructExpression>()) {
         for (auto e : si->components)
             if (getConstant(e->expression) == nullptr)
                 return nullptr;
@@ -597,7 +597,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
             if (!found)
                 BUG("Could not find field %1% in type %2%", e->member, type);
             result = CloneConstants::clone(list->components.at(index));
-        } else if (auto si = expr->to<IR::StructInitializerExpression>()) {
+        } else if (auto si = expr->to<IR::StructExpression>()) {
             if (origtype->is<IR::Type_Header>() && e->member.name == IR::Type_Header::isValid)
                 return e;
             auto ne = si->components.getDeclaration<IR::NamedExpression>(e->member.name);

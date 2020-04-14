@@ -106,7 +106,7 @@ class EliminateTuples final : public PassManager {
         passes.push_back(new ClearTypeMap(typeMap));
         // We do a round of type-checking which may mutate the program.
         // This will convert some ListExpressions
-        // into StructInitializerExpression where tuples were converted
+        // into StructExpression where tuples were converted
         // to structs.
         passes.push_back(new ResolveReferences(refMap));
         if (!typeInference)

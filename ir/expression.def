@@ -403,9 +403,8 @@ class ListExpression : Expression {
     void push_back(Expression e) { components.push_back(e); }
 }
 
-/// IR representation of an initializer for a struct.
-/// Currently it does not have a direct representation as P4 source.
-class StructInitializerExpression : Expression {
+/// An expression that evaluates to a struct.
+class StructExpression : Expression {
     /// The struct or header type that is being intialized.
     /// May only be known after type checking; so it can be nullptr.
     NullOK optional Type_Name typeName;

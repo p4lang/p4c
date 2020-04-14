@@ -78,7 +78,7 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
                 retval->push_back(new IR::AssignmentStatement(statement->srcInfo, left, right));
                 index++;
             }
-        } else if (auto si = statement->right->to<IR::StructInitializerExpression>()) {
+        } else if (auto si = statement->right->to<IR::StructExpression>()) {
             for (auto f : strct->fields) {
                 auto right = si->components.getDeclaration<IR::NamedExpression>(f->name);
                 auto left = new IR::Member(statement->left, f->name);

@@ -29,7 +29,7 @@ void DoSetHeaders::generateSetValid(
 
     auto srcType = typeMap->getType(src, true);
     auto list = src->to<IR::ListExpression>();
-    auto si = src->to<IR::StructInitializerExpression>();
+    auto si = src->to<IR::StructExpression>();
     if (list == nullptr && si == nullptr)
         return;
 

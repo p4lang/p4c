@@ -592,7 +592,7 @@ void ExpressionConverter::postorder(const IR::ListExpression* expression)  {
     }
 }
 
-void ExpressionConverter::postorder(const IR::StructInitializerExpression* expression)  {
+void ExpressionConverter::postorder(const IR::StructExpression* expression)  {
     // Handle like a ListExpression
     auto result = new Util::JsonArray();
     mapExpression(expression, result);

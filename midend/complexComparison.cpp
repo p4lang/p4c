@@ -43,7 +43,7 @@ const IR::Expression* RemoveComplexComparisons::explode(
     if (auto ht = leftType->to<IR::Type_Header>()) {
         auto lmethod = new IR::Member(left, IR::Type_Header::isValid);
         const IR::Expression* lvalid;
-        if (left->is<IR::StructInitializerExpression>()) {
+        if (left->is<IR::StructExpression>()) {
             // A header defined this way is always valid
             lvalid = new IR::BoolLiteral(true);
         } else {
@@ -53,7 +53,7 @@ const IR::Expression* RemoveComplexComparisons::explode(
 
         const IR::Expression* rvalid;
         if (!rightTuple) {
-            if (right->is<IR::StructInitializerExpression>()) {
+            if (right->is<IR::StructExpression>()) {
                 rvalid = new IR::BoolLiteral(true);
             } else {
                 auto rmethod = new IR::Member(right, IR::Type_Header::isValid);
@@ -73,7 +73,7 @@ const IR::Expression* RemoveComplexComparisons::explode(
             const IR::Expression* fright;
             const IR::Type* rightType;
             if (!rightTuple) {
-                if (auto si = right->to<IR::StructInitializerExpression>()) {
+                if (auto si = right->to<IR::StructExpression>()) {
                     auto nf = si->components.getDeclaration<IR::NamedExpression>(f->name);
                     CHECK_NULL(nf);
                     fright = nf->expression;
@@ -101,7 +101,7 @@ const IR::Expression* RemoveComplexComparisons::explode(
             const IR::Expression* fright;
             const IR::Type* rightType;
             if (!rightTuple) {
-                if (auto si = right->to<IR::StructInitializerExpression>()) {
+                if (auto si = right->to<IR::StructExpression>()) {
                     auto nf = si->components.getDeclaration<IR::NamedExpression>(f->name);
                     CHECK_NULL(nf);
                     fright = nf->expression;

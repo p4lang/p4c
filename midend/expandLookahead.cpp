@@ -51,7 +51,7 @@ const IR::Expression* DoExpandLookahead::expand(
             vec->push_back(new IR::NamedExpression(f->srcInfo, f->name, e));
         }
         auto type = st->getP4Type()->to<IR::Type_Name>();
-        return new IR::StructInitializerExpression(
+        return new IR::StructExpression(
             base->srcInfo, type, type, *vec);
     } else if (type->is<IR::Type_Bits>() || type->is<IR::Type_Boolean>()) {
         unsigned size = type->width_bits();

@@ -217,7 +217,7 @@ class ReadsWrites : public Inspector {
         rw.emplace(expression, result);
     }
 
-    void postorder(const IR::StructInitializerExpression* expression) override {
+    void postorder(const IR::StructExpression* expression) override {
         const SetOfLocations* result = new SetOfLocations();
         for (auto e : expression->components) {
             auto s = ::get(rw, e->expression);

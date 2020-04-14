@@ -745,11 +745,11 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
     }
     if (initType->is<IR::Type_UnknownStruct>()) {
         if (auto ts = destType->to<IR::Type_StructLike>()) {
-            auto si = sourceExpression->to<IR::StructInitializerExpression>();
+            auto si = sourceExpression->to<IR::StructExpression>();
             CHECK_NULL(si);
             bool cst = isCompileTimeConstant(sourceExpression);
             auto type = new IR::Type_Name(ts->name);
-            sourceExpression = new IR::StructInitializerExpression(
+            sourceExpression = new IR::StructExpression(
                 type, type, si->components);
             setType(sourceExpression, destType);
             if (cst)
@@ -1589,23 +1589,23 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
                 }
 
                 if (ls != nullptr) {
-                    auto l = expression->left->to<IR::StructInitializerExpression>();
+                    auto l = expression->left->to<IR::StructExpression>();
                     CHECK_NULL(l);  // struct initializers are the only expressions that can
                                     // have StructUnknown types
                     BUG_CHECK(rtype->is<IR::Type_StructLike>(), "%1%: expected a struct", rtype);
                     auto type = new IR::Type_Name(rtype->to<IR::Type_StructLike>()->name);
-                    expression->left = new IR::StructInitializerExpression(
+                    expression->left = new IR::StructExpression(
                         expression->left->srcInfo, type, type, l->components);
                     setType(expression->left, rtype);
                     if (lcst)
                         setCompileTimeConstant(expression->left);
                 } else {
-                    auto r = expression->right->to<IR::StructInitializerExpression>();
+                    auto r = expression->right->to<IR::StructExpression>();
                     CHECK_NULL(r);  // struct initializers are the only expressions that can
                                     // have StructUnknown types
                     BUG_CHECK(ltype->is<IR::Type_StructLike>(), "%1%: expected a struct", ltype);
                     auto type = new IR::Type_Name(ltype->to<IR::Type_StructLike>()->name);
-                    expression->right = new IR::StructInitializerExpression(
+                    expression->right = new IR::StructExpression(
                         expression->right->srcInfo, type, type, r->components);
                     setType(expression->right, rtype);
                     if (rcst)
@@ -1845,7 +1845,7 @@ const IR::Node* TypeInference::postorder(IR::ListExpression* expression) {
     return expression;
 }
 
-const IR::Node* TypeInference::postorder(IR::StructInitializerExpression* expression) {
+const IR::Node* TypeInference::postorder(IR::StructExpression* expression) {
     if (done()) return expression;
     bool constant = true;
     auto components = new IR::IndexedVector<IR::StructField>();
@@ -2316,14 +2316,14 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
         return expression;
 
     if (auto st = castType->to<IR::Type_StructLike>()) {
-        if (auto se = expression->expr->to<IR::StructInitializerExpression>()) {
+        if (auto se = expression->expr->to<IR::StructExpression>()) {
             // Interpret (S) { kvpairs } as a struct initializer expression
             // instead of a cast to a struct.
             if (se->type == nullptr || se->type->is<IR::Type_Unknown>() ||
                 se->type->is<IR::Type_UnknownStruct>()) {
                 auto type = new IR::Type_Name(st->name);
                 setType(type, new IR::Type_Type(st));
-                auto sie = new IR::StructInitializerExpression(
+                auto sie = new IR::StructExpression(
                     se->srcInfo, type, se->components);
                 auto result = postorder(sie);  // may insert casts
                 setType(result, st);
