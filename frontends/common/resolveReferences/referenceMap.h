@@ -95,6 +95,7 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
 
     /// Set boolean indicating whether map is for a P4_14 program to @p isV1.
     void setIsV1(bool isv1) { this->isv1 = isv1; }
+    void setAnyOrder(bool anyOrder) { this->isv1 = anyOrder; }
 
     /// Generate a name from @p base that fresh for the program.
     cstring newName(cstring base);
