@@ -136,13 +136,10 @@ const IR::Node* Predication::clone(const IR::AssignmentStatement* statement) {
 const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
     if (!inside_action || ifNestingLevel == 0)
         return statement;
-    auto context = getContext();
+    const Context * ctxt = nullptr;
     std::vector<const IR::Expression*> conditions;
-    while (context != nullptr) {
-        if (context->node->is<IR::IfStatement>()) {
-            conditions.push_back(context->node->to<IR::IfStatement>()->condition);
-        }
-        context = context->parent;
+    while (auto ifs = findContext<IR::IfStatement>(ctxt)) {
+        conditions.push_back(ifs->condition);
     }
     auto clonedStatement = clone(statement)->to<IR::AssignmentStatement>();
     ExpressionReplacer replacer(clonedStatement, travesalPath, conditions);
