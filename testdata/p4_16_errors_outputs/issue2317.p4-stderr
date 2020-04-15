@@ -1,0 +1,3 @@
+issue2317.p4(16): [--Werror=type-error] error: ==: cannot be applied to action results
+    if (f(x) == f(x)) { }
+        ^^^^^^^^^^^^
