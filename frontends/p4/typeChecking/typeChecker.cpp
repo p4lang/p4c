@@ -678,6 +678,8 @@ const IR::Node* TypeInference::postorder(IR::Declaration_Variable* decl) {
 }
 
 bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) const {
+    if (src->is<IR::Type_Action>())
+        return false;
     if (src == dest)
         return true;
 
@@ -1548,6 +1550,12 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
     }
 
     if (equTest) {
+        if (ltype->is<IR::Type_Action>() || rtype->is<IR::Type_Action>()) {
+            // Actions return Type_Action instead of void.
+            typeError("%1%: cannot be applied to action results", expression);
+            return expression;
+        }
+
         bool defined = false;
         if (TypeMap::equivalent(ltype, rtype) &&
             (!ltype->is<IR::Type_Void>() && !ltype->is<IR::Type_Varbits>())) {
