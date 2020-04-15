@@ -168,7 +168,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ResetHeaders(&refMap, &typeMap),
         new UniqueNames(&refMap),  // Give each local declaration a unique internal name
         new MoveDeclarations(),  // Move all local declarations to the beginning
-        new MoveInitializers(),
+        new MoveInitializers(&refMap),
         new SideEffectOrdering(&refMap, &typeMap, skipSideEffectOrdering),
         new SetHeaders(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),

@@ -97,6 +97,19 @@ const IR::Node* MoveDeclarations::postorder(IR::Declaration_Constant* decl) {
     return nullptr;
 }
 
+////////////////////////////////////////////////////////////////////
+
+const IR::Node* MoveInitializers::postorder(IR::P4Parser* parser) {
+    if (toMove->empty())
+        return parser;
+    CHECK_NULL(oldStart);
+    auto newStart = new IR::ParserState(IR::ID(IR::ParserState::start), *toMove,
+                                        new IR::PathExpression(oldStart->name));
+    toMove = new IR::IndexedVector<IR::StatOrDecl>();
+    parser->states.insert(parser->states.begin(), newStart);
+    return parser;
+}
+
 const IR::Node* MoveInitializers::postorder(IR::Declaration_Variable* decl) {
     if (getContext() == nullptr)
         return decl;
@@ -116,12 +129,12 @@ const IR::Node* MoveInitializers::postorder(IR::Declaration_Variable* decl) {
 }
 
 const IR::Node* MoveInitializers::postorder(IR::ParserState* state) {
-    if (state->name != IR::ParserState::start ||
-        toMove->empty())
+    if (toMove->empty())
         return state;
-    toMove->append(state->components);
-    state->components = *toMove;
-    toMove = new IR::IndexedVector<IR::StatOrDecl>();
+    if (state->name != IR::ParserState::start)
+        return state;
+    oldStart = state;
+    state->name = nameGen->newName("start");
     return state;
 }
 
