@@ -97,6 +97,36 @@ const IR::Node* MoveDeclarations::postorder(IR::Declaration_Constant* decl) {
     return nullptr;
 }
 
+////////////////////////////////////////////////////////////////////
+
+const IR::Node* MoveInitializers::preorder(IR::P4Parser* parser) {
+    // Determine if we have anything to do in this parser.
+    // Check if we have top-level declarations with intializers.
+    auto someInitializers = false;
+    for (auto d : parser->parserLocals) {
+        if (auto dv = d->to<IR::Declaration_Variable>()) {
+            if (dv->initializer != nullptr) {
+                someInitializers = true;
+                break;
+            }}}
+    if (someInitializers) {
+        newStartName = refMap->newName(IR::ParserState::start);
+        oldStart = parser->states.getDeclaration(IR::ParserState::start)->to<IR::ParserState>();
+        CHECK_NULL(oldStart);
+    }
+    return parser;
+}
+
+const IR::Node* MoveInitializers::postorder(IR::P4Parser* parser) {
+    if (oldStart == nullptr)
+        return parser;
+    auto newStart = new IR::ParserState(IR::ID(IR::ParserState::start), *toMove,
+                                        new IR::PathExpression(newStartName));
+    toMove = new IR::IndexedVector<IR::StatOrDecl>();
+    parser->states.insert(parser->states.begin(), newStart);
+    return parser;
+}
+
 const IR::Node* MoveInitializers::postorder(IR::Declaration_Variable* decl) {
     if (getContext() == nullptr)
         return decl;
@@ -116,12 +146,10 @@ const IR::Node* MoveInitializers::postorder(IR::Declaration_Variable* decl) {
 }
 
 const IR::Node* MoveInitializers::postorder(IR::ParserState* state) {
-    if (state->name != IR::ParserState::start ||
-        toMove->empty())
+    if (oldStart == nullptr)
         return state;
-    toMove->append(state->components);
-    state->components = *toMove;
-    toMove = new IR::IndexedVector<IR::StatOrDecl>();
+    if (state->name == IR::ParserState::start)
+        state->name = newStartName;
     return state;
 }
 
@@ -134,5 +162,15 @@ const IR::Node* MoveInitializers::postorder(IR::P4Control* control) {
     toMove = new IR::IndexedVector<IR::StatOrDecl>();
     return control;
 }
+
+const IR::Node* MoveInitializers::postorder(IR::Path* path) {
+    if (oldStart == nullptr || path->name != IR::ParserState::start)
+        return path;
+    auto decl = refMap->getDeclaration(getOriginal()->to<IR::Path>());
+    if (!decl->is<IR::ParserState>())
+        return path;
+    return new IR::Path(newStartName);
+}
+
 
 }  // namespace P4

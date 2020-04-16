@@ -213,6 +213,9 @@ control FabricVerifyChecksum(inout parsed_headers_t hdr, inout fabric_metadata_t
 parser FabricParser(packet_in packet, out parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata, inout standard_metadata_t standard_metadata) {
     bit<4> tmp;
     state start {
+        transition start_0;
+    }
+    state start_0 {
         transition select(standard_metadata.ingress_port) {
             9w255: parse_packet_out;
             default: parse_ethernet;
