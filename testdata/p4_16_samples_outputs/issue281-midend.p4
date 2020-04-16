@@ -40,16 +40,18 @@ struct m {
 }
 
 parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t std) {
+    bit<16> l3_etherType;
     state start {
         hdr.ether.setInvalid();
         hdr.vlan.setInvalid();
         hdr.ipv4.setInvalid();
         hdr.ether.setInvalid();
         b.extract<ethernet_t>(hdr.ether);
-        transition L3_start;
+        l3_etherType = hdr.ether.etherType;
+        transition L3_start_0;
     }
-    state L3_start {
-        transition select(hdr.ether.etherType) {
+    state L3_start_0 {
+        transition select(l3_etherType) {
             16w0x800: L3_ipv4;
             16w0x8100: L3_vlan;
             default: start_3;
@@ -63,7 +65,8 @@ parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t 
     state L3_vlan {
         hdr.vlan.setInvalid();
         b.extract<vlan_t>(hdr.vlan);
-        transition L3_start;
+        l3_etherType = hdr.vlan.etherType;
+        transition L3_start_0;
     }
     state start_3 {
         transition accept;

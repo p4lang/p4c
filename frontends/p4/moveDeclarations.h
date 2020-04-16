@@ -74,11 +74,12 @@ class MoveDeclarations : public Transform {
 class MoveInitializers : public Transform {
     ReferenceMap* refMap;
     IR::IndexedVector<IR::StatOrDecl> *toMove;  // This contains just IR::AssignmentStatement
-    const IR::ParserState* oldStart; // nullptr if we do not want to rename the start state
+    const IR::ParserState* oldStart;  // nullptr if we do not want to rename the start state
     cstring newStartName;  // name allocated to the old start state
 
  public:
-    MoveInitializers(ReferenceMap* refMap): refMap(refMap), oldStart(nullptr), newStartName("") {
+    explicit MoveInitializers(ReferenceMap* refMap):
+            refMap(refMap), oldStart(nullptr), newStartName("") {
         setName("MoveInitializers"); CHECK_NULL(refMap);
         toMove = new IR::IndexedVector<IR::StatOrDecl>(); }
     const IR::Node* preorder(IR::P4Parser* parser) override;
