@@ -15,21 +15,26 @@ limitations under the License.
 */
 #include "predication.h"
 #include "frontends/p4/cloner.h"
-
-
 namespace P4 {
-/// convert an expression into a string that uniqely identifies the value referenced
-/// return null cstring if not a reference to a constant thing.
-static cstring expr_name(const IR::Expression *exp) {
+/// convert an expression into a string that uniqely identifies the lvalue referenced
+/// return null cstring if not a reference to a lvalue.
+static cstring lvalue_name(const IR::Expression *exp) {
     if (auto p = exp->to<IR::PathExpression>())
         return p->path->name;
     if (auto m = exp->to<IR::Member>()) {
-        if (auto base = expr_name(m->expr))
+        if (auto base = lvalue_name(m->expr))
             return base + "." + m->member;
     } else if (auto a = exp->to<IR::ArrayIndex>()) {
         if (auto k = a->right->to<IR::Constant>())
-            if (auto base = expr_name(a->left))
-                return base + "." + std::to_string(k->asInt()); }
+            if (auto base = lvalue_name(a->left))
+                return base + "." + std::to_string(k->asInt());
+    } else if (auto s = exp->to<IR::Slice>()) {
+        if (auto base = lvalue_name(s->e0))
+            if (auto h = s->e1->to<IR::Constant>())
+                if (auto l = s->e2->to<IR::Constant>())
+                    return base + "." +
+                        std::to_string(h->asInt()) + ":" + std::to_string(l->asInt());
+    }
     return cstring();
 }
 
@@ -51,21 +56,18 @@ bool Predication::EmptyStatementRemover::preorder(IR::BlockStatement * block) {
     return false;
 }
 
-const IR::AssignmentStatement *
-Predication::ExpressionReplacer::preorder(IR::AssignmentStatement * statement) {
-    // fill the conditions from context
-    while (context != nullptr) {
-        if (context->node->is<IR::IfStatement>()) {
-            conditions.push_back(context->node->to<IR::IfStatement>()->condition);
-        }
-        context = context->parent;
+const IR::Mux * Predication::ExpressionReplacer::preorder(IR::Mux * mux) {
+    ++currentNestingLevel;
+    bool thenElsePass = travesalPath[currentNestingLevel - 1];
+    if (currentNestingLevel == travesalPath.size()) {
+        emplaceExpression(mux);
+    } else if (currentNestingLevel < travesalPath.size()) {
+        visitBranch(mux, thenElsePass);
     }
-
-    if (!statement->right->is<IR::Mux>()) {
-        statement->right = new IR::Mux(conditions.back(), statement->left, statement->left);
-    }
-    visit(statement->right);
-    return statement;
+    visit(mux->e1);
+    visit(mux->e2);
+    --currentNestingLevel;
+    return mux;
 }
 
 void Predication::ExpressionReplacer::emplaceExpression(IR::Mux * mux) {
@@ -73,59 +75,45 @@ void Predication::ExpressionReplacer::emplaceExpression(IR::Mux * mux) {
     bool thenElsePass = travesalPath[currentNestingLevel - 1];
     mux->e0 = condition;
     if (thenElsePass) {
-        mux->e1 = rightExpression;
+        mux->e1 = statement->right;
     } else {
-        mux->e2 = rightExpression;
+        mux->e2 = statement->right;
     }
 }
 
-void Predication::ExpressionReplacer::visitThen(IR::Mux * mux) {
+void Predication::ExpressionReplacer::visitBranch(IR::Mux * mux, bool then) {
     auto condition = conditions[conditions.size() - currentNestingLevel];
-    auto statement = findContext<IR::AssignmentStatement>();
-    auto leftName = expr_name(statement->left);
-    auto thenExprName = expr_name(mux->e1);
-    if (expr_name(mux->e2) == expr_name(statement->left)) {
+    auto leftName = lvalue_name(statement->left);
+    auto thenExprName = lvalue_name(mux->e1);
+    auto elseExprName = lvalue_name(mux->e2);
+
+    if (leftName.isNullOrEmpty()) {
+        ::error(ErrorType::ERR_EXPRESSION,
+                "%1%: Assignment inside if statement can't be transformed to condition expression",
+                statement);
+    }
+
+    if (then && elseExprName == leftName) {
         mux->e2 = statement->left;
-    }
-    if (mux->e1->is<IR::Mux>() || thenExprName.isNullOrEmpty() || thenExprName == leftName) {
-        if (!mux->e1->is<IR::Mux>()) {
-            mux->e1 = new IR::Mux(condition, statement->left, statement->left);
-        }
-        visit(mux->e1);
-    }
-}
-
-void Predication::ExpressionReplacer::visitElse(IR::Mux * mux) {
-    auto condition = conditions[conditions.size() - currentNestingLevel];
-    auto statement = findContext<IR::AssignmentStatement>();
-    auto leftName = expr_name(statement->left);
-    auto elseExprName = expr_name(mux->e2);
-    if (expr_name(mux->e1) == leftName) {
-        mux->e1 = statement->left;
-            mux->e1 = statement->left;
+    } else if (!then && thenExprName == leftName) {
         mux->e1 = statement->left;
     }
-    if (mux->e2->is<IR::Mux>() || elseExprName.isNullOrEmpty() || elseExprName == leftName) {
-        if (!mux->e2->is<IR::Mux>()) {
-            mux->e2 = new IR::Mux(condition, statement->left, statement->left);
+
+    if (then) {
+        if (mux->e1->is<IR::Mux>() || thenExprName.isNullOrEmpty() || thenExprName == leftName) {
+            if (!mux->e1->is<IR::Mux>()) {
+                mux->e1 = new IR::Mux(condition, statement->left, statement->left);
+            }
+            visit(mux->e1);
         }
-        visit(mux->e2);
-    }
-}
-
-
-const IR::Mux * Predication::ExpressionReplacer::preorder(IR::Mux * mux) {
-    ++currentNestingLevel;
-    bool thenElsePass = travesalPath[currentNestingLevel - 1];
-    if (currentNestingLevel == travesalPath.size()) {
-        emplaceExpression(mux);
-    } else if (thenElsePass) {
-        visitThen(mux);
     } else {
-        visitElse(mux);
+        if (mux->e2->is<IR::Mux>() || elseExprName.isNullOrEmpty() || elseExprName == leftName) {
+            if (!mux->e2->is<IR::Mux>()) {
+                mux->e2 = new IR::Mux(condition, statement->left, statement->left);
+            }
+            visit(mux->e2);
+        }
     }
-    --currentNestingLevel;
-    return mux;
 }
 
 const IR::Expression* Predication::clone(const IR::Expression* expression) {
@@ -148,7 +136,13 @@ const IR::Node* Predication::clone(const IR::AssignmentStatement* statement) {
 const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
     if (!inside_action || ifNestingLevel == 0)
         return statement;
-    ExpressionReplacer replacer(clone(statement->right), travesalPath, getContext());
+    const Context * ctxt = nullptr;
+    std::vector<const IR::Expression*> conditions;
+    while (auto ifs = findContext<IR::IfStatement>(ctxt)) {
+        conditions.push_back(ifs->condition);
+    }
+    auto clonedStatement = clone(statement)->to<IR::AssignmentStatement>();
+    ExpressionReplacer replacer(clonedStatement, travesalPath, conditions);
     // Referenced lvalue is not appeard before
     dependencies.clear();
     visit(statement->right);
@@ -156,38 +150,40 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
     for (auto dependency : dependencies) {
         if (liveAssignments.find(dependency) != liveAssignments.end()) {
             // print out dependecy
-            currentBlock->push_back(liveAssignments[dependency]);
+            blocks.back()->push_back(liveAssignments[dependency]);
             // remove from names to not duplicate
             orderedNames.erase(dependency);
             liveAssignments.erase(dependency);
         }
     }
-    auto statementName = expr_name(statement->left);
+    auto statementName = lvalue_name(statement->left);
     auto foundedAssignment = liveAssignments.find(statementName);
     if (foundedAssignment != liveAssignments.end()) {
         statement->right = foundedAssignment->second->right;
         // move the lvalue assignment to the back
         orderedNames.erase(statementName);
+    } else if (!statement->right->is<IR::Mux>()) {
+        auto clonedLeft = clone(statement->left);
+        statement->right = new IR::Mux(conditions.back(), clonedLeft, clonedLeft);
     }
     orderedNames.push_back(statementName);
-    auto updatedStatement = statement->apply(replacer);
-    auto rightStatement = clone(updatedStatement->to<IR::AssignmentStatement>()->right);
+    auto rightStatement = clone(statement->right)->apply(replacer);
     liveAssignments[statementName] = new IR::AssignmentStatement(statement->left, rightStatement);
     return new IR::EmptyStatement();
 }
 
 const IR::Node* Predication::preorder(IR::PathExpression * pathExpr) {
-    dependencies.push_back(expr_name(pathExpr));
+    dependencies.push_back(lvalue_name(pathExpr));
     return pathExpr;
 }
 const IR::Node* Predication::preorder(IR::Member * member) {
     visit(member->expr);
-    dependencies.push_back(expr_name(member));
+    dependencies.push_back(lvalue_name(member));
     return member;
 }
 const IR::Node* Predication::preorder(IR::ArrayIndex * arrInd) {
     visit(arrInd->left);
-    dependencies.push_back(expr_name(arrInd));
+    dependencies.push_back(lvalue_name(arrInd));
     return arrInd;
 }
 
@@ -197,7 +193,15 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
 
     ++ifNestingLevel;
     auto rv = new IR::BlockStatement;
-    currentBlock = rv;
+    if (!statement->condition->is<IR::PathExpression>()) {
+        cstring conditionName = generator->newName("cond");
+        auto condDecl = new IR::Declaration_Variable(conditionName, IR::Type::Boolean::get());
+        rv->push_back(condDecl);
+        auto condition = new IR::PathExpression(IR::ID(conditionName));
+        rv->push_back(new IR::AssignmentStatement(clone(condition), statement->condition));
+        statement->condition = condition;  // replace with variable cond
+    }
+    blocks.push_back(new IR::BlockStatement);
     travesalPath.push_back(true);
     visit(statement->ifTrue);
     rv->push_back(statement->ifTrue);
@@ -209,16 +213,17 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
         rv->push_back(statement->ifFalse);
     }
 
+    rv->push_back(blocks.back());
     for (auto exprName : orderedNames) {
         rv->push_back(liveAssignments[exprName]);
     }
     liveAssignments.clear();
     orderedNames.clear();
     travesalPath.pop_back();
+    blocks.pop_back();
     --ifNestingLevel;
 
     prune();
-
     return rv->apply(remover);
 }
 

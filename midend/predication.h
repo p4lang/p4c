@@ -53,26 +53,24 @@ class Predication final : public Transform {
      */
     class ExpressionReplacer final : public Transform {
      private:
-        const IR::Expression * rightExpression;
+        const IR::AssignmentStatement * statement;
         const std::vector<bool>& travesalPath;
-        const Visitor::Context * context;
-        std::vector<const IR::Expression*> conditions;
+        std::vector<const IR::Expression*>& conditions;
         unsigned currentNestingLevel = 0;
      public:
-        explicit ExpressionReplacer(const IR::Expression * e,
+        explicit ExpressionReplacer(const IR::AssignmentStatement * a,
                                     std::vector<bool>& t,
-                                    const Visitor::Context * c)
-        : rightExpression(e), travesalPath(t), context(c)
-        { CHECK_NULL(e); }
+                                    std::vector<const IR::Expression*>& c)
+        : statement(a), travesalPath(t), conditions(c)
+        { CHECK_NULL(a); }
         const IR::Mux * preorder(IR::Mux * mux) override;
-        const IR::AssignmentStatement * preorder(IR::AssignmentStatement * statement) override;
         void emplaceExpression(IR::Mux * mux);
-        void visitThen(IR::Mux * mux);
-        void visitElse(IR::Mux * mux);
+        void visitBranch(IR::Mux * mux, bool then);
     };
 
+    NameGenerator* generator;
     EmptyStatementRemover remover;
-    IR::BlockStatement * currentBlock;
+    std::vector<IR::BlockStatement*> blocks;
     bool inside_action;
     unsigned ifNestingLevel;
     // Traverse path of nested if-else statements
@@ -93,9 +91,9 @@ class Predication final : public Transform {
     }
 
  public:
-    explicit Predication(NameGenerator* generator) :
-        inside_action(false), ifNestingLevel(0)
-    { CHECK_NULL(generator); setName("Predication"); }
+    explicit Predication(NameGenerator* gen) :
+        generator(gen), inside_action(false), ifNestingLevel(0)
+    { setName("Predication"); }
     const IR::Expression* clone(const IR::Expression* expression);
     const IR::Node* clone(const IR::AssignmentStatement* statement);
     const IR::Node* preorder(IR::IfStatement* statement) override;
