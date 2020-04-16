@@ -18,7 +18,7 @@ limitations under the License.
 #define _FRONTENDS_P4_MOVEDECLARATIONS_H_
 
 #include "ir/ir.h"
-#include "frontends/p4/typeMap.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
 
 namespace P4 {
 
@@ -67,23 +67,26 @@ class MoveDeclarations : public Transform {
 
 /** After MoveDeclarations, some variable declarations in the "local"
  * section of a parser and control may still have initializers; these are moved
- * into the a new start state, and to the beginning of the apply body repectively.
+ * into a new start state, and to the beginning of the apply body repectively.
  *
  * @pre Must be run after MoveDeclarations.
  */
 class MoveInitializers : public Transform {
-    NameGenerator* nameGen;
+    ReferenceMap* refMap;
     IR::IndexedVector<IR::StatOrDecl> *toMove;  // This contains just IR::AssignmentStatement
-    IR::ParserState* oldStart;
+    const IR::ParserState* oldStart; // nullptr if we do not want to rename the start state
+    cstring newStartName;  // name allocated to the old start state
 
  public:
-    explicit MoveInitializers(NameGenerator* nameGen): nameGen(nameGen), oldStart(nullptr) {
-        setName("MoveInitializers"); CHECK_NULL(nameGen);
+    MoveInitializers(ReferenceMap* refMap): refMap(refMap), oldStart(nullptr), newStartName("") {
+        setName("MoveInitializers"); CHECK_NULL(refMap);
         toMove = new IR::IndexedVector<IR::StatOrDecl>(); }
+    const IR::Node* preorder(IR::P4Parser* parser) override;
     const IR::Node* postorder(IR::P4Parser* parser) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
     const IR::Node* postorder(IR::ParserState* state) override;
     const IR::Node* postorder(IR::P4Control* control) override;
+    const IR::Node* postorder(IR::Path* path) override;
 };
 
 }  // namespace P4
