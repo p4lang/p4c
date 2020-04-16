@@ -2401,10 +2401,11 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
             return expression;
         }
     } else if (auto tbl = decl->to<IR::P4Table>()) {
-        auto current = findContext<IR::P4Table>();
-        if (current->name == tbl->name) {
-            typeError("%1%: Cannot refer to the containing table %2%", expression, tbl);
-            return expression;
+        if (auto current = findContext<IR::P4Table>()) {
+            if (current->name == tbl->name) {
+                typeError("%1%: Cannot refer to the containing table %2%", expression, tbl);
+                return expression;
+            }
         }
     }
 
