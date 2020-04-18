@@ -54,6 +54,17 @@ Util::Enumerator<const IR::IDeclaration*>* IGeneralNamespace::getDeclsByName(cst
     return getDeclarations()->where(filter);
 }
 
+Util::Enumerator<const IDeclaration*>* INestedNamespace::getDeclarations() const {
+    Util::Enumerator<const IDeclaration*>* rv = nullptr;
+    for (auto nested : getNestedNamespaces()) {
+        if (nested) {
+            if (rv)
+                rv = rv->concat(nested->getDeclarations());
+            else
+                rv = nested->getDeclarations(); } }
+    return rv;
+}
+
 bool IFunctional::callMatches(const Vector<Argument> *arguments) const {
     auto paramList = getParameters()->parameters;
     std::map<cstring, const IR::Parameter*> paramNames;
