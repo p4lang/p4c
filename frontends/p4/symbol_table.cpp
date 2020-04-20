@@ -52,6 +52,7 @@ class NamedSymbol {
     virtual bool sameType(const NamedSymbol* other) const {
         return typeid(*this) == typeid(*other);
     }
+    virtual const Namespace *symNamespace() const;
 
     bool template_args = false;  // does the symbol expect template args
 };
@@ -107,12 +108,19 @@ class Namespace : public NamedSymbol {
     void clear() {
         contents.clear();
     }
+    static const Namespace empty;
 };
 
+const Namespace Namespace::empty("<empty>", Util::SourceInfo(), false);
+const Namespace *NamedSymbol::symNamespace() const { return &Namespace::empty; }
+
 class Object : public NamedSymbol {
+    const Namespace     *typeNamespace = &Namespace::empty;
  public:
     Object(cstring name, Util::SourceInfo si) : NamedSymbol(name, si) {}
     cstring toString() const override { return cstring("Object ") + getName(); }
+    const Namespace *symNamespace() const override { return typeNamespace; }
+    void setNamespace(const Namespace *ns) { typeNamespace = ns; }
 };
 
 class SimpleType : public NamedSymbol {
@@ -147,6 +155,7 @@ void ProgramStructure::push(Namespace* ns) {
     CHECK_NULL(ns);
     if (debug)
         fprintf(debugStream, "ProgramStructure: pushing %s\n", ns->toString().c_str());
+    LOG4("ProgramStructure: pushing " << ns->toString());
     BUG_CHECK(currentNamespace != nullptr, "Null currentNamespace");
     currentNamespace->declare(ns);
     ns->setParent(currentNamespace);
@@ -170,6 +179,7 @@ void ProgramStructure::pop() {
     if (debug)
         fprintf(debugStream, "ProgramStructure: popping %s\n",
                 currentNamespace->toString().c_str());
+    LOG4("ProgramStructure: popping " << currentNamespace->toString());
     currentNamespace = parent;
 }
 
@@ -182,12 +192,15 @@ void ProgramStructure::declareType(IR::ID id) {
     currentNamespace->declare(st);
 }
 
-void ProgramStructure::declareObject(IR::ID id) {
+void ProgramStructure::declareObject(IR::ID id, cstring type) {
     if (debug)
         fprintf(debugStream, "ProgramStructure: adding object %s\n", id.name.c_str());
 
-    LOG3("ProgramStructure: adding object " << id);
+    LOG3("ProgramStructure: adding object " << id << " with type " << type);
+    auto type_sym = lookup(type);
     auto o = new Object(id.name, id.srcInfo);
+    if (auto tns = dynamic_cast<const Namespace *>(type_sym))
+        o->setNamespace(tns);
     currentNamespace->declare(o);
 }
 
@@ -200,29 +213,41 @@ void ProgramStructure::startAbsolutePath() {
     identifierContext.lookupContext = rootNamespace;
 }
 
+void ProgramStructure::relativePathFromLastSymbol() {
+    if (identifierContext.previousSymbol) {
+        identifierContext.lookupContext = identifierContext.previousSymbol->symNamespace();
+    } else {
+        identifierContext.lookupContext = &Namespace::empty;
+    }
+}
+
 void ProgramStructure::clearPath() {
+    identifierContext.previousSymbol = nullptr;
     identifierContext.lookupContext = nullptr;
 }
 
-NamedSymbol* ProgramStructure::lookup(cstring identifier) const {
-    Namespace* parent = identifierContext.lookupContext;
+NamedSymbol* ProgramStructure::lookup(cstring identifier) {
+    const Namespace* parent = identifierContext.lookupContext;
+    NamedSymbol *rv = nullptr;
     if (parent == nullptr) {
         // We don't have a parent, try lookup up the stack
         parent = currentNamespace;
         while (parent != nullptr) {
             NamedSymbol* symbol = parent->lookup(identifier);
-            if (symbol != nullptr)
-                return symbol;
+            if (symbol != nullptr) {
+                rv = symbol;
+                break; }
             parent = parent->getParent();
         }
+    } else {
+        rv = parent->lookup(identifier);
     }
-
-    if (parent == nullptr)
-        return nullptr;
-    return parent->lookup(identifier);
+    identifierContext.previousSymbol = rv;
+    identifierContext.lookupContext = nullptr;
+    return rv;
 }
 
-ProgramStructure::SymbolKind ProgramStructure::lookupIdentifier(cstring identifier) const {
+ProgramStructure::SymbolKind ProgramStructure::lookupIdentifier(cstring identifier) {
     NamedSymbol* ns = lookup(identifier);
     if (ns == nullptr || dynamic_cast<Object*>(ns) != nullptr) {
         LOG2("Identifier " << identifier);
@@ -244,6 +269,13 @@ void ProgramStructure::declareTypes(const IR::IndexedVector<IR::Type_Var>* typeV
         return;
     for (auto tv : *typeVars)
         declareType(tv->name);
+}
+
+void ProgramStructure::declareParameters(const IR::IndexedVector<IR::Parameter>* params) {
+    if (params == nullptr)
+        return;
+    for (auto param : *params)
+        declareObject(param->name, param->type->toString());
 }
 
 void ProgramStructure::endParse() {

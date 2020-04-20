@@ -221,7 +221,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 // End of token definitions ///////////////////////////////////////////////////
 
 
-%type<IR::ID*>              name nonTypeName nonTableKwName
+%type<IR::ID*>              name dot_name nonTypeName nonTableKwName
 %type<IR::Direction>        direction
 %type<IR::Path*>            prefixedNonTypeName prefixedType
 %type<IR::IndexedVector<IR::Type_Var>*>  typeParameterList
@@ -315,6 +315,16 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %left DOT
 
 %right THEN ELSE /* THEN is a fake token */
+
+/*
+FIXME -- we need this %destructor for correct error recovery, but because of the
+broken bison C++ skeleton, it gets declarations in the wrong order and it won't
+compile.  Not having it (just) means that the symbol table may get confused after
+a syntax error causing a spurious error cascade, which isn't too bad.
+
+%destructor { driver.structure->pop(); } functionPrototype parserTypeDeclaration
+                                         controlTypeDeclaration
+*/
 
 %%
 
@@ -621,27 +631,29 @@ packageTypeDeclaration
       optTypeParameters {
           if (!$5->empty()) driver.structure->markAsTemplate(*$3);
           driver.structure->declareTypes(&$5->parameters); }
-      "(" parameterList ")"        { auto pl = new IR::ParameterList(@8, *$8);
-                                     $$ = new IR::Type_Package(@3, *$3, $1, $5, pl); }
+      "(" parameterList ")"        {
+          driver.structure->declareParameters($8);
+          auto pl = new IR::ParameterList(@8, *$8);
+          $$ = new IR::Type_Package(@3, *$3, $1, $5, pl); }
     ;
 
 instantiation
       : annotations typeRef "(" argumentList ")" name ";"
                      { $$ = new IR::Declaration_Instance(@6, *$6, new IR::Annotations(*$1),
                                                          $2, $4);
-                       driver.structure->declareObject(*$6); }
+                       driver.structure->declareObject(*$6, $2->toString()); }
       | typeRef "(" argumentList ")" name ";"
                      { $$ = new IR::Declaration_Instance(@5, *$5, $1, $3);
-                       driver.structure->declareObject(*$5); }
+                       driver.structure->declareObject(*$5, $1->toString()); }
       /* experimental */
       | annotations typeRef "(" argumentList ")" name "=" objInitializer ";"
                      { $$ = new IR::Declaration_Instance(@6, *$6, new IR::Annotations(*$1),
                                                          $2, $4, $8);
-                       driver.structure->declareObject(*$6); }
+                       driver.structure->declareObject(*$6, $2->toString()); }
       /* experimental */
       | typeRef "(" argumentList ")" name "=" objInitializer ";"
                      { $$ = new IR::Declaration_Instance(@5, *$5, $1, $3, $7);
-                       driver.structure->declareObject(*$5); }
+                       driver.structure->declareObject(*$5, $1->toString()); }
     ;
 
 /* experimental; includes the following 3 productions */
@@ -695,10 +707,11 @@ parserLocalElement
 
 parserTypeDeclaration
     : optAnnotations
-        PARSER name       { driver.structure->pushContainerType(*$3, false); }
+        PARSER name       { driver.structure->pushContainerType(*$3, true); }
         optTypeParameters { if (!$5->empty()) driver.structure->markAsTemplate(*$3);
                             driver.structure->declareTypes(&$5->parameters); }
-        "(" parameterList ")" { auto pl = new IR::ParameterList(@8, *$8);
+        "(" parameterList ")" { driver.structure->declareParameters($8);
+                                auto pl = new IR::ParameterList(@8, *$8);
                                 $$ = new IR::Type_Parser(@3, *$3, $1, $5, pl); }
     ;
 
@@ -809,10 +822,11 @@ controlDeclaration
 
 controlTypeDeclaration
     : optAnnotations
-        CONTROL name { driver.structure->pushContainerType(*$3, false); }
+        CONTROL name { driver.structure->pushContainerType(*$3, true); }
         optTypeParameters { if (!$5->empty()) driver.structure->markAsTemplate(*$3);
                             driver.structure->declareTypes(&$5->parameters); }
-        "(" parameterList ")" { auto pl = new IR::ParameterList(@8, *$8);
+        "(" parameterList ")" { driver.structure->declareParameters($8);
+                                auto pl = new IR::ParameterList(@8, *$8);
                                 $$ = new IR::Type_Control(@3, *$3, $1, $5, pl); }
     ;
 
@@ -842,7 +856,10 @@ externDeclaration
                             driver.structure->declareTypes(&$5->parameters); }
         "{" methodPrototypes "}" { driver.structure->pop();
                                    $$ = new IR::Type_Extern(@3, *$3, $5, *$8, $1); }
-    | optAnnotations EXTERN functionPrototype ";" { $$ = $3; $3->annotations = $1; }
+    | optAnnotations EXTERN functionPrototype ";" {
+            driver.structure->pop();
+            $$ = $3;
+            $3->annotations = $1; }
     | optAnnotations EXTERN name ";" {
             // forward declaration;
             driver.structure->pushContainerType(*$3, true);
@@ -858,20 +875,24 @@ methodPrototypes
 functionPrototype
     : typeOrVoid
         name optTypeParameters {
-            driver.structure->declareObject(*$2);
+            driver.structure->declareObject(*$2, $1->toString());
             if (!$3->empty()) driver.structure->markAsTemplate(*$2);
             driver.structure->pushNamespace(@2, false);
             driver.structure->declareTypes(&$3->parameters); }
-        "(" parameterList ")" { driver.structure->pop(); }
-                           { auto params = new IR::ParameterList(@6, *$6);
-                             auto mt = new IR::Type_Method(@2, $3, $1, params);
-                             $$ = new IR::Method(@2, *$2, mt); }
+        "(" parameterList ")" { driver.structure->declareParameters($6);
+                                auto params = new IR::ParameterList(@6, *$6);
+                                auto mt = new IR::Type_Method(@2, $3, $1, params);
+                                $$ = new IR::Method(@2, *$2, mt); }
     ;
 
 methodPrototype
-    : optAnnotations functionPrototype ";" { $$ = $2; $2->annotations = $1; }
-    | optAnnotations ABSTRACT functionPrototype ";"    { $$ = $3; $$->setAbstract();
-                                                         $3->annotations = $1; }  // experimental
+    : optAnnotations functionPrototype ";" {
+            driver.structure->pop();
+            $$ = $2; $2->annotations = $1; }
+    | optAnnotations ABSTRACT functionPrototype ";" {
+            driver.structure->pop();
+            $$ = $3; $$->setAbstract();
+            $3->annotations = $1; }  // experimental
     | optAnnotations TYPE_IDENTIFIER "(" parameterList ")" ";"  // constructor
                                         { auto par = new IR::ParameterList(@4, *$4);
                                           auto mt = new IR::Type_Method(@2, par);
@@ -1255,16 +1276,16 @@ variableDeclaration
     : annotations typeRef name optInitializer ";"
                                      { auto ann = new IR::Annotations(@1, *$1);
                                        $$ = new IR::Declaration_Variable(@1+@4, *$3, ann, $2, $4);
-                                       driver.structure->declareObject(*$3); }
+                                       driver.structure->declareObject(*$3, $2->toString()); }
     | typeRef name optInitializer ";"
                                      { $$ = new IR::Declaration_Variable(@1+@4, *$2, $1, $3);
-                                       driver.structure->declareObject(*$2); }
+                                       driver.structure->declareObject(*$2, $1->toString()); }
     ;
 
 constantDeclaration
     : optAnnotations CONST typeRef name "=" initializer ";"
                                      { $$ = new IR::Declaration_Constant(@1+@6, *$4, $1, $3, $6);
-                                       driver.structure->declareObject(*$4); }
+                                       driver.structure->declareObject(*$4, $3->toString()); }
     ;
 
 optInitializer
@@ -1279,7 +1300,9 @@ initializer
 /**************** Expressions ****************/
 
 functionDeclaration
-    : functionPrototype blockStatement   { $$ = new IR::Function($1->srcInfo, $1->name, $1->type, $2); }
+    : functionPrototype blockStatement   {
+            driver.structure->pop();
+            $$ = new IR::Function($1->srcInfo, $1->name, $1->type, $2); }
     ;
 
 argumentList
@@ -1312,10 +1335,14 @@ prefixedNonTypeName
                                            driver.structure->clearPath(); }
     ;
 
+dot_name:
+    "." { driver.structure->relativePathFromLastSymbol(); } name {
+          driver.structure->clearPath(); $$ = $3; }
+
 lvalue
     : prefixedNonTypeName                { $$ = new IR::PathExpression($1); }
     | THIS                               { $$ = new IR::This(@1); }  // experimental
-    | lvalue "." name                    { $$ = new IR::Member(@1 + @3, $1, *$3); }
+    | lvalue dot_name %prec DOT          { $$ = new IR::Member(@1 + @2, $1, *$2); }
     | lvalue "[" expression "]"          { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
     | lvalue "[" expression ":" expression "]" { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
     ;
@@ -1338,12 +1365,12 @@ expression
     | "~" expression %prec PREFIX        { $$ = new IR::Cmpl(@1 + @2, $2); }
     | "-" expression %prec PREFIX        { $$ = new IR::Neg(@1 + @2, $2); }
     | "+" expression %prec PREFIX        { $$ = $2; }
-    | typeName "." name
-        { $$ = new IR::Member(@1 + @3, new IR::TypeNameExpression(@1, $1), *$3); }
+    | typeName dot_name %prec DOT
+        { $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression(@1, $1), *$2); }
     | ERROR "." name
         { auto typeName = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error")));
           $$ = new IR::Member(@1+@3, new IR::TypeNameExpression(@1+@3, typeName), *$3); }
-    | expression "." name                { $$ = new IR::Member(@1 + @3, $1, *$3); }
+    | expression dot_name %prec DOT      { $$ = new IR::Member(@1 + @2, $1, *$2); }
     | expression "*" expression          { $$ = new IR::Mul(@1 + @3, $1, $3); }
     | expression "/" expression          { $$ = new IR::Div(@1 + @3, $1, $3); }
     | expression "%" expression          { $$ = new IR::Mod(@1 + @3, $1, $3); }
