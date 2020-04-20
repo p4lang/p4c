@@ -55,7 +55,9 @@ class ProgramStructure final {
  public:
     enum class SymbolKind {
         Identifier,
-        Type
+        TemplateIdentifier,
+        Type,
+        TemplateType,
     };
 
     ProgramStructure();
@@ -65,6 +67,7 @@ class ProgramStructure final {
     void pushContainerType(IR::ID id, bool allowDuplicates);
     void declareType(IR::ID id);
     void declareObject(IR::ID id);
+    void markAsTemplate(IR::ID id);  // the symbol expects template args
 
     // the last namespace has been exited
     void pop();

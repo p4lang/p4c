@@ -52,6 +52,8 @@ class NamedSymbol {
     virtual bool sameType(const NamedSymbol* other) const {
         return typeid(*this) == typeid(*other);
     }
+
+    bool template_args = false;  // does the symbol expect template args
 };
 
 class Namespace : public NamedSymbol {
@@ -175,6 +177,7 @@ void ProgramStructure::declareType(IR::ID id) {
     if (debug)
         fprintf(debugStream, "ProgramStructure: adding type %s\n", id.name.c_str());
 
+    LOG3("ProgramStructure: adding type " << id);
     auto st = new SimpleType(id.name, id.srcInfo);
     currentNamespace->declare(st);
 }
@@ -183,8 +186,14 @@ void ProgramStructure::declareObject(IR::ID id) {
     if (debug)
         fprintf(debugStream, "ProgramStructure: adding object %s\n", id.name.c_str());
 
+    LOG3("ProgramStructure: adding object " << id);
     auto o = new Object(id.name, id.srcInfo);
     currentNamespace->declare(o);
+}
+
+void ProgramStructure::markAsTemplate(IR::ID id) {
+    LOG3("ProgramStructure: " << id << " has template args");
+    lookup(id)->template_args = true;
 }
 
 void ProgramStructure::startAbsolutePath() {
@@ -217,9 +226,13 @@ ProgramStructure::SymbolKind ProgramStructure::lookupIdentifier(cstring identifi
     NamedSymbol* ns = lookup(identifier);
     if (ns == nullptr || dynamic_cast<Object*>(ns) != nullptr) {
         LOG2("Identifier " << identifier);
+        if (ns && ns->template_args)
+            return ProgramStructure::SymbolKind::TemplateIdentifier;
         return ProgramStructure::SymbolKind::Identifier;
     }
     if (dynamic_cast<SimpleType*>(ns) != nullptr || dynamic_cast<ContainerType*>(ns) != nullptr) {
+        if (ns && ns->template_args)
+            return ProgramStructure::SymbolKind::TemplateType;
         return ProgramStructure::SymbolKind::Type;
         LOG2("Type " << identifier);
     }

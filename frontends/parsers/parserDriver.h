@@ -208,6 +208,10 @@ class P4ParserDriver final : public AbstractParserDriver {
     /// incrementally, so we need to hold some state between tokens.)
     std::string stringLiteral;
 
+    // flag to track when template args are expected, to adjust the precedence
+    // of '<'
+    bool template_args;
+
  private:
     P4ParserDriver();
 
