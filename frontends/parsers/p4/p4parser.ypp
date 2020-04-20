@@ -1253,7 +1253,7 @@ variableDeclaration
 
 constantDeclaration
     : optAnnotations CONST typeRef name "=" initializer ";"
-                                     { $$ = new IR::Declaration_Constant(@1+@6, *$4, $1, $3, $6);
+                                     { $$ = new IR::Declaration_Constant(@4, *$4, $1, $3, $6);
                                        driver.structure->declareObject(*$4); }
     ;
 

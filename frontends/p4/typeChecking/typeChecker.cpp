@@ -2220,6 +2220,7 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
     if (ltype == nullptr || rtype == nullptr)
         return expression;
 
+    auto leftType = ltype;  // save original type
     if (auto se = ltype->to<IR::Type_SerEnum>())
         ltype = se->type;
     if (auto se = rtype->to<IR::Type_SerEnum>())
@@ -2238,7 +2239,7 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
         return expression;
     }
 
-    const IR::Type* sameType = ltype;
+    const IR::Type* sameType = leftType;
     if (bl != nullptr && br != nullptr) {
         if (!TypeMap::equivalent(bl, br)) {
             typeError("%1%: Cannot operate on values with different types %2% and %3%",
@@ -2259,8 +2260,8 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
         e->right = new IR::Constant(cst->srcInfo, ltype, cst->value, cst->base);
         setCompileTimeConstant(e->right);
         expression = e;
-        sameType = ltype;
-        setType(e->right, sameType);
+        setType(e->right, ltype);
+        sameType = leftType;  // Not ltype: SerEnum &&& Bit is Set<SerEnum>
     } else {
         // both are InfInt: use same exact type for both sides, so it is properly
         // set after unification
