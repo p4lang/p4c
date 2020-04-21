@@ -272,6 +272,7 @@ class Slice : Operation_Ternary {
 }
 
 class Member : Operation_Unary {
+    precedence = DBPrint::Prec_Postfix;
     ID member;
     virtual int offset_bits() const;
     int lsb() const;

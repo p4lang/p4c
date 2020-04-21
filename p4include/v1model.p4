@@ -55,8 +55,6 @@ limitations under the License.
 #define V1MODEL_VERSION 20180101
 #endif
 
-const bit<32> __v1model_version = V1MODEL_VERSION;
-
 match_kind {
     range,
     // Either an exact match, or a wildcard (matching any value).
@@ -68,6 +66,8 @@ match_kind {
 #if V1MODEL_VERSION >= 20200408
 typedef bit<9>  PortId_t;       // should not be a constant size?
 #endif
+
+const bit<32> __v1model_version = V1MODEL_VERSION;
 
 @metadata @name("standard_metadata")
 struct standard_metadata_t {
