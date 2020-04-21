@@ -53,9 +53,9 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint {
     virtual cstring node_type_name() const = 0;
     virtual void validate() const {}
     virtual const Annotation *getAnnotation(cstring) const { return nullptr; }
-    template<typename T> bool is() const;
-    template<typename T> const T *to() const;
-    template<typename T> const T &as() const;
+    template<typename T> bool is() const { return to<T>() != nullptr; }
+    template<typename T> const T *to() const { return dynamic_cast<const T*>(this); }
+    template<typename T> const T &as() const { return dynamic_cast<const T&>(*this); }
 };
 
 class Node : public virtual INode {
@@ -130,10 +130,6 @@ class Node : public virtual INode {
 
 // simple version of dbprint
 cstring dbp(const INode* node);
-
-template<typename T> bool INode::is() const { return getNode()->is<T>(); }
-template<typename T> const T *INode::to() const { return getNode()->to<T>(); }
-template<typename T> const T &INode::as() const { return getNode()->as<T>(); }
 
 inline bool equal(const Node *a, const Node *b) {
     return a == b || (a && b && *a == *b); }
