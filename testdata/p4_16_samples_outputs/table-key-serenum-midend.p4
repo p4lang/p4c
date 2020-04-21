@@ -40,9 +40,7 @@ control c(inout Headers h, inout standard_metadata_t sm) {
         }
         const entries = {
                         16w0x800 : do_act(32w0x800);
-
                         16w0x8100 : do_act(32w0x8100);
-
         }
 
         default_action = NoAction_0();

@@ -55,6 +55,8 @@ limitations under the License.
 #define V1MODEL_VERSION 20180101
 #endif
 
+const bit<32> __v1model_version = V1MODEL_VERSION;
+
 match_kind {
     range,
     // Either an exact match, or a wildcard (matching any value).
@@ -755,7 +757,5 @@ package V1Switch<H, M>(Parser<H, M> p,
                        ComputeChecksum<H, M> ck,
                        Deparser<H> dep
                        );
-
-const bit<32> __v1model_version = V1MODEL_VERSION;
 
 #endif  /* _V1_MODEL_P4_ */

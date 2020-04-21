@@ -61,7 +61,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         default_action = set_error_idx(0);
         const entries = {
                         error.NoError : set_error_idx(1);
-
         }
 
     }

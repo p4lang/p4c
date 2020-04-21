@@ -103,21 +103,13 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         default_action = set_error_idx(0);
         const entries = {
                         error.NoError : set_error_idx(1);
-
                         error.PacketTooShort : set_error_idx(2);
-
                         error.NoMatch : set_error_idx(3);
-
                         error.StackOutOfBounds : set_error_idx(4);
-
                         error.HeaderTooShort : set_error_idx(5);
-
                         error.ParserTimeout : set_error_idx(6);
-
                         error.BadIPv4HeaderChecksum : set_error_idx(7);
-
                         error.UnhandledIPv4Options : set_error_idx(8);
-
         }
 
         psa_direct_counter = parser_error_counts;

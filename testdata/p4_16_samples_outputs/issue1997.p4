@@ -37,9 +37,7 @@ control c(in hdr h, inout standard_metadata_t standard_meta) {
         default_action = a;
         const entries = {
                         0x1 : a();
-
                         0x2 : b();
-
         }
 
     }

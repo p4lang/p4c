@@ -63,11 +63,8 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         default_action = a();
         const entries = {
                         8w0x11 &&& 8w0xf0 : a_with_control_params(9w11);
-
                         8w0x12 : a_with_control_params(9w12);
-
                         default : a_with_control_params(9w13);
-
         }
 
     }

@@ -2,7 +2,6 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
-const bit<32> __v1model_version = 20180101;
 header ethernet_t {
     bit<48> dst_addr;
     bit<48> src_addr;
