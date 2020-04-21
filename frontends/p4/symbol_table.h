@@ -44,18 +44,21 @@ class ProgramStructure final {
     Namespace* currentNamespace;
 
     struct PathContext {
-        Namespace* lookupContext;
-        PathContext() : lookupContext(nullptr) {}
+        const NamedSymbol* previousSymbol;
+        const Namespace* lookupContext;
+        PathContext() : previousSymbol(nullptr), lookupContext(nullptr) {}
     } identifierContext;
 
     void push(Namespace* ns);
-    NamedSymbol* lookup(const cstring identifier) const;
+    NamedSymbol* lookup(const cstring identifier);
     void declare(NamedSymbol* symbol);
 
  public:
     enum class SymbolKind {
         Identifier,
-        Type
+        TemplateIdentifier,
+        Type,
+        TemplateType,
     };
 
     ProgramStructure();
@@ -64,15 +67,18 @@ class ProgramStructure final {
     void pushNamespace(SourceInfo info, bool allowDuplicates);
     void pushContainerType(IR::ID id, bool allowDuplicates);
     void declareType(IR::ID id);
-    void declareObject(IR::ID id);
+    void declareObject(IR::ID id, cstring type);
+    void markAsTemplate(IR::ID id);  // the symbol expects template args
 
     // the last namespace has been exited
     void pop();
     // Declares these types in the current scope
     void declareTypes(const IR::IndexedVector<IR::Type_Var>* typeVars);
-    SymbolKind lookupIdentifier(cstring identifier) const;
+    void declareParameters(const IR::IndexedVector<IR::Parameter>* params);
+    SymbolKind lookupIdentifier(cstring identifier);
 
     void startAbsolutePath();
+    void relativePathFromLastSymbol();
     void clearPath();
 
     void endParse();

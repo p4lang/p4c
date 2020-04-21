@@ -77,8 +77,6 @@ set (P4RUNTIME_EXCLUDE
 )
 
 set (P4_XFAIL_TESTS
-  # issue #13
-  testdata/p4_16_samples/cast-call.p4
   # This program is invalid according to the PSA specification as one direct
   # counter is shared by multiple match tables: "A DirectCounter instance must
   # appear as the value of the psa_direct_counter table attribute for at most

@@ -192,6 +192,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %token<Token>      L_BRACE "{"
 %token<Token>      R_BRACE "}"
 %token<Token>      L_ANGLE "<"
+%token<Token>      L_ANGLE_ARGS    // < where template args are expected
 %token<Token>      R_ANGLE ">"
 %token<Token>      R_ANGLE_SHIFT   // > immediately followed by another >
 %token<Token>      L_PAREN "("
@@ -220,7 +221,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 // End of token definitions ///////////////////////////////////////////////////
 
 
-%type<IR::ID*>              name nonTypeName nonTableKwName
+%type<IR::ID*>              name dot_name nonTypeName nonTableKwName
 %type<IR::Direction>        direction
 %type<IR::Path*>            prefixedNonTypeName prefixedType
 %type<IR::IndexedVector<IR::Type_Var>*>  typeParameterList
@@ -310,10 +311,20 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %left PP PLUS MINUS PLUS_SAT MINUS_SAT
 %left MUL DIV MOD
 %right PREFIX
-%nonassoc R_BRACKET L_PAREN L_BRACKET
+%nonassoc R_BRACKET L_PAREN L_BRACKET L_ANGLE_ARGS
 %left DOT
 
 %right THEN ELSE /* THEN is a fake token */
+
+/*
+FIXME -- we need this %destructor for correct error recovery, but because of the
+broken bison C++ skeleton, it gets declarations in the wrong order and it won't
+compile.  Not having it (just) means that the symbol table may get confused after
+a syntax error causing a spurious error cascade, which isn't too bad.
+
+%destructor { driver.structure->pop(); } functionPrototype parserTypeDeclaration
+                                         controlTypeDeclaration
+*/
 
 %%
 
@@ -569,6 +580,7 @@ annotationToken
     | "{"              { $$ = $1; }
     | "}"              { $$ = $1; }
     | "<"              { $$ = $1; }
+    | L_ANGLE_ARGS     { $$ = $1; }
     | ">"              { $$ = $1; }
     | R_ANGLE_SHIFT    { $$ = $1; }
 
@@ -616,28 +628,32 @@ direction
 
 packageTypeDeclaration
     : optAnnotations PACKAGE name { driver.structure->pushContainerType(*$3, false); }
-      optTypeParameters { driver.structure->declareTypes(&$5->parameters); }
-      "(" parameterList ")"        { auto pl = new IR::ParameterList(@8, *$8);
-                                     $$ = new IR::Type_Package(@3, *$3, $1, $5, pl); }
+      optTypeParameters {
+          if (!$5->empty()) driver.structure->markAsTemplate(*$3);
+          driver.structure->declareTypes(&$5->parameters); }
+      "(" parameterList ")"        {
+          driver.structure->declareParameters($8);
+          auto pl = new IR::ParameterList(@8, *$8);
+          $$ = new IR::Type_Package(@3, *$3, $1, $5, pl); }
     ;
 
 instantiation
       : annotations typeRef "(" argumentList ")" name ";"
                      { $$ = new IR::Declaration_Instance(@6, *$6, new IR::Annotations(*$1),
                                                          $2, $4);
-                       driver.structure->declareObject(*$6); }
+                       driver.structure->declareObject(*$6, $2->toString()); }
       | typeRef "(" argumentList ")" name ";"
                      { $$ = new IR::Declaration_Instance(@5, *$5, $1, $3);
-                       driver.structure->declareObject(*$5); }
+                       driver.structure->declareObject(*$5, $1->toString()); }
       /* experimental */
       | annotations typeRef "(" argumentList ")" name "=" objInitializer ";"
                      { $$ = new IR::Declaration_Instance(@6, *$6, new IR::Annotations(*$1),
                                                          $2, $4, $8);
-                       driver.structure->declareObject(*$6); }
+                       driver.structure->declareObject(*$6, $2->toString()); }
       /* experimental */
       | typeRef "(" argumentList ")" name "=" objInitializer ";"
                      { $$ = new IR::Declaration_Instance(@5, *$5, $1, $3, $7);
-                       driver.structure->declareObject(*$5); }
+                       driver.structure->declareObject(*$5, $1->toString()); }
     ;
 
 /* experimental; includes the following 3 productions */
@@ -691,9 +707,11 @@ parserLocalElement
 
 parserTypeDeclaration
     : optAnnotations
-        PARSER name       { driver.structure->pushContainerType(*$3, false); }
-        optTypeParameters { driver.structure->declareTypes(&$5->parameters); }
-        "(" parameterList ")" { auto pl = new IR::ParameterList(@8, *$8);
+        PARSER name       { driver.structure->pushContainerType(*$3, true); }
+        optTypeParameters { if (!$5->empty()) driver.structure->markAsTemplate(*$3);
+                            driver.structure->declareTypes(&$5->parameters); }
+        "(" parameterList ")" { driver.structure->declareParameters($8);
+                                auto pl = new IR::ParameterList(@8, *$8);
                                 $$ = new IR::Type_Parser(@3, *$3, $1, $5, pl); }
     ;
 
@@ -782,13 +800,13 @@ simpleKeysetExpression
 
 valueSetDeclaration
     : optAnnotations
-        VALUESET "<" baseType r_angle "(" expression ")" name ";"
+        VALUESET l_angle baseType r_angle "(" expression ")" name ";"
         { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
     | optAnnotations
-        VALUESET "<" tupleType r_angle "(" expression ")" name ";"
+        VALUESET l_angle tupleType r_angle "(" expression ")" name ";"
         { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
     | optAnnotations
-        VALUESET "<" typeName r_angle "(" expression ")" name ";"
+        VALUESET l_angle typeName r_angle "(" expression ")" name ";"
         { $$ = new IR::P4ValueSet(@9, *$9, $1, $4, $7); }
     ;
 
@@ -804,9 +822,11 @@ controlDeclaration
 
 controlTypeDeclaration
     : optAnnotations
-        CONTROL name { driver.structure->pushContainerType(*$3, false); }
-        optTypeParameters { driver.structure->declareTypes(&$5->parameters); }
-        "(" parameterList ")" { auto pl = new IR::ParameterList(@8, *$8);
+        CONTROL name { driver.structure->pushContainerType(*$3, true); }
+        optTypeParameters { if (!$5->empty()) driver.structure->markAsTemplate(*$3);
+                            driver.structure->declareTypes(&$5->parameters); }
+        "(" parameterList ")" { driver.structure->declareParameters($8);
+                                auto pl = new IR::ParameterList(@8, *$8);
                                 $$ = new IR::Type_Control(@3, *$3, $1, $5, pl); }
     ;
 
@@ -832,10 +852,14 @@ controlBody
 externDeclaration
     : optAnnotations
         EXTERN nonTypeName { driver.structure->pushContainerType(*$3, true); }
-        optTypeParameters { driver.structure->declareTypes(&$5->parameters); }
+        optTypeParameters { if (!$5->empty()) driver.structure->markAsTemplate(*$3);
+                            driver.structure->declareTypes(&$5->parameters); }
         "{" methodPrototypes "}" { driver.structure->pop();
                                    $$ = new IR::Type_Extern(@3, *$3, $5, *$8, $1); }
-    | optAnnotations EXTERN functionPrototype ";" { $$ = $3; $3->annotations = $1; }
+    | optAnnotations EXTERN functionPrototype ";" {
+            driver.structure->pop();
+            $$ = $3;
+            $3->annotations = $1; }
     | optAnnotations EXTERN name ";" {
             // forward declaration;
             driver.structure->pushContainerType(*$3, true);
@@ -850,18 +874,25 @@ methodPrototypes
 
 functionPrototype
     : typeOrVoid
-        name optTypeParameters { driver.structure->pushNamespace(@2, false);
-                                 driver.structure->declareTypes(&$3->parameters); }
-        "(" parameterList ")" { driver.structure->pop(); }
-                           { auto params = new IR::ParameterList(@6, *$6);
-                             auto mt = new IR::Type_Method(@2, $3, $1, params);
-                             $$ = new IR::Method(@2, *$2, mt); }
+        name optTypeParameters {
+            driver.structure->declareObject(*$2, $1->toString());
+            if (!$3->empty()) driver.structure->markAsTemplate(*$2);
+            driver.structure->pushNamespace(@2, false);
+            driver.structure->declareTypes(&$3->parameters); }
+        "(" parameterList ")" { driver.structure->declareParameters($6);
+                                auto params = new IR::ParameterList(@6, *$6);
+                                auto mt = new IR::Type_Method(@2, $3, $1, params);
+                                $$ = new IR::Method(@2, *$2, mt); }
     ;
 
 methodPrototype
-    : optAnnotations functionPrototype ";" { $$ = $2; $2->annotations = $1; }
-    | optAnnotations ABSTRACT functionPrototype ";"    { $$ = $3; $$->setAbstract();
-                                                         $3->annotations = $1; }  // experimental
+    : optAnnotations functionPrototype ";" {
+            driver.structure->pop();
+            $$ = $2; $2->annotations = $1; }
+    | optAnnotations ABSTRACT functionPrototype ";" {
+            driver.structure->pop();
+            $$ = $3; $$->setAbstract();
+            $3->annotations = $1; }  // experimental
     | optAnnotations TYPE_IDENTIFIER "(" parameterList ")" ";"  // constructor
                                         { auto par = new IR::ParameterList(@4, *$4);
                                           auto mt = new IR::Type_Method(@2, par);
@@ -894,7 +925,7 @@ typeName
     ;
 
 tupleType
-    : TUPLE "<" typeArgumentList r_angle    { $$ = new IR::Type_Tuple(@1+@4, *$3); }
+    : TUPLE l_angle typeArgumentList r_angle    { $$ = new IR::Type_Tuple(@1+@4, *$3); }
     ;
 
 headerStackType
@@ -902,7 +933,7 @@ headerStackType
     ;
 
 specializedType
-    : typeName "<" typeArgumentList r_angle { $$ = new IR::Type_Specialized(@1 + @4, $1, $3); }
+    : typeName l_angle typeArgumentList r_angle { $$ = new IR::Type_Specialized(@1 + @4, $1, $3); }
     ;
 
 baseType
@@ -911,18 +942,18 @@ baseType
     | BIT    { $$ = IR::Type::Bits::get(@1, 1); }
     | STRING { $$ = IR::Type::String::get(); }
     | INT    { $$ = new IR::Type_InfInt(); }
-    | BIT "<" INTEGER r_angle
+    | BIT l_angle INTEGER r_angle
       { $$ = IR::Type::Bits::get(@1+@4, parseConstantChecked(@3, $3), false); }
-    | INT "<" INTEGER r_angle
+    | INT l_angle INTEGER r_angle
       { $$ = IR::Type::Bits::get(@1+@4, parseConstantChecked(@3, $3), true); }
-    | VARBIT "<" INTEGER r_angle
+    | VARBIT l_angle INTEGER r_angle
       { $$ = IR::Type::Varbits::get(@1+@4, parseConstantChecked(@3, $3)); }
 
-    | BIT "<" "(" expression ")" r_angle
+    | BIT l_angle "(" expression ")" r_angle
       { $$ = new IR::Type_Bits(@1+@6, $4, false); }
-    | INT "<" "(" expression ")" r_angle
+    | INT l_angle "(" expression ")" r_angle
       { $$ = new IR::Type_Bits(@1+@6, $4, true); }
-    | VARBIT "<" "(" expression ")" r_angle
+    | VARBIT l_angle "(" expression ")" r_angle
       { $$ = new IR::Type_Varbits(@1+@6, $4); }
     ;
 
@@ -935,7 +966,7 @@ typeOrVoid
 
 optTypeParameters
     : /* empty */               { $$ = new IR::TypeParameters(); }
-    | "<" typeParameterList r_angle { $$ = new IR::TypeParameters(@1+@3, *$2); }
+    | l_angle typeParameterList r_angle { $$ = new IR::TypeParameters(@1+@3, *$2); }
     ;
 
 typeParameterList
@@ -1017,7 +1048,7 @@ enumDeclaration
     : optAnnotations
         ENUM name { driver.structure->declareType(*$3); }
         "{" identifierList "}" { $$ = new IR::Type_Enum(@3, *$3, *$6); }
-    | optAnnotations ENUM BIT "<" INTEGER r_angle name { driver.structure->declareType(*$7); }
+    | optAnnotations ENUM BIT l_angle INTEGER r_angle name { driver.structure->declareType(*$7); }
         "{" specifiedIdentifierList "}" {
             auto type = IR::Type::Bits::get(@3+@6, parseConstantChecked(@5, $5));
             $$ = new IR::Type_SerEnum(@7, *$7, type, *$10); }
@@ -1068,7 +1099,7 @@ assignmentOrMethodCallStatement
                                                  new IR::Vector<IR::Type>(), $3);
           $$ = new IR::MethodCallStatement(@1 + @4, mc); }
 
-    | lvalue "<" typeArgumentList r_angle "(" argumentList ")" ";"
+    | lvalue l_angle typeArgumentList r_angle "(" argumentList ")" ";"
         { auto mc = new IR::MethodCallExpression(@1 + @7,
                                                  $1, $3, $6);
           $$ = new IR::MethodCallStatement(@1 + @7, mc); }
@@ -1245,16 +1276,16 @@ variableDeclaration
     : annotations typeRef name optInitializer ";"
                                      { auto ann = new IR::Annotations(@1, *$1);
                                        $$ = new IR::Declaration_Variable(@1+@4, *$3, ann, $2, $4);
-                                       driver.structure->declareObject(*$3); }
+                                       driver.structure->declareObject(*$3, $2->toString()); }
     | typeRef name optInitializer ";"
                                      { $$ = new IR::Declaration_Variable(@1+@4, *$2, $1, $3);
-                                       driver.structure->declareObject(*$2); }
+                                       driver.structure->declareObject(*$2, $1->toString()); }
     ;
 
 constantDeclaration
     : optAnnotations CONST typeRef name "=" initializer ";"
                                      { $$ = new IR::Declaration_Constant(@1+@6, *$4, $1, $3, $6);
-                                       driver.structure->declareObject(*$4); }
+                                       driver.structure->declareObject(*$4, $3->toString()); }
     ;
 
 optInitializer
@@ -1269,7 +1300,9 @@ initializer
 /**************** Expressions ****************/
 
 functionDeclaration
-    : functionPrototype blockStatement   { $$ = new IR::Function($1->srcInfo, $1->name, $1->type, $2); }
+    : functionPrototype blockStatement   {
+            driver.structure->pop();
+            $$ = new IR::Function($1->srcInfo, $1->name, $1->type, $2); }
     ;
 
 argumentList
@@ -1302,10 +1335,14 @@ prefixedNonTypeName
                                            driver.structure->clearPath(); }
     ;
 
+dot_name:
+    "." { driver.structure->relativePathFromLastSymbol(); } name {
+          driver.structure->clearPath(); $$ = $3; }
+
 lvalue
     : prefixedNonTypeName                { $$ = new IR::PathExpression($1); }
     | THIS                               { $$ = new IR::This(@1); }  // experimental
-    | lvalue "." name                    { $$ = new IR::Member(@1 + @3, $1, *$3); }
+    | lvalue dot_name %prec DOT          { $$ = new IR::Member(@1 + @2, $1, *$2); }
     | lvalue "[" expression "]"          { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
     | lvalue "[" expression ":" expression "]" { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
     ;
@@ -1328,12 +1365,12 @@ expression
     | "~" expression %prec PREFIX        { $$ = new IR::Cmpl(@1 + @2, $2); }
     | "-" expression %prec PREFIX        { $$ = new IR::Neg(@1 + @2, $2); }
     | "+" expression %prec PREFIX        { $$ = $2; }
-    | typeName "." name
-        { $$ = new IR::Member(@1 + @3, new IR::TypeNameExpression(@1, $1), *$3); }
+    | typeName dot_name %prec DOT
+        { $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression(@1, $1), *$2); }
     | ERROR "." name
         { auto typeName = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error")));
           $$ = new IR::Member(@1+@3, new IR::TypeNameExpression(@1+@3, typeName), *$3); }
-    | expression "." name                { $$ = new IR::Member(@1 + @3, $1, *$3); }
+    | expression dot_name %prec DOT      { $$ = new IR::Member(@1 + @2, $1, *$2); }
     | expression "*" expression          { $$ = new IR::Mul(@1 + @3, $1, $3); }
     | expression "/" expression          { $$ = new IR::Div(@1 + @3, $1, $3); }
     | expression "%" expression          { $$ = new IR::Mod(@1 + @3, $1, $3); }
@@ -1346,7 +1383,8 @@ expression
         { $$ = new IR::Shr(@1 + @4, $1, $4); }
     | expression "<=" expression         { $$ = new IR::Leq(@1 + @3, $1, $3); }
     | expression ">=" expression         { $$ = new IR::Geq(@1 + @3, $1, $3); }
-    | expression "<" expression          { $$ = new IR::Lss(@1 + @3, $1, $3); }
+    | expression l_angle expression %prec "<"
+                                         { $$ = new IR::Lss(@1 + @3, $1, $3); }
     | expression ">" expression          { $$ = new IR::Grt(@1 + @3, $1, $3); }
     | expression "!=" expression         { $$ = new IR::Neq(@1 + @3, $1, $3); }
     | expression "==" expression         { $$ = new IR::Equ(@1 + @3, $1, $3); }
@@ -1357,10 +1395,8 @@ expression
     | expression "&&" expression         { $$ = new IR::LAnd(@1 + @2 + @3, $1, $3); }
     | expression "||" expression         { $$ = new IR::LOr(@1 + @2 + @3, $1, $3); }
     | expression "?" expression ":" expression { $$ = new IR::Mux(@1 + @5, $1, $3, $5); }
-    | expression "<" realTypeArgumentList r_angle "(" argumentList ")"
+    | expression l_angle realTypeArgumentList r_angle "(" argumentList ")"
         { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3, $6); }
-    // FIXME: the previous rule has the wrong precedence, and parses with
-    // precedence weaker than casts.  There is no easy way to fix this in bison.
     | expression "(" argumentList ")"
         { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3); }
     | namedType "(" argumentList ")"
@@ -1394,6 +1430,7 @@ strList
                                    $$->push_back(new IR::StringLiteral(@3, $3)); }
     ;
 
+l_angle : "<" | L_ANGLE_ARGS ;
 r_angle : ">" | R_ANGLE_SHIFT ;
 
 /*****************************************************************************/
