@@ -80,12 +80,13 @@ from .stf_lexer import STFLexer
 
 # PARSER ----------------------------------------------------------------------
 
+
 class STFParser:
     def __init__(self):
         self.lexer = STFLexer()
         self.lexer.build()
         self.tokens = self.lexer.tokens
-        self.parser = yacc.yacc(module = self)
+        self.parser = yacc.yacc(module=self)
         self.errors_cnt = 0
 
     def parse(self, data=None, filename=''):
@@ -99,8 +100,8 @@ class STFParser:
 
         self.lexer.filename = filename
         self.lexer.reset_lineno()
-        stf_ast = self.parser.parse(input = data,
-                                    lexer = self.lexer)
+        stf_ast = self.parser.parse(input=data,
+                                    lexer=self.lexer)
         self.errors_cnt += self.lexer.errors_cnt
         return stf_ast, self.errors_cnt
 
