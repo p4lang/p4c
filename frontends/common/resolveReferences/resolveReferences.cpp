@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include "resolveReferences.h"
+#include <boost/range/adaptor/reversed.hpp>
 #include <sstream>
 #include "frontends/common/options.h"
 
@@ -32,6 +33,8 @@ ResolutionContext::resolve(IR::ID name, P4::ResolutionType type) const {
     while (auto scope = findContext<IR::INamespace>(ctxt)) {
         auto *rv = lookup(scope, name, type);
         if (!rv->empty()) return rv; }
+    if (type == P4::ResolutionType::Any)
+        return lookupMatchKind(name);
     return &empty;
 }
 
@@ -40,8 +43,7 @@ ResolutionContext::lookup(const IR::INamespace *current, IR::ID name,
                           P4::ResolutionType type) const {
     LOG2("Trying to resolve in " << current->toString());
 
-    if (current->is<IR::IGeneralNamespace>()) {
-        auto gen = current->to<IR::IGeneralNamespace>();
+    if (auto gen = current->to<IR::IGeneralNamespace>()) {
         Util::Enumerator<const IR::IDeclaration*> *decls = gen->getDeclsByName(name);
         switch (type) {
             case P4::ResolutionType::Any:
@@ -78,45 +80,49 @@ ResolutionContext::lookup(const IR::INamespace *current, IR::ID name,
         if (!vector->empty()) {
             LOG3("Resolved in " << dbp(current->getNode()));
             return vector; }
-    } else {
-        auto simple = current->to<IR::ISimpleNamespace>();
+    } else if (auto simple = current->to<IR::ISimpleNamespace>()) {
         auto decl = simple->getDeclByName(name);
-        if (decl == nullptr)
-            return &empty;
-        switch (type) {
-            case P4::ResolutionType::Any:
-                break;
-            case P4::ResolutionType::Type: {
-                if (!decl->is<IR::Type>())
-                    return &empty;
-                break; }
-            case P4::ResolutionType::TypeVariable: {
-                if (!decl->is<IR::Type_Var>())
-                    return &empty;
-                break; }
-        default:
-            BUG("Unexpected enumeration value %1%", static_cast<int>(type)); }
-
-        if (!anyOrder && name.srcInfo.isValid() &&
-            !current->is<IR::Method>() &&  // method params may be referenced in annotations
-                                           // before the method
-            !decl->is<IR::Type_Var>() && !decl->is<IR::ParserState>()
-            // type vars and parser states may be used before their definitions
-        ) {
-            Util::SourceInfo nsi = name.srcInfo;
-            Util::SourceInfo dsi = decl->getNode()->srcInfo;
-            bool before = dsi <= nsi;
-            LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
-            if (!before)
-                return &empty; }
-
-        LOG3("Resolved in " << dbp(current->getNode()));
-        auto result = new std::vector<const IR::IDeclaration*>();
-        result->push_back(decl);
-        return result;
-    }
-    if (type == P4::ResolutionType::Any)
-        return lookupMatchKind(name);
+        if (decl) {
+            switch (type) {
+                case P4::ResolutionType::Any:
+                    break;
+                case P4::ResolutionType::Type: {
+                    if (!decl->is<IR::Type>())
+                        decl = nullptr;
+                    break; }
+                case P4::ResolutionType::TypeVariable: {
+                    if (!decl->is<IR::Type_Var>())
+                        decl = nullptr;
+                    break; }
+            default:
+                BUG("Unexpected enumeration value %1%", static_cast<int>(type)); } }
+        if (decl) {
+            if (!anyOrder && name.srcInfo.isValid() &&
+                !current->is<IR::Method>() &&  // method params may be referenced in annotations
+                                               // before the method
+                !decl->is<IR::Type_Var>() && !decl->is<IR::ParserState>()
+                // type vars and parser states may be used before their definitions
+            ) {
+                Util::SourceInfo nsi = name.srcInfo;
+                Util::SourceInfo dsi = decl->getNode()->srcInfo;
+                bool before = dsi <= nsi;
+                LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
+                if (!before)
+                    decl = nullptr; } }
+        if (decl) {
+            LOG3("Resolved in " << dbp(current->getNode()));
+            auto result = new std::vector<const IR::IDeclaration*>();
+            result->push_back(decl);
+            return result; }
+    } else {
+        BUG_CHECK(current->is<IR::INestedNamespace>(),
+                  "Unhandled namespace type %s", current->node_type_name()); }
+    if (auto nested = current->to<IR::INestedNamespace>()) {
+        // boost bug -- trying to iterate with an adaptor over an unnamed temp crashes
+        auto temp = nested->getNestedNamespaces();
+        for (auto nn : boost::adaptors::reverse(temp)) {
+            auto rv = lookup(nn, name, type);
+            if (!rv->empty()) return rv; } }
     return &empty;
 }
 
@@ -256,7 +262,13 @@ void ResolveReferences::resolvePath(const IR::Path *path, bool isType) const {
 void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
     if (!checkShadow) return;
     std::map<cstring, const IR::Node *> prev_in_scope;  // check for shadowing within a scope
-    for (auto *decl : *ns->getDeclarations()) {
+    auto decls = ns->getDeclarations();
+    if (auto nest = ns->to<IR::INestedNamespace>()) {
+        // boost bug -- trying to iterate with an adaptor over an unnamed temp crashes
+        auto temp = nest->getNestedNamespaces();
+        for (auto nn : boost::adaptors::reverse(temp))
+            decls = nn->getDeclarations()->concat(decls); }
+    for (auto *decl : *decls) {
         const IR::Node *node = decl->getNode();
         if (node->is<IR::StructField>())
             continue;
