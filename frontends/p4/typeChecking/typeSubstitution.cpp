@@ -46,7 +46,7 @@ bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
     substitution->apply(occurs);
     if (occurs.occurs) {
         ::error(ErrorType::ERR_TYPE_ERROR,
-                "%1%: Cannot unify type %2% with %3% since the former is already set",
+                "%1%: Cannot unify type %2% with %3%",
                 errorLocation, var, substitution);
         return false;
     }
