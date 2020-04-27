@@ -78,7 +78,7 @@ void ControlConverter::convertTableEntries(const IR::P4Table *table,
                     auto km = k->to<IR::Mask>();
                     key->emplace("key", stringRepr(km->left->to<IR::Constant>()->value, k8));
                     auto trailing_zeros = [](unsigned long n, unsigned long keyWidth)
-                        { return n ? __builtin_ctzl(n) : (int) keyWidth; };
+                        { return n ? __builtin_ctzl(n) : static_cast<int>(keyWidth); };
                     auto count_ones = [](unsigned long n) { return n ? __builtin_popcountl(n) : 0;};
                     auto mask = static_cast<unsigned long>(km->right->to<IR::Constant>()->value);
                     auto len = trailing_zeros(mask, keyWidth);
