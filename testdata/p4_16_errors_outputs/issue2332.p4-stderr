@@ -1,0 +1,3 @@
+issue2332.p4(1): [--Werror=type-error] error: x: initializer has wrong type bit<1>
+const bit<32> x = 1w1;
+              ^

@@ -142,12 +142,13 @@ const IR::Node* DoConstantFolding::postorder(IR::Declaration_Constant* d) {
         // is not init, but (d->type)init. The typechecker inserts
         // casts, but if we run this before typechecking we have to be
         // more conservative.
-        if (init->is<IR::Constant>()) {
-            auto cst = init->to<IR::Constant>();
-            if (d->type->is<IR::Type_Bits>()) {
-                if (cst->type->is<IR::Type_InfInt>() ||
-                    (cst->type->is<IR::Type_Bits>() &&
-                     !(*d->type->to<IR::Type_Bits>() == *cst->type->to<IR::Type_Bits>())))
+        if (auto cst = init->to<IR::Constant>()) {
+            if (auto dtype = d->type->to<IR::Type_Bits>()) {
+                auto cstBits = cst->type->to<IR::Type_Bits>();
+                if (cstBits && !(*dtype == *cstBits))
+                    ::error(ErrorType::ERR_TYPE_ERROR, "%1%: initializer has wrong type %2%",
+                            d, cst->type);
+                else if (cst->type->is<IR::Type_InfInt>())
                     init = new IR::Constant(init->srcInfo, d->type, cst->value, cst->base);
             } else if (!d->type->is<IR::Type_InfInt>()) {
                 // Don't fold this yet, we can't evaluate the cast.
@@ -679,6 +680,12 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
     if (cr->value < 0) {
         ::error("%1%: Shifts with negative amounts are not permitted", e);
         return e;
+    }
+    if (auto crTypeBits = cr->type->to<IR::Type_Bits>()) {
+        if (crTypeBits->isSigned) {
+            ::error(ErrorType::ERR_EXPECTED, "%1%: shift amounts cannot be signed", right);
+            return e;
+        }
     }
 
     if (cr->value == 0) {

@@ -63,6 +63,8 @@ match_kind {
     selector
 }
 
+const bit<32> __v1model_version = V1MODEL_VERSION;
+
 #if V1MODEL_VERSION >= 20200408
 typedef bit<9>  PortId_t;       // should not be a constant size?
 #endif
@@ -755,7 +757,5 @@ package V1Switch<H, M>(Parser<H, M> p,
                        ComputeChecksum<H, M> ck,
                        Deparser<H> dep
                        );
-
-const bit<32> __v1model_version = V1MODEL_VERSION;
 
 #endif  /* _V1_MODEL_P4_ */
