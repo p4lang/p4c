@@ -8,7 +8,6 @@ header ethernet_t {
     bit<16> eth_type;
 }
 
-
 struct Headers {
     ethernet_t eth_hdr;
 }
@@ -38,25 +37,25 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) { 
+control vrfy(inout Headers h, inout Meta m) {
     apply {
-    } 
+    }
 }
 
-control update(inout Headers h, inout Meta m) { 
+control update(inout Headers h, inout Meta m) {
     apply {
-    } 
+    }
 }
 
 control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
-    } 
+    }
 }
 
-control deparser(packet_out b, in Headers h) { 
+control deparser(packet_out b, in Headers h) {
     apply {
         b.emit(h);
-    } 
+    }
 }
 
 V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
