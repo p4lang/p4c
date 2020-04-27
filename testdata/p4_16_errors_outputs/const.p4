@@ -2,7 +2,7 @@ const bit<32> zero = 32w0;
 const bit<48> tooLarge = 48w0xbbccddeeff00;
 const bit<32> one = 32w1;
 const bit<32> max = 32w0xffffffff;
-const bit<32> z = 1;
+const bit<32> z = 1w1;
 struct S {
     bit<32> a;
     bit<32> b;
