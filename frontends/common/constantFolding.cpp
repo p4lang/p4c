@@ -521,8 +521,6 @@ const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
         return e;
     }
 
-    if (!typesKnown)
-        return e;
     auto e0 = getConstant(e->e0);
     if (e0 == nullptr)
         return e;
@@ -559,9 +557,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
     big_int mask = 1;
     mask = (mask << (m - l + 1)) - 1;
     value = value & mask;
-    auto resultType = typeMap->getType(getOriginal(), true);
-    if (!resultType->is<IR::Type_Bits>())
-        BUG("Type of slice is not Type_Bits, but %1%", resultType);
+    auto resultType = IR::Type_Bits::get(m - l + 1);
     return new IR::Constant(e->srcInfo, resultType, value, cbase->base, true);
 }
 
