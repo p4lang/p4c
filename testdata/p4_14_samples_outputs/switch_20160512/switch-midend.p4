@@ -1875,7 +1875,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         meta._tunnel_metadata_egress_tunnel_type143 = 5w14;
     }
     @name(".rewrite_ipv4_multicast") action _rewrite_ipv4_multicast_0() {
-        hdr.ethernet.dstAddr[22:0] = ((bit<48>)hdr.ipv4.dstAddr)[22:0];
+        hdr.ethernet.dstAddr[22:0] = hdr.ipv4.dstAddr[22:0];
     }
     @name(".rewrite_ipv6_multicast") action _rewrite_ipv6_multicast_0() {
     }
@@ -2579,7 +2579,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.gre.S = 1w0;
         hdr.gre.s = 1w0;
         hdr.nvgre.tni = meta._tunnel_metadata_vnid149;
-        hdr.nvgre.flow_id = (bit<8>)meta._hash_metadata_entropy_hash34;
+        hdr.nvgre.flow_id = meta._hash_metadata_entropy_hash34[7:0];
         hdr.ipv4.setValid();
         hdr.ipv4.protocol = 8w47;
         hdr.ipv4.ttl = 8w64;
@@ -2672,7 +2672,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.gre.S = 1w0;
         hdr.gre.s = 1w0;
         hdr.nvgre.tni = meta._tunnel_metadata_vnid149;
-        hdr.nvgre.flow_id = (bit<8>)meta._hash_metadata_entropy_hash34;
+        hdr.nvgre.flow_id = meta._hash_metadata_entropy_hash34[7:0];
         hdr.ipv6.setValid();
         hdr.ipv6.version = 4w0x6;
         hdr.ipv6.nextHdr = 8w47;

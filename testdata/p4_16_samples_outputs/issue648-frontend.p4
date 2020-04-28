@@ -8,7 +8,7 @@ header hdr {
 
 control ingress(inout hdr h) {
     apply {
-        h.a[7:0] = ((bit<32>)h.c)[7:0];
+        h.a[7:0] = h.c;
         h.a[15:8] = h.c + h.c;
     }
 }

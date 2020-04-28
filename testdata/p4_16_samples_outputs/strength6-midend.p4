@@ -25,10 +25,13 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h.c = (bit<8>)h.h.a[11:7];
     }
     @name("ingress.case2") action case2() {
-        h.h.c = (bit<8>)(16w0 ++ h.h.a[15:8]);
+        h.h.c = 8w0;
     }
     @name("ingress.case3") action case3() {
         h.h.c = h.h.a[12:5];
+    }
+    @name("ingress.case4") action case4() {
+        h.h.c = ((int<32>)(int<16>)h.h.a)[22:15];
     }
     @name("ingress.t") table t_0 {
         actions = {
@@ -36,6 +39,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             case1();
             case2();
             case3();
+            case4();
         }
         const default_action = case0();
     }

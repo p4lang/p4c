@@ -17,7 +17,7 @@ control p() {
         f = (bit<32>)a >> 4;
         f = (bit<32>)a << 6;
         c = a * b;
-        e = ((bit<32>)a)[15:0];
+        e = a[15:0];
         f = e ++ e;
         c = (d ? a : b);
         d = a == b;

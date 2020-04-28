@@ -18,35 +18,39 @@ struct Meta {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.case0") action case0() {
-        h.h.c = h.h.a[11:4];
+    action case0() {
+        h.h.c = ((bit<12>)h.h.a)[11:4];
     }
-    @name("ingress.case1") action case1() {
-        h.h.c = (bit<8>)h.h.a[11:7];
+    action case1() {
+        h.h.c = (bit<8>)h.h.a[14:3][8:4];
     }
-    @name("ingress.case2") action case2() {
-        h.h.c = (bit<8>)(16w0 ++ h.h.a[15:8]);
+    action case2() {
+        h.h.c = (bit<8>)(16w0 ++ h.h.a)[31:8][15:8];
     }
-    @name("ingress.case3") action case3() {
-        h.h.c = h.h.a[12:5];
+    action case3() {
+        h.h.c = (bit<8>)((int<32>)(int<16>)h.h.a)[14:2][10:3];
     }
-    @name("ingress.t") table t_0 {
+    action case4() {
+        h.h.c = (bit<8>)((int<32>)(int<16>)h.h.a)[22:15];
+    }
+    table t {
         actions = {
-            case0();
-            case1();
-            case2();
-            case3();
+            case0;
+            case1;
+            case2;
+            case3;
+            case4;
         }
-        const default_action = case0();
+        const default_action = case0;
     }
     apply {
-        t_0.apply();
+        t.apply();
     }
 }
 
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
-        b.extract<hdr>(h.h);
+        b.extract(h.h);
         transition accept;
     }
 }
@@ -68,9 +72,9 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
 control deparser(packet_out b, in Headers h) {
     apply {
-        b.emit<hdr>(h.h);
+        b.emit(h.h);
     }
 }
 
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
 
