@@ -1737,7 +1737,7 @@ control process_rewrite(inout headers hdr, inout metadata meta, inout standard_m
         meta.tunnel_metadata.egress_tunnel_type = 5w14;
     }
     @name(".rewrite_ipv4_multicast") action rewrite_ipv4_multicast() {
-        hdr.ethernet.dstAddr[22:0] = ((bit<48>)hdr.ipv4.dstAddr)[22:0];
+        hdr.ethernet.dstAddr[22:0] = hdr.ipv4.dstAddr[22:0];
     }
     @name(".rewrite_ipv6_multicast") action rewrite_ipv6_multicast() {
     }
@@ -2440,7 +2440,7 @@ control process_tunnel_encap(inout headers hdr, inout metadata meta, inout stand
         hdr.gre.S = 1w0;
         hdr.gre.s = 1w0;
         hdr.nvgre.tni = meta.tunnel_metadata.vnid;
-        hdr.nvgre.flow_id = (bit<8>)meta.hash_metadata.entropy_hash;
+        hdr.nvgre.flow_id = meta.hash_metadata.entropy_hash[7:0];
     }
     @name(".ipv4_nvgre_rewrite") action ipv4_nvgre_rewrite() {
         f_insert_nvgre_header();
