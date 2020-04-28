@@ -401,7 +401,8 @@ ParserConverter::convertSelectExpression(const IR::SelectExpression* expr) {
             trans->emplace("next_state", stateName(sc->state->path->name));
         } else {
             if (mask == 0) {
-                trans->emplace("value", "default");
+                trans->emplace("type", "default");
+                trans->emplace("value", Util::JsonValue::null);
                 trans->emplace("mask", Util::JsonValue::null);
                 trans->emplace("next_state", stateName(sc->state->path->name));
             } else {
@@ -430,7 +431,8 @@ ParserConverter::convertSelectKey(const IR::SelectExpression* expr) {
 Util::IJson*
 ParserConverter::convertPathExpression(const IR::PathExpression* pe) {
     auto trans = new Util::JsonObject();
-    trans->emplace("value", "default");
+    trans->emplace("type", "default");
+    trans->emplace("value", Util::JsonValue::null);
     trans->emplace("mask", Util::JsonValue::null);
     trans->emplace("next_state", stateName(pe->path->name));
     return trans;
@@ -439,7 +441,8 @@ ParserConverter::convertPathExpression(const IR::PathExpression* pe) {
 Util::IJson*
 ParserConverter::createDefaultTransition() {
     auto trans = new Util::JsonObject();
-    trans->emplace("value", "default");
+    trans->emplace("type", "default");
+    trans->emplace("value", Util::JsonValue::null);
     trans->emplace("mask", Util::JsonValue::null);
     trans->emplace("next_state", Util::JsonValue::null);
     return trans;
