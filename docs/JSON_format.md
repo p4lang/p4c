@@ -295,7 +295,7 @@ parser. The attributes for these objects are:
     - `value`: only relevant if the `type` attribute is `hexstr`, in which case
     it is the hexstring value for the transition, or `parse_vset`, in which case
     it is the name of the corresponding parse value-set. Set to `null` if `type`
-    is `hexstr`.
+    is `default`.
     - `mask`: only relevant if the `type` attribute is `hexstr` or `parse_vset`
     (`null` if `type` is `default`). It can either be a hexstring (to be used as
     a mask and ANDed with the key and the value) or `null`. For a parse
