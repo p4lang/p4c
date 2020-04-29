@@ -21,6 +21,7 @@ limitations under the License.
 #include <algorithm>
 #include <cstring>
 #include <set>
+#include "ir/ir.h"
 #include "backends/bmv2/common/annotations.h"
 #include "frontends/p4/fromv1.0/v1model.h"
 #include "simpleSwitch.h"
@@ -952,6 +953,59 @@ void SimpleSwitchBackend::createActions(ConversionContext* ctxt, V1ProgramStruct
     }
 }
 
+namespace {
+
+class ValidateMetadata : public Inspector, P4WriteContext {
+    bool ingress;
+    const P4::ReferenceMap* refMap;
+    const IR::Parameter* standard_metadata;
+
+ public:
+    ValidateMetadata(bool ingress, const P4::ReferenceMap* refMap,
+                     const IR::Parameter* standard_metadata):
+            ingress(ingress), refMap(refMap), standard_metadata(standard_metadata) {
+        CHECK_NULL(refMap); CHECK_NULL(standard_metadata);
+        setName("ValidateMetadata");
+    }
+
+    void postorder(const IR::Member* member) override {
+        if (auto pe = member->expr->to<IR::PathExpression>()) {
+            auto field = member->member;
+            auto decl = refMap->getDeclaration(pe->path);
+            cstring name = ingress ? "ingress" : "egress";
+            if (decl->getNode() == standard_metadata) {
+                if (field == "ingress_port" ||
+                    field == "instance_type" ||
+                    field == "packet_length" ||
+                    field == "ingress_global_timestamp" ||
+                    field == "checksum_error" ||
+                    field == "parser_error") {
+                    if (isWrite())
+                        ::warning(ErrorType::WARN_INVALID,
+                                  "Suspicious metadata access in %1%: %2%", name, member);
+                }
+                if (field == "egress_spec" ||
+                    field == "mcast_grp")
+                    if (!ingress && isWrite())
+                        ::warning(ErrorType::WARN_INVALID,
+                                  "Suspicious metadata access in %1%: %2%", name, member);
+                if (field == "egress_port" ||
+                    field == "egress_rid" ||
+                    field == "egress_global_timestamp" ||
+                    field == "enq_timestamp" ||
+                    field == "enq_qdepth" ||
+                    field == "deq_timedelta" ||
+                    field == "deq_qdepth")
+                    if (ingress || isWrite())
+                        ::warning(ErrorType::WARN_INVALID,
+                                  "Suspicious metadata access in %1%: %2%", name, member);
+            }
+        }
+    }
+};
+
+}  // namespace
+
 void
 SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     structure = new V1ProgramStructure();
@@ -1111,9 +1165,15 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
 
     auto cconv = new ControlConverter(ctxt, "ingress", options.emitExterns);
     structure->ingress->apply(*cconv);
+    ValidateMetadata vmi(true, ctxt->refMap,
+                         structure->ingress->type->applyParams->parameters.at(2));
+    structure->ingress->apply(vmi);
 
     cconv = new ControlConverter(ctxt, "egress", options.emitExterns);
     structure->egress->apply(*cconv);
+    ValidateMetadata vme(false, ctxt->refMap,
+                         structure->egress->type->applyParams->parameters.at(2));
+    structure->egress->apply(vme);
 
     auto dconv = new DeparserConverter(ctxt);
     structure->deparser->apply(*dconv);
