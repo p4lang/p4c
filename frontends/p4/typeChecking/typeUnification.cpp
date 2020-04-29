@@ -312,9 +312,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
         for (size_t i=0; i < td->components.size(); i++) {
             auto si = ts->components.at(i);
             auto di = td->components.at(i);
-            bool success = unify(errorPosition, di, si, reportErrors);
-            if (!success)
-                return false;
+            constraints->addEqualityConstraint(di, si);
         }
         return true;
     } else if (dest->is<IR::Type_Struct>() || dest->is<IR::Type_Header>()) {
@@ -333,10 +331,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
             for (const IR::StructField* f : strct->fields) {
                 const IR::Type* tplField = tpl->components.at(index);
                 const IR::Type* destt = f->type;
-
-                bool success = unify(errorPosition, destt, tplField, reportErrors);
-                if (!success)
-                    return false;
+                constraints->addEqualityConstraint(destt, tplField);
                 index++;
             }
             return true;
@@ -366,9 +361,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
                     TypeInference::typeError("%1%: No initializer for field %2%", errorPosition, f);
                     return false;
                 }
-                bool success = unify(errorPosition, f->type, stField->type, reportErrors);
-                if (!success)
-                    return false;
+                constraints->addEqualityConstraint(f->type, stField->type);
             }
             return true;
         }
