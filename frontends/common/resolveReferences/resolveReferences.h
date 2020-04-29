@@ -86,8 +86,6 @@ class ResolveReferences : public Inspector, private ResolutionContext {
     /// Reference map -- essentially from paths to declarations.
     ReferenceMap *refMap;
 
-    /// Indicates if _all_ forward references are allowed
-
     /// If @true, then warn if one declaration shadows another.
     bool checkShadow;
 

@@ -493,7 +493,7 @@ class SwitchStatement : Statement {
         v.parallel_visit(cases, "cases"); }
 }
 
-class Function : Declaration, IFunctional, ISimpleNamespace {
+class Function : Declaration, IFunctional, ISimpleNamespace, INestedNamespace {
     Type_Method    type;
     BlockStatement body;
     ParameterList getParameters() const override {
@@ -503,6 +503,8 @@ class Function : Declaration, IFunctional, ISimpleNamespace {
         return type->parameters->getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return type->parameters->getDeclByName(name); }
+    std::vector<INamespace> getNestedNamespaces() const {
+        return { type->typeParameters }; }
 }
 
 /////////////////////////////////////////////////////////////

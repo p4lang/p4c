@@ -47,7 +47,7 @@ class MinimalNameGenerator : public NameGenerator, public Inspector {
     cstring newName(cstring base);
 };
 
-// FIXME -- temp cpmmon base class to allow use of ReferenceMap or ResolutionContext
+// FIXME -- temp common base class to allow use of ReferenceMap or ResolutionContext
 // interchangeably when looking up declarations.  This should go away once the refMap does
 class DeclarationLookup {
  public:
