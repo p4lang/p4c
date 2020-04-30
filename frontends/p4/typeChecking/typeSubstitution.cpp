@@ -44,8 +44,12 @@ bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
     // It is not if var occurs in substitution
     TypeOccursVisitor occurs(var);
     substitution->apply(occurs);
-    if (occurs.occurs)
+    if (occurs.occurs) {
+        ::error(ErrorType::ERR_TYPE_ERROR,
+                "%1%: Cannot unify type %2% with %3%",
+                errorLocation, var, substitution);
         return false;
+    }
 
     // Check to see whether we already have a binding for this variable
     if (containsKey(var)) {

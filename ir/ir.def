@@ -88,11 +88,11 @@ class P4Parser : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, I
     optional inline IndexedVector<ParserState>  states;
 
     TypeParameters getTypeParameters() const override { return type->getTypeParameters(); }
-    std::vector<INamespace> getNestedNamespaces() const {
+    std::vector<INamespace> getNestedNamespaces() const override {
         return { type->typeParameters, type->applyParams, constructorParams }; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return parserLocals.getDeclarations()->concat(states.getDeclarations()); }
-    IDeclaration getDeclByName(cstring name) const {
+    IDeclaration getDeclByName(cstring name) const override {
         auto decl = parserLocals.getDeclaration(name);
         if (!decl) decl = states.getDeclaration(name);
         return decl; }
@@ -119,7 +119,7 @@ class P4Control : Type_Declaration, INestedNamespace, ISimpleNamespace, IApply, 
     BlockStatement                              body;
 
     TypeParameters getTypeParameters() const override { return type->getTypeParameters(); }
-    std::vector<INamespace> getNestedNamespaces() const {
+    std::vector<INamespace> getNestedNamespaces() const override {
         return { type->typeParameters, type->applyParams, constructorParams }; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return controlLocals.getDeclarations(); }

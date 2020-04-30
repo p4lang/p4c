@@ -658,7 +658,7 @@ const IR::Node* TypeInference::postorder(IR::Declaration_Variable* decl) {
         return decl;
     }
 
-    if (type->is<IR::Type_String>()) {
+    if (type->is<IR::Type_String>() || type->is<IR::Type_InfInt>()) {
         typeError("%1%: Cannot declare variables with type %2%", decl, type);
         return decl;
     }
@@ -1044,6 +1044,7 @@ TypeInference::containerInstantiation(
     TypeConstraints constraints(typeMap->getSubstitutions());
     constraints.addEqualityConstraint(constructor, callType);
     auto tvs = constraints.solve(node);
+    BUG_CHECK(tvs != nullptr || ::errorCount(), "Null substitution");
     if (tvs == nullptr)
         return std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>(nullptr, nullptr);
     addSubstitutions(tvs);

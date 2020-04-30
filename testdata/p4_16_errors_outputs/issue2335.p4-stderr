@@ -1,0 +1,3 @@
+issue2335.p4(3): [--Werror=type-error] error: x: Cannot declare variables with type int
+    int x = 0;
+    ^^^^^^^^^^

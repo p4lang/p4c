@@ -44,7 +44,7 @@ class MinimalNameGenerator : public NameGenerator, public Inspector {
     }
 
     /// Generate a name from @p base that fresh for the program.
-    cstring newName(cstring base);
+    cstring newName(cstring base) override;
 };
 
 // FIXME -- temp common base class to allow use of ReferenceMap or ResolutionContext
@@ -98,7 +98,7 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
     void setAnyOrder(bool anyOrder) { this->isv1 = anyOrder; }
 
     /// Generate a name from @p base that fresh for the program.
-    cstring newName(cstring base);
+    cstring newName(cstring base) override;
 
     /// Clear the reference map
     void clear();

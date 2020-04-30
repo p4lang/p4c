@@ -63,6 +63,8 @@ bool TypeConstraints::solve(const IR::Node* root, EqualityConstraint *constraint
         const IR::Type* leftSubst = subst->lookup(leftTv);
         if (leftSubst == nullptr) {
             auto right = constraint->right->apply(replaceVariables)->to<IR::Type>();
+            if (leftTv == right->to<IR::ITypeVar>())
+                return true;
             LOG3("Binding " << leftTv << " => " << right);
             return subst->compose(root, leftTv, right);
         } else {
@@ -76,6 +78,8 @@ bool TypeConstraints::solve(const IR::Node* root, EqualityConstraint *constraint
         const IR::Type* rightSubst = subst->lookup(rightTv);
         if (rightSubst == nullptr) {
             auto left = constraint->left->apply(replaceVariables)->to<IR::Type>();
+            if (left->to<IR::ITypeVar>() == rightTv)
+                return true;
             LOG3("Binding " << rightTv << " => " << left);
             return subst->compose(root, rightTv, left);
         } else {

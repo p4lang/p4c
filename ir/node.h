@@ -27,7 +27,7 @@ limitations under the License.
 #include "lib/json.h"
 
 class Visitor;
-class Visitor_Context;
+struct Visitor_Context;
 class Inspector;
 class Modifier;
 class Transform;

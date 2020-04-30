@@ -568,9 +568,9 @@ class Method : Declaration, IAnnotated, IFunctional, ISimpleNamespace {
     Annotations getAnnotations() const override { return annotations; }
     ParameterList getParameters() const override { return type->parameters; }
     // annotations can refer to parameters, so need to look them up in scope
-    IDeclaration getDeclByName(cstring name) const {
+    IDeclaration getDeclByName(cstring name) const override {
         return type->parameters->getDeclByName(name); }
-    Util::Enumerator<IDeclaration> *getDeclarations() const {
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
         return type->parameters->getDeclarations(); }
 }
 
@@ -603,7 +603,7 @@ class Type_Extern : Type_Declaration, INestedNamespace, IGeneralNamespace,
     optional inline NameMap<Attribute, ordered_map> attributes;  // P4_14 only, currently
     optional Annotations annotations = Annotations::empty;
 
-    std::vector<INamespace> getNestedNamespaces() const { return { typeParameters }; }
+    std::vector<INamespace> getNestedNamespaces() const override { return { typeParameters }; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return attributes.valueEnumerator()->as<const IDeclaration*>()
             ->concat(methods.getEnumerator()->as<const IDeclaration*>()); }
