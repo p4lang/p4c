@@ -7,24 +7,26 @@ control c(inout bit<32> x) {
             bit<32> retval;
             bit<32> tmp;
             bit<32> tmp_0;
+            bit<32> tmp_1;
+            tmp = a_0;
             {
                 bit<32> a_1 = a_0;
                 bit<32> b_1 = b_0;
                 bool hasReturned_0 = false;
                 bit<32> retval_0;
-                bit<32> tmp_1;
+                bit<32> tmp_2;
                 if (a_1 > b_1) {
-                    tmp_1 = b_1;
+                    tmp_2 = b_1;
                 } else {
-                    tmp_1 = a_1;
+                    tmp_2 = a_1;
                 }
                 hasReturned_0 = true;
-                retval_0 = tmp_1;
-                tmp = retval_0;
+                retval_0 = tmp_2;
+                tmp_0 = retval_0;
             }
-            tmp_0 = a_0 + tmp;
+            tmp_1 = tmp + tmp_0;
             hasReturned = true;
-            retval = tmp_0;
+            retval = tmp_1;
             x = retval;
         }
     }

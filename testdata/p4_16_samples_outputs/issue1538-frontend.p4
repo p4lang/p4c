@@ -69,17 +69,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             bit<16> retval_3;
             bit<16> tmp;
             bit<16> tmp_0;
+            bit<16> tmp_1;
+            tmp = x_2;
             {
                 bit<16> x_3 = x_2;
                 bool hasReturned_4 = false;
                 bit<16> retval_4;
                 hasReturned_4 = true;
                 retval_4 = x_3 + 16w1;
-                tmp = retval_4;
+                tmp_0 = retval_4;
             }
-            tmp_0 = x_2 + tmp;
+            tmp_1 = tmp + tmp_0;
             hasReturned_3 = true;
-            retval_3 = tmp_0;
+            retval_3 = tmp_1;
             hdr.ethernet.srcAddr[15:0] = retval_3;
         }
         {

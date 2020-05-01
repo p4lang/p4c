@@ -1,13 +1,13 @@
 control c(inout bit<32> x) {
-    bit<32> tmp_1;
+    bit<32> tmp_2;
     @hidden action inlinefunction2() {
-        tmp_1 = x;
+        tmp_2 = x;
     }
     @hidden action inlinefunction2_0() {
-        tmp_1 = x;
+        tmp_2 = x;
     }
     @hidden action inlinefunction11() {
-        x = x + tmp_1;
+        x = x + tmp_2;
     }
     @hidden table tbl_inlinefunction2 {
         actions = {
