@@ -76,13 +76,37 @@ void FindActionParameters::postorder(const IR::MethodCallExpression* expression)
     }
 }
 
+namespace {
+
+// Inserts a vector of operations before a return or exit
+// statement.
+class InsertBeforeExits : public Transform {
+    const IR::IndexedVector<IR::StatOrDecl> *toInsert;
+
+ public:
+    InsertBeforeExits(const IR::IndexedVector<IR::StatOrDecl> *toInsert):
+            toInsert(toInsert) { setName("InsertBeforeExits"); }
+    const IR::Node* postorder(IR::ReturnStatement* statement) override {
+        auto vec = new IR::IndexedVector<IR::StatOrDecl>(*toInsert);
+        vec->push_back(statement);
+        return vec;
+    }
+    const IR::Node* postorder(IR::ExitStatement* statement) override {
+        auto vec = new IR::IndexedVector<IR::StatOrDecl>(*toInsert);
+        vec->push_back(statement);
+        return vec;
+    }
+};
+
+}  // namespace
+
 const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
     LOG1("Visiting " << dbp(action));
     BUG_CHECK(getParent<IR::P4Control>() || getParent<IR::P4Program>(),
               "%1%: unexpected parent %2%", getOriginal(), getContext()->node);
     auto result = new IR::IndexedVector<IR::Declaration>();
     auto leftParams = new IR::IndexedVector<IR::Parameter>();
-    auto initializers = new IR::IndexedVector<IR::StatOrDecl>();
+    auto body = new IR::IndexedVector<IR::StatOrDecl>();
     auto postamble = new IR::IndexedVector<IR::StatOrDecl>();
     auto invocation = invocations->get(getOriginal<IR::P4Action>());
     if (invocation == nullptr)
@@ -112,7 +136,7 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
                 p->direction == IR::Direction::None) {
                 auto left = new IR::PathExpression(p->name);
                 auto assign = new IR::AssignmentStatement(arg->srcInfo, left, arg->expression);
-                initializers->push_back(assign);
+                body->push_back(assign);
             }
             if (p->direction == IR::Direction::Out ||
                 p->direction == IR::Direction::InOut) {
@@ -125,11 +149,13 @@ const IR::Node* DoRemoveActionParameters::postorder(IR::P4Action* action) {
     if (result->empty())
         return action;
 
-    initializers->append(action->body->components);
-    initializers->append(*postamble);
+    InsertBeforeExits ibf(postamble);
+    auto actionBody = action->body->apply(ibf)->to<IR::BlockStatement>();
+    body->append(actionBody->components);
+    body->append(*postamble);
 
     action->parameters = new IR::ParameterList(action->parameters->srcInfo, *leftParams);
-    action->body = new IR::BlockStatement(action->body->srcInfo, *initializers);
+    action->body = new IR::BlockStatement(action->body->srcInfo, *body);
     LOG1("To replace " << dbp(action));
     result->push_back(action);
     return result;
