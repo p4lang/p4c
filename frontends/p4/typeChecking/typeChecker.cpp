@@ -3270,6 +3270,10 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         auto prop = findContext<IR::Property>();
         if (prop != nullptr && prop->name == IR::TableProperties::actionsPropertyName)
             inActionsList = true;
+        if (findContext<IR::Key>()) {
+            typeError("%1%: Action calls are not allowed in table keys", expression);
+            return expression;
+        }
         return actionCall(inActionsList, expression);
     } else {
         // Constant-fold minSizeInBits, minSizeInBytes
@@ -3391,6 +3395,14 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
 
         if (mi->is<ExternMethod>())
             checkCorelibMethods(mi->to<ExternMethod>());
+
+        auto bi = mi->to<BuiltInMethod>();
+        if ((findContext<IR::SelectCase>() || findContext<IR::Key>()) &&
+            (!bi || (bi->name == IR::Type_Stack::pop_front ||
+                     bi->name == IR::Type_Stack::push_front))) {
+            typeError("%1%: no function calls allowed in this context", expression);
+            return expression;
+        }
 
         return result;
     }
