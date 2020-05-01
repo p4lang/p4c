@@ -4,7 +4,7 @@
 namespace P4 {
 
 bool AnalyzeParser::preorder(const IR::ParserState* state) {
-    LOG1("Found state " << state << " of " << current->parser);
+    LOG1("Found state " << dbp(state) << " of " << current->parser->name);
     if (state->name.name == IR::ParserState::start)
         current->start = state;
     current->addState(state);
@@ -24,20 +24,20 @@ void AnalyzeParser::postorder(const IR::PathExpression* expression) {
 
 namespace ParserStructureImpl {
 
-// Set of possible definitions of a variable
+/// Set of possible definitions of a variable
 struct VarDef {
     const SymbolicValue* leftValue;
     std::vector<const IR::Node*> definitions;  // statements or parameters
 };
 
-// Definitions for all variables at a program point
+/// Definitions for all variables at a program point
 struct Definitions {
     std::map<const SymbolicValue*, VarDef*> definitions;
     void add(VarDef* def)
     { definitions[def->leftValue] = def; }
 };
 
-// For each program point the definitions of all variables
+/// For each program point the definitions of all variables
 struct AllDefinitions {
     std::map<const IR::Node*, Definitions*> perStatement;
 };
@@ -113,7 +113,7 @@ class ParserSymbolicInterpreter {
         return result.str();
     }
 
-    // Return false if an error can be detected statically
+    /// Return false if an error can be detected statically
     bool reportIfError(const ParserStateInfo* state, SymbolicValue* value) const {
         if (value->is<SymbolicException>()) {
             auto exc = value->to<SymbolicException>();
@@ -144,9 +144,9 @@ class ParserSymbolicInterpreter {
         return false;
     }
 
-    // Executes symbolically the specified statement.
-    // Returns 'true' if execution completes successfully,
-    // and 'false' if an error occurred.
+    /// Executes symbolically the specified statement.
+    /// Returns 'true' if execution completes successfully,
+    /// and 'false' if an error occurred.
     bool executeStatement(const ParserStateInfo* state, const IR::StatOrDecl* sord,
                           ValueMap* valueMap) const {
         ExpressionEvaluator ev(refMap, typeMap, valueMap);
@@ -236,7 +236,7 @@ class ParserSymbolicInterpreter {
         return false;
     }
 
-    // True if any header has changed its "validity" bit
+    /// True if any header has changed its "validity" bit
     static bool headerValidityChange(const ValueMap* before, const ValueMap* after) {
         for (auto v : before->map) {
             auto value = v.second;
@@ -246,7 +246,7 @@ class ParserSymbolicInterpreter {
         return false;
     }
 
-    // Return true if we have detected a loop we cannot unroll
+    /// Return true if we have detected a loop we cannot unroll
     bool checkLoops(ParserStateInfo* state) const {
         const ParserStateInfo* crt = state;
         while (true) {

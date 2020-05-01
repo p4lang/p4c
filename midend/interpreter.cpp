@@ -8,7 +8,7 @@ namespace P4 {
 unsigned SymbolicValue::crtid = 0;
 
 SymbolicValue* SymbolicValueFactory::create(const IR::Type* type, bool uninitialized) const {
-    type = typeMap->getType(type, true);
+    type = typeMap->getTypeType(type, true);
     if (type->is<IR::Type_Bits>())
         return new SymbolicInteger(ScalarValue::init(uninitialized), type->to<IR::Type_Bits>());
     if (type->is<IR::Type_Boolean>())
