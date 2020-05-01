@@ -84,7 +84,7 @@ class InsertBeforeExits : public Transform {
     const IR::IndexedVector<IR::StatOrDecl> *toInsert;
 
  public:
-    InsertBeforeExits(const IR::IndexedVector<IR::StatOrDecl> *toInsert):
+    explicit InsertBeforeExits(const IR::IndexedVector<IR::StatOrDecl> *toInsert):
             toInsert(toInsert) { setName("InsertBeforeExits"); }
     const IR::Node* postorder(IR::ReturnStatement* statement) override {
         auto vec = new IR::IndexedVector<IR::StatOrDecl>(*toInsert);
