@@ -41,10 +41,12 @@ TEST_F(FromJSONTest, load_ir_from_json) {
     ASSERT_FALSE(exitCode);
     exitCode = system("./p4c-bm2-ss -o outputFROM.json --fromJSON jsonFile.json");
     ASSERT_FALSE(exitCode);
-    system("grep -v program outputTO.json > outputTO.json.tmp; "
-           "mv outputTO.json.tmp outputTO.json");
-    system("grep -v program outputFROM.json > outputFROM.json.tmp; "
-           " mv outputFROM.json.tmp outputFROM.json");
+    exitCode = system("grep -v program outputTO.json > outputTO.json.tmp; "
+                      "mv outputTO.json.tmp outputTO.json");
+    ASSERT_FALSE(exitCode);
+    exitCode = system("grep -v program outputFROM.json > outputFROM.json.tmp; "
+                      " mv outputFROM.json.tmp outputFROM.json");
+    ASSERT_FALSE(exitCode);
     exitCode = system("diff outputTO.json outputFROM.json");
     ASSERT_FALSE(exitCode);
 }
