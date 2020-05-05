@@ -157,6 +157,9 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
                    START_INTEGER_TRIPLE
                    START_STRING_LITERAL_TRIPLE
 
+                   // P4Runtime annotations
+                   START_P4RT_TRANSLATION_ANNOTATION  // @p4runtime_translation
+
 %token             END END_ANNOTATION
 
 
@@ -395,6 +398,21 @@ fragment
           result->push_back(new IR::StringLiteral(@4, $4));
           result->push_back(new IR::StringLiteral(@6, $6));
           $$ = result; }
+
+      // P4Runtime annotations
+    | START_P4RT_TRANSLATION_ANNOTATION STRING_LITERAL "," baseType
+        { auto* result = new IR::Vector<IR::Expression>();
+          result->push_back(new IR::StringLiteral(@2, $2));
+          result->push_back(new IR::DefaultExpression($4));
+          $$ = result;
+        }
+      // Legacy syntax; to be removed in P4RT 2.0
+    | START_P4RT_TRANSLATION_ANNOTATION STRING_LITERAL "," INTEGER
+        { auto* result = new IR::Vector<IR::Expression>();
+          result->push_back(new IR::StringLiteral(@2, $2));
+          result->push_back(parseConstant(@4, $4, 0));
+          $$ = result;
+        }
     ;
 
 program : input END { YYACCEPT; };

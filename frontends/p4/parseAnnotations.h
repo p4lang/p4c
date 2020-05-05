@@ -153,6 +153,8 @@ class ParseAnnotations : public Modifier {
     static bool parseConstantList(IR::Annotation* annotation);
     static bool parseConstantOrStringLiteralList(IR::Annotation* annotation);
     static bool parseStringLiteralList(IR::Annotation* annotation);
+    // Parses a `@p4runtime_translation` annotation.
+    static bool parseP4rtTranslationAnnotation(IR::Annotation* annotation);
 
     void addHandler(cstring name, Handler h) { handlers.insert({name, h}); }
 

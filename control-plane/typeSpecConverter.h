@@ -86,10 +86,24 @@ class TypeSpecConverter : public Inspector {
         const IR::Type* type, ::p4::config::v1::P4TypeInfo* typeInfo);
 };
 
+/// See section "User-defined types" in P4RT specification.
+struct ControllerType {
+    enum Type { kBit, kString };
+    Type type;  // Supported controller types are `string` and `bit<W>`.
+    int width;  // Meaningful only if type == kBit.
+};
+
+/// Payload of @p4runtime_translation annotation.
+struct TranslationAnnotation {
+    std::string original_type_uri;
+    ControllerType controller_type;
+};
+
 /// hasTranslationAnnotation returns true iff the type is annotated by a *valid*
-/// p4runtime_translation annotation, in which case it also sets @uri and @sdnB based on the
-/// annotation's two arguments.
-bool hasTranslationAnnotation(const IR::Type* type, std::string* uri, int* sdnB);
+/// p4runtime_translation annotation, in which case it populates the given
+/// TranslationAnnotation with the values parsed from the annotation.
+bool hasTranslationAnnotation(const IR::Type* type,
+                              TranslationAnnotation* payload);
 
 /// getTypeName returns a cstring for use as type_name for a Type_Newtype. It
 /// returns nullptr if @type is not a Type_Newtype.

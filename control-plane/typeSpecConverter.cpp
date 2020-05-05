@@ -41,9 +41,13 @@ namespace P4 {
 
 namespace ControlPlaneAPI {
 
-bool hasTranslationAnnotation(const IR::Type* type, std::string* uri, int* sdnB) {
+bool hasTranslationAnnotation(const IR::Type* type, TranslationAnnotation* payload) {
     auto ann = type->getAnnotation("p4runtime_translation");
     if (!ann) return false;
+    BUG_CHECK(ann->expr.size() == 2,
+              "Expected @p4runtime_translation annotation with 2 arguments, but"
+              "got %1% arguments",
+              ann->expr.size());
     auto uriL = ann->expr[0]->to<IR::StringLiteral>();
     if (!uriL) {
         ::error(ErrorType::ERR_INVALID,
@@ -51,23 +55,46 @@ bool hasTranslationAnnotation(const IR::Type* type, std::string* uri, int* sdnB)
                 type);
         return false;
     }
-    *uri = static_cast<std::string>(uriL->value);
-    auto sdnBL = ann->expr[1]->to<IR::Constant>();
-    if (!sdnBL) {
-        ::error(ErrorType::ERR_INVALID,
-                "%1%: the second argument to @p4runtime_translation must be a positive constant",
-                type);
-        return false;
+    payload->original_type_uri = std::string(uriL->value);
+
+    // Legacy syntax: @p4runtime_translation(<uri>, <width>).
+    auto ctypeBL = ann->expr[1]->to<IR::Constant>();
+    if(ctypeBL != nullptr) {
+        if (ctypeBL->value <= 0 || ctypeBL->value > std::numeric_limits<int32_t>::max()) {
+            ::error(ErrorType::ERR_INVALID,
+                    "%1%: the second argument to @p4runtime_translation must be"
+                    " apositive integer that fits in 32 bits",
+                    type);
+            return false;
+        }
+        payload->controller_type = ControllerType{
+            .type = ControllerType::kBit,
+            .width = static_cast<int32_t>(ctypeBL->value),
+        };
+        return true;
     }
-    if (sdnBL->value <= 0 || sdnBL->value > std::numeric_limits<int32_t>::max()) {
-        ::error(ErrorType::ERR_INVALID,
-                "%1%: the second argument to @p4runtime_translation must be positive integer that "
-                "fits in 32 bits",
-                type);
-        return false;
+
+    // New syntax: @pruntime_translation(<uri>, <basic_type>).
+    auto ctypeTY = ann->expr[1]->to<IR::DefaultExpression>();
+    if (ctypeTY != nullptr && ctypeTY->type->to<IR::Type_String>() != nullptr) {
+        payload->controller_type = ControllerType {
+            .type = ControllerType::kString,
+            .width = 0,
+        };
+        return true;
     }
-    *sdnB = static_cast<int32_t>(sdnBL->value);
-    return true;
+    if (ctypeTY != nullptr && ctypeTY->type->to<IR::Type_Bits>() != nullptr) {
+        payload->controller_type = ControllerType {
+            .type = ControllerType::kBit,
+            .width = ctypeTY->type->to<IR::Type_Bits>()->width_bits(),
+        };
+        return true;
+    }
+    ::error(ErrorType::ERR_INVALID,
+            "%1%: the second argument to @p4runtime_translation must be one of "
+            "the basic types 'string' or 'bit<W>'",
+            type);
+    return false;
 }
 
 cstring getTypeName(const IR::Type* type, const TypeMap* typeMap) {
@@ -159,10 +186,6 @@ bool TypeSpecConverter::preorder(const IR::Type_Name* type) {
 
 bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
     if (p4RtTypeInfo) {
-        std::string uri;
-        int sdnB;
-        auto isTranslatedType = hasTranslationAnnotation(type, &uri, &sdnB);
-
         auto name = std::string(type->controlPlaneName());
         auto types = p4RtTypeInfo->mutable_new_types();
         if (types->find(name) == types->end()) {
@@ -174,6 +197,9 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
                 underlyingType = typeMap->getTypeType(
                     underlyingType->to<IR::Type_Newtype>()->type, true);
             }
+
+            TranslationAnnotation ann;
+            bool isTranslatedType = hasTranslationAnnotation(type, &ann);
             if (isTranslatedType && !underlyingType->is<IR::Type_Bits>()) {
                 ::error(ErrorType::ERR_INVALID,
                         "%1%: P4Runtime requires the underlying type for a user-defined type with "
@@ -187,8 +213,15 @@ bool TypeSpecConverter::preorder(const IR::Type_Newtype* type) {
 
             if (isTranslatedType) {
                 auto translatedType = newTypeSpec->mutable_translated_type();
-                translatedType->set_uri(uri);
-                translatedType->set_sdn_bitwidth(sdnB);
+                translatedType->set_uri(ann.original_type_uri);
+                if (ann.controller_type.type == ControllerType::kString) {
+                    translatedType->mutable_sdn_string();
+                } else if (ann.controller_type.type == ControllerType::kBit) {
+                    translatedType->set_sdn_bitwidth(ann.controller_type.width);
+                } else {
+                    BUG("Unexpected controller type: %1%",
+                        ann.controller_type.type);
+                }
             } else {
                 newTypeSpec->mutable_original_type()->CopyFrom(*typeSpec);
             }

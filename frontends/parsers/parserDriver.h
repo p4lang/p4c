@@ -186,7 +186,12 @@ class P4ParserDriver final : public AbstractParserDriver {
         const Util::SourceInfo& srcInfo,
         const IR::Vector<IR::AnnotationToken>& body);
 
- protected:
+    // P4Runtime Annotations /////////////////////////////////////////////////
+    static const IR::Vector<IR::Expression>* parseP4rtTranslationAnnotation(
+        const Util::SourceInfo& srcInfo,
+        const IR::Vector<IR::AnnotationToken>& body);
+
+   protected:
     friend class P4::P4Lexer;
     friend class P4::P4Parser;
 
