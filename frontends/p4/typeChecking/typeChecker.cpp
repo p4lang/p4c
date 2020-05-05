@@ -235,7 +235,7 @@ const IR::ParameterList* TypeInference::canonicalizeParameters(const IR::Paramet
     bool changes = false;
     auto vec = new IR::IndexedVector<IR::Parameter>();
     for (auto p : *params->getEnumerator()) {
-        auto paramType = getType(p);
+        auto paramType = getTypeType(p->type);
         if (paramType == nullptr)
             return nullptr;
         BUG_CHECK(!paramType->is<IR::Type_Type>(), "%1%: Unexpected parameter type", paramType);
@@ -1032,7 +1032,7 @@ TypeInference::containerInstantiation(
         auto argType = getType(arg);
         if (argType == nullptr)
             return std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>(nullptr, nullptr);
-        auto argInfo = new IR::ArgumentInfo(arg->srcInfo, arg, true, argType, aarg->name);
+        auto argInfo = new IR::ArgumentInfo(arg->srcInfo, arg, true, argType, aarg);
         args->push_back(argInfo);
     }
     auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R")));
@@ -1468,6 +1468,19 @@ const IR::Node* TypeInference::postorder(IR::Parameter* param) {
 
     if (paramType->is<IR::P4Control>() || paramType->is<IR::P4Parser>()) {
         typeError("%1%: parameter cannot have type %2%", param, paramType);
+        return param;
+    }
+
+    if (!readOnly && paramType->is<IR::Type_InfInt>()) {
+        // We only give these errors if we are no in 'readOnly' mode:
+        // this prevents giving a confusing error message to the user.
+        if (param->direction != IR::Direction::None)
+            typeError("%1%: parameters with type %2% must be directionless",
+                      param, paramType);
+        if (findContext<IR::P4Action>()) {
+            typeError("%1%: actions cannot have parameters with type %2%",
+                      param, paramType);
+        }
         return param;
     }
 
@@ -2723,8 +2736,10 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             if (!isLeftValue(expression->expr))
                 typeError("%1%: must be applied to a left-value", expression);
             auto params = new IR::IndexedVector<IR::Parameter>();
-            auto param = new IR::Parameter(IR::ID("count", nullptr), IR::Direction::In,
+            auto param = new IR::Parameter(IR::ID("count", nullptr), IR::Direction::None,
                                            new IR::Type_InfInt());
+            auto tt = new IR::Type_Type(param->type);
+            setType(param->type, tt);
             setType(param, param->type);
             params->push_back(param);
             auto type = new IR::Type_Method(IR::Type_Void::get(), new IR::ParameterList(*params));
@@ -3088,9 +3103,9 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             if (argType == nullptr)
                 return expression;
             auto argInfo = new IR::ArgumentInfo(arg->srcInfo, isLeftValue(arg),
-                                                isCompileTimeConstant(arg), argType, aarg->name);
+                                                isCompileTimeConstant(arg), argType, aarg);
             args->push_back(argInfo);
-            constArgs &= isCompileTimeConstant(arg);
+            constArgs = constArgs && isCompileTimeConstant(arg);
         }
         auto typeArgs = new IR::Vector<IR::Type>();
         for (auto ta : *expression->typeArguments) {

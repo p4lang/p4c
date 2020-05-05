@@ -75,7 +75,7 @@ bool TypeUnification::unifyCall(const IR::Node* errorPosition,
         left.emplace(p->name, p);
 
     for (auto arg : *src->arguments) {
-        cstring argName = arg->name.name;
+        cstring argName = arg->argument->name.name;
         bool named = !argName.isNullOrEmpty();
         const IR::Parameter* param;
 
@@ -84,7 +84,7 @@ bool TypeUnification::unifyCall(const IR::Node* errorPosition,
             if (param == nullptr) {
                 if (reportErrors)
                     TypeInference::typeError(
-                        "%1%: No parameter named %2%", errorPosition, arg->name);
+                        "%1%: No parameter named %2%", errorPosition, arg->argument->name);
                 return false;
             }
         } else {
@@ -115,8 +115,7 @@ bool TypeUnification::unifyCall(const IR::Node* errorPosition,
             return false;
         } else if (param->direction == IR::Direction::None && !arg->compileTimeConstant) {
             if (reportErrors)
-                TypeInference::typeError("%1%: not a compile-time constant when binding to %2%",
-                                         arg->srcInfo, param);
+                TypeInference::typeError("%1%: must be a compile-time constant", arg->argument);
             return false;
         }
 

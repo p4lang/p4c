@@ -1,3 +1,3 @@
-issue584.p4(28): [--Werror=legacy] error: 0xffff: could not infer a width
+issue584.p4(28): [--Werror=type-error] error: 0xffff: could not infer a width
         hash(var, HashAlgorithm.crc16, 16w0, hdr, 0xFFFF);
                                                   ^^^^^^
