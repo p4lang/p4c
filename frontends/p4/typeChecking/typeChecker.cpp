@@ -165,7 +165,7 @@ const IR::Type* TypeInference::getType(const IR::Node* element) const {
     // for some node; we are now just trying to typecheck a parent node.
     // So an error should have already been signalled.
     if ((result == nullptr) && (::errorCount() == 0))
-        BUG("Could not find type of %1%", element);
+        BUG("Could not find type of %1% %2%", dbp(element), element);
     return result;
 }
 
@@ -1474,14 +1474,16 @@ const IR::Node* TypeInference::postorder(IR::Parameter* param) {
     if (!readOnly && paramType->is<IR::Type_InfInt>()) {
         // We only give these errors if we are no in 'readOnly' mode:
         // this prevents giving a confusing error message to the user.
-        if (param->direction != IR::Direction::None)
+        if (param->direction != IR::Direction::None) {
             typeError("%1%: parameters with type %2% must be directionless",
                       param, paramType);
+            return param;
+        }
         if (findContext<IR::P4Action>()) {
             typeError("%1%: actions cannot have parameters with type %2%",
                       param, paramType);
+            return param;
         }
-        return param;
     }
 
     // The parameter type cannot have free type variables
