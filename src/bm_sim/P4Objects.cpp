@@ -391,7 +391,7 @@ P4Objects::process_single_param(ActionFn* action_fn,
     build_expression(cfg_parameter["value"], expr, &expr_type);
     expr->build();
     action_fn->parameter_push_back_expression(
-        std::unique_ptr<Expression>(expr));
+        std::unique_ptr<Expression>(expr), expr_type);
   } else if (type == "register") {
     // TODO(antonin): cheap optimization
     // this may not be worth doing, and probably does not belong here
