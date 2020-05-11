@@ -196,8 +196,15 @@ P4Objects::build_expression(const Json::Value &json_expression,
       expr->push_back_op(opcode);
       *expr_type = ExprType::BOOL;
     } else if (op == "access_field") {
-      build_expression(json_left, expr);
+      build_expression(json_left, expr, &typeL);
+      assert(typeL == ExprType::HEADER);
       expr->push_back_access_field(json_right.asInt());
+      *expr_type = ExprType::DATA;
+    } else if (op == "access_union_header") {
+      build_expression(json_left, expr, &typeL);
+      assert(typeL == ExprType::UNION);
+      expr->push_back_access_field(json_right.asInt());
+      *expr_type = ExprType::HEADER;
     } else {
       // special handling for unary + and -, we set the left operand to 0
       if ((op == "+" || op == "-") && json_left.isNull())
