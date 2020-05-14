@@ -309,8 +309,14 @@ const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
             expr->e0 = shift_of;
             expr->e1 = new IR::Constant(hi + shift_amt);
             expr->e2 = new IR::Constant(lo + shift_amt); }
-        if (hi + shift_amt <= 0 && !hasSideEffects(shift_of))
-            return new IR::Constant(IR::Type_Bits::get(hi - lo + 1), 0);
+        if (hi + shift_amt <= 0) {
+            if (!hasSideEffects(shift_of))
+                return new IR::Constant(IR::Type_Bits::get(hi - lo + 1), 0);
+            // TODO: here we could promote the side-effect into a
+            // separate statement.  and still return the constant.
+            // But for now we only produce expressions.
+            return expr;
+        }
         if (lo + shift_amt < 0) {
             expr->e0 = shift_of;
             expr->e1 = new IR::Constant(hi + shift_amt);

@@ -45,7 +45,7 @@ TEST_F(FromJSONTest, load_ir_from_json) {
                       "mv outputTO.json.tmp outputTO.json");
     ASSERT_FALSE(exitCode);
     exitCode = system("grep -v program outputFROM.json > outputFROM.json.tmp; "
-                      " mv outputFROM.json.tmp outputFROM.json");
+                      "mv outputFROM.json.tmp outputFROM.json");
     ASSERT_FALSE(exitCode);
     exitCode = system("diff outputTO.json outputFROM.json");
     ASSERT_FALSE(exitCode);

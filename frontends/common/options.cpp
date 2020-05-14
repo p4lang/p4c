@@ -284,7 +284,10 @@ bool setIncludePathIfExists(const char*& includePathOut,
                             const char* possiblePath) {
     struct stat st;
     if (!(stat(possiblePath, &st) >= 0 && S_ISDIR(st.st_mode))) return false;
-    includePathOut = strdup(possiblePath);
+    if (auto path = realpath(possiblePath, NULL))
+        includePathOut = path;
+    else
+        includePathOut = strdup(possiblePath);
     return true;
 }
 

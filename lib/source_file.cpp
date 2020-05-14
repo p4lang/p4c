@@ -278,10 +278,14 @@ cstring InputSources::toDebugString() const {
 ///////////////////////////////////////////////////
 
 cstring SourceInfo::toSourceFragment() const {
+    if (!isValid())
+        return "";
     return sources->getSourceFragment(*this);
 }
 
 cstring SourceInfo::toBriefSourceFragment() const {
+    if (!isValid())
+        return "";
     return sources->getBriefSourceFragment(*this);
 }
 
