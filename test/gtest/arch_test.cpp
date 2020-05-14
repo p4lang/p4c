@@ -54,6 +54,7 @@ TEST_F(P4CArchitecture, packet_out) {
         PSA(MyDeparser()) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     ReferenceMap refMap;
     TypeMap      typeMap;
@@ -89,13 +90,15 @@ TEST_F(P4CArchitecture, duplicatedDeclarationBug) {
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
-    ReferenceMap refMap;
-    TypeMap      typeMap;
-    PassManager  passes({
-        new TypeChecking(&refMap, &typeMap)
-    });
+    if (pgm != nullptr) {
+        ReferenceMap refMap;
+        TypeMap      typeMap;
+        PassManager  passes({
+            new TypeChecking(&refMap, &typeMap)
+        });
 
-    pgm = pgm->apply(passes);
+        pgm = pgm->apply(passes);
+    }
     ASSERT_GT(::errorCount(), 0U);
 }
 
@@ -135,6 +138,7 @@ TEST_F(P4CArchitecture, instantiation) {
         PSA(MyParser(), MyIngress(), MyDeparser()) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     ReferenceMap refMap;
     TypeMap      typeMap;
@@ -167,12 +171,14 @@ TEST_F(P4CArchitecture, psa_package_with_body) {
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
 
-    ReferenceMap refMap;
-    TypeMap      typeMap;
-    PassManager  passes({
-        new TypeChecking(&refMap, &typeMap)
-    });
-    pgm = pgm->apply(passes);
+    if (pgm != nullptr) {
+        ReferenceMap refMap;
+        TypeMap      typeMap;
+        PassManager  passes({
+            new TypeChecking(&refMap, &typeMap)
+        });
+        pgm = pgm->apply(passes);
+    }
     ASSERT_GT(::errorCount(), 0U);
 }
 
@@ -202,6 +208,7 @@ TEST_F(P4CArchitecture, psa_control_in_control) {
         PSA(MyIngress()) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     ReferenceMap refMap;
     TypeMap      typeMap;
@@ -227,6 +234,7 @@ TEST_F(P4CArchitecture, psa_clone_as_param_to_package) {
         PSA(c) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     ReferenceMap refMap;
     TypeMap      typeMap;
@@ -261,6 +269,7 @@ TEST_F(P4CArchitecture, psa_clone_as_param_to_control) {
         PSA(MyIngress(clone<bit<32>>())) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     ReferenceMap refMap;
     TypeMap      typeMap;
@@ -303,6 +312,7 @@ TEST_F(P4CArchitecture, psa_clone_as_param_to_extern) {
         PSA(MyIngress(pre)) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     ReferenceMap refMap;
     TypeMap      typeMap;
@@ -334,6 +344,7 @@ TEST_F(P4CArchitecture, clone_as_extern_method) {
         PSA(MyIngress()) main;
     )");
     auto pgm = P4::parseP4String(program, CompilerOptions::FrontendVersion::P4_16);
+    ASSERT_TRUE(pgm != nullptr && ::errorCount() == 0);
 
     ReferenceMap refMap;
     TypeMap      typeMap;
