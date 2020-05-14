@@ -125,8 +125,9 @@ const IR::Node* CreateStructInitializers::postorder(IR::MethodCallExpression* ex
 
 
 const IR::Node* CreateStructInitializers::postorder(IR::Operation_Relation* expression) {
-    auto ltype = typeMap->getType(expression->left);
-    auto rtype = typeMap->getType(expression->right);
+    auto orig = getOriginal<IR::Operation_Relation>();
+    auto ltype = typeMap->getType(orig->left, true);
+    auto rtype = typeMap->getType(orig->right, true);
     if (ltype->is<IR::Type_StructLike>() && rtype->is<IR::Type_List>())
         expression->right = convert(expression->right, ltype);
     if (rtype->is<IR::Type_StructLike>() && ltype->is<IR::Type_List>())
