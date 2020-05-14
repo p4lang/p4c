@@ -29,7 +29,7 @@ namespace P4 {
 //////////////////////////////////////////////
 // The following are for a single parser
 
-// Information produced for a parser state by the symbolic evaluator
+/// Information produced for a parser state by the symbolic evaluator
 struct ParserStateInfo {
     const IR::P4Parser*    parser;
     const IR::ParserState* state;  // original state this is produced from
@@ -45,7 +45,7 @@ struct ParserStateInfo {
     { CHECK_NULL(parser); CHECK_NULL(state); CHECK_NULL(before); }
 };
 
-// Information produced for a parser by the symbolic evaluator
+/// Information produced for a parser by the symbolic evaluator
 class ParserInfo {
     // for each original state a vector of states produced by unrolling
     std::map<cstring, std::vector<ParserStateInfo*>*> states;
@@ -70,7 +70,7 @@ class ParserInfo {
 
 typedef CallGraph<const IR::ParserState*> StateCallGraph;
 
-// Information about a parser in the input program
+/// Information about a parser in the input program
 class ParserStructure {
     std::map<cstring, const IR::ParserState*> stateMap;
     StateCallGraph* callGraph;
@@ -104,6 +104,11 @@ class AnalyzeParser : public Inspector {
         visitDagOnce = false;
     }
 
+    bool preorder(const IR::P4Parser* parser) override {
+        LOG2("Scanning " << parser);
+        current->parser = parser;
+        return true;
+    }
     bool preorder(const IR::ParserState* state) override;
     void postorder(const IR::PathExpression* expression) override;
 };
@@ -129,6 +134,7 @@ class ParserRewriter : public PassManager {
  public:
     ParserRewriter(ReferenceMap* refMap, TypeMap* typeMap, bool unroll) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap);
+        setName("ParserRewriter");
         passes.push_back(new AnalyzeParser(refMap, &current));
         passes.push_back(new VisitFunctor (
             [this, refMap, typeMap, unroll](const IR::Node* root) -> const IR::Node* {
@@ -139,12 +145,6 @@ class ParserRewriter : public PassManager {
         if (unroll)
             passes.push_back(new ParserUnroller(refMap, typeMap, &current));
 #endif
-    }
-    Visitor::profile_t init_apply(const IR::Node* node) override {
-        LOG1("Scanning " << node);
-        BUG_CHECK(node->is<IR::P4Parser>(), "%1%: expected a parser", node);
-        current.parser = node->to<IR::P4Parser>();
-        return Visitor::init_apply(node);
     }
 };
 
@@ -158,10 +158,10 @@ class RewriteAllParsers : public Transform {
  public:
     RewriteAllParsers(ReferenceMap* refMap, TypeMap* typeMap, bool unroll) :
             refMap(refMap), typeMap(typeMap), unroll(unroll)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("RewriteAllParsers"); }
     const IR::Node* postorder(IR::P4Parser* parser) override {
-        ParserRewriter rewriter(refMap, typeMap, unroll);
-        return parser->apply(rewriter);
+        auto rewriter = new ParserRewriter(refMap, typeMap, unroll);
+        return parser->apply(*rewriter);
     }
 };
 

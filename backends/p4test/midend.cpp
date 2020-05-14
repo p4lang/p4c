@@ -43,7 +43,6 @@ limitations under the License.
 #include "midend/midEndLast.h"
 #include "midend/nestedStructs.h"
 #include "midend/noMatch.h"
-#include "midend/parserUnroll.h"
 #include "midend/predication.h"
 #include "midend/removeExits.h"
 #include "midend/removeMiss.h"
@@ -77,9 +76,6 @@ MidEnd::MidEnd(CompilerOptions& options) {
 
     auto v1controls = new std::set<cstring>();
 
-    // TODO: parser loop unrolling
-    // TODO: lower errors to integers
-    // TODO: handle bit-slices as out arguments
     addPasses({
         options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
         new P4::RemoveMiss(&refMap, &typeMap),
