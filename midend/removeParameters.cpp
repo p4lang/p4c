@@ -89,13 +89,12 @@ class InsertBeforeExits : public Transform {
     const IR::Node* postorder(IR::ReturnStatement* statement) override {
         auto vec = new IR::IndexedVector<IR::StatOrDecl>(*toInsert);
         vec->push_back(statement);
-        return vec;
-    }
+        return new IR::BlockStatement(statement->srcInfo, *vec); }
+
     const IR::Node* postorder(IR::ExitStatement* statement) override {
         auto vec = new IR::IndexedVector<IR::StatOrDecl>(*toInsert);
         vec->push_back(statement);
-        return vec;
-    }
+        return new IR::BlockStatement(statement->srcInfo, *vec); }
 };
 
 }  // namespace
