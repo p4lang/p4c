@@ -41,43 +41,48 @@ namespace P4 {
 
 namespace ControlPlaneAPI {
 
-bool hasTranslationAnnotation(const IR::Type* type, TranslationAnnotation* payload) {
+bool hasTranslationAnnotation(const IR::Type* type,
+                              TranslationAnnotation* payload) {
     auto ann = type->getAnnotation("p4runtime_translation");
     if (!ann) return false;
 
     // Syntax: @pruntime_translation(<uri>, <basic_type>).
     BUG_CHECK(ann->expr.size() == 2,
-              "Expected @p4runtime_translation annotation with 2 arguments, but"
-              "got %1% arguments",
-              ann->expr.size());
-    auto uriL = ann->expr[0]->to<IR::StringLiteral>();
-    if (!uriL) {
-        ::error(ErrorType::ERR_INVALID,
-                "%1%: the first argument to @p4runtime_translation must be a string literal",
-                type);
-        return false;
-    }
-    payload->original_type_uri = std::string(uriL->value);
+              "%1%: expected @p4runtime_translation annotation with 2 "
+              "arguments, but found %2% arguments",
+              type, ann->expr.size());
+    const IR::Expression* first_arg = ann->expr[0];
+    const IR::Expression* second_arg = ann->expr[1];
 
-    auto ctypeTY = ann->expr[1]->to<IR::DefaultExpression>();
-    if (ctypeTY != nullptr && ctypeTY->type->to<IR::Type_String>() != nullptr) {
+    auto uri = first_arg->to<IR::StringLiteral>();
+    BUG_CHECK(uri != nullptr,
+              "%1%: the first argument to @p4runtime_translation must be a "
+              "string literal",
+              type);
+    payload->original_type_uri = std::string(uri->value);
+
+    BUG_CHECK(second_arg->to<IR::DefaultExpression>() != nullptr,
+              "%1%: expected second argument to @p4runtime_translation to parse"
+              " as a IR::DefaultExpression, but got %2%",
+              type, second_arg);
+    auto controller_type = second_arg->to<IR::DefaultExpression>()->type;
+    if (controller_type->to<IR::Type_String>() != nullptr) {
         payload->controller_type = ControllerType {
             .type = ControllerType::kString,
             .width = 0,
         };
         return true;
-    }
-    if (ctypeTY != nullptr && ctypeTY->type->to<IR::Type_Bits>() != nullptr) {
+    } else if (controller_type->to<IR::Type_Bits>() != nullptr) {
         payload->controller_type = ControllerType {
             .type = ControllerType::kBit,
-            .width = ctypeTY->type->to<IR::Type_Bits>()->width_bits(),
+            .width = controller_type->to<IR::Type_Bits>()->width_bits(),
         };
         return true;
     }
     ::error(ErrorType::ERR_INVALID,
             "%1%: the second argument to @p4runtime_translation must be one of "
-            "the basic types 'string' or 'bit<W>'",
-            type);
+            "the basic types 'string' or 'bit<W>', but got %2%",
+            type, controller_type);
     return false;
 }
 
