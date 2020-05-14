@@ -140,9 +140,23 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::Operation_Unary* expression)
 
 const IR::Node* DoSimplifyExpressions::preorder(IR::Operation_Binary* expression) {
     LOG3("Visiting " << dbp(expression));
-    auto type = typeMap->getType(getOriginal(), true);
-    if (SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
-        visit(expression->left);
+    auto original = getOriginal<IR::Operation_Binary>();
+    auto type = typeMap->getType(original, true);
+    if (SideEffects::check(original, refMap, typeMap)) {
+        if (SideEffects::check(original->right, refMap, typeMap)) {
+            // We are a bit conservative here. We handle this case:
+            // T f(inout T val) { ... }
+            // val + f(val);
+            // We must save val before the evaluation of f
+            auto ltype = typeMap->getType(original->left, true);
+            auto leftTmp = createTemporary(ltype);
+            visit(expression->left);
+            auto leftPath = addAssignment(expression->srcInfo, leftTmp, expression->left);
+            expression->left = leftPath;
+            typeMap->setType(leftPath, ltype);
+        } else {
+            visit(expression->left);
+        }
         CHECK_NULL(expression->left);
         visit(expression->right);
         typeMap->setType(expression, type);

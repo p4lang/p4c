@@ -73,14 +73,28 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bit<8> tmp_18;
     bit<8> tmp_19;
     bit<8> tmp_20;
-    bit<24> tmp_21;
+    bit<8> tmp_21;
     bit<8> tmp_22;
     bit<8> tmp_23;
-    bool tmp_24;
+    bit<8> tmp_24;
     bit<8> tmp_25;
     bit<8> tmp_26;
-    bool tmp_27;
+    bit<8> tmp_27;
+    bit<8> tmp_28;
+    bit<8> tmp_29;
+    bit<16> tmp_30;
+    bit<8> tmp_31;
+    bit<24> tmp_32;
+    bit<8> tmp_33;
+    bit<8> tmp_34;
+    bit<8> tmp_35;
+    bool tmp_36;
+    bit<8> tmp_37;
+    bit<8> tmp_38;
+    bit<8> tmp_39;
+    bool tmp_40;
     apply {
+        tmp = 8w0;
         {
             bit<8> val_0 = h.h.a;
             bool hasReturned = false;
@@ -89,9 +103,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned = true;
             retval = 8w2;
             h.h.a = val_0;
-            tmp = retval;
+            tmp_0 = retval;
         }
-        tmp_0 = 8w0 & tmp;
+        tmp_1 = tmp & tmp_0;
+        tmp_2 = 8w0;
         {
             bit<8> val_1 = h.h.b;
             bool hasReturned_1 = false;
@@ -100,9 +115,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_1 = true;
             retval_1 = 8w2;
             h.h.b = val_1;
-            tmp_1 = retval_1;
+            tmp_3 = retval_1;
         }
-        tmp_2 = 8w0 * tmp_1;
+        tmp_4 = tmp_2 * tmp_3;
+        tmp_5 = 8w0;
         {
             bit<8> val_2 = h.h.c;
             bool hasReturned_2 = false;
@@ -111,9 +127,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_2 = true;
             retval_2 = 8w2;
             h.h.c = val_2;
-            tmp_3 = retval_2;
+            tmp_6 = retval_2;
         }
-        tmp_4 = 8w0 / tmp_3;
+        tmp_7 = tmp_5 / tmp_6;
+        tmp_8 = 8w0;
         {
             bit<8> val_3 = h.h.d;
             bool hasReturned_3 = false;
@@ -122,9 +139,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_3 = true;
             retval_3 = 8w2;
             h.h.d = val_3;
-            tmp_5 = retval_3;
+            tmp_9 = retval_3;
         }
-        tmp_6 = 8w0 >> tmp_5;
+        tmp_10 = tmp_8 >> tmp_9;
+        tmp_11 = 8w0;
         {
             bit<8> val_4 = h.h.e;
             bool hasReturned_4 = false;
@@ -133,9 +151,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_4 = true;
             retval_4 = 8w2;
             h.h.e = val_4;
-            tmp_7 = retval_4;
+            tmp_12 = retval_4;
         }
-        tmp_8 = 8w0 << tmp_7;
+        tmp_13 = tmp_11 << tmp_12;
+        tmp_14 = 8w0;
         {
             bit<8> val_5 = h.h.f;
             bool hasReturned_5 = false;
@@ -144,9 +163,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_5 = true;
             retval_5 = 8w2;
             h.h.f = val_5;
-            tmp_9 = retval_5;
+            tmp_15 = retval_5;
         }
-        tmp_10 = 8w0 % tmp_9;
+        tmp_16 = tmp_14 % tmp_15;
         {
             bit<8> val_6 = h.h.g;
             bool hasReturned_6 = false;
@@ -157,6 +176,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             h.h.g = val_6;
             dummy_var_0 = retval_6;
         }
+        tmp_17 = 8w0;
         {
             bit<8> val_7 = h.h.h;
             bool hasReturned_7 = false;
@@ -165,9 +185,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_7 = true;
             retval_7 = 8w2;
             h.h.h = val_7;
-            tmp_11 = retval_7;
+            tmp_18 = retval_7;
         }
-        tmp_12 = 8w0 |-| tmp_11;
+        tmp_19 = tmp_17 |-| tmp_18;
+        tmp_20 = 8w255;
         {
             bit<8> val_8 = h.h.i;
             bool hasReturned_8 = false;
@@ -176,9 +197,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_8 = true;
             retval_8 = 8w2;
             h.h.i = val_8;
-            tmp_13 = retval_8;
+            tmp_21 = retval_8;
         }
-        tmp_14 = 8w255 |+| tmp_13;
+        tmp_22 = tmp_20 |+| tmp_21;
+        tmp_23 = 8w255;
         {
             bit<8> val_9 = h.h.j;
             bool hasReturned_9 = false;
@@ -187,9 +209,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_9 = true;
             retval_9 = 8w2;
             h.h.j = val_9;
-            tmp_15 = retval_9;
+            tmp_24 = retval_9;
         }
-        tmp_16 = 8w255 + tmp_15;
+        tmp_25 = tmp_23 + tmp_24;
+        tmp_26 = 8w255;
         {
             bit<8> val_10 = h.h.k;
             bool hasReturned_10 = false;
@@ -198,9 +221,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_10 = true;
             retval_10 = 8w2;
             h.h.k = val_10;
-            tmp_17 = retval_10;
+            tmp_27 = retval_10;
         }
-        tmp_18 = 8w255 | tmp_17;
+        tmp_28 = tmp_26 | tmp_27;
         {
             bit<8> val_11 = h.h.l;
             bool hasReturned_11 = false;
@@ -209,8 +232,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_11 = true;
             retval_11 = 8w2;
             h.h.l = val_11;
-            tmp_19 = retval_11;
+            tmp_29 = retval_11;
         }
+        tmp_30 = 16w1;
         {
             bit<8> val_12 = h.h.m;
             bool hasReturned_12 = false;
@@ -219,9 +243,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_12 = true;
             retval_12 = 8w2;
             h.h.m = val_12;
-            tmp_20 = retval_12;
+            tmp_31 = retval_12;
         }
-        tmp_21 = 16w1 ++ tmp_20;
+        tmp_32 = tmp_30 ++ tmp_31;
         {
             bit<8> val_13 = h.b.c;
             bool hasReturned_13 = false;
@@ -230,8 +254,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_13 = true;
             retval_13 = 8w2;
             h.b.c = val_13;
-            tmp_22 = retval_13;
+            tmp_34 = retval_13;
         }
+        tmp_33 = tmp_34;
         {
             bit<8> val_14 = h.b.c;
             bool hasReturned_14 = false;
@@ -240,9 +265,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_14 = true;
             retval_14 = 8w2;
             h.b.c = val_14;
-            tmp_23 = retval_14;
+            tmp_35 = retval_14;
         }
-        tmp_24 = tmp_22 != tmp_23;
+        tmp_36 = tmp_33 != tmp_35;
         {
             bit<8> val_15 = h.b.d;
             bool hasReturned_15 = false;
@@ -251,8 +276,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_15 = true;
             retval_15 = 8w2;
             h.b.d = val_15;
-            tmp_25 = retval_15;
+            tmp_38 = retval_15;
         }
+        tmp_37 = tmp_38;
         {
             bit<8> val_16 = h.b.d;
             bool hasReturned_16 = false;
@@ -261,9 +287,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_16 = true;
             retval_16 = 8w2;
             h.b.d = val_16;
-            tmp_26 = retval_16;
+            tmp_39 = retval_16;
         }
-        tmp_27 = tmp_25 == tmp_26;
+        tmp_40 = tmp_37 == tmp_39;
     }
 }
 

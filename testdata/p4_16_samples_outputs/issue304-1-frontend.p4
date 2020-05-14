@@ -9,18 +9,22 @@ control t(inout bit<32> b) {
         void a(inout bit<32> arg) {
             bit<32> c1_tmp;
             bit<32> c1_tmp_0;
-            c1_tmp = this.b();
-            c1_tmp_0 = arg + c1_tmp;
-            arg = c1_tmp_0;
+            bit<32> c1_tmp_1;
+            c1_tmp = arg;
+            c1_tmp_0 = this.b();
+            c1_tmp_1 = c1_tmp + c1_tmp_0;
+            arg = c1_tmp_1;
         }
     };
     @name("t.c2.x") X() c2_x = {
         void a(inout bit<32> arg) {
             bit<32> c2_tmp;
             bit<32> c2_tmp_0;
-            c2_tmp = this.b();
-            c2_tmp_0 = arg + c2_tmp;
-            arg = c2_tmp_0;
+            bit<32> c2_tmp_1;
+            c2_tmp = arg;
+            c2_tmp_0 = this.b();
+            c2_tmp_1 = c2_tmp + c2_tmp_0;
+            arg = c2_tmp_1;
         }
     };
     apply {

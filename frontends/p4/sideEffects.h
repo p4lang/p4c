@@ -118,8 +118,6 @@ a[tmp1].x = tmp4;        // assign result of call of f to actual left value
  * first.
  */
 class DoSimplifyExpressions : public Transform, P4WriteContext {
-    // FIXME: does not handle select labels
-
     ReferenceMap*        refMap;
     TypeMap*             typeMap;
 

@@ -4,13 +4,13 @@ extern E {
 }
 
 control c(inout bit<32> r) {
-    bit<32> tmp;
     bit<32> tmp_0;
+    bit<32> tmp_1;
     @name("c.e") E() e_0;
     @hidden action complex4l25() {
-        tmp = e_0.f(32w4);
-        tmp_0 = e_0.f(32w5);
-        r = tmp + tmp_0;
+        tmp_0 = e_0.f(32w4);
+        tmp_1 = e_0.f(32w5);
+        r = tmp_0 + tmp_1;
     }
     @hidden table tbl_complex4l25 {
         actions = {

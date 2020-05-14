@@ -29,7 +29,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bit<16> tmp_2;
     bit<16> tmp_3;
     bit<16> tmp_4;
+    bit<16> tmp_5;
+    bit<16> tmp_6;
+    bit<16> tmp_7;
     apply {
+        tmp = 16w0;
         {
             bit<16> eth_type_0 = h.eth_hdr.eth_type;
             bool hasReturned = false;
@@ -38,9 +42,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned = true;
             retval = 16w2;
             h.eth_hdr.eth_type = eth_type_0;
-            tmp = retval;
+            tmp_0 = retval;
         }
-        tmp_0 = 16w0 & tmp;
+        tmp_1 = tmp & tmp_0;
+        tmp_2 = 16w0;
         {
             bit<16> eth_type_1 = h.eth_hdr.eth_type;
             bool hasReturned_1 = false;
@@ -49,9 +54,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_1 = true;
             retval_1 = 16w2;
             h.eth_hdr.eth_type = eth_type_1;
-            tmp_1 = retval_1;
+            tmp_3 = retval_1;
         }
-        tmp_2 = 16w0 * tmp_1;
+        tmp_4 = tmp_2 * tmp_3;
+        tmp_5 = 16w0;
         {
             bit<16> eth_type_2 = h.eth_hdr.eth_type;
             bool hasReturned_2 = false;
@@ -60,9 +66,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_2 = true;
             retval_2 = 16w2;
             h.eth_hdr.eth_type = eth_type_2;
-            tmp_3 = retval_2;
+            tmp_6 = retval_2;
         }
-        tmp_4 = 16w0 >> tmp_3;
+        tmp_7 = tmp_5 >> tmp_6;
     }
 }
 
