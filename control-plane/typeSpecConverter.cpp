@@ -59,7 +59,7 @@ bool hasTranslationAnnotation(const IR::Type* type, TranslationAnnotation* paylo
 
     // Legacy syntax: @p4runtime_translation(<uri>, <width>).
     auto ctypeBL = ann->expr[1]->to<IR::Constant>();
-    if(ctypeBL != nullptr) {
+    if (ctypeBL != nullptr) {
         if (ctypeBL->value <= 0 || ctypeBL->value > std::numeric_limits<int32_t>::max()) {
             ::error(ErrorType::ERR_INVALID,
                     "%1%: the second argument to @p4runtime_translation must be"
