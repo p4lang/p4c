@@ -234,6 +234,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
                             simpleKeysetExpression transitionStatement switchLabel
 %type<ConstType*>           baseType typeOrVoid specializedType headerStackType
                             typeRef tupleType typeArg realTypeArg namedType
+                            p4rtControllerType
 %type<IR::Type_Name*>       typeName
 %type<IR::Argument*>        argument
 %type<IR::Vector<IR::Argument>*>  argumentList nonEmptyArgList
@@ -400,19 +401,21 @@ fragment
           $$ = result; }
 
       // P4Runtime annotations
-    | START_P4RT_TRANSLATION_ANNOTATION STRING_LITERAL "," baseType
+    | START_P4RT_TRANSLATION_ANNOTATION STRING_LITERAL "," p4rtControllerType
         { auto* result = new IR::Vector<IR::Expression>();
           result->push_back(new IR::StringLiteral(@2, $2));
           result->push_back(new IR::DefaultExpression($4));
-          $$ = result;
-        }
-      // Legacy syntax; to be removed in P4RT 2.0
-    | START_P4RT_TRANSLATION_ANNOTATION STRING_LITERAL "," INTEGER
-        { auto* result = new IR::Vector<IR::Expression>();
-          result->push_back(new IR::StringLiteral(@2, $2));
-          result->push_back(parseConstant(@4, $4, 0));
-          $$ = result;
-        }
+          $$ = result; }
+    ;
+
+p4rtControllerType
+    : STRING
+        { $$ = IR::Type::String::get(); }
+    | BIT l_angle INTEGER r_angle
+        { $$ = IR::Type::Bits::get(@1+@4, parseConstantChecked(@3, $3), false); }
+    // Legacy syntax; to be removed in P4RT 2.0
+    | INTEGER
+        { $$ = IR::Type::Bits::get(@1, parseConstantChecked(@1, $1), false); }
     ;
 
 program : input END { YYACCEPT; };

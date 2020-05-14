@@ -2055,4 +2055,53 @@ TEST_F(P4RuntimeDataTypeSpec, NewTypeInvalidTranslation) {
     EXPECT_EQ(4u, ::errorCount());
 }
 
+TEST_F(P4RuntimeDataTypeSpec, NewType_NewTranslationSyntax_String_Valid) {
+    using ::p4::config::v1::P4NewTypeTranslation;
+
+    std::string program = P4_SOURCE(R"(
+        @p4runtime_translation("p4.org/myArch/v1/Type", string)
+        type bit<8> my_type_t;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr);
+    EXPECT_EQ(::errorCount(), 0);
+
+    auto it = typeInfo.new_types().find("my_type_t");
+    ASSERT_NE(it, typeInfo.new_types().end());
+    const P4NewTypeTranslation& translation = it->second.translated_type();
+    EXPECT_EQ(translation.uri(), "p4.org/myArch/v1/Type");
+    EXPECT_EQ(translation.sdn_type_case(), P4NewTypeTranslation::kSdnString);
+}
+
+TEST_F(P4RuntimeDataTypeSpec, NewType_NewTranslationSyntax_BitW_Valid) {
+    using ::p4::config::v1::P4NewTypeTranslation;
+
+    std::string program = P4_SOURCE(R"(
+        @p4runtime_translation("p4.org/myArch/v1/Type", bit<32>)
+        type bit<8> my_type_t;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr);
+    EXPECT_EQ(::errorCount(), 0);
+
+    auto it = typeInfo.new_types().find("my_type_t");
+    ASSERT_NE(it, typeInfo.new_types().end());
+    const P4NewTypeTranslation& translation = it->second.translated_type();
+    EXPECT_EQ(translation.uri(), "p4.org/myArch/v1/Type");
+    EXPECT_EQ(translation.sdn_type_case(), P4NewTypeTranslation::kSdnBitwidth);
+    EXPECT_EQ(translation.sdn_bitwidth(), 32);
+}
+
+TEST_F(P4RuntimeDataTypeSpec, NewType_NewTranslationSyntax_IntW_Invalid) {
+    using ::p4::config::v1::P4NewTypeTranslation;
+
+    std::string program = P4_SOURCE(R"(
+        @p4runtime_translation("p4.org/myArch/v1/Type", int<32>)
+        type bit<8> my_type_t;
+    )");
+    getProgram(program);
+    ASSERT_EQ(::errorCount(), 1);
+}
+
+
 }  // namespace Test

@@ -44,6 +44,8 @@ namespace ControlPlaneAPI {
 bool hasTranslationAnnotation(const IR::Type* type, TranslationAnnotation* payload) {
     auto ann = type->getAnnotation("p4runtime_translation");
     if (!ann) return false;
+
+    // Syntax: @pruntime_translation(<uri>, <basic_type>).
     BUG_CHECK(ann->expr.size() == 2,
               "Expected @p4runtime_translation annotation with 2 arguments, but"
               "got %1% arguments",
@@ -57,24 +59,6 @@ bool hasTranslationAnnotation(const IR::Type* type, TranslationAnnotation* paylo
     }
     payload->original_type_uri = std::string(uriL->value);
 
-    // Legacy syntax: @p4runtime_translation(<uri>, <width>).
-    auto ctypeBL = ann->expr[1]->to<IR::Constant>();
-    if (ctypeBL != nullptr) {
-        if (ctypeBL->value <= 0 || ctypeBL->value > std::numeric_limits<int32_t>::max()) {
-            ::error(ErrorType::ERR_INVALID,
-                    "%1%: the second argument to @p4runtime_translation must be"
-                    " apositive integer that fits in 32 bits",
-                    type);
-            return false;
-        }
-        payload->controller_type = ControllerType{
-            .type = ControllerType::kBit,
-            .width = static_cast<int32_t>(ctypeBL->value),
-        };
-        return true;
-    }
-
-    // New syntax: @pruntime_translation(<uri>, <basic_type>).
     auto ctypeTY = ann->expr[1]->to<IR::DefaultExpression>();
     if (ctypeTY != nullptr && ctypeTY->type->to<IR::Type_String>() != nullptr) {
         payload->controller_type = ControllerType {
