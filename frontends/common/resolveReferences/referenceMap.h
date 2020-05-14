@@ -44,7 +44,7 @@ class MinimalNameGenerator : public NameGenerator, public Inspector {
     }
 
     /// Generate a name from @p base that fresh for the program.
-    cstring newName(cstring base);
+    cstring newName(cstring base) override;
 };
 
 // FIXME -- temp cpmmon base class to allow use of ReferenceMap or ResolutionContext

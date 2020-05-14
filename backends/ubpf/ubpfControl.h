@@ -34,9 +34,9 @@ namespace UBPF {
         std::vector<UBPFRegister *> registersLookups;
 
         explicit UBPFControlBodyTranslator(const UBPFControl *control);
-        virtual void processMethod(const P4::ExternMethod *method);
-        virtual void processApply(const P4::ApplyMethod *method);
-        virtual void processFunction(const P4::ExternFunction *function);
+        virtual void processMethod(const P4::ExternMethod *method) override;
+        virtual void processApply(const P4::ApplyMethod *method) override;
+        virtual void processFunction(const P4::ExternFunction *function) override;
         void processChecksumReplace2(const P4::ExternFunction *function);
         void processChecksumReplace4(const P4::ExternFunction *function);
         bool preorder(const IR::PathExpression *expression) override;

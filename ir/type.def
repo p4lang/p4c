@@ -568,9 +568,9 @@ class Method : Declaration, IAnnotated, IFunctional, ISimpleNamespace {
     Annotations getAnnotations() const override { return annotations; }
     ParameterList getParameters() const override { return type->parameters; }
     // annotations can refer to parameters, so need to look them up in scope
-    IDeclaration getDeclByName(cstring name) const {
+    IDeclaration getDeclByName(cstring name) const override {
         return type->parameters->getDeclByName(name); }
-    Util::Enumerator<IDeclaration> *getDeclarations() const {
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
         return type->parameters->getDeclarations(); }
 }
 
