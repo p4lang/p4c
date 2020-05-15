@@ -38,7 +38,7 @@ struct Headers_t {
 struct metadata {
 }
 
-parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
+parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
         p.extract(headers.ethernet);
         transition select(headers.ethernet.etherType) {
@@ -56,7 +56,7 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
     }
 }
 
-control pipe(inout Headers_t headers, inout metadata meta) {
+control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     apply {
         bit<32> old_addr = headers.ipv4.dstAddr;
         bit<32> new_addr = 32w0x1020304;

@@ -33,7 +33,7 @@ struct metadata {
 }
 
 extern bit<16> compute_hash(in bit<32> srcAddr, in bit<32> dstAddr);
-parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
+parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
         p.extract<Ethernet_h>(headers.ethernet);
         p.extract<IPv4_h>(headers.ipv4);
@@ -41,7 +41,7 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
     }
 }
 
-control pipe(inout Headers_t headers, inout metadata meta) {
+control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     apply {
         headers.ipv4.hdrChecksum = compute_hash(headers.ipv4.srcAddr, headers.ipv4.dstAddr);
     }

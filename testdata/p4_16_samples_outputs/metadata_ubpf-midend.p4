@@ -16,17 +16,17 @@ struct metadata {
     bit<16> etherType;
 }
 
-parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
+parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
         p.extract<Ethernet_h>(headers.ethernet);
         transition accept;
     }
 }
 
-control pipe(inout Headers_t headers, inout metadata meta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarnUnused @name(".NoAction") action NoAction_3() {
     }
     @name("pipe.fill_metadata") action fill_metadata() {
         meta.etherType = headers.ethernet.etherType;

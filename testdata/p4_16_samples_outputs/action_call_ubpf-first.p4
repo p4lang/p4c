@@ -7,13 +7,13 @@ struct Headers_t {
 struct metadata {
 }
 
-parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
+parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
         transition accept;
     }
 }
 
-control pipe(inout Headers_t headers, inout metadata meta) {
+control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     action RejectConditional(bit<1> condition) {
         if (condition == 1w1) {
             bit<1> tmp = 1w0;

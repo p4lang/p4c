@@ -27,7 +27,7 @@ struct metadata {
     bit<32> output;
 }
 
-parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
+parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
         transition accept;
     }
@@ -49,7 +49,7 @@ struct tuple_2 {
     bit<8> field_5;
 }
 
-control pipe(inout Headers_t headers, inout metadata meta) {
+control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     @name("pipe.a") action a_1() {
         hash<tuple_0>(meta.output, HashAlgorithm.lookup3, { headers.test.sa, headers.test.da });
     }

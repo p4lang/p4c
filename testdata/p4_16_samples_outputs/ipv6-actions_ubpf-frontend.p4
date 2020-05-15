@@ -52,7 +52,7 @@ struct Headers_t {
 struct metadata {
 }
 
-parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
+parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
         p.extract<Ethernet_h>(headers.ethernet);
         transition select(headers.ethernet.etherType) {
@@ -76,8 +76,8 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
     }
 }
 
-control pipe(inout Headers_t headers, inout metadata meta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
+    @noWarnUnused @name(".NoAction") action NoAction_0() {
     }
     bit<128> tmp_0;
     @name("pipe.Reject") action Reject() {
