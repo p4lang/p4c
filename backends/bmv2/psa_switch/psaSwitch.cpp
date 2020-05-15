@@ -616,8 +616,14 @@ Util::IJson* ExternConverter_Register::convertExternObject(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
-    if (mc->arguments->size() != 2) {
+    if (em->method->name != "write" && em->method->name != "read") {
+        modelError("Unsupported register method %1%", mc);
+        return nullptr;
+    } else if (em->method->name == "write" && mc->arguments->size() != 2) {
         modelError("Expected 2 arguments for %1%", mc);
+        return nullptr;
+    } else if (em->method->name == "read" && mc->arguments->size() != 1) {
+        modelError("Expected 1 arguments for %1%", mc);
         return nullptr;
     }
     auto reg = new Util::JsonObject();
@@ -930,8 +936,8 @@ void ExternConverter_Register::convertExternInstance(
         return;
     }
     auto st = eb->instanceType->to<IR::Type_SpecializedCanonical>();
-    if (st->arguments->size() != 1) {
-        modelError("%1%: expected 1 type argument", st);
+    if (st->arguments->size() != 2) {
+        modelError("%1%: expected 2 type argument", st);
         return;
     }
     auto regType = st->arguments->at(0);
