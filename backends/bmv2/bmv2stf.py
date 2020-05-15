@@ -402,6 +402,14 @@ class RunBMV2(object):
             # Pass through multicast group commands unchanged, with
             # same arguments as expected by simple_switch_CLI
             self.do_cli_command(first + " " + cmd)
+        elif first == "counter_read" or first == "counter_write":
+            # Pass through multicast group commands unchanged, with
+            # same arguments as expected by simple_switch_CLI
+            self.do_cli_command(first + " " + cmd)
+        elif first == "register_read" or first == "register_write" or first == "register_reset":
+            # Pass through multicast group commands unchanged, with
+            # same arguments as expected by simple_switch_CLI
+            self.do_cli_command(first + " " + cmd)
         elif first == "packet":
             interface, data = nextWord(cmd)
             interface = int(interface)
