@@ -790,8 +790,7 @@ class ParseAnnotations : public P4::ParseAnnotations {
         // annotation is for them).
         PARSE("max_group_size", Constant),
         // @p4runtime_translation has two args
-        PARSE_PAIR("p4runtime_translation",
-                   Expression),
+        PARSE_EMPTY("p4runtime_translation"),
     }) { }
 };
 
