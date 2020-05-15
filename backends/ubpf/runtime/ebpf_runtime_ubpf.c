@@ -29,7 +29,7 @@ pcap_list_t *feed_packets(packet_filter ebpf_filter, pcap_list_t *pkt_list, int 
         struct std_meta {
             uint32_t input_port;
             uint32_t packet_length;
-            enum ubpf_action output_action;
+            uint32_t output_action;
             uint32_t output_port;
         };
         struct std_meta md;

@@ -57,7 +57,8 @@ namespace UBPF {
     }
 
     void UbpfTarget::emitGetFromStandardMetadata(Util::SourceCodeBuilder *builder,
-                                                 cstring stdMetadataVar, cstring metadataField) const {
+                                                 cstring stdMetadataVar,
+                                                 cstring metadataField) const {
         builder->appendFormat("%s->%s", stdMetadataVar.c_str(), metadataField.c_str());
     }
 
