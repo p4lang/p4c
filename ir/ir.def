@@ -503,7 +503,7 @@ class Function : Declaration, IFunctional, ISimpleNamespace, INestedNamespace {
         return type->parameters->getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return type->parameters->getDeclByName(name); }
-    std::vector<INamespace> getNestedNamespaces() const {
+    std::vector<INamespace> getNestedNamespaces() const override {
         return { type->typeParameters }; }
 }
 

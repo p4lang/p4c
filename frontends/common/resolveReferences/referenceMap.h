@@ -79,19 +79,21 @@ class ReferenceMap final : public ProgramMap, public NameGenerator, public Decla
     ReferenceMap();
     /// Looks up declaration for @p path. If @p notNull is false, then
     /// failure to find a declaration is an error.
-    const IR::IDeclaration* getDeclaration(const IR::Path* path, bool notNull = false) const;
+    const IR::IDeclaration* getDeclaration(const IR::Path* path, bool notNull = false)
+        const override;
 
     /// Sets declaration for @p path to @p decl.
     void setDeclaration(const IR::Path* path, const IR::IDeclaration* decl);
 
     /// Looks up declaration for @p pointer. If @p notNull is false,
     /// then failure to find a declaration is an error.
-    const IR::IDeclaration* getDeclaration(const IR::This* pointer, bool notNull = false) const;
+    const IR::IDeclaration* getDeclaration(const IR::This* pointer, bool notNull = false)
+        const override;
 
     /// Sets declaration for @p pointer to @p decl.
     void setDeclaration(const IR::This* pointer, const IR::IDeclaration* decl);
 
-    void dbprint(std::ostream& cout) const;
+    void dbprint(std::ostream& cout) const override;
 
     /// Set boolean indicating whether map is for a P4_14 program to @p isV1.
     void setIsV1(bool isv1) { this->isv1 = isv1; }
