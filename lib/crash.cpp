@@ -72,50 +72,65 @@ static void sigint_shutdown(int sig, siginfo_t *, void *) {
  * else that might be problematic if there's memory corruption or exhaustion
  */
 const char *addr2line(void *addr, const char *text) {
-    int pfd[2], len;
-    pid_t child;
+MTONLY(
+    static std::mutex           lock;
+    std::lock_guard<std::mutex> acquire(lock); )
+    static pid_t child = 0;
+    static int to_child, from_child;
     static char buffer[1024];
+    if (!child) {
+        int pfd1[2], pfd2[2];
+        char *p = buffer;
+        const char *argv[4] = { "/bin/sh", "-c", buffer, 0 }, *t;
+        strcpy(p, "addr2line "); p += strlen(p);  // NOLINT
+        strcpy(p, " -Cfspe "); p += strlen(p);    // NOLINT
+        if (!text || !(t = strchr(text, '('))) {
+            text = program_name;
+            t = text + strlen(text); }
+        if (!memchr(text, '/', t-text)) {
+            strcpy(p, "$(which "); p += strlen(p); }        // NOLINT
+        strncpy(p, text, t-text);
+        p += t-text;
+        if (!memchr(text, '/', t-text)) *p++ = ')';
+        child = -1;
+#if HAVE_PIPE2
+        if (pipe2(pfd1, O_CLOEXEC) < 0) return 0;
+        if (pipe2(pfd2, O_CLOEXEC) < 0) return 0;
+#else
+        if (pipe(pfd1) < 0) return 0;
+        if (pipe(pfd2) < 0) return 0;
+        fcntl(pfd1[0], F_SETFD, FD_CLOEXEC | fcntl(pfd1[0], F_GETFL));
+        fcntl(pfd1[1], F_SETFD, FD_CLOEXEC | fcntl(pfd1[1], F_GETFL));
+        fcntl(pfd2[0], F_SETFD, FD_CLOEXEC | fcntl(pfd2[0], F_GETFL));
+        fcntl(pfd2[1], F_SETFD, FD_CLOEXEC | fcntl(pfd2[1], F_GETFL));
+#endif
+        while ((child = fork()) == -1 && errno == EAGAIN) {}
+        if (child == -1) return 0;
+        if (child == 0) {
+            dup2(pfd1[1], 1);
+            dup2(pfd1[1], 2);
+            dup2(pfd2[0], 0);
+            execvp(argv[0], (char*const*)argv);
+            _exit(-1); }
+        close(pfd1[1]);
+        from_child = pfd1[0];
+        close(pfd2[0]);
+        to_child = pfd2[1]; }
+    if (child == -1) return 0;
     char *p = buffer;
-    const char *argv[4] = { "/bin/sh", "-c", buffer, 0 }, *t;
-    strcpy(p, "addr2line "); p += strlen(p);  // NOLINT
     uintptr_t a = (uintptr_t)addr;
     int shift = (CHAR_BIT * sizeof(uintptr_t) - 1) & ~3;
     while (shift > 0 && (a >> shift) == 0) shift -= 4;
     while (shift >= 0) {
         *p++ = "0123456789abcdef"[(a >> shift) & 0xf];
         shift -= 4; }
-    strcpy(p, " -fsipe "); p += strlen(p);    // NOLINT
-    if (!text || !(t = strchr(text, '('))) {
-        text = program_name;
-        t = text + strlen(text); }
-    if (!memchr(text, '/', t-text)) {
-        strcpy(p, "$(which "); p += strlen(p); }        // NOLINT
-    strncpy(p, text, t-text);
-    p += t-text;
-    if (!memchr(text, '/', t-text)) *p++ = ')';
-    strcpy(p, " | c++filt");  // NOLINT
-    p += strlen(p);
-#if HAVE_PIPE2
-    if (pipe2(pfd, O_CLOEXEC) < 0) return 0;
-#else
-    if (pipe(pfd) < 0) return 0;
-    fcntl(pfd[0], F_SETFD, FD_CLOEXEC | fcntl(pfd[0], F_GETFL));
-    fcntl(pfd[1], F_SETFD, FD_CLOEXEC | fcntl(pfd[1], F_GETFL));
-#endif
-    while ((child = fork()) == -1 && errno == EAGAIN) {}
-    if (child == -1) return 0;
-    if (child == 0) {
-        dup2(pfd[1], 1);
-        dup2(pfd[1], 2);
-        execvp(argv[0], (char*const*)argv);
-        _exit(-1); }
-    close(pfd[1]);
+    *p++ = '\n';
+    write(to_child, buffer, p-buffer);
     p = buffer;
+    int len;
     while (p < buffer + sizeof(buffer) - 1 &&
-           (len = read(pfd[0], p, buffer+sizeof(buffer)-p-1)) > 0 &&
+           (len = read(from_child, p, buffer+sizeof(buffer)-p-1)) > 0 &&
            (p += len) && !memchr(p-len, '\n', len)) {}
-    close(pfd[0]);
-    waitpid(child, &len, WNOHANG);
     *p = 0;
     if ((p = strchr(buffer, '\n'))) *p = 0;
     if (buffer[0] == 0 || buffer[0] == '?')
