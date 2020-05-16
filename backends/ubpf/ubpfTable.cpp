@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <p4/enumInstance.h>
 #include "ubpfTable.h"
 #include "ubpfType.h"
 #include "ubpfParser.h"
