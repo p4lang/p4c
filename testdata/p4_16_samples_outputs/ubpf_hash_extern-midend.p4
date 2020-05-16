@@ -42,33 +42,33 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    @hidden action ubpf_hash_extern52() {
+    @hidden action ubpf_hash_extern53() {
         headers.ipv4.hdrChecksum = compute_hash(headers.ipv4.srcAddr, headers.ipv4.dstAddr);
     }
-    @hidden table tbl_ubpf_hash_extern52 {
+    @hidden table tbl_ubpf_hash_extern53 {
         actions = {
-            ubpf_hash_extern52();
+            ubpf_hash_extern53();
         }
-        const default_action = ubpf_hash_extern52();
+        const default_action = ubpf_hash_extern53();
     }
     apply {
-        tbl_ubpf_hash_extern52.apply();
+        tbl_ubpf_hash_extern53.apply();
     }
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    @hidden action ubpf_hash_extern59() {
+    @hidden action ubpf_hash_extern60() {
         packet.emit<Ethernet_h>(headers.ethernet);
         packet.emit<IPv4_h>(headers.ipv4);
     }
-    @hidden table tbl_ubpf_hash_extern59 {
+    @hidden table tbl_ubpf_hash_extern60 {
         actions = {
-            ubpf_hash_extern59();
+            ubpf_hash_extern60();
         }
-        const default_action = ubpf_hash_extern59();
+        const default_action = ubpf_hash_extern60();
     }
     apply {
-        tbl_ubpf_hash_extern59.apply();
+        tbl_ubpf_hash_extern60.apply();
     }
 }
 

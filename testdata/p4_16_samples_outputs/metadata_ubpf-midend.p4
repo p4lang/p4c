@@ -61,17 +61,17 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 }
 
 control DeparserImpl(packet_out packet, in Headers_t headers) {
-    @hidden action metadata_ubpf90() {
+    @hidden action metadata_ubpf91() {
         packet.emit<Ethernet_h>(headers.ethernet);
     }
-    @hidden table tbl_metadata_ubpf90 {
+    @hidden table tbl_metadata_ubpf91 {
         actions = {
-            metadata_ubpf90();
+            metadata_ubpf91();
         }
-        const default_action = metadata_ubpf90();
+        const default_action = metadata_ubpf91();
     }
     apply {
-        tbl_metadata_ubpf90.apply();
+        tbl_metadata_ubpf91.apply();
     }
 }
 
