@@ -2092,7 +2092,7 @@ TEST_F(P4RuntimeDataTypeSpec, NewTypeValidTranslationAnnotations) {
 
     auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
     ASSERT_TRUE(type != nullptr);
-    auto typeSpec = P4::ControlPlaneAPI::TypeSpecConverter::convert(
+    P4::ControlPlaneAPI::TypeSpecConverter::convert(
         &refMap, &typeMap, type, &typeInfo);
 
     for (std::string type : {"my_type1_t", "my_type2_t", "my_type3_t"}) {
@@ -2104,7 +2104,6 @@ TEST_F(P4RuntimeDataTypeSpec, NewTypeValidTranslationAnnotations) {
             EXPECT_EQ(translation.sdn_type_case(),
                       P4NewTypeTranslation::kSdnString);
         } else {
-
             EXPECT_EQ(translation.sdn_type_case(),
                       P4NewTypeTranslation::kSdnBitwidth);
             EXPECT_EQ(translation.sdn_bitwidth(), 32);
