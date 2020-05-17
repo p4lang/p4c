@@ -1,3 +1,4 @@
+#define UBPF_MODEL_VERSION 20200304
 #include <ubpf_model.p4>
 #include <core.p4>
 

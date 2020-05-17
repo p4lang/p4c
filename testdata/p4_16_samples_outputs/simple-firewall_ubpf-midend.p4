@@ -106,33 +106,33 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     @name("pipe._drop") action _drop_2() {
         mark_to_drop();
     }
-    @hidden action simplefirewall_ubpf126() {
+    @hidden action simplefirewall_ubpf125() {
         hash<tuple_0>(meta._conn_id2, HashAlgorithm.lookup3, { headers.ipv4.srcAddr, headers.ipv4.dstAddr });
     }
-    @hidden action simplefirewall_ubpf128() {
+    @hidden action simplefirewall_ubpf127() {
         hash<tuple_0>(meta._conn_id2, HashAlgorithm.lookup3, { headers.ipv4.dstAddr, headers.ipv4.srcAddr });
     }
-    @hidden action simplefirewall_ubpf131() {
+    @hidden action simplefirewall_ubpf130() {
         meta._connInfo_s0 = conn_state_0.read(meta._conn_id2);
         meta._connInfo_srv_addr1 = conn_srv_addr_0.read(meta._conn_id2);
     }
-    @hidden table tbl_simplefirewall_ubpf126 {
+    @hidden table tbl_simplefirewall_ubpf125 {
         actions = {
-            simplefirewall_ubpf126();
+            simplefirewall_ubpf125();
         }
-        const default_action = simplefirewall_ubpf126();
+        const default_action = simplefirewall_ubpf125();
     }
-    @hidden table tbl_simplefirewall_ubpf128 {
+    @hidden table tbl_simplefirewall_ubpf127 {
         actions = {
-            simplefirewall_ubpf128();
+            simplefirewall_ubpf127();
         }
-        const default_action = simplefirewall_ubpf128();
+        const default_action = simplefirewall_ubpf127();
     }
-    @hidden table tbl_simplefirewall_ubpf131 {
+    @hidden table tbl_simplefirewall_ubpf130 {
         actions = {
-            simplefirewall_ubpf131();
+            simplefirewall_ubpf130();
         }
-        const default_action = simplefirewall_ubpf131();
+        const default_action = simplefirewall_ubpf130();
     }
     @hidden table tbl_update_conn_info {
         actions = {
@@ -179,11 +179,11 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     apply {
         if (headers.tcp.isValid()) {
             if (headers.ipv4.srcAddr < headers.ipv4.dstAddr) {
-                tbl_simplefirewall_ubpf126.apply();
+                tbl_simplefirewall_ubpf125.apply();
             } else {
-                tbl_simplefirewall_ubpf128.apply();
+                tbl_simplefirewall_ubpf127.apply();
             }
-            tbl_simplefirewall_ubpf131.apply();
+            tbl_simplefirewall_ubpf130.apply();
             if (meta._connInfo_s0 == 32w0 || meta._connInfo_srv_addr1 == 32w0) {
                 if (headers.tcp.syn == 1w1 && headers.tcp.ack == 1w0) {
                     tbl_update_conn_info.apply();
@@ -216,19 +216,19 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    @hidden action simplefirewall_ubpf173() {
+    @hidden action simplefirewall_ubpf172() {
         packet.emit<Ethernet_t>(headers.ethernet);
         packet.emit<Ipv4_t>(headers.ipv4);
         packet.emit<Tcp_t>(headers.tcp);
     }
-    @hidden table tbl_simplefirewall_ubpf173 {
+    @hidden table tbl_simplefirewall_ubpf172 {
         actions = {
-            simplefirewall_ubpf173();
+            simplefirewall_ubpf172();
         }
-        const default_action = simplefirewall_ubpf173();
+        const default_action = simplefirewall_ubpf172();
     }
     apply {
-        tbl_simplefirewall_ubpf173.apply();
+        tbl_simplefirewall_ubpf172.apply();
     }
 }
 

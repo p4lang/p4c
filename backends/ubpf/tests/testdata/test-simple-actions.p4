@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#define UBPF_MODEL_VERSION 20200515
 #include <ubpf_model.p4>
 #include <core.p4>
 

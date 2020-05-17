@@ -32,6 +32,10 @@ The scope of the uBPF backend is wider than the scope of the eBPF backend. Excep
 P4-to-uBPF compiler supports also P4 registers and programmable actions including packet's modifications and tunneling. For further details
 refer to [uBPF architecture model](p4include/ubpf_model.p4).
 
+**Note!** Due to the reason that the `standard_metadata` has been introduced to the uBPF model at 15th of May 2020 the old P4 programs
+will not work anymore. You should update your P4 program to the latest architecture model. Alternatively, you can also specify the old version of uBPF model:
+`#define UBPF_MODEL_VERSION 20200304` before `#include <ubpf_model.p4>`. 
+
 The current version of the P4-to-uBPF compiler translates P4_16 programs to programs written in the C language. This
 program is compatible with the uBPF VM and the `clang` compiler can be used to generate uBPF bytecode.
 

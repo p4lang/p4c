@@ -133,18 +133,18 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    @hidden action ipv4actions_ubpf174() {
+    @hidden action ipv4actions_ubpf173() {
         packet.emit<Ethernet_h>(headers.ethernet);
         packet.emit<IPv4_h>(headers.ipv4);
     }
-    @hidden table tbl_ipv4actions_ubpf174 {
+    @hidden table tbl_ipv4actions_ubpf173 {
         actions = {
-            ipv4actions_ubpf174();
+            ipv4actions_ubpf173();
         }
-        const default_action = ipv4actions_ubpf174();
+        const default_action = ipv4actions_ubpf173();
     }
     apply {
-        tbl_ipv4actions_ubpf174.apply();
+        tbl_ipv4actions_ubpf173.apply();
     }
 }
 

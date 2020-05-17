@@ -20,7 +20,7 @@ limitations under the License.
 #include <core.p4>
 
 #ifndef UBPF_MODEL_VERSION
-#define UBPF_MODEL_VERSION 20200304
+#define UBPF_MODEL_VERSION 20200515
 #endif
 
 /* TODO: handle the uBPF model version in the compiler. */
