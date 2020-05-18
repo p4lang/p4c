@@ -27,13 +27,13 @@ struct metadata {
     bit<32> output;
 }
 
-parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
+parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
         transition accept;
     }
 }
 
-control pipe(inout Headers_t headers, inout metadata meta) {
+control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     action a() {
         hash<tuple<bit<16>, bit<8>>>(meta.output, HashAlgorithm.lookup3, { headers.test.sa, headers.test.da });
     }

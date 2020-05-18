@@ -58,7 +58,7 @@ struct metadata {
     bit<32>          conn_id;
 }
 
-parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
+parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
         p.extract<Ethernet_t>(headers.ethernet);
         transition select(headers.ethernet.etherType) {
@@ -73,7 +73,7 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
     }
 }
 
-control pipe(inout Headers_t headers, inout metadata meta) {
+control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     @name("pipe.conn_state") Register<bit<32>, bit<32>>(32w65536) conn_state_0;
     @name("pipe.conn_srv_addr") Register<bit<32>, bit<32>>(32w65536) conn_srv_addr_0;
     @name("pipe.update_conn_state") action update_conn_state(bit<32> s_2) {

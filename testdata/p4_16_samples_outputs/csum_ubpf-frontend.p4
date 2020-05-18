@@ -38,7 +38,7 @@ struct Headers_t {
 struct metadata {
 }
 
-parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
+parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
         p.extract<Ethernet>(headers.ethernet);
         transition select(headers.ethernet.etherType) {
@@ -53,7 +53,7 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
     }
 }
 
-control pipe(inout Headers_t headers, inout metadata meta) {
+control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     bit<32> old_addr_0;
     bit<32> new_addr_0;
     bit<16> from_0;

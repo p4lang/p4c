@@ -34,7 +34,7 @@ struct metadata {
 
 extern bit<16> incremental_checksum(in bit<16> csum, in bit<32> old, in bit<32> new);
 extern bool verify_ipv4_checksum(in IPv4_h iphdr);
-parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
+parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
         p.extract<Ethernet_h>(headers.ethernet);
         p.extract<IPv4_h>(headers.ipv4);
@@ -42,61 +42,61 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
     }
 }
 
-control pipe(inout Headers_t headers, inout metadata meta) {
+control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     bool verified_0;
     bit<32> old_addr_0;
-    @hidden action ubpf_checksum_extern55() {
+    @hidden action ubpf_checksum_extern56() {
         old_addr_0 = headers.ipv4.dstAddr;
         headers.ipv4.dstAddr = 32w0x1020304;
         headers.ipv4.hdrChecksum = incremental_checksum(headers.ipv4.hdrChecksum, old_addr_0, 32w0x1020304);
     }
-    @hidden action ubpf_checksum_extern60() {
+    @hidden action ubpf_checksum_extern61() {
         mark_to_drop();
     }
-    @hidden action ubpf_checksum_extern53() {
+    @hidden action ubpf_checksum_extern54() {
         verified_0 = verify_ipv4_checksum(headers.ipv4);
     }
-    @hidden table tbl_ubpf_checksum_extern53 {
+    @hidden table tbl_ubpf_checksum_extern54 {
         actions = {
-            ubpf_checksum_extern53();
+            ubpf_checksum_extern54();
         }
-        const default_action = ubpf_checksum_extern53();
+        const default_action = ubpf_checksum_extern54();
     }
-    @hidden table tbl_ubpf_checksum_extern55 {
+    @hidden table tbl_ubpf_checksum_extern56 {
         actions = {
-            ubpf_checksum_extern55();
+            ubpf_checksum_extern56();
         }
-        const default_action = ubpf_checksum_extern55();
+        const default_action = ubpf_checksum_extern56();
     }
-    @hidden table tbl_ubpf_checksum_extern60 {
+    @hidden table tbl_ubpf_checksum_extern61 {
         actions = {
-            ubpf_checksum_extern60();
+            ubpf_checksum_extern61();
         }
-        const default_action = ubpf_checksum_extern60();
+        const default_action = ubpf_checksum_extern61();
     }
     apply {
-        tbl_ubpf_checksum_extern53.apply();
+        tbl_ubpf_checksum_extern54.apply();
         if (verified_0 == true) {
-            tbl_ubpf_checksum_extern55.apply();
+            tbl_ubpf_checksum_extern56.apply();
         } else {
-            tbl_ubpf_checksum_extern60.apply();
+            tbl_ubpf_checksum_extern61.apply();
         }
     }
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    @hidden action ubpf_checksum_extern68() {
+    @hidden action ubpf_checksum_extern69() {
         packet.emit<Ethernet_h>(headers.ethernet);
         packet.emit<IPv4_h>(headers.ipv4);
     }
-    @hidden table tbl_ubpf_checksum_extern68 {
+    @hidden table tbl_ubpf_checksum_extern69 {
         actions = {
-            ubpf_checksum_extern68();
+            ubpf_checksum_extern69();
         }
-        const default_action = ubpf_checksum_extern68();
+        const default_action = ubpf_checksum_extern69();
     }
     apply {
-        tbl_ubpf_checksum_extern68.apply();
+        tbl_ubpf_checksum_extern69.apply();
     }
 }
 

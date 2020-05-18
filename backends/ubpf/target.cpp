@@ -30,9 +30,9 @@ namespace UBPF {
     void UbpfTarget::emitMain(Util::SourceCodeBuilder *builder,
                               cstring functionName,
                               cstring argName,
-                              cstring pktLen) const {
-        builder->appendFormat("uint64_t %s(void *%s, uint64_t %s)",
-                              functionName.c_str(), argName.c_str(), pktLen.c_str());
+                              cstring standardMetdata) const {
+        builder->appendFormat("uint64_t %s(void *%s, struct standard_metadata *%s)",
+                              functionName.c_str(), argName.c_str(), standardMetdata.c_str());
     }
 
     void UbpfTarget::emitTableLookup(Util::SourceCodeBuilder *builder,
@@ -54,6 +54,12 @@ namespace UBPF {
     void UbpfTarget::emitGetPacketData(Util::SourceCodeBuilder *builder,
                                        cstring ctxVar) const {
         builder->appendFormat("ubpf_packet_data(%s)", ctxVar.c_str());
+    }
+
+    void UbpfTarget::emitGetFromStandardMetadata(Util::SourceCodeBuilder *builder,
+                                                 cstring stdMetadataVar,
+                                                 cstring metadataField) const {
+        builder->appendFormat("%s->%s", stdMetadataVar.c_str(), metadataField.c_str());
     }
 
     void UbpfTarget::emitUbpfHelpers(EBPF::CodeBuilder *builder) const {

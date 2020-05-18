@@ -26,16 +26,29 @@ pcap_list_t *feed_packets(packet_filter ebpf_filter, pcap_list_t *pkt_list, int 
     for (uint32_t i = 0; i < list_len; i++) {
         /* Parse each packet in the list and check the result */
         struct dp_packet dp;
+        struct std_meta {
+            uint32_t input_port;
+            uint32_t packet_length;
+            uint32_t output_action;
+            uint32_t output_port;
+        };
+        struct std_meta md;
         pcap_pkt *input_pkt = get_packet(pkt_list, i);
         dp.data = (void *) input_pkt->data;
         dp.size_ = input_pkt->pcap_hdr.len;
-        int result = ebpf_filter(&dp, dp.size_);
+
+        md.input_port = input_pkt->ifindex;
+        md.packet_length = dp.size_;
+        md.output_port = 0;
+
+        int result = ebpf_filter(&dp, (struct standard_metadata *) &md);
         /* Updating input_pkt's length */
         input_pkt->pcap_hdr.len = dp.size_;
         input_pkt->pcap_hdr.caplen = dp.size_;
         if (result != 0) {
             /* We copy the entire content to emulate an outgoing packet */
             pcap_pkt *out_pkt = copy_pkt(input_pkt);
+            out_pkt->ifindex = md.output_port;
             output_pkts = append_packet(output_pkts, out_pkt);
         }
         if (debug)

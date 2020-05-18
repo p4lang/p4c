@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <p4/enumInstance.h>
 #include "ubpfTable.h"
 #include "ubpfType.h"
 #include "ubpfParser.h"
@@ -37,6 +38,24 @@ class UbpfActionTranslationVisitor : public EBPF::CodeGenInspector {
             EBPF::CodeGenInspector(program->refMap, program->typeMap), program(program),
             action(nullptr), valueName(valueName) {
         CHECK_NULL(program);
+    }
+
+    bool preorder(const IR::Member* expression) override {
+        cstring name = "";
+        if (expression->expr->is<IR::PathExpression>()) {
+            name = expression->expr->to<IR::PathExpression>()->path->name.name;
+        }
+        auto ei = P4::EnumInstance::resolve(expression, typeMap);
+        if (ei == nullptr) {
+            visit(expression->expr);
+            if (name == program->stdMetadataVar) {
+                builder->append("->");
+            } else {
+                builder->append(".");
+            }
+        }
+        builder->append(expression->member);
+        return false;
     }
 
     bool preorder(const IR::PathExpression *expression) override {

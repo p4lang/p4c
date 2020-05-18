@@ -22,9 +22,10 @@ limitations under the License.
 #include "../../ebpf/runtime/ebpf_registry.h"
 #include "ubpf_test.h"
 
-typedef uint64_t (*packet_filter)(void *dp, uint64_t pkt_len);
+struct standard_metadata;
 
-extern uint64_t entry(void *dp, uint64_t pkt_len);
+extern uint64_t entry(void *, struct standard_metadata *);
+typedef uint64_t (*packet_filter)(void *dp, struct standard_metadata *std_meta);
 
 void *run_and_record_output(packet_filter entry, const char *pcap_base, pcap_list_t *pkt_list, int debug);
 

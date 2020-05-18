@@ -15,6 +15,7 @@ limitations under the License.
 */
 
 #include <core.p4>
+#define UBPF_MODEL_VERSION 20200515
 #include <ubpf_model.p4>
 
 @ethernetaddress typedef bit<48> EthernetAddress;
@@ -36,14 +37,14 @@ struct metadata {
     bit<16> etherType;
 }
 
-parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
+parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
         p.extract(headers.ethernet);
         transition accept;
     }
 }
 
-control pipe(inout Headers_t headers, inout metadata meta) {
+control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
 
     action fill_metadata() {
         meta.etherType = headers.ethernet.etherType;

@@ -38,6 +38,8 @@ namespace UBPF {
                              cstring key, cstring value) const override;
         void emitGetPacketData(Util::SourceCodeBuilder *builder,
                                cstring ctxVar) const;
+        void emitGetFromStandardMetadata(Util::SourceCodeBuilder *builder,
+                cstring stdMetadataVar, cstring metadataField) const;
         void emitUserTableUpdate(UNUSED Util::SourceCodeBuilder *builder, UNUSED cstring tblName,
                                  UNUSED cstring key, UNUSED cstring value) const override {};
         void emitTableDecl(UNUSED Util::SourceCodeBuilder *builder,
@@ -49,7 +51,7 @@ namespace UBPF {
         void emitMain(Util::SourceCodeBuilder *builder,
                       cstring functionName,
                       cstring argName,
-                      cstring pktLen) const;
+                      cstring standardMetadata) const;
         void emitUbpfHelpers(EBPF::CodeBuilder *builder) const;
         void emitChecksumHelpers(EBPF::CodeBuilder *builder) const;
 

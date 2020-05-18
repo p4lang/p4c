@@ -1,18 +1,10 @@
-#define UBPF_MODEL_VERSION 20200304
-#include <ubpf_model.p4>
 #include <core.p4>
+#include <ubpf_model.p4>
 
 typedef bit<48> EthernetAddress;
 typedef bit<32>     IPv4Address;
 
 #define IPV4_ETHTYPE 0x800
-#define ETH_HDR_SIZE 14
-#define IPV4_HDR_SIZE 20
-#define UDP_HDR_SIZE 8
-#define IP_VERSION_4 4
-#define IPV4_MIN_IHL 5
-
-const bit<8> PROTO_ICMP = 1;
 
 // standard Ethernet header
 header Ethernet_h
@@ -38,22 +30,15 @@ header IPv4_h {
     IPv4Address  dstAddr;
 }
 
-header icmp_t {
-    bit<8>  type;
-    bit<8>  code;
-    bit<16> checksum;
-    bit<32> rest;
-}
-
 struct Headers_t {
     Ethernet_h ethernet;
     IPv4_h     ipv4;
-    icmp_t     icmp;
 }
 
 struct metadata {}
 
-parser prs(packet_in packet, out Headers_t hdr, inout metadata meta) {
+
+parser prs(packet_in packet, out Headers_t hdr, inout metadata meta, inout standard_metadata std_meta) {
     state start {
         transition parse_ethernet;
     }
@@ -67,35 +52,40 @@ parser prs(packet_in packet, out Headers_t hdr, inout metadata meta) {
 
     state parse_ipv4 {
         packet.extract(hdr.ipv4);
-        transition select(hdr.ipv4.protocol) {
-            PROTO_ICMP: parce_icmp;
-            default: accept;
-        }
-    }
-
-    state parce_icmp {
-        packet.extract(hdr.icmp);
         transition accept;
     }
 }
 
-control pipe(inout Headers_t hdr, inout metadata meta) {
+control pipe(inout Headers_t hdr, inout metadata meta, inout standard_metadata std_meta) {
 
-    Register<bit<32>, bit<32>>(1) packet_counter_reg;
+    action mod_nw_tos(bit<32> out_port) {
+        hdr.ipv4.diffserv = 12;
+        std_meta.output_action = ubpf_action.REDIRECT;
+        std_meta.output_port = out_port;
+    }
+
+    table test_tbl {
+
+        key = {
+            std_meta.input_port : exact;
+        }
+
+        actions = {
+            mod_nw_tos;
+        }
+
+    }
 
     apply {
-        bit<32> last_count;
-        bit<32> index = 0;
-        last_count = packet_counter_reg.read(index);
-        packet_counter_reg.write(index, last_count + 1);
+        test_tbl.apply();
     }
+
 }
 
 control dprs(packet_out packet, in Headers_t hdr) {
     apply {
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
-        packet.emit(hdr.icmp);
     }
 }
 

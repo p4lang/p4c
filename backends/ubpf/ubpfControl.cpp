@@ -519,7 +519,11 @@ namespace UBPF {
         auto ei = P4::EnumInstance::resolve(expression, typeMap);
         if (ei == nullptr) {
             visit(expression->expr);
-            builder->append(".");
+            if (name == control->program->stdMetadataVar) {
+                builder->append("->");
+            } else {
+                builder->append(".");
+            }
         }
         builder->append(expression->member);
         return false;
@@ -611,8 +615,8 @@ namespace UBPF {
     bool UBPFControl::build() {
         passVariable = program->refMap->newName("pass");
         auto pl = controlBlock->container->type->applyParams;
-        if (pl->size() != 2) {
-            ::error("Expected control block to have exactly 2 parameter");
+        if (pl->size() != 3) {
+            ::error("Expected control block to have exactly 3 parameter");
             return false;
         }
 

@@ -1,4 +1,5 @@
 #include <core.p4>
+#define UBPF_MODEL_VERSION 20200515
 #include <ubpf_model.p4>
 
 typedef bit<48> EthernetAddress;
@@ -39,7 +40,7 @@ struct metadata { }
 extern bit<16> incremental_checksum(in bit<16> csum, in bit<32> old, in bit<32> new);
 extern bool verify_ipv4_checksum(in IPv4_h iphdr);
 
-parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
+parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
         p.extract(headers.ethernet);
         p.extract(headers.ipv4);
@@ -47,7 +48,7 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
     }
 }
 
-control pipe(inout Headers_t headers, inout metadata meta) {
+control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
 
     apply {
         bool verified = verify_ipv4_checksum(headers.ipv4);

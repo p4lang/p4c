@@ -79,10 +79,12 @@ namespace UBPF {
         builder->target->emitChecksumHelpers(builder);
 
         builder->emitIndent();
-        builder->target->emitMain(builder, "entry", contextVar.c_str(), lengthVar.c_str());
+        builder->target->emitMain(builder, "entry", contextVar.c_str(), stdMetadataVar.c_str());
         builder->blockStart();
 
         emitPktVariable(builder);
+
+        emitPacketLengthVariable(builder);
 
         emitHeaderInstances(builder);
         builder->append(" = ");
@@ -212,6 +214,13 @@ namespace UBPF {
         builder->emitIndent();
         builder->appendFormat("void *%s = ", packetStartVar.c_str());
         builder->target->emitGetPacketData(builder, contextVar);
+        builder->endOfStatement(true);
+    }
+
+    void UBPFProgram::emitPacketLengthVariable(UbpfCodeBuilder *builder) const {
+        builder->emitIndent();
+        builder->appendFormat("uint32_t %s = ", lengthVar.c_str());
+        builder->target->emitGetFromStandardMetadata(builder, stdMetadataVar, "packet_length");
         builder->endOfStatement(true);
     }
 

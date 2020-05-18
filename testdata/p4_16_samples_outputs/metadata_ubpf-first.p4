@@ -16,14 +16,14 @@ struct metadata {
     bit<16> etherType;
 }
 
-parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
+parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
         p.extract<Ethernet_h>(headers.ethernet);
         transition accept;
     }
 }
 
-control pipe(inout Headers_t headers, inout metadata meta) {
+control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     action fill_metadata() {
         meta.etherType = headers.ethernet.etherType;
     }

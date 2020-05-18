@@ -38,7 +38,7 @@ struct Headers_t {
 struct metadata {
 }
 
-parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
+parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
         p.extract<Ethernet>(headers.ethernet);
         transition select(headers.ethernet.etherType) {
@@ -53,10 +53,10 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta) {
     }
 }
 
-control pipe(inout Headers_t headers, inout metadata meta) {
+control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     bit<32> old_addr_0;
     bit<16> from_0;
-    @hidden action csum_ubpf79() {
+    @hidden action csum_ubpf80() {
         old_addr_0 = headers.ipv4.dstAddr;
         headers.ipv4.dstAddr = 32w0x1020304;
         headers.ipv4.checksum = csum_replace4(headers.ipv4.checksum, old_addr_0, 32w0x1020304);
@@ -64,31 +64,31 @@ control pipe(inout Headers_t headers, inout metadata meta) {
         headers.udp.dstPort = 16w0x400;
         headers.udp.checksum = csum_replace2(headers.udp.checksum, from_0, 16w0x400);
     }
-    @hidden table tbl_csum_ubpf79 {
+    @hidden table tbl_csum_ubpf80 {
         actions = {
-            csum_ubpf79();
+            csum_ubpf80();
         }
-        const default_action = csum_ubpf79();
+        const default_action = csum_ubpf80();
     }
     apply {
-        tbl_csum_ubpf79.apply();
+        tbl_csum_ubpf80.apply();
     }
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    @hidden action csum_ubpf95() {
+    @hidden action csum_ubpf96() {
         packet.emit<Ethernet>(headers.ethernet);
         packet.emit<IPv4>(headers.ipv4);
         packet.emit<udp_t>(headers.udp);
     }
-    @hidden table tbl_csum_ubpf95 {
+    @hidden table tbl_csum_ubpf96 {
         actions = {
-            csum_ubpf95();
+            csum_ubpf96();
         }
-        const default_action = csum_ubpf95();
+        const default_action = csum_ubpf96();
     }
     apply {
-        tbl_csum_ubpf95.apply();
+        tbl_csum_ubpf96.apply();
     }
 }
 
