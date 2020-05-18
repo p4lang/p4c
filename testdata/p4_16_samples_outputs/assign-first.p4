@@ -5,7 +5,7 @@ header h {
 control c() {
     h hdr;
     apply {
-        hdr = (h){field = 32w10};
+        hdr = { 32w10 };
     }
 }
 

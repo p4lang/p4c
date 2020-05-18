@@ -60,7 +60,7 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
     register<bit<32>>(32w100) debug;
     register<bit<32>>(32w1) reg;
     action test() {
-        Value val = (Value){field1 = 32w0};
+        Value val = { 32w0 };
         bool _pred = val.field1 != 32w0;
         bit<32> inc = (_pred ? 32w1 : 32w0);
         debug.write(32w0, (_pred ? 32w1 : 32w0));

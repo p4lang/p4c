@@ -20,7 +20,7 @@ struct Meta {
 }
 
 bit<16> simple_function() {
-    nested_struct tmp_struct = (nested_struct){eth_hdr = (ethernet_t){dst_addr = 48w0,src_addr = 48w0,eth_type = 16w0}};
+    nested_struct tmp_struct = { { 48w0, 48w0, 16w0 } };
     return tmp_struct.eth_hdr.eth_type;
 }
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {

@@ -24,7 +24,7 @@ struct Meta {
 }
 
 bit<16> function_1() {
-    nested_struct tmp_struct = (nested_struct){s = (simple_struct){a = 32w1}};
+    nested_struct tmp_struct = { { 32w1 } };
     tmp_struct.s.a = 32w1;
     return 16w1;
 }

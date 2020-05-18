@@ -397,7 +397,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
 control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd, out psa_ingress_deparser_output_metadata_t ostd) {
     apply {
         clone_metadata_t clone_md;
-        clone_md.data.h1 = (clone_1_t){data = 32w0};
+        clone_md.data.h1 = { 32w0 };
         clone_md.type = 3w0;
         if (meta.custom_clone_id == 3w1) {
             ostd.clone_metadata = clone_md;

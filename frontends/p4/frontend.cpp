@@ -152,7 +152,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new ValidateMatchAnnotations(&typeMap),
         new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
         new BindTypeVariables(&refMap, &typeMap),
-        new StructInitializers(&refMap, &typeMap),
+        new StructInitializers(&refMap, &typeMap, false),
         new SpecializeGenericFunctions(&refMap, &typeMap),
         new TableKeyNames(&refMap, &typeMap),
         new PassRepeated({
@@ -169,6 +169,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new UniqueNames(&refMap),  // Give each local declaration a unique internal name
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new MoveInitializers(&refMap),
+        new StructInitializers(&refMap, &typeMap, true),
         new SideEffectOrdering(&refMap, &typeMap, skipSideEffectOrdering),
         new SetHeaders(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),

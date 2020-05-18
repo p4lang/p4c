@@ -6,7 +6,7 @@ control c(inout bit<32> b) {
     action a() {
         S s1;
         S s2;
-        s2 = (S){x = 32w0};
+        s2 = { 32w0 };
         s1 = s2;
         s2 = s1;
         b = s2.x;

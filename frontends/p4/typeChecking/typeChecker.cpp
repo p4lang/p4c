@@ -384,7 +384,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         if (anySet)
             canon = new IR::Type_Tuple(type->srcInfo, *fields);
         else if (anyChange)
-            canon = new IR::Type_List(type->srcInfo, *fields);
+            canon = new IR::Type_List(type->srcInfo, *fields, list->defaultInitializer);
         else
             canon = type;
         canon = typeMap->getCanonical(canon);
@@ -518,7 +518,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             });
     } else if (auto su = type->to<IR::Type_UnknownStruct>()) {
         return canonicalizeFields(su, [su](const IR::IndexedVector<IR::StructField>* fields) {
-                return new IR::Type_UnknownStruct(su->srcInfo, su->name, su->annotations, *fields);
+                return new IR::Type_UnknownStruct(su->srcInfo, su->name, su->annotations,
+                                                  *fields, su->defaultInitializer);
             });
     } else if (auto st = type->to<IR::Type_Specialized>()) {
         auto baseCanon = canonicalize(st->baseType);
@@ -731,7 +732,6 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
 
     if (initType == destType)
         return sourceExpression;
-
     auto tvs = unify(errorPosition, destType, initType);
     if (tvs == nullptr)
         // error already signalled
@@ -752,7 +752,7 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
             bool cst = isCompileTimeConstant(sourceExpression);
             auto type = new IR::Type_Name(ts->name);
             sourceExpression = new IR::StructExpression(
-                type, type, si->components);
+                type, type, si->components, si->defaultInitializer);
             setType(sourceExpression, destType);
             if (cst)
                 setCompileTimeConstant(sourceExpression);
@@ -1841,7 +1841,8 @@ const IR::Node* TypeInference::postorder(IR::ListExpression* expression) {
         components->push_back(type);
     }
 
-    auto tupleType = new IR::Type_List(expression->srcInfo, *components);
+    auto tupleType = new IR::Type_List(expression->srcInfo, *components,
+                                       expression->defaultInitializer);
     auto type = canonicalize(tupleType);
     if (type == nullptr)
         return expression;
@@ -1868,7 +1869,7 @@ const IR::Node* TypeInference::postorder(IR::StructExpression* expression) {
     }
 
     const IR::Type* structType = new IR::Type_UnknownStruct(
-        expression->srcInfo, "unknown struct", *components);
+        expression->srcInfo, "unknown struct", *components, expression->defaultInitializer);
     structType = canonicalize(structType);
 
     const IR::Expression* result = expression;

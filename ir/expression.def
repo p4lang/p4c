@@ -390,21 +390,47 @@ class ConstructorCallExpression : Expression {
 
 /// Represents a list of expressions separated by commas
 class ListExpression : Expression {
+    bool defaultInitializer = false;
+    ListExpression(Util::SourceInfo srcInfo, IR::Vector<IR::Expression>& components, bool defaultInitializer)
+                   : Expression(srcInfo), defaultInitializer(defaultInitializer), components(components) {
+        validate();
+        initUnknown();
+    }
+
     inline Vector<Expression> components;
     ListExpression {
         validate();
+        initUnknown();
+    }
+
+    void initUnknown(){
         if (type->is<Type::Unknown>()) {
             Vector<Type> tuple;
             for (auto e : components)
                 tuple.push_back(e->type);
-            type = new Type_List(tuple); } }
+            type = new Type_List(tuple, defaultInitializer);
+        }
+    }
+
     validate { components.check_null(); }
     size_t size() const { return components.size(); }
     void push_back(Expression e) { components.push_back(e); }
 }
 
 /// An expression that evaluates to a struct.
+/// Currently it does not have a direct representation as P4 source.
 class StructExpression : Expression {
+    bool defaultInitializer = false;
+    StructExpression(Util::SourceInfo srcInfo, const IR::Type* type, const IR::Type_Name* typeName, IR::IndexedVector<IR::NamedExpression>& components, bool defaultInitializer)
+                                : Expression(srcInfo, type), defaultInitializer(defaultInitializer), typeName(typeName), components(components) {
+        validate();
+    }
+
+    StructExpression(const IR::Type* type, const IR::Type_Name* typeName, const IR::IndexedVector<IR::NamedExpression>& components, bool defaultInitializer)
+                                : Expression(type), defaultInitializer(defaultInitializer), typeName(typeName), components(components) {
+        validate();
+    }
+
     /// The struct or header type that is being intialized.
     /// May only be known after type checking; so it can be nullptr.
     NullOK optional Type_Name typeName;

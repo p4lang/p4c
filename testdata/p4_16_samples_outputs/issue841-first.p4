@@ -44,7 +44,7 @@ control MyDeparser(packet_out packet, in headers hdr) {
 
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
     Checksum16() checksum;
-    h_t h = (h_t){src = hdr.h.src,dst = hdr.h.dst,csum = 16w0};
+    h_t h = { hdr.h.src, hdr.h.dst, 16w0 };
     apply {
         hdr.h.csum = checksum.get<h_t>(h);
     }

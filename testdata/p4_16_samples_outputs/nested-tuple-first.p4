@@ -16,7 +16,7 @@ struct tuple_0 {
 extern void f<T>(in T data);
 control c(inout bit<1> r) {
     apply {
-        S s = (S){f1 = { (T){f = 1w0}, (T){f = 1w1} },f2 = (T){f = 1w0},z = 1w1};
+        S s = { { { 1w0 }, { 1w1 } }, { 1w0 }, 1w1 };
         f<tuple<T, T>>(s.f1);
         f<tuple_0>((tuple_0){field = (T){f = 1w0},field_0 = (T){f = 1w1}});
         r = s.f2.f & s.z;
