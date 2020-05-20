@@ -200,11 +200,14 @@ using Parser = P4::P4Parser;
                   /* FIXME: if the type is a reserved keyword this doesn't work */
                   case Util::ProgramStructure::SymbolKind::TemplateIdentifier:
                       driver.template_args = true;
+                      driver.onReadIdentifier(name);
+                      return Parser::make_IDENTIFIER(name, driver.yylloc);
                   case Util::ProgramStructure::SymbolKind::Identifier:
                       driver.onReadIdentifier(name);
                       return Parser::make_IDENTIFIER(name, driver.yylloc);
                   case Util::ProgramStructure::SymbolKind::TemplateType:
                       driver.template_args = true;
+                      return Parser::make_TYPE_IDENTIFIER(name, driver.yylloc);
                   case Util::ProgramStructure::SymbolKind::Type:
                       return Parser::make_TYPE_IDENTIFIER(name, driver.yylloc);
                   default:

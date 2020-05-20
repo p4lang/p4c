@@ -20,13 +20,14 @@ limitations under the License.
 #include "ir/ir.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "frontends/p4/cloner.h"
 
 namespace BMV2 {
 
 /**
   This pass rewrites expressions which are not supported natively on BMv2.
 */
-class LowerExpressions : public Transform {
+class LowerExpressions : public P4::ClonePathExpressions {
     P4::TypeMap* typeMap;
     // Cannot shift with a value larger than 8 bits
     const int maxShiftWidth = 8;
