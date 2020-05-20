@@ -65,7 +65,8 @@ bool hasTranslationAnnotation(const IR::Type* type,
               "%1%: expected second argument to @p4runtime_translation to parse"
               " as a IR::DefaultExpression, but got %2%",
               type, second_arg);
-    auto controller_type = second_arg->to<IR::DefaultExpression>()->type;
+    const IR::Type* controller_type =
+        second_arg->to<IR::DefaultExpression>()->type;
     if (controller_type->to<IR::Type_String>() != nullptr) {
         payload->controller_type = ControllerType {
             .type = ControllerType::kString,
