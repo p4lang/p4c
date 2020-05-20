@@ -32,7 +32,21 @@ control vrfy(inout Headers h, inout Meta m) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    }
+    @name("ingress.t") table t_0 {
+        key = {
+            h.ports.port1: exact @name("h.ports.port1") ;
+            h.ports.port2: exact @name("h.ports.port2") ;
+            h.ports.port3: exact @name("h.ports.port3") ;
+        }
+        actions = {
+            NoAction_0();
+        }
+        default_action = NoAction_0();
+    }
     apply {
+        t_0.apply();
     }
 }
 
