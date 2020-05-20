@@ -71,6 +71,7 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
     state parse_ipv4 {
         tmp_2 = pkt.lookahead<bit<8>>();
         tmp.setValid();
+        tmp.setValid();
         tmp.version = tmp_2[7:4];
         tmp.ihl = tmp_2[3:0];
         pkt.extract<ipv4_t>(hdr.ipv4, (bit<32>)((bit<9>)tmp_2[3:0] << 3));
