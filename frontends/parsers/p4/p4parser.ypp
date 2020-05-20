@@ -740,6 +740,7 @@ parserStatement
     | variableDeclaration             { $$ = $1; }
     | constantDeclaration             { $$ = $1; }
     | parserBlockStatement            { $$ = $1; }
+    | conditionalStatement            { $$ = $1; }  // experimental
     ;
 
 parserBlockStatement
