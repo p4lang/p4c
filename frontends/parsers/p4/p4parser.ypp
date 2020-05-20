@@ -411,6 +411,7 @@ fragment
 // We want this to return an `IR::Type`, but we need it to return an
 // `IR::Expression` for things to type-check. We thus use `IR::StringLiteral` to
 // encode the type "string", and `IR::Constant(W)` to encode the type "bit<W>".
+// TODO: Could this be redesigned to avoid this hack?
 p4rtControllerType
     : STRING
         { $$ = new IR::StringLiteral(@1, ""); }
