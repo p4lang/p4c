@@ -90,7 +90,7 @@ bool CFG::dfs(Node* node, std::set<Node*> &visited,
         table = node->to<TableNode>()->table;
         if (stack.find(table) != stack.end()) {
             ::error(ErrorType::ERR_INVALID,
-                    "Program can not be implemented on this taret since it contains a path from "
+                    "Program can not be implemented on this target since it contains a path from "
                     "table %1% back to itself", table);
             return false;
         }
