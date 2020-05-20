@@ -32,7 +32,18 @@ control vrfy(inout Headers h, inout Meta m) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    table t {
+        key = {
+            h.ports.port1: exact;
+            h.ports.port2: exact;
+            h.ports.port3: exact;
+        }
+        actions = {
+            NoAction;
+        }
+    }
     apply {
+        t.apply();
     }
 }
 
