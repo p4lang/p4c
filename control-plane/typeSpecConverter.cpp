@@ -61,29 +61,24 @@ bool hasTranslationAnnotation(const IR::Type* type,
               type);
     payload->original_type_uri = std::string(uri->value);
 
-    BUG_CHECK(second_arg->to<IR::DefaultExpression>() != nullptr,
-              "%1%: expected second argument to @p4runtime_translation to parse"
-              " as a IR::DefaultExpression, but got %2%",
-              type, second_arg);
-    const IR::Type* controller_type =
-        second_arg->to<IR::DefaultExpression>()->type;
-    if (controller_type->to<IR::Type_String>() != nullptr) {
+    // See p4rtControllerType in p4parser.ypp for an explanation of how the
+    // second argument is encoded.
+    if (second_arg->to<IR::StringLiteral>() != nullptr) {
         payload->controller_type = ControllerType {
             .type = ControllerType::kString,
             .width = 0,
         };
         return true;
-    } else if (controller_type->to<IR::Type_Bits>() != nullptr) {
+    } else if (second_arg->to<IR::Constant>() != nullptr) {
         payload->controller_type = ControllerType {
             .type = ControllerType::kBit,
-            .width = controller_type->to<IR::Type_Bits>()->width_bits(),
+            .width = second_arg->to<IR::Constant>()->asInt(),
         };
         return true;
     }
-    ::error(ErrorType::ERR_INVALID,
-            "%1%: the second argument to @p4runtime_translation must be one of "
-            "the basic types 'string' or 'bit<W>', but got %2%",
-            type, controller_type);
+    BUG("%1%: expected second argument to @p4runtime_translation to parse as an"
+        " IR::StringLiteral or IR::Constant, but got %2%",
+        type, second_arg);
     return false;
 }
 

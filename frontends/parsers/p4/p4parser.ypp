@@ -232,9 +232,9 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %type<IR::Expression*>      expression lvalue keysetExpression selectExpression
                             stateExpression optInitializer initializer
                             simpleKeysetExpression transitionStatement switchLabel
+                            p4rtControllerType
 %type<ConstType*>           baseType typeOrVoid specializedType headerStackType
                             typeRef tupleType typeArg realTypeArg namedType
-                            p4rtControllerType
 %type<IR::Type_Name*>       typeName
 %type<IR::Argument*>        argument
 %type<IR::Vector<IR::Argument>*>  argumentList nonEmptyArgList
@@ -404,18 +404,21 @@ fragment
     | START_P4RT_TRANSLATION_ANNOTATION STRING_LITERAL "," p4rtControllerType
         { auto* result = new IR::Vector<IR::Expression>();
           result->push_back(new IR::StringLiteral(@2, $2));
-          result->push_back(new IR::DefaultExpression($4));
+          result->push_back($4);
           $$ = result; }
     ;
 
+// We want this to return an `IR::Type`, but we need it to return an
+// `IR::Expression` for things to type-check. We thus use `IR::StringLiteral` to
+// encode the type "string", and `IR::Constant(W)` to encode the type "bit<W>".
 p4rtControllerType
     : STRING
-        { $$ = IR::Type::String::get(); }
+        { $$ = new IR::StringLiteral(@1, ""); }
     | BIT l_angle INTEGER r_angle
-        { $$ = IR::Type::Bits::get(@1+@4, parseConstantChecked(@3, $3), false); }
+        { $$ = new IR::Constant(parseConstantChecked(@3, $3)); }
     // Legacy syntax; to be removed in P4RT 2.0
     | INTEGER
-        { $$ = IR::Type::Bits::get(@1, parseConstantChecked(@1, $1), false); }
+        { $$ = new IR::Constant(parseConstantChecked(@1, $1)); }
     ;
 
 program : input END { YYACCEPT; };
