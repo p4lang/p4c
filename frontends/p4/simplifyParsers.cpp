@@ -51,7 +51,7 @@ class RemoveUnreachableStates : public Transform {
             // state will probably be reached through an error.
             bool acceptReachable = false;
             bool rejectReachable = false;
-            for (auto s: reachable) {
+            for (auto s : reachable) {
                 if (s->name == IR::ParserState::reject)
                     rejectReachable = true;
                 else if (s->name == IR::ParserState::accept)
