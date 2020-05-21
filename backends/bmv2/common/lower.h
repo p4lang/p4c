@@ -20,14 +20,13 @@ limitations under the License.
 #include "ir/ir.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4/cloner.h"
 
 namespace BMV2 {
 
 /**
   This pass rewrites expressions which are not supported natively on BMv2.
 */
-class LowerExpressions : public P4::ClonePathExpressions {
+class LowerExpressions : public Transform {
     P4::TypeMap* typeMap;
     // Cannot shift with a value larger than 8 bits
     const int maxShiftWidth = 8;
@@ -48,6 +47,7 @@ class LowerExpressions : public P4::ClonePathExpressions {
     const IR::Node* postorder(IR::Concat* expression) override;
     const IR::Node* preorder(IR::P4Table* table) override
     { prune(); return table; }  // don't simplify expressions in table
+    const IR::Node* postorder(IR::PathExpression* path) override;
 };
 
 /**

@@ -468,6 +468,10 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         new P4::TypeChecking(refMap, typeMap),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new LowerExpressions(typeMap),
+	// LowerExpressions converts the DAG into a TREE (at least for expressions)
+        // This is important later for conversion to JSON.
+        new P4::ClearTypeMap(typeMap),
+        new P4::TypeChecking(refMap, typeMap),
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
         new RemoveComplexExpressions(refMap, typeMap,
