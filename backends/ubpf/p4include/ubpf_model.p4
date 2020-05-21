@@ -99,6 +99,10 @@ extern Register<T, S> {
  */
 extern bit<48> ubpf_time_get_ns();
 
+/*
+ * Truncate packet
+ */
+extern void truncate(in bit<32> len);
 
 enum HashAlgorithm {
     lookup3

@@ -67,6 +67,16 @@ namespace UBPF {
             }
 
             return;
+        } else if (function->method->name.name == control->program->model.truncate.name) {
+            if (function->expr->arguments->size() == 1) {
+                builder->appendFormat("%s = (int) (",
+                        control->program->packetTruncatedSizeVar.c_str());
+                visit(function->expr->arguments->at(0)->expression);
+                builder->append(")");
+            } else {
+                ::error("%1%: One argument expected", function->expr);
+            }
+            return;
         }
         processCustomExternFunction(function, UBPFTypeFactory::instance);
     }
