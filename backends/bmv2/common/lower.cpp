@@ -26,12 +26,6 @@ namespace BMV2 {
 // since parent expression trees may need the information
 // when processing in post-order.
 
-const IR::Node* LowerExpressions::postorder(IR::PathExpression* expression) {
-    auto clone = new IR::PathExpression(expression->path->clone());
-    typeMap->cloneExpressionProperties(clone, getOriginal<IR::Expression>());
-    return clone;
-}
-
 const IR::Expression* LowerExpressions::shift(const IR::Operation_Binary* expression) const {
     auto rhs = expression->right;
     auto rhstype = typeMap->getType(rhs, true);
