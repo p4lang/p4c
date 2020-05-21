@@ -58,7 +58,7 @@ class ExpressionConverter : public Inspector {
     cstring              scalarsName;
 
     /// After translating an Expression to JSON, save the result to 'map'.
-    /// WARNING: this assumes that each the same IR node has the same
+    /// WARNING: this assumes that each IR node has the same
     /// translation in any context, but this is not true in general.
     /// For this pass to work correctly, the IR tree must be converted
     /// from a DAG to a TREE.
