@@ -87,7 +87,8 @@ class Evaluator final : public Inspector, public IHasBlock {
                                         const IR::Vector<IR::Argument>* arguments);
 };
 
-// A pass which "evaluates" the program
+/// A pass which "evaluates" the program, creating Blocks for all
+/// high-level constructs.
 class EvaluatorPass final : public PassManager, public IHasBlock {
     P4::Evaluator* evaluator;
  public:

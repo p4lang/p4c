@@ -21,9 +21,8 @@ limitations under the License.
 
 namespace P4 {
 
-// Inserting an IR dag in several places does not work,
-// because PathExpressions must be unique.  The Cloner takes
-// care of this.
+/// This transform converts identical PathExpression nodes in a DAG
+/// into distinct nodes.
 class ClonePathExpressions : public Transform {
  public:
     ClonePathExpressions()

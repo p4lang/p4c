@@ -37,7 +37,7 @@ void ReferenceMap::clear() {
 void ReferenceMap::setDeclaration(const IR::Path* path, const IR::IDeclaration* decl) {
     CHECK_NULL(path);
     CHECK_NULL(decl);
-    LOG1("Resolved " << path << " to " << decl);
+    LOG3("Resolved " << dbp(path) << " to " << dbp(decl));
     auto previous = get(pathToDeclaration, path);
     if (previous != nullptr && previous != decl)
         BUG("%1% already resolved to %2% instead of %3%",
@@ -50,7 +50,7 @@ void ReferenceMap::setDeclaration(const IR::Path* path, const IR::IDeclaration* 
 void ReferenceMap::setDeclaration(const IR::This* pointer, const IR::IDeclaration* decl) {
     CHECK_NULL(pointer);
     CHECK_NULL(decl);
-    LOG1("Resolved " << pointer << " to " << decl);
+    LOG3("Resolved " << dbp(pointer) << " to " << dbp(decl));
     auto previous = get(thisToDeclaration, pointer);
     if (previous != nullptr && previous != decl)
         BUG("%1% already resolved to %2% instead of %3%",
@@ -63,9 +63,9 @@ const IR::IDeclaration* ReferenceMap::getDeclaration(const IR::This* pointer, bo
     auto result = get(thisToDeclaration, pointer);
 
     if (result)
-        LOG1("Looking up " << pointer << " found " << result->getNode());
+        LOG3("Looking up " << dbp(pointer) << " found " << dbp(result));
     else
-        LOG1("Looking up " << pointer << " found nothing");
+        LOG3("Looking up " << dbp(pointer) << " found nothing");
 
     if (notNull)
         BUG_CHECK(result != nullptr, "Cannot find declaration for %1%", pointer);
@@ -77,9 +77,9 @@ const IR::IDeclaration* ReferenceMap::getDeclaration(const IR::Path* path, bool 
     auto result = get(pathToDeclaration, path);
 
     if (result)
-        LOG1("Looking up " << path << " found " << result->getNode());
+        LOG3("Looking up " << dbp(path) << " found " << dbp(result));
     else
-        LOG1("Looking up " << path << " found nothing");
+        LOG3("Looking up " << dbp(path) << " found nothing");
 
     if (notNull)
         BUG_CHECK(result != nullptr, "Cannot find declaration for %1%", path);

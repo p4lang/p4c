@@ -1055,6 +1055,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         // Converts the DAG into a TREE (at least for expressions)
         // This is important later for conversion to JSON.
         new P4::ClonePathExpressions(),
+        new P4::ClearTypeMap(typeMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
     });

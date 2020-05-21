@@ -64,7 +64,7 @@ class SourcePosition final {
 
     inline bool operator==(const SourcePosition& rhs) const {
         return columnNumber == rhs.columnNumber &&
-                lineNumber == rhs.columnNumber;
+                lineNumber == rhs.lineNumber;
     }
     inline bool operator!=(const SourcePosition& rhs) const
     {return !this->operator==(rhs);}
