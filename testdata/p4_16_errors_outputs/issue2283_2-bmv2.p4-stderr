@@ -1,0 +1,10 @@
+issue2283_2-bmv2.p4(6):syntax error, unexpected BOOL, expecting BIT or STRING or INTEGER
+@p4runtime_translation("p4.org/psa/v1/PortId1_t", bool)
+                                                  ^^^^
+issue2283_2-bmv2.p4(9):syntax error, unexpected INT, expecting BIT or STRING or INTEGER
+@p4runtime_translation("p4.org/psa/v1/PortId2_t", int<32>)
+                                                  ^^^
+issue2283_2-bmv2.p4(12):syntax error, unexpected +, expecting > or R_ANGLE_SHIFT
+@p4runtime_translation("p4.org/psa/v1/PortId3_t", bit<5+3>)
+                                                       ^
+[--Werror=unsupported] error: Cannot generate P4Info message: unsupported P4 program (cannot apply necessary program transformations)

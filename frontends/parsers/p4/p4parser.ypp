@@ -157,6 +157,9 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
                    START_INTEGER_TRIPLE
                    START_STRING_LITERAL_TRIPLE
 
+                   // P4Runtime annotations
+                   START_P4RT_TRANSLATION_ANNOTATION  // @p4runtime_translation
+
 %token             END END_ANNOTATION
 
 
@@ -229,6 +232,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %type<IR::Expression*>      expression lvalue keysetExpression selectExpression
                             stateExpression optInitializer initializer
                             simpleKeysetExpression transitionStatement switchLabel
+                            p4rtControllerType
 %type<ConstType*>           baseType typeOrVoid specializedType headerStackType
                             typeRef tupleType typeArg realTypeArg namedType
 %type<IR::Type_Name*>       typeName
@@ -395,6 +399,27 @@ fragment
           result->push_back(new IR::StringLiteral(@4, $4));
           result->push_back(new IR::StringLiteral(@6, $6));
           $$ = result; }
+
+      // P4Runtime annotations
+    | START_P4RT_TRANSLATION_ANNOTATION STRING_LITERAL "," p4rtControllerType
+        { auto* result = new IR::Vector<IR::Expression>();
+          result->push_back(new IR::StringLiteral(@2, $2));
+          result->push_back($4);
+          $$ = result; }
+    ;
+
+// We want this to return an `IR::Type`, but we need it to return an
+// `IR::Expression` for things to type-check. We thus use `IR::StringLiteral` to
+// encode the type "string", and `IR::Constant(W)` to encode the type "bit<W>".
+// TODO: Could this be redesigned to avoid this hack?
+p4rtControllerType
+    : STRING
+        { $$ = new IR::StringLiteral(@1, ""); }
+    | BIT l_angle INTEGER r_angle
+        { $$ = new IR::Constant(parseConstantChecked(@3, $3)); }
+    // Legacy syntax; to be removed in P4RT 2.0
+    | INTEGER
+        { $$ = new IR::Constant(parseConstantChecked(@1, $1)); }
     ;
 
 program : input END { YYACCEPT; };

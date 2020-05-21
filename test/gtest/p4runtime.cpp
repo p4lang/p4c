@@ -1640,10 +1640,10 @@ class P4RuntimeDataTypeSpec : public P4Runtime {
     const IR::P4Program* getProgram(const std::string& programStr) {
         auto pgm = P4::parseP4String(programStr, CompilerOptions::FrontendVersion::P4_16);
         if (pgm == nullptr) return nullptr;
-        PassManager  passes({
+        PassManager passes({
             new P4::ParseAnnotations("P4RuntimeDataTypeSpecTest", false, {
-                // @p4runtime_translation has two args
-                PARSE_PAIR("p4runtime_translation", Expression),
+                {"p4runtime_translation",
+                 &P4::ParseAnnotations::parseP4rtTranslationAnnotation},
             }),
             new P4::ResolveReferences(&refMap),
             new P4::TypeInference(&refMap, &typeMap, false)
@@ -2030,17 +2030,60 @@ TEST_F(P4RuntimeDataTypeSpec, NewType) {
     }
 }
 
-TEST_F(P4RuntimeDataTypeSpec, NewTypeInvalidTranslation) {
+TEST_F(P4RuntimeDataTypeSpec, NewTypeInvalidTranslationAnnotations) {
     std::string program = P4_SOURCE(R"(
         @p4runtime_translation("p4.org/myArch/v1/Type", 0xffffffff)
-        type bit<8> my_type_t;
+        type bit<8> my_type1_t;
+
         @p4runtime_translation("p4.org/myArch/v1/Type2", -1)
         type bit<8> my_type2_t;
+
         @p4runtime_translation(1, 32)
         type bit<8> my_type3_t;
+
+        @p4runtime_translation("p4.org/myArch/v1/Type", int<32>)
+        type bit<8> my_type4_t;
+
+        @p4runtime_translation("p4.org/myArch/v1/Type", bool)
+        type bit<8> my_type5_t;
+    )");
+    getProgram(program);
+    ASSERT_EQ(::errorCount(), 5u);
+}
+
+TEST_F(P4RuntimeDataTypeSpec, NewTypeIllegalTranslationAnnotations) {
+    std::string program = P4_SOURCE(R"(
         @p4runtime_translation("p4.org/myArch/v1/Type4", 32)
-        type bool my_type4_t;
-        struct my_struct { my_type_t f; my_type2_t f2; my_type3_t f3; my_type4_t f4; }
+        type bool my_type_t;
+
+        struct my_struct { my_type_t x; }
+        extern my_extern_t<T> { my_extern_t(bit<32> v); }
+        my_extern_t<my_struct>(32w1024) my_extern;
+    )");
+    auto pgm = getProgram(program);
+    ASSERT_TRUE(pgm != nullptr);
+    ASSERT_EQ(::errorCount(), 0u);  // No syntax error.
+
+    auto type = findExternTypeParameterName<IR::Type_Name>(pgm, "my_extern_t");
+    ASSERT_TRUE(type != nullptr);
+    P4::ControlPlaneAPI::TypeSpecConverter::convert(
+        &refMap, &typeMap, type, &typeInfo);
+    EXPECT_EQ(1u, ::errorCount());  // But a type error.
+}
+
+TEST_F(P4RuntimeDataTypeSpec, NewTypeValidTranslationAnnotations) {
+    using ::p4::config::v1::P4NewTypeTranslation;
+    std::string program = P4_SOURCE(R"(
+        @p4runtime_translation("p4.org/myArch/v1/Type", 32)
+        type bit<8> my_type1_t;
+
+        @p4runtime_translation("p4.org/myArch/v1/Type", bit<32>)
+        type bit<8> my_type2_t;
+
+        @p4runtime_translation("p4.org/myArch/v1/Type", string)
+        type bit<8> my_type3_t;
+
+        struct my_struct { my_type1_t f1; my_type2_t f2; my_type3_t f3; }
         extern my_extern_t<T> { my_extern_t(bit<32> v); }
         my_extern_t<my_struct>(32w1024) my_extern;
     )");
@@ -2051,8 +2094,22 @@ TEST_F(P4RuntimeDataTypeSpec, NewTypeInvalidTranslation) {
     ASSERT_TRUE(type != nullptr);
     P4::ControlPlaneAPI::TypeSpecConverter::convert(
         &refMap, &typeMap, type, &typeInfo);
-    // expect 4 errors, one for each invalid @p4runtime_translation annotation above.
-    EXPECT_EQ(4u, ::errorCount());
+
+    for (std::string type : {"my_type1_t", "my_type2_t", "my_type3_t"}) {
+        auto it = typeInfo.new_types().find(type);
+        ASSERT_TRUE(it != typeInfo.new_types().end());
+        const P4NewTypeTranslation& translation = it->second.translated_type();
+        EXPECT_EQ("p4.org/myArch/v1/Type", translation.uri());
+        if (type == "my_type3_t") {
+            EXPECT_EQ(translation.sdn_type_case(),
+                      P4NewTypeTranslation::kSdnString);
+        } else {
+            EXPECT_EQ(translation.sdn_type_case(),
+                      P4NewTypeTranslation::kSdnBitwidth);
+            EXPECT_EQ(translation.sdn_bitwidth(), 32);
+        }
+    }
 }
+
 
 }  // namespace Test

@@ -298,6 +298,15 @@ P4ParserDriver::parseStringLiteralTriple(const Util::SourceInfo& srcInfo,
             P4AnnotationLexer::STRING_LITERAL_TRIPLE, srcInfo, body);
 }
 
+/* static */ const IR::Vector<IR::Expression>*
+P4ParserDriver::parseP4rtTranslationAnnotation(
+    const Util::SourceInfo& srcInfo,
+    const IR::Vector<IR::AnnotationToken>& body) {
+    P4ParserDriver driver;
+    return driver.parse<IR::Vector<IR::Expression>>(
+            P4AnnotationLexer::P4RT_TRANSLATION_ANNOTATION, srcInfo, body);
+}
+
 void P4ParserDriver::onReadErrorDeclaration(IR::Type_Error* error) {
     if (allErrors == nullptr) {
         nodes->push_back(error);

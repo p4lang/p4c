@@ -714,15 +714,17 @@ getMatchType(cstring matchTypeName) {
     }
 }
 
-// getTypeWidth returns the width in bits for the @type, except if it is a user-defined type with a
-// @p4runtime_translation annotation, in which case it returns the SDN bitwidth specified by the
-// user.
+// getTypeWidth returns the width in bits for the @type, except if it is a
+// user-defined type with a @p4runtime_translation annotation whose controller
+// type is bit<W>, in which case it returns W.
 static int
 getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
-    std::string uri;
-    int sdnB;
-    auto isTranslatedType = hasTranslationAnnotation(type, &uri, &sdnB);
-    return isTranslatedType ? sdnB : typeMap->minWidthBits(type, type->getNode());
+    TranslationAnnotation annotation;
+    if (hasTranslationAnnotation(type, &annotation) &&
+        annotation.controller_type.type == ControllerType::kBit) {
+        return annotation.controller_type.width;
+    }
+    return typeMap->minWidthBits(type, type->getNode());
 }
 
 /// @return the header instance fields matched against by @table's key. The
@@ -789,10 +791,9 @@ class ParseAnnotations : public P4::ParseAnnotations {
         // "locally" (in this case on action profile instances since this
         // annotation is for them).
         PARSE("max_group_size", Constant),
-        // @p4runtime_translation has two args
-        PARSE_PAIR("p4runtime_translation",
-                   Expression),
-    }) { }
+        {"p4runtime_translation",
+         &P4::ParseAnnotations::parseP4rtTranslationAnnotation},
+    }) {}
 };
 
 namespace {

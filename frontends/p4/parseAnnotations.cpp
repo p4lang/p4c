@@ -116,6 +116,17 @@ bool ParseAnnotations::parseStringLiteralList(IR::Annotation* annotation) {
     return parsed != nullptr;
 }
 
+bool ParseAnnotations::parseP4rtTranslationAnnotation(
+        IR::Annotation* annotation) {
+    const IR::Vector<IR::Expression>* parsed =
+        P4::P4ParserDriver::parseP4rtTranslationAnnotation(annotation->srcInfo,
+                                                         annotation->body);
+    if (parsed != nullptr) {
+        annotation->expr.append(*parsed);
+    }
+    return parsed != nullptr;
+}
+
 void ParseAnnotations::postorder(IR::Annotation* annotation) {
     if (!annotation->needsParsing) {
         return;
