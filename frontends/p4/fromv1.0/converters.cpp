@@ -624,6 +624,16 @@ ProgramStructure *(*Converter::createProgramStructure)() = defaultCreateProgramS
 
 ConversionContext *(*Converter::createConversionContext)() = defaultCreateConversionContext;
 
+namespace {
+class RemoveLengthAnnotations: public Transform {
+    const IR::Node* postorder(IR::Annotation* annotation) override {
+        if (annotation->name == "length")
+            return nullptr;
+        return annotation;
+    }
+};
+}   // namespace
+
 Converter::Converter() {
     setStopOnError(true); setName("Converter");
     structure = createProgramStructure();
@@ -645,6 +655,7 @@ Converter::Converter() {
     passes.emplace_back(new FixExtracts(structure));
     passes.emplace_back(new FixMultiEntryPoint(structure));
     passes.emplace_back(new MoveIntrinsicMetadata(structure));
+    passes.emplace_back(new RemoveLengthAnnotations());
 }
 
 Visitor::profile_t Converter::init_apply(const IR::Node* node) {

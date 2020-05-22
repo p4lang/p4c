@@ -105,7 +105,11 @@ class RemoveComplexExpressions : public Transform {
     const IR::Node* preorder(IR::P4Parser* parser) override
     { newDecls.clear(); return parser; }
     const IR::Node* postorder(IR::P4Parser* parser) override {
-        parser->parserLocals.append(newDecls);
+        if (newDecls.size() != 0) {
+            // prepend declarations
+            newDecls.append(parser->parserLocals);
+            parser->parserLocals = newDecls;
+        }
         return parser;
     }
     const IR::Node* preorder(IR::P4Control* control) override;

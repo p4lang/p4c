@@ -30,7 +30,6 @@ header ipv4_t {
     bit<16>     hdrChecksum;
     bit<32>     srcAddr;
     bit<32>     dstAddr;
-    @length(((bit<32>)ihl << 2) * 8 - 160) 
     varbit<320> options_ipv4;
 }
 
