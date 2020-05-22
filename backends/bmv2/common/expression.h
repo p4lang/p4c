@@ -57,7 +57,11 @@ class ExpressionConverter : public Inspector {
     P4::P4CoreLibrary&   corelib;
     cstring              scalarsName;
 
-    /// after translating an Expression to JSON, save the result to 'map'.
+    /// After translating an Expression to JSON, save the result to 'map'.
+    /// WARNING: this assumes that each IR node has the same
+    /// translation in any context, but this is not true in general.
+    /// For this pass to work correctly, the IR tree must be converted
+    /// from a DAG to a TREE.
     std::map<const IR::Expression*, Util::IJson*> map;
     bool leftValue;  // true if converting a left value
     // in some cases the bmv2 JSON requires a 'bitwidth' attribute for hex

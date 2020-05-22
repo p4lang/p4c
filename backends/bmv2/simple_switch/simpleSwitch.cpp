@@ -23,6 +23,7 @@ limitations under the License.
 #include <set>
 #include "backends/bmv2/common/annotations.h"
 #include "frontends/p4/fromv1.0/v1model.h"
+#include "frontends/p4/cloner.h"
 #include "simpleSwitch.h"
 #include "backends/bmv2/simple_switch/options.h"
 
@@ -1051,6 +1052,10 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
                                      new ProcessControls(&structure->pipeline_controls)),
         new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
+        // Converts the DAG into a TREE (at least for expressions)
+        // This is important later for conversion to JSON.
+        new P4::ClonePathExpressions(),
+        new P4::ClearTypeMap(typeMap),
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
     });
