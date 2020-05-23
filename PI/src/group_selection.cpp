@@ -57,6 +57,8 @@ GroupSelection::remove_member_from_group(grp_hdl_t grp, mbr_hdl_t mbr) {
   std::lock_guard<std::mutex> lock(mutex);
   auto &group = groups[grp];
   group.remove_member(mbr);
+  // Remove group from map when it is empty to avoid using up memory.
+  if (group.size() == 0) groups.erase(grp);
 }
 
 mbr_hdl_t
@@ -102,6 +104,11 @@ GroupSelection::GroupInfo::get_from_hash(hash_t h) const {
   auto active_count = activated_members.count();
   auto index = static_cast<size_t>(h % active_count);
   return activated_members.get_nth(index);
+}
+
+size_t
+GroupSelection::GroupInfo::size() const {
+  return members.size();
 }
 
 }  // namespace pibmv2

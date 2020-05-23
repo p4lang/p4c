@@ -339,8 +339,11 @@ ActionProfile::delete_group(grp_hdl_t grp) {
       // the ref count for the members. Note that we do not allow deletion of a
       // member which is in a group
       GroupInfo &group_info = grp_mgr.at(grp);
-      for (auto mbr : group_info)
+      for (auto mbr : group_info) {
         index_ref_count.decrease(IndirectIndex::make_mbr_index(mbr));
+
+        grp_selector->remove_member_from_group(grp, mbr);
+      }
 
       int error = grp_handles.release_handle(grp);
       _BM_UNUSED(error);

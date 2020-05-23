@@ -65,7 +65,7 @@ class SimpleSwitchGrpcTest_Ternary : public SimpleSwitchGrpcBaseTest {
   }
 
   p4v1::Entity make_entry(const std::string &v, const std::string &mask,
-                        int32_t priority, int a_id) const {
+                          int32_t priority, int a_id) const {
     p4v1::Entity entity;
     auto table_entry = entity.mutable_table_entry();
     table_entry->set_table_id(t_id);

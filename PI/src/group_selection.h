@@ -56,6 +56,7 @@ class GroupSelection : public bm::ActionProfile::GroupSelectionIface {
     void add_member(mbr_hdl_t mbr);
     void remove_member(mbr_hdl_t mbr);
     mbr_hdl_t get_from_hash(hash_t h) const;
+    size_t size() const;
 
    private:
     bm::RandAccessUIntSet activated_members{};
