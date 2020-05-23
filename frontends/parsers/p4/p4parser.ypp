@@ -1078,6 +1078,22 @@ enumDeclaration
         "{" specifiedIdentifierList "}" {
             auto type = IR::Type::Bits::get(@3+@6, parseConstantChecked(@5, $5));
             $$ = new IR::Type_SerEnum(@7, *$7, type, *$10); }
+    | optAnnotations ENUM typeRef name { driver.structure->declareType(*$4);}
+	 "{" specifiedIdentifierList "}" {
+              auto type = $3;
+              if (type->is<IR::Type_Name>()) {
+                  auto tn = type->to<IR::Type_Name>();
+                  auto name = tn->path->name;
+                  // TODO: For future, to support deeply nested "type", we could
+                  // set a bool flag in p4c/ir/type.def in Type_Enum class to say
+                  // the enum is a serEnum.  Then, the typeChecker or any frontend
+                  // pass can check for each Enum if flag is set, then create a new
+                  // serEnum and swap the new with old Enum.
+                  auto td = driver.getTypeByName(driver.nodes, name);
+                  if (td != nullptr)
+                      $$ = new IR::Type_SerEnum(@4, *$4, td, *$7);
+              }
+	  }
     ;
 
 specifiedIdentifierList
