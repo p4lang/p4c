@@ -28,6 +28,8 @@ This pass converts a P4-16 IR into a P4 source (text) program.
 It can optionally emit as comments a representation of the program IR.
 */
 class ToP4 : public Inspector {
+    TypeMap*       typeMap;
+    ReferenceMap*  refMap;
     int expressionPrecedence;  /// precedence of current IR::Operation
     bool isDeclaration;  /// current type is a declaration
     bool showIR;  /// if true dump IR as comments
@@ -108,6 +110,30 @@ class ToP4 : public Inspector {
             withinArgument(false),
             builder(* new Util::SourceCodeBuilder()),
             outStream(outStream),
+            mainFile(mainFile)
+    { visitDagOnce = false; setName("ToP4"); }
+    ToP4(Util::SourceCodeBuilder& builder, bool showIR,
+         ReferenceMap* refMap, TypeMap *typeMap, cstring mainFile = nullptr) :
+            expressionPrecedence(DBPrint::Prec_Low),
+            isDeclaration(true),
+            showIR(showIR),
+            withinArgument(false),
+            builder(builder),
+            outStream(nullptr),
+            refMap(refMap),
+            typeMap(typeMap),
+            mainFile(mainFile)
+    { visitDagOnce = false; setName("ToP4"); }
+    ToP4(std::ostream* outStream, bool showIR,
+         ReferenceMap* refMap, TypeMap *typeMap, cstring mainFile = nullptr) :
+            expressionPrecedence(DBPrint::Prec_Low),
+            isDeclaration(true),
+            showIR(showIR),
+            withinArgument(false),
+            builder(* new Util::SourceCodeBuilder()),
+            outStream(outStream),
+            refMap(refMap),
+            typeMap(typeMap),
             mainFile(mainFile)
     { visitDagOnce = false; setName("ToP4"); }
 

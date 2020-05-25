@@ -191,29 +191,6 @@ class P4ParserDriver final : public AbstractParserDriver {
         const Util::SourceInfo& srcInfo,
         const IR::Vector<IR::AnnotationToken>& body);
 
-    // Method supports only direct typedef or type but not any deeply nested kind.
-    // To support deeply nested kind we need to use getTypeType() off of typeMap
-    // which is not available in parser driver. The symbol table is used by the
-    // lexer and does not help yacc code.
-    static IR::Type_Bits* getTypeByName(IR::Vector<IR::Node>* nodes, cstring name) {
-        cstring node_name;
-        const IR::Type* type;
-        for (auto n = nodes->begin(); n != nodes->end(); ++n) {
-            if ((*n)->is<IR::Type_Typedef>()) {
-                auto ptr = (*n)->to<IR::Type_Typedef>();
-                node_name = ptr->name;
-                type = ptr->type;
-            } else if ((*n)->is<IR::Type_Newtype>()) {
-                auto ptr = (*n)->to<IR::Type_Newtype>();
-                node_name = ptr->name;
-                type = ptr->type;
-            }
-            if (node_name == name)
-                return (const_cast<IR::Type_Bits*>(type->to<IR::Type_Bits>()));
-        }
-        return nullptr;
-    }
-
  protected:
     friend class P4::P4Lexer;
     friend class P4::P4Parser;

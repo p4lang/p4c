@@ -461,7 +461,8 @@ class SerEnumMember : Declaration, CompileTimeValue {
 /** A serializable enumeration with a backing type */
 class Type_SerEnum : Type_Declaration, ISimpleNamespace, IAnnotated {
     optional Annotations annotations = Annotations::empty;
-    Type_Bits type;
+    NullOK Type_Bits type;
+    optional NullOK Type_Name nameType;
     inline IndexedVector<SerEnumMember> members;
     Annotations getAnnotations() const override { return annotations; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {

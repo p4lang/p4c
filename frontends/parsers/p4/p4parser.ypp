@@ -1083,15 +1083,7 @@ enumDeclaration
               auto type = $3;
               if (type->is<IR::Type_Name>()) {
                   auto tn = type->to<IR::Type_Name>();
-                  auto name = tn->path->name;
-                  // TODO: For future, to support deeply nested "type", we could
-                  // set a bool flag in p4c/ir/type.def in Type_Enum class to say
-                  // the enum is a serEnum.  Then, the typeChecker or any frontend
-                  // pass can check for each Enum if flag is set, then create a new
-                  // serEnum and swap the new with old Enum.
-                  auto td = driver.getTypeByName(driver.nodes, name);
-                  if (td != nullptr)
-                      $$ = new IR::Type_SerEnum(@4, *$4, td, *$7);
+                  $$ = new IR::Type_SerEnum(@4, *$4, nullptr, tn, *$7);
               }
 	  }
     ;

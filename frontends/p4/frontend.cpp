@@ -78,8 +78,13 @@ class PrettyPrint : public Inspector {
     cstring ppfile;
     /// The file that is being compiled.  This used
     cstring inputfile;
+    ReferenceMap* refMap;
+    TypeMap* typeMap;
+
  public:
-    explicit PrettyPrint(const CompilerOptions& options) {
+    explicit PrettyPrint(const CompilerOptions& options,
+                         ReferenceMap* refMap,
+                         TypeMap* typeMap) : refMap(refMap), typeMap(typeMap) {
         setName("PrettyPrint");
         ppfile = options.prettyPrintFile;
         inputfile = options.file;
@@ -88,7 +93,7 @@ class PrettyPrint : public Inspector {
         if (!ppfile.isNullOrEmpty()) {
             Util::PathName path(ppfile);
             std::ostream *ppStream = openFile(path.toString(), true);
-            P4::ToP4 top4(ppStream, false, inputfile);
+            P4::ToP4 top4(ppStream, false, refMap, typeMap, inputfile);
             (void)program->apply(top4);
         }
         return false;  // prune
@@ -131,12 +136,12 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new P4V1::getV1ModelVersion,
         // Parse annotations
         new ParseAnnotationBodies(&parseAnnotations, &typeMap),
-        new PrettyPrint(options),
         // Simple checks on parsed program
         new ValidateParsedProgram(),
         // Synthesize some built-in constructs
         new CreateBuiltins(),
         new ResolveReferences(&refMap, true),  // check shadowing
+        new PrettyPrint(options, &refMap, &typeMap),
         // First pass of constant folding, before types are known --
         // may be needed to compute types.
         new ConstantFolding(&refMap, nullptr),

@@ -104,9 +104,9 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
             hdr.ipv4.dstAddr: exact;
         }
         actions = {
-            set_dmac;
-            drop;
-            NoAction;
+            set_dmac();
+            drop();
+            NoAction();
         }
         size = 1024;
         default_action = NoAction();
@@ -120,9 +120,9 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
             hdr.ipv4.dstAddr: lpm;
         }
         actions = {
-            set_nhop;
-            drop;
-            NoAction;
+            set_nhop();
+            drop();
+            NoAction();
         }
         size = 1024;
         default_action = NoAction();
@@ -155,8 +155,8 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
             standard_metadata.egress_port: exact;
         }
         actions = {
-            rewrite_mac;
-            NoAction;
+            rewrite_mac();
+            NoAction();
         }
         size = 1024;
         default_action = NoAction();

@@ -1755,6 +1755,25 @@ const IR::Node* TypeInference::preorder(IR::EntriesList* el) {
     return el;
 }
 
+const IR::Node* TypeInference::preorder(IR::Type_SerEnum* sm) {
+    const IR::Type_Bits* type;
+    if (sm->type == nullptr) {
+        auto decl = refMap->getDeclaration(sm->nameType->path, true);
+        CHECK_NULL(decl);
+        if (decl->is<IR::Type_Typedef>()) {
+            auto t = getTypeType(decl->to<IR::Type_Typedef>()->type);
+            type = t->to<IR::Type_Bits>();
+        } else if (decl->is<IR::Type_Newtype>()) {
+            auto t = getTypeType(decl->to<IR::Type_Newtype>()->type);
+            type = t->to<IR::Type_Bits>();
+        }
+        CHECK_NULL(type);
+        sm = new IR::Type_SerEnum(sm->srcInfo, sm->name, sm->annotations, type,
+                                  sm->members);
+    }
+    return sm;
+}
+
 /**
  *  typecheck a table initializer entry
  *

@@ -43,7 +43,8 @@ control c(inout Headers h, inout standard_metadata_t sm) {
             h.eth.type: exact;
         }
         actions = {
-            do_act;
+            do_act();
+            @defaultonly NoAction();
         }
         const entries = {
                         EthTypes.IPv4 : do_act(0x800);
@@ -52,6 +53,7 @@ control c(inout Headers h, inout standard_metadata_t sm) {
 
         }
 
+        default_action = NoAction();
     }
     apply {
         tns.apply();
