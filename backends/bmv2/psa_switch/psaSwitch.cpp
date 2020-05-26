@@ -622,8 +622,8 @@ Util::IJson* ExternConverter_Register::convertExternObject(
     } else if (em->method->name == "write" && mc->arguments->size() != 2) {
         modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
-    } else if (em->method->name == "read" && mc->arguments->size() != 1) {
-        modelError("Expected 1 arguments for %1%", mc);
+    } else if (em->method->name == "read" && mc->arguments->size() != 2) {
+        modelError("p4c-psa internally requires 2 arguments for %1%", mc);
         return nullptr;
     }
     auto reg = new Util::JsonObject();
@@ -634,12 +634,11 @@ Util::IJson* ExternConverter_Register::convertExternObject(
         auto primitive = mkPrimitive("register_read");
         auto parameters = mkParameters(primitive);
         primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
-        /* TODO */
-        // auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
-        // parameters->append(dest);
+        auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
+        parameters->append(dest);
         parameters->append(reg);
-        // auto index = ctxt->conv->convert(mc->arguments->at(1)->expression);
-        // parameters->append(index);
+        auto index = ctxt->conv->convert(mc->arguments->at(1)->expression);
+        parameters->append(index);
         return primitive;
     } else if (em->method->name == "write") {
         auto primitive = mkPrimitive("register_write");
