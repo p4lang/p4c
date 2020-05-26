@@ -8,10 +8,6 @@ header ethernet_t {
     bit<16> eth_type;
 }
 
-struct nested_struct {
-    ethernet_t eth_hdr;
-}
-
 struct Headers {
     ethernet_t eth_hdr;
 }
@@ -19,31 +15,22 @@ struct Headers {
 struct Meta {
 }
 
+ethernet_t do_function() {
+    return { 48w1, 48w1, 16w1 };
+}
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
+        transition parse_hdrs;
+    }
+    state parse_hdrs {
         pkt.extract<ethernet_t>(hdr.eth_hdr);
         transition accept;
     }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    ethernet_t tmp_struct_0_eth_hdr;
-    @hidden action issue2261l22() {
-        tmp_struct_0_eth_hdr.setValid();
-        tmp_struct_0_eth_hdr.setValid();
-        tmp_struct_0_eth_hdr.dst_addr = 48w0;
-        tmp_struct_0_eth_hdr.src_addr = 48w0;
-        tmp_struct_0_eth_hdr.eth_type = 16w0;
-        h.eth_hdr.eth_type = 16w0;
-    }
-    @hidden table tbl_issue2261l22 {
-        actions = {
-            issue2261l22();
-        }
-        const default_action = issue2261l22();
-    }
     apply {
-        tbl_issue2261l22.apply();
+        h.eth_hdr = do_function();
     }
 }
 
@@ -62,9 +49,9 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control deparser(packet_out b, in Headers h) {
+control deparser(packet_out pkt, in Headers h) {
     apply {
-        b.emit<ethernet_t>(h.eth_hdr);
+        pkt.emit<Headers>(h);
     }
 }
 

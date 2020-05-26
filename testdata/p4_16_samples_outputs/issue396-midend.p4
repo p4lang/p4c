@@ -17,13 +17,17 @@ control d(out bool b) {
     H tmp;
     @hidden action issue396l28() {
         h_0.setValid();
+        h_0.setValid();
         h_0.x = 32w0;
         s_0_h.setValid();
+        s1_0_h.setValid();
         s1_0_h.setValid();
         s1_0_h.x = 32w0;
         h3_0[0].setValid();
         h3_0[1].setValid();
+        h3_0[1].setValid();
         h3_0[1].x = 32w1;
+        tmp.setValid();
         tmp.setValid();
         tmp.x = 32w0;
         eout_0 = tmp.isValid();
