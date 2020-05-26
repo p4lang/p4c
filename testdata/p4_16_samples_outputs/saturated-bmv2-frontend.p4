@@ -83,13 +83,9 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         default_action = drop();
         const entries = {
                         8w0x1 : usat_plus();
-
                         8w0x2 : usat_minus();
-
                         8w0x3 : sat_plus();
-
                         8w0x4 : sat_minus();
-
         }
 
     }

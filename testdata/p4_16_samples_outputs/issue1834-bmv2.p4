@@ -28,7 +28,6 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
         }
         const entries = {
                         1 : act(1);
-
         }
 
     }

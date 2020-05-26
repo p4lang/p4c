@@ -92,15 +92,10 @@ control Ingress(inout headers hdr, out bool xout) {
         const default_action = operation_drop();
         const entries = {
                         8w0x2b : operation_add();
-
                         8w0x2d : operation_sub();
-
                         8w0x26 : operation_and();
-
                         8w0x7c : operation_or();
-
                         8w0x5e : operation_xor();
-
         }
 
         implementation = hash_table(32w8);

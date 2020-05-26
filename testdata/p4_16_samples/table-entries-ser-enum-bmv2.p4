@@ -70,9 +70,9 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
 	const default_action = a();
 
         const entries = {
-            (MyEnum1B.MBR1, _)                                      : a_with_control_params(1);
-            (MyEnum1B.MBR2, ((bit<16>)MyEnum2B.MBR2) &&& 0xff00)    : a_with_control_params(2);
-            (MyEnum1B.MBR2, _)                                      : a_with_control_params(3);
+            (MyEnum1B.MBR1, _)                           : a_with_control_params(1);
+            (MyEnum1B.MBR2, MyEnum2B.MBR2 &&& 0xff00)    : a_with_control_params(2);
+            (MyEnum1B.MBR2, _)                           : a_with_control_params(3);
         }
     }
 

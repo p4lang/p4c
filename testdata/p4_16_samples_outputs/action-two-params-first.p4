@@ -56,7 +56,6 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         const default_action = drop();
         const entries = {
                         32w0x20020420 : actTbl(24w42, 32w0x20024200);
-
         }
 
     }

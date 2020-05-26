@@ -29,7 +29,6 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
         }
         const entries = {
                         8w1 : act(8w1);
-
         }
 
         default_action = NoAction();

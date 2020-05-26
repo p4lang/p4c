@@ -17,13 +17,9 @@ control MyC(inout bit<2> x) {
         }
         const entries = {
                         0 : a;
-
                         1 : b;
-
                         2 : a();
-
                         3 : b();
-
         }
 
     }

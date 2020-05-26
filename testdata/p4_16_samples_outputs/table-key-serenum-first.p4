@@ -48,9 +48,7 @@ control c(inout Headers h, inout standard_metadata_t sm) {
         }
         const entries = {
                         EthTypes.IPv4 : do_act(32w0x800);
-
                         EthTypes.VLAN : do_act(32w0x8100);
-
         }
 
         default_action = NoAction();

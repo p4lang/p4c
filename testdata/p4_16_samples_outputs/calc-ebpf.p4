@@ -92,15 +92,10 @@ control Ingress(inout headers hdr, out bool xout) {
         const default_action = operation_drop();
         const entries = {
                         P4CALC_PLUS : operation_add();
-
                         P4CALC_MINUS : operation_sub();
-
                         P4CALC_AND : operation_and();
-
                         P4CALC_OR : operation_or();
-
                         P4CALC_CARET : operation_xor();
-
         }
 
         implementation = hash_table(8);

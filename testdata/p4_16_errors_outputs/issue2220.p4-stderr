@@ -1,0 +1,6 @@
+issue2220.p4(11): [--Werror=type-error] error: s1: Cannot unify bit<8> to myEnum
+ S s1 = { val = (bit<8>)0 };
+ ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+issue2220.p4(3)
+enum bit<8> myEnum { One = 1 }
+            ^^^^^^

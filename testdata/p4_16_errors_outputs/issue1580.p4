@@ -49,7 +49,6 @@ control ingress(inout headers_t hdr, inout user_metadata_t meta, inout standard_
         }
         const entries = {
                         3 : a3();
-
         }
 
         default_action = a1;

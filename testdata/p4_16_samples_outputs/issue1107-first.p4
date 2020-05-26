@@ -35,9 +35,7 @@ control myc(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         }
         const entries = {
                         (32w1, 32w0xffffffff) : set_eg(9w1);
-
                         (32w2, 32w0xffffffff) : set_eg(9w2);
-
         }
 
         default_action = NoAction();

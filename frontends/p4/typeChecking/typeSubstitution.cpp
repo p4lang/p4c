@@ -32,6 +32,8 @@ bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
     if (var->is<IR::Type_InfInt>()) {
         while (substitution->is<IR::Type_Newtype>())
             substitution = substitution->to<IR::Type_Newtype>()->type;
+        if (auto se = substitution->to<IR::Type_SerEnum>())
+            substitution = se->type;
         if (!substitution->is<IR::Type_InfInt>() &&
             !substitution->is<IR::Type_Bits>()) {
             ::error(ErrorType::ERR_TYPE_ERROR,

@@ -1418,7 +1418,6 @@ bool ToP4::preorder(const IR::Entry *e) {
     visit(e->action);
     visit(e->annotations);
     builder.append(";");
-    builder.newline();
     return false;
 }
 
