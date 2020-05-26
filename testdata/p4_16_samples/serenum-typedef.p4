@@ -1,6 +1,11 @@
 #include <core.p4>
 
-typedef bit<16> EthT;
+// Nested typdef or typedef mixed with p4-16 type are
+// supported.
+type bit<16> Base_t;
+typedef Base_t Base1_t;
+typedef Base1_t Base2_t;
+typedef Base2_t EthT;
 
 enum EthT EthTypes {
     IPv4 = 0x0800,

@@ -31,45 +31,6 @@ Visitor::profile_t ToP4::init_apply(const IR::Node* node) {
     return Inspector::init_apply(node);
 }
 
-namespace {
-class SerEnumTypeSubstitution : public Transform {
-    TypeMap*       typeMap;
-    ReferenceMap*  refMap;
-    ToP4*          tc;
-
- public:
-  SerEnumTypeSubstitution(ReferenceMap* refMap,
-                          TypeMap* typeMap,
-                          ToP4* tc) :
-    refMap(refMap), typeMap(typeMap), tc(tc) {
-    CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(tc); }
-    const IR::Node* preorder(IR::Type_SerEnum* sm) override {
-        const IR::Type_Bits* type;
-        LOG3("Visiting serEnum: " << sm);
-        if (sm->type == nullptr) {
-            auto decl = refMap->getDeclaration(sm->nameType->path, true);
-            CHECK_NULL(decl);
-            if (decl->is<IR::Type_Typedef>()) {
-                auto t = decl->to<IR::Type_Typedef>()->type;
-                type = t->to<IR::Type_Bits>();
-            } else if (decl->is<IR::Type_Newtype>()) {
-                auto t = decl->to<IR::Type_Newtype>()->type;
-                type = t->to<IR::Type_Bits>();
-            }
-            CHECK_NULL(type);
-            sm->type = type;
-            sm = new IR::Type_SerEnum(sm->srcInfo, sm->name, sm->annotations, type,
-                                      sm->members);
-        }
-        return sm;
-    }
-    const IR::Type_SerEnum* convert(const IR::Type_SerEnum* sm) {
-        auto result = sm->apply(*this)->to<IR::Type_SerEnum>();
-        return result;
-    }
-};
-}  // namespace
-
 void ToP4::end_apply(const IR::Node*) {
     if (outStream != nullptr) {
         cstring result = builder.toString();
@@ -390,12 +351,10 @@ bool ToP4::preorder(const IR::Type_SerEnum* t) {
     dump(1);
     visit(t->annotations);
     builder.append("enum ");
-    if ((t->type == nullptr) && (t->nameType != nullptr)) {
-        SerEnumTypeSubstitution sts(refMap, typeMap, this);
-        t = sts.convert(t);
-        CHECK_NULL(t->type);
-    }
-    visit(t->type);
+    if (t->type)
+        visit(t->type);
+    if (t->nameType)
+        visit(t->nameType);
     builder.spc();
     builder.append(t->name);
     builder.spc();

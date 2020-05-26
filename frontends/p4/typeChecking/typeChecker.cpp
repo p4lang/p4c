@@ -1762,9 +1762,13 @@ const IR::Node* TypeInference::preorder(IR::Type_SerEnum* sm) {
         CHECK_NULL(decl);
         if (decl->is<IR::Type_Typedef>()) {
             auto t = getTypeType(decl->to<IR::Type_Typedef>()->type);
+            while (t->is<IR::Type_Newtype>())
+                t = getTypeType(t->to<IR::Type_Newtype>()->type);
             type = t->to<IR::Type_Bits>();
         } else if (decl->is<IR::Type_Newtype>()) {
             auto t = getTypeType(decl->to<IR::Type_Newtype>()->type);
+            while (t->is<IR::Type_Newtype>())
+                t = getTypeType(t->to<IR::Type_Newtype>()->type);
             type = t->to<IR::Type_Bits>();
         }
         CHECK_NULL(type);

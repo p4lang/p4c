@@ -65,8 +65,8 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
             h.h.f2: ternary;
         }
         actions = {
-            a();
-            a_with_control_params();
+            a;
+            a_with_control_params;
         }
         const default_action = a();
         const entries = {

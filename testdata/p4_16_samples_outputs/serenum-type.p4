@@ -1,7 +1,10 @@
 #include <core.p4>
 
-type bit<16> EthT;
-enum bit<16> EthTypes {
+typedef bit<16> Base_t;
+type Base_t Base1_t;
+type Base1_t Base2_t;
+type Base2_t EthT;
+enum EthT EthTypes {
     IPv4 = 0x800,
     ARP = 0x806,
     RARP = 0x8035,
