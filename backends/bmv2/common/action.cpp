@@ -47,7 +47,7 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
         // TODO(jafingerhut) - add line/col at all individual cases below,
         // or perhaps it can be done as a common case above or below
         // for all of them?
-        
+
         IR::MethodCallExpression *mce2;
         auto isR = false;
         if (s->is<IR::AssignmentStatement>()) {
@@ -57,18 +57,18 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
             r = assign->right;
             auto mce = r->to<IR::MethodCallExpression>();
             if (mce != nullptr) {
-                auto mi = P4::MethodInstance::resolve(mce, ctxt->refMap, ctxt->typeMap); 
+                auto mi = P4::MethodInstance::resolve(mce, ctxt->refMap, ctxt->typeMap);
                 auto em = mi->to<P4::ExternMethod>();
-                if (em != nullptr){
-                    if (em->originalExternType->name.name == "Register" || 
+                if (em != nullptr) {
+                    if (em->originalExternType->name.name == "Register" ||
                     em->method->name.name == "read") {
                         isR = true;
                         // l = l->to<IR::PathExpression>();
                         // BUG_CHECK(l != nullptr, "register_read dest cast failed");
                         auto dest = new IR::Argument(l);
                         auto args = new IR::Vector<IR::Argument>();
-                        args->push_back(dest); //dest
-                        args->push_back(mce->arguments->at(0)); //index
+                        args->push_back(dest);  // dest
+                        args->push_back(mce->arguments->at(0));  // index
                         mce2 = new IR::MethodCallExpression(mce->method, mce->typeArguments);
                         mce2->arguments = args;
                         s = new IR::MethodCallStatement(mce);

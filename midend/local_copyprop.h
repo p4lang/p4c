@@ -131,19 +131,19 @@ class LocalCopyPropagation : public PassManager {
         if (!typeChecking)
             typeChecking = new TypeChecking(refMap, typeMap, true);
         passes.push_back(typeChecking);
-        policy = 
-            [refMap, typeMap](const Context *, const IR::Expression *e) -> bool { 
+        policy =
+            [refMap, typeMap](const Context *, const IR::Expression *e) -> bool {
                 auto mce = e->to<IR::MethodCallExpression>();
                 if (mce == nullptr)
                     return true;
-                auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap); 
+                auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
                 auto em = mi->to<P4::ExternMethod>();
                 if (em == nullptr)
                     return true;
-                if (em->originalExternType->name.name == "Register" || 
+                if (em->originalExternType->name.name == "Register" ||
                         em->method->name.name == "read")
                     return false;
-                return true; 
+                return true;
             };
         passes.push_back(new DoLocalCopyPropagation(refMap, typeMap, policy));
         setName("LocalCopyPropagation");
