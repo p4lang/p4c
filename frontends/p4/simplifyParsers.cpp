@@ -46,6 +46,20 @@ class RemoveUnreachableStates : public Transform {
             transitions->reachable(start->to<IR::ParserState>(), reachable);
             // Remove unreachable states from call-graph
             transitions->restrict(reachable);
+            // If neither the accept nor the reject states are
+            // reachable the parser we signal an error.  The reject
+            // state will probably be reached through an error.
+            bool acceptReachable = false;
+            bool rejectReachable = false;
+            for (auto s : reachable) {
+                if (s->name == IR::ParserState::reject)
+                    rejectReachable = true;
+                else if (s->name == IR::ParserState::accept)
+                    acceptReachable = true;
+            }
+            if (!rejectReachable && !acceptReachable)
+                ::error(ErrorType::ERR_UNREACHABLE,
+                        "%1%: Parser never reaches accept or reject state", parser);
             LOG1("Parser " << dbp(parser) << " has " << transitions->size() << " reachable states");
         }
         return parser;

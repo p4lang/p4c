@@ -44,6 +44,7 @@ class ErrorType {
     static const int ERR_UNSUPPORTED_ON_TARGET;  // target can not handle construct
     static const int ERR_DUPLICATE;           // duplicate objects
     static const int ERR_IO;                  // IO error
+    static const int ERR_UNREACHABLE;         // unreachable parser state
 
     // If we specialize for 1000 error types we're good!
     static const int ERR_MAX_ERRORS;

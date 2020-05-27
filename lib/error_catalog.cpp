@@ -34,6 +34,7 @@ const int ErrorType::ERR_TYPE_ERROR    =  11;
 const int ErrorType::ERR_UNSUPPORTED_ON_TARGET = 12;
 const int ErrorType::ERR_DUPLICATE     =  13;
 const int ErrorType::ERR_IO            =  14;
+const int ErrorType::ERR_UNREACHABLE   =  15;
 // If we specialize for 1000 error types we're good!
 const int ErrorType::ERR_MAX_ERRORS    = 999;
 
