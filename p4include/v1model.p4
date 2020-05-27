@@ -69,8 +69,6 @@ const bit<32> __v1model_version = V1MODEL_VERSION;
 typedef bit<9>  PortId_t;       // should not be a constant size?
 #endif
 
-const bit<32> __v1model_version = V1MODEL_VERSION;
-
 @metadata @name("standard_metadata")
 struct standard_metadata_t {
 #if V1MODEL_VERSION >= 20200408
