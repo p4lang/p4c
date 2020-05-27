@@ -12,7 +12,7 @@ class ErrorOnInfInt : public Inspector {
     void postorder(const IR::Expression *expression) override {
         auto t = typeMap->getType(expression, true);
         if (t->is<IR::Type_InfInt>())
-            ::error("%1%: could not infer a width", expression);
+            ::error(ErrorType::ERR_TYPE_ERROR, "%1%: could not infer a width", expression);
     }
 };
 

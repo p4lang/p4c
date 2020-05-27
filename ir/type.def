@@ -536,7 +536,8 @@ class ArgumentInfo {
     bool leftValue;
     bool compileTimeConstant;
     Type type;
-    ID   name;  // only present if using named arguments
+    Argument argument;
+    toString { return argument->toString(); }
 #nodbprint
 }
 

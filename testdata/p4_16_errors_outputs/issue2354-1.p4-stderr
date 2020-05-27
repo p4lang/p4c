@@ -1,0 +1,3 @@
+issue2354-1.p4(3): [--Werror=type-error] error: x: actions cannot have parameters with type int
+    action a(int x) {
+                 ^
