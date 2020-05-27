@@ -1,6 +1,6 @@
 #include <core.p4>
 
-enum bit<(10 + 6)> EthTypes {
+enum bit<(9 + 7)> EthTypes {
     IPv4 = 0x800,
     ARP = 0x806,
     RARP = 0x8035,

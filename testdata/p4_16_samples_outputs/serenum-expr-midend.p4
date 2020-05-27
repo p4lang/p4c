@@ -24,16 +24,16 @@ parser prs(packet_in p, out Headers h) {
 
 control c(inout Headers h) {
     bool hasReturned;
-    @hidden action serenumexpr39() {
+    @hidden action serenumexpr42() {
         hasReturned = true;
     }
     @hidden action act() {
         hasReturned = false;
     }
-    @hidden action serenumexpr41() {
+    @hidden action serenumexpr44() {
         h.eth.setInvalid();
     }
-    @hidden action serenumexpr43() {
+    @hidden action serenumexpr46() {
         h.eth.type = 16w0;
     }
     @hidden table tbl_act {
@@ -42,34 +42,34 @@ control c(inout Headers h) {
         }
         const default_action = act();
     }
-    @hidden table tbl_serenumexpr39 {
+    @hidden table tbl_serenumexpr42 {
         actions = {
-            serenumexpr39();
+            serenumexpr42();
         }
-        const default_action = serenumexpr39();
+        const default_action = serenumexpr42();
     }
-    @hidden table tbl_serenumexpr41 {
+    @hidden table tbl_serenumexpr44 {
         actions = {
-            serenumexpr41();
+            serenumexpr44();
         }
-        const default_action = serenumexpr41();
+        const default_action = serenumexpr44();
     }
-    @hidden table tbl_serenumexpr43 {
+    @hidden table tbl_serenumexpr46 {
         actions = {
-            serenumexpr43();
+            serenumexpr46();
         }
-        const default_action = serenumexpr43();
+        const default_action = serenumexpr46();
     }
     apply {
         tbl_act.apply();
         if (!h.eth.isValid()) {
-            tbl_serenumexpr39.apply();
+            tbl_serenumexpr42.apply();
         }
         if (!hasReturned) {
             if (h.eth.type == 16w0x800) {
-                tbl_serenumexpr41.apply();
+                tbl_serenumexpr44.apply();
             } else {
-                tbl_serenumexpr43.apply();
+                tbl_serenumexpr46.apply();
             }
         }
     }
