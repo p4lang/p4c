@@ -1074,16 +1074,13 @@ enumDeclaration
     : optAnnotations
         ENUM name { driver.structure->declareType(*$3); }
         "{" identifierList "}" { $$ = new IR::Type_Enum(@3, *$3, *$6); }
-    | optAnnotations ENUM BIT l_angle INTEGER r_angle name { driver.structure->declareType(*$7); }
-        "{" specifiedIdentifierList "}" {
-            auto type = IR::Type::Bits::get(@3+@6, parseConstantChecked(@5, $5));
-            $$ = new IR::Type_SerEnum(@7, *$7, type, *$10); }
-    | optAnnotations ENUM typeRef name { driver.structure->declareType(*$4);}
+    | optAnnotations ENUM typeRef name { driver.structure->declareType(*$4); }
 	 "{" specifiedIdentifierList "}" {
-              auto type = $3;
-              if (type->is<IR::Type_Name>()) {
-                  auto tn = type->to<IR::Type_Name>();
+              auto type = $typeRef;
+              if (auto tn = type->to<IR::Type_Name>()) {
                   $$ = new IR::Type_SerEnum(@4, *$4, nullptr, tn, *$7);
+              } else if (auto tb = type->to<IR::Type_Bits>()) {
+                  $$ = new IR::Type_SerEnum(@4, *$4, tb, *$7);
               }
 	  }
     ;
