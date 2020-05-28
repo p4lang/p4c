@@ -57,12 +57,22 @@ actions {
     name: "MyIC.a1"
     alias: "a1"
   }
+  params {
+    id: 1
+    name: "param"
+    bitwidth: 48
+  }
 }
 actions {
   preamble {
     id: 23466264
     name: "MyIC.a2"
     alias: "a2"
+  }
+  params {
+    id: 1
+    name: "param"
+    bitwidth: 16
   }
 }
 action_profiles {
