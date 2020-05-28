@@ -27,7 +27,7 @@ BUILDDIR:= $(BPFDIR)build
 override INCLUDES+= -I./$(SRCDIR) -include ebpf_runtime_$(TARGET).h
 # Optimization flags to save space
 override CFLAGS+=-O2 -g # -Wall -Werror
-LIBS+=-lpcap -lelf $(ROOT_DIR)usr/lib64/libbpf.a -lelf -lz
+LIBS+=-lpcap $(ROOT_DIR)usr/lib64/libbpf.a -lelf -lz
 SOURCES=$(SRCDIR)/ebpf_registry.c  $(SRCDIR)/ebpf_map.c $(BPFNAME).c $(EXTERNOBJ)
 SRC_BASE+=$(SRCDIR)/ebpf_runtime.c $(SRCDIR)/pcap_util.c $(SOURCES)
 SRC_BASE+=$(SRCDIR)/ebpf_runtime_$(TARGET).c
