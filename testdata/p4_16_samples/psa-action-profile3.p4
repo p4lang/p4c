@@ -45,8 +45,8 @@ control MyIC(
     inout psa_ingress_output_metadata_t d) {
 
     ActionProfile(1024) ap;
-    action a1() { }
-    action a2() { }
+    action a1(bit<48> param) { a.dstAddr = param; }
+    action a2(bit<16> param) { a.etherType = param; }
     table tbl {
         key = {
             a.srcAddr : exact;
