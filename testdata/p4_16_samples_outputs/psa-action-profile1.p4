@@ -55,6 +55,7 @@ control MyEC(inout EMPTY a, inout EMPTY b, in psa_egress_input_metadata_t c, ino
 
 control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout ethernet_t d, in EMPTY e, in psa_ingress_output_metadata_t f) {
     apply {
+        buffer.emit(d);
     }
 }
 
