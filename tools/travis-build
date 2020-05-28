@@ -59,7 +59,7 @@ apt-get install -y --no-install-recommends \
 pip3 install $P4C_PIP3_PACKAGES
 
 # build libbpf for ebpf tests
-python /p4c/backends/ebpf/build_libbpf
+python3 /p4c/backends/ebpf/build_libbpf
 
 # ! ------- BEGIN Python2 -------------------------------------------------
 # ! ------- Should be deleted when conversion to Python3 is finalized -----
