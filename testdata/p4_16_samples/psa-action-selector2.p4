@@ -83,7 +83,9 @@ control MyID(
     inout ethernet_t d,
     in user_meta_t e,
     in psa_ingress_output_metadata_t f) {
-    apply { }
+    apply {
+        buffer.emit(d);
+    }
 }
 
 control MyED(

@@ -62,7 +62,17 @@ control MyEC(inout EMPTY a, inout EMPTY b, in psa_egress_input_metadata_t c, ino
 }
 
 control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout ethernet_t d, in user_meta_t e, in psa_ingress_output_metadata_t f) {
+    @hidden action psaactionselector3l85() {
+        buffer.emit<ethernet_t>(d);
+    }
+    @hidden table tbl_psaactionselector3l85 {
+        actions = {
+            psaactionselector3l85();
+        }
+        const default_action = psaactionselector3l85();
+    }
     apply {
+        tbl_psaactionselector3l85.apply();
     }
 }
 
