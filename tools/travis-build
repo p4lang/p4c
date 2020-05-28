@@ -26,6 +26,7 @@ export P4C_DEPS="bison \
 export P4C_EBPF_DEPS="libpcap-dev \
              libelf-dev \
              llvm \
+             zlib1g \
              clang \
              iproute2 \
              net-tools"
@@ -56,6 +57,9 @@ apt-get install -y --no-install-recommends \
   git
 
 pip3 install $P4C_PIP3_PACKAGES
+
+# build libbpf for ebpf tests
+/p4c/backends/ebpf/build_libbpf
 
 # ! ------- BEGIN Python2 -------------------------------------------------
 # ! ------- Should be deleted when conversion to Python3 is finalized -----

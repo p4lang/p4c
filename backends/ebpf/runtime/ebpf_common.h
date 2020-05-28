@@ -15,13 +15,13 @@ limitations under the License.
 */
 
 /*
- * This file contains general ebpf definitions.
+ * This file contains general type definitions used in ebpf programs.
  * It should be included with new target header files.
  */
 
-#include <stdio.h>      // printf
-#include <linux/bpf.h>  // types, and general bpf definitions
-#include <stdbool.h>    // true and false
+#include <stdio.h>          // printf
+#include <stdbool.h>        // true and false
+#include <linux/types.h>    // u8, u16, u32, u64
 
 typedef signed char s8;
 typedef unsigned char u8;
@@ -85,6 +85,8 @@ typedef unsigned long long u64;
 # error "Fix your compiler's __BYTE_ORDER__?!"
 #endif
 
+#undef htonl
+#undef htons
 #define htonl(d) __constant_htonl(d)
 #define htons(d) __constant_htons(d)
 #define htonll(d) __constant_htonll(d)
@@ -93,3 +95,13 @@ typedef unsigned long long u64;
 #define load_half(data, b) __constant_ntohs(*(u16 *)((u8*)(data) + (b)))
 #define load_word(data, b) __constant_ntohl(*(u32 *)((u8*)(data) + (b)))
 #define load_dword(data, b) __constant_ntohll(*(u64 *)((u8*)(data) + (b)))
+
+/*
+ * Helper function.
+ * Print a byte buffer according to the specified length.
+ */
+static inline void print_n_bytes(void *receiveBuffer, int num) {
+    for (int i = 0; i < num; i++)
+        printf("%02x", ((unsigned char *)receiveBuffer)[i]);
+    printf("\n");
+}

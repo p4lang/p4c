@@ -3,7 +3,7 @@ ROOT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # Argument for the CLANG compiler
 LLC ?= llc
 CLANG ?= clang
-override INCLUDES+= -I$(ROOT_DIR)
+override INCLUDES+= -I$(ROOT_DIR) -I$(ROOT_DIR)usr/include/bpf/ -I$(ROOT_DIR)contrib/libbpf/include/uapi/
 override LIBS+=
 # Optimization flags to save space
 override CFLAGS+= -O2 -g -D__KERNEL__ -D__ASM_SYSREG_H \
@@ -72,5 +72,5 @@ $(BPFNAME).bc: %.bc : %.c
 $(BPFNAME).o: %.o : %.bc
 	$(LLC) -march=bpf -mcpu=probe -filetype=obj $< -o $@
 
-clean: clean_loader
+clean:
 	rm -f *.o *.bc $(BPFNAME).c $(BPFNAME).h

@@ -63,7 +63,7 @@ set (P4C_EBPF_HDRS
 # endif()
 # The kernel-based ebpf tests seem to be broken, so we disable them
 # The dependences on the kernel APIs are too brittle
-set (SUPPORTS_KERNEL False)
+set (SUPPORTS_KERNEL True)
 
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_EBPF_SRCS};${P4C_EBPF_HDRS}")
 
@@ -138,6 +138,15 @@ else()
     "Did not find an LLVM version that can compile the eBPF kernel tests...\n"
     "'llvm-config' reason: ${LLVM_PACKAGE_VERSION}\n"
     "'llvm-config' return value: ${LLVM_RET}" )
+  set (SUPPORTS_KERNEL False)
+endif()
+
+if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/usr/include/bpf")
+  message(STATUS "Found libbpf")
+else()
+  message(WARNING "Missing the libbpf dependency, disabling kernel tests."
+  " You can install libbpf by running './build_libbpf' in the "
+  "${CMAKE_CURRENT_SOURCE_DIR}/runtime folder.")
   set (SUPPORTS_KERNEL False)
 endif()
 
