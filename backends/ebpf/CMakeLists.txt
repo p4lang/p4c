@@ -88,7 +88,13 @@ set(EBPF_DRIVER_KERNEL "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t kernel -
 set(EBPF_DRIVER_BCC "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t bcc -c \"${P4C_BINARY_DIR}/p4c-ebpf\"")
 set(EBPF_DRIVER_TEST "${CMAKE_CURRENT_SOURCE_DIR}/run-ebpf-test.py -t test -c \"${P4C_BINARY_DIR}/p4c-ebpf\"")
 
-set (XFAIL_TESTS_KERNEL)
+set (XFAIL_TESTS_KERNEL
+  # Rejected by kernel verifier, likely reasons:
+  # https://github.com/xdp-project/xdp-tutorial/issues/38
+  # We are using iproute2, which has a bug.
+  # Load eBPF code directly to avoid this
+  ${P4C_SOURCE_DIR}/testdata/p4_16_samples/lpm_ebpf.p4
+  )
 set (XFAIL_TESTS_BCC)
 set (XFAIL_TESTS_TEST)
 
@@ -150,9 +156,12 @@ endif()
 # Only add the kernel tests if the two requirements are met
 if (SUPPORTS_KERNEL)
   p4c_add_tests("ebpf-kernel" ${EBPF_DRIVER_KERNEL} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_KERNEL}")
-  # These are special tests with args that are not included in the default ebpf tests
-  p4c_add_test_with_args("ebpf-kernel" ${EBPF_DRIVER_KERNEL} FALSE "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-conntrack-ebpf.c" "")
-  p4c_add_test_with_args("ebpf-kernel" ${EBPF_DRIVER_KERNEL} FALSE "testdata/p4_16_samples/ebpf_checksum_extern.p4" "testdata/p4_16_samples/ebpf_checksum_extern.p4" "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-checksum-ebpf.c" "")
+  # These are special tests with args that are not included
+  # in the default ebpf tests
+  # FIXME: Both do not work yet
+  # They are probably getting rejected because of direct calls
+  p4c_add_test_with_args("ebpf-kernel" ${EBPF_DRIVER_KERNEL} TRUE "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-conntrack-ebpf.c" "")
+  p4c_add_test_with_args("ebpf-kernel" ${EBPF_DRIVER_KERNEL} TRUE "testdata/p4_16_samples/ebpf_checksum_extern.p4" "testdata/p4_16_samples/ebpf_checksum_extern.p4" "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-checksum-ebpf.c" "")
 endif()
 # ToDo Add check which verifies that BCC is installed
 # Ideally, this is done via check for the python package
@@ -161,5 +170,7 @@ p4c_add_tests("ebpf" ${EBPF_DRIVER_TEST} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_TEST
 
 # These are special tests with args that are not included in the default ebpf tests
 p4c_add_test_with_args("ebpf" ${EBPF_DRIVER_TEST} FALSE "testdata/p4_16_samples/ebpf_checksum_extern.p4" "testdata/p4_16_samples/ebpf_checksum_extern.p4" "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-checksum-ebpf.c" "")
-p4c_add_test_with_args("ebpf" ${EBPF_DRIVER_TEST} FALSE "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-conntrack-ebpf.c" "")
+# FIXME:This does not work yet
+# We do not have support for dynamic addition of tables in the test framework
+p4c_add_test_with_args("ebpf" ${EBPF_DRIVER_TEST} TRUE "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-conntrack-ebpf.c" "")
 message(STATUS "Done with configuring BPF back end")
