@@ -70,7 +70,7 @@ cd /tmp/iproute2
 ./configure
 make -j `getconf _NPROCESSORS_ONLN` && \
 make install
-cd /
+cd /p4c
 rm -rf /tmp/pip
 # iproute2-end
 
