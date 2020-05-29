@@ -141,8 +141,10 @@ else()
   set (SUPPORTS_KERNEL False)
 endif()
 
-if (EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/usr/include/bpf")
-  message(STATUS "Found libbpf")
+# check for the libbpf library
+find_library(LIBBPF NAMES bpf HINTS "${CMAKE_CURRENT_SOURCE_DIR}/runtime/usr/lib64/")
+if (LIBBPF)
+  message(STATUS "Found libbpf library")
 else()
   message(WARNING "Missing the libbpf dependency, disabling kernel tests."
   " You can install libbpf by running './build_libbpf' in the "

@@ -8,7 +8,7 @@ BPFNAME=$(basename $(BPFOBJ))
 BPFDIR=$(dir $(BPFOBJ))
 # This can be any file with the extension ".c"
 EXTERNOBJ=
-override INCLUDES+= -I$(dir $(BPFOBJ)) -I$(ROOT_DIR)usr/include/bpf/ -I$(ROOT_DIR)contrib/libbpf/include/uapi/
+override INCLUDES+= -I$(dir $(BPFOBJ))
 
 # Arguments for the P4 Compiler
 P4INCLUDE=-I./p4include
@@ -26,8 +26,8 @@ SRCDIR=.
 BUILDDIR:= $(BPFDIR)build
 override INCLUDES+= -I./$(SRCDIR) -include ebpf_runtime_$(TARGET).h
 # Optimization flags to save space
-override CFLAGS+=-O2 -g # -Wall -Werror
-LIBS+=-lpcap $(ROOT_DIR)usr/lib64/libbpf.a -lelf -lz
+override CFLAGS+= -O2 -g # -Wall -Werror
+override LIBS+= -lpcap
 SOURCES=$(SRCDIR)/ebpf_registry.c  $(SRCDIR)/ebpf_map.c $(BPFNAME).c $(EXTERNOBJ)
 SRC_BASE+=$(SRCDIR)/ebpf_runtime.c $(SRCDIR)/pcap_util.c $(SOURCES)
 SRC_BASE+=$(SRCDIR)/ebpf_runtime_$(TARGET).c

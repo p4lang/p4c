@@ -59,7 +59,10 @@ class Target(EBPFTarget):
         args += "CFLAGS+=-DCONTROL_PLANE "
         args += "SOURCES= "
         # add the folder local to the P4 file to the list of includes
-        args += "INCLUDES+=-I" + os.path.dirname(self.options.p4filename)
+        args += "INCLUDES+=-I%s " % os.path.dirname(self.options.p4filename)
+        args += "INCLUDES+=-I%s/usr/include/bpf " % self.runtimedir
+        args += "INCLUDES+=-I%s/contrib/libbpf/include/uapi " % self.runtimedir
+        args += "LIBS+=%s/usr/lib64/libbpf.a -lelf -lz " % self.runtimedir
         errmsg = "Failed to build the filter:"
         return run_timeout(self.options.verbose, args, TIMEOUT,
                            self.outputs, errmsg)

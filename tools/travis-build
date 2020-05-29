@@ -56,11 +56,13 @@ apt-get install -y --no-install-recommends \
   ${P4C_RUNTIME_DEPS} \
   git
 
+pip3 install wheel
 pip3 install $P4C_PIP3_PACKAGES
 
 # build libbpf for ebpf tests
-python3 /p4c/backends/ebpf/build_libbpf
-
+cd /p4c
+python3 backends/ebpf/build_libbpf
+cd -
 # ! ------- BEGIN Python2 -------------------------------------------------
 # ! ------- Should be deleted when conversion to Python3 is finalized -----
 # We install pip with get-pip.py (https://pip.pypa.io/en/stable/installing/)

@@ -1,9 +1,4 @@
-#!/usr/bin/env python
-
-#!/usr/bin/env python2
-# Copyright 2013-present Barefoot Networks, Inc.
-# Copyright 2018 VMware, Inc.
-#
+#!/usr/bin/env python3
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -46,7 +41,7 @@ def main():
     git_cmd = "git submodule update --init %s" % libbpf_dir
     err = testutils.run_timeout(verbose=VERBOSE, args=git_cmd,
                                 timeout=20, outputs=outputs,
-                                errmsg="Could not build libbpf")
+                                errmsg="Could not initialize libbpf submodule")
     # Create the libbpf build directory
     create_dir(libbpf_build_dir)
     # Build libbpf
