@@ -28,7 +28,6 @@ export P4C_EBPF_DEPS="libpcap-dev \
              zlib1g-dev \
              llvm \
              clang \
-             iproute2 \
              net-tools"
 
 export P4C_RUNTIME_DEPS="cpp \
@@ -65,12 +64,14 @@ python3 backends/ebpf/build_libbpf
 cd -
 
 # We also need to build iproute2 from source to support Ubuntu 16.04 eBPF.
-RUN cd /tmp && \
-    git clone -b v5.0.0 git://git.kernel.org/pub/scm/linux/kernel/git/shemminger/iproute2.git && \
-  cd /tmp/iproute2 && \
-  ./configure && \
-  make -j `getconf _NPROCESSORS_ONLN` && \
-  make install
+cd /tmp
+git clone -b v5.0.0 git://git.kernel.org/pub/scm/linux/kernel/git/shemminger/iproute2.git
+cd /tmp/iproute2
+./configure
+make -j `getconf _NPROCESSORS_ONLN` && \
+make install
+cd /
+rm -rf /tmp/pip
 # iproute2-end
 
 
