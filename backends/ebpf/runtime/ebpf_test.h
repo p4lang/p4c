@@ -78,6 +78,8 @@ struct bpf_table tables[] = {
     registry_update_table(MAP_PATH"/"#table, key, value, flags)
 #define BPF_USER_MAP_UPDATE_ELEM(index, key, value, flags)\
     registry_update_table_id(index, key, value, flags)
+#define BPF_MAP_DELETE_ELEM(index, key, value, flags) \
+    registry_delete_table_id(index, key, value, flags)
 #define BPF_OBJ_PIN(table, name) registry_add(table)
 #define BPF_OBJ_GET(name) registry_get_id(name)
 
