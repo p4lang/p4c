@@ -25,8 +25,8 @@ export P4C_DEPS="bison \
 
 export P4C_EBPF_DEPS="libpcap-dev \
              libelf-dev \
+             zlib1g-dev \
              llvm \
-             zlib1g \
              clang \
              iproute2 \
              net-tools"
