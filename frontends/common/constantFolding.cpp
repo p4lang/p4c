@@ -418,7 +418,6 @@ DoConstantFolding::binary(const IR::Operation_Binary* e,
     bool runk = rt->is<IR::Type_InfInt>();
 
     const IR::Type* resultType;
-    big_int value = func(left->value, right->value);
 
     const IR::Type_Bits* ltb = nullptr;
     const IR::Type_Bits* rtb = nullptr;
@@ -458,6 +457,7 @@ DoConstantFolding::binary(const IR::Operation_Binary* e,
             right = cast(right, left->base, ltb);
         }
     }
+    big_int value = func(left->value, right->value);
     if (saturating) {
         if ((rtb = resultType->to<IR::Type::Bits>())) {
             big_int limit = 1;
