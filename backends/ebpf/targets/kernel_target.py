@@ -60,9 +60,12 @@ class Target(EBPFTarget):
         args += "SOURCES= "
         # add the folder local to the P4 file to the list of includes
         args += "INCLUDES+=-I%s " % os.path.dirname(self.options.p4filename)
+        # some kernel specific includes for libbpf
         args += "INCLUDES+=-I%s/usr/include/bpf " % self.runtimedir
         args += "INCLUDES+=-I%s/contrib/libbpf/include/uapi " % self.runtimedir
-        args += "LIBS+=%s/usr/lib64/libbpf.a -lelf -lz " % self.runtimedir
+        args += "LIBS+=%s/usr/lib64/libbpf.a " % self.runtimedir
+        args += "LIBS+=-lz "
+        args += "LIBS+=-lelf "
         errmsg = "Failed to build the filter:"
         return run_timeout(self.options.verbose, args, TIMEOUT,
                            self.outputs, errmsg)
