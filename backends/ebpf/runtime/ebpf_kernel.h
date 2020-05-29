@@ -103,10 +103,10 @@ struct bpf_elf_map SEC("maps") NAME = {          \
     bpf_map_lookup_elem(&table, key)
 #define BPF_MAP_UPDATE_ELEM(table, key, value, flags) \
     bpf_map_update_elem(&table, key, value, flags)
-#define BPF_USER_MAP_UPDATE_ELEM(index, key, value, flags)\
-    bpf_update_elem(index, key, value, flags)
 #define BPF_MAP_DELETE_ELEM(table, key) \
     bpf_map_delete_elem(&table, key)
+#define BPF_USER_MAP_UPDATE_ELEM(index, key, value, flags)\
+    bpf_update_elem(index, key, value, flags)
 #define BPF_OBJ_PIN(table, name) bpf_obj_pin(table, name)
 #define BPF_OBJ_GET(name) bpf_obj_get(name)
 

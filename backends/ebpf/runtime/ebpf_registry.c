@@ -136,7 +136,15 @@ int registry_update_table_id(int tbl_id, void *key, void *value, unsigned long l
     return bpf_map_update_elem(&tmp_tbl->bpf_map, key, tmp_tbl->key_size, value, tmp_tbl->value_size, flags);
 }
 
-int registry_delete_table_id(int tbl_id, void *key) {
+int registry_delete_table_elem(const char *name, void *key) {
+    struct bpf_table *tmp_tbl = registry_lookup_table(name);
+    if (tmp_tbl == NULL)
+        /* not found, return */
+        return EXIT_FAILURE;
+    return bpf_map_delete_elem(tmp_tbl->bpf_map, key, tmp_tbl->key_size);;
+}
+
+int registry_delete_table_elem_id(int tbl_id, void *key) {
     struct bpf_table *tmp_tbl = registry_lookup_table_id(tbl_id);
     if (tmp_tbl == NULL)
         /* not found, return */

@@ -7,7 +7,7 @@ BPFOBJ=
 BPFNAME=$(basename $(BPFOBJ))
 BPFDIR=$(dir $(BPFOBJ))
 # This can be any file with the extension ".c"
-EXTERNOBJ=
+override EXTERNOBJ+=
 override INCLUDES+= -I$(dir $(BPFOBJ))
 
 # Arguments for the P4 Compiler
@@ -24,15 +24,16 @@ P4ARGS=
 GCC ?= gcc
 SRCDIR=.
 BUILDDIR:= $(BPFDIR)build
-override INCLUDES+= -I./$(SRCDIR) -include ebpf_runtime_$(TARGET).h
+override INCLUDES+= -I$(ROOT_DIR) -include $(ROOT_DIR)ebpf_runtime_$(TARGET).h
 # Optimization flags to save space
 override CFLAGS+= -O2 -g # -Wall -Werror
 override LIBS+= -lpcap
-SOURCES=$(SRCDIR)/ebpf_registry.c  $(SRCDIR)/ebpf_map.c $(BPFNAME).c $(EXTERNOBJ)
-SRC_BASE+=$(SRCDIR)/ebpf_runtime.c $(SRCDIR)/pcap_util.c $(SOURCES)
-SRC_BASE+=$(SRCDIR)/ebpf_runtime_$(TARGET).c
-OBJECTS = $(SRC_BASE:%.c=$(BUILDDIR)/%.o)
-DEPS =  $(OBJECTS:.o=.d)
+SOURCES= $(ROOT_DIR)ebpf_registry.c  $(ROOT_DIR)ebpf_map.c $(BPFNAME).c $(EXTERNOBJ)
+SRC_BASE+=$(ROOT_DIR)ebpf_runtime.c $(ROOT_DIR)pcap_util.c $(SOURCES)
+SRC_BASE+=$(ROOT_DIR)ebpf_runtime_$(TARGET).c
+SRC_PROCESSED= $(notdir $(SRC_BASE))
+OBJECTS = $(SRC_PROCESSED:%.c=$(BUILDDIR)/%.o)
+DEPS =  $(OBJECTS:%.o=%.d)
 
 # checks the executable and symlinks to the output
 all: $(BPFNAME).c $(BPFNAME)
@@ -46,12 +47,29 @@ $(BPFNAME): $(OBJECTS)
 # Add dependency files, if they exist
 -include $(DEPS)
 
+# We build the main target separately from the auxiliary objects
+# TODO: Find a way to make this more elegant
+$(BUILDDIR)/$(notdir $(BPFNAME)).o: $(BPFNAME).c
+	@echo "Creating folder: $(dir $@)"
+	@mkdir -p $(dir $@)
+	@echo "Compiling: $< -> $@"
+	$(GCC) $(CFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
+
+# We also build the extern objects separately from the auxiliary objects
+# TODO: Find a way to make this more elegant
+$(BUILDDIR)/$(notdir $(basename $(EXTERNOBJ))).o: $(EXTERNOBJ)
+	@echo "Creating folder: $(dir $@)"
+	@mkdir -p $(dir $@)
+	@echo "Compiling: $< -> $@"
+	$(GCC) $(CFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
+
+
 # Source file rules
 # After the first compilation they will be joined with the rules from the
 # dependency files to provide header dependencies
-$(BUILDDIR)/%.o: $(SRCDIR)/%.c
-	@echo "Creating folder: $(dir $(OBJECTS))"
-	@mkdir -p $(dir $(OBJECTS))
+$(BUILDDIR)/%.o: ./%.c
+	@echo "Creating folder: $(dir $@)"
+	@mkdir -p $(dir $@)
 	@echo "Compiling: $< -> $@"
 	$(GCC) $(CFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
 

@@ -15,6 +15,8 @@
 # Makefile for the EBPF P4-16 back-end.
 # To be included in the main P4C compiler makefile
 
+message(STATUS "Start configuring eBPF back end")
+
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/version.h.cmake"
   "${CMAKE_CURRENT_BINARY_DIR}/version.h" @ONLY)
 
@@ -49,21 +51,6 @@ set (P4C_EBPF_HDRS
   target.h
   lower.h
   )
-
-# # determine the kernel version
-# execute_process(COMMAND uname -r
-#   OUTPUT_VARIABLE P4C_EBPF_KERNEL_VER
-#   OUTPUT_STRIP_TRAILING_WHITESPACE
-#   RESULT_VARIABLE rc)
-# message(STATUS "Detected kernel version: ${P4C_EBPF_KERNEL_VER}")
-# if (EXISTS /usr/src/linux-headers-${P4C_EBPF_KERNEL_VER}/include/uapi/linux)
-#   set (SUPPORTS_KERNEL True)
-# else()
-#   set (SUPPORTS_KERNEL False)
-# endif()
-# The kernel-based ebpf tests seem to be broken, so we disable them
-# The dependences on the kernel APIs are too brittle
-set (SUPPORTS_KERNEL True)
 
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_EBPF_SRCS};${P4C_EBPF_HDRS}")
 
@@ -109,12 +96,20 @@ set (EBPF_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*_ebpf.p4"
   )
 
+# determine the kernel version
+execute_process(COMMAND uname -r
+  OUTPUT_VARIABLE P4C_EBPF_KERNEL_VER
+  OUTPUT_STRIP_TRAILING_WHITESPACE
+  RESULT_VARIABLE rc)
+message(STATUS "Detected kernel version: ${P4C_EBPF_KERNEL_VER}")
 # Check if the kernel version is new enough to support ebpf features
 set (MIN_KERNEL 4.15.0)
 string (REGEX MATCH "[0-9]+[^-]*" KERNEL_VER ${CMAKE_SYSTEM})
 if (${KERNEL_VER} VERSION_LESS ${MIN_KERNEL} )
   MESSAGE(WARNING "Kernel version ${KERNEL_VER} too small, expected ${MIN_KERNEL}. Ignoring ebpf kernel tests...")
   set (SUPPORTS_KERNEL False)
+else()
+  set (SUPPORTS_KERNEL True)
 endif()
 
 # Check if we have the right llvm version
@@ -167,3 +162,4 @@ p4c_add_tests("ebpf" ${EBPF_DRIVER_TEST} ${EBPF_TEST_SUITES} "${XFAIL_TESTS_TEST
 # These are special tests with args that are not included in the default ebpf tests
 p4c_add_test_with_args("ebpf" ${EBPF_DRIVER_TEST} FALSE "testdata/p4_16_samples/ebpf_checksum_extern.p4" "testdata/p4_16_samples/ebpf_checksum_extern.p4" "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-checksum-ebpf.c" "")
 p4c_add_test_with_args("ebpf" ${EBPF_DRIVER_TEST} FALSE "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "testdata/p4_16_samples/ebpf_conntrack_extern.p4" "--extern-file ${P4C_SOURCE_DIR}/testdata/extern_modules/extern-conntrack-ebpf.c" "")
+message(STATUS "Done with configuring BPF back end")

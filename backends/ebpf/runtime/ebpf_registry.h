@@ -117,13 +117,25 @@ int registry_update_table_id(int tbl_id, void *key, void *value, unsigned long l
 
 /**
  * @brief Delete a key from the hashmap.
- * @details A safe wrapper function to delete an entry from a bpf map.
+ * @details A safe wrapper function to delete an entry from a bpf map where
+ * only the table id is known.
  * If the map can be found and exists, this function calls
  * the bpf_map_delte_elem function to delete an entry.
  * This operation uses an integer as the key.
  * @return EXIT_FAILURE if map cannot be found.
  */
-int registry_delete_table_id(int tbl_id, void *key);
+int registry_delete_table_elem(const char *name, void *key);
+
+/**
+ * @brief Delete a key from the hashmap.
+ * @details A safe wrapper function to delete an entry from a bpf map where
+ * only the table id is known.
+ * If the map can be found and exists, this function calls
+ * the bpf_map_delte_elem function to delete an entry.
+ * This operation uses an integer as the key.
+ * @return EXIT_FAILURE if map cannot be found.
+ */
+int registry_delete_table_elem_id(int tbl_id, void *key);
 
 /**
  * @brief Retrieve a value from a bpf map through the registry.
@@ -139,7 +151,7 @@ void *registry_lookup_table_elem(const char *name, void *key);
 /**
  * @brief Retrieve a value from a bpf map through the registry.
  * @details A wrapper function to retrieve a value from a hash map
- * where only the name is known. The function looks up the identifier
+ * where only the id is known. The function looks up the identifier
  * in the registry and calls bpf_map_lookup_elem on the retrieved list.
  * If there is no table, this function also returns NULL.
  * This operation uses an integer as the key.
