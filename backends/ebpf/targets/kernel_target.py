@@ -46,7 +46,9 @@ class Target(EBPFTarget):
         # add the folder local to the P4 file to the list of includes
         args += " INCLUDES+=-I" + os.path.dirname(self.options.p4filename)
         if self.options.extern:
+            # we inline the extern so we need a direct include
             args += " INCLUDES+=-include" + self.options.extern + " "
+            # need to include the temporary dir because of the tmp import
             args += " INCLUDES+=-I" + self.tmpdir + " "
         errmsg = "Failed to compile the eBPF byte code:"
         return run_timeout(self.options.verbose, args, TIMEOUT,

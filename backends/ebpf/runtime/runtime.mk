@@ -6,8 +6,6 @@ BPFOBJ=
 # Get the source name of the object to match targets
 BPFNAME=$(basename $(BPFOBJ))
 BPFDIR=$(dir $(BPFOBJ))
-# This can be any file with the extension ".c"
-override EXTERNOBJ+=
 override INCLUDES+= -I$(dir $(BPFOBJ))
 
 # Arguments for the P4 Compiler
@@ -32,7 +30,7 @@ override LIBS+= -lpcap
 SOURCE_BASE= $(ROOT_DIR)ebpf_runtime.c $(ROOT_DIR)pcap_util.c
 SOURCE_BASE+= $(ROOT_DIR)ebpf_runtime_$(TARGET).c
 # Add the generated file and externs to the base sources
-override SOURCES+= $(EXTERNOBJ) $(SOURCE_BASE)
+override SOURCES+= $(SOURCE_BASE)
 SRC_PROCESSED= $(notdir $(SOURCES))
 OBJECTS = $(SRC_PROCESSED:%.c=$(BUILDDIR)/%.o)
 DEPS = $(OBJECTS:%.o=%.d)
@@ -53,14 +51,6 @@ $(BPFNAME): $(OBJECTS)
 # We build the main target separately from the auxiliary objects
 # TODO: Find a way to make this more elegant
 $(BUILDDIR)/$(notdir $(BPFNAME)).o: $(BPFNAME).c
-	@echo "Creating folder: $(dir $@)"
-	@mkdir -p $(dir $@)
-	@echo "Compiling: $< -> $@"
-	$(GCC) $(CFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
-
-# We also build the extern objects separately from the auxiliary objects
-# TODO: Find a way to make this more elegant
-$(BUILDDIR)/$(notdir $(basename $(EXTERNOBJ))).o: $(EXTERNOBJ)
 	@echo "Creating folder: $(dir $@)"
 	@mkdir -p $(dir $@)
 	@echo "Compiling: $< -> $@"

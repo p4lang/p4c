@@ -39,8 +39,11 @@ class Target(EBPFTarget):
         args += "SOURCES+=%s.c " % self.template
         # include the src of libbpf directly, does not require installation
         args += "INCLUDES+=-I%s/contrib/libbpf/src " % self.runtimedir
-
-        args += "EXTERNOBJ+=" + self.options.extern + " "
+        if self.options.extern:
+            # we inline the extern so we need a direct include
+            args += "INCLUDES+=-include" + self.options.extern + " "
+            # need to include the temporary dir because of the tmp import
+            args += "INCLUDES+=-I" + self.tmpdir + " "
         errmsg = "Failed to build the filter:"
         return run_timeout(self.options.verbose, args, TIMEOUT,
                            self.outputs, errmsg)
