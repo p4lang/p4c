@@ -57,7 +57,6 @@ class Target(EBPFTarget):
         # List of bpf programs to attach to the interface
         args += "BPFOBJ=" + self.template + " "
         args += "CFLAGS+=-DCONTROL_PLANE "
-        args += "SOURCES= "
         # add the folder local to the P4 file to the list of includes
         args += "INCLUDES+=-I%s " % os.path.dirname(self.options.p4filename)
         # some kernel specific includes for libbpf

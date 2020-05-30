@@ -22,18 +22,20 @@ P4ARGS=
 
 # Argument for the GCC compiler
 GCC ?= gcc
-SRCDIR=.
 BUILDDIR:= $(BPFDIR)build
 override INCLUDES+= -I$(ROOT_DIR) -include $(ROOT_DIR)ebpf_runtime_$(TARGET).h
 # Optimization flags to save space
 override CFLAGS+= -O2 -g # -Wall -Werror
 override LIBS+= -lpcap
-SOURCES= $(ROOT_DIR)ebpf_registry.c  $(ROOT_DIR)ebpf_map.c $(BPFNAME).c $(EXTERNOBJ)
-SRC_BASE+=$(ROOT_DIR)ebpf_runtime.c $(ROOT_DIR)pcap_util.c $(SOURCES)
-SRC_BASE+=$(ROOT_DIR)ebpf_runtime_$(TARGET).c
-SRC_PROCESSED= $(notdir $(SRC_BASE))
+
+# The base files required to build the runtime
+SOURCE_BASE= $(ROOT_DIR)ebpf_runtime.c $(ROOT_DIR)pcap_util.c
+SOURCE_BASE+= $(ROOT_DIR)ebpf_runtime_$(TARGET).c
+# Add the generated file and externs to the base sources
+override SOURCES+= $(EXTERNOBJ) $(SOURCE_BASE)
+SRC_PROCESSED= $(notdir $(SOURCES))
 OBJECTS = $(SRC_PROCESSED:%.c=$(BUILDDIR)/%.o)
-DEPS =  $(OBJECTS:%.o=%.d)
+DEPS = $(OBJECTS:%.o=%.d)
 
 # checks the executable and symlinks to the output
 all: $(BPFNAME).c $(BPFNAME)
@@ -46,6 +48,7 @@ $(BPFNAME): $(OBJECTS)
 
 # Add dependency files, if they exist
 -include $(DEPS)
+
 
 # We build the main target separately from the auxiliary objects
 # TODO: Find a way to make this more elegant
@@ -63,8 +66,7 @@ $(BUILDDIR)/$(notdir $(basename $(EXTERNOBJ))).o: $(EXTERNOBJ)
 	@echo "Compiling: $< -> $@"
 	$(GCC) $(CFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
 
-
-# Source file rules
+# Compile the base files
 # After the first compilation they will be joined with the rules from the
 # dependency files to provide header dependencies
 $(BUILDDIR)/%.o: ./%.c

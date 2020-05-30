@@ -33,6 +33,13 @@ class Target(EBPFTarget):
         # List of bpf programs to attach to the interface
         args += "BPFOBJ=" + self.template + " "
         args += "CFLAGS+=-DCONTROL_PLANE "
+        # these files are specific to the test target
+        args += "SOURCES+=%s/ebpf_registry.c " % self.runtimedir
+        args += "SOURCES+=%s/ebpf_map.c " % self.runtimedir
+        args += "SOURCES+=%s.c " % self.template
+        # include the src of libbpf directly, does not require installation
+        args += "INCLUDES+=-I%s/contrib/libbpf/src " % self.runtimedir
+
         args += "EXTERNOBJ+=" + self.options.extern + " "
         errmsg = "Failed to build the filter:"
         return run_timeout(self.options.verbose, args, TIMEOUT,
