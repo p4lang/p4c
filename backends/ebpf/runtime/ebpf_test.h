@@ -55,7 +55,7 @@ struct sk_buff {
 #define BPF_EXIST   2 /* update existing element */
 #define BPF_F_LOCK  4 /* spin_lock-ed map_lookup/map_update */
 
-/* Support bpf map types */
+/* Supported bpf map types */
 enum bpf_map_type {
     BPF_MAP_TYPE_HASH,
     BPF_MAP_TYPE_ARRAY,

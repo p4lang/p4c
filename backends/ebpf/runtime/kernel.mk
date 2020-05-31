@@ -63,9 +63,7 @@ $(BPFNAME).c: $(P4FILE)
 	$(P4C) --Werror $(P4INCLUDE) --target $(TARGET) -o $@ $< $(P4ARGS);
 
 # Compile the C code with the clang llvm compiler
-# do extra CLANG so first pass can return non-zero to shell and stop make
 $(BPFNAME).bc: %.bc : %.c
-	@$(CLANG) $(CFLAGS) $(INCLUDES) -emit-llvm -c $< -o - > /dev/null
 	$(CLANG) $(CFLAGS) $(INCLUDES) -emit-llvm -c $< -o $@
 
 # Invoke the llvm on the generated .bc code and produce bpf byte code

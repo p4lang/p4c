@@ -32,6 +32,7 @@ limitations under the License.
  * taken from here: https://github.com/torvalds/linux/blob/master/tools/testing/selftests/bpf/bpf_helpers.h
  */
 #ifdef CONTROL_PLANE // BEGIN EBPF USER SPACE DEFINITIONS
+
 #include "bpf.h" // bpf_obj_get/pin, bpf_map_update_elem
 
 #define BPF_USER_MAP_UPDATE_ELEM(index, key, value, flags)\
@@ -40,19 +41,16 @@ limitations under the License.
 #define BPF_OBJ_GET(name) bpf_obj_get(name)
 
 #else // BEGIN EBPF KERNEL DEFINITIONS
+
 #include <linux/pkt_cls.h>  // TC_ACT_OK, TC_ACT_SHOT
 #include "linux/bpf.h"  // types, and general bpf definitions
-
-#define bpf_printk(fmt, ...)                                            \
-                ({                                                      \
-                        char ____fmt[] = fmt;                           \
-                        bpf_trace_printk(____fmt, sizeof(____fmt),      \
-                                     ##__VA_ARGS__);                    \
-                })
+// This file contains the definitions of all the kernel bpf essentials
+#include "bpf_helpers.h"
 
 
 /* a helper structure used by an eBPF C program
  * to describe map attributes for the elf_bpf loader
+ * FIXME: We only need this because we are loading with iproute2
  */
 struct bpf_elf_map {
     __u32 type;
@@ -63,25 +61,6 @@ struct bpf_elf_map {
     __u32 id;
     __u32 pinning;
 };
-
-/* Helper functions called from eBPF programs written in C
- * These are necessary to compile the kernel portion of the eBPF program.
- * For any new API access, a cast like this has to be created.
- */
-
-static int (*bpf_map_update_elem)(struct bpf_elf_map *map, void *key, void *value, u64 flags) = (void *)BPF_FUNC_map_update_elem;
-static void *(*bpf_map_lookup_elem)(struct bpf_elf_map *map, void *key) = (void *)BPF_FUNC_map_lookup_elem;
-static void *(*bpf_map_delete_elem)(struct bpf_elf_map *map, void *key) = (void *)BPF_FUNC_map_delete_elem;
-static void (*bpf_tail_call)(void *ctx, void *map, int index) = (void *)BPF_FUNC_tail_call;
-static int (*probe_read)(void *dst, int size, const void *unsafe_addr) = (void *)BPF_FUNC_probe_read;
-static int (*probe_read_str)(void *dst, int size, const void *unsafe_addr) = (void *)BPF_FUNC_probe_read_str;
-static int (*perf_event_output)(void *, struct bpf_elf_map *, int, void *, unsigned long) = (void *)BPF_FUNC_perf_event_output;
-
-/** Helper macro to place programs, maps, license in
- * different sections in elf_bpf file. Section names
- * are interpreted by elf_bpf loader
- */
-#define SEC(NAME) __attribute__((section(NAME), used))
 
 /* simple descriptor which replaces the kernel sk_buff structure */
 #define SK_BUFF struct __sk_buff

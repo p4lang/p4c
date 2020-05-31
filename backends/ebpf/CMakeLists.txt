@@ -96,7 +96,10 @@ set (XFAIL_TESTS_KERNEL
   ${P4C_SOURCE_DIR}/testdata/p4_16_samples/lpm_ebpf.p4
   )
 set (XFAIL_TESTS_BCC)
-set (XFAIL_TESTS_TEST)
+set (XFAIL_TESTS_TEST
+  # lpm not implemented for stf tests
+  ${P4C_SOURCE_DIR}/testdata/p4_16_samples/lpm_ebpf.p4
+  )
 
 set (EBPF_TEST_SUITES
   "${P4C_SOURCE_DIR}/testdata/p4_16_samples/*_ebpf.p4"
