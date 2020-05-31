@@ -915,6 +915,10 @@ void ExternConverter_DirectMeter::convertExternInstance(
 void ExternConverter_Register::convertExternInstance(
     UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
     UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+    size_t paramSize = eb->getConstructorParameters()->size();
+    if (paramSize == 2) {
+        modelError("%1%: Expecting 1 parameter. Initial value not supported", eb->constructor);
+    }
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto jreg = new Util::JsonObject();
