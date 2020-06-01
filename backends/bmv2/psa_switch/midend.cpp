@@ -92,6 +92,20 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options, std::ostream* outStre
                                 : MidEnd(options) {
     auto convertEnums = new P4::ConvertEnums(&refMap, &typeMap, new PsaEnumOn32Bits("psa.p4"));
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
+    std::function<bool(const Context *, const IR::Expression *)> policy =
+            [=](const Context *, const IR::Expression *e) -> bool {
+        auto mce = e->to<IR::MethodCallExpression>();
+        if (mce == nullptr)
+            return true;
+        auto mi = P4::MethodInstance::resolve(mce, &refMap, &typeMap);
+        auto em = mi->to<P4::ExternMethod>();
+        if (em == nullptr)
+            return true;
+        if (em->originalExternType->name.name == "Register" ||
+                em->method->name.name == "read")
+            return false;
+        return true;
+    };
     if (BMV2::PsaSwitchContext::get().options().loadIRFromJson == false) {
         std::initializer_list<Visitor *> midendPasses = {
             options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
@@ -126,7 +140,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options, std::ostream* outStre
             new P4::Predication(&refMap),
             new P4::MoveDeclarations(),  // more may have been introduced
             new P4::ConstantFolding(&refMap, &typeMap),
-            new P4::LocalCopyPropagation(&refMap, &typeMap),
+            new P4::LocalCopyPropagation(&refMap, &typeMap, nullptr, policy),
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::MoveDeclarations(),
             new P4::ValidateTableProperties({ "psa_implementation",

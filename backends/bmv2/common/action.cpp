@@ -47,6 +47,36 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
         // TODO(jafingerhut) - add line/col at all individual cases below,
         // or perhaps it can be done as a common case above or below
         // for all of them?
+
+        IR::MethodCallExpression *mce2;
+        auto isR = false;
+        if (s->is<IR::AssignmentStatement>()) {
+            auto assign = s->to<IR::AssignmentStatement>();
+            const IR::Expression *l, *r;
+            l = assign->left;
+            r = assign->right;
+            auto mce = r->to<IR::MethodCallExpression>();
+            if (mce != nullptr) {
+                auto mi = P4::MethodInstance::resolve(mce, ctxt->refMap, ctxt->typeMap);
+                auto em = mi->to<P4::ExternMethod>();
+                if (em != nullptr) {
+                    if (em->originalExternType->name.name == "Register" ||
+                    em->method->name.name == "read") {
+                        isR = true;
+                        // l = l->to<IR::PathExpression>();
+                        // BUG_CHECK(l != nullptr, "register_read dest cast failed");
+                        auto dest = new IR::Argument(l);
+                        auto args = new IR::Vector<IR::Argument>();
+                        args->push_back(dest);  // dest
+                        args->push_back(mce->arguments->at(0));  // index
+                        mce2 = new IR::MethodCallExpression(mce->method, mce->typeArguments);
+                        mce2->arguments = args;
+                        s = new IR::MethodCallStatement(mce);
+                    }
+                }
+            }
+        }
+
         if (!s->is<IR::Statement>()) {
             continue;
         } else if (auto block = s->to<IR::BlockStatement>()) {
@@ -64,7 +94,6 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
             auto assign = s->to<IR::AssignmentStatement>();
             l = assign->left;
             r = assign->right;
-
             auto type = ctxt->typeMap->getType(l, true);
             cstring operation = jsonAssignment(type, false);
             auto primitive = mkPrimitive(operation, result);
@@ -122,7 +151,12 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
             } else if (mi->is<P4::ExternMethod>()) {
                 auto em = mi->to<P4::ExternMethod>();
                 LOG3("P4V1:: convert " << s);
-                auto json = ExternConverter::cvtExternObject(ctxt, em, mc, s, emitExterns);
+                Util::IJson* json;
+                if (isR) {
+                    json = ExternConverter::cvtExternObject(ctxt, em, mce2, s, emitExterns);
+                } else {
+                    json = ExternConverter::cvtExternObject(ctxt, em, mc, s, emitExterns);
+                }
                 if (json)
                     result->append(json);
                 continue;

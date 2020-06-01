@@ -621,8 +621,14 @@ Util::IJson* ExternConverter_Register::convertExternObject(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
-    if (mc->arguments->size() != 2) {
+    if (em->method->name != "write" && em->method->name != "read") {
+        modelError("Unsupported register method %1%", mc);
+        return nullptr;
+    } else if (em->method->name == "write" && mc->arguments->size() != 2) {
         modelError("Expected 2 arguments for %1%", mc);
+        return nullptr;
+    } else if (em->method->name == "read" && mc->arguments->size() != 2) {
+        modelError("p4c-psa internally requires 2 arguments for %1%", mc);
         return nullptr;
     }
     auto reg = new Util::JsonObject();
@@ -633,12 +639,11 @@ Util::IJson* ExternConverter_Register::convertExternObject(
         auto primitive = mkPrimitive("register_read");
         auto parameters = mkParameters(primitive);
         primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
-        /* TODO */
-        // auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
-        // parameters->append(dest);
+        auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
+        parameters->append(dest);
         parameters->append(reg);
-        // auto index = ctxt->conv->convert(mc->arguments->at(1)->expression);
-        // parameters->append(index);
+        auto index = ctxt->conv->convert(mc->arguments->at(1)->expression);
+        parameters->append(index);
         return primitive;
     } else if (em->method->name == "write") {
         auto primitive = mkPrimitive("register_write");
@@ -915,6 +920,10 @@ void ExternConverter_DirectMeter::convertExternInstance(
 void ExternConverter_Register::convertExternInstance(
     UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
     UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+    size_t paramSize = eb->getConstructorParameters()->size();
+    if (paramSize == 2) {
+        modelError("%1%: Expecting 1 parameter. Initial value not supported", eb->constructor);
+    }
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
     auto jreg = new Util::JsonObject();
@@ -935,8 +944,8 @@ void ExternConverter_Register::convertExternInstance(
         return;
     }
     auto st = eb->instanceType->to<IR::Type_SpecializedCanonical>();
-    if (st->arguments->size() != 1) {
-        modelError("%1%: expected 1 type argument", st);
+    if (st->arguments->size() != 2) {
+        modelError("%1%: expected 2 type argument", st);
         return;
     }
     auto regType = st->arguments->at(0);
