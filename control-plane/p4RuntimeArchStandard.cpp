@@ -1023,11 +1023,12 @@ PSAArchHandlerBuilder::operator()(
     return new P4RuntimeArchHandlerPSA(refMap, typeMap, evaluatedProgram);
 }
 
-/// Implements @ref P4RuntimeArchHandlerIface for the UBPF architecture. We re-use PSA to handle externs.
-/// Rationale: The only configurable extern object in ubpf_model.p4 is Register. The Register is defined
-/// exactly the same as for PSA. Therefore, we can re-use PSA.
+/// Implements @ref P4RuntimeArchHandlerIface for the UBPF architecture.
+/// We re-use PSA to handle externs.
+/// Rationale: The only configurable extern object in ubpf_model.p4 is Register.
+/// The Register is defined exactly the same as for PSA. Therefore, we can re-use PSA.
 class P4RuntimeArchHandlerUBPF final : public P4RuntimeArchHandlerCommon<Arch::PSA> {
-public:
+ public:
     P4RuntimeArchHandlerUBPF(ReferenceMap* refMap,
                              TypeMap* typeMap,
                              const IR::ToplevelBlock* evaluatedProgram)
