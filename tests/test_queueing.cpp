@@ -92,18 +92,17 @@ void QueueingTest<QType>::produce() {
 namespace {
 
 template <typename Q>
-void produce_if_dropping(Q &queue, size_t iterations, size_t capacity,
+void produce_if_dropping(Q &queue, size_t iterations,
                          const std::vector<RndInput> &values) {
   for (size_t i = 0; i < iterations; i++) {
     size_t queue_id = values[i].queue_id;
     // this is to avoid drops
     // kind of makes me question if using type parameterization is really useful
     // for this
-    while (queue.size(queue_id) > capacity / 2) {
+    while (!queue.push_front(queue_id, unique_ptr<int>(new int(values[i].v)))) {
       // originally, I just had an empty loop, but Valgrind was running forever
       std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
-    queue.push_front(queue_id, unique_ptr<int>(new int(values[i].v)));
   }
 }
 
@@ -111,12 +110,12 @@ void produce_if_dropping(Q &queue, size_t iterations, size_t capacity,
 
 template <>
 void QueueingTest<QueueingLogicRL<QEm, WorkerMapper> >::produce() {
-  produce_if_dropping(queue, iterations, capacity, values);
+  produce_if_dropping(queue, iterations, values);
 }
 
 template <>
 void QueueingTest<QueueingLogicPriRL<QEm, WorkerMapper> >::produce() {
-  produce_if_dropping(queue, iterations, capacity, values);
+  produce_if_dropping(queue, iterations, values);
 }
 
 using testing::Types;
