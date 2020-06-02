@@ -1,23 +1,27 @@
 #include <core.p4>
 
-type bit<16> Base_t;
+// Nested typdef or typedef mixed with p4-16 type are
+// supported.
+typedef bit<16> Base_t;
 typedef Base_t Base1_t;
 typedef Base1_t Base2_t;
 typedef Base2_t EthT;
-enum bit<16> EthTypes {
-    IPv4 = 16w0x800,
-    ARP = 16w0x806,
-    RARP = 16w0x8035,
-    EtherTalk = 16w0x809b,
-    VLAN = 16w0x8100,
-    IPX = 16w0x8137,
-    IPv6 = 16w0x86dd
+
+enum EthT EthTypes {
+    IPv4 = 0x0800,
+    ARP = 0x0806,
+    RARP = 0x8035,
+    EtherTalk = 0x809B,
+    VLAN = 0x8100,
+    IPX = 0x8137,
+    IPv6 = 0x86DD
 }
 
 header Ethernet {
-    bit<48>  src;
-    bit<48>  dest;
+    bit<48> src;
+    bit<48> dest;
     EthTypes type;
+    
 }
 
 struct Headers {
@@ -26,8 +30,9 @@ struct Headers {
 
 parser prs(packet_in p, out Headers h) {
     Ethernet e;
+
     state start {
-        p.extract<Ethernet>(e);
+        p.extract(e);
         transition select(e.type) {
             EthTypes.IPv4: accept;
             EthTypes.ARP: accept;
@@ -38,19 +43,17 @@ parser prs(packet_in p, out Headers h) {
 
 control c(inout Headers h) {
     apply {
-        if (!h.eth.isValid()) {
+        if (!h.eth.isValid())
             return;
-        }
-        if (h.eth.type == EthTypes.IPv4) {
+        if (h.eth.type == EthTypes.IPv4)
             h.eth.setInvalid();
-        } else {
-            h.eth.type = (EthTypes)16w0;
-        }
+        else
+            h.eth.type = (EthTypes)(bit<16>)0;
     }
 }
 
 parser p<H>(packet_in _p, out H h);
 control ctr<H>(inout H h);
 package top<H>(p<H> _p, ctr<H> _c);
-top<Headers>(prs(), c()) main;
 
+top(prs(), c()) main;

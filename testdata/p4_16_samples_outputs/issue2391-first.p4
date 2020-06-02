@@ -1,5 +1,9 @@
 #include <core.p4>
 
+typedef bit<16> Base_t;
+typedef Base_t Base1_t;
+typedef Base1_t Base2_t;
+typedef Base2_t EthT;
 enum bit<16> EthTypes {
     IPv4 = 16w0x800,
     ARP = 16w0x806,
@@ -21,10 +25,10 @@ struct Headers {
 }
 
 parser prs(packet_in p, out Headers h) {
-    Ethernet e_0;
+    Ethernet e;
     state start {
-        p.extract<Ethernet>(e_0);
-        transition select(e_0.type) {
+        p.extract<Ethernet>(e);
+        transition select(e.type) {
             EthTypes.IPv4: accept;
             EthTypes.ARP: accept;
             default: reject;
@@ -34,16 +38,13 @@ parser prs(packet_in p, out Headers h) {
 
 control c(inout Headers h) {
     apply {
-        bool hasReturned = false;
         if (!h.eth.isValid()) {
-            hasReturned = true;
+            return;
         }
-        if (!hasReturned) {
-            if (h.eth.type == EthTypes.IPv4) {
-                h.eth.setInvalid();
-            } else {
-                h.eth.type = (EthTypes)16w0;
-            }
+        if (h.eth.type == EthTypes.IPv4) {
+            h.eth.setInvalid();
+        } else {
+            h.eth.type = (EthTypes)16w0;
         }
     }
 }

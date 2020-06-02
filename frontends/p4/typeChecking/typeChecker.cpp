@@ -1755,27 +1755,27 @@ const IR::Node* TypeInference::preorder(IR::EntriesList* el) {
     return el;
 }
 
-const IR::Node* TypeInference::preorder(IR::Type_SerEnum* sm) {
+const IR::Node* TypeInference::preorder(IR::Type_SerEnum* se) {
     const IR::Type_Bits* type;
-    if (sm->type == nullptr) {
-        auto decl = refMap->getDeclaration(sm->nameType->path, true);
+    if (se->type == nullptr) {
+        auto decl = refMap->getDeclaration(se->nameType->path, true);
         CHECK_NULL(decl);
         if (decl->is<IR::Type_Typedef>()) {
             auto t = getTypeType(decl->to<IR::Type_Typedef>()->type);
-            while (t->is<IR::Type_Newtype>())
-                t = getTypeType(t->to<IR::Type_Newtype>()->type);
+            if (t->is<IR::Type_Newtype>()) {
+                typeError("SerNum %1% typedef has a nested p4-16 type", se);
+                return se;
+            }
             type = t->to<IR::Type_Bits>();
         } else if (decl->is<IR::Type_Newtype>()) {
-            auto t = getTypeType(decl->to<IR::Type_Newtype>()->type);
-            while (t->is<IR::Type_Newtype>())
-                t = getTypeType(t->to<IR::Type_Newtype>()->type);
-            type = t->to<IR::Type_Bits>();
+            typeError("SerNum %1% cannot be a p4-16 type", se);
+            return se;
         }
         CHECK_NULL(type);
-        sm = new IR::Type_SerEnum(sm->srcInfo, sm->name, sm->annotations, type,
-                                  sm->members);
+        se = new IR::Type_SerEnum(se->srcInfo, se->name, se->annotations, type,
+                                  se->members);
     }
-    return sm;
+    return se;
 }
 
 /**

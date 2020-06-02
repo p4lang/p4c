@@ -1,7 +1,5 @@
 #include <core.p4>
 
-// Nested p4-16 "type" or "type" mixed with typedef are
-// supported.
 typedef bit<16> Base_t;
 type Base_t Base1_t;
 type Base1_t Base2_t;

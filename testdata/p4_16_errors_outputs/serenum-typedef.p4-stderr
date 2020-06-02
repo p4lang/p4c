@@ -1,0 +1,6 @@
+serenum-typedef.p4(8): [--Werror=type-error] error: SerNum EthTypes typedef has a nested p4-16 type
+enum EthT EthTypes {
+          ^^^^^^^^
+In file: /home/hemant/int/p4c/frontends/p4/typeMap.cpp:91
+[31mCompiler Bug[0m: /home/hemant/int/p4c/frontends/p4/typeMap.cpp:91: Null element
+
