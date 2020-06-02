@@ -309,7 +309,7 @@ if (a clone primitive action was called) {
 if (egress_spec == DROP_PORT) {  // e.g. because your code called drop/mark_to_drop
     Drop packet.
 } else if (recirculate was called) {
-    start ingress processing over again for deparsed packet
+    after deparsing, deparsed packet starts over again as input to parser
 } else {
     Send the packet to the port in egress_port.
 }
@@ -364,9 +364,10 @@ if (egress_spec == DROP_PORT) {
 } else if (recirculate was called) {
     // This condition will be true if your code called the recirculate
     // primitive action during egress processing.
-    Start ingress over again, for the packet as constructed by the
-    deparser, with any modifications made to the packet during both
-    ingress and egress processing.  Preserve the final egress values
+    Start processing the packet over again.  That is, take the packet
+    as constructed by the deparser, with any modifications made to the
+    packet during both ingress and egress processing, and give that
+    packet as input to the parser.  Preserve the final egress values
     of any fields specified in the field list given as an argument to
     the last recirculate primitive action called, except assign
     instance_type a value of PKT_INSTANCE_TYPE_RECIRC.
