@@ -49,7 +49,7 @@ namespace Standard {
 /// "traits" for each extern type, templatized by the architecture name (using
 /// the Arch enum class defined below), as a convenient way to access
 /// architecture-specific names in the unified code.
-enum class Arch { V1MODEL, PSA, UBPF };
+enum class Arch { V1MODEL, PSA };
 
 /// Traits for the action profile extern, must be specialized for v1model and
 /// PSA.
