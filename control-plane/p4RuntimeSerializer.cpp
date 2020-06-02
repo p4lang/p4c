@@ -2028,6 +2028,7 @@ P4RuntimeSerializer::serializeP4RuntimeIfRequired(const P4RuntimeAPI& p4Runtime,
 P4RuntimeSerializer::P4RuntimeSerializer() {
     registerArch("v1model", new ControlPlaneAPI::Standard::V1ModelArchHandlerBuilder());
     registerArch("psa", new ControlPlaneAPI::Standard::PSAArchHandlerBuilder());
+    registerArch("ubpf", new ControlPlaneAPI::Standard::UBPFArchHandlerBuilder());
 }
 
 P4RuntimeSerializer*
