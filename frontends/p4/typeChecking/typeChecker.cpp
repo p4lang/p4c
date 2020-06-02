@@ -1763,12 +1763,14 @@ const IR::Node* TypeInference::preorder(IR::Type_SerEnum* se) {
         if (decl->is<IR::Type_Typedef>()) {
             auto t = getTypeType(decl->to<IR::Type_Typedef>()->type);
             if (t->is<IR::Type_Newtype>()) {
-                typeError("SerNum %1% typedef has a nested p4-16 type", se);
+                ::error("SerNum %1% typedef has a nested p4-16 type", se);
+                prune();
                 return se;
             }
             type = t->to<IR::Type_Bits>();
         } else if (decl->is<IR::Type_Newtype>()) {
-            typeError("SerNum %1% cannot be a p4-16 type", se);
+            ::error("SerNum %1% cannot be a p4-16 type", se);
+            prune();
             return se;
         }
         CHECK_NULL(type);
