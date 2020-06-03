@@ -3,7 +3,7 @@ ROOT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # Argument for the CLANG compiler
 LLC ?= llc
 CLANG ?= clang
-override INCLUDES+= -I$(ROOT_DIR)
+override INCLUDES+= -I$(ROOT_DIR) -I$(ROOT_DIR)usr/include/bpf/ -I$(ROOT_DIR)contrib/libbpf/include/uapi/
 override LIBS+=
 # Optimization flags to save space
 override CFLAGS+= -O2 -g -D__KERNEL__ -D__ASM_SYSREG_H \
@@ -63,14 +63,12 @@ $(BPFNAME).c: $(P4FILE)
 	$(P4C) --Werror $(P4INCLUDE) --target $(TARGET) -o $@ $< $(P4ARGS);
 
 # Compile the C code with the clang llvm compiler
-# do extra CLANG so first pass can return non-zero to shell and stop make
 $(BPFNAME).bc: %.bc : %.c
-	@$(CLANG) $(CFLAGS) $(INCLUDES) -emit-llvm -c $< -o - > /dev/null
 	$(CLANG) $(CFLAGS) $(INCLUDES) -emit-llvm -c $< -o $@
 
 # Invoke the llvm on the generated .bc code and produce bpf byte code
 $(BPFNAME).o: %.o : %.bc
 	$(LLC) -march=bpf -mcpu=probe -filetype=obj $< -o $@
 
-clean: clean_loader
+clean:
 	rm -f *.o *.bc $(BPFNAME).c $(BPFNAME).h

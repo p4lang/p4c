@@ -125,8 +125,7 @@ int registry_update_table(const char *name, void *key, void *value, unsigned lon
     if (tmp_tbl == NULL)
         /* not found, return */
         return EXIT_FAILURE;
-    bpf_map_update_elem(&tmp_tbl->bpf_map, key, tmp_tbl->key_size, value, tmp_tbl->value_size, flags);
-    return EXIT_SUCCESS;
+    return bpf_map_update_elem(&tmp_tbl->bpf_map, key, tmp_tbl->key_size, value, tmp_tbl->value_size, flags);
 }
 
 int registry_update_table_id(int tbl_id, void *key, void *value, unsigned long long flags) {
@@ -134,8 +133,23 @@ int registry_update_table_id(int tbl_id, void *key, void *value, unsigned long l
     if (tmp_tbl == NULL)
         /* not found, return */
         return EXIT_FAILURE;
-    bpf_map_update_elem(&tmp_tbl->bpf_map, key, tmp_tbl->key_size, value, tmp_tbl->value_size, flags);
-    return EXIT_SUCCESS;
+    return bpf_map_update_elem(&tmp_tbl->bpf_map, key, tmp_tbl->key_size, value, tmp_tbl->value_size, flags);
+}
+
+int registry_delete_table_elem(const char *name, void *key) {
+    struct bpf_table *tmp_tbl = registry_lookup_table(name);
+    if (tmp_tbl == NULL)
+        /* not found, return */
+        return EXIT_FAILURE;
+    return bpf_map_delete_elem(tmp_tbl->bpf_map, key, tmp_tbl->key_size);;
+}
+
+int registry_delete_table_elem_id(int tbl_id, void *key) {
+    struct bpf_table *tmp_tbl = registry_lookup_table_id(tbl_id);
+    if (tmp_tbl == NULL)
+        /* not found, return */
+        return EXIT_FAILURE;
+    return bpf_map_delete_elem(tmp_tbl->bpf_map, key, tmp_tbl->key_size);;
 }
 
 void *registry_lookup_table_elem(const char *name, void *key) {
@@ -143,7 +157,6 @@ void *registry_lookup_table_elem(const char *name, void *key) {
     if (tmp_tbl == NULL)
         /* not found, return */
         return NULL;
-    if (tmp_tbl->bpf_map)
     return bpf_map_lookup_elem(tmp_tbl->bpf_map, key, tmp_tbl->key_size);
 }
 
@@ -152,7 +165,6 @@ void *registry_lookup_table_elem_id(int tbl_id, void *key) {
     if (tmp_tbl == NULL)
         /* not found, return */
         return NULL;
-    if (tmp_tbl->bpf_map)
     return bpf_map_lookup_elem(tmp_tbl->bpf_map, key, tmp_tbl->key_size);
 }
 

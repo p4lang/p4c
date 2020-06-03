@@ -192,7 +192,9 @@ In addition the following packages and programs are required to run the full tes
 
 - libelf-dev to compile C-programs to eBPF byte code.
 
-- iproute2 to use tc/ip commands to load eBPF programs.
+- zlib1g as libelf dependency.
+
+- a recent version of iproute2 that supports `clsact` to load eBPF programs via `tc` and `ip`.
 
 - net-tools (if not installed already)
 
@@ -207,7 +209,7 @@ Additionally, the eBPF compiler test suite has the following python dependencies
 You can install these using:
 ```
 $ sudo apt-get install clang llvm libpcap-dev libelf-dev iproute2 net-tools
-$ sudo pip3 install pyroute2 ply==3.8 scapy==2.4.0
+$ pip3 install --user pyroute2 ply==3.8 scapy==2.4.0
 ```
 
 ### Supported capabilities
@@ -330,12 +332,12 @@ The following tests run ebpf programs:
 
 - `make check-ebpf`: runs the basic ebpf user-space tests
 - `make check-ebpf-bcc`: runs the user-space tests using bcc to compile ebpf
-- `sudo make check-ebpf-kernel`: runs the kernel-level tests.
+- `sudo -E make check-ebpf-kernel`: runs the kernel-level tests.
    Requires root privileges to install the ebpf program in the Linux kernel.
    Note: by default the kernel ebpf tests are disabled; if you want to enable them
    you can modify the file `backends/ebpf/CMakeLists.txt` by setting this variable to `True`:
    `set (SUPPORTS_KERNEL True)`
-   
+
 # How to inject custom extern function to the generated eBPF program?
 
 The P4 to eBPF compiler comes with the support for custom C extern functions. It means that a developer
@@ -344,11 +346,11 @@ from the P4 program as a normal P4 action. As a result, P4 program can be extend
 functionality, which is not supported natively by the P4 language. This feature is briefly
 described below.
 
-## Basic principles 
+## Basic principles
 
-The C extern function can effectively enhance the functionality of P4 program. A programmer should be able to write own function, declare it in the P4 program and invoke from within P4 action or P4 control block. 
+The C extern function can effectively enhance the functionality of P4 program. A programmer should be able to write own function, declare it in the P4 program and invoke from within P4 action or P4 control block.
 
-The C extern can use BPF helpers in order to make syscalls to eBPF subsystem. In particular, the C extern can define and have control over its own set of BPF maps. However, the C extern must not read or write to BPF maps implementing P4 tables and used by the main P4 program. 
+The C extern can use BPF helpers in order to make syscalls to eBPF subsystem. In particular, the C extern can define and have control over its own set of BPF maps. However, the C extern must not read or write to BPF maps implementing P4 tables and used by the main P4 program.
 
 The C extern could be also allowed to access packet’s payload, but this feature is not implemented in the first version of the C Custom Externs feature.
 
@@ -363,7 +365,7 @@ extern bool verify_ipv4_checksum(in IPv4_h iphdr);
 
 ## Compilation
 
-The `--emit-externs` flag must be appended to the `p4c-ebpf` compiler to instruct it that 
+The `--emit-externs` flag must be appended to the `p4c-ebpf` compiler to instruct it that
 there are some C extern functions defined in the P4 program and compiler should not warn about them.
 
 ```bash
@@ -381,10 +383,10 @@ clang -O2 -include C-EXTERN-FILE.c -target bpf -c OUTPUT.c -o OUTPUT.o
 
 * Basic types are converted from P4 representation to C representation as follows:
 
-  * fields shorter than 64 bits are rounded up to the nearest C unsigned integer (e.g. bit<1> → u8, bit<48> → u64). 
-  * fields wider than 64 bits are converted to the array of u8. If the field has custom width (e.g. 123 bits) the last element of the array is also u8 (according to the first rule). For example, IPv6 address is converted from bit<128> to u8[16]. 
+  * fields shorter than 64 bits are rounded up to the nearest C unsigned integer (e.g. bit<1> → u8, bit<48> → u64).
+  * fields wider than 64 bits are converted to the array of u8. If the field has custom width (e.g. 123 bits) the last element of the array is also u8 (according to the first rule). For example, IPv6 address is converted from bit<128> to u8[16].
   * **Boolean (bool)** type is converted to u8.
-  * **header** type is converted to C structure. The rules above are applied to each field of a header. Moreover, each C structure representing **header** type contains additional valid bit field, implemented as u8. 
+  * **header** type is converted to C structure. The rules above are applied to each field of a header. Moreover, each C structure representing **header** type contains additional valid bit field, implemented as u8.
   * **struct** type is converted to C structure. The rules above are applied to each field of a struct.
 
 * A direction of parameter passed to C extern function is handled as follows:
@@ -395,11 +397,11 @@ clang -O2 -include C-EXTERN-FILE.c -target bpf -c OUTPUT.c -o OUTPUT.o
 * Using BPF maps:
 
   * BPF maps can be defined inside the C extern function to provide statefulness. BPF map can be defined as follows:
-  
+
   ```C
   REGISTER_START()
   REGISTER_TABLE(<NAME>, BPF_MAP_TYPE_HASH, <KEY-SIZE>, <VALUE-SIZE>>, <MAX_ENTRIES>)
   REGISTER_END()
   ```
-  
+
   * The C extern function must not access BPF maps that are used to implement P4 tables and defined in the main C program generated from the P4 language.

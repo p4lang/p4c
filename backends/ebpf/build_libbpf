@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+""" This programs builds a libbpf static library and places it in the runtime
+    folder. The library and its headers are required by the kernel target.
+"""
+
+import os
+import sys
+sys.path.insert(0, os.path.dirname(
+    os.path.realpath(__file__)) + '/../../tools')
+import testutils
+
+VERBOSE = True
+
+
+def create_dir(directory):
+    """ Create the folder, if it does not exit yet"""
+    if not directory == "" and not os.path.exists(directory):
+        os.makedirs(directory)
+
+
+def main():
+    outputs = {"stdout": None, "stderr": None}
+    file_dir = os.path.dirname(os.path.realpath(__file__))
+    libbpf_dir = "%s/runtime/contrib/libbpf" % file_dir
+    libbpf_src_dir = "%s/src" % libbpf_dir
+    libbpf_build_dir = "%s/build" % libbpf_src_dir
+    libbpf_target_dir = "%s/runtime" % file_dir
+    # Download submodule if it has not been initialized yet
+    git_cmd = "git submodule update --init %s" % libbpf_dir
+    err = testutils.run_timeout(verbose=VERBOSE, args=git_cmd,
+                                timeout=20, outputs=outputs,
+                                errmsg="Could not initialize libbpf submodule")
+    # Create the libbpf build directory
+    create_dir(libbpf_build_dir)
+    # Build libbpf
+    mk_cmd = "make -C %s install " % libbpf_src_dir
+    mk_cmd += "BUILD_STATIC_ONLY=y "
+    mk_cmd += "OBJDIR=%s " % libbpf_build_dir
+    mk_cmd += "DESTDIR=%s " % libbpf_target_dir
+    err = testutils.run_timeout(verbose=VERBOSE, args=mk_cmd,
+                                timeout=20, outputs=outputs,
+                                errmsg="Could not build libbpf")
+    return err
+
+
+if __name__ == '__main__':
+    main()

@@ -25,37 +25,47 @@ from testutils import *
 
 
 class Target(EBPFTarget):
-  def __init__(self, tmpdir, options, template, outputs):
-    EBPFTarget.__init__(self, tmpdir, options, template, outputs)
+    def __init__(self, tmpdir, options, template, outputs):
+        EBPFTarget.__init__(self, tmpdir, options, template, outputs)
 
-  def compile_dataplane(self):
-    args = self.get_make_args(self.runtimedir, self.options.target)
-    # List of bpf programs to attach to the interface
-    args += "BPFOBJ=" + self.template + " "
-    args += "CFLAGS+=-DCONTROL_PLANE "
-    args += "EXTERNOBJ=" + self.options.extern + " "
-    errmsg = "Failed to build the filter:"
-    return run_timeout(self.options.verbose, args, TIMEOUT,
-                       self.outputs, errmsg)
+    def compile_dataplane(self):
+        args = self.get_make_args(self.runtimedir, self.options.target)
+        # List of bpf programs to attach to the interface
+        args += "BPFOBJ=" + self.template + " "
+        args += "CFLAGS+=-DCONTROL_PLANE "
+        # these files are specific to the test target
+        args += "SOURCES+=%s/ebpf_registry.c " % self.runtimedir
+        args += "SOURCES+=%s/ebpf_map.c " % self.runtimedir
+        args += "SOURCES+=%s.c " % self.template
+        # include the src of libbpf directly, does not require installation
+        args += "INCLUDES+=-I%s/contrib/libbpf/src " % self.runtimedir
+        if self.options.extern:
+            # we inline the extern so we need a direct include
+            args += "INCLUDES+=-include" + self.options.extern + " "
+            # need to include the temporary dir because of the tmp import
+            args += "INCLUDES+=-I" + self.tmpdir + " "
+        errmsg = "Failed to build the filter:"
+        return run_timeout(self.options.verbose, args, TIMEOUT,
+                           self.outputs, errmsg)
 
-  def run(self):
-    report_output(self.outputs["stdout"],
-                  self.options.verbose, "Running model")
-    direction = "in"
-    pcap_pattern = self.filename('', direction)
-    num_files = len(glob(self.filename('*', direction)))
-    report_output(self.outputs["stdout"],
-                  self.options.verbose,
-                  "Input file: %s" % pcap_pattern)
-    # Main executable
-    args = self.template + " "
-    # Input pcap pattern
-    args += "-f " + pcap_pattern + " "
-    # Number of input interfaces
-    args += "-n " + str(num_files) + " "
-    # Debug flag (verbose output)
-    args += "-d"
-    errmsg = "Failed to execute the filter:"
-    result = run_timeout(self.options.verbose, args,
-                         TIMEOUT, self.outputs, errmsg)
-    return result
+    def run(self):
+        report_output(self.outputs["stdout"],
+                      self.options.verbose, "Running model")
+        direction = "in"
+        pcap_pattern = self.filename('', direction)
+        num_files = len(glob(self.filename('*', direction)))
+        report_output(self.outputs["stdout"],
+                      self.options.verbose,
+                      "Input file: %s" % pcap_pattern)
+        # Main executable
+        args = self.template + " "
+        # Input pcap pattern
+        args += "-f " + pcap_pattern + " "
+        # Number of input interfaces
+        args += "-n " + str(num_files) + " "
+        # Debug flag (verbose output)
+        args += "-d"
+        errmsg = "Failed to execute the filter:"
+        result = run_timeout(self.options.verbose, args,
+                             TIMEOUT, self.outputs, errmsg)
+        return result

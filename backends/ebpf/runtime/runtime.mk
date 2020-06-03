@@ -1,3 +1,5 @@
+# Actual location of the makefile
+ROOT_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 # If needed, bpf target files can be hardcoded here
 # This can be any file with the extension ".c"
 BPFOBJ=
@@ -5,8 +7,6 @@ BPFOBJ=
 BPFNAME=$(basename $(BPFOBJ))
 BPFDIR=$(dir $(BPFOBJ))
 override INCLUDES+= -I$(dir $(BPFOBJ))
-# This can be any file with the extension ".c"
-EXTERNOBJ=
 
 # Arguments for the P4 Compiler
 P4INCLUDE=-I./p4include
@@ -20,17 +20,20 @@ P4ARGS=
 
 # Argument for the GCC compiler
 GCC ?= gcc
-SRCDIR=.
 BUILDDIR:= $(BPFDIR)build
-override INCLUDES+= -I./$(SRCDIR) -include ebpf_runtime_$(TARGET).h
+override INCLUDES+= -I$(ROOT_DIR) -include $(ROOT_DIR)ebpf_runtime_$(TARGET).h
 # Optimization flags to save space
-override CFLAGS+=-O2 -g # -Wall -Werror
-LIBS+=-lpcap
-SOURCES=$(SRCDIR)/ebpf_registry.c  $(SRCDIR)/ebpf_map.c $(BPFNAME).c $(EXTERNOBJ)
-SRC_BASE+=$(SRCDIR)/ebpf_runtime.c $(SRCDIR)/pcap_util.c $(SOURCES)
-SRC_BASE+=$(SRCDIR)/ebpf_runtime_$(TARGET).c
-OBJECTS = $(SRC_BASE:%.c=$(BUILDDIR)/%.o)
-DEPS = $(OBJECTS:.o=.d)
+override CFLAGS+= -O2 -g # -Wall -Werror
+override LIBS+= -lpcap
+
+# The base files required to build the runtime
+SOURCE_BASE= $(ROOT_DIR)ebpf_runtime.c $(ROOT_DIR)pcap_util.c
+SOURCE_BASE+= $(ROOT_DIR)ebpf_runtime_$(TARGET).c
+# Add the generated file and externs to the base sources
+override SOURCES+= $(SOURCE_BASE)
+SRC_PROCESSED= $(notdir $(SOURCES))
+OBJECTS = $(SRC_PROCESSED:%.c=$(BUILDDIR)/%.o)
+DEPS = $(OBJECTS:%.o=%.d)
 
 # checks the executable and symlinks to the output
 all: $(BPFNAME).c $(BPFNAME)
@@ -44,14 +47,23 @@ $(BPFNAME): $(OBJECTS)
 # Add dependency files, if they exist
 -include $(DEPS)
 
-# Source file rules
+
+# We build the main target separately from the auxiliary objects
+# TODO: Find a way to make this more elegant
+$(BUILDDIR)/$(notdir $(BPFNAME)).o: $(BPFNAME).c
+	@echo "Creating folder: $(dir $@)"
+	@mkdir -p $(dir $@)
+	@echo "Compiling: $< -> $@"
+	$(GCC) $(CFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
+
+# Compile the base files
 # After the first compilation they will be joined with the rules from the
 # dependency files to provide header dependencies
-$(BUILDDIR)/%.o: $(SRCDIR)/%.c
-	@echo "Creating folder: $(dir $(OBJECTS))"
-	@mkdir -p $(dir $(OBJECTS))
+$(BUILDDIR)/%.o: ./%.c
+	@echo "Creating folder: $(dir $@)"
+	@mkdir -p $(dir $@)
 	@echo "Compiling: $< -> $@"
-	$(GCC) $(CFLAGS) $(INCLUDES) $(LIBS) -MP -MMD -c $< -o $@
+	$(GCC) $(CFLAGS) $(INCLUDES) -MP -MMD -c $< -o $@
 
 # If the target file is missing, generate .c files with the P4 compiler
 $(BPFNAME).c: $(P4FILE)

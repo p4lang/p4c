@@ -92,13 +92,13 @@ def open_process(verbose, args, outputs):
     report_output(outputs["stdout"],
                   verbose, "Writing", args)
     proc = None
-    if outputs["stderr"] is not None:
-        try:
-            proc = Popen(args, stdout=subprocess.PIPE, shell=True,
-                         stdin=subprocess.PIPE, stderr=subprocess.PIPE,
-                         universal_newlines=True)
-        except OSError as e:
-            report_err(outputs["stderr"], "Failed executing: ", e)
+
+    try:
+        proc = Popen(args, stdout=subprocess.PIPE, shell=True,
+                stdin=subprocess.PIPE, stderr=subprocess.PIPE,
+                universal_newlines=True)
+    except OSError as e:
+       report_err(outputs["stderr"], "Failed executing: ", e)
     if proc is None:
         # Never even started
         report_err(outputs["stderr"], "Process failed to start")

@@ -58,9 +58,9 @@ void close_sockets(int *sockfds, int num_pcaps) {
 
 int *init_sockets(char *pcap_base, uint16_t num_pcaps){
     int *sockfds = malloc(sizeof(int) * num_pcaps);
-    int max_10_uint16  = 5;     // Max size of uint16 in base 10
+    uint16_t max_10_uint16  = 6;     // Max size of uint16 in base 10
     for (uint16_t i = 0; i < num_pcaps; i++) {
-        char iface_name[max_10_uint16 + 1];
+        char iface_name[max_10_uint16];
         snprintf(iface_name, max_10_uint16, "%hu", i);
         sockfds[i] = open_socket(iface_name);
     }

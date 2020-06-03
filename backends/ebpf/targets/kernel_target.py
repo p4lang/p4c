@@ -46,7 +46,9 @@ class Target(EBPFTarget):
         # add the folder local to the P4 file to the list of includes
         args += " INCLUDES+=-I" + os.path.dirname(self.options.p4filename)
         if self.options.extern:
+            # we inline the extern so we need a direct include
             args += " INCLUDES+=-include" + self.options.extern + " "
+            # need to include the temporary dir because of the tmp import
             args += " INCLUDES+=-I" + self.tmpdir + " "
         errmsg = "Failed to compile the eBPF byte code:"
         return run_timeout(self.options.verbose, args, TIMEOUT,
@@ -57,9 +59,14 @@ class Target(EBPFTarget):
         # List of bpf programs to attach to the interface
         args += "BPFOBJ=" + self.template + " "
         args += "CFLAGS+=-DCONTROL_PLANE "
-        args += "SOURCES= "
         # add the folder local to the P4 file to the list of includes
-        args += "INCLUDES+=-I" + os.path.dirname(self.options.p4filename)
+        args += "INCLUDES+=-I%s " % os.path.dirname(self.options.p4filename)
+        # some kernel specific includes for libbpf
+        args += "INCLUDES+=-I%s/usr/include/bpf " % self.runtimedir
+        args += "INCLUDES+=-I%s/contrib/libbpf/include/uapi " % self.runtimedir
+        args += "LIBS+=%s/usr/lib64/libbpf.a " % self.runtimedir
+        args += "LIBS+=-lz "
+        args += "LIBS+=-lelf "
         errmsg = "Failed to build the filter:"
         return run_timeout(self.options.verbose, args, TIMEOUT,
                            self.outputs, errmsg)

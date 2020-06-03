@@ -15,13 +15,15 @@ limitations under the License.
 */
 
 /*
- * This file contains general ebpf definitions.
+ * This file contains general type definitions used in ebpf programs.
  * It should be included with new target header files.
  */
 
-#include <stdio.h>      // printf
-#include <linux/bpf.h>  // types, and general bpf definitions
-#include <stdbool.h>    // true and false
+#include <stdio.h>          // printf
+#include <stdbool.h>        // true and false
+#include <linux/types.h>    // u8, u16, u32, u64
+
+#include "bpf_endian.h" // definitions for bpf_ntohs etc...
 
 typedef signed char s8;
 typedef unsigned char u8;
@@ -32,64 +34,24 @@ typedef unsigned int u32;
 typedef signed long long s64;
 typedef unsigned long long u64;
 
-#ifndef ___constant_swab16
-#define ___constant_swab16(x) ((__u16)(             \
-    (((__u16)(x) & (__u16)0x00ffU) << 8) |          \
-    (((__u16)(x) & (__u16)0xff00U) >> 8)))
-#endif
 
-#ifndef ___constant_swab32
-#define ___constant_swab32(x) ((__u32)(             \
-    (((__u32)(x) & (__u32)0x000000ffUL) << 24) |        \
-    (((__u32)(x) & (__u32)0x0000ff00UL) <<  8) |        \
-    (((__u32)(x) & (__u32)0x00ff0000UL) >>  8) |        \
-    (((__u32)(x) & (__u32)0xff000000UL) >> 24)))
-#endif
-
-#ifndef ___constant_swab64
-#define ___constant_swab64(x) ((__u64)(             \
-    (((__u64)(x) & (__u64)0x00000000000000ffULL) << 56) |   \
-    (((__u64)(x) & (__u64)0x000000000000ff00ULL) << 40) |   \
-    (((__u64)(x) & (__u64)0x0000000000ff0000ULL) << 24) |   \
-    (((__u64)(x) & (__u64)0x00000000ff000000ULL) <<  8) |   \
-    (((__u64)(x) & (__u64)0x000000ff00000000ULL) >>  8) |   \
-    (((__u64)(x) & (__u64)0x0000ff0000000000ULL) >> 24) |   \
-    (((__u64)(x) & (__u64)0x00ff000000000000ULL) >> 40) |   \
-    (((__u64)(x) & (__u64)0xff00000000000000ULL) >> 56)))
-#endif
-
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-#ifndef __constant_htonll
-#define __constant_htonll(x) (___constant_swab64((x)))
-#endif
-
-#ifndef __constant_ntohll
-#define __constant_ntohll(x) (___constant_swab64((x)))
-#endif
-
-#define __constant_htonl(x) (___constant_swab32((x)))
-#define __constant_ntohl(x) (___constant_swab32(x))
-#define __constant_htons(x) (___constant_swab16((x)))
-#define __constant_ntohs(x) ___constant_swab16((x))
-
-#elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
-# warning "I never tested BIG_ENDIAN machine!"
-#define __constant_htonll(x) (x)
-#define __constant_ntohll(X) (x)
-#define __constant_htonl(x) (x)
-#define __constant_ntohl(x) (x)
-#define __constant_htons(x) (x)
-#define __constant_ntohs(x) (x)
-
-#else
-# error "Fix your compiler's __BYTE_ORDER__?!"
-#endif
-
-#define htonl(d) __constant_htonl(d)
-#define htons(d) __constant_htons(d)
-#define htonll(d) __constant_htonll(d)
+#undef htonl
+#undef htons
+#define htons(d) __bpf_htons(d)
+#define htonl(d) __bpf_ntohl(d)
+#define htonll(d) __bpf_constant_be64_to_cpu(d)
 
 #define load_byte(data, b) (*(((u8*)(data)) + (b)))
-#define load_half(data, b) __constant_ntohs(*(u16 *)((u8*)(data) + (b)))
-#define load_word(data, b) __constant_ntohl(*(u32 *)((u8*)(data) + (b)))
-#define load_dword(data, b) __constant_ntohll(*(u64 *)((u8*)(data) + (b)))
+#define load_half(data, b) bpf_ntohs(*(u16 *)((u8*)(data) + (b)))
+#define load_word(data, b) bpf_ntohl(*(u32 *)((u8*)(data) + (b)))
+#define load_dword(data, b) bpf_cpu_to_be64(*(u64 *)((u8*)(data) + (b)))
+
+/*
+ * Helper function.
+ * Print a byte buffer according to the specified length.
+ */
+static inline void print_n_bytes(void *receiveBuffer, int num) {
+    for (int i = 0; i < num; i++)
+        printf("%02x", ((unsigned char *)receiveBuffer)[i]);
+    printf("\n");
+}
