@@ -1,0 +1,48 @@
+pkg_info {
+  arch: "ubpf"
+}
+tables {
+  preamble {
+    id: 49639434
+    name: "pipe.tbl_a"
+    alias: "tbl_a"
+  }
+  action_refs {
+    id: 16865584
+  }
+  action_refs {
+    id: 32630357
+  }
+  action_refs {
+    id: 26966999
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 16865584
+    name: "pipe.RejectConditional"
+    alias: "RejectConditional"
+  }
+  params {
+    id: 1
+    name: "condition"
+    bitwidth: 1
+  }
+}
+actions {
+  preamble {
+    id: 32630357
+    name: "pipe.act_return"
+    alias: "act_return"
+  }
+}
+actions {
+  preamble {
+    id: 26966999
+    name: "pipe.act_exit"
+    alias: "act_exit"
+  }
+}
+type_info {
+}

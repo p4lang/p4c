@@ -49,6 +49,14 @@ struct PSAArchHandlerBuilder : public P4RuntimeArchHandlerBuilderIface {
         const IR::ToplevelBlock* evaluatedProgram) const override;
 };
 
+/// The architecture handler builder implementation for UBPF.
+struct UBPFArchHandlerBuilder : public P4RuntimeArchHandlerBuilderIface {
+     P4RuntimeArchHandlerIface* operator()(
+         ReferenceMap* refMap,
+         TypeMap* typeMap,
+         const IR::ToplevelBlock* evaluatedProgram) const override;
+};
+
 }  // namespace Standard
 
 }  // namespace ControlPlaneAPI
