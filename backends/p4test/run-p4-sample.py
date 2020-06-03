@@ -229,12 +229,15 @@ def process_file(options, argv):
     def getArch(path):
         v1Pattern = re.compile('include.*v1model\.p4')
         psaPattern = re.compile('include.*psa\.p4')
+        ubpfPattern = re.compile('include.*ubpf_model\.p4')
         with open(path, 'r', encoding='utf-8') as f:
             for line in f:
                 if v1Pattern.search(line):
                     return "v1model"
                 elif psaPattern.search(line):
                     return "psa"
+                elif ubpfPattern.search(line):
+                    return "ubpf"
             return None
 
     if not os.path.isfile(options.p4filename):
