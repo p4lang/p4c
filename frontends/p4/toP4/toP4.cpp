@@ -351,10 +351,7 @@ bool ToP4::preorder(const IR::Type_SerEnum* t) {
     dump(1);
     visit(t->annotations);
     builder.append("enum ");
-    if (t->type)
-        visit(t->type);
-    if (t->nameType)
-        visit(t->nameType);
+    visit(t->type);
     builder.spc();
     builder.append(t->name);
     builder.spc();

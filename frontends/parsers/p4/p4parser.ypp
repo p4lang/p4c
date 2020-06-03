@@ -1077,11 +1077,7 @@ enumDeclaration
     | optAnnotations ENUM typeRef name { driver.structure->declareType(*$4); }
 	 "{" specifiedIdentifierList "}" {
               auto type = $typeRef;
-              if (auto tn = type->to<IR::Type_Name>()) {
-                  $$ = new IR::Type_SerEnum(@4, *$4, nullptr, tn, *$7);
-              } else if (auto tb = type->to<IR::Type_Bits>()) {
-                  $$ = new IR::Type_SerEnum(@4, *$4, tb, *$7);
-              }
+              $$ = new IR::Type_SerEnum(@4, *$4, type, *$7);
 	  }
     ;
 

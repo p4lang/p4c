@@ -1755,10 +1755,16 @@ const IR::Node* TypeInference::preorder(IR::EntriesList* el) {
     return el;
 }
 
+// If e->type is Type_Bits, this method doesn't do anything.
 const IR::Node* TypeInference::preorder(IR::Type_SerEnum* se) {
     const IR::Type_Bits* type;
-    if (se->type == nullptr) {
-        auto decl = refMap->getDeclaration(se->nameType->path, true);
+    if (!se->type->is<IR::Type_Bits>() && !se->type->is<IR::Type_Name>()) {
+        ::error("SerNum %1% SerEnum has invalid type", se);
+        prune();
+        return se;
+    }
+    if (auto tn = se->type->to<IR::Type_Name>()) {
+        auto decl = refMap->getDeclaration(tn->path, true);
         CHECK_NULL(decl);
         if (decl->is<IR::Type_Typedef>()) {
             auto t = getTypeType(decl->to<IR::Type_Typedef>()->type);
