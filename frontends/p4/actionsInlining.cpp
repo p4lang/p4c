@@ -99,6 +99,10 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
         } else if (param->direction == IR::Direction::None) {
             // This works because there can be no side-effects in the evaluation of this
             // argument.
+            if (!argument) {
+                ::error("%1%: No argument supplied for %2%", statement, param);
+                continue;
+            }
             subst.add(param, argument);
         } else if (param->direction == IR::Direction::Out) {
             // uninitialized variable
