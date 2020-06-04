@@ -1,4 +1,7 @@
-serenum-typedef.p4(8): error: SerNum EthTypes typedef has a nested p4-16 type
+serenum-typedef.p4(3): [--Werror=legacy] error: nested type Base_t cannot be used for the underlying type of an enum EthTypes
+type bit<16> Base_t;
+             ^^^^^^
+serenum-typedef.p4(8)
 enum EthT EthTypes {
           ^^^^^^^^
 serenum-typedef.p4(57): [--Werror=type-error] error: prs: cannot evaluate to a compile-time constant

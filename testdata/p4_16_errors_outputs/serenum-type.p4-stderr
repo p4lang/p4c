@@ -1,4 +1,7 @@
-serenum-type.p4(8): error: SerNum EthTypes cannot be a p4-16 type
+serenum-type.p4(6): [--Werror=legacy] error: type EthT cannot be used for the underlying type of an enum EthTypes
+type Base2_t EthT;
+             ^^^^
+serenum-type.p4(8)
 enum EthT EthTypes {
           ^^^^^^^^
 serenum-type.p4(57): [--Werror=type-error] error: prs: cannot evaluate to a compile-time constant

@@ -1768,14 +1768,15 @@ const IR::Node* TypeInference::preorder(IR::Type_SerEnum* se) {
         CHECK_NULL(decl);
         if (decl->is<IR::Type_Typedef>()) {
             auto t = getTypeType(decl->to<IR::Type_Typedef>()->type);
-            if (t->is<IR::Type_Newtype>()) {
-                ::error("SerNum %1% typedef has a nested p4-16 type", se);
+            if (auto tn = t->to<IR::Type_Newtype>()) {
+                ::error("nested type %1% cannot be used for the underlying "
+                        "type of an enum %2%", tn, se);
                 prune();
                 return se;
             }
             type = t->to<IR::Type_Bits>();
-        } else if (decl->is<IR::Type_Newtype>()) {
-            ::error("SerNum %1% cannot be a p4-16 type", se);
+        } else if (auto t = decl->to<IR::Type_Newtype>()) {
+            ::error("type %1% cannot be used for the underlying type of an enum %2%", t, se);
             prune();
             return se;
         }
