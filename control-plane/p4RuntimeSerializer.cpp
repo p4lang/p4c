@@ -1234,16 +1234,36 @@ class P4RuntimeAnalyzer {
                     [](cstring name) { return name == IR::Annotation::matchAnnotation; });
                 addDocumentation(match, f);
             }
+        } else if (et->is<IR::Type_SerEnum>()) {
+            auto serEnum = et->to<IR::Type_SerEnum>();
+            auto fType = serEnum->type;
+            if (!fType->is<IR::Type_Bits>()) {
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "Unsupported type argument for Value Set; "
+                        "this version of P4Runtime requires that when the type parameter "
+                        "of a Value Set is a serializable enum, "
+                        "it must be of type bit<W>, but %1% is not", serEnum);
+            }
+            auto fields = serEnum->members;
+            p4rt_id_t index = 1;
+            for (auto f : fields) {
+                auto* match = vs->add_match();
+                match->set_id(index++);
+                match->set_name(f->controlPlaneName());
+                match->set_bitwidth(fType->width_bits());
+                match->set_match_type(MatchField::MatchTypes::EXACT);
+            }
+
         } else if (et->is<IR::Type_BaseList>()) {
             ::error(ErrorType::ERR_UNSUPPORTED,
                     "%1%: Unsupported type argument for Value Set; "
                     "this version of P4Runtime requires the type parameter of a Value Set "
-                    "to be a bit<W> or a struct of bit<W> fields",
+                    "to be a bit<W>, a struct of bit<W> fields, or a serializable enum",
                     inst);
         } else {
             ::error(ErrorType::ERR_INVALID,
                     "%1%: invalid type parameter for Value Set; "
-                    "it must be one of bit<W>, struct or tuple",
+                    "it must be one of bit<W>, struct, tuple or serializable enum",
                     inst);
         }
     }
