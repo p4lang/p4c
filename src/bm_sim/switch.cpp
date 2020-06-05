@@ -93,6 +93,11 @@ SwitchWContexts::reset_target_state() {
   reset_target_state_();
 }
 
+void
+SwitchWContexts::swap_notify() {
+  swap_notify_();
+}
+
 std::string
 SwitchWContexts::get_debugger_addr() const {
 #ifdef BM_DEBUG_ON
@@ -467,6 +472,8 @@ SwitchWContexts::do_swap() {
       phv_source->set_phv_factory(cxt_id, &cxt.get_phv_factory());
     rc &= swap_done;
   }
+  // at this stage, we have no more Packet instances in bmv2
+  swap_notify();
 #ifdef BM_DEBUG_ON
   Debugger::get()->config_change();
 #endif

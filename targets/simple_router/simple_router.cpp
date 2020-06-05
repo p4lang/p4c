@@ -57,9 +57,6 @@ class SimpleSwitch : public Switch {
   int receive_(port_t port_num, const char *buffer, int len) override {
     static int pkt_id = 0;
 
-    if (this->do_swap() == 0)  // a swap took place
-      swap_happened = true;
-
     auto packet = new_packet_ptr(port_num, pkt_id++, len,
                                  bm::PacketBuffer(2048, buffer, len));
 
@@ -74,6 +71,10 @@ class SimpleSwitch : public Switch {
     t1.detach();
     std::thread t2(&SimpleSwitch::transmit_thread, this);
     t2.detach();
+  }
+
+  void swap_notify_() override {
+    swap_happened = true;
   }
 
  private:

@@ -236,12 +236,6 @@ SimpleSwitch::SimpleSwitch(bool enable_swap, port_t drop_port)
 
 int
 SimpleSwitch::receive_(port_t port_num, const char *buffer, int len) {
-  // this is a good place to call this, because blocking this thread will not
-  // block the processing of existing packet instances, which is a requirement
-  if (do_swap() == 0) {
-    check_queueing_metadata();
-  }
-
   // we limit the packet buffer to original size + 512 bytes, which means we
   // cannot add more than 512 bytes of header data to the packet, which should
   // be more than enough
@@ -285,6 +279,13 @@ SimpleSwitch::start_and_return_() {
     threads_.push_back(std::thread(&SimpleSwitch::egress_thread, this, i));
   }
   threads_.push_back(std::thread(&SimpleSwitch::transmit_thread, this));
+}
+
+void
+SimpleSwitch::swap_notify_() {
+  bm::Logger::get()->debug(
+      "simple_switch target has been notified of a config swap");
+  check_queueing_metadata();
 }
 
 SimpleSwitch::~SimpleSwitch() {
@@ -437,12 +438,15 @@ SimpleSwitch::check_queueing_metadata() {
   bool deq_timedelta_e = field_exists("queueing_metadata", "deq_timedelta");
   bool deq_qdepth_e = field_exists("queueing_metadata", "deq_qdepth");
   if (enq_timestamp_e || enq_qdepth_e || deq_timedelta_e || deq_qdepth_e) {
-    if (enq_timestamp_e && enq_qdepth_e && deq_timedelta_e && deq_qdepth_e)
+    if (enq_timestamp_e && enq_qdepth_e && deq_timedelta_e && deq_qdepth_e) {
       with_queueing_metadata = true;
-    else
+      return;
+    } else {
       bm::Logger::get()->warn(
           "Your JSON input defines some but not all queueing metadata fields");
+    }
   }
+  with_queueing_metadata = false;
 }
 
 void

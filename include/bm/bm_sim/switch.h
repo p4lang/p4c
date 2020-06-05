@@ -37,8 +37,8 @@
 //!
 //! When subclassing on of these two classes, you need to remember to implement
 //! the two pure virtual functions:
-//! bm::SwitchWContexts::receive(int port_num, const char *buffer, int len) and
-//! bm::SwitchWContexts::start_and_return(). Your receive() implementation will
+//! bm::SwitchWContexts::receive_(int port_num, const char *buffer, int len) and
+//! bm::SwitchWContexts::start_and_return_(). Your receive() implementation will
 //! be called for you every time a new packet is received by the device. In your
 //! start_and_return() function, you are supposed to start the different
 //! processing threads of your target switch and return immediately. Note that
@@ -49,20 +49,14 @@
 //! Both switch classes support live swapping of P4-JSON configurations. To
 //! enable it you need to provide the correct flag to the constructor (see
 //! bm::SwitchWContexts::SwitchWContexts()). Swaps are ordered through the
-//! runtime interfaces. However, it is the target switch responsibility to
-//! decide when to "commit" the swap. This is because swapping configurations
-//! invalidate certain pointers that you may still be using. We plan on trying
-//! to make this more target-friendly in the future but it is not trivial. Here
-//! is an example of how the simple router target implements swapping:
-//! @code
-//! // swap is enabled, so update pointers if needed
-//! if (this->do_swap() == 0) {  // a swap took place
-//!   ingress_mau = this->get_pipeline("ingress");
-//!   egress_mau = this->get_pipeline("egress");
-//!   parser = this->get_parser("parser");
-//!   deparser = this->get_deparser("deparser");
-//! }
-//! @endcode
+//! runtime interfaces. We ensure that during the actual swap operation
+//! (bm::SwitchWContexts::do_swap() method), there is no Packet instance
+//! inflight, which we achieve using the process_packet_mutex mutex). The final
+//! step of the swap is to call bm::SwitchWContexts::swap_notify_(), which
+//! targets can override if they need to perform some operations as part of the
+//! swap. Targets are guaranteed that no Packet instances exist as that
+//! time. Note that swapping configurations may invalidate pointers that you are
+//! still using, and it is your responsibility to refresh them.
 
 #ifndef BM_BM_SIM_SWITCH_H_
 #define BM_BM_SIM_SWITCH_H_
@@ -880,6 +874,8 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
 
   void reset_target_state();
 
+  void swap_notify();
+
   //! Override in your switch implementation; it will be called every time a
   //! packet is received.
   virtual int receive_(port_t port_num, const char *buffer, int len) = 0;
@@ -894,6 +890,13 @@ class SwitchWContexts : public DevMgr, public RuntimeInterface {
   //! reset_state() is invoked by the control plane. For example, the
   //! simple_switch target uses this to reset PRE state.
   virtual void reset_target_state_() { }
+
+  //! You can override this method in your target. It will be called at the end
+  //! of a config swap operation. At that time, you will be guaranteed that no
+  //! Packet instances exist, as long as your target uses the correct methods to
+  //! instantiate these objects (bm::SwitchWContexts::new_packet_ptr() and
+  //! bm::SwitchWContexts::new_packet()).
+  virtual void swap_notify_() { }
 
  private:
   size_t nb_cxts{};

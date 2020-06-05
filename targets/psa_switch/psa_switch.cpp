@@ -142,12 +142,6 @@ PsaSwitch::PsaSwitch(bool enable_swap)
 
 int
 PsaSwitch::receive_(port_t port_num, const char *buffer, int len) {
-
-  // for p4runtime program swap - antonin
-  // putting do_swap call here is ok because blocking this thread will not
-  // block processing of existing packet instances, which is a requirement
-  do_swap();
-
   // we limit the packet buffer to original size + 512 bytes, which means we
   // cannot add more than 512 bytes of header data to the packet, which should
   // be more than enough

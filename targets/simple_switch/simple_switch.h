@@ -96,6 +96,8 @@ class SimpleSwitch : public Switch {
 
   void reset_target_state_() override;
 
+  void swap_notify_() override;
+
   bool mirroring_add_session(mirror_id_t mirror_id,
                              const MirroringSessionConfig &config);
 
