@@ -45,11 +45,8 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         const entries = {
                         48w0xa0102030000 &&& 48w0xffffffffffff : act_hit(48w1);
-
                         48w0xa0000000000 &&& 48w0xff0000000000 : act_hit(48w2);
-
                         48w0x0 &&& 48w0x0 : act_hit(48w3);
-
         }
 
         const default_action = act_miss();

@@ -90,7 +90,7 @@ class TypeSpecConverter : public Inspector {
 struct ControllerType {
     enum Type { kBit, kString };
     Type type;  // Supported controller types are `string` and `bit<W>`.
-    int width;  // Meaningful only if type == kBit.
+    int width;  // 0 if type == kString.
 };
 
 /// Payload of @p4runtime_translation annotation.
