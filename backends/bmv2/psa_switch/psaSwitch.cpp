@@ -22,6 +22,7 @@ namespace BMV2 {
 void PsaProgramStructure::create(ConversionContext* ctxt) {
     createTypes(ctxt);
     createHeaders(ctxt);
+    createScalars(ctxt);
     createExterns();
     createParsers(ctxt);
     createActions(ctxt);
@@ -114,6 +115,24 @@ void PsaProgramStructure::createTypes(ConversionContext* ctxt) {
     /* TODO */
     // add errors to json
     // add enums to json
+}
+
+void PsaProgramStructure::createScalars(ConversionContext* ctxt) {
+    auto name = scalars.begin()->first;
+    ctxt->json->add_header("scalars_t", name);
+    ctxt->json->add_header_type("scalars_t");
+
+    for (auto kv : scalars) {
+        LOG5("Adding a scalar field " << kv.second << " to generated json");
+        auto field = new Util::JsonArray();
+        auto ftype = typeMap->getType(kv.second, true);
+        if (auto type = ftype->to<IR::Type_Bits>()) {
+            field->append(kv.second->name);
+            field->append(type->size);
+            field->append(type->isSigned);
+        }
+        ctxt->json->add_header_field("scalars_t", field);
+    }
 }
 
 void PsaProgramStructure::createHeaders(ConversionContext* ctxt) {
@@ -388,6 +407,19 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
             }
         }
     }
+}
+
+
+bool InspectPsaProgram::preorder(const IR::Declaration_Variable* dv) {
+        auto ft = typeMap->getType(dv->getNode(), true);
+        cstring scalarsName = refMap->newName("scalars");
+
+        if (ft->is<IR::Type_Bits>()) {
+            LOG5("Adding " << dv << " into scalars map");
+            pinfo->scalars.emplace(scalarsName, dv);
+        }
+
+        return false;
 }
 
 // This visitor only visits the parameter in the statement from architecture.
