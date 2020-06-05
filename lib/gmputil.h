@@ -84,7 +84,7 @@ static inline unsigned bitcount(big_int v) {
 }
 
 static inline int ffs(big_int v) {
-    if (v == 0) return -1;
+    if (v <= 0) return -1;
     return boost::multiprecision::lsb(v);
 }
 
