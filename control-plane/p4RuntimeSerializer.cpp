@@ -715,13 +715,14 @@ getMatchType(cstring matchTypeName) {
 }
 
 // getTypeWidth returns the width in bits for the @type, except if it is a
-// user-defined type with a @p4runtime_translation annotation whose controller
-// type is bit<W>, in which case it returns W.
+// user-defined type with a @p4runtime_translation annotation, in which case it
+// returns W if the type is bit<W>, and 0 otherwise (i.e. if the type is
+// string).
 static int
 getTypeWidth(const IR::Type* type, TypeMap* typeMap) {
     TranslationAnnotation annotation;
-    if (hasTranslationAnnotation(type, &annotation) &&
-        annotation.controller_type.type == ControllerType::kBit) {
+    if (hasTranslationAnnotation(type, &annotation)) {
+        // W if the type is bit<W>, and 0 if the type is string
         return annotation.controller_type.width;
     }
     return typeMap->minWidthBits(type, type->getNode());

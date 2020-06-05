@@ -45,11 +45,8 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         const entries = {
                         0xa0102030000 &&& 0xffffffffffff : act_hit(1);
-
                         0xa0000000000 &&& 0xff0000000000 : act_hit(2);
-
                         0x0 &&& 0x0 : act_hit(3);
-
         }
 
         const default_action = act_miss();

@@ -28,7 +28,6 @@ tables {
   match_fields {
     id: 3
     name: "h.ports.port3"
-    bitwidth: 16
     match_type: EXACT
     type_name {
       name: "PortId3_t"
