@@ -462,6 +462,8 @@ controller_packet_metadata {
     name: "packet_in"
     alias: "packet_in"
     annotations: "@controller_header(\"packet_in\")"
+    annotation_locations {
+    }
   }
   metadata {
     id: 1
@@ -475,6 +477,8 @@ controller_packet_metadata {
     name: "packet_out"
     alias: "packet_out"
     annotations: "@controller_header(\"packet_out\")"
+    annotation_locations {
+    }
   }
   metadata {
     id: 1

@@ -25,6 +25,8 @@ tables {
           int64_value: 11
         }
       }
+      source_location {
+      }
     }
     structured_annotations {
       name: "MixedKV"
@@ -48,6 +50,8 @@ tables {
           }
         }
       }
+      source_location {
+      }
     }
   }
   action_refs {
@@ -59,6 +63,8 @@ tables {
           int64_value: 1
         }
       }
+      source_location {
+      }
     }
   }
   action_refs {
@@ -69,6 +75,8 @@ tables {
         expressions {
           int64_value: 2
         }
+      }
+      source_location {
       }
     }
   }
@@ -83,6 +91,8 @@ actions {
     name: "NoAction"
     alias: "NoAction"
     annotations: "@noWarn(\"unused\")"
+    annotation_locations {
+    }
   }
 }
 actions {

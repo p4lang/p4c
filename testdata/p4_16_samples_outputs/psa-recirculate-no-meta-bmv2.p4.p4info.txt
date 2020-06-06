@@ -19,6 +19,8 @@ actions {
     name: "send_to_port"
     alias: "send_to_port"
     annotations: "@noWarnUnused"
+    annotation_locations {
+    }
   }
 }
 actions {

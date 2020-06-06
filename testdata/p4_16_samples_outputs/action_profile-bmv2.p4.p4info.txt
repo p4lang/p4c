@@ -39,6 +39,8 @@ actions {
     name: "NoAction"
     alias: "NoAction"
     annotations: "@noWarn(\"unused\")"
+    annotation_locations {
+    }
   }
 }
 actions {
