@@ -130,6 +130,8 @@ void PsaProgramStructure::createScalars(ConversionContext* ctxt) {
             field->append(kv.second->name);
             field->append(type->size);
             field->append(type->isSigned);
+        } else {
+            BUG_CHECK(kv.second, "%1 is not of Type_Bits");
         }
         ctxt->json->add_header_field("scalars_t", field);
     }
