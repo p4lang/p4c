@@ -62,6 +62,8 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     @name("ingress.port_pkt_ip_bytes_in") Register<PacketByteCountState_t, PortId_t>(32w512) port_pkt_ip_bytes_in_0;
     apply {
         ostd.egress_port = (PortId_t)32w0;
+        hdr.ipv4.setValid();
+        hdr.ipv4.totalLen = 16w14;
         if (hdr.ipv4.isValid()) @atomic {
             tmp_0 = port_pkt_ip_bytes_in_0.read(istd.ingress_port);
             update_pkt_ip_byte_count(tmp_0, hdr.ipv4.totalLen);
