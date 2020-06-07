@@ -121,6 +121,9 @@ control ingress(inout headers hdr,
 
     apply {
         ostd.egress_port = (PortId_t) 0;
+        hdr.ipv4.setValid();
+        // dstAddr (48 bits), srcAddr (48 bits), etherType (16 bits)
+        hdr.ipv4.totalLen = (48 + 48 + 16) / 8;
         if (hdr.ipv4.isValid()) {
             @atomic {
                 PacketByteCountState_t tmp;

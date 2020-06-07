@@ -121,9 +121,8 @@ class PsaProgramStructure : public ProgramStructure {
 
  public:
     // We place scalar user metadata fields (i.e., bit<>, bool)
-    // in the scalarsName metadata object, so we may need to rename
-    // these fields.  This map holds the new names.
-    std::vector<const IR::StructField*> scalars;
+    // in the scalars map.
+    ordered_map<cstring, const IR::Declaration_Variable*> scalars;
     unsigned                            scalars_width = 0;
     unsigned                            error_width = 32;
     unsigned                            bool_width = 1;
@@ -160,6 +159,7 @@ class PsaProgramStructure : public ProgramStructure {
     void createStructLike(ConversionContext* ctxt, const IR::Type_StructLike* st);
     void createTypes(ConversionContext* ctxt);
     void createHeaders(ConversionContext* ctxt);
+    void createScalars(ConversionContext* ctxt);
     void createParsers(ConversionContext* ctxt);
     void createExterns();
     void createActions(ConversionContext* ctxt);
@@ -220,6 +220,7 @@ class InspectPsaProgram : public Inspector {
     void addTypesAndInstances(const IR::Type_StructLike* type, bool meta);
     void addHeaderType(const IR::Type_StructLike *st);
     void addHeaderInstance(const IR::Type_StructLike *st, cstring name);
+    bool preorder(const IR::Declaration_Variable* dv) override;
     bool preorder(const IR::Parameter* parameter) override;
 };
 
@@ -243,7 +244,7 @@ class ConvertPsaToJson : public Inspector {
         CHECK_NULL(structure); }
 
     void postorder(UNUSED const IR::P4Program* program) override {
-        cstring scalarsName = refMap->newName("scalars");
+        cstring scalarsName = "scalars";
         // This visitor is used in multiple passes to convert expression to json
         auto conv = new PsaSwitchExpressionConverter(refMap, typeMap, structure, scalarsName);
         auto ctxt = new ConversionContext(refMap, typeMap, toplevel, structure, conv, json);

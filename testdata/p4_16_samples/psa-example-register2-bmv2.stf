@@ -1,0 +1,13 @@
+# cmd | port | dest | src | ethertype
+packet 4 000000000001 000000000002 ffff
+
+register_read ingress.port_pkt_ip_bytes_in 4
+# expect 281474976710670
+
+# Here is the reason:
+# PACKET_BYTE_COUNT_WIDTH = 80
+# PACKET_COUNT_WIDTH = 32
+# BYTE_COUNT_WIDTH = 48
+# PACKET_BYTE [79:0] = PACKET[79:48] | BYTE[47:0]
+# The test case generates 1 packet which has 14 bytes
+# Thus we expect (1 << 48) + 14 = 281474976710670

@@ -65,6 +65,8 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     Register<PacketByteCountState_t, PortId_t>(NUM_PORTS) port_pkt_ip_bytes_in;
     apply {
         ostd.egress_port = (PortId_t)0;
+        hdr.ipv4.setValid();
+        hdr.ipv4.totalLen = (48 + 48 + 16) / 8;
         if (hdr.ipv4.isValid()) {
             @atomic {
                 PacketByteCountState_t tmp;
