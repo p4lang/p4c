@@ -275,9 +275,10 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) {
         return le->name == re->name;
     }
 
-    BUG("%1%: Unexpected type check for equivalence", dbp(left));
+    BUG_CHECK(::errorCount(), "%1%: Unexpected type check for equivalence", dbp(left));
     // The following are not expected to be compared for equivalence:
     // Type_Dontcare, Type_Unknown, Type_Name, Type_Specialized, Type_Typedef
+    return false;
 }
 
 bool TypeMap::implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to) {

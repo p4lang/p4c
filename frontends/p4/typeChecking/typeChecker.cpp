@@ -700,7 +700,7 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
         } else if (dest->is<IR::Type_Boolean>()) {
             return f->size == 1 && !f->isSigned;
         } else if (auto de = dest->to<IR::Type_SerEnum>()) {
-            return TypeMap::equivalent(src, de->type);
+            return TypeMap::equivalent(src, getTypeType(de->type));
         }
     } else if (src->is<IR::Type_Boolean>()) {
         if (dest->is<IR::Type_Bits>()) {
@@ -713,11 +713,12 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
         auto st = getTypeType(src->to<IR::Type_Newtype>()->type);
         return TypeMap::equivalent(dest, st);
     } else if (auto se = src->to<IR::Type_SerEnum>()) {
+        auto set = getTypeType(se->type);
         if (auto db = dest->to<IR::Type_Bits>()) {
-            return TypeMap::equivalent(se->type, db);
+            return TypeMap::equivalent(set, db);
         }
         if (auto de = dest->to<IR::Type_SerEnum>()) {
-            return TypeMap::equivalent(se->type, de->type);
+            return TypeMap::equivalent(set, getTypeType(de->type));
         }
     }
     return false;
@@ -1233,6 +1234,10 @@ const IR::Node* TypeInference::postorder(IR::Type_Enum* type) {
 }
 
 const IR::Node* TypeInference::postorder(IR::Type_SerEnum* type) {
+    if (::errorCount())
+        // If we failed to typecheck a SerEnumMember we do not
+        // want to set the type for the SerEnum either.
+        return type;
     auto canon = setTypeType(type);
     for (auto e : *type->getDeclarations())
         setType(e->getNode(), canon);
@@ -1273,6 +1278,10 @@ const IR::Node* TypeInference::postorder(IR::SerEnumMember* member) {
     auto serEnum = findContext<IR::Type_SerEnum>();
     CHECK_NULL(serEnum);
     auto type = getTypeType(serEnum->type);
+    if (!type->is<IR::Type_Bits>()) {
+        typeError("%1%: Illegal type for enum; only bit<> and int<> are allowed", serEnum->type);
+        return member;
+    }
     auto exprType = getType(member->value);
     auto tvs = unify(member, type, exprType);
     if (tvs == nullptr)
@@ -1548,9 +1557,9 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
 
     bool equTest = expression->is<IR::Equ>() || expression->is<IR::Neq>();
     if (auto l = ltype->to<IR::Type_SerEnum>())
-        ltype = l->type;
+        ltype = getTypeType(l->type);
     if (auto r = rtype->to<IR::Type_SerEnum>())
-        rtype = r->type;
+        rtype = getTypeType(r->type);
 
     if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_InfInt>()) {
         // This can happen because we are replacing some constant functions with
@@ -2003,9 +2012,9 @@ const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expressio
         return expression;
 
     if (auto se = ltype->to<IR::Type_SerEnum>())
-        ltype = se->type;
+        ltype = getTypeType(se->type);
     if (auto se = rtype->to<IR::Type_SerEnum>())
-        rtype = se->type;
+        rtype = getTypeType(se->type);
 
     const IR::Type_Bits* bl = ltype->to<IR::Type_Bits>();
     const IR::Type_Bits* br = rtype->to<IR::Type_Bits>();
@@ -2075,9 +2084,9 @@ const IR::Node* TypeInference::unsBinaryArith(const IR::Operation_Binary* expres
         return expression;
 
     if (auto se = ltype->to<IR::Type_SerEnum>())
-        ltype = se->type;
+        ltype = getTypeType(se->type);
     if (auto se = rtype->to<IR::Type_SerEnum>())
-        rtype = se->type;
+        rtype = getTypeType(se->type);
 
     const IR::Type_Bits* bl = ltype->to<IR::Type_Bits>();
     if (bl != nullptr && bl->isSigned) {
@@ -2170,9 +2179,9 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
         return expression;
 
     if (auto se = ltype->to<IR::Type_SerEnum>())
-        ltype = se->type;
+        ltype = getTypeType(se->type);
     if (auto se = rtype->to<IR::Type_SerEnum>())
-        rtype = se->type;
+        rtype = getTypeType(se->type);
 
     const IR::Type_Bits* bl = ltype->to<IR::Type_Bits>();
     const IR::Type_Bits* br = rtype->to<IR::Type_Bits>();
@@ -2238,9 +2247,9 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
 
     auto leftType = ltype;  // save original type
     if (auto se = ltype->to<IR::Type_SerEnum>())
-        ltype = se->type;
+        ltype = getTypeType(se->type);
     if (auto se = rtype->to<IR::Type_SerEnum>())
-        rtype = se->type;
+        rtype = getTypeType(se->type);
 
     // The following section is very similar to "binaryArith()" above
     const IR::Type_Bits* bl = ltype->to<IR::Type_Bits>();
@@ -2328,7 +2337,7 @@ const IR::Node* TypeInference::postorder(IR::Neg* expression) {
         return expression;
 
     if (auto se = type->to<IR::Type_SerEnum>())
-        type = se->type;
+        type = getTypeType(se->type);
 
     if (type->is<IR::Type_InfInt>()) {
         setType(getOriginal(), type);
@@ -2354,7 +2363,7 @@ const IR::Node* TypeInference::postorder(IR::Cmpl* expression) {
         return expression;
 
     if (auto se = type->to<IR::Type_SerEnum>())
-        type = se->type;
+        type = getTypeType(se->type);
 
     if (type->is<IR::Type_InfInt>()) {
         typeError("%1% cannot be applied to an operand with an unknown width");
@@ -2515,7 +2524,7 @@ const IR::Node* TypeInference::postorder(IR::Slice* expression) {
         return expression;
 
     if (auto se = type->to<IR::Type_SerEnum>())
-        type = se->type;
+        type = getTypeType(se->type);
 
     if (!type->is<IR::Type_Bits>()) {
         typeError("%1%: bit extraction only defined for bit<> types", expression);
