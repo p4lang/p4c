@@ -62,6 +62,24 @@ static inline void *ubpf_adjust_head_test(void *ctx, int offset) {
     }
 }
 
+static inline uint32_t ubpf_truncate_packet_test(void *ctx, int maxlen)
+{
+    struct dp_packet *dp = (struct dp_packet *) ctx;
+    uint32_t cutlen= 0;
+
+    if (maxlen < 0)
+        return 0;
+
+    if (maxlen >= dp->size_) {
+        cutlen = 0;
+    } else {
+        cutlen = dp->size_ - maxlen;
+        dp->data = realloc(dp->data, maxlen);
+        dp->size_ = maxlen;
+    }
+
+    return cutlen;
+}
 
 
 #endif //P4C_UBPF_TEST_H
