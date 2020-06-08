@@ -43,7 +43,7 @@ packet 0 ca0107fc001c1111111111110800 02 010203 0000000001 0123456789 abcdef0123
 #        ca0107fc001c1111111111110800 02 8a0203 0000000001 0123456789 abcd8a018a
 
 # After assignment:
-        hdr.vector[1].e = hdr.pool[hdr.ml.idx].base0;
+#        hdr.vector[1].e = hdr.pool[hdr.ml.idx].base0;
 #                                  changed VV
 #        ca0107fc001c1111111111110800 02 8aab03 0000000001 0123456789 abcd8a018a
 
@@ -75,7 +75,7 @@ packet 0 ca0107fc001c1111111111110800 00 010203 deadbeeff0 0123456789 abcdef0123
 #        ca0107fc001c1111111111110800 00 8a0203 dead8aef8a 0123456789 abcdef0123
 
 # After assignment:
-        hdr.vector[1].e = hdr.pool[hdr.ml.idx].base0;
+#        hdr.vector[1].e = hdr.pool[hdr.ml.idx].base0;
 #                                  changed VV
 #        ca0107fc001c1111111111110800 00 8ade03 dead8aef8a 0123456789 abcdef0123
 
@@ -85,4 +85,3 @@ packet 0 ca0107fc001c1111111111110800 00 010203 deadbeeff0 0123456789 abcdef0123
 #        ca0107fc001c1111111111110800 00 8ade03 aead8aef8a 0123456789 abcdef0123
 
 expect 0 ca0107fc001c1111111111110800 00 8ade03 aead8aef8a 0123456789 abcdef0123
-
