@@ -38,17 +38,54 @@ limitations under the License.
 #include "backends/bmv2/common/lower.h"
 #include "backends/bmv2/common/parser.h"
 #include "backends/bmv2/common/programStructure.h"
+#include "backends/bmv2/psa_switch/psaSwitch.h"
 
 namespace DPDK {
 
+// in-memory representation of dpdk assembly
+struct Asm {
+    std::vector<cstring> header_config;
+    std::vector<cstring> metadata_config;
+    std::vector<cstring> table_config;
+    std::vector<cstring> action_config;
+    std::vector<cstring> instr_config;
+};
+
+std::ostream& operator<<(std::ostream& out, const Asm& asm_);
+
+class DumpAsm : public Inspector {
+    BMV2::PsaProgramStructure* structure;
+    BMV2::JsonObjects *json;
+    Asm* asm_;
+
+    int next_reg_id;
+    std::map<int, cstring> reg_id_to_name;
+    std::map<cstring, int> reg_name_to_id;
+    std::map<cstring, cstring> symbol_table;
+
+    std::map<cstring, Util::JsonObject*> parsers;
+
+ public:
+    DumpAsm(BMV2::PsaProgramStructure* st, BMV2::JsonObjects* json, Asm* asm_) :
+        structure(st), json(json), asm_(asm_) {}
+
+    int next_free_reg() { return next_reg_id++; }
+    bool preorder(const IR::P4Control* c) override;
+    bool preorder(const IR::P4Parser* p) override;
+    profile_t init_apply(const IR::Node*) override;
+    void end_apply() override;
+};
+
 class PsaSwitchBackend : public BMV2::Backend {
     BMV2::BMV2Options &options;
+    Asm asm_;
 
  public:
     void convert(const IR::ToplevelBlock* tlb) override;
     PsaSwitchBackend(BMV2::BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                           P4::ConvertEnums::EnumMapping* enumMap) :
         Backend(options, refMap, typeMap, enumMap), options(options) { }
+    void codegen(std::ostream&) const;
 };
 
 }  // namespace DPDK

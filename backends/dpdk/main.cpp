@@ -129,7 +129,7 @@ int main(int argc, char *const argv[]) {
     if (!options.outputFile.isNullOrEmpty()) {
         std::ostream* out = openFile(options.outputFile, false);
         if (out != nullptr) {
-            backend->serialize(*out);
+            backend->codegen(*out);
             out->flush();
         }
     }

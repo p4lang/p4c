@@ -1,0 +1,39 @@
+# yaml format tags for dpdk assembly
+#
+# <name> : a string of 1 or more letters, digits, '_', '-', '.',
+#          '$', or '@' not starting with a digit.  Cannot start or
+#          end with '-' or '.' or have two consecutive '-' or '.'
+# <register> : <name> that matches a predefined register name
+# <match> : <name> used for matching
+# <matcher> : <constant> | <range>
+# <instruction> : instructions defined in dpdk swx assembly specification
+phv [<thread>]:
+    <name> : # struct name
+        # <name> is defined as <field>.<range>, e.g. srcAddr.0-47
+        <name> : <register>
+
+parser [<thread>]:
+    name: <name> # parser name defined in the arch file
+    start: <name> # start state
+    states:
+        <name> [<match>]:
+            match: <matcher>
+            next: <name>
+
+tables [thread]:
+    <table-type> <name> <id>:
+        key :
+            <name> :
+        actions:
+            <name> <index>:
+            - <instruction> <operand>
+
+program [thread]:
+    <instruction>
+    <label> :
+        <instruction>
+
+version:
+    version: <number>
+    run_id: <sha>
+    target: <name>
