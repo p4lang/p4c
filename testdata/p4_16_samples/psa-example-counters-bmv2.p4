@@ -54,7 +54,7 @@ struct metadata {
 // BEGIN:Counter_Example_Part1
 typedef bit<48> ByteCounter_t;
 typedef bit<32> PacketCounter_t;
-typedef bit<80> PacketByteCounter_t;
+typedef bit<64> PacketByteCounter_t;
 
 const bit<32> NUM_PORTS = 512;
 

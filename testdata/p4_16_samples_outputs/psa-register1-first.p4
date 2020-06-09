@@ -25,9 +25,9 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 }
 
 control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    Register<bit<10>, bit<10>>(32w1024) reg;
+    Register<bit<16>, bit<10>>(32w1024) reg;
     action execute_register(bit<10> idx) {
-        bit<10> data = reg.read(idx);
+        bit<16> data = reg.read(idx);
     }
     table tbl {
         key = {
