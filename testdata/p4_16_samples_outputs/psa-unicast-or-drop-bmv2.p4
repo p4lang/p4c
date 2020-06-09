@@ -28,8 +28,10 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     apply {
         send_to_port(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr);
-        if (hdr.ethernet.dstAddr == 0) {
-            ingress_drop(ostd);
+        if (hdr.ethernet.dstAddr[47:32] == 0) {
+            if (hdr.ethernet.dstAddr[31:0] == 0) {
+                ingress_drop(ostd);
+            }
         }
     }
 }

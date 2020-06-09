@@ -28,7 +28,7 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     @noWarnUnused @name(".send_to_port") action send_to_port() {
         ostd.drop = false;
-        ostd.multicast_group = 32w0;
+        ostd.multicast_group = 16w0;
         ostd.egress_port = (PortIdUint_t)hdr.ethernet.dstAddr;
     }
     @noWarnUnused @name(".ingress_drop") action ingress_drop() {
@@ -48,8 +48,10 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     }
     apply {
         tbl_send_to_port.apply();
-        if (hdr.ethernet.dstAddr == 48w0) {
-            tbl_ingress_drop.apply();
+        if (hdr.ethernet.dstAddr[47:32] == 16w0) {
+            if (hdr.ethernet.dstAddr[31:0] == 32w0) {
+                tbl_ingress_drop.apply();
+            }
         }
     }
 }
@@ -66,32 +68,32 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
 }
 
 control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaunicastordropbmv2l99() {
+    @hidden action psaunicastordropbmv2l101() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_psaunicastordropbmv2l99 {
+    @hidden table tbl_psaunicastordropbmv2l101 {
         actions = {
-            psaunicastordropbmv2l99();
+            psaunicastordropbmv2l101();
         }
-        const default_action = psaunicastordropbmv2l99();
+        const default_action = psaunicastordropbmv2l101();
     }
     apply {
-        tbl_psaunicastordropbmv2l99.apply();
+        tbl_psaunicastordropbmv2l101.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psaunicastordropbmv2l99_0() {
+    @hidden action psaunicastordropbmv2l101_0() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_psaunicastordropbmv2l99_0 {
+    @hidden table tbl_psaunicastordropbmv2l101_0 {
         actions = {
-            psaunicastordropbmv2l99_0();
+            psaunicastordropbmv2l101_0();
         }
-        const default_action = psaunicastordropbmv2l99_0();
+        const default_action = psaunicastordropbmv2l101_0();
     }
     apply {
-        tbl_psaunicastordropbmv2l99_0.apply();
+        tbl_psaunicastordropbmv2l101_0.apply();
     }
 }
 

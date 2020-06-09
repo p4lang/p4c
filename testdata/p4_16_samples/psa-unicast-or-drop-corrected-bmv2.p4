@@ -61,12 +61,14 @@ control cIngress(inout headers_t hdr,
         // wide, so the least significant 32 bits are significant, and
         // the upper 16 bits are always ignored.
         send_to_port(ostd, (PortId_t) (PortIdUint_t) hdr.ethernet.dstAddr);
-        if (hdr.ethernet.dstAddr == 0) {
-            // This action should overwrite the ostd.drop field that
-            // was assigned a value via the send_to_port() action
-            // above, causing this packet to be dropped, _not_ sent
-            // out of port 0.
-            ingress_drop(ostd);
+        if (hdr.ethernet.dstAddr[47:32] == 0) {
+            if (hdr.ethernet.dstAddr[31:0] == 0) {
+                // This action should overwrite the ostd.drop field that
+                // was assigned a value via the send_to_port() action
+                // above, causing this packet to be dropped, _not_ sent
+                // out of port 0.
+                ingress_drop(ostd);
+            }
         }
     }
 }
