@@ -34,7 +34,7 @@ struct metadata {
 }
 
 typedef bit<48> ByteCounter_t;
-typedef bit<80> PacketByteCounter_t;
+typedef bit<64> PacketByteCounter_t;
 struct headers {
     ethernet_t ethernet;
     ipv4_t     ipv4;
