@@ -646,7 +646,7 @@ enum PSA_MeterType_t {
 // END:MeterType_defn
 
 // BEGIN:MeterColor_defn
-enum PSA_MeterColor_t { RED, GREEN, YELLOW }
+enum bit<8> PSA_MeterColor_t { GREEN = 8w0, YELLOW = 8w1, RED = 8w3 }
 // END:MeterColor_defn
 
 // BEGIN:Meter_extern

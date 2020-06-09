@@ -25,7 +25,7 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 }
 
 control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    PSA_MeterColor_t tmp;
+    bit<8> tmp;
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("MyIC.meter0") Meter<bit<12>>(32w1024, PSA_MeterType_t.PACKETS) meter0_0;
@@ -49,7 +49,7 @@ control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t 
     }
     apply {
         tbl_act.apply();
-        if (tmp == PSA_MeterColor_t.GREEN) {
+        if (tmp == 8w0) {
             tbl_0.apply();
         }
     }
