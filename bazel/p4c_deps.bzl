@@ -29,9 +29,9 @@ def p4c_deps():
     if not native.existing_rule("com_github_nelhage_rules_boost"):
         git_repository(
             name = "com_github_nelhage_rules_boost",
-            commit = "ed844db5990d21b75dc3553c057069f324b3916b",
+            commit = "1da7517245fb944d6b7b427aa86fd5571663f90a",
             remote = "https://github.com/nelhage/rules_boost",
-            shallow_since = "1576879360 -0800",
+            shallow_since = "1591812253 -0700",
         )
     if not native.existing_rule("com_google_googletest"):
         # Cannot currently use local_repository due to Bazel limitation,

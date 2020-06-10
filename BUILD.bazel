@@ -280,6 +280,7 @@ cc_library(
     deps = [
         ":config_h",
         "@boost//:format",
+        "@boost//:multiprecision",
         "@com_google_googletest//:gtest",
     ],
 )

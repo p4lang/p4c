@@ -322,6 +322,20 @@ default is 2GB, which is not enough to build p4c. Increase the memory limit to
 at least 4GB via Docker preferences or you are likely to see "internal compiler
 errors" from gcc which are caused by low memory.
 
+# Bazel
+
+![bazel build](https://github.com/p4lang/p4c/workflows/Bazel/badge.svg)
+
+The project can also be build using [Bazel](https://bazel.build):
+```sh
+bazel build //...
+```
+We run continuous integration to ensure this works with the latest version of Bazel.
+
+We also provide a [`p4_library` Bazel rule](bazel/p4_library.bzl) for invoking p4c
+during the build process of your own project. See [bazel/example](bazel/example) for
+an example of how to use it.
+
 # Build system
 
 The build system is based on cmake.  This section describes how it can be customized.
