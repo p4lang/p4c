@@ -1,4 +1,4 @@
-name: "Bazel"
+name: "bazel"
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  build_direct:  # Build p4c directly.
     runs-on: ubuntu-latest
     env:
       BAZEL: bazelisk-linux-amd64
@@ -20,7 +20,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: "~/.cache/bazel"  # See https://docs.bazel.build/versions/master/output_directories.html
-        key: bazel
+        key: bazel1
 
     - name: Install bazelisk
       run: |
@@ -28,11 +28,35 @@ jobs:
         chmod +x $BAZEL
         sudo mv $BAZEL /usr/local/bin/bazel
 
-    - name: Install Flex and GMP
-      run: sudo apt-get update && sudo apt-get install flex libgmp-dev
+    - name: Install Flex, Bison, and GMP
+      run: sudo apt-get update && sudo apt-get install bison flex libgmp-dev
 
     - name: Build p4c
       run: bazel build //... --verbose_failures
+  
+  build_indirect:  # Build Bazel project depending on p4c as a subproject.
+    runs-on: ubuntu-latest
+    env:
+      BAZEL: bazelisk-linux-amd64
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    
+    - name: Mount bazel cache
+      uses: actions/cache@v2
+      with:
+        path: "~/.cache/bazel"  # See https://docs.bazel.build/versions/master/output_directories.html
+        key: bazel2
+
+    - name: Install bazelisk
+      run: |
+        curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.4.0/$BAZEL"
+        chmod +x $BAZEL
+        sudo mv $BAZEL /usr/local/bin/bazel
+
+    - name: Install Flex, Bison, and GMP
+      run: sudo apt-get update && sudo apt-get install bison flex libgmp-dev
 
     - name: Build bazel/example
       run: cd ./bazel/example && bazel build //... --verbose_failures

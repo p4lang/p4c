@@ -1,16 +1,19 @@
 """Build rule for generating C or C++ sources with Bison."""
 
 def _genyacc_impl(ctx):
-    """Implementation for genyacc rule."""
+    """Implementation for genyacc rule.
+
+    Expects to find bison binary on the PATH.
+    """
 
     # Argument list
-    args = ctx.actions.args()
-    args.add("--defines=%s" % ctx.outputs.header_out.path)
-    args.add("--output-file=%s" % ctx.outputs.source_out.path)
+    args = []
+    args.append("--defines=%s" % ctx.outputs.header_out.path)
+    args.append("--output-file=%s" % ctx.outputs.source_out.path)
     if ctx.attr.prefix:
-        args.add("--name-prefix=%s" % ctx.attr.prefix)
-    args.add_all([ctx.expand_location(opt) for opt in ctx.attr.extra_options])
-    args.add(ctx.file.src.path)
+        args.append("--name-prefix=%s" % ctx.attr.prefix)
+    args += [ctx.expand_location(opt) for opt in ctx.attr.extra_options]
+    args.append(ctx.file.src.path)
 
     # Output files
     outputs = ctx.outputs.extra_outs + [
@@ -18,15 +21,10 @@ def _genyacc_impl(ctx):
         ctx.outputs.source_out,
     ]
 
-    ctx.actions.run(
-        executable = ctx.executable._bison,
-        env = {
-            "M4": ctx.executable._m4.path,
-            "BISON_PKGDATADIR": ctx.attr._bison_data_path,
-        },
-        arguments = [args],
-        inputs = ctx.files._bison_data + ctx.files.src,
-        tools = [ctx.executable._m4],
+    ctx.actions.run_shell(
+        use_default_shell_env = True,
+        command = "bison " + " ".join(args),
+        inputs = ctx.files.src,
         outputs = outputs,
         mnemonic = "Yacc",
         progress_message = "Generating %s and %s from %s" %
@@ -62,14 +60,6 @@ genyacc = rule(
             doc = "A list of extra options to pass to Bison.  These are " +
                   "subject to $(location ...) expansion.",
         ),
-        "_bison": attr.label(
-            default = "@bison",
-            executable = True,
-            cfg = "host",
-        ),
-        "_bison_data": attr.label(default = "@bison//:bison_runtime_data"),
-        "_bison_data_path": attr.string(default = "external/bison/data"),
-        "_m4": attr.label(default = "@m4", executable = True, cfg = "host"),
     },
     output_to_genfiles = True,
 )

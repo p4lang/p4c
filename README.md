@@ -324,17 +324,18 @@ errors" from gcc which are caused by low memory.
 
 # Bazel
 
-![bazel build](https://github.com/p4lang/p4c/workflows/Bazel/badge.svg)
+![bazel build](https://github.com/p4lang/p4c/workflows/bazel/badge.svg)
 
 The project can also be build using [Bazel](https://bazel.build):
 ```sh
 bazel build //...
 ```
-We run continuous integration to ensure this works with the latest version of Bazel.
+We run continuous integration to ensure this works with the latest version of
+Bazel.
 
-We also provide a [`p4_library` Bazel rule](bazel/p4_library.bzl) for invoking p4c
-during the build process of your own project. See [bazel/example](bazel/example) for
-an example of how to use it.
+We also provide a [`p4_library` Bazel rule](bazel/p4_library.bzl) for invoking
+p4c during the build process of your own project.
+See [bazel/example](bazel/example) for an example of how to use it.
 
 # Build system
 

@@ -1,8 +1,9 @@
 """Build rule for generating C or C++ sources with Flex."""
 
-# Expects to find flex in the path.
 def genlex(name, src, out, prefix, includes = [], visibility = None):
     """Generate a C++ lexer from a lex file using Flex.
+
+    Expects to find flex binary on the PATH.
 
     Args:
       name: The name of the rule.
