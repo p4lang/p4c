@@ -16,14 +16,14 @@
 static inline u8 verify_ipv4_checksum(const struct IPv4_h iphdr)
 {
     u8 correct = 0;
-    u32 checksum = __bpf_htons(((u16) iphdr.version << 12) | ((u16) iphdr.ihl << 8) | (u16) iphdr.diffserv);
-    checksum += __bpf_htons(iphdr.totalLen);
-    checksum += __bpf_htons(iphdr.identification);
-    checksum += __bpf_htons(((u16) iphdr.flags << 13) | iphdr.fragOffset);
-    checksum += __bpf_htons(((u16) iphdr.ttl << 8) | (u16) iphdr.protocol);
-    checksum += __bpf_htons(iphdr.hdrChecksum);
-    u32 srcAddr = __bpf_ntohl(iphdr.srcAddr);
-    u32 dstAddr = __bpf_ntohl(iphdr.dstAddr);
+    u32 checksum = bpf_htons(((u16) iphdr.version << 12) | ((u16) iphdr.ihl << 8) | (u16) iphdr.diffserv);
+    checksum += bpf_htons(iphdr.totalLen);
+    checksum += bpf_htons(iphdr.identification);
+    checksum += bpf_htons(((u16) iphdr.flags << 13) | iphdr.fragOffset);
+    checksum += bpf_htons(((u16) iphdr.ttl << 8) | (u16) iphdr.protocol);
+    checksum += bpf_htons(iphdr.hdrChecksum);
+    u32 srcAddr = bpf_ntohl(iphdr.srcAddr);
+    u32 dstAddr = bpf_ntohl(iphdr.dstAddr);
     checksum += (srcAddr >> 16) + (u16) srcAddr;
     checksum += (dstAddr >> 16) + (u16) dstAddr;
 

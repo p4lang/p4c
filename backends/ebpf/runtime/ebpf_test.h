@@ -28,6 +28,26 @@ limitations under the License.
 #include "ebpf_registry.h"
 #include "ebpf_common.h"
 
+#include <endian.h>
+
+/* define some byte order conversions, these mimic bpf_endian.h */
+#define htonll(x) htobe64(x)
+#define ntohll(x) be64toh(x)
+
+#define bpf_htons(x) htobe16(x)
+#define bpf_ntohs(x) be16toh(x)
+#define bpf_htonl(x) htobe32(x)
+#define bpf_ntohl(x) be32toh(x)
+#define bpf_cpu_to_be64(x) htobe64(x)
+#define bpf_be64_to_cpu(x) be64toh(x)
+
+#define load_byte(data, b) (*(((u8*)(data)) + (b)))
+#define load_half(data, b) bpf_ntohs(*(u16 *)((u8*)(data) + (b)))
+#define load_word(data, b) bpf_ntohl(*(u32 *)((u8*)(data) + (b)))
+#define load_dword(data, b) bpf_be64_to_cpu(*(u64 *)((u8*)(data) + (b)))
+
+
+
 #define bpf_printk(fmt, ...)                                            \
                 ({                                                      \
                         char ____fmt[] = fmt;                           \

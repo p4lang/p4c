@@ -23,8 +23,6 @@ limitations under the License.
 #include <stdbool.h>        // true and false
 #include <linux/types.h>    // u8, u16, u32, u64
 
-#include "bpf_endian.h" // definitions for bpf_ntohs etc...
-
 typedef signed char s8;
 typedef unsigned char u8;
 typedef signed short s16;
@@ -34,17 +32,6 @@ typedef unsigned int u32;
 typedef signed long long s64;
 typedef unsigned long long u64;
 
-
-#undef htonl
-#undef htons
-#define htons(d) __bpf_htons(d)
-#define htonl(d) __bpf_ntohl(d)
-#define htonll(d) __bpf_constant_be64_to_cpu(d)
-
-#define load_byte(data, b) (*(((u8*)(data)) + (b)))
-#define load_half(data, b) bpf_ntohs(*(u16 *)((u8*)(data) + (b)))
-#define load_word(data, b) bpf_ntohl(*(u32 *)((u8*)(data) + (b)))
-#define load_dword(data, b) bpf_cpu_to_be64(*(u64 *)((u8*)(data) + (b)))
 
 /*
  * Helper function.
