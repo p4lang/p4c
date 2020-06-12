@@ -8,6 +8,8 @@ actions {
     alias: "multicast"
     annotations: "@noWarnUnused"
     annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/build/p4include/psa.p4"
+      line: 504
     }
   }
 }

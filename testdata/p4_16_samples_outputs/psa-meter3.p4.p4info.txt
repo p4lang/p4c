@@ -26,6 +26,8 @@ actions {
     alias: "NoAction"
     annotations: "@noWarn(\"unused\")"
     annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/build/p4include/core.p4"
+      line: 74
     }
   }
 }
