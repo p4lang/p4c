@@ -878,21 +878,57 @@ void ExternConverter_DirectCounter::convertExternInstance(
 void ExternConverter_Meter::convertExternInstance(
     UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
     UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+    if (eb->getConstructorParameters()->size() != 2) {
+      modelError("%1%: expected two parameters", eb);
+      return;
+    }
+
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
-    auto jmtr = new Util::JsonObject();
-    jmtr->emplace("name", name);
-    jmtr->emplace("id", nextId("meter_arrays"));
-    jmtr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
-    jmtr->emplace("is_direct", false);
+
+    // adding meter instance into extern_instances
+    auto jext_mtr = new Util::JsonObject();
+    jext_mtr->emplace("name", name);
+    jext_mtr->emplace("id", nextId("extern_instances"));
+    jext_mtr->emplace("type", eb->getName());
+    jext_mtr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+    ctxt->json->externs->append(jext_mtr);
+
+    // adding attributes to meter extern_instance
+    Util::JsonArray *arr = ctxt->json->insert_array_field(jext_mtr, "attribute_values");
+
+    // is_direct
+    auto is_direct = new Util::JsonObject();
+    is_direct->emplace("name", "is_direct");
+    is_direct->emplace("type", "string");
+    is_direct->emplace("value", "false");
+    arr->append(is_direct);
+
+    // meter_array size
     auto sz = eb->findParameterValue("n_meters");
     CHECK_NULL(sz);
     if (!sz->is<IR::Constant>()) {
         modelError("%1%: expected a constant", sz->getNode());
         return;
     }
-    jmtr->emplace("size", sz->to<IR::Constant>()->value);
-    jmtr->emplace("rate_count", 2);
+    auto attr_name = eb->getConstructorParameters()->getParameter(0);
+    auto s = sz->to<IR::Constant>();
+    auto bitwidth = ctxt->typeMap->minWidthBits(s->type, sz->getNode());
+    cstring val = BMV2::stringRepr(s->value, ROUNDUP(bitwidth, 8));
+    auto msz = new Util::JsonObject();
+    msz->emplace("name", attr_name->toString());
+    msz->emplace("type", "hexstr");
+    msz->emplace("value", val);
+    arr->append(msz);
+
+    // rate count
+    auto rc = new Util::JsonObject();
+    rc->emplace("name", "rate_count");
+    rc->emplace("type", "hexstr");
+    rc->emplace("value", 2);
+    arr->append(rc);
+
+    // meter kind
     auto mkind = eb->findParameterValue("type");
     CHECK_NULL(mkind);
     if (!mkind->is<IR::Declaration_ID>()) {
@@ -907,8 +943,11 @@ void ExternConverter_Meter::convertExternInstance(
         type = "bytes";
     else
         ::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected meter type", mkind->getNode());
-    jmtr->emplace("type", type);
-    ctxt->json->meter_arrays->append(jmtr);
+    auto k = new Util::JsonObject();
+    k->emplace("name", "type");
+    k->emplace("type", "string");
+    k->emplace("value", type);
+    arr->append(k);
 }
 
 void ExternConverter_DirectMeter::convertExternInstance(
