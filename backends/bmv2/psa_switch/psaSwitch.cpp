@@ -771,22 +771,23 @@ void ExternConverter_Counter::convertExternInstance(
     UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
-    auto jctr = new Util::JsonObject();
-    jctr->emplace("name", name);
-    jctr->emplace("id", nextId("counter_arrays"));
-    jctr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
     auto sz = eb->findParameterValue("n_counters");
     CHECK_NULL(sz);
     if (!sz->is<IR::Constant>()) {
         modelError("%1%: expected a constant", sz->getNode());
         return;
     }
+
+    // adding counter instance to counter_arrays[]
+    auto jctr = new Util::JsonObject();
+    jctr->emplace("name", name);
+    jctr->emplace("id", nextId("counter_arrays"));
+    jctr->emplace_non_null("source_info", eb->sourceInfoJsonObj());
     jctr->emplace("size", sz->to<IR::Constant>()->value);
     jctr->emplace("is_direct", false);
     ctxt->json->counters->append(jctr);
 
-    // Code below used to add json into EXTERN_INSTANCES NODE
-
+    // add counter instance to extern_instances
     auto extern_obj = new Util::JsonObject();
     extern_obj->emplace("name", name);
     extern_obj->emplace("id", nextId("extern_instances"));
