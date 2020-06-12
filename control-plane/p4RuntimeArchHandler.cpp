@@ -118,9 +118,9 @@ int64_t getTableSize(const IR::P4Table* table) {
 p4configv1::SourceLocation
 serializeSourceLocation(const Util::SourceInfo& source_info) {
     p4configv1::SourceLocation src_loc;
-    src_loc.set_file(source_info.filename.c_str());
-    src_loc.set_line(std::max(0, source_info.line));
-    src_loc.set_column(std::max(0, source_info.column));
+    src_loc.set_file(source_info.getSourceFile());
+    src_loc.set_line(source_info.getStart().getLineNumber());
+    src_loc.set_column(source_info.getStart().getColumnNumber());
     return src_loc;
 }
 
