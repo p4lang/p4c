@@ -39,9 +39,10 @@ def main():
     libbpf_target_dir = "%s/runtime" % file_dir
     # Download submodule if it has not been initialized yet
     git_cmd = "git submodule update --init %s" % libbpf_dir
-    err = testutils.run_timeout(verbose=VERBOSE, args=git_cmd,
-                                timeout=20, outputs=outputs,
-                                errmsg="Could not initialize libbpf submodule")
+    # We ignore the error that is thrown here
+    testutils.run_timeout(verbose=VERBOSE, args=git_cmd,
+                          timeout=20, outputs=outputs,
+                          errmsg="Could not initialize libbpf submodule")
     # Create the libbpf build directory
     create_dir(libbpf_build_dir)
     # Build libbpf
