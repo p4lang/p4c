@@ -34,6 +34,10 @@ actions {
     name: "NoAction"
     alias: "NoAction"
     annotations: "@noWarn(\"unused\")"
+    annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/build/p4include/core.p4"
+      line: 92
+    }
   }
 }
 actions {
@@ -64,6 +68,10 @@ controller_packet_metadata {
     name: "packet_out"
     alias: "packet_out"
     annotations: "@controller_header(\"packet_out\")"
+    annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/testdata/p4_16_samples/custom-type-restricted-fields.p4"
+      line: 902
+    }
   }
   metadata {
     id: 1

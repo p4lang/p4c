@@ -20,6 +20,11 @@ tables {
     id: 28485346
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
+    annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/testdata/p4_16_samples/fabric_20190420/include/spgw.p4"
+      line: 2463
+      column: 12
+    }
   }
   const_default_action_id: 28485346
   direct_resource_ids: 334575698
@@ -136,6 +141,11 @@ tables {
     id: 28485346
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
+    annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/testdata/p4_16_samples/fabric_20190420/include/control/forwarding.p4"
+      line: 1627
+      column: 12
+    }
   }
   const_default_action_id: 28485346
   direct_resource_ids: 330959985
@@ -160,6 +170,11 @@ tables {
     id: 28485346
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
+    annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/testdata/p4_16_samples/fabric_20190420/include/control/forwarding.p4"
+      line: 1651
+      column: 12
+    }
   }
   const_default_action_id: 28485346
   direct_resource_ids: 318961579
@@ -187,6 +202,11 @@ tables {
     id: 28485346
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
+    annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/testdata/p4_16_samples/fabric_20190420/include/control/forwarding.p4"
+      line: 1682
+      column: 12
+    }
   }
   const_default_action_id: 28485346
   direct_resource_ids: 333425635
@@ -308,6 +328,11 @@ tables {
     id: 28485346
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
+    annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/testdata/p4_16_samples/fabric_20190420/include/control/next.p4"
+      line: 2053
+      column: 12
+    }
   }
   const_default_action_id: 28485346
   direct_resource_ids: 326370320
@@ -341,6 +366,11 @@ tables {
     id: 28485346
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
+    annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/testdata/p4_16_samples/fabric_20190420/include/control/next.p4"
+      line: 2085
+      column: 12
+    }
   }
   const_default_action_id: 28485346
   direct_resource_ids: 321989420
@@ -371,6 +401,11 @@ tables {
     id: 28485346
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
+    annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/testdata/p4_16_samples/fabric_20190420/include/control/next.p4"
+      line: 2129
+      column: 12
+    }
   }
   const_default_action_id: 28485346
   implementation_id: 291115404
@@ -396,6 +431,11 @@ tables {
     id: 28485346
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
+    annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/testdata/p4_16_samples/fabric_20190420/include/control/next.p4"
+      line: 2156
+      column: 12
+    }
   }
   const_default_action_id: 28485346
   direct_resource_ids: 319194968
@@ -426,6 +466,11 @@ tables {
     id: 28485346
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
+    annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/testdata/p4_16_samples/fabric_20190420/include/control/next.p4"
+      line: 2230
+      column: 12
+    }
   }
   const_default_action_id: 28485346
   direct_resource_ids: 318892680
@@ -868,6 +913,10 @@ controller_packet_metadata {
     name: "packet_in"
     alias: "packet_in"
     annotations: "@controller_header(\"packet_in\")"
+    annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/testdata/p4_16_samples/fabric_20190420/include/control/../header.p4"
+      line: 1201
+    }
   }
   metadata {
     id: 1
@@ -886,6 +935,10 @@ controller_packet_metadata {
     name: "packet_out"
     alias: "packet_out"
     annotations: "@controller_header(\"packet_out\")"
+    annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/testdata/p4_16_samples/fabric_20190420/include/control/../header.p4"
+      line: 1208
+    }
   }
   metadata {
     id: 1

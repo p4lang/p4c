@@ -20,6 +20,8 @@ tables {
     id: 21257015
     annotations: "@defaultonly"
     scope: DEFAULT_ONLY
+    annotation_locations {
+    }
   }
   size: 1024
 }
@@ -29,6 +31,8 @@ actions {
     name: "NoAction"
     alias: "NoAction"
     annotations: "@noWarn(\"unused\")"
+    annotation_locations {
+    }
   }
 }
 actions {

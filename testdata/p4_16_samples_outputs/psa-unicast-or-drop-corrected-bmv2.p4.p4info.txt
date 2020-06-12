@@ -7,6 +7,10 @@ actions {
     name: "send_to_port"
     alias: "send_to_port"
     annotations: "@noWarnUnused"
+    annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/build/p4include/psa.p4"
+      line: 487
+    }
   }
 }
 actions {
@@ -15,5 +19,9 @@ actions {
     name: "ingress_drop"
     alias: "ingress_drop"
     annotations: "@noWarnUnused"
+    annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/build/p4include/psa.p4"
+      line: 520
+    }
   }
 }

@@ -462,6 +462,10 @@ controller_packet_metadata {
     name: "packet_in"
     alias: "packet_in"
     annotations: "@controller_header(\"packet_in\")"
+    annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/testdata/p4_16_samples/v1model-p4runtime-most-types1.p4"
+      line: 1081
+    }
   }
   metadata {
     id: 1
@@ -475,6 +479,10 @@ controller_packet_metadata {
     name: "packet_out"
     alias: "packet_out"
     annotations: "@controller_header(\"packet_out\")"
+    annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/testdata/p4_16_samples/v1model-p4runtime-most-types1.p4"
+      line: 1086
+    }
   }
   metadata {
     id: 1

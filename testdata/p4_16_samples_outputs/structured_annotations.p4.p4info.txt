@@ -25,6 +25,11 @@ tables {
           int64_value: 11
         }
       }
+      source_location {
+        file: "/usr/local/google/home/smolkaj/src/p4c/testdata/p4_16_samples/structured_annotations.p4"
+        line: 915
+        column: 4
+      }
     }
     structured_annotations {
       name: "MixedKV"
@@ -48,6 +53,11 @@ tables {
           }
         }
       }
+      source_location {
+        file: "/usr/local/google/home/smolkaj/src/p4c/testdata/p4_16_samples/structured_annotations.p4"
+        line: 916
+        column: 4
+      }
     }
   }
   action_refs {
@@ -59,6 +69,11 @@ tables {
           int64_value: 1
         }
       }
+      source_location {
+        file: "/usr/local/google/home/smolkaj/src/p4c/testdata/p4_16_samples/structured_annotations.p4"
+        line: 920
+        column: 12
+      }
     }
   }
   action_refs {
@@ -69,6 +84,11 @@ tables {
         expressions {
           int64_value: 2
         }
+      }
+      source_location {
+        file: "/usr/local/google/home/smolkaj/src/p4c/testdata/p4_16_samples/structured_annotations.p4"
+        line: 922
+        column: 12
       }
     }
   }
@@ -83,6 +103,10 @@ actions {
     name: "NoAction"
     alias: "NoAction"
     annotations: "@noWarn(\"unused\")"
+    annotation_locations {
+      file: "/usr/local/google/home/smolkaj/src/p4c/build/p4include/core.p4"
+      line: 90
+    }
   }
 }
 actions {

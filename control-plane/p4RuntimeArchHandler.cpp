@@ -115,6 +115,15 @@ int64_t getTableSize(const IR::P4Table* table) {
     return tableSize == 0 ? defaultTableSize : tableSize;
 }
 
+p4configv1::SourceLocation
+serializeSourceLocation(const Util::SourceInfo& source_info) {
+    p4configv1::SourceLocation src_loc;
+    src_loc.set_file(source_info.getSourceFile());
+    src_loc.set_line(source_info.getStart().getLineNumber());
+    src_loc.set_column(source_info.getStart().getColumnNumber());
+    return src_loc;
+}
+
 std::string serializeOneAnnotation(const IR::Annotation* annotation) {
     // we do not need custom serialization logic here: the P4Info should include
     // the annotation as it was in P4.
@@ -159,6 +168,8 @@ void serializeOneStructuredAnnotation(
     const IR::Annotation* annotation,
     p4configv1::StructuredAnnotation* structuredAnnotation) {
     structuredAnnotation->set_name(annotation->name.name);
+    *structuredAnnotation->mutable_source_location() =
+        serializeSourceLocation(annotation->getSourceInfo());
     switch (annotation->annotationKind()) {
         case IR::Annotation::Kind::StructuredEmpty:
             // nothing to do, body oneof should be empty.

@@ -239,6 +239,10 @@ void forAllEvaluatedBlocks(const IR::Block* block, Func function) {
     }
 }
 
+/// Serialize `Util::SourceInfo` to P4Runtime `SourceLocation` Protobuf message.
+::p4::config::v1::SourceLocation
+serializeSourceLocation(const Util::SourceInfo& source_info);
+
 /// Serialize an unstructured @annotation to a string.
 std::string serializeOneAnnotation(const IR::Annotation* annotation);
 
@@ -278,6 +282,8 @@ void addAnnotations(Message* message, const IR::IAnnotated* annotated, UnaryPred
         if (p(annotation->name)) continue;
 
         message->add_annotations(serializeOneAnnotation(annotation));
+        *message->add_annotation_locations() =
+            serializeSourceLocation(annotation->getSourceInfo());
     }
 }
 

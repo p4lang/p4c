@@ -9,7 +9,7 @@ actions {
     annotations: "@noWarnUnused"
     annotation_locations {
       file: "/usr/local/google/home/smolkaj/src/p4c/build/p4include/psa.p4"
-      line: 487
+      line: 488
     }
   }
 }
@@ -21,7 +21,24 @@ actions {
     annotations: "@noWarnUnused"
     annotation_locations {
       file: "/usr/local/google/home/smolkaj/src/p4c/build/p4include/psa.p4"
-      line: 520
+      line: 521
     }
   }
+}
+registers {
+  preamble {
+    id: 376043845
+    name: "cIngress.regfile"
+    alias: "regfile"
+  }
+  type_spec {
+    bitstring {
+      bit {
+        bitwidth: 48
+      }
+    }
+  }
+  size: 128
+}
+type_info {
 }
