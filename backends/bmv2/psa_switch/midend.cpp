@@ -73,6 +73,8 @@ class PsaEnumOn32Bits : public P4::ChooseEnumRepresentation {
     bool convert(const IR::Type_Enum* type) const override {
         if (type->name == "PSA_PacketPath_t")
             return true;
+        if (type->name == "PSA_MeterColor_t")
+            return true;
         if (type->srcInfo.isValid()) {
             auto sourceFile = type->srcInfo.getSourceFile();
             if (sourceFile.endsWith(filename))
@@ -103,6 +105,9 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options, std::ostream* outStre
             return true;
         if (em->originalExternType->name.name == "Register" ||
                 em->method->name.name == "read")
+            return false;
+        if (em->originalExternType->name.name == "Meter" &&
+                em->method->name.name == "execute")
             return false;
         return true;
     };

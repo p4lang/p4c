@@ -619,21 +619,24 @@ Util::IJson* ExternConverter_Meter::convertExternObject(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
-    if (mc->arguments->size() != 2) {
+    if (mc->arguments->size() != 1 && mc->arguments->size() != 2) {
         modelError("Expected 2 arguments for %1%", mc);
         return nullptr;
     }
-    auto primitive = mkPrimitive("execute_meter");
+    auto primitive = mkPrimitive("_" + em->originalExternType->name +
+                                 "_" + em->method->name);
     auto parameters = mkParameters(primitive);
     primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
     auto mtr = new Util::JsonObject();
-    mtr->emplace("type", "meter_array");
+    mtr->emplace("type", "extern");
     mtr->emplace("value", em->object->controlPlaneName());
     parameters->append(mtr);
+    if (mc->arguments->size() == 2) {
+        auto result = ctxt->conv->convert(mc->arguments->at(1)->expression);
+        parameters->append(result);
+    }
     auto index = ctxt->conv->convert(mc->arguments->at(0)->expression);
     parameters->append(index);
-    auto result = ctxt->conv->convert(mc->arguments->at(1)->expression);
-    parameters->append(result);
     return primitive;
 }
 
