@@ -4,6 +4,8 @@
 
 set -e  # Exit on error.
 
+export P4C_PYTHON3="python3" # Python3 is required for p4c to run, P4C_DEPS would otherwise uninstall it
+
 export P4C_DEPS="bison \
              build-essential \
              cmake \
@@ -18,7 +20,6 @@ export P4C_DEPS="bison \
              libgmp-dev \
              pkg-config \
              python \
-             python3 \
              python3-pip \
              python3-setuptools \
              tcpdump"
@@ -51,6 +52,7 @@ export P4C_PIP3_PACKAGES="ipaddr \
 apt-get update
 apt-get install -y --no-install-recommends \
   ${P4C_DEPS} \
+  ${P4C_PYTHON3} \
   ${P4C_EBPF_DEPS} \
   ${P4C_RUNTIME_DEPS} \
   git
