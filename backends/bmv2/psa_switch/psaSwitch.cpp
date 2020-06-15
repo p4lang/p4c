@@ -903,7 +903,7 @@ void ExternConverter_Meter::convertExternInstance(
     // is_direct
     auto is_direct = new Util::JsonObject();
     is_direct->emplace("name", "is_direct");
-    is_direct->emplace("type", "string");
+    is_direct->emplace("type", "expression");
     is_direct->emplace("value", "false");
     arr->append(is_direct);
 
