@@ -43,76 +43,94 @@ class DpdkMovStatement : DpdkAsmStatement {
 
 // IR classes for DPDK assembly
 class DpdkAddStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkAndStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkApplyStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkEmitStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkExtractStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkJmpStatement : DpdkAsmStatement {
     cstring label;
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkJmpActionStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkJmpHitStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkJmpMissStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 
-// IR classes for DPDK assembly
-class DpdkAddStatement : DpdkAsmStatement {
-#nodbprint
-}
 class DpdkRxStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkTxStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkShlStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkShrStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkSubStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkOrStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkXorStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkValidateStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkInvalidateStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkExternObjStatement : DpdkAsmStatement {
     Expression methodCall;
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkExternFuncStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkReturnStatement : DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkLabelStatement : DpdkAsmStatement {
     cstring label;
+    std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
