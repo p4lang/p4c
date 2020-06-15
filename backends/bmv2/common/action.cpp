@@ -185,8 +185,8 @@ ActionConverter::convertActionParams(const IR::ParameterList *parameters,
         auto param = new Util::JsonObject();
         param->emplace("name", p->name);
         auto type = ctxt->typeMap->getType(p, true);
-        //TODO: added IR::Type_Enum here to support PSA_MeterColor_t
-        //should re-consider how to support action parameters that is neither bit<> nor int<>
+        // TODO: added IR::Type_Enum here to support PSA_MeterColor_t
+        // should re-consider how to support action parameters that is neither bit<> nor int<>
         if (!(type->is<IR::Type_Bits>() || type->is<IR::Type_Enum>()))
             ::error(ErrorType::ERR_INVALID,
                     "%1%: action parameters must be bit<> or int<> on this target", p);
