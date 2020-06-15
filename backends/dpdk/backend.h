@@ -42,43 +42,63 @@ limitations under the License.
 
 namespace DPDK {
 
-// in-memory representation of dpdk assembly
-struct Asm {
-    std::vector<cstring> header_config;
-    std::vector<cstring> metadata_config;
-    std::vector<cstring> table_config;
-    std::vector<cstring> action_config;
-    std::vector<cstring> instr_config;
-};
-
-std::ostream& operator<<(std::ostream& out, const Asm& asm_);
-
-class DumpAsm : public Inspector {
-    BMV2::PsaProgramStructure* structure;
-    BMV2::JsonObjects *json;
-    Asm* asm_;
-
-    int next_reg_id;
+class ConvertToDpdkProgram : public Transform {
+    int next_reg_id = 0;
+    int next_label_id = 0;
     std::map<int, cstring> reg_id_to_name;
     std::map<cstring, int> reg_name_to_id;
     std::map<cstring, cstring> symbol_table;
 
-    std::map<cstring, Util::JsonObject*> parsers;
+    BMV2::PsaProgramStructure& structure;
+    const IR::DpdkAsmProgram* dpdk_program;
 
  public:
-    DumpAsm(BMV2::PsaProgramStructure* st, BMV2::JsonObjects* json, Asm* asm_) :
-        structure(st), json(json), asm_(asm_) {}
+    ConvertToDpdkProgram(BMV2::PsaProgramStructure& structure) : structure(structure) {}
 
+    const IR::DpdkAsmProgram* create();
+    const IR::DpdkAsmStatement* createListStatement(cstring name,
+            std::initializer_list<IR::IndexedVector<IR::DpdkAsmStatement>> statements);
     int next_free_reg() { return next_reg_id++; }
-    bool preorder(const IR::P4Control* c) override;
-    bool preorder(const IR::P4Parser* p) override;
-    profile_t init_apply(const IR::Node*) override;
-    void end_apply() override;
+    const IR::Node* preorder(IR::P4Program* p) override;
+    const IR::DpdkAsmProgram* getDpdkProgram() { return dpdk_program; }
+};
+
+class ConvertToDpdkParser : public Inspector {
+    IR::IndexedVector<IR::DpdkAsmStatement> instructions;
+ public:
+    ConvertToDpdkParser() {}
+    IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() { return instructions; }
+    bool preorder(const IR::P4Parser* a) override;
+    bool preorder(const IR::ParserState* s) override;
+};
+
+class ConvertToDpdkControl : public Inspector {
+    int next_reg_id = 0;
+    int next_label_id = 0;
+    IR::IndexedVector<IR::DpdkAsmStatement> instructions;
+    IR::IndexedVector<IR::DpdkAsmStatement> tables;
+    IR::IndexedVector<IR::DpdkAsmStatement> actions;
+ public:
+    ConvertToDpdkControl() {}
+
+    IR::IndexedVector<IR::DpdkAsmStatement> getTables() { return tables; }
+    IR::IndexedVector<IR::DpdkAsmStatement> getActions() { return actions; }
+    IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() { return instructions; }
+
+    bool preorder(const IR::P4Action* a) override;
+    bool preorder(const IR::IfStatement* s) override;
+    bool preorder(const IR::AssignmentStatement*) override;
+    bool preorder(const IR::ReturnStatement* ) override;
+    bool preorder(const IR::MethodCallStatement* ) override;
+
+    void add_inst(const IR::DpdkAsmStatement* s) { instructions.push_back(s); }
+    void add_table(const IR::DpdkAsmStatement* t) { tables.push_back(t); }
+    void add_action(const IR::DpdkAsmStatement* a) { actions.push_back(a); }
 };
 
 class PsaSwitchBackend : public BMV2::Backend {
     BMV2::BMV2Options &options;
-    Asm asm_;
+    const IR::DpdkAsmProgram* dpdk_program = nullptr;
 
  public:
     void convert(const IR::ToplevelBlock* tlb) override;

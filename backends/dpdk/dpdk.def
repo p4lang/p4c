@@ -1,0 +1,118 @@
+class DpdkHeaderType : Type_Header {
+    std::ostream& toSexp(std::ostream& out) const;
+#nodbprint
+}
+
+class DpdkStructType : Type_Struct {
+    std::ostream& toSexp(std::ostream& out) const;
+#nodbprint
+}
+
+abstract DpdkAsmStatement {
+    std::ostream& toSexp(std::ostream& out) const;
+#nodbprint
+}
+
+class DpdkAction : P4Action {
+    std::ostream& toSexp(std::ostream& out) const;
+#nodbprint
+}
+
+// Toplevel Assembly representation
+class DpdkAsmProgram : P4Program {
+    optional inline IndexedVector<DpdkHeaderType> headerType;
+    optional inline IndexedVector<DpdkStructType> structType;
+    optional inline IndexedVector<DpdkAsmStatement> statements;
+    std::ostream& toSexp(std::ostream& out) const;
+#nodbprint
+}
+
+class DpdkListStatement : DpdkAsmStatement {
+    optional cstring name;
+    optional inline IndexedVector<DpdkAsmStatement> statements;
+    std::ostream& toSexp(std::ostream& out) const;
+#nodbprint
+}
+
+class DpdkMovStatement : DpdkAsmStatement {
+    Expression left;
+    Expression right;
+    std::ostream& toSexp(std::ostream& out) const;
+#nodbprint
+}
+
+// IR classes for DPDK assembly
+class DpdkAddStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkAndStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkApplyStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkEmitStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkExtractStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkJmpStatement : DpdkAsmStatement {
+    cstring label;
+#nodbprint
+}
+class DpdkJmpActionStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkJmpHitStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkJmpMissStatement : DpdkAsmStatement {
+#nodbprint
+}
+
+// IR classes for DPDK assembly
+class DpdkAddStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkRxStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkTxStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkShlStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkShrStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkSubStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkOrStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkXorStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkValidateStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkInvalidateStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkExternObjStatement : DpdkAsmStatement {
+    Expression methodCall;
+#nodbprint
+}
+class DpdkExternFuncStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkReturnStatement : DpdkAsmStatement {
+#nodbprint
+}
+class DpdkLabelStatement : DpdkAsmStatement {
+    cstring label;
+#nodbprint
+}

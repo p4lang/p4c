@@ -16,6 +16,8 @@ limitations under the License.
 #include "backend.h"
 #include "backends/bmv2/psa_switch/psaSwitch.h"
 #include "ir/ir.h"
+#include "sexp.h"
+#include "lib/stringify.h"
 
 namespace DPDK {
 
@@ -68,79 +70,148 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     main->apply(*parsePsaArch);
     program = toplevel->getProgram();
 
+    auto convertToDpdk = new ConvertToDpdkProgram(structure);
     PassManager toAsm = {
         new BMV2::DiscoverStructure(&structure),
         new BMV2::InspectPsaProgram(refMap, typeMap, &structure),
-        new BMV2::ConvertPsaToJson(refMap, typeMap, toplevel, json, &structure),
-        new DumpAsm(&structure, json, &asm_),
+        // convert to assembly program
+        convertToDpdk,
     };
 
     program->apply(toAsm);
-}
-
-Visitor::profile_t DumpAsm::init_apply(const IR::Node* node) {
-    for (auto p : *json->parsers) {
-        // back from json is difficult
-        std::cout << p->to<Util::JsonObject>()->get("name")->toString() << std::endl;
-        parsers.emplace(p->to<Util::JsonObject>()->get("name")->toString(), p->to<Util::JsonObject>());
-    }
-    return Inspector::init_apply(node);
+    dpdk_program = convertToDpdk->getDpdkProgram();
+    if (!dpdk_program) return;
+    // additional passes to optimize DPDK assembly
+    // PassManager optimizeAsm = { }
+    //program->apply(DumpAsm());
 }
 
 void PsaSwitchBackend::codegen(std::ostream& out) const {
-    out << asm_ << std::endl;
+    out << dpdk_program << std::endl;
 }
 
-bool DumpAsm::preorder(const IR::P4Parser* p) {
-    LOG1("parser " << p->name.name);
-    if (parsers.count(p->name.name)) {
-        LOG1(p->name.name);
+const IR::DpdkAsmStatement* ConvertToDpdkProgram::createListStatement(cstring name,
+        std::initializer_list<IR::IndexedVector<IR::DpdkAsmStatement>> list) {
+
+    auto stmts = new IR::IndexedVector<IR::DpdkAsmStatement>();
+    for (auto l : list) {
+        stmts->append(l);
     }
+    return new IR::DpdkListStatement(name, *stmts);
+}
+
+const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
+    IR::IndexedVector<IR::DpdkHeaderType> headerType;
+    for (auto kv : structure.header_types) {
+        auto h = kv.second;
+        auto ht = new IR::DpdkHeaderType(h->srcInfo, h->name, h->annotations, h->fields);
+        headerType.push_back(ht);
+    }
+    IR::IndexedVector<IR::DpdkStructType> structType;
+    for (auto kv : structure.metadata_types) {
+        auto s = kv.second;
+        auto st = new IR::DpdkStructType(s->srcInfo, s->name, s->annotations, s->fields);
+        structType.push_back(st);
+    }
+    IR::IndexedVector<IR::DpdkAsmStatement> statements;
+    auto ingress_parser_converter = new ConvertToDpdkParser();
+    auto egress_parser_converter = new ConvertToDpdkParser();
+    for (auto kv : structure.parsers) {
+        if (kv.first == "ingress")
+            kv.second->apply(*ingress_parser_converter);
+        else if (kv.first == "egress")
+            kv.second->apply(*egress_parser_converter);
+        else
+            BUG("Unknown parser %s", kv.second->name);
+    }
+    auto ingress_converter = new ConvertToDpdkControl();
+    auto egress_converter = new ConvertToDpdkControl();
+    for (auto kv : structure.pipelines) {
+        if (kv.first == "ingress")
+            kv.second->apply(*ingress_converter);
+        else if (kv.first == "egress")
+            kv.second->apply(*egress_converter);
+        else
+            BUG("Unknown control block %s", kv.second->name);
+    }
+    auto ingress_deparser_converter = new ConvertToDpdkControl();
+    auto egress_deparser_converter = new ConvertToDpdkControl();
+    for (auto kv : structure.deparsers) {
+        if (kv.first == "ingress")
+            kv.second->apply(*ingress_deparser_converter);
+        else if (kv.first == "egress")
+            kv.second->apply(*egress_deparser_converter);
+        else
+            BUG("Unknown deparser block %s", kv.second->name);
+    }
+    statements.append(ingress_converter->getActions());
+    statements.append(ingress_converter->getTables());
+
+    // ingress processing
+    auto ingress_statements = createListStatement("ingress",
+            { ingress_parser_converter->getInstructions(),
+              ingress_converter->getInstructions(),
+              ingress_deparser_converter->getInstructions() });
+    statements.push_back(ingress_statements);
+
+    statements.append(egress_converter->getActions());
+    statements.append(egress_converter->getTables());
+
+    // egress processing
+    auto egress_statements = createListStatement("egress",
+            { egress_parser_converter->getInstructions(),
+              egress_converter->getInstructions(),
+              egress_deparser_converter->getInstructions() });
+    statements.push_back(egress_statements);
+
+    return new IR::DpdkAsmProgram(headerType, structType, statements);
+}
+
+const IR::Node* ConvertToDpdkProgram::preorder(IR::P4Program* prog) {
+    dpdk_program = create();
+    return prog;
+}
+
+bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
     return true;
 }
 
-bool DumpAsm::preorder(const IR::P4Control* c) {
-    //
+bool ConvertToDpdkParser::preorder(const IR::ParserState* s) {
     return true;
 }
 
-void DumpAsm::end_apply() {
-    for (auto h : structure->header_types) {
-        // translate to asm syntax
-        asm_->header_config.push_back(h.first);
-    }
-    for (auto m : structure->metadata_types) {
-        asm_->metadata_config.push_back(m.first);
-    }
-    // visit P4::Control to collect tables
-    for (auto p : structure->pipelines) {
-    }
-    // visit P4::Parser to collect parsers
-    for (auto p : structure->parsers) {
-    }
-    // visit P4::Control to collect deparsers
-    for (auto d : structure->deparsers) {
-    }
+bool ConvertToDpdkControl::preorder(const IR::P4Action* a) {
+    return true;
 }
 
-// dump asm object to text
-std::ostream& operator<<(std::ostream& out, const Asm& asm_) {
-    out << "# struct " << std::endl;
-    for (auto s : asm_.metadata_config)
-        out << s << std::endl;;
-    out << "# header " << std::endl;
-    for (auto h : asm_.header_config)
-        out << h << std::endl;
-    out << "# table " << std::endl;
-    for (auto t : asm_.table_config)
-        out << t << std::endl;
-    out << "# action " << std::endl;
-    for (auto a : asm_.action_config)
-        out << a << std::endl;
-    out << "# instr " << std::endl;
-    for (auto i : asm_.instr_config)
-        out << i << std::endl;
-    return out;
+bool ConvertToDpdkControl::preorder(const IR::IfStatement* stmt) {
+    auto name = Util::printf_format("tmp_%d", next_reg_id++);
+    auto cond = new IR::DpdkMovStatement(new IR::PathExpression(IR::ID(name)), stmt->condition);
+    add_inst(cond);
+    //auto true_label  = Util::printf_format("label_%d", next_label_id++);
+    //auto false_label = Util::printf_format("label_%d", next_label_id++);
+    //auto end_label = Util::printf_format("label_%d", next_label_id++);
+    //add_inst(new IR::DpdkJmpStatement(true_label));
+    //add_inst(new IR::DpdkJmpStatement(false_label));
+    //add_inst(new IR::DpdkLabelStatement(true_label));
+    //visit(stmt->ifTrue);
+    //add_inst(new IR::DpdkLabelStatement(false_label));
+    //visit(stmt->ifFalse);
+    return false;
+}
+
+bool ConvertToDpdkControl::preorder(const IR::MethodCallStatement* stmt) {
+    //add_inst(new IR::DpdkExternObjStatement(stmt->methodCall));
+    return false;
+}
+
+bool ConvertToDpdkControl::preorder(const IR::AssignmentStatement* stmt) {
+    //add_inst(new IR::DpdkMovStatement(stmt->left, stmt->right));
+    return true;
+}
+
+bool ConvertToDpdkControl::preorder(const IR::ReturnStatement* stmt) {
+    return true;
 }
 
 }  // namespace DPDK

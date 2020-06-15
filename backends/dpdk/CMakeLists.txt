@@ -31,6 +31,7 @@ set(P4C_DPDK_SOURCES
     ../bmv2/common/programStructure.cpp
     ../bmv2/common/sharedActionSelectorCheck.cpp
     ../bmv2/psa_switch/psaSwitch.cpp
+    sexp.cpp
     backend.cpp
     main.cpp
     )
@@ -59,8 +60,11 @@ set(P4C_DPDK_HEADERS
     ../bmv2/common/programStructure.h
     ../bmv2/common/sharedActionSelectorCheck.h
     ../bmv2/psa_switch/psaSwitch.h
+    sexp.h
     backend.h
     )
+
+set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/dpdk.def PARENT_SCOPE)
 
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_DPDK_SOURCES}")
 add_executable(p4c-dpdk ${P4C_DPDK_SOURCES})
