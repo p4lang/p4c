@@ -134,7 +134,7 @@ metadata intrinsic_metadata_t intrinsic_metadata;
 - `ingress_global_timestamp`: a timestamp, in microseconds, set when the packet
 shows up on ingress. The clock is set to 0 every time the switch starts. This
 field can be read directly from either pipeline (ingress and egress) but should
-not be written to.
+not be written to.  See Section [BMv2 timestamp implementation notes](#BMv2-timestamp-implementation-notes) for more details.
 - `egress_global_timestamp`: a timestamp, in microseconds, set when the packet
 starts egress processing. The clock is the same as for
 `ingress_global_timestamp`. This field should only be read from the egress
@@ -1032,3 +1032,62 @@ you have two actions for table `t` where one has the action
 `m.read(result_field2)`, or if both of those calls are in the same
 action.  All calls to the `read()` method for `m` must have the same
 result parameter where the result is written.
+
+
+### BMv2 timestamp implementation notes
+
+All timestamps in BMv2 as of 2020-Jun-14 are in units of
+microseconds, and they all begin at 0 when the process begins,
+e.g. when `simple_switch` or `simple_switch_grpc` begins.
+
+Thus if one starts multiple `simple_switch` processes, either on the
+same system, or different systems, it is highly unlikely that their
+timestamps will be within 1 microsecond of each other.  Timestamp
+values from switch #1 could easily be X microseconds later than, or
+earlier than, switch #2, and this time difference between pairs of
+switches could change from one time of starting a multi-switch system,
+versus another time.  While it is possible to start pairs of
+`simple_switch` processes where X would be in the range -10 to +10
+microseconds, that would almost certainly be a lucky and unlikely
+chance that leads to such close timestamps.  Differences within plus
+or minus 2,000,000 microseconds should be fairly straightforward to
+achieve, if you go to at least a little bit of effort to start the
+processes at the same second as each other.
+
+Many commercial switch and NIC vendors implement standards like PTP
+([Precision Time
+Protocol](https://en.wikipedia.org/wiki/Precision_Time_Protocol)), but
+`simple_switch` does not.
+
+If one wants to use `simple_switch` and have some form of more closely
+synchronized timestamps between different switches, you have several
+options:
+
++ Modify `simple_switch` code so that the `ingress_global_timestamp`
+  and other timestamp values are calculated from the local system
+  time, e.g. perhaps using a system call like `gettimeofday`.  Many
+  systems today use NTP ([Network Time
+  Protocol](https://en.wikipedia.org/wiki/Network_Time_Protocol)) to
+  synchronize their time to some time server, and according to the
+  Wikipedia article it can achieve better than one millisecond
+  accuracy on local area networks under ideal conditions, and to
+  within tens of milliseconds over the public Internet.  If your use
+  case can accomodate this much difference in the timestamps on
+  different switches, this method should require fairly low
+  development effort to implement.
++ Implement PTP in some combination of P4 program and control plane
+  software, and run that on simple_switch.  This is likely to be a
+  significant amount of time and effort to achieve, and given the
+  variable latencies in software processing of packets in virtual
+  and/or physical Ethernet interfaces on typical hosts, it seems
+  unlikely that synchronization closer than tens or hundreds of
+  microseconds would be achievable.  Commercial PTP implementations
+  can achieve more tight synchronization because the PTP packet
+  handling is implemented within the Ethernet packet processing
+  hardware, very close to the physical transmission and reception of
+  the data between switches.
++ Implement a newer synchronization algorithm like
+  [HUYGENS](https://www.usenix.org/system/files/conference/nsdi18/nsdi18-geng.pdf).
+  This is likely to be at least as much development effort as
+  implementing PTP, but seems likely to be able to achieve tighter
+  time synchronization.
