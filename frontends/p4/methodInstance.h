@@ -77,6 +77,8 @@ class MethodInstance : public InstanceBase {
     const IR::Type_MethodBase* actualMethodType;
     /// For each callee parameter the corresponding argument
     ParameterSubstitution substitution;
+    /// Substitution of the type parameters
+    TypeVariableSubstitution       typeSubstitution;
 
     virtual bool isApply() const { return false; }
 
@@ -129,6 +131,7 @@ class ExternMethod final : public MethodInstance {
             originalExternType(originalExternType), actualExternType(actualExternType) {
         CHECK_NULL(method); CHECK_NULL(originalExternType); CHECK_NULL(actualExternType);
         bindParameters();
+        typeSubstitution.setBindings(expr, method->type->typeParameters, expr->typeArguments);
     }
     friend class MethodInstance;
  public:
@@ -148,8 +151,11 @@ class ExternFunction final : public MethodInstance {
                    const IR::Method* method,
                    const IR::Type_Method* originalMethodType,
                    const IR::Type_Method* actualMethodType) :
-            MethodInstance(expr, nullptr, originalMethodType, actualMethodType), method(method)
-    { CHECK_NULL(method); bindParameters(); }
+            MethodInstance(expr, nullptr, originalMethodType, actualMethodType), method(method) {
+        CHECK_NULL(method);
+        bindParameters();
+        typeSubstitution.setBindings(expr, method->type->typeParameters, expr->typeArguments);
+    }
     friend class MethodInstance;
  public:
     const IR::Method* method;
@@ -179,8 +185,12 @@ class FunctionCall final : public MethodInstance {
                  const IR::Function* function,
                  const IR::Type_Method* originalMethodType,
                  const IR::Type_Method* actualMethodType) :
-            MethodInstance(expr, nullptr, originalMethodType, actualMethodType), function(function)
-    { CHECK_NULL(function); bindParameters(); }
+            MethodInstance(expr, nullptr, originalMethodType, actualMethodType), function(function) {
+        CHECK_NULL(function);
+        bindParameters();
+        typeSubstitution.setBindings(
+            function, function->type->typeParameters, expr->typeArguments);
+    }
     friend class MethodInstance;
  public:
     const IR::Function* function;
@@ -222,6 +232,8 @@ class ConstructorCall : public InstanceBase {
  public:
     /// For each callee parameter the corresponding argument
     ParameterSubstitution substitution;
+    TypeVariableSubstitution typeSubstitution;
+
     const IR::ConstructorCallExpression* cce;
     const IR::Vector<IR::Type>*          typeArguments;
     const IR::ParameterList*             constructorParameters;
@@ -261,6 +273,7 @@ class Instantiation : public InstanceBase {
  protected:
     void substitute() {
         substitution.populate(constructorParameters, constructorArguments);
+        typeSubstitution.setBindings(instance, typeParameters, typeArguments);
     }
 
  public:
@@ -273,7 +286,10 @@ class Instantiation : public InstanceBase {
     const IR::Vector<IR::Type>*    typeArguments;
     const IR::Vector<IR::Argument>*constructorArguments;
     const IR::ParameterList*       constructorParameters;
+    const IR::TypeParameters*      typeParameters;
     ParameterSubstitution          substitution;
+    TypeVariableSubstitution       typeSubstitution;
+
     static Instantiation* resolve(const IR::Declaration_Instance* instance,
                                   DeclarationLookup* refMap,
                                   TypeMap* typeMap);
@@ -288,6 +304,7 @@ class ExternInstantiation : public Instantiation {
         auto constructor = type->lookupConstructor(constructorArguments);
         BUG_CHECK(constructor, "%1%: could not find constructor", type);
         constructorParameters = constructor->type->parameters;
+        typeParameters = type->typeParameters;
         substitute();
     }
     const IR::Type_Extern* type;
@@ -300,6 +317,7 @@ class PackageInstantiation : public Instantiation {
                          const IR::Type_Package* package) :
             Instantiation(instance, typeArguments), package(package) {
         constructorParameters = package->getConstructorParameters();
+        typeParameters = package->typeParameters;
         substitute();
     }
     const IR::Type_Package*  package;
@@ -311,6 +329,7 @@ class ParserInstantiation : public Instantiation {
                         const IR::Vector<IR::Type>* typeArguments,
                         const IR::P4Parser* parser) :
             Instantiation(instance, typeArguments), parser(parser) {
+        typeParameters = parser->type->typeParameters;
         constructorParameters = parser->getConstructorParameters();
         substitute(); }
     const IR::P4Parser* parser;
@@ -322,6 +341,7 @@ class ControlInstantiation : public Instantiation {
                          const IR::Vector<IR::Type>* typeArguments,
                          const IR::P4Control* control) :
             Instantiation(instance, typeArguments), control(control) {
+        typeParameters = control->type->typeParameters;
         constructorParameters = control->getConstructorParameters();
         substitute(); }
     const IR::P4Control* control;

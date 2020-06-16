@@ -16,34 +16,35 @@ limitations under the License.
 
 #include "defaultArguments.h"
 #include "frontends/p4/methodInstance.h"
+#include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
 
 namespace P4 {
 
-class SubstituteTypeArguments : public Transform {
-    TypeMap *typeMap;
-
+namespace {
+class TypeNameSubstitutionVisitor : public TypeVariableSubstitutionVisitor {
+    const TypeMap* typeMap;
  public:
-    SubstituteTypeArguments(TypeMap* typeMap): typeMap(typeMap) {
-        CHECK_NULL(typeMap); setName("SubstituteTypeArguments");
-    }
+    explicit TypeNameSubstitutionVisitor(
+        const TypeVariableSubstitution *bindings, const TypeMap* typeMap)
+            : TypeVariableSubstitutionVisitor(bindings, true), typeMap(typeMap)
+    { CHECK_NULL(typeMap); setName("TypeNameSubstitution"); }
 
-    const IR::Node* preorder(IR::Type_Name* type) override {
-        auto t = typeMap->getTypeType(getOriginal(), true);
-        if (auto tv = t->to<IR::Type_Var>()) {
-            auto subst = typeMap->getType(tv);
-            if (subst != nullptr)
-                return subst->getP4Type();
-        }
-        return type;
+    const IR::Node* preorder(IR::Type_Name* tn) override {
+        auto t = typeMap->getTypeType(getOriginal<IR::Type>(), true);
+        if (auto tv = t->to<IR::ITypeVar>())
+            return replacement(tv, tn)->to<IR::Type>()->getP4Type();
+        return tn;
     }
 };
+}  // namespace
 
 /// Scans a parameter substitution and returns the new arguments to use if some
 /// parameters have default values.
 /// Returns nullptr if no arguments need to be changed.
 static const IR::Vector<IR::Argument>* fillDefaults(
-    TypeMap* typeMap,
-    const ParameterSubstitution* subst) {
+    const TypeMap* typeMap,
+    const ParameterSubstitution* subst,
+    const TypeVariableSubstitution* tsv) {
     auto args = new IR::Vector<IR::Argument>();
     bool changed = false;
     for (auto param : *subst->getParametersInOrder()) {
@@ -56,12 +57,10 @@ static const IR::Vector<IR::Argument>* fillDefaults(
         } else if (param->defaultValue != nullptr) {
             // Parameter with default value: add a corresponding argument
             const IR::Expression* value = param->defaultValue;
-            SubstituteTypeArguments sta(typeMap);
-            value = param->defaultValue->apply(sta);
-            if (value != param->defaultValue) {
-                arg = new IR::Argument(param->srcInfo, param->name, value);
-                changed = true;
-            }
+            TypeNameSubstitutionVisitor tsvv(tsv, typeMap);
+            value = param->defaultValue->apply(tsvv);
+            arg = new IR::Argument(param->srcInfo, param->name, value);
+            changed = true;
         }
         args->push_back(arg);
     }
@@ -73,7 +72,7 @@ static const IR::Vector<IR::Argument>* fillDefaults(
 
 const IR::Node* DoDefaultArguments::postorder(IR::MethodCallExpression* mce) {
     auto mi = MethodInstance::resolve(mce, refMap, typeMap);
-    auto args = fillDefaults(typeMap, &mi->substitution);
+    auto args = fillDefaults(typeMap, &mi->substitution, &mi->typeSubstitution);
     if (args != nullptr)
         mce->arguments = args;
     return mce;
@@ -81,7 +80,7 @@ const IR::Node* DoDefaultArguments::postorder(IR::MethodCallExpression* mce) {
 
 const IR::Node* DoDefaultArguments::postorder(IR::ConstructorCallExpression* cce) {
     auto cc = ConstructorCall::resolve(cce, refMap, typeMap);
-    auto args = fillDefaults(typeMap, &cc->substitution);
+    auto args = fillDefaults(typeMap, &cc->substitution, &cc->typeSubstitution);
     if (args != nullptr)
         cce->arguments = args;
     return cce;
@@ -89,7 +88,7 @@ const IR::Node* DoDefaultArguments::postorder(IR::ConstructorCallExpression* cce
 
 const IR::Node* DoDefaultArguments::postorder(IR::Declaration_Instance* inst) {
     auto ii = Instantiation::resolve(inst, refMap, typeMap);
-    auto args = fillDefaults(typeMap, &ii->substitution);
+    auto args = fillDefaults(typeMap, &ii->substitution, &ii->typeSubstitution);
     if (args != nullptr)
         inst->arguments = args;
     return inst;
