@@ -1,3 +1,18 @@
+// define globals
+(defm local_metadata (struct local_metadata_t))
+(defv wcmp_group_id_valid (bit 1))
+(defv wcmp_group_id_value (bit 12))
+(defv nexthop_id_valid (bit 1))
+(defv nexthop_id_value (bit 10))
+(defv router_interface_id_valid (bit 1))
+(defv route_interface_id_value (bit 10))
+(defv neighbor_id_valid (bit 1))
+(defv neighbor_id_value (bit 10))
+(defv HASH_BASE_CRC16 (bit 1))
+(defv HASH_MAX_CRC16 (bit 14))
+(defv wcmp_selector_input (bit 16))
+
+// define header format
 (header ethernet_t
  (field dst_addr (bit 48))
  (field src_addr (bit 48))
@@ -63,6 +78,8 @@
  (field egress_port (bit 32))
  (field submit_to_ingress (bit 1))
  (field unused_pad (bit 7)))
+
+// define structs
 (struct headers_t
  (field ethernet ethernet_t)
  (field ipv4 ipv4_t)
@@ -75,12 +92,14 @@
  (field vrf_id (bit 10))
  (field l4_src_port (bit 16))
  (field l4_dst_port (bit 16)))
+
+//define enum
 (enum parser_error
  (declare type (bit 8))
  ((UnhandledIPv4Options 1)
   (BadIPv4HeaderChecksum 2)))
-(defp packet_parser
- ((extract headers.ethernet)))
+
+// define actions and tables. TODO: resolve name conflict
 (defa set_dst_mac
  ((mov headers.ethernet.dst_addr dst_mac)))
 (deft neighboar_table
@@ -124,8 +143,10 @@
  (key local_metadata.vrf_id exact)
  (key headers.ipv6.dst_addr lpm)
  (actions (drop set_nexthop_id set_wcmp_group_id)))
-(defc ingress
- ((apply acl_set_vrf_set_vrt_table)
+
+ //define control flow, ingress and egress will be squashed together
+(defc 
+  (apply acl_set_vrf_set_vrt_table)
   (mov routing_wcmp_group_id_valid false)
   (mov routing_nexthop_id_valid false)
   (mov routing_router_interface_id_valid false)
@@ -171,22 +192,12 @@
   (jmp tmp_2 lbl_9)
   (add tmp_3 headers.ipv6.hop_limit 255)
   (mov headers.ipv6.hop_limit tmp_3)
-  (label lbl_9)))
-(defc packet_deparser
- ((emit headers.ethernet)
+  (label lbl_9)
+  (emit headers.ethernet)
   (emit headers.ipv4)
   (emit headers.ipv6)
   (emit headers.arp)
   (emit headers.icmp)
   (emit headers.tcp)
-  (emit headers.udp)))
-(defc egress ())
-(defp egress_parser ())
-(defc egress_deparser
- ((emit headers.ethernet)
-  (emit headers.ipv4)
-  (emit headers.ipv6)
-  (emit headers.icmp)
-  (emit headers.tcp)
   (emit headers.udp)
-  (emit headers.arp)))
+)
