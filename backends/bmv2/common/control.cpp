@@ -352,7 +352,9 @@ ControlConverter::convertTable(const CFG::TableNode* node,
             // 1) if there is at least one RANGE field, then the table is RANGE
             // 2) if there is at least one TERNARY or OPTIONAL field, then the table is TERNARY
             // 3) if there is a LPM field, then the table is LPM
-            // 4) otherwise the table is EXACT
+            // 4) if there is a LPM field, then the table is ternary or EXACT
+            // TODO: Do we also check if table is range or optional in 4?
+            LOG3("Tbl match key: " << match_type << " " << table_match_type);
             if (match_type != table_match_type) {
                 if (match_type == BMV2::MatchImplementation::rangeMatchTypeName)
                     table_match_type = BMV2::MatchImplementation::rangeMatchTypeName;
@@ -361,7 +363,8 @@ ControlConverter::convertTable(const CFG::TableNode* node,
                     table_match_type != BMV2::MatchImplementation::rangeMatchTypeName)
                     table_match_type = corelib.ternaryMatch.name;
                 if (match_type == corelib.lpmMatch.name &&
-                    table_match_type == corelib.exactMatch.name)
+                    (table_match_type == corelib.exactMatch.name ||
+                     table_match_type == corelib.ternaryMatch.name))
                     table_match_type = corelib.lpmMatch.name;
             } else if (match_type == corelib.lpmMatch.name) {
                 ::error(ErrorType::ERR_UNSUPPORTED,
