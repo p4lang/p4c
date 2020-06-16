@@ -9,10 +9,11 @@ static void print(std::ostream& out, const IR::DpdkAsmStatement* s) {
         out << s->to<IR::DpdkJmpStatement>() << std::endl;
     else if (s->is<IR::DpdkLabelStatement>())
         out << s->to<IR::DpdkLabelStatement>() << std::endl;
-    if (s->is<IR::DpdkMovStatement>())
+    else if (s->is<IR::DpdkMovStatement>())
         out << s->to<IR::DpdkMovStatement>() << std::endl;
-    else if (s->is<IR::DpdkExternObjStatement>())
-        out << s->to<IR::DpdkExternObjStatement>() << std::endl;
+    else if (s->is<IR::DpdkExternObjStatement>()) {
+        LOG1("print extern ");
+        out << s->to<IR::DpdkExternObjStatement>() << std::endl; }
     else if (s->is<IR::DpdkListStatement>())
         out << s->to<IR::DpdkListStatement>() << std::endl;
     else
@@ -25,8 +26,18 @@ std::ostream& IR::DpdkAsmProgram::toSexp(std::ostream& out) const {
     for (auto s : structType)
         out << s << std::endl;
     for (auto s : statements) {
-        out << "  ";
-        ::print(out, s);
+        if (s->is<IR::DpdkJmpStatement>())
+            out << s->to<IR::DpdkJmpStatement>() << std::endl;
+        else if (s->is<IR::DpdkLabelStatement>())
+            out << s->to<IR::DpdkLabelStatement>() << std::endl;
+        else if (s->is<IR::DpdkMovStatement>())
+            out << s->to<IR::DpdkMovStatement>() << std::endl;
+        else if (s->is<IR::DpdkExternObjStatement>())
+            out << s->to<IR::DpdkExternObjStatement>() << std::endl;
+        else if (s->is<IR::DpdkListStatement>())
+            out << s->to<IR::DpdkListStatement>() << std::endl;
+        else
+            BUG("Statement %s unsupported", s);
         out << std::endl;
     }
     return out;
@@ -82,9 +93,20 @@ std::ostream& IR::DpdkStructType::toSexp(std::ostream& out) const {
 
 std::ostream& IR::DpdkListStatement::toSexp(std::ostream& out) const {
     out << "(def_process " << name << std::endl;
-    for (auto h : statements) {
+    for (auto s : statements) {
         out << "  ";
-        ::print(out, h);
+        if (s->is<IR::DpdkJmpStatement>())
+            out << s->to<IR::DpdkJmpStatement>() << std::endl;
+        else if (s->is<IR::DpdkLabelStatement>())
+            out << s->to<IR::DpdkLabelStatement>() << std::endl;
+        else if (s->is<IR::DpdkMovStatement>())
+            out << s->to<IR::DpdkMovStatement>() << std::endl;
+        else if (s->is<IR::DpdkExternObjStatement>()) {
+            out << s->to<IR::DpdkExternObjStatement>() << std::endl; }
+        else if (s->is<IR::DpdkListStatement>())
+            out << s->to<IR::DpdkListStatement>() << std::endl;
+        else
+            BUG("Statement %s unsupported", s);
     }
     out << ")" << std::endl;
     return out;
@@ -121,6 +143,7 @@ std::ostream& IR::DpdkExtractStatement::toSexp(std::ostream& out) const {
 }
 
 std::ostream& IR::DpdkJmpStatement::toSexp(std::ostream& out) const {
+    LOG1("print jmp");
     out << "(jmp" << label << ")";
     return out;
 }
@@ -254,6 +277,7 @@ std::ostream& operator<<(std::ostream& out, const IR::DpdkValidateStatement* s) 
 std::ostream& operator<<(std::ostream& out, const IR::DpdkInvalidateStatement* s) {
     return s->toSexp(out); }
 std::ostream& operator<<(std::ostream& out, const IR::DpdkExternObjStatement* s) {
+    LOG1("extern " << s->methodCall);
     return s->toSexp(out); }
 std::ostream& operator<<(std::ostream& out, const IR::DpdkExternFuncStatement* s) {
     return s->toSexp(out); }

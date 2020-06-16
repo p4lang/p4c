@@ -188,25 +188,25 @@ bool ConvertToDpdkControl::preorder(const IR::IfStatement* stmt) {
     auto name = Util::printf_format("tmp_%d", next_reg_id++);
     auto cond = new IR::DpdkMovStatement(new IR::PathExpression(IR::ID(name)), stmt->condition);
     add_inst(cond);
-    //auto true_label  = Util::printf_format("label_%d", next_label_id++);
-    //auto false_label = Util::printf_format("label_%d", next_label_id++);
-    //auto end_label = Util::printf_format("label_%d", next_label_id++);
-    //add_inst(new IR::DpdkJmpStatement(true_label));
-    //add_inst(new IR::DpdkJmpStatement(false_label));
-    //add_inst(new IR::DpdkLabelStatement(true_label));
-    //visit(stmt->ifTrue);
-    //add_inst(new IR::DpdkLabelStatement(false_label));
-    //visit(stmt->ifFalse);
+    auto true_label  = Util::printf_format("label_%d", next_label_id++);
+    auto false_label = Util::printf_format("label_%d", next_label_id++);
+    auto end_label = Util::printf_format("label_%d", next_label_id++);
+    add_inst(new IR::DpdkJmpStatement(true_label));
+    add_inst(new IR::DpdkJmpStatement(false_label));
+    add_inst(new IR::DpdkLabelStatement(true_label));
+    visit(stmt->ifTrue);
+    add_inst(new IR::DpdkLabelStatement(false_label));
+    visit(stmt->ifFalse);
     return false;
 }
 
 bool ConvertToDpdkControl::preorder(const IR::MethodCallStatement* stmt) {
-    //add_inst(new IR::DpdkExternObjStatement(stmt->methodCall));
+    add_inst(new IR::DpdkExternObjStatement(stmt->methodCall));
     return false;
 }
 
 bool ConvertToDpdkControl::preorder(const IR::AssignmentStatement* stmt) {
-    //add_inst(new IR::DpdkMovStatement(stmt->left, stmt->right));
+    add_inst(new IR::DpdkMovStatement(stmt->left, stmt->right));
     return true;
 }
 

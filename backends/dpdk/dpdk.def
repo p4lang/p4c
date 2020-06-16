@@ -23,6 +23,7 @@ class DpdkAsmProgram : P4Program {
     optional inline IndexedVector<DpdkHeaderType> headerType;
     optional inline IndexedVector<DpdkStructType> structType;
     optional inline IndexedVector<DpdkAsmStatement> statements;
+
     std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
