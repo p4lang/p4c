@@ -27,7 +27,6 @@ genrule(
         sed 's|cmakedefine|define|g' < $(SRCS) | \
         sed 's|define HAVE_LIBGC 1|undef HAVE_LIBGC|g' > $(OUTS)
     """,
-    visibility = ["//visibility:private"],
 )
 
 cc_library(
@@ -36,7 +35,6 @@ cc_library(
         "config.h",
     ],
     include_prefix = ".",
-    visibility = [":__subpackages__"],
 )
 
 genyacc(
@@ -60,7 +58,6 @@ genrule(
     srcs = ["frontends/parsers/p4/p4lexer.ll"],
     outs = ["frontends/parsers/p4/p4lexer.lex"],
     cmd = ("sed '/%option outfile=\"lex.yy.c\"/d' $< > $@"),
-    visibility = ["//visibility:private"],
 )
 
 genlex(
@@ -68,7 +65,6 @@ genlex(
     src = "frontends/parsers/p4/p4lexer.lex",
     out = "frontends/parsers/p4/p4lexer.cc",
     prefix = "yy",
-    visibility = ["//visibility:private"],
 )
 
 genrule(
@@ -76,7 +72,6 @@ genrule(
     srcs = ["frontends/parsers/v1/v1lexer.ll"],
     outs = ["frontends/parsers/v1/v1lexer.lex"],
     cmd = ("sed '/%option outfile=\"lex.yy.c\"/d' $< > $@"),
-    visibility = ["//visibility:private"],
 )
 
 genlex(
@@ -84,7 +79,6 @@ genlex(
     src = "frontends/parsers/v1/v1lexer.lex",
     out = "frontends/parsers/v1/v1lexer.cc",
     prefix = "yy",
-    visibility = ["//visibility:private"],
 )
 
 cc_library(
@@ -94,7 +88,6 @@ cc_library(
         "lib/",
         "tools/ir-generator",
     ],
-    visibility = [":__subpackages__"],
 )
 
 # This rule helps split some circular dependencies between subdirectories.
@@ -107,7 +100,6 @@ cc_library(
     ]) + glob([
         "frontends/common/*.h",
     ]),
-    visibility = ["//visibility:private"],
 )
 
 # The ir-generator tool uses a parser built by these genlex and genyacc rules.
@@ -156,7 +148,6 @@ cc_binary(
     name = "irgenerator",
     srcs = ["tools/ir-generator/generator.cpp"],
     linkopts = ["-lgmp"],
-    visibility = [":__subpackages__"],
     deps = [
         ":p4c_ir_generator_lib",
         ":p4c_toolkit",
@@ -206,7 +197,6 @@ cc_library(
     ] + glob([
         "ir/*.h",
     ]),
-    visibility = [":__subpackages__"],
     deps = [
         ":p4c_frontend_h",
         ":p4c_includes",
@@ -249,7 +239,6 @@ cc_library(
     data = glob([
         "p4include/*.p4",
     ]),
-    visibility = [":__subpackages__"],
     deps = [
         ":control_plane_h",
         ":p4c_ir",
@@ -333,7 +322,6 @@ cc_library(
         "backends/bmv2/simple_switch/*.h",
     ]),
     copts = P4C_BUILD_DEFAULT_COPTS,
-    visibility = [":__subpackages__"],
     deps = [
         ":p4c_bmv2_common_lib",
         ":p4c_frontend_midend",
@@ -347,7 +335,6 @@ genrule(
     srcs = ["backends/bmv2/simple_switch/version.h.cmake"],
     outs = ["backends/bmv2/simple_switch/version.h"],
     cmd = ("sed 's|@P4C_VERSION@|0.0.0.0|g' $< > $@"),
-    visibility = ["//visibility:private"],
 )
 
 cc_binary(
@@ -379,5 +366,4 @@ genrule(
     srcs = ["backends/p4test/version.h.cmake"],
     outs = ["backends/p4test/version.h"],
     cmd = ("sed 's|@P4C_VERSION@|0.0.0.0|g' $< > $@"),
-    #visibility = ["//visibility:private"],
 )
