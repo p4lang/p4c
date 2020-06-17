@@ -19,5 +19,5 @@ struct hdr_t {
 struct meta_t {
 }
 
-P<empty_t, empty_t>(c = nothing()) main;
+P<_, _>(c = nothing()) main;
 
