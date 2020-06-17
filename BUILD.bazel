@@ -23,8 +23,10 @@ genrule(
     name = "sed_config_h",
     srcs = ["cmake/config.h.cmake"],
     outs = ["config.h"],
-    cmd = ("sed 's|cmakedefine|define|g' $< | " +
-           "sed 's|define HAVE_LIBGC 1|undef HAVE_LIBGC|g' > $@"),
+    cmd = """
+        sed 's|cmakedefine|define|g' < $(SRCS) | \
+        sed 's|define HAVE_LIBGC 1|undef HAVE_LIBGC|g' > $(OUTS)
+    """,
     visibility = ["//visibility:private"],
 )
 
@@ -174,17 +176,19 @@ genrule(
         "ir/ir-generated.cpp",
         "ir/ir-generated.h",
     ],
-    cmd = ("$(location " +
-           ":irgenerator) " +
-           "-t $(@D)/ir/gen-tree-macro.h -i $(@D)/ir/ir-generated.cpp " +
-           "-o $(@D)/ir/ir-generated.h " +
-           "$(location ir/base.def) " +
-           "$(location ir/type.def) " +
-           "$(location ir/expression.def) " +
-           "$(location ir/ir.def) " +
-           "$(location ir/v1.def) " +
-           "$(location frontends/p4-14/ir-v1.def) " +
-           "$(locations backends/bmv2/bmv2.def )"),
+    cmd = """
+        $(location :irgenerator) \
+            -t $(RULEDIR)/ir/gen-tree-macro.h \
+            -i $(RULEDIR)/ir/ir-generated.cpp \
+            -o $(RULEDIR)/ir/ir-generated.h \
+            $(location ir/base.def) \
+            $(location ir/type.def) \
+            $(location ir/expression.def) \
+            $(location ir/ir.def) \
+            $(location ir/v1.def) \
+            $(location frontends/p4-14/ir-v1.def) \
+            $(locations backends/bmv2/bmv2.def)
+    """,
     tools = [":irgenerator"],
 )
 
