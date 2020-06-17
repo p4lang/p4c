@@ -360,10 +360,51 @@ cc_binary(
     data = [":p4include"],
 )
 
-# This builds the p4test backend
+# This builds the p4test backend.
+
+cc_binary(
+    name = "p4c_backend_p4test",
+    srcs = [
+        "backends/p4test/p4test.cpp",
+    ],
+    copts = P4C_BUILD_DEFAULT_COPTS,
+    linkopts = [
+        "-lgmp",
+        "-lgmpxx",
+    ],
+    deps = [
+        ":control_plane",
+        ":control_plane_h",
+        ":p4c_frontend_midend",
+        ":p4c_ir",
+        ":p4c_toolkit",
+        ":p4c_backend_p4test_lib",
+    ],
+)
+
 genrule(
     name = "p4c_p4test_version",
     srcs = ["backends/p4test/version.h.cmake"],
     outs = ["backends/p4test/version.h"],
     cmd = ("sed 's|@P4C_VERSION@|0.0.0.0|g' $< > $@"),
+)
+
+cc_library(
+    name = "p4c_backend_p4test_lib",
+    srcs = [
+        "backends/p4test/midend.cpp",
+    ],
+    hdrs = [
+        "backends/p4test/midend.h",
+        "backends/p4test/version.h",
+    ],
+    copts = P4C_BUILD_DEFAULT_COPTS,
+    deps = [
+        ":p4c_frontend_midend",
+        ":p4c_ir",
+        ":p4c_toolkit",
+    ],
+    data = [
+        ":p4c_p4test_version",
+    ]
 )
