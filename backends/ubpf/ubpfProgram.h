@@ -44,6 +44,7 @@ namespace UBPF {
 
         cstring contextVar, outerHdrOffsetVar, outerHdrLengthVar;
         cstring stdMetadataVar;
+        cstring packetTruncatedSizeVar;
 
         UBPFProgram(const EbpfOptions &options, const IR::P4Program *program,
                     P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const IR::ToplevelBlock *toplevel) :
@@ -56,6 +57,7 @@ namespace UBPF {
             lengthVar = cstring("pkt_len");
             endLabel = cstring("deparser");
             stdMetadataVar = cstring("std_meta");
+            packetTruncatedSizeVar = cstring("packetTruncatedSize");
         }
 
         bool build() override;

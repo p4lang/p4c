@@ -352,6 +352,17 @@ void UBPFDeparser::emit(EBPF::CodeBuilder *builder) {
     builder->appendFormat("%s = 0", program->offsetVar.c_str());
     builder->endOfStatement(true);
 
+    builder->emitIndent();
+    builder->appendFormat("if (%s > 0) ", program->packetTruncatedSizeVar.c_str());
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("%s -= ubpf_truncate_packet(%s, %s)", program->lengthVar.c_str(),
+                          program->contextVar.c_str(), program->packetTruncatedSizeVar.c_str());
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+    builder->emitIndent();
+    builder->newline();
+
     codeGen->setBuilder(builder);
     controlBlock->container->body->apply(*codeGen);
 }

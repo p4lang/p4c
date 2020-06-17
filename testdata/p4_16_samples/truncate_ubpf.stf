@@ -1,0 +1,21 @@
+# packet_in = { bit<8> out_size, bit<32> header, data }
+# packet_out = { bit<32> header, data }
+# In a output packet header will changed to 0xFF_FE_FD_FC to be able to check whether it is emitted
+
+# truncate after all headers
+packet 0 06 01020304 fedc ba98 7654 3210
+expect 0 fffefdfc fedc
+
+# truncate after the end of a packet
+packet 0 ff 01020304 fedc ba98 7654 3210
+expect 0 fffefdfc fedc ba98 7654 3210
+
+# size of truncated packet equal to original
+packet 0 06 01020304 fedc
+expect 0 fffefdfc fedc
+packet 0 07 01020304 fedc
+expect 0 fffefdfc fedc
+
+# truncate inside of header, so it wouldn't be emitted
+packet 0 02 01020304 fedc ba98 7654 3210
+expect 0 0102

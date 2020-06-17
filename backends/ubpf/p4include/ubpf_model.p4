@@ -99,6 +99,17 @@ extern Register<T, S> {
  */
 extern bit<48> ubpf_time_get_ns();
 
+/***
+ * Truncate packet to the maximum size
+ *
+ * @param len   Maximum length of the packet (from beginning of packet) in
+ *              bytes, further bytes will be removed. If deparsed packet is
+ *              shorter than len, this extern has no effect.
+ *              Minimum value for len is 14, as a packet in Open vSwitch must
+ *              have at least Ethernet header. Smaller values than 14 will be
+ *              adjusted to the minimum value by switch.
+ */
+extern void truncate(in bit<32> len);
 
 enum HashAlgorithm {
     lookup3

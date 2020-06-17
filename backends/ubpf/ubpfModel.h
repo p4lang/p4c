@@ -69,6 +69,7 @@ namespace UBPF {
                       drop("mark_to_drop"),
                       pass("mark_to_pass"),
                       ubpf_time_get_ns("ubpf_time_get_ns"),
+                      truncate("truncate"),
                       csum_replace2("csum_replace2"),
                       csum_replace4("csum_replace4"),
                       hashAlgorithm(),
@@ -85,6 +86,7 @@ namespace UBPF {
         ::Model::Elem drop;
         ::Model::Elem pass;
         ::Model::Elem ubpf_time_get_ns;
+        ::Model::Elem truncate;
         ::Model::Extern_Model csum_replace2;
         ::Model::Extern_Model csum_replace4;
         Algorithm_Model hashAlgorithm;

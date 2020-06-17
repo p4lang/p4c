@@ -73,6 +73,7 @@ namespace UBPF {
                 "static void (*ubpf_printf)(const char *fmt, ...) = (void *)7;\n"
                 "static void *(*ubpf_packet_data)(const void *) = (void *)9;\n"
                 "static void *(*ubpf_adjust_head)(const void *, uint64_t) = (void *)8;\n"
+                "static uint32_t (*ubpf_truncate_packet)(const void *, uint64_t) = (void *)11;\n"
                 "\n");
         builder->newline();
         builder->appendLine(

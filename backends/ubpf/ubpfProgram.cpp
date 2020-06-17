@@ -246,6 +246,10 @@ namespace UBPF {
         builder->emitIndent();
         builder->appendFormat("unsigned char %s;", byteVar.c_str());
         builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat("int %s = -1;", packetTruncatedSizeVar.c_str());
+        builder->newline();
     }
 
     void UBPFProgram::emitPipeline(EBPF::CodeBuilder *builder) {

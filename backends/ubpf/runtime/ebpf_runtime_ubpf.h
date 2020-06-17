@@ -47,6 +47,8 @@ static void inline init_ubpf_table_test(char *name, unsigned int key_size, unsig
     ubpf_packet_data_test(ctx)
 #define ubpf_adjust_head(ctx, ofs) \
     ubpf_adjust_head_test(ctx, ofs)
+#define ubpf_truncate_packet(ctx, maxlen) \
+    ubpf_truncate_packet_test(ctx, maxlen)
 #define ubpf_map_lookup(table, key) \
     registry_lookup_table_elem(#table, key)
 #define ubpf_map_update(table, key, value) \
