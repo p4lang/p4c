@@ -84,3 +84,5 @@ table port {
 ^
 [--Wwarn=unused] warning: .next_hop_group: unused instance
 [--Wwarn=unused] warning: .vlan: unused instance
+[--Wwarn=unused] warning: .next_hop_group: unused instance
+[--Wwarn=unused] warning: .vlan: unused instance

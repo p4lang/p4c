@@ -1,3 +1,6 @@
 unused-counter-bmv2.p4(51): [--Wwarn=unused] warning: c1: unused instance
     direct_counter(CounterType.packets) c1;
                                         ^^
+unused-counter-bmv2.p4(51): [--Wwarn=unused] warning: c1: unused instance
+    direct_counter(CounterType.packets) c1;
+                                        ^^

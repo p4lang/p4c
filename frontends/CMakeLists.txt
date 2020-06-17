@@ -46,6 +46,7 @@ set (P4_FRONTEND_SRCS
   p4/reservedWords.cpp
   p4/resetHeaders.cpp
   p4/setHeaders.cpp
+  p4/rmExit.cpp
   p4/sideEffects.cpp
   p4/simplify.cpp
   p4/simplifyDefUse.cpp
@@ -112,6 +113,7 @@ set (P4_FRONTEND_HDRS
   p4/resetHeaders.h
   p4/setHeaders.h
   p4/sideEffects.h
+  p4/rmExit.h
   p4/simplify.h
   p4/simplifyDefUse.h
   p4/simplifyParsers.h

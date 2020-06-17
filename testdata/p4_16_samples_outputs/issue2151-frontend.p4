@@ -1,9 +1,5 @@
 control c() {
-    @name("c.a") action a() {
-    }
     apply {
-        exit;
-        a();
     }
 }
 

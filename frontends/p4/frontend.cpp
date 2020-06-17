@@ -49,6 +49,7 @@ limitations under the License.
 #include "removeReturns.h"
 #include "resetHeaders.h"
 #include "setHeaders.h"
+#include "rmExit.h"
 #include "sideEffects.h"
 #include "simplify.h"
 #include "simplifyDefUse.h"
@@ -164,6 +165,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SimplifyControlFlow(&refMap, &typeMap),
         new SwitchAddDefault,
         new FrontEndDump(),  // used for testing the program at this point
+        new RmExits(&refMap, &typeMap),
         new RemoveAllUnusedDeclarations(&refMap, true),
         new SimplifyParsers(&refMap),
         new ResetHeaders(&refMap, &typeMap),

@@ -1,0 +1,10 @@
+pkg_info {
+  arch: "v1model"
+}
+actions {
+  preamble {
+    id: 19425698
+    name: "ingress.call_exit"
+    alias: "call_exit"
+  }
+}
