@@ -226,10 +226,8 @@ void FindSpecializations::postorder(const IR::ConstructorCallExpression* express
 
     auto insert = findInsertionPoint();
     auto decl = cc->to<ContainerConstructorCall>()->container;
-#if 0
     if (decl->is<IR::Type_Package>())
         return;
-#endif
     specMap->addSpecialization(expression, decl, insert);
 }
 

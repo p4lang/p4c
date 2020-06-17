@@ -112,11 +112,6 @@ class FindSpecializations : public Inspector {
     /// specialize.
     bool noParameters(const IR::IContainer* container);
 
-    // skip packages; we only specialize package instantiations.
-    // (packages can contain constructor call expressions for
-    // default argument values).
-    bool preorder(const IR::Type_Package*) override
-    { return false; }
     bool preorder(const IR::P4Parser* parser) override
     { return noParameters(parser); }
     bool preorder(const IR::P4Control* control) override

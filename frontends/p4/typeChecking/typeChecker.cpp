@@ -961,7 +961,7 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
 
     auto simpleType = type;
     if (type->is<IR::Type_SpecializedCanonical>())
-        simpleType = getTypeType(type->to<IR::Type_SpecializedCanonical>()->baseType);
+        simpleType = type->to<IR::Type_SpecializedCanonical>()->substituted;
 
     if (auto et = simpleType->to<IR::Type_Extern>()) {
         setType(orig, type);
@@ -983,7 +983,7 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
         }
         if (args != decl->arguments)
             decl->arguments = args;
-    } else if (auto cont = simpleType->to<IR::IContainer>()) {
+    } else if (simpleType->is<IR::IContainer>()) {
         if (decl->initializer != nullptr) {
             typeError("%1%: initializers only allowed for extern instances", decl->initializer);
             prune();
@@ -993,7 +993,8 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
             ::error("%1%: cannot instantiate at top-level", decl);
             return decl;
         }
-        auto typeAndArgs = containerInstantiation(decl, decl->arguments, cont);
+        auto typeAndArgs = containerInstantiation(
+            decl, decl->arguments, simpleType->to<IR::IContainer>());
         auto type = typeAndArgs.first;
         auto args = typeAndArgs.second;
         if (type == nullptr || args == nullptr) {
@@ -3227,8 +3228,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             return expression;
         setType(result, returnType);
 
-        // Hopefull by now we know enough about the type to use MethodInstance.
-        auto mi = MethodInstance::resolve(result, refMap, typeMap);
+        auto mi = MethodInstance::resolve(result, refMap, typeMap, nullptr, true);
         if (mi->isApply()) {
             auto a = mi->to<ApplyMethod>();
             if (a->isTableApply() && findContext<IR::P4Action>())
@@ -3615,8 +3615,8 @@ const IR::ActionListElement* TypeInference::validateActionInitializer(
     }
 
     SameExpression se(refMap, typeMap);
-    auto callInstance = MethodInstance::resolve(call, refMap, typeMap);
-    auto listInstance = MethodInstance::resolve(actionListCall, refMap, typeMap);
+    auto callInstance = MethodInstance::resolve(call, refMap, typeMap, nullptr, true);
+    auto listInstance = MethodInstance::resolve(actionListCall, refMap, typeMap, nullptr, true);
 
     for (auto param : *listInstance->substitution.getParametersInArgumentOrder()) {
         auto aa = listInstance->substitution.lookup(param);
