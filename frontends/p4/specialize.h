@@ -118,6 +118,13 @@ class FindSpecializations : public Inspector {
     { return noParameters(control); }
     void postorder(const IR::ConstructorCallExpression* expression) override;
     void postorder(const IR::Declaration_Instance* decl) override;
+
+    bool preorder(const IR::Parameter*) override {
+        // This prevents specialization of the default values of
+        // parameters; we don't care to specialize these, we only need
+        // to specialize them if they appear in a call.
+        return false;
+    }
 };
 
 /** @brief Specializes each Parser and Control *with constant constructor

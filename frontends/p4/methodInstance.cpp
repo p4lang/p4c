@@ -175,7 +175,7 @@ Instantiation* Instantiation::resolve(const IR::Declaration_Instance* instance,
     const IR::Vector<IR::Type>* typeArguments;
 
     if (auto st = type->to<IR::Type_SpecializedCanonical>()) {
-        simpleType = st->substituted;
+        simpleType = st->baseType;
         typeArguments = st->arguments;
     } else {
         typeArguments = new IR::Vector<IR::Type>();

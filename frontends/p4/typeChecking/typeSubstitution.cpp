@@ -105,8 +105,8 @@ bool TypeVariableSubstitution::setBindings(const IR::Node* errorLocation,
         BUG("Nullptr argument to setBindings");
 
     if (params->parameters.size() != args->size()) {
-        ::error(ErrorType::ERR_TYPE_ERROR, "%1% has %2% type parameters, invoked with %3% %4%",
-                errorLocation, params->parameters.size(), args->size(), args);
+        ::error(ErrorType::ERR_TYPE_ERROR, "%1% has %2% type parameters, invoked with %3%",
+                errorLocation, params->parameters.size(), args->size());
         return false;
     }
 
