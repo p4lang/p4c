@@ -29,9 +29,19 @@ class UBPFStateTranslationVisitor : public EBPF::CodeGenInspector {
     P4::P4CoreLibrary& p4lib;
     const UBPFParserState* state;
 
+    void emitCheckPacketLength(const IR::Expression* expr, const char * varname, unsigned width);
+    void emitCheckPacketLength(const IR::Expression* expr)
+    { emitCheckPacketLength(expr, nullptr, 0); }
+    void emitCheckPacketLength(unsigned width)
+    { emitCheckPacketLength(nullptr, nullptr, width); }
+    void emitCheckPacketLength(const char * varname)
+    { emitCheckPacketLength(nullptr, varname, 0); }
+
     void compileExtractField(const IR::Expression* expr, cstring field,
-                             unsigned alignment, EBPF::EBPFType* type);
+                             unsigned alignment, EBPF::EBPFType* type, bool advanceCursor = true);
     void compileExtract(const IR::Expression* destination);
+
+    void compileLookahead(const IR::Expression* destination);
 
  public:
     explicit UBPFStateTranslationVisitor(const UBPFParserState* state) :
@@ -44,9 +54,41 @@ class UBPFStateTranslationVisitor : public EBPF::CodeGenInspector {
     bool preorder(const IR::MethodCallExpression* expression) override;
     bool preorder(const IR::MethodCallStatement* stat) override
     { visit(stat->methodCall); return false; }
-    bool preorder(UNUSED const IR::AssignmentStatement* stat) override { return false; }
+    bool preorder(const IR::AssignmentStatement* stat) override;
 };
 }  // namespace
+
+// if expr is nullprt, width is used instead
+void UBPFStateTranslationVisitor::emitCheckPacketLength(const IR::Expression* expr,
+        const char * varname, unsigned width) {
+    auto program = state->parser->program;
+
+    builder->emitIndent();
+    if (expr != nullptr) {
+        builder->appendFormat("if (%s < BYTES(%s + ",
+                              program->lengthVar.c_str(),
+                              program->offsetVar.c_str());
+        visit(expr);
+        builder->append(")) ");
+    } else if (varname != nullptr) {
+        builder->appendFormat("if (%s < BYTES(%s + %s)) ",
+                              program->lengthVar.c_str(),
+                              program->offsetVar.c_str(), varname);
+    } else {
+        builder->appendFormat("if (%s < BYTES(%s + %d)) ",
+                              program->lengthVar.c_str(),
+                              program->offsetVar.c_str(), width);
+    }
+
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("goto %s;", IR::ParserState::reject.c_str());
+    builder->newline();
+    builder->blockEnd(true);
+
+    builder->emitIndent();
+    builder->newline();
+}
 
 bool UBPFStateTranslationVisitor::preorder(const IR::ParserState* parserState) {
     if (parserState->isBuiltin()) return false;
@@ -139,7 +181,8 @@ bool UBPFStateTranslationVisitor::preorder(const IR::Member* expression) {
 
 void
 UBPFStateTranslationVisitor::compileExtractField(
-        const IR::Expression* expr, cstring field, unsigned alignment, EBPF::EBPFType* type) {
+        const IR::Expression* expr, cstring field, unsigned alignment, EBPF::EBPFType* type,
+        bool advanceCursor) {
     unsigned widthToExtract = dynamic_cast<EBPF::IHasWidth*>(type)->widthInBits();
     auto program = state->parser->program;
 
@@ -166,8 +209,12 @@ UBPFStateTranslationVisitor::compileExtractField(
 
         unsigned shift = loadSize - alignment - widthToExtract;
         builder->emitIndent();
-        visit(expr);
-        builder->appendFormat(".%s = (", field.c_str());
+        if (expr) {
+            visit(expr);
+            builder->appendFormat(".%s = (", field.c_str());
+        } else {
+            builder->append("(");
+        }
         type->emit(builder);
         builder->appendFormat(")((%s(%s, BYTES(%s))",
                               helper,
@@ -184,7 +231,8 @@ UBPFStateTranslationVisitor::compileExtractField(
         }
 
         builder->append(")");
-        builder->endOfStatement(true);
+        if (advanceCursor)
+            builder->endOfStatement(true);
     } else {
         // wide values; read all bytes one by one.
         unsigned shift;
@@ -221,10 +269,12 @@ UBPFStateTranslationVisitor::compileExtractField(
         }
     }
 
-    builder->emitIndent();
-    builder->appendFormat("%s += %d", program->offsetVar.c_str(), widthToExtract);
-    builder->endOfStatement(true);
-    builder->newline();
+    if (advanceCursor) {
+        builder->emitIndent();
+        builder->appendFormat("%s += %d", program->offsetVar.c_str(), widthToExtract);
+        builder->endOfStatement(true);
+        builder->newline();
+    }
 }
 
 void
@@ -238,19 +288,7 @@ UBPFStateTranslationVisitor::compileExtract(const IR::Expression* destination) {
     }
 
     unsigned width = ht->width_bits();
-    auto program = state->parser->program;
-    builder->emitIndent();
-    builder->appendFormat("if (%s < BYTES(%s + %d)) ",
-                          program->lengthVar.c_str(),
-                          program->offsetVar.c_str(), width);
-    builder->blockStart();
-    builder->emitIndent();
-    builder->appendFormat("goto %s;", IR::ParserState::reject.c_str());
-    builder->newline();
-    builder->blockEnd(true);
-
-    builder->emitIndent();
-    builder->newline();
+    emitCheckPacketLength(width);
 
     unsigned alignment = 0;
     for (auto f : ht->fields) {
@@ -271,6 +309,30 @@ UBPFStateTranslationVisitor::compileExtract(const IR::Expression* destination) {
         visit(destination);
         builder->appendLine(".ebpf_valid = 1;");
     }
+}
+
+void
+UBPFStateTranslationVisitor::compileLookahead(const IR::Expression* destination) {
+    auto type = state->parser->typeMap->getType(destination);
+    auto etype = UBPFTypeFactory::instance->create(type);
+
+    if (type->to<IR::Type_Bits>() == nullptr)
+        BUG("lookahead<%1%>(): only bit type is supported yet", type);
+
+    unsigned width = dynamic_cast<EBPF::IHasWidth*>(etype)->widthInBits();
+    if (width > 64)
+        BUG("lookahead<%1%>(): more than 64 bits not supported yet", type);
+
+    // check packet's length
+    emitCheckPacketLength(width);
+
+    builder->emitIndent();
+    etype->emit(builder);
+    builder->append(" ");
+    visit(destination);
+    builder->append(" = ");
+    compileExtractField(nullptr, "", 0, etype, false);
+    builder->endOfStatement(true);
 }
 
 bool UBPFStateTranslationVisitor::preorder(const IR::MethodCallExpression* expression) {
@@ -311,6 +373,34 @@ bool UBPFStateTranslationVisitor::preorder(const IR::MethodCallExpression* expre
     }
 
     ::error("Unexpected method call in parser %1%", expression);
+
+    return false;
+}
+
+bool UBPFStateTranslationVisitor::preorder(const IR::AssignmentStatement* stat) {
+    if (auto mce = stat->right->to<IR::MethodCallExpression>()) {
+        auto mi = P4::MethodInstance::resolve(mce,
+                                              state->parser->program->refMap,
+                                              state->parser->program->typeMap);
+        auto extMethod = mi->to<P4::ExternMethod>();
+        if (extMethod == nullptr)
+            BUG("Unhandled method %1%", mce);
+
+        auto decl = extMethod->object;
+        if (decl == state->parser->packet) {
+            if (extMethod->method->name.name == p4lib.packetIn.lookahead.name) {
+                compileLookahead(stat->left);
+                return false;
+            }
+        }
+        ::error("Unexpected method call in parser %1%", stat->right);
+    } else {
+        builder->emitIndent();
+        visit(stat->left);
+        builder->append(" = ");
+        visit(stat->right);
+        builder->endOfStatement(true);
+    }
 
     return false;
 }
