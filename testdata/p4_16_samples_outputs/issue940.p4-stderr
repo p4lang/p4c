@@ -13,7 +13,4 @@ extern bit<6> wrong();
 issue940.p4(9): [--Wwarn=unused] warning: instance: unused instance
 Checksum16() instance;
              ^^^^^^^^
-issue940.p4(9): [--Wwarn=unused] warning: instance: unused instance
-Checksum16() instance;
-             ^^^^^^^^
 warning: Program does not contain a `main' module

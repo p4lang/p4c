@@ -156,7 +156,7 @@ class RmExits : public PassManager {
  public:
     RmExits(ReferenceMap* refMap, TypeMap* typeMap) {
             passes.push_back(new TypeChecking(refMap, typeMap));
-            passes.push_back(new RemoveAllUnusedDeclarations(refMap, true));
+            passes.push_back(new RemoveAllUnusedDeclarations(refMap, false));
             passes.push_back(new TypeChecking(refMap, typeMap));
             passes.push_back(new DoRmExits(refMap, typeMap));
         setName("RmExits");
