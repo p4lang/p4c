@@ -466,6 +466,7 @@ class MethodCallStatement : Statement {
     MethodCallStatement(Util::SourceInfo si, Expression m,
                         const std::initializer_list<Argument> &a)
     : Statement(si), methodCall(new MethodCallExpression(si, m, a)) {}
+    toString{ return methodCall->toString(); }
 }
 
 class SwitchCase {
