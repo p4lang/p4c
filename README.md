@@ -19,7 +19,6 @@ The code contains five sample backends:
 * p4c-bm2-ss: can be used to target the P4 `simple_switch` written using
   the BMv2 behavioral model https://github.com/p4lang/behavioral-model
 * p4c-ebpf: can be used to generate C code which can be compiled to EBPF
-  https://en.wikipedia.org/wiki/Berkeley_Packet_Filter and then loaded
   in the Linux kernel for packet filtering
 * p4test: a source-to-source P4 translator which can be used for
   testing, learning compiler internals and debugging.
@@ -335,7 +334,6 @@ Bazel.
 
 We also provide a [`p4_library` Bazel rule](bazel/p4_library.bzl) for invoking
 p4c during the build process of other Bazel projects.
-
 
 See [bazel/example](bazel/example) for an example of how to depend on p4c in
 your own Bazel project.
