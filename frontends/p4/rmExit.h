@@ -98,6 +98,17 @@ class EditCtrlIR : public Transform {
         setName("EditCtrlIR");
     }
 
+    bool findEditAct(cstring name) {
+        auto it = actions->find(name);
+        if (it != actions->end()) {
+            if (it->second.first == 1) {
+                LOG1("edit action: " << std::hex << name);
+                return true;
+            }
+        }
+        return false;
+    }
+
     const IR::Node* preorder(IR::BlockStatement* block) override {
         auto act = findContext<IR::P4Action>();
         if (act == nullptr) {
@@ -113,24 +124,16 @@ class EditCtrlIR : public Transform {
                 auto pe = mc->method->to<IR::PathExpression>();
                 CHECK_NULL(pe);
                 cstring name = pe->path->name;
-                auto it = actions->find(name);
-                if (it != actions->end()) {
-                    if (it->second.first == 1) {
-                        LOG1("edit action: " << std::hex << name);
-                        break;  // breaks out of for loop.
-                    }
-                }
+                LOG1("PE path name: " << name);
+                if (findEditAct(name))
+                    break;
             }
-            if (sd->is<IR::ExitStatement>()) {
-                continue;
-            }
+            if (sd->is<IR::ExitStatement>())
+                break;
             newComponents->push_back(sd);
         }
         auto bs = block->clone();
         bs->components = *newComponents;
-        LOG1("Dumping bs" << std::hex);
-        // dump(bs);
-        LOG1("End Dump");
         return bs;
     }
 };

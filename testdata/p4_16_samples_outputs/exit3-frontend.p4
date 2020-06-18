@@ -1,7 +1,6 @@
 control ctrl(out bit<32> c) {
     bit<32> a_0;
     @name("ctrl.e") action e() {
-        exit;
     }
     @name("ctrl.t") table t_0 {
         actions = {
@@ -11,7 +10,6 @@ control ctrl(out bit<32> c) {
     }
     apply {
         a_0 = 32w0;
-        c = 32w2;
         if (a_0 == 32w0) {
             t_0.apply();
         } else {

@@ -30,6 +30,19 @@ namespace P4 {
 const IR::Node* DoRmExits::preorder(IR::P4Control* control) {
     LOG1("#############################################################################");
     LOG1("Visiting control cpp " << std::hex << control->name);
+    bool hasExit = false;
+    bool hasOut = false;
+    bool ctrlExit = false;
+    bool ctrlOut = false;
+
+    auto applyParams = control->getApplyParameters();
+    for (auto p : *applyParams) {
+        if (p->hasOut()) {
+            ctrlOut = true;
+            LOG1("CtrlOut found cpp");
+            break;
+        }
+    }
     // Collect actions list with exit or not.
     std::map<cstring, std::pair<int, bool>> actions;
     FindExitActions fea(refMap, &actions);
@@ -40,7 +53,6 @@ const IR::Node* DoRmExits::preorder(IR::P4Control* control) {
              " hasOut " << it.second.second);
     }
     LOG1("");
-    bool hasExit = false;
     for (auto it : actions) {
         if (it.second.first) {
             LOG1("action cpp has : " << it.first << " exit "
@@ -49,7 +61,6 @@ const IR::Node* DoRmExits::preorder(IR::P4Control* control) {
             break;
         }
     }
-    bool hasOut = false;
     for (auto it : actions) {
         if (it.second.second) {
             LOG1("action cpp has : " << it.first << " hasOut "
@@ -61,7 +72,6 @@ const IR::Node* DoRmExits::preorder(IR::P4Control* control) {
     // End Collect actions list with exit or not.
 
     // Check if control has any exit.
-    bool ctrlExit = false;
     auto newComponents = new IR::IndexedVector<IR::StatOrDecl>();
     for (auto c : control->body->components) {
         if (c->is<IR::ExitStatement>()) {
@@ -72,7 +82,7 @@ const IR::Node* DoRmExits::preorder(IR::P4Control* control) {
     }
     // End check if control has any exit.
 
-    if (!hasExit && !ctrlExit) return control;
+    if (!hasExit && !ctrlExit && !ctrlOut) return control;
     if (ctrlExit) {
         auto bs = control->body->clone();
         bs->components = *newComponents;
@@ -83,7 +93,8 @@ const IR::Node* DoRmExits::preorder(IR::P4Control* control) {
         return result;
     }
 
-    if (!hasExit || !hasOut) return control;
+    if (!hasOut && !ctrlOut) return control;
+    if (!hasExit) return control;
 
     // Now update the IR due exit statements.
     EditCtrlIR ecr(refMap, typeMap, &actions);
