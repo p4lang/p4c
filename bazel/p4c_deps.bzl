@@ -5,6 +5,22 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 def p4c_deps():
     """Loads dependencies need to compile p4c."""
+    # Third party projects can define the target
+    # @com_github_p4lang_p4c_extension:ir_extensions with a `filegroup`
+    # containing their custom .def files.
+    if not native.existing_rule("com_github_p4lang_p4c_extension"):
+        # By default, no IR extensions.
+        native.new_local_repository(
+            name = "com_github_p4lang_p4c_extension",
+            path = ".",
+            build_file_content = """
+filegroup(
+    name = "ir_extensions",
+    srcs = [],
+    visibility = ["//visibility:public"],
+)
+            """,
+        )
     if not native.existing_rule("com_github_nelhage_rules_boost"):
         git_repository(
             name = "com_github_nelhage_rules_boost",
