@@ -1,0 +1,3 @@
+key_after_exit.p4(27): [--Wwarn=mismatch] warning: 1: Constant key field
+            16w1: exact @name("key") ;
+            ^^^^

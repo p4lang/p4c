@@ -109,6 +109,16 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
         if (getParent<IR::BlockStatement>() || getParent<IR::IndexedVector<IR::StatOrDecl>>())
             return nullptr;
         return blk; }
+    IR::P4Table *preorder(IR::P4Table *tbl) override {
+        if (self.tables.count(tbl->name) && self.tables.at(tbl->name).apply_count == 0) {
+            LOG3("  removing dead local table " << tbl->name);
+            return nullptr; }
+        return tbl; }
+    IR::P4Action *preorder(IR::P4Action *act) override {
+        if (self.actions.count(act->name) && self.actions.at(act->name).apply_count == 0) {
+            LOG3("  removing dead local action " << act->name);
+            return nullptr; }
+        return act; }
 
  public:
     explicit ElimDead(DoLocalCopyPropagation &self) : self(self) {}
@@ -116,7 +126,7 @@ class DoLocalCopyPropagation::ElimDead : public Transform {
 
 class DoLocalCopyPropagation::RewriteTableKeys : public Transform {
     /* When doing copyprop on a control, if we have values available at a table.apply
-     * call and thise values are used in the key of the table, we want to propagate them
+     * call and these values are used in the key of the table, we want to propagate them
      * into the table (replacing the write keys).  We can't do that while we're visiting
      * the control apply body, so we record the need for it in the TableInfo, and then
      * after finishing the control apply body, we call this pass to re-transform the
@@ -530,6 +540,18 @@ IR::P4Control *DoLocalCopyPropagation::preorder(IR::P4Control *ctrl) {
     visit(ctrl->body, "body");
     if (need_key_rewrite)
         ctrl->controlLocals = *ctrl->controlLocals.apply(RewriteTableKeys(*this));
+    if (!elimUnusedTables) {
+        for (auto local : ctrl->controlLocals) {
+            if (auto *act = local->to<IR::P4Action>()) {
+                auto &act_info = actions.at(act->name);
+                if (act_info.apply_count == 0) {
+                    // unused action -- preserve any unused locals it references
+                    apply_function(&act_info); }
+            } else if (auto *tbl = local->to<IR::P4Table>()) {
+                auto &tbl_info = tables.at(tbl->name);
+                if (tbl_info.apply_count == 0) {
+                    // unused table -- preserve any unused locals it references
+                    apply_table(&tbl_info); } } } }
     LOG5("DoLocalCopyPropagation before ElimDead " << ctrl->name);
     LOG5(ctrl);
     ctrl->controlLocals = *ctrl->controlLocals.apply(ElimDead(*this));
@@ -544,6 +566,7 @@ IR::P4Control *DoLocalCopyPropagation::preorder(IR::P4Control *ctrl) {
 
 void DoLocalCopyPropagation::apply_function(DoLocalCopyPropagation::FuncInfo *act) {
     LOG7("apply_function reads=" << act->reads << " writes=" << act->writes);
+    ++act->apply_count;
     for (auto write : act->writes)
         dropValuesUsing(write);
     for (auto read : act->reads)
@@ -561,7 +584,6 @@ void DoLocalCopyPropagation::apply_table(DoLocalCopyPropagation::TableInfo *tbl)
             if (var->val && lvalue_out(var->val)->is<IR::PathExpression>()) {
                 if (tbl->apply_count > 1 &&
                     (!tbl->key_remap.count(vname) || !tbl->key_remap.at(vname)->equiv(*var->val))) {
-                    /* FIXME -- need deep expr comparison here, not shallow */
                     LOG3("  different values used in different applies for key " << key);
                     tbl->key_remap.erase(vname);
                     var->live = true;
