@@ -1,10 +1,10 @@
 workspace(name = "example_p4_project")
 
+# May replace this with `git_repository` or `http_archive` in your own project.
 local_repository(
   name = "com_github_p4lang_p4c",
   path = "../..",
-  # This part is optional and only needed for custom backends with IR
-  # extensions.
+  # This part is optional: only needed for custom backends with IR extensions.
   repo_mapping = {
     # Tells p4c where to look for `:ir_extensions` target: in this project.
     "@com_github_p4lang_p4c_extension" : "@example_p4_project",

@@ -332,11 +332,11 @@ bazel build //...
 We run continuous integration to ensure this works with the latest version of
 Bazel.
 
-We also provide a [`p4_library` Bazel rule](bazel/p4_library.bzl) for invoking
-p4c during the build process of other Bazel projects.
+We also provide a [`p4_library` rule](bazel/p4_library.bzl) for invoking
+p4c during the build process of 3rd party Bazel projects.
 
-See [bazel/example](bazel/example) for an example of how to depend on p4c in
-your own Bazel project.
+See [bazel/example](bazel/example) for an example of how to use or extend p4c in
+your own Bazel project. You may use it as a template to get you started.
 
 # Build system
 

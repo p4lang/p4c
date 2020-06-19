@@ -9,4 +9,6 @@ demonstrate how to:
 
 - define custom IR extensions.
 
-This project is build during CI to ensure it is always up to date.
+You can use this project as a template to get you started.
+
+The project is built during CI to ensure it is always up to date.
