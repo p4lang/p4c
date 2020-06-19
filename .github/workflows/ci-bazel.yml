@@ -34,7 +34,7 @@ jobs:
     - name: Build p4c
       run: bazel build //... --verbose_failures
   
-  build_indirect:  # Build Bazel project depending on p4c as a subproject.
+  build_indirect:  # Build 3rd party Bazel project depending on p4c as a subproject.
     runs-on: ubuntu-latest
     env:
       BAZEL: bazelisk-linux-amd64
