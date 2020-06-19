@@ -70,6 +70,7 @@ class ConvertToDpdkParser : public Inspector {
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() { return instructions; }
     bool preorder(const IR::P4Parser* a) override;
     bool preorder(const IR::ParserState* s) override;
+    void add_instr(const IR::DpdkAsmStatement* s){ instructions.push_back(s); }
 };
 
 class ConvertToDpdkControl : public Inspector {

@@ -18,6 +18,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "sexp.h"
 #include "lib/stringify.h"
+#include <unordered_map>
 
 namespace DPDK {
 
@@ -173,18 +174,170 @@ const IR::Node* ConvertToDpdkProgram::preorder(IR::P4Program* prog) {
 }
 
 bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
-    return true;
+    ordered_map<cstring, int> degree_map;
+    ordered_map<cstring, IR::ParserState> state_map;
+    std::vector<IR::ParserState> stack;
+    for(auto state: p->states){
+        if(state->name == "start") stack.push_back(*state);
+        degree_map.insert({state->name.toString(), 0});
+        state_map.insert({state->name.toString(), *state});
+    }
+    for(auto state: p->states){
+        if(state->selectExpression){
+            if(state->selectExpression->is<IR::SelectExpression>()){
+                auto select = state->selectExpression->to<IR::SelectExpression>();
+                for(auto pair: select->selectCases){
+                    auto got = degree_map.find (pair->state->path->name);
+                    if(got != degree_map.end()){
+                        got->second++;
+                    }
+                }
+            }
+            else if(auto path = state->selectExpression->to<IR::PathExpression>()){
+                auto got = degree_map.find(path->path->name);
+                if(got != degree_map.end()){
+                    got->second++;
+                }
+            }
+        }
+    }
+    degree_map.erase("start");
+    state_map.erase("start");
+    while(stack.size() > 0){
+        auto state = stack.back();
+        stack.pop_back();
+        
+        
+        // the main body
+        auto i = new IR::DpdkLabelStatement("L_" + state.name.toString());
+        add_instr(i);
+        auto c = state.components;
+        for(auto stat : c){
+            if(stat->is<IR::MethodCallStatement>()){
+            const IR::MethodCallStatement *m = stat->to<IR::MethodCallStatement>();
+                for(auto a : *m->methodCall->arguments){
+                    auto i = new IR::DpdkExtractStatement(a);
+                    add_instr(i);
+                }
+            }
+            else if(stat->is<IR::AssignmentStatement>()){
+                auto s = stat->to<IR::AssignmentStatement>();
+                auto i = new IR::DpdkMovStatement(s->left, s->right);
+                add_instr(i);
+            }
+        }
+        if(state.selectExpression){
+            if(state.selectExpression->is<IR::SelectExpression>()){
+                auto e = state.selectExpression->to<IR::SelectExpression>();
+                cstring switch_var;
+                for(auto v:e->select->components){
+                    switch_var = v->toString();
+                }
+                for(auto v:e->selectCases){
+                    if(!v->keyset->is<IR::DefaultExpression>()){
+                        auto i = new IR::DpdkJmpStatement("L_" + v->state->toString(), v->keyset->toString() + " == " + switch_var);
+                        add_instr(i);
+                    }
+                    else{
+                        auto i = new IR::DpdkJmpStatement("L_" + v->state->toString());
+                        add_instr(i);
+                    }
+                }
+            }
+            else if(state.selectExpression->is<IR::PathExpression>()){
+                auto i = new IR::DpdkJmpStatement("L_" + state.selectExpression->toString());
+                add_instr(i);
+            }
+        }
+        // ===========
+
+
+        if(state.selectExpression){
+            if(state.selectExpression->is<IR::SelectExpression>()){
+                auto select = state.selectExpression->to<IR::SelectExpression>();
+                for(auto pair: select->selectCases){
+                    auto result = degree_map.find(pair->state->toString());
+                    if(result != degree_map.end()){
+                        result->second--;
+                    }
+
+                }
+            }
+             else if(state.selectExpression->is<IR::PathExpression>()){
+                auto got = degree_map.find(state.selectExpression->toString());
+                if(got != degree_map.end()){
+                    got->second--;
+                }
+            }
+        }
+
+        for(auto pair:degree_map){
+            if(pair.second == 0){
+                auto result = state_map.find(pair.first);
+                if(result != state_map.end()){
+                    stack.push_back(result->second);
+                    degree_map.erase(result->first);
+                }
+            }
+        }
+
+
+        std::cout << state << std::endl;
+        if(state.name == "start") continue;
+    }
+    return false;
 }
 
-bool ConvertToDpdkParser::preorder(const IR::ParserState* s) {
-    return true;
+bool ConvertToDpdkParser::preorder(const IR::ParserState* s) 
+{
+    LOG1(s);
+
+    std::cout << std::endl << std::endl << "state " << s->name.toString() << " {" << std::endl;
+    auto c = s->components;
+    for(auto stat : c){
+        if(stat->is<IR::MethodCallStatement>()){
+           const IR::MethodCallStatement *m = stat->to<IR::MethodCallStatement>();
+            std::cout << m->methodCall->method;
+            for(auto a: *m->methodCall->typeArguments){
+                std::cout << "<" << a << ">";
+            }
+            for(auto a : *m->methodCall->arguments){
+                std::cout << "(" << a << ");" << std::endl;
+            }
+        }
+        else if(stat->is<IR::AssignmentStatement>()){
+            auto s = stat->to<IR::AssignmentStatement>();
+            std::cout << s->left << " = " << s->right << ";" << std::endl;
+        }
+    }
+    if(s->selectExpression){
+        if(s->selectExpression->is<IR::SelectExpression>()){
+            auto e = s->selectExpression->to<IR::SelectExpression>();
+
+            for(auto v:e->select->components){
+                std::cout << "select{" <<  v << "} {" << std::endl; // select()
+            }
+            for(auto v:e->selectCases){
+                std::cout << v->keyset << ":" << v->state->toString() << std::endl; // next_state
+            }
+        }
+        else if(s->selectExpression->is<IR::PathExpression>()){
+            std::cout << s->selectExpression->toString();
+        }
+    }
+        std::cout << "} }" << std::endl << std::endl;
+    return false;
 }
+
 
 bool ConvertToDpdkControl::preorder(const IR::P4Action* a) {
     return true;
 }
 
+
+
 bool ConvertToDpdkControl::preorder(const IR::IfStatement* stmt) {
+    
     auto name = Util::printf_format("tmp_%d", next_reg_id++);
     auto cond = new IR::DpdkMovStatement(new IR::PathExpression(IR::ID(name)), stmt->condition);
     add_inst(cond);

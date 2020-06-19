@@ -23,10 +23,14 @@ class DpdkAsmProgram : P4Program {
     optional inline IndexedVector<DpdkHeaderType> headerType;
     optional inline IndexedVector<DpdkStructType> structType;
     optional inline IndexedVector<DpdkAsmStatement> statements;
-
+// Globals
+// Tables
+// Actions
     std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
+
+
 
 class DpdkListStatement : DpdkAsmStatement {
     optional cstring name;
@@ -60,11 +64,13 @@ class DpdkEmitStatement : DpdkAsmStatement {
 #nodbprint
 }
 class DpdkExtractStatement : DpdkAsmStatement {
+    Argument header;
     std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkJmpStatement : DpdkAsmStatement {
     cstring label;
+    optional cstring condition;
     std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }

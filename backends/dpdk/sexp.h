@@ -29,4 +29,4 @@ std::ostream& operator<<(std::ostream& out, const IR::DpdkExternObjStatement* st
 std::ostream& operator<<(std::ostream& out, const IR::DpdkExternFuncStatement* statement);
 std::ostream& operator<<(std::ostream& out, const IR::DpdkReturnStatement* statement);
 std::ostream& operator<<(std::ostream& out, const IR::DpdkLabelStatement* statement);
-
+std::ostream& operator<<(std::ostream& out, const IR::DpdkExtractStatement* statement);
