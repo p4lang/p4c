@@ -32,6 +32,7 @@ control ingress(inout parsed_packet_t hdr,
             hdr.eth.src = 0;
             hdr.eth.dst = 0;
         }
+        standard_metadata.egress_spec = 0;
     }
 }
 
