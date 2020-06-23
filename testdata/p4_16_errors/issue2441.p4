@@ -5,7 +5,7 @@
 
  struct empty_t {}
 
- control nothing(inout empty_t hdr, inout empty_t meta, in intrinsic_metadata_t imeta) {
+ control nothing<H>(inout H hdr, inout empty_t meta, in intrinsic_metadata_t imeta) {
     apply {}
  }
 
@@ -14,9 +14,9 @@
      inout M meta,
      in intrinsic_metadata_t intr_md);
 
- package P<H, M>(C<H, M> c = nothing());
+ package P<H, M>(C<H, M> c = nothing<H>());
 
  struct hdr_t { }
  struct meta_t { }
 
- P<_, _>() main;
+ P() main;

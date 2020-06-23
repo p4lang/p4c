@@ -56,8 +56,11 @@ static const IR::Type* validateType(
 const IR::Type* DoBindTypeVariables::getVarValue(
     const IR::Type_Var* var, const IR::Node* errorPosition) const {
     auto type = typeMap->getSubstitution(var);
-    if (type == nullptr)
-        return new IR::Type_Dontcare;
+    if (type == nullptr) {
+        ::error(ErrorType::ERR_TYPE_ERROR, "%1%: could not infer a type for variable %2%",
+                errorPosition, var);
+        return nullptr;
+    }
     auto result = validateType(type, typeMap, errorPosition);
     LOG2("Replacing " << var << " with " << result);
     return result;
