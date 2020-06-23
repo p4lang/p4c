@@ -46,7 +46,7 @@ control ComputeChecksum<H, M>(inout H hdr,
 control Deparser<H>(packet_out b, in H hdr);
 
 package MySwitch<H, M>(Parser<H, M> p,
-                       VerifyChecksum<H, M> vr = EmptyVerifyChecksum(),
+                       VerifyChecksum<H, M> vr = EmptyVerifyChecksum<H, M>(),
                        Ingress<H, M> ig,
                        Egress<H, M> eg,
                        ComputeChecksum<H, M> ck,
