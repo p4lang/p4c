@@ -30,6 +30,7 @@ control ingress(inout parsed_packet_t hdr, inout local_metadata_t local_metadata
             hdr.eth.src = 48w0;
             hdr.eth.dst = 48w0;
         }
+        standard_metadata.egress_spec = 9w0;
     }
 }
 
