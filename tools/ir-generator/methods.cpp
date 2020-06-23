@@ -50,7 +50,13 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
             if (!first)
                 buf << std::endl << cl->indent << cl->indent << "&& ";
             first = false;
-            buf << f->name << " == a." << f->name; }
+            if (auto *arr = dynamic_cast<const ArrayType *>(f->type)) {
+                for (int i = 0; i < arr->size; ++i) {
+                    if (i != 0)
+                        buf << std::endl << cl->indent << cl->indent << "&& ";
+                    buf << f->name << "[" << i << "] == a." << f->name << "[" << i << "]"; }
+            } else {
+                buf << f->name << " == a." << f->name; } }
         if (first) {  // a nested class with no fields?
             buf << "false"; }
         buf << ";" << std::endl;
