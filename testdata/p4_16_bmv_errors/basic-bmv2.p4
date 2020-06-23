@@ -75,8 +75,7 @@ control MyIngress(inout headers hdr,
         mark_to_drop(standard_metadata);
     }
     
-    action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
-        /* TODO: fill out code in action body */
+    action ipv4_forward() {
     }
     
     table ipv4_lpm {

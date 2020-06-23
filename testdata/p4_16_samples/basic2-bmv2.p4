@@ -80,8 +80,7 @@ control MyIngress(inout headers hdr,
     
     table ipv4_lpm {
         key = {
-            hdr.ipv4.version: ternary;	
-            hdr.ipv4.dstAddr: lpm;
+            hdr.ipv4.dstAddr: ternary;
             hdr.ipv4.srcAddr: lpm;
         }
         actions = {
