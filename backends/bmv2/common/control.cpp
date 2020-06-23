@@ -415,7 +415,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
             tkey->append(keyelement);
         }
     }
-    LOG1("table_match_type: " << table_match_type);
+    LOG3("table_match_type: " << table_match_type);
     result->emplace("match_type", table_match_type);
     ctxt->conv->simpleExpressionsOnly = false;
 
