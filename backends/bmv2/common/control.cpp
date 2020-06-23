@@ -337,6 +337,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
     ctxt->conv->simpleExpressionsOnly = true;
 
     if (key != nullptr) {
+        int count_lpm = 0;
         for (auto ke : key->keyElements) {
             auto expr = ke->expression;
             auto ket = ctxt->typeMap->getType(expr, true);
@@ -353,6 +354,11 @@ ControlConverter::convertTable(const CFG::TableNode* node,
             // 2) if there is at least one TERNARY or OPTIONAL field, then the table is TERNARY
             // 3) if there is a LPM field, then the table is LPM
             // 4) otherwise the table is EXACT
+            if (match_type == corelib.lpmMatch.name)
+                count_lpm++;
+            if (count_lpm > 1)
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "multiple LPM keys in table %1% not supported", table);
             if (match_type != table_match_type) {
                 if (match_type == BMV2::MatchImplementation::rangeMatchTypeName)
                     table_match_type = BMV2::MatchImplementation::rangeMatchTypeName;
@@ -363,9 +369,6 @@ ControlConverter::convertTable(const CFG::TableNode* node,
                 if (match_type == corelib.lpmMatch.name &&
                     table_match_type == corelib.exactMatch.name)
                     table_match_type = corelib.lpmMatch.name;
-            } else if (match_type == corelib.lpmMatch.name) {
-                ::error(ErrorType::ERR_UNSUPPORTED,
-                        "multiple LPM keys in table %1% not supported", table);
             }
 
             big_int mask;
@@ -412,6 +415,7 @@ ControlConverter::convertTable(const CFG::TableNode* node,
             tkey->append(keyelement);
         }
     }
+    LOG3("table_match_type: " << table_match_type);
     result->emplace("match_type", table_match_type);
     ctxt->conv->simpleExpressionsOnly = false;
 
