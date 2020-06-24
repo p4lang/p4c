@@ -42,12 +42,13 @@ filegroup(
         git_repository(
             name = "com_github_p4lang_p4runtime",
             remote = "https://github.com/p4lang/p4runtime",
-            commit = "776797d4bc7c2e5f1a7249f73f1c879a91688e75",
-            shallow_since = "1591811258 -0700",
+            # Newest commit on master branch as of June 24, 2020.
+            commit = "af483ccbdc030fa1edba3668f1c7af9118b60c9a",
+            shallow_since = "1592931215 -0700",
             # strip_prefix is broken; we use patch_cmds as a workaround,
             # see https://github.com/bazelbuild/bazel/issues/10062.
+            # strip_prefix = "proto",
             patch_cmds = ["mv proto/* ."],
-            # strip_prefix = "proto",  # Broken.
         )
     if not native.existing_rule("com_google_googletest"):
         # Cannot currently use local_repository due to Bazel limitation,
