@@ -42,13 +42,15 @@ std::ostream& IR::DpdkAsmProgram::toSexp(std::ostream& out) const {
             BUG("Statement %s unsupported", s);
         out << std::endl;
     }
+    for (auto a: actions){
+        out << a << std::endl;
+    }
+    for (auto t: tables){
+        out << t << std::endl;
+    }
     return out;
 }
 
-std::ostream& IR::DpdkAction::toSexp(std::ostream& out) const {
-    out << " Action";
-    return out;
-}
 
 std::ostream& IR::DpdkAsmStatement::toSexp(std::ostream& out) const {
     out << "asm";
@@ -103,6 +105,8 @@ std::ostream& IR::DpdkListStatement::toSexp(std::ostream& out) const {
             out << s->to<IR::DpdkLabelStatement>() << std::endl;
         else if (s->is<IR::DpdkMovStatement>())
             out << s->to<IR::DpdkMovStatement>() << std::endl;
+        else if (s->is<IR::DpdkAddStatement>())
+            out << s->to<IR::DpdkAddStatement>() << std::endl;
         else if (s->is<IR::DpdkExternObjStatement>()) {
             out << s->to<IR::DpdkExternObjStatement>() << std::endl; }
         else if (s->is<IR::DpdkListStatement>())
@@ -122,7 +126,7 @@ std::ostream& IR::DpdkMovStatement::toSexp(std::ostream& out) const {
 }
 
 std::ostream& IR::DpdkAddStatement::toSexp(std::ostream& out) const {
-    out << "(add";
+    out << "(add " << dst << " " << src1 << " " << src2 << ")";
     return out;
 }
 
@@ -234,6 +238,42 @@ std::ostream& IR::DpdkLabelStatement::toSexp(std::ostream& out) const {
     out << "(label " << label << ")";
     return out;
 }
+std::ostream& IR::DpdkTable::toSexp(std::ostream& out) const {
+    out << "(deft " << name << std::endl;
+    if(match_keys){
+        out << "(key " << std::endl;
+        for(auto key : match_keys->keyElements){
+            out << "(" << key->expression << " " << key->matchType << ")" << std::endl;
+        }
+        out << ")" << std::endl; 
+    }
+    out << "(action " << std::endl;
+    for(auto action: actions->actionList){
+        out << "(" << action->expression << ")" << std::endl;
+    }
+    out << ")" << std::endl;
+
+    out << ")";
+    return out;
+}
+std::ostream& IR::DpdkAction::toSexp(std::ostream& out) const {
+    out << "(defa " << name;
+    out << " (";
+
+    for(auto p : para.parameters){
+        out << p->type << " ";
+        out << p->name;
+        if(p != para.parameters.back())
+            out << ", ";
+    }
+    out << ")" << std::endl << "(" << std::endl;
+    for(auto i: statements){
+        out << statements << std::endl;
+    }
+    out << "))";
+
+    return out;
+}
 
 std::ostream& operator<<(std::ostream& out, const IR::DpdkAsmProgram* p) {
     return p->toSexp(out); }
@@ -291,5 +331,9 @@ std::ostream& operator<<(std::ostream& out, const IR::DpdkExternFuncStatement* s
 std::ostream& operator<<(std::ostream& out, const IR::DpdkReturnStatement* s) {
     return s->toSexp(out); }
 std::ostream& operator<<(std::ostream& out, const IR::DpdkLabelStatement* s) {
+    return s->toSexp(out); }
+std::ostream& operator<<(std::ostream& out, const IR::DpdkTable* s) {
+    return s->toSexp(out); }
+std::ostream& operator<<(std::ostream& out, const IR::DpdkAction* s) {
     return s->toSexp(out); }
 

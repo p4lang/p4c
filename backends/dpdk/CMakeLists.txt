@@ -34,6 +34,7 @@ set(P4C_DPDK_SOURCES
     sexp.cpp
     backend.cpp
     main.cpp
+    ConvertToDpdkHelper.cpp
     )
 
 set(P4C_DPDK_HEADERS
@@ -62,6 +63,7 @@ set(P4C_DPDK_HEADERS
     ../bmv2/psa_switch/psaSwitch.h
     sexp.h
     backend.h
+    ConvertToDpdkHelper.cpp.h
     )
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/dpdk.def PARENT_SCOPE)

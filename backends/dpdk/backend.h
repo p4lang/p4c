@@ -77,24 +77,27 @@ class ConvertToDpdkControl : public Inspector {
     int next_reg_id = 0;
     int next_label_id = 0;
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
-    IR::IndexedVector<IR::DpdkAsmStatement> tables;
-    IR::IndexedVector<IR::DpdkAsmStatement> actions;
+    IR::IndexedVector<IR::DpdkTable> tables;
+    IR::IndexedVector<IR::DpdkAction> actions;
  public:
     ConvertToDpdkControl() {}
 
-    IR::IndexedVector<IR::DpdkAsmStatement> getTables() { return tables; }
-    IR::IndexedVector<IR::DpdkAsmStatement> getActions() { return actions; }
-    IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() { return instructions; }
+    IR::IndexedVector<IR::DpdkTable>& getTables() { return tables; }
+    IR::IndexedVector<IR::DpdkAction>& getActions() { return actions; }
+    IR::IndexedVector<IR::DpdkAsmStatement>& getInstructions() { return instructions; }
 
     bool preorder(const IR::P4Action* a) override;
-    bool preorder(const IR::IfStatement* s) override;
-    bool preorder(const IR::AssignmentStatement*) override;
-    bool preorder(const IR::ReturnStatement* ) override;
-    bool preorder(const IR::MethodCallStatement* ) override;
+    bool preorder(const IR::P4Table* a) override;
+    // bool preorder(const IR::IfStatement* s) override;
+    // bool preorder(const IR::AssignmentStatement*) override;
+    // bool preorder(const IR::ReturnStatement* ) override;
+    // bool preorder(const IR::MethodCallStatement* ) override;
+    // bool preorder(const IR::Statement*) override;
+    bool preorder(const IR::P4Control*) override;
 
     void add_inst(const IR::DpdkAsmStatement* s) { instructions.push_back(s); }
-    void add_table(const IR::DpdkAsmStatement* t) { tables.push_back(t); }
-    void add_action(const IR::DpdkAsmStatement* a) { actions.push_back(a); }
+    void add_table(const IR::DpdkTable* t) { tables.push_back(t); }
+    void add_action(const IR::DpdkAction* a) { actions.push_back(a); }
 };
 
 class PsaSwitchBackend : public BMV2::Backend {

@@ -18,7 +18,9 @@ limitations under the License.
 #include "ir/ir.h"
 #include "sexp.h"
 #include "lib/stringify.h"
+#include "ir/dbprint.h"
 #include <unordered_map>
+#include "ConvertToDpdkHelper.h"
 
 namespace DPDK {
 
@@ -145,8 +147,8 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
         else
             BUG("Unknown deparser block %s", kv.second->name);
     }
-    statements.append(ingress_converter->getActions());
-    statements.append(ingress_converter->getTables());
+    // statements.append(ingress_converter->getActions());
+    // statements.append(ingress_converter->getTables());
 
     // ingress processing
     auto ingress_statements = createListStatement("ingress",
@@ -155,8 +157,8 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
               ingress_deparser_converter->getInstructions() });
     statements.push_back(ingress_statements);
 
-    statements.append(egress_converter->getActions());
-    statements.append(egress_converter->getTables());
+    // statements.append(egress_converter->getActions());
+    // statements.append(egress_converter->getTables());
 
     // egress processing
     auto egress_statements = createListStatement("egress",
@@ -165,7 +167,7 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
               egress_deparser_converter->getInstructions() });
     statements.push_back(egress_statements);
 
-    return new IR::DpdkAsmProgram(headerType, structType, statements);
+    return new IR::DpdkAsmProgram(headerType, structType, ingress_converter->getActions(), ingress_converter->getTables() , statements);
 }
 
 const IR::Node* ConvertToDpdkProgram::preorder(IR::P4Program* prog) {
@@ -174,8 +176,8 @@ const IR::Node* ConvertToDpdkProgram::preorder(IR::P4Program* prog) {
 }
 
 bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
-    ordered_map<cstring, int> degree_map;
-    ordered_map<cstring, IR::ParserState> state_map;
+    std::unordered_map<cstring, int> degree_map;
+    std::unordered_map<cstring, IR::ParserState> state_map;
     std::vector<IR::ParserState> stack;
     for(auto state: p->states){
         if(state->name == "start") stack.push_back(*state);
@@ -221,9 +223,10 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
                 }
             }
             else if(stat->is<IR::AssignmentStatement>()){
-                auto s = stat->to<IR::AssignmentStatement>();
-                auto i = new IR::DpdkMovStatement(s->left, s->right);
-                add_instr(i);
+                auto h = new DPDK::ConvertToDpdkIRHelper();
+                stat->apply(*h);
+                for(auto i: h->get_instr())
+                    add_instr(i);
             }
         }
         if(state.selectExpression){
@@ -263,7 +266,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
 
                 }
             }
-             else if(state.selectExpression->is<IR::PathExpression>()){
+            else if(state.selectExpression->is<IR::PathExpression>()){
                 auto got = degree_map.find(state.selectExpression->toString());
                 if(got != degree_map.end()){
                     got->second--;
@@ -271,7 +274,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
             }
         }
 
-        for(auto pair:degree_map){
+        for(auto pair: degree_map){
             if(pair.second == 0){
                 auto result = state_map.find(pair.first);
                 if(result != state_map.end()){
@@ -282,7 +285,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
         }
 
 
-        std::cout << state << std::endl;
+        // std::cout << state << std::endl;
         if(state.name == "start") continue;
     }
     return false;
@@ -290,81 +293,65 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
 
 bool ConvertToDpdkParser::preorder(const IR::ParserState* s) 
 {
-    LOG1(s);
-
-    std::cout << std::endl << std::endl << "state " << s->name.toString() << " {" << std::endl;
-    auto c = s->components;
-    for(auto stat : c){
-        if(stat->is<IR::MethodCallStatement>()){
-           const IR::MethodCallStatement *m = stat->to<IR::MethodCallStatement>();
-            std::cout << m->methodCall->method;
-            for(auto a: *m->methodCall->typeArguments){
-                std::cout << "<" << a << ">";
-            }
-            for(auto a : *m->methodCall->arguments){
-                std::cout << "(" << a << ");" << std::endl;
-            }
-        }
-        else if(stat->is<IR::AssignmentStatement>()){
-            auto s = stat->to<IR::AssignmentStatement>();
-            std::cout << s->left << " = " << s->right << ";" << std::endl;
-        }
-    }
-    if(s->selectExpression){
-        if(s->selectExpression->is<IR::SelectExpression>()){
-            auto e = s->selectExpression->to<IR::SelectExpression>();
-
-            for(auto v:e->select->components){
-                std::cout << "select{" <<  v << "} {" << std::endl; // select()
-            }
-            for(auto v:e->selectCases){
-                std::cout << v->keyset << ":" << v->state->toString() << std::endl; // next_state
-            }
-        }
-        else if(s->selectExpression->is<IR::PathExpression>()){
-            std::cout << s->selectExpression->toString();
-        }
-    }
-        std::cout << "} }" << std::endl << std::endl;
     return false;
 }
 
-
+// =====================Control=============================
 bool ConvertToDpdkControl::preorder(const IR::P4Action* a) {
+    //     std::cout << a->node_type_name() << std::endl;
+    // std::cout << a << std::endl;
+    auto helper = new DPDK::ConvertToDpdkIRHelper();
+    a->body->apply(*helper);
+    auto stmt_list = new IR::IndexedVector<IR::DpdkAsmStatement>();
+    for(auto i:helper->get_instr())
+        stmt_list->push_back(i);
+
+    auto action = new IR::DpdkAction(*stmt_list, a->name, *a->parameters);
+    actions.push_back(action);
+    // a->body
+    // a->parameters
+    return false;
+}
+
+bool ConvertToDpdkControl::preorder(const IR::P4Table* a) {
+    auto t = new IR::DpdkTable(a->name, a->getKey(), a->getActionList());
+    tables.push_back(t);
+
+
+    return false;
+}
+
+// bool ConvertToDpdkControl::preorder(const IR::Statement* s){
+//     // std::cout << s->node_type_name() << std::endl;
+//     // std::cout << s << std::endl;
+//     return true;
+// }
+
+bool ConvertToDpdkControl::preorder(const IR::P4Control* c){
+    auto helper = new DPDK::ConvertToDpdkIRHelper();
+    c->body->apply(*helper);
+    for(auto i:helper->get_instr())
+        add_inst(i);
     return true;
 }
 
-
-
-bool ConvertToDpdkControl::preorder(const IR::IfStatement* stmt) {
+// bool ConvertToDpdkControl::preorder(const IR::IfStatement* stmt) {
     
-    auto name = Util::printf_format("tmp_%d", next_reg_id++);
-    auto cond = new IR::DpdkMovStatement(new IR::PathExpression(IR::ID(name)), stmt->condition);
-    add_inst(cond);
-    auto true_label  = Util::printf_format("label_%d", next_label_id++);
-    auto false_label = Util::printf_format("label_%d", next_label_id++);
-    auto end_label = Util::printf_format("label_%d", next_label_id++);
-    add_inst(new IR::DpdkJmpStatement(true_label));
-    add_inst(new IR::DpdkJmpStatement(false_label));
-    add_inst(new IR::DpdkLabelStatement(true_label));
-    visit(stmt->ifTrue);
-    add_inst(new IR::DpdkLabelStatement(false_label));
-    visit(stmt->ifFalse);
-    return false;
-}
+//     return true;
+// }
 
-bool ConvertToDpdkControl::preorder(const IR::MethodCallStatement* stmt) {
-    add_inst(new IR::DpdkExternObjStatement(stmt->methodCall));
-    return false;
-}
+// bool ConvertToDpdkControl::preorder(const IR::MethodCallStatement* stmt) {
+//     // add_inst(new IR::DpdkExternObjStatement(stmt->methodCall));
+//     return true;
+// }
 
-bool ConvertToDpdkControl::preorder(const IR::AssignmentStatement* stmt) {
-    add_inst(new IR::DpdkMovStatement(stmt->left, stmt->right));
-    return true;
-}
+// bool ConvertToDpdkControl::preorder(const IR::AssignmentStatement* stmt) {
+//     // add_inst(new IR::DpdkMovStatement(stmt->left, stmt->right));
+//     return true;
+// }
 
-bool ConvertToDpdkControl::preorder(const IR::ReturnStatement* stmt) {
-    return true;
-}
+// bool ConvertToDpdkControl::preorder(const IR::ReturnStatement* stmt) {
+//     return true;
+// }
 
 }  // namespace DPDK

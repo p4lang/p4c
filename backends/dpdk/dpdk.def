@@ -8,29 +8,40 @@ class DpdkStructType : Type_Struct {
 #nodbprint
 }
 
-abstract DpdkAsmStatement {
+class DpdkAsmStatement {
     std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 
-class DpdkAction : P4Action {
+class DpdkAction {
+    inline IndexedVector<DpdkAsmStatement> statements;
+    inline cstring name;
+    inline ParameterList para;
     std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
+}
+
+class DpdkTable{
+    inline cstring name;
+    Key match_keys;
+    ActionList actions;
+
+    std::ostream& toSexp(std::ostream& out) const;
+#nodbprint
+#novalidate
 }
 
 // Toplevel Assembly representation
 class DpdkAsmProgram : P4Program {
-    optional inline IndexedVector<DpdkHeaderType> headerType;
-    optional inline IndexedVector<DpdkStructType> structType;
-    optional inline IndexedVector<DpdkAsmStatement> statements;
+    inline IndexedVector<DpdkHeaderType> headerType;
+    inline IndexedVector<DpdkStructType> structType;
+    inline IndexedVector<DpdkAction> actions;
+    inline IndexedVector<DpdkTable> tables;
+    inline IndexedVector<DpdkAsmStatement> statements;
 // Globals
-// Tables
-// Actions
     std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
-
-
 
 class DpdkListStatement : DpdkAsmStatement {
     optional cstring name;
@@ -48,6 +59,9 @@ class DpdkMovStatement : DpdkAsmStatement {
 
 // IR classes for DPDK assembly
 class DpdkAddStatement : DpdkAsmStatement {
+    Expression dst;
+    Expression src1;
+    Expression src2;
     std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
@@ -96,14 +110,23 @@ class DpdkTxStatement : DpdkAsmStatement {
 #nodbprint
 }
 class DpdkShlStatement : DpdkAsmStatement {
+    Expression dst;
+    Expression src1;
+    Expression src2;
     std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkShrStatement : DpdkAsmStatement {
+    Expression dst;
+    Expression src1;
+    Expression src2;
     std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
 class DpdkSubStatement : DpdkAsmStatement {
+    Expression dst;
+    Expression src1;
+    Expression src2;
     std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
