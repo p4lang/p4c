@@ -73,6 +73,10 @@ class Predication final : public Transform {
     std::vector<IR::BlockStatement*> blocks;
     bool inside_action;
     unsigned ifNestingLevel;
+    unsigned depNestingLevel;
+    const IR::AssignmentStatement* dependencyAssignment;
+    cstring dependantName;
+    std::vector<cstring> statNames;
     // Traverse path of nested if-else statements
     // true at the end of the vector means that you are currently visiting 'then' branch'
     // false at the end of the vector means that you are in the else branch of the if statement.
@@ -81,7 +85,7 @@ class Predication final : public Transform {
     ordered_set<cstring> orderedNames;
     std::vector<cstring> dependencies;
     std::map<cstring, const IR::AssignmentStatement *> liveAssignments;
-
+    std::map<const IR::AssignmentStatement *, bool> isAssignmentPushed;
     const IR::Statement* error(const IR::Statement* statement) const {
         if (inside_action && ifNestingLevel > 0)
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
@@ -92,7 +96,8 @@ class Predication final : public Transform {
 
  public:
     explicit Predication(NameGenerator* gen) :
-        generator(gen), inside_action(false), ifNestingLevel(0)
+        generator(gen), inside_action(false), ifNestingLevel(0), depNestingLevel(0),
+            dependencyAssignment(nullptr)
     { setName("Predication"); }
     const IR::Expression* clone(const IR::Expression* expression);
     const IR::Node* clone(const IR::AssignmentStatement* statement);
