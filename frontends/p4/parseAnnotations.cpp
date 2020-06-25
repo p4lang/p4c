@@ -32,6 +32,7 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
             // string literal argument.
             PARSE(IR::Annotation::nameAnnotation, StringLiteral),
             PARSE(IR::Annotation::deprecatedAnnotation, StringLiteral),
+            PARSE(IR::Annotation::noMergeStateAnnotation, StringLiteral),
             PARSE(IR::Annotation::noWarnAnnotation, StringLiteral),
 
             // @length has an expression argument.
