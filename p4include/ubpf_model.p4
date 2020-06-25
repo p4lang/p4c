@@ -179,4 +179,3 @@ package ubpf<H, M>(parse<H, M> prs,
                 deparser<H> dprs);
 
 #endif /* _UBPF_MODEL_P4_ */
-
