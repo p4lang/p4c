@@ -90,7 +90,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
 }
 
 void PsaSwitchBackend::codegen(std::ostream& out) const {
-    out << dpdk_program << std::endl;
+    dpdk_program->toSexp(out) << std::endl;
 }
 
 const IR::DpdkAsmStatement* ConvertToDpdkProgram::createListStatement(cstring name,
@@ -298,8 +298,6 @@ bool ConvertToDpdkParser::preorder(const IR::ParserState* s)
 
 // =====================Control=============================
 bool ConvertToDpdkControl::preorder(const IR::P4Action* a) {
-    //     std::cout << a->node_type_name() << std::endl;
-    // std::cout << a << std::endl;
     auto helper = new DPDK::ConvertToDpdkIRHelper();
     a->body->apply(*helper);
     auto stmt_list = new IR::IndexedVector<IR::DpdkAsmStatement>();
@@ -308,8 +306,6 @@ bool ConvertToDpdkControl::preorder(const IR::P4Action* a) {
 
     auto action = new IR::DpdkAction(*stmt_list, a->name, *a->parameters);
     actions.push_back(action);
-    // a->body
-    // a->parameters
     return false;
 }
 
