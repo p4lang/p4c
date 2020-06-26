@@ -719,7 +719,7 @@ void ExternConverter_action_profile::convertExternInstance(
         }
         auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
         selector->emplace("algo", algo);
-        auto input = ctxt->selector_check->get_selector_input(inst);
+        auto input = ctxt->get_selector_input(inst);
         if (input == nullptr) {
             // the selector is never used by any table, we cannot figure out its
             // input and therefore cannot include it in the JSON
@@ -775,7 +775,7 @@ void ExternConverter_action_selector::convertExternInstance(
         }
         auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
         selector->emplace("algo", algo);
-        auto input = ctxt->selector_check->get_selector_input(inst);
+        auto input = ctxt->get_selector_input(inst);
         if (input == nullptr) {
             // the selector is never used by any table, we cannot figure out its
             // input and therefore cannot include it in the JSON
@@ -1138,10 +1138,12 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
 
     createActions(ctxt, structure);
 
-    auto cconv = new ControlConverter(ctxt, "ingress", options.emitExterns);
+    auto cconv = new ControlConverter<Standard::Arch::V1MODEL>(ctxt,
+            "ingress", options.emitExterns);
     structure->ingress->apply(*cconv);
 
-    cconv = new ControlConverter(ctxt, "egress", options.emitExterns);
+    cconv = new ControlConverter<Standard::Arch::V1MODEL>(ctxt,
+            "egress", options.emitExterns);
     structure->egress->apply(*cconv);
 
     auto dconv = new DeparserConverter(ctxt);

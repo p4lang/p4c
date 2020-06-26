@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "frontends/p4/methodInstance.h"
 #include "helpers.h"
+#include "context.h"
 #include "ir/ir.h"
 #include "programStructure.h"
 

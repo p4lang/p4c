@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "helpers.h"
+#include "context.h"
 
 namespace BMV2 {
 

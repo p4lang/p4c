@@ -22,14 +22,12 @@ namespace BMV2 {
 
 bool ConvertGlobals::preorder(const IR::ExternBlock* block) {
     // Not really used, but necessary as an argument
-    SharedActionSelectorCheck ssc(ctxt->refMap, ctxt->typeMap);
     LOG2("Converting " << block);
     // This object will be lost, but we don't care about
     // global action profiles here; they are synthesized also
     // from each table that uses them.
     auto action_profiles = new Util::JsonArray();
     ctxt->action_profiles = action_profiles;
-    ctxt->selector_check = &ssc;
     ExternConverter::cvtExternInstance(ctxt, block->node->to<IR::Declaration>(),
         block->to<IR::ExternBlock>(), emitExterns);
     return false;
