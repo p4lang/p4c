@@ -62,7 +62,6 @@ set (BMV2_BACKEND_COMMON_HDRS
   common/action.h
   common/annotations.h
   common/backend.h
-  common/context.h
   common/control.h
   common/controlFlowGraph.h
   common/deparser.h
