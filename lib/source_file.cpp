@@ -79,7 +79,7 @@ void InputSources::seal() {
 
 unsigned InputSources::lineCount() const {
     int size = contents.size();
-    if (contents.back().isNullOrEmpty()) {
+    if (contents.back().empty()) {
         // do not count the last line if it is empty.
         size -= 1;
         if (size < 0)
