@@ -147,25 +147,15 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
         else
             BUG("Unknown deparser block %s", kv.second->name);
     }
-    // statements.append(ingress_converter->getActions());
-    // statements.append(ingress_converter->getTables());
-
-    // ingress processing
-    auto ingress_statements = createListStatement("ingress",
+    auto s = createListStatement("ingress",
             { ingress_parser_converter->getInstructions(),
               ingress_converter->getInstructions(),
-              ingress_deparser_converter->getInstructions() });
-    statements.push_back(ingress_statements);
-
-    // statements.append(egress_converter->getActions());
-    // statements.append(egress_converter->getTables());
-
-    // egress processing
-    auto egress_statements = createListStatement("egress",
-            { egress_parser_converter->getInstructions(),
+              ingress_deparser_converter->getInstructions(),
+              egress_parser_converter->getInstructions(),
               egress_converter->getInstructions(),
               egress_deparser_converter->getInstructions() });
-    statements.push_back(egress_statements);
+    statements.push_back(s);
+
 
     return new IR::DpdkAsmProgram(headerType, structType, ingress_converter->getActions(), ingress_converter->getTables() , statements);
 }
@@ -232,13 +222,13 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
         if(state.selectExpression){
             if(state.selectExpression->is<IR::SelectExpression>()){
                 auto e = state.selectExpression->to<IR::SelectExpression>();
-                cstring switch_var;
+                const IR::Expression* switch_var;
                 for(auto v:e->select->components){
-                    switch_var = v->toString();
+                    switch_var = v;
                 }
                 for(auto v:e->selectCases){
                     if(!v->keyset->is<IR::DefaultExpression>()){
-                        auto i = new IR::DpdkJmpStatement("L_" + v->state->toString(), v->keyset->toString() + " == " + switch_var);
+                        auto i = new IR::DpdkJmpStatement("L_" + v->state->toString(), new IR::Equ(v->keyset, switch_var));
                         add_instr(i);
                     }
                     else{
@@ -253,8 +243,6 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
             }
         }
         // ===========
-
-
         if(state.selectExpression){
             if(state.selectExpression->is<IR::SelectExpression>()){
                 auto select = state.selectExpression->to<IR::SelectExpression>();
@@ -285,7 +273,6 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
         }
 
 
-        // std::cout << state << std::endl;
         if(state.name == "start") continue;
     }
     return false;
@@ -317,17 +304,13 @@ bool ConvertToDpdkControl::preorder(const IR::P4Table* a) {
     return false;
 }
 
-// bool ConvertToDpdkControl::preorder(const IR::Statement* s){
-//     // std::cout << s->node_type_name() << std::endl;
-//     // std::cout << s << std::endl;
-//     return true;
-// }
 
 bool ConvertToDpdkControl::preorder(const IR::P4Control* c){
-    auto helper = new DPDK::ConvertToDpdkIRHelper();
+    auto helper = new DPDK::ConvertToDpdkIRHelper(next_label_id);
     c->body->apply(*helper);
-    for(auto i:helper->get_instr())
+    for(auto i: helper->get_instr()){
         add_inst(i);
+    }
     return true;
 }
 

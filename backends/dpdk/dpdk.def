@@ -70,10 +70,12 @@ class DpdkAndStatement : DpdkAsmStatement {
 #nodbprint
 }
 class DpdkApplyStatement : DpdkAsmStatement {
+    cstring table;
     std::ostream& toSexp(std::ostream& out) const override;
 #nodbprint
 }
 class DpdkEmitStatement : DpdkAsmStatement {
+    cstring header;
     std::ostream& toSexp(std::ostream& out) const override;
 #nodbprint
 }
@@ -84,9 +86,10 @@ class DpdkExtractStatement : DpdkAsmStatement {
 }
 class DpdkJmpStatement : DpdkAsmStatement {
     cstring label;
-    optional cstring condition;
+    optional Expression condition;
     std::ostream& toSexp(std::ostream& out) const override;
 #nodbprint
+#novalidate
 }
 class DpdkJmpActionStatement : DpdkAsmStatement {
     std::ostream& toSexp(std::ostream& out) const override;

@@ -45,28 +45,48 @@ namespace DPDK{
     }
     bool ConvertToDpdkIRHelper::preorder(const IR::BlockStatement* b){
         for(auto i:b->components){
-            std::cout << i->node_type_name() << std::endl;
-            std::cout << i << std::endl;
             visit(i);
         }
         return false;
     }
 
     bool ConvertToDpdkIRHelper::preorder(const IR::IfStatement* s){
-        // auto cond = new IR::DpdkMovStatement(new IR::PathExpression(IR::ID(name)), s->condition);
-        // add_instr(cond);
-        // auto true_label  = Util::printf_format("label_%d", next_label_id++);
-        // auto false_label = Util::printf_format("label_%d", next_label_id++);
-        // auto end_label = Util::printf_format("label_%d", next_label_id++);
-        // add_inst(new IR::DpdkJmpStatement(true_label));
-        // add_inst(new IR::DpdkJmpStatement(false_label));
-        // add_inst(new IR::DpdkLabelStatement(true_label));
-        // visit(stmt->ifTrue);
-        // add_inst(new IR::DpdkLabelStatement(false_label));
-        // visit(stmt->ifFalse);
+        auto true_label  = Util::printf_format("label_%d", next_label_id++);
+        auto end_label = Util::printf_format("label_%d", next_label_id++);
+        add_instr(new IR::DpdkJmpStatement(true_label, s->condition));
+        visit(s->ifFalse);
+        add_instr(new IR::DpdkJmpStatement(end_label));
+        add_instr(new IR::DpdkLabelStatement(true_label));
+        visit(s->ifTrue);
+        add_instr(new IR::DpdkLabelStatement(end_label));
     }
 
     bool ConvertToDpdkIRHelper::preorder(const IR::MethodCallStatement* s){
+        if(auto member = s->methodCall->method->to<IR::Member>()){
+            if(member->member == "apply") {
+                if(auto table = member->expr->to<IR::PathExpression>()){
+                    add_instr(new IR::DpdkApplyStatement(table->path->name));
+                }
+                else{
+                    BUG("member is not a path expression");
+                }
+                return false;
+            }
+            else if(member->member == "emit"){
+                if(s->methodCall->arguments->size() == 1){
+                    auto header = (*s->methodCall->arguments)[0];
+                    if(auto m = header->expression->to<IR::Member>()){
+                        add_instr(new IR::DpdkEmitStatement(m->member));
+                    }
+                    else{
+                        BUG("One emit does not like this packet.emit(header.xxx)");
+                    }
+                }
+                else{
+                    BUG("emit has 0 or 2 more args");
+                }
+            }
+        }
 
     }
     

@@ -6,25 +6,11 @@ using namespace DBPrint;
 
 static void print(std::ostream& out, const IR::DpdkAsmStatement* s) {
     s->toSexp(out) << std::endl;
-    // if (s->is<IR::DpdkJmpStatement>())
-    //     out << s->to<IR::DpdkJmpStatement>() << std::endl;
-    // else if (s->is<IR::DpdkLabelStatement>())
-    //     out << s->to<IR::DpdkLabelStatement>() << std::endl;
-    // else if (s->is<IR::DpdkMovStatement>())
-    //     out << s->to<IR::DpdkMovStatement>() << std::endl;
-    // else if (s->is<IR::DpdkExternObjStatement>()) {
-    //     LOG1("print extern ");
-    //     out << s->to<IR::DpdkExternObjStatement>() << std::endl; }
-    // else if (s->is<IR::DpdkListStatement>())
-    //     out << s->to<IR::DpdkListStatement>() << std::endl;
-    // else
-    //     BUG("Statement %s unsupported", s);
 }
 
 std::ostream& IR::DpdkAsmProgram::toSexp(std::ostream& out) const {
     for (auto h : headerType)
         h->toSexp(out) << std::endl;
-        // out << h << std::endl;
     for (auto s : structType)
         s->toSexp(out) << std::endl;
     for (auto s : statements) {
@@ -88,22 +74,6 @@ std::ostream& IR::DpdkListStatement::toSexp(std::ostream& out) const {
     for (auto s : statements) {
         out << "  ";
         s->toSexp(out) << std::endl;
-        // if (s->is<IR::DpdkJmpStatement>())
-        //     out << s->to<IR::DpdkJmpStatement>() << std::endl;
-        // else if (s->is<IR::DpdkLabelStatement>())
-        //     out << s->to<IR::DpdkLabelStatement>() << std::endl;
-        // else if (s->is<IR::DpdkMovStatement>())
-        //     out << s->to<IR::DpdkMovStatement>() << std::endl;
-        // else if (s->is<IR::DpdkAddStatement>())
-        //     out << s->to<IR::DpdkAddStatement>() << std::endl;
-        // else if (s->is<IR::DpdkExternObjStatement>()) {
-        //     out << s->to<IR::DpdkExternObjStatement>() << std::endl; }
-        // else if (s->is<IR::DpdkListStatement>())
-        //     out << s->to<IR::DpdkListStatement>() << std::endl;
-        // else if (s->is<IR::DpdkExtractStatement>())
-        //     out << s->to<IR::DpdkExtractStatement>() << std::endl;
-        // else
-        //     BUG("Statement %s unsupported", s);
     }
     out << ")" << std::endl;
     return out;
@@ -125,12 +95,12 @@ std::ostream& IR::DpdkAndStatement::toSexp(std::ostream& out) const {
 }
 
 std::ostream& IR::DpdkApplyStatement::toSexp(std::ostream& out) const {
-    out << "(apply";
+    out << "(apply " << table << ")";
     return out;
 }
 
 std::ostream& IR::DpdkEmitStatement::toSexp(std::ostream& out) const {
-    out << "(emit";
+    out << "(emit " << header << ")";
     return out;
 }
 
@@ -141,7 +111,7 @@ std::ostream& IR::DpdkExtractStatement::toSexp(std::ostream& out) const {
 
 std::ostream& IR::DpdkJmpStatement::toSexp(std::ostream& out) const {
     LOG1("print jmp");
-    if(condition.isNullOrEmpty())
+    if(!condition)
         out << "(jmp " << label << ")";
     else
         out << "(jmp " << label << " " << condition << ")";

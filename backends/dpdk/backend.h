@@ -88,11 +88,6 @@ class ConvertToDpdkControl : public Inspector {
 
     bool preorder(const IR::P4Action* a) override;
     bool preorder(const IR::P4Table* a) override;
-    // bool preorder(const IR::IfStatement* s) override;
-    // bool preorder(const IR::AssignmentStatement*) override;
-    // bool preorder(const IR::ReturnStatement* ) override;
-    // bool preorder(const IR::MethodCallStatement* ) override;
-    // bool preorder(const IR::Statement*) override;
     bool preorder(const IR::P4Control*) override;
 
     void add_inst(const IR::DpdkAsmStatement* s) { instructions.push_back(s); }
