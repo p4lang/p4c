@@ -23,6 +23,7 @@ limitations under the License.
 #include "options.h"
 #include "lib/log.h"
 #include "lib/exceptions.h"
+#include "lib/exename.h"
 #include "lib/nullstream.h"
 #include "lib/path.h"
 #include "frontends/p4/toP4/toP4.h"
@@ -264,22 +265,6 @@ void CompilerOptions::setInputFile() {
 
 namespace {
 
-template <size_t N>
-static void convertToAbsPath(const char* const relPath, char (&output)[N]) {
-    output[0] = '\0';  // Default to the empty string, indicating failure.
-
-    char cwd[PATH_MAX];
-    if (!getcwd(cwd, sizeof(cwd))) return;
-    const size_t cwdLen = strlen(cwd);
-    if (cwdLen == 0) return;
-    const char* separator = cwd[cwdLen - 1] == '/' ? "" : "/";
-
-    // Construct an absolute path. We're assuming that @relPath is relative to
-    // the current working directory.
-    int n = snprintf(output, N, "%s%s%s", cwd, separator, relPath);
-    BUG_CHECK(n >= 0, "Pathname too long");
-}
-
 bool setIncludePathIfExists(const char*& includePathOut,
                             const char* possiblePath) {
     struct stat st;
@@ -295,25 +280,8 @@ bool setIncludePathIfExists(const char*& includePathOut,
 
 std::vector<const char*>* CompilerOptions::process(int argc, char* const argv[]) {
     char buffer[PATH_MAX];
-    int len;
-    /* find the path of the executable.  We use a number of techniques that may fail
-     * or work on different systems, and take the first working one we find.  Fall
-     * back to not overriding the compiled-in installation path */
-    if ((len = readlink("/proc/self/exe", buffer, sizeof(buffer))) > 0 ||
-        (len = readlink("/proc/curproc/exe", buffer, sizeof(buffer))) > 0 ||
-        (len = readlink("/proc/curproc/file", buffer, sizeof(buffer))) > 0 ||
-        (len = readlink("/proc/self/path/a.out", buffer, sizeof(buffer))) > 0) {
-        buffer[len] = 0;
-    } else if (argv[0][0] == '/') {
-        snprintf(buffer, sizeof(buffer), "%s", argv[0]);
-    } else if (strchr(argv[0], '/')) {
-        convertToAbsPath(argv[0], buffer);
-    } else if (getenv("_")) {
-        strncpy(buffer, getenv("_"), sizeof(buffer));
-        buffer[sizeof(buffer) - 1] = 0;
-    } else {
-        buffer[0] = 0; }
 
+    snprintf(buffer, sizeof(buffer), "%s", exename(argv[0]));
     if (char *p = strrchr(buffer, '/')) {
         ++p;
         exe_name = p;
