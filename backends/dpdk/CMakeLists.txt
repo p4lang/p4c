@@ -31,7 +31,6 @@ set(P4C_DPDK_SOURCES
     ../bmv2/common/programStructure.cpp
     ../bmv2/common/sharedActionSelectorCheck.cpp
     ../bmv2/psa_switch/psaSwitch.cpp
-    sexp.cpp
     backend.cpp
     main.cpp
     ConvertToDpdkHelper.cpp
@@ -68,7 +67,17 @@ set(P4C_DPDK_HEADERS
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/dpdk.def PARENT_SCOPE)
 
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_DPDK_SOURCES}")
+set(DPDK_IR_SRCS
+    sexp.cpp
+    )
+# IR sources that need to go into the frontend library
+set(QUAL_DPDK_IR_SRCS)
+foreach(src IN LISTS DPDK_IR_SRCS)
+  set(QUAL_DPDK_IR_SRCS ${QUAL_BF_P4C_IR_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/${src})
+endforeach()
+set(EXTENSION_FRONTEND_SOURCES ${EXTENSION_FRONTEND_SOURCES} ${QUAL_DPDK_IR_SRCS} PARENT_SCOPE)
+
+add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_DPDK_SOURCES}" "${DPDK_IR_SRCS}")
 add_executable(p4c-dpdk ${P4C_DPDK_SOURCES})
 target_link_libraries (p4c-dpdk ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 add_dependencies(p4c-dpdk genIR frontend)
