@@ -27,9 +27,15 @@ namespace DPDK{
 class ConvertToDpdkIRHelper : public Inspector {
     int next_label_id;
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
+    P4::ReferenceMap *refmap;
+    P4::TypeMap *typemap;
  public:
     ConvertToDpdkIRHelper(){}
     ConvertToDpdkIRHelper(int next_label_id): next_label_id(next_label_id){}
+    ConvertToDpdkIRHelper(
+        P4::ReferenceMap *refmap, 
+        P4::TypeMap *typemap, 
+        int next_label_id): refmap(refmap), typemap(typemap), next_label_id(next_label_id){}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() { return instructions; }
     bool preorder(const IR::AssignmentStatement* a) override;
     bool preorder(const IR::BlockStatement* a) override;

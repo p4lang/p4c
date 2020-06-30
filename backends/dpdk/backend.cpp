@@ -73,7 +73,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     main->apply(*parsePsaArch);
     program = toplevel->getProgram();
 
-    auto convertToDpdk = new ConvertToDpdkProgram(structure);
+    auto convertToDpdk = new ConvertToDpdkProgram(structure, refMap, typeMap);
     PassManager toAsm = {
         new BMV2::DiscoverStructure(&structure),
         new BMV2::InspectPsaProgram(refMap, typeMap, &structure),
@@ -127,8 +127,8 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
         else
             BUG("Unknown parser %s", kv.second->name);
     }
-    auto ingress_converter = new ConvertToDpdkControl();
-    auto egress_converter = new ConvertToDpdkControl();
+    auto ingress_converter = new ConvertToDpdkControl(refmap, typemap);
+    auto egress_converter = new ConvertToDpdkControl(refmap, typemap);
     for (auto kv : structure.pipelines) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_converter);
@@ -137,8 +137,8 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
         else
             BUG("Unknown control block %s", kv.second->name);
     }
-    auto ingress_deparser_converter = new ConvertToDpdkControl();
-    auto egress_deparser_converter = new ConvertToDpdkControl();
+    auto ingress_deparser_converter = new ConvertToDpdkControl(refmap, typemap);
+    auto egress_deparser_converter = new ConvertToDpdkControl(refmap, typemap);
     for (auto kv : structure.deparsers) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_deparser_converter);
@@ -306,7 +306,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Table* a) {
 
 
 bool ConvertToDpdkControl::preorder(const IR::P4Control* c){
-    auto helper = new DPDK::ConvertToDpdkIRHelper(next_label_id);
+    auto helper = new DPDK::ConvertToDpdkIRHelper(refmap, typemap, next_label_id);
     c->body->apply(*helper);
     for(auto i: helper->get_instr()){
         add_inst(i);

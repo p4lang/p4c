@@ -62,19 +62,21 @@ namespace DPDK{
     }
 
     bool ConvertToDpdkIRHelper::preorder(const IR::MethodCallStatement* s){
-        if(auto member = s->methodCall->method->to<IR::Member>()){
-            if(member->member == "apply") {
-                if(auto table = member->expr->to<IR::PathExpression>()){
-                    add_instr(new IR::DpdkApplyStatement(table->path->name));
-                }
-                else{
-                    BUG("member is not a path expression");
-                }
-                return false;
+        auto mi = P4::MethodInstance::resolve(s->methodCall, refmap, typemap);
+        if(auto a = mi->to<P4::ApplyMethod>()){
+            if(a->isTableApply()){
+                auto table = a->object->to<IR::P4Table>();
+                add_instr(new IR::DpdkApplyStatement(table->name));
             }
-            else if(member->member == "emit"){
-                if(s->methodCall->arguments->size() == 1){
-                    auto header = (*s->methodCall->arguments)[0];
+            else{
+                BUG("not implemented for `apply` other than table");
+            }
+        }
+        else if(auto a = mi->to<P4::ExternMethod>()){
+            if(a->method->getName() == "emit"){
+                auto args = a->expr->arguments;
+                if(args->size() == 1){
+                    auto header = (*args)[0];
                     if(auto m = header->expression->to<IR::Member>()){
                         add_instr(new IR::DpdkEmitStatement(m->member));
                     }
@@ -83,11 +85,14 @@ namespace DPDK{
                     }
                 }
                 else{
-                    BUG("emit has 0 or 2 more args");
+                    BUG("emit function has 0 or 2 more params");
                 }
             }
+            else{
+                BUG("Unknown extern function.");
+            }
         }
-
+        return false;
     }
-    
+
 }
