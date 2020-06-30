@@ -113,6 +113,7 @@ class CollapseChains : public Transform {
         // has no other incoming edges.
         for (auto oe : *transitions) {
             auto node = oe.first;
+            // Avoid merging in case of state annotation
             if (!node->annotations->annotations.empty()) {
                 continue;
             }
@@ -127,6 +128,7 @@ class CollapseChains : public Transform {
             auto callers = transitions->getCallers(next);
             if (callers->size() != 1)
                 continue;
+            // Avoid merging in case of state annotation
             if (!next->annotations->annotations.empty())
                 // we are not sure what to do with the annotations
                 continue;
