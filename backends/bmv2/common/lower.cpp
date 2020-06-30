@@ -108,9 +108,11 @@ const IR::Node* LowerExpressions::postorder(IR::Slice* expression) {
     typeMap->setType(result, type);
 
     // Signedness conversion.
-    type = IR::Type_Bits::get(h - l + 1, false);
-    result = new IR::Cast(expression->srcInfo, type, result);
-    typeMap->setType(result, type);
+    if (type->isSigned) {
+        type = IR::Type_Bits::get(h - l + 1, false);
+        result = new IR::Cast(expression->srcInfo, type, result);
+        typeMap->setType(result, type);
+    }
 
     LOG3("Replaced " << expression << " with " << result);
     return result;
