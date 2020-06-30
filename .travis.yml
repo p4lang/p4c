@@ -5,6 +5,10 @@ branches:
   - master
   - stable
 
+dist: xenial
+
+language: shell
+
 os:
   - linux
   - osx
@@ -43,3 +47,12 @@ script:
   # run with sudo (...) --privileged so that we can create network namespaces for the ebpf tests
   - if [[ $TRAVIS_OS_NAME == 'linux' && $UNIFIED == ON ]] ; then sudo docker run --privileged -w /p4c/build -e CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random ; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' && $UNIFIED == ON ]] ; then ctest --output-on-failure -j 2 --schedule-random -LE "bpf$" ; fi
+
+# After checking the normal p4c test we run validation
+# This ensures that compilation does not affect program correctness
+jobs:
+  include:
+    - stage: validate
+      os: linux
+      script:
+        - docker run -w /gauntlet p4c python3.6 -m pytest test.py -vrf -k "p4c"
