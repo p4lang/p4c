@@ -105,6 +105,9 @@ const IR::Node* CreateStructInitializers::postorder(IR::MethodCallExpression* ex
         if (p->direction == IR::Direction::In ||
             p->direction == IR::Direction::None) {
             auto paramType = typeMap->getType(p, true);
+            if (paramType == nullptr)
+                // on error
+                continue;
             auto init = convert(arg->expression, paramType);
             CHECK_NULL(init);
             if (init != arg->expression) {
