@@ -1432,24 +1432,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
                // Experimental feature - see Issue 383.
                (t->is<IR::Type_Struct>() && onlyBitsOrBitStructs(t)) ||
                t->is<IR::Type_SerEnum>() || t->is<IR::Type_Boolean>(); };
-    if (!validateFields(canon, validator))
-        return type;
-
-    const IR::StructField* varbit = nullptr;
-    for (auto field : type->fields) {
-        auto ftype = getType(field);
-        if (ftype == nullptr)
-            return type;
-        if (ftype->is<IR::Type_Varbits>()) {
-            if (varbit == nullptr) {
-                varbit = field;
-            } else {
-                typeError("%1% and %2%: multiple varbit fields in a header",
-                          varbit, field);
-                return type;
-            }
-        }
-    }
+    validateFields(canon, validator);
     return type;
 }
 
@@ -2976,13 +2959,22 @@ bool TypeInference::hasVarbitsOrUnions(const IR::Type* type) const {
     if (type->is<IR::Type_HeaderUnion>() || type->is<IR::Type_Varbits>()) {
         return true;
     } else if (auto ht = type->to<IR::Type_StructLike>()) {
+        const IR::StructField* varbit = nullptr;
         for (auto f : ht->fields) {
             auto ftype = typeMap->getType(f);
             if (ftype == nullptr)
                 continue;
-            if (hasVarbitsOrUnions(ftype))
-                return true;
+            if (ftype->is<IR::Type_Varbits>()) {
+                if (varbit == nullptr) {
+                    varbit = f;
+                } else {
+                    typeError("%1% and %2%: multiple varbit fields in a header",
+                              varbit, f);
+                    return type;
+                }
+            }
         }
+        return varbit != nullptr;
     } else if (auto at = type->to<IR::Type_Stack>()) {
         return hasVarbitsOrUnions(at->elementType);
     } else if (auto tpl = type->to<IR::Type_Tuple>()) {
