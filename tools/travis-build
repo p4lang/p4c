@@ -94,9 +94,9 @@ rm -rf /tmp/pip
 pip install $P4C_PIP_PACKAGES
 # ! ------  END Python2 ----------------------------------------------------
 
-
 # ! ------  BEGIN VALIDATION -----------------------------------------------
-# These steps are necessary for the validation tests
+# These steps are necessary to validate the correct compilation of the P4C test
+# suite programs. See also https://github.com/p4gauntlet/p4_tv.
 # Grab the toz3 extension for the p4 compiler
 mkdir -p /p4c/extensions
 git clone -b stable https://github.com/p4gauntlet/toz3 /p4c/extensions/toz3
@@ -115,9 +115,6 @@ python3.6 -m pip install z3-solver
 python3.6 -m pip install pytest
 python3.6 -m pip install dataclasses
 # ! ------  END VALIDATION ------------------------------------------------
-
-
-
 
 function build() {
   if [ -e build ]; then /bin/rm -rf build; fi

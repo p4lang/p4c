@@ -49,7 +49,8 @@ script:
   - if [[ $TRAVIS_OS_NAME == 'osx' && $UNIFIED == ON ]] ; then ctest --output-on-failure -j 2 --schedule-random -LE "bpf$" ; fi
 
 # After checking the normal p4c test we run validation
-# This ensures that compilation does not affect program correctness
+# Validation ensures that P4C compiles P4-16 programs correctly.
+# We only test the front end.
 jobs:
   include:
     - stage: validate
