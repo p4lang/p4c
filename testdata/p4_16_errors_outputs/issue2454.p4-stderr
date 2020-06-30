@@ -1,0 +1,6 @@
+issue2454.p4(3): [--Werror=type-error] error: t: parameter cannot have type control C
+void f<T>(T t) {}
+            ^
+issue2454.p4(1)
+control C() { apply { } }
+        ^
