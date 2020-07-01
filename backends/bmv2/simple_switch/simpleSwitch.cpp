@@ -815,7 +815,7 @@ Util::IJson* ExternConverter_log_msg::convertExternFunction(
         // evaluating to integral types.
         auto argType = ctxt->typeMap->getType(arg1);
         if (auto ts = argType->to<IR::Type_List>()) {
-            for (auto tf: ts->components) {
+            for (auto tf : ts->components) {
                 if (!tf->is<IR::Type_Bits>()) {
                     ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                             "%1%: only integral values supported for logged values", mc);
