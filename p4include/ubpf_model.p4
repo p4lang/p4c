@@ -19,6 +19,31 @@ limitations under the License.
 
 #include <core.p4>
 
+#ifndef UBPF_MODEL_VERSION
+#define UBPF_MODEL_VERSION 20200515
+#endif
+
+/* TODO: handle the uBPF model version in the compiler. */
+const bit<32> __ubpf_model_version = UBPF_MODEL_VERSION;
+
+#if UBPF_MODEL_VERSION >= 20200515
+enum ubpf_action {
+    ABORT,
+    DROP,
+    PASS,
+    REDIRECT
+}
+
+struct standard_metadata {
+    bit<32>     input_port;
+    bit<32>     packet_length;
+    ubpf_action output_action;
+    bit<32>     output_port;
+    bool        clone;
+    bit<32>     clone_port;
+}
+#endif
+
 /*
  * The uBPF target can currently pass the packet or drop it.
  * By default, all packets are passed.
@@ -74,6 +99,17 @@ extern Register<T, S> {
  */
 extern bit<48> ubpf_time_get_ns();
 
+/***
+ * Truncate packet to the maximum size
+ *
+ * @param len   Maximum length of the packet (from beginning of packet) in
+ *              bytes, further bytes will be removed. If deparsed packet is
+ *              shorter than len, this extern has no effect.
+ *              Minimum value for len is 14, as a packet in Open vSwitch must
+ *              have at least Ethernet header. Smaller values than 14 will be
+ *              adjusted to the minimum value by switch.
+ */
+extern void truncate(in bit<32> len);
 
 enum HashAlgorithm {
     lookup3
@@ -119,8 +155,17 @@ extern bit<16> csum_replace4(in bit<16> csum,
  * header, header stack, or header_union.
  */
 
+#if UBPF_MODEL_VERSION >= 20200515
+parser parse<H, M>(packet_in packet, out H headers, inout M meta, inout standard_metadata std);
+#else
 parser parse<H, M>(packet_in packet, out H headers, inout M meta);
+#endif
+
+#if UBPF_MODEL_VERSION >= 20200515
+control pipeline<H, M>(inout H headers, inout M meta, inout standard_metadata std);
+#else
 control pipeline<H, M>(inout H headers, inout M meta);
+#endif
 
 /*
  * The only legal statements in the body of the deparser control are:
