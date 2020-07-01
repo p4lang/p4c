@@ -48,12 +48,12 @@ script:
   - if [[ $TRAVIS_OS_NAME == 'linux' && $UNIFIED == ON ]] ; then sudo docker run --privileged -w /p4c/build -e CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random ; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' && $UNIFIED == ON ]] ; then ctest --output-on-failure -j 2 --schedule-random -LE "bpf$" ; fi
 
-# After checking the normal p4c test we run validation
+# We run validation in parallel with the normal tests
 # Validation ensures that P4C compiles P4-16 programs correctly.
-# We only test the front end.
+# We only test the front end and some mid end passes for now.
 jobs:
   include:
-    - stage: validate
+    - name: "Validation"
       os: linux
       script:
-        - docker run -w /gauntlet p4c python3.6 -m pytest test.py -vrf -k "p4c"
+        - docker run -w /gauntlet p4c python3.6 -m pytest test.py -vrf -k "test_p4c"
