@@ -19,6 +19,7 @@ limitations under the License.
 #include <sys/stat.h>
 #include <unistd.h>
 #include <unordered_set>
+#include <regex>
 
 #include "options.h"
 #include "lib/log.h"
@@ -393,7 +394,15 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
         std::cerr << name << std::endl;
 
     for (auto s : top4) {
-        if (strstr(name.c_str(), s.c_str()) != nullptr) {
+        bool match = false;
+        try {
+            match = std::regex_search(name.begin(), name.end(), std::regex(s));
+        } catch (const std::regex_error& e) {
+          ::error("Malformed toP4 regex string \"%s\".", s);
+          ::error("The regex matcher follows ECMAScript syntax.");
+            exit(1);
+        }
+        if (match) {
             cstring suffix = cstring("-") + name;
             cstring filename = file;
             if (filename == "-")
