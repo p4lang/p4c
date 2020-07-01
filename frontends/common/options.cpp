@@ -396,14 +396,14 @@ void CompilerOptions::dumpPass(const char* manager, unsigned seq, const char* pa
     for (auto s : top4) {
         bool match = false;
         try {
-           auto s_regex = std::regex(s, std::regex_constants::extended);
+           auto s_regex = std::regex(s, std::regex_constants::ECMAScript);
             // we use regex_search instead of regex_match
             // regex_match compares the regex against the entire string
             // regex_search checks if the regex is contained as substring
             match = std::regex_search(name.begin(), name.end(), s_regex);
         } catch (const std::regex_error &e) {
             ::error("Malformed toP4 regex string \"%s\".", s);
-            ::error("The regex matcher follows extended POSIX syntax.");
+            ::error("The regex matcher follows ECMAScript syntax.");
             exit(1);
         }
         if (match) {
