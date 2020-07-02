@@ -341,22 +341,23 @@ void
 UBPFStateTranslationVisitor::compileAdvance(const IR::Expression* expr) {
     auto type = state->parser->typeMap->getType(expr);
     auto etype = UBPFTypeFactory::instance->create(type);
-    const char * tmpVarName = "__tmp_9507";  // need to be some random name
+    cstring tmpVarName = refMap->newName("tmp");
 
     builder->emitIndent();
     builder->blockStart();
     // declare temp var
     builder->emitIndent();
     etype->emit(builder);
-    builder->appendFormat(" %s = ", tmpVarName);
+    builder->appendFormat(" %s = ", tmpVarName.c_str());
     visit(expr);
     builder->endOfStatement(true);
 
     // check packet's length
-    emitCheckPacketLength(tmpVarName);
+    emitCheckPacketLength(tmpVarName.c_str());
 
     builder->emitIndent();
-    builder->appendFormat("%s += %s", state->parser->program->offsetVar.c_str(), tmpVarName);
+    builder->appendFormat("%s += %s",
+            state->parser->program->offsetVar.c_str(), tmpVarName.c_str());
     builder->endOfStatement(true);
     builder->blockEnd(true);
     builder->newline();
