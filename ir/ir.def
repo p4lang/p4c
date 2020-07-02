@@ -476,7 +476,7 @@ class SwitchCase {
     validate{
         if (!(label->is<IR::DefaultExpression>() || label->is<IR::PathExpression>()))
             ::error(ErrorType::ERR_EXPRESSION,
-                    "%1%: Unexpected expression for switch case", label);
+                    "%1%: Unexpected expression for switch case", *this);
         BUG_CHECK(statement == nullptr || statement->is<IR::BlockStatement>(),
                   "%1%: Expected a block statement",
                   statement);
