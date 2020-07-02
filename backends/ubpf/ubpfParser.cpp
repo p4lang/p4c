@@ -397,7 +397,7 @@ bool UBPFStateTranslationVisitor::preorder(const IR::MethodCallExpression* expre
 
             if (extMethod->method->name.name == p4lib.packetIn.advance.name) {
                 if (expression->arguments->size() != 1) {
-                    ::error("Exactly one argument expected %1%", expression);
+                    ::error(ErrorType::ERR_EXPECTED, "%1%: expected 1 argument", expression);
                     return false;
                 }
                 compileAdvance(expression->arguments->at(0)->expression);
