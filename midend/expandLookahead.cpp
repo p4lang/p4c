@@ -25,7 +25,7 @@ void DoExpandLookahead::expand(
     const IR::Type* type,                 // type that is being extracted from source
     unsigned* offset,                     // current bit offset in source
     const IR::Expression* destination,    // result is assigned to this expression
-    IR::IndexedVector<IR::StatOrDecl>* output) { // add here new assignments if needed
+    IR::IndexedVector<IR::StatOrDecl>* output) {  // add here new assignments
     if (type->is<IR::Type_Struct>() || type->is<IR::Type_Header>()) {
         if (type->is<IR::Type_Header>()) {
             auto setValid = new IR::Member(destination, IR::Type_Header::setValid);

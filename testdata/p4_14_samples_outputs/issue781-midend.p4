@@ -47,7 +47,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name(".start") state start {
         tmp = packet.lookahead<bit<160>>();
         tmp_hdr_0.setValid();
-        tmp_hdr_0.setValid();
         tmp_hdr_0.version = tmp[159:156];
         tmp_hdr_0.ihl = tmp[155:152];
         tmp_hdr_0.diffserv = tmp[151:144];
