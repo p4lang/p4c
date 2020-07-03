@@ -43,6 +43,8 @@ class UBPFStateTranslationVisitor : public EBPF::CodeGenInspector {
 
     void compileLookahead(const IR::Expression* destination);
 
+    void compileAdvance(const IR::Expression* expr);
+
  public:
     explicit UBPFStateTranslationVisitor(const UBPFParserState* state) :
             CodeGenInspector(state->parser->program->refMap, state->parser->program->typeMap),
@@ -335,6 +337,32 @@ UBPFStateTranslationVisitor::compileLookahead(const IR::Expression* destination)
     builder->endOfStatement(true);
 }
 
+void
+UBPFStateTranslationVisitor::compileAdvance(const IR::Expression* expr) {
+    auto type = state->parser->typeMap->getType(expr);
+    auto etype = UBPFTypeFactory::instance->create(type);
+    cstring tmpVarName = refMap->newName("tmp");
+
+    builder->emitIndent();
+    builder->blockStart();
+    // declare temp var
+    builder->emitIndent();
+    etype->emit(builder);
+    builder->appendFormat(" %s = ", tmpVarName.c_str());
+    visit(expr);
+    builder->endOfStatement(true);
+
+    // check packet's length
+    emitCheckPacketLength(tmpVarName.c_str());
+
+    builder->emitIndent();
+    builder->appendFormat("%s += %s",
+            state->parser->program->offsetVar.c_str(), tmpVarName.c_str());
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+    builder->newline();
+}
+
 bool UBPFStateTranslationVisitor::preorder(const IR::MethodCallExpression* expression) {
     builder->emitIndent();
     builder->append("/* ");
@@ -367,6 +395,16 @@ bool UBPFStateTranslationVisitor::preorder(const IR::MethodCallExpression* expre
                 compileExtract(expression->arguments->at(0)->expression);
                 return false;
             }
+
+            if (extMethod->method->name.name == p4lib.packetIn.advance.name) {
+                if (expression->arguments->size() != 1) {
+                    ::error(ErrorType::ERR_EXPECTED, "%1%: expected 1 argument", expression);
+                    return false;
+                }
+                compileAdvance(expression->arguments->at(0)->expression);
+                return false;
+            }
+
             BUG("Unhandled packet method %1%", expression->method);
             return false;
         }

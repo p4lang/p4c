@@ -1,0 +1,17 @@
+packet 0 00 0123456789abcdef
+expect 0 00 0123456789abcdef
+
+packet 0 10 0123456789abcdef
+expect 0 10 456789abcdef
+
+packet 0 30 0123456789abcdef
+expect 0 30 cdef
+
+packet 0 40 0123456789abcdef
+expect 0 40
+
+packet 0 48 0123456789abcdef
+expect 0 48 0123456789abcdef
+
+packet 0 ff 0123456789abcdef
+expect 0 ff 0123456789abcdef
