@@ -1,0 +1,48 @@
+workspace(name = "example_p4_project")
+
+# May replace this with `git_repository` or `http_archive` in your own project.
+local_repository(
+  name = "com_github_p4lang_p4c",
+  path = "../..",
+  # This part is optional: only needed for custom backends with IR extensions.
+  repo_mapping = {
+    # Tells p4c where to look for `:ir_extensions` target: in this project.
+    "@com_github_p4lang_p4c_extension" : "@example_p4_project",
+  },
+)
+
+load("@com_github_p4lang_p4c//:bazel/p4c_deps.bzl", "p4c_deps")
+
+p4c_deps()
+
+# -- Dependencies of dependencies. ---------------------------------------------
+
+load("@com_github_nelhage_rules_boost//:boost/boost.bzl", "boost_deps")
+
+boost_deps()
+
+load("@com_github_p4lang_p4runtime//:p4runtime_deps.bzl", "p4runtime_deps")
+
+p4runtime_deps()
+
+# -- Dependencies of dependencies of P4Runtime. --------------------------------
+
+load("@com_google_protobuf//:protobuf_deps.bzl", "protobuf_deps")
+
+protobuf_deps()
+
+load("@com_google_googleapis//:repository_rules.bzl", "switched_rules_by_language")
+
+switched_rules_by_language(
+    name = "com_google_googleapis_imports",
+    grpc = True,
+    cc = True,
+)
+
+load("@com_github_grpc_grpc//bazel:grpc_deps.bzl", "grpc_deps")
+
+grpc_deps()
+
+load("@com_github_grpc_grpc//bazel:grpc_extra_deps.bzl", "grpc_extra_deps")
+
+grpc_extra_deps()

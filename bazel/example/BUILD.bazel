@@ -1,0 +1,38 @@
+load("@com_github_p4lang_p4c//:bazel/p4_library.bzl", "p4_library")
+
+filegroup(
+  name = "ir_extensions",
+  srcs = glob(["*.def"]),
+  visibility = ["//visibility:public"],  # So p4c can compile these.
+)
+
+p4_library(
+  name = "program",
+  src = "program.p4",
+  p4info_out = "program.p4info.txt",
+)
+
+p4_library(
+  name = "program_with_more_options",
+  src = "program.p4",
+  deps = [],                            # Optional: #include-ed dependencies.
+  p4info_out = "program.p4info.2.txt",  # Optional.
+  target = "bmv2",                      # Optional (default: "bmv2").
+  target_out = "program.bmv2.json",     # Optional.
+  arch = "v1model",                     # Optional (default: "v1model").
+)
+
+cc_binary(
+  name = "main",
+  srcs = ["main.cc"],
+  data = ["program.p4info.txt"],
+  deps = [
+    "@com_github_p4lang_p4c//:p4c_ir",
+    "@com_github_p4lang_p4runtime//:p4info_cc_proto",
+    "@com_google_protobuf//:protobuf",
+  ],
+  linkopts = [
+    "-lgmp",
+    "-lgmpxx",
+  ],
+)
