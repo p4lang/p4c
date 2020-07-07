@@ -76,7 +76,7 @@ class DpdkApplyStatement : DpdkAsmStatement {
 #nodbprint
 }
 class DpdkEmitStatement : DpdkAsmStatement {
-    cstring header;
+    Expression header;
     std::ostream& toSexp(std::ostream& out) const override;
 #nodbprint
 }

@@ -201,7 +201,10 @@ namespace DPDK{
                     if(args->size() == 1){
                         auto header = (*args)[0];
                         if(auto m = header->expression->to<IR::Member>()){
-                            add_instr(new IR::DpdkEmitStatement(m->member));
+                            add_instr(new IR::DpdkEmitStatement(m));
+                        }
+                        else if (auto path = header->expression->to<IR::PathExpression>()){
+                            add_instr(new IR::DpdkEmitStatement(path));
                         }
                         else{
                             BUG("One emit does not like this packet.emit(header.xxx)");

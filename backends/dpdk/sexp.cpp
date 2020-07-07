@@ -108,7 +108,7 @@ std::ostream& IR::DpdkApplyStatement::toSexp(std::ostream& out) const {
 }
 
 std::ostream& IR::DpdkEmitStatement::toSexp(std::ostream& out) const {
-    out << "(emit " << header << ")";
+    out << "(emit " << DPDK::toStr(header) << ")";
     return out;
 }
 
