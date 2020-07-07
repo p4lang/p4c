@@ -353,5 +353,9 @@ std::ostream& IR::DpdkVerifyStatement::toSexp(std::ostream& out) const{
     out << "(verify " << DPDK::toStr(condition) << " " << DPDK::toStr(error) << ")";
     return out;
 }
+std::ostream& IR::DpdkMeterExecuteStatement::toSexp(std::ostream& out) const{
+    out << "(meter_execute " << meter << " " << DPDK::toStr(index) << " " << DPDK::toStr(color) << ")";
+    return out;
+}
 
 

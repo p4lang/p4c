@@ -327,3 +327,11 @@ class DpdkVerifyStatement: DpdkAsmStatement {
     std::ostream& toSexp(std::ostream& out) const override;
 #nodbprint
 }
+
+class DpdkMeterExecuteStatement: DpdkAsmStatement {
+    cstring meter;
+    Expression index;
+    Expression color;
+    std::ostream& toSexp(std::ostream& out) const override;
+#nodbprint
+}
