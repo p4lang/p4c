@@ -333,29 +333,43 @@ std::ostream& IR::DpdkLeqStatement::toSexp(std::ostream& out) const{
     out << "(Leq " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
+
 std::ostream& IR::DpdkLssStatement::toSexp(std::ostream& out) const{
     out << "(Lss " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
+
 std::ostream& IR::DpdkGeqStatement::toSexp(std::ostream& out) const{
     out << "(Geq " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
+
 std::ostream& IR::DpdkGrtStatement::toSexp(std::ostream& out) const{
     out << "(Grt " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
+
 std::ostream& IR::DpdkNeqStatement::toSexp(std::ostream& out) const{
     out << "(Neq " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
+
 std::ostream& IR::DpdkVerifyStatement::toSexp(std::ostream& out) const{
     out << "(verify " << DPDK::toStr(condition) << " " << DPDK::toStr(error) << ")";
     return out;
 }
+
 std::ostream& IR::DpdkMeterExecuteStatement::toSexp(std::ostream& out) const{
     out << "(meter_execute " << meter << " " << DPDK::toStr(index) << " " << DPDK::toStr(color) << ")";
     return out;
 }
 
+std::ostream& IR::DpdkCounterCountStatement::toSexp(std::ostream& out) const{
+    out << "(counter_count " << counter << " " << DPDK::toStr(index) << ")";
+    return out;
+}
 
+std::ostream& IR::DpdkRegisterReadStatement::toSexp(std::ostream& out) const{
+    out << "(register_read " << DPDK::toStr(dst) << " " << reg << " " << DPDK::toStr(index) << ")";
+    return out;
+}

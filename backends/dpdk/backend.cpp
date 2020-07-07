@@ -80,7 +80,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         // convert to assembly program
         convertToDpdk,
     };
-
+    // std::cout << program << std::endl;
     program->apply(toAsm);
     dpdk_program = convertToDpdk->getDpdkProgram();
     if (!dpdk_program) return;

@@ -84,6 +84,17 @@ namespace DPDK{
                         }
                     }
                 }
+                else if(e->originalExternType->getName().name == "Register"){
+                    if(e->method->getName().name == "get"){
+                        if(e->expr->arguments->size() == 1){
+                            auto index = (*e->expr->arguments)[0]->expression;
+                            i = new IR::DpdkRegisterReadStatement(left, e->object->getName(), index);
+                        }
+                        else {
+                            BUG("register.get() does not have 1 arg");
+                        }
+                    }
+                }
                 else{
                     BUG("ExternMethod Not implemented");
                 } 
@@ -247,6 +258,24 @@ namespace DPDK{
                     else {
                         BUG("meter execution does not have 2 args");
                     }
+                }
+            }
+            else if(a->originalExternType->getName().name == "Counter"){
+                if(a->method->getName().name == "count"){
+                    auto args = a->expr->arguments;
+                    if(args->size() == 1){
+                        auto index = (*args)[0]->expression;
+                        auto counter = a->object->getName();
+                        add_instr(new IR::DpdkCounterCountStatement(counter, index));
+                    }
+                    else {
+                        BUG("counter count does not have 1 arg");
+                    }
+                }
+            }
+            else if(a->originalExternType->getName().name == "Register"){
+                if(a->method->getName().name == "read"){
+                    std::cout << "ignore this register read, because the return value is optimized." << std::endl;
                 }
             }
             else{
