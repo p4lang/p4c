@@ -234,23 +234,23 @@ namespace DPDK{
                 BUG("Unknown extern function.");
             }
         }
-        // else if(auto a = mi->to<P4::ExternFunction>()){
-        //     if(a->method->name == "verify"){
-        //         auto args = a->expr->arguments;
-        //         if(args->size() == 2){
-        //             auto condition = (*args)[0];
-        //             auto error = (*args)[1];
-        //             add_instr(new IR::DpdkVerifyStatement(condition->expression, error->expression));
-        //         }
-        //         else{
-        //             BUG("verify has 0 or 2 more args");
-        //         }
-        //     }
-        // }
+        else if(auto a = mi->to<P4::ExternFunction>()){
+            if(a->method->name == "verify"){
+                auto args = a->expr->arguments;
+                if(args->size() == 2){
+                    auto condition = (*args)[0];
+                    auto error = (*args)[1];
+                    add_instr(new IR::DpdkVerifyStatement(condition->expression, error->expression));
+                }
+                else{
+                    BUG("verify has 0 or 2 more args");
+                }
+            }
+        }
 
-        // else {
-        //     BUG("function not implemented.");
-        // }
+        else {
+            BUG("function not implemented.");
+        }
         return false;
     }
 
@@ -276,11 +276,27 @@ namespace DPDK{
         return p->path->name;
     }
 
+    cstring toStr(const IR::TypeNameExpression* const p){
+        return p->typeName->path->name;
+    }
+
+    cstring toStr(const IR::MethodCallExpression* const m){
+        if(auto path = m->method->to<IR::PathExpression>()){
+            return path->path->name;
+        }
+        else{
+            BUG("action's method is not a PathExpression");
+        }
+        return "";
+    }
+
     cstring toStr(const IR::Expression* const exp){
         if(auto e = exp->to<IR::Constant>()) return toStr(e);
         else if(auto e = exp->to<IR::BoolLiteral>()) return toStr(e);
         else if(auto e = exp->to<IR::Member>()) return toStr(e);
         else if(auto e = exp->to<IR::PathExpression>()) return toStr(e);
+        else if(auto e = exp->to<IR::TypeNameExpression>()) return toStr(e);
+        else if(auto e = exp->to<IR::MethodCallExpression>()) return toStr(e);
         else{
             std::cout << exp << std::endl;
             std::cout << exp->node_type_name() << std::endl;

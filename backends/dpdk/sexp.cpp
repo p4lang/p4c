@@ -16,9 +16,11 @@ std::ostream& IR::DpdkAsmProgram::toSexp(std::ostream& out) const {
         s->toSexp(out) << std::endl;
     for (auto a: actions){
         a->toSexp(out) << std::endl;
+        out << std::endl;
     }
     for (auto t: tables){
         t->toSexp(out) << std::endl;
+        out << std::endl;
     }
     for (auto s : statements) {
         s->toSexp(out) << std::endl;
@@ -203,14 +205,17 @@ std::ostream& IR::DpdkTable::toSexp(std::ostream& out) const {
     out << "(deft " << name << std::endl;
     if(match_keys){
         for(auto key : match_keys->keyElements){
-            out << "(key (" << key->expression << " " << key->matchType << "))" << std::endl;
+            out << "(key (" << DPDK::toStr(key->expression) << " " << DPDK::toStr(key->matchType) << "))" << std::endl;
         }
     }
     out << "(action " << std::endl;
     for(auto action: actions->actionList){
-        out << "(" << action->expression << ")" << std::endl;
+        out << "(" << DPDK::toStr(action->expression) << ")" << std::endl;
     }
     out << ")" << std::endl;
+
+    out << "(default_action " << DPDK::toStr(default_action) << " )" << std::endl;
+    
 
     out << ")";
     return out;

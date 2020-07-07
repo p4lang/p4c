@@ -25,6 +25,7 @@ class DpdkTable{
     inline cstring name;
     Key match_keys;
     ActionList actions;
+    Expression default_action;
 
     std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
