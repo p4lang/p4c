@@ -773,7 +773,8 @@ ExpressionConverter::convert(const IR::Expression* e, bool doFixup, bool wrap, b
     if (result == nullptr)
         BUG("%1%: Could not convert expression", e);
 
-    if (convertBool) {
+    auto type = typeMap->getType(e, true);
+    if (convertBool && type->is<IR::Type_Boolean>()) {
         auto obj = new Util::JsonObject();
         obj->emplace("type", "expression");
         auto conv = new Util::JsonObject();
