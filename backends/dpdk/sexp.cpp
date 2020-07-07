@@ -1,4 +1,5 @@
 #include "sexp.h"
+#include "ConvertToDpdkHelper.h"
 #include <iostream>
 #include "ir/dbprint.h"
 
@@ -13,14 +14,14 @@ std::ostream& IR::DpdkAsmProgram::toSexp(std::ostream& out) const {
         h->toSexp(out) << std::endl;
     for (auto s : structType)
         s->toSexp(out) << std::endl;
-    for (auto s : statements) {
-        s->toSexp(out) << std::endl;
-    }
     for (auto a: actions){
         a->toSexp(out) << std::endl;
     }
     for (auto t: tables){
         t->toSexp(out) << std::endl;
+    }
+    for (auto s : statements) {
+        s->toSexp(out) << std::endl;
     }
     return out;
 }
@@ -80,12 +81,17 @@ std::ostream& IR::DpdkListStatement::toSexp(std::ostream& out) const {
 }
 
 std::ostream& IR::DpdkMovStatement::toSexp(std::ostream& out) const {
-    out << "(mov " << left << " " << right << ")";
+    out << "(mov " << DPDK::toStr(left) << " " << DPDK::toStr(right) << ")";
     return out;
 }
 
 std::ostream& IR::DpdkAddStatement::toSexp(std::ostream& out) const {
-    out << "(add " << dst << " " << src1 << " " << src2 << ")";
+    out << "(add " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
+    return out;
+}
+
+std::ostream& IR::DpdkEquStatement::toSexp(std::ostream& out) const {
+    out << "(Equ " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
 
@@ -105,7 +111,7 @@ std::ostream& IR::DpdkEmitStatement::toSexp(std::ostream& out) const {
 }
 
 std::ostream& IR::DpdkExtractStatement::toSexp(std::ostream& out) const {
-    out << "(extract " << header << ")";
+    out << "(extract " << DPDK::toStr(header) << ")";
     return out;
 }
 
@@ -114,7 +120,7 @@ std::ostream& IR::DpdkJmpStatement::toSexp(std::ostream& out) const {
     if(!condition)
         out << "(jmp " << label << ")";
     else
-        out << "(jmp " << label << " " << condition << ")";
+        out << "(jmp " << label << " " << DPDK::toStr(condition) << ")";
     return out;
 }
 
@@ -168,10 +174,6 @@ std::ostream& IR::DpdkXorStatement::toSexp(std::ostream& out) const {
     return out;
 }
 
-std::ostream& IR::DpdkValidateStatement::toSexp(std::ostream& out) const {
-    out << "(valid " << ")";
-    return out;
-}
 
 std::ostream& IR::DpdkInvalidateStatement::toSexp(std::ostream& out) const {
     out << "(invalid " << ")";
@@ -200,11 +202,9 @@ std::ostream& IR::DpdkLabelStatement::toSexp(std::ostream& out) const {
 std::ostream& IR::DpdkTable::toSexp(std::ostream& out) const {
     out << "(deft " << name << std::endl;
     if(match_keys){
-        out << "(key " << std::endl;
         for(auto key : match_keys->keyElements){
-            out << "(" << key->expression << " " << key->matchType << ")" << std::endl;
+            out << "(key (" << key->expression << " " << key->matchType << "))" << std::endl;
         }
-        out << ")" << std::endl; 
     }
     out << "(action " << std::endl;
     for(auto action: actions->actionList){
@@ -221,7 +221,7 @@ std::ostream& IR::DpdkAction::toSexp(std::ostream& out) const {
 
     for(auto p : para.parameters){
         out << p->type << " ";
-        out << p->name;
+        out << p->getName();
         if(p != para.parameters.back())
             out << ", ";
     }
@@ -233,3 +233,120 @@ std::ostream& IR::DpdkAction::toSexp(std::ostream& out) const {
 
     return out;
 }
+
+std::ostream& IR::DpdkChecksumAddStatement::toSexp(std::ostream& out) const{
+    out << "(csum_add " << csum << " " << DPDK::toStr(field) << ")";
+    return out;
+}
+
+std::ostream& IR::DpdkGetHashStatement::toSexp(std::ostream& out) const{
+    out << "(get_hash " << DPDK::toStr(dst) << " " << hash  << " (";
+    if(auto l = fields->to<IR::ListExpression>()){
+        for(auto c : l->components) {
+            out << " " << DPDK::toStr(c);
+        }
+    }
+    else{
+        BUG("get_hash's arg is not a ListExpression.");
+    }
+    out << "))";
+    return out;
+}
+
+std::ostream& IR::DpdkValidateStatement::toSexp(std::ostream& out) const{
+    out << "(validate " << DPDK::toStr(dst) << " " << header << ")";
+    return out;
+}
+
+std::ostream& IR::DpdkGetChecksumStatement::toSexp(std::ostream& out) const{
+    out << "(csum_get " << DPDK::toStr(dst) << " " << checksum << ")";
+    return out;
+}
+
+std::ostream& IR::DpdkNegStatement::toSexp(std::ostream& out) const{
+    out << "(neg " << DPDK::toStr(dst) << " " << DPDK::toStr(src) << ")";
+    return out;
+}
+
+std::ostream& IR::DpdkCmplStatement::toSexp(std::ostream& out) const{
+    out << "(cmpl " << DPDK::toStr(dst) << " " << DPDK::toStr(src) << ")";
+    return out;
+}
+
+std::ostream& IR::DpdkLNotStatement::toSexp(std::ostream& out) const{
+    out << "(lnot " << DPDK::toStr(dst) << " " << DPDK::toStr(src) << ")";
+    return out;
+}
+
+std::ostream& IR::DpdkCastStatement::toSexp(std::ostream& out) const{
+    out << "(cast " << DPDK::toStr(type) << " " << DPDK::toStr(src) << " " << DPDK::toStr(dst) << ")";
+    return out;
+}
+
+
+std::ostream& IR::DpdkCmpStatement::toSexp(std::ostream& out) const{
+    out << "(cmp " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
+    return out;
+}
+
+std::ostream& IR::DpdkJmpEqualStatement::toSexp(std::ostream& out) const{
+    out << "(je " << label << ")";
+    return out;
+}
+
+std::ostream& IR::DpdkJmpNotEqualStatement::toSexp(std::ostream& out) const{
+    out << "(je " << label << ")";
+    return out;
+}
+
+std::ostream& IR::DpdkJmpGreaterEqualStatement::toSexp(std::ostream& out) const{
+    out << "(jge " << label << ")";
+    return out;
+}
+
+std::ostream& IR::DpdkJmpGreaterStatement::toSexp(std::ostream& out) const{
+    out << "(jg " << label << ")";
+    return out;
+}
+
+std::ostream& IR::DpdkJmpLessorEqualStatement::toSexp(std::ostream& out) const{
+    out << "(jle " << label << ")";
+    return out;
+}
+
+std::ostream& IR::DpdkJmpLessorStatement::toSexp(std::ostream& out) const{
+    out << "(jl " << label << ")";
+    return out;
+}
+
+std::ostream& IR::DpdkLAndStatement::toSexp(std::ostream& out) const{
+    out << "(LAnd " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
+    return out;
+}
+
+std::ostream& IR::DpdkLeqStatement::toSexp(std::ostream& out) const{
+    out << "(Leq " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
+    return out;
+}
+std::ostream& IR::DpdkLssStatement::toSexp(std::ostream& out) const{
+    out << "(Lss " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
+    return out;
+}
+std::ostream& IR::DpdkGeqStatement::toSexp(std::ostream& out) const{
+    out << "(Geq " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
+    return out;
+}
+std::ostream& IR::DpdkGrtStatement::toSexp(std::ostream& out) const{
+    out << "(Grt " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
+    return out;
+}
+std::ostream& IR::DpdkNeqStatement::toSexp(std::ostream& out) const{
+    out << "(Neq " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
+    return out;
+}
+std::ostream& IR::DpdkVerifyStatement::toSexp(std::ostream& out) const{
+    out << "(verify " << DPDK::toStr(condition) << " " << DPDK::toStr(error) << ")";
+    return out;
+}
+
+
