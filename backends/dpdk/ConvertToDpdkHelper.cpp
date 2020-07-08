@@ -179,9 +179,7 @@ namespace DPDK{
                 auto table = a->object->to<IR::P4Table>();
                 add_instr(new IR::DpdkApplyStatement(table->name));
             }
-            else{
-                BUG("not implemented for `apply` other than table");
-            }
+            else BUG("not implemented for `apply` other than table");
         }
         else if(auto a = mi->to<P4::ExternMethod>()){
             // std::cout << a->originalExternType->getName() << std::endl;
@@ -196,13 +194,9 @@ namespace DPDK{
                                 add_instr(new IR::DpdkChecksumAddStatement(a->object->getName(), field));
                             }
                         }
-                        else{
-                            BUG("The argument of InternetCheckSum.add is not a list.");
-                        }
+                        else BUG("The argument of InternetCheckSum.add is not a list.");
                     }
-                    else{
-                        BUG("InternetChecksum.add has 0 or 2 more args");
-                    }
+                    else BUG("InternetChecksum.add has 0 or 2 more args");
                 }
             }
             // Packet emit function call
@@ -217,13 +211,9 @@ namespace DPDK{
                         else if (auto path = header->expression->to<IR::PathExpression>()){
                             add_instr(new IR::DpdkEmitStatement(path));
                         }
-                        else{
-                            BUG("One emit does not like this packet.emit(header.xxx)");
-                        }
+                        else BUG("One emit does not like this packet.emit(header.xxx)");
                     }
-                    else{
-                        BUG("emit function has 0 or 2 more args");
-                    }
+                    else BUG("emit function has 0 or 2 more args");
                 }
             }
             else if(a->originalExternType->getName().name == "packet_in"){
@@ -237,13 +227,9 @@ namespace DPDK{
                         else if(auto path = header->expression->to<IR::PathExpression>()){
                             add_instr(new IR::DpdkExtractStatement(path));
                         }
-                        else{
-                            BUG("Extract does not like this packet.extract(header.xxx)");
-                        }
+                        else BUG("Extract does not like this packet.extract(header.xxx)");
                     }
-                    else{
-                        BUG("extraction has 0 or 2 more args");
-                    }
+                    else BUG("extraction has 0 or 2 more args");
                 }
             }
             else if(a->originalExternType->getName().name == "Meter"){
@@ -255,10 +241,10 @@ namespace DPDK{
                         auto meter = a->object->getName();
                         add_instr(new IR::DpdkMeterExecuteStatement(meter, index, color));
                     }
-                    else {
-                        BUG("meter execution does not have 2 args");
-                    }
+                    else BUG("meter execution does not have 2 args");
                 }
+                else BUG("Meter function not implemented.");
+
             }
             else if(a->originalExternType->getName().name == "Counter"){
                 if(a->method->getName().name == "count"){
@@ -268,15 +254,25 @@ namespace DPDK{
                         auto counter = a->object->getName();
                         add_instr(new IR::DpdkCounterCountStatement(counter, index));
                     }
-                    else {
-                        BUG("counter count does not have 1 arg");
-                    }
+                    else BUG("counter count does not have 1 arg");
                 }
+                else BUG("Counter function not implemented");
             }
             else if(a->originalExternType->getName().name == "Register"){
                 if(a->method->getName().name == "read"){
                     std::cout << "ignore this register read, because the return value is optimized." << std::endl;
                 }
+                else if(a->method->getName().name == "write"){
+                    auto args = a->expr->arguments;
+                    if(args->size() == 2){
+                        auto index = (*args)[0]->expression;
+                        auto src = (*args)[1]->expression;
+                        auto reg = a->object->getName();
+                        add_instr(new IR::DpdkRegisterWriteStatement(reg, index, src));
+                    }
+                    else BUG("reg.write function does not have 2 args");
+                }
+
             }
             else{
                 std::cout << a->originalExternType->getName() << std::endl;    

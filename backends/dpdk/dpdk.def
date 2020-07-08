@@ -350,3 +350,11 @@ class DpdkRegisterReadStatement: DpdkAsmStatement {
     std::ostream& toSexp(std::ostream& out) const override;
 #nodbprint
 }
+
+class DpdkRegisterWriteStatement: DpdkAsmStatement {
+    cstring reg;
+    Expression index;
+    Expression src;
+    std::ostream& toSexp(std::ostream& out) const override;
+#nodbprint
+}

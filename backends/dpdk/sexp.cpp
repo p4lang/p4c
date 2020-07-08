@@ -284,7 +284,7 @@ std::ostream& IR::DpdkLNotStatement::toSexp(std::ostream& out) const{
 }
 
 std::ostream& IR::DpdkCastStatement::toSexp(std::ostream& out) const{
-    out << "(cast " << DPDK::toStr(type) << " " << DPDK::toStr(src) << " " << DPDK::toStr(dst) << ")";
+    out << "(cast " << " " << DPDK::toStr(dst) << DPDK::toStr(type) << " " << DPDK::toStr(src) <<  ")";
     return out;
 }
 
@@ -371,5 +371,10 @@ std::ostream& IR::DpdkCounterCountStatement::toSexp(std::ostream& out) const{
 
 std::ostream& IR::DpdkRegisterReadStatement::toSexp(std::ostream& out) const{
     out << "(register_read " << DPDK::toStr(dst) << " " << reg << " " << DPDK::toStr(index) << ")";
+    return out;
+}
+
+std::ostream& IR::DpdkRegisterWriteStatement::toSexp(std::ostream& out) const{
+    out << "(register_write " << reg << " " << DPDK::toStr(index) << " " << DPDK::toStr(src) << ")";
     return out;
 }
