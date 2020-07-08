@@ -210,7 +210,7 @@ std::ostream& IR::DpdkTable::toSexp(std::ostream& out) const {
     }
     out << "(action " << std::endl;
     for(auto action: actions->actionList){
-        out << "(" << DPDK::toStr(action->expression) << ")" << std::endl;
+        out << DPDK::toStr(action->expression) << std::endl;
     }
     out << ")" << std::endl;
 
@@ -222,15 +222,15 @@ std::ostream& IR::DpdkTable::toSexp(std::ostream& out) const {
 }
 std::ostream& IR::DpdkAction::toSexp(std::ostream& out) const {
     out << "(defa " << name;
-    out << " (";
+    out << " (arg_list ";
 
     for(auto p : para.parameters){
-        out << p->type << " ";
-        out << p->getName();
+        out << "(arg " << p->type << " ";
+        out << p->getName() << ")";
         if(p != para.parameters.back())
-            out << ", ";
+            out << " ";
     }
-    out << ")" << std::endl << "(" << std::endl;
+    out << ")" << std::endl << "(instructions " << std::endl;
     for(auto i: statements){
         i->toSexp(out) << std::endl;
     }
