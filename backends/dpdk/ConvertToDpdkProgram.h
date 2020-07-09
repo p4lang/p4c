@@ -24,12 +24,13 @@
 #include "backends/bmv2/common/parser.h"
 #include "backends/bmv2/common/programStructure.h"
 #include "backends/bmv2/psa_switch/psaSwitch.h"
+#include "DpdkVariableCollector.h"
 
 namespace DPDK
 {
     
 class ConvertToDpdkProgram : public Transform {
-    int next_tmp_id = 0;
+    DpdkVariableCollector collector;
     int next_label_id = 0;
     std::map<int, cstring> reg_id_to_name;
     std::map<cstring, int> reg_name_to_id;
@@ -49,7 +50,6 @@ class ConvertToDpdkProgram : public Transform {
     const IR::DpdkAsmProgram* create();
     const IR::DpdkAsmStatement* createListStatement(cstring name,
             std::initializer_list<IR::IndexedVector<IR::DpdkAsmStatement>> statements);
-    int next_free_reg() { return next_tmp_id++; }
     const IR::Node* preorder(IR::P4Program* p) override;
     const IR::DpdkAsmProgram* getDpdkProgram() { return dpdk_program; }
 };
@@ -58,9 +58,9 @@ class ConvertToDpdkParser : public Inspector {
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     P4::ReferenceMap *refmap;
     P4::TypeMap *typemap;
-    int *next_tmp_id;
+    DpdkVariableCollector *collector;
  public:
-    ConvertToDpdkParser(P4::ReferenceMap *refmap, P4::TypeMap *typemap, int * next_tmp_id): refmap(refmap), typemap(typemap), next_tmp_id(next_tmp_id) {}
+    ConvertToDpdkParser(P4::ReferenceMap *refmap, P4::TypeMap *typemap, DpdkVariableCollector *collector): refmap(refmap), typemap(typemap), collector(collector) {}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() { return instructions; }
     bool preorder(const IR::P4Parser* a) override;
     bool preorder(const IR::ParserState* s) override;
@@ -68,7 +68,7 @@ class ConvertToDpdkParser : public Inspector {
 };
 
 class ConvertToDpdkControl : public Inspector {
-    int* next_tmp_id;
+    DpdkVariableCollector *collector;
     int next_label_id = 0;
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     IR::IndexedVector<IR::DpdkTable> tables;
@@ -76,7 +76,7 @@ class ConvertToDpdkControl : public Inspector {
     P4::ReferenceMap *refmap;
     P4::TypeMap *typemap;
  public:
-    ConvertToDpdkControl(P4::ReferenceMap *refmap, P4::TypeMap *typemap, int *next_tmp_id): refmap(refmap), typemap(typemap), next_tmp_id(next_tmp_id) {}
+    ConvertToDpdkControl(P4::ReferenceMap *refmap, P4::TypeMap *typemap, DpdkVariableCollector *collector): refmap(refmap), typemap(typemap), collector(collector) {}
 
     IR::IndexedVector<IR::DpdkTable>& getTables() { return tables; }
     IR::IndexedVector<IR::DpdkAction>& getActions() { return actions; }

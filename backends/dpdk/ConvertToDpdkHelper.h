@@ -23,13 +23,15 @@
 #include "backends/bmv2/common/parser.h"
 #include "backends/bmv2/common/programStructure.h"
 #include "backends/bmv2/psa_switch/psaSwitch.h"
+#include "DpdkVariableCollector.h"
+
 
 #define TOSTR_DECLA(NAME) std::ostream& toStr(std::ostream&, IR::NAME*)
 
 namespace DPDK{
 class ConvertStatementToDpdk : public Inspector {
     int next_label_id;
-    int *next_tmp_id;
+    DpdkVariableCollector *collector;
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     P4::ReferenceMap *refmap;
     P4::TypeMap *typemap;
@@ -38,11 +40,11 @@ class ConvertStatementToDpdk : public Inspector {
         P4::ReferenceMap *refmap, 
         P4::TypeMap *typemap, 
         int next_label_id,
-        int *next_tmp_id): 
+        DpdkVariableCollector *collector): 
         refmap(refmap), 
         typemap(typemap), 
         next_label_id(next_label_id),
-        next_tmp_id(next_tmp_id){}
+        collector(collector){}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() { return instructions; }
 
     bool preorder(const IR::AssignmentStatement* a) override;
@@ -58,16 +60,17 @@ class ConvertStatementToDpdk : public Inspector {
 cstring toStr(const IR::Expression *const);
 cstring toStr(const IR::Type *const);
 cstring toStr(const IR::Argument* const);
+// IR::Expression* getMethodReturnType(const IR::MethodCallExpression*, P4::ReferenceMap*, P4::TypeMap*);
 
 
 class TreeUnroller: public Inspector {
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
-    int* next_tmp_id;
+    DpdkVariableCollector *collector;
     IR::PathExpression *tmp;
     P4::ReferenceMap *refmap;
     P4::TypeMap *typemap;
 public:
-    TreeUnroller(int* next_tmp_id, P4::ReferenceMap *refmap, P4::TypeMap *typemap): next_tmp_id(next_tmp_id), refmap(refmap), typemap(typemap){}
+    TreeUnroller(DpdkVariableCollector *collector, P4::ReferenceMap *refmap, P4::TypeMap *typemap): collector(collector), refmap(refmap), typemap(typemap){}
     bool preorder(const IR::Operation_Binary*) override;
     bool preorder(const IR::MethodCallExpression*) override;
     bool preorder(const IR::Member*) override;

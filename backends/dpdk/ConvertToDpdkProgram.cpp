@@ -8,6 +8,7 @@
 #include "ConvertToDpdkProgram.h"
 #include "ConvertToDpdkHelper.h"
 
+
 namespace DPDK{
 const IR::DpdkAsmStatement* ConvertToDpdkProgram::createListStatement(cstring name,
         std::initializer_list<IR::IndexedVector<IR::DpdkAsmStatement>> list) {
@@ -33,8 +34,8 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
         structType.push_back(st);
     }
     IR::IndexedVector<IR::DpdkAsmStatement> statements;
-    auto ingress_parser_converter = new ConvertToDpdkParser(refmap, typemap, &next_tmp_id);
-    auto egress_parser_converter = new ConvertToDpdkParser(refmap, typemap, &next_tmp_id);
+    auto ingress_parser_converter = new ConvertToDpdkParser(refmap, typemap, &collector);
+    auto egress_parser_converter = new ConvertToDpdkParser(refmap, typemap, &collector);
     for (auto kv : structure.parsers) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_parser_converter);
@@ -43,8 +44,8 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
         else
             BUG("Unknown parser %s", kv.second->name);
     }
-    auto ingress_converter = new ConvertToDpdkControl(refmap, typemap, &next_tmp_id);
-    auto egress_converter = new ConvertToDpdkControl(refmap, typemap, &next_tmp_id);
+    auto ingress_converter = new ConvertToDpdkControl(refmap, typemap, &collector);
+    auto egress_converter = new ConvertToDpdkControl(refmap, typemap, &collector);
     for (auto kv : structure.pipelines) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_converter);
@@ -53,8 +54,8 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
         else
             BUG("Unknown control block %s", kv.second->name);
     }
-    auto ingress_deparser_converter = new ConvertToDpdkControl(refmap, typemap, &next_tmp_id);
-    auto egress_deparser_converter = new ConvertToDpdkControl(refmap, typemap, &next_tmp_id);
+    auto ingress_deparser_converter = new ConvertToDpdkControl(refmap, typemap, &collector);
+    auto egress_deparser_converter = new ConvertToDpdkControl(refmap, typemap, &collector);
     for (auto kv : structure.deparsers) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_deparser_converter);
@@ -73,15 +74,19 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
     statements.push_back(s);
 
 
-    return new IR::DpdkAsmProgram(headerType, structType, ingress_converter->getActions(), ingress_converter->getTables() , statements);
+    return new IR::DpdkAsmProgram(headerType, structType, ingress_converter->getActions(), ingress_converter->getTables() , statements, collector.get_globals());
 }
 
 const IR::Node* ConvertToDpdkProgram::preorder(IR::P4Program* prog) {
+    // std::cout << prog << std::endl;
     dpdk_program = create();
     return prog;
 }
 
 bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
+    for(auto l:p->parserLocals) {
+        collector->push_variable(new IR::DpdkDeclaration(l));
+    }
     std::unordered_map<cstring, int> degree_map;
     std::unordered_map<cstring, IR::ParserState> state_map;
     std::vector<IR::ParserState> stack;
@@ -122,7 +127,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
         add_instr(i);
         auto c = state.components;
         for(auto stat : c){
-            DPDK::ConvertStatementToDpdk h(refmap, typemap, 0, this->next_tmp_id);
+            DPDK::ConvertStatementToDpdk h(refmap, typemap, 0, this->collector);
             stat->apply(h);
             for(auto i: h.get_instr())
                 add_instr(i);
@@ -198,7 +203,7 @@ bool ConvertToDpdkParser::preorder(const IR::ParserState* s)
 
 // =====================Control=============================
 bool ConvertToDpdkControl::preorder(const IR::P4Action* a) {
-    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, 0, next_tmp_id);
+    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, 0, collector);
     a->body->apply(*helper);
     auto stmt_list = new IR::IndexedVector<IR::DpdkAsmStatement>();
     for(auto i:helper->get_instr())
@@ -217,7 +222,13 @@ bool ConvertToDpdkControl::preorder(const IR::P4Table* a) {
 
 
 bool ConvertToDpdkControl::preorder(const IR::P4Control* c){
-    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, 0, next_tmp_id);
+    for(auto l:c->controlLocals){
+        if(not l->is<IR::P4Action>() and not l->is<IR::P4Table>()){
+            // std::cout << l << std::endl;
+            collector->push_variable(new IR::DpdkDeclaration(l));
+        }
+    }
+    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, 0, collector);
     c->body->apply(*helper);
     for(auto i: helper->get_instr()){
         add_inst(i);

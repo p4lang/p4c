@@ -10,17 +10,19 @@ static void print(std::ostream& out, const IR::DpdkAsmStatement* s) {
 }
 
 std::ostream& IR::DpdkAsmProgram::toSexp(std::ostream& out) const {
+    for(auto l: globals){
+        l->toSexp(out) << std::endl;   
+    }
+    out << std::endl;
     for (auto h : headerType)
         h->toSexp(out) << std::endl;
     for (auto s : structType)
         s->toSexp(out) << std::endl;
     for (auto a: actions){
-        a->toSexp(out) << std::endl;
-        out << std::endl;
+        a->toSexp(out) << std::endl << std::endl;
     }
     for (auto t: tables){
-        t->toSexp(out) << std::endl;
-        out << std::endl;
+        t->toSexp(out) << std::endl << std::endl;
     }
     for (auto s : statements) {
         s->toSexp(out) << std::endl;
@@ -34,6 +36,23 @@ std::ostream& IR::DpdkAsmStatement::toSexp(std::ostream& out) const {
     return out;
 }
 
+std::ostream& IR::DpdkDeclaration::toSexp(std::ostream& out) const{
+    if(auto var = global->to<IR::Declaration_Variable>()){
+        out << "(defv " << DPDK::toStr(var->type) << " " << global->name << ")";
+    }
+    else if(auto ins = global->to<IR::Declaration_Instance>()){
+        out << "(def" << DPDK::toStr(ins->type);
+        for(auto arg : *ins->arguments)
+            out << " " << DPDK::toStr(arg->expression);
+        out << " " << global->name << ")";
+    }
+    else{
+        std::cout << global->node_type_name() << std::endl;
+        BUG("");
+    }
+    return out;
+}
+
 std::ostream& IR::DpdkHeaderType::toSexp(std::ostream& out) const {
     out << "(header " << name << std::endl;
     if (fields.empty()) {
@@ -43,10 +62,14 @@ std::ostream& IR::DpdkHeaderType::toSexp(std::ostream& out) const {
         out << "  (field " << (*it)->name;
         if (auto t = (*it)->type->to<IR::Type_Bits>())
             out << " (bit " << t->width_bits() << "))";
-        else if (auto t = (*it)->type->to<IR::Type_Name>())
-            out << " " << t->path << ")";
-        else if (auto t = (*it)->type->to<IR::Type_Boolean>())
+        else if(auto t = (*it)->type->to<IR::Type_Name>())
+            out << " " << t->path->name << ")";
+        else if(auto t = (*it)->type->to<IR::Type_Boolean>())
             out << " bool)";
+        else{
+            std::cout << (*it)->type->node_type_name() << std::endl;
+            BUG("Unsupported type");
+        }
         if (std::next(it) != fields.end())
             out << std::endl;
     }
@@ -65,6 +88,14 @@ std::ostream& IR::DpdkStructType::toSexp(std::ostream& out) const {
             out << " (bit " << t->width_bits() << "))";
         else if (auto t = (*it)->type->to<IR::Type_Name>())
             out << " " << t->path << ")";
+        else if(auto t = (*it)->type->to<IR::Type_Error>())
+            out << " " << t->error << ")";
+        else if(auto t = (*it)->type->to<IR::Type_Boolean>())
+            out << " bool)";
+        else{
+            std::cout << (*it)->type->node_type_name() << std::endl;
+            BUG("Unsupported type");
+        }
         if (std::next(it) != fields.end())
             out << std::endl;
     }
@@ -73,12 +104,12 @@ std::ostream& IR::DpdkStructType::toSexp(std::ostream& out) const {
 }
 
 std::ostream& IR::DpdkListStatement::toSexp(std::ostream& out) const {
-    out << "(def_process " << name << std::endl;
+    out << "(defg " << name << std::endl << "(";
     for (auto s : statements) {
         out << "  ";
         s->toSexp(out) << std::endl;
     }
-    out << ")" << std::endl;
+    out << ")" << std::endl << ")" << std::endl;
     return out;
 }
 
@@ -93,7 +124,7 @@ std::ostream& IR::DpdkAddStatement::toSexp(std::ostream& out) const {
 }
 
 std::ostream& IR::DpdkEquStatement::toSexp(std::ostream& out) const {
-    out << "(Equ " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
+    out << "(equ " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
 
@@ -205,14 +236,14 @@ std::ostream& IR::DpdkTable::toSexp(std::ostream& out) const {
     out << "(deft " << name << std::endl;
     if(match_keys){
         for(auto key : match_keys->keyElements){
-            out << "(key (" << DPDK::toStr(key->expression) << " " << DPDK::toStr(key->matchType) << "))" << std::endl;
+            out << "(key " << DPDK::toStr(key->expression) << " " << DPDK::toStr(key->matchType) << ")" << std::endl;
         }
     }
-    out << "(action " << std::endl;
+    out << "(actions (" << std::endl;
     for(auto action: actions->actionList){
         out << DPDK::toStr(action->expression) << std::endl;
     }
-    out << ")" << std::endl;
+    out << "))" << std::endl;
 
     out << "(default_action " << DPDK::toStr(default_action) << " )" << std::endl;
     
@@ -222,15 +253,15 @@ std::ostream& IR::DpdkTable::toSexp(std::ostream& out) const {
 }
 std::ostream& IR::DpdkAction::toSexp(std::ostream& out) const {
     out << "(defa " << name;
-    out << " (arg_list ";
+    out << " (";
 
     for(auto p : para.parameters){
-        out << "(arg " << p->type << " ";
+        out << "(param " << p->type << " ";
         out << p->getName() << ")";
         if(p != para.parameters.back())
             out << " ";
     }
-    out << ")" << std::endl << "(instructions " << std::endl;
+    out << ")" << std::endl << "( " << std::endl;
     for(auto i: statements){
         i->toSexp(out) << std::endl;
     }
@@ -284,7 +315,7 @@ std::ostream& IR::DpdkLNotStatement::toSexp(std::ostream& out) const{
 }
 
 std::ostream& IR::DpdkCastStatement::toSexp(std::ostream& out) const{
-    out << "(cast " << " " << DPDK::toStr(dst) << DPDK::toStr(type) << " " << DPDK::toStr(src) <<  ")";
+    out << "(cast " << " " << DPDK::toStr(dst) << " " << DPDK::toStr(type) << " " << DPDK::toStr(src) <<  ")";
     return out;
 }
 
@@ -325,32 +356,32 @@ std::ostream& IR::DpdkJmpLessorStatement::toSexp(std::ostream& out) const{
 }
 
 std::ostream& IR::DpdkLAndStatement::toSexp(std::ostream& out) const{
-    out << "(LAnd " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
+    out << "(land " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
 
 std::ostream& IR::DpdkLeqStatement::toSexp(std::ostream& out) const{
-    out << "(Leq " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
+    out << "(leq " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
 
 std::ostream& IR::DpdkLssStatement::toSexp(std::ostream& out) const{
-    out << "(Lss " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
+    out << "(lss " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
 
 std::ostream& IR::DpdkGeqStatement::toSexp(std::ostream& out) const{
-    out << "(Geq " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
+    out << "(geq " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
 
 std::ostream& IR::DpdkGrtStatement::toSexp(std::ostream& out) const{
-    out << "(Grt " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
+    out << "(grt " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
 
 std::ostream& IR::DpdkNeqStatement::toSexp(std::ostream& out) const{
-    out << "(Neq " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
+    out << "(neq " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
 

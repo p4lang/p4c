@@ -1,3 +1,9 @@
+class DpdkDeclaration {
+    Declaration global;
+    std::ostream& toSexp(std::ostream& out) const;
+#nodbprint
+}
+
 class DpdkHeaderType : Type_Header {
     std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
@@ -39,7 +45,7 @@ class DpdkAsmProgram : P4Program {
     inline IndexedVector<DpdkAction> actions;
     inline IndexedVector<DpdkTable> tables;
     inline IndexedVector<DpdkAsmStatement> statements;
-// Globals
+    inline IndexedVector<DpdkDeclaration> globals;
     std::ostream& toSexp(std::ostream& out) const;
 #nodbprint
 }
