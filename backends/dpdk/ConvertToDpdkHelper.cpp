@@ -372,7 +372,15 @@ namespace DPDK{
             BUG("not implemented type");
         }
     }
-
+    cstring toStr(const IR::PropertyValue* const property){
+        if(auto expr_value = property->to<IR::ExpressionValue>()){
+            return toStr(expr_value->expression);
+        }
+        else{
+            std::cout << property->node_type_name() << std::endl;
+            BUG("not implemneted property value");
+        }
+    }
 
     // IR::Expression* getMethodReturnType(
     //     const IR::MethodCallExpression* mce, 

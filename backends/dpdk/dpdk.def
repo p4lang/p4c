@@ -32,6 +32,7 @@ class DpdkTable{
     Key match_keys;
     ActionList actions;
     Expression default_action;
+    TableProperties properties;
 
     std::ostream& toSexp(std::ostream& out) const;
 #nodbprint

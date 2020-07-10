@@ -60,6 +60,7 @@ class ConvertStatementToDpdk : public Inspector {
 cstring toStr(const IR::Expression *const);
 cstring toStr(const IR::Type *const);
 cstring toStr(const IR::Argument* const);
+cstring toStr(const IR::PropertyValue* const);
 // IR::Expression* getMethodReturnType(const IR::MethodCallExpression*, P4::ReferenceMap*, P4::TypeMap*);
 
 

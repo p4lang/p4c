@@ -215,7 +215,8 @@ bool ConvertToDpdkControl::preorder(const IR::P4Action* a) {
 }
 
 bool ConvertToDpdkControl::preorder(const IR::P4Table* a) {
-    auto t = new IR::DpdkTable(a->name, a->getKey(), a->getActionList(), a->getDefaultAction());
+    // auto psa_implementation = a->properties->getProperty("psa_implementation");
+    auto t = new IR::DpdkTable(a->name, a->getKey(), a->getActionList(), a->getDefaultAction(), a->properties);
     tables.push_back(t);
     return false;
 }

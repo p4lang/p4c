@@ -246,7 +246,9 @@ std::ostream& IR::DpdkTable::toSexp(std::ostream& out) const {
     out << "))" << std::endl;
 
     out << "(default_action " << DPDK::toStr(default_action) << " )" << std::endl;
-    
+    if(auto psa_implementation = properties->getProperty("psa_implementation")){
+        out << "(psa_implementation " << DPDK::toStr(psa_implementation->value) << ")" << std::endl;
+    }
 
     out << ")";
     return out;
