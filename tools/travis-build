@@ -113,6 +113,8 @@ apt update
 apt install -y python3.6
 python3.6 -m pip install z3-solver
 python3.6 -m pip install pytest
+# to parallelize tests
+python3.6 -m pip install pytest-xdist
 python3.6 -m pip install dataclasses
 # ! ------  END VALIDATION ------------------------------------------------
 
