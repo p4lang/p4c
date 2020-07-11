@@ -57,7 +57,7 @@ control cIngress(inout headers_t hdr,
     Meter<bit<12>>(1024, PSA_MeterType_t.PACKETS) meter0;
     apply {
         hdr.ethernet.dstAddr = 2;
-        if (meter0.execute(1) == PSA_MeterColor_t.RED) {
+        if (meter0.execute(1) == PSA_MeterColor_t.GREEN) {
             hdr.ethernet.dstAddr = 3;
         }
         send_to_port(ostd, (PortId_t) (PortIdUint_t) hdr.ethernet.dstAddr);
