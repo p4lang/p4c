@@ -48,7 +48,7 @@ std::ostream& IR::DpdkDeclaration::toSexp(std::ostream& out) const{
     }
     else{
         std::cout << global->node_type_name() << std::endl;
-        BUG("");
+        BUG("Delcaration type not implementation");
     }
     return out;
 }
@@ -285,7 +285,7 @@ std::ostream& IR::DpdkGetHashStatement::toSexp(std::ostream& out) const{
         }
     }
     else{
-        BUG("get_hash's arg is not a ListExpression.");
+        ::error("get_hash's arg is not a ListExpression.");
     }
     out << "))";
     return out;

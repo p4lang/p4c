@@ -55,47 +55,34 @@ namespace DPDK{
                 i = new IR::DpdkEquStatement(left, left_tmp, right_tmp);
             }
             else {
+                std::cerr << right->node_type_name() << std::endl;
                 BUG("not implemented.");
             }
         }
         // handle method call
         else if(auto m = right->to<IR::MethodCallExpression>()){
             auto mi = P4::MethodInstance::resolve(m, refmap, typemap);
-            // std::cout << m << std::endl;
+            // std::cerr << m << std::endl;
             if(auto e = mi->to<P4::ExternMethod>()){
                 if(e->originalExternType->getName().name == "Hash"){
-                    if(e->method->getName().name == "get_hash"){
-                        if(e->expr->arguments->size() == 1){
-                            auto field = (*e->expr->arguments)[0];
-                            i = new IR::DpdkGetHashStatement(e->object->getName(), field->expression, left);
-                        }
-                        else{
-                            BUG("get_hash function has 0 or 2 more args.");
-                        }
+                    if(e->expr->arguments->size() == 1){
+                        auto field = (*e->expr->arguments)[0];
+                        i = new IR::DpdkGetHashStatement(e->object->getName(), field->expression, left);
                     }
                 }
                 else if(e->originalExternType->getName().name == "InternetChecksum"){
                     if(e->method->getName().name == "get"){
-                        if(e->expr->arguments->size() == 0){
-                            i = new IR::DpdkGetChecksumStatement(left, e->object->getName());
-                        }
-                        else{
-                            BUG("checksum.get() has args");
-                        }
+                        i = new IR::DpdkGetChecksumStatement(left, e->object->getName());
                     }
                 }
                 else if(e->originalExternType->getName().name == "Register"){
                     if(e->method->getName().name == "get"){
-                        if(e->expr->arguments->size() == 1){
-                            auto index = (*e->expr->arguments)[0]->expression;
-                            i = new IR::DpdkRegisterReadStatement(left, e->object->getName(), index);
-                        }
-                        else {
-                            BUG("register.get() does not have 1 arg");
-                        }
+                        auto index = (*e->expr->arguments)[0]->expression;
+                        i = new IR::DpdkRegisterReadStatement(left, e->object->getName(), index);
                     }
                 }
                 else{
+                    std::cerr << e->originalExternType->getName() << std::endl;
                     BUG("ExternMethod Not implemented");
                 } 
             }
@@ -103,13 +90,11 @@ namespace DPDK{
                 if(b->name.name == "isValid"){
                     if(auto member = b->appliedTo->to<IR::Member>()){
                         i = new IR::DpdkValidateStatement(left, member->member);
-                        // std::cout << member->member << std::endl;
-                    }
-                    else{
-                        BUG("Does match header.xxx.isValid() format");
+                        // std::cerr << member->member << std::endl;
                     }
                 }
                 else{
+                    std::cerr << b->name.name << std::endl;
                     BUG("BuiltInMethod Not Implemented");
                 }
             }
@@ -119,8 +104,8 @@ namespace DPDK{
         }
         else if(right->is<IR::Operation_Unary>() and not right->is<IR::Member>()){
             if(auto ca = right->to<IR::Cast>()){
-                // std::cout << ca << std::endl;
-                // std::cout << ca->expr->is<IR::Member>() << std::endl;
+                // std::cerr << ca << std::endl;
+                // std::cerr << ca->expr->is<IR::Member>() << std::endl;
                 i = new IR::DpdkCastStatement(left, ca->expr, ca->destType);
             }
             else if(auto n = right->to<IR::Neg>()){
@@ -133,12 +118,19 @@ namespace DPDK{
                 i = new IR::DpdkLNotStatement(left, ln->expr);
             }
             else{
-                // std::cout << right->node_type_name() << std::endl;
+                std::cerr << right->node_type_name() << std::endl;
+                BUG("Not implemented.");
             }
         }
-        else{
-            // std::cout << right->node_type_name() << std::endl;
+        else if(right->is<IR::PathExpression>() or 
+                right->is<IR::Member>() or
+                right->is<IR::BoolLiteral>() or
+                right->is<IR::Constant>()){
             i = new IR::DpdkMovStatement(a->left, a->right);
+        }
+        else{
+            std::cerr<< right->node_type_name() << std::endl;
+            BUG("Not implemented.");
         }
         add_instr(i);
         return false;
@@ -182,117 +174,91 @@ namespace DPDK{
             else BUG("not implemented for `apply` other than table");
         }
         else if(auto a = mi->to<P4::ExternMethod>()){
-            // std::cout << a->originalExternType->getName() << std::endl;
+            // std::cerr << a->originalExternType->getName() << std::endl;
             // Checksum function call
             if(a->originalExternType->getName().name == "InternetChecksum"){
                 if(a->method->getName().name == "add") {
                     auto args = a->expr->arguments;
-                    if(args->size() == 1){
-                        const IR::Argument *arg = (*args)[0];
-                        if(auto l = arg->expression->to<IR::ListExpression>()){
-                            for(auto field : l->components){
-                                add_instr(new IR::DpdkChecksumAddStatement(a->object->getName(), field));
-                            }
+                    const IR::Argument *arg = (*args)[0];
+                    if(auto l = arg->expression->to<IR::ListExpression>()){
+                        for(auto field : l->components){
+                            add_instr(new IR::DpdkChecksumAddStatement(a->object->getName(), field));
                         }
-                        else BUG("The argument of InternetCheckSum.add is not a list.");
                     }
-                    else BUG("InternetChecksum.add has 0 or 2 more args");
+                    else ::error("The argument of InternetCheckSum.add is not a list.");
                 }
             }
             // Packet emit function call
             else if(a->originalExternType->getName().name == "packet_out"){
                 if(a->method->getName().name == "emit"){
                     auto args = a->expr->arguments;
-                    if(args->size() == 1){
-                        auto header = (*args)[0];
-                        if(auto m = header->expression->to<IR::Member>()){
-                            add_instr(new IR::DpdkEmitStatement(m));
-                        }
-                        else if (auto path = header->expression->to<IR::PathExpression>()){
-                            add_instr(new IR::DpdkEmitStatement(path));
-                        }
-                        else BUG("One emit does not like this packet.emit(header.xxx)");
+                    auto header = (*args)[0];
+                    if(auto m = header->expression->to<IR::Member>()){
+                        add_instr(new IR::DpdkEmitStatement(m));
                     }
-                    else BUG("emit function has 0 or 2 more args");
+                    else if (auto path = header->expression->to<IR::PathExpression>()){
+                        add_instr(new IR::DpdkEmitStatement(path));
+                    }
+                    else ::error("One emit does not like this packet.emit(header.xxx)");
                 }
             }
             else if(a->originalExternType->getName().name == "packet_in"){
                 if(a->method->getName().name == "extract"){
                     auto args = a->expr->arguments;
-                    if(args->size() == 1){
-                        auto header = (*args)[0];
-                        if(auto m = header->expression->to<IR::Member>()){
-                            add_instr(new IR::DpdkExtractStatement(m));
-                        }
-                        else if(auto path = header->expression->to<IR::PathExpression>()){
-                            add_instr(new IR::DpdkExtractStatement(path));
-                        }
-                        else BUG("Extract does not like this packet.extract(header.xxx)");
+                    auto header = (*args)[0];
+                    if(auto m = header->expression->to<IR::Member>()){
+                        add_instr(new IR::DpdkExtractStatement(m));
                     }
-                    else BUG("extraction has 0 or 2 more args");
+                    else if(auto path = header->expression->to<IR::PathExpression>()){
+                        add_instr(new IR::DpdkExtractStatement(path));
+                    }
+                    else ::error("Extract format does not like this packet.extract(header.xxx)");
                 }
             }
             else if(a->originalExternType->getName().name == "Meter"){
                 if(a->method->getName().name == "execute"){
                     auto args = a->expr->arguments;
-                    if(args->size() == 2){
-                        auto index = (*args)[0]->expression;
-                        auto color = (*args)[0]->expression;
-                        auto meter = a->object->getName();
-                        add_instr(new IR::DpdkMeterExecuteStatement(meter, index, color));
-                    }
-                    else BUG("meter execution does not have 2 args");
+                    auto index = (*args)[0]->expression;
+                    auto color = (*args)[1]->expression;
+                    auto meter = a->object->getName();
+                    add_instr(new IR::DpdkMeterExecuteStatement(meter, index, color));
                 }
                 else BUG("Meter function not implemented.");
-
             }
             else if(a->originalExternType->getName().name == "Counter"){
                 if(a->method->getName().name == "count"){
                     auto args = a->expr->arguments;
-                    if(args->size() == 1){
-                        auto index = (*args)[0]->expression;
-                        auto counter = a->object->getName();
-                        add_instr(new IR::DpdkCounterCountStatement(counter, index));
-                    }
-                    else BUG("counter count does not have 1 arg");
+                    auto index = (*args)[0]->expression;
+                    auto counter = a->object->getName();
+                    add_instr(new IR::DpdkCounterCountStatement(counter, index));
                 }
                 else BUG("Counter function not implemented");
             }
             else if(a->originalExternType->getName().name == "Register"){
                 if(a->method->getName().name == "read"){
-                    std::cout << "ignore this register read, because the return value is optimized." << std::endl;
+                    std::cerr << "ignore this register read, because the return value is optimized." << std::endl;
                 }
                 else if(a->method->getName().name == "write"){
                     auto args = a->expr->arguments;
-                    if(args->size() == 2){
-                        auto index = (*args)[0]->expression;
-                        auto src = (*args)[1]->expression;
-                        auto reg = a->object->getName();
-                        add_instr(new IR::DpdkRegisterWriteStatement(reg, index, src));
-                    }
-                    else BUG("reg.write function does not have 2 args");
+                    auto index = (*args)[0]->expression;
+                    auto src = (*args)[1]->expression;
+                    auto reg = a->object->getName();
+                    add_instr(new IR::DpdkRegisterWriteStatement(reg, index, src));
                 }
-
             }
             else{
-                std::cout << a->originalExternType->getName() << std::endl;    
+                std::cerr << a->originalExternType->getName() << std::endl;    
                 BUG("Unknown extern function.");
             }
         }
         else if(auto a = mi->to<P4::ExternFunction>()){
             if(a->method->name == "verify"){
                 auto args = a->expr->arguments;
-                if(args->size() == 2){
-                    auto condition = (*args)[0];
-                    auto error = (*args)[1];
-                    add_instr(new IR::DpdkVerifyStatement(condition->expression, error->expression));
-                }
-                else{
-                    BUG("verify has 0 or 2 more args");
-                }
+                auto condition = (*args)[0];
+                auto error = (*args)[1];
+                add_instr(new IR::DpdkVerifyStatement(condition->expression, error->expression));
             }
         }
-
         else {
             BUG("function not implemented.");
         }
@@ -330,7 +296,7 @@ namespace DPDK{
             return path->path->name;
         }
         else{
-            BUG("action's method is not a PathExpression");
+            ::error("action's method is not a PathExpression");
         }
         return "";
     }
@@ -343,8 +309,8 @@ namespace DPDK{
         else if(auto e = exp->to<IR::TypeNameExpression>()) return toStr(e);
         else if(auto e = exp->to<IR::MethodCallExpression>()) return toStr(e);
         else{
-            std::cout << exp << std::endl;
-            std::cout << exp->node_type_name() << std::endl;
+            std::cerr << exp << std::endl;
+            std::cerr << exp->node_type_name() << std::endl;
             BUG("not implemented");
         }
         return "";
@@ -368,7 +334,7 @@ namespace DPDK{
             return type_s;
         }
         else{
-            std::cout << type->node_type_name() << std::endl;
+            std::cerr << type->node_type_name() << std::endl;
             BUG("not implemented type");
         }
     }
@@ -377,7 +343,7 @@ namespace DPDK{
             return toStr(expr_value->expression);
         }
         else{
-            std::cout << property->node_type_name() << std::endl;
+            std::cerr << property->node_type_name() << std::endl;
             BUG("not implemneted property value");
         }
     }
@@ -412,7 +378,7 @@ namespace DPDK{
         else if(bin->is<IR::Grt>()) i = new IR::DpdkGrtStatement(tmp, left_tmp, right_tmp);
         else if(bin->is<IR::Neq>()) i = new IR::DpdkNeqStatement(tmp, left_tmp, right_tmp);
         else{
-            std::cout << bin->node_type_name() << std::endl;
+            std::cerr << bin->node_type_name() << std::endl;
             BUG("not implemented");
         }
         add_instr(i);

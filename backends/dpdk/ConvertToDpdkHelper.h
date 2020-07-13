@@ -56,12 +56,19 @@ class ConvertStatementToDpdk : public Inspector {
     IR::IndexedVector<IR::DpdkAsmStatement> & get_instr(){return instructions;}
     int get_label_num(){return next_label_id;}
 };
-
+// this function takes different subclass of Expression and translate it into string in desired format.
+// For example, for PathExpression, it returns PathExpression->path->name
+// For Member, it returns toStr(Member->expr).Member->member
 cstring toStr(const IR::Expression *const);
+
+// this function takes different subclass of Type and translate it into string in desired format.
+// For example, for Type_Boolean, it returns bool
+// For Type_Bits, it returns bit_<bit_width>
 cstring toStr(const IR::Type *const);
-cstring toStr(const IR::Argument* const);
+
+// this function takes different subclass of PropertyValue and translate it into string in desired format.
+// For example, for ExpressionValue, it returns toStr(ExpressionValue->expression)
 cstring toStr(const IR::PropertyValue* const);
-// IR::Expression* getMethodReturnType(const IR::MethodCallExpression*, P4::ReferenceMap*, P4::TypeMap*);
 
 
 class TreeUnroller: public Inspector {

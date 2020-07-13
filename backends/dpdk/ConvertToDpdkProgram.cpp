@@ -135,12 +135,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
         if(state.selectExpression){
             if(auto e = state.selectExpression->to<IR::SelectExpression>()){
                 const IR::Expression* switch_var;
-                if(e->select->components.size() == 1){
-                    switch_var = e->select->components[0];
-                }
-                else {
-                    BUG("state select statement has 2 or more args");
-                }
+                switch_var = e->select->components[0];
                 for(auto v:e->selectCases){
                     if(!v->keyset->is<IR::DefaultExpression>()){
                         add_instr(new IR::DpdkCmpStatement(v->keyset, switch_var));
