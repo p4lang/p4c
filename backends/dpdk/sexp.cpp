@@ -38,10 +38,10 @@ std::ostream& IR::DpdkAsmStatement::toSexp(std::ostream& out) const {
 
 std::ostream& IR::DpdkDeclaration::toSexp(std::ostream& out) const{
     if(auto var = global->to<IR::Declaration_Variable>()){
-        out << "(defv " << DPDK::toStr(var->type) << " " << global->name << ")";
+        out << "(Var " << DPDK::toStr(var->type) << " " << global->name << ")";
     }
     else if(auto ins = global->to<IR::Declaration_Instance>()){
-        out << "(def" << DPDK::toStr(ins->type);
+        out << "(" << DPDK::toStr(ins->type);
         for(auto arg : *ins->arguments)
             out << " " << DPDK::toStr(arg->expression);
         out << " " << global->name << ")";
@@ -104,9 +104,9 @@ std::ostream& IR::DpdkStructType::toSexp(std::ostream& out) const {
 }
 
 std::ostream& IR::DpdkListStatement::toSexp(std::ostream& out) const {
-    out << "(defg " << name << std::endl << "(";
+    out << "(main " << std::endl << "(" << std::endl;
     for (auto s : statements) {
-        out << "  ";
+        out << "\t";
         s->toSexp(out) << std::endl;
     }
     out << ")" << std::endl << ")" << std::endl;
@@ -233,28 +233,28 @@ std::ostream& IR::DpdkLabelStatement::toSexp(std::ostream& out) const {
     return out;
 }
 std::ostream& IR::DpdkTable::toSexp(std::ostream& out) const {
-    out << "(deft " << name << std::endl;
+    out << "(table " << name << std::endl;
     if(match_keys){
         for(auto key : match_keys->keyElements){
-            out << "(key " << DPDK::toStr(key->expression) << " " << DPDK::toStr(key->matchType) << ")" << std::endl;
+            out << "\t(key " << DPDK::toStr(key->expression) << " " << DPDK::toStr(key->matchType) << ")" << std::endl;
         }
     }
-    out << "(actions (" << std::endl;
+    out << "\t(actions (" << std::endl;
     for(auto action: actions->actionList){
-        out << DPDK::toStr(action->expression) << std::endl;
+        out << "\t\t" << DPDK::toStr(action->expression) << std::endl;
     }
-    out << "))" << std::endl;
+    out << "\t))" << std::endl;
 
-    out << "(default_action " << DPDK::toStr(default_action) << " )" << std::endl;
+    out << "\t(default_action " << DPDK::toStr(default_action) << " )" << std::endl;
     if(auto psa_implementation = properties->getProperty("psa_implementation")){
-        out << "(psa_implementation " << DPDK::toStr(psa_implementation->value) << ")" << std::endl;
+        out << "\t(action_selector " << DPDK::toStr(psa_implementation->value) << ")" << std::endl;
     }
 
     out << ")";
     return out;
 }
 std::ostream& IR::DpdkAction::toSexp(std::ostream& out) const {
-    out << "(defa " << name;
+    out << "(action " << name;
     out << " (";
 
     for(auto p : para.parameters){
@@ -265,6 +265,7 @@ std::ostream& IR::DpdkAction::toSexp(std::ostream& out) const {
     }
     out << ")" << std::endl << "( " << std::endl;
     for(auto i: statements){
+        out << "\t";
         i->toSexp(out) << std::endl;
     }
     out << "))";
@@ -278,7 +279,7 @@ std::ostream& IR::DpdkChecksumAddStatement::toSexp(std::ostream& out) const{
 }
 
 std::ostream& IR::DpdkGetHashStatement::toSexp(std::ostream& out) const{
-    out << "(get_hash " << DPDK::toStr(dst) << " " << hash  << " (";
+    out << "(hash_get " << DPDK::toStr(dst) << " " << hash  << " (";
     if(auto l = fields->to<IR::ListExpression>()){
         for(auto c : l->components) {
             out << " " << DPDK::toStr(c);
