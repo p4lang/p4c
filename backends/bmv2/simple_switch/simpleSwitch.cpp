@@ -810,8 +810,32 @@ Util::IJson* ExternConverter_log_msg::convertExternFunction(
     auto str = ctxt->conv->convert(mc->arguments->at(0)->expression);
     params->append(str);
     if (mc->arguments->size() == 2) {
-        auto val = ctxt->conv->convert(mc->arguments->at(1)->expression);
-        paramsValue->emplace("value", val);
+        auto arg1 = mc->arguments->at(1)->expression;
+        // this must be a list expression, with all components
+        // evaluating to integral types.
+        auto argType = ctxt->typeMap->getType(arg1);
+        if (auto ts = argType->to<IR::Type_List>()) {
+            for (auto tf : ts->components) {
+                if (!tf->is<IR::Type_Bits>() && !tf->is<IR::Type_Boolean>()) {
+                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                            "%1%: only integral values supported for logged values", mc);
+                    return primitive;
+                }
+            }
+        } else {
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "%1%: Second argument must be a list expression: %2%", mc, arg1);
+            return primitive;
+        }
+
+        auto le = arg1->to<IR::ListExpression>();
+        CHECK_NULL(le);
+        auto arr = new Util::JsonArray();
+        for (auto v : le->components) {
+            auto val = ctxt->conv->convert(v, false, true, true);
+            arr->append(val);
+        }
+        paramsValue->emplace("value", arr);
     } else {
         auto tmp = new Util::JsonObject();
         paramsValue->emplace("value", tmp);
