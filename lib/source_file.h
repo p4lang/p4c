@@ -266,7 +266,7 @@ class Comment final : IHasDbPrint {
     Comment(SourceInfo srcInfo, bool singleLine, cstring body):
             srcInfo(srcInfo), singleLine(singleLine), body(body) {}
     cstring toString() const {
-        cstring result;
+        std::string result;
         if (singleLine)
             result = "//";
         else
@@ -340,7 +340,7 @@ class InputSources final {
     std::map<unsigned, SourceFileLine> line_file_map;
 
     /// Each line also stores the end-of-line character(s)
-    std::vector<cstring> contents;
+    std::vector<std::string> contents;
     /// The commends found in the file.
     std::vector<Comment*> comments;
 };

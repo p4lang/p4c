@@ -73,9 +73,16 @@ class Predication final : public Transform {
     std::vector<IR::BlockStatement*> blocks;
     bool inside_action;
     unsigned ifNestingLevel;
+    // Tracking the nesting level of dependency assignment
     unsigned depNestingLevel;
+    // Stores last liveAssignments[dependency]
+    // Used for pushing dependencies on rv before visiting if-else
     const IR::AssignmentStatement* dependencyAssignment;
+    // Name of assignment that is dependant
     cstring dependantName;
+    // To store assignment statements.
+    // If any dependant is equal to any member of statNames,
+    // isStatementDependant is set to true.
     std::vector<cstring> statNames;
     // Traverse path of nested if-else statements
     // true at the end of the vector means that you are currently visiting 'then' branch'
@@ -85,6 +92,11 @@ class Predication final : public Transform {
     ordered_set<cstring> orderedNames;
     std::vector<cstring> dependencies;
     std::map<cstring, const IR::AssignmentStatement *> liveAssignments;
+    // Control when to push an assignment on rv block.
+    // True of corresponding assignemnt means that
+    // the assignment has already been pushed when handeling dependencies.
+    // False of corresponding assignemnt means that
+    // the assignment should be pushed on rv block at that point.
     std::map<const IR::AssignmentStatement *, bool> isAssignmentPushed;
     const IR::Statement* error(const IR::Statement* statement) const {
         if (inside_action && ifNestingLevel > 0)

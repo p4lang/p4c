@@ -37,3 +37,6 @@ build/
 
 # macOS files
 .DS_Store
+
+# Bazel files
+bazel-*

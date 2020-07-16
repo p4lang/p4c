@@ -1,0 +1,415 @@
+load("//:bazel/flex.bzl", "genlex")
+load("//:bazel/bison.bzl", "genyacc")
+
+package(
+    default_visibility = ["//visibility:public"],
+    licenses = ["notice"],  # Apache v2
+)
+
+filegroup(
+    name = "p4include",
+    srcs = glob(["p4include/*.p4"]),
+)
+
+P4C_BUILD_DEFAULT_COPTS = [
+    # Where p4c should look for p4include at runtime.
+    ("-DCONFIG_PKGDATADIR=\\\"external/%s\\\"" % repository_name()),
+    # This will work only if the binary is executed by Bazel. For a general
+    # solution, we would need to make p4c aware of Bazel, specifically:
+    # https://github.com/bazelbuild/bazel/blob/master/tools/cpp/runfiles/runfiles_src.h
+]
+
+genrule(
+    name = "sed_config_h",
+    srcs = ["cmake/config.h.cmake"],
+    outs = ["config.h"],
+    cmd = """
+        sed 's|cmakedefine|define|g' < $(SRCS) | \
+        sed 's|define HAVE_LIBGC 1|undef HAVE_LIBGC|g' > $(OUTS)
+    """,
+)
+
+cc_library(
+    name = "config_h",
+    hdrs = [
+        "config.h",
+    ],
+    include_prefix = ".",
+)
+
+genyacc(
+    name = "p4_parser_yacc",
+    src = "frontends/parsers/p4/p4parser.ypp",
+    extra_outs = ["frontends/parsers/p4/stack.hh"],
+    header_out = "frontends/parsers/p4/p4parser.hpp",
+    source_out = "frontends/parsers/p4/p4parser.cc",
+)
+
+genyacc(
+    name = "v1_parser_yacc",
+    src = "frontends/parsers/v1/v1parser.ypp",
+    extra_outs = ["frontends/parsers/v1/stack.hh"],
+    header_out = "frontends/parsers/v1/v1parser.hpp",
+    source_out = "frontends/parsers/v1/v1parser.cc",
+)
+
+genrule(
+    name = "p4lexer_lex",
+    srcs = ["frontends/parsers/p4/p4lexer.ll"],
+    outs = ["frontends/parsers/p4/p4lexer.lex"],
+    cmd = ("sed '/%option outfile=\"lex.yy.c\"/d' $< > $@"),
+)
+
+genlex(
+    name = "p4lexer",
+    src = "frontends/parsers/p4/p4lexer.lex",
+    out = "frontends/parsers/p4/p4lexer.cc",
+    prefix = "yy",
+)
+
+genrule(
+    name = "v1lexer_lex",
+    srcs = ["frontends/parsers/v1/v1lexer.ll"],
+    outs = ["frontends/parsers/v1/v1lexer.lex"],
+    cmd = ("sed '/%option outfile=\"lex.yy.c\"/d' $< > $@"),
+)
+
+genlex(
+    name = "v1lexer",
+    src = "frontends/parsers/v1/v1lexer.lex",
+    out = "frontends/parsers/v1/v1lexer.cc",
+    prefix = "yy",
+)
+
+cc_library(
+    name = "p4c_includes",
+    includes = [
+        "ir/",
+        "lib/",
+        "tools/ir-generator",
+    ],
+)
+
+# This rule helps split some circular dependencies between subdirectories.
+cc_library(
+    name = "p4c_frontend_h",
+    hdrs = [
+        "frontends/p4/typeChecking/typeSubstitution.h",
+    ] + glob([
+        "frontends/p4/*.h",
+    ]) + glob([
+        "frontends/common/*.h",
+    ]),
+)
+
+# The ir-generator tool uses a parser built by these genlex and genyacc rules.
+genlex(
+    name = "ir_generator_lex",
+    src = "tools/ir-generator/ir-generator-lex.l",
+    out = "tools/ir-generator/ir-generator-lex.c",
+    includes = [
+        "tools/ir-generator/ir-generator-yacc.hh",
+    ],
+    prefix = "yy",
+)
+
+genyacc(
+    name = "ir_generator_yacc",
+    src = "tools/ir-generator/ir-generator.ypp",
+    header_out = "tools/ir-generator/ir-generator-yacc.hh",
+    source_out = "tools/ir-generator/ir-generator-yacc.cc",
+)
+
+# This cc_library contains the ir-generator tool sources, including the
+# ir-generator parser source from the lex/yacc output. The srcs attribute
+# excludes generator.cpp since it is part of the cc_binary.
+cc_library(
+    name = "p4c_ir_generator_lib",
+    srcs = [
+        "tools/ir-generator/ir-generator-yacc.cc",
+    ] + glob(
+        ["tools/ir-generator/*.cpp"],
+        exclude = ["tools/ir-generator/generator.cpp"],
+    ),
+    hdrs = [
+        "tools/ir-generator/ir-generator-lex.c",
+        "tools/ir-generator/ir-generator-yacc.hh",
+    ] + glob([
+        "tools/ir-generator/*.h",
+    ]),
+    deps = [
+        ":p4c_includes",
+        ":p4c_toolkit",
+    ],
+)
+
+# The next rule builds the ir-generator tool binary.
+cc_binary(
+    name = "irgenerator",
+    srcs = ["tools/ir-generator/generator.cpp"],
+    linkopts = ["-lgmp"],
+    deps = [
+        ":p4c_ir_generator_lib",
+        ":p4c_toolkit",
+    ],
+)
+
+filegroup(
+    name = "ir_extra_defs",
+    srcs = [
+        "frontends/p4-14/ir-v1.def",
+        "backends/bmv2/bmv2.def",
+        # p4c extensions may set this target to a `filegroup` containing
+        # additional .def files.
+        "@com_github_p4lang_p4c_extension//:ir_extensions",
+    ],
+)
+
+genrule(
+    name = "ir_generated_files",
+    srcs = glob(["ir/*.def"]) + [":ir_extra_defs"],
+    outs = [
+        "ir/gen-tree-macro.h",
+        "ir/ir-generated.cpp",
+        "ir/ir-generated.h",
+    ],
+    cmd = """
+        $(location :irgenerator) \
+            -t $(RULEDIR)/ir/gen-tree-macro.h \
+            -i $(RULEDIR)/ir/ir-generated.cpp \
+            -o $(RULEDIR)/ir/ir-generated.h \
+            $(location ir/base.def) \
+            $(location ir/type.def) \
+            $(location ir/expression.def) \
+            $(location ir/ir.def) \
+            $(location ir/v1.def) \
+            $(locations :ir_extra_defs)
+    """,
+    tools = [":irgenerator"],
+)
+
+# This library contains p4c's IR (Internal Representation) of the P4 spec.
+cc_library(
+    name = "p4c_ir",
+    srcs = [
+        "ir/ir-generated.cpp",
+    ] + glob([
+        "ir/*.cpp",
+    ]),
+    hdrs = [
+        "ir/gen-tree-macro.h",
+        "ir/ir-generated.h",
+    ] + glob([
+        "ir/*.h",
+    ]),
+    deps = [
+        ":p4c_frontend_h",
+        ":p4c_includes",
+        ":p4c_toolkit",
+    ],
+)
+
+# This library combines the frontend and midend sources plus the
+# generated parser sources.
+cc_library(
+    name = "p4c_frontend_midend",
+    srcs = [
+        # These are the parser files from the genlex/genyacc rules, which
+        # glob doesn't find.
+        "frontends/parsers/p4/p4lexer.cc",
+        "frontends/parsers/p4/p4parser.cc",
+        "frontends/parsers/v1/v1lexer.cc",
+        "frontends/parsers/v1/v1parser.cc",
+    ] + glob([
+        "frontends/*.cpp",
+        "frontends/**/*.cpp",
+        "midend/*.cpp",
+    ]),
+    hdrs = [
+        "frontends/parsers/p4/p4lexer.hpp",
+        "frontends/parsers/p4/p4AnnotationLexer.hpp",
+        "frontends/parsers/p4/abstractP4Lexer.hpp",
+        "frontends/parsers/p4/p4parser.hpp",
+        "frontends/parsers/p4/stack.hh",
+        "frontends/parsers/v1/stack.hh",
+        "frontends/parsers/v1/v1lexer.hpp",
+        "frontends/parsers/v1/v1parser.hpp",
+        "ir/ir-generated.cpp",
+    ] + glob([
+        "frontends/*.h",
+        "frontends/**/*.h",
+        "midend/*.h",
+    ]),
+    copts = P4C_BUILD_DEFAULT_COPTS,
+    data = glob([
+        "p4include/*.p4",
+    ]),
+    deps = [
+        ":control_plane_h",
+        ":p4c_ir",
+        ":p4c_toolkit",
+        "@boost//:algorithm",
+        "@boost//:functional",
+        "@boost//:iostreams",
+    ],
+)
+
+cc_library(
+    name = "control_plane",
+    srcs = glob([
+        "control-plane/*.cpp",
+    ]),
+    copts = P4C_BUILD_DEFAULT_COPTS,
+    deps = [
+        ":control_plane_h",
+        ":p4c_frontend_midend",
+        ":p4c_ir",
+        ":p4c_toolkit",
+    ],
+)
+
+cc_library(
+    name = "p4c_toolkit",
+    srcs = glob([
+        "lib/*.cpp",
+    ]),
+    hdrs = glob([
+        "lib/*.h",
+    ]),
+    deps = [
+        ":config_h",
+        "@boost//:format",
+        "@boost//:multiprecision",
+        "@com_google_googletest//:gtest",
+    ],
+)
+
+# The control-plane headers are in a separate cc_library to break the
+# circular dependencies between control-plane and frontends/midend.
+cc_library(
+    name = "control_plane_h",
+    hdrs = glob(
+        ["control-plane/*.h"],
+    ),
+    deps = [
+        ":p4c_frontend_h",
+        ":p4c_ir",
+        ":p4c_toolkit",
+        "@com_github_p4lang_p4runtime//:p4info_cc_proto",
+        "@com_github_p4lang_p4runtime//:p4runtime_cc_grpc",
+        "@com_github_p4lang_p4runtime//:p4types_cc_proto",
+    ],
+)
+
+cc_library(
+    name = "p4c_bmv2_common_lib",
+    srcs = glob(
+        ["backends/bmv2/common/*.cpp"],
+    ),
+    hdrs = glob([
+        "backends/bmv2/common/*.h",
+    ]),
+    copts = P4C_BUILD_DEFAULT_COPTS,
+    deps = [
+        ":p4c_frontend_midend",
+        ":p4c_ir",
+        ":p4c_toolkit",
+    ],
+)
+
+cc_library(
+    name = "p4c_bmv2_simple_lib",
+    srcs = glob(
+        ["backends/bmv2/simple_switch/*.cpp"],
+        exclude = ["backends/bmv2/simple_switch/main.cpp"],
+    ),
+    hdrs = glob([
+        "backends/bmv2/simple_switch/*.h",
+    ]),
+    copts = P4C_BUILD_DEFAULT_COPTS,
+    deps = [
+        ":p4c_bmv2_common_lib",
+        ":p4c_frontend_midend",
+        ":p4c_ir",
+        ":p4c_toolkit",
+    ],
+)
+
+genrule(
+    name = "p4c_bmv2_version",
+    srcs = ["backends/bmv2/simple_switch/version.h.cmake"],
+    outs = ["backends/bmv2/simple_switch/version.h"],
+    cmd = ("sed 's|@P4C_VERSION@|0.0.0.0|g' $< > $@"),
+)
+
+cc_binary(
+    name = "p4c_bmv2",
+    srcs = [
+        "backends/bmv2/simple_switch/main.cpp",
+        "backends/bmv2/simple_switch/version.h",
+    ],
+    copts = P4C_BUILD_DEFAULT_COPTS,
+    linkopts = [
+        "-lgmp",
+        "-lgmpxx",
+    ],
+    deps = [
+        ":control_plane",
+        ":control_plane_h",
+        ":p4c_bmv2_common_lib",
+        ":p4c_bmv2_simple_lib",
+        ":p4c_frontend_midend",
+        ":p4c_ir",
+        ":p4c_toolkit",
+    ],
+    data = [":p4include"],
+)
+
+# This builds the p4test backend.
+
+cc_binary(
+    name = "p4c_backend_p4test",
+    srcs = [
+        "backends/p4test/p4test.cpp",
+    ],
+    copts = P4C_BUILD_DEFAULT_COPTS,
+    linkopts = [
+        "-lgmp",
+        "-lgmpxx",
+    ],
+    deps = [
+        ":control_plane",
+        ":control_plane_h",
+        ":p4c_frontend_midend",
+        ":p4c_ir",
+        ":p4c_toolkit",
+        ":p4c_backend_p4test_lib",
+    ],
+)
+
+genrule(
+    name = "p4c_p4test_version",
+    srcs = ["backends/p4test/version.h.cmake"],
+    outs = ["backends/p4test/version.h"],
+    cmd = ("sed 's|@P4C_VERSION@|0.0.0.0|g' $< > $@"),
+)
+
+cc_library(
+    name = "p4c_backend_p4test_lib",
+    srcs = [
+        "backends/p4test/midend.cpp",
+    ],
+    hdrs = [
+        "backends/p4test/midend.h",
+        "backends/p4test/version.h",
+    ],
+    copts = P4C_BUILD_DEFAULT_COPTS,
+    deps = [
+        ":p4c_frontend_midend",
+        ":p4c_ir",
+        ":p4c_toolkit",
+    ],
+    data = [
+        ":p4c_p4test_version",
+    ]
+)

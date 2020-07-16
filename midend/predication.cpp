@@ -134,7 +134,7 @@ const IR::Node* Predication::clone(const IR::AssignmentStatement* statement) {
 }
 
 const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
-    if (!inside_action || ifNestingLevel == 0) {
+    if (findContext<IR::P4Action>() == nullptr || ifNestingLevel == 0) {
         return statement;
     }
     const Context * ctxt = nullptr;
@@ -163,13 +163,11 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
     auto statementName = lvalue_name(statement->left);
     statNames.push_back(statementName);
     bool isStatementDependant = false;
-    auto depName = dependantName;
-    for_each(statNames.begin(), statNames.end(),
-                [&depName, &isStatementDependant](const cstring& statName) {
-                    if (depName == statName)
-                        { isStatementDependant = true; }
-                    });
-    auto foundedAssignment = liveAssignments.find(statementName);
+    for (auto it  = statNames.begin(); it != statNames.end(); it++) {
+        if (dependantName == *it) {
+            isStatementDependant = true;
+        }
+    }
     if (depNestingLevel < ifNestingLevel && isStatementDependant) {
         statement->right = new IR::Mux(conditions.back(), statement->right, statement->left);
         if (travesalPath[ifNestingLevel - 1]) {
@@ -185,6 +183,7 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
                 new IR::AssignmentStatement(statement->left, rightStatement);
         }
     } else {
+        auto foundedAssignment = liveAssignments.find(statementName);
         if (foundedAssignment != liveAssignments.end()) {
             statement->right = foundedAssignment->second->right;
             // move the lvalue assignment to the back
@@ -217,7 +216,7 @@ const IR::Node* Predication::preorder(IR::ArrayIndex * arrInd) {
 }
 
 const IR::Node* Predication::preorder(IR::IfStatement* statement) {
-    if (!inside_action) {
+    if (findContext<IR::P4Action>() == nullptr) {
         return statement;
     }
     ++ifNestingLevel;

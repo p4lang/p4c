@@ -29,6 +29,7 @@ limitations under the License.
 #endif
 #include <unistd.h>
 #include <iostream>
+#include "exename.h"
 #include "exceptions.h"
 #include "hex.h"
 #include "log.h"
@@ -39,8 +40,6 @@ static const char *signames[] = {
     "TSTP", "TTIN", "TTOU", "URG",  "XCPU", "XFSZ", "VTALRM", "PROF", "WINCH", "POLL",
     "PWR",  "SYS"
 };
-
-char *program_name;
 
 #ifdef MULTITHREAD
 #include <pthread.h>
@@ -77,21 +76,34 @@ MTONLY(
     std::lock_guard<std::mutex> acquire(lock); )
     static pid_t child = 0;
     static int to_child, from_child;
-    static char buffer[1024];
+    static char binary[PATH_MAX];
+    static char buffer[PATH_MAX];
+    const char *t;
+
+    if (!text || !(t = strchr(text, '('))) {
+        text = exename();
+        t = text + strlen(text); }
+    memcpy(buffer, text, t-text);
+    buffer[t-text] = 0;
+    if (child && strcmp(binary, buffer)) {
+        child = 0;
+        close(to_child);
+        close(from_child); }
+    memcpy(binary, buffer, (t-text) + 1);
+    text = binary;
     if (!child) {
         int pfd1[2], pfd2[2];
         char *p = buffer;
-        const char *argv[4] = { "/bin/sh", "-c", buffer, 0 }, *t;
+        const char *argv[4] = { "/bin/sh", "-c", buffer, 0 };
         strcpy(p, "addr2line "); p += strlen(p);  // NOLINT
         strcpy(p, " -Cfspe "); p += strlen(p);    // NOLINT
-        if (!text || !(t = strchr(text, '('))) {
-            text = program_name;
-            t = text + strlen(text); }
+        t = text + strlen(text);
         if (!memchr(text, '/', t-text)) {
             strcpy(p, "$(which "); p += strlen(p); }        // NOLINT
-        strncpy(p, text, t-text);
+        memcpy(p, text, t-text);
         p += t-text;
         if (!memchr(text, '/', t-text)) *p++ = ')';
+        *p = 0;
         child = -1;
 #if HAVE_PIPE2
         if (pipe2(pfd1, O_CLOEXEC) < 0) return 0;
