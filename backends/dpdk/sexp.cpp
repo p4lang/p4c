@@ -9,9 +9,108 @@ static void print(std::ostream& out, const IR::DpdkAsmStatement* s) {
     s->toSexp(out) << std::endl;
 }
 
+namespace DPDK {
+// this function takes different subclass of Expression and translate it into string in desired format.
+// For example, for PathExpression, it returns PathExpression->path->name
+// For Member, it returns toStr(Member->expr).Member->member
+cstring toStr(const IR::Expression *const);
+
+// this function takes different subclass of Type and translate it into string in desired format.
+// For example, for Type_Boolean, it returns bool
+// For Type_Bits, it returns bit_<bit_width>
+cstring toStr(const IR::Type *const);
+
+// this function takes different subclass of PropertyValue and translate it into string in desired format.
+// For example, for ExpressionValue, it returns toStr(ExpressionValue->expression)
+cstring toStr(const IR::PropertyValue* const);
+
+
+cstring toStr(const IR::Constant* const c){
+    std::ostringstream out;
+    out << c->value;
+    return out.str();
+}
+cstring toStr(const IR::BoolLiteral* const b){
+    std::ostringstream out;
+    out << b->value;
+    return out.str();
+}
+
+cstring toStr(const IR::Member* const m){
+    std::ostringstream out;
+    out << m->member;
+    return toStr(m->expr) + "." + out.str();
+}
+
+cstring toStr(const IR::PathExpression* const p){
+    return p->path->name;
+}
+
+cstring toStr(const IR::TypeNameExpression* const p){
+    return p->typeName->path->name;
+}
+
+cstring toStr(const IR::MethodCallExpression* const m){
+    if(auto path = m->method->to<IR::PathExpression>()){
+        return path->path->name;
+    }
+    else{
+        ::error("action's method is not a PathExpression");
+    }
+    return "";
+}
+
+cstring toStr(const IR::Expression* const exp){
+    if (auto e = exp->to<IR::Constant>()) return toStr(e);
+    else if (auto e = exp->to<IR::BoolLiteral>()) return toStr(e);
+    else if (auto e = exp->to<IR::Member>()) return toStr(e);
+    else if (auto e = exp->to<IR::PathExpression>()) return toStr(e);
+    else if (auto e = exp->to<IR::TypeNameExpression>()) return toStr(e);
+    else if (auto e = exp->to<IR::MethodCallExpression>()) return toStr(e);
+    else if (auto e = exp->to<IR::Cast>()) return toStr(e->expr);
+    else{
+        BUG("%1% not implemented", exp);
+    }
+    return "";
+}
+
+cstring toStr(const IR::Type* const type){
+    if(type->is<IR::Type_Boolean>()) return "bool";
+    else if(auto b = type->to<IR::Type_Bits>()) {
+        std::ostringstream out;
+        out << "bit_" << b->width_bits();
+        return out.str();
+    }
+    else if(auto n = type->to<IR::Type_Name>()) {
+        return n->path->name;
+    }
+    else if(auto s = type->to<IR::Type_Specialized>()) {
+        cstring type_s = s->baseType->path->name;
+        for(auto arg: *(s->arguments)) {
+            type_s += " " + toStr(arg);
+        }
+        return type_s;
+    }
+    else{
+        std::cerr << type->node_type_name() << std::endl;
+        BUG("not implemented type");
+    }
+}
+cstring toStr(const IR::PropertyValue* const property){
+    if(auto expr_value = property->to<IR::ExpressionValue>()){
+        return toStr(expr_value->expression);
+    }
+    else{
+        std::cerr << property->node_type_name() << std::endl;
+        BUG("not implemneted property value");
+    }
+}
+
+}  // namespace DPDK
+
 std::ostream& IR::DpdkAsmProgram::toSexp(std::ostream& out) const {
     for(auto l: globals){
-        l->toSexp(out) << std::endl;   
+        l->toSexp(out) << std::endl;
     }
     out << std::endl;
     for (auto h : headerType)
