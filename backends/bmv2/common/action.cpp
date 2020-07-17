@@ -60,8 +60,10 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                 auto mi = P4::MethodInstance::resolve(mce, ctxt->refMap, ctxt->typeMap);
                 auto em = mi->to<P4::ExternMethod>();
                 if (em != nullptr) {
-                    if (em->originalExternType->name.name == "Register" ||
-                    em->method->name.name == "read") {
+                    if ((em->originalExternType->name.name == "Register" ||
+                                                em->method->name.name == "read") ||
+                        (em->originalExternType->name.name == "Meter" &&
+                                                em->method->name.name == "execute")) {
                         isR = true;
                         // l = l->to<IR::PathExpression>();
                         // BUG_CHECK(l != nullptr, "register_read dest cast failed");
@@ -183,7 +185,9 @@ ActionConverter::convertActionParams(const IR::ParameterList *parameters,
         auto param = new Util::JsonObject();
         param->emplace("name", p->name);
         auto type = ctxt->typeMap->getType(p, true);
-        if (!type->is<IR::Type_Bits>())
+        // TODO: added IR::Type_Enum here to support PSA_MeterColor_t
+        // should re-consider how to support action parameters that is neither bit<> nor int<>
+        if (!(type->is<IR::Type_Bits>() || type->is<IR::Type_Enum>()))
             ::error(ErrorType::ERR_INVALID,
                     "%1%: action parameters must be bit<> or int<> on this target", p);
         param->emplace("bitwidth", type->width_bits());

@@ -410,6 +410,8 @@ class RunBMV2(object):
             # Pass through multicast group commands unchanged, with
             # same arguments as expected by simple_switch_CLI
             self.do_cli_command(first + " " + cmd)
+        elif first == "meter_get_rates" or first == "meter_set_rates" or first == "meter_array_set_rates":
+            self.do_cli_command(first + " " + cmd)
         elif first == "packet":
             interface, data = nextWord(cmd)
             interface = int(interface)
