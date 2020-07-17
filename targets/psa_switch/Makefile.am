@@ -8,7 +8,7 @@ THRIFT_IDL = $(srcdir)/thrift/psa_switch.thrift
 
 noinst_LTLIBRARIES = libpsaswitch.la
 
-libpsaswitch_la_SOURCES = psa_switch.cpp psa_switch.h primitives.cpp externs/psa_counter.h externs/psa_counter.cpp
+libpsaswitch_la_SOURCES = psa_switch.cpp psa_switch.h primitives.cpp externs/psa_counter.h externs/psa_counter.cpp externs/psa_meter.h externs/psa_meter.cpp
 
 libpsaswitch_la_LIBADD = \
 $(top_builddir)/src/bm_sim/libbmsim.la \

@@ -35,6 +35,7 @@
 #include <functional>
 
 #include "externs/psa_counter.h"
+#include "externs/psa_meter.h"
 
 // TODO(antonin)
 // experimental support for priority queueing
@@ -152,6 +153,48 @@ class PsaSwitch : public Switch {
     if (!ex) return Counter::CounterErrorCode::INVALID_COUNTER_NAME;
     PSA_Counter *counter = static_cast<PSA_Counter*>(ex);
     return counter->reset_counters();
+  }
+
+  MeterErrorCode
+  meter_array_set_rates(
+      cxt_id_t cxt_id, const std::string &meter_name,
+      const std::vector<Meter::rate_config_t> &configs) override {
+    auto *context = get_context(cxt_id);
+    auto *ex = context->get_extern_instance(meter_name).get();
+    if (!ex) return Meter::MeterErrorCode::INVALID_METER_NAME;
+    auto *meter = static_cast<PSA_Meter*>(ex);
+    meter->set_rates(configs);
+    return Meter::MeterErrorCode::SUCCESS;
+  }
+
+  MeterErrorCode
+  meter_set_rates(cxt_id_t cxt_id,
+                  const std::string &meter_name, size_t idx,
+                  const std::vector<Meter::rate_config_t> &configs) override {
+    auto *context = get_context(cxt_id);
+    auto *ex = context->get_extern_instance(meter_name).get();
+    if (!ex) return Meter::MeterErrorCode::INVALID_METER_NAME;
+    auto *meter = static_cast<PSA_Meter*>(ex);
+    if (idx >= meter->size())
+      return Meter::MeterErrorCode::INVALID_INDEX;
+    meter->get_meter(idx).set_rates(configs);
+    return Meter::MeterErrorCode::SUCCESS;
+  }
+
+  MeterErrorCode
+  meter_get_rates(cxt_id_t cxt_id,
+                  const std::string &meter_name, size_t idx,
+                  std::vector<Meter::rate_config_t> *configs) override {
+    auto *context = get_context(cxt_id);
+    auto *ex = context->get_extern_instance(meter_name).get();
+    if (!ex) return Meter::MeterErrorCode::INVALID_METER_NAME;
+    auto *meter = static_cast<PSA_Meter*>(ex);
+    if (idx >= meter->size())
+      return Meter::MeterErrorCode::INVALID_INDEX;
+    auto conf_vec = meter->get_meter(idx).get_rates();
+    for (auto conf : conf_vec)
+        configs->push_back(conf);
+    return Meter::MeterErrorCode::SUCCESS;
   }
 
   // TODO(derek): override RuntimeInterface methods not yet supported
