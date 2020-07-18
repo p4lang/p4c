@@ -9,6 +9,10 @@ static void print(std::ostream& out, const IR::DpdkAsmStatement* s) {
     s->toSexp(out) << std::endl;
 }
 
+void add_space(std::ostream& out, int size) {
+    out << std::setfill(' ') << std::setw(size) << " ";
+}
+
 namespace DPDK {
 // this function takes different subclass of Expression and translate it into string in desired format.
 // For example, for PathExpression, it returns PathExpression->path->name
@@ -205,7 +209,7 @@ std::ostream& IR::DpdkStructType::toSexp(std::ostream& out) const {
 std::ostream& IR::DpdkListStatement::toSexp(std::ostream& out) const {
     out << "(main " << std::endl << "(" << std::endl;
     for (auto s : statements) {
-        out << "\t";
+        out << "  ";
         s->toSexp(out) << std::endl;
     }
     out << ")" << std::endl << ")" << std::endl;
@@ -335,20 +339,26 @@ std::ostream& IR::DpdkTable::toSexp(std::ostream& out) const {
     out << "(table " << name << std::endl;
     if(match_keys){
         for(auto key : match_keys->keyElements){
-            out << "\t(key " << DPDK::toStr(key->expression) << " " << DPDK::toStr(key->matchType) << ")" << std::endl;
+            add_space(out, 2);
+            out << "(key " << DPDK::toStr(key->expression) << " "
+                << DPDK::toStr(key->matchType) << ")" << std::endl;
         }
     }
-    out << "\t(actions (" << std::endl;
+    add_space(out, 2);
+    out << "(actions (";
     for(auto action: actions->actionList){
-        out << "\t\t" << DPDK::toStr(action->expression) << std::endl;
+        out << DPDK::toStr(action->expression);
+        if (action != actions->actionList.back())
+            out << " ";
     }
-    out << "\t))" << std::endl;
+    out << "))" << std::endl;
 
-    out << "\t(default_action " << DPDK::toStr(default_action) << " )" << std::endl;
+    add_space(out, 2);
+    out << "(default_action " << DPDK::toStr(default_action) << ")" << std::endl;
     if(auto psa_implementation = properties->getProperty("psa_implementation")){
-        out << "\t(action_selector " << DPDK::toStr(psa_implementation->value) << ")" << std::endl;
+        add_space(out, 2);
+        out << "(action_selector " << DPDK::toStr(psa_implementation->value) << ")" << std::endl;
     }
-
     out << ")";
     return out;
 }
@@ -362,9 +372,9 @@ std::ostream& IR::DpdkAction::toSexp(std::ostream& out) const {
         if(p != para.parameters.back())
             out << " ";
     }
-    out << ")" << std::endl << "( " << std::endl;
+    out << ")" << std::endl << "(" << std::endl;
     for(auto i: statements){
-        out << "\t";
+        add_space(out, 2);
         i->toSexp(out) << std::endl;
     }
     out << "))";
