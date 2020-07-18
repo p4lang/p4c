@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <grpc++/grpc++.h>
+#include <grpcpp/grpcpp.h>
 
 #include <p4/bm/dataplane_interface.grpc.pb.h>
 #include <p4/v1/p4runtime.grpc.pb.h>

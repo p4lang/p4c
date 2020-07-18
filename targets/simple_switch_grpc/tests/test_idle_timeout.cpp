@@ -19,7 +19,7 @@
  */
 
 #include <google/protobuf/util/message_differencer.h>
-#include <grpc++/grpc++.h>
+#include <grpcpp/grpcpp.h>
 
 #include <p4/bm/dataplane_interface.grpc.pb.h>
 #include <p4/v1/p4runtime.grpc.pb.h>

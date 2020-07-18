@@ -20,7 +20,7 @@
 
 #include <bm/bm_sim/logger.h>
 
-#include <grpc++/grpc++.h>
+#include <grpcpp/grpcpp.h>
 
 #include <gnmi/gnmi.grpc.pb.h>
 #include <p4/bm/dataplane_interface.grpc.pb.h>

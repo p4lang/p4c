@@ -23,16 +23,12 @@
 
 #include <bm/bm_sim/dev_mgr.h>
 
+#include <grpcpp/server.h>
+
 #include <memory>
 #include <string>
 
 class SimpleSwitch;
-
-namespace grpc {
-
-class Server;
-
-}  // namespace grpc
 
 namespace bm {
 

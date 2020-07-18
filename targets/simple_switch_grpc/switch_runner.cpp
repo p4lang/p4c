@@ -34,7 +34,7 @@
 #include <PI/target/pi_imp.h>
 #include <PI/target/pi_learn_imp.h>
 
-#include <grpc++/grpc++.h>
+#include <grpcpp/grpcpp.h>
 
 #include <p4/bm/dataplane_interface.grpc.pb.h>
 

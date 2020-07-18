@@ -18,7 +18,7 @@
  *
  */
 
-#include <grpc++/grpc++.h>
+#include <grpcpp/grpcpp.h>
 
 #include <p4/v1/p4runtime.grpc.pb.h>
 #include <PI/proto/pi_server.h>

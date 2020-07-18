@@ -21,7 +21,7 @@
 // TODO(antonin): we should try to unify this test suite with the "ternary" one,
 // as pretty much all of the code is exactly the same.
 
-#include <grpc++/grpc++.h>
+#include <grpcpp/grpcpp.h>
 
 #include <p4/bm/dataplane_interface.grpc.pb.h>
 #include <p4/v1/p4runtime.grpc.pb.h>

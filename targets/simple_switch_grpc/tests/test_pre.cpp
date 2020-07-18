@@ -18,7 +18,7 @@
  *
  */
 
-#include <grpc++/grpc++.h>
+#include <grpcpp/grpcpp.h>
 
 #include <google/rpc/status.pb.h>
 #include <p4/bm/dataplane_interface.grpc.pb.h>

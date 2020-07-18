@@ -18,7 +18,7 @@
  *
  */
 
-#include <grpc++/grpc++.h>
+#include <grpcpp/grpcpp.h>
 
 #include <google/rpc/code.pb.h>
 
