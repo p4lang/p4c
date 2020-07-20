@@ -22,6 +22,7 @@ limitations under the License.
 #include <unordered_map>
 #include "ConvertToDpdkHelper.h"
 #include "ConvertToDpdkProgram.h"
+#include "convertToDpdkArch.h"
 
 namespace DPDK {
 
@@ -41,23 +42,21 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
     auto program = tlb->getProgram();
     PassManager simplify = {
-        /* TODO */
-        // new RenameUserMetadata(refMap, userMetaType, userMetaName),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
         new P4::SynthesizeActions(refMap, typeMap,
                 new BMV2::SkipControls(&structure.non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),
-        // new P4::SimplifyControlFlow(refMap, typeMap),
         new BMV2::LowerExpressions(typeMap),
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
         new BMV2::RemoveComplexExpressions(refMap, typeMap,
                 new BMV2::ProcessControls(&structure.pipeline_controls)),
-        // new P4::SimplifyControlFlow(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
+        new DPDK::RewriteToDpdkArch(refMap, typeMap),
         // Converts the DAG into a TREE (at least for expressions)
         // This is important later for conversion to JSON.
+        new P4::TypeChecking(refMap, typeMap, true),
         evaluator,
         new VisitFunctor([this, evaluator, structure]() {
             toplevel = evaluator->getToplevelBlock(); }),
