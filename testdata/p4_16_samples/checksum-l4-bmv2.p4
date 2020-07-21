@@ -41,6 +41,13 @@ header tcp_t {
     bit<16> urgentPtr;
 }
 
+header udp_t {
+    bit<16> srcPort;
+    bit<16> dstPort;
+    bit<16> length_;
+    bit<16> checksum;
+}
+
 header IPv4_up_to_ihl_only_h {
     bit<4>       version;
     bit<4>       ihl;
@@ -50,6 +57,7 @@ struct headers {
     ethernet_t    ethernet;
     ipv4_t        ipv4;
     tcp_t         tcp;
+    udp_t         udp;
 }
 
 struct mystruct1_t {
@@ -59,7 +67,7 @@ struct mystruct1_t {
 
 struct metadata {
     mystruct1_t mystruct1;
-    bit<16>     tcpLen; // includes TCP hdr len + TCP payload len
+    bit<16>     l4Len; // includes TCP hdr len + TCP payload len in bytes.
 }
 
 typedef tuple<
@@ -102,24 +110,35 @@ parser parserI(packet_in pkt,
                       - 20)));
         verify(hdr.ipv4.version == 4w4, error.IPv4IncorrectVersion);
         verify(hdr.ipv4.ihl >= 4w5, error.IPv4HeaderTooShort);
+        meta.l4Len = hdr.ipv4.totalLen - (bit<16>)(hdr.ipv4.ihl*4);
         transition select (hdr.ipv4.protocol) {
             6: parse_tcp;
+            17: parse_udp;
             default: accept;
         }
     }
     state parse_tcp {
         pkt.extract(hdr.tcp);
-        meta.tcpLen = hdr.ipv4.totalLen - (bit<16>)(hdr.ipv4.ihl*4);
         transition accept;
     }
+    state parse_udp {
+        pkt.extract(hdr.udp);
+        transition accept;
+    }
+
 }
 
 control cIngress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t stdmeta)
 {
-    action foo() {
+    action foot() {
         hdr.tcp.srcPort = hdr.tcp.srcPort + 1;
+        hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
+        hdr.ipv4.dstAddr = hdr.ipv4.dstAddr + 4;
+    }
+    action foou() {
+        hdr.udp.srcPort = hdr.udp.srcPort + 1;
         hdr.ipv4.ttl = hdr.ipv4.ttl - 1;
         hdr.ipv4.dstAddr = hdr.ipv4.dstAddr + 4;
     }
@@ -127,11 +146,23 @@ control cIngress(inout headers hdr,
         key = {
             hdr.tcp.dstPort : exact;
         }
-        actions = { foo; }
-        default_action = foo;
+        actions = { foot; }
+        default_action = foot;
+    }
+    table huh {
+        key = {
+            hdr.udp.dstPort : exact;
+        }
+        actions = { foou; }
+        default_action = foou;
     }
     apply {
-        guh.apply();
+        if (hdr.tcp.isValid()) {
+            guh.apply();
+        }
+        if (hdr.udp.isValid()) {
+            huh.apply();
+        }
     }
 }
 
@@ -196,23 +227,35 @@ control uc(inout headers hdr,
 
         update_checksum_with_payload(hdr.tcp.isValid(),
             { hdr.ipv4.srcAddr,
-              hdr.ipv4.dstAddr,
-              8w0,
-              hdr.ipv4.protocol,
-              meta.tcpLen,
-              hdr.tcp.srcPort,
-              hdr.tcp.dstPort,
-              hdr.tcp.seqNo,
-              hdr.tcp.ackNo,
-              hdr.tcp.dataOffset,
-              hdr.tcp.res,
-              hdr.tcp.ecn,
-              hdr.tcp.ctrl,
-              hdr.tcp.window,
-              16w0, // checksum
-              hdr.tcp.urgentPtr
-	    },
+                hdr.ipv4.dstAddr,
+                8w0,
+                hdr.ipv4.protocol,
+                meta.l4Len,
+                hdr.tcp.srcPort,
+                hdr.tcp.dstPort,
+                hdr.tcp.seqNo,
+                hdr.tcp.ackNo,
+                hdr.tcp.dataOffset,
+                hdr.tcp.res,
+                hdr.tcp.ecn,
+                hdr.tcp.ctrl,
+                hdr.tcp.window,
+                16w0, // checksum
+                hdr.tcp.urgentPtr
+            },
             hdr.tcp.checksum, HashAlgorithm.csum16);
+        update_checksum_with_payload(hdr.udp.isValid(),
+            { hdr.ipv4.srcAddr,
+                hdr.ipv4.dstAddr,
+                8w0,
+                hdr.ipv4.protocol,
+                meta.l4Len,
+                hdr.udp.srcPort,
+                hdr.udp.dstPort,
+                hdr.udp.length_,
+                16w0 // checksum
+            },
+            hdr.udp.checksum, HashAlgorithm.csum16);
     }
 }
 
@@ -223,6 +266,7 @@ control DeparserI(packet_out packet,
         packet.emit(hdr.ethernet);
         packet.emit(hdr.ipv4);
         packet.emit(hdr.tcp);
+        packet.emit(hdr.udp);
     }
 }
 

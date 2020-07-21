@@ -1,0 +1,53 @@
+pkg_info {
+  arch: "v1model"
+}
+tables {
+  preamble {
+    id: 48165785
+    name: "cIngress.guh"
+    alias: "guh"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.tcp.dstPort"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 25440736
+  }
+  size: 1024
+}
+tables {
+  preamble {
+    id: 43043839
+    name: "cIngress.huh"
+    alias: "huh"
+  }
+  match_fields {
+    id: 1
+    name: "hdr.udp.dstPort"
+    bitwidth: 16
+    match_type: EXACT
+  }
+  action_refs {
+    id: 18556685
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 25440736
+    name: "cIngress.foot"
+    alias: "foot"
+  }
+}
+actions {
+  preamble {
+    id: 18556685
+    name: "cIngress.foou"
+    alias: "foou"
+  }
+}
+type_info {
+}

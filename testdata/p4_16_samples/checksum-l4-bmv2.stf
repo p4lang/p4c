@@ -1,19 +1,6 @@
-# The packets in the 'packet' lines below were created using the
-# Python Scapy library.
-#
-# First define these Python functions:
-#
-# def str_to_hex(s):
-#     return ''.join(map(lambda x: '%02x' % (ord(x)), s))
-#
-# import re
-# def hex_to_str(hex_s):
-#     tmp = re.sub('[ \t]', '', hex_s)
-#     return str(bytearray.fromhex(tmp))
-
 # The first packet was created with these Python statements:
-# pkt1=Ether() / IP(dst='10.1.0.1') / TCP(sport=5793, dport=80)
-# str_to_hex(str(pkt1))
+# pkt1=Ether()/IP(dst='10.1.0.1')/TCP(sport=5793, dport=80)
+#
 
 # The packet in the first 'expect' line was created by running the P4
 # program checksum1-bmv2.p4 using simple_switch  It was verified
@@ -38,3 +25,8 @@ expect 0 525400123502080027018BBC080045000030000100003F0665B30A00020F0A01000516A
 
 packet 0 525400123502080027018bbc0800 4600002c000100004006cdb30a00020f0a02030483031000 157d005000000000000000005002200061010000deadbeefdeadbeef
 expect 0 525400123502080027018BBC08004600002C000100003F06CEAF0A00020F0A02030883031000157E005000000000000000005002200025B10000DEADBEEFDEADBEEF
+
+# UDP pkt for UDP checksum test
+#
+packet 0 CA0107FC001C11111111111108004500002C00010000401166BA0A0100040A01000116A100500018B99B64656164626565666465616462656566
+expect 0 CA0107FC001C11111111111108004500002C000100003F1167B60A0100040A01000516A200500018B98664656164626565666465616462656566
