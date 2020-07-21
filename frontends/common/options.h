@@ -77,14 +77,14 @@ class CompilerOptions : public Util::Options {
     cstring prettyPrintFile = nullptr;
     // Compiler version.
     cstring compilerVersion;
-    // if true skip frontend passes witch names are contained in passesToExcludeFrontend vector
+    // if true, skip frontend passes whose names are contained in passesToExcludeFrontend vector
     bool excludeFrontendPasses = false;
     bool listFrontendPasses = false;
 
-    // if true skip midend passes witch names are contained in passesToExcludeMidend vector
+    // if true, skip midend passes whose names are contained in passesToExcludeMidend vector
     bool excludeMidendPasses = false;
     bool listMidendPasses = false;
-    // if true skip backend passes witch names are contained in passesToExcludeBackend vector
+    // if true, skip backend passes whose names are contained in passesToExcludeBackend vector
     bool excludeBackendPasses = false;
 
     // Dump a JSON representation of the IR in the file
