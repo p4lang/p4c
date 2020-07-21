@@ -8,10 +8,39 @@
  */
 
 #include "convertToDpdkArch.h"
+#include "sexp.h"
 
 namespace DPDK {
 
+cstring TypeStruct2Name(const cstring s){
+    if(s == "psa_ingress_parser_input_metadata_t"){
+        return "psa_ingress_parser_input_metadata";
+    }
+    else if(s == "psa_ingress_input_metadata_t"){
+        return "psa_ingress_input_metadata";
+    }
+    else if(s == "psa_ingress_output_metadata_t"){
+        return "psa_ingress_output_metadata";
+    }
+    else if(s == "psa_egress_parser_input_metadata_t"){
+        return "psa_egress_parser_input_metadata";
+    }
+    else if(s == "psa_egress_input_metadata_t"){
+        return "psa_egress_input_metadata";
+    }
+    else if(s == "psa_egress_output_metadata_t"){
+        return "psa_egress_output_metadata";
+    }
+    else if(s == "psa_egress_deparser_input_metadata_t"){
+        return "psa_egress_deparser_input_metadata";
+    }
+    else{
+        return "local_metadata";
+    }
+}
+
 const IR::Node* ConvertToDpdkArch::postorder(IR::P4Program* p) {
+    // std::cout << p << std::endl;
     return p;
 }
 
@@ -43,6 +72,7 @@ const IR::Node* ConvertToDpdkArch::postorder(IR::Type_Control* c) {
 }
 
 const IR::Type_Parser* ConvertToDpdkArch::rewriteParserType(const IR::Type_Parser* p, cstring name) {
+
     auto applyParams = new IR::ParameterList();
     if (name == "IngressParser") {
         applyParams->push_back(p->applyParams->parameters.at(0));
@@ -55,6 +85,7 @@ const IR::Type_Parser* ConvertToDpdkArch::rewriteParserType(const IR::Type_Parse
     }
     auto tp = new IR::Type_Parser(p->name, p->annotations,
             p->typeParameters, applyParams);
+
     return tp;
 }
 
@@ -94,25 +125,10 @@ const IR::Node* ConvertToDpdkArch::postorder(IR::P4Parser* p) {
 }
 
 const IR::Node* ConvertToDpdkArch::postorder(IR::Type_StructLike* s) {
-
     return s;
 }
 
 const IR::Node* ConvertToDpdkArch::postorder(IR::PathExpression* p) {
-    auto declaration = refMap->getDeclaration(p->path);
-    if (auto decl = declaration->to<IR::Parameter>()) {
-        if (auto type = decl->type->to<IR::Type_Name>()) {
-            if (type->path->name == "psa_ingress_parser_input_metadata_t" ||
-                type->path->name == "psa_ingress_input_metadata_t" ||
-                type->path->name == "psa_ingress_output_metadata_t" ||
-                type->path->name == "psa_egress_parser_input_metadata_t" ||
-                type->path->name == "psa_egress_input_metadata_t" ||
-                type->path->name == "psa_egress_output_metadata_t" ||
-                type->path->name == "psa_egress_deparser_input_metadata_t") {
-                return new IR::Member(new IR::PathExpression(IR::ID("m")), decl->name);
-            }
-        }
-    }
     return p;
 }
 
@@ -170,13 +186,88 @@ bool ParsePsa::preorder(const IR::PackageBlock* block) {
         parseEgressPipeline(block);
 
     // collect user-provided structure
-    LOG1(block->type->getConstructorMethodType());
     LOG1(block->instanceType);
-    for (auto n : block->instanceType->constantValue) {
-        LOG1("n " << n);
-    }
-
+    // for (auto n : block->instanceType->constantValue) {
+    //     LOG1("n " << n);
+    // }
     return false;
+}
+
+// bool ParsePsa::preorder(const IR::Type_Struct* s){
+//     s->fields
+// }
+
+bool CollectMetadataHeaderInfo::preorder(const IR::P4Program* p){
+    for(auto kv : *toBlockInfo){
+        if(kv.second.pipe == "IngressParser"){
+            auto parser = kv.first->to<IR::P4Parser>();
+            auto local_metadata = parser->getApplyParameters()->getParameter(2);
+            local_metadata_type = local_metadata->type->to<IR::Type_Name>()->path->name;
+            auto header = parser->getApplyParameters()->getParameter(1);
+            header_type = header->type->to<IR::Type_Name>()->path->name;
+        }
+    }
+    return true;
+}
+
+
+
+bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s){
+     for(auto field : s->fields){
+         fields.push_back(new IR::StructField(IR::ID(TypeStruct2Name(s->name.name) + "_" + field->name), field->type));
+     }
+     return true;
+ }
+
+const IR::Node* ReplaceMetadataHeaderName::postorder(IR::P4Program* p){
+    // std::cout << p << std::endl;
+    return p;
+}
+
+
+const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Member *m){
+    if(auto p = m->expr->to<IR::PathExpression>()){   
+        auto declaration = refMap->getDeclaration(p->path);
+        if (auto decl = declaration->to<IR::Parameter>()) {
+            if (auto type = decl->type->to<IR::Type_Name>()) {
+                if (type->path->name == "psa_ingress_parser_input_metadata_t" ||
+                    type->path->name == "psa_ingress_input_metadata_t" ||
+                    type->path->name == "psa_ingress_output_metadata_t" ||
+                    type->path->name == "psa_egress_parser_input_metadata_t" ||
+                    type->path->name == "psa_egress_input_metadata_t" ||
+                    type->path->name == "psa_egress_output_metadata_t" ||
+                    type->path->name == "psa_egress_deparser_input_metadata_t") {
+                    return new IR::Member(new IR::PathExpression(IR::ID("m")), IR::ID(TypeStruct2Name(type->path->name.name) + "_" + m->member.name));
+                }
+                else if(type->path->name == info->header_type) {
+                    return new IR::Member(new IR::PathExpression(IR::ID("h")), IR::ID(m->member.name));
+                }
+                else if(type->path->name == info->local_metadata_type){
+                    return new IR::Member(new IR::PathExpression(IR::ID("m")), IR::ID("local_metadata_" + m->member.name));
+                }
+            }
+        }
+    }    
+    return m;
+}
+
+const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Parameter *p){
+    if(auto type = p->type->to<IR::Type_Name>()){
+        if(type->path->name == info->header_type){
+            return new IR::Parameter(IR::ID("h"), p->direction, p->type);
+        }
+        else if(type->path->name == info->local_metadata_type){
+            return new IR::Parameter(IR::ID("m"), p->direction, p->type);
+        }
+    }
+    return p;
+}
+
+const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct* s){
+    if(s->name == info->local_metadata_type){
+        return new IR::Type_Struct(s->name, info->fields);
+    }
+    return s;
 }
 
 }  // namespace DPDK
