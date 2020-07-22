@@ -202,6 +202,37 @@ control vc(inout headers hdr,
                 hdr.ipv4.options
             },
             hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        verify_checksum_with_payload(hdr.tcp.isValid(),
+            { hdr.ipv4.srcAddr,
+                hdr.ipv4.dstAddr,
+                8w0,
+                hdr.ipv4.protocol,
+                meta.l4Len,
+                hdr.tcp.srcPort,
+                hdr.tcp.dstPort,
+                hdr.tcp.seqNo,
+                hdr.tcp.ackNo,
+                hdr.tcp.dataOffset,
+                hdr.tcp.res,
+                hdr.tcp.ecn,
+                hdr.tcp.ctrl,
+                hdr.tcp.window,
+                16w0, // checksum
+                hdr.tcp.urgentPtr
+            },
+            hdr.tcp.checksum, HashAlgorithm.csum16);
+        verify_checksum_with_payload(hdr.udp.isValid(),
+            { hdr.ipv4.srcAddr,
+                hdr.ipv4.dstAddr,
+                8w0,
+                hdr.ipv4.protocol,
+                meta.l4Len,
+                hdr.udp.srcPort,
+                hdr.udp.dstPort,
+                hdr.udp.length_,
+                16w0 // checksum
+            },
+            hdr.udp.checksum, HashAlgorithm.csum16);
     }
 }
 
