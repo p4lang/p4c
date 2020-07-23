@@ -12,6 +12,15 @@
 
 namespace DPDK {
 
+bool isSimpleExpression(const IR::Expression *e){
+    if(e->is<IR::Member>() or
+        e->is<IR::PathExpression>() or
+        e->is<IR::Constant>() or
+        e->is<IR::BoolLiteral>())
+        return true;
+    return false;
+}
+
 cstring TypeStruct2Name(const cstring s){
     if(s == "psa_ingress_parser_input_metadata_t"){
         return "psa_ingress_parser_input_metadata";
@@ -197,6 +206,19 @@ bool ParsePsa::preorder(const IR::PackageBlock* block) {
 //     s->fields
 // }
 
+void CollectMetadataHeaderInfo::pushMetadata(const IR::Parameter* p){
+    
+    for(auto m: used_metadata){
+        // std::cout << "m:" << m->type->to<IR::Type_Name>()->path->name.name << std::endl;
+        // std::cout << "p:" << p->type->to<IR::Type_Name>()->path->name.name << std::endl;
+        if(m->to<IR::Type_Name>()->path->name.name == p->type->to<IR::Type_Name>()->path->name.name){
+            return;
+        }
+    }
+    // std::cout <<"pushed:" << p->type->to<IR::Type_Name>()->path->name.name << std::endl;
+    used_metadata.push_back(p->type);
+}
+
 bool CollectMetadataHeaderInfo::preorder(const IR::P4Program* p){
     for(auto kv : *toBlockInfo){
         if(kv.second.pipe == "IngressParser"){
@@ -205,7 +227,48 @@ bool CollectMetadataHeaderInfo::preorder(const IR::P4Program* p){
             local_metadata_type = local_metadata->type->to<IR::Type_Name>()->path->name;
             auto header = parser->getApplyParameters()->getParameter(1);
             header_type = header->type->to<IR::Type_Name>()->path->name;
+            pushMetadata(parser->getApplyParameters()->getParameter(2));
+            pushMetadata(parser->getApplyParameters()->getParameter(3));
+            pushMetadata(parser->getApplyParameters()->getParameter(4));
+            pushMetadata(parser->getApplyParameters()->getParameter(5));
         }
+        else if(kv.second.pipe == "Ingress"){
+            auto control = kv.first->to<IR::P4Control>();
+            pushMetadata(control->getApplyParameters()->getParameter(1));
+            pushMetadata(control->getApplyParameters()->getParameter(2));
+            pushMetadata(control->getApplyParameters()->getParameter(3));
+        }
+        else if(kv.second.pipe == "IngressParser"){
+            auto deparser = kv.first->to<IR::P4Control>();
+            pushMetadata(deparser->getApplyParameters()->getParameter(1));
+            pushMetadata(deparser->getApplyParameters()->getParameter(2));
+            pushMetadata(deparser->getApplyParameters()->getParameter(3));
+            pushMetadata(deparser->getApplyParameters()->getParameter(5));
+            pushMetadata(deparser->getApplyParameters()->getParameter(6));
+        }
+        else if(kv.second.pipe == "EgressParser"){
+            auto parser = kv.first->to<IR::P4Parser>();
+            pushMetadata(parser->getApplyParameters()->getParameter(2));
+            pushMetadata(parser->getApplyParameters()->getParameter(3));
+            pushMetadata(parser->getApplyParameters()->getParameter(4));
+            pushMetadata(parser->getApplyParameters()->getParameter(5));
+            pushMetadata(parser->getApplyParameters()->getParameter(6));
+        }
+        else if(kv.second.pipe == "Egress"){
+            auto control = kv.first->to<IR::P4Control>();
+            pushMetadata(control->getApplyParameters()->getParameter(1));
+            pushMetadata(control->getApplyParameters()->getParameter(2));
+            pushMetadata(control->getApplyParameters()->getParameter(3));
+        }
+        else if(kv.second.pipe == "EgressDeparser"){
+            auto deparser = kv.first->to<IR::P4Control>();
+            pushMetadata(deparser->getApplyParameters()->getParameter(1));
+            pushMetadata(deparser->getApplyParameters()->getParameter(2));
+            pushMetadata(deparser->getApplyParameters()->getParameter(4));
+            pushMetadata(deparser->getApplyParameters()->getParameter(5));
+            pushMetadata(deparser->getApplyParameters()->getParameter(6));
+        }
+
     }
     return true;
 }
@@ -213,10 +276,15 @@ bool CollectMetadataHeaderInfo::preorder(const IR::P4Program* p){
 
 
 bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s){
-     for(auto field : s->fields){
-         fields.push_back(new IR::StructField(IR::ID(TypeStruct2Name(s->name.name) + "_" + field->name), field->type));
-     }
-     return true;
+    for(auto m: used_metadata){
+        if(m->to<IR::Type_Name>()->path->name.name == s->name.name){
+            for(auto field : s->fields){
+                fields.push_back(new IR::StructField(IR::ID(TypeStruct2Name(s->name.name) + "_" + field->name), field->type));
+            }
+            return true;
+        }        
+    }
+    return true;
  }
 
 const IR::Node* ReplaceMetadataHeaderName::postorder(IR::P4Program* p){
@@ -269,5 +337,223 @@ const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct* s){
     }
     return s;
 }
+
+
+const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a){
+    auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
+    auto right = a->right;
+    if(right->is<IR::MethodCallExpression>()) {
+        prune();
+        return a;
+    }
+    else if(auto bin = right->to<IR::Operation_Binary>()) {
+        ExpressionUnroll::sanity(bin->right);
+        ExpressionUnroll::sanity(bin->left);
+        auto left_unroller = new ExpressionUnroll(collector);
+        auto right_unroller = new ExpressionUnroll(collector);
+        bin->left->apply(*left_unroller);
+        const IR::Expression * left_tmp = left_unroller->root;
+        bin->right->apply(*right_unroller);
+        const IR::Expression * right_tmp = right_unroller->root;
+        if(not left_tmp) left_tmp = bin->left;
+        if(not right_tmp) right_tmp = bin->right;
+        for(auto s: left_unroller->stmt)
+            code_block->push_back(s);
+        for(auto s: right_unroller->stmt)
+            code_block->push_back(s);
+        prune();
+        if(right->is<IR::Add>()){
+            a->right = new IR::Add(left_tmp, right_tmp);
+        }
+        else if(right->is<IR::Sub>()){
+            a->right = new IR::Sub(left_tmp, right_tmp);
+        }
+        else if(right->is<IR::Shl>()){
+            a->right = new IR::Shl(left_tmp, right_tmp);
+        }
+        else if(right->is<IR::Shr>()){
+            a->right = new IR::Shr(left_tmp, right_tmp);
+        }
+        else if(right->is<IR::Equ>()){
+            a->right = new IR::Equ(left_tmp, right_tmp);
+        }
+        else {
+            std::cerr << right->node_type_name() << std::endl;
+            BUG("not implemented.");
+        }
+        code_block->push_back(a);
+        return new IR::BlockStatement(*code_block);
+    }
+    else if(isSimpleExpression(right)){
+        prune();
+    }
+    else if(auto un = right->to<IR::Operation_Unary>()){
+        auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
+        ExpressionUnroll::sanity(un->expr);
+        auto unroller = new ExpressionUnroll(collector);
+        un->expr->apply(*unroller);
+        prune();
+        const IR::Expression *un_tmp = unroller->root;
+        for(auto s: unroller->stmt)
+            code_block->push_back(s);
+        if(not un_tmp) un_tmp = un->expr;
+        if(auto n = right->to<IR::Neg>()){
+            a->right = new IR::Neg(un_tmp);
+        }
+        else if(auto c = right->to<IR::Cmpl>()){
+            a->right = new IR::Cmpl(un_tmp);
+        }
+        else if(auto ln = right->to<IR::LNot>()){
+            a->right = new IR::LNot(un_tmp);
+        }
+        else if(auto c = right->to<IR::Cast>()){
+            a->right = new IR::Cast(c->destType, un_tmp);
+        }
+        else{
+            std::cerr << right->node_type_name() << std::endl;
+            BUG("Not implemented.");
+        }
+        code_block->push_back(a);
+        return new IR::BlockStatement(*code_block);
+    }
+    else{
+        std::cerr << right->node_type_name() << std::endl;
+        BUG("not implemented");
+    }
+    return a;
+}
+
+const IR::Node *StatementUnroll::postorder(IR::IfStatement *i){
+    auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
+    ExpressionUnroll::sanity(i->condition);
+    auto unroller = new ExpressionUnroll(collector);
+    i->condition->apply(*unroller);
+    for(auto i:unroller->stmt)
+        code_block->push_back(i);
+    if(unroller->root) {
+        i->condition = unroller->root;
+    }
+    code_block->push_back(i);
+    return new IR::BlockStatement(*code_block);
+}
+
+const IR::Node *StatementUnroll::preorder(IR::MethodCallStatement *m){
+    // visit(m->methodCall);
+    // prune();    
+    return m;
+}
+
+bool ExpressionUnroll::preorder(const IR::Operation_Unary *u){
+    sanity(u->expr);
+    visit(u->expr);
+    const IR::Expression *un_expr;
+    if(root){
+        if(auto neg = u->to<IR::Neg>()){
+            un_expr = new IR::Neg(root);
+        }
+        else if(auto neg = u->to<IR::Cmpl>()){
+            un_expr = new IR::Cmpl(root);
+        }
+        else if(auto neg = u->to<IR::LNot>()){
+            un_expr = new IR::LNot(root);
+        }
+        else{
+            std::cout << u->node_type_name() << std::endl;
+            BUG("Not Implemented");
+        }
+    }
+    else{
+        un_expr = u->expr;
+    }
+    root = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
+    stmt.push_back(new IR::AssignmentStatement(root, un_expr));
+
+}
+
+bool ExpressionUnroll::preorder(const IR::Operation_Binary *bin){
+    sanity(bin->left);
+    sanity(bin->right);
+    visit(bin->left);
+    const IR::Expression *left_root = root;
+    visit(bin->right);
+    const IR::Expression *right_root = root;
+    if(not left_root) left_root = bin->left;
+    if(not right_root) right_root = bin->right;
+    root = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
+    const IR::Expression *bin_expr;
+    if(bin->is<IR::Add>()) {
+        bin_expr = new IR::Add(left_root, right_root);
+    }
+    else if(bin->is<IR::Sub>()) {
+        bin_expr = new IR::Sub(left_root, right_root);
+    }
+    else if(bin->is<IR::Shl>()) {
+        bin_expr = new IR::Shl(left_root, right_root);
+    }
+    else if(bin->is<IR::Shr>()) {
+        bin_expr = new IR::Shr(left_root, right_root);
+    }
+    else if(bin->is<IR::Equ>()) {
+        bin_expr = new IR::Equ(left_root, right_root);
+    }
+    else if(bin->is<IR::LAnd>()) {
+        bin_expr = new IR::LAnd(left_root, right_root);
+    }
+    else if(bin->is<IR::Leq>()) {
+        bin_expr = new IR::Leq(left_root, right_root);
+    }
+    else if(bin->is<IR::Lss>()) {
+        bin_expr = new IR::Lss(left_root, right_root);
+    }
+    else if(bin->is<IR::Geq>()) {
+        bin_expr = new IR::Geq(left_root, right_root);
+    }
+    else if(bin->is<IR::Grt>()) {
+        bin_expr = new IR::Grt(left_root, right_root);
+    }
+    else if(bin->is<IR::Neq>()) {
+        bin_expr = new IR::Neq(left_root, right_root);
+    }
+    else{
+        std::cerr << bin->node_type_name() << std::endl;
+        BUG("not implemented");
+    }
+    stmt.push_back(new IR::AssignmentStatement(root, bin_expr));
+    return false;
+}
+
+bool ExpressionUnroll::preorder(const IR::MethodCallExpression *m){
+    auto args = new IR::Vector<IR::Argument>;
+    for(auto arg: *m->arguments){
+        sanity(arg->expression);
+        visit(arg->expression);
+        if(not root) args->push_back(arg);
+        else args->push_back(new IR::Argument(root));
+    }
+    root = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
+    auto new_m = new IR::MethodCallExpression(m->method, args);
+    stmt.push_back(new IR::AssignmentStatement(root, new_m));
+    return false;
+}
+
+bool ExpressionUnroll::preorder(const IR::Member *member){
+    root = nullptr;
+    return false;
+}
+
+bool ExpressionUnroll::preorder(const IR::PathExpression *path){
+    root = nullptr;
+    return false;
+}
+
+bool ExpressionUnroll::preorder(const IR::Constant *c){
+    root = nullptr;
+    return false;
+}
+bool ExpressionUnroll::preorder(const IR::BoolLiteral *b){
+    root = nullptr;
+    return false;
+}
+
 
 }  // namespace DPDK

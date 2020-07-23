@@ -23,6 +23,7 @@ const IR::DpdkAsmStatement* ConvertToDpdkProgram::createListStatement(cstring na
 const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
     IR::IndexedVector<IR::DpdkHeaderType> headerType;
     for (auto kv : structure.header_types) {
+        // std::cout << kv.second << std::endl;
         auto h = kv.second;
         auto ht = new IR::DpdkHeaderType(h->srcInfo, h->name, h->annotations, h->fields);
         headerType.push_back(ht);
@@ -34,8 +35,8 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
         structType.push_back(st);
     }
     IR::IndexedVector<IR::DpdkAsmStatement> statements;
-    auto ingress_parser_converter = new ConvertToDpdkParser(refmap, typemap, &collector);
-    auto egress_parser_converter = new ConvertToDpdkParser(refmap, typemap, &collector);
+    auto ingress_parser_converter = new ConvertToDpdkParser(refmap, typemap, collector);
+    auto egress_parser_converter = new ConvertToDpdkParser(refmap, typemap, collector);
     for (auto kv : structure.parsers) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_parser_converter);
@@ -44,8 +45,8 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
         else
             BUG("Unknown parser %s", kv.second->name);
     }
-    auto ingress_converter = new ConvertToDpdkControl(refmap, typemap, &collector);
-    auto egress_converter = new ConvertToDpdkControl(refmap, typemap, &collector);
+    auto ingress_converter = new ConvertToDpdkControl(refmap, typemap, collector);
+    auto egress_converter = new ConvertToDpdkControl(refmap, typemap, collector);
     for (auto kv : structure.pipelines) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_converter);
@@ -54,8 +55,8 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
         else
             BUG("Unknown control block %s", kv.second->name);
     }
-    auto ingress_deparser_converter = new ConvertToDpdkControl(refmap, typemap, &collector);
-    auto egress_deparser_converter = new ConvertToDpdkControl(refmap, typemap, &collector);
+    auto ingress_deparser_converter = new ConvertToDpdkControl(refmap, typemap, collector);
+    auto egress_deparser_converter = new ConvertToDpdkControl(refmap, typemap, collector);
     for (auto kv : structure.deparsers) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_deparser_converter);
@@ -74,7 +75,7 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
     statements.push_back(s);
 
 
-    return new IR::DpdkAsmProgram(headerType, structType, ingress_converter->getActions(), ingress_converter->getTables() , statements, collector.get_globals());
+    return new IR::DpdkAsmProgram(headerType, structType, ingress_converter->getActions(), ingress_converter->getTables() , statements, collector->get_globals());
 }
 
 const IR::Node* ConvertToDpdkProgram::preorder(IR::P4Program* prog) {

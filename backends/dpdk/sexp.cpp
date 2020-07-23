@@ -372,7 +372,7 @@ std::ostream& IR::DpdkAction::toSexp(std::ostream& out) const {
         if(p != para.parameters.back())
             out << " ";
     }
-    out << ")" << std::endl << "(" << std::endl;
+    out << ")" << std::endl << "(";
     for(auto i: statements){
         add_space(out, 2);
         i->toSexp(out) << std::endl;

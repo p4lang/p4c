@@ -30,7 +30,7 @@ namespace DPDK
 {
     
 class ConvertToDpdkProgram : public Transform {
-    DpdkVariableCollector collector;
+    DpdkVariableCollector *collector;
     int next_label_id = 0;
     std::map<int, cstring> reg_id_to_name;
     std::map<cstring, int> reg_name_to_id;
@@ -45,7 +45,12 @@ class ConvertToDpdkProgram : public Transform {
     ConvertToDpdkProgram(
         BMV2::PsaProgramStructure& structure, 
         P4::ReferenceMap *refmap, 
-        P4::TypeMap * typemap) : structure(structure), refmap(refmap), typemap(typemap) {}
+        P4::TypeMap * typemap,
+        DpdkVariableCollector *collector) : 
+        structure(structure), 
+        refmap(refmap), 
+        typemap(typemap),
+        collector(collector) {}
 
     const IR::DpdkAsmProgram* create();
     const IR::DpdkAsmStatement* createListStatement(cstring name,
