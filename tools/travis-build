@@ -100,13 +100,14 @@ pip install $P4C_PIP_PACKAGES
 
 # Also pull Gauntlet for translation validation
 git clone -b stable https://github.com/p4gauntlet/p4_tv /gauntlet
-rm -rf /gauntlet/modules/p4c
-ln -s /p4c /gauntlet/modules/p4c
 cd /gauntlet
 git submodule update --init --recursive
 cd -
+# Symlink the parent p4c repository with Gauntlet
+rm -rf /gauntlet/modules/p4c
+ln -s /p4c /gauntlet/modules/p4c
 
-# Grab the toz3 extension for the p4 compiler
+# Symlink the toz3 extension for the p4 compiler
 mkdir -p /p4c/extensions
 ln -sf /gauntlet/modules/toz3 /p4c/extensions/toz3
 
