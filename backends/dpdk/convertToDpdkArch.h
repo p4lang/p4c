@@ -123,11 +123,16 @@ public:
 class StatementUnroll: public Transform {
 private:
     DpdkVariableCollector *collector;
+    std::map<const IR::Node*, IR::IndexedVector<IR::Declaration>*> decl_map;
 public:
     StatementUnroll(DpdkVariableCollector* collector):collector(collector){}
-    
+    IR::IndexedVector<IR::Declaration> *findDeclarationList(const IR::P4Control *control, const IR::P4Parser *parser);
     const IR::Node *preorder(IR::AssignmentStatement *a) override;
     const IR::Node *postorder(IR::IfStatement *a) override;
+    const IR::Node *postorder(IR::P4Control *a) override;
+    const IR::Node *postorder(IR::P4Parser *a) override;
+    // const IR::Node *postorder(IR::P4Control *a) override;
+    // const IR::Node *postorder(IR::P4Parser *a) override;
     const IR::Node *preorder(IR::MethodCallStatement *a) override;
 };
 
@@ -135,6 +140,7 @@ class ExpressionUnroll: public Inspector {
     DpdkVariableCollector *collector;
 public:
     IR::IndexedVector<IR::StatOrDecl> stmt;
+    IR::IndexedVector<IR::Declaration> decl;
     IR::PathExpression *root;
     static void sanity(const IR::Expression* e){
         if(not e->is<IR::Operation_Unary>() and
@@ -184,7 +190,6 @@ class RewriteToDpdkArch : public PassManager {
         passes.push_back(new ReplaceMetadataHeaderName(refMap, info));
         passes.push_back(new InjectJumboStruct(info));
         passes.push_back(new StatementUnroll(collector));
-        passes.push_back(new printP4());
     }
 };
 

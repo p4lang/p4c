@@ -57,25 +57,5 @@ class ConvertStatementToDpdk : public Inspector {
     int get_label_num(){return next_label_id;}
 };
 
-class TreeUnroller: public Inspector {
-    IR::IndexedVector<IR::DpdkAsmStatement> instructions;
-    DpdkVariableCollector *collector;
-    IR::PathExpression *tmp;
-    P4::ReferenceMap *refmap;
-    P4::TypeMap *typemap;
-public:
-    TreeUnroller(DpdkVariableCollector *collector, P4::ReferenceMap *refmap, P4::TypeMap *typemap): collector(collector), refmap(refmap), typemap(typemap){}
-    bool preorder(const IR::Operation_Binary*) override;
-    bool preorder(const IR::MethodCallExpression*) override;
-    bool preorder(const IR::Member*) override;
-    bool preorder(const IR::PathExpression*) override;
-    bool preorder(const IR::Constant*) override;
-    void add_instr(const IR::DpdkAsmStatement* s){ instructions.push_back(s); }
-    IR::IndexedVector<IR::DpdkAsmStatement> & get_instr(){return instructions;}
-    IR::Expression* get_tmp(){return tmp;}
-};
-
-
-
 } // namespace DPDK
 #endif

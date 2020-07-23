@@ -25,35 +25,26 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement* a){
     IR::DpdkAsmStatement *i;
     // handle Binary Operation
     if(auto r = right->to<IR::Operation_Binary>()){
-        auto left_unroller = new TreeUnroller(collector, refmap, typemap);
-        auto right_unroller = new TreeUnroller(collector, refmap, typemap);
-        r->left->apply(*left_unroller);
-        for(auto i: left_unroller->get_instr()){
-            add_instr(i);
-        }
-        r->right->apply(*right_unroller);
-        for(auto i: right_unroller->get_instr()){
-            add_instr(i);
-        }
-        const IR::Expression* left_tmp = left_unroller->get_tmp();
-        const IR::Expression* right_tmp = right_unroller->get_tmp();
-        if(not left_tmp) left_tmp = r->left;
-        if(not right_tmp) right_tmp = r->right;
-
         if(right->is<IR::Add>()){
-            i = new IR::DpdkAddStatement(left, left_tmp, right_tmp);
+            i = new IR::DpdkAddStatement(left, r->left, r->right);
         }
         else if(right->is<IR::Sub>()){
-            i = new IR::DpdkSubStatement(left, left_tmp, right_tmp);
+            i = new IR::DpdkSubStatement(left, r->left, r->right);
         }
         else if(right->is<IR::Shl>()){
-            i = new IR::DpdkShlStatement(left, left_tmp, right_tmp);
+            i = new IR::DpdkShlStatement(left, r->left, r->right);
         }
         else if(right->is<IR::Shr>()){
-            i = new IR::DpdkShrStatement(left, left_tmp, right_tmp);
+            i = new IR::DpdkShrStatement(left, r->left, r->right);
         }
         else if(right->is<IR::Equ>()){
-            i = new IR::DpdkEquStatement(left, left_tmp, right_tmp);
+            i = new IR::DpdkEquStatement(left, r->left, r->right);
+        }
+        else if(right->is<IR::LAnd>()){
+            i = new IR::DpdkLAndStatement(left, r->left, r->right);
+        }
+        else if(right->is<IR::Leq>()){
+            i = new IR::DpdkLeqStatement(left, r->left, r->right);
         }
         else {
             std::cerr << right->node_type_name() << std::endl;
@@ -147,15 +138,7 @@ bool ConvertStatementToDpdk::preorder(const IR::IfStatement* s){
     auto true_label  = Util::printf_format("label_%d", next_label_id++);
     auto end_label = Util::printf_format("label_%d", next_label_id++);
 
-    auto converter = new TreeUnroller(collector, refmap, typemap);
-    s->condition->apply(*converter);
-    for(auto i:converter->get_instr()){
-        add_instr(i);
-    }
-    const IR::Expression * tmp = converter->get_tmp();
-    if(not tmp) tmp = s->condition;
-
-    add_instr(new IR::DpdkCmpStatement(tmp, new IR::Constant(0)));
+    add_instr(new IR::DpdkCmpStatement(s->condition, new IR::Constant(0)));
     add_instr(new IR::DpdkJmpNotEqualStatement(true_label));
     visit(s->ifFalse);
     add_instr(new IR::DpdkJmpStatement(end_label));
@@ -267,68 +250,5 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement* s){
 }
 
 
-// IR::Expression* getMethodReturnType(
-//     const IR::MethodCallExpression* mce,
-//     P4::ReferenceMap* refmap,
-//     P4::TypeMap* typemap){
-//         auto mi = P4::MethodInstance::resolve(mce, refmap, typemap);
-
-//     }
-
-bool TreeUnroller::preorder(const IR::Operation_Binary *bin){
-    visit(bin->left);
-    const IR::Expression* left_tmp = tmp;
-    visit(bin->right);
-    const IR::Expression* right_tmp = tmp;
-    cstring tmp_name = collector->get_next_tmp();
-    tmp = new IR::PathExpression(IR::ID(tmp_name));
-    if(not left_tmp) left_tmp = bin->left;
-    if(not right_tmp) right_tmp = bin->right;
-    IR::DpdkAsmStatement *i;
-    if(bin->is<IR::Add>()) i = new IR::DpdkAddStatement(tmp, left_tmp, right_tmp);
-    else if(bin->is<IR::Sub>()) i = new IR::DpdkSubStatement(tmp, left_tmp, right_tmp);
-    else if(bin->is<IR::Shl>()) i = new IR::DpdkShlStatement(tmp, left_tmp, right_tmp);
-    else if(bin->is<IR::Shr>()) i = new IR::DpdkShrStatement(tmp, left_tmp, right_tmp);
-    else if(bin->is<IR::Equ>()) i = new IR::DpdkEquStatement(tmp, left_tmp, right_tmp);
-    else if(bin->is<IR::LAnd>()) i = new IR::DpdkLAndStatement(tmp, left_tmp, right_tmp);
-    else if(bin->is<IR::Leq>()) i = new IR::DpdkLeqStatement(tmp, left_tmp, right_tmp);
-    else if(bin->is<IR::Lss>()) i = new IR::DpdkLssStatement(tmp, left_tmp, right_tmp);
-    else if(bin->is<IR::Geq>()) i = new IR::DpdkGeqStatement(tmp, left_tmp, right_tmp);
-    else if(bin->is<IR::Grt>()) i = new IR::DpdkGrtStatement(tmp, left_tmp, right_tmp);
-    else if(bin->is<IR::Neq>()) i = new IR::DpdkNeqStatement(tmp, left_tmp, right_tmp);
-    else{
-        std::cerr << bin->node_type_name() << std::endl;
-        BUG("not implemented");
-    }
-    add_instr(i);
-    return false;
-}
-
-bool TreeUnroller::preorder(const IR::MethodCallExpression *method){
-    cstring tmp_name = collector->get_next_tmp();
-    tmp = new IR::PathExpression(IR::ID(tmp_name));
-    auto assignment = new IR::AssignmentStatement(tmp, method);
-    auto convertor = new ConvertStatementToDpdk(refmap, typemap, 0, collector);
-    assignment->apply(*convertor);
-    for(auto i : convertor->get_instr()){
-        add_instr(i);
-    }
-    return false;
-}
-
-bool TreeUnroller::preorder(const IR::Member *member){
-    tmp = nullptr;
-    return false;
-}
-
-bool TreeUnroller::preorder(const IR::PathExpression *path){
-    tmp = nullptr;
-    return false;
-}
-
-bool TreeUnroller::preorder(const IR::Constant *path){
-    tmp = nullptr;
-    return false;
-}
 
 } // namespace DPDK

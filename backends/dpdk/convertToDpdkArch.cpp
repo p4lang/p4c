@@ -338,10 +338,40 @@ const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct* s){
     return s;
 }
 
+IR::IndexedVector<IR::Declaration> *
+StatementUnroll::findDeclarationList(const IR::P4Control *control, const IR::P4Parser *parser){
+    IR::IndexedVector<IR::Declaration> *decls;
+    if(parser) {
+        auto res = decl_map.find(parser);
+        if(res != decl_map.end()){
+            decls = res->second;
+        }
+        else{
+            decls = new IR::IndexedVector<IR::Declaration>;
+            decl_map.emplace(parser, decls);
+        }
+    }
+    else if(control) {
+        auto res = decl_map.find(control);
+        if(res != decl_map.end()){
+            decls = res->second;
+        }
+        else{
+            decls = new IR::IndexedVector<IR::Declaration>;
+            decl_map.emplace(control, decls);            
+        }
+    }
+    return decls;
+}
+
 
 const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a){
     auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
     auto right = a->right;
+    auto control = findOrigCtxt<IR::P4Control>();
+    auto parser = findOrigCtxt<IR::P4Parser>();
+    auto decls = findDeclarationList(control, parser);
+
     if(right->is<IR::MethodCallExpression>()) {
         prune();
         return a;
@@ -359,8 +389,12 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a){
         if(not right_tmp) right_tmp = bin->right;
         for(auto s: left_unroller->stmt)
             code_block->push_back(s);
+        for(auto d: left_unroller->decl)
+            decls->push_back(d);
         for(auto s: right_unroller->stmt)
             code_block->push_back(s);
+        for(auto d: right_unroller->decl)
+            decls->push_back(d);
         prune();
         if(right->is<IR::Add>()){
             a->right = new IR::Add(left_tmp, right_tmp);
@@ -396,6 +430,8 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a){
         const IR::Expression *un_tmp = unroller->root;
         for(auto s: unroller->stmt)
             code_block->push_back(s);
+        for(auto d: unroller->decl)
+            decls->push_back(d);
         if(not un_tmp) un_tmp = un->expr;
         if(auto n = right->to<IR::Neg>()){
             a->right = new IR::Neg(un_tmp);
@@ -430,6 +466,13 @@ const IR::Node *StatementUnroll::postorder(IR::IfStatement *i){
     i->condition->apply(*unroller);
     for(auto i:unroller->stmt)
         code_block->push_back(i);
+
+    auto control = findOrigCtxt<IR::P4Control>();
+    auto parser = findOrigCtxt<IR::P4Parser>();
+    auto decls = findDeclarationList(control, parser);
+
+    for(auto d: unroller->decl)
+        decls->push_back(d);
     if(unroller->root) {
         i->condition = unroller->root;
     }
@@ -442,6 +485,28 @@ const IR::Node *StatementUnroll::preorder(IR::MethodCallStatement *m){
     // prune();    
     return m;
 }
+
+const IR::Node *StatementUnroll::postorder(IR::P4Control *a){
+    auto control = getOriginal();
+    auto res = decl_map.find(control);
+    if(res == decl_map.end()){
+        return a;
+    }
+    for(auto d: *(res->second))
+        a->controlLocals.push_back(d);
+    return a;
+}
+const IR::Node *StatementUnroll::postorder(IR::P4Parser *a){
+    auto parser = getOriginal();
+    auto res = decl_map.find(parser);
+    if(res == decl_map.end()){
+        return a;
+    }
+    for(auto d: *(res->second))
+        a->parserLocals.push_back(d);
+    return a;
+}
+
 
 bool ExpressionUnroll::preorder(const IR::Operation_Unary *u){
     sanity(u->expr);
@@ -479,8 +544,10 @@ bool ExpressionUnroll::preorder(const IR::Operation_Binary *bin){
     const IR::Expression *right_root = root;
     if(not left_root) left_root = bin->left;
     if(not right_root) right_root = bin->right;
+    
     root = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
     const IR::Expression *bin_expr;
+    decl.push_back(new IR::Declaration_Variable(root->path->name, bin->type));
     if(bin->is<IR::Add>()) {
         bin_expr = new IR::Add(left_root, right_root);
     }
@@ -531,6 +598,7 @@ bool ExpressionUnroll::preorder(const IR::MethodCallExpression *m){
         else args->push_back(new IR::Argument(root));
     }
     root = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
+    decl.push_back(new IR::Declaration_Variable(root->path->name, m->type));
     auto new_m = new IR::MethodCallExpression(m->method, args);
     stmt.push_back(new IR::AssignmentStatement(root, new_m));
     return false;
