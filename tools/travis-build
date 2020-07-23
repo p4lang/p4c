@@ -103,8 +103,8 @@ git clone -b stable https://github.com/p4gauntlet/toz3 /p4c/extensions/toz3
 
 # Also pull Gauntlet for translation validation
 git clone -b stable https://github.com/p4gauntlet/p4_tv /gauntlet
-rm -rf /gauntlet/p4c
-ln -s /p4c /gauntlet/p4c
+rm -rf /gauntlet/modules/p4c
+ln -s /p4c /gauntlet/modules/p4c
 
 # Install Gauntlet Python dependencies locally
 # Unfortunately we need Python 3.6, which Xenial does not have
