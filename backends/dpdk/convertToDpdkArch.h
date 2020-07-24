@@ -7,6 +7,7 @@ namespace DPDK {
 
 cstring TypeStruct2Name(const cstring *s);
 bool isSimpleExpression(const IR::Expression *e);
+bool isNonConstantSimpleExpression(const IR::Expression *e);
 
 enum gress_t {
     INGRESS = 0,
@@ -117,22 +118,65 @@ public:
         CollectMetadataHeaderInfo *info
     ): info(info){}
     const IR::Node *preorder(IR::Type_Struct* s) override;
-    // const IR::Node *postorder(IR::P4Program* p) override{std::cout << p << std::endl; return p;}
+};
+
+class DeclarationInjector {
+    std::map<const IR::Node*, IR::IndexedVector<IR::Declaration>*> decl_map;
+public:
+    void collect(const IR::P4Control * control, const IR::P4Parser *parser, const IR::Declaration* decl){
+        IR::IndexedVector<IR::Declaration> *decls;
+        if(parser) {
+            auto res = decl_map.find(parser);
+            if(res != decl_map.end()){
+                decls = res->second;
+            }
+            else{
+                decls = new IR::IndexedVector<IR::Declaration>;
+                decl_map.emplace(parser, decls);
+            }
+        }
+        else if(control) {
+            auto res = decl_map.find(control);
+            if(res != decl_map.end()){
+                decls = res->second;
+            }
+            else{
+                decls = new IR::IndexedVector<IR::Declaration>;
+                decl_map.emplace(control, decls);            
+            }
+        }
+        decls->push_back(decl);
+    }
+    IR::Node* inject_control(const IR::Node *orig, IR::P4Control *control){
+        auto res = decl_map.find(orig);
+        if(res == decl_map.end()){
+            return control;
+        }
+        for(auto d: *(res->second))
+            control->controlLocals.push_back(d);
+        return control;
+    }
+    IR::Node* inject_parser(const IR::Node *orig, IR::P4Parser *parser){
+        auto res = decl_map.find(orig);
+        if(res == decl_map.end()){
+            return parser;
+        }
+        for(auto d: *(res->second))
+            parser->parserLocals.push_back(d);
+        return parser;
+    }
 };
 
 class StatementUnroll: public Transform {
 private:
     DpdkVariableCollector *collector;
-    std::map<const IR::Node*, IR::IndexedVector<IR::Declaration>*> decl_map;
+    DeclarationInjector injector;
 public:
     StatementUnroll(DpdkVariableCollector* collector):collector(collector){}
-    IR::IndexedVector<IR::Declaration> *findDeclarationList(const IR::P4Control *control, const IR::P4Parser *parser);
     const IR::Node *preorder(IR::AssignmentStatement *a) override;
     const IR::Node *postorder(IR::IfStatement *a) override;
     const IR::Node *postorder(IR::P4Control *a) override;
     const IR::Node *postorder(IR::P4Parser *a) override;
-    // const IR::Node *postorder(IR::P4Control *a) override;
-    // const IR::Node *postorder(IR::P4Parser *a) override;
     const IR::Node *preorder(IR::MethodCallStatement *a) override;
 };
 
@@ -164,6 +208,17 @@ public:
     bool preorder(const IR::BoolLiteral *a) override;
 
 };
+
+class ConvertBinaryOperationTo2Params: public Transform {
+    DpdkVariableCollector *collector;
+    DeclarationInjector injector;
+public:
+    ConvertBinaryOperationTo2Params(DpdkVariableCollector *collector): collector(collector){}
+    const IR::Node *postorder(IR::AssignmentStatement *a) override;
+    const IR::Node *postorder(IR::P4Control *a) override;
+    const IR::Node *postorder(IR::P4Parser *a) override;
+};
+
 class printP4: public Inspector {
     public:
     bool preorder(const IR::P4Program *p) override{std::cout << p << std::endl; return false;}
@@ -190,6 +245,10 @@ class RewriteToDpdkArch : public PassManager {
         passes.push_back(new ReplaceMetadataHeaderName(refMap, info));
         passes.push_back(new InjectJumboStruct(info));
         passes.push_back(new StatementUnroll(collector));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
+        passes.push_back(new ConvertBinaryOperationTo2Params(collector));
+        passes.push_back(new printP4());
     }
 };
 
