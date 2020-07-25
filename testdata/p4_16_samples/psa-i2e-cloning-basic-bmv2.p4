@@ -56,19 +56,17 @@ control cIngress(inout headers_t hdr,
 {
     action clone() {
         ostd.clone = true;
-        ostd.clone_session_id = (CloneSessionId_t) (CloneSessionIdUint_t) 3;
+        ostd.clone_session_id = (CloneSessionId_t) (CloneSessionIdUint_t) 8;
     }
 
     apply {
         clone();
 
-        if (hdr.ethernet.dstAddr == 0) {
-            // This action should overwrite the ostd.drop field that
-            // was assigned a value via the send_to_port() action
-            // above, causing this packet to be dropped, _not_ sent
-            // out of port 0.
+        if (hdr.ethernet.dstAddr == (EthernetAddress) 9) {
+            // PROPERTY - dropped packets are still cloned
             ingress_drop(ostd);
         } else {
+            // GENERAL CASE - all other packets are sent to port number from packet
             send_to_port(ostd, (PortId_t) (PortIdUint_t) hdr.ethernet.dstAddr);
         }
     }
@@ -94,6 +92,7 @@ control cEgress(inout headers_t hdr,
                 inout psa_egress_output_metadata_t ostd)
 {
     apply {
+        // mark the clone packets so stf can tell the difference
         if (istd.packet_path == PSA_PacketPath_t.CLONE_I2E) {
             hdr.ethernet.srcAddr = 48w5;
         }
