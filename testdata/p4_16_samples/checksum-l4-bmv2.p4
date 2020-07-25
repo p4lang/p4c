@@ -217,7 +217,6 @@ control vc(inout headers hdr,
                 hdr.tcp.ecn,
                 hdr.tcp.ctrl,
                 hdr.tcp.window,
-                16w0, // checksum
                 hdr.tcp.urgentPtr
             },
             hdr.tcp.checksum, HashAlgorithm.csum16);
@@ -229,8 +228,7 @@ control vc(inout headers hdr,
                 meta.l4Len,
                 hdr.udp.srcPort,
                 hdr.udp.dstPort,
-                hdr.udp.length_,
-                16w0 // checksum
+                hdr.udp.length_
             },
             hdr.udp.checksum, HashAlgorithm.csum16);
     }
@@ -271,7 +269,6 @@ control uc(inout headers hdr,
                 hdr.tcp.ecn,
                 hdr.tcp.ctrl,
                 hdr.tcp.window,
-                16w0, // checksum
                 hdr.tcp.urgentPtr
             },
             hdr.tcp.checksum, HashAlgorithm.csum16);
@@ -283,8 +280,7 @@ control uc(inout headers hdr,
                 meta.l4Len,
                 hdr.udp.srcPort,
                 hdr.udp.dstPort,
-                hdr.udp.length_,
-                16w0 // checksum
+                hdr.udp.length_
             },
             hdr.udp.checksum, HashAlgorithm.csum16);
     }
