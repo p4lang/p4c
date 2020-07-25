@@ -16,7 +16,12 @@ tables {
   action_refs {
     id: 25440736
   }
+  action_refs {
+    id: 21257015
+  }
+  const_default_action_id: 21257015
   size: 1024
+  is_const_table: true
 }
 tables {
   preamble {
@@ -33,7 +38,20 @@ tables {
   action_refs {
     id: 18556685
   }
+  action_refs {
+    id: 21257015
+  }
+  const_default_action_id: 21257015
   size: 1024
+  is_const_table: true
+}
+actions {
+  preamble {
+    id: 21257015
+    name: "NoAction"
+    alias: "NoAction"
+    annotations: "@noWarn(\"unused\")"
+  }
 }
 actions {
   preamble {

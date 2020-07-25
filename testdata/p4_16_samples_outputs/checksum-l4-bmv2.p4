@@ -121,8 +121,13 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         }
         actions = {
             foot;
+            NoAction;
         }
-        default_action = foot;
+        const default_action = NoAction;
+        const entries = {
+                        16w80 : foot();
+        }
+
     }
     table huh {
         key = {
@@ -130,8 +135,13 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         }
         actions = {
             foou;
+            NoAction;
         }
-        default_action = foou;
+        const default_action = NoAction;
+        const entries = {
+                        16w80 : foou();
+        }
+
     }
     apply {
         if (hdr.tcp.isValid()) {
