@@ -421,7 +421,12 @@ control uc(inout headers hdr,
                 hdr.tcp.ecn,
                 hdr.tcp.ctrl,
                 hdr.tcp.window,
-                hdr.tcp.urgentPtr
+                hdr.tcp.urgentPtr,
+                hdr.tcp_opt_ss,
+                hdr.tcp_opt_s,
+                hdr.tcp_opt_sack,
+                hdr.tcp_opt_nop,
+                hdr.tcp_opt_end
             },
             hdr.tcp.checksum, HashAlgorithm.csum16);
         update_checksum_with_payload(hdr.udp.isValid(),
