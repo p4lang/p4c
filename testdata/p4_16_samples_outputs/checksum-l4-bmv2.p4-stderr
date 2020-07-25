@@ -1,3 +1,0 @@
-checksum-l4-bmv2.p4(269): [--Wwarn=uninitialized_use] warning: hdr may not be completely initialized
-        Tcp_option_parser.apply(pkt, hdr);
-                                     ^^^
