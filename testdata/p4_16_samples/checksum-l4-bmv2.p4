@@ -146,15 +146,23 @@ control cIngress(inout headers hdr,
         key = {
             hdr.tcp.dstPort : exact;
         }
-        actions = { foot; }
-        default_action = foot;
+        actions = { foot; NoAction; }
+        const default_action = NoAction;
+
+        const entries = {
+            (16w80) : foot();
+        }
     }
     table huh {
         key = {
             hdr.udp.dstPort : exact;
         }
-        actions = { foou; }
-        default_action = foou;
+        actions = { foou; NoAction; }
+        const default_action = NoAction;
+
+        const entries = {
+            (16w80) : foou();
+        }
     }
     apply {
         if (hdr.tcp.isValid()) {
