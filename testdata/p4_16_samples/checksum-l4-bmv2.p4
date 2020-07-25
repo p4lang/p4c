@@ -110,7 +110,7 @@ parser parserI(packet_in pkt,
                       - 20)));
         verify(hdr.ipv4.version == 4w4, error.IPv4IncorrectVersion);
         verify(hdr.ipv4.ihl >= 4w5, error.IPv4HeaderTooShort);
-        meta.l4Len = hdr.ipv4.totalLen - (bit<16>)(hdr.ipv4.ihl*4);
+        meta.l4Len = hdr.ipv4.totalLen - (bit<16>)(hdr.ipv4.ihl)*4;
         transition select (hdr.ipv4.protocol) {
             6: parse_tcp;
             17: parse_udp;
