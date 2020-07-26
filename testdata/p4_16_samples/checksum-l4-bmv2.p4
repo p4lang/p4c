@@ -1,3 +1,33 @@
+/*
+ * Copyright 2020 MNK Labs & Consulting, LLC.
+ *
+ * https://mnkcg.com
+ *
+ * All Rights Reserved.
+ *
+ * NOTICE: All information contained herein is, and remains the property of
+ * MNK Consulting, LLC. and its suppliers, if any. The intellectual and
+ * technical concepts contained herein are proprietary to MNK Consulting, LLC.
+ * and its suppliers and may be covered by U.S. and Foreign Patents, patents in
+ * process, and are protected by trade secret or copyright law. Dissemination of
+ * this information or reproduction of this material is strictly forbidden unless
+ * prior written permission is obtained from MNK Consulting, LLC.
+ *
+ * No warranty, explicit or implicit is provided, unless granted under a written
+ * agreement with MNK Labs & Consulting, LLC.
+ *
+ * Jointly developed with Andy Fingerhut (ex-Cisco and Barefoot/Intel).
+ *
+ * This program does not support IPv6.  However, IPv6 also uses
+ * a pseudo header for upper-layer protocols (e.g., TCP and UDP).
+ * More details for IPv6 checksum is availale at the link below.
+ *
+ * https://tools.ietf.org/html/rfc8200#page-27
+ *
+ * The program does not support UDP options because none have been specified
+ * in a RFC.
+*/
+
 #include <core.p4>
 #include <v1model.p4>
 
