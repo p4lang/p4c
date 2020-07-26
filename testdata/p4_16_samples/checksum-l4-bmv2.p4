@@ -20,7 +20,7 @@
  *
  * This program does not support IPv6.  However, IPv6 also uses
  * a pseudo header for upper-layer protocols (e.g., TCP and UDP).
- * More details for IPv6 checksum is availale at the link below.
+ * More details for IPv6 checksum is available at the link below.
  *
  * https://tools.ietf.org/html/rfc8200#page-27
  *
