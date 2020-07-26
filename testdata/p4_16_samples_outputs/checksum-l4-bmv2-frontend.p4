@@ -63,7 +63,8 @@ header tcp_upto_data_offset_only_h {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<8>  dataOffset;
+    bit<4>  dataOffset;
+    bit<4>  dontCare;
 }
 
 struct headers {
@@ -119,7 +120,7 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
     }
     state parse_tcp {
         tmp_4 = pkt.lookahead<tcp_upto_data_offset_only_h>();
-        tmp_5 = (bit<9>)tmp_4.dataOffset[7:4] << 2;
+        tmp_5 = (bit<9>)tmp_4.dataOffset << 2;
         tmp_6 = tmp_5 + 9w492;
         tmp_7 = tmp_6 << 3;
         tmp_8 = (bit<32>)tmp_7;

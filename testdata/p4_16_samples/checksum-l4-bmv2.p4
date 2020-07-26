@@ -88,11 +88,11 @@ header tcp_upto_data_offset_only_h {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    // dataOffset in TCP hdr uses 4 bits but set to 8 bits below.
+    // dataOffset in TCP hdr uses 4 bits but needs padding.
     // If 4 bits are used for it, p4c-bm2-ss complains the header
-    // is not a multiple of 8 bits. In the lookahead we use bit Slice
-    // to get 4 bits.
-    bit<8>  dataOffset;
+    // is not a multiple of 8 bits.
+    bit<4>  dataOffset;
+    bit<4>  dontCare;
 }
 
 struct headers {
@@ -166,11 +166,11 @@ parser parserI(packet_in pkt,
         // for it to be less than 5.  There are only TCP options
         // present if the value is at least 6.  The length of the TCP
         // options alone, without the 20-byte base header, is thus ((4
-        // * ihl) - 20) bytes, or 8 times that many bits.
+        // * dataOffset) - 20) bytes, or 8 times that many bits.
         pkt.extract(hdr.tcp,
-	            (bit<32>)
+                    (bit<32>)
                     (8 *
-                     (4 * (bit<9>) (pkt.lookahead<tcp_upto_data_offset_only_h>().dataOffset[7:4])
+                     (4 * (bit<9>) (pkt.lookahead<tcp_upto_data_offset_only_h>().dataOffset)
                       - 20)));
         verify(hdr.tcp.dataOffset >= 4w5, error.TCPHeaderTooShort);
         transition accept;

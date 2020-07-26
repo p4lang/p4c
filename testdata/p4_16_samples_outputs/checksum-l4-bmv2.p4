@@ -64,7 +64,8 @@ header tcp_upto_data_offset_only_h {
     bit<16> dstPort;
     bit<32> seqNo;
     bit<32> ackNo;
-    bit<8>  dataOffset;
+    bit<4>  dataOffset;
+    bit<4>  dontCare;
 }
 
 struct headers {
@@ -105,7 +106,7 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
         }
     }
     state parse_tcp {
-        pkt.extract(hdr.tcp, (bit<32>)(8 * (4 * (bit<9>)(pkt.lookahead<tcp_upto_data_offset_only_h>()).dataOffset[7:4] - 20)));
+        pkt.extract(hdr.tcp, (bit<32>)(8 * (4 * (bit<9>)(pkt.lookahead<tcp_upto_data_offset_only_h>()).dataOffset - 20)));
         verify(hdr.tcp.dataOffset >= 4w5, error.TCPHeaderTooShort);
         transition accept;
     }
