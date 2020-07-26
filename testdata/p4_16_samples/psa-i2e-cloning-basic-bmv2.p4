@@ -66,6 +66,8 @@ control cIngress(inout headers_t hdr,
             // PROPERTY - dropped packets are still cloned
             ingress_drop(ostd);
         } else {
+            // mark the original packet so stf can tell the difference btwn this and clones
+            hdr.ethernet.srcAddr = (EthernetAddress) 51966;
             // GENERAL CASE - all other packets are sent to port number from packet
             send_to_port(ostd, (PortId_t) (PortIdUint_t) hdr.ethernet.dstAddr);
         }

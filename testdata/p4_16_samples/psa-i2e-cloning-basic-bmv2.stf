@@ -14,7 +14,7 @@ mirroring_get 8
 packet 1 000000000002 000000000000 ffff
 
 # original packet sent to its dest
-expect 2 000000000002 000000000000 ffff $
+expect 2 000000000002 00000000cafe ffff $
 
 # clone packets
 expect 6 000000000002 000000000005 ffff $
