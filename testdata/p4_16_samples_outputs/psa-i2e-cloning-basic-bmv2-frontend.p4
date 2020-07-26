@@ -36,13 +36,14 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     }
     @name("cIngress.clone") action clone_1() {
         ostd.clone = true;
-        ostd.clone_session_id = (CloneSessionId_t)16w3;
+        ostd.clone_session_id = (CloneSessionId_t)16w8;
     }
     apply {
         clone_1();
-        if (hdr.ethernet.dstAddr == 48w0) {
+        if (hdr.ethernet.dstAddr == 48w9) {
             ingress_drop(ostd);
         } else {
+            hdr.ethernet.srcAddr = 48w51966;
             send_to_port(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr);
         }
     }
