@@ -519,7 +519,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
     const IR::Expression* msb = getConstant(e->e1);
     const IR::Expression* lsb = getConstant(e->e2);
     if (msb == nullptr || lsb == nullptr) {
-        ::error(ErrorType::ERR_EXPECTED, "%1%: bit indexes must be compile-time constants", e);
+        ::error(ErrorType::ERR_EXPECTED, "%1%: bit indices must be compile-time constants", e);
         return e;
     }
 
