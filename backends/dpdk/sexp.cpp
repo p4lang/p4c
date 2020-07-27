@@ -253,10 +253,7 @@ std::ostream& IR::DpdkExtractStatement::toSexp(std::ostream& out) const {
 
 std::ostream& IR::DpdkJmpStatement::toSexp(std::ostream& out) const {
     LOG1("print jmp");
-    if(!condition)
-        out << "(jmp " << label << ")";
-    else
-        out << "(jmp " << label << " " << DPDK::toStr(condition) << ")";
+    out << "(jmp " << label << ")";
     return out;
 }
 
