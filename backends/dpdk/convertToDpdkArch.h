@@ -1,3 +1,5 @@
+#ifndef BACKENDS_CONVERT_TO_DPDK_ARCH_H_
+#define BACKENDS_CONVERT_TO_DPDK_ARCH_H_ 
 #include <ir/ir.h>
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -248,11 +250,12 @@ public:
 
 class RewriteToDpdkArch : public PassManager {
  public:
+    CollectMetadataHeaderInfo *info;
     RewriteToDpdkArch(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, DpdkVariableCollector *collector) {
         setName("RewriteToDpdkArch");
         auto* evaluator = new P4::EvaluatorPass(refMap, typeMap);
         auto* parsePsa = new ParsePsa();
-        auto info = new CollectMetadataHeaderInfo(&parsePsa->toBlockInfo);
+        info = new CollectMetadataHeaderInfo(&parsePsa->toBlockInfo);
         passes.push_back(evaluator);
         passes.push_back(new VisitFunctor([evaluator, parsePsa]() {
             auto toplevel = evaluator->getToplevelBlock();
@@ -283,4 +286,24 @@ class RewriteToDpdkArch : public PassManager {
     }
 };
 
-}  // namespace DPDK
+class PrependHDotToActionArgs: public Transform {
+    P4::ReferenceMap *refMap;
+public:
+    PrependHDotToActionArgs(P4::ReferenceMap *refMap): refMap(refMap){}
+    const IR::Node *postorder(IR::PathExpression *path){
+        auto declaration = refMap->getDeclaration(path->path);
+        if(auto action = findContext<IR::DpdkAction>()){
+            if(auto p = declaration->to<IR::Parameter>()){    
+                for(auto para: action->para){
+                    if(para->equiv(*p)){
+                        return new IR::Member(new IR::PathExpression(IR::ID("t")), path->path->name);
+                    }
+                }
+            }
+        }
+        return path;
+    }
+};
+
+};  // namespace DPDK
+#endif

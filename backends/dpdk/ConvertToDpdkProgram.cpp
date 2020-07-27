@@ -20,7 +20,7 @@ const IR::DpdkAsmStatement* ConvertToDpdkProgram::createListStatement(cstring na
     return new IR::DpdkListStatement(name, *stmts);
 }
 
-const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
+const IR::DpdkAsmProgram* ConvertToDpdkProgram::create(IR::P4Program *prog) {
     IR::IndexedVector<IR::DpdkHeaderType> headerType;
     for (auto kv : structure.header_types) {
         // std::cout << kv.second << std::endl;
@@ -28,12 +28,15 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
         auto ht = new IR::DpdkHeaderType(h->srcInfo, h->name, h->annotations, h->fields);
         headerType.push_back(ht);
     }
+    // for(auto obj: prog-)
+
     IR::IndexedVector<IR::DpdkStructType> structType;
     for (auto kv : structure.metadata_types) {
         auto s = kv.second;
         auto st = new IR::DpdkStructType(s->srcInfo, s->name, s->annotations, s->fields);
         structType.push_back(st);
     }
+
     IR::IndexedVector<IR::DpdkAsmStatement> statements;
     auto ingress_parser_converter = new ConvertToDpdkParser(refmap, typemap, collector);
     auto egress_parser_converter = new ConvertToDpdkParser(refmap, typemap, collector);
@@ -80,7 +83,7 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create() {
 
 const IR::Node* ConvertToDpdkProgram::preorder(IR::P4Program* prog) {
     // std::cout << prog << std::endl;
-    dpdk_program = create();
+    dpdk_program = create(prog);
     return prog;
 }
 

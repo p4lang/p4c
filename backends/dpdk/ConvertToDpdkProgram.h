@@ -25,7 +25,7 @@
 #include "backends/bmv2/common/programStructure.h"
 #include "backends/bmv2/psa_switch/psaSwitch.h"
 #include "DpdkVariableCollector.h"
-
+#include "convertToDpdkArch.h"
 namespace DPDK
 {
     
@@ -40,19 +40,21 @@ class ConvertToDpdkProgram : public Transform {
     const IR::DpdkAsmProgram* dpdk_program;
     P4::ReferenceMap *refmap;
     P4::TypeMap *typemap;
-
+    CollectMetadataHeaderInfo *info;
  public:
     ConvertToDpdkProgram(
         BMV2::PsaProgramStructure& structure, 
         P4::ReferenceMap *refmap, 
         P4::TypeMap * typemap,
-        DpdkVariableCollector *collector) : 
+        DpdkVariableCollector *collector,
+        CollectMetadataHeaderInfo* info) : 
         structure(structure), 
         refmap(refmap), 
         typemap(typemap),
-        collector(collector) {}
+        collector(collector),
+        info(info) {}
 
-    const IR::DpdkAsmProgram* create();
+    const IR::DpdkAsmProgram* create(IR::P4Program *prog);
     const IR::DpdkAsmStatement* createListStatement(cstring name,
             std::initializer_list<IR::IndexedVector<IR::DpdkAsmStatement>> statements);
     const IR::Node* preorder(IR::P4Program* p) override;
