@@ -248,8 +248,23 @@ public:
 
 };
 
+class PrependHDotToActionArgs: public Transform {
+    P4::ReferenceMap *refMap;
+    std::map<const cstring, IR::IndexedVector<IR::Parameter>*> args_struct_map;
+    BlockInfoMapping *toBlockInfo;
+public:
+
+    PrependHDotToActionArgs(
+        BlockInfoMapping *toBlockInfo,
+        P4::ReferenceMap *refMap
+    ): refMap(refMap), toBlockInfo(toBlockInfo){}
+    const IR::Node *postorder(IR::P4Action* a) override;
+    const IR::Node *postorder(IR::P4Program* s) override;
+    const IR::Node *preorder(IR::PathExpression *path) override;
+};
+
 class RewriteToDpdkArch : public PassManager {
- public:
+public:
     CollectMetadataHeaderInfo *info;
     RewriteToDpdkArch(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, DpdkVariableCollector *collector) {
         setName("RewriteToDpdkArch");
@@ -282,28 +297,12 @@ class RewriteToDpdkArch : public PassManager {
             main->apply(*parsePsa);
             }));
         passes.push_back(new CollectLocalVariableToMetadata(&parsePsa->toBlockInfo, info, refMap));
+        passes.push_back(new PrependHDotToActionArgs(&parsePsa->toBlockInfo, refMap));
         // passes.push_back(new printP4());
     }
 };
 
-class PrependHDotToActionArgs: public Transform {
-    P4::ReferenceMap *refMap;
-public:
-    PrependHDotToActionArgs(P4::ReferenceMap *refMap): refMap(refMap){}
-    const IR::Node *postorder(IR::PathExpression *path){
-        auto declaration = refMap->getDeclaration(path->path);
-        if(auto action = findContext<IR::DpdkAction>()){
-            if(auto p = declaration->to<IR::Parameter>()){    
-                for(auto para: action->para){
-                    if(para->equiv(*p)){
-                        return new IR::Member(new IR::PathExpression(IR::ID("t")), path->path->name);
-                    }
-                }
-            }
-        }
-        return path;
-    }
-};
+
 
 };  // namespace DPDK
 #endif

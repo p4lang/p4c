@@ -89,7 +89,6 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     dpdk_program = convertToDpdk->getDpdkProgram();
     if (!dpdk_program) return;
     PassManager post_code_gen = {
-        new PrependHDotToActionArgs(refMap),
         new DpdkAsmOptimization,
     };
     
