@@ -29,14 +29,18 @@ public:
     const IR::Node *postorder(IR::DpdkListStatement *l) override;
 };
 
+class RemoveUselessJmpAndLabel: public Transform {
+public:
+    const IR::Node *postorder(IR::DpdkListStatement *l) override;
+};
 
 class DpdkAsmOptimization: public PassManager{
 private:
 public:
     DpdkAsmOptimization(){
         passes.push_back(new RemoveRedundantLabel);
-        // auto *r = new PassRepeated{new RemoveRedundantLabel};
-        // passes.push_back(r);
+        auto *r = new PassRepeated{new RemoveUselessJmpAndLabel};
+        passes.push_back(r);
     }
 };
 

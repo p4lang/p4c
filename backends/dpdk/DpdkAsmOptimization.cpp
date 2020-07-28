@@ -40,4 +40,42 @@ const IR::Node *RemoveRedundantLabel::postorder(IR::DpdkListStatement *l){
     l->statements = *new_l;
     return l;
 }
+
+
+const IR::Node *RemoveUselessJmpAndLabel::postorder(IR::DpdkListStatement *l){
+    const IR::DpdkJmpStatement *cache = nullptr;
+    bool changed = false;
+    IR::IndexedVector<IR::DpdkAsmStatement> new_l;
+    for(auto stmt: l->statements){
+        if(auto jmp = stmt->to<IR::DpdkJmpStatement>()){
+            if(cache) new_l.push_back(cache);
+            cache = jmp;
+        }
+        else if(auto label = stmt->to<IR::DpdkLabelStatement>()){
+            if(not cache){
+                new_l.push_back(stmt);
+            }
+            else if(cache->label != label->label){                
+                new_l.push_back(cache);
+                cache = nullptr;
+                new_l.push_back(stmt);
+            }
+            else{
+                cache = nullptr;
+                changed = true;
+            }
+        }
+        else{
+            if(cache) {
+                new_l.push_back(cache);
+                cache = nullptr;
+            }
+            new_l.push_back(stmt);
+        }
+    }
+    if(changed) l->statements = new_l;
+    return l;
+}
+
+
 } // namespace DPDK
