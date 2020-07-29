@@ -359,6 +359,13 @@ std::ostream& IR::DpdkTable::toSexp(std::ostream& out) const {
         add_space(out, 2);
         out << "(action_selector " << DPDK::toStr(psa_implementation->value) << ")" << std::endl;
     }
+    add_space(out, 2);
+    if(auto size = properties->getProperty("size")) {
+        out << "(table_size " << DPDK::toStr(size->value) << ")" << std::endl;
+    }
+    else {
+        out << "(table_size 0)" << std::endl;
+    }
     out << ")";
     return out;
 }
