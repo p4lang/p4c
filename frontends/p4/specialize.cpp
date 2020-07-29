@@ -36,16 +36,14 @@ const IR::Type_Declaration* SpecializationInfo::synthesize(ReferenceMap* refMap)
     auto clone = specialized->getNode()->apply(sp);
     CHECK_NULL(clone);
     const IR::Type_Declaration* result = nullptr;
-    if (clone->is<IR::P4Parser>()) {
-        auto parser = clone->to<IR::P4Parser>();
+    if (auto parser = clone->to<IR::P4Parser>()) {
         auto newtype = new IR::Type_Parser(name, parser->type->annotations,
                                            new IR::TypeParameters(),
                                            parser->getApplyParameters());
         declarations->append(parser->parserLocals);
         result = new IR::P4Parser(name, newtype, new IR::ParameterList(),
                                   *declarations, parser->states);
-    } else if (clone->is<IR::P4Control>()) {
-        auto control = clone->to<IR::P4Control>();
+    } else if (auto control = clone->to<IR::P4Control>()) {
         auto newtype = new IR::Type_Control(name, control->type->annotations,
                                             new IR::TypeParameters(),
                                             control->getApplyParameters());
@@ -80,7 +78,7 @@ void SpecializationMap::addSpecialization(
     const IR::ConstructorCallExpression* invocation, const IR::IContainer* cont,
     const IR::Node* insertion) {
     LOG2("Will specialize " << dbp(invocation) << " of " << dbp(cont->getNode())
-         << " " << cont->getNode() << " inserted after" << insertion);
+         << " " << cont->getNode() << " inserted after " << insertion);
 
     auto spec = new SpecializationInfo(invocation, cont, insertion);
     auto declaration = cont->to<IR::IDeclaration>();
@@ -104,7 +102,7 @@ void SpecializationMap::addSpecialization(
     const IR::Declaration_Instance* invocation, const IR::IContainer* cont,
     const IR::Node* insertion) {
     LOG2("Will specialize " << dbp(invocation) << " of " << dbp(cont->getNode()) <<
-         " inserted after" << insertion);
+         " inserted after " << insertion);
 
     auto spec = new SpecializationInfo(invocation, cont, insertion);
     auto declaration = cont->to<IR::IDeclaration>();
@@ -202,7 +200,7 @@ bool FindSpecializations::noParameters(const IR::IContainer* container) {
 
 const IR::Node* FindSpecializations::findInsertionPoint() const {
     // Find location where the specialization is to be inserted.
-    // This can be before a Parser, Control or a toplevel instance declaration
+    // This can be before a Parser, Control, or a toplevel instance declaration
     const IR::Node* insert = findContext<IR::P4Parser>();
     if (insert != nullptr)
         return insert;

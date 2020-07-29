@@ -22,4 +22,4 @@ control c() {
 control e<T>();
 package top<T>(e<T> e);
 
-top(c()) main;
+top<_>(c()) main;

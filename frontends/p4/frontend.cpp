@@ -150,8 +150,10 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new CheckNamedArgs(),
         new TypeInference(&refMap, &typeMap, false),  // insert casts
         new ValidateMatchAnnotations(&typeMap),
-        new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
         new BindTypeVariables(&refMap, &typeMap),
+        new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
+        new ResolveReferences(&refMap),
+        new TypeInference(&refMap, &typeMap, false),  // more casts may be needed
         new RemoveParserControlFlow(&refMap, &typeMap),
         new StructInitializers(&refMap, &typeMap),
         new SpecializeGenericFunctions(&refMap, &typeMap),

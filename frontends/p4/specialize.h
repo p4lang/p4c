@@ -118,6 +118,13 @@ class FindSpecializations : public Inspector {
     { return noParameters(control); }
     void postorder(const IR::ConstructorCallExpression* expression) override;
     void postorder(const IR::Declaration_Instance* decl) override;
+
+    bool preorder(const IR::Parameter*) override {
+        // This prevents specialization of the default values of
+        // parameters; we don't care to specialize these, we only need
+        // to specialize them if they appear in a call.
+        return false;
+    }
 };
 
 /** @brief Specializes each Parser and Control *with constant constructor
@@ -163,6 +170,9 @@ class Specialize : public Transform {
     { CHECK_NULL(specMap); setName("Specialize"); }
     const IR::Node* postorder(IR::P4Parser* parser) override
     { return instantiate(parser); }
+    // skip packages
+    const IR::Node* preorder(IR::Type_Package* package) override
+    { prune(); return package; }
     const IR::Node* postorder(IR::P4Control* control) override
     { return instantiate(control); }
     const IR::Node* postorder(IR::ConstructorCallExpression* expression) override;

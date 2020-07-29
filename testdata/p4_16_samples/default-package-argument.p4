@@ -19,4 +19,4 @@
  struct hdr_t { }
  struct meta_t { }
 
- P() main;
+ P<_, _>() main;

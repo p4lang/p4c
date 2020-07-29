@@ -32,6 +32,13 @@ class InstanceBase {
 
  protected:
     virtual ~InstanceBase() {}
+
+ public:
+    /// For each callee parameter the corresponding argument
+    ParameterSubstitution          substitution;
+    /// Substitution of the type parameters
+    /// This may not be filled in if we resolved with 'incomplete'
+    TypeVariableSubstitution       typeSubstitution;
 };
 
 /**
@@ -75,26 +82,28 @@ class MethodInstance : public InstanceBase {
     /** Type of called method,
         with instantiated type parameters. */
     const IR::Type_MethodBase* actualMethodType;
-    /// For each callee parameter the corresponding argument
-    ParameterSubstitution substitution;
-
     virtual bool isApply() const { return false; }
 
     /** @param useExpressionType If true, the typeMap can be nullptr,
-        and then mce->type is used.  For some technical reasons
-        neither the refMap or the typeMap are const here.  */
+     *   and then mce->type is used.  For some technical reasons
+     *   neither the refMap or the typeMap are const here.
+     *  @param incomplete        If true we do not expect to have
+     *                           all type arguments.
+     */
     static MethodInstance* resolve(const IR::MethodCallExpression* mce,
                                    DeclarationLookup* refMap, TypeMap* typeMap,
                                    bool useExpressionType = false,
-                                   const Visitor::Context *ctxt = nullptr);
+                                   const Visitor::Context *ctxt = nullptr,
+                                   bool incomplete = false);
     static MethodInstance* resolve(const IR::MethodCallExpression* mce,
                                    DeclarationLookup* refMap, TypeMap* typeMap,
-                                   const Visitor::Context *ctxt)
-    { return resolve(mce, refMap, typeMap, false, ctxt); }
+                                   const Visitor::Context *ctxt,
+                                   bool incomplete = false)
+    { return resolve(mce, refMap, typeMap, false, ctxt, incomplete); }
     static MethodInstance* resolve(const IR::MethodCallStatement* mcs,
                                    DeclarationLookup* refMap, TypeMap* typeMap,
                                    const Visitor::Context *ctxt = nullptr)
-    { return resolve(mcs->methodCall, refMap, typeMap, false, ctxt); }
+    { return resolve(mcs->methodCall, refMap, typeMap, false, ctxt, false); }
     const IR::ParameterList* getOriginalParameters() const
     { return originalMethodType->parameters; }
     const IR::ParameterList* getActualParameters() const
@@ -124,11 +133,13 @@ class ExternMethod final : public MethodInstance {
                  const IR::Type_Extern* originalExternType,
                  const IR::Type_Method* originalMethodType,
                  const IR::Type_Extern* actualExternType,
-                 const IR::Type_Method* actualMethodType) :
+                 const IR::Type_Method* actualMethodType, bool incomplete) :
             MethodInstance(expr, decl, originalMethodType, actualMethodType), method(method),
             originalExternType(originalExternType), actualExternType(actualExternType) {
         CHECK_NULL(method); CHECK_NULL(originalExternType); CHECK_NULL(actualExternType);
         bindParameters();
+        if (!incomplete)
+            typeSubstitution.setBindings(expr, method->type->typeParameters, expr->typeArguments);
     }
     friend class MethodInstance;
  public:
@@ -147,9 +158,13 @@ class ExternFunction final : public MethodInstance {
     ExternFunction(const IR::MethodCallExpression* expr,
                    const IR::Method* method,
                    const IR::Type_Method* originalMethodType,
-                   const IR::Type_Method* actualMethodType) :
-            MethodInstance(expr, nullptr, originalMethodType, actualMethodType), method(method)
-    { CHECK_NULL(method); bindParameters(); }
+                   const IR::Type_Method* actualMethodType, bool incomplete) :
+            MethodInstance(expr, nullptr, originalMethodType, actualMethodType), method(method) {
+        CHECK_NULL(method);
+        bindParameters();
+        if (!incomplete)
+            typeSubstitution.setBindings(expr, method->type->typeParameters, expr->typeArguments);
+    }
     friend class MethodInstance;
  public:
     const IR::Method* method;
@@ -178,9 +193,15 @@ class FunctionCall final : public MethodInstance {
     FunctionCall(const IR::MethodCallExpression* expr,
                  const IR::Function* function,
                  const IR::Type_Method* originalMethodType,
-                 const IR::Type_Method* actualMethodType) :
-            MethodInstance(expr, nullptr, originalMethodType, actualMethodType), function(function)
-    { CHECK_NULL(function); bindParameters(); }
+                 const IR::Type_Method* actualMethodType, bool incomplete) :
+            MethodInstance(expr, nullptr, originalMethodType, actualMethodType),
+            function(function) {
+        CHECK_NULL(function);
+        bindParameters();
+        if (!incomplete)
+            typeSubstitution.setBindings(
+                function, function->type->typeParameters, expr->typeArguments);
+    }
     friend class MethodInstance;
  public:
     const IR::Function* function;
@@ -220,8 +241,6 @@ class ConstructorCall : public InstanceBase {
     explicit ConstructorCall(const IR::ConstructorCallExpression* cce): cce(cce)
     { CHECK_NULL(cce); }
  public:
-    /// For each callee parameter the corresponding argument
-    ParameterSubstitution substitution;
     const IR::ConstructorCallExpression* cce;
     const IR::Vector<IR::Type>*          typeArguments;
     const IR::ParameterList*             constructorParameters;
@@ -261,6 +280,7 @@ class Instantiation : public InstanceBase {
  protected:
     void substitute() {
         substitution.populate(constructorParameters, constructorArguments);
+        typeSubstitution.setBindings(instance, typeParameters, typeArguments);
     }
 
  public:
@@ -273,7 +293,8 @@ class Instantiation : public InstanceBase {
     const IR::Vector<IR::Type>*    typeArguments;
     const IR::Vector<IR::Argument>*constructorArguments;
     const IR::ParameterList*       constructorParameters;
-    ParameterSubstitution          substitution;
+    const IR::TypeParameters*      typeParameters;
+
     static Instantiation* resolve(const IR::Declaration_Instance* instance,
                                   DeclarationLookup* refMap,
                                   TypeMap* typeMap);
@@ -288,6 +309,7 @@ class ExternInstantiation : public Instantiation {
         auto constructor = type->lookupConstructor(constructorArguments);
         BUG_CHECK(constructor, "%1%: could not find constructor", type);
         constructorParameters = constructor->type->parameters;
+        typeParameters = type->typeParameters;
         substitute();
     }
     const IR::Type_Extern* type;
@@ -300,8 +322,10 @@ class PackageInstantiation : public Instantiation {
                          const IR::Type_Package* package) :
             Instantiation(instance, typeArguments), package(package) {
         constructorParameters = package->getConstructorParameters();
-        substitute(); }
-    const IR::Type_Package* package;
+        typeParameters = package->typeParameters;
+        substitute();
+    }
+    const IR::Type_Package*  package;
 };
 
 class ParserInstantiation : public Instantiation {
@@ -310,6 +334,7 @@ class ParserInstantiation : public Instantiation {
                         const IR::Vector<IR::Type>* typeArguments,
                         const IR::P4Parser* parser) :
             Instantiation(instance, typeArguments), parser(parser) {
+        typeParameters = parser->type->typeParameters;
         constructorParameters = parser->getConstructorParameters();
         substitute(); }
     const IR::P4Parser* parser;
@@ -321,6 +346,7 @@ class ControlInstantiation : public Instantiation {
                          const IR::Vector<IR::Type>* typeArguments,
                          const IR::P4Control* control) :
             Instantiation(instance, typeArguments), control(control) {
+        typeParameters = control->type->typeParameters;
         constructorParameters = control->getConstructorParameters();
         substitute(); }
     const IR::P4Control* control;

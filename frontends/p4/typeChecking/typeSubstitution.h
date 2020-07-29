@@ -87,8 +87,6 @@ class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVa
     void simpleCompose(const TypeVariableSubstitution* other);
 };
 
-class TypeNameSubstitution final : public TypeSubstitution<const IR::Type_Name*> {};
-
 }  // namespace P4
 
 #endif /* _TYPECHECKING_TYPESUBSTITUTION_H_ */

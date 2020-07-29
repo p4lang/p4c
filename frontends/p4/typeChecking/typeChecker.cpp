@@ -963,8 +963,7 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
     if (type->is<IR::Type_SpecializedCanonical>())
         simpleType = type->to<IR::Type_SpecializedCanonical>()->substituted;
 
-    if (simpleType->is<IR::Type_Extern>()) {
-        auto et = simpleType->to<IR::Type_Extern>();
+    if (auto et = simpleType->to<IR::Type_Extern>()) {
         setType(orig, type);
         setType(decl, type);
 
@@ -3221,8 +3220,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             return expression;
         setType(result, returnType);
 
-        // Hopefull by now we know enough about the type to use MethodInstance.
-        auto mi = MethodInstance::resolve(result, refMap, typeMap);
+        auto mi = MethodInstance::resolve(result, refMap, typeMap, nullptr, true);
         if (mi->isApply()) {
             auto a = mi->to<ApplyMethod>();
             if (a->isTableApply() && findContext<IR::P4Action>())
@@ -3609,8 +3607,8 @@ const IR::ActionListElement* TypeInference::validateActionInitializer(
     }
 
     SameExpression se(refMap, typeMap);
-    auto callInstance = MethodInstance::resolve(call, refMap, typeMap);
-    auto listInstance = MethodInstance::resolve(actionListCall, refMap, typeMap);
+    auto callInstance = MethodInstance::resolve(call, refMap, typeMap, nullptr, true);
+    auto listInstance = MethodInstance::resolve(actionListCall, refMap, typeMap, nullptr, true);
 
     for (auto param : *listInstance->substitution.getParametersInArgumentOrder()) {
         auto aa = listInstance->substitution.lookup(param);
