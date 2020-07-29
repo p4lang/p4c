@@ -27,8 +27,11 @@ namespace P4 {
 /// Given an assignment like
 /// a = lookahead<T>();
 /// this is transformed into
-/// bit<X> tmp = lookahead<sizeof<T>>();
-/// a = { tmp[f1,f0], tmp[f2, f1+1], ... }
+/// bit<sizeof(T)> tmp = lookahead<bit<sizeof(T)>>();
+/// a.m.setValid();  // for header fields
+/// a.m0 = tmp[f1,f0];
+/// a.m1 = tmp[f2, f1+1];
+/// ...
 class DoExpandLookahead : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
@@ -41,10 +44,10 @@ class DoExpandLookahead : public Transform {
         const IR::PathExpression* tmp;  // temporary used for result
     };
 
-    const IR::Expression* expand(
-        const IR::PathExpression* base, const IR::Type* type, unsigned* offset);
-    void expandSetValid(const IR::Expression* base, const IR::Type* type,
-                        IR::IndexedVector<IR::StatOrDecl>* output);
+    void expand(
+        const IR::PathExpression* bitvector, const IR::Type* type, unsigned* offset,
+        const IR::Expression* destination,
+        IR::IndexedVector<IR::StatOrDecl>* output);
     ExpansionInfo* convertLookahead(const IR::MethodCallExpression* expression);
 
  public:

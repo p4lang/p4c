@@ -43,7 +43,6 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
     state check_p4calc {
         tmp_3 = packet.lookahead<bit<128>>();
         tmp.setValid();
-        tmp.setValid();
         tmp.p = tmp_3[127:120];
         tmp.four = tmp_3[119:112];
         tmp.ver = tmp_3[111:104];
@@ -53,7 +52,6 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         tmp.res = tmp_3[31:0];
         tmp_4 = packet.lookahead<bit<128>>();
         tmp_0.setValid();
-        tmp_0.setValid();
         tmp_0.p = tmp_4[127:120];
         tmp_0.four = tmp_4[119:112];
         tmp_0.ver = tmp_4[111:104];
@@ -62,7 +60,6 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
         tmp_0.operand_b = tmp_4[63:32];
         tmp_0.res = tmp_4[31:0];
         tmp_5 = packet.lookahead<bit<128>>();
-        tmp_1.setValid();
         tmp_1.setValid();
         tmp_1.p = tmp_5[127:120];
         tmp_1.four = tmp_5[119:112];
