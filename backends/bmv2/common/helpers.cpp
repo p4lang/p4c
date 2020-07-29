@@ -19,8 +19,6 @@ limitations under the License.
 namespace BMV2 {
 
 /// constant definition for bmv2
-const cstring TableImplementation::actionProfileName = "action_profile";
-const cstring TableImplementation::actionSelectorName = "action_selector";
 const cstring MatchImplementation::selectorMatchTypeName = "selector";
 const cstring MatchImplementation::rangeMatchTypeName = "range";
 const cstring MatchImplementation::optionalMatchTypeName = "optional";

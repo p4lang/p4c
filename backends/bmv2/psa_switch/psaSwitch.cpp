@@ -203,11 +203,11 @@ void PsaProgramStructure::createActions(ConversionContext* ctxt) {
 }
 
 void PsaProgramStructure::createControls(ConversionContext* ctxt) {
-    auto cvt = new BMV2::ControlConverter(ctxt, "ingress", true);
+    auto cvt = new BMV2::ControlConverter<Standard::Arch::PSA>(ctxt, "ingress", true);
     auto ingress = pipelines.at("ingress");
     ingress->apply(*cvt);
 
-    cvt = new BMV2::ControlConverter(ctxt, "egress", true);
+    cvt = new BMV2::ControlConverter<Standard::Arch::PSA>(ctxt, "egress", true);
     auto egress = pipelines.at("egress");
     egress->apply(*cvt);
 }
@@ -1098,7 +1098,7 @@ void ExternConverter_ActionSelector::convertExternInstance(
     }
     auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
     selector->emplace("algo", algo);
-    auto input = ctxt->selector_check->get_selector_input(
+    auto input = ctxt->get_selector_input(
         c->to<IR::Declaration_Instance>());
     if (input == nullptr) {
         // the selector is never used by any table, we cannot figure out its
