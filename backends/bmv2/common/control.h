@@ -34,11 +34,6 @@ namespace BMV2 {
 
 static constexpr unsigned INVALID_ACTION_ID = 0xffffffff;
 
-#if 0
-template<> class SharedActionSelectorCheck<Standard::Arch::V1MODEL>;
-template<> class SharedActionSelectorCheck<Standard::Arch::PSA>;
-#endif
-
 template<Standard::Arch arch>
 class ControlConverter : public Inspector {
     ConversionContext* ctxt;
@@ -695,8 +690,8 @@ class ControlConverter : public Inspector {
                 return false;
             }
             auto type_extern_name = dcltype->to<IR::Type_Extern>()->name;
-            auto actionProfileName = Standard::ActionProfileTraits<arch>::propertyName();
-            auto actionSelectorName = Standard::ActionSelectorTraits<arch>::propertyName();
+            auto actionProfileName = Standard::ActionProfileTraits<arch>::typeName();
+            auto actionSelectorName = Standard::ActionSelectorTraits<arch>::typeName();
             if (type_extern_name == actionProfileName) {
                 table->emplace("type", "indirect");
             } else if (type_extern_name == actionSelectorName) {
