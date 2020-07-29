@@ -129,7 +129,8 @@ class ControlConverter : public Inspector {
                 auto jk = ctxt->conv->convert(expr);
                 keyelement->emplace("target", jk->to<Util::JsonObject>()->get("value"));
                 if (mask != 0)
-                    keyelement->emplace("mask", stringRepr(mask, ROUNDUP(expr->type->width_bits(), 8)));
+                    keyelement->emplace("mask",
+                            stringRepr(mask, ROUNDUP(expr->type->width_bits(), 8)));
                 else
                     keyelement->emplace("mask", Util::JsonValue::null);
                 tkey->append(keyelement);
@@ -199,7 +200,8 @@ class ControlConverter : public Inspector {
                     auto pe = expr->to<IR::PathExpression>();
                     auto decl = ctxt->refMap->getDeclaration(pe->path, true);
                     if (!decl->is<IR::Declaration_Instance>()) {
-                        ::error(ErrorType::ERR_EXPECTED, "%1%: expected an instance", decl->getNode());
+                        ::error(ErrorType::ERR_EXPECTED,
+                                "%1%: expected an instance", decl->getNode());
                         return result;
                     }
                     cstring ctrname = decl->controlPlaneName();
@@ -422,7 +424,6 @@ class ControlConverter : public Inspector {
     }
     convertTableEntries(table, result);
     return result;
-
     }
     void convertTableEntries(const IR::P4Table *table, Util::JsonObject *jsonTable) {
         auto entriesList = table->getEntries();
@@ -456,9 +457,11 @@ class ControlConverter : public Inspector {
                         key->emplace("key", stringRepr(k->to<IR::Constant>()->value, k8));
                     else if (k->is<IR::BoolLiteral>())
                         // booleans are converted to ints
-                        key->emplace("key", stringRepr(k->to<IR::BoolLiteral>()->value ? 1 : 0, k8));
+                        key->emplace("key",
+                                stringRepr(k->to<IR::BoolLiteral>()->value ? 1 : 0, k8));
                     else
-                        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: unsupported exact key expression", k);
+                        ::error(ErrorType::ERR_UNSUPPORTED,
+                                "%1%: unsupported exact key expression", k);
                 } else if (matchType == corelib.ternaryMatch.name) {
                     if (k->is<IR::Mask>()) {
                         auto km = k->to<IR::Mask>();
@@ -480,8 +483,10 @@ class ControlConverter : public Inspector {
                         key->emplace("key", stringRepr(km->left->to<IR::Constant>()->value, k8));
                         auto trailing_zeros = [](unsigned long n, unsigned long keyWidth)
                             { return n ? __builtin_ctzl(n) : static_cast<int>(keyWidth); };
-                        auto count_ones = [](unsigned long n) { return n ? __builtin_popcountl(n) : 0;};
-                        auto mask = static_cast<unsigned long>(km->right->to<IR::Constant>()->value);
+                        auto count_ones = [](unsigned long n)
+                            { return n ? __builtin_popcountl(n) : 0;};
+                        auto mask =
+                            static_cast<unsigned long>(km->right->to<IR::Constant>()->value);
                         auto len = trailing_zeros(mask, keyWidth);
                         if (len + count_ones(mask) != keyWidth)  // any remaining 0s in the prefix?
                             ::error(ErrorType::ERR_INVALID, "%1%: invalid mask for LPM key", k);
@@ -494,7 +499,8 @@ class ControlConverter : public Inspector {
                         key->emplace("key", stringRepr(0, k8));
                         key->emplace("prefix_length", 0);
                     } else {
-                        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: unsupported LPM key expression", k);
+                        ::error(ErrorType::ERR_UNSUPPORTED,
+                                "%1%: unsupported LPM key expression", k);
                     }
                 } else if (matchType == "range") {
                     if (k->is<IR::Range>()) {
@@ -508,7 +514,8 @@ class ControlConverter : public Inspector {
                         key->emplace("start", stringRepr(0, k8));
                         key->emplace("end", stringRepr((1 << keyWidth)-1, k8));  // 2^N -1
                     } else {
-                        ::error(ErrorType::ERR_UNSUPPORTED, "%1% unsupported range key expression", k);
+                        ::error(ErrorType::ERR_UNSUPPORTED,
+                                "%1% unsupported range key expression", k);
                     }
                 } else if (matchType == "optional") {
                     // Table key fields with match_kind optional with
@@ -597,7 +604,8 @@ class ControlConverter : public Inspector {
         }
 
         if (!implementation->value->is<IR::ExpressionValue>()) {
-            ::error(ErrorType::ERR_EXPECTED, "%1%: expected expression for property", implementation);
+            ::error(ErrorType::ERR_EXPECTED,
+                    "%1%: expected expression for property", implementation);
             return false;
         }
         auto propv = implementation->value->to<IR::ExpressionValue>();
@@ -680,13 +688,15 @@ class ControlConverter : public Inspector {
             auto pathe = propv->expression->to<IR::PathExpression>();
             auto decl = ctxt->refMap->getDeclaration(pathe->path, true);
             if (!decl->is<IR::Declaration_Instance>()) {
-                ::error(ErrorType::ERR_EXPECTED, "%1%: expected a reference to an instance", pathe);
+                ::error(ErrorType::ERR_EXPECTED,
+                        "%1%: expected a reference to an instance", pathe);
                 return false;
             }
             apname = decl->controlPlaneName();
             auto dcltype = ctxt->typeMap->getType(pathe, true);
             if (!dcltype->is<IR::Type_Extern>()) {
-                ::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected type for implementation", dcltype);
+                ::error(ErrorType::ERR_UNEXPECTED,
+                        "%1%: unexpected type for implementation", dcltype);
                 return false;
             }
             auto type_extern_name = dcltype->to<IR::Type_Extern>()->name;
@@ -697,7 +707,8 @@ class ControlConverter : public Inspector {
             } else if (type_extern_name == actionSelectorName) {
                 table->emplace("type", "indirect_ws");
             } else {
-                ::error(ErrorType::ERR_UNEXPECTED, "%1%: unexpected type for implementation", dcltype);
+                ::error(ErrorType::ERR_UNEXPECTED,
+                        "%1%: unexpected type for implementation", dcltype);
                 return false;
             }
             isSimpleTable = false;
@@ -751,7 +762,8 @@ class ControlConverter : public Inspector {
         if (cfg->entryPoint->successors.size() == 0) {
             result->emplace("init_table", Util::JsonValue::null);
         } else {
-            BUG_CHECK(cfg->entryPoint->successors.size() == 1, "Expected 1 start node for %1%", cont);
+            BUG_CHECK(cfg->entryPoint->successors.size() == 1,
+                    "Expected 1 start node for %1%", cont);
             auto start = (*(cfg->entryPoint->successors.edges.begin()))->endpoint;
             result->emplace("init_table", nodeName(start));
         }

@@ -142,8 +142,7 @@ template<> struct RegisterTraits<Arch::PSA> {
 template <Arch arch> struct CounterExtern { };
 template <Arch arch> struct MeterExtern { };
 
-
-}  // Standard
+}  // namespace Standard
 
 namespace Helpers {
 
@@ -243,7 +242,7 @@ template<> struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PSA> >
     static boost::optional<size_t> indexTypeParamIdx() { return 0; }
 };
 
-}  // Helpers
+}  // namespace Helpers
 
 using BlockTypeMap = std::map<const IR::Block*, const IR::Type*>;
 
