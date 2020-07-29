@@ -41,18 +41,21 @@ class ConvertToDpdkProgram : public Transform {
     P4::ReferenceMap *refmap;
     P4::TypeMap *typemap;
     CollectMetadataHeaderInfo *info;
+    std::map<const cstring, IR::IndexedVector<IR::Parameter>*> *args_struct_map;
  public:
     ConvertToDpdkProgram(
         BMV2::PsaProgramStructure& structure, 
         P4::ReferenceMap *refmap, 
         P4::TypeMap * typemap,
         DpdkVariableCollector *collector,
-        CollectMetadataHeaderInfo* info) : 
+        CollectMetadataHeaderInfo* info,
+        std::map<const cstring, IR::IndexedVector<IR::Parameter>*> *args_struct_map) : 
         structure(structure), 
         refmap(refmap), 
         typemap(typemap),
         collector(collector),
-        info(info) {}
+        info(info),
+        args_struct_map(args_struct_map) {}
 
     const IR::DpdkAsmProgram* create(IR::P4Program *prog);
     const IR::DpdkAsmStatement* createListStatement(cstring name,

@@ -28,9 +28,20 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create(IR::P4Program *prog) {
         auto ht = new IR::DpdkHeaderType(h->srcInfo, h->name, h->annotations, h->fields);
         headerType.push_back(ht);
     }
-    // for(auto obj: prog-)
-
     IR::IndexedVector<IR::DpdkStructType> structType;
+    for(auto obj: prog->objects) {
+        if(auto s = obj->to<IR::Type_Struct>()){
+            if(s->name.name == info->local_metadata_type){
+                auto st = new IR::DpdkStructType(s->srcInfo, s->name, s->annotations, s->fields);
+                structType.push_back(st);
+            }
+            else if(args_struct_map->find(s->name.name) != args_struct_map->end()){
+                auto st = new IR::DpdkArgStructType(s->srcInfo, s->name, s->annotations, s->fields);
+                structType.push_back(st);
+            }
+        }
+    }
+
     for (auto kv : structure.metadata_types) {
         auto s = kv.second;
         auto st = new IR::DpdkStructType(s->srcInfo, s->name, s->annotations, s->fields);

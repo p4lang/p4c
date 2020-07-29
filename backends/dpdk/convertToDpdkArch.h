@@ -250,9 +250,9 @@ public:
 
 class PrependHDotToActionArgs: public Transform {
     P4::ReferenceMap *refMap;
-    std::map<const cstring, IR::IndexedVector<IR::Parameter>*> args_struct_map;
     BlockInfoMapping *toBlockInfo;
 public:
+    std::map<const cstring, IR::IndexedVector<IR::Parameter>*> args_struct_map;
 
     PrependHDotToActionArgs(
         BlockInfoMapping *toBlockInfo,
@@ -266,6 +266,7 @@ public:
 class RewriteToDpdkArch : public PassManager {
 public:
     CollectMetadataHeaderInfo *info;
+    std::map<const cstring, IR::IndexedVector<IR::Parameter>*> *args_struct_map;
     RewriteToDpdkArch(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, DpdkVariableCollector *collector) {
         setName("RewriteToDpdkArch");
         auto* evaluator = new P4::EvaluatorPass(refMap, typeMap);
@@ -297,7 +298,9 @@ public:
             main->apply(*parsePsa);
             }));
         passes.push_back(new CollectLocalVariableToMetadata(&parsePsa->toBlockInfo, info, refMap));
-        passes.push_back(new PrependHDotToActionArgs(&parsePsa->toBlockInfo, refMap));
+        auto p = new PrependHDotToActionArgs(&parsePsa->toBlockInfo, refMap);
+        args_struct_map = &p->args_struct_map;
+        passes.push_back(p);
         // passes.push_back(new printP4());
     }
 };
