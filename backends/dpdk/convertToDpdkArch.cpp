@@ -498,7 +498,8 @@ bool ExpressionUnroll::preorder(const IR::Operation_Unary *u){
     }
     root = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
     stmt.push_back(new IR::AssignmentStatement(root, un_expr));
-
+    decl.push_back(new IR::Declaration_Variable(root->path->name, u->type));
+    return false;
 }
 
 bool ExpressionUnroll::preorder(const IR::Operation_Binary *bin){

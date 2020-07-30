@@ -154,8 +154,9 @@ public:
         if(res == decl_map.end()){
             return control;
         }
-        for(auto d: *(res->second))
-            control->controlLocals.push_back(d);
+        // for(auto d: *(res->second))
+            control->controlLocals.prepend(*res->second);
+            // control->controlLocals.push_back(d);
         return control;
     }
     IR::Node* inject_parser(const IR::Node *orig, IR::P4Parser *parser){
@@ -163,8 +164,8 @@ public:
         if(res == decl_map.end()){
             return parser;
         }
-        for(auto d: *(res->second))
-            parser->parserLocals.push_back(d);
+        // for(auto d: *(res->second))
+            parser->parserLocals.prepend(*res->second);
         return parser;
     }
 };

@@ -39,6 +39,10 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create(IR::P4Program *prog) {
                 auto st = new IR::DpdkArgStructType(s->srcInfo, s->name, s->annotations, s->fields);
                 structType.push_back(st);
             }
+            else if(s->name.name == info->header_type) {
+                auto st = new IR::DpdkHeaderStructType(s->srcInfo, s->name, s->annotations, s->fields);
+                structType.push_back(st);
+            }
         }
     }
 

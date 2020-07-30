@@ -182,6 +182,7 @@ std::ostream& IR::DpdkHeaderType::toSexp(std::ostream& out) const {
 
 std::ostream& IR::DpdkStructType::toSexp(std::ostream& out) const {
     if(this->is<IR::DpdkArgStructType>()) out << "(arg_struct " << name << std::endl;
+    else if(this->is<IR::DpdkHeaderStructType>()) out << "(header_struct " << name << std::endl;
     else out << "(struct " << name << std::endl;
     if (fields.empty()) {
         out << "  ()";
@@ -209,12 +210,12 @@ std::ostream& IR::DpdkStructType::toSexp(std::ostream& out) const {
 
 std::ostream& IR::DpdkListStatement::toSexp(std::ostream& out) const {
     out << "(main " << std::endl << "(" << std::endl;
-    out << "  (rx m.standard_metadata_ingress_port)" << std::endl;
+    out << "  (rx m.psa_ingress_input_metadata_ingress_port)" << std::endl;
     for (auto s : statements) {
         out << "  ";
         s->toSexp(out) << std::endl;
     }
-    out << "  (tx m.ostd_egress_port)" << std::endl;
+    out << "  (tx m.psa_ingress_output_metadata_egress_port)" << std::endl;
     out << ")" << std::endl << ")" << std::endl;
     return out;
 }

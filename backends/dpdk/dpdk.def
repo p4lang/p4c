@@ -24,6 +24,11 @@ class DpdkArgStructType: DpdkStructType {
 #nodbprint
 }
 
+class DpdkHeaderStructType: DpdkStructType {
+    std::ostream& toSexp(std::ostream& out) const;
+#nodbprint
+}
+
 class DpdkAsmStatement {
     virtual std::ostream& toSexp(std::ostream& out) const;
 #nodbprint

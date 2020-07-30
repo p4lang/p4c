@@ -25,6 +25,8 @@ limitations under the License.
 #include "convertToDpdkArch.h"
 #include "DpdkVariableCollector.h"
 #include "DpdkAsmOptimization.h"
+#include "elim_typedef.h"
+
 
 namespace DPDK {
 
@@ -46,6 +48,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     DpdkVariableCollector collector;
     auto rewriteToDpdkArch = new DPDK::RewriteToDpdkArch(refMap, typeMap, &collector);
     PassManager simplify = {
+        new P4::EliminateTypedef(refMap, typeMap),
         new P4::ClearTypeMap(typeMap),  // because the user metadata type has changed
         new P4::SynthesizeActions(refMap, typeMap,
                 new BMV2::SkipControls(&structure.non_pipeline_controls)),
