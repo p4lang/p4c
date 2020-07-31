@@ -825,11 +825,6 @@ const IR::Vector<IR::Argument> *
 TypeInference::checkExternConstructor(const IR::Node* errorPosition,
                                       const IR::Type_Extern* ext,
                                       const IR::Vector<IR::Argument> *arguments) {
-    auto tp = ext->getTypeParameters();
-    if (!tp->empty()) {
-        typeError("%1%: Type parameters must be supplied for constructor", errorPosition);
-        return nullptr;
-    }
     auto constructor = ext->lookupConstructor(arguments);
     if (constructor == nullptr) {
         typeError("%1%: type %2% has no matching constructor",
@@ -844,8 +839,7 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
     methodType = cloneWithFreshTypeVariables(methodType)->to<IR::Type_Method>();
     CHECK_NULL(methodType);
 
-    bool changes = false;
-    auto result = new IR::Vector<IR::Argument>();
+    auto args = new IR::Vector<IR::ArgumentInfo>();
     size_t i = 0;
     for (auto pi : *methodType->parameters->getEnumerator()) {
         if (i >= arguments->size()) {
@@ -867,30 +861,24 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
             paramType->is<IR::Type_Package>())
             typeError("%1%: parameter cannot have type %2%", pi, paramType);
 
-        auto tvs = unify(errorPosition, paramType, argType);
-        if (tvs == nullptr) {
-            // error already signalled
-            return nullptr;
-        }
-        if (tvs->isIdentity()) {
-            result->push_back(arg);
-            continue;
-        }
-
-        ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-        auto newArg = cts.convert(arg->expression);
-        if (::errorCount() > 0)
-            return arguments;
-
-        result->push_back(new IR::Argument(arg->srcInfo, arg->name, newArg));
-        setType(newArg, paramType);
-        if (newArg != arg->expression)
-            changes = true;
+        auto argInfo = new IR::ArgumentInfo(arg->srcInfo, arg->expression, true, argType, arg);
+        args->push_back(argInfo);
     }
-    if (changes)
-        return result;
-    else
-        return arguments;
+
+    auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R")));
+    auto callType = new IR::Type_MethodCall(new IR::Vector<IR::Type>(),
+                                            rettype, args);
+    TypeConstraints constraints(typeMap->getSubstitutions());
+    constraints.addEqualityConstraint(mt, callType);
+    auto tvs = constraints.solve(errorPosition);
+    BUG_CHECK(tvs != nullptr || ::errorCount(), "Null substitution");
+    if (tvs == nullptr)
+        return nullptr;
+    addSubstitutions(tvs);
+
+    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+    auto newArgs = cts.convert(arguments);
+    return newArgs;
 }
 
 // Return true on success
@@ -1317,26 +1305,34 @@ const IR::Node* TypeInference::postorder(IR::P4ValueSet* decl) {
 
 const IR::Node* TypeInference::postorder(IR::Type_Extern* type) {
     if (done()) return type;
-    auto canon = setTypeType(type);
-    if (canon != nullptr) {
-        auto te = canon->to<IR::Type_Extern>();
-        CHECK_NULL(te);
-        for (auto method : te->methods) {
-            if (method->name == type->name) {  // constructor
+    setTypeType(type);
+    return type;
+}
+
+const IR::Node* TypeInference::postorder(IR::Type_Method* type) {
+    auto methodType = type;
+    if (auto ext = findContext<IR::Type_Extern>()) {
+        auto extName = ext->name.name;
+        if (auto method = findContext<IR::Method>()) {
+            auto name = method->name.name;
+            if (name == extName) {
+                // This is a constructor.
                 if (method->type->typeParameters != nullptr &&
                     method->type->typeParameters->size() > 0) {
                     typeError("%1%: Constructors cannot have type parameters",
                               method->type->typeParameters);
                     return type;
                 }
+                // For constructors we add the type variables of the
+                // enclosing extern as type parameters.  Given
+                // extern e<E> { e(); }
+                // the type of method e is in fact e<T>();
+                methodType = new IR::Type_Method(
+                    ext->typeParameters, type->returnType, type->parameters);
             }
         }
     }
-    return type;
-}
-
-const IR::Node* TypeInference::postorder(IR::Type_Method* type) {
-    (void)setTypeType(type);
+    (void)setTypeType(methodType);
     return type;
 }
 
