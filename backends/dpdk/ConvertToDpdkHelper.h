@@ -35,16 +35,19 @@ class ConvertStatementToDpdk : public Inspector {
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     P4::ReferenceMap *refmap;
     P4::TypeMap *typemap;
+    std::map<const IR::Declaration_Instance *, cstring> *csum_map;
  public:
     ConvertStatementToDpdk(
         P4::ReferenceMap *refmap,
         P4::TypeMap *typemap,
         int next_label_id,
-        DpdkVariableCollector *collector):
+        DpdkVariableCollector *collector,
+        std::map<const IR::Declaration_Instance *, cstring> *csum_map):
         refmap(refmap),
         typemap(typemap),
         next_label_id(next_label_id),
-        collector(collector){}
+        collector(collector),
+        csum_map(csum_map){}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() { return instructions; }
 
     bool preorder(const IR::AssignmentStatement* a) override;

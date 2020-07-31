@@ -80,7 +80,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     if (!main) return;  // no main
     main->apply(*parsePsaArch);
     program = toplevel->getProgram();
-    auto convertToDpdk = new ConvertToDpdkProgram(structure, refMap, typeMap, &collector, rewriteToDpdkArch->info, rewriteToDpdkArch->args_struct_map);
+    auto convertToDpdk = new ConvertToDpdkProgram(structure, refMap, typeMap, &collector, rewriteToDpdkArch);
     PassManager toAsm = {
         new BMV2::DiscoverStructure(&structure),
         new BMV2::InspectPsaProgram(refMap, typeMap, &structure),

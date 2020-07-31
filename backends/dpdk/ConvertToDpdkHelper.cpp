@@ -64,7 +64,12 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement* a){
             }
             else if(e->originalExternType->getName().name == "InternetChecksum"){
                 if(e->method->getName().name == "get"){
-                    i = new IR::DpdkGetChecksumStatement(left, e->object->getName());
+                    auto res = csum_map->find(e->object->to<IR::Declaration_Instance>());
+                    cstring intermediate;
+                    if(res != csum_map->end()){
+                        intermediate = res->second;
+                    }
+                    i = new IR::DpdkGetChecksumStatement(left, e->object->getName(), intermediate);
                 }
             }
             else if(e->originalExternType->getName().name == "Register"){
@@ -162,11 +167,19 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement* s){
         // Checksum function call
         if(a->originalExternType->getName().name == "InternetChecksum"){
             if(a->method->getName().name == "add") {
+                auto res = csum_map->find(a->object->to<IR::Declaration_Instance>());
+                cstring intermediate;
+                if(res != csum_map->end()){
+                    intermediate = res->second;
+                }
+                else {
+                    BUG("checksum map does not collect all checksum def.");
+                }
                 auto args = a->expr->arguments;
                 const IR::Argument *arg = (*args)[0];
                 if(auto l = arg->expression->to<IR::ListExpression>()){
                     for(auto field : l->components){
-                        add_instr(new IR::DpdkChecksumAddStatement(a->object->getName(), field));
+                        add_instr(new IR::DpdkChecksumAddStatement(a->object->getName(), intermediate, field));
                     }
                 }
                 else ::error("The argument of InternetCheckSum.add is not a list.");

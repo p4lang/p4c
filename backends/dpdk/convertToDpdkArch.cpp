@@ -638,39 +638,38 @@ const IR::Node *ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStateme
                 std::cerr << r->left->node_type_name() << std::endl;
                 BUG("Confronting a expression that can be simplified to become a constant.");
             }
-            auto tmp1 = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
-            auto tmp2 = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
-            injector.collect(control, parser, new IR::Declaration_Variable(tmp1->path->name, src1->type));
-            injector.collect(control, parser, new IR::Declaration_Variable(tmp2->path->name, r->type));
-            code_block.push_back(new IR::AssignmentStatement(tmp1, src1));
+            auto tmp = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
+            injector.collect(control, parser, new IR::Declaration_Variable(tmp->path->name, src1->type));
+            // injector.collect(control, parser, new IR::Declaration_Variable(tmp->path->name, r->type));
+            code_block.push_back(new IR::AssignmentStatement(tmp, src1));
             IR::Operation_Binary *expr;
             if(right->is<IR::Add>()){
-                expr = new IR::Add(tmp1, src2);
+                expr = new IR::Add(tmp, src2);
             }
             else if(right->is<IR::Sub>()){
-                expr = new IR::Sub(tmp1, src2);
+                expr = new IR::Sub(tmp, src2);
             }
             else if(right->is<IR::Shl>()){
-                expr = new IR::Shl(tmp1, src2);
+                expr = new IR::Shl(tmp, src2);
             }
             else if(right->is<IR::Shr>()){
-                expr = new IR::Shr(tmp1, src2);
+                expr = new IR::Shr(tmp, src2);
             }
             else if(right->is<IR::Equ>()){
-                expr = new IR::Equ(tmp1, src2);
+                expr = new IR::Equ(tmp, src2);
             }
             else if(right->is<IR::LAnd>()){
-                expr = new IR::LAnd(tmp1, src2);
+                expr = new IR::LAnd(tmp, src2);
             }
             else if(right->is<IR::Leq>()){
-                expr = new IR::Leq(tmp1, src2);
+                expr = new IR::Leq(tmp, src2);
             }
             else {
                 std::cerr << right->node_type_name() << std::endl;
                 BUG("not implemented.");
             }
-            code_block.push_back(new IR::AssignmentStatement(tmp2, expr));
-            code_block.push_back(new IR::AssignmentStatement(left, tmp2));
+            code_block.push_back(new IR::AssignmentStatement(tmp, expr));
+            code_block.push_back(new IR::AssignmentStatement(left, tmp));
             return new IR::BlockStatement(code_block);
         }
     }

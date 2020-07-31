@@ -76,7 +76,6 @@ class ParsePsa : public Inspector {
     void parseIngressPipeline(const IR::PackageBlock* block);
     void parseEgressPipeline(const IR::PackageBlock* block);
     bool preorder(const IR::PackageBlock* block) override;
-    // bool preorder(const IR::Type_Struct* s) override;
 
 
  public:
@@ -264,10 +263,60 @@ public:
     const IR::Node *preorder(IR::PathExpression *path) override;
 };
 
+
+class CollectInternetChecksumInstance: public Inspector {
+    std::map<const IR::Declaration_Instance *, cstring> *csum_map;
+    int index = 0;
+public:
+    CollectInternetChecksumInstance(std::map<const IR::Declaration_Instance *, cstring> *csum_map): csum_map(csum_map){}
+    bool preorder(const IR::Declaration_Instance *d) override{
+        if(d->type->is<IR::Type_Name>()) {
+            if(d->type->to<IR::Type_Name>()->path->name.name == "InternetChecksum"){
+                if(findContext<IR::P4Control>() or findContext<IR::P4Parser>()){
+                    std::ostringstream s;
+                    s << "_internet_checksum_intermediate_value_" << index++;
+                    csum_map->emplace(d, s.str());
+                }
+            }
+        }
+        return false;
+    }
+};
+
+class InjectInternetChecksumIntermediateValue: public Transform {
+    std::map<const IR::Declaration_Instance *, cstring> *csum_map;
+    CollectMetadataHeaderInfo *info;
+public:
+    InjectInternetChecksumIntermediateValue(
+        CollectMetadataHeaderInfo *info,
+        std::map<const IR::Declaration_Instance *, cstring> *csum_map
+    ): info(info), csum_map(csum_map){}
+    const IR::Node *postorder(IR::Type_Struct *s) override{
+        if(s->name.name == info->local_metadata_type) {
+            for(auto kv : *csum_map) {
+                s->fields.push_back(new IR::StructField(IR::ID(kv.second), new IR::Type_Bits(16, false)));
+            }
+        }
+        return s;
+    }
+};
+
+class ConvertInternetChecksum: public PassManager {
+public:
+    std::map<const IR::Declaration_Instance *, cstring> csum_map;
+    ConvertInternetChecksum(CollectMetadataHeaderInfo *info){
+        passes.push_back(new CollectInternetChecksumInstance(&csum_map));
+        passes.push_back(new InjectInternetChecksumIntermediateValue(info, &csum_map));
+    }
+};
+
+
+
 class RewriteToDpdkArch : public PassManager {
 public:
     CollectMetadataHeaderInfo *info;
     std::map<const cstring, IR::IndexedVector<IR::Parameter>*> *args_struct_map;
+    std::map<const IR::Declaration_Instance *, cstring> *csum_map;
     RewriteToDpdkArch(P4::ReferenceMap* refMap, P4::TypeMap* typeMap, DpdkVariableCollector *collector) {
         setName("RewriteToDpdkArch");
         auto* evaluator = new P4::EvaluatorPass(refMap, typeMap);
@@ -288,7 +337,7 @@ public:
         passes.push_back(new StatementUnroll(collector));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
-        // passes.push_back(new ConvertBinaryOperationTo2Params(collector));
+        passes.push_back(new ConvertBinaryOperationTo2Params(collector));
         parsePsa = new ParsePsa();
         passes.push_back(evaluator);
         passes.push_back(new VisitFunctor([evaluator, parsePsa]() {
@@ -299,6 +348,9 @@ public:
             main->apply(*parsePsa);
             }));
         passes.push_back(new CollectLocalVariableToMetadata(&parsePsa->toBlockInfo, info, refMap));
+        auto checksum_convertor = new ConvertInternetChecksum(info);
+        csum_map = &checksum_convertor->csum_map;
+        passes.push_back(checksum_convertor);
         auto p = new PrependHDotToActionArgs(&parsePsa->toBlockInfo, refMap);
         args_struct_map = &p->args_struct_map;
         passes.push_back(p);

@@ -42,20 +42,22 @@ class ConvertToDpdkProgram : public Transform {
     P4::TypeMap *typemap;
     CollectMetadataHeaderInfo *info;
     std::map<const cstring, IR::IndexedVector<IR::Parameter>*> *args_struct_map;
+    std::map<const IR::Declaration_Instance *, cstring> *csum_map;
  public:
     ConvertToDpdkProgram(
         BMV2::PsaProgramStructure& structure, 
         P4::ReferenceMap *refmap, 
         P4::TypeMap * typemap,
         DpdkVariableCollector *collector,
-        CollectMetadataHeaderInfo* info,
-        std::map<const cstring, IR::IndexedVector<IR::Parameter>*> *args_struct_map) : 
+        DPDK::RewriteToDpdkArch *dpdkarch) : 
         structure(structure), 
         refmap(refmap), 
         typemap(typemap),
-        collector(collector),
-        info(info),
-        args_struct_map(args_struct_map) {}
+        collector(collector) {
+            info = dpdkarch->info;
+            args_struct_map = dpdkarch->args_struct_map;
+            csum_map = dpdkarch->csum_map;
+        }
 
     const IR::DpdkAsmProgram* create(IR::P4Program *prog);
     const IR::DpdkAsmStatement* createListStatement(cstring name,
@@ -69,8 +71,17 @@ class ConvertToDpdkParser : public Inspector {
     P4::ReferenceMap *refmap;
     P4::TypeMap *typemap;
     DpdkVariableCollector *collector;
+    std::map<const IR::Declaration_Instance *, cstring> *csum_map;
  public:
-    ConvertToDpdkParser(P4::ReferenceMap *refmap, P4::TypeMap *typemap, DpdkVariableCollector *collector): refmap(refmap), typemap(typemap), collector(collector) {}
+    ConvertToDpdkParser(
+        P4::ReferenceMap *refmap, 
+        P4::TypeMap *typemap, 
+        DpdkVariableCollector *collector,
+        std::map<const IR::Declaration_Instance *, cstring> *csum_map
+    ):  refmap(refmap), 
+        typemap(typemap),
+        collector(collector),
+        csum_map(csum_map) {}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() { return instructions; }
     bool preorder(const IR::P4Parser* a) override;
     bool preorder(const IR::ParserState* s) override;
@@ -85,8 +96,17 @@ class ConvertToDpdkControl : public Inspector {
     IR::IndexedVector<IR::DpdkAction> actions;
     P4::ReferenceMap *refmap;
     P4::TypeMap *typemap;
+    std::map<const IR::Declaration_Instance *, cstring> *csum_map;
  public:
-    ConvertToDpdkControl(P4::ReferenceMap *refmap, P4::TypeMap *typemap, DpdkVariableCollector *collector): refmap(refmap), typemap(typemap), collector(collector) {}
+    ConvertToDpdkControl(
+        P4::ReferenceMap *refmap, 
+        P4::TypeMap *typemap, 
+        DpdkVariableCollector *collector,
+        std::map<const IR::Declaration_Instance *, cstring> *csum_map
+    ):  refmap(refmap), 
+        typemap(typemap), 
+        collector(collector),
+        csum_map(csum_map) {}
 
     IR::IndexedVector<IR::DpdkTable>& getTables() { return tables; }
     IR::IndexedVector<IR::DpdkAction>& getActions() { return actions; }

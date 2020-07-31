@@ -226,7 +226,9 @@ std::ostream& IR::DpdkMovStatement::toSexp(std::ostream& out) const {
 }
 
 std::ostream& IR::DpdkAddStatement::toSexp(std::ostream& out) const {
-    out << "(add " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
+    // out << "(add " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
+
+    out << "(add " << DPDK::toStr(dst) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
 
@@ -392,7 +394,7 @@ std::ostream& IR::DpdkAction::toSexp(std::ostream& out) const {
 }
 
 std::ostream& IR::DpdkChecksumAddStatement::toSexp(std::ostream& out) const{
-    out << "(csum_add " << csum << " " << DPDK::toStr(field) << ")";
+    out << "(csum_add " << "m." << intermediate_value << " " << DPDK::toStr(field) << ")";
     return out;
 }
 
@@ -416,7 +418,7 @@ std::ostream& IR::DpdkValidateStatement::toSexp(std::ostream& out) const{
 }
 
 std::ostream& IR::DpdkGetChecksumStatement::toSexp(std::ostream& out) const{
-    out << "(csum_get " << DPDK::toStr(dst) << " " << checksum << ")";
+    out << "(mov " << DPDK::toStr(dst) << " " << "m." << intermediate_value << ")";
     return out;
 }
 
