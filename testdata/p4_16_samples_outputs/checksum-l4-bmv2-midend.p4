@@ -100,7 +100,6 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
     state parse_ipv4 {
         tmp_9 = pkt.lookahead<bit<8>>();
         tmp.setValid();
-        tmp.setValid();
         tmp.version = tmp_9[7:4];
         tmp.ihl = tmp_9[3:0];
         pkt.extract<ipv4_t>(hdr.ipv4, (bit<32>)(((bit<9>)tmp_9[3:0] << 2) + 9w492 << 3));
@@ -115,7 +114,6 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
     }
     state parse_tcp {
         tmp_10 = pkt.lookahead<bit<104>>();
-        tmp_4.setValid();
         tmp_4.setValid();
         tmp_4.srcPort = tmp_10[103:88];
         tmp_4.dstPort = tmp_10[87:72];
