@@ -274,7 +274,7 @@ public:
             if(d->type->to<IR::Type_Name>()->path->name.name == "InternetChecksum"){
                 if(findContext<IR::P4Control>() or findContext<IR::P4Parser>()){
                     std::ostringstream s;
-                    s << "_internet_checksum_intermediate_value_" << index++;
+                    s << "_checksum_state_" << index++;
                     csum_map->emplace(d, s.str());
                 }
             }

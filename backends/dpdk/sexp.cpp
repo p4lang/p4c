@@ -191,10 +191,18 @@ std::ostream& IR::DpdkStructType::toSexp(std::ostream& out) const {
         out << "  (field " << (*it)->name;
         if (auto t = (*it)->type->to<IR::Type_Bits>())
             out << " (bit " << t->width_bits() << "))";
-        else if (auto t = (*it)->type->to<IR::Type_Name>())
-            out << " " << t->path << ")";
-        else if(auto t = (*it)->type->to<IR::Type_Error>())
-            out << " " << t->error << ")";
+        else if (auto t = (*it)->type->to<IR::Type_Name>()){
+            if(t->path->name == "error"){
+                out << " (bit 8))";
+            }
+            else {
+                out << " " << t->path << ")";
+            }
+        }
+        else if(auto t = (*it)->type->to<IR::Type_Error>()){
+            out << " (bit 8))";
+        }
+            // out << " " << t->error << ")";
         else if(auto t = (*it)->type->to<IR::Type_Boolean>())
             out << " bool)";
         else{
