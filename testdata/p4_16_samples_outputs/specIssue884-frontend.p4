@@ -33,7 +33,7 @@ struct meta_t {
 
 control Ingress(inout headers_t hdr, inout meta_t meta) {
     @name("Ingress.hash1") Hash<bit<32>>(algo = HashAlgorithm_t.CRC32) hash1_0;
-    @name("Ingress.tmp") CRCPolynomial<bit<32>>(coeff = 32w0x107) tmp;
+    @name("Ingress.tmp") CRCPolynomial<bit<16>>(coeff = 16w0x107) tmp;
     @name("Ingress.hash2") Hash<bit<32>>(poly = tmp) hash2_0;
     @name("Ingress.hamming") LCGMatrix<bit<8>, bit<10>>(8w4, 10w7, "1000100
          0100011
