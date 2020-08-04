@@ -402,7 +402,7 @@ std::ostream& IR::DpdkAction::toSexp(std::ostream& out) const {
 }
 
 std::ostream& IR::DpdkChecksumAddStatement::toSexp(std::ostream& out) const{
-    out << "(csum_add " << "m." << intermediate_value << " " << DPDK::toStr(field) << ")";
+    out << "(csum_add " << "h.checksum_intermediate." << intermediate_value << " " << DPDK::toStr(field) << ")";
     return out;
 }
 

@@ -149,8 +149,7 @@ control ingress(inout headers_t headers, inout local_metadata_t local_metadata1,
     }
 
     apply {
-        if(a == 1)
-            vxlan.apply();
+        vxlan.apply();
     }
 }
 

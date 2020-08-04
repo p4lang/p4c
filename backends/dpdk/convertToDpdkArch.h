@@ -291,15 +291,37 @@ public:
         CollectMetadataHeaderInfo *info,
         std::map<const IR::Declaration_Instance *, cstring> *csum_map
     ): info(info), csum_map(csum_map){}
-    const IR::Node *postorder(IR::Type_Struct *s) override{
-        if(s->name.name == info->local_metadata_type) {
-            for(auto kv : *csum_map) {
-                s->fields.push_back(new IR::StructField(IR::ID(kv.second), new IR::Type_Bits(16, false)));
+    
+    const IR::Node *postorder(IR::P4Program *p) override {
+        auto new_objs = new IR::Vector<IR::Node>;
+        bool inserted = false;
+        for(auto obj: p->objects){
+            if(auto h = obj->to<IR::Type_Header>() and not inserted){
+                inserted = true;
+                if(csum_map->size() > 0){
+                    auto fields = new IR::IndexedVector<IR::StructField>;
+                    for(auto kv :*csum_map){
+                        fields->push_back(new IR::StructField(IR::ID(kv.second), new IR::Type_Bits(16, false)));
+                    }
+                    new_objs->push_back(new IR::Type_Header(IR::ID("checksum_intermediate_t"), *fields));
+                }
             }
+            new_objs->push_back(obj);
+        }
+        p->objects = *new_objs;
+        return p;
+    }
+
+    const IR::Node *postorder(IR::Type_Struct *s) override{
+        if(s->name.name == info->header_type) {
+            if(csum_map->size() > 0)
+                s->fields.push_back(new IR::StructField(IR::ID("checksum_intermediate"), new IR::Type_Name(IR::ID("checksum_intermediate_t"))));
         }
         return s;
     }
 };
+
+
 
 class ConvertInternetChecksum: public PassManager {
 public:
@@ -349,12 +371,12 @@ public:
             }));
         passes.push_back(new CollectLocalVariableToMetadata(&parsePsa->toBlockInfo, info, refMap));
         auto checksum_convertor = new ConvertInternetChecksum(info);
-        csum_map = &checksum_convertor->csum_map;
         passes.push_back(checksum_convertor);
+        csum_map = &checksum_convertor->csum_map;
+        passes.push_back(new printP4());
         auto p = new PrependHDotToActionArgs(&parsePsa->toBlockInfo, refMap);
         args_struct_map = &p->args_struct_map;
         passes.push_back(p);
-        // passes.push_back(new printP4());
     }
 };
 
