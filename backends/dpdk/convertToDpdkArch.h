@@ -274,7 +274,7 @@ public:
             if(d->type->to<IR::Type_Name>()->path->name.name == "InternetChecksum"){
                 if(findContext<IR::P4Control>() or findContext<IR::P4Parser>()){
                     std::ostringstream s;
-                    s << "_checksum_state_" << index++;
+                    s << "state_" << index++;
                     csum_map->emplace(d, s.str());
                 }
             }
@@ -303,7 +303,7 @@ public:
                     for(auto kv :*csum_map){
                         fields->push_back(new IR::StructField(IR::ID(kv.second), new IR::Type_Bits(16, false)));
                     }
-                    new_objs->push_back(new IR::Type_Header(IR::ID("checksum_intermediate_t"), *fields));
+                    new_objs->push_back(new IR::Type_Header(IR::ID("cksum_state_t"), *fields));
                 }
             }
             new_objs->push_back(obj);
@@ -315,7 +315,7 @@ public:
     const IR::Node *postorder(IR::Type_Struct *s) override{
         if(s->name.name == info->header_type) {
             if(csum_map->size() > 0)
-                s->fields.push_back(new IR::StructField(IR::ID("checksum_intermediate"), new IR::Type_Name(IR::ID("checksum_intermediate_t"))));
+                s->fields.push_back(new IR::StructField(IR::ID("cksum_state"), new IR::Type_Name(IR::ID("cksum_state_t"))));
         }
         return s;
     }
@@ -373,10 +373,10 @@ public:
         auto checksum_convertor = new ConvertInternetChecksum(info);
         passes.push_back(checksum_convertor);
         csum_map = &checksum_convertor->csum_map;
-        passes.push_back(new printP4());
         auto p = new PrependHDotToActionArgs(&parsePsa->toBlockInfo, refMap);
         args_struct_map = &p->args_struct_map;
         passes.push_back(p);
+        // passes.push_back(new printP4());
     }
 };
 

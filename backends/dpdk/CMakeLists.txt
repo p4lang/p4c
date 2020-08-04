@@ -13,7 +13,7 @@
 # limitations under the License.
 
 set(P4C_DPDK_SOURCES
-    ../bmv2/psa_switch/midend.cpp
+    midend.cpp
     ../bmv2/common/helpers.cpp
     ../bmv2/common/JsonObjects.cpp
     ../bmv2/common/action.cpp
