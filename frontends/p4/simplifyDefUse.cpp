@@ -467,6 +467,16 @@ class FindUninitialized : public Inspector {
             }
         }
 
+        // The effect of copy-in: in arguments are read
+        LOG3("Summarizing call effect on in arguments; defs are " <<
+             getCurrentDefinitions());
+        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+            auto expr = mi->substitution.lookup(p);
+            if (p->direction != IR::Direction::Out) {
+                visit(expr);
+            }
+        }
+
         // Symbolically call some methods (actions and tables, extern methods)
         std::vector <const IR::IDeclaration *> callee;
         if (auto ac = mi->to<ActionCall>()) {
@@ -477,32 +487,30 @@ class FindUninitialized : public Inspector {
                 auto table = am->object->to<IR::P4Table>();
                 callee.push_back(table);
             }
-            // skip control apply calls; we summarize their
-            // effects by assuming they write all out parameters
-            // and read all in parameters
         } else if (auto em = mi->to<ExternMethod>()) {
             LOG4("##call to extern " << expression);
             callee = em->mayCall(); }
+
+        // We skip control and function apply calls, since we can
+        // summarize their effects by assuming they write all out
+        // parameters and read all in parameters and have no other
+        // side effects.
+
         if (!callee.empty()) {
-            LOG3("Analyzing " << callee);
+            LOG3("Analyzing " << callee << IndentCtl::indent);
             ProgramPoint pt(context, expression);
             FindUninitialized fu(this, pt);
             for (auto c : callee)
                 (void)c->getNode()->apply(fu);
         }
-
-        LOG3("Summarizing call effect on arguments at " << currentPoint);
         for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
             auto expr = mi->substitution.lookup(p);
-            if (p->direction == IR::Direction::Out) {
-                // out parameters are not read; they behave as if they are on
-                // the LHS of an assignment
+            if (p->direction == IR::Direction::Out ||
+                p->direction == IR::Direction::InOut) {
                 bool save = lhs;
                 lhs = true;
                 visit(expr);
                 lhs = save;
-            } else {
-                visit(expr);
             }
         }
         reads(expression, LocationSet::empty);
