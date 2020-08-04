@@ -467,8 +467,7 @@ class FindUninitialized : public Inspector {
             }
         }
 
-        // Symbolically call some methods (actions and tables, extern methods)
-        // The effect of copy-in: in arguments are copied
+        // The effect of copy-in: in arguments are read
         LOG3("Summarizing call effect on in arguments; defs are " <<
              getCurrentDefinitions());
         for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
@@ -478,6 +477,7 @@ class FindUninitialized : public Inspector {
             }
         }
 
+        // Symbolically call some methods (actions and tables, extern methods)
         std::vector <const IR::IDeclaration *> callee;
         if (auto ac = mi->to<ActionCall>()) {
             callee.push_back(ac->action);
@@ -500,40 +500,19 @@ class FindUninitialized : public Inspector {
             LOG3("Analyzing " << callee << IndentCtl::indent);
             ProgramPoint pt(context, expression);
             FindUninitialized fu(this, pt);
-            for (auto c : callee) {
+            for (auto c : callee)
                 (void)c->getNode()->apply(fu);
-
-                currentPoint = fu.currentPoint;
-                // The effect of copy-out
-                LOG3("Summarizing call effect on out arguments; defs are " <<
-                     getCurrentDefinitions());
-                for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
-                    auto expr = mi->substitution.lookup(p);
-                    if (p->direction == IR::Direction::Out ||
-                        p->direction == IR::Direction::InOut) {
-                        // out parameters behave as if they are on the
-                        // LHS of an assignment.
-                        bool save = lhs;
-                        lhs = true;
-                        visit(expr);
-                        lhs = save;
-                    }
-                }
-                LOG3(IndentCtl::unindent);
-            }
-        } else {
-            for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
-                auto expr = mi->substitution.lookup(p);
-                if (p->direction == IR::Direction::Out ||
-                    p->direction == IR::Direction::InOut) {
-                    bool save = lhs;
-                    lhs = true;
-                    visit(expr);
-                    lhs = save;
-                }
+        }
+        for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+            auto expr = mi->substitution.lookup(p);
+            if (p->direction == IR::Direction::Out ||
+                p->direction == IR::Direction::InOut) {
+                bool save = lhs;
+                lhs = true;
+                visit(expr);
+                lhs = save;
             }
         }
-
         reads(expression, LocationSet::empty);
         return false;
     }
