@@ -55,6 +55,10 @@ convert(const IR::Expression* expression, const IR::Type* type) {
                     expression->srcInfo, type, type, *si);
                 return result;
             }
+        } else if (auto mux = expression->to<IR::Mux>()) {
+            auto e1 = convert(mux->e1, type);
+            auto e2 = convert(mux->e2, type);
+            return new IR::Mux(mux->e0, e1, e2);
         }
     } else if (auto tup = type->to<IR::Type_BaseList>()) {
         auto le = expression->to<IR::ListExpression>();
