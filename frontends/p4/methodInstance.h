@@ -241,9 +241,9 @@ class ConstructorCall : public InstanceBase {
     explicit ConstructorCall(const IR::ConstructorCallExpression* cce): cce(cce)
     { CHECK_NULL(cce); }
  public:
-    const IR::ConstructorCallExpression* cce;
-    const IR::Vector<IR::Type>*          typeArguments;
-    const IR::ParameterList*             constructorParameters;
+    const IR::ConstructorCallExpression* cce = nullptr;
+    const IR::Vector<IR::Type>*          typeArguments = nullptr;
+    const IR::ParameterList*             constructorParameters = nullptr;
     static ConstructorCall* resolve(const IR::ConstructorCallExpression* cce,
                                     DeclarationLookup* refMap,
                                     TypeMap* typeMap);

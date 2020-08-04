@@ -304,7 +304,7 @@ class SymbolicInteger final : public ScalarValue {
     explicit SymbolicInteger(const IR::Type_Bits* type) :
             ScalarValue(ScalarValue::ValueState::Uninitialized, type), constant(nullptr) {}
     SymbolicInteger(ScalarValue::ValueState state, const IR::Type_Bits* type) :
-            ScalarValue(state, type) {}
+            ScalarValue(state, type), constant(nullptr) {}
     explicit SymbolicInteger(const IR::Constant* constant) :
             ScalarValue(ScalarValue::ValueState::Constant, constant->type), constant(constant)
     { CHECK_NULL(constant); }
@@ -393,7 +393,7 @@ class SymbolicStruct : public SymbolicValue {
 class SymbolicHeader : public SymbolicStruct {
  public:
     explicit SymbolicHeader(const IR::Type_Header* type) : SymbolicStruct(type) {}
-    SymbolicBool* valid;
+    SymbolicBool* valid = nullptr;
     SymbolicHeader(const IR::Type_Header* type, bool uninitialized,
                    const SymbolicValueFactory* factory);
     virtual void setValid(bool v);

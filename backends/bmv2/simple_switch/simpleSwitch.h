@@ -44,12 +44,12 @@ class V1ProgramStructure : public ProgramStructure {
     std::set<cstring>                pipeline_controls;
     std::set<cstring>                non_pipeline_controls;
 
-    const IR::P4Parser* parser;
-    const IR::P4Control* ingress;
-    const IR::P4Control* egress;
-    const IR::P4Control* compute_checksum;
-    const IR::P4Control* verify_checksum;
-    const IR::P4Control* deparser;
+    const IR::P4Parser* parser = nullptr;
+    const IR::P4Control* ingress = nullptr;
+    const IR::P4Control* egress = nullptr;
+    const IR::P4Control* compute_checksum = nullptr;
+    const IR::P4Control* verify_checksum = nullptr;
+    const IR::P4Control* deparser = nullptr;
 
     V1ProgramStructure() { }
 };
@@ -126,9 +126,10 @@ class ParseV1Architecture : public Inspector {
 };
 
 class SimpleSwitchBackend : public Backend {
-    BMV2Options&        options;
-    P4V1::V1Model&      v1model;
-    V1ProgramStructure* structure;
+    BMV2Options&                options;
+    P4V1::V1Model&              v1model;
+    V1ProgramStructure*         structure = nullptr;
+    ExpressionConverter*        conv = nullptr;
 
  protected:
     cstring createCalculation(cstring algo, const IR::Expression* fields,

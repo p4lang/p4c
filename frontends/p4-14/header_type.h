@@ -20,7 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 
 class CheckHeaderTypes : public Modifier {
-    const IR::V1Program    *global;
+    const IR::V1Program    *global = nullptr;
  public:
     CheckHeaderTypes() { setName("CheckHeaderTypes"); }
     bool preorder(IR::V1Program *glob) override { global = glob; return true; }
