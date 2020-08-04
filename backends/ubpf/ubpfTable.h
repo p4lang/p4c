@@ -37,8 +37,6 @@ namespace UBPF {
         size_t size{};
         EBPF::CodeGenInspector *codeGen;
 
-        virtual void emitInstance(EBPF::CodeBuilder *pBuilder);
-
     protected:
         UBPFTableBase(const UBPFProgram *program, cstring instanceName,
                       EBPF::CodeGenInspector *codeGen) :
@@ -54,11 +52,13 @@ namespace UBPF {
     class UBPFTable final : public UBPFTableBase {
     private:
         void setTableSize(const IR::TableBlock *table);
+        void setTableKind();
 
     public:
         const IR::Key *keyGenerator;
         const IR::ActionList *actionList;
         const IR::TableBlock *table;
+        EBPF::TableKind tableKind;
         cstring defaultActionMapName;
         cstring actionEnumName;
         cstring noActionName;
@@ -69,6 +69,7 @@ namespace UBPF {
                   EBPF::CodeGenInspector *codeGen);
 
         cstring generateActionName(const IR::P4Action *action);
+        void emitInstance(EBPF::CodeBuilder *pBuilder);
         void emitTypes(EBPF::CodeBuilder *builder);
         void emitActionArguments(EBPF::CodeBuilder *builder,
                                  const IR::P4Action *action, cstring name);

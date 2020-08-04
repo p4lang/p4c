@@ -66,6 +66,19 @@ namespace UBPF {
             builder->appendFormat("uint8_t*");
     }
 
+    cstring UBPFScalarType::getAsString() {
+        if (width <= 8)
+            return cstring("uint8_t");
+        else if (width <= 16)
+            return cstring("uint16_t");
+        else if (width <= 32)
+            return cstring("uint32_t");
+        else if (width <= 64)
+            return cstring("uint64_t");
+        else
+            return cstring("uint8_t*");
+    }
+
     void UBPFScalarType::declare(EBPF::CodeBuilder *builder, cstring id, bool asPointer) {
         if (EBPFScalarType::generatesScalar(width)) {
             emit(builder);

@@ -42,9 +42,9 @@ namespace UBPF {
                 cstring stdMetadataVar, cstring metadataField) const;
         void emitUserTableUpdate(UNUSED Util::SourceCodeBuilder *builder, UNUSED cstring tblName,
                                  UNUSED cstring key, UNUSED cstring value) const override {};
-        void emitTableDecl(UNUSED Util::SourceCodeBuilder *builder,
-                           UNUSED cstring tblName, UNUSED EBPF::TableKind tableKind,
-                           UNUSED cstring keyType, UNUSED cstring valueType, UNUSED unsigned size) const override {};
+        void emitTableDecl(Util::SourceCodeBuilder *builder,
+                           cstring tblName, EBPF::TableKind tableKind,
+                           cstring keyType, cstring valueType, unsigned size) const override;
         void emitMain(UNUSED Util::SourceCodeBuilder *builder,
                       UNUSED cstring functionName,
                       UNUSED cstring argName) const override {};

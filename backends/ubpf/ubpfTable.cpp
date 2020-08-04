@@ -134,53 +134,6 @@ class UbpfActionTranslationVisitor : public EBPF::CodeGenInspector {
 };  // UbpfActionTranslationVisitor
 }  // namespace
 
-void UBPFTableBase::emitInstance(EBPF::CodeBuilder *builder) {
-    builder->append("struct ");
-    builder->appendFormat("ubpf_map_def %s = ", dataMapName);
-    builder->spc();
-    builder->blockStart();
-
-    builder->emitIndent();
-    builder->append(".type = UBPF_MAP_TYPE_HASHMAP,");
-    builder->newline();
-
-    builder->emitIndent();
-    if (keyType != nullptr && keyType->is<IR::Type_Bits>()) {
-        auto tb = keyType->to<IR::Type_Bits>();
-        auto scalar = new UBPFScalarType(tb);
-        builder->append(".key_size = sizeof(");
-        scalar->emit(builder);
-        builder->append("),");
-    } else {
-        builder->appendFormat(".key_size = sizeof(struct %s),",
-                              keyTypeName.c_str());
-    }
-    builder->newline();
-
-    builder->emitIndent();
-    if (valueType != nullptr && valueType->is<IR::Type_Bits>()) {
-        auto tb = valueType->to<IR::Type_Bits>();
-        auto scalar = new UBPFScalarType(tb);
-        builder->append(".value_size = sizeof(");
-        scalar->emit(builder);
-        builder->append("),");
-    } else {
-        builder->appendFormat(".value_size = sizeof(struct %s),",
-                              valueTypeName.c_str());
-    }
-    builder->newline();
-
-    builder->emitIndent();
-    builder->appendFormat(".max_entries = %d,", size);
-    builder->newline();
-
-    builder->emitIndent();
-    builder->append(".nb_hash_functions = 0,");
-    builder->newline();
-
-    builder->blockEnd(false);
-    builder->endOfStatement(true);
-}
 
 UBPFTable::UBPFTable(const UBPFProgram *program,
                      const IR::TableBlock *table,
@@ -200,6 +153,52 @@ UBPFTable::UBPFTable(const UBPFProgram *program,
     actionList = table->container->getActionList();
 
     setTableSize(table);
+    setTableKind();
+}
+
+void UBPFTable::emitInstance(EBPF::CodeBuilder *builder) {
+
+    cstring keyTypeStr;
+    if (keyType != nullptr && keyType->is<IR::Type_Bits>()) {
+        auto tb = keyType->to<IR::Type_Bits>();
+        auto scalar = new UBPFScalarType(tb);
+        keyTypeStr = scalar->getAsString();
+    } else {
+        keyTypeStr = cstring("struct ") + keyTypeName.c_str();;
+    }
+
+    cstring valueTypeStr;
+    if (valueType != nullptr && valueType->is<IR::Type_Bits>()) {
+        auto tb = valueType->to<IR::Type_Bits>();
+        auto scalar = new UBPFScalarType(tb);
+        valueTypeStr = scalar->getAsString();
+    } else {
+        valueTypeStr = cstring("struct ") + valueTypeName.c_str();
+    }
+
+    builder->target->emitTableDecl(builder, dataMapName, tableKind,
+                                   keyTypeStr,valueTypeStr, size);
+}
+
+void UBPFTable::setTableKind()
+{
+    // set table kind to HASH by default
+    EBPF::TableKind tableKind = EBPF::TableHash;
+
+    // If any key field is LPM we will generate an LPM table
+    for (auto it : keyGenerator->keyElements) {
+        auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
+        auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
+        if (matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name) {
+            if (tableKind == EBPF::TableLPMTrie) {
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "only one LPM field allowed", it->matchType);
+                return;
+            }
+            tableKind = EBPF::TableLPMTrie;
+        }
+    }
+    this->tableKind = tableKind;
 }
 
 void UBPFTable::setTableSize(const IR::TableBlock *table) {
@@ -255,7 +254,10 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
         // Emit key in decreasing order size - this way there will be no gaps
         for (auto it = ordered.rbegin(); it != ordered.rend(); ++it) {
             auto c = it->second;
-
+            if (tableKind == EBPF::TableLPMTrie) {
+                builder->emitIndent();
+                builder->appendLine("uint32_t prefix_len;");
+            }
             auto ebpfType = ::get(keyTypes, c);
             builder->emitIndent();
             cstring fieldName = ::get(keyFieldNames, c);
@@ -268,8 +270,8 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
             auto mtdecl = program->refMap->getDeclaration(
                     c->matchType->path, true);
             auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
-            if (matchType->name.name !=
-                P4::P4CoreLibrary::instance.exactMatch.name)
+            if (matchType->name.name != P4::P4CoreLibrary::instance.exactMatch.name &&
+                matchType->name.name != P4::P4CoreLibrary::instance.lpmMatch.name)
                 ::error("Match of type %1% not supported", c->matchType);
         }
     }
