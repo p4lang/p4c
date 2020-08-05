@@ -27,7 +27,7 @@ limitations under the License.
  */
 namespace P4 {
 class CreateBuiltins final : public Modifier {
-    bool addNoAction;
+    bool addNoAction = false;
  public:
     using Modifier::postorder;
     CreateBuiltins() { setName("CreateBuiltins"); }

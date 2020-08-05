@@ -224,6 +224,7 @@ struct PushContext {
         current.parent = stack;
         current.node = current.original = node;
         current.child_index = 0;
+        current.child_name = "";
         current.depth = stack ? stack->depth+1 : 1;
         assert(current.depth < 10000);    // stack overflow?
         stack = &current; }

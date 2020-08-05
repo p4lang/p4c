@@ -54,7 +54,6 @@ class Backend {
     P4::ConvertEnums::EnumMapping*   enumMap;
     P4::P4CoreLibrary&               corelib;
     BMV2::JsonObjects*               json;
-    ExpressionConverter*             conv;
     const IR::ToplevelBlock*         toplevel;
 
  public:

@@ -35,6 +35,7 @@ IR::Node::Node(JSONLoader &json) : id(-1) {
         id = currentId++;
     else if (id >= currentId)
         currentId = id+1;
+    clone_id = id;
 }
 
 // Abbreviated debug print
