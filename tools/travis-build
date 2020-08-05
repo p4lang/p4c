@@ -94,6 +94,35 @@ rm -rf /tmp/pip
 pip install $P4C_PIP_PACKAGES
 # ! ------  END Python2 ----------------------------------------------------
 
+# ! ------  BEGIN VALIDATION -----------------------------------------------
+# These steps are necessary to validate the correct compilation of the P4C test
+# suite programs. See also https://github.com/p4gauntlet/p4_tv.
+
+# Also pull Gauntlet for translation validation
+git clone -b stable https://github.com/p4gauntlet/p4_tv /gauntlet
+cd /gauntlet
+git submodule update --init --recursive
+cd -
+# Symlink the parent p4c repository with Gauntlet
+rm -rf /gauntlet/modules/p4c
+ln -s /p4c /gauntlet/modules/p4c
+
+# Symlink the toz3 extension for the p4 compiler
+mkdir -p /p4c/extensions
+ln -sf /gauntlet/modules/toz3 /p4c/extensions/toz3
+
+# Install Gauntlet Python dependencies locally
+# Unfortunately we need Python 3.6, which Xenial does not have
+add-apt-repository ppa:deadsnakes/ppa
+apt update
+apt install -y python3.6
+python3.6 -m pip install z3-solver
+python3.6 -m pip install pytest
+# to parallelize tests
+python3.6 -m pip install pytest-xdist
+python3.6 -m pip install dataclasses
+# ! ------  END VALIDATION ------------------------------------------------
+
 function build() {
   if [ -e build ]; then /bin/rm -rf build; fi
   mkdir -p build

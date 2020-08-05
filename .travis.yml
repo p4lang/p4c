@@ -5,6 +5,10 @@ branches:
   - master
   - stable
 
+dist: xenial
+
+language: shell
+
 os:
   - linux
   - osx
@@ -43,3 +47,13 @@ script:
   # run with sudo (...) --privileged so that we can create network namespaces for the ebpf tests
   - if [[ $TRAVIS_OS_NAME == 'linux' && $UNIFIED == ON ]] ; then sudo docker run --privileged -w /p4c/build -e CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random ; fi
   - if [[ $TRAVIS_OS_NAME == 'osx' && $UNIFIED == ON ]] ; then ctest --output-on-failure -j 2 --schedule-random -LE "bpf$" ; fi
+
+# We run validation in parallel with the normal tests
+# Validation ensures that P4C compiles P4-16 programs correctly.
+# We only test the front end and some mid end passes for now.
+jobs:
+  include:
+    - name: "Validation"
+      os: linux
+      script:
+        - docker run -w /gauntlet p4c python3.6 -m pytest test.py -vrf -k "test_p4c" -n $CTEST_PARALLEL_LEVEL
