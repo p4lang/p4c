@@ -209,8 +209,8 @@ class DpdkGetHashStatement : DpdkAsmStatement {
 }
 
 class DpdkValidateStatement : DpdkAsmStatement {
-    Expression dst;
-    cstring header;
+    cstring label;
+    Expression header;
     std::ostream& toSexp(std::ostream& out) const override;
 #nodbprint
 }
@@ -260,31 +260,43 @@ class DpdkCmpStatement: DpdkAsmStatement {
 }
 
 class DpdkJmpEqualStatement: DpdkJmpStatement {
+    Expression src1;
+    Expression src2;
     std::ostream& toSexp(std::ostream& out) const override;
 #nodbprint
 }
 
 class DpdkJmpNotEqualStatement: DpdkJmpStatement {
+    Expression src1;
+    Expression src2;
     std::ostream& toSexp(std::ostream& out) const override;
 #nodbprint
 }
 
 class DpdkJmpGreaterEqualStatement: DpdkJmpStatement{
+    Expression src1;
+    Expression src2;
     std::ostream& toSexp(std::ostream& out) const override;
 #nodbprint
 }
 
 class DpdkJmpGreaterStatement: DpdkJmpStatement{
+    Expression src1;
+    Expression src2;
     std::ostream& toSexp(std::ostream& out) const override;
 #nodbprint
 }
 
 class DpdkJmpLessorEqualStatement: DpdkJmpStatement{
+    Expression src1;
+    Expression src2;
     std::ostream& toSexp(std::ostream& out) const override;
 #nodbprint
 }
 
 class DpdkJmpLessorStatement: DpdkJmpStatement{
+    Expression src1;
+    Expression src2;
     std::ostream& toSexp(std::ostream& out) const override;
 #nodbprint
 }

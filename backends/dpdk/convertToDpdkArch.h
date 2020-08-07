@@ -211,6 +211,64 @@ public:
 
 };
 
+class IfStatementUnroll: public Transform {
+private:
+    DpdkVariableCollector *collector;
+    DeclarationInjector injector;
+    P4::ReferenceMap * refMap;
+    P4::TypeMap* typeMap;
+public:
+    IfStatementUnroll(DpdkVariableCollector* collector, P4::ReferenceMap *refMap, P4::TypeMap *typeMap):collector(collector), refMap(refMap), typeMap(typeMap){}
+    const IR::Node *postorder(IR::IfStatement *a) override;
+    const IR::Node *postorder(IR::P4Control *a) override;
+    const IR::Node *postorder(IR::P4Parser *a) override;
+};
+
+class LogicalExpressionUnroll: public Inspector {
+    DpdkVariableCollector *collector;
+    P4::ReferenceMap * refMap;
+    P4::TypeMap* typeMap;
+public:
+    IR::IndexedVector<IR::StatOrDecl> stmt;
+    IR::IndexedVector<IR::Declaration> decl;
+    IR::Expression *root;
+    static void sanity(const IR::Expression* e){
+        if(not e->is<IR::Operation_Unary>() and
+            not e->is<IR::MethodCallExpression>() and
+            not e->is<IR::Member>() and
+            not e->is<IR::PathExpression>() and
+            not e->is<IR::Operation_Binary>() and
+            not e->is<IR::Constant>() and
+            not e->is<IR::BoolLiteral>()) {
+                std::cerr << e->node_type_name() << std::endl;
+                BUG("Untraversed node");
+            }
+    }
+    static bool is_logical(const IR::Operation_Binary* bin){
+        if(bin->is<IR::LAnd>() or 
+            bin->is<IR::LOr>() or
+            bin->is<IR::Equ>() or
+            bin->is<IR::Neq>() or
+            bin->is<IR::Grt>() or
+            bin->is<IR::Lss>()) return true;
+        else if(bin->is<IR::Geq>() or bin->is<IR::Leq>()){
+            std::cerr << bin->node_type_name() << std::endl;
+            BUG("does not implemented");
+        }
+        else return false;
+    }
+
+    LogicalExpressionUnroll(DpdkVariableCollector* collector, P4::ReferenceMap *refMap, P4::TypeMap *typeMap):collector(collector), refMap(refMap), typeMap(typeMap){}
+    bool preorder(const IR::Operation_Unary *a) override;
+    bool preorder(const IR::Operation_Binary *a) override;
+    bool preorder(const IR::MethodCallExpression *a) override;
+    bool preorder(const IR::Member *a) override;
+    bool preorder(const IR::PathExpression *a) override;
+    bool preorder(const IR::Constant *a) override;
+    bool preorder(const IR::BoolLiteral *a) override;
+
+};
+
 class ConvertBinaryOperationTo2Params: public Transform {
     DpdkVariableCollector *collector;
     DeclarationInjector injector;
@@ -222,7 +280,7 @@ public:
 };
 
 class printP4: public Inspector {
-    public:
+public:
     bool preorder(const IR::P4Program *p) override{std::cout << p << std::endl; return false;}
     
 };
@@ -357,6 +415,8 @@ public:
         passes.push_back(new ReplaceMetadataHeaderName(refMap, info));
         passes.push_back(new InjectJumboStruct(info));
         passes.push_back(new StatementUnroll(collector));
+        passes.push_back(new IfStatementUnroll(collector, refMap, typeMap));
+        // passes.push_back(new printP4());
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
         passes.push_back(new ConvertBinaryOperationTo2Params(collector));
@@ -376,7 +436,6 @@ public:
         auto p = new PrependHDotToActionArgs(&parsePsa->toBlockInfo, refMap);
         args_struct_map = &p->args_struct_map;
         passes.push_back(p);
-        // passes.push_back(new printP4());
     }
 };
 

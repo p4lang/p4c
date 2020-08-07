@@ -157,8 +157,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
                 switch_var = e->select->components[0];
                 for(auto v:e->selectCases){
                     if(!v->keyset->is<IR::DefaultExpression>()){
-                        add_instr(new IR::DpdkCmpStatement(v->keyset, switch_var));
-                        add_instr(new IR::DpdkJmpEqualStatement("L_" + v->state->path->name));
+                        add_instr(new IR::DpdkJmpEqualStatement("L_" + v->state->path->name, v->keyset, switch_var));
                     }
                     else{
                         auto i = new IR::DpdkJmpStatement("L_" + v->state->path->name);

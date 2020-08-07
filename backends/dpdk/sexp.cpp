@@ -421,7 +421,7 @@ std::ostream& IR::DpdkGetHashStatement::toSexp(std::ostream& out) const{
 }
 
 std::ostream& IR::DpdkValidateStatement::toSexp(std::ostream& out) const{
-    out << "(validate " << DPDK::toStr(dst) << " " << header << ")";
+    out << "(jv " << DPDK::toStr(header) << " " << label << ")";
     return out;
 }
 
@@ -457,22 +457,22 @@ std::ostream& IR::DpdkCmpStatement::toSexp(std::ostream& out) const{
 }
 
 std::ostream& IR::DpdkJmpEqualStatement::toSexp(std::ostream& out) const{
-    out << "(je " << label << ")";
+    out << "(je " << label << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
 
 std::ostream& IR::DpdkJmpNotEqualStatement::toSexp(std::ostream& out) const{
-    out << "(je " << label << ")";
+    out << "(jne " << label << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
 
 std::ostream& IR::DpdkJmpGreaterEqualStatement::toSexp(std::ostream& out) const{
-    out << "(jge " << label << ")";
+    out << "(jge " << label << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
 
 std::ostream& IR::DpdkJmpGreaterStatement::toSexp(std::ostream& out) const{
-    out << "(jg " << label << ")";
+    out << "(jg " << label << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
 
@@ -482,7 +482,7 @@ std::ostream& IR::DpdkJmpLessorEqualStatement::toSexp(std::ostream& out) const{
 }
 
 std::ostream& IR::DpdkJmpLessorStatement::toSexp(std::ostream& out) const{
-    out << "(jl " << label << ")";
+    out << "(jl " << label << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2) << ")";
     return out;
 }
 

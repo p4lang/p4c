@@ -84,16 +84,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement* a){
             }
         }
         else if(auto b = mi->to<P4::BuiltInMethod>()){
-            if(b->name.name == "isValid"){
-                if(auto member = b->appliedTo->to<IR::Member>()){
-                    i = new IR::DpdkValidateStatement(left, member->member);
-                    // std::cerr << member->member << std::endl;
-                }
-            }
-            else{
-                std::cerr << b->name.name << std::endl;
-                BUG("BuiltInMethod Not Implemented");
-            }
+            std::cerr << b->name.name << std::endl;
+            BUG("BuiltInMethod Not Implemented");
         }
         else {
             BUG("MethodInstance Not implemented");
@@ -139,16 +131,76 @@ bool ConvertStatementToDpdk::preorder(const IR::BlockStatement* b){
     return false;
 }
 
-bool ConvertStatementToDpdk::preorder(const IR::IfStatement* s){
-    auto true_label  = Util::printf_format("label_%d", next_label_id++);
-    auto end_label = Util::printf_format("label_%d", next_label_id++);
+void BranchingInstructionGeneration::generate(const IR::Expression *expr, cstring true_label, cstring false_label){
+        if(auto land = expr->to<IR::LAnd>()){
+            auto land_true = Util::printf_format("label_%d", *next_label_id++);
+            generate(land->left, land_true , false_label);
+            instructions.push_back(new IR::DpdkLabelStatement(land_true));
+            generate(land->right, true_label, false_label);
+        }
+        else if(auto lor = expr->to<IR::LOr>()){
+            auto lor_false = Util::printf_format("label_%d", *next_label_id++);
+            generate(lor->left, true_label, lor_false);
+            instructions.push_back(new IR::DpdkLabelStatement(lor_false));
+            generate(lor->right, true_label, false_label);
+        }
+        else if(auto equ = expr->to<IR::Equ>()){
+            instructions.push_back(new IR::DpdkJmpEqualStatement(true_label, equ->left, equ->right));
+            instructions.push_back(new IR::DpdkJmpStatement(false_label));
+        }
+        else if(auto neq = expr->to<IR::Neq>()){
+            instructions.push_back(new IR::DpdkJmpNotEqualStatement(true_label, neq->left, neq->right));
+            instructions.push_back(new IR::DpdkJmpStatement(false_label));
+        }
+        else if(auto lss = expr->to<IR::Lss>()){
+            instructions.push_back(new IR::DpdkJmpLessorStatement(true_label, lss->left, lss->right));
+            instructions.push_back(new IR::DpdkJmpStatement(false_label));
+        }
+        else if(auto grt = expr->to<IR::Grt>()){
+            instructions.push_back(new IR::DpdkJmpGreaterStatement(true_label, grt->left, grt->right));
+            instructions.push_back(new IR::DpdkJmpStatement(false_label));
+        }
+        else if(auto mce = expr->to<IR::MethodCallExpression>()){
+            auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
+            if(auto a = mi->to<P4::BuiltInMethod>()){
+                if(a->name == "isValid"){
+                    instructions.push_back(new IR::DpdkValidateStatement(true_label, a->appliedTo));
+                    instructions.push_back(new IR::DpdkJmpStatement(false_label));
+                }
+                else{
+                    std::cerr << a->name << std::endl;
+                    BUG("Not implemented");
+                }
+            }
+            else {
+                BUG("not implemented method instance");
+            }
+        }
+        else if(expr->is<IR::PathExpression>() or expr->is<IR::Member>()){
+            instructions.push_back(new IR::DpdkJmpEqualStatement(true_label, expr, new IR::Constant(1)));
+            instructions.push_back(new IR::DpdkJmpStatement(false_label));
+        }
+        else{
+            std::cerr << expr->node_type_name() << std::endl;
+            BUG("Not implemented");
+        }
+    }
+// bool BranchingInstructionGeneration::preorder(const IR::LAnd* l){
 
-    add_instr(new IR::DpdkCmpStatement(s->condition, new IR::Constant(0)));
-    add_instr(new IR::DpdkJmpNotEqualStatement(true_label));
-    visit(s->ifFalse);
-    add_instr(new IR::DpdkJmpStatement(end_label));
+// }
+
+bool ConvertStatementToDpdk::preorder(const IR::IfStatement* s){
+    auto true_label  = Util::printf_format("label_%dtrue", next_label_id);
+    auto false_label  = Util::printf_format("label_%dfalse", next_label_id);
+    auto end_label = Util::printf_format("label_%dend", next_label_id++);
+    auto gen = new BranchingInstructionGeneration(&next_label_id, refmap, typemap);
+    gen->generate(s->condition, true_label, false_label);
+    instructions.append(gen->instructions);
     add_instr(new IR::DpdkLabelStatement(true_label));
     visit(s->ifTrue);
+    add_instr(new IR::DpdkJmpStatement(end_label));
+    add_instr(new IR::DpdkLabelStatement(false_label));
+    visit(s->ifFalse);
     add_instr(new IR::DpdkLabelStatement(end_label));
     return false;
 }

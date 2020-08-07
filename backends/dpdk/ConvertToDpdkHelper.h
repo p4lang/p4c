@@ -29,6 +29,22 @@
 #define TOSTR_DECLA(NAME) std::ostream& toStr(std::ostream&, IR::NAME*)
 
 namespace DPDK{
+class BranchingInstructionGeneration {
+    int *next_label_id;
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+public:
+    IR::IndexedVector<IR::DpdkAsmStatement> instructions;
+    BranchingInstructionGeneration(
+        int *next_label_id,
+        P4::ReferenceMap *refMap,
+        P4::TypeMap *typeMap): 
+        next_label_id(next_label_id),
+        refMap(refMap),
+        typeMap(typeMap){}
+    void generate(const IR::Expression *, cstring, cstring);
+};
+
 class ConvertStatementToDpdk : public Inspector {
     int next_label_id;
     DpdkVariableCollector *collector;
@@ -49,7 +65,7 @@ class ConvertStatementToDpdk : public Inspector {
         collector(collector),
         csum_map(csum_map){}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() { return instructions; }
-
+    void branchingInstructionGeneration(cstring true_label, cstring false_label, const IR::Expression * expr);
     bool preorder(const IR::AssignmentStatement* a) override;
     bool preorder(const IR::BlockStatement* a) override;
     bool preorder(const IR::IfStatement* a) override;
