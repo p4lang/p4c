@@ -1044,6 +1044,16 @@ TypeInference::containerInstantiation(
     BUG_CHECK(tvs != nullptr || ::errorCount(), "Null substitution");
     if (tvs == nullptr)
         return std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>(nullptr, nullptr);
+    // Infer Dont_Care for type vars used only in not-present optional params
+    auto typeParams = constructor->typeParameters;
+    for (auto p : params->parameters) {
+        if (!p->isOptional()) continue;
+        forAllMatching<IR::Type_Var>(p, [tvs, typeParams](const IR::Type_Var *tv) {
+            if (tvs->lookup(tv)) return;  // already bound
+            if (typeParams->getDeclByName(tv->name) != tv) return;  // not a tv of this call
+            tvs->setBinding(tv, new IR::Type_Dontcare);
+        });
+    }
     addSubstitutions(tvs);
 
     ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
