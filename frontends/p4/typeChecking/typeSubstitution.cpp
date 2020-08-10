@@ -125,4 +125,8 @@ bool TypeVariableSubstitution::setBindings(const IR::Node* errorLocation,
     return true;
 }
 
+// to call from gdb
+void dump(P4::TypeVariableSubstitution &tvs) { std::cout << tvs << std::endl; }
+void dump(P4::TypeVariableSubstitution *tvs) { std::cout << *tvs << std::endl; }
+
 }  // namespace P4
