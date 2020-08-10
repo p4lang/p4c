@@ -323,7 +323,7 @@ std::ostream& IR::DpdkXorStatement::toSexp(std::ostream& out) const {
 
 
 std::ostream& IR::DpdkInvalidateStatement::toSexp(std::ostream& out) const {
-    out << "(invalid " << ")";
+    out << "(jiv " << DPDK::toStr(header) << " " << label << ")";
     return out;
 }
 

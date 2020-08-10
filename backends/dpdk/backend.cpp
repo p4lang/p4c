@@ -91,11 +91,11 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     program->apply(toAsm);
     dpdk_program = convertToDpdk->getDpdkProgram();
     if (!dpdk_program) return;
-    // PassManager post_code_gen = {
-    //     new DpdkAsmOptimization,
-    // };
+    PassManager post_code_gen = {
+        new DpdkAsmOptimization,
+    };
     
-    // dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
+    dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
     // additional passes to optimize DPDK assembly
     // PassManager optimizeAsm = { }
     //program->apply(DumpAsm());

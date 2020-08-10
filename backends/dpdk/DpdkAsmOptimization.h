@@ -34,13 +34,27 @@ public:
     const IR::Node *postorder(IR::DpdkListStatement *l) override;
 };
 
-class DpdkAsmOptimization: public PassManager{
+class RemoveJmpAfterLabel: public Transform {
+public:
+    const IR::Node *postorder(IR::DpdkListStatement *l) override;
+};
+
+class RemoveLabelAfterLabel: public Transform {
+public:
+    const IR::Node *postorder(IR::DpdkListStatement *l) override;
+};
+
+class DpdkAsmOptimization: public PassRepeated{
 private:
 public:
     DpdkAsmOptimization(){
         passes.push_back(new RemoveRedundantLabel);
-        auto *r = new PassRepeated{new RemoveUselessJmpAndLabel};
+        auto r = new PassRepeated{new RemoveLabelAfterLabel};
         passes.push_back(r);
+        passes.push_back(new RemoveUselessJmpAndLabel);
+        passes.push_back(new RemoveRedundantLabel);
+        passes.push_back(r);
+        passes.push_back(new RemoveJmpAfterLabel);
     }
 };
 

@@ -33,6 +33,21 @@ class BranchingInstructionGeneration {
     int *next_label_id;
     P4::ReferenceMap *refMap;
     P4::TypeMap *typeMap;
+    bool nested(const IR::Node *n){
+        if(n->is<IR::LAnd>() or n->is<IR::LOr>()){
+            return true;
+        }
+        else if(n->is<IR::Member>() or
+            n->is<IR::Equ>() or
+            n->is<IR::Neq>() or
+            n->is<IR::Lss>() or
+            n->is<IR::Grt>() or
+            n->is<IR::MethodCallExpression>() or
+            n->is<IR::PathExpression>() or
+            n->is<IR::Member>()){
+            return false;
+        }
+    }
 public:
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     BranchingInstructionGeneration(
@@ -42,7 +57,7 @@ public:
         next_label_id(next_label_id),
         refMap(refMap),
         typeMap(typeMap){}
-    void generate(const IR::Expression *, cstring, cstring);
+    bool generate(const IR::Expression *, cstring, cstring, bool);
 };
 
 class ConvertStatementToDpdk : public Inspector {
