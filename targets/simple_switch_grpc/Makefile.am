@@ -53,7 +53,7 @@ $(builddir)/../simple_switch/libsimpleswitch_thrift.la
 endif
 
 libsimple_switch_grpc_la_LIBADD += \
--lpifeproto -lpigrpcserver -lpi \
+-lpifeproto -lpigrpcserver -lpi -lpip4info \
 $(GRPC_LIBS) $(PROTOBUF_LIBS)
 
 # dataplane_interface.proto
