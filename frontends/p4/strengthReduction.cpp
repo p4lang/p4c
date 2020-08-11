@@ -150,6 +150,8 @@ const IR::Node* DoStrengthReduction::postorder(IR::LOr* expr) {
 }
 
 const IR::Node* DoStrengthReduction::postorder(IR::LNot* expr) {
+    if (auto e = expr->expr->to<IR::LNot>())
+        return e->expr;
     if (auto e = expr->expr->to<IR::Equ>())
         return new IR::Neq(e->left, e->right);
     if (auto e = expr->expr->to<IR::Neq>())

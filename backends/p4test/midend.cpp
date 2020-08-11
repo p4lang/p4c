@@ -108,6 +108,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::LocalCopyPropagation(&refMap, &typeMap),
         new P4::ConstantFolding(&refMap, &typeMap),
+        new P4::StrengthReduction(&refMap, &typeMap),
         new P4::MoveDeclarations(),  // more may have been introduced
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::CompileTimeOperations(),
