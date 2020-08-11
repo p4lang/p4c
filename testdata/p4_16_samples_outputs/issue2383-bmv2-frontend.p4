@@ -28,6 +28,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             bool hasReturned = false;
             ethernet_t retval;
             hasReturned = true;
+            retval.setValid();
             retval = { 48w1, 48w1, 16w1 };
             h.eth_hdr = retval;
         }

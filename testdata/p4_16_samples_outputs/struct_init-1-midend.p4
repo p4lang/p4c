@@ -12,23 +12,10 @@ struct metadata_t {
 
 control I(inout metadata_t meta) {
     H h_0;
-    @hidden action struct_init1l18() {
-        h_0.setValid();
-    }
     @hidden action struct_init1l15() {
         meta._foo__v0 = meta._foo__v0 + 9w1;
         h_0.setValid();
-        h_0.setValid();
         h_0.b = 32w2;
-    }
-    @hidden action struct_init1l13() {
-        h_0.setValid();
-    }
-    @hidden table tbl_struct_init1l13 {
-        actions = {
-            struct_init1l13();
-        }
-        const default_action = struct_init1l13();
     }
     @hidden table tbl_struct_init1l15 {
         actions = {
@@ -36,19 +23,9 @@ control I(inout metadata_t meta) {
         }
         const default_action = struct_init1l15();
     }
-    @hidden table tbl_struct_init1l18 {
-        actions = {
-            struct_init1l18();
-        }
-        const default_action = struct_init1l18();
-    }
     apply {
-        tbl_struct_init1l13.apply();
         if (meta._foo__v0 == 9w192) {
             tbl_struct_init1l15.apply();
-            if (!h_0.isValid() && false || h_0.isValid() && false) {
-                tbl_struct_init1l18.apply();
-            }
         }
     }
 }

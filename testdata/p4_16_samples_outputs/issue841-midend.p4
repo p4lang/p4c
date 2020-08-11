@@ -47,7 +47,6 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
     @name("MyComputeChecksum.checksum") Checksum16() checksum_0;
     apply {
         h_0.setValid();
-        h_0.setValid();
         h_0.src = hdr.h.src;
         h_0.dst = hdr.h.dst;
         h_0.csum = 16w0;

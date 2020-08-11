@@ -37,8 +37,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         {
             bool hasReturned = false;
             bit<16> retval;
-            nested_struct tmp_struct_0;
-            tmp_struct_0.s.setValid();
             hasReturned = true;
             retval = 16w1;
             tmp = retval;
@@ -51,8 +49,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             {
                 bool hasReturned_3 = false;
                 bit<16> retval_3;
-                nested_struct tmp_struct_1;
-                tmp_struct_1.s.setValid();
                 hasReturned_3 = true;
                 retval_3 = 16w1;
                 tmp_1 = retval_3;
@@ -65,8 +61,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         {
             bool hasReturned_4 = false;
             bit<16> retval_4;
-            nested_struct tmp_struct_2;
-            tmp_struct_2.s.setValid();
             hasReturned_4 = true;
             retval_4 = 16w1;
         }
