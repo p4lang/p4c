@@ -135,17 +135,12 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr, cstrin
         if(auto land = expr->to<IR::LAnd>()){
             if(nested(land->left) and nested(land->right)){
                 generate(land->left, true_label + "half", false_label, true);
-                instructions.push_back(new IR::DpdkJmpStatement(false_label));
                 instructions.push_back(new IR::DpdkLabelStatement(true_label + "half"));
-                generate(land->right, true_label, false_label, true);
-                instructions.push_back(new IR::DpdkJmpStatement(false_label));
-                return false;
+                return generate(land->right, true_label, false_label, true);
             }
             else if(not nested(land->left) and nested(land->right)){
                 generate(land->left, true_label, false_label, true);
-                generate(land->right, true_label, false_label, true);
-                instructions.push_back(new IR::DpdkJmpStatement(false_label));
-                return false;
+                return generate(land->right, true_label, false_label, true);
             }
             else if(not nested(land->left) and not nested(land->right)){
                 generate(land->left, true_label, false_label, true);
@@ -160,17 +155,12 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr, cstrin
         else if(auto lor = expr->to<IR::LOr>()){
             if(nested(lor->left) and nested(lor->right)){
                 generate(lor->left, true_label, false_label + "half", false);
-                instructions.push_back(new IR::DpdkJmpStatement(true_label));
                 instructions.push_back(new IR::DpdkLabelStatement(false_label + "half"));
-                generate(lor->right, true_label, false_label, false);
-                instructions.push_back(new IR::DpdkJmpStatement(true_label));
-                return true;
+                return generate(lor->right, true_label, false_label, false);
             }
             else if(not nested(lor->left) and nested(lor->right)){
                 generate(lor->left, true_label, false_label, false);
-                generate(lor->right, true_label, false_label, false);
-                instructions.push_back(new IR::DpdkJmpStatement(true_label));
-                return true;
+                return generate(lor->right, true_label, false_label, false);
             }
             else if(not nested(lor->left) and not nested(lor->right)){
                 generate(lor->left, true_label, false_label, false);
