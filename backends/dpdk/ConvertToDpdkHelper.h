@@ -29,6 +29,72 @@
 #define TOSTR_DECLA(NAME) std::ostream& toStr(std::ostream&, IR::NAME*)
 
 namespace DPDK{
+/* This class will generate a optimized jmp and label control flow.
+ * Couple of examples here
+ *
+ * Example 1:
+ * If(a && b){
+ * 
+ * }
+ * Else{
+ * 
+ * }
+ * 
+ * Will be translated to(in an optimal form):
+ * cmp a 1
+ * jneq false
+ * cmp b 1
+ * jneq false
+ * true:
+ *     // if true statements go here
+ *     jmp end
+ * false:
+ *     // if false statements go here
+ * end:
+ * 
+ * In this case, in order to use less jmp, I use jneq instead of jeq to let the
+ * true condition fall through the jmp statement and short-circuit the false
+ * condition.
+ * 
+ * Example 2:
+ * (a && b) || c
+ * cmp a 1
+ * jneq half_false
+ * cmp b 1
+ * jneq half_false
+ * jmp true
+ * half_false:
+ *     cmp c 1
+ *     jeq true
+ * false:
+ * 
+ *     jmp end
+ * true:
+ * 
+ * end:
+ * 
+ * In this case, it is not in an optimal form. To make it optimal, I need to
+ * change (a && b) || c to c ||(a && b) and assembly code looks like this:
+ * cmp c 1
+ * jeq true
+ * cmp a 1
+ * jneq false
+ * cmp b 1
+ * jneq false
+ * false:
+ * 
+ *     jmp end
+ * true:
+ * 
+ * end:
+ * 
+ * It is very important to generate as fewer jmp and label instructions as 
+ * possible, because the performance of DPDK is directly related to the number
+ * of instructions.
+ * 
+ * This class uses a recursive function to generate the control flow and is 
+ * optmized.
+ */
 class BranchingInstructionGeneration {
     int *next_label_id;
     P4::ReferenceMap *refMap;

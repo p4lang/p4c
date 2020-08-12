@@ -139,19 +139,6 @@ const IR::Node* ConvertToDpdkArch::postorder(IR::P4Parser* p) {
     return p;
 }
 
-const IR::Node* ConvertToDpdkArch::postorder(IR::Type_StructLike* s) {
-    return s;
-}
-
-const IR::Node* ConvertToDpdkArch::postorder(IR::PathExpression* p) {
-    return p;
-}
-
-const IR::Node* ConvertToDpdkArch::postorder(IR::Member* m) {
-    LOG1("m " << m);
-    return m;
-}
-
 void ParsePsa::parseIngressPipeline(const IR::PackageBlock* block) {
     auto ingress_parser = block->getParameterValue("ip");
     BlockInfo ip("IngressParser", INGRESS, PARSER);
@@ -215,13 +202,10 @@ bool ParsePsa::preorder(const IR::PackageBlock* block) {
 void CollectMetadataHeaderInfo::pushMetadata(const IR::Parameter* p){
     
     for(auto m: used_metadata){
-        // std::cout << "m:" << m->type->to<IR::Type_Name>()->path->name.name << std::endl;
-        // std::cout << "p:" << p->type->to<IR::Type_Name>()->path->name.name << std::endl;
         if(m->to<IR::Type_Name>()->path->name.name == p->type->to<IR::Type_Name>()->path->name.name){
             return;
         }
     }
-    // std::cout <<"pushed:" << p->type->to<IR::Type_Name>()->path->name.name << std::endl;
     used_metadata.push_back(p->type);
 }
 
@@ -293,10 +277,6 @@ bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s){
     return true;
  }
 
-const IR::Node* ReplaceMetadataHeaderName::postorder(IR::P4Program* p){
-    // std::cout << p << std::endl;
-    return p;
-}
 
 
 const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Member *m){
@@ -438,30 +418,8 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a){
     return a;
 }
 
-const IR::Node *StatementUnroll::postorder(IR::IfStatement *i){
-    // auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
-    // ExpressionUnroll::sanity(i->condition);
-    // auto unroller = new ExpressionUnroll(collector);
-    // i->condition->apply(*unroller);
-    // for(auto i:unroller->stmt)
-    //     code_block->push_back(i);
 
-    // auto control = findOrigCtxt<IR::P4Control>();
-    // auto parser = findOrigCtxt<IR::P4Parser>();
-
-    // for(auto d: unroller->decl)
-    //     injector.collect(control, parser, d);
-    // if(unroller->root) {
-    //     i->condition = unroller->root;
-    // }
-    // code_block->push_back(i);
-    // return new IR::BlockStatement(*code_block);
-    return i;
-}
-
-const IR::Node *StatementUnroll::preorder(IR::MethodCallStatement *m){
-    // visit(m->methodCall);
-    // prune();    
+const IR::Node *StatementUnroll::preorder(IR::MethodCallStatement *m){    
     return m;
 }
 
@@ -937,7 +895,7 @@ const IR::Node *CollectLocalVariableToMetadata::postorder(IR::P4Parser * p){
     return p;
 }
 
-const IR::Node *PrependHDotToActionArgs::postorder(IR::P4Action* a){
+const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Action* a){
     if(a->parameters->size() > 0){
         auto l = new IR::IndexedVector<IR::Parameter>;
         for(auto p: a->parameters->parameters){
@@ -951,7 +909,7 @@ const IR::Node *PrependHDotToActionArgs::postorder(IR::P4Action* a){
     return a;
 }
 
-const IR::Node *PrependHDotToActionArgs::postorder(IR::P4Program* program){
+const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Program* program){
     auto new_objs = new IR::Vector<IR::Node>;
     for(auto obj: program->objects){
         if(auto control = obj->to<IR::P4Control>()){
@@ -975,7 +933,7 @@ const IR::Node *PrependHDotToActionArgs::postorder(IR::P4Program* program){
     return program;
 }
 
-const IR::Node *PrependHDotToActionArgs::preorder(IR::PathExpression *path){
+const IR::Node *PrependPDotToActionArgs::preorder(IR::PathExpression *path){
     auto declaration = refMap->getDeclaration(path->path);
     if(auto action = findContext<IR::P4Action>()){
         if(not declaration){

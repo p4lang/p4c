@@ -60,6 +60,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         new BMV2::RemoveComplexExpressions(refMap, typeMap,
                 new BMV2::ProcessControls(&structure.pipeline_controls)),
         new P4::RemoveAllUnusedDeclarations(refMap),
+        // Convert to Dpdk specific format
         rewriteToDpdkArch,
         // Converts the DAG into a TREE (at least for expressions)
         // This is important later for conversion to JSON.
@@ -87,7 +88,6 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         // convert to assembly program
         convertToDpdk,
     };
-    // std::cout << program << std::endl;
     program->apply(toAsm);
     dpdk_program = convertToDpdk->getDpdkProgram();
     if (!dpdk_program) return;

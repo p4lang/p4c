@@ -1,8 +1,8 @@
 #include "DpdkAsmOptimization.h"
 
 namespace DPDK{
-// One assumption of this piece of program is that DPDK never produces jmp statements that
-// that jump back to previous statements.
+// One assumption of this piece of program is that DPDK never produces jmp 
+// statements that jump back to previous statements.
 const IR::Node *RemoveRedundantLabel::postorder(IR::DpdkListStatement *l){
     bool changed = false;
     IR::IndexedVector<IR::DpdkAsmStatement> used_labels;
