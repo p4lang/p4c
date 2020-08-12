@@ -72,7 +72,7 @@ control c(inout bit<32> r) {
     }
     apply {
         tbl_act.apply();
-        if (!(tmp > 32w0)) {
+        if (tmp <= 32w0) {
             tbl_complex10l21.apply();
         } else {
             tbl_complex10l21_0.apply();

@@ -75,56 +75,56 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name(".mark_egr_resubmit_packet") action mark_egr_resubmit_packet() {
         hdr.ethernet.dstAddr = 48w0;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_resubmit_count0 << 40;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_recirculate_count1 << 32;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_clone_e2e_count2 << 24;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_f14 << 16;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24 | (bit<48>)meta._mymeta_f14 << 16;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24 | (bit<48>)meta._mymeta_f14 << 16;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_last_ing_instance_type3 << 8;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24 | (bit<48>)meta._mymeta_f14 << 16 | (bit<48>)meta._mymeta_last_ing_instance_type3 << 8;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24 | (bit<48>)meta._mymeta_f14 << 16 | (bit<48>)meta._mymeta_last_ing_instance_type3 << 8;
     }
     @name(".mark_max_clone_e2e_packet") action mark_max_clone_e2e_packet() {
         hdr.ethernet.dstAddr = 48w0;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_resubmit_count0 << 40;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_recirculate_count1 << 32;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_clone_e2e_count2 << 24;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_f14 << 16;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24 | (bit<48>)meta._mymeta_f14 << 16;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24 | (bit<48>)meta._mymeta_f14 << 16;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_last_ing_instance_type3 << 8;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24 | (bit<48>)meta._mymeta_f14 << 16 | (bit<48>)meta._mymeta_last_ing_instance_type3 << 8;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24 | (bit<48>)meta._mymeta_f14 << 16 | (bit<48>)meta._mymeta_last_ing_instance_type3 << 8;
         hdr.ethernet.etherType = 16w0xce2e;
     }
     @name(".mark_max_recirculate_packet") action mark_max_recirculate_packet() {
         hdr.ethernet.dstAddr = 48w0;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_resubmit_count0 << 40;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_recirculate_count1 << 32;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_clone_e2e_count2 << 24;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_f14 << 16;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24 | (bit<48>)meta._mymeta_f14 << 16;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24 | (bit<48>)meta._mymeta_f14 << 16;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_last_ing_instance_type3 << 8;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24 | (bit<48>)meta._mymeta_f14 << 16 | (bit<48>)meta._mymeta_last_ing_instance_type3 << 8;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24 | (bit<48>)meta._mymeta_f14 << 16 | (bit<48>)meta._mymeta_last_ing_instance_type3 << 8;
         hdr.ethernet.etherType = 16w0xec14;
     }
     @name(".mark_vanilla_packet") action mark_vanilla_packet() {
         hdr.ethernet.dstAddr = 48w0;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_resubmit_count0 << 40;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_recirculate_count1 << 32;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_clone_e2e_count2 << 24;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_f14 << 16;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24 | (bit<48>)meta._mymeta_f14 << 16;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24 | (bit<48>)meta._mymeta_f14 << 16;
         meta._temporaries_temp15 = (bit<48>)meta._mymeta_last_ing_instance_type3 << 8;
-        hdr.ethernet.dstAddr = 48w0 | (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24 | (bit<48>)meta._mymeta_f14 << 16 | (bit<48>)meta._mymeta_last_ing_instance_type3 << 8;
+        hdr.ethernet.dstAddr = (bit<48>)meta._mymeta_resubmit_count0 << 40 | (bit<48>)meta._mymeta_recirculate_count1 << 32 | (bit<48>)meta._mymeta_clone_e2e_count2 << 24 | (bit<48>)meta._mymeta_f14 << 16 | (bit<48>)meta._mymeta_last_ing_instance_type3 << 8;
         hdr.ethernet.etherType = 16w0xf00f;
     }
     @name(".t_do_clone_e2e") table t_do_clone_e2e_0 {

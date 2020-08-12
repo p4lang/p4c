@@ -22,9 +22,9 @@ control c(out bit<32> x) {
         x = u_0.h1.f + u_0.h2.g;
         u_0.h1.setValid();
         u_0.h1.f = 32w0;
-        x = x + 32w0;
+        x = x;
         u_0.h2.g = 32w0;
-        x = x + 32w0;
+        x = x;
         u2_0[0].h1.setValid();
         u2_0[0].h1.f = 32w2;
         x = x + u2_0[1].h2.g + 32w2;
