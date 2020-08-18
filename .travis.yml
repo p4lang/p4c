@@ -55,8 +55,5 @@ jobs:
   include:
     - name: "Validation"
       os: linux
-      install:
-        - tools/start_ccache
-        - docker build --network ccache_network -t p4c --build-arg P4C_VALIDATION=ON .
       script:
         - docker run -w /gauntlet p4c python3.6 -m pytest test.py -vrf -k "test_p4c" -n $CTEST_PARALLEL_LEVEL
