@@ -46,7 +46,7 @@ control I(inout metadata_t meta) {
         tbl_struct_init1l13.apply();
         if (meta._foo__v0 == 9w192) {
             tbl_struct_init1l15.apply();
-            if (!h_0.isValid() && false || h_0.isValid() && true && false) {
+            if (!h_0.isValid() && false || h_0.isValid() && false) {
                 tbl_struct_init1l18.apply();
             }
         }

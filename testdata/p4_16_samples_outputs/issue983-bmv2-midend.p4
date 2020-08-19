@@ -76,7 +76,7 @@ control ingress(inout headers hdr, inout metadata user_meta, inout standard_meta
     @hidden action issue983bmv2l92() {
         user_meta._fwd_meta_tmp0 = ~hdr.ethernet.etherType;
         user_meta._fwd_meta_x11 = (bit<32>)~hdr.ethernet.etherType;
-        user_meta._fwd_meta_x22 = ((bit<32>)~hdr.ethernet.etherType)[31:16] + ((bit<32>)~hdr.ethernet.etherType)[15:0];
+        user_meta._fwd_meta_x22 = ((bit<32>)~hdr.ethernet.etherType)[31:16] + ~hdr.ethernet.etherType;
         user_meta._fwd_meta_x33 = (bit<32>)~hdr.ethernet.etherType;
         user_meta._fwd_meta_x44 = ~(bit<32>)hdr.ethernet.etherType;
         user_meta._fwd_meta_exp_etherType5 = 16w0x800;
@@ -142,7 +142,7 @@ control ingress(inout headers hdr, inout metadata user_meta, inout standard_meta
         if ((bit<32>)~hdr.ethernet.etherType != 32w0xf7ff) {
             tbl_issue983bmv2l111.apply();
         }
-        if (((bit<32>)~hdr.ethernet.etherType)[31:16] + ((bit<32>)~hdr.ethernet.etherType)[15:0] != 16w0xf7ff) {
+        if (((bit<32>)~hdr.ethernet.etherType)[31:16] + ~hdr.ethernet.etherType != 16w0xf7ff) {
             tbl_issue983bmv2l114.apply();
         }
         if ((bit<32>)~hdr.ethernet.etherType != 32w0xf7ff) {
