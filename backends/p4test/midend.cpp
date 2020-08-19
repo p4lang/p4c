@@ -68,7 +68,7 @@ class SkipControls : public P4::ActionSynthesisPolicy {
     }
 };
 
-MidEnd::MidEnd(CompilerOptions& options) {
+MidEnd::MidEnd(CompilerOptions& options, std::ostream* outStream) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     refMap.setIsV1(isv1);
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
@@ -76,7 +76,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
 
     auto v1controls = new std::set<cstring>();
 
-    addPasses({
+    std::initializer_list<Visitor *> midendPasses = {
         options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
         new P4::RemoveMiss(&refMap, &typeMap),
         new P4::EliminateNewtype(&refMap, &typeMap),
@@ -143,7 +143,19 @@ MidEnd::MidEnd(CompilerOptions& options) {
         evaluator,
         new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
         new P4::MidEndLast()
-    });
+    };
+    addPasses(midendPasses);
+    if (options.listMidendPasses) {
+        for (auto it : midendPasses) {
+            if (it != nullptr) {
+                *outStream << it->name() <<'\n';
+            }
+        }
+        return;
+    }
+    if (options.excludeMidendPasses) {
+        removePasses(options.passesToExcludeMidend);
+    }
 }
 
 }  // namespace P4Test
