@@ -116,11 +116,9 @@ ln -sf /gauntlet/modules/toz3 /p4c/extensions/toz3
 add-apt-repository ppa:deadsnakes/ppa
 apt update
 apt install -y python3.6
-python3.6 -m pip install z3-solver
-python3.6 -m pip install pytest
-# to parallelize tests
-python3.6 -m pip install pytest-xdist
-python3.6 -m pip install dataclasses
+# pytest-xdist to parallelize tests
+# dataclasses for Python3.6 compatibility
+python3.6 -m pip install z3-solver pytest pytest-xdist==1.34.0 dataclasses
 # ! ------  END VALIDATION ------------------------------------------------
 
 function build() {
