@@ -16,6 +16,7 @@ limitations under the License.
 
 #include <utility>
 #include "ir.h"
+#include "configuration.h"
 
 namespace IR {
 
@@ -64,6 +65,9 @@ const Type_Bits* Type_Bits::get(int width, bool isSigned) {
     auto &result = (*type_map)[std::make_pair(width, isSigned)];
     if (!result)
         result = new Type_Bits(width, isSigned);
+    if (width > P4CConfiguration::MaximumWidthSupported)
+        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Compiler only supports widths up to %2%",
+                result, P4CConfiguration::MaximumWidthSupported);
     return result;
 }
 

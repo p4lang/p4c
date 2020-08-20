@@ -515,6 +515,15 @@ const IR::Node* DoConstantFolding::postorder(IR::LOr* e) {
     return new IR::BoolLiteral(left->srcInfo, true);
 }
 
+static bool overflowWidth(const IR::Node* node, int width) {
+    if (width > P4CConfiguration::MaximumWidthSupported) {
+        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Compiler only supports widths up to %2%",
+                node, P4CConfiguration::MaximumWidthSupported);
+        return false;
+    }
+    return true;
+}
+
 const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
     const IR::Expression* msb = getConstant(e->e1);
     const IR::Expression* lsb = getConstant(e->e2);
@@ -550,12 +559,8 @@ const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
                 "%1%: bit slicing should be specified as [msb:lsb]", e);
         return e;
     }
-    if (m > P4CConfiguration::MaximumWidthSupported ||
-        l > P4CConfiguration::MaximumWidthSupported) {
-        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Compiler only supports widths up to %2%",
-                e, P4CConfiguration::MaximumWidthSupported);
+    if (overflowWidth(e, m) || overflowWidth(e, l))
         return e;
-    }
     big_int value = cbase->value >> l;
     big_int mask = 1;
     mask = (mask << (m - l + 1)) - 1;
@@ -635,6 +640,8 @@ const IR::Node* DoConstantFolding::postorder(IR::Concat* e) {
     }
 
     auto resultType = IR::Type_Bits::get(lt->size + rt->size, lt->isSigned);
+    if (overflowWidth(e, resultType->size))
+        return e;
     big_int value = Util::shift_left(left->value, static_cast<unsigned>(rt->size)) + right->value;
     return new IR::Constant(e->srcInfo, resultType, value, left->base);
 }
@@ -704,6 +711,8 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
 
     big_int value = cl->value;
     unsigned shift = static_cast<unsigned>(cr->asInt());
+    if (overflowWidth(e, shift))
+        return e;
 
     auto tb = left->type->to<IR::Type_Bits>();
     if (tb != nullptr) {
