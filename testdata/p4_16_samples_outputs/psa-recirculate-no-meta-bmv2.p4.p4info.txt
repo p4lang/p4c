@@ -23,6 +23,13 @@ actions {
 }
 actions {
   preamble {
+    id: 20711895
+    name: "cIngress.record_ingress_ports_in_pkt"
+    alias: "record_ingress_ports_in_pkt"
+  }
+}
+actions {
+  preamble {
     id: 25218586
     name: "cEgress.add"
     alias: "add"
