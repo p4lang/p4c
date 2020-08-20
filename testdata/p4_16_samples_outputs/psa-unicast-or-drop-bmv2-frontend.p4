@@ -60,26 +60,23 @@ parser EgressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user_
 }
 
 control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    @name(".packet_path_to_int") action packet_path_to_int(in PSA_PacketPath_t packet_path_1, out bit<32> ret) {
-        if (packet_path_1 == PSA_PacketPath_t.NORMAL) {
-            ret = 32w1;
-        } else if (packet_path_1 == PSA_PacketPath_t.NORMAL_UNICAST) {
-            ret = 32w2;
-        } else if (packet_path_1 == PSA_PacketPath_t.NORMAL_MULTICAST) {
-            ret = 32w3;
-        } else if (packet_path_1 == PSA_PacketPath_t.CLONE_I2E) {
-            ret = 32w4;
-        } else if (packet_path_1 == PSA_PacketPath_t.CLONE_E2E) {
-            ret = 32w5;
-        } else if (packet_path_1 == PSA_PacketPath_t.RESUBMIT) {
-            ret = 32w6;
-        } else if (packet_path_1 == PSA_PacketPath_t.RECIRCULATE) {
-            ret = 32w7;
-        }
-    }
     apply {
         hdr.output_data.word0 = (bit<32>)istd.egress_port;
-        packet_path_to_int(istd.packet_path, hdr.output_data.word2);
+        if (istd.packet_path == PSA_PacketPath_t.NORMAL) {
+            hdr.output_data.word2 = 32w1;
+        } else if (istd.packet_path == PSA_PacketPath_t.NORMAL_UNICAST) {
+            hdr.output_data.word2 = 32w2;
+        } else if (istd.packet_path == PSA_PacketPath_t.NORMAL_MULTICAST) {
+            hdr.output_data.word2 = 32w3;
+        } else if (istd.packet_path == PSA_PacketPath_t.CLONE_I2E) {
+            hdr.output_data.word2 = 32w4;
+        } else if (istd.packet_path == PSA_PacketPath_t.CLONE_E2E) {
+            hdr.output_data.word2 = 32w5;
+        } else if (istd.packet_path == PSA_PacketPath_t.RESUBMIT) {
+            hdr.output_data.word2 = 32w6;
+        } else if (istd.packet_path == PSA_PacketPath_t.RECIRCULATE) {
+            hdr.output_data.word2 = 32w7;
+        }
     }
 }
 

@@ -26,23 +26,26 @@ struct headers_t {
     output_data_t output_data;
 }
 
-action packet_path_to_int(in PSA_PacketPath_t packet_path, out bit<32> ret) {
-    if (packet_path == PSA_PacketPath_t.NORMAL) {
-        ret = 32w1;
-    } else if (packet_path == PSA_PacketPath_t.NORMAL_UNICAST) {
-        ret = 32w2;
-    } else if (packet_path == PSA_PacketPath_t.NORMAL_MULTICAST) {
-        ret = 32w3;
-    } else if (packet_path == PSA_PacketPath_t.CLONE_I2E) {
-        ret = 32w4;
-    } else if (packet_path == PSA_PacketPath_t.CLONE_E2E) {
-        ret = 32w5;
-    } else if (packet_path == PSA_PacketPath_t.RESUBMIT) {
-        ret = 32w6;
-    } else if (packet_path == PSA_PacketPath_t.RECIRCULATE) {
-        ret = 32w7;
+control packet_path_to_int(in PSA_PacketPath_t packet_path, out bit<32> ret) {
+    apply {
+        if (packet_path == PSA_PacketPath_t.NORMAL) {
+            ret = 32w1;
+        } else if (packet_path == PSA_PacketPath_t.NORMAL_UNICAST) {
+            ret = 32w2;
+        } else if (packet_path == PSA_PacketPath_t.NORMAL_MULTICAST) {
+            ret = 32w3;
+        } else if (packet_path == PSA_PacketPath_t.CLONE_I2E) {
+            ret = 32w4;
+        } else if (packet_path == PSA_PacketPath_t.CLONE_E2E) {
+            ret = 32w5;
+        } else if (packet_path == PSA_PacketPath_t.RESUBMIT) {
+            ret = 32w6;
+        } else if (packet_path == PSA_PacketPath_t.RECIRCULATE) {
+            ret = 32w7;
+        }
     }
 }
+
 parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
@@ -66,10 +69,11 @@ parser EgressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user_
 }
 
 control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
+    @name("packet_path_to_int") packet_path_to_int() packet_path_to_int_inst;
     apply {
         hdr.output_data.word0 = (bit<32>)istd.egress_port;
         hdr.output_data.word1 = (bit<32>)(EgressInstanceUint_t)istd.instance;
-        packet_path_to_int(istd.packet_path, hdr.output_data.word2);
+        packet_path_to_int_inst.apply(istd.packet_path, hdr.output_data.word2);
     }
 }
 

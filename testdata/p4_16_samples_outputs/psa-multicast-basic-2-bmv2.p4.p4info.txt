@@ -9,10 +9,3 @@ actions {
     annotations: "@noWarnUnused"
   }
 }
-actions {
-  preamble {
-    id: 17364882
-    name: "packet_path_to_int"
-    alias: "packet_path_to_int"
-  }
-}

@@ -44,22 +44,25 @@ struct headers_t {
     output_data_t    output_data;
 }
 
-action packet_path_to_int (in PSA_PacketPath_t packet_path, out bit<32> ret)
+control packet_path_to_int (in PSA_PacketPath_t packet_path,
+                            out bit<32> ret)
 {
-    if (packet_path == PSA_PacketPath_t.NORMAL) {
-        ret = 1;
-    } else if (packet_path == PSA_PacketPath_t.NORMAL_UNICAST) {
-        ret = 2;
-    } else if (packet_path == PSA_PacketPath_t.NORMAL_MULTICAST) {
-        ret = 3;
-    } else if (packet_path == PSA_PacketPath_t.CLONE_I2E) {
-        ret = 4;
-    } else if (packet_path == PSA_PacketPath_t.CLONE_E2E) {
-        ret = 5;
-    } else if (packet_path == PSA_PacketPath_t.RESUBMIT) {
-        ret = 6;
-    } else if (packet_path == PSA_PacketPath_t.RECIRCULATE) {
-        ret = 7;
+    apply {
+        if (packet_path == PSA_PacketPath_t.NORMAL) {
+            ret = 1;
+        } else if (packet_path == PSA_PacketPath_t.NORMAL_UNICAST) {
+            ret = 2;
+        } else if (packet_path == PSA_PacketPath_t.NORMAL_MULTICAST) {
+            ret = 3;
+        } else if (packet_path == PSA_PacketPath_t.CLONE_I2E) {
+            ret = 4;
+        } else if (packet_path == PSA_PacketPath_t.CLONE_E2E) {
+            ret = 5;
+        } else if (packet_path == PSA_PacketPath_t.RESUBMIT) {
+            ret = 6;
+        } else if (packet_path == PSA_PacketPath_t.RECIRCULATE) {
+            ret = 7;
+        }
     }
 }
 
@@ -111,7 +114,7 @@ control cEgress(inout headers_t hdr,
     apply {
         hdr.output_data.word0 = (bit<32>) istd.egress_port;
         hdr.output_data.word1 = (bit<32>) ((EgressInstanceUint_t) istd.instance);
-        packet_path_to_int(istd.packet_path, hdr.output_data.word2);
+        packet_path_to_int.apply(istd.packet_path, hdr.output_data.word2);
     }
 }
 

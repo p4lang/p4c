@@ -72,61 +72,127 @@ parser EgressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user_
 }
 
 control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    bit<32> ret;
-    @name(".packet_path_to_int") action packet_path_to_int() {
-        ret = (istd.packet_path == PSA_PacketPath_t.NORMAL ? 32w1 : (istd.packet_path == PSA_PacketPath_t.NORMAL_UNICAST ? 32w2 : (istd.packet_path == PSA_PacketPath_t.NORMAL_MULTICAST ? 32w3 : (istd.packet_path == PSA_PacketPath_t.CLONE_I2E ? 32w4 : (istd.packet_path == PSA_PacketPath_t.CLONE_E2E ? 32w5 : (istd.packet_path == PSA_PacketPath_t.RESUBMIT ? 32w6 : (istd.packet_path == PSA_PacketPath_t.RECIRCULATE ? 32w7 : ret)))))));
-        hdr.output_data.word2 = ret;
+    @hidden action psaunicastordropbmv2l52() {
+        hdr.output_data.word2 = 32w1;
     }
-    @hidden action psaunicastordropbmv2l123() {
+    @hidden action psaunicastordropbmv2l54() {
+        hdr.output_data.word2 = 32w2;
+    }
+    @hidden action psaunicastordropbmv2l56() {
+        hdr.output_data.word2 = 32w3;
+    }
+    @hidden action psaunicastordropbmv2l58() {
+        hdr.output_data.word2 = 32w4;
+    }
+    @hidden action psaunicastordropbmv2l60() {
+        hdr.output_data.word2 = 32w5;
+    }
+    @hidden action psaunicastordropbmv2l62() {
+        hdr.output_data.word2 = 32w6;
+    }
+    @hidden action psaunicastordropbmv2l64() {
+        hdr.output_data.word2 = 32w7;
+    }
+    @hidden action psaunicastordropbmv2l126() {
         hdr.output_data.word0 = (bit<32>)istd.egress_port;
     }
-    @hidden table tbl_psaunicastordropbmv2l123 {
+    @hidden table tbl_psaunicastordropbmv2l126 {
         actions = {
-            psaunicastordropbmv2l123();
+            psaunicastordropbmv2l126();
         }
-        const default_action = psaunicastordropbmv2l123();
+        const default_action = psaunicastordropbmv2l126();
     }
-    @hidden table tbl_packet_path_to_int {
+    @hidden table tbl_psaunicastordropbmv2l52 {
         actions = {
-            packet_path_to_int();
+            psaunicastordropbmv2l52();
         }
-        const default_action = packet_path_to_int();
+        const default_action = psaunicastordropbmv2l52();
+    }
+    @hidden table tbl_psaunicastordropbmv2l54 {
+        actions = {
+            psaunicastordropbmv2l54();
+        }
+        const default_action = psaunicastordropbmv2l54();
+    }
+    @hidden table tbl_psaunicastordropbmv2l56 {
+        actions = {
+            psaunicastordropbmv2l56();
+        }
+        const default_action = psaunicastordropbmv2l56();
+    }
+    @hidden table tbl_psaunicastordropbmv2l58 {
+        actions = {
+            psaunicastordropbmv2l58();
+        }
+        const default_action = psaunicastordropbmv2l58();
+    }
+    @hidden table tbl_psaunicastordropbmv2l60 {
+        actions = {
+            psaunicastordropbmv2l60();
+        }
+        const default_action = psaunicastordropbmv2l60();
+    }
+    @hidden table tbl_psaunicastordropbmv2l62 {
+        actions = {
+            psaunicastordropbmv2l62();
+        }
+        const default_action = psaunicastordropbmv2l62();
+    }
+    @hidden table tbl_psaunicastordropbmv2l64 {
+        actions = {
+            psaunicastordropbmv2l64();
+        }
+        const default_action = psaunicastordropbmv2l64();
     }
     apply {
-        tbl_psaunicastordropbmv2l123.apply();
-        tbl_packet_path_to_int.apply();
+        tbl_psaunicastordropbmv2l126.apply();
+        if (istd.packet_path == PSA_PacketPath_t.NORMAL) {
+            tbl_psaunicastordropbmv2l52.apply();
+        } else if (istd.packet_path == PSA_PacketPath_t.NORMAL_UNICAST) {
+            tbl_psaunicastordropbmv2l54.apply();
+        } else if (istd.packet_path == PSA_PacketPath_t.NORMAL_MULTICAST) {
+            tbl_psaunicastordropbmv2l56.apply();
+        } else if (istd.packet_path == PSA_PacketPath_t.CLONE_I2E) {
+            tbl_psaunicastordropbmv2l58.apply();
+        } else if (istd.packet_path == PSA_PacketPath_t.CLONE_E2E) {
+            tbl_psaunicastordropbmv2l60.apply();
+        } else if (istd.packet_path == PSA_PacketPath_t.RESUBMIT) {
+            tbl_psaunicastordropbmv2l62.apply();
+        } else if (istd.packet_path == PSA_PacketPath_t.RECIRCULATE) {
+            tbl_psaunicastordropbmv2l64.apply();
+        }
     }
 }
 
 control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaunicastordropbmv2l132() {
+    @hidden action psaunicastordropbmv2l135() {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<output_data_t>(hdr.output_data);
     }
-    @hidden table tbl_psaunicastordropbmv2l132 {
+    @hidden table tbl_psaunicastordropbmv2l135 {
         actions = {
-            psaunicastordropbmv2l132();
+            psaunicastordropbmv2l135();
         }
-        const default_action = psaunicastordropbmv2l132();
+        const default_action = psaunicastordropbmv2l135();
     }
     apply {
-        tbl_psaunicastordropbmv2l132.apply();
+        tbl_psaunicastordropbmv2l135.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psaunicastordropbmv2l132_0() {
+    @hidden action psaunicastordropbmv2l135_0() {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<output_data_t>(hdr.output_data);
     }
-    @hidden table tbl_psaunicastordropbmv2l132_0 {
+    @hidden table tbl_psaunicastordropbmv2l135_0 {
         actions = {
-            psaunicastordropbmv2l132_0();
+            psaunicastordropbmv2l135_0();
         }
-        const default_action = psaunicastordropbmv2l132_0();
+        const default_action = psaunicastordropbmv2l135_0();
     }
     apply {
-        tbl_psaunicastordropbmv2l132_0.apply();
+        tbl_psaunicastordropbmv2l135_0.apply();
     }
 }
 
