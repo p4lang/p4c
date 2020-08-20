@@ -1,0 +1,11 @@
+pkg_info {
+  arch: "psa"
+}
+actions {
+  preamble {
+    id: 32077379
+    name: "multicast"
+    alias: "multicast"
+    annotations: "@noWarnUnused"
+  }
+}

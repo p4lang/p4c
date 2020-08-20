@@ -1,5 +1,5 @@
 /*
-Copyright 2019 Cisco Systems, Inc.
+Copyright 2020 Intel Corporation
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -93,19 +93,8 @@ control cIngress(inout headers_t hdr,
                  inout psa_ingress_output_metadata_t ostd)
 {
     apply {
-        // Direct packets out of a port number equal to the least
-        // significant bits of the Ethernet destination address.  On
-        // the BMv2 PSA implementation, type PortIdUint_t is 32 bits
-        // wide, so the least significant 32 bits are significant, and
-        // the upper 16 bits are always ignored.
-        send_to_port(ostd, (PortId_t) (PortIdUint_t) hdr.ethernet.dstAddr);
-        if (hdr.ethernet.dstAddr == 0) {
-            // This action should overwrite the ostd.drop field that
-            // was assigned a value via the send_to_port() action
-            // above, causing this packet to be dropped, _not_ sent
-            // out of port 0.
-            ingress_drop(ostd);
-        }
+	multicast(ostd,
+            (MulticastGroup_t) (MulticastGroupUint_t) hdr.ethernet.dstAddr);
     }
 }
 
@@ -131,6 +120,7 @@ control cEgress(inout headers_t hdr,
 {
     apply {
         hdr.output_data.word0 = (bit<32>) istd.egress_port;
+        hdr.output_data.word1 = (bit<32>) ((EgressInstanceUint_t) istd.instance);
         packet_path_to_int.apply(istd.packet_path, hdr.output_data.word2);
     }
 }
