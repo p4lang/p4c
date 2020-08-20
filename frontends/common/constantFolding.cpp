@@ -519,9 +519,9 @@ static bool overflowWidth(const IR::Node* node, int width) {
     if (width > P4CConfiguration::MaximumWidthSupported) {
         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Compiler only supports widths up to %2%",
                 node, P4CConfiguration::MaximumWidthSupported);
-        return false;
+        return true;
     }
-    return true;
+    return false;
 }
 
 const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
