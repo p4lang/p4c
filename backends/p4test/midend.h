@@ -29,7 +29,7 @@ class MidEnd : public PassManager {
     P4::TypeMap         typeMap;
     IR::ToplevelBlock   *toplevel = nullptr;
 
-    explicit MidEnd(CompilerOptions& options);
+    explicit MidEnd(CompilerOptions& options, std::ostream* outStream = nullptr);
     IR::ToplevelBlock* process(const IR::P4Program *&program) {
         program = program->apply(*this);
         return toplevel; }

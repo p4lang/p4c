@@ -40,6 +40,14 @@ class P4TestOptions : public CompilerOptions {
     bool validateOnly = false;
     bool loadIRFromJson = false;
     P4TestOptions() {
+        registerOption("--listMidendPasses", nullptr,
+                [this](const char*) {
+                    listMidendPasses = true;
+                    loadIRFromJson = false;
+                    P4Test::MidEnd MidEnd(*this, outStream);
+                    exit(0);
+                    return false; },
+                "[p4test] Lists exact name of all midend passes.\n");
         registerOption("--parse-only", nullptr,
                        [this](const char*) {
                            parseOnly = true;
