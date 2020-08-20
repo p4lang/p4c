@@ -35,31 +35,12 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 }
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarnUnused @name(".send_to_port") action send_to_port() {
-        ostd.drop = false;
-        ostd.multicast_group = 32w0;
-        ostd.egress_port = (PortIdUint_t)hdr.ethernet.dstAddr;
-    }
-    @noWarnUnused @name(".ingress_drop") action ingress_drop() {
-        ostd.drop = true;
-    }
-    @hidden table tbl_send_to_port {
-        actions = {
-            send_to_port();
-        }
-        const default_action = send_to_port();
-    }
-    @hidden table tbl_ingress_drop {
-        actions = {
-            ingress_drop();
-        }
-        const default_action = ingress_drop();
+    @noWarnUnused @name(".multicast") action multicast(inout psa_ingress_output_metadata_t meta_1, in MulticastGroup_t multicast_group_1) {
+        meta_1.drop = false;
+        meta_1.multicast_group = multicast_group_1;
     }
     apply {
-        tbl_send_to_port.apply();
-        if (hdr.ethernet.dstAddr == 48w0) {
-            tbl_ingress_drop.apply();
-        }
+        multicast(ostd, (MulticastGroup_t)(MulticastGroupUint_t)hdr.ethernet.dstAddr);
     }
 }
 
@@ -72,61 +53,41 @@ parser EgressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user_
 }
 
 control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    bit<32> ret;
-    @name(".packet_path_to_int") action packet_path_to_int() {
-        ret = (istd.packet_path == PSA_PacketPath_t.NORMAL ? 32w1 : (istd.packet_path == PSA_PacketPath_t.NORMAL_UNICAST ? 32w2 : (istd.packet_path == PSA_PacketPath_t.NORMAL_MULTICAST ? 32w3 : (istd.packet_path == PSA_PacketPath_t.CLONE_I2E ? 32w4 : (istd.packet_path == PSA_PacketPath_t.CLONE_E2E ? 32w5 : (istd.packet_path == PSA_PacketPath_t.RESUBMIT ? 32w6 : (istd.packet_path == PSA_PacketPath_t.RECIRCULATE ? 32w7 : ret)))))));
-        hdr.output_data.word2 = ret;
-    }
-    @hidden action psaunicastordropbmv2l123() {
-        hdr.output_data.word0 = (bit<32>)istd.egress_port;
-    }
-    @hidden table tbl_psaunicastordropbmv2l123 {
-        actions = {
-            psaunicastordropbmv2l123();
+    @name(".packet_path_to_int") action packet_path_to_int(in PSA_PacketPath_t packet_path_1, out bit<32> ret) {
+        if (packet_path_1 == PSA_PacketPath_t.NORMAL) {
+            ret = 32w1;
+        } else if (packet_path_1 == PSA_PacketPath_t.NORMAL_UNICAST) {
+            ret = 32w2;
+        } else if (packet_path_1 == PSA_PacketPath_t.NORMAL_MULTICAST) {
+            ret = 32w3;
+        } else if (packet_path_1 == PSA_PacketPath_t.CLONE_I2E) {
+            ret = 32w4;
+        } else if (packet_path_1 == PSA_PacketPath_t.CLONE_E2E) {
+            ret = 32w5;
+        } else if (packet_path_1 == PSA_PacketPath_t.RESUBMIT) {
+            ret = 32w6;
+        } else if (packet_path_1 == PSA_PacketPath_t.RECIRCULATE) {
+            ret = 32w7;
         }
-        const default_action = psaunicastordropbmv2l123();
-    }
-    @hidden table tbl_packet_path_to_int {
-        actions = {
-            packet_path_to_int();
-        }
-        const default_action = packet_path_to_int();
     }
     apply {
-        tbl_psaunicastordropbmv2l123.apply();
-        tbl_packet_path_to_int.apply();
+        hdr.output_data.word0 = (bit<32>)istd.egress_port;
+        hdr.output_data.word1 = (bit<32>)(EgressInstanceUint_t)istd.instance;
+        packet_path_to_int(istd.packet_path, hdr.output_data.word2);
     }
 }
 
 control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaunicastordropbmv2l132() {
+    apply {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<output_data_t>(hdr.output_data);
-    }
-    @hidden table tbl_psaunicastordropbmv2l132 {
-        actions = {
-            psaunicastordropbmv2l132();
-        }
-        const default_action = psaunicastordropbmv2l132();
-    }
-    apply {
-        tbl_psaunicastordropbmv2l132.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psaunicastordropbmv2l132_0() {
+    apply {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<output_data_t>(hdr.output_data);
-    }
-    @hidden table tbl_psaunicastordropbmv2l132_0 {
-        actions = {
-            psaunicastordropbmv2l132_0();
-        }
-        const default_action = psaunicastordropbmv2l132_0();
-    }
-    apply {
-        tbl_psaunicastordropbmv2l132_0.apply();
     }
 }
 

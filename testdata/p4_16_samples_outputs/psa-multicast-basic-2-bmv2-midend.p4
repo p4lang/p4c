@@ -35,31 +35,18 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 }
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarnUnused @name(".send_to_port") action send_to_port() {
+    @noWarnUnused @name(".multicast") action multicast() {
         ostd.drop = false;
-        ostd.multicast_group = 32w0;
-        ostd.egress_port = (PortIdUint_t)hdr.ethernet.dstAddr;
+        ostd.multicast_group = (MulticastGroupUint_t)hdr.ethernet.dstAddr;
     }
-    @noWarnUnused @name(".ingress_drop") action ingress_drop() {
-        ostd.drop = true;
-    }
-    @hidden table tbl_send_to_port {
+    @hidden table tbl_multicast {
         actions = {
-            send_to_port();
+            multicast();
         }
-        const default_action = send_to_port();
-    }
-    @hidden table tbl_ingress_drop {
-        actions = {
-            ingress_drop();
-        }
-        const default_action = ingress_drop();
+        const default_action = multicast();
     }
     apply {
-        tbl_send_to_port.apply();
-        if (hdr.ethernet.dstAddr == 48w0) {
-            tbl_ingress_drop.apply();
-        }
+        tbl_multicast.apply();
     }
 }
 
@@ -77,14 +64,15 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
         ret = (istd.packet_path == PSA_PacketPath_t.NORMAL ? 32w1 : (istd.packet_path == PSA_PacketPath_t.NORMAL_UNICAST ? 32w2 : (istd.packet_path == PSA_PacketPath_t.NORMAL_MULTICAST ? 32w3 : (istd.packet_path == PSA_PacketPath_t.CLONE_I2E ? 32w4 : (istd.packet_path == PSA_PacketPath_t.CLONE_E2E ? 32w5 : (istd.packet_path == PSA_PacketPath_t.RESUBMIT ? 32w6 : (istd.packet_path == PSA_PacketPath_t.RECIRCULATE ? 32w7 : ret)))))));
         hdr.output_data.word2 = ret;
     }
-    @hidden action psaunicastordropbmv2l123() {
+    @hidden action psamulticastbasic2bmv2l112() {
         hdr.output_data.word0 = (bit<32>)istd.egress_port;
+        hdr.output_data.word1 = (bit<32>)(EgressInstanceUint_t)istd.instance;
     }
-    @hidden table tbl_psaunicastordropbmv2l123 {
+    @hidden table tbl_psamulticastbasic2bmv2l112 {
         actions = {
-            psaunicastordropbmv2l123();
+            psamulticastbasic2bmv2l112();
         }
-        const default_action = psaunicastordropbmv2l123();
+        const default_action = psamulticastbasic2bmv2l112();
     }
     @hidden table tbl_packet_path_to_int {
         actions = {
@@ -93,40 +81,40 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
         const default_action = packet_path_to_int();
     }
     apply {
-        tbl_psaunicastordropbmv2l123.apply();
+        tbl_psamulticastbasic2bmv2l112.apply();
         tbl_packet_path_to_int.apply();
     }
 }
 
 control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaunicastordropbmv2l132() {
+    @hidden action psamulticastbasic2bmv2l122() {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<output_data_t>(hdr.output_data);
     }
-    @hidden table tbl_psaunicastordropbmv2l132 {
+    @hidden table tbl_psamulticastbasic2bmv2l122 {
         actions = {
-            psaunicastordropbmv2l132();
+            psamulticastbasic2bmv2l122();
         }
-        const default_action = psaunicastordropbmv2l132();
+        const default_action = psamulticastbasic2bmv2l122();
     }
     apply {
-        tbl_psaunicastordropbmv2l132.apply();
+        tbl_psamulticastbasic2bmv2l122.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psaunicastordropbmv2l132_0() {
+    @hidden action psamulticastbasic2bmv2l122_0() {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<output_data_t>(hdr.output_data);
     }
-    @hidden table tbl_psaunicastordropbmv2l132_0 {
+    @hidden table tbl_psamulticastbasic2bmv2l122_0 {
         actions = {
-            psaunicastordropbmv2l132_0();
+            psamulticastbasic2bmv2l122_0();
         }
-        const default_action = psaunicastordropbmv2l132_0();
+        const default_action = psamulticastbasic2bmv2l122_0();
     }
     apply {
-        tbl_psaunicastordropbmv2l132_0.apply();
+        tbl_psamulticastbasic2bmv2l122_0.apply();
     }
 }
 

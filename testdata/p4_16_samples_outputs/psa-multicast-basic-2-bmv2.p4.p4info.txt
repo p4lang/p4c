@@ -3,17 +3,9 @@ pkg_info {
 }
 actions {
   preamble {
-    id: 27646489
-    name: "send_to_port"
-    alias: "send_to_port"
-    annotations: "@noWarnUnused"
-  }
-}
-actions {
-  preamble {
-    id: 30788783
-    name: "ingress_drop"
-    alias: "ingress_drop"
+    id: 32077379
+    name: "multicast"
+    alias: "multicast"
     annotations: "@noWarnUnused"
   }
 }
