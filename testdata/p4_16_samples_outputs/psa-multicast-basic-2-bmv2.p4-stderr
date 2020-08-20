@@ -1,6 +1,0 @@
-psa-multicast-basic-2-bmv2.p4(48): [--Wwarn=uninitialized_out_param] warning: out parameter ret may be uninitialized when packet_path_to_int terminates
-                            out bit<32> ret)
-                                        ^^^
-psa-multicast-basic-2-bmv2.p4(47)
-control packet_path_to_int (in PSA_PacketPath_t packet_path,
-        ^^^^^^^^^^^^^^^^^^

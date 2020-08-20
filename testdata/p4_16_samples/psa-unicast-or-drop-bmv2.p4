@@ -48,6 +48,10 @@ control packet_path_to_int (in PSA_PacketPath_t packet_path,
                             out bit<32> ret)
 {
     apply {
+        // Unconditionally assign a value of 8 to ret, because if all
+        // assignments to ret are conditional, p4c gives warnings
+        // about ret possibly being uninitialized.
+        ret = 8;
         if (packet_path == PSA_PacketPath_t.NORMAL) {
             ret = 1;
         } else if (packet_path == PSA_PacketPath_t.NORMAL_UNICAST) {
@@ -63,6 +67,9 @@ control packet_path_to_int (in PSA_PacketPath_t packet_path,
         } else if (packet_path == PSA_PacketPath_t.RECIRCULATE) {
             ret = 7;
         }
+        // ret should still be 8 if packet_path is not any of those
+        // enum values, which according to the P4_16 specification,
+        // could happen if packet_path were uninitialized.
     }
 }
 

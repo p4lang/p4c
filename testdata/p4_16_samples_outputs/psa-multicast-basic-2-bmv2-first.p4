@@ -28,6 +28,7 @@ struct headers_t {
 
 control packet_path_to_int(in PSA_PacketPath_t packet_path, out bit<32> ret) {
     apply {
+        ret = 32w8;
         if (packet_path == PSA_PacketPath_t.NORMAL) {
             ret = 32w1;
         } else if (packet_path == PSA_PacketPath_t.NORMAL_UNICAST) {

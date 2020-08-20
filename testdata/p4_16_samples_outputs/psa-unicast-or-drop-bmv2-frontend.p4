@@ -62,6 +62,7 @@ parser EgressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user_
 control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
     apply {
         hdr.output_data.word0 = (bit<32>)istd.egress_port;
+        hdr.output_data.word2 = 32w8;
         if (istd.packet_path == PSA_PacketPath_t.NORMAL) {
             hdr.output_data.word2 = 32w1;
         } else if (istd.packet_path == PSA_PacketPath_t.NORMAL_UNICAST) {

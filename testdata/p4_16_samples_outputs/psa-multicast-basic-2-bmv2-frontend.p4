@@ -56,6 +56,7 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
     apply {
         hdr.output_data.word0 = (bit<32>)istd.egress_port;
         hdr.output_data.word1 = (bit<32>)(EgressInstanceUint_t)istd.instance;
+        hdr.output_data.word2 = 32w8;
         if (istd.packet_path == PSA_PacketPath_t.NORMAL) {
             hdr.output_data.word2 = 32w1;
         } else if (istd.packet_path == PSA_PacketPath_t.NORMAL_UNICAST) {
