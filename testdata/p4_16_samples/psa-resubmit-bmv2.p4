@@ -24,6 +24,13 @@ header ethernet_t {
     bit<16>         etherType;
 }
 
+header output_data_t {
+    bit<32> word0;
+    bit<32> word1;
+    bit<32> word2;
+    bit<32> word3;
+}
+
 struct empty_metadata_t {
 }
 
@@ -32,6 +39,36 @@ struct metadata_t {
 
 struct headers_t {
     ethernet_t       ethernet;
+    output_data_t    output_data;
+}
+
+control packet_path_to_int (in PSA_PacketPath_t packet_path,
+                            out bit<32> ret)
+{
+    apply {
+        // Unconditionally assign a value of 8 to ret, because if all
+        // assignments to ret are conditional, p4c gives warnings
+        // about ret possibly being uninitialized.
+        ret = 8;
+        if (packet_path == PSA_PacketPath_t.NORMAL) {
+            ret = 1;
+        } else if (packet_path == PSA_PacketPath_t.NORMAL_UNICAST) {
+            ret = 2;
+        } else if (packet_path == PSA_PacketPath_t.NORMAL_MULTICAST) {
+            ret = 3;
+        } else if (packet_path == PSA_PacketPath_t.CLONE_I2E) {
+            ret = 4;
+        } else if (packet_path == PSA_PacketPath_t.CLONE_E2E) {
+            ret = 5;
+        } else if (packet_path == PSA_PacketPath_t.RESUBMIT) {
+            ret = 6;
+        } else if (packet_path == PSA_PacketPath_t.RECIRCULATE) {
+            ret = 7;
+        }
+        // ret should still be 8 if packet_path is not any of those
+        // enum values, which according to the P4_16 specification,
+        // could happen if packet_path were uninitialized.
+    }
 }
 
 parser IngressParserImpl(packet_in pkt,
@@ -43,6 +80,7 @@ parser IngressParserImpl(packet_in pkt,
 {
     state start {
         pkt.extract(hdr.ethernet);
+        pkt.extract(hdr.output_data);
         transition accept;
     }
 }
@@ -52,25 +90,23 @@ control cIngress(inout headers_t hdr,
                  in    psa_ingress_input_metadata_t  istd,
                  inout psa_ingress_output_metadata_t ostd)
 {
-
-    action resubmit() {
-        // this write should not make it to the output packet
-        hdr.ethernet.srcAddr = 48w256;
-        ostd.resubmit = true;
-    }
-
-    action pkt_write() {
-        ostd.drop = false;
-        hdr.ethernet.dstAddr = 48w4;
-    }
-
     apply {
-        pkt_write();
+        ostd.drop = false;
         // Resubmit once
         if (istd.packet_path != PSA_PacketPath_t.RESUBMIT) {
-            resubmit();
+            // Any and all assignments in this part of the code should
+            // not affect the output packet contents, because just
+            // after resubmit, at the beginning of ingress the second
+            // time, the packet will have its original contents.
+            hdr.ethernet.srcAddr = 256;
+            ostd.resubmit = true;
         } else {
+            // Any assignments that modify the packet contents in this
+            // part of the code _should_ affect the output packet
+            // contents, because we are not resubmitting it again.
+            hdr.ethernet.etherType = 0xf00d;
             send_to_port(ostd, (PortId_t) ((PortIdUint_t) hdr.ethernet.dstAddr));
+            packet_path_to_int.apply(istd.packet_path, hdr.output_data.word0);
         }
     }
 }
@@ -102,6 +138,7 @@ control CommonDeparserImpl(packet_out packet,
 {
     apply {
         packet.emit(hdr.ethernet);
+        packet.emit(hdr.output_data);
     }
 }
 
