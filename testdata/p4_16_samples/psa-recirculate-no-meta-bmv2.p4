@@ -44,6 +44,35 @@ struct headers_t {
     output_data_t    output_data;
 }
 
+control packet_path_to_int (in PSA_PacketPath_t packet_path,
+                            out bit<32> ret)
+{
+    apply {
+        // Unconditionally assign a value of 8 to ret, because if all
+        // assignments to ret are conditional, p4c gives warnings
+        // about ret possibly being uninitialized.
+        ret = 8;
+        if (packet_path == PSA_PacketPath_t.NORMAL) {
+            ret = 1;
+        } else if (packet_path == PSA_PacketPath_t.NORMAL_UNICAST) {
+            ret = 2;
+        } else if (packet_path == PSA_PacketPath_t.NORMAL_MULTICAST) {
+            ret = 3;
+        } else if (packet_path == PSA_PacketPath_t.CLONE_I2E) {
+            ret = 4;
+        } else if (packet_path == PSA_PacketPath_t.CLONE_E2E) {
+            ret = 5;
+        } else if (packet_path == PSA_PacketPath_t.RESUBMIT) {
+            ret = 6;
+        } else if (packet_path == PSA_PacketPath_t.RECIRCULATE) {
+            ret = 7;
+        }
+        // ret should still be 8 if packet_path is not any of those
+        // enum values, which according to the P4_16 specification,
+        // could happen if packet_path were uninitialized.
+    }
+}
+
 parser IngressParserImpl(packet_in pkt,
                          out headers_t hdr,
                          inout metadata_t user_meta,
@@ -63,6 +92,8 @@ control cIngress(inout headers_t hdr,
                  in    psa_ingress_input_metadata_t  istd,
                  inout psa_ingress_output_metadata_t ostd)
 {   
+    bit<32> int_packet_path;
+
     action record_ingress_ports_in_pkt() {
         hdr.output_data.word1 = (bit<32>) ((PortIdUint_t) istd.ingress_port);
     }
@@ -74,10 +105,19 @@ control cIngress(inout headers_t hdr,
         } else {
             send_to_port(ostd, PSA_PORT_RECIRCULATE);
         }
+        packet_path_to_int.apply(istd.packet_path, int_packet_path);
+        if (istd.packet_path == PSA_PacketPath_t.RECIRCULATE) {
+            hdr.output_data.word2 = int_packet_path;
+        } else {
+            // Changes made to the packet contents before
+            // recirculation _should_ be retained after the packet is
+            // recirculated.
+            hdr.output_data.word0 = int_packet_path;
+        }
     }
 }
 
-parser EgressParserImpl(packet_in buffer,
+parser EgressParserImpl(packet_in pkt,
                         out headers_t hdr,
                         inout metadata_t user_meta,
                         in psa_egress_parser_input_metadata_t istd,
@@ -86,7 +126,8 @@ parser EgressParserImpl(packet_in buffer,
                         in empty_metadata_t clone_e2e_meta)
 {
     state start {
-      buffer.extract(hdr.ethernet);
+        pkt.extract(hdr.ethernet);
+        pkt.extract(hdr.output_data);
         transition accept;
     }
 }
@@ -97,14 +138,17 @@ control cEgress(inout headers_t hdr,
                 inout psa_egress_output_metadata_t ostd)
 {
     action add() {
-      hdr.ethernet.dstAddr = hdr.ethernet.dstAddr + hdr.ethernet.srcAddr;
+        hdr.ethernet.dstAddr = hdr.ethernet.dstAddr + hdr.ethernet.srcAddr;
     }
     table e {
-      actions = { add; }
-      default_action = add;
+        actions = { add; }
+        default_action = add;
     }
     apply { 
-      e.apply();
+        e.apply();
+        if (istd.egress_port == PSA_PORT_RECIRCULATE) {
+            packet_path_to_int.apply(istd.packet_path, hdr.output_data.word3);
+        }
     }
 }
 

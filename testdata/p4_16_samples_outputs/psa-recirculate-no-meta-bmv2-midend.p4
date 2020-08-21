@@ -35,6 +35,7 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 }
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
+    bit<32> int_packet_path_0;
     @noWarnUnused @name(".send_to_port") action send_to_port() {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
@@ -47,6 +48,36 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     }
     @name("cIngress.record_ingress_ports_in_pkt") action record_ingress_ports_in_pkt() {
         hdr.output_data.word1 = (PortIdUint_t)istd.ingress_port;
+    }
+    @hidden action psarecirculatenometabmv2l56() {
+        int_packet_path_0 = 32w1;
+    }
+    @hidden action psarecirculatenometabmv2l58() {
+        int_packet_path_0 = 32w2;
+    }
+    @hidden action psarecirculatenometabmv2l60() {
+        int_packet_path_0 = 32w3;
+    }
+    @hidden action psarecirculatenometabmv2l62() {
+        int_packet_path_0 = 32w4;
+    }
+    @hidden action psarecirculatenometabmv2l64() {
+        int_packet_path_0 = 32w5;
+    }
+    @hidden action psarecirculatenometabmv2l66() {
+        int_packet_path_0 = 32w6;
+    }
+    @hidden action psarecirculatenometabmv2l68() {
+        int_packet_path_0 = 32w7;
+    }
+    @hidden action psarecirculatenometabmv2l54() {
+        int_packet_path_0 = 32w8;
+    }
+    @hidden action psarecirculatenometabmv2l110() {
+        hdr.output_data.word2 = int_packet_path_0;
+    }
+    @hidden action psarecirculatenometabmv2l115() {
+        hdr.output_data.word0 = int_packet_path_0;
     }
     @hidden table tbl_record_ingress_ports_in_pkt {
         actions = {
@@ -66,6 +97,66 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         }
         const default_action = send_to_port_0();
     }
+    @hidden table tbl_psarecirculatenometabmv2l54 {
+        actions = {
+            psarecirculatenometabmv2l54();
+        }
+        const default_action = psarecirculatenometabmv2l54();
+    }
+    @hidden table tbl_psarecirculatenometabmv2l56 {
+        actions = {
+            psarecirculatenometabmv2l56();
+        }
+        const default_action = psarecirculatenometabmv2l56();
+    }
+    @hidden table tbl_psarecirculatenometabmv2l58 {
+        actions = {
+            psarecirculatenometabmv2l58();
+        }
+        const default_action = psarecirculatenometabmv2l58();
+    }
+    @hidden table tbl_psarecirculatenometabmv2l60 {
+        actions = {
+            psarecirculatenometabmv2l60();
+        }
+        const default_action = psarecirculatenometabmv2l60();
+    }
+    @hidden table tbl_psarecirculatenometabmv2l62 {
+        actions = {
+            psarecirculatenometabmv2l62();
+        }
+        const default_action = psarecirculatenometabmv2l62();
+    }
+    @hidden table tbl_psarecirculatenometabmv2l64 {
+        actions = {
+            psarecirculatenometabmv2l64();
+        }
+        const default_action = psarecirculatenometabmv2l64();
+    }
+    @hidden table tbl_psarecirculatenometabmv2l66 {
+        actions = {
+            psarecirculatenometabmv2l66();
+        }
+        const default_action = psarecirculatenometabmv2l66();
+    }
+    @hidden table tbl_psarecirculatenometabmv2l68 {
+        actions = {
+            psarecirculatenometabmv2l68();
+        }
+        const default_action = psarecirculatenometabmv2l68();
+    }
+    @hidden table tbl_psarecirculatenometabmv2l110 {
+        actions = {
+            psarecirculatenometabmv2l110();
+        }
+        const default_action = psarecirculatenometabmv2l110();
+    }
+    @hidden table tbl_psarecirculatenometabmv2l115 {
+        actions = {
+            psarecirculatenometabmv2l115();
+        }
+        const default_action = psarecirculatenometabmv2l115();
+    }
     apply {
         if (hdr.ethernet.dstAddr[3:0] >= 4w4) {
             tbl_record_ingress_ports_in_pkt.apply();
@@ -73,12 +164,34 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         } else {
             tbl_send_to_port_0.apply();
         }
+        tbl_psarecirculatenometabmv2l54.apply();
+        if (istd.packet_path == PSA_PacketPath_t.NORMAL) {
+            tbl_psarecirculatenometabmv2l56.apply();
+        } else if (istd.packet_path == PSA_PacketPath_t.NORMAL_UNICAST) {
+            tbl_psarecirculatenometabmv2l58.apply();
+        } else if (istd.packet_path == PSA_PacketPath_t.NORMAL_MULTICAST) {
+            tbl_psarecirculatenometabmv2l60.apply();
+        } else if (istd.packet_path == PSA_PacketPath_t.CLONE_I2E) {
+            tbl_psarecirculatenometabmv2l62.apply();
+        } else if (istd.packet_path == PSA_PacketPath_t.CLONE_E2E) {
+            tbl_psarecirculatenometabmv2l64.apply();
+        } else if (istd.packet_path == PSA_PacketPath_t.RESUBMIT) {
+            tbl_psarecirculatenometabmv2l66.apply();
+        } else if (istd.packet_path == PSA_PacketPath_t.RECIRCULATE) {
+            tbl_psarecirculatenometabmv2l68.apply();
+        }
+        if (istd.packet_path == PSA_PacketPath_t.RECIRCULATE) {
+            tbl_psarecirculatenometabmv2l110.apply();
+        } else {
+            tbl_psarecirculatenometabmv2l115.apply();
+        }
     }
 }
 
-parser EgressParserImpl(packet_in buffer, out headers_t hdr, inout metadata_t user_meta, in psa_egress_parser_input_metadata_t istd, in empty_metadata_t normal_meta, in empty_metadata_t clone_i2e_meta, in empty_metadata_t clone_e2e_meta) {
+parser EgressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user_meta, in psa_egress_parser_input_metadata_t istd, in empty_metadata_t normal_meta, in empty_metadata_t clone_i2e_meta, in empty_metadata_t clone_e2e_meta) {
     state start {
-        buffer.extract<ethernet_t>(hdr.ethernet);
+        pkt.extract<ethernet_t>(hdr.ethernet);
+        pkt.extract<output_data_t>(hdr.output_data);
         transition accept;
     }
 }
@@ -93,40 +206,130 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
         }
         default_action = add_1();
     }
+    @hidden action psarecirculatenometabmv2l56_0() {
+        hdr.output_data.word3 = 32w1;
+    }
+    @hidden action psarecirculatenometabmv2l58_0() {
+        hdr.output_data.word3 = 32w2;
+    }
+    @hidden action psarecirculatenometabmv2l60_0() {
+        hdr.output_data.word3 = 32w3;
+    }
+    @hidden action psarecirculatenometabmv2l62_0() {
+        hdr.output_data.word3 = 32w4;
+    }
+    @hidden action psarecirculatenometabmv2l64_0() {
+        hdr.output_data.word3 = 32w5;
+    }
+    @hidden action psarecirculatenometabmv2l66_0() {
+        hdr.output_data.word3 = 32w6;
+    }
+    @hidden action psarecirculatenometabmv2l68_0() {
+        hdr.output_data.word3 = 32w7;
+    }
+    @hidden action psarecirculatenometabmv2l54_0() {
+        hdr.output_data.word3 = 32w8;
+    }
+    @hidden table tbl_psarecirculatenometabmv2l54_0 {
+        actions = {
+            psarecirculatenometabmv2l54_0();
+        }
+        const default_action = psarecirculatenometabmv2l54_0();
+    }
+    @hidden table tbl_psarecirculatenometabmv2l56_0 {
+        actions = {
+            psarecirculatenometabmv2l56_0();
+        }
+        const default_action = psarecirculatenometabmv2l56_0();
+    }
+    @hidden table tbl_psarecirculatenometabmv2l58_0 {
+        actions = {
+            psarecirculatenometabmv2l58_0();
+        }
+        const default_action = psarecirculatenometabmv2l58_0();
+    }
+    @hidden table tbl_psarecirculatenometabmv2l60_0 {
+        actions = {
+            psarecirculatenometabmv2l60_0();
+        }
+        const default_action = psarecirculatenometabmv2l60_0();
+    }
+    @hidden table tbl_psarecirculatenometabmv2l62_0 {
+        actions = {
+            psarecirculatenometabmv2l62_0();
+        }
+        const default_action = psarecirculatenometabmv2l62_0();
+    }
+    @hidden table tbl_psarecirculatenometabmv2l64_0 {
+        actions = {
+            psarecirculatenometabmv2l64_0();
+        }
+        const default_action = psarecirculatenometabmv2l64_0();
+    }
+    @hidden table tbl_psarecirculatenometabmv2l66_0 {
+        actions = {
+            psarecirculatenometabmv2l66_0();
+        }
+        const default_action = psarecirculatenometabmv2l66_0();
+    }
+    @hidden table tbl_psarecirculatenometabmv2l68_0 {
+        actions = {
+            psarecirculatenometabmv2l68_0();
+        }
+        const default_action = psarecirculatenometabmv2l68_0();
+    }
     apply {
         e_0.apply();
+        if (istd.egress_port == 32w0xfffffffa) {
+            tbl_psarecirculatenometabmv2l54_0.apply();
+            if (istd.packet_path == PSA_PacketPath_t.NORMAL) {
+                tbl_psarecirculatenometabmv2l56_0.apply();
+            } else if (istd.packet_path == PSA_PacketPath_t.NORMAL_UNICAST) {
+                tbl_psarecirculatenometabmv2l58_0.apply();
+            } else if (istd.packet_path == PSA_PacketPath_t.NORMAL_MULTICAST) {
+                tbl_psarecirculatenometabmv2l60_0.apply();
+            } else if (istd.packet_path == PSA_PacketPath_t.CLONE_I2E) {
+                tbl_psarecirculatenometabmv2l62_0.apply();
+            } else if (istd.packet_path == PSA_PacketPath_t.CLONE_E2E) {
+                tbl_psarecirculatenometabmv2l64_0.apply();
+            } else if (istd.packet_path == PSA_PacketPath_t.RESUBMIT) {
+                tbl_psarecirculatenometabmv2l66_0.apply();
+            } else if (istd.packet_path == PSA_PacketPath_t.RECIRCULATE) {
+                tbl_psarecirculatenometabmv2l68_0.apply();
+            }
+        }
     }
 }
 
 control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psarecirculatenometabmv2l115() {
+    @hidden action psarecirculatenometabmv2l159() {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<output_data_t>(hdr.output_data);
     }
-    @hidden table tbl_psarecirculatenometabmv2l115 {
+    @hidden table tbl_psarecirculatenometabmv2l159 {
         actions = {
-            psarecirculatenometabmv2l115();
+            psarecirculatenometabmv2l159();
         }
-        const default_action = psarecirculatenometabmv2l115();
+        const default_action = psarecirculatenometabmv2l159();
     }
     apply {
-        tbl_psarecirculatenometabmv2l115.apply();
+        tbl_psarecirculatenometabmv2l159.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psarecirculatenometabmv2l115_0() {
+    @hidden action psarecirculatenometabmv2l159_0() {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<output_data_t>(hdr.output_data);
     }
-    @hidden table tbl_psarecirculatenometabmv2l115_0 {
+    @hidden table tbl_psarecirculatenometabmv2l159_0 {
         actions = {
-            psarecirculatenometabmv2l115_0();
+            psarecirculatenometabmv2l159_0();
         }
-        const default_action = psarecirculatenometabmv2l115_0();
+        const default_action = psarecirculatenometabmv2l159_0();
     }
     apply {
-        tbl_psarecirculatenometabmv2l115_0.apply();
+        tbl_psarecirculatenometabmv2l159_0.apply();
     }
 }
 
