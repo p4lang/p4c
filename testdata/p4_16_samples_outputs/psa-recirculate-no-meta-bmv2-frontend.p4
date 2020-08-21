@@ -45,6 +45,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         meta_2.multicast_group = (MulticastGroup_t)32w0;
         meta_2.egress_port = egress_port_2;
     }
+    bit<32> int_packet_path_0;
     @name("cIngress.record_ingress_ports_in_pkt") action record_ingress_ports_in_pkt() {
         hdr.output_data.word1 = (PortIdUint_t)istd.ingress_port;
     }
@@ -55,12 +56,34 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         } else {
             send_to_port_0(ostd, (PortId_t)32w0xfffffffa);
         }
+        int_packet_path_0 = 32w8;
+        if (istd.packet_path == PSA_PacketPath_t.NORMAL) {
+            int_packet_path_0 = 32w1;
+        } else if (istd.packet_path == PSA_PacketPath_t.NORMAL_UNICAST) {
+            int_packet_path_0 = 32w2;
+        } else if (istd.packet_path == PSA_PacketPath_t.NORMAL_MULTICAST) {
+            int_packet_path_0 = 32w3;
+        } else if (istd.packet_path == PSA_PacketPath_t.CLONE_I2E) {
+            int_packet_path_0 = 32w4;
+        } else if (istd.packet_path == PSA_PacketPath_t.CLONE_E2E) {
+            int_packet_path_0 = 32w5;
+        } else if (istd.packet_path == PSA_PacketPath_t.RESUBMIT) {
+            int_packet_path_0 = 32w6;
+        } else if (istd.packet_path == PSA_PacketPath_t.RECIRCULATE) {
+            int_packet_path_0 = 32w7;
+        }
+        if (istd.packet_path == PSA_PacketPath_t.RECIRCULATE) {
+            hdr.output_data.word2 = int_packet_path_0;
+        } else {
+            hdr.output_data.word0 = int_packet_path_0;
+        }
     }
 }
 
-parser EgressParserImpl(packet_in buffer, out headers_t hdr, inout metadata_t user_meta, in psa_egress_parser_input_metadata_t istd, in empty_metadata_t normal_meta, in empty_metadata_t clone_i2e_meta, in empty_metadata_t clone_e2e_meta) {
+parser EgressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user_meta, in psa_egress_parser_input_metadata_t istd, in empty_metadata_t normal_meta, in empty_metadata_t clone_i2e_meta, in empty_metadata_t clone_e2e_meta) {
     state start {
-        buffer.extract<ethernet_t>(hdr.ethernet);
+        pkt.extract<ethernet_t>(hdr.ethernet);
+        pkt.extract<output_data_t>(hdr.output_data);
         transition accept;
     }
 }
@@ -77,6 +100,24 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
     }
     apply {
         e_0.apply();
+        if (istd.egress_port == (PortId_t)32w0xfffffffa) {
+            hdr.output_data.word3 = 32w8;
+            if (istd.packet_path == PSA_PacketPath_t.NORMAL) {
+                hdr.output_data.word3 = 32w1;
+            } else if (istd.packet_path == PSA_PacketPath_t.NORMAL_UNICAST) {
+                hdr.output_data.word3 = 32w2;
+            } else if (istd.packet_path == PSA_PacketPath_t.NORMAL_MULTICAST) {
+                hdr.output_data.word3 = 32w3;
+            } else if (istd.packet_path == PSA_PacketPath_t.CLONE_I2E) {
+                hdr.output_data.word3 = 32w4;
+            } else if (istd.packet_path == PSA_PacketPath_t.CLONE_E2E) {
+                hdr.output_data.word3 = 32w5;
+            } else if (istd.packet_path == PSA_PacketPath_t.RESUBMIT) {
+                hdr.output_data.word3 = 32w6;
+            } else if (istd.packet_path == PSA_PacketPath_t.RECIRCULATE) {
+                hdr.output_data.word3 = 32w7;
+            }
+        }
     }
 }
 
