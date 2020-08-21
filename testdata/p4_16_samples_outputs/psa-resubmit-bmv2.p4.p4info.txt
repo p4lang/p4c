@@ -9,17 +9,3 @@ actions {
     annotations: "@noWarnUnused"
   }
 }
-actions {
-  preamble {
-    id: 27400393
-    name: "cIngress.resubmit"
-    alias: "resubmit"
-  }
-}
-actions {
-  preamble {
-    id: 24095040
-    name: "cIngress.pkt_write"
-    alias: "pkt_write"
-  }
-}

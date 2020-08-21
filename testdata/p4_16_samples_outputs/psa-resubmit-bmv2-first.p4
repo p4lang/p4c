@@ -8,6 +8,13 @@ header ethernet_t {
     bit<16>         etherType;
 }
 
+header output_data_t {
+    bit<32> word0;
+    bit<32> word1;
+    bit<32> word2;
+    bit<32> word3;
+}
+
 struct empty_metadata_t {
 }
 
@@ -15,31 +22,50 @@ struct metadata_t {
 }
 
 struct headers_t {
-    ethernet_t ethernet;
+    ethernet_t    ethernet;
+    output_data_t output_data;
+}
+
+control packet_path_to_int(in PSA_PacketPath_t packet_path, out bit<32> ret) {
+    apply {
+        ret = 32w8;
+        if (packet_path == PSA_PacketPath_t.NORMAL) {
+            ret = 32w1;
+        } else if (packet_path == PSA_PacketPath_t.NORMAL_UNICAST) {
+            ret = 32w2;
+        } else if (packet_path == PSA_PacketPath_t.NORMAL_MULTICAST) {
+            ret = 32w3;
+        } else if (packet_path == PSA_PacketPath_t.CLONE_I2E) {
+            ret = 32w4;
+        } else if (packet_path == PSA_PacketPath_t.CLONE_E2E) {
+            ret = 32w5;
+        } else if (packet_path == PSA_PacketPath_t.RESUBMIT) {
+            ret = 32w6;
+        } else if (packet_path == PSA_PacketPath_t.RECIRCULATE) {
+            ret = 32w7;
+        }
+    }
 }
 
 parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
+        pkt.extract<output_data_t>(hdr.output_data);
         transition accept;
     }
 }
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    action resubmit() {
-        hdr.ethernet.srcAddr = 48w256;
-        ostd.resubmit = true;
-    }
-    action pkt_write() {
-        ostd.drop = false;
-        hdr.ethernet.dstAddr = 48w4;
-    }
+    @name("packet_path_to_int") packet_path_to_int() packet_path_to_int_inst;
     apply {
-        pkt_write();
+        ostd.drop = false;
         if (istd.packet_path != PSA_PacketPath_t.RESUBMIT) {
-            resubmit();
+            hdr.ethernet.srcAddr = 48w256;
+            ostd.resubmit = true;
         } else {
+            hdr.ethernet.etherType = 16w0xf00d;
             send_to_port(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr);
+            packet_path_to_int_inst.apply(istd.packet_path, hdr.output_data.word0);
         }
     }
 }
@@ -59,6 +85,7 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
 control CommonDeparserImpl(packet_out packet, inout headers_t hdr) {
     apply {
         packet.emit<ethernet_t>(hdr.ethernet);
+        packet.emit<output_data_t>(hdr.output_data);
     }
 }
 
