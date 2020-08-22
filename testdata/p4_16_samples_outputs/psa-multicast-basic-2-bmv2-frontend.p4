@@ -41,6 +41,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     }
     apply {
         multicast(ostd, (MulticastGroup_t)(MulticastGroupUint_t)hdr.ethernet.dstAddr);
+        ostd.class_of_service = (ClassOfService_t)(ClassOfServiceUint_t)hdr.ethernet.srcAddr[0:0];
     }
 }
 
@@ -72,6 +73,7 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
         } else if (istd.packet_path == PSA_PacketPath_t.RECIRCULATE) {
             hdr.output_data.word2 = 32w7;
         }
+        hdr.output_data.word3 = (bit<32>)(ClassOfServiceUint_t)istd.class_of_service;
     }
 }
 
