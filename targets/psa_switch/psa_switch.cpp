@@ -166,9 +166,6 @@ PsaSwitch::receive_(port_t port_num, const char *buffer, int len) {
   // each add_header / remove_header primitive call
   packet->set_register(PACKET_LENGTH_REG_IDX, len);
 
-  phv->get_field("psa_ingress_input_metadata.ingress_timestamp").set(
-      get_ts().count());
-
   input_buffer.push_front(std::move(packet));
   return 0;
 }
@@ -292,11 +289,12 @@ PsaSwitch::ingress_thread() {
     input_buffer.pop_back(&packet);
     if (packet == nullptr) break;
 
-    port_t ingress_port = packet->get_ingress_port();
+    phv = packet->get_phv();
+    auto ingress_port =
+        phv->get_field("psa_ingress_parser_input_metadata.ingress_port").
+            get_uint();
     BMLOG_DEBUG_PKT(*packet, "Processing packet received on port {}",
                     ingress_port);
-
-    phv = packet->get_phv();
 
     /* Ingress cloning and resubmitting work on the packet before parsing.
        `buffer_state` contains the `data_size` field which tracks how many
@@ -308,11 +306,19 @@ PsaSwitch::ingress_thread() {
 
     const Packet::buffer_state_t packet_in_state = packet->save_buffer_state();
 
+    // The PSA specification says that for all packets, whether they
+    // are new ones from a port, or resubmitted, or recirculated, the
+    // ingress_timestamp should be the time near when the packet began
+    // ingress processing.  This one place for assigning a value to
+    // ingress_timestamp covers all cases.
+    phv->get_field("psa_ingress_input_metadata.ingress_timestamp").set(
+        get_ts().count());
+
     Parser *parser = this->get_parser("ingress_parser");
     parser->parse(packet.get());
 
     // pass relevant values from ingress parser
-    // ingress_timestamp is already set at receive time
+    // ingress_timestamp is already set above
     phv->get_field("psa_ingress_input_metadata.ingress_port").set(
         phv->get_field("psa_ingress_parser_input_metadata.ingress_port"));
     phv->get_field("psa_ingress_input_metadata.packet_path").set(
@@ -346,7 +352,8 @@ PsaSwitch::ingress_thread() {
 
       packet->restore_buffer_state(packet_in_state);
       phv->reset_metadata();
-      phv->get_field("psa_ingress_parser_input_metadata.packet_path").set(PACKET_PATH_RESUBMIT);
+      phv->get_field("psa_ingress_parser_input_metadata.packet_path").set(
+          PACKET_PATH_RESUBMIT);
 
       input_buffer.push_front(std::move(packet));
       continue;
@@ -356,6 +363,8 @@ PsaSwitch::ingress_thread() {
     deparser->deparse(packet.get());
 
     auto &f_packet_path = phv->get_field("psa_egress_parser_input_metadata.packet_path");
+    const auto &f_ig_cos = phv->get_field("psa_ingress_output_metadata.class_of_service");
+    const auto ig_cos = f_ig_cos.get_uint();
 
     // handling multicast
     unsigned int mgid = 0u;
@@ -368,6 +377,7 @@ PsaSwitch::ingress_thread() {
                       mgid);
       const auto pre_out = pre->replicate({mgid});
       auto &f_instance = phv->get_field("psa_egress_input_metadata.instance");
+      auto &f_eg_cos = phv->get_field("psa_egress_input_metadata.class_of_service");
       auto packet_size = packet->get_register(PACKET_LENGTH_REG_IDX);
       for(const auto &out : pre_out){
         auto egress_port = out.egress_port;
@@ -378,6 +388,7 @@ PsaSwitch::ingress_thread() {
         f_instance.set(instance);
         // TODO use appropriate enum member from JSON
         f_packet_path.set(PACKET_PATH_NORMAL_MULTICAST);
+        f_eg_cos.set(ig_cos);
         std::unique_ptr<Packet> packet_copy = packet->clone_with_phv_ptr();
         packet_copy->set_register(PACKET_LENGTH_REG_IDX, packet_size);
         enqueue(egress_port, std::move(packet_copy));
@@ -386,10 +397,14 @@ PsaSwitch::ingress_thread() {
     }
 
     const auto &f_egress_port = phv->get_field("psa_ingress_output_metadata.egress_port");
+    auto &f_instance = phv->get_field("psa_egress_input_metadata.instance");
+    auto &f_eg_cos = phv->get_field("psa_egress_input_metadata.class_of_service");
     port_t egress_port = f_egress_port.get_uint();
     BMLOG_DEBUG_PKT(*packet, "Egress port is {}", egress_port);
+    f_instance.set(0);
     // TODO use appropriate enum member from JSON
     f_packet_path.set(PACKET_PATH_NORMAL_UNICAST);
+    f_eg_cos.set(ig_cos);
 
     enqueue(egress_port, std::move(packet));
   }
@@ -419,6 +434,8 @@ PsaSwitch::egress_thread(size_t worker_id) {
     phv->reset();
 
     phv->get_field("psa_egress_parser_input_metadata.egress_port").set(port);
+    phv->get_field("psa_egress_input_metadata.egress_timestamp").set(
+        get_ts().count());
 
     Parser *parser = this->get_parser("egress_parser");
     parser->parse(packet.get());
@@ -427,8 +444,6 @@ PsaSwitch::egress_thread(size_t worker_id) {
         phv->get_field("psa_egress_parser_input_metadata.egress_port"));
     phv->get_field("psa_egress_input_metadata.packet_path").set(
         phv->get_field("psa_egress_parser_input_metadata.packet_path"));
-    phv->get_field("psa_egress_input_metadata.egress_timestamp")
-        .set(get_ts().count());
     phv->get_field("psa_egress_input_metadata.parser_error").set(
         packet->get_error_code().get());
 
@@ -441,6 +456,8 @@ PsaSwitch::egress_thread(size_t worker_id) {
     egress_mau->apply(packet.get());
     packet->reset_exit();
     // TODO(peter): add stf test where exit is invoked but packet still gets recirc'd
+    phv->get_field("psa_egress_deparser_input_metadata.egress_port").set(
+        phv->get_field("psa_egress_parser_input_metadata.egress_port"));
 
     Deparser *deparser = this->get_deparser("egress_deparser");
     deparser->deparse(packet.get());
@@ -456,12 +473,6 @@ PsaSwitch::egress_thread(size_t worker_id) {
         .set(PSA_PORT_RECIRCULATE);
       phv->get_field("psa_ingress_parser_input_metadata.packet_path")
         .set(PACKET_PATH_RECIRCULATE);
-      phv->get_field("psa_ingress_input_metadata.ingress_port")
-        .set(PSA_PORT_RECIRCULATE);
-      phv->get_field("psa_ingress_input_metadata.packet_path")
-        .set(PACKET_PATH_RECIRCULATE);
-      phv->get_field("psa_ingress_input_metadata.ingress_timestamp")
-        .set(get_ts().count());
       input_buffer.push_front(std::move(packet));
       continue;
     }
