@@ -387,7 +387,6 @@ control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata me
     }
     @hidden action issue982l417() {
         clone_md_0_data.h1.setValid();
-        clone_md_0_data.h1.setValid();
         clone_md_0_data.h1.data = 32w0;
     }
     @hidden action issue982l422() {
