@@ -88,14 +88,14 @@ class Token {
     cstring text;
     UnparsedConstant* unparsedConstant;
 
-    explicit Token() { }
-    explicit Token(int type, cstring text) : Token(type, text, nullptr) { }
-    explicit Token(int type, UnparsedConstant unparsedConstant)
+    Token() : Token(0, "", nullptr) { }
+    Token(int type, cstring text) : Token(type, text, nullptr) { }
+    Token(int type, UnparsedConstant unparsedConstant)
             : Token(type, unparsedConstant.text,
                     new UnparsedConstant(unparsedConstant)) { }
 
  private:
-    explicit Token(int type, cstring text, UnparsedConstant* unparsedConstant)
+    Token(int type, cstring text, UnparsedConstant* unparsedConstant)
             : type(type), text(text), unparsedConstant(unparsedConstant) { }
 };
 

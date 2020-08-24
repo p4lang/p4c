@@ -18,13 +18,11 @@ control ingress(inout Headers h) {
     ethernet_t tmp;
     @hidden action issue2487l19() {
         tmp.setValid();
-        tmp.setValid();
         tmp.dst_addr = 48w1;
         tmp.src_addr = 48w1;
         tmp.eth_type = 16w1;
     }
     @hidden action issue2487l19_0() {
-        tmp.setValid();
         tmp.setValid();
         tmp.dst_addr = 48w2;
         tmp.src_addr = 48w2;

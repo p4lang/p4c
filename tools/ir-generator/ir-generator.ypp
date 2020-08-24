@@ -429,6 +429,7 @@ IrDefinitions *parse(char** files, int count) {
             yyrestart(fp);
             BEGIN(NORMAL);
             errors |= yyparse();
+            fclose(fp);
             if (errors & 2) {
                 error("out of memory");
                 break; }

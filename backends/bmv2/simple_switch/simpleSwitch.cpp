@@ -699,6 +699,8 @@ void ExternConverter_action_profile::convertExternInstance(
 
     auto add_size = [&action_profile, &eb](const cstring &pname) {
         auto sz = eb->findParameterValue(pname);
+        BUG_CHECK(sz, "%1%Invalid declaration of extern ctor: no size param",
+                  eb->constructor->srcInfo);
         if (!sz->is<IR::Constant>()) {
             ::error("%1%: expected a constant", sz);
             return;
@@ -755,6 +757,8 @@ void ExternConverter_action_selector::convertExternInstance(
 
     auto add_size = [&action_profile, &eb](const cstring &pname) {
         auto sz = eb->findParameterValue(pname);
+        BUG_CHECK(sz, "%1%Invalid declaration of extern ctor: no size param",
+                  eb->constructor->srcInfo);
         if (!sz->is<IR::Constant>()) {
             ::error("%1%: expected a constant", sz);
             return;

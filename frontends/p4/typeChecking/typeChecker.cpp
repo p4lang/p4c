@@ -1548,6 +1548,7 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
         ltype = getTypeType(l->type);
     if (auto r = rtype->to<IR::Type_SerEnum>())
         rtype = getTypeType(r->type);
+    BUG_CHECK(ltype && rtype, "Invalid Type_SerEnum/getTypeType");
 
     if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_InfInt>()) {
         // This can happen because we are replacing some constant functions with
@@ -2003,6 +2004,7 @@ const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expressio
         ltype = getTypeType(se->type);
     if (auto se = rtype->to<IR::Type_SerEnum>())
         rtype = getTypeType(se->type);
+    BUG_CHECK(ltype && rtype, "Invalid Type_SerEnum/getTypeType");
 
     const IR::Type_Bits* bl = ltype->to<IR::Type_Bits>();
     const IR::Type_Bits* br = rtype->to<IR::Type_Bits>();
@@ -2170,6 +2172,7 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
         ltype = getTypeType(se->type);
     if (auto se = rtype->to<IR::Type_SerEnum>())
         rtype = getTypeType(se->type);
+    BUG_CHECK(ltype && rtype, "Invalid Type_SerEnum/getTypeType");
 
     const IR::Type_Bits* bl = ltype->to<IR::Type_Bits>();
     const IR::Type_Bits* br = rtype->to<IR::Type_Bits>();
@@ -2238,6 +2241,7 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
         ltype = getTypeType(se->type);
     if (auto se = rtype->to<IR::Type_SerEnum>())
         rtype = getTypeType(se->type);
+    BUG_CHECK(ltype && rtype, "Invalid Type_SerEnum/getTypeType");
 
     // The following section is very similar to "binaryArith()" above
     const IR::Type_Bits* bl = ltype->to<IR::Type_Bits>();
@@ -2326,6 +2330,7 @@ const IR::Node* TypeInference::postorder(IR::Neg* expression) {
 
     if (auto se = type->to<IR::Type_SerEnum>())
         type = getTypeType(se->type);
+    BUG_CHECK(type, "Invalid Type_SerEnum/getTypeType");
 
     if (type->is<IR::Type_InfInt>()) {
         setType(getOriginal(), type);
@@ -2352,6 +2357,7 @@ const IR::Node* TypeInference::postorder(IR::Cmpl* expression) {
 
     if (auto se = type->to<IR::Type_SerEnum>())
         type = getTypeType(se->type);
+    BUG_CHECK(type, "Invalid Type_SerEnum/getTypeType");
 
     if (type->is<IR::Type_InfInt>()) {
         typeError("%1% cannot be applied to an operand with an unknown width");
