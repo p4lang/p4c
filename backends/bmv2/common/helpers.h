@@ -266,7 +266,7 @@ struct ConversionContext {
     BMV2::JsonObjects*               json;
 
     // for action profile conversion
-    Util::JsonArray*                 action_profiles;
+    Util::JsonArray*                 action_profiles = nullptr;
 
     std::map<const IR::Declaration_Instance *, SelectorInput> selector_input_map;
 

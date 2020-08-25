@@ -39,7 +39,6 @@ class KeyIsSimple {
  */
 class IsLikeLeftValue : public KeyIsSimple, public Inspector {
  protected:
-    TypeMap* typeMap;
     bool     simple;
 
  public:

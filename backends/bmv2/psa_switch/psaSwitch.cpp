@@ -1060,6 +1060,9 @@ void ExternConverter_ActionProfile::convertExternInstance(
     action_profile->emplace_non_null("source_info", eb->sourceInfoJsonObj());
 
     auto sz = eb->findParameterValue("size");
+    BUG_CHECK(sz, "%1%Invalid declaration of extern ActionProfile ctor: no size param",
+              eb->constructor->srcInfo);
+
     if (!sz->is<IR::Constant>()) {
         ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
     }
@@ -1083,6 +1086,8 @@ void ExternConverter_ActionSelector::convertExternInstance(
     action_profile->emplace_non_null("source_info", eb->sourceInfoJsonObj());
 
     auto sz = eb->findParameterValue("size");
+    BUG_CHECK(sz, "%1%Invalid declaration of extern ActionSelector: no size param",
+              eb->constructor->srcInfo);
     if (!sz->is<IR::Constant>()) {
         ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
         return;

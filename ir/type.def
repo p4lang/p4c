@@ -78,7 +78,7 @@ class Type_State : Type_Base {
 
 /// Represents both bit<> and int<> types in P4-14 and P4-16
 class Type_Bits : Type_Base {
-    optional int size;
+    optional int size = 0;      // zero (only) for not-yet evaluated const expression
     NullOK optional Expression expression; // only used temporarily
     bool isSigned;
     static Type_Bits get(Util::SourceInfo si, int sz, bool isSigned = false);
@@ -91,8 +91,8 @@ class Type_Bits : Type_Base {
 }
 
 class Type_Varbits : Type_Base {
-    optional int         size;   // if zero it means "unknown"
-    NullOK optional Expression  expression;  // only used temporarily
+    optional int         size = 0;   // if zero it means "unknown"
+    NullOK optional Expression  expression = nullptr;  // only used temporarily
     static Type_Varbits get(Util::SourceInfo si, int size = 0);
     static Type_Varbits get();
     toString{ return cstring("varbit<") + Util::toString(size) + ">"; }

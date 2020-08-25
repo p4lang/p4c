@@ -54,7 +54,7 @@ class Backend {
     P4::ConvertEnums::EnumMapping*   enumMap;
     P4::P4CoreLibrary&               corelib;
     BMV2::JsonObjects*               json;
-    const IR::ToplevelBlock*         toplevel;
+    const IR::ToplevelBlock*         toplevel = nullptr;
 
  public:
     Backend(BMV2Options& options, P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
