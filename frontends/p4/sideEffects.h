@@ -138,6 +138,8 @@ class DoSimplifyExpressions : public Transform, P4WriteContext {
     }
 
     const IR::Node* postorder(IR::Expression* expression) override;
+    const IR::Node* preorder(IR::StructExpression * expression) override;
+    const IR::Node* preorder(IR::ListExpression * expression) override;
     const IR::Node* preorder(IR::Literal* expression) override;
     const IR::Node* preorder(IR::ArrayIndex* expression) override;
     const IR::Node* preorder(IR::Member* expression) override;
