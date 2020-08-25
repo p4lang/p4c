@@ -143,11 +143,11 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         // Desugars direct parser and control applications
         // into instantiations followed by application
         new InstantiateDirectCalls(&refMap),
-        // Type checking and type inference.  Also inserts
-        // explicit casts where implicit casts exist.
         new ResolveReferences(&refMap),  // check shadowing
         new Deprecated(&refMap),
         new CheckNamedArgs(),
+        // Type checking and type inference.  Also inserts
+        // explicit casts where implicit casts exist.
         new TypeInference(&refMap, &typeMap, false),  // insert casts
         new ValidateMatchAnnotations(&typeMap),
         new BindTypeVariables(&refMap, &typeMap),

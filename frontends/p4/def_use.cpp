@@ -39,15 +39,14 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
         // Since we don't have any operations except assignment for a
         // type described by a type variable, we treat is as a base type.
         type->is<IR::Type_Var>() ||
-        // Similarly for tuples.  This may need to be revisited if we
-        // add tuple field accessors.
+        // The following may need to be revisited when we add tuple
+        // field accessors.
         type->is<IR::Type_Tuple>() ||
+        type->is<IR::Type_List>() ||
         // Also for newtype
         type->is<IR::Type_Newtype>())
         return new BaseLocation(type, name);
-    if (type->is<IR::Type_StructLike>()) {
-        type = typeMap->getTypeType(type, true);  // get the canonical version
-        auto st = type->to<IR::Type_StructLike>();
+    if (auto st = type->to<IR::Type_StructLike>()) {
         auto result = new StructLocation(type, name);
 
         // For header unions we will model all of the valid fields
@@ -71,10 +70,7 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
             result->addField(validFieldName, valid);
         }
         return result;
-    }
-    if (type->is<IR::Type_Stack>()) {
-        type = typeMap->getTypeType(type, true);  // get the canonical version
-        auto st = type->to<IR::Type_Stack>();
+    } else if (auto st = type->to<IR::Type_Stack>()) {
         auto result = new ArrayLocation(st, name);
         for (unsigned i = 0; i < st->getSize(); i++) {
             auto sl = create(st->elementType, name + "[" + Util::toString(i) + "]");

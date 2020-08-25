@@ -74,7 +74,7 @@ class BaseLocation : public StorageLocation {
                 type->is<IR::Type_Boolean>() || type->is<IR::Type_Var>() ||
                 type->is<IR::Type_Tuple>() || type->is<IR::Type_Error>() ||
                 type->is<IR::Type_Varbits>() || type->is<IR::Type_Newtype>() ||
-                type->is<IR::Type_SerEnum>(),
+                type->is<IR::Type_SerEnum>() || type->is<IR::Type_List>(),
                 "%1%: unexpected type", type); }
     void addValidBits(LocationSet*) const override {}
     void addLastIndexField(LocationSet*) const override {}
