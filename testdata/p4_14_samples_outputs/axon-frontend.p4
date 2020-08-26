@@ -36,6 +36,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     bit<64> tmp;
+    bit<64> tmp_0;
     @name(".parse_fwdHop") state parse_fwdHop {
         packet.extract<axon_hop_t>(hdr.axon_fwdHop.next);
         meta.my_metadata.fwdHopCount = meta.my_metadata.fwdHopCount + 8w255;
@@ -69,7 +70,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition parse_next_revHop;
     }
     @name(".start") state start {
-        tmp = packet.lookahead<bit<64>>();
+        tmp_0 = packet.lookahead<bit<64>>();
+        tmp = tmp_0;
         transition select(tmp) {
             64w0: parse_head;
             default: accept;

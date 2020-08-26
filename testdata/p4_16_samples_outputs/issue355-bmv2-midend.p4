@@ -20,15 +20,15 @@ control DeparserI(packet_out packet, in H hdr) {
 }
 
 parser parserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t stdmeta) {
-    ethernet_t tmp;
-    bit<112> tmp_0;
+    ethernet_t tmp_0;
+    bit<112> tmp_1;
     state start {
-        tmp_0 = pkt.lookahead<bit<112>>();
-        tmp.setValid();
-        tmp.dstAddr = tmp_0[111:64];
-        tmp.srcAddr = tmp_0[63:16];
-        tmp.etherType = tmp_0[15:0];
-        transition select(tmp_0[15:0]) {
+        tmp_1 = pkt.lookahead<bit<112>>();
+        tmp_0.setValid();
+        tmp_0.dstAddr = tmp_1[111:64];
+        tmp_0.srcAddr = tmp_1[63:16];
+        tmp_0.etherType = tmp_1[15:0];
+        transition select(tmp_1[15:0]) {
             16w0x1000 &&& 16w0x1000: accept;
             default: noMatch;
         }

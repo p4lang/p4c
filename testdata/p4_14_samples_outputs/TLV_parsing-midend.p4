@@ -78,8 +78,8 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     ipv4_option_timestamp_t_1 tmp_hdr_0;
-    bit<8> tmp;
-    bit<16> tmp_0;
+    bit<8> tmp_1;
+    bit<16> tmp_2;
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -111,17 +111,17 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition parse_ipv4_options;
     }
     @name(".parse_ipv4_option_timestamp") state parse_ipv4_option_timestamp {
-        tmp_0 = packet.lookahead<bit<16>>();
+        tmp_2 = packet.lookahead<bit<16>>();
         tmp_hdr_0.setValid();
-        tmp_hdr_0.value = tmp_0[15:8];
-        tmp_hdr_0.len = tmp_0[7:0];
-        packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_0[7:0] << 3) + 32w4294967280);
+        tmp_hdr_0.value = tmp_2[15:8];
+        tmp_hdr_0.len = tmp_2[7:0];
+        packet.extract<ipv4_option_timestamp_t>(hdr.ipv4_option_timestamp, ((bit<32>)tmp_2[7:0] << 3) + 32w4294967280);
         meta._my_metadata_parse_ipv4_counter0 = meta._my_metadata_parse_ipv4_counter0 - hdr.ipv4_option_timestamp.len;
         transition parse_ipv4_options;
     }
     @name(".parse_ipv4_options") state parse_ipv4_options {
-        tmp = packet.lookahead<bit<8>>();
-        transition select(meta._my_metadata_parse_ipv4_counter0, tmp) {
+        tmp_1 = packet.lookahead<bit<8>>();
+        transition select(meta._my_metadata_parse_ipv4_counter0, tmp_1) {
             (8w0x0 &&& 8w0xff, 8w0x0 &&& 8w0x0): accept;
             (8w0x0 &&& 8w0x0, 8w0x0 &&& 8w0xff): parse_ipv4_option_EOL;
             (8w0x0 &&& 8w0x0, 8w0x1 &&& 8w0xff): parse_ipv4_option_NOP;

@@ -106,7 +106,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     bit<7> Tcp_option_parser_tcp_hdr_bytes_left;
     bit<8> Tcp_option_parser_n_sack_bytes;
     bit<8> Tcp_option_parser_tmp;
-    Tcp_option_sack_top Tcp_option_parser_tmp_0;
+    bit<8> Tcp_option_parser_tmp_0;
+    Tcp_option_sack_top Tcp_option_parser_tmp_1;
     state start {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -188,7 +189,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     state Tcp_option_parser_next_option_part2 {
-        Tcp_option_parser_tmp = packet.lookahead<bit<8>>();
+        Tcp_option_parser_tmp_0 = packet.lookahead<bit<8>>();
+        Tcp_option_parser_tmp = Tcp_option_parser_tmp_0;
         transition select(Tcp_option_parser_tmp) {
             8w0: Tcp_option_parser_parse_tcp_option_end;
             8w1: Tcp_option_parser_parse_tcp_option_nop;
@@ -221,8 +223,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition Tcp_option_parser_next_option;
     }
     state Tcp_option_parser_parse_tcp_option_sack {
-        Tcp_option_parser_tmp_0 = packet.lookahead<Tcp_option_sack_top>();
-        Tcp_option_parser_n_sack_bytes = Tcp_option_parser_tmp_0.length;
+        Tcp_option_parser_tmp_1 = packet.lookahead<Tcp_option_sack_top>();
+        Tcp_option_parser_n_sack_bytes = Tcp_option_parser_tmp_1.length;
         verify(Tcp_option_parser_n_sack_bytes == 8w10 || Tcp_option_parser_n_sack_bytes == 8w18 || Tcp_option_parser_n_sack_bytes == 8w26 || Tcp_option_parser_n_sack_bytes == 8w34, error.TcpBadSackOptionLength);
         verify(Tcp_option_parser_tcp_hdr_bytes_left >= (bit<7>)Tcp_option_parser_n_sack_bytes, error.TcpOptionTooLongForHeader);
         Tcp_option_parser_tcp_hdr_bytes_left = Tcp_option_parser_tcp_hdr_bytes_left - (bit<7>)Tcp_option_parser_n_sack_bytes;

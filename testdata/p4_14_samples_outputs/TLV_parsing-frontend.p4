@@ -80,6 +80,8 @@ struct headers {
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     ipv4_option_timestamp_t_1 tmp_hdr_0;
     bit<8> tmp;
+    bit<8> tmp_0;
+    bit<8> tmp_1;
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -117,8 +119,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition parse_ipv4_options;
     }
     @name(".parse_ipv4_options") state parse_ipv4_options {
-        tmp = packet.lookahead<bit<8>>();
-        transition select(meta.my_metadata.parse_ipv4_counter, tmp) {
+        tmp = meta.my_metadata.parse_ipv4_counter;
+        tmp_1 = packet.lookahead<bit<8>>();
+        tmp_0 = tmp_1;
+        transition select(tmp, tmp_0) {
             (8w0x0 &&& 8w0xff, 8w0x0 &&& 8w0x0): accept;
             (8w0x0 &&& 8w0x0, 8w0x0 &&& 8w0xff): parse_ipv4_option_EOL;
             (8w0x0 &&& 8w0x0, 8w0x1 &&& 8w0xff): parse_ipv4_option_NOP;

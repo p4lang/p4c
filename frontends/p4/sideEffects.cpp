@@ -141,7 +141,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::Operation_Unary* expression)
 const IR::Node* DoSimplifyExpressions::preorder(IR::StructExpression* expression) {
     LOG3("Visiting " << dbp(expression));
     bool foundEffect = false;
-    for (auto v: expression->components) {
+    for (auto v : expression->components) {
         if (SideEffects::check(v->expression, refMap, typeMap)) {
             foundEffect = true;
             break;
@@ -153,7 +153,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::StructExpression* expression
     // this will handle cases like a = (S) { b, f(b) }, where f can mutate b.
     IR::IndexedVector<IR::NamedExpression> vec;
     LOG3("Dismantling " << dbp(expression));
-    for (auto &v: expression->components) {
+    for (auto &v : expression->components) {
         auto t = typeMap->getType(v->expression, true);
         auto tmp = createTemporary(t);
         visit(v);
@@ -168,7 +168,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::StructExpression* expression
 const IR::Node* DoSimplifyExpressions::preorder(IR::ListExpression* expression) {
     LOG3("Visiting " << dbp(expression));
     bool foundEffect = false;
-    for (auto v: expression->components) {
+    for (auto v : expression->components) {
         if (SideEffects::check(v, refMap, typeMap)) {
             foundEffect = true;
             break;
@@ -179,7 +179,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::ListExpression* expression) 
     // allocate temporaries for all members in order.
     // this will handle cases like a = { b, f(b) }, where f can mutate b.
     LOG3("Dismantling " << dbp(expression));
-    for (auto &v: expression->components) {
+    for (auto &v : expression->components) {
         auto t = typeMap->getType(v, true);
         auto tmp = createTemporary(t);
         visit(v);
@@ -399,7 +399,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
                          " param " << dbp(p1) << " aliasing" << dbp(p2));
                     if (p1->hasOut() && p2->hasOut())
                         ::warning(ErrorType::WARN_ORDERING,
-                                  "'out' arguments have some fields in common", arg1, arg2);
+                                  "%1%: 'out' argument has fields in common with %2%", arg1, arg2);
                     useTemporary.emplace(p1);
                     useTemporary.emplace(p2);
                     break;
