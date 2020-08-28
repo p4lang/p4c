@@ -1,0 +1,176 @@
+mc_mgrp_create 7
+mc_node_create 257 8 9
+mc_node_associate 7 0
+
+# This STF test and corresponding PSA architecture test program are
+# intended to try out all possible end-of-ingress packet behaviores of
+# the PSA architecture, and verify that an implementation correctly
+# prioritizes the flags like drop, resubmit, and multicast_group being
+# 0 or non-0, relative to each other, as specified in the PSA
+# specification.
+
+# The P4 program is written to copy parts of the ethernet.dstAddr
+# field into PSA ingress standard metadata fields drop, resubmit,
+# multicast_group, egress_port.
+
+# Here is a visual breakdown of the sub-fields of dstAddr
+#packet 2 00 00 0000 0000 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
+#         ^^ least significant bit is cast to bool and assigned to drop
+#            ^^ least significant bit is cast to bool and assigned to resubmit
+#               ^^^^ assigned to multicast_group
+#                    ^^^^ assigned to egress_port
+
+# I believe the list below should be all interesting combinations of
+# these 4 values of:
+
+# drop true/false
+# resubmit true/false,
+# multicast_group 0/non-0 (7 is used for non-0 value in these tests).
+# egress_port 0/non-0
+
+# egress_port 0 or non-0 should not affect the behavior, except
+# whether the packet unicasts to port 0 or non-0, but I will include
+# test cases that exercise that, anyway (using 5 as the non-0 value in
+# these tests).
+
+# Later when ingress-to-egress cloning is supported in the PSA
+# implementation, it would be good to double the number of test cases
+# to cover all of these cross-producted with clone true/false.
+
+# drop=false (0) cases:
+# 00 00 0000 0000
+# 00 00 0000 0005
+# 00 00 0007 0000
+# 00 00 0007 0005
+# 00 01 0000 0000
+# 00 01 0000 0005
+# 00 01 0007 0000
+# 00 01 0007 0005
+
+# drop=true (1) cases:
+# 01 00 0000 0000
+# 01 00 0000 0005
+# 01 00 0007 0000
+# 01 00 0007 0005
+# 01 01 0000 0000
+# 01 01 0000 0005
+# 01 01 0007 0000
+# 01 01 0007 0005
+
+######################################################################
+# drop=false (0) cases:
+######################################################################
+
+# First initialize the egress packet seen register to 0, read it to
+# confirm it is 0, so that at the end of all of these drop=false cases
+# we can read it again and confirm that when packets reach egress,
+# that register is updating as it should.
+
+# write index 0 with value 0
+packet 2 000000000000 00000000 0000 c1 00   deadbeef deadbeef deadbeef deadbeef
+expect 0 000000000000 00000000 0000 c1 00   00000001 deadbeef deadbeef deadbeef
+
+# read index 0 and confirm it has value 0
+packet 2 000000000000 00000000 0000 c0 00   deadbeef deadbeef deadbeef deadbeef
+expect 0 000000000000 00000000 0000 c0 00   00000000 deadbeef deadbeef deadbeef
+
+
+packet 2 00 00 0000 0000 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
+#        ^^ least significant bit is cast to bool and assigned to drop
+#           ^^ least significant bit is cast to bool and assigned to resubmit
+#              ^^^^ assigned to multicast_group
+#                   ^^^^ assigned to egress_port
+# packet should unicast to port 0
+expect 0 00 00 0000 0000 000000000000 0000   00000001 00000000 00000000 00000002
+
+packet 2 00 00 0000 0005 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
+# packet should unicast to port 5
+expect 5 00 00 0000 0005 000000000000 0000   00000001 00000005 00000000 00000002
+
+packet 2 00 00 0007 0000 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
+# packet should multicast to group 7
+expect 8 00 00 0007 0000 000000000000 0000   00000001 00000008 00000101 00000003
+expect 9 00 00 0007 0000 000000000000 0000   00000001 00000009 00000101 00000003
+
+packet 2 00 00 0007 0005 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
+# packet should multicast to group 7
+expect 8 00 00 0007 0005 000000000000 0000   00000001 00000008 00000101 00000003
+expect 9 00 00 0007 0005 000000000000 0000   00000001 00000009 00000101 00000003
+
+packet 2 00 01 0000 0000 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
+# packet should resubmit once, then unicast to port 0
+expect 0 00 01 0000 0000 000000000000 0000   00000006 00000000 00000000 00000002
+
+packet 2 00 01 0000 0005 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
+# packet should resubmit once, then unicast to port 5
+expect 5 00 01 0000 0005 000000000000 0000   00000006 00000005 00000000 00000002
+
+packet 2 00 01 0007 0000 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
+# packet should resubmit once, then multicast to group 7
+expect 8 00 01 0007 0000 000000000000 0000   00000006 00000008 00000101 00000003
+expect 9 00 01 0007 0000 000000000000 0000   00000006 00000009 00000101 00000003
+
+packet 2 00 01 0007 0005 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
+# packet should resubmit once, then multicast to group 7
+expect 8 00 01 0007 0005 000000000000 0000   00000006 00000008 00000101 00000003
+expect 9 00 01 0007 0005 000000000000 0000   00000006 00000009 00000101 00000003
+
+# read index 0 and confirm it has value equal to number of data
+# packets that went through egress processing since we initialized it
+# to 0, counting each multicast copy separately, since each copy
+# executes egress code independently of each other.
+
+# As a testing wrinkle, since these packets might be sent very close
+# in time to eah other, and bmv2 can process multiple packets
+# concurrently, a packet that is not resubmitted might 'pass up' a
+# packet that is resubmitted.  That is, this sequence of events is
+# possible:
+
+# send in packet A that will be resubmitted and one unicast copy comes out
+# send in packet B that will not be resubmitted and one unicast copy comes out
+# unicast copy of B comes out
+# unicast copy of A comes out
+
+packet 2 000100000000 00000000 0000 c0 00   deadbeef deadbeef deadbeef deadbeef
+expect 0 000100000000 00000000 0000 c0 00   00000001 deadbeef deadbeef deadbeef
+
+######################################################################
+# drop=true (1) cases:
+######################################################################
+
+# This set of tests use the register index 1, instead of 0 as used
+# above, to keep them more independent of each other (the test P4
+# program uses the least significant 8 bits of the etherType as the
+# index to access within the register array).  It also sends command
+# packets to output port 1 instead of output port 0, again in an
+# effort to keep the output packet stream more predictable in its
+# order.
+
+# First initialize the egress packet seen register to 0, read it to
+# confirm it is 0, so that at the end of all of these drop=false cases
+# we can read it again and confirm that when packets reach egress,
+# that register is updating as it should.
+
+# write index 1 with value 0
+packet 2 000000000001 00000000 0000 c1 01   deadbeef deadbeef deadbeef deadbeef
+expect 1 000000000001 00000000 0000 c1 01   00000001 deadbeef deadbeef deadbeef
+
+# read index 1 and confirm it has value 0
+packet 2 000000000001 00000000 0001 c0 01   deadbeef deadbeef deadbeef deadbeef
+expect 1 000000000001 00000000 0001 c0 01   00000000 deadbeef deadbeef deadbeef
+
+packet 2 01 00 0000 0000 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
+packet 2 01 00 0000 0005 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
+packet 2 01 00 0007 0000 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
+packet 2 01 00 0007 0005 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
+packet 2 01 01 0000 0000 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
+packet 2 01 01 0000 0005 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
+packet 2 01 01 0007 0000 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
+packet 2 01 01 0007 0005 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
+
+
+# read index 1 and confirm it still has value 0, since none of the
+# recent data packets should have ever reached egress processing.
+
+packet 2 000100000001 00000000 0001 c0 01   deadbeef deadbeef deadbeef deadbeef
+expect 1 000100000001 00000000 0001 c0 01   00000000 deadbeef deadbeef deadbeef
