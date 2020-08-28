@@ -43,6 +43,9 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     @noWarnUnused @name(".ingress_drop") action ingress_drop() {
         ostd.drop = true;
     }
+    @hidden action psaunicastordropbmv2l109() {
+        ostd.class_of_service = (ClassOfServiceUint_t)hdr.ethernet.srcAddr[0:0];
+    }
     @hidden table tbl_send_to_port {
         actions = {
             send_to_port();
@@ -55,11 +58,18 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         }
         const default_action = ingress_drop();
     }
+    @hidden table tbl_psaunicastordropbmv2l109 {
+        actions = {
+            psaunicastordropbmv2l109();
+        }
+        const default_action = psaunicastordropbmv2l109();
+    }
     apply {
         tbl_send_to_port.apply();
         if (hdr.ethernet.dstAddr == 48w0) {
             tbl_ingress_drop.apply();
         }
+        tbl_psaunicastordropbmv2l109.apply();
     }
 }
 
@@ -95,7 +105,11 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
     }
     @hidden action psaunicastordropbmv2l54() {
         hdr.output_data.word0 = (bit<32>)istd.egress_port;
+        hdr.output_data.word1 = (bit<32>)(EgressInstanceUint_t)istd.instance;
         hdr.output_data.word2 = 32w8;
+    }
+    @hidden action psaunicastordropbmv2l137() {
+        hdr.output_data.word3 = (bit<32>)(ClassOfServiceUint_t)istd.class_of_service;
     }
     @hidden table tbl_psaunicastordropbmv2l54 {
         actions = {
@@ -145,6 +159,12 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
         }
         const default_action = psaunicastordropbmv2l68();
     }
+    @hidden table tbl_psaunicastordropbmv2l137 {
+        actions = {
+            psaunicastordropbmv2l137();
+        }
+        const default_action = psaunicastordropbmv2l137();
+    }
     apply {
         tbl_psaunicastordropbmv2l54.apply();
         if (istd.packet_path == PSA_PacketPath_t.NORMAL) {
@@ -162,38 +182,39 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
         } else if (istd.packet_path == PSA_PacketPath_t.RECIRCULATE) {
             tbl_psaunicastordropbmv2l68.apply();
         }
+        tbl_psaunicastordropbmv2l137.apply();
     }
 }
 
 control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaunicastordropbmv2l142() {
+    @hidden action psaunicastordropbmv2l145() {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<output_data_t>(hdr.output_data);
     }
-    @hidden table tbl_psaunicastordropbmv2l142 {
+    @hidden table tbl_psaunicastordropbmv2l145 {
         actions = {
-            psaunicastordropbmv2l142();
+            psaunicastordropbmv2l145();
         }
-        const default_action = psaunicastordropbmv2l142();
+        const default_action = psaunicastordropbmv2l145();
     }
     apply {
-        tbl_psaunicastordropbmv2l142.apply();
+        tbl_psaunicastordropbmv2l145.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psaunicastordropbmv2l142_0() {
+    @hidden action psaunicastordropbmv2l145_0() {
         buffer.emit<ethernet_t>(hdr.ethernet);
         buffer.emit<output_data_t>(hdr.output_data);
     }
-    @hidden table tbl_psaunicastordropbmv2l142_0 {
+    @hidden table tbl_psaunicastordropbmv2l145_0 {
         actions = {
-            psaunicastordropbmv2l142_0();
+            psaunicastordropbmv2l145_0();
         }
-        const default_action = psaunicastordropbmv2l142_0();
+        const default_action = psaunicastordropbmv2l145_0();
     }
     apply {
-        tbl_psaunicastordropbmv2l142_0.apply();
+        tbl_psaunicastordropbmv2l145_0.apply();
     }
 }
 

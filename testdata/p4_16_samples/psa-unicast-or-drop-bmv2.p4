@@ -1,5 +1,5 @@
 /*
-Copyright 2019 Cisco Systems, Inc.
+Copyright 2019-2020 Cisco Systems, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -106,6 +106,7 @@ control cIngress(inout headers_t hdr,
             // out of port 0.
             ingress_drop(ostd);
         }
+        ostd.class_of_service = (ClassOfService_t) ((ClassOfServiceUint_t) hdr.ethernet.srcAddr[0:0]);
     }
 }
 
@@ -131,7 +132,9 @@ control cEgress(inout headers_t hdr,
 {
     apply {
         hdr.output_data.word0 = (bit<32>) istd.egress_port;
+        hdr.output_data.word1 = (bit<32>) ((EgressInstanceUint_t) istd.instance);
         packet_path_to_int.apply(istd.packet_path, hdr.output_data.word2);
+        hdr.output_data.word3 = (bit<32>) ((ClassOfServiceUint_t) istd.class_of_service);
     }
 }
 

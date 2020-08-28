@@ -58,6 +58,7 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     apply {
         multicast(ostd, (MulticastGroup_t)(MulticastGroupUint_t)hdr.ethernet.dstAddr);
+        ostd.class_of_service = (ClassOfService_t)(ClassOfServiceUint_t)hdr.ethernet.srcAddr[0:0];
     }
 }
 
@@ -75,6 +76,7 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
         hdr.output_data.word0 = (bit<32>)istd.egress_port;
         hdr.output_data.word1 = (bit<32>)(EgressInstanceUint_t)istd.instance;
         packet_path_to_int_inst.apply(istd.packet_path, hdr.output_data.word2);
+        hdr.output_data.word3 = (bit<32>)(ClassOfServiceUint_t)istd.class_of_service;
     }
 }
 
