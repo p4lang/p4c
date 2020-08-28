@@ -86,23 +86,17 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    bit<1> eth_valid_0;
-    bit<1> ipv4_valid_0;
-    bit<1> tcp_valid_0;
-    @hidden action issue1025bmv2l132() {
-        eth_valid_0 = (bit<1>)hdr.ethernet.isValid();
-        ipv4_valid_0 = (bit<1>)hdr.ipv4.isValid();
-        tcp_valid_0 = (bit<1>)hdr.tcp.isValid();
-        hdr.ethernet.dstAddr = 31w0 ++ eth_valid_0 ++ 7w0 ++ ipv4_valid_0 ++ 7w0 ++ tcp_valid_0;
+    @hidden action issue1025bmv2l135() {
+        hdr.ethernet.dstAddr = 31w0 ++ (bit<1>)hdr.ethernet.isValid() ++ 7w0 ++ (bit<1>)hdr.ipv4.isValid() ++ 7w0 ++ (bit<1>)hdr.tcp.isValid();
     }
-    @hidden table tbl_issue1025bmv2l132 {
+    @hidden table tbl_issue1025bmv2l135 {
         actions = {
-            issue1025bmv2l132();
+            issue1025bmv2l135();
         }
-        const default_action = issue1025bmv2l132();
+        const default_action = issue1025bmv2l135();
     }
     apply {
-        tbl_issue1025bmv2l132.apply();
+        tbl_issue1025bmv2l135.apply();
     }
 }
 
@@ -130,4 +124,3 @@ control DeparserI(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(parserI(), verifyChecksum(), cIngress(), cEgress(), updateChecksum(), DeparserI()) main;
-

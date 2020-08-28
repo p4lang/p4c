@@ -30,15 +30,26 @@ class hasSideEffects : public Inspector {
     bool result = false;
     bool preorder(const IR::AssignmentStatement *) override { result = true; return false; }
     bool preorder(const IR::MethodCallExpression *mc) override {
-        if (result) return false;
+        if (result) {
+            return false;
+        }
         /* assume has side effects if we can't look it up */
         if (refMap && typeMap) {
             auto *mi = P4::MethodInstance::resolve(mc, refMap, typeMap, true);
+            if (auto *bm = mi->to<P4::BuiltInMethod>()) {
+                if (bm->name == "isValid") {
+                    return true;
+                }
+            }
             if (auto *em = mi->to<P4::ExternMethod>()) {
                 if (em->method->getAnnotation(IR::Annotation::noSideEffectsAnnotation))
-                    return true; } }
+                    return true;
+                }
+            }
         result = true;
-        return false; }
+        return false;
+    }
+
     bool preorder(const IR::Primitive *) override { result = true; return false; }
     bool preorder(const IR::Expression *) override { return !result; }
 
