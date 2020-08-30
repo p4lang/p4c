@@ -63,6 +63,8 @@ namespace UBPF {
         cstring type;
         if (tableKind == EBPF::TableHash) {
             type = "UBPF_MAP_TYPE_HASHMAP";
+        } else if (tableKind == EBPF::TableArray) {
+            type = "UBPF_MAP_TYPE_ARRAY";
         } else if (tableKind == EBPF::TableLPMTrie) {
             type = "UBPF_MAP_TYPE_LPM_TRIE";
         } else {

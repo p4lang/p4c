@@ -41,8 +41,8 @@ static void inline init_ubpf_table_test(char *name, unsigned int key_size, unsig
 }
 
 
-#define ubpf_printf(fmt, args) \
-    ubpf_printf_test(fmt, args)
+#define ubpf_printf(fmt, ...) \
+    printf(fmt, ##__VA_ARGS__)
 #define ubpf_packet_data(ctx) \
     ubpf_packet_data_test(ctx)
 #define ubpf_adjust_head(ctx, ofs) \

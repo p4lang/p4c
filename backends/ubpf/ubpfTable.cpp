@@ -188,8 +188,6 @@ UBPFTable::UBPFTable(const UBPFProgram *program,
     setTableKind();
 }
 
-
-
 void UBPFTable::emitInstance(EBPF::CodeBuilder *builder) {
     UBPFTableBase::emitInstance(builder, tableKind);
 }
@@ -447,6 +445,55 @@ void UBPFTable::emitAction(EBPF::CodeBuilder *builder, cstring valueName) {
 
     builder->blockEnd(true);
 }
+
+void UBPFTable::emitInitializer(EBPF::CodeBuilder *builder) {
+    const IR::P4Table* t = table->container;
+    const IR::Expression* defaultAction = t->getDefaultAction();
+    BUG_CHECK(defaultAction->is<IR::MethodCallExpression>(),
+              "%1%: expected an action call", defaultAction);
+    auto mce = defaultAction->to<IR::MethodCallExpression>();
+    auto mi = P4::MethodInstance::resolve(mce, program->refMap, program->typeMap);
+
+    auto ac = mi->to<P4::ActionCall>();
+    BUG_CHECK(ac != nullptr, "%1%: expected an action call", mce);
+    auto action = ac->action;
+
+    cstring name = generateActionName(action);
+    cstring defaultTable = defaultActionMapName;
+    cstring value = name + "_value";
+
+    builder->emitIndent();
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("struct %s %s = ", valueTypeName.c_str(), value.c_str());
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat(".action = %s,", name.c_str());
+    builder->newline();
+    EBPF::CodeGenInspector cg(program->refMap, program->typeMap);
+    cg.setBuilder(builder);
+    builder->emitIndent();
+    builder->appendFormat(".u = {.%s = {", name.c_str());
+    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+        auto arg = mi->substitution.lookup(p);
+        arg->apply(cg);
+        builder->append(",");
+    }
+    builder->append("}},\n");
+    builder->blockEnd(false);
+    builder->endOfStatement(true);
+
+    builder->emitIndent();
+    builder->appendFormat("INIT_UBPF_TABLE(\"%s\", sizeof(%s), sizeof(%s));", defaultTable, program->zeroKey.c_str(), value);
+    builder->newline();
+
+    builder->emitIndent();
+    builder->target->emitTableUpdate(builder, defaultTable, program->zeroKey, "&" + value);
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+}
+
+
 }  // namespace UBPF
 
 

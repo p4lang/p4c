@@ -79,7 +79,7 @@ namespace UBPF {
         void emitValueType(EBPF::CodeBuilder *builder);
         void emitKey(EBPF::CodeBuilder *builder, cstring keyName);
         void emitAction(EBPF::CodeBuilder *builder, cstring valueName);
-        void emitInitializer(UNUSED EBPF::CodeBuilder *builder) {};
+        void emitInitializer(EBPF::CodeBuilder *builder);
     };
 
 }

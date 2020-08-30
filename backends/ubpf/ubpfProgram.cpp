@@ -139,6 +139,15 @@ namespace UBPF {
         emitTableDefinition(builder);
         builder->newline();
         control->emitTableTypes(builder);
+
+        builder->appendLine("static void init_tables() ");
+        builder->blockStart();
+        builder->emitIndent();
+        builder->appendFormat("uint32_t %s = 0;", zeroKey.c_str());
+        builder->newline();
+        control->emitTableInitializers(builder);
+        builder->blockEnd(true);
+
         builder->appendLine("#endif");
     }
 
@@ -172,6 +181,10 @@ namespace UBPF {
         builder->append("ubpf_map_type");
         builder->spc();
         builder->blockStart();
+
+        builder->emitIndent();
+        builder->append("UBPF_MAP_TYPE_ARRAY = 1,");
+        builder->newline();
 
         builder->emitIndent();
         builder->append("UBPF_MAP_TYPE_HASHMAP = 4,");
@@ -248,7 +261,15 @@ namespace UBPF {
         builder->newline();
 
         builder->emitIndent();
+        builder->appendFormat("uint8_t %s = 0;", control->hitVariable);
+        builder->newline();
+
+        builder->emitIndent();
         builder->appendFormat("unsigned char %s;", byteVar.c_str());
+        builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat("uint32_t %s = 0;", zeroKey.c_str());
         builder->newline();
 
         builder->emitIndent();
