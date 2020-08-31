@@ -19,6 +19,7 @@ genrule(
         "sed 's|cmakedefine|define|g' < $(SRCS)",
         "sed 's|define HAVE_LIBGC 1|undef HAVE_LIBGC|g' > $(OUTS)",
     ]),
+    visibility = ["//visibility:private"],
 )
 
 cc_library(
@@ -45,6 +46,7 @@ genyacc(
     extra_outs = ["frontends/parsers/p4/stack.hh"],
     header_out = "frontends/parsers/p4/p4parser.hpp",
     source_out = "frontends/parsers/p4/p4parser.cc",
+    visibility = ["//visibility:private"],
 )
 
 genyacc(
@@ -53,6 +55,7 @@ genyacc(
     extra_outs = ["frontends/parsers/v1/stack.hh"],
     header_out = "frontends/parsers/v1/v1parser.hpp",
     source_out = "frontends/parsers/v1/v1parser.cc",
+    visibility = ["//visibility:private"],
 )
 
 genrule(
@@ -60,6 +63,7 @@ genrule(
     srcs = ["frontends/parsers/p4/p4lexer.ll"],
     outs = ["frontends/parsers/p4/p4lexer.lex"],
     cmd = "sed '/%option outfile=\"lex.yy.c\"/d' $(SRCS) > $(OUTS)",
+    visibility = ["//visibility:private"],
 )
 
 genlex(
@@ -67,6 +71,7 @@ genlex(
     src = "frontends/parsers/p4/p4lexer.lex",
     out = "frontends/parsers/p4/p4lexer.cc",
     prefix = "yy",
+    visibility = ["//visibility:private"],
 )
 
 genrule(
@@ -74,6 +79,7 @@ genrule(
     srcs = ["frontends/parsers/v1/v1lexer.ll"],
     outs = ["frontends/parsers/v1/v1lexer.lex"],
     cmd = "sed '/%option outfile=\"lex.yy.c\"/d' $(SRCS) > $(OUTS)",
+    visibility = ["//visibility:private"],
 )
 
 genlex(
@@ -81,6 +87,7 @@ genlex(
     src = "frontends/parsers/v1/v1lexer.lex",
     out = "frontends/parsers/v1/v1lexer.cc",
     prefix = "yy",
+    visibility = ["//visibility:private"],
 )
 
 # The ir-generator tool uses a parser built by these genlex and genyacc rules.
@@ -89,6 +96,7 @@ genlex(
     src = "tools/ir-generator/ir-generator-lex.l",
     out = "tools/ir-generator/ir-generator-lex.c",
     prefix = "yy",
+    visibility = ["//visibility:private"],
 )
 
 genyacc(
@@ -96,6 +104,7 @@ genyacc(
     src = "tools/ir-generator/ir-generator.ypp",
     header_out = "tools/ir-generator/ir-generator-yacc.hh",
     source_out = "tools/ir-generator/ir-generator-yacc.cc",
+    visibility = ["//visibility:private"],
 )
 
 # This cc_library contains the ir-generator tool sources, including the
@@ -117,6 +126,7 @@ cc_library(
     deps = [
         ":lib",
     ],
+    visibility = ["//visibility:private"],
 )
 
 # The next rule builds the ir-generator tool binary.
@@ -162,6 +172,7 @@ genrule(
             $(locations :ir_extra_defs)
     """,
     tools = [":ir_generator"],
+    visibility = ["//visibility:private"],
 )
 
 # It would be better to build these modules separately, but they have cyclic
@@ -242,6 +253,7 @@ genrule(
     srcs = ["backends/bmv2/simple_switch/version.h.cmake"],
     outs = ["backends/bmv2/simple_switch/version.h"],
     cmd = "sed 's|@P4C_VERSION@|0.0.0.0|g' $(SRCS) > $(OUTS)",
+    visibility = ["//visibility:private"],
 )
 
 cc_binary(
@@ -286,6 +298,7 @@ genrule(
     srcs = ["backends/p4test/version.h.cmake"],
     outs = ["backends/p4test/version.h"],
     cmd = "sed 's|@P4C_VERSION@|0.0.0.0|g' $(SRCS) > $(OUTS)",
+    visibility = ["//visibility:private"],
 )
 
 cc_library(
