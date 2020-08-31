@@ -51,12 +51,6 @@ class SimpleSwitchAPI(runtime_CLI.RuntimeAPI):
                                         standard_client, mc_client)
         self.sswitch_client = sswitch_client
 
-    def parse_int(self, arg, name):
-        try:
-            return int(arg)
-        except:
-            raise UIn_Error("Bad format for {}, expected integer".format(name))
-
     @handle_bad_input
     def do_set_queue_depth(self, line):
         "Set depth of one / all egress queue(s): set_queue_depth <nb_pkts> [<egress_port>]"

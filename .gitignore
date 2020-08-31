@@ -27,11 +27,14 @@
 *.out
 *.app
 
-# Python byet code
+# Python byte code
 *.pyc
 
 build/*
 lib*
+
+# Vim
+*.swp
 
 # Emacs
 *~

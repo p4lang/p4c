@@ -868,6 +868,12 @@ class RuntimeAPI(cmd.Cmd):
                 "Wrong number of args, expected %d but got %d" % (n, len(args))
             )
 
+    def parse_int(self, arg, name):
+        try:
+            return int(arg)
+        except:
+            raise UIn_Error("Bad format for {}, expected integer".format(name))
+
     def _complete_res(self, array, text):
         res = sorted(array.keys())
         if not text:
@@ -1987,7 +1993,7 @@ class RuntimeAPI(cmd.Cmd):
         else:
             self.client.bm_counter_write(0, counter_name, index, BmCounterValue(packets=pkts, bytes = byts))
         print "%s[%d] has been updated" % (counter_name, index)
-        
+
     def complete_counter_write(self, text, line, start_index, end_index):
         return self._complete_counters(text)
 

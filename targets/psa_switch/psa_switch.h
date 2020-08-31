@@ -65,6 +65,13 @@ class PsaSwitch : public Switch {
   using TransmitFn = std::function<void(port_t, packet_id_t,
                                         const char *, int)>;
 
+  struct MirroringSessionConfig {
+    port_t egress_port;
+    bool egress_port_valid;
+    unsigned int mgid;
+    bool mgid_valid;
+  };
+
  private:
   using clock = std::chrono::high_resolution_clock;
 
@@ -80,15 +87,19 @@ class PsaSwitch : public Switch {
 
   void reset_target_state_() override;
 
+  bool mirroring_add_session(mirror_id_t mirror_id,
+                             const MirroringSessionConfig &config);
+  bool mirroring_delete_session(mirror_id_t mirror_id);
+  bool mirroring_get_session(mirror_id_t mirror_id,
+                             MirroringSessionConfig *config) const;
+
   int mirroring_mapping_add(mirror_id_t mirror_id, port_t egress_port) {
     mirroring_map[mirror_id] = egress_port;
     return 0;
   }
-
   int mirroring_mapping_delete(mirror_id_t mirror_id) {
     return mirroring_map.erase(mirror_id);
   }
-
   bool mirroring_mapping_get(mirror_id_t mirror_id, port_t *port) const {
     return get_mirroring_mapping(mirror_id, port);
   }
@@ -205,6 +216,8 @@ class PsaSwitch : public Switch {
   static constexpr port_t PSA_PORT_RECIRCULATE = 0xfffffffa;
   static packet_id_t packet_id;
 
+  class MirroringSessions;
+
   enum PktInstanceType {
     PACKET_PATH_NORMAL,
     PACKET_PATH_NORMAL_UNICAST,
@@ -230,6 +243,8 @@ class PsaSwitch : public Switch {
   void ingress_thread();
   void egress_thread(size_t worker_id);
   void transmit_thread();
+
+  void multicast(Packet *packet, unsigned int mgid, PktInstanceType path, unsigned int class_of_service);
 
   bool get_mirroring_mapping(mirror_id_t mirror_id, port_t *port) const {
     const auto it = mirroring_map.find(mirror_id);
@@ -261,6 +276,7 @@ class PsaSwitch : public Switch {
   std::shared_ptr<McSimplePreLAG> pre;
   clock::time_point start;
   std::unordered_map<mirror_id_t, port_t> mirroring_map;
+  std::unique_ptr<MirroringSessions> mirroring_sessions;
   bool with_queueing_metadata{false};
 };
 

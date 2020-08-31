@@ -21,11 +21,27 @@
 namespace cpp pswitch_runtime
 namespace py pswitch_runtime
 
+struct MirroringSessionConfig {
+  1:optional i32 port;
+  2:optional i32 mgid;
+}
+
+enum MirroringOperationErrorCode {
+  SESSION_NOT_FOUND = 1,
+}
+
+exception InvalidMirroringOperation {
+  1:MirroringOperationErrorCode code;
+}
+
 service PsaSwitch {
 
-  i32 mirroring_mapping_add(1:i32 mirror_id, 2:i32 egress_port);
-  i32 mirroring_mapping_delete(1:i32 mirror_id);
-  i32 mirroring_mapping_get_egress_port(1:i32 mirror_id);
+  void mirroring_session_add(1:i32 mirror_id, 2:MirroringSessionConfig config)
+  throws (1:InvalidMirroringOperation ouch);
+  void mirroring_session_delete(1:i32 mirror_id)
+  throws (1:InvalidMirroringOperation ouch);
+  MirroringSessionConfig mirroring_session_get(1:i32 mirror_id)
+  throws (1:InvalidMirroringOperation ouch);
 
   i32 set_egress_queue_depth(1:i32 port_num, 2:i32 depth_pkts);
   i32 set_all_egress_queue_depths(1:i32 depth_pkts);
