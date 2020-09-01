@@ -39,7 +39,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         ostd.clone_session_id = 16w8;
     }
     @hidden action psai2ecloningbasicbmv2l70() {
-        hdr.ethernet.srcAddr = 48w51966;
+        hdr.ethernet.srcAddr = 48w0xcafe;
     }
     @hidden table tbl_clone {
         actions = {
@@ -85,7 +85,7 @@ parser EgressParserImpl(packet_in buffer, out headers_t hdr, inout metadata_t us
 
 control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
     @hidden action psai2ecloningbasicbmv2l99() {
-        hdr.ethernet.srcAddr = 48w5;
+        hdr.ethernet.etherType = 16w0xface;
     }
     @hidden table tbl_psai2ecloningbasicbmv2l99 {
         actions = {

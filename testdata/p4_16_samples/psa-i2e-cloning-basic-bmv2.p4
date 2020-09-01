@@ -67,7 +67,7 @@ control cIngress(inout headers_t hdr,
             ingress_drop(ostd);
         } else {
             // mark the original packet so stf can tell the difference btwn this and clones
-            hdr.ethernet.srcAddr = (EthernetAddress) 51966;
+            hdr.ethernet.srcAddr = (EthernetAddress) 0xcafe;
             // GENERAL CASE - all other packets are sent to port number from packet
             send_to_port(ostd, (PortId_t) (PortIdUint_t) hdr.ethernet.dstAddr);
         }
@@ -96,7 +96,7 @@ control cEgress(inout headers_t hdr,
     apply {
         // mark the clone packets so stf can tell the difference
         if (istd.packet_path == PSA_PacketPath_t.CLONE_I2E) {
-            hdr.ethernet.srcAddr = 48w5;
+            hdr.ethernet.etherType = 0xface;
         }
     }
 }
