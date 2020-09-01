@@ -61,18 +61,75 @@ mc_node_associate 7 0
 # drop=false (0) cases:
 ######################################################################
 
-# First initialize the egress packet seen register to 0, read it to
-# confirm it is 0, so that at the end of all of these drop=false cases
-# we can read it again and confirm that when packets reach egress,
-# that register is updating as it should.
+# Note that as of 2020-Aug-31, p4c STF tests push packets into the
+# BMv2 switch without any attempt to wait for the previously sent
+# packet to first finish processing.
 
-# write index 0 with value 0
-packet 2 000000000000 00000000 0000 c1 00   deadbeef deadbeef deadbeef deadbeef
-expect 0 000000000000 00000000 0000 c1 00   00000001 deadbeef deadbeef deadbeef
+# Also, BMv2's ingress and egress processing are separate threads that
+# can interleave in time in fairly arbitrary ways.
 
-# read index 0 and confirm it has value 0
-packet 2 000000000000 00000000 0000 c0 00   deadbeef deadbeef deadbeef deadbeef
-expect 0 000000000000 00000000 0000 c0 00   00000000 deadbeef deadbeef deadbeef
+# Thus for two packets P1 and P2, both sent into port 2, the P1
+# unicast out port 5, and P2 unicast out port 6, the order of
+# procesing in BMv2 could be any of these:
+
+# P1 ingress
+# P2 ingress
+# P1 egress
+# P2 egress
+
+# P1 ingress
+# P2 ingress
+# P2 egress
+# P1 egress
+
+# P1 ingress
+# P1 egress
+# P2 ingress
+# P2 egress
+
+# About the only thing one can guarantee from the STF test is that "P1
+# ingress" will occur before "P2 ingress", and the only reason you can
+# do so is that P1 and P2 are sent into the same port 2.  If they were
+# sent into different ports, even that would not be guaranteed.
+
+# Thus it seems that if we want to write STF tests that use P4
+# registers to verify that packets reach certain parts of the
+# processing, we either need:
+
+# (a) A way to make STF tests stop and wait until all previously
+# packets sent in have finished processing, before sending in the next
+# packet.
+
+# or
+
+# (b) all packets that write and read registers, where the read
+# register results are included in the output packets and checked by
+# expected packets in the STF test, should follow the same 'path' of
+# input port, ingress processing, the same number of resubmit and/or
+# recirculate operations in the same order, and multicast to the same
+# multicast_group, or unicast to the same output port, before leaving
+# on an output port, as the 'data packets' that cause the P4 register
+# to be updated.
+
+# For now, I will comment out all packets intended to initialize and
+# read P4 registers in this test.  This still leaves a very important
+# part of the test, which is verifying that the majority of the
+# packets come out the correct output ports, and modified as they
+# should be by the P4 program.
+
+
+### # First initialize the egress packet seen register to 0, read it to
+### # confirm it is 0, so that at the end of all of these drop=false cases
+### # we can read it again and confirm that when packets reach egress,
+### # that register is updating as it should.
+###
+### # write index 0 with value 0
+### packet 2 000000000000 00000000 0000 c1 00   deadbeef deadbeef deadbeef deadbeef
+### expect 0 000000000000 00000000 0000 c1 00   00000001 deadbeef deadbeef deadbeef
+###
+### # read index 0 and confirm it has value 0
+### packet 2 000000000000 00000000 0000 c0 00   deadbeef deadbeef deadbeef deadbeef
+### expect 0 000000000000 00000000 0000 c0 00   00000000 deadbeef deadbeef deadbeef
 
 
 packet 2 00 00 0000 0000 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
@@ -131,33 +188,33 @@ expect 9 00 01 0007 0005 000000000000 0000   00000006 00000009 00000101 00000003
 # unicast copy of B comes out
 # unicast copy of A comes out
 
-packet 2 000100000000 00000000 0000 c0 00   deadbeef deadbeef deadbeef deadbeef
-expect 0 000100000000 00000000 0000 c0 00   00000001 deadbeef deadbeef deadbeef
+### packet 2 000100000000 00000000 0000 c0 00   deadbeef deadbeef deadbeef deadbeef
+### expect 0 000100000000 00000000 0000 c0 00   00000001 deadbeef deadbeef deadbeef
 
 ######################################################################
 # drop=true (1) cases:
 ######################################################################
 
-# This set of tests use the register index 1, instead of 0 as used
-# above, to keep them more independent of each other (the test P4
-# program uses the least significant 8 bits of the etherType as the
-# index to access within the register array).  It also sends command
-# packets to output port 1 instead of output port 0, again in an
-# effort to keep the output packet stream more predictable in its
-# order.
+### # This set of tests use the register index 1, instead of 0 as used
+### # above, to keep them more independent of each other (the test P4
+### # program uses the least significant 8 bits of the etherType as the
+### # index to access within the register array).  It also sends command
+### # packets to output port 1 instead of output port 0, again in an
+### # effort to keep the output packet stream more predictable in its
+### # order.
+###
+### # First initialize the egress packet seen register to 0, read it to
+### # confirm it is 0, so that at the end of all of these drop=false cases
+### # we can read it again and confirm that when packets reach egress,
+### # that register is updating as it should.
+###
+### # write index 1 with value 0
+### packet 2 000000000001 00000000 0000 c1 01   deadbeef deadbeef deadbeef deadbeef
+### expect 1 000000000001 00000000 0000 c1 01   00000001 deadbeef deadbeef deadbeef
 
-# First initialize the egress packet seen register to 0, read it to
-# confirm it is 0, so that at the end of all of these drop=false cases
-# we can read it again and confirm that when packets reach egress,
-# that register is updating as it should.
-
-# write index 1 with value 0
-packet 2 000000000001 00000000 0000 c1 01   deadbeef deadbeef deadbeef deadbeef
-expect 1 000000000001 00000000 0000 c1 01   00000001 deadbeef deadbeef deadbeef
-
-# read index 1 and confirm it has value 0
-packet 2 000000000001 00000000 0001 c0 01   deadbeef deadbeef deadbeef deadbeef
-expect 1 000000000001 00000000 0001 c0 01   00000000 deadbeef deadbeef deadbeef
+### # read index 1 and confirm it has value 0
+### packet 2 000000000001 00000000 0001 c0 01   deadbeef deadbeef deadbeef deadbeef
+### expect 1 000000000001 00000000 0001 c0 01   00000000 deadbeef deadbeef deadbeef
 
 packet 2 01 00 0000 0000 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
 packet 2 01 00 0000 0005 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
@@ -169,8 +226,8 @@ packet 2 01 01 0007 0000 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
 packet 2 01 01 0007 0005 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
 
 
-# read index 1 and confirm it still has value 0, since none of the
-# recent data packets should have ever reached egress processing.
-
-packet 2 000100000001 00000000 0001 c0 01   deadbeef deadbeef deadbeef deadbeef
-expect 1 000100000001 00000000 0001 c0 01   00000000 deadbeef deadbeef deadbeef
+### # read index 1 and confirm it still has value 0, since none of the
+### # recent data packets should have ever reached egress processing.
+###
+### packet 2 000100000001 00000000 0001 c0 01   deadbeef deadbeef deadbeef deadbeef
+### expect 1 000100000001 00000000 0001 c0 01   00000000 deadbeef deadbeef deadbeef
