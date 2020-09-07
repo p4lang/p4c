@@ -1,0 +1,67 @@
+issue2004-1.p4(35): [--Wwarn=duplicated] warning: Label 4 is already assigned inside  range 2 .. 20. Optimized code will not contain this label.
+            4 : reject;
+            ^
+issue2004-1.p4(34)
+            2 .. 20 : accept;
+            ^
+issue2004-1.p4(34)
+            2 .. 20 : accept;
+                 ^^
+issue2004-1.p4(36): [--Wwarn=duplicated] warning: Range label 0x5 .. 0xa is already assigned inside previous range 2 .. 20. Optimized code will not contain this label.
+            0x5 .. 0xa : reject;
+            ^^^
+issue2004-1.p4(36)
+            0x5 .. 0xa : reject;
+                   ^^^
+issue2004-1.p4(34)
+            2 .. 20 : accept;
+            ^
+issue2004-1.p4(34)
+            2 .. 20 : accept;
+                 ^^
+issue2004-1.p4(37): [--Wwarn=duplicated] warning: Label 11 is already assigned inside  range 2 .. 20. Optimized code will not contain this label.
+            11 : reject;
+            ^^
+issue2004-1.p4(34)
+            2 .. 20 : accept;
+            ^
+issue2004-1.p4(34)
+            2 .. 20 : accept;
+                 ^^
+issue2004-1.p4(38): [--Wwarn=duplicated] warning: Label 2 is already assigned inside  range 2 .. 20. Optimized code will not contain this label.
+            2 : reject;
+            ^
+issue2004-1.p4(34)
+            2 .. 20 : accept;
+            ^
+issue2004-1.p4(34)
+            2 .. 20 : accept;
+                 ^^
+issue2004-1.p4(39): [--Wwarn=duplicated] warning: Label 20 is already assigned inside  range 2 .. 20. Optimized code will not contain this label.
+            20 : reject;
+            ^^
+issue2004-1.p4(34)
+            2 .. 20 : accept;
+            ^
+issue2004-1.p4(34)
+            2 .. 20 : accept;
+                 ^^
+issue2004-1.p4(41): [--Wwarn=duplicated] warning: Range label 11 .. 20 is already assigned inside previous range 2 .. 20. Optimized code will not contain this label.
+            11 .. 20 : reject;
+            ^^
+issue2004-1.p4(41)
+            11 .. 20 : reject;
+                  ^^
+issue2004-1.p4(34)
+            2 .. 20 : accept;
+            ^
+issue2004-1.p4(34)
+            2 .. 20 : accept;
+                 ^^
+issue2004-1.p4(42): [--Wwarn=overlaping] warning: Range label 1 .. 21 is overlaping with range 2 .. 20. Optimization will parse this range.
+            1 .. 21 : accept;
+            ^
+issue2004-1.p4(42)
+            1 .. 21 : accept;
+                 ^^
+

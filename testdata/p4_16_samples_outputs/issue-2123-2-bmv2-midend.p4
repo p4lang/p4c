@@ -55,8 +55,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
             16w0xfffc &&& 16w0xfffe: parse_h2;
             16w0xfffe &&& 16w0xffff: parse_h2;
             16w0x900: parse_h3;
-            16w0x8ff &&& 16w0xffff: parse_h4;
-            16w0x900 &&& 16w0xfffe: parse_h4;
+            16w0x8ff: parse_h4;
+            16w0x901: parse_h4;
             default: accept;
         }
     }

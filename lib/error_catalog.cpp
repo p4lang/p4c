@@ -58,6 +58,8 @@ const int ErrorType::WARN_PARSER_TRANSITION = 1014;
 const int ErrorType::WARN_UNREACHABLE       = 1015;
 const int ErrorType::WARN_SHADOWING         = 1016;
 const int ErrorType::WARN_IGNORE            = 1017;
+const int ErrorType::WARN_DUPLICATED        = 1018;
+const int ErrorType::WARN_OVERLAPING        = 2019;
 const int ErrorType::WARN_MAX_WARNINGS      = 2142;
 
 // map from errorCode to ErrorSig
@@ -98,5 +100,7 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     { ErrorType::WARN_PARSER_TRANSITION, "parser-transition"},
     { ErrorType::WARN_UNREACHABLE,       "parser-transition"},
     { ErrorType::WARN_SHADOWING,         "shadow"},
-    { ErrorType::WARN_IGNORE,            "ignore"}
+    { ErrorType::WARN_IGNORE,            "ignore"},
+    { ErrorType::WARN_DUPLICATED,        "duplicated"},
+    { ErrorType::WARN_OVERLAPING,        "overlaping"},
 };

@@ -2,6 +2,7 @@
 #define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
+const bit<16> TYPE_IPV4 = 16w8;
 struct ingress_metadata_t {
     bit<12> vrf;
     bit<16> bd;
@@ -42,15 +43,25 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state parse_ethernet {
         packet.extract<ethernet_t>(hdr = hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
-            16w0x806 .. 16w0x800: parse_ipv4;
-            hdr.ipv4.totalLen .. 16w0x800: parse_ipv4;
-            16w0x800 .. hdr.ipv4.totalLen: parse_ipv4;
+            16w4 .. 16w12: parse_ipv4;
+            16w0x32 .. 16w0x66: parse_ethernet_second;
+            16w0x800: parse_ipv4;
+            16w3 &&& 16w10: parse_ethernet_second;
+            16w1 .. 16w35: parse_ipv4;
+            16w102 .. 16w120: parse_ipv4;
             default: accept;
         }
     }
     state parse_ipv4 {
         packet.extract<ipv4_t>(hdr = hdr.ipv4);
         transition accept;
+    }
+    state parse_ethernet_second {
+        packet.extract<ethernet_t>(hdr.ethernet);
+        transition select(hdr.ethernet.etherType) {
+            16w8: parse_ipv4;
+            default: accept;
+        }
     }
     state start {
         transition parse_ethernet;

@@ -1,0 +1,37 @@
+issue2004-4.p4(48): [--Wwarn=duplicated] warning: Range label 0x5 .. 0x9 is already assigned inside previous range 4 .. 12. Optimized code will not contain this label.
+            0x5 .. 0x9 : parse_ethernet_second;
+            ^^^
+issue2004-4.p4(48)
+            0x5 .. 0x9 : parse_ethernet_second;
+                   ^^^
+issue2004-4.p4(45)
+            4 .. 12 : parse_ipv4;
+            ^
+issue2004-4.p4(45)
+            4 .. 12 : parse_ipv4;
+                 ^^
+issue2004-4.p4(51): [--Wwarn=duplicated] warning: Label 0x23 is already assigned inside  range 1 .. 35. Optimized code will not contain this label.
+            0x23: parse_ethernet_second;
+            ^^^^
+issue2004-4.p4(50)
+            1 .. 35 : parse_ipv4;
+            ^
+issue2004-4.p4(50)
+            1 .. 35 : parse_ipv4;
+                 ^^
+issue2004-4.p4(2): [--Wwarn=duplicated] warning: Label 8 is already assigned. Optimized code will not contain this label.
+const bit<16> TYPE_IPV4 = 8;
+                          ^
+issue2004-4.p4(50): [--Wwarn=overlaping] warning: Range label 1 .. 35 is overlaping with range 4 .. 12. Optimization will parse this range.
+            1 .. 35 : parse_ipv4;
+            ^
+issue2004-4.p4(50)
+            1 .. 35 : parse_ipv4;
+                 ^^
+issue2004-4.p4(52): [--Wwarn=overlaping] warning: Range label 102 .. 120 is overlaping with range 0x32 .. 0x66. Optimization will parse this range.
+            102 .. 120 : parse_ipv4;
+            ^^^
+issue2004-4.p4(52)
+            102 .. 120 : parse_ipv4;
+                   ^^^
+

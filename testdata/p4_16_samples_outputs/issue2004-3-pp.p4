@@ -15,16 +15,6 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
-    bit<16> totalLen;
-    bit<16> identification;
-    bit<3>  flags;
-    bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
-    bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
 }
@@ -40,17 +30,15 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state parse_ethernet {
-        packet.extract<ethernet_t>(hdr = hdr.ethernet);
+        packet.extract(hdr = hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
-            16w0x806 .. 16w0x800: parse_ipv4;
-            hdr.ipv4.totalLen .. 16w0x800: parse_ipv4;
-            16w0x800 .. hdr.ipv4.totalLen: parse_ipv4;
-            default: accept;
+            1 .. 5: accept;
+            15 .. 20: accept;
+            5 .. 15: accept;
+            8 .. 13: reject;
+            7: reject;
+            default: reject;
         }
-    }
-    state parse_ipv4 {
-        packet.extract<ipv4_t>(hdr = hdr.ipv4);
-        transition accept;
     }
     state start {
         transition parse_ethernet;
@@ -82,5 +70,5 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
     }
 }
 
-V1Switch<headers, metadata>(p = ParserImpl(), ig = ingress(), vr = verifyChecksum(), eg = egress(), ck = computeChecksum(), dep = DeparserImpl()) main;
+V1Switch(p = ParserImpl(), ig = ingress(), vr = verifyChecksum(), eg = egress(), ck = computeChecksum(), dep = DeparserImpl()) main;
 
