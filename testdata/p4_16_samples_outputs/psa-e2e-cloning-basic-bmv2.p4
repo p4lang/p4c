@@ -54,10 +54,15 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
             clone();
             if (hdr.ethernet.dstAddr == (EthernetAddress)9) {
                 egress_drop(ostd);
+                ostd.clone_session_id = (CloneSessionId_t)(CloneSessionIdUint_t)9;
             }
             if (istd.egress_port == PSA_PORT_RECIRCULATE) {
                 hdr.ethernet.srcAddr = (EthernetAddress)0xbeef;
+                ostd.clone_session_id = (CloneSessionId_t)(CloneSessionIdUint_t)10;
             } else {
+                if (hdr.ethernet.dstAddr == (EthernetAddress)8) {
+                    ostd.clone_session_id = (CloneSessionId_t)(CloneSessionIdUint_t)11;
+                }
                 hdr.ethernet.srcAddr = (EthernetAddress)0xcafe;
             }
         }

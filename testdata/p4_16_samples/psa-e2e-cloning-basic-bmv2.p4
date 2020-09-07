@@ -88,7 +88,6 @@ control cEgress(inout headers_t hdr,
     }
 
     apply {
-
         if (istd.packet_path == PSA_PacketPath_t.CLONE_E2E) {
             // mark the clone packets so stf can tell the difference
             hdr.ethernet.etherType = 0xface;
@@ -97,10 +96,15 @@ control cEgress(inout headers_t hdr,
             // property - dropped packets are still cloned
             if (hdr.ethernet.dstAddr == (EthernetAddress) 9) {
                 egress_drop(ostd);
+                ostd.clone_session_id = (CloneSessionId_t) (CloneSessionIdUint_t) 9;
             }
             if (istd.egress_port == PSA_PORT_RECIRCULATE) {
                 hdr.ethernet.srcAddr = (EthernetAddress) 0xbeef;
+                ostd.clone_session_id = (CloneSessionId_t) (CloneSessionIdUint_t) 10;
             } else {
+                if (hdr.ethernet.dstAddr == (EthernetAddress) 8) {
+                    ostd.clone_session_id = (CloneSessionId_t) (CloneSessionIdUint_t) 11;
+                }
                 // property - clone packets are copies of the packet as output by
                 //            the egress deparser. this value should appear in
                 //            all packets that leave the switch.
