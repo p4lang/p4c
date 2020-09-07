@@ -31,3 +31,18 @@ expect 6 000000000009 00000000cafe face $
 expect 7 000000000009 00000000cafe face $
 expect 8 000000000009 00000000cafe face $
 
+# RECIRCULATE PACKET CASE
+packet 1 000000000008 000000000000 ffff
+
+# clones from first pass for recirc packets
+expect 6 000000000008 00000000beef face $
+expect 7 000000000008 00000000beef face $
+expect 8 000000000008 00000000beef face $
+
+# original recirc packet sent to its dest
+expect 8 000000000008 00000000cafe ffff $
+
+# clones from second pass for recirc packets
+expect 6 000000000008 00000000cafe face $
+expect 7 000000000008 00000000cafe face $
+expect 8 000000000008 00000000cafe face $

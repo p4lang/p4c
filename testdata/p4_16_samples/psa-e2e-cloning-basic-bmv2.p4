@@ -54,7 +54,11 @@ control cIngress(inout headers_t hdr,
                  inout psa_ingress_output_metadata_t ostd)
 {
     apply {
-        send_to_port(ostd, (PortId_t) (PortIdUint_t) hdr.ethernet.dstAddr);
+        if (hdr.ethernet.dstAddr == (EthernetAddress) 8 && istd.packet_path != PSA_PacketPath_t.RECIRCULATE) {
+            send_to_port(ostd, PSA_PORT_RECIRCULATE);
+        } else {
+            send_to_port(ostd, (PortId_t) (PortIdUint_t) hdr.ethernet.dstAddr);
+        }
     }
 }
 
@@ -94,10 +98,14 @@ control cEgress(inout headers_t hdr,
             if (hdr.ethernet.dstAddr == (EthernetAddress) 9) {
                 egress_drop(ostd);
             }
-            // property - clone packets are copies of the packet as output by
-            //            the egress deparser. this value should appear in
-            //            all packets that leave the switch.
-            hdr.ethernet.srcAddr = (EthernetAddress) 0xcafe;
+            if (istd.egress_port == PSA_PORT_RECIRCULATE) {
+                hdr.ethernet.srcAddr = (EthernetAddress) 0xbeef;
+            } else {
+                // property - clone packets are copies of the packet as output by
+                //            the egress deparser. this value should appear in
+                //            all packets that leave the switch.
+                hdr.ethernet.srcAddr = (EthernetAddress) 0xcafe;
+            }
         }
     }
 }
