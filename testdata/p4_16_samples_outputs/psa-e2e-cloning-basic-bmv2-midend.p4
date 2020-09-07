@@ -29,6 +29,11 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     @noWarnUnused @name(".send_to_port") action send_to_port() {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
+        ostd.egress_port = 32w0xfffffffa;
+    }
+    @noWarnUnused @name(".send_to_port") action send_to_port_0() {
+        ostd.drop = false;
+        ostd.multicast_group = 32w0;
         ostd.egress_port = (PortIdUint_t)hdr.ethernet.dstAddr;
     }
     @hidden table tbl_send_to_port {
@@ -37,8 +42,18 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         }
         const default_action = send_to_port();
     }
+    @hidden table tbl_send_to_port_0 {
+        actions = {
+            send_to_port_0();
+        }
+        const default_action = send_to_port_0();
+    }
     apply {
-        tbl_send_to_port.apply();
+        if (hdr.ethernet.dstAddr == 48w8 && istd.packet_path != PSA_PacketPath_t.RECIRCULATE) {
+            tbl_send_to_port.apply();
+        } else {
+            tbl_send_to_port_0.apply();
+        }
     }
 }
 
@@ -57,17 +72,20 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
         ostd.clone = true;
         ostd.clone_session_id = 16w8;
     }
-    @hidden action psae2ecloningbasicbmv2l90() {
+    @hidden action psae2ecloningbasicbmv2l94() {
         hdr.ethernet.etherType = 16w0xface;
     }
-    @hidden action psae2ecloningbasicbmv2l100() {
+    @hidden action psae2ecloningbasicbmv2l102() {
+        hdr.ethernet.srcAddr = 48w0xbeef;
+    }
+    @hidden action psae2ecloningbasicbmv2l107() {
         hdr.ethernet.srcAddr = 48w0xcafe;
     }
-    @hidden table tbl_psae2ecloningbasicbmv2l90 {
+    @hidden table tbl_psae2ecloningbasicbmv2l94 {
         actions = {
-            psae2ecloningbasicbmv2l90();
+            psae2ecloningbasicbmv2l94();
         }
-        const default_action = psae2ecloningbasicbmv2l90();
+        const default_action = psae2ecloningbasicbmv2l94();
     }
     @hidden table tbl_clone {
         actions = {
@@ -81,52 +99,62 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
         }
         const default_action = egress_drop();
     }
-    @hidden table tbl_psae2ecloningbasicbmv2l100 {
+    @hidden table tbl_psae2ecloningbasicbmv2l102 {
         actions = {
-            psae2ecloningbasicbmv2l100();
+            psae2ecloningbasicbmv2l102();
         }
-        const default_action = psae2ecloningbasicbmv2l100();
+        const default_action = psae2ecloningbasicbmv2l102();
+    }
+    @hidden table tbl_psae2ecloningbasicbmv2l107 {
+        actions = {
+            psae2ecloningbasicbmv2l107();
+        }
+        const default_action = psae2ecloningbasicbmv2l107();
     }
     apply {
         if (istd.packet_path == PSA_PacketPath_t.CLONE_E2E) {
-            tbl_psae2ecloningbasicbmv2l90.apply();
+            tbl_psae2ecloningbasicbmv2l94.apply();
         } else {
             tbl_clone.apply();
             if (hdr.ethernet.dstAddr == 48w9) {
                 tbl_egress_drop.apply();
             }
-            tbl_psae2ecloningbasicbmv2l100.apply();
+            if (istd.egress_port == 32w0xfffffffa) {
+                tbl_psae2ecloningbasicbmv2l102.apply();
+            } else {
+                tbl_psae2ecloningbasicbmv2l107.apply();
+            }
         }
     }
 }
 
 control IngressDeparserImpl(packet_out buffer, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers_t hdr, in metadata_t meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psae2ecloningbasicbmv2l109() {
+    @hidden action psae2ecloningbasicbmv2l117() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_psae2ecloningbasicbmv2l109 {
+    @hidden table tbl_psae2ecloningbasicbmv2l117 {
         actions = {
-            psae2ecloningbasicbmv2l109();
+            psae2ecloningbasicbmv2l117();
         }
-        const default_action = psae2ecloningbasicbmv2l109();
+        const default_action = psae2ecloningbasicbmv2l117();
     }
     apply {
-        tbl_psae2ecloningbasicbmv2l109.apply();
+        tbl_psae2ecloningbasicbmv2l117.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out buffer, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers_t hdr, in metadata_t meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
-    @hidden action psae2ecloningbasicbmv2l109_0() {
+    @hidden action psae2ecloningbasicbmv2l117_0() {
         buffer.emit<ethernet_t>(hdr.ethernet);
     }
-    @hidden table tbl_psae2ecloningbasicbmv2l109_0 {
+    @hidden table tbl_psae2ecloningbasicbmv2l117_0 {
         actions = {
-            psae2ecloningbasicbmv2l109_0();
+            psae2ecloningbasicbmv2l117_0();
         }
-        const default_action = psae2ecloningbasicbmv2l109_0();
+        const default_action = psae2ecloningbasicbmv2l117_0();
     }
     apply {
-        tbl_psae2ecloningbasicbmv2l109_0.apply();
+        tbl_psae2ecloningbasicbmv2l117_0.apply();
     }
 }
 

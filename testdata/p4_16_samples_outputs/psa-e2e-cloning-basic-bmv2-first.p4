@@ -27,7 +27,11 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     apply {
-        send_to_port(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr);
+        if (hdr.ethernet.dstAddr == 48w8 && istd.packet_path != PSA_PacketPath_t.RECIRCULATE) {
+            send_to_port(ostd, (PortId_t)32w0xfffffffa);
+        } else {
+            send_to_port(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr);
+        }
     }
 }
 
@@ -51,7 +55,11 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
             if (hdr.ethernet.dstAddr == 48w9) {
                 egress_drop(ostd);
             }
-            hdr.ethernet.srcAddr = 48w0xcafe;
+            if (istd.egress_port == (PortId_t)32w0xfffffffa) {
+                hdr.ethernet.srcAddr = 48w0xbeef;
+            } else {
+                hdr.ethernet.srcAddr = 48w0xcafe;
+            }
         }
     }
 }
