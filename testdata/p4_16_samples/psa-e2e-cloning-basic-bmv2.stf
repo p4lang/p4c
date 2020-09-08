@@ -35,7 +35,7 @@ mirroring_get 10
 mirroring_add_mc 11 6
 mirroring_get 11
 
-# GENERAL CASE
+# UNICAST PACKET CASE
 packet 1 000000000002 000000000000 ffff
 
 # original packet sent to its dest
