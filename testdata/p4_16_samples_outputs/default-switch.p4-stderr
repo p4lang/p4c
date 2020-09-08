@@ -1,4 +1,7 @@
-default-switch.p4(13): [--Wwarn=ordering] warning: SwitchCase: label following default label.
+default-switch.p4(13): [--Wwarn=ordering] warning: b: label following 'default' DefaultExpression label.
             b: { return; }
-            ^^^^^^^^^^^^^^
+            ^
+default-switch.p4(12)
+            default:
+            ^^^^^^^
 warning: Program does not contain a `main' module

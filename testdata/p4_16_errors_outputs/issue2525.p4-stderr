@@ -1,0 +1,9 @@
+issue2525.p4(64): [--Werror=invalid] error: SwitchStatement has multiple 'default' labels: DefaultExpression and DefaultExpression.
+        switch (t.apply().action_run) {
+        ^^^^^^
+issue2525.p4(66)
+            default: { stdmeta.egress_port = 2; }
+            ^^^^^^^
+issue2525.p4(67)
+            default: { stdmeta.egress_port = 3; } // duplicate default label
+            ^^^^^^^
