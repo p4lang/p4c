@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -125,11 +125,11 @@ void increaseVerbosity();
                           << X << std::endl                                     \
                       : std::clog)
 
-#define ERROR(X) (std::clog << "ERROR: " << X << std::endl)
-#define WARNING(X) (::Log::verbose()                               \
+#define P4C_ERROR(X) (std::clog << "ERROR: " << X << std::endl)
+#define P4C_WARNING(X) (::Log::verbose()                               \
                       ? std::clog << "WARNING: " << X << std::endl \
                       : std::clog)
-#define ERRWARN(C, X) ((C) ? ERROR(X) : WARNING(X))
+#define ERRWARN(C, X) ((C) ? P4C_ERROR(X) : P4C_WARNING(X))
 
 static inline std::ostream &operator<<(std::ostream &out,
                                        std::function<std::ostream &(std::ostream&)> fn) {
