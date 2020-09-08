@@ -4,4 +4,4 @@ type-shadow.p4(18): [--Wwarn=shadow] warning: 'D' shadows 'D'
 type-shadow.p4(16)
 extern X<D>
          ^
-warning: Program does not contain a `main' module
+[--Wwarn=missing] warning: Program does not contain a `main' module

@@ -272,7 +272,7 @@ ExternConverter::convertHashAlgorithm(cstring algorithm) {
     else if (algorithm == P4V1::V1Model::instance.algorithm.xor16.name)
         result = "xor16";
     else
-        ::error("Unsupported algorithm %1%", algorithm);
+        ::error(ErrorType::ERR_UNSUPPORTED, "Unsupported algorithm %1%", algorithm);
     return result;
 }
 

@@ -49,7 +49,8 @@ getExternInstanceFromProperty(const IR::P4Table* table,
     auto property = table->properties->getProperty(propertyName);
     if (property == nullptr) return boost::none;
     if (!property->value->is<IR::ExpressionValue>()) {
-        ::error("Expected %1% property value for table %2% to be an expression: %3%",
+        ::error(ErrorType::ERR_EXPECTED,
+                "Expected %1% property value for table %2% to be an expression: %3%",
                 propertyName, table->controlPlaneName(), property);
         return boost::none;
     }
@@ -58,14 +59,16 @@ getExternInstanceFromProperty(const IR::P4Table* table,
     if (isConstructedInPlace) *isConstructedInPlace = expr->is<IR::ConstructorCallExpression>();
     if (expr->is<IR::ConstructorCallExpression>()
         && property->getAnnotation(IR::Annotation::nameAnnotation) == nullptr) {
-        ::error("Table '%1%' has an anonymous table property '%2%' with no name annotation, "
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "Table '%1%' has an anonymous table property '%2%' with no name annotation, "
                 "which is not supported by P4Runtime", table->controlPlaneName(), propertyName);
         return boost::none;
     }
     auto name = property->controlPlaneName();
     auto externInstance = ExternInstance::resolve(expr, refMap, typeMap, name);
     if (!externInstance) {
-        ::error("Expected %1% property value for table %2% to resolve to an "
+        ::error(ErrorType::ERR_INVALID,
+                "Expected %1% property value for table %2% to resolve to an "
                 "extern instance: %3%", propertyName, table->controlPlaneName(),
                 property);
         return boost::none;
@@ -79,7 +82,8 @@ bool isExternPropertyConstructedInPlace(const IR::P4Table* table,
     auto property = table->properties->getProperty(propertyName);
     if (property == nullptr) return false;
     if (!property->value->is<IR::ExpressionValue>()) {
-        ::error("Expected %1% property value for table %2% to be an expression: %3%",
+        ::error(ErrorType::ERR_EXPECTED,
+                "Expected %1% property value for table %2% to be an expression: %3%",
                 propertyName, table->controlPlaneName(), property);
         return false;
     }
@@ -101,13 +105,15 @@ int64_t getTableSize(const IR::P4Table* table) {
     }
 
     if (!sizeProperty->value->is<IR::ExpressionValue>()) {
-        ::error("Expected an expression for table size property: %1%", sizeProperty);
+        ::error(ErrorType::ERR_EXPECTED,
+                "Expected an expression for table size property: %1%", sizeProperty);
         return defaultTableSize;
     }
 
     auto expression = sizeProperty->value->to<IR::ExpressionValue>()->expression;
     if (!expression->is<IR::Constant>()) {
-        ::error("Expected a constant for table size property: %1%", sizeProperty);
+        ::error(ErrorType::ERR_EXPECTED,
+                "Expected a constant for table size property: %1%", sizeProperty);
         return defaultTableSize;
     }
 

@@ -28,7 +28,7 @@ namespace ControlPlaneAPI {
 boost::optional<std::string> stringReprConstant(big_int value, int width) {
     // TODO(antonin): support negative values
     if (value < 0) {
-        ::error("%1%: Negative values not supported yet", value);
+        ::error(ErrorType::ERR_INVALID, "%1%: Negative values not supported yet", value);
         return boost::none;
     }
     BUG_CHECK(width > 0, "Unexpected width 0");

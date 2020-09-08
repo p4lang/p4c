@@ -312,7 +312,7 @@ abstract CounterOrMeter : Stateful {
         else if (strcasecmp(t.c_str(), "bytes") == 0) type = CounterType::BYTES;
         else if (strcasecmp(t.c_str(), "packets_and_bytes") == 0 ||
                  strcasecmp(t.c_str(), "PacketAndBytes") == 0) type = CounterType::BOTH;
-        else error("%s: Unknown type %s", srcInfo, t); }  // NOLINT
+        else error(ErrorType::ERR_UNKNOWN, "%s: Unknown type %s", srcInfo, t); }  // NOLINT
 }
 
 class Counter : CounterOrMeter {

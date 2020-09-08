@@ -187,6 +187,11 @@ class ParsePsaArchitecture : public Inspector {
     explicit ParsePsaArchitecture(PsaProgramStructure* structure) :
         structure(structure) { CHECK_NULL(structure); }
 
+    void modelError(const char* format, const IR::INode* node) {
+        ::error(format, node->getNode());
+        ::error("Are you using an up-to-date 'psa.p4'?");
+    }
+
     bool preorder(const IR::ToplevelBlock* block) override;
     bool preorder(const IR::PackageBlock* block) override;
     bool preorder(const IR::ExternBlock* block) override;

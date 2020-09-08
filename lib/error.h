@@ -41,12 +41,14 @@ inline unsigned diagnosticCount() {
 
 /// Report an error with the given message.
 // LEGACY: once we transition to error types, this should be deprecated
+#if 1
 template <typename... T>
 inline void error(const char* format, T... args) {
     auto& context = BaseCompileContext::get();
     auto action = context.getDefaultErrorDiagnosticAction();
     context.errorReporter().diagnose(action, nullptr, format, args...);
 }
+#endif
 
 /// Report errors of type kind. Requires that the node argument have source info.
 /// The message format is declared in the error catalog.
@@ -99,6 +101,7 @@ void error(const int kind, const char *format, Args... args) {
 /// Report an error if condition e is false.
 #define ERROR_CHECK(e, ...) do { if (!(e)) ::error(__VA_ARGS__); } while (0)
 
+#if 0
 /// Report a warning with the given message.
 // LEGACY: once we transition to error types, this should be deprecated
 template <typename... T>
@@ -107,6 +110,7 @@ inline void warning(const char* format, T... args) {
     auto action = context.getDefaultWarningDiagnosticAction();
     context.errorReporter().diagnose(action, nullptr, format, args...);
 }
+#endif
 
 /// Report warnings of type kind. Requires that the node argument have source info.
 template<class T,

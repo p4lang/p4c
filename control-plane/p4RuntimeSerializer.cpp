@@ -113,12 +113,12 @@ explicitNameAnnotation(const IR::IAnnotated* item) {
     auto* anno = item->getAnnotation(IR::Annotation::nameAnnotation);
     if (!anno) return boost::none;
     if (anno->expr.size() != 1) {
-        ::error("A %1% annotation must have one argument", anno);
+        ::error(ErrorType::ERR_INVALID, "A %1% annotation must have one argument", anno);
         return boost::none;
     }
     auto* str = anno->expr[0]->to<IR::StringLiteral>();
     if (!str) {
-        ::error("An %1% annotation's argument must be a string", anno);
+        ::error(ErrorType::ERR_INVALID, "An %1% annotation's argument must be a string", anno);
         return boost::none;
     }
     return str->value;
@@ -149,13 +149,14 @@ static bool writeJsonTo(const Message& message, std::ostream* destination) {
 
     std::string output;
     if (MessageToJsonString(message, &output, options) != Status::OK) {
-        ::error("Failed to serialize protobuf message to JSON");
+        ::error(ErrorType::ERR_IO,
+                "Failed to serialize protobuf message to JSON");
         return false;
     }
 
     *destination << output;
     if (!destination->good()) {
-        ::error("Failed to write JSON protobuf message to the output");
+        ::error(ErrorType::ERR_IO, "Failed to write JSON protobuf message to the output");
         return false;
     }
 
@@ -173,13 +174,13 @@ static bool writeTextTo(const Message& message, std::ostream* destination) {
     // have here is a std::ostream and performance is not a concern.
     std::string output;
     if (!google::protobuf::TextFormat::PrintToString(message, &output)) {
-        ::error("Failed to serialize protobuf message to text");
+        ::error(ErrorType::ERR_IO, "Failed to serialize protobuf message to text");
         return false;
     }
 
     *destination << output;
     if (!destination->good()) {
-        ::error("Failed to write text protobuf message to the output");
+        ::error(ErrorType::ERR_IO, "Failed to write text protobuf message to the output");
         return false;
     }
 
@@ -447,7 +448,7 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
         }
 
         if (assignedIds.find(*id) != assignedIds.end()) {
-            ::error("@id %1% is assigned to multiple declarations", *id);
+            ::error(ErrorType::ERR_INVALID, "@id %1% is assigned to multiple declarations", *id);
             return INVALID_ID;
         }
 
@@ -493,7 +494,8 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
             });
 
             if (!id) {
-                ::error("No available id to represent %1% in P4Runtime", name);
+                ::error(ErrorType::ERR_OVERLIMIT,
+                        "No available id to represent %1% in P4Runtime", name);
                 return;
             }
 
@@ -642,7 +644,8 @@ getDefaultAction(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMa
         BUG_CHECK(instance->is<P4::ActionCall>(), "Expected an action: %1%", expr);
         actionName = instance->to<P4::ActionCall>()->action->controlPlaneName();
     } else {
-        ::error("Unexpected expression in default action for table %1%: %2%",
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "Unexpected expression in default action for table %1%: %2%",
                 table->controlPlaneName(), expr);
         return boost::none;
     }
@@ -662,7 +665,8 @@ static bool getConstTable(const IR::P4Table* table) {
     if (ep == nullptr) return false;
     BUG_CHECK(ep->value->is<IR::EntriesList>(), "Invalid 'entries' property");
     if (!ep->isConstant)
-        ::error("%1%: P4Runtime only supports constant table initializers", ep);
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "%1%: P4Runtime only supports constant table initializers", ep);
     return true;
 }
 
@@ -966,7 +970,7 @@ class P4RuntimeAnalyzer {
             if (!paramType->is<IR::Type_Bits>() && !paramType->is<IR::Type_Boolean>()
                 && !paramType->is<IR::Type_Newtype>() &&
                 !paramType->is<IR::Type_SerEnum>()) {
-                ::error("Action parameter %1% has a type which is not "
+                ::error(ErrorType::ERR_TYPE_ERROR, "Action parameter %1% has a type which is not "
                         "bit<>, int<>, bool, type or serializable enum", actionParam);
                 continue;
             }
@@ -1077,7 +1081,8 @@ class P4RuntimeAnalyzer {
             auto isTableOnly = (action.annotations->getAnnotation("tableonly") != nullptr);
             auto isDefaultOnly = (action.annotations->getAnnotation("defaultonly") != nullptr);
             if (isTableOnly && isDefaultOnly) {
-                ::error("Table '%1%' has an action reference ('%2%') which is annotated "
+                ::error(ErrorType::ERR_INVALID,
+                        "Table '%1%' has an action reference ('%2%') which is annotated "
                         "with both '@tableonly' and '@defaultonly'", name, action.name);
             }
             if (isTableOnly) action_ref->set_scope(p4configv1::ActionRef::TABLE_ONLY);
@@ -1159,11 +1164,12 @@ class P4RuntimeAnalyzer {
         unsigned int size = 0;
         auto sizeConstant = inst->size->to<IR::Constant>();
         if (sizeConstant == nullptr || !sizeConstant->fitsInt()) {
-            ::error("@size should be an integer for declaration %1%", inst);
+            ::error(ErrorType::ERR_INVALID, "@size should be an integer for declaration %1%", inst);
             return;
         }
         if (sizeConstant->value < 0) {
-            ::error("@size should be a positive integer for declaration %1%", inst);
+            ::error(ErrorType::ERR_INVALID,
+                    "@size should be a positive integer for declaration %1%", inst);
             return;
         }
         size = static_cast<unsigned int>(sizeConstant->value);
@@ -1280,7 +1286,7 @@ class P4RuntimeAnalyzer {
     void addPkgInfo(const IR::ToplevelBlock* evaluatedProgram, cstring arch) const {
         auto* main = evaluatedProgram->getMain();
         if (main == nullptr) {
-            ::warning("Program does not contain a main module, "
+            ::warning(ErrorType::WARN_MISSING, "Program does not contain a main module, "
                       "so P4Info's 'pkg_info' field will not be set");
             return;
         }
@@ -1564,7 +1570,8 @@ class P4RuntimeEntriesConverter {
               addOptional(protoEntry, fieldId++, k, keyWidth, typeMap);
             } else {
                 if (!k->is<IR::DefaultExpression>())
-                    ::error("%1%: match type not supported by P4Runtime serializer", matchType);
+                    ::error(ErrorType::ERR_UNSUPPORTED,
+                         "%1%: match type not supported by P4Runtime serializer", matchType);
                 continue;
             }
         }
@@ -1590,12 +1597,12 @@ class P4RuntimeEntriesConverter {
                  BUG_CHECK(w == keyWidth, "SerEnum bitwidth mismatch");
                  return stringRepr(type, w);
              }
-             ::error("%1% invalid Member key expression", k);
+             ::error(ErrorType::ERR_INVALID, "%1% invalid Member key expression", k);
              return boost::none;
         } else if (k->is<IR::Cast>()) {
             return convertSimpleKeyExpression(k->to<IR::Cast>()->expr, keyWidth, typeMap);
         } else {
-            ::error("%1% invalid key expression", k);
+            ::error(ErrorType::ERR_INVALID, "%1% invalid key expression", k);
             return boost::none;
         }
     }
@@ -1616,12 +1623,12 @@ class P4RuntimeEntriesConverter {
              if (auto sei = ei->to<SerEnumInstance>()) {
                  return simpleKeyExpressionValue(sei->value, typeMap);
              }
-             ::error("%1% invalid Member key expression", k);
+             ::error(ErrorType::ERR_INVALID, "%1% invalid Member key expression", k);
              return boost::none;
         } else if (k->is<IR::Cast>()) {
             return simpleKeyExpressionValue(k->to<IR::Cast>()->expr, typeMap);
         } else {
-            ::error("%1% invalid key expression", k);
+            ::error(ErrorType::ERR_INVALID, "%1% invalid key expression", k);
             return boost::none;
         }
     }
@@ -1655,7 +1662,7 @@ class P4RuntimeEntriesConverter {
             auto mask = km->right->to<IR::Constant>()->value;
             auto len = trailing_zeros(mask);
             if (len + count_ones(mask) != keyWidth) {  // any remaining 0s in the prefix?
-                ::error("%1% invalid mask for LPM key", k);
+                ::error(ErrorType::ERR_INVALID, "%1% invalid mask for LPM key", k);
                 return;
             }
             if ((*value & mask) != *value) {
@@ -1733,7 +1740,7 @@ class P4RuntimeEntriesConverter {
             // For e.g. 16 bit key has a max value of 65535, Range of (1..65536)
             // will be converted to (1..0) and will fail below check.
             if (*start > *end)
-                ::error("%s Invalid range for table entry", kr->srcInfo);
+                ::error(ErrorType::ERR_INVALID, "%s Invalid range for table entry", kr->srcInfo);
             if (*start == 0 && *end == maxValue)  // don't care
                 return;
             startStr = stringReprConstant(*start, keyWidth);
@@ -1866,7 +1873,8 @@ P4RuntimeSerializer::generateP4Runtime(const IR::P4Program* program, cstring arc
 
     auto archHandlerBuilderIt = archHandlerBuilders.find(arch);
     if (archHandlerBuilderIt == archHandlerBuilders.end()) {
-        ::error("Arch '%1%' not supported by P4Runtime serializer", arch);
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "Arch '%1%' not supported by P4Runtime serializer", arch);
         return P4RuntimeAPI{new p4configv1::P4Info(), new p4v1::WriteRequest()};
     }
 
@@ -1918,7 +1926,7 @@ void P4RuntimeAPI::serializeP4InfoTo(std::ostream* destination, P4RuntimeFormat 
             break;
     }
     if (!success)
-        ::error("Failed to serialize the P4Runtime API to the output");
+        ::error(ErrorType::ERR_IO, "Failed to serialize the P4Runtime API to the output");
 }
 
 void P4RuntimeAPI::serializeEntriesTo(std::ostream* destination, P4RuntimeFormat format) const {
@@ -1938,7 +1946,8 @@ void P4RuntimeAPI::serializeEntriesTo(std::ostream* destination, P4RuntimeFormat
             break;
     }
     if (!success)
-        ::error("Failed to serialize the P4Runtime static table entries to the output");
+        ::error(ErrorType::ERR_IO,
+                "Failed to serialize the P4Runtime static table entries to the output");
 }
 
 static bool parseFileNames(cstring fileNameVector,
@@ -1963,12 +1972,14 @@ static bool parseFileNames(cstring fileNameVector,
             } else if (suffix == ".txt") {
                 formats.push_back(P4::P4RuntimeFormat::TEXT);
             } else {
-                ::error("%1%: Could not detect p4runtime info file format from file suffix %2%",
+                ::error(ErrorType::ERR_UNKNOWN,
+                        "%1%: Could not detect p4runtime info file format from file suffix %2%",
                         name, suffix);
                 return false;
             }
         } else {
-            ::error("%1%: unknown file kind; known suffixes are .bin, .txt, .json", name);
+            ::error(ErrorType::ERR_UNKNOWN,
+                    "%1%: unknown file kind; known suffixes are .bin, .txt, .json", name);
             return false;
         }
     }
@@ -2014,7 +2025,7 @@ P4RuntimeSerializer::serializeP4RuntimeIfRequired(const P4RuntimeAPI& p4Runtime,
             P4::P4RuntimeFormat format = formats.at(i);
             std::ostream* out = openFile(file, false);
             if (!out) {
-                ::error("Couldn't open P4Runtime API file: %1%", file);
+                ::error(ErrorType::ERR_IO, "Couldn't open P4Runtime API file: %1%", file);
                 continue;
             }
             p4Runtime.serializeP4InfoTo(out, format);
@@ -2037,7 +2048,7 @@ P4RuntimeSerializer::serializeP4RuntimeIfRequired(const P4RuntimeAPI& p4Runtime,
             P4::P4RuntimeFormat format = formats.at(i);
             std::ostream* out = openFile(file, false);
             if (!out) {
-                ::error("Couldn't open P4Runtime static entries file: %1%",
+                ::error(ErrorType::ERR_IO, "Couldn't open P4Runtime static entries file: %1%",
                         options.p4RuntimeEntriesFile);
                 continue;
             }

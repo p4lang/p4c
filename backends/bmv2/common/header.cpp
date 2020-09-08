@@ -303,7 +303,8 @@ void HeaderConverter::addHeaderType(const IR::Type_StructLike *st) {
                     target_name = aliasAnnotation->body.at(0)->text;
                 } else {
                     // aliasAnnotation->body is empty or not saved correctly
-                    ::error("There is no saved data for aliases target_name.");
+                    ::error(ErrorType::ERR_INVALID,
+                            "There is no saved data for aliases target_name.");
                 }
             }
             LOG2("field alias " << target_name);

@@ -4,4 +4,4 @@ bit f<X>() {
 issue1342.p4(1)
 const bit X = 1;
           ^
-warning: Program does not contain a `main' module
+[--Wwarn=missing] warning: Program does not contain a `main' module

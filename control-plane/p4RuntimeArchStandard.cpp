@@ -624,7 +624,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         auto size = instance->substitution.lookupByName(
             ActionProfileTraits<arch>::sizeParamName())->expression;
         if (!size->template is<IR::Constant>()) {
-            ::error("Action profile '%1%' has non-constant size '%2%'",
+            ::error(ErrorType::ERR_INVALID, "Action profile '%1%' has non-constant size '%2%'",
                     *instance->name, size);
             return boost::none;
         }
@@ -639,7 +639,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         auto decl = instance->node->to<IR::IDeclaration>();
         auto size = instance->getParameterValue(ActionProfileTraits<arch>::sizeParamName());
         if (!size->template is<IR::Constant>()) {
-            ::error("Action profile '%1%' has non-constant size '%2%'",
+            ::error(ErrorType::ERR_INVALID,
+                    "Action profile '%1%' has non-constant size '%2%'",
                     decl->controlPlaneName(), size);
             return boost::none;
         }
@@ -811,7 +812,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         const IR::Property* impl = getTableImplementationProperty(table);
         if (impl == nullptr) return boost::none;
         if (!impl->value->is<IR::ExpressionValue>()) {
-            ::error("Expected implementation property value for table %1% to be an expression: %2%",
+            ::error(ErrorType::ERR_EXPECTED,
+                    "Expected implementation property value for table %1% to be an expression: %2%",
                     table->controlPlaneName(), impl);
             return boost::none;
         }
