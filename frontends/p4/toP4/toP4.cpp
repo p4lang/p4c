@@ -558,7 +558,7 @@ bool ToP4::preorder(const IR::Type_Control* t) {
 ///////////////////////
 
 char DigitToChar(int digit) {
-    switch(digit) {
+    switch (digit) {
         case 0: return '0';
         case 1: return '1';
         case 2: return '2';
