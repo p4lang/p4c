@@ -205,7 +205,7 @@ void Block::setValue(const Node* node, const CompileTimeValue* value) {
     CHECK_NULL(node);
     auto it = constantValue.find(node);
     if (it != constantValue.end())
-        BUG_CHECK(value == constantValue[node],
+        BUG_CHECK(value->equiv(*constantValue[node]),
                       "%1% already set in %2% to %3%, not %4%",
                   node, this, value, constantValue[node]);
     else
