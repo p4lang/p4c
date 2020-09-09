@@ -273,6 +273,14 @@ class JSONLoader {
         JSONLoader(json, node_refs).unpack_json(v); }
 
     template<typename T>
+    void load(const std::string field, T *&v) {
+        JSONLoader loader(*this, field);
+        if (loader.json == nullptr) {
+            v = nullptr;
+        } else {
+            loader.unpack_json(v); } }
+
+    template<typename T>
     void load(const std::string field, T &v) {
         JSONLoader loader(*this, field);
         if (loader.json == nullptr) return;

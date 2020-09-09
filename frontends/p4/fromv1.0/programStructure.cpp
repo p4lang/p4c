@@ -692,7 +692,8 @@ void ProgramStructure::createDeparserInternal(
         if (extracts.count(caller) == 0) {
             lastExtract = hr.getFakeHeader(caller);
         } else {
-            for (auto e : extracts[caller]) {
+            BUG_CHECK(!extracts.at(caller).empty(), "empty vector in extracts");
+            for (auto e : extracts.at(caller)) {
                 auto h = hr.getHeader(e);
                 if (lastExtract != nullptr) {
                     if (!lastExtract->is<IR::Member>() || lastExtract != h)
