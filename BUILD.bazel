@@ -11,30 +11,33 @@ filegroup(
     srcs = glob(["p4include/*.p4"]),
 )
 
-P4C_BUILD_DEFAULT_COPTS = [
-    # Where p4c should look for p4include at runtime.
-    ("-DCONFIG_PKGDATADIR=\\\"external/%s\\\"" % repository_name()),
-    # This will work only if the binary is executed by Bazel. For a general
-    # solution, we would need to make p4c aware of Bazel, specifically:
-    # https://github.com/bazelbuild/bazel/blob/master/tools/cpp/runfiles/runfiles_src.h
-]
-
 genrule(
     name = "sed_config_h",
     srcs = ["cmake/config.h.cmake"],
     outs = ["config.h"],
-    cmd = """
-        sed 's|cmakedefine|define|g' < $(SRCS) | \
-        sed 's|define HAVE_LIBGC 1|undef HAVE_LIBGC|g' > $(OUTS)
-    """,
+    cmd = " | ".join([
+        "sed 's|cmakedefine|define|g' < $(SRCS)",
+        "sed 's|define HAVE_LIBGC 1|undef HAVE_LIBGC|g' > $(OUTS)",
+    ]),
+    visibility = ["//visibility:private"],
 )
 
 cc_library(
     name = "config_h",
-    hdrs = [
-        "config.h",
-    ],
+    hdrs = ["config.h"],
     include_prefix = ".",
+)
+
+cc_library(
+    name = "lib",
+    srcs = glob(["lib/*.cpp"]),
+    hdrs = glob(["lib/*.h"]),
+    deps = [
+        ":config_h",
+        "@boost//:format",
+        "@boost//:multiprecision",
+        "@com_google_googletest//:gtest",
+    ],
 )
 
 genyacc(
@@ -43,6 +46,7 @@ genyacc(
     extra_outs = ["frontends/parsers/p4/stack.hh"],
     header_out = "frontends/parsers/p4/p4parser.hpp",
     source_out = "frontends/parsers/p4/p4parser.cc",
+    visibility = ["//visibility:private"],
 )
 
 genyacc(
@@ -51,13 +55,15 @@ genyacc(
     extra_outs = ["frontends/parsers/v1/stack.hh"],
     header_out = "frontends/parsers/v1/v1parser.hpp",
     source_out = "frontends/parsers/v1/v1parser.cc",
+    visibility = ["//visibility:private"],
 )
 
 genrule(
     name = "p4lexer_lex",
     srcs = ["frontends/parsers/p4/p4lexer.ll"],
     outs = ["frontends/parsers/p4/p4lexer.lex"],
-    cmd = ("sed '/%option outfile=\"lex.yy.c\"/d' $< > $@"),
+    cmd = "sed '/%option outfile=\"lex.yy.c\"/d' $(SRCS) > $(OUTS)",
+    visibility = ["//visibility:private"],
 )
 
 genlex(
@@ -65,13 +71,15 @@ genlex(
     src = "frontends/parsers/p4/p4lexer.lex",
     out = "frontends/parsers/p4/p4lexer.cc",
     prefix = "yy",
+    visibility = ["//visibility:private"],
 )
 
 genrule(
     name = "v1lexer_lex",
     srcs = ["frontends/parsers/v1/v1lexer.ll"],
     outs = ["frontends/parsers/v1/v1lexer.lex"],
-    cmd = ("sed '/%option outfile=\"lex.yy.c\"/d' $< > $@"),
+    cmd = "sed '/%option outfile=\"lex.yy.c\"/d' $(SRCS) > $(OUTS)",
+    visibility = ["//visibility:private"],
 )
 
 genlex(
@@ -79,27 +87,7 @@ genlex(
     src = "frontends/parsers/v1/v1lexer.lex",
     out = "frontends/parsers/v1/v1lexer.cc",
     prefix = "yy",
-)
-
-cc_library(
-    name = "p4c_includes",
-    includes = [
-        "ir/",
-        "lib/",
-        "tools/ir-generator",
-    ],
-)
-
-# This rule helps split some circular dependencies between subdirectories.
-cc_library(
-    name = "p4c_frontend_h",
-    hdrs = [
-        "frontends/p4/typeChecking/typeSubstitution.h",
-    ] + glob([
-        "frontends/p4/*.h",
-    ]) + glob([
-        "frontends/common/*.h",
-    ]),
+    visibility = ["//visibility:private"],
 )
 
 # The ir-generator tool uses a parser built by these genlex and genyacc rules.
@@ -107,10 +95,8 @@ genlex(
     name = "ir_generator_lex",
     src = "tools/ir-generator/ir-generator-lex.l",
     out = "tools/ir-generator/ir-generator-lex.c",
-    includes = [
-        "tools/ir-generator/ir-generator-yacc.hh",
-    ],
     prefix = "yy",
+    visibility = ["//visibility:private"],
 )
 
 genyacc(
@@ -118,39 +104,39 @@ genyacc(
     src = "tools/ir-generator/ir-generator.ypp",
     header_out = "tools/ir-generator/ir-generator-yacc.hh",
     source_out = "tools/ir-generator/ir-generator-yacc.cc",
+    visibility = ["//visibility:private"],
 )
 
 # This cc_library contains the ir-generator tool sources, including the
 # ir-generator parser source from the lex/yacc output. The srcs attribute
 # excludes generator.cpp since it is part of the cc_binary.
 cc_library(
-    name = "p4c_ir_generator_lib",
-    srcs = [
-        "tools/ir-generator/ir-generator-yacc.cc",
-    ] + glob(
-        ["tools/ir-generator/*.cpp"],
+    name = "ir_generator_lib",
+    srcs = glob(
+        include = ["tools/ir-generator/*.cpp"],
         exclude = ["tools/ir-generator/generator.cpp"],
-    ),
-    hdrs = [
-        "tools/ir-generator/ir-generator-lex.c",
-        "tools/ir-generator/ir-generator-yacc.hh",
-    ] + glob([
-        "tools/ir-generator/*.h",
-    ]),
-    deps = [
-        ":p4c_includes",
-        ":p4c_toolkit",
+    ) + [
+        "tools/ir-generator/ir-generator-yacc.cc",
     ],
+    hdrs = glob(["tools/ir-generator/*.h"]),
+    textual_hdrs = [
+        ":ir_generator_lex",
+        ":ir_generator_yacc",
+    ],
+    deps = [
+        ":lib",
+    ],
+    visibility = ["//visibility:private"],
 )
 
 # The next rule builds the ir-generator tool binary.
 cc_binary(
-    name = "irgenerator",
+    name = "ir_generator",
     srcs = ["tools/ir-generator/generator.cpp"],
     linkopts = ["-lgmp"],
     deps = [
-        ":p4c_ir_generator_lib",
-        ":p4c_toolkit",
+        ":ir_generator_lib",
+        ":lib",
     ],
 )
 
@@ -174,7 +160,7 @@ genrule(
         "ir/ir-generated.h",
     ],
     cmd = """
-        $(location :irgenerator) \
+        $(location :ir_generator) \
             -t $(RULEDIR)/ir/gen-tree-macro.h \
             -i $(RULEDIR)/ir/ir-generated.cpp \
             -o $(RULEDIR)/ir/ir-generated.h \
@@ -185,135 +171,66 @@ genrule(
             $(location ir/v1.def) \
             $(locations :ir_extra_defs)
     """,
-    tools = [":irgenerator"],
+    tools = [":ir_generator"],
+    visibility = ["//visibility:private"],
 )
 
-# This library contains p4c's IR (Internal Representation) of the P4 spec.
+# It would be better to build these modules separately, but they have cyclic
+# dependencies.
 cc_library(
-    name = "p4c_ir",
-    srcs = [
-        "ir/ir-generated.cpp",
-    ] + glob([
-        "ir/*.cpp",
-    ]),
-    hdrs = [
-        "ir/gen-tree-macro.h",
-        "ir/ir-generated.h",
-    ] + glob([
-        "ir/*.h",
-    ]),
-    deps = [
-        ":p4c_frontend_h",
-        ":p4c_includes",
-        ":p4c_toolkit",
-    ],
-)
-
-# This library combines the frontend and midend sources plus the
-# generated parser sources.
-cc_library(
-    name = "p4c_frontend_midend",
-    srcs = [
-        # These are the parser files from the genlex/genyacc rules, which
-        # glob doesn't find.
-        "frontends/parsers/p4/p4lexer.cc",
-        "frontends/parsers/p4/p4parser.cc",
-        "frontends/parsers/v1/v1lexer.cc",
-        "frontends/parsers/v1/v1parser.cc",
-    ] + glob([
-        "frontends/*.cpp",
+    name = "ir_frontend_midend_control_plane",
+    srcs = glob([
+        "ir/**/*.cpp",
         "frontends/**/*.cpp",
-        "midend/*.cpp",
-    ]),
-    hdrs = [
-        "frontends/parsers/p4/p4lexer.hpp",
-        "frontends/parsers/p4/p4AnnotationLexer.hpp",
-        "frontends/parsers/p4/abstractP4Lexer.hpp",
-        "frontends/parsers/p4/p4parser.hpp",
-        "frontends/parsers/p4/stack.hh",
-        "frontends/parsers/v1/stack.hh",
-        "frontends/parsers/v1/v1lexer.hpp",
-        "frontends/parsers/v1/v1parser.hpp",
+        "midend/**/*.cpp",
+        "control-plane/**/*.cpp",
+    ]) + [
+        "frontends/parsers/p4/p4parser.cc",
+        "frontends/parsers/v1/v1parser.cc",
+        "frontends/parsers/p4/p4lexer.cc",
+        "frontends/parsers/v1/v1lexer.cc",
         "ir/ir-generated.cpp",
-    ] + glob([
-        "frontends/*.h",
+    ],
+    textual_hdrs = glob([
+        "ir/**/*.h",
         "frontends/**/*.h",
-        "midend/*.h",
-    ]),
-    copts = P4C_BUILD_DEFAULT_COPTS,
-    data = glob([
-        "p4include/*.p4",
-    ]),
+        "frontends/**/*.hpp",
+        "midend/**/*.h",
+        "control-plane/**/*.h",
+    ]) + [
+        ":p4_parser_yacc",
+        ":v1_parser_yacc",
+        ":p4lexer",
+        ":v1lexer",
+        ":ir_generated_files",
+    ],
     deps = [
-        ":control_plane_h",
-        ":p4c_ir",
-        ":p4c_toolkit",
+        ":config_h",
+        ":lib",
         "@boost//:algorithm",
         "@boost//:functional",
         "@boost//:iostreams",
-    ],
-)
-
-cc_library(
-    name = "control_plane",
-    srcs = glob([
-        "control-plane/*.cpp",
-    ]),
-    copts = P4C_BUILD_DEFAULT_COPTS,
-    deps = [
-        ":control_plane_h",
-        ":p4c_frontend_midend",
-        ":p4c_ir",
-        ":p4c_toolkit",
-    ],
-)
-
-cc_library(
-    name = "p4c_toolkit",
-    srcs = glob([
-        "lib/*.cpp",
-    ]),
-    hdrs = glob([
-        "lib/*.h",
-    ]),
-    deps = [
-        ":config_h",
-        "@boost//:format",
-        "@boost//:multiprecision",
-        "@com_google_googletest//:gtest",
-    ],
-)
-
-# The control-plane headers are in a separate cc_library to break the
-# circular dependencies between control-plane and frontends/midend.
-cc_library(
-    name = "control_plane_h",
-    hdrs = glob(
-        ["control-plane/*.h"],
-    ),
-    deps = [
-        ":p4c_frontend_h",
-        ":p4c_ir",
-        ":p4c_toolkit",
         "@com_github_p4lang_p4runtime//:p4info_cc_proto",
-        "@com_github_p4lang_p4runtime//:p4runtime_cc_grpc",
+        "@com_github_p4lang_p4runtime//:p4runtime_cc_proto",
         "@com_github_p4lang_p4runtime//:p4types_cc_proto",
+        "@com_google_protobuf//:protobuf",
+    ],
+    copts = [
+        # Where p4c should look for p4include at runtime.
+        ("-DCONFIG_PKGDATADIR=\\\"external/%s\\\"" % repository_name()),
+        # This will work only if the binary is executed by Bazel. For a general
+        # solution, we would need to make p4c aware of Bazel, specifically:
+        # https://github.com/bazelbuild/bazel/blob/master/tools/cpp/runfiles/runfiles_src.h
     ],
 )
 
 cc_library(
     name = "p4c_bmv2_common_lib",
-    srcs = glob(
-        ["backends/bmv2/common/*.cpp"],
-    ),
-    hdrs = glob([
-        "backends/bmv2/common/*.h",
-    ]),
-    copts = P4C_BUILD_DEFAULT_COPTS,
+    srcs = glob(["backends/bmv2/common/*.cpp"]),
+    hdrs = glob(["backends/bmv2/common/*.h"]),
     deps = [
-        ":p4c_frontend_midend",
-        ":p4c_ir",
-        ":p4c_toolkit",
+        ":ir_frontend_midend_control_plane",
+        ":lib",
     ],
 )
 
@@ -323,15 +240,11 @@ cc_library(
         ["backends/bmv2/simple_switch/*.cpp"],
         exclude = ["backends/bmv2/simple_switch/main.cpp"],
     ),
-    hdrs = glob([
-        "backends/bmv2/simple_switch/*.h",
-    ]),
-    copts = P4C_BUILD_DEFAULT_COPTS,
+    hdrs = glob(["backends/bmv2/simple_switch/*.h"]),
     deps = [
         ":p4c_bmv2_common_lib",
-        ":p4c_frontend_midend",
-        ":p4c_ir",
-        ":p4c_toolkit",
+        ":ir_frontend_midend_control_plane",
+        ":lib",
     ],
 )
 
@@ -339,7 +252,8 @@ genrule(
     name = "p4c_bmv2_version",
     srcs = ["backends/bmv2/simple_switch/version.h.cmake"],
     outs = ["backends/bmv2/simple_switch/version.h"],
-    cmd = ("sed 's|@P4C_VERSION@|0.0.0.0|g' $< > $@"),
+    cmd = "sed 's|@P4C_VERSION@|0.0.0.0|g' $(SRCS) > $(OUTS)",
+    visibility = ["//visibility:private"],
 )
 
 cc_binary(
@@ -348,19 +262,15 @@ cc_binary(
         "backends/bmv2/simple_switch/main.cpp",
         "backends/bmv2/simple_switch/version.h",
     ],
-    copts = P4C_BUILD_DEFAULT_COPTS,
     linkopts = [
         "-lgmp",
         "-lgmpxx",
     ],
     deps = [
-        ":control_plane",
-        ":control_plane_h",
         ":p4c_bmv2_common_lib",
         ":p4c_bmv2_simple_lib",
-        ":p4c_frontend_midend",
-        ":p4c_ir",
-        ":p4c_toolkit",
+        ":ir_frontend_midend_control_plane",
+        ":lib",
     ],
     data = [":p4include"],
 )
@@ -372,17 +282,13 @@ cc_binary(
     srcs = [
         "backends/p4test/p4test.cpp",
     ],
-    copts = P4C_BUILD_DEFAULT_COPTS,
     linkopts = [
         "-lgmp",
         "-lgmpxx",
     ],
     deps = [
-        ":control_plane",
-        ":control_plane_h",
-        ":p4c_frontend_midend",
-        ":p4c_ir",
-        ":p4c_toolkit",
+        ":ir_frontend_midend_control_plane",
+        ":lib",
         ":p4c_backend_p4test_lib",
     ],
 )
@@ -391,7 +297,8 @@ genrule(
     name = "p4c_p4test_version",
     srcs = ["backends/p4test/version.h.cmake"],
     outs = ["backends/p4test/version.h"],
-    cmd = ("sed 's|@P4C_VERSION@|0.0.0.0|g' $< > $@"),
+    cmd = "sed 's|@P4C_VERSION@|0.0.0.0|g' $(SRCS) > $(OUTS)",
+    visibility = ["//visibility:private"],
 )
 
 cc_library(
@@ -403,13 +310,8 @@ cc_library(
         "backends/p4test/midend.h",
         "backends/p4test/version.h",
     ],
-    copts = P4C_BUILD_DEFAULT_COPTS,
     deps = [
-        ":p4c_frontend_midend",
-        ":p4c_ir",
-        ":p4c_toolkit",
+        ":ir_frontend_midend_control_plane",
+        ":lib",
     ],
-    data = [
-        ":p4c_p4test_version",
-    ]
 )
