@@ -66,7 +66,7 @@ control cIngress(inout headers_t hdr,
         // To see random behavior, un-comment the line below this comment to
         // see package coming out from different ports.
         // The line is currently commented so that STF test can pass.
-        // hdr.ethernet.dstAddr = rand.read();
+        // hdr.ethernet.dstAddr = r;
 
         send_to_port(ostd, (PortId_t) (PortIdUint_t) hdr.ethernet.dstAddr);
     }
