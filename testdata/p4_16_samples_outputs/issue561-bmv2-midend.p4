@@ -105,7 +105,7 @@ struct Tcp_option_sack_top {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     bit<7> Tcp_option_parser_tcp_hdr_bytes_left;
-    bit<8> Tcp_option_parser_tmp;
+    bit<8> Tcp_option_parser_tmp_0;
     bit<16> tmp;
     state start {
         packet.extract<ethernet_t>(hdr.ethernet);
@@ -185,8 +185,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     state Tcp_option_parser_next_option_part2 {
-        Tcp_option_parser_tmp = packet.lookahead<bit<8>>();
-        transition select(Tcp_option_parser_tmp) {
+        Tcp_option_parser_tmp_0 = packet.lookahead<bit<8>>();
+        transition select(Tcp_option_parser_tmp_0) {
             8w0: Tcp_option_parser_parse_tcp_option_end;
             8w1: Tcp_option_parser_parse_tcp_option_nop;
             8w2: Tcp_option_parser_parse_tcp_option_ss;

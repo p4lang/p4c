@@ -1,4 +1,4 @@
-signs.p4(17): [--Wwarn=shadow] warning: a shadows a
+signs.p4(17): [--Wwarn=shadow] warning: 'a' shadows 'a'
     bit<8> a = 8w0;
     ^^^^^^^^^^^^^^^
 signs.p4(16)

@@ -1,4 +1,4 @@
-default_action1.p4(20): [--Wwarn=shadow] warning: b shadows b
+default_action1.p4(20): [--Wwarn=shadow] warning: 'b' shadows 'b'
     action b() {}
            ^
 default_action1.p4(16)

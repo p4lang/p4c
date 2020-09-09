@@ -278,7 +278,7 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
             continue;
 
         if (prev_in_scope.count(decl->getName()))
-            ::warning(ErrorType::WARN_SHADOWING, "%1% shadows %2%", node,
+            ::warning(ErrorType::WARN_SHADOWING, "'%1%' shadows '%2%'", node,
                       prev_in_scope.at(decl->getName()));
         else if (!node->is<IR::Method>() && !node->is<IR::Function>())
             prev_in_scope[decl->getName()] = node;
@@ -300,7 +300,7 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
                 // attribute locals often match attributes
                 continue;
 
-            ::warning(ErrorType::WARN_SHADOWING, "%1% shadows %2%", node, pnode);
+            ::warning(ErrorType::WARN_SHADOWING, "'%1%' shadows '%2%'", node, pnode);
         }
     }
 }

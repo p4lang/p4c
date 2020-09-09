@@ -230,7 +230,7 @@ control FabricVerifyChecksum(inout parsed_headers_t hdr, inout fabric_metadata_t
 }
 
 parser FabricParser(packet_in packet, out parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata, inout standard_metadata_t standard_metadata) {
-    bit<4> tmp;
+    bit<4> tmp_0;
     state start {
         transition select(standard_metadata.ingress_port) {
             9w255: parse_packet_out;
@@ -273,8 +273,8 @@ parser FabricParser(packet_in packet, out parsed_headers_t hdr, inout fabric_met
         packet.extract<mpls_t>(hdr.mpls);
         fabric_metadata._mpls_label5 = hdr.mpls.label;
         fabric_metadata._mpls_ttl6 = hdr.mpls.ttl;
-        tmp = packet.lookahead<bit<4>>();
-        transition select(tmp) {
+        tmp_0 = packet.lookahead<bit<4>>();
+        transition select(tmp_0) {
             4w4: parse_ipv4;
             default: parse_ethernet;
         }

@@ -23,6 +23,7 @@ struct headers {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     bit<64> tmp;
+    bit<64> tmp_0;
     @name(".parse_head") state parse_head {
         packet.extract<easyroute_head_t>(hdr.easyroute_head);
         transition select(hdr.easyroute_head.num_valid) {
@@ -35,7 +36,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition accept;
     }
     @name(".start") state start {
-        tmp = packet.lookahead<bit<64>>();
+        tmp_0 = packet.lookahead<bit<64>>();
+        tmp = tmp_0;
         transition select(tmp) {
             64w0: parse_head;
             default: accept;

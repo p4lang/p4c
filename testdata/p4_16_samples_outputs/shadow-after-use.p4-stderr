@@ -1,4 +1,4 @@
-shadow-after-use.p4(21): [--Wwarn=shadow] warning: x shadows x
+shadow-after-use.p4(21): [--Wwarn=shadow] warning: 'x' shadows 'x'
     table x {
           ^
 shadow-after-use.p4(18)

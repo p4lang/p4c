@@ -49,12 +49,14 @@ struct Tcp_option_sack_top {
 
 parser Tcp_option_parser(packet_in b, out Tcp_option_stack vec) {
     bit<8> tmp;
-    Tcp_option_sack_top tmp_0;
-    bit<8> tmp_1;
+    bit<8> tmp_0;
+    Tcp_option_sack_top tmp_1;
     bit<8> tmp_2;
-    bit<32> tmp_3;
+    bit<8> tmp_3;
+    bit<32> tmp_4;
     state start {
-        tmp = b.lookahead<bit<8>>();
+        tmp_0 = b.lookahead<bit<8>>();
+        tmp = tmp_0;
         transition select(tmp) {
             8w0x0: parse_tcp_option_end;
             8w0x1: parse_tcp_option_nop;
@@ -80,11 +82,11 @@ parser Tcp_option_parser(packet_in b, out Tcp_option_stack vec) {
         transition start;
     }
     state parse_tcp_option_sack {
-        tmp_0 = b.lookahead<Tcp_option_sack_top>();
-        tmp_1 = tmp_0.length << 3;
-        tmp_2 = tmp_1 + 8w240;
-        tmp_3 = (bit<32>)tmp_2;
-        b.extract<Tcp_option_sack_h>(vec.next.sack, tmp_3);
+        tmp_1 = b.lookahead<Tcp_option_sack_top>();
+        tmp_2 = tmp_1.length << 3;
+        tmp_3 = tmp_2 + 8w240;
+        tmp_4 = (bit<32>)tmp_3;
+        b.extract<Tcp_option_sack_h>(vec.next.sack, tmp_4);
         transition start;
     }
 }
