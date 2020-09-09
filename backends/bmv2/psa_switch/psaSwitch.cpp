@@ -578,7 +578,65 @@ Util::IJson* ExternConverter_InternetChecksum::convertExternObject(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
-    auto primitive = mkPrimitive("InternetChecksum");
+
+    if (em->method->name != "clear"
+            && em->method->name != "get"
+            && em->method->name != "add"
+            && em->method->name != "subtract"
+            && em->method->name != "get_state"
+            && em->method->name != "set_state") {
+        modelError("Unsupported register method %1%", mc);
+        return nullptr;
+    } else if (em->method->name == "clear" && mc->arguments->size() != 0) {
+        modelError("Expected 0 arguments for %1%", mc);
+        return nullptr;
+    } else if (em->method->name == "get" && mc->arguments->size() != 1) {
+        modelError("Expected 1 arguments for %1%", mc);
+        return nullptr;
+    } else if (em->method->name == "get_state" && mc->arguments->size() != 1) {
+        modelError("Expected 1 arguments for %1%", mc);
+        return nullptr;
+    } else if (em->method->name == "set_state" && mc->arguments->size() != 1) {
+        modelError("Expected 1 arguments for %1%", mc);
+        return nullptr;
+    } else if (em->method->name == "subtract" && mc->arguments->size() != 1) {
+        modelError("Expected 1 arguments for %1%", mc);
+        return nullptr;
+    } else if (em->method->name == "add" && mc->arguments->size() != 1) {
+        modelError("Expected 1 arguments for %1%", mc);
+        return nullptr;
+    }
+
+
+    auto opName = "_" + em->originalExternType->name + "_" + em->method->name;
+
+    auto primitive = mkPrimitive(opName);
+
+    auto parameters = mkParameters(primitive);
+    primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    auto externObj = new Util::JsonObject();
+    externObj->emplace("type", "extern");
+    externObj->emplace("value", em->object->controlPlaneName());
+    parameters->append(externObj);
+
+    if (em->method->name == "get") {
+        auto dest = ctxt->conv->convert(mc->arguments->at(0)->expression);
+        parameters->append(dest);
+    }
+    if (em->method->name == "get_state" || em->method->name == "set_state") {
+        auto state = ctxt->conv->convert(mc->arguments->at(0)->expression);
+        parameters->append(state);
+    }
+    if (em->method->name == "add" || em->method->name == "subtract") {
+        /*
+        for (uint32_t i = 0; i < mc->arguments->size(); i++) {
+            auto icField = ctxt->conv->convert(mc->arguments->at(i)->expression);
+            parameters->append(icField);
+        }
+        */
+        auto icField = ctxt->conv->convert(mc->arguments->at(0)->expression);
+        parameters->append(icField);
+    }
     return primitive;
 }
 
@@ -766,8 +824,24 @@ void ExternConverter_Checksum::convertExternInstance(
 
 void ExternConverter_InternetChecksum::convertExternInstance(
     UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns)
-{ /* TODO */ }
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+
+    if (eb->getConstructorParameters()->size() != 0) {
+      modelError("%1%: expected 0 parameters", eb);
+      return;
+    }
+
+    auto inst = c->to<IR::Declaration_Instance>();
+    cstring name = inst->controlPlaneName();
+
+    // adding meter instance into extern_instances
+    auto jext = new Util::JsonObject();
+    jext->emplace("name", name);
+    jext->emplace("id", nextId("extern_instances"));
+    jext->emplace("type", eb->getName());
+    jext->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+    ctxt->json->externs->append(jext);
+}
 
 void ExternConverter_Counter::convertExternInstance(
     UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
