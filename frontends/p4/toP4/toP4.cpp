@@ -610,7 +610,8 @@ bool ToP4::preorder(const IR::Constant* c) {
     }
     std::deque<char> buf;
     do {
-        const int digit = (value % c->base).convert_to<int>();
+        const int digit =
+            static_cast<int>(static_cast<big_int>(value % c->base));
         value /= c->base;
         buf.push_front(DigitToChar(digit));
     } while (value > 0);
