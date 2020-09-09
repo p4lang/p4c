@@ -3,7 +3,7 @@ load("//:bazel/bison.bzl", "genyacc")
 
 package(
     default_visibility = ["//visibility:public"],
-    licenses = ["notice"],  # Apache v2
+    licenses = ["notice"],
 )
 
 filegroup(
