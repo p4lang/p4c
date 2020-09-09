@@ -55,15 +55,19 @@ control cIngress(inout headers_t hdr,
                  inout psa_ingress_output_metadata_t ostd)
 {
     Random<bit<48>>(1, 4) rand;
+    bit<48> r;
     apply {
         hdr.ethernet.dstAddr = 2;
-        if (rand.read() < 5) {
+        r = rand.read();
+        if ((r >= 1) && (r <=4)) {
              hdr.ethernet.dstAddr = 3;
         }
-        // To see random behavior, un-comment the line below this comment to see
-        // package coming out from different ports. 
+
+        // To see random behavior, un-comment the line below this comment to
+        // see package coming out from different ports.
         // The line is currently commented so that STF test can pass.
         // hdr.ethernet.dstAddr = rand.read();
+
         send_to_port(ostd, (PortId_t) (PortIdUint_t) hdr.ethernet.dstAddr);
     }
 }
