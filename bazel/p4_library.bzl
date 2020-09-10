@@ -52,7 +52,6 @@ def _p4_library_impl(ctx):
             p4c = p4c.path,
             p4c_args = " ".join(args),
         ),
-        arguments = args,
         inputs = p4deps + [p4file],
         tools = depset(
             direct = [p4c],
