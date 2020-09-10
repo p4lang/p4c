@@ -1,5 +1,7 @@
 """P4 compilation rule."""
 
+load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
+
 def _p4_library_impl(ctx):
     p4c = ctx.executable._p4c
     p4file = ctx.file.src
@@ -14,9 +16,10 @@ def _p4_library_impl(ctx):
         "--arch",
         ctx.attr.arch,
     ]
-    if ctx.attr.extra_args: args.append(ctx.attr.extra_args)
+    if ctx.attr.extra_args:
+        args.append(ctx.attr.extra_args)
 
-    include_dirs = { d.dirname : 0 for d in p4deps }  # Use dict to express set.
+    include_dirs = {d.dirname: 0 for d in p4deps}  # Use dict to express set.
     args += [("-I" + dir) for dir in include_dirs.keys()]
 
     outputs = []
@@ -36,13 +39,28 @@ def _p4_library_impl(ctx):
     if not outputs:
         fail("No outputs specified. Must specify p4info_out or target_out or both.")
 
-    ctx.actions.run(
-        executable = p4c,
+    cpp_toolchain = find_cpp_toolchain(ctx)
+    ctx.actions.run_shell(
+        command = """
+            # p4c invokes cc for preprocessing; we provide it below.
+            function cc () {{ "{cc}" "$@"; }}
+            export -f cc
+
+            "{p4c}" {p4c_args}
+        """.format(
+            cc = cpp_toolchain.compiler_executable,
+            p4c = p4c.path,
+            p4c_args = " ".join(args),
+        ),
         arguments = args,
         inputs = p4deps + [p4file],
+        tools = depset(
+            direct = [p4c],
+            transitive = [cpp_toolchain.all_files],
+        ),
         outputs = outputs,
         progress_message = "Compiling P4 program %s" % p4file.short_path,
-        use_default_shell_env = True,  # This is so p4c finds cc.
+        use_default_shell_env = True,
     )
 
 p4_library = rule(
