@@ -157,7 +157,6 @@ UBPFTable::UBPFTable(const UBPFProgram *program,
 }
 
 void UBPFTable::emitInstance(EBPF::CodeBuilder *builder) {
-
     cstring keyTypeStr;
     if (keyType != nullptr && keyType->is<IR::Type_Bits>()) {
         auto tb = keyType->to<IR::Type_Bits>();
@@ -177,11 +176,10 @@ void UBPFTable::emitInstance(EBPF::CodeBuilder *builder) {
     }
 
     builder->target->emitTableDecl(builder, dataMapName, tableKind,
-                                   keyTypeStr,valueTypeStr, size);
+                                   keyTypeStr, valueTypeStr, size);
 }
 
-void UBPFTable::setTableKind()
-{
+void UBPFTable::setTableKind() {
     if (keyGenerator == nullptr) {
         return;
     }

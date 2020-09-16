@@ -78,9 +78,7 @@ namespace UBPF {
         }
 
         builder->target->emitTableDecl(builder, dataMapName, EBPF::TableHash,
-                                       keyTypeStr,valueTypeStr, size);
-
-
+                                       keyTypeStr, valueTypeStr, size);
     }
 
     void UBPFRegister::emitMethodInvocation(EBPF::CodeBuilder *builder,
