@@ -182,6 +182,9 @@ void UBPFTable::emitInstance(EBPF::CodeBuilder *builder) {
 
 void UBPFTable::setTableKind()
 {
+    if (keyGenerator == nullptr) {
+        return;
+    }
     // set table kind to HASH by default
     EBPF::TableKind tableKind = EBPF::TableHash;
 
@@ -252,11 +255,13 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
         }
 
         // Emit key in decreasing order size - this way there will be no gaps
+        unsigned key_idx = 0;
         for (auto it = ordered.rbegin(); it != ordered.rend(); ++it) {
             auto c = it->second;
             if (tableKind == EBPF::TableLPMTrie) {
                 builder->emitIndent();
-                builder->appendLine("uint32_t prefix_len;");
+                builder->appendFormat("uint32_t prefix_len%d;", key_idx);
+                builder->newline();
             }
             auto ebpfType = ::get(keyTypes, c);
             builder->emitIndent();
@@ -273,6 +278,7 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
             if (matchType->name.name != P4::P4CoreLibrary::instance.exactMatch.name &&
                 matchType->name.name != P4::P4CoreLibrary::instance.lpmMatch.name)
                 ::error("Match of type %1% not supported", c->matchType);
+            key_idx++;
         }
     }
 
