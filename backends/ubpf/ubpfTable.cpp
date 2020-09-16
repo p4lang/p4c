@@ -454,6 +454,15 @@ void UBPFTable::emitInitializer(EBPF::CodeBuilder *builder) {
     auto mce = defaultAction->to<IR::MethodCallExpression>();
     auto mi = P4::MethodInstance::resolve(mce, program->refMap, program->typeMap);
 
+    auto defact = t->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
+    // uBPF does not support setting default action at compile time. Default action must be set from a control plane and
+    // 'const' qualifier does not permit to modify default action by a control plane.
+    if (defact->isConstant) {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "%1%: uBPF target does not allow 'const default_action'. Use `default_action` instead.", defact);
+    }
+    ::warning(ErrorType::WARN_IGNORE, "Default action statement may have no effect. "
+                                               "It is more safe to set default action by a control plane.");
     auto ac = mi->to<P4::ActionCall>();
     BUG_CHECK(ac != nullptr, "%1%: expected an action call", mce);
     auto action = ac->action;
@@ -491,6 +500,14 @@ void UBPFTable::emitInitializer(EBPF::CodeBuilder *builder) {
     builder->target->emitTableUpdate(builder, defaultTable, program->zeroKey, "&" + value);
     builder->endOfStatement(true);
     builder->blockEnd(true);
+
+
+    // Check if there are const entries.
+    auto entries = t->getEntries();
+    if (entries != nullptr) {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "%1%: Immutable table entries cannot be configured by the uBPF target and should not be used.", entries);
+    }
 }
 
 

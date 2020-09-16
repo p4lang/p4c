@@ -139,7 +139,7 @@ namespace UBPF {
         emitTableDefinition(builder);
         builder->newline();
         control->emitTableTypes(builder);
-
+        builder->appendLine("#if CONTROL_PLANE");
         builder->appendLine("static void init_tables() ");
         builder->blockStart();
         builder->emitIndent();
@@ -147,7 +147,7 @@ namespace UBPF {
         builder->newline();
         control->emitTableInitializers(builder);
         builder->blockEnd(true);
-
+        builder->appendLine("#endif");
         builder->appendLine("#endif");
     }
 
