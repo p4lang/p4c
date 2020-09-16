@@ -461,8 +461,6 @@ void UBPFTable::emitInitializer(EBPF::CodeBuilder *builder) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "%1%: uBPF target does not allow 'const default_action'. Use `default_action` instead.", defact);
     }
-    ::warning(ErrorType::WARN_IGNORE, "Default action statement may have no effect. "
-                                               "It is more safe to set default action by a control plane.");
     auto ac = mi->to<P4::ActionCall>();
     BUG_CHECK(ac != nullptr, "%1%: expected an action call", mce);
     auto action = ac->action;
