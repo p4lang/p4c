@@ -177,6 +177,10 @@ namespace UBPF {
         builder->append("UBPF_MAP_TYPE_HASHMAP = 4,");
         builder->newline();
 
+        builder->emitIndent();
+        builder->append("UBPF_MAP_TYPE_LPM_TRIE = 5,");
+        builder->newline();
+
         builder->blockEnd(false);
         builder->endOfStatement(true);
 

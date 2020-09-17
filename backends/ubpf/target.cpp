@@ -51,6 +51,49 @@ namespace UBPF {
                               tblName.c_str(), key.c_str(), value.c_str());
     }
 
+    void UbpfTarget::emitTableDecl(Util::SourceCodeBuilder *builder,
+                                   cstring tblName, EBPF::TableKind tableKind,
+                                   cstring keyType, cstring valueType,
+                                   unsigned size) const {
+        builder->append("struct ");
+        builder->appendFormat("ubpf_map_def %s = ", tblName);
+        builder->spc();
+        builder->blockStart();
+
+        cstring type;
+        if (tableKind == EBPF::TableHash) {
+            type = "UBPF_MAP_TYPE_HASHMAP";
+        } else if (tableKind == EBPF::TableLPMTrie) {
+            type = "UBPF_MAP_TYPE_LPM_TRIE";
+        } else {
+            BUG("%1%: unsupported table kind", tableKind);
+        }
+
+        builder->emitIndent();
+        builder->appendFormat(".type = %s,", type);
+        builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat(".key_size = sizeof(%s),", keyType);
+        builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat(".value_size = sizeof(%s),", valueType);
+
+        builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat(".max_entries = %d,", size);
+        builder->newline();
+
+        builder->emitIndent();
+        builder->append(".nb_hash_functions = 0,");
+        builder->newline();
+
+        builder->blockEnd(false);
+        builder->endOfStatement(true);
+    }
+
     void UbpfTarget::emitGetPacketData(Util::SourceCodeBuilder *builder,
                                        cstring ctxVar) const {
         builder->appendFormat("ubpf_packet_data(%s)", ctxVar.c_str());

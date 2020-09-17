@@ -58,6 +58,10 @@ namespace UBPF {
         }
     }
 
+    void UBPFRegister::emitInstance(EBPF::CodeBuilder *builder) {
+        UBPFTableBase::emitInstance(builder, EBPF::TableHash);
+    }
+
     void UBPFRegister::emitMethodInvocation(EBPF::CodeBuilder *builder,
                                             const P4::ExternMethod *method) {
         if (method->method->name.name ==
@@ -149,6 +153,7 @@ namespace UBPF {
 
         last_key_name = keyName;
     }
+
 }  // namespace UBPF
 
 

@@ -50,6 +50,8 @@ namespace UBPF {
 
         void emit(EBPF::CodeBuilder *builder) override;
 
+        cstring getAsString();
+
         void declare(EBPF::CodeBuilder *builder, cstring id, bool asPointer) override;
     };
 
