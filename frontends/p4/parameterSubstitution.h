@@ -84,7 +84,7 @@ class ParameterSubstitution : public IHasDbPrint {
     /// Only works if parameters were inserted using populate.
     Util::Enumerator<const IR::Parameter*>* getParametersInOrder() const {
         if (paramList == nullptr)
-            return nullptr;
+            return new Util::EmptyEnumerator<const IR::Parameter*>;
         return paramList->getEnumerator();
     }
 
