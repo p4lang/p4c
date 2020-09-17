@@ -20,6 +20,7 @@ def _p4_library_impl(ctx):
         args.append(ctx.attr.extra_args)
 
     include_dirs = {d.dirname: 0 for d in p4deps}  # Use dict to express set.
+    include_dirs["."] = 0  # Enable include paths relative to workspace root.
     args += [("-I" + dir) for dir in include_dirs.keys()]
 
     outputs = []

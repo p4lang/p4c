@@ -1,0 +1,20 @@
+load("@com_github_p4lang_p4c//:bazel/p4_library.bzl", "p4_library")
+
+p4_library(
+  name = "program",
+  src = "program.p4",
+  deps = ["empty.p4"],
+  p4info_out = "program.p4info.txt",
+  visibility = ["//:__subpackages__"],
+)
+
+p4_library(
+  name = "program_with_more_options",
+  src = "program.p4",
+  deps = ["empty.p4"],                  # Optional: #include-ed dependencies.
+  p4info_out = "program.p4info.2.txt",  # Optional.
+  target = "bmv2",                      # Optional (default: "bmv2").
+  target_out = "program.bmv2.json",     # Optional.
+  arch = "v1model",                     # Optional (default: "v1model").
+  visibility = ["//:__subpackages__"],  # Optional.
+)
