@@ -85,8 +85,7 @@ bool StateTranslationVisitor::preorder(const IR::AssignmentStatement* statement)
         ::error("Unexpected method call in parser %1%", statement->right);
     }
 
-    CodeGenInspector::visit(statement);
-    return false;
+    return CodeGenInspector::preorder(statement);
 }
 
 bool StateTranslationVisitor::preorder(const IR::ParserState* parserState) {
