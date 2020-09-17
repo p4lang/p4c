@@ -806,9 +806,7 @@ keysetExpression
     ;
 
 tupleKeysetExpression
-    /* at least two elements in the tuple */
-    : "(" simpleKeysetExpression "," simpleExpressionList ")"
-                                { $$ = $4; $4->insert($4->begin(), $2); }
+    : "(" simpleExpressionList ")" { $$ = $2; }
     ;
 
 simpleExpressionList
