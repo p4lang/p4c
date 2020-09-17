@@ -190,6 +190,18 @@ class GenericEnumerator : public Enumerator<typename Iter::value_type> {
 
 /////////////////////////////////////////////////////////////////////
 
+/* always returns false */
+template <typename T>
+class EmptyEnumerator : public Enumerator<T> {
+ public:
+    cstring toString() const { return "EmptyEnumerator"; }
+    bool moveNext() { return false; }
+    T getCurrent() const {
+        throw std::logic_error("You cannot call 'getCurrent' on an EmptyEnumerator"); }
+};
+
+/////////////////////////////////////////////////////////////////////
+
 /* filters according to a predicate */
 template <typename T>
 class FilterEnumerator final : public Enumerator<T> {

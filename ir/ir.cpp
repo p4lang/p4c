@@ -62,7 +62,7 @@ Util::Enumerator<const IDeclaration*>* INestedNamespace::getDeclarations() const
                 rv = rv->concat(nested->getDeclarations());
             else
                 rv = nested->getDeclarations(); } }
-    return rv;
+    return rv ? rv : new Util::EmptyEnumerator<const IDeclaration*>;
 }
 
 bool IFunctional::callMatches(const Vector<Argument> *arguments) const {
