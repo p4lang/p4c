@@ -37,6 +37,8 @@ namespace UBPF {
         size_t size{};
         EBPF::CodeGenInspector *codeGen;
 
+        void emitInstance(EBPF::CodeBuilder *pBuilder, EBPF::TableKind tableKind);
+
     protected:
         UBPFTableBase(const UBPFProgram *program, cstring instanceName,
                       EBPF::CodeGenInspector *codeGen) :

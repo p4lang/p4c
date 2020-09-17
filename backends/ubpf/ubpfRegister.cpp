@@ -59,26 +59,7 @@ namespace UBPF {
     }
 
     void UBPFRegister::emitInstance(EBPF::CodeBuilder *builder) {
-        cstring keyTypeStr;
-        if (keyType != nullptr && keyType->is<IR::Type_Bits>()) {
-            auto tb = keyType->to<IR::Type_Bits>();
-            auto scalar = new UBPFScalarType(tb);
-            keyTypeStr = scalar->getAsString();
-        } else {
-            keyTypeStr = cstring("struct ") + keyTypeName.c_str();;
-        }
-
-        cstring valueTypeStr;
-        if (valueType != nullptr && valueType->is<IR::Type_Bits>()) {
-            auto tb = valueType->to<IR::Type_Bits>();
-            auto scalar = new UBPFScalarType(tb);
-            valueTypeStr = scalar->getAsString();
-        } else {
-            valueTypeStr = cstring("struct ") + valueTypeName.c_str();
-        }
-
-        builder->target->emitTableDecl(builder, dataMapName, EBPF::TableHash,
-                                       keyTypeStr, valueTypeStr, size);
+        UBPFTableBase::emitInstance(builder, EBPF::TableHash);
     }
 
     void UBPFRegister::emitMethodInvocation(EBPF::CodeBuilder *builder,

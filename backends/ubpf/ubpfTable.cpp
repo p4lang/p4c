@@ -134,6 +134,35 @@ class UbpfActionTranslationVisitor : public EBPF::CodeGenInspector {
 };  // UbpfActionTranslationVisitor
 }  // namespace
 
+void UBPFTableBase::emitInstance(EBPF::CodeBuilder *builder, EBPF::TableKind tableKind) {
+    BUG_CHECK(keyType != nullptr, "Key type of %1% is not set", instanceName);
+    BUG_CHECK(valueType != nullptr, "Value type of %1% is not set", instanceName);
+
+    cstring keyTypeStr;
+    if (keyType->is<IR::Type_Bits>()) {
+        auto tb = keyType->to<IR::Type_Bits>();
+        auto scalar = new UBPFScalarType(tb);
+        keyTypeStr = scalar->getAsString();
+    } else if (keyType->is<IR::Type_StructLike>()) {
+        keyTypeStr = cstring("struct ") + keyTypeName.c_str();;
+    }
+    // Key type is not null, but we didn't handle it
+    BUG_CHECK(!keyTypeStr.isNullOrEmpty(), "Key type %1% not supported", keyType->toString());
+
+    cstring valueTypeStr;
+    if (valueType->is<IR::Type_Bits>()) {
+        auto tb = valueType->to<IR::Type_Bits>();
+        auto scalar = new UBPFScalarType(tb);
+        valueTypeStr = scalar->getAsString();
+    } else if (valueType->is<IR::Type_StructLike>()) {
+        valueTypeStr = cstring("struct ") + valueTypeName.c_str();
+    }
+    // Value type is not null, but we didn't handle it
+    BUG_CHECK(!valueTypeStr.isNullOrEmpty(), "Value type %1% not supported", valueType->toString());
+
+    builder->target->emitTableDecl(builder, dataMapName, tableKind,
+                                   keyTypeStr, valueTypeStr, size);
+}
 
 UBPFTable::UBPFTable(const UBPFProgram *program,
                      const IR::TableBlock *table,
@@ -152,31 +181,17 @@ UBPFTable::UBPFTable(const UBPFProgram *program,
     keyGenerator = table->container->getKey();
     actionList = table->container->getActionList();
 
+    keyType = new IR::Type_Struct(IR::ID(keyTypeName));
+    valueType = new IR::Type_Struct(IR::ID(valueTypeName));
+
     setTableSize(table);
     setTableKind();
 }
 
+
+
 void UBPFTable::emitInstance(EBPF::CodeBuilder *builder) {
-    cstring keyTypeStr;
-    if (keyType != nullptr && keyType->is<IR::Type_Bits>()) {
-        auto tb = keyType->to<IR::Type_Bits>();
-        auto scalar = new UBPFScalarType(tb);
-        keyTypeStr = scalar->getAsString();
-    } else {
-        keyTypeStr = cstring("struct ") + keyTypeName.c_str();;
-    }
-
-    cstring valueTypeStr;
-    if (valueType != nullptr && valueType->is<IR::Type_Bits>()) {
-        auto tb = valueType->to<IR::Type_Bits>();
-        auto scalar = new UBPFScalarType(tb);
-        valueTypeStr = scalar->getAsString();
-    } else {
-        valueTypeStr = cstring("struct ") + valueTypeName.c_str();
-    }
-
-    builder->target->emitTableDecl(builder, dataMapName, tableKind,
-                                   keyTypeStr, valueTypeStr, size);
+    UBPFTableBase::emitInstance(builder, tableKind);
 }
 
 void UBPFTable::setTableKind() {
