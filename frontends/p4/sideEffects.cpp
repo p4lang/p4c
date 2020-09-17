@@ -160,7 +160,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::StructExpression* expression
         auto path = addAssignment(expression->srcInfo, tmp, v->expression);
         typeMap->setType(path, t);
         v = new IR::NamedExpression(v->name, path);
-	vec.push_back(v);
+        vec.push_back(v);
     }
     expression->components = vec;
     prune();
