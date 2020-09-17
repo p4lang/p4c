@@ -89,6 +89,25 @@ const IR::Node* CreateStructInitializers::postorder(IR::AssignmentStatement* sta
     return statement;
 }
 
+const IR::Node* CreateStructInitializers::postorder(IR::ReturnStatement* statement) {
+    if (statement->expression == nullptr)
+        return statement;
+    auto func = findOrigCtxt<IR::Function>();
+    if (func == nullptr)
+        return statement;
+
+    auto ftype = typeMap->getType(func);
+    BUG_CHECK(ftype->is<IR::Type_Method>(), "%1%: expected a method type for function", ftype);
+    auto mt = ftype->to<IR::Type_Method>();
+    auto returnType = mt->returnType;
+    CHECK_NULL(returnType);
+
+    auto init = convert(statement->expression, returnType);
+    if (init != statement->expression)
+        statement->expression = init;
+    return statement;
+}
+
 const IR::Node* CreateStructInitializers::postorder(IR::Declaration_Variable* decl) {
     if (decl->initializer == nullptr)
         return decl;
