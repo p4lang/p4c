@@ -176,10 +176,13 @@ class IndexedVector : public Vector<T> {
 
     void toJSON(JSONGenerator &json) const override;
     static IndexedVector<T>* fromJSON(JSONLoader &json);
-    void check_valid() const {
+    void validate() const {
         for (auto el : *this) {
-            auto it = declarations.find(el->getName());
-            BUG_CHECK(it != declarations.end() && it->second == el, "invalid element %1%", el); }
+  	    auto decl = el->template to<IR::IDeclaration>();
+	    if (!decl) continue;
+            auto it = declarations.find(decl->getName());
+            BUG_CHECK(it != declarations.end() && it->second->getNode() == el->getNode(),
+		      "invalid element %1%", el); }
     }
 };
 
