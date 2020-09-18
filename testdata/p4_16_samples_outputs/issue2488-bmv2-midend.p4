@@ -27,7 +27,6 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    ethernet_t tmp_eth_hdr;
     ethernet_t tmp_0;
     bit<48> tmp_1;
     @hidden action issue2488bmv2l37() {
@@ -37,8 +36,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         tmp_0.dst_addr = tmp_1;
         tmp_0.src_addr = 48w2;
         tmp_0.eth_type = 16w1;
-        tmp_eth_hdr.setValid();
-        tmp_eth_hdr = tmp_0;
         h.eth_hdr.dst_addr = 48w1;
         h.eth_hdr = tmp_0;
     }

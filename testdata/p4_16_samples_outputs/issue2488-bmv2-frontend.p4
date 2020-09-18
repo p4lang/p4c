@@ -52,7 +52,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         tmp_4 = 16w1;
         tmp_0.setValid();
         tmp_0 = (ethernet_t){dst_addr = tmp_1,src_addr = tmp_2,eth_type = tmp_4};
-        tmp.eth_hdr.setValid();
         tmp = (Headers){eth_hdr = tmp_0};
         tmp_5 = h.eth_hdr.dst_addr;
         {
