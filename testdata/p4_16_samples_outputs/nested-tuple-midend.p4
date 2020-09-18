@@ -3,8 +3,8 @@ struct T {
 }
 
 struct tuple_1 {
-    T field_1;
-    T field_2;
+    T f0;
+    T f1;
 }
 
 struct S {
@@ -20,12 +20,12 @@ struct tuple_0 {
 
 extern void f<T>(in T data);
 control c(inout bit<1> r) {
-    T s_0_f1_field;
-    T s_0_f1_field_0;
+    T s_0_f1_f0;
+    T s_0_f1_f1;
     @hidden action nestedtuple34() {
-        s_0_f1_field.f = 1w0;
-        s_0_f1_field_0.f = 1w1;
-        f<tuple_1>({ s_0_f1_field, s_0_f1_field_0 });
+        s_0_f1_f0.f = 1w0;
+        s_0_f1_f1.f = 1w1;
+        f<tuple_1>({ s_0_f1_f0, s_0_f1_f1 });
         f<tuple_0>((tuple_0){field = (T){f = 1w0},field_0 = (T){f = 1w1}});
         r = 1w0;
     }

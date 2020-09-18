@@ -2836,6 +2836,20 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         }
     }
 
+    if (auto tt = type->to<IR::Type_Tuple>()) {
+        int index = tt->fieldNameValid(member);
+        if (index >= 0) {
+            auto type = tt->components.at(static_cast<unsigned>(index));
+            setType(getOriginal(), type);
+            setType(expression, type);
+            if (isCompileTimeConstant(expression->expr)) {
+                setCompileTimeConstant(expression);
+                setCompileTimeConstant(getOriginal<IR::Expression>());
+            }
+            return expression;
+        }
+    }
+
     typeError("Cannot extract field %1% from %2% which has type %3%",
               expression->member, expression->expr, type->toString());
     // unreachable

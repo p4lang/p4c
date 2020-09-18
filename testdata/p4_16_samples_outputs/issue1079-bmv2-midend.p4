@@ -25,7 +25,7 @@ parser EmptyParser(packet_in b, out headers_t headers, inout metadata_t meta, in
 }
 
 struct tuple_0 {
-    bit<16> field;
+    bit<16> f0;
 }
 
 control EmptyVerifyChecksum(inout headers_t hdr, inout metadata_t meta) {

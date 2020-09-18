@@ -241,32 +241,32 @@ control DeparserImpl(packet_out packet, in headers_t hdr) {
 }
 
 struct tuple_0 {
-    bit<48> field;
-    bit<48> field_0;
-    bit<48> field_1;
-    bit<8>  field_2;
-    bit<8>  field_3;
-    bit<8>  field_4;
-    bit<8>  field_5;
-    bit<8>  field_6;
-    bit<8>  field_7;
-    bit<8>  field_8;
-    bit<8>  field_9;
-    bit<8>  field_10;
-    bit<8>  field_11;
-    bit<8>  field_12;
-    bit<8>  field_13;
-    bit<8>  field_14;
-    bit<8>  field_15;
-    bit<8>  field_16;
-    bit<8>  field_17;
-    bit<8>  field_18;
-    bit<8>  field_19;
-    bit<8>  field_20;
-    bit<8>  field_21;
-    bit<8>  field_22;
-    bit<8>  field_23;
-    int<8>  field_24;
+    bit<48> f0;
+    bit<48> f1;
+    bit<48> f2;
+    bit<8>  f3;
+    bit<8>  f4;
+    bit<8>  f5;
+    bit<8>  f6;
+    bit<8>  f7;
+    bit<8>  f8;
+    bit<8>  f9;
+    bit<8>  f10;
+    bit<8>  f11;
+    bit<8>  f12;
+    bit<8>  f13;
+    bit<8>  f14;
+    bit<8>  f15;
+    bit<8>  f16;
+    bit<8>  f17;
+    bit<8>  f18;
+    bit<8>  f19;
+    bit<8>  f20;
+    bit<8>  f21;
+    bit<8>  f22;
+    bit<8>  f23;
+    bit<8>  f24;
+    int<8>  f25;
 }
 
 control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {

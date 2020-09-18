@@ -52,7 +52,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 struct tuple_0 {
-    mymeta_t field;
+    mymeta_t f0;
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {

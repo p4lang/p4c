@@ -55,8 +55,8 @@ class ReplacementMap {
  * is replaced by
  *
  *   struct tuple_0 {
- *     bit<32> field;
- *     bit<32> field_0;
+ *     bit<32> f0;
+ *     bit<32> f1;
  *   }
  *   tuple_0 t;
  *

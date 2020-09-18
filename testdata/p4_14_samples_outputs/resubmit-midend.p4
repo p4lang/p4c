@@ -42,8 +42,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 struct tuple_0 {
-    standard_metadata_t field;
-    mymeta_t            field_0;
+    standard_metadata_t f0;
+    mymeta_t            f1;
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {

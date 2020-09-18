@@ -117,11 +117,11 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 @name(".heavy_hitter_counter2") register<bit<16>, bit<4>>(32w16) heavy_hitter_counter2;
 
 struct tuple_0 {
-    bit<32> field;
-    bit<32> field_0;
-    bit<8>  field_1;
-    bit<16> field_2;
-    bit<16> field_3;
+    bit<32> f0;
+    bit<32> f1;
+    bit<8>  f2;
+    bit<16> f3;
+    bit<16> f4;
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -220,17 +220,17 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 }
 
 struct tuple_1 {
-    bit<4>  field_4;
-    bit<4>  field_5;
-    bit<8>  field_6;
-    bit<16> field_7;
-    bit<16> field_8;
-    bit<3>  field_9;
-    bit<13> field_10;
-    bit<8>  field_11;
-    bit<8>  field_12;
-    bit<32> field_13;
-    bit<32> field_14;
+    bit<4>  f0;
+    bit<4>  f1;
+    bit<8>  f2;
+    bit<16> f3;
+    bit<16> f4;
+    bit<3>  f5;
+    bit<13> f6;
+    bit<8>  f7;
+    bit<8>  f8;
+    bit<32> f9;
+    bit<32> f10;
 }
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {

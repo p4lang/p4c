@@ -42,7 +42,7 @@ control deparser(packet_out b, in Headers h) {
 }
 
 struct tuple_0 {
-    bit<16> field;
+    bit<16> f0;
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
