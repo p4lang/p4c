@@ -25,7 +25,7 @@ control MyVerifyChecksum(inout my_packet hdr, inout my_metadata meta) {
 }
 
 struct tuple_0 {
-    bit<32> field;
+    bit<32> f0;
 }
 
 control MyIngress(inout my_packet p, inout my_metadata m, inout standard_metadata_t s) {

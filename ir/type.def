@@ -325,6 +325,9 @@ class Type_List : Type_BaseList {
 class Type_Tuple : Type_BaseList {
     toString{ return "Tuple(" + Util::toString(components.size()) + ")"; }
     const Type* getP4Type() const override;
+    /// Return a field index if given a legal tuple field name.
+    /// Otherwise return -1.
+    int fieldNameValid(cstring name) const;
 }
 
 /// The type of an architectural block.

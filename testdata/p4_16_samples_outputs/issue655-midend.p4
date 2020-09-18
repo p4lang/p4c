@@ -48,7 +48,7 @@ control cEgress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
 }
 
 struct tuple_0 {
-    bit<16> field;
+    bit<16> f0;
 }
 
 control vc(inout Parsed_packet hdr, inout Metadata meta) {

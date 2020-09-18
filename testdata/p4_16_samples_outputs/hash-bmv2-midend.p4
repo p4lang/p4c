@@ -36,7 +36,7 @@ control ComputeChecksumI(inout H hdr, inout M meta) {
 }
 
 struct tuple_0 {
-    bit<32> field;
+    bit<32> f0;
 }
 
 control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {

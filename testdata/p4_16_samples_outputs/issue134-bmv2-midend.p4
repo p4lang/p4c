@@ -42,7 +42,7 @@ control VerifyChecksumI(inout H hdr, inout M meta) {
 }
 
 struct tuple_0 {
-    bit<1> field;
+    bit<1> f0;
 }
 
 control ComputeChecksumI(inout H hdr, inout M meta) {

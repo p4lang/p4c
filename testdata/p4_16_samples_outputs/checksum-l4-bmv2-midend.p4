@@ -190,48 +190,48 @@ control cEgress(inout headers hdr, inout metadata meta, inout standard_metadata_
 }
 
 struct tuple_0 {
-    bit<4>      field;
-    bit<4>      field_0;
-    bit<8>      field_1;
-    bit<16>     field_2;
-    bit<16>     field_3;
-    bit<3>      field_4;
-    bit<13>     field_5;
-    bit<8>      field_6;
-    bit<8>      field_7;
-    bit<32>     field_8;
-    bit<32>     field_9;
-    varbit<320> field_10;
+    bit<4>      f0;
+    bit<4>      f1;
+    bit<8>      f2;
+    bit<16>     f3;
+    bit<16>     f4;
+    bit<3>      f5;
+    bit<13>     f6;
+    bit<8>      f7;
+    bit<8>      f8;
+    bit<32>     f9;
+    bit<32>     f10;
+    varbit<320> f11;
 }
 
 struct tuple_1 {
-    bit<32>     field_11;
-    bit<32>     field_12;
-    bit<8>      field_13;
-    bit<8>      field_14;
-    bit<16>     field_15;
-    bit<16>     field_16;
-    bit<16>     field_17;
-    bit<32>     field_18;
-    bit<32>     field_19;
-    bit<4>      field_20;
-    bit<3>      field_21;
-    bit<3>      field_22;
-    bit<6>      field_23;
-    bit<16>     field_24;
-    bit<16>     field_25;
-    varbit<320> field_26;
+    bit<32>     f0;
+    bit<32>     f1;
+    bit<8>      f2;
+    bit<8>      f3;
+    bit<16>     f4;
+    bit<16>     f5;
+    bit<16>     f6;
+    bit<32>     f7;
+    bit<32>     f8;
+    bit<4>      f9;
+    bit<3>      f10;
+    bit<3>      f11;
+    bit<6>      f12;
+    bit<16>     f13;
+    bit<16>     f14;
+    varbit<320> f15;
 }
 
 struct tuple_2 {
-    bit<32> field_27;
-    bit<32> field_28;
-    bit<8>  field_29;
-    bit<8>  field_30;
-    bit<16> field_31;
-    bit<16> field_32;
-    bit<16> field_33;
-    bit<16> field_34;
+    bit<32> f0;
+    bit<32> f1;
+    bit<8>  f2;
+    bit<8>  f3;
+    bit<16> f4;
+    bit<16> f5;
+    bit<16> f6;
+    bit<16> f7;
 }
 
 control vc(inout headers hdr, inout metadata meta) {

@@ -202,18 +202,18 @@ struct parsed_headers_t {
 }
 
 struct tuple_0 {
-    bit<4>  field;
-    bit<4>  field_0;
-    bit<6>  field_1;
-    bit<2>  field_2;
-    bit<16> field_3;
-    bit<16> field_4;
-    bit<3>  field_5;
-    bit<13> field_6;
-    bit<8>  field_7;
-    bit<8>  field_8;
-    bit<32> field_9;
-    bit<32> field_10;
+    bit<4>  f0;
+    bit<4>  f1;
+    bit<6>  f2;
+    bit<2>  f3;
+    bit<16> f4;
+    bit<16> f5;
+    bit<3>  f6;
+    bit<13> f7;
+    bit<8>  f8;
+    bit<8>  f9;
+    bit<32> f10;
+    bit<32> f11;
 }
 
 control FabricComputeChecksum(inout parsed_headers_t hdr, inout fabric_metadata_t meta) {

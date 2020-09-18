@@ -35,27 +35,27 @@ enum MyEnum_t {
 }
 
 struct tuple_0 {
-    bool field;
+    bool f0;
 }
 
 struct tuple_1 {
-    bit<1> field_0;
+    bit<1> f0;
 }
 
 struct tuple_2 {
-    int<8> field_1;
+    int<8> f0;
 }
 
 struct tuple_3 {
-    bit<8> field_2;
+    bit<8> f0;
 }
 
 struct tuple_4 {
-    MyEnum_t field_3;
+    MyEnum_t f0;
 }
 
 struct tuple_5 {
-    bit<10> field_4;
+    bit<10> f0;
 }
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {

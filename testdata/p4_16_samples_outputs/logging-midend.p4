@@ -3,8 +3,8 @@
 #include <v1model.p4>
 
 struct tuple_0 {
-    bit<32> field;
-    bit<32> field_0;
+    bit<32> f0;
+    bit<32> f1;
 }
 
 control c(inout bit<32> x, inout bit<32> y) {

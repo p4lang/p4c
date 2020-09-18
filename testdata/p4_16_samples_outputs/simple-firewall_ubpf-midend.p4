@@ -75,8 +75,8 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 struct tuple_0 {
-    bit<32> field;
-    bit<32> field_0;
+    bit<32> f0;
+    bit<32> f1;
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {

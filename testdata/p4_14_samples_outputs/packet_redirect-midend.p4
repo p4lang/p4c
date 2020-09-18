@@ -43,8 +43,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 struct tuple_0 {
-    standard_metadata_t field;
-    metaA_t             field_0;
+    standard_metadata_t f0;
+    metaA_t             f1;
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {

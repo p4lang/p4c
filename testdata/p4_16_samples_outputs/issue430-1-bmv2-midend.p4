@@ -28,7 +28,7 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout Metadata meta, inout 
 }
 
 struct tuple_0 {
-    bit<48> field;
+    bit<48> f0;
 }
 
 control cIngress(inout Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {

@@ -9,7 +9,7 @@ struct foo {
 control c();
 package top(c _c);
 struct tuple_0 {
-    bit<8> field;
+    bit<8> f0;
 }
 
 control c1() {

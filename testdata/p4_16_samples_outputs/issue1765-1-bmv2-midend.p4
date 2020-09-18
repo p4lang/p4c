@@ -171,11 +171,11 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 struct tuple_0 {
-    bit<128> field;
-    bit<128> field_0;
-    bit<32>  field_1;
-    bit<24>  field_2;
-    bit<8>   field_3;
+    bit<128> f0;
+    bit<128> f1;
+    bit<32>  f2;
+    bit<24>  f3;
+    bit<8>   f4;
 }
 
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {

@@ -1315,15 +1315,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 @name(".lag_action_profile") @mode("fair") action_selector(HashAlgorithm.identity, 32w1024, 32w8) lag_action_profile;
 
 struct tuple_0 {
-    bit<32> field;
-    bit<16> field_0;
+    bit<32> f0;
+    bit<16> f1;
 }
 
 struct tuple_1 {
-    bit<16> field_1;
-    bit<16> field_2;
-    bit<16> field_3;
-    bit<9>  field_4;
+    bit<16> f0;
+    bit<16> f1;
+    bit<16> f2;
+    bit<9>  f3;
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -3270,62 +3270,62 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 @name(".drop_stats_2") counter<bit<10>>(32w1024, CounterType.packets) drop_stats_2;
 
 struct tuple_2 {
-    bit<1>  field_5;
-    bit<16> field_6;
+    bit<1>  f0;
+    bit<16> f1;
 }
 
 struct tuple_3 {
-    tuple_1 field_7;
-    bit<16> field_8;
-    bit<16> field_9;
+    tuple_1 f0;
+    bit<16> f1;
+    bit<16> f2;
 }
 
 struct tuple_4 {
-    bit<32> field_10;
-    bit<32> field_11;
-    bit<8>  field_12;
-    bit<16> field_13;
-    bit<16> field_14;
+    bit<32> f0;
+    bit<32> f1;
+    bit<8>  f2;
+    bit<16> f3;
+    bit<16> f4;
 }
 
 struct tuple_5 {
-    bit<48> field_15;
-    bit<48> field_16;
-    bit<32> field_17;
-    bit<32> field_18;
-    bit<8>  field_19;
-    bit<16> field_20;
-    bit<16> field_21;
+    bit<48> f0;
+    bit<48> f1;
+    bit<32> f2;
+    bit<32> f3;
+    bit<8>  f4;
+    bit<16> f5;
+    bit<16> f6;
 }
 
 struct tuple_6 {
-    bit<128> field_22;
-    bit<128> field_23;
-    bit<8>   field_24;
-    bit<16>  field_25;
-    bit<16>  field_26;
+    bit<128> f0;
+    bit<128> f1;
+    bit<8>   f2;
+    bit<16>  f3;
+    bit<16>  f4;
 }
 
 struct tuple_7 {
-    bit<48>  field_27;
-    bit<48>  field_28;
-    bit<128> field_29;
-    bit<128> field_30;
-    bit<8>   field_31;
-    bit<16>  field_32;
-    bit<16>  field_33;
+    bit<48>  f0;
+    bit<48>  f1;
+    bit<128> f2;
+    bit<128> f3;
+    bit<8>   f4;
+    bit<16>  f5;
+    bit<16>  f6;
 }
 
 struct tuple_8 {
-    bit<16> field_34;
-    bit<48> field_35;
-    bit<48> field_36;
-    bit<16> field_37;
+    bit<16> f0;
+    bit<48> f1;
+    bit<48> f2;
+    bit<16> f3;
 }
 
 struct tuple_9 {
-    bit<16> field_38;
-    bit<8>  field_39;
+    bit<16> f0;
+    bit<8>  f1;
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -6194,17 +6194,17 @@ control DeparserImpl(packet_out packet, in headers hdr) {
 }
 
 struct tuple_10 {
-    bit<4>  field_40;
-    bit<4>  field_41;
-    bit<8>  field_42;
-    bit<16> field_43;
-    bit<16> field_44;
-    bit<3>  field_45;
-    bit<13> field_46;
-    bit<8>  field_47;
-    bit<8>  field_48;
-    bit<32> field_49;
-    bit<32> field_50;
+    bit<4>  f0;
+    bit<4>  f1;
+    bit<8>  f2;
+    bit<16> f3;
+    bit<16> f4;
+    bit<3>  f5;
+    bit<13> f6;
+    bit<8>  f7;
+    bit<8>  f8;
+    bit<32> f9;
+    bit<32> f10;
 }
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
