@@ -182,11 +182,11 @@ class IndexedVector : public Vector<T> {
     void validate() const {
         if (invalid) return;  // don't crash the compiler because an error happened
         for (auto el : *this) {
-  	    auto decl = el->template to<IR::IDeclaration>();
-	    if (!decl) continue;
+            auto decl = el->template to<IR::IDeclaration>();
+            if (!decl) continue;
             auto it = declarations.find(decl->getName());
             BUG_CHECK(it != declarations.end() && it->second->getNode() == el->getNode(),
-		      "invalid element %1%", el); }
+                      "invalid element %1%", el); }
     }
 };
 
