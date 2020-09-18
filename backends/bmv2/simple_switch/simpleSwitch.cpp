@@ -36,7 +36,7 @@ using BMV2::stringRepr;
 namespace BMV2 {
 
 void ParseV1Architecture::modelError(const char* format, const IR::Node* node) {
-    ::error(ErrorType::ERR_UNSUPPORTED,
+    ::error(ErrorType::ERR_MODEL,
             (cstring("%1%") + format +
              "\nAre you using an up-to-date v1model.p4?").c_str(), node);
 }
@@ -216,7 +216,7 @@ Util::IJson* ExternConverter_hash::convertExternFunction(
     auto ei = P4::EnumInstance::resolve(mc->arguments->at(1)->expression, ctxt->typeMap);
     CHECK_NULL(ei);
     if (supportedHashAlgorithms.find(ei->name) == supportedHashAlgorithms.end()) {
-        ::error("%1%: unexpected algorithm", ei->name);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: unexpected algorithm", ei->name);
         return nullptr;
     }
     auto fields = mc->arguments->at(3);
@@ -497,7 +497,8 @@ void ExternConverter_meter::convertExternInstance(
     else if (mkind_name == v1model.meter.meterType.bytes.name)
         type = "bytes";
     else
-        ::error("Unexpected meter type %1%", mkind->getNode());
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "Unexpected meter type %1%", mkind->getNode());
     jmtr->emplace("type", type);
     ctxt->json->meter_arrays->append(jmtr);
 }
@@ -554,7 +555,8 @@ void ExternConverter_register::convertExternInstance(
         return;
     }
     if (sz->to<IR::Constant>()->value == 0)
-        error("%1%: direct registers are not supported in bmv2", inst);
+        error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+              "%1%: direct registers are not supported in bmv2", inst);
     jreg->emplace("size", sz->to<IR::Constant>()->value);
     if (!eb->instanceType->is<IR::Type_SpecializedCanonical>()) {
         modelError("%1%: Expected a generic specialized type", eb->instanceType);
@@ -567,12 +569,14 @@ void ExternConverter_register::convertExternInstance(
     }
     auto regType = st->arguments->at(0);
     if (!regType->is<IR::Type_Bits>()) {
-        ::error("%1%: Only registers with bit or int types are currently supported", eb);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "%1%: Only registers with bit or int types are currently supported", eb);
         return;
     }
     unsigned width = regType->width_bits();
     if (width == 0) {
-        ::error("%1%: unknown width", st->arguments->at(0));
+        ::error(ErrorType::ERR_EXPRESSION,
+                "%1%: unknown width", st->arguments->at(0));
         return;
     }
     jreg->emplace("bitwidth", width);
@@ -702,7 +706,7 @@ void ExternConverter_action_profile::convertExternInstance(
         BUG_CHECK(sz, "%1%Invalid declaration of extern ctor: no size param",
                   eb->constructor->srcInfo);
         if (!sz->is<IR::Constant>()) {
-            ::error("%1%: expected a constant", sz);
+            ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
             return;
         }
         action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
@@ -725,7 +729,8 @@ void ExternConverter_action_profile::convertExternInstance(
         if (input == nullptr) {
             // the selector is never used by any table, we cannot figure out its
             // input and therefore cannot include it in the JSON
-            ::warning("Action selector '%1%' is never referenced by a table "
+            ::warning(ErrorType::WARN_UNUSED,
+                      "Action selector '%1%' is never referenced by a table "
                       "and cannot be included in bmv2 JSON", c);
             return;
         }
@@ -760,7 +765,7 @@ void ExternConverter_action_selector::convertExternInstance(
         BUG_CHECK(sz, "%1%Invalid declaration of extern ctor: no size param",
                   eb->constructor->srcInfo);
         if (!sz->is<IR::Constant>()) {
-            ::error("%1%: expected a constant", sz);
+            ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
             return;
         }
         action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
@@ -783,7 +788,8 @@ void ExternConverter_action_selector::convertExternInstance(
         if (input == nullptr) {
             // the selector is never used by any table, we cannot figure out its
             // input and therefore cannot include it in the JSON
-            ::warning("Action selector '%1%' is never referenced by a table "
+            ::warning(ErrorType::WARN_UNUSED,
+                      "Action selector '%1%' is never referenced by a table "
                       "and cannot be included in bmv2 JSON", c);
             return;
         }
@@ -850,8 +856,9 @@ Util::IJson* ExternConverter_log_msg::convertExternFunction(
 
 void
 SimpleSwitchBackend::modelError(const char* format, const IR::Node* node) const {
-    ::error(format, node);
-    ::error("Are you using an up-to-date v1model.p4?");
+    ::error(ErrorType::ERR_MODEL,
+            (cstring("%1%") + format +
+             "\nAre you using an up-to-date v1model.p4?").c_str(), node);
 }
 
 cstring
@@ -966,7 +973,7 @@ SimpleSwitchBackend::convertChecksum(const IR::BlockStatement *block, Util::Json
                 }
             }
         }
-        ::error("%1%: Only calls to %2% or %3% allowed", stat,
+        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Only calls to %2% or %3% allowed", stat,
                 verify ? v1model.verify_checksum.name : v1model.update_checksum.name,
                 verify ? v1model.verify_checksum_with_payload.name :
                 v1model.update_checksum_with_payload.name);
@@ -1014,12 +1021,14 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     auto metaParam = params->parameters.at(2);
     auto paramType = metaParam->type;
     if (!paramType->is<IR::Type_Name>()) {
-        ::error("%1%: expected the user metadata type to be a struct", paramType);
+        ::error(ErrorType::ERR_EXPECTED,
+                "%1%: expected the user metadata type to be a struct", paramType);
         return;
     }
     auto decl = refMap->getDeclaration(paramType->to<IR::Type_Name>()->path);
     if (!decl->is<IR::Type_Struct>()) {
-        ::error("%1%: expected the user metadata type to be a struct", paramType);
+        ::error(ErrorType::ERR_EXPECTED,
+                "%1%: expected the user metadata type to be a struct", paramType);
         return;
     }
     userMetaType = decl->to<IR::Type_Struct>();
@@ -1030,13 +1039,15 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         auto headersParam = params->parameters.at(1);
         auto headersType = headersParam->type;
         if (!headersType->is<IR::Type_Name>()) {
-            ::error("%1%: expected type to be a struct", headersParam->type);
+            ::error(ErrorType::ERR_EXPECTED,
+                    "%1%: expected type to be a struct", headersParam->type);
             return;
         }
         decl = refMap->getDeclaration(headersType->to<IR::Type_Name>()->path);
         auto st = decl->to<IR::Type_Struct>();
         if (st == nullptr) {
-            ::error("%1%: expected type to be a struct", headersParam->type);
+            ::error(ErrorType::ERR_EXPECTED,
+                    "%1%: expected type to be a struct", headersParam->type);
             return;
         }
         LOG2("Headers type is " << st);
@@ -1045,7 +1056,8 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
             if (!t->is<IR::Type_Header>() &&
                 !t->is<IR::Type_Stack>() &&
                 !t->is<IR::Type_HeaderUnion>()) {
-                ::error("%1%: the type should be a struct of headers, stacks, or unions",
+                ::error(ErrorType::ERR_EXPECTED,
+                        "%1%: the type should be a struct of headers, stacks, or unions",
                         headersParam->type);
                 return;
             }

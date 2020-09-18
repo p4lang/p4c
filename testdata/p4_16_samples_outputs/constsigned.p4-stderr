@@ -49,4 +49,4 @@ const int<1> zz1 = 1;
 constsigned.p4(51): [--Wwarn=overflow] warning: 2: signed value does not fit in 2 bits
 const int<2> zz2 = 2;
                    ^
-warning: Program does not contain a `main' module
+[--Wwarn=missing] warning: Program does not contain a `main' module

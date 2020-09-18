@@ -62,7 +62,8 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
     if (ltype->is<IR::Type_StructLike>()) {
         if (statement->right->is<IR::MethodCallExpression>()) {
             if (errorOnMethodCall)
-                ::error("%1%: functions or methods returning structures "
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "%1%: functions or methods returning structures "
                         "are not supported on this target",
                         statement->right);
             return statement;

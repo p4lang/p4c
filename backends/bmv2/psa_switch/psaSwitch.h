@@ -48,8 +48,9 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
     BMV2::ExpressionConverter(refMap, typeMap, structure, scalarsName) { }
 
     void modelError(const char* format, const cstring field) {
-      ::error(format, field);
-      ::error("Invalid metadata parameter value");
+        ::error(ErrorType::ERR_MODEL,
+                (cstring(format) +
+                 "\nInvalid metadata parameter value for PSA").c_str(), field);
     }
 
     /**
@@ -85,17 +86,17 @@ class PsaSwitchExpressionConverter : public ExpressionConverter {
 
           // encode the counter type from enum -> int
           if (fieldName == "BYTES") {
-            cstring repr = BMV2::stringRepr(0, ROUNDUP(bitwidth, 32));
-            jsn->emplace("value", repr);
+              cstring repr = BMV2::stringRepr(0, ROUNDUP(bitwidth, 32));
+              jsn->emplace("value", repr);
           } else if (fieldName == "PACKETS") {
-            cstring repr = BMV2::stringRepr(1, ROUNDUP(bitwidth, 32));
-            jsn->emplace("value", repr);
+              cstring repr = BMV2::stringRepr(1, ROUNDUP(bitwidth, 32));
+              jsn->emplace("value", repr);
           } else if (fieldName == "PACKETS_AND_BYTES") {
-            cstring repr = BMV2::stringRepr(2, ROUNDUP(bitwidth, 32));
-            jsn->emplace("value", repr);
+              cstring repr = BMV2::stringRepr(2, ROUNDUP(bitwidth, 32));
+              jsn->emplace("value", repr);
           } else {
-            modelError("%1%: Exptected a PSA_CounterType_t", fieldName);
-            return nullptr;
+              modelError("%1%: Exptected a PSA_CounterType_t", fieldName);
+              return nullptr;
           }
           return jsn;
       } else if (isStandardMetadata(ptName)) {  // check if its psa metadata
@@ -186,6 +187,12 @@ class ParsePsaArchitecture : public Inspector {
  public:
     explicit ParsePsaArchitecture(PsaProgramStructure* structure) :
         structure(structure) { CHECK_NULL(structure); }
+
+    void modelError(const char* format, const IR::INode* node) {
+        ::error(ErrorType::ERR_MODEL,
+                (cstring(format) + "Are you using an up-to-date 'psa.p4'?").c_str(),
+                node->getNode());
+    }
 
     bool preorder(const IR::ToplevelBlock* block) override;
     bool preorder(const IR::PackageBlock* block) override;

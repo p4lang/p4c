@@ -339,7 +339,8 @@ void InlineList::analyze() {
         if (!allowMultipleCalls && inl->invocations.size() > 1) {
             ++it;
             auto second = *it;
-            ::error("Multiple invocations of the same object "
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "Multiple invocations of the same object "
                     "not supported on this target: %1%, %2%",
                     first, second);
             continue;
@@ -413,7 +414,7 @@ void DiscoverInlining::visit_all(const IR::Block* block) {
 bool DiscoverInlining::preorder(const IR::ControlBlock* block) {
     LOG4("Visiting " << block);
     if (getContext()->node->is<IR::ParserBlock>()) {
-        ::error("%1%: instantiation of control in parser",
+        ::error(ErrorType::ERR_INVALID, "%1%: instantiation of control in parser",
                 block->node);
         return false;
     } else if (getContext()->node->is<IR::ControlBlock>() && allowControls) {
@@ -434,7 +435,7 @@ bool DiscoverInlining::preorder(const IR::ControlBlock* block) {
 bool DiscoverInlining::preorder(const IR::ParserBlock* block) {
     LOG4("Visiting " << block);
     if (getContext()->node->is<IR::ControlBlock>()) {
-        ::error("%1%: instantiation of parser in control",
+        ::error(ErrorType::ERR_INVALID, "%1%: instantiation of parser in control",
                 block->node);
         return false;
     } else if (getContext()->node->is<IR::ParserBlock>()) {

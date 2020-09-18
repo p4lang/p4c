@@ -41,7 +41,7 @@ class RemoveUnreachableStates : public Transform {
     const IR::Node* preorder(IR::P4Parser* parser) override {
         auto start = parser->getDeclByName(IR::ParserState::start);
         if (start == nullptr) {
-            ::error("%1%: parser does not have a `start' state", parser);
+            ::error(ErrorType::ERR_NOT_FOUND, "%1%: parser does not have a `start' state", parser);
         } else {
             transitions->reachable(start->to<IR::ParserState>(), reachable);
             // Remove unreachable states from call-graph

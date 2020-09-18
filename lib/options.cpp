@@ -76,7 +76,7 @@ std::vector<const char*>* Util::Options::process(int argc, char* const argv[]) {
             if (option->argName != nullptr && arg == nullptr &&
                     !(option->flags & OptionFlags::OptionalArgument)) {
                 if (i == argc - 1) {
-                    ::error("Option %1% is missing required argument %2%",
+                    ::error(ErrorType::ERR_EXPECTED, "Option %1% is missing required argument %2%",
                             opt, option->argName);
                     usage();
                     return nullptr; }

@@ -250,7 +250,8 @@ const IR::PackageBlock* ToplevelBlock::getMain() const {
     auto program = getProgram();
     auto mainDecls = program->getDeclsByName(IR::P4Program::main)->toVector();
     if (mainDecls->size() == 0) {
-        ::warning("Program does not contain a `%s' module", IR::P4Program::main);
+        ::warning(ErrorType::WARN_MISSING,
+                  "Program does not contain a `%s' module", IR::P4Program::main);
         return nullptr;
     }
     auto main = mainDecls->at(0);

@@ -94,7 +94,8 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
             auto ebpfType = EBPFTypeFactory::instance->create(type);
             cstring fieldName = cstring("field") + Util::toString(fieldNumber);
             if (!ebpfType->is<IHasWidth>()) {
-                ::error("%1%: illegal type %2% for key field", c, type);
+                ::error(ErrorType::ERR_TYPE_ERROR,
+                        "%1%: illegal type %2% for key field", c, type);
                 return;
             }
             unsigned width = ebpfType->to<IHasWidth>()->widthInBits();
@@ -121,7 +122,8 @@ void EBPFTable::emitKeyType(CodeBuilder* builder) {
             auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
             if (matchType->name.name != P4::P4CoreLibrary::instance.exactMatch.name &&
                 matchType->name.name != P4::P4CoreLibrary::instance.lpmMatch.name)
-                ::error("Match of type %1% not supported", c->matchType);
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "Match of type %1% not supported", c->matchType);
         }
     }
 
@@ -206,26 +208,29 @@ void EBPFTable::emitInstance(CodeBuilder* builder) {
         auto impl = table->container->properties->getProperty(
             program->model.tableImplProperty.name);
         if (impl == nullptr) {
-            ::error("Table %1% does not have an %2% property",
+            ::error(ErrorType::ERR_EXPECTED, "Table %1% does not have an %2% property",
                     table->container, program->model.tableImplProperty.name);
             return;
         }
 
         // Some type checking...
         if (!impl->value->is<IR::ExpressionValue>()) {
-            ::error("%1%: Expected property to be an `extern` block", impl);
+            ::error(ErrorType::ERR_EXPECTED,
+                    "%1%: Expected property to be an `extern` block", impl);
             return;
         }
 
         auto expr = impl->value->to<IR::ExpressionValue>()->expression;
         if (!expr->is<IR::ConstructorCallExpression>()) {
-            ::error("%1%: Expected property to be an `extern` block", impl);
+            ::error(ErrorType::ERR_EXPECTED,
+                    "%1%: Expected property to be an `extern` block", impl);
             return;
         }
 
         auto block = table->getValue(expr);
         if (block == nullptr || !block->is<IR::ExternBlock>()) {
-            ::error("%1%: Expected property to be an `extern` block", impl);
+            ::error(ErrorType::ERR_EXPECTED,
+                    "%1%: Expected property to be an `extern` block", impl);
             return;
         }
 
@@ -236,7 +241,8 @@ void EBPFTable::emitInstance(CodeBuilder* builder) {
         } else if (extBlock->type->name.name == program->model.hash_table.name) {
             tableKind = TableHash;
         } else {
-            ::error("%1%: implementation must be one of %2% or %3%",
+            ::error(ErrorType::ERR_EXPECTED,
+                    "%1%: implementation must be one of %2% or %3%",
                     impl, program->model.array_table.name, program->model.hash_table.name);
             return;
         }

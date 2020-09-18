@@ -65,7 +65,8 @@ class TypeCheck::AssignInitialTypes : public Transform {
         if (auto ht = global->get<IR::v1HeaderType>(m->type_name))
             setType(m, ht->as_metadata);
         else
-            error("%s: No header type %s defined", m->srcInfo, m->type_name);
+            error(ErrorType::ERR_TYPE_ERROR,
+                  "%s: No header type %s defined", m->srcInfo, m->type_name);
         return m; }
 
     const IR::Node *preorder(IR::BoolLiteral* b) override {
@@ -77,7 +78,8 @@ class TypeCheck::AssignInitialTypes : public Transform {
         if (auto ht = global->get<IR::v1HeaderType>(hm->type_name))
             setType(hm, ht->as_header);
         else
-            error("%s: No header type %s defined", hm->srcInfo, hm->type_name);
+            error(ErrorType::ERR_TYPE_ERROR,
+                  "%s: No header type %s defined", hm->srcInfo, hm->type_name);
         return hm; }
 
     const IR::Node *preorder(IR::ActionSelector *sel) override {
@@ -87,14 +89,16 @@ class TypeCheck::AssignInitialTypes : public Transform {
         if (sel->key.name && (kf = global->get<IR::FieldListCalculation>(sel->key)))
             sel->key_fields = kf;
         else
-            error("%s: Key must coordinate to a field_list_calculation", sel->srcInfo);
+            error(ErrorType::ERR_TYPE_ERROR,
+                  "%s: Key must coordinate to a field_list_calculation", sel->srcInfo);
         return sel; }
 
     const IR::Node *preorder(IR::FieldListCalculation *flc) override {
         if (!global) return flc;
         if (flc->input_fields != nullptr) return flc;
         if (!flc->input || flc->input->names.empty()) {
-            error("%s: no input in field_list_calculation", flc->srcInfo);
+            error(ErrorType::ERR_TYPE_ERROR,
+                  "%s: no input in field_list_calculation", flc->srcInfo);
             return flc; }
         const IR::FieldList *in_f = nullptr;
         if (flc->input->names.size() == 1 &&
@@ -115,7 +119,8 @@ class TypeCheck::AssignInitialTypes : public Transform {
             prop->value = new IR::ExpressionValue(ev->srcInfo,
                             new IR::GlobalRef(pe->srcInfo, t));
         } else {
-            error("property %s must be a %s", prop, tname); } }
+            error(ErrorType::ERR_TYPE_ERROR,
+                  "property %s must be a %s", prop, tname); } }
     const IR::Node *preorder(IR::Property *prop) override {
         if (auto di = findContext<IR::Declaration_Instance>()) {
             auto ext = di->type->to<IR::Type_Extern>();
@@ -134,7 +139,8 @@ class TypeCheck::AssignInitialTypes : public Transform {
                 else if (attr->type->is<IR::Type_Register>())
                     prop_update<IR::Register>(prop, "register");
             } else {
-                error("No property name %s in extern %s", prop->name, ext->name); } }
+                error(ErrorType::ERR_TYPE_ERROR,
+                      "No property name %s in extern %s", prop->name, ext->name); } }
         return prop; }
 
     const IR::Node *postorder(IR::PathExpression *ref) override {
@@ -173,7 +179,8 @@ class TypeCheck::AssignInitialTypes : public Transform {
             /* FIXME -- is something, should probably be typechecked */
         } else if (getParent<IR::Member>()) {
             if (ref->path->name != "latest")
-                error("%s: No header or metadata named %s", ref->srcInfo, ref->path->name);
+                error(ErrorType::ERR_TYPE_ERROR,
+                      "%s: No header or metadata named %s", ref->srcInfo, ref->path->name);
         } else {
             if (getParent<IR::HeaderStackItemRef>()) {
                 if (ref->path->name == "next" || ref->path->name == "last")
@@ -184,7 +191,8 @@ class TypeCheck::AssignInitialTypes : public Transform {
                     setType(ref, field->type);
                     visit(ref->type);
                     return ref; } }
-            error("%s: No defintion for %s", ref->srcInfo, ref->path->name); }
+            error(ErrorType::ERR_TYPE_ERROR,
+                  "%s: No defintion for %s", ref->srcInfo, ref->path->name); }
         return new_node; }
 
     const IR::Node *postorder(IR::Type_Name *ref) override {
@@ -193,7 +201,8 @@ class TypeCheck::AssignInitialTypes : public Transform {
             visit(t);
             return t;
         } else {
-            error("%s: No defintion for %s", ref->srcInfo, ref->path->name); }
+            error(ErrorType::ERR_TYPE_ERROR,
+                  "%s: No definition for %s", ref->srcInfo, ref->path->name); }
         return ref; }
 
     const IR::Node *postorder(IR::HeaderStackItemRef *ref) override {
@@ -202,7 +211,8 @@ class TypeCheck::AssignInitialTypes : public Transform {
         else if (auto hst = ref->base()->type->to<IR::Type_Stack>())
             setType(ref, hst->elementType);
         else
-            error("%s: %s is not a header", ref->base()->srcInfo, ref->base()->toString());
+            error(ErrorType::ERR_TYPE_ERROR,
+                  "%s: %s is not a header", ref->base()->srcInfo, ref->base()->toString());
         visit(ref->type);
         return ref; }
 
@@ -216,7 +226,8 @@ class TypeCheck::AssignInitialTypes : public Transform {
                 setType(ref, f->type);
                 visit(ref->type);
                 return ref; }
-            error("%s: No field named %s in %s", ref->srcInfo, ref->member, ht->name); }
+            error(ErrorType::ERR_TYPE_ERROR,
+                  "%s: No field named %s in %s", ref->srcInfo, ref->member, ht->name); }
         return ref; }
 
     const IR::Node *postorder(IR::Expression *e) override {
@@ -235,14 +246,16 @@ combineTypes(const Util::SourceInfo &loc, const IR::Type *a, const IR::Type *b) 
         auto aBits = a->to<IR::Type_Bits>();
         auto bBits = b->to<IR::Type_Bits>();
         if (aBits->isSigned != bBits->isSigned) {
-            error("%s: Types %s and %s differ in signedness",
+            error(ErrorType::ERR_TYPE_ERROR,
+                  "%s: Types %s and %s differ in signedness",
                   loc, a->toString(), b->toString());
             return a;
         }
         return IR::Type_Bits::get(std::max(aBits->width_bits(), bBits->width_bits()),
                                   aBits->isSigned);
     }
-    error("%s: Incompatible types %s and %s", loc, a->toString(), b->toString());
+    error(ErrorType::ERR_TYPE_ERROR,
+          "%s: Incompatible types %s and %s", loc, a->toString(), b->toString());
     return a;
 }
 
@@ -273,7 +286,8 @@ class TypeCheck::InferExpressionsBottomUp : public Modifier {
         if (type->is<IR::Type::Unknown>() || type->is<IR::Type::Bits>() ||
             type->is<IR::Type_InfInt>())
             return true;
-        ::error("%1%: not defined on operands of type %2%", node, type);
+        ::error(ErrorType::ERR_TYPE_ERROR,
+                "%1%: not defined on operands of type %2%", node, type);
         return false;
     }
 
@@ -398,14 +412,16 @@ class TypeCheck::InferActionArgsBottomUp : public Inspector {
             for (auto op : prim->operands) {
                 if (arg == af->args.end()) {
                     if (self.iterCounter == 1)
-                        error("%s: too many arguments to action %s", prim->srcInfo, prim);
+                        error(ErrorType::ERR_TYPE_ERROR,
+                              "%s: too many arguments to action %s", prim->srcInfo, prim);
                     break; }
                 if (op->type != IR::Type::Unknown::get())
                     self.actionArgUseTypes[*arg] =
                         combineTypes(prim->srcInfo, self.actionArgUseTypes[*arg], op->type);
                 ++arg; }
             if (arg != af->args.end() && self.iterCounter == 1)
-                error("%s: not enough arguments to action %s", prim->srcInfo, prim);
+                error(ErrorType::ERR_TYPE_ERROR,
+                      "%s: not enough arguments to action %s", prim->srcInfo, prim);
         } else if (self.iterCounter == 1) {
             prim->typecheck(); } }
 

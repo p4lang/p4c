@@ -147,7 +147,7 @@ bool CodeGenInspector::preorder(const IR::PathExpression* expression) {
 
 bool CodeGenInspector::preorder(const IR::Path* p) {
     if (p->absolute)
-        ::error("%1%: Unexpected absolute path", p);
+        ::error(ErrorType::ERR_EXPECTED, "%1%: Unexpected absolute path", p);
     builder->append(p->name);
     return false;
 }
@@ -344,7 +344,8 @@ void CodeGenInspector::widthCheck(const IR::Node* node) const {
         // This is a bug which we can probably fix
         BUG("%1%: Computations on %2% bits not yet supported", node, tb->size);
     // We could argue that this may not be supported ever
-    ::error("%1%: Computations on %2% bits not supported", node, tb->size);
+    ::error(ErrorType::ERR_OVERLIMIT,
+            "%1%: Computations on %2% bits not supported", node, tb->size);
 }
 
 }  // namespace EBPF

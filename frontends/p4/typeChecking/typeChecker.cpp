@@ -347,7 +347,8 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
             return nullptr;
         if (et->is<IR::Type_Stack>() || et->is<IR::Type_Set>() ||
             et->is<IR::Type_HeaderUnion>())
-            ::error("%1%: Sets of %2% are not supported", type, et);
+            ::error(ErrorType::ERR_TYPE_ERROR,
+                    "%1%: Sets of %2% are not supported", type, et);
         if (et == set->elementType)
             return type;
         const IR::Type *canon = new IR::Type_Set(type->srcInfo, et);
@@ -978,7 +979,7 @@ const IR::Node* TypeInference::preorder(IR::Declaration_Instance* decl) {
             return decl;
         }
         if (!simpleType->is<IR::Type_Package>() && (findContext<IR::IContainer>() == nullptr)) {
-            ::error("%1%: cannot instantiate at top-level", decl);
+            ::error(ErrorType::ERR_INVALID, "%1%: cannot instantiate at top-level", decl);
             return decl;
         }
         auto typeAndArgs = containerInstantiation(
@@ -1363,8 +1364,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Newtype* type) {
     if (!argType->is<IR::Type_Bits>() &&
         !argType->is<IR::Type_Boolean>() &&
         !argType->is<IR::Type_Newtype>())
-        ::error("%1%: `type' can only be applied to base types",
-                type);
+        typeError("%1%: `type' can only be applied to base types", type);
     return type;
 }
 

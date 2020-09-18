@@ -35,6 +35,7 @@ const int ErrorType::ERR_UNSUPPORTED_ON_TARGET = 12;
 const int ErrorType::ERR_DUPLICATE     =  13;
 const int ErrorType::ERR_IO            =  14;
 const int ErrorType::ERR_UNREACHABLE   =  15;
+const int ErrorType::ERR_MODEL         =  16;
 // If we specialize for 1000 error types we're good!
 const int ErrorType::ERR_MAX_ERRORS    = 999;
 
@@ -77,6 +78,7 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     { ErrorType::ERR_UNSUPPORTED_ON_TARGET, "target-error"},
     { ErrorType::ERR_DUPLICATE,          "duplicate"},
     { ErrorType::ERR_IO,                 "I/O error"},
+    { ErrorType::ERR_MODEL,              "Target model error"},
 
     // Warnings
     { ErrorType::LEGACY_WARNING,         "legacy"},

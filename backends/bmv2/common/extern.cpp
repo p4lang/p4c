@@ -144,7 +144,7 @@ void
 ExternConverter::modelError(const char* format, const IR::Node* node) const {
     cstring errMsg = cstring(format) +
                      ". Are you using an up-to-date v1model.p4?";
-    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, errMsg.c_str(), node);
+    ::error(ErrorType::ERR_MODEL, errMsg.c_str(), node);
 }
 
 void
@@ -272,7 +272,7 @@ ExternConverter::convertHashAlgorithm(cstring algorithm) {
     else if (algorithm == P4V1::V1Model::instance.algorithm.xor16.name)
         result = "xor16";
     else
-        ::error("Unsupported algorithm %1%", algorithm);
+        ::error(ErrorType::ERR_UNSUPPORTED, "Unsupported algorithm %1%", algorithm);
     return result;
 }
 
@@ -282,8 +282,8 @@ ExternConverter_assume ExternConverter_assume::singleton;
 Util::IJson*
 ExternConverter::convertAssertAssume(ConversionContext* ctxt,
     const IR::MethodCallExpression* methodCall, const P4::ExternFunction* ef) {
-     if (methodCall->arguments->size() != 1) {
-        ::error("Expected 1 arguments for %1%", methodCall);
+    if (methodCall->arguments->size() != 1) {
+        ::error(ErrorType::ERR_EXPECTED, "Expected 1 arguments for %1%", methodCall);
         return nullptr;
     }
     auto primitive = mkPrimitive(ef->method->name.name);

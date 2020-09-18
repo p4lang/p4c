@@ -39,7 +39,8 @@ void compile(EbpfOptions& options) {
     auto hook = options.getDebugHook();
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     if (isv1) {
-        ::error("This compiler only handles P4-16");
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "This compiler only handles P4-16");
         return;
     }
     const IR::P4Program *program = nullptr;
@@ -47,14 +48,14 @@ void compile(EbpfOptions& options) {
     if (options.loadIRFromJson) {
         std::filebuf fb;
         if (fb.open(options.file, std::ios::in) == nullptr) {
-            ::error("%s: No such file or directory.", options.file);
+            ::error(ErrorType::ERR_IO, "%s: No such file or directory.", options.file);
             return;
         }
 
         std::istream inJson(&fb);
         JSONLoader jsonFileLoader(inJson);
         if (jsonFileLoader.json == nullptr) {
-            ::error("Not valid input file");
+            ::error(ErrorType::ERR_IO, "%s: Not valid input file", options.file);
             return;
         }
         program = new IR::P4Program(jsonFileLoader);

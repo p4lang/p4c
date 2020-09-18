@@ -47,7 +47,8 @@ EBPFType* EBPFTypeFactory::create(const IR::Type* type) {
             return nullptr;
         result = new EBPFStackType(ts, et);
     } else {
-        ::error("Type %1% not supported", type);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "Type %1% not supported", type);
     }
 
     return result;
@@ -152,7 +153,8 @@ EBPFStructType::EBPFStructType(const IR::Type_StructLike* strct) :
         auto type = EBPFTypeFactory::instance->create(f->type);
         auto wt = dynamic_cast<IHasWidth*>(type);
         if (wt == nullptr) {
-            ::error("EBPF: Unsupported type in struct: %s", f->type);
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "EBPF: Unsupported type in struct: %s", f->type);
         } else {
             width += wt->widthInBits();
             implWidth += wt->implementationWidthInBits();
@@ -245,7 +247,8 @@ void EBPFTypeName::emitInitializer(CodeBuilder* builder) {
 unsigned EBPFTypeName::widthInBits() {
     auto wt = dynamic_cast<IHasWidth*>(canonical);
     if (wt == nullptr) {
-        ::error("Type %1% does not have a fixed witdh", type);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "Type %1% does not have a fixed witdh", type);
         return 0;
     }
     return wt->widthInBits();
@@ -254,7 +257,8 @@ unsigned EBPFTypeName::widthInBits() {
 unsigned EBPFTypeName::implementationWidthInBits() {
     auto wt = dynamic_cast<IHasWidth*>(canonical);
     if (wt == nullptr) {
-        ::error("Type %1% does not have a fixed witdh", type);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "Type %1% does not have a fixed witdh", type);
         return 0;
     }
     return wt->implementationWidthInBits();

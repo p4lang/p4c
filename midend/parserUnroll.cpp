@@ -77,7 +77,8 @@ class ParserSymbolicInterpreter {
             if (value == nullptr)
                 value = factory->create(type, true);
             if (value->is<SymbolicError>()) {
-                ::error("%1%: %2%", d, value->to<SymbolicError>()->message());
+                ::error(ErrorType::ERR_EXPRESSION,
+                        "%1%: %2%", d, value->to<SymbolicError>()->message());
                 return nullptr;
             }
             if (value != nullptr)
@@ -131,7 +132,7 @@ class ParserSymbolicInterpreter {
 
             if (!stateClone)
                 // errors in the original state are signalled
-                ::error("%1%: error %2% will be triggered\n%3%",
+                ::error(ErrorType::ERR_EXPRESSION, "%1%: error %2% will be triggered\n%3%",
                         exc->errorPosition, exc->message(), stateChain(state));
             // else this error will occur in a clone of the state produced
             // by unrolling - if the state is reached.  So we don't give an error.
@@ -140,7 +141,8 @@ class ParserSymbolicInterpreter {
         if (!value->is<SymbolicStaticError>())
             return true;
         auto ev = value->to<SymbolicStaticError>();
-        ::error("%1%: %2%\n%3%", ev->errorPosition, ev->message(), stateChain(state));
+        ::error(ErrorType::ERR_EXPRESSION,
+                "%1%: %2%\n%3%", ev->errorPosition, ev->message(), stateChain(state));
         return false;
     }
 
@@ -275,7 +277,8 @@ class ParserSymbolicInterpreter {
                                   "Potential parser cycle without extracting any bytes:\n%1%",
                                   stateChain(state));
                     else
-                        ::error("Parser cycle without extracting any bytes:\n%1%",
+                        ::error(ErrorType::ERR_INVALID,
+                                "Parser cycle without extracting any bytes:\n%1%",
                                 stateChain(state));
                     return true;
                 }
@@ -283,7 +286,7 @@ class ParserSymbolicInterpreter {
                 // If no header validity has changed we can't really unroll
                 if (!headerValidityChange(crt->before, state->before)) {
                     if (unroll)
-                        ::error("Parser cycle cannot be unrolled:\n%1%",
+                        ::error(ErrorType::ERR_INVALID, "Parser cycle cannot be unrolled:\n%1%",
                                 stateChain(state));
                     return true;
                 }

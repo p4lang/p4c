@@ -23,6 +23,9 @@ limitations under the License.
 #include "lib/cstring.h"
 #include "lib/error_reporter.h"
 
+// This should eventually be turned to 0 when all the code is converted
+#define LEGACY 1
+
 /// @return the number of errors encountered so far in the current compilation
 /// context.
 inline unsigned errorCount() {
@@ -41,12 +44,14 @@ inline unsigned diagnosticCount() {
 
 /// Report an error with the given message.
 // LEGACY: once we transition to error types, this should be deprecated
+#if LEGACY
 template <typename... T>
 inline void error(const char* format, T... args) {
     auto& context = BaseCompileContext::get();
     auto action = context.getDefaultErrorDiagnosticAction();
     context.errorReporter().diagnose(action, nullptr, format, args...);
 }
+#endif
 
 /// Report errors of type kind. Requires that the node argument have source info.
 /// The message format is declared in the error catalog.
@@ -67,6 +72,7 @@ void error(const int kind, const char *format, const T &node, Args... args) {
     error(kind, format, &node, std::forward<Args>(args)...);
 }
 
+#if LEGACY
 /// Convert errors that have a first argument as a node with source info to errors with kind
 /// This allows incremental migration toward minimizing the number of errors and warnings
 /// reported when passes are repeated, as typed errors are filtered.
@@ -86,6 +92,7 @@ template<class T,
 void error(const char *format, const T &node, Args... args) {
     error(ErrorType::LEGACY_ERROR, format, node, std::forward<Args>(args)...);
 }
+#endif
 
 /// Report errors of type kind for messages that do not have a node.
 /// These will not be filtered
@@ -98,15 +105,6 @@ void error(const int kind, const char *format, Args... args) {
 
 /// Report an error if condition e is false.
 #define ERROR_CHECK(e, ...) do { if (!(e)) ::error(__VA_ARGS__); } while (0)
-
-/// Report a warning with the given message.
-// LEGACY: once we transition to error types, this should be deprecated
-template <typename... T>
-inline void warning(const char* format, T... args) {
-    auto& context = BaseCompileContext::get();
-    auto action = context.getDefaultWarningDiagnosticAction();
-    context.errorReporter().diagnose(action, nullptr, format, args...);
-}
 
 /// Report warnings of type kind. Requires that the node argument have source info.
 template<class T,

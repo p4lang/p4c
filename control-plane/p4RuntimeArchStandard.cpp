@@ -317,11 +317,13 @@ struct Register {
 
         auto size = instance->getParameterValue("size")->to<IR::Constant>();
         if (!size->is<IR::Constant>()) {
-            ::error("Register '%1%' has a non-constant size: %2%", declaration, size);
+            ::error(ErrorType::ERR_UNSUPPORTED,
+                    "Register '%1%' has a non-constant size: %2%", declaration, size);
             return boost::none;
         }
         if (!size->to<IR::Constant>()->fitsInt()) {
-            ::error("Register '%1%' has a size that doesn't fit in an integer: %2%",
+            ::error(ErrorType::ERR_UNSUPPORTED,
+                    "Register '%1%' has a size that doesn't fit in an integer: %2%",
                     declaration, size);
             return boost::none;
         }
@@ -424,7 +426,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
             if (instance) {
                 if (instance->type->name != ActionProfileTraits<arch>::typeName() &&
                     instance->type->name != ActionSelectorTraits<arch>::typeName()) {
-                    ::error("Expected an action profile or action selector: %1%",
+                    ::error(ErrorType::ERR_EXPECTED,
+                            "Expected an action profile or action selector: %1%",
                             instance->expression);
                 } else if (isConstructedInPlace) {
                     symbols->add(SymbolType::ACTION_PROFILE(), *instance->name);
@@ -440,7 +443,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                 &isConstructedInPlace);
             if (instance) {
                 if (instance->type->name != CounterTraits::directTypeName()) {
-                    ::error("Expected a direct counter: %1%", instance->expression);
+                    ::error(ErrorType::ERR_EXPECTED,
+                            "Expected a direct counter: %1%", instance->expression);
                 } else if (isConstructedInPlace) {
                     symbols->add(SymbolType::DIRECT_COUNTER(), *instance->name);
                 }
@@ -455,7 +459,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
                 &isConstructedInPlace);
             if (instance) {
                 if (instance->type->name != MeterTraits::directTypeName()) {
-                    ::error("Expected a direct meter: %1%", instance->expression);
+                    ::error(ErrorType::ERR_EXPECTED,
+                            "Expected a direct meter: %1%", instance->expression);
                 } else if (isConstructedInPlace) {
                     symbols->add(SymbolType::DIRECT_METER(), *instance->name);
                 }
@@ -624,7 +629,7 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         auto size = instance->substitution.lookupByName(
             ActionProfileTraits<arch>::sizeParamName())->expression;
         if (!size->template is<IR::Constant>()) {
-            ::error("Action profile '%1%' has non-constant size '%2%'",
+            ::error(ErrorType::ERR_INVALID, "Action profile '%1%' has non-constant size '%2%'",
                     *instance->name, size);
             return boost::none;
         }
@@ -639,7 +644,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         auto decl = instance->node->to<IR::IDeclaration>();
         auto size = instance->getParameterValue(ActionProfileTraits<arch>::sizeParamName());
         if (!size->template is<IR::Constant>()) {
-            ::error("Action profile '%1%' has non-constant size '%2%'",
+            ::error(ErrorType::ERR_INVALID,
+                    "Action profile '%1%' has non-constant size '%2%'",
                     decl->controlPlaneName(), size);
             return boost::none;
         }
@@ -811,7 +817,8 @@ class P4RuntimeArchHandlerCommon : public P4RuntimeArchHandlerIface {
         const IR::Property* impl = getTableImplementationProperty(table);
         if (impl == nullptr) return boost::none;
         if (!impl->value->is<IR::ExpressionValue>()) {
-            ::error("Expected implementation property value for table %1% to be an expression: %2%",
+            ::error(ErrorType::ERR_EXPECTED,
+                    "Expected implementation property value for table %1% to be an expression: %2%",
                     table->controlPlaneName(), impl);
             return boost::none;
         }
@@ -933,14 +940,16 @@ class P4RuntimeArchHandlerV1Model final : public P4RuntimeArchHandlerCommon<Arch
                                                       .supportTimeout.name);
         if (timeout == nullptr) return false;
         if (!timeout->value->is<IR::ExpressionValue>()) {
-            ::error("Unexpected value %1% for supports_timeout on table %2%",
+            ::error(ErrorType::ERR_UNEXPECTED,
+                    "Unexpected value %1% for supports_timeout on table %2%",
                     timeout, table);
             return false;
         }
 
         auto expr = timeout->value->to<IR::ExpressionValue>()->expression;
         if (!expr->is<IR::BoolLiteral>()) {
-            ::error("Unexpected non-boolean value %1% for supports_timeout "
+            ::error(ErrorType::ERR_UNEXPECTED,
+                    "Unexpected non-boolean value %1% for supports_timeout "
                     "property on table %2%", timeout, table);
             return false;
         }

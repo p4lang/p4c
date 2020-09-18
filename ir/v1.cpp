@@ -111,9 +111,11 @@ void IR::Primitive::typecheck() const {
     if (prim_info.count(name)) {
         auto &info = prim_info.at(name);
         if (operands.size() < info.min_operands)
-            error("%s: not enough operands for primitive %s", srcInfo, name);
+            error(ErrorType::ERR_INSUFFICIENT,
+                  "%s: not enough operands for primitive %s", srcInfo, name);
         if (operands.size() > info.max_operands)
-            error("%s: too many operands for primitive %s", srcInfo, name);
+            error(ErrorType::ERR_OVERLIMIT,
+                  "%s: too many operands for primitive %s", srcInfo, name);
     } else {
         /*error("%s: unknown primitive %s", srcInfo, name);*/ }
 }

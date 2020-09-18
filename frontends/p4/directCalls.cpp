@@ -27,7 +27,8 @@ const IR::Node* DoInstantiateCalls::postorder(IR::MethodCallExpression* expressi
 
     auto ref = refMap->getDeclaration(tn->typeName->path, true);
     if (!ref->is<IR::P4Control>() && !ref->is<IR::P4Parser>()) {
-        ::error("%1%: cannot invoke method of %2%", expression, ref);
+        ::error(ErrorType::ERR_INVALID,
+                "%1%: cannot invoke method of %2%", expression, ref);
         return expression;
     }
 

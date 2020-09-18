@@ -50,7 +50,7 @@ void DoSimplifySelectCases::checkSimpleConstant(const IR::Expression* expr) cons
             return;
         }
     }
-    ::error("%1%: must be a compile-time constant", expr);
+    ::error(ErrorType::ERR_INVALID, "%1%: must be a compile-time constant", expr);
 }
 
 const IR::Node* DoSimplifySelectCases::preorder(IR::SelectExpression* expression) {
