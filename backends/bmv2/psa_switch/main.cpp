@@ -81,13 +81,13 @@ int main(int argc, char *const argv[]) {
     } else {
         std::filebuf fb;
         if (fb.open(options.file, std::ios::in) == nullptr) {
-            ::error("%s: No such file or directory.", options.file);
+            ::error(ErrorType::ERR_IO, "%s: No such file or directory.", options.file);
             return 1;
         }
         std::istream inJson(&fb);
         JSONLoader jsonFileLoader(inJson);
         if (jsonFileLoader.json == nullptr) {
-            ::error("Not valid input file");
+            ::error(ErrorType::ERR_IO, "%s: Not valid input file", options.file);
             return 1;
         }
         program = new IR::P4Program(jsonFileLoader);

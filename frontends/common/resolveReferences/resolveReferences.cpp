@@ -184,9 +184,9 @@ ResolutionContext::resolveUnique(IR::ID name,
     if (decls->size() == 1)
         return decls->at(0);
 
-    ::error(ErrorType::ERR_INVALID, "%1%: multiple matching declarations", name);
+    ::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations", name);
     for (auto a : *decls)
-        ::error("Candidate: %1%", a);
+        ::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
     return nullptr;
 }
 
@@ -200,9 +200,9 @@ ResolutionContext::getDeclaration(const IR::Path *path, bool notNull) const {
         if (decls->empty()) {
             ::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", path->name);
         } else if (decls->size() != 1) {
-            ::error(ErrorType::ERR_INVALID, "%1%: multiple matching declarations", path->name);
+            ::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations", path->name);
             for (auto a : *decls)
-                ::error("Candidate: %1%", a);
+                ::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
         } else {
             result = decls->at(0); }
     } else {
@@ -345,10 +345,10 @@ bool ResolveReferences::preorder(const IR::KeyElement *ke) {
         ::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", ke->matchType->path->name);
         refMap->usedName(ke->matchType->path->name.name);
     } else if (decls->size() != 1) {
-        ::error(ErrorType::ERR_INVALID, "%1%: multiple matching declarations",
+        ::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations",
                 ke->matchType->path->name);
         for (auto a : *decls)
-            ::error("Candidate: %1%", a);
+            ::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
     } else {
         refMap->setDeclaration(ke->matchType->path, decls->at(0));
     }

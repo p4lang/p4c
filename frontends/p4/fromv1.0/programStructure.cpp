@@ -1155,7 +1155,7 @@ const IR::Statement* ProgramStructure::convertPrimitive(const IR::Primitive* pri
         auto stat = new IR::MethodCallStatement(primitive->srcInfo, call);
         return stat;
     }
-    error("Unsupported primitive %1%", primitive);
+    error(ErrorType::ERR_UNSUPPORTED, "Unsupported primitive %1%", primitive);
     return nullptr;
 }
 

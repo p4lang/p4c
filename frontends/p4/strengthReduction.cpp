@@ -255,7 +255,7 @@ const IR::Node* DoStrengthReduction::postorder(IR::Mul* expr) {
 
 const IR::Node* DoStrengthReduction::postorder(IR::Div* expr) {
     if (isZero(expr->right)) {
-        ::error("%1%: Division by zero", expr);
+        ::error(ErrorType::ERR_EXPRESSION, "%1%: Division by zero", expr);
         return expr;
     }
     if (isOne(expr->right))
@@ -273,7 +273,7 @@ const IR::Node* DoStrengthReduction::postorder(IR::Div* expr) {
 
 const IR::Node* DoStrengthReduction::postorder(IR::Mod* expr) {
     if (isZero(expr->right)) {
-        ::error("%1%: Modulo by zero", expr);
+        ::error(ErrorType::ERR_EXPRESSION, "%1%: Modulo by zero", expr);
         return expr;
     }
     if (isZero(expr->left) && !hasSideEffects(expr->right))

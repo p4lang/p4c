@@ -100,7 +100,7 @@ TypeSpecConverter::TypeSpecConverter(
 }
 
 bool TypeSpecConverter::preorder(const IR::Type* type) {
-    ::error("Unexpected type %1%", type);
+    ::error(ErrorType::ERR_UNEXPECTED, "Unexpected type %1%", type);
     map.emplace(type, new P4DataTypeSpec());
     return false;
 }
@@ -361,7 +361,8 @@ bool TypeSpecConverter::preorder(const IR::Type_SerEnum* type) {
                 auto member = enumTypeSpec->add_members();
                 member->set_name(m->controlPlaneName());
                 if (!m->value->is<IR::Constant>()) {
-                    ::error("%1% unsupported SerEnum member value", m->value);
+                    ::error(ErrorType::ERR_UNSUPPORTED,
+                            "%1% unsupported SerEnum member value", m->value);
                     continue;
                 }
                 auto value = stringRepr(m->value->to<IR::Constant>(), width);

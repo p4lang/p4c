@@ -49,7 +49,7 @@ bool ControlBodyTranslator::preorder(const IR::PathExpression* expression) {
 void ControlBodyTranslator::processCustomExternFunction(const P4::ExternFunction* function,
                                                         EBPFTypeFactory *typeFactory) {
     if (!control->emitExterns)
-        ::error("%1%: Not supported", function->method);
+        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Not supported", function->method);
 
     visit(function->expr->method);
     builder->append("(");
@@ -78,7 +78,7 @@ void ControlBodyTranslator::processCustomExternFunction(const P4::ExternFunction
 
 void ControlBodyTranslator::processFunction(const P4::ExternFunction* function) {
     if (!control->emitExterns)
-        ::error("%1%: Not supported", function->method);
+        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Not supported", function->method);
     processCustomExternFunction(function, EBPFTypeFactory::instance);
 }
 
@@ -141,7 +141,7 @@ bool ControlBodyTranslator::preorder(const IR::MethodCallExpression* expression)
         return false;
     }
 
-    ::error("Unsupported method invocation %1%", expression);
+    ::error(ErrorType::ERR_UNSUPPORTED, "Unsupported method invocation %1%", expression);
     return false;
 }
 
@@ -219,7 +219,7 @@ void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Argument>* args) {
     auto type = typeMap->getType(expr);
     auto ht = type->to<IR::Type_Header>();
     if (ht == nullptr) {
-        ::error("Cannot emit a non-header type %1%", expr);
+        ::error(ErrorType::ERR_UNSUPPORTED, "Cannot emit a non-header type %1%", expr);
         return;
     }
 
@@ -254,7 +254,8 @@ void ControlBodyTranslator::compileEmit(const IR::Vector<IR::Argument>* args) {
         auto etype = EBPFTypeFactory::instance->create(ftype);
         auto et = dynamic_cast<IHasWidth*>(etype);
         if (et == nullptr) {
-            ::error("Only headers with fixed widths supported %1%", f);
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "Only headers with fixed widths supported %1%", f);
             return;
         }
         compileEmitField(expr, f->name, alignment, etype);
@@ -283,7 +284,8 @@ void ControlBodyTranslator::processMethod(const P4::ExternMethod* method) {
             return;
         }
     }
-    ::error("%1%: Unexpected method call", method->expr);
+    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+            "%1%: Unexpected method call", method->expr);
 }
 
 void ControlBodyTranslator::processApply(const P4::ApplyMethod* method) {
@@ -491,7 +493,8 @@ void EBPFControl::scanConstants() {
                 counters.emplace(name, ctr);
             }
         } else {
-            ::error("Unexpected block %s nested within control", b->toString());
+            ::error(ErrorType::ERR_UNEXPECTED,
+                    "Unexpected block %s nested within control", b->toString());
         }
     }
 }
@@ -500,7 +503,8 @@ bool EBPFControl::build() {
     hitVariable = program->refMap->newName("hit");
     auto pl = controlBlock->container->type->applyParams;
     if (pl->size() != 2) {
-        ::error("Expected control block to have exactly 2 parameters");
+        ::error(ErrorType::ERR_EXPECTED,
+                "Expected control block to have exactly 2 parameters");
         return false;
     }
 

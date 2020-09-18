@@ -39,7 +39,8 @@ void DoResetHeaders::generateResets(
     } else if (type->is<IR::Type_Stack>()) {
         auto tstack = type->to<IR::Type_Stack>();
         if (!tstack->sizeKnown()) {
-            ::error("%1%: stack size is not a compile-time constant", tstack);
+            ::error(ErrorType::ERR_UNSUPPORTED,
+                    "%1%: stack size is not a compile-time constant", tstack);
             return;
         }
         for (unsigned i = 0; i < tstack->getSize(); i++) {

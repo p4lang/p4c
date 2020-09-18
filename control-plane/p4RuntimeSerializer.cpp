@@ -627,7 +627,7 @@ getDefaultAction(const IR::P4Table* table, ReferenceMap* refMap, TypeMap* typeMa
         table->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
     if (defaultActionProperty == nullptr) return boost::none;
     if (!defaultActionProperty->value->is<IR::ExpressionValue>()) {
-        ::error("Expected an action: %1%", defaultActionProperty);
+        ::error(ErrorType::ERR_EXPECTED, "Expected an action: %1%", defaultActionProperty);
         return boost::none;
     }
 
@@ -1306,7 +1306,8 @@ class P4RuntimeAnalyzer {
                 auto setStringField = [kv, pkginfo, &keysVisited](cstring fName) {
                     auto* v = kv->expression->to<IR::StringLiteral>();
                     if (v == nullptr) {
-                        ::error("Value for '%1%' key in @pkginfo annotation is not a string", kv);
+                        ::error(ErrorType::ERR_UNSUPPORTED,
+                             "Value for '%1%' key in @pkginfo annotation is not a string", kv);
                         return;
                     }
                     // kv annotations are represented with an IndexedVector in
@@ -1514,7 +1515,8 @@ class P4RuntimeEntriesConverter {
                    ReferenceMap* refMap,
                    TypeMap* typeMap) const {
         if (!actionRef->is<IR::MethodCallExpression>()) {
-            ::error("%1%: invalid action in entries list", actionRef);
+            ::error(ErrorType::ERR_INVALID,
+                    "%1%: invalid action in entries list", actionRef);
             return;
         }
         auto actionCall = actionRef->to<IR::MethodCallExpression>();
@@ -1540,7 +1542,8 @@ class P4RuntimeEntriesConverter {
                 auto value = stringRepr(arg->expression->to<IR::BoolLiteral>(), width);
                 protoParam->set_value(*value);
             } else {
-                ::error("%1% unsupported argument expression", arg->expression);
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "%1% unsupported argument expression", arg->expression);
                 continue;
             }
         }
