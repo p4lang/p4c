@@ -114,7 +114,7 @@ class ComplexValues final {
  *  This does not work if the second argument of f is out or inout,
  *  since the list expression is not a l-value.  This pass cannot be
  *  used in this case.  This can arise only if there are extern functions
- *  that can return nested structs.
+ *  that can have out arguments with types that are structs.
  *
  *  @pre: This pass should be run after CopyStructures, EliminateTuples, and
  *        MoveInitializers.
@@ -134,6 +134,7 @@ class RemoveNestedStructs final : public Transform {
     const IR::Node* postorder(IR::Member* expression) override;
     /// replace reference to nested structs with the corresponding non-nested version
     const IR::Node* postorder(IR::PathExpression* expression) override;
+    const IR::Node* postorder(IR::MethodCallExpression* expression) override;
 };
 
 class NestedStructs final : public PassManager {

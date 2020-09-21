@@ -1,4 +1,5 @@
 #include "nestedStructs.h"
+#include "frontends/p4/methodInstance.h"
 
 namespace P4 {
 
@@ -81,6 +82,22 @@ const IR::Node* RemoveNestedStructs::postorder(IR::Member* expression) {
         return expression;
     auto e = comp->convertToExpression();
     return e;
+}
+
+const IR::Node* RemoveNestedStructs::postorder(IR::MethodCallExpression* expression) {
+    auto mi = MethodInstance::resolve(expression, values->refMap, values->typeMap);
+    if (!mi->is<ExternMethod>() && !mi->is<ExternFunction>())
+        return expression;
+    for (auto p : mi->getActualParameters()->parameters) {
+        if (!p->hasOut())
+            continue;
+        if (values->isNestedStruct(p->type)) {
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "%1%: extern functions with 'out' nested struct argument (%2%) not supported",
+                    expression, p);
+        }
+    }
+    return expression;
 }
 
 const IR::Node* RemoveNestedStructs::postorder(IR::PathExpression* expression) {
