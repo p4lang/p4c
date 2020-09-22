@@ -3576,6 +3576,8 @@ const IR::Node* TypeInference::postorder(IR::KeyElement* elem) {
     if (type != nullptr && type != IR::Type_MatchKind::get())
         typeError("%1% must be a %2% value", elem->matchType,
                   IR::Type_MatchKind::get()->toString());
+    if (isCompileTimeConstant(elem->expression) && !readOnly)
+        warning(ErrorType::WARN_IGNORE_PROPERTY, "%1%: constant key element", elem);
     return elem;
 }
 

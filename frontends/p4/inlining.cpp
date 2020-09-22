@@ -545,11 +545,14 @@ void GeneralInliner::inline_subst(P4Block *caller,
                 }
             }
 
-            // Substitute applyParameters which are not directionless
+            // Substitute applyParameters
             // with fresh variable names or with the call arguments.
             for (auto param : callee->getApplyParameters()->parameters) {
-                if (param->direction == IR::Direction::None)
+                if (param->direction == IR::Direction::None) {
+                    auto initializer = mi->substitution.lookup(param);
+                    substs->paramSubst.add(param, initializer);
                     continue;
+                }
                 if (call != nullptr && (useTemporary.find(param) == useTemporary.end())) {
                     // Substitute argument directly
                     CHECK_NULL(mi);
@@ -632,8 +635,16 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
             // This is important, since this variable may be used many times.
             DoResetHeaders::generateResets(typeMap, paramType, initializer->expression, &body);
         } else if (param->direction == IR::Direction::None) {
+            // already set; the value must be the same, or else we cannot compile
             auto initializer = mi->substitution.lookup(param);
-            substs->paramSubst.add(param, initializer);
+            auto prev = substs->paramSubst.lookup(param);
+            if (!initializer->equiv(*prev))
+                // This is a compile-time constant, since this is a non-directional
+                // parameter, so the value should be independent on the context.
+                ::error("%1%: non-directional parameters must be substitued with the "
+                        "same value in all invocations; two different substitutions are "
+                        "%2% and %3%", param, initializer, prev);
+            continue;
         }
     }
 
