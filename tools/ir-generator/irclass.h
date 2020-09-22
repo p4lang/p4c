@@ -49,6 +49,8 @@ class IrNamespace {
     static void add_class(IrClass *);
     IrNamespace *lookupChild(cstring name) const { return ::get(children, name); }
     IrClass *lookupClass(cstring name) const { return ::get(classes, name); }
+    cstring qualified_name(const IrNamespace *ctxt = nullptr) const;
+    // name with scope qual if needed in the context
 };
 
 std::ostream &operator<<(std::ostream &, IrNamespace *);
@@ -270,6 +272,8 @@ class IrClass : public IrElement {
     std::string fullName() const;
     Util::Enumerator<IrField*>* getFields() const;
     Util::Enumerator<IrMethod*>* getUserMethods() const;
+    cstring qualified_name(const IrNamespace *ctxt = nullptr) const;
+    // name with scope qual if needed in the context
 };
 
 class IrDefinitions {

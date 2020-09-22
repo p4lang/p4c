@@ -40,8 +40,13 @@ class n4 {
         } else if (v < UINT64_C(9950000000)) {
             v = (v + UINT64_C(50000000))/UINT64_C(100000000);
             os << v/10 << '.' << v%10 << 'G';
-        } else {
+        } else if (v < UINT64_C(999500000000)) {
             os << std::setw(3) << (v + UINT64_C(500000000))/UINT64_C(1000000000) << 'G';
+        } else if (v < UINT64_C(9950000000000)) {
+            v = (v + UINT64_C(50000000000))/UINT64_C(100000000000);
+            os << v/10 << '.' << v%10 << 'T';
+        } else {
+            os << std::setw(3) << (v + UINT64_C(500000000000))/UINT64_C(1000000000000) << 'T';
         }
         return os; }
 };

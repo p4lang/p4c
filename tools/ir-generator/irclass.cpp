@@ -282,13 +282,26 @@ std::string IrClass::fullName() const {
     return tmp.str();
 }
 
-static void output_scope_if_needed(std::ostream &out, const IrNamespace *scope,
-                                   const IrNamespace *in) {
-    if (!scope) return;
-    for (auto i = in; i; i = i->parent)
-        if (scope == i) return;
-    output_scope_if_needed(out, scope->parent, in);
-    out << scope->name << "::";
+cstring IrNamespace::qualified_name(const IrNamespace *in) const {
+    cstring rv = name ? name : "IR";
+    if (parent) {
+        for (auto i = in; i; i = i->parent) {
+            auto sym = i->lookupChild(name);
+            if (sym && this != sym) break;
+            if (parent == i) return rv; }
+        rv = parent->qualified_name(in) + "::" + rv; }
+    return rv;
+}
+
+cstring IrClass::qualified_name(const IrNamespace *in) const {
+    cstring rv = name;
+    if (containedIn) {
+        for (auto i = in; i; i = i->parent) {
+            auto sym = i->lookupClass(name);
+            if (sym && this != sym) break;
+            if (containedIn == i) return rv; }
+        rv = containedIn->qualified_name(in) + "::" + rv; }
+    return rv;
 }
 
 void IrClass::generate_hdr(std::ostream &out) const {
@@ -315,8 +328,7 @@ void IrClass::generate_hdr(std::ostream &out) const {
         out << sep << "public ";
         if (p->kind == NodeKind::Interface)
             out << "virtual ";
-        output_scope_if_needed(out, p->containedIn, containedIn);
-        out << p->name;
+        out << p->qualified_name(containedIn);
         sep = ", "; }
 
     out << " {" << std::endl;
@@ -367,7 +379,7 @@ int IrClass::generateConstructor(const ctor_args_t &arglist, const IrMethod *use
     int optargs = 0;
     std::stringstream body;
     const char *sep = ":\n    ";
-    auto parent = getParent() ? getParent()->name : cstring();
+    auto parent = getParent() ? getParent()->qualified_name(containedIn) : cstring();
     const char *end_parent = "";
     for (auto &arg : arglist) {
         if (arg.first->optional && (skip_opt & (1U << optargs++)))

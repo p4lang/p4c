@@ -53,11 +53,12 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
                 backup.emplace_back(it, program); } }
         try {
             try {
-                size_t maxmem;
                 LOG1(log_indent << name() << " invoking " << v->name());
                 auto after = program->apply(**it);
-                LOG3(log_indent << "heap after " << v->name() << ": in use " <<
-                     n4(gc_mem_inuse(&maxmem)) << "B, max " << n4(maxmem) << "B");
+                if (LOGGING(3)) {
+                    size_t maxmem, mem = gc_mem_inuse(&maxmem);  // triggers gc
+                    LOG3(log_indent << "heap after " << v->name() << ": in use " <<
+                         n4(mem) << "B, max " << n4(maxmem) << "B"); }
                 if (stop_on_error && ::errorCount() > initial_error_count)
                     break;
                 if ((program = after) == nullptr) break;
