@@ -85,7 +85,8 @@ const IR::Node* RemoveNestedStructs::postorder(IR::Member* expression) {
 }
 
 const IR::Node* RemoveNestedStructs::postorder(IR::MethodCallExpression* expression) {
-    auto mi = MethodInstance::resolve(expression, values->refMap, values->typeMap);
+    auto mi = MethodInstance::resolve(
+        getOriginal<IR::MethodCallExpression>(), values->refMap, values->typeMap);
     if (!mi->is<ExternMethod>() && !mi->is<ExternFunction>())
         return expression;
     for (auto p : mi->getActualParameters()->parameters) {
