@@ -150,52 +150,64 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
     // print out dependencies
     for (auto dependency : dependencies) {
         if (liveAssignments.find(dependency) != liveAssignments.end()) {
-            // print out dependecy
-            blocks.back()->push_back(liveAssignments[dependency]);
-            dependencyAssignment = liveAssignments[dependency];
+            // Save statement's name if it is dependent
+            dependentNames.push_back(lvalue_name(statement->left));
             // remove from names to not duplicate
-            orderedNames.erase(dependency);
             liveAssignments.erase(dependency);
             depNestingLevel = ifNestingLevel;
-            dependantName = lvalue_name(statement->left);
         }
     }
     auto statementName = lvalue_name(statement->left);
-    statNames.push_back(statementName);
-    bool isStatementDependant = false;
-    for (auto it  = statNames.begin(); it != statNames.end(); it++) {
-        if (dependantName == *it) {
-            isStatementDependant = true;
-        }
+    // Set value to true in isStatementDependent map
+    // if the name of a current statement is the same as
+    // the name of any in dependentNames.
+    auto it = std::find(dependentNames.begin(), dependentNames.end(), statementName);
+    if (it != dependentNames.end()) {
+        isStatementDependent[statementName] = true;
+    } else {
+        isStatementDependent[statementName] = false;
     }
-    if (depNestingLevel < ifNestingLevel && isStatementDependant) {
+    // Push liveAssignments in liveAssigns in adequate order
+    // If current statement is dependent, it should be pushed on liveAssigns.
+    if (depNestingLevel < ifNestingLevel && isStatementDependent[statementName]) {
         statement->right = new IR::Mux(conditions.back(), statement->right, statement->left);
         if (travesalPath[ifNestingLevel - 1]) {
-            orderedNames.push_back(statementName);
+            // push back dependent statements in if branch
             auto rightStatement = clone(statement->right)->apply(replacer);
             liveAssignments[statementName] =
                 new IR::AssignmentStatement(statement->left, rightStatement);
+            liveAssigns.push_back(liveAssignments[statementName]);
         } else {
+            // push back dependent statements in else brach
             cstring elseStatementsName = generator->newName("elseStatement");
-            orderedNames.push_back(elseStatementsName);
             auto rightStatement = clone(statement->right)->apply(replacer);
             liveAssignments[elseStatementsName] =
                 new IR::AssignmentStatement(statement->left, rightStatement);
+            liveAssigns.push_back(liveAssignments[elseStatementsName]);
         }
     } else {
         auto foundedAssignment = liveAssignments.find(statementName);
         if (foundedAssignment != liveAssignments.end()) {
             statement->right = foundedAssignment->second->right;
-            // move the lvalue assignment to the back
-            orderedNames.erase(statementName);
+            // Remove statement for 'then' if there is an else branch
+            if (!travesalPath[ifNestingLevel - 1]) {
+                liveAssigns.erase(std::remove(liveAssigns.begin(), liveAssigns.end(),
+                    foundedAssignment->second), liveAssigns.end());
+            }
         } else if (!statement->right->is<IR::Mux>()) {
             auto clonedLeft = clone(statement->left);
             statement->right = new IR::Mux(conditions.back(), clonedLeft, clonedLeft);
         }
-        orderedNames.push_back(statementName);
+        // Remove statement for 'then' if there is an a statement
+        // with the same statement name in the else branch.
+        if (liveAssigns.size() > 0 && !isStatementDependent[statementName] &&
+            lvalue_name(liveAssigns.back()->left) == lvalue_name(statement->left)) {
+            liveAssigns.pop_back();
+        }
         auto rightStatement = clone(statement->right)->apply(replacer);
         liveAssignments[statementName] =
             new IR::AssignmentStatement(statement->left, rightStatement);
+        liveAssigns.push_back(liveAssignments[statementName]);
     }
     return new IR::EmptyStatement();
 }
@@ -221,17 +233,6 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
     }
     ++ifNestingLevel;
     auto rv = new IR::BlockStatement;
-    // This pushes dependencies before IfStatement
-    if (dependencyAssignment) {
-        rv->push_back(blocks.back());
-        blocks.pop_back();
-        for (auto exprName : orderedNames) {
-            if (!isAssignmentPushed[liveAssignments[exprName]]) {
-                rv->push_back(liveAssignments[exprName]);
-            }
-            isAssignmentPushed[liveAssignments[exprName]] = true;
-        }
-    }
     if (!statement->condition->is<IR::PathExpression>()) {
         cstring conditionName = generator->newName("cond");
         auto condDecl = new IR::Declaration_Variable(conditionName, IR::Type::Boolean::get());
@@ -240,7 +241,6 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
         rv->push_back(new IR::AssignmentStatement(clone(condition), statement->condition));
         statement->condition = condition;  // replace with variable cond
     }
-    blocks.push_back(new IR::BlockStatement);
     travesalPath.push_back(true);
     visit(statement->ifTrue);
     rv->push_back(statement->ifTrue);
@@ -250,18 +250,12 @@ const IR::Node* Predication::preorder(IR::IfStatement* statement) {
         visit(statement->ifFalse);
         rv->push_back(statement->ifFalse);
     }
-    rv->push_back(blocks.back());
-    blocks.pop_back();
-    blocks.push_back(new IR::BlockStatement);
-    for (auto exprName : orderedNames) {
-        if (!isAssignmentPushed[liveAssignments[exprName]]) {
-            rv->push_back(liveAssignments[exprName]);
-        }
-        isAssignmentPushed[liveAssignments[exprName]] = false;
+    // Push assignments which are correctly aranged in liveAssigns vector on rv block.
+    for (auto it : liveAssigns) {
+        rv->push_back(it);
     }
-    dependencyAssignment = nullptr;
+    liveAssigns.clear();
     liveAssignments.clear();
-    orderedNames.clear();
     travesalPath.pop_back();
     --ifNestingLevel;
     prune();
