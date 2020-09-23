@@ -42,8 +42,8 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
             if (parent->name == "Node")
                 buf << "typeid(*this) == typeid(a)";
             else
-                buf << parent->name << "::operator==(static_cast<const "
-                    << parent->name << " &>(a))";
+                buf << parent->qualified_name(cl->containedIn) << "::operator==(static_cast<const "
+                    << parent->qualified_name(cl->containedIn) << " &>(a))";
             first = false; }
         for (auto f : *cl->getFields()) {
             if (*f->type == NamedType::SourceInfo()) continue;  // FIXME -- deal with SourcInfo
@@ -75,7 +75,8 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
                 buf << cl->indent << cl->indent << "if (typeid(*this) != typeid(a_)) "
                                                    "return false;\n";
             } else {
-                buf << cl->indent << cl->indent << "if (!" << parent->name
+                buf << cl->indent << cl->indent << "if (!"
+                    << parent->qualified_name(cl->containedIn)
                     << "::equiv(a_)) return false;\n"; } }
         if (body) {
             buf << cl->indent << cl->indent << "auto &a = static_cast<const " << cl->name
@@ -121,7 +122,8 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         std::stringstream buf;
         buf << "{" << std::endl;
         if (auto parent = cl->getParent())
-            buf << cl->indent << parent->name << "::visit_children(v);" << std::endl;
+            buf << cl->indent << parent->qualified_name(cl->containedIn)
+                << "::visit_children(v);" << std::endl;
         for (auto f : *cl->getFields()) {
             if (f->type->resolve(cl->containedIn) == nullptr)
                 // This is not an IR pointer
@@ -170,7 +172,8 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         std::stringstream buf;
         buf << "{" << std::endl;
         if (auto parent = cl->getParent())
-            buf << cl->indent << parent->name << "::dump_fields(out);" << std::endl;
+            buf << cl->indent << parent->qualified_name(cl->containedIn)
+                << "::dump_fields(out);" << std::endl;
         bool needed = false;
         for (auto f : *cl->getFields()) {
             if (*f->type == NamedType::SourceInfo()) continue;  // FIXME -- deal with SourcInfo
@@ -189,7 +192,8 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
         std::stringstream buf;
         buf << "{" << std::endl;
         if (auto parent = cl->getParent())
-            buf << cl->indent << parent->name << "::toJSON(json);" << std::endl;
+            buf << cl->indent << parent->qualified_name(cl->containedIn)
+                << "::toJSON(json);" << std::endl;
         for (auto f : *cl->getFields()) {
             if (*f->type == NamedType::SourceInfo()) continue;  // FIXME -- deal with SourcInfo
             if (!f->isInline && f->nullOK)
@@ -203,7 +207,7 @@ const ordered_map<cstring, IrMethod::info_t> IrMethod::Generate = {
     [](IrClass *cl, Util::SourceInfo, cstring) -> cstring {
         std::stringstream buf;
         if (auto parent = cl->getParent())
-            buf << ": " << parent->name << "(json)";
+            buf << ": " << parent->qualified_name(cl->containedIn) << "(json)";
         buf << " {" << std::endl;
         for (auto f : *cl->getFields()) {
             if (*f->type == NamedType::SourceInfo()) continue;  // FIXME -- deal with SourcInfo
