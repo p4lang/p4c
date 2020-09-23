@@ -17,11 +17,60 @@ limitations under the License.
 #ifndef _P4_FRONTEND_H_
 #define _P4_FRONTEND_H_
 
+#include <iostream>
+#include <fstream>
 #include "ir/ir.h"
 #include "parseAnnotations.h"
 #include "../common/options.h"
+#include "lib/path.h"
+#include "lib/nullstream.h"
+#include "toP4/toP4.h"
 
 namespace P4 {
+
+    /**
+This pass outputs the program as a P4 source file.
+*/
+class PrettyPrint : public Inspector {
+    /// output file
+    cstring ppfile;
+    /// The file that is being compiled.  This used
+    cstring inputfile;
+public:
+    explicit PrettyPrint(const CompilerOptions& options) {
+        setName("PrettyPrint");
+        ppfile = options.prettyPrintFile;
+        inputfile = options.file;
+    }
+    bool preorder(const IR::P4Program* program) override {
+        if (!ppfile.isNullOrEmpty()) {
+            Util::PathName path(ppfile);
+            std::ostream *ppStream = openFile(path.toString(), true);
+            P4::ToP4 top4(ppStream, false, inputfile);
+            (void)program->apply(top4);
+        }
+        return false;  // prune
+    }
+};
+
+/**
+ * This pass is a no-op whose purpose is to mark the end of the
+ * front-end, which is useful for debugging. It is implemented as an
+ * empty @ref PassManager (instead of a @ref Visitor) for efficiency.
+ */
+class FrontEndLast : public PassManager {
+public:
+    FrontEndLast() { setName("FrontEndLast"); }
+};
+
+/**
+ * This pass is a no-op whose purpose is to mark a point in the
+ * front-end, used for testing.
+ */
+class FrontEndDump : public PassManager {
+public:
+    FrontEndDump() { setName("FrontEndDump"); }
+};
 
 class FrontEnd {
     /// A pass for parsing annotations.

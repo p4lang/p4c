@@ -28,6 +28,7 @@ limitations under the License.
 #include "lib/nullstream.h"
 
 #include "backends/ubpf/midend.h"
+#include "backends/ubpf/frontend.h"
 #include "backends/ebpf/ebpfOptions.h"
 #include "ubpfBackend.h"
 #include "frontends/p4/frontend.h"
@@ -47,7 +48,7 @@ void compile(EbpfOptions& options) {
     if (::errorCount() > 0)
         return;
 
-    P4::FrontEnd frontend;
+    UBPF::FrontEnd frontend;
     frontend.addDebugHook(hook);
     program = frontend.run(options, program);
     if (::errorCount() > 0)

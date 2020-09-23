@@ -30,6 +30,7 @@ set(P4C_UBPF_SOURCES
         ubpfModel.cpp
         target.cpp
         midend.cpp
+        frontend.cpp
         ../../backends/ebpf/ebpfProgram.cpp
         ../../backends/ebpf/ebpfTable.cpp
         ../../backends/ebpf/ebpfParser.cpp
@@ -53,6 +54,7 @@ set(P4C_UBPF_HEADERS
         ubpfModel.h
         target.h
         midend.h
+        frontend.h
         ubpfBackend.h)
 
 set (P4C_UBPF_DIST_HEADERS p4include/ubpf_model.p4)
