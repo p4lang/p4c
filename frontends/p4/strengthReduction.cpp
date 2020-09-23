@@ -132,8 +132,10 @@ const IR::Node* DoStrengthReduction::postorder(IR::BXor* expr) {
         return new IR::Cmpl(expr);
     if (hasSideEffects(expr))
         return expr;
-    if (expr->left->equiv(*expr->right))
-        return new IR::Constant(0);
+    if (expr->left->equiv(*expr->right) && expr->left->type &&
+        !expr->left->type->is<IR::Type_Unknown>())
+        // we assume that this type is right
+        return new IR::Constant(expr->left->type, 0);
     return expr;
 }
 
@@ -191,8 +193,9 @@ const IR::Node* DoStrengthReduction::postorder(IR::Sub* expr) {
     }
     if (hasSideEffects(expr))
         return expr;
-    if (expr->left->equiv(*expr->right))
-        return new IR::Constant(0);
+    if (expr->left->equiv(*expr->right) && expr->left->type &&
+        !expr->left->type->is<IR::Type_Unknown>())
+        return new IR::Constant(expr->left->type, 0);
     return expr;
 }
 
