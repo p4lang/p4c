@@ -466,8 +466,9 @@ void UBPF::UBPFParser::emit(EBPF::CodeBuilder *builder) {
 
 bool UBPF::UBPFParser::build() {
     auto pl = parserBlock->container->type->applyParams;
-    if (pl->size() != 4) {
-        ::error("Expected parser to have exactly 4 parameters");
+    size_t numberOfArgs = UBPFModel::instance.numberOfParserArguments();
+    if (pl->size() != numberOfArgs) {
+        ::error("Expected parser to have exactly %d parameters", numberOfArgs);
         return false;
     }
 

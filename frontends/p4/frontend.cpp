@@ -27,6 +27,7 @@ limitations under the License.
 #include "frontends/p4/typeChecking/bindVariables.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/fromv1.0/v1model.h"
+#include "ubpf/ubpfModel.h"
 // Passes
 #include "actionsInlining.h"
 #include "checkConstants.h"
@@ -129,6 +130,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     std::initializer_list<Visitor *> frontendPasses = {
         new P4V1::getV1ModelVersion,
+        new UBPF::getUBPFModelVersion,
         // Parse annotations
         new ParseAnnotationBodies(&parseAnnotations, &typeMap),
         new PrettyPrint(options),

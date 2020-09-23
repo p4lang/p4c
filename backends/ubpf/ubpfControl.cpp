@@ -625,8 +625,9 @@ namespace UBPF {
     bool UBPFControl::build() {
         passVariable = program->refMap->newName("pass");
         auto pl = controlBlock->container->type->applyParams;
-        if (pl->size() != 3) {
-            ::error("Expected control block to have exactly 3 parameter");
+        size_t numberOfArgs = UBPFModel::instance.numberOfControlBlockArguments();
+        if (pl->size() != numberOfArgs) {
+            ::error("Expected control block to have exactly %d parameter", numberOfArgs);
             return false;
         }
 
