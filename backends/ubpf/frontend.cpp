@@ -89,7 +89,8 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new P4::TypeInference(&refMap, &typeMap, false),  // insert casts
             new P4::ValidateMatchAnnotations(&typeMap),
             new P4::BindTypeVariables(&refMap, &typeMap),
-            new P4::DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
+            // add default argument values to parameters
+            new P4::DefaultArguments(&refMap, &typeMap),
             new P4::ResolveReferences(&refMap),
             new P4::TypeInference(&refMap, &typeMap, false),  // more casts may be needed
             new P4::RemoveParserControlFlow(&refMap, &typeMap),
@@ -161,4 +162,4 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     const IR::P4Program *result = program->apply(passes);
     return result;
 }
-}
+}  // namespace UBPF

@@ -36,7 +36,7 @@ class PrettyPrint : public Inspector {
     cstring ppfile;
     /// The file that is being compiled.  This used
     cstring inputfile;
-public:
+ public:
     explicit PrettyPrint(const CompilerOptions& options) {
         setName("PrettyPrint");
         ppfile = options.prettyPrintFile;
@@ -59,7 +59,7 @@ public:
  * empty @ref PassManager (instead of a @ref Visitor) for efficiency.
  */
 class FrontEndLast : public PassManager {
-public:
+ public:
     FrontEndLast() { setName("FrontEndLast"); }
 };
 
@@ -68,7 +68,7 @@ public:
  * front-end, used for testing.
  */
 class FrontEndDump : public PassManager {
-public:
+ public:
     FrontEndDump() { setName("FrontEndDump"); }
 };
 

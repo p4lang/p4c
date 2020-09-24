@@ -21,6 +21,6 @@ public:
                              bool skipSideEffectOrdering = false,
                              std::ostream *outStream = nullptr);
 };
-} // namespace UBPF
+}  // namespace UBPF
 
 #endif //_BACKENDS_UBPF_FRONTEND_H_

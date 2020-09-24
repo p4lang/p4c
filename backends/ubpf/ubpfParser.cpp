@@ -17,6 +17,7 @@ limitations under the License.
 #include "ubpfParser.h"
 #include "ubpfType.h"
 #include "ubpfHelpers.h"
+#include "ubpfModel.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
 
@@ -443,13 +444,13 @@ bool UBPFStateTranslationVisitor::preorder(const IR::AssignmentStatement* stat) 
     return false;
 }
 
-void UBPF::UBPFParserState::emit(EBPF::CodeBuilder* builder) {
+void UBPFParserState::emit(EBPF::CodeBuilder* builder) {
     UBPFStateTranslationVisitor visitor(this);
     visitor.setBuilder(builder);
     state->apply(visitor);
 }
 
-void UBPF::UBPFParser::emit(EBPF::CodeBuilder *builder) {
+void UBPFParser::emit(EBPF::CodeBuilder *builder) {
     for (auto s : states)
         s->emit(builder);
 
@@ -464,9 +465,9 @@ void UBPF::UBPFParser::emit(EBPF::CodeBuilder *builder) {
     builder->newline();
 }
 
-bool UBPF::UBPFParser::build() {
+bool UBPFParser::build() {
     auto pl = parserBlock->container->type->applyParams;
-    size_t numberOfArgs = UBPF::UBPFModel::instance.numberOfParserArguments();
+    size_t numberOfArgs = UBPFModel::instance.numberOfParserArguments();
     if (pl->size() != numberOfArgs) {
         ::error("Expected parser to have exactly %d parameters", numberOfArgs);
         return false;
