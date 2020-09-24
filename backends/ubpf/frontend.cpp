@@ -1,9 +1,9 @@
 #include "ubpfModel.h"
 #include "frontend.h"
+#include "frontends/p4/frontend.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/bindVariables.h"
-#include "ir/ir.h"
 #include "ir/pass_manager.h"
 
 // Passes
