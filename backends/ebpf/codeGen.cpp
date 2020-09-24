@@ -67,13 +67,11 @@ bool CodeGenInspector::comparison(const IR::Operation_Relation* b) {
                    EBPFScalarType::generatesScalar(et->to<EBPFScalarType>()->widthInBits()))
                   || et->is<EBPFBoolType>();
     if (scalar) {
-        builder->append("(");
         visit(b->left);
         builder->spc();
         builder->append(b->getStringOp());
         builder->spc();
         visit(b->right);
-        builder->append(")");
     } else {
         if (!et->is<IHasWidth>())
             BUG("%1%: Comparisons for type %2% not yet implemented", type);
