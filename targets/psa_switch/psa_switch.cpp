@@ -428,8 +428,8 @@ PsaSwitch::ingress_thread() {
     auto clone = phv->get_field("psa_ingress_output_metadata.clone").get_uint();
     if (clone) {
       MirroringSessionConfig config;
-      auto clone_session_id = phv->get_field("psa_ingress_output_metadata.clone_session_id").get_uint();
-      auto is_session_configured = mirroring_get_session(static_cast<mirror_id_t>(clone_session_id), &config);
+      auto clone_session_id = phv->get_field("psa_ingress_output_metadata.clone_session_id").get<mirror_id_t>();
+      auto is_session_configured = mirroring_get_session(clone_session_id, &config);
 
       if (is_session_configured) {
         BMLOG_DEBUG_PKT(*packet, "Cloning packet at ingress to session id {}", clone_session_id);
@@ -562,6 +562,45 @@ PsaSwitch::egress_thread(size_t worker_id) {
 
     Deparser *deparser = this->get_deparser("egress_deparser");
     deparser->deparse(packet.get());
+
+    // egress cloning - each cloned packet is a copy of the packet as output by the egress deparser
+    auto clone = phv->get_field("psa_egress_output_metadata.clone").get_uint();
+    if (clone) {
+      MirroringSessionConfig config;
+      auto clone_session_id = phv->get_field("psa_egress_output_metadata.clone_session_id").get<mirror_id_t>();
+      auto is_session_configured = mirroring_get_session(clone_session_id, &config);
+
+      if (is_session_configured) {
+        BMLOG_DEBUG_PKT(*packet, "Cloning packet after egress to session id {}", clone_session_id);
+        std::unique_ptr<Packet> packet_copy = packet->clone_no_phv_ptr();
+        auto phv_copy = packet_copy->get_phv();
+        phv_copy->reset_metadata();
+        phv_copy->get_field("psa_egress_parser_input_metadata.packet_path").set(PACKET_PATH_CLONE_E2E);
+
+        if (config.mgid_valid) {
+          BMLOG_DEBUG_PKT(*packet_copy, "Cloning packet to multicast group {}", config.mgid);
+          // TODO 0 as the last arg (for class_of_service) is currently a placeholder
+          // implement cos into cloning session configs
+          multicast(packet_copy.get(), config.mgid, PACKET_PATH_CLONE_E2E, 0);
+        }
+
+        if (config.egress_port_valid) {
+          BMLOG_DEBUG_PKT(*packet_copy, "Cloning packet to egress port {}", config.egress_port);
+          enqueue(config.egress_port, std::move(packet_copy));
+        }
+
+      } else {
+        BMLOG_DEBUG_PKT(*packet,
+                        "Cloning packet after egress to unconfigured session id {} causes no clone packets to be created",
+                        clone_session_id);
+      }
+    }
+
+    auto drop = phv->get_field("psa_egress_output_metadata.drop").get_uint();
+    if (drop) {
+      BMLOG_DEBUG_PKT(*packet, "Dropping packet at the end of egress");
+      continue;
+    }
 
     if (port == PSA_PORT_RECIRCULATE) {
       BMLOG_DEBUG_PKT(*packet, "Recirculating packet");
