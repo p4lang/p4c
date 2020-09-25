@@ -8,8 +8,13 @@ header ethernet_t {
     bit<16> eth_type;
 }
 
+header H {
+    bit<8> a;
+}
+
 struct Headers {
     ethernet_t eth_hdr;
+    H[2]       h;
 }
 
 struct Meta {
@@ -18,27 +23,25 @@ struct Meta {
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
         pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract<H>(hdr.h.next);
+        pkt.extract<H>(hdr.h.next);
         transition accept;
     }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<48> tmp;
-    bit<16> val_0;
-    @name("ingress.do_action") action do_action() {
-        val_0 = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? h.eth_hdr.eth_type : val_0);
-        h.eth_hdr.eth_type = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? val_0 : h.eth_hdr.eth_type);
-        tmp = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? 48w1 : tmp);
-        h.eth_hdr.src_addr = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? tmp : h.eth_hdr.src_addr);
+    @name("ingress.simple_action") action simple_action() {
+        h.h[0].a = (h.eth_hdr.src_addr != h.eth_hdr.dst_addr ? 8w2 : h.h[0].a);
+        h.h[1].a = (h.eth_hdr.src_addr != h.eth_hdr.dst_addr ? h.h[1].a : 8w1);
     }
-    @hidden table tbl_do_action {
+    @hidden table tbl_simple_action {
         actions = {
-            do_action();
+            simple_action();
         }
-        const default_action = do_action();
+        const default_action = simple_action();
     }
     apply {
-        tbl_do_action.apply();
+        tbl_simple_action.apply();
     }
 }
 
@@ -57,9 +60,11 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control deparser(packet_out pkt, in Headers h) {
+control deparser(packet_out b, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
+        b.emit<ethernet_t>(h.eth_hdr);
+        b.emit<H>(h.h[0]);
+        b.emit<H>(h.h[1]);
     }
 }
 

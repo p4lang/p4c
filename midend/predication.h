@@ -75,29 +75,27 @@ class Predication final : public Transform {
     unsigned ifNestingLevel;
     // Tracking the nesting level of dependency assignment
     unsigned depNestingLevel;
-    // Stores last liveAssignments[dependency]
-    // Used for pushing dependencies on rv before visiting if-else
-    const IR::AssignmentStatement* dependencyAssignment;
-    // Name of assignment that is dependant
-    cstring dependantName;
-    // To store assignment statements.
-    // If any dependant is equal to any member of statNames,
-    // isStatementDependant is set to true.
-    std::vector<cstring> statNames;
+    // To store dependent assignments.
+    // If current statement is equal to any member of dependentNames,
+    // isStatementdependent of the coresponding statement is set to true.
+    std::vector<cstring> dependentNames;
     // Traverse path of nested if-else statements
     // true at the end of the vector means that you are currently visiting 'then' branch'
     // false at the end of the vector means that you are in the else branch of the if statement.
     // Size of this vector is the current if nesting level.
     std::vector<bool> travesalPath;
-    ordered_set<cstring> orderedNames;
     std::vector<cstring> dependencies;
+    // Collects assignment statements with transformed right expression.
+    // liveAssignments are pushed at the back of liveAssigns vetor.
     std::map<cstring, const IR::AssignmentStatement *> liveAssignments;
-    // Control when to push an assignment on rv block.
-    // True of corresponding assignemnt means that
-    // the assignment has already been pushed when handeling dependencies.
-    // False of corresponding assignemnt means that
-    // the assignment should be pushed on rv block at that point.
-    std::map<const IR::AssignmentStatement *, bool> isAssignmentPushed;
+    // Vector of assignment statements which collects assignments from
+    // liveAssignments and dependencies in adequate order. In preorder
+    // of if statements assignments from liveAssigns are pushed on rv block.
+    std::vector<const IR::AssignmentStatement*> liveAssigns;
+    // Map that shows if the current statement is dependent.
+    // Bool value is true for dependent statements,
+    // false for statements that are not dependent.
+    std::map<cstring, bool> isStatementDependent;
     const IR::Statement* error(const IR::Statement* statement) const {
         if (inside_action && ifNestingLevel > 0)
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
@@ -108,8 +106,7 @@ class Predication final : public Transform {
 
  public:
     explicit Predication(NameGenerator* gen) :
-        generator(gen), inside_action(false), ifNestingLevel(0), depNestingLevel(0),
-            dependencyAssignment(nullptr)
+        generator(gen), inside_action(false), ifNestingLevel(0), depNestingLevel(0)
     { setName("Predication"); }
     const IR::Expression* clone(const IR::Expression* expression);
     const IR::Node* clone(const IR::AssignmentStatement* statement);

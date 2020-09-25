@@ -32,7 +32,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.eth_hdr.eth_type = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? val1_0 : h.eth_hdr.eth_type);
         h.eth_hdr.src_addr = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? val2_0 : h.eth_hdr.src_addr);
         tmp = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? 48w1 : tmp);
-        tmp = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? tmp : tmp);
         h.eth_hdr.src_addr = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? tmp : h.eth_hdr.src_addr);
     }
     @hidden table tbl_do_action {

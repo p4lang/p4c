@@ -17,28 +17,36 @@ struct Meta {
 
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
+        transition parse_hdrs;
+    }
+    state parse_hdrs {
         pkt.extract<ethernet_t>(hdr.eth_hdr);
         transition accept;
     }
 }
 
+void dummy2(inout Headers val1) {
+    val1.eth_hdr.dst_addr = val1.eth_hdr.dst_addr + 48w3;
+}
+void dummy(inout Headers val) {
+    dummy2(val);
+    val.eth_hdr.eth_type = 16w2;
+    dummy2(val);
+}
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<48> tmp;
-    bit<16> val_0;
-    @name("ingress.do_action") action do_action() {
-        val_0 = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? h.eth_hdr.eth_type : val_0);
-        h.eth_hdr.eth_type = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? val_0 : h.eth_hdr.eth_type);
-        tmp = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? 48w1 : tmp);
-        h.eth_hdr.src_addr = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? tmp : h.eth_hdr.src_addr);
-    }
-    @hidden table tbl_do_action {
-        actions = {
-            do_action();
+    action simple_action() {
+        if (h.eth_hdr.eth_type == 16w1) {
+            return;
         }
-        const default_action = do_action();
+        h.eth_hdr.src_addr = 48w1;
+        dummy(h);
+        h.eth_hdr.dst_addr = h.eth_hdr.dst_addr + 48w4;
     }
     apply {
-        tbl_do_action.apply();
+        h.eth_hdr.src_addr = 48w2;
+        h.eth_hdr.dst_addr = 48w2;
+        h.eth_hdr.eth_type = 16w2;
+        simple_action();
     }
 }
 
@@ -57,9 +65,9 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control deparser(packet_out pkt, in Headers h) {
+control deparser(packet_out b, in Headers h) {
     apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
+        b.emit<Headers>(h);
     }
 }
 
