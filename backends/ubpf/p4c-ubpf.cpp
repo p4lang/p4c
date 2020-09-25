@@ -28,7 +28,6 @@ limitations under the License.
 #include "lib/nullstream.h"
 
 #include "backends/ubpf/midend.h"
-#include "backends/ubpf/frontend.h"
 #include "backends/ebpf/ebpfOptions.h"
 #include "ubpfBackend.h"
 #include "frontends/p4/frontend.h"
@@ -36,6 +35,7 @@ limitations under the License.
 #include "frontends/common/parseInput.h"
 #include "ir/json_loader.h"
 #include "fstream"
+#include "ubpfModel.h"
 
 void compile(EbpfOptions& options) {
     auto hook = options.getDebugHook();
@@ -48,7 +48,8 @@ void compile(EbpfOptions& options) {
     if (::errorCount() > 0)
         return;
 
-    UBPF::FrontEnd frontend;
+    P4::FrontEnd frontend;
+    program = UBPF::UBPFModel::instance.run(program);
     frontend.addDebugHook(hook);
     program = frontend.run(options, program);
     if (::errorCount() > 0)

@@ -44,6 +44,7 @@ limitations under the License.
 #include "localizeActions.h"
 #include "moveConstructors.h"
 #include "moveDeclarations.h"
+#include "parseAnnotations.h"
 #include "parserControlFlow.h"
 #include "removeReturns.h"
 #include "resetHeaders.h"
@@ -58,6 +59,7 @@ limitations under the License.
 #include "structInitializers.h"
 #include "switchAddDefault.h"
 #include "tableKeyNames.h"
+#include "toP4/toP4.h"
 #include "typeChecking/typeChecker.h"
 #include "uniqueNames.h"
 #include "unusedDeclarations.h"
@@ -66,6 +68,52 @@ limitations under the License.
 #include "validateParsedProgram.h"
 
 namespace P4 {
+
+namespace {
+/**
+This pass outputs the program as a P4 source file.
+*/
+class PrettyPrint : public Inspector {
+    /// output file
+    cstring ppfile;
+    /// The file that is being compiled.  This used
+    cstring inputfile;
+ public:
+    explicit PrettyPrint(const CompilerOptions& options) {
+        setName("PrettyPrint");
+        ppfile = options.prettyPrintFile;
+        inputfile = options.file;
+    }
+    bool preorder(const IR::P4Program* program) override {
+        if (!ppfile.isNullOrEmpty()) {
+            Util::PathName path(ppfile);
+            std::ostream *ppStream = openFile(path.toString(), true);
+            P4::ToP4 top4(ppStream, false, inputfile);
+            (void)program->apply(top4);
+        }
+        return false;  // prune
+    }
+};
+}  // namespace
+
+/**
+ * This pass is a no-op whose purpose is to mark the end of the
+ * front-end, which is useful for debugging. It is implemented as an
+ * empty @ref PassManager (instead of a @ref Visitor) for efficiency.
+ */
+class FrontEndLast : public PassManager {
+ public:
+    FrontEndLast() { setName("FrontEndLast"); }
+};
+
+/**
+ * This pass is a no-op whose purpose is to mark a point in the
+ * front-end, used for testing.
+ */
+class FrontEndDump : public PassManager {
+ public:
+    FrontEndDump() { setName("FrontEndDump"); }
+};
 
 // TODO: remove skipSideEffectOrdering flag
 const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program,
