@@ -49,13 +49,17 @@ bool CodeGenInspector::preorder(const IR::Declaration_Variable* decl) {
 
 bool CodeGenInspector::preorder(const IR::Operation_Binary* b) {
     widthCheck(b);
-    builder->append("(");
+    int prec = expressionPrecedence;
+    bool useParens = prec > b->getPrecedence();
+    if (useParens)
+        builder->append("(");
     visit(b->left);
     builder->spc();
     builder->append(b->getStringOp());
     builder->spc();
     visit(b->right);
-    builder->append(")");
+    if (useParens)
+        builder->append(")");
     return false;
 }
 
@@ -67,13 +71,17 @@ bool CodeGenInspector::comparison(const IR::Operation_Relation* b) {
                    EBPFScalarType::generatesScalar(et->to<EBPFScalarType>()->widthInBits()))
                   || et->is<EBPFBoolType>();
     if (scalar) {
-        builder->append("(");
+        int prec = expressionPrecedence;
+        bool useParens = prec > b->getPrecedence();
+        if (useParens)
+            builder->append("(");
         visit(b->left);
         builder->spc();
         builder->append(b->getStringOp());
         builder->spc();
         visit(b->right);
-        builder->append(")");
+        if (useParens)
+            builder->append(")");
     } else {
         if (!et->is<IHasWidth>())
             BUG("%1%: Comparisons for type %2% not yet implemented", type);
@@ -89,44 +97,60 @@ bool CodeGenInspector::comparison(const IR::Operation_Relation* b) {
 
 bool CodeGenInspector::preorder(const IR::Mux* b) {
     widthCheck(b);
-    builder->append("(");
+    int prec = expressionPrecedence;
+    bool useParens = prec >= b->getPrecedence();
+    if (useParens)
+        builder->append("(");
     visit(b->e0);
     builder->append(" ? ");
     visit(b->e1);
     builder->append(" : ");
     visit(b->e2);
-    builder->append(")");
+    if (useParens)
+        builder->append(")");
     return false;
 }
 
 bool CodeGenInspector::preorder(const IR::Operation_Unary* u) {
     widthCheck(u);
-    builder->append("(");
+    int prec = expressionPrecedence;
+    bool useParens = prec > u->getPrecedence();
+    if (useParens)
+        builder->append("(");
     builder->append(u->getStringOp());
     visit(u->expr);
-    builder->append(")");
+    if (useParens)
+        builder->append(")");
     return false;
 }
 
 bool CodeGenInspector::preorder(const IR::ArrayIndex* a) {
-    builder->append("(");
+    int prec = expressionPrecedence;
+    bool useParens = prec > a->getPrecedence();
+    if (useParens)
+        builder->append("(");
     visit(a->left);
     builder->append("[");
     visit(a->right);
     builder->append("]");
-    builder->append(")");
+    if (useParens)
+        builder->append(")");
     return false;
 }
 
 bool CodeGenInspector::preorder(const IR::Cast* c) {
     widthCheck(c);
-    builder->append("(");
+    int prec = expressionPrecedence;
+    bool useParens = prec > c->getPrecedence();
+    if (useParens)
+        builder->append("(");
     builder->append("(");
     auto et = EBPFTypeFactory::instance->create(c->destType);
     et->emit(builder);
     builder->append(")");
     visit(c->expr);
-    builder->append(")");
+    if (useParens)
+        builder->append(")");
     return false;
 }
 
