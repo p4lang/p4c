@@ -30,6 +30,9 @@ struct Headers_t {
 }
 
 struct metadata {
+    bit<8> qfi;
+    bit<8> filt_dir;
+    bit<8> reflec_qos;
 }
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
@@ -62,26 +65,38 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         }
         const default_action = NoAction_0();
     }
+    @hidden action parenthesistest_ubpf95() {
+        headers.ipv4.setInvalid();
+    }
+    @hidden table tbl_parenthesistest_ubpf95 {
+        actions = {
+            parenthesistest_ubpf95();
+        }
+        const default_action = parenthesistest_ubpf95();
+    }
     apply {
         if (headers.ipv4.isValid()) {
             filter_tbl_0.apply();
+        }
+        if (meta.qfi != 8w0 && (meta.filt_dir == 8w2 || meta.reflec_qos == 8w1)) {
+            tbl_parenthesistest_ubpf95.apply();
         }
     }
 }
 
 control dprs(packet_out packet, in Headers_t headers) {
-    @hidden action parenthesistest_ubpf93() {
+    @hidden action parenthesistest_ubpf101() {
         packet.emit<Ethernet_h>(headers.ethernet);
         packet.emit<IPv4_h>(headers.ipv4);
     }
-    @hidden table tbl_parenthesistest_ubpf93 {
+    @hidden table tbl_parenthesistest_ubpf101 {
         actions = {
-            parenthesistest_ubpf93();
+            parenthesistest_ubpf101();
         }
-        const default_action = parenthesistest_ubpf93();
+        const default_action = parenthesistest_ubpf101();
     }
     apply {
-        tbl_parenthesistest_ubpf93.apply();
+        tbl_parenthesistest_ubpf101.apply();
     }
 }
 

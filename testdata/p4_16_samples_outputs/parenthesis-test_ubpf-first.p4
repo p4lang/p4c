@@ -30,6 +30,9 @@ struct Headers_t {
 }
 
 struct metadata {
+    bit<8> qfi;
+    bit<8> filt_dir;
+    bit<8> reflec_qos;
 }
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
@@ -63,6 +66,9 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     apply {
         if (headers.ipv4.isValid()) {
             filter_tbl.apply();
+        }
+        if (meta.qfi != 8w0 && (meta.filt_dir == 8w2 || meta.reflec_qos == 8w1)) {
+            headers.ipv4.setInvalid();
         }
     }
 }

@@ -57,9 +57,11 @@ bool CodeGenInspector::preorder(const IR::Operation_Binary* b) {
     builder->spc();
     builder->append(b->getStringOp());
     builder->spc();
+    expressionPrecedence = b->getPrecedence() + 1;
     visit(b->right);
     if (useParens)
         builder->append(")");
+    expressionPrecedence = prec;
     return false;
 }
 
