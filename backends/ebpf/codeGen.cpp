@@ -103,11 +103,15 @@ bool CodeGenInspector::preorder(const IR::Mux* b) {
     bool useParens = prec >= b->getPrecedence();
     if (useParens)
         builder->append("(");
+    expressionPrecedence = b->getPrecedence();
     visit(b->e0);
     builder->append(" ? ");
+    expressionPrecedence = DBPrint::Prec_Low;
     visit(b->e1);
     builder->append(" : ");
+    expressionPrecedence = b->getPrecedence();
     visit(b->e2);
+    expressionPrecedence = prec;
     if (useParens)
         builder->append(")");
     return false;
@@ -120,7 +124,9 @@ bool CodeGenInspector::preorder(const IR::Operation_Unary* u) {
     if (useParens)
         builder->append("(");
     builder->append(u->getStringOp());
+    expressionPrecedence = u->getPrecedence();
     visit(u->expr);
+    expressionPrecedence = prec;
     if (useParens)
         builder->append(")");
     return false;
@@ -131,12 +137,15 @@ bool CodeGenInspector::preorder(const IR::ArrayIndex* a) {
     bool useParens = prec > a->getPrecedence();
     if (useParens)
         builder->append("(");
+    expressionPrecedence = a->getPrecedence();
     visit(a->left);
     builder->append("[");
+    expressionPrecedence = DBPrint::Prec_Low;
     visit(a->right);
     builder->append("]");
     if (useParens)
         builder->append(")");
+    expressionPrecedence = prec;
     return false;
 }
 
@@ -150,9 +159,11 @@ bool CodeGenInspector::preorder(const IR::Cast* c) {
     auto et = EBPFTypeFactory::instance->create(c->destType);
     et->emit(builder);
     builder->append(")");
+    expressionPrecedence = c->getPrecedence();
     visit(c->expr);
     if (useParens)
         builder->append(")");
+    expressionPrecedence = prec;
     return false;
 }
 
