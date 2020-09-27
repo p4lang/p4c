@@ -1,0 +1,69 @@
+
+mc_mgrp_create 3
+mc_node_create 0 6
+mc_node_create 0 7
+mc_node_create 0 8
+mc_node_associate 3 0
+mc_node_associate 3 1
+mc_node_associate 3 2
+
+mc_mgrp_create 4
+mc_node_create 0 9
+mc_node_create 0 10
+mc_node_associate 4 3
+mc_node_associate 4 4
+
+mc_mgrp_create 5
+mc_node_create 0 11
+mc_node_create 0 12
+mc_node_associate 5 5
+mc_node_associate 5 6
+
+mc_mgrp_create 6
+mc_node_create 0 13
+mc_node_associate 6 7
+
+mirroring_add_mc 8 3
+mirroring_get 8
+
+mirroring_add_mc 9 4
+mirroring_get 9
+
+mirroring_add_mc 10 5
+mirroring_get 10
+
+mirroring_add_mc 11 6
+mirroring_get 11
+
+# UNICAST PACKET CASE
+packet 1 000000000002 000000000000 ffff
+
+# original packet sent to its dest
+expect 2 000000000002 00000000cafe ffff $
+
+# clone packets
+expect 6 000000000002 00000000cafe face $
+expect 7 000000000002 00000000cafe face $
+expect 8 000000000002 00000000cafe face $
+
+# DROPPED PACKET CASE
+packet 1 000000000009 000000000000 ffff
+
+# original packet should be dropped and not sent out port 9
+
+# clone packets
+expect 9  000000000009 00000000cafe face $
+expect 10 000000000009 00000000cafe face $
+
+# RECIRCULATE PACKET CASE
+packet 1 000000000008 000000000000 ffff
+
+# clones from first pass for recirc packets
+expect 11 000000000008 00000000beef face $
+expect 12 000000000008 00000000beef face $
+
+# original recirc packet sent to its dest
+expect 8 000000000008 00000000cafe ffff $
+
+# clones from second pass for recirc packets
+expect 13 000000000008 00000000cafe face $
