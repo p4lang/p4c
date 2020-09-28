@@ -168,12 +168,15 @@ bool CodeGenInspector::preorder(const IR::Cast* c) {
 }
 
 bool CodeGenInspector::preorder(const IR::Member* expression) {
+    int prec = expressionPrecedence;
+    expressionPrecedence = expression->getPrecedence();
     auto ei = P4::EnumInstance::resolve(expression, typeMap);
     if (ei == nullptr) {
         visit(expression->expr);
         builder->append(".");
     }
     builder->append(expression->member);
+    expressionPrecedence = prec;
     return false;
 }
 
@@ -196,12 +199,15 @@ bool CodeGenInspector::preorder(const IR::BoolLiteral* b) {
 
 bool CodeGenInspector::preorder(const IR::ListExpression* expression) {
     bool first = true;
+    int prec = expressionPrecedence;
+    expressionPrecedence = DBPrint::Prec_Low;
     for (auto e : expression->components) {
         if (!first)
             builder->append(", ");
         first = false;
         visit(e);
     }
+    expressionPrecedence = prec;
     return false;
 }
 
