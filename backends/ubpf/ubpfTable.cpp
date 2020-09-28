@@ -455,11 +455,13 @@ void UBPFTable::emitInitializer(EBPF::CodeBuilder *builder) {
     auto mi = P4::MethodInstance::resolve(mce, program->refMap, program->typeMap);
 
     auto defact = t->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
-    // uBPF does not support setting default action at compile time. Default action must be set from a control plane and
-    // 'const' qualifier does not permit to modify default action by a control plane.
+    // uBPF does not support setting default action at compile time.
+    // Default action must be set from a control plane and 'const' qualifier
+    // does not permit to modify default action by a control plane.
     if (defact->isConstant) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%: uBPF target does not allow 'const default_action'. Use `default_action` instead.", defact);
+                "%1%: uBPF target does not allow 'const default_action'. "
+                "Use `default_action` instead.", defact);
     }
     auto ac = mi->to<P4::ActionCall>();
     BUG_CHECK(ac != nullptr, "%1%: expected an action call", mce);
@@ -491,7 +493,8 @@ void UBPFTable::emitInitializer(EBPF::CodeBuilder *builder) {
     builder->endOfStatement(true);
 
     builder->emitIndent();
-    builder->appendFormat("INIT_UBPF_TABLE(\"%s\", sizeof(%s), sizeof(%s));", defaultTable, program->zeroKey.c_str(), value);
+    builder->appendFormat("INIT_UBPF_TABLE(\"%s\", sizeof(%s), sizeof(%s));", defaultTable,
+            program->zeroKey.c_str(), value);
     builder->newline();
 
     builder->emitIndent();
@@ -504,7 +507,9 @@ void UBPFTable::emitInitializer(EBPF::CodeBuilder *builder) {
     auto entries = t->getEntries();
     if (entries != nullptr) {
         ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%: Immutable table entries cannot be configured by the uBPF target and should not be used.", entries);
+                "%1%: Immutable table entries cannot be configured by the uBPF target "
+                "and should not be used.",
+                entries);
     }
 }
 

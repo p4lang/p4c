@@ -622,7 +622,13 @@ namespace UBPF {
             it.second->emitInstance(builder);
     }
 
+    void UBPFControl::emitTableInitializers(EBPF::CodeBuilder *builder) {
+        for (auto it : tables)
+            it.second->emitInitializer(builder);
+    }
+
     bool UBPFControl::build() {
+        hitVariable = program->refMap->newName("hit");
         passVariable = program->refMap->newName("pass");
         auto pl = controlBlock->container->type->applyParams;
         size_t numberOfArgs = UBPFModel::instance.numberOfControlBlockArguments();
