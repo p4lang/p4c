@@ -67,9 +67,6 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         if (headers.ipv4.isValid()) {
             filter_tbl.apply();
         }
-        if (meta.qfi != 8w0 && (meta.filt_dir == 8w2 || meta.reflec_qos == 8w1)) {
-            headers.ipv4.setInvalid();
-        }
     }
 }
 

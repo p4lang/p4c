@@ -68,7 +68,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             filter_tbl.apply();
         }
         if (meta.qfi != 0 && (meta.filt_dir == 2 || meta.reflec_qos == 1)) {
-            headers.ipv4.setInvalid();
+            ;
         }
     }
 }
