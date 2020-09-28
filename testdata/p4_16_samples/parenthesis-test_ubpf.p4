@@ -92,7 +92,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         if ((meta.qfi != 0) &&
             ((meta.filt_dir == 2) ||
              (meta.reflec_qos == 1)))
-	     ; // do nothing.
+	     meta.qfi = 3;
     }
 }
 

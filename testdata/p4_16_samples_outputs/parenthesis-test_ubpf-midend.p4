@@ -65,9 +65,21 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         }
         const default_action = NoAction_0();
     }
+    @hidden action parenthesistest_ubpf95() {
+        meta.qfi = 8w3;
+    }
+    @hidden table tbl_parenthesistest_ubpf95 {
+        actions = {
+            parenthesistest_ubpf95();
+        }
+        const default_action = parenthesistest_ubpf95();
+    }
     apply {
         if (headers.ipv4.isValid()) {
             filter_tbl_0.apply();
+        }
+        if (meta.qfi != 8w0 && (meta.filt_dir == 8w2 || meta.reflec_qos == 8w1)) {
+            tbl_parenthesistest_ubpf95.apply();
         }
     }
 }
