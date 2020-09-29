@@ -221,6 +221,30 @@ namespace UBPF {
         }
 
         builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat("if (%s == NULL) ", valueName.c_str());
+        builder->blockStart();
+
+        builder->emitIndent();
+        builder->appendLine("/* miss; find default action */");
+        builder->emitIndent();
+        builder->appendFormat("%s = 0", control->hitVariable.c_str());
+        builder->endOfStatement(true);
+
+        builder->emitIndent();
+        builder->append("value = ");
+        builder->target->emitTableLookup(builder, table->defaultActionMapName,
+                                         control->program->zeroKey, valueName);
+        builder->endOfStatement(true);
+        builder->blockEnd(false);
+        builder->append(" else ");
+        builder->blockStart();
+        builder->emitIndent();
+        builder->appendFormat("%s = 1", control->hitVariable.c_str());
+        builder->endOfStatement(true);
+        builder->blockEnd(true);
+
         builder->emitIndent();
         builder->appendFormat("if (%s != NULL) ", valueName.c_str());
         builder->blockStart();
