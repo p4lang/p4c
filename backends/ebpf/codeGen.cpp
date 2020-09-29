@@ -231,12 +231,22 @@ bool CodeGenInspector::preorder(const IR::MethodCallExpression* expression) {
         }
     }
 
+    int prec = expressionPrecedence;
+    bool useParens = (prec > DBPrint::Prec_Postfix) ||
+            (!expression->typeArguments->empty() &&
+             prec >= DBPrint::Prec_Cond);
+    // FIXME: we use parenthesis more often than necessary
+    // because the bison parser has a bug which parses
+    // these expressions incorrectly.
+    expressionPrecedence = DBPrint::Prec_Postfix;
     visit(expression->method);
-    builder->append("(");
+    if (useParens)
+        builder->append("(");
     bool first = true;
     for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
         if (!first)
             builder->append(", ");
+        expressionPrecedence = DBPrint::Prec_Low;
         first = false;
 
         if (p->direction == IR::Direction::Out ||
@@ -246,6 +256,7 @@ bool CodeGenInspector::preorder(const IR::MethodCallExpression* expression) {
         visit(arg);
     }
     builder->append(")");
+    expressionPrecedence = prec;
     return false;
 }
 
