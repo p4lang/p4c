@@ -45,6 +45,7 @@ namespace UBPF {
         cstring contextVar, outerHdrOffsetVar, outerHdrLengthVar;
         cstring stdMetadataVar;
         cstring packetTruncatedSizeVar;
+        cstring arrayIndexType = "uint32_t";
 
         UBPFProgram(const EbpfOptions &options, const IR::P4Program *program,
                     P4::ReferenceMap *refMap, P4::TypeMap *typeMap, const IR::ToplevelBlock *toplevel) :
