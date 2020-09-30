@@ -34,7 +34,6 @@ namespace UBPF {
         const IR::Type *keyType{};
         const IR::Type *valueType{};
         cstring dataMapName;
-        cstring defaultActionMapName;
         size_t size{};
         EBPF::CodeGenInspector *codeGen;
 
@@ -62,6 +61,7 @@ namespace UBPF {
         const IR::ActionList *actionList;
         const IR::TableBlock *table;
         EBPF::TableKind tableKind;
+        cstring defaultActionMapName;
         cstring actionEnumName;
         cstring noActionName;
         std::map<const IR::KeyElement *, cstring> keyFieldNames;
