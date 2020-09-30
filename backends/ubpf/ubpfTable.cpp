@@ -162,9 +162,6 @@ void UBPFTableBase::emitInstance(EBPF::CodeBuilder *builder, EBPF::TableKind tab
 
     builder->target->emitTableDecl(builder, dataMapName, tableKind,
                                    keyTypeStr, valueTypeStr, size);
-    builder->target->emitTableDecl(builder, defaultActionMapName, EBPF::TableArray,
-                                   program->arrayIndexType,
-                                   cstring("struct ") + valueTypeName, 1);
 }
 
 UBPFTable::UBPFTable(const UBPFProgram *program,
@@ -193,6 +190,9 @@ UBPFTable::UBPFTable(const UBPFProgram *program,
 
 void UBPFTable::emitInstance(EBPF::CodeBuilder *builder) {
     UBPFTableBase::emitInstance(builder, tableKind);
+    builder->target->emitTableDecl(builder, defaultActionMapName, EBPF::TableArray,
+                                   program->arrayIndexType,
+                                   cstring("struct ") + valueTypeName, 1);
 }
 
 void UBPFTable::setTableKind() {
