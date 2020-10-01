@@ -232,7 +232,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %type<IR::Expression*>      expression lvalue keysetExpression selectExpression
                             stateExpression optInitializer initializer
                             simpleKeysetExpression transitionStatement switchLabel
-                            p4rtControllerType
+                            p4rtControllerType reducedSimpleKeysetExpression
 %type<ConstType*>           baseType typeOrVoid specializedType headerStackType
                             typeRef tupleType typeArg realTypeArg namedType
 %type<IR::Type_Name*>       typeName
@@ -806,12 +806,22 @@ keysetExpression
     ;
 
 tupleKeysetExpression
-    : "(" simpleExpressionList ")" { $$ = $2; }
+    : "(" simpleKeysetExpression "," simpleExpressionList ")"
+                                { $$ = $4; $4->insert($4->begin(), $2); }
+    | "(" reducedSimpleKeysetExpression ")" { $$ = new IR::Vector<IR::Expression>(); $$->push_back($2); }
     ;
 
 simpleExpressionList
     : simpleKeysetExpression { $$ = new IR::Vector<IR::Expression>(); $$->push_back($1); }
     | simpleExpressionList "," simpleKeysetExpression { $$ = $1; $$->push_back($3); }
+    ;
+
+reducedSimpleKeysetExpression
+    // like simpleKeysetExpression, but without 'expression', to avoid a conflict
+    : expression "&&&" expression { $$ = new IR::Mask(@1 + @3, $1, $3); }
+    | expression ".." expression  { $$ = new IR::Range(@1 + @3, $1, $3); }
+    | DEFAULT                     { $$ = new IR::DefaultExpression(@1); }
+    | "_"                         { $$ = new IR::DefaultExpression(@1); }
     ;
 
 simpleKeysetExpression
