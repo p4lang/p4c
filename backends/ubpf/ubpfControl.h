@@ -77,6 +77,7 @@ namespace UBPF {
         void emitDeclaration(EBPF::CodeBuilder *builder, const IR::Declaration *decl);
         void emitTableTypes(EBPF::CodeBuilder *builder);
         void emitTableInstances(EBPF::CodeBuilder *builder);
+        void emitTableInitializers(EBPF::CodeBuilder *builder);
         bool build();
 
         UBPFTable *getTable(cstring name) const {

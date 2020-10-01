@@ -122,7 +122,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             Reject();
             NoAction_0();
         }
-        const default_action = NoAction_0();
+        default_action = NoAction_0();
     }
     apply {
         filter_tbl_0.apply();

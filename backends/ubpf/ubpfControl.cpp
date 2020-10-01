@@ -221,6 +221,30 @@ namespace UBPF {
         }
 
         builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat("if (%s == NULL) ", valueName.c_str());
+        builder->blockStart();
+
+        builder->emitIndent();
+        builder->appendLine("/* miss; find default action */");
+        builder->emitIndent();
+        builder->appendFormat("%s = 0", control->hitVariable.c_str());
+        builder->endOfStatement(true);
+
+        builder->emitIndent();
+        builder->append("value = ");
+        builder->target->emitTableLookup(builder, table->defaultActionMapName,
+                                         control->program->zeroKey, valueName);
+        builder->endOfStatement(true);
+        builder->blockEnd(false);
+        builder->append(" else ");
+        builder->blockStart();
+        builder->emitIndent();
+        builder->appendFormat("%s = 1", control->hitVariable.c_str());
+        builder->endOfStatement(true);
+        builder->blockEnd(true);
+
         builder->emitIndent();
         builder->appendFormat("if (%s != NULL) ", valueName.c_str());
         builder->blockStart();
@@ -622,7 +646,13 @@ namespace UBPF {
             it.second->emitInstance(builder);
     }
 
+    void UBPFControl::emitTableInitializers(EBPF::CodeBuilder *builder) {
+        for (auto it : tables)
+            it.second->emitInitializer(builder);
+    }
+
     bool UBPFControl::build() {
+        hitVariable = program->refMap->newName("hit");
         passVariable = program->refMap->newName("pass");
         auto pl = controlBlock->container->type->applyParams;
         size_t numberOfArgs = UBPFModel::instance.numberOfControlBlockArguments();
