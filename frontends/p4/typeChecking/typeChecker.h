@@ -182,6 +182,15 @@ class TypeInference : public Transform {
     const IR::Node* preorder(IR::Type* type) override
     { return pruneIfDone(type); }
 
+    struct Comparison {
+        const IR::Expression* left;
+        const IR::Expression* right;
+    };
+
+    // Helper function to handle comparisons
+    bool compare(const IR::Node* errorPosition, const IR::Type* ltype,
+                 const IR::Type* rtype, Comparison* compare);
+
     // do functions pre-order so we can check the prototype
     // before the returns
     const IR::Node* preorder(IR::Function* function) override;

@@ -860,13 +860,17 @@ bool ComputeWriteSet::preorder(const IR::SwitchStatement* statement) {
     }
     auto table = TableApplySolver::isActionRun(
         statement->expression, storageMap->refMap, storageMap->typeMap);
-    CHECK_NULL(table);
-    auto al = table->getActionList();
-    bool allCases = statement->cases.size() == al->size();
-    if (!seenDefault && !allCases)
-        // no case may have been executed
-        result = result->joinDefinitions(save);
-    return setDefinitions(result);
+    if (table) {
+        auto al = table->getActionList();
+        bool allCases = statement->cases.size() == al->size();
+        if (!seenDefault && !allCases)
+            // no case may have been executed
+            result = result->joinDefinitions(save);
+        return setDefinitions(result);
+    } else {
+        // TODO
+        return setDefinitions(result);
+    }
 }
 
 bool ComputeWriteSet::preorder(const IR::P4Action* action) {

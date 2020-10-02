@@ -1571,6 +1571,111 @@ const IR::Node* TypeInference::postorder(IR::BoolLiteral* expression) {
     return expression;
 }
 
+// Returns nullptr on error
+bool TypeInference::compare(const IR::Node* errorPosition,
+                            const IR::Type* ltype,
+                            const IR::Type* rtype,
+                            Comparison* compare) {
+    if (ltype->is<IR::Type_Action>() || rtype->is<IR::Type_Action>()) {
+        // Actions return Type_Action instead of void.
+        typeError("%1%: cannot be applied to action results", errorPosition);
+        return false;
+    }
+
+    bool defined = false;
+    if (TypeMap::equivalent(ltype, rtype) &&
+        (!ltype->is<IR::Type_Void>() && !ltype->is<IR::Type_Varbits>())) {
+        defined = true;
+    } else if (ltype->is<IR::Type_Base>() && rtype->is<IR::Type_Base>() &&
+               TypeMap::equivalent(ltype, rtype)) {
+        defined = true;
+    } else if (ltype->is<IR::Type_BaseList>() && rtype->is<IR::Type_BaseList>()) {
+        auto tvs = unify(errorPosition, ltype, rtype);
+        if (tvs == nullptr)
+            return false;
+        if (!tvs->isIdentity()) {
+            ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+            compare->left = cts.convert(compare->left);
+            compare->right = cts.convert(compare->right);
+        }
+        defined = true;
+    } else {
+        auto ls = ltype->to<IR::Type_UnknownStruct>();
+        auto rs = rtype->to<IR::Type_UnknownStruct>();
+        if (ls != nullptr || rs != nullptr) {
+            if (ls != nullptr && rs != nullptr) {
+                typeError("%1%: cannot compare initializers with unknown types", errorPosition);
+                return false;
+            }
+
+            bool lcst = isCompileTimeConstant(compare->left);
+            bool rcst = isCompileTimeConstant(compare->right);
+
+            auto tvs = unify(errorPosition, ltype, rtype);
+            if (tvs == nullptr)
+                return false;
+            if (!tvs->isIdentity()) {
+                ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+                compare->left = cts.convert(compare->left);
+                compare->right = cts.convert(compare->right);
+            }
+
+            if (ls != nullptr) {
+                auto l = compare->left->to<IR::StructExpression>();
+                CHECK_NULL(l);  // struct initializers are the only expressions that can
+                // have StructUnknown types
+                BUG_CHECK(rtype->is<IR::Type_StructLike>(), "%1%: expected a struct", rtype);
+                auto type = new IR::Type_Name(rtype->to<IR::Type_StructLike>()->name);
+                compare->left = new IR::StructExpression(
+                    compare->left->srcInfo, type, type, l->components);
+                setType(compare->left, rtype);
+                if (lcst)
+                    setCompileTimeConstant(compare->left);
+            } else {
+                auto r = compare->right->to<IR::StructExpression>();
+                CHECK_NULL(r);  // struct initializers are the only expressions that can
+                // have StructUnknown types
+                BUG_CHECK(ltype->is<IR::Type_StructLike>(), "%1%: expected a struct", ltype);
+                auto type = new IR::Type_Name(ltype->to<IR::Type_StructLike>()->name);
+                compare->right = new IR::StructExpression(
+                    compare->right->srcInfo, type, type, r->components);
+                setType(compare->right, rtype);
+                if (rcst)
+                    setCompileTimeConstant(compare->right);
+            }
+            defined = true;
+        }
+
+        // comparison between structs and list expressions is allowed
+        if ((ltype->is<IR::Type_StructLike>() && rtype->is<IR::Type_List>()) ||
+            (ltype->is<IR::Type_List>() && rtype->is<IR::Type_StructLike>())) {
+            if (!ltype->is<IR::Type_StructLike>()) {
+                // swap
+                auto type = ltype;
+                ltype = rtype;
+                rtype = type;
+            }
+
+            auto tvs = unify(errorPosition, ltype, rtype);
+            if (tvs == nullptr)
+                return false;
+            if (!tvs->isIdentity()) {
+                ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+                compare->left = cts.convert(compare->left);
+                compare->right = cts.convert(compare->right);
+            }
+            defined = true;
+        }
+    }
+
+    if (!defined) {
+        typeError("%1%: not defined on %2% and %3%",
+                  errorPosition, ltype->toString(), rtype->toString());
+        return false;
+    }
+    return true;
+}
+
 const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
     if (done()) return expression;
     auto ltype = getType(expression->left);
@@ -1612,106 +1717,14 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
     }
 
     if (equTest) {
-        if (ltype->is<IR::Type_Action>() || rtype->is<IR::Type_Action>()) {
-            // Actions return Type_Action instead of void.
-            typeError("%1%: cannot be applied to action results", expression);
+        Comparison c;
+        c.left = expression->left;
+        c.right = expression->right;
+        auto b = compare(expression, ltype, rtype, &c);
+        if (!b)
             return expression;
-        }
-
-        bool defined = false;
-        if (TypeMap::equivalent(ltype, rtype) &&
-            (!ltype->is<IR::Type_Void>() && !ltype->is<IR::Type_Varbits>())) {
-            defined = true;
-        } else if (ltype->is<IR::Type_Base>() && rtype->is<IR::Type_Base>() &&
-                 TypeMap::equivalent(ltype, rtype)) {
-            defined = true;
-        } else if (ltype->is<IR::Type_BaseList>() && rtype->is<IR::Type_BaseList>()) {
-            auto tvs = unify(expression, ltype, rtype);
-            if (tvs == nullptr)
-                // error already signalled
-                return expression;
-            if (!tvs->isIdentity()) {
-                ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-                expression->left = cts.convert(expression->left);
-                expression->right = cts.convert(expression->right);
-            }
-            defined = true;
-        } else {
-            auto ls = ltype->to<IR::Type_UnknownStruct>();
-            auto rs = rtype->to<IR::Type_UnknownStruct>();
-            if (ls != nullptr || rs != nullptr) {
-                if (ls != nullptr && rs != nullptr) {
-                    typeError("%1%: cannot compare initializers with unknown types", expression);
-                    return expression;
-                }
-
-                bool lcst = isCompileTimeConstant(expression->left);
-                bool rcst = isCompileTimeConstant(expression->right);
-
-                auto tvs = unify(expression, ltype, rtype);
-                if (tvs == nullptr)
-                    // error already signalled
-                    return expression;
-                if (!tvs->isIdentity()) {
-                    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-                    expression->left = cts.convert(expression->left);
-                    expression->right = cts.convert(expression->right);
-                }
-
-                if (ls != nullptr) {
-                    auto l = expression->left->to<IR::StructExpression>();
-                    CHECK_NULL(l);  // struct initializers are the only expressions that can
-                                    // have StructUnknown types
-                    BUG_CHECK(rtype->is<IR::Type_StructLike>(), "%1%: expected a struct", rtype);
-                    auto type = new IR::Type_Name(rtype->to<IR::Type_StructLike>()->name);
-                    expression->left = new IR::StructExpression(
-                        expression->left->srcInfo, type, type, l->components);
-                    setType(expression->left, rtype);
-                    if (lcst)
-                        setCompileTimeConstant(expression->left);
-                } else {
-                    auto r = expression->right->to<IR::StructExpression>();
-                    CHECK_NULL(r);  // struct initializers are the only expressions that can
-                                    // have StructUnknown types
-                    BUG_CHECK(ltype->is<IR::Type_StructLike>(), "%1%: expected a struct", ltype);
-                    auto type = new IR::Type_Name(ltype->to<IR::Type_StructLike>()->name);
-                    expression->right = new IR::StructExpression(
-                        expression->right->srcInfo, type, type, r->components);
-                    setType(expression->right, rtype);
-                    if (rcst)
-                        setCompileTimeConstant(expression->right);
-                }
-                defined = true;
-            }
-
-            // comparison between structs and list expressions is allowed
-            if ((ltype->is<IR::Type_StructLike>() && rtype->is<IR::Type_List>()) ||
-                 (ltype->is<IR::Type_List>() && rtype->is<IR::Type_StructLike>())) {
-                if (!ltype->is<IR::Type_StructLike>()) {
-                    // swap
-                    auto type = ltype;
-                    ltype = rtype;
-                    rtype = type;
-                }
-
-                auto tvs = unify(expression, ltype, rtype);
-                if (tvs == nullptr)
-                    // error already signalled
-                    return expression;
-                if (!tvs->isIdentity()) {
-                    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-                    expression->left = cts.convert(expression->left);
-                    expression->right = cts.convert(expression->right);
-                }
-                defined = true;
-            }
-        }
-
-        if (!defined) {
-            typeError("%1%: not defined on %2% and %3%",
-                      expression, ltype->toString(), rtype->toString());
-            return expression;
-        }
+        expression->left = c.left;
+        expression->right = c.right;
     } else {
         if (!ltype->is<IR::Type_Bits>() || !rtype->is<IR::Type_Bits>() || !(ltype == rtype)) {
             typeError("%1%: not defined on %2% and %3%",
@@ -3502,24 +3515,53 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
     auto type = getType(stat->expression);
     if (type == nullptr)
         return stat;
-    if (!type->is<IR::Type_ActionEnum>()) {
-        typeError("%1%: Switch condition can only be produced by table.apply(...).action_run",
-                  stat);
-        return stat;
-    }
-    auto ae = type->to<IR::Type_ActionEnum>();
-    std::set<cstring> foundLabels;
-    for (auto c : stat->cases) {
-        if (c->label->is<IR::DefaultExpression>())
-            continue;
-        auto pe = c->label->to<IR::PathExpression>();
-        CHECK_NULL(pe);
-        cstring label = pe->path->name.name;
-        if (foundLabels.find(label) != foundLabels.end())
-            typeError("%1%: duplicate switch label", c->label);
-        foundLabels.emplace(label);
-        if (!ae->contains(label))
-            typeError("%1% is not a legal label (action name)", c->label);
+
+    if (auto ae = type->to<IR::Type_ActionEnum>()) {
+        // switch (table.apply(...))
+        std::set<cstring> foundLabels;
+        for (auto c : stat->cases) {
+            if (c->label->is<IR::DefaultExpression>())
+                continue;
+            auto pe = c->label->to<IR::PathExpression>();
+            CHECK_NULL(pe);
+            cstring label = pe->path->name.name;
+            if (foundLabels.find(label) != foundLabels.end())
+                typeError("%1%: duplicate switch label", c->label);
+            foundLabels.emplace(label);
+            if (!ae->contains(label))
+                typeError("%1% is not a legal label (action name)", c->label);
+        }
+    } else {
+        // switch (expression)
+        Comparison comp;
+        comp.left = stat->expression;
+        if (isCompileTimeConstant(stat->expression))
+            warning(ErrorType::WARN_MISMATCH, "%1%: constant expression in switch",
+                    stat->expression);
+
+        for (auto &c : stat->cases) {
+            if (!isCompileTimeConstant(c->label))
+                typeError("%1%: must be a compile-time constant", c->label);
+            auto lt = getType(c->label);
+            if (lt == nullptr)
+                continue;
+            comp.right = c->label;
+            if (lt->is<IR::Type_InfInt>() && type->is<IR::Type_Bits>()) {
+                auto cst = c->label->to<IR::Constant>();
+                CHECK_NULL(cst);
+                c = new IR::SwitchCase(
+                    c->srcInfo,
+                    new IR::Constant(cst->srcInfo, type, cst->value, cst->base), c->statement);
+                setType(c->label, type);
+                setCompileTimeConstant(c->label);
+                continue;
+            }
+            bool b = compare(stat, type, lt, &comp);
+            if (b && comp.right != c->label) {
+                c = new IR::SwitchCase(c->srcInfo, comp.right, c->statement);
+                setCompileTimeConstant(c->label);
+            }
+        }
     }
     return stat;
 }
