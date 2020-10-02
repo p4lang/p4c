@@ -3545,7 +3545,6 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
             auto lt = getType(c->label);
             if (lt == nullptr)
                 continue;
-            comp.right = c->label;
             if (lt->is<IR::Type_InfInt>() && type->is<IR::Type_Bits>()) {
                 auto cst = c->label->to<IR::Constant>();
                 CHECK_NULL(cst);
@@ -3555,7 +3554,10 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
                 setType(c->label, type);
                 setCompileTimeConstant(c->label);
                 continue;
+            } else if (c->label->is<IR::DefaultExpression>()) {
+                continue;
             }
+            comp.right = c->label;
             bool b = compare(stat, type, lt, &comp);
             if (b && comp.right != c->label) {
                 c = new IR::SwitchCase(c->srcInfo, comp.right, c->statement);
