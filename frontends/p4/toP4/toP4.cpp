@@ -1093,7 +1093,7 @@ bool ToP4::preorder(const IR::MethodCallStatement* s) {
 }
 
 bool ToP4::preorder(const IR::SwitchCase* s) {
-    if (useCase)
+    if (useCase && !s->label->is<IR::DefaultExpression>())
         builder.append("case ");
     visit(s->label);
     builder.append(": ");
@@ -1110,7 +1110,7 @@ bool ToP4::preorder(const IR::SwitchStatement* s) {
     setVecSep("\n", "\n");
     bool saveCase = useCase;
     useCase = false;
-    for (auto c: s->cases) {
+    for (auto c : s->cases) {
         if (!c->label->is<IR::DefaultExpression>() &&
             !c->label->is<IR::PathExpression>()) {
             useCase = true;
