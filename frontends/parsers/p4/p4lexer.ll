@@ -113,6 +113,8 @@ using Parser = P4::P4Parser;
                   return makeToken(BOOL); }
 "bit"           { BEGIN(driver.saveState); driver.template_args = true;
                   return makeToken(BIT); }
+"case"          { BEGIN(driver.saveState); driver.template_args = false;
+                  return makeToken(CASE); }
 "const"         { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(CONST); }
 "control"       { BEGIN(driver.saveState); driver.template_args = false;

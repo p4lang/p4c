@@ -891,12 +891,11 @@ bool ComputeWriteSet::preorder(const IR::SwitchStatement* statement) {
         if (!seenDefault && !allCases)
             // no case may have been executed
             result = result->joinDefinitions(save);
+        return setDefinitions(result);
     } else {
-        // TODO: in some cases we can check for exhaustive matches,
-        // but this is conservative.
-        result = result->joinDefinitions(save);
+        // TODO
+        return setDefinitions(result);
     }
-    return setDefinitions(result);
 }
 
 bool ComputeWriteSet::preorder(const IR::P4Action* action) {

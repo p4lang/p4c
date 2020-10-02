@@ -3630,6 +3630,7 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
             auto lt = getType(c->label);
             if (lt == nullptr)
                 continue;
+            comp.right = c->label;
             if (lt->is<IR::Type_InfInt>() && type->is<IR::Type_Bits>()) {
                 auto cst = c->label->to<IR::Constant>();
                 CHECK_NULL(cst);
