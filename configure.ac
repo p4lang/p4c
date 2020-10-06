@@ -10,9 +10,9 @@ AC_CONFIG_HEADERS([config.h])
 
 AC_SUBST([BM_VERSION], [AC_PACKAGE_VERSION])
 
-# Pyhton is optional to the package
-m4_define_default([_AM_PYTHON_INTERPRETER_LIST], [python2 python2.7])
-AM_PATH_PYTHON([2.7],, [:])
+# Python is optional to the package
+m4_define_default([_AM_PYTHON_INTERPRETER_LIST], [python3 python2 python2.7])
+AM_PATH_PYTHON([3.5],, [:])
 
 coverage_enabled=no
 AC_ARG_ENABLE([coverage],

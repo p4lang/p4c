@@ -1,5 +1,4 @@
-#!/usr/bin/env python2
-
+#!/usr/bin/env python
 # Copyright 2013-present Barefoot Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,7 +23,7 @@ import google.protobuf.text_format
 import signal
 import sys
 import threading
-import Queue
+import queue
 
 parser = argparse.ArgumentParser(description='Mininet demo')
 parser.add_argument('--grpc-addr', help='P4Runtime gRPC server address',
@@ -36,26 +35,26 @@ def main():
     channel = grpc.insecure_channel(args.grpc_addr)
     stub = gnmi_pb2.gNMIStub(channel)
 
-    stream_out_q = Queue.Queue()
-    stream_in_q = Queue.Queue()
+    stream_out_q = queue.Queue()
+    stream_in_q = queue.Queue()
 
     def req_iterator():
         while True:
             req = stream_out_q.get()
             if req is None:
                 break
-            print "***************************"
-            print "REQUEST"
-            print req
-            print "***************************"
+            print("***************************")
+            print("REQUEST")
+            print(req)
+            print("***************************")
             yield req
 
     def stream_recv(stream):
         for response in stream:
-            print "***************************"
-            print "RESPONSE"
-            print response
-            print "***************************"
+            print("***************************")
+            print("RESPONSE")
+            print(response)
+            print("***************************")
             stream_in_q.put(response)
 
     stream = stub.Subscribe(req_iterator())

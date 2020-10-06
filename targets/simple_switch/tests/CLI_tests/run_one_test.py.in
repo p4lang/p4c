@@ -1,5 +1,4 @@
-#!/usr/bin/env python2
-
+#!/usr/bin/env python
 # Copyright 2013-present Barefoot Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,6 +22,8 @@ import random
 import re
 
 # Class written by Mihai Budiu, for Barefoot Networks, Inc.
+
+
 class ConcurrentInteger(object):
     # Generates exclusive integers in a range 0-max
     # in a way which is safe across multiple processes.
@@ -33,10 +34,13 @@ class ConcurrentInteger(object):
     def __init__(self, folder, max):
         self.folder = folder
         self.max = max
+
     def lockName(self, value):
         return "lock_" + str(value)
+
     def release(self, value):
         os.rmdir(self.lockName(value))
+
     def generate(self):
         # try 10 times
         for i in range(0, 10):
@@ -50,6 +54,7 @@ class ConcurrentInteger(object):
                 time.sleep(1)
                 continue
         return None
+
 
 def main():
     if len(sys.argv) < 4:
@@ -107,7 +112,7 @@ def main():
         if "PYTHONPATH" in sub_env:
             pythonpath = sub_env["PYTHONPATH"] + ":"
         sub_env["PYTHONPATH"] = pythonpath + \
-                                "@abs_top_builddir@/thrift_src/gen-py/"
+            "@abs_top_builddir@/thrift_src/gen-py/"
         p = subprocess.Popen(cmd, stdin=f, stdout=subprocess.PIPE, env=sub_env)
         out, _ = p.communicate()
         rc = p.returncode
@@ -117,6 +122,10 @@ def main():
             sys.exit(3)
 
     assert(out)
+
+    if sys.version_info >= (3, 0):
+        # force string conversion for Python2 and Python3 compatibility
+        out = out.decode()
 
     def parse_data(s, pattern):
         m = re.findall("{}(.*?)(?={})".format(pattern, pattern), s,
@@ -140,13 +149,14 @@ def main():
             cleanup()
             sys.exit(0)
         else:
-            print "Expected"
-            print "\n".join(expected_parse)
-            print "But got"
-            print "\n".join(out_parsed)
+            print("Expected")
+            print("\n".join(expected_parse))
+            print("But got")
+            print("\n".join(out_parsed))
 
     cleanup()
     sys.exit(4)
+
 
 if __name__ == '__main__':
     main()

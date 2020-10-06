@@ -29,4 +29,11 @@ run_cpplint $ROOT_DIR/pdfixed/include pdfixed/include
 
 run_cpplint $ROOT_DIR/PI PI
 
+echo "********************************"
+if [ $return_status -eq 0 ]; then
+    echo "STYLE CHECK SUCCESS"
+else
+    echo "STYLE CHECK FAILURE"
+fi
+
 exit $return_status

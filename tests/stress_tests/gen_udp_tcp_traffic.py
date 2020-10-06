@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 
 # Copyright 2013-present Barefoot Networks, Inc.
 #
@@ -45,7 +45,7 @@ args = parser.parse_args()
 
 def get_rand_mac():
     res = []
-    for i in xrange(6):
+    for i in range(6):
         b = random.randint(0, 255)
         res.append(hex(b)[2:])
     return ":".join(res)
@@ -53,7 +53,7 @@ def get_rand_mac():
 def main():
     random.seed(args.seed)
     patterns = []
-    for i in xrange(args.patterns):
+    for i in range(args.patterns):
         transport = random.choice([UDP, TCP])
         dst, src = get_rand_mac(), get_rand_mac()
         # cannot use fuzz() for Ethernet, or scapy tries to resolve the MAC
@@ -63,7 +63,7 @@ def main():
         p = p / payload
         patterns.append(p)
     packets = []
-    for i in xrange(args.packets):
+    for i in range(args.packets):
         p = random.choice(patterns)
         packets.append(p)
     with open(args.out, 'w') as f:

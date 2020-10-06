@@ -1,5 +1,4 @@
-#!/usr/bin/env python2
-
+#!/usr/bin/env python
 # Copyright 2013-present Barefoot Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,7 +52,7 @@ class SingleSwitchTopo(Topo):
                                 thrift_port = thrift_port,
                                 pcap_dump = pcap_dump)
 
-        for h in xrange(n):
+        for h in range(n):
             host = self.addHost('h%d' % (h + 1),
                                 ip = "10.0.%d.10/24" % h,
                                 mac = '00:04:00:00:00:%02x' %h)
@@ -75,11 +74,11 @@ def main():
     net.start()
 
 
-    sw_mac = ["00:aa:bb:00:00:%02x" % n for n in xrange(num_hosts)]
+    sw_mac = ["00:aa:bb:00:00:%02x" % n for n in range(num_hosts)]
 
-    sw_addr = ["10.0.%d.1" % n for n in xrange(num_hosts)]
+    sw_addr = ["10.0.%d.1" % n for n in range(num_hosts)]
 
-    for n in xrange(num_hosts):
+    for n in range(num_hosts):
         h = net.get('h%d' % (n + 1))
         if mode == "l2":
             h.setDefaultRoute("dev eth0")
@@ -87,13 +86,13 @@ def main():
             h.setARP(sw_addr[n], sw_mac[n])
             h.setDefaultRoute("dev eth0 via %s" % sw_addr[n])
 
-    for n in xrange(num_hosts):
+    for n in range(num_hosts):
         h = net.get('h%d' % (n + 1))
         h.describe()
 
     sleep(1)
 
-    print "Ready !"
+    print("Ready !")
 
     CLI( net )
     net.stop()

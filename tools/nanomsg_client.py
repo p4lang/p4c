@@ -1,5 +1,4 @@
-#!/usr/bin/env python2
-
+#!/usr/bin/env python
 # Copyright 2013-present Barefoot Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,12 +18,15 @@
 # Antonin Bas (antonin@barefootnetworks.com)
 #
 #
+# enable prints without line break
+from __future__ import print_function
 
 import nnpy
 import struct
 import sys
 import json
 import argparse
+
 
 parser = argparse.ArgumentParser(description='BM nanomsg event logger client')
 parser.add_argument('--socket', help='Nanomsg socket to which to subscribe',
@@ -37,6 +39,7 @@ parser.add_argument('--thrift-ip', help='Thrift IP address for table updates. If
                     type=str, action="store", default='localhost')
 
 args = parser.parse_args()
+
 
 class NameMap:
     def __init__(self):
@@ -65,12 +68,15 @@ class NameMap:
                 self.names[("condition", obj["id"])] = obj["name"]
 
     def get_name(self, type_, id_):
-        return self.names.get( (type_, id_), None )
+        return self.names.get((type_, id_), None)
+
 
 name_map = NameMap()
 
+
 def name_lookup(type_, id_):
     return name_map.get_name(type_, id_)
+
 
 class MSG_TYPES:
     (PACKET_IN, PACKET_OUT,
@@ -79,7 +85,7 @@ class MSG_TYPES:
      CHECKSUM_UPDATE,
      PIPELINE_START, PIPELINE_DONE,
      CONDITION_EVAL, TABLE_HIT, TABLE_MISS,
-     ACTION_EXECUTE) = range(15)
+     ACTION_EXECUTE) = list(range(15))
     CONFIG_CHANGE = 999
 
     @staticmethod
@@ -126,6 +132,7 @@ class MSG_TYPES:
         }
         return strs[type_]
 
+
 class Msg(object):
     def __init__(self, msg):
         self.msg = msg
@@ -148,6 +155,7 @@ class Msg(object):
             (self.type_str, self.switch_id, self.cxt_id,
              self.sig, self.id_, self.copy_id)
 
+
 class PacketIn(Msg):
     def __init__(self, msg):
         super(PacketIn, self).__init__(msg)
@@ -161,6 +169,7 @@ class PacketIn(Msg):
     def __str__(self):
         return super(PacketIn, self).__str__() +\
             ", port_in: %d" % self.port_in
+
 
 class PacketOut(Msg):
     def __init__(self, msg):
@@ -176,6 +185,7 @@ class PacketOut(Msg):
         return super(PacketOut, self).__str__() +\
             ", port_out: %d" % self.port_out
 
+
 class ParserStart(Msg):
     def __init__(self, msg):
         super(ParserStart, self).__init__(msg)
@@ -188,10 +198,12 @@ class ParserStart(Msg):
 
     def __str__(self):
         s = super(ParserStart, self).__str__()
-        s += ", parser_id: " +  str(self.parser_id)
+        s += ", parser_id: " + str(self.parser_id)
         name = name_lookup("parser", self.parser_id)
-        if name: s += " (" + name + ")"
+        if name:
+            s += " (" + name + ")"
         return s
+
 
 class ParserDone(Msg):
     def __init__(self, msg):
@@ -205,10 +217,12 @@ class ParserDone(Msg):
 
     def __str__(self):
         s = super(ParserDone, self).__str__()
-        s += ", parser_id: " +  str(self.parser_id)
+        s += ", parser_id: " + str(self.parser_id)
         name = name_lookup("parser", self.parser_id)
-        if name: s += " (" + name + ")"
+        if name:
+            s += " (" + name + ")"
         return s
+
 
 class ParserExtract(Msg):
     def __init__(self, msg):
@@ -222,10 +236,12 @@ class ParserExtract(Msg):
 
     def __str__(self):
         s = super(ParserExtract, self).__str__()
-        s += ", header_id: " +  str(self.header_id)
+        s += ", header_id: " + str(self.header_id)
         name = name_lookup("header", self.header_id)
-        if name: s += " (" + name + ")"
+        if name:
+            s += " (" + name + ")"
         return s
+
 
 class DeparserStart(Msg):
     def __init__(self, msg):
@@ -239,10 +255,12 @@ class DeparserStart(Msg):
 
     def __str__(self):
         s = super(DeparserStart, self).__str__()
-        s += ", deparser_id: " +  str(self.deparser_id)
+        s += ", deparser_id: " + str(self.deparser_id)
         name = name_lookup("deparser", self.deparser_id)
-        if name: s += " (" + name + ")"
+        if name:
+            s += " (" + name + ")"
         return s
+
 
 class DeparserDone(Msg):
     def __init__(self, msg):
@@ -256,10 +274,12 @@ class DeparserDone(Msg):
 
     def __str__(self):
         s = super(DeparserDone, self).__str__()
-        s += ", deparser_id: " +  str(self.deparser_id)
+        s += ", deparser_id: " + str(self.deparser_id)
         name = name_lookup("deparser", self.deparser_id)
-        if name: s += " (" + name + ")"
+        if name:
+            s += " (" + name + ")"
         return s
+
 
 class DeparserEmit(Msg):
     def __init__(self, msg):
@@ -269,14 +289,16 @@ class DeparserEmit(Msg):
         self.struct_ = struct.Struct("i")
 
     def extract(self):
-         self.header_id, = super(DeparserEmit, self).extract()
+        self.header_id, = super(DeparserEmit, self).extract()
 
     def __str__(self):
         s = super(DeparserEmit, self).__str__()
-        s += ", header_id: " +  str(self.header_id)
+        s += ", header_id: " + str(self.header_id)
         name = name_lookup("header", self.header_id)
-        if name: s += " (" + name + ")"
+        if name:
+            s += " (" + name + ")"
         return s
+
 
 class ChecksumUpdate(Msg):
     def __init__(self, msg):
@@ -286,14 +308,16 @@ class ChecksumUpdate(Msg):
         self.struct_ = struct.Struct("i")
 
     def extract(self):
-         self.cksum_id, = super(ChecksumUpdate, self).extract()
+        self.cksum_id, = super(ChecksumUpdate, self).extract()
 
     def __str__(self):
         s = super(ChecksumUpdate, self).__str__()
-        s += ", cksum_id: " +  str(self.cksum_id)
+        s += ", cksum_id: " + str(self.cksum_id)
         name = name_lookup("checksum", self.cksum_id)
-        if name: s += " (" + name + ")"
+        if name:
+            s += " (" + name + ")"
         return s
+
 
 class PipelineStart(Msg):
     def __init__(self, msg):
@@ -307,10 +331,12 @@ class PipelineStart(Msg):
 
     def __str__(self):
         s = super(PipelineStart, self).__str__()
-        s += ", pipeline_id: " +  str(self.pipeline_id)
+        s += ", pipeline_id: " + str(self.pipeline_id)
         name = name_lookup("pipeline", self.pipeline_id)
-        if name: s += " (" + name + ")"
+        if name:
+            s += " (" + name + ")"
         return s
+
 
 class PipelineDone(Msg):
     def __init__(self, msg):
@@ -324,10 +350,12 @@ class PipelineDone(Msg):
 
     def __str__(self):
         s = super(PipelineDone, self).__str__()
-        s += ", pipeline_id: " +  str(self.pipeline_id)
+        s += ", pipeline_id: " + str(self.pipeline_id)
         name = name_lookup("pipeline", self.pipeline_id)
-        if name: s += " (" + name + ")"
+        if name:
+            s += " (" + name + ")"
         return s
+
 
 class ConditionEval(Msg):
     def __init__(self, msg):
@@ -342,9 +370,10 @@ class ConditionEval(Msg):
 
     def __str__(self):
         s = super(ConditionEval, self).__str__()
-        s += ", condition_id: " +  str(self.condition_id)
+        s += ", condition_id: " + str(self.condition_id)
         name = name_lookup("condition", self.condition_id)
-        if name: s += " (" + name + ")"
+        if name:
+            s += " (" + name + ")"
         s += ", result: " + str(self.result)
         return s
 
@@ -361,11 +390,13 @@ class TableHit(Msg):
 
     def __str__(self):
         s = super(TableHit, self).__str__()
-        s += ", table_id: " +  str(self.table_id)
+        s += ", table_id: " + str(self.table_id)
         name = name_lookup("table", self.table_id)
-        if name: s += " (" + name + ")"
-        s += ", entry_hdl: " +  str(self.entry_hdl)
+        if name:
+            s += " (" + name + ")"
+        s += ", entry_hdl: " + str(self.entry_hdl)
         return s
+
 
 class TableMiss(Msg):
     def __init__(self, msg):
@@ -379,10 +410,12 @@ class TableMiss(Msg):
 
     def __str__(self):
         s = super(TableMiss, self).__str__()
-        s += ", table_id: " +  str(self.table_id)
+        s += ", table_id: " + str(self.table_id)
         name = name_lookup("table", self.table_id)
-        if name: s += " (" + name + ")"
+        if name:
+            s += " (" + name + ")"
         return s
+
 
 class ActionExecute(Msg):
     def __init__(self, msg):
@@ -396,10 +429,12 @@ class ActionExecute(Msg):
 
     def __str__(self):
         s = super(ActionExecute, self).__str__()
-        s += ", action_id: " +  str(self.action_id)
+        s += ", action_id: " + str(self.action_id)
         name = name_lookup("action", self.action_id)
-        if name: s += " (" + name + ")"
+        if name:
+            s += " (" + name + ")"
         return s
+
 
 class ConfigChange(Msg):
     def __init__(self, msg):
@@ -414,13 +449,15 @@ class ConfigChange(Msg):
     def __str__(self):
         return "type: %s, switch_id: %d" % (self.type_str, self.switch_id)
 
+
 def json_init(client):
     if client is None:
-        print "Unable to request new config from switch because Thrift is unavailable"
+        print("Unable to request new config from switch because Thrift is unavailable")
         sys.exit(0)
     import bmpy_utils as utils
     json_cfg = utils.get_json_config(standard_client=client)
     name_map.load_names(json_cfg)
+
 
 def recv_msgs(socket_addr, client):
     def get_msg_type(msg):
@@ -438,23 +475,24 @@ def recv_msgs(socket_addr, client):
         try:
             p = MSG_TYPES.get_msg_class(msg_type)(msg)
         except:
-            print "Unknown msg type", msg_type
+            print("Unknown msg type", msg_type)
             continue
         p.extract()
-        print p
+        print(p)
 
         if p.type_ == MSG_TYPES.CONFIG_CHANGE:
-            print "The JSON config has changed"
-            print "Requesting new config from switch,",
-            print "which may cause some log messages to be dropped"
+            print("The JSON config has changed")
+            print("Requesting new config from switch,", end=' ')
+            print("which may cause some log messages to be dropped")
             json_init(client)
+
 
 def main():
     deprecated_args = []
     for a in deprecated_args:
         if getattr(args, a) is not None:
-            print "Command line option '--{}' is deprecated".format(a),
-            print "and will be ignored"
+            print("Command line option '--{}' is deprecated".format(a), end=' ')
+            print("and will be ignored")
 
     client = None
     socket_addr = None
@@ -467,19 +505,21 @@ def main():
         try:
             import bmpy_utils as utils
         except:
-            print "When '--json' or '--socket' is not provided, the client needs bmpy_utils"
-            print "bmpy_utils is not available when building bmv2 without Thrift support"
+            print(
+                "When '--json' or '--socket' is not provided, the client needs bmpy_utils")
+            print("bmpy_utils is not available when building bmv2 without Thrift support")
             sys.exit(1)
-        client = utils.thrift_connect_standard(args.thrift_ip, args.thrift_port)
+        client = utils.thrift_connect_standard(
+            args.thrift_ip, args.thrift_port)
         info = client.bm_mgmt_get_info()
         if info.elogger_socket is None:
-            print "The event logger is not enabled on the switch,",
-            print "run with '--nanolog <addr>'"
+            print("The event logger is not enabled on the switch,", end=' ')
+            print("run with '--nanolog <addr>'")
             sys.exit(1)
         if args.socket is None:
             socket_addr = info.elogger_socket
-            print "'--socket' not provided, using", socket_addr,
-            print "(obtained from switch)"
+            print("'--socket' not provided, using", socket_addr, end=' ')
+            print("(obtained from switch)")
 
         if args.json is None:
             json_cfg = utils.get_json_config(standard_client=client)
@@ -490,6 +530,7 @@ def main():
     name_map.load_names(json_cfg)
 
     recv_msgs(socket_addr, client)
+
 
 if __name__ == "__main__":
     main()

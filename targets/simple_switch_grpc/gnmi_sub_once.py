@@ -1,5 +1,4 @@
-#!/usr/bin/env python2
-
+#!/usr/bin/env python
 # Copyright 2013-present Barefoot Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -43,18 +42,18 @@ def main():
             for name in ["interfaces", "interface", "..."]:
                 e = path.elem.add()
                 e.name = name
-            print "***************************"
-            print "REQUEST"
-            print req
-            print "***************************"
+            print("***************************")
+            print("REQUEST")
+            print(req)
+            print("***************************")
             yield req
             return
 
     for response in stub.Subscribe(req_iterator()):
-        print "***************************"
-        print "RESPONSE"
-        print response
-        print "***************************"
+        print("***************************")
+        print("RESPONSE")
+        print(response)
+        print("***************************")
 
 if __name__ == '__main__':
     main()

@@ -40,14 +40,14 @@ class P4Host(Host):
         return r
 
     def describe(self):
-        print "**********"
-        print self.name
-        print "default interface: %s\t%s\t%s" %(
+        print("**********")
+        print(self.name)
+        print("default interface: %s\t%s\t%s" %(
             self.defaultIntf().name,
             self.defaultIntf().IP(),
             self.defaultIntf().MAC()
-        )
-        print "**********"
+        ))
+        print("**********")
 
 class P4Switch(Switch):
     """P4 virtual switch"""

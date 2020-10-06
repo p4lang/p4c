@@ -1,5 +1,5 @@
 ????
-my_indirect_counter[0]=  BmCounterValue(packets=0, bytes=0)
+my_indirect_counter[0]= (0 bytes, 0 packets)
 ????
 Invalid counter operation (INVALID_INDEX)
 ????

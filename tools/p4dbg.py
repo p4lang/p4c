@@ -1,5 +1,4 @@
-#!/usr/bin/env python2
-
+#!/usr/bin/env python
 # Copyright 2013-present Barefoot Networks, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,6 +19,16 @@
 #
 #
 
+
+# enable prints without line break
+from __future__ import print_function
+# bind raw_input to input for Python2<>3 compatibility
+try:
+    input = raw_input
+except NameError:
+    pass
+
+
 import nnpy
 import struct
 import sys
@@ -28,6 +37,7 @@ import argparse
 import cmd
 from collections import defaultdict
 from functools import wraps
+
 
 try:
     import runtime_CLI
@@ -123,8 +133,8 @@ def get_all_fields():
     return field_map.get_all_fields()
 
 def enum(type_name, *sequential, **named):
-    enums = dict(zip(sequential, range(len(sequential))), **named)
-    reverse = dict((value, key) for key, value in enums.iteritems())
+    enums = dict(list(zip(sequential, list(range(len(sequential))))), **named)
+    reverse = dict((value, key) for key, value in enums.items())
 
     @staticmethod
     def to_str(x):
@@ -336,7 +346,7 @@ def make_init_function(P, t, fmt):
         if not fmt:
             return
         for k, v in kwargs.items():
-            if k not in zip(*fmt)[0]:
+            if k not in list(zip(*fmt))[0]:
                 continue
             setattr(self, k, v)
 
@@ -538,9 +548,9 @@ def handle_bad_input(f):
         try:
             return f(*args, **kwargs)
         except UIn_Error as e:
-            print "Error:", e
+            print("Error:", e)
         except UIn_Warning as e:
-            print "Error:", e
+            print("Error:", e)
     return handle
 
 def prompt_yes_no(question, yes_default=True):
@@ -550,12 +560,12 @@ def prompt_yes_no(question, yes_default=True):
     else:
         prompt = "[y/N]"
     while True:
-        print question, prompt,
-        choice = raw_input().lower()
+        print(question, prompt, end=' ')
+        choice = input().lower()
         if choice in valid:
             return valid[choice]
         else:
-            print "Please respond with 'yes' or 'no' (or 'y' or 'n')."
+            print("Please respond with 'yes' or 'no' (or 'y' or 'n').")
 
 class DebuggerAPI(cmd.Cmd):
     prompt = 'P4DBG: '
@@ -569,7 +579,7 @@ class DebuggerAPI(cmd.Cmd):
             self.sok.connect(self.addr)
             self.sok.setsockopt(nnpy.SOL_SOCKET, nnpy.RCVTIMEO, 500)
         except:
-            print "Impossible to connect to provided socket (bad format?)"
+            print("Impossible to connect to provided socket (bad format?)")
             sys.exit(1)
         self.req_id = 0
         self.switch_id = 0
@@ -612,13 +622,13 @@ class DebuggerAPI(cmd.Cmd):
     def init_runtime_CLI(self):
         runtime_CLI.load_json_str(self.json_cfg)
         self.runtime_CLI = runtime_CLI.RuntimeAPI(
-            runtime_CLI.PreType.None, self.standard_client, mc_client=None)
+            runtime_CLI.PreType.none, self.standard_client, mc_client=None)
 
     def attach(self):
-        print "Connecting to the switch..."
+        print("Connecting to the switch...")
         self.send_attach()
         self.attached = True
-        print "Connection established"
+        print("Connection established")
 
     def send_attach(self):
         req = Msg_Attach(switch_id = 0, req_id = self.get_req_id())
@@ -626,13 +636,13 @@ class DebuggerAPI(cmd.Cmd):
         try:
             msg = self.wait_for_msg()
         except AssertionError:
-            print "Unable to attach to the switch,",
-            print "maybe you need to run p4dbg as root?"
+            print("Unable to attach to the switch,", end=' ')
+            print("maybe you need to run p4dbg as root?")
             sys.exit(1)
         self.check_msg_CLS(msg, Msg_Status)
 
     def do_EOF(self, line):
-        print "Detaching from switch"
+        print("Detaching from switch")
         self.say_bye()
         return True
 
@@ -672,15 +682,15 @@ class DebuggerAPI(cmd.Cmd):
 
     def handle_config_change(self):
         self.reset()
-        print "We have been notified that the JSON config has changed on the",
-        print "switch. The debugger state has therefore been reset."
+        print("We have been notified that the JSON config has changed on the", end=' ')
+        print("switch. The debugger state has therefore been reset.")
 
         if not self.standard_client:
-            print "Unable to request new config from switch because Thrift is unavailable"
+            print("Unable to request new config from switch because Thrift is unavailable")
             sys.exit(0)
 
-        print "You can request the new config and keep debugging,",
-        print "or we will exit."
+        print("You can request the new config and keep debugging,", end=' ')
+        print("or we will exit.")
 
         v = prompt_yes_no("Do you want to request the new config?", True)
         if v:
@@ -699,8 +709,8 @@ class DebuggerAPI(cmd.Cmd):
                     self.get_me_a_prompt = True
                 except AssertionError:
                     # happens when there is a connection timeout
-                    print "Connection to the switch lost,",
-                    print "are you sure it is still running?"
+                    print("Connection to the switch lost,", end=' ')
+                    print("are you sure it is still running?")
                     return
             if msg.type == MsgType.KEEP_ALIVE:
                 if self.get_me_a_prompt == True:
@@ -723,18 +733,18 @@ class DebuggerAPI(cmd.Cmd):
                 break
         self.current_packet_id = msg.packet_id
         self.current_copy_id = msg.copy_id
-        print "New event for packet", self.packet_id_str(msg.packet_id, msg.copy_id)
+        print("New event for packet", self.packet_id_str(msg.packet_id, msg.copy_id))
         return msg
 
     def special_update(self, id_, v):
         if id_ == FIELD_ID_CTR:
             type_name, obj_name = resolve_ctr(v)
             if 0x80 & (v >> 24):
-                print "Exiting", type_name, "'%s'" % obj_name
+                print("Exiting", type_name, "'%s'" % obj_name)
             else:
-                print "Entering", type_name, "'%s'" % obj_name
+                print("Entering", type_name, "'%s'" % obj_name)
         elif id_ == FIELD_ID_COND:
-            print "Condition evaluated to", bool(v)
+            print("Condition evaluated to", bool(v))
 
     @handle_bad_input
     def do_continue(self, line):
@@ -748,10 +758,10 @@ class DebuggerAPI(cmd.Cmd):
                 self.special_update(msg.fid, msg.bytes_int)
                 return
             assert(msg.fid in self.wps)
-            print "Watchpoint hit for field", get_name_from_field_id(msg.fid)
-            print "New value is", msg.bytes_str, "(%d)" % msg.bytes_int
+            print("Watchpoint hit for field", get_name_from_field_id(msg.fid))
+            print("New value is", msg.bytes_str, "(%d)" % msg.bytes_int)
         elif msg.type == MsgType.PACKET_IN:
-            print "Packet in!"
+            print("Packet in!")
         # elif msg.type == MsgType.PACKET_OUT:
         #     pass
         else:
@@ -768,10 +778,10 @@ class DebuggerAPI(cmd.Cmd):
             if msg.fid in {FIELD_ID_CTR, FIELD_ID_COND, FIELD_ID_ACTION}:
                 self.special_update(msg.fid, msg.bytes_int)
                 return
-            print "Update for field", get_name_from_field_id(msg.fid)
-            print "New value is", msg.bytes_str, "(%d)" % msg.bytes_int
+            print("Update for field", get_name_from_field_id(msg.fid))
+            print("New value is", msg.bytes_str, "(%d)" % msg.bytes_int)
         elif msg.type == MsgType.PACKET_IN:
-            print "Packet in!"
+            print("Packet in!")
         # elif msg.type == MsgType.PACKET_OUT:
         #     pass
         else:
@@ -847,7 +857,7 @@ class DebuggerAPI(cmd.Cmd):
     def do_show_wps(self, line):
         "Shows all the watchpoints set: show_wps"
         for f_name in map(get_name_from_field_id, self.wps):
-            print f_name
+            print(f_name)
 
     @handle_bad_input
     def do_break(self, line):
@@ -906,7 +916,7 @@ class DebuggerAPI(cmd.Cmd):
         args_cnt = len(args)
         if not self.bps:
             return []
-        objs = map(resolve_ctr, self.bps)
+        objs = list(map(resolve_ctr, self.bps))
         if (args_cnt == 1 and not text) or\
            (args_cnt == 2 and text):
             return [t for t in zip(*objs)[0] if t.startswith(text)]
@@ -919,7 +929,7 @@ class DebuggerAPI(cmd.Cmd):
     def do_show_bps(self, line):
         "Shows all the breakpoints set: show_bps"
         for t, n in map(resolve_ctr, self.bps):
-            print t, "'%s'" % n
+            print(t, "'%s'" % n)
 
     def get_req_id(self):
         req_id = self.req_id
@@ -947,8 +957,8 @@ class DebuggerAPI(cmd.Cmd):
         if len(args) == 1:
             if self.current_packet_id is None:
                 raise UIn_Error("Cannot use this command because no packets have been observed yet")
-            print "Packet id not specified, assuming current packet (%s)" \
-                % self.current_packet_id_str()
+            print("Packet id not specified, assuming current packet (%s)" \
+                % self.current_packet_id_str())
             packet_id = self.current_packet_id
             copy_id = self.current_copy_id
             field_name = args[0]
@@ -966,16 +976,16 @@ class DebuggerAPI(cmd.Cmd):
         msg = self.wait_for_msg()
         if msg.type == MsgType.STATUS:
             if msg.status == 1:
-                print "Unknown packet id. Maybe it left the switch already"
+                print("Unknown packet id. Maybe it left the switch already")
             elif msg.status == 2:
-                print "We have not received a value for this field,"\
-                    " maybe it is not valid (yet), or the value is 0"
+                print("We have not received a value for this field,"\
+                    " maybe it is not valid (yet), or the value is 0")
                 pass
             else:
                 assert(0)
             return
         self.check_msg_CLS(msg, Msg_FieldValue)
-        print msg.bytes_str, "(%d)" % msg.bytes_int
+        print(msg.bytes_str, "(%d)" % msg.bytes_int)
 
     def complete_print(self, text, line, start_index, end_index):
         args = line.split()
@@ -991,8 +1001,8 @@ class DebuggerAPI(cmd.Cmd):
         if len(args) == 0:
             if self.current_packet_id is None:
                 raise UIn_Error("Cannot use this command because no packets have been observed yet")
-            print "Packet id not specified, assuming current packet (%s)" \
-                % self.current_packet_id_str()
+            print("Packet id not specified, assuming current packet (%s)" \
+                % self.current_packet_id_str())
             packet_id = self.current_packet_id
             copy_id = self.current_copy_id
         else:
@@ -1006,7 +1016,7 @@ class DebuggerAPI(cmd.Cmd):
         msg = self.wait_for_msg()
         if msg.type == MsgType.STATUS:
             if msg.status == 1:
-                print "Unknown packet id. Maybe it left the switch already"
+                print("Unknown packet id. Maybe it left the switch already")
             else:
                 assert(0)
             return
@@ -1016,7 +1026,7 @@ class DebuggerAPI(cmd.Cmd):
         for ctr in ctrs:
             type_name, obj_name = resolve_ctr(ctr)
             bt += ["%s '%s'" % (type_name, obj_name)]
-        print " -> ".join(bt)
+        print(" -> ".join(bt))
 
     @handle_bad_input
     def do_break_packet_in(self, line):
@@ -1032,7 +1042,7 @@ class DebuggerAPI(cmd.Cmd):
     def do_remove_packet_in(self, line):
         "Remove breakpoint set by break_packet_in"
         if not self.break_packet_in:
-            print "Packet in breakpoint was not previously set"
+            print("Packet in breakpoint was not previously set")
             return
         req = Msg_RemovePacketIn(switch_id = 0, req_id = self.get_req_id())
         self.sok.send(req.generate())
@@ -1055,7 +1065,7 @@ class DebuggerAPI(cmd.Cmd):
     def do_resume_packet_in(self, line):
         "Start accepting packets into the switch again (undoes stop_packet_in)"
         if not self.stop_packet_in:
-            print "stop_packet_in was not being enforced"
+            print("stop_packet_in was not being enforced")
             return
         req = Msg_ResumePacketIn(switch_id = 0, req_id = self.get_req_id())
         self.sok.send(req.generate())
@@ -1163,8 +1173,8 @@ def main():
     deprecated_args = []
     for a in deprecated_args:
         if getattr(args, a) is not None:
-            print "Command line option '--{}' is deprecated".format(a),
-            print "and will be ignored"
+            print("Command line option '--{}' is deprecated".format(a), end=' ')
+            print("and will be ignored")
 
     client = None
     socket_addr = None
@@ -1176,18 +1186,18 @@ def main():
         try:
             import bmpy_utils as utils
         except:
-            print "When '--json' or '--socket' is not provided, the debugger needs bmpy_utils"
-            print "bmpy_utils is not available when building bmv2 without Thrift support"
+            print("When '--json' or '--socket' is not provided, the debugger needs bmpy_utils")
+            print("bmpy_utils is not available when building bmv2 without Thrift support")
             sys.exit(1)
         client = utils.thrift_connect_standard(args.thrift_ip, args.thrift_port)
         info = client.bm_mgmt_get_info()
         if info.debugger_socket is None:
-            print "The debugger is not enabled on the switch"
+            print("The debugger is not enabled on the switch")
             sys.exit(1)
         if args.socket is None:
             socket_addr = info.debugger_socket
-            print "'--socket' not provided, using", socket_addr,
-            print "(obtained from switch)"
+            print("'--socket' not provided, using", socket_addr, end=' ')
+            print("(obtained from switch)")
 
     json_cfg = None
     if args.json is not None:
@@ -1202,8 +1212,8 @@ def main():
         if c.attached:
             c.say_bye()
     except Exception as e:
-        print "Unknow error, detaching and exiting"
-        print e
+        print("Unknow error, detaching and exiting")
+        print(e)
         if c.attached:
             c.say_bye()
 

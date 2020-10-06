@@ -21,7 +21,7 @@
 #
 
 import sys
-import md5
+import hashlib
 
 from thrift import Thrift
 from thrift.transport import TSocket
@@ -29,9 +29,10 @@ from thrift.transport import TTransport
 from thrift.protocol import TBinaryProtocol
 from thrift.protocol import TMultiplexedProtocol
 
+
 def check_JSON_md5(client, json_src, out=sys.stdout):
     with open(json_src, 'r') as f:
-        m = md5.new()
+        m = hashlib.md5()
         for L in f:
             m.update(L)
         md5sum = m.digest()
@@ -56,6 +57,7 @@ def check_JSON_md5(client, json_src, out=sys.stdout):
         my_print("{:<15}: {}\n".format("CLI input md5", md5sum_str))
         my_print("**********\n")
 
+
 def get_json_config(standard_client=None, json_path=None, out=sys.stdout):
     def my_print(s):
         out.write(s)
@@ -77,6 +79,8 @@ def get_json_config(standard_client=None, json_path=None, out=sys.stdout):
         return json_cfg
 
 # services is [(service_name, client_class), ...]
+
+
 def thrift_connect(thrift_ip, thrift_port, services, out=sys.stdout):
     def my_print(s):
         out.write(s)
@@ -94,7 +98,8 @@ def thrift_connect(thrift_ip, thrift_port, services, out=sys.stdout):
         if service_name is None:
             clients.append(None)
             continue
-        protocol = TMultiplexedProtocol.TMultiplexedProtocol(bprotocol, service_name)
+        protocol = TMultiplexedProtocol.TMultiplexedProtocol(
+            bprotocol, service_name)
         client = service_cls(protocol)
         clients.append(client)
 
@@ -109,6 +114,7 @@ def thrift_connect(thrift_ip, thrift_port, services, out=sys.stdout):
         sys.exit(1)
 
     return clients
+
 
 def thrift_connect_standard(thrift_ip, thrift_port, out=sys.stdout):
     from bm_runtime.standard import Standard
