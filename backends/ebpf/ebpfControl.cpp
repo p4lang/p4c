@@ -406,7 +406,7 @@ bool ControlBodyTranslator::preorder(const IR::IfStatement* statement) {
         builder->blockStart();
     visit(statement->ifTrue);
     if (!statement->ifTrue->is<IR::BlockStatement>())
-        builder->blockEnd(true)
+        builder->blockEnd(true);
     if (statement->ifFalse != nullptr) {
         builder->newline();
         builder->emitIndent();
