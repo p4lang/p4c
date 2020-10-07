@@ -402,26 +402,20 @@ bool ControlBodyTranslator::preorder(const IR::IfStatement* statement) {
     else
         visit(statement->condition);
     builder->append(") ");
-    if (!statement->ifTrue->is<IR::BlockStatement>()) {
-        builder->increaseIndent();
-        builder->newline();
-        builder->emitIndent();
-    }
+    if (!statement->ifTrue->is<IR::BlockStatement>())
+        builder->blockStart();
     visit(statement->ifTrue);
     if (!statement->ifTrue->is<IR::BlockStatement>())
-        builder->decreaseIndent();
+        builder->blockEnd(true)
     if (statement->ifFalse != nullptr) {
         builder->newline();
         builder->emitIndent();
         builder->append("else ");
-        if (!statement->ifFalse->is<IR::BlockStatement>()) {
-            builder->increaseIndent();
-            builder->newline();
-            builder->emitIndent();
-        }
+        if (!statement->ifFalse->is<IR::BlockStatement>())
+            builder->blockStart();
         visit(statement->ifFalse);
         if (!statement->ifFalse->is<IR::BlockStatement>())
-            builder->decreaseIndent();
+            builder->blockEnd(true);
     }
     return false;
 }
