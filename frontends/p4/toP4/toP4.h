@@ -34,7 +34,6 @@ class ToP4 : public Inspector {
     bool withinArgument;  /// if true we are within a method call argument
     bool noIncludes = false;  /// If true do not generate #include statements.
                               /// Used for debugging.
-    bool useCase = false;     /// 'true' if we have to write 'case' in a switch
 
     struct VecPrint {
         cstring separator;

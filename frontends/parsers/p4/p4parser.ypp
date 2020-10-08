@@ -213,7 +213,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %token<Token>      MASK "&&&"
 %token<Token>      RANGE ".."
 %token<Token>      TRUE FALSE THIS
-%token<Token>      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CASE CONST CONTROL DEFAULT
+%token<Token>      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DEFAULT
                    ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
                    INT KEY SELECT MATCH_KIND TYPE OUT PACKAGE PARSER PRAGMA RETURN STATE
                    STRING STRUCT SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
@@ -452,7 +452,6 @@ nonTypeName
     | STATE       { $$ = new IR::ID(@1, "state"); }
     | ENTRIES     { $$ = new IR::ID(@1, "entries"); }
     | TYPE        { $$ = new IR::ID(@1, "type"); }
-    | CASE        { $$ = new IR::ID(@1, "case"); }
     ;
 
 name
