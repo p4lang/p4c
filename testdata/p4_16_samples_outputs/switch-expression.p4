@@ -3,14 +3,14 @@
 control c(inout bit<32> b) {
     apply {
         switch (b) {
-            case 16: 
-            case 32: {
+            16: 
+            32: {
                 b = 1;
             }
-            case 64: {
+            64: {
                 b = 2;
             }
-            case 92: 
+            92: 
             default: {
                 b = 3;
             }

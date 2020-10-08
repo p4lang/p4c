@@ -3,14 +3,14 @@
 control c(inout bit<32> b) {
     apply {
         switch (b) {
-            case 32w16: 
-            case 32w32: {
+            32w16: 
+            32w32: {
                 b = 32w1;
             }
-            case 32w64: {
+            32w64: {
                 b = 32w2;
             }
-            case 32w92: 
+            32w92: 
             default: {
                 b = 32w3;
             }
