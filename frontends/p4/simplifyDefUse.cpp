@@ -381,7 +381,7 @@ class FindUninitialized : public Inspector {
         if (!isFinalRead(getContext(), expression))
             return;
         const LocationSet* read = getReads(expression);
-        if (read == nullptr || read->isEmpty())
+        if (read == nullptr || read->isEmpty() || currentDefinitions->empty())
             return;
         auto points = currentDefinitions->getPoints(read);
         if (reportUninitialized && !lhs && points->containsBeforeStart()) {
