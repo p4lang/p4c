@@ -49,13 +49,19 @@ bool CodeGenInspector::preorder(const IR::Declaration_Variable* decl) {
 
 bool CodeGenInspector::preorder(const IR::Operation_Binary* b) {
     widthCheck(b);
-    builder->append("(");
+    int prec = expressionPrecedence;
+    bool useParens = prec > b->getPrecedence();
+    if (useParens)
+        builder->append("(");
     visit(b->left);
     builder->spc();
     builder->append(b->getStringOp());
     builder->spc();
+    expressionPrecedence = b->getPrecedence() + 1;
     visit(b->right);
-    builder->append(")");
+    if (useParens)
+        builder->append(")");
+    expressionPrecedence = prec;
     return false;
 }
 
@@ -67,13 +73,17 @@ bool CodeGenInspector::comparison(const IR::Operation_Relation* b) {
                    EBPFScalarType::generatesScalar(et->to<EBPFScalarType>()->widthInBits()))
                   || et->is<EBPFBoolType>();
     if (scalar) {
-        builder->append("(");
+        int prec = expressionPrecedence;
+        bool useParens = prec > b->getPrecedence();
+        if (useParens)
+            builder->append("(");
         visit(b->left);
         builder->spc();
         builder->append(b->getStringOp());
         builder->spc();
         visit(b->right);
-        builder->append(")");
+        if (useParens)
+            builder->append(")");
     } else {
         if (!et->is<IHasWidth>())
             BUG("%1%: Comparisons for type %2% not yet implemented", type);
@@ -89,54 +99,84 @@ bool CodeGenInspector::comparison(const IR::Operation_Relation* b) {
 
 bool CodeGenInspector::preorder(const IR::Mux* b) {
     widthCheck(b);
-    builder->append("(");
+    int prec = expressionPrecedence;
+    bool useParens = prec >= b->getPrecedence();
+    if (useParens)
+        builder->append("(");
+    expressionPrecedence = b->getPrecedence();
     visit(b->e0);
     builder->append(" ? ");
+    expressionPrecedence = DBPrint::Prec_Low;
     visit(b->e1);
     builder->append(" : ");
+    expressionPrecedence = b->getPrecedence();
     visit(b->e2);
-    builder->append(")");
+    expressionPrecedence = prec;
+    if (useParens)
+        builder->append(")");
     return false;
 }
 
 bool CodeGenInspector::preorder(const IR::Operation_Unary* u) {
     widthCheck(u);
-    builder->append("(");
+    int prec = expressionPrecedence;
+    bool useParens = prec > u->getPrecedence();
+    if (useParens)
+        builder->append("(");
     builder->append(u->getStringOp());
+    expressionPrecedence = u->getPrecedence();
     visit(u->expr);
-    builder->append(")");
+    expressionPrecedence = prec;
+    if (useParens)
+        builder->append(")");
     return false;
 }
 
 bool CodeGenInspector::preorder(const IR::ArrayIndex* a) {
-    builder->append("(");
+    int prec = expressionPrecedence;
+    bool useParens = prec > a->getPrecedence();
+    if (useParens)
+        builder->append("(");
+    expressionPrecedence = a->getPrecedence();
     visit(a->left);
     builder->append("[");
+    expressionPrecedence = DBPrint::Prec_Low;
     visit(a->right);
     builder->append("]");
-    builder->append(")");
+    if (useParens)
+        builder->append(")");
+    expressionPrecedence = prec;
     return false;
 }
 
 bool CodeGenInspector::preorder(const IR::Cast* c) {
     widthCheck(c);
-    builder->append("(");
+    int prec = expressionPrecedence;
+    bool useParens = prec > c->getPrecedence();
+    if (useParens)
+        builder->append("(");
     builder->append("(");
     auto et = EBPFTypeFactory::instance->create(c->destType);
     et->emit(builder);
     builder->append(")");
+    expressionPrecedence = c->getPrecedence();
     visit(c->expr);
-    builder->append(")");
+    if (useParens)
+        builder->append(")");
+    expressionPrecedence = prec;
     return false;
 }
 
 bool CodeGenInspector::preorder(const IR::Member* expression) {
+    int prec = expressionPrecedence;
+    expressionPrecedence = expression->getPrecedence();
     auto ei = P4::EnumInstance::resolve(expression, typeMap);
     if (ei == nullptr) {
         visit(expression->expr);
         builder->append(".");
     }
     builder->append(expression->member);
+    expressionPrecedence = prec;
     return false;
 }
 
@@ -159,12 +199,15 @@ bool CodeGenInspector::preorder(const IR::BoolLiteral* b) {
 
 bool CodeGenInspector::preorder(const IR::ListExpression* expression) {
     bool first = true;
+    int prec = expressionPrecedence;
+    expressionPrecedence = DBPrint::Prec_Low;
     for (auto e : expression->components) {
         if (!first)
             builder->append(", ");
         first = false;
         visit(e);
     }
+    expressionPrecedence = prec;
     return false;
 }
 
@@ -188,12 +231,22 @@ bool CodeGenInspector::preorder(const IR::MethodCallExpression* expression) {
         }
     }
 
+    int prec = expressionPrecedence;
+    bool useParens = (prec > DBPrint::Prec_Postfix) ||
+                      (!expression->typeArguments->empty() &&
+                      prec >= DBPrint::Prec_Cond);
+    // FIXME: we use parenthesis more often than necessary
+    // because the bison parser has a bug which parses
+    // these expressions incorrectly.
+    expressionPrecedence = DBPrint::Prec_Postfix;
     visit(expression->method);
-    builder->append("(");
+    if (useParens)
+        builder->append("(");
     bool first = true;
     for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
         if (!first)
             builder->append(", ");
+        expressionPrecedence = DBPrint::Prec_Low;
         first = false;
 
         if (p->direction == IR::Direction::Out ||
@@ -203,6 +256,7 @@ bool CodeGenInspector::preorder(const IR::MethodCallExpression* expression) {
         visit(arg);
     }
     builder->append(")");
+    expressionPrecedence = prec;
     return false;
 }
 
