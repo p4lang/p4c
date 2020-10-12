@@ -758,7 +758,10 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
     }
     if (auto ts = destType->to<IR::Type_StructLike>()) {
         bool cst = isCompileTimeConstant(sourceExpression);
-        if (initType->is<IR::Type_UnknownStruct>()) {
+        if (initType->is<IR::Type_UnknownStruct>() || initType->is<IR::Type_Struct>()) {
+            // Even if the structure is a struct expression with the right type,
+            // we still need to recurse over its fields; they many not have
+            // the right type.
             auto si = sourceExpression->to<IR::StructExpression>();
             CHECK_NULL(si);
             auto type = new IR::Type_Name(ts->name);
@@ -779,7 +782,8 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
             }
             if (!changes)
                 vec = si->components;
-            sourceExpression = new IR::StructExpression(type, type, vec);
+            if (initType->is<IR::Type_UnknownStruct>() || changes)
+                sourceExpression = new IR::StructExpression(type, type, vec);
         } else if (auto li = sourceExpression->to<IR::ListExpression>()) {
             auto type = new IR::Type_Name(ts->name);
             if (ts->fields.size() != li->components.size()) {
@@ -795,10 +799,8 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
                 vec.push_back(new IR::NamedExpression(fieldI->name, src));
             }
             sourceExpression = new IR::StructExpression(type, type, vec);
-        } else {
-            BUG_CHECK(sourceExpression->is<IR::StructExpression>(),
-                      "%1%: Expected a struct expression", sourceExpression);
         }
+        // else this is some other expression that evaluates to a struct
         setType(sourceExpression, destType);
         if (cst)
             setCompileTimeConstant(sourceExpression);
