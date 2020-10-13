@@ -71,7 +71,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
             toplevel = evaluator->getToplevelBlock(); }),
     };
     auto hook = options.getDebugHook();
-    simplify.addDebugHook(hook);
+    simplify.addDebugHook(hook, true);
     program->apply(simplify);
 
     // map IR node to compile-time allocated resource blocks.
@@ -88,13 +88,14 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         // convert to assembly program
         convertToDpdk,
     };
+    toAsm.addDebugHook(hook, true);
     program->apply(toAsm);
     dpdk_program = convertToDpdk->getDpdkProgram();
     if (!dpdk_program) return;
     PassManager post_code_gen = {
         new DpdkAsmOptimization,
     };
-    
+
     dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
     // additional passes to optimize DPDK assembly
     // PassManager optimizeAsm = { }
@@ -102,6 +103,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
 }
 
 void PsaSwitchBackend::codegen(std::ostream& out) const {
-    dpdk_program->toSexp(out) << std::endl;
+    // dpdk_program->toSexp(out) << std::endl;
+    dpdk_program->toSpec(out) << std::endl;
 }
 }  // namespace DPDK

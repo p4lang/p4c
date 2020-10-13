@@ -1,5 +1,5 @@
 #ifndef BACKENDS_CONVERT_TO_DPDK_ARCH_H_
-#define BACKENDS_CONVERT_TO_DPDK_ARCH_H_ 
+#define BACKENDS_CONVERT_TO_DPDK_ARCH_H_
 #include <ir/ir.h>
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
@@ -43,12 +43,12 @@ using UserMeta = std::set<cstring>;
 class CollectMetadataHeaderInfo;
 
 /* According to the implementation of DPDK backend, for a control block, there
- * are only two parameters: header and metadata. Therefore, first we need to 
- * rewrite the declaration of PSA architecture included in psa.p4 in order to 
- * pass the type checking. In addition, this pass changes the definition of 
- * P4Control and P4Parser(parameter list) in the P4 program provided by the 
- * user. 
- */ 
+ * are only two parameters: header and metadata. Therefore, first we need to
+ * rewrite the declaration of PSA architecture included in psa.p4 in order to
+ * pass the type checking. In addition, this pass changes the definition of
+ * P4Control and P4Parser(parameter list) in the P4 program provided by the
+ * user.
+ */
 class ConvertToDpdkArch : public Transform {
     BlockInfoMapping* block_info;
     P4::ReferenceMap* refMap;
@@ -64,10 +64,10 @@ class ConvertToDpdkArch : public Transform {
 
  public:
     ConvertToDpdkArch(
-        BlockInfoMapping* b, 
-        P4::ReferenceMap* refMap, 
+        BlockInfoMapping* b,
+        P4::ReferenceMap* refMap,
         CollectMetadataHeaderInfo* info) :
-        block_info(b), 
+        block_info(b),
         refMap(refMap),
         info(info) {}
 };
@@ -92,7 +92,7 @@ class ParsePsa : public Inspector {
 };
 
 // This Pass collects infomation about the name of all metadata and header
-// And it collects every field of metadata and renames all fields with a prefix 
+// And it collects every field of metadata and renames all fields with a prefix
 // according to the metadata struct name. Eventually, the reference of a fields
 // will become m.$(struct_name)_$(field_name).
 class CollectMetadataHeaderInfo : public Inspector {
@@ -108,7 +108,7 @@ public:
     IR::IndexedVector<IR::StructField> fields;
 };
 
-// This pass modifies all metadata references and header reference. For 
+// This pass modifies all metadata references and header reference. For
 // metadata, struct_name.field_name -> m.struct_name_field_name. For header
 // headers.header_name.field_name -> h.header_name.field_name
 class ReplaceMetadataHeaderName : public Transform {
@@ -116,7 +116,7 @@ class ReplaceMetadataHeaderName : public Transform {
     P4::ReferenceMap *refMap;
 public:
     ReplaceMetadataHeaderName(
-        P4::ReferenceMap *refMap, 
+        P4::ReferenceMap *refMap,
         CollectMetadataHeaderInfo *info):
         refMap(refMap),
         info(info){}
@@ -126,7 +126,7 @@ public:
 };
 
 // Previously, we have collected the information about how the single metadata
-// struct looks like in CollectMetadataHeaderInfo. This pass finds a suitable 
+// struct looks like in CollectMetadataHeaderInfo. This pass finds a suitable
 // place to inject this struct.
 class InjectJumboStruct : public Transform {
     CollectMetadataHeaderInfo *info;
@@ -139,8 +139,8 @@ public:
 };
 
 // This class is helpful for StatementUnroll and IfStatementUnroll. Since dpdk
-// asm is not able to process complex expression, e.g., a = b + c * d. We need 
-// break it down. Therefore, we need some temporary variables to hold the 
+// asm is not able to process complex expression, e.g., a = b + c * d. We need
+// break it down. Therefore, we need some temporary variables to hold the
 // intermediate values. And this class is helpful to inject the declarations of
 // temporary value into P4Control and P4Parser.
 class DeclarationInjector {
@@ -166,7 +166,7 @@ public:
             }
             else{
                 decls = new IR::IndexedVector<IR::Declaration>;
-                decl_map.emplace(control, decls);            
+                decl_map.emplace(control, decls);
             }
         }
         decls->push_back(decl);
@@ -191,8 +191,8 @@ public:
 
 /* This pass breaks complex expressions down, since dpdk asm cannot describe
  * complex expression. This pass is not complete. MethodCallStatement should be
- * unrolled as well. Note that IfStatement should not be unrolled here, as we 
- * have a separate pass for it, because IfStatement does not want to unroll 
+ * unrolled as well. Note that IfStatement should not be unrolled here, as we
+ * have a separate pass for it, because IfStatement does not want to unroll
  * logical expression(dpdk asm has conditional jmp for these cases)
  */
 class StatementUnroll: public Transform {
@@ -209,11 +209,11 @@ public:
 
 /* This pass helps StatementUnroll to unroll expressions inside statements.
  * For example, if an AssignmentStatement looks like this: a = b + c * d
- * StatementUnroll's AssignmentStatement preorder will call ExpressionUnroll 
+ * StatementUnroll's AssignmentStatement preorder will call ExpressionUnroll
  * twice for BinaryExpression's left(b) and right(c * d). For left, since it is
  * a simple expression, ExpressionUnroll will set root to PathExpression(b) and
  * the decl and stmt is empty. For right, ExpressionUnroll will set root to
- * PathExpression(tmp), decl contains tmp's declaration and stmt contains: 
+ * PathExpression(tmp), decl contains tmp's declaration and stmt contains:
  * tmp = c * d, which will be injected in front of the AssignmentStatement.
  */
 class ExpressionUnroll: public Inspector {
@@ -223,7 +223,7 @@ public:
     IR::IndexedVector<IR::Declaration> decl;
     IR::PathExpression *root;
     // This function is a sanity to check whether the component of a Expression
-    // falls into following classes, if not, it means we haven't implemented a 
+    // falls into following classes, if not, it means we haven't implemented a
     // handle for that class.
     static void sanity(const IR::Expression* e){
         if(not e->is<IR::Operation_Unary>() and
@@ -237,7 +237,9 @@ public:
                 BUG("Untraversed node");
             }
     }
-    ExpressionUnroll(DpdkVariableCollector* collector):collector(collector){}
+    ExpressionUnroll(DpdkVariableCollector* collector):collector(collector) {
+        setName("ExpressionUnroll");
+    }
     bool preorder(const IR::Operation_Unary *a) override;
     bool preorder(const IR::Operation_Binary *a) override;
     bool preorder(const IR::MethodCallExpression *a) override;
@@ -248,7 +250,7 @@ public:
 
 };
 
-// This pass is similiar to StatementUnroll pass, the difference is that this 
+// This pass is similiar to StatementUnroll pass, the difference is that this
 // pass will call LogicalExpressionUnroll to unroll the expression, which treat
 // logical expression differently.
 class IfStatementUnroll: public Transform {
@@ -258,14 +260,17 @@ private:
     P4::ReferenceMap * refMap;
     P4::TypeMap* typeMap;
 public:
-    IfStatementUnroll(DpdkVariableCollector* collector, P4::ReferenceMap *refMap, P4::TypeMap *typeMap):collector(collector), refMap(refMap), typeMap(typeMap){}
+    IfStatementUnroll(DpdkVariableCollector* collector,
+            P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
+        : collector(collector), refMap(refMap), typeMap(typeMap) {
+            setName("IfStatementUnroll"); }
     const IR::Node *postorder(IR::IfStatement *a) override;
     const IR::Node *postorder(IR::P4Control *a) override;
     const IR::Node *postorder(IR::P4Parser *a) override;
 };
 
-/* Assume one logical expression looks like this: a && (b + c > d), this pass 
- * will unroll the expression to {tmp = b + c; if(a && (tmp > d))}. Logical 
+/* Assume one logical expression looks like this: a && (b + c > d), this pass
+ * will unroll the expression to {tmp = b + c; if(a && (tmp > d))}. Logical
  * calculation will be unroll in a dedicated pass.
  */
 class LogicalExpressionUnroll: public Inspector {
@@ -289,8 +294,9 @@ public:
             }
     }
     static bool is_logical(const IR::Operation_Binary* bin){
-        if(bin->is<IR::LAnd>() or 
+        if(bin->is<IR::LAnd>() or
             bin->is<IR::LOr>() or
+            bin->is<IR::Leq>() or
             bin->is<IR::Equ>() or
             bin->is<IR::Neq>() or
             bin->is<IR::Grt>() or
@@ -314,7 +320,7 @@ public:
 };
 
 // According to dpdk spec, Binary Operation will only have two parameters, which
-// looks like: a = a + b. Therefore, this pass transform all AssignStatement 
+// looks like: a = a + b. Therefore, this pass transform all AssignStatement
 // that has Binary_Operation to become two-parameter form.
 class ConvertBinaryOperationTo2Params: public Transform {
     DpdkVariableCollector *collector;
@@ -329,7 +335,7 @@ public:
 class printP4: public Inspector {
 public:
     bool preorder(const IR::P4Program *p) override{std::cout << p << std::endl; return false;}
-    
+
 };
 
 // Since in dpdk asm, there is no local variable declaraion, we need to collect
@@ -341,7 +347,7 @@ class CollectLocalVariableToMetadata: public Transform {
     P4::ReferenceMap *refMap;
 public:
     CollectLocalVariableToMetadata(
-        BlockInfoMapping *toBlockInfo, 
+        BlockInfoMapping *toBlockInfo,
         CollectMetadataHeaderInfo *info,
         P4::ReferenceMap *refMap):
         toBlockInfo(toBlockInfo),
@@ -359,7 +365,7 @@ public:
 // respect this, we need at first make all action parameter lists into separate
 // structs and declare that struct in the P4 program. Then we modify the action
 // parameter list. Eventuall, it will only contain one parameter `t`, which is a
-// struct containing all parameters previously defined. Next, we prepend t. in 
+// struct containing all parameters previously defined. Next, we prepend t. in
 // front of action parameters. Please note that it is possible that the user
 // defines a struct paremeter himself or define multiple struct parameters in
 // action parameterlist. Current implementation does not support this.
@@ -378,8 +384,8 @@ public:
     const IR::Node *preorder(IR::PathExpression *path) override;
 };
 
-// For dpdk asm, there is not object-oriented. Therefore, we cannot define a 
-// checksum in dpdk asm. And dpdk asm only provides ckadd(checksum add) and 
+// For dpdk asm, there is not object-oriented. Therefore, we cannot define a
+// checksum in dpdk asm. And dpdk asm only provides ckadd(checksum add) and
 // cksub(checksum sub). So we need to define a explicit state for each checksum
 // declaration. Essentially, this state will be declared in header struct and
 // initilized to 0. And for cksum.add(x), it will be translated to ckadd state
@@ -415,7 +421,7 @@ public:
         CollectMetadataHeaderInfo *info,
         std::map<const IR::Declaration_Instance *, cstring> *csum_map
     ): info(info), csum_map(csum_map){}
-    
+
     const IR::Node *postorder(IR::P4Program *p) override {
         auto new_objs = new IR::Vector<IR::Node>;
         bool inserted = false;
@@ -458,7 +464,7 @@ public:
 
 // This pass is preparing logical expression for following branching statement
 // optimization. This pass breaks parenthesis looks liks this: (a && b) && c.
-// After this pass, the expression looks like this: a && b && c. (The AST is 
+// After this pass, the expression looks like this: a && b && c. (The AST is
 // different).
 class BreakLogicalExpressionParenthesis: public Transform {
 public:
@@ -479,7 +485,7 @@ public:
             BUG("Logical Expression Unroll pass failed");
         }
         return land;
-    } 
+    }
     const IR::Node* postorder(IR::LOr* lor){
         std::cout << lor << std::endl;
         if(auto lor2 = lor->left->to<IR::LOr>()){
@@ -497,12 +503,12 @@ public:
             BUG("Logical Expression Unroll pass failed");
         }
         return lor;
-    } 
+    }
 };
 
-// This pass will swap the simple expression to the front of an logical 
-// expression. Note that even for a subexpression of a logical expression, we 
-// will swap it as well. For example, a && ((b && c) || d), will become 
+// This pass will swap the simple expression to the front of an logical
+// expression. Note that even for a subexpression of a logical expression, we
+// will swap it as well. For example, a && ((b && c) || d), will become
 // a && (d || (b && c))
 class SwapSimpleExpressionToFrontOfLogicalExpression: public Transform {
     bool is_simple(const IR::Node *n){
@@ -556,8 +562,8 @@ public:
 };
 
 // This passmanager togethor transform logical expression into a form that
-// the simple expression will go to the front of the expression. And for 
-// expression at the same level(the same level is that expressions that are 
+// the simple expression will go to the front of the expression. And for
+// expression at the same level(the same level is that expressions that are
 // connected directly by && or ||) should be traversed from left to right
 // (a && b) && c is not a valid expression here.
 class ConvertLogicalExpression: public PassManager{

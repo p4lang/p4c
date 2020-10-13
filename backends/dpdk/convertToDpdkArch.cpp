@@ -200,7 +200,7 @@ bool ParsePsa::preorder(const IR::PackageBlock* block) {
 // }
 
 void CollectMetadataHeaderInfo::pushMetadata(const IR::Parameter* p){
-    
+
     for(auto m: used_metadata){
         if(m->to<IR::Type_Name>()->path->name.name == p->type->to<IR::Type_Name>()->path->name.name){
             return;
@@ -272,7 +272,7 @@ bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s){
                 fields.push_back(new IR::StructField(IR::ID(TypeStruct2Name(s->name.name) + "_" + field->name), field->type));
             }
             return true;
-        }        
+        }
     }
     return true;
  }
@@ -280,7 +280,7 @@ bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s){
 
 
 const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Member *m){
-    if(auto p = m->expr->to<IR::PathExpression>()){   
+    if(auto p = m->expr->to<IR::PathExpression>()){
         auto declaration = refMap->getDeclaration(p->path);
         if (auto decl = declaration->to<IR::Parameter>()) {
             if (auto type = decl->type->to<IR::Type_Name>()) {
@@ -419,7 +419,7 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a){
 }
 
 
-const IR::Node *StatementUnroll::preorder(IR::MethodCallStatement *m){    
+const IR::Node *StatementUnroll::preorder(IR::MethodCallStatement *m){
     return m;
 }
 
@@ -470,7 +470,7 @@ bool ExpressionUnroll::preorder(const IR::Operation_Binary *bin){
     const IR::Expression *right_root = root;
     if(not left_root) left_root = bin->left;
     if(not right_root) right_root = bin->right;
-    
+
     root = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
     const IR::Expression *bin_expr;
     decl.push_back(new IR::Declaration_Variable(root->path->name, bin->type));
@@ -581,8 +581,7 @@ const IR::Node *IfStatementUnroll::postorder(IR::P4Parser *a){
 bool LogicalExpressionUnroll::preorder(const IR::Operation_Unary *u){
     sanity(u->expr);
     if(not u->is<IR::Member>()){
-        std::cerr << u->node_type_name() << std::endl;
-        BUG("Not Implemented");
+        BUG("%1% Not Implemented", u);
     }
     else{
         root = u->clone();
@@ -602,8 +601,7 @@ bool LogicalExpressionUnroll::preorder(const IR::Operation_Unary *u){
             un_expr = new IR::LNot(root);
         }
         else{
-            std::cout << u->node_type_name() << std::endl;
-            BUG("Not Implemented");
+            BUG("%1% Not Implemented", u);
         }
     }
     else{
@@ -625,12 +623,12 @@ bool LogicalExpressionUnroll::preorder(const IR::Operation_Binary *bin){
     const IR::Expression *right_root = root;
     if(not left_root) left_root = bin->left;
     if(not right_root) right_root = bin->right;
-    
+
     IR::Expression *bin_expr;
     if(is_logical(bin)){
         if(bin->is<IR::LAnd>()){
             bin_expr = new IR::LAnd(left_root, right_root);
-        } 
+        }
         else if(bin->is<IR::LOr>()){
             bin_expr = new IR::LOr(left_root, right_root);
         }
