@@ -789,7 +789,7 @@ void ExternConverter_Hash::convertExternInstance(
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
 
-    //adding hash instance into extern_instances
+    // adding hash instance into extern_instances
     auto jext = new Util::JsonObject();
     jext->emplace("name", name);
     jext->emplace("id", nextId("extern_instances"));
