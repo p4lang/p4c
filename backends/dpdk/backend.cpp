@@ -72,7 +72,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     };
     auto hook = options.getDebugHook();
     simplify.addDebugHook(hook, true);
-    program->apply(simplify);
+    program = program->apply(simplify);
 
     // map IR node to compile-time allocated resource blocks.
     toplevel->apply(*new BMV2::BuildResourceMap(&structure.resourceMap));
@@ -89,7 +89,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         convertToDpdk,
     };
     toAsm.addDebugHook(hook, true);
-    program->apply(toAsm);
+    program = program->apply(toAsm);
     dpdk_program = convertToDpdk->getDpdkProgram();
     if (!dpdk_program) return;
     PassManager post_code_gen = {

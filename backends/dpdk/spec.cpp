@@ -162,35 +162,50 @@ std::ostream& IR::DpdkHeaderType::toSpec(std::ostream& out) const {
 }
 
 std::ostream& IR::DpdkStructType::toSpec(std::ostream& out) const {
-    out << "struct " << name << " {" << std::endl;
-    if (fields.empty()) {
-        out << "}" << std::endl;
-        return out; }
-    for (auto it = fields.begin(); it != fields.end(); ++it) {
-        if (auto t = (*it)->type->to<IR::Type_Bits>())
-            out << "\tbit<" << t->width_bits() << ">";
-        else if (auto t = (*it)->type->to<IR::Type_Name>()){
-            if(t->path->name == "error"){
+    if (getAnnotations()->getSingle("__packet_data__")) {
+        for (auto it = fields.begin(); it != fields.end(); ++it) {
+            if(auto t = (*it)->type->to<IR::Type_Name>())
+                out << "header " << (*it)->name << " instanceof " << t->path->name;
+            else{
+                std::cout << (*it)->type->node_type_name() << std::endl;
+                BUG("Unsupported type");
+            }
+            out << std::endl;
+        }
+    } else {
+        out << "struct " << name << " {" << std::endl;
+        if (fields.empty()) {
+            out << "}" << std::endl;
+            return out; }
+        for (auto it = fields.begin(); it != fields.end(); ++it) {
+            if (auto t = (*it)->type->to<IR::Type_Bits>())
+                out << "\tbit<" << t->width_bits() << ">";
+            else if (auto t = (*it)->type->to<IR::Type_Name>()){
+                if(t->path->name == "error"){
+                    out << "\tbit<8>";
+                }
+                else {
+                    out << "\t" << t->path;
+                }
+            }
+            else if(auto t = (*it)->type->to<IR::Type_Error>()){
                 out << "\tbit<8>";
             }
-            else {
-                out << "\t" << t->path;
-            }
-        }
-        else if(auto t = (*it)->type->to<IR::Type_Error>()){
-            out << "\tbit<8>";
-        }
             // out << " " << t->error << ")";
-        else if(auto t = (*it)->type->to<IR::Type_Boolean>())
-            out << "\tbool";
-        else{
-            std::cout << (*it)->type->node_type_name() << std::endl;
-            BUG("Unsupported type");
+            else if(auto t = (*it)->type->to<IR::Type_Boolean>())
+                out << "\tbool";
+            else{
+                std::cout << (*it)->type->node_type_name() << std::endl;
+                BUG("Unsupported type");
+            }
+            out << " " << (*it)->name;
+            out << std::endl;
         }
-        out << " " << (*it)->name;
-        out << std::endl;
+        out << "}" << std::endl;
+        if (getAnnotations()->getSingle("__metadata__")) {
+            out << "metadata instanceof " << name << std::endl;
+        }
     }
-    out << "}" << std::endl;
     return out;
 }
 

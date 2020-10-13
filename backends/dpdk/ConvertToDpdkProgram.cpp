@@ -32,7 +32,12 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create(IR::P4Program *prog) {
     for(auto obj: prog->objects) {
         if(auto s = obj->to<IR::Type_Struct>()){
             if(s->name.name == info->local_metadata_type){
-                auto st = new IR::DpdkStructType(s->srcInfo, s->name, s->annotations, s->fields);
+                auto* annotations = new IR::Annotations({
+                        new IR::Annotation(IR::ID("__metadata__"), { })
+                        });
+                for (auto anno : s->annotations->annotations)
+                    annotations->add(anno);
+                auto st = new IR::DpdkStructType(s->srcInfo, s->name, annotations, s->fields);
                 structType.push_back(st);
             }
             else if(args_struct_map->find(s->name.name) != args_struct_map->end()){
@@ -40,6 +45,11 @@ const IR::DpdkAsmProgram* ConvertToDpdkProgram::create(IR::P4Program *prog) {
                 structType.push_back(st);
             }
             else if(s->name.name == info->header_type) {
+                auto* annotations = new IR::Annotations({
+                        new IR::Annotation(IR::ID("__packet_data__"), { })
+                        });
+                for (auto anno : s->annotations->annotations)
+                    annotations->add(anno);
                 auto st = new IR::DpdkHeaderStructType(s->srcInfo, s->name, s->annotations, s->fields);
                 structType.push_back(st);
             }
@@ -139,8 +149,8 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
     while(stack.size() > 0){
         auto state = stack.back();
         stack.pop_back();
-        
-        
+
+
         // the main body
         auto i = new IR::DpdkLabelStatement("L_" + state.name.toString());
         add_instr(i);
@@ -209,7 +219,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser* p) {
     return false;
 }
 
-bool ConvertToDpdkParser::preorder(const IR::ParserState* s) 
+bool ConvertToDpdkParser::preorder(const IR::ParserState* s)
 {
     return false;
 }

@@ -34,12 +34,12 @@ namespace DPDK{
  *
  * Example 1:
  * If(a && b){
- * 
+ *
  * }
  * Else{
- * 
+ *
  * }
- * 
+ *
  * Will be translated to(in an optimal form):
  * cmp a 1
  * jneq false
@@ -51,11 +51,11 @@ namespace DPDK{
  * false:
  *     // if false statements go here
  * end:
- * 
+ *
  * In this case, in order to use less jmp, I use jneq instead of jeq to let the
  * true condition fall through the jmp statement and short-circuit the false
  * condition.
- * 
+ *
  * Example 2:
  * (a && b) || c
  * cmp a 1
@@ -67,12 +67,12 @@ namespace DPDK{
  *     cmp c 1
  *     jeq true
  * false:
- * 
+ *
  *     jmp end
  * true:
- * 
+ *
  * end:
- * 
+ *
  * In this case, it is not in an optimal form. To make it optimal, I need to
  * change (a && b) || c to c ||(a && b) and assembly code looks like this:
  * cmp c 1
@@ -82,17 +82,17 @@ namespace DPDK{
  * cmp b 1
  * jneq false
  * false:
- * 
+ *
  *     jmp end
  * true:
- * 
+ *
  * end:
- * 
- * It is very important to generate as fewer jmp and label instructions as 
+ *
+ * It is very important to generate as fewer jmp and label instructions as
  * possible, because the performance of DPDK is directly related to the number
  * of instructions.
- * 
- * This class uses a recursive function to generate the control flow and is 
+ *
+ * This class uses a recursive function to generate the control flow and is
  * optmized.
  */
 class BranchingInstructionGeneration {
@@ -119,7 +119,7 @@ public:
     BranchingInstructionGeneration(
         int *next_label_id,
         P4::ReferenceMap *refMap,
-        P4::TypeMap *typeMap): 
+        P4::TypeMap *typeMap):
         next_label_id(next_label_id),
         refMap(refMap),
         typeMap(typeMap){}
@@ -128,10 +128,10 @@ public:
 
 class ConvertStatementToDpdk : public Inspector {
     int next_label_id;
-    DpdkVariableCollector *collector;
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
-    P4::ReferenceMap *refmap;
     P4::TypeMap *typemap;
+    P4::ReferenceMap *refmap;
+    DpdkVariableCollector *collector;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
  public:
     ConvertStatementToDpdk(
@@ -140,9 +140,9 @@ class ConvertStatementToDpdk : public Inspector {
         int next_label_id,
         DpdkVariableCollector *collector,
         std::map<const IR::Declaration_Instance *, cstring> *csum_map):
-        refmap(refmap),
-        typemap(typemap),
         next_label_id(next_label_id),
+        typemap(typemap),
+        refmap(refmap),
         collector(collector),
         csum_map(csum_map){}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() { return instructions; }

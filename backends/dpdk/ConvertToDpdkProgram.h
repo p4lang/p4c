@@ -28,31 +28,31 @@
 #include "convertToDpdkArch.h"
 namespace DPDK
 {
-    
+
 class ConvertToDpdkProgram : public Transform {
-    DpdkVariableCollector *collector;
     int next_label_id = 0;
     std::map<int, cstring> reg_id_to_name;
     std::map<cstring, int> reg_name_to_id;
     std::map<cstring, cstring> symbol_table;
 
     BMV2::PsaProgramStructure& structure;
-    const IR::DpdkAsmProgram* dpdk_program;
-    P4::ReferenceMap *refmap;
     P4::TypeMap *typemap;
+    P4::ReferenceMap *refmap;
+    DpdkVariableCollector *collector;
+    const IR::DpdkAsmProgram* dpdk_program;
     CollectMetadataHeaderInfo *info;
     std::map<const cstring, IR::IndexedVector<IR::Parameter>*> *args_struct_map;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
  public:
     ConvertToDpdkProgram(
-        BMV2::PsaProgramStructure& structure, 
-        P4::ReferenceMap *refmap, 
+        BMV2::PsaProgramStructure& structure,
+        P4::ReferenceMap *refmap,
         P4::TypeMap * typemap,
         DpdkVariableCollector *collector,
-        DPDK::RewriteToDpdkArch *dpdkarch) : 
-        structure(structure), 
-        refmap(refmap), 
+        DPDK::RewriteToDpdkArch *dpdkarch) :
+        structure(structure),
         typemap(typemap),
+        refmap(refmap),
         collector(collector) {
             info = dpdkarch->info;
             args_struct_map = dpdkarch->args_struct_map;
@@ -74,11 +74,11 @@ class ConvertToDpdkParser : public Inspector {
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
  public:
     ConvertToDpdkParser(
-        P4::ReferenceMap *refmap, 
-        P4::TypeMap *typemap, 
+        P4::ReferenceMap *refmap,
+        P4::TypeMap *typemap,
         DpdkVariableCollector *collector,
         std::map<const IR::Declaration_Instance *, cstring> *csum_map
-    ):  refmap(refmap), 
+    ):  refmap(refmap),
         typemap(typemap),
         collector(collector),
         csum_map(csum_map) {}
@@ -89,22 +89,22 @@ class ConvertToDpdkParser : public Inspector {
 };
 
 class ConvertToDpdkControl : public Inspector {
+    P4::TypeMap *typemap;
+    P4::ReferenceMap *refmap;
     DpdkVariableCollector *collector;
     int next_label_id = 0;
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     IR::IndexedVector<IR::DpdkTable> tables;
     IR::IndexedVector<IR::DpdkAction> actions;
-    P4::ReferenceMap *refmap;
-    P4::TypeMap *typemap;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
  public:
     ConvertToDpdkControl(
-        P4::ReferenceMap *refmap, 
-        P4::TypeMap *typemap, 
+        P4::ReferenceMap *refmap,
+        P4::TypeMap *typemap,
         DpdkVariableCollector *collector,
-        std::map<const IR::Declaration_Instance *, cstring> *csum_map
-    ):  refmap(refmap), 
-        typemap(typemap), 
+        std::map<const IR::Declaration_Instance *, cstring> *csum_map):
+        typemap(typemap),
+        refmap(refmap),
         collector(collector),
         csum_map(csum_map) {}
 

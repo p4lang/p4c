@@ -112,8 +112,8 @@ public:
 // metadata, struct_name.field_name -> m.struct_name_field_name. For header
 // headers.header_name.field_name -> h.header_name.field_name
 class ReplaceMetadataHeaderName : public Transform {
-    CollectMetadataHeaderInfo *info;
     P4::ReferenceMap *refMap;
+    CollectMetadataHeaderInfo *info;
 public:
     ReplaceMetadataHeaderName(
         P4::ReferenceMap *refMap,
@@ -414,8 +414,8 @@ public:
 // state into header instead of metadata is due to the implementation of dpdk
 // side(a question related to endianness)
 class InjectInternetChecksumIntermediateValue: public Transform {
-    std::map<const IR::Declaration_Instance *, cstring> *csum_map;
     CollectMetadataHeaderInfo *info;
+    std::map<const IR::Declaration_Instance *, cstring> *csum_map;
 public:
     InjectInternetChecksumIntermediateValue(
         CollectMetadataHeaderInfo *info,

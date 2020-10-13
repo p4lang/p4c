@@ -319,7 +319,15 @@ const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Parameter *p){
 
 const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct* s){
     if(s->name == info->local_metadata_type){
-        return new IR::Type_Struct(s->name, info->fields);
+        auto* annotations = new IR::Annotations({
+            new IR::Annotation(IR::ID("__metadata__"), { })
+        });
+        return new IR::Type_Struct(s->name, annotations, info->fields);
+    } else if (s->name == info->header_type) {
+        auto* annotations = new IR::Annotations({
+            new IR::Annotation(IR::ID("__packet_data__"), { })
+        });
+        return new IR::Type_Struct(s->name, annotations, s->fields);
     }
     return s;
 }
