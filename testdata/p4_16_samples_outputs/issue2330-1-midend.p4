@@ -32,7 +32,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.eth_hdr.eth_type = (h.eth_hdr.dst_addr != 48w0 ? val1_0 : h.eth_hdr.eth_type);
         h.eth_hdr.src_addr = (h.eth_hdr.dst_addr != 48w0 ? val2_0 : h.eth_hdr.src_addr);
         tmp = (h.eth_hdr.dst_addr != 48w0 ? 48w1 : tmp);
-        tmp = tmp;
         h.eth_hdr.src_addr = (h.eth_hdr.dst_addr != 48w0 ? tmp : h.eth_hdr.src_addr);
     }
     @hidden table tbl_do_action {
@@ -68,3 +67,4 @@ control deparser(packet_out pkt, in Headers h) {
 }
 
 V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+
