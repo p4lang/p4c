@@ -232,16 +232,9 @@ bool CodeGenInspector::preorder(const IR::MethodCallExpression* expression) {
     }
 
     int prec = expressionPrecedence;
-    bool useParens = (prec > DBPrint::Prec_Postfix) ||
-                      (!expression->typeArguments->empty() &&
-                      prec >= DBPrint::Prec_Cond);
-    // FIXME: we use parenthesis more often than necessary
-    // because the bison parser has a bug which parses
-    // these expressions incorrectly.
     expressionPrecedence = DBPrint::Prec_Postfix;
     visit(expression->method);
-    if (useParens)
-        builder->append("(");
+    builder->append("(");
     bool first = true;
     for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
         if (!first)
