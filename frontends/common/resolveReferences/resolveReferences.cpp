@@ -65,7 +65,7 @@ ResolutionContext::lookup(const IR::INamespace *current, IR::ID name,
 
         if (!anyOrder && name.srcInfo.isValid()) {
             std::function<bool(const IR::IDeclaration*)> locationFilter =
-                    [name](const IR::IDeclaration *d) {
+                    [this, name, type](const IR::IDeclaration *d) {
                 if (d->is<IR::Type_Var>() || d->is<IR::ParserState>())
                     // type vars and parser states may be used before their definitions
                     return true;
@@ -73,6 +73,18 @@ ResolutionContext::lookup(const IR::INamespace *current, IR::ID name,
                 Util::SourceInfo dsi = d->getNode()->srcInfo;
                 bool before = dsi <= nsi;
                 LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
+
+                if (type == ResolutionType::Type) {
+                    if (auto *type_decl = findContext<IR::Type_Declaration>())
+                        if (type_decl->getNode() == d->getNode()) {
+                            ::error(ErrorType::ERR_UNSUPPORTED,
+                                "Self-referencing types not supported: '%1%' within '%2%'",
+                                name, d->getNode()); }
+                } else if (type == ResolutionType::Any) {
+                    if (auto *decl_ctxt = findContext<IR::Declaration>())
+                        if (decl_ctxt->getNode() == d->getNode())
+                            before = false; }
+
                 return before; };
             decls = decls->where(locationFilter); }
 
@@ -107,6 +119,12 @@ ResolutionContext::lookup(const IR::INamespace *current, IR::ID name,
                 Util::SourceInfo dsi = decl->getNode()->srcInfo;
                 bool before = dsi <= nsi;
                 LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
+
+                if (type == ResolutionType::Any)
+                    if (auto* ctxt = findContext<IR::Declaration>()) {
+                        if (ctxt->getNode() == decl->getNode()) {
+                            before = false; } }
+
                 if (!before)
                     decl = nullptr; } }
         if (decl) {
@@ -299,6 +317,15 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
             if (pnode->is<IR::Attribute>() && node->is<IR::AttribLocal>())
                 // attribute locals often match attributes
                 continue;
+
+            // parameter shadowing
+            if (node->is<IR::Declaration>() &&
+                !node->is<IR::Parameter>()) {
+                auto *decl_node = node->to<IR::Declaration>();
+                if (auto *param = pnode->to<IR::Parameter>())
+                    if (decl_node->name.name == param->name.name)
+                        ::error(ErrorType::WARN_SHADOWING,
+                                "declaration of '%1%' shadows a parameter '%2%'", node, pnode); }
 
             ::warning(ErrorType::WARN_SHADOWING, "'%1%' shadows '%2%'", node, pnode);
         }
