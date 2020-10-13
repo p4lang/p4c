@@ -159,8 +159,10 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::StructExpression* expression
         visit(v);
         auto path = addAssignment(expression->srcInfo, tmp, v->expression);
         typeMap->setType(path, t);
-        v = new IR::NamedExpression(v->name, path);
+        // We cannot directly mutate v, because of https://github.com/p4lang/p4c/issues/43
+        vec.push_back(new IR::NamedExpression(v->name, path));
     }
+    expression->components = vec;
     prune();
     return expression;
 }

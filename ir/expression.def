@@ -410,7 +410,7 @@ class StructExpression : Expression {
     /// May only be known after type checking; so it can be nullptr.
     NullOK optional Type_Name typeName;
     inline IndexedVector<NamedExpression> components;
-    validate { components.check_null(); }
+    validate { components.check_null(); components.validate(); }
     size_t size() const { return components.size(); }
 }
 
