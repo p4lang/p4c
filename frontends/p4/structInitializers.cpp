@@ -83,9 +83,7 @@ convert(const IR::Expression* expression, const IR::Type* type) {
 
 const IR::Node* CreateStructInitializers::postorder(IR::AssignmentStatement* statement) {
     auto type = typeMap->getType(statement->left);
-    auto init = convert(statement->right, type);
-    if (init != statement->right)
-        statement->right = init;
+    statement->right = convert(statement->right, type);
     return statement;
 }
 
@@ -102,9 +100,7 @@ const IR::Node* CreateStructInitializers::postorder(IR::ReturnStatement* stateme
     auto returnType = mt->returnType;
     CHECK_NULL(returnType);
 
-    auto init = convert(statement->expression, returnType);
-    if (init != statement->expression)
-        statement->expression = init;
+    statement->expression = convert(statement->expression, returnType);
     return statement;
 }
 
@@ -112,9 +108,7 @@ const IR::Node* CreateStructInitializers::postorder(IR::Declaration_Variable* de
     if (decl->initializer == nullptr)
         return decl;
     auto type = typeMap->getTypeType(decl->type, true);
-    auto init = convert(decl->initializer, type);
-    if (init != decl->initializer)
-        decl->initializer = init;
+    decl->initializer = convert(decl->initializer, type);
     return decl;
 }
 

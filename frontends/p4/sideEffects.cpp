@@ -151,7 +151,6 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::StructExpression* expression
         return expression;
     // allocate temporaries for all members in order.
     // this will handle cases like a = (S) { b, f(b) }, where f can mutate b.
-    IR::IndexedVector<IR::NamedExpression> vec;
     LOG3("Dismantling " << dbp(expression));
     for (auto &v : expression->components) {
         auto t = typeMap->getType(v->expression, true);
@@ -160,9 +159,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::StructExpression* expression
         auto path = addAssignment(expression->srcInfo, tmp, v->expression);
         typeMap->setType(path, t);
         v = new IR::NamedExpression(v->name, path);
-        vec.push_back(v);
     }
-    expression->components = vec;
     prune();
     return expression;
 }
