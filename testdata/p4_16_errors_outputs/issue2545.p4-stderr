@@ -1,0 +1,6 @@
+issue2545.p4(17): [--Werror=target-error] error: call_extern: extern functions with 'out' nested struct argument (val) not supported
+        call_extern(tmp);
+        ^^^^^^^^^^^^^^^^
+issue2545.p4(12)
+extern bit<64> call_extern(inout Headers val);
+                                         ^^^
