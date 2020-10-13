@@ -83,7 +83,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             NoAction;
         }
 
-        const default_action = NoAction;
+        default_action = NoAction;
     }
 
     apply {

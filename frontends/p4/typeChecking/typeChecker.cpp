@@ -650,13 +650,13 @@ const IR::Node* TypeInference::postorder(IR::Declaration_Variable* decl) {
         }
     }
 
-    if (auto sc = type->to<IR::Type_SpecializedCanonical>()) {
-        auto baseType = sc->baseType;
-        if (baseType->is<IR::IContainer>() || baseType->is<IR::Type_Extern>()) {
-            typeError("%1%: cannot declare variables of type %2% (consider using an instantiation)",
-                      decl, type);
-            return decl;
-        }
+    const IR::Type* baseType = type;
+    if (auto sc = type->to<IR::Type_SpecializedCanonical>())
+        baseType = sc->baseType;
+    if (baseType->is<IR::IContainer>() || baseType->is<IR::Type_Extern>()) {
+        typeError("%1%: cannot declare variables of type %2% (consider using an instantiation)",
+                  decl, type);
+        return decl;
     }
 
     if (type->is<IR::Type_String>() || type->is<IR::Type_InfInt>()) {
@@ -733,8 +733,6 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
     const IR::Type* initType = getType(sourceExpression);
     if (initType == nullptr)
         return sourceExpression;
-    if (initType == destType)
-        return sourceExpression;
 
     auto tvs = unify(errorPosition, destType, initType);
     if (tvs == nullptr)
@@ -758,11 +756,12 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
     }
     if (auto ts = destType->to<IR::Type_StructLike>()) {
         bool cst = isCompileTimeConstant(sourceExpression);
-        if (initType->is<IR::Type_UnknownStruct>() || initType->is<IR::Type_Struct>()) {
+        auto si = sourceExpression->to<IR::StructExpression>();
+        if (initType->is<IR::Type_UnknownStruct>() ||
+            (si != nullptr && initType->is<IR::Type_Struct>())) {
             // Even if the structure is a struct expression with the right type,
             // we still need to recurse over its fields; they many not have
             // the right type.
-            auto si = sourceExpression->to<IR::StructExpression>();
             CHECK_NULL(si);
             auto type = new IR::Type_Name(ts->name);
             if (ts->fields.size() != si->components.size()) {
