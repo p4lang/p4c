@@ -200,7 +200,7 @@ macro(add_parser pname)
   if (CMAKE_VERSION VERSION_LESS "3.7.2")
       BISON_TARGET (${pname}Parser parsers/${pname}/${pname}parser.ypp ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}parser.cpp VERBOSE ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}parser.output)
   else ()
-      BISON_TARGET (${pname}Parser parsers/${pname}/${pname}parser.ypp ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}parser.cpp VERBOSE)
+      BISON_TARGET (${pname}Parser parsers/${pname}/${pname}parser.ypp ${CMAKE_CURRENT_BINARY_DIR}/parsers/${pname}/${pname}parser.cpp VERBOSE COMPILE_FLAGS "-Werror=conflicts-sr -Werror=conflicts-rr")
   endif ()
 
   # regardless of the output name, flex puts out yy.lex.c, so we use a custom command to generate
