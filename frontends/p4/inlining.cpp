@@ -285,7 +285,9 @@ class Substitutions : public SubstituteParameters {
         cstring newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
+        auto annos = setNameAnnotation(extName, decl->annotations);
         decl->name = newName;
+        decl->annotations = annos;
         return decl;
     }
     const IR::Node* postorder(IR::PathExpression* expression) override {
