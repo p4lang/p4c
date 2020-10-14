@@ -48,7 +48,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     bit<32> new_addr_0;
     apply {
         verified_0 = verify_ipv4_checksum(headers.ipv4);
-        if (verified_0 == true) {
+        if (verified_0) {
             old_addr_0 = headers.ipv4.dstAddr;
             new_addr_0 = 32w0x1020304;
             headers.ipv4.dstAddr = new_addr_0;
