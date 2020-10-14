@@ -8,7 +8,7 @@ struct S {
     bit<32> b;
 }
 
-const S v = { 32w3, 32w1 };
+const S v = (S){a = 32w3,b = 32w1};
 const bit<32> two = 32w2;
 const int<32> twotwo = 32s2;
 const bit<32> twothree = 32w2;
@@ -18,7 +18,7 @@ struct T {
     S b;
 }
 
-const T zz = { { 32w0, 32w1 }, { 32w2, 32w3 } };
+const T zz = (T){a = (S){a = 32w0,b = 32w1},b = (S){a = 32w2,b = 32w3}};
 const bit<32> x = 32w0;
 const bit<32> x1 = 32w4294967295;
 typedef int<32> int32;

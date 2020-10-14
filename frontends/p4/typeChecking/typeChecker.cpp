@@ -650,10 +650,10 @@ const IR::Node* TypeInference::postorder(IR::Declaration_Variable* decl) {
         }
     }
 
-    if (type->is<IR::Type_SpecializedCanonical>())
-        type = type->to<IR::Type_SpecializedCanonical>()->baseType;
-
-    if (type->is<IR::IContainer>() || type->is<IR::Type_Extern>()) {
+    const IR::Type* baseType = type;
+    if (auto sc = type->to<IR::Type_SpecializedCanonical>())
+        baseType = sc->baseType;
+    if (baseType->is<IR::IContainer>() || baseType->is<IR::Type_Extern>()) {
         typeError("%1%: cannot declare variables of type %2% (consider using an instantiation)",
                   decl, type);
         return decl;
@@ -733,8 +733,6 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
     const IR::Type* initType = getType(sourceExpression);
     if (initType == nullptr)
         return sourceExpression;
-    if (initType == destType)
-        return sourceExpression;
 
     auto tvs = unify(errorPosition, destType, initType);
     if (tvs == nullptr)
@@ -756,18 +754,55 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
         setType(sourceExpression, destType);
         setCompileTimeConstant(sourceExpression);
     }
-    if (initType->is<IR::Type_UnknownStruct>()) {
-        if (auto ts = destType->to<IR::Type_StructLike>()) {
-            auto si = sourceExpression->to<IR::StructExpression>();
+    if (auto ts = destType->to<IR::Type_StructLike>()) {
+        bool cst = isCompileTimeConstant(sourceExpression);
+        auto si = sourceExpression->to<IR::StructExpression>();
+        if (initType->is<IR::Type_UnknownStruct>() ||
+            (si != nullptr && initType->is<IR::Type_Struct>())) {
+            // Even if the structure is a struct expression with the right type,
+            // we still need to recurse over its fields; they many not have
+            // the right type.
             CHECK_NULL(si);
-            bool cst = isCompileTimeConstant(sourceExpression);
             auto type = new IR::Type_Name(ts->name);
-            sourceExpression = new IR::StructExpression(
-                type, type, si->components);
-            setType(sourceExpression, destType);
-            if (cst)
-                setCompileTimeConstant(sourceExpression);
+            if (ts->fields.size() != si->components.size()) {
+                typeError("%1%: destination type expects %2% fields, but source only has %3%",
+                          errorPosition, ts->fields.size(), si->components.size());
+                return sourceExpression;
+            }
+            IR::IndexedVector<IR::NamedExpression> vec;
+            bool changes = false;
+            for (size_t i = 0; i < ts->fields.size(); i++) {
+                auto fieldI = ts->fields.at(i);
+                auto compI = si->components.at(i)->expression;
+                auto src = assignment(sourceExpression, fieldI->type, compI);
+                if (src != compI)
+                    changes = true;
+                vec.push_back(new IR::NamedExpression(fieldI->name, src));
+            }
+            if (!changes)
+                vec = si->components;
+            if (initType->is<IR::Type_UnknownStruct>() || changes)
+                sourceExpression = new IR::StructExpression(type, type, vec);
+        } else if (auto li = sourceExpression->to<IR::ListExpression>()) {
+            auto type = new IR::Type_Name(ts->name);
+            if (ts->fields.size() != li->components.size()) {
+                typeError("%1%: destination type expects %2% fields, but source only has %3%",
+                          errorPosition, ts->fields.size(), li->components.size());
+                return sourceExpression;
+            }
+            IR::IndexedVector<IR::NamedExpression> vec;
+            for (size_t i = 0; i < ts->fields.size(); i++) {
+                auto fieldI = ts->fields.at(i);
+                auto compI = li->components.at(i);
+                auto src = assignment(sourceExpression, fieldI->type, compI);
+                vec.push_back(new IR::NamedExpression(fieldI->name, src));
+            }
+            sourceExpression = new IR::StructExpression(type, type, vec);
         }
+        // else this is some other expression that evaluates to a struct
+        setType(sourceExpression, destType);
+        if (cst)
+            setCompileTimeConstant(sourceExpression);
     }
 
     return sourceExpression;
