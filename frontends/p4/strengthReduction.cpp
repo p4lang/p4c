@@ -95,6 +95,8 @@ const IR::Node* DoStrengthReduction::postorder(IR::BAnd* expr) {
         return expr->left;
     if (isZero(expr->right))
         return expr->right;
+    if (expr->left->equiv(*expr->right))
+        return expr->left;
     return expr;
 }
 
@@ -107,6 +109,10 @@ const IR::Node* DoStrengthReduction::postorder(IR::BOr* expr) {
     auto r = expr->right->to<IR::Cmpl>();
     if (l && r)
         return new IR::Cmpl(new IR::BAnd(expr->srcInfo, l->expr, r->expr));
+    if (hasSideEffects(expr))
+        return expr;
+    if (expr->left->equiv(*expr->right))
+        return expr->left;
     return expr;
 }
 
@@ -124,6 +130,12 @@ const IR::Node* DoStrengthReduction::postorder(IR::BXor* expr) {
         cmpl = !cmpl; }
     if (cmpl)
         return new IR::Cmpl(expr);
+    if (hasSideEffects(expr))
+        return expr;
+    if (expr->left->equiv(*expr->right) && expr->left->type &&
+        !expr->left->type->is<IR::Type_Unknown>())
+        // we assume that this type is right
+        return new IR::Constant(expr->left->type, 0);
     return expr;
 }
 
@@ -179,6 +191,11 @@ const IR::Node* DoStrengthReduction::postorder(IR::Sub* expr) {
         auto result = new IR::Add(expr->srcInfo, expr->left, neg);
         return result;
     }
+    if (hasSideEffects(expr))
+        return expr;
+    if (expr->left->equiv(*expr->right) && expr->left->type &&
+        !expr->left->type->is<IR::Type_Unknown>())
+        return new IR::Constant(expr->left->type, 0);
     return expr;
 }
 
@@ -286,6 +303,18 @@ const IR::Node* DoStrengthReduction::postorder(IR::Mod* expr) {
         auto sh = new IR::BAnd(expr->srcInfo, expr->left, amt);
         return sh;
     }
+    return expr;
+}
+
+const IR::Node* DoStrengthReduction::postorder(IR::Mux* expr) {
+    if (isTrue(expr->e1) && isFalse(expr->e2))
+        return expr->e0;
+    else if (isFalse(expr->e1) && isTrue(expr->e2))
+        return new IR::LNot(expr->e0);
+    else if (auto lnot = expr->e0->to<IR::LNot>())
+        return new IR::Mux(lnot->expr, expr->e2, expr->e1);
+    else if (!hasSideEffects(expr) && expr->e1->equiv(*expr->e2))
+        return expr->e1;
     return expr;
 }
 

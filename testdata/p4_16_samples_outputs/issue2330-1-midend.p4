@@ -27,12 +27,12 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bit<16> val1_0;
     bit<48> val2_0;
     @name("ingress.do_action") action do_action() {
-        val1_0 = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? h.eth_hdr.eth_type : val1_0);
-        val2_0 = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? h.eth_hdr.src_addr : val2_0);
-        h.eth_hdr.eth_type = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? val1_0 : h.eth_hdr.eth_type);
-        h.eth_hdr.src_addr = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? val2_0 : h.eth_hdr.src_addr);
-        tmp = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? 48w1 : tmp);
-        h.eth_hdr.src_addr = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? tmp : h.eth_hdr.src_addr);
+        val1_0 = (h.eth_hdr.dst_addr != 48w0 ? h.eth_hdr.eth_type : val1_0);
+        val2_0 = (h.eth_hdr.dst_addr != 48w0 ? h.eth_hdr.src_addr : val2_0);
+        h.eth_hdr.eth_type = (h.eth_hdr.dst_addr != 48w0 ? val1_0 : h.eth_hdr.eth_type);
+        h.eth_hdr.src_addr = (h.eth_hdr.dst_addr != 48w0 ? val2_0 : h.eth_hdr.src_addr);
+        tmp = (h.eth_hdr.dst_addr != 48w0 ? 48w1 : tmp);
+        h.eth_hdr.src_addr = (h.eth_hdr.dst_addr != 48w0 ? tmp : h.eth_hdr.src_addr);
     }
     @hidden table tbl_do_action {
         actions = {

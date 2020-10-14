@@ -26,10 +26,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bit<48> tmp;
     bit<16> val_0;
     @name("ingress.do_action") action do_action() {
-        val_0 = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? h.eth_hdr.eth_type : val_0);
-        h.eth_hdr.eth_type = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? val_0 : h.eth_hdr.eth_type);
-        tmp = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? 48w1 : tmp);
-        h.eth_hdr.src_addr = (!(h.eth_hdr.dst_addr != 48w0 ? false : true) ? tmp : h.eth_hdr.src_addr);
+        val_0 = (h.eth_hdr.dst_addr != 48w0 ? h.eth_hdr.eth_type : val_0);
+        h.eth_hdr.eth_type = (h.eth_hdr.dst_addr != 48w0 ? val_0 : h.eth_hdr.eth_type);
+        tmp = (h.eth_hdr.dst_addr != 48w0 ? 48w1 : tmp);
+        h.eth_hdr.src_addr = (h.eth_hdr.dst_addr != 48w0 ? tmp : h.eth_hdr.src_addr);
     }
     @hidden table tbl_do_action {
         actions = {

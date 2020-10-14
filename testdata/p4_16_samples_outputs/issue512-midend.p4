@@ -37,7 +37,7 @@ control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_m
         meta.b = meta.b + 4w5;
         cond = meta.b > 4w10;
         meta.b = (meta.b > 4w10 ? meta.b ^ 4w5 : meta.b);
-        meta.b = (!(cond ? true : false) ? meta.b + 4w5 : meta.b);
+        meta.b = (cond ? meta.b : meta.b + 4w5);
     }
     @name("cIngress.guh") table guh_0 {
         key = {

@@ -29,20 +29,20 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bool c_0;
     bool c1_0;
     @name("ingress.simple_action") action simple_action() {
-        h.eth_hdr.src_addr = (!(h.eth_hdr.eth_type == 16w1 ? true : false) ? 48w1 : h.eth_hdr.src_addr);
-        val1_eth_hdr = (!(h.eth_hdr.eth_type == 16w1 ? true : false) ? h.eth_hdr : val1_eth_hdr);
-        dst = (!(h.eth_hdr.eth_type == 16w1 ? true : false) ? val1_eth_hdr.dst_addr : dst);
-        type_1 = (!(h.eth_hdr.eth_type == 16w1 ? true : false) ? val1_eth_hdr.eth_type : type_1);
-        c_0 = (!(h.eth_hdr.eth_type == 16w1 ? true : false) ? true : c_0);
-        c1_0 = (!(h.eth_hdr.eth_type == 16w1 ? true : false) ? false : c1_0);
-        type_1 = (!(h.eth_hdr.eth_type == 16w1 ? true : false) ? (c_0 ? type_1 : type_1) : type_1);
-        dst = (!(h.eth_hdr.eth_type == 16w1 ? true : false) ? (c_0 ? (c1_0 ? 48w1 : dst) : dst) : dst);
-        dst = (!(h.eth_hdr.eth_type == 16w1 ? true : false) ? (c_0 ? (c1_0 ? dst : 48w2) : dst) : dst);
-        type_1 = (!(h.eth_hdr.eth_type == 16w1 ? true : false) ? (c_0 ? type_1 : 16w3) : type_1);
-        val1_eth_hdr.dst_addr = (!(h.eth_hdr.eth_type == 16w1 ? true : false) ? dst : val1_eth_hdr.dst_addr);
-        val1_eth_hdr.eth_type = (!(h.eth_hdr.eth_type == 16w1 ? true : false) ? type_1 : val1_eth_hdr.eth_type);
-        val1_eth_hdr.dst_addr = (!(h.eth_hdr.eth_type == 16w1 ? true : false) ? val1_eth_hdr.dst_addr + 48w3 : val1_eth_hdr.dst_addr);
-        h.eth_hdr = (!(h.eth_hdr.eth_type == 16w1 ? true : false) ? val1_eth_hdr : h.eth_hdr);
+        h.eth_hdr.src_addr = (h.eth_hdr.eth_type != 16w1 ? 48w1 : h.eth_hdr.src_addr);
+        val1_eth_hdr = (h.eth_hdr.eth_type != 16w1 ? h.eth_hdr : val1_eth_hdr);
+        dst = (h.eth_hdr.eth_type != 16w1 ? val1_eth_hdr.dst_addr : dst);
+        type_1 = (h.eth_hdr.eth_type != 16w1 ? val1_eth_hdr.eth_type : type_1);
+        c_0 = (h.eth_hdr.eth_type != 16w1 ? true : c_0);
+        c1_0 = (h.eth_hdr.eth_type != 16w1 ? false : c1_0);
+        type_1 = type_1;
+        dst = (h.eth_hdr.eth_type != 16w1 ? (c_0 ? (c1_0 ? 48w1 : dst) : dst) : dst);
+        dst = (h.eth_hdr.eth_type != 16w1 ? (c_0 ? (c1_0 ? dst : 48w2) : dst) : dst);
+        type_1 = (h.eth_hdr.eth_type != 16w1 ? (c_0 ? type_1 : 16w3) : type_1);
+        val1_eth_hdr.dst_addr = (h.eth_hdr.eth_type != 16w1 ? dst : val1_eth_hdr.dst_addr);
+        val1_eth_hdr.eth_type = (h.eth_hdr.eth_type != 16w1 ? type_1 : val1_eth_hdr.eth_type);
+        val1_eth_hdr.dst_addr = (h.eth_hdr.eth_type != 16w1 ? val1_eth_hdr.dst_addr + 48w3 : val1_eth_hdr.dst_addr);
+        h.eth_hdr = (h.eth_hdr.eth_type != 16w1 ? val1_eth_hdr : h.eth_hdr);
     }
     @hidden action issue2345multiple_dependencies60() {
         h.eth_hdr.src_addr = 48w2;

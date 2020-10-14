@@ -11,7 +11,7 @@ control p(out bit<1> y) {
             z_0 = y0;
         }
         {
-            bit<1> x0_1 = z_0 & z_0;
+            bit<1> x0_1 = z_0;
             bit<1> y0_1;
             x_0 = x0_1;
             y0_1 = x0_1 & x_0;
