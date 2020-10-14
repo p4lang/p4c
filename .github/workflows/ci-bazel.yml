@@ -19,12 +19,13 @@ jobs:
     - name: Mount bazel cache
       uses: actions/cache@v2
       with:
-        path: "~/.cache/bazel"  # See https://docs.bazel.build/versions/master/output_directories.html
-        key: bazel1
+        # See https://docs.bazel.build/versions/master/output_directories.html
+        path: "~/.cache/bazel"
+        key: ${{ runner.os }}-build-direct
 
     - name: Install bazelisk
       run: |
-        curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.4.0/$BAZEL"
+        curl -LO "https://github.com/bazelbuild/bazelisk/releases/download/v1.7.1/$BAZEL"
         chmod +x $BAZEL
         sudo mv $BAZEL /usr/local/bin/bazel
 
@@ -32,7 +33,7 @@ jobs:
       run: sudo apt-get update && sudo apt-get install bison flex libfl-dev libgmp-dev
 
     - name: Build p4c
-      run: bazel build //... --verbose_failures
+      run: bazel build //... --verbose_failures --distinct_host_configuration=false
   
   build_indirect:  # Build 3rd party Bazel project depending on p4c as a subproject.
     runs-on: ubuntu-latest
@@ -46,8 +47,9 @@ jobs:
     - name: Mount bazel cache
       uses: actions/cache@v2
       with:
-        path: "~/.cache/bazel"  # See https://docs.bazel.build/versions/master/output_directories.html
-        key: bazel2
+        # See https://docs.bazel.build/versions/master/output_directories.html
+        path: "~/.cache/bazel"
+        key: ${{ runner.os }}-build-indirect
 
     - name: Install bazelisk
       run: |
@@ -59,4 +61,4 @@ jobs:
       run: sudo apt-get update && sudo apt-get install bison flex libfl-dev libgmp-dev
 
     - name: Build bazel/example
-      run: cd ./bazel/example && bazel build //... --verbose_failures
+      run: cd ./bazel/example && bazel build //... --verbose_failures --distinct_host_configuration=false
