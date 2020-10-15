@@ -24,14 +24,14 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.simple_action") action simple_action() {
-        bool hasReturned = false;
+        @name("ingress.hasReturned") bool hasReturned = false;
         if (h.eth_hdr.eth_type == 16w1) {
             hasReturned = true;
         }
         if (!hasReturned) {
             h.eth_hdr.src_addr = 48w1;
             {
-                Headers val_0 = h;
+                @name("ingress.val_0") Headers val_0 = h;
                 h = val_0;
             }
         }

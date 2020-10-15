@@ -11,8 +11,8 @@ struct Headers {
 }
 
 control ingress(inout Headers h) {
-    ethernet_t tmp;
-    ethernet_t retval_0;
+    @name("ingress.tmp") ethernet_t tmp;
+    @name("ingress.retval_0") ethernet_t retval_0;
     @hidden action issue25431l17() {
         tmp.setValid();
         tmp.dst_addr = 48w1;

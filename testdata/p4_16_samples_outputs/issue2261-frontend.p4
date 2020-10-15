@@ -29,9 +29,9 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         {
-            bool hasReturned = false;
-            bit<16> retval;
-            nested_struct tmp_struct_0;
+            @name("ingress.hasReturned") bool hasReturned = false;
+            @name("ingress.retval") bit<16> retval;
+            @name("ingress.tmp_struct") nested_struct tmp_struct_0;
             tmp_struct_0.eth_hdr.setValid();
             tmp_struct_0 = (nested_struct){eth_hdr = (ethernet_t){dst_addr = 48w0,src_addr = 48w0,eth_type = 16w0}};
             hasReturned = true;

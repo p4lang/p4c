@@ -9,10 +9,10 @@ struct S {
 control c(out bool b);
 package top(c _c);
 control d(out bool b) {
-    H h_0;
-    H[2] h3_0;
+    @name("d.h") H h_0;
+    @name("d.h3") H[2] h3_0;
     H s1_0_h;
-    H tmp;
+    @name("d.tmp") H tmp;
     @hidden action issue396l39() {
         h_0.setValid();
         h_0.x = 32w0;

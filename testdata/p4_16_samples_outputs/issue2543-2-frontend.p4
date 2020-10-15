@@ -13,18 +13,18 @@ struct Headers {
 control ingress(inout Headers h) {
     apply {
         {
-            bool hasReturned = false;
-            Headers retval;
-            ethernet_t tmp;
-            bit<48> tmp_0;
-            bit<48> tmp_1;
-            bit<16> tmp_2;
-            bit<16> tmp_3;
+            @name("ingress.hasReturned_0") bool hasReturned = false;
+            @name("ingress.retval_0") Headers retval;
+            @name("ingress.tmp") ethernet_t tmp;
+            @name("ingress.tmp_0") bit<48> tmp_0;
+            @name("ingress.tmp_1") bit<48> tmp_1;
+            @name("ingress.tmp_2") bit<16> tmp_2;
+            @name("ingress.tmp_3") bit<16> tmp_3;
             tmp_0 = 48w1;
             tmp_1 = 48w1;
             {
-                bool hasReturned_0 = false;
-                bit<16> retval_0;
+                @name("ingress.hasReturned") bool hasReturned_0 = false;
+                @name("ingress.retval") bit<16> retval_0;
                 hasReturned_0 = true;
                 retval_0 = 16w9;
                 tmp_3 = retval_0;

@@ -27,21 +27,21 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    Headers tmp;
-    ethernet_t tmp_0;
-    bit<48> tmp_1;
-    bit<48> tmp_2;
-    bit<48> tmp_3;
-    bit<16> tmp_4;
-    bit<48> tmp_5;
-    bit<48> tmp_6;
-    bit<48> tmp_7;
+    @name("ingress.tmp") Headers tmp;
+    @name("ingress.tmp") ethernet_t tmp_0;
+    @name("ingress.tmp_1") bit<48> tmp_1;
+    @name("ingress.tmp_2") bit<48> tmp_2;
+    @name("ingress.tmp_3") bit<48> tmp_3;
+    @name("ingress.tmp_4") bit<16> tmp_4;
+    @name("ingress.tmp_5") bit<48> tmp_5;
+    @name("ingress.tmp_6") bit<48> tmp_6;
+    @name("ingress.tmp_7") bit<48> tmp_7;
     apply {
         tmp_1 = h.eth_hdr.dst_addr;
         {
-            bit<48> s_0 = h.eth_hdr.dst_addr;
-            bool hasReturned = false;
-            bit<48> retval;
+            @name("ingress.s_0") bit<48> s_0 = h.eth_hdr.dst_addr;
+            @name("ingress.hasReturned") bool hasReturned = false;
+            @name("ingress.retval") bit<48> retval;
             s_0 = 48w1;
             hasReturned = true;
             retval = 48w2;
@@ -55,9 +55,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         tmp = (Headers){eth_hdr = tmp_0};
         tmp_5 = h.eth_hdr.dst_addr;
         {
-            bit<48> s_1 = h.eth_hdr.dst_addr;
-            bool hasReturned_1 = false;
-            bit<48> retval_1;
+            @name("ingress.s_1") bit<48> s_1 = h.eth_hdr.dst_addr;
+            @name("ingress.hasReturned") bool hasReturned_1 = false;
+            @name("ingress.retval") bit<48> retval_1;
             s_1 = 48w1;
             hasReturned_1 = true;
             retval_1 = 48w2;

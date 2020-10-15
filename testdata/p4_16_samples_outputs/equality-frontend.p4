@@ -9,14 +9,14 @@ struct S {
 }
 
 control c(out bit<1> x) {
-    varbit<32> a_0;
-    varbit<32> b_0;
-    H h1_0;
-    H h2_0;
-    S s1_0;
-    S s2_0;
-    H[2] a1_0;
-    H[2] a2_0;
+    @name("c.a") varbit<32> a_0;
+    @name("c.b") varbit<32> b_0;
+    @name("c.h1") H h1_0;
+    @name("c.h2") H h2_0;
+    @name("c.s1") S s1_0;
+    @name("c.s2") S s2_0;
+    @name("c.a1") H[2] a1_0;
+    @name("c.a2") H[2] a2_0;
     apply {
         if (a_0 == b_0) {
             x = 1w1;

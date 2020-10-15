@@ -7,13 +7,13 @@ header H {
 control c();
 package top(c _c);
 control my() {
-    bit<1> a_0;
-    H[2] s_0;
-    bit<1> tmp;
-    bit<1> tmp_1;
-    bit<1> tmp_3;
-    bit<1> tmp_5;
-    bit<1> tmp_6;
+    @name("my.a") bit<1> a_0;
+    @name("my.s") H[2] s_0;
+    @name("my.tmp") bit<1> tmp;
+    @name("my.tmp_1") bit<1> tmp_1;
+    @name("my.tmp_3") bit<1> tmp_3;
+    @name("my.tmp_5") bit<1> tmp_5;
+    @name("my.tmp_6") bit<1> tmp_6;
     @hidden action side_effects27() {
         a_0 = 1w0;
         tmp = g(a_0);

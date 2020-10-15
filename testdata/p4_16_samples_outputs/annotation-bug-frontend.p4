@@ -19,8 +19,8 @@ struct tuple_0 {
 
 extern bit<16> get<T>(in T data);
 control cc() {
-    headers hdr_0;
-    headers tmp;
+    @name("cc.hdr") headers hdr_0;
+    @name("cc.tmp") headers tmp;
     apply {
         tmp = (headers){ipv4_option_timestamp = hdr_0.ipv4_option_timestamp};
         get<headers>(tmp);
