@@ -49,7 +49,7 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    Choice c_c;
+    @name("ingress.c.c") Choice c_c;
     apply {
         c_c = Choice.First;
         if (c_c == Choice.Second) {

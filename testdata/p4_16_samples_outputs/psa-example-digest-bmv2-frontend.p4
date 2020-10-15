@@ -120,8 +120,8 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     @name("ingress.do_L2_forward") action do_L2_forward(PortId_t egress_port) {
         @noWarnUnused {
-            psa_ingress_output_metadata_t meta_1 = ostd;
-            PortId_t egress_port_1 = egress_port;
+            @name("ingress.meta_1") psa_ingress_output_metadata_t meta_1 = ostd;
+            @name("ingress.egress_port_1") PortId_t egress_port_1 = egress_port;
             meta_1.drop = false;
             meta_1.multicast_group = (MulticastGroup_t)32w0;
             meta_1.egress_port = egress_port_1;
@@ -130,8 +130,8 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
     }
     @name("ingress.do_tst") action do_tst(PortId_t egress_port, EthTypes serEnumT) {
         @noWarnUnused {
-            psa_ingress_output_metadata_t meta_2 = ostd;
-            PortId_t egress_port_2 = egress_port;
+            @name("ingress.meta_2") psa_ingress_output_metadata_t meta_2 = ostd;
+            @name("ingress.egress_port_2") PortId_t egress_port_2 = egress_port;
             meta_2.drop = false;
             meta_2.multicast_group = (MulticastGroup_t)32w0;
             meta_2.egress_port = egress_port_2;

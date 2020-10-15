@@ -30,7 +30,7 @@ parser p(packet_in b, out headers hdr, inout metadata meta, inout standard_metad
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    H[2] tmp_0;
+    @name("ingress.tmp") H[2] tmp_0;
     apply {
         hdr.same.setValid();
         hdr.same.same = 8w0;

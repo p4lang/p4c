@@ -5,8 +5,8 @@ header H {
 }
 
 parser P(packet_in p, out H[2] h) {
-    bit<32> x_0;
-    H tmp_0;
+    @name("P.x") bit<32> x_0;
+    @name("P.tmp") H tmp_0;
     state start {
         p.extract<H>(tmp_0);
         transition select(tmp_0.field) {

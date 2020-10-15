@@ -32,7 +32,7 @@ control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
         default_action = a();
     }
     apply {
-        bool hasReturned = false;
+        @name("EgressI.hasReturned") bool hasReturned = false;
         switch (t_0.apply().action_run) {
             a: {
                 hasReturned = true;

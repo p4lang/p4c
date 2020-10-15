@@ -23,15 +23,15 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<16> tmp;
-    bit<16> tmp_0;
-    bool tmp_1;
+    @name("ingress.tmp") bit<16> tmp;
+    @name("ingress.tmp_0") bit<16> tmp_0;
+    @name("ingress.tmp_1") bool tmp_1;
     apply {
         tmp = h.eth_hdr.eth_type;
         {
-            bit<16> val_0 = h.eth_hdr.eth_type;
-            bool hasReturned = false;
-            bit<16> retval;
+            @name("ingress.val_0") bit<16> val_0 = h.eth_hdr.eth_type;
+            @name("ingress.hasReturned") bool hasReturned = false;
+            @name("ingress.retval") bit<16> retval;
             val_0 = 16w182;
             hasReturned = true;
             retval = 16w2;

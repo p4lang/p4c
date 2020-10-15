@@ -15,8 +15,8 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<32> tmp;
-    bit<32> tmp_0;
+    @name("ParserImpl.tmp") bit<32> tmp;
+    @name("ParserImpl.tmp_0") bit<32> tmp_0;
     @name(".$start") state start {
         transition select((InstanceType_0)standard_metadata.instance_type) {
             InstanceType_0.START: start_0;

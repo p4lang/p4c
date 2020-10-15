@@ -14,9 +14,9 @@ header_union U {
 control ct(out bit<32> b);
 package top(ct _ct);
 control c(out bit<32> x) {
-    U u_0;
-    U[2] u2_0;
-    bool b_0;
+    @name("c.u") U u_0;
+    @name("c.u2") U[2] u2_0;
+    @name("c.b") bool b_0;
     apply {
         b_0 = u_0.isValid();
         u_0.h1.isValid();

@@ -7,7 +7,7 @@ extern void f(in tuple_0 data);
 control proto();
 package top(proto _p);
 control c() {
-    tuple_0 x_0;
+    @name("c.x") tuple_0 x_0;
     @hidden action tuple0l23() {
         x_0.f0 = 32w10;
         x_0.f1 = false;

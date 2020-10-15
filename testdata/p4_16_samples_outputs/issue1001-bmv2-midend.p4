@@ -17,7 +17,7 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    Meta x_0;
+    @name("ingress.x") Meta x_0;
     @hidden action issue1001bmv2l20() {
         clone3<Meta>(CloneType.I2E, 32w64, x_0);
     }

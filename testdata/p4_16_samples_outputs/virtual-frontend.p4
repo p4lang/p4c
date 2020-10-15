@@ -15,7 +15,7 @@ control c(inout bit<16> p) {
             return ix + 16w1;
         }
         void g(inout data x) {
-            data ix_0;
+            @name("c.ix") data ix_0;
             ix_0 = x;
             if (ix_0.a < ix_0.b) {
                 x.a = ix_0.a + 16w1;

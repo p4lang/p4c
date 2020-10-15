@@ -42,10 +42,10 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<8> c_n;
+    @name("ingress.c.n") bit<8> c_n;
     apply {
         {
-            bool c_hasReturned = false;
+            @name("ingress.c.hasReturned") bool c_hasReturned = false;
             c_n = 8w0;
             if (!h.h.isValid()) {
                 c_hasReturned = true;

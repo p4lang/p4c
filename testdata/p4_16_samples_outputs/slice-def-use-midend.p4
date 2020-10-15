@@ -40,7 +40,7 @@ parser P(packet_in b, out Headers p, inout Metadata meta, inout standard_metadat
 }
 
 control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    bit<8> n_0;
+    @name("Ing.n") bit<8> n_0;
     @name("Ing.debug") register<bit<8>>(32w2) debug_0;
     @hidden action slicedefuse79() {
         n_0 = 8w0b11111111;

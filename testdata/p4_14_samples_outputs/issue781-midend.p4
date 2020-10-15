@@ -42,7 +42,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    ipv4_t_1 tmp_hdr_0;
+    @name("ParserImpl.tmp_hdr") ipv4_t_1 tmp_hdr_0;
     bit<160> tmp;
     @name(".start") state start {
         tmp = packet.lookahead<bit<160>>();

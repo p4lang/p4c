@@ -43,8 +43,8 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    bool verified_0;
-    bit<32> old_addr_0;
+    @name("pipe.verified") bool verified_0;
+    @name("pipe.old_addr") bit<32> old_addr_0;
     @hidden action ubpf_checksum_extern56() {
         old_addr_0 = headers.ipv4.dstAddr;
         headers.ipv4.dstAddr = 32w0x1020304;

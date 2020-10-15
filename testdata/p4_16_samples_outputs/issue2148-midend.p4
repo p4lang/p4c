@@ -14,9 +14,9 @@ struct Meta {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    H not_initialized_0;
-    H not_initialized_2;
-    bit<32> new_val_1;
+    @name("ingress.not_initialized") H not_initialized_0;
+    @name("ingress.not_initialized") H not_initialized_2;
+    @name("ingress.new_val") bit<32> new_val_1;
     @name("ingress.do_thing_action") action do_thing_action() {
     }
     @hidden action issue2148l21() {

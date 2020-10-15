@@ -46,12 +46,12 @@ struct Tcp_option_sack_top {
 }
 
 parser Tcp_option_parser(packet_in b, out Tcp_option_stack vec) {
-    bit<8> tmp;
-    bit<8> tmp_0;
-    Tcp_option_sack_top tmp_1;
-    bit<8> tmp_2;
-    bit<8> tmp_3;
-    bit<32> tmp_4;
+    @name("Tcp_option_parser.tmp") bit<8> tmp;
+    @name("Tcp_option_parser.tmp_0") bit<8> tmp_0;
+    @name("Tcp_option_parser.tmp_1") Tcp_option_sack_top tmp_1;
+    @name("Tcp_option_parser.tmp_2") bit<8> tmp_2;
+    @name("Tcp_option_parser.tmp_3") bit<8> tmp_3;
+    @name("Tcp_option_parser.tmp_4") bit<32> tmp_4;
     state start {
         tmp_0 = b.lookahead<bit<8>>();
         tmp = tmp_0;

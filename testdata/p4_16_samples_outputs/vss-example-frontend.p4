@@ -54,9 +54,9 @@ struct Parsed_packet {
 }
 
 parser TopParser(packet_in b, out Parsed_packet p) {
-    bit<16> tmp;
-    bool tmp_0;
-    bool tmp_1;
+    @name("TopParser.tmp") bit<16> tmp;
+    @name("TopParser.tmp_0") bool tmp_0;
+    @name("TopParser.tmp_1") bool tmp_1;
     @name("TopParser.ck") Ck16() ck_0;
     state start {
         b.extract<Ethernet_h>(p.ethernet);
@@ -81,7 +81,7 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 control TopPipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    IPv4Address nextHop_0;
+    @name("TopPipe.nextHop") IPv4Address nextHop_0;
     @name("TopPipe.Drop_action") action Drop_action() {
         outCtrl.outputPort = 4w0xf;
     }
@@ -152,7 +152,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         default_action = Drop_action_5();
     }
     apply {
-        bool hasReturned = false;
+        @name("TopPipe.hasReturned") bool hasReturned = false;
         if (parseError != error.NoError) {
             Drop_action_6();
             hasReturned = true;

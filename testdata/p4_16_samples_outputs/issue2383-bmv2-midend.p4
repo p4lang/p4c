@@ -23,7 +23,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    ethernet_t retval;
+    @name("ingress.retval") ethernet_t retval;
     @hidden action issue2383bmv2l20() {
         retval.setValid();
         retval.dst_addr = 48w1;

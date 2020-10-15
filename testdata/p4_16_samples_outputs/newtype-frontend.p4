@@ -14,11 +14,11 @@ header H {
 control c(out B32 x) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    N32 k_0;
-    bit<32> b_0;
-    N32 n_0;
-    N32 n1_0;
-    S s_0;
+    @name("c.k") N32 k_0;
+    @name("c.b") bit<32> b_0;
+    @name("c.n") N32 n_0;
+    @name("c.n1") N32 n1_0;
+    @name("c.s") S s_0;
     @name("c.t") table t_0 {
         actions = {
             NoAction_0();

@@ -17,7 +17,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     @name("pipe.RejectConditional") action RejectConditional(bit<1> condition) {
     }
     @name("pipe.act_return") action act_return() {
-        bool hasReturned = false;
+        @name("pipe.hasReturned") bool hasReturned = false;
         mark_to_pass();
         hasReturned = true;
     }

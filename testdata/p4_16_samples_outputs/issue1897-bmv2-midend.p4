@@ -30,7 +30,7 @@ struct headers {
 }
 
 parser ProtParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    addr_t addr_0;
+    @name("ProtParser.addr_0") addr_t addr_0;
     state start {
         packet.extract<addr_type_t>(hdr.addr_type);
         addr_0.ipv4.setInvalid();

@@ -11,7 +11,7 @@ extern Overloaded {
 }
 
 control c() {
-    bit<32> z_0;
+    @name("c.z") bit<32> z_0;
     @name("c.o") Overloaded() o_0;
     apply {
         f();

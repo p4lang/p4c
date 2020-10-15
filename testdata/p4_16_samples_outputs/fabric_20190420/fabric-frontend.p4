@@ -211,8 +211,8 @@ control FabricVerifyChecksum(inout parsed_headers_t hdr, inout fabric_metadata_t
 }
 
 parser FabricParser(packet_in packet, out parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata, inout standard_metadata_t standard_metadata) {
-    bit<4> tmp;
-    bit<4> tmp_0;
+    @name("FabricParser.tmp") bit<4> tmp;
+    @name("FabricParser.tmp_0") bit<4> tmp_0;
     state start {
         transition start_0;
     }
@@ -671,7 +671,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         {
             hdr.gtpu_ipv4.setInvalid();
             hdr.gtpu_udp.setInvalid();
-            bool spgw_normalizer_hasReturned = false;
+            @name("FabricIngress.spgw_normalizer.hasReturned") bool spgw_normalizer_hasReturned = false;
             if (!hdr.gtpu.isValid()) {
                 spgw_normalizer_hasReturned = true;
             }
@@ -704,7 +704,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         filtering_ingress_port_vlan.apply();
         filtering_fwd_classifier.apply();
         {
-            bool spgw_ingress_hasReturned = false;
+            @name("FabricIngress.spgw_ingress.hasReturned_0") bool spgw_ingress_hasReturned = false;
             if (hdr.gtpu.isValid()) {
                 if (!spgw_ingress_s1u_filter_table.apply().hit) {
                     mark_to_drop(standard_metadata);

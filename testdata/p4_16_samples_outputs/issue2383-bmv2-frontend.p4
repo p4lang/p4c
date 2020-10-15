@@ -25,8 +25,8 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         {
-            bool hasReturned = false;
-            ethernet_t retval;
+            @name("ingress.hasReturned") bool hasReturned = false;
+            @name("ingress.retval") ethernet_t retval;
             hasReturned = true;
             retval.setValid();
             retval = (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1};

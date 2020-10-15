@@ -12,7 +12,7 @@ control d(out bit<32> x) {
     }
     apply {
         {
-            bool cinst_hasReturned = false;
+            @name("d.cinst.hasReturned") bool cinst_hasReturned = false;
             switch (cinst_t.apply().action_run) {
                 cinst_a1_0: 
                 cinst_a2_0: {

@@ -101,7 +101,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         mark_to_drop();
     }
     apply {
-        bool hasReturned = false;
+        @name("pipe.hasReturned") bool hasReturned = false;
         if (headers.tcp.isValid()) {
             if (headers.ipv4.srcAddr < headers.ipv4.dstAddr) {
                 hash<tuple<bit<32>, bit<32>>>(meta.conn_id, HashAlgorithm.lookup3, { headers.ipv4.srcAddr, headers.ipv4.dstAddr });

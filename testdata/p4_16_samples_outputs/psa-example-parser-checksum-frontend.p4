@@ -60,9 +60,9 @@ struct headers {
 typedef bit<32> PacketCounter_t;
 typedef bit<8> ErrorIndex_t;
 parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
-    bit<16> tmp;
-    bool tmp_0;
-    bool tmp_1;
+    @name("IngressParserImpl.tmp") bit<16> tmp;
+    @name("IngressParserImpl.tmp_0") bool tmp_0;
+    @name("IngressParserImpl.tmp_1") bool tmp_1;
     @name("IngressParserImpl.ck") InternetChecksum() ck_0;
     state start {
         buffer.extract<ethernet_t>(hdr.ethernet);
@@ -165,4 +165,3 @@ IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_met
 EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
 
 PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
-

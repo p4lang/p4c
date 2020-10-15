@@ -79,7 +79,7 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    bit<128> tmp_0;
+    @name("pipe.tmp") bit<128> tmp_0;
     @name("pipe.Reject") action Reject() {
         mark_to_drop();
     }

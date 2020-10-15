@@ -31,8 +31,8 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         meta_1.multicast_group = (MulticastGroup_t)32w0;
         meta_1.egress_port = egress_port_1;
     }
-    PSA_MeterColor_t tmp;
-    bool tmp_0;
+    @name("cIngress.tmp") PSA_MeterColor_t tmp;
+    @name("cIngress.tmp_0") bool tmp_0;
     @name("cIngress.meter0") Meter<bit<12>>(32w1024, PSA_MeterType_t.PACKETS) meter0_0;
     apply {
         hdr.ethernet.dstAddr = 48w2;

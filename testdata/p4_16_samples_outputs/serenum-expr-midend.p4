@@ -11,7 +11,7 @@ struct Headers {
 }
 
 parser prs(packet_in p, out Headers h) {
-    Ethernet e_0;
+    @name("prs.e") Ethernet e_0;
     state start {
         p.extract<Ethernet>(e_0);
         transition select(e_0.type) {
@@ -23,7 +23,7 @@ parser prs(packet_in p, out Headers h) {
 }
 
 control c(inout Headers h) {
-    bool hasReturned;
+    @name("c.hasReturned") bool hasReturned;
     @hidden action serenumexpr42() {
         hasReturned = true;
     }

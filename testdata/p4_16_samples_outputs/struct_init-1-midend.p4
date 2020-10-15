@@ -11,7 +11,7 @@ struct metadata_t {
 }
 
 control I(inout metadata_t meta) {
-    H h_0;
+    @name("I.h") H h_0;
     @hidden action struct_init1l15() {
         meta._foo__v0 = meta._foo__v0 + 9w1;
         h_0.setValid();

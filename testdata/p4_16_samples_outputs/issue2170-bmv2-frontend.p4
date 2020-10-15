@@ -52,7 +52,7 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
         default_action = NoAction_0();
     }
     apply {
-        bool hasReturned = false;
+        @name("ingress.hasReturned") bool hasReturned = false;
         switch (simple_table_0.apply().action_run) {
             NoAction_0: {
                 hasReturned = true;

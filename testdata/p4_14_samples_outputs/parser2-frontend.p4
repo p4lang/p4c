@@ -107,10 +107,10 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<1> tmp;
-    bit<24> tmp_0;
-    bit<4> tmp_1;
-    bit<4> tmp_2;
+    @name("ParserImpl.tmp") bit<1> tmp;
+    @name("ParserImpl.tmp_0") bit<24> tmp_0;
+    @name("ParserImpl.tmp_1") bit<4> tmp_1;
+    @name("ParserImpl.tmp_2") bit<4> tmp_2;
     @name(".parse_ethernet") state parse_ethernet {
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {

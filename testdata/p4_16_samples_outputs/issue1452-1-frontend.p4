@@ -1,5 +1,5 @@
 control c() {
-    bit<32> x_0;
+    @name("c.x") bit<32> x_0;
     @name("c.b") action b(out bit<32> arg) {
         arg = 32w2;
     }

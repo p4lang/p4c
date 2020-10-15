@@ -88,7 +88,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<64> tmp_0;
+    @name("ParserImpl.tmp_0") bit<64> tmp_0;
     @name(".parse_cpu_header") state parse_cpu_header {
         packet.extract<cpu_header_t>(hdr.cpu_header);
         meta._meta_if_index10 = hdr.cpu_header.if_index;

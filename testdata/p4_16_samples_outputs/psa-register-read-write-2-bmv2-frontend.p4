@@ -46,11 +46,11 @@ control MyIC(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_inp
         meta_1.multicast_group = (MulticastGroup_t)32w0;
         meta_1.egress_port = egress_port_1;
     }
-    bit<8> idx_0;
-    bit<8> action_type_0;
-    bit<16> orig_data_0;
-    bit<16> next_data_0;
-    bool validAction_0;
+    @name("MyIC.idx") bit<8> idx_0;
+    @name("MyIC.action_type") bit<8> action_type_0;
+    @name("MyIC.orig_data") bit<16> orig_data_0;
+    @name("MyIC.next_data") bit<16> next_data_0;
+    @name("MyIC.validAction") bool validAction_0;
     @name("MyIC.reg") Register<bit<16>, bit<8>>(32w6) reg_0;
     apply {
         if (hdr.ethernet.isValid()) {

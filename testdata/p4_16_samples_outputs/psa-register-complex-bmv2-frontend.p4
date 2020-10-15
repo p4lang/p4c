@@ -31,11 +31,11 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         meta_1.multicast_group = (MulticastGroup_t)32w0;
         meta_1.egress_port = egress_port_1;
     }
-    bit<48> tmp;
-    bit<48> tmp_0;
-    bit<48> tmp_1;
-    bit<48> tmp_2;
-    bit<48> tmp_3;
+    @name("cIngress.tmp") bit<48> tmp;
+    @name("cIngress.tmp_0") bit<48> tmp_0;
+    @name("cIngress.tmp_1") bit<48> tmp_1;
+    @name("cIngress.tmp_2") bit<48> tmp_2;
+    @name("cIngress.tmp_3") bit<48> tmp_3;
     @name("cIngress.regfile") Register<EthernetAddress, bit<32>>(32w128) regfile_0;
     apply {
         regfile_0.write(32w1, 48w3);

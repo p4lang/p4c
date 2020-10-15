@@ -1,9 +1,9 @@
 control c(inout bit<8> v) {
     apply {
-        bool hasReturned = false;
+        @name("c.hasReturned_0") bool hasReturned = false;
         {
-            bit<8> val_0 = v;
-            bool hasReturned_0 = false;
+            @name("c.val_0") bit<8> val_0 = v;
+            @name("c.hasReturned") bool hasReturned_0 = false;
             if (val_0 == 8w0) {
                 val_0 = 8w1;
                 hasReturned_0 = true;

@@ -23,21 +23,21 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<16> tmp;
-    bit<16> tmp_0;
-    bit<16> tmp_1;
-    bit<16> tmp_2;
-    bit<16> tmp_3;
-    bit<16> tmp_4;
-    bit<16> tmp_5;
-    bit<16> tmp_6;
-    bit<16> tmp_7;
+    @name("ingress.tmp") bit<16> tmp;
+    @name("ingress.tmp_0") bit<16> tmp_0;
+    @name("ingress.tmp_1") bit<16> tmp_1;
+    @name("ingress.tmp_2") bit<16> tmp_2;
+    @name("ingress.tmp_3") bit<16> tmp_3;
+    @name("ingress.tmp_4") bit<16> tmp_4;
+    @name("ingress.tmp_5") bit<16> tmp_5;
+    @name("ingress.tmp_6") bit<16> tmp_6;
+    @name("ingress.tmp_7") bit<16> tmp_7;
     apply {
         tmp = 16w0;
         {
-            bit<16> eth_type_0 = h.eth_hdr.eth_type;
-            bool hasReturned = false;
-            bit<16> retval;
+            @name("ingress.eth_type_0") bit<16> eth_type_0 = h.eth_hdr.eth_type;
+            @name("ingress.hasReturned") bool hasReturned = false;
+            @name("ingress.retval") bit<16> retval;
             eth_type_0 = 16w0x806;
             hasReturned = true;
             retval = 16w2;
@@ -47,9 +47,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         tmp_1 = tmp & tmp_0;
         tmp_2 = 16w0;
         {
-            bit<16> eth_type_1 = h.eth_hdr.eth_type;
-            bool hasReturned_1 = false;
-            bit<16> retval_1;
+            @name("ingress.eth_type_1") bit<16> eth_type_1 = h.eth_hdr.eth_type;
+            @name("ingress.hasReturned") bool hasReturned_1 = false;
+            @name("ingress.retval") bit<16> retval_1;
             eth_type_1 = 16w0x806;
             hasReturned_1 = true;
             retval_1 = 16w2;
@@ -59,9 +59,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         tmp_4 = tmp_2 * tmp_3;
         tmp_5 = 16w0;
         {
-            bit<16> eth_type_2 = h.eth_hdr.eth_type;
-            bool hasReturned_2 = false;
-            bit<16> retval_2;
+            @name("ingress.eth_type_2") bit<16> eth_type_2 = h.eth_hdr.eth_type;
+            @name("ingress.hasReturned") bool hasReturned_2 = false;
+            @name("ingress.retval") bit<16> retval_2;
             eth_type_2 = 16w0x806;
             hasReturned_2 = true;
             retval_2 = 16w2;

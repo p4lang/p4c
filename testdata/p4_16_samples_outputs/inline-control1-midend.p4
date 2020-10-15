@@ -4,7 +4,7 @@ extern Y {
 }
 
 control d(out bit<32> x) {
-    bit<32> x_0;
+    @name("d.x_0") bit<32> x_0;
     @name("d.cinst.y") Y(32w16) cinst_y;
     @hidden action inlinecontrol1l24() {
         x_0 = cinst_y.get();

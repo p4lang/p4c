@@ -17,12 +17,12 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<16> tmp_port_0;
+    @name("ParserImpl.tmp_port") bit<16> tmp_port_0;
     state start {
         {
-            bit<16> x_0 = (bit<16>)standard_metadata.ingress_port;
-            bool hasReturned = false;
-            bit<16> retval;
+            @name("ParserImpl.x_1") bit<16> x_0 = (bit<16>)standard_metadata.ingress_port;
+            @name("ParserImpl.hasReturned") bool hasReturned = false;
+            @name("ParserImpl.retval") bit<16> retval;
             hasReturned = true;
             retval = x_0 + 16w1;
             tmp_port_0 = retval;
@@ -32,9 +32,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state start_0 {
         packet.extract<ethernet_t>(hdr.ethernet);
         {
-            bit<16> x_1 = hdr.ethernet.etherType;
-            bool hasReturned_0 = false;
-            bit<16> retval_0;
+            @name("ParserImpl.x_2") bit<16> x_1 = hdr.ethernet.etherType;
+            @name("ParserImpl.hasReturned") bool hasReturned_0 = false;
+            @name("ParserImpl.retval") bit<16> retval_0;
             hasReturned_0 = true;
             retval_0 = x_1 + 16w1;
             hdr.ethernet.etherType = retval_0;
@@ -64,17 +64,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         mac_da_0.apply();
         {
-            bit<16> x_2 = hdr.ethernet.srcAddr[15:0];
-            bool hasReturned_3 = false;
-            bit<16> retval_3;
-            bit<16> tmp;
-            bit<16> tmp_0;
-            bit<16> tmp_1;
+            @name("ingress.x_3") bit<16> x_2 = hdr.ethernet.srcAddr[15:0];
+            @name("ingress.hasReturned_0") bool hasReturned_3 = false;
+            @name("ingress.retval_0") bit<16> retval_3;
+            @name("ingress.tmp") bit<16> tmp;
+            @name("ingress.tmp_0") bit<16> tmp_0;
+            @name("ingress.tmp_1") bit<16> tmp_1;
             tmp = x_2;
             {
-                bit<16> x_3 = x_2;
-                bool hasReturned_4 = false;
-                bit<16> retval_4;
+                @name("ingress.x_0") bit<16> x_3 = x_2;
+                @name("ingress.hasReturned") bool hasReturned_4 = false;
+                @name("ingress.retval") bit<16> retval_4;
                 hasReturned_4 = true;
                 retval_4 = x_3 + 16w1;
                 tmp_0 = retval_4;
@@ -85,17 +85,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ethernet.srcAddr[15:0] = retval_3;
         }
         {
-            bit<16> x_4 = hdr.ethernet.srcAddr[15:0];
-            bool hasReturned_5 = false;
-            bit<16> retval_5;
+            @name("ingress.x_4") bit<16> x_4 = hdr.ethernet.srcAddr[15:0];
+            @name("ingress.hasReturned") bool hasReturned_5 = false;
+            @name("ingress.retval") bit<16> retval_5;
             hasReturned_5 = true;
             retval_5 = x_4 + 16w1;
             hdr.ethernet.srcAddr[15:0] = retval_5;
         }
         {
-            bit<16> x_5 = hdr.ethernet.etherType;
-            bool hasReturned_6 = false;
-            bit<16> retval_6;
+            @name("ingress.x_5") bit<16> x_5 = hdr.ethernet.etherType;
+            @name("ingress.hasReturned") bool hasReturned_6 = false;
+            @name("ingress.retval") bit<16> retval_6;
             hasReturned_6 = true;
             retval_6 = x_5 + 16w1;
             hdr.ethernet.etherType = retval_6;

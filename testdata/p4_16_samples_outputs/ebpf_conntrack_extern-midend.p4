@@ -59,7 +59,7 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    bool allow_0;
+    @name("pipe.allow") bool allow_0;
     @hidden action ebpf_conntrack_extern77() {
         pass = true;
     }

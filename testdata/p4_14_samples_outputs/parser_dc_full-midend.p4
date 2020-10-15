@@ -363,8 +363,8 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<24> tmp_0;
-    bit<4> tmp_2;
+    @name("ParserImpl.tmp_0") bit<24> tmp_0;
+    @name("ParserImpl.tmp_2") bit<4> tmp_2;
     @name(".parse_arp_rarp") state parse_arp_rarp {
         packet.extract<arp_rarp_t>(hdr.arp_rarp);
         transition select(hdr.arp_rarp.protoType) {

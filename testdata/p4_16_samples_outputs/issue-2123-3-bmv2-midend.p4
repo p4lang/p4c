@@ -108,11 +108,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<1> tmp;
-    bit<1> tmp_0;
-    bit<1> tmp_1;
-    bit<1> tmp_2;
-    bit<1> tmp_3;
+    @name("ingress.tmp") bit<1> tmp;
+    @name("ingress.tmp_0") bit<1> tmp_0;
+    @name("ingress.tmp_1") bit<1> tmp_1;
+    @name("ingress.tmp_2") bit<1> tmp_2;
+    @name("ingress.tmp_3") bit<1> tmp_3;
     @hidden action issue21233bmv2l108() {
         tmp = 1w1;
     }

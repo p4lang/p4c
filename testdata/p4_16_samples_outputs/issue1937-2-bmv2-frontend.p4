@@ -15,8 +15,8 @@ struct metadata_t {
 }
 
 parser parserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    bit<8> tmp;
-    bit<8> tmp_0;
+    @name("parserImpl.tmp") bit<8> tmp;
+    @name("parserImpl.tmp_0") bit<8> tmp_0;
     state start {
         tmp_0 = hdr.h1.f1;
         transition foo_start;

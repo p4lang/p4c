@@ -42,9 +42,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     apply {
         mac_da_0.apply();
         {
-            bit<16> x_0 = hdr.ethernet.srcAddr[15:0];
-            bool hasReturned = false;
-            bit<16> retval;
+            @name("ingress.x_0") bit<16> x_0 = hdr.ethernet.srcAddr[15:0];
+            @name("ingress.hasReturned") bool hasReturned = false;
+            @name("ingress.retval") bit<16> retval;
             if (x_0 > 16w5) {
                 hasReturned = true;
                 retval = x_0 + 16w65535;

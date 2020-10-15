@@ -185,8 +185,8 @@ control MyComputeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    mac_addr_t mac_tmp_0;
-    ipv6_addr_t addr_tmp_0;
+    @name("MyIngress.mac_tmp") mac_addr_t mac_tmp_0;
+    @name("MyIngress.addr_tmp") ipv6_addr_t addr_tmp_0;
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @noWarn("unused") @name(".NoAction") action NoAction_4() {

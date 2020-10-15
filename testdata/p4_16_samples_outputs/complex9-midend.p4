@@ -1,8 +1,8 @@
 extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
-    bit<32> tmp;
-    bool tmp_1;
-    bit<32> tmp_2;
+    @name("c.tmp") bit<32> tmp;
+    @name("c.tmp_1") bool tmp_1;
+    @name("c.tmp_2") bit<32> tmp_2;
     @hidden action complex9l21() {
         tmp_1 = false;
     }

@@ -29,7 +29,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<1> tmp;
+    @name("ingress.tmp") bit<1> tmp;
     @name("ingress.slice_action") action slice_action(inout bit<1> sliced_val) {
         h.h.a = 8w2;
         sliced_val = 1w1;

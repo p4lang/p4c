@@ -65,7 +65,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         default_action = Reject(32w0);
     }
     apply {
-        bool hasReturned = false;
+        @name("pipe.hasReturned") bool hasReturned = false;
         if (!headers.ipv4.isValid()) {
             headers.ipv4.setInvalid();
             headers.ipv4.setValid();

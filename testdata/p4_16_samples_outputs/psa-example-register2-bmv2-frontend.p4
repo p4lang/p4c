@@ -58,7 +58,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         s[79:48] = s[79:48] + 32w1;
         s[47:0] = s[47:0] + (bit<48>)ip_length_bytes;
     }
-    PacketByteCountState_t tmp_0;
+    @name("ingress.tmp") PacketByteCountState_t tmp_0;
     @name("ingress.port_pkt_ip_bytes_in") Register<PacketByteCountState_t, PortId_t>(32w512) port_pkt_ip_bytes_in_0;
     apply {
         ostd.egress_port = (PortId_t)32w0;

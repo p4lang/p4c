@@ -16,10 +16,10 @@ struct Meta {
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.do_thing_action") action do_thing_action() {
         {
-            bool hasReturned = false;
-            bit<16> retval;
-            H not_initialized_0;
-            bit<32> new_val_0;
+            @name("ingress.hasReturned") bool hasReturned = false;
+            @name("ingress.retval") bit<16> retval;
+            @name("ingress.not_initialized") H not_initialized_0;
+            @name("ingress.new_val") bit<32> new_val_0;
             new_val_0 = 32w1;
             if (not_initialized_0.a < 16w6) {
                 ;
@@ -32,10 +32,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         {
-            bool hasReturned_1 = false;
-            bit<16> retval_1;
-            H not_initialized_2;
-            bit<32> new_val_1;
+            @name("ingress.hasReturned") bool hasReturned_1 = false;
+            @name("ingress.retval") bit<16> retval_1;
+            @name("ingress.not_initialized") H not_initialized_2;
+            @name("ingress.new_val") bit<32> new_val_1;
             new_val_1 = 32w1;
             if (not_initialized_2.a < 16w6) {
                 ;
