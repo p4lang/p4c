@@ -602,7 +602,7 @@ control EgressNextControl(inout parsed_headers_t hdr, inout fabric_metadata_t fa
         size = 1024;
     }
     apply {
-        if (fabric_metadata.is_multicast == true && standard_metadata.ingress_port == standard_metadata.egress_port) {
+        if (fabric_metadata.is_multicast && standard_metadata.ingress_port == standard_metadata.egress_port) {
             mark_to_drop(standard_metadata);
         }
         if (fabric_metadata.mpls_label == 20w0) {
@@ -644,11 +644,11 @@ control PacketIoIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabr
 
 control PacketIoEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata, inout standard_metadata_t standard_metadata) {
     apply {
-        if (fabric_metadata.is_controller_packet_out == true) {
+        if (fabric_metadata.is_controller_packet_out) {
             exit;
         }
         if (standard_metadata.egress_port == 9w255) {
-            if (fabric_metadata.is_multicast == true && fabric_metadata.clone_to_cpu == false) {
+            if (fabric_metadata.is_multicast && !fabric_metadata.clone_to_cpu) {
                 mark_to_drop(standard_metadata);
             }
             hdr.packet_in.setValid();
@@ -935,11 +935,11 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         pkt_io_ingress.apply(hdr, fabric_metadata, standard_metadata);
         filtering.apply(hdr, fabric_metadata, standard_metadata);
         spgw_ingress_inst.apply(hdr.gtpu_ipv4, hdr.gtpu_udp, hdr.gtpu, hdr.ipv4, hdr.udp, fabric_metadata, standard_metadata);
-        if (fabric_metadata.skip_forwarding == false) {
+        if (!fabric_metadata.skip_forwarding) {
             forwarding.apply(hdr, fabric_metadata, standard_metadata);
         }
         acl.apply(hdr, fabric_metadata, standard_metadata);
-        if (fabric_metadata.skip_next == false) {
+        if (!fabric_metadata.skip_next) {
             next.apply(hdr, fabric_metadata, standard_metadata);
             port_counters_control.apply(hdr, fabric_metadata, standard_metadata);
         }

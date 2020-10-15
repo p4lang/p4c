@@ -856,7 +856,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
             if (!spgw_ingress_hasReturned) {
                 tbl_spgw175.apply();
             }
-            if (fabric_metadata._skip_forwarding7 == false) {
+            if (!fabric_metadata._skip_forwarding7) {
                 if (fabric_metadata._fwd_type9 == 3w0) {
                     forwarding_bridging.apply();
                 } else if (fabric_metadata._fwd_type9 == 3w1) {
@@ -866,7 +866,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
                 }
             }
             acl_acl.apply();
-            if (fabric_metadata._skip_next8 == false) {
+            if (!fabric_metadata._skip_next8) {
                 next_xconnect.apply();
                 next_hashed.apply();
                 next_multicast.apply();
@@ -1065,19 +1065,19 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
     }
     apply {
         tbl_act_0.apply();
-        if (fabric_metadata._is_controller_packet_out12 == true) {
+        if (fabric_metadata._is_controller_packet_out12) {
             tbl_packetio41.apply();
         }
         if (!hasExited_0) {
             if (standard_metadata.egress_port == 9w255) {
-                if (fabric_metadata._is_multicast11 == true && fabric_metadata._clone_to_cpu13 == false) {
+                if (fabric_metadata._is_multicast11 && !fabric_metadata._clone_to_cpu13) {
                     tbl_packetio47.apply();
                 }
                 tbl_packetio49.apply();
             }
         }
         if (!hasExited_0) {
-            if (fabric_metadata._is_multicast11 == true && standard_metadata.ingress_port == standard_metadata.egress_port) {
+            if (fabric_metadata._is_multicast11 && standard_metadata.ingress_port == standard_metadata.egress_port) {
                 tbl_next308.apply();
             }
             if (fabric_metadata._mpls_label5 == 20w0) {

@@ -161,6 +161,34 @@ const IR::Node* DoStrengthReduction::postorder(IR::LOr* expr) {
     return expr;
 }
 
+const IR::Node* DoStrengthReduction::postorder(IR::Equ* expr) {
+    // a == true is the same as a
+    if (isTrue(expr->left))
+        return expr->right;
+    if (isTrue(expr->right))
+        return expr->left;
+    // a == false is the same as !a
+    if (isFalse(expr->left))
+        return new IR::LNot(expr->right);
+    if (isFalse(expr->right))
+        return new IR::LNot(expr->left);
+    return expr;
+}
+
+const IR::Node* DoStrengthReduction::postorder(IR::Neq* expr) {
+    // a != true is the same as !a
+    if (isTrue(expr->left))
+        return new IR::LNot(expr->right);
+    if (isTrue(expr->right))
+        return new IR::LNot(expr->left);
+    // a != false is the same as a
+    if (isFalse(expr->left))
+        return expr->right;
+    if (isFalse(expr->right))
+        return expr->left;
+    return expr;
+}
+
 const IR::Node* DoStrengthReduction::postorder(IR::LNot* expr) {
     if (auto e = expr->expr->to<IR::LNot>())
         return e->expr;

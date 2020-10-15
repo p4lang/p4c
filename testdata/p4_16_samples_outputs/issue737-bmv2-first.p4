@@ -31,7 +31,7 @@ control IngressP(inout Parsed_packet hdr, inout Meta m, inout standard_metadata_
         if (m.metafield) {
             hdr.h.field = 64w3;
         }
-        if (m.metafield == false) {
+        if (!m.metafield) {
             hdr.h.field = 64w5;
         }
         if (!m.metafield) {

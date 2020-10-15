@@ -76,7 +76,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     apply {
         tbl_ubpf_checksum_extern54.apply();
-        if (verified_0 == true) {
+        if (verified_0) {
             tbl_ubpf_checksum_extern56.apply();
         } else {
             tbl_ubpf_checksum_extern61.apply();

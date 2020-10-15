@@ -29,7 +29,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     ethernet_t tmp_0;
     bit<48> tmp_1;
-    @hidden action issue2488bmv2l37() {
+    @hidden action issue2488bmv2l40() {
         tmp_1 = h.eth_hdr.dst_addr;
         h.eth_hdr.dst_addr = 48w1;
         tmp_0.setValid();
@@ -39,14 +39,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.eth_hdr.dst_addr = 48w1;
         h.eth_hdr = tmp_0;
     }
-    @hidden table tbl_issue2488bmv2l37 {
+    @hidden table tbl_issue2488bmv2l40 {
         actions = {
-            issue2488bmv2l37();
+            issue2488bmv2l40();
         }
-        const default_action = issue2488bmv2l37();
+        const default_action = issue2488bmv2l40();
     }
     apply {
-        tbl_issue2488bmv2l37.apply();
+        tbl_issue2488bmv2l40.apply();
     }
 }
 

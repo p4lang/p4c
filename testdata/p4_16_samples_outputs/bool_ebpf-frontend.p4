@@ -14,7 +14,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     bool x_0;
     apply {
         x_0 = true;
-        pass = x_0 != false;
+        pass = x_0;
     }
 }
 
