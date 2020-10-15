@@ -47,8 +47,9 @@ const IR::Node* RemoveNestedStructs::postorder(IR::Declaration_Variable* decl) {
         return decl;
 
     BUG_CHECK(decl->initializer == nullptr, "%1%: did not expect an initializer", decl);
-    BUG_CHECK(decl->annotations->size() == 0,
-              "%1%: don't know how to handle variable annotations", decl);
+    BUG_CHECK(decl->annotations->size() == 0 ||
+              (decl->annotations->size() == 1 && decl->annotations->getSingle("name") != nullptr),
+              "%1%: don't know how to handle variable annotations other than @name", decl);
     auto map = new ComplexValues::FieldsMap();
     values->values.emplace(getOriginal<IR::Declaration_Variable>(), map);
     if (findContext<IR::Function>()) {
