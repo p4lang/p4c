@@ -351,7 +351,13 @@ std::ostream& IR::DpdkTable::toSpec(std::ostream& out) const {
     }
     out << "\t}" << std::endl;
 
-    out << "\tdefault_action " << DPDK::toStr(default_action) << std::endl;
+    out << "\tdefault_action " << DPDK::toStr(default_action);
+    if (default_action->to<IR::MethodCallExpression>()->arguments->size() == 0) {
+        out << " args none ";
+    } else {
+        BUG("non-zero default action arguments not supported yet");
+    }
+    out << std::endl;
     if(auto psa_implementation = properties->getProperty("psa_implementation")){
         out << "\taction_selector " << DPDK::toStr(psa_implementation->value) << std::endl;
     }
