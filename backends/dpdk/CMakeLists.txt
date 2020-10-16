@@ -33,12 +33,12 @@ set(P4C_DPDK_SOURCES
     ../bmv2/psa_switch/psaSwitch.cpp
     backend.cpp
     main.cpp
-    ConvertToDpdkHelper.cpp
-    ConvertToDpdkProgram.cpp
-    DpdkVariableCollector.cpp
-    convertToDpdkArch.cpp
-    DpdkAsmOptimization.cpp
-    elim_typedef.cpp
+    dpdkHelpers.cpp
+    dpdkProgram.cpp
+    dpdkVarCollector.cpp
+    dpdkArch.cpp
+    dpdkAsmOpt.cpp
+    elimTypedef.cpp
     )
 
 set(P4C_DPDK_HEADERS
@@ -66,12 +66,12 @@ set(P4C_DPDK_HEADERS
     ../bmv2/common/sharedActionSelectorCheck.h
     ../bmv2/psa_switch/psaSwitch.h
     backend.h
-    ConvertToDpdkHelper.h
-    ConvertToDpdkProgram.h
-    DpdkVariableCollector.h
-    convertToDpdkArch.h
-    DpdkAsmOptimization.h
-    elim_typedef.h
+    dpdkHelpers.h
+    dpdkProgram.h
+    dpdkVarCollector.h
+    dpdkArch.h
+    dpdkAsmOpt.h
+    elimTypedef.h
     )
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/dpdk.def PARENT_SCOPE)

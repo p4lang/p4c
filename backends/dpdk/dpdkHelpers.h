@@ -23,7 +23,7 @@
 #include "backends/bmv2/common/parser.h"
 #include "backends/bmv2/common/programStructure.h"
 #include "backends/bmv2/psa_switch/psaSwitch.h"
-#include "DpdkVariableCollector.h"
+#include "dpdkVarCollector.h"
 
 
 #define TOSTR_DECLA(NAME) std::ostream& toStr(std::ostream&, IR::NAME*)

@@ -5,8 +5,8 @@
 #include "lib/stringify.h"
 #include "ir/dbprint.h"
 #include <unordered_map>
-#include "ConvertToDpdkProgram.h"
-#include "ConvertToDpdkHelper.h"
+#include "dpdkProgram.h"
+#include "dpdkHelpers.h"
 
 
 namespace DPDK{

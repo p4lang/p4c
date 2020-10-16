@@ -4,7 +4,7 @@
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "DpdkVariableCollector.h"
+#include "dpdkVarCollector.h"
 namespace DPDK {
 
 cstring TypeStruct2Name(const cstring *s);

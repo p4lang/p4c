@@ -1,6 +1,6 @@
-#include "ConvertToDpdkHelper.h"
 #include <iostream>
 #include "ir/dbprint.h"
+#include "dpdkHelpers.h"
 
 using namespace DBPrint;
 
@@ -242,7 +242,7 @@ std::ostream& IR::DpdkAndStatement::toSpec(std::ostream& out) const {
 }
 
 std::ostream& IR::DpdkApplyStatement::toSpec(std::ostream& out) const {
-    out << "apply " << table;
+    out << "table " << table;
     return out;
 }
 
@@ -354,8 +354,7 @@ std::ostream& IR::DpdkTable::toSpec(std::ostream& out) const {
 
     out << "\tdefault_action " << DPDK::toStr(default_action) << std::endl;
     if(auto psa_implementation = properties->getProperty("psa_implementation")){
-        add_space(out, 2);
-        out << "(action_selector " << DPDK::toStr(psa_implementation->value) << ")" << std::endl;
+        out << "\taction_selector " << DPDK::toStr(psa_implementation->value) << std::endl;
     }
     if(auto size = properties->getProperty("size")) {
         out << "\tsize " << DPDK::toStr(size->value) << "" << std::endl;
@@ -370,10 +369,10 @@ std::ostream& IR::DpdkAction::toSpec(std::ostream& out) const {
     out << "action " << name << " args ";
 
     if (para.parameters.size() == 0)
-        out << "none";
+        out << "none ";
 
     for(auto p : para.parameters){
-        out << "instance_of " << p->type << " ";
+        out << "instanceof " << p->type << " ";
         if(p != para.parameters.back())
             out << " ";
     }
@@ -389,7 +388,7 @@ std::ostream& IR::DpdkAction::toSpec(std::ostream& out) const {
 }
 
 std::ostream& IR::DpdkChecksumAddStatement::toSpec(std::ostream& out) const{
-    out << "(csum_add " << "h.cksum_state." << intermediate_value << " " << DPDK::toStr(field) << ")";
+    out << "ckadd " << "h.cksum_state." << intermediate_value << " " << DPDK::toStr(field);
     return out;
 }
 

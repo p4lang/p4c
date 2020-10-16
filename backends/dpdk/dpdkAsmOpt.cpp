@@ -1,7 +1,7 @@
-#include "DpdkAsmOptimization.h"
+#include "dpdkAsmOpt.h"
 
 namespace DPDK{
-// One assumption of this piece of program is that DPDK never produces jmp 
+// One assumption of this piece of program is that DPDK never produces jmp
 // statements that jump back to previous statements.
 const IR::Node *RemoveRedundantLabel::postorder(IR::DpdkListStatement *l){
     bool changed = false;
@@ -59,7 +59,7 @@ const IR::Node *RemoveUselessJmpAndLabel::postorder(IR::DpdkListStatement *l){
             if(not cache){
                 new_l.push_back(stmt);
             }
-            else if(cache->label != label->label){                
+            else if(cache->label != label->label){
                 new_l.push_back(cache);
                 cache = nullptr;
                 new_l.push_back(stmt);

@@ -24,8 +24,8 @@
 #include "backends/bmv2/common/parser.h"
 #include "backends/bmv2/common/programStructure.h"
 #include "backends/bmv2/psa_switch/psaSwitch.h"
-#include "DpdkVariableCollector.h"
-#include "convertToDpdkArch.h"
+#include "dpdkVarCollector.h"
+#include "dpdkArch.h"
 namespace DPDK
 {
 

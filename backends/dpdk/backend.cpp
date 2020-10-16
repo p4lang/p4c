@@ -20,12 +20,12 @@ limitations under the License.
 #include "lib/stringify.h"
 #include "ir/dbprint.h"
 #include <unordered_map>
-#include "ConvertToDpdkHelper.h"
-#include "ConvertToDpdkProgram.h"
-#include "convertToDpdkArch.h"
-#include "DpdkVariableCollector.h"
-#include "DpdkAsmOptimization.h"
-#include "elim_typedef.h"
+#include "dpdkHelpers.h"
+#include "dpdkProgram.h"
+#include "dpdkArch.h"
+#include "dpdkVarCollector.h"
+#include "dpdkAsmOpt.h"
+#include "elimTypedef.h"
 
 
 namespace DPDK {
@@ -103,7 +103,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
 }
 
 void PsaSwitchBackend::codegen(std::ostream& out) const {
-    // dpdk_program->toSexp(out) << std::endl;
     dpdk_program->toSpec(out) << std::endl;
 }
+
 }  // namespace DPDK

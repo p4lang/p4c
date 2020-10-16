@@ -7,7 +7,7 @@
  * We need to convert psa control blocks to this form.
  */
 
-#include "convertToDpdkArch.h"
+#include "dpdkArch.h"
 #include "sexp.h"
 
 namespace DPDK {
