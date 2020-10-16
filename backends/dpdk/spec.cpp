@@ -191,9 +191,8 @@ std::ostream& IR::DpdkStructType::toSpec(std::ostream& out) const {
             else if(auto t = (*it)->type->to<IR::Type_Error>()){
                 out << "\tbit<8>";
             }
-            // out << " " << t->error << ")";
             else if(auto t = (*it)->type->to<IR::Type_Boolean>())
-                out << "\tbool";
+                out << "\tbit<8>";
             else{
                 std::cout << (*it)->type->node_type_name() << std::endl;
                 BUG("Unsupported type");
