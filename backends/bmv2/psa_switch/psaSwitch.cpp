@@ -633,7 +633,31 @@ Util::IJson* ExternConverter_Hash::convertExternObject(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
-    auto primitive = mkPrimitive("Hash");
+    if (em->method->name != "get_hash") {
+        modelError("Unsupported method %1%", mc);
+        return nullptr;
+    } else if (em->method->name == "get_hash" && mc->arguments->size() != 2) {
+        modelError("Expected 2 argument for %1%", mc);
+        return nullptr;
+    }
+
+    auto opName = "_" + em->originalExternType->name + "_" + em->method->name;
+
+    auto primitive = mkPrimitive(opName);
+
+    auto parameters = mkParameters(primitive);
+    primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    auto externObj = new Util::JsonObject();
+    externObj->emplace("type", "extern");
+    externObj->emplace("value", em->object->controlPlaneName());
+    parameters->append(externObj);
+
+    if (em->method->name == "get_hash") {
+        auto data = ctxt->conv->convert(mc->arguments->at(0)->expression);
+        parameters->append(data);
+        auto dest = ctxt->conv->convert(mc->arguments->at(1)->expression);
+        parameters->append(dest);
+    }
     return primitive;
 }
 
@@ -827,8 +851,44 @@ Util::IJson* ExternConverter_Digest::convertExternObject(
 
 void ExternConverter_Hash::convertExternInstance(
     UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns)
-{ /* TODO */ }
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+    if (eb->getConstructorParameters()->size() != 1) {
+        modelError("%1%: expected 1 parameter", eb);
+        return;
+    }
+
+    auto inst = c->to<IR::Declaration_Instance>();
+    cstring name = inst->controlPlaneName();
+
+    // adding hash instance into extern_instances
+    auto jext = new Util::JsonObject();
+    jext->emplace("name", name);
+    jext->emplace("id", nextId("extern_instances"));
+    jext->emplace("type", eb->getName());
+    jext->emplace_non_null("source_info", eb->sourceInfoJsonObj());
+    ctxt->json->externs->append(jext);
+
+    // adding attributes to hash instance
+    Util::JsonArray *arr = ctxt->json->insert_array_field(jext, "attribute_values");
+
+    // algo
+    auto algo = eb->findParameterValue("algo");
+    CHECK_NULL(algo);
+    if (!algo->is<IR::Declaration_ID>()) {
+        modelError("%1%: expected a member", algo->getNode());
+        return;
+    }
+    cstring algo_name = algo->to<IR::Declaration_ID>()->name;
+    cstring hash_algo = "?";
+    if (algo_name == "CRC16") {
+        hash_algo = "crc16";
+    }
+    auto aj = new Util::JsonObject();
+    aj->emplace("name", "algo");
+    aj->emplace("type", "string");
+    aj->emplace("value", hash_algo);
+    arr->append(aj);
+}
 
 void ExternConverter_Checksum::convertExternInstance(
     UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,

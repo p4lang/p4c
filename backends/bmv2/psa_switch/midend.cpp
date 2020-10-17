@@ -103,11 +103,14 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options, std::ostream* outStre
         auto em = mi->to<P4::ExternMethod>();
         if (em == nullptr)
             return true;
-        if (em->originalExternType->name.name == "Register" ||
+        if (em->originalExternType->name.name == "Register" &&
                 em->method->name.name == "read")
             return false;
         if (em->originalExternType->name.name == "Meter" &&
                 em->method->name.name == "execute")
+            return false;
+        if (em->originalExternType->name.name == "Hash" &&
+                em->method->name.name == "get_hash")
             return false;
         return true;
     };
