@@ -59,8 +59,8 @@ struct tuple_5 {
 }
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    MyEnum_t enum1_0;
-    bit<10> serenum1_0;
+    @name("ingressImpl.enum1") MyEnum_t enum1_0;
+    @name("ingressImpl.serenum1") bit<10> serenum1_0;
     @hidden action issue22011bmv2l111() {
         enum1_0 = MyEnum_t.VAL1;
     }

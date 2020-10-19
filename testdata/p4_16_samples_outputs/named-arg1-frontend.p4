@@ -1,7 +1,7 @@
 #include <core.p4>
 
 parser par(out bool b) {
-    bit<32> x_0;
+    @name("par.x") bit<32> x_0;
     state start {
         transition adder_0_start;
     }
@@ -16,11 +16,11 @@ parser par(out bool b) {
 }
 
 control c(out bool b) {
-    bit<16> xv_0;
-    bit<16> x_1;
-    bool b_0;
-    bit<16> x_2;
-    bool b_1;
+    @name("c.xv") bit<16> xv_0;
+    @name("c.x_1") bit<16> x_1;
+    @name("c.b_0") bool b_0;
+    @name("c.x_2") bit<16> x_2;
+    @name("c.b_1") bool b_1;
     @name("c.a") action a(in bit<16> bi, out bit<16> mb) {
         mb = -bi;
     }

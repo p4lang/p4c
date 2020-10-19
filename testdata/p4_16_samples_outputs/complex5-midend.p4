@@ -1,6 +1,6 @@
 extern bit<32> f(in bit<32> x);
 control c(inout bit<32> r) {
-    bit<32> tmp;
+    @name("c.tmp") bit<32> tmp;
     @hidden action complex5l22() {
         r = 32w1;
     }

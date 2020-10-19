@@ -5,7 +5,7 @@
 control empty();
 package top(empty e);
 control Ing() {
-    bool tmp;
+    @name("Ing.tmp_1") bool tmp;
     @name("Ing.cond") action cond_0() {
         tmp = tmp;
     }

@@ -12,7 +12,7 @@ struct Headers {
 
 extern bit<64> call_extern(inout Headers val);
 control ingress(inout Headers h) {
-    Headers tmp_0;
+    @name("ingress.tmp") Headers tmp_0;
     apply {
         tmp_0 = h;
         call_extern(tmp_0);

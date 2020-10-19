@@ -4,7 +4,7 @@
 
 control c() {
     @name("c.v") action v() {
-        bool hasReturned = false;
+        @name("c.hasReturned") bool hasReturned = false;
         hasReturned = true;
     }
     apply {

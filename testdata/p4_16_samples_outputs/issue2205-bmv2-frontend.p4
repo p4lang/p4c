@@ -21,17 +21,17 @@ struct Meta {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<8> val;
-    bit<8> tmp;
-    bit<8> tmp_0;
-    bit<8> tmp_1;
+    @name("ingress.val_0") bit<8> val;
+    @name("ingress.tmp") bit<8> tmp;
+    @name("ingress.tmp_0") bit<8> tmp_0;
+    @name("ingress.tmp_1") bit<8> tmp_1;
     apply {
         val = 8w3;
         tmp = val;
         {
-            bit<8> some_input_0 = val;
-            bool hasReturned = false;
-            bit<8> retval;
+            @name("ingress.some_input_0") bit<8> some_input_0 = val;
+            @name("ingress.hasReturned") bool hasReturned = false;
+            @name("ingress.retval") bit<8> retval;
             some_input_0 = 8w1;
             hasReturned = true;
             retval = 8w1;

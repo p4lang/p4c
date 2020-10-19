@@ -32,7 +32,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".setb1") action setb1(bit<8> val, bit<9> port) {
         {
-            bit<8> dest = hdr.data.b1;
+            @name("ingress.dest") bit<8> dest = hdr.data.b1;
             dest = val;
             hdr.data.b1 = dest;
         }

@@ -1,7 +1,7 @@
 control c(inout bit<8> v) {
-    bool hasReturned;
-    bit<8> val_0;
-    bool hasReturned_0;
+    @name("c.hasReturned_0") bool hasReturned;
+    @name("c.val_0") bit<8> val_0;
+    @name("c.hasReturned") bool hasReturned_0;
     @hidden action issue2175l3() {
         val_0 = 8w1;
         hasReturned_0 = true;

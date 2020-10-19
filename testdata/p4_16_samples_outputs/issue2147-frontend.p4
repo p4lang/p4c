@@ -1,5 +1,5 @@
 control ingress(inout bit<8> h) {
-    bit<7> tmp_0;
+    @name("ingress.tmp") bit<7> tmp_0;
     @name("ingress.a") action a(inout bit<7> b) {
         h[0:0] = 1w0;
     }

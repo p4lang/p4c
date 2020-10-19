@@ -4,8 +4,8 @@ extern Y {
 }
 
 control d(out bit<32> x) {
-    bit<32> y_0;
-    bit<32> x_0;
+    @name("d.y") bit<32> y_0;
+    @name("d.x_0") bit<32> x_0;
     @name("d.cinst.y") Y(32w16) cinst_y;
     apply {
         x_0 = cinst_y.get();

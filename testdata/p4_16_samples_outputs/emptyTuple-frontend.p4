@@ -1,6 +1,6 @@
 typedef tuple<> emptyTuple;
 control c(out bool b) {
-    emptyTuple t_0;
+    @name("c.t") emptyTuple t_0;
     apply {
         t_0 = {  };
         if (t_0 == {  }) {

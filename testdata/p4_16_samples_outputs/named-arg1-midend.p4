@@ -8,8 +8,8 @@ parser par(out bool b) {
 }
 
 control c(out bool b) {
-    bit<16> xv_0;
-    bool b_1;
+    @name("c.xv") bit<16> xv_0;
+    @name("c.b_1") bool b_1;
     @name("c.a") action a() {
         xv_0 = 16w65533;
     }

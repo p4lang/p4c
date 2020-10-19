@@ -85,16 +85,16 @@ struct metadata {
 }
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    IPv4_up_to_ihl_only_h tmp;
-    bit<9> tmp_0;
-    bit<9> tmp_1;
-    bit<9> tmp_2;
-    bit<32> tmp_3;
-    tcp_upto_data_offset_only_h tmp_4;
-    bit<9> tmp_5;
-    bit<9> tmp_6;
-    bit<9> tmp_7;
-    bit<32> tmp_8;
+    @name("parserI.tmp") IPv4_up_to_ihl_only_h tmp;
+    @name("parserI.tmp_0") bit<9> tmp_0;
+    @name("parserI.tmp_1") bit<9> tmp_1;
+    @name("parserI.tmp_2") bit<9> tmp_2;
+    @name("parserI.tmp_3") bit<32> tmp_3;
+    @name("parserI.tmp_4") tcp_upto_data_offset_only_h tmp_4;
+    @name("parserI.tmp_5") bit<9> tmp_5;
+    @name("parserI.tmp_6") bit<9> tmp_6;
+    @name("parserI.tmp_7") bit<9> tmp_7;
+    @name("parserI.tmp_8") bit<32> tmp_8;
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {

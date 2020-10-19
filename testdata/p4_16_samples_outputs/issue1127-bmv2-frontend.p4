@@ -23,12 +23,12 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    headers tmp;
-    bit<8> tmp_0;
-    headers tmp_1;
-    bit<8> tmp_2;
-    headers hdr_0;
-    bit<8> op_0;
+    @name("cIngress.tmp") headers tmp;
+    @name("cIngress.tmp_0") bit<8> tmp_0;
+    @name("cIngress.tmp_1") headers tmp_1;
+    @name("cIngress.tmp_2") bit<8> tmp_2;
+    @name("cIngress.hdr_0") headers hdr_0;
+    @name("cIngress.op_0") bit<8> op_0;
     apply {
         tmp = hdr;
         tmp_0 = hdr.h1.op1;

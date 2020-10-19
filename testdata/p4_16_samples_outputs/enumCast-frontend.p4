@@ -31,9 +31,9 @@ struct O {
 }
 
 parser p(packet_in packet, out O o) {
-    bool bb_0;
-    E1 a_0;
-    E2 b_0;
+    @name("p.bb") bool bb_0;
+    @name("p.a") E1 a_0;
+    @name("p.b") E2 b_0;
     state start {
         a_0 = E1.e1;
         b_0 = E2.e2;

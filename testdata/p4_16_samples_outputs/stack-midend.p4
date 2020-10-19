@@ -4,7 +4,7 @@ header h {
 }
 
 parser p() {
-    h[4] stack_0;
+    @name("p.stack") h[4] stack_0;
     state start {
         stack_0[0].setInvalid();
         stack_0[1].setInvalid();
@@ -17,7 +17,7 @@ parser p() {
 }
 
 control c() {
-    h[4] stack_1;
+    @name("c.stack") h[4] stack_1;
     @hidden action stack39() {
         stack_1[3].setValid();
         stack_1[2] = stack_1[3];

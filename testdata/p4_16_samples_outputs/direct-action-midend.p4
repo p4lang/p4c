@@ -1,5 +1,5 @@
 control c(inout bit<16> y) {
-    bit<32> x_0;
+    @name("c.x") bit<32> x_0;
     @name("c.a") action a() {
         y = (bit<16>)x_0;
     }

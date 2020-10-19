@@ -62,7 +62,7 @@ control pipe(inout Headers_t headers, out bool pass) {
         const default_action = NoAction_0();
     }
     apply {
-        bool hasReturned = false;
+        @name("pipe.hasReturned") bool hasReturned = false;
         pass = true;
         if (!headers.ipv4.isValid()) {
             pass = false;

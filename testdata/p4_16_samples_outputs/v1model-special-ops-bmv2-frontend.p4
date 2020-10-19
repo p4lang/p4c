@@ -64,11 +64,11 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     @name(".my_drop") action my_drop_0(inout standard_metadata_t smeta_1) {
         mark_to_drop(smeta_1);
     }
-    bit<32> ipv4_address_0;
-    bit<8> byte0_0;
-    bit<8> byte1_0;
-    bit<8> byte2_0;
-    bit<8> byte3_0;
+    @name("ingress.ipv4_address_0") bit<32> ipv4_address_0;
+    @name("ingress.byte0_0") bit<8> byte0_0;
+    @name("ingress.byte1_0") bit<8> byte1_0;
+    @name("ingress.byte2_0") bit<8> byte2_0;
+    @name("ingress.byte3_0") bit<8> byte3_0;
     @name("ingress.set_l2ptr") action set_l2ptr(bit<32> l2ptr) {
         meta.fwd.l2ptr = l2ptr;
     }

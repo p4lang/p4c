@@ -113,7 +113,9 @@ IR::ID* RenameSymbols::getName() const {
 const IR::Node* RenameSymbols::postorder(IR::Declaration_Variable* decl) {
     auto name = getName();
     if (name != nullptr && *name != decl->name) {
+        auto annos = addNameAnnotation(decl->name, decl->annotations);
         decl->name = *name;
+        decl->annotations = annos;
     }
     return decl;
 }

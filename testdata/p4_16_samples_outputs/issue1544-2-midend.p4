@@ -1,7 +1,7 @@
 control c(inout bit<32> x) {
-    bit<32> tmp_3;
-    bit<32> tmp_9;
-    bit<32> tmp_10;
+    @name("c.tmp") bit<32> tmp_3;
+    @name("c.tmp") bit<32> tmp_9;
+    @name("c.tmp") bit<32> tmp_10;
     @hidden action issue15442l2() {
         tmp_3 = x + 32w1;
     }

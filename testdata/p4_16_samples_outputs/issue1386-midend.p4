@@ -42,7 +42,7 @@ control deparser(packet_out b, in Headers h) {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bool c_hasReturned;
+    @name("ingress.c.hasReturned") bool c_hasReturned;
     @hidden action issue1386l12() {
         c_hasReturned = true;
     }

@@ -23,7 +23,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<16> tmp_0;
+    @name("ingress.tmp") bit<16> tmp_0;
     standard_metadata_t smeta;
     @name(".my_drop") action my_drop() {
         smeta.ingress_port = standard_metadata.ingress_port;

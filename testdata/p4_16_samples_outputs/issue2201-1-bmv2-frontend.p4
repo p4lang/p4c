@@ -41,12 +41,12 @@ enum bit<10> MySerializableEnum_t {
 }
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    bool bool1_0;
-    bit<1> bit1_0;
-    MyEnum_t enum1_0;
-    MySerializableEnum_t serenum1_0;
-    int<8> signed1_0;
-    bit<8> unsigned1_0;
+    @name("ingressImpl.bool1") bool bool1_0;
+    @name("ingressImpl.bit1") bit<1> bit1_0;
+    @name("ingressImpl.enum1") MyEnum_t enum1_0;
+    @name("ingressImpl.serenum1") MySerializableEnum_t serenum1_0;
+    @name("ingressImpl.signed1") int<8> signed1_0;
+    @name("ingressImpl.unsigned1") bit<8> unsigned1_0;
     apply {
         bool1_0 = (bool)hdr.ethernet.dstAddr[0:0];
         log_msg<tuple<bool>>("bool1={}", { bool1_0 });

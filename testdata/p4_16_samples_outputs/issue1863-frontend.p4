@@ -4,7 +4,7 @@ struct S {
 }
 
 control c(out bit<1> b) {
-    S s_0;
+    @name("c.s") S s_0;
     apply {
         s_0 = (S){a = 1w0,b = 1w1};
         s_0 = (S){a = s_0.b,b = s_0.a};

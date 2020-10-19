@@ -69,15 +69,15 @@ struct headers {
 }
 
 parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<9> paddingLen_0;
-    bool currentISelected_0;
-    bit<8> hdrLeft_0;
-    bool currentISelected_1;
-    prot_i_t inf_0;
-    metadata meta_0;
-    bool currentISelected_2;
-    bit<8> currI_0;
-    bool subParser_currentISelected2;
+    @name("PROTParser.paddingLen") bit<9> paddingLen_0;
+    @name("PROTParser.currentISelected") bool currentISelected_0;
+    @name("PROTParser.hdrLeft") bit<8> hdrLeft_0;
+    @name("PROTParser.currentISelected") bool currentISelected_1;
+    @name("PROTParser.inf_0") prot_i_t inf_0;
+    @name("PROTParser.meta_0") metadata meta_0;
+    @name("PROTParser.currentISelected_2") bool currentISelected_2;
+    @name("PROTParser.currI_0") bit<8> currI_0;
+    @name("PROTParser.subParser.currentISelected2") bool subParser_currentISelected2;
     state start {
         packet.extract<preamble_t>(hdr.preamble);
         packet.extract<prot_common_t>(hdr.prot_common);

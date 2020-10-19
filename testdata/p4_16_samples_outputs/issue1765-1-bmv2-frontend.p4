@@ -183,8 +183,8 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
-    mac_addr_t mac_tmp_0;
-    ipv6_addr_t addr_tmp_0;
+    @name("MyIngress.mac_tmp") mac_addr_t mac_tmp_0;
+    @name("MyIngress.addr_tmp") ipv6_addr_t addr_tmp_0;
     @name("MyIngress.set_egress_port") action set_egress_port(port_t out_port) {
         standard_metadata.egress_spec = out_port;
     }

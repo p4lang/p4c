@@ -7,8 +7,8 @@ struct struct_t {
 }
 
 control ctrl(inout struct_t input, out bit<8> output) {
-    bit<8> tmp0_0;
-    bit<8> tmp1_0;
+    @name("ctrl.tmp0") bit<8> tmp0_0;
+    @name("ctrl.tmp1") bit<8> tmp1_0;
     @name("ctrl.act") action act() {
         tmp0_0 = input.stack[0].field;
         input.stack.pop_front(1);

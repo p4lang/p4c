@@ -45,7 +45,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         meta_2.multicast_group = (MulticastGroup_t)32w0;
         meta_2.egress_port = egress_port_2;
     }
-    bit<32> int_packet_path_0;
+    @name("cIngress.int_packet_path") bit<32> int_packet_path_0;
     @name("cIngress.record_ingress_ports_in_pkt") action record_ingress_ports_in_pkt() {
         hdr.output_data.word1 = (PortIdUint_t)istd.ingress_port;
     }

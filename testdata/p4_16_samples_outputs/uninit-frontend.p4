@@ -9,13 +9,13 @@ header Header {
 extern void func(in Header h);
 extern bit<32> g(inout bit<32> v, in bit<32> w);
 parser p1(packet_in p, out Header h) {
-    Header[2] stack_0;
-    bool c_0;
-    bool d_0;
-    bit<32> tmp;
-    bit<32> tmp_0;
-    bit<32> tmp_1;
-    bit<32> tmp_2;
+    @name("p1.stack") Header[2] stack_0;
+    @name("p1.c") bool c_0;
+    @name("p1.d") bool d_0;
+    @name("p1.tmp") bit<32> tmp;
+    @name("p1.tmp_0") bit<32> tmp_0;
+    @name("p1.tmp_1") bit<32> tmp_1;
+    @name("p1.tmp_2") bit<32> tmp_2;
     state start {
         h.data1 = 32w0;
         func(h);
@@ -47,10 +47,10 @@ parser p1(packet_in p, out Header h) {
 }
 
 control c(out bit<32> v) {
-    bit<32> d_1;
-    bit<32> setByAction_0;
-    bit<32> e_0;
-    bool touched_0;
+    @name("c.d") bit<32> d_1;
+    @name("c.setByAction") bit<32> setByAction_0;
+    @name("c.e") bit<32> e_0;
+    @name("c.touched") bool touched_0;
     @name("c.a1") action a1() {
         setByAction_0 = 32w1;
     }

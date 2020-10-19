@@ -24,19 +24,19 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.simple_action") action simple_action() {
-        bool hasReturned = false;
+        @name("ingress.hasReturned") bool hasReturned = false;
         if (h.eth_hdr.eth_type == 16w1) {
             hasReturned = true;
         }
         if (!hasReturned) {
             h.eth_hdr.src_addr = 48w1;
             {
-                Headers val1 = h;
+                @name("ingress.val1") Headers val1 = h;
                 {
-                    Headers val = val1;
-                    bool c_0;
-                    bool c1_0;
-                    bool c2_0;
+                    @name("ingress.val") Headers val = val1;
+                    @name("ingress.c") bool c_0;
+                    @name("ingress.c1") bool c1_0;
+                    @name("ingress.c2") bool c2_0;
                     c_0 = true;
                     c1_0 = false;
                     c2_0 = true;

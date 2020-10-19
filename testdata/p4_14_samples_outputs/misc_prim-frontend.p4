@@ -39,11 +39,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    bit<32> tmp;
-    bit<32> tmp_0;
-    int<32> tmp_1;
-    int<32> tmp_2;
-    int<32> tmp_3;
+    @name("ingress.tmp") bit<32> tmp;
+    @name("ingress.tmp_0") bit<32> tmp_0;
+    @name("ingress.tmp_1") int<32> tmp_1;
+    @name("ingress.tmp_2") int<32> tmp_2;
+    @name("ingress.tmp_3") int<32> tmp_3;
     @name(".action_0") action action_0() {
         hdr.pkt.field_a_32 = ~((bit<32>)hdr.pkt.field_b_32 | hdr.pkt.field_c_32);
     }

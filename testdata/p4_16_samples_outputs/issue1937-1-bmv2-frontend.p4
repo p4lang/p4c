@@ -21,8 +21,8 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name(".foo") action foo_0(out bit<8> x_1, in bit<8> y_1=5) {
         x_1 = y_1 >> 2;
     }
-    bit<8> tmp;
-    bit<8> tmp_0;
+    @name("ingressImpl.tmp") bit<8> tmp;
+    @name("ingressImpl.tmp_0") bit<8> tmp_0;
     apply {
         tmp_0 = hdr.h1.f1;
         foo(tmp, tmp_0);

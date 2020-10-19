@@ -7,10 +7,10 @@ struct struct_t {
 }
 
 control ctrl(inout struct_t input, out bit<8> out1, out header_h out2) {
-    bit<8> tmp0_0;
-    bit<8> tmp1_0;
-    header_h tmp2_0;
-    header_h tmp3_0;
+    @name("ctrl.tmp0") bit<8> tmp0_0;
+    @name("ctrl.tmp1") bit<8> tmp1_0;
+    @name("ctrl.tmp2") header_h tmp2_0;
+    @name("ctrl.tmp3") header_h tmp3_0;
     @name("ctrl.act") action act() {
         tmp0_0 = input.hdr.field;
         input.hdr.setValid();

@@ -178,7 +178,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         }
         default_action = NoAction_0();
     }
-    PortId_t forwarding_mask;
+    @name("FabricIngress.forwarding.mask") PortId_t forwarding_mask;
     @name("FabricIngress.forwarding.fwd") action forwarding_fwd_0(PortId_t next_port) {
         standard_metadata.egress_spec = next_port;
     }

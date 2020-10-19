@@ -11,7 +11,7 @@ struct metadata_t {
 }
 
 control I(inout metadata_t meta) {
-    H h_0;
+    @name("I.h") H h_0;
     apply {
         if (meta.foo == (PortId_t){_v = 9w192}) {
             meta.foo._v = meta.foo._v + 9w1;

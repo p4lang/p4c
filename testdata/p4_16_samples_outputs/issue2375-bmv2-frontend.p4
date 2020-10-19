@@ -25,7 +25,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    bool tmp_0;
+    @name("ingress.tmp") bool tmp_0;
     @name("ingress.do_action") action do_action(inout bool val1, inout bool val2) {
     }
     @name("ingress.simple_table") table simple_table_0 {

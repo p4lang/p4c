@@ -11,18 +11,18 @@ struct Headers {
 }
 
 control ingress(inout Headers h) {
-    Headers foo_0;
-    ethernet_t tmp;
-    bit<48> tmp_0;
-    bit<48> tmp_1;
-    bit<16> tmp_2;
-    bit<16> tmp_3;
+    @name("ingress.foo") Headers foo_0;
+    @name("ingress.tmp") ethernet_t tmp;
+    @name("ingress.tmp_0") bit<48> tmp_0;
+    @name("ingress.tmp_1") bit<48> tmp_1;
+    @name("ingress.tmp_2") bit<16> tmp_2;
+    @name("ingress.tmp_3") bit<16> tmp_3;
     apply {
         tmp_0 = 48w1;
         tmp_1 = 48w1;
         {
-            bool hasReturned = false;
-            bit<16> retval;
+            @name("ingress.hasReturned") bool hasReturned = false;
+            @name("ingress.retval") bit<16> retval;
             hasReturned = true;
             retval = 16w1;
             tmp_3 = retval;
@@ -32,8 +32,8 @@ control ingress(inout Headers h) {
         tmp = (ethernet_t){dst_addr = tmp_0,src_addr = tmp_1,eth_type = tmp_2};
         foo_0 = (Headers){eth_hdr = tmp};
         {
-            bool hasReturned_0 = false;
-            ethernet_t retval_0;
+            @name("ingress.hasReturned_0") bool hasReturned_0 = false;
+            @name("ingress.retval_0") ethernet_t retval_0;
             hasReturned_0 = true;
             retval_0.setValid();
             retval_0 = (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1};

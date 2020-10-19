@@ -57,13 +57,13 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    bool c_0;
-    bit<16> x_0;
-    bit<16> y_0;
-    bit<16> z_0;
+    @name("MyIngress.c") bool c_0;
+    @name("MyIngress.x") bit<16> x_0;
+    @name("MyIngress.y") bit<16> y_0;
+    @name("MyIngress.z") bit<16> z_0;
     @name("MyIngress.ipv4_forward") action ipv4_forward() {
         {
-            bit<16> value_1;
+            @name("MyIngress.value_1") bit<16> value_1;
             x_0 = hdr.ipv4.identification;
             y_0 = hdr.ipv4.hdrChecksum;
             z_0 = hdr.ipv4.totalLen;

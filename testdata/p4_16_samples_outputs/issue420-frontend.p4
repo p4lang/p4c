@@ -35,7 +35,7 @@ control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_m
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("cIngress.foo") action foo(bit<16> bar) {
-        bool hasReturned = false;
+        @name("cIngress.hasReturned") bool hasReturned = false;
         if (bar == 16w0xf00d) {
             hdr.ethernet.srcAddr = 48w0xdeadbeeff00d;
             hasReturned = true;
@@ -54,7 +54,7 @@ control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_m
         default_action = NoAction_0();
     }
     apply {
-        bool hasReturned_0 = false;
+        @name("cIngress.hasReturned_0") bool hasReturned_0 = false;
         tbl1_0.apply();
         hasReturned_0 = true;
     }

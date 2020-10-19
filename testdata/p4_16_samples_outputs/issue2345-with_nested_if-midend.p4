@@ -25,9 +25,9 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     ethernet_t val1_eth_hdr;
     ethernet_t val_eth_hdr;
-    bool c_0;
-    bool c1_0;
-    bool c2_0;
+    @name("ingress.c") bool c_0;
+    @name("ingress.c1") bool c1_0;
+    @name("ingress.c2") bool c2_0;
     @name("ingress.simple_action") action simple_action() {
         h.eth_hdr.src_addr = (h.eth_hdr.eth_type != 16w1 ? 48w1 : h.eth_hdr.src_addr);
         val1_eth_hdr = (h.eth_hdr.eth_type != 16w1 ? h.eth_hdr : val1_eth_hdr);

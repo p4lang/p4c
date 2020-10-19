@@ -230,7 +230,7 @@ control FabricVerifyChecksum(inout parsed_headers_t hdr, inout fabric_metadata_t
 }
 
 parser FabricParser(packet_in packet, out parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata, inout standard_metadata_t standard_metadata) {
-    bit<4> tmp_0;
+    @name("FabricParser.tmp_0") bit<4> tmp_0;
     state start {
         transition select(standard_metadata.ingress_port) {
             9w255: parse_packet_out;
@@ -352,8 +352,8 @@ control FabricDeparser(packet_out packet, in parsed_headers_t hdr) {
 
 control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata, inout standard_metadata_t standard_metadata) {
     bool hasExited;
-    bool spgw_normalizer_hasReturned;
-    bool spgw_ingress_hasReturned;
+    @name("FabricIngress.spgw_normalizer.hasReturned") bool spgw_normalizer_hasReturned;
+    @name("FabricIngress.spgw_ingress.hasReturned_0") bool spgw_ingress_hasReturned;
     @name(".nop") action nop() {
     }
     @name(".nop") action nop_0() {

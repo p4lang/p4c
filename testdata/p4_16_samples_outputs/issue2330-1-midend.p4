@@ -23,9 +23,9 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<48> tmp;
-    bit<16> val1_0;
-    bit<48> val2_0;
+    @name("ingress.tmp") bit<48> tmp;
+    @name("ingress.val1_0") bit<16> val1_0;
+    @name("ingress.val2_0") bit<48> val2_0;
     @name("ingress.do_action") action do_action() {
         val1_0 = (h.eth_hdr.dst_addr != 48w0 ? h.eth_hdr.eth_type : val1_0);
         val2_0 = (h.eth_hdr.dst_addr != 48w0 ? h.eth_hdr.src_addr : val2_0);

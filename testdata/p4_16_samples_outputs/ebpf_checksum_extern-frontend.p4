@@ -39,7 +39,7 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    bool verified_0;
+    @name("pipe.verified") bool verified_0;
     apply {
         verified_0 = verify_ipv4_checksum(headers.ipv4);
         pass = verified_0;

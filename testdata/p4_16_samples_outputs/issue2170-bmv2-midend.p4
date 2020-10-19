@@ -37,7 +37,7 @@ parser p(packet_in pkt, out Parsed_packet hdr, inout Metadata meta, inout standa
 }
 
 control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_metadata_t stdmeta) {
-    bool hasReturned;
+    @name("ingress.hasReturned") bool hasReturned;
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("ingress.do_something") action do_something() {

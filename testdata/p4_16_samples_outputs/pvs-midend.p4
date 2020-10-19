@@ -5,7 +5,7 @@ header H {
 }
 
 parser p(packet_in pk) {
-    H h_0;
+    @name("p.h") H h_0;
     @name("p.vs") value_set<tuple<bit<32>, bit<2>>>(4) vs_0;
     state start {
         pk.extract<H>(h_0);

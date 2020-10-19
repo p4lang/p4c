@@ -4,8 +4,8 @@ header h {
 }
 
 parser p() {
-    h[4] stack_0;
-    h b_0;
+    @name("p.stack") h[4] stack_0;
+    @name("p.b") h b_0;
     state start {
         stack_0[0].setInvalid();
         stack_0[1].setInvalid();
@@ -19,8 +19,8 @@ parser p() {
 }
 
 control c() {
-    h[4] stack_1;
-    h b_1;
+    @name("c.stack") h[4] stack_1;
+    @name("c.b") h b_1;
     apply {
         stack_1[3].setValid();
         b_1 = stack_1[3];

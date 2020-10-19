@@ -9,16 +9,16 @@ struct S {
 }
 
 control c(out bit<1> x) {
-    varbit<32> a_0;
-    varbit<32> b_0;
-    H h1_0;
-    H h2_0;
+    @name("c.a") varbit<32> a_0;
+    @name("c.b") varbit<32> b_0;
+    @name("c.h1") H h1_0;
+    @name("c.h2") H h2_0;
     bit<32> s1_0_a;
     H s1_0_h;
     bit<32> s2_0_a;
     H s2_0_h;
-    H[2] a1_0;
-    H[2] a2_0;
+    @name("c.a1") H[2] a1_0;
+    @name("c.a2") H[2] a2_0;
     @hidden action equality23() {
         x = 1w1;
     }

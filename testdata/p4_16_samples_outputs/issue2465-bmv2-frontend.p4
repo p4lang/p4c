@@ -15,7 +15,7 @@ struct m {
 }
 
 parser MyParser(packet_in b, out h hdrs, inout m meta, inout standard_metadata_t std) {
-    h l_0;
+    @name("MyParser.l") h l_0;
     state start {
         l_0.h[0].setInvalid();
         l_0.h[1].setInvalid();

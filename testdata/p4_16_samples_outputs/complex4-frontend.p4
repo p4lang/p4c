@@ -4,10 +4,10 @@ extern E {
 }
 
 control c(inout bit<32> r) {
-    bit<32> tmp;
-    bit<32> tmp_0;
-    bit<32> tmp_1;
-    bit<32> tmp_2;
+    @name("c.tmp") bit<32> tmp;
+    @name("c.tmp_0") bit<32> tmp_0;
+    @name("c.tmp_1") bit<32> tmp_1;
+    @name("c.tmp_2") bit<32> tmp_2;
     @name("c.e") E() e_0;
     apply {
         tmp_0 = e_0.f(32w4);

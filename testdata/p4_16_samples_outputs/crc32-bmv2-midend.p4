@@ -27,9 +27,9 @@ struct metadata {
 }
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    p4calc_t tmp_0;
-    p4calc_t tmp_2;
-    p4calc_t tmp_4;
+    @name("MyParser.tmp_1") p4calc_t tmp_0;
+    @name("MyParser.tmp_3") p4calc_t tmp_2;
+    @name("MyParser.tmp_5") p4calc_t tmp_4;
     bit<128> tmp_6;
     bit<128> tmp_7;
     bit<128> tmp_8;
@@ -89,8 +89,8 @@ struct tuple_0 {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<48> tmp_5;
-    bit<32> nselect_0;
+    @name("MyIngress.tmp") bit<48> tmp_5;
+    @name("MyIngress.nselect") bit<32> nselect_0;
     @name("MyIngress.operation_add") action operation_add() {
         hdr.p4calc.res = hdr.p4calc.operand_a + hdr.p4calc.operand_b;
         tmp_5 = hdr.ethernet.dstAddr;

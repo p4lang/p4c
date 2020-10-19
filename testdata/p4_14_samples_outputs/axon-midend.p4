@@ -36,7 +36,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<64> tmp_0;
+    @name("ParserImpl.tmp_0") bit<64> tmp_0;
     @name(".parse_fwdHop") state parse_fwdHop {
         packet.extract<axon_hop_t>(hdr.axon_fwdHop.next);
         meta._my_metadata_fwdHopCount0 = meta._my_metadata_fwdHopCount0 + 8w255;

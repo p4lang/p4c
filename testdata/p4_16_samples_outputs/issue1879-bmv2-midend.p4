@@ -69,7 +69,7 @@ struct headers {
 }
 
 parser PROTParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    prot_i_t inf_0;
+    @name("PROTParser.inf_0") prot_i_t inf_0;
     bit<8> meta_0_currPos;
     currenti_t meta_0_currenti;
     state start {

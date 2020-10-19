@@ -86,8 +86,8 @@ struct metadata {
 }
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    IPv4_up_to_ihl_only_h tmp;
-    tcp_upto_data_offset_only_h tmp_4;
+    @name("parserI.tmp") IPv4_up_to_ihl_only_h tmp;
+    @name("parserI.tmp_4") tcp_upto_data_offset_only_h tmp_4;
     bit<8> tmp_9;
     bit<104> tmp_10;
     state start {
