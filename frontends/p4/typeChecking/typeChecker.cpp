@@ -1954,6 +1954,7 @@ const IR::Node* TypeInference::postorder(IR::StructExpression* expression) {
         components->push_back(new IR::StructField(c->name, type));
     }
 
+    // This is the type inferred by looking at the fields.
     const IR::Type* structType = new IR::Type_UnknownStruct(
         expression->srcInfo, "unknown struct", *components);
     structType = canonicalize(structType);
@@ -2445,13 +2446,16 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
     if (sourceType == nullptr || castType == nullptr)
         return expression;
 
-    if (auto st = castType->to<IR::Type_StructLike>()) {
+    auto concreteType = castType;
+    if (auto tsc = castType->to<IR::Type_SpecializedCanonical>())
+        concreteType = tsc->substituted;
+    if (auto st = concreteType->to<IR::Type_StructLike>()) {
         if (auto se = expression->expr->to<IR::StructExpression>()) {
             // Interpret (S) { kvpairs } as a struct initializer expression
             // instead of a cast to a struct.
             if (se->type == nullptr || se->type->is<IR::Type_Unknown>() ||
                 se->type->is<IR::Type_UnknownStruct>()) {
-                auto type = new IR::Type_Name(st->name);
+                auto type = castType->getP4Type();
                 setType(type, new IR::Type_Type(st));
                 auto sie = new IR::StructExpression(
                     se->srcInfo, type, se->components);
