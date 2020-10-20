@@ -421,9 +421,14 @@ class ListExpression : Expression {
 class StructExpression : Expression {
     /// The struct or header type that is being intialized.
     /// May only be known after type checking; so it can be nullptr.
-    NullOK optional Type_Name typeName;
+    NullOK Type structType;
     inline IndexedVector<NamedExpression> components;
-    validate { components.check_null(); components.validate(); }
+    validate {
+        components.check_null(); components.validate();
+        BUG_CHECK(structType == nullptr || structType->is<IR::Type_Name>() ||
+                  structType->is<IR::Type_Specialized>(),
+                  "%1%: unexpected struct type", this);
+    }
     size_t size() const { return components.size(); }
 }
 

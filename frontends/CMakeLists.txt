@@ -53,6 +53,7 @@ set (P4_FRONTEND_SRCS
   p4/simplifyParsers.cpp
   p4/specialize.cpp
   p4/specializeGenericFunctions.cpp
+  p4/specializeGenericTypes.cpp
   p4/strengthReduction.cpp
   p4/structInitializers.cpp
   p4/switchAddDefault.cpp
@@ -119,6 +120,7 @@ set (P4_FRONTEND_HDRS
   p4/simplifyParsers.h
   p4/specialize.h
   p4/specializeGenericFunctions.h
+  p4/specializeGenericTypes.h
   p4/strengthReduction.h
   p4/structInitializers.h
   p4/switchAddDefault.h

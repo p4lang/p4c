@@ -146,6 +146,7 @@ class TypeConstraint : public IHasDbPrint {
             }
             o = constraint->origin;
             constraint = constraint->derivedFrom;
+
         }
         // Indent each string in the message
         std::string s = message.c_str();

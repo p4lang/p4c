@@ -493,6 +493,7 @@ bool ToP4::process(const IR::Type_StructLike* t, const char* name) {
         visit(t->annotations);
         builder.appendFormat("%s ", name); }
     builder.append(t->name);
+    visit(t->typeParameters);
     if (!isDeclaration)
         return false;
     builder.spc();
@@ -855,9 +856,9 @@ bool ToP4::preorder(const IR::NamedExpression* e) {
 bool ToP4::preorder(const IR::StructExpression* e) {
     if (expressionPrecedence > DBPrint::Prec_Prefix)
         builder.append("(");
-    if (e->typeName != nullptr) {
+    if (e->structType != nullptr) {
         builder.append("(");
-        visit(e->typeName);
+        visit(e->structType);
         builder.append(")");
     }
     builder.append("{");

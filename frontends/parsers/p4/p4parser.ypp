@@ -228,7 +228,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %type<IR::Direction>        direction
 %type<IR::Path*>            prefixedNonTypeName prefixedType
 %type<IR::IndexedVector<IR::Type_Var>*>  typeParameterList
-%type<IR::TypeParameters*>  optTypeParameters
+%type<IR::TypeParameters*>  optTypeParameters typeParameters
 %type<IR::Expression*>      expression lvalue keysetExpression selectExpression
                             stateExpression optInitializer initializer
                             simpleKeysetExpression transitionStatement switchLabel
@@ -1001,7 +1001,11 @@ typeOrVoid
 
 optTypeParameters
     : /* empty */               { $$ = new IR::TypeParameters(); }
-    | l_angle typeParameterList r_angle { $$ = new IR::TypeParameters(@1+@3, *$2); }
+    | typeParameters            { $$ = $1; }
+    ;
+
+typeParameters
+    : l_angle typeParameterList r_angle { $$ = new IR::TypeParameters(@1+@3, *$2); }
     ;
 
 typeParameterList
@@ -1056,18 +1060,36 @@ headerTypeDeclaration
     : optAnnotations
         HEADER name { driver.structure->declareType(*$3); }
         "{" structFieldList "}" { $$ = new IR::Type_Header(@3, *$3, $1, *$6); }
+    | optAnnotations  // experimental
+        HEADER name typeParameters { driver.structure->declareType(*$3);
+                                     driver.structure->markAsTemplate(*$3);
+                                     driver.structure->declareTypes(&$4->parameters); }
+        "{" structFieldList "}" { $$ = new IR::Type_Header(@3, *$3, $1, $4, *$7);
+                                  driver.structure->pop(); }
     ;
 
 structTypeDeclaration
     : optAnnotations
         STRUCT name { driver.structure->declareType(*$3); }
         "{" structFieldList "}" { $$ = new IR::Type_Struct(@3, *$3, $1, *$6); }
+    | optAnnotations  // experimental
+        STRUCT name typeParameters { driver.structure->pushContainerType(*$3, true);
+                                     driver.structure->markAsTemplate(*$3);
+                                     driver.structure->declareTypes(&$4->parameters); }
+        "{" structFieldList "}" { $$ = new IR::Type_Struct(@3, *$3, $1, $4, *$7);
+                                  driver.structure->pop(); }
     ;
 
 headerUnionDeclaration
     : optAnnotations
         HEADER_UNION name { driver.structure->declareType(*$3); }
         "{" structFieldList "}" { $$ = new IR::Type_HeaderUnion(@3, *$3, $1, *$6); }
+    | optAnnotations  // experimental
+        HEADER_UNION name typeParameters { driver.structure->declareType(*$3);
+                                     driver.structure->markAsTemplate(*$3);
+                                     driver.structure->declareTypes(&$4->parameters); }
+        "{" structFieldList "}" { $$ = new IR::Type_HeaderUnion(@3, *$3, $1, $4, *$7);
+                                  driver.structure->pop(); }
     ;
 
 structFieldList
