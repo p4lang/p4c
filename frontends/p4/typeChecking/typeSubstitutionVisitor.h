@@ -19,6 +19,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "typeSubstitution.h"
+#include "frontends/p4/typeMap.h"
 
 namespace P4 {
 
@@ -55,6 +56,26 @@ class TypeVariableSubstitutionVisitor : public Transform {
     { return replacement(getOriginal<IR::Type_Var>(), tv); }
     const IR::Node* preorder(IR::Type_InfInt* ti) override
     { return replacement(getOriginal<IR::Type_InfInt>(), ti); }
+};
+
+class TypeSubstitutionVisitor : public TypeVariableSubstitutionVisitor {
+    TypeMap* typeMap;
+
+ public:
+    TypeSubstitutionVisitor(TypeMap* typeMap, TypeVariableSubstitution* ts) :
+            TypeVariableSubstitutionVisitor(ts), typeMap(typeMap) {
+        CHECK_NULL(typeMap); setName("TypeSubstitutionVisitor"); }
+    const IR::Node* postorder(IR::PathExpression* path) override {
+        // We want fresh nodes for variables, etc.
+        return new IR::PathExpression(path->path->clone()); }
+    const IR::Node* postorder(IR::Type_Name* type) override {
+        auto actual = typeMap->getTypeType(getOriginal<IR::Type_Name>(), true);
+        if (auto tv = actual->to<IR::ITypeVar>()) {
+            LOG3("Replacing " << tv);
+            return replacement(tv, type);
+        }
+        return type;
+    }
 };
 
 }  // namespace P4
