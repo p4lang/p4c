@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc.
+Copyright 2020 Intel Corp.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,22 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef BACKENDS_BMV2_PSA_SWITCH_OPTIONS_H_
-#define BACKENDS_BMV2_PSA_SWITCH_OPTIONS_H_
+
+#ifndef BACKENDS_DPDK_PSA_SWITCH_OPTIONS_H_
+#define BACKENDS_DPDK_PSA_SWITCH_OPTIONS_H_
 
 #include "backends/bmv2/common/options.h"
-#include "backends/bmv2/psa_switch/midend.h"
+#include "backends/dpdk/midend.h"
 
-namespace BMV2 {
+namespace DPDK {
 
-class PsaSwitchOptions : public BMV2Options {
+class PsaSwitchOptions : public BMV2::BMV2Options {
  public:
     PsaSwitchOptions() {
         registerOption("--listMidendPasses", nullptr,
                 [this](const char*) {
                     listMidendPasses = true;
                     loadIRFromJson = false;
-                    BMV2::PsaSwitchMidEnd midEnd(*this, outStream);
+                    DPDK::PsaSwitchMidEnd midEnd(*this, outStream);
                     exit(0);
                     return false; },
                 "[PsaSwitch back-end] Lists exact name of all midend passes.\n");
@@ -38,6 +39,6 @@ class PsaSwitchOptions : public BMV2Options {
 
 using PsaSwitchContext = P4CContextWithOptions<PsaSwitchOptions>;
 
-};  // namespace BMV2
+};  // namespace DPDK
 
-#endif /* BACKENDS_BMV2_PSA_SWITCH_OPTIONS_H_ */
+#endif /* BACKENDS_DPDK_PSA_SWITCH_OPTIONS_H_ */

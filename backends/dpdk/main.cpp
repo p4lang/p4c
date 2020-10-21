@@ -14,125 +14,127 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <stdio.h>
-#include <string>
+#include <cstdio>
 #include <iostream>
+#include <string>
+#include <fstream>
 
-#include "ir/ir.h"
+#include "backends/bmv2/common/JsonObjects.h"
+#include "backends/bmv2/common/backend.h"
+#include "backends/bmv2/psa_switch/version.h"
+#include "backends/dpdk/midend.h"
+#include "backends/dpdk/backend.h"
+#include "backends/dpdk/options.h"
 #include "control-plane/p4RuntimeSerializer.h"
 #include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
+#include "ir/ir.h"
+#include "ir/json_loader.h"
 #include "lib/error.h"
 #include "lib/exceptions.h"
 #include "lib/gc.h"
 #include "lib/log.h"
 #include "lib/nullstream.h"
-#include "backends/bmv2/common/JsonObjects.h"
-#include "backends/bmv2/psa_switch/midend.h"
-#include "backends/bmv2/psa_switch/options.h"
-#include "backends/bmv2/psa_switch/version.h"
-#include "backends/bmv2/common/backend.h"
-#include "backends/dpdk/backend.h"
-#include "ir/json_loader.h"
-#include "fstream"
 
 int main(int argc, char *const argv[]) {
-    setup_gc_logging();
+  setup_gc_logging();
 
-    AutoCompileContext autoPsaSwitchContext(new BMV2::PsaSwitchContext);
-    auto& options = BMV2::PsaSwitchContext::get().options();
-    options.langVersion = CompilerOptions::FrontendVersion::P4_16;
-    options.compilerVersion = BMV2_PSA_VERSION_STRING;
+  AutoCompileContext autoPsaSwitchContext(new DPDK::PsaSwitchContext);
+  auto &options = DPDK::PsaSwitchContext::get().options();
+  options.langVersion = CompilerOptions::FrontendVersion::P4_16;
+  options.compilerVersion = BMV2_PSA_VERSION_STRING;
 
-    if (options.process(argc, argv) != nullptr) {
-            if (options.loadIRFromJson == false)
-                    options.setInputFile();
-    }
-    if (::errorCount() > 0)
-        return 1;
+  if (options.process(argc, argv) != nullptr) {
+    if (options.loadIRFromJson == false)
+      options.setInputFile();
+  }
+  if (::errorCount() > 0)
+    return 1;
 
-    auto hook = options.getDebugHook();
+  auto hook = options.getDebugHook();
 
-    const IR::P4Program *program = nullptr;
-    const IR::ToplevelBlock* toplevel = nullptr;
+  const IR::P4Program *program = nullptr;
+  const IR::ToplevelBlock *toplevel = nullptr;
 
+  if (options.loadIRFromJson == false) {
+    program = P4::parseP4File(options);
 
-    if (options.loadIRFromJson == false) {
-        program = P4::parseP4File(options);
-
-        if (program == nullptr || ::errorCount() > 0)
-            return 1;
-        try {
-            P4::P4COptionPragmaParser optionsPragmaParser;
-            program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
-
-            P4::FrontEnd frontend;
-            frontend.addDebugHook(hook);
-            program = frontend.run(options, program);
-        } catch (const std::exception &bug) {
-            std::cerr << bug.what() << std::endl;
-            return 1;
-        }
-        if (program == nullptr || ::errorCount() > 0)
-            return 1;
-    } else {
-        std::filebuf fb;
-        if (fb.open(options.file, std::ios::in) == nullptr) {
-            ::error("%s: No such file or directory.", options.file);
-            return 1;
-        }
-        std::istream inJson(&fb);
-        JSONLoader jsonFileLoader(inJson);
-        if (jsonFileLoader.json == nullptr) {
-            ::error("Not valid input file");
-            return 1;
-        }
-        program = new IR::P4Program(jsonFileLoader);
-        fb.close();
-    }
-
-    P4::serializeP4RuntimeIfRequired(program, options);
-    if (::errorCount() > 0)
-        return 1;
-
-    BMV2::PsaSwitchMidEnd midEnd(options);
-    midEnd.addDebugHook(hook);
+    if (program == nullptr || ::errorCount() > 0)
+      return 1;
     try {
-        toplevel = midEnd.process(program);
-        if (::errorCount() > 1 || toplevel == nullptr ||
-            toplevel->getMain() == nullptr)
-            return 1;
-        if (options.dumpJsonFile)
-            JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
+      P4::P4COptionPragmaParser optionsPragmaParser;
+      program->apply(P4::ApplyOptionsPragmas(optionsPragmaParser));
+
+      P4::FrontEnd frontend;
+      frontend.addDebugHook(hook);
+      program = frontend.run(options, program);
     } catch (const std::exception &bug) {
-        std::cerr << bug.what() << std::endl;
-        return 1;
+      std::cerr << bug.what() << std::endl;
+      return 1;
     }
-    if (::errorCount() > 0)
-        return 1;
-
-    auto backend = new DPDK::PsaSwitchBackend(options, &midEnd.refMap,
-            &midEnd.typeMap, &midEnd.enumMap);
-
-    // Necessary because BMV2Context is expected at the top of stack in further processing
-    AutoCompileContext autoContext(new BMV2::BMV2Context(BMV2::PsaSwitchContext::get()));
-    try {
-        backend->convert(toplevel);
-    } catch (const std::exception &bug) {
-        std::cerr << bug.what() << std::endl;
-        return 1;
+    if (program == nullptr || ::errorCount() > 0)
+      return 1;
+  } else {
+    std::filebuf fb;
+    if (fb.open(options.file, std::ios::in) == nullptr) {
+      ::error("%s: No such file or directory.", options.file);
+      return 1;
     }
-    if (::errorCount() > 0)
-        return 1;
-
-    if (!options.outputFile.isNullOrEmpty()) {
-        std::ostream* out = openFile(options.outputFile, false);
-        if (out != nullptr) {
-            backend->codegen(*out);
-            out->flush();
-        }
+    std::istream inJson(&fb);
+    JSONLoader jsonFileLoader(inJson);
+    if (jsonFileLoader.json == nullptr) {
+      ::error("Not valid input file");
+      return 1;
     }
+    program = new IR::P4Program(jsonFileLoader);
+    fb.close();
+  }
 
-    return ::errorCount() > 0;
+  P4::serializeP4RuntimeIfRequired(program, options);
+  if (::errorCount() > 0)
+    return 1;
+
+  DPDK::PsaSwitchMidEnd midEnd(options);
+  midEnd.addDebugHook(hook);
+  try {
+    toplevel = midEnd.process(program);
+    if (::errorCount() > 1 || toplevel == nullptr ||
+        toplevel->getMain() == nullptr)
+      return 1;
+    if (options.dumpJsonFile)
+      JSONGenerator(*openFile(options.dumpJsonFile, true), true)
+          << program << std::endl;
+  } catch (const std::exception &bug) {
+    std::cerr << bug.what() << std::endl;
+    return 1;
+  }
+  if (::errorCount() > 0)
+    return 1;
+
+  auto backend = new DPDK::PsaSwitchBackend(options, &midEnd.refMap,
+                                            &midEnd.typeMap, &midEnd.enumMap);
+
+  // Necessary because BMV2Context is expected at the top of stack in further
+  // processing
+  AutoCompileContext autoContext(
+      new BMV2::BMV2Context(DPDK::PsaSwitchContext::get()));
+  try {
+    backend->convert(toplevel);
+  } catch (const std::exception &bug) {
+    std::cerr << bug.what() << std::endl;
+    return 1;
+  }
+  if (::errorCount() > 0)
+    return 1;
+
+  if (!options.outputFile.isNullOrEmpty()) {
+    std::ostream *out = openFile(options.outputFile, false);
+    if (out != nullptr) {
+      backend->codegen(*out);
+      out->flush();
+    }
+  }
+
+  return ::errorCount() > 0;
 }

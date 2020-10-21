@@ -13,7 +13,6 @@
 # limitations under the License.
 
 set(P4C_DPDK_SOURCES
-    midend.cpp
     ../bmv2/common/helpers.cpp
     ../bmv2/common/JsonObjects.cpp
     ../bmv2/common/action.cpp
@@ -33,6 +32,7 @@ set(P4C_DPDK_SOURCES
     ../bmv2/psa_switch/psaSwitch.cpp
     backend.cpp
     main.cpp
+    midend.cpp
     dpdkHelpers.cpp
     dpdkProgram.cpp
     dpdkVarCollector.cpp
@@ -66,12 +66,14 @@ set(P4C_DPDK_HEADERS
     ../bmv2/common/sharedActionSelectorCheck.h
     ../bmv2/psa_switch/psaSwitch.h
     backend.h
+    midend.h
     dpdkHelpers.h
     dpdkProgram.h
     dpdkVarCollector.h
     dpdkArch.h
     dpdkAsmOpt.h
     elimTypedef.h
+    options.h
     )
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/dpdk.def PARENT_SCOPE)
