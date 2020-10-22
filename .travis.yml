@@ -53,9 +53,9 @@ script:
 # We only test the front end and some mid end passes for now.
 jobs:
   include:
-    - install:
-        - docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg ENABLE_GMP=$ENABLE_GMP --build-arg VALIDATION=ON .
     - name: "Validation"
       os: linux
+      install:
+        - docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg ENABLE_GMP=$ENABLE_GMP --build-arg VALIDATION=ON .
       script:
         - docker run -w /gauntlet p4c python3.6 -m pytest test.py -vrf -k "test_p4c" -n $CTEST_PARALLEL_LEVEL --suppress-crashes
