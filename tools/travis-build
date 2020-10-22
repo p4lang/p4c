@@ -104,7 +104,9 @@ function build_gauntlet() {
 
 # These steps are necessary to validate the correct compilation of the P4C test
 # suite programs. See also https://github.com/p4gauntlet/gauntlet.
-build_gauntlet
+if [ "$VALIDATION" == "ON" ]; then
+  build_gauntlet
+fi
 # ! ------  END VALIDATION -----------------------------------------------
 
 
