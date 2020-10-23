@@ -125,6 +125,185 @@ public:
   InjectJumboStruct(CollectMetadataHeaderInfo *info) : info(info) {}
   const IR::Node *preorder(IR::Type_Struct *s) override;
 };
+
+// This class is helpful for StatementUnroll and IfStatementUnroll. Since dpdk
+// asm is not able to process complex expression, e.g., a = b + c * d. We need
+// break it down. Therefore, we need some temporary variables to hold the
+// intermediate values. And this class is helpful to inject the declarations of
+// temporary value into P4Control and P4Parser.
+class DeclarationInjector {
+  std::map<const IR::Node *, IR::IndexedVector<IR::Declaration> *> decl_map;
+
+public:
+  // push the declaration to the right code block.
+  void collect(const IR::P4Control *control, const IR::P4Parser *parser,
+               const IR::Declaration *decl) {
+    IR::IndexedVector<IR::Declaration> *decls;
+    if (parser) {
+      auto res = decl_map.find(parser);
+      if (res != decl_map.end()) {
+        decls = res->second;
+      } else {
+        decls = new IR::IndexedVector<IR::Declaration>;
+        decl_map.emplace(parser, decls);
+      }
+    } else if (control) {
+      auto res = decl_map.find(control);
+      if (res != decl_map.end()) {
+        decls = res->second;
+      } else {
+        decls = new IR::IndexedVector<IR::Declaration>;
+        decl_map.emplace(control, decls);
+      }
+    }
+    decls->push_back(decl);
+  }
+  IR::Node *inject_control(const IR::Node *orig, IR::P4Control *control) {
+    auto res = decl_map.find(orig);
+    if (res == decl_map.end()) {
+      return control;
+    }
+    control->controlLocals.prepend(*res->second);
+    return control;
+  }
+  IR::Node *inject_parser(const IR::Node *orig, IR::P4Parser *parser) {
+    auto res = decl_map.find(orig);
+    if (res == decl_map.end()) {
+      return parser;
+    }
+    parser->parserLocals.prepend(*res->second);
+    return parser;
+  }
+};
+
+/* This pass breaks complex expressions down, since dpdk asm cannot describe
+ * complex expression. This pass is not complete. MethodCallStatement should be
+ * unrolled as well. Note that IfStatement should not be unrolled here, as we
+ * have a separate pass for it, because IfStatement does not want to unroll
+ * logical expression(dpdk asm has conditional jmp for these cases)
+ */
+class StatementUnroll : public Transform {
+private:
+  DpdkVariableCollector *collector;
+  DeclarationInjector injector;
+
+public:
+  StatementUnroll(DpdkVariableCollector *collector) : collector(collector) {}
+  const IR::Node *preorder(IR::AssignmentStatement *a) override;
+  const IR::Node *postorder(IR::P4Control *a) override;
+  const IR::Node *postorder(IR::P4Parser *a) override;
+  const IR::Node *preorder(IR::MethodCallStatement *a) override;
+};
+
+/* This pass helps StatementUnroll to unroll expressions inside statements.
+ * For example, if an AssignmentStatement looks like this: a = b + c * d
+ * StatementUnroll's AssignmentStatement preorder will call ExpressionUnroll
+ * twice for BinaryExpression's left(b) and right(c * d). For left, since it is
+ * a simple expression, ExpressionUnroll will set root to PathExpression(b) and
+ * the decl and stmt is empty. For right, ExpressionUnroll will set root to
+ * PathExpression(tmp), decl contains tmp's declaration and stmt contains:
+ * tmp = c * d, which will be injected in front of the AssignmentStatement.
+ */
+class ExpressionUnroll : public Inspector {
+  DpdkVariableCollector *collector;
+
+public:
+  IR::IndexedVector<IR::StatOrDecl> stmt;
+  IR::IndexedVector<IR::Declaration> decl;
+  IR::PathExpression *root;
+  // This function is a sanity to check whether the component of a Expression
+  // falls into following classes, if not, it means we haven't implemented a
+  // handle for that class.
+  static void sanity(const IR::Expression *e) {
+    if (not e->is<IR::Operation_Unary>() and
+        not e->is<IR::MethodCallExpression>() and not e->is<IR::Member>() and
+        not e->is<IR::PathExpression>() and
+        not e->is<IR::Operation_Binary>() and not e->is<IR::Constant>() and
+        not e->is<IR::BoolLiteral>()) {
+      std::cerr << e->node_type_name() << std::endl;
+      BUG("Untraversed node");
+    }
+  }
+  ExpressionUnroll(DpdkVariableCollector *collector) : collector(collector) {
+    setName("ExpressionUnroll");
+  }
+  bool preorder(const IR::Operation_Unary *a) override;
+  bool preorder(const IR::Operation_Binary *a) override;
+  bool preorder(const IR::MethodCallExpression *a) override;
+  bool preorder(const IR::Member *a) override;
+  bool preorder(const IR::PathExpression *a) override;
+  bool preorder(const IR::Constant *a) override;
+  bool preorder(const IR::BoolLiteral *a) override;
+};
+
+// This pass is similiar to StatementUnroll pass, the difference is that this
+// pass will call LogicalExpressionUnroll to unroll the expression, which treat
+// logical expression differently.
+class IfStatementUnroll : public Transform {
+private:
+  DpdkVariableCollector *collector;
+  DeclarationInjector injector;
+  P4::ReferenceMap *refMap;
+  P4::TypeMap *typeMap;
+
+public:
+  IfStatementUnroll(DpdkVariableCollector *collector, P4::ReferenceMap *refMap,
+                    P4::TypeMap *typeMap)
+      : collector(collector), refMap(refMap), typeMap(typeMap) {
+    setName("IfStatementUnroll");
+  }
+  const IR::Node *postorder(IR::IfStatement *a) override;
+  const IR::Node *postorder(IR::P4Control *a) override;
+  const IR::Node *postorder(IR::P4Parser *a) override;
+};
+
+/* Assume one logical expression looks like this: a && (b + c > d), this pass
+ * will unroll the expression to {tmp = b + c; if(a && (tmp > d))}. Logical
+ * calculation will be unroll in a dedicated pass.
+ */
+class LogicalExpressionUnroll : public Inspector {
+  DpdkVariableCollector *collector;
+  P4::ReferenceMap *refMap;
+  P4::TypeMap *typeMap;
+
+public:
+  IR::IndexedVector<IR::StatOrDecl> stmt;
+  IR::IndexedVector<IR::Declaration> decl;
+  IR::Expression *root;
+  static void sanity(const IR::Expression *e) {
+    if (not e->is<IR::Operation_Unary>() and
+        not e->is<IR::MethodCallExpression>() and not e->is<IR::Member>() and
+        not e->is<IR::PathExpression>() and
+        not e->is<IR::Operation_Binary>() and not e->is<IR::Constant>() and
+        not e->is<IR::BoolLiteral>()) {
+      std::cerr << e->node_type_name() << std::endl;
+      BUG("Untraversed node");
+    }
+  }
+  static bool is_logical(const IR::Operation_Binary *bin) {
+    if (bin->is<IR::LAnd>() or bin->is<IR::LOr>() or bin->is<IR::Leq>() or
+        bin->is<IR::Equ>() or bin->is<IR::Neq>() or bin->is<IR::Grt>() or
+        bin->is<IR::Lss>())
+      return true;
+    else if (bin->is<IR::Geq>() or bin->is<IR::Leq>()) {
+      std::cerr << bin->node_type_name() << std::endl;
+      BUG("does not implemented");
+    } else
+      return false;
+  }
+
+  LogicalExpressionUnroll(DpdkVariableCollector *collector,
+                          P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
+      : collector(collector), refMap(refMap), typeMap(typeMap) {}
+  bool preorder(const IR::Operation_Unary *a) override;
+  bool preorder(const IR::Operation_Binary *a) override;
+  bool preorder(const IR::MethodCallExpression *a) override;
+  bool preorder(const IR::Member *a) override;
+  bool preorder(const IR::PathExpression *a) override;
+  bool preorder(const IR::Constant *a) override;
+  bool preorder(const IR::BoolLiteral *a) override;
+};
+
 class RewriteToDpdkArch : public PassManager {
 public:
   CollectMetadataHeaderInfo *info;
@@ -147,6 +326,10 @@ public:
         new ConvertToDpdkArch(&parsePsa->toBlockInfo, refMap, info));
     passes.push_back(new ReplaceMetadataHeaderName(refMap, info));
     passes.push_back(new InjectJumboStruct(info));
+    passes.push_back(new StatementUnroll(collector));
+    passes.push_back(new IfStatementUnroll(collector, refMap, typeMap));
+    passes.push_back(new P4::ClearTypeMap(typeMap));
+    passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
   }
 };
 

@@ -282,3 +282,355 @@ const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct *s) {
   return s;
 }
 
+const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
+  auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
+  auto right = a->right;
+  auto control = findOrigCtxt<IR::P4Control>();
+  auto parser = findOrigCtxt<IR::P4Parser>();
+
+  if (right->is<IR::MethodCallExpression>()) {
+    prune();
+    return a;
+  } else if (auto bin = right->to<IR::Operation_Binary>()) {
+    ExpressionUnroll::sanity(bin->right);
+    ExpressionUnroll::sanity(bin->left);
+    auto left_unroller = new ExpressionUnroll(collector);
+    auto right_unroller = new ExpressionUnroll(collector);
+    bin->left->apply(*left_unroller);
+    const IR::Expression *left_tmp = left_unroller->root;
+    bin->right->apply(*right_unroller);
+    const IR::Expression *right_tmp = right_unroller->root;
+    if (!left_tmp)
+      left_tmp = bin->left;
+    if (!right_tmp)
+      right_tmp = bin->right;
+    for (auto s : left_unroller->stmt)
+      code_block->push_back(s);
+    for (auto d : left_unroller->decl)
+      injector.collect(control, parser, d);
+    for (auto s : right_unroller->stmt)
+      code_block->push_back(s);
+    for (auto d : right_unroller->decl)
+      injector.collect(control, parser, d);
+    prune();
+    if (right->is<IR::Add>()) {
+      a->right = new IR::Add(left_tmp, right_tmp);
+    } else if (right->is<IR::Sub>()) {
+      a->right = new IR::Sub(left_tmp, right_tmp);
+    } else if (right->is<IR::Shl>()) {
+      a->right = new IR::Shl(left_tmp, right_tmp);
+    } else if (right->is<IR::Shr>()) {
+      a->right = new IR::Shr(left_tmp, right_tmp);
+    } else if (right->is<IR::Equ>()) {
+      a->right = new IR::Equ(left_tmp, right_tmp);
+    } else {
+      std::cerr << right->node_type_name() << std::endl;
+      BUG("not implemented.");
+    }
+    code_block->push_back(a);
+    return new IR::BlockStatement(*code_block);
+  } else if (isSimpleExpression(right)) {
+    prune();
+  } else if (auto un = right->to<IR::Operation_Unary>()) {
+    auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
+    ExpressionUnroll::sanity(un->expr);
+    auto unroller = new ExpressionUnroll(collector);
+    un->expr->apply(*unroller);
+    prune();
+    const IR::Expression *un_tmp = unroller->root;
+    for (auto s : unroller->stmt)
+      code_block->push_back(s);
+    for (auto d : unroller->decl)
+      injector.collect(control, parser, d);
+    if (!un_tmp)
+      un_tmp = un->expr;
+    if (right->to<IR::Neg>()) {
+      a->right = new IR::Neg(un_tmp);
+    } else if (right->to<IR::Cmpl>()) {
+      a->right = new IR::Cmpl(un_tmp);
+    } else if (right->to<IR::LNot>()) {
+      a->right = new IR::LNot(un_tmp);
+    } else if (auto c = right->to<IR::Cast>()) {
+      a->right = new IR::Cast(c->destType, un_tmp);
+    } else {
+      std::cerr << right->node_type_name() << std::endl;
+      BUG("Not implemented.");
+    }
+    code_block->push_back(a);
+    return new IR::BlockStatement(*code_block);
+  } else {
+    std::cerr << right->node_type_name() << std::endl;
+    BUG("not implemented");
+  }
+  return a;
+}
+
+const IR::Node *StatementUnroll::preorder(IR::MethodCallStatement *m) {
+  return m;
+}
+
+const IR::Node *StatementUnroll::postorder(IR::P4Control *a) {
+  auto control = getOriginal();
+  return injector.inject_control(control, a);
+}
+const IR::Node *StatementUnroll::postorder(IR::P4Parser *a) {
+  auto parser = getOriginal();
+  return injector.inject_parser(parser, a);
+}
+
+bool ExpressionUnroll::preorder(const IR::Operation_Unary *u) {
+  sanity(u->expr);
+  visit(u->expr);
+  const IR::Expression *un_expr;
+  if (root) {
+    if (u->to<IR::Neg>()) {
+      un_expr = new IR::Neg(root);
+    } else if (u->to<IR::Cmpl>()) {
+      un_expr = new IR::Cmpl(root);
+    } else if (u->to<IR::LNot>()) {
+      un_expr = new IR::LNot(root);
+    } else {
+      std::cout << u->node_type_name() << std::endl;
+      BUG("Not Implemented");
+    }
+  } else {
+    un_expr = u->expr;
+  }
+  root = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
+  stmt.push_back(new IR::AssignmentStatement(root, un_expr));
+  decl.push_back(new IR::Declaration_Variable(root->path->name, u->type));
+  return false;
+}
+
+bool ExpressionUnroll::preorder(const IR::Operation_Binary *bin) {
+  sanity(bin->left);
+  sanity(bin->right);
+  visit(bin->left);
+  const IR::Expression *left_root = root;
+  visit(bin->right);
+  const IR::Expression *right_root = root;
+  if (!left_root)
+    left_root = bin->left;
+  if (!right_root)
+    right_root = bin->right;
+
+  root = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
+  const IR::Expression *bin_expr;
+  decl.push_back(new IR::Declaration_Variable(root->path->name, bin->type));
+  if (bin->is<IR::Add>()) {
+    bin_expr = new IR::Add(left_root, right_root);
+  } else if (bin->is<IR::Sub>()) {
+    bin_expr = new IR::Sub(left_root, right_root);
+  } else if (bin->is<IR::Shl>()) {
+    bin_expr = new IR::Shl(left_root, right_root);
+  } else if (bin->is<IR::Shr>()) {
+    bin_expr = new IR::Shr(left_root, right_root);
+  } else if (bin->is<IR::Equ>()) {
+    bin_expr = new IR::Equ(left_root, right_root);
+  } else if (bin->is<IR::LAnd>()) {
+    bin_expr = new IR::LAnd(left_root, right_root);
+  } else if (bin->is<IR::Leq>()) {
+    bin_expr = new IR::Leq(left_root, right_root);
+  } else if (bin->is<IR::Lss>()) {
+    bin_expr = new IR::Lss(left_root, right_root);
+  } else if (bin->is<IR::Geq>()) {
+    bin_expr = new IR::Geq(left_root, right_root);
+  } else if (bin->is<IR::Grt>()) {
+    bin_expr = new IR::Grt(left_root, right_root);
+  } else if (bin->is<IR::Neq>()) {
+    bin_expr = new IR::Neq(left_root, right_root);
+  } else {
+    std::cerr << bin->node_type_name() << std::endl;
+    BUG("not implemented");
+  }
+  stmt.push_back(new IR::AssignmentStatement(root, bin_expr));
+  return false;
+}
+
+bool ExpressionUnroll::preorder(const IR::MethodCallExpression *m) {
+  auto args = new IR::Vector<IR::Argument>;
+  for (auto arg : *m->arguments) {
+    sanity(arg->expression);
+    visit(arg->expression);
+    if (!root)
+      args->push_back(arg);
+    else
+      args->push_back(new IR::Argument(root));
+  }
+  root = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
+  decl.push_back(new IR::Declaration_Variable(root->path->name, m->type));
+  auto new_m = new IR::MethodCallExpression(m->method, args);
+  stmt.push_back(new IR::AssignmentStatement(root, new_m));
+  return false;
+}
+
+bool ExpressionUnroll::preorder(const IR::Member *) {
+  root = nullptr;
+  return false;
+}
+
+bool ExpressionUnroll::preorder(const IR::PathExpression *) {
+  root = nullptr;
+  return false;
+}
+
+bool ExpressionUnroll::preorder(const IR::Constant *) {
+  root = nullptr;
+  return false;
+}
+bool ExpressionUnroll::preorder(const IR::BoolLiteral *) {
+  root = nullptr;
+  return false;
+}
+
+const IR::Node *IfStatementUnroll::postorder(IR::IfStatement *i) {
+  auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
+  ExpressionUnroll::sanity(i->condition);
+  auto unroller = new LogicalExpressionUnroll(collector, refMap, typeMap);
+  i->condition->apply(*unroller);
+  for (auto i : unroller->stmt)
+    code_block->push_back(i);
+
+  auto control = findOrigCtxt<IR::P4Control>();
+  auto parser = findOrigCtxt<IR::P4Parser>();
+
+  for (auto d : unroller->decl)
+    injector.collect(control, parser, d);
+  if (unroller->root) {
+    i->condition = unroller->root;
+  }
+  code_block->push_back(i);
+  return new IR::BlockStatement(*code_block);
+}
+
+const IR::Node *IfStatementUnroll::postorder(IR::P4Control *a) {
+  auto control = getOriginal();
+  return injector.inject_control(control, a);
+}
+const IR::Node *IfStatementUnroll::postorder(IR::P4Parser *a) {
+  auto parser = getOriginal();
+  return injector.inject_parser(parser, a);
+}
+
+bool LogicalExpressionUnroll::preorder(const IR::Operation_Unary *u) {
+  sanity(u->expr);
+  if (!u->is<IR::Member>()) {
+    BUG("%1% Not Implemented", u);
+  } else {
+    root = u->clone();
+    return false;
+  }
+
+  visit(u->expr);
+  const IR::Expression *un_expr;
+  if (root) {
+    if (u->to<IR::Neg>()) {
+      un_expr = new IR::Neg(root);
+    } else if (u->to<IR::Cmpl>()) {
+      un_expr = new IR::Cmpl(root);
+    } else if (u->to<IR::LNot>()) {
+      un_expr = new IR::LNot(root);
+    } else {
+      BUG("%1% Not Implemented", u);
+    }
+  } else {
+    un_expr = u->expr;
+  }
+  auto tmp = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
+  root = tmp;
+  stmt.push_back(new IR::AssignmentStatement(root, un_expr));
+  decl.push_back(new IR::Declaration_Variable(tmp->path->name, u->type));
+  return false;
+}
+
+bool LogicalExpressionUnroll::preorder(const IR::Operation_Binary *bin) {
+  sanity(bin->left);
+  sanity(bin->right);
+  visit(bin->left);
+  const IR::Expression *left_root = root;
+  visit(bin->right);
+  const IR::Expression *right_root = root;
+  if (!left_root)
+    left_root = bin->left;
+  if (!right_root)
+    right_root = bin->right;
+
+  IR::Expression *bin_expr;
+  if (is_logical(bin)) {
+    if (bin->is<IR::LAnd>()) {
+      bin_expr = new IR::LAnd(left_root, right_root);
+    } else if (bin->is<IR::LOr>()) {
+      bin_expr = new IR::LOr(left_root, right_root);
+    } else if (bin->is<IR::Equ>()) {
+      bin_expr = new IR::Equ(left_root, right_root);
+    } else if (bin->is<IR::Neq>()) {
+      bin_expr = new IR::Neq(left_root, right_root);
+    } else if (bin->is<IR::Grt>()) {
+      bin_expr = new IR::Grt(left_root, right_root);
+    } else if (bin->is<IR::Lss>()) {
+      bin_expr = new IR::Lss(left_root, right_root);
+    } else {
+        BUG("not implemented");
+    }
+    root = bin_expr;
+  } else {
+    auto tmp = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
+    root = tmp;
+    decl.push_back(new IR::Declaration_Variable(tmp->path->name, bin->type));
+    if (bin->is<IR::Add>()) {
+      bin_expr = new IR::Add(left_root, right_root);
+    } else if (bin->is<IR::Sub>()) {
+      bin_expr = new IR::Sub(left_root, right_root);
+    } else if (bin->is<IR::Shl>()) {
+      bin_expr = new IR::Shl(left_root, right_root);
+    } else if (bin->is<IR::Shr>()) {
+      bin_expr = new IR::Shr(left_root, right_root);
+    } else {
+      std::cerr << bin->node_type_name() << std::endl;
+      BUG("not implemented");
+    }
+    stmt.push_back(new IR::AssignmentStatement(root, bin_expr));
+  }
+  return false;
+}
+
+bool LogicalExpressionUnroll::preorder(const IR::MethodCallExpression *m) {
+  auto args = new IR::Vector<IR::Argument>;
+  for (auto arg : *m->arguments) {
+    sanity(arg->expression);
+    visit(arg->expression);
+    if (!root)
+      args->push_back(arg);
+    else
+      args->push_back(new IR::Argument(root));
+  }
+  if (m->type->to<IR::Type_Boolean>()) {
+    root = m->clone();
+    return false;
+  }
+  auto tmp = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
+  root = tmp;
+  decl.push_back(new IR::Declaration_Variable(tmp->path->name, m->type));
+  auto new_m = new IR::MethodCallExpression(m->method, args);
+  stmt.push_back(new IR::AssignmentStatement(root, new_m));
+  return false;
+}
+
+bool LogicalExpressionUnroll::preorder(const IR::Member *) {
+  root = nullptr;
+  return false;
+}
+
+bool LogicalExpressionUnroll::preorder(const IR::PathExpression *) {
+  root = nullptr;
+  return false;
+}
+
+bool LogicalExpressionUnroll::preorder(const IR::Constant *) {
+  root = nullptr;
+  return false;
+}
+bool LogicalExpressionUnroll::preorder(const IR::BoolLiteral *) {
+  root = nullptr;
+  return false;
+}

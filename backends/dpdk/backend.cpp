@@ -17,6 +17,7 @@ limitations under the License.
 #include <unordered_map>
 #include "backends/bmv2/psa_switch/psaSwitch.h"
 #include "dpdkArch.h"
+#include "dpdkVarCollector.h"
 #include "elimTypedef.h"
 #include "ir/dbprint.h"
 #include "ir/ir.h"
@@ -42,6 +43,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
 
   auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
   auto program = tlb->getProgram();
+  DpdkVariableCollector collector;
   auto rewriteToDpdkArch =
       new DPDK::RewriteToDpdkArch(refMap, typeMap, &collector);
   PassManager simplify = {
