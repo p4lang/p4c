@@ -840,3 +840,65 @@ const IR::Node *CollectLocalVariableToMetadata::postorder(IR::P4Parser *p) {
   return p;
 }
 
+const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Action *a) {
+  if (a->parameters->size() > 0) {
+    auto l = new IR::IndexedVector<IR::Parameter>;
+    for (auto p : a->parameters->parameters) {
+      l->push_back(p);
+    }
+    args_struct_map.emplace(a->name.name + "_arg_t", l);
+    auto new_l = new IR::IndexedVector<IR::Parameter>;
+    new_l->push_back(
+        new IR::Parameter(IR::ID("t"), IR::Direction::None,
+                          new IR::Type_Name(IR::ID(a->name.name + "_arg_t"))));
+    a->parameters = new IR::ParameterList(*new_l);
+  }
+  return a;
+}
+
+const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Program *program) {
+  auto new_objs = new IR::Vector<IR::Node>;
+  for (auto obj : program->objects) {
+    if (auto control = obj->to<IR::P4Control>()) {
+      for (auto kv : *toBlockInfo) {
+        if (kv.second.pipe == "Ingress") {
+          if (kv.first->to<IR::P4Control>()->name == control->name) {
+            for (auto kv : args_struct_map) {
+              auto fields = new IR::IndexedVector<IR::StructField>;
+              for (auto field : *kv.second) {
+                fields->push_back(
+                    new IR::StructField(field->name, field->type));
+              }
+              new_objs->push_back(
+                  new IR::Type_Struct(IR::ID(kv.first), *fields));
+            }
+          }
+        }
+      }
+    }
+    new_objs->push_back(obj);
+  }
+  program->objects = *new_objs;
+  return program;
+}
+
+const IR::Node *PrependPDotToActionArgs::preorder(IR::PathExpression *path) {
+  auto declaration = refMap->getDeclaration(path->path);
+  if (auto action = findContext<IR::P4Action>()) {
+    if (!declaration) {
+      return path;
+    }
+    if (auto p = declaration->to<IR::Parameter>()) {
+      for (auto para : action->parameters->parameters) {
+        if (para->equiv(*p)) {
+          prune();
+          return new IR::Member(new IR::PathExpression(IR::ID("t")),
+                                path->path->name);
+        }
+      }
+    }
+  }
+  return path;
+}
+
+}  // namespace DPDK
