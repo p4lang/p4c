@@ -111,6 +111,23 @@ int main(int argc, char *const argv[]) {
   }
   if (::errorCount() > 0)
     return 1;
+
+  auto backend = new DPDK::PsaSwitchBackend(options, &midEnd.refMap,
+                                            &midEnd.typeMap, &midEnd.enumMap);
+
+  // Necessary because BMV2Context is expected at the top of stack in further
+  // processing
+  AutoCompileContext autoContext(
+      new BMV2::BMV2Context(DPDK::PsaSwitchContext::get()));
+  try {
+    backend->convert(toplevel);
+  } catch (const std::exception &bug) {
+    std::cerr << bug.what() << std::endl;
+    return 1;
+  }
+  if (::errorCount() > 0)
+    return 1;
+
   if (!options.outputFile.isNullOrEmpty()) {
     std::ostream *out = openFile(options.outputFile, false);
     if (out != nullptr) {
