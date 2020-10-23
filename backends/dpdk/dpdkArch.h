@@ -114,6 +114,17 @@ public:
   const IR::Node *preorder(IR::Parameter *p) override;
 };
 
+// Previously, we have collected the information about how the single metadata
+// struct looks like in CollectMetadataHeaderInfo. This pass finds a suitable
+// place to inject this struct.
+class InjectJumboStruct : public Transform {
+  CollectMetadataHeaderInfo *info;
+  int cnt = 0;
+
+public:
+  InjectJumboStruct(CollectMetadataHeaderInfo *info) : info(info) {}
+  const IR::Node *preorder(IR::Type_Struct *s) override;
+};
 class RewriteToDpdkArch : public PassManager {
 public:
   CollectMetadataHeaderInfo *info;
@@ -135,6 +146,7 @@ public:
     passes.push_back(
         new ConvertToDpdkArch(&parsePsa->toBlockInfo, refMap, info));
     passes.push_back(new ReplaceMetadataHeaderName(refMap, info));
+    passes.push_back(new InjectJumboStruct(info));
   }
 };
 
