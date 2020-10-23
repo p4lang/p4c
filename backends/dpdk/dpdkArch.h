@@ -323,6 +323,25 @@ public:
   const IR::Node *postorder(IR::P4Control *a) override;
   const IR::Node *postorder(IR::P4Parser *a) override;
 };
+// Since in dpdk asm, there is no local variable declaraion, we need to collect
+// all local variables and inject them into the metadata struct.
+class CollectLocalVariableToMetadata : public Transform {
+  BlockInfoMapping *toBlockInfo;
+  CollectMetadataHeaderInfo *info;
+  std::map<const cstring, IR::IndexedVector<IR::Declaration>> locals_map;
+  P4::ReferenceMap *refMap;
+
+public:
+  CollectLocalVariableToMetadata(BlockInfoMapping *toBlockInfo,
+                                 CollectMetadataHeaderInfo *info,
+                                 P4::ReferenceMap *refMap)
+      : toBlockInfo(toBlockInfo), info(info), refMap(refMap) {}
+  const IR::Node *preorder(IR::P4Program *p) override;
+  const IR::Node *postorder(IR::Type_Struct *s) override;
+  const IR::Node *postorder(IR::PathExpression *path) override;
+  const IR::Node *postorder(IR::P4Control *c) override;
+  const IR::Node *postorder(IR::P4Parser *p) override;
+};
 class RewriteToDpdkArch : public PassManager {
 public:
   CollectMetadataHeaderInfo *info;
@@ -350,6 +369,17 @@ public:
     passes.push_back(new P4::ClearTypeMap(typeMap));
     passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
     passes.push_back(new ConvertBinaryOperationTo2Params(collector));
+    parsePsa = new ParsePsa();
+    passes.push_back(evaluator);
+    passes.push_back(new VisitFunctor([evaluator, parsePsa]() {
+      auto toplevel = evaluator->getToplevelBlock();
+      auto main = toplevel->getMain();
+      ERROR_CHECK(main != nullptr, ErrorType::ERR_INVALID,
+                  "program: does not instantiate `main`");
+      main->apply(*parsePsa);
+    }));
+    passes.push_back(new CollectLocalVariableToMetadata(&parsePsa->toBlockInfo,
+                                                        info, refMap));
   }
 };
 

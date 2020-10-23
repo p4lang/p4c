@@ -751,3 +751,92 @@ const IR::Node *ConvertBinaryOperationTo2Params::postorder(IR::P4Parser *a) {
   return injector.inject_parser(parser, a);
 }
 
+const IR::Node *CollectLocalVariableToMetadata::preorder(IR::P4Program *p) {
+  for (auto kv : *toBlockInfo) {
+    if (kv.second.pipe == "IngressParser") {
+      auto parser = kv.first->to<IR::P4Parser>();
+      locals_map.emplace(kv.second.pipe, parser->parserLocals);
+    } else if (kv.second.pipe == "Ingress") {
+      auto control = kv.first->to<IR::P4Control>();
+      locals_map.emplace(kv.second.pipe, control->controlLocals);
+    } else if (kv.second.pipe == "IngressParser") {
+      auto control = kv.first->to<IR::P4Control>();
+      locals_map.emplace(kv.second.pipe, control->controlLocals);
+    } else if (kv.second.pipe == "EgressParser") {
+      auto parser = kv.first->to<IR::P4Parser>();
+      locals_map.emplace(kv.second.pipe, parser->parserLocals);
+    } else if (kv.second.pipe == "Egress") {
+      auto control = kv.first->to<IR::P4Control>();
+      locals_map.emplace(kv.second.pipe, control->controlLocals);
+    } else if (kv.second.pipe == "EgressDeparser") {
+      auto control = kv.first->to<IR::P4Control>();
+      locals_map.emplace(kv.second.pipe, control->controlLocals);
+    }
+  }
+  return p;
+}
+
+const IR::Node *CollectLocalVariableToMetadata::postorder(IR::Type_Struct *s) {
+  if (s->name.name == info->local_metadata_type) {
+    for (auto kv : locals_map) {
+      for (auto d : kv.second) {
+        if (auto dv = d->to<IR::Declaration_Variable>()) {
+          s->fields.push_back(new IR::StructField(
+              IR::ID(kv.first + "_" + dv->name.name), dv->type));
+        } else if (!d->is<IR::P4Action>() && !d->is<IR::P4Table>() &&
+                   !d->is<IR::Declaration_Instance>()) {
+          std::cerr << d->node_type_name() << std::endl;
+          BUG("unhandled declaration type");
+        }
+      }
+    }
+  }
+  return s;
+}
+
+const IR::Node *
+CollectLocalVariableToMetadata::postorder(IR::PathExpression *p) {
+  if (auto decl =
+          refMap->getDeclaration(p->path)->to<IR::Declaration_Variable>()) {
+    for (auto kv : locals_map) {
+      for (auto d : kv.second) {
+        if (d->equiv(*decl)) {
+          return new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                IR::ID(kv.first + "_" + decl->name.name));
+        }
+      }
+    }
+    BUG("one Declaration Vairable is not include in a control or parser");
+  }
+  return p;
+}
+
+const IR::Node *CollectLocalVariableToMetadata::postorder(IR::P4Control *c) {
+  IR::IndexedVector<IR::Declaration> decls;
+  for (auto d : c->controlLocals) {
+    if (d->is<IR::Declaration_Instance>() || d->is<IR::P4Action>() ||
+        d->is<IR::P4Table>()) {
+      decls.push_back(d);
+    } else if (!d->is<IR::Declaration_Variable>()) {
+      std::cerr << d->node_type_name() << std::endl;
+      BUG("Unhandled declaration type in control");
+    }
+  }
+  c->controlLocals = decls;
+  return c;
+}
+const IR::Node *CollectLocalVariableToMetadata::postorder(IR::P4Parser *p) {
+  IR::IndexedVector<IR::Declaration> decls;
+  for (auto d : p->parserLocals) {
+    if (d->is<IR::Declaration_Instance>() || d->is<IR::P4Action>() ||
+        d->is<IR::P4Table>()) {
+      decls.push_back(d);
+    } else if (!d->is<IR::Declaration_Variable>()) {
+      std::cerr << d->node_type_name() << std::endl;
+      BUG("Unhandled declaration type in parser");
+    }
+  }
+  p->parserLocals = decls;
+  return p;
+}
+
