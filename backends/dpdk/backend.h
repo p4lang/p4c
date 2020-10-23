@@ -43,6 +43,7 @@ limitations under the License.
 namespace DPDK {
 class PsaSwitchBackend : public BMV2::Backend {
   BMV2::BMV2Options &options;
+  const IR::DpdkAsmProgram *dpdk_program = nullptr;
 
 public:
   void convert(const IR::ToplevelBlock *tlb) override;
