@@ -229,3 +229,42 @@ bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s) {
   }
   return true;
 }
+
+const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Member *m) {
+  if (auto p = m->expr->to<IR::PathExpression>()) {
+    auto declaration = refMap->getDeclaration(p->path);
+    if (auto decl = declaration->to<IR::Parameter>()) {
+      if (auto type = decl->type->to<IR::Type_Name>()) {
+        if (type->path->name == "psa_ingress_parser_input_metadata_t" ||
+            type->path->name == "psa_ingress_input_metadata_t" ||
+            type->path->name == "psa_ingress_output_metadata_t" ||
+            type->path->name == "psa_egress_parser_input_metadata_t" ||
+            type->path->name == "psa_egress_input_metadata_t" ||
+            type->path->name == "psa_egress_output_metadata_t" ||
+            type->path->name == "psa_egress_deparser_input_metadata_t") {
+          return new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                IR::ID(TypeStruct2Name(type->path->name.name) +
+                                       "_" + m->member.name));
+        } else if (type->path->name == info->header_type) {
+          return new IR::Member(new IR::PathExpression(IR::ID("h")),
+                                IR::ID(m->member.name));
+        } else if (type->path->name == info->local_metadata_type) {
+          return new IR::Member(new IR::PathExpression(IR::ID("m")),
+                                IR::ID("local_metadata_" + m->member.name));
+        }
+      }
+    }
+  }
+  return m;
+}
+
+const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Parameter *p) {
+  if (auto type = p->type->to<IR::Type_Name>()) {
+    if (type->path->name == info->header_type) {
+      return new IR::Parameter(IR::ID("h"), p->direction, p->type);
+    } else if (type->path->name == info->local_metadata_type) {
+      return new IR::Parameter(IR::ID("m"), p->direction, p->type);
+    }
+  }
+  return p;
+}

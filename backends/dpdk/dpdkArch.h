@@ -99,6 +99,21 @@ public:
   IR::IndexedVector<IR::StructField> fields;
 };
 
+// This pass modifies all metadata references and header reference. For
+// metadata, struct_name.field_name -> m.struct_name_field_name. For header
+// headers.header_name.field_name -> h.header_name.field_name
+class ReplaceMetadataHeaderName : public Transform {
+  P4::ReferenceMap *refMap;
+  CollectMetadataHeaderInfo *info;
+
+public:
+  ReplaceMetadataHeaderName(P4::ReferenceMap *refMap,
+                            CollectMetadataHeaderInfo *info)
+      : refMap(refMap), info(info) {}
+  const IR::Node *preorder(IR::Member *m) override;
+  const IR::Node *preorder(IR::Parameter *p) override;
+};
+
 class RewriteToDpdkArch : public PassManager {
 public:
   CollectMetadataHeaderInfo *info;
@@ -119,6 +134,7 @@ public:
     passes.push_back(info);
     passes.push_back(
         new ConvertToDpdkArch(&parsePsa->toBlockInfo, refMap, info));
+    passes.push_back(new ReplaceMetadataHeaderName(refMap, info));
   }
 };
 
