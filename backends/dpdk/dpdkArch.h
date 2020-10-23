@@ -342,9 +342,93 @@ public:
   const IR::Node *postorder(IR::P4Control *c) override;
   const IR::Node *postorder(IR::P4Parser *p) override;
 };
+// For dpdk asm, there is not object-oriented. Therefore, we cannot define a
+// checksum in dpdk asm. And dpdk asm only provides ckadd(checksum add) and
+// cksub(checksum sub). So we need to define a explicit state for each checksum
+// declaration. Essentially, this state will be declared in header struct and
+// initilized to 0. And for cksum.add(x), it will be translated to ckadd state
+// x. For dst = cksum.get(), it will be translated to mov dst state. This pass
+// collects checksum instances and index them.
+class CollectInternetChecksumInstance : public Inspector {
+  std::map<const IR::Declaration_Instance *, cstring> *csum_map;
+  int index = 0;
+
+public:
+  CollectInternetChecksumInstance(
+      std::map<const IR::Declaration_Instance *, cstring> *csum_map)
+      : csum_map(csum_map) {}
+  bool preorder(const IR::Declaration_Instance *d) override {
+    if (d->type->is<IR::Type_Name>()) {
+      if (d->type->to<IR::Type_Name>()->path->name.name == "InternetChecksum") {
+        if (findContext<IR::P4Control>() or findContext<IR::P4Parser>()) {
+          std::ostringstream s;
+          s << "state_" << index++;
+          csum_map->emplace(d, s.str());
+        }
+      }
+    }
+    return false;
+  }
+};
+
+// This pass will inject checksum states into header. The reason why we inject
+// state into header instead of metadata is due to the implementation of dpdk
+// side(a question related to endianness)
+class InjectInternetChecksumIntermediateValue : public Transform {
+  CollectMetadataHeaderInfo *info;
+  std::map<const IR::Declaration_Instance *, cstring> *csum_map;
+
+public:
+  InjectInternetChecksumIntermediateValue(
+      CollectMetadataHeaderInfo *info,
+      std::map<const IR::Declaration_Instance *, cstring> *csum_map)
+      : info(info), csum_map(csum_map) {}
+
+  const IR::Node *postorder(IR::P4Program *p) override {
+    auto new_objs = new IR::Vector<IR::Node>;
+    bool inserted = false;
+    for (auto obj : p->objects) {
+      if (obj->to<IR::Type_Header>() and not inserted) {
+        inserted = true;
+        if (csum_map->size() > 0) {
+          auto fields = new IR::IndexedVector<IR::StructField>;
+          for (auto kv : *csum_map) {
+            fields->push_back(new IR::StructField(
+                IR::ID(kv.second), new IR::Type_Bits(16, false)));
+          }
+          new_objs->push_back(
+              new IR::Type_Header(IR::ID("cksum_state_t"), *fields));
+        }
+      }
+      new_objs->push_back(obj);
+    }
+    p->objects = *new_objs;
+    return p;
+  }
+
+  const IR::Node *postorder(IR::Type_Struct *s) override {
+    if (s->name.name == info->header_type) {
+      if (csum_map->size() > 0)
+        s->fields.push_back(new IR::StructField(
+            IR::ID("cksum_state"), new IR::Type_Name(IR::ID("cksum_state_t"))));
+    }
+    return s;
+  }
+};
+
+class ConvertInternetChecksum : public PassManager {
+public:
+  std::map<const IR::Declaration_Instance *, cstring> csum_map;
+  ConvertInternetChecksum(CollectMetadataHeaderInfo *info) {
+    passes.push_back(new CollectInternetChecksumInstance(&csum_map));
+    passes.push_back(
+        new InjectInternetChecksumIntermediateValue(info, &csum_map));
+  }
+};
 class RewriteToDpdkArch : public PassManager {
 public:
   CollectMetadataHeaderInfo *info;
+  std::map<const IR::Declaration_Instance *, cstring> *csum_map;
   RewriteToDpdkArch(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                     DpdkVariableCollector *collector) {
     setName("RewriteToDpdkArch");
@@ -380,6 +464,9 @@ public:
     }));
     passes.push_back(new CollectLocalVariableToMetadata(&parsePsa->toBlockInfo,
                                                         info, refMap));
+    auto checksum_convertor = new ConvertInternetChecksum(info);
+    passes.push_back(checksum_convertor);
+    csum_map = &checksum_convertor->csum_map;
   }
 };
 
