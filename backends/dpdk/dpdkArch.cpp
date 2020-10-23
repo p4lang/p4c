@@ -11,6 +11,38 @@
 
 namespace DPDK {
 
+bool isSimpleExpression(const IR::Expression *e) {
+  if (e->is<IR::Member>() || e->is<IR::PathExpression>() ||
+      e->is<IR::Constant>() || e->is<IR::BoolLiteral>())
+    return true;
+  return false;
+}
+bool isNonConstantSimpleExpression(const IR::Expression *e) {
+  if (e->is<IR::Member>() || e->is<IR::PathExpression>())
+    return true;
+  return false;
+}
+
+cstring TypeStruct2Name(const cstring s) {
+  if (s == "psa_ingress_parser_input_metadata_t") {
+    return "psa_ingress_parser_input_metadata";
+  } else if (s == "psa_ingress_input_metadata_t") {
+    return "psa_ingress_input_metadata";
+  } else if (s == "psa_ingress_output_metadata_t") {
+    return "psa_ingress_output_metadata";
+  } else if (s == "psa_egress_parser_input_metadata_t") {
+    return "psa_egress_parser_input_metadata";
+  } else if (s == "psa_egress_input_metadata_t") {
+    return "psa_egress_input_metadata";
+  } else if (s == "psa_egress_output_metadata_t") {
+    return "psa_egress_output_metadata";
+  } else if (s == "psa_egress_deparser_input_metadata_t") {
+    return "psa_egress_deparser_input_metadata";
+  } else {
+    return "local_metadata";
+  }
+}
+
 const IR::Node *ConvertToDpdkArch::postorder(IR::P4Program *p) {
   // std::cout << p << std::endl;
   return p;
@@ -634,3 +666,88 @@ bool LogicalExpressionUnroll::preorder(const IR::BoolLiteral *) {
   root = nullptr;
   return false;
 }
+
+const IR::Node *
+ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
+  auto right = a->right;
+  auto left = a->left;
+  if (auto r = right->to<IR::Operation_Binary>()) {
+    if (!isSimpleExpression(r->right) || !isSimpleExpression(r->left))
+      BUG("Statement Unroll pass failed");
+    if (left->equiv(*r->left)) {
+      return a;
+    } else if (left->equiv(*r->right)) {
+      if (right->is<IR::Add>()) {
+        a->right = new IR::Add(r->right, r->left);
+      } else if (right->is<IR::Sub>()) {
+        a->right = new IR::Sub(r->right, r->left);
+      } else if (right->is<IR::Shl>()) {
+        a->right = new IR::Shl(r->right, r->left);
+      } else if (right->is<IR::Shr>()) {
+        a->right = new IR::Shr(r->right, r->left);
+      } else if (right->is<IR::Equ>()) {
+        a->right = new IR::Equ(r->right, r->left);
+      } else {
+        std::cerr << right->node_type_name() << std::endl;
+        BUG("not implemented.");
+      }
+      return a;
+    } else {
+      IR::IndexedVector<IR::StatOrDecl> code_block;
+      const IR::Expression *src1;
+      const IR::Expression *src2;
+      if (isNonConstantSimpleExpression(r->left)) {
+        src1 = r->left;
+        src2 = r->right;
+      } else if (isNonConstantSimpleExpression(r->right)) {
+        src1 = r->right;
+        src2 = r->left;
+      } else {
+        std::cerr << r->right->node_type_name() << std::endl;
+        std::cerr << r->left->node_type_name() << std::endl;
+        BUG("Confronting a expression that can be simplified to become a "
+            "constant.");
+      }
+      // auto tmp = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
+      // injector.collect(control, parser, new
+      // IR::Declaration_Variable(tmp->path->name, src1->type));
+      // injector.collect(control, parser, new
+      // IR::Declaration_Variable(tmp->path->name, r->type));
+      code_block.push_back(new IR::AssignmentStatement(left, src1));
+      IR::Operation_Binary *expr;
+      if (right->is<IR::Add>()) {
+        expr = new IR::Add(left, src2);
+      } else if (right->is<IR::Sub>()) {
+        expr = new IR::Sub(left, src2);
+      } else if (right->is<IR::Shl>()) {
+        expr = new IR::Shl(left, src2);
+      } else if (right->is<IR::Shr>()) {
+        expr = new IR::Shr(left, src2);
+      } else if (right->is<IR::Equ>()) {
+        expr = new IR::Equ(left, src2);
+      } else if (right->is<IR::LAnd>()) {
+        expr = new IR::LAnd(left, src2);
+      } else if (right->is<IR::Leq>()) {
+        expr = new IR::Leq(left, src2);
+      } else {
+        std::cerr << right->node_type_name() << std::endl;
+        BUG("not implemented.");
+      }
+      code_block.push_back(new IR::AssignmentStatement(left, expr));
+      // code_block.push_back(new IR::AssignmentStatement(left, tmp));
+      return new IR::BlockStatement(code_block);
+    }
+  }
+  return a;
+}
+
+const IR::Node *ConvertBinaryOperationTo2Params::postorder(IR::P4Control *a) {
+  auto control = getOriginal();
+  return injector.inject_control(control, a);
+}
+
+const IR::Node *ConvertBinaryOperationTo2Params::postorder(IR::P4Parser *a) {
+  auto parser = getOriginal();
+  return injector.inject_parser(parser, a);
+}
+

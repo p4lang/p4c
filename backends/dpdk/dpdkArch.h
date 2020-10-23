@@ -1,10 +1,15 @@
 #ifndef BACKENDS_CONVERT_TO_DPDK_ARCH_H_
 #define BACKENDS_CONVERT_TO_DPDK_ARCH_H_
+#include "dpdkVarCollector.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeMap.h"
 #include <ir/ir.h>
 namespace DPDK {
+
+cstring TypeStruct2Name(const cstring *s);
+bool isSimpleExpression(const IR::Expression *e);
+bool isNonConstantSimpleExpression(const IR::Expression *e);
 
 enum gress_t {
   INGRESS = 0,
@@ -304,6 +309,20 @@ public:
   bool preorder(const IR::BoolLiteral *a) override;
 };
 
+// According to dpdk spec, Binary Operation will only have two parameters, which
+// looks like: a = a + b. Therefore, this pass transform all AssignStatement
+// that has Binary_Operation to become two-parameter form.
+class ConvertBinaryOperationTo2Params : public Transform {
+  DpdkVariableCollector *collector;
+  DeclarationInjector injector;
+
+public:
+  ConvertBinaryOperationTo2Params(DpdkVariableCollector *collector)
+      : collector(collector) {}
+  const IR::Node *postorder(IR::AssignmentStatement *a) override;
+  const IR::Node *postorder(IR::P4Control *a) override;
+  const IR::Node *postorder(IR::P4Parser *a) override;
+};
 class RewriteToDpdkArch : public PassManager {
 public:
   CollectMetadataHeaderInfo *info;
@@ -330,6 +349,7 @@ public:
     passes.push_back(new IfStatementUnroll(collector, refMap, typeMap));
     passes.push_back(new P4::ClearTypeMap(typeMap));
     passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
+    passes.push_back(new ConvertBinaryOperationTo2Params(collector));
   }
 };
 
