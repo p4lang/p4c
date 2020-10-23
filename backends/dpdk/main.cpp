@@ -95,6 +95,22 @@ int main(int argc, char *const argv[]) {
   if (::errorCount() > 0)
     return 1;
 
+  DPDK::PsaSwitchMidEnd midEnd(options);
+  midEnd.addDebugHook(hook);
+  try {
+    toplevel = midEnd.process(program);
+    if (::errorCount() > 1 || toplevel == nullptr ||
+        toplevel->getMain() == nullptr)
+      return 1;
+    if (options.dumpJsonFile)
+      JSONGenerator(*openFile(options.dumpJsonFile, true), true)
+          << program << std::endl;
+  } catch (const std::exception &bug) {
+    std::cerr << bug.what() << std::endl;
+    return 1;
+  }
+  if (::errorCount() > 0)
+    return 1;
   if (!options.outputFile.isNullOrEmpty()) {
     std::ostream *out = openFile(options.outputFile, false);
     if (out != nullptr) {
