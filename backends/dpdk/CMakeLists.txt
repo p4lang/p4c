@@ -13,15 +13,66 @@
 # limitations under the License.
 
 set(P4C_DPDK_SOURCES
+    ../bmv2/common/helpers.cpp
+    ../bmv2/common/JsonObjects.cpp
+    ../bmv2/common/action.cpp
+    ../bmv2/common/control.cpp
+    ../bmv2/common/controlFlowGraph.cpp
+    ../bmv2/common/deparser.cpp
+    ../bmv2/common/expression.cpp
+    ../bmv2/common/extern.cpp
+    ../bmv2/common/globals.cpp
+    ../bmv2/common/header.cpp
+    ../bmv2/common/helpers.cpp
+    ../bmv2/common/lower.cpp
+    ../bmv2/common/metermap.cpp
+    ../bmv2/common/parser.cpp
+    ../bmv2/common/programStructure.cpp
+    ../bmv2/common/sharedActionSelectorCheck.cpp
+    ../bmv2/psa_switch/psaSwitch.cpp
+    backend.cpp
     main.cpp
+    midend.cpp
+    dpdkVarCollector.cpp
+    dpdkArch.cpp
+    elimTypedef.cpp
     )
 
 set(P4C_DPDK_HEADERS
+    ../bmv2/psa_switch/midend.h
+    ../bmv2/common/helpers.h
+    ../bmv2/common/JsonObjects.h
+    ../bmv2/common/lower.h
+    ../bmv2/common/action.h
+    ../bmv2/common/annotations.h
+    ../bmv2/common/backend.h
+    ../bmv2/common/control.h
+    ../bmv2/common/controlFlowGraph.h
+    ../bmv2/common/deparser.h
+    ../bmv2/common/expression.h
+    ../bmv2/common/extern.h
+    ../bmv2/common/globals.h
+    ../bmv2/common/header.h
+    ../bmv2/common/helpers.h
+    ../bmv2/common/lower.h
+    ../bmv2/common/metermap.h
+    ../bmv2/common/midend.h
+    ../bmv2/common/options.h
+    ../bmv2/common/parser.h
+    ../bmv2/common/programStructure.h
+    ../bmv2/common/sharedActionSelectorCheck.h
+    ../bmv2/psa_switch/psaSwitch.h
+    backend.h
+    midend.h
+    dpdkVarCollector.h
+    dpdkArch.h
+    elimTypedef.h
     )
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/dpdk.def PARENT_SCOPE)
 
 set(DPDK_IR_SRCS
+    spec.cpp
     )
 # IR sources that need to go into the frontend library
 set(QUAL_DPDK_IR_SRCS)
