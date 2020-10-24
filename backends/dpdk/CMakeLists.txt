@@ -93,8 +93,6 @@ add_dependencies(p4c-dpdk genIR frontend)
 
 install (TARGETS p4c-dpdk
         RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
-install (DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/p4include
-        DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
 
 add_custom_target(linkp4cdpdk
         COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_BINARY_DIR}/p4c-dpdk ${P4C_BINARY_DIR}/p4c-dpdk
