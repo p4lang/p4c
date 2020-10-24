@@ -28,7 +28,6 @@
 namespace DPDK {
 
 class ConvertToDpdkProgram : public Transform {
-  int next_label_id = 0;
   std::map<int, cstring> reg_id_to_name;
   std::map<cstring, int> reg_name_to_id;
   std::map<cstring, cstring> symbol_table;
@@ -89,7 +88,6 @@ class ConvertToDpdkControl : public Inspector {
   P4::TypeMap *typemap;
   P4::ReferenceMap *refmap;
   DpdkVariableCollector *collector;
-  int next_label_id = 0;
   IR::IndexedVector<IR::DpdkAsmStatement> instructions;
   IR::IndexedVector<IR::DpdkTable> tables;
   IR::IndexedVector<IR::DpdkAction> actions;

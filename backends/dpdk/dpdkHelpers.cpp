@@ -254,7 +254,7 @@ bool ConvertStatementToDpdk::preorder(const IR::IfStatement *s) {
   auto false_label = Util::printf_format("label_%dfalse", next_label_id);
   auto end_label = Util::printf_format("label_%dend", next_label_id++);
   auto gen =
-      new BranchingInstructionGeneration(&next_label_id, refmap, typemap);
+      new BranchingInstructionGeneration(refmap, typemap);
   bool res = gen->generate(s->condition, true_label, false_label, true);
 
   instructions.append(gen->instructions);

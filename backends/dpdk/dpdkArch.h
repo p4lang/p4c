@@ -50,8 +50,6 @@ class CollectMetadataHeaderInfo;
  */
 class ConvertToDpdkArch : public Transform {
   BlockInfoMapping *block_info;
-  P4::ReferenceMap *refMap;
-  CollectMetadataHeaderInfo *info;
 
   const IR::Type_Control *rewriteControlType(const IR::Type_Control *, cstring);
   const IR::Type_Parser *rewriteParserType(const IR::Type_Parser *, cstring);
@@ -62,16 +60,14 @@ class ConvertToDpdkArch : public Transform {
   const IR::Node *postorder(IR::P4Parser *c) override;
 
 public:
-  ConvertToDpdkArch(BlockInfoMapping *b, P4::ReferenceMap *refMap,
-                    CollectMetadataHeaderInfo *info)
-      : block_info(b), refMap(refMap), info(info) {}
+  ConvertToDpdkArch(BlockInfoMapping *b)
+      : block_info(b) {}
 };
 
 /* This Pass collects information about the name of Ingress, IngressParser,
  * IngressDeparser, Egress, EgressParser and EgressDeparser.
  */
 class ParsePsa : public Inspector {
-  const IR::PackageBlock *mainBlock;
 
 public:
   ParsePsa() {}
@@ -124,7 +120,6 @@ public:
 // place to inject this struct.
 class InjectJumboStruct : public Transform {
   CollectMetadataHeaderInfo *info;
-  int cnt = 0;
 
 public:
   InjectJumboStruct(CollectMetadataHeaderInfo *info) : info(info) {}
@@ -143,7 +138,7 @@ public:
   // push the declaration to the right code block.
   void collect(const IR::P4Control *control, const IR::P4Parser *parser,
                const IR::Declaration *decl) {
-    IR::IndexedVector<IR::Declaration> *decls;
+    IR::IndexedVector<IR::Declaration> *decls = nullptr;
     if (parser) {
       auto res = decl_map.find(parser);
       if (res != decl_map.end()) {
@@ -161,6 +156,7 @@ public:
         decl_map.emplace(control, decls);
       }
     }
+    BUG_CHECK(decls != nullptr, "decls cannot be null");
     decls->push_back(decl);
   }
   IR::Node *inject_control(const IR::Node *orig, IR::P4Control *control) {
@@ -248,13 +244,10 @@ class IfStatementUnroll : public Transform {
 private:
   DpdkVariableCollector *collector;
   DeclarationInjector injector;
-  P4::ReferenceMap *refMap;
-  P4::TypeMap *typeMap;
 
 public:
-  IfStatementUnroll(DpdkVariableCollector *collector, P4::ReferenceMap *refMap,
-                    P4::TypeMap *typeMap)
-      : collector(collector), refMap(refMap), typeMap(typeMap) {
+  IfStatementUnroll(DpdkVariableCollector *collector)
+      : collector(collector) {
     setName("IfStatementUnroll");
   }
   const IR::Node *postorder(IR::IfStatement *a) override;
@@ -268,8 +261,6 @@ public:
  */
 class LogicalExpressionUnroll : public Inspector {
   DpdkVariableCollector *collector;
-  P4::ReferenceMap *refMap;
-  P4::TypeMap *typeMap;
 
 public:
   IR::IndexedVector<IR::StatOrDecl> stmt;
@@ -297,9 +288,8 @@ public:
       return false;
   }
 
-  LogicalExpressionUnroll(DpdkVariableCollector *collector,
-                          P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
-      : collector(collector), refMap(refMap), typeMap(typeMap) {}
+  LogicalExpressionUnroll(DpdkVariableCollector *collector)
+      : collector(collector) {}
   bool preorder(const IR::Operation_Unary *a) override;
   bool preorder(const IR::Operation_Binary *a) override;
   bool preorder(const IR::MethodCallExpression *a) override;
@@ -313,12 +303,10 @@ public:
 // looks like: a = a + b. Therefore, this pass transform all AssignStatement
 // that has Binary_Operation to become two-parameter form.
 class ConvertBinaryOperationTo2Params : public Transform {
-  DpdkVariableCollector *collector;
   DeclarationInjector injector;
 
 public:
-  ConvertBinaryOperationTo2Params(DpdkVariableCollector *collector)
-      : collector(collector) {}
+  ConvertBinaryOperationTo2Params() {}
   const IR::Node *postorder(IR::AssignmentStatement *a) override;
   const IR::Node *postorder(IR::P4Control *a) override;
   const IR::Node *postorder(IR::P4Parser *a) override;
@@ -571,15 +559,14 @@ public:
       main->apply(*parsePsa);
     }));
     passes.push_back(info);
-    passes.push_back(
-        new ConvertToDpdkArch(&parsePsa->toBlockInfo, refMap, info));
+    passes.push_back(new ConvertToDpdkArch(&parsePsa->toBlockInfo));
     passes.push_back(new ReplaceMetadataHeaderName(refMap, info));
     passes.push_back(new InjectJumboStruct(info));
     passes.push_back(new StatementUnroll(collector));
-    passes.push_back(new IfStatementUnroll(collector, refMap, typeMap));
+    passes.push_back(new IfStatementUnroll(collector));
     passes.push_back(new P4::ClearTypeMap(typeMap));
     passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
-    passes.push_back(new ConvertBinaryOperationTo2Params(collector));
+    passes.push_back(new ConvertBinaryOperationTo2Params());
     parsePsa = new ParsePsa();
     passes.push_back(evaluator);
     passes.push_back(new VisitFunctor([evaluator, parsePsa]() {

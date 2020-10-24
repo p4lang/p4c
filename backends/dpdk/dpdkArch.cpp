@@ -518,7 +518,7 @@ bool ExpressionUnroll::preorder(const IR::BoolLiteral *) {
 const IR::Node *IfStatementUnroll::postorder(IR::IfStatement *i) {
   auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
   ExpressionUnroll::sanity(i->condition);
-  auto unroller = new LogicalExpressionUnroll(collector, refMap, typeMap);
+  auto unroller = new LogicalExpressionUnroll(collector);
   i->condition->apply(*unroller);
   for (auto i : unroller->stmt)
     code_block->push_back(i);

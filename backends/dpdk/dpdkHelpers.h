@@ -95,7 +95,6 @@ namespace DPDK {
  * optmized.
  */
 class BranchingInstructionGeneration {
-  int *next_label_id;
   P4::ReferenceMap *refMap;
   P4::TypeMap *typeMap;
   bool nested(const IR::Node *n) {
@@ -112,9 +111,8 @@ class BranchingInstructionGeneration {
 
 public:
   IR::IndexedVector<IR::DpdkAsmStatement> instructions;
-  BranchingInstructionGeneration(int *next_label_id, P4::ReferenceMap *refMap,
-                                 P4::TypeMap *typeMap)
-      : next_label_id(next_label_id), refMap(refMap), typeMap(typeMap) {}
+  BranchingInstructionGeneration(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
+      : refMap(refMap), typeMap(typeMap) {}
   bool generate(const IR::Expression *, cstring, cstring, bool);
 };
 
