@@ -107,4 +107,9 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
 
   dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
 }
+
+void PsaSwitchBackend::codegen(std::ostream &out) const {
+  dpdk_program->toSpec(out) << std::endl;
+}
+
 }  // namespace DPDK

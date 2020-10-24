@@ -73,6 +73,7 @@ set(P4C_DPDK_HEADERS
     dpdkArch.h
     dpdkAsmOpt.h
     elimTypedef.h
+    options.h
     )
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/dpdk.def PARENT_SCOPE)

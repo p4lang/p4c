@@ -50,6 +50,7 @@ public:
   PsaSwitchBackend(BMV2::BMV2Options &options, P4::ReferenceMap *refMap,
                    P4::TypeMap *typeMap, P4::ConvertEnums::EnumMapping *enumMap)
       : Backend(options, refMap, typeMap, enumMap), options(options) {}
+  void codegen(std::ostream &) const;
 };
 
 } // namespace DPDK
