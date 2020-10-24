@@ -449,9 +449,112 @@ public:
         new InjectInternetChecksumIntermediateValue(info, &csum_map));
   }
 };
+
+// This pass is preparing logical expression for following branching statement
+// optimization. This pass breaks parenthesis looks liks this: (a && b) && c.
+// After this pass, the expression looks like this: a && b && c. (The AST is
+// different).
+class BreakLogicalExpressionParenthesis : public Transform {
+public:
+  const IR::Node *postorder(IR::LAnd *land) {
+    std::cout << land << std::endl;
+    if (auto land2 = land->left->to<IR::LAnd>()) {
+      auto sub = new IR::LAnd(land2->right, land->right);
+      return new IR::LAnd(land2->left, sub);
+    } else if (not land->left->is<IR::LOr>() and
+               not land->left->is<IR::Equ>() and
+               not land->left->is<IR::Neq>() and
+               not land->left->is<IR::Lss>() and
+               not land->left->is<IR::Grt>() and
+               not land->left->is<IR::MethodCallExpression>() and
+               not land->left->is<IR::PathExpression>() and
+               not land->left->is<IR::Member>()) {
+      BUG("Logical Expression Unroll pass failed");
+    }
+    return land;
+  }
+  const IR::Node *postorder(IR::LOr *lor) {
+    std::cout << lor << std::endl;
+    if (auto lor2 = lor->left->to<IR::LOr>()) {
+      auto sub = new IR::LOr(lor2->right, lor->right);
+      return new IR::LOr(lor2->left, sub);
+    } else if (not lor->left->is<IR::LOr>() and not lor->left->is<IR::Equ>() and
+               not lor->left->is<IR::Neq>() and not lor->left->is<IR::Lss>() and
+               not lor->left->is<IR::Grt>() and
+               not lor->left->is<IR::MethodCallExpression>() and
+               not lor->left->is<IR::PathExpression>() and
+               not lor->left->is<IR::Member>()) {
+      BUG("Logical Expression Unroll pass failed");
+    }
+    return lor;
+  }
+};
+
+// This pass will swap the simple expression to the front of an logical
+// expression. Note that even for a subexpression of a logical expression, we
+// will swap it as well. For example, a && ((b && c) || d), will become
+// a && (d || (b && c))
+class SwapSimpleExpressionToFrontOfLogicalExpression : public Transform {
+  bool is_simple(const IR::Node *n) {
+    if (n->is<IR::Equ>() or n->is<IR::Neq>() or n->is<IR::Lss>() or
+        n->is<IR::Grt>() or n->is<IR::MethodCallExpression>() or
+        n->is<IR::PathExpression>() or n->is<IR::Member>()) {
+      return true;
+    } else if (not n->is<IR::LAnd>() and not n->is<IR::LOr>()) {
+      BUG("Logical Expression Unroll pass failed");
+    } else {
+      return false;
+    }
+  }
+
+public:
+  const IR::Node *postorder(IR::LAnd *land) {
+    if (not is_simple(land->left) and is_simple(land->right)) {
+      return new IR::LAnd(land->right, land->left);
+    } else if (not is_simple(land->left)) {
+      if (auto land2 = land->right->to<IR::LAnd>()) {
+        if (is_simple(land2->left)) {
+          auto sub = new IR::LAnd(land->left, land2->right);
+          return new IR::LAnd(land2->left, sub);
+        }
+      }
+    }
+    return land;
+  }
+  const IR::Node *postorder(IR::LOr *lor) {
+    if (not is_simple(lor->left) and is_simple(lor->right)) {
+      return new IR::LOr(lor->right, lor->left);
+    } else if (not is_simple(lor->left)) {
+      if (auto lor2 = lor->right->to<IR::LOr>()) {
+        if (is_simple(lor2->left)) {
+          auto sub = new IR::LOr(lor->left, lor2->right);
+          return new IR::LOr(lor2->left, sub);
+        }
+      }
+    }
+    return lor;
+  }
+};
+
+// This passmanager togethor transform logical expression into a form that
+// the simple expression will go to the front of the expression. And for
+// expression at the same level(the same level is that expressions that are
+// connected directly by && or ||) should be traversed from left to right
+// (a && b) && c is not a valid expression here.
+class ConvertLogicalExpression : public PassManager {
+public:
+  ConvertLogicalExpression() {
+    auto r = new PassRepeated{new BreakLogicalExpressionParenthesis};
+    passes.push_back(r);
+    r = new PassRepeated{new SwapSimpleExpressionToFrontOfLogicalExpression};
+    passes.push_back(r);
+  }
+};
+
 class RewriteToDpdkArch : public PassManager {
 public:
   CollectMetadataHeaderInfo *info;
+  std::map<const cstring, IR::IndexedVector<IR::Parameter> *> *args_struct_map;
   std::map<const IR::Declaration_Instance *, cstring> *csum_map;
   RewriteToDpdkArch(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                     DpdkVariableCollector *collector) {
@@ -494,6 +597,7 @@ public:
     auto p = new PrependPDotToActionArgs(&parsePsa->toBlockInfo, refMap);
     args_struct_map = &p->args_struct_map;
     passes.push_back(p);
+    passes.push_back(new ConvertLogicalExpression);
   }
 };
 
