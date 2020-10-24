@@ -17,6 +17,9 @@ limitations under the License.
 #include <unordered_map>
 #include "backends/bmv2/psa_switch/psaSwitch.h"
 #include "dpdkArch.h"
+#include "dpdkAsmOpt.h"
+#include "dpdkHelpers.h"
+#include "dpdkProgram.h"
 #include "dpdkVarCollector.h"
 #include "elimTypedef.h"
 #include "ir/dbprint.h"
@@ -98,5 +101,10 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
   dpdk_program = convertToDpdk->getDpdkProgram();
   if (!dpdk_program)
     return;
+  PassManager post_code_gen = {
+      new DpdkAsmOptimization,
+  };
+
+  dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
 }
 }  // namespace DPDK

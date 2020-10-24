@@ -33,9 +33,11 @@ set(P4C_DPDK_SOURCES
     backend.cpp
     main.cpp
     midend.cpp
+    dpdkHelpers.cpp
     dpdkProgram.cpp
     dpdkVarCollector.cpp
     dpdkArch.cpp
+    dpdkAsmOpt.cpp
     elimTypedef.cpp
     )
 
@@ -65,9 +67,11 @@ set(P4C_DPDK_HEADERS
     ../bmv2/psa_switch/psaSwitch.h
     backend.h
     midend.h
+    dpdkHelpers.h
     dpdkProgram.h
     dpdkVarCollector.h
     dpdkArch.h
+    dpdkAsmOpt.h
     elimTypedef.h
     )
 
