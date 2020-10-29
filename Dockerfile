@@ -14,6 +14,9 @@ ARG IMAGE_TYPE=build
 # Whether to do a unified build.
 ARG ENABLE_UNIFIED_COMPILATION=ON
 
+# Whether to enable translation validation
+ARG VALIDATION=OFF
+
 # Delegate the build to tools/travis-build.
 COPY . /p4c/
 WORKDIR /p4c/
