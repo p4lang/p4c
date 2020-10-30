@@ -23,9 +23,10 @@
 #ifndef BM_BM_SIM_QUEUE_H_
 #define BM_BM_SIM_QUEUE_H_
 
+#include <condition_variable>
 #include <deque>
 #include <mutex>
-#include <condition_variable>
+#include <utility>
 
 namespace bm {
 

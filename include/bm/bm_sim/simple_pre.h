@@ -24,11 +24,11 @@
 #ifndef BM_BM_SIM_SIMPLE_PRE_H_
 #define BM_BM_SIM_SIMPLE_PRE_H_
 
-#include <boost/thread/shared_mutex.hpp>
-
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
 #include <vector>
+
+#include <boost/thread/shared_mutex.hpp>
 
 #include "handle_mgr.h"
 #include "pre.h"

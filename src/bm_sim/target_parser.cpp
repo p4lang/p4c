@@ -27,14 +27,14 @@
 #include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/target_parser.h>
 
-#include <boost/program_options.hpp>
-
 #include <memory>
 #include <ostream>
 #include <sstream>
 #include <string>
 #include <unordered_set>
 #include <vector>
+
+#include <boost/program_options.hpp>
 
 namespace po = boost::program_options;
 

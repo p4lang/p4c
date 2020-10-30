@@ -18,22 +18,21 @@
  *
  */
 
-#include <bm/config.h>
-#include <bm/bm_sim/options_parse.h>
+#include <bm/bm_sim/P4Objects.h>
 #include <bm/bm_sim/event_logger.h>
 #include <bm/bm_sim/logger.h>
-#include <bm/bm_sim/P4Objects.h>
+#include <bm/bm_sim/options_parse.h>
+#include <bm/config.h>
+
+#include <cassert>
+#include <iostream>
+#include <sstream>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
-
-#include <vector>
-#include <string>
-#include <iostream>
-#include <sstream>
-#include <unordered_map>
-
-#include <cassert>
 
 #include "version.h"
 

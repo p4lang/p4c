@@ -24,6 +24,7 @@
 #include <bm/config.h>
 
 #include <limits>
+#include <memory>
 #include <string>
 
 namespace bm {

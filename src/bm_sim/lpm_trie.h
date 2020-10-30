@@ -24,6 +24,7 @@
 #include <bf_lpm_trie/bf_lpm_trie.h>
 
 #include <algorithm>  // for std::swap
+#include <utility>  // for std::swap
 
 namespace bm {
 

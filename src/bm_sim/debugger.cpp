@@ -27,8 +27,6 @@
 // temporary deps?
 #include <bm/bm_sim/bytecontainer.h>
 #include <bm/bm_sim/logger.h>
-
-#include <boost/functional/hash.hpp>
 #include <nanomsg/reqrep.h>
 
 #include <chrono>
@@ -41,6 +39,9 @@
 #include <mutex>
 #include <condition_variable>
 #include <vector>
+
+#include <boost/functional/hash.hpp>
+
 #endif  // BM_DEBUG_ON
 
 namespace bm {

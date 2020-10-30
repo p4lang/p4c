@@ -20,8 +20,6 @@
 
 #include <gtest/gtest.h>
 
-#include <boost/filesystem.hpp>
-
 #include <bm/bm_sim/actions.h>
 #include <bm/bm_sim/deparser.h>
 #include <bm/bm_sim/packet.h>
@@ -37,6 +35,8 @@
 #include <vector>
 #include <string>
 #include <utility>  // for std::pair
+
+#include <boost/filesystem.hpp>
 
 using namespace bm;
 

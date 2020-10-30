@@ -54,14 +54,15 @@
 #ifndef BM_BM_SIM_CALCULATIONS_H_
 #define BM_BM_SIM_CALCULATIONS_H_
 
-#include <memory>
-#include <type_traits>
-#include <string>
-#include <unordered_map>
-#include <tuple>
-#include <vector>
-#include <algorithm>   // for std::copy
+#include <algorithm>  // for std::copy
 #include <iosfwd>
+#include <memory>
+#include <string>
+#include <tuple>
+#include <type_traits>
+#include <unordered_map>
+#include <utility>
+#include <vector>
 
 #include "boost/variant.hpp"
 

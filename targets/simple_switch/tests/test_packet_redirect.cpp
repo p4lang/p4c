@@ -24,13 +24,13 @@
 #include <bm/bm_apps/packet_pipe.h>
 #include <bm/bm_sim/logger.h>
 
-#include <boost/filesystem.hpp>
-
 #include <initializer_list>
 #include <set>
 #include <string>
 #include <memory>
 #include <vector>
+
+#include <boost/filesystem.hpp>
 
 #include "simple_switch.h"
 
@@ -139,16 +139,16 @@ class SimpleSwitch_PacketRedirectP4 : public ::testing::Test {
   }
 
  protected:
-  static const std::string event_logger_addr;
-  static const std::string packet_in_addr;
+  static const char event_logger_addr[];
+  static const char packet_in_addr[];
   static SimpleSwitch *test_switch;
   bm_apps::PacketInject packet_inject;
   PacketInReceiver receiver{};
   NNEventListener events;
 
  private:
-  static const std::string testdata_dir;
-  static const std::string test_json;
+  static const char testdata_dir[];
+  static const char test_json[];
 };
 
 // In theory, I could be using an 'inproc' transport here. However, I observe a
@@ -157,15 +157,15 @@ class SimpleSwitch_PacketRedirectP4 : public ::testing::Test {
 // packet drops are to be expected when the phblisher is faster than the
 // consummer. However, I do not believe my consummer is that slow and I never
 // observe the drops with 'ipc'
-const std::string SimpleSwitch_PacketRedirectP4::event_logger_addr =
+const char SimpleSwitch_PacketRedirectP4::event_logger_addr[] =
     "ipc:///tmp/test_events_abc123";
-const std::string SimpleSwitch_PacketRedirectP4::packet_in_addr =
+const char SimpleSwitch_PacketRedirectP4::packet_in_addr[] =
     "ipc:///tmp/test_packet_in_abc123";
 
 SimpleSwitch *SimpleSwitch_PacketRedirectP4::test_switch = nullptr;
 
-const std::string SimpleSwitch_PacketRedirectP4::testdata_dir = TESTDATADIR;
-const std::string SimpleSwitch_PacketRedirectP4::test_json =
+const char SimpleSwitch_PacketRedirectP4::testdata_dir[] = TESTDATADIR;
+const char SimpleSwitch_PacketRedirectP4::test_json[] =
     "packet_redirect.json";
 
 TEST_F(SimpleSwitch_PacketRedirectP4, Baseline) {

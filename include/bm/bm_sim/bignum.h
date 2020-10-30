@@ -21,10 +21,10 @@
 #ifndef BM_BM_SIM_BIGNUM_H_
 #define BM_BM_SIM_BIGNUM_H_
 
+#include <gmp.h>
+
 // will need to implement this ourselves if we do not use Boost
 #include <boost/multiprecision/gmp.hpp>
-
-#include <gmp.h>
 
 namespace bm {
 

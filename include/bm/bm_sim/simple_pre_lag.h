@@ -25,6 +25,7 @@
 #define BM_BM_SIM_SIMPLE_PRE_LAG_H_
 
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "pre.h"

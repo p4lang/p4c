@@ -20,12 +20,12 @@
 
 #include <gtest/gtest.h>
 
-#include <boost/filesystem.hpp>
-
 #include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/switch.h>
 
 #include <string>
+
+#include <boost/filesystem.hpp>
 
 using namespace::bm;
 
@@ -57,12 +57,12 @@ class RuntimeIfaceTest : public ::testing::Test {
   // virtual void TearDown() { }
 
  private:
-  static const std::string testdata_dir;
-  static const std::string test_json;
+  static const char testdata_dir[];
+  static const char test_json[];
 };
 
-const std::string RuntimeIfaceTest::testdata_dir = TESTDATADIR;
-const std::string RuntimeIfaceTest::test_json = "runtime_iface.json";
+const char RuntimeIfaceTest::testdata_dir[] = TESTDATADIR;
+const char RuntimeIfaceTest::test_json[] = "runtime_iface.json";
 
 TEST_F(RuntimeIfaceTest, Counters) {
   using ErrorCode = Counter::CounterErrorCode;

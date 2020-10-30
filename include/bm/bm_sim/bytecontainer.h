@@ -23,11 +23,11 @@
 #ifndef BM_BM_SIM_BYTECONTAINER_H_
 #define BM_BM_SIM_BYTECONTAINER_H_
 
-#include <boost/functional/hash.hpp>
-
 #include <vector>
 #include <iterator>
 #include <string>
+
+#include <boost/functional/hash.hpp>
 
 #include "short_alloc.h"
 

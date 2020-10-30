@@ -23,11 +23,12 @@
 #ifndef BM_BM_SIM_PARSER_H_
 #define BM_BM_SIM_PARSER_H_
 
-#include <utility>
-#include <string>
-#include <vector>
+#include <memory>
 #include <mutex>
+#include <string>
 #include <type_traits>
+#include <utility>
+#include <vector>
 
 #include <cassert>
 

@@ -18,25 +18,26 @@
  *
  */
 
-#include <boost/filesystem.hpp>
-
-#include <bm/config.h>
-#include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/switch.h>
+
 #include <bm/bm_sim/P4Objects.h>
-#include <bm/bm_sim/options_parse.h>
-#include <bm/bm_sim/logger.h>
+#include <bm/bm_sim/_assert.h>
 #include <bm/bm_sim/debugger.h>
 #include <bm/bm_sim/event_logger.h>
+#include <bm/bm_sim/logger.h>
+#include <bm/bm_sim/options_parse.h>
 #include <bm/bm_sim/packet.h>
 #include <bm/bm_sim/periodic_task.h>
+#include <bm/config.h>
 
 #include <cassert>
 #include <fstream>
-#include <string>
-#include <vector>
 #include <iostream>
 #include <streambuf>
+#include <string>
+#include <vector>
+
+#include <boost/filesystem.hpp>
 
 #include "md5.h"
 

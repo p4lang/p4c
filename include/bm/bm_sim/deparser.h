@@ -27,8 +27,10 @@
 #include <bm/bm_sim/packet.h>
 #include <bm/bm_sim/phv.h>
 
-#include <vector>
 #include <string>
+#include <memory>
+#include <utility>
+#include <vector>
 
 #include "named_p4object.h"
 #include "phv_forward.h"

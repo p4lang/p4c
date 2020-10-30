@@ -15,13 +15,13 @@
 
 #include <gtest/gtest.h>
 
-#include <boost/filesystem.hpp>
-
 #include <bm/bm_sim/pcap_file.h>
 
 #include <string>
 // TODO(unknown): is this still needed?
 #include <cstdio>
+
+#include <boost/filesystem.hpp>
 
 using namespace bm;
 

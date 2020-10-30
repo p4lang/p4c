@@ -35,16 +35,17 @@
 #ifndef BM_BM_SIM_STATEFUL_H_
 #define BM_BM_SIM_STATEFUL_H_
 
+#include <functional>
+#include <mutex>
+#include <string>
+#include <unordered_set>
+#include <unordered_map>
+#include <vector>
+
 #include <boost/thread/locks.hpp>  // for boost::lock
 
-#include <string>
-#include <vector>
-#include <mutex>
-#include <unordered_set>
-#include <functional>
-
-#include "data.h"
 #include "bignum.h"
+#include "data.h"
 #include "named_p4object.h"
 #include "short_alloc.h"
 

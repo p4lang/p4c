@@ -22,6 +22,7 @@
 #define BM_BM_SIM_MATCH_KEY_TYPES_H_
 
 #include <limits>
+#include <utility>
 #include <vector>
 
 #include "bytecontainer.h"

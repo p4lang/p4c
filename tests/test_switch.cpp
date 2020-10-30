@@ -20,8 +20,6 @@
 
 #include <gtest/gtest.h>
 
-#include <boost/filesystem.hpp>
-
 #include <bm/bm_sim/switch.h>
 #include <bm/bm_runtime/bm_runtime.h>
 
@@ -31,6 +29,8 @@
 #include <string>
 #include <thread>
 #include <map>
+
+#include <boost/filesystem.hpp>
 
 #include "utils.h"
 

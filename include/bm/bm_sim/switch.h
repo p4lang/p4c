@@ -61,26 +61,28 @@
 #ifndef BM_BM_SIM_SWITCH_H_
 #define BM_BM_SIM_SWITCH_H_
 
-#include <boost/thread/shared_mutex.hpp>
-
-#include <memory>
-#include <string>
-#include <typeinfo>
-#include <typeindex>
-#include <set>
-#include <vector>
-#include <iosfwd>
 #include <condition_variable>
+#include <iosfwd>
+#include <memory>
+#include <set>
+#include <string>
+#include <typeindex>
+#include <typeinfo>
+#include <unordered_map>
+#include <utility>
+#include <vector>
+
+#include <boost/thread/shared_mutex.hpp>
 
 #include "action_profile.h"
 #include "context.h"
-#include "device_id.h"
-#include "queue.h"
-#include "learning.h"
-#include "runtime_interface.h"
 #include "dev_mgr.h"
-#include "phv_source.h"
+#include "device_id.h"
+#include "learning.h"
 #include "lookup_structures.h"
+#include "phv_source.h"
+#include "queue.h"
+#include "runtime_interface.h"
 #include "target_parser.h"
 
 namespace bm {

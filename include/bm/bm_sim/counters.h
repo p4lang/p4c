@@ -35,10 +35,11 @@
 #ifndef BM_BM_SIM_COUNTERS_H_
 #define BM_BM_SIM_COUNTERS_H_
 
-#include <vector>
 #include <atomic>
-#include <string>
 #include <iosfwd>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "named_p4object.h"
 #include "packet.h"

@@ -23,10 +23,11 @@
 #ifndef BM_BM_SIM_DATA_H_
 #define BM_BM_SIM_DATA_H_
 
-#include <type_traits>
-#include <string>
-#include <vector>
 #include <iosfwd>
+#include <string>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 #include <cstring>
 #include <cassert>

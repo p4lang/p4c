@@ -38,8 +38,9 @@
 #include <bm/config.h>
 
 #include <functional>
-#include <string>
 #include <map>
+#include <memory>
+#include <string>
 
 #include "packet_handler.h"
 #include "port_monitor.h"

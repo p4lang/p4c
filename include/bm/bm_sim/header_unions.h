@@ -24,9 +24,10 @@
 #define BM_BM_SIM_HEADER_UNIONS_H_
 
 #include <algorithm>  // std::swap
-#include <vector>
-#include <string>
 #include <functional>  // std::reference_wrapper
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "named_p4object.h"
 #include "headers.h"

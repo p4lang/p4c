@@ -15,19 +15,19 @@
 
 #include <gtest/gtest.h>
 
-#include <boost/filesystem.hpp>
-
+#include <bm/bm_sim/P4Objects.h>
 #include <bm/bm_sim/actions.h>
 #include <bm/bm_sim/core/primitives.h>
 #include <bm/bm_sim/logger.h>
-#include <bm/bm_sim/phv.h>
 #include <bm/bm_sim/packet.h>
-#include <bm/bm_sim/P4Objects.h>
+#include <bm/bm_sim/phv.h>
 
-#include <vector>
-#include <string>
 #include <fstream>
 #include <sstream>
+#include <string>
+#include <vector>
+
+#include <boost/filesystem.hpp>
 
 #include "jsoncpp/json.h"
 

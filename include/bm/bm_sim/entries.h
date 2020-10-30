@@ -22,6 +22,7 @@
 #define BM_BM_SIM_ENTRIES_H_
 
 #include <memory>
+#include <utility>
 
 #include "actions.h"
 #include "bytecontainer.h"

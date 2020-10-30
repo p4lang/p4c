@@ -23,8 +23,6 @@
 #include <bm/bm_sim/dev_mgr.h>
 #include <bm/bm_sim/logger.h>
 
-#include <boost/optional.hpp>
-
 #include <chrono>
 #include <iostream>
 #include <iterator>  // for std::distance
@@ -32,6 +30,8 @@
 #include <regex>
 #include <string>
 #include <unordered_map>
+
+#include <boost/optional.hpp>
 
 extern "C" {
 #include "sysrepo.h"

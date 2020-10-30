@@ -21,13 +21,15 @@
 #ifndef BM_BM_SIM_MATCH_TABLES_H_
 #define BM_BM_SIM_MATCH_TABLES_H_
 
+#include <iosfwd>
+#include <memory>
+#include <string>
+#include <type_traits>
+#include <unordered_map>
+#include <vector>
+
 // shared_mutex will only be available in C++-14, so for now I'm using boost
 #include <boost/thread/shared_mutex.hpp>
-
-#include <vector>
-#include <type_traits>
-#include <iosfwd>
-#include <string>
 
 #include "match_units.h"
 #include "actions.h"

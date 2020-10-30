@@ -22,6 +22,7 @@
 #define BM_BM_SIM_ACTION_ENTRY_H_
 
 #include <iosfwd>
+#include <utility>
 
 #include "actions.h"
 #include "control_flow.h"

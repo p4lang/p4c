@@ -23,11 +23,12 @@
 
 #include <bm/bm_sim/transport.h>
 
-#include <mutex>
+#include <algorithm>  // for std::copy
 #include <condition_variable>
+#include <memory>
+#include <mutex>
 #include <string>
 #include <vector>
-#include <algorithm>  // for std::copy
 
 class MemoryAccessor : public bm::TransportIface {
  public:

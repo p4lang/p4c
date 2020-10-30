@@ -23,6 +23,7 @@
 
 #include <algorithm>  // for swap
 #include <type_traits>
+#include <utility>
 
 #include <Judy.h>
 

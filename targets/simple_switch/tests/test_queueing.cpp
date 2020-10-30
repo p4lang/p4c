@@ -17,12 +17,12 @@
 
 #include <bm/bm_apps/packet_pipe.h>
 
-#include <boost/filesystem.hpp>
-
 #include <string>
 #include <memory>
 #include <vector>
 #include <algorithm>  // for std::is_sorted
+
+#include <boost/filesystem.hpp>
 
 #include "simple_switch.h"
 
@@ -124,23 +124,23 @@ class SimpleSwitch_QueueingP4 : public ::testing::Test {
   }
 
  protected:
-  static const std::string packet_in_addr;
+  static const char packet_in_addr[];
   static SimpleSwitch *test_switch;
   bm_apps::PacketInject packet_inject;
   PacketInReceiver receiver{};
 
  private:
-  static const std::string testdata_dir;
-  static const std::string test_json;
+  static const char testdata_dir[];
+  static const char test_json[];
 };
 
-const std::string SimpleSwitch_QueueingP4::packet_in_addr =
+const char SimpleSwitch_QueueingP4::packet_in_addr[] =
     "inproc://packets";
 
 SimpleSwitch *SimpleSwitch_QueueingP4::test_switch = nullptr;
 
-const std::string SimpleSwitch_QueueingP4::testdata_dir = TESTDATADIR;
-const std::string SimpleSwitch_QueueingP4::test_json =
+const char SimpleSwitch_QueueingP4::testdata_dir[] = TESTDATADIR;
+const char SimpleSwitch_QueueingP4::test_json[] =
     "queueing.json";
 
 constexpr size_t SimpleSwitch_QueueingP4::kQueueingHdrSize;

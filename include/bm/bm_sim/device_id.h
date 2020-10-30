@@ -22,6 +22,7 @@
 #define BM_BM_SIM_DEVICE_ID_H_
 
 #include <cstdint>
+#include <utility>
 
 namespace bm {
 

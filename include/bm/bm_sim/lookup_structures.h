@@ -105,6 +105,8 @@
 #ifndef BM_BM_SIM_LOOKUP_STRUCTURES_H_
 #define BM_BM_SIM_LOOKUP_STRUCTURES_H_
 
+#include <memory>
+
 #include "match_key_types.h"
 #include "bytecontainer.h"
 

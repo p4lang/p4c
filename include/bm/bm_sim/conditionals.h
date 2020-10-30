@@ -21,7 +21,9 @@
 #ifndef BM_BM_SIM_CONDITIONALS_H_
 #define BM_BM_SIM_CONDITIONALS_H_
 
+#include <memory>
 #include <string>
+#include <utility>
 
 #include "phv.h"
 #include "control_flow.h"

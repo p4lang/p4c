@@ -18,12 +18,12 @@
  *
  */
 
-#include <boost/filesystem.hpp>
-
 #include <vector>
 #include <string>
 #include <iostream>
 #include <memory>
+
+#include <boost/filesystem.hpp>
 
 #include "stress_utils.h"
 

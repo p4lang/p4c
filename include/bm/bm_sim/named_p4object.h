@@ -24,8 +24,9 @@
 #define BM_BM_SIM_NAMED_P4OBJECT_H_
 
 #include <bm/bm_sim/source_info.h>
-#include <string>
 #include <memory>
+#include <string>
+#include <utility>
 
 namespace bm {
 

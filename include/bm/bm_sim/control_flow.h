@@ -21,7 +21,9 @@
 #ifndef BM_BM_SIM_CONTROL_FLOW_H_
 #define BM_BM_SIM_CONTROL_FLOW_H_
 
+#include <memory>
 #include <string>
+#include <utility>
 
 #include "named_p4object.h"
 

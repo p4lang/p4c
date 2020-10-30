@@ -25,9 +25,10 @@
 
 #include <bm/config.h>
 
-#include <vector>
-#include <string>
+#include <memory>
 #include <set>
+#include <string>
+#include <vector>
 
 #include "fields.h"
 #include "named_p4object.h"

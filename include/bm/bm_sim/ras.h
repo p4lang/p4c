@@ -22,6 +22,7 @@
 #define BM_BM_SIM_RAS_H_
 
 #include <algorithm>  // for std::swap
+#include <utility>
 
 #include <cassert>
 

@@ -27,10 +27,12 @@
 
 #include <condition_variable>
 #include <deque>
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <mutex>
 #include <string>
+#include <unordered_map>
+#include <utility>
 
 #include "simple_switch.h"
 #include "register_access.h"

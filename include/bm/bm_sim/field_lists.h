@@ -23,13 +23,13 @@
 #ifndef BM_BM_SIM_FIELD_LISTS_H_
 #define BM_BM_SIM_FIELD_LISTS_H_
 
-#include <boost/functional/hash.hpp>
-#include <boost/variant.hpp>
-
 #include <utility>  // for pair<>
 #include <vector>
 #include <unordered_set>
 #include <string>
+
+#include <boost/functional/hash.hpp>
+#include <boost/variant.hpp>
 
 #include "phv_forward.h"
 #include "bytecontainer.h"
