@@ -3282,10 +3282,9 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         setType(result, returnType);
 
         auto mi = MethodInstance::resolve(result, refMap, typeMap, nullptr, true);
-        if (mi->isApply()) {
-            auto a = mi->to<ApplyMethod>();
-            if (a->isTableApply() && findContext<IR::P4Action>())
-                typeError("%1%: tables cannot be invoked from actions", expression);
+        if (mi->isApply() && findContext<IR::P4Action>()) {
+            typeError("%1%: apply cannot be called from actions", expression);
+            return expression;
         }
 
         // Check that verify is only invoked from parsers.
