@@ -39,6 +39,7 @@ OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
 OPTION (ENABLE_GC "Use libgc" ON)
 OPTION (ENABLE_MULTITHREAD "Use multithreading" OFF)
 OPTION (ENABLE_GMP "Use GMP library" ON)
+OPTION (ENABLE_WERROR "Turn GCC warnings into errors (as much as possible)" OFF)
 
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
 
@@ -168,7 +169,6 @@ find_package (BMV2)
 # enable CTest
 enable_testing ()
 
-
 # if we want to manage versions in CMake ...
 # include (cmake/P4CVersion.cmake)
 # set (CPACK_PACKAGE_VERSION_MAJOR ${__P4C_VERSION_MAJOR})
@@ -191,6 +191,13 @@ add_cxx_compiler_option ("-Wall")
 add_cxx_compiler_option ("-Wextra")
 add_cxx_compiler_option ("-Wno-overloaded-virtual")
 add_cxx_compiler_option ("-Wno-deprecated")
+add_cxx_compiler_option ("-Wno-unused-result")
+
+if (ENABLE_WERROR)
+  add_cxx_compiler_option ("-Werror")
+  # For GCC bugs related to boost::optional.
+  add_cxx_compiler_option ("-Wno-error=maybe-uninitialized")
+endif ()
 
 # If we're on GCC, use the gold linker if available.
 if(CMAKE_COMPILER_IS_GNUCC)

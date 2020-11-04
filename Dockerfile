@@ -14,6 +14,9 @@ ARG IMAGE_TYPE=build
 # Whether to do a unified build.
 ARG ENABLE_UNIFIED_COMPILATION=ON
 
+# Whether to turn GCC warnings into errors.
+ARG ENABLE_WERROR=ON
+
 # Whether to enable translation validation
 ARG VALIDATION=OFF
 

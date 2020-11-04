@@ -120,7 +120,9 @@ function build() {
   make
 }
 
-build "-DENABLE_UNIFIED_COMPILATION=${ENABLE_UNIFIED_COMPILATION}"
+build \
+  "-DENABLE_UNIFIED_COMPILATION=${ENABLE_UNIFIED_COMPILATION}" \
+  "-DENABLE_WERROR=${ENABLE_WERROR}"
 
 make install
 /usr/local/bin/ccache -p -s

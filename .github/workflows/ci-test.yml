@@ -68,7 +68,7 @@ jobs:
   #         # To flush out issues with unified vs. non-unified builds,
   #         # do a non-unified build before continuing with the rest,
   #         # which produces a unified build.
-  #         ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=${{matrix.unified}} -DENABLE_GMP=${{ matrix.enable_gmp }} && cd build && make -j2
+  #         ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=${{matrix.unified}} -DENABLE_GMP=${{ matrix.enable_gmp }} -DENABLE_WERROR && cd build && make -j2
 
   #   - name: Run tests (MacOS)
   #     run: |

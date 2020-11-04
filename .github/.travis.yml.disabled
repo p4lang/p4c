@@ -41,7 +41,7 @@ install:
   # build before continuing with the rest, which produces a unified build.
   # This is done here on MacOS; for Linux, this is done in Dockerfile.
   - if [[ $TRAVIS_OS_NAME == 'linux' ]] ; then docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg ENABLE_GMP=$ENABLE_GMP . ; fi
-  - if [[ $TRAVIS_OS_NAME == 'osx' ]] ; then ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=$UNIFIED -DENABLE_GMP=$ENABLE_GMP && cd build && make -j2; fi
+  - if [[ $TRAVIS_OS_NAME == 'osx' ]] ; then ./bootstrap.sh -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=$UNIFIED -DENABLE_GMP=$ENABLE_GMP -DENABLE_WERROR && cd build && make -j2; fi
 
 script:
   # run with sudo (...) --privileged so that we can create network namespaces for the ebpf tests
