@@ -18,35 +18,62 @@ limitations under the License.
 #define _TYPECHECKING_TYPECONSTRAINTS_H_
 
 #include <sstream>
+#include <boost/optional.hpp>
 #include "ir/ir.h"
 #include "typeUnification.h"
 #include "typeConstraints.h"
 #include "typeSubstitution.h"
 #include "typeSubstitutionVisitor.h"
+#include "lib/error_helper.h"
 
 namespace P4 {
 
+/// Requires two types to be equal.
+class EqualityConstraint : public IHasDbPrint {
+ public:
+    const IR::Type* left;
+    const IR::Type* right;
+    /// Constraint which produced this one.  May be nullptr.
+    const EqualityConstraint* derivedFrom;
+    /// Place in source code which originated the contraint.  May be nullptr.
+    const IR::Node* origin;
+    EqualityConstraint(const IR::Type* left, const IR::Type* right,
+                       const EqualityConstraint* derivedFrom)
+            : left(left), right(right), derivedFrom(derivedFrom), origin(nullptr) { check(); }
+    EqualityConstraint(const IR::Type* left, const IR::Type* right,
+                       const IR::Node* origin)
+            : left(left), right(right), derivedFrom(nullptr), origin(origin) { check(); }
+    void check() const {
+        CHECK_NULL(left); CHECK_NULL(right);
+        if (left->is<IR::Type_Name>() || right->is<IR::Type_Name>())
+            BUG("Unifying type names %1% and %2%", left, right);
+        LOG3(this);
+    }
+    void dbprint(std::ostream& out) const override
+    { out << "Constraint:" << dbp(left) << " = " << dbp(right); }
+
+    template <typename... T>
+    void reportError(const char* format, T... args) const {
+        boost::format fmt(format);
+        auto message = ::error_helper(fmt, "", "", "", args...);
+        auto o = origin;
+        auto constraint = derivedFrom;
+        while (constraint) {
+            boost::format fmt("----While unifying '%1%' with '%2%'");
+            message += ::error_helper(fmt, "", "", "", constraint->left, constraint->right);
+            o = constraint->origin;
+            constraint = constraint->derivedFrom;
+        }
+        CHECK_NULL(o);
+        ::error(ErrorType::ERR_TYPE_ERROR, (cstring("%1%\n") + cstring(message).trim()).c_str(), o);
+    }
+    void reportError() const {
+        reportError("Cannot unify %1% to %2%", right, left);
+    }
+};
+
 // A list of equality constraints on types.
 class TypeConstraints final {
-    /// Requires two types to be equal.
-    class EqualityConstraint : public IHasDbPrint {
-     public:
-        const IR::Type* left;
-        const IR::Type* right;
-        /// Constraint which produced this one.  May be nullptr.
-        const EqualityConstraint* derivedFrom;
-        EqualityConstraint(const IR::Type* left, const IR::Type* right,
-                           EqualityConstraint* derivedFrom)
-                : left(left), right(right), derivedFrom(derivedFrom) {
-            CHECK_NULL(left); CHECK_NULL(right);
-            if (left->is<IR::Type_Name>() || right->is<IR::Type_Name>())
-                BUG("Unifying type names %1% and %2%", left, right);
-            LOG3(this);
-        }
-        void dbprint(std::ostream& out) const override
-        { out << "Constraint:" << dbp(left) << " = " << dbp(right); }
-    };
-
  private:
     /*
      * Not all type variables that appear in unification can be bound:
@@ -81,18 +108,18 @@ class TypeConstraints final {
     /// part of definedVariables.
     bool isUnifiableTypeVariable(const IR::Type* type);
     void addEqualityConstraint(
-        const IR::Type* left, const IR::Type* right, EqualityConstraint* derivedFrom = nullptr);
+        const IR::Type* left, const IR::Type* right, const EqualityConstraint* derivedFrom);
+    void addEqualityConstraint(
+        const IR::Node* source, const IR::Type* left, const IR::Type* right);
 
     /*
      * Solve the specified constraint.
-     * @param root       Element where error is signalled if necessary.
      * @param subst      Variable substitution which is updated with new constraints.
      * @param constraint Constraint to solve.
-     * @return           True on success.
+     * @return           True on success.  Does not report error on failure.
      */
-    bool solve(const IR::Node* root, EqualityConstraint *constraint,
-               TypeVariableSubstitution *subst);
-    TypeVariableSubstitution* solve(const IR::Node* root);
+    bool solve(EqualityConstraint *constraint, TypeVariableSubstitution *subst);
+    TypeVariableSubstitution* solve();
     void dbprint(std::ostream& out) const;
 };
 }  // namespace P4

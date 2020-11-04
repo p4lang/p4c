@@ -23,20 +23,19 @@ namespace P4 {
 
 
 /// Unifies a call with a prototype.
-bool TypeUnification::unifyCall(const IR::Node* errorPosition,
-                                const IR::Type_MethodBase* dest,
-                                const IR::Type_MethodCall* src,
-                                bool reportErrors) {
+bool TypeUnification::unifyCall(const EqualityConstraint* constraint) {
     // These are canonical types.
+    auto dest = constraint->left->to<IR::Type_MethodBase>();
+    auto src = constraint->right->to<IR::Type_MethodCall>();
     CHECK_NULL(dest); CHECK_NULL(src);
     LOG3("Unifying function " << dest << " with caller " << src);
 
     for (auto tv : dest->typeParameters->parameters)
         constraints->addUnifiableTypeVariable(tv);
     if (dest->returnType == nullptr)
-        constraints->addEqualityConstraint(IR::Type_Void::get(), src->returnType);
+        constraints->addEqualityConstraint(IR::Type_Void::get(), src->returnType, constraint);
     else
-        constraints->addEqualityConstraint(dest->returnType, src->returnType);
+        constraints->addEqualityConstraint(dest->returnType, src->returnType, constraint);
     constraints->addUnifiableTypeVariable(src->returnType);  // always a type variable
 
     for (auto tv : dest->typeParameters->parameters)
@@ -44,9 +43,9 @@ bool TypeUnification::unifyCall(const IR::Node* errorPosition,
 
     if (src->typeArguments->size() != 0) {
         if (dest->typeParameters->size() != src->typeArguments->size()) {
-            TypeInference::typeError(
-                "%1% has %2% type parameters, but is invoked with %3% type arguments",
-                errorPosition, dest->typeParameters->size(), src->typeArguments->size());
+            constraint->reportError(
+                "%1% type parameters expected, but %2% type arguments supplied",
+                dest->typeParameters->size(), src->typeArguments->size());
             return false;
         }
 
@@ -56,15 +55,14 @@ bool TypeUnification::unifyCall(const IR::Node* errorPosition,
             // variable type represents type of formal method argument
             // written beetween angle brackets, and tv should be replaced
             // with type of an actual argument
-            constraints->addEqualityConstraint(type /*dst */, tv /* src */);
+            constraints->addEqualityConstraint(type /*dst */, tv /* src */, constraint);
         }
     }
 
     if (dest->parameters->size() < src->arguments->size()) {
-        if (reportErrors)
-            TypeInference::typeError(
-                "%1%: Passing %2% arguments when %3% expected",
-                errorPosition, src->arguments->size(), dest->parameters->size());
+        constraint->reportError(
+            "%1% arguments received when %2% expected",
+            src->arguments->size(), dest->parameters->size());
         return false;
     }
 
@@ -82,15 +80,13 @@ bool TypeUnification::unifyCall(const IR::Node* errorPosition,
         if (named) {
             param = dest->parameters->getParameter(argName);
             if (param == nullptr) {
-                if (reportErrors)
-                    TypeInference::typeError(
-                        "%1%: No parameter named %2%", errorPosition, arg->argument->name);
+                TypeInference::typeError(
+                    "No parameter named %1%", arg->argument->name);
                 return false;
             }
         } else {
             if (paramIt == dest->parameters->end()) {
-                if (reportErrors)
-                    TypeInference::typeError("%1%: Too many arguments for call", errorPosition);
+                TypeInference::typeError("Too many arguments for call");
                 return false;
             }
             param = *paramIt;
@@ -102,30 +98,28 @@ bool TypeUnification::unifyCall(const IR::Node* errorPosition,
         left.erase(leftIt);
 
         if (arg->type->is<IR::Type_Dontcare>() && param->direction != IR::Direction::Out) {
-            if (reportErrors)
-                TypeInference::typeError(
-                    "%1%: don't care argument only allowed for out parameters", arg->srcInfo);
+            TypeInference::typeError(
+                "%1%: don't care argument only allowed for out parameters", arg->srcInfo);
             return false;
         }
         if ((param->direction == IR::Direction::Out || param->direction == IR::Direction::InOut) &&
             (!arg->leftValue)) {
-            if (reportErrors)
-                TypeInference::typeError("%1%: Read-only value used for out/inout parameter %2%",
-                                         arg->srcInfo, param);
+            TypeInference::typeError("%1%: Read-only value used for out/inout parameter %2%",
+                                     arg->srcInfo, param);
             return false;
         } else if (param->direction == IR::Direction::None && !arg->compileTimeConstant) {
-            if (reportErrors)
-                TypeInference::typeError("%1%: must be a compile-time constant", arg->argument);
+            constraint->reportError("%1%: argument used for directionless parameter %2% "
+                                    "must be a compile-time constant", arg->argument, param);
             return false;
         }
 
         if (param->direction != IR::Direction::None && param->type->is<IR::Type_Extern>()) {
             if (optarg) continue;
-            TypeInference::typeError("%1%: extern values cannot be passed in/out/inout", param);
+            constraint->reportError("%1%: extern values cannot be passed in/out/inout", param);
             return false;
         }
 
-        constraints->addEqualityConstraint(param->type, arg->type);
+        constraints->addEqualityConstraint(param->type, arg->type, constraint);
         if (!named)
             ++paramIt;
     }
@@ -134,8 +128,7 @@ bool TypeUnification::unifyCall(const IR::Node* errorPosition,
     for (auto p : left) {
         bool opt = p.second->isOptional() || p.second->defaultValue != nullptr;
         if (opt) continue;
-        if (reportErrors)
-            TypeInference::typeError("%1%: No argument for parameter %2%", errorPosition, p.second);
+        constraint->reportError("No argument for parameter %1%", p.second);
         return false;
     }
 
@@ -144,11 +137,10 @@ bool TypeUnification::unifyCall(const IR::Node* errorPosition,
 
 // skipReturnValues is needed because the return type of a package
 // is the package itself, so checking it gets into an infinite loop.
-bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
-                                     const IR::Type_MethodBase* dest,
-                                     const IR::Type_MethodBase* src,
-                                     bool reportErrors,
+bool TypeUnification::unifyFunctions(const EqualityConstraint* constraint,
                                      bool skipReturnValues) {
+    auto dest = constraint->left->to<IR::Type_MethodBase>();
+    auto src = constraint->right->to<IR::Type_MethodBase>();
     CHECK_NULL(dest); CHECK_NULL(src);
     LOG3("Unifying functions " << dest << " with " << src);
 
@@ -158,13 +150,12 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
         constraints->addUnifiableTypeVariable(tv);
 
     if ((src->returnType == nullptr) != (dest->returnType == nullptr)) {
-        if (reportErrors)
-            TypeInference::typeError("%1%: Cannot unify functions with different return types"
-                                     " %2% and %3%", errorPosition, dest, src);
+        constraint->reportError("Cannot unify functions with different return types"
+                                " %1% and %2%", dest, src);
         return false;
     }
     if (!skipReturnValues && src->returnType != nullptr)
-        constraints->addEqualityConstraint(dest->returnType, src->returnType);
+        constraints->addEqualityConstraint(dest->returnType, src->returnType, constraint);
 
     auto sit = src->parameters->parameters.begin();
     for (auto dit : *dest->parameters->getEnumerator()) {
@@ -173,19 +164,17 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
                 continue;
             if (dit->defaultValue != nullptr)
                 continue;
-            if (reportErrors)
-                TypeInference::typeError(
-                    "%1%: Cannot unify functions with different number of arguments: "
-                    "%2% to %3%", errorPosition, src, dest);
+            constraint->reportError(
+                "Cannot unify functions with different number of arguments: "
+                "%1% to %2%", src, dest);
             return false; }
         if ((*sit)->direction != dit->direction) {
-            if (reportErrors)
-                TypeInference::typeError("%1%: Cannot unify parameter %2% with %3% "
-                                         "because they have different directions",
-                                         errorPosition, *sit, dit);
+            constraint->reportError("Cannot unify parameter %1% with %2% "
+                                    "because they have different directions",
+                                    *sit, dit);
             return false;
         }
-        constraints->addEqualityConstraint(dit->type, (*sit)->type);
+        constraints->addEqualityConstraint(dit->type, (*sit)->type, constraint);
         ++sit;
     }
     while (sit != src->parameters->parameters.end()) {
@@ -195,25 +184,21 @@ bool TypeUnification::unifyFunctions(const IR::Node* errorPosition,
         if ((*sit)->defaultValue != nullptr) {
             ++sit;
             continue; }
-        if (reportErrors)
-            TypeInference::typeError(
-                "%1%: Cannot unify functions with different number of arguments: "
-                "%2% to %3%", errorPosition, src, dest);
+        constraint->reportError(
+            "Cannot unify functions with different number of arguments: "
+            "%1% to %2%", src, dest);
         return false; }
     return true;
 }
 
-bool TypeUnification::unifyBlocks(const IR::Node* errorPosition,
-                                  const IR::Type_ArchBlock* dest,
-                                  const IR::Type_ArchBlock* src,
-                                  bool reportErrors) {
+bool TypeUnification::unifyBlocks(const EqualityConstraint* constraint) {
     // These are canonical types.
+    auto dest = constraint->left->to<IR::Type_ArchBlock>();
+    auto src = constraint->right->to<IR::Type_ArchBlock>();
     CHECK_NULL(dest); CHECK_NULL(src);
     LOG3("Unifying blocks " << dest << " with " << src);
     if (typeid(*dest) != typeid(*src)) {
-        if (reportErrors)
-            TypeInference::typeError("%1%: Cannot unify %2% to %3%",
-                                     errorPosition, src->toString(), dest->toString());
+        constraint->reportError();
         return false;
     }
     for (auto tv : dest->typeParameters->parameters)
@@ -226,32 +211,27 @@ bool TypeUnification::unifyBlocks(const IR::Node* errorPosition,
         auto destPackage = dest->to<IR::Type_Package>();
         auto srcPackage = src->to<IR::Type_Package>();
         if (destPackage->name != srcPackage->name) {
-            if (reportErrors)
-                TypeInference::typeError("%1%: Cannot unify %2% to %3%",
-                                         errorPosition, src->toString(), dest->toString());
+            constraint->reportError();
             return false;
         }
         auto destConstructor = dest->to<IR::Type_Package>()->getConstructorMethodType();
         auto srcConstructor = src->to<IR::Type_Package>()->getConstructorMethodType();
-        bool success = unifyFunctions(
-            errorPosition, destConstructor, srcConstructor, reportErrors, true);
-        return success;
+        return unifyFunctions(new EqualityConstraint(
+            destConstructor, srcConstructor, constraint), true);
     } else if (dest->is<IR::IApply>()) {
         // parsers, controls
         auto srcapply = src->to<IR::IApply>()->getApplyMethodType();
         auto destapply = dest->to<IR::IApply>()->getApplyMethodType();
-        bool success = unifyFunctions(errorPosition, destapply, srcapply, reportErrors);
-        return success;
+        return unifyFunctions(
+            new EqualityConstraint(destapply, srcapply, constraint));
     }
-    TypeInference::typeError("%1%: Cannot unify %2% to %3%",
-                             errorPosition, src->toString(), dest->toString());
+    constraint->reportError();
     return false;
 }
 
-bool TypeUnification::unify(const IR::Node* errorPosition,
-                            const IR::Type* dest,
-                            const IR::Type* src,
-                            bool reportErrors) {
+bool TypeUnification::unify(const EqualityConstraint* constraint) {
+    auto dest = constraint->left;
+    auto src = constraint->right;
     // These are canonical types.
     CHECK_NULL(dest); CHECK_NULL(src);
     LOG3("Unifying " << dest << " with " << src);
@@ -274,55 +254,47 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
 
     if (dest->is<IR::Type_ArchBlock>()) {
         if (!src->is<IR::Type_ArchBlock>()) {
-            if (reportErrors)
-                TypeInference::typeError("%1%: Cannot unify %2% to %3%",
-                                         errorPosition, src->toString(), dest->toString());
+            constraint->reportError();
             return false;
         }
-        return unifyBlocks(errorPosition, dest->to<IR::Type_ArchBlock>(),
-                           src->to<IR::Type_ArchBlock>(), reportErrors);
+        auto bc = new EqualityConstraint(dest, src, constraint);
+        return unifyBlocks(bc);
     } else if (dest->is<IR::Type_MethodBase>()) {
         auto destt = dest->to<IR::Type_MethodBase>();
         auto srct = src->to<IR::Type_MethodCall>();
         if (srct != nullptr)
-            return unifyCall(errorPosition, destt, srct, reportErrors);
+            return unifyCall(constraint);
         auto srcf = src->to<IR::Type_MethodBase>();
         if (srcf != nullptr)
-            return unifyFunctions(errorPosition, destt, srcf, reportErrors);
-
-        if (reportErrors)
-            TypeInference::typeError("%1%: Cannot unify non-function type %2% to function type %3%",
-                                     errorPosition, src->toString(), dest->toString());
+            return unifyFunctions(new EqualityConstraint(destt, srcf, constraint));
+        constraint->reportError("Cannot unify non-function type %1% to function type %2%",
+                                src, dest);
         return false;
     } else if (auto td = dest->to<IR::Type_BaseList>()) {
         if (!src->is<IR::Type_BaseList>()) {
-            if (reportErrors)
-                TypeInference::typeError("%1%: Cannot unify type %2% with %3%",
-                                         errorPosition, dest->toString(), src->toString());
+            constraint->reportError();
             return false;
         }
         auto ts = src->to<IR::Type_BaseList>();
         if (td->components.size() != ts->components.size()) {
-            TypeInference::typeError("%1%: tuples with different sizes %2% vs %3%",
-                                     errorPosition, td->components.size(), ts->components.size());
+            constraint->reportError("Tuples with different sizes %1% vs %2%",
+                                    td->components.size(), ts->components.size());
             return false;
         }
 
         for (size_t i=0; i < td->components.size(); i++) {
             auto si = ts->components.at(i);
             auto di = td->components.at(i);
-            constraints->addEqualityConstraint(di, si);
+            constraints->addEqualityConstraint(di, si, constraint);
         }
         return true;
     } else if (dest->is<IR::Type_Struct>() || dest->is<IR::Type_Header>()) {
         auto strct = dest->to<IR::Type_StructLike>();
         if (auto tpl = src->to<IR::Type_List>()) {
             if (strct->fields.size() != tpl->components.size()) {
-                if (reportErrors)
-                    TypeInference::typeError("%1%: Number of fields %2% in initializer different "
-                                             "than number of fields in structure %3%: %4% to %5%",
-                                             errorPosition, tpl->components.size(),
-                                             strct->fields.size(), tpl, strct);
+                constraint->reportError("Number of fields %1% in initializer different "
+                                        "than number of fields in structure %2%: %3% to %4%",
+                                         tpl->components.size(), strct->fields.size(), tpl, strct);
                 return false;
             }
 
@@ -330,7 +302,7 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
             for (const IR::StructField* f : strct->fields) {
                 const IR::Type* tplField = tpl->components.at(index);
                 const IR::Type* destt = f->type;
-                constraints->addEqualityConstraint(destt, tplField);
+                constraints->addEqualityConstraint(destt, tplField, constraint);
                 index++;
             }
             return true;
@@ -338,60 +310,51 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
             if (strct->name != st->name &&
                 !st->is<IR::Type_UnknownStruct>() &&
                 !strct->is<IR::Type_UnknownStruct>()) {
-                if (reportErrors)
-                    TypeInference::typeError("%1%: Cannot unify %2% with %3%",
-                                             errorPosition, st->name, strct->name);
+                constraint->reportError("Cannot unify %1% with %2%",
+                                         st->name, strct->name);
                 return false;
             }
             // There is another case, in which each field of the source is unifiable with the
             // corresponding field of the destination, e.g., a struct containing tuples.
             if (strct->fields.size() != st->fields.size()) {
-                if (reportErrors)
-                    TypeInference::typeError("%1%: Number of fields %2% in initializer different "
-                                             "than number of fields in structure %3%: %4% to %5%",
-                                             errorPosition, st->fields.size(),
-                                             strct->fields.size(), st, strct);
+                constraint->reportError("Number of fields %1% in initializer different "
+                                        "than number of fields in structure %2%: %3% to %4%",
+                                        st->fields.size(), strct->fields.size(), st, strct);
                 return false;
             }
 
             for (const IR::StructField* f : strct->fields) {
                 auto stField = st->getField(f->name);
                 if (stField == nullptr) {
-                    TypeInference::typeError("%1%: No initializer for field %2%", errorPosition, f);
+                    constraint->reportError("No initializer for field %1%", f);
                     return false;
                 }
-                constraints->addEqualityConstraint(f->type, stField->type);
+                constraints->addEqualityConstraint(f->type, stField->type, constraint);
             }
             return true;
         }
 
-        if (reportErrors)
-            TypeInference::typeError("%1%: Cannot unify %2% to %3%",
-                                     errorPosition, src->toString(), dest->toString());
+        constraint->reportError();
         return false;
     } else if (dest->is<IR::Type_Base>()) {
         if (dest->is<IR::Type_Bits>() && src->is<IR::Type_InfInt>()) {
             constraints->addUnifiableTypeVariable(src->to<IR::Type_InfInt>());
-            constraints->addEqualityConstraint(dest, src);
+            constraints->addEqualityConstraint(dest, src, constraint);
             return true;
         }
         if (auto senum = src->to<IR::Type_SerEnum>()) {
             if (dest->is<IR::Type_Bits>())
                 // unify with enum's underlying type
-                return unify(errorPosition, senum->type, dest, reportErrors);
+                return unify(new EqualityConstraint(senum->type, dest, constraint));
         }
         if (!src->is<IR::Type_Base>()) {
-            if (reportErrors)
-                TypeInference::typeError("%1%: Cannot unify %2% to %3%",
-                                         errorPosition, src->toString(), dest->toString());
+            constraint->reportError();
             return false;
         }
 
         bool success = (*src) == (*dest);
         if (!success) {
-            if (reportErrors)
-                TypeInference::typeError("%1%: Cannot unify %2% to %3%",
-                                         errorPosition, src->toString(), dest->toString());
+            constraint->reportError();
             return false;
         }
 
@@ -399,26 +362,23 @@ bool TypeUnification::unify(const IR::Node* errorPosition,
     } else if (dest->is<IR::Type_Declaration>() && src->is<IR::Type_Declaration>()) {
         bool canUnify = typeid(dest) == typeid(src) &&
             dest->to<IR::Type_Declaration>()->name == src->to<IR::Type_Declaration>()->name;
-        if (!canUnify && reportErrors)
-            TypeInference::typeError("%1%: Cannot unify %2% to %3%",
-                                     errorPosition, src->toString(), dest->toString());
+        if (!canUnify)
+            constraint->reportError();
         return canUnify;
     } else if (dest->is<IR::Type_Stack>() && src->is<IR::Type_Stack>()) {
         auto dstack = dest->to<IR::Type_Stack>();
         auto sstack = src->to<IR::Type_Stack>();
         if (dstack->getSize() != sstack->getSize()) {
-            if (reportErrors)
-                TypeInference::typeError(
-                    "%1%: cannot unify stacks with different sized %2% and %3%",
-                    errorPosition, dstack, sstack);
+            constraint->reportError(
+                "cannot unify stacks with different sizes %1% and %2%",
+                dstack, sstack);
             return false;
         }
-        constraints->addEqualityConstraint(dstack->elementType, sstack->elementType);
+        constraints->addEqualityConstraint(dstack->elementType, sstack->elementType, constraint);
         return true;
     }
 
-    if (reportErrors)
-        TypeInference::typeError("%1%: Cannot unify %2% to %3%", errorPosition, src, dest);
+    constraint->reportError();
     return false;
 }
 

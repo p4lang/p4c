@@ -80,8 +80,7 @@ class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVa
     bool setBindings(const IR::Node* errorLocation,
                      const IR::TypeParameters* params,
                      const IR::Vector<IR::Type>* args);
-    bool compose(const IR::Node* errorLocation,
-                 const IR::ITypeVar* var, const IR::Type* substitution);
+    bool compose(const IR::ITypeVar* var, const IR::Type* substitution);
     // In this variant of compose all variables in 'other' that are
     // assigned to are disjoint from all variables already in 'this'.
     void simpleCompose(const TypeVariableSubstitution* other);

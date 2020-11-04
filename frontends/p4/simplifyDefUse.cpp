@@ -154,9 +154,9 @@ class FindUninitialized : public Inspector {
                 loc = storage->removeHeaders();
                 points = defs->getPoints(loc);
                 if (points->containsBeforeStart())
-                    DIAGNOSE_WARN("uninitialized_out_param",
-                                  "out parameter %1% may be uninitialized when "
-                                  "%2% terminates", p, block->getName());
+                    ::warning(ErrorType::WARN_UNINITIALIZED,
+                              "out parameter %1% may be uninitialized when "
+                              "%2% terminates", p, block->getName());
             }
         }
     }
@@ -394,7 +394,7 @@ class FindUninitialized : public Inspector {
                 message = "%1% may be uninitialized";
             else
                 message = "%1% may not be completely initialized";
-            DIAGNOSE_WARN("uninitialized_use", message, expression);
+            ::warning(ErrorType::WARN_UNINITIALIZED, message, expression);
         }
         hasUses->add(points);
     }

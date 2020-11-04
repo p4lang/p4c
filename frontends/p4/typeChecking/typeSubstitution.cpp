@@ -20,8 +20,7 @@ limitations under the License.
 #include "typeConstraints.h"
 
 namespace P4 {
-bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
-                                       const IR::ITypeVar* var, const IR::Type* substitution) {
+bool TypeVariableSubstitution::compose(const IR::ITypeVar* var, const IR::Type* substitution) {
     LOG3("Adding " << var << "->" << dbp(substitution) << "=" <<
          substitution << " to substitution");
     if (substitution->is<IR::Type_Dontcare>())
@@ -36,8 +35,6 @@ bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
             substitution = se->type;
         if (!substitution->is<IR::Type_InfInt>() &&
             !substitution->is<IR::Type_Bits>()) {
-            ::error(ErrorType::ERR_TYPE_ERROR,
-                    "%1%: Cannot unify type %2% with %3%", errorLocation, var, substitution);
             return false;
         }
     }
@@ -46,12 +43,8 @@ bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
     // It is not if var occurs in substitution
     TypeOccursVisitor occurs(var);
     substitution->apply(occurs);
-    if (occurs.occurs) {
-        ::error(ErrorType::ERR_TYPE_ERROR,
-                "%1%: Cannot unify type %2% with %3%",
-                errorLocation, var, substitution);
+    if (occurs.occurs)
         return false;
-    }
 
     // Check to see whether we already have a binding for this variable
     if (containsKey(var)) {

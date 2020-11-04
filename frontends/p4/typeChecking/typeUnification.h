@@ -22,6 +22,7 @@ limitations under the License.
 namespace P4 {
 
 class TypeConstraints;
+class EqualityConstraint;
 
 /**
 Hindley-Milner type unification algorithm
@@ -36,33 +37,19 @@ Constraint solving can fail, which means that the program does not type-check.
 class TypeUnification final {
     TypeConstraints*  constraints;
 
-    bool unifyCall(const IR::Node* errorPosition,
-                   const IR::Type_MethodBase* dest,
-                   const IR::Type_MethodCall* src,
-                   bool reportErrors);
-    bool unifyFunctions(const IR::Node* errorPosition,
-                        const IR::Type_MethodBase* dest,
-                        const IR::Type_MethodBase* src,
-                        bool reportErrors,
+    bool unifyCall(const EqualityConstraint* constraint);
+    bool unifyFunctions(const EqualityConstraint* constraint,
                         bool skipReturnValues = false);
-    bool unifyBlocks(const IR::Node* errorPosition,
-                     const IR::Type_ArchBlock* dest,
-                     const IR::Type_ArchBlock* src,
-                     bool reportErrors);
-
+    bool unifyBlocks(const EqualityConstraint* constraint);
  public:
     explicit TypeUnification(TypeConstraints* constraints) : constraints(constraints) {}
     /**
      * Return false if unification fails right away.
      * Generates a set of type constraints.
      * If it returns true unification could still fail later.
-     * @param dest         Destination type.
-     * @param src          Source type.
-     * @param reportErrors If true report errors caused by unification.
      * @return     False if unification fails immediately.
      */
-    bool unify(const IR::Node* errorPosition, const IR::Type* dest,
-               const IR::Type* src, bool reportErrors);
+    bool unify(const EqualityConstraint* constraint);
 };
 
 }  // namespace P4

@@ -512,7 +512,7 @@ abstract Type_MethodBase : Type, IMayBeGenericType, ISimpleNamespace {
         cstring result = "";
         if (returnType != nullptr)
             result = returnType->toString();
-        result += " function";
+        result += " <method>";
         result += typeParameters->toString();
         result += "(";
         result += parameters->toString();
@@ -553,6 +553,33 @@ class Type_MethodCall : Type {
     Vector<ArgumentInfo> arguments;
     validate{ typeArguments->check_null(); arguments->check_null(); }
     const Type* getP4Type() const override { return nullptr; }
+    toString {
+        cstring result = "";
+        if (returnType != nullptr)
+            result = returnType->toString();
+        result += " <invocation>";
+        if (!typeArguments->empty()) {
+            result += "<";
+            bool first = true;
+            for (auto a: *typeArguments) {
+                if (!first)
+                    result += ", ";
+                first = false;
+                result += a->toString();
+            }
+            result += ">";
+        }
+        result += "(";
+        bool first = true;
+        for (auto a: *arguments) {
+            if (!first)
+                result += ", ";
+            first = false;
+            result += a->toString();
+        }
+        result += ")";
+        return result;
+    }
 }
 
 /// Actions look a lot like methods in many respects.

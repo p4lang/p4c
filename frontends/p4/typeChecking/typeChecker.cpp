@@ -200,8 +200,8 @@ TypeVariableSubstitution* TypeInference::unify(const IR::Node* errorPosition,
         return new TypeVariableSubstitution();
 
     TypeConstraints constraints(typeMap->getSubstitutions());
-    constraints.addEqualityConstraint(destType, srcType);
-    auto tvs = constraints.solve(errorPosition);
+    constraints.addEqualityConstraint(errorPosition, destType, srcType);
+    auto tvs = constraints.solve();
     addSubstitutions(tvs);
     return tvs;
 }
@@ -901,12 +901,12 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
         args->push_back(argInfo);
     }
 
-    auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R")));
-    auto callType = new IR::Type_MethodCall(new IR::Vector<IR::Type>(),
-                                            rettype, args);
+    auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), "return_type"));
+    auto callType = new IR::Type_MethodCall(
+        errorPosition->srcInfo, new IR::Vector<IR::Type>(), rettype, args);
     TypeConstraints constraints(typeMap->getSubstitutions());
-    constraints.addEqualityConstraint(mt, callType);
-    auto tvs = constraints.solve(errorPosition);
+    constraints.addEqualityConstraint(errorPosition, mt, callType);
+    auto tvs = constraints.solve();
     BUG_CHECK(tvs != nullptr || ::errorCount(), "Null substitution");
     if (tvs == nullptr)
         return nullptr;
@@ -1068,15 +1068,15 @@ TypeInference::containerInstantiation(
         auto argInfo = new IR::ArgumentInfo(arg->srcInfo, arg, true, argType, aarg);
         args->push_back(argInfo);
     }
-    auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R")));
+    auto rettype = new IR::Type_Var(IR::ID(refMap->newName("<any>")));
     // There are never type arguments at this point; if they exist, they have been folded
     // into the constructor by type specialization.
     auto callType = new IR::Type_MethodCall(node->srcInfo,
                                             new IR::Vector<IR::Type>(),
                                             rettype, args);
     TypeConstraints constraints(typeMap->getSubstitutions());
-    constraints.addEqualityConstraint(constructor, callType);
-    auto tvs = constraints.solve(node);
+    constraints.addEqualityConstraint(node, constructor, callType);
+    auto tvs = constraints.solve();
     BUG_CHECK(tvs != nullptr || ::errorCount(), "Null substitution");
     if (tvs == nullptr)
         return std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>(nullptr, nullptr);
@@ -1373,7 +1373,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Method* type) {
                 // enclosing extern as type parameters.  Given
                 // extern e<E> { e(); }
                 // the type of method e is in fact e<T>();
-                methodType = new IR::Type_Method(
+                methodType = new IR::Type_Method(type->srcInfo,
                     ext->typeParameters, type->returnType, type->parameters);
             }
         }
@@ -2971,7 +2971,7 @@ TypeInference::actionCall(bool inActionList,
         if (paramType == nullptr || argType == nullptr)
             // type checking failed before
             return actionCall;
-        constraints.addEqualityConstraint(paramType, argType);
+        constraints.addEqualityConstraint(actionCall, paramType, argType);
         if (param->direction == IR::Direction::None) {
             if (inActionList) {
                 typeError("%1%: parameter %2% cannot be bound: it is set by the control plane",
@@ -3012,7 +3012,7 @@ TypeInference::actionCall(bool inActionList,
 
     setType(getOriginal(), resultType);
     setType(actionCall, resultType);
-    auto tvs = constraints.solve(actionCall);
+    auto tvs = constraints.solve();
     if (tvs == nullptr)
         return actionCall;
     addSubstitutions(tvs);
@@ -3218,7 +3218,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
 
         // We build a type for the callExpression and unify it with the method expression
         // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
-        auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), "return type"));
+        auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), "return_type"));
         auto args = new IR::Vector<IR::ArgumentInfo>();
         bool constArgs = true;
         for (auto aarg : *expression->arguments) {
@@ -3242,8 +3242,8 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
                                                 typeArgs, rettype, args);
 
         TypeConstraints constraints(typeMap->getSubstitutions());
-        constraints.addEqualityConstraint(ft, callType);
-        auto tvs = constraints.solve(expression);
+        constraints.addEqualityConstraint(expression, ft, callType);
+        auto tvs = constraints.solve();
         if (tvs == nullptr)
             return expression;
         addSubstitutions(tvs);

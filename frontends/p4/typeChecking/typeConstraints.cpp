@@ -20,21 +20,27 @@ limitations under the License.
 namespace P4 {
 
 void TypeConstraints::addEqualityConstraint(
-    const IR::Type* left, const IR::Type* right, EqualityConstraint* derivedFrom) {
+    const IR::Type* left, const IR::Type* right, const EqualityConstraint* derivedFrom) {
     auto c = new EqualityConstraint(left, right, derivedFrom);
     constraints.push_back(c);
 }
 
-TypeVariableSubstitution* TypeConstraints::solve(const IR::Node* root) {
+void TypeConstraints::addEqualityConstraint(
+    const IR::Node* source, const IR::Type* left, const IR::Type* right) {
+    auto c = new EqualityConstraint(left, right, source);
+    constraints.push_back(c);
+}
+
+TypeVariableSubstitution* TypeConstraints::solve() {
     LOG3("Solving constraints:\n" << *this);
 
     auto tvs = new TypeVariableSubstitution();
     while (!constraints.empty()) {
         auto last = constraints.back();
         constraints.pop_back();
-        bool success = solve(root, last, tvs);
+        bool success = solve(last, tvs);
         if (!success)
-                return nullptr;
+            return nullptr;
     }
     LOG3("Constraint solution:\n" << tvs);
     return tvs;
@@ -52,7 +58,7 @@ bool TypeConstraints::isUnifiableTypeVariable(const IR::Type* type) {
     return unifiableTypeVariables.count(tv) > 0;
 }
 
-bool TypeConstraints::solve(const IR::Node* root, EqualityConstraint *constraint,
+bool TypeConstraints::solve(EqualityConstraint *constraint,
                             TypeVariableSubstitution *subst) {
     if (isUnifiableTypeVariable(constraint->left)) {
         auto leftTv = constraint->left->to<IR::ITypeVar>();
@@ -66,7 +72,10 @@ bool TypeConstraints::solve(const IR::Node* root, EqualityConstraint *constraint
             if (leftTv == right->to<IR::ITypeVar>())
                 return true;
             LOG3("Binding " << leftTv << " => " << right);
-            return subst->compose(root, leftTv, right);
+            auto comp = subst->compose(leftTv, right);
+            if (!comp)
+                constraint->reportError("Cannot unify %1% with %2%", leftTv, right);
+            return comp;
         } else {
             addEqualityConstraint(leftSubst, constraint->right, constraint);
             return true;
@@ -81,16 +90,18 @@ bool TypeConstraints::solve(const IR::Node* root, EqualityConstraint *constraint
             if (left->to<IR::ITypeVar>() == rightTv)
                 return true;
             LOG3("Binding " << rightTv << " => " << left);
-            return subst->compose(root, rightTv, left);
+            auto comp = subst->compose(rightTv, left);
+            if (!comp)
+                constraint->reportError("Cannot unify %1% with %2%", rightTv, left);
+            return comp;
         } else {
             addEqualityConstraint(constraint->left, rightSubst, constraint);
             return true;
         }
     }
 
-    bool success = unification->unify(root, constraint->left, constraint->right, true);
+    return unification->unify(constraint);
     // this may add more constraints
-    return success;
 }
 
 void TypeConstraints::dbprint(std::ostream& out) const {
