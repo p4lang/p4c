@@ -48,8 +48,7 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
         // or perhaps it can be done as a common case above or below
         // for all of them?
 
-        IR::MethodCallExpression *mce2;
-        auto isR = false;
+        boost::optional<IR::MethodCallExpression*> mce2 = boost::none;
         if (s->is<IR::AssignmentStatement>()) {
             auto assign = s->to<IR::AssignmentStatement>();
             const IR::Expression *l, *r;
@@ -64,7 +63,6 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                                                 em->method->name.name == "read") ||
                         (em->originalExternType->name.name == "Meter" &&
                                                 em->method->name.name == "execute")) {
-                        isR = true;
                         // l = l->to<IR::PathExpression>();
                         // BUG_CHECK(l != nullptr, "register_read dest cast failed");
                         auto dest = new IR::Argument(l);
@@ -72,7 +70,7 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                         args->push_back(dest);  // dest
                         args->push_back(mce->arguments->at(0));  // index
                         mce2 = new IR::MethodCallExpression(mce->method, mce->typeArguments);
-                        mce2->arguments = args;
+                        (*mce2)->arguments = args;
                         s = new IR::MethodCallStatement(mce);
                     }
                 }
@@ -154,8 +152,8 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                 auto em = mi->to<P4::ExternMethod>();
                 LOG3("P4V1:: convert " << s);
                 Util::IJson* json;
-                if (isR) {
-                    json = ExternConverter::cvtExternObject(ctxt, em, mce2, s, emitExterns);
+                if (mce2) {
+                    json = ExternConverter::cvtExternObject(ctxt, em, *mce2, s, emitExterns);
                 } else {
                     json = ExternConverter::cvtExternObject(ctxt, em, mc, s, emitExterns);
                 }
