@@ -186,9 +186,6 @@ void TypeInference::setType(const IR::Node* element, const IR::Type* type) {
 }
 
 void TypeInference::addSubstitutions(const TypeVariableSubstitution* tvs) {
-    if (readOnly)
-        // we only need to do this the first time
-        return;
     typeMap->addSubstitutions(tvs);
 }
 
