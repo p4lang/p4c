@@ -113,7 +113,6 @@ class CreateSpecializedTypes : public Transform {
     }
 
     const IR::Node* insert(const IR::Node* before);
-    //const IR::Node* postorder(IR::StructExpression* expression) override;
     const IR::Node* postorder(IR::Type_Declaration* type) override;
     const IR::Node* postorder(IR::Declaration* decl) override
     { return insert(decl); }

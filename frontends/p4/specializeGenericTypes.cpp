@@ -73,7 +73,7 @@ namespace {
 
 class ContainsTypeVariable : public Inspector {
     bool contains = false;
-  public:
+ public:
     bool preorder(const IR::TypeParameters*) override { return false; }
     bool preorder(const IR::Type_Var*) override { contains = true; return false; }
     bool preorder(const IR::Type_Specialized*) override { contains = true; return false; }
