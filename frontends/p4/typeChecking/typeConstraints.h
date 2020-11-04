@@ -52,6 +52,12 @@ class EqualityConstraint : public IHasDbPrint {
     void dbprint(std::ostream& out) const override
     { out << "Constraint:" << dbp(left) << " = " << dbp(right); }
 
+    cstring localError() const {
+        boost::format fmt("----While unifying '%1%' with '%2%'");
+        auto message = ::error_helper(fmt, "", "", "", left, right);
+        return cstring(message);
+    }
+
     template <typename... T>
     void reportError(const char* format, T... args) const {
         boost::format fmt(format);
@@ -59,8 +65,7 @@ class EqualityConstraint : public IHasDbPrint {
         auto o = origin;
         auto constraint = derivedFrom;
         while (constraint) {
-            boost::format fmt("----While unifying '%1%' with '%2%'");
-            message += ::error_helper(fmt, "", "", "", constraint->left, constraint->right);
+            message += constraint->localError();
             o = constraint->origin;
             constraint = constraint->derivedFrom;
         }

@@ -37,6 +37,7 @@ class BindTypeVariables : public PassManager {
         passes.push_back(new ResolveReferences(refMap));
         passes.push_back(new TypeInference(refMap, typeMap, false));  // may insert casts
         passes.push_back(new DoBindTypeVariables(typeMap));
+        passes.push_back(new ClearTypeMap(typeMap));
         setName("BindTypeVariables");
     }
 };

@@ -159,12 +159,15 @@ const IR::Node* DoConstantFolding::postorder(IR::Declaration_Constant* d) {
         if (init != d->initializer)
             d = new IR::Declaration_Constant(d->srcInfo, d->name, d->annotations, d->type, init);
     }
-    if (!typesKnown && init->is<IR::StructExpression>())
-        // If we substitute structs before type checking we may lose casts
-        // e.g. struct S { bit<8> x; }
-        // const S s = { x = 1024 };
-        // const bit<16> z = (bit<16>)s.x;
-        // If we substitute this too early we may get a value of 1024 for z.
+    if (!typesKnown && (init->is<IR::StructExpression>() ||
+                        // If we substitute structs before type checking we may lose casts
+                        // e.g. struct S { bit<8> x; }
+                        // const S s = { x = 1024 };
+                        // const bit<16> z = (bit<16>)s.x;
+                        // If we substitute this too early we may get a value of 1024 for z.
+                        init->is<IR::Cast>()))
+                        // Also, note that early in the compilation some struct expressions may
+                        // still be represented as cast expressions that cast to a struct type.
         return d;
     LOG3("Constant " << d << " set to " << init);
     constants.emplace(getOriginal<IR::Declaration_Constant>(), init);
