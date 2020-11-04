@@ -107,9 +107,9 @@ int main(int argc, char *const argv[]) {
             const IR::Node* node = nullptr;
             loader >> node;
             if (!(program = node->to<IR::P4Program>()))
-                error("%s is not a P4Program in json format", options.file);
+                error(ErrorType::ERR_INVALID, "%s is not a P4Program in json format", options.file);
         } else {
-            error("Can't open %s", options.file); }
+            error(ErrorType::ERR_IO, "Can't open %s", options.file); }
     } else {
         program = P4::parseP4File(options);
 
@@ -170,7 +170,7 @@ int main(int argc, char *const argv[]) {
 
             gen2 << node;
             if (ss1.str() != ss2.str()) {
-                error("json mismatch");
+                error(ErrorType::ERR_UNEXPECTED, "json mismatch");
                 std::ofstream t1("t1.json"), t2("t2.json");
                 t1 << ss1.str() << std::flush;
                 t2 << ss2.str() << std::flush;

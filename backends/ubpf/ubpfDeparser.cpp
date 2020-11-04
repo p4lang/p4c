@@ -82,7 +82,8 @@ class OutHeaderSize final : public EBPF::CodeGenInspector {
         auto type = typeMap->getType(h);
         auto ht = type->to<IR::Type_Header>();
         if (ht == nullptr) {
-            ::error("Cannot emit a non-header type %1%", h);
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "Cannot emit a non-header type %1%", h);
             return false;
         }
         unsigned width = ht->width_bits();
@@ -115,7 +116,8 @@ void UBPFDeparserTranslationVisitor::compileEmitField(const IR::Expression *expr
                                                       EBPF::EBPFType *type) {
     auto et = dynamic_cast<EBPF::IHasWidth *>(type);
     if (et == nullptr) {
-        ::error("Only headers with fixed widths supported %1%", expr);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "Only headers with fixed widths supported %1%", expr);
         return;
     }
 
@@ -236,7 +238,8 @@ void UBPFDeparserTranslationVisitor::compileEmit(const IR::Vector<IR::Argument> 
     auto type = typeMap->getType(expr);
     auto ht = type->to<IR::Type_Header>();
     if (ht == nullptr) {
-        ::error("Cannot emit a non-header type %1%", expr);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "Cannot emit a non-header type %1%", expr);
         return;
     }
 
@@ -267,7 +270,8 @@ void UBPFDeparserTranslationVisitor::compileEmit(const IR::Vector<IR::Argument> 
         auto etype = UBPFTypeFactory::instance->create(ftype);
         auto et = dynamic_cast<EBPF::IHasWidth *>(etype);
         if (et == nullptr) {
-            ::error("Only headers with fixed widths supported %1%", f);
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "Only headers with fixed widths supported %1%", f);
             return;
         }
         compileEmitField(expr, f->name, alignment, etype);
@@ -294,14 +298,16 @@ bool UBPFDeparserTranslationVisitor::preorder(const IR::MethodCallExpression *ex
         }
     }
 
-    ::error("Unexpected method call in deparser %1%", expression);
+    ::error(ErrorType::ERR_UNEXPECTED,
+            "Unexpected method call in deparser %1%", expression);
     return false;
 }
 
 bool UBPFDeparser::build() {
     auto pl = controlBlock->container->type->applyParams;
     if (pl->size() != 2) {
-        ::error("%1%: Expected deparser to have exactly 2 parameters", controlBlock->getNode());
+        ::error(ErrorType::ERR_EXPECTED,
+                "%1%: Expected deparser to have exactly 2 parameters", controlBlock->getNode());
         return false;
     }
 
