@@ -1,6 +1,10 @@
 name: "test-p4c"
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
   build-linux:
