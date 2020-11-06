@@ -80,7 +80,10 @@ class TypeVariableSubstitution final : public TypeSubstitution<const IR::ITypeVa
     bool setBindings(const IR::Node* errorLocation,
                      const IR::TypeParameters* params,
                      const IR::Vector<IR::Type>* args);
-    bool compose(const IR::ITypeVar* var, const IR::Type* substitution);
+    /// Returns an empyty string on error, or an error message format otherwise.
+    /// The error message should be used with 'var' and 'substitution' as arguments when
+    /// reporting an error (i.e., it may contain %1% and %2% inside).
+    cstring compose(const IR::ITypeVar* var, const IR::Type* substitution);
     // In this variant of compose all variables in 'other' that are
     // assigned to are disjoint from all variables already in 'this'.
     void simpleCompose(const TypeVariableSubstitution* other);

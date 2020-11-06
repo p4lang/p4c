@@ -192,15 +192,18 @@ void TypeInference::addSubstitutions(const TypeVariableSubstitution* tvs) {
     typeMap->addSubstitutions(tvs);
 }
 
-TypeVariableSubstitution* TypeInference::unify(const IR::Node* errorPosition,
-                                               const IR::Type* destType,
-                                               const IR::Type* srcType) {
+TypeVariableSubstitution* TypeInference::unify(
+    const IR::Node* errorPosition, const IR::Type* destType, const IR::Type* srcType,
+    cstring errorFormat, std::initializer_list<const IR::Node*> errorArgs) {
     CHECK_NULL(destType); CHECK_NULL(srcType);
     if (srcType == destType)
         return new TypeVariableSubstitution();
 
     TypeConstraints constraints(typeMap->getSubstitutions());
-    constraints.addEqualityConstraint(errorPosition, destType, srcType);
+    auto constraint = new EqualityConstraint(destType, srcType, errorPosition);
+    if (!errorFormat.isNullOrEmpty())
+        constraint->setError(errorFormat, errorArgs);
+    constraints.add(constraint);
     auto tvs = constraints.solve();
     addSubstitutions(tvs);
     return tvs;
@@ -503,7 +506,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         changes = changes || pl != mt->parameters || tps != mt->typeParameters;
         const IR::Type* resultType = mt;
         if (changes)
-            resultType = new IR::Type_Method(mt->getSourceInfo(), tps, res, pl);
+            resultType = new IR::Type_Method(mt->getSourceInfo(), tps, res, pl, mt->name);
         return resultType;
     } else if (auto hdr = type->to<IR::Type_Header>()) {
         return canonicalizeFields(hdr, [hdr](const IR::IndexedVector<IR::StructField>* fields) {
@@ -734,7 +737,10 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
     if (initType == nullptr)
         return sourceExpression;
 
-    auto tvs = unify(errorPosition, destType, initType);
+    auto tvs = unify(errorPosition, destType, initType,
+                     "Source expression '%1%' produces a result of type '%2%' which cannot be "
+                     "assigned to a left-value with type '%3%'",
+                     { sourceExpression, initType, destType });
     if (tvs == nullptr)
         // error already signalled
         return sourceExpression;
@@ -743,7 +749,8 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
         sourceExpression = cts.convert(sourceExpression);  // sets type
     }
     if (destType->is<IR::Type_SerEnum>() && !TypeMap::equivalent(destType, initType)) {
-        typeError("%1%: No implicit casts to %2%", errorPosition, destType);
+        typeError("%1%: values of type '%2%' cannot be implicitly cast to type '%3%'",
+                  errorPosition, initType, destType);
         return sourceExpression;
     }
 
@@ -901,16 +908,15 @@ TypeInference::checkExternConstructor(const IR::Node* errorPosition,
         args->push_back(argInfo);
     }
 
-    auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), "return_type"));
+    auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), "<returned type>"));
     auto callType = new IR::Type_MethodCall(
         errorPosition->srcInfo, new IR::Vector<IR::Type>(), rettype, args);
-    TypeConstraints constraints(typeMap->getSubstitutions());
-    constraints.addEqualityConstraint(errorPosition, mt, callType);
-    auto tvs = constraints.solve();
-    BUG_CHECK(tvs != nullptr || ::errorCount(), "Null substitution");
+    auto tvs = unify(errorPosition, mt, callType,
+                     "Constructor invocation %1% does not match constructor declaration %2%",
+                     { callType, constructor });
+    BUG_CHECK(tvs != nullptr || ::errorCount(), "Unification failed with no error");
     if (tvs == nullptr)
         return nullptr;
-    addSubstitutions(tvs);
 
     ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
     auto newArgs = cts.convert(arguments);
@@ -952,7 +958,10 @@ bool TypeInference::checkAbstractMethods(const IR::Declaration_Instance* inst,
             auto meth = virt[func->name.name];
             auto methtype = getType(meth);
             virt.erase(func->name.name);
-            auto tvs = unify(inst, methtype, ftype);
+            auto tvs = unify(
+                inst, methtype, ftype,
+                "Method '%1%' does not have the expected type '%2%'",
+                { func, methtype });
             if (tvs == nullptr)
                 return false;
             BUG_CHECK(tvs->isIdentity(), "%1%: expected no type variables", tvs);
@@ -1071,12 +1080,12 @@ TypeInference::containerInstantiation(
     auto rettype = new IR::Type_Var(IR::ID(refMap->newName("<any>")));
     // There are never type arguments at this point; if they exist, they have been folded
     // into the constructor by type specialization.
-    auto callType = new IR::Type_MethodCall(node->srcInfo,
-                                            new IR::Vector<IR::Type>(),
-                                            rettype, args);
-    TypeConstraints constraints(typeMap->getSubstitutions());
-    constraints.addEqualityConstraint(node, constructor, callType);
-    auto tvs = constraints.solve();
+    auto callType = new IR::Type_MethodCall(
+        node->srcInfo, new IR::Vector<IR::Type>(), rettype, args);
+
+    auto tvs = unify(container->getNode(), constructor, callType,
+                     "Constructor invocation '%1%' does not match declaration '%2%'",
+                     { callType, constructor });
     BUG_CHECK(tvs != nullptr || ::errorCount(), "Null substitution");
     if (tvs == nullptr)
         return std::pair<const IR::Type*, const IR::Vector<IR::Argument>*>(nullptr, nullptr);
@@ -1090,7 +1099,6 @@ TypeInference::containerInstantiation(
             tvs->setBinding(tv, new IR::Type_Dontcare);
         });
     }
-    addSubstitutions(tvs);
 
     ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
     auto newArgs = cts.convert(constructorArguments);
@@ -1316,7 +1324,9 @@ const IR::Node* TypeInference::postorder(IR::SerEnumMember* member) {
         return member;
     }
     auto exprType = getType(member->value);
-    auto tvs = unify(member, type, exprType);
+    auto tvs = unify(member, type, exprType,
+                     "Enum member '%1%' has type '%2%' and not the expected type '%2%'",
+                     { member, exprType, type });
     if (tvs == nullptr)
         // error already signalled
         return member;
@@ -1373,8 +1383,8 @@ const IR::Node* TypeInference::postorder(IR::Type_Method* type) {
                 // enclosing extern as type parameters.  Given
                 // extern e<E> { e(); }
                 // the type of method e is in fact e<T>();
-                methodType = new IR::Type_Method(type->srcInfo,
-                    ext->typeParameters, type->returnType, type->parameters);
+                methodType = new IR::Type_Method(
+                    type->srcInfo, ext->typeParameters, type->returnType, type->parameters, name);
             }
         }
     }
@@ -1717,6 +1727,109 @@ const IR::Node* TypeInference::postorder(IR::Operation_Relation* expression) {
     }
 
     if (equTest) {
+        if (ltype->is<IR::Type_Action>() || rtype->is<IR::Type_Action>()) {
+            // Actions return Type_Action instead of void.
+            typeError("%1%: cannot be applied to action results", expression);
+            return expression;
+        }
+
+        bool defined = false;
+        if (TypeMap::equivalent(ltype, rtype) &&
+            (!ltype->is<IR::Type_Void>() && !ltype->is<IR::Type_Varbits>())) {
+            defined = true;
+        } else if (ltype->is<IR::Type_Base>() && rtype->is<IR::Type_Base>() &&
+                 TypeMap::equivalent(ltype, rtype)) {
+            defined = true;
+        } else if (ltype->is<IR::Type_BaseList>() && rtype->is<IR::Type_BaseList>()) {
+            auto tvs = unify(expression, ltype, rtype,
+                             "Cannot compare values with different types '%1%' and '%2%'",
+                             { ltype, rtype });
+            if (tvs == nullptr)
+                // error already signalled
+                return expression;
+            if (!tvs->isIdentity()) {
+                ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+                expression->left = cts.convert(expression->left);
+                expression->right = cts.convert(expression->right);
+            }
+            defined = true;
+        } else {
+            auto ls = ltype->to<IR::Type_UnknownStruct>();
+            auto rs = rtype->to<IR::Type_UnknownStruct>();
+            if (ls != nullptr || rs != nullptr) {
+                if (ls != nullptr && rs != nullptr) {
+                    typeError("%1%: cannot compare initializers with unknown types", expression);
+                    return expression;
+                }
+
+                bool lcst = isCompileTimeConstant(expression->left);
+                bool rcst = isCompileTimeConstant(expression->right);
+                auto tvs = unify(
+                    expression, ltype, rtype,
+                    "Cannot compare values with different types '%1%' and '%2%'", { ltype, rtype });
+                if (tvs == nullptr)
+                    // error already signalled
+                    return expression;
+                if (!tvs->isIdentity()) {
+                    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+                    expression->left = cts.convert(expression->left);
+                    expression->right = cts.convert(expression->right);
+                }
+
+                if (ls != nullptr) {
+                    auto l = expression->left->to<IR::StructExpression>();
+                    CHECK_NULL(l);  // struct initializers are the only expressions that can
+                                    // have StructUnknown types
+                    BUG_CHECK(rtype->is<IR::Type_StructLike>(), "%1%: expected a struct", rtype);
+                    auto type = new IR::Type_Name(rtype->to<IR::Type_StructLike>()->name);
+                    expression->left = new IR::StructExpression(
+                        expression->left->srcInfo, type, type, l->components);
+                    setType(expression->left, rtype);
+                    if (lcst)
+                        setCompileTimeConstant(expression->left);
+                } else {
+                    auto r = expression->right->to<IR::StructExpression>();
+                    CHECK_NULL(r);  // struct initializers are the only expressions that can
+                                    // have StructUnknown types
+                    BUG_CHECK(ltype->is<IR::Type_StructLike>(), "%1%: expected a struct", ltype);
+                    auto type = new IR::Type_Name(ltype->to<IR::Type_StructLike>()->name);
+                    expression->right = new IR::StructExpression(
+                        expression->right->srcInfo, type, type, r->components);
+                    setType(expression->right, rtype);
+                    if (rcst)
+                        setCompileTimeConstant(expression->right);
+                }
+                defined = true;
+            }
+
+            // comparison between structs and list expressions is allowed
+            if ((ltype->is<IR::Type_StructLike>() && rtype->is<IR::Type_List>()) ||
+                 (ltype->is<IR::Type_List>() && rtype->is<IR::Type_StructLike>())) {
+                if (!ltype->is<IR::Type_StructLike>()) {
+                    // swap
+                    auto type = ltype;
+                    ltype = rtype;
+                    rtype = type;
+                }
+
+                auto tvs = unify(
+                    expression, ltype, rtype,
+                    "Cannot compare values with different types '%1%' and '%2%'", { ltype, rtype });
+                if (tvs == nullptr)
+                    // error already signalled
+                    return expression;
+                if (!tvs->isIdentity()) {
+                    ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
+                    expression->left = cts.convert(expression->left);
+                    expression->right = cts.convert(expression->right);
+                }
+                defined = true;
+            }
+        }
+
+        if (!defined) {
+            typeError("%1%: not defined on %2% and %3%",
+                      expression, ltype->toString(), rtype->toString());
         Comparison c;
         c.left = expression->left;
         c.right = expression->right;
@@ -1877,7 +1990,10 @@ const IR::Node* TypeInference::postorder(IR::Entry* entry) {
     if (nonConstantKeys)
         return entry;
 
-    TypeVariableSubstitution *tvs = unify(entry, keyTuple, entryKeyType);
+    TypeVariableSubstitution *tvs = unify(
+        entry, keyTuple, entryKeyType,
+        "Table entry has type '%1%' which is not the expected type '%2%'",
+        { keyTuple, entryKeyType });
     if (tvs == nullptr)
         return entry;
     ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
@@ -1951,7 +2067,9 @@ const IR::Node* TypeInference::postorder(IR::StructExpression* expression) {
         auto desired = getTypeType(expression->typeName);
         if (desired == nullptr)
             return expression;
-        auto tvs = unify(expression, desired, structType);
+        auto tvs = unify(expression, desired, structType,
+                         "Initializer type '%1%' does not match expected type '%2%'",
+                         { structType, desired });
         if (tvs == nullptr)
             return expression;
         if (!tvs->isIdentity()) {
@@ -2057,11 +2175,11 @@ const IR::Node* TypeInference::binaryArith(const IR::Operation_Binary* expressio
     const IR::Type_Bits* bl = ltype->to<IR::Type_Bits>();
     const IR::Type_Bits* br = rtype->to<IR::Type_Bits>();
     if (bl == nullptr && !ltype->is<IR::Type_InfInt>()) {
-        typeError("%1%: cannot be applied to %2% of type %3%",
+        typeError("%1%: cannot be applied to expression '%2%' with type '%3%'",
                   expression->getStringOp(), expression->left, ltype->toString());
         return expression;
     } else if (br == nullptr && !rtype->is<IR::Type_InfInt>()) {
-        typeError("%1%: cannot be applied to %2% of type %3%",
+        typeError("%1%: cannot be applied to expression '%2%' with type '%3%'",
                   expression->getStringOp(), expression->right, rtype->toString());
         return expression;
     } else if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_InfInt>()) {
@@ -2225,11 +2343,11 @@ const IR::Node* TypeInference::bitwise(const IR::Operation_Binary* expression) {
     const IR::Type_Bits* bl = ltype->to<IR::Type_Bits>();
     const IR::Type_Bits* br = rtype->to<IR::Type_Bits>();
     if (bl == nullptr && !ltype->is<IR::Type_InfInt>()) {
-        typeError("%1%: cannot be applied to %2% of type %3%",
+        typeError("%1%: cannot be applied to expression '%2%' with type '%3%'",
                   expression->getStringOp(), expression->left, ltype->toString());
         return expression;
     } else if (br == nullptr && !rtype->is<IR::Type_InfInt>()) {
-        typeError("%1%: cannot be applied to %2% of type %3%",
+        typeError("%1%: cannot be applied to expressio '%2%' with type '%3%'",
                   expression->getStringOp(), expression->right, rtype->toString());
         return expression;
     } else if (ltype->is<IR::Type_InfInt>() && rtype->is<IR::Type_InfInt>()) {
@@ -2295,11 +2413,11 @@ const IR::Node* TypeInference::typeSet(const IR::Operation_Binary* expression) {
     const IR::Type_Bits* bl = ltype->to<IR::Type_Bits>();
     const IR::Type_Bits* br = rtype->to<IR::Type_Bits>();
     if (bl == nullptr && !ltype->is<IR::Type_InfInt>()) {
-        typeError("%1%: cannot be applied to %2% of type %3%",
+        typeError("%1%: cannot be applied to expression '%2%' with type '%3%'",
                   expression->getStringOp(), expression->left, ltype->toString());
         return expression;
     } else if (br == nullptr && !rtype->is<IR::Type_InfInt>()) {
-        typeError("%1%: cannot be applied to %2% of type %3%",
+        typeError("%1%: cannot be applied to expression '%2%' with type '%3%'",
                   expression->getStringOp(), expression->right, rtype->toString());
         return expression;
     }
@@ -2408,12 +2526,12 @@ const IR::Node* TypeInference::postorder(IR::Cmpl* expression) {
     BUG_CHECK(type, "Invalid Type_SerEnum/getTypeType");
 
     if (type->is<IR::Type_InfInt>()) {
-        typeError("%1% cannot be applied to an operand with an unknown width");
+        typeError("'%1%' cannot be applied to an operand with an unknown width");
     } else if (type->is<IR::Type_Bits>()) {
         setType(getOriginal(), type);
         setType(expression, type);
     } else {
-        typeError("Cannot apply %1% to value %2% of type %3%",
+        typeError("Cannot apply operation '%1%' to expression '%2%' with type '%3%'",
                   expression->getStringOp(), expression->expr, type->toString());
     }
     if (isCompileTimeConstant(expression->expr)) {
@@ -2470,7 +2588,8 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
         while (destType->is<IR::Type_Newtype>())
             destType = getTypeType(destType->to<IR::Type_Newtype>()->type);
 
-        auto tvs = unify(expression, destType, sourceType);
+        auto tvs = unify(expression, destType, sourceType,
+                         "Cannot cast from '%1%' to '%2%'", { sourceType, destType });
         if (tvs == nullptr)
             return expression;
         const IR::Expression* rhs = expression;
@@ -2648,7 +2767,9 @@ const IR::Node* TypeInference::postorder(IR::Mux* expression) {
                   expression->e1, expression->e2);
         return expression;
     }
-    auto tvs = unify(expression, secondType, thirdType);
+    auto tvs = unify(expression, secondType, thirdType,
+                     "The expressions in a ?: conditional have different types '%1%' and '%2%'",
+                     { secondType, thirdType });
     if (tvs != nullptr) {
         if (!tvs->isIdentity()) {
             ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
@@ -2727,7 +2848,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         if (type->is<IR::Type_Header>() || type->is<IR::Type_HeaderUnion>()) {
             if (inMethod && (member == IR::Type_Header::isValid)) {
                 // Built-in method
-                auto type = new IR::Type_Method(IR::Type_Boolean::get(), new IR::ParameterList());
+                auto type = new IR::Type_Method(
+                    IR::Type_Boolean::get(), new IR::ParameterList(), member);
                 auto ctype = canonicalize(type);
                 if (ctype == nullptr)
                     return expression;
@@ -2739,7 +2861,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         if (inMethod && (member == IR::Type_Header::minSizeInBits ||
                          member == IR::Type_Header::minSizeInBytes)) {
             // Built-in method
-            auto type = new IR::Type_Method(new IR::Type_InfInt(), new IR::ParameterList());
+            auto type = new IR::Type_Method(
+                new IR::Type_InfInt(), new IR::ParameterList(), member);
             auto ctype = canonicalize(type);
             if (ctype == nullptr)
                 return expression;
@@ -2753,7 +2876,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 if (!isLeftValue(expression->expr))
                     typeError("%1%: must be applied to a left-value", expression);
                 // Built-in method
-                auto type = new IR::Type_Method(IR::Type_Void::get(), new IR::ParameterList);
+                auto type = new IR::Type_Method(
+                    IR::Type_Void::get(), new IR::ParameterList, member);
                 auto ctype = canonicalize(type);
                 if (ctype == nullptr)
                     return expression;
@@ -2843,7 +2967,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             setType(param->type, tt);
             setType(param, param->type);
             params->push_back(param);
-            auto type = new IR::Type_Method(IR::Type_Void::get(), new IR::ParameterList(*params));
+            auto type = new IR::Type_Method(
+                IR::Type_Void::get(), new IR::ParameterList(*params), member);
             auto canon = canonicalize(type);
             if (canon == nullptr)
                 return expression;
@@ -2854,7 +2979,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             member == IR::Type_StructLike::minSizeInBytes ||
             member == IR::Type_StructLike::minSizeInBits)) {
             // Built-in method
-            auto type = new IR::Type_Method(new IR::Type_InfInt(), new IR::ParameterList());
+            auto type = new IR::Type_Method(new IR::Type_InfInt(), new IR::ParameterList(), member);
             auto ctype = canonicalize(type);
             if (ctype == nullptr)
                 return expression;
@@ -3218,7 +3343,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
 
         // We build a type for the callExpression and unify it with the method expression
         // Allocate a fresh variable for the return type; it will be hopefully bound in the process.
-        auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), "return_type"));
+        auto rettype = new IR::Type_Var(IR::ID(refMap->newName("R"), "<returned type>"));
         auto args = new IR::Vector<IR::ArgumentInfo>();
         bool constArgs = true;
         for (auto aarg : *expression->arguments) {
@@ -3238,15 +3363,14 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
                 return expression;
             typeArgs->push_back(taType);
         }
-        auto callType = new IR::Type_MethodCall(expression->srcInfo,
-                                                typeArgs, rettype, args);
+        auto callType = new IR::Type_MethodCall(
+            expression->srcInfo, typeArgs, rettype, args);
 
-        TypeConstraints constraints(typeMap->getSubstitutions());
-        constraints.addEqualityConstraint(expression, ft, callType);
-        auto tvs = constraints.solve();
+        auto tvs = unify(expression, ft, callType,
+                         "Function type '%1%' does not match invocation type '%2%'",
+                         { ft, callType });
         if (tvs == nullptr)
             return expression;
-        addSubstitutions(tvs);
 
         LOG2("Method type before specialization " << methodType << " with " << tvs);
         TypeVariableSubstitutionVisitor substVisitor(tvs);
@@ -3404,7 +3528,9 @@ TypeInference::matchCase(const IR::SelectExpression* select, const IR::Type_Base
         }
         useSelType = selectType->components.at(0);
     }
-    auto tvs = unify(select, useSelType, caseType);
+    auto tvs = unify(select, useSelType, caseType,
+                     "'match' case label type '%1%' does not match expected type '%2%'",
+                     { caseType, useSelType });
     if (tvs == nullptr)
         return nullptr;
     ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);

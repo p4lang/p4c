@@ -870,10 +870,10 @@ blackbox_body: /* epsilon */ {
           { ($$=$1).attribs->addUnique($3, $5); }
     | blackbox_body METHOD name "(" opt_argument_list ")" ";"
           { ($$=$1).methods->push_back(new IR::Method(@2+@3, $3,
-                new IR::Type_Method(@4+@6, IR::Type::Void::get(), $5))); }
+                new IR::Type_Method(@4+@6, IR::Type::Void::get(), $5, $3))); }
     | blackbox_body METHOD name "(" opt_argument_list ")" "{" blackbox_method "}"
           { ($$=$1).methods->push_back(new IR::Method(@2+@3, $3,
-                new IR::Type_Method(@4+@6, IR::Type::Void::get(), $5), $8)); }
+                new IR::Type_Method(@4+@6, IR::Type::Void::get(), $5, $3), $8)); }
     | blackbox_body error { $$ = $1; }
 ;
 

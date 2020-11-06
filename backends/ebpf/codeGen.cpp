@@ -27,7 +27,7 @@ void CodeGenInspector::substitute(const IR::Parameter* p, const IR::Parameter* w
 { substitution.emplace(p, with); }
 
 bool CodeGenInspector::preorder(const IR::Constant* expression) {
-    builder->append(expression->toString());
+    builder->append(Util::toString(expression->value, 0, false));
     return true;
 }
 

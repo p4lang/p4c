@@ -49,7 +49,7 @@ template <typename... T>
 inline void error(const char* format, T... args) {
     auto& context = BaseCompileContext::get();
     auto action = context.getDefaultErrorDiagnosticAction();
-    context.errorReporter().diagnose(action, nullptr, format, args...);
+    context.errorReporter().diagnose(action, nullptr, format, "", args...);
 }
 #endif
 
@@ -61,7 +61,18 @@ template<class T,
 void error(const int kind, const char *format, const T *node, Args... args) {
     auto& context = BaseCompileContext::get();
     auto action = context.getDefaultErrorDiagnosticAction();
-    context.errorReporter().diagnose(action, kind, format, node, args...);
+    context.errorReporter().diagnose(action, kind, format, "", node, args...);
+}
+
+/// This is similar to the above method, but also has a suffix
+template<class T,
+         typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value>::type,
+         class... Args>
+void errorWithSuffix(const int kind, const char *format, const char* suffix,
+                     const T *node, Args... args) {
+    auto& context = BaseCompileContext::get();
+    auto action = context.getDefaultErrorDiagnosticAction();
+    context.errorReporter().diagnose(action, kind, format, suffix, node, args...);
 }
 
 /// The const ref variant of the above
@@ -100,11 +111,8 @@ template<typename... Args>
 void error(const int kind, const char *format, Args... args) {
     auto& context = BaseCompileContext::get();
     auto action = context.getDefaultErrorDiagnosticAction();
-    context.errorReporter().diagnose(action, kind, format, std::forward<Args>(args)...);
+    context.errorReporter().diagnose(action, kind, format, "", std::forward<Args>(args)...);
 }
-
-/// Report an error if condition e is false.
-#define ERROR_CHECK(e, ...) do { if (!(e)) ::error(__VA_ARGS__); } while (0)
 
 #if LEGACY
 /// Report a warning with the given message.
@@ -112,7 +120,7 @@ template <typename... T>
 inline void warning(const char* format, T... args) {
     auto& context = BaseCompileContext::get();
     auto action = context.getDefaultWarningDiagnosticAction();
-    context.errorReporter().diagnose(action, nullptr, format, args...);
+    context.errorReporter().diagnose(action, nullptr, format, "", args...);
 }
 #endif
 
@@ -123,7 +131,7 @@ template<class T,
 void warning(const int kind, const char *format, const T *node, Args... args) {
     auto& context = BaseCompileContext::get();
     auto action = context.getDefaultWarningDiagnosticAction();
-    context.errorReporter().diagnose(action, kind, format, node, args...);
+    context.errorReporter().diagnose(action, kind, format, "", node, args...);
 }
 
 /// The const ref variant of the above
@@ -140,11 +148,8 @@ template<typename... Args>
 void warning(const int kind, const char *format, Args... args) {
     auto& context = BaseCompileContext::get();
     auto action = context.getDefaultWarningDiagnosticAction();
-    context.errorReporter().diagnose(action, kind, format, std::forward<Args>(args)...);
+    context.errorReporter().diagnose(action, kind, format, "", std::forward<Args>(args)...);
 }
-
-/// Report a warning if condition e is false.
-#define WARN_CHECK(e, ...) do { if (!(e)) ::warning(__VA_ARGS__); } while (0)
 
 /**
  * Trigger a diagnostic message.
@@ -157,13 +162,14 @@ void warning(const int kind, const char *format, Args... args) {
  *                        so the diagnostic name is a valid P4 identifier.
  * @param format  A format for the diagnostic message, using the same style as
  *                '::warning' or '::error'.
+ * @param suffix  A message that is appended at the end.
  */
 template <typename... T>
 inline void diagnose(DiagnosticAction defaultAction, const char* diagnosticName,
-                     const char* format, T... args) {
+                     const char* format, const char* suffix, T... args) {
     auto& context = BaseCompileContext::get();
     auto action = context.getDiagnosticAction(diagnosticName, defaultAction);
-    context.errorReporter().diagnose(action, diagnosticName, format, args...);
+    context.errorReporter().diagnose(action, diagnosticName, format, suffix, args...);
 }
 
 #endif /* P4C_LIB_ERROR_H_ */

@@ -80,7 +80,7 @@ class ErrorReporter final {
     template <typename... T>
     std::string format_message(const char* format, T... args) {
         boost::format fmt(format);
-        std::string message = ::error_helper(fmt, "", "", "", args...);
+        std::string message = ::error_helper(fmt, "", "", "", "", args...);
         return message;
     }
 
@@ -88,15 +88,15 @@ class ErrorReporter final {
               typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo,
                                                                  T>::value>::type,
               typename... Args>
-    void diagnose(DiagnosticAction action, const int errorCode, const char *format, const T *node,
-                  Args... args) {
+    void diagnose(DiagnosticAction action, const int errorCode, const char *format,
+                  const char* suffix, const T *node, Args... args) {
         if (!error_reported(errorCode, node->getSourceInfo())) {
             const char *name = get_error_name(errorCode);
             auto da = getDiagnosticAction(name, action);
             if (name)
-                diagnose(da, name, format, node, args...);
+                diagnose(da, name, format, suffix, node, args...);
             else
-                diagnose(action, nullptr, format, node, std::forward<Args>(args)...);
+                diagnose(action, nullptr, format, suffix, node, std::forward<Args>(args)...);
         }
     }
 
@@ -104,26 +104,27 @@ class ErrorReporter final {
               typename = typename std::enable_if<std::is_base_of<Util::IHasSourceInfo,
                                                                  T>::value>::type,
               typename... Args>
-    void diagnose(DiagnosticAction action, const int errorCode, const char *format, const T &node,
-                  Args... args) {
-        diagnose(action, errorCode, format, &node, std::forward<Args>(args)...);
+    void diagnose(DiagnosticAction action, const int errorCode, const char *format,
+                  const char* suffix, const T &node, Args... args) {
+        diagnose(action, errorCode, format, suffix, &node, std::forward<Args>(args)...);
     }
 
     template <typename... Args>
-    void diagnose(DiagnosticAction action, const int errorCode, const char *format, Args... args) {
+    void diagnose(DiagnosticAction action, const int errorCode, const char *format,
+                  const char* suffix, Args... args) {
         const char *name = get_error_name(errorCode);
         auto da = getDiagnosticAction(name, action);
         if (name)
-            diagnose(da, name, format, args...);
+            diagnose(da, name, format, suffix, args...);
         else
-            diagnose(action, nullptr, format, std::forward<Args>(args)...);
+            diagnose(action, nullptr, format, suffix, std::forward<Args>(args)...);
     }
 
     /// The sink of all the diagnostic functions. Here the error gets printed
     /// or an exception thrown if the error count exceeds maxErrorCount.
     template <typename... T>
     void diagnose(DiagnosticAction action, const char* diagnosticName,
-                  const char* format, T... args) {
+                  const char* format, const char* suffix, T... args) {
         if (action == DiagnosticAction::Ignore) return;
 
         std::string prefix;
@@ -152,7 +153,7 @@ class ErrorReporter final {
         }
 
         boost::format fmt(format);
-        std::string message = ::error_helper(fmt, prefix, "", "", args...);
+        std::string message = ::error_helper(fmt, prefix, "", "", suffix, args...);
         emit_message(message);
         if (errorCount >= maxErrorCount)
             FATAL_ERROR("Number of errors exceeded set maximum of %1%", maxErrorCount);

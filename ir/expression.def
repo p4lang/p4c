@@ -215,7 +215,19 @@ class Constant : Literal {
     Constant operator-(const Constant &c) const;
     Constant operator-() const;
 #end
-    toString { return Util::toString(&value, base); }
+    toString {
+        const IR::Type_Bits* tb = dynamic_cast<const IR::Type_Bits*>(type);
+        unsigned width;
+        bool sign;
+        if (tb == nullptr) {
+            width = 0;
+            sign = false;
+        } else {
+            width = tb->size;
+            sign = tb->isSigned;
+        }
+        return Util::toString(value, width, sign, base);
+    }
     visit_children { v.visit(type, "type"); }
 }
 

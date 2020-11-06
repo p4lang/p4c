@@ -179,7 +179,7 @@ class IndexedVector : public Vector<T> {
 
     void toJSON(JSONGenerator &json) const override;
     static IndexedVector<T>* fromJSON(JSONLoader &json);
-    void validate() const {
+    void validate() const override {
         if (invalid) return;  // don't crash the compiler because an error happened
         for (auto el : *this) {
             auto decl = el->template to<IR::IDeclaration>();

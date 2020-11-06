@@ -107,7 +107,7 @@ ExternConverter::convertExternInstance(ConversionContext* ctxt,
         cstring value;
         if (auto cst = val->to<IR::Constant>()) {
             type = "hexstr";
-            value = Util::toString(&cst->value, 16);
+            value = Util::toString(cst->value, 0, false, 16);
         } else if (auto str = val->to<IR::StringLiteral>()) {
             type = "string";
             value = str->value;

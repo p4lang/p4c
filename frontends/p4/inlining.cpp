@@ -644,9 +644,10 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
             if (!initializer->equiv(*prev))
                 // This is a compile-time constant, since this is a non-directional
                 // parameter, so the value should be independent on the context.
-                ::error("%1%: non-directional parameters must be substitued with the "
-                        "same value in all invocations; two different substitutions are "
-                        "%2% and %3%", param, initializer, prev);
+                ::error(ErrorType::ERR_INVALID,
+                     "%1%: non-directional parameters must be substitued with the "
+                     "same value in all invocations; two different substitutions are "
+                     "%2% and %3%", param, initializer, prev);
             continue;
         }
     }
@@ -804,7 +805,8 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
                 if (!initializer->equiv(*prev))
                     // This is a compile-time constant, since this is a non-directional
                     // parameter, so the value should be independent on the context.
-                    ::error("%1%: non-directional parameters must be substitued with the "
+                    ::error(ErrorType::ERR_INVALID,
+                            "%1%: non-directional parameters must be substitued with the "
                             "same value in all invocations; two different substitutions are "
                             "%2% and %3%", param, initializer, prev);
                 continue;

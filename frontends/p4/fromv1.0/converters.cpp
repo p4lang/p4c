@@ -501,7 +501,7 @@ class FixupExtern : public Modifier {
         // FIXME -- 0-arg one if needed
         if (!type->lookupMethod(type->name, new IR::Vector<IR::Argument>())) {
             type->methods.push_back(new IR::Method(type->name, new IR::Type_Method(
-                                                new IR::ParameterList()))); } }
+                new IR::ParameterList(), type->getName()))); } }
     void postorder(IR::Method *meth) override {
         if (meth->name == origname) meth->name = extname; }
     // Convert extern methods that take a field_list_calculation to take a type param instead

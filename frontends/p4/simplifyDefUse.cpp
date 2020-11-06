@@ -155,8 +155,8 @@ class FindUninitialized : public Inspector {
                 points = defs->getPoints(loc);
                 if (points->containsBeforeStart())
                     ::warning(ErrorType::WARN_UNINITIALIZED,
-                              "out parameter %1% may be uninitialized when "
-                              "%2% terminates", p, block->getName());
+                              "out parameter '%1%' may be uninitialized when "
+                              "'%2%' terminates", p, block->getName());
             }
         }
     }

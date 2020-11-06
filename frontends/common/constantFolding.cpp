@@ -586,7 +586,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
     auto type = typeMap->getType(orig->expr, true);
     auto origtype = typeMap->getType(orig);
 
-    const IR::Expression* result;
+    const IR::Expression* result = e;
     if (type->is<IR::Type_Stack>() && e->member == IR::Type_Stack::arraySize) {
         auto st = type->to<IR::Type_Stack>();
         auto size = st->getSize();
