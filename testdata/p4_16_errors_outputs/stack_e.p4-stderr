@@ -1,4 +1,4 @@
-stack_e.p4(23): [--Werror=type-error] error: Header stack struct s[] used with non-header type struct s
+stack_e.p4(23): [--Werror=type-error] error: Header stack struct s[5] used with non-header type struct s
         s[5] stack1; // non-header illegal in header stack
         ^^^^
 stack_e.p4(26): [--Werror=type-error] error: Index too large: 1231092310293
