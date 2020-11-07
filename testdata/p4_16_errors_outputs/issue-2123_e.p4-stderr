@@ -1,7 +1,7 @@
-issue-2123_e.p4(63): [--Wwarn=uninitialized] warning: hdr.ipv4.totalLen may be uninitialized
+issue-2123_e.p4(63): [--Wwarn=uninitialized_use] warning: hdr.ipv4.totalLen may be uninitialized
             hdr.ipv4.totalLen .. 0x0800 : parse_ipv4;
             ^^^^^^^^^^^^^^^^^
-issue-2123_e.p4(64): [--Wwarn=uninitialized] warning: hdr.ipv4.totalLen may be uninitialized
+issue-2123_e.p4(64): [--Wwarn=uninitialized_use] warning: hdr.ipv4.totalLen may be uninitialized
             0x0800 .. hdr.ipv4.totalLen : parse_ipv4;
                       ^^^^^^^^^^^^^^^^^
 issue-2123_e.p4(61): [--Werror=invalid] error: 16w0x806-16w0x800: Range end is less than start.

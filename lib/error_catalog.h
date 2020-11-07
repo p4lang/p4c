@@ -59,6 +59,8 @@ class ErrorType {
     static const int WARN_UNSUPPORTED;        // unsupported construct
     static const int WARN_DEPRECATED;         // deprecated feature
     static const int WARN_UNINITIALIZED;      // unitialized instance
+    static const int WARN_UNINITIALIZED_USE;  // use of uninitialized value
+    static const int WARN_UNINITIALIZED_OUT_PARAM;  // output parameter may be uninitialized
     static const int WARN_UNUSED;             // unused instance
     static const int WARN_MISSING;            // missing construct
     static const int WARN_ORDERING;           // inconsistent statement ordering
