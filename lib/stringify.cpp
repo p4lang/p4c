@@ -17,6 +17,7 @@ limitations under the License.
 #include <stdarg.h>
 #include <sstream>
 #include "stringify.h"
+#include "exceptions.h"
 
 namespace Util {
 cstring toString(bool value) {
