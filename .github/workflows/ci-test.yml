@@ -17,7 +17,7 @@ jobs:
         exclude:
           - unified: OFF
             enable_gmp: OFF
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-latest
     env:
       CTEST_PARALLEL_LEVEL: 4
     steps:
@@ -83,12 +83,14 @@ jobs:
       unified: ON
       enable_gmp: ON
       CTEST_PARALLEL_LEVEL: 4
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: recursive
 
+      # run with sudo (...) --privileged
+      # this is needed to create network namespaces for the ebpf tests
     - name: Build (Linux)
       run: |
         tools/start_ccache
