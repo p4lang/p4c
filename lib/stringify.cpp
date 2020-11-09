@@ -16,6 +16,7 @@ limitations under the License.
 
 #include <stdarg.h>
 #include <sstream>
+#include <deque>
 #include "stringify.h"
 #include "exceptions.h"
 
