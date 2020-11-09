@@ -105,7 +105,7 @@ class Bridge(object):
         self.ns_exec("sysctl -w net.ipv6.conf.all.disable_ipv6=1")
         self.ns_exec("sysctl -w net.ipv6.conf.default.disable_ipv6=1")
         # Also filter igmp packets, -w is necessary because of a race condition
-        self.ns_exec("iptables -w -A OUTPUT -p igmp -j DROP")
+        self.ns_exec("iptables -w -A OUTPUT -p 2 -j DROP")
         return SUCCESS
 
     def create_bridge(self):
