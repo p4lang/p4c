@@ -232,7 +232,8 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %type<IR::Expression*>      expression lvalue keysetExpression selectExpression
                             stateExpression optInitializer initializer
                             simpleKeysetExpression transitionStatement switchLabel
-                            p4rtControllerType nonBraceExpression
+                            p4rtControllerType reducedSimpleKeysetExpression
+                            nonBraceExpression
 %type<ConstType*>           baseType typeOrVoid specializedType headerStackType
                             typeRef tupleType typeArg realTypeArg namedType
 %type<IR::Type_Name*>       typeName
