@@ -1,0 +1,3 @@
+# cmd | port | dest | src | ethertype
+packet 4 000000000001 000000000000 ffff
+expect 3 000000000003 000000000000 ffff
