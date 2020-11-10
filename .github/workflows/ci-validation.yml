@@ -1,0 +1,39 @@
+name: "validate-p4c"
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  # We run validation in parallel with the normal tests
+  # Validation ensures that P4C compiles P4-16 programs correctly.
+  # We only test the front end and some mid end passes for now.
+  validate:
+    env:
+      UNIFIED: ON
+      ENABLE_GMP: ON
+      BUILD_SUCCESS: true
+      CTEST_PARALLEL_LEVEL: 4
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Build (Linux)
+      run: |
+        tools/start_ccache
+        docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg ENABLE_GMP=$ENABLE_GMP --build-arg VALIDATION=ON . || echo "BUILD_SUCCESS=false" >> $GITHUB_ENV
+
+    - name: Validate
+      if: env.BUILD_SUCCESS == 'true'
+      run: |
+          docker run -w /gauntlet p4c python3.6 -m pytest test.py -vrf -k "test_p4c" -n $CTEST_PARALLEL_LEVEL --suppress-crashes
+
+    - name: Build Failed
+      if: env.BUILD_SUCCESS == 'false'
+      run: |
+          echo "Building Gauntlet failed."
+
