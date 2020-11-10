@@ -74,34 +74,3 @@ jobs:
   #     run: |
   #       ctest --output-on-failure -j 2 --schedule-random -LE "bpf$"
   #     if: matrix.unified == 'ON'
-
-  # We run validation in parallel with the normal tests
-  # Validation ensures that P4C compiles P4-16 programs correctly.
-  # We only test the front end and some mid end passes for now.
-  validate:
-    strategy:
-      fail-fast: false
-    env:
-      unified: ON
-      enable_gmp: ON
-      CTEST_PARALLEL_LEVEL: 4
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: recursive
-
-    - name: Build (Linux)
-      run: |
-        tools/start_ccache
-        docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=$UNIFIED --build-arg ENABLE_GMP=$ENABLE_GMP --build-arg VALIDATION=ON .
-
-    - name: Validate
-      run: |
-          docker run -w /gauntlet p4c python3.6 -m pytest test.py -vrf -k "test_p4c" -n $CTEST_PARALLEL_LEVEL --suppress-crashes
-      if: success()
-
-    - name: Build_Failure
-      if: failure()
-      run: |
-          echo "Building Gauntlet failed."
