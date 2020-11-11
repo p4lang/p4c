@@ -46,16 +46,16 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition select(hdr.ethernet.etherType) {
             16w0x800 &&& 16w0xfffc: parse_h0;
             16w0x804 &&& 16w0xfffe: parse_h0;
-            16w0x806 &&& 16w0xffff: parse_h0;
+            16w0x806: parse_h0;
             16w0x808: parse_h1;
-            16w0xfff1 &&& 16w0xffff: parse_h2;
+            16w0xfff1: parse_h2;
             16w0xfff2 &&& 16w0xfffe: parse_h2;
             16w0xfff4 &&& 16w0xfffc: parse_h2;
             16w0xfff8 &&& 16w0xfffc: parse_h2;
             16w0xfffc &&& 16w0xfffe: parse_h2;
-            16w0xfffe &&& 16w0xffff: parse_h2;
+            16w0xfffe: parse_h2;
             16w0x900: parse_h3;
-            16w0x8ff &&& 16w0xffff: parse_h4;
+            16w0x8ff: parse_h4;
             16w0x900 &&& 16w0xfffe: parse_h4;
             default: accept;
         }
