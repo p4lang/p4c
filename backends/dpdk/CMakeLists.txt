@@ -16,7 +16,6 @@ set(P4C_DPDK_SOURCES
     ../bmv2/common/helpers.cpp
     ../bmv2/common/JsonObjects.cpp
     ../bmv2/common/action.cpp
-    ../bmv2/common/control.cpp
     ../bmv2/common/controlFlowGraph.cpp
     ../bmv2/common/deparser.cpp
     ../bmv2/common/expression.cpp
@@ -28,7 +27,6 @@ set(P4C_DPDK_SOURCES
     ../bmv2/common/metermap.cpp
     ../bmv2/common/parser.cpp
     ../bmv2/common/programStructure.cpp
-    ../bmv2/common/sharedActionSelectorCheck.cpp
     ../bmv2/psa_switch/psaSwitch.cpp
     backend.cpp
     main.cpp
@@ -84,7 +82,7 @@ set(DPDK_IR_SRCS
 # IR sources that need to go into the frontend library
 set(QUAL_DPDK_IR_SRCS)
 foreach(src IN LISTS DPDK_IR_SRCS)
-  set(QUAL_DPDK_IR_SRCS ${QUAL_BF_P4C_IR_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/${src})
+    set(QUAL_DPDK_IR_SRCS ${QUAL_DPDK_IR_SRCS} ${CMAKE_CURRENT_SOURCE_DIR}/${src})
 endforeach()
 set(EXTENSION_FRONTEND_SOURCES ${EXTENSION_FRONTEND_SOURCES} ${QUAL_DPDK_IR_SRCS} PARENT_SCOPE)
 
