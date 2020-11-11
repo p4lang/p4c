@@ -11,6 +11,7 @@ updates {
       match {
         field_id: 2
         optional {
+          value: "\021\021"
         }
       }
       action {
