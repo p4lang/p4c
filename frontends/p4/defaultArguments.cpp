@@ -17,7 +17,6 @@ limitations under the License.
 #include "defaultArguments.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/typeChecking/typeSubstitutionVisitor.h"
-#include "frontends/p4/cloner.h"
 
 namespace P4 {
 
