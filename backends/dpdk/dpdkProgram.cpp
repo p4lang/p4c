@@ -57,16 +57,16 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
         structType.push_back(st);
       } else if (args_struct_map->find(s->name.name) !=
                  args_struct_map->end()) {
-        auto st = new IR::DpdkArgStructType(s->srcInfo, s->name, s->annotations,
-                                            s->fields);
+          auto st = new IR::DpdkStructType(s->srcInfo, s->name, s->annotations,
+                  s->fields);
         structType.push_back(st);
       } else if (s->name.name == info->header_type) {
         auto *annotations = new IR::Annotations(
             {new IR::Annotation(IR::ID("__packet_data__"), {})});
         for (auto anno : s->annotations->annotations)
           annotations->add(anno);
-        auto st = new IR::DpdkHeaderStructType(s->srcInfo, s->name,
-                                               s->annotations, s->fields);
+        auto st = new IR::DpdkStructType(s->srcInfo, s->name,
+                s->annotations, s->fields);
         structType.push_back(st);
       }
     }
