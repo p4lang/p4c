@@ -102,12 +102,6 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
   add_instr(i);
   return false;
 }
-bool ConvertStatementToDpdk::preorder(const IR::BlockStatement *b) {
-  for (auto i : b->components) {
-    visit(i);
-  }
-  return false;
-}
 
 /* This recursion requires the pass of ConvertLogicalExpression. This pass will
  * transform the logical experssion to a form that this function use as
@@ -203,11 +197,11 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
           false_label, lss->left, lss->right));
     else
       instructions.push_back(
-          new IR::DpdkJmpLessorStatement(true_label, lss->left, lss->right));
+          new IR::DpdkJmpLessOrStatement(true_label, lss->left, lss->right));
     return is_and;
   } else if (auto grt = expr->to<IR::Grt>()) {
     if (is_and)
-      instructions.push_back(new IR::DpdkJmpLessorEqualStatement(
+      instructions.push_back(new IR::DpdkJmpLessOrEqualStatement(
           false_label, grt->left, grt->right));
     else
       instructions.push_back(
@@ -225,11 +219,10 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
               new IR::DpdkValidateStatement(true_label, a->appliedTo));
         return is_and;
       } else {
-        std::cerr << a->name << std::endl;
-        BUG("Not implemented");
+        BUG("%1%: Not implemented", expr);
       }
     } else {
-      BUG("not implemented method instance");
+      BUG("%1%:not implemented method instance", expr);
     }
   } else if (expr->is<IR::PathExpression>() || expr->is<IR::Member>()) {
     if (is_and)
@@ -240,8 +233,7 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
           new IR::DpdkJmpEqualStatement(true_label, expr, new IR::Constant(1)));
     return is_and;
   } else {
-    std::cerr << expr->node_type_name() << std::endl;
-    BUG("Not implemented");
+    BUG("%1%: Not implemented", expr);
   }
 }
 
@@ -298,7 +290,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
           BUG("checksum map does not collect all checksum def.");
         }
         auto args = a->expr->arguments;
-        const IR::Argument *arg = (*args)[0];
+        const IR::Argument *arg = args->at(0);
         if (auto l = arg->expression->to<IR::ListExpression>()) {
           for (auto field : l->components) {
             add_instr(new IR::DpdkChecksumAddStatement(a->object->getName(),
@@ -311,11 +303,10 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
     } else if (a->originalExternType->getName().name == "packet_out") {
       if (a->method->getName().name == "emit") {
         auto args = a->expr->arguments;
-        auto header = (*args)[0];
-        if (auto m = header->expression->to<IR::Member>()) {
-          add_instr(new IR::DpdkEmitStatement(m));
-        } else if (auto path = header->expression->to<IR::PathExpression>()) {
-          add_instr(new IR::DpdkEmitStatement(path));
+        auto header = args->at(0);
+        if (header->expression->is<IR::Member>() ||
+            header->expression->is<IR::PathExpression>()) {
+          add_instr(new IR::DpdkEmitStatement(header->expression));
         } else {
           ::error("One emit does not like this packet.emit(header.xxx)");
         }
@@ -323,11 +314,10 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
     } else if (a->originalExternType->getName().name == "packet_in") {
       if (a->method->getName().name == "extract") {
         auto args = a->expr->arguments;
-        auto header = (*args)[0];
-        if (auto m = header->expression->to<IR::Member>()) {
-          add_instr(new IR::DpdkExtractStatement(m));
-        } else if (auto path = header->expression->to<IR::PathExpression>()) {
-          add_instr(new IR::DpdkExtractStatement(path));
+        auto header = args->at(0);
+        if (header->expression->is<IR::Member>() ||
+            header->expression->is<IR::PathExpression>()) {
+          add_instr(new IR::DpdkExtractStatement(header->expression));
         } else {
           ::error(
               "Extract format does not like this packet.extract(header.xxx)");
@@ -336,8 +326,8 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
     } else if (a->originalExternType->getName().name == "Meter") {
       if (a->method->getName().name == "execute") {
         auto args = a->expr->arguments;
-        auto index = (*args)[0]->expression;
-        auto color = (*args)[1]->expression;
+        auto index = args->at(0)->expression;
+        auto color = args->at(1)->expression;
         auto meter = a->object->getName();
         add_instr(new IR::DpdkMeterExecuteStatement(meter, index, color));
       } else {
@@ -346,7 +336,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
     } else if (a->originalExternType->getName().name == "Counter") {
       if (a->method->getName().name == "count") {
         auto args = a->expr->arguments;
-        auto index = (*args)[0]->expression;
+        auto index = args->at(0)->expression;
         auto counter = a->object->getName();
         add_instr(new IR::DpdkCounterCountStatement(counter, index));
       } else {
@@ -359,20 +349,19 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                   << std::endl;
       } else if (a->method->getName().name == "write") {
         auto args = a->expr->arguments;
-        auto index = (*args)[0]->expression;
-        auto src = (*args)[1]->expression;
+        auto index = args->at(0)->expression;
+        auto src = args->at(1)->expression;
         auto reg = a->object->getName();
         add_instr(new IR::DpdkRegisterWriteStatement(reg, index, src));
       }
     } else {
-      std::cerr << a->originalExternType->getName() << std::endl;
-      BUG("Unknown extern function.");
+      ::error("%1%: Unknown extern function.", s);
     }
   } else if (auto a = mi->to<P4::ExternFunction>()) {
     if (a->method->name == "verify") {
       auto args = a->expr->arguments;
-      auto condition = (*args)[0];
-      auto error = (*args)[1];
+      auto condition = args->at(0);
+      auto error = args->at(1);
       add_instr(new IR::DpdkVerifyStatement(condition->expression,
                                             error->expression));
     }

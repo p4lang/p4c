@@ -67,8 +67,6 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
       new P4::RemoveAllUnusedDeclarations(refMap),
       // Convert to Dpdk specific format
       rewriteToDpdkArch,
-      // Converts the DAG into a TREE (at least for expressions)
-      // This is important later for conversion to JSON.
       new P4::ClearTypeMap(typeMap),
       new P4::TypeChecking(refMap, typeMap, true),
       evaluator,

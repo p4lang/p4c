@@ -37,7 +37,7 @@ public:
 //
 // jmp label1 will be removed.
 
-class RemoveUselessJmpAndLabel : public Transform {
+class RemoveConsecutiveJmpAndLabel : public Transform {
 public:
   const IR::Node *postorder(IR::DpdkListStatement *l) override;
 };
@@ -57,7 +57,7 @@ public:
 // ...
 // jmp label2
 
-class RemoveJmpAfterLabel : public Transform {
+class ThreadJumps : public Transform {
 public:
   const IR::Node *postorder(IR::DpdkListStatement *l) override;
 };
@@ -77,10 +77,10 @@ public:
     passes.push_back(new RemoveRedundantLabel);
     auto r = new PassRepeated{new RemoveLabelAfterLabel};
     passes.push_back(r);
-    passes.push_back(new RemoveUselessJmpAndLabel);
+    passes.push_back(new RemoveConsecutiveJmpAndLabel);
     passes.push_back(new RemoveRedundantLabel);
     passes.push_back(r);
-    passes.push_back(new RemoveJmpAfterLabel);
+    passes.push_back(new ThreadJumps);
   }
 };
 
