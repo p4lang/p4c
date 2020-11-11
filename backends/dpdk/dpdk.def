@@ -68,18 +68,6 @@ class DpdkMovStatement : DpdkAsmStatement, IDPDKNode {
 #nodbprint
 }
 
-// IR classes for DPDK assembly
-class DpdkAddStatement : DpdkAsmStatement, IDPDKNode {
-    Expression dst;
-    Expression src1;
-    Expression src2;
-    std::ostream& toSpec(std::ostream& out) const override;
-#nodbprint
-}
-class DpdkAndStatement : DpdkAsmStatement, IDPDKNode {
-    std::ostream& toSpec(std::ostream& out) const override;
-#nodbprint
-}
 class DpdkApplyStatement : DpdkAsmStatement, IDPDKNode {
     cstring table;
     std::ostream& toSpec(std::ostream& out) const override;
@@ -121,43 +109,57 @@ class DpdkRxStatement : DpdkAsmStatement, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
+
 class DpdkTxStatement : DpdkAsmStatement, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
-class DpdkShlStatement : DpdkAsmStatement, IDPDKNode {
+
+abstract DpdkAssignmentStatement : DpdkAsmStatement {
     Expression dst;
+}
+
+abstract DpdkBinaryStatement : DpdkAssignmentStatement {
     Expression src1;
     Expression src2;
+}
+
+class DpdkAddStatement : DpdkBinaryStatement, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
-class DpdkShrStatement : DpdkAsmStatement, IDPDKNode {
-    Expression dst;
-    Expression src1;
-    Expression src2;
+
+class DpdkAndStatement : DpdkBinaryStatement, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
-class DpdkSubStatement : DpdkAsmStatement, IDPDKNode {
-    Expression dst;
-    Expression src1;
-    Expression src2;
+
+class DpdkShlStatement : DpdkBinaryStatement, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
-class DpdkOrStatement : DpdkAsmStatement, IDPDKNode {
+class DpdkShrStatement : DpdkBinaryStatement, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
-class DpdkEquStatement : DpdkAsmStatement, IDPDKNode {
-    Expression dst;
-    Expression src1;
-    Expression src2;
+class DpdkSubStatement : DpdkBinaryStatement, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
-class DpdkXorStatement : DpdkAsmStatement, IDPDKNode {
+class DpdkOrStatement : DpdkBinaryStatement, IDPDKNode {
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+class DpdkEquStatement : DpdkBinaryStatement, IDPDKNode {
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+class DpdkXorStatement : DpdkBinaryStatement, IDPDKNode {
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+
+class DpdkCmpStatement: DpdkBinaryStatement, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
@@ -244,13 +246,6 @@ class DpdkCastStatement: DpdkAsmStatement, IDPDKNode {
 #nodbprint
 }
 
-class DpdkCmpStatement: DpdkAsmStatement, IDPDKNode {
-    Expression src1;
-    Expression src2;
-    std::ostream& toSpec(std::ostream& out) const override;
-#nodbprint
-}
-
 class DpdkJmpEqualStatement: DpdkJmpBaseStatement, IDPDKNode {
     Expression src1;
     Expression src2;
@@ -279,62 +274,56 @@ class DpdkJmpGreaterStatement: DpdkJmpBaseStatement, IDPDKNode {
 #nodbprint
 }
 
-class DpdkJmpLessorEqualStatement: DpdkJmpBaseStatement, IDPDKNode {
+class DpdkJmpLessOrEqualStatement: DpdkJmpBaseStatement, IDPDKNode {
     Expression src1;
     Expression src2;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
 
-class DpdkJmpLessorStatement: DpdkJmpBaseStatement, IDPDKNode {
+class DpdkJmpLessOrStatement: DpdkJmpBaseStatement, IDPDKNode {
     Expression src1;
     Expression src2;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
 
-class DpdkLAndStatement: DpdkAsmStatement, IDPDKNode {
-    Expression dst;
+class DpdkLAndStatement: DpdkAssignmentStatement, IDPDKNode {
     Expression src1;
     Expression src2;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
 
-class DpdkLeqStatement: DpdkAsmStatement, IDPDKNode {
-    Expression dst;
+class DpdkLeqStatement: DpdkAssignmentStatement, IDPDKNode {
     Expression src1;
     Expression src2;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
 
-class DpdkLssStatement: DpdkAsmStatement, IDPDKNode {
-    Expression dst;
+class DpdkLssStatement: DpdkAssignmentStatement, IDPDKNode {
     Expression src1;
     Expression src2;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
 
-class DpdkGrtStatement: DpdkAsmStatement, IDPDKNode {
-    Expression dst;
+class DpdkGrtStatement: DpdkAssignmentStatement, IDPDKNode {
     Expression src1;
     Expression src2;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
 
-class DpdkGeqStatement: DpdkAsmStatement, IDPDKNode {
-    Expression dst;
+class DpdkGeqStatement: DpdkAssignmentStatement, IDPDKNode {
     Expression src1;
     Expression src2;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
 
-class DpdkNeqStatement: DpdkAsmStatement, IDPDKNode {
-    Expression dst;
+class DpdkNeqStatement: DpdkAssignmentStatement, IDPDKNode {
     Expression src1;
     Expression src2;
     std::ostream& toSpec(std::ostream& out) const override;
@@ -363,8 +352,7 @@ class DpdkCounterCountStatement: DpdkAsmStatement, IDPDKNode {
 #nodbprint
 }
 
-class DpdkRegisterReadStatement: DpdkAsmStatement, IDPDKNode {
-    Expression dst;
+class DpdkRegisterReadStatement: DpdkAssignmentStatement, IDPDKNode {
     cstring reg;
     Expression index;
     std::ostream& toSpec(std::ostream& out) const override;

@@ -209,7 +209,6 @@ public:
   const IR::Node *preorder(IR::AssignmentStatement *a) override;
   const IR::Node *postorder(IR::P4Control *a) override;
   const IR::Node *postorder(IR::P4Parser *a) override;
-  const IR::Node *preorder(IR::MethodCallStatement *a) override;
 };
 
 /* This pass helps StatementUnroll to unroll expressions inside statements.
@@ -232,11 +231,11 @@ public:
   // falls into following classes, if not, it means we haven't implemented a
   // handle for that class.
   static void sanity(const IR::Expression *e) {
-    if (not e->is<IR::Operation_Unary>() and
-        not e->is<IR::MethodCallExpression>() and not e->is<IR::Member>() and
-        not e->is<IR::PathExpression>() and
-        not e->is<IR::Operation_Binary>() and not e->is<IR::Constant>() and
-        not e->is<IR::BoolLiteral>()) {
+    if (!e->is<IR::Operation_Unary>() &&
+        !e->is<IR::MethodCallExpression>() && !e->is<IR::Member>() &&
+        !e->is<IR::PathExpression>() &&
+        !e->is<IR::Operation_Binary>() && !e->is<IR::Constant>() &&
+        !e->is<IR::BoolLiteral>()) {
       std::cerr << e->node_type_name() << std::endl;
       BUG("Untraversed node");
     }
@@ -283,23 +282,22 @@ public:
   IR::IndexedVector<IR::Declaration> decl;
   IR::Expression *root;
   static void sanity(const IR::Expression *e) {
-    if (not e->is<IR::Operation_Unary>() and
-        not e->is<IR::MethodCallExpression>() and not e->is<IR::Member>() and
-        not e->is<IR::PathExpression>() and
-        not e->is<IR::Operation_Binary>() and not e->is<IR::Constant>() and
-        not e->is<IR::BoolLiteral>()) {
+    if (!e->is<IR::Operation_Unary>() &&
+        !e->is<IR::MethodCallExpression>() && !e->is<IR::Member>() &&
+        !e->is<IR::PathExpression>() &&
+        !e->is<IR::Operation_Binary>() && !e->is<IR::Constant>() &&
+        !e->is<IR::BoolLiteral>()) {
       std::cerr << e->node_type_name() << std::endl;
       BUG("Untraversed node");
     }
   }
   static bool is_logical(const IR::Operation_Binary *bin) {
-    if (bin->is<IR::LAnd>() or bin->is<IR::LOr>() or bin->is<IR::Leq>() or
-        bin->is<IR::Equ>() or bin->is<IR::Neq>() or bin->is<IR::Grt>() or
+    if (bin->is<IR::LAnd>() || bin->is<IR::LOr>() || bin->is<IR::Leq>() ||
+        bin->is<IR::Equ>() || bin->is<IR::Neq>() || bin->is<IR::Grt>() ||
         bin->is<IR::Lss>())
       return true;
     else if (bin->is<IR::Geq>() or bin->is<IR::Leq>()) {
-      std::cerr << bin->node_type_name() << std::endl;
-      BUG("does not implemented");
+      BUG("%1%: not implemented", bin);
     } else
       return false;
   }

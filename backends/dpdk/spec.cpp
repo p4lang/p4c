@@ -142,10 +142,6 @@ std::ostream &IR::DpdkDeclaration::toSpec(std::ostream &out) const {
 
 std::ostream &IR::DpdkHeaderType::toSpec(std::ostream &out) const {
   out << "struct " << name << " {" << std::endl;
-  if (fields.empty()) {
-    out << "}" << std::endl;
-    return out;
-  }
   for (auto it = fields.begin(); it != fields.end(); ++it) {
     if (auto t = (*it)->type->to<IR::Type_Bits>())
       out << "\tbit<" << t->width_bits() << ">";
@@ -177,10 +173,6 @@ std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
     }
   } else {
     out << "struct " << name << " {" << std::endl;
-    if (fields.empty()) {
-      out << "}" << std::endl;
-      return out;
-    }
     for (auto it = fields.begin(); it != fields.end(); ++it) {
       if (auto t = (*it)->type->to<IR::Type_Bits>())
         out << "\tbit<" << t->width_bits() << ">";
@@ -475,12 +467,12 @@ std::ostream &IR::DpdkJmpGreaterStatement::toSpec(std::ostream &out) const {
   return out;
 }
 
-std::ostream &IR::DpdkJmpLessorEqualStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkJmpLessOrEqualStatement::toSpec(std::ostream &out) const {
   out << "jle " << label;
   return out;
 }
 
-std::ostream &IR::DpdkJmpLessorStatement::toSpec(std::ostream &out) const {
+std::ostream &IR::DpdkJmpLessOrStatement::toSpec(std::ostream &out) const {
   out << "jl " << label << " " << DPDK::toStr(src1) << " " << DPDK::toStr(src2);
   return out;
 }

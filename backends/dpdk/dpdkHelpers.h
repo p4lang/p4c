@@ -67,7 +67,7 @@ namespace DPDK {
  *     // if false statements go here
  * end:
  *
- * In this case, in order to use less jmp, I use jneq instead of jeq to let the
+ * In this case, in order to use fewer jmp, I use jneq instead of jeq to let the
  * true condition fall through the jmp statement and short-circuit the false
  * condition.
  *
@@ -114,15 +114,11 @@ class BranchingInstructionGeneration {
   P4::ReferenceMap *refMap;
   P4::TypeMap *typeMap;
   bool nested(const IR::Node *n) {
-    if (n->is<IR::LAnd>() or n->is<IR::LOr>()) {
-      return true;
-    } else if (n->is<IR::Member>() or n->is<IR::Equ>() or n->is<IR::Neq>() or
-               n->is<IR::Lss>() or n->is<IR::Grt>() or
-               n->is<IR::MethodCallExpression>() or
-               n->is<IR::PathExpression>() or n->is<IR::Member>()) {
-      return false;
-    }
-    return false;
+      if (n->is<IR::LAnd>() || n->is<IR::LOr>()) {
+          return true;
+      } else {
+          return false;
+      }
   }
 
 public:

@@ -86,7 +86,7 @@ foreach(src IN LISTS DPDK_IR_SRCS)
 endforeach()
 set(EXTENSION_FRONTEND_SOURCES ${EXTENSION_FRONTEND_SOURCES} ${QUAL_DPDK_IR_SRCS} PARENT_SCOPE)
 
-add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_DPDK_SOURCES}" "${DPDK_IR_SRCS}")
+add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_DPDK_SOURCES}" "${P4C_DPDK_HEADERS}" "${DPDK_IR_SRCS}")
 add_executable(p4c-dpdk ${P4C_DPDK_SOURCES})
 target_link_libraries (p4c-dpdk ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 add_dependencies(p4c-dpdk genIR frontend)

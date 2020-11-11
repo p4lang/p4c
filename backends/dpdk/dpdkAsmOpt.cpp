@@ -17,8 +17,7 @@ limitations under the License.
 #include "dpdkAsmOpt.h"
 
 namespace DPDK {
-// One assumption of this piece of program is that DPDK never produces jmp
-// statements that jump back to previous statements.
+// The assumption is compiler can only produce forward jumps.
 const IR::Node *RemoveRedundantLabel::postorder(IR::DpdkListStatement *l) {
   bool changed = false;
   IR::IndexedVector<IR::DpdkAsmStatement> used_labels;
@@ -60,7 +59,7 @@ const IR::Node *RemoveRedundantLabel::postorder(IR::DpdkListStatement *l) {
   return l;
 }
 
-const IR::Node *RemoveUselessJmpAndLabel::postorder(IR::DpdkListStatement *l) {
+const IR::Node *RemoveConsecutiveJmpAndLabel::postorder(IR::DpdkListStatement *l) {
   const IR::DpdkJmpBaseStatement *cache = nullptr;
   bool changed = false;
   IR::IndexedVector<IR::DpdkAsmStatement> new_l;
@@ -94,8 +93,7 @@ const IR::Node *RemoveUselessJmpAndLabel::postorder(IR::DpdkListStatement *l) {
   return l;
 }
 
-const IR::Node *RemoveJmpAfterLabel::postorder(IR::DpdkListStatement *l) {
-  bool changed = false;
+const IR::Node *ThreadJumps::postorder(IR::DpdkListStatement *l) {
   std::map<const cstring, cstring> label_map;
   const IR::DpdkLabelStatement *cache = nullptr;
   for (auto stmt : l->statements) {
@@ -118,7 +116,6 @@ const IR::Node *RemoveJmpAfterLabel::postorder(IR::DpdkListStatement *l) {
       if (res != label_map.end()) {
         ((IR::DpdkJmpBaseStatement *)stmt)->label = res->second;
         new_l->push_back(stmt);
-        changed = true;
       } else {
         new_l->push_back(stmt);
       }
@@ -126,8 +123,8 @@ const IR::Node *RemoveJmpAfterLabel::postorder(IR::DpdkListStatement *l) {
       new_l->push_back(stmt);
     }
   }
-  if (changed)
-    l->statements = *new_l;
+  if (l->statements.size() != new_l->size())
+      l->statements = *new_l;
   return l;
 }
 

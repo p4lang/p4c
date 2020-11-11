@@ -48,7 +48,6 @@ private:
 
 public:
   DpdkVariableCollector() { next_tmp_id = 0; }
-  // cstring get_next_tmp(IR::Expression* type);
   cstring get_next_tmp();
   void push_variable(const IR::DpdkDeclaration *);
   IR::IndexedVector<IR::DpdkDeclaration> &get_globals() { return variables; }
