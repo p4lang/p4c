@@ -111,51 +111,54 @@ namespace DPDK {
  * optmized.
  */
 class BranchingInstructionGeneration {
-  P4::ReferenceMap *refMap;
-  P4::TypeMap *typeMap;
-  bool nested(const IR::Node *n) {
-      if (n->is<IR::LAnd>() || n->is<IR::LOr>()) {
-          return true;
-      } else {
-          return false;
-      }
-  }
+    P4::ReferenceMap *refMap;
+    P4::TypeMap *typeMap;
+    bool nested(const IR::Node *n) {
+        if (n->is<IR::LAnd>() || n->is<IR::LOr>()) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-public:
-  IR::IndexedVector<IR::DpdkAsmStatement> instructions;
-  BranchingInstructionGeneration(P4::ReferenceMap *refMap, P4::TypeMap *typeMap)
-      : refMap(refMap), typeMap(typeMap) {}
-  bool generate(const IR::Expression *, cstring, cstring, bool);
+  public:
+    IR::IndexedVector<IR::DpdkAsmStatement> instructions;
+    BranchingInstructionGeneration(P4::ReferenceMap *refMap,
+                                   P4::TypeMap *typeMap)
+        : refMap(refMap), typeMap(typeMap) {}
+    bool generate(const IR::Expression *, cstring, cstring, bool);
 };
 
 class ConvertStatementToDpdk : public Inspector {
-  int next_label_id;
-  IR::IndexedVector<IR::DpdkAsmStatement> instructions;
-  P4::TypeMap *typemap;
-  P4::ReferenceMap *refmap;
-  DpdkVariableCollector *collector;
-  std::map<const IR::Declaration_Instance *, cstring> *csum_map;
+    int next_label_id;
+    IR::IndexedVector<IR::DpdkAsmStatement> instructions;
+    P4::TypeMap *typemap;
+    P4::ReferenceMap *refmap;
+    DpdkVariableCollector *collector;
+    std::map<const IR::Declaration_Instance *, cstring> *csum_map;
 
-public:
-  ConvertStatementToDpdk(
-      P4::ReferenceMap *refmap, P4::TypeMap *typemap, int next_label_id,
-      DpdkVariableCollector *collector,
-      std::map<const IR::Declaration_Instance *, cstring> *csum_map)
-      : next_label_id(next_label_id), typemap(typemap), refmap(refmap),
-        collector(collector), csum_map(csum_map) {}
-  IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() {
-    return instructions;
-  }
-  void branchingInstructionGeneration(cstring true_label, cstring false_label,
-                                      const IR::Expression *expr);
-  bool preorder(const IR::AssignmentStatement *a) override;
-  bool preorder(const IR::BlockStatement *a) override;
-  bool preorder(const IR::IfStatement *a) override;
-  bool preorder(const IR::MethodCallStatement *a) override;
+  public:
+    ConvertStatementToDpdk(
+        P4::ReferenceMap *refmap, P4::TypeMap *typemap, int next_label_id,
+        DpdkVariableCollector *collector,
+        std::map<const IR::Declaration_Instance *, cstring> *csum_map)
+        : next_label_id(next_label_id), typemap(typemap), refmap(refmap),
+          collector(collector), csum_map(csum_map) {}
+    IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() {
+        return instructions;
+    }
+    void branchingInstructionGeneration(cstring true_label, cstring false_label,
+                                        const IR::Expression *expr);
+    bool preorder(const IR::AssignmentStatement *a) override;
+    bool preorder(const IR::BlockStatement *a) override;
+    bool preorder(const IR::IfStatement *a) override;
+    bool preorder(const IR::MethodCallStatement *a) override;
 
-  void add_instr(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
-  IR::IndexedVector<IR::DpdkAsmStatement> &get_instr() { return instructions; }
-  int get_label_num() { return next_label_id; }
+    void add_instr(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
+    IR::IndexedVector<IR::DpdkAsmStatement> &get_instr() {
+        return instructions;
+    }
+    int get_label_num() { return next_label_id; }
 };
 
 } // namespace DPDK

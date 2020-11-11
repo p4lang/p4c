@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-
 #ifndef BACKENDS_DPDK_PSA_SWITCH_OPTIONS_H_
 #define BACKENDS_DPDK_PSA_SWITCH_OPTIONS_H_
 
@@ -24,21 +23,23 @@ limitations under the License.
 namespace DPDK {
 
 class PsaSwitchOptions : public BMV2::BMV2Options {
- public:
+  public:
     PsaSwitchOptions() {
-        registerOption("--listMidendPasses", nullptr,
-                [this](const char*) {
-                    listMidendPasses = true;
-                    loadIRFromJson = false;
-                    DPDK::PsaSwitchMidEnd midEnd(*this, outStream);
-                    exit(0);
-                    return false; },
-                "[PsaSwitch back-end] Lists exact name of all midend passes.\n");
+        registerOption(
+            "--listMidendPasses", nullptr,
+            [this](const char *) {
+                listMidendPasses = true;
+                loadIRFromJson = false;
+                DPDK::PsaSwitchMidEnd midEnd(*this, outStream);
+                exit(0);
+                return false;
+            },
+            "[PsaSwitch back-end] Lists exact name of all midend passes.\n");
     }
 };
 
 using PsaSwitchContext = P4CContextWithOptions<PsaSwitchOptions>;
 
-};  // namespace DPDK
+}; // namespace DPDK
 
 #endif /* BACKENDS_DPDK_PSA_SWITCH_OPTIONS_H_ */

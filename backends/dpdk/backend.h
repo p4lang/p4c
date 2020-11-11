@@ -42,15 +42,16 @@ limitations under the License.
 
 namespace DPDK {
 class PsaSwitchBackend : public BMV2::Backend {
-  BMV2::BMV2Options &options;
-  const IR::DpdkAsmProgram *dpdk_program = nullptr;
+    BMV2::BMV2Options &options;
+    const IR::DpdkAsmProgram *dpdk_program = nullptr;
 
-public:
-  void convert(const IR::ToplevelBlock *tlb) override;
-  PsaSwitchBackend(BMV2::BMV2Options &options, P4::ReferenceMap *refMap,
-                   P4::TypeMap *typeMap, P4::ConvertEnums::EnumMapping *enumMap)
-      : Backend(options, refMap, typeMap, enumMap), options(options) {}
-  void codegen(std::ostream &) const;
+  public:
+    void convert(const IR::ToplevelBlock *tlb) override;
+    PsaSwitchBackend(BMV2::BMV2Options &options, P4::ReferenceMap *refMap,
+                     P4::TypeMap *typeMap,
+                     P4::ConvertEnums::EnumMapping *enumMap)
+        : Backend(options, refMap, typeMap, enumMap), options(options) {}
+    void codegen(std::ostream &) const;
 };
 
 } // namespace DPDK

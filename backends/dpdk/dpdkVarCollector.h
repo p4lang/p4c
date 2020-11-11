@@ -42,15 +42,15 @@ limitations under the License.
 namespace DPDK {
 
 class DpdkVariableCollector {
-private:
-  int next_tmp_id;
-  IR::IndexedVector<IR::DpdkDeclaration> variables;
+  private:
+    int next_tmp_id;
+    IR::IndexedVector<IR::DpdkDeclaration> variables;
 
-public:
-  DpdkVariableCollector() { next_tmp_id = 0; }
-  cstring get_next_tmp();
-  void push_variable(const IR::DpdkDeclaration *);
-  IR::IndexedVector<IR::DpdkDeclaration> &get_globals() { return variables; }
+  public:
+    DpdkVariableCollector() { next_tmp_id = 0; }
+    cstring get_next_tmp();
+    void push_variable(const IR::DpdkDeclaration *);
+    IR::IndexedVector<IR::DpdkDeclaration> &get_globals() { return variables; }
 };
 
 } // namespace DPDK

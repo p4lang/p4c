@@ -42,8 +42,8 @@ limitations under the License.
 namespace DPDK {
 // This pass removes label that no jmps jump to
 class RemoveRedundantLabel : public Transform {
-public:
-  const IR::Node *postorder(IR::DpdkListStatement *l) override;
+  public:
+    const IR::Node *postorder(IR::DpdkListStatement *l) override;
 };
 
 // This pass removes jmps that jump to a label that is immediately after it.
@@ -54,8 +54,8 @@ public:
 // jmp label1 will be removed.
 
 class RemoveConsecutiveJmpAndLabel : public Transform {
-public:
-  const IR::Node *postorder(IR::DpdkListStatement *l) override;
+  public:
+    const IR::Node *postorder(IR::DpdkListStatement *l) override;
 };
 
 // This pass removes labels whose next instruction is a jmp statement. This pass
@@ -74,30 +74,30 @@ public:
 // jmp label2
 
 class ThreadJumps : public Transform {
-public:
-  const IR::Node *postorder(IR::DpdkListStatement *l) override;
+  public:
+    const IR::Node *postorder(IR::DpdkListStatement *l) override;
 };
 
 // This pass removes labels whose next instruction is a label. In addition, it
 // will update any jmp that jump to this label to the label next to it.
 
 class RemoveLabelAfterLabel : public Transform {
-public:
-  const IR::Node *postorder(IR::DpdkListStatement *l) override;
+  public:
+    const IR::Node *postorder(IR::DpdkListStatement *l) override;
 };
 
 class DpdkAsmOptimization : public PassRepeated {
-private:
-public:
-  DpdkAsmOptimization() {
-    passes.push_back(new RemoveRedundantLabel);
-    auto r = new PassRepeated{new RemoveLabelAfterLabel};
-    passes.push_back(r);
-    passes.push_back(new RemoveConsecutiveJmpAndLabel);
-    passes.push_back(new RemoveRedundantLabel);
-    passes.push_back(r);
-    passes.push_back(new ThreadJumps);
-  }
+  private:
+  public:
+    DpdkAsmOptimization() {
+        passes.push_back(new RemoveRedundantLabel);
+        auto r = new PassRepeated{new RemoveLabelAfterLabel};
+        passes.push_back(r);
+        passes.push_back(new RemoveConsecutiveJmpAndLabel);
+        passes.push_back(new RemoveRedundantLabel);
+        passes.push_back(r);
+        passes.push_back(new ThreadJumps);
+    }
 };
 
 } // namespace DPDK

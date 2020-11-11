@@ -26,11 +26,11 @@ limitations under the License.
 namespace DPDK {
 
 class PsaSwitchMidEnd : public BMV2::MidEnd {
-public:
-  // If p4c is run with option '--listMidendPasses', outStream is used for
-  // printing passes names
-  explicit PsaSwitchMidEnd(CompilerOptions &options,
-                           std::ostream *outStream = nullptr);
+  public:
+    // If p4c is run with option '--listMidendPasses', outStream is used for
+    // printing passes names
+    explicit PsaSwitchMidEnd(CompilerOptions &options,
+                             std::ostream *outStream = nullptr);
 };
 
 } // namespace DPDK
