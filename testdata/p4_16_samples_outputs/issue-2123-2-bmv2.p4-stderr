@@ -1,0 +1,7 @@
+issue-2123-2-bmv2.p4(72): [--Wwarn=overlaping] warning: Element of range label 0x8ff .. 0x901 is already assigned by constant label 0x900. Optimization will parse this range.
+            0x08ff .. 0x0901: parse_h4;
+            ^^^^^^
+issue-2123-2-bmv2.p4(72)
+            0x08ff .. 0x0901: parse_h4;
+                      ^^^^^^
+

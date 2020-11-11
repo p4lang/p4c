@@ -70,6 +70,8 @@ class ErrorType {
     static const int WARN_UNREACHABLE;        // parser state unreachable
     static const int WARN_SHADOWING;          // instance shadowing
     static const int WARN_IGNORE;             // simply ignore
+    static const int WARN_DUPLICATED;         // duplicated values
+    static const int WARN_OVERLAPING;         // overlaping values
 
     static const int WARN_MAX_WARNINGS;
 };

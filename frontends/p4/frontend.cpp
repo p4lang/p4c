@@ -67,6 +67,7 @@ limitations under the License.
 #include "uselessCasts.h"
 #include "validateMatchAnnotations.h"
 #include "validateParsedProgram.h"
+#include "removeDuplicatedSelectLabels.h"
 
 namespace P4 {
 
@@ -165,6 +166,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
             new Reassociation(),
             new UselessCasts(&refMap, &typeMap)
         }),
+        new RemoveDuplicatedSelectLabels(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
         new SwitchAddDefault,
         new FrontEndDump(),  // used for testing the program at this point

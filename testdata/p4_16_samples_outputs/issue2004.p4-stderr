@@ -1,0 +1,61 @@
+issue2004.p4(35): [--Wwarn=duplicated] warning: Label 4 is already assigned. Optimized code will not contain this label.
+            4 : reject;
+            ^
+issue2004.p4(39): [--Wwarn=duplicated] warning: Range label 20 .. 30 is the same as previous range 20 .. 30. Optimized code will not contain this label.
+            20 .. 30 : reject;
+            ^^
+issue2004.p4(39)
+            20 .. 30 : reject;
+                  ^^
+issue2004.p4(38)
+            20 .. 30 : accept;
+            ^^
+issue2004.p4(38)
+            20 .. 30 : accept;
+                  ^^
+issue2004.p4(40): [--Wwarn=duplicated] warning: Label 4 is already assigned. Optimized code will not contain this label.
+            4 : reject;
+            ^
+issue2004.p4(41): [--Wwarn=duplicated] warning: Label 10 is already assigned. Optimized code will not contain this label.
+            10 : reject;
+            ^^
+issue2004.p4(43): [--Wwarn=duplicated] warning: Label 0x66 is already assigned inside  range 40 .. 1000. Optimized code will not contain this label.
+            0x066 : accept;
+            ^^^^^
+issue2004.p4(42)
+            40 .. 1000 : accept;
+            ^^
+issue2004.p4(42)
+            40 .. 1000 : accept;
+                  ^^^^
+issue2004.p4(44): [--Wwarn=duplicated] warning: Label 0x6 is already assigned. Optimized code will not contain this label.
+            0x06 : reject;
+            ^^^^
+issue2004.p4(45): [--Wwarn=duplicated] warning: Label 20 is already assigned inside  range 20 .. 30. Optimized code will not contain this label.
+            20 : reject;
+            ^^
+issue2004.p4(38)
+            20 .. 30 : accept;
+            ^^
+issue2004.p4(38)
+            20 .. 30 : accept;
+                  ^^
+issue2004.p4(47): [--Wwarn=duplicated] warning: Label 50 is already assigned inside  range 40 .. 1000. Optimized code will not contain this label.
+            50 : reject;
+            ^^
+issue2004.p4(42)
+            40 .. 1000 : accept;
+            ^^
+issue2004.p4(42)
+            40 .. 1000 : accept;
+                  ^^^^
+issue2004.p4(48): [--Wwarn=duplicated] warning: Label 102 is already assigned inside  range 40 .. 1000. Optimized code will not contain this label.
+            102 : reject;
+            ^^^
+issue2004.p4(42)
+            40 .. 1000 : accept;
+            ^^
+issue2004.p4(42)
+            40 .. 1000 : accept;
+                  ^^^^
+

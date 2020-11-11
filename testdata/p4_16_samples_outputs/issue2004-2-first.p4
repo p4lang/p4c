@@ -15,16 +15,6 @@ header ethernet_t {
 }
 
 header ipv4_t {
-    bit<4>  version;
-    bit<4>  ihl;
-    bit<8>  diffserv;
-    bit<16> totalLen;
-    bit<16> identification;
-    bit<3>  flags;
-    bit<13> fragOffset;
-    bit<8>  ttl;
-    bit<8>  protocol;
-    bit<16> hdrChecksum;
     bit<32> srcAddr;
     bit<32> dstAddr;
 }
@@ -42,15 +32,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state parse_ethernet {
         packet.extract<ethernet_t>(hdr = hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
-            16w0x806 .. 16w0x800: parse_ipv4;
-            hdr.ipv4.totalLen .. 16w0x800: parse_ipv4;
-            16w0x800 .. hdr.ipv4.totalLen: parse_ipv4;
-            default: accept;
+            16w10 .. 16w15: accept;
+            16w4: accept;
+            16w3 .. 16w5: accept;
+            16w5 .. 16w10: accept;
+            16w17 .. 16w20: accept;
+            16w3 &&& 16w5: accept;
+            16w3 .. 16w20: reject;
+            default: reject;
         }
-    }
-    state parse_ipv4 {
-        packet.extract<ipv4_t>(hdr = hdr.ipv4);
-        transition accept;
     }
     state start {
         transition parse_ethernet;

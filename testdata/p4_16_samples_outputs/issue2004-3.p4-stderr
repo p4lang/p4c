@@ -1,0 +1,28 @@
+issue2004-3.p4(37): [--Wwarn=duplicated] warning: Range label 8 .. 13 is already assigned inside previous range 5 .. 15. Optimized code will not contain this label.
+            8 .. 13 : reject;
+            ^
+issue2004-3.p4(37)
+            8 .. 13 : reject;
+                 ^^
+issue2004-3.p4(36)
+            5 .. 15 : accept;
+            ^
+issue2004-3.p4(36)
+            5 .. 15 : accept;
+                 ^^
+issue2004-3.p4(38): [--Wwarn=duplicated] warning: Label 7 is already assigned inside  range 5 .. 15. Optimized code will not contain this label.
+            7 : reject;
+            ^
+issue2004-3.p4(36)
+            5 .. 15 : accept;
+            ^
+issue2004-3.p4(36)
+            5 .. 15 : accept;
+                 ^^
+issue2004-3.p4(36): [--Wwarn=overlaping] warning: Range label 5 .. 15 is overlaping with range 1 .. 5. Optimization will parse this range.
+            5 .. 15 : accept;
+            ^
+issue2004-3.p4(36)
+            5 .. 15 : accept;
+                 ^^
+
