@@ -227,7 +227,7 @@ class StorageMap {
     }
     virtual void dbprint(std::ostream& out) const {
         for (auto &it : storage)
-            out << it.first << ": " << it.second << std::endl;
+            out << it.first << ": " << it.second << IndentCtl::endl;
     }
 };
 
@@ -351,14 +351,14 @@ class Definitions : public IHasDbPrint {
     bool operator==(const Definitions& other) const;
     void dbprint(std::ostream& out) const {
         if (unreachable) {
-            out << "  Unreachable" << std::endl;
+            out << "  Unreachable" << IndentCtl::endl;
         }
         if (definitions.empty())
             out << "  Empty definitions";
         bool first = true;
         for (auto d : definitions) {
             if (!first)
-                out << std::endl;
+                out << IndentCtl::endl;
             out << "  " << *d.first << "=>" << *d.second;
             first = false;
         }
@@ -404,7 +404,7 @@ class AllDefinitions : public IHasDbPrint {
     }
     void dbprint(std::ostream& out) const {
         for (auto e : atPoint)
-            out << e.first << " => " << e.second << std::endl;
+            out << e.first << " => " << e.second << IndentCtl::endl;
     }
 };
 
