@@ -43,6 +43,23 @@ struct H3<T> {
     H4<H2<T>> h3;
 }
 
+header GH<T> {
+    T data;
+}
+
+header X {
+    bit<32> b;
+}
+
+header GH_0 {
+    bit<32> data;
+}
+
+header GH_1 {
+    bit<32> _data_b0;
+}
+
+typedef GH_1[3] Stack;
 struct H4_0 {
     H2_0 x;
 }
@@ -54,18 +71,36 @@ struct H3_0 {
     H4_0 h3;
 }
 
+header_union HU<T> {
+    X     xu;
+    GH<T> h3u;
+}
+
+header_union HU_0 {
+    X    xu;
+    GH_0 h3u;
+}
+
 control c(out bit<1> x) {
-    @hidden action genericstruct76() {
+    @name("c.gh") GH_1 gh_0;
+    @name("c.s") Stack s_0;
+    @name("c.xinst") X xinst_0;
+    @hidden action genericstruct91() {
+        s_0[0].setValid();
+        s_0[0]._data_b0 = 32w1;
+        s_0[0].isValid();
+        xinst_0.setValid();
+        xinst_0.b = 32w2;
         x = 1w0;
     }
-    @hidden table tbl_genericstruct76 {
+    @hidden table tbl_genericstruct91 {
         actions = {
-            genericstruct76();
+            genericstruct91();
         }
-        const default_action = genericstruct76();
+        const default_action = genericstruct91();
     }
     apply {
-        tbl_genericstruct76.apply();
+        tbl_genericstruct91.apply();
     }
 }
 

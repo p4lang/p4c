@@ -51,6 +51,8 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, DeclarationLookup* 
             else
                 BUG("Could not find type for %1%", mem->expr);
         }
+        if (auto sc = basetype->to<IR::Type_SpecializedCanonical>())
+            basetype = sc->baseType;
         if (basetype->is<IR::Type_HeaderUnion>()) {
             if (mem->member == IR::Type_Header::isValid)
                 return new BuiltInMethod(mce, mem->member, mem->expr, mt->to<IR::Type_Method>());

@@ -1434,7 +1434,9 @@ const IR::Node* TypeInference::postorder(IR::Type_Stack* type) {
     if (etype == nullptr)
         return type;
 
-    if (!etype->is<IR::Type_Header>() && !etype->is<IR::Type_HeaderUnion>())
+    if (!etype->is<IR::Type_Header>() && !etype->is<IR::Type_HeaderUnion>() &&
+        // experimental: generic stacks
+        !etype->is<IR::Type_SpecializedCanonical>())
         typeError("Header stack %1% used with non-header type %2%",
                   type, etype->toString());
     return type;
@@ -1483,7 +1485,9 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
                // Nested bit-vector struct inside a Header is supported
                // Experimental feature - see Issue 383.
                (t->is<IR::Type_Struct>() && onlyBitsOrBitStructs(t)) ||
-               t->is<IR::Type_SerEnum>() || t->is<IR::Type_Boolean>(); };
+               t->is<IR::Type_SerEnum>() || t->is<IR::Type_Boolean>() ||
+                // experimental: generic headers
+                t->is<IR::Type_Var>() || t->is<IR::Type_SpecializedCanonical>(); };
     validateFields(canon, validator);
     return type;
 }
@@ -1499,6 +1503,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
         t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() ||
         t->is<IR::Type_Varbits>() || t->is<IR::Type_ActionEnum>() ||
         t->is<IR::Type_Tuple>() || t->is<IR::Type_SerEnum>() ||
+                // experimental: generic structs
         t->is<IR::Type_Var>() || t->is<IR::Type_SpecializedCanonical>(); };
     (void)validateFields(canon, validator);
     return type;
@@ -1506,7 +1511,9 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
 
 const IR::Node* TypeInference::postorder(IR::Type_HeaderUnion *type) {
     auto canon = setTypeType(type);
-    auto validator = [] (const IR::Type* t) { return t->is<IR::Type_Header>(); };
+    auto validator = [] (const IR::Type* t) { return t->is<IR::Type_Header>() ||
+                // experimental: generic unions
+        t->is<IR::Type_Var>() || t->is<IR::Type_SpecializedCanonical>(); };
     (void)validateFields(canon, validator);
     return type;
 }

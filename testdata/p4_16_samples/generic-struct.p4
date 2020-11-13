@@ -3,12 +3,6 @@ struct Header<St> {
     bit valid;
 }
 
-#if STACK
-Header<St>[10] stack;
-
-typedef Header<St>[10] Stack;
-#endif
-
 struct S {
     bit<32> b;
 }
@@ -33,7 +27,7 @@ const Header<S> h2 = (Header<S>){
     valid = 0
 };
 
-const Header<bit<16>> b = {
+const Header<bit<16>> bz = {
     data = 16,
     valid = 1
 };
@@ -62,6 +56,19 @@ struct H3<T> {
     H4<H2<T>> h3;
 }
 
+header GH<T> {
+    T data;
+}
+
+header X {
+    bit<32> b;
+}
+
+const GH<bit<32>> g = { data = 0 };
+const GH<S> g1 = { data = { b = 0 } };
+
+typedef GH<S>[3] Stack;
+
 const H3<S> h4 = {
     r = { g = { data = { b = 10 }, valid = 0 }, invalid = 1 },
     s = { b = 20 },
@@ -69,11 +76,25 @@ const H3<S> h4 = {
     h3 = { x = { g = { data = { b = 0 }, valid = 1 }, invalid = 1 } }
 };
 
+header_union HU<T> {
+    X xu;
+    GH<T> h3u;
+}
+
 control c(out bit x) {
     apply {
         H3<S> h5;
         H4<H2<S>> n;
-        x = u.f.valid & h1.g.valid & h.valid & h2.valid & h1.g.valid & h3.g.valid & n.x.g.valid;
+        GH<S> gh;
+        bool b = gh.isValid();
+        Stack s;
+        s[0] = { data = { b = 1 }};
+        b = b && s[0].isValid();
+        X xinst = { b = 2 };
+        HU<bit<32>> z;
+        z.xu = xinst;
+        z.h3u = { data = 1 };
+        x = u.f.valid & h1.g.valid & h.valid & h2.valid & h1.g.valid & h3.g.valid & n.x.g.valid & (bit)b;
     }
 }
 
