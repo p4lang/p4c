@@ -27,7 +27,7 @@ cstring toStr(const IR::PropertyValue *const);
 
 cstring toStr(const IR::Constant *const c) {
     std::ostringstream out;
-    out << c->value;
+    out << "0x" << std::hex << c->value;
     return out.str();
 }
 cstring toStr(const IR::BoolLiteral *const b) {
@@ -206,34 +206,12 @@ std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
 
 std::ostream &IR::DpdkListStatement::toSpec(std::ostream &out) const {
     out << "apply {" << std::endl;
-    out << "\trx m.psa_ingress_input_metadata_ingress_port" << std::endl;
+    out << "rx m.psa_ingress_input_metadata_ingress_port" << std::endl;
     for (auto s : statements) {
-        out << "\t";
         s->toSpec(out) << std::endl;
     }
-    out << "\ttx m.psa_ingress_output_metadata_egress_port" << std::endl;
+    out << "tx m.psa_ingress_output_metadata_egress_port" << std::endl;
     out << "}" << std::endl;
-    return out;
-}
-
-std::ostream &IR::DpdkMovStatement::toSpec(std::ostream &out) const {
-    out << "mov " << DPDK::toStr(left) << " " << DPDK::toStr(right);
-    return out;
-}
-
-std::ostream &IR::DpdkAddStatement::toSpec(std::ostream &out) const {
-    out << "add " << DPDK::toStr(dst) << " " << DPDK::toStr(src2);
-    return out;
-}
-
-std::ostream &IR::DpdkEquStatement::toSpec(std::ostream &out) const {
-    out << "equ " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " "
-        << DPDK::toStr(src2);
-    return out;
-}
-
-std::ostream &IR::DpdkAndStatement::toSpec(std::ostream &out) const {
-    out << "and";
     return out;
 }
 
@@ -253,22 +231,29 @@ std::ostream &IR::DpdkExtractStatement::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkJmpStatement::toSpec(std::ostream &out) const {
-    out << "jmp " << label;
+    out << instruction << " " << label;
     return out;
 }
 
-std::ostream &IR::DpdkJmpActionStatement::toSpec(std::ostream &out) const {
-    out << "jmpa";
+std::ostream& IR::DpdkJmpHeaderStatement::toSpec(std::ostream& out) const {
+    out << instruction << " " << label << " " << DPDK::toStr(header);
     return out;
 }
 
-std::ostream &IR::DpdkJmpMissStatement::toSpec(std::ostream &out) const {
-    out << "jmpm";
+std::ostream& IR::DpdkJmpCondStatement::toSpec(std::ostream& out) const {
+    out << instruction << " " << label << " " << DPDK::toStr(src1)
+        << " " << DPDK::toStr(src2);
     return out;
 }
 
-std::ostream &IR::DpdkJmpHitStatement::toSpec(std::ostream &out) const {
-    out << "jmph";
+std::ostream& IR::DpdkBinaryStatement::toSpec(std::ostream& out) const {
+    out << instruction << " " << DPDK::toStr(dst) << " " << DPDK::toStr(src1)
+        << " " << DPDK::toStr(src2);
+    return out;
+}
+
+std::ostream& IR::DpdkUnaryStatement::toSpec(std::ostream& out) const {
+    out << instruction << " " << DPDK::toStr(dst) << " " << DPDK::toStr(src);
     return out;
 }
 
@@ -279,36 +264,6 @@ std::ostream &IR::DpdkRxStatement::toSpec(std::ostream &out) const {
 
 std::ostream &IR::DpdkTxStatement::toSpec(std::ostream &out) const {
     out << "tx ";
-    return out;
-}
-
-std::ostream &IR::DpdkShlStatement::toSpec(std::ostream &out) const {
-    out << "shl ";
-    return out;
-}
-
-std::ostream &IR::DpdkShrStatement::toSpec(std::ostream &out) const {
-    out << "shr ";
-    return out;
-}
-
-std::ostream &IR::DpdkSubStatement::toSpec(std::ostream &out) const {
-    out << "sub ";
-    return out;
-}
-
-std::ostream &IR::DpdkOrStatement::toSpec(std::ostream &out) const {
-    out << "or ";
-    return out;
-}
-
-std::ostream &IR::DpdkXorStatement::toSpec(std::ostream &out) const {
-    out << "xor ";
-    return out;
-}
-
-std::ostream &IR::DpdkInvalidateStatement::toSpec(std::ostream &out) const {
-    out << "jiv " << DPDK::toStr(header) << " " << label;
     return out;
 }
 
@@ -331,6 +286,7 @@ std::ostream &IR::DpdkLabelStatement::toSpec(std::ostream &out) const {
     out << "label " << label;
     return out;
 }
+
 std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
     out << "table " << name << " {" << std::endl;
     if (match_keys) {
@@ -409,29 +365,9 @@ std::ostream &IR::DpdkGetHashStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
-std::ostream &IR::DpdkValidateStatement::toSpec(std::ostream &out) const {
-    out << "jv " << DPDK::toStr(header) << " " << label;
-    return out;
-}
-
 std::ostream &IR::DpdkGetChecksumStatement::toSpec(std::ostream &out) const {
     out << "mov " << DPDK::toStr(dst) << " "
         << "h.cksum_state." << intermediate_value;
-    return out;
-}
-
-std::ostream &IR::DpdkNegStatement::toSpec(std::ostream &out) const {
-    out << "neg " << DPDK::toStr(dst) << " " << DPDK::toStr(src);
-    return out;
-}
-
-std::ostream &IR::DpdkCmplStatement::toSpec(std::ostream &out) const {
-    out << "cmpl " << DPDK::toStr(dst) << " " << DPDK::toStr(src);
-    return out;
-}
-
-std::ostream &IR::DpdkLNotStatement::toSpec(std::ostream &out) const {
-    out << "lnot " << DPDK::toStr(dst) << " " << DPDK::toStr(src);
     return out;
 }
 
@@ -439,83 +375,6 @@ std::ostream &IR::DpdkCastStatement::toSpec(std::ostream &out) const {
     out << "cast "
         << " " << DPDK::toStr(dst) << " " << DPDK::toStr(type) << " "
         << DPDK::toStr(src);
-    return out;
-}
-
-std::ostream &IR::DpdkCmpStatement::toSpec(std::ostream &out) const {
-    out << "cmp " << DPDK::toStr(src1) << " " << DPDK::toStr(src2);
-    return out;
-}
-
-std::ostream &IR::DpdkJmpEqualStatement::toSpec(std::ostream &out) const {
-    out << "je " << label << " " << DPDK::toStr(src1) << " "
-        << DPDK::toStr(src2);
-    return out;
-}
-
-std::ostream &IR::DpdkJmpNotEqualStatement::toSpec(std::ostream &out) const {
-    out << "jne " << label << " " << DPDK::toStr(src1) << " "
-        << DPDK::toStr(src2);
-    return out;
-}
-
-std::ostream &
-IR::DpdkJmpGreaterEqualStatement::toSpec(std::ostream &out) const {
-    out << "jge " << label << " " << DPDK::toStr(src1) << " "
-        << DPDK::toStr(src2);
-    return out;
-}
-
-std::ostream &IR::DpdkJmpGreaterStatement::toSpec(std::ostream &out) const {
-    out << "jg " << label << " " << DPDK::toStr(src1) << " "
-        << DPDK::toStr(src2);
-    return out;
-}
-
-std::ostream &IR::DpdkJmpLessOrEqualStatement::toSpec(std::ostream &out) const {
-    out << "jle " << label;
-    return out;
-}
-
-std::ostream &IR::DpdkJmpLessOrStatement::toSpec(std::ostream &out) const {
-    out << "jl " << label << " " << DPDK::toStr(src1) << " "
-        << DPDK::toStr(src2);
-    return out;
-}
-
-std::ostream &IR::DpdkLAndStatement::toSpec(std::ostream &out) const {
-    out << "land " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " "
-        << DPDK::toStr(src2);
-    return out;
-}
-
-std::ostream &IR::DpdkLeqStatement::toSpec(std::ostream &out) const {
-    out << "leq " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " "
-        << DPDK::toStr(src2);
-    return out;
-}
-
-std::ostream &IR::DpdkLssStatement::toSpec(std::ostream &out) const {
-    out << "lss " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " "
-        << DPDK::toStr(src2);
-    return out;
-}
-
-std::ostream &IR::DpdkGeqStatement::toSpec(std::ostream &out) const {
-    out << "geq " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " "
-        << DPDK::toStr(src2);
-    return out;
-}
-
-std::ostream &IR::DpdkGrtStatement::toSpec(std::ostream &out) const {
-    out << "grt " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " "
-        << DPDK::toStr(src2);
-    return out;
-}
-
-std::ostream &IR::DpdkNeqStatement::toSpec(std::ostream &out) const {
-    out << "neq " << DPDK::toStr(dst) << " " << DPDK::toStr(src1) << " "
-        << DPDK::toStr(src2);
     return out;
 }
 

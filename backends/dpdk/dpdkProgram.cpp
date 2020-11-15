@@ -177,7 +177,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
         stack.pop_back();
 
         // the main body
-        auto i = new IR::DpdkLabelStatement("L_" + state.name.toString());
+        auto i = new IR::DpdkLabelStatement(state.name.toString());
         add_instr(i);
         auto c = state.components;
         for (auto stat : c) {
@@ -194,17 +194,16 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
                 for (auto v : e->selectCases) {
                     if (!v->keyset->is<IR::DefaultExpression>()) {
                         add_instr(new IR::DpdkJmpEqualStatement(
-                            "L_" + v->state->path->name, v->keyset,
+                            v->state->path->name, v->keyset,
                             switch_var));
                     } else {
-                        auto i = new IR::DpdkJmpStatement("L_" +
-                                                          v->state->path->name);
+                        auto i = new IR::DpdkJmpLabelStatement(v->state->path->name);
                         add_instr(i);
                     }
                 }
             } else if (auto p =
                            state.selectExpression->to<IR::PathExpression>()) {
-                auto i = new IR::DpdkJmpStatement("L_" + p->path->name);
+                auto i = new IR::DpdkJmpLabelStatement(p->path->name);
                 add_instr(i);
             } else {
                 BUG("P4 Parser switch statement has other situations.");

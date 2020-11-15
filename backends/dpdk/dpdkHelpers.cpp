@@ -157,7 +157,7 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
         } else if (!nested(land->left) && !nested(land->right)) {
             generate(land->left, true_label, false_label, true);
             generate(land->right, true_label, false_label, true);
-            instructions.push_back(new IR::DpdkJmpStatement(true_label));
+            instructions.push_back(new IR::DpdkJmpLabelStatement(true_label));
             return true;
         } else {
             BUG("Previous simple expression lifting pass failed");
@@ -174,7 +174,7 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
         } else if (!nested(lor->left) && !nested(lor->right)) {
             generate(lor->left, true_label, false_label, false);
             generate(lor->right, true_label, false_label, false);
-            instructions.push_back(new IR::DpdkJmpStatement(false_label));
+            instructions.push_back(new IR::DpdkJmpLabelStatement(false_label));
             return false;
         } else {
             BUG("Previous simple expression lifting pass failed");
@@ -200,7 +200,7 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
             instructions.push_back(new IR::DpdkJmpGreaterEqualStatement(
                 false_label, lss->left, lss->right));
         else
-            instructions.push_back(new IR::DpdkJmpLessOrStatement(
+            instructions.push_back(new IR::DpdkJmpLessStatement(
                 true_label, lss->left, lss->right));
         return is_and;
     } else if (auto grt = expr->to<IR::Grt>()) {
@@ -216,10 +216,10 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
         if (auto a = mi->to<P4::BuiltInMethod>()) {
             if (a->name == "isValid") {
                 if (is_and)
-                    instructions.push_back(new IR::DpdkInvalidateStatement(
+                    instructions.push_back(new IR::DpdkJmpIfInvalidStatement(
                         false_label, a->appliedTo));
                 else
-                    instructions.push_back(new IR::DpdkValidateStatement(
+                    instructions.push_back(new IR::DpdkJmpIfValidStatement(
                         true_label, a->appliedTo));
                 return is_and;
             } else {
@@ -256,14 +256,14 @@ bool ConvertStatementToDpdk::preorder(const IR::IfStatement *s) {
     if (res == true) {
         add_instr(new IR::DpdkLabelStatement(true_label));
         visit(s->ifTrue);
-        add_instr(new IR::DpdkJmpStatement(end_label));
+        add_instr(new IR::DpdkJmpLabelStatement(end_label));
         add_instr(new IR::DpdkLabelStatement(false_label));
         visit(s->ifFalse);
         add_instr(new IR::DpdkLabelStatement(end_label));
     } else {
         add_instr(new IR::DpdkLabelStatement(false_label));
         visit(s->ifFalse);
-        add_instr(new IR::DpdkJmpStatement(end_label));
+        add_instr(new IR::DpdkJmpLabelStatement(end_label));
         add_instr(new IR::DpdkLabelStatement(true_label));
         visit(s->ifTrue);
         add_instr(new IR::DpdkLabelStatement(end_label));

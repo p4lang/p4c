@@ -22,10 +22,10 @@ const IR::Node *RemoveRedundantLabel::postorder(IR::DpdkListStatement *l) {
     bool changed = false;
     IR::IndexedVector<IR::DpdkAsmStatement> used_labels;
     for (auto stmt : l->statements) {
-        if (auto jmp = stmt->to<IR::DpdkJmpBaseStatement>()) {
+        if (auto jmp = stmt->to<IR::DpdkJmpStatement>()) {
             bool found = false;
             for (auto label : used_labels) {
-                if (label->to<IR::DpdkJmpBaseStatement>()->label ==
+                if (label->to<IR::DpdkJmpStatement>()->label ==
                     jmp->label) {
                     found = true;
                     break;
@@ -41,7 +41,7 @@ const IR::Node *RemoveRedundantLabel::postorder(IR::DpdkListStatement *l) {
         if (auto label = stmt->to<IR::DpdkLabelStatement>()) {
             bool found = false;
             for (auto jmp_label : used_labels) {
-                if (jmp_label->to<IR::DpdkJmpBaseStatement>()->label ==
+                if (jmp_label->to<IR::DpdkJmpStatement>()->label ==
                     label->label) {
                     found = true;
                     break;
@@ -63,11 +63,11 @@ const IR::Node *RemoveRedundantLabel::postorder(IR::DpdkListStatement *l) {
 
 const IR::Node *
 RemoveConsecutiveJmpAndLabel::postorder(IR::DpdkListStatement *l) {
-    const IR::DpdkJmpBaseStatement *cache = nullptr;
+    const IR::DpdkJmpStatement *cache = nullptr;
     bool changed = false;
     IR::IndexedVector<IR::DpdkAsmStatement> new_l;
     for (auto stmt : l->statements) {
-        if (auto jmp = stmt->to<IR::DpdkJmpBaseStatement>()) {
+        if (auto jmp = stmt->to<IR::DpdkJmpStatement>()) {
             if (cache)
                 new_l.push_back(cache);
             cache = jmp;
@@ -105,7 +105,7 @@ const IR::Node *ThreadJumps::postorder(IR::DpdkListStatement *l) {
                 cache = label;
             }
         } else {
-            if (auto jmp = stmt->to<IR::DpdkJmpStatement>()) {
+            if (auto jmp = stmt->to<IR::DpdkJmpLabelStatement>()) {
                 label_map.emplace(cache->label, jmp->label);
             } else {
                 cache = nullptr;
@@ -114,10 +114,10 @@ const IR::Node *ThreadJumps::postorder(IR::DpdkListStatement *l) {
     }
     auto new_l = new IR::IndexedVector<IR::DpdkAsmStatement>;
     for (auto stmt : l->statements) {
-        if (auto jmp = stmt->to<IR::DpdkJmpBaseStatement>()) {
+        if (auto jmp = stmt->to<IR::DpdkJmpStatement>()) {
             auto res = label_map.find(jmp->label);
             if (res != label_map.end()) {
-                ((IR::DpdkJmpBaseStatement *)stmt)->label = res->second;
+                ((IR::DpdkJmpStatement *)stmt)->label = res->second;
                 new_l->push_back(stmt);
             } else {
                 new_l->push_back(stmt);
@@ -150,10 +150,10 @@ const IR::Node *RemoveLabelAfterLabel::postorder(IR::DpdkListStatement *l) {
     }
     auto new_l = new IR::IndexedVector<IR::DpdkAsmStatement>;
     for (auto stmt : l->statements) {
-        if (auto jmp = stmt->to<IR::DpdkJmpBaseStatement>()) {
+        if (auto jmp = stmt->to<IR::DpdkJmpStatement>()) {
             auto res = label_map.find(jmp->label);
             if (res != label_map.end()) {
-                ((IR::DpdkJmpBaseStatement *)stmt)->label = res->second;
+                ((IR::DpdkJmpStatement *)stmt)->label = res->second;
                 new_l->push_back(stmt);
                 changed = true;
             } else {
