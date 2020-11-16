@@ -13,11 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#include <iostream>
 #include "dpdkHelpers.h"
 #include "ir/ir.h"
-#include <iostream>
 
 namespace DPDK {
+
+int ConvertStatementToDpdk::next_label_id = 0;
 
 bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
     auto left = a->left;
@@ -379,4 +381,4 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
     return false;
 }
 
-} // namespace DPDK
+}  // namespace DPDK

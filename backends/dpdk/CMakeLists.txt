@@ -36,7 +36,6 @@ set(P4C_DPDK_SOURCES
     dpdkVarCollector.cpp
     dpdkArch.cpp
     dpdkAsmOpt.cpp
-    elimTypedef.cpp
     )
 
 set(P4C_DPDK_HEADERS
@@ -70,7 +69,6 @@ set(P4C_DPDK_HEADERS
     dpdkVarCollector.h
     dpdkArch.h
     dpdkAsmOpt.h
-    elimTypedef.h
     options.h
     )
 
@@ -78,6 +76,7 @@ set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/dpdk.def PARENT_SC
 
 set(DPDK_IR_SRCS
     spec.cpp
+    dbprint-dpdk.cpp
     )
 # IR sources that need to go into the frontend library
 set(QUAL_DPDK_IR_SRCS)

@@ -14,6 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <unordered_map>
 #include "dpdkProgram.h"
 #include "backend.h"
 #include "backends/bmv2/psa_switch/psaSwitch.h"
@@ -21,7 +22,6 @@ limitations under the License.
 #include "ir/dbprint.h"
 #include "ir/ir.h"
 #include "lib/stringify.h"
-#include <unordered_map>
 
 namespace DPDK {
 const IR::DpdkAsmStatement *ConvertToDpdkProgram::createListStatement(
@@ -178,10 +178,11 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
 
         // the main body
         auto i = new IR::DpdkLabelStatement(state.name.toString());
+        LOG1("state " << i);
         add_instr(i);
         auto c = state.components;
         for (auto stat : c) {
-            DPDK::ConvertStatementToDpdk h(refmap, typemap, 0, this->collector,
+            DPDK::ConvertStatementToDpdk h(refmap, typemap, this->collector,
                                            csum_map);
             stat->apply(h);
             for (auto i : h.get_instr())
@@ -194,8 +195,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
                 for (auto v : e->selectCases) {
                     if (!v->keyset->is<IR::DefaultExpression>()) {
                         add_instr(new IR::DpdkJmpEqualStatement(
-                            v->state->path->name, v->keyset,
-                            switch_var));
+                            v->state->path->name, switch_var, v->keyset));
                     } else {
                         auto i = new IR::DpdkJmpLabelStatement(v->state->path->name);
                         add_instr(i);
@@ -248,7 +248,7 @@ bool ConvertToDpdkParser::preorder(const IR::ParserState *) { return false; }
 
 // =====================Control=============================
 bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
-    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, 0,
+    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap,
                                                    collector, csum_map);
     a->body->apply(*helper);
     auto stmt_list = new IR::IndexedVector<IR::DpdkAsmStatement>();
@@ -261,8 +261,6 @@ bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
 }
 
 bool ConvertToDpdkControl::preorder(const IR::P4Table *a) {
-    // auto psa_implementation =
-    // a->properties->getProperty("psa_implementation");
     auto t = new IR::DpdkTable(a->name, a->getKey(), a->getActionList(),
                                a->getDefaultAction(), a->properties);
     tables.push_back(t);
@@ -272,16 +270,16 @@ bool ConvertToDpdkControl::preorder(const IR::P4Table *a) {
 bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
     for (auto l : c->controlLocals) {
         if (!l->is<IR::P4Action>() && !l->is<IR::P4Table>()) {
-            // std::cout << l << std::endl;
             collector->push_variable(new IR::DpdkDeclaration(l));
         }
     }
-    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, 0,
+    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap,
                                                    collector, csum_map);
     c->body->apply(*helper);
     for (auto i : helper->get_instr()) {
+        LOG1("inst " << i);
         add_inst(i);
     }
     return true;
 }
-} // namespace DPDK
+}  // namespace DPDK

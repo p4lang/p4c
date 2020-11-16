@@ -19,6 +19,12 @@ class DpdkStructType : Type_Struct, IDPDKNode {
 }
 
 abstract DpdkAsmStatement : IDPDKNode {
+    cstring toUpper(cstring label) {
+        std::string st = label.c_str();
+        transform(st.begin(), st.end(), st.begin(), ::toupper);
+        cstring ret = cstring::to_cstring(st);
+        return ret;
+    }
     std::ostream& toSpec(std::ostream& out) const override;
 }
 
@@ -64,13 +70,12 @@ class DpdkListStatement : DpdkAsmStatement, IDPDKNode {
 class DpdkApplyStatement : DpdkAsmStatement, IDPDKNode {
     cstring table;
     std::ostream& toSpec(std::ostream& out) const override;
-#nodbprint
 }
 class DpdkEmitStatement : DpdkAsmStatement, IDPDKNode {
     Expression header;
     std::ostream& toSpec(std::ostream& out) const override;
-#nodbprint
 }
+
 class DpdkExtractStatement : DpdkAsmStatement, IDPDKNode {
     Expression header;
     std::ostream& toSpec(std::ostream& out) const override;
@@ -83,16 +88,10 @@ abstract DpdkJmpStatement : DpdkAsmStatement {
     std::ostream& toSpec(std::ostream& out) const override;
 #noconstructor
     DpdkJmpStatement(cstring instruction, cstring l) :
-        instruction(instruction) {
-        // always use UPPER_CASE for label.
-        std::string st = l.c_str();
-        transform(st.begin(), st.end(), st.begin(), ::toupper);
-        label = cstring::to_cstring(st);
-    }
+        instruction(instruction), label(toUpper(l)) { }
 }
 
 class DpdkJmpLabelStatement : DpdkJmpStatement {
-#nodbprint
 #noconstructor
     DpdkJmpLabelStatement(cstring label) :
         DpdkJmpStatement("jmp", label) { }
@@ -121,7 +120,6 @@ abstract DpdkJmpHeaderStatement : DpdkJmpStatement {
 }
 
 class DpdkJmpIfInvalidStatement : DpdkJmpHeaderStatement {
-#nodbprint
 #noconstructor
     DpdkJmpIfInvalidStatement(cstring label, Expression hdr) :
         DpdkJmpHeaderStatement("jmpnv", label, hdr) { }
@@ -151,7 +149,6 @@ class DpdkJmpEqualStatement: DpdkJmpCondStatement, IDPDKNode {
 }
 
 class DpdkJmpNotEqualStatement: DpdkJmpCondStatement, IDPDKNode {
-#nodbprint
 #noconstructor
     DpdkJmpNotEqualStatement(cstring label, Expression src1, Expression src2) :
         DpdkJmpCondStatement("jmpne", label, src1, src2) { }
@@ -358,19 +355,24 @@ class DpdkExternObjStatement : DpdkAsmStatement, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
+
 class DpdkExternFuncStatement : DpdkAsmStatement, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
+
 class DpdkReturnStatement : DpdkAsmStatement, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
+
 class DpdkLabelStatement : DpdkAsmStatement, IDPDKNode {
     cstring label;
     std::ostream& toSpec(std::ostream& out) const override;
-#nodbprint
+#noconstructor
+    DpdkLabelStatement(cstring l) : label(toUpper(l)) { }
 }
+
 class DpdkChecksumAddStatement : DpdkAsmStatement, IDPDKNode {
     cstring csum;
     cstring intermediate_value;

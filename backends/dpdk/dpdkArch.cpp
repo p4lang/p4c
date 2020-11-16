@@ -926,4 +926,4 @@ const IR::Node *PrependPDotToActionArgs::preorder(IR::PathExpression *path) {
     return path;
 }
 
-} // namespace DPDK
+}  // namespace DPDK

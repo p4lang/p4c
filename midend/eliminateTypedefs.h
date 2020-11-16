@@ -1,5 +1,5 @@
-#ifndef EXTENSIONS_P4C_MIDEND_ELIM_TYPEDEF_H_
-#define EXTENSIONS_P4C_MIDEND_ELIM_TYPEDEF_H_
+#ifndef MIDEND_ELIMINATETYPEDEFS_H_
+#define MIDEND_ELIMINATETYPEDEFS_H_
 
 #include "frontends/p4/typeChecking/typeChecker.h"
 
@@ -13,13 +13,13 @@ namespace P4 {
 class DoReplaceTypedef final : public Transform {
     const ReferenceMap *refMap;
 
-  public:
+ public:
     explicit DoReplaceTypedef(const ReferenceMap *refMap) : refMap(refMap) {}
     const IR::Type *preorder(IR::Type_Name *type) override;
 };
 
 class EliminateTypedef final : public PassManager {
-  public:
+ public:
     EliminateTypedef(ReferenceMap *refMap, TypeMap *typeMap,
                      TypeChecking *typeChecking = nullptr) {
         if (!typeChecking)
@@ -27,10 +27,10 @@ class EliminateTypedef final : public PassManager {
         passes.push_back(typeChecking);
         passes.push_back(new DoReplaceTypedef(refMap));
         passes.push_back(new TypeChecking(refMap, typeMap, true));
-        setName("EliminateTypedef");
+        setName("EliminateTypedefs");
     }
 };
 
-} // namespace P4
+}  // namespace P4
 
-#endif /* EXTENSIONS_BF_P4C_MIDEND_ELIM_TYPEDEF_H_ */
+#endif /* MIDEND_ELIMINATETYPEDEFS_H_ */

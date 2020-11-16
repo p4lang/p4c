@@ -130,7 +130,7 @@ class BranchingInstructionGeneration {
 };
 
 class ConvertStatementToDpdk : public Inspector {
-    int next_label_id;
+    static int next_label_id;
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
@@ -139,10 +139,10 @@ class ConvertStatementToDpdk : public Inspector {
 
   public:
     ConvertStatementToDpdk(
-        P4::ReferenceMap *refmap, P4::TypeMap *typemap, int next_label_id,
+        P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkVariableCollector *collector,
         std::map<const IR::Declaration_Instance *, cstring> *csum_map)
-        : next_label_id(next_label_id), typemap(typemap), refmap(refmap),
+        : typemap(typemap), refmap(refmap),
           collector(collector), csum_map(csum_map) {}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() {
         return instructions;

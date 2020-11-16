@@ -28,4 +28,4 @@ cstring DpdkVariableCollector::get_next_tmp() {
 void DpdkVariableCollector::push_variable(const IR::DpdkDeclaration *d) {
     variables.push_back(d);
 }
-} // namespace DPDK
+}  // namespace DPDK

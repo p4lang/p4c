@@ -82,8 +82,7 @@ class PsaEnumOn32Bits : public P4::ChooseEnumRepresentation {
         return true;
     }
     unsigned enumSize(unsigned) const override { return 32; }
-
-  public:
+ public:
     explicit PsaEnumOn32Bits(cstring filename) : filename(filename) {}
 };
 
@@ -154,7 +153,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options,
             new P4::FlattenInterfaceStructs(&refMap, &typeMap),
             new P4::ReplaceSelectRange(&refMap, &typeMap),
             new P4::Predication(&refMap),
-            new P4::MoveDeclarations(), // more may have been introduced
+            new P4::MoveDeclarations(),  // more may have been introduced
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::LocalCopyPropagation(&refMap, &typeMap, nullptr, policy),
             new P4::ConstantFolding(&refMap, &typeMap),
@@ -203,4 +202,4 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options,
     }
 }
 
-} // namespace DPDK
+}  // namespace DPDK

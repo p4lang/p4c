@@ -208,7 +208,10 @@ std::ostream &IR::DpdkListStatement::toSpec(std::ostream &out) const {
     out << "apply {" << std::endl;
     out << "rx m.psa_ingress_input_metadata_ingress_port" << std::endl;
     for (auto s : statements) {
-        s->toSpec(out) << std::endl;
+        out << "\t";
+        s->toSpec(out);
+        if (!s->to<IR::DpdkLabelStatement>())
+            out << std::endl;
     }
     out << "tx m.psa_ingress_output_metadata_egress_port" << std::endl;
     out << "}" << std::endl;
@@ -283,7 +286,7 @@ std::ostream &IR::DpdkReturnStatement::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkLabelStatement::toSpec(std::ostream &out) const {
-    out << "label " << label;
+    out << label << ": ";
     return out;
 }
 

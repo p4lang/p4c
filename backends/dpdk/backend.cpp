@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#include <unordered_map>
 #include "backend.h"
 #include "backends/bmv2/psa_switch/psaSwitch.h"
 #include "dpdkArch.h"
@@ -20,11 +21,10 @@ limitations under the License.
 #include "dpdkHelpers.h"
 #include "dpdkProgram.h"
 #include "dpdkVarCollector.h"
-#include "elimTypedef.h"
+#include "midend/eliminateTypedefs.h"
 #include "ir/dbprint.h"
 #include "ir/ir.h"
 #include "lib/stringify.h"
-#include <unordered_map>
 
 namespace DPDK {
 
@@ -83,7 +83,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
 
     main = toplevel->getMain();
     if (!main)
-        return; // no main
+        return;  // no main
     main->apply(*parsePsaArch);
     program = toplevel->getProgram();
     auto convertToDpdk = new ConvertToDpdkProgram(
@@ -110,4 +110,4 @@ void PsaSwitchBackend::codegen(std::ostream &out) const {
     dpdk_program->toSpec(out) << std::endl;
 }
 
-} // namespace DPDK
+}  // namespace DPDK

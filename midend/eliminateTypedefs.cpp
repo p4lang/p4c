@@ -1,4 +1,4 @@
-#include "elimTypedef.h"
+#include "eliminateTypedefs.h"
 
 namespace P4 {
 
@@ -12,4 +12,4 @@ const IR::Type *DoReplaceTypedef::preorder(IR::Type_Name *type) {
     return type;
 }
 
-} // namespace P4
+}  // namespace P4
