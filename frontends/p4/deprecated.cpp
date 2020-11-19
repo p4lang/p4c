@@ -38,9 +38,8 @@ void CheckDeprecated::warnIfDeprecated(
 }
 
 bool CheckDeprecated::preorder(const IR::PathExpression* expression) {
-    auto decl = refMap->getDeclaration(expression->path);
-    CHECK_NULL(decl);
-    warnIfDeprecated(decl->to<IR::IAnnotated>(), expression);
+    if (auto decl = refMap->getDeclaration(expression->path))
+        warnIfDeprecated(decl->to<IR::IAnnotated>(), expression);
     return false;
 }
 

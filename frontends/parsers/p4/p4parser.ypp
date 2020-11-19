@@ -216,7 +216,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %token<Token>      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DEFAULT
                    ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
                    INT KEY SELECT MATCH_KIND TYPE OUT PACKAGE PARSER PRAGMA RETURN STATE
-                   STRING STRUCT SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
+                   STRING STRUCT SWITCH TABLE TRANSITION TUPLE TYPEDEF UNION VARBIT VALUESET VOID
 
 %token<cstring> IDENTIFIER TYPE_IDENTIFIER STRING_LITERAL
 %token<UnparsedConstant>  INTEGER
@@ -275,6 +275,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
                               headerUnionDeclaration derivedTypeDeclaration
                               parserDeclaration controlDeclaration enumDeclaration
                               typedefDeclaration packageTypeDeclaration typeDeclaration
+                              unionTypeDeclaration
 %type<IR::Type_Error*>      errorDeclaration
 %type<IR::Node*>            fragment
 %type<IR::Node*>            declaration externDeclaration matchKindDeclaration
@@ -1053,6 +1054,7 @@ derivedTypeDeclaration
     : headerTypeDeclaration            { $$ = $1; }
     | headerUnionDeclaration           { $$ = $1; }
     | structTypeDeclaration            { $$ = $1; }
+    | unionTypeDeclaration             { $$ = $1; }
     | enumDeclaration                  { $$ = $1; }
     ;
 
@@ -1082,6 +1084,11 @@ headerUnionDeclaration
       "{" structFieldList "}" { $$ = new IR::Type_HeaderUnion(@3, *$3, $1, $5, *$8);
                                 driver.structure->pop(); }
     ;
+
+unionTypeDeclaration
+    : optAnnotations UNION name { driver.structure->declareType(*$3); }
+        "{" structFieldList "}" { $$ = new IR::Type_Union(@3, *$3, $1, *$6); }
+;
 
 structFieldList
     : %empty                           { $$ = new IR::IndexedVector<IR::StructField>(); }
@@ -1226,7 +1233,10 @@ switchCase
 
 switchLabel
     : DEFAULT                  { $$ = new IR::DefaultExpression(@1); }
+    // Experimental: support for arbitrary expressions
     | nonBraceExpression       { $$ = $1; }
+    // Experimental: support for unions
+    | TYPE_IDENTIFIER          { $$ = new IR::PathExpression(new IR::Path(IR::ID(@1, $1))); }
     ;
 
 statementOrDeclaration

@@ -57,7 +57,12 @@ bool FindGlobalActionUses::preorder(const IR::P4Action* action) {
 }
 
 bool FindGlobalActionUses::preorder(const IR::PathExpression* path) {
-    auto decl = refMap->getDeclaration(path->path, true);
+    auto decl = refMap->getDeclaration(path->path);
+    if (!decl) {
+        BUG_CHECK(getParent<IR::SwitchCase>(),
+                  "Could not find declaration for %1%", path);
+        return path;
+    }
     if (!decl->is<IR::P4Action>())
         return false;
 
@@ -120,7 +125,12 @@ const IR::Node* LocalizeActions::postorder(IR::PathExpression* expression) {
 }
 
 bool FindRepeatedActionUses::preorder(const IR::PathExpression* expression) {
-    auto decl = refMap->getDeclaration(expression->path, true);
+    auto decl = refMap->getDeclaration(expression->path);
+    if (!decl) {
+        BUG_CHECK(getParent<IR::SwitchCase>(),
+                  "Could not find declaration for %1%", expression);
+        return expression;
+    }
     if (!decl->is<IR::P4Action>())
         return false;
     auto action = decl->to<IR::P4Action>();

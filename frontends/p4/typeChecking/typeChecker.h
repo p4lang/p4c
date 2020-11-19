@@ -73,6 +73,8 @@ class TypeInference : public Transform {
     // Output: type map
     TypeMap* typeMap;
     const IR::Node* initialNode;
+    /// A stack of switch statements that switch on unions.
+    std::vector<IR::SwitchStatement*> unions;
 
  public:
     // @param readOnly If ftrue it will assert that it behaves like
@@ -206,6 +208,7 @@ class TypeInference : public Transform {
     const IR::Node* preorder(IR::Declaration_Instance* decl) override;
     // check invariants for entire list before checking the entries
     const IR::Node* preorder(IR::EntriesList* el) override;
+    const IR::Node* preorder(IR::SwitchStatement* stat) override;
 
     const IR::Node* postorder(IR::Declaration_MatchKind* decl) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
@@ -225,6 +228,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Type_Enum* type) override;
     const IR::Node* postorder(IR::Type_SerEnum* type) override;
     const IR::Node* postorder(IR::Type_Extern* type) override;
+    const IR::Node* postorder(IR::Type_Union* type) override;
     const IR::Node* postorder(IR::StructField* field) override;
     const IR::Node* postorder(IR::Type_Header* type) override;
     const IR::Node* postorder(IR::Type_Stack* type) override;

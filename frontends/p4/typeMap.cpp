@@ -207,6 +207,12 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool stric
         }
         return true;
     }
+    if (auto ul = left->to<IR::Type_Union>()) {
+        auto ur = right->to<IR::Type_Union>();
+        if (ul->name != ur->name)
+            return false;
+        return true;
+    }
     if (auto lt = left->to<IR::Type_Tuple>()) {
         auto rt = right->to<IR::Type_Tuple>();
         if (lt->components.size() != rt->components.size())

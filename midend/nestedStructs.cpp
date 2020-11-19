@@ -104,7 +104,12 @@ const IR::Node* RemoveNestedStructs::postorder(IR::MethodCallExpression* express
 
 const IR::Node* RemoveNestedStructs::postorder(IR::PathExpression* expression) {
     LOG3("Visiting " << dbp(getOriginal()));
-    auto decl = values->refMap->getDeclaration(expression->path, true);
+    auto decl = values->refMap->getDeclaration(expression->path);
+    if (!decl) {
+        BUG_CHECK(getParent<IR::SwitchCase>(),
+                  "Could not find declaration for %1%", expression);
+        return expression;
+    }
     auto comp = values->getTranslation(decl);
     if (comp == nullptr)
         return expression;

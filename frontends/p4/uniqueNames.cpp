@@ -129,7 +129,12 @@ const IR::Node* RenameSymbols::postorder(IR::Parameter* param) {
 }
 
 const IR::Node* RenameSymbols::postorder(IR::PathExpression* expression) {
-    auto decl = refMap->getDeclaration(expression->path, true);
+    auto decl = refMap->getDeclaration(expression->path);
+    if (!decl) {
+        BUG_CHECK(getParent<IR::SwitchCase>(),
+                  "Could not find declaration for %1%", expression);
+        return expression;
+    }
     if (!renameMap->toRename(decl))
         return expression;
     // This should be a local name.

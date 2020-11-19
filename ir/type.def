@@ -307,6 +307,11 @@ class Type_Header : Type_StructLike {
     toString{ return cstring("header ") + externalName(); }
 }
 
+class Type_Union : Type_StructLike {
+#nodbprint
+    toString{ return cstring("union ") + externalName(); }
+}
+
 class Type_Set : Type {
     Type elementType;
     dbprint{ Node::dbprint(out); out << "<" << elementType << ">"; }
@@ -495,16 +500,24 @@ class Type_String : Type_Base {
     toString{ return "string"; }
 }
 
-class Type_Enum : Type_Declaration, ISimpleNamespace, IAnnotated {
+interface IEnum : ISimpleNamespace {}
+
+/// Code common to Type_Enum and Type_SerEnum
+abstract Type_EnumBase : Type_Declaration, IEnum, IAnnotated {
     optional Annotations annotations = Annotations::empty;
-    inline IndexedVector<Declaration_ID> members;
     Annotations getAnnotations() const override { return annotations; }
+    virtual size_t size() const = 0;
+}
+
+class Type_Enum : Type_EnumBase {
+    inline IndexedVector<Declaration_ID> members;
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return members.getDeclaration(name); }
 #nodbprint
     validate{ members.check_null(); }
+    size_t size() const { return members.size(); }
 }
 
 /// A member of a serializable enum with a backing value
@@ -515,17 +528,16 @@ class SerEnumMember : Declaration, CompileTimeValue {
 }
 
 /** A serializable enumeration with a backing type */
-class Type_SerEnum : Type_Declaration, ISimpleNamespace, IAnnotated {
-    optional Annotations annotations = Annotations::empty;
+class Type_SerEnum : Type_EnumBase {
     Type type;
     inline IndexedVector<SerEnumMember> members;
-    Annotations getAnnotations() const override { return annotations; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return members.getDeclaration(name); }
 #nodbprint
     validate{ members.check_null(); }
+    size_t size() const { return members.size(); }
 }
 
 class Type_Table : Type, IApply {

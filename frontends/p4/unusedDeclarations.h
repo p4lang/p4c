@@ -93,6 +93,8 @@ class RemoveUnusedDeclarations : public Transform {
     { visit(type->typeParameters); prune(); return type; }
     const IR::Node* preorder(IR::Type_Extern* type) override
     { visit(type->typeParameters); prune(); return type; }
+    const IR::Node* preorder(IR::Type_Union* type) override
+    { prune(); return type; }
     const IR::Node* preorder(IR::Type_Method* type) override
     { visit(type->typeParameters); prune(); return type; }
     const IR::Node* preorder(IR::Parameter* param) override;

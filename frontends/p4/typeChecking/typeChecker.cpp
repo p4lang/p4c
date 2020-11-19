@@ -337,8 +337,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         if (!typeMap->contains(canon))
             typeMap->setType(canon, new IR::Type_Type(canon));
         return canon;
-    } else if (type->is<IR::Type_Enum>() ||
-               type->is<IR::Type_SerEnum>() ||
+    } else if (type->is<IR::Type_EnumBase>() ||
                type->is<IR::Type_ActionEnum>() ||
                type->is<IR::Type_MatchKind>()) {
         return type;
@@ -524,6 +523,10 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
     } else if (auto su = type->to<IR::Type_UnknownStruct>()) {
         return canonicalizeFields(su, [su](const IR::IndexedVector<IR::StructField>* fields) {
                 return new IR::Type_UnknownStruct(su->srcInfo, su->name, su->annotations, *fields);
+            });
+    } else if (auto su = type->to<IR::Type_Union>()) {
+        return canonicalizeFields(su, [su](const IR::IndexedVector<IR::StructField>* fields) {
+                return new IR::Type_Union(su->srcInfo, su->name, su->annotations, *fields);
             });
     } else if (auto st = type->to<IR::Type_Specialized>()) {
         auto baseCanon = canonicalize(st->baseType);
@@ -1532,7 +1535,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
             t = getTypeType(t->to<IR::Type_Newtype>()->type);
         return t->is<IR::Type_Struct>() || t->is<IR::Type_Bits>() ||
         t->is<IR::Type_Header>() || t->is<IR::Type_HeaderUnion>() ||
-        t->is<IR::Type_Enum>() || t->is<IR::Type_Error>() ||
+        t->is<IR::Type_EnumBase>() || t->is<IR::Type_Error>() ||
         t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() ||
         t->is<IR::Type_Varbits>() || t->is<IR::Type_ActionEnum>() ||
         t->is<IR::Type_Tuple>() || t->is<IR::Type_SerEnum>() ||
@@ -2587,6 +2590,28 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
 
 const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
     if (done()) return expression;
+    auto context = getContext();
+    if (!expression->path->absolute &&
+        context->node->is<IR::SwitchCase>() && context->child_index == 0) {
+        // This is the label of a switch case.
+        if (auto sw = findContext<IR::SwitchStatement>()) {
+            auto type = getType(sw->expression);
+            if (auto tu = type->to<IR::Type_Union>()) {
+                auto name = expression->path->name;
+                auto field = tu->getDeclByName(name.name);
+                if (!field) {
+                    typeError("%1%: union '%2%' does not have such a field",
+                              expression, tu);
+                } else {
+                    setType(expression, tu);
+                    setType(getOriginal<IR::Expression>(), tu);
+                    setCompileTimeConstant(expression);
+                    setCompileTimeConstant(getOriginal<IR::Expression>());
+                }
+                return expression;
+            }
+        }
+    }
     auto decl = refMap->getDeclaration(expression->path, true);
     const IR::Type* type = nullptr;
     if (decl->is<IR::Function>()) {
@@ -2883,6 +2908,40 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
         return expression;
     }
 
+    if (auto tu = type->to<IR::Type_Union>()) {
+        auto field = tu->getField(member);
+        if (field == nullptr) {
+            typeError("Field %1% is not a member of '%2%'", expression->member, tu);
+            return expression;
+        }
+
+        const IR::SwitchStatement* parent = nullptr;
+        for (auto ss : unions) {
+            if (ss->expression->equiv(*expression->expr))
+                parent = ss;
+        }
+        if (!parent || !findContext<IR::SwitchCase>())
+            typeError("%1%: union fields must be accessed with a switch statement",
+                      expression->member);
+        auto fieldType = getTypeType(field->type);
+        if (fieldType == nullptr)
+            return expression;
+
+        setType(getOriginal(), fieldType);
+        setType(expression, fieldType);
+        if (isLeftValue(expression->expr)) {
+            setLeftValue(expression);
+            setLeftValue(getOriginal<IR::Expression>());
+        } else {
+            LOG2("No left value " << expression->expr);
+        }
+        if (isCompileTimeConstant(expression->expr)) {
+            setCompileTimeConstant(expression);
+            setCompileTimeConstant(getOriginal<IR::Expression>());
+        }
+        return expression;
+    }
+
     if (type->is<IR::IApply>() &&
         member == IR::IApply::applyMethodName) {
         auto methodType = type->to<IR::IApply>()->getApplyMethodType();
@@ -2961,8 +3020,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
 
     if (type->is<IR::Type_Type>()) {
         auto base = type->to<IR::Type_Type>()->type;
-        if (base->is<IR::Type_Error>() || base->is<IR::Type_Enum>() ||
-            base->is<IR::Type_SerEnum>()) {
+        if (base->is<IR::Type_Error>() || base->is<IR::Type_EnumBase>()) {
             if (isCompileTimeConstant(expression->expr)) {
                 setCompileTimeConstant(expression);
                 setCompileTimeConstant(getOriginal<IR::Expression>()); }
@@ -3595,6 +3653,17 @@ const IR::Node* TypeInference::postorder(IR::IfStatement* conditional) {
     return conditional;
 }
 
+const IR::Node* TypeInference::preorder(IR::SwitchStatement* stat) {
+    visit(stat->expression);
+    auto type = getType(stat->expression);
+    if (type == nullptr)
+        return stat;
+    if (type->is<IR::Type_Union>())
+        unions.push_back(stat);
+    visit(stat->cases);
+    return stat;
+}
+
 const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto type = getType(stat->expression);
@@ -3623,8 +3692,16 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
         if (isCompileTimeConstant(stat->expression))
             warning(ErrorType::WARN_MISMATCH, "%1%: constant expression in switch",
                     stat->expression);
-
+        auto unionType = getType(stat->expression)->to<IR::Type_Union>();
         for (auto &c : stat->cases) {
+            if (unionType) {
+                if (!c->label->is<IR::PathExpression>())
+                    typeError("%1%: all switch labels must be fields of '%2%'",
+                              c->label, unionType);
+                // If it is a PathExpression we have checked it in postorder(PathExpression)
+                continue;
+            }
+
             if (!isCompileTimeConstant(c->label))
                 typeError("%1%: must be a compile-time constant", c->label);
             auto lt = getType(c->label);
@@ -3648,6 +3725,11 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
                 c = new IR::SwitchCase(c->srcInfo, comp.right, c->statement);
                 setCompileTimeConstant(c->label);
             }
+        }
+        if (unionType) {
+            BUG_CHECK(!unions.empty(), "Empty stack");
+            // BUG_CHECK(unions.back() == getOriginal(), "Corrupted unions stack");
+            unions.pop_back();
         }
     }
     return stat;
@@ -3730,9 +3812,8 @@ const IR::Node* TypeInference::postorder(IR::KeyElement* elem) {
         return elem;
     while (ktype->is<IR::Type_Newtype>())
         ktype = getTypeType(ktype->to<IR::Type_Newtype>()->type);
-    if (!ktype->is<IR::Type_Bits>() && !ktype->is<IR::Type_SerEnum>() &&
-        !ktype->is<IR::Type_Error>() && !ktype->is<IR::Type_Boolean>() &&
-        !ktype->is<IR::Type_Enum>())
+    if (!ktype->is<IR::Type_Bits>() && !ktype->is<IR::Type_EnumBase>() &&
+        !ktype->is<IR::Type_Error>() && !ktype->is<IR::Type_Boolean>())
         typeError("Key %1% field type must be a scalar type; it cannot be %2%",
                   elem->expression, ktype->toString());
     auto type = getType(elem->matchType);
