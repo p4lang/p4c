@@ -81,8 +81,9 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
 
         for (auto f : st->fields) {
             cstring fieldName = name + "." + f->name;
+            // For unions we model all fields as one big object.
             auto sl = create(f->type, fieldName);
-            if (globalValid != nullptr)
+            if (globalValid != nullptr && type->is<IR::Type_HeaderUnion>())
                 dynamic_cast<StructLocation*>(sl)->replaceField(
                     fieldName + "." + validFieldName, globalValid);
             result->createField(f->name.name, sl);
@@ -106,67 +107,71 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
 
 const LocationSet* StorageLocation::removeHeaders() const {
     auto result = new LocationSet();
-    removeHeaders(result);
+    removeHeadersFromLocationSet(result);
     return result;
 }
 
-void BaseLocation::removeHeaders(LocationSet* result) const
+void BaseLocation::removeHeadersFromLocationSet(LocationSet* result) const
 { result->add(this); }
 
-void StructLocation::addValidBits(LocationSet* result) const {
+void StructLocation::addValidBitsToLocationSet(LocationSet* result) const {
     if (type->is<IR::Type_Header>()) {
-        addField(StorageFactory::validFieldName, result);
+        addFieldToLocationSet(StorageFactory::validFieldName, result);
     } else {
         for (auto f : fields())
-            f->addValidBits(result);
+            f->addValidBitsToLocationSet(result);
     }
 }
 
-void StructLocation::addLastIndexField(LocationSet* result) const {
+void StructLocation::addLastIndexFieldToLocationSet(LocationSet* result) const {
     for (auto f : fields())
-        f->addLastIndexField(result);
+        f->addLastIndexFieldToLocationSet(result);
 }
 
-void StructLocation::addField(cstring field, LocationSet* result) const {
+void StructLocation::addFieldToLocationSet(cstring field, LocationSet* result) const {
     auto f = ::get(fieldLocations, field);
     CHECK_NULL(f);
     result->add(f);
 }
 
-void TupleLocation::removeHeaders(LocationSet* result) const {
-    for (auto f : elements)
-        f->removeHeaders(result);
-}
-
-void StructLocation::removeHeaders(LocationSet* result) const {
+void StructLocation::removeHeadersFromLocationSet(LocationSet* result) const {
     if (!type->is<IR::Type_Struct>()) return;
     for (auto f : fieldLocations)
-        f.second->removeHeaders(result);
+        f.second->removeHeadersFromLocationSet(result);
 }
 
-void ArrayLocation::addValidBits(LocationSet* result) const {
+UnionLocation::UnionLocation(const IR::Type_Union* type, cstring name) :
+        StructLocation(type, name) {
+}
+
+void UnionLocation::addFieldToLocationSet(cstring, LocationSet* result) const {
+    // Field name is ignored.
+    result->add(this);
+}
+
+void ArrayLocation::addValidBitsToLocationSet(LocationSet* result) const {
     for (auto e : *this)
-        e->addValidBits(result);
+        e->addValidBitsToLocationSet(result);
 }
 
-void ArrayLocation::addLastIndexField(LocationSet* result) const {
+void ArrayLocation::addLastIndexFieldToLocationSet(LocationSet* result) const {
     result->add(getLastIndexField());
 }
 
-void IndexedLocation::addElement(unsigned index, LocationSet* result) const {
+void ArrayLocation::addElementToLocationSet(unsigned index, LocationSet* result) const {
     BUG_CHECK(index < elements.size(), "%1%: out of bounds index", index);
     result->add(elements.at(index));
 }
 
 const LocationSet* StorageLocation::getValidBits() const {
     auto result = new LocationSet();
-    addValidBits(result);
+    addValidBitsToLocationSet(result);
     return result;
 }
 
 const LocationSet* StorageLocation::getLastIndexField() const {
     auto result = new LocationSet();
-    addLastIndexField(result);
+    addLastIndexFieldToLocationSet(result);
     return result;
 }
 
@@ -197,21 +202,20 @@ const LocationSet* LocationSet::getArrayLastIndex() const {
 const LocationSet* LocationSet::getField(cstring field) const {
     auto result = new LocationSet();
     for (auto l : locations) {
-        if (l->is<StructLocation>()) {
-            auto strct = l->to<StructLocation>();
+        if (auto strct = l->to<StructLocation>()) {
             if (field == StorageFactory::validFieldName && strct->isHeaderUnion()) {
-                // special handling for union.isValid()
+                // special handling for header_union.isValid()
                 for (auto f : strct->fields()) {
-                    f->to<StructLocation>()->addField(field, result);
+                    f->to<StructLocation>()->addFieldToLocationSet(field, result);
                 }
             } else {
-                strct->addField(field, result);
+                strct->addFieldToLocationSet(field, result);
             }
         } else {
             BUG_CHECK(l->is<ArrayLocation>(), "%1%: expected an ArrayLocation", l);
             auto array = l->to<ArrayLocation>();
             for (auto f : *array)
-                f->to<StructLocation>()->addField(field, result);
+                f->to<StructLocation>()->addFieldToLocationSet(field, result);
         }
     }
     return result;
@@ -885,16 +889,23 @@ bool ComputeWriteSet::preorder(const IR::SwitchStatement* statement) {
     }
     auto table = TableApplySolver::isActionRun(
         statement->expression, storageMap->refMap, storageMap->typeMap);
+    auto tu = storageMap->typeMap->getType(statement->expression)->to<IR::Type_Union>();
     if (table) {
         auto al = table->getActionList();
         bool allCases = statement->cases.size() == al->size();
         if (!seenDefault && !allCases)
             // no case may have been executed
             result = result->joinDefinitions(save);
+    } else if (tu) {
+        bool allCases = statement->cases.size() >= tu->size();
+        if (!seenDefault && !allCases)
+            // no case may have been executed
+            result = result->joinDefinitions(save);
     } else {
         // TODO: in some cases we can check for exhaustive matches,
         // but this is conservative.
-        result = result->joinDefinitions(save);
+        if (!seenDefault)
+            result = result->joinDefinitions(save);
     }
     return setDefinitions(result);
 }

@@ -52,13 +52,13 @@ class StorageLocation : public IHasDbPrint {
 
     /// @returns All locations inside that represent valid bits.
     const LocationSet* getValidBits() const;
-    virtual void addValidBits(LocationSet* result) const = 0;
+    virtual void addValidBitsToLocationSet(LocationSet* result) const = 0;
     /// @returns All locations inside if we exclude all headers.
     const LocationSet* removeHeaders() const;
-    virtual void removeHeaders(LocationSet* result) const = 0;
+    virtual void removeHeadersFromLocationSet(LocationSet* result) const = 0;
     /// @returns All locations inside that represent the 'lastIndex' of an array.
     const LocationSet* getLastIndexField() const;
-    virtual void addLastIndexField(LocationSet* result) const = 0;
+    virtual void addLastIndexFieldToLocationSet(LocationSet* result) const = 0;
 };
 
 /** Represents a storage location with a simple type or a tuple type.
@@ -79,9 +79,9 @@ class BaseLocation : public StorageLocation {
                       type->is<IR::Type_Varbits>() || type->is<IR::Type_Newtype>() ||
                       type->is<IR::Type_SerEnum>() || type->is<IR::Type_List>(),
                       "%1%: unexpected type", type); }
-    void addValidBits(LocationSet*) const override {}
-    void addLastIndexField(LocationSet*) const override {}
-    void removeHeaders(LocationSet* result) const override;
+    void addValidBitsToLocationSet(LocationSet*) const override {}
+    void addLastIndexFieldToLocationSet(LocationSet*) const override {}
+    void removeHeadersFromLocationSet(LocationSet* result) const override;
 };
 
 /// Base class for location sets that contain fields
@@ -104,7 +104,7 @@ class WithFieldsLocation : public StorageLocation {
     }
 };
 
-/** Represents the locations for a struct, header or union */
+/** Represents the locations for a struct, header, header_union, or union */
 class StructLocation : public WithFieldsLocation {
  public:
     StructLocation(const IR::Type* type, cstring name) :
@@ -112,10 +112,12 @@ class StructLocation : public WithFieldsLocation {
         BUG_CHECK(type->is<IR::Type_StructLike>(),
                   "%1%: unexpected type", type);
     }
-    void addField(cstring field, LocationSet* addTo) const;
-    void addValidBits(LocationSet* result) const override;
-    void removeHeaders(LocationSet* result) const override;
-    void addLastIndexField(LocationSet* result) const override;
+
+ protected:
+    virtual void addFieldToLocationSet(cstring field, LocationSet* addTo) const;
+    void addValidBitsToLocationSet(LocationSet* result) const override;
+    void removeHeadersFromLocationSet(LocationSet* result) const override;
+    void addLastIndexFieldToLocationSet(LocationSet* result) const override;
     bool isHeader() const { return type->is<IR::Type_Header>(); }
     bool isHeaderUnion() const { return type->is<IR::Type_HeaderUnion>(); }
     bool isStruct() const { return type->is<IR::Type_Struct>(); }
@@ -166,9 +168,10 @@ class ArrayLocation : public IndexedLocation {
         for (unsigned i = 0; i < elements.size(); i++)
             out << *elements.at(i) << " ";
     }
-    void addValidBits(LocationSet* result) const override;
-    void removeHeaders(LocationSet*) const override {}  // no results added
-    void addLastIndexField(LocationSet* result) const override;
+    void addElementToLocationSet(unsigned index, LocationSet* result) const;
+    void addValidBitsToLocationSet(LocationSet* result) const override;
+    void removeHeadersFromLocationSet(LocationSet*) const override {}  // no results added
+    void addLastIndexFieldToLocationSet(LocationSet* result) const override;
 };
 
 class StorageFactory {

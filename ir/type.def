@@ -273,6 +273,7 @@ abstract Type_StructLike : Type_Declaration, INestedNamespace, ISimpleNamespace,
         return fields.getDeclaration(name); }
     validate{ fields.check_null(); }
     dbprint;
+    size_t size() const { return fields.size(); }
 #apply
 }
 

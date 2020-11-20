@@ -157,8 +157,8 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SpecializeGenericTypes(&refMap, &typeMap),
         new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
         new ResolveReferences(&refMap),
-        new TypeInference(&refMap, &typeMap, false, true),  // more casts may be needed
-        new RemoveParserControlFlow(&refMap, &typeMap),
+        new TypeInference(&refMap, &typeMap, false),  // more casts may be needed
+        new RemoveParserIfs(&refMap, &typeMap),
         new StructInitializers(&refMap, &typeMap),
         new SpecializeGenericFunctions(&refMap, &typeMap),
         new TableKeyNames(&refMap, &typeMap),
