@@ -280,11 +280,12 @@ Installing on macOS:
 
 P4c relies on [BDW garbage collector](https://github.com/ivmai/bdwgc)
 to manage its memory.  By default, the p4c exectuables are linked with
-the garbage collector library.  In rare cases when the GC causes
-problems, this can be disabled by setting `ENABLE_GC` cmake option to
-`OFF`.  However, this will dramatically increase the memory usage by the
-compiler, and may become impractical for compiling large programs.  **Do
-not disable the GC**, unless you really have to.
+the garbage collector library.  When the GC causes problems, this can
+be disabled by setting `ENABLE_GC` cmake option to `OFF`.  However,
+this will dramatically increase the memory usage by the compiler, and
+may become impractical for compiling large programs.  **Do not disable
+the GC**, unless you really have to.  We have noticed that this may be
+a problem on MacOS.
 
 # Development tools
 
