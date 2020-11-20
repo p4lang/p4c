@@ -36,8 +36,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             h.eth_hdr.dst_addr = val_0;
             tmp = retval;
         }
-        tmp_0 = tmp << 8w15;
-        h.eth_hdr.eth_type = tmp_0[15:0];
+        tmp_0 = tmp[0:0] ++ 15w0;
+        h.eth_hdr.eth_type = tmp_0;
     }
 }
 

@@ -30,7 +30,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action issue2614bmv2l36() {
-        h.h.a = 8w0;
+        h.h.a = 8w128;
     }
     @hidden table tbl_issue2614bmv2l36 {
         actions = {

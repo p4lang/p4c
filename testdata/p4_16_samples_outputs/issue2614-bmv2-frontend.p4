@@ -29,8 +29,10 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @name("ingress.tmp1") bit<8> tmp1_0;
     apply {
-        h.h.a = 8w0;
+        tmp1_0 = 8w1;
+        h.h.a = tmp1_0[0:0] ++ 7w0;
     }
 }
 
