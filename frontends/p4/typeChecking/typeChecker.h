@@ -73,8 +73,19 @@ class TypeInference : public Transform {
     // Output: type map
     TypeMap* typeMap;
     const IR::Node* initialNode;
-    /// A stack of switch statements that switch on unions.
-    std::vector<IR::SwitchStatement*> unions;
+
+    struct CurrentSwitchLabel {
+        const IR::SwitchStatement* sw;
+        const IR::SwitchCase* cs;
+        const CurrentSwitchLabel* previous;
+
+        CurrentSwitchLabel(const IR::SwitchStatement* sw, const IR::SwitchCase* cs,
+                           const CurrentSwitchLabel* prev): sw(sw), cs(cs), previous(prev) {}
+    };
+    /// Maintain a stack with the nested switch labels and statements
+    /// that correspond to unions.  These define the union fields that
+    /// are currently in scope.
+    const CurrentSwitchLabel *currentSwitchLabel = nullptr;
 
  public:
     // @param readOnly If ftrue it will assert that it behaves like

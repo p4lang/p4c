@@ -57,12 +57,7 @@ bool FindGlobalActionUses::preorder(const IR::P4Action* action) {
 }
 
 bool FindGlobalActionUses::preorder(const IR::PathExpression* path) {
-    auto decl = refMap->getDeclaration(path->path);
-    if (!decl) {
-        BUG_CHECK(getParent<IR::SwitchCase>(),
-                  "Could not find declaration for %1%", path);
-        return path;
-    }
+    auto decl = refMap->getDeclaration(path->path, true);
     if (!decl->is<IR::P4Action>())
         return false;
 

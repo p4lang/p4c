@@ -500,13 +500,14 @@ class Type_String : Type_Base {
     toString{ return "string"; }
 }
 
-interface IEnum : ISimpleNamespace {}
+interface IEnum : ISimpleNamespace {
+    virtual size_t size() const = 0;
+}
 
 /// Code common to Type_Enum and Type_SerEnum
 abstract Type_EnumBase : Type_Declaration, IEnum, IAnnotated {
     optional Annotations annotations = Annotations::empty;
     Annotations getAnnotations() const override { return annotations; }
-    virtual size_t size() const = 0;
 }
 
 class Type_Enum : Type_EnumBase {

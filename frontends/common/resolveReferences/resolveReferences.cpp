@@ -197,10 +197,7 @@ ResolutionContext::resolveUnique(IR::ID name,
     }
 
     if (decls->empty()) {
-        if (!findContext<IR::SwitchCase>())
-            // Switch labels for safe unions are resolved based on types, not lexically.
-            // switch (b) { x: ... } // x may be a field name of the b union
-            ::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", name);
+        ::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", name);
         return nullptr;
     }
     if (decls->size() == 1)
