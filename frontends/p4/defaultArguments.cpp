@@ -27,7 +27,7 @@ class TypeNameSubstitutionVisitor : public TypeVariableSubstitutionVisitor {
     explicit TypeNameSubstitutionVisitor(
         const TypeVariableSubstitution *bindings, const TypeMap* typeMap)
             : TypeVariableSubstitutionVisitor(bindings, true), typeMap(typeMap)
-    { CHECK_NULL(typeMap); setName("TypeNameSubstitution"); }
+    { CHECK_NULL(typeMap); setName("TypeNameSubstitution"); visitDagOnce = false; }
 
     const IR::Node* preorder(IR::Type_Name* tn) override {
         auto t = typeMap->getTypeType(getOriginal<IR::Type>(), true);
@@ -35,6 +35,10 @@ class TypeNameSubstitutionVisitor : public TypeVariableSubstitutionVisitor {
             return replacement(tv, tn)->to<IR::Type>()->getP4Type();
         return tn;
     }
+    // When cloning the value of an argument we want to make a fresh
+    // copy for each new InfInt type, and not share the same one.
+    const IR::Node* postorder(IR::Type_InfInt*) override
+    { return new IR::Type_InfInt(); }
 };
 }  // namespace
 
