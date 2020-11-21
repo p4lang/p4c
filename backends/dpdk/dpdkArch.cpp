@@ -365,8 +365,8 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
     } else if (auto bin = right->to<IR::Operation_Binary>()) {
         expressionUnrollSanityCheck(bin->right);
         expressionUnrollSanityCheck(bin->left);
-        auto left_unroller = new ExpressionUnroll(collector);
-        auto right_unroller = new ExpressionUnroll(collector);
+        auto left_unroller = new ExpressionUnroll(refMap, collector);
+        auto right_unroller = new ExpressionUnroll(refMap, collector);
         bin->left->apply(*left_unroller);
         const IR::Expression *left_tmp = left_unroller->root;
         bin->right->apply(*right_unroller);
@@ -405,7 +405,7 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
     } else if (auto un = right->to<IR::Operation_Unary>()) {
         auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
         expressionUnrollSanityCheck(un->expr);
-        auto unroller = new ExpressionUnroll(collector);
+        auto unroller = new ExpressionUnroll(refMap, collector);
         un->expr->apply(*unroller);
         prune();
         const IR::Expression *un_tmp = unroller->root;
@@ -463,7 +463,7 @@ bool ExpressionUnroll::preorder(const IR::Operation_Unary *u) {
     } else {
         un_expr = u->expr;
     }
-    root = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
+    root = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
     stmt.push_back(new IR::AssignmentStatement(root, un_expr));
     decl.push_back(new IR::Declaration_Variable(root->path->name, u->type));
     return false;
@@ -481,7 +481,7 @@ bool ExpressionUnroll::preorder(const IR::Operation_Binary *bin) {
     if (!right_root)
         right_root = bin->right;
 
-    root = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
+    root = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
     const IR::Expression *bin_expr;
     decl.push_back(new IR::Declaration_Variable(root->path->name, bin->type));
     if (bin->is<IR::Add>()) {
@@ -524,7 +524,7 @@ bool ExpressionUnroll::preorder(const IR::MethodCallExpression *m) {
         else
             args->push_back(new IR::Argument(root));
     }
-    root = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
+    root = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
     decl.push_back(new IR::Declaration_Variable(root->path->name, m->type));
     auto new_m = new IR::MethodCallExpression(m->method, args);
     stmt.push_back(new IR::AssignmentStatement(root, new_m));
@@ -553,7 +553,7 @@ bool ExpressionUnroll::preorder(const IR::BoolLiteral *) {
 const IR::Node *IfStatementUnroll::postorder(IR::IfStatement *i) {
     auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
     expressionUnrollSanityCheck(i->condition);
-    auto unroller = new LogicalExpressionUnroll(collector);
+    auto unroller = new LogicalExpressionUnroll(refMap, collector);
     i->condition->apply(*unroller);
     for (auto i : unroller->stmt)
         code_block->push_back(i);
@@ -606,7 +606,7 @@ bool LogicalExpressionUnroll::preorder(const IR::Operation_Unary *u) {
     } else {
         un_expr = u->expr;
     }
-    auto tmp = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
+    auto tmp = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
     root = tmp;
     stmt.push_back(new IR::AssignmentStatement(root, un_expr));
     decl.push_back(new IR::Declaration_Variable(tmp->path->name, u->type));
@@ -644,7 +644,7 @@ bool LogicalExpressionUnroll::preorder(const IR::Operation_Binary *bin) {
         }
         root = bin_expr;
     } else {
-        auto tmp = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
+        auto tmp = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
         root = tmp;
         decl.push_back(
             new IR::Declaration_Variable(tmp->path->name, bin->type));
@@ -679,7 +679,7 @@ bool LogicalExpressionUnroll::preorder(const IR::MethodCallExpression *m) {
         root = m->clone();
         return false;
     }
-    auto tmp = new IR::PathExpression(IR::ID(collector->get_next_tmp()));
+    auto tmp = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
     root = tmp;
     decl.push_back(new IR::Declaration_Variable(tmp->path->name, m->type));
     auto new_m = new IR::MethodCallExpression(m->method, args);
@@ -748,12 +748,6 @@ ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
                     "a "
                     "constant.");
             }
-            // auto tmp = new
-            // IR::PathExpression(IR::ID(collector->get_next_tmp()));
-            // injector.collect(control, parser, new
-            // IR::Declaration_Variable(tmp->path->name, src1->type));
-            // injector.collect(control, parser, new
-            // IR::Declaration_Variable(tmp->path->name, r->type));
             code_block.push_back(new IR::AssignmentStatement(left, src1));
             IR::Operation_Binary *expr;
             if (right->is<IR::Add>()) {

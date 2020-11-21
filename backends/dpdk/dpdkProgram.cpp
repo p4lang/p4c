@@ -240,7 +240,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
             }
         }
 
-        if(degree_map.size() > 0 and stack.size() == 0)
+        if (degree_map.size() > 0 && stack.size() == 0)
             BUG("Unsupported parser loop");
 
         if (state.name == "start")

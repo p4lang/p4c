@@ -202,11 +202,13 @@ class DeclarationInjector {
  */
 class StatementUnroll : public Transform {
   private:
+    P4::ReferenceMap *refMap;
     DpdkVariableCollector *collector;
     DeclarationInjector injector;
 
   public:
-    StatementUnroll(DpdkVariableCollector *collector) : collector(collector) {}
+    StatementUnroll(P4::ReferenceMap *refMap, DpdkVariableCollector *collector) :
+        refMap(refMap), collector(collector) {}
     const IR::Node *preorder(IR::AssignmentStatement *a) override;
     const IR::Node *postorder(IR::P4Control *a) override;
     const IR::Node *postorder(IR::P4Parser *a) override;
@@ -222,13 +224,15 @@ class StatementUnroll : public Transform {
  * tmp = c * d, which will be injected in front of the AssignmentStatement.
  */
 class ExpressionUnroll : public Inspector {
+    P4::ReferenceMap *refMap;
     DpdkVariableCollector *collector;
 
   public:
     IR::IndexedVector<IR::StatOrDecl> stmt;
     IR::IndexedVector<IR::Declaration> decl;
     IR::PathExpression *root;
-    ExpressionUnroll(DpdkVariableCollector *collector) : collector(collector) {
+    ExpressionUnroll(P4::ReferenceMap *refMap, DpdkVariableCollector *collector) :
+        refMap(refMap), collector(collector) {
         setName("ExpressionUnroll");
     }
     bool preorder(const IR::Operation_Unary *a) override;
@@ -245,11 +249,13 @@ class ExpressionUnroll : public Inspector {
 // logical expression differently.
 class IfStatementUnroll : public Transform {
   private:
+    P4::ReferenceMap *refMap;
     DpdkVariableCollector *collector;
     DeclarationInjector injector;
 
   public:
-    IfStatementUnroll(DpdkVariableCollector *collector) : collector(collector) {
+    IfStatementUnroll(P4::ReferenceMap* refMap, DpdkVariableCollector *collector) :
+        refMap(refMap), collector(collector) {
         setName("IfStatementUnroll");
     }
     const IR::Node *postorder(IR::IfStatement *a) override;
@@ -262,6 +268,7 @@ class IfStatementUnroll : public Transform {
  * calculation will be unroll in a dedicated pass.
  */
 class LogicalExpressionUnroll : public Inspector {
+    P4::ReferenceMap* refMap;
     DpdkVariableCollector *collector;
 
   public:
@@ -279,8 +286,8 @@ class LogicalExpressionUnroll : public Inspector {
             return false;
     }
 
-    LogicalExpressionUnroll(DpdkVariableCollector *collector)
-        : collector(collector) {}
+    LogicalExpressionUnroll(P4::ReferenceMap* refMap, DpdkVariableCollector *collector)
+        : refMap(refMap), collector(collector) {}
     bool preorder(const IR::Operation_Unary *a) override;
     bool preorder(const IR::Operation_Binary *a) override;
     bool preorder(const IR::MethodCallExpression *a) override;
@@ -560,8 +567,8 @@ class RewriteToDpdkArch : public PassManager {
         passes.push_back(new ConvertToDpdkArch(&parsePsa->toBlockInfo));
         passes.push_back(new ReplaceMetadataHeaderName(refMap, info));
         passes.push_back(new InjectJumboStruct(info));
-        passes.push_back(new StatementUnroll(collector));
-        passes.push_back(new IfStatementUnroll(collector));
+        passes.push_back(new StatementUnroll(refMap, collector));
+        passes.push_back(new IfStatementUnroll(refMap, collector));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
         passes.push_back(new ConvertBinaryOperationTo2Params());

@@ -129,7 +129,7 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
             instructions.push_back(
                     new IR::DpdkLabelStatement(true_label + "half"));
             return generate(land->right, true_label, false_label, true);
-        }
+        } else if (!nested(land->left) && nested(land->right)) {
         /* Second, left is simple and right is nested. Call recursion for the
          * left part, true fall through. Note that right now, the truthfulness
          * of right represents the truthfulness of the whole, because if the
@@ -140,10 +140,9 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
          * have already properly jmp to correct label, there is no need to jmp
          * to any label.
          */
-        else if (!nested(land->left) && nested(land->right)) {
             generate(land->left, true_label, false_label, true);
             return generate(land->right, true_label, false_label, true);
-        }
+        } else if (!nested(land->left) && !nested(land->right)) {
         /* Third, left is simple and right is simple. In this case, call the
          * recursion and indicating  that this call is from LAnd, the
          * subfunction will let true fall  through. Therefore, after two
@@ -152,7 +151,6 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
          * why I still need to indicate true fallen  through is because there
          * is chance to eliminate the jmp instruction  I just added.
          */
-        else if (!nested(land->left) && !nested(land->right)) {
             generate(land->left, true_label, false_label, true);
             generate(land->right, true_label, false_label, true);
             instructions.push_back(new IR::DpdkJmpLabelStatement(true_label));
@@ -177,7 +175,7 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
         } else {
             BUG("Previous simple expression lifting pass failed");
         }
-    }
+    } else if (auto equ = expr->to<IR::Equ>()) {
     /* First, I will describe the base case. The base case is handling logical
      * expression that is not LAnd and LOr. It will conside whether the simple
      * expression itself is the left or right of a LAnd or a LOr(The
@@ -189,48 +187,47 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
      * through. And finally for a base case, it returns what condition it fall
      * through.
      */
-    else if (auto equ = expr->to<IR::Equ>()) {
-        if (is_and)
+        if (is_and) {
             instructions.push_back(new IR::DpdkJmpNotEqualStatement(
                         false_label, equ->left, equ->right));
-        else
+        } else {
             instructions.push_back(new IR::DpdkJmpEqualStatement(
-                        true_label, equ->left, equ->right));
+                        true_label, equ->left, equ->right)); }
         return is_and;
     } else if (auto neq = expr->to<IR::Neq>()) {
-        if (is_and)
+        if (is_and) {
             instructions.push_back(new IR::DpdkJmpEqualStatement(
                         false_label, neq->left, neq->right));
-        else
+        } else {
             instructions.push_back(new IR::DpdkJmpNotEqualStatement(
-                        true_label, neq->left, neq->right));
+                        true_label, neq->left, neq->right)); }
         return is_and;
     } else if (auto lss = expr->to<IR::Lss>()) {
-        if (is_and)
+        if (is_and) {
             instructions.push_back(new IR::DpdkJmpGreaterEqualStatement(
                         false_label, lss->left, lss->right));
-        else
+        } else {
             instructions.push_back(new IR::DpdkJmpLessStatement(
-                        true_label, lss->left, lss->right));
+                        true_label, lss->left, lss->right)); }
         return is_and;
     } else if (auto grt = expr->to<IR::Grt>()) {
-        if (is_and)
+        if (is_and) {
             instructions.push_back(new IR::DpdkJmpLessOrEqualStatement(
                         false_label, grt->left, grt->right));
-        else
+        } else {
             instructions.push_back(new IR::DpdkJmpGreaterStatement(
-                        true_label, grt->left, grt->right));
+                        true_label, grt->left, grt->right)); }
         return is_and;
     } else if (auto mce = expr->to<IR::MethodCallExpression>()) {
         auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
         if (auto a = mi->to<P4::BuiltInMethod>()) {
             if (a->name == "isValid") {
-                if (is_and)
+                if (is_and) {
                     instructions.push_back(new IR::DpdkJmpIfInvalidStatement(
                                 false_label, a->appliedTo));
-                else
+                } else {
                     instructions.push_back(new IR::DpdkJmpIfValidStatement(
-                                true_label, a->appliedTo));
+                                true_label, a->appliedTo)); }
                 return is_and;
             } else {
                 BUG("%1%: Not implemented", expr);
@@ -239,12 +236,12 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
             BUG("%1%:not implemented method instance", expr);
         }
     } else if (expr->is<IR::PathExpression>() || expr->is<IR::Member>()) {
-        if (is_and)
+        if (is_and) {
             instructions.push_back(new IR::DpdkJmpNotEqualStatement(
                         false_label, expr, new IR::Constant(1)));
-        else
+        } else {
             instructions.push_back(new IR::DpdkJmpEqualStatement(
-                        true_label, expr, new IR::Constant(1)));
+                        true_label, expr, new IR::Constant(1))); }
         return is_and;
     } else {
         BUG("%1%: Not implemented", expr);
@@ -395,4 +392,4 @@ bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
     return false;
 }
 
-} // namespace DPDK
+}  // namespace DPDK
