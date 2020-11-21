@@ -53,9 +53,6 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::EliminateTypedef(refMap, typeMap),
         // because the user metadata type has changed
         new P4::ClearTypeMap(typeMap),
-        new P4::SynthesizeActions(
-            refMap, typeMap,
-            new BMV2::SkipControls(&structure.non_pipeline_controls)),
         new P4::MoveActionsToTables(refMap, typeMap),
         new P4::TypeChecking(refMap, typeMap),
         new BMV2::LowerExpressions(typeMap),

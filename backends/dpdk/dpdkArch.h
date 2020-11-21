@@ -26,6 +26,7 @@ namespace DPDK {
 cstring TypeStruct2Name(const cstring *s);
 bool isSimpleExpression(const IR::Expression *e);
 bool isNonConstantSimpleExpression(const IR::Expression *e);
+void expressionUnrollSanityCheck(const IR::Expression *e);
 
 enum gress_t {
     INGRESS = 0,
@@ -227,18 +228,6 @@ class ExpressionUnroll : public Inspector {
     IR::IndexedVector<IR::StatOrDecl> stmt;
     IR::IndexedVector<IR::Declaration> decl;
     IR::PathExpression *root;
-    // This function is a sanity to check whether the component of a Expression
-    // falls into following classes, if not, it means we haven't implemented a
-    // handle for that class.
-    static void sanity(const IR::Expression *e) {
-        if (!e->is<IR::Operation_Unary>() &&
-            !e->is<IR::MethodCallExpression>() && !e->is<IR::Member>() &&
-            !e->is<IR::PathExpression>() && !e->is<IR::Operation_Binary>() &&
-            !e->is<IR::Constant>() && !e->is<IR::BoolLiteral>()) {
-            std::cerr << e->node_type_name() << std::endl;
-            BUG("Untraversed node");
-        }
-    }
     ExpressionUnroll(DpdkVariableCollector *collector) : collector(collector) {
         setName("ExpressionUnroll");
     }
@@ -279,15 +268,6 @@ class LogicalExpressionUnroll : public Inspector {
     IR::IndexedVector<IR::StatOrDecl> stmt;
     IR::IndexedVector<IR::Declaration> decl;
     IR::Expression *root;
-    static void sanity(const IR::Expression *e) {
-        if (!e->is<IR::Operation_Unary>() &&
-            !e->is<IR::MethodCallExpression>() && !e->is<IR::Member>() &&
-            !e->is<IR::PathExpression>() && !e->is<IR::Operation_Binary>() &&
-            !e->is<IR::Constant>() && !e->is<IR::BoolLiteral>()) {
-            std::cerr << e->node_type_name() << std::endl;
-            BUG("Untraversed node");
-        }
-    }
     static bool is_logical(const IR::Operation_Binary *bin) {
         if (bin->is<IR::LAnd>() || bin->is<IR::LOr>() || bin->is<IR::Leq>() ||
             bin->is<IR::Equ>() || bin->is<IR::Neq>() || bin->is<IR::Grt>() ||

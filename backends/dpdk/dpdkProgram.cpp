@@ -191,6 +191,8 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
         if (state.selectExpression) {
             if (auto e = state.selectExpression->to<IR::SelectExpression>()) {
                 const IR::Expression *switch_var;
+                BUG_CHECK(e->select->components.size() != 1,
+                        "Unsupported select expression %2%", e->select);
                 switch_var = e->select->components[0];
                 for (auto v : e->selectCases) {
                     if (!v->keyset->is<IR::DefaultExpression>()) {
@@ -237,6 +239,9 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
                 }
             }
         }
+
+        if(degree_map.size() > 0 and stack.size() == 0)
+            BUG("Unsupported parser loop");
 
         if (state.name == "start")
             continue;

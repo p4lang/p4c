@@ -152,6 +152,7 @@ class ConvertStatementToDpdk : public Inspector {
     bool preorder(const IR::AssignmentStatement *a) override;
     bool preorder(const IR::IfStatement *a) override;
     bool preorder(const IR::MethodCallStatement *a) override;
+    bool preorder(const IR::SwitchStatement* a) override;
 
     void add_instr(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
     IR::IndexedVector<IR::DpdkAsmStatement> &get_instr() {

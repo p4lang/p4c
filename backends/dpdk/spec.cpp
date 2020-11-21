@@ -87,12 +87,6 @@ cstring toStr(const IR::Type *const type) {
         return out.str();
     } else if (auto n = type->to<IR::Type_Name>()) {
         return n->path->name;
-    } else if (auto s = type->to<IR::Type_Specialized>()) {
-        cstring type_s = s->baseType->path->name;
-        for (auto arg : *(s->arguments)) {
-            type_s += " " + toStr(arg);
-        }
-        return type_s;
     } else {
         std::cerr << type->node_type_name() << std::endl;
         BUG("not implemented type");

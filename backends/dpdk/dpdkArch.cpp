@@ -59,6 +59,19 @@ cstring TypeStruct2Name(const cstring s) {
     }
 }
 
+// This function is a sanity to check whether the component of a Expression
+// falls into following classes, if not, it means we haven't implemented a
+// handle for that class.
+void expressionUnrollSanityCheck(const IR::Expression *e) {
+    if (!e->is<IR::Operation_Unary>() &&
+            !e->is<IR::MethodCallExpression>() && !e->is<IR::Member>() &&
+            !e->is<IR::PathExpression>() && !e->is<IR::Operation_Binary>() &&
+            !e->is<IR::Constant>() && !e->is<IR::BoolLiteral>()) {
+        std::cerr << e->node_type_name() << std::endl;
+        BUG("Untraversed node");
+    }
+}
+
 const IR::Node *ConvertToDpdkArch::postorder(IR::P4Program *p) {
     // std::cout << p << std::endl;
     return p;
@@ -350,8 +363,8 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
         prune();
         return a;
     } else if (auto bin = right->to<IR::Operation_Binary>()) {
-        ExpressionUnroll::sanity(bin->right);
-        ExpressionUnroll::sanity(bin->left);
+        expressionUnrollSanityCheck(bin->right);
+        expressionUnrollSanityCheck(bin->left);
         auto left_unroller = new ExpressionUnroll(collector);
         auto right_unroller = new ExpressionUnroll(collector);
         bin->left->apply(*left_unroller);
@@ -391,7 +404,7 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
         prune();
     } else if (auto un = right->to<IR::Operation_Unary>()) {
         auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
-        ExpressionUnroll::sanity(un->expr);
+        expressionUnrollSanityCheck(un->expr);
         auto unroller = new ExpressionUnroll(collector);
         un->expr->apply(*unroller);
         prune();
@@ -433,7 +446,7 @@ const IR::Node *StatementUnroll::postorder(IR::P4Parser *a) {
 }
 
 bool ExpressionUnroll::preorder(const IR::Operation_Unary *u) {
-    sanity(u->expr);
+    expressionUnrollSanityCheck(u->expr);
     visit(u->expr);
     const IR::Expression *un_expr;
     if (root) {
@@ -457,8 +470,8 @@ bool ExpressionUnroll::preorder(const IR::Operation_Unary *u) {
 }
 
 bool ExpressionUnroll::preorder(const IR::Operation_Binary *bin) {
-    sanity(bin->left);
-    sanity(bin->right);
+    expressionUnrollSanityCheck(bin->left);
+    expressionUnrollSanityCheck(bin->right);
     visit(bin->left);
     const IR::Expression *left_root = root;
     visit(bin->right);
@@ -504,7 +517,7 @@ bool ExpressionUnroll::preorder(const IR::Operation_Binary *bin) {
 bool ExpressionUnroll::preorder(const IR::MethodCallExpression *m) {
     auto args = new IR::Vector<IR::Argument>;
     for (auto arg : *m->arguments) {
-        sanity(arg->expression);
+        expressionUnrollSanityCheck(arg->expression);
         visit(arg->expression);
         if (!root)
             args->push_back(arg);
@@ -539,7 +552,7 @@ bool ExpressionUnroll::preorder(const IR::BoolLiteral *) {
 
 const IR::Node *IfStatementUnroll::postorder(IR::IfStatement *i) {
     auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
-    ExpressionUnroll::sanity(i->condition);
+    expressionUnrollSanityCheck(i->condition);
     auto unroller = new LogicalExpressionUnroll(collector);
     i->condition->apply(*unroller);
     for (auto i : unroller->stmt)
@@ -566,8 +579,11 @@ const IR::Node *IfStatementUnroll::postorder(IR::P4Parser *a) {
     return injector.inject_parser(parser, a);
 }
 
+// TODO(GordonWuCn): simplify with a postorder visitor if it is a statement,
+// return the expression, else introduce a temporary for the current expression
+// and return the temporary in a pathexpression.
 bool LogicalExpressionUnroll::preorder(const IR::Operation_Unary *u) {
-    sanity(u->expr);
+    expressionUnrollSanityCheck(u->expr);
     if (!u->is<IR::Member>()) {
         BUG("%1% Not Implemented", u);
     } else {
@@ -598,8 +614,8 @@ bool LogicalExpressionUnroll::preorder(const IR::Operation_Unary *u) {
 }
 
 bool LogicalExpressionUnroll::preorder(const IR::Operation_Binary *bin) {
-    sanity(bin->left);
-    sanity(bin->right);
+    expressionUnrollSanityCheck(bin->left);
+    expressionUnrollSanityCheck(bin->right);
     visit(bin->left);
     const IR::Expression *left_root = root;
     visit(bin->right);
@@ -652,7 +668,7 @@ bool LogicalExpressionUnroll::preorder(const IR::Operation_Binary *bin) {
 bool LogicalExpressionUnroll::preorder(const IR::MethodCallExpression *m) {
     auto args = new IR::Vector<IR::Argument>;
     for (auto arg : *m->arguments) {
-        sanity(arg->expression);
+        expressionUnrollSanityCheck(arg->expression);
         visit(arg->expression);
         if (!root)
             args->push_back(arg);
@@ -838,8 +854,7 @@ CollectLocalVariableToMetadata::postorder(IR::PathExpression *p) {
 const IR::Node *CollectLocalVariableToMetadata::postorder(IR::P4Control *c) {
     IR::IndexedVector<IR::Declaration> decls;
     for (auto d : c->controlLocals) {
-        if (d->is<IR::Declaration_Instance>() || d->is<IR::P4Action>() ||
-            d->is<IR::P4Table>()) {
+        if (d->is<IR::Declaration_Instance>()) {
             decls.push_back(d);
         } else if (!d->is<IR::Declaration_Variable>()) {
             std::cerr << d->node_type_name() << std::endl;
