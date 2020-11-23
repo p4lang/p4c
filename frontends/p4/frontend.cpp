@@ -56,6 +56,7 @@ limitations under the License.
 #include "simplifyParsers.h"
 #include "specialize.h"
 #include "specializeGenericFunctions.h"
+#include "specializeGenericTypes.h"
 #include "strengthReduction.h"
 #include "structInitializers.h"
 #include "switchAddDefault.h"
@@ -152,6 +153,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new TypeInference(&refMap, &typeMap, false),  // insert casts
         new ValidateMatchAnnotations(&typeMap),
         new BindTypeVariables(&refMap, &typeMap),
+        new SpecializeGenericTypes(&refMap, &typeMap),
         new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
         new ResolveReferences(&refMap),
         new TypeInference(&refMap, &typeMap, false),  // more casts may be needed

@@ -18,30 +18,6 @@ limitations under the License.
 
 namespace P4 {
 
-namespace {
-
-class TypeSubstitutionVisitor : public TypeVariableSubstitutionVisitor {
-    TypeMap* typeMap;
-
- public:
-    TypeSubstitutionVisitor(TypeMap* typeMap, TypeVariableSubstitution* ts) :
-            TypeVariableSubstitutionVisitor(ts), typeMap(typeMap) {
-        CHECK_NULL(typeMap); setName("TypeSubstitutionVisitor"); }
-    const IR::Node* postorder(IR::PathExpression* path) override {
-        // We want fresh nodes for variables, etc.
-        return new IR::PathExpression(path->path->clone()); }
-    const IR::Node* postorder(IR::Type_Name* type) override {
-        auto actual = typeMap->getTypeType(getOriginal<IR::Type_Name>(), true);
-        if (auto tv = actual->to<IR::ITypeVar>()) {
-            LOG3("Replacing " << tv);
-            return replacement(tv, type);
-        }
-        return type;
-    }
-};
-
-}  // namespace
-
 bool FindFunctionSpecializations::preorder(const IR::MethodCallExpression* mce) {
     if (!mce->typeArguments->size())
         return false;

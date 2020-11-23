@@ -186,9 +186,6 @@ void TypeInference::setType(const IR::Node* element, const IR::Type* type) {
 }
 
 void TypeInference::addSubstitutions(const TypeVariableSubstitution* tvs) {
-    if (readOnly)
-        // we only need to do this the first time
-        return;
     typeMap->addSubstitutions(tvs);
 }
 
@@ -510,15 +507,18 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         return resultType;
     } else if (auto hdr = type->to<IR::Type_Header>()) {
         return canonicalizeFields(hdr, [hdr](const IR::IndexedVector<IR::StructField>* fields) {
-                return new IR::Type_Header(hdr->srcInfo, hdr->name, hdr->annotations, *fields);
+            return new IR::Type_Header(
+                hdr->srcInfo, hdr->name, hdr->annotations, hdr->typeParameters, *fields);
             });
     } else if (auto str = type->to<IR::Type_Struct>()) {
         return canonicalizeFields(str, [str](const IR::IndexedVector<IR::StructField>* fields) {
-                return new IR::Type_Struct(str->srcInfo, str->name, str->annotations, *fields);
+                return new IR::Type_Struct(
+                    str->srcInfo, str->name, str->annotations, str->typeParameters, *fields);
             });
     } else if (auto hu = type->to<IR::Type_HeaderUnion>()) {
         return canonicalizeFields(hu, [hu](const IR::IndexedVector<IR::StructField>* fields) {
-                return new IR::Type_HeaderUnion(hu->srcInfo, hu->name, hu->annotations, *fields);
+                return new IR::Type_HeaderUnion(
+                    hu->srcInfo, hu->name, hu->annotations, hu->typeParameters, *fields);
             });
     } else if (auto su = type->to<IR::Type_UnknownStruct>()) {
         return canonicalizeFields(su, [su](const IR::IndexedVector<IR::StructField>* fields) {
@@ -761,16 +761,19 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
         setType(sourceExpression, destType);
         setCompileTimeConstant(sourceExpression);
     }
-    if (auto ts = destType->to<IR::Type_StructLike>()) {
+    auto concreteType = destType;
+    if (auto tsc = destType->to<IR::Type_SpecializedCanonical>())
+        concreteType = tsc->substituted;
+    if (auto ts = concreteType->to<IR::Type_StructLike>()) {
         bool cst = isCompileTimeConstant(sourceExpression);
         auto si = sourceExpression->to<IR::StructExpression>();
+        auto type = destType->getP4Type();
         if (initType->is<IR::Type_UnknownStruct>() ||
             (si != nullptr && initType->is<IR::Type_Struct>())) {
             // Even if the structure is a struct expression with the right type,
             // we still need to recurse over its fields; they many not have
             // the right type.
             CHECK_NULL(si);
-            auto type = new IR::Type_Name(ts->name);
             if (ts->fields.size() != si->components.size()) {
                 typeError("%1%: destination type expects %2% fields, but source only has %3%",
                           errorPosition, ts->fields.size(), si->components.size());
@@ -791,7 +794,6 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
             if (initType->is<IR::Type_UnknownStruct>() || changes)
                 sourceExpression = new IR::StructExpression(type, type, vec);
         } else if (auto li = sourceExpression->to<IR::ListExpression>()) {
-            auto type = new IR::Type_Name(ts->name);
             if (ts->fields.size() != li->components.size()) {
                 typeError("%1%: destination type expects %2% fields, but source only has %3%",
                           errorPosition, ts->fields.size(), li->components.size());
@@ -1432,7 +1434,9 @@ const IR::Node* TypeInference::postorder(IR::Type_Stack* type) {
     if (etype == nullptr)
         return type;
 
-    if (!etype->is<IR::Type_Header>() && !etype->is<IR::Type_HeaderUnion>())
+    if (!etype->is<IR::Type_Header>() && !etype->is<IR::Type_HeaderUnion>() &&
+        // experimental: generic stacks
+        !etype->is<IR::Type_SpecializedCanonical>())
         typeError("Header stack %1% used with non-header type %2%",
                   type, etype->toString());
     return type;
@@ -1453,7 +1457,7 @@ bool TypeInference::validateFields(const IR::Type* type,
         if (ftype == nullptr)
             return false;
         if (!checker(ftype)) {
-            typeError("Field %1% of %2% cannot have type %3%",
+            typeError("Field '%1%' of '%2%' cannot have type '%3%'",
                       field, type->toString(), field->type);
             err = true;
         }
@@ -1481,7 +1485,9 @@ const IR::Node* TypeInference::postorder(IR::Type_Header* type) {
                // Nested bit-vector struct inside a Header is supported
                // Experimental feature - see Issue 383.
                (t->is<IR::Type_Struct>() && onlyBitsOrBitStructs(t)) ||
-               t->is<IR::Type_SerEnum>() || t->is<IR::Type_Boolean>(); };
+               t->is<IR::Type_SerEnum>() || t->is<IR::Type_Boolean>() ||
+                // experimental: generic headers
+                t->is<IR::Type_Var>() || t->is<IR::Type_SpecializedCanonical>(); };
     validateFields(canon, validator);
     return type;
 }
@@ -1496,14 +1502,18 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
         t->is<IR::Type_Enum>() || t->is<IR::Type_Error>() ||
         t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() ||
         t->is<IR::Type_Varbits>() || t->is<IR::Type_ActionEnum>() ||
-        t->is<IR::Type_Tuple>() || t->is<IR::Type_SerEnum>(); };
+        t->is<IR::Type_Tuple>() || t->is<IR::Type_SerEnum>() ||
+                // experimental: generic structs
+        t->is<IR::Type_Var>() || t->is<IR::Type_SpecializedCanonical>(); };
     (void)validateFields(canon, validator);
     return type;
 }
 
 const IR::Node* TypeInference::postorder(IR::Type_HeaderUnion *type) {
     auto canon = setTypeType(type);
-    auto validator = [] (const IR::Type* t) { return t->is<IR::Type_Header>(); };
+    auto validator = [] (const IR::Type* t) { return t->is<IR::Type_Header>() ||
+                // experimental: generic unions
+        t->is<IR::Type_Var>() || t->is<IR::Type_SpecializedCanonical>(); };
     (void)validateFields(canon, validator);
     return type;
 }
@@ -1954,14 +1964,15 @@ const IR::Node* TypeInference::postorder(IR::StructExpression* expression) {
         components->push_back(new IR::StructField(c->name, type));
     }
 
+    // This is the type inferred by looking at the fields.
     const IR::Type* structType = new IR::Type_UnknownStruct(
         expression->srcInfo, "unknown struct", *components);
     structType = canonicalize(structType);
 
     const IR::Expression* result = expression;
-    if (expression->typeName != nullptr) {
+    if (expression->structType != nullptr) {
         // We know the exact type of the initializer
-        auto desired = getTypeType(expression->typeName);
+        auto desired = getTypeType(expression->structType);
         if (desired == nullptr)
             return expression;
         auto tvs = unify(expression, desired, structType,
@@ -2445,13 +2456,16 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
     if (sourceType == nullptr || castType == nullptr)
         return expression;
 
-    if (auto st = castType->to<IR::Type_StructLike>()) {
+    auto concreteType = castType;
+    if (auto tsc = castType->to<IR::Type_SpecializedCanonical>())
+        concreteType = tsc->substituted;
+    if (auto st = concreteType->to<IR::Type_StructLike>()) {
         if (auto se = expression->expr->to<IR::StructExpression>()) {
             // Interpret (S) { kvpairs } as a struct initializer expression
             // instead of a cast to a struct.
             if (se->type == nullptr || se->type->is<IR::Type_Unknown>() ||
                 se->type->is<IR::Type_UnknownStruct>()) {
-                auto type = new IR::Type_Name(st->name);
+                auto type = castType->getP4Type();
                 setType(type, new IR::Type_Type(st));
                 auto sie = new IR::StructExpression(
                     se->srcInfo, type, se->components);
@@ -2472,7 +2486,8 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
     if (!castType->is<IR::Type_Bits>() &&
         !castType->is<IR::Type_Boolean>() &&
         !castType->is<IR::Type_Newtype>() &&
-        !castType->is<IR::Type_SerEnum>()) {
+        !castType->is<IR::Type_SerEnum>() &&
+        !castType->is<IR::Type_SpecializedCanonical>()) {
         typeError("%1%: cast not supported", expression->destType);
         return expression;
     }

@@ -29,17 +29,22 @@ limitations under the License.
 
 namespace P4 {
 
-// This pass only clears the typeMap if the program has changed.
+// This pass only clears the typeMap if the program has changed
+// or the 'force' flag is set.
 // This is needed if the types of some objects in the program change.
 class ClearTypeMap : public Inspector {
     TypeMap* typeMap;
+    bool     force;
  public:
-    explicit ClearTypeMap(TypeMap* typeMap) :
-            typeMap(typeMap) { CHECK_NULL(typeMap); }
+    explicit ClearTypeMap(TypeMap* typeMap, bool force = false) :
+            typeMap(typeMap), force(force) { CHECK_NULL(typeMap); }
     bool preorder(const IR::P4Program* program) override {
         // Clear map only if program has not changed from last time
-        // otherwise we can reuse it
-        if (!typeMap->checkMap(program))
+        // otherwise we can reuse it.  The 'force' flag is needed
+        // because the program is saved only *after* typechecking,
+        // so if the program changes during type-checking, the
+        // typeMap may not be complete.
+        if (force || !typeMap->checkMap(program))
             typeMap->clear();
         return false;  // prune()
     }

@@ -205,7 +205,12 @@ const Type* Type_SpecializedCanonical::getP4Type() const {
         auto at = a->getP4Type();
         args->push_back(at);
     }
-    return new IR::Type_Specialized(srcInfo, baseType->getP4Type()->to<IR::Type_Name>(), args);
+    auto bt = baseType->getP4Type();
+    if (auto tn = bt->to<IR::Type_Name>())
+        return new IR::Type_Specialized(srcInfo, tn, args);
+    auto st = baseType->to<IR::Type_StructLike>();
+    BUG_CHECK(st != nullptr, "%1%: expected a struct", baseType);
+    return new IR::Type_Specialized(srcInfo, new IR::Type_Name(st->getName()), args);
 }
 
 }  // namespace IR
