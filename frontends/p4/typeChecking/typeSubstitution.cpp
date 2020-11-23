@@ -20,7 +20,6 @@ limitations under the License.
 #include "typeConstraints.h"
 
 namespace P4 {
-// Return
 cstring TypeVariableSubstitution::compose(const IR::ITypeVar* var, const IR::Type* substitution) {
     LOG3("Adding " << var << "->" << dbp(substitution) << "=" <<
          substitution << " to substitution");
