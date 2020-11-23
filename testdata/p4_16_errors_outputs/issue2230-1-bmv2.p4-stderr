@@ -19,9 +19,13 @@ issue2230-1-bmv2.p4(82)
   control myCtrl(inout h2_t h2, inout s2_t s2)
                                            ^^
 issue2230-1-bmv2.p4(43)
-struct s2_t {
-       ^^^^
-issue2230-1-bmv2.p4(137): [--Werror=type-error] error: funky_swap: Cannot unify struct s1_t with struct s2_t
+  struct s2_t {
+         ^^^^
+  ---- Originating from:
+issue2230-1-bmv2.p4(115): Function type 'myCtrl' does not match invocation type '<Method call>'
+          c1.apply(hdr.h1, s1);
+          ^^^^^^^^^^^^^^^^^^^^
+issue2230-1-bmv2.p4(137): [--Werror=type-error] error: funky_swap
         s1 = funky_swap(s1);
              ^^^^^^^^^^^^^^
   ---- Actual error:

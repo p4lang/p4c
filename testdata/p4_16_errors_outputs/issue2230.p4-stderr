@@ -1,4 +1,4 @@
-issue2230.p4(70): [--Werror=type-error] error: AssignmentStatement: Cannot unify header h1_t with header h2_t
+issue2230.p4(70): [--Werror=type-error] error: AssignmentStatement
         hdr.h2 = hdr.h1;
                ^
   ---- Actual error:
@@ -16,9 +16,9 @@ issue2230.p4(28)
   header h1_t {
          ^^^^
 issue2230.p4(33)
-header h2_t {
-       ^^^^
-issue2230.p4(74): [--Werror=type-error] error: AssignmentStatement: Cannot unify struct s1_t with header h1_t
+  header h2_t {
+         ^^^^
+issue2230.p4(74): [--Werror=type-error] error: AssignmentStatement
         hdr.h1b = s1;
                 ^
   ---- Actual error:
@@ -36,9 +36,9 @@ issue2230.p4(38)
   struct s1_t {
          ^^^^
 issue2230.p4(28)
-header h1_t {
-       ^^^^
-issue2230.p4(80): [--Werror=type-error] error: AssignmentStatement: Cannot unify header h1_t with struct s1_t
+  header h1_t {
+         ^^^^
+issue2230.p4(80): [--Werror=type-error] error: AssignmentStatement
         s1 = hdr.h1;
            ^
   ---- Actual error:
