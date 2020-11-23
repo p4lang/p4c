@@ -19,6 +19,7 @@ set (MIDEND_SRCS
   copyStructures.cpp
   eliminateNewtype.cpp
   eliminateSerEnums.cpp
+  eliminateSwitch.cpp
   eliminateTuples.cpp
   expandEmit.cpp
   expandLookahead.cpp
@@ -58,6 +59,7 @@ set (MIDEND_HDRS
   copyStructures.h
   eliminateNewtype.h
   eliminateSerEnums.h
+  eliminateSwitch.h
   eliminateTuples.h
   expandEmit.h
   expandLookahead.h

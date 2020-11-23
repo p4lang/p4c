@@ -35,6 +35,7 @@ limitations under the License.
 #include "midend/eliminateTuples.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
+#include "midend/eliminateSwitch.h"
 #include "midend/flattenHeaders.h"
 #include "midend/flattenInterfaceStructs.h"
 #include "midend/replaceSelectRange.h"
@@ -118,6 +119,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options, std::ostream* o
             new P4::SimplifyControlFlow(&refMap, &typeMap),
             new P4::CompileTimeOperations(),
             new P4::TableHit(&refMap, &typeMap),
+            new P4::EliminateSwitch(&refMap, &typeMap),
             new P4::RemoveLeftSlices(&refMap, &typeMap),
             // p4c-bm removed unused action parameters. To produce a compatible
             // control plane API, we remove them as well for P4-14 programs.

@@ -233,6 +233,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
                             stateExpression optInitializer initializer
                             simpleKeysetExpression transitionStatement switchLabel
                             p4rtControllerType reducedSimpleKeysetExpression
+                            nonBraceExpression
 %type<ConstType*>           baseType typeOrVoid specializedType headerStackType
                             typeRef tupleType typeArg realTypeArg namedType
 %type<IR::Type_Name*>       typeName
@@ -1207,12 +1208,12 @@ switchCases
 
 switchCase
     : switchLabel ":" blockStatement { $$ = new IR::SwitchCase(@1 + @3, $1, $3); }
-    | switchLabel ":" { $$ = new IR::SwitchCase(@1, $1, nullptr); }
+    | switchLabel ":"                { $$ = new IR::SwitchCase(@1, $1, nullptr); }
     ;
 
 switchLabel
-    : name                     { $$ = new IR::PathExpression(*$1); }
-    | DEFAULT                  { $$ = new IR::DefaultExpression(@1); }
+    : DEFAULT                  { $$ = new IR::DefaultExpression(@1); }
+    | nonBraceExpression       { $$ = $1; }
     ;
 
 statementOrDeclaration
@@ -1433,6 +1434,60 @@ expression
     | expression l_angle realTypeArgumentList r_angle "(" argumentList ")"
         { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3, $6); }
     | expression "(" argumentList ")"
+        { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3); }
+    | namedType "(" argumentList ")"
+        { $$ = new IR::ConstructorCallExpression(@1 + @4, $1, $3); }
+    | "(" typeRef ")" expression %prec PREFIX { $$ = new IR::Cast(@1 + @4, $2, $4); }
+    ;
+
+nonBraceExpression
+    : INTEGER                            { $$ = parseConstant(@1, $1, 0); }
+    | STRING_LITERAL                     { $$ = new IR::StringLiteral(@1, $1); }
+    | TRUE                               { $$ = new IR::BoolLiteral(@1, true); }
+    | FALSE                              { $$ = new IR::BoolLiteral(@1, false); }
+    | THIS                               { $$ = new IR::This(@1); }  // experimental
+    | nonTypeName                        { $$ = new IR::PathExpression(*$1); }
+    | dotPrefix nonTypeName              { $$ = new IR::PathExpression(new IR::Path(*$2, true)); driver.structure->clearPath(); }
+    | nonBraceExpression "[" expression "]"      { $$ = new IR::ArrayIndex(@1 + @4, $1, $3); }
+    | nonBraceExpression "[" expression ":" expression "]" { $$ = new IR::Slice(@1 + @6, $1, $3, $5); }
+    | "(" expression ")"                 { $$ = $2; }
+    | "!" expression %prec PREFIX        { $$ = new IR::LNot(@1 + @2, $2); }
+    | "~" expression %prec PREFIX        { $$ = new IR::Cmpl(@1 + @2, $2); }
+    | "-" expression %prec PREFIX        { $$ = new IR::Neg(@1 + @2, $2); }
+    | "+" expression %prec PREFIX        { $$ = $2; }
+    | typeName dot_name %prec DOT
+        { $$ = new IR::Member(@1 + @2, new IR::TypeNameExpression(@1, $1), *$2); }
+    | ERROR "." name
+        { auto typeName = new IR::Type_Name(@1, new IR::Path(IR::ID(@1, "error")));
+          $$ = new IR::Member(@1+@3, new IR::TypeNameExpression(@1+@3, typeName), *$3); }
+    | nonBraceExpression dot_name %prec DOT      { $$ = new IR::Member(@1 + @2, $1, *$2); }
+    | nonBraceExpression "*" expression          { $$ = new IR::Mul(@1 + @3, $1, $3); }
+    | nonBraceExpression "/" expression          { $$ = new IR::Div(@1 + @3, $1, $3); }
+    | nonBraceExpression "%" expression          { $$ = new IR::Mod(@1 + @3, $1, $3); }
+    | nonBraceExpression "+" expression          { $$ = new IR::Add(@1 + @3, $1, $3); }
+    | nonBraceExpression "-" expression          { $$ = new IR::Sub(@1 + @3, $1, $3); }
+    | nonBraceExpression "|+|" expression        { $$ = new IR::AddSat(@1 + @3, $1, $3); }
+    | nonBraceExpression "|-|" expression        { $$ = new IR::SubSat(@1 + @3, $1, $3); }
+    | nonBraceExpression "<<" expression         { $$ = new IR::Shl(@1 + @3, $1, $3); }
+    | nonBraceExpression R_ANGLE_SHIFT ">" expression %prec R_ANGLE_SHIFT
+        { $$ = new IR::Shr(@1 + @4, $1, $4); }
+    | nonBraceExpression "<=" expression         { $$ = new IR::Leq(@1 + @3, $1, $3); }
+    | nonBraceExpression ">=" expression         { $$ = new IR::Geq(@1 + @3, $1, $3); }
+    | nonBraceExpression l_angle expression %prec "<"
+                                         { $$ = new IR::Lss(@1 + @3, $1, $3); }
+    | nonBraceExpression ">" expression          { $$ = new IR::Grt(@1 + @3, $1, $3); }
+    | nonBraceExpression "!=" expression         { $$ = new IR::Neq(@1 + @3, $1, $3); }
+    | nonBraceExpression "==" expression         { $$ = new IR::Equ(@1 + @3, $1, $3); }
+    | nonBraceExpression "&" expression          { $$ = new IR::BAnd(@1 + @3, $1, $3); }
+    | nonBraceExpression "^" expression          { $$ = new IR::BXor(@1 + @3, $1, $3); }
+    | nonBraceExpression "|" expression          { $$ = new IR::BOr(@1 + @3, $1, $3); }
+    | nonBraceExpression "++" expression         { $$ = new IR::Concat(@1 + @3, $1, $3); }
+    | nonBraceExpression "&&" expression         { $$ = new IR::LAnd(@1 + @2 + @3, $1, $3); }
+    | nonBraceExpression "||" expression         { $$ = new IR::LOr(@1 + @2 + @3, $1, $3); }
+    | nonBraceExpression "?" expression ":" expression { $$ = new IR::Mux(@1 + @5, $1, $3, $5); }
+    | nonBraceExpression l_angle realTypeArgumentList r_angle "(" argumentList ")"
+        { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3, $6); }
+    | nonBraceExpression "(" argumentList ")"
         { $$ = new IR::MethodCallExpression(@1 + @4, $1, $3); }
     | namedType "(" argumentList ")"
         { $$ = new IR::ConstructorCallExpression(@1 + @4, $1, $3); }

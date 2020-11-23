@@ -860,12 +860,17 @@ bool ComputeWriteSet::preorder(const IR::SwitchStatement* statement) {
     }
     auto table = TableApplySolver::isActionRun(
         statement->expression, storageMap->refMap, storageMap->typeMap);
-    CHECK_NULL(table);
-    auto al = table->getActionList();
-    bool allCases = statement->cases.size() == al->size();
-    if (!seenDefault && !allCases)
-        // no case may have been executed
+    if (table) {
+        auto al = table->getActionList();
+        bool allCases = statement->cases.size() == al->size();
+        if (!seenDefault && !allCases)
+            // no case may have been executed
+            result = result->joinDefinitions(save);
+    } else {
+        // TODO: in some cases we can check for exhaustive matches,
+        // but this is conservative.
         result = result->joinDefinitions(save);
+    }
     return setDefinitions(result);
 }
 
