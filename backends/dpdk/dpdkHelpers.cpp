@@ -387,7 +387,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
 }
 
 // TODO(hanw): TBD
-bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *s) {
+bool ConvertStatementToDpdk::preorder(const IR::SwitchStatement *) {
     BUG("Not implemented");
     return false;
 }

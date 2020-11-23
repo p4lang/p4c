@@ -848,11 +848,11 @@ CollectLocalVariableToMetadata::postorder(IR::PathExpression *p) {
 const IR::Node *CollectLocalVariableToMetadata::postorder(IR::P4Control *c) {
     IR::IndexedVector<IR::Declaration> decls;
     for (auto d : c->controlLocals) {
-        if (d->is<IR::Declaration_Instance>()) {
+        if (d->is<IR::Declaration_Instance>() || d->is<IR::P4Action>() ||
+            d->is<IR::P4Table>()) {
             decls.push_back(d);
         } else if (!d->is<IR::Declaration_Variable>()) {
-            std::cerr << d->node_type_name() << std::endl;
-            BUG("%1%: Unhandled declaration type in control", c);
+            BUG("%1%: Unhandled declaration type in control", d);
         }
     }
     c->controlLocals = decls;
@@ -861,11 +861,9 @@ const IR::Node *CollectLocalVariableToMetadata::postorder(IR::P4Control *c) {
 const IR::Node *CollectLocalVariableToMetadata::postorder(IR::P4Parser *p) {
     IR::IndexedVector<IR::Declaration> decls;
     for (auto d : p->parserLocals) {
-        if (d->is<IR::Declaration_Instance>() || d->is<IR::P4Action>() ||
-            d->is<IR::P4Table>()) {
+        if (d->is<IR::Declaration_Instance>()) {
             decls.push_back(d);
         } else if (!d->is<IR::Declaration_Variable>()) {
-            std::cerr << d->node_type_name() << std::endl;
             BUG("%1%: Unhandled declaration type in parser", p);
         }
     }

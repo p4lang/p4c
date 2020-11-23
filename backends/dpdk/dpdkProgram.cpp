@@ -178,7 +178,6 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
 
         // the main body
         auto i = new IR::DpdkLabelStatement(state.name.toString());
-        LOG1("state " << i);
         add_instr(i);
         auto c = state.components;
         for (auto stat : c) {
@@ -191,8 +190,8 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
         if (state.selectExpression) {
             if (auto e = state.selectExpression->to<IR::SelectExpression>()) {
                 const IR::Expression *switch_var;
-                BUG_CHECK(e->select->components.size() != 1,
-                        "Unsupported select expression %2%", e->select);
+                BUG_CHECK(e->select->components.size() == 1,
+                        "Unsupported select expression %1%", e->select);
                 switch_var = e->select->components[0];
                 for (auto v : e->selectCases) {
                     if (!v->keyset->is<IR::DefaultExpression>()) {
