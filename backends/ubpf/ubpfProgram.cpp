@@ -32,7 +32,8 @@ namespace UBPF {
                                                pack->type->name);
 
         if (pack->getConstructorParameters()->size() != 3) {
-            ::error("Expected toplevel package %1% to have 3 parameters", pack->type);
+            ::error(ErrorType::ERR_MODEL,
+                    "Expected toplevel package %1% to have 3 parameters", pack->type);
             return false;
         }
 

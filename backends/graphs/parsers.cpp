@@ -35,7 +35,7 @@ void ParserGraphs::postorder(const IR::P4Parser *parser) {
     LOG2("Writing parser graph " << parser->name);
     auto out = openFile(path.toString(), false);
     if (out == nullptr) {
-        ::error("Failed to open file %1%", path.toString());
+        ::error(ErrorType::ERR_IO, "Failed to open file %1%", path.toString());
         return;
     }
 

@@ -91,7 +91,7 @@ void KeyNameGenerator::postorder(const IR::ArrayIndex* expression) {
 }
 
 void KeyNameGenerator::postorder(const IR::Constant* expression)
-{ name.emplace(expression, expression->toString()); }
+{ name.emplace(expression, Util::toString(expression->value, 0, false, expression->base)); }
 
 void KeyNameGenerator::postorder(const IR::Slice* expression) {
     cstring e0 = getName(expression->e0);

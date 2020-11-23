@@ -28,7 +28,7 @@ uninit.p4(92): [--Wwarn=uninitialized_use] warning: e may be uninitialized
 uninit.p4(97): [--Wwarn=uninitialized_use] warning: touched may be uninitialized
         touched = !touched; // uninitialized
                    ^^^^^^^
-uninit.p4(68): [--Wwarn=uninitialized_out_param] warning: out parameter v may be uninitialized when c terminates
+uninit.p4(68): [--Wwarn=uninitialized_out_param] warning: out parameter 'v' may be uninitialized when 'c' terminates
 control c(out bit<32> v) { // uninitialized
                       ^
 uninit.p4(68)

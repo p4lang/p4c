@@ -1,4 +1,4 @@
-tunnel.p4(1002): [--Wwarn=mismatch] warning: -14: negative value with unsigned type
+tunnel.p4(1002): [--Wwarn=mismatch] warning: -16w14: negative value with unsigned type
     add(egress_metadata.payload_length, standard_metadata.packet_length, -14);
                                                                           ^^
 intrinsic.p4(40): [--Wwarn=type-inference] warning: Could not infer type for enable_dod, using bit<8>

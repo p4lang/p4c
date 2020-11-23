@@ -258,7 +258,7 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
             auto ebpfType = UBPFTypeFactory::instance->create(type);
             cstring fieldName = c->expression->toString().replace('.', '_');
             if (!ebpfType->is<EBPF::IHasWidth>()) {
-                ::error("%1%: illegal type %2% for key field", c, type);
+                ::error(ErrorType::ERR_INVALID, "%1%: illegal type %2% for key field", c, type);
                 return;
             }
             unsigned width = ebpfType->to<EBPF::IHasWidth>()->widthInBits();
@@ -291,7 +291,8 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
             auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
             if (matchType->name.name != P4::P4CoreLibrary::instance.exactMatch.name &&
                 matchType->name.name != P4::P4CoreLibrary::instance.lpmMatch.name)
-                ::error("Match of type %1% not supported", c->matchType);
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "Match of type %1% not supported", c->matchType);
             key_idx++;
         }
     }
@@ -518,6 +519,3 @@ void UBPFTable::emitInitializer(EBPF::CodeBuilder *builder) {
 
 
 }  // namespace UBPF
-
-
-

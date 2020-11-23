@@ -16,7 +16,22 @@ enum class Direction {
     Out,
     InOut
 };
+
+inline cstring directionToString(IR::Direction direction) {
+    switch (direction) {
+        case IR::Direction::None:
+            return "<none>";
+        case IR::Direction::In:
+            return "in";
+        case IR::Direction::Out:
+            return "out";
+        case IR::Direction::InOut:
+            return "inout";
+        default:
+            BUG("Unhandled case");
+    }
 }
+}  // namespace IR
 
 inline std::ostream& operator<<(std::ostream &out, IR::Direction d) {
     switch (d) {
@@ -386,7 +401,8 @@ class Type_Name : Type {
 class Type_Stack : Type {
     Type        elementType;
     Expression  size;
-    toString{ return elementType->toString() + "[]"; }
+    toString{ return elementType->toString() + "[" +
+                (sizeKnown() ? Util::toString(getSize()) : "?") + "]"; }
     dbprint{ out << elementType << "[" << size << "]"; }
     bool sizeKnown() const;
     unsigned getSize() const;
@@ -508,17 +524,7 @@ abstract Type_MethodBase : Type, IMayBeGenericType, ISimpleNamespace {
     size_t minParameterCount() const;
     virtual TypeParameters getTypeParameters() const override { return typeParameters; }
     void dbprint(std::ostream& out) const override;
-    toString {
-        cstring result = "";
-        if (returnType != nullptr)
-            result = returnType->toString();
-        result += " function";
-        result += typeParameters->toString();
-        result += "(";
-        result += parameters->toString();
-        result += ")";
-        return result;
-    }
+    toString { return "<Method>"; }
     const IR::Type* getP4Type() const override { return nullptr; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return typeParameters->getDeclarations()->concat(parameters->getDeclarations()); }
@@ -531,6 +537,9 @@ abstract Type_MethodBase : Type, IMayBeGenericType, ISimpleNamespace {
 /// Type for a method or function.
 class Type_Method : Type_MethodBase {
 #nodbprint
+    // The name is only used to give better error messages.
+    cstring name;
+    toString { return name; }
 }
 
 /// Describes an argument of a MethodCall
@@ -553,6 +562,7 @@ class Type_MethodCall : Type {
     Vector<ArgumentInfo> arguments;
     validate{ typeArguments->check_null(); arguments->check_null(); }
     const Type* getP4Type() const override { return nullptr; }
+    toString { return "<Method call>"; }
 }
 
 /// Actions look a lot like methods in many respects.

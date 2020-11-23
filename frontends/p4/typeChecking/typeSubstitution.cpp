@@ -20,12 +20,11 @@ limitations under the License.
 #include "typeConstraints.h"
 
 namespace P4 {
-bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
-                                       const IR::ITypeVar* var, const IR::Type* substitution) {
+cstring TypeVariableSubstitution::compose(const IR::ITypeVar* var, const IR::Type* substitution) {
     LOG3("Adding " << var << "->" << dbp(substitution) << "=" <<
          substitution << " to substitution");
     if (substitution->is<IR::Type_Dontcare>())
-        return true;
+        return "";
 
     // Type variables that represent Type_InfInt can only be unified to bit<> types
     // or to other Type_InfInt types.
@@ -36,9 +35,8 @@ bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
             substitution = se->type;
         if (!substitution->is<IR::Type_InfInt>() &&
             !substitution->is<IR::Type_Bits>()) {
-            ::error(ErrorType::ERR_TYPE_ERROR,
-                    "%1%: Cannot unify type %2% with %3%", errorLocation, var, substitution);
-            return false;
+            return "'%1%' type can only be unified with 'int', 'bit<>', or 'signed<>' types, "
+                    "not with '%2%'";
         }
     }
 
@@ -46,12 +44,8 @@ bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
     // It is not if var occurs in substitution
     TypeOccursVisitor occurs(var);
     substitution->apply(occurs);
-    if (occurs.occurs) {
-        ::error(ErrorType::ERR_TYPE_ERROR,
-                "%1%: Cannot unify type %2% with %3%",
-                errorLocation, var, substitution);
-        return false;
-    }
+    if (occurs.occurs)
+        return "'%1%' cannot be replaced with '%2%' which already contains it";
 
     // Check to see whether we already have a binding for this variable
     if (containsKey(var)) {
@@ -71,7 +65,7 @@ bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
         const IR::Type* type = bound.second;
         const IR::Node* newType = type->apply(visitor);
         if (newType == nullptr)
-            return false;
+            return "Could not replace '%1%' with '%2%'";
         if (newType == type)
             continue;
 
@@ -82,7 +76,7 @@ bool TypeVariableSubstitution::compose(const IR::Node* errorLocation,
     success = setBinding(var, substitution);
     if (!success)
         BUG("Failed to insert binding");
-    return true;
+    return "";
 }
 
 void TypeVariableSubstitution::simpleCompose(const TypeVariableSubstitution* other) {

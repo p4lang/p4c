@@ -1,9 +1,20 @@
 issue2021.p4(8): [--Werror=type-error] error: Expression .x cannot be the target of an assignment
         .x = 8w3;
          ^
-issue2021.p4(3): [--Werror=type-error] error: : Read-only value used for out/inout parameter a
-const bit<8> x = 8w1;
-                 ^^^
+issue2021.p4(9): [--Werror=type-error] error: f
+        f(.x);
+        ^^^^^
+  ---- Actual error:
+issue2021.p4(3): : Read-only value used for out/inout parameter 'a'
+  const bit<8> x = 8w1;
+                   ^^^
 issue2021.p4(4)
-extern void f(out bit<8> a);
-                         ^
+  extern void f(out bit<8> a);
+                           ^
+  ---- Originating from:
+issue2021.p4(4): Function type 'f' does not match invocation type '<Method call>'
+  extern void f(out bit<8> a);
+              ^
+issue2021.p4(9)
+          f(.x);
+          ^^^^^

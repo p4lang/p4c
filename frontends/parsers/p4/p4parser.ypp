@@ -916,7 +916,7 @@ functionPrototype
             driver.structure->declareTypes(&$3->parameters); }
         "(" parameterList ")" { driver.structure->declareParameters($6);
                                 auto params = new IR::ParameterList(@6, *$6);
-                                auto mt = new IR::Type_Method(@2, $3, $1, params);
+                                auto mt = new IR::Type_Method(@2, $3, $1, params, *$2);
                                 $$ = new IR::Method(@2, *$2, mt); }
     ;
 
@@ -930,7 +930,7 @@ methodPrototype
             $3->annotations = $1; }  // experimental
     | optAnnotations TYPE_IDENTIFIER "(" parameterList ")" ";"  // constructor
                                         { auto par = new IR::ParameterList(@4, *$4);
-                                          auto mt = new IR::Type_Method(@2, par);
+                                          auto mt = new IR::Type_Method(@2, par, $2);
                                           $$ = new IR::Method(@2, IR::ID(@2, $2), mt, $1); }
     ;
 

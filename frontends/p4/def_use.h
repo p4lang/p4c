@@ -146,10 +146,7 @@ class ArrayLocation : public StorageLocation {
 };
 
 class StorageFactory {
-    TypeMap* typeMap;
  public:
-    explicit StorageFactory(TypeMap* typeMap) : typeMap(typeMap)
-    { CHECK_NULL(typeMap); }
     StorageLocation* create(const IR::Type* type, cstring name) const;
 
     static const cstring validFieldName;
@@ -207,7 +204,7 @@ class StorageMap {
     TypeMap*       typeMap;
 
     StorageMap(ReferenceMap* refMap, TypeMap* typeMap) :
-            factory(typeMap), refMap(refMap), typeMap(typeMap)
+            refMap(refMap), typeMap(typeMap)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); }
     StorageLocation* add(const IR::IDeclaration* decl) {
         CHECK_NULL(decl);
