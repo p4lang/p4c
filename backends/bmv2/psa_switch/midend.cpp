@@ -113,14 +113,14 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options, std::ostream* outStre
         return true;
     };
     if (BMV2::PsaSwitchContext::get().options().loadIRFromJson == false) {
-        std::initializer_list<Visitor *> midendPasses = {
+        addPasses({
             options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
             new P4::RemoveMiss(&refMap, &typeMap),
             new P4::EliminateNewtype(&refMap, &typeMap),
             new P4::EliminateSerEnums(&refMap, &typeMap),
             new P4::RemoveActionParameters(&refMap, &typeMap),
             convertEnums,
-            new VisitFunctor([this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); }),
+            [this, convertEnums]() { enumMap = convertEnums->getEnumMapping(); },
             new P4::OrderArguments(&refMap, &typeMap),
             new P4::TypeChecking(&refMap, &typeMap),
             new P4::SimplifyKey(&refMap, &typeMap,
@@ -164,17 +164,13 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options, std::ostream* outStre
             new P4::TypeChecking(&refMap, &typeMap),
             new P4::MidEndLast(),
             evaluator,
-            new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
-        };
+            [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
+        });
         if (options.listMidendPasses) {
-            for (auto it : midendPasses) {
-                if (it != nullptr) {
-                    *outStream << it->name() <<'\n';
-                }
-            }
+            listPasses(*outStream, "\n");
+            *outStream << std::endl;
             return;
         }
-        addPasses(midendPasses);
         if (options.excludeMidendPasses) {
             removePasses(options.passesToExcludeMidend);
         }
@@ -184,9 +180,9 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options, std::ostream* outStre
             new P4::ResolveReferences(&refMap),
             new P4::TypeChecking(&refMap, &typeMap),
             fillEnumMap,
-            new VisitFunctor([this, fillEnumMap]() { enumMap = fillEnumMap->repr; }),
+            [this, fillEnumMap]() { enumMap = fillEnumMap->repr; },
             evaluator,
-            new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
+            [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
         });
     }
 }

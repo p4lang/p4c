@@ -130,6 +130,7 @@ class Visitor {
         v.parallel_visit_children(*this); }
 
     virtual Visitor *clone() const { BUG("need %s::clone method",  name()); return nullptr; }
+    virtual bool check_clone(const Visitor *a) { return typeid(*this) == typeid(*a); }
 
     // Functions for IR visit_children to call for ControlFlowVisitors.
     virtual Visitor &flow_clone() { return *this; }
@@ -237,7 +238,6 @@ class Visitor {
 
     void visit_children(const IR::Node *, std::function<void()> fn) { fn(); }
     class ChangeTracker;  // used by Modifier and Transform -- private to them
-    virtual bool check_clone(const Visitor *) { return true; }
     // This overrides visitDagOnce for a single node -- can only be called from
     // preorder and postorder functions
     void visitOnce() const { *visitCurrentOnce = true; }

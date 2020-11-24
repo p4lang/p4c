@@ -40,12 +40,38 @@ class PassManager : virtual public Visitor, virtual public Backtrack {
 
  public:
     PassManager() = default;
-    PassManager(const std::initializer_list<Visitor *> &init)
+    PassManager(const PassManager &) = default;
+    PassManager(PassManager &&) = default;
+    class VisitorRef {
+        Visitor *visitor;
+        friend class PassManager;
+
+     public:
+        VisitorRef() : visitor(nullptr) {}
+        VisitorRef(Visitor *v) : visitor(v) {}                          // NOLINT(runtime/explicit)
+        VisitorRef(const Visitor &v) : visitor(v.clone()) {             // NOLINT(runtime/explicit)
+            BUG_CHECK(visitor->check_clone(&v), "Incorrect clone in PassManager"); }
+        explicit VisitorRef(std::function<const IR::Node *(const IR::Node *)>);
+        // ambiguity resolution converters -- allow different lambda signatures
+        template<class T> VisitorRef(T t, typename std::enable_if<
+                std::is_convertible<decltype(t(nullptr)), const IR::Node *>::value, int>::type = 0)
+        : VisitorRef(std::function<const IR::Node *(const IR::Node *)>(t)) {}
+        template<class T> VisitorRef(T t, typename std::enable_if<
+                std::is_same<decltype(t(nullptr)), void>::value, int>::type = 0)
+        : VisitorRef(std::function<const IR::Node *(const IR::Node *)>(
+                [t](const IR::Node *n) -> const IR::Node * { t(n); return n; })) {}
+        template<class T> VisitorRef(T t, typename std::enable_if<
+                std::is_same<decltype(t()), void>::value, int>::type = 0)
+        : VisitorRef(std::function<const IR::Node *(const IR::Node *)>(
+                [t](const IR::Node *n) -> const IR::Node * { t(); return n; })) {}
+    };
+    PassManager(const std::initializer_list<VisitorRef> &init)
     { addPasses(init); }
-    void addPasses(const std::initializer_list<Visitor *> &init) {
+    void addPasses(const std::initializer_list<VisitorRef> &init) {
         never_backtracks_cache = -1;
-        for (auto p : init) if (p) passes.emplace_back(p); }
+        for (auto &p : init) if (p.visitor) passes.emplace_back(p.visitor); }
     void removePasses(const std::vector<cstring> &exclude);
+    void listPasses(std::ostream &, cstring sep) const;
     const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
     bool backtrack(trigger &trig) override;
     bool never_backtracks() override;
@@ -63,6 +89,22 @@ class PassManager : virtual public Visitor, virtual public Backtrack {
                 if (auto child = dynamic_cast<PassManager *>(pass))
                     child->addDebugHooks(hooks, recursive); }
     void early_exit() { early_exit_flag = true; }
+    PassManager *clone() const override { return new PassManager(*this); }
+};
+
+template<class T>
+class OnBacktrack : virtual public Visitor, virtual public Backtrack {
+    std::function<void(T *)>    fn;
+
+ public:
+    explicit OnBacktrack(std::function<void(T *)> f) : fn(f) {}
+    const IR::Node *apply_visitor(const IR::Node *n, const char * = 0) override { return n; }
+    bool backtrack(trigger &trig) override {
+        if (auto *t = dynamic_cast<T *>(&trig)) {
+            fn(t);
+            return true;
+        } else {
+            return false; } }
 };
 
 // Repeat a pass until convergence (or up to a fixed number of repeats)
@@ -70,41 +112,49 @@ class PassRepeated : virtual public PassManager {
     unsigned            repeats;  // 0 = until convergence
  public:
     PassRepeated() : repeats(0) {}
-    PassRepeated(const std::initializer_list<Visitor *> &init) :
+    PassRepeated(const std::initializer_list<VisitorRef> &init) :
             PassManager(init), repeats(0) {}
     const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
     PassRepeated *setRepeats(unsigned repeats) { this->repeats = repeats; return this; }
+    PassRepeated *clone() const override { return new PassRepeated(*this); }
 };
 
 class PassRepeatUntil : virtual public PassManager {
     std::function<bool()>       done;
  public:
     explicit PassRepeatUntil(std::function<bool()> done) : done(done) {}
-    PassRepeatUntil(const std::initializer_list<Visitor *> &init,
+    PassRepeatUntil(const std::initializer_list<VisitorRef> &init,
                     std::function<bool()> done)
     : PassManager(init), done(done) {}
     const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
+    PassRepeatUntil *clone() const override { return new PassRepeatUntil(*this); }
 };
 
 class PassIf : virtual public PassManager {
     std::function<bool()>       cond;
  public:
     explicit PassIf(std::function<bool()> cond) : cond(cond) {}
-    PassIf(std::function<bool()> cond, const std::initializer_list<Visitor *> &init)
+    PassIf(std::function<bool()> cond, const std::initializer_list<VisitorRef> &init)
     : PassManager(init), cond(cond) {}
     const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
+    PassIf *clone() const override { return new PassIf(*this); }
 };
 
 // Converts a function Node* -> Node* into a visitor
 class VisitFunctor : virtual public Visitor {
     std::function<const IR::Node *(const IR::Node *)>       fn;
     const IR::Node *apply_visitor(const IR::Node *n, const char * = 0) override { return fn(n); }
+
  public:
-    explicit VisitFunctor(std::function<const IR::Node *(const IR::Node *)> f) : fn(f)
-    { setName("VisitFunctor"); }
+    explicit VisitFunctor(std::function<const IR::Node *(const IR::Node *)> f) : fn(f) {}
     explicit VisitFunctor(std::function<void()> f)
-    : fn([f](const IR::Node *n)->const IR::Node *{ f(); return n; }) { setName("VisitFunctor"); }
+    : fn([f](const IR::Node *n)->const IR::Node *{ f(); return n; }) {}
+
+    VisitFunctor *clone() const override { return new VisitFunctor(*this); }
 };
+
+inline PassManager::VisitorRef::VisitorRef(std::function<const IR::Node *(const IR::Node *)> fn)
+: visitor(new VisitFunctor(fn)) {}
 
 class DynamicVisitor : virtual public Visitor {
     Visitor     *visitor;
@@ -120,6 +170,7 @@ class DynamicVisitor : virtual public Visitor {
     DynamicVisitor() : visitor(nullptr) {}
     explicit DynamicVisitor(Visitor *v) : visitor(v) {}
     void setVisitor(Visitor *v) { visitor = v; }
+    DynamicVisitor *clone() const override { return new DynamicVisitor(*this); }
 };
 
 #endif /* _IR_PASS_MANAGER_H_ */

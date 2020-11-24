@@ -1097,7 +1097,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         new P4::ClonePathExpressions(),
         new P4::ClearTypeMap(typeMap),
         evaluator,
-        new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
+        [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
     });
 
     auto hook = options.getDebugHook();

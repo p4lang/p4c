@@ -135,16 +135,14 @@ class ParserRewriter : public PassManager {
     ParserRewriter(ReferenceMap* refMap, TypeMap* typeMap, bool unroll) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap);
         setName("ParserRewriter");
-        passes.push_back(new AnalyzeParser(refMap, &current));
-        passes.push_back(new VisitFunctor (
-            [this, refMap, typeMap, unroll](const IR::Node* root) -> const IR::Node* {
-                current.analyze(refMap, typeMap, unroll);
-                return root;
-            }));
+        addPasses({
+            new AnalyzeParser(refMap, &current),
+            [this, refMap, typeMap, unroll](void) {
+                current.analyze(refMap, typeMap, unroll); },
 #if 0
-        if (unroll)
-            passes.push_back(new ParserUnroller(refMap, typeMap, &current));
+            unroll ? new ParserUnroller(refMap, typeMap, &current) : 0,
 #endif
+        });
     }
 };
 
