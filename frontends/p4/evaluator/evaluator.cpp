@@ -168,7 +168,7 @@ Evaluator::processConstructor(
         // constructors with zero arguments that may not appear in the original extern declaration.
         auto canon = instanceType;
         if (canon->is<IR::Type_SpecializedCanonical>())
-            canon = canon->to<IR::Type_SpecializedCanonical>()->substituted->to<IR::Type>();
+            canon = canon->to<IR::Type_SpecializedCanonical>()->substituted;
         BUG_CHECK(canon->is<IR::Type_Extern>(), "%1%: expected an extern", canon);
         auto constructor = canon->to<IR::Type_Extern>()->lookupConstructor(arguments);
         BUG_CHECK(constructor != nullptr,

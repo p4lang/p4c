@@ -130,6 +130,7 @@ class ReplaceTypeUses : public Transform {
         setName("ReplaceTypeUses"); CHECK_NULL(specMap); }
     const IR::Node* postorder(IR::Type_Specialized* type) override;
     const IR::Node* postorder(IR::StructExpression* expresison) override;
+    const IR::Node* postorder(IR::SwitchCase* scase) override;
 };
 
 /**

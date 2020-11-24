@@ -476,6 +476,7 @@ class Type_SpecializedCanonical : Type {
         BUG_CHECK(baseType->is<IMayBeGenericType>(), "base type %1% is not generic", baseType);
         BUG_CHECK(substituted->is<IMayBeGenericType>(), "substituted %1% is not generic", substituted);
     }
+    // Always a Type_Specialized
     const Type* getP4Type() const override;
     toString{
         cstring result = baseType->toString() + "<";
@@ -591,6 +592,8 @@ class Type_Method : Type_MethodBase {
     // The name is only used to give better error messages.
     cstring name;
     toString { return name; }
+    /// Do not use the name when comparing for equivalence.
+    equiv { return Type_MethodBase::equiv(a); }
 }
 
 /// Describes an argument of a MethodCall

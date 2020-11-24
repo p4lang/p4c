@@ -37,8 +37,7 @@ class StorageLocation : public IHasDbPrint {
     { CHECK_NULL(type); }
     template <class T>
     const T* to() const {
-        auto result = dynamic_cast<const T*>(this);
-        return result;
+        return dynamic_cast<const T*>(this);
     }
     template <class T>
     bool is() const {

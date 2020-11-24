@@ -176,4 +176,27 @@ const IR::Node* ReplaceTypeUses::postorder(IR::StructExpression* expression) {
     return expression;
 }
 
+const IR::Node* ReplaceTypeUses::postorder(IR::SwitchCase* scase) {
+    auto label = scase->label;
+    if (label->is<IR::DefaultExpression>())
+        return scase;
+    auto sw = findOrigCtxt<IR::SwitchStatement>();
+    CHECK_NULL(sw);
+    auto type = specMap->typeMap->getType(sw->expression);
+    auto ts = type->to<IR::Type_SpecializedCanonical>();
+    if (!ts)
+        return scase;
+    auto replacement = specMap->get(ts->getP4Type()->to<IR::Type_Specialized>());
+    if (!replacement)
+        return scase;
+    auto member = label->to<IR::Member>();
+    CHECK_NULL(member);
+    auto newLabel = new IR::Member(
+        label->srcInfo, new IR::TypeNameExpression(
+            label->srcInfo,
+            new IR::Type_Name(replacement->replacement->name)), member->member);
+    scase->label = newLabel;
+    return scase;
+}
+
 }  // namespace P4

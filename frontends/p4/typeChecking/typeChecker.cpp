@@ -520,13 +520,14 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
                 return new IR::Type_HeaderUnion(
                     hu->srcInfo, hu->name, hu->annotations, hu->typeParameters, *fields);
             });
+    } else if (auto su = type->to<IR::Type_Union>()) {
+        return canonicalizeFields(su, [su](const IR::IndexedVector<IR::StructField>* fields) {
+                return new IR::Type_Union(
+                    su->srcInfo, su->name, su->annotations, su->typeParameters, *fields);
+            });
     } else if (auto su = type->to<IR::Type_UnknownStruct>()) {
         return canonicalizeFields(su, [su](const IR::IndexedVector<IR::StructField>* fields) {
                 return new IR::Type_UnknownStruct(su->srcInfo, su->name, su->annotations, *fields);
-            });
-    } else if (auto su = type->to<IR::Type_Union>()) {
-        return canonicalizeFields(su, [su](const IR::IndexedVector<IR::StructField>* fields) {
-                return new IR::Type_Union(su->srcInfo, su->name, su->annotations, *fields);
             });
     } else if (auto st = type->to<IR::Type_Specialized>()) {
         auto baseCanon = canonicalize(st->baseType);
@@ -1501,6 +1502,11 @@ bool TypeInference::validateFields(const IR::Type* type,
     return !err;
 }
 
+const IR::Node* TypeInference::postorder(IR::Type_Union* type) {
+    setTypeType(type);
+    return type;
+}
+
 const IR::Node* TypeInference::postorder(IR::StructField* field) {
     if (done()) return field;
     auto canon = getTypeType(field->type);
@@ -1548,7 +1554,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
 const IR::Node* TypeInference::postorder(IR::Type_HeaderUnion *type) {
     auto canon = setTypeType(type);
     auto validator = [] (const IR::Type* t) { return t->is<IR::Type_Header>() ||
-                // experimental: generic unions
+                // experimental: generic header_unions
         t->is<IR::Type_Var>() || t->is<IR::Type_SpecializedCanonical>(); };
     (void)validateFields(canon, validator);
     return type;
@@ -2845,7 +2851,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             // - as the LHS of an assignment
             // - within a properly labeled switch statement
             auto context = getContext();
-            bool assignedTo = context->node->is<IR::AssignmentStatement>() || context->child_index != 0;
+            bool assignedTo = context->node->is<IR::AssignmentStatement>() ||
+                    context->child_index != 0;
             auto c = currentSwitchLabel;
             while (c) {
                 if (c->sw->expression->equiv(*expression->expr))
@@ -3675,8 +3682,10 @@ const IR::Node* TypeInference::preorder(IR::SwitchStatement* stat) {
         return stat;
 
     auto saveCurrentSwitchLabel = currentSwitchLabel;
+    if (auto ts = type->to<IR::Type_SpecializedCanonical>())
+        type = ts->baseType;
     if (type->is<IR::Type_Union>()) {
-        for (auto sc: stat->cases) {
+        for (auto sc : stat->cases) {
             currentSwitchLabel = new CurrentSwitchLabel(stat, sc, saveCurrentSwitchLabel);
             visit(sc);
         }
@@ -3734,6 +3743,8 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
                 continue;
             }
             comp.right = c->label;
+            if (auto ts = type->to<IR::Type_SpecializedCanonical>())
+                type = ts->baseType;
             bool b = compare(c->label, type, lt, &comp);
             if (b && comp.right != c->label) {
                 c = new IR::SwitchCase(c->srcInfo, comp.right, c->statement);
