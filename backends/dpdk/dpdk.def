@@ -151,7 +151,7 @@ class DpdkJmpEqualStatement: DpdkJmpCondStatement, IDPDKNode {
 class DpdkJmpNotEqualStatement: DpdkJmpCondStatement, IDPDKNode {
 #noconstructor
     DpdkJmpNotEqualStatement(cstring label, Expression src1, Expression src2) :
-        DpdkJmpCondStatement("jmpne", label, src1, src2) { }
+        DpdkJmpCondStatement("jmpneq", label, src1, src2) { }
 }
 
 class DpdkJmpGreaterEqualStatement: DpdkJmpCondStatement, IDPDKNode {

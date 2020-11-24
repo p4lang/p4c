@@ -21,6 +21,7 @@ limitations under the License.
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeMap.h"
 #include <ir/ir.h>
+#include "lib/error.h"
 namespace DPDK {
 
 cstring TypeStruct2Name(const cstring *s);
@@ -559,8 +560,11 @@ class RewriteToDpdkArch : public PassManager {
         passes.push_back(new VisitFunctor([evaluator, parsePsa]() {
             auto toplevel = evaluator->getToplevelBlock();
             auto main = toplevel->getMain();
-            ERROR_CHECK(main != nullptr, ErrorType::ERR_INVALID,
-                        "program: does not instantiate `main`");
+            if (main == nullptr) {
+                ::error(ErrorType::ERR_NOT_FOUND,
+                    "Could not locate top-level block; is there a %1% module?",
+                    IR::P4Program::main);
+                return; }
             main->apply(*parsePsa);
         }));
         passes.push_back(info);
@@ -577,8 +581,11 @@ class RewriteToDpdkArch : public PassManager {
         passes.push_back(new VisitFunctor([evaluator, parsePsa]() {
             auto toplevel = evaluator->getToplevelBlock();
             auto main = toplevel->getMain();
-            ERROR_CHECK(main != nullptr, ErrorType::ERR_INVALID,
-                        "program: does not instantiate `main`");
+            if (main == nullptr) {
+                ::error(ErrorType::ERR_NOT_FOUND,
+                    "Could not locate top-level block; is there a %1% module?",
+                    IR::P4Program::main);
+                return; }
             main->apply(*parsePsa);
         }));
         passes.push_back(new CollectLocalVariableToMetadata(

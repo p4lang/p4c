@@ -200,14 +200,14 @@ std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
 
 std::ostream &IR::DpdkListStatement::toSpec(std::ostream &out) const {
     out << "apply {" << std::endl;
-    out << "rx m.psa_ingress_input_metadata_ingress_port" << std::endl;
+    out << "\trx m.psa_ingress_input_metadata_ingress_port" << std::endl;
     for (auto s : statements) {
         out << "\t";
         s->toSpec(out);
         if (!s->to<IR::DpdkLabelStatement>())
             out << std::endl;
     }
-    out << "tx m.psa_ingress_output_metadata_egress_port" << std::endl;
+    out << "\ttx m.psa_ingress_output_metadata_egress_port" << std::endl;
     out << "}" << std::endl;
     return out;
 }
@@ -244,7 +244,10 @@ std::ostream& IR::DpdkJmpCondStatement::toSpec(std::ostream& out) const {
 }
 
 std::ostream& IR::DpdkBinaryStatement::toSpec(std::ostream& out) const {
-    out << instruction << " " << DPDK::toStr(dst) << " " << DPDK::toStr(src1)
+    BUG_CHECK(dst == src1, "The first source field %1% in a binary operation"
+            "must be the same as the destination field %2% to be supported by DPDK",
+            src1, dst);
+    out << instruction << " " << DPDK::toStr(dst)
         << " " << DPDK::toStr(src2);
     return out;
 }
@@ -280,7 +283,7 @@ std::ostream &IR::DpdkReturnStatement::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkLabelStatement::toSpec(std::ostream &out) const {
-    out << label << ": ";
+    out << label << ":";
     return out;
 }
 
