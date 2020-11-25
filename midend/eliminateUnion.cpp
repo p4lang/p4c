@@ -28,7 +28,7 @@ const IR::Node* DoEliminateUnion::postorder(IR::Type_Union* type) {
 
     // Populate the enum with the field names
     IR::IndexedVector<IR::Declaration_ID> members;
-    for (auto f: type->fields)
+    for (auto f : type->fields)
         members.push_back(new IR::Declaration_ID(f->name));
     MinimalNameGenerator none(&members);
     // Add a new field called 'None' for uninitalized unions
@@ -99,7 +99,8 @@ const IR::Node* DoEliminateUnion::postorder(IR::Declaration_Variable* decl) {
         BUG_CHECK(enumType != tagTypeName.end(), "Could not find enum for %1%", type);
         auto tagName = tagFieldName.find(name);
         BUG_CHECK(tagName != tagFieldName.end(), "Could not find field %1%", type);
-        auto initializer = new IR::Member(new IR::TypeNameExpression(enumType->second), none->second);
+        auto initializer = new IR::Member(
+            new IR::TypeNameExpression(enumType->second), none->second);
         auto dest = new IR::Member(
             decl->srcInfo, new IR::PathExpression(decl->getName()), tagName->second);
         auto assign = new IR::AssignmentStatement(decl->srcInfo, dest, initializer);

@@ -120,12 +120,7 @@ const IR::Node* LocalizeActions::postorder(IR::PathExpression* expression) {
 }
 
 bool FindRepeatedActionUses::preorder(const IR::PathExpression* expression) {
-    auto decl = refMap->getDeclaration(expression->path);
-    if (!decl) {
-        BUG_CHECK(getParent<IR::SwitchCase>(),
-                  "Could not find declaration for %1%", expression);
-        return expression;
-    }
+    auto decl = refMap->getDeclaration(expression->path, true);
     if (!decl->is<IR::P4Action>())
         return false;
     auto action = decl->to<IR::P4Action>();
