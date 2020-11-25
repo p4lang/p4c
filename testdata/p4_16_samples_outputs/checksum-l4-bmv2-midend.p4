@@ -87,9 +87,9 @@ struct metadata {
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     @name("parserI.tmp") IPv4_up_to_ihl_only_h tmp;
-    @name("parserI.tmp_4") tcp_upto_data_offset_only_h tmp_4;
-    bit<8> tmp_9;
-    bit<104> tmp_10;
+    @name("parserI.tmp_3") tcp_upto_data_offset_only_h tmp_3;
+    bit<8> tmp_7;
+    bit<104> tmp_8;
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -98,11 +98,11 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
         }
     }
     state parse_ipv4 {
-        tmp_9 = pkt.lookahead<bit<8>>();
+        tmp_7 = pkt.lookahead<bit<8>>();
         tmp.setValid();
-        tmp.version = tmp_9[7:4];
-        tmp.ihl = tmp_9[3:0];
-        pkt.extract<ipv4_t>(hdr.ipv4, (bit<32>)(((bit<9>)tmp_9[3:0] << 2) + 9w492 << 3));
+        tmp.version = tmp_7[7:4];
+        tmp.ihl = tmp_7[3:0];
+        pkt.extract<ipv4_t>(hdr.ipv4, (bit<32>)(((bit<9>)tmp_7[3:0] << 2) + 9w492 << 3));
         verify(hdr.ipv4.version == 4w4, error.IPv4IncorrectVersion);
         verify(hdr.ipv4.ihl >= 4w5, error.IPv4HeaderTooShort);
         meta._l4Len2 = hdr.ipv4.totalLen - ((bit<16>)hdr.ipv4.ihl << 2);
@@ -113,15 +113,15 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
         }
     }
     state parse_tcp {
-        tmp_10 = pkt.lookahead<bit<104>>();
-        tmp_4.setValid();
-        tmp_4.srcPort = tmp_10[103:88];
-        tmp_4.dstPort = tmp_10[87:72];
-        tmp_4.seqNo = tmp_10[71:40];
-        tmp_4.ackNo = tmp_10[39:8];
-        tmp_4.dataOffset = tmp_10[7:4];
-        tmp_4.dontCare = tmp_10[3:0];
-        pkt.extract<tcp_t>(hdr.tcp, (bit<32>)(((bit<9>)tmp_10[7:4] << 2) + 9w492 << 3));
+        tmp_8 = pkt.lookahead<bit<104>>();
+        tmp_3.setValid();
+        tmp_3.srcPort = tmp_8[103:88];
+        tmp_3.dstPort = tmp_8[87:72];
+        tmp_3.seqNo = tmp_8[71:40];
+        tmp_3.ackNo = tmp_8[39:8];
+        tmp_3.dataOffset = tmp_8[7:4];
+        tmp_3.dontCare = tmp_8[3:0];
+        pkt.extract<tcp_t>(hdr.tcp, (bit<32>)(((bit<9>)tmp_8[7:4] << 2) + 9w492 << 3));
         verify(hdr.tcp.dataOffset >= 4w5, error.TCPHeaderTooShort);
         transition accept;
     }

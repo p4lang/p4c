@@ -128,6 +128,14 @@ class DoSimplifyExpressions : public Transform, P4WriteContext {
     const IR::Expression* addAssignment(Util::SourceInfo srcInfo, cstring varName,
                                         const IR::Expression* expression);
     bool mayAlias(const IR::Expression* left, const IR::Expression* right) const;
+    const IR::Parameter* findAlias(const IR::Parameter* p,
+                                   const IR::Expression* e,
+                                   const IR::MethodCallExpression* mce);
+    cstring declareTemporary(const IR::Parameter* p,
+                             const IR::Expression* expr);
+    const IR::AssignmentStatement* copyOutValue(const IR::Expression* expr1,
+                                       const IR::Expression* expr2,
+                                       IR::IndexedVector<IR::StatOrDecl>* copyBack);
     bool containsHeaderType(const IR::Type* type);
 
  public:

@@ -1,0 +1,12 @@
+issue2288-3.p4(46): [--Wwarn=ordering] warning: h.h.a: 'out' argument has fields in common with h.h.a
+       h.h.b = f(h.h.a, f(h.h.a, f(h.h.a, h.h.a)));
+                 ^^^^^
+issue2288-3.p4(46)
+       h.h.b = f(h.h.a, f(h.h.a, f(h.h.a, h.h.a)));
+                          ^^^^^
+issue2288-3.p4(46): [--Wwarn=ordering] warning: h.h.a: 'out' argument has fields in common with h.h.a
+       h.h.b = f(h.h.a, f(h.h.a, f(h.h.a, h.h.a)));
+                          ^^^^^
+issue2288-3.p4(46)
+       h.h.b = f(h.h.a, f(h.h.a, f(h.h.a, h.h.a)));
+                                   ^^^^^

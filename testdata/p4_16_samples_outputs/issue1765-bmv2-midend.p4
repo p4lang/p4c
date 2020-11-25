@@ -68,7 +68,7 @@ struct metadata {
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     @name("parserI.tmp") IPv4_up_to_ihl_only_h tmp;
-    bit<8> tmp_4;
+    bit<8> tmp_3;
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -77,11 +77,11 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
         }
     }
     state parse_ipv4 {
-        tmp_4 = pkt.lookahead<bit<8>>();
+        tmp_3 = pkt.lookahead<bit<8>>();
         tmp.setValid();
-        tmp.version = tmp_4[7:4];
-        tmp.ihl = tmp_4[3:0];
-        pkt.extract<ipv4_t>(hdr.ipv4, (bit<32>)(((bit<9>)tmp_4[3:0] << 2) + 9w492 << 3));
+        tmp.version = tmp_3[7:4];
+        tmp.ihl = tmp_3[3:0];
+        pkt.extract<ipv4_t>(hdr.ipv4, (bit<32>)(((bit<9>)tmp_3[3:0] << 2) + 9w492 << 3));
         verify(hdr.ipv4.version == 4w4, error.IPv4IncorrectVersion);
         verify(hdr.ipv4.ihl >= 4w5, error.IPv4HeaderTooShort);
         transition select(hdr.ipv4.protocol) {

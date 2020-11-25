@@ -23,17 +23,17 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name(".foo") action foo_0() {
         hdr.h1.f2 = 8w1;
     }
-    @hidden action act() {
+    @hidden action issue19371bmv2l30() {
         tmp_0 = hdr.h1.f1;
     }
-    @hidden action act_0() {
+    @hidden action act() {
         hdr.h1.f1 = tmp;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue19371bmv2l30 {
         actions = {
-            act();
+            issue19371bmv2l30();
         }
-        const default_action = act();
+        const default_action = issue19371bmv2l30();
     }
     @hidden table tbl_foo {
         actions = {
@@ -41,11 +41,11 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         }
         const default_action = foo();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_act {
         actions = {
-            act_0();
+            act();
         }
-        const default_action = act_0();
+        const default_action = act();
     }
     @hidden table tbl_foo_0 {
         actions = {
@@ -54,9 +54,9 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         const default_action = foo_0();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue19371bmv2l30.apply();
         tbl_foo.apply();
-        tbl_act_0.apply();
+        tbl_act.apply();
         tbl_foo_0.apply();
     }
 }

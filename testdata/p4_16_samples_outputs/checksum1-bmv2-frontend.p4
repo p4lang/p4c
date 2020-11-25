@@ -69,7 +69,6 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
     @name("parserI.tmp_0") bit<9> tmp_0;
     @name("parserI.tmp_1") bit<9> tmp_1;
     @name("parserI.tmp_2") bit<9> tmp_2;
-    @name("parserI.tmp_3") bit<32> tmp_3;
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -82,8 +81,7 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
         tmp_0 = (bit<9>)tmp.ihl << 2;
         tmp_1 = tmp_0 + 9w492;
         tmp_2 = tmp_1 << 3;
-        tmp_3 = (bit<32>)tmp_2;
-        pkt.extract<ipv4_t>(hdr.ipv4, tmp_3);
+        pkt.extract<ipv4_t>(hdr.ipv4, (bit<32>)tmp_2);
         verify(hdr.ipv4.version == 4w4, error.IPv4IncorrectVersion);
         verify(hdr.ipv4.ihl >= 4w5, error.IPv4HeaderTooShort);
         transition select(hdr.ipv4.protocol) {

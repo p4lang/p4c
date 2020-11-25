@@ -62,19 +62,11 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    @name("cIngress.tmp") headers tmp;
-    @name("cIngress.tmp_0") bit<8> tmp_0;
-    @name("cIngress.tmp_1") headers tmp_1;
-    @name("cIngress.tmp_2") bit<8> tmp_2;
-    @name("cIngress.tmp_3") headers tmp_3;
-    @name("cIngress.tmp_4") bit<8> tmp_4;
     @name("cIngress.hdr_0") headers hdr_0;
     @name("cIngress.op_0") bit<8> op_0;
     apply {
-        tmp = hdr;
-        tmp_0 = hdr.h1.op1;
-        hdr_0 = tmp;
-        op_0 = tmp_0;
+        hdr_0 = hdr;
+        op_0 = hdr.h1.op1;
         if (op_0 == 8w0x0) {
             ;
         } else if (op_0[7:4] == 4w1) {
@@ -150,12 +142,9 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
                 hdr_0.h2[4].setInvalid();
             }
         }
-        tmp = hdr_0;
-        hdr = tmp;
-        tmp_1 = hdr;
-        tmp_2 = hdr.h1.op2;
-        hdr_0 = tmp_1;
-        op_0 = tmp_2;
+        hdr = hdr_0;
+        hdr_0 = hdr;
+        op_0 = hdr.h1.op2;
         if (op_0 == 8w0x0) {
             ;
         } else if (op_0[7:4] == 4w1) {
@@ -231,12 +220,9 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
                 hdr_0.h2[4].setInvalid();
             }
         }
-        tmp_1 = hdr_0;
-        hdr = tmp_1;
-        tmp_3 = hdr;
-        tmp_4 = hdr.h1.op3;
-        hdr_0 = tmp_3;
-        op_0 = tmp_4;
+        hdr = hdr_0;
+        hdr_0 = hdr;
+        op_0 = hdr.h1.op3;
         if (op_0 == 8w0x0) {
             ;
         } else if (op_0[7:4] == 4w1) {
@@ -312,8 +298,7 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
                 hdr_0.h2[4].setInvalid();
             }
         }
-        tmp_3 = hdr_0;
-        hdr = tmp_3;
+        hdr = hdr_0;
         hdr.h1.h2_valid_bits = 8w0;
         if (hdr.h2[0].isValid()) {
             hdr.h1.h2_valid_bits[0:0] = 1w1;

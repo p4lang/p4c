@@ -323,6 +323,59 @@ bool DoSimplifyExpressions::containsHeaderType(const IR::Type* type) {
     }
     return false;
 }
+const IR::Parameter* DoSimplifyExpressions::findAlias(const IR::Parameter* param1,
+                                                      const IR::Expression* expr1,
+                                                      const IR::MethodCallExpression* mce1) {
+    auto mi = MethodInstance::resolve(mce1, refMap, typeMap);
+    const IR::Parameter* returnParam = nullptr;
+
+    for (auto param2 : *mi->substitution.getParametersInArgumentOrder()) {
+        auto arg2 = mi->substitution.lookup(param2);
+
+        auto expr2 = arg2->expression;
+        if (auto mce2 = expr2->to<IR::MethodCallExpression>()) {
+            returnParam =  findAlias(param1, expr1, mce2);
+            continue;
+        }
+        if (param1->direction == IR::Direction::In && param2->direction == IR::Direction::In) {
+            continue;
+        }
+        if (param1->type == param2->type && mayAlias(expr1, expr2)) {
+            returnParam = param2;
+            break;
+        }
+    }
+    return returnParam;
+}
+
+cstring DoSimplifyExpressions::declareTemporary(const IR::Parameter* p,
+                                                const IR::Expression* expr) {
+    auto argType = typeMap->getType(p, true);
+    if (argType->is<IR::Type_Dontcare>())
+        argType = typeMap->getType(expr, true);
+
+    auto tmp = createTemporary(argType);
+    if (p->direction != IR::Direction::Out) {
+        auto newArg = addAssignment(expr->srcInfo, tmp, expr);
+        typeMap->setType(newArg, argType);
+        typeMap->setLeftValue(newArg);
+    }
+
+    return tmp;
+}
+const IR::AssignmentStatement* DoSimplifyExpressions::copyOutValue(
+    const IR::Expression* expr1,
+    const IR::Expression* expr2,
+    IR::IndexedVector<IR::StatOrDecl>* copyBack) {
+
+    ClonePathExpressions cloner;
+    auto assign = new IR::AssignmentStatement(
+            cloner.clone<IR::Expression>(expr1),
+            cloner.clone<IR::Expression>(expr2));
+    copyBack->push_back(assign);
+
+    return  assign;
+}
 
 const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
     BUG_CHECK(!isWrite(), "%1%: method on left hand side?", mce);
@@ -344,24 +397,12 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
     // large structs.  We want to avoid copying these large
     // structs if possible.
     std::set<const IR::Parameter*> useTemporary;
-    std::set<const IR::Expression*> hasSideEffects;
-
-    bool anyOut = false;
+    std::map<const IR::Argument*, const IR::Expression*> newArgsValues;
     for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
         if (p->direction == IR::Direction::None)
             continue;
-        if (p->hasOut())
-            anyOut = true;
+
         auto arg = mi->substitution.lookup(p);
-        // If an argument evaluation has side-effects then
-        // always use a temporary to hold the argument value.
-        if (SideEffects::check(arg->expression, refMap, typeMap)) {
-            LOG3("Using temporary for " << dbp(mce) <<
-                 " param " << dbp(p) << " arg side effect");
-            useTemporary.emplace(p);
-            hasSideEffects.emplace(arg->expression);
-            continue;
-        }
 
         // If the parameter is out and the argument is a slice then
         // also use a temporary; makes the job of def-use analysis easier
@@ -391,39 +432,282 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
         }
     }
 
-    if (anyOut) {
-        // Check aliasing between all pairs of arguments where at
-        // least one of them is out or inout.
-        for (auto p1 : *mi->substitution.getParametersInArgumentOrder()) {
-            auto arg1 = mi->substitution.lookup(p1);
-            if (hasSideEffects.count(arg1->expression))
+    // Check aliasing between all pairs of arguments where at
+    // least one of them is out or inout.
+    for (auto p1 : *mi->substitution.getParametersInArgumentOrder()) {
+        if (p1->direction == IR::Direction::None)
+           continue;
+        auto arg1 = mi->substitution.lookup(p1);
+
+        for (auto p2 : *mi->substitution.getParametersInArgumentOrder()) {
+            if (p2->direction == IR::Direction::None)
                 continue;
-            for (auto p2 : *mi->substitution.getParametersInArgumentOrder()) {
-                LOG3("p1=" << dbp(p1) << " p2=" << dbp(p2));
-                if (p2 == p1)
-                    break;
-                if (!p1->hasOut() && !p2->hasOut())
+
+            LOG3("p1=" << dbp(p1) << " p2=" << dbp(p2));
+            if (p2 == p1)
+                break;
+
+            auto arg2 = mi->substitution.lookup(p2);
+
+            if (auto m = arg1->expression->to<IR::Member>()) {
+                auto u = arg1->expression->to<IR::Operation_Unary>();
+                if  (u->expr->is<IR::ArrayIndex>()) {
+                    auto b = u->expr->to<IR::Operation_Binary>();
+                    // we handle this case T f(in T x, inout T y){...}; T g(inout T z){...}
+                    // f(g(val), s[val].x)
+                    // tmp_0 = val;
+                    // tmp_1 = s[tmp_0].x;
+                    // tmp_2 = g(val);
+                    // f(tmp_2, tmp_1);
+                    // s[tmp_0].x = tmp_1;
+                    if (!b->right->is<IR::MethodCallExpression>() &&
+                        arg2->expression->is<IR::MethodCallExpression>()) {
+                        auto mce2 = arg2->expression->to<IR::MethodCallExpression>();
+                        auto p3 = findAlias(p1, b->right, mce2);
+                        if  (p3) {
+                            auto mi2 = MethodInstance::resolve(mce2, refMap, typeMap);
+                            auto arg3 = mi2->substitution.lookup(p3);
+                            if (p3->hasOut() && p1->hasOut()) {
+                                ::warning(ErrorType::WARN_ORDERING,
+                                    "%1%: 'out' argument has fields in common with %2%",
+                                    arg1, arg3);
+                            }
+                            // tmp_0 = val;
+                            auto tmp0 = declareTemporary(p1, b->right);
+                            const IR::Expression* argValue0 =
+                                new IR::PathExpression(IR::ID(tmp0, nullptr));
+                            // s[tmp_0].x
+                            auto newArrayIndex = new IR::ArrayIndex(b->left, argValue0);
+                            auto newMember = new IR::Member(newArrayIndex, m->member);
+                            // tmp_1 = s[tmp_0].x;
+                            auto tmp1 = declareTemporary(p1, newMember);
+                            const IR::Expression* argValue1 =
+                                new IR::PathExpression(IR::ID(tmp1, nullptr));
+
+                            // s[tmp_0].x = tmp_1;
+                            if (p1->direction != IR::Direction::In)
+                                copyOutValue(newMember, argValue1, copyBack);
+
+                            newArgsValues[arg1] = argValue1;
+                        }
+                    }
+                    // we handle this case T f(in T x, inout T y){...}; T g(inout T z){...}
+                    // f(val, s[g(val)].x)
+                    // tmp_0 = val;
+                    // tmp_1 = g(val);
+                    // tmp_2 = s[tmp_1].x;
+                    // f(tmp_0, tmp_2);
+                    // s[tmp_1].x = tmp_2;
+                    if (b->right->is<IR::MethodCallExpression>() &&
+                        !arg2->expression->is<IR::MethodCallExpression>()) {
+                        auto mce1 = b->right->to<IR::MethodCallExpression>();
+                        auto p3 = findAlias(p2, arg2->expression, mce1);
+                        if  (p3) {
+                            auto mi1 = MethodInstance::resolve(mce1, refMap, typeMap);
+                            auto arg3 = mi1->substitution.lookup(p3);
+                            if (p3->hasOut() && p2->hasOut()) {
+                                ::warning(ErrorType::WARN_ORDERING,
+                                    "%1%: 'out' argument has fields in common with %2%",
+                                    arg1, arg3);
+                            }
+                            // tmp_0 = val
+                            auto tmp0 = declareTemporary(p2, arg2->expression);
+                            const IR::Expression* argValue0 =
+                                new IR::PathExpression(IR::ID(tmp0, nullptr));
+                            // val = tmp_0
+                            if (p2->direction != IR::Direction::In)
+                                copyOutValue(arg2->expression, argValue0, copyBack);
+                            // tmp_1 = g(val)
+                            auto tmp1 = declareTemporary(p1, b->right);
+                            const IR::Expression* argValue1 =
+                                new IR::PathExpression(IR::ID(tmp1, nullptr));
+                            // s[tmp_1].x
+                            auto newArrayIndex = new IR::ArrayIndex(b->left, argValue1);
+                            auto newMember = new IR::Member(newArrayIndex, m->member);
+                            // tmp_2 = s[tmp_1].x;
+                            auto tmp2 = declareTemporary(p1, newMember);
+                            const IR::Expression* argValue2 =
+                                new IR::PathExpression(IR::ID(tmp2, nullptr));
+                            // s[tmp_1].x = tmp_2
+                            if (p1->direction != IR::Direction::In)
+                                copyOutValue(newMember, argValue2, copyBack);
+                            // save new temporaries as argument of f
+                            // f(arg2, arg1) ---> f(tmp_0, tmp_2)
+                            newArgsValues[arg1] = argValue2;
+                            newArgsValues[arg2] = argValue0;
+                        }
+                    }
                     continue;
-                auto arg2 = mi->substitution.lookup(p2);
-                if (hasSideEffects.count(arg2->expression))
-                    continue;
-                if (mayAlias(arg1->expression, arg2->expression)) {
-                    LOG3("Using temporary for " << dbp(mce) <<
-                         " param " << dbp(p1) << " aliasing" << dbp(p2));
-                    if (p1->hasOut() && p2->hasOut())
-                        ::warning(ErrorType::WARN_ORDERING,
-                                  "%1%: 'out' argument has fields in common with %2%", arg1, arg2);
-                    useTemporary.emplace(p1);
-                    useTemporary.emplace(p2);
-                    break;
                 }
+            }
+
+            if (auto m = arg2->expression->to<IR::Member>()) {
+                auto u = arg2->expression->to<IR::Operation_Unary>();
+                if  (u->expr->is<IR::ArrayIndex>()) {
+                    auto b = u->expr->to<IR::Operation_Binary>();
+                    // we handle this case T f(inout T x, in T y) {...}; T g(inout T z){...}
+                    // f(s[val].x, g(val))
+                    // tmp_0 = val;
+                    // tmp_1 = s[tmp_0].x;
+                    // tmp_2 = g(val);
+                    // f(tmp_1, tmp_2);
+                    // s[tmp_0].x = tmp_1;
+                    if (!b->right->is<IR::MethodCallExpression>() &&
+                        arg1->expression->is<IR::MethodCallExpression>()) {
+                        auto mce1 = arg1->expression->to<IR::MethodCallExpression>();
+                        auto p3 = findAlias(p2, b->right, mce1);
+                        if  (p3) {
+                            auto mi1 = MethodInstance::resolve(mce1, refMap, typeMap);
+                            auto arg3 = mi1->substitution.lookup(p3);
+                            if (p3->hasOut() && p2->hasOut()) {
+                                 ::warning(ErrorType::WARN_ORDERING,
+                                    "%1%: 'out' argument has fields in common with %2%",
+                                     arg2, arg3);
+                            }
+                            // tmp_0 = val;
+                            auto tmp0 = declareTemporary(p2, b->right);
+                            const IR::Expression* argValue0 =
+                                new IR::PathExpression(IR::ID(tmp0, nullptr));
+                            // s[tmp_0].x
+                            auto newArrayIndex = new IR::ArrayIndex(b->left, argValue0);
+                            auto newMember = new IR::Member(newArrayIndex, m->member);
+                            // tmp_1 = s[tmp_0].x;
+                            auto tmp1 = declareTemporary(p2, newMember);
+                            const IR::Expression* argValue1 =
+                                new IR::PathExpression(IR::ID(tmp1, nullptr));
+                            // s[tmp_0].x = tmp_1
+                            if (p2->direction != IR::Direction::In)
+                                copyOutValue(newMember, argValue1, copyBack);
+
+                            newArgsValues[arg2] = argValue1;
+                        }
+                    }
+                    // we handle this case T f(inout T x, in T y); T g(inout T z) {...}
+                    // f(s[g(val)].x, val)
+                    // tmp_0 = val;
+                    // tmp_1 = g(val);
+                    // tmp_2 = s[tmp_1].x;
+                    // f(tmp_2, tmp_0);
+                    // s[tmp_1].x = tmp_2;
+                    if (b->right->is<IR::MethodCallExpression>() &&
+                        !arg1->expression->is<IR::MethodCallExpression>()) {
+                        auto mce1 = b->right->to<IR::MethodCallExpression>();
+                        auto p3 = findAlias(p1, arg1->expression, mce1);
+                        if  (p3) {
+                            auto mi1 = MethodInstance::resolve(mce1, refMap, typeMap);
+                            auto arg3 = mi1->substitution.lookup(p3);
+                            if (p3->hasOut() && p1->hasOut()) {
+                                 ::warning(ErrorType::WARN_ORDERING,
+                                    "%1%: 'out' argument has fields in common with %2%",
+                                     arg1, arg3);
+                            }
+                            // tmp_0 = val
+                            auto tmp0 = declareTemporary(p3, arg3->expression);
+                            const IR::Expression* argValue0 =
+                                new IR::PathExpression(IR::ID(tmp0, nullptr));
+                            // val = tmp_0
+                            if (p1->direction != IR::Direction::In)
+                                copyOutValue(arg3->expression, argValue0, copyBack);
+                            // tmp_1 = g(val)
+                            auto tmp1 = declareTemporary(p2, b->right);
+                            const IR::Expression* argValue1 =
+                                new IR::PathExpression(IR::ID(tmp1, nullptr));
+                            // s[tmp_1].x
+                            auto newArrayIndex = new IR::ArrayIndex(b->left, argValue1);
+                            auto newMember = new IR::Member(newArrayIndex, m->member);
+                            // tmp_2 = s[tmp_1].x
+                            auto tmp2 = declareTemporary(p2, newMember);
+                            const IR::Expression* argValue2 =
+                                new IR::PathExpression(IR::ID(tmp2, nullptr));
+                            // s[tmp_1].x = tmp_2
+                            if (p2->direction != IR::Direction::In)
+                                copyOutValue(newMember, argValue2, copyBack);
+                            // save new temporaries as argument of f
+                            // f(arg2, arg1) ---> f(tmp_2, tmp_0)
+                            newArgsValues[arg1] = argValue0;
+                            newArgsValues[arg2] = argValue2;
+                        }
+                    }
+                    continue;
+                }
+            }
+
+            // not handle this case f(g(val), h(val))
+            if (arg1->expression->is<IR::MethodCallExpression>() &&
+                arg2->expression->is<IR::MethodCallExpression>()) {
+                continue;
+            }
+
+            // we handle this case T f(inout T a, in T b) {...}; T g(inout T c){...}
+            // f(val, g(val))
+            // tmp = val
+            // tmp_0 = g(val)
+            // f(tmp, tmp_0)
+            // val = tmp
+            if (arg1->expression->is<IR::MethodCallExpression>()) {
+                auto mce1 = arg1->expression->to<IR::MethodCallExpression>();
+                auto p3 = findAlias(p2, arg2->expression, mce1);
+                if  (p3) {
+                    auto mi1 = MethodInstance::resolve(mce1, refMap, typeMap);
+                    auto arg3 = mi1->substitution.lookup(p3);
+                    if (p3->hasOut() && p2->hasOut()) {
+                        ::warning(ErrorType::WARN_ORDERING,
+                            "%1%: 'out' argument has fields in common with %2%",
+                            arg2, arg3);
+                    }
+                    useTemporary.emplace(p3);
+                    useTemporary.emplace(p2);
+                }
+                continue;
+            }
+            // handle this case f(in T a, inout T b){...}; T g(inout T c){...}
+            // f(g(val), val)
+            // tmp = val
+            // tmp_0 = g(val)
+            // f(tmp_0, tmp)
+            // val = tmp
+            if (arg2->expression->is<IR::MethodCallExpression>()) {
+                auto mce2 = arg2->expression->to<IR::MethodCallExpression>();
+                auto p3 = findAlias(p1, arg1->expression, mce2);
+                if  (p3) {
+                    auto mi2 = MethodInstance::resolve(mce2, refMap, typeMap);
+                    auto arg3 = mi2->substitution.lookup(p3);
+                    if (p3->hasOut() && p1->hasOut()) {
+                                 ::warning(ErrorType::WARN_ORDERING,
+                                    "%1%: 'out' argument has fields in common with %2%",
+                                     arg1, arg3);
+                    }
+                    // tmp = val
+                    auto tmp1 = declareTemporary(p1, arg1->expression);
+                    const IR::Expression* argValue1 =
+                        new IR::PathExpression(IR::ID(tmp1, nullptr));
+
+                    // val = tmp
+                    if  (p1->direction != IR::Direction::In)
+                        copyOutValue(arg1->expression, argValue1, copyBack);
+                    // save new temporary as argument of f
+                    newArgsValues[arg1] = argValue1;
+                }
+                continue;
+            }
+            if (p1->direction == IR::Direction::In && p2->direction == IR::Direction::In) {
+                continue;
+            }
+            // and handle this case f(val, val)
+            if (p1->type == p2->type && mayAlias(arg1->expression, arg2->expression)) {
+                LOG3("Using temporary for " << dbp(mce) <<
+                     " param " << dbp(p1) << " aliasing" << dbp(p2));
+                if (p1->hasOut() && p2->hasOut())
+                    ::warning(ErrorType::WARN_ORDERING,
+                              "%1%: 'out' argument has fields in common with %2%", arg1, arg2);
+                useTemporary.emplace(p1);
+                useTemporary.emplace(p2);
             }
         }
     }
 
     visit(mce->method);
 
-    ClonePathExpressions cloner;  // a cheap version of deep copy
     for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
         auto arg = mi->substitution.lookup(p);
         if (p->direction == IR::Direction::None) {
@@ -436,36 +720,27 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
              (useTemp ? " with " : " without ") << "temporary");
 
         const IR::Expression* argValue = nullptr;
-        visit(arg);  // May mutate arg!  Recursively simplifies arg.
+        if (newArgsValues[arg] == nullptr)
+            visit(arg);  // May mutate arg!  Recursively simplifies arg.
         auto newarg = arg->expression;
         CHECK_NULL(newarg);
 
         if (useTemp) {
             // declare temporary variable
-            auto paramtype = typeMap->getType(p, true);
-            if (paramtype->is<IR::Type_Dontcare>())
-                paramtype = typeMap->getType(arg, true);
-            auto tmp = createTemporary(paramtype);
+            // tmp = arg->expression
+            auto tmp = declareTemporary(p, arg->expression);
             argValue = new IR::PathExpression(IR::ID(tmp, nullptr));
-            if (p->direction != IR::Direction::Out) {
-                auto clone = argValue->clone();
-                auto stat = new IR::AssignmentStatement(clone, newarg);
-                LOG3(clone << " = " << newarg);
-                statements.push_back(stat);
-                typeMap->setType(clone, paramtype);
-                typeMap->setLeftValue(clone);
-            }
+            // arg->expresion = tmp
+            if  (p->direction != IR::Direction::In)
+                copyOutValue(arg->expression, argValue, copyBack);
         } else {
             argValue = newarg;
         }
-        if (p->direction != IR::Direction::In && useTemp) {
-            auto assign = new IR::AssignmentStatement(
-                cloner.clone<IR::Expression>(newarg),
-                cloner.clone<IR::Expression>(argValue));
-            copyBack->push_back(assign);
-            LOG3("Will copy out value " << dbp(assign));
+        if (newArgsValues[arg] == nullptr) {
+            args->push_back(new IR::Argument(arg->name, argValue));
+        } else {
+            args->push_back(new IR::Argument(arg->name, newArgsValues[arg]));
         }
-        args->push_back(new IR::Argument(arg->name, argValue));
     }
 
     // Special handling for table.apply(...).X; we cannot generate

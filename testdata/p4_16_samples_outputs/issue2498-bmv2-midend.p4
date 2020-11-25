@@ -34,17 +34,17 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         h.h.a = 8w2;
         tmp = 1w1;
     }
-    @hidden action act() {
+    @hidden action issue2498bmv2l42() {
         tmp = h.h.a[0:0];
     }
-    @hidden action act_0() {
+    @hidden action act() {
         h.h.a[0:0] = tmp;
     }
-    @hidden table tbl_act {
+    @hidden table tbl_issue2498bmv2l42 {
         actions = {
-            act();
+            issue2498bmv2l42();
         }
-        const default_action = act();
+        const default_action = issue2498bmv2l42();
     }
     @hidden table tbl_slice_action {
         actions = {
@@ -52,16 +52,16 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = slice_action();
     }
-    @hidden table tbl_act_0 {
+    @hidden table tbl_act {
         actions = {
-            act_0();
+            act();
         }
-        const default_action = act_0();
+        const default_action = act();
     }
     apply {
-        tbl_act.apply();
+        tbl_issue2498bmv2l42.apply();
         tbl_slice_action.apply();
-        tbl_act_0.apply();
+        tbl_act.apply();
     }
 }
 

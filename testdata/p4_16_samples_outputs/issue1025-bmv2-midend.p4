@@ -60,7 +60,7 @@ struct metadata {
 
 parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
     @name("parserI.tmp") IPv4_up_to_ihl_only_h tmp;
-    bit<8> tmp_2;
+    bit<8> tmp_1;
     state start {
         pkt.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
@@ -69,11 +69,11 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
         }
     }
     state parse_ipv4 {
-        tmp_2 = pkt.lookahead<bit<8>>();
+        tmp_1 = pkt.lookahead<bit<8>>();
         tmp.setValid();
-        tmp.version = tmp_2[7:4];
-        tmp.ihl = tmp_2[3:0];
-        pkt.extract<ipv4_t>(hdr.ipv4, (bit<32>)((bit<9>)tmp_2[3:0] << 3));
+        tmp.version = tmp_1[7:4];
+        tmp.ihl = tmp_1[3:0];
+        pkt.extract<ipv4_t>(hdr.ipv4, (bit<32>)((bit<9>)tmp_1[3:0] << 3));
         transition select(hdr.ipv4.protocol) {
             8w6: parse_tcp;
             default: accept;
@@ -124,3 +124,4 @@ control DeparserI(packet_out packet, in headers hdr) {
 }
 
 V1Switch<headers, metadata>(parserI(), verifyChecksum(), cIngress(), cEgress(), updateChecksum(), DeparserI()) main;
+

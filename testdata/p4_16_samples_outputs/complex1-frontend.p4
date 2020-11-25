@@ -3,17 +3,11 @@ control c(inout bit<32> r) {
     @name("c.tmp") bit<32> tmp;
     @name("c.tmp_0") bit<32> tmp_0;
     @name("c.tmp_1") bit<32> tmp_1;
-    @name("c.tmp_2") bit<32> tmp_2;
-    @name("c.tmp_3") bit<32> tmp_3;
-    @name("c.tmp_4") bit<32> tmp_4;
     apply {
         tmp = f(32w5, 32w2);
-        tmp_0 = tmp;
-        tmp_1 = f(32w2, 32w3);
-        tmp_2 = tmp_1;
-        tmp_3 = f(32w6, tmp_2);
-        tmp_4 = tmp_3;
-        r = f(tmp_0, tmp_4);
+        tmp_0 = f(32w2, 32w3);
+        tmp_1 = f(32w6, tmp_0);
+        r = f(tmp, tmp_1);
     }
 }
 
