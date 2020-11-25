@@ -35,6 +35,7 @@ limitations under the License.
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
 #include "midend/eliminateSwitch.h"
+#include "midend/eliminateUnion.h"
 #include "midend/flattenHeaders.h"
 #include "midend/flattenInterfaceStructs.h"
 #include "midend/replaceSelectRange.h"
@@ -115,6 +116,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions& options, std::ostream* outStre
     if (BMV2::PsaSwitchContext::get().options().loadIRFromJson == false) {
         addPasses({
             options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
+            new P4::EliminateUnion(&refMap, &typeMap),
             new P4::RemoveMiss(&refMap, &typeMap),
             new P4::EliminateNewtype(&refMap, &typeMap),
             new P4::EliminateSerEnums(&refMap, &typeMap),

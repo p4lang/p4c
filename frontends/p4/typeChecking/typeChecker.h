@@ -77,15 +77,16 @@ class TypeInference : public Transform {
     struct CurrentSwitchLabel {
         const IR::SwitchStatement* sw;
         const IR::SwitchCase* cs;
-        const CurrentSwitchLabel* previous;
+        // Note: since this field is mutated this visitor is not thread-safe
+        CurrentSwitchLabel* previous;
 
         CurrentSwitchLabel(const IR::SwitchStatement* sw, const IR::SwitchCase* cs,
-                           const CurrentSwitchLabel* prev): sw(sw), cs(cs), previous(prev) {}
+                           CurrentSwitchLabel* prev): sw(sw), cs(cs), previous(prev) {}
     };
     /// Maintain a stack with the nested switch labels and statements
     /// that correspond to unions.  These define the union fields that
     /// are currently in scope.
-    const CurrentSwitchLabel *currentSwitchLabel = nullptr;
+    CurrentSwitchLabel *currentSwitchLabel = nullptr;
 
  public:
     // @param readOnly If ftrue it will assert that it behaves like
@@ -219,7 +220,7 @@ class TypeInference : public Transform {
     const IR::Node* preorder(IR::Declaration_Instance* decl) override;
     // check invariants for entire list before checking the entries
     const IR::Node* preorder(IR::EntriesList* el) override;
-    const IR::Node* preorder(IR::SwitchStatement* stat) override;
+    const IR::Node* preorder(IR::SwitchCase* scase) override;
 
     const IR::Node* postorder(IR::Declaration_MatchKind* decl) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;

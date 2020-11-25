@@ -140,15 +140,6 @@ void StructLocation::removeHeadersFromLocationSet(LocationSet* result) const {
         f.second->removeHeadersFromLocationSet(result);
 }
 
-UnionLocation::UnionLocation(const IR::Type_Union* type, cstring name) :
-        StructLocation(type, name) {
-}
-
-void UnionLocation::addFieldToLocationSet(cstring, LocationSet* result) const {
-    // Field name is ignored.
-    result->add(this);
-}
-
 void ArrayLocation::addValidBitsToLocationSet(LocationSet* result) const {
     for (auto e : *this)
         e->addValidBitsToLocationSet(result);

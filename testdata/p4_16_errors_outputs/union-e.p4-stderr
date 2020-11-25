@@ -1,0 +1,75 @@
+union-e.p4(20): [--Werror=type-error] error: x: union fields must be accessed with a switch statement
+        u.x.b = 0; // not within a switch
+          ^
+union-e.p4(21): [--Werror=type-error] error: U.x: union field name may only be used as the label of a switch statement
+        U u1 = U.x;
+               ^^^
+union-e.p4(23): [--Werror=type-error] error: u.x: cannot change union in a statement SwitchStatement that depends on it
+            U.y: { u.x = 0; } // wrong fields accessed
+                   ^^^
+union-e.p4(22)
+        switch (u) {
+        ^^^^^^
+union-e.p4(23): [--Werror=type-error] error: u.x: cannot change union in a statement SwitchStatement that depends on it
+            U.y: { u.x = 0; } // wrong fields accessed
+                   ^^^
+union-e.p4(22)
+        switch (u) {
+        ^^^^^^
+union-e.p4(29): [--Werror=type-error] error: u.y: guarded by mismatched case label U.s
+                    U.x: { u.s.b = (bit<8>)u.y + (bit<8>)u1.x; } // u.y is not guarded
+                                           ^^^
+union-e.p4(27)
+            U.s: {
+            ^^^
+union-e.p4(29): [--Werror=type-error] error: u.y: guarded by mismatched case label U.s
+                    U.x: { u.s.b = (bit<8>)u.y + (bit<8>)u1.x; } // u.y is not guarded
+                                           ^^^
+union-e.p4(27)
+            U.s: {
+            ^^^
+union-e.p4(31): [--Werror=type-error] error: u.s: cannot change union in a statement SwitchStatement that depends on it
+                u.s = { b = 2 }; // cannot be written while guarded
+                ^^^
+union-e.p4(22)
+        switch (u) {
+        ^^^^^^
+union-e.p4(29): [--Werror=type-error] error: u.y: guarded by mismatched case label U.s
+                    U.x: { u.s.b = (bit<8>)u.y + (bit<8>)u1.x; } // u.y is not guarded
+                                           ^^^
+union-e.p4(27)
+            U.s: {
+            ^^^
+union-e.p4(29): [--Werror=type-error] error: u.y: guarded by mismatched case label U.s
+                    U.x: { u.s.b = (bit<8>)u.y + (bit<8>)u1.x; } // u.y is not guarded
+                                           ^^^
+union-e.p4(27)
+            U.s: {
+            ^^^
+union-e.p4(31): [--Werror=type-error] error: u.s: cannot change union in a statement SwitchStatement that depends on it
+                u.s = { b = 2 }; // cannot be written while guarded
+                ^^^
+union-e.p4(22)
+        switch (u) {
+        ^^^^^^
+union-e.p4(25): [--Werror=type-error] error: U1.x: comparison not defined between union U and union U1
+            U1.x: { } // incompatible label
+            ^^^^
+union-e.p4(5)
+union U {
+      ^
+union-e.p4(11)
+union U1 {
+      ^^
+union-e.p4(26): [--Werror=type-error] error: 3: comparison not defined between union U and int
+            3: { } // not a union field
+            ^
+union-e.p4(5)
+union U {
+      ^
+union-e.p4(35): [--Werror=type-error] error: U.y: comparison not defined between bit<32> and union U
+            U.y: { } // wrong label type
+            ^^^
+union-e.p4(5)
+union U {
+      ^

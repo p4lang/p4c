@@ -32,7 +32,9 @@ limitations under the License.
 #include "midend/copyStructures.h"
 #include "midend/convertEnums.h"
 #include "midend/eliminateNewtype.h"
+#include "midend/eliminateSwitch.h"
 #include "midend/eliminateTuples.h"
+#include "midend/eliminateUnion.h"
 #include "midend/local_copyprop.h"
 #include "midend/midEndLast.h"
 #include "midend/noMatch.h"
@@ -78,6 +80,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
     PassManager midEnd = {};
     if (options.loadIRFromJson == false) {
         midEnd.addPasses({
+            new P4::EliminateUnion(&refMap, &typeMap),
             new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
             new P4::RemoveMiss(&refMap, &typeMap),
             new P4::ClearTypeMap(&typeMap),
@@ -105,6 +108,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::SimplifyControlFlow(&refMap, &typeMap),
             new P4::TableHit(&refMap, &typeMap),
+            new P4::EliminateSwitch(&refMap, &typeMap),
             new P4::ValidateTableProperties({"implementation"}),
             new P4::RemoveLeftSlices(&refMap, &typeMap),
             new EBPF::Lower(&refMap, &typeMap),

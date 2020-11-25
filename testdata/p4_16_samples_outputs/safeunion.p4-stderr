@@ -1,0 +1,3 @@
+safeunion.p4(3): [--Wwarn=mismatch] warning: Either_Tag.t: constant expression in switch
+union Either {
+      ^^^^^^

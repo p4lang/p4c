@@ -1212,6 +1212,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Type* type) {
 
 const IR::Node* TypeInference::postorder(IR::P4Control* cont) {
     (void)setTypeType(cont, false);
+    BUG_CHECK(!currentSwitchLabel, "inside switch at the end of control %1%?", cont);
     return cont;
 }
 
@@ -3675,25 +3676,26 @@ const IR::Node* TypeInference::postorder(IR::IfStatement* conditional) {
     return conditional;
 }
 
-const IR::Node* TypeInference::preorder(IR::SwitchStatement* stat) {
-    visit(stat->expression);
+// Keep the switch cases for switch statements that switch on a union
+// on a stack rooted at currentSwitchLabel
+const IR::Node* TypeInference::preorder(IR::SwitchCase* scase) {
+    auto stat = getParent<IR::SwitchStatement>();
+    auto orig = getOriginal<IR::SwitchCase>();
+    CHECK_NULL(stat);
     auto type = getType(stat->expression);
-    if (type == nullptr)
-        return stat;
-
-    auto saveCurrentSwitchLabel = currentSwitchLabel;
     if (auto ts = type->to<IR::Type_SpecializedCanonical>())
         type = ts->baseType;
     if (type->is<IR::Type_Union>()) {
-        for (auto sc : stat->cases) {
-            currentSwitchLabel = new CurrentSwitchLabel(stat, sc, saveCurrentSwitchLabel);
-            visit(sc);
-        }
-        currentSwitchLabel = saveCurrentSwitchLabel;
-    } else {
-        visit(stat->cases);
+        if (currentSwitchLabel != nullptr && currentSwitchLabel->sw == stat)
+            // We are in a new label in the same switch
+            currentSwitchLabel->cs = orig;
+        else
+            // New switch
+            currentSwitchLabel = new CurrentSwitchLabel(stat, orig, currentSwitchLabel);
     }
-    return stat;
+    visit(scase->label);
+    visit(scase->statement);
+    return scase;
 }
 
 const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
@@ -3752,6 +3754,9 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
             }
         }
     }
+    // pop the switch label stack
+    if (currentSwitchLabel != nullptr && currentSwitchLabel->sw == stat)
+        currentSwitchLabel = currentSwitchLabel->previous;
     return stat;
 }
 
