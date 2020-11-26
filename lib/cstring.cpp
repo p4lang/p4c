@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "cstring.h"
 
+#include <algorithm>
 #include <string>
 #include <unordered_set>
 
@@ -240,3 +241,11 @@ cstring cstring::escapeJson() const {
     }
     return cstring(out);
 }
+
+cstring cstring::toUpper() {
+    std::string st = str;
+    std::transform(st.begin(), st.end(), st.begin(), ::toupper);
+    cstring ret = cstring::to_cstring(st);
+    return ret;
+}
+

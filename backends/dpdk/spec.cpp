@@ -283,7 +283,7 @@ std::ostream &IR::DpdkReturnStatement::toSpec(std::ostream &out) const {
 }
 
 std::ostream &IR::DpdkLabelStatement::toSpec(std::ostream &out) const {
-    out << label << ":";
+    out << label << " :";
     return out;
 }
 

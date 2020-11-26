@@ -43,10 +43,12 @@ limitations under the License.
 #include "midend/local_copyprop.h"
 #include "midend/midEndLast.h"
 #include "midend/nestedStructs.h"
+#include "midend/noMatch.h"
 #include "midend/orderArguments.h"
 #include "midend/predication.h"
 #include "midend/removeAssertAssume.h"
 #include "midend/removeLeftSlices.h"
+#include "midend/removeExits.h"
 #include "midend/removeMiss.h"
 #include "midend/removeParameters.h"
 #include "midend/removeSelectBooleans.h"
@@ -136,11 +138,13 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options,
                 &refMap, &typeMap,
                 new P4::OrPolicy(new P4::IsValid(&refMap, &typeMap),
                                  new P4::IsMask())),
+            new P4::RemoveExits(&refMap, &typeMap),
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::StrengthReduction(&refMap, &typeMap),
             new P4::SimplifySelectCases(&refMap, &typeMap, true),
             new P4::ExpandLookahead(&refMap, &typeMap),
             new P4::ExpandEmit(&refMap, &typeMap),
+            new P4::HandleNoMatch(&refMap),
             new P4::SimplifyParsers(&refMap),
             new P4::StrengthReduction(&refMap, &typeMap),
             new P4::EliminateTuples(&refMap, &typeMap),

@@ -219,6 +219,13 @@ bool ParsePsa::preorder(const IR::PackageBlock *block) {
     return false;
 }
 
+void CollectMetadataHeaderInfo::pushMetadata(const IR::ParameterList* params,
+        std::list<int> indices) {
+    for (auto idx : indices) {
+        pushMetadata(params->getParameter(idx));
+    }
+}
+
 void CollectMetadataHeaderInfo::pushMetadata(const IR::Parameter *p) {
     for (auto m : used_metadata) {
         if (m->to<IR::Type_Name>()->path->name.name ==
@@ -239,46 +246,27 @@ bool CollectMetadataHeaderInfo::preorder(const IR::P4Program *) {
             auto header = parser->getApplyParameters()->getParameter(1);
             header_type = header->type->to<IR::Type_Name>()->path->name;
             auto params = parser->getApplyParameters();
-            pushMetadata(params->getParameter(2));
-            pushMetadata(params->getParameter(3));
-            pushMetadata(params->getParameter(4));
-            pushMetadata(params->getParameter(5));
+            pushMetadata(params, { 2, 3, 4, 5 });
         } else if (kv.second.pipe == "Ingress") {
             auto control = kv.first->to<IR::P4Control>();
             auto params = control->getApplyParameters();
-            pushMetadata(params->getParameter(1));
-            pushMetadata(params->getParameter(2));
-            pushMetadata(params->getParameter(3));
+            pushMetadata(params, { 1, 2, 3 });
         } else if (kv.second.pipe == "IngressParser") {
             auto deparser = kv.first->to<IR::P4Control>();
             auto params = deparser->getApplyParameters();
-            pushMetadata(params->getParameter(1));
-            pushMetadata(params->getParameter(2));
-            pushMetadata(params->getParameter(3));
-            pushMetadata(params->getParameter(5));
-            pushMetadata(params->getParameter(6));
+            pushMetadata(params, { 1, 2, 3, 5, 6 });
         } else if (kv.second.pipe == "EgressParser") {
             auto parser = kv.first->to<IR::P4Parser>();
             auto params = parser->getApplyParameters();
-            pushMetadata(params->getParameter(2));
-            pushMetadata(params->getParameter(3));
-            pushMetadata(params->getParameter(4));
-            pushMetadata(params->getParameter(5));
-            pushMetadata(params->getParameter(6));
+            pushMetadata(params, { 2, 3, 4, 5, 6 });
         } else if (kv.second.pipe == "Egress") {
             auto control = kv.first->to<IR::P4Control>();
             auto params = control->getApplyParameters();
-            pushMetadata(params->getParameter(1));
-            pushMetadata(params->getParameter(2));
-            pushMetadata(params->getParameter(3));
+            pushMetadata(params, { 1, 2, 3 });
         } else if (kv.second.pipe == "EgressDeparser") {
             auto deparser = kv.first->to<IR::P4Control>();
             auto params = deparser->getApplyParameters();
-            pushMetadata(params->getParameter(1));
-            pushMetadata(params->getParameter(2));
-            pushMetadata(params->getParameter(4));
-            pushMetadata(params->getParameter(5));
-            pushMetadata(params->getParameter(6));
+            pushMetadata(params, { 1, 2, 4, 5, 6 });
         }
     }
     return true;
@@ -559,10 +547,9 @@ const IR::Node *IfStatementUnroll::postorder(IR::IfStatement *i) {
         code_block->push_back(i);
 
     auto control = findOrigCtxt<IR::P4Control>();
-    auto parser = findOrigCtxt<IR::P4Parser>();
 
     for (auto d : unroller->decl)
-        injector.collect(control, parser, d);
+        injector.collect(control, nullptr, d);
     if (unroller->root) {
         i->condition = unroller->root;
     }
@@ -573,10 +560,6 @@ const IR::Node *IfStatementUnroll::postorder(IR::IfStatement *i) {
 const IR::Node *IfStatementUnroll::postorder(IR::P4Control *a) {
     auto control = getOriginal();
     return injector.inject_control(control, a);
-}
-const IR::Node *IfStatementUnroll::postorder(IR::P4Parser *a) {
-    auto parser = getOriginal();
-    return injector.inject_parser(parser, a);
 }
 
 // TODO(GordonWuCn): simplify with a postorder visitor if it is a statement,

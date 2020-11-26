@@ -107,6 +107,7 @@ const IR::Node *ThreadJumps::postorder(IR::DpdkListStatement *l) {
             }
         } else {
             if (auto jmp = stmt->to<IR::DpdkJmpLabelStatement>()) {
+                LOG1("emplace " << cache->label << " " << jmp->label);
                 label_map.emplace(cache->label, jmp->label);
             } else {
                 cache = nullptr;

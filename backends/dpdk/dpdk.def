@@ -19,12 +19,6 @@ class DpdkStructType : Type_Struct, IDPDKNode {
 }
 
 abstract DpdkAsmStatement : IDPDKNode {
-    cstring toUpper(cstring label) {
-        std::string st = label.c_str();
-        transform(st.begin(), st.end(), st.begin(), ::toupper);
-        cstring ret = cstring::to_cstring(st);
-        return ret;
-    }
     std::ostream& toSpec(std::ostream& out) const override;
 }
 
@@ -49,7 +43,7 @@ class DpdkTable {
 }
 
 // Toplevel Assembly representation
-class DpdkAsmProgram : P4Program {
+class DpdkAsmProgram {
     inline IndexedVector<DpdkHeaderType> headerType;
     inline IndexedVector<DpdkStructType> structType;
     inline IndexedVector<DpdkAction> actions;
@@ -88,7 +82,7 @@ abstract DpdkJmpStatement : DpdkAsmStatement {
     std::ostream& toSpec(std::ostream& out) const override;
 #noconstructor
     DpdkJmpStatement(cstring instruction, cstring l) :
-        instruction(instruction), label(toUpper(l)) { }
+        instruction(instruction), label(l.toUpper()) { }
 }
 
 class DpdkJmpLabelStatement : DpdkJmpStatement {
@@ -370,7 +364,7 @@ class DpdkLabelStatement : DpdkAsmStatement, IDPDKNode {
     cstring label;
     std::ostream& toSpec(std::ostream& out) const override;
 #noconstructor
-    DpdkLabelStatement(cstring l) : label(toUpper(l)) { }
+    DpdkLabelStatement(cstring l) : label(l.toUpper()) { }
 }
 
 class DpdkChecksumAddStatement : DpdkAsmStatement, IDPDKNode {

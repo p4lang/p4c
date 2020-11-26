@@ -99,6 +99,7 @@ class ConvertToDpdkParser : public Inspector {
     bool preorder(const IR::P4Parser *a) override;
     bool preorder(const IR::ParserState *s) override;
     void add_instr(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
+    cstring append_parser_name(const IR::P4Parser* p, cstring);
 };
 
 class ConvertToDpdkControl : public Inspector {

@@ -136,6 +136,10 @@ const IR::Node *ConvertToDpdkProgram::preorder(IR::P4Program *prog) {
     return prog;
 }
 
+cstring ConvertToDpdkParser::append_parser_name(const IR::P4Parser *p, cstring label) {
+    return p->name + "_" + label;
+}
+
 bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
     for (auto l : p->parserLocals) {
         collector->push_variable(new IR::DpdkDeclaration(l));
@@ -177,7 +181,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
         stack.pop_back();
 
         // the main body
-        auto i = new IR::DpdkLabelStatement(state.name.toString());
+        auto i = new IR::DpdkLabelStatement(append_parser_name(p, state.name));
         add_instr(i);
         auto c = state.components;
         for (auto stat : c) {
@@ -196,15 +200,17 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
                 for (auto v : e->selectCases) {
                     if (!v->keyset->is<IR::DefaultExpression>()) {
                         add_instr(new IR::DpdkJmpEqualStatement(
-                            v->state->path->name, switch_var, v->keyset));
+                            append_parser_name(p, v->state->path->name), switch_var, v->keyset));
                     } else {
-                        auto i = new IR::DpdkJmpLabelStatement(v->state->path->name);
+                        auto i = new IR::DpdkJmpLabelStatement(
+                                append_parser_name(p, v->state->path->name));
                         add_instr(i);
                     }
                 }
-            } else if (auto p =
+            } else if (auto path =
                            state.selectExpression->to<IR::PathExpression>()) {
-                auto i = new IR::DpdkJmpLabelStatement(p->path->name);
+                auto i = new IR::DpdkJmpLabelStatement(
+                        append_parser_name(p, path->path->name));
                 add_instr(i);
             } else {
                 BUG("P4 Parser switch statement has other situations.");

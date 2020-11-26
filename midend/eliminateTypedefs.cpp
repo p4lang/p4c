@@ -7,7 +7,7 @@ const IR::Type *DoReplaceTypedef::preorder(IR::Type_Name *type) {
         if (!decl->getNode()->is<IR::Type_Typedef>())
             return type;
         auto tdecl = decl->getNode()->to<IR::Type_Typedef>();
-        return tdecl->type;
+        return tdecl->type->getP4Type();
     }
     return type;
 }
