@@ -257,6 +257,9 @@ class cstring {
     /// @return the total size in bytes of all interned strings. @count is set
     /// to the total number of interned strings.
     static size_t cache_size(size_t &count);
+
+    // convert the cstring to upper case
+    cstring toUpper();
 };
 
 inline bool operator==(const char *a, cstring b) { return b == a; }

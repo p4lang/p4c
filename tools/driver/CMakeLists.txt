@@ -36,6 +36,9 @@ endif()
 if (ENABLE_EBPF)
   list (APPEND P4C_TARGET_CFGS p4c_src/p4c.ebpf.cfg)
 endif()
+if (ENABLE_DPDK)
+  list (APPEND P4C_TARGET_CFGS p4c_src/p4c.dpdk.cfg)
+endif()
 
 install (PROGRAMS ${P4C_BINARY_DIR}/${P4C_DRIVER_NAME}
   DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
