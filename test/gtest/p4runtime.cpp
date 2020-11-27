@@ -163,6 +163,35 @@ const p4configv1::ControllerPacketMetadata* findControllerHeader(const P4::P4Run
 
 class P4Runtime : public P4CTest { };
 
+TEST_F(P4Runtime, ArgTypeDontCare) {
+    auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
+        struct Headers { }
+        struct Metadata { }
+        parser parse(packet_in p, out Headers h, inout Metadata m,
+                     inout standard_metadata_t sm) {
+            state start { transition accept; } }
+        control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control egress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) { apply { } }
+        control computeChecksum(inout Headers h, inout Metadata m) { apply { } }
+        control deparse(packet_out p, in Headers h) { apply { } }
+
+        control ingress(inout Headers h, inout Metadata m,
+                        inout standard_metadata_t sm) {
+            bit<8> index = 0;
+            bit<8> result = 0;
+            meter<_>(1024, MeterType.bytes) mtr;  // Use `result` argument to infer type.
+            apply {
+                mtr.execute_meter(index, result);
+            }
+       }
+
+        V1Switch(parse(), verifyChecksum(), ingress(), egress(),
+                 computeChecksum(), deparse()) main;
+    )"));
+    ASSERT_TRUE(test && ::errorCount() == 0);
+}
+
 TEST_F(P4Runtime, IdAssignment) {
     auto test = createP4RuntimeTestCase(P4_SOURCE(P4Headers::V1MODEL, R"(
         struct Headers { }

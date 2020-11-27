@@ -414,11 +414,13 @@ struct Counterlike {
             BUG_CHECK(type->arguments->size() > *indexTypeParamIdx,
                       "%1%: expected at least %2% type arguments",
                       instance, *indexTypeParamIdx + 1);
-            auto typeArg = type->arguments->at(*indexTypeParamIdx);
-            // We ignore the return type on purpose, but the call is required to update p4RtTypeInfo
-            // if the index has a user-defined type.
-            TypeSpecConverter::convert(refMap, typeMap, typeArg, p4RtTypeInfo);
-            index_type_name = getTypeName(typeArg, typeMap);
+            const IR::Type* typeArg = type->arguments->at(*indexTypeParamIdx);
+            if (!typeArg->is<IR::Type_Dontcare>()) {
+                // We ignore the return type on purpose, but the call is required to update p4RtTypeInfo
+                // if the index has a user-defined type.
+                TypeSpecConverter::convert(refMap, typeMap, typeArg, p4RtTypeInfo);
+                index_type_name = getTypeName(typeArg, typeMap);
+            }
         }
 
         return Counterlike<Kind>{declaration->controlPlaneName(),
