@@ -27,34 +27,74 @@ namespace {
 class HasUses {
     // Set of program points whose left-hand sides are used elsewhere
     // in the program together with their use count
-    std::unordered_map<const IR::Node*, unsigned> used;
+    std::set<const IR::Node*> used;
+
+    class SliceTracker {
+        const IR::Slice* trackedSlice = nullptr;
+        bool active = false;
+        bool overwritesPrevious(const IR::Slice *previous) {
+            if (trackedSlice->getH() >= previous->getH() &&
+                trackedSlice->getL() <= previous->getL())
+                // current overwrites the previous
+                return true;
+
+            return false;
+        }
+
+     public:
+        SliceTracker() = default;
+        explicit SliceTracker(const IR::Slice* slice) :
+            trackedSlice(slice), active(true) { }
+        bool isActive() const { return active; }
+
+        // main logic of this class
+        bool overwrites(const ProgramPoint previous) {
+            if (!isActive()) return false;
+
+            auto last = previous.last();
+            if (auto *assign_stmt = last->to<IR::AssignmentStatement>()) {
+                if (auto *slice_stmt = assign_stmt->left->to<IR::Slice>()) {
+                    // two slice stmts writing to same location
+                    // skip use of previous if it gets overwritten
+                    if (overwritesPrevious(slice_stmt)) {
+                        LOG4("Skipping " << dbp(last) << " " << last);
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+    };
+
+    SliceTracker tracker;
 
  public:
     HasUses() = default;
     void add(const ProgramPoints* points) {
         for (auto e : *points) {
+            // skips overwritten slice statements
+            if (tracker.overwrites(e)) continue;
+
             auto last = e.last();
             if (last != nullptr) {
                 LOG3("Found use for " << dbp(last) << " " <<
                      (last->is<IR::Statement>() ? last : nullptr));
-                auto it = used.find(last);
-                if (it == used.end())
-                    used.emplace(last, 1);
-                else
-                    used.emplace(last, it->second + 1);
+                used.emplace(last);
             }
         }
     }
-    void remove(const ProgramPoint point) {
-        auto last = point.last();
-        auto it = used.find(last);
-        if (it->second == 1)
-            used.erase(it);
-        else
-            used.emplace(last, it->second - 1);
-    }
     bool hasUses(const IR::Node* node) const
     { return used.find(node) != used.end(); }
+
+    void watchForOverwrites(const IR::Slice* slice) {
+        BUG_CHECK(!tracker.isActive(), "Call to SliceTracker, but it's already active");
+        tracker = SliceTracker(slice);
+    }
+
+    void doneWatching() {
+        tracker = SliceTracker();
+    }
 };
 
 // Run for each parser and control separately
@@ -83,7 +123,7 @@ class FindUninitialized : public Inspector {
             BUG_CHECK(result != nullptr, "no locations known for %1%", dbp(expression));
         return result;
     }
-    // 'expression' is reading the 'loc' location set
+    /// 'expression' is reading the 'loc' location set
     void reads(const IR::Expression* expression, const LocationSet* loc) {
         BUG_CHECK(!unreachable, "reached an unreachable expression in FindUninitialized");
         LOG3(expression << " reads " << loc);
@@ -93,6 +133,7 @@ class FindUninitialized : public Inspector {
     }
     bool setCurrent(const IR::Statement* statement) {
         currentPoint = ProgramPoint(context, statement);
+        LOG3(IndentCtl::unindent);
         return false;
     }
     profile_t init_apply(const IR::Node *root) override {
@@ -132,17 +173,19 @@ class FindUninitialized : public Inspector {
 
     Definitions* getCurrentDefinitions() const {
         auto defs = definitions->getDefinitions(currentPoint, true);
-        LOG3("FU Current point is (after) " << currentPoint << " definitions are " << defs);
+        LOG3("FU Current point is (after) " << currentPoint <<
+                " definitions are " << IndentCtl::endl << defs);
         return defs;
     }
 
     void checkOutParameters(const IR::IDeclaration* block,
                             const IR::ParameterList* parameters,
                             Definitions* defs) {
-        LOG2("Checking output parameters; definitions are " << defs);
+        LOG2("Checking output parameters; definitions are " << IndentCtl::endl << defs);
         for (auto p : parameters->parameters) {
             if (p->direction == IR::Direction::Out || p->direction == IR::Direction::InOut) {
                 auto storage = definitions->storageMap->getStorage(p);
+                LOG3("Checking parameter: " << p);
                 if (storage == nullptr)
                     continue;
 
@@ -170,6 +213,7 @@ class FindUninitialized : public Inspector {
         visit(control->body);
         checkOutParameters(
             control, control->getApplyMethodType()->parameters, getCurrentDefinitions());
+        LOG3("FU Returning from " << control->name << "[" << control->id << "]");
         return false;
     }
 
@@ -234,16 +278,19 @@ class FindUninitialized : public Inspector {
 
         auto outputDefs = acceptdefs->joinDefinitions(rejectdefs);
         checkOutParameters(parser, parser->getApplyMethodType()->parameters, outputDefs);
+        LOG3("FU Returning from " << parser->name << "[" << parser->id << "]");
         return false;
     }
 
     bool preorder(const IR::AssignmentStatement* statement) override {
-        LOG3("FU Visiting " << dbp(statement) << " " << statement);
+        LOG3("FU Visiting " << dbp(statement) << " " << statement << IndentCtl::indent);
         if (!unreachable) {
             lhs = true;
             visit(statement->left);
+            LOG3("FU Returned from " << statement->left);
             lhs = false;
             visit(statement->right);
+            LOG3("FU Returned from " << statement->right);
         } else {
             LOG3("Unreachable");
         }
@@ -375,14 +422,25 @@ class FindUninitialized : public Inspector {
 
     // Keeps track of which expression producers have uses in the given expression
     void registerUses(const IR::Expression* expression, bool reportUninitialized = true) {
+        LOG3("FU Registering uses for '" << expression << "'");
+        if (!isFinalRead(getContext(), expression)) {
+            LOG3("Expression '" << expression << "' is not fully read. Returning...");
+            return;
+        }
+
         auto currentDefinitions = getCurrentDefinitions();
-        if (currentDefinitions->isUnreachable())
+        if (currentDefinitions->isUnreachable()) {
+            LOG3("are not reachable. Returning...");
             return;
-        if (!isFinalRead(getContext(), expression))
-            return;
+        }
+
         const LocationSet* read = getReads(expression);
-        if (read == nullptr || read->isEmpty())
+        if (read == nullptr || read->isEmpty()) {
+            LOG3("No LocationSet for '" << expression << "'. Returning...");
             return;
+        }
+        LOG3("LocationSet for '" << expression << "' is <<" << read << ">>");
+
         auto points = currentDefinitions->getPoints(read);
         if (reportUninitialized && !lhs && points->containsBeforeStart()) {
             // Do not report uninitialized values on the LHS.
@@ -396,6 +454,7 @@ class FindUninitialized : public Inspector {
                 message = "%1% may not be completely initialized";
             ::warning(ErrorType::WARN_UNINITIALIZED_USE, message, expression);
         }
+
         hasUses->add(points);
     }
 
@@ -408,12 +467,19 @@ class FindUninitialized : public Inspector {
             return false;
         }
         auto decl = refMap->getDeclaration(expression->path, true);
+        LOG4("Declaration for path '" << expression->path << "' is "
+            << IndentCtl::indent << IndentCtl::endl << decl
+            << IndentCtl::unindent);
+
         auto storage = definitions->storageMap->getStorage(decl);
         const LocationSet* result;
         if (storage != nullptr)
             result = new LocationSet(storage);
         else
             result = LocationSet::empty;
+
+        LOG4("LocationSet for declaration " << IndentCtl::indent << IndentCtl::endl << decl
+            << IndentCtl::unindent << IndentCtl::endl << "is <<" << result << ">>");
         reads(expression, result);
         registerUses(expression);
         return false;
@@ -426,6 +492,7 @@ class FindUninitialized : public Inspector {
         currentPoint = ProgramPoint(context, action);
         visit(action->body);
         checkOutParameters(action, action->parameters, getCurrentDefinitions());
+        LOG3("FU Returning from " << action);
         return false;
     }
 
@@ -443,6 +510,7 @@ class FindUninitialized : public Inspector {
             currentPoint = savePoint;  // restore the current point
                                     // it is modified by the inter-procedural analysis
         }
+        LOG3("FU Returning from " << table->name);
         return false;
     }
 
@@ -468,7 +536,7 @@ class FindUninitialized : public Inspector {
         }
 
         // The effect of copy-in: in arguments are read
-        LOG3("Summarizing call effect on in arguments; defs are " <<
+        LOG3("Summarizing call effect on in arguments; definitions are " << IndentCtl::endl <<
              getCurrentDefinitions());
         for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
             auto expr = mi->substitution.lookup(p);
@@ -520,6 +588,7 @@ class FindUninitialized : public Inspector {
     bool preorder(const IR::Member* expression) override {
         LOG3("FU Visiting [" << expression->id << "]: " << expression);
         visit(expression->expr);
+        LOG3("FU Returned from " << expression->expr);
         if (expression->expr->is<IR::TypeNameExpression>()) {
             // this is a constant
             reads(expression, LocationSet::empty);
@@ -528,12 +597,14 @@ class FindUninitialized : public Inspector {
         if (TableApplySolver::isHit(expression, refMap, typeMap) ||
             TableApplySolver::isActionRun(expression, refMap, typeMap))
             return false;
+
         auto type = typeMap->getType(expression, true);
         if (type->is<IR::Type_Method>())
             // dealt within the parent
             return false;
 
         auto storage = getReads(expression->expr, true);
+
         auto basetype = typeMap->getType(expression->expr, true);
         if (basetype->is<IR::Type_Stack>()) {
             if (expression->member.name == IR::Type_Stack::next ||
@@ -560,13 +631,24 @@ class FindUninitialized : public Inspector {
 
     bool preorder(const IR::Slice* expression) override {
         LOG3("FU Visiting [" << expression->id << "]: " << expression);
+
+        auto* slice_stmt = findContext<IR::AssignmentStatement>();
+        if (slice_stmt != nullptr && lhs) {
+            // track this slice statement
+            hasUses->watchForOverwrites(expression);
+            LOG4("Tracking " << dbp(slice_stmt) << " " << slice_stmt <<
+                    " for potential overwrites"); }
+
         bool save = lhs;
         lhs = false;  // slices on the LHS also read the data
         visit(expression->e0);
+        LOG3("FU Returned from " << expression);
         auto storage = getReads(expression->e0, true);
         reads(expression, storage);   // true even in LHS
         registerUses(expression);
         lhs = save;
+
+        hasUses->doneWatching();
         return false;
     }
 
@@ -630,7 +712,7 @@ class RemoveUnused : public Transform {
     { CHECK_NULL(hasUses); setName("RemoveUnused"); }
     const IR::Node* postorder(IR::AssignmentStatement* statement) override {
         if (!hasUses->hasUses(getOriginal())) {
-            LOG3("Removing statement " << getOriginal() << " " << statement);
+            LOG3("Removing statement " << getOriginal() << " " << statement << IndentCtl::indent);
             SideEffects se(nullptr, nullptr);
             (void)statement->right->apply(se);
 
@@ -667,7 +749,7 @@ class ProcessDefUse : public PassManager {
 
 const IR::Node* DoSimplifyDefUse::process(const IR::Node* node) {
     ProcessDefUse process(refMap, typeMap);
-    LOG5("ProcessDefUse of:\n" << node);
+    LOG5("ProcessDefUse of:" << IndentCtl::endl << node);
     return node->apply(process);
 }
 
