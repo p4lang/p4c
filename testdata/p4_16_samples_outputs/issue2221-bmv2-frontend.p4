@@ -23,17 +23,10 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.tmp") bit<16> tmp;
     @name("ingress.tmp_0") bit<16> tmp_0;
-    @name("ingress.tmp_1") bit<16> tmp_1;
-    @name("ingress.tmp_2") bit<16> tmp_2;
     @name("ingress.tmp_3") bit<16> tmp_3;
-    @name("ingress.tmp_4") bit<16> tmp_4;
-    @name("ingress.tmp_5") bit<16> tmp_5;
-    @name("ingress.tmp_6") bit<16> tmp_6;
-    @name("ingress.tmp_7") bit<16> tmp_7;
+    @name("ingress.tmp_6") bit<16> tmp_4;
     apply {
-        tmp = 16w0;
         {
             @name("ingress.eth_type_0") bit<16> eth_type_0 = h.eth_hdr.eth_type;
             @name("ingress.hasReturned") bool hasReturned = false;
@@ -44,8 +37,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             h.eth_hdr.eth_type = eth_type_0;
             tmp_0 = retval;
         }
-        tmp_1 = tmp & tmp_0;
-        tmp_2 = 16w0;
         {
             @name("ingress.eth_type_1") bit<16> eth_type_1 = h.eth_hdr.eth_type;
             @name("ingress.hasReturned") bool hasReturned_1 = false;
@@ -56,8 +47,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             h.eth_hdr.eth_type = eth_type_1;
             tmp_3 = retval_1;
         }
-        tmp_4 = tmp_2 * tmp_3;
-        tmp_5 = 16w0;
         {
             @name("ingress.eth_type_2") bit<16> eth_type_2 = h.eth_hdr.eth_type;
             @name("ingress.hasReturned") bool hasReturned_2 = false;
@@ -66,9 +55,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_2 = true;
             retval_2 = 16w2;
             h.eth_hdr.eth_type = eth_type_2;
-            tmp_6 = retval_2;
+            tmp_4 = retval_2;
         }
-        tmp_7 = tmp_5 >> tmp_6;
     }
 }
 

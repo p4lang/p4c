@@ -6,7 +6,6 @@ header Header {
 
 parser p(packet_in pckt, out Header h) {
     state start {
-        h.data = 32w0;
         h.data = 32w7;
         h.data[15:0] = 16w8;
         h.data[31:16] = 16w5;

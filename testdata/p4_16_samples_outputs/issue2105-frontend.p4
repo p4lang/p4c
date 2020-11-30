@@ -11,9 +11,7 @@ struct Headers {
 }
 
 control c() {
-    @name("c.x") bit<8> x_0;
     apply {
-        x_0 = 8w0;
     }
 }
 

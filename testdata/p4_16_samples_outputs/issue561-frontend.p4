@@ -16,9 +16,8 @@ package top(ct _ct);
 control c(out bit<32> x) {
     @name("c.u") U u_0;
     @name("c.u2") U[2] u2_0;
-    @name("c.b") bool b_0;
     apply {
-        b_0 = u_0.isValid();
+        u_0.isValid();
         u_0.h1.isValid();
         x = u_0.h1.f + u_0.h2.g;
         u_0.h1.setValid();

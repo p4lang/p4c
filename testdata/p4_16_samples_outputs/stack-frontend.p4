@@ -5,26 +5,23 @@ header h {
 
 parser p() {
     @name("p.stack") h[4] stack_0;
-    @name("p.b") h b_0;
     state start {
         stack_0[0].setInvalid();
         stack_0[1].setInvalid();
         stack_0[2].setInvalid();
         stack_0[3].setInvalid();
         stack_0[3].setValid();
-        b_0 = stack_0.last;
-        stack_0[2] = b_0;
         transition accept;
     }
 }
 
 control c() {
     @name("c.stack") h[4] stack_1;
-    @name("c.b") h b_1;
+    @name("c.b") h b_0;
     apply {
         stack_1[3].setValid();
-        b_1 = stack_1[3];
-        stack_1[2] = b_1;
+        b_0 = stack_1[3];
+        stack_1[2] = b_0;
         stack_1.push_front(2);
         stack_1.pop_front(2);
     }

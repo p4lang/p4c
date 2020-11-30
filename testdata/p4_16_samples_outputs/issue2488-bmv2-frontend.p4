@@ -33,9 +33,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_2") bit<48> tmp_2;
     @name("ingress.tmp_3") bit<48> tmp_3;
     @name("ingress.tmp_4") bit<16> tmp_4;
-    @name("ingress.tmp_5") bit<48> tmp_5;
-    @name("ingress.tmp_6") bit<48> tmp_6;
-    @name("ingress.tmp_7") bit<48> tmp_7;
     apply {
         tmp_1 = h.eth_hdr.dst_addr;
         {
@@ -53,7 +50,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         tmp_0.setValid();
         tmp_0 = (ethernet_t){dst_addr = tmp_1,src_addr = tmp_2,eth_type = tmp_4};
         tmp = (Headers){eth_hdr = tmp_0};
-        tmp_5 = h.eth_hdr.dst_addr;
         {
             @name("ingress.s_1") bit<48> s_1 = h.eth_hdr.dst_addr;
             @name("ingress.hasReturned") bool hasReturned_1 = false;
@@ -62,9 +58,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             hasReturned_1 = true;
             retval_1 = 48w2;
             h.eth_hdr.dst_addr = s_1;
-            tmp_7 = retval_1;
         }
-        tmp_6 = tmp_7;
         h = tmp;
     }
 }

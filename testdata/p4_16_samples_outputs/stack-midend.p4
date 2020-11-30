@@ -11,7 +11,6 @@ parser p() {
         stack_0[2].setInvalid();
         stack_0[3].setInvalid();
         stack_0[3].setValid();
-        stack_0[2] = stack_0.last;
         transition accept;
     }
 }

@@ -16,7 +16,8 @@ package top(ct _ct);
 control c(out bit<32> x) {
     @name("c.u") U u_0;
     @name("c.u2") U[2] u2_0;
-    @hidden action issue561l33() {
+    @hidden action issue561l32() {
+        u_0.isValid();
         u_0.h1.isValid();
         x = u_0.h1.f + u_0.h2.g;
         u_0.h1.setValid();
@@ -28,14 +29,14 @@ control c(out bit<32> x) {
         u2_0[0].h1.f = 32w2;
         x = x + u2_0[1].h2.g + 32w2;
     }
-    @hidden table tbl_issue561l33 {
+    @hidden table tbl_issue561l32 {
         actions = {
-            issue561l33();
+            issue561l32();
         }
-        const default_action = issue561l33();
+        const default_action = issue561l32();
     }
     apply {
-        tbl_issue561l33.apply();
+        tbl_issue561l32.apply();
     }
 }
 
