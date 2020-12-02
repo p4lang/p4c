@@ -189,16 +189,11 @@ const IR::Node* Predication::preorder(IR::AssignmentStatement* statement) {
         auto foundedAssignment = liveAssignments.find(statementName);
         if (foundedAssignment != liveAssignments.end()) {
             statement->right = foundedAssignment->second->right;
-            // Remove statement for 'then' if there is an else branch
-            if (!travesalPath[ifNestingLevel - 1]) {
-                liveAssigns.erase(std::remove(liveAssigns.begin(), liveAssigns.end(),
-                    foundedAssignment->second), liveAssigns.end());
-            }
         } else if (!statement->right->is<IR::Mux>()) {
             auto clonedLeft = clone(statement->left);
             statement->right = new IR::Mux(conditions.back(), clonedLeft, clonedLeft);
         }
-        // Remove statement for 'then' if there is an a statement
+        // Remove statement for 'then' if there is a statement
         // with the same statement name in the else branch.
         if (liveAssigns.size() > 0 && !isStatementDependent[statementName] &&
             lvalue_name(liveAssigns.back()->left) == lvalue_name(statement->left)) {
