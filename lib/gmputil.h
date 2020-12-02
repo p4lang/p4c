@@ -94,8 +94,4 @@ static inline int floor_log2(big_int v) {
     return rv;
 }
 
-static inline int ceil_log2(big_int v) {
-    return v ? floor_log2(v-1) + 1 : -1;
-}
-
 #endif /* _LIB_GMPUTIL_H_ */
