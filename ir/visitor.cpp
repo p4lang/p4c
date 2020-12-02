@@ -439,22 +439,22 @@ bool ControlFlowVisitor::join_flows(const IR::Node *n) {
 bool Inspector::check_clone(const Visitor *v) {
     auto *t = dynamic_cast<const Inspector *>(v);
     BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
-    return true;
+    return Visitor::check_clone(v);
 }
 bool Modifier::check_clone(const Visitor *v) {
     auto *t = dynamic_cast<const Modifier *>(v);
     BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
-    return true;
+    return Visitor::check_clone(v);
 }
 bool Transform::check_clone(const Visitor *v) {
     auto *t = dynamic_cast<const Transform *>(v);
     BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
-    return true;
+    return Visitor::check_clone(v);
 }
 
 ControlFlowVisitor &ControlFlowVisitor::flow_clone() {
     auto *rv = clone();
-    assert(rv->check_clone(this));
+    BUG_CHECK(rv->check_clone(this), "Clone failed to copy visitor type");
     return *rv;
 }
 

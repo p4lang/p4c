@@ -583,8 +583,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         new P4::ClonePathExpressions(),
         new P4::ClearTypeMap(typeMap),
         evaluator,
-        new VisitFunctor([this, evaluator, structure]() {
-            toplevel = evaluator->getToplevelBlock(); }),
+        [this, evaluator, structure]() { toplevel = evaluator->getToplevelBlock(); },
     };
     auto hook = options.getDebugHook();
     simplify.addDebugHook(hook);

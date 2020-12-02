@@ -34,6 +34,14 @@ void PassManager::removePasses(const std::vector<cstring> &exclude) {
     }
 }
 
+void PassManager::listPasses(std::ostream &out, cstring sep) const {
+    bool first = true;
+    for (auto p : passes) {
+        if (first) out << sep;
+        out << p->name();
+        first = false; }
+}
+
 const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *) {
     safe_vector<std::pair<safe_vector<Visitor *>::iterator, const IR::Node *>> backup;
     static indent_t log_indent(-1);

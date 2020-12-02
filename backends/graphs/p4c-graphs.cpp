@@ -56,7 +56,7 @@ MidEnd::MidEnd(CompilerOptions& options) {
 
     addPasses({
         evaluator,
-        new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
+        [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
     });
 }
 

@@ -111,11 +111,10 @@ namespace UBPF {
             if (program == nullptr)
                 return nullptr;
 
-            std::initializer_list<Visitor *> frontendPasses = {
+            PassManager passes({
                     new getUBPFModelVersion,
-            };
+            });
 
-            PassManager passes(frontendPasses);
             passes.setName("UBPFFrontEnd");
             passes.setStopOnError(true);
             const IR::P4Program *result = program->apply(passes);

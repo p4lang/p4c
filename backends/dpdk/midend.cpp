@@ -121,7 +121,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options,
         return true;
     };
     if (DPDK::PsaSwitchContext::get().options().loadIRFromJson == false) {
-        std::initializer_list<Visitor *> midendPasses = {
+        addPasses({
             options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap)
                            : nullptr,
             new P4::RemoveMiss(&refMap, &typeMap),
@@ -176,16 +176,12 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options,
             new VisitFunctor([this, evaluator]() {
                 toplevel = evaluator->getToplevelBlock();
             }),
-        };
+        });
         if (options.listMidendPasses) {
-            for (auto it : midendPasses) {
-                if (it != nullptr) {
-                    *outStream << it->name() << '\n';
-                }
-            }
+            listPasses(*outStream, "\n");
+            *outStream << std::endl;
             return;
         }
-        addPasses(midendPasses);
         if (options.excludeMidendPasses) {
             removePasses(options.passesToExcludeMidend);
         }

@@ -75,7 +75,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
 
     PassManager midEnd = {};
     if (options.loadIRFromJson == false) {
-        std::initializer_list<Visitor *> midendPasses = {
+        midEnd.addPasses({
             new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
             new P4::RemoveMiss(&refMap, &typeMap),
             new P4::ClearTypeMap(&typeMap),
@@ -107,25 +107,20 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
             new EBPF::Lower(&refMap, &typeMap),
             evaluator,
             new P4::MidEndLast()
-        };
+        });
         if (options.listMidendPasses) {
-            for (auto it : midendPasses) {
-                if (it != nullptr) {
-                    *outStream << it->name() <<'\n';
-                }
-            }
-            return nullptr;
+            midEnd.listPasses(*outStream, "\n");
+            *outStream << std::endl;
         }
-        midEnd = midendPasses;
         if (options.excludeMidendPasses) {
             midEnd.removePasses(options.passesToExcludeMidend);
         }
     } else {
-        midEnd = {
+        midEnd.addPasses({
             new P4::ResolveReferences(&refMap),
             new P4::TypeChecking(&refMap, &typeMap),
             evaluator
-        };
+        });
     }
     midEnd.setName("MidEnd");
     midEnd.addDebugHooks(hooks);

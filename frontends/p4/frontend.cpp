@@ -129,7 +129,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     refMap.setIsV1(isv1);
 
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
-    std::initializer_list<Visitor *> frontendPasses = {
+    PassManager passes({
         new P4V1::getV1ModelVersion,
         // Parse annotations
         new ParseAnnotationBodies(&parseAnnotations, &typeMap),
@@ -161,7 +161,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new StructInitializers(&refMap, &typeMap),
         new SpecializeGenericFunctions(&refMap, &typeMap),
         new TableKeyNames(&refMap, &typeMap),
-        new PassRepeated({
+        PassRepeated({
             new ConstantFolding(&refMap, &typeMap),
             new StrengthReduction(&refMap, &typeMap),
             new Reassociation(),
@@ -205,17 +205,12 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new SimplifyControlFlow(&refMap, &typeMap),
         new HierarchicalNames(),
         new FrontEndLast(),
-    };
+    });
     if (options.listFrontendPasses) {
-        for (auto it : frontendPasses) {
-            if (it != nullptr) {
-                *outStream << it->name() <<'\n';
-            }
-        }
+        passes.listPasses(*outStream, "\n");
+        *outStream << std::endl;
         return nullptr;
     }
-
-    PassManager passes(frontendPasses);
 
     if (options.excludeFrontendPasses) {
        passes.removePasses(options.passesToExcludeFrontend);
