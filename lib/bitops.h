@@ -17,8 +17,30 @@ limitations under the License.
 #ifndef P4C_LIB_BITOPS_H_
 #define P4C_LIB_BITOPS_H_
 
-#include "gmputil.h"
+#include <limits.h>
 #include "bitvec.h"
+
+static inline unsigned bitcount(unsigned v) {
+#if defined(__GNUC__) || defined(__clang__)
+    unsigned rv = __builtin_popcount(v);
+#else
+    unsigned rv = 0;
+    while (v) { v &= v-1; ++rv; }
+#endif
+    return rv; }
+
+static inline int floor_log2(unsigned v) {
+    int rv = -1;
+#if defined(__GNUC__) || defined(__clang__)
+    if (v) rv = CHAR_BIT*sizeof(unsigned) - __builtin_clz(v) - 1;
+#else
+    while (v) { rv++; v >>= 1; }
+#endif
+    return rv; }
+
+static inline int ceil_log2(unsigned v) {
+    return v ? floor_log2(v-1) + 1 : -1;
+}
 
 static inline unsigned bitmask2bytemask(const bitvec &a) {
     int max = a.max().index();
