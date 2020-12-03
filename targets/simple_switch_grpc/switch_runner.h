@@ -50,7 +50,7 @@ class SimpleSwitchGrpcRunner {
   // PIGrpcServerRunAddr, ... which uses static state
   static SimpleSwitchGrpcRunner &get_instance(
       bool enable_swap = false,
-      std::string grpc_server_addr = "0.0.0.0:50051",
+      std::string grpc_server_addr = "0.0.0.0:9559",
       bm::DevMgrIface::port_t cpu_port = 0,
       std::string dp_grpc_server_addr = "",
       bm::DevMgrIface::port_t drop_port = default_drop_port) {
@@ -71,7 +71,7 @@ class SimpleSwitchGrpcRunner {
 
  private:
   SimpleSwitchGrpcRunner(bool enable_swap = false,
-                         std::string grpc_server_addr = "0.0.0.0:50051",
+                         std::string grpc_server_addr = "0.0.0.0:9559",
                          bm::DevMgrIface::port_t cpu_port = 0,
                          std::string dp_grpc_server_addr = "",
                          bm::DevMgrIface::port_t drop_port = default_drop_port);

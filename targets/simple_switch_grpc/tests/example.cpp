@@ -53,7 +53,7 @@ test() {
   int dev_id = 99;
 
   auto channel = grpc::CreateChannel(
-      "localhost:50051", grpc::InsecureChannelCredentials());
+      "localhost:9559", grpc::InsecureChannelCredentials());
   std::unique_ptr<p4v1::P4Runtime::Stub> pi_stub_(
       p4v1::P4Runtime::NewStub(channel));
 

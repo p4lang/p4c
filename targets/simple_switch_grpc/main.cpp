@@ -34,7 +34,7 @@ main(int argc, char* argv[]) {
       "P4Runtime!");
   simple_switch_parser.add_string_option(
       "grpc-server-addr",
-      "Bind gRPC server to given address [default is 0.0.0.0:50051]");
+      "Bind gRPC server to given address [default is 0.0.0.0:9559]");
   simple_switch_parser.add_uint_option(
       "cpu-port",
       "Choose a numerical value for the CPU port, it will be used for "
@@ -80,7 +80,7 @@ main(int argc, char* argv[]) {
     auto rc = simple_switch_parser.get_string_option(
         "grpc-server-addr", &grpc_server_addr);
     if (rc == bm::TargetParserBasic::ReturnCode::OPTION_NOT_PROVIDED)
-      grpc_server_addr = "0.0.0.0:50051";
+      grpc_server_addr = "0.0.0.0:9559";
     else if (rc != bm::TargetParserBasic::ReturnCode::SUCCESS)
       std::exit(1);
   }
