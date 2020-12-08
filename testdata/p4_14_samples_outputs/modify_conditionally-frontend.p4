@@ -38,14 +38,8 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name("ingress.tmp") bit<8> tmp;
     @name(".table0_actionlist") action table0_actionlist(bit<1> do_goto_table, bit<8> goto_table_id) {
         meta.metadata_global.do_goto_table = do_goto_table;
-        if (do_goto_table != 1w0) {
-            tmp = goto_table_id;
-        } else {
-            tmp = meta.metadata_global.goto_table_id;
-        }
     }
     @name(".table0") table table0_0 {
         actions = {

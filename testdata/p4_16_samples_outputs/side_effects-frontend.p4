@@ -29,7 +29,6 @@ control my() {
         tmp_4 = tmp_3;
         tmp_5 = s_0[tmp_4].z;
         tmp_6 = f(tmp_5, a_0);
-        s_0[tmp_4].z = tmp_5;
         a_0 = tmp_6;
         a_0 = g(a_0);
         a_0 = g(a_0);

@@ -83,16 +83,12 @@ header_union HU_0 {
 
 control c(out bit<1> x) {
     @name("c.gh") GH_1 gh_0;
-    @name("c.b") bool b_0;
     @name("c.s") Stack s_0;
-    @name("c.xinst") X xinst_0;
     apply {
-        b_0 = gh_0.isValid();
+        gh_0.isValid();
         s_0[0].setValid();
         s_0[0] = (GH_1){data = (S){b = 32w1}};
         s_0[0].isValid();
-        xinst_0.setValid();
-        xinst_0 = (X){b = 32w2};
         x = 1w0;
     }
 }

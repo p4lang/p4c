@@ -84,23 +84,21 @@ header_union HU_0 {
 control c(out bit<1> x) {
     @name("c.gh") GH_1 gh_0;
     @name("c.s") Stack s_0;
-    @name("c.xinst") X xinst_0;
-    @hidden action genericstruct91() {
+    @hidden action genericstruct89() {
+        gh_0.isValid();
         s_0[0].setValid();
         s_0[0]._data_b0 = 32w1;
         s_0[0].isValid();
-        xinst_0.setValid();
-        xinst_0.b = 32w2;
         x = 1w0;
     }
-    @hidden table tbl_genericstruct91 {
+    @hidden table tbl_genericstruct89 {
         actions = {
-            genericstruct91();
+            genericstruct89();
         }
-        const default_action = genericstruct91();
+        const default_action = genericstruct89();
     }
     apply {
-        tbl_genericstruct91.apply();
+        tbl_genericstruct89.apply();
     }
 }
 
