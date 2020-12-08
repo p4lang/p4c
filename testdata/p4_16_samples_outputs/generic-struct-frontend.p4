@@ -1,8 +1,3 @@
-struct Header<St> {
-    St     data;
-    bit<1> valid;
-}
-
 struct S {
     bit<32> b;
 }
@@ -16,15 +11,6 @@ struct U {
     Header_0 f;
 }
 
-struct H2<G> {
-    Header<G> g;
-    bit<1>    invalid;
-}
-
-struct H4<T> {
-    T x;
-}
-
 struct Header_1 {
     bit<16> data;
     bit<1>  valid;
@@ -36,17 +22,6 @@ struct H2_0 {
 }
 
 typedef H2_0 R;
-struct H3<T> {
-    R         r;
-    T         s;
-    H2<T>     h2;
-    H4<H2<T>> h3;
-}
-
-header GH<T> {
-    T data;
-}
-
 header X {
     bit<32> b;
 }
@@ -64,15 +39,11 @@ struct H4_0 {
 }
 
 struct H3_0 {
-    R    r;
-    S    s;
-    H2_0 h2;
-    H4_0 h3;
-}
-
-header_union HU<T> {
-    X     xu;
-    GH<T> h3u;
+    R           r;
+    S           s;
+    H2_0        h2;
+    H4_0        h3;
+    tuple<S, S> t;
 }
 
 header_union HU_0 {

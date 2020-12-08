@@ -54,6 +54,7 @@ struct H3<T> {
     T s;
     H2<T> h2;
     H4<H2<T>> h3;
+    tuple<T, T> t;
 }
 
 header GH<T> {
@@ -73,7 +74,8 @@ const H3<S> h4 = {
     r = { g = { data = { b = 10 }, valid = 0 }, invalid = 1 },
     s = { b = 20 },
     h2 = { g = { data = { b = 0 }, valid = 1 }, invalid = 1 },
-    h3 = { x = { g = { data = { b = 0 }, valid = 1 }, invalid = 1 } }
+    h3 = { x = { g = { data = { b = 0 }, valid = 1 }, invalid = 1 } },
+    t = { { b = 0 }, { b = 1 } }
 };
 
 header_union HU<T> {

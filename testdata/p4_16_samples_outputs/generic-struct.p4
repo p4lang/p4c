@@ -28,10 +28,11 @@ const H2<S> h1 = (H2<S>){g = (Header<S>){data = {b = 0},valid = 1},invalid = 1};
 const H2<S> h3 = {g = {data = {b = 0},valid = 1},invalid = 1};
 typedef H2<S> R;
 struct H3<T> {
-    R         r;
-    T         s;
-    H2<T>     h2;
-    H4<H2<T>> h3;
+    R           r;
+    T           s;
+    H2<T>       h2;
+    H4<H2<T>>   h3;
+    tuple<T, T> t;
 }
 
 header GH<T> {
@@ -45,7 +46,7 @@ header X {
 const GH<bit<32>> g = {data = 0};
 const GH<S> g1 = {data = {b = 0}};
 typedef GH<S>[3] Stack;
-const H3<S> h4 = {r = {g = {data = {b = 10},valid = 0},invalid = 1},s = {b = 20},h2 = {g = {data = {b = 0},valid = 1},invalid = 1},h3 = {x = {g = {data = {b = 0},valid = 1},invalid = 1}}};
+const H3<S> h4 = {r = {g = {data = {b = 10},valid = 0},invalid = 1},s = {b = 20},h2 = {g = {data = {b = 0},valid = 1},invalid = 1},h3 = {x = {g = {data = {b = 0},valid = 1},invalid = 1}},t = { {b = 0}, {b = 1} }};
 header_union HU<T> {
     X     xu;
     GH<T> h3u;
