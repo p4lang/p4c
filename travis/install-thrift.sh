@@ -15,5 +15,5 @@ cd thrift-0.11.0
 ./configure --with-cpp=yes --with-c_glib=no --with-java=no --with-ruby=no --with-erlang=no --with-go=no --with-nodejs=no
 make -j2 && sudo make install
 cd lib/py
-sudo python setup.py install
+sudo python3 setup.py install
 cd ../../..

@@ -6,7 +6,7 @@ then
     # This older package libssl1.0-dev enables compiling Thrift 0.9.2
     # on Ubuntu 18.04.  Package libssl-dev exists, but Thrift 0.9.2
     # fails to compile when it is installed.
-    # TBD whether using this package makes a difference for Ubuntu
+    # TBD: whether using this package makes a difference for Ubuntu
     # 18.04 and Thrift 0.11.0.
     LIBSSL_DEV="libssl1.0-dev"
 else
@@ -32,8 +32,8 @@ sudo apt-get install -y \
     g++ \
     $LIBSSL_DEV \
     libffi-dev \
-    python-dev \
-    python-pip \
+    python3-dev \
+    python3-pip \
     wget
 
 tmpdir=`mktemp -d -p .`
