@@ -654,8 +654,7 @@ direction
     ;
 
 packageTypeDeclaration
-    : optAnnotations PACKAGE name { // std::cout << "Package: " << $3 << "\n";
-                                    driver.structure->pushContainerType(*$3, false); }
+    : optAnnotations PACKAGE name { driver.structure->pushContainerType(*$3, false); }
       optTypeParameters {
           if (!$5->empty()) driver.structure->markAsTemplate(*$3);
           driver.structure->declareTypes(&$5->parameters); }
