@@ -158,10 +158,16 @@ P4ParserDriver::parse(std::istream& in, const char* sourceFile,
 }
 
 /* static */ const IR::P4Program*
-P4ParserDriver::parse(FILE* in, const char* sourceFile,
+P4ParserDriver::parse(unsigned ver, FILE* in, const char* sourceFile,
                       unsigned sourceLine /* = 1 */) {
     AutoStdioInputStream inputStream(in);
-    return parse(inputStream.get(), sourceFile, sourceLine);
+    auto ret = parse(inputStream.get(), sourceFile, sourceLine);
+    if (ver == 18) {
+        ToP4 top4(&std::cout, false, nullptr);
+        ret->apply(top4);
+        exit(0);
+    }
+    return ret;
 }
 
 template<typename T> const T*

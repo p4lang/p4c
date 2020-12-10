@@ -215,8 +215,8 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %token<Token>      TRUE FALSE THIS
 %token<Token>      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DEFAULT
                    ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
-                   INT KEY SELECT MATCH_KIND TYPE OUT PACKAGE PARSER PRAGMA RETURN STATE
-                   STRING STRUCT SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
+                   INT KEY SELECT MATCH_KIND TYPE OUT OVERRIDE PACKAGE PARSER PRAGMA RETURN STATE
+                   STRING STRUCT SUPER SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
 
 %token<cstring> IDENTIFIER TYPE_IDENTIFIER STRING_LITERAL
 %token<UnparsedConstant>  INTEGER
@@ -546,6 +546,7 @@ annotationToken
     | MATCH_KIND       { $$ = $1; }
     | TYPE             { $$ = $1; }
     | OUT              { $$ = $1; }
+    | OVERRIDE         { $$ = $1; }
     | PARSER           { $$ = $1; }
     | PACKAGE          { $$ = $1; }
     | PRAGMA           { $$ = $1; }
@@ -554,6 +555,7 @@ annotationToken
     | STATE            { $$ = $1; }
     | STRING           { $$ = $1; }
     | STRUCT           { $$ = $1; }
+    | SUPER            { $$ = $1; }
     | SWITCH           { $$ = $1; }
     | TABLE            { $$ = $1; }
     | THIS             { $$ = $1; }
@@ -652,7 +654,8 @@ direction
     ;
 
 packageTypeDeclaration
-    : optAnnotations PACKAGE name { driver.structure->pushContainerType(*$3, false); }
+    : optAnnotations PACKAGE name { // std::cout << "Package: " << $3 << "\n";
+                                    driver.structure->pushContainerType(*$3, false); }
       optTypeParameters {
           if (!$5->empty()) driver.structure->markAsTemplate(*$3);
           driver.structure->declareTypes(&$5->parameters); }
@@ -664,12 +667,46 @@ packageTypeDeclaration
 
 instantiation
       : annotations typeRef "(" argumentList ")" name ";"
-                     { $$ = new IR::Declaration_Instance(@6, *$6, new IR::Annotations(*$1),
-                                                         $2, $4);
+                     {
+                       auto decli = new IR::Declaration_Instance(@6, *$6, new IR::Annotations(*$1), $2, $4);
+                       PkgInfo* pi = new PkgInfo();
+                       pi->parent = decli;
+                       pi->id = *$6;
+                       pi->type = $2;
+                       driver.pkgmap.emplace(decli->Name(), pi);
+                       driver.parentPkg = decli;
+                       $$ = decli;
                        driver.structure->declareObject(*$6, $2->toString()); }
       | typeRef "(" argumentList ")" name ";"
-                     { $$ = new IR::Declaration_Instance(@5, *$5, $1, $3);
-                       driver.structure->declareObject(*$5, $1->toString()); }
+                     {
+                       auto decli = new IR::Declaration_Instance(@5, *$5, $1, $3);
+                       PkgInfo* pi = new PkgInfo();
+                       pi->parent = decli;
+                       pi->id = *$5;
+                       pi->type = $1;
+                       driver.pkgmap.emplace(decli->Name(), pi);
+                       driver.parentPkg = decli;
+                       $$ = decli;
+                       driver.structure->declareObject(*$5, $1->toString());
+		     }
+      | typeRef "(" argumentList ")" name OVERRIDE ";"
+                     {
+                       if (driver.parentPkg) {
+                           auto name = $5->toString();
+                           auto it = driver.pkgmap.find(name);
+                           if (it != driver.pkgmap.end()) {
+                               PkgInfo* pi = it->second;
+                               if (pi->type->toString() == $1->toString()) {
+                                   driver.structure->undeclareObject(pi->id);
+                                   if (driver.delObj(driver.nodes, name) < 0) {
+                                       yyerrok;
+                                   }
+                                   $$ = new IR::Declaration_Instance(@5, *$5, $1, $3);
+                                   driver.structure->declareObject(*$5, $1->toString());
+			       }
+			   }
+			}
+                      }
       /* experimental */
       | annotations typeRef "(" argumentList ")" name "=" objInitializer ";"
                      { $$ = new IR::Declaration_Instance(@6, *$6, new IR::Annotations(*$1),
@@ -711,11 +748,19 @@ dotPrefix
 
 parserDeclaration
     : parserTypeDeclaration optConstructorParameters
+      // This code section exists to support multiple parsers - either
+      // for compiling as p4-16 or compiling them as p4-18 for merging.
       "{" parserLocalElements parserStates "}"
                              { driver.structure->pop();
                                auto pl = new IR::ParameterList(@2, *$2);
                                $$ = new IR::P4Parser($1->name.srcInfo, $1->name,
                                                      $1, pl, *$4, *$5);}
+    | parserTypeDeclaration optConstructorParameters {}
+      OVERRIDE { driver.custOverrides = true; }
+      "{" parserLocalElements parserStates "}"
+                             { driver.structure->pop();
+                               $$ = nullptr;
+                             }
     ;
 
 parserLocalElements
@@ -732,12 +777,17 @@ parserLocalElement
 
 parserTypeDeclaration
     : optAnnotations
-        PARSER name       { driver.structure->pushContainerType(*$3, true); }
+        PARSER name       {
+                            driver.parent = driver.getNodeByName(driver.nodes, $3->name);
+			    driver.structure->pushContainerType(*$3, true); }
         optTypeParameters { if (!$5->empty()) driver.structure->markAsTemplate(*$3);
                             driver.structure->declareTypes(&$5->parameters); }
         "(" parameterList ")" { driver.structure->declareParameters($8);
                                 auto pl = new IR::ParameterList(@8, *$8);
-                                $$ = new IR::Type_Parser(@3, *$3, $1, $5, pl); }
+                                if (!driver.parent) {
+                                    $$ = new IR::Type_Parser(@3, *$3, $1, $5, pl);
+                                }
+                              }
     ;
 
 parserStates
@@ -750,7 +800,100 @@ parserState
     : optAnnotations STATE name { driver.structure->pushContainerType(*$3, false); }
       "{" parserStatements transitionStatement "}"
                                       { driver.structure->pop();
-                                        $$ = new IR::ParserState(@3, *$3, $1, *$6, $7); }
+auto* ps = new IR::ParserState(@3, *$3, $1, *$6, $7);
+                                        if (driver.parent) {
+                                            auto* rps = driver.findState(driver.parent, $3->name);
+                                            if (rps) {
+                                               std::cout << "\nError: Parent has parser state "
+					             "but no override keyword used by P4 program";
+                                               yyerrok;
+                                            }
+                                            // New object in B. Add to A.
+                                            auto ret = driver.addPState(&driver.parent, ps, driver.nodes);
+                                            if (ret != 0) {
+                                               std::cout << "\nError: Add parserState to parent failed";
+                                               yyerrok;
+                                            }
+                                        }
+                                        driver.printParser(driver.parent);
+					$$ = ps;
+                                      }
+    | optAnnotations STATE name OVERRIDE {
+                                        // Find parserState in parent parser and
+                                        // save it.
+					if (!driver.parent) {
+                                            std::cout << "Error: Override has null parent\n";
+                                            yyerrok;
+					    exit(-1);
+					}
+					driver.overriden_ps = driver.findState(driver.parent, $3->name);
+					// After saving, delete it to avoid cycles
+					// in IR.  p4c uses a DAG.
+					auto ret = driver.delPState(&driver.parent, $3->name,
+                                                                    driver.nodes);
+                                       if (ret != 0) {
+                                            std::cout << "\nError: Failed to delete vendor parser state being replaced.";
+                                            yyerrok;
+                                       }
+                                       driver.printParser(driver.parent);
+                                       driver.structure->pushContainerType(*$3, false); }
+      "{" parserStatements transitionStatement "}"
+                                      { driver.structure->pop();
+                                        // Add new PS name_transition, copy
+                                        // data from parent PS except extract.
+                                        auto nps = driver.overriden_ps;
+                                        auto comps = nps->components;
+                                        driver.delExtractComp(&comps);
+                                        cstring newName = nps->name + "_transition";
+                                        auto name = new IR::ID(nps->srcInfo, newName);
+                                        ///// START
+                                        auto selExpr = nps->selectExpression;
+                                        // Add replacing default statement's
+                                        // state with new one in nps.
+                                        const IR::Expression* sep;
+                                        const IR::ParserState* ps;
+                                        if (driver.defID) {
+                                            sep = driver.delSelectCase(&selExpr, &(driver.parent));
+                                            if (sep == nullptr) {
+                                                std::cout << "\nError: Failed to delete selectCase. " << newName << "\n";
+                                                yyerrok;
+                                             }
+                                             driver.printParser(driver.parent);
+                                             sep = driver.addDefSelectCase(&sep, driver.defID, &(driver.parent));
+                                             if (sep == nullptr) {
+                                                 std::cout << "\nError: Failed to add selectCase.";
+                                                 yyerrok;
+                                             }
+                                             ps = new IR::ParserState(nps->srcInfo, *name,
+                                                                      nps->annotations,
+                                                                      comps,
+                                                                      sep);
+                                         ///////// END
+                                         } else {
+                                             ps = new IR::ParserState(nps->srcInfo, *name,
+                                                                      nps->annotations,
+                                                                      comps,
+                                                                      selExpr);
+                                         }
+                                        auto res = driver.addPState(&driver.parent, ps,
+                                                                    driver.nodes);
+                                        if (res != 0) {
+                                            std::cout << "\nError: Override add new transition parserState to parent failed";
+                                            yyerrok;
+                                        }
+
+                                        // Add cust_parser override PS.
+                                        $$ = new IR::ParserState(@3, *$3, $1, *$7, $8);
+                                        // std::cout << "PState override: " << $3 << "\n";
+                                        // std::cout << "Override PS: "<< $$ << "\n";
+                                        auto ret = driver.addPState(&driver.parent, $$,
+                                                                    driver.nodes);
+                                        if (ret != 0) {
+                                            std::cout << "\nError: Override add parserState to parent failed";
+                                            yyerrok;
+                                        }
+                                        driver.printParser(driver.parent);
+				       }
     ;
 
 parserStatements
@@ -774,12 +917,21 @@ parserBlockStatement
     ;
 
 transitionStatement
-    : %empty                      { $$ = nullptr; }
+    : /* empty */                 { $$ = nullptr; }
+    | SUPER "." name "." TRANSITION "." DEFAULT "." name ";" {}
+    | SUPER "." name "." TRANSITION ";" {}
     | TRANSITION stateExpression  { $$ = $2; }
     ;
 
 stateExpression
     : name ";"         { $$ = new IR::PathExpression(*$1); }
+    | SUPER "." name "." TRANSITION "." DEFAULT "." name ";" {
+                         cstring newName = $3->name + "_transition";
+                         auto name = new IR::ID($3->srcInfo, newName);
+                         driver.defID = $9;
+                         $$ = new IR::PathExpression(*name); }
+    | SUPER "." name "." TRANSITION ";" {
+                         $$ = new IR::PathExpression(*$3); }
     | selectExpression { $$ = $1; }
     ;
 
@@ -798,6 +950,10 @@ selectCase
     : keysetExpression ":" name ";"
       { auto expr = new IR::PathExpression(*$3);
         $$ = new IR::SelectCase(@1 + @3, $1, expr); }
+    | keysetExpression ":" SUPER "." name "." TRANSITION ";"  {
+                       auto id = $5;
+                       auto expr = driver.genPathExpr(id);
+                       $$ = new IR::SelectCase(@1 + @5, $1, expr);}
     ;
 
 keysetExpression
@@ -845,6 +1001,8 @@ valueSetDeclaration
     ;
 
 /*************************** CONTROL ************************/
+optOverridesCtrl
+    : OVERRIDE { }
 
 controlDeclaration
     : controlTypeDeclaration optConstructorParameters
@@ -852,11 +1010,27 @@ controlDeclaration
         { driver.structure->pop();
           auto pl = new IR::ParameterList(@2, *$2);
           $$ = new IR::P4Control($1->name.srcInfo, $1->name, $1, pl, *$4, $6); }
+    | controlTypeDeclaration optConstructorParameters optOverridesCtrl
+      "{" controlLocalDeclarations APPLY controlBody "}"
+        { driver.structure->pop();
+          if (driver.parentCtrl) {
+              auto ct = driver.getControl(driver.parentCtrl);
+              auto name = ct->name;
+              auto src = ct->srcInfo;
+              auto type = ct->type;
+              auto pl = ct->constructorParams;
+              delete ct->constructorParams;
+              delete ct;
+              driver.parentCtrl = new IR::P4Control(src, name, type, pl, *$5, $7);
+	      $$ = nullptr;
+	   }
+	}
     ;
 
 controlTypeDeclaration
     : optAnnotations
-        CONTROL name { driver.structure->pushContainerType(*$3, true); }
+        CONTROL name { driver.parentCtrl = driver.getNodeByName(driver.nodes, $3->name);
+	               driver.structure->pushContainerType(*$3, true); }
         optTypeParameters { if (!$5->empty()) driver.structure->markAsTemplate(*$3);
                             driver.structure->declareTypes(&$5->parameters); }
         "(" parameterList ")" { driver.structure->declareParameters($8);
@@ -1072,6 +1246,18 @@ structTypeDeclaration
         driver.structure->declareTypes(&$5->parameters); }
       "{" structFieldList "}" { $$ = new IR::Type_Struct(@3, *$3, $1, $5, *$8);
                                 driver.structure->pop(); }
+    | optAnnotations // TODO
+        STRUCT name { }
+        OVERRIDE { driver.parentSt = driver.getNodeByName(driver.nodes, $3->name); }
+        "{" structFieldList "}" { if (driver.parentSt) {
+                                      auto fs = *$8;
+                                      auto st = driver.getStruct(driver.parentSt);
+                                      for (auto f : fs)
+		                          st->fields.push_back(f);
+                                  }
+				  driver.parentSt = nullptr;
+                                  $$ = nullptr;
+				 }
     ;
 
 headerUnionDeclaration
@@ -1096,11 +1282,36 @@ enumDeclaration
     : optAnnotations
         ENUM name { driver.structure->declareType(*$3); }
         "{" identifierList "}" { $$ = new IR::Type_Enum(@3, *$3, *$6); }
+    | optAnnotations
+        ENUM name { }
+        OVERRIDE { driver.parentEm = driver.getNodeByName(driver.nodes, $3->name); }
+        "{" identifierList "}" {  if (driver.parentEm) {
+                                      auto mems = *$8;
+                                      auto em = driver.getEnum(driver.parentEm);
+                                      for (auto m : mems)
+		                          em->members.push_back(m);
+                                  }
+                                  driver.parentEm = nullptr;
+                                  $$ = nullptr;
+		              }
     | optAnnotations ENUM typeRef name { driver.structure->declareType(*$4); }
 	 "{" specifiedIdentifierList "}" {
               auto type = $typeRef;
               $$ = new IR::Type_SerEnum(@4, *$4, type, *$7);
 	  }
+    | optAnnotations
+        ENUM typeRef name { }
+        OVERRIDE { driver.parentSerEm = driver.getNodeByName(driver.nodes, $4->name); }
+        "{" specifiedIdentifierList "}" {
+                                  if (driver.parentSerEm) {
+                                      auto em = driver.getSerEnum(driver.parentSerEm);
+                                      auto mems = $9;
+                                      for (auto m : *mems)
+		                          em->members.push_back(m);
+                                  }
+                                  driver.parentSerEm = nullptr;
+                                  $$ = nullptr;
+		              }
     ;
 
 specifiedIdentifierList

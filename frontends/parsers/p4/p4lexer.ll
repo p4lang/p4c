@@ -153,6 +153,8 @@ using Parser = P4::P4Parser;
                   return makeToken(TYPE); }
 "out"           { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(OUT); }
+"override"      { BEGIN(driver.saveState); driver.template_args = false;
+                  return makeToken(OVERRIDE); }
 "parser"        { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(PARSER); }
 "package"       { BEGIN(driver.saveState); driver.template_args = false;
@@ -167,6 +169,8 @@ using Parser = P4::P4Parser;
                   return makeToken(STRING); }
 "struct"        { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(STRUCT); }
+"super"         { BEGIN(driver.saveState); driver.template_args = false;
+                  return makeToken(SUPER); }
 "switch"        { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(SWITCH); }
 "table"         { BEGIN(driver.saveState); driver.template_args = false;

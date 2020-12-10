@@ -76,12 +76,14 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                        return true; },
                     "[Deprecated; use --std instead] Specify language version to compile.",
                     OptionFlags::Hide);
-    registerOption("--std", "{p4-14|p4-16}",
+    registerOption("--std", "{p4-14|p4-16|p4-18}",
                    [this](const char* arg) {
                        if (!strcmp(arg, "14") || !strcmp(arg, "p4-14")) {
                            langVersion = CompilerOptions::FrontendVersion::P4_14;
                        } else if (!strcmp(arg, "16") || !strcmp(arg, "p4-16")) {
                            langVersion = CompilerOptions::FrontendVersion::P4_16;
+                       } else if (!strcmp(arg, "18") || !strcmp(arg, "p4-18")) {
+                           langVersion = CompilerOptions::FrontendVersion::P4_18;
                        } else {
                            ::error(ErrorType::ERR_INVALID, "Illegal language version %1%", arg);
                            return false;

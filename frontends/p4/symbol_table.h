@@ -52,6 +52,7 @@ class ProgramStructure final {
     void push(Namespace* ns);
     NamedSymbol* lookup(const cstring identifier);
     void declare(NamedSymbol* symbol);
+    void undeclare(NamedSymbol* symbol);
 
  public:
     enum class SymbolKind {
@@ -69,6 +70,8 @@ class ProgramStructure final {
     void declareType(IR::ID id);
     void declareObject(IR::ID id, cstring type);
     void markAsTemplate(IR::ID id);  // the symbol expects template args
+    void declareObject(IR::ID id);
+    void undeclareObject(IR::ID id);
 
     // the last namespace has been exited
     void pop();
