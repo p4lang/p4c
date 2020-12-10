@@ -1,0 +1,852 @@
+diff --git a/frontends/common/options.cpp b/frontends/common/options.cpp
+index c52b7f56f..be3a8db0a 100644
+--- a/frontends/common/options.cpp
++++ b/frontends/common/options.cpp
+@@ -76,12 +76,14 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
+                        return true; },
+                     "[Deprecated; use --std instead] Specify language version to compile.",
+                     OptionFlags::Hide);
+-    registerOption("--std", "{p4-14|p4-16}",
++    registerOption("--std", "{p4-14|p4-16|p4-18}",
+                    [this](const char* arg) {
+                        if (!strcmp(arg, "14") || !strcmp(arg, "p4-14")) {
+                            langVersion = CompilerOptions::FrontendVersion::P4_14;
+                        } else if (!strcmp(arg, "16") || !strcmp(arg, "p4-16")) {
+                            langVersion = CompilerOptions::FrontendVersion::P4_16;
++                       } else if (!strcmp(arg, "18") || !strcmp(arg, "p4-18")) {
++                           langVersion = CompilerOptions::FrontendVersion::P4_18;
+                        } else {
+                            ::error(ErrorType::ERR_INVALID, "Illegal language version %1%", arg);
+                            return false;
+diff --git a/frontends/common/options.h b/frontends/common/options.h
+index 33e32abe1..3a89473f9 100644
+--- a/frontends/common/options.h
++++ b/frontends/common/options.h
+@@ -56,7 +56,8 @@ class CompilerOptions : public Util::Options {
+ 
+     enum class FrontendVersion {
+         P4_14,
+-        P4_16
++        P4_16,
++        P4_18
+     };
+ 
+     // Name of executable that is being run.
+@@ -93,6 +94,9 @@ class CompilerOptions : public Util::Options {
+     // Dump and undump the IR tree
+     bool debugJson = false;
+ 
++    // gets a node in P4 IR by name.
++    cstring P4NodeName = nullptr;
++
+     // Write a P4Runtime control plane API description to the specified file.
+     cstring p4RuntimeFile = nullptr;
+ 
+diff --git a/frontends/common/parseInput.h b/frontends/common/parseInput.h
+index 9505cbcc4..10dfb45de 100644
+--- a/frontends/common/parseInput.h
++++ b/frontends/common/parseInput.h
+@@ -83,9 +83,23 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
+             return nullptr;
+     }
+ 
+-    auto result = options.isv1()
+-                ? parseV1Program<FILE*, C>(in, options.file, 1, options.getDebugHook())
+-                : P4ParserDriver::parse(in, options.file);
++    unsigned ver = 16;
++    static const IR::P4Program* result;
++    switch (options.langVersion) {
++    case CompilerOptions::FrontendVersion::P4_14:
++        result = parseV1Program(in, options.file, 1, options.getDebugHook());
++        break;
++    case CompilerOptions::FrontendVersion::P4_16:
++        result = P4ParserDriver::parse(ver, in, options.file);
++        break;
++    case CompilerOptions::FrontendVersion::P4_18:
++        ver = 18;
++        result = P4ParserDriver::parse(ver, in, options.file);
++        break;
++    default:
++        break;
++    }
++
+     options.closeInput(in);
+ 
+     if (::errorCount() > 0) {
+diff --git a/frontends/p4/fromv1.0/programStructure.cpp b/frontends/p4/fromv1.0/programStructure.cpp
+index ff1e72adf..565a93683 100644
+--- a/frontends/p4/fromv1.0/programStructure.cpp
++++ b/frontends/p4/fromv1.0/programStructure.cpp
+@@ -595,9 +595,10 @@ void ProgramStructure::include(cstring filename, cstring ppoptions) {
+         options.preprocessor_options += ppoptions; }
+     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
+     options.file = path.toString();
++    unsigned ver = 16;
+     if (!::errorCount()) {
+         if (FILE* file = options.preprocess()) {
+-            auto code = P4::P4ParserDriver::parse(file, options.file);
++            auto code = P4::P4ParserDriver::parse(ver, file, options.file);
+             if (code && !::errorCount())
+                 for (auto decl : code->objects)
+                     declarations->push_back(decl);
+diff --git a/frontends/p4/symbol_table.cpp b/frontends/p4/symbol_table.cpp
+index 53bb40892..ee213d7ca 100644
+--- a/frontends/p4/symbol_table.cpp
++++ b/frontends/p4/symbol_table.cpp
+@@ -89,6 +89,15 @@ class Namespace : public NamedSymbol {
+         }
+         contents.emplace(symbol->getName(), symbol);
+     }
++    void undeclare(NamedSymbol* symbol) {
++        cstring symname = symbol->getName();
++        if (symname.isNullOrEmpty()) return;
++
++        auto it = contents.find(symname);
++        if (it != contents.end()) {
++            contents.erase(it);
++        }
++    }
+     NamedSymbol* lookup(cstring name) const {
+         auto it = contents.find(name);
+         if (it == contents.end())
+@@ -204,6 +213,14 @@ void ProgramStructure::declareObject(IR::ID id, cstring type) {
+     currentNamespace->declare(o);
+ }
+ 
++void ProgramStructure::undeclareObject(IR::ID id) {
++    if (debug)
++        fprintf(debugStream, "ProgramStructure: deleting object %s\n", id.name.c_str());
++
++    auto o = new Object(id.name, id.srcInfo);
++    currentNamespace->undeclare(o);
++}
++
+ void ProgramStructure::markAsTemplate(IR::ID id) {
+     LOG3("ProgramStructure: " << id << " has template args");
+     lookup(id)->template_args = true;
+diff --git a/frontends/p4/symbol_table.h b/frontends/p4/symbol_table.h
+index 12f487dae..2c4e7478a 100644
+--- a/frontends/p4/symbol_table.h
++++ b/frontends/p4/symbol_table.h
+@@ -52,6 +52,7 @@ class ProgramStructure final {
+     void push(Namespace* ns);
+     NamedSymbol* lookup(const cstring identifier);
+     void declare(NamedSymbol* symbol);
++    void undeclare(NamedSymbol* symbol);
+ 
+  public:
+     enum class SymbolKind {
+@@ -69,6 +70,8 @@ class ProgramStructure final {
+     void declareType(IR::ID id);
+     void declareObject(IR::ID id, cstring type);
+     void markAsTemplate(IR::ID id);  // the symbol expects template args
++    void declareObject(IR::ID id);
++    void undeclareObject(IR::ID id);
+ 
+     // the last namespace has been exited
+     void pop();
+diff --git a/frontends/parsers/p4/p4lexer.ll b/frontends/parsers/p4/p4lexer.ll
+index 7736a2f01..13d2c19cc 100644
+--- a/frontends/parsers/p4/p4lexer.ll
++++ b/frontends/parsers/p4/p4lexer.ll
+@@ -153,6 +153,8 @@ using Parser = P4::P4Parser;
+                   return makeToken(TYPE); }
+ "out"           { BEGIN(driver.saveState); driver.template_args = false;
+                   return makeToken(OUT); }
++"override"      { BEGIN(driver.saveState); driver.template_args = false;
++                  return makeToken(OVERRIDE); }
+ "parser"        { BEGIN(driver.saveState); driver.template_args = false;
+                   return makeToken(PARSER); }
+ "package"       { BEGIN(driver.saveState); driver.template_args = false;
+@@ -167,6 +169,8 @@ using Parser = P4::P4Parser;
+                   return makeToken(STRING); }
+ "struct"        { BEGIN(driver.saveState); driver.template_args = false;
+                   return makeToken(STRUCT); }
++"super"         { BEGIN(driver.saveState); driver.template_args = false;
++                  return makeToken(SUPER); }
+ "switch"        { BEGIN(driver.saveState); driver.template_args = false;
+                   return makeToken(SWITCH); }
+ "table"         { BEGIN(driver.saveState); driver.template_args = false;
+diff --git a/frontends/parsers/p4/p4parser.ypp b/frontends/parsers/p4/p4parser.ypp
+index d81d49386..3c36bce54 100644
+--- a/frontends/parsers/p4/p4parser.ypp
++++ b/frontends/parsers/p4/p4parser.ypp
+@@ -215,8 +215,8 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
+ %token<Token>      TRUE FALSE THIS
+ %token<Token>      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DEFAULT
+                    ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
+-                   INT KEY SELECT MATCH_KIND TYPE OUT PACKAGE PARSER PRAGMA RETURN STATE
+-                   STRING STRUCT SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
++                   INT KEY SELECT MATCH_KIND TYPE OUT OVERRIDE PACKAGE PARSER PRAGMA RETURN STATE
++                   STRING STRUCT SUPER SWITCH TABLE TRANSITION TUPLE TYPEDEF VARBIT VALUESET VOID
+ 
+ %token<cstring> IDENTIFIER TYPE_IDENTIFIER STRING_LITERAL
+ %token<UnparsedConstant>  INTEGER
+@@ -546,6 +546,7 @@ annotationToken
+     | MATCH_KIND       { $$ = $1; }
+     | TYPE             { $$ = $1; }
+     | OUT              { $$ = $1; }
++    | OVERRIDE         { $$ = $1; }
+     | PARSER           { $$ = $1; }
+     | PACKAGE          { $$ = $1; }
+     | PRAGMA           { $$ = $1; }
+@@ -554,6 +555,7 @@ annotationToken
+     | STATE            { $$ = $1; }
+     | STRING           { $$ = $1; }
+     | STRUCT           { $$ = $1; }
++    | SUPER            { $$ = $1; }
+     | SWITCH           { $$ = $1; }
+     | TABLE            { $$ = $1; }
+     | THIS             { $$ = $1; }
+@@ -652,7 +654,8 @@ direction
+     ;
+ 
+ packageTypeDeclaration
+-    : optAnnotations PACKAGE name { driver.structure->pushContainerType(*$3, false); }
++    : optAnnotations PACKAGE name { // std::cout << "Package: " << $3 << "\n";
++                                    driver.structure->pushContainerType(*$3, false); }
+       optTypeParameters {
+           if (!$5->empty()) driver.structure->markAsTemplate(*$3);
+           driver.structure->declareTypes(&$5->parameters); }
+@@ -664,12 +667,46 @@ packageTypeDeclaration
+ 
+ instantiation
+       : annotations typeRef "(" argumentList ")" name ";"
+-                     { $$ = new IR::Declaration_Instance(@6, *$6, new IR::Annotations(*$1),
+-                                                         $2, $4);
++                     {
++                       auto decli = new IR::Declaration_Instance(@6, *$6, new IR::Annotations(*$1), $2, $4);
++                       PkgInfo* pi = new PkgInfo();
++                       pi->parent = decli;
++                       pi->id = *$6;
++                       pi->type = $2;
++                       driver.pkgmap.emplace(decli->Name(), pi);
++                       driver.parentPkg = decli;
++                       $$ = decli;
+                        driver.structure->declareObject(*$6, $2->toString()); }
+       | typeRef "(" argumentList ")" name ";"
+-                     { $$ = new IR::Declaration_Instance(@5, *$5, $1, $3);
+-                       driver.structure->declareObject(*$5, $1->toString()); }
++                     {
++                       auto decli = new IR::Declaration_Instance(@5, *$5, $1, $3);
++                       PkgInfo* pi = new PkgInfo();
++                       pi->parent = decli;
++                       pi->id = *$5;
++                       pi->type = $1;
++                       driver.pkgmap.emplace(decli->Name(), pi);
++                       driver.parentPkg = decli;
++                       $$ = decli;
++                       driver.structure->declareObject(*$5, $1->toString());
++		     }
++      | typeRef "(" argumentList ")" name OVERRIDE ";"
++                     {
++                       if (driver.parentPkg) {
++                           auto name = $5->toString();
++                           auto it = driver.pkgmap.find(name);
++                           if (it != driver.pkgmap.end()) {
++                               PkgInfo* pi = it->second;
++                               if (pi->type->toString() == $1->toString()) {
++                                   driver.structure->undeclareObject(pi->id);
++                                   if (driver.delObj(driver.nodes, name) < 0) {
++                                       yyerrok;
++                                   }
++                                   $$ = new IR::Declaration_Instance(@5, *$5, $1, $3);
++                                   driver.structure->declareObject(*$5, $1->toString());
++			       }
++			   }
++			}
++                      }
+       /* experimental */
+       | annotations typeRef "(" argumentList ")" name "=" objInitializer ";"
+                      { $$ = new IR::Declaration_Instance(@6, *$6, new IR::Annotations(*$1),
+@@ -711,11 +748,19 @@ dotPrefix
+ 
+ parserDeclaration
+     : parserTypeDeclaration optConstructorParameters
++      // This code section exists to support multiple parsers - either
++      // for compiling as p4-16 or compiling them as p4-18 for merging.
+       "{" parserLocalElements parserStates "}"
+                              { driver.structure->pop();
+                                auto pl = new IR::ParameterList(@2, *$2);
+                                $$ = new IR::P4Parser($1->name.srcInfo, $1->name,
+                                                      $1, pl, *$4, *$5);}
++    | parserTypeDeclaration optConstructorParameters {}
++      OVERRIDE { driver.custOverrides = true; }
++      "{" parserLocalElements parserStates "}"
++                             { driver.structure->pop();
++                               $$ = nullptr;
++                             }
+     ;
+ 
+ parserLocalElements
+@@ -732,12 +777,17 @@ parserLocalElement
+ 
+ parserTypeDeclaration
+     : optAnnotations
+-        PARSER name       { driver.structure->pushContainerType(*$3, true); }
++        PARSER name       {
++                            driver.parent = driver.getNodeByName(driver.nodes, $3->name);
++			    driver.structure->pushContainerType(*$3, true); }
+         optTypeParameters { if (!$5->empty()) driver.structure->markAsTemplate(*$3);
+                             driver.structure->declareTypes(&$5->parameters); }
+         "(" parameterList ")" { driver.structure->declareParameters($8);
+                                 auto pl = new IR::ParameterList(@8, *$8);
+-                                $$ = new IR::Type_Parser(@3, *$3, $1, $5, pl); }
++                                if (!driver.parent) {
++                                    $$ = new IR::Type_Parser(@3, *$3, $1, $5, pl);
++                                }
++                              }
+     ;
+ 
+ parserStates
+@@ -750,7 +800,100 @@ parserState
+     : optAnnotations STATE name { driver.structure->pushContainerType(*$3, false); }
+       "{" parserStatements transitionStatement "}"
+                                       { driver.structure->pop();
+-                                        $$ = new IR::ParserState(@3, *$3, $1, *$6, $7); }
++auto* ps = new IR::ParserState(@3, *$3, $1, *$6, $7);
++                                        if (driver.parent) {
++                                            auto* rps = driver.findState(driver.parent, $3->name);
++                                            if (rps) {
++                                               std::cout << "\nError: Parent has parser state "
++					             "but no override keyword used by P4 program";
++                                               yyerrok;
++                                            }
++                                            // New object in B. Add to A.
++                                            auto ret = driver.addPState(&driver.parent, ps, driver.nodes);
++                                            if (ret != 0) {
++                                               std::cout << "\nError: Add parserState to parent failed";
++                                               yyerrok;
++                                            }
++                                        }
++                                        driver.printParser(driver.parent);
++					$$ = ps;
++                                      }
++    | optAnnotations STATE name OVERRIDE {
++                                        // Find parserState in parent parser and
++                                        // save it.
++					if (!driver.parent) {
++                                            std::cout << "Error: Override has null parent\n";
++                                            yyerrok;
++					    exit(-1);
++					}
++					driver.overriden_ps = driver.findState(driver.parent, $3->name);
++					// After saving, delete it to avoid cycles
++					// in IR.  p4c uses a DAG.
++					auto ret = driver.delPState(&driver.parent, $3->name,
++                                                                    driver.nodes);
++                                       if (ret != 0) {
++                                            std::cout << "\nError: Failed to delete vendor parser state being replaced.";
++                                            yyerrok;
++                                       }
++                                       driver.printParser(driver.parent);
++                                       driver.structure->pushContainerType(*$3, false); }
++      "{" parserStatements transitionStatement "}"
++                                      { driver.structure->pop();
++                                        // Add new PS name_transition, copy
++                                        // data from parent PS except extract.
++                                        auto nps = driver.overriden_ps;
++                                        auto comps = nps->components;
++                                        driver.delExtractComp(&comps);
++                                        cstring newName = nps->name + "_transition";
++                                        auto name = new IR::ID(nps->srcInfo, newName);
++                                        ///// START
++                                        auto selExpr = nps->selectExpression;
++                                        // Add replacing default statement's
++                                        // state with new one in nps.
++                                        const IR::Expression* sep;
++                                        const IR::ParserState* ps;
++                                        if (driver.defID) {
++                                            sep = driver.delSelectCase(&selExpr, &(driver.parent));
++                                            if (sep == nullptr) {
++                                                std::cout << "\nError: Failed to delete selectCase. " << newName << "\n";
++                                                yyerrok;
++                                             }
++                                             driver.printParser(driver.parent);
++                                             sep = driver.addDefSelectCase(&sep, driver.defID, &(driver.parent));
++                                             if (sep == nullptr) {
++                                                 std::cout << "\nError: Failed to add selectCase.";
++                                                 yyerrok;
++                                             }
++                                             ps = new IR::ParserState(nps->srcInfo, *name,
++                                                                      nps->annotations,
++                                                                      comps,
++                                                                      sep);
++                                         ///////// END
++                                         } else {
++                                             ps = new IR::ParserState(nps->srcInfo, *name,
++                                                                      nps->annotations,
++                                                                      comps,
++                                                                      selExpr);
++                                         }
++                                        auto res = driver.addPState(&driver.parent, ps,
++                                                                    driver.nodes);
++                                        if (res != 0) {
++                                            std::cout << "\nError: Override add new transition parserState to parent failed";
++                                            yyerrok;
++                                        }
++
++                                        // Add cust_parser override PS.
++                                        $$ = new IR::ParserState(@3, *$3, $1, *$7, $8);
++                                        // std::cout << "PState override: " << $3 << "\n";
++                                        // std::cout << "Override PS: "<< $$ << "\n";
++                                        auto ret = driver.addPState(&driver.parent, $$,
++                                                                    driver.nodes);
++                                        if (ret != 0) {
++                                            std::cout << "\nError: Override add parserState to parent failed";
++                                            yyerrok;
++                                        }
++                                        driver.printParser(driver.parent);
++				       }
+     ;
+ 
+ parserStatements
+@@ -774,12 +917,21 @@ parserBlockStatement
+     ;
+ 
+ transitionStatement
+-    : %empty                      { $$ = nullptr; }
++    : /* empty */                 { $$ = nullptr; }
++    | SUPER "." name "." TRANSITION "." DEFAULT "." name ";" {}
++    | SUPER "." name "." TRANSITION ";" {}
+     | TRANSITION stateExpression  { $$ = $2; }
+     ;
+ 
+ stateExpression
+     : name ";"         { $$ = new IR::PathExpression(*$1); }
++    | SUPER "." name "." TRANSITION "." DEFAULT "." name ";" {
++                         cstring newName = $3->name + "_transition";
++                         auto name = new IR::ID($3->srcInfo, newName);
++                         driver.defID = $9;
++                         $$ = new IR::PathExpression(*name); }
++    | SUPER "." name "." TRANSITION ";" {
++                         $$ = new IR::PathExpression(*$3); }
+     | selectExpression { $$ = $1; }
+     ;
+ 
+@@ -798,6 +950,10 @@ selectCase
+     : keysetExpression ":" name ";"
+       { auto expr = new IR::PathExpression(*$3);
+         $$ = new IR::SelectCase(@1 + @3, $1, expr); }
++    | keysetExpression ":" SUPER "." name "." TRANSITION ";"  {
++                       auto id = $5;
++                       auto expr = driver.genPathExpr(id);
++                       $$ = new IR::SelectCase(@1 + @5, $1, expr);}
+     ;
+ 
+ keysetExpression
+@@ -845,6 +1001,8 @@ valueSetDeclaration
+     ;
+ 
+ /*************************** CONTROL ************************/
++optOverridesCtrl
++    : OVERRIDE { }
+ 
+ controlDeclaration
+     : controlTypeDeclaration optConstructorParameters
+@@ -852,11 +1010,27 @@ controlDeclaration
+         { driver.structure->pop();
+           auto pl = new IR::ParameterList(@2, *$2);
+           $$ = new IR::P4Control($1->name.srcInfo, $1->name, $1, pl, *$4, $6); }
++    | controlTypeDeclaration optConstructorParameters optOverridesCtrl
++      "{" controlLocalDeclarations APPLY controlBody "}"
++        { driver.structure->pop();
++          if (driver.parentCtrl) {
++              auto ct = driver.getControl(driver.parentCtrl);
++              auto name = ct->name;
++              auto src = ct->srcInfo;
++              auto type = ct->type;
++              auto pl = ct->constructorParams;
++              delete ct->constructorParams;
++              delete ct;
++              driver.parentCtrl = new IR::P4Control(src, name, type, pl, *$5, $7);
++	      $$ = nullptr;
++	   }
++	}
+     ;
+ 
+ controlTypeDeclaration
+     : optAnnotations
+-        CONTROL name { driver.structure->pushContainerType(*$3, true); }
++        CONTROL name { driver.parentCtrl = driver.getNodeByName(driver.nodes, $3->name);
++	               driver.structure->pushContainerType(*$3, true); }
+         optTypeParameters { if (!$5->empty()) driver.structure->markAsTemplate(*$3);
+                             driver.structure->declareTypes(&$5->parameters); }
+         "(" parameterList ")" { driver.structure->declareParameters($8);
+@@ -1072,6 +1246,18 @@ structTypeDeclaration
+         driver.structure->declareTypes(&$5->parameters); }
+       "{" structFieldList "}" { $$ = new IR::Type_Struct(@3, *$3, $1, $5, *$8);
+                                 driver.structure->pop(); }
++    | optAnnotations // TODO
++        STRUCT name { }
++        OVERRIDE { driver.parentSt = driver.getNodeByName(driver.nodes, $3->name); }
++        "{" structFieldList "}" { if (driver.parentSt) {
++                                      auto fs = *$8;
++                                      auto st = driver.getStruct(driver.parentSt);
++                                      for (auto f : fs)
++		                          st->fields.push_back(f);
++                                  }
++				  driver.parentSt = nullptr;
++                                  $$ = nullptr;
++				 }
+     ;
+ 
+ headerUnionDeclaration
+@@ -1096,11 +1282,36 @@ enumDeclaration
+     : optAnnotations
+         ENUM name { driver.structure->declareType(*$3); }
+         "{" identifierList "}" { $$ = new IR::Type_Enum(@3, *$3, *$6); }
++    | optAnnotations
++        ENUM name { }
++        OVERRIDE { driver.parentEm = driver.getNodeByName(driver.nodes, $3->name); }
++        "{" identifierList "}" {  if (driver.parentEm) {
++                                      auto mems = *$8;
++                                      auto em = driver.getEnum(driver.parentEm);
++                                      for (auto m : mems)
++		                          em->members.push_back(m);
++                                  }
++                                  driver.parentEm = nullptr;
++                                  $$ = nullptr;
++		              }
+     | optAnnotations ENUM typeRef name { driver.structure->declareType(*$4); }
+ 	 "{" specifiedIdentifierList "}" {
+               auto type = $typeRef;
+               $$ = new IR::Type_SerEnum(@4, *$4, type, *$7);
+ 	  }
++    | optAnnotations
++        ENUM typeRef name { }
++        OVERRIDE { driver.parentSerEm = driver.getNodeByName(driver.nodes, $4->name); }
++        "{" specifiedIdentifierList "}" {
++                                  if (driver.parentSerEm) {
++                                      auto em = driver.getSerEnum(driver.parentSerEm);
++                                      auto mems = $9;
++                                      for (auto m : *mems)
++		                          em->members.push_back(m);
++                                  }
++                                  driver.parentSerEm = nullptr;
++                                  $$ = nullptr;
++		              }
+     ;
+ 
+ specifiedIdentifierList
+diff --git a/frontends/parsers/parserDriver.cpp b/frontends/parsers/parserDriver.cpp
+index a9f43401b..5e522c922 100644
+--- a/frontends/parsers/parserDriver.cpp
++++ b/frontends/parsers/parserDriver.cpp
+@@ -158,10 +158,16 @@ P4ParserDriver::parse(std::istream& in, const char* sourceFile,
+ }
+ 
+ /* static */ const IR::P4Program*
+-P4ParserDriver::parse(FILE* in, const char* sourceFile,
++P4ParserDriver::parse(unsigned ver, FILE* in, const char* sourceFile,
+                       unsigned sourceLine /* = 1 */) {
+     AutoStdioInputStream inputStream(in);
+-    return parse(inputStream.get(), sourceFile, sourceLine);
++    auto ret = parse(inputStream.get(), sourceFile, sourceLine);
++    if (ver == 18) {
++        ToP4 top4(&std::cout, false, nullptr);
++        ret->apply(top4);
++        exit(0);
++    }
++    return ret;
+ }
+ 
+ template<typename T> const T*
+diff --git a/frontends/parsers/parserDriver.h b/frontends/parsers/parserDriver.h
+index f7cf7da07..93e48b788 100644
+--- a/frontends/parsers/parserDriver.h
++++ b/frontends/parsers/parserDriver.h
+@@ -22,6 +22,7 @@ limitations under the License.
+ #include <string>
+ 
+ #include "frontends/p4/symbol_table.h"
++#include "frontends/p4/coreLibrary.h"
+ #include "frontends/parsers/p4/abstractP4Lexer.hpp"
+ #include "frontends/parsers/p4/p4AnnotationLexer.hpp"
+ #include "ir/ir.h"
+@@ -33,6 +34,14 @@ namespace P4 {
+ class P4Lexer;
+ class P4Parser;
+ 
++class PkgInfo {
++ public:
++    PkgInfo() {}
++    IR::Node* parent;
++    IR::ID id;
++    const IR::Type* type;
++};
++
+ /// The base class of ParserDrivers, which provide a high level interface to
+ /// parsers and lexers and manage their state.
+ class AbstractParserDriver {
+@@ -113,7 +122,7 @@ class P4ParserDriver final : public AbstractParserDriver {
+      */
+     static const IR::P4Program* parse(std::istream& in, const char* sourceFile,
+                                       unsigned sourceLine = 1);
+-    static const IR::P4Program* parse(FILE* in, const char* sourceFile,
++    static const IR::P4Program* parse(unsigned ver, FILE* in, const char* sourceFile,
+                                       unsigned sourceLine = 1);
+ 
+     /**
+@@ -190,6 +199,232 @@ class P4ParserDriver final : public AbstractParserDriver {
+     static const IR::Vector<IR::Expression>* parseP4rtTranslationAnnotation(
+         const Util::SourceInfo& srcInfo,
+         const IR::Vector<IR::AnnotationToken>& body);
++    static IR::P4Control* getControl(IR::Node* p) {
++        if (p == nullptr) return nullptr;
++        return (const_cast<IR::P4Control*>(p->to<IR::P4Control>()));
++    }
++
++    static IR::Type_Struct* getStruct(IR::Node* p) {
++        if (p == nullptr) return nullptr;
++        return (const_cast<IR::Type_Struct*>(p->to<IR::Type_Struct>()));
++    }
++
++    static IR::Type_HeaderUnion* getHdrUnion(IR::Node* p) {
++        if (p == nullptr) return nullptr;
++        return (const_cast<IR::Type_HeaderUnion*>(p->to<IR::Type_HeaderUnion>()));
++    }
++
++    static IR::Type_Enum* getEnum(IR::Node* p) {
++        if (p == nullptr) return nullptr;
++        return (const_cast<IR::Type_Enum*>(p->to<IR::Type_Enum>()));
++    }
++
++    static IR::Type_SerEnum* getSerEnum(IR::Node* p) {
++        if (p == nullptr) return nullptr;
++        return (const_cast<IR::Type_SerEnum*>(p->to<IR::Type_SerEnum>()));
++    }
++
++    static IR::Declaration_Instance* getPackage(IR::Node* p) {
++        if (p == nullptr) return nullptr;
++        return (const_cast<IR::Declaration_Instance*>(p->to<IR::Declaration_Instance>()));
++    }
++
++    static void printParser(IR::Node* p) {
++        if (p == nullptr) return;
++        // auto parser = p->to<IR::P4Parser>();
++        //  std::cout << "Printing P4Parser: " << parser << "\n\n";
++    }
++
++    static IR::PathExpression* genPathExpr(IR::ID*& id) {
++        cstring name = id->name + "_transition";
++        return new IR::PathExpression(name);
++    }
++
++    //
++    // Need to scan the vector to find the node with the name that we're extending,
++    // and put a new type in its place
++    // Use in yacc code: driver.getNodeByName(driver.nodes, name);
++    //
++    static IR::Node* getNodeByName(IR::Vector<IR::Node>* nodes, cstring name) {
++        cstring node_name;
++        // std::cout << "getNodeByName: " << name << "\n";
++        for (auto n = nodes->begin(); n != nodes->end(); ++n) {
++            if ((*n)->is<IR::P4Parser>()) {
++                auto type = (*n)->to<IR::P4Parser>();
++                node_name = type->name;
++            } else if ((*n)->is<IR::Type_Struct>()) {
++                auto type = (*n)->to<IR::Type_Struct>();
++                node_name = type->name;
++            } else if ((*n)->is<IR::P4Control>()) {
++                auto type = (*n)->to<IR::P4Control>();
++                node_name = type->name;
++            } else if ((*n)->is<IR::Declaration_Instance>()) {
++                auto type = (*n)->to<IR::Declaration_Instance>();
++                node_name = type->name;
++            } else if ((*n)->is<IR::Type_Enum>()) {
++                auto type = (*n)->to<IR::Type_Enum>();
++                node_name = type->name;
++            } else if ((*n)->is<IR::Type_SerEnum>()) {
++                auto type = (*n)->to<IR::Type_SerEnum>();
++                node_name = type->name;
++            } else if ((*n)->is<IR::Type_HeaderUnion>()) {
++                auto type = (*n)->to<IR::Type_HeaderUnion>();
++                node_name = type->name;
++            }
++            if (node_name == name)
++                return (const_cast<IR::Node*>((*n)));
++        }
++        return nullptr;
++    }
++
++    static int setNodeByName(IR::Vector<IR::Node>* nodes, IR::Node* new_node, cstring name) {
++        if ((nodes == nullptr) || (new_node == nullptr)) return -1;
++        IR::Node* cur = getNodeByName(nodes, name);
++        if (cur == nullptr) return -1;
++        // std::cout << "Replacing: " << cur << "\nwith\n" << new_node << "\n";
++        std::replace(nodes->begin(), nodes->end(), cur, new_node);
++        return 0;
++    }
++
++    static const IR::Expression* addDefSelectCase(const IR::Expression** se,
++                                                  const IR::ID *id, IR::Node** p) {
++      if ((*se == nullptr)) return nullptr;
++      if (id == nullptr) return nullptr;
++      auto sep = *se;
++      // auto parser = (*p)->to<IR::P4Parser>();
++      // std::cout << "AddSelectCase for parser:" << parser->name << "|" << id->name << "\n";
++      if (!sep->is<IR::SelectExpression>()) {
++          std::cout << "Error SelectExpression\n";
++          return nullptr;
++      }
++      auto sepp = sep->to<IR::SelectExpression>();
++      auto scs = sepp->selectCases;
++
++      auto keyset = new IR::DefaultExpression();
++      auto state = new IR::PathExpression(*id);
++      auto sc = new IR::SelectCase(id->srcInfo, keyset, state);
++      scs.push_back(sc);
++
++      sepp = new IR::SelectExpression(sepp->srcInfo, sepp->select, scs);
++      sep = sepp->to<IR::Expression>();
++      return sep;
++    }
++
++    static const IR::Expression* delSelectCase(const IR::Expression** se, IR::Node** p) {
++      if ((*se == nullptr)) return nullptr;
++      if (p == nullptr) return nullptr;
++      auto sep = *se;
++      auto parser = (*p)->to<IR::P4Parser>();
++      //  std::cout << "delSelectCase for parser:" << parser->name << "\n";
++      if (!sep->is<IR::SelectExpression>()) {
++          std::cout << "Error SelectExpression\n";
++          return nullptr;
++      }
++      auto sepp = sep->to<IR::SelectExpression>();
++      auto scs = sepp->selectCases;
++      const IR::SelectCase* found;
++      for (auto sc : scs) {
++          if (sc->keyset->is<IR::DefaultExpression>()) {
++              found = sc;
++              break;
++          }
++      }
++
++      auto it = std::find(scs.begin(), scs.end(), found);
++      if (it != scs.end()) {
++          scs.erase(it);
++          sepp = new IR::SelectExpression(sepp->srcInfo, sepp->select, scs);
++          sep = sepp->to<IR::Expression>();
++          return sep;
++      }
++      return nullptr;
++    }
++
++    static void delExtractComp(IR::IndexedVector<IR::StatOrDecl>* comp) {
++        if (comp == nullptr) return;
++        P4CoreLibrary &corelib = P4CoreLibrary::instance;
++        const IR::MethodCallStatement* found;
++        for (auto c : *comp) {
++            if (c->is<IR::MethodCallStatement>()) {
++                auto mcs = c->to<IR::MethodCallStatement>();
++                auto mc = mcs->methodCall;
++                auto member = mc->method->to<IR::Member>();
++                if (member->member.name == corelib.packetIn.extract.name) {
++                    found = mcs;
++                    break;
++                }
++            }
++        }
++        auto it = std::find(comp->begin(), comp->end(), found);
++        if (it != comp->end()) {
++            comp->erase(it);
++            return;
++        }
++        return;
++    }
++
++    static const IR::ParserState* findState(IR::Node* p, cstring name) {
++        // Both customer and vendor parsers are expected to include parser state
++        // start.  Or if they are both included by accident, the check below
++        // deals with it.
++        if ((p == nullptr) || (name == "start")) return nullptr;
++        auto parser = p->to<IR::P4Parser>();
++        if (parser == nullptr) return nullptr;
++        // std::cout << "P4Parser: " << parser << "\n";
++        for (auto s : parser->states) {
++            if (s->name == name) {
++                return s;
++            }
++        }
++        return nullptr;
++    }
++
++    static int addPState(IR::Node** p, const IR::ParserState* ps,
++                         IR::Vector<IR::Node>* nodes) {
++        if (*p == nullptr || ps == nullptr) return -1;
++        auto parser = (*p)->to<IR::P4Parser>();
++        if (parser == nullptr) return -1;
++        auto sts = parser->states;
++        sts.push_back(ps);
++        // std::cout << "\nAdd PS: " << ps->name << "\n";
++        *p = new IR::P4Parser(parser->srcInfo, parser->name, parser->type,
++                              parser->constructorParams, parser->parserLocals, sts);
++        if (!setNodeByName(nodes, *p, parser->name))
++            return 0;
++        else
++            return -1;
++
++        return 0;
++    }
++
++    static int delPState(IR::Node** p, cstring name, IR::Vector<IR::Node>* nodes) {
++        if (*p == nullptr) return -1;
++        auto parser = (*p)->to<IR::P4Parser>();
++        if (parser == nullptr) return -1;
++        auto sts = parser->states;
++        if (sts.removeByName(name)) {
++            // std::cout << "\nDel PS: " << name << "\n";
++            *p = new IR::P4Parser(parser->srcInfo, parser->name, parser->type,
++                                  parser->constructorParams, parser->parserLocals, sts);
++            if (!setNodeByName(nodes, *p, parser->name))
++                return 0;
++            else
++                return -1;
++        }
++        return -1;
++    }
++
++    static int delObj(IR::Vector<IR::Node>* nodes, cstring name) {
++        if (nodes == nullptr) return -1;
++        IR::Node* cur = getNodeByName(nodes, name);
++        if (cur == nullptr) return -1;
++        auto it = std::find(nodes->begin(), nodes->end(), cur);
++        if (it != nodes->end()) {
++            nodes->erase(it);
++            return 0;
++        }
++        return -1;
++    }
+ 
+  protected:
+     friend class P4::P4Lexer;
+@@ -209,6 +444,28 @@ class P4ParserDriver final : public AbstractParserDriver {
+     /// we're parsing.
+     IR::Vector<IR::Node>* nodes = nullptr;
+ 
++    /// parent (or vendor) P4Parser to track because it is what we override
++    /// functionality for and/or add to it.
++    IR::Node* parent = nullptr;
++
++    /// parent (or vendor) P4Control to track because it is what we override
++    /// functionality for and/or add to it.
++    IR::Node* parentCtrl = nullptr;
++
++    IR::Node* parentSt = nullptr;
++    IR::Node* parentHu = nullptr;
++    IR::Node* parentEm = nullptr;
++    IR::Node* parentSerEm = nullptr;
++    IR::Node* parentPkg = nullptr;
++
++    const IR::ParserState* overriden_ps = nullptr;
++
++    const IR::ID *defID = nullptr;
++
++    bool custOverrides = false;
++
++    std::map<cstring, PkgInfo*> pkgmap;
++
+     /// A scratch buffer to hold the current string literal. (They're lexed
+     /// incrementally, so we need to hold some state between tokens.)
+     std::string stringLiteral;
