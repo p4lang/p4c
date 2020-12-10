@@ -852,13 +852,13 @@ auto* ps = new IR::ParserState(@3, *$3, $1, *$6, $7);
                                         const IR::Expression* sep;
                                         const IR::ParserState* ps;
                                         if (driver.defID) {
-                                            sep = driver.delSelectCase(&selExpr, &(driver.parent));
+                                            sep = driver.delSelectCase(&selExpr);
                                             if (sep == nullptr) {
                                                 std::cout << "\nError: Failed to delete selectCase. " << newName << "\n";
                                                 yyerrok;
                                              }
                                              driver.printParser(driver.parent);
-                                             sep = driver.addDefSelectCase(&sep, driver.defID, &(driver.parent));
+                                             sep = driver.addDefSelectCase(&sep, driver.defID);
                                              if (sep == nullptr) {
                                                  std::cout << "\nError: Failed to add selectCase.";
                                                  yyerrok;
@@ -916,7 +916,7 @@ parserBlockStatement
     ;
 
 transitionStatement
-    : /* empty */                 { $$ = nullptr; }
+    : %empty                      { $$ = nullptr; }
     | SUPER "." name "." TRANSITION "." DEFAULT "." name ";" {}
     | SUPER "." name "." TRANSITION ";" {}
     | TRANSITION stateExpression  { $$ = $2; }
@@ -1245,8 +1245,7 @@ structTypeDeclaration
         driver.structure->declareTypes(&$5->parameters); }
       "{" structFieldList "}" { $$ = new IR::Type_Struct(@3, *$3, $1, $5, *$8);
                                 driver.structure->pop(); }
-    | optAnnotations // TODO
-        STRUCT name { }
+    | optAnnotations STRUCT name { }
         OVERRIDE { driver.parentSt = driver.getNodeByName(driver.nodes, $3->name); }
         "{" structFieldList "}" { if (driver.parentSt) {
                                       auto fs = *$8;
@@ -1265,7 +1264,19 @@ headerUnionDeclaration
         driver.structure->markAsTemplate(*$3);
         driver.structure->declareTypes(&$5->parameters); }
       "{" structFieldList "}" { $$ = new IR::Type_HeaderUnion(@3, *$3, $1, $5, *$8);
-                                driver.structure->pop(); }
+      }
+    | optAnnotations
+        HEADER_UNION name { }
+        OVERRIDE { driver.parentHu = driver.getNodeByName(driver.nodes, $3->name); }
+        "{" structFieldList "}" { if (driver.parentHu) {
+                                      auto fs = *$8;
+                                      auto hu = driver.getHdrUnion(driver.parentHu);
+                                      for (auto f : fs)
+		                          hu->fields.push_back(f);
+                                  }
+                                  driver.parentHu = nullptr;
+                                  $$ = nullptr;
+                                }
     ;
 
 structFieldList

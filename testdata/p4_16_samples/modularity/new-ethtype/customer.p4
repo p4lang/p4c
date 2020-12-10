@@ -42,9 +42,6 @@ control Cust_ingress(inout headers_t hdr,
                        inout meta_t meta,
                        inout standard_metadata_t standard_metadata)
 {
-    table t_exact override {
-     
-    }
     apply {
         Choice c = Choice.Third;
 	Rate r = Rate.Fast;

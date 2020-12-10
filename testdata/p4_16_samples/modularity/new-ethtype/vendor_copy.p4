@@ -27,7 +27,7 @@ parser vendor_parser(packet_in packet,
 
 control vendor_ingress(inout headers_t hdr,
                        inout meta_t meta,
-                       inout standard_metadata_t standard_metadata)
+                       inout standard_metadata_t standard_meta)
 {
     action a() { standard_meta.egress_spec = 0; }
 

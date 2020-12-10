@@ -287,12 +287,10 @@ class P4ParserDriver final : public AbstractParserDriver {
     }
 
     static const IR::Expression* addDefSelectCase(const IR::Expression** se,
-                                                  const IR::ID *id, IR::Node** p) {
+                                                  const IR::ID *id) {
       if ((*se == nullptr)) return nullptr;
       if (id == nullptr) return nullptr;
       auto sep = *se;
-      // auto parser = (*p)->to<IR::P4Parser>();
-      // std::cout << "AddSelectCase for parser:" << parser->name << "|" << id->name << "\n";
       if (!sep->is<IR::SelectExpression>()) {
           std::cout << "Error SelectExpression\n";
           return nullptr;
@@ -310,12 +308,9 @@ class P4ParserDriver final : public AbstractParserDriver {
       return sep;
     }
 
-    static const IR::Expression* delSelectCase(const IR::Expression** se, IR::Node** p) {
+    static const IR::Expression* delSelectCase(const IR::Expression** se) {
       if ((*se == nullptr)) return nullptr;
-      if (p == nullptr) return nullptr;
       auto sep = *se;
-      auto parser = (*p)->to<IR::P4Parser>();
-      //  std::cout << "delSelectCase for parser:" << parser->name << "\n";
       if (!sep->is<IR::SelectExpression>()) {
           std::cout << "Error SelectExpression\n";
           return nullptr;
