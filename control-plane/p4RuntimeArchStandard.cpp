@@ -991,8 +991,14 @@ class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
                             const IR::TableBlock* tableBlock) override {
         P4RuntimeArchHandlerCommon<Arch::PSA>::addTableProperties(
             symbols, p4info, table, tableBlock);
-        // TODO(antonin): not supported yet in PSA
-        table->set_idle_timeout_behavior(p4configv1::Table::NOTIFY_CONTROL);
+
+        auto tableDeclaration = tableBlock->container;
+        bool supportsTimeout = getSupportsTimeout(tableDeclaration);
+        if (supportsTimeout) {
+            table->set_idle_timeout_behavior(p4configv1::Table::NOTIFY_CONTROL);
+        } else {
+            table->set_idle_timeout_behavior(p4configv1::Table::NO_TIMEOUT);
+        }
     }
 
     void addExternInstance(const P4RuntimeSymbolTableIface& symbols,
@@ -1023,6 +1029,31 @@ class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
                   "P4 type %1% could not be converted to P4Info P4DataTypeSpec");
 
         return Digest{decl->controlPlaneName(), typeSpec, decl->to<IR::IAnnotated>()};
+    }
+
+    /// @return true if @table's 'support_timeout' property exists and is true. This
+    /// indicates that @table supports entry ageing.
+    static bool getSupportsTimeout(const IR::P4Table* table) {
+        auto timeout = table->properties->getProperty("psa_idle_timeout");
+
+        if (timeout == nullptr) return false;
+
+        if (auto exprValue = timeout->value->to<IR::ExpressionValue>()) {
+            if (auto expr = exprValue->expression) {
+                if (auto member = expr->to<IR::Member>()) {
+                    if (member->member == "NOTIFY_CONTROL") {
+                        return true;
+                    } else if (member->member == "NO_TIMEOUT") {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "Unexpected value %1% for supports_timeout "
+                "property on table %2%", timeout, table);
+        return false;
     }
 };
 
