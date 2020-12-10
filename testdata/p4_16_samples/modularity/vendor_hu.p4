@@ -12,6 +12,10 @@ header Hdr2 {
     bit<16> b;
 }
 
+header Hdr3 {
+    bit<16> c;
+}
+
 header_union U {
     Hdr1 h1;
     Hdr2 h2;

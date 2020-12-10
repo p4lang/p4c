@@ -1,10 +1,6 @@
 #include <v1model.p4>
 #include "../vendor_hu.p4"
 
-header Hdr3 {
-    bit<16> c;
-}
-
 header_union U override {
     Hdr3 h3;
 }
