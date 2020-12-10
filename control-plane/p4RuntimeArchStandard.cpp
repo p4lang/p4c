@@ -1052,7 +1052,8 @@ class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
 
         ::error(ErrorType::ERR_UNEXPECTED,
                 "Unexpected value %1% for supports_timeout "
-                "property on table %2%", timeout, table);
+                "property on table %2%. Supported values are "
+                "{ NOTIFY_CONTROL, NO_TIMEOUT }", timeout, table);
         return false;
     }
 };
