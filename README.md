@@ -490,3 +490,27 @@ access them from the IR
 * Tables with multiple apply calls
 
 See also [unsupported P4_16 language features](backends/bmv2/README.md#unsupported-p4_16-language-features).
+
+## P4-16 Modularity
+
+Generate merged P4-16 program.  new.p4 uses new keywords in `override`
+and `super`. On invoking the command below, a p4-16 program is generated
+to stdout.
+
+
+```bash
+./p4test --std p4-18 -I <path> <new.p4>
+```
+### What is Supported
+
+For code merge (or reuse) between base.p4 to a new.p4 the following P4
+constructs support override to help automate merging.
+
+1. parser
+2. parser state
+3. control, e.g., for deparser
+4. Package
+5. struct
+6. enum
+7. serialized enum
+8. header union
