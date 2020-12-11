@@ -748,7 +748,7 @@ dotPrefix
 parserDeclaration
     : parserTypeDeclaration optConstructorParameters
       // This code section exists to support multiple parsers - either
-      // for compiling as p4-16 or compiling them as p4-18 for merging.
+      // for compiling as p4-16 or compiling them as p4-16-expt for merging.
       "{" parserLocalElements parserStates "}"
                              { driver.structure->pop();
                                auto pl = new IR::ParameterList(@2, *$2);

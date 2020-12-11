@@ -57,7 +57,7 @@ class CompilerOptions : public Util::Options {
     enum class FrontendVersion {
         P4_14,
         P4_16,
-        P4_18
+        P4_16_expt
     };
 
     // Name of executable that is being run.
@@ -93,9 +93,6 @@ class CompilerOptions : public Util::Options {
 
     // Dump and undump the IR tree
     bool debugJson = false;
-
-    // gets a node in P4 IR by name.
-    cstring P4NodeName = nullptr;
 
     // Write a P4Runtime control plane API description to the specified file.
     cstring p4RuntimeFile = nullptr;

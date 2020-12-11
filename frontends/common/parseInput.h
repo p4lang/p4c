@@ -92,7 +92,7 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
     case CompilerOptions::FrontendVersion::P4_16:
         result = P4ParserDriver::parse(ver, in, options.file);
         break;
-    case CompilerOptions::FrontendVersion::P4_18:
+    case CompilerOptions::FrontendVersion::P4_16_expt:
         ver = 18;
         result = P4ParserDriver::parse(ver, in, options.file);
         break;

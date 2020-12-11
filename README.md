@@ -493,14 +493,17 @@ See also [unsupported P4_16 language features](backends/bmv2/README.md#unsupport
 
 ## P4-16 Modularity
 
-Generate merged P4-16 program.  new.p4 uses new keywords in `override`
-and `super`. On invoking the command below, a p4-16 program is generated
-to stdout.
-
+The description here exists to help code review for what is supported.
+The p4-16 specification will be updated once code is checked in.
+Additional description is TODO.
 
 ```bash
-./p4test --std p4-18 -I <path> <new.p4>
+./p4test --std p4-16-expt -I <path> <new.p4>
 ```
+
+The above command generates a merged P4-16 program to stdout.  new.p4 uses new keywords in `override`and `super`.
+
+
 ### What is Supported
 
 For code merge (or reuse) between base.p4 to a new.p4 the following P4
