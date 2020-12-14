@@ -100,6 +100,11 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
     registerOption("--toJSON", "file",
                    [this](const char* arg) { dumpJsonFile = arg; return true; },
                    "Dump the compiler IR after the midend as JSON in the specified file.");
+
+    registerOption("-o", "outfile",
+                   [this](const char* arg) { outputFile = arg; return true; },
+                   "Write output to outfile");
+
     registerOption("--p4runtime-files", "filelist",
                    [this](const char* arg) { p4RuntimeFiles = arg; return true; },
                    "Write the P4Runtime control plane API description to the specified\n"
