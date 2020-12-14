@@ -12,6 +12,12 @@ union U1 {
     bit<32> x;
 }
 
+struct G {
+    U u;
+}
+
+extern void wg(out G g);
+
 control c() {
     apply {
         U u;
@@ -20,6 +26,7 @@ control c() {
         u.x.b = 0;       // not within a switch
         U u1 = U.x;
         switch (u) {
+            U.G: { }          // no such field in union
             U.y: { u.x = 0; } // wrong fields accessed
             //U.z: { }          // no such field
             U1.x: { }         // incompatible label
@@ -33,6 +40,11 @@ control c() {
         }
         switch (z) {
             U.y: { }          // wrong label type
+        }
+
+        G g;
+        switch (g.u) {
+            U.x: { wg(g); }   // g should not be mutable
         }
     }
 }

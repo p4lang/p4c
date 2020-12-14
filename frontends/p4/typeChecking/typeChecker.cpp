@@ -1546,6 +1546,7 @@ const IR::Node* TypeInference::postorder(IR::Type_Struct* type) {
         t->is<IR::Type_Boolean>() || t->is<IR::Type_Stack>() ||
         t->is<IR::Type_Varbits>() || t->is<IR::Type_ActionEnum>() ||
         t->is<IR::Type_Tuple>() || t->is<IR::Type_SerEnum>() ||
+        t->is<IR::Type_MatchKind>() ||
                 // experimental: generic structs
         t->is<IR::Type_Var>() || t->is<IR::Type_SpecializedCanonical>(); };
     (void)validateFields(canon, validator);
@@ -2651,6 +2652,10 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
         type = getType(decl->getNode());
         if (type == nullptr)
             return expression;
+        if (type->is<IR::Type_MatchKind>()) {
+            setCompileTimeConstant(expression);
+            setCompileTimeConstant(getOriginal<IR::Expression>());
+        }
     }
 
     setType(getOriginal(), type);
@@ -3035,6 +3040,11 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                           "of a switch statement", expression);
                 return expression;
             }
+            if (!tu->getField(member)) {
+                typeError("%1%: no such field in union '%2%'", expression, tu);
+                return expression;
+            }
+
             // By assigning to the label the union type (and not the union field type!)
             // the type checker for switch statements works fine when comparing the label
             // type with the switch expression type.
