@@ -1031,7 +1031,7 @@ class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
         return Digest{decl->controlPlaneName(), typeSpec, decl->to<IR::IAnnotated>()};
     }
 
-    /// @return true if @table's 'support_timeout' property exists and is true. This
+    /// @return true if @table's 'psa_idle_timeout' property exists and is true. This
     /// indicates that @table supports entry ageing.
     static bool getSupportsTimeout(const IR::P4Table* table) {
         auto timeout = table->properties->getProperty("psa_idle_timeout");
@@ -1046,12 +1046,18 @@ class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
                     } else if (member->member == "NO_TIMEOUT") {
                         return false;
                     }
+                } else if (auto path = expr->to<IR::PathExpression>()) {
+                    ::error(ErrorType::ERR_UNEXPECTED,
+                        "Unresolved value %1% for psa_idle_timeout "
+                        "property on table %2%. Must be a constant and one of "
+                        "{ NOTIFY_CONTROL, NO_TIMEOUT }", timeout, table);
+                    return false;
                 }
             }
         }
 
         ::error(ErrorType::ERR_UNEXPECTED,
-                "Unexpected value %1% for supports_timeout "
+                "Unexpected value %1% for psa_idle_timeout "
                 "property on table %2%. Supported values are "
                 "{ NOTIFY_CONTROL, NO_TIMEOUT }", timeout, table);
         return false;
