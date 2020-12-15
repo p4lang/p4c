@@ -20,7 +20,6 @@ tables {
     id: 23115527
   }
   size: 1024
-  idle_timeout_behavior: NOTIFY_CONTROL
 }
 actions {
   preamble {

@@ -18,7 +18,6 @@ tables {
   }
   direct_resource_ids: 368068636
   size: 1024
-  idle_timeout_behavior: NOTIFY_CONTROL
 }
 actions {
   preamble {

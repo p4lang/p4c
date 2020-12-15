@@ -20,7 +20,6 @@ tables {
     id: 26564927
   }
   size: 1024
-  idle_timeout_behavior: NOTIFY_CONTROL
 }
 tables {
   preamble {
@@ -41,7 +40,6 @@ tables {
     id: 21257015
   }
   size: 1024
-  idle_timeout_behavior: NOTIFY_CONTROL
 }
 tables {
   preamble {
@@ -65,7 +63,6 @@ tables {
     id: 21257015
   }
   size: 1024
-  idle_timeout_behavior: NOTIFY_CONTROL
 }
 actions {
   preamble {
