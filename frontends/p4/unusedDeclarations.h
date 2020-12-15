@@ -62,6 +62,7 @@ class RemoveUnusedDeclarations : public Transform {
      */
     bool giveWarning(const IR::Node* node);
     const IR::Node* process(const IR::IDeclaration* decl);
+    const IR::Node* warnIfUnused(const IR::Node* node);
 
  public:
     explicit RemoveUnusedDeclarations(const ReferenceMap* refMap,
@@ -91,14 +92,14 @@ class RemoveUnusedDeclarations : public Transform {
     const IR::Node* preorder(IR::Declaration_MatchKind* decl) override
     { prune(); return decl; }
     const IR::Node* preorder(IR::Type_StructLike* type) override
-    { prune(); return type; }
+    { visit(type->typeParameters); prune(); return type; }
     const IR::Node* preorder(IR::Type_Extern* type) override
-    { prune(); return type; }
+    { visit(type->typeParameters); prune(); return type; }
     const IR::Node* preorder(IR::Type_Method* type) override
-    { prune(); return type; }
-    const IR::Node* preorder(IR::Parameter* param) override { return param; }  // never dead
-    const IR::Node* preorder(IR::NamedExpression* ne) override { return ne; }  // idem
-    const IR::Node* preorder(IR::TypeParameters* p) override { prune(); return p; }  // "
+    { visit(type->typeParameters); prune(); return type; }
+    const IR::Node* preorder(IR::Parameter* param) override;
+    const IR::Node* preorder(IR::NamedExpression* ne) override { return ne; }  // never dead
+    const IR::Node* preorder(IR::Type_Var* p) override { prune(); return warnIfUnused(p); }
 
     const IR::Node* preorder(IR::Declaration_Variable* decl)  override;
     const IR::Node* preorder(IR::Declaration* decl) override { return process(decl); }

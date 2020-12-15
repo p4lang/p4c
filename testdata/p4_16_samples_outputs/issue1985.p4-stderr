@@ -1,0 +1,3 @@
+issue1985.p4(22): [--Wwarn=unused] warning: 'b' is unused
+    action a(in bool b) {
+                     ^
