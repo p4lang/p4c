@@ -117,7 +117,6 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
                         error.BadIPv4HeaderChecksum : set_error_idx(8w7);
                         error.UnhandledIPv4Options : set_error_idx(8w8);
         }
-
         psa_direct_counter = parser_error_counts_0;
     }
     apply {
@@ -165,3 +164,4 @@ IngressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_met
 EgressPipeline<headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(EgressParserImpl(), egress(), EgressDeparserImpl()) ep;
 
 PSA_Switch<headers, metadata, headers, metadata, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t, empty_metadata_t>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+

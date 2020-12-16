@@ -111,7 +111,6 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
                         error.BadIPv4HeaderChecksum : set_error_idx(7);
                         error.UnhandledIPv4Options : set_error_idx(8);
         }
-
         psa_direct_counter = parser_error_counts;
     }
     apply {
