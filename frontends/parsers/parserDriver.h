@@ -123,7 +123,7 @@ class P4ParserDriver final : public AbstractParserDriver {
     static const IR::P4Program* parse(std::istream& in, const char* sourceFile,
                                       unsigned sourceLine = 1);
     static const IR::P4Program* parse(unsigned ver, FILE* in, const char* sourceFile,
-                                      unsigned sourceLine = 1);
+                                      cstring outputFile, unsigned sourceLine = 1);
 
     /**
      * Parses a P4-16 annotation body.

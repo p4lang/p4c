@@ -598,7 +598,7 @@ void ProgramStructure::include(cstring filename, cstring ppoptions) {
     unsigned ver = 16;
     if (!::errorCount()) {
         if (FILE* file = options.preprocess()) {
-            auto code = P4::P4ParserDriver::parse(ver, file, options.file);
+            auto code = P4::P4ParserDriver::parse(ver, file, options.file, nullptr);
             if (code && !::errorCount())
                 for (auto decl : code->objects)
                     declarations->push_back(decl);
