@@ -511,7 +511,7 @@ simplicity the design does not introduce any new header struct or
 parser, etc. For more simplicity we got rid of the keyword `extends` and
 just use `override` throughout.
 
-Without using any keywords, a sturct can be extended in P4 today.  Consider the
+Without using any keywords, a struct can be extended in P4 today.  Consider the
 example below.
 
 ```p4
