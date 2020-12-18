@@ -228,10 +228,13 @@ class TypeConstraints final {
  public:
     TypeVariableSubstitutionVisitor replaceVariables;
 
-    explicit TypeConstraints(const TypeVariableSubstitution* definedVariables) :
-            unification(new TypeUnification(this)), definedVariables(definedVariables),
-            currentSubstitution(new TypeVariableSubstitution()),
-            replaceVariables(definedVariables) {}
+    /// @param strictStruct If true structs are considered equal only if the have the same name,
+    ///                     otherwise only if they have the same fields.
+    TypeConstraints(const TypeVariableSubstitution* definedVariables, bool strictStruct) :
+            unification(new TypeUnification(this, strictStruct)),
+            definedVariables(definedVariables),
+            replaceVariables(definedVariables)
+            currentSubstitution(new TypeVariableSubstitution()) {}
 
     // Mark this variable as being free.
     void addUnifiableTypeVariable(const IR::ITypeVar* typeVariable)

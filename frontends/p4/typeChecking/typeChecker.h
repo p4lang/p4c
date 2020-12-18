@@ -75,14 +75,17 @@ class TypeInference : public Transform {
     const IR::Node* initialNode;
 
  public:
-    // If readOnly=true it will assert that it behaves like
-    // an Inspector.
+    // @param readOnly If ftrue it will assert that it behaves like
+    //        an Inspector.
+    // @param strictStruct If true it will require strict structure
+    //                     equality.
     TypeInference(ReferenceMap* refMap, TypeMap* typeMap,
-                  bool readOnly = false);
+                  bool readOnly = false, bool strictStruct = false);
 
  protected:
     // If true we expect to leave the program unchanged
     bool readOnly;
+    bool strictStruct;
     const IR::Type* getType(const IR::Node* element) const;
     const IR::Type* getTypeType(const IR::Node* element) const;
     void setType(const IR::Node* element, const IR::Type* type);
