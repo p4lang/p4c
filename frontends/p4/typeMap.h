@@ -86,11 +86,16 @@ class TypeMap final : public ProgramMap {
     const TypeVariableSubstitution* getSubstitutions() const { return &allTypeVariables; }
 
     /// Check deep structural equivalence; defined between canonical types only.
-    static bool equivalent(const IR::Type* left, const IR::Type* right);
+    /// @param strictStruct If true we require structs to have the same name to be
+    ///                     equivalent, if false only that the have the same fields.
+    static bool equivalent(const IR::Type* left, const IR::Type* right, bool strictStruct);
     /// This is the same as equivalence, but it also allows some legal
     /// implicit conversions, such as a tuple type to a struct type, which
     /// is used when initializing a struct with a list expression.
-    static bool implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to);
+    /// @param strictStruct If true we require structs to have the same name to be
+    ///                     equivalent, if false only that the have the same fields.
+    static bool implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to,
+                                        bool strictStruct);
 
     // Used for tuples and stacks only
     const IR::Type* getCanonical(const IR::Type* type);
