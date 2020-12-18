@@ -3355,6 +3355,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         }
         // The return type may also contain type variables
         returnType = returnType->apply(substVisitor)->to<IR::Type>();
+        (void)returnType->apply(*learn);
         if (returnType->is<IR::Type_Control>() ||
             returnType->is<IR::Type_Parser>() ||
             returnType->is<IR::P4Parser>() ||
