@@ -50,7 +50,7 @@ class HasUses {
         // main logic of this class
         bool overwrites(const ProgramPoint previous) {
             if (!isActive()) return false;
-
+            if (previous.isBeforeStart()) return false;
             auto last = previous.last();
             if (auto *assign_stmt = last->to<IR::AssignmentStatement>()) {
                 if (auto *slice_stmt = assign_stmt->left->to<IR::Slice>()) {
