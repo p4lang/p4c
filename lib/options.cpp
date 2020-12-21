@@ -40,14 +40,15 @@ void Util::Options::registerOption(const char* option, const char* argName,
 
 void Util::Options::unRegisterOption(const char* option) {
     auto it = options.find(option);
-    auto itv = find (optionOrder.begin(), optionOrder.end(), option);
-    if (it != options.end()) {
-        auto o = it->second;
-        options.erase(it);
-        if (itv != optionOrder.end())
-            optionOrder.erase(itv);
-        delete o;
-    }
+    auto itv = find(optionOrder.begin(), optionOrder.end(), option);
+    BUG_CHECK(it != options.end(),
+              "Failed to find option data to unregister: %1%", option);
+    auto o = it->second;
+    options.erase(it);
+    BUG_CHECK(itv != optionOrder.end(),
+              "Failed to find option internal data to unregister: %1%", option);
+    optionOrder.erase(itv);
+    delete o;
 }
 
 // Process options; return list of remaining options.
