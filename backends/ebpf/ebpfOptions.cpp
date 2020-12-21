@@ -4,9 +4,6 @@
 
 EbpfOptions::EbpfOptions() {
         langVersion = CompilerOptions::FrontendVersion::P4_16;
-        registerOption("-o", "outfile",
-                [this](const char* arg) { outputFile = arg; return true; },
-                "Write output to outfile");
         registerOption("--listMidendPasses", nullptr,
                 [this](const char*) {
                     loadIRFromJson = false;

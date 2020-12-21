@@ -90,6 +90,9 @@ class CompilerOptions : public Util::Options {
     // Dump a JSON representation of the IR in the file
     cstring dumpJsonFile = nullptr;
 
+    // Use to dump output from backends.
+    cstring outputFile = nullptr;
+
     // Dump and undump the IR tree
     bool debugJson = false;
 
