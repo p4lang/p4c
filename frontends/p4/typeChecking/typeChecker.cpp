@@ -571,7 +571,7 @@ const IR::Type* TypeInference::canonicalize(const IR::Type* type) {
         auto specialized = specialize(gt, args);
 
         auto result = new IR::Type_SpecializedCanonical(
-            type->srcInfo, baseCanon, args, specialized);
+            type->srcInfo, baseCanon, args, specialized, st);
         // learn the types of all components of the specialized type
         LOG2("Scanning the specialized type");
         auto *tc = clone();
@@ -3525,7 +3525,7 @@ const IR::Node* TypeInference::postorder(IR::ConstructorCallExpression* expressi
         if (type->is<IR::Type_SpecializedCanonical>()) {
             auto st = type->to<IR::Type_SpecializedCanonical>();
             conttype = new IR::Type_SpecializedCanonical(
-                type->srcInfo, st->baseType, st->arguments, conttype);
+                type->srcInfo, st->baseType, st->arguments, conttype, st->original);
         }
         if (args != expression->arguments)
             expression->arguments = args;

@@ -470,11 +470,19 @@ class Type_SpecializedCanonical : Type {
     /// 'substituted' is baseType with all type
     /// variables substituted with the arguments.
     Type         substituted;  // always IMayBeGenericType
+    Type_Specialized original; // IR node in program that maps to this type
 #nodbprint
     validate{
         arguments->check_null();
         BUG_CHECK(baseType->is<IMayBeGenericType>(), "base type %1% is not generic", baseType);
         BUG_CHECK(substituted->is<IMayBeGenericType>(), "substituted %1% is not generic", substituted);
+    }
+    visit_children {
+        Type::visit_children(v);
+        v.visit(baseType, "baseType");
+        v.visit(arguments, "arguments");
+        v.visit(substituted, "substituted");
+        // do *not* visit 'original', ever; it would lead to an infinite loop
     }
     // Always a Type_Specialized
     const Type* getP4Type() const override;

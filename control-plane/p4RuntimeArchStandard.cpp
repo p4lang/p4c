@@ -1119,7 +1119,7 @@ class P4RuntimeArchHandlerPSA final : public P4RuntimeArchHandlerCommon<Arch::PS
                     } else if (member->member == "NO_TIMEOUT") {
                         return false;
                     }
-                } else if (expr->is<IR::PathExpression>()) {
+                } else if (!expr->is<IR::PathExpression>()) {
                     ::error(ErrorType::ERR_UNEXPECTED,
                         "Unresolved value %1% for psa_idle_timeout "
                         "property on table %2%. Must be a constant and one of "

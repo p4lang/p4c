@@ -279,7 +279,8 @@ bool TypeUnification::unify(const EqualityConstraint* constraint) {
             constraints->add(constraint->create(di, si));
         }
         return true;
-    } else if (dest->is<IR::Type_Struct>() || dest->is<IR::Type_Header>()) {
+    } else if (dest->is<IR::Type_Struct>() || dest->is<IR::Type_Header>() ||
+               dest->is<IR::Type_Union>()) {
         auto strct = dest->to<IR::Type_StructLike>();
         if (auto tpl = src->to<IR::Type_List>()) {
             if (strct->fields.size() != tpl->components.size())

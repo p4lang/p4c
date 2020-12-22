@@ -186,7 +186,7 @@ const IR::Node* ReplaceTypeUses::postorder(IR::SwitchCase* scase) {
     auto ts = type->to<IR::Type_SpecializedCanonical>();
     if (!ts)
         return scase;
-    auto replacement = specMap->get(ts->getP4Type()->to<IR::Type_Specialized>());
+    auto replacement = specMap->get(ts->original);
     if (!replacement)
         return scase;
     auto member = label->to<IR::Member>();
