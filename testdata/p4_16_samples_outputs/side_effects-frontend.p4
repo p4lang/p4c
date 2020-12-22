@@ -4,11 +4,10 @@ header H {
     bit<1> z;
 }
 
-control c();
-package top(c _c);
-control my() {
+control c<T>(inout T t);
+package top<T>(c<T> _c);
+control my(inout H[2] s) {
     @name("my.a") bit<1> a_0;
-    @name("my.s") H[2] s_0;
     @name("my.tmp") bit<1> tmp;
     @name("my.tmp_0") bit<1> tmp_0;
     @name("my.tmp_1") bit<1> tmp_1;
@@ -17,24 +16,36 @@ control my() {
     @name("my.tmp_4") bit<1> tmp_4;
     @name("my.tmp_5") bit<1> tmp_5;
     @name("my.tmp_6") bit<1> tmp_6;
+    @name("my.tmp_7") bit<1> tmp_7;
+    @name("my.tmp_8") bit<1> tmp_8;
+    @name("my.tmp_9") bit<1> tmp_9;
+    @name("my.tmp_10") bit<1> tmp_10;
+    @name("my.tmp_11") bit<1> tmp_11;
     apply {
         a_0 = 1w0;
-        tmp = g(a_0);
-        tmp_0 = tmp;
-        a_0 = f(a_0, tmp_0);
-        tmp_1 = g(a_0);
-        tmp_2 = tmp_1;
-        a_0 = f(s_0[a_0].z, tmp_2);
-        tmp_3 = g(a_0);
-        tmp_4 = tmp_3;
-        tmp_5 = s_0[tmp_4].z;
-        tmp_6 = f(tmp_5, a_0);
+        tmp = a_0;
+        tmp_0 = g(a_0);
+        tmp_1 = tmp_0;
+        tmp_2 = f(tmp, tmp_1);
+        a_0 = tmp_2;
+        tmp_3 = s[a_0].z;
+        tmp_4 = g(a_0);
+        tmp_5 = tmp_4;
+        tmp_6 = f(tmp_3, tmp_5);
+        s[a_0].z = tmp_3;
         a_0 = tmp_6;
+        tmp_7 = g(a_0);
+        tmp_8 = tmp_7;
+        tmp_9 = s[tmp_8].z;
+        tmp_10 = a_0;
+        tmp_11 = f(tmp_9, tmp_10);
+        s[tmp_8].z = tmp_9;
+        a_0 = tmp_11;
         a_0 = g(a_0);
         a_0 = g(a_0);
-        g(a_0);
+        s[a_0].z = g(a_0);
     }
 }
 
-top(my()) main;
+top<H[2]>(my()) main;
 

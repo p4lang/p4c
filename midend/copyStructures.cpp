@@ -24,7 +24,7 @@ const IR::Node* RemoveAliases::postorder(IR::AssignmentStatement* statement) {
     if (!type->is<IR::Type_StructLike>())
         return statement;
 
-    ReadsWrites rw(refMap, false);
+    ReadsWrites rw(refMap);
     if (!rw.mayAlias(statement->left, statement->right))
         return statement;
     auto tmp = refMap->newName("tmp");

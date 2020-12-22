@@ -304,7 +304,7 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::LOr* expression) {
 
 bool DoSimplifyExpressions::mayAlias(const IR::Expression* left,
                                      const IR::Expression* right) const {
-    ReadsWrites rw(refMap, true);
+    ReadsWrites rw(refMap);
     return rw.mayAlias(left, right);
 }
 
@@ -396,17 +396,21 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
         // least one of them is out or inout.
         for (auto p1 : *mi->substitution.getParametersInArgumentOrder()) {
             auto arg1 = mi->substitution.lookup(p1);
+#if 0
             if (hasSideEffects.count(arg1->expression))
                 continue;
+#endif
             for (auto p2 : *mi->substitution.getParametersInArgumentOrder()) {
-                LOG3("p1=" << dbp(p1) << " p2=" << dbp(p2));
                 if (p2 == p1)
                     break;
                 if (!p1->hasOut() && !p2->hasOut())
                     continue;
+                LOG3("p1=" << dbp(p1) << " p2=" << dbp(p2));
                 auto arg2 = mi->substitution.lookup(p2);
+#if 0
                 if (hasSideEffects.count(arg2->expression))
                     continue;
+#endif
                 if (mayAlias(arg1->expression, arg2->expression)) {
                     LOG3("Using temporary for " << dbp(mce) <<
                          " param " << dbp(p1) << " aliasing" << dbp(p2));

@@ -13,15 +13,16 @@ parser p1(packet_in p, out Header h) {
     @name("p1.tmp_0") bit<32> tmp_0;
     @name("p1.tmp_1") bit<32> tmp_1;
     @name("p1.tmp_2") bit<32> tmp_2;
+    @name("p1.tmp_3") bit<32> tmp_3;
     state start {
         h.data1 = 32w0;
         func(h);
         tmp = h.data2;
         tmp_0 = h.data2;
-        tmp_1 = g(tmp, tmp_0);
-        h.data2 = tmp;
-        tmp_2 = tmp_1;
-        g(h.data2, tmp_2);
+        tmp_1 = h.data2;
+        tmp_2 = g(tmp_0, tmp_1);
+        tmp_3 = tmp_2;
+        g(tmp, tmp_3);
         h.data2 = h.data3 + 32w1;
         transition select(h.isValid()) {
             true: next1;
