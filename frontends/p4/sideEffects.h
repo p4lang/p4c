@@ -163,6 +163,8 @@ class DoSimplifyExpressions : public Transform, P4WriteContext {
 
     IR::IndexedVector<IR::Declaration> toInsert;  // temporaries
     IR::IndexedVector<IR::StatOrDecl> statements;
+    /// Set of temporaries introduced for method call results
+    std::set<const IR::Expression*> temporaries;
 
     cstring createTemporary(const IR::Type* type);
     const IR::Expression* addAssignment(Util::SourceInfo srcInfo, cstring varName,
