@@ -61,7 +61,9 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::Literal* expression) {
 const IR::Node* DoSimplifyExpressions::preorder(IR::ArrayIndex* expression) {
     LOG3("Visiting " << dbp(expression));
     auto type = typeMap->getType(getOriginal(), true);
-    if (SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
+    if (SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap) ||
+        // if the expression appears as part of an argument also use a temporary for the index
+        findContext<IR::Argument>() != nullptr) {
         visit(expression->left);
         CHECK_NULL(expression->left);
         visit(expression->right);
@@ -90,7 +92,9 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::Member* expression) {
     LOG3("Visiting " << dbp(expression));
     auto type = typeMap->getType(getOriginal(), true);
     const IR::Expression *rv = expression;
-    if (SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap)) {
+    if (SideEffects::check(getOriginal<IR::Expression>(), refMap, typeMap) ||
+        // This may be part of a left-value that is passed as an out argument
+        findContext<IR::Argument>() != nullptr) {
         visit(expression->expr);
         CHECK_NULL(expression->expr);
 
@@ -349,11 +353,11 @@ class GetWrittenExpressions : public Inspector {
         CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("GetWrittenExpressions"); }
     void postorder(const IR::MethodCallExpression* expression) override {
         auto mi = MethodInstance::resolve(expression, refMap, typeMap);
-        // This can only be a table apply, the other apply methods return void,
-        // so they cannot be expressions.
-        if (mi->is<ApplyMethod>()) {
-            written.emplace(everything);
-            return;
+        if (auto a = mi->to<ApplyMethod>()) {
+            if (a->isTableApply()) {
+                written.emplace(everything);
+                return;
+            }
         }
         for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
             if (!p->hasOut()) continue;
@@ -484,14 +488,14 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
 
         const IR::Expression* argValue = nullptr;
         visit(arg);  // May mutate arg!  Recursively simplifies arg.
-        auto newarg = arg->expression;
-        CHECK_NULL(newarg);
+        auto argex = arg->expression;
+        CHECK_NULL(argex);
 
         if (useTemp) {
             // declare temporary variable if this is not already
             // a temporary
-            if (temporaries.find(newarg) == temporaries.end()) {
-                LOG3("Not a temporary " << newarg);
+            if (temporaries.find(argex) == temporaries.end()) {
+                LOG3("Not a temporary " << argex);
                 auto paramtype = typeMap->getType(p, true);
                 if (paramtype->is<IR::Type_Dontcare>())
                     paramtype = typeMap->getType(arg, true);
@@ -499,22 +503,22 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
                 argValue = new IR::PathExpression(IR::ID(tmp, nullptr));
                 if (p->direction != IR::Direction::Out) {
                     auto clone = argValue->clone();
-                    auto stat = new IR::AssignmentStatement(clone, newarg);
-                    LOG3(clone << " = " << newarg);
+                    auto stat = new IR::AssignmentStatement(clone, argex);
+                    LOG3(clone << " = " << argex);
                     statements.push_back(stat);
                     typeMap->setType(clone, paramtype);
                     typeMap->setLeftValue(clone);
                 }
             } else {
-                LOG3("Already a temporary " << newarg);
-                argValue = newarg;
+                LOG3("Already a temporary " << argex);
+                argValue = argex;
             }
         } else {
-            argValue = newarg;
+            argValue = argex;
         }
         if (p->direction != IR::Direction::In && useTemp) {
             auto assign = new IR::AssignmentStatement(
-                cloner.clone<IR::Expression>(newarg),
+                cloner.clone<IR::Expression>(argex),
                 cloner.clone<IR::Expression>(argValue));
             copyBack->push_back(assign);
             LOG3("Will copy out value " << dbp(assign));

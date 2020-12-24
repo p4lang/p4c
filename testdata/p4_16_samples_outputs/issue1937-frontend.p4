@@ -7,28 +7,22 @@ header h1_t {
 
 parser parserImpl(out h1_t hdr) {
     @name("parserImpl.tmp") bit<8> tmp;
-    @name("parserImpl.tmp_0") bit<8> tmp_0;
-    @name("parserImpl.tmp_1") bit<8> tmp_1;
-    @name("parserImpl.tmp_2") bit<8> tmp_2;
     state start {
-        tmp_0 = hdr.f1;
+        tmp = hdr.f1;
         transition foo_start;
     }
     state foo_start {
-        tmp = tmp_0 >> 2;
+        hdr.f1 = tmp >> 2;
         transition start_0;
     }
     state start_0 {
-        hdr.f1 = tmp;
-        tmp_2 = 8w5;
         transition foo_start_0;
     }
     state foo_start_0 {
-        tmp_1 = tmp_2 >> 2;
+        hdr.f2 = 8w5 >> 2;
         transition start_1;
     }
     state start_1 {
-        hdr.f2 = tmp_1;
         transition accept;
     }
 }
