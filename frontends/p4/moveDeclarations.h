@@ -31,6 +31,8 @@ namespace P4 {
  * UniqueNames pass.
  */
 class MoveDeclarations : public Transform {
+    bool parsersOnly;
+
     /// List of lists of declarations to move, one list per
     /// control/parser/action.
     std::vector<IR::Vector<IR::Declaration>*> toMove;
@@ -42,21 +44,38 @@ class MoveDeclarations : public Transform {
     { getMoves()->push_back(decl); }
 
  public:
-    MoveDeclarations() { setName("MoveDeclarations"); visitDagOnce = false; }
+    explicit MoveDeclarations(bool parsersOnly = false): parsersOnly(parsersOnly) {
+        setName("MoveDeclarations"); visitDagOnce = false; }
     void end_apply(const IR::Node*) override
     { BUG_CHECK(toMove.empty(), "Non empty move stack"); }
     const IR::Node* preorder(IR::P4Action* action) override {
+        if (parsersOnly) {
+            prune();
+            return action;
+        }
         if (findContext<IR::P4Control>() == nullptr)
             // If we are not in a control, move to the beginning of the action.
             // Otherwise move to the control's beginning.
             push();
         return action; }
-    const IR::Node* preorder(IR::P4Control* control) override
-    { push(); return control; }
+    const IR::Node* preorder(IR::P4Control* control) override {
+        if (parsersOnly) {
+            prune();
+            return control;
+        }
+        push();
+        return control;
+    }
     const IR::Node* preorder(IR::P4Parser* parser) override
     { push(); return parser; }
-    const IR::Node* preorder(IR::Function* function) override
-    { push(); return function; }
+    const IR::Node* preorder(IR::Function* function) override {
+        if (parsersOnly) {
+            prune();
+            return function;
+        }
+        push();
+        return function;
+    }
     const IR::Node* postorder(IR::P4Action* action) override;
     const IR::Node* postorder(IR::P4Control* control) override;
     const IR::Node* postorder(IR::P4Parser* parser) override;

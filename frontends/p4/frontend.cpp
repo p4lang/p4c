@@ -157,7 +157,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
         new ResolveReferences(&refMap),
         new TypeInference(&refMap, &typeMap, false),  // more casts may be needed
-        new RemoveParserControlFlow(&refMap, &typeMap),
+        new RemoveParserIfs(&refMap, &typeMap),
         new StructInitializers(&refMap, &typeMap),
         new SpecializeGenericFunctions(&refMap, &typeMap),
         new TableKeyNames(&refMap, &typeMap),
@@ -197,7 +197,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         // Check for constants only after inlining
         new CheckConstants(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
-        new RemoveParserControlFlow(&refMap, &typeMap),
+        new RemoveParserControlFlow(&refMap, &typeMap),  // more ifs may have been added to parsers
         new UniqueNames(&refMap),
         new LocalizeAllActions(&refMap),
         new UniqueNames(&refMap),  // needed again after inlining
