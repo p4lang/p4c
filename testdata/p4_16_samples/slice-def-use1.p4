@@ -43,7 +43,7 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
     @name("debug") register<bit<8>>(32w2) debug;
     action act() {
         n = 8w0b11111111;
-        n[7:4] = 4w0;
+        n[7:4] = (bit<4>)(n ^ 4w0);
         debug.write(32w1, n);
         standard_meta.egress_spec = 9w0;
     }
