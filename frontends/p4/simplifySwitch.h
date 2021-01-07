@@ -14,12 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _FRONTENDS_P4_SIMPLIFSWITCH_H
-#define _FRONTENDS_P4_SIMPLIFSWITCH_H
+#ifndef _FRONTENDS_P4_SIMPLIFYSWITCH_H_
+#define _FRONTENDS_P4_SIMPLIFYSWITCH_H_
 
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
-#include "frontends/p4/parserCallGraph.h"
+#include "frontends/p4/typeChecking/typeChecker.h"
 
 namespace P4 {
 
@@ -48,4 +48,4 @@ class SimplifySwitch : public PassManager {
 
 }  // namespace P4
 
-#endif /* _FRONTENDS_P4_SIMPLIFSWITCH_H */
+#endif /* _FRONTENDS_P4_SIMPLIFYSWITCH_H_ */
