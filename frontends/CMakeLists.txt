@@ -51,6 +51,7 @@ set (P4_FRONTEND_SRCS
   p4/simplify.cpp
   p4/simplifyDefUse.cpp
   p4/simplifyParsers.cpp
+  p4/simplifySwitch.cpp
   p4/specialize.cpp
   p4/specializeGenericFunctions.cpp
   p4/specializeGenericTypes.cpp
@@ -118,6 +119,7 @@ set (P4_FRONTEND_HDRS
   p4/simplify.h
   p4/simplifyDefUse.h
   p4/simplifyParsers.h
+  p4/simplifySwitch.h
   p4/specialize.h
   p4/specializeGenericFunctions.h
   p4/specializeGenericTypes.h

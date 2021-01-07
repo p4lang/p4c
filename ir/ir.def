@@ -470,15 +470,10 @@ class MethodCallStatement : Statement {
 }
 
 class SwitchCase {
-    Expression       label;  // Can be DefaultExpression or a PathExpression
+    Expression       label;
     NullOK Statement statement;  // If missing then it's a fall-through
 #nodbprint
     validate{
-#if 0
-        if (!(label->is<IR::DefaultExpression>() || label->is<IR::PathExpression>()))
-            ::error(ErrorType::ERR_EXPRESSION,
-                    "%1%: Unexpected expression for switch case", *this);
-#endif
         BUG_CHECK(statement == nullptr || statement->is<IR::BlockStatement>(),
                   "%1%: Expected a block statement",
                   statement);
