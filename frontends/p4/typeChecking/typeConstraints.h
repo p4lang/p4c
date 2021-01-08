@@ -228,7 +228,8 @@ class TypeConstraints final {
 
     explicit TypeConstraints(const TypeVariableSubstitution* definedVariables) :
             unification(new TypeUnification(this)), definedVariables(definedVariables),
-            replaceVariables(definedVariables) {}
+            replaceVariables(definedVariables),
+            currentSubstitution(new TypeVariableSubstitution()) {}
 
     // Mark this variable as being free.
     void addUnifiableTypeVariable(const IR::ITypeVar* typeVariable)
