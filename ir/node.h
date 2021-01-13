@@ -79,6 +79,8 @@ class Node : public virtual INode {
     virtual const Node *apply_visitor_preorder(Transform &v);
     virtual const Node *apply_visitor_postorder(Transform &v);
     virtual void apply_visitor_revisit(Transform &v, const Node *n) const;
+    Node &operator=(const Node &) = default;
+    Node &operator=(Node &&) = default;
 
  protected:
     static int currentId;

@@ -280,6 +280,8 @@ class ProgramPoint : public IHasDbPrint {
     { return stack.empty(); }
     std::vector<const IR::Node*>::const_iterator begin() const { return stack.begin(); }
     std::vector<const IR::Node*>::const_iterator end() const { return stack.end(); }
+    ProgramPoint &operator=(const ProgramPoint &) = default;
+    ProgramPoint &operator=(ProgramPoint &&) = default;
 };
 }  // namespace P4
 
