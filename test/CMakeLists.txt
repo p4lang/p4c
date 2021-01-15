@@ -49,6 +49,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/format_test.cpp
   gtest/helpers.cpp
   gtest/json_test.cpp
+  gtest/local_copyprop.cpp
   gtest/midend_test.cpp
   gtest/opeq_test.cpp
   gtest/ordered_map.cpp

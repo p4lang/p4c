@@ -18,6 +18,7 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/simplifyDefUse.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "has_side_effects.h"
 
@@ -135,6 +136,7 @@ class LocalCopyPropagation : public PassManager {
             typeChecking = new TypeChecking(refMap, typeMap, true);
         passes.push_back(typeChecking);
         passes.push_back(new DoLocalCopyPropagation(refMap, typeMap, policy, elimUnusedTables));
+        passes.push_back(new SimplifyDefUse(refMap, typeMap, typeChecking));
     }
 };
 
