@@ -41,7 +41,7 @@ TEST_F(LocalCopyPropTest, DeadCodeRemoval) {
                         inout standard_metadata_t sm) {
             Func() func = {
                 void apply(inout bit<32> val) {
-                    val = headers.h.f1;
+                    val = headers.h.f1;     // This will become dead code post copy propagation.
                     val = val + 1;
                 }
             };
@@ -81,7 +81,7 @@ TEST_F(LocalCopyPropTest, DeadCodeRemoval) {
 
     std::string program_string = builder.toString();
     boost::algorithm::trim_fill(program_string, " ");
-    // Check that implifyDefUse has removed dead code from:
+    // Check that SimplifyDefUse has removed dead code from:
     //    void apply(inout bit<32> val) { val = headers.h.f1; val = headers.h.f1 + 32w1; }";
     std::string expected = "void apply(inout bit<32> val) { ; val = headers.h.f1 + 32w1; }";
     EXPECT_TRUE(program_string.find(expected) != std::string::npos);
