@@ -77,7 +77,6 @@ class Options {
                         OptionProcessor processor,  // function to execute when option matches
                         const char* description,  // option help message
                         OptionFlags flags = OptionFlags::Default);  // additional flags
-    void unRegisterOption(const char* option);
 
     explicit Options(cstring message) : binaryName(nullptr), message(message) {}
 

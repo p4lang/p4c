@@ -40,7 +40,6 @@ class P4TestOptions : public CompilerOptions {
     bool validateOnly = false;
     bool loadIRFromJson = false;
     P4TestOptions() {
-        unRegisterOption("-o");
         registerOption("--listMidendPasses", nullptr,
                 [this](const char*) {
                     listMidendPasses = true;

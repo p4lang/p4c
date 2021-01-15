@@ -26,6 +26,8 @@ class BMV2Options : public CompilerOptions {
  public:
     // Externs generation
     bool emitExterns = false;
+    // file to output to
+    cstring outputFile = nullptr;
     // read from json
     bool loadIRFromJson = false;
 
@@ -34,6 +36,9 @@ class BMV2Options : public CompilerOptions {
                 [this](const char*) { emitExterns = true; return true; },
                 "[BMv2 back-end] Force externs be emitted by the backend.\n"
                 "The generated code follows the BMv2 JSON specification.");
+        registerOption("-o", "outfile",
+                [this](const char* arg) { outputFile = arg; return true; },
+                "Write output to outfile");
         registerOption("--fromJSON", "file",
                 [this](const char* arg) { loadIRFromJson = true; file = arg; return true; },
                 "Use IR representation from JsonFile dumped previously,"\
