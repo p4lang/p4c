@@ -87,13 +87,12 @@ class ConstantTypeSubstitution : public Transform {
 };
 }  // namespace
 
-TypeChecking::TypeChecking(ReferenceMap* refMap, TypeMap* typeMap,
-                           bool updateExpressions) {
+TypeChecking::TypeChecking(ReferenceMap* refMap, TypeMap* typeMap, bool) {
     addPasses({
        new P4::ResolveReferences(refMap),
        new P4::TypeInference(refMap, typeMap, true),
-       updateExpressions ? new ApplyTypesToExpressions(typeMap) : nullptr,
-       updateExpressions ? new P4::ResolveReferences(refMap) : nullptr });
+       new ApplyTypesToExpressions(typeMap),
+       new P4::ResolveReferences(refMap) });
     setStopOnError(true);
 }
 
