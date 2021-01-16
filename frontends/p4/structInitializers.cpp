@@ -24,6 +24,7 @@ namespace P4 {
 const IR::Expression*
 convert(const IR::Expression* expression, const IR::Type* type) {
     bool modified = false;
+    CHECK_NULL(type);
     if (auto st = type->to<IR::Type_StructLike>()) {
         auto si = new IR::IndexedVector<IR::NamedExpression>();
         if (auto le = expression->to<IR::ListExpression>()) {
@@ -82,7 +83,7 @@ convert(const IR::Expression* expression, const IR::Type* type) {
 }
 
 const IR::Node* CreateStructInitializers::postorder(IR::AssignmentStatement* statement) {
-    auto type = typeMap->getType(statement->left);
+    auto type = typeMap->getType(getOriginal<IR::AssignmentStatement>()->left);
     statement->right = convert(statement->right, type);
     return statement;
 }
