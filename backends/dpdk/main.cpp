@@ -95,10 +95,17 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0)
         return 1;
 
-    DPDK::PsaSwitchMidEnd midEnd(options);
-    midEnd.addDebugHook(hook);
+    BMV2::MidEnd* midEnd = nullptr;
+    if (options.arch == "psa")
+        midEnd = new DPDK::PsaSwitchMidEnd(options);
+    else if (options.arch == "pna")
+        midEnd = new DPDK::PnaNicMidEnd(options);
+    else
+        ::error("Unsupported architecture %1%", options.arch);
+
+    midEnd->addDebugHook(hook);
     try {
-        toplevel = midEnd.process(program);
+        toplevel = midEnd->process(program);
         if (::errorCount() > 1 || toplevel == nullptr ||
             toplevel->getMain() == nullptr)
             return 1;
@@ -112,8 +119,15 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0)
         return 1;
 
-    auto backend = new DPDK::PsaSwitchBackend(options, &midEnd.refMap,
-                                              &midEnd.typeMap, &midEnd.enumMap);
+    BMV2::Backend *backend = nullptr;
+    if (options.arch == "psa")
+        backend = new DPDK::PsaSwitchBackend(options, &midEnd->refMap,
+                &midEnd->typeMap, &midEnd->enumMap);
+    else if (options.arch == "pna")
+        backend = new DPDK::PnaNicBackend(options, &midEnd->refMap,
+                &midEnd->typeMap, &midEnd->enumMap);
+    else
+        ::error("Unsupported architecture %1%", options.arch);
 
     // Necessary because BMV2Context is expected at the top of stack in further
     // processing
@@ -131,7 +145,10 @@ int main(int argc, char *const argv[]) {
     if (!options.outputFile.isNullOrEmpty()) {
         std::ostream *out = openFile(options.outputFile, false);
         if (out != nullptr) {
-            backend->codegen(*out);
+            if (auto be = dynamic_cast<DPDK::PsaSwitchBackend*>(backend))
+                be->codegen(*out);
+            else if (auto be = dynamic_cast<DPDK::PnaNicBackend*>(backend))
+                be->codegen(*out);
             out->flush();
         }
     }

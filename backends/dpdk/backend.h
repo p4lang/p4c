@@ -54,6 +54,19 @@ class PsaSwitchBackend : public BMV2::Backend {
     void codegen(std::ostream &) const;
 };
 
+class PnaNicBackend : public BMV2::Backend {
+    BMV2::BMV2Options &options;
+    const IR::DpdkAsmProgram *dpdk_program = nullptr;
+
+  public:
+    void convert(const IR::ToplevelBlock *tlb) override;
+    PnaNicBackend(BMV2::BMV2Options &options, P4::ReferenceMap *refMap,
+            P4::TypeMap *typeMap,
+            P4::ConvertEnums::EnumMapping *enumMap)
+        : Backend(options, refMap, typeMap, enumMap), options(options) {}
+    void codegen(std::ostream &) const;
+};
+
 } // namespace DPDK
 
 #endif /* BACKENDS_DPDK_BACKEND_H_ */

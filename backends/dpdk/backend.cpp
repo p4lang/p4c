@@ -107,4 +107,28 @@ void PsaSwitchBackend::codegen(std::ostream &out) const {
     dpdk_program->toSpec(out) << std::endl;
 }
 
+void PnaNicBackend::convert(const IR::ToplevelBlock *tlb) {
+    BMV2::PsaProgramStructure structure(refMap, typeMap);
+    auto main = tlb->getMain();
+    if (!main)
+        return;
+
+    if (main->type->name != "PNA_NIC")
+        ::warning(ErrorType::WARN_INVALID,
+                  "%1%: the main package should be called PNA_NIC"
+                  "; are you using the wrong architecture?",
+                  main->type->name);
+
+    auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
+    auto program = tlb->getProgram();
+    DpdkVariableCollector collector;
+    auto rewriteToDpdkArch =
+        new DPDK::RewriteToDpdkArch(refMap, typeMap, &collector);
+
+}
+
+void PnaNicBackend::codegen(std::ostream &out) const {
+    dpdk_program->toSpec(out) << std::endl;
+}
+
 }  // namespace DPDK
