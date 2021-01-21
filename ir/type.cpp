@@ -162,24 +162,6 @@ const Type* Type_List::getP4Type() const {
     return new IR::Type_List(srcInfo, *args);
 }
 
-int Type_Tuple::fieldNameValid(cstring name) const {
-    if (!name.startsWith("f"))
-        return -1;
-
-    for (size_t i = 1; i < name.size(); i++) {
-        if (!isdigit(name.get(i)))
-            return -1;
-        if (name.get(i) == '0' && i < name.size() - 1)
-            // no leading zeros
-            return -1;
-    }
-    // There is no overflow if we use big_int
-    big_int v(name.substr(1));
-    if (v > size())
-        return -1;
-    return static_cast<int>(v);
-}
-
 const Type* Type_Tuple::getP4Type() const {
     auto args = new IR::Vector<Type>();
     for (auto a : components) {

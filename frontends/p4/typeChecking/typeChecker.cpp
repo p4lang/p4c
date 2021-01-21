@@ -2005,47 +2005,63 @@ const IR::Node* TypeInference::postorder(IR::ArrayIndex* expression) {
     if (ltype == nullptr || rtype == nullptr)
         return expression;
 
-    if (!ltype->is<IR::Type_Stack>()) {
-        typeError("Array indexing %1% applied to non-array type %2%",
-                  expression, ltype->toString());
-        return expression;
+    int index = -1;
+    if (auto cst = expression->right->to<IR::Constant>()) {
+        if (!cst->fitsInt()) {
+            typeError("Index too large: %1%", cst);
+            return expression;
+        }
+        index = cst->asInt();
+        if (index < 0) {
+            typeError("%1%: Negative array index %2%", expression, cst);
+            return expression;
+        }
     }
+    // if index is negative here it means it's not a constant
 
-    bool rightOpConstant = expression->right->is<IR::Constant>();
-    if (!rtype->is<IR::Type_Bits>() && !rightOpConstant) {
+    if (!rtype->is<IR::Type_Bits>() && (index < 0)) {
         typeError("Array index %1% must be an integer, but it has type %2%",
                   expression->right, rtype->toString());
         return expression;
     }
 
-    auto hst = ltype->to<IR::Type_Stack>();
+    const IR::Type* type = nullptr;
+    if (auto hst = ltype->to<IR::Type_Stack>()) {
+        if (hst->sizeKnown()) {
+            int size = hst->getSize();
+            if (index >= 0 && index >= size) {
+                typeError("Array index %1% larger or equal to array size %2%",
+                          expression->right, hst->size);
+                return expression;
+            }
+        }
+        type = hst->elementType;
+    } else if (auto tup = ltype->to<IR::Type_Tuple>()) {
+        if (index < 0) {
+            typeError("Tuple index %1% must be constant", expression->right);
+            return expression;
+        }
+        if (static_cast<size_t>(index) >= tup->getSize()) {
+            typeError("Tuple index %1% larger than tuple size %2%",
+                      expression->right, tup->getSize());
+            return expression;
+        }
+        type = tup->components.at(index);
+        if (isCompileTimeConstant(expression->left)) {
+            setCompileTimeConstant(expression);
+            setCompileTimeConstant(getOriginal<IR::Expression>());
+        }
+    } else {
+        typeError("Indexing %1% applied to non-array and non-tuple type %2%",
+                  expression, ltype->toString());
+        return expression;
+    }
     if (isLeftValue(expression->left)) {
         setLeftValue(expression);
         setLeftValue(getOriginal<IR::Expression>());
     }
-
-    if (rightOpConstant) {
-        auto cst = expression->right->to<IR::Constant>();
-        if (!cst->fitsInt()) {
-            typeError("Index too large: %1%", cst);
-            return expression;
-        }
-        int index = cst->asInt();
-        if (index < 0) {
-            typeError("%1%: Negative array index %2%", expression, cst);
-            return expression;
-        }
-        if (hst->sizeKnown()) {
-            int size = hst->getSize();
-            if (index >= size) {
-                typeError("Array index %1% larger or equal to array size %2%",
-                          cst, hst->size);
-                return expression;
-            }
-        }
-    }
-    setType(getOriginal(), hst->elementType);
-    setType(expression, hst->elementType);
+    setType(getOriginal(), type);
+    setType(expression, type);
     return expression;
 }
 
@@ -2920,20 +2936,6 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                 typeError("%1%: Invalid enum tag", expression);
                 setType(getOriginal(), type);
                 setType(expression, type); }
-            return expression;
-        }
-    }
-
-    if (auto tt = type->to<IR::Type_Tuple>()) {
-        int index = tt->fieldNameValid(member);
-        if (index >= 0) {
-            auto type = tt->components.at(static_cast<unsigned>(index));
-            setType(getOriginal(), type);
-            setType(expression, type);
-            if (isCompileTimeConstant(expression->expr)) {
-                setCompileTimeConstant(expression);
-                setCompileTimeConstant(getOriginal<IR::Expression>());
-            }
             return expression;
         }
     }

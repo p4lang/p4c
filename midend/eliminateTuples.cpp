@@ -86,4 +86,16 @@ const IR::Node* DoReplaceTuples::insertReplacements(const IR::Node* before) {
     return result;
 }
 
+const IR::Node* DoReplaceTuples::postorder(IR::ArrayIndex* expression) {
+    auto type = repl->typeMap->getType(expression->left);
+    if (type->is<IR::Type_Tuple>()) {
+        auto cst = expression->right->to<IR::Constant>();
+        BUG_CHECK(cst, "%1%: Expected a constant", expression->right);
+        cstring field = cstring("f") + Util::toString(cst->asInt());
+        auto src = expression->right->srcInfo;
+        return new IR::Member(src, expression->left, IR::ID(src, field));
+    }
+    return expression;
+}
+
 }  // namespace P4

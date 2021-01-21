@@ -318,11 +318,19 @@ class Type_Set : Type {
         return elementType->width_bits(); }
 }
 
+interface Type_Indexed {
+    // Probably this sohuld be called 'size()', but some subclasses already
+    // have a 'size' field.
+    virtual size_t getSize() const = 0;
+    Type at(size_t index) const;
+}
+
 /// Base class for Type_List and Type_Tuple
-abstract Type_BaseList : Type {
+abstract Type_BaseList : Type, Type_Indexed {
     optional inline Vector<Type> components;
     validate{ components.check_null(); }
-    size_t size() const { return components.size(); }
+    size_t getSize() const { return components.size(); }
+    Type at(size_t index) const { return components.at(index); }
     int width_bits() const override {
         /// returning sum of the width of the elements
         int rv = 0;
@@ -343,9 +351,6 @@ class Type_List : Type_BaseList {
 class Type_Tuple : Type_BaseList {
     toString{ return "Tuple(" + Util::toString(components.size()) + ")"; }
     const Type* getP4Type() const override;
-    /// Return a field index if given a legal tuple field name.
-    /// Otherwise return -1.
-    int fieldNameValid(cstring name) const;
 }
 
 /// The type of an architectural block.
@@ -401,14 +406,15 @@ class Type_Name : Type {
     }
 }
 
-class Type_Stack : Type {
+class Type_Stack : Type_Indexed, Type {
     Type        elementType;
     Expression  size;
     toString{ return elementType->toString() + "[" +
                 (sizeKnown() ? Util::toString(getSize()) : "?") + "]"; }
     dbprint{ out << elementType << "[" << size << "]"; }
     bool sizeKnown() const;
-    unsigned getSize() const;
+    size_t getSize() const;
+    Type at(size_t index) const { return elementType; }
     static const cstring next;
     static const cstring last;
     static const cstring arraySize;

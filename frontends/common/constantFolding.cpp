@@ -190,6 +190,40 @@ const IR::Node* DoConstantFolding::preorder(IR::ArrayIndex* e) {
     visit(e->right);
     assignmentTarget = save;
     prune();
+
+    if (!typesKnown)
+        return e;
+    auto orig = getOriginal<IR::ArrayIndex>();
+    auto type = typeMap->getType(orig->left, true);
+    if (type->is<IR::Type_Tuple>()) {
+        auto init = getConstant(e->right);
+        if (init == nullptr) {
+            if (typesKnown)
+                ::error(ErrorType::ERR_INVALID,
+                        "%1%: Index must evaluate to a constant", e->right);
+            return e;
+        }
+        if (auto cst = init->to<IR::Constant>()) {
+            if (!cst->fitsInt()) {
+                ::error(ErrorType::ERR_INVALID, "Index too large: %1%", cst);
+                return e;
+            }
+            int index = cst->asInt();
+            if (index < 0) {
+                ::error(ErrorType::ERR_INVALID,
+                        "Tuple index %1% must be constant", e->right);
+                return e;
+            }
+            if (auto list = init->to<IR::ListExpression>()) {
+                if (static_cast<size_t>(index) >= list->size()) {
+                    ::error(ErrorType::ERR_INVALID,
+                            "Tuple index %1% too large", e->right);
+                    return e;
+                }
+                return CloneConstants::clone(list->components.at(static_cast<size_t>(index)));
+            }
+        }
+    }
     return e;
 }
 
@@ -596,41 +630,32 @@ const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
         if (expr == nullptr)
             return e;
 
-        if (auto tt = type->to<IR::Type_Tuple>()) {
-            int index = tt->fieldNameValid(e->member);
-            if (index < 0)
-                return e;
-            if (auto list = expr->to<IR::ListExpression>()) {
-                result = CloneConstants::clone(list->components.at(static_cast<size_t>(index)));
-            }
-        } else {
-            auto structType = type->to<IR::Type_StructLike>();
-            if (structType == nullptr)
-                BUG("Expected a struct type, got %1%", type);
-            if (auto list = expr->to<IR::ListExpression>()) {
-                bool found = false;
-                int index = 0;
-                for (auto f : structType->fields) {
-                    if (f->name.name == e->member.name) {
-                        found = true;
-                        break;
-                    }
-                    index++;
+        auto structType = type->to<IR::Type_StructLike>();
+        if (structType == nullptr)
+            BUG("Expected a struct type, got %1%", type);
+        if (auto list = expr->to<IR::ListExpression>()) {
+            bool found = false;
+            int index = 0;
+            for (auto f : structType->fields) {
+                if (f->name.name == e->member.name) {
+                    found = true;
+                    break;
                 }
-
-                if (!found)
-                    BUG("Could not find field %1% in type %2%", e->member, type);
-                result = CloneConstants::clone(list->components.at(index));
-            } else if (auto si = expr->to<IR::StructExpression>()) {
-                if (origtype->is<IR::Type_Header>() && e->member.name == IR::Type_Header::isValid)
-                    return e;
-                auto ne = si->components.getDeclaration<IR::NamedExpression>(e->member.name);
-                BUG_CHECK(ne != nullptr,
-                          "Could not find field %1% in initializer %2%", e->member, si);
-                return CloneConstants::clone(ne->expression);
-            } else {
-                BUG("Unexpected initializer: %1%", expr);
+                index++;
             }
+
+            if (!found)
+                    BUG("Could not find field %1% in type %2%", e->member, type);
+            result = CloneConstants::clone(list->components.at(index));
+        } else if (auto si = expr->to<IR::StructExpression>()) {
+            if (origtype->is<IR::Type_Header>() && e->member.name == IR::Type_Header::isValid)
+                return e;
+            auto ne = si->components.getDeclaration<IR::NamedExpression>(e->member.name);
+            BUG_CHECK(ne != nullptr,
+                      "Could not find field %1% in initializer %2%", e->member, si);
+                return CloneConstants::clone(ne->expression);
+        } else {
+            BUG("Unexpected initializer: %1%", expr);
         }
     }
     return result;
