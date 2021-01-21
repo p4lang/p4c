@@ -59,7 +59,6 @@ header GH_1 {
     bit<32> _data_b0;
 }
 
-typedef GH_1[3] Stack;
 struct H4_0 {
     H2_0 x;
 }
@@ -82,23 +81,17 @@ header_union HU_0 {
 }
 
 control c(out bit<1> x) {
-    @name("c.gh") GH_1 gh_0;
-    @name("c.s") Stack s_0;
-    @hidden action genericstruct89() {
-        gh_0.isValid();
-        s_0[0].setValid();
-        s_0[0]._data_b0 = 32w1;
-        s_0[0].isValid();
+    @hidden action genericstruct97() {
         x = 1w0;
     }
-    @hidden table tbl_genericstruct89 {
+    @hidden table tbl_genericstruct97 {
         actions = {
-            genericstruct89();
+            genericstruct97();
         }
-        const default_action = genericstruct89();
+        const default_action = genericstruct97();
     }
     apply {
-        tbl_genericstruct89.apply();
+        tbl_genericstruct97.apply();
     }
 }
 

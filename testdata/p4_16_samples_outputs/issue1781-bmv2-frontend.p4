@@ -26,12 +26,6 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
         }
     }
     apply {
-        {
-            @name("IngressImpl.hasReturned") bool hasReturned_1 = false;
-            @name("IngressImpl.retval") bit<32> retval_1;
-            hasReturned_1 = true;
-            retval_1 = 32w1;
-        }
         update_value(value_0);
     }
 }

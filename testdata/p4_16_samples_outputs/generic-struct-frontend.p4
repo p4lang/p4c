@@ -59,7 +59,6 @@ header GH_1 {
     S data;
 }
 
-typedef GH_1[3] Stack;
 struct H4_0 {
     H2_0 x;
 }
@@ -82,13 +81,7 @@ header_union HU_0 {
 }
 
 control c(out bit<1> x) {
-    @name("c.gh") GH_1 gh_0;
-    @name("c.s") Stack s_0;
     apply {
-        gh_0.isValid();
-        s_0[0].setValid();
-        s_0[0] = (GH_1){data = (S){b = 32w1}};
-        s_0[0].isValid();
         x = 1w0;
     }
 }

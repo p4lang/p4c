@@ -12,19 +12,6 @@ struct Headers {
 
 control ingress(inout Headers h) {
     apply {
-        {
-            @name("ingress.hasReturned") bool hasReturned = false;
-            @name("ingress.retval") bit<16> retval;
-            hasReturned = true;
-            retval = 16w1;
-        }
-        {
-            @name("ingress.hasReturned_0") bool hasReturned_0 = false;
-            @name("ingress.retval_0") ethernet_t retval_0;
-            hasReturned_0 = true;
-            retval_0.setValid();
-            retval_0 = (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1};
-        }
     }
 }
 

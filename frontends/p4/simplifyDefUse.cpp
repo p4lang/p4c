@@ -706,14 +706,17 @@ class FindUninitialized : public Inspector {
 class RemoveUnused : public Transform {
     // TODO: remove transitively unused
     const HasUses* hasUses;
+    ReferenceMap*   refMap;
+    TypeMap*        typeMap;
 
  public:
-    explicit RemoveUnused(const HasUses* hasUses) : hasUses(hasUses)
-    { CHECK_NULL(hasUses); setName("RemoveUnused"); }
+    explicit RemoveUnused(const HasUses* hasUses, ReferenceMap* refMap, TypeMap* typeMap)
+                        : hasUses(hasUses), refMap(refMap), typeMap(typeMap)
+    { CHECK_NULL(hasUses);  CHECK_NULL(refMap);  CHECK_NULL(typeMap); setName("RemoveUnused"); }
     const IR::Node* postorder(IR::AssignmentStatement* statement) override {
         if (!hasUses->hasUses(getOriginal())) {
             LOG3("Removing statement " << getOriginal() << " " << statement << IndentCtl::indent);
-            SideEffects se(nullptr, nullptr);
+            SideEffects se(refMap, typeMap);
             (void)statement->right->apply(se);
 
             if (se.nodeWithSideEffect != nullptr) {
@@ -726,9 +729,20 @@ class RemoveUnused : public Transform {
                 auto mce = se.nodeWithSideEffect->to<IR::MethodCallExpression>();
                 return new IR::MethodCallStatement(statement->srcInfo, mce);
             }
+            // removing
             return new IR::EmptyStatement();
         }
         return statement;
+    }
+    const IR::Node* postorder(IR::MethodCallStatement* mcs) override {
+        if (!hasUses->hasUses(getOriginal())) {
+            if (SideEffects::hasSideEffect(mcs->methodCall, refMap, typeMap)) {
+                return mcs;
+            }
+            // removing
+            return new IR::EmptyStatement();
+        }
+        return mcs;
     }
 };
 
@@ -741,7 +755,7 @@ class ProcessDefUse : public PassManager {
             definitions(new AllDefinitions(refMap, typeMap)) {
         passes.push_back(new ComputeWriteSet(definitions));
         passes.push_back(new FindUninitialized(definitions, &hasUses));
-        passes.push_back(new RemoveUnused(&hasUses));
+        passes.push_back(new RemoveUnused(&hasUses, refMap, typeMap));
         setName("ProcessDefUse");
     }
 };
