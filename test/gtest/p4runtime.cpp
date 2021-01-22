@@ -169,7 +169,7 @@ TEST_F(P4Runtime, IdAssignment) {
         struct Metadata { }
         parser parse(packet_in p, out Headers h, inout Metadata m,
                      inout standard_metadata_t sm) {
-            state start { transition accept; } }
+            state start { h = {}; transition accept; } }
         control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
         control egress(inout Headers h, inout Metadata m,
                         inout standard_metadata_t sm) { apply { } }
@@ -493,7 +493,7 @@ TEST_F(P4Runtime, IdAssignmentCounters) {
         struct Metadata { }
         parser parse(packet_in p, out Headers h, inout Metadata m,
                      inout standard_metadata_t sm) {
-            state start { transition accept; } }
+            state start { h = {}; transition accept; } }
         control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
         control egress(inout Headers h, inout Metadata m,
                         inout standard_metadata_t sm) { apply { } }
@@ -933,7 +933,7 @@ TEST_F(P4Runtime, PSADigests) {
             in EMPTY d,
             in EMPTY e,
             in EMPTY f) {
-            state start { transition accept; } }
+            state start { a = {}; transition accept; } }
 
         control MyIC(
             inout Headers h,
@@ -971,7 +971,7 @@ TEST_F(P4Runtime, PSADigests) {
             inout Headers h,
             in Metadata e,
             in psa_ingress_output_metadata_t f) {
-            apply { } }
+            apply { a = {}; b = {}; c = {}; } }
 
         control MyED(
             packet_out buffer,
@@ -981,7 +981,7 @@ TEST_F(P4Runtime, PSADigests) {
             in EMPTY d,
             in psa_egress_output_metadata_t e,
             in psa_egress_deparser_input_metadata_t f) {
-        apply { } }
+        apply { a = {}; b = {}; } }
 
         IngressPipeline(MyIP(), MyIC(), MyID()) ip;
         EgressPipeline(MyEP(), MyEC(), MyED()) ep;
@@ -1402,7 +1402,7 @@ TEST_F(P4Runtime, Documentation) {
         struct Metadata { }
         parser parse(packet_in p, out Headers h, inout Metadata m,
                      inout standard_metadata_t sm) {
-            state start { transition accept; } }
+            state start { h = {}; transition accept; } }
         control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
         control egress(inout Headers h, inout Metadata m,
                         inout standard_metadata_t sm) { apply { } }
@@ -1479,7 +1479,7 @@ boost::optional<P4::P4RuntimeAPI> P4RuntimePkgInfo::createTestCase(const char* a
 
         parser parse(packet_in p, out Headers h, inout Metadata m,
                      inout standard_metadata_t sm) {
-            state start { transition accept; } }
+            state start { h = {}; transition accept; } }
         control verifyChecksum(inout Headers h, inout Metadata m) { apply { } }
         control egress(inout Headers h, inout Metadata m,
                         inout standard_metadata_t sm) { apply { } }
