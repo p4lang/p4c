@@ -21,7 +21,11 @@ jobs:
       with:
         # See https://docs.bazel.build/versions/master/output_directories.html
         path: "~/.cache/bazel"
-        key: ${{ runner.os }}-build-direct
+        # Create cash entry for every run (by using unique key derived from commit hash).
+        # See https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows
+        key: ${{ runner.os }}-build-direct-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-build-direct-
 
     - name: Install bazelisk
       run: |
@@ -49,7 +53,11 @@ jobs:
       with:
         # See https://docs.bazel.build/versions/master/output_directories.html
         path: "~/.cache/bazel"
-        key: ${{ runner.os }}-build-indirect
+        # Create cash entry for every run (by using unique key derived from commit hash).
+        # See https://docs.github.com/en/actions/guides/caching-dependencies-to-speed-up-workflows
+        key: ${{ runner.os }}-build-indirect-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-build-indirect-
 
     - name: Install bazelisk
       run: |
