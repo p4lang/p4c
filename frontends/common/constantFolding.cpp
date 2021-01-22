@@ -214,7 +214,8 @@ const IR::Node* DoConstantFolding::preorder(IR::ArrayIndex* e) {
                         "Tuple index %1% must be constant", e->right);
                 return e;
             }
-            if (auto list = init->to<IR::ListExpression>()) {
+            auto value = getConstant(e->left);
+            if (auto list = value->to<IR::ListExpression>()) {
                 if (static_cast<size_t>(index) >= list->size()) {
                     ::error(ErrorType::ERR_INVALID,
                             "Tuple index %1% too large", e->right);

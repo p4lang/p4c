@@ -2499,6 +2499,14 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
                     typeError("%1%: cast not supported", expression->destType);
                 return expression;
             }
+        } else if (auto le = expression->expr->to<IR::ListExpression>()) {
+            if (st->fields.size() == 0 && le->size() == 0) {
+                // Empty structs
+                auto result = new IR::StructExpression(
+                    le->srcInfo, castType->getP4Type(), IR::IndexedVector<IR::NamedExpression>());
+                setType(result, st);
+                return result;
+            }
         }
     }
 
