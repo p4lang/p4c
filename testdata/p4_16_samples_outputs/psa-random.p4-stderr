@@ -1,0 +1,36 @@
+psa-random.p4(34): [--Wwarn=uninitialized_out_param] warning: out parameter 'a' may be uninitialized when 'MyEP' terminates
+    out EMPTY a,
+              ^
+psa-random.p4(32)
+parser MyEP(
+       ^^^^
+psa-random.p4(75): [--Wwarn=uninitialized_out_param] warning: out parameter 'a' may be uninitialized when 'MyID' terminates
+    out EMPTY a,
+              ^
+psa-random.p4(73)
+control MyID(
+        ^^^^
+psa-random.p4(76): [--Wwarn=uninitialized_out_param] warning: out parameter 'b' may be uninitialized when 'MyID' terminates
+    out EMPTY b,
+              ^
+psa-random.p4(73)
+control MyID(
+        ^^^^
+psa-random.p4(77): [--Wwarn=uninitialized_out_param] warning: out parameter 'c' may be uninitialized when 'MyID' terminates
+    out EMPTY c,
+              ^
+psa-random.p4(73)
+control MyID(
+        ^^^^
+psa-random.p4(86): [--Wwarn=uninitialized_out_param] warning: out parameter 'a' may be uninitialized when 'MyED' terminates
+    out EMPTY a,
+              ^
+psa-random.p4(84)
+control MyED(
+        ^^^^
+psa-random.p4(87): [--Wwarn=uninitialized_out_param] warning: out parameter 'b' may be uninitialized when 'MyED' terminates
+    out EMPTY b,
+              ^
+psa-random.p4(84)
+control MyED(
+        ^^^^

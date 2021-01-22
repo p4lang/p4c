@@ -1,0 +1,42 @@
+issue1208-1.p4(7): [--Wwarn=uninitialized_out_param] warning: out parameter 'a' may be uninitialized when 'MyIP' terminates
+    out EMPTY a,
+              ^
+issue1208-1.p4(5)
+parser MyIP(
+       ^^^^
+issue1208-1.p4(19): [--Wwarn=uninitialized_out_param] warning: out parameter 'a' may be uninitialized when 'MyEP' terminates
+    out EMPTY a,
+              ^
+issue1208-1.p4(17)
+parser MyEP(
+       ^^^^
+issue1208-1.p4(48): [--Wwarn=uninitialized_out_param] warning: out parameter 'a' may be uninitialized when 'MyID' terminates
+    out EMPTY a,
+              ^
+issue1208-1.p4(46)
+control MyID(
+        ^^^^
+issue1208-1.p4(49): [--Wwarn=uninitialized_out_param] warning: out parameter 'b' may be uninitialized when 'MyID' terminates
+    out EMPTY b,
+              ^
+issue1208-1.p4(46)
+control MyID(
+        ^^^^
+issue1208-1.p4(50): [--Wwarn=uninitialized_out_param] warning: out parameter 'c' may be uninitialized when 'MyID' terminates
+    out EMPTY c,
+              ^
+issue1208-1.p4(46)
+control MyID(
+        ^^^^
+issue1208-1.p4(59): [--Wwarn=uninitialized_out_param] warning: out parameter 'a' may be uninitialized when 'MyED' terminates
+    out EMPTY a,
+              ^
+issue1208-1.p4(57)
+control MyED(
+        ^^^^
+issue1208-1.p4(60): [--Wwarn=uninitialized_out_param] warning: out parameter 'b' may be uninitialized when 'MyED' terminates
+    out EMPTY b,
+              ^
+issue1208-1.p4(57)
+control MyED(
+        ^^^^

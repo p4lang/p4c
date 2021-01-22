@@ -10,6 +10,7 @@ parser MyParser(packet_in packet,
                 inout standard_metadata_t standard_metadata) {
 
     state start {
+        hdr = {};
         transition accept;
     }
 }

@@ -21,7 +21,7 @@ struct H { };
 struct M { };
 
 parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t smeta) {
-    state start { transition accept; }
+    state start { hdr = {}; transition accept; }
 }
 
 action drop(inout standard_metadata_t smeta) { mark_to_drop(smeta); } // this global action seems to cause the problem

@@ -10,6 +10,7 @@ struct M {
 
 parser P(packet_in pkt, out H h, inout M m, inout standard_metadata_t meta) {
     state start {
+        h = {  };
         transition accept;
     }
 }

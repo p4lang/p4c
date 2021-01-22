@@ -15,14 +15,14 @@ control pipe(inout Headers_t headers, out bool pass) {
     @name("pipe.Reject") action Reject() {
         pass = x_0;
     }
-    @hidden action action_call_ebpf34() {
+    @hidden action action_call_ebpf35() {
         x_0 = true;
     }
-    @hidden table tbl_action_call_ebpf34 {
+    @hidden table tbl_action_call_ebpf35 {
         actions = {
-            action_call_ebpf34();
+            action_call_ebpf35();
         }
-        const default_action = action_call_ebpf34();
+        const default_action = action_call_ebpf35();
     }
     @hidden table tbl_Reject {
         actions = {
@@ -31,7 +31,7 @@ control pipe(inout Headers_t headers, out bool pass) {
         const default_action = Reject();
     }
     apply {
-        tbl_action_call_ebpf34.apply();
+        tbl_action_call_ebpf35.apply();
         tbl_Reject.apply();
     }
 }

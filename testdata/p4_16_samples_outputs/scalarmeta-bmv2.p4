@@ -15,6 +15,7 @@ struct m {
 
 parser MyParser(packet_in b, out h hdrs, inout m meta, inout standard_metadata_t std) {
     state start {
+        hdrs = {  };
         meta.counter = 4;
         transition q0;
     }

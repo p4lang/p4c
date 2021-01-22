@@ -11,6 +11,7 @@ struct M {
 
 parser ParserI(packet_in b, out H h, inout M m, inout std_meta_t s) {
     state start {
+        h = (H){};
         transition accept;
     }
 }
@@ -40,7 +41,6 @@ control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
             default: {
             }
         }
-
     }
 }
 

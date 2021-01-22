@@ -12,6 +12,7 @@ struct metadata {
 typedef bit<8> test_t;
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
+        hdr = (headers){};
         transition accept;
     }
 }
@@ -30,7 +31,6 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
         const entries = {
                         8w1 : act(8w1);
         }
-
         default_action = NoAction();
     }
     apply {

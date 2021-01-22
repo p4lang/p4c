@@ -1,0 +1,30 @@
+psa-end-of-ingress-test-bmv2.p4(182): [--Wwarn=uninitialized_out_param] warning: out parameter 'clone_i2e_meta' may be uninitialized when 'IngressDeparserImpl' terminates
+                            out empty_metadata_t clone_i2e_meta,
+                                                 ^^^^^^^^^^^^^^
+psa-end-of-ingress-test-bmv2.p4(181)
+control IngressDeparserImpl(packet_out buffer,
+        ^^^^^^^^^^^^^^^^^^^
+psa-end-of-ingress-test-bmv2.p4(183): [--Wwarn=uninitialized_out_param] warning: out parameter 'resubmit_meta' may be uninitialized when 'IngressDeparserImpl' terminates
+                            out empty_metadata_t resubmit_meta,
+                                                 ^^^^^^^^^^^^^
+psa-end-of-ingress-test-bmv2.p4(181)
+control IngressDeparserImpl(packet_out buffer,
+        ^^^^^^^^^^^^^^^^^^^
+psa-end-of-ingress-test-bmv2.p4(184): [--Wwarn=uninitialized_out_param] warning: out parameter 'normal_meta' may be uninitialized when 'IngressDeparserImpl' terminates
+                            out empty_metadata_t normal_meta,
+                                                 ^^^^^^^^^^^
+psa-end-of-ingress-test-bmv2.p4(181)
+control IngressDeparserImpl(packet_out buffer,
+        ^^^^^^^^^^^^^^^^^^^
+psa-end-of-ingress-test-bmv2.p4(196): [--Wwarn=uninitialized_out_param] warning: out parameter 'clone_e2e_meta' may be uninitialized when 'EgressDeparserImpl' terminates
+                           out empty_metadata_t clone_e2e_meta,
+                                                ^^^^^^^^^^^^^^
+psa-end-of-ingress-test-bmv2.p4(195)
+control EgressDeparserImpl(packet_out buffer,
+        ^^^^^^^^^^^^^^^^^^
+psa-end-of-ingress-test-bmv2.p4(197): [--Wwarn=uninitialized_out_param] warning: out parameter 'recirculate_meta' may be uninitialized when 'EgressDeparserImpl' terminates
+                           out empty_metadata_t recirculate_meta,
+                                                ^^^^^^^^^^^^^^^^
+psa-end-of-ingress-test-bmv2.p4(195)
+control EgressDeparserImpl(packet_out buffer,
+        ^^^^^^^^^^^^^^^^^^

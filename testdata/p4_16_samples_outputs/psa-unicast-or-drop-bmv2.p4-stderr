@@ -1,0 +1,30 @@
+psa-unicast-or-drop-bmv2.p4(151): [--Wwarn=uninitialized_out_param] warning: out parameter 'clone_i2e_meta' may be uninitialized when 'IngressDeparserImpl' terminates
+                            out empty_metadata_t clone_i2e_meta,
+                                                 ^^^^^^^^^^^^^^
+psa-unicast-or-drop-bmv2.p4(150)
+control IngressDeparserImpl(packet_out buffer,
+        ^^^^^^^^^^^^^^^^^^^
+psa-unicast-or-drop-bmv2.p4(152): [--Wwarn=uninitialized_out_param] warning: out parameter 'resubmit_meta' may be uninitialized when 'IngressDeparserImpl' terminates
+                            out empty_metadata_t resubmit_meta,
+                                                 ^^^^^^^^^^^^^
+psa-unicast-or-drop-bmv2.p4(150)
+control IngressDeparserImpl(packet_out buffer,
+        ^^^^^^^^^^^^^^^^^^^
+psa-unicast-or-drop-bmv2.p4(153): [--Wwarn=uninitialized_out_param] warning: out parameter 'normal_meta' may be uninitialized when 'IngressDeparserImpl' terminates
+                            out empty_metadata_t normal_meta,
+                                                 ^^^^^^^^^^^
+psa-unicast-or-drop-bmv2.p4(150)
+control IngressDeparserImpl(packet_out buffer,
+        ^^^^^^^^^^^^^^^^^^^
+psa-unicast-or-drop-bmv2.p4(165): [--Wwarn=uninitialized_out_param] warning: out parameter 'clone_e2e_meta' may be uninitialized when 'EgressDeparserImpl' terminates
+                           out empty_metadata_t clone_e2e_meta,
+                                                ^^^^^^^^^^^^^^
+psa-unicast-or-drop-bmv2.p4(164)
+control EgressDeparserImpl(packet_out buffer,
+        ^^^^^^^^^^^^^^^^^^
+psa-unicast-or-drop-bmv2.p4(166): [--Wwarn=uninitialized_out_param] warning: out parameter 'recirculate_meta' may be uninitialized when 'EgressDeparserImpl' terminates
+                           out empty_metadata_t recirculate_meta,
+                                                ^^^^^^^^^^^^^^^^
+psa-unicast-or-drop-bmv2.p4(164)
+control EgressDeparserImpl(packet_out buffer,
+        ^^^^^^^^^^^^^^^^^^

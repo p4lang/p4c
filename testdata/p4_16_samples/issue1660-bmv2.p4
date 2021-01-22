@@ -10,6 +10,7 @@ struct local_metadata_t {}
 parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_metadata,
              inout standard_metadata_t standard_metadata) {
     state start {
+        h = {};
 	transition accept;
     }
 }

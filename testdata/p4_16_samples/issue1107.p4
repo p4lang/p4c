@@ -11,7 +11,7 @@ typedef bit<32> IPAddr;
 const IPAddr MyIP = 0xffffffff;
 
 parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t smeta) {
-    state start { transition accept; }
+    state start { hdr = {}; transition accept; }
 }
 
 action empty() { }

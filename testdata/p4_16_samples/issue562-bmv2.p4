@@ -19,9 +19,10 @@ struct local_metadata_t {
 parser parse(packet_in pk, out parsed_packet_t hdr,
              inout local_metadata_t local_metadata,
              inout standard_metadata_t standard_metadata) {
-  state start {
-    transition accept;
-  }
+    state start {
+        hdr = {};
+        transition accept;
+    }
 }
 
 control ingress(inout parsed_packet_t hdr,

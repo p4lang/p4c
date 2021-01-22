@@ -13,6 +13,7 @@ struct Meta {
 
 parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm) {
     state start {
+        h = (Headers){};
         transition accept;
     }
 }
@@ -55,7 +56,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const entries = {
                         9w0 : NoAction();
         }
-
         size = 10;
         default_action = NoAction();
     }

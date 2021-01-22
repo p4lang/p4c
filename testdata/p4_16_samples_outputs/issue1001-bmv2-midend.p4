@@ -18,17 +18,17 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.x") Meta x_0;
-    @hidden action issue1001bmv2l20() {
+    @hidden action issue1001bmv2l21() {
         clone3<Meta>(CloneType.I2E, 32w64, x_0);
     }
-    @hidden table tbl_issue1001bmv2l20 {
+    @hidden table tbl_issue1001bmv2l21 {
         actions = {
-            issue1001bmv2l20();
+            issue1001bmv2l21();
         }
-        const default_action = issue1001bmv2l20();
+        const default_action = issue1001bmv2l21();
     }
     apply {
-        tbl_issue1001bmv2l20.apply();
+        tbl_issue1001bmv2l21.apply();
     }
 }
 

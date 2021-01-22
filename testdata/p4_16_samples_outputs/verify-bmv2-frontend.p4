@@ -15,6 +15,7 @@ struct h {
 parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t std) {
     @name("MyParser.e") error e_0;
     state start {
+        hdr = (h){};
         verify(meta.x == 8s0, error.NewError);
         verify(true, error.NoError);
         e_0 = error.NoError;

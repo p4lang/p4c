@@ -9,6 +9,7 @@ struct metadata {
 
 parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     state start {
+        headers = (Headers_t){};
         transition accept;
     }
 }

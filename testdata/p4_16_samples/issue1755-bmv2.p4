@@ -12,6 +12,7 @@ parser MyParser(packet_in packet,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
     state start {
+        hdr = {};
         packet.advance(8);
         transition accept;
     }

@@ -12,6 +12,7 @@ struct M {
 
 parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t smeta) {
     state start {
+        hdr = (H){};
         transition accept;
     }
 }
@@ -35,7 +36,6 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
                         (32w1, 32w0xffffffff) : myc_set_eg_0(9w1);
                         (32w2, 32w0xffffffff) : myc_set_eg_0(9w2);
         }
-
         default_action = NoAction_0();
     }
     apply {

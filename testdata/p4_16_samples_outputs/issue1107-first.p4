@@ -14,6 +14,7 @@ typedef bit<32> IPAddr;
 const IPAddr MyIP = 32w0xffffffff;
 parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t smeta) {
     state start {
+        hdr = (H){};
         transition accept;
     }
 }
@@ -37,7 +38,6 @@ control myc(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
                         (32w1, 32w0xffffffff) : set_eg(9w1);
                         (32w2, 32w0xffffffff) : set_eg(9w2);
         }
-
         default_action = NoAction();
     }
     apply {

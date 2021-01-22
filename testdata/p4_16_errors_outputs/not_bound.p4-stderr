@@ -1,3 +1,9 @@
+not_bound.p4(23): [--Wwarn=uninitialized_out_param] warning: out parameter 'hdr' may be uninitialized when 'ParserImpl' terminates
+parser ParserImpl (packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+                                                 ^^^
+not_bound.p4(23)
+parser ParserImpl (packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+       ^^^^^^^^^^
 not_bound.p4(36): [--Werror=uninitialized] error: action set_nhop: parameter port must be bound
         set_nhop(); // parameter not bound
         ^^^^^^^^^^

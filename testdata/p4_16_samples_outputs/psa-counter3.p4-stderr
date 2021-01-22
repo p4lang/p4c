@@ -1,3 +1,39 @@
 psa-counter3.p4(48): [--Wwarn=unused] warning: counter1: unused instance
     Counter<bit<10>,bit<12>>(1024, PSA_CounterType_t.PACKETS) counter1;
                                                               ^^^^^^^^
+psa-counter3.p4(30): [--Wwarn=uninitialized_out_param] warning: out parameter 'a' may be uninitialized when 'MyEP' terminates
+    out EMPTY a,
+              ^
+psa-counter3.p4(28)
+parser MyEP(
+       ^^^^
+psa-counter3.p4(65): [--Wwarn=uninitialized_out_param] warning: out parameter 'a' may be uninitialized when 'MyID' terminates
+    out EMPTY a,
+              ^
+psa-counter3.p4(63)
+control MyID(
+        ^^^^
+psa-counter3.p4(66): [--Wwarn=uninitialized_out_param] warning: out parameter 'b' may be uninitialized when 'MyID' terminates
+    out EMPTY b,
+              ^
+psa-counter3.p4(63)
+control MyID(
+        ^^^^
+psa-counter3.p4(67): [--Wwarn=uninitialized_out_param] warning: out parameter 'c' may be uninitialized when 'MyID' terminates
+    out EMPTY c,
+              ^
+psa-counter3.p4(63)
+control MyID(
+        ^^^^
+psa-counter3.p4(76): [--Wwarn=uninitialized_out_param] warning: out parameter 'a' may be uninitialized when 'MyED' terminates
+    out EMPTY a,
+              ^
+psa-counter3.p4(74)
+control MyED(
+        ^^^^
+psa-counter3.p4(77): [--Wwarn=uninitialized_out_param] warning: out parameter 'b' may be uninitialized when 'MyED' terminates
+    out EMPTY b,
+              ^
+psa-counter3.p4(74)
+control MyED(
+        ^^^^

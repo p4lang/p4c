@@ -7,3 +7,33 @@ psa-register-read-write-2-bmv2.p4(88): [--Wwarn=uninitialized_use] warning: orig
 psa-register-read-write-2-bmv2.p4(95): [--Wwarn=uninitialized_use] warning: orig_data may be uninitialized
             hdr.output_data.word0 = (bit<32>) orig_data;
                                               ^^^^^^^^^
+psa-register-read-write-2-bmv2.p4(113): [--Wwarn=uninitialized_out_param] warning: out parameter 'clone_i2e_meta' may be uninitialized when 'MyID' terminates
+    out EMPTY clone_i2e_meta,
+              ^^^^^^^^^^^^^^
+psa-register-read-write-2-bmv2.p4(111)
+control MyID(
+        ^^^^
+psa-register-read-write-2-bmv2.p4(114): [--Wwarn=uninitialized_out_param] warning: out parameter 'resubmit_meta' may be uninitialized when 'MyID' terminates
+    out EMPTY resubmit_meta,
+              ^^^^^^^^^^^^^
+psa-register-read-write-2-bmv2.p4(111)
+control MyID(
+        ^^^^
+psa-register-read-write-2-bmv2.p4(115): [--Wwarn=uninitialized_out_param] warning: out parameter 'normal_meta' may be uninitialized when 'MyID' terminates
+    out EMPTY normal_meta,
+              ^^^^^^^^^^^
+psa-register-read-write-2-bmv2.p4(111)
+control MyID(
+        ^^^^
+psa-register-read-write-2-bmv2.p4(128): [--Wwarn=uninitialized_out_param] warning: out parameter 'clone_e2e_meta' may be uninitialized when 'MyED' terminates
+    out EMPTY clone_e2e_meta,
+              ^^^^^^^^^^^^^^
+psa-register-read-write-2-bmv2.p4(126)
+control MyED(
+        ^^^^
+psa-register-read-write-2-bmv2.p4(129): [--Wwarn=uninitialized_out_param] warning: out parameter 'recirculate_meta' may be uninitialized when 'MyED' terminates
+    out EMPTY recirculate_meta,
+              ^^^^^^^^^^^^^^^^
+psa-register-read-write-2-bmv2.p4(126)
+control MyED(
+        ^^^^

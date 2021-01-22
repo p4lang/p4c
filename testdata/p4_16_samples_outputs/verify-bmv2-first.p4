@@ -14,6 +14,7 @@ struct h {
 
 parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t std) {
     state start {
+        hdr = (h){};
         verify(meta.x == 8s0, error.NewError);
         verify(true, error.NoError);
         error e = error.NoError;

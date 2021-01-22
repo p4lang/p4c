@@ -1,0 +1,36 @@
+psa-counter2.p4(30): [--Wwarn=uninitialized_out_param] warning: out parameter 'a' may be uninitialized when 'MyEP' terminates
+    out EMPTY a,
+              ^
+psa-counter2.p4(28)
+parser MyEP(
+       ^^^^
+psa-counter2.p4(74): [--Wwarn=uninitialized_out_param] warning: out parameter 'a' may be uninitialized when 'MyID' terminates
+    out EMPTY a,
+              ^
+psa-counter2.p4(72)
+control MyID(
+        ^^^^
+psa-counter2.p4(75): [--Wwarn=uninitialized_out_param] warning: out parameter 'b' may be uninitialized when 'MyID' terminates
+    out EMPTY b,
+              ^
+psa-counter2.p4(72)
+control MyID(
+        ^^^^
+psa-counter2.p4(76): [--Wwarn=uninitialized_out_param] warning: out parameter 'c' may be uninitialized when 'MyID' terminates
+    out EMPTY c,
+              ^
+psa-counter2.p4(72)
+control MyID(
+        ^^^^
+psa-counter2.p4(85): [--Wwarn=uninitialized_out_param] warning: out parameter 'a' may be uninitialized when 'MyED' terminates
+    out EMPTY a,
+              ^
+psa-counter2.p4(83)
+control MyED(
+        ^^^^
+psa-counter2.p4(86): [--Wwarn=uninitialized_out_param] warning: out parameter 'b' may be uninitialized when 'MyED' terminates
+    out EMPTY b,
+              ^
+psa-counter2.p4(83)
+control MyED(
+        ^^^^

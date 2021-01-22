@@ -14,6 +14,7 @@ struct S {
 
 parser P(packet_in b, out Headers p, inout Metadata meta, inout standard_metadata_t standard_meta) {
     state start {
+        p = (Headers){};
         transition accept;
     }
 }

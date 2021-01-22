@@ -1,0 +1,30 @@
+psa-meter7-bmv2.p4(98): [--Wwarn=uninitialized_out_param] warning: out parameter 'clone_i2e_meta' may be uninitialized when 'IngressDeparserImpl' terminates
+                            out empty_metadata_t clone_i2e_meta,
+                                                 ^^^^^^^^^^^^^^
+psa-meter7-bmv2.p4(97)
+control IngressDeparserImpl(packet_out buffer,
+        ^^^^^^^^^^^^^^^^^^^
+psa-meter7-bmv2.p4(99): [--Wwarn=uninitialized_out_param] warning: out parameter 'resubmit_meta' may be uninitialized when 'IngressDeparserImpl' terminates
+                            out empty_metadata_t resubmit_meta,
+                                                 ^^^^^^^^^^^^^
+psa-meter7-bmv2.p4(97)
+control IngressDeparserImpl(packet_out buffer,
+        ^^^^^^^^^^^^^^^^^^^
+psa-meter7-bmv2.p4(100): [--Wwarn=uninitialized_out_param] warning: out parameter 'normal_meta' may be uninitialized when 'IngressDeparserImpl' terminates
+                            out empty_metadata_t normal_meta,
+                                                 ^^^^^^^^^^^
+psa-meter7-bmv2.p4(97)
+control IngressDeparserImpl(packet_out buffer,
+        ^^^^^^^^^^^^^^^^^^^
+psa-meter7-bmv2.p4(112): [--Wwarn=uninitialized_out_param] warning: out parameter 'clone_e2e_meta' may be uninitialized when 'EgressDeparserImpl' terminates
+                           out empty_metadata_t clone_e2e_meta,
+                                                ^^^^^^^^^^^^^^
+psa-meter7-bmv2.p4(111)
+control EgressDeparserImpl(packet_out buffer,
+        ^^^^^^^^^^^^^^^^^^
+psa-meter7-bmv2.p4(113): [--Wwarn=uninitialized_out_param] warning: out parameter 'recirculate_meta' may be uninitialized when 'EgressDeparserImpl' terminates
+                           out empty_metadata_t recirculate_meta,
+                                                ^^^^^^^^^^^^^^^^
+psa-meter7-bmv2.p4(111)
+control EgressDeparserImpl(packet_out buffer,
+        ^^^^^^^^^^^^^^^^^^

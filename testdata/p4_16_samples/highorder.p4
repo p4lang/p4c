@@ -23,7 +23,7 @@ package ebpfFilter<H>(parse<H> prs);
 struct Headers_t {}
 
 parser prs(out Headers_t headers) {
-    state start { transition accept; }
+    state start { headers = {}; transition accept; }
 }
 
 ebpfFilter(prs()) main;

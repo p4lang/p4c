@@ -21,6 +21,7 @@ struct Headers_t {}
 
 parser prs(packet_in p, out Headers_t headers) {
     state start {
+        headers = {};
         transition accept;
     }
 }

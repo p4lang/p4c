@@ -8,6 +8,7 @@ struct H {
 
 parser ing_parse(out H hdr) {
     state start {
+        hdr = {  };
         transition accept;
     }
 }
