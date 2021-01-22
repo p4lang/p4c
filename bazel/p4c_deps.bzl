@@ -24,8 +24,10 @@ filegroup(
     if not native.existing_rule("com_github_nelhage_rules_boost"):
         git_repository(
             name = "com_github_nelhage_rules_boost",
+            # Newest commit on master branch as of Jan 22, 2021.
             commit = "77dbe5a5262c71a2fe2c033677f50aaa0e31090d",
             remote = "https://github.com/nelhage/rules_boost",
+            shallow_since = "1611019749 -0800",
         )
     if not native.existing_rule("com_github_p4lang_p4runtime"):
         # Cannot currently use local_repository due to Bazel limitation,
