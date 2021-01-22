@@ -70,7 +70,8 @@ class BaseLocation : public StorageLocation {
         if (auto tt = type->to<IR::Type_Tuple>())
             BUG_CHECK(tt->getSize() == 0, "%1%: tuples with fields are not base locations", tt);
         else if (auto ts = type->to<IR::Type_StructLike>())
-            BUG_CHECK(ts->fields.size() == 0, "%1%: structs with fields are not base locations", tt);
+            BUG_CHECK(ts->fields.size() == 0,
+                      "%1%: structs with fields are not base locations", tt);
         else
             BUG_CHECK(type->is<IR::Type_Bits>() || type->is<IR::Type_Enum>() ||
                       type->is<IR::Type_Boolean>() || type->is<IR::Type_Var>() ||

@@ -66,7 +66,7 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
         return result;
     }
     if (auto st = type->to<IR::Type_StructLike>()) {
-        if (st->fields.size() == 0)
+        if (st->is<IR::Type_Struct>() && st->fields.size() == 0)
             // See the comment above about empty tuples
             return new BaseLocation(type, name);
         auto result = new StructLocation(type, name);
