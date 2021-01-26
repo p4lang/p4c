@@ -154,6 +154,11 @@ const IR::Node* DoConstantFolding::postorder(IR::Declaration_Constant* d) {
             } else if (!d->type->is<IR::Type_InfInt>()) {
                 // Don't fold this yet, we can't evaluate the cast.
                 return d;
+            } else {
+                // Destination type is InfInt; we must "erase" the width of the source
+                if (!cst->type->is<IR::Type_InfInt>()) {
+                    init = new IR::Constant(cst->srcInfo, cst->value, cst->base);
+                }
             }
         }
         if (init != d->initializer)

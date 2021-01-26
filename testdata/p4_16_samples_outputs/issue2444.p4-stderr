@@ -1,0 +1,4 @@
+issue2444.p4(11): [--Wwarn=overflow] warning: 2s3: signed value does not fit in 2 bits
+const int z3 = 2s3
+               ^^^
+[--Wwarn=missing] warning: Program does not contain a `main' module
