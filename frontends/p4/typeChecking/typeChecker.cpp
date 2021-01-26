@@ -705,6 +705,8 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
             return f->size == 1 && !f->isSigned;
         } else if (auto de = dest->to<IR::Type_SerEnum>()) {
             return TypeMap::equivalent(src, getTypeType(de->type));
+        } else if (auto ii = dest->to<IR::Type_InfInt>()) {
+            return true;
         }
     } else if (src->is<IR::Type_Boolean>()) {
         if (dest->is<IR::Type_Bits>()) {
@@ -712,7 +714,7 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
             return b->size == 1 && !b->isSigned;
         }
     } else if (src->is<IR::Type_InfInt>()) {
-        return dest->is<IR::Type_Bits>();
+        return dest->is<IR::Type_Bits>() || dest->is<IR::Type_Boolean>();
     } else if (src->is<IR::Type_Newtype>()) {
         auto st = getTypeType(src->to<IR::Type_Newtype>()->type);
         return TypeMap::equivalent(dest, st);
@@ -2490,6 +2492,7 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
         !castType->is<IR::Type_Boolean>() &&
         !castType->is<IR::Type_Newtype>() &&
         !castType->is<IR::Type_SerEnum>() &&
+        !castType->is<IR::Type_InfInt>() &&
         !castType->is<IR::Type_SpecializedCanonical>()) {
         typeError("%1%: cast not supported", expression->destType);
         return expression;
