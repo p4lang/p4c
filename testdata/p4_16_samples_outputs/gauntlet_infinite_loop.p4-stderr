@@ -1,0 +1,15 @@
+gauntlet_infinite_loop.p4(17): [--Wwarn=shadow] warning: 'padding' shadows 'header padding'
+parser sub_parser(packet_in b, out headers hdr, out padding padding) {
+                                                            ^^^^^^^
+gauntlet_infinite_loop.p4(8)
+header padding {
+       ^^^^^^^
+gauntlet_infinite_loop.p4(38): [--Wwarn=ordering] warning: hdr.p: 'out' argument has fields in common with hdr
+        sub_parser.apply(packet, hdr, hdr.p);
+                                      ^^^^^
+gauntlet_infinite_loop.p4(38)
+        sub_parser.apply(packet, hdr, hdr.p);
+                                 ^^^
+gauntlet_infinite_loop.p4(24): [--Wwarn=uninitialized_use] warning: padding.p may be uninitialized
+        transition select(padding.p) {
+                          ^^^^^^^^^
