@@ -1,3 +1,0 @@
-gauntlet_bounded_loop.p4(30): [--Wwarn=uninitialized_use] warning: hdr.p.p may be uninitialized
-        transition select(hdr.p.p) {
-                          ^^^^^^^

@@ -1,6 +1,0 @@
-gauntlet_index_7.p4(22): [--Wwarn=uninitialized_out_param] warning: out parameter 'hdr' may be uninitialized when 'p' terminates
-parser p(packet_in pkt, out Headers hdr) {
-                                    ^^^
-gauntlet_index_7.p4(22)
-parser p(packet_in pkt, out Headers hdr) {
-       ^

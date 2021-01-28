@@ -1,3 +1,0 @@
-gauntlet_exit_combination_21.p4(27): [--Wwarn=unused] warning: Table tbl is not used; removing
-    table tbl {
-          ^^^

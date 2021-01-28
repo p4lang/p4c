@@ -1,6 +1,0 @@
-gauntlet_table_call_in_expression.p4(33): [--Wwarn=shadow] warning: 'simple_action' shadows 'simple_action'
-    action simple_action() {
-           ^^^^^^^^^^^^^
-gauntlet_table_call_in_expression.p4(17)
-bit<16> simple_action() {
-        ^^^^^^^^^^^^^
