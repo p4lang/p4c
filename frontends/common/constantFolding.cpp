@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "lib/gmputil.h"
 #include "constantFolding.h"
-#include "ir/configuration.h"
+#include "frontends/common/options.h"
 #include "frontends/p4/enumInstance.h"
 
 namespace P4 {
@@ -531,9 +531,9 @@ const IR::Node* DoConstantFolding::postorder(IR::LOr* e) {
 }
 
 static bool overflowWidth(const IR::Node* node, int width) {
-    if (width > P4CConfiguration::MaximumWidthSupported) {
+    if (width > P4CContext::getConfig().maximumWidthSupported()) {
         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Compiler only supports widths up to %2%",
-                node, P4CConfiguration::MaximumWidthSupported);
+                node, P4CContext::getConfig().maximumWidthSupported());
         return true;
     }
     return false;
