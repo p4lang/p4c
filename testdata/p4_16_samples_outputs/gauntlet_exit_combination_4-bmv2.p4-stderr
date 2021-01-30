@@ -1,0 +1,6 @@
+gauntlet_exit_combination_4-bmv2.p4(33): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+            48w100: exact @name("key") ;
+            ^^^^^^
+gauntlet_exit_combination_4-bmv2.p4(33): [--Wwarn=mismatch] warning: 48w100: Constant key field
+            48w100: exact @name("key") ;
+            ^^^^^^
