@@ -24,6 +24,7 @@ limitations under the License.
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
 #include "lib/options.h"
+#include "ir/configuration.h"
 #include "ir/ir.h"  // for DebugHook definition
 // for p4::P4RuntimeFormat definition
 #include "control-plane/p4RuntimeSerializer.h"
@@ -149,12 +150,16 @@ class CompilerOptions : public Util::Options {
 };
 
 
-/// A compilation context which exposes compiler options.
+/// A compilation context which exposes compiler options and a compiler configuration.
 class P4CContext : public BaseCompileContext {
  public:
     /// @return the current compilation context, which must inherit from
     /// P4CContext.
     static P4CContext& get();
+
+    /// @return the compiler configuration for the current compilation context. If there is no
+    /// current compilation context, the default configuration is returned.
+    static const P4CConfiguration& getConfig();
 
     P4CContext() {}
 
@@ -188,6 +193,9 @@ class P4CContext : public BaseCompileContext {
     /// intended to help the user find misspelled diagnostics and the like; it
     /// doesn't affect functionality.
     virtual bool isRecognizedDiagnostic(cstring diagnostic);
+
+    /// @return the compiler configuration associated with this type of compilation context.
+    virtual const P4CConfiguration& getConfigImpl();
 };
 
 /// A utility template which can be used to easily make subclasses of P4CContext

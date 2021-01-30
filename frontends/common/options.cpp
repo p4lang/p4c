@@ -446,6 +446,11 @@ DebugHook CompilerOptions::getDebugHook() const {
     return CompileContextStack::top<P4CContext>();
 }
 
+const P4CConfiguration& P4CContext::getConfig() {
+    if (CompileContextStack::isEmpty()) return DefaultP4CConfiguration::get();
+    return get().getConfigImpl();
+}
+
 bool P4CContext::isRecognizedDiagnostic(cstring diagnostic) {
     static const std::unordered_set<cstring> recognizedDiagnostics = {
         "uninitialized_out_param",
@@ -454,4 +459,8 @@ bool P4CContext::isRecognizedDiagnostic(cstring diagnostic) {
     };
 
     return recognizedDiagnostics.count(diagnostic);
+}
+
+const P4CConfiguration& P4CContext::getConfigImpl() {
+    return DefaultP4CConfiguration::get();
 }

@@ -49,6 +49,10 @@ struct CompileContextStack final {
         return *current;
     }
 
+    static bool isEmpty() {
+        return getStack().empty();
+    }
+
  private:
     friend struct AutoCompileContext;
 
