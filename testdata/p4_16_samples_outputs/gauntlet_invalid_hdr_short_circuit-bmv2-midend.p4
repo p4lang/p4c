@@ -8,8 +8,15 @@ header ethernet_t {
     bit<16> eth_type;
 }
 
+header H {
+    bit<8> a;
+    bit<8> b;
+    bit<8> c;
+}
+
 struct Headers {
     ethernet_t eth_hdr;
+    H          h;
 }
 
 struct Meta {
@@ -23,9 +30,9 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.dummy_1") ethernet_t dummy_1;
+    @name("ingress.dummy_1") H dummy_1;
     @hidden action act() {
-        h.eth_hdr = dummy_1;
+        h.h = dummy_1;
     }
     @hidden table tbl_act {
         actions = {
@@ -56,6 +63,7 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 control deparser(packet_out pkt, in Headers h) {
     apply {
         pkt.emit<ethernet_t>(h.eth_hdr);
+        pkt.emit<H>(h.h);
     }
 }
 

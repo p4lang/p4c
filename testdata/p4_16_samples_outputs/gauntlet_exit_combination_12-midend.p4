@@ -1,6 +1,4 @@
 #include <core.p4>
-#define V1MODEL_VERSION 20180101
-#include <v1model.p4>
 
 header ethernet_t {
     bit<48> dst_addr;
@@ -12,17 +10,14 @@ struct Headers {
     ethernet_t eth_hdr;
 }
 
-struct Meta {
-}
-
-parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
+parser p(packet_in pkt, out Headers hdr) {
     state start {
         pkt.extract<ethernet_t>(hdr.eth_hdr);
         transition accept;
     }
 }
 
-control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+control ingress(inout Headers h) {
     bool hasExited;
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
@@ -40,7 +35,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         default_action = NoAction_0();
     }
-    @hidden action gauntlet_exit_combination_12bmv2l45() {
+    @hidden action gauntlet_exit_combination_12l42() {
         h.eth_hdr.eth_type = 16w0xdead;
     }
     @hidden action act() {
@@ -52,18 +47,18 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         const default_action = act();
     }
-    @hidden table tbl_gauntlet_exit_combination_12bmv2l45 {
+    @hidden table tbl_gauntlet_exit_combination_12l42 {
         actions = {
-            gauntlet_exit_combination_12bmv2l45();
+            gauntlet_exit_combination_12l42();
         }
-        const default_action = gauntlet_exit_combination_12bmv2l45();
+        const default_action = gauntlet_exit_combination_12l42();
     }
     apply {
         tbl_act.apply();
         switch (simple_table_0.apply().action_run) {
             do_action: {
                 if (!hasExited) {
-                    tbl_gauntlet_exit_combination_12bmv2l45.apply();
+                    tbl_gauntlet_exit_combination_12l42.apply();
                 }
             }
             default: {
@@ -72,26 +67,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) {
-    apply {
-    }
-}
-
-control update(inout Headers h, inout Meta m) {
-    apply {
-    }
-}
-
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    apply {
-    }
-}
-
-control deparser(packet_out pkt, in Headers h) {
-    apply {
-        pkt.emit<ethernet_t>(h.eth_hdr);
-    }
-}
-
-V1Switch<Headers, Meta>(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+parser Parser(packet_in b, out Headers hdr);
+control Ingress(inout Headers hdr);
+package top(Parser p, Ingress ig);
+top(p(), ingress()) main;
 

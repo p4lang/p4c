@@ -7,14 +7,21 @@ header ethernet_t {
     bit<16> eth_type;
 }
 
+header H {
+    bit<8> a;
+    bit<8> b;
+    bit<8> c;
+}
+
 
 struct Headers {
     ethernet_t eth_hdr;
+    H h;
 }
 
 struct Meta {}
 
-bool return_bool(out ethernet_t dummy) {
+bool return_bool(out H dummy) {
     return true;
 }
 
@@ -32,7 +39,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 
     apply {
-        bool dummy = false || return_bool(h.eth_hdr);
+        bool dummy = false || return_bool(h.h);
 
     }
 }

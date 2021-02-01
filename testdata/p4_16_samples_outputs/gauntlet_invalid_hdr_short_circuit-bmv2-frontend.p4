@@ -8,8 +8,15 @@ header ethernet_t {
     bit<16> eth_type;
 }
 
+header H {
+    bit<8> a;
+    bit<8> b;
+    bit<8> c;
+}
+
 struct Headers {
     ethernet_t eth_hdr;
+    H          h;
 }
 
 struct Meta {
@@ -26,12 +33,12 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.dummy") bool dummy_0;
     apply {
         {
-            @name("ingress.dummy_1") ethernet_t dummy_1;
+            @name("ingress.dummy_1") H dummy_1;
             @name("ingress.hasReturned") bool hasReturned = false;
             @name("ingress.retval") bool retval;
             hasReturned = true;
             retval = true;
-            h.eth_hdr = dummy_1;
+            h.h = dummy_1;
             dummy_0 = retval;
         }
     }
