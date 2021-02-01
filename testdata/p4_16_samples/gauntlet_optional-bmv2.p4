@@ -1,6 +1,4 @@
 #include <core.p4>
-#include <v1model.p4>
-
 header ethernet_t {
     bit<48> dst_addr;
     bit<48> src_addr;
@@ -16,8 +14,6 @@ struct Headers {
     H h;
 }
 
-struct Meta {}
-
 extern Checksum {
     Checksum();
     void add<T>(in T data);
@@ -27,8 +23,7 @@ extern Checksum {
     bit<16> update<T>(in T data, @optional in bool zeros_as_ones);
 }
 
-
-parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
+parser p(packet_in pkt, out Headers hdr) {
     state start {
         transition parse_hdrs;
     }
@@ -39,22 +34,12 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
     }
 }
 
-control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+control ingress(inout Headers h) {
     apply {
     }
 }
 
-control vrfy(inout Headers h, inout Meta m) {
-    apply {
-    }
-}
-
-control update(inout Headers h, inout Meta m) {
-    apply {
-    }
-}
-
-control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+control egress(inout Headers h) {
     Checksum() ipv4_checksum;
     apply {
         h.h.result = ipv4_checksum.update({ h.eth_hdr.dst_addr, h.eth_hdr.src_addr, h.eth_hdr.eth_type});
@@ -67,5 +52,10 @@ control deparser(packet_out pkt, in Headers h) {
     }
 }
 
-V1Switch(p(), vrfy(), ingress(), egress(), update(), deparser()) main;
+parser Parser(packet_in b, out Headers hdr);
+control Ingress(inout Headers hdr);
+control Egress(inout Headers hdr);
+control Deparser(packet_out b, in Headers hdr);
+package top(Parser p, Ingress ig, Egress eg, Deparser dep);
+top(p(), ingress(), egress(), deparser()) main;
 
