@@ -191,7 +191,7 @@ set (XFAIL_TESTS
   # Next three use unknown externs
   testdata/p4_16_samples/issue1882-bmv2.p4
   testdata/p4_16_samples/issue1882-1-bmv2.p4
-  testdata/p4_16_samples/issue2264-bmv2.p4
+  testdata/p4_16_samples/issue2664-bmv2.p4
   # This one uses arguments of incorrect types to log_msg
   testdata/p4_16_samples/issue2201-bmv2.p4
 )

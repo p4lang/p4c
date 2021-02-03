@@ -479,7 +479,7 @@ void ExpressionConverter::postorder(const IR::Member* expression)  {
 
 Util::IJson* ExpressionConverter::fixLocal(Util::IJson* json) {
     if (!json)
-        return new Util::JsonValue(); // null
+        return new Util::JsonValue();  // null
     if (auto jo = json->to<Util::JsonObject>()) {
         auto to = jo->get("type");
         if (to != nullptr && to->to<Util::JsonValue>() != nullptr &&
