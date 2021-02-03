@@ -438,3 +438,13 @@ class DpdkRegisterWriteStatement: DpdkAsmStatement, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
+
+class DpdkValidateStatement: DpdkAsmStatement, IDPDKNode {
+    Expression header;
+    std::ostream& toSpec(std::ostream& out) const override;
+}
+
+class DpdkInvalidateStatement: DpdkAsmStatement, IDPDKNode {
+    Expression header;
+    std::ostream& toSpec(std::ostream& out) const override;
+}

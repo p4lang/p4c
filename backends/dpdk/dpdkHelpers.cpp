@@ -380,8 +380,16 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             add_instr(new IR::DpdkVerifyStatement(condition->expression,
                                                   error->expression));
         }
+    } else if (auto a = mi->to<P4::BuiltInMethod>()) {
+        if (a->name == "setValid") {
+            add_instr(new IR::DpdkValidateStatement(a->appliedTo));
+        } else if (a->name == "setInvalid") {
+            add_instr(new IR::DpdkInvalidateStatement(a->appliedTo));
+        } else {
+            BUG("%1% function not implemented.", s);
+        }
     } else {
-        BUG("function not implemented.");
+        BUG("%1% function not implemented.", s);
     }
     return false;
 }

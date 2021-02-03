@@ -23,3 +23,11 @@ void IR::DpdkEmitStatement::dbprint(std::ostream& out) const {
 void IR::DpdkJmpNotEqualStatement::dbprint(std::ostream& out) const {
     out << "jmpneq " << label << " " << src1 << " " << src2;
 }
+
+void IR::DpdkValidateStatement::dbprint(std::ostream& out) const {
+    out << "validate " << header;
+}
+
+void IR::DpdkInvalidateStatement::dbprint(std::ostream& out) const {
+    out << "invalidate " << header;
+}
