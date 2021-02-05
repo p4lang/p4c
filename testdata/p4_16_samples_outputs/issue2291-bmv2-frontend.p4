@@ -23,45 +23,9 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.tmp_0") bit<16> tmp;
-    @name("ingress.tmp_1") bit<16> tmp_0;
     @name("ingress.simple_action") action simple_action() {
-        {
-            @name("ingress.hasReturned") bool hasReturned = false;
-            @name("ingress.retval") bit<16> retval;
-            hasReturned = true;
-            retval = 16w4;
-        }
-        {
-            @name("ingress.hasReturned_0") bool hasReturned_0 = false;
-            @name("ingress.retval_0") bit<16> retval_0;
-            @name("ingress.tmp") bit<16> tmp_1;
-            {
-                @name("ingress.hasReturned") bool hasReturned_3 = false;
-                @name("ingress.retval") bit<16> retval_3;
-                hasReturned_3 = true;
-                retval_3 = 16w4;
-                tmp_1 = retval_3;
-            }
-            hasReturned_0 = true;
-            retval_0 = tmp_1;
-        }
     }
     apply {
-        {
-            @name("ingress.hasReturned") bool hasReturned_4 = false;
-            @name("ingress.retval") bit<16> retval_4;
-            hasReturned_4 = true;
-            retval_4 = 16w4;
-            tmp = retval_4;
-        }
-        tmp_0 = tmp;
-        {
-            @name("ingress.hasReturned") bool hasReturned_5 = false;
-            @name("ingress.retval") bit<16> retval_5;
-            hasReturned_5 = true;
-            retval_5 = 16w4;
-        }
         simple_action();
     }
 }

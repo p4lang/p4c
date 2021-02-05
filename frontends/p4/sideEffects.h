@@ -83,6 +83,46 @@ class SideEffects : public Inspector {
         expression->apply(se);
         return se.nodeWithSideEffect != nullptr;
     }
+    /// @return true if the expression may have side-effects.
+    static bool hasSideEffect(const IR::Expression* exp,
+                      ReferenceMap* refMap,
+                      TypeMap* typeMap) {
+        auto mce = exp->to<IR::MethodCallExpression>();
+        if (mce == nullptr)
+            return false;
+        // mce does not produce a side effect in few cases:
+        //  * isValid()
+        //  * function with all in parameters
+        //  * extern function with noSideEffectsAnnotation
+        //  * extern method with noSideEffectsAnnotation
+        auto mi = MethodInstance::resolve(mce, refMap, typeMap);
+        if (mi->is<FunctionCall>()) {
+            for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+                if (p->hasOut()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (auto em = mi->to<P4::ExternMethod>()) {
+            if (em->method->getAnnotation(IR::Annotation::noSideEffectsAnnotation)) {
+                return false;
+            }
+            return true;
+        }
+        if (auto ef = mi->to<P4::ExternFunction>()) {
+            if (ef->method->getAnnotation(IR::Annotation::noSideEffectsAnnotation)) {
+                return false;
+            }
+            return true;
+        }
+        if (auto bim = mi->to<BuiltInMethod>()) {
+            if (bim->name.name == IR::Type_Header::isValid) {
+                return false;
+            }
+        }
+        return true;
+    }
 };
 
 /** @brief Convert expressions so that each expression contains at most one

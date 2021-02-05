@@ -25,9 +25,7 @@ parser p(packet_in b, out Headers h, inout Meta m, inout standard_metadata_t sm)
 register<bit<8>>(32w256) r;
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.x") bit<8> x_0;
     apply {
-        r.read(x_0, (bit<32>)h.myhdr.reg_idx_to_update);
         r.write((bit<32>)h.myhdr.reg_idx_to_update, 8w0x2a);
     }
 }
