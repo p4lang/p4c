@@ -226,8 +226,8 @@ ActionProfile::add_member(const ActionFn *action_fn, ActionData action_data,
   if (rc == MatchErrorCode::SUCCESS) {
     BMLOG_DEBUG("Added member {} to action profile '{}'", *mbr, get_name());
   } else {
-    BMLOG_ERROR("Error when trying to add member to action profile '{}'",
-                get_name());
+    BMLOG_ERROR("Error when trying to add member to action profile '{}': {}",
+                get_name(), match_error_code_to_string(rc));
   }
 
   return rc;
@@ -256,8 +256,8 @@ ActionProfile::delete_member(mbr_hdl_t mbr) {
     BMLOG_DEBUG("Removed member {} from action profile '{}'", mbr, get_name());
   } else {
     BMLOG_ERROR(
-        "Error when trying to remove member {} from action profile '{}'",
-        mbr, get_name());
+        "Error when trying to remove member {} from action profile '{}': {}",
+        mbr, get_name(), match_error_code_to_string(rc));
   }
 
   return rc;
@@ -288,8 +288,8 @@ ActionProfile::modify_member(mbr_hdl_t mbr, const ActionFn *action_fn,
     BMLOG_DEBUG("Modified member {} from action profile '{}'", mbr, get_name());
   } else {
     BMLOG_ERROR(
-        "Error when trying to modify member {} from action profile '{}'",
-        mbr, get_name());
+        "Error when trying to modify member {} from action profile '{}': {}",
+        mbr, get_name(), match_error_code_to_string(rc));
   }
 
   return rc;
@@ -316,8 +316,8 @@ ActionProfile::create_group(grp_hdl_t *grp) {
   if (rc == MatchErrorCode::SUCCESS) {
     BMLOG_DEBUG("Created group {} in action profile '{}'", *grp, get_name());
   } else {
-    BMLOG_ERROR("Error when trying to create group in action profile '{}'",
-                get_name());
+    BMLOG_ERROR("Error when trying to create group in action profile '{}': {}",
+                get_name(), match_error_code_to_string(rc));
   }
 
   return rc;
@@ -356,8 +356,9 @@ ActionProfile::delete_group(grp_hdl_t grp) {
   if (rc == MatchErrorCode::SUCCESS) {
     BMLOG_DEBUG("Removed group {} from action profile '{}'", grp, get_name());
   } else {
-    BMLOG_ERROR("Error when trying to remove group {} from action profile '{}'",
-                grp, get_name());
+    BMLOG_ERROR(
+        "Error when trying to remove group {} from action profile '{}': {}",
+        grp, get_name(), match_error_code_to_string(rc));
   }
 
   return rc;
@@ -390,9 +391,9 @@ ActionProfile::add_member_to_group(mbr_hdl_t mbr, grp_hdl_t grp) {
     BMLOG_DEBUG("Added member {} to group {} in action profile '{}'",
                 mbr, grp, get_name());
   } else {
-    BMLOG_ERROR(
-        "Error when trying to add member {} to group {} in action profile '{}'",
-        mbr, grp, get_name());
+    BMLOG_ERROR("Error when trying to add member {} to group {} in action "
+                "profile '{}': {}", mbr, grp, get_name(),
+                match_error_code_to_string(rc));
   }
 
   return rc;
@@ -426,7 +427,8 @@ ActionProfile::remove_member_from_group(mbr_hdl_t mbr, grp_hdl_t grp) {
                 mbr, grp, get_name());
   } else {
     BMLOG_ERROR("Error when trying to remove member {} from group {} "
-                "in table '{}'", mbr, grp, get_name());
+                "in table '{}': {}", mbr, grp, get_name(),
+                match_error_code_to_string(rc));
   }
 
   return rc;

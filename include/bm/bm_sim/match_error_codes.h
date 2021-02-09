@@ -54,6 +54,8 @@ enum class MatchErrorCode {
   ERROR,
 };
 
+const char *match_error_code_to_string(MatchErrorCode code);
+
 }  // namespace bm
 
 #endif  // BM_BM_SIM_MATCH_ERROR_CODES_H_

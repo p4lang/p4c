@@ -45,6 +45,7 @@ learning.cpp \
 lookup_structures.cpp \
 logger.cpp \
 lpm_trie.h \
+match_error_codes.cpp \
 match_units.cpp \
 match_tables.cpp \
 md5.c \
