@@ -254,8 +254,10 @@ static int _bmi_port_interface_add(bmi_port_mgr_t *port_mgr,
 
   port->ifname = strdup(ifname);
 
-  if (pcap_input_dump) bmi_interface_add_dumper(bmi, pcap_input_dump, 1);
-  if (pcap_output_dump) bmi_interface_add_dumper(bmi, pcap_output_dump, 0);
+  if (pcap_input_dump)
+    bmi_interface_add_dumper(bmi, pcap_input_dump, bmi_input_dumper);
+  if (pcap_output_dump)
+    bmi_interface_add_dumper(bmi, pcap_output_dump, bmi_output_dumper);
 
   port->bmi = bmi;
 
