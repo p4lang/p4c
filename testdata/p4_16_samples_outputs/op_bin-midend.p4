@@ -56,17 +56,17 @@ control pipe(inout Headers_t headers, out bool xout) {
         implementation = hash_table(32w8);
         default_action = NoAction_0();
     }
-    @hidden action op_bin82() {
+    @hidden action op_bin83() {
         xout = true;
     }
-    @hidden table tbl_op_bin82 {
+    @hidden table tbl_op_bin83 {
         actions = {
-            op_bin82();
+            op_bin83();
         }
-        const default_action = op_bin82();
+        const default_action = op_bin83();
     }
     apply {
-        tbl_op_bin82.apply();
+        tbl_op_bin83.apply();
         filter_tbl_0.apply();
     }
 }
