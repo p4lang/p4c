@@ -27,7 +27,9 @@ void CodeGenInspector::substitute(const IR::Parameter* p, const IR::Parameter* w
 { substitution.emplace(p, with); }
 
 bool CodeGenInspector::preorder(const IR::Constant* expression) {
-    builder->append(Util::toString(expression->value, 0, false));
+    // Until EBPF/UBPF applications set the IR::Constant base to hex vs.
+    // decimal all emits will use hex.
+    builder->append(Util::toString(expression->value, 0, false, 16));
     return true;
 }
 
@@ -49,19 +51,13 @@ bool CodeGenInspector::preorder(const IR::Declaration_Variable* decl) {
 
 bool CodeGenInspector::preorder(const IR::Operation_Binary* b) {
     widthCheck(b);
-    int prec = expressionPrecedence;
-    bool useParens = prec > b->getPrecedence();
-    if (useParens)
-        builder->append("(");
+    builder->append("(");
     visit(b->left);
     builder->spc();
     builder->append(b->getStringOp());
     builder->spc();
-    expressionPrecedence = b->getPrecedence() + 1;
     visit(b->right);
-    if (useParens)
-        builder->append(")");
-    expressionPrecedence = prec;
+    builder->append(")");
     return false;
 }
 
