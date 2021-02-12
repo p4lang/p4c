@@ -27,9 +27,8 @@ void CodeGenInspector::substitute(const IR::Parameter* p, const IR::Parameter* w
 { substitution.emplace(p, with); }
 
 bool CodeGenInspector::preorder(const IR::Constant* expression) {
-    // Until EBPF/UBPF applications set the IR::Constant base to hex vs.
-    // decimal all emits will use hex.
-    builder->append(Util::toString(expression->value, 0, false, 16));
+    builder->append(Util::toString(expression->value, 0, false,
+                                   expression->base));
     return true;
 }
 

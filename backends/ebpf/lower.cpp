@@ -53,7 +53,7 @@ const IR::Node* LowerExpressions::postorder(IR::Slice* expression) {
     int l = expression->getL();
     const IR::Expression* expr;
     if (l != 0) {
-        expr = new IR::Shr(expression->e0->srcInfo, expression->e0, new IR::Constant(l));
+        expr = new IR::Shr(expression->e0->srcInfo, expression->e0, new IR::Constant(l, 16));
         auto e0type = typeMap->getType(expression->e0, true);
         typeMap->setType(expr, e0type);
     } else {
