@@ -50,13 +50,22 @@ bool CodeGenInspector::preorder(const IR::Declaration_Variable* decl) {
 
 bool CodeGenInspector::preorder(const IR::Operation_Binary* b) {
     widthCheck(b);
-    builder->append("(");
+    int prec = expressionPrecedence;
+    bool useParens = false;
+    if ((prec > b->getPrecedence()) ||
+        (b->getPrecedence() >= DBPrint::Prec_BOr))
+        useParens = true;
+    if (useParens)
+        builder->append("(");
     visit(b->left);
     builder->spc();
     builder->append(b->getStringOp());
     builder->spc();
+    expressionPrecedence = b->getPrecedence() + 1;
     visit(b->right);
-    builder->append(")");
+    if (useParens)
+        builder->append(")");
+    expressionPrecedence = prec;
     return false;
 }
 

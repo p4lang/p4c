@@ -60,7 +60,6 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool xout) {
-
     // UBPF does not support const entries, so using hard-coded label below.
     action set_flowlabel(bit<20> label) {
      	headers.ipv6.ip_version_traffic_class_and_flow_label[31:12] = label;
@@ -82,6 +81,16 @@ control pipe(inout Headers_t headers, out bool xout) {
     apply {
         xout = true;
         filter_tbl.apply();
+
+        // If-statement below tests if appropriate parenthesis are
+        // added because, if not, gcc compling fails with emitted C code.
+        if (headers.ipv6.isValid() && ((headers.ethernet.etherType == 0x86dd)
+	    || (headers.ipv6.hop_limit == 255)))
+            headers.ipv6.protocol = 17;
+        // If-statement below tests if duplicate parenthesis
+        // are not added in emitted C code causing gcc compiling failure.
+        if (headers.ethernet.etherType == 0x0800)
+            headers.ipv6.protocol = 10;
     }
 }
 

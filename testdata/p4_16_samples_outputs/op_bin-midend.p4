@@ -56,18 +56,42 @@ control pipe(inout Headers_t headers, out bool xout) {
         implementation = hash_table(32w8);
         default_action = NoAction_0();
     }
-    @hidden action op_bin83() {
+    @hidden action op_bin82() {
         xout = true;
     }
-    @hidden table tbl_op_bin83 {
+    @hidden action op_bin89() {
+        headers.ipv6.protocol = 8w17;
+    }
+    @hidden action op_bin93() {
+        headers.ipv6.protocol = 8w10;
+    }
+    @hidden table tbl_op_bin82 {
         actions = {
-            op_bin83();
+            op_bin82();
         }
-        const default_action = op_bin83();
+        const default_action = op_bin82();
+    }
+    @hidden table tbl_op_bin89 {
+        actions = {
+            op_bin89();
+        }
+        const default_action = op_bin89();
+    }
+    @hidden table tbl_op_bin93 {
+        actions = {
+            op_bin93();
+        }
+        const default_action = op_bin93();
     }
     apply {
-        tbl_op_bin83.apply();
+        tbl_op_bin82.apply();
         filter_tbl_0.apply();
+        if (headers.ipv6.isValid() && (headers.ethernet.etherType == 16w0x86dd || headers.ipv6.hop_limit == 8w255)) {
+            tbl_op_bin89.apply();
+        }
+        if (headers.ethernet.etherType == 16w0x800) {
+            tbl_op_bin93.apply();
+        }
     }
 }
 

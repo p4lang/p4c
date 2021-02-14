@@ -59,6 +59,12 @@ control pipe(inout Headers_t headers, out bool xout) {
     apply {
         xout = true;
         filter_tbl_0.apply();
+        if (headers.ipv6.isValid() && (headers.ethernet.etherType == 16w0x86dd || headers.ipv6.hop_limit == 8w255)) {
+            headers.ipv6.protocol = 8w17;
+        }
+        if (headers.ethernet.etherType == 16w0x800) {
+            headers.ipv6.protocol = 8w10;
+        }
     }
 }
 
