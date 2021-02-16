@@ -205,7 +205,8 @@ class ordered_set {
         auto old = find(*it);
         if (old != data.end()) {
             data.erase(old); }
-        data_map.emplace(&*it, it); }
+        data_map.emplace(&*it, it);
+        return std::make_pair(it, true); }
 
     /* should be erase(const_iterator), but glibc++ std::list::erase is broken */
     iterator erase(iterator pos) {
