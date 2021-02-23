@@ -816,10 +816,8 @@ DoConstantFolding::Result
 DoConstantFolding::setContains(const IR::Expression* keySet, const IR::Expression* select) const {
     if (keySet->is<IR::DefaultExpression>())
         return Result::Yes;
-    if (select->is<IR::ListExpression>()) {
-        auto list = select->to<IR::ListExpression>();
-        if (keySet->is<IR::ListExpression>()) {
-            auto klist = keySet->to<IR::ListExpression>();
+    if (auto list = select->to<IR::ListExpression>()) {
+        if (auto klist = keySet->to<IR::ListExpression>()) {
             BUG_CHECK(list->components.size() == klist->components.size(),
                       "%1% and %2% size mismatch", list, klist);
             for (unsigned i=0; i < list->components.size(); i++) {
@@ -844,14 +842,26 @@ DoConstantFolding::setContains(const IR::Expression* keySet, const IR::Expressio
         return Result::No;
     }
 
-    BUG_CHECK(select->is<IR::Constant>(), "%1%: expected a constant", select);
-    auto cst = select->to<IR::Constant>();
-    if (keySet->is<IR::Constant>()) {
-        if (keySet->to<IR::Constant>()->value == cst->value)
+    if (select->is<IR::Member>()) {
+        // This must be an enum value
+        auto key = getConstant(keySet);
+        if (key == nullptr)
+            ::error(ErrorType::ERR_TYPE_ERROR, "%1%: expression must evaluate to a constant", key);
+        auto sel = getConstant(select);
+        // For Enum and SerEnum instances we can just use expression equivalence.
+        // This assumes that type checking does not allow us to compare constants to SerEnums.
+        if (key->equiv(*sel))
             return Result::Yes;
         return Result::No;
-    } else if (keySet->is<IR::Range>()) {
-        auto range = keySet->to<IR::Range>();
+    }
+
+    BUG_CHECK(select->is<IR::Constant>(), "%1%: expected a constant", select);
+    auto cst = select->to<IR::Constant>();
+    if (auto kc = keySet->to<IR::Constant>()) {
+        if (kc->value == cst->value)
+            return Result::Yes;
+        return Result::No;
+    } else if (auto range = keySet->to<IR::Range>()) {
         auto left = getConstant(range->left);
         if (left == nullptr) {
             ::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant", left);
@@ -866,15 +876,14 @@ DoConstantFolding::setContains(const IR::Expression* keySet, const IR::Expressio
             right->to<IR::Constant>()->value >= cst->value)
             return Result::Yes;
         return Result::No;
-    } else if (keySet->is<IR::Mask>()) {
+    } else if (auto mask = keySet->to<IR::Mask>()) {
         // check if left & right == cst & right
-        auto range = keySet->to<IR::Mask>();
-        auto left = getConstant(range->left);
+        auto left = getConstant(mask->left);
         if (left == nullptr) {
             ::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant", left);
             return Result::DontKnow;
         }
-        auto right = getConstant(range->right);
+        auto right = getConstant(mask->right);
         if (right == nullptr) {
             ::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant", right);
             return Result::DontKnow;

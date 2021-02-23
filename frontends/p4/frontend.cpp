@@ -54,6 +54,7 @@ limitations under the License.
 #include "simplify.h"
 #include "simplifyDefUse.h"
 #include "simplifyParsers.h"
+#include "simplifySwitch.h"
 #include "specialize.h"
 #include "specializeGenericFunctions.h"
 #include "specializeGenericTypes.h"
@@ -178,6 +179,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new MoveInitializers(&refMap),
         new SideEffectOrdering(&refMap, &typeMap, skipSideEffectOrdering),
         new SimplifyControlFlow(&refMap, &typeMap),
+        new SimplifySwitch(&refMap, &typeMap),
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new SimplifyDefUse(&refMap, &typeMap),
         new UniqueParameters(&refMap, &typeMap),
