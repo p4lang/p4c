@@ -37,8 +37,7 @@ namespace BMV2 {
 
 void ParseV1Architecture::modelError(const char* format, const IR::Node* node) {
     ::error(ErrorType::ERR_MODEL,
-            (cstring("%1%") + format +
-             "\nAre you using an up-to-date v1model.p4?").c_str(), node);
+            (cstring(format) + "\nAre you using an up-to-date v1model.p4?").c_str(), node);
 }
 
 bool ParseV1Architecture::preorder(const IR::PackageBlock* main) {
