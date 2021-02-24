@@ -26,8 +26,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("ingress.tmp") bool tmp;
-    @name("ingress.tmp_0") bit<16> tmp_0;
-    @name("ingress.tmp_1") bit<16> tmp_1;
     @name("ingress.exit_action") action exit_action() {
         exit;
     }
@@ -43,18 +41,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         tmp = exit_table_0.apply().hit;
-        if (tmp) {
-            tmp_0 = 16w1;
-        } else {
-            tmp_0 = 16w2;
-        }
-        tmp_1 = tmp_0;
-        {
-            @name("ingress.hasReturned") bool hasReturned = false;
-            @name("ingress.retval") bit<8> retval;
-            hasReturned = true;
-            retval = 8w1;
-        }
     }
 }
 
