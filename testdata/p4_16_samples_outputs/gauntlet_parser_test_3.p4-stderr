@@ -1,0 +1,3 @@
+gauntlet_parser_test_3.p4(17): [--Wwarn=uninitialized] warning: h.h1.next: reading uninitialized value
+            h.h2[1] = h.h1.next;
+                      ^^^^^^^^^
