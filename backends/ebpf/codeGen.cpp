@@ -51,10 +51,7 @@ bool CodeGenInspector::preorder(const IR::Declaration_Variable* decl) {
 bool CodeGenInspector::preorder(const IR::Operation_Binary* b) {
     widthCheck(b);
     int prec = expressionPrecedence;
-    bool useParens = false;
-    if ((prec > b->getPrecedence()) ||
-        (b->getPrecedence() >= DBPrint::Prec_BOr))
-        useParens = true;
+    bool useParens = getParent<IR::IfStatement>() == nullptr;
     if (useParens)
         builder->append("(");
     visit(b->left);
