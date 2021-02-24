@@ -66,7 +66,7 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
             // Test that p4c gives error if one attempts to use an
             // explicit mask for an optional field at all.  Only
             // support an exact value without a mask, or _ / default.
-            (0xaa &&& 0xff, 0x1111 &&& 0xffff) : a_with_control_params(1);
+            (0xaa &&& 0xf0, 0x1111 &&& 0xffff) : a_with_control_params(1);
             // value too large
             (0x100, default): a_with_control_params(2);
             // other value too large

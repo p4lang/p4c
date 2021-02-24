@@ -1293,7 +1293,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         meta._tunnel_metadata_ingress_tunnel_type137 = 5w12;
         meta._tunnel_metadata_tunnel_vni138 = hdr.vxlan_gpe.vni;
         transition select(hdr.vxlan_gpe.flags, hdr.vxlan_gpe.next_proto) {
-            (8w0x8 &&& 8w0x8, 8w0x5 &&& 8w0xff): parse_gpe_int_header;
+            (8w0x8 &&& 8w0x8, 8w0x5): parse_gpe_int_header;
             default: parse_inner_ethernet;
         }
     }

@@ -35,7 +35,7 @@ parser MyParser(packet_in b, out my_packet p, inout my_metadata m, inout standar
             (16w0x810, 3w0x4 &&& 3w0x6, 6w0x32 &&& 6w0x33, 5w10 &&& 5w30): foo;
             (16w0x810, 3w0x4 &&& 3w0x6, 6w0x32 &&& 6w0x33, 5w12 &&& 5w28): foo;
             (16w0x810, 3w0x4 &&& 3w0x6, 6w0x32 &&& 6w0x33, 5w16 &&& 5w28): foo;
-            (16w0x810, 3w0x4 &&& 3w0x6, 6w0x32 &&& 6w0x33, 5w20 &&& 5w31): foo;
+            (16w0x810, 3w0x4 &&& 3w0x6, 6w0x32 &&& 6w0x33, 5w20): foo;
             default: noMatch;
         }
     }

@@ -334,6 +334,25 @@ const IR::Node* DoStrengthReduction::postorder(IR::Mod* expr) {
     return expr;
 }
 
+const IR::Node* DoStrengthReduction::postorder(IR::Range* range) {
+    // Range a..a is the same as a
+    if (auto c0 = range->left->to<IR::Constant>()) {
+        if (auto c1 = range->right->to<IR::Constant>()) {
+            if (c0->value == c1->value)
+                return c0;
+        }
+    }
+    return range;
+}
+
+const IR::Node* DoStrengthReduction::postorder(IR::Mask* mask) {
+    // a &&& 0xFFFF = a
+    if (isAllOnes(mask->right)) {
+        return mask->left;
+    }
+    return mask;
+}
+
 const IR::Node* DoStrengthReduction::postorder(IR::Mux* expr) {
     if (isTrue(expr->e1) && isFalse(expr->e2))
         return expr->e0;

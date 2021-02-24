@@ -5,8 +5,5 @@ table-entries-optional-2-bmv2.p4(73): [--Wwarn=mismatch] warning: 16w0x10000: va
             (default, 0x10000): a_with_control_params(3);
                       ^^^^^^^
 table-entries-optional-2-bmv2.p4(69): [--Werror=invalid] error: &&& invalid key expression
-            (0xaa &&& 0xff, 0x1111 &&& 0xffff) : a_with_control_params(1);
+            (0xaa &&& 0xf0, 0x1111 &&& 0xffff) : a_with_control_params(1);
              ^^^^^^^^^^^^^
-table-entries-optional-2-bmv2.p4(69): [--Werror=invalid] error: &&& invalid key expression
-            (0xaa &&& 0xff, 0x1111 &&& 0xffff) : a_with_control_params(1);
-                            ^^^^^^^^^^^^^^^^^
