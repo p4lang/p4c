@@ -23,7 +23,17 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @hidden action gauntlet_hdr_in_valuebmv2l33() {
+        h.eth_hdr.eth_type = 16w2;
+    }
+    @hidden table tbl_gauntlet_hdr_in_valuebmv2l33 {
+        actions = {
+            gauntlet_hdr_in_valuebmv2l33();
+        }
+        const default_action = gauntlet_hdr_in_valuebmv2l33();
+    }
     apply {
+        tbl_gauntlet_hdr_in_valuebmv2l33.apply();
     }
 }
 

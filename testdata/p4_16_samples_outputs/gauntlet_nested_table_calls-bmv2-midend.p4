@@ -24,6 +24,8 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bool hasExited;
+    @name("ingress.tmp") bool tmp;
+    @name("ingress.tmp_0") bit<16> tmp_0;
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("ingress.exit_action") action exit_action() {
@@ -40,17 +42,74 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         default_action = NoAction_0();
     }
     @hidden action act() {
+        tmp = true;
+    }
+    @hidden action act_0() {
+        tmp = false;
+    }
+    @hidden action act_1() {
         hasExited = false;
     }
+    @hidden action gauntlet_nested_table_callsbmv2l44() {
+        tmp_0 = 16w1;
+    }
+    @hidden action gauntlet_nested_table_callsbmv2l44_0() {
+        tmp_0 = 16w2;
+    }
+    @hidden action gauntlet_nested_table_callsbmv2l44_1() {
+        h.eth_hdr.eth_type = tmp_0;
+    }
     @hidden table tbl_act {
+        actions = {
+            act_1();
+        }
+        const default_action = act_1();
+    }
+    @hidden table tbl_act_0 {
         actions = {
             act();
         }
         const default_action = act();
     }
+    @hidden table tbl_act_1 {
+        actions = {
+            act_0();
+        }
+        const default_action = act_0();
+    }
+    @hidden table tbl_gauntlet_nested_table_callsbmv2l44 {
+        actions = {
+            gauntlet_nested_table_callsbmv2l44();
+        }
+        const default_action = gauntlet_nested_table_callsbmv2l44();
+    }
+    @hidden table tbl_gauntlet_nested_table_callsbmv2l44_0 {
+        actions = {
+            gauntlet_nested_table_callsbmv2l44_0();
+        }
+        const default_action = gauntlet_nested_table_callsbmv2l44_0();
+    }
+    @hidden table tbl_gauntlet_nested_table_callsbmv2l44_1 {
+        actions = {
+            gauntlet_nested_table_callsbmv2l44_1();
+        }
+        const default_action = gauntlet_nested_table_callsbmv2l44_1();
+    }
     apply {
         tbl_act.apply();
-        exit_table_0.apply();
+        if (exit_table_0.apply().hit) {
+            tbl_act_0.apply();
+        } else {
+            tbl_act_1.apply();
+        }
+        if (!hasExited) {
+            if (tmp) {
+                tbl_gauntlet_nested_table_callsbmv2l44.apply();
+            } else {
+                tbl_gauntlet_nested_table_callsbmv2l44_0.apply();
+            }
+            tbl_gauntlet_nested_table_callsbmv2l44_1.apply();
+        }
     }
 }
 

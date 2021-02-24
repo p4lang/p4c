@@ -23,7 +23,22 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @name("ingress.retval") ethernet_t retval;
+    @hidden action gauntlet_function_if_hdr_returnbmv2l21() {
+        retval.setValid();
+        retval.dst_addr = 48w1;
+        retval.src_addr = 48w1;
+        retval.eth_type = 16w1;
+        h.eth_hdr = retval;
+    }
+    @hidden table tbl_gauntlet_function_if_hdr_returnbmv2l21 {
+        actions = {
+            gauntlet_function_if_hdr_returnbmv2l21();
+        }
+        const default_action = gauntlet_function_if_hdr_returnbmv2l21();
+    }
     apply {
+        tbl_gauntlet_function_if_hdr_returnbmv2l21.apply();
     }
 }
 
