@@ -192,6 +192,8 @@ class FindUninitialized : public Inspector {
                 const LocationSet* loc = new LocationSet(storage);
                 auto points = defs->getPoints(loc);
                 hasUses->add(points);
+                if (typeMap->typeIsEmpty(storage->type))
+                    continue;
                 // Check uninitialized non-headers (headers can be invalid).
                 // inout parameters can never match here, so we could skip them.
                 loc = storage->removeHeaders();
