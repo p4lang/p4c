@@ -8,8 +8,13 @@ header ethernet_t {
     bit<16> eth_type;
 }
 
+header H {
+    bit<8> a;
+}
+
 struct Headers {
     ethernet_t eth_hdr;
+    H          h;
 }
 
 struct Meta {
@@ -18,12 +23,23 @@ struct Meta {
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
         pkt.extract<ethernet_t>(hdr.eth_hdr);
+        pkt.extract<H>(hdr.h);
         transition accept;
     }
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @hidden action gauntlet_nested_ifs_in_functionbmv2l47() {
+        h.h.a = 8w1;
+    }
+    @hidden table tbl_gauntlet_nested_ifs_in_functionbmv2l47 {
+        actions = {
+            gauntlet_nested_ifs_in_functionbmv2l47();
+        }
+        const default_action = gauntlet_nested_ifs_in_functionbmv2l47();
+    }
     apply {
+        tbl_gauntlet_nested_ifs_in_functionbmv2l47.apply();
     }
 }
 
@@ -45,6 +61,7 @@ control egress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
 control deparser(packet_out b, in Headers h) {
     apply {
         b.emit<ethernet_t>(h.eth_hdr);
+        b.emit<H>(h.h);
     }
 }
 

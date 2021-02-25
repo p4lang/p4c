@@ -15,8 +15,8 @@ struct Headers {
 struct Meta {
 }
 
-bit<8> simple_function(in bit<16> input_value) {
-    return 8w1;
+bit<16> simple_function(in bit<16> input_value) {
+    return input_value;
 }
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
@@ -43,7 +43,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         default_action = NoAction();
     }
     apply {
-        simple_function((exit_table.apply().hit ? 16w1 : 16w2));
+        h.eth_hdr.eth_type = simple_function((exit_table.apply().hit ? 16w1 : 16w2));
     }
 }
 

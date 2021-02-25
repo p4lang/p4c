@@ -1,4 +1,5 @@
 #include <core.p4>
+#define V1MODEL_VERSION 20180101
 #include <v1model.p4>
 
 header ethernet_t {
@@ -11,12 +12,12 @@ struct Headers {
     ethernet_t eth_hdr;
 }
 
-struct Meta {}
-
-bit<8> simple_function(in bit<16> input_value) {
-    return 1;
+struct Meta {
 }
 
+bit<16> simple_function(in bit<16> input_value) {
+    return input_value;
+}
 parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t sm) {
     state start {
         transition parse_hdrs;
@@ -28,11 +29,9 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-
     action exit_action() {
         exit;
     }
-
     table exit_table {
         key = {
             h.eth_hdr.eth_type: exact @name("key") ;
@@ -42,7 +41,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
     }
     apply {
-        simple_function(exit_table.apply().hit ? 16w1 : 16w2);
+        h.eth_hdr.eth_type = simple_function((exit_table.apply().hit ? 16w1 : 16w2));
     }
 }
 

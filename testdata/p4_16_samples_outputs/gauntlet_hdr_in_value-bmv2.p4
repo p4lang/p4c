@@ -12,8 +12,8 @@ struct Headers {
     ethernet_t eth_hdr;
 }
 
-bit<16> do_function(Headers val) {
-    return val.eth_hdr.eth_type;
+bit<16> increment_eth_type(Headers val) {
+    return val.eth_hdr.eth_type + 1;
 }
 struct Meta {
 }
@@ -30,7 +30,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
-        do_function({ { 48w1, 48w1, 16w1 } });
+        h.eth_hdr.eth_type = increment_eth_type({ { 48w1, 48w1, 16w1 } });
     }
 }
 
