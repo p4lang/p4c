@@ -188,9 +188,10 @@ set (XFAIL_TESTS
   # These test use computations in the verify/update checksum controls - unsupported
   testdata/p4_16_samples/issue1765-bmv2.p4
   testdata/p4_16_samples/issue1765-1-bmv2.p4
-  # Next two use unknown externs
+  # Next three use unknown externs
   testdata/p4_16_samples/issue1882-bmv2.p4
   testdata/p4_16_samples/issue1882-1-bmv2.p4
+  testdata/p4_16_samples/issue2664-bmv2.p4
   # This one uses arguments of incorrect types to log_msg
   testdata/p4_16_samples/issue2201-bmv2.p4
 )
