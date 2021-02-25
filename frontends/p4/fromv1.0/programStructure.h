@@ -233,8 +233,7 @@ class ProgramStructure {
     addGlobalNameAnnotation(cstring name, const IR::Annotations* annos = nullptr);
 
     virtual const IR::ParserState*
-        convertParser(const IR::V1Parser*, const IR::Type_Struct* headers,
-                      IR::IndexedVector<IR::Declaration>*);
+        convertParser(const IR::V1Parser*, IR::IndexedVector<IR::Declaration>*);
     virtual const IR::Statement* convertParserStatement(const IR::Expression* expr);
     virtual const IR::P4Control* convertControl(const IR::V1Control* control, cstring newName);
     virtual const IR::Declaration_Instance* convertDirectMeter(const IR::Meter* m, cstring newName);
@@ -258,11 +257,10 @@ class ProgramStructure {
     virtual const IR::Expression* counterType(const IR::CounterOrMeter* cm);
     virtual void createChecksumVerifications();
     virtual void createChecksumUpdates();
-    // Returns the type used to represent the headers
-    virtual const IR::Type_Struct* createStructures();
+    virtual void createStructures();
     virtual cstring createType(const IR::Type_StructLike* type, bool header,
                        std::unordered_set<const IR::Type*> *converted);
-    virtual void createParser(const IR::Type_Struct* headers);
+    virtual void createParser();
     virtual void createControls();
     void createDeparserInternal(IR::ID deparserId,
             IR::Parameter* packetOut,

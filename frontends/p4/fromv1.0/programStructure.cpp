@@ -217,7 +217,7 @@ const IR::Type_Struct* ProgramStructure::createFieldListType(const IR::Expressio
     return result;
 }
 
-const IR::Type_Struct* ProgramStructure::createStructures() {
+void ProgramStructure::createStructures() {
     auto metadata = new IR::Type_Struct(v1model.metadataType.Id());
     for (auto it : this->metadata) {
         IR::ID id = it.first->name;
@@ -268,7 +268,6 @@ const IR::Type_Struct* ProgramStructure::createStructures() {
         headers->fields.push_back(field);
     }
     declarations->push_back(headers);
-    return headers;
 }
 
 void ProgramStructure::createExterns() {
@@ -422,20 +421,11 @@ ProgramStructure::explodeType(const std::vector<const IR::Type::Bits *> &fieldTy
  */
 const IR::ParserState*
 ProgramStructure::convertParser(const IR::V1Parser* parser,
-                                const IR::Type_Struct* headers,
                                 IR::IndexedVector<IR::Declaration>* stateful) {
     ExpressionConverter conv(this);
 
     latest = nullptr;
     IR::IndexedVector<IR::StatOrDecl> components;
-    if (parser->name == "start" &&
-        headers->fields.size() == 0) {
-        // initialize the headers only if empty to avoid a warning
-        auto path = new IR::PathExpression(v1model.parser.headersParam.Id());
-        auto init = new IR::StructExpression(
-            headers->getP4Type(), IR::IndexedVector<IR::NamedExpression>());
-        components.push_back(new IR::AssignmentStatement(path, init));
-    }
     for (auto e : parser->stmts) {
         auto stmt = convertParserStatement(e);
         if (stmt) components.push_back(stmt);
@@ -539,7 +529,7 @@ ProgramStructure::convertParser(const IR::V1Parser* parser,
     return result;
 }
 
-void ProgramStructure::createParser(const IR::Type_Struct* headers) {
+void ProgramStructure::createParser() {
     auto paramList = new IR::ParameterList;
     auto pinpath = new IR::Path(p4lib.packetIn.Id());
     auto pintype = new IR::Type_Name(pinpath);
@@ -571,9 +561,8 @@ void ProgramStructure::createParser(const IR::Type_Struct* headers) {
     auto type = new IR::Type_Parser(v1model.parser.Id(), new IR::TypeParameters(), paramList);
     IR::IndexedVector<IR::Declaration> stateful;
     IR::IndexedVector<IR::ParserState> states;
-
     for (auto p : parserStates) {
-        auto ps = convertParser(p.first, headers, &stateful);
+        auto ps = convertParser(p.first, &stateful);
         if (ps == nullptr)
             return;
         states.push_back(ps);
@@ -2532,9 +2521,9 @@ void ProgramStructure::createChecksumUpdates() {
 
 const IR::P4Program* ProgramStructure::create(Util::SourceInfo info) {
     createTypes();
-    auto headers = createStructures();
+    createStructures();
     createExterns();
-    createParser(headers);
+    createParser();
     if (::errorCount())
         return nullptr;
     createControls();

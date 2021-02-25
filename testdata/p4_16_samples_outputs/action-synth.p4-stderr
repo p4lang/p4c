@@ -1,6 +1,0 @@
-action-synth.p4(23): [--Wwarn=uninitialized_out_param] warning: out parameter 'hdr' may be uninitialized when 'ParserI' terminates
-parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t smeta) {
-                                   ^^^
-action-synth.p4(23)
-parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t smeta) {
-       ^^^^^^^

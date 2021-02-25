@@ -23,7 +23,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name(".start") state start_0 {
-        hdr = (headers){};
         transition accept;
     }
     @packet_entry @name(".start_e2e_mirrored") state start_e2e_mirrored {
