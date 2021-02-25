@@ -27,7 +27,8 @@ void CodeGenInspector::substitute(const IR::Parameter* p, const IR::Parameter* w
 { substitution.emplace(p, with); }
 
 bool CodeGenInspector::preorder(const IR::Constant* expression) {
-    builder->append(Util::toString(expression->value, 0, false));
+    builder->append(Util::toString(expression->value, 0, false,
+                                   expression->base));
     return true;
 }
 
@@ -50,7 +51,7 @@ bool CodeGenInspector::preorder(const IR::Declaration_Variable* decl) {
 bool CodeGenInspector::preorder(const IR::Operation_Binary* b) {
     widthCheck(b);
     int prec = expressionPrecedence;
-    bool useParens = prec > b->getPrecedence();
+    bool useParens = getParent<IR::IfStatement>() == nullptr;
     if (useParens)
         builder->append("(");
     visit(b->left);
