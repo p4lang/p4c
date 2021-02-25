@@ -14,7 +14,6 @@ struct metadata {
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        hdr = (headers){};
         packet.lookahead<B8>();
         transition accept;
     }

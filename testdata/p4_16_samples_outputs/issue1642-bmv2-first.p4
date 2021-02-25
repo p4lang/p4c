@@ -26,7 +26,6 @@ struct local_metadata_t {
 
 parser parse(packet_in pk, out parsed_packet_t hdr, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
     state start {
-        hdr = (parsed_packet_t){};
         transition accept;
     }
 }

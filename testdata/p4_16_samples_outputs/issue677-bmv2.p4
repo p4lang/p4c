@@ -11,7 +11,6 @@ struct M {
 
 parser ParserI(packet_in pk, out H hdr, inout M meta, inout SM smeta) {
     state start {
-        hdr = {  };
         transition accept;
     }
 }

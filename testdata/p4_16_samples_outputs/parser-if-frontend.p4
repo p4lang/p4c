@@ -10,7 +10,6 @@ struct m {
 
 parser MyParser(packet_in b, out h hdrs, inout m meta, inout standard_metadata_t std) {
     state start {
-        hdrs = (h){};
         transition select(std.ingress_port == 9w0) {
             true: start_true;
             false: start_join;

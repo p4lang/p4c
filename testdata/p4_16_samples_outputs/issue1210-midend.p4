@@ -21,30 +21,30 @@ parser ParserImpl(packet_in packet, out parsed_headers_t hdr, inout metadata_t m
 }
 
 control IngressImpl(inout parsed_headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @hidden action issue1210l51() {
+    @hidden action issue1210l50() {
         meta._foo__v0 = meta._foo__v0 + 9w1;
     }
-    @hidden action issue1210l60() {
+    @hidden action issue1210l59() {
         meta._foo__v0 = meta._foo__v0 + 9w1;
     }
-    @hidden table tbl_issue1210l51 {
+    @hidden table tbl_issue1210l50 {
         actions = {
-            issue1210l51();
+            issue1210l50();
         }
-        const default_action = issue1210l51();
+        const default_action = issue1210l50();
     }
-    @hidden table tbl_issue1210l60 {
+    @hidden table tbl_issue1210l59 {
         actions = {
-            issue1210l60();
+            issue1210l59();
         }
-        const default_action = issue1210l60();
+        const default_action = issue1210l59();
     }
     apply {
         if (meta._foo__v0 == meta._bar__v1) {
-            tbl_issue1210l51.apply();
+            tbl_issue1210l50.apply();
         }
         if (meta._foo__v0 == 9w192) {
-            tbl_issue1210l60.apply();
+            tbl_issue1210l59.apply();
         }
     }
 }

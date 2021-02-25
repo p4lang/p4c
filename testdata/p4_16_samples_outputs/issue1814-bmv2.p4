@@ -11,7 +11,6 @@ struct metadata {
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     state start {
-        hdr = {  };
         transition accept;
     }
 }

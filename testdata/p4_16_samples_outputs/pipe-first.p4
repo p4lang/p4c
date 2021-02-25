@@ -93,7 +93,6 @@ control pp(inout TArg1 arg1, inout TArg2 arg2);
 package myswitch(prs prser, pp pipe);
 parser my_parser(bs b, out Packet_data p) {
     state start {
-        p = (Packet_data){};
         transition accept;
     }
 }

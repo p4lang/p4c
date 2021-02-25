@@ -13,7 +13,6 @@ parser ParserImpl(packet_in packet,
                   inout metadata_t meta,
                   inout standard_metadata_t standard_metadata) {
     state start {
-        hdr = {};
         transition select() {
             default: accept;
         }

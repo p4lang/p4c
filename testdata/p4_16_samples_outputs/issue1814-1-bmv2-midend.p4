@@ -37,18 +37,18 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
         }
         default_action = NoAction_0();
     }
-    @hidden action issue18141bmv2l43() {
+    @hidden action issue18141bmv2l42() {
         testRegister_0.read(registerData_0, 32w0);
         meta.test = (bool)registerData_0;
     }
-    @hidden table tbl_issue18141bmv2l43 {
+    @hidden table tbl_issue18141bmv2l42 {
         actions = {
-            issue18141bmv2l43();
+            issue18141bmv2l42();
         }
-        const default_action = issue18141bmv2l43();
+        const default_action = issue18141bmv2l42();
     }
     apply {
-        tbl_issue18141bmv2l43.apply();
+        tbl_issue18141bmv2l42.apply();
         debug_table_0.apply();
     }
 }

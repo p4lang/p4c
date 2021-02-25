@@ -21,7 +21,6 @@ control DeparserI(packet_out packet, in H hdr) {
 
 parser parserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t stdmeta) {
     state start {
-        hdr = {  };
         transition select((pkt.lookahead<ethernet_t>()).etherType) {
             16w0x1000 &&& 16w0x1000: accept;
         }

@@ -17,7 +17,6 @@ parser parserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
     @name("parserI.tmp") bit<16> tmp;
     @name("parserI.tmp_0") bit<112> tmp_0;
     state start {
-        hdr = (H){};
         tmp_0 = pkt.lookahead<bit<112>>();
         tmp = tmp_0[111:96];
         transition select(tmp) {

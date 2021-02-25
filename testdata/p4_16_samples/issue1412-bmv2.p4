@@ -13,7 +13,7 @@ parser ParserImpl (
     inout metadata meta,
     inout standard_metadata_t ostd
     )
-{ state start { parsed_hdr = {}; transition accept; } }
+{ state start { transition accept; } }
 
 control VerifyChecksumImpl (
     inout headers_t hdr,

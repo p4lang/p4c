@@ -7,7 +7,6 @@ struct Headers_t {
 
 parser prs(out Headers_t headers) {
     state start {
-        headers = (Headers_t){};
         transition accept;
     }
 }

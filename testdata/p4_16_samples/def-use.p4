@@ -21,7 +21,7 @@ struct H { };
 struct M { };
 
 parser ParserI(packet_in b, out H h, inout M m, inout std_meta_t s) {
-    state start { h = {}; transition accept; }
+    state start { transition accept; }
 }
 
 control IngressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {

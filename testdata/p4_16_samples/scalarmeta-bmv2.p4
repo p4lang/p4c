@@ -28,15 +28,14 @@ struct m {
 }
 
 parser MyParser(packet_in b, out h hdrs, inout m meta, inout standard_metadata_t std) {
-    state start {
-        hdrs = {};
-        meta.counter = 4;
-        transition q0;
-    }
-    state q0 {
-        meta.counter = meta.counter - 1;
-        transition accept;
-    }
+  state start {
+    meta.counter = 4;
+    transition q0;
+  }
+  state q0 {
+    meta.counter = meta.counter - 1;
+    transition accept;
+  }
 }
 
 control MyVerifyChecksum(inout h hdr, inout m meta) {

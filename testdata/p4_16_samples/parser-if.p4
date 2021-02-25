@@ -21,12 +21,11 @@ struct h {}
 struct m {}
 
 parser MyParser(packet_in b, out h hdrs, inout m meta, inout standard_metadata_t std) {
-    state start {
-        hdrs = {};
-        if (std.ingress_port == 0)
-            std.ingress_port = 2;
-        transition accept;
-    }
+  state start {
+    if (std.ingress_port == 0)
+       std.ingress_port = 2;
+    transition accept;
+  }
 }
 
 control MyVerifyChecksum(inout h hdr, inout m meta) {

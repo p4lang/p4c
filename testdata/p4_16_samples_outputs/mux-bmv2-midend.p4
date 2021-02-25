@@ -27,14 +27,14 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
         val[31:0] = res_0[31:0];
         res_0 = val;
     }
-    @hidden action muxbmv2l59() {
+    @hidden action muxbmv2l58() {
         res_0 = 64w0;
     }
-    @hidden table tbl_muxbmv2l59 {
+    @hidden table tbl_muxbmv2l58 {
         actions = {
-            muxbmv2l59();
+            muxbmv2l58();
         }
-        const default_action = muxbmv2l59();
+        const default_action = muxbmv2l58();
     }
     @hidden table tbl_update {
         actions = {
@@ -43,7 +43,7 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
         const default_action = update();
     }
     apply {
-        tbl_muxbmv2l59.apply();
+        tbl_muxbmv2l58.apply();
         tbl_update.apply();
     }
 }

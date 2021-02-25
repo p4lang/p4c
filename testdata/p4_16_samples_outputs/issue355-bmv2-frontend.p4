@@ -23,7 +23,6 @@ parser parserI(packet_in pkt, out H hdr, inout M meta, inout standard_metadata_t
     @name("parserI.tmp") bit<16> tmp;
     @name("parserI.tmp_0") ethernet_t tmp_0;
     state start {
-        hdr = (H){};
         tmp_0 = pkt.lookahead<ethernet_t>();
         tmp = tmp_0.etherType;
         transition select(tmp) {

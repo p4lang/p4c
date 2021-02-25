@@ -35,7 +35,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     @hidden action act() {
         hasExited = false;
     }
-    @hidden action action_call_ubpf66() {
+    @hidden action action_call_ubpf65() {
         hasExited = true;
     }
     @hidden table tbl_act {
@@ -44,17 +44,17 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         }
         const default_action = act();
     }
-    @hidden table tbl_action_call_ubpf66 {
+    @hidden table tbl_action_call_ubpf65 {
         actions = {
-            action_call_ubpf66();
+            action_call_ubpf65();
         }
-        const default_action = action_call_ubpf66();
+        const default_action = action_call_ubpf65();
     }
     apply {
         tbl_act.apply();
         tbl_a_0.apply();
         if (!hasExited) {
-            tbl_action_call_ubpf66.apply();
+            tbl_action_call_ubpf65.apply();
         }
     }
 }

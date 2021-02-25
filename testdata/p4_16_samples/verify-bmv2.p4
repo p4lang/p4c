@@ -24,7 +24,6 @@ error { NewError }
 
 parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t std) {
     state start {
-        hdr = {};
         verify(meta.x == 0, error.NewError);
         verify(true, error.NoError);
         error e = error.NoError;

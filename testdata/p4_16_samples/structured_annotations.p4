@@ -27,7 +27,6 @@ parser parserImpl(packet_in packet,
                   inout standard_metadata_t stdmeta)
 {
     state start {
-        hdr = {};
         transition accept;
     }
 }
