@@ -28,22 +28,23 @@ control c(out bool o) {
         Safe s1;
         s1.b = 32w2;
         switch (s) {
-            Safe.b: {
-                o = s.b == 32w0;
+            s.b as b: {
+                o = b == 32w0;
             }
-            Safe.c: {
+            s.c as sc: {
                 switch (s1) {
-                    Safe.b: {
-                        o = s1.b == (bit<32>)s.c;
+                    s1.b as s1b: {
+                        o = s1b == (bit<32>)sc;
                     }
                     default: {
                         o = false;
                     }
                 }
             }
-            Safe.f: {
-                o = s.f.f == 8w1;
-                s.f.f = 8w2;
+            s.f as f: {
+                o = f.f == 8w1;
+                f.f = 8w2;
+                s.f = f;
             }
             default: {
                 o = true;
@@ -51,11 +52,11 @@ control c(out bool o) {
             }
         }
         switch (e) {
-            Either_0.t: {
-                o = e.t == 32w0;
+            e.t as et: {
+                o = o && et == 32w0;
             }
-            Either_0.u: {
-                o = e.u == 16w0;
+            e.u as eu: {
+                o = o && eu == 16w0;
             }
         }
     }

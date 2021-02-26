@@ -28,27 +28,32 @@ control c(out bool o) {
         s_0.b = 32w4;
         s1_0.b = 32w2;
         switch (s_0) {
-            Safe.b: {
+            s_0.b as b: {
+                o = b == 32w0;
             }
-            Safe.c: {
+            s_0.c as sc: {
                 switch (s1_0) {
-                    Safe.b: {
+                    s1_0.b as s1b: {
+                        o = s1b == (bit<32>)sc;
                     }
                     default: {
+                        o = false;
                     }
                 }
             }
-            Safe.f: {
+            s_0.f as f: {
+                o = f.f == 8w1;
             }
             default: {
+                o = true;
             }
         }
         switch (e_0) {
-            Either_0.t: {
-                o = e_0.t == 32w0;
+            e_0.t as et: {
+                o = o && et == 32w0;
             }
-            Either_0.u: {
-                o = e_0.u == 16w0;
+            e_0.u as eu: {
+                o = o && eu == 16w0;
             }
         }
     }

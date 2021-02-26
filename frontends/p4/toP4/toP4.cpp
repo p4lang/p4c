@@ -1094,6 +1094,10 @@ bool ToP4::preorder(const IR::MethodCallStatement* s) {
 
 bool ToP4::preorder(const IR::SwitchCase* s) {
     visit(s->label);
+    if (s->alias != nullptr) {
+        builder.append(" as ");
+        builder.append(s->alias->name);
+    }
     builder.append(": ");
     visit(s->statement);
     return false;

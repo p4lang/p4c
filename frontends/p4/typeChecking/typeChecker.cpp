@@ -1212,7 +1212,6 @@ const IR::Node* TypeInference::postorder(IR::Type_Type* type) {
 
 const IR::Node* TypeInference::postorder(IR::P4Control* cont) {
     (void)setTypeType(cont, false);
-    BUG_CHECK(!currentSwitchLabel, "inside switch at the end of control %1%?", cont);
     return cont;
 }
 
@@ -2596,6 +2595,18 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
     return expression;
 }
 
+const IR::Node* TypeInference::postorder(IR::Declaration_Alias* decl) {
+    if (done()) return decl;
+    auto sc = findContext<IR::SwitchCase>();
+    BUG_CHECK(sc, "%1%: Alias outside of switch case", decl);
+    auto type = getType(sc->label);
+    if (type == nullptr)
+        return decl;
+    setType(decl, type);
+    setType(getOriginal(), type);
+    return decl;
+}
+
 const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
     if (done()) return expression;
     auto decl = refMap->getDeclaration(expression->path, true);
@@ -2623,7 +2634,7 @@ const IR::Node* TypeInference::postorder(IR::PathExpression* expression) {
 
     if (decl->is<IR::ParserState>()) {
         type = IR::Type_State::get();
-    } else if (decl->is<IR::Declaration_Variable>()) {
+    } else if (decl->is<IR::Declaration_Variable>() || decl->is<IR::Declaration_Alias>()) {
         setLeftValue(expression);
         setLeftValue(getOriginal<IR::Expression>());
     } else if (decl->is<IR::Parameter>()) {
@@ -2857,34 +2868,13 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
             // - as the LHS of an assignment
             // - within a properly labeled switch statement
             auto context = getContext();
-            bool assignedTo = context->node->is<IR::AssignmentStatement>() ||
-                    context->child_index != 0;
-            auto c = currentSwitchLabel;
-            while (c) {
-                if (c->sw->expression->equiv(*expression->expr))
-                    break;
-                c = c->previous;
-            }
-
-            if (!c) {
-                if (!assignedTo) {
-                    typeError("%1%: union fields must be accessed with a switch statement",
-                              expression->member);
-                    return expression;
-                }
-            } else {
-                if (assignedTo) {
-                    typeError("%1%: cannot change union in a statement %2% that depends on it",
-                              expression, c->sw);
-                    return expression;
-                }
-                auto label = c->cs->label->to<IR::Member>();
-                CHECK_NULL(label);
-                if (label->member != expression->member) {
-                    typeError("%1%: guarded by mismatched case label %2%",
-                              expression, label);
-                    return expression;
-                }
+            bool assignedTo = context->node->is<IR::AssignmentStatement>() &&
+                    context->child_index == 0;
+            bool inLabel = context->node->is<IR::SwitchCase>();
+            if (!assignedTo && !inLabel) {
+                typeError("%1%: union fields can only be assigned to or read in switch labels",
+                          expression);
+                return expression;
             }
             setType(getOriginal(), fieldType);
             setType(expression, fieldType);
@@ -3032,28 +3022,7 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
 
     if (type->is<IR::Type_Type>()) {
         auto base = type->to<IR::Type_Type>()->type;
-        if (auto tu = base->to<IR::Type_Union>()) {
-            auto context = getContext();
-            if (!context->node->is<IR::SwitchCase>() || context->child_index != 0) {
-                // Not the label of a switch case.
-                typeError("%1%: union field name may only be used as the label "
-                          "of a switch statement", expression);
-                return expression;
-            }
-            if (!tu->getField(member)) {
-                typeError("%1%: no such field in union '%2%'", expression, tu);
-                return expression;
-            }
-
-            // By assigning to the label the union type (and not the union field type!)
-            // the type checker for switch statements works fine when comparing the label
-            // type with the switch expression type.
-            setType(expression, tu);
-            setType(getOriginal<IR::Expression>(), tu);
-            setCompileTimeConstant(expression);
-            setCompileTimeConstant(getOriginal<IR::Expression>());
-            return expression;
-        } else if (base->is<IR::Type_Error>() || base->is<IR::Type_EnumBase>()) {
+        if (base->is<IR::Type_Error>() || base->is<IR::Type_EnumBase>()) {
             if (isCompileTimeConstant(expression->expr)) {
                 setCompileTimeConstant(expression);
                 setCompileTimeConstant(getOriginal<IR::Expression>()); }
@@ -3686,28 +3655,6 @@ const IR::Node* TypeInference::postorder(IR::IfStatement* conditional) {
     return conditional;
 }
 
-// Keep the switch cases for switch statements that switch on a union
-// on a stack rooted at currentSwitchLabel
-const IR::Node* TypeInference::preorder(IR::SwitchCase* scase) {
-    auto stat = getParent<IR::SwitchStatement>();
-    auto orig = getOriginal<IR::SwitchCase>();
-    CHECK_NULL(stat);
-    auto type = getType(stat->expression);
-    if (auto ts = type->to<IR::Type_SpecializedCanonical>())
-        type = ts->baseType;
-    if (type->is<IR::Type_Union>()) {
-        if (currentSwitchLabel != nullptr && currentSwitchLabel->sw == stat)
-            // We are in a new label in the same switch
-            currentSwitchLabel->cs = orig;
-        else
-            // New switch
-            currentSwitchLabel = new CurrentSwitchLabel(stat, orig, currentSwitchLabel);
-    }
-    visit(scase->label);
-    visit(scase->statement);
-    return scase;
-}
-
 const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
     LOG3("TI Visiting " << dbp(getOriginal()));
     auto type = getType(stat->expression);
@@ -3733,40 +3680,70 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
         // switch (expression)
         Comparison comp;
         comp.left = stat->expression;
-        if (isCompileTimeConstant(stat->expression))
+        if (isCompileTimeConstant(stat->expression)) {
             warning(ErrorType::WARN_MISMATCH, "%1%: constant expression in switch",
                     stat->expression);
-        for (auto &c : stat->cases) {
-            if (!isCompileTimeConstant(c->label))
-                typeError("%1%: must be a compile-time constant", c->label);
-            auto lt = getType(c->label);
-            if (lt == nullptr)
-                continue;
-            if (lt->is<IR::Type_InfInt>() && type->is<IR::Type_Bits>()) {
-                auto cst = c->label->to<IR::Constant>();
-                CHECK_NULL(cst);
-                c = new IR::SwitchCase(
-                    c->srcInfo,
-                    new IR::Constant(cst->srcInfo, type, cst->value, cst->base), c->statement);
-                setType(c->label, type);
-                setCompileTimeConstant(c->label);
-                continue;
-            } else if (c->label->is<IR::DefaultExpression>()) {
-                continue;
+        }
+        auto type = getType(stat->expression);
+        if (auto ts = type->to<IR::Type_SpecializedCanonical>())
+            type = ts->baseType;
+        if (type->is<IR::Type_Union>()) {
+            // Switch on a union type must have all case labels of the form
+            // switch (u) {
+            //   u.b as id: { }
+            // }
+            for (auto &c : stat->cases) {
+                if (c->label->is<IR::DefaultExpression>())
+                    continue;
+                if (c->alias == nullptr) {
+                    typeError("%1%: switch label on a union must specify an identifier alias",
+                              c->label);
+                    continue;
+                }
+                auto mem = c->label->to<IR::Member>();
+                if (mem == nullptr) {
+                    typeError("%1%: switch label on a union must select a union field", c);
+                    continue;
+                }
+                if (!stat->expression->equiv(*mem->expr)) {
+                    typeError("%1%: switch label on a union must select a union field", c);
+                    continue;
+                }
+                if (c->statement == nullptr) {
+                    typeError("%1%: fallthrough not allowed for 'switch' on unions", c);
+                    continue;
+                }
             }
-            comp.right = c->label;
-            if (auto ts = type->to<IR::Type_SpecializedCanonical>())
-                type = ts->baseType;
-            bool b = compare(c->label, type, lt, &comp);
-            if (b && comp.right != c->label) {
-                c = new IR::SwitchCase(c->srcInfo, comp.right, c->statement);
-                setCompileTimeConstant(c->label);
+        } else {
+            for (auto &c : stat->cases) {
+                if (!isCompileTimeConstant(c->label))
+                    typeError("%1%: must be a compile-time constant", c->label);
+                auto lt = getType(c->label);
+                if (lt == nullptr)
+                    continue;
+                if (lt->is<IR::Type_InfInt>() && type->is<IR::Type_Bits>()) {
+                    auto cst = c->label->to<IR::Constant>();
+                    CHECK_NULL(cst);
+                    c = new IR::SwitchCase(
+                        c->srcInfo,
+                        new IR::Constant(cst->srcInfo, type, cst->value, cst->base), c->statement);
+                    setType(c->label, type);
+                    setCompileTimeConstant(c->label);
+                    continue;
+                } else if (c->label->is<IR::DefaultExpression>()) {
+                    continue;
+                }
+                comp.right = c->label;
+                if (auto ts = type->to<IR::Type_SpecializedCanonical>())
+                    type = ts->baseType;
+                bool b = compare(c->label, type, lt, &comp);
+                if (b && comp.right != c->label) {
+                    c = new IR::SwitchCase(c->srcInfo, comp.right, c->statement);
+                    setCompileTimeConstant(c->label);
+                }
             }
         }
     }
-    // pop the switch label stack
-    if (currentSwitchLabel != nullptr && currentSwitchLabel->sw == stat)
-        currentSwitchLabel = currentSwitchLabel->previous;
     return stat;
 }
 

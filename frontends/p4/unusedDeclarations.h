@@ -99,6 +99,7 @@ class RemoveUnusedDeclarations : public Transform {
     { visit(type->typeParameters); prune(); return type; }
     const IR::Node* preorder(IR::Parameter* param) override;
     const IR::Node* preorder(IR::NamedExpression* ne) override { return ne; }  // never dead
+    const IR::Node* preorder(IR::Declaration_Alias* decl) override { return decl; }  // never dead
     const IR::Node* preorder(IR::Type_Var* p) override { prune(); return warnIfUnused(p); }
 
     const IR::Node* preorder(IR::Declaration_Variable* decl)  override;

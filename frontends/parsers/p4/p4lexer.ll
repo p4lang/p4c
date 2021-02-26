@@ -109,6 +109,8 @@ using Parser = P4::P4Parser;
                   return makeToken(ACTIONS); }
 "apply"         { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(APPLY); }
+"as"            { BEGIN(driver.saveState); driver.template_args = false;
+                  return makeToken(AS); }
 "bool"          { BEGIN(driver.saveState); driver.template_args = false;
                   return makeToken(BOOL); }
 "bit"           { BEGIN(driver.saveState); driver.template_args = true;

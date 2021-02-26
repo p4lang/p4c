@@ -51,31 +51,44 @@ const IR::Node* DoEliminateUnion::postorder(IR::Type_Union* type) {
     return result;
 }
 
-const IR::Node* DoEliminateUnion::postorder(IR::Member* expression) {
-    if (!getParent<IR::SwitchCase>())
-        return expression;
-    // Rewrite switch labels of the form Union.Field
-    if (auto tn = expression->expr->to<IR::TypeNameExpression>()) {
-        auto it = tagTypeName.find(tn->toString());
-        if (it != tagTypeName.end()) {
-            return new IR::Member(
-                expression->srcInfo, new IR::TypeNameExpression(it->second), expression->member);
-        }
-    }
-    return expression;
+const IR::Node* DoEliminateUnion::postorder(IR::SwitchCase* sc) {
+    // Rewrite `u.b as var: {}` into `Tag.b: { FieldType var = u.b; {}}`
+    auto sw = findContext<IR::SwitchStatement>();
+    CHECK_NULL(sw);
+    auto swtype = typeMap->getType(sw->expression, true);
+    auto tu = swtype->to<IR::Type_Union>();
+    if (!tu)
+        return sc;
+    if (sc->label->is<IR::DefaultExpression>())
+        return sc;
+
+    auto mem = sc->label->to<IR::Member>();
+    BUG_CHECK(mem, "%1%: expected a member", sc->label);
+    auto it = tagTypeName.find(tu->name.name);
+    BUG_CHECK(it != tagTypeName.end(), "%1%: no tag type found", tu);
+    CHECK_NULL(sc->statement);
+    auto fieldType = typeMap->getType(sc->label, true);
+    auto decl = new IR::Declaration_Variable(
+        sc->srcInfo, sc->alias->name, fieldType->getP4Type(), sc->label);
+    auto stat = new IR::BlockStatement;
+    stat->push_back(decl);
+    stat->push_back(sc->statement);
+    return new IR::SwitchCase(
+        sc->srcInfo,
+        new IR::Member(sc->srcInfo, new IR::TypeNameExpression(it->second), mem->member),
+        stat);
 }
 
 const IR::Node* DoEliminateUnion::postorder(IR::SwitchStatement* statement) {
     // Rewrite the switch expression of the form switch(u)
     // into switch (u.tag)
-    auto type = typeMap->getType(statement->expression);
+    auto type = typeMap->getType(statement->expression, true);
     if (auto tu = type->to<IR::Type_Union>()) {
         auto name = tu->getName().name;
         auto field = tagFieldName.find(name);
-        if (field != tagFieldName.end()) {
-            auto expr = new IR::Member(statement->expression, field->second);
-            statement->expression = expr;
-        }
+        if (field != tagFieldName.end())
+            statement->expression = new IR::Member(
+                statement->expression->srcInfo, statement->expression, field->second);
     }
     return statement;
 }
@@ -84,7 +97,7 @@ const IR::Node* DoEliminateUnion::postorder(IR::Declaration_Variable* decl) {
     // Initialize all union variables to have a tag of "None".
     // This may be a bit conservative.  Create the initializers
     // in the toInsert list.
-    auto type = typeMap->getType(getOriginal());
+    auto type = typeMap->getType(getOriginal(), true);
     if (auto tu = type->to<IR::Type_Union>()) {
         if (findContext<IR::P4Parser>()) {
             ::error(ErrorType::ERR_UNSUPPORTED,
@@ -136,7 +149,7 @@ const IR::Node* DoEliminateUnion::postorder(IR::AssignmentStatement* statement) 
     auto mem = statement->left->to<IR::Member>();
     if (!mem)
         return statement;
-    auto btype = typeMap->getType(mem->expr);
+    auto btype = typeMap->getType(mem->expr, true);
     auto tu = btype->to<IR::Type_Union>();
     if (!tu)
         return statement;

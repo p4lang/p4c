@@ -1,6 +1,3 @@
-safeunion1.p4(34): [--Wwarn=uninitialized_use] warning: s.f.f may be uninitialized
-            Safe.f: { o = (s.f.f == 1); s.f.f = 2; }
-                           ^^^^^
 safeunion1.p4(7): [--Wwarn=mismatch] warning: Safe_Tag.b: constant expression in switch
 union Safe {
       ^^^^

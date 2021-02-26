@@ -213,7 +213,7 @@ inline std::ostream& operator<<(std::ostream& out, const P4::Token& t) {
 %token<Token>      MASK "&&&"
 %token<Token>      RANGE ".."
 %token<Token>      TRUE FALSE THIS
-%token<Token>      ABSTRACT ACTION ACTIONS APPLY BOOL BIT CONST CONTROL DEFAULT
+%token<Token>      ABSTRACT ACTION ACTIONS APPLY AS BOOL BIT CONST CONTROL DEFAULT
                    ELSE ENTRIES ENUM ERROR EXIT EXTERN HEADER HEADER_UNION IF IN INOUT
                    INT KEY SELECT MATCH_KIND TYPE OUT PACKAGE PARSER PRAGMA RETURN STATE
                    STRING STRUCT SWITCH TABLE TRANSITION TUPLE TYPEDEF UNION VARBIT VALUESET VOID
@@ -453,6 +453,7 @@ nonTypeName
     | STATE       { $$ = new IR::ID(@1, "state"); }
     | ENTRIES     { $$ = new IR::ID(@1, "entries"); }
     | TYPE        { $$ = new IR::ID(@1, "type"); }
+    | AS          { $$ = new IR::ID(@1, "as"); }
     ;
 
 name
@@ -466,6 +467,7 @@ nonTableKwName
     | APPLY            { $$ = new IR::ID(@1, "apply"); }
     | STATE            { $$ = new IR::ID(@1, "state"); }
     | TYPE             { $$ = new IR::ID(@1, "type"); }
+    | AS               { $$ = new IR::ID(@1, "as"); }
     ;
 
 optCONST
@@ -524,6 +526,7 @@ annotationToken
     | ABSTRACT         { $$ = $1; }
     | ACTION           { $$ = $1; }
     | ACTIONS          { $$ = $1; }
+    | AS               { $$ = $1; }
     | APPLY            { $$ = $1; }
     | BOOL             { $$ = $1; }
     | BIT              { $$ = $1; }
@@ -1232,16 +1235,18 @@ switchCases
     ;
 
 switchCase
-    : switchLabel ":" blockStatement { $$ = new IR::SwitchCase(@1 + @3, $1, $3); }
+    : switchLabel ":" blockStatement { $$ = new IR::SwitchCase(@1, $1, $3); }
     | switchLabel ":"                { $$ = new IR::SwitchCase(@1, $1, nullptr); }
+    // Experimental: support for unions
+    | nonBraceExpression AS name ":" blockStatement
+    { auto alias = new IR::Declaration_Alias(*$3);
+      $$ = new IR::SwitchCase(@1 + @5, $1, alias, $5); }
     ;
 
 switchLabel
     : DEFAULT                  { $$ = new IR::DefaultExpression(@1); }
     // Experimental: support for arbitrary expressions
     | nonBraceExpression       { $$ = $1; }
-    // Experimental: support for unions
-    | TYPE_IDENTIFIER          { $$ = new IR::PathExpression(new IR::Path(IR::ID(@1, $1))); }
     ;
 
 statementOrDeclaration

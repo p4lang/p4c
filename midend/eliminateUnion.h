@@ -34,7 +34,7 @@ U x;
 
 x.b = ...;
 switch (x) {
-   U.b: ... ;
+   x.b as b: ... ;
    ...
 }
 
@@ -56,7 +56,7 @@ x.tag = U_Tag.None;
 x.b = ...;
 x.tag = U_Tag.b;
 switch (x.tag) {
-   UE.b: ... ;
+   UE.b: { bit<32> b = x.b; ... };
 }
 
  */
@@ -72,7 +72,7 @@ class DoEliminateUnion final : public Transform {
             refMap(refMap), typeMap(typeMap)
     { setName("DoEliminateUnion"); CHECK_NULL(refMap); CHECK_NULL(typeMap); }
     const IR::Node* postorder(IR::Type_Union* type) override;
-    const IR::Node* postorder(IR::Member* expression) override;
+    const IR::Node* postorder(IR::SwitchCase* sc) override;
     const IR::Node* postorder(IR::SwitchStatement* statement) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
     const IR::Node* postorder(IR::P4Control* control) override;

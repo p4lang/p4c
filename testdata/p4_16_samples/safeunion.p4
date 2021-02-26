@@ -10,8 +10,8 @@ control c(out bool o) {
 
         e.t = 2;
         switch (e) {
-            Either.t: {
-                o = e.t == 0;
+            e.t as t: {
+                o = t == 0;
             }
         }
     }

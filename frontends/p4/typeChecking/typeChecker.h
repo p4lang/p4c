@@ -74,20 +74,6 @@ class TypeInference : public Transform {
     TypeMap* typeMap;
     const IR::Node* initialNode;
 
-    struct CurrentSwitchLabel {
-        const IR::SwitchStatement* sw;
-        const IR::SwitchCase* cs;
-        // Note: since this field is mutated this visitor is not thread-safe
-        CurrentSwitchLabel* previous;
-
-        CurrentSwitchLabel(const IR::SwitchStatement* sw, const IR::SwitchCase* cs,
-                           CurrentSwitchLabel* prev): sw(sw), cs(cs), previous(prev) {}
-    };
-    /// Maintain a stack with the nested switch labels and statements
-    /// that correspond to unions.  These define the union fields that
-    /// are currently in scope.
-    CurrentSwitchLabel *currentSwitchLabel = nullptr;
-
  public:
     // @param readOnly If ftrue it will assert that it behaves like
     //        an Inspector.
@@ -220,8 +206,8 @@ class TypeInference : public Transform {
     const IR::Node* preorder(IR::Declaration_Instance* decl) override;
     // check invariants for entire list before checking the entries
     const IR::Node* preorder(IR::EntriesList* el) override;
-    const IR::Node* preorder(IR::SwitchCase* scase) override;
 
+    const IR::Node* postorder(IR::Declaration_Alias* decl) override;
     const IR::Node* postorder(IR::Declaration_MatchKind* decl) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
     const IR::Node* postorder(IR::Declaration_Constant* constant) override;

@@ -21,6 +21,7 @@ limitations under the License.
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/simplifyParsers.h"
+#include "frontends/p4/simplifySwitch.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -102,6 +103,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
             new P4::EliminateTuples(&refMap, &typeMap),
             new P4::LocalCopyPropagation(&refMap, &typeMap),
             new P4::SimplifySelectList(&refMap, &typeMap),
+            new P4::SimplifySwitch(&refMap, &typeMap),
             new P4::MoveDeclarations(),  // more may have been introduced
             new P4::RemoveSelectBooleans(&refMap, &typeMap),
             new P4::SingleArgumentSelect(),

@@ -9,8 +9,8 @@ control c(out bool o) {
     apply {
         e_0.t = 32w2;
         switch (e_0) {
-            Either.t: {
-                o = e_0.t == 32w0;
+            e_0.t as t: {
+                o = t == 32w0;
             }
         }
     }

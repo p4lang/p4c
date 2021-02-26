@@ -22,6 +22,7 @@ limitations under the License.
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/simplifyParsers.h"
+#include "frontends/p4/simplifySwitch.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
@@ -108,6 +109,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options, std::ostream* o
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::LocalCopyPropagation(&refMap, &typeMap),
             new P4::ConstantFolding(&refMap, &typeMap),
+            new P4::SimplifySwitch(&refMap, &typeMap),
             new P4::StrengthReduction(&refMap, &typeMap),
             new P4::SimplifyKey(&refMap, &typeMap,
                                 new P4::OrPolicy(
