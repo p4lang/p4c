@@ -39,14 +39,36 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
         // Since we don't have any operations except assignment for a
         // type described by a type variable, we treat is as a base type.
         type->is<IR::Type_Var>() ||
-        // The following may need to be revisited when we add tuple
-        // field accessors.
-        type->is<IR::Type_Tuple>() ||
-        type->is<IR::Type_List>() ||
         // Also for newtype
         type->is<IR::Type_Newtype>())
         return new BaseLocation(type, name);
+    if (auto bl = type->to<IR::Type_BaseList>()) {
+        // A tuple with no fields is treated like a base location.
+        // The other tuples are treated as a collection of their
+        // fields.  We need to treat the empty tuple specially because
+        // otherwise, since there are no fields, assignments like t =
+        // {} would be treated as doing nothing.  However, these
+        // assignments do something: they intialize the value
+        // (although it's not clear what an uninitialized value of
+        // type empty tuple could be).
+        if (bl->getSize() == 0)
+            return new BaseLocation(type, name);
+
+        // Tuple and List
+        auto result = new TupleLocation(type, name);
+        size_t index = 0;
+        for (auto t : bl->components) {
+            cstring fieldName = name + "[" + Util::toString(index) + "]";
+            auto sl = create(t, fieldName);
+            result->createElement(index, sl);
+            index++;
+        }
+        return result;
+    }
     if (auto st = type->to<IR::Type_StructLike>()) {
+        if (st->is<IR::Type_Struct>() && st->fields.size() == 0)
+            // See the comment above about empty tuples
+            return new BaseLocation(type, name);
         auto result = new StructLocation(type, name);
 
         // For header unions we will model all of the valid fields
@@ -63,18 +85,18 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
             if (globalValid != nullptr)
                 dynamic_cast<StructLocation*>(sl)->replaceField(
                     fieldName + "." + validFieldName, globalValid);
-            result->addField(f->name, sl);
+            result->createField(f->name.name, sl);
         }
         if (st->is<IR::Type_Header>()) {
             auto valid = create(IR::Type_Boolean::get(), name + "." + validFieldName);
-            result->addField(validFieldName, valid);
+            result->createField(validFieldName, valid);
         }
         return result;
     } else if (auto st = type->to<IR::Type_Stack>()) {
         auto result = new ArrayLocation(st, name);
         for (unsigned i = 0; i < st->getSize(); i++) {
             auto sl = create(st->elementType, name + "[" + Util::toString(i) + "]");
-            result->addElement(i, sl);
+            result->createElement(i, sl);
         }
         result->setLastIndexField(create(IR::Type_Bits::get(32), name + "." + indexFieldName));
         return result;
@@ -111,6 +133,11 @@ void StructLocation::addField(cstring field, LocationSet* result) const {
     result->add(f);
 }
 
+void TupleLocation::removeHeaders(LocationSet* result) const {
+    for (auto f : elements)
+        f->removeHeaders(result);
+}
+
 void StructLocation::removeHeaders(LocationSet* result) const {
     if (!type->is<IR::Type_Struct>()) return;
     for (auto f : fieldLocations)
@@ -126,8 +153,7 @@ void ArrayLocation::addLastIndexField(LocationSet* result) const {
     result->add(getLastIndexField());
 }
 
-
-void ArrayLocation::addElement(unsigned index, LocationSet* result) const {
+void IndexedLocation::addElement(unsigned index, LocationSet* result) const {
     BUG_CHECK(index < elements.size(), "%1%: out of bounds index", index);
     result->add(elements.at(index));
 }
@@ -197,7 +223,7 @@ const LocationSet* LocationSet::getValidField() const
 const LocationSet* LocationSet::getIndex(unsigned index) const {
     auto result = new LocationSet();
     for (auto l : locations) {
-        auto array = l->to<ArrayLocation>();
+        auto array = l->to<IndexedLocation>();
         array->addElement(index, result);
     }
     return result;
@@ -223,11 +249,11 @@ const LocationSet* LocationSet::canonicalize() const {
 void LocationSet::addCanonical(const StorageLocation* location) {
     if (location->is<BaseLocation>()) {
         add(location);
-    } else if (location->is<StructLocation>()) {
-        for (auto f : location->to<StructLocation>()->fields())
+    } else if (auto wfl = location->to<WithFieldsLocation>()) {
+        for (auto f : wfl->fields())
             addCanonical(f);
-    } else if (location->is<ArrayLocation>()) {
-        for (auto e : *location->to<ArrayLocation>())
+    } else if (auto a = location->to<IndexedLocation>()) {
+        for (auto e : *a)
             addCanonical(e);
     } else {
         BUG("unexpected location");

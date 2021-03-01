@@ -38,7 +38,6 @@ class StorageLocation : public IHasDbPrint {
     template <class T>
     const T* to() const {
         auto result = dynamic_cast<const T*>(this);
-        CHECK_NULL(result);
         return result;
     }
     template <class T>
@@ -66,42 +65,52 @@ class StorageLocation : public IHasDbPrint {
     It could be either a scalar variable, or a field of a struct, etc. */
 class BaseLocation : public StorageLocation {
  public:
-    // We can use this for tuples because tuples have no field accessors,
-    // so we treat them as monolithic objects.
     BaseLocation(const IR::Type* type, cstring name) :
-            StorageLocation(type, name)
-    { BUG_CHECK(type->is<IR::Type_Bits>() || type->is<IR::Type_Enum>() ||
-                type->is<IR::Type_Boolean>() || type->is<IR::Type_Var>() ||
-                type->is<IR::Type_Tuple>() || type->is<IR::Type_Error>() ||
-                type->is<IR::Type_Varbits>() || type->is<IR::Type_Newtype>() ||
-                type->is<IR::Type_SerEnum>() || type->is<IR::Type_List>(),
-                "%1%: unexpected type", type); }
+            StorageLocation(type, name) {
+        if (auto tt = type->to<IR::Type_Tuple>())
+            BUG_CHECK(tt->getSize() == 0, "%1%: tuples with fields are not base locations", tt);
+        else if (auto ts = type->to<IR::Type_StructLike>())
+            BUG_CHECK(ts->fields.size() == 0,
+                      "%1%: structs with fields are not base locations", tt);
+        else
+            BUG_CHECK(type->is<IR::Type_Bits>() || type->is<IR::Type_Enum>() ||
+                      type->is<IR::Type_Boolean>() || type->is<IR::Type_Var>() ||
+                      type->is<IR::Type_Error>() ||
+                      type->is<IR::Type_Varbits>() || type->is<IR::Type_Newtype>() ||
+                      type->is<IR::Type_SerEnum>() || type->is<IR::Type_List>(),
+                      "%1%: unexpected type", type); }
     void addValidBits(LocationSet*) const override {}
     void addLastIndexField(LocationSet*) const override {}
     void removeHeaders(LocationSet* result) const override;
 };
 
-/** Represents the locations for element of a struct, header or union */
-class StructLocation : public StorageLocation {
+/// Base class for location sets that contain fields
+class WithFieldsLocation : public StorageLocation {
+ protected:
     ordered_map<cstring, const StorageLocation*> fieldLocations;
     friend class StorageFactory;
-
-    void addField(cstring name, StorageLocation* field)
+    WithFieldsLocation(const IR::Type* type, cstring name) :
+            StorageLocation(type, name) {}
+ public:
+    void createField(cstring name, StorageLocation* field)
     { fieldLocations.emplace(name, field); CHECK_NULL(field); }
     void replaceField(cstring field, StorageLocation* replacement)
     { fieldLocations[field] = replacement; }
-
- public:
-    StructLocation(const IR::Type* type, cstring name) :
-            StorageLocation(type, name) {
-        BUG_CHECK(type->is<IR::Type_StructLike>(),
-                  "%1%: unexpected type", type);
-    }
     IterValues<ordered_map<cstring, const StorageLocation*>::const_iterator> fields() const
     { return Values(fieldLocations); }
     void dbprint(std::ostream& out) const override {
         for (auto f : fieldLocations)
             out << *f.second << " ";
+    }
+};
+
+/** Represents the locations for a struct, header or union */
+class StructLocation : public WithFieldsLocation {
+ public:
+    StructLocation(const IR::Type* type, cstring name) :
+            WithFieldsLocation(type, name) {
+        BUG_CHECK(type->is<IR::Type_StructLike>(),
+                  "%1%: unexpected type", type);
     }
     void addField(cstring field, LocationSet* addTo) const;
     void addValidBits(LocationSet* result) const override;
@@ -112,34 +121,51 @@ class StructLocation : public StorageLocation {
     bool isStruct() const { return type->is<IR::Type_Struct>(); }
 };
 
-class ArrayLocation : public StorageLocation {
+/// Interface for locations that support an index operation
+class IndexedLocation : public StorageLocation {
+ protected:
     std::vector<const StorageLocation*> elements;
-    const StorageLocation* lastIndexField;  // accessed by lastIndex
     friend class StorageFactory;
 
-    void addElement(unsigned index, StorageLocation* element)
+    void createElement(unsigned index, StorageLocation* element)
     { elements[index] = element; CHECK_NULL(element); }
-
  public:
-    ArrayLocation(const IR::Type* type, cstring name) :
-            StorageLocation(type, name), lastIndexField(nullptr) {
-        BUG_CHECK(type->is<IR::Type_Stack>(), "%1%: unexpected type", type);
-        auto stack = type->to<IR::Type_Stack>();
-        elements.resize(stack->getSize());
+    IndexedLocation(const IR::Type* type, cstring name) : StorageLocation(type, name) {
+        CHECK_NULL(type);
+        auto it = type->to<IR::Type_Indexed>();
+        BUG_CHECK(it != nullptr, "%1%: unexpected type", type);
+        elements.resize(it->getSize());
     }
-    void setLastIndexField(const StorageLocation* location)
-    { lastIndexField = location; }
-    const StorageLocation* getLastIndexField() const
-    { return lastIndexField; }
+    void addElement(unsigned index, LocationSet* result) const;
     std::vector<const StorageLocation*>::const_iterator begin() const
     { return elements.cbegin(); }
     std::vector<const StorageLocation*>::const_iterator end() const
     { return elements.cend(); }
+};
+
+/** Represents the locations for a tuple or list */
+class TupleLocation : public IndexedLocation {
+ public:
+    TupleLocation(const IR::Type* type, cstring name) : IndexedLocation(type, name) {}
+    size_t getSize() const { return elements.size(); }
+    void addValidBits(LocationSet*) const override {}
+    void addLastIndexField(LocationSet*) const override {}
+    void removeHeaders(LocationSet* result) const override;
+};
+
+class ArrayLocation : public IndexedLocation {
+    const StorageLocation* lastIndexField;  // accessed by lastIndex
+ public:
+    ArrayLocation(const IR::Type* type, cstring name) :
+            IndexedLocation(type, name), lastIndexField(nullptr) {}
+    void setLastIndexField(const StorageLocation* location)
+    { lastIndexField = location; }
+    const StorageLocation* getLastIndexField() const
+    { return lastIndexField; }
     void dbprint(std::ostream& out) const override {
         for (unsigned i = 0; i < elements.size(); i++)
             out << *elements.at(i) << " ";
     }
-    void addElement(unsigned index, LocationSet* result) const;
     void addValidBits(LocationSet* result) const override;
     void removeHeaders(LocationSet*) const override {}  // no results added
     void addLastIndexField(LocationSet* result) const override;

@@ -41,7 +41,6 @@ control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
                 do.apply(hdr, meta, std_meta);
             }
         }
-
     }
 }
 

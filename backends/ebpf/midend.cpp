@@ -29,6 +29,7 @@ limitations under the License.
 #include "frontends/p4/unusedDeclarations.h"
 #include "midend/actionSynthesis.h"
 #include "midend/complexComparison.h"
+#include "midend/copyStructures.h"
 #include "midend/convertEnums.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateTuples.h"
@@ -93,6 +94,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
             new P4::SimplifyParsers(&refMap),
             new P4::StrengthReduction(&refMap, &typeMap),
             new P4::SimplifyComparisons(&refMap, &typeMap),
+            new P4::CopyStructures(&refMap, &typeMap),
             new P4::EliminateTuples(&refMap, &typeMap),
             new P4::LocalCopyPropagation(&refMap, &typeMap),
             new P4::SimplifySelectList(&refMap, &typeMap),

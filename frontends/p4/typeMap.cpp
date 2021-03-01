@@ -19,6 +19,35 @@ limitations under the License.
 
 namespace P4 {
 
+bool TypeMap::typeIsEmpty(const IR::Type* type) const {
+    if (auto bt = type->to<IR::Type_Bits>()) {
+        return bt->size == 0;
+    } else if (auto tt = type->to<IR::Type_Tuple>()) {
+        if (tt->getSize() == 0)
+            return true;
+        for (auto ft : tt->components) {
+            auto t = getTypeType(ft, true);
+            if (!typeIsEmpty(t))
+                return false;
+        }
+        return true;
+    } else if (auto ts = type->to<IR::Type_Stack>()) {
+        if (!ts->sizeKnown())
+            return false;
+        return ts->getSize() == 0;
+    } else if (auto tst = type->to<IR::Type_Struct>()) {
+        if (tst->fields.size() == 0)
+            return true;
+        for (auto f : tst->fields) {
+            auto t = getTypeType(f->type, true);
+            if (!typeIsEmpty(t))
+                return false;
+        }
+        return true;
+    }
+    return false;
+}
+
 void TypeMap::dbprint(std::ostream& out) const {
     out << "TypeMap for " << dbp(program) << std::endl;
     for (auto it : typeMap)

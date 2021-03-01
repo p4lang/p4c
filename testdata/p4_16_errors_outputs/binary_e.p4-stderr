@@ -1,4 +1,4 @@
-binary_e.p4(32): [--Werror=type-error] error: Array indexing a[2] applied to non-array type int<2>
+binary_e.p4(32): [--Werror=type-error] error: Indexing a[2] applied to non-array and non-tuple type int<2>
         c = a[2]; // not an array
             ^^^^
 binary_e.p4(33): [--Werror=type-error] error: Array index d must be an integer, but it has type bool

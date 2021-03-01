@@ -37,7 +37,7 @@ bool DoExpandEmit::expandArg(
         return true;
     } else if (auto tup = type->to<IR::Type_Tuple>()) {
         auto le = arg->expression->to<IR::ListExpression>();
-        BUG_CHECK(le != nullptr && le->size() == tup->size(), "%1%: not a list?", arg);
+        BUG_CHECK(le != nullptr && le->size() == tup->getSize(), "%1%: not a list?", arg);
         for (size_t i = 0; i < le->size(); i++) {
             auto expr = new IR::Argument(arg->srcInfo, arg->name, le->components.at(i));
             auto type = tup->components.at(i);
