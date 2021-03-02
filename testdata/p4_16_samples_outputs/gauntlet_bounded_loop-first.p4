@@ -14,13 +14,13 @@ struct headers {
 }
 
 parser sub_parser(packet_in b, out headers hdr) {
-    bit<8> tracker;
+    @name("tracker") bit<8> tracker_0;
     state start {
-        tracker = 8w0;
+        tracker_0 = 8w0;
         transition next;
     }
     state next {
-        transition select(tracker == 8w1) {
+        transition select(tracker_0 == 8w1) {
             true: next_true;
             false: next_join;
         }
@@ -37,16 +37,16 @@ parser sub_parser(packet_in b, out headers hdr) {
         }
     }
     state parse_hdr {
-        tracker = tracker + 8w1;
+        tracker_0 = tracker_0 + 8w1;
         b.extract<H>(hdr.nop);
         transition next;
     }
 }
 
 parser p(packet_in packet, out headers hdr) {
-    @name("sub_parser") sub_parser() sub_parser_inst;
+    @name("sub_parser") sub_parser() sub_parser_inst_0;
     state start {
-        sub_parser_inst.apply(packet, hdr);
+        sub_parser_inst_0.apply(packet, hdr);
         transition accept;
     }
 }

@@ -705,7 +705,7 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
             return f->size == 1 && !f->isSigned;
         } else if (auto de = dest->to<IR::Type_SerEnum>()) {
             return TypeMap::equivalent(src, getTypeType(de->type));
-        } else if (auto ii = dest->to<IR::Type_InfInt>()) {
+        } else if (dest->is<IR::Type_InfInt>()) {
             return true;
         }
     } else if (src->is<IR::Type_Boolean>()) {

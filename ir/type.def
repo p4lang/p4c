@@ -414,7 +414,7 @@ class Type_Stack : Type_Indexed, Type {
     dbprint{ out << elementType << "[" << size << "]"; }
     bool sizeKnown() const;
     size_t getSize() const;
-    Type at(size_t index) const { return elementType; }
+    Type at(size_t _) const { return elementType; }
     static const cstring next;
     static const cstring last;
     static const cstring arraySize;
