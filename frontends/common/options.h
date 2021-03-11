@@ -57,7 +57,8 @@ class CompilerOptions : public Util::Options {
 
     enum class FrontendVersion {
         P4_14,
-        P4_16
+        P4_16,
+        P4_16_expt
     };
 
     // Name of executable that is being run.

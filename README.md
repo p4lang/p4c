@@ -490,3 +490,151 @@ access them from the IR
 * Tables with multiple apply calls
 
 See also [unsupported P4_16 language features](backends/bmv2/README.md#unsupported-p4_16-language-features).
+
+## P4-16 Modularity
+
+The description here exists to help code review for what is supported.
+The p4-16 specification will be updated once code is checked in.
+During code checkin the blurb below will also be removed.
+
+Code reuse: want to be able to extend P4 programs without the need to rewrite
+            the base program.
+            e.g. parsers, individual parser states, controls, structs, headers…
+
+
+### Background
+
+Initially, we had used a keyword `extends` to patch an existing object
+such as a struct (e.g., add a new member to a struct).  We also used
+an `override` keyword to swap an object, e.g, swap P4 package. For
+simplicity the design does not introduce any new header struct or
+parser, etc. For more simplicity we got rid of the keyword `extends` and
+just use `override` throughout.
+
+Without using any keywords, a struct can be extended in P4 today.  Consider the
+example below.
+
+```p4
+struct S { … }
+struct S_Ext { S field; … }
+```
+
+The new `struct S_ext` has a nested struct which is fine, but not every P4 object
+is extensible this way.  P4 enum, header, header union, etc. have nesting
+restrictions. A uniform rule to extend all types, using nesting, is not possible.
+This is why we support only patching any object type (example, add new member to a struct, header, header union, enum, serializable enum, etc.).
+
+
+### New `override` keyword
+
+Tells compiler to extend various P4 constructs (e.g., parser, parser state,
+struct, control, package, etc.).
+
+### New `super` keyword
+In parser state transition block, use `super.state.transition`
+- state represents name of a base parser state; uses base transition code
+  without using the extract code.
+- `super` can be used for other constructs (e.g. control).
+
+### Examples of `override`
+
+```p4
+
+base.p4
+-------
+struct headers_t {
+    ethernet_t eth;
+    ipv4_t     ipv4;
+}
+
+enum Choice {
+    First,
+    Second
+}
+
+enum bit<8> Rate {
+    Slow = 1,
+    Medium = 2
+}
+
+extended.p4
+-----------
+
+header new_header_t { bit<8> foo; }
+
+struct headers_t override { // tells compiler this is a "patch" to the previous type definition, not a new one.
+    new_header_t new_header;
+}
+
+enum Choice override { // patch for enum
+    Third
+}
+
+enum bit<8> Rate override { // patch for serializable enum
+    Fast = 3
+}
+
+package V1Switch(base_parser, new_ingress, new_deparser) override; // tells compiler to ignore (drop) previous package declaration and use this one.
+
+// tells compiler to patch previously
+// defined parser with the same name ("base_parser")
+parser base_parser(…) override {
+    state ethernet override {  // override previously defined state definition
+        ...
+    }
+
+    state new_state {  // if no override, then add the state as a new one
+        ...
+    }
+}
+```
+
+### Examples of `super.state.transition`
+See slides 5-6 of https://github.com/p4lang/p4-spec/wiki/files/hemant-2020-08-17.pdf
+
+### Keyword `default.yyy`
+
+- `new.p4` has no select in parser state and only includes a transition.
+
+```p4
+state parse_udp {
+     packet.extract(hdr.udp);
+        transition parse_rtp;
+}
+
+- Use `default.xxx` to hint compiler to change `default: accept;` to
+  `default:parse_rtp;` in base state.
+
+state parse_udp override {
+        packet.extract(hdr.udp);
+        transition super.parse_udp.transition.default.parse_rtp;
+}
+```
+
+### Steps for parser merging
+
+See slide 7 of https://github.com/p4lang/p4-spec/wiki/files/hemant-2020-08-17.pdf
+Also, the following compile command is used to merge `base.p4` with `new.p4`.
+`base.p4` is included by `new.p4`.
+
+```bash
+./p4test --std p4-16-expt -I <path> <new.p4> -pp <output.p4>
+```
+
+The above command generates a merged P4-16 program to `output.p4`.  `new.p4` uses
+new keywords in `override`and `super`.
+
+
+### What is Supported
+
+For code merge (or reuse) between base.p4 to a new.p4 the following P4
+constructs support override to help automate merging.
+
+1. parser
+2. parser state
+3. control, e.g., for deparser
+4. Package
+5. struct
+6. enum
+7. serialized enum
+8. header union

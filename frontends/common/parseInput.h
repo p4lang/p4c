@@ -83,9 +83,25 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
             return nullptr;
     }
 
-    auto result = options.isv1()
-                ? parseV1Program<FILE*, C>(in, options.file, 1, options.getDebugHook())
-                : P4ParserDriver::parse(in, options.file);
+    unsigned ver = 16;
+    cstring outputFile = nullptr;
+    static const IR::P4Program* result;
+    switch (options.langVersion) {
+    case CompilerOptions::FrontendVersion::P4_14:
+        result = parseV1Program<FILE*, C>(in, options.file, 1, options.getDebugHook());
+        break;
+    case CompilerOptions::FrontendVersion::P4_16:
+        result = P4ParserDriver::parse(ver, in, options.file, outputFile);
+        break;
+    case CompilerOptions::FrontendVersion::P4_16_expt:
+        ver = 18;
+        outputFile = options.prettyPrintFile;
+        result = P4ParserDriver::parse(ver, in, options.file, outputFile);
+        break;
+    default:
+        break;
+    }
+
     options.closeInput(in);
 
     if (::errorCount() > 0) {

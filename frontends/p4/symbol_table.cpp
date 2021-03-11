@@ -89,6 +89,15 @@ class Namespace : public NamedSymbol {
         }
         contents.emplace(symbol->getName(), symbol);
     }
+    void undeclare(NamedSymbol* symbol) {
+        cstring symname = symbol->getName();
+        if (symname.isNullOrEmpty()) return;
+
+        auto it = contents.find(symname);
+        if (it != contents.end()) {
+            contents.erase(it);
+        }
+    }
     NamedSymbol* lookup(cstring name) const {
         auto it = contents.find(name);
         if (it == contents.end())
@@ -202,6 +211,14 @@ void ProgramStructure::declareObject(IR::ID id, cstring type) {
     if (auto tns = dynamic_cast<const Namespace *>(type_sym))
         o->setNamespace(tns);
     currentNamespace->declare(o);
+}
+
+void ProgramStructure::undeclareObject(IR::ID id) {
+    if (debug)
+        fprintf(debugStream, "ProgramStructure: deleting object %s\n", id.name.c_str());
+
+    auto o = new Object(id.name, id.srcInfo);
+    currentNamespace->undeclare(o);
 }
 
 void ProgramStructure::markAsTemplate(IR::ID id) {
