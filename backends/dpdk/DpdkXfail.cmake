@@ -18,7 +18,6 @@ p4c_add_xfail_reason("dpdk"
   testdata/p4_16_samples/psa-meter6.p4
   testdata/p4_16_samples/psa-test.p4
   testdata/p4_16_samples/psa-register1.p4
-  testdata/p4_16_samples/psa-register2.p4
   )
 
 p4c_add_xfail_reason("dpdk"
@@ -28,6 +27,7 @@ p4c_add_xfail_reason("dpdk"
   testdata/p4_16_samples/psa-action-selector3.p4
   testdata/p4_16_samples/psa-hash.p4
   testdata/p4_16_samples/psa-random.p4
+  testdata/p4_16_samples/psa-register2.p4
   testdata/p4_16_samples/psa-register3.p4
   )
 
@@ -36,8 +36,6 @@ p4c_add_xfail_reason("dpdk"
   testdata/p4_16_samples/psa-example-digest-bmv2.p4
   testdata/p4_16_samples/psa-example-counters-bmv2.p4
   )
-
-  testdata/p4_16_samples/psa-example-parser-checksum.p4
 
 p4c_add_xfail_reason("dpdk"
   "not implemented"
@@ -53,6 +51,7 @@ p4c_add_xfail_reason("dpdk"
   "error: AssignmentStatement"
   testdata/p4_16_samples/psa-multicast-basic-2-bmv2.p4
   testdata/p4_16_samples/psa-unicast-or-drop-bmv2.p4
+  testdata/p4_16_samples/psa-example-parser-checksum.p4
   )
 
 p4c_add_xfail_reason("dpdk"
