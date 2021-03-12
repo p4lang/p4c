@@ -71,7 +71,7 @@ class SkipControls : public P4::ActionSynthesisPolicy {
     }
 };
 
-MidEnd::MidEnd(CompilerOptions& options, std::ostream* outStream, bool withLoopsUnrolling) {
+MidEnd::MidEnd(CompilerOptions& options, std::ostream* outStream) {
     bool isv1 = options.langVersion == CompilerOptions::FrontendVersion::P4_14;
     refMap.setIsV1(isv1);
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
@@ -146,7 +146,7 @@ MidEnd::MidEnd(CompilerOptions& options, std::ostream* outStream, bool withLoops
         new P4::MoveActionsToTables(&refMap, &typeMap),
         evaluator,
         [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
-        withLoopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr,
+        options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr,
         new P4::MidEndLast()
     });
     if (options.listMidendPasses) {

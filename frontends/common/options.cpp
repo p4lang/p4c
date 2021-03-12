@@ -247,6 +247,9 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                       return false;
                    },
                    "List exact names of all frontend passes\n");
+    registerOption("-loopsUnroll", nullptr,
+                   [this](const char*) { loopsUnrolling = true; return true; },
+                   "Unrolling all parser's loops");
 }
 
 void CompilerOptions::setInputFile() {
