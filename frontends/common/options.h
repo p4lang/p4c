@@ -51,8 +51,6 @@ class ParserOptions : public Util::Options {
     cstring compilerVersion;
     // options to pass to preprocessor
     cstring preprocessor_options = "";
-
-
 };
 
 
