@@ -80,6 +80,8 @@ bool SymbolicValueFactory::isFixedWidth(const IR::Type* type) const {
 
 unsigned SymbolicValueFactory::getWidth(const IR::Type* type) const {
     type = typeMap->getType(type, true);
+    if (type->is<IR::Type_Type>())
+        type = type->to<IR::Type_Type>()->type;
     if (type->is<IR::Type_Bits>())
         return type->to<IR::Type_Bits>()->size;
     if (type->is<IR::Type_Boolean>())
@@ -783,7 +785,7 @@ bool ExpressionEvaluator::preorder(const IR::ArrayIndex* expression) {
     visit(expression->left);
     evaluatingLeftValue = lv;
     visit(expression->right);
-    return false;  // prune
+    return true;  // don't prune
 }
 
 void ExpressionEvaluator::postorder(const IR::ArrayIndex* expression) {
