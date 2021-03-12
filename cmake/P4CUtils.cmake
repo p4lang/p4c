@@ -316,3 +316,28 @@ function(p4c_find_tests input_files test_list incl_excl patterns)
   # return
   set(${test_list} ${__p4tests} PARENT_SCOPE)
 endfunction(p4c_find_tests)
+
+# if we have a reason for failure, then use that regular expression to
+# make the test succeed. If that changes, we know the test moved to a
+# different failure. Also turn off automatic ignoring of failures (WILL_FAIL).
+macro(p4c_add_xfail_reason tag reason)
+  set (__tests "${ARGN}")
+  string (TOUPPER ${tag} __upperTag)
+  foreach (test IN LISTS __tests)
+    list (FIND ${__upperTag}_MUST_PASS_TESTS ${test} __isMustPass)
+    if (${__isMustPass} EQUAL -1) # not a mandatory pass test
+      p4c_test_set_name(__testname ${tag} ${test})
+      if ( "${reason}" STREQUAL "")
+        set_tests_properties(${__testname} PROPERTIES WILL_FAIL 1)
+      else ()
+        set_tests_properties(${__testname} PROPERTIES
+          PASS_REGULAR_EXPRESSION ${reason}
+          WILL_FAIL 0)
+      endif()
+      p4c_add_test_label(${tag} "XFAIL" ${test})
+    else()
+      message(WARNING "${test} can not be listed as an xfail. It must always pass!")
+    endif()
+  endforeach()
+endmacro(p4c_add_xfail_reason)
+
