@@ -39,14 +39,25 @@ extern const char* p4_14includePath;
 // Each back-end should subclass this file.
 
 class ParserOptions : public Util::Options {
+    static const char* defaultMessage;
+
  public:
     ParserOptions();
+    // Target
+    cstring target = nullptr;
+    // Architecture
+    cstring arch = nullptr;
+    // Compiler version.
+    cstring compilerVersion;
+    // options to pass to preprocessor
+    cstring preprocessor_options = "";
+
+
 };
 
 
 class CompilerOptions : public ParserOptions {
     bool close_input = false;
-    static const char* defaultMessage;
 
     // annotation names that are to be ignored by the compiler
     std::set<cstring> disabledAnnotations;
@@ -71,8 +82,6 @@ class CompilerOptions : public ParserOptions {
     cstring exe_name;
     // Which language to compile
     FrontendVersion langVersion = FrontendVersion::P4_14;
-    // options to pass to preprocessor
-    cstring preprocessor_options = "";
     // file to compile (- for stdin)
     cstring file = nullptr;
     // if true preprocess only
@@ -83,8 +92,6 @@ class CompilerOptions : public ParserOptions {
     cstring dumpFolder = ".";
     // Pretty-print the program in the specified file
     cstring prettyPrintFile = nullptr;
-    // Compiler version.
-    cstring compilerVersion;
     // if true, skip frontend passes whose names are contained in passesToExcludeFrontend vector
     bool excludeFrontendPasses = false;
     bool listFrontendPasses = false;
@@ -116,11 +123,6 @@ class CompilerOptions : public ParserOptions {
     // Choose format for P4Runtime API description.
     P4::P4RuntimeFormat p4RuntimeFormat = P4::P4RuntimeFormat::BINARY;
 
-    // Target
-    cstring target = nullptr;
-
-    // Architecture
-    cstring arch = nullptr;
 
     // substrings matched agains pass names
     std::vector<cstring> top4;

@@ -34,7 +34,7 @@ limitations under the License.
 const char* p4includePath = CONFIG_PKGDATADIR "/p4include";
 const char* p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
 
-const char* CompilerOptions::defaultMessage = "Compile a P4 program";
+const char* ParserOptions::defaultMessage = "Compile a P4 program";
 
 
 ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
