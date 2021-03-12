@@ -37,7 +37,14 @@ extern const char* p4_14includePath;
 // Base class for compiler options.
 // This class contains the options for the front-ends.
 // Each back-end should subclass this file.
-class CompilerOptions : public Util::Options {
+
+class ParserOptions : public Util::Options {
+ public:
+    ParserOptions();
+};
+
+
+class CompilerOptions : public ParserOptions {
     bool close_input = false;
     static const char* defaultMessage;
 

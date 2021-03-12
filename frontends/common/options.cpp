@@ -36,7 +36,8 @@ const char* p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
 
 const char* CompilerOptions::defaultMessage = "Compile a P4 program";
 
-CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
+
+ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
     registerOption("--help", nullptr,
                    [this](const char*) { usage(); exit(0); return false; },
                    "Print this help message");
@@ -49,6 +50,16 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                    [this](const char* arg) {
                        preprocessor_options += std::string(" -I") + arg; return true; },
                    "Specify include path (passed to preprocessor)");
+    registerOption("--target", "target",
+                   [this](const char* arg) { target = arg; return true; },
+                    "Compile for the specified target device.");
+    registerOption("--arch", "arch",
+                   [this](const char* arg) { arch = arg; return true; },
+                   "Compile for the specified architecture.");
+}
+
+
+CompilerOptions::CompilerOptions() : ParserOptions() {
     registerOption("-D", "arg=value",
                    [this](const char* arg) {
                        preprocessor_options += std::string(" -D") + arg; return true; },
@@ -88,12 +99,6 @@ CompilerOptions::CompilerOptions() : Util::Options(defaultMessage) {
                        }
                        return true; },
                     "Specify language version to compile.");
-    registerOption("--target", "target",
-                   [this](const char* arg) { target = arg; return true; },
-                    "Compile for the specified target device.");
-    registerOption("--arch", "arch",
-                   [this](const char* arg) { arch = arg; return true; },
-                   "Compile for the specified architecture.");
     registerOption("--pp", "file",
                    [this](const char* arg) { prettyPrintFile = arg; return true; },
                    "Pretty-print the program in the specified file.");
