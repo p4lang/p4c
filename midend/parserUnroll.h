@@ -36,21 +36,21 @@ const char outOfBoundsStateName[] = "stateOutOfBound";
 /// Information produced for a parser state by the symbolic evaluator
 struct ParserStateInfo {
     friend class ParserStateRewriter;
+    cstring                         name;  // new state name
     const IR::P4Parser*             parser;
     const IR::ParserState*          state;  // original state this is produced from
-    IR::ParserState*                newState;  // pointer to a new state
     const ParserStateInfo*          predecessor;  // how we got here in the symbolic evaluation
-    std::map<cstring,size_t>        statesIndexes;  // global map in state indexes
-    cstring                         name;  // new state name
     ValueMap*                       before;
     ValueMap*                       after;
+    IR::ParserState*                newState;  // pointer to a new state
+    size_t                          currentIndex;
+    std::map<cstring,size_t>        statesIndexes;  // global map in state indexes
     std::unordered_set<cstring>     scenarioStates;  // set of scenario states.
     std::unordered_set<cstring>     scenarioHS;  // scenario header stack's operations
-    size_t                          currentIndex;
     ParserStateInfo(cstring name, const IR::P4Parser* parser, const IR::ParserState* state,
                     const ParserStateInfo* predecessor, ValueMap* before, size_t index) :
-            parser(parser), state(state), predecessor(predecessor),
-            name(name), before(before), newState(nullptr), after(nullptr), currentIndex(index)
+            name(name), parser(parser), state(state), predecessor(predecessor),
+            before(before), after(nullptr), newState(nullptr), currentIndex(index)
     { 
         CHECK_NULL(parser); CHECK_NULL(state); CHECK_NULL(before);
         if (predecessor){

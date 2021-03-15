@@ -30,7 +30,7 @@ bool cmpStates(const cstring& aname, const cstring& bname, const std::map<cstrin
 }
 
 struct VisitedStatesCompare {
-   bool operator() (const std::pair<cstring, std::map<cstring,size_t> >& l, const const std::pair<cstring, std::map<cstring,size_t> > r) const {
+   bool operator() (const std::pair<cstring, std::map<cstring,size_t> >& l, const std::pair<cstring, std::map<cstring,size_t> > r) const {
        return cmpStates(l.first, r.first, l.second, r.second);
    }
 };
@@ -51,7 +51,7 @@ bool AnalyzeParser::preorder(const IR::ParserState* state) {
     return true;
 }
 
-void AnalyzeParser::postorder(const IR::ParserState* state) {
+void AnalyzeParser::postorder(const IR::ParserState*) {
     currentState = nullptr;
 }
 
@@ -193,12 +193,12 @@ class ParserStateRewriter : public Transform {
     }
 
  private:
+    ParserStructure* parserStructure;
     ParserStateInfo* state;
     ValueMap* valueMap;
     ReferenceMap* refMap;
     TypeMap* typeMap;
     ExpressionEvaluator* afterExec;
-    ParserStructure* parserStructure;
     std::map<std::pair<cstring, std::map<cstring,size_t> >, size_t,VisitedStatesCompare>& visitedStates;
     size_t currentIndex;
 };
