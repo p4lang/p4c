@@ -192,6 +192,18 @@ class Visitor {
         const Context *c = ctxt;
         return findOrigCtxt<T>(c); }
 
+    // Parent visitor search functions
+    const Visitor* getParentVisitor() const { return parentVisitor; }
+    template <class T> inline const T* findAncestorVisitor() const {
+        auto* v = parentVisitor;
+        while (v) {
+            if (auto *rv = dynamic_cast<const T *>(v)) return rv;
+            v = v->parentVisitor;
+        }
+        return nullptr;
+    }
+    void setParentVisitor(const Visitor *pv) { parentVisitor = pv; }
+
     /// @return the current node - i.e., the node that was passed to preorder()
     /// or postorder(). For Modifiers and Transforms, this is a clone of the
     /// node returned by getOriginal().
@@ -247,6 +259,7 @@ class Visitor {
     virtual void visitor_const_error();
     const Context *ctxt = nullptr;  // should be readonly to subclasses
     bool *visitCurrentOnce = nullptr;
+    const Visitor *parentVisitor = nullptr;
     friend class Inspector;
     friend class Modifier;
     friend class Transform;

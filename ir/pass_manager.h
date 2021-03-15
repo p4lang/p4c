@@ -69,7 +69,11 @@ class PassManager : virtual public Visitor, virtual public Backtrack {
     { addPasses(init); }
     void addPasses(const std::initializer_list<VisitorRef> &init) {
         never_backtracks_cache = -1;
-        for (auto &p : init) if (p.visitor) passes.emplace_back(p.visitor); }
+        for (auto &p : init) if (p.visitor) {
+                p.visitor->setParentVisitor(this);
+                passes.emplace_back(p.visitor);
+        }
+    }
     void removePasses(const std::vector<cstring> &exclude);
     void listPasses(std::ostream &, cstring sep) const;
     const IR::Node *apply_visitor(const IR::Node *, const char * = 0) override;
