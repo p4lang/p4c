@@ -151,6 +151,7 @@ set (COMMON_FRONTEND_SRCS
   common/constantFolding.cpp
   common/constantParsing.cpp
   common/options.cpp
+  common/parser_options.cpp
   common/parseInput.cpp
   common/resolveReferences/referenceMap.cpp
   common/resolveReferences/resolveReferences.cpp
@@ -163,6 +164,7 @@ set (COMMON_FRONTEND_HDRS
   common/model.h
   common/name_gateways.h
   common/options.h
+  common/parser_options.h
   common/parseInput.h
   common/programMap.h
   common/resolveReferences/referenceMap.h

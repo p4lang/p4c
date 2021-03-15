@@ -34,77 +34,8 @@ limitations under the License.
 const char* p4includePath = CONFIG_PKGDATADIR "/p4include";
 const char* p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
 
-const char* ParserOptions::defaultMessage = "Compile a P4 program";
-
-
-ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
-    registerOption("--help", nullptr,
-                   [this](const char*) { usage(); exit(0); return false; },
-                   "Print this help message");
-    registerOption("--version", nullptr,
-                   [this](const char*) {
-                       std::cerr << binaryName << std::endl;
-                       std::cerr << "Version " << compilerVersion << std::endl;
-                       exit(0); return false; }, "Print compiler version");
-    registerOption("-I", "path",
-                   [this](const char* arg) {
-                       preprocessor_options += std::string(" -I") + arg; return true; },
-                   "Specify include path (passed to preprocessor)");
-    registerOption("--target", "target",
-                   [this](const char* arg) { target = arg; return true; },
-                    "Compile for the specified target device.");
-    registerOption("--arch", "arch",
-                   [this](const char* arg) { arch = arg; return true; },
-                   "Compile for the specified architecture.");
-}
-
-
 CompilerOptions::CompilerOptions() : ParserOptions() {
-    registerOption("-D", "arg=value",
-                   [this](const char* arg) {
-                       preprocessor_options += std::string(" -D") + arg; return true; },
-                   "Define macro (passed to preprocessor)");
-    registerOption("-U", "arg",
-                   [this](const char* arg) {
-                       preprocessor_options += std::string(" -U") + arg; return true; },
-                   "Undefine macro (passed to preprocessor)");
-    registerOption("-E", nullptr,
-                   [this](const char*) { doNotCompile = true; return true; },
-                   "Preprocess only, do not compile (prints program on stdout)");
-    registerOption("--nocpp", nullptr,
-                   [this](const char*) { doNotPreprocess = true; return true; },
-                   "Skip preprocess, assume input file is already preprocessed.");
-    registerOption("--p4v", "{14|16}",
-                   [this](const char* arg) {
-                       if (!strcmp(arg, "1.0") || !strcmp(arg, "14")) {
-                           langVersion = CompilerOptions::FrontendVersion::P4_14;
-                       } else if (!strcmp(arg, "1.2") || !strcmp(arg, "16")) {
-                           langVersion = CompilerOptions::FrontendVersion::P4_16;
-                       } else {
-                           ::error(ErrorType::ERR_INVALID, "Illegal language version %1%", arg);
-                           return false;
-                       }
-                       return true; },
-                    "[Deprecated; use --std instead] Specify language version to compile.",
-                    OptionFlags::Hide);
-    registerOption("--std", "{p4-14|p4-16}",
-                   [this](const char* arg) {
-                       if (!strcmp(arg, "14") || !strcmp(arg, "p4-14")) {
-                           langVersion = CompilerOptions::FrontendVersion::P4_14;
-                       } else if (!strcmp(arg, "16") || !strcmp(arg, "p4-16")) {
-                           langVersion = CompilerOptions::FrontendVersion::P4_16;
-                       } else {
-                           ::error(ErrorType::ERR_INVALID, "Illegal language version %1%", arg);
-                           return false;
-                       }
-                       return true; },
-                    "Specify language version to compile.");
-    registerOption("--pp", "file",
-                   [this](const char* arg) { prettyPrintFile = arg; return true; },
-                   "Pretty-print the program in the specified file.");
-    registerOption("--toJSON", "file",
-                   [this](const char* arg) { dumpJsonFile = arg; return true; },
-                   "Dump the compiler IR after the midend as JSON in the specified file.");
+
     registerOption("--p4runtime-files", "filelist",
                    [this](const char* arg) { p4RuntimeFiles = arg; return true; },
                    "Write the P4Runtime control plane API description to the specified\n"
@@ -139,16 +70,37 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
                        return true; },
                    "Choose output format for the P4Runtime API description (default is binary).\n"
                    "[Deprecated; use '--p4runtime-files' instead].");
-    registerOption("--disable-annotations", "annotations",
-                   [this](const char *arg) {
+
+    registerOption("--excludeFrontendPasses", "pass1[,pass2]",
+                   [this](const char* arg) {
+                      excludeFrontendPasses = true;
                       auto copy = strdup(arg);
-                      while (auto name = strsep(&copy, ","))
-                          disabledAnnotations.insert(name);
+                      while (auto pass = strsep(&copy, ","))
+                          passesToExcludeFrontend.push_back(pass);
                       return true;
                    },
-                   "Specify a (comma separated) list of annotations that should be ignored by\n"
-                   "the compiler. A warning will be printed that the annotation is ignored",
-                   OptionFlags::OptionalArgument);
+                   "Exclude passes from frontend passes whose name is equal\n"
+                   "to one of `passX' strings.\n");
+    registerOption("--excludeMidendPasses", "pass1[,pass2]",
+                   [this](const char* arg) {
+                      excludeMidendPasses = true;
+                      auto copy = strdup(arg);
+                      while (auto pass = strsep(&copy, ","))
+                          passesToExcludeMidend.push_back(pass);
+                      return true;
+                   },
+                   "Exclude passes from midend passes whose name is equal\n"
+                   "to one of `passX' strings.\n");
+    registerOption("--listFrontendPasses", nullptr,
+                   [this](const char*) {
+                      listFrontendPasses = true;
+                      P4::FrontEnd frontend;
+                      frontend.run(*this, nullptr, false, outStream);
+                      exit(0);
+                      return false;
+                   },
+                   "List exact names of all frontend passes\n");
+
     registerOption("--Wdisable", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
@@ -193,65 +145,32 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
                        auto maxError = strtoul(arg, nullptr, 10);
                        P4CContext::get().errorReporter().setMaxErrorCount(maxError);
                        return true; },
-                   "Set the maximum number of errors to display before failing.");
-    registerOption("--testJson", nullptr,
-                    [this](const char*) { debugJson = true; return true; },
-                    "[Compiler debugging] Dump and undump the IR");
-    registerOption("-T", "loglevel",
-                   [](const char* arg) { Log::addDebugSpec(arg); return true; },
-                   "[Compiler debugging] Adjust logging level per file (see below)");
-    registerOption("-v", nullptr,
-                   [](const char*) { Log::increaseVerbosity(); return true; },
-                   "[Compiler debugging] Increase verbosity level (can be repeated)");
-    registerOption("--top4", "pass1[,pass2]",
+                       "Set the maximum number of errors to display before failing.");
+    registerOption("--p4v", "{14|16}",
                    [this](const char* arg) {
-                       auto copy = strdup(arg);
-                       while (auto pass = strsep(&copy, ","))
-                           top4.push_back(pass);
-                       return true;
-                   },
-                   "[Compiler debugging] Dump the P4 representation after\n"
-                   "passes whose name contains one of `passX' substrings.\n"
-                   "When '-v' is used this will include the compiler IR.\n");
-    registerOption("--dump", "folder",
-                   [this](const char* arg) { dumpFolder = arg; return true; },
-                   "[Compiler debugging] Folder where P4 programs are dumped\n");
-    registerUsage("loglevel format is:\n"
-                  "  sourceFile:level,...,sourceFile:level\n"
-                  "where 'sourceFile' is a compiler source file and\n"
-                  "'level' is the verbosity level for LOG messages in that file");
-    registerOption("--ndebug", nullptr,
-                   [this](const char*) { ndebug = true; return true; },
-                  "Compile program in non-debug mode.\n");
-    registerOption("--excludeFrontendPasses", "pass1[,pass2]",
+                       if (!strcmp(arg, "1.0") || !strcmp(arg, "14")) {
+                           langVersion = CompilerOptions::FrontendVersion::P4_14;
+                       } else if (!strcmp(arg, "1.2") || !strcmp(arg, "16")) {
+                           langVersion = CompilerOptions::FrontendVersion::P4_16;
+                       } else {
+                           ::error(ErrorType::ERR_INVALID, "Illegal language version %1%", arg);
+                           return false;
+                       }
+                       return true; },
+                    "[Deprecated; use --std instead] Specify language version to compile.",
+                    OptionFlags::Hide);
+    registerOption("--std", "{p4-14|p4-16}",
                    [this](const char* arg) {
-                      excludeFrontendPasses = true;
-                      auto copy = strdup(arg);
-                      while (auto pass = strsep(&copy, ","))
-                          passesToExcludeFrontend.push_back(pass);
-                      return true;
-                   },
-                   "Exclude passes from frontend passes whose name is equal\n"
-                   "to one of `passX' strings.\n");
-    registerOption("--excludeMidendPasses", "pass1[,pass2]",
-                   [this](const char* arg) {
-                      excludeMidendPasses = true;
-                      auto copy = strdup(arg);
-                      while (auto pass = strsep(&copy, ","))
-                          passesToExcludeMidend.push_back(pass);
-                      return true;
-                   },
-                   "Exclude passes from midend passes whose name is equal\n"
-                   "to one of `passX' strings.\n");
-    registerOption("--listFrontendPasses", nullptr,
-                   [this](const char*) {
-                      listFrontendPasses = true;
-                      P4::FrontEnd frontend;
-                      frontend.run(*this, nullptr, false, outStream);
-                      exit(0);
-                      return false;
-                   },
-                   "List exact names of all frontend passes\n");
+                       if (!strcmp(arg, "14") || !strcmp(arg, "p4-14")) {
+                           langVersion = CompilerOptions::FrontendVersion::P4_14;
+                       } else if (!strcmp(arg, "16") || !strcmp(arg, "p4-16")) {
+                           langVersion = CompilerOptions::FrontendVersion::P4_16;
+                       } else {
+                           ::error(ErrorType::ERR_INVALID, "Illegal language version %1%", arg);
+                           return false;
+                       }
+                       return true; },
+                    "Specify language version to compile.");                       
 }
 
 void CompilerOptions::setInputFile() {

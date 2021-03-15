@@ -24,6 +24,7 @@ limitations under the License.
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
 #include "lib/options.h"
+#include "parser_options.h"
 #include "ir/configuration.h"
 #include "ir/ir.h"  // for DebugHook definition
 // for p4::P4RuntimeFormat definition
@@ -38,27 +39,9 @@ extern const char* p4_14includePath;
 // This class contains the options for the front-ends.
 // Each back-end should subclass this file.
 
-class ParserOptions : public Util::Options {
-    static const char* defaultMessage;
-
- public:
-    ParserOptions();
-    // Target
-    cstring target = nullptr;
-    // Architecture
-    cstring arch = nullptr;
-    // Compiler version.
-    cstring compilerVersion;
-    // options to pass to preprocessor
-    cstring preprocessor_options = "";
-};
-
-
 class CompilerOptions : public ParserOptions {
     bool close_input = false;
 
-    // annotation names that are to be ignored by the compiler
-    std::set<cstring> disabledAnnotations;
 
     // Checks if parsed options make sense with respect to each-other.
     void validateOptions() const;
@@ -71,25 +54,12 @@ class CompilerOptions : public ParserOptions {
     CompilerOptions();
     std::vector<const char*>* process(int argc, char* const argv[]) override;
 
-    enum class FrontendVersion {
-        P4_14,
-        P4_16
-    };
+
 
     // Name of executable that is being run.
     cstring exe_name;
-    // Which language to compile
-    FrontendVersion langVersion = FrontendVersion::P4_14;
     // file to compile (- for stdin)
     cstring file = nullptr;
-    // if true preprocess only
-    bool doNotCompile = false;
-    // if true skip preprocess
-    bool doNotPreprocess = false;
-    // debugging dumps of programs written in this folder
-    cstring dumpFolder = ".";
-    // Pretty-print the program in the specified file
-    cstring prettyPrintFile = nullptr;
     // if true, skip frontend passes whose names are contained in passesToExcludeFrontend vector
     bool excludeFrontendPasses = false;
     bool listFrontendPasses = false;
@@ -99,13 +69,8 @@ class CompilerOptions : public ParserOptions {
     bool listMidendPasses = false;
     // if true, skip backend passes whose names are contained in passesToExcludeBackend vector
     bool excludeBackendPasses = false;
-
-    // Dump a JSON representation of the IR in the file
-    cstring dumpJsonFile = nullptr;
-
-    // Dump and undump the IR tree
-    bool debugJson = false;
-
+    // Which language to compile
+    FrontendVersion langVersion = FrontendVersion::P4_14;
     // Write a P4Runtime control plane API description to the specified file.
     cstring p4RuntimeFile = nullptr;
 
@@ -120,13 +85,6 @@ class CompilerOptions : public ParserOptions {
 
     // Choose format for P4Runtime API description.
     P4::P4RuntimeFormat p4RuntimeFormat = P4::P4RuntimeFormat::BINARY;
-
-
-    // substrings matched agains pass names
-    std::vector<cstring> top4;
-
-    // if this flag is true, compile program in non-debug mode
-    bool ndebug = false;
 
     // strings matched against pass names that should be excluded from Frontend passes
     std::vector<cstring> passesToExcludeFrontend;
