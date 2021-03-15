@@ -567,13 +567,14 @@ const IR::Node *IfStatementUnroll::postorder(IR::P4Control *a) {
 // and return the temporary in a pathexpression.
 bool LogicalExpressionUnroll::preorder(const IR::Operation_Unary *u) {
     expressionUnrollSanityCheck(u->expr);
-    if (!u->is<IR::Member>()) {
-        BUG("%1% Not Implemented", u);
-    } else {
-        root = u->clone();
-        return false;
-    }
 
+    // If the expression is a methodcall expression, do not insert a temporary
+    // variable to represent the value of the methodcall. Instead the
+    // methodcall is converted to a dpdk branch instruction in a later pass.
+    if (u->expr->is<IR::MethodCallExpression>())
+        return false;
+
+    root = u->clone();
     visit(u->expr);
     const IR::Expression *un_expr;
     if (root) {
@@ -589,6 +590,7 @@ bool LogicalExpressionUnroll::preorder(const IR::Operation_Unary *u) {
     } else {
         un_expr = u->expr;
     }
+
     auto tmp = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
     root = tmp;
     stmt.push_back(new IR::AssignmentStatement(root, un_expr));
