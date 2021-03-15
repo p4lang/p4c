@@ -11,7 +11,6 @@
 
 #include "p4/createBuiltins.h"
 #include "p4/typeChecking/typeChecker.h"
-#include "p4/typeChecking/typeChecker.h"
 
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
@@ -148,7 +147,8 @@ class MidEnd : public PassManager {
                     auto verify = main->getParameterValue(P4V1::V1Model::instance.sw.verify.name);
                     auto update = main->getParameterValue(
                         P4V1::V1Model::instance.sw.compute.name);
-                    auto deparser = main->getParameterValue(P4V1::V1Model::instance.sw.deparser.name);
+                    auto deparser = main->getParameterValue(
+                                    P4V1::V1Model::instance.sw.deparser.name);
                     if (verify == nullptr || update == nullptr || deparser == nullptr ||
                         !verify->is<IR::ControlBlock>() || !update->is<IR::ControlBlock>() ||
                         !deparser->is<IR::ControlBlock>()) {
@@ -162,19 +162,18 @@ class MidEnd : public PassManager {
             new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(v1controls)),
             new P4::MoveActionsToTables(&refMap, &typeMap),
             evaluator,
-            [this, evaluator]() { 
-                toplevel = evaluator->getToplevelBlock(); 
+            [this, evaluator]() {
+                toplevel = evaluator->getToplevelBlock();
                 },
             new P4::TypeChecking(&refMap, &typeMap),
             new P4::RewriteAllParsers(&refMap, &typeMap, true),
             evaluator,
-            [this, evaluator]() { 
-                toplevel = evaluator->getToplevelBlock(); 
+            [this, evaluator]() {
+                toplevel = evaluator->getToplevelBlock();
                 std::cout << "1:" << toplevel << std::endl;
                 std::cout << toplevel->getMain() << std::endl;
             },
             new P4::MidEndLast()
-            //new P4::ParsersUnroll(true, &refMap, &typeMap),
         });
         if (options.listMidendPasses) {
             listPasses(*outStream, "\n");
@@ -194,13 +193,13 @@ class MidEnd : public PassManager {
 /// Relative path to the examples
 const char *relPath = "./testdata/p4_16_samples/parserUnroll/";
 
-//#define PARSER_UNROLL_TIME_CHECKING
+// #define PARSER_UNROLL_TIME_CHECKING
 
 #ifdef PARSER_UNROLL_TIME_CHECKING
     #include <chrono>
 #endif
 
-///Rewrites parser
+/// Rewrites parser
 std::pair<const IR::P4Parser*, const IR::P4Parser*> rewriteParser(const IR::P4Program* program,
                                                                   CompilerOptions& options) {
     P4::FrontEnd frontend;
@@ -218,6 +217,7 @@ std::pair<const IR::P4Parser*, const IR::P4Parser*> rewriteParser(const IR::P4Pr
 #endif
     ParsersUnroll unroller(true, &refMap, &typeMap);
     res  = program->apply(unroller);
+    std::cout << res << std::endl;
 #ifdef PARSER_UNROLL_TIME_CHECKING
     auto t2 = high_resolution_clock::now();
     auto msInt = duration_cast<milliseconds>(t2 - t1);
@@ -243,10 +243,10 @@ std::pair<const IR::P4Parser*, const IR::P4Parser*> loadExample(const char *file
      AutoCompileContext autoP4TestContext(new P4TestContext);
     auto& options = P4CContext::get().options();
     const char* argv = "./gtestp4c";
-    options.process(1,(char* const*)&argv);
+    options.process(1, (char* const*)&argv);
     const IR::P4Program* program = load_model(file, options);
     if (!program)
-        return std::make_pair(nullptr,nullptr);
+        return std::make_pair(nullptr, nullptr);
     return rewriteParser(program, options);
 }
 
@@ -294,4 +294,4 @@ TEST_F(P4CParserUnroll, noLoopsAndHeaderStacks) {
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() + 2);
 }
 
-}  // Test
+}  // namespace Test

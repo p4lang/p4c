@@ -44,16 +44,15 @@ struct ParserStateInfo {
     ValueMap*                       after;
     IR::ParserState*                newState;  // pointer to a new state
     size_t                          currentIndex;
-    std::map<cstring,size_t>        statesIndexes;  // global map in state indexes
+    std::map<cstring, size_t>       statesIndexes;  // global map in state indexes
     std::unordered_set<cstring>     scenarioStates;  // set of scenario states.
     std::unordered_set<cstring>     scenarioHS;  // scenario header stack's operations
     ParserStateInfo(cstring name, const IR::P4Parser* parser, const IR::ParserState* state,
                     const ParserStateInfo* predecessor, ValueMap* before, size_t index) :
             name(name), parser(parser), state(state), predecessor(predecessor),
-            before(before), after(nullptr), newState(nullptr), currentIndex(index)
-    { 
+            before(before), after(nullptr), newState(nullptr), currentIndex(index) {
         CHECK_NULL(parser); CHECK_NULL(state); CHECK_NULL(before);
-        if (predecessor){
+        if (predecessor) {
             statesIndexes = predecessor->statesIndexes;
             scenarioHS = predecessor->scenarioHS;
         }
@@ -102,7 +101,7 @@ class ParserStructure {
     const ParserInfo*      result;
     StateCallGraph*        callGraph;
     std::map<cstring, std::set<cstring> > statesWithHeaderStacks;
-    std::map<cstring,size_t>  callsIndexes;  // map for curent calls of state insite current one
+    std::map<cstring, size_t>  callsIndexes;  // map for curent calls of state insite current one
     void setParser(const IR::P4Parser* parser) {
         CHECK_NULL(parser);
         callGraph = new StateCallGraph(parser->name);
@@ -119,6 +118,7 @@ class ParserStructure {
     void analyze(ReferenceMap* refMap, TypeMap* typeMap, bool unroll, bool& hasOutOfboundState);
     /// check reachability for usage of header stack
     bool reachableHSUsage(IR::ID id, ParserStateInfo* state);
+
  protected:
     /// evaluates rechable states with HS operations for each path.
     void evaluateReachability();
@@ -147,7 +147,6 @@ class AnalyzeParser : public Inspector {
     void postorder(const IR::ArrayIndex* array) override;
     void postorder(const IR::Member* member) override;
     void postorder(const IR::PathExpression* expression) override;
-
 };
 
 #if 0
@@ -196,6 +195,7 @@ class RewriteAllParsers : public Transform {
     const IR::ParserState*  outOfBoundsState;
     const IR::Type_Declaration* stdMetadataType;
     const IR::Type_Declaration* error;
+
  public:
     RewriteAllParsers(ReferenceMap* refMap, TypeMap* typeMap, bool unroll) :
             refMap(refMap), typeMap(typeMap), unroll(unroll), outOfBoundsState(nullptr),
@@ -227,7 +227,7 @@ class RewriteAllParsers : public Transform {
     // start generation of a code
     const IR::Node* postorder(IR::P4Parser* parser) override {
         BUG_CHECK(stdMetadataType, "The standard_metadata_t type was not found");
-        
+
         // getting name of standard_metadata_t parameter
         BUG_CHECK(parser->type, "Parser without type is not supported");
         BUG_CHECK(parser->type->applyParams, "Parser without parameters is not supported");
@@ -255,14 +255,16 @@ class RewriteAllParsers : public Transform {
 
         const IR::Expression* selectExpression = new IR::PathExpression(new IR::Type_State(),
             new IR::Path("reject", false));
-        
-        outOfBoundsState = new IR::ParserState(IR::ID(outOfBoundsStateName), components, selectExpression);
+
+        outOfBoundsState = new IR::ParserState(IR::ID(outOfBoundsStateName), components,
+                                               selectExpression);
 
         // making rewriting
         auto rewriter = new ParserRewriter(refMap, typeMap, unroll);
         parser->apply(*rewriter);
         /// make a new parser
-        BUG_CHECK(rewriter->current.result, "No result was found after unrolling of the parser loop");
+        BUG_CHECK(rewriter->current.result,
+                  "No result was found after unrolling of the parser loop");
         BUG_CHECK(outOfBoundsState, "No StackOutOfBound state was builded");
         IR::P4Parser* newParser = parser->clone();
         IR::IndexedVector<IR::ParserState> states = newParser->states;

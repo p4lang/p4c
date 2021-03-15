@@ -148,7 +148,7 @@ class CompilerOptions : public Util::Options {
 
     virtual bool enable_intrinsic_metadata_fix();
 
-    //if true unroll all parser's loop inside midend
+    // if true unroll all parser's loop inside midend
     bool loopsUnrolling = false;
 };
 

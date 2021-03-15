@@ -55,7 +55,6 @@ limitations under the License.
 #include "midend/simplifySelectList.h"
 #include "midend/tableHit.h"
 #include "midend/removeAssertAssume.h"
-#include "midend/parserUnroll.h"
 
 namespace P4Test {
 

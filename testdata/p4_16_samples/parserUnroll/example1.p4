@@ -51,20 +51,21 @@ struct headers {
     ethernet_t              ethernet;
     srcRoute_t[MAX_HOPS]    srcRoutes;
     ipv4_t                  ipv4;
-    int<32>                 index;
 }
 
 parser MyParser(packet_in packet,
                 out headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
+    
+    int<32>                 index;
 
     state start {
         transition parse_ethernet;
     }
 
     state parse_ethernet {
-        hdr.index = 0;
+        index = 0;
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             TYPE_SRCROUTING: parse_srcRouting;
@@ -73,9 +74,9 @@ parser MyParser(packet_in packet,
     }
 
     state parse_srcRouting {
-        packet.extract(hdr.srcRoutes[hdr.index]);
-        hdr.index = hdr.index + 1;
-        transition select(hdr.srcRoutes[hdr.index - 1].bos) {
+        packet.extract(hdr.srcRoutes[index]);
+        index = index + 1;
+        transition select(hdr.srcRoutes[index - 1].bos) {
             1: parse_ipv4;
             default: parse_srcRouting;
         }
