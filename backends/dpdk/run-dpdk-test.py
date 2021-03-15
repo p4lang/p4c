@@ -225,7 +225,7 @@ def process_file(options, argv):
 
     if not os.path.isfile(options.p4filename):
         raise Exception("No such file " + options.p4filename)
-    args = ["./p4c-dpdk", "--target", "dpdk", "--dump", tmpdir, "-I", "p4include", "-o", spec] + options.compilerOptions
+    args = ["./p4c-dpdk", "--dump", tmpdir, "-I", "p4include", "-o", spec] + options.compilerOptions
     arch = getArch(options.p4filename)
     if arch is not None:
         args.extend(["--arch", arch])
