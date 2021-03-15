@@ -190,6 +190,7 @@ def process_file(options, argv):
     ppfile = tmpdir + "/" + basename                  # after parsing
     referenceOutputs = ",".join(list(rename.keys()))
     stderr = tmpdir + "/" + basename + "-stderr"
+    spec = tmpdir + "/" + basename + ".spec"
     p4runtimeFile = tmpdir + "/" + basename + ".p4info.txt"
     p4runtimeEntriesFile = tmpdir + "/" + basename + ".entries.txt"
 
@@ -224,7 +225,7 @@ def process_file(options, argv):
 
     if not os.path.isfile(options.p4filename):
         raise Exception("No such file " + options.p4filename)
-    args = ["./p4c", "--target", "dpdk", "--dump", tmpdir, "-o", options.p4filename+".spec"] + options.compilerOptions
+    args = ["./p4c-dpdk", "--target", "dpdk", "--dump", tmpdir, "-I", "p4include", "-o", spec] + options.compilerOptions
     arch = getArch(options.p4filename)
     if arch is not None:
         args.extend(["--arch", arch])
