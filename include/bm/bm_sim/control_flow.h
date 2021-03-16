@@ -38,8 +38,23 @@ class ControlFlowNode : public NamedP4Object {
   ControlFlowNode(const std::string &name, p4object_id_t id,
                   std::unique_ptr<SourceInfo> source_info)
       : NamedP4Object(name, id, std::move(source_info)) {}
-  virtual ~ControlFlowNode() { }
+
+  virtual ~ControlFlowNode() = default;
+
   virtual const ControlFlowNode *operator()(Packet *pkt) const = 0;
+
+  //! Deleted copy constructor
+  ControlFlowNode(const ControlFlowNode &other) = delete;
+  //! Deleted copy assignment operator
+  ControlFlowNode &operator=(const ControlFlowNode &other) = delete;
+
+  // The following are implictly deleted otherwise because of the user-defined
+  // virtual destructor.
+
+  //! Default move constructor
+  ControlFlowNode(ControlFlowNode &&other) = default;
+  //! Default assignment operator
+  ControlFlowNode &operator=(ControlFlowNode &&other) = default;
 };
 
 }  // namespace bm

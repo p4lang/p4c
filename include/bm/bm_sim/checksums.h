@@ -38,7 +38,20 @@ class Checksum : public NamedP4Object{
   Checksum(const std::string &name, p4object_id_t id,
            header_id_t header_id, int field_offset);
 
-  virtual ~Checksum() { }
+  virtual ~Checksum() = default;
+
+  //! Deleted copy constructor
+  Checksum(const Checksum &other) = delete;
+  //! Deleted copy assignment operator
+  Checksum &operator=(const Checksum &other) = delete;
+
+  // The following are implictly deleted otherwise because of the user-defined
+  // virtual destructor.
+
+  //! Default move constructor
+  Checksum(Checksum &&other) = default;
+  //! Default assignment operator
+  Checksum &operator=(Checksum &&other) = default;
 
   void update(Packet *pkt) const;
 

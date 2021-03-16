@@ -342,10 +342,10 @@ class Parser : public NamedP4Object {
   //! Deleted copy assignment operator
   Parser &operator=(const Parser &other) = delete;
 
-  //! Default move constructor
-  Parser(Parser &&other) /*noexcept*/ = default;
-  //! Default move assignment operator
-  Parser &operator=(Parser &&other) /*noexcept*/ = default;
+  //! Deleted move constructor (const member variables)
+  Parser(Parser &&other) = delete;
+  //! Deleted move assignment operator (const member variables)
+  Parser &operator=(Parser &&other) /*noexcept*/ = delete;
 
  private:
   void verify_checksums(Packet *pkt) const;

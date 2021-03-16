@@ -648,7 +648,7 @@ bm::MatchTableAbstract::EntryCommon get_match_entry(
           0, t_name, handle, &entry);
       if (error_code != bm::MatchErrorCode::SUCCESS)
         throw bm_exception(error_code);
-      return entry;
+      return std::move(entry);  // avoid copy
     }
     case bm::MatchTableType::INDIRECT: {
       bm::MatchTableIndirect::Entry entry;
@@ -656,7 +656,7 @@ bm::MatchTableAbstract::EntryCommon get_match_entry(
           0, t_name, handle, &entry);
       if (error_code != bm::MatchErrorCode::SUCCESS)
         throw bm_exception(error_code);
-      return entry;
+      return std::move(entry);  // avoid copy
     }
     case bm::MatchTableType::INDIRECT_WS: {
       bm::MatchTableIndirectWS::Entry entry;
@@ -664,7 +664,7 @@ bm::MatchTableAbstract::EntryCommon get_match_entry(
           0, t_name, handle, &entry);
       if (error_code != bm::MatchErrorCode::SUCCESS)
         throw bm_exception(error_code);
-      return entry;
+      return std::move(entry);  // avoid copy
     }
   }
   return {};

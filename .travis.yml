@@ -17,9 +17,8 @@ stages:
 matrix:
   include:
     - env: CXX=g++ CC=gcc sswitch_grpc=yes
-    - env: CXX=g++-7 CC=gcc-7 GCOV=gcov-7 sswitch_grpc=no
     - env: CXX=clang++-3.8 CC=clang-3.8 sswitch_grpc=no
-    - env: CXX=clang++-6.0 CC=clang-6.0 sswitch_grpc=no
+    - env: CXX=clang++-8 CC=clang-8 sswitch_grpc=no
     - stage: deploy
       install: skip
       script: docker run --rm -v $(pwd):/data -it hrektts/doxygen doxygen

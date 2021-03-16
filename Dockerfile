@@ -21,9 +21,8 @@ ARG sswitch_grpc=yes
 ENV BM_DEPS automake \
             build-essential \
             clang-3.8 \
-            clang-6.0 \
+            clang-8 \
             curl \
-            g++-7 \
             git \
             lcov \
             libjudy-dev \
@@ -46,9 +45,6 @@ ENV BM_RUNTIME_DEPS libboost-program-options1.58.0 \
 COPY . /behavioral-model/
 WORKDIR /behavioral-model/
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends software-properties-common && \
-    add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
-    apt-get update && \
     apt-get install -y --no-install-recommends $BM_DEPS $BM_RUNTIME_DEPS && \
     ln -sf /usr/bin/python3 /usr/bin/python && \
     ./autogen.sh && \

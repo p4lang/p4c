@@ -65,7 +65,7 @@ class NamedP4Object {
   const SourceInfo *get_source_info() const { return source_info.get(); }
 
  protected:
-  const std::string name;
+  std::string name;
   p4object_id_t id;
   std::unique_ptr<SourceInfo> source_info;
 };
