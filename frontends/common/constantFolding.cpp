@@ -220,10 +220,12 @@ const IR::Node* DoConstantFolding::preorder(IR::ArrayIndex* e) {
                 return e;
             }
             auto value = getConstant(e->left);
+            if (!value)
+                return e;
             if (auto list = value->to<IR::ListExpression>()) {
                 if (static_cast<size_t>(index) >= list->size()) {
                     ::error(ErrorType::ERR_INVALID,
-                            "Tuple index %1% too large", e->right);
+                            "Tuple index %1% out of bounds", e->right);
                     return e;
                 }
                 return CloneConstants::clone(list->components.at(static_cast<size_t>(index)));
