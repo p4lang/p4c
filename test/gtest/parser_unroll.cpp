@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include <fstream>
 
 #include "gtest/gtest.h"
@@ -80,6 +82,7 @@ class SkipControls : public P4::ActionSynthesisPolicy {
         return true;
     }
 };
+
 
 class MidEnd : public PassManager {
  public:
@@ -166,13 +169,11 @@ class MidEnd : public PassManager {
                 toplevel = evaluator->getToplevelBlock();
                 },
             new P4::TypeChecking(&refMap, &typeMap),
-            new P4::RewriteAllParsers(&refMap, &typeMap, true),
             evaluator,
             [this, evaluator]() {
                 toplevel = evaluator->getToplevelBlock();
-                std::cout << "1:" << toplevel << std::endl;
-                std::cout << toplevel->getMain() << std::endl;
             },
+            options.loopsUnrolling ? new ParsersUnroll(true, &refMap, &typeMap) : nullptr,
             new P4::MidEndLast()
         });
         if (options.listMidendPasses) {
@@ -191,7 +192,7 @@ class MidEnd : public PassManager {
 };
 
 /// Relative path to the examples
-const char *relPath = "./testdata/p4_16_samples/parserUnroll/";
+const char *relPath = "../testdata/p4_16_samples/";
 
 // #define PARSER_UNROLL_TIME_CHECKING
 
@@ -207,7 +208,6 @@ std::pair<const IR::P4Parser*, const IR::P4Parser*> rewriteParser(const IR::P4Pr
     P4::ReferenceMap    refMap;
     P4::TypeMap         typeMap;
 
-    const IR::P4Program* res = nullptr;
 #ifdef PARSER_UNROLL_TIME_CHECKING
     using std::chrono::high_resolution_clock;
     using std::chrono::duration_cast;
@@ -215,9 +215,9 @@ std::pair<const IR::P4Parser*, const IR::P4Parser*> rewriteParser(const IR::P4Pr
     using std::chrono::milliseconds;
     auto t1 = high_resolution_clock::now();
 #endif
-    ParsersUnroll unroller(true, &refMap, &typeMap);
-    res  = program->apply(unroller);
-    std::cout << res << std::endl;
+    MidEnd midEnd(options);
+    const IR::P4Program* res = program;
+    midEnd.process(res);
 #ifdef PARSER_UNROLL_TIME_CHECKING
     auto t2 = high_resolution_clock::now();
     auto msInt = duration_cast<milliseconds>(t2 - t1);
@@ -232,6 +232,8 @@ std::pair<const IR::P4Parser*, const IR::P4Parser*> rewriteParser(const IR::P4Pr
 
 /// Loads example from a file
 const IR::P4Program* load_model(const char* curFile, CompilerOptions& options) {
+    setenv("P4C_16_INCLUDE_PATH", "../p4include", 1);
+    options.loopsUnrolling = true;
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = P4TEST_VERSION_STRING;
     options.file = relPath;
@@ -250,8 +252,8 @@ std::pair<const IR::P4Parser*, const IR::P4Parser*> loadExample(const char *file
     return rewriteParser(program, options);
 }
 
-TEST_F(P4CParserUnroll, example1) {
-    auto parsers = loadExample("example1.p4");
+TEST_F(P4CParserUnroll, test1) {
+    auto parsers = loadExample("parser-unroll-test1.p4");
     ASSERT_TRUE(parsers.first);
     ASSERT_TRUE(parsers.second);
     // 2 - exclude accept and reject states
@@ -259,36 +261,36 @@ TEST_F(P4CParserUnroll, example1) {
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() + 2 - 3 - 1);
 }
 
-TEST_F(P4CParserUnroll, example2) {
-    auto parsers = loadExample("example2.p4");
+TEST_F(P4CParserUnroll, test2) {
+    auto parsers = loadExample("parser-unroll-test2.p4");
     ASSERT_TRUE(parsers.first);
     ASSERT_TRUE(parsers.second);
     ASSERT_EQ(parsers.first->states.size(),  parsers.second->states.size() + 2 - 3 - 1);
 }
 
-TEST_F(P4CParserUnroll, example3) {
-    auto parsers = loadExample("example3.p4");
+TEST_F(P4CParserUnroll, test3) {
+    auto parsers = loadExample("parser-unroll-test3.p4");
     ASSERT_TRUE(parsers.first);
     ASSERT_TRUE(parsers.second);
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() + 2 - 4);
 }
 
 TEST_F(P4CParserUnroll, switch_20160512_p4_16) {
-    auto parsers =  loadExample("switch_20160512.p4");
+    auto parsers =  loadExample("parser-unroll-switch_20160512.p4");
     ASSERT_TRUE(parsers.first);
     ASSERT_TRUE(parsers.second);
-    ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() + 2 - 22 - 5 - 1);
+    ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() + 2 - 22 -5 - 2);
 }
 
 TEST_F(P4CParserUnroll, header_stack_access_remover) {
-    auto parsers =  loadExample("example4.p4");
+    auto parsers =  loadExample("parser-unroll-test4.p4");
     ASSERT_TRUE(parsers.first);
     ASSERT_TRUE(parsers.second);
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() + 2 - 3);
 }
 
 TEST_F(P4CParserUnroll, noLoopsAndHeaderStacks) {
-    auto parsers =  loadExample("example5.p4");
+    auto parsers =  loadExample("parser-unroll-test5.p4");
     ASSERT_TRUE(parsers.first);
     ASSERT_TRUE(parsers.second);
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() + 2);

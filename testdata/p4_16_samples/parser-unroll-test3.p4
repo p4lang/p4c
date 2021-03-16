@@ -1,4 +1,4 @@
-#include "include/v1model.p4"
+#include "v1model.p4"
 
 const bit<16> TYPE_IPV4 = 0x800;
 const bit<16> TYPE_SRCROUTING = 0x1234;
@@ -49,9 +49,7 @@ struct metadata {
 
 struct headers {
     ethernet_t              ethernet;
-    srcRoute_t              srcRoutes1;
-    srcRoute_t              srcRoutes2;
-    srcRoute_t              srcRoutes3;
+    srcRoute_t[MAX_HOPS]    srcRoutes;
     ipv4_t                  ipv4;
     bit<32>                 index;
 }
@@ -62,37 +60,44 @@ parser MyParser(packet_in packet,
                 inout standard_metadata_t standard_metadata) {
     state start {
         hdr.index = 0;
+        transition parse_ethernet;
+    }
+
+    state parse_ethernet {
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
-            0: last;
-            1: access1;
-            2: access2;
-            3: access3;
+            TYPE_SRCROUTING: parse_srcRouting;
             default: accept;
         }
     }
 
-    state last {
+    state parse_srcRouting {
+        packet.extract(hdr.srcRoutes.next); 
+        transition select(hdr.srcRoutes.last.bos) {
+            1: parse_ipv4;
+            2: callMidle;
+            default: 
+                callMidle;
+        }
+    }
+
+    state callLast {
+        packet.extract(hdr.srcRoutes.next);
+        transition select(hdr.srcRoutes.last.bos) {
+            1: parse_ipv4;
+            default:
+                parse_srcRouting;
+        }
+    }
+
+    state callMidle {
         hdr.index = hdr.index + 1;
+        transition callLast;
+    }
+
+    state parse_ipv4 {
+        packet.extract(hdr.ipv4);
         transition accept;
-    }
-
-    state access1 {
-        hdr.index = hdr.index + 1;
-        packet.extract(hdr.srcRoutes1);
-        transition last;
-    }
-
-    state access2 {
-        hdr.index = hdr.index + 1;
-        packet.extract(hdr.srcRoutes2);
-        transition access1;
-    }
-
-    state access3 {
-        hdr.index = hdr.index + 1;
-        packet.extract(hdr.srcRoutes3);
-        transition access2;
     }
 }
 

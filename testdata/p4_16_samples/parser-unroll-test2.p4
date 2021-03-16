@@ -1,8 +1,8 @@
-#include "include/v1model.p4"
+#include "v1model.p4"
 
 const bit<16> TYPE_IPV4 = 0x800;
 const bit<16> TYPE_SRCROUTING = 0x1234;
-const bit<16> MAX_HOPS = 4;
+const bit<16> MAX_HOPS = 3;
 /*
 +-----------------------------+
 | ethernet !(0x0800 or 0x1234)|
@@ -24,7 +24,7 @@ header ethernet_t {
 }
 
 header srcRoute_t {
-    bit<2>    bos;   /* Bottom of stack */
+    bit<1>    bos;   /* Bottom of stack */
     bit<15>   port;
 }
 
@@ -51,15 +51,14 @@ struct headers {
     ethernet_t              ethernet;
     srcRoute_t[MAX_HOPS]    srcRoutes;
     ipv4_t                  ipv4;
-    bit<32>                 index;
 }
 
 parser MyParser(packet_in packet,
                 out headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
+
     state start {
-        hdr.index = 0;
         transition parse_ethernet;
     }
 
@@ -72,33 +71,19 @@ parser MyParser(packet_in packet,
     }
 
     state parse_srcRouting {
-        packet.extract(hdr.srcRoutes.next); 
-        transition select(hdr.srcRoutes.last.bos) {
-            1: parse_ipv4;
-            2: callMidle;
-            default: 
-                callMidle;
-        }
-    }
-
-    state callLast {
         packet.extract(hdr.srcRoutes.next);
         transition select(hdr.srcRoutes.last.bos) {
             1: parse_ipv4;
-            default:
-                parse_srcRouting;
+            default: 
+            parse_srcRouting;
         }
-    }
-
-    state callMidle {
-        hdr.index = hdr.index + 1;
-        transition callLast;
     }
 
     state parse_ipv4 {
         packet.extract(hdr.ipv4);
         transition accept;
     }
+
 }
 
 control mau(inout headers hdr, inout metadata meta, inout standard_metadata_t sm) {

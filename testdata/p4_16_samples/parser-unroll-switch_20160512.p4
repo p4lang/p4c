@@ -1024,7 +1024,6 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
             (5w0x0, 8w0x0): accept;
             (5w0x0 &&& 5w0xf, 8w0x0 &&& 8w0x0): parse_int_val;
             default: accept;
-            default: parse_all_int_meta_value_heders;
         }
     }
     @name(".parse_int_val") state parse_int_val {

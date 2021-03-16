@@ -97,9 +97,3 @@ target_link_libraries (gtestp4c ${GTEST_LDADD} ${P4C_LIBRARIES} gtest ${P4C_LIB_
 # Tests
 add_test (NAME gtestp4c COMMAND gtestp4c WORKING_DIRECTORY ${P4C_BINARY_DIR})
 set_tests_properties (gtestp4c PROPERTIES LABELS "gtest")
-
-add_custom_command(
-        TARGET gtestp4c POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-                ${CMAKE_SOURCE_DIR}/testdata/p4_16_samples/parserUnroll
-                ${P4C_BINARY_DIR}/testdata/p4_16_samples/parserUnroll)

@@ -120,16 +120,8 @@ const IR::Type* TypeMap::getType(const IR::Node* element, bool notNull) const {
     CHECK_NULL(element);
     auto result = get(typeMap, element);
     LOG4("Looking up type for " << dbp(element) << " => " << dbp(result));
-    if (notNull && result == nullptr) {
-        if (element->is<IR::Type>())
-            return element->to<IR::Type>();
-        if (element->is<IR::ArrayIndex>()) {
-            const IR::Expression* left = element->to<IR::ArrayIndex>()->left;
-            if (left->type->is<IR::Type_Stack>())
-                return left->type->to<IR::Type_Stack>()->elementType;
-        }
+    if (notNull && result == nullptr)
         BUG_CHECK(errorCount() > 0, "Could not find type for %1%", dbp(element));
-    }
     if (result != nullptr && result->is<IR::Type_Name>())
         BUG("%1% in map", dbp(result));
     return result;

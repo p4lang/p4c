@@ -1,4 +1,4 @@
-#include "include/v1model.p4"
+#include "v1model.p4"
 
 const bit<16> TYPE_IPV4 = 0x800;
 const bit<16> TYPE_SRCROUTING = 0x1234;
@@ -49,7 +49,9 @@ struct metadata {
 
 struct headers {
     ethernet_t              ethernet;
-    srcRoute_t[MAX_HOPS]    srcRoutes;
+    srcRoute_t              srcRoutes1;
+    srcRoute_t              srcRoutes2;
+    srcRoute_t              srcRoutes3;
     ipv4_t                  ipv4;
     bit<32>                 index;
 }
@@ -77,19 +79,19 @@ parser MyParser(packet_in packet,
 
     state access1 {
         hdr.index = hdr.index + 1;
-        packet.extract(hdr.srcRoutes.next);
+        packet.extract(hdr.srcRoutes1);
         transition last;
     }
 
     state access2 {
         hdr.index = hdr.index + 1;
-        packet.extract(hdr.srcRoutes.next);
+        packet.extract(hdr.srcRoutes2);
         transition access1;
     }
 
     state access3 {
         hdr.index = hdr.index + 1;
-        packet.extract(hdr.srcRoutes.next);
+        packet.extract(hdr.srcRoutes3);
         transition access2;
     }
 }

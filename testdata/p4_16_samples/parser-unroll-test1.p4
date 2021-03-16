@@ -1,4 +1,4 @@
-#include "include/v1model.p4"
+#include "v1model.p4"
 
 const bit<16> TYPE_IPV4 = 0x800;
 const bit<16> TYPE_SRCROUTING = 0x1234;
@@ -57,12 +57,15 @@ parser MyParser(packet_in packet,
                 out headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
+    
+    int<32>                 index;
 
     state start {
         transition parse_ethernet;
     }
 
     state parse_ethernet {
+        index = 0;
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
             TYPE_SRCROUTING: parse_srcRouting;
@@ -71,11 +74,11 @@ parser MyParser(packet_in packet,
     }
 
     state parse_srcRouting {
-        packet.extract(hdr.srcRoutes.next);
-        transition select(hdr.srcRoutes.last.bos) {
+        packet.extract(hdr.srcRoutes[index]);
+        index = index + 1;
+        transition select(hdr.srcRoutes[index - 1].bos) {
             1: parse_ipv4;
-            default: 
-            parse_srcRouting;
+            default: parse_srcRouting;
         }
     }
 

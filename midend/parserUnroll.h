@@ -19,10 +19,9 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/callGraph.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
-#include "frontends/p4/createBuiltins.h"
-#include "frontends/p4/callGraph.h"
 #include "interpreter.h"
 
 namespace P4 {
@@ -36,17 +35,18 @@ const char outOfBoundsStateName[] = "stateOutOfBound";
 /// Information produced for a parser state by the symbolic evaluator
 struct ParserStateInfo {
     friend class ParserStateRewriter;
-    cstring                         name;  // new state name
+    cstring                         name;   // new state name
     const IR::P4Parser*             parser;
     const IR::ParserState*          state;  // original state this is produced from
-    const ParserStateInfo*          predecessor;  // how we got here in the symbolic evaluation
+    const ParserStateInfo*          predecessor;     // how we got here in the symbolic evaluation
     ValueMap*                       before;
     ValueMap*                       after;
-    IR::ParserState*                newState;  // pointer to a new state
+    IR::ParserState*                newState;        // pointer to a new state
     size_t                          currentIndex;
-    std::map<cstring, size_t>       statesIndexes;  // global map in state indexes
-    std::unordered_set<cstring>     scenarioStates;  // set of scenario states.
-    std::unordered_set<cstring>     scenarioHS;  // scenario header stack's operations
+    std::map<cstring, size_t>       statesIndexes;   // global map in state indexes
+    // set of parsers' states names with are in current path.
+    std::unordered_set<cstring>     scenarioStates;
+    std::unordered_set<cstring>     scenarioHS;      // scenario header stack's operations
     ParserStateInfo(cstring name, const IR::P4Parser* parser, const IR::ParserState* state,
                     const ParserStateInfo* predecessor, ValueMap* before, size_t index) :
             name(name), parser(parser), state(state), predecessor(predecessor),
@@ -149,21 +149,6 @@ class AnalyzeParser : public Inspector {
     void postorder(const IR::PathExpression* expression) override;
 };
 
-#if 0
-class ParserUnroller : public Transform {
-    ReferenceMap*           refMap;
-    TypeMap*                typeMap;
-    ParserStructure*        parser;
- public:
-    ParserUnroller(ReferenceMap* refMap, TypeMap* typeMap, ParserStructure* parser) :
-            refMap(refMap), typeMap(typeMap), parser(parser) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(parser);
-        setName("ParserUnroller");
-        visitDagOnce = false;
-    }
-};
-#endif
-
 // Applied to a P4Parser object.
 class ParserRewriter : public PassManager {
     ParserStructure         current;
@@ -192,85 +177,38 @@ class RewriteAllParsers : public Transform {
     ReferenceMap*           refMap;
     TypeMap*                typeMap;
     bool                    unroll;
-    const IR::ParserState*  outOfBoundsState;
-    const IR::Type_Declaration* stdMetadataType;
-    const IR::Type_Declaration* error;
 
  public:
     RewriteAllParsers(ReferenceMap* refMap, TypeMap* typeMap, bool unroll) :
-            refMap(refMap), typeMap(typeMap), unroll(unroll), outOfBoundsState(nullptr),
-            stdMetadataType(nullptr), error(nullptr)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("RewriteAllParsers"); }
-
-    // generate OutOfBound state
-    const IR::Node* preorder(IR::P4Program *p4Program) override {
-        // getting error variable
-        const auto errorEnum = p4Program->getDeclsByName("error");
-        BUG_CHECK(errorEnum, "Can't find error variable");
-        const auto errorVector = errorEnum->toVector();
-        BUG_CHECK(errorVector->size(), "Can't find error variable %1%", errorVector);
-        const auto error0 = errorVector->at(0);
-        BUG_CHECK(error0->is<IR::Type_Declaration>(), "Can't translate error to expression");
-        error = error0->to<IR::Type_Declaration>();
-
-        const auto stdMetadataTypeEnum = p4Program->getDeclsByName("standard_metadata_t");
-        BUG_CHECK(stdMetadataTypeEnum, "Can't find standard_metadata_t type");
-        const auto stdMetadataTypeVector = stdMetadataTypeEnum->toVector();
-        BUG_CHECK(stdMetadataTypeVector->size(), "Can't find standard_metadata_t type");
-        BUG_CHECK(stdMetadataTypeVector->at(0)->is<IR::Type_Declaration>(),
-                  "Can't translate standard_metadata_t type");
-        stdMetadataType = stdMetadataTypeVector->at(0)->to<IR::Type_Declaration>();
-
-        return p4Program;
+            refMap(refMap), typeMap(typeMap), unroll(unroll) {
+        CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("RewriteAllParsers");
     }
 
     // start generation of a code
     const IR::Node* postorder(IR::P4Parser* parser) override {
-        BUG_CHECK(stdMetadataType, "The standard_metadata_t type was not found");
-
-        // getting name of standard_metadata_t parameter
-        BUG_CHECK(parser->type, "Parser without type is not supported");
-        BUG_CHECK(parser->type->applyParams, "Parser without parameters is not supported");
-        const IR::Parameter* metaData = nullptr;
-        for (auto& i : parser->type->applyParams->parameters) {
-            if (!i->type->is<IR::Type_Name>())
-                continue;
-            if (i->type->to<IR::Type_Name>()->path->name != stdMetadataType->name)
-                continue;
-            metaData = i;
-            break;
-        }
-
-        // generating of out of bounds state
-        BUG_CHECK(metaData, "Can't find standard_metadata_t parameter in the parser: %1%", parser);
-        BUG_CHECK(error, "Can't find error type");
-        const IR::Member* right = new IR::Member(
-            new IR::TypeNameExpression(new IR::Type_Name(error->name)), IR::ID("StackOutOfBounds"));
-
-        const IR::Member* left = new IR::Member(new IR::PathExpression(stdMetadataType,
-            new IR::Path(metaData->name.name, false)), IR::ID("parser_error"));
-
-        IR::IndexedVector<IR::StatOrDecl> components;
-        components.push_back(new IR::AssignmentStatement(left, right));
-
-        const IR::Expression* selectExpression = new IR::PathExpression(new IR::Type_State(),
-            new IR::Path("reject", false));
-
-        outOfBoundsState = new IR::ParserState(IR::ID(outOfBoundsStateName), components,
-                                               selectExpression);
-
         // making rewriting
         auto rewriter = new ParserRewriter(refMap, typeMap, unroll);
         parser->apply(*rewriter);
         /// make a new parser
         BUG_CHECK(rewriter->current.result,
                   "No result was found after unrolling of the parser loop");
-        BUG_CHECK(outOfBoundsState, "No StackOutOfBound state was builded");
         IR::P4Parser* newParser = parser->clone();
         IR::IndexedVector<IR::ParserState> states = newParser->states;
         newParser->states.clear();
-        if (rewriter->hasOutOfboundState)
+        if (rewriter->hasOutOfboundState) {
+            // generating state with verify(false, error.StackOutOfBounds)
+            IR::Vector<IR::Argument>* arguments = new IR::Vector<IR::Argument>();
+            arguments->push_back(new IR::Argument(new IR::BoolLiteral(false)));
+            arguments->push_back(new IR::Argument(new IR::Member(
+                new IR::TypeNameExpression(new IR::Type_Name(IR::ID("error"))),
+                    IR::ID("StackOutOfBounds"))));
+            IR::IndexedVector<IR::StatOrDecl> components;
+            components.push_back(new IR::MethodCallStatement(
+                new IR::MethodCallExpression(new IR::PathExpression(IR::ID("verify")), arguments)));
+            auto* outOfBoundsState = new IR::ParserState(IR::ID(outOfBoundsStateName), components,
+                nullptr);
             newParser->states.push_back(outOfBoundsState);
+        }
         for (auto& i : rewriter->current.result->states) {
             for (auto& j : *i.second)
                 if (j->newState)

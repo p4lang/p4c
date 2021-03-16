@@ -5,44 +5,53 @@
 
 namespace P4 {
 
-bool cmpStates(const cstring& aname, const cstring& bname,
-               const std::map<cstring, size_t>& astatesIndexes,
-               const std::map<cstring, size_t>& bstatesIndexes) {
-    if (aname < bname)
-            return true;
-    if (aname > bname)
-        return false;
-    std::map<cstring, std::pair<size_t, size_t> > mp;
-    for (auto& i1 : astatesIndexes)
-        mp.emplace(i1.first, std::make_pair(i1.second, -1));
-    for (auto& i2 : bstatesIndexes) {
-        auto ref = mp.find(i2.first);
-        if (ref == mp.end())
-            mp.emplace(i2.first, std::make_pair(-1, i2.second));
-        else
-            ref->second.second = i2.second;
-    }
-    for (auto j : mp) {
-        if (j.second.first < j.second.second)
-            return true;
-        if (j.second.first > j.second.second)
-            return false;
-    }
-    return false;
-}
-
-struct VisitedStatesCompare {
+/// The main class for checking less of the two states.
+struct VisitedStatesLess {
     bool operator() (const std::pair<cstring, std::map<cstring, size_t> >& l,
                      const std::pair<cstring, std::map<cstring, size_t> > r) const {
-       return cmpStates(l.first, r.first, l.second, r.second);
+       return checkLessForStates(l.first, r.first, l.second, r.second);
+    }
+
+    /// Checks of two states to be less. If @a aname < @a bname then it returns @a true.
+    /// if @a aname > @a bname then it returns false.
+    /// If @a aname is equal @a bname then it checks the values of the headers stack indexes.
+    /// For both map of header stacks' indexes it creates map of pairs of values for each
+    /// header stack index.
+    /// If some indexes are missing then it cosiders them as -1.
+    /// Next, it continues checking each pair in a intermidiate map with the same approach
+    /// as for @a name and @a bname.
+    static bool checkLessForStates(const cstring& aname, const cstring& bname,
+               const std::map<cstring, size_t>& astatesIndexes,
+               const std::map<cstring, size_t>& bstatesIndexes) {
+        if (aname < bname)
+            return true;
+        if (aname > bname)
+            return false;
+        std::map<cstring, std::pair<size_t, size_t> > mp;
+        for (auto& i1 : astatesIndexes)
+            mp.emplace(i1.first, std::make_pair(i1.second, -1));
+        for (auto& i2 : bstatesIndexes) {
+            auto ref = mp.find(i2.first);
+            if (ref == mp.end())
+                mp.emplace(i2.first, std::make_pair(-1, i2.second));
+            else
+                ref->second.second = i2.second;
+        }
+        for (auto j : mp) {
+            if (j.second.first < j.second.second)
+                return true;
+            if (j.second.first > j.second.second)
+                return false;
+        }
+        return false;
     }
 };
 
 /**
  * Checks for terminal state.
  */
-bool isLastTransition(IR::ID id) {
-    return (id.name == "reject" || id.name == "accept");
+bool isTerminalState(IR::ID id) {
+    return (id.name == IR::ParserState::reject || id.name == IR::ParserState::accept);
 }
 
 bool AnalyzeParser::preorder(const IR::ParserState* state) {
@@ -62,10 +71,12 @@ void AnalyzeParser::postorder(const IR::ArrayIndex* array) {
     // ignore arrays with concrete arguments
     if (array->right->is<IR::Constant>())
         return;
+    // tries to collect the name of a header stack for current state of a parser.
     current->addStateHSUsage(currentState, array->left);
 }
 
 void AnalyzeParser::postorder(const IR::Member* member) {
+    // tries to collect the name of a header stack for current state of a parser.
     current->addStateHSUsage(currentState, member->expr);
 }
 
@@ -80,16 +91,20 @@ void AnalyzeParser::postorder(const IR::PathExpression* expression) {
 
 namespace ParserStructureImpl {
 
-// Makes transformation of one parer state.
+/// Visited map of pairs :
+/// 1) name of the parser state and values of the header stack indexes.
+/// 2) value of index which is used for generation of the new names of the parsers' states.
+using StatesVisitedMap = std::map<std::pair<cstring, std::map<cstring, size_t> >, size_t,
+                                  VisitedStatesLess>;
+
+// Makes transformation of the statements of a parser state.
+// It updates indexes of a header stack and generates correct name of the next transition.
 class ParserStateRewriter : public Transform {
  public:
     /// Default constructor.
-    ParserStateRewriter(ParserStructure* parserStructure,
-                        ParserStateInfo* state,
+    ParserStateRewriter(ParserStructure* parserStructure, ParserStateInfo* state,
                         ValueMap* valueMap, ReferenceMap* refMap, TypeMap* typeMap,
-                        ExpressionEvaluator* afterExec,
-                        std::map<std::pair<cstring, std::map<cstring, size_t> >, size_t,
-                                 VisitedStatesCompare>& visitedStates) :
+                        ExpressionEvaluator* afterExec, StatesVisitedMap& visitedStates) :
     parserStructure(parserStructure), state(state),
     valueMap(valueMap), refMap(refMap), typeMap(typeMap), afterExec(afterExec),
     visitedStates(visitedStates)  {
@@ -99,11 +114,11 @@ class ParserStateRewriter : public Transform {
         currentIndex = 0;
     }
 
-    /// update indexes of Header Stack.
+    /// Updates indexes of a header stack.
     IR::Node* preorder(IR::ArrayIndex* expression) {
         ParserStateRewriter rewriter(parserStructure, state, valueMap, refMap, typeMap,
                                      afterExec, visitedStates);
-        auto basetype = typeMap->getType(expression->left, true);
+        auto basetype = getTypeArray(expression->left);
         if (!basetype->is<IR::Type_Stack>())
             return expression;
         IR::ArrayIndex* newExpression = expression->clone();
@@ -120,11 +135,11 @@ class ParserStateRewriter : public Transform {
         return newExpression;
     }
 
-    /// Eliminate header stack acces operations.
+    /// Eliminates header stack acces next, last operations.
     IR::Node* postorder(IR::Member* expression) {
         if (!afterExec)
             return expression;
-        auto basetype = typeMap->getType(expression->expr, true);
+        auto basetype = getTypeArray(expression->expr);
         if (basetype->is<IR::Type_Stack>()) {
             auto l = afterExec->get(expression->expr);
             BUG_CHECK(l->is<SymbolicArray>(), "%1%: expected an array", l);
@@ -142,13 +157,13 @@ class ParserStateRewriter : public Transform {
             state->statesIndexes[ostr.str().c_str()] = idx;
             IR::ArrayIndex* newArray = new IR::ArrayIndex(expression->expr,
                                                           new IR::Constant(idx));
-            typeMap->setType(newArray, newArray->type);
+            typeMap->setType(newArray, expression->expr->type);
             return newArray;
         }
         return expression;
     }
 
-    /// translating current name of the state
+    /// Adds a new index for transition if it is required by algorithm.
     IR::Node* postorder(IR::PathExpression* expression) {
         if (!expression->type->is<IR::Type_State>())
             return expression;
@@ -161,7 +176,18 @@ class ParserStateRewriter : public Transform {
     inline size_t getIndex() { return currentIndex; }
 
  protected:
-    /// store all indexes of HS
+    const IR::Type* getTypeArray(const IR::Node* element) {
+        if (element->is<IR::ArrayIndex>()) {
+            const IR::Expression* left = element->to<IR::ArrayIndex>()->left;
+            if (left->type->is<IR::Type_Stack>())
+                return left->type->to<IR::Type_Stack>()->elementType;
+        }
+        return typeMap->getType(element, true);
+    }
+
+    /// Checks if this sates with the same state of header stack indexes
+    /// was collect somethere previously.
+    /// If it was called then it returns true and generates a new name with the stored index.
     bool was_called(cstring& nm, IR::ID& id) {
         if (state->scenarioStates.count(id.name) && state->statesIndexes.size() == 0)
             return false;
@@ -176,7 +202,7 @@ class ParserStateRewriter : public Transform {
 
     /// Generated new state name
     IR::ID genNewName(IR::ID id) {
-        if (isLastTransition(id))
+        if (isTerminalState(id))
             return id;
         size_t index = 0;
         cstring name = id.name;
@@ -206,8 +232,7 @@ class ParserStateRewriter : public Transform {
     ReferenceMap* refMap;
     TypeMap* typeMap;
     ExpressionEvaluator* afterExec;
-    std::map<std::pair<cstring, std::map<cstring, size_t> >, size_t,
-             VisitedStatesCompare>& visitedStates;
+    StatesVisitedMap& visitedStates;
     size_t currentIndex;
 };
 
@@ -222,10 +247,10 @@ class ParserSymbolicInterpreter {
     SymbolicValueFactory* factory;
     ParserInfo*         synthesizedParser;  // output produced
     bool                unroll;
-    std::map<std::pair<cstring, std::map<cstring, size_t> >,
-             size_t, VisitedStatesCompare> visitedStates;
+    StatesVisitedMap    visitedStates;
+
     ValueMap* initializeVariables() {
-         ValueMap* result = new ValueMap();
+        ValueMap* result = new ValueMap();
         ExpressionEvaluator ev(refMap, typeMap, result);
 
         for (auto p : parser->getApplyParameters()->parameters) {
@@ -291,32 +316,29 @@ class ParserSymbolicInterpreter {
     /// Return false if an error can be detected statically
     bool reportIfError(const ParserStateInfo* state, SymbolicValue* value) const {
         if (value->is<SymbolicException>()) {
-        auto exc = value->to<SymbolicException>();
+            auto exc = value->to<SymbolicException>();
 
-        bool stateClone = false;
-        auto orig = state->state;
-        auto crt = state;
-        while (crt->predecessor != nullptr) {
-            crt = crt->predecessor;
-            if (crt->state == orig) {
-                stateClone = true;
-                break;
+            bool stateClone = false;
+            auto orig = state->state;
+            auto crt = state;
+            while (crt->predecessor != nullptr) {
+                crt = crt->predecessor;
+                if (crt->state == orig) {
+                    stateClone = true;
+                    break;
+                }
             }
-        }
 
-        if (!stateClone)
-            // errors in the original state are signalled
-            ::error(ErrorType::ERR_EXPRESSION, "%1%: error %2% will be triggered\n%3%",
-                    exc->errorPosition, exc->message(), stateChain(state));
-            // else this error will occur in a clone of the state produced
-            // by unrolling - if the state is reached.  So we don't give an error.
-            return false;
+            if (!stateClone)
+                // errors in the original state are signalled
+                ::error(ErrorType::ERR_EXPRESSION, "%1%: error %2% will be triggered\n%3%",
+                        exc->errorPosition, exc->message(), stateChain(state));
+                // else this error will occur in a clone of the state produced
+                // by unrolling - if the state is reached.  So we don't give an error.
+                return false;
         }
         if (!value->is<SymbolicStaticError>())
             return true;
-        auto ev = value->to<SymbolicStaticError>();
-        ::error(ErrorType::ERR_EXPRESSION,
-                "%1%: %2%\n%3%", ev->errorPosition, ev->message(), stateChain(state));
         return false;
     }
 
@@ -324,7 +346,7 @@ class ParserSymbolicInterpreter {
     /// Returns 'true' if execution completes successfully,
     /// and 'false' if an error occurred.
     bool executeStatement(ParserStateInfo* state, const IR::StatOrDecl* sord,
-                          IR::StatOrDecl* &newSord, ValueMap* valueMap) {
+                          const IR::StatOrDecl* &newSord, ValueMap* valueMap) {
         ExpressionEvaluator ev(refMap, typeMap, valueMap);
 
         bool success = true;
@@ -350,14 +372,16 @@ class ParserSymbolicInterpreter {
             ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,
                                          visitedStates);
             const IR::Node* node = sord->apply(rewriter);
-            newSord = const_cast<IR::StatOrDecl*>(node->to<IR::StatOrDecl>());
+            newSord = node->to<IR::StatOrDecl>();
+        } else {
+            newSord = nullptr;
         }
         LOG2("After " << sord << " state is\n" << valueMap);
         return success;
     }
 
     std::vector<ParserStateInfo*>* evaluateSelect(ParserStateInfo* state,
-                                                  IR::Expression* &newSelect, ValueMap* valueMap) {
+                                   const IR::Expression* &newSelect, ValueMap* valueMap) {
         // TODO: update next state map
         auto select = state->state->selectExpression;
         if (select == nullptr)
@@ -373,7 +397,8 @@ class ParserSymbolicInterpreter {
             ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, nullptr,
                                          visitedStates);
             const IR::Expression* node = select->apply(rewriter);
-            newSelect = const_cast<IR::Expression*>(node->to<IR::Expression>());
+            CHECK_NULL(node);
+            newSelect = node->to<IR::Expression>();
 
             auto nextInfo = newStateInfo(state, next->getName(), state->after, rewriter.getIndex());
             if (nextInfo != nullptr) {
@@ -515,9 +540,13 @@ class ParserSymbolicInterpreter {
         return IR::ID(state->state->name + std::to_string(state->currentIndex));
     }
 
+    /// Generates new state with the help of symbolic execution.
+    /// If corresponded state was generated previously then it returns @a nullptr and
+    /// sets @a wasGenerated to true.
+    /// @param newStates is a set of parsers' names which were genereted.
     std::vector<ParserStateInfo*>* evaluateState(ParserStateInfo* state,
                                                  std::unordered_set<cstring> &newStates,
-                                                 bool &wasNotGenerated) {
+                                                 bool &wasGenerated) {
         LOG1("Analyzing " << state->state);
         auto valueMap = state->before->clone();
         IR::IndexedVector<IR::StatOrDecl> components;
@@ -525,13 +554,13 @@ class ParserSymbolicInterpreter {
         if (unroll) {
             newName = getNewName(state);
             if (newStates.count(newName)) {
-                wasNotGenerated = false;
+                wasGenerated = false;
                 return nullptr;
             }
             newStates.insert(newName);
         }
         for (auto s : state->state->components) {
-            IR::StatOrDecl* newComponent = nullptr;
+            const IR::StatOrDecl* newComponent = nullptr;
             bool success = executeStatement(state, s, newComponent, valueMap);
             if (!success)
                 return nullptr;
@@ -539,7 +568,7 @@ class ParserSymbolicInterpreter {
                 components.push_back(newComponent);
         }
         state->after = valueMap;
-        IR::Expression* expression = nullptr;
+        const IR::Expression* expression = nullptr;
         auto result = evaluateSelect(state, expression, valueMap);
 
         if (unroll) {
@@ -552,16 +581,16 @@ class ParserSymbolicInterpreter {
  public:
     bool  hasOutOfboundState;
     /// constructor
-    ParserSymbolicInterpreter(ParserStructure* structure,
-    ReferenceMap* refMap, TypeMap* typeMap, bool unroll) : structure(structure),
-    refMap(refMap), typeMap(typeMap), synthesizedParser(nullptr), unroll(unroll) {
+    ParserSymbolicInterpreter(ParserStructure* structure, ReferenceMap* refMap, TypeMap* typeMap,
+                              bool unroll) : structure(structure), refMap(refMap),
+                              typeMap(typeMap), synthesizedParser(nullptr), unroll(unroll) {
         CHECK_NULL(structure); CHECK_NULL(refMap); CHECK_NULL(typeMap);
         factory = new SymbolicValueFactory(typeMap);
         parser = structure->parser;
         hasOutOfboundState = false;
     }
     /// running symbolic execution
-    virtual ParserInfo* run() {
+    ParserInfo* run() {
         synthesizedParser = new ParserInfo();
         auto initMap = initializeVariables();
         if (initMap == nullptr)
@@ -571,8 +600,8 @@ class ParserSymbolicInterpreter {
         std::vector<ParserStateInfo*> toRun;  // worklist
         toRun.push_back(startInfo);
         auto visitorCmp = [](const ParserStateInfo& a, const ParserStateInfo& b) {
-            return cmpStates(a.state->name.name, b.state->name.name, a.statesIndexes,
-                             b.statesIndexes);
+            return VisitedStatesLess::checkLessForStates(a.state->name.name, b.state->name.name,
+                    a.statesIndexes, b.statesIndexes);
         };
         std::set<ParserStateInfo, decltype(visitorCmp)> visited(visitorCmp);
         std::unordered_set<cstring> newStates;
@@ -580,7 +609,8 @@ class ParserSymbolicInterpreter {
             auto stateInfo = toRun.back();
             toRun.pop_back();
             LOG1("Symbolic evaluation of " << stateChain(stateInfo));
-            // checking visited and and a loop2
+            // checking visited state, loop state, and the reachable states with needed header stack
+            // operators.
             if (visited.count(*stateInfo) && !stateInfo->scenarioStates.count(stateInfo->name) &&
                 !structure->reachableHSUsage(stateInfo->state->name, stateInfo))
                 continue;

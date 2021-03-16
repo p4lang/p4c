@@ -1,8 +1,8 @@
-#include "include/v1model.p4"
+#include "v1model.p4"
 
 const bit<16> TYPE_IPV4 = 0x800;
 const bit<16> TYPE_SRCROUTING = 0x1234;
-const bit<16> MAX_HOPS = 3;
+const bit<16> MAX_HOPS = 4;
 /*
 +-----------------------------+
 | ethernet !(0x0800 or 0x1234)|
@@ -24,7 +24,7 @@ header ethernet_t {
 }
 
 header srcRoute_t {
-    bit<1>    bos;   /* Bottom of stack */
+    bit<2>    bos;   /* Bottom of stack */
     bit<15>   port;
 }
 
@@ -51,42 +51,47 @@ struct headers {
     ethernet_t              ethernet;
     srcRoute_t[MAX_HOPS]    srcRoutes;
     ipv4_t                  ipv4;
+    bit<32>                 index;
 }
 
 parser MyParser(packet_in packet,
                 out headers hdr,
                 inout metadata meta,
                 inout standard_metadata_t standard_metadata) {
-    
-    int<32>                 index;
-
     state start {
-        transition parse_ethernet;
-    }
-
-    state parse_ethernet {
-        index = 0;
+        hdr.index = 0;
         packet.extract(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
-            TYPE_SRCROUTING: parse_srcRouting;
+            0: last;
+            1: access1;
+            2: access2;
+            3: access3;
             default: accept;
         }
     }
 
-    state parse_srcRouting {
-        packet.extract(hdr.srcRoutes[index]);
-        index = index + 1;
-        transition select(hdr.srcRoutes[index - 1].bos) {
-            1: parse_ipv4;
-            default: parse_srcRouting;
-        }
-    }
-
-    state parse_ipv4 {
-        packet.extract(hdr.ipv4);
+    state last {
+        hdr.index = hdr.index + 1;
         transition accept;
     }
 
+    state access1 {
+        hdr.index = hdr.index + 1;
+        packet.extract(hdr.srcRoutes.next);
+        transition last;
+    }
+
+    state access2 {
+        hdr.index = hdr.index + 1;
+        packet.extract(hdr.srcRoutes.next);
+        transition access1;
+    }
+
+    state access3 {
+        hdr.index = hdr.index + 1;
+        packet.extract(hdr.srcRoutes.next);
+        transition access2;
+    }
 }
 
 control mau(inout headers hdr, inout metadata meta, inout standard_metadata_t sm) {
