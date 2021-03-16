@@ -35,7 +35,6 @@ const char* p4includePath = CONFIG_PKGDATADIR "/p4include";
 const char* p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
 
 CompilerOptions::CompilerOptions() : ParserOptions() {
-
     registerOption("--p4runtime-files", "filelist",
                    [this](const char* arg) { p4RuntimeFiles = arg; return true; },
                    "Write the P4Runtime control plane API description to the specified\n"
@@ -170,7 +169,7 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
                            return false;
                        }
                        return true; },
-                    "Specify language version to compile.");                       
+                    "Specify language version to compile.");
 }
 
 void CompilerOptions::setInputFile() {
