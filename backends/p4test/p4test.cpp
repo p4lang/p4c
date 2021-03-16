@@ -150,6 +150,9 @@ int main(int argc, char *const argv[]) {
             const IR::ToplevelBlock *top = nullptr;
             try {
                 top = midEnd.process(program);
+                // This can modify program!
+                if (program == nullptr)
+                    return 1;
             } catch (const std::exception &bug) {
                 std::cerr << bug.what() << std::endl;
                 return 1;
