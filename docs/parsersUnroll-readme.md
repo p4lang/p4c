@@ -2,18 +2,18 @@
 
 ## Main definitions
 
-**Definition 1**
+**Definition 1**.
 P2C Parser is a couple *P = ({S}, {HS})*, where *{S}* is a set of the parser states *S*,
 *{HS}* is a set of header stack variables which are used in the parser *P*.
 
-**Definition 2**
+**Definition 2**.
 The map *M* is a couple *M = {(HS,i)}* – where *i* is an index of corresponding stack variable evaluated during the symbolic execution. 
 Index is evaluated correspondingly to [P2C semantics](https://p4.org/p4-spec/docs/P4-16-v1.2.1.html#sec-header-stacks).
 
-**Definition 3**
+**Definition 3**.
 Let ind be a function which returns current number for a parser state with the corresponding set of header stack variables during symbolic execution: *ind:S×M→N*, where *N* is a set of natural number. 
 
-**Definition 4**
+**Definition 4**.
 The main data structure of the algorithm is a triple:
 1.  current parser’s state, 
 2.  state of symbolic execution (formula over the parser program variables),
@@ -24,7 +24,7 @@ The following information is stored into ParserStructure class:
 *   calls graph – graph of parser states calls,
 *   a set of header stack variables which are used in each parser’s state.
 
-**Definition 5**
+**Definition 5**.
 Let *states path* be a sequence of parser’s state calls. Each such path contains a set of header state variables which are used with the arbitrary arguments in a path p and denote it *{HSp}*. These arguments cannot be as c constants.
 
 ## Algorithm description
