@@ -243,9 +243,29 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
             instructions.push_back(new IR::DpdkJmpEqualStatement(
                         true_label, expr, new IR::Constant(1))); }
         return is_and;
+    } else if (auto lnot = expr->to<IR::LNot>()) {
+        if (auto mce = lnot->expr->to<IR::MethodCallExpression>()) {
+            auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
+            if (auto a = mi->to<P4::BuiltInMethod>()) {
+                if (a->name == IR::Type_Header::isValid) {
+                    if (is_and) {
+                        instructions.push_back(new IR::DpdkJmpIfValidStatement(
+                                    false_label, a->appliedTo));
+                    } else {
+                        instructions.push_back(new IR::DpdkJmpIfInvalidStatement(
+                                    true_label, a->appliedTo)); }
+                    return is_and;
+                } else {
+                    BUG("%1%: Not implemented", expr);
+                }
+            } else {
+                BUG("%1%: MethodInstance not implemented", expr);
+            }
+        }
     } else {
         BUG("%1%: Not implemented", expr);
     }
+    return is_and;
 }
 
 // This function convert IfStatement to dpdk asm. Based on the return value of
