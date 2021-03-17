@@ -235,13 +235,43 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
         } else {
             BUG("%1%:not implemented method instance", expr);
         }
-    } else if (expr->is<IR::PathExpression>() || expr->is<IR::Member>()) {
+    } else if (auto path = expr->to<IR::PathExpression>()) {
         if (is_and) {
             instructions.push_back(new IR::DpdkJmpNotEqualStatement(
                         false_label, expr, new IR::Constant(1)));
         } else {
             instructions.push_back(new IR::DpdkJmpEqualStatement(
                         true_label, expr, new IR::Constant(1))); }
+    } else if (auto mem = expr->to<IR::Member>()) {
+        if (auto mce = mem->expr->to<IR::MethodCallExpression>()) {
+            auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
+            if (auto a = mi->to<P4::ApplyMethod>()) {
+                if (a->isTableApply()) {
+                    if (mem->member == IR::Type_Table::hit) {
+                        instructions.push_back(
+                                new IR::DpdkApplyStatement(a->object->getName()));
+                        instructions.push_back(
+                                new IR::DpdkJmpHitStatement(false_label));
+                    } else if (mem->member == IR::Type_Table::miss) {
+                        instructions.push_back(
+                                new IR::DpdkApplyStatement(a->object->getName()));
+                        instructions.push_back(
+                                new IR::DpdkJmpMissStatement(false_label));
+                    }
+                } else {
+                    BUG("%1%: not implemented.", expr);
+                }
+            } else {
+                BUG("%1%: not implemented.", expr);
+            }
+        } else {
+            if (is_and) {
+                instructions.push_back(new IR::DpdkJmpNotEqualStatement(
+                            false_label, expr, new IR::Constant(1)));
+            } else {
+                instructions.push_back(new IR::DpdkJmpEqualStatement(
+                            true_label, expr, new IR::Constant(1))); }
+        }
         return is_and;
     } else if (auto lnot = expr->to<IR::LNot>()) {
         if (auto mce = lnot->expr->to<IR::MethodCallExpression>()) {
