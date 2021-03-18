@@ -65,7 +65,7 @@ parseV1Program(Input& stream, const char* sourceFile, unsigned sourceLine,
  * on failure. If failure occurs, an error will also be reported.
  */
 template <typename C = P4V1::Converter>
-const IR::P4Program* parseP4File(CompilerOptions& options) {
+const IR::P4Program* parseP4File(ParserOptions& options) {
     BUG_CHECK(&options == &P4CContext::get().options(),
               "Parsing using options that don't match the current "
               "compiler context");
