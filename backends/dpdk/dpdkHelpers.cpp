@@ -235,35 +235,49 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
         } else {
             BUG("%1%:not implemented method instance", expr);
         }
-    } else if (expr->is<IR::PathExpression>() || expr->is<IR::Member>()) {
+    } else if (auto path = expr->to<IR::PathExpression>()) {
         if (is_and) {
             instructions.push_back(new IR::DpdkJmpNotEqualStatement(
                         false_label, expr, new IR::Constant(1)));
         } else {
             instructions.push_back(new IR::DpdkJmpEqualStatement(
                         true_label, expr, new IR::Constant(1))); }
-        return is_and;
-    } else if (auto lnot = expr->to<IR::LNot>()) {
-        if (auto mce = lnot->expr->to<IR::MethodCallExpression>()) {
+    } else if (auto mem = expr->to<IR::Member>()) {
+        if (auto mce = mem->expr->to<IR::MethodCallExpression>()) {
             auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
-            if (auto a = mi->to<P4::BuiltInMethod>()) {
-                if (a->name == IR::Type_Header::isValid) {
-                    if (is_and) {
-                        instructions.push_back(new IR::DpdkJmpIfValidStatement(
-                                    false_label, a->appliedTo));
-                    } else {
-                        instructions.push_back(new IR::DpdkJmpIfInvalidStatement(
-                                    true_label, a->appliedTo)); }
-                    return is_and;
+            if (auto a = mi->to<P4::ApplyMethod>()) {
+                if (a->isTableApply()) {
+                    if (mem->member == IR::Type_Table::hit) {
+                        instructions.push_back(
+                                new IR::DpdkApplyStatement(a->object->getName()));
+                        if (is_and) {
+                            instructions.push_back(
+                                    new IR::DpdkJmpHitStatement(true_label));
+                        } else {
+                            instructions.push_back(
+                                    new IR::DpdkJmpMissStatement(true_label));
+                        }
+                        return false;
+                    }
                 } else {
-                    BUG("%1%: Not implemented", expr);
+                    BUG("%1%: not implemented.", expr);
                 }
             } else {
-                BUG("%1%: MethodInstance not implemented", expr);
+                BUG("%1%: not implemented.", expr);
             }
+        } else {
+            if (is_and) {
+                instructions.push_back(new IR::DpdkJmpNotEqualStatement(
+                            false_label, expr, new IR::Constant(1)));
+            } else {
+                instructions.push_back(new IR::DpdkJmpEqualStatement(
+                            true_label, expr, new IR::Constant(1))); }
         }
+        return is_and;
+    } else if (auto lnot = expr->to<IR::LNot>()) {
+        return generate(lnot->expr, true_label, false_label, false);
     } else {
-        BUG("%1%: Not implemented", expr);
+        BUG("%1%: not implemented", expr);
     }
     return is_and;
 }

@@ -32,14 +32,76 @@ action NoAction_0 args none {
 	return
 }
 
+action remove_header args none {
+	invalidate h
+	return
+}
+
+action ifHit args none {
+	invalidate h
+	return
+}
+
+action ifHit_2 args none {
+	invalidate h
+	return
+}
+
+action ifMiss args none {
+	validate h
+	return
+}
+
+action ifMiss_2 args none {
+	validate h
+	return
+}
+
 table tbl_0 {
 	key {
 		h.srcAddr exact
 	}
 	actions {
 		NoAction_0
+		remove_header
 	}
 	default_action NoAction_0 args none 
+	size 0
+}
+
+
+table tbl_ifHit {
+	actions {
+		ifHit
+	}
+	default_action ifHit args none 
+	size 0
+}
+
+
+table tbl_ifMiss {
+	actions {
+		ifMiss
+	}
+	default_action ifMiss args none 
+	size 0
+}
+
+
+table tbl_ifMiss_0 {
+	actions {
+		ifMiss_2
+	}
+	default_action ifMiss_2 args none 
+	size 0
+}
+
+
+table tbl_ifHit_0 {
+	actions {
+		ifHit_2
+	}
+	default_action ifHit_2 args none 
 	size 0
 }
 
@@ -47,10 +109,23 @@ table tbl_0 {
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	extract h
-	jmpv LABEL_0TRUE h
+	table tbl_0
+	jmph LABEL_0TRUE
 	jmp LABEL_0END
-	LABEL_0TRUE :	table tbl_0
-	LABEL_0END :	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_0TRUE :	table tbl_ifHit
+	LABEL_0END :	table tbl_0
+	jmpnh LABEL_1TRUE
+	jmp LABEL_1END
+	LABEL_1TRUE :	table tbl_ifMiss
+	LABEL_1END :	table tbl_0
+	jmpnh LABEL_2TRUE
+	jmp LABEL_2END
+	LABEL_2TRUE :	table tbl_ifMiss_0
+	LABEL_2END :	table tbl_0
+	jmph LABEL_3TRUE
+	jmp LABEL_3END
+	LABEL_3TRUE :	table tbl_ifHit_0
+	LABEL_3END :	tx m.psa_ingress_output_metadata_egress_port
 }
 
 
