@@ -250,13 +250,14 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
                     if (mem->member == IR::Type_Table::hit) {
                         instructions.push_back(
                                 new IR::DpdkApplyStatement(a->object->getName()));
-                        instructions.push_back(
-                                new IR::DpdkJmpHitStatement(false_label));
-                    } else if (mem->member == IR::Type_Table::miss) {
-                        instructions.push_back(
-                                new IR::DpdkApplyStatement(a->object->getName()));
-                        instructions.push_back(
-                                new IR::DpdkJmpMissStatement(false_label));
+                        if (is_and) {
+                            instructions.push_back(
+                                    new IR::DpdkJmpHitStatement(true_label));
+                        } else {
+                            instructions.push_back(
+                                    new IR::DpdkJmpMissStatement(true_label));
+                        }
+                        return false;
                     }
                 } else {
                     BUG("%1%: not implemented.", expr);
@@ -274,26 +275,9 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
         }
         return is_and;
     } else if (auto lnot = expr->to<IR::LNot>()) {
-        if (auto mce = lnot->expr->to<IR::MethodCallExpression>()) {
-            auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
-            if (auto a = mi->to<P4::BuiltInMethod>()) {
-                if (a->name == IR::Type_Header::isValid) {
-                    if (is_and) {
-                        instructions.push_back(new IR::DpdkJmpIfValidStatement(
-                                    false_label, a->appliedTo));
-                    } else {
-                        instructions.push_back(new IR::DpdkJmpIfInvalidStatement(
-                                    true_label, a->appliedTo)); }
-                    return is_and;
-                } else {
-                    BUG("%1%: Not implemented", expr);
-                }
-            } else {
-                BUG("%1%: MethodInstance not implemented", expr);
-            }
-        }
+        return generate(lnot->expr, true_label, false_label, false);
     } else {
-        BUG("%1%: Not implemented", expr);
+        BUG("%1%: not implemented", expr);
     }
     return is_and;
 }

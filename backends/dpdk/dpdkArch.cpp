@@ -574,6 +574,16 @@ bool LogicalExpressionUnroll::preorder(const IR::Operation_Unary *u) {
     if (u->expr->is<IR::MethodCallExpression>())
         return false;
 
+    // if the expression is apply().hit or apply().miss, do not insert a temporary
+    // variable.
+    if (auto member = u->expr->to<IR::Member>()) {
+        if (member->expr->is<IR::MethodCallExpression>() &&
+            (member->member == IR::Type_Table::hit ||
+             member->member == IR::Type_Table::miss)) {
+            return false;
+        }
+    }
+
     root = u->clone();
     visit(u->expr);
     const IR::Expression *un_expr;
