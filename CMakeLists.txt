@@ -192,6 +192,7 @@ add_cxx_compiler_option ("-Wall")
 add_cxx_compiler_option ("-Wextra")
 add_cxx_compiler_option ("-Wno-overloaded-virtual")
 add_cxx_compiler_option ("-Wno-deprecated")
+# add_cxx_compiler_option ("-fsanitize=null")
 
 # If we're on GCC, use the gold linker if available.
 if(CMAKE_COMPILER_IS_GNUCC)
