@@ -47,8 +47,9 @@ table tbl_0 {
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	extract h
-	jmpv LABEL_0END h
-	table tbl_0
+	jmpv LABEL_0TRUE h
+	jmp LABEL_0END
+	LABEL_0TRUE :	table tbl_0
 	LABEL_0END :	tx m.psa_ingress_output_metadata_egress_port
 }
 
