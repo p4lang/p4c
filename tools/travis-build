@@ -80,6 +80,8 @@ rm -rf /tmp/pip
 # ! ------  BEGIN VALIDATION -----------------------------------------------
 
 function build_gauntlet() {
+  # for add-apt-repository
+  apt-get install -y software-properties-common
   # Also pull Gauntlet for translation validation
   git clone -b stable https://github.com/p4gauntlet/gauntlet /gauntlet
   cd /gauntlet
