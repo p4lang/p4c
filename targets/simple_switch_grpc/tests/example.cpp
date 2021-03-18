@@ -126,7 +126,7 @@ test() {
   {
     auto param = action->add_params();
     param->set_param_id(p1_id);
-    param->set_value(std::string("\x00\x09", 2));
+    param->set_value(std::string("\x09", 1));  // canonical representation
   }
 
   // add entry
