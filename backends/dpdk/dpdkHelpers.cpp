@@ -24,7 +24,7 @@ int ConvertStatementToDpdk::next_label_id = 0;
 bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
     auto left = a->left;
     auto right = a->right;
-    IR::DpdkAsmStatement *i;
+    IR::DpdkAsmStatement *i = nullptr;
     // handle Binary Operation
     if (auto r = right->to<IR::Operation_Binary>()) {
         if (right->is<IR::Add>()) {
@@ -103,7 +103,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
         std::cerr << right->node_type_name() << std::endl;
         BUG("Not implemented.");
     }
-    add_instr(i);
+    if (i)
+        add_instr(i);
     return false;
 }
 
