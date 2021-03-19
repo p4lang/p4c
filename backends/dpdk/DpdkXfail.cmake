@@ -62,8 +62,5 @@ p4c_add_xfail_reason("dpdk"
 
 p4c_add_xfail_reason("dpdk"
   "Error compiling"
-  testdata/p4_16_samples/psa-register-complex-bmv2.p4
-  testdata/p4_16_samples/psa-register-read-write-bmv2.p4
   testdata/p4_16_samples/psa-recirculate-no-meta-bmv2.p4
   )
-
