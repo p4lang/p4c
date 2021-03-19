@@ -26,4 +26,4 @@ class CompilerOptions : public ParserOptions {
     // Choose format for P4Runtime API description.
     P4::P4RuntimeFormat p4RuntimeFormat = P4::P4RuntimeFormat::BINARY;
 };
-#endif /* FRONTENDS_COMMON_PARSER_OPTIONS_H_ */
+#endif  /* FRONTENDS_COMMON_OPTIONS_H_ */

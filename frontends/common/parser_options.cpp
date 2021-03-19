@@ -195,7 +195,6 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
     registerOption("--dump", "folder",
                    [this](const char* arg) { dumpFolder = arg; return true; },
                    "[Compiler debugging] Folder where P4 programs are dumped\n");
-
 }
 
 void ParserOptions::setInputFile() {
