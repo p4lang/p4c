@@ -398,8 +398,9 @@ extern void assume(in bool check);
 
 // BEGIN:Match_kinds
 match_kind {
-    range,   /// Used to represent min..max intervals
-    selector /// Used for dynamic action selection via the ActionSelector extern
+    range,    /// Used to represent min..max intervals
+    selector, /// Used for dynamic action selection via the ActionSelector extern
+    optional  /// Either an exact match, or a wildcard matching any value for the entire field
 }
 // END:Match_kinds
 
