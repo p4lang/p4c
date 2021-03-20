@@ -71,8 +71,8 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
                        }
                        return true; },
                    "Choose output format for the P4Runtime API description (default is binary).\n"
-                   "[Deprecated; use '--p4runtime-files' instead].")
-    registerOption("-loopsUnroll", nullptr,
+                   "[Deprecated; use '--p4runtime-files' instead].");
+    registerOption("--loopsUnroll", nullptr,
                    [this](const char*) { loopsUnrolling = true; return true; },
                    "Unrolling all parser's loops");
 }
