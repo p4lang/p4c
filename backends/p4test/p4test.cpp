@@ -150,33 +150,36 @@ int main(int argc, char *const argv[]) {
             const IR::ToplevelBlock *top = nullptr;
             try {
                 top = midEnd.process(program);
+                // This can modify program!
+                log_dump(program, "After midend");
+                log_dump(top, "Top level block");
             } catch (const std::exception &bug) {
                 std::cerr << bug.what() << std::endl;
                 return 1;
             }
-            log_dump(program, "After midend");
-            log_dump(top, "Top level block");
         }
-        if (options.dumpJsonFile)
-            JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
-        if (options.debugJson) {
-            std::stringstream ss1, ss2;
-            JSONGenerator gen1(ss1), gen2(ss2);
-            gen1 << program;
+        if (program) {
+            if (options.dumpJsonFile)
+                JSONGenerator(*openFile(options.dumpJsonFile, true), true) << program << std::endl;
+            if (options.debugJson) {
+                std::stringstream ss1, ss2;
+                JSONGenerator gen1(ss1), gen2(ss2);
+                gen1 << program;
 
-            const IR::Node* node = nullptr;
-            JSONLoader loader(ss1);
-            loader >> node;
+                const IR::Node* node = nullptr;
+                JSONLoader loader(ss1);
+                loader >> node;
 
-            gen2 << node;
-            if (ss1.str() != ss2.str()) {
-                error(ErrorType::ERR_UNEXPECTED, "json mismatch");
-                std::ofstream t1("t1.json"), t2("t2.json");
-                t1 << ss1.str() << std::flush;
-                t2 << ss2.str() << std::flush;
-                auto rv = system("json_diff t1.json t2.json");
-                if (rv != 0) ::warning(ErrorType::WARN_FAILED,
-                                       "json_diff failed with code %1%", rv);
+                gen2 << node;
+                if (ss1.str() != ss2.str()) {
+                    error(ErrorType::ERR_UNEXPECTED, "json mismatch");
+                    std::ofstream t1("t1.json"), t2("t2.json");
+                    t1 << ss1.str() << std::flush;
+                    t2 << ss2.str() << std::flush;
+                    auto rv = system("json_diff t1.json t2.json");
+                    if (rv != 0) ::warning(ErrorType::WARN_FAILED,
+                                           "json_diff failed with code %1%", rv);
+                }
             }
         }
     }

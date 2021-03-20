@@ -24,7 +24,7 @@ int ConvertStatementToDpdk::next_label_id = 0;
 bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
     auto left = a->left;
     auto right = a->right;
-    IR::DpdkAsmStatement *i;
+    IR::DpdkAsmStatement *i = nullptr;
     // handle Binary Operation
     if (auto r = right->to<IR::Operation_Binary>()) {
         if (right->is<IR::Add>()) {
@@ -103,7 +103,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
         std::cerr << right->node_type_name() << std::endl;
         BUG("Not implemented.");
     }
-    add_instr(i);
+    if (i)
+        add_instr(i);
     return false;
 }
 
@@ -235,17 +236,51 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
         } else {
             BUG("%1%:not implemented method instance", expr);
         }
-    } else if (expr->is<IR::PathExpression>() || expr->is<IR::Member>()) {
+    } else if (auto path = expr->to<IR::PathExpression>()) {
         if (is_and) {
             instructions.push_back(new IR::DpdkJmpNotEqualStatement(
                         false_label, expr, new IR::Constant(1)));
         } else {
             instructions.push_back(new IR::DpdkJmpEqualStatement(
                         true_label, expr, new IR::Constant(1))); }
+    } else if (auto mem = expr->to<IR::Member>()) {
+        if (auto mce = mem->expr->to<IR::MethodCallExpression>()) {
+            auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
+            if (auto a = mi->to<P4::ApplyMethod>()) {
+                if (a->isTableApply()) {
+                    if (mem->member == IR::Type_Table::hit) {
+                        instructions.push_back(
+                                new IR::DpdkApplyStatement(a->object->getName()));
+                        if (is_and) {
+                            instructions.push_back(
+                                    new IR::DpdkJmpHitStatement(true_label));
+                        } else {
+                            instructions.push_back(
+                                    new IR::DpdkJmpMissStatement(true_label));
+                        }
+                        return false;
+                    }
+                } else {
+                    BUG("%1%: not implemented.", expr);
+                }
+            } else {
+                BUG("%1%: not implemented.", expr);
+            }
+        } else {
+            if (is_and) {
+                instructions.push_back(new IR::DpdkJmpNotEqualStatement(
+                            false_label, expr, new IR::Constant(1)));
+            } else {
+                instructions.push_back(new IR::DpdkJmpEqualStatement(
+                            true_label, expr, new IR::Constant(1))); }
+        }
         return is_and;
+    } else if (auto lnot = expr->to<IR::LNot>()) {
+        return generate(lnot->expr, true_label, false_label, false);
     } else {
-        BUG("%1%: Not implemented", expr);
+        BUG("%1%: not implemented", expr);
     }
+    return is_and;
 }
 
 // This function convert IfStatement to dpdk asm. Based on the return value of

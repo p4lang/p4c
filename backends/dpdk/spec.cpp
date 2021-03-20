@@ -52,7 +52,7 @@ cstring toStr(const IR::MethodCallExpression *const m) {
     if (auto path = m->method->to<IR::PathExpression>()) {
         return path->path->name;
     } else {
-        ::error("action's method is not a PathExpression");
+        ::error("%1% is not a PathExpression", m->toString());
     }
     return "";
 }

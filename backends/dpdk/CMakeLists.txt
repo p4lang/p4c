@@ -99,3 +99,11 @@ add_custom_target(linkp4cdpdk
 
 add_dependencies(p4c_driver linkp4cdpdk)
 
+
+set(DPDK_COMPILER_DRIVER "${CMAKE_CURRENT_SOURCE_DIR}/run-dpdk-test.py")
+
+set (P4_16_SUITES
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/psa-*.p4")
+p4c_add_tests("dpdk" ${DPDK_COMPILER_DRIVER} "${P4_16_SUITES}" "")
+
+include(DpdkXfail.cmake)
