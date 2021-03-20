@@ -242,8 +242,8 @@ const IR::P4Program* load_model(const char* curFile, CompilerOptions& options) {
 }
 
 std::pair<const IR::P4Parser*, const IR::P4Parser*> loadExample(const char *file) {
-     AutoCompileContext autoP4TestContext(new P4TestContext);
-    auto& options = P4CContext::get().options();
+    AutoCompileContext autoP4TestContext(new P4TestContext);
+    auto& options = P4TestContext::get().options();
     const char* argv = "./gtestp4c";
     options.process(1, (char* const*)&argv);
     const IR::P4Program* program = load_model(file, options);

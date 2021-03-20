@@ -43,7 +43,5 @@ class CompilerOptions : public ParserOptions {
     cstring p4RuntimeEntriesFiles = nullptr;
     // Choose format for P4Runtime API description.
     P4::P4RuntimeFormat p4RuntimeFormat = P4::P4RuntimeFormat::BINARY;
-    // if true unroll all parser's loop inside midend
-    bool loopsUnrolling = false;
 };
 #endif  /* FRONTENDS_COMMON_OPTIONS_H_ */
