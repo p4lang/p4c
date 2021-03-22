@@ -23,25 +23,58 @@ limitations under the License.
 // for p4::P4RuntimeFormat definition
 #include "control-plane/p4RuntimeSerializer.h"
 
-
 class CompilerOptions : public ParserOptions {
+ protected:
+    // Checks if parsed options make sense with respect to each-other.
+    void validateOptions() const override;
+
  public:
     CompilerOptions();
 
-    // if true, skip frontend passes whose names are contained in passesToExcludeFrontend vector
+    // if true, skip frontend passes whose names are contained in
+    // passesToExcludeFrontend vector
     bool excludeFrontendPasses = false;
     bool listFrontendPasses = false;
-    // strings matched against pass names that should be excluded from Frontend passes
+    // if true, skip midend passes whose names are contained in
+    // passesToExcludeMidend vector
+    bool excludeMidendPasses = false;
+    bool listMidendPasses = false;
+    // if true, skip backend passes whose names are contained in
+    // passesToExcludeBackend vector
+    bool excludeBackendPasses = false;
+    // strings matched against pass names that should be excluded from Frontend
+    // passes
     std::vector<cstring> passesToExcludeFrontend;
+    // strings matched against pass names that should be excluded from Midend
+    // passes
+    std::vector<cstring> passesToExcludeMidend;
+    // strings matched against pass names that should be excluded from Backend
+    // passes
+    std::vector<cstring> passesToExcludeBackend;
+    // Dump a JSON representation of the IR in the file
+    cstring dumpJsonFile = nullptr;
+    // Dump and undump the IR tree
+    bool debugJson = false;
+    // if this flag is true, compile program in non-debug mode
+    bool ndebug = false;
+    // Write a P4Runtime control plane API description to the specified file.
+    cstring p4RuntimeFile = nullptr;
+    // Write static table entries as a P4Runtime WriteRequest message to the
+    // specified file.
+    cstring p4RuntimeEntriesFile = nullptr;
+    // Write P4Runtime control plane API description to the specified files.
+    cstring p4RuntimeFiles = nullptr;
+    // Write static table entries as a P4Runtime WriteRequest message to the
+    // specified files.
+    cstring p4RuntimeEntriesFiles = nullptr;
+    // Choose format for P4Runtime API description.
+    P4::P4RuntimeFormat p4RuntimeFormat = P4::P4RuntimeFormat::BINARY;
+    // Pretty-print the program in the specified file
+    cstring prettyPrintFile = nullptr;
     // Target
     cstring target = nullptr;
     // Architecture
     cstring arch = nullptr;
-    // Write P4Runtime control plane API description to the specified files.
-    cstring p4RuntimeFiles = nullptr;
-    // Write static table entries as a P4Runtime WriteRequest message to the specified files.
-    cstring p4RuntimeEntriesFiles = nullptr;
-    // Choose format for P4Runtime API description.
-    P4::P4RuntimeFormat p4RuntimeFormat = P4::P4RuntimeFormat::BINARY;
+    virtual bool enable_intrinsic_metadata_fix();
 };
-#endif  /* FRONTENDS_COMMON_OPTIONS_H_ */
+#endif /* FRONTENDS_COMMON_OPTIONS_H_ */

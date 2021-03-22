@@ -15,93 +15,125 @@ limitations under the License.
 */
 
 #include <getopt.h>
-#include <sys/types.h>
+#include <regex>
 #include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <unordered_set>
-#include <regex>
 
-#include "parser_options.h"
-#include "lib/log.h"
-#include "lib/exceptions.h"
-#include "lib/exename.h"
-#include "lib/nullstream.h"
-#include "lib/path.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "ir/json_generator.h"
+#include "lib/exceptions.h"
+#include "lib/exename.h"
+#include "lib/log.h"
+#include "lib/nullstream.h"
+#include "lib/path.h"
+#include "parser_options.h"
 
-const char* p4includePath = CONFIG_PKGDATADIR "/p4include";
-const char* p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
+const char *p4includePath = CONFIG_PKGDATADIR "/p4include";
+const char *p4_14includePath = CONFIG_PKGDATADIR "/p4_14include";
 
-const char* ParserOptions::defaultMessage = "Compile a P4 program";
+const char *ParserOptions::defaultMessage = "Compile a P4 program";
 
 ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
-    registerOption("--help", nullptr,
-                   [this](const char*) { usage(); exit(0); return false; },
-                   "Print this help message");
-    registerOption("--version", nullptr,
-                   [this](const char*) {
-                       std::cerr << binaryName << std::endl;
-                       std::cerr << "Version " << compilerVersion << std::endl;
-                       exit(0); return false; }, "Print compiler version");
-    registerOption("-I", "path",
-                   [this](const char* arg) {
-                       preprocessor_options += std::string(" -I") + arg; return true; },
-                   "Specify include path (passed to preprocessor)");
-    registerOption("-D", "arg=value",
-                   [this](const char* arg) {
-                       preprocessor_options += std::string(" -D") + arg; return true; },
-                   "Define macro (passed to preprocessor)");
-    registerOption("-U", "arg",
-                   [this](const char* arg) {
-                       preprocessor_options += std::string(" -U") + arg; return true; },
-                   "Undefine macro (passed to preprocessor)");
-    registerOption("-E", nullptr,
-                   [this](const char*) { doNotCompile = true; return true; },
-                   "Preprocess only, do not compile (prints program on stdout)");
-    registerOption("--p4v", "{14|16}",
-                   [this](const char* arg) {
-                       if (!strcmp(arg, "1.0") || !strcmp(arg, "14")) {
-                           langVersion = ParserOptions::FrontendVersion::P4_14;
-                       } else if (!strcmp(arg, "1.2") || !strcmp(arg, "16")) {
-                           langVersion = ParserOptions::FrontendVersion::P4_16;
-                       } else {
-                           ::error(ErrorType::ERR_INVALID, "Illegal language version %1%", arg);
-                           return false;
-                       }
-                       return true; },
-                    "[Deprecated; use --std instead] Specify language version to compile.",
-                    OptionFlags::Hide);
-    registerOption("--std", "{p4-14|p4-16}",
-                   [this](const char* arg) {
-                       if (!strcmp(arg, "14") || !strcmp(arg, "p4-14")) {
-                           langVersion = ParserOptions::FrontendVersion::P4_14;
-                       } else if (!strcmp(arg, "16") || !strcmp(arg, "p4-16")) {
-                           langVersion = ParserOptions::FrontendVersion::P4_16;
-                       } else {
-                           ::error(ErrorType::ERR_INVALID, "Illegal language version %1%", arg);
-                           return false;
-                       }
-                       return true; },
-                    "Specify language version to compile.");
-    registerOption("--nocpp", nullptr,
-                   [this](const char*) { doNotPreprocess = true; return true; },
-                   "Skip preprocess, assume input file is already preprocessed.");
-    registerOption("--toJSON", "file",
-                   [this](const char* arg) { dumpJsonFile = arg; return true; },
-                   "Dump the compiler IR after the midend as JSON in the specified file.");
-
-    registerOption("--disable-annotations", "annotations",
-                   [this](const char *arg) {
-                      auto copy = strdup(arg);
-                      while (auto name = strsep(&copy, ","))
-                          disabledAnnotations.insert(name);
-                      return true;
-                   },
-                   "Specify a (comma separated) list of annotations that should be ignored by\n"
-                   "the compiler. A warning will be printed that the annotation is ignored",
-                   OptionFlags::OptionalArgument);
-    registerOption("--Wdisable", "diagnostic",
+    registerOption(
+        "--help", nullptr,
+        [this](const char *) {
+            usage();
+            exit(0);
+            return false;
+        },
+        "Print this help message");
+    registerOption(
+        "--version", nullptr,
+        [this](const char *) {
+            std::cerr << binaryName << std::endl;
+            std::cerr << "Version " << compilerVersion << std::endl;
+            exit(0);
+            return false;
+        },
+        "Print compiler version");
+    registerOption(
+        "-I", "path",
+        [this](const char *arg) {
+            preprocessor_options += std::string(" -I") + arg;
+            return true;
+        },
+        "Specify include path (passed to preprocessor)");
+    registerOption(
+        "-D", "arg=value",
+        [this](const char *arg) {
+            preprocessor_options += std::string(" -D") + arg;
+            return true;
+        },
+        "Define macro (passed to preprocessor)");
+    registerOption(
+        "-U", "arg",
+        [this](const char *arg) {
+            preprocessor_options += std::string(" -U") + arg;
+            return true;
+        },
+        "Undefine macro (passed to preprocessor)");
+    registerOption(
+        "-E", nullptr,
+        [this](const char *) {
+            doNotCompile = true;
+            return true;
+        },
+        "Preprocess only, do not compile (prints program on stdout)");
+    registerOption(
+        "--p4v", "{14|16}",
+        [this](const char *arg) {
+            if (!strcmp(arg, "1.0") || !strcmp(arg, "14")) {
+                langVersion = ParserOptions::FrontendVersion::P4_14;
+            } else if (!strcmp(arg, "1.2") || !strcmp(arg, "16")) {
+                langVersion = ParserOptions::FrontendVersion::P4_16;
+            } else {
+                ::error(ErrorType::ERR_INVALID, "Illegal language version %1%",
+                        arg);
+                return false;
+            }
+            return true;
+        },
+        "[Deprecated; use --std instead] Specify language version to compile.",
+        OptionFlags::Hide);
+    registerOption(
+        "--std", "{p4-14|p4-16}",
+        [this](const char *arg) {
+            if (!strcmp(arg, "14") || !strcmp(arg, "p4-14")) {
+                langVersion = ParserOptions::FrontendVersion::P4_14;
+            } else if (!strcmp(arg, "16") || !strcmp(arg, "p4-16")) {
+                langVersion = ParserOptions::FrontendVersion::P4_16;
+            } else {
+                ::error(ErrorType::ERR_INVALID, "Illegal language version %1%",
+                        arg);
+                return false;
+            }
+            return true;
+        },
+        "Specify language version to compile.");
+    registerOption(
+        "--nocpp", nullptr,
+        [this](const char *) {
+            doNotPreprocess = true;
+            return true;
+        },
+        "Skip preprocess, assume input file is already preprocessed.");
+    registerOption(
+        "--disable-annotations", "annotations",
+        [this](const char *arg) {
+            auto copy = strdup(arg);
+            while (auto name = strsep(&copy, ","))
+                disabledAnnotations.insert(name);
+            return true;
+        },
+        "Specify a (comma separated) list of annotations that should be "
+        "ignored by\n"
+        "the compiler. A warning will be printed that the annotation is "
+        "ignored",
+        OptionFlags::OptionalArgument);
+    registerOption(
+        "--Wdisable", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
                 P4CContext::get().setDiagnosticAction(diagnostic,
@@ -111,10 +143,12 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
                 P4CContext::get().setDefaultWarningDiagnosticAction(action);
             }
             return true;
-        }, "Disable a compiler diagnostic, or disable all warnings if no "
-           "diagnostic is specified.",
+        },
+        "Disable a compiler diagnostic, or disable all warnings if no "
+        "diagnostic is specified.",
         OptionFlags::OptionalArgument);
-    registerOption("--Wwarn", "diagnostic",
+    registerOption(
+        "--Wwarn", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
                 P4CContext::get().setDiagnosticAction(diagnostic,
@@ -124,10 +158,12 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
                 P4CContext::get().setDefaultWarningDiagnosticAction(action);
             }
             return true;
-        }, "Report a warning for a compiler diagnostic, or treat all warnings "
-           "as warnings (the default) if no diagnostic is specified.",
+        },
+        "Report a warning for a compiler diagnostic, or treat all warnings "
+        "as warnings (the default) if no diagnostic is specified.",
         OptionFlags::OptionalArgument);
-    registerOption("--Werror", "diagnostic",
+    registerOption(
+        "--Werror", "diagnostic",
         [](const char *diagnostic) {
             if (diagnostic) {
                 P4CContext::get().setDiagnosticAction(diagnostic,
@@ -137,73 +173,66 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
                 P4CContext::get().setDefaultWarningDiagnosticAction(action);
             }
             return true;
-        }, "Report an error for a compiler diagnostic, or treat all warnings as "
-           "errors if no diagnostic is specified.",
+        },
+        "Report an error for a compiler diagnostic, or treat all warnings as "
+        "errors if no diagnostic is specified.",
         OptionFlags::OptionalArgument);
-    registerOption("--maxErrorCount", "errorCount",
-                   [](const char *arg) {
-                       auto maxError = strtoul(arg, nullptr, 10);
-                       P4CContext::get().errorReporter().setMaxErrorCount(maxError);
-                       return true; },
-                   "Set the maximum number of errors to display before failing.");
-    registerOption("--testJson", nullptr,
-                    [this](const char*) { debugJson = true; return true; },
-                    "[Compiler debugging] Dump and undump the IR");
-    registerOption("-T", "loglevel",
-                   [](const char* arg) { Log::addDebugSpec(arg); return true; },
-                   "[Compiler debugging] Adjust logging level per file (see below)");
-    registerOption("-v", nullptr,
-                   [](const char*) { Log::increaseVerbosity(); return true; },
-                   "[Compiler debugging] Increase verbosity level (can be repeated)");
-
-    registerUsage("loglevel format is:\n"
-                  "  sourceFile:level,...,sourceFile:level\n"
-                  "where 'sourceFile' is a compiler source file and\n"
-                  "'level' is the verbosity level for LOG messages in that file");
-    registerOption("--ndebug", nullptr,
-                   [this](const char*) { ndebug = true; return true; },
-                  "Compile program in non-debug mode.\n");
-    registerOption("--excludeMidendPasses", "pass1[,pass2]",
-                   [this](const char* arg) {
-                      excludeMidendPasses = true;
-                      auto copy = strdup(arg);
-                      while (auto pass = strsep(&copy, ","))
-                          passesToExcludeMidend.push_back(pass);
-                      return true;
-                   },
-                   "Exclude passes from midend passes whose name is equal\n"
-                   "to one of `passX' strings.\n");
-    registerOption("--p4runtime-file", "file",
-                   [this](const char* arg) { p4RuntimeFile = arg; return true; },
-                   "Write a P4Runtime control plane API description to the specified file.\n"
-                   "[Deprecated; use '--p4runtime-files' instead].");
-    registerOption("--p4runtime-entries-file", "file",
-                   [this](const char* arg) { p4RuntimeEntriesFile = arg; return true; },
-                   "Write static table entries as a P4Runtime WriteRequest message"
-                   "to the specified file.\n"
-                   "[Deprecated; use '--p4runtime-entries-files' instead].");
-    registerOption("--top4", "pass1[,pass2]",
-                   [this](const char* arg) {
-                       auto copy = strdup(arg);
-                       while (auto pass = strsep(&copy, ","))
-                           top4.push_back(pass);
-                       return true;
-                   },
-                   "[Compiler debugging] Dump the P4 representation after\n"
-                   "passes whose name contains one of `passX' substrings.\n"
-                   "When '-v' is used this will include the compiler IR.\n");
-    registerOption("--dump", "folder",
-                   [this](const char* arg) { dumpFolder = arg; return true; },
-                   "[Compiler debugging] Folder where P4 programs are dumped\n");
     registerOption("--loopsUnroll", nullptr,
                    [this](const char*) { loopsUnrolling = true; return true; },
                    "Unrolling all parser's loops");
+    registerOption(
+        "--maxErrorCount", "errorCount",
+        [](const char *arg) {
+            auto maxError = strtoul(arg, nullptr, 10);
+            P4CContext::get().errorReporter().setMaxErrorCount(maxError);
+            return true;
+        },
+        "Set the maximum number of errors to display before failing.");
+    registerOption(
+        "-T", "loglevel",
+        [](const char *arg) {
+            Log::addDebugSpec(arg);
+            return true;
+        },
+        "[Compiler debugging] Adjust logging level per file (see below)");
+    registerOption(
+        "-v", nullptr,
+        [](const char *) {
+            Log::increaseVerbosity();
+            return true;
+        },
+        "[Compiler debugging] Increase verbosity level (can be repeated)");
+    registerOption(
+        "--top4", "pass1[,pass2]",
+        [this](const char *arg) {
+            auto copy = strdup(arg);
+            while (auto pass = strsep(&copy, ","))
+                top4.push_back(pass);
+            return true;
+        },
+        "[Compiler debugging] Dump the P4 representation after\n"
+        "passes whose name contains one of `passX' substrings.\n"
+        "When '-v' is used this will include the compiler IR.\n");
+    registerOption(
+        "--dump", "folder",
+        [this](const char *arg) {
+            dumpFolder = arg;
+            return true;
+        },
+        "[Compiler debugging] Folder where P4 programs are dumped\n");
+    registerUsage(
+        "loglevel format is:\n"
+        "  sourceFile:level,...,sourceFile:level\n"
+        "where 'sourceFile' is a compiler source file and\n"
+        "'level' is the verbosity level for LOG messages in that file");
 }
 
 void ParserOptions::setInputFile() {
     if (remainingOptions.size() > 1) {
-        ::error(ErrorType::ERR_OVERLIMIT, "Only one input file must be specified: %s",
-                cstring::join(remainingOptions.begin(), remainingOptions.end(), ","));
+        ::error(ErrorType::ERR_OVERLIMIT,
+                "Only one input file must be specified: %s",
+                cstring::join(remainingOptions.begin(), remainingOptions.end(),
+                              ","));
         usage();
         exit(1);
     } else if (remainingOptions.size() == 0) {
@@ -217,10 +246,11 @@ void ParserOptions::setInputFile() {
 
 namespace {
 
-bool setIncludePathIfExists(const char*& includePathOut,
-                            const char* possiblePath) {
+bool setIncludePathIfExists(const char *&includePathOut,
+                            const char *possiblePath) {
     struct stat st;
-    if (!(stat(possiblePath, &st) >= 0 && S_ISDIR(st.st_mode))) return false;
+    if (!(stat(possiblePath, &st) >= 0 && S_ISDIR(st.st_mode)))
+        return false;
     if (auto path = realpath(possiblePath, NULL))
         includePathOut = path;
     else
@@ -228,9 +258,10 @@ bool setIncludePathIfExists(const char*& includePathOut,
     return true;
 }
 
-}  // namespace
+} // namespace
 
-std::vector<const char*>* ParserOptions::process(int argc, char* const argv[]) {
+std::vector<const char *> *ParserOptions::process(int argc,
+                                                  char *const argv[]) {
     char buffer[PATH_MAX];
 
     snprintf(buffer, sizeof(buffer), "%s", exename(argv[0]));
@@ -240,11 +271,13 @@ std::vector<const char*>* ParserOptions::process(int argc, char* const argv[]) {
         snprintf(p, buffer + sizeof(buffer) - p, "p4include");
         if (!setIncludePathIfExists(p4includePath, buffer)) {
             snprintf(p, buffer + sizeof(buffer) - p, "../p4include");
-            setIncludePathIfExists(p4includePath, buffer); }
+            setIncludePathIfExists(p4includePath, buffer);
+        }
         snprintf(p, buffer + sizeof(buffer) - p, "p4_14include");
         if (!setIncludePathIfExists(p4_14includePath, buffer)) {
             snprintf(p, buffer + sizeof(buffer) - p, "../p4_14include");
-            setIncludePathIfExists(p4_14includePath, buffer); }
+            setIncludePathIfExists(p4_14includePath, buffer);
+        }
     }
 
     auto remainingOptions = Util::Options::process(argc, argv);
@@ -252,21 +285,10 @@ std::vector<const char*>* ParserOptions::process(int argc, char* const argv[]) {
     return remainingOptions;
 }
 
-void ParserOptions::validateOptions() const {
-    if (!p4RuntimeFile.isNullOrEmpty()) {
-        ::warning(ErrorType::WARN_DEPRECATED,
-                  "'--p4runtime-file' and '--p4runtime-format' are deprecated, "
-                  "consider using '--p4runtime-files' instead");
-    }
-    if (!p4RuntimeEntriesFile.isNullOrEmpty()) {
-        ::warning(ErrorType::WARN_DEPRECATED,
-                  "'--p4runtime-entries-file' is deprecated, "
-                  "consider using '--p4runtime-entries-files' instead");
-    }
-}
+void ParserOptions::validateOptions() const {}
 
-FILE* ParserOptions::preprocess() {
-    FILE* in = nullptr;
+FILE *ParserOptions::preprocess() {
+    FILE *in = nullptr;
 
     if (file == "-") {
         file = "<stdin>";
@@ -280,14 +302,17 @@ FILE* ParserOptions::preprocess() {
         // the p4c driver sets environment variables for include
         // paths.  check the environment and add these to the command
         // line for the preprocessor
-        char * driverP4IncludePath =
-          isv1() ? getenv("P4C_14_INCLUDE_PATH") : getenv("P4C_16_INCLUDE_PATH");
-        cmd += cstring(" -C -undef -nostdinc -x assembler-with-cpp") + " " + preprocessor_options
-            + (driverP4IncludePath ? " -I" + cstring(driverP4IncludePath) : "")
-            + " -I" + (isv1() ? p4_14includePath : p4includePath) + " " + file;
+        char *driverP4IncludePath = isv1() ? getenv("P4C_14_INCLUDE_PATH")
+                                           : getenv("P4C_16_INCLUDE_PATH");
+        cmd +=
+            cstring(" -C -undef -nostdinc -x assembler-with-cpp") + " " +
+            preprocessor_options +
+            (driverP4IncludePath ? " -I" + cstring(driverP4IncludePath) : "") +
+            " -I" + (isv1() ? p4_14includePath : p4includePath) + " " + file;
 
         if (Log::verbose())
-            std::cerr << "Invoking preprocessor " << std::endl << cmd << std::endl;
+            std::cerr << "Invoking preprocessor " << std::endl
+                      << cmd << std::endl;
         in = popen(cmd.c_str(), "r");
         if (in == nullptr) {
             ::error(ErrorType::ERR_IO, "Error invoking preprocessor");
@@ -310,14 +335,15 @@ FILE* ParserOptions::preprocess() {
     return in;
 }
 
-void ParserOptions::closeInput(FILE* inputStream) const {
+void ParserOptions::closeInput(FILE *inputStream) const {
     if (close_input) {
         int exitCode = pclose(inputStream);
         if (WIFEXITED(exitCode) && WEXITSTATUS(exitCode) == 4)
             ::error(ErrorType::ERR_IO, "input file %s does not exist", file);
         else if (exitCode != 0)
             ::error(ErrorType::ERR_IO,
-                    "Preprocessor returned exit code %d; aborting compilation", exitCode);
+                    "Preprocessor returned exit code %d; aborting compilation",
+                    exitCode);
     }
 }
 
@@ -325,7 +351,8 @@ void ParserOptions::closeInput(FILE* inputStream) const {
 // folder/file-suffix.ext
 static cstring makeFileName(cstring folder, cstring name, cstring baseSuffix) {
     Util::PathName filename(name);
-    Util::PathName newName(filename.getBasename() + baseSuffix + "." + filename.getExtension());
+    Util::PathName newName(filename.getBasename() + baseSuffix + "." +
+                           filename.getExtension());
     auto result = Util::PathName(folder).join(newName.toString());
     return result.toString();
 }
@@ -334,13 +361,10 @@ bool ParserOptions::isv1() const {
     return langVersion == ParserOptions::FrontendVersion::P4_14;
 }
 
-bool ParserOptions::enable_intrinsic_metadata_fix() {
-    return true;
-}
-
-void ParserOptions::dumpPass(const char* manager, unsigned seq, const char* pass,
-                               const IR::Node* node) const {
-    if (strncmp(pass, "P4::", 4) == 0) pass += 4;
+void ParserOptions::dumpPass(const char *manager, unsigned seq,
+                             const char *pass, const IR::Node *node) const {
+    if (strncmp(pass, "P4::", 4) == 0)
+        pass += 4;
     cstring name = cstring(manager) + "_" + Util::toString(seq) + "_" + pass;
     if (Log::verbose())
         std::cerr << name << std::endl;
@@ -348,14 +372,16 @@ void ParserOptions::dumpPass(const char* manager, unsigned seq, const char* pass
     for (auto s : top4) {
         bool match = false;
         try {
-           auto s_regex = std::regex(s, std::regex_constants::ECMAScript);
+            auto s_regex = std::regex(s, std::regex_constants::ECMAScript);
             // we use regex_search instead of regex_match
             // regex_match compares the regex against the entire string
             // regex_search checks if the regex is contained as substring
             match = std::regex_search(name.begin(), name.end(), s_regex);
         } catch (const std::regex_error &e) {
-            ::error(ErrorType::ERR_INVALID, "Malformed toP4 regex string \"%s\".\n"
-                    "The regex matcher follows ECMAScript syntax.", s);
+            ::error(ErrorType::ERR_INVALID,
+                    "Malformed toP4 regex string \"%s\".\n"
+                    "The regex matcher follows ECMAScript syntax.",
+                    s);
             exit(1);
         }
         if (match) {
@@ -371,7 +397,7 @@ void ParserOptions::dumpPass(const char* manager, unsigned seq, const char* pass
                     std::cerr << "Writing program to " << fileName << std::endl;
                 P4::ToP4 toP4(stream, Log::verbose(), file);
                 node->apply(toP4);
-                delete stream;  // close the file
+                delete stream; // close the file
             }
             break;
         }
@@ -393,25 +419,23 @@ DebugHook ParserOptions::getDebugHook() const {
     return dp;
 }
 
-/* static */ P4CContext& P4CContext::get() {
+/* static */ P4CContext &P4CContext::get() {
     return CompileContextStack::top<P4CContext>();
 }
 
-const P4CConfiguration& P4CContext::getConfig() {
-    if (CompileContextStack::isEmpty()) return DefaultP4CConfiguration::get();
+const P4CConfiguration &P4CContext::getConfig() {
+    if (CompileContextStack::isEmpty())
+        return DefaultP4CConfiguration::get();
     return get().getConfigImpl();
 }
 
 bool P4CContext::isRecognizedDiagnostic(cstring diagnostic) {
     static const std::unordered_set<cstring> recognizedDiagnostics = {
-        "uninitialized_out_param",
-        "uninitialized_use",
-        "unknown_diagnostic"
-    };
+        "uninitialized_out_param", "uninitialized_use", "unknown_diagnostic"};
 
     return recognizedDiagnostics.count(diagnostic);
 }
 
-const P4CConfiguration& P4CContext::getConfigImpl() {
+const P4CConfiguration &P4CContext::getConfigImpl() {
     return DefaultP4CConfiguration::get();
 }
