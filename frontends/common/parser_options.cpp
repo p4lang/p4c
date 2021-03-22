@@ -221,9 +221,8 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
         },
         "[Compiler debugging] Folder where P4 programs are dumped\n");
     registerUsage(
-        "loglevel format is:\n"
-        "  sourceFile:level,...,sourceFile:level\n"
-        "where 'sourceFile' is a compiler source file and\n"
+        "loglevel format is: \"sourceFile:level,...,sourceFile:level\"\n"
+        "where 'sourceFile' is a compiler source file and "
         "'level' is the verbosity level for LOG messages in that file");
 }
 
