@@ -110,21 +110,17 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	extract h
 	table tbl_0
-	jmph LABEL_0TRUE
-	jmp LABEL_0END
-	LABEL_0TRUE :	table tbl_ifHit
+	jmpnh LABEL_0END
+	table tbl_ifHit
 	LABEL_0END :	table tbl_0
-	jmpnh LABEL_1TRUE
-	jmp LABEL_1END
-	LABEL_1TRUE :	table tbl_ifMiss
+	jmph LABEL_1END
+	table tbl_ifMiss
 	LABEL_1END :	table tbl_0
-	jmpnh LABEL_2TRUE
-	jmp LABEL_2END
-	LABEL_2TRUE :	table tbl_ifMiss_0
+	jmph LABEL_2END
+	table tbl_ifMiss_0
 	LABEL_2END :	table tbl_0
-	jmph LABEL_3TRUE
-	jmp LABEL_3END
-	LABEL_3TRUE :	table tbl_ifHit_0
+	jmpnh LABEL_3END
+	table tbl_ifHit_0
 	LABEL_3END :	tx m.psa_ingress_output_metadata_egress_port
 }
 
