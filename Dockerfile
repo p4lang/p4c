@@ -17,7 +17,7 @@ ARG ENABLE_UNIFIED_COMPILATION=ON
 # Whether to enable translation validation
 ARG VALIDATION=OFF
 
-# Delegate the build to tools/travis-build.
+# Delegate the build to tools/ci-build.
 COPY . /p4c/
 WORKDIR /p4c/
-RUN chmod u+x tools/travis-build && tools/travis-build
+RUN chmod u+x tools/ci-build.sh && tools/ci-build.sh
