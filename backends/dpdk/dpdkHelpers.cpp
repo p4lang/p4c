@@ -47,7 +47,6 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
         }
     } else if (auto m = right->to<IR::MethodCallExpression>()) {
         auto mi = P4::MethodInstance::resolve(m, refmap, typemap);
-        // std::cerr << m << std::endl;
         if (auto e = mi->to<P4::ExternMethod>()) {
             if (e->originalExternType->getName().name == "Hash") {
                 if (e->expr->arguments->size() == 1) {
@@ -74,14 +73,12 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                         left, e->object->getName(), index);
                 }
             } else {
-                std::cerr << e->originalExternType->getName() << std::endl;
-                BUG("ExternMethod Not implemented");
+                BUG("%1% Not implemented", e->originalExternType->name);
             }
         } else if (auto b = mi->to<P4::BuiltInMethod>()) {
-            std::cerr << b->name.name << std::endl;
-            BUG("BuiltInMethod Not Implemented");
+            BUG("%1% Not Implemented", b->name);
         } else {
-            BUG("MethodInstance Not implemented");
+            BUG("%1% Not implemented", m);
         }
     } else if (right->is<IR::Operation_Unary>() && !right->is<IR::Member>()) {
         if (auto ca = right->to<IR::Cast>()) {
@@ -253,12 +250,11 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
                                 new IR::DpdkApplyStatement(a->object->getName()));
                         if (is_and) {
                             instructions.push_back(
-                                    new IR::DpdkJmpHitStatement(true_label));
+                                    new IR::DpdkJmpMissStatement(false_label));
                         } else {
                             instructions.push_back(
-                                    new IR::DpdkJmpMissStatement(true_label));
+                                    new IR::DpdkJmpHitStatement(true_label));
                         }
-                        return false;
                     }
                 } else {
                     BUG("%1%: not implemented.", expr);
@@ -276,7 +272,8 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
         }
         return is_and;
     } else if (auto lnot = expr->to<IR::LNot>()) {
-        return generate(lnot->expr, true_label, false_label, false);
+        generate(lnot->expr, false_label, true_label, false);
+        return is_and;
     } else {
         BUG("%1%: not implemented", expr);
     }
