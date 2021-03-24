@@ -29,7 +29,8 @@ Doxyfile \
 Doxymain.md \
 LICENSE \
 README.md \
-install_deps.sh
+install_deps.sh \
+autogen.sh
 
 # 'travis' files, used by install_deps.sh to install some dependencies
 EXTRA_DIST += \

@@ -129,7 +129,7 @@ class NotificationsListener {
         cb(hdr, data);
 
       } else {
-        std::cerr << "Unknow notification type\n";
+        std::cerr << "Unknown notification type\n";
       }
     }
   }

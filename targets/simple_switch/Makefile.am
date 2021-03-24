@@ -21,7 +21,8 @@ lib_LTLIBRARIES = libsimpleswitch_runner.la
 libsimpleswitch_la_SOURCES = \
 simple_switch.cpp \
 simple_switch.h \
-primitives.cpp
+primitives.cpp \
+register_access.h
 
 libsimpleswitch_runner_la_SOURCES = \
 runner.cpp
