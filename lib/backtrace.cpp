@@ -1,5 +1,5 @@
 /*
-Copyright 2019-present Barefoot Networks, Inc. 
+Copyright 2019-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -34,7 +34,7 @@ void backtrace_fill_stacktrace(std::string &msg, void *const*backtrace, int size
     free(strings);
 }
 
-#ifdef __GLIBC__
+#if defined(__GLIBC__) && !defined(_FUNCTEXCEPT_H)
 /* DANGER -- overrides for glibc++ exception throwers to include a stack trace.
  * correct functions depends on library internals, so may not work on some versions
  * and will fail with non-GNU libc++ */

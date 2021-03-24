@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+#include "gc.h"
 
 #include "config.h"
 #if HAVE_LIBGC
@@ -22,7 +23,6 @@ limitations under the License.
 #include <unistd.h>
 #include <new>
 #include "log.h"
-#include "gc.h"
 #include "cstring.h"
 #include "n4.h"
 #include "backtrace.h"
@@ -34,13 +34,15 @@ limitations under the License.
 #endif
 
 static bool done_init, started_init;
+
+// One can disable the GC, e.g., to run under Valgrind, by editing config.h
+#if HAVE_LIBGC
+
+#ifndef GC_CPP_H
 // emergency pool to allow a few extra allocations after a bad_alloc is thrown so we
 // can generate reasonable errors, a stack trace, etc
 static char emergency_pool[16*1024];
 static char *emergency_ptr;
-
-// One can disable the GC, e.g., to run under Valgrind, by editing config.h
-#if HAVE_LIBGC
 void *operator new(std::size_t size) {
     /* DANGER -- on OSX, can't safely call the garbage collector allocation
      * routines from a static global constructor without manually initializing
@@ -60,6 +62,7 @@ void *operator new(std::size_t size) {
         throw backtrace_exception<std::bad_alloc>(); }
     return rv;
 }
+
 void operator delete(void *p) _GLIBCXX_USE_NOEXCEPT {
     if (p >= emergency_pool && p < emergency_pool + sizeof(emergency_pool))
         return;
@@ -68,6 +71,7 @@ void operator delete(void *p) _GLIBCXX_USE_NOEXCEPT {
 
 void *operator new[](std::size_t size) { return ::operator new(size); }
 void operator delete[](void *p) _GLIBCXX_USE_NOEXCEPT { ::operator delete(p); }
+#endif // GC_CPP_H
 
 void *realloc(void *ptr, size_t size) {
     if (!done_init) {

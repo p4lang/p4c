@@ -40,6 +40,7 @@ OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
 OPTION (ENABLE_GC "Use libgc" ON)
 OPTION (ENABLE_MULTITHREAD "Use multithreading" OFF)
 OPTION (ENABLE_GMP "Use GMP library" ON)
+OPTION (BUILD_STATIC_RELEASE "Build a statically linked release binary" OFF)
 
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
 
@@ -79,6 +80,14 @@ include(UnifiedBuild)
 set (P4C_CXX_FLAGS "")
 set (P4C_LIB_DEPS)
 
+# set the required options for a static release build
+if (BUILD_STATIC_RELEASE)
+  message(STATUS "Building static release binaries")
+  set(Boost_USE_STATIC_LIBS ON)
+  set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+  set(CMAKE_EXE_LINKER_FLAGS "-static")
+endif ()
+
 # required tools and libraries
 find_package (PythonInterp 3 REQUIRED)
 find_package (FLEX 2.0 REQUIRED)
@@ -91,6 +100,7 @@ find_package (Protobuf 3.0.0 REQUIRED)
 if (ENABLE_PROTOBUF_STATIC)
   set(CMAKE_FIND_LIBRARY_SUFFIXES ${SAVED_CMAKE_FIND_LIBRARY_SUFFIXES})
 endif ()
+set (CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 # The boost graph headers are optional and only required by the graphs backend
 find_package (Boost QUIET COMPONENTS graph)
 if (Boost_FOUND)
@@ -102,7 +112,7 @@ find_package (Boost REQUIRED COMPONENTS iostreams)
 # otherwise ordered_map code tries to use boost::get (graph)
 add_definitions ("-DBOOST_NO_ARGUMENT_DEPENDENT_LOOKUP")
 if (ENABLE_GC)
-  find_package (LibGc 7.2.0 REQUIRED)
+  find_package (LibGc 7.4.2 REQUIRED)
   set (HAVE_LIBGC 1)
 endif ()
 if (ENABLE_MULTITHREAD)
@@ -193,6 +203,11 @@ add_cxx_compiler_option ("-Wextra")
 add_cxx_compiler_option ("-Wno-overloaded-virtual")
 add_cxx_compiler_option ("-Wno-deprecated")
 add_cxx_compiler_option ("-Wno-deprecated-declarations")
+# we want to optimize the binary size for a static release binary
+if (BUILD_STATIC_RELEASE)
+  add_cxx_compiler_option ("-flto")
+endif ()
+# Enable/disable runtime exceptions on nullpointer dereferencing
 # add_cxx_compiler_option ("-fsanitize=null")
 
 # If we're on GCC, use the gold linker if available.

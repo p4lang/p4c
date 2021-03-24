@@ -31,7 +31,11 @@ add_definitions(-DGTEST_HAS_SEH=0)
 add_definitions(-DGTEST_HAS_PTHREAD=0)
 
 # Build the GTest library itself.
-add_library(gtest ${GTEST_ROOT}/src/gtest-all.cc)
+if (BUILD_STATIC_RELEASE)
+  add_library(gtest STATIC ${GTEST_ROOT}/src/gtest-all.cc)
+else()
+  add_library(gtest ${GTEST_ROOT}/src/gtest-all.cc)
+endif ()
 
 set (GTEST_UNITTEST_SOURCES
   gtest/arch_test.cpp

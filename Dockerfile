@@ -10,12 +10,13 @@ ARG MAKEFLAGS=-j2
 # testing; in this case, the source code and build-only dependencies will not be
 # removed from the image.
 ARG IMAGE_TYPE=build
-
 # Whether to do a unified build.
 ARG ENABLE_UNIFIED_COMPILATION=ON
-
 # Whether to enable translation validation
 ARG VALIDATION=OFF
+# This creates a release build that includes link time optimization and links
+# all libraries statically.
+ARG BUILD_STATIC_RELEASE=OFF
 
 # Delegate the build to tools/ci-build.
 COPY . /p4c/
