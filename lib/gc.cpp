@@ -71,7 +71,7 @@ void operator delete(void *p) _GLIBCXX_USE_NOEXCEPT {
 
 void *operator new[](std::size_t size) { return ::operator new(size); }
 void operator delete[](void *p) _GLIBCXX_USE_NOEXCEPT { ::operator delete(p); }
-#endif // GC_CPP_H
+#endif  // GC_CPP_H
 
 void *realloc(void *ptr, size_t size) {
     if (!done_init) {
