@@ -14,9 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+
 #include <time.h>
 #include "ir.h"
 #include "lib/log.h"
+
+#include "visitor.h"
 
 /** @class Visitor::ChangeTracker
  *  @brief Assists visitors in traversing the IR.
@@ -63,7 +66,7 @@ class Visitor::ChangeTracker {
      * `start(@final); finish(@final);` were invoked.
      *
      * @return true if the node has changed or been removed or coalesced.
-     * 
+     *
      * @exception Util::CompilerBug This method fails if `start(@orig)` has not
      * previously been invoked.
      */
@@ -113,7 +116,7 @@ class Visitor::ChangeTracker {
      *  and we don't want to visit @n again the next time we see it.
      * That is, `start(@n)` has been invoked, followed by `finish(@n)`,
      * and the visitOnce field is true.
-     * 
+     *
      * @return true if @n has been visited and the visitor is finished and visitOnce is true
      */
     bool done(const IR::Node *n) const {

@@ -16,6 +16,8 @@ limitations under the License.
 
 #include "ir.h"
 
+#include "dump.h"
+
 namespace {
 class IRDumper : public Inspector {
     std::ostream                &out;

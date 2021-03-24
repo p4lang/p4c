@@ -14,9 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <boost/algorithm/string.hpp>
-#include <boost/optional.hpp>
-#include <boost/range/adaptor/reversed.hpp>
 #include <google/protobuf/text_format.h>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -35,6 +32,10 @@ limitations under the License.
 #include "p4/config/v1/p4types.pb.h"
 #include "p4/v1/p4runtime.pb.h"
 #pragma GCC diagnostic pop
+
+#include <boost/algorithm/string.hpp>
+#include <boost/optional.hpp>
+#include <boost/range/adaptor/reversed.hpp>
 
 #include "frontends/common/options.h"
 #include "frontends/common/resolveReferences/referenceMap.h"

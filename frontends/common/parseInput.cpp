@@ -16,10 +16,11 @@ limitations under the License.
 
 #include "parseInput.h"
 
-#include <boost/optional.hpp>
 #include <cstdio>
 #include <iostream>
 #include <sstream>
+
+#include <boost/optional.hpp>
 
 #include "frontends/parsers/parserDriver.h"
 #include "frontends/p4/fromv1.0/converters.h"

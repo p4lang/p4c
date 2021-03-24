@@ -16,11 +16,12 @@ limitations under the License.
 
 #include "programStructure.h"
 
+#include <set>
+#include <algorithm>
+
 #include <boost/iostreams/device/file_descriptor.hpp>
 #include <boost/iostreams/stream.hpp>
 
-#include <set>
-#include <algorithm>
 
 #include "lib/path.h"
 #include "lib/bitops.h"
