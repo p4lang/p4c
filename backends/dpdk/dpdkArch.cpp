@@ -418,8 +418,7 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
         code_block->push_back(a);
         return new IR::BlockStatement(*code_block);
     } else {
-        std::cerr << right->node_type_name() << std::endl;
-        BUG("not implemented");
+        BUG("%1% not implemented", a);
     }
     return a;
 }
