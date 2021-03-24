@@ -115,9 +115,9 @@ class ParserStructure {
     void calls(const IR::ParserState* caller, const IR::ParserState* callee)
     { callGraph->calls(caller, callee); }
 
-    void analyze(ReferenceMap* refMap, TypeMap* typeMap, bool unroll, bool& hasOutOfboundState);
+    bool analyze(ReferenceMap* refMap, TypeMap* typeMap, bool unroll);
     /// check reachability for usage of header stack
-    bool reachableHSUsage(IR::ID id, ParserStateInfo* state);
+    bool reachableHSUsage(IR::ID id, const ParserStateInfo* state) const;
 
  protected:
     /// evaluates rechable states with HS operations for each path.
@@ -162,10 +162,7 @@ class ParserRewriter : public PassManager {
         addPasses({
             new AnalyzeParser(refMap, &current),
             [this, refMap, typeMap, unroll](void) {
-                current.analyze(refMap, typeMap, unroll, hasOutOfboundState); },
-#if 0
-            unroll ? new ParserUnroller(refMap, typeMap, &current) : 0,
-#endif
+                hasOutOfboundState = current.analyze(refMap, typeMap, unroll); },
         });
     }
 };

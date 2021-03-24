@@ -200,10 +200,22 @@ const char *relPath = "../testdata/p4_16_samples/";
     #include <chrono>
 #endif
 
+const IR::P4Parser* getParser(const IR::P4Program* program) {
+    cstring parserName = "MyParser";
+   /* std::function<bool(const IR::IDeclaration*)> filter =
+            [parserName](const IR::IDeclaration* d)
+            { CHECK_NULL(d); return d->getName().name.find(parserName.c_str()) != nullptr; };*/
+    std::function<bool(const IR::IDeclaration*)> filter =
+            [parserName](const IR::IDeclaration* d)
+            { CHECK_NULL(d); return d->is<IR::P4Parser>(); };
+    const auto* newDeclVector = program->getDeclarations()->where(filter)->toVector();
+    return (*newDeclVector)[0]->to<IR::P4Parser>();
+}
+
 /// Rewrites parser
 std::pair<const IR::P4Parser*, const IR::P4Parser*> rewriteParser(const IR::P4Program* program,
                                                                   CompilerOptions& options) {
-    P4::FrontEnd frontend;
+   P4::FrontEnd frontend;
     program = frontend.run(options, program);
     P4::ReferenceMap    refMap;
     P4::TypeMap         typeMap;
@@ -223,29 +235,27 @@ std::pair<const IR::P4Parser*, const IR::P4Parser*> rewriteParser(const IR::P4Pr
     auto msInt = duration_cast<milliseconds>(t2 - t1);
     std::cout << msInt.count() << std::endl;
 #endif
-    const auto newDeclVector = res->getDeclsByName("MyParser")->toVector();
-    const auto* newDecl = (*newDeclVector)[0];
-    const auto oldDeclVector = program->getDeclsByName("MyParser")->toVector();
-    const auto* oldDecl = (*oldDeclVector)[0];
-    return std::make_pair(oldDecl->to<IR::P4Parser>(), newDecl->to<IR::P4Parser>());
+    return std::make_pair(getParser(program), getParser(res));
 }
 
 /// Loads example from a file
 const IR::P4Program* load_model(const char* curFile, CompilerOptions& options) {
     setenv("P4C_16_INCLUDE_PATH", "../p4include", 1);
     options.loopsUnrolling = true;
-    options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = P4TEST_VERSION_STRING;
     options.file = relPath;
     options.file += curFile;
     return P4::parseP4File(options);
 }
 
-std::pair<const IR::P4Parser*, const IR::P4Parser*> loadExample(const char *file) {
+std::pair<const IR::P4Parser*, const IR::P4Parser*> loadExample(const char *file,
+        CompilerOptions::FrontendVersion langVersion =
+        CompilerOptions::FrontendVersion::P4_16) {
     AutoCompileContext autoP4TestContext(new P4TestContext);
     auto& options = P4TestContext::get().options();
     const char* argv = "./gtestp4c";
     options.process(1, (char* const*)&argv);
+    options.langVersion = langVersion;
     const IR::P4Program* program = load_model(file, options);
     if (!program)
         return std::make_pair(nullptr, nullptr);
@@ -275,11 +285,12 @@ TEST_F(P4CParserUnroll, test3) {
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() + 2 - 4);
 }
 
-TEST_F(P4CParserUnroll, switch_20160512_p4_16) {
-    auto parsers =  loadExample("parser-unroll-switch_20160512.p4");
+TEST_F(P4CParserUnroll, switch_20160512) {
+    auto parsers =  loadExample("../p4_14_samples/switch_20160512/switch.p4",
+        CompilerOptions::FrontendVersion::P4_14);
     ASSERT_TRUE(parsers.first);
     ASSERT_TRUE(parsers.second);
-    ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() + 2 - 22 -5 - 2);
+    ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() + 2 - 22 - 4 - 2);
 }
 
 TEST_F(P4CParserUnroll, header_stack_access_remover) {
@@ -291,6 +302,13 @@ TEST_F(P4CParserUnroll, header_stack_access_remover) {
 
 TEST_F(P4CParserUnroll, noLoopsAndHeaderStacks) {
     auto parsers =  loadExample("parser-unroll-test5.p4");
+    ASSERT_TRUE(parsers.first);
+    ASSERT_TRUE(parsers.second);
+    ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() + 2);
+}
+
+TEST_F(P4CParserUnroll, t1_Cond) {
+    auto parsers =  loadExample("parser-unroll-t1-cond.p4");
     ASSERT_TRUE(parsers.first);
     ASSERT_TRUE(parsers.second);
     ASSERT_EQ(parsers.first->states.size(), parsers.second->states.size() + 2);
