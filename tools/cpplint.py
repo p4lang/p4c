@@ -55,6 +55,7 @@ import sys
 import sysconfig
 import unicodedata
 import xml.etree.ElementTree
+import fnmatch
 
 # if empty, use defaults
 _valid_extensions = set([])
@@ -6570,6 +6571,8 @@ def ProcessConfigOverrides(filename):
             ProcessHppHeadersOption(val)
           elif name == 'includeorder':
             ProcessIncludeOrderOption(val)
+          elif name == 'filematch':
+            skip = not fnmatch.fnmatch(os.path.basename(filename), val)
           else:
             _cpplint_state.PrintError(
                 'Invalid configuration option (%s) in file %s\n' %
