@@ -1,5 +1,5 @@
 p4c_add_xfail_reason("dpdk"
-  "Duplicates declaration"
+  "declaration not found"
   testdata/p4_16_samples/psa-action-profile1.p4
   testdata/p4_16_samples/psa-action-profile2.p4
   testdata/p4_16_samples/psa-action-profile3.p4
@@ -18,10 +18,6 @@ p4c_add_xfail_reason("dpdk"
   testdata/p4_16_samples/psa-meter6.p4
   testdata/p4_16_samples/psa-test.p4
   testdata/p4_16_samples/psa-register1.p4
-  )
-
-p4c_add_xfail_reason("dpdk"
-  "declaration not found"
   testdata/p4_16_samples/psa-action-selector1.p4
   testdata/p4_16_samples/psa-action-selector2.p4
   testdata/p4_16_samples/psa-action-selector3.p4

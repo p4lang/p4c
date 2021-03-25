@@ -319,10 +319,13 @@ const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Member *m) {
 
 const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Parameter *p) {
     if (auto type = p->type->to<IR::Type_Name>()) {
-        if (type->path->name == info->header_type) {
-            return new IR::Parameter(IR::ID("h"), p->direction, p->type);
+       cstring newName;
+       if (type->path->name == info->header_type) {
+           newName = "h." + p->name;
+           return new IR::Parameter(IR::ID(newName), p->direction, p->type);
         } else if (type->path->name == info->local_metadata_type) {
-            return new IR::Parameter(IR::ID("m"), p->direction, p->type);
+            newName = "m." + p->name;
+            return new IR::Parameter(IR::ID(newName), p->direction, p->type);
         }
     }
     return p;
