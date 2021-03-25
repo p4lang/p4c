@@ -58,13 +58,17 @@ apply {
 	jmpeq INGRESSPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
-	INGRESSPARSERIMPL_ACCEPT :	emit h.ethernet
-	emit h.ipv4
-	extract h.ethernet
-	extract h.ipv4
+	INGRESSPARSERIMPL_ACCEPT :	jmpnv LABEL_0FALSE h.ethernet
 	emit h.ethernet
+	LABEL_0FALSE :	jmpnv LABEL_1FALSE h.ipv4
 	emit h.ipv4
-	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_1FALSE :	extract h.ethernet
+	extract h.ipv4
+	jmpnv LABEL_2FALSE h.ethernet
+	emit h.ethernet
+	LABEL_2FALSE :	jmpnv LABEL_3FALSE h.ipv4
+	emit h.ipv4
+	LABEL_3FALSE :	tx m.psa_ingress_output_metadata_egress_port
 }
 
 

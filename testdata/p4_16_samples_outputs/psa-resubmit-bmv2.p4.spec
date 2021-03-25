@@ -92,12 +92,16 @@ apply {
 	jmp LABEL_0END
 	LABEL_6FALSE :	jmpneq LABEL_0END m.psa_ingress_input_metadata_packet_path 0x6
 	mov h.output_data.word0 0x7
-	LABEL_0END :	emit h.ethernet
-	emit h.output_data
-	extract h.ethernet
+	LABEL_0END :	jmpnv LABEL_8FALSE h.ethernet
 	emit h.ethernet
+	LABEL_8FALSE :	jmpnv LABEL_9FALSE h.output_data
 	emit h.output_data
-	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_9FALSE :	extract h.ethernet
+	jmpnv LABEL_10FALSE h.ethernet
+	emit h.ethernet
+	LABEL_10FALSE :	jmpnv LABEL_11FALSE h.output_data
+	emit h.output_data
+	LABEL_11FALSE :	tx m.psa_ingress_output_metadata_egress_port
 }
 
 

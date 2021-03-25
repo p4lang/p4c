@@ -90,12 +90,14 @@ apply {
 	jmp LABEL_0END
 	LABEL_0FALSE :	mov h.ethernet.srcAddr 0xcafe
 	table tbl_send_to_port
-	LABEL_0END :	emit h.ethernet
-	extract h.ethernet
+	LABEL_0END :	jmpnv LABEL_2FALSE h.ethernet
+	emit h.ethernet
+	LABEL_2FALSE :	extract h.ethernet
 	jmpneq LABEL_1END m.psa_egress_input_metadata_packet_path 0x3
 	mov h.ethernet.etherType 0xface
-	LABEL_1END :	emit h.ethernet
-	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_1END :	jmpnv LABEL_3FALSE h.ethernet
+	emit h.ethernet
+	LABEL_3FALSE :	tx m.psa_ingress_output_metadata_egress_port
 }
 
 
