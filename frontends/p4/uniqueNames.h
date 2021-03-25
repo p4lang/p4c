@@ -80,8 +80,14 @@ class FindSymbols : public Inspector {
     }
     void postorder(const IR::Declaration_Variable* decl) override
     { doDecl(decl); }
-    void postorder(const IR::Declaration_Constant* decl) override
-    { doDecl(decl); }
+    void postorder(const IR::Declaration_Constant* decl) override {
+        // Skip toplevel constants with names like __
+        // We assume that these do not clash and no new symbols with
+        // these names will be added.
+        if (decl->getName().name.startsWith("__") && getParent<IR::P4Program>())
+            return;
+        doDecl(decl);
+    }
     void postorder(const IR::Declaration_Instance* decl) override
     { if (!isTopLevel()) doDecl(decl); }
     void postorder(const IR::P4Table* decl) override

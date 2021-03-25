@@ -128,7 +128,7 @@ P4CTestEnvironment::P4CTestEnvironment() {
     // XXX(seth): We should find a more robust way to locate these headers.
     _coreP4 = readHeader("p4include/core.p4");
     _v1Model = readHeader("p4include/v1model.p4", true,
-                          "V1MODEL_VERSION", P4V1::V1Model::instance.version);
+                          "V1MODEL_VERSION", 20200408);
     _psaP4 = readHeader("p4include/psa.p4", true);
 }
 

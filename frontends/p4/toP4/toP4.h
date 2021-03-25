@@ -247,6 +247,9 @@ class ToP4 : public Inspector {
     bool preorder(const IR::V1Program*) override { return false; }
 };
 
+std::string toP4(const IR::INode* node);
+void dumpP4(const IR::INode* node);
+
 }  // namespace P4
 
 #endif /* _P4_TOP4_TOP4_H_ */

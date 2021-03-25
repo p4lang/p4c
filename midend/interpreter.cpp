@@ -79,7 +79,7 @@ bool SymbolicValueFactory::isFixedWidth(const IR::Type* type) const {
 }
 
 unsigned SymbolicValueFactory::getWidth(const IR::Type* type) const {
-    type = typeMap->getType(type, true);
+    type = typeMap->getTypeType(type, true);
     if (type->is<IR::Type_Bits>())
         return type->to<IR::Type_Bits>()->size;
     if (type->is<IR::Type_Boolean>())
@@ -739,7 +739,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
 
 void ExpressionEvaluator::postorder(const IR::Member* expression) {
     auto type = typeMap->getType(expression, true);
-    if (type->is<IR::Type_MethodBase>()) {
+    if (type->is<IR::Type_MethodBase>() || type->is<IR::Type_Error>()) {
         // not really void, but we can't do anything with this anyway
         set(expression, SymbolicVoid::get());
         return;
@@ -783,7 +783,7 @@ bool ExpressionEvaluator::preorder(const IR::ArrayIndex* expression) {
     visit(expression->left);
     evaluatingLeftValue = lv;
     visit(expression->right);
-    return false;  // prune
+    return true;  // don't prune
 }
 
 void ExpressionEvaluator::postorder(const IR::ArrayIndex* expression) {
@@ -971,7 +971,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
         mi->actualMethodType->returnType->is<IR::Type_Void>()) {
         set(expression, SymbolicVoid::get());
     } else {
-        auto type = typeMap->getType(mi->actualMethodType->returnType, true);
+        auto type = typeMap->getTypeType(mi->actualMethodType->returnType, true);
         auto res = factory->create(type, false);
         set(expression, res);
     }

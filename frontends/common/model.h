@@ -52,17 +52,13 @@ struct Extern_Model : public Type_Model {
 
 /// Param_Model : Elem
 struct Param_Model : public Elem {
-    Type_Model type;
-    unsigned   index;
+    const Type_Model type;
+    const unsigned   index;
     Param_Model(cstring name, Type_Model type, unsigned index) :
             Elem(name), type(type), index(index) {}
 };
 
-class Model {
- public:
-    cstring version;
-    explicit Model(cstring version) : version(version) {}
-};
+class Model {};
 
 }  // namespace Model
 

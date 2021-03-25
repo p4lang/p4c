@@ -104,6 +104,9 @@ const IR::Node* RemoveUnusedDeclarations::process(const IR::IDeclaration* decl) 
     LOG3("Visiting " << decl);
     if (decl->getName().name == IR::ParserState::verify && getParent<IR::P4Program>())
         return decl->getNode();
+    if (decl->getName().name.startsWith("__"))
+        // Internal identifiers, e.g., __v1model_version
+        return decl->getNode();
     if (refMap->isUsed(getOriginal<IR::IDeclaration>()))
         return decl->getNode();
     LOG3("Removing " << getOriginal());
