@@ -1,4 +1,5 @@
 
+
 struct ethernet_t {
 	bit<48> dstAddr
 	bit<48> srcAddr
@@ -36,17 +37,32 @@ metadata instanceof metadata_t
 
 header ethernet instanceof ethernet_t
 
-action multicast args none {
+action send_to_port args none {
 	mov m.psa_ingress_output_metadata_drop 0
-	cast  h.ethernet.dstAddr bit_32 m.psa_ingress_output_metadata_multicast_group
+	mov m.psa_ingress_output_metadata_multicast_group 0x0
+	cast  h.ethernet.dstAddr bit_32 m.psa_ingress_output_metadata_egress_port
 	return
 }
 
-table tbl_multicast {
+action ingress_drop args none {
+	mov m.psa_ingress_output_metadata_drop 1
+	return
+}
+
+table tbl_send_to_port {
 	actions {
-		multicast
+		send_to_port
 	}
-	default_action multicast args none 
+	default_action send_to_port args none 
+	size 0
+}
+
+
+table tbl_ingress_drop {
+	actions {
+		ingress_drop
+	}
+	default_action ingress_drop args none 
 	size 0
 }
 
@@ -54,12 +70,16 @@ table tbl_multicast {
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	extract h.ethernet
-	table tbl_multicast
-	jmpnv LABEL_0FALSE h.ethernet
+	register_write regfile_0 0x1 0x3
+	table tbl_send_to_port
+	jmpneq LABEL_0END h.ethernet.dstAddr 0x0
+	table tbl_ingress_drop
+	LABEL_0END :	jmpnv LABEL_1FALSE h.ethernet
 	emit h.ethernet
-	LABEL_0FALSE :	jmpnv LABEL_1FALSE h.ethernet
+	LABEL_1FALSE :	extract h.ethernet
+	jmpnv LABEL_2FALSE h.ethernet
 	emit h.ethernet
-	LABEL_1FALSE :	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_2FALSE :	tx m.psa_ingress_output_metadata_egress_port
 }
 
 

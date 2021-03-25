@@ -76,8 +76,9 @@ apply {
 	table tbl_send_to_port
 	jmp LABEL_0END
 	LABEL_0FALSE :	table tbl_send_to_port_0
-	LABEL_0END :	emit h.ethernet
-	extract h.ethernet
+	LABEL_0END :	jmpnv LABEL_5FALSE h.ethernet
+	emit h.ethernet
+	LABEL_5FALSE :	extract h.ethernet
 	jmpneq LABEL_1FALSE m.psa_egress_input_metadata_packet_path 0x4
 	mov h.ethernet.etherType 0xface
 	jmp LABEL_1END
@@ -92,8 +93,9 @@ apply {
 	LABEL_3FALSE :	jmpneq LABEL_4END h.ethernet.dstAddr 0x8
 	mov m.psa_egress_output_metadata_clone_session_id 0xb
 	LABEL_4END :	mov h.ethernet.srcAddr 0xcafe
-	LABEL_1END :	emit h.ethernet
-	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_1END :	jmpnv LABEL_6FALSE h.ethernet
+	emit h.ethernet
+	LABEL_6FALSE :	tx m.psa_ingress_output_metadata_egress_port
 }
 
 
