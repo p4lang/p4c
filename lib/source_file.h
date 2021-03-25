@@ -231,9 +231,9 @@ class SourceInfo final {
     { return !this->operator< (rhs); }
 
  private:
-    const InputSources* sources;
-    SourcePosition start;
-    SourcePosition end;
+    const InputSources* sources = nullptr;
+    SourcePosition start = SourcePosition();
+    SourcePosition end = SourcePosition();
 };
 
 class IHasSourceInfo {
