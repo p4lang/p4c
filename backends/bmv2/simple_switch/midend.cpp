@@ -126,10 +126,10 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options, std::ostream* o
             // control plane API, we remove them as well for P4-14 programs.
             isv1 ? new P4::RemoveUnusedActionParameters(&refMap) : nullptr,
             new P4::TypeChecking(&refMap, &typeMap),
-            new P4::MidEndLast(),
             evaluator,
             [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
             options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr,
+            new P4::MidEndLast()
         });
         if (options.listMidendPasses) {
             listPasses(*outStream, "\n");

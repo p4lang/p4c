@@ -145,8 +145,8 @@ MidEnd::MidEnd(CompilerOptions& options, std::ostream* outStream) {
         new P4::MoveActionsToTables(&refMap, &typeMap),
         evaluator,
         [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
-        new P4::MidEndLast(),
-        options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr
+        options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr,
+        new P4::MidEndLast()
     });
     if (options.listMidendPasses) {
         listPasses(*outStream, "\n");
