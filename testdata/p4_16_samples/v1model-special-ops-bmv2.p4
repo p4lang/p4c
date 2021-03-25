@@ -23,7 +23,7 @@ limitations under the License.
 // named "PktInstanceType" in the p4lang/behavioral-model source file
 // targets/simple_switch/simple_switch.h
 
-// https://github.com/p4lang/behavioral-model/blob/master/targets/simple_switch/simple_switch.h#L126-L134
+// https://github.com/p4lang/behavioral-model/blob/main/targets/simple_switch/simple_switch.h#L126-L134
 
 const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_NORMAL        = 0;
 const bit<32> BMV2_V1MODEL_INSTANCE_TYPE_INGRESS_CLONE = 1;

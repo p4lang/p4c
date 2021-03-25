@@ -24,7 +24,7 @@ filegroup(
     if not native.existing_rule("com_github_nelhage_rules_boost"):
         git_repository(
             name = "com_github_nelhage_rules_boost",
-            # Newest commit on master branch as of Jan 22, 2021.
+            # Newest commit on main branch as of Jan 22, 2021.
             commit = "77dbe5a5262c71a2fe2c033677f50aaa0e31090d",
             remote = "https://github.com/nelhage/rules_boost",
             shallow_since = "1611019749 -0800",
@@ -43,7 +43,7 @@ filegroup(
         git_repository(
             name = "com_github_p4lang_p4runtime",
             remote = "https://github.com/p4lang/p4runtime",
-            # Newest commit on master branch as of Jan 22, 2021.
+            # Newest commit on main branch as of Jan 22, 2021.
             commit = "0d40261b67283999bf0f03bd6b40b5374c7aebd0",
             shallow_since = "1611340571 -0800",
             # strip_prefix is broken; we use patch_cmds as a workaround,
