@@ -119,12 +119,9 @@ class FindParameters : public Inspector {
     ReferenceMap* refMap;  // used to generate new names
     RenameMap*    renameMap;
 
-    // If all is true then rename all parameters, else rename only
-    // directional parameters
-    void doParameters(const IR::ParameterList* pl, bool all) {
+    // Rename all parameters
+    void doParameters(const IR::ParameterList* pl) {
         for (auto p : pl->parameters) {
-            if (!all && p->direction == IR::Direction::None)
-                continue;
             cstring newName = refMap->newName(p->name);
             renameMap->setNewName(p, newName);
         }
@@ -134,8 +131,7 @@ class FindParameters : public Inspector {
             refMap(refMap), renameMap(renameMap)
     { CHECK_NULL(refMap); CHECK_NULL(renameMap); setName("FindParameters"); }
     void postorder(const IR::P4Action* action) override {
-        bool inTable = renameMap->isInTable(action);
-        doParameters(action->parameters, !inTable);
+        doParameters(action->parameters);
     }
 };
 
