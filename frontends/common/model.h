@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_FRONTENDS_COMMON_MODEL_H_
-#define P4C_FRONTENDS_COMMON_MODEL_H_
+#ifndef _FRONTENDS_COMMON_MODEL_H_
+#define _FRONTENDS_COMMON_MODEL_H_
 
 #include "lib/cstring.h"
 #include "ir/id.h"
@@ -66,4 +66,4 @@ class Model {
 
 }  // namespace Model
 
-#endif /* P4C_FRONTENDS_COMMON_MODEL_H_ */
+#endif /* _FRONTENDS_COMMON_MODEL_H_ */

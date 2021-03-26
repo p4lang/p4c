@@ -13,8 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-#ifndef P4C_LIB_ERROR_HELPER_H_
-#define P4C_LIB_ERROR_HELPER_H_
+#ifndef _LIB_ERROR_HELPER_H_
+#define _LIB_ERROR_HELPER_H_
 
 #include <boost/format.hpp>
 #include <stdarg.h>
@@ -350,4 +350,4 @@ auto bug_helper(boost::format& f, std::string message, std::string position,
                         std::forward<Args>(args)...);
 }
 
-#endif   // P4C_LIB_ERROR_HELPER_H_
+#endif   // _LIB_ERROR_HELPER_H_

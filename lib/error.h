@@ -16,8 +16,8 @@ limitations under the License.
 
 /* -*-C++-*- */
 
-#ifndef P4C_LIB_ERROR_H_
-#define P4C_LIB_ERROR_H_
+#ifndef _LIB_ERROR_H_
+#define _LIB_ERROR_H_
 
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
@@ -172,4 +172,4 @@ inline void diagnose(DiagnosticAction defaultAction, const char* diagnosticName,
     context.errorReporter().diagnose(action, diagnosticName, format, suffix, args...);
 }
 
-#endif /* P4C_LIB_ERROR_H_ */
+#endif /* _LIB_ERROR_H_ */
