@@ -1,5 +1,5 @@
-#ifndef FRONTENDS_P4_P4ANNOTATIONLEXER_H_
-#define FRONTENDS_P4_P4ANNOTATIONLEXER_H_
+#ifndef FRONTENDS_PARSERS_P4_P4ANNOTATIONLEXER_HPP_
+#define FRONTENDS_PARSERS_P4_P4ANNOTATIONLEXER_HPP_
 
 #include "frontends/parsers/p4/abstractP4Lexer.hpp"
 #include "frontends/parsers/p4/p4parser.hpp"
