@@ -27,4 +27,4 @@ class AbstractP4Lexer {
 
 }  // namespace P4
 
-#endif  /* FRONTENDS_P4_ABSTRACTP4LEXER_H_ */
+#endif  /* FRONTENDS_PARSERS_P4_ABSTRACTP4LEXER_HPP_ */

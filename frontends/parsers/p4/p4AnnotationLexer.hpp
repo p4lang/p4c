@@ -58,4 +58,4 @@ class P4AnnotationLexer : public AbstractP4Lexer {
 
 }  // namespace P4
 
-#endif  /* FRONTENDS_P4_P4ANNOTATIONLEXER_H_ */
+#endif  /* FRONTENDS_PARSERS_P4_P4ANNOTATIONLEXER_HPP_ */
