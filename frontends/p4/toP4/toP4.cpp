@@ -170,9 +170,12 @@ bool ToP4::preorder(const IR::P4Program* program) {
                     const char *p = sourceFile.c_str() + strlen(p4includePath);
                     if (*p == '/') p++;
                     if (P4V1::V1Model::instance.file.name == p) {
-                        std::stringstream buf;
-                        buf << "#define V1MODEL_VERSION " << P4V1::V1Model::instance.version;
-                        builder.appendLine(buf.str()); }
+                        P4V1::getV1ModelVersion g;
+                        program->apply(g);
+                        builder.append("#define V1MODEL_VERSION ");
+                        builder.append(g.version);
+                        builder.appendLine("");
+                    }
                     builder.append("#include <");
                     builder.append(p);
                     builder.appendLine(">");
@@ -1417,4 +1420,17 @@ bool ToP4::preorder(const IR::Path* p) {
     builder.append(p->asString());
     return false;
 }
+
+std::string toP4(const IR::INode* node) {
+    std::stringstream stream;
+    P4::ToP4 toP4(&stream, false);
+    node->getNode()->apply(toP4);
+    return stream.str();
+}
+
+void dumpP4(const IR::INode* node) {
+    auto s = toP4(node);
+    std::cout << s;
+}
+
 }  // namespace P4

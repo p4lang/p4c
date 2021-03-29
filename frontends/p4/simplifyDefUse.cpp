@@ -706,7 +706,6 @@ class FindUninitialized : public Inspector {
 };
 
 class RemoveUnused : public Transform {
-    // TODO: remove transitively unused
     const HasUses* hasUses;
     ReferenceMap*   refMap;
     TypeMap*        typeMap;

@@ -64,7 +64,9 @@ namespace Standard {
 /// "traits" for each extern type, templatized by the architecture name (using
 /// the Arch enum class defined below), as a convenient way to access
 /// architecture-specific names in the unified code.
-enum class Arch { V1MODEL, PSA };
+/// The V1MODEL2020 is the modified v1model.p4 file with a version
+/// >= 20200408
+enum class Arch { V1MODEL, PSA, V1MODEL2020 };
 
 /// Traits for the action profile extern, must be specialized for v1model and
 /// PSA.
@@ -80,6 +82,9 @@ template<> struct ActionProfileTraits<Arch::V1MODEL> {
     }
     static const cstring sizeParamName() { return "size"; }
 };
+
+template<> struct ActionProfileTraits<Arch::V1MODEL2020> :
+            public ActionProfileTraits<Arch::V1MODEL> {};
 
 template<> struct ActionProfileTraits<Arch::PSA> {
     static const cstring name() { return "action profile"; }
@@ -103,6 +108,9 @@ template<> struct ActionSelectorTraits<Arch::V1MODEL> : public ActionProfileTrai
     }
 };
 
+template<> struct ActionSelectorTraits<Arch::V1MODEL2020> :
+            public ActionProfileTraits<Arch::V1MODEL2020> {};
+
 template<> struct ActionSelectorTraits<Arch::PSA> : public ActionProfileTraits<Arch::PSA> {
     static const cstring name() { return "action selector"; }
     static const cstring typeName() {
@@ -122,9 +130,11 @@ template<> struct RegisterTraits<Arch::V1MODEL> {
     // the index of the type parameter for the data stored in the register, in
     // the type parameter list of the extern type declaration
     static size_t dataTypeParamIdx() { return 0; }
-    static boost::optional<size_t> indexTypeParamIdx() {
-        if (P4V1::V1Model::instance.haveIndexTypeParam()) return 1;
-        return boost::none; }
+    static boost::optional<size_t> indexTypeParamIdx() { return boost::none; }
+};
+
+template<> struct RegisterTraits<Arch::V1MODEL2020> : public RegisterTraits<Arch::V1MODEL> {
+    static boost::optional<size_t> indexTypeParamIdx() { return 1; }
 };
 
 template<> struct RegisterTraits<Arch::PSA> {
@@ -177,9 +187,24 @@ template<> struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MO
     static const cstring sizeParamName() {
         return "size";
     }
-    static boost::optional<size_t> indexTypeParamIdx() {
-        if (P4V1::V1Model::instance.haveIndexTypeParam()) return 0;
-        return boost::none; }
+    static boost::optional<size_t> indexTypeParamIdx() { return boost::none; }
+};
+
+template<> struct CounterlikeTraits<Standard::CounterExtern<Standard::Arch::V1MODEL2020> > {
+    static const cstring name() { return "counter"; }
+    static const cstring directPropertyName() {
+        return P4V1::V1Model::instance.tableAttributes.counters.name;
+    }
+    static const cstring typeName() {
+        return P4V1::V1Model::instance.counter.name;
+    }
+    static const cstring directTypeName() {
+        return P4V1::V1Model::instance.directCounter.name;
+    }
+    static const cstring sizeParamName() {
+        return "size";
+    }
+    static boost::optional<size_t> indexTypeParamIdx() { return 0; }
 };
 
 /// @ref CounterlikeTraits<> specialization for @ref CounterExtern for PSA
@@ -217,10 +242,26 @@ template<> struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODE
     static const cstring sizeParamName() {
         return "size";
     }
-    static boost::optional<size_t> indexTypeParamIdx() {
-        if (P4V1::V1Model::instance.haveIndexTypeParam()) return 0;
-        return boost::none; }
+    static boost::optional<size_t> indexTypeParamIdx() { return boost::none; }
 };
+
+template<> struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::V1MODEL2020> > {
+    static const cstring name() { return "meter"; }
+    static const cstring directPropertyName() {
+        return P4V1::V1Model::instance.tableAttributes.meters.name;
+    }
+    static const cstring typeName() {
+        return P4V1::V1Model::instance.meter.name;
+    }
+    static const cstring directTypeName() {
+        return P4V1::V1Model::instance.directMeter.name;
+    }
+    static const cstring sizeParamName() {
+        return "size";
+    }
+    static boost::optional<size_t> indexTypeParamIdx() { return 0; }
+};
+
 
 /// @ref CounterlikeTraits<> specialization for @ref MeterExtern for PSA
 template<> struct CounterlikeTraits<Standard::MeterExtern<Standard::Arch::PSA> > {

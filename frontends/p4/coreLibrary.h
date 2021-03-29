@@ -98,7 +98,7 @@ class P4Exception_Model : public ::Model::Elem {
 class P4CoreLibrary : public ::Model::Model {
  protected:
     P4CoreLibrary() :
-            Model("0.2"), noAction("NoAction"), exactMatch("exact"),
+            noAction("NoAction"), exactMatch("exact"),
             ternaryMatch("ternary"), lpmMatch("lpm"), packetIn(PacketIn()),
             packetOut(PacketOut()), noError(StandardExceptions::NoError),
             packetTooShort(StandardExceptions::PacketTooShort),
