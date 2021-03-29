@@ -57,7 +57,7 @@ if (NOT $ENV{P4C_VERSION} STREQUAL "")
 else()
   # Semantic version numbering: <major>.<minor>.<patch>[-rcX]
   # Examples: 0.5.1, 1.0.0-rc1, 1.0.1-alpha
-  set (P4C_SEM_VERSION_STRING "1.2.0")
+  set (P4C_SEM_VERSION_STRING "1.2.0+g202103291035~a69e52")
   string (REGEX MATCH "([0-9]+)\\.([0-9]+)\\.([0-9]+)([-0-9a-z\\.]*).*"
     __p4c_version ${P4C_SEM_VERSION_STRING})
   set (P4C_VERSION_MAJOR ${CMAKE_MATCH_1})
