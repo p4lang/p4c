@@ -62,7 +62,6 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
             default: {
             }
         }
-
         if (tmp_condition > 8w0) {
             hdr.h.a = 8w0;
         }

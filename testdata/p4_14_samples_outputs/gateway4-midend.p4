@@ -48,13 +48,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._drop") action _drop() {
         mark_to_drop(standard_metadata);
     }
-    @name(".setb1") action setb1(bit<8> val, bit<9> port) {
+    @name(".setb1") action setb1(@name("val") bit<8> val, @name("port") bit<9> port) {
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
-    @name(".setb1") action setb1_2(bit<8> val, bit<9> port) {
-        hdr.data.b1 = val;
-        standard_metadata.egress_spec = port;
+    @name(".setb1") action setb1_2(@name("val") bit<8> val_1, @name("port") bit<9> port_1) {
+        hdr.data.b1 = val_1;
+        standard_metadata.egress_spec = port_1;
     }
     @name(".noop") action noop() {
     }

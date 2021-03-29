@@ -32,7 +32,7 @@ control c2(inout headers hdr, inout metadata meta, inout standard_metadata_t std
 control c3(inout headers hdr, inout metadata meta, inout standard_metadata_t std_meta) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name("c3.a") action a(in bool b_1) {
+    @name("c3.a") action a(@name("b") in bool b_1) {
         hdr.h.x = 8w0;
     }
     @name("c3.t") table t_0 {

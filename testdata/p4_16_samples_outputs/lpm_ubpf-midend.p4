@@ -50,7 +50,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     @name("pipe.hasReturned") bool hasReturned;
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name("pipe.Reject") action Reject(IPv4Address add) {
+    @name("pipe.Reject") action Reject(@name("add") IPv4Address add) {
         mark_to_drop();
         headers.ipv4.srcAddr = add;
     }

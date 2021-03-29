@@ -75,7 +75,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".drop") action drop() {
     }
-    @name(".forward") action forward(bit<48> to) {
+    @name(".forward") action forward(@name("to") bit<48> to) {
         hdr.ethernet.dstAddr = to;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }

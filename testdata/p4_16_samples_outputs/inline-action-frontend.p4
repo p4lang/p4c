@@ -6,7 +6,7 @@ control p(inout bit<1> bt) {
             bt = y0;
         }
         {
-            @name("p.y0_1") bit<1> y0_1 = bt;
+            @name("p.y0") bit<1> y0_1 = bt;
             y0_1 = y0_1 | 1w1;
             bt = y0_1;
         }

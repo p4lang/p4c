@@ -22,7 +22,6 @@ control ctrl() {
             default: {
             }
         }
-
     }
 }
 

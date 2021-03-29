@@ -54,7 +54,7 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @name(".update_pkt_ip_byte_count") action update_pkt_ip_byte_count(inout PacketByteCountState_t s, in bit<16> ip_length_bytes) {
+    @name(".update_pkt_ip_byte_count") action update_pkt_ip_byte_count(@name("s") inout PacketByteCountState_t s, @name("ip_length_bytes") in bit<16> ip_length_bytes) {
         s[79:48] = s[79:48] + 32w1;
         s[47:0] = s[47:0] + (bit<48>)ip_length_bytes;
     }

@@ -14,7 +14,6 @@ control c(inout bit<32> b) {
                 b[6:3] = 4w1;
             }
         }
-
     }
 }
 

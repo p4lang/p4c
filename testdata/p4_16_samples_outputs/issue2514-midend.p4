@@ -17,7 +17,7 @@ struct my_meta_t {
 control MyIngress(inout my_headers_t hdr, inout my_meta_t meta) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name("MyIngress.hit") action hit(bit<16> p) {
+    @name("MyIngress.hit") action hit(@name("p") bit<16> p) {
         hdr.h.f1 = p;
     }
     @name("MyIngress.t") table t_0 {
@@ -33,7 +33,6 @@ control MyIngress(inout my_headers_t hdr, inout my_meta_t meta) {
                         16w0x101 &&& 16w0x505 : hit(16w5);
                         default : hit(16w0);
         }
-
         default_action = NoAction_0();
     }
     apply {

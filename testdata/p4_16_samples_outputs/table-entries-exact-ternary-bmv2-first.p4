@@ -68,7 +68,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
                         (8w0x3, 16w0x1111 &&& 16w0xf000) : a_with_control_params(9w3);
                         (8w0x4, default) : a_with_control_params(9w4);
         }
-
     }
     apply {
         t_exact_ternary.apply();

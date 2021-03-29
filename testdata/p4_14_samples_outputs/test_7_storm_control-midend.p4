@@ -178,8 +178,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".no_action") action no_action() {
     }
-    @name(".ing_meter_set") action ing_meter_set(bit<16> meter_) {
-        meta._ingress_metadata_ing_meter8 = meter_;
+    @name(".ing_meter_set") action ing_meter_set(@name("meter_") bit<16> meter_1) {
+        meta._ingress_metadata_ing_meter8 = meter_1;
     }
     @name(".storm_control") table storm_control_0 {
         actions = {

@@ -1,5 +1,5 @@
 control c(inout bit<32> x) {
-    @name("c.a") action a(in bit<32> arg_1) {
+    @name("c.a") action a(@name("arg") in bit<32> arg_1) {
         x = arg_1;
     }
     apply {

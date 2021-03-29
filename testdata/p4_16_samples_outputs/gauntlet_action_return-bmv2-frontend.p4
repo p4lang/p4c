@@ -24,7 +24,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("ingress.tmp_key") bit<128> tmp_key_0;
-    @name("ingress.do_action") action do_action(inout bit<8> val) {
+    @name("ingress.do_action") action do_action(@name("val") inout bit<8> val) {
         @name("ingress.hasReturned") bool hasReturned = false;
         if (val > 8w10) {
             val = 8w2;

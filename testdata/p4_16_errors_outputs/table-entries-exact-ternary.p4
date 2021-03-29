@@ -70,7 +70,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
                         0x1111 &&& 0xf : a();
                         0x1 : a();
         }
-
     }
     apply {
         t_exact_ternary.apply();

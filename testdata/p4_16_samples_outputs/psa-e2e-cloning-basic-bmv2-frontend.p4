@@ -26,12 +26,12 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 }
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarnUnused @name(".send_to_port") action send_to_port(inout psa_ingress_output_metadata_t meta_2, in PortId_t egress_port_1) {
+    @noWarnUnused @name(".send_to_port") action send_to_port(@name("meta") inout psa_ingress_output_metadata_t meta_2, @name("egress_port") in PortId_t egress_port_1) {
         meta_2.drop = false;
         meta_2.multicast_group = (MulticastGroup_t)32w0;
         meta_2.egress_port = egress_port_1;
     }
-    @noWarnUnused @name(".send_to_port") action send_to_port_0(inout psa_ingress_output_metadata_t meta_3, in PortId_t egress_port_2) {
+    @noWarnUnused @name(".send_to_port") action send_to_port_0(@name("meta") inout psa_ingress_output_metadata_t meta_3, @name("egress_port") in PortId_t egress_port_2) {
         meta_3.drop = false;
         meta_3.multicast_group = (MulticastGroup_t)32w0;
         meta_3.egress_port = egress_port_2;
@@ -53,7 +53,7 @@ parser EgressParserImpl(packet_in buffer, out headers_t hdr, inout metadata_t us
 }
 
 control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    @noWarnUnused @name(".egress_drop") action egress_drop(inout psa_egress_output_metadata_t meta_4) {
+    @noWarnUnused @name(".egress_drop") action egress_drop(@name("meta") inout psa_egress_output_metadata_t meta_4) {
         meta_4.drop = true;
     }
     @name("cEgress.clone") action clone_1() {

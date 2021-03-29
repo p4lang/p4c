@@ -30,7 +30,6 @@ control ctrl() {
                 c = 4;
             }
         }
-
         c = 5;
     }
 }

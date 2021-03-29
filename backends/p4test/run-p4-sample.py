@@ -119,7 +119,8 @@ def run_timeout(options, args, timeout, stderr):
 timeout = 10 * 60
 
 def compare_files(options, produced, expected, ignore_case):
-    if options.replace:
+    # p4info files should not change
+    if options.replace and "p4info" not in produced:
         if options.verbose:
             print("Saving new version of ", expected)
         shutil.copy2(produced, expected)

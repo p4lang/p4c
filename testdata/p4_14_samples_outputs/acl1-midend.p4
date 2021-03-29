@@ -254,18 +254,18 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".nop") action nop() {
     }
-    @name(".copy_to_cpu") action copy_to_cpu(bit<16> reason_code) {
-        meta._fabric_metadata_reason_code13 = reason_code;
+    @name(".copy_to_cpu") action copy_to_cpu(@name("reason_code") bit<16> reason_code_2) {
+        meta._fabric_metadata_reason_code13 = reason_code_2;
     }
-    @name(".redirect_to_cpu") action redirect_to_cpu(bit<16> reason_code) {
-        meta._fabric_metadata_reason_code13 = reason_code;
+    @name(".redirect_to_cpu") action redirect_to_cpu(@name("reason_code") bit<16> reason_code_3) {
+        meta._fabric_metadata_reason_code13 = reason_code_3;
     }
     @name(".drop_packet") action drop_packet() {
     }
-    @name(".drop_packet_with_reason") action drop_packet_with_reason(bit<8> drop_reason) {
-        drop_stats.count(drop_reason);
+    @name(".drop_packet_with_reason") action drop_packet_with_reason(@name("drop_reason") bit<8> drop_reason_1) {
+        drop_stats.count(drop_reason_1);
     }
-    @name(".negative_mirror") action negative_mirror(bit<8> session_id) {
+    @name(".negative_mirror") action negative_mirror(@name("session_id") bit<8> session_id) {
     }
     @name(".congestion_mirror_set") action congestion_mirror_set() {
     }

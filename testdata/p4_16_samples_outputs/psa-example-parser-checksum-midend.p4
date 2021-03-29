@@ -104,7 +104,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         ostd.drop = true;
     }
     @name("ingress.parser_error_counts") DirectCounter<PacketCounter_t>(PSA_CounterType_t.PACKETS) parser_error_counts_0;
-    @name("ingress.set_error_idx") action set_error_idx(ErrorIndex_t idx) {
+    @name("ingress.set_error_idx") action set_error_idx(@name("idx") ErrorIndex_t idx) {
         parser_error_counts_0.count();
     }
     @name("ingress.parser_error_count_and_convert") table parser_error_count_and_convert_0 {

@@ -66,7 +66,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
                         0x1181 : a_with_control_params(2);
                         0x1181 &&& 0xf00f : a_with_control_params(3);
         }
-
     }
     apply {
         t_ternary.apply();

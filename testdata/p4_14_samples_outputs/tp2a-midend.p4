@@ -37,7 +37,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @noWarn("unused") @name(".NoAction") action NoAction_7() {
     }
-    @name(".setb1") action setb1(bit<32> val) {
+    @name(".setb1") action setb1(@name("val") bit<32> val) {
         hdr.data.b1 = val;
     }
     @name(".noop") action noop() {
@@ -48,14 +48,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".noop") action noop_6() {
     }
-    @name(".setb3") action setb3(bit<32> val) {
-        hdr.data.b3 = val;
+    @name(".setb3") action setb3(@name("val") bit<32> val_4) {
+        hdr.data.b3 = val_4;
     }
-    @name(".setb2") action setb2(bit<32> val) {
-        hdr.data.b2 = val;
+    @name(".setb2") action setb2(@name("val") bit<32> val_5) {
+        hdr.data.b2 = val_5;
     }
-    @name(".setb4") action setb4(bit<32> val) {
-        hdr.data.b4 = val;
+    @name(".setb4") action setb4(@name("val") bit<32> val_6) {
+        hdr.data.b4 = val_6;
     }
     @name(".A1") table A1_0 {
         actions = {

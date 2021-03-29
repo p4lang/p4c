@@ -49,7 +49,7 @@ control update(inout packet_t h, inout Meta m) {
 }
 
 control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t meta) {
-    @name("ingress.setb1") action setb1(bit<9> port, bit<8> val) {
+    @name("ingress.setb1") action setb1(@name("port") bit<9> port, @name("val") bit<8> val) {
         hdrs.data.b1 = val;
         meta.egress_spec = port;
     }
@@ -63,26 +63,26 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
     }
     @name("ingress.noop") action noop_8() {
     }
-    @name("ingress.setbyte") action setbyte(out bit<8> reg, bit<8> val) {
-        reg = val;
+    @name("ingress.setbyte") action setbyte(@name("reg") out bit<8> reg, @name("val") bit<8> val_5) {
+        reg = val_5;
     }
-    @name("ingress.setbyte") action setbyte_4(out bit<8> reg_1, bit<8> val) {
-        reg_1 = val;
+    @name("ingress.setbyte") action setbyte_4(@name("reg") out bit<8> reg_1, @name("val") bit<8> val_6) {
+        reg_1 = val_6;
     }
-    @name("ingress.setbyte") action setbyte_5(out bit<8> reg_2, bit<8> val) {
-        reg_2 = val;
+    @name("ingress.setbyte") action setbyte_5(@name("reg") out bit<8> reg_2, @name("val") bit<8> val_7) {
+        reg_2 = val_7;
     }
-    @name("ingress.setbyte") action setbyte_6(out bit<8> reg_3, bit<8> val) {
-        reg_3 = val;
+    @name("ingress.setbyte") action setbyte_6(@name("reg") out bit<8> reg_3, @name("val") bit<8> val_8) {
+        reg_3 = val_8;
     }
-    @name("ingress.act1") action act1(bit<8> val) {
-        hdrs.extra[0].b1 = val;
+    @name("ingress.act1") action act1(@name("val") bit<8> val_9) {
+        hdrs.extra[0].b1 = val_9;
     }
-    @name("ingress.act2") action act2(bit<8> val) {
-        hdrs.extra[0].b1 = val;
+    @name("ingress.act2") action act2(@name("val") bit<8> val_10) {
+        hdrs.extra[0].b1 = val_10;
     }
-    @name("ingress.act3") action act3(bit<8> val) {
-        hdrs.extra[0].b1 = val;
+    @name("ingress.act3") action act3(@name("val") bit<8> val_11) {
+        hdrs.extra[0].b1 = val_11;
     }
     @name("ingress.test1") table test1_0 {
         key = {
@@ -152,7 +152,6 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
             default: {
             }
         }
-
     }
 }
 

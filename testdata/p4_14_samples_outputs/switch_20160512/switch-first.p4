@@ -2270,7 +2270,6 @@ control process_int_insertion(inout headers hdr, inout metadata meta, inout stan
             default: {
             }
         }
-
     }
 }
 
@@ -3091,7 +3090,6 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
                 default: {
                 }
             }
-
             process_tunnel_encap_0.apply(hdr, meta, standard_metadata);
             process_int_outer_encap_0.apply(hdr, meta, standard_metadata);
             if (meta.egress_metadata.port_type == 2w0) {
@@ -3332,7 +3330,6 @@ control process_validate_outer_header(inout headers hdr, inout metadata meta, in
                 }
             }
         }
-
     }
 }
 
@@ -3474,7 +3471,6 @@ control process_ip_sourceguard(inout headers hdr, inout metadata meta, inout sta
                 default: {
                 }
             }
-
         }
     }
 }
@@ -3791,7 +3787,6 @@ control process_outer_ipv4_multicast(inout headers hdr, inout metadata meta, ino
             default: {
             }
         }
-
     }
 }
 
@@ -3871,7 +3866,6 @@ control process_outer_ipv6_multicast(inout headers hdr, inout metadata meta, ino
             default: {
             }
         }
-
     }
 }
 
@@ -3946,7 +3940,6 @@ control process_ipv4_vtep(inout headers hdr, inout metadata meta, inout standard
             default: {
             }
         }
-
     }
 }
 
@@ -4002,7 +3995,6 @@ control process_ipv6_vtep(inout headers hdr, inout metadata meta, inout standard
             default: {
             }
         }
-
     }
 }
 
@@ -4270,7 +4262,6 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
                     }
                 }
             }
-
         }
         if (meta.tunnel_metadata.tunnel_terminate == 1w1 || meta.multicast_metadata.outer_mcast_route_hit == 1w1 && (meta.multicast_metadata.outer_mcast_mode == 2w1 && meta.multicast_metadata.mcast_rpf_group == 16w0 || meta.multicast_metadata.outer_mcast_mode == 2w2 && meta.multicast_metadata.mcast_rpf_group != 16w0)) {
             switch (tunnel.apply().action_run) {
@@ -4280,7 +4271,6 @@ control process_tunnel(inout headers hdr, inout metadata meta, inout standard_me
                 default: {
                 }
             }
-
         } else {
             tunnel_miss.apply();
         }
@@ -4841,7 +4831,6 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
                 default: {
                 }
             }
-
         }
         if (meta.ingress_metadata.bypass_lookups & 16w0x2 == 16w0 && meta.multicast_metadata.ipv4_multicast_enabled == 1w1) {
             switch (ipv4_multicast_route.apply().action_run) {
@@ -4851,7 +4840,6 @@ control process_ipv4_multicast(inout headers hdr, inout metadata meta, inout sta
                 default: {
                 }
             }
-
         }
     }
 }
@@ -4986,7 +4974,6 @@ control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout sta
                 default: {
                 }
             }
-
         }
         if (meta.ingress_metadata.bypass_lookups & 16w0x2 == 16w0 && meta.multicast_metadata.ipv6_multicast_enabled == 1w1) {
             switch (ipv6_multicast_route.apply().action_run) {
@@ -4996,7 +4983,6 @@ control process_ipv6_multicast(inout headers hdr, inout metadata meta, inout sta
                 default: {
                 }
             }
-
         }
     }
 }
@@ -5121,7 +5107,6 @@ control process_ipv4_urpf(inout headers hdr, inout metadata meta, inout standard
                 default: {
                 }
             }
-
         }
     }
 }
@@ -5175,7 +5160,6 @@ control process_ipv4_fib(inout headers hdr, inout metadata meta, inout standard_
             default: {
             }
         }
-
     }
 }
 
@@ -5280,7 +5264,6 @@ control process_ipv6_urpf(inout headers hdr, inout metadata meta, inout standard
                 default: {
                 }
             }
-
         }
     }
 }
@@ -5334,7 +5317,6 @@ control process_ipv6_fib(inout headers hdr, inout metadata meta, inout standard_
             default: {
             }
         }
-
     }
 }
 
@@ -6030,7 +6012,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                         }
                     }
                 }
-
             }
         }
         process_meter_index_0.apply(hdr, meta, standard_metadata);

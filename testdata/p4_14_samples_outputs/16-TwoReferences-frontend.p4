@@ -120,7 +120,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             default: {
             }
         }
-
         F_0.apply();
     }
 }

@@ -57,7 +57,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name("egress.on_miss") action on_miss() {
     }
-    @name("egress.rewrite_src_dst_mac") action rewrite_src_dst_mac(bit<48> smac, bit<48> dmac) {
+    @name("egress.rewrite_src_dst_mac") action rewrite_src_dst_mac(@name("smac") bit<48> smac, @name("dmac") bit<48> dmac) {
         hdr.ethernet.srcAddr = smac;
         hdr.ethernet.dstAddr = dmac;
     }
@@ -89,8 +89,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @noWarn("unused") @name(".NoAction") action NoAction_11() {
     }
-    @name("ingress.set_vrf") action set_vrf(bit<12> vrf) {
-        meta.ingress_metadata.vrf = vrf;
+    @name("ingress.set_vrf") action set_vrf(@name("vrf") bit<12> vrf_1) {
+        meta.ingress_metadata.vrf = vrf_1;
     }
     @name("ingress.on_miss") action on_miss_2() {
     }
@@ -98,19 +98,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("ingress.on_miss") action on_miss_6() {
     }
-    @name("ingress.fib_hit_nexthop") action fib_hit_nexthop(bit<16> nexthop_index) {
-        meta.ingress_metadata.nexthop_index = nexthop_index;
+    @name("ingress.fib_hit_nexthop") action fib_hit_nexthop(@name("nexthop_index") bit<16> nexthop_index_1) {
+        meta.ingress_metadata.nexthop_index = nexthop_index_1;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("ingress.fib_hit_nexthop") action fib_hit_nexthop_2(bit<16> nexthop_index) {
-        meta.ingress_metadata.nexthop_index = nexthop_index;
+    @name("ingress.fib_hit_nexthop") action fib_hit_nexthop_2(@name("nexthop_index") bit<16> nexthop_index_2) {
+        meta.ingress_metadata.nexthop_index = nexthop_index_2;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
-    @name("ingress.set_egress_details") action set_egress_details(bit<9> egress_spec) {
-        standard_metadata.egress_spec = egress_spec;
+    @name("ingress.set_egress_details") action set_egress_details(@name("egress_spec") bit<9> egress_spec_1) {
+        standard_metadata.egress_spec = egress_spec_1;
     }
-    @name("ingress.set_bd") action set_bd(bit<16> bd) {
-        meta.ingress_metadata.bd = bd;
+    @name("ingress.set_bd") action set_bd(@name("bd") bit<16> bd_2) {
+        meta.ingress_metadata.bd = bd_2;
     }
     @name("ingress.bd") table bd_0 {
         actions = {
@@ -183,7 +183,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                 default: {
                 }
             }
-
             nexthop_0.apply();
         }
     }

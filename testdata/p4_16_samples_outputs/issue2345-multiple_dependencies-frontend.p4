@@ -34,7 +34,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
                 @name("ingress.val1") Headers val1 = h;
                 {
                     @name("ingress.dst") bit<48> dst = val1.eth_hdr.dst_addr;
-                    @name("ingress.type_1") bit<16> type_1 = val1.eth_hdr.eth_type;
+                    @name("ingress.type") bit<16> type_1 = val1.eth_hdr.eth_type;
                     @name("ingress.c") bool c_0;
                     @name("ingress.c1") bool c1_0;
                     c_0 = true;

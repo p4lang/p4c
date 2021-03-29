@@ -26,7 +26,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    standard_metadata_t smeta;
+    @name("smeta") standard_metadata_t smeta;
     @name(".my_drop") action my_drop() {
         smeta.ingress_port = standard_metadata.ingress_port;
         smeta.egress_spec = standard_metadata.egress_spec;
@@ -62,7 +62,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.parser_error = smeta.parser_error;
         standard_metadata.priority = smeta.priority;
     }
-    @name("ingress.set_port") action set_port(bit<9> output_port) {
+    @name("ingress.set_port") action set_port(@name("output_port") bit<9> output_port) {
         standard_metadata.egress_spec = output_port;
     }
     @name("ingress.mac_da") table mac_da_0 {

@@ -40,7 +40,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name(".A") action A_2(bit<8> val, bit<9> port, bit<10> idx) {
+    @name(".A") action A_2(@name("val") bit<8> val, @name("port") bit<9> port, @name("idx") bit<10> idx) {
         hdr.A.b1 = val;
         standard_metadata.egress_spec = port;
         meta.meta.B = idx;

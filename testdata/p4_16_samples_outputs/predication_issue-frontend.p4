@@ -23,7 +23,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name(".assign_addrs") action assign_addrs(inout Headers h_1, bool check_1, bool check_2) {
+    @name(".assign_addrs") action assign_addrs(@name("h") inout Headers h_1, @name("check_1") bool check_1, @name("check_2") bool check_2) {
         h_1.eth_hdr.dst_addr = 48w4;
         if (check_1) {
             h_1.eth_hdr.dst_addr = 48w2;

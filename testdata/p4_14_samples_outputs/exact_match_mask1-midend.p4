@@ -29,7 +29,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     bit<32> key_0;
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name(".setb1") action setb1(bit<8> val, bit<9> port) {
+    @name(".setb1") action setb1(@name("val") bit<8> val, @name("port") bit<9> port) {
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }

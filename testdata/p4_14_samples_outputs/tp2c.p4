@@ -111,7 +111,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                         A4.apply();
                     }
                 }
-
             }
         }
         B1.apply();

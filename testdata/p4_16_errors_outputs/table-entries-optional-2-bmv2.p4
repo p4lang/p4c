@@ -67,7 +67,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
                         (0x100, default) : a_with_control_params(2);
                         (default, 0x10000) : a_with_control_params(3);
         }
-
     }
     apply {
         t_optional.apply();

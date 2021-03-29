@@ -11,7 +11,7 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool pass) {
-    @name("pipe.Reject") action Reject(bit<8> rej, bit<8> bar) {
+    @name("pipe.Reject") action Reject(@name("rej") bit<8> rej, @name("bar") bit<8> bar) {
         if (rej == 8w0) {
             pass = true;
         } else {

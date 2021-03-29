@@ -5,7 +5,7 @@
 control c(inout bit<32> x, inout bit<32> y) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name("c.a") action a(inout bit<32> b, inout bit<32> d) {
+    @name("c.a") action a(@name("b") inout bit<32> b, @name("d") inout bit<32> d) {
         log_msg("Logging message.");
         log_msg<tuple<bit<32>, bit<32>>>("Logging values {} and {}", { b, d });
     }

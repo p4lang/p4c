@@ -33,23 +33,23 @@ control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t 
     }
     @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
-    @name("MyIC.a1") action a1(bit<48> param) {
+    @name("MyIC.a1") action a1(@name("param") bit<48> param) {
         a.dstAddr = param;
     }
-    @name("MyIC.a1") action a1_3(bit<48> param) {
-        a.dstAddr = param;
+    @name("MyIC.a1") action a1_3(@name("param") bit<48> param_2) {
+        a.dstAddr = param_2;
     }
-    @name("MyIC.a1") action a1_4(bit<48> param) {
-        a.dstAddr = param;
+    @name("MyIC.a1") action a1_4(@name("param") bit<48> param_3) {
+        a.dstAddr = param_3;
     }
-    @name("MyIC.a2") action a2(bit<16> param) {
-        a.etherType = param;
+    @name("MyIC.a2") action a2(@name("param") bit<16> param_4) {
+        a.etherType = param_4;
     }
-    @name("MyIC.a2") action a2_3(bit<16> param) {
-        a.etherType = param;
+    @name("MyIC.a2") action a2_3(@name("param") bit<16> param_5) {
+        a.etherType = param_5;
     }
-    @name("MyIC.a2") action a2_4(bit<16> param) {
-        a.etherType = param;
+    @name("MyIC.a2") action a2_4(@name("param") bit<16> param_6) {
+        a.etherType = param_6;
     }
     @name("MyIC.tbl_idle_timeout") table tbl_idle_timeout_0 {
         key = {

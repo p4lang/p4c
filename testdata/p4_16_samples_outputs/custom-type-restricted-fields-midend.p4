@@ -98,7 +98,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name("ingressImpl.my_drop") action my_drop() {
         mark_to_drop(stdmeta);
     }
-    @name("ingressImpl.set_addr") action set_addr(IPv4Addr_t new_dstAddr) {
+    @name("ingressImpl.set_addr") action set_addr(@name("new_dstAddr") IPv4Addr_t new_dstAddr) {
         hdr.ipv4.dstAddr = new_dstAddr;
         stdmeta.egress_spec = stdmeta.ingress_port;
     }

@@ -76,21 +76,21 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     @name("pipe.conn_state") Register<bit<32>, bit<32>>(32w65536) conn_state_0;
     @name("pipe.conn_srv_addr") Register<bit<32>, bit<32>>(32w65536) conn_srv_addr_0;
-    @name("pipe.update_conn_state") action update_conn_state(bit<32> s_2) {
+    @name("pipe.update_conn_state") action update_conn_state(@name("s") bit<32> s_2) {
         conn_state_0.write(meta.conn_id, s_2);
     }
-    @name("pipe.update_conn_state") action update_conn_state_2(bit<32> s_3) {
+    @name("pipe.update_conn_state") action update_conn_state_2(@name("s") bit<32> s_3) {
         conn_state_0.write(meta.conn_id, s_3);
     }
-    @name("pipe.update_conn_info") action update_conn_info(bit<32> s_4, bit<32> addr) {
+    @name("pipe.update_conn_info") action update_conn_info(@name("s") bit<32> s_4, @name("addr") bit<32> addr) {
         conn_state_0.write(meta.conn_id, s_4);
         conn_srv_addr_0.write(meta.conn_id, addr);
     }
-    @name("pipe.update_conn_info") action update_conn_info_3(bit<32> s_5, bit<32> addr_1) {
+    @name("pipe.update_conn_info") action update_conn_info_3(@name("s") bit<32> s_5, @name("addr") bit<32> addr_1) {
         conn_state_0.write(meta.conn_id, s_5);
         conn_srv_addr_0.write(meta.conn_id, addr_1);
     }
-    @name("pipe.update_conn_info") action update_conn_info_4(bit<32> s_6, bit<32> addr_2) {
+    @name("pipe.update_conn_info") action update_conn_info_4(@name("s") bit<32> s_6, @name("addr") bit<32> addr_2) {
         conn_state_0.write(meta.conn_id, s_6);
         conn_srv_addr_0.write(meta.conn_id, addr_2);
     }

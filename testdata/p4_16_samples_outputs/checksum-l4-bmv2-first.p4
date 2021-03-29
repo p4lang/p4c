@@ -139,7 +139,6 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         const entries = {
                         16w80 : foot();
         }
-
     }
     table huh {
         key = {
@@ -153,7 +152,6 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         const entries = {
                         16w80 : foou();
         }
-
     }
     apply {
         if (hdr.tcp.isValid()) {

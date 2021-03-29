@@ -31,7 +31,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    bit<16> byaA;
+    @name("byaA") bit<16> byaA;
     @name("ingress.simple_action") action simple_action() {
         h.eth_hdr.eth_type = byaA;
     }

@@ -96,7 +96,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
     @name("TopPipe.Drop_action") action Drop_action_6() {
         outCtrl.outputPort = 4w0xf;
     }
-    @name("TopPipe.Set_nhop") action Set_nhop(IPv4Address ipv4_dest, PortId port) {
+    @name("TopPipe.Set_nhop") action Set_nhop(@name("ipv4_dest") IPv4Address ipv4_dest, @name("port") PortId port) {
         nextHop_0 = ipv4_dest;
         headers.ip.ttl = headers.ip.ttl + 8w255;
         outCtrl.outputPort = port;
@@ -125,7 +125,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         }
         const default_action = NoAction_0();
     }
-    @name("TopPipe.Set_dmac") action Set_dmac(EthernetAddress dmac) {
+    @name("TopPipe.Set_dmac") action Set_dmac(@name("dmac") EthernetAddress dmac) {
         headers.ethernet.dstAddr = dmac;
     }
     @name("TopPipe.dmac") table dmac_0 {
@@ -139,7 +139,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         size = 1024;
         default_action = Drop_action_4();
     }
-    @name("TopPipe.Set_smac") action Set_smac(EthernetAddress smac) {
+    @name("TopPipe.Set_smac") action Set_smac(@name("smac") EthernetAddress smac) {
         headers.ethernet.srcAddr = smac;
     }
     @name("TopPipe.smac") table smac_0 {

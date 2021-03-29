@@ -132,7 +132,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name(".do_rewrites") action do_rewrites(bit<48> smac) {
+    @name(".do_rewrites") action do_rewrites(@name("smac") bit<48> smac) {
         hdr.cpu_header.setInvalid();
         hdr.ethernet.srcAddr = smac;
         hdr.ipv4.srcAddr = meta._meta_ipv4_sa1;
@@ -191,7 +191,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @noWarn("unused") @name(".NoAction") action NoAction_11() {
     }
-    @name(".set_dmac") action set_dmac(bit<48> dmac) {
+    @name(".set_dmac") action set_dmac(@name("dmac") bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
     }
     @name("._drop") action _drop_2() {
@@ -206,13 +206,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._drop") action _drop_8() {
         mark_to_drop(standard_metadata);
     }
-    @name(".set_if_info") action set_if_info(bit<32> ipv4_addr, bit<48> mac_addr, bit<1> is_ext) {
+    @name(".set_if_info") action set_if_info(@name("ipv4_addr") bit<32> ipv4_addr, @name("mac_addr") bit<48> mac_addr, @name("is_ext") bit<1> is_ext) {
         meta._meta_if_ipv4_addr6 = ipv4_addr;
         meta._meta_if_mac_addr7 = mac_addr;
         meta._meta_is_ext_if8 = is_ext;
     }
-    @name(".set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
-        meta._meta_nhop_ipv45 = nhop_ipv4;
+    @name(".set_nhop") action set_nhop(@name("nhop_ipv4") bit<32> nhop_ipv4_1, @name("port") bit<9> port) {
+        meta._meta_nhop_ipv45 = nhop_ipv4_1;
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
@@ -223,15 +223,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta._meta_do_forward0 = 1w0;
         mark_to_drop(standard_metadata);
     }
-    @name(".nat_hit_int_to_ext") action nat_hit_int_to_ext(bit<32> srcAddr, bit<16> srcPort) {
+    @name(".nat_hit_int_to_ext") action nat_hit_int_to_ext(@name("srcAddr") bit<32> srcAddr_1, @name("srcPort") bit<16> srcPort_1) {
         meta._meta_do_forward0 = 1w1;
-        meta._meta_ipv4_sa1 = srcAddr;
-        meta._meta_tcp_sp3 = srcPort;
+        meta._meta_ipv4_sa1 = srcAddr_1;
+        meta._meta_tcp_sp3 = srcPort_1;
     }
-    @name(".nat_hit_ext_to_int") action nat_hit_ext_to_int(bit<32> dstAddr, bit<16> dstPort) {
+    @name(".nat_hit_ext_to_int") action nat_hit_ext_to_int(@name("dstAddr") bit<32> dstAddr_1, @name("dstPort") bit<16> dstPort_1) {
         meta._meta_do_forward0 = 1w1;
-        meta._meta_ipv4_da2 = dstAddr;
-        meta._meta_tcp_dp4 = dstPort;
+        meta._meta_ipv4_da2 = dstAddr_1;
+        meta._meta_tcp_dp4 = dstPort_1;
     }
     @name(".nat_no_nat") action nat_no_nat() {
         meta._meta_do_forward0 = 1w1;

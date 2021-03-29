@@ -42,19 +42,19 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
-    @name(".set_index") action set_index(bit<16> index, bit<9> port) {
-        meta.counter_metadata.counter_index = index;
+    @name(".set_index") action set_index(@name("index") bit<16> index_1, @name("port") bit<9> port) {
+        meta.counter_metadata.counter_index = index_1;
         standard_metadata.egress_spec = port;
         meta.counter_metadata.counter_run = 4w1;
     }
     @name(".count_entries") action count_entries() {
         count1.count((bit<14>)meta.counter_metadata.counter_index);
     }
-    @name(".seth2") action seth2(bit<16> val) {
+    @name(".seth2") action seth2(@name("val") bit<16> val) {
         hdr.data.h2 = val;
     }
-    @name(".seth4") action seth4(bit<16> val) {
-        hdr.data.h4 = val;
+    @name(".seth4") action seth4(@name("val") bit<16> val_2) {
+        hdr.data.h4 = val_2;
     }
     @name(".index_setter") table index_setter_0 {
         actions = {

@@ -362,7 +362,7 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("ingress.do_clone") action do_clone(PortId_t port) {
+    @name("ingress.do_clone") action do_clone(@name("port") PortId_t port) {
         ostd.clone = true;
         ostd.clone_port = port;
         user_meta.custom_clone_id = 3w1;

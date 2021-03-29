@@ -3,7 +3,7 @@ control p() {
     @name("p.x_0") bit<1> x_2;
     @name("p.x_1") bit<1> x_3;
     @name("p.y_0") bit<1> y_1;
-    @name("p.b") action b(in bit<1> x, out bit<1> y) {
+    @name("p.b") action b(@name("x") in bit<1> x, @name("y") out bit<1> y) {
         x_2 = x;
         z_0 = x & x_2;
         y = z_0;

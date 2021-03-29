@@ -565,20 +565,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta.m.field_32_63 = 32w63;
         meta.m.field_32_64 = 32w64;
     }
-    @name(".set_egress_spec") action set_egress_spec(bit<9> port) {
+    @name(".set_egress_spec") action set_egress_spec(@name("port") bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name(".set_egress_spec") action set_egress_spec_5(bit<9> port) {
-        standard_metadata.egress_spec = port;
+    @name(".set_egress_spec") action set_egress_spec_5(@name("port") bit<9> port_1) {
+        standard_metadata.egress_spec = port_1;
     }
-    @name(".set_egress_spec") action set_egress_spec_6(bit<9> port) {
-        standard_metadata.egress_spec = port;
+    @name(".set_egress_spec") action set_egress_spec_6(@name("port") bit<9> port_2) {
+        standard_metadata.egress_spec = port_2;
     }
-    @name(".set_egress_spec") action set_egress_spec_7(bit<9> port) {
-        standard_metadata.egress_spec = port;
+    @name(".set_egress_spec") action set_egress_spec_7(@name("port") bit<9> port_3) {
+        standard_metadata.egress_spec = port_3;
     }
-    @name(".set_egress_spec") action set_egress_spec_8(bit<9> port) {
-        standard_metadata.egress_spec = port;
+    @name(".set_egress_spec") action set_egress_spec_8(@name("port") bit<9> port_4) {
+        standard_metadata.egress_spec = port_4;
     }
     @name(".t1") table t1_0 {
         actions = {

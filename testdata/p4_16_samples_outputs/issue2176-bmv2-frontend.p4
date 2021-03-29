@@ -39,7 +39,7 @@ control ingress(inout Parsed_packet h, inout Metadata m, inout standard_metadata
     @name("ingress.tmp") bit<8> tmp;
     @name("ingress.tmp_0") bit<8> tmp_0;
     @name("ingress.tmp_1") bit<8> tmp_1;
-    @name("ingress.do_action_2") action do_action_0(inout bit<8> val_0, inout bit<8> val_1, inout bit<8> val_2) {
+    @name("ingress.do_action_2") action do_action_0(@name("val_0") inout bit<8> val_0, @name("val_1") inout bit<8> val_1, @name("val_2") inout bit<8> val_2) {
         val_1 = 8w2;
         val_2 = 8w0;
     }
