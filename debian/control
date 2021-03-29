@@ -44,9 +44,9 @@ Build-Depends: bison,
                thrift-compiler
 Standards-Version: 4.5.1.0
 Rules-Requires-Root: no
-Homepage: https://github.com/simula/p4c
-Vcs-Git: https://github.com/simula/p4c
-Vcs-Browser: https://github.com/simula/p4c/tree/p4-packaging
+Homepage: https://github.com/p4lang/p4c
+Vcs-Git: https://github.com/p4lang/p4c
+Vcs-Browser: https://github.com/p4lang/p4c
 
 Package: p4lang-p4c
 Architecture: amd64 arm64
@@ -89,7 +89,7 @@ Depends: clang,
          ${python:Depends},
          ${shlibs:Depends}
 Description: p4c p4lang project compiler
- p4c is a new, alpha-quality reference compiler for the P4 programming language.
+ p4c is a new reference compiler for the P4 programming language.
  It supports both P4-14 and P4-16; you can find more information about P4 here
  and the specifications for both versions of the language in http://p4.org.
  .

@@ -1,5 +1,5 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: p4lang-pi
+Upstream-Name: p4lang-p4c
 Source: https://github.com/p4lang/p4c
 
 Files: *
