@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef _MIDEND_PARSERUNROLL_H_
 #define _MIDEND_PARSERUNROLL_H_
 
+#include "ir/ir-generated.h"
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/callGraph.h"
@@ -211,6 +212,9 @@ class RewriteAllParsers : public Transform {
                 if (j->newState)
                     newParser->states.push_back(j->newState);
         }
+        // adding accept/reject
+        newParser->states.push_back(new IR::ParserState(IR::ParserState::accept, nullptr));
+        newParser->states.push_back(new IR::ParserState(IR::ParserState::reject, nullptr));
         return newParser;
     }
 };
