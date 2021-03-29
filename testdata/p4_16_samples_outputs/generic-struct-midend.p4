@@ -57,28 +57,21 @@ header_union HU_0 {
 }
 
 control c(out bit<1> x) {
-    @name("c.gh") GH_1 gh_0;
-    @name("c.s") Stack s_0;
-    @name("c.xinst") X xinst_0;
-    @hidden action genericstruct93() {
-        s_0[0].setValid();
-        s_0[0]._data_b0 = 32w1;
-        s_0[0].isValid();
-        xinst_0.setValid();
-        xinst_0.b = 32w2;
+    @hidden action genericstruct99() {
         x = 1w0;
     }
-    @hidden table tbl_genericstruct93 {
+    @hidden table tbl_genericstruct99 {
         actions = {
-            genericstruct93();
+            genericstruct99();
         }
-        const default_action = genericstruct93();
+        const default_action = genericstruct99();
     }
     apply {
-        tbl_genericstruct93.apply();
+        tbl_genericstruct99.apply();
     }
 }
 
 control ctrl(out bit<1> x);
 package top(ctrl _c);
 top(c()) main;
+
