@@ -1,5 +1,11 @@
 gauntlet_side_effect_order_1-bmv2.p4(37): [--Wwarn=ordering] warning: val: 'out' argument has fields in common with val
         do_action_1(val, val);
+                    ^^^
+gauntlet_side_effect_order_1-bmv2.p4(37)
+        do_action_1(val, val);
+                         ^^^
+gauntlet_side_effect_order_1-bmv2.p4(37): [--Wwarn=ordering] warning: val: 'out' argument has fields in common with val
+        do_action_1(val, val);
                          ^^^
 gauntlet_side_effect_order_1-bmv2.p4(37)
         do_action_1(val, val);

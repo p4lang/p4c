@@ -1,12 +1,21 @@
+uninit.p4(36): [--Wwarn=ordering] warning: h.data2: 'out' argument has fields in common with h.data2
+        g(h.data2, g(h.data2, h.data2)); // uninitialized
+          ^^^^^^^
+uninit.p4(36)
+        g(h.data2, g(h.data2, h.data2)); // uninitialized
+                     ^^^^^^^
 uninit.p4(35): [--Wwarn=uninitialized_use] warning: h may not be completely initialized
         func(h); // uninitialized
              ^
 uninit.p4(36): [--Wwarn=uninitialized_use] warning: h.data2 may be uninitialized
         g(h.data2, g(h.data2, h.data2)); // uninitialized
-                     ^^^^^^^
+          ^^^^^^^
 uninit.p4(36): [--Wwarn=uninitialized_use] warning: h.data2 may be uninitialized
         g(h.data2, g(h.data2, h.data2)); // uninitialized
                               ^^^^^^^
+uninit.p4(36): [--Wwarn=uninitialized_use] warning: h.data2 may be uninitialized
+        g(h.data2, g(h.data2, h.data2)); // uninitialized
+                     ^^^^^^^
 uninit.p4(41): [--Wwarn=uninitialized_use] warning: h.data3 may be uninitialized
         h.data2 = h.data3 + 1; // uninitialized
                   ^^^^^^^

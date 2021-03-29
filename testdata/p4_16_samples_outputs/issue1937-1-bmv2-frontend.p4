@@ -22,11 +22,9 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         x_1 = y_1 >> 2;
     }
     @name("ingressImpl.tmp") bit<8> tmp;
-    @name("ingressImpl.tmp_0") bit<8> tmp_0;
     apply {
-        tmp_0 = hdr.h1.f1;
-        foo(tmp, tmp_0);
-        hdr.h1.f1 = tmp;
+        tmp = hdr.h1.f1;
+        foo(hdr.h1.f1, tmp);
         foo_0(x_1 = hdr.h1.f2, y_1 = 8w5);
     }
 }

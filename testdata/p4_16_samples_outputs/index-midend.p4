@@ -6,10 +6,10 @@ header H {
 
 parser P(packet_in p, out H[2] h) {
     @name("P.x") bit<32> x_0;
-    @name("P.tmp") H tmp_0;
+    @name("P.tmp") H tmp;
     state start {
-        p.extract<H>(tmp_0);
-        transition select(tmp_0.field) {
+        p.extract<H>(tmp);
+        transition select(tmp.field) {
             32w0: n1;
             default: n2;
         }
