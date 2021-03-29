@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_SYMBITMATRIX_H_
-#define P4C_LIB_SYMBITMATRIX_H_
+#ifndef _LIB_SYMBITMATRIX_H_
+#define _LIB_SYMBITMATRIX_H_
 
 #include "bitvec.h"
 
@@ -90,4 +90,4 @@ class SymBitMatrix : private bitvec {
     bool operator|=(const SymBitMatrix &a) { return bitvec::operator|=(a); }
 };
 
-#endif /* P4C_LIB_SYMBITMATRIX_H_ */
+#endif /* _LIB_SYMBITMATRIX_H_ */

@@ -192,6 +192,7 @@ add_cxx_compiler_option ("-Wall")
 add_cxx_compiler_option ("-Wextra")
 add_cxx_compiler_option ("-Wno-overloaded-virtual")
 add_cxx_compiler_option ("-Wno-deprecated")
+add_cxx_compiler_option ("-Wno-deprecated-declarations")
 # add_cxx_compiler_option ("-fsanitize=null")
 
 # If we're on GCC, use the gold linker if available.
@@ -442,4 +443,12 @@ if (ENABLE_DOCS AND DOXYGEN_FOUND)
     DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}/docs)
 endif()
 
-# \TODO: packaging
+# Packaging:
+SET(CPACK_SOURCE_GENERATOR "TXZ")
+SET(CPACK_SOURCE_PACKAGE_FILE_NAME
+   "p4c-${P4C_SEM_VERSION_STRING}")
+SET(CPACK_SOURCE_IGNORE_FILES
+   "${PROJECT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}-*;${PROJECT_SOURCE_DIR}/${CMAKE_PROJECT_NAME}_*;/build/;/.git/;/config.log;/CMakeFiles/;CMakeCache.txt$;.tar.gz$;/_CPack_Packages;/Makefile$;~$;/build-deb;/clean-deb;/filter-empty-entries;/make-symbols;/make-ppa;/make-deb;/debian.conf;/make-rpm;/rpm.conf;${CPACK_SOURCE_IGNORE_FILES}")
+INCLUDE(CPack)
+
+ADD_CUSTOM_TARGET(dist COMMAND ${CMAKE_MAKE_PROGRAM} clean package_source)

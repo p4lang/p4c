@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_ERROR_CATALOG_H_
-#define P4C_LIB_ERROR_CATALOG_H_
+#ifndef _LIB_ERROR_CATALOG_H_
+#define _LIB_ERROR_CATALOG_H_
 
 #include <map>
 #include <string>
@@ -110,4 +110,4 @@ class ErrorCatalog {
     static std::map<int, cstring> errorCatalog;
 };
 
-#endif  // P4C_LIB_ERROR_CATALOG_H_
+#endif  // _LIB_ERROR_CATALOG_H_
