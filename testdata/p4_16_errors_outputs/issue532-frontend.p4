@@ -30,8 +30,8 @@ extern s1_t choose_entry(in choices_t choices);
 control ingress(inout parsed_packet_t hdr, inout my_meta_t my_meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name("ingress.select_entry") action select_entry(choices_t choices) {
-        my_meta.entry = choose_entry(choices);
+    @name("ingress.select_entry") action select_entry(@name("choices") choices_t choices_1) {
+        my_meta.entry = choose_entry(choices_1);
     }
     @name("ingress.t") table t_0 {
         actions = {

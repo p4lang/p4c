@@ -37,11 +37,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @noWarn("unused") @name(".NoAction") action NoAction_7() {
     }
-    @name(".send") action send(bit<9> port) {
+    @name(".send") action send(@name("port") bit<9> port) {
         standard_metadata.egress_port = port;
     }
-    @name(".send") action send_2(bit<9> port) {
-        standard_metadata.egress_port = port;
+    @name(".send") action send_2(@name("port") bit<9> port_2) {
+        standard_metadata.egress_port = port_2;
     }
     @name(".discard") action discard() {
         mark_to_drop(standard_metadata);
@@ -73,11 +73,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 1024;
         default_action = NoAction_5();
     }
-    @name(".send") action _send_0(bit<9> port) {
-        standard_metadata.egress_port = port;
+    @name(".send") action _send_0(@name("port") bit<9> port_3) {
+        standard_metadata.egress_port = port_3;
     }
-    @name(".send") action _send_2(bit<9> port) {
-        standard_metadata.egress_port = port;
+    @name(".send") action _send_2(@name("port") bit<9> port_4) {
+        standard_metadata.egress_port = port_4;
     }
     @name(".discard") action _discard_0() {
         mark_to_drop(standard_metadata);

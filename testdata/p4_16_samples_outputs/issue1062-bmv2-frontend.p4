@@ -47,7 +47,7 @@ control deparser(packet_out b, in Header_t h) {
 }
 
 control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t standard_meta) {
-    @name("ingress.set_error_idx") action set_error_idx(bit<8> idx) {
+    @name("ingress.set_error_idx") action set_error_idx(@name("idx") bit<8> idx) {
         h.h.e = idx;
     }
     @name("ingress.t_exact") table t_exact_0 {
@@ -61,7 +61,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         const entries = {
                         error.NoError : set_error_idx(8w1);
         }
-
     }
     apply {
         t_exact_0.apply();

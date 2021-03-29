@@ -32,7 +32,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name("._nop") action _nop() {
     }
-    @name("._truncate") action _truncate(bit<32> new_length, bit<9> port) {
+    @name("._truncate") action _truncate(@name("new_length") bit<32> new_length, @name("port") bit<9> port) {
         standard_metadata.egress_spec = port;
         truncate(new_length);
     }

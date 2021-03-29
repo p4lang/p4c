@@ -49,7 +49,6 @@ control c(inout Headers h, inout standard_metadata_t sm) {
                         EthTypes.IPv4 : do_act(0x800);
                         EthTypes.VLAN : do_act(0x8100);
         }
-
     }
     apply {
         tns.apply();

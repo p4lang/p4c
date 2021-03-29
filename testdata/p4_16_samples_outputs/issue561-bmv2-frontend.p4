@@ -237,14 +237,14 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".my_drop") action my_drop(inout standard_metadata_t smeta) {
+    @name(".my_drop") action my_drop(@name("smeta") inout standard_metadata_t smeta) {
         mark_to_drop(smeta);
     }
-    @name(".my_drop") action my_drop_0(inout standard_metadata_t smeta_1) {
+    @name(".my_drop") action my_drop_0(@name("smeta") inout standard_metadata_t smeta_1) {
         mark_to_drop(smeta_1);
     }
-    @name("ingress.set_l2ptr") action set_l2ptr(bit<32> l2ptr) {
-        meta.fwd_metadata.l2ptr = l2ptr;
+    @name("ingress.set_l2ptr") action set_l2ptr(@name("l2ptr") bit<32> l2ptr_1) {
+        meta.fwd_metadata.l2ptr = l2ptr_1;
     }
     @name("ingress.ipv4_da_lpm") table ipv4_da_lpm_0 {
         key = {
@@ -256,7 +256,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = my_drop(standard_metadata);
     }
-    @name("ingress.set_bd_dmac_intf") action set_bd_dmac_intf(bit<24> bd, bit<48> dmac, bit<9> intf) {
+    @name("ingress.set_bd_dmac_intf") action set_bd_dmac_intf(@name("bd") bit<24> bd, @name("dmac") bit<48> dmac, @name("intf") bit<9> intf) {
         meta.fwd_metadata.out_bd = bd;
         hdr.ethernet.dstAddr = dmac;
         standard_metadata.egress_spec = intf;
@@ -279,10 +279,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".my_drop") action my_drop_1(inout standard_metadata_t smeta_2) {
+    @name(".my_drop") action my_drop_1(@name("smeta") inout standard_metadata_t smeta_2) {
         mark_to_drop(smeta_2);
     }
-    @name("egress.rewrite_mac") action rewrite_mac(bit<48> smac) {
+    @name("egress.rewrite_mac") action rewrite_mac(@name("smac") bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
     @name("egress.send_frame") table send_frame_0 {

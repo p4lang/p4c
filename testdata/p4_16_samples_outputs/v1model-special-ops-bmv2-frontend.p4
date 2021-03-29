@@ -58,10 +58,10 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
 }
 
 control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
-    @name(".my_drop") action my_drop(inout standard_metadata_t smeta) {
+    @name(".my_drop") action my_drop(@name("smeta") inout standard_metadata_t smeta) {
         mark_to_drop(smeta);
     }
-    @name(".my_drop") action my_drop_0(inout standard_metadata_t smeta_1) {
+    @name(".my_drop") action my_drop_0(@name("smeta") inout standard_metadata_t smeta_1) {
         mark_to_drop(smeta_1);
     }
     @name("ingress.ipv4_address_0") bit<32> ipv4_address_0;
@@ -69,19 +69,19 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     @name("ingress.byte1_0") bit<8> byte1_0;
     @name("ingress.byte2_0") bit<8> byte2_0;
     @name("ingress.byte3_0") bit<8> byte3_0;
-    @name("ingress.set_l2ptr") action set_l2ptr(bit<32> l2ptr) {
-        meta.fwd.l2ptr = l2ptr;
+    @name("ingress.set_l2ptr") action set_l2ptr(@name("l2ptr") bit<32> l2ptr_2) {
+        meta.fwd.l2ptr = l2ptr_2;
     }
-    @name("ingress.set_mcast_grp") action set_mcast_grp(bit<16> mcast_grp) {
-        standard_metadata.mcast_grp = mcast_grp;
+    @name("ingress.set_mcast_grp") action set_mcast_grp(@name("mcast_grp") bit<16> mcast_grp_1) {
+        standard_metadata.mcast_grp = mcast_grp_1;
     }
-    @name("ingress.do_resubmit") action do_resubmit(bit<32> new_ipv4_dstAddr) {
+    @name("ingress.do_resubmit") action do_resubmit(@name("new_ipv4_dstAddr") bit<32> new_ipv4_dstAddr) {
         hdr.ipv4.dstAddr = new_ipv4_dstAddr;
         resubmit<tuple<>>({  });
     }
-    @name("ingress.do_clone_i2e") action do_clone_i2e(bit<32> l2ptr) {
+    @name("ingress.do_clone_i2e") action do_clone_i2e(@name("l2ptr") bit<32> l2ptr_3) {
         clone3<tuple<>>(CloneType.I2E, 32w5, {  });
-        meta.fwd.l2ptr = l2ptr;
+        meta.fwd.l2ptr = l2ptr_3;
     }
     @name("ingress.ipv4_da_lpm") table ipv4_da_lpm_0 {
         key = {
@@ -96,7 +96,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
         }
         default_action = my_drop(standard_metadata);
     }
-    @name("ingress.set_bd_dmac_intf") action set_bd_dmac_intf(bit<24> bd, bit<48> dmac, bit<9> intf) {
+    @name("ingress.set_bd_dmac_intf") action set_bd_dmac_intf(@name("bd") bit<24> bd, @name("dmac") bit<48> dmac, @name("intf") bit<9> intf) {
         meta.fwd.out_bd = bd;
         hdr.ethernet.dstAddr = dmac;
         standard_metadata.egress_spec = intf;
@@ -141,11 +141,11 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
 control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name(".my_drop") action my_drop_1(inout standard_metadata_t smeta_2) {
+    @name(".my_drop") action my_drop_1(@name("smeta") inout standard_metadata_t smeta_2) {
         mark_to_drop(smeta_2);
     }
-    @name("egress.set_out_bd") action set_out_bd(bit<24> bd) {
-        meta.fwd.out_bd = bd;
+    @name("egress.set_out_bd") action set_out_bd(@name("bd") bit<24> bd_2) {
+        meta.fwd.out_bd = bd_2;
     }
     @name("egress.get_multicast_copy_out_bd") table get_multicast_copy_out_bd_0 {
         key = {
@@ -158,15 +158,15 @@ control egress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t
         }
         default_action = NoAction_0();
     }
-    @name("egress.rewrite_mac") action rewrite_mac(bit<48> smac) {
+    @name("egress.rewrite_mac") action rewrite_mac(@name("smac") bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
-    @name("egress.do_recirculate") action do_recirculate(bit<32> new_ipv4_dstAddr) {
-        hdr.ipv4.dstAddr = new_ipv4_dstAddr;
+    @name("egress.do_recirculate") action do_recirculate(@name("new_ipv4_dstAddr") bit<32> new_ipv4_dstAddr_2) {
+        hdr.ipv4.dstAddr = new_ipv4_dstAddr_2;
         recirculate<tuple<>>({  });
     }
-    @name("egress.do_clone_e2e") action do_clone_e2e(bit<48> smac) {
-        hdr.ethernet.srcAddr = smac;
+    @name("egress.do_clone_e2e") action do_clone_e2e(@name("smac") bit<48> smac_2) {
+        hdr.ethernet.srcAddr = smac_2;
         clone3<tuple<>>(CloneType.E2E, 32w11, {  });
     }
     @name("egress.send_frame") table send_frame_0 {

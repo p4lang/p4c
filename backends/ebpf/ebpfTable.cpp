@@ -140,7 +140,7 @@ void EBPFTable::emitActionArguments(CodeBuilder* builder,
     for (auto p : *action->parameters->getEnumerator()) {
         builder->emitIndent();
         auto type = EBPFTypeFactory::instance->create(p->type);
-        type->declare(builder, p->name.name, false);
+        type->declare(builder, p->externalName(), false);
         builder->endOfStatement(true);
     }
 

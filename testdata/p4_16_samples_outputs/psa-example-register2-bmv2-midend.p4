@@ -54,7 +54,7 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     @name("ingress.tmp") PacketByteCountState_t tmp_0;
-    PacketByteCountState_t s;
+    @name("s") PacketByteCountState_t s;
     @name(".update_pkt_ip_byte_count") action update_pkt_ip_byte_count() {
         s = tmp_0;
         s[79:48] = tmp_0[79:48] + 32w1;

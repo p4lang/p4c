@@ -91,7 +91,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name("egress.rewrite_mac") action rewrite_mac(bit<48> smac) {
+    @name("egress.rewrite_mac") action rewrite_mac(@name("smac") bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
     @name("egress._drop") action _drop() {
@@ -153,11 +153,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("ingress._drop") action _drop_6() {
         mark_to_drop(standard_metadata);
     }
-    @name("ingress.set_ecmp_select") action set_ecmp_select(bit<8> ecmp_base, bit<8> ecmp_count) {
+    @name("ingress.set_ecmp_select") action set_ecmp_select(@name("ecmp_base") bit<8> ecmp_base, @name("ecmp_count") bit<8> ecmp_count) {
         hash<bit<14>, bit<10>, tuple_0, bit<20>>(meta._ingress_metadata_ecmp_offset4, HashAlgorithm.crc16, (bit<10>)ecmp_base, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.protocol, hdr.tcp.srcPort, hdr.tcp.dstPort, meta._ingress_metadata_flowlet_id2 }, (bit<20>)ecmp_count);
     }
-    @name("ingress.set_nhop") action set_nhop(bit<32> nhop_ipv4, bit<9> port) {
-        meta._ingress_metadata_nhop_ipv45 = nhop_ipv4;
+    @name("ingress.set_nhop") action set_nhop(@name("nhop_ipv4") bit<32> nhop_ipv4_1, @name("port") bit<9> port) {
+        meta._ingress_metadata_nhop_ipv45 = nhop_ipv4_1;
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
@@ -169,7 +169,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta._ingress_metadata_flow_ipg0 = (bit<32>)standard_metadata.ingress_global_timestamp - meta._ingress_metadata_flowlet_lasttime3;
         flowlet_lasttime_0.write((bit<32>)meta._ingress_metadata_flowlet_map_index1, (bit<32>)standard_metadata.ingress_global_timestamp);
     }
-    @name("ingress.set_dmac") action set_dmac(bit<48> dmac) {
+    @name("ingress.set_dmac") action set_dmac(@name("dmac") bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
     }
     @name("ingress.update_flowlet_id") action update_flowlet_id() {

@@ -33,7 +33,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name(".cnt") direct_counter(CounterType.packets) cnt_0;
-    @name(".act") action act_0(bit<9> port) {
+    @name(".act") action act_0(@name("port") bit<9> port) {
         cnt_0.count();
         standard_metadata.egress_spec = port;
     }

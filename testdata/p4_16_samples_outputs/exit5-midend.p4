@@ -35,7 +35,6 @@ control ctrl() {
                 }
             }
         }
-
     }
 }
 

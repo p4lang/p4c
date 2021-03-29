@@ -4,4 +4,3 @@ issue2544_shadowing1.p4(25): [--Werror=shadow] error: declaration of 'h' shadows
 issue2544_shadowing1.p4(23)
 control ingress(inout Headers h) {
                               ^
-

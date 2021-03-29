@@ -49,7 +49,7 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name("pipe.Reject") action Reject(IPv4Address add) {
+    @name("pipe.Reject") action Reject(@name("add") IPv4Address add) {
         mark_to_drop();
         headers.ipv4.srcAddr = add;
     }

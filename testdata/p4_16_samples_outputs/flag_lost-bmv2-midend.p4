@@ -63,7 +63,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("ingress.drop") action drop_2() {
         mark_to_drop(standard_metadata);
     }
-    @name("ingress.ipv4_forward") action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
+    @name("ingress.ipv4_forward") action ipv4_forward(@name("dstAddr") macAddr_t dstAddr_1, @name("port") egressSpec_t port) {
         meta.test_bool = true;
     }
     @name("ingress.ipv4_lpm") table ipv4_lpm_0 {

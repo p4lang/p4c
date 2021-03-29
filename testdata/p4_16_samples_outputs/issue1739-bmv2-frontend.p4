@@ -51,15 +51,15 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
 }
 
 control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
-    @name(".my_drop") action my_drop(inout standard_metadata_t smeta) {
+    @name(".my_drop") action my_drop(@name("smeta") inout standard_metadata_t smeta) {
         mark_to_drop(smeta);
     }
-    @name(".my_drop") action my_drop_0(inout standard_metadata_t smeta_1) {
+    @name(".my_drop") action my_drop_0(@name("smeta") inout standard_metadata_t smeta_1) {
         mark_to_drop(smeta_1);
     }
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name("ingress.set_output") action set_output(bit<9> out_port) {
+    @name("ingress.set_output") action set_output(@name("out_port") bit<9> out_port) {
         standard_metadata.egress_spec = out_port;
     }
     @name("ingress.ipv4_da_lpm") table ipv4_da_lpm_0 {

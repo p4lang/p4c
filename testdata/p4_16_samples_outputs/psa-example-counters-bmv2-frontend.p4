@@ -87,11 +87,11 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     @name("ingress.port_bytes_in") Counter<ByteCounter_t, PortId_t>(32w512, PSA_CounterType_t.BYTES) port_bytes_in_0;
     @name("ingress.per_prefix_pkt_byte_count") DirectCounter<PacketByteCounter_t>(PSA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_byte_count_0;
-    @name("ingress.next_hop") action next_hop(PortId_t oport) {
+    @name("ingress.next_hop") action next_hop(@name("oport") PortId_t oport) {
         per_prefix_pkt_byte_count_0.count();
         @noWarnUnused {
-            @name("ingress.meta_2") psa_ingress_output_metadata_t meta_2 = ostd;
-            @name("ingress.egress_port_1") PortId_t egress_port_1 = oport;
+            @name("ingress.meta") psa_ingress_output_metadata_t meta_2 = ostd;
+            @name("ingress.egress_port") PortId_t egress_port_1 = oport;
             meta_2.drop = false;
             meta_2.multicast_group = (MulticastGroup_t)32w0;
             meta_2.egress_port = egress_port_1;
@@ -101,7 +101,7 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     @name("ingress.default_route_drop") action default_route_drop() {
         per_prefix_pkt_byte_count_0.count();
         @noWarnUnused {
-            @name("ingress.meta_3") psa_ingress_output_metadata_t meta_3 = ostd;
+            @name("ingress.meta") psa_ingress_output_metadata_t meta_3 = ostd;
             meta_3.drop = true;
             ostd = meta_3;
         }

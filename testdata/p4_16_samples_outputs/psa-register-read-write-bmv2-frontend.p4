@@ -26,12 +26,12 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 }
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarnUnused @name(".send_to_port") action send_to_port(inout psa_ingress_output_metadata_t meta_2, in PortId_t egress_port_1) {
+    @noWarnUnused @name(".send_to_port") action send_to_port(@name("meta") inout psa_ingress_output_metadata_t meta_2, @name("egress_port") in PortId_t egress_port_1) {
         meta_2.drop = false;
         meta_2.multicast_group = (MulticastGroup_t)32w0;
         meta_2.egress_port = egress_port_1;
     }
-    @noWarnUnused @name(".ingress_drop") action ingress_drop(inout psa_ingress_output_metadata_t meta_3) {
+    @noWarnUnused @name(".ingress_drop") action ingress_drop(@name("meta") inout psa_ingress_output_metadata_t meta_3) {
         meta_3.drop = true;
     }
     @name("cIngress.regfile") Register<EthernetAddress, bit<32>>(32w128) regfile_0;

@@ -53,7 +53,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    standard_metadata_t smeta;
+    @name("smeta") standard_metadata_t smeta;
     @name(".my_drop") action my_drop() {
         smeta.ingress_port = standard_metadata.ingress_port;
         smeta.egress_spec = standard_metadata.egress_spec;
@@ -90,15 +90,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         standard_metadata.priority = smeta.priority;
     }
     @name("ingress.ipv4_da_lpm_stats") direct_counter(CounterType.packets) ipv4_da_lpm_stats_0;
-    @name("ingress.set_l2ptr") action set_l2ptr(bit<32> l2ptr) {
+    @name("ingress.set_l2ptr") action set_l2ptr(@name("l2ptr") bit<32> l2ptr_1) {
         ipv4_da_lpm_stats_0.count();
-        meta._fwd_metadata_l2ptr0 = l2ptr;
+        meta._fwd_metadata_l2ptr0 = l2ptr_1;
     }
     @name("ingress.drop_with_count") action drop_with_count() {
         ipv4_da_lpm_stats_0.count();
         mark_to_drop(standard_metadata);
     }
-    @name("ingress.set_bd_dmac_intf") action set_bd_dmac_intf(bit<24> bd, bit<48> dmac, bit<9> intf) {
+    @name("ingress.set_bd_dmac_intf") action set_bd_dmac_intf(@name("bd") bit<24> bd, @name("dmac") bit<48> dmac, @name("intf") bit<9> intf) {
         meta._fwd_metadata_out_bd1 = bd;
         hdr.ethernet.dstAddr = dmac;
         standard_metadata.egress_spec = intf;
@@ -132,7 +132,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    standard_metadata_t smeta_1;
+    @name("smeta") standard_metadata_t smeta_1;
     @name(".my_drop") action my_drop_0() {
         smeta_1.ingress_port = standard_metadata.ingress_port;
         smeta_1.egress_spec = standard_metadata.egress_spec;
@@ -168,7 +168,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         standard_metadata.parser_error = smeta_1.parser_error;
         standard_metadata.priority = smeta_1.priority;
     }
-    @name("egress.rewrite_mac") action rewrite_mac(bit<48> smac) {
+    @name("egress.rewrite_mac") action rewrite_mac(@name("smac") bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
     }
     @name("egress.send_frame") table send_frame_0 {

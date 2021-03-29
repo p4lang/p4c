@@ -57,7 +57,6 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         const entries = {
                         32w0x20020420 : actTbl(24w42, 32w0x20024200);
         }
-
     }
     apply {
         if (hdr.ipv4.isValid()) {

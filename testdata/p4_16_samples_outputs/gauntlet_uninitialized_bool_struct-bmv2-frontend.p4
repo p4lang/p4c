@@ -30,7 +30,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("ingress.tmp") bool_struct tmp_0;
-    @name("ingress.dummy_action") action dummy_action(out bit<16> dummy_bit, out bool_struct dummy_struct) {
+    @name("ingress.dummy_action") action dummy_action(@name("dummy_bit") out bit<16> dummy_bit, @name("dummy_struct") out bool_struct dummy_struct) {
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {

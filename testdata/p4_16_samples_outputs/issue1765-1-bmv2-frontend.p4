@@ -185,11 +185,11 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @name("MyIngress.mac_tmp") mac_addr_t mac_tmp_0;
     @name("MyIngress.addr_tmp") ipv6_addr_t addr_tmp_0;
-    @name("MyIngress.set_egress_port") action set_egress_port(port_t out_port) {
+    @name("MyIngress.set_egress_port") action set_egress_port(@name("out_port") port_t out_port) {
         standard_metadata.egress_spec = out_port;
     }
-    @name("MyIngress.set_egress_port") action set_egress_port_2(port_t out_port) {
-        standard_metadata.egress_spec = out_port;
+    @name("MyIngress.set_egress_port") action set_egress_port_2(@name("out_port") port_t out_port_1) {
+        standard_metadata.egress_spec = out_port_1;
     }
     @name("MyIngress.controller_debug") action controller_debug() {
         meta.task = 16w3;
@@ -201,13 +201,13 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         meta.ingress_port = standard_metadata.ingress_port;
         clone3<metadata>(CloneType.I2E, 32w100, meta);
     }
-    @name("MyIngress.controller_reply") action controller_reply(task_t task) {
-        meta.task = task;
+    @name("MyIngress.controller_reply") action controller_reply(@name("task") task_t task_1) {
+        meta.task = task_1;
         meta.ingress_port = standard_metadata.ingress_port;
         clone3<metadata>(CloneType.I2E, 32w100, meta);
     }
-    @name("MyIngress.controller_reply") action controller_reply_2(task_t task) {
-        meta.task = task;
+    @name("MyIngress.controller_reply") action controller_reply_2(@name("task") task_t task_2) {
+        meta.task = task_2;
         meta.ingress_port = standard_metadata.ingress_port;
         clone3<metadata>(CloneType.I2E, 32w100, meta);
     }

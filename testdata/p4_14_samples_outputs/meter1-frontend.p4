@@ -65,7 +65,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         size = 16;
         default_action = NoAction_0();
     }
-    @name(".m_action") action m_action_0(bit<9> meter_idx) {
+    @name(".m_action") action m_action_0(@name("meter_idx") bit<9> meter_idx) {
         my_meter_0.read(meta.meta.meter_tag);
         standard_metadata.egress_spec = 9w1;
     }

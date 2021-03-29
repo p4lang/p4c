@@ -21,10 +21,10 @@ control c(out bool b) {
     @name("c.b_0") bool b_0;
     @name("c.x_2") bit<16> x_2;
     @name("c.b_1") bool b_1;
-    @name("c.a") action a(in bit<16> bi, out bit<16> mb) {
+    @name("c.a") action a(@name("bi") in bit<16> bi, @name("mb") out bit<16> mb) {
         mb = -bi;
     }
-    @name("c.a") action a_2(in bit<16> bi_1, out bit<16> mb_1) {
+    @name("c.a") action a_2(@name("bi") in bit<16> bi_1, @name("mb") out bit<16> mb_1) {
         mb_1 = -bi_1;
     }
     apply {

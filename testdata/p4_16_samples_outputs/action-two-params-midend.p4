@@ -43,7 +43,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     @name("MyIngress.drop") action drop() {
         mark_to_drop(standard_metadata);
     }
-    @name("MyIngress.actTbl") action actTbl(bit<24> id, bit<32> ip) {
+    @name("MyIngress.actTbl") action actTbl(@name("id") bit<24> id, @name("ip") bit<32> ip) {
     }
     @name("MyIngress.ingress_tbl") table ingress_tbl_0 {
         key = {
@@ -57,7 +57,6 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         const entries = {
                         32w0x20020420 : actTbl(24w42, 32w0x20024200);
         }
-
     }
     apply {
         if (hdr.ipv4.isValid()) {

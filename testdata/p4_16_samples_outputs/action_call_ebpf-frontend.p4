@@ -12,7 +12,7 @@ parser prs(packet_in p, out Headers_t headers) {
 
 control pipe(inout Headers_t headers, out bool pass) {
     @name("pipe.x") bool x_0;
-    @name("pipe.Reject") action Reject(bool rej) {
+    @name("pipe.Reject") action Reject(@name("rej") bool rej) {
         pass = rej;
     }
     apply {

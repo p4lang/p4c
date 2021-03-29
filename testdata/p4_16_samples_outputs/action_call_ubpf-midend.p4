@@ -15,7 +15,7 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     bool hasExited;
-    @name("pipe.RejectConditional") action RejectConditional(bit<1> condition) {
+    @name("pipe.RejectConditional") action RejectConditional(@name("condition") bit<1> condition) {
     }
     @name("pipe.act_return") action act_return() {
         mark_to_pass();

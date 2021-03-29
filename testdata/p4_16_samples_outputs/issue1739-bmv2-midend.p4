@@ -51,8 +51,8 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout meta_t meta, inout 
 }
 
 control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_t standard_metadata) {
-    standard_metadata_t smeta;
-    standard_metadata_t smeta_1;
+    @name("smeta") standard_metadata_t smeta;
+    @name("smeta") standard_metadata_t smeta_1;
     @name(".my_drop") action my_drop() {
         smeta.ingress_port = standard_metadata.ingress_port;
         smeta.egress_spec = standard_metadata.egress_spec;
@@ -125,7 +125,7 @@ control ingress(inout headers_t hdr, inout meta_t meta, inout standard_metadata_
     }
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name("ingress.set_output") action set_output(bit<9> out_port) {
+    @name("ingress.set_output") action set_output(@name("out_port") bit<9> out_port) {
         standard_metadata.egress_spec = out_port;
     }
     @name("ingress.ipv4_da_lpm") table ipv4_da_lpm_0 {

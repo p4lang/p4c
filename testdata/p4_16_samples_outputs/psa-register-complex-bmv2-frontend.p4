@@ -26,7 +26,7 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 }
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarnUnused @name(".send_to_port") action send_to_port(inout psa_ingress_output_metadata_t meta_1, in PortId_t egress_port_1) {
+    @noWarnUnused @name(".send_to_port") action send_to_port(@name("meta") inout psa_ingress_output_metadata_t meta_1, @name("egress_port") in PortId_t egress_port_1) {
         meta_1.drop = false;
         meta_1.multicast_group = (MulticastGroup_t)32w0;
         meta_1.egress_port = egress_port_1;

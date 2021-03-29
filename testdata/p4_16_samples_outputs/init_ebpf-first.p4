@@ -34,7 +34,6 @@ control pipe(inout Headers_t headers, out bool pass) {
                         16w0x800 : match(true);
                         16w0xd000 : match(false);
         }
-
         implementation = hash_table(32w64);
         default_action = NoAction();
     }

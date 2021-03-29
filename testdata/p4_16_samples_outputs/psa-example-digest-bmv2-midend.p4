@@ -103,18 +103,18 @@ control ingress(inout headers hdr, inout metadata meta, in psa_ingress_input_met
         }
         default_action = unknown_source();
     }
-    @name("ingress.do_L2_forward") action do_L2_forward(PortId_t egress_port) {
+    @name("ingress.do_L2_forward") action do_L2_forward(@name("egress_port") PortId_t egress_port_0) {
         @noWarnUnused {
             ostd.drop = false;
             ostd.multicast_group = 32w0;
-            ostd.egress_port = egress_port;
+            ostd.egress_port = egress_port_0;
         }
     }
-    @name("ingress.do_tst") action do_tst(PortId_t egress_port, bit<16> serEnumT) {
+    @name("ingress.do_tst") action do_tst(@name("egress_port") PortId_t egress_port_5, @name("serEnumT") bit<16> serEnumT) {
         @noWarnUnused {
             ostd.drop = false;
             ostd.multicast_group = 32w0;
-            ostd.egress_port = egress_port;
+            ostd.egress_port = egress_port_5;
         }
     }
     @name("ingress.l2_tbl") table l2_tbl_0 {

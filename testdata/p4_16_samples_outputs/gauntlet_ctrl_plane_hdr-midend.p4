@@ -20,7 +20,7 @@ parser p(packet_in pkt, out Headers hdr) {
 control ingress(inout Headers h) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name("ingress.do_action") action do_action(ethernet_t ctrl_hdr) {
+    @name("ingress.do_action") action do_action(@name("ctrl_hdr") ethernet_t ctrl_hdr) {
         h.eth_hdr.dst_addr = ctrl_hdr.dst_addr;
     }
     @name("ingress.simple_table") table simple_table_0 {

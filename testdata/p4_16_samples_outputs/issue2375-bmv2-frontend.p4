@@ -26,7 +26,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("ingress.tmp") bool tmp_0;
-    @name("ingress.do_action") action do_action(inout bool val1, inout bool val2) {
+    @name("ingress.do_action") action do_action(@name("val1") inout bool val1, @name("val2") inout bool val2) {
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {

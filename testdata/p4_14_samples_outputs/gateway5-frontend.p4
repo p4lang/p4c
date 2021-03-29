@@ -37,11 +37,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @name(".output") action output(bit<9> port) {
+    @name(".output") action output(@name("port") bit<9> port) {
         standard_metadata.egress_spec = port;
     }
-    @name(".output") action output_2(bit<9> port) {
-        standard_metadata.egress_spec = port;
+    @name(".output") action output_2(@name("port") bit<9> port_1) {
+        standard_metadata.egress_spec = port_1;
     }
     @name(".noop") action noop() {
     }

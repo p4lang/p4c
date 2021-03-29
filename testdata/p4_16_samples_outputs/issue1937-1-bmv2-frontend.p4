@@ -15,10 +15,10 @@ struct metadata_t {
 }
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    @name(".foo") action foo(out bit<8> x, in bit<8> y=5) {
+    @name(".foo") action foo(@name("x") out bit<8> x, @name("y") in bit<8> y=5) {
         x = y >> 2;
     }
-    @name(".foo") action foo_0(out bit<8> x_1, in bit<8> y_1=5) {
+    @name(".foo") action foo_0(@name("x") out bit<8> x_1, @name("y") in bit<8> y_1=5) {
         x_1 = y_1 >> 2;
     }
     @name("ingressImpl.tmp") bit<8> tmp;

@@ -28,8 +28,8 @@ control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t 
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("MyIC.meter0") Meter<bit<12>>(32w1024, PSA_MeterType_t.PACKETS) meter0_0;
-    @name("MyIC.execute") action execute_1(bit<12> index, PSA_MeterColor_t color) {
-        meter0_0.execute(index, color);
+    @name("MyIC.execute") action execute_1(@name("index") bit<12> index_1, @name("color") PSA_MeterColor_t color_1) {
+        meter0_0.execute(index_1, color_1);
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {
