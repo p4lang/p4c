@@ -55,7 +55,7 @@ struct H3_0 {
     tuple<S, S> t;
 }
 
-const H3_0 h4 = (H3_0){r = (H2_0){g = (Header_0){data = (S){b = 32w10},valid = 1w0},invalid = 1w1},s = (S){b = 32w20},h2 = (H2_0){g = (Header_0){data = (S){b = 32w0},valid = 1w1},invalid = 1w1},h3 = (H4_0){x = (H2_0){g = (Header_0){data = (S){b = 32w0},valid = 1w1},invalid = 1w1}},t = { {b = 32w0}, {b = 32w1} }};
+const H3_0 h4 = (H3_0){r = (H2_0){g = (Header_0){data = (S){b = 32w10},valid = 1w0},invalid = 1w1},s = (S){b = 32w20},h2 = (H2_0){g = (Header_0){data = (S){b = 32w0},valid = 1w1},invalid = 1w1},h3 = (H4_0){x = (H2_0){g = (Header_0){data = (S){b = 32w0},valid = 1w1},invalid = 1w1}},t = { (S){b = 32w0}, (S){b = 32w1} }};
 header_union HU_0 {
     X    xu;
     GH_0 h3u;
