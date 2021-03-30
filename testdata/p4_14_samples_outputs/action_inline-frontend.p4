@@ -30,7 +30,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.md.b = y0;
         }
         {
-            @name("ingress.y0_1") bit<1> y0_1 = meta.md.b;
+            @name("ingress.y0") bit<1> y0_1 = meta.md.b;
             y0_1 = y0_1 + 1w1;
             meta.md.b = y0_1;
         }

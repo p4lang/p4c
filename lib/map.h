@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_MAP_H_
-#define P4C_LIB_MAP_H_
+#ifndef _LIB_MAP_H_
+#define _LIB_MAP_H_
 
 #include <map>
 
@@ -165,4 +165,4 @@ template<class M> class MapForKey {
 template<class M> MapForKey<M> ValuesForKey(M &m, typename M::key_type k) {
     return MapForKey<M>(m, k); }
 
-#endif /* P4C_LIB_MAP_H_ */
+#endif /* _LIB_MAP_H_ */

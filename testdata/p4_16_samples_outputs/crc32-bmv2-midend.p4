@@ -162,7 +162,6 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
                         8w0x5e : operation_xor();
                         8w0x3e : operation_crc();
         }
-
     }
     @hidden table tbl_operation_drop {
         actions = {

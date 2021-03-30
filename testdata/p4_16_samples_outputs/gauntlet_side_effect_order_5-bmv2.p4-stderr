@@ -1,5 +1,11 @@
 gauntlet_side_effect_order_5-bmv2.p4(33): [--Wwarn=ordering] warning: h.eth_hdr.src_addr: 'out' argument has fields in common with h.eth_hdr.src_addr
         do_thing(h.eth_hdr.src_addr, h.eth_hdr.src_addr);
+                 ^^^^^^^^^^^^^^^^^^
+gauntlet_side_effect_order_5-bmv2.p4(33)
+        do_thing(h.eth_hdr.src_addr, h.eth_hdr.src_addr);
+                                     ^^^^^^^^^^^^^^^^^^
+gauntlet_side_effect_order_5-bmv2.p4(33): [--Wwarn=ordering] warning: h.eth_hdr.src_addr: 'out' argument has fields in common with h.eth_hdr.src_addr
+        do_thing(h.eth_hdr.src_addr, h.eth_hdr.src_addr);
                                      ^^^^^^^^^^^^^^^^^^
 gauntlet_side_effect_order_5-bmv2.p4(33)
         do_thing(h.eth_hdr.src_addr, h.eth_hdr.src_addr);

@@ -23,10 +23,10 @@ struct Meta {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.c") bit<8> c_0;
-    @name("ingress.do_thing") action do_thing(inout bit<8> inout_c) {
+    @name("ingress.do_thing") action do_thing(@name("inout_c") inout bit<8> inout_c) {
         h.h.a = inout_c;
     }
-    @name("ingress.do_thing") action do_thing_2(inout bit<8> inout_c_1) {
+    @name("ingress.do_thing") action do_thing_2(@name("inout_c") inout bit<8> inout_c_1) {
         h.h.a = inout_c_1;
     }
     apply {

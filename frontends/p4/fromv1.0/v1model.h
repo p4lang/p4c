@@ -238,7 +238,7 @@ struct TableAttributes_Model {
 class V1Model : public ::Model::Model {
  protected:
     V1Model() :
-            Model::Model("0.1"), file("v1model.p4"),
+            file("v1model.p4"),
             standardMetadata("standard_metadata"),
             // The following 2 are not really docmented in the P4-14 spec.
             intrinsicMetadata("intrinsic_metadata"),
@@ -265,60 +265,62 @@ class V1Model : public ::Model::Model {
     {}
 
  public:
-    unsigned      version = 20200408;
-    ::Model::Elem       file;
-    ::Model::Elem       standardMetadata;
-    ::Model::Elem       intrinsicMetadata;
-    ::Model::Elem       queueingMetadata;
-    ::Model::Type_Model headersType;
-    ::Model::Type_Model metadataType;
-    StandardMetadataType_Model standardMetadataType;
-    Parser_Model        parser;
-    Deparser_Model      deparser;
-    Control_Model       egress;
-    Control_Model       ingress;
-    Switch_Model        sw;
-    Truncate            truncate;
-    CounterOrMeter_Model counterOrMeter;
-    Counter_Model       counter;
-    Meter_Model         meter;
-    Random_Model        random;
-    ActionProfile_Model action_profile;
-    ActionSelector_Model action_selector;
-    Cloner_Model        clone;
-    ::Model::Elem       resubmit;
-    TableAttributes_Model tableAttributes;
-    ::Model::Elem       rangeMatchType;
-    ::Model::Elem       optionalMatchType;
-    ::Model::Elem       selectorMatchType;
-    VerifyUpdate_Model  verify;
-    VerifyUpdate_Model  compute;
-    DigestReceiver_Model digest_receiver;
-    Hash_Model          hash;
-    Algorithm_Model     algorithm;
-    Register_Model      registers;
-    ::Model::Elem       drop;
-    ::Model::Elem       recirculate;
-    ::Model::Elem       verify_checksum;
-    ::Model::Elem       update_checksum;
-    ::Model::Elem       verify_checksum_with_payload;
-    ::Model::Elem       update_checksum_with_payload;
-    ::Model::Elem       log_msg;
-    DirectMeter_Model   directMeter;
-    DirectCounter_Model directCounter;
-
-    bool haveIndexTypeParam() const { return version >= 20200408; }  // depends on version
+    const ::Model::Elem       file;
+    const ::Model::Elem       standardMetadata;
+    const ::Model::Elem       intrinsicMetadata;
+    const ::Model::Elem       queueingMetadata;
+    const ::Model::Type_Model headersType;
+    const ::Model::Type_Model metadataType;
+    const StandardMetadataType_Model standardMetadataType;
+    const Parser_Model        parser;
+    const Deparser_Model      deparser;
+    const Control_Model       egress;
+    const Control_Model       ingress;
+    const Switch_Model        sw;
+    const Truncate            truncate;
+    const CounterOrMeter_Model counterOrMeter;
+    const Counter_Model       counter;
+    const Meter_Model         meter;
+    const Random_Model        random;
+    const ActionProfile_Model action_profile;
+    const ActionSelector_Model action_selector;
+    const Cloner_Model        clone;
+    const ::Model::Elem       resubmit;
+    const TableAttributes_Model tableAttributes;
+    const ::Model::Elem       rangeMatchType;
+    const ::Model::Elem       optionalMatchType;
+    const ::Model::Elem       selectorMatchType;
+    const VerifyUpdate_Model  verify;
+    const VerifyUpdate_Model  compute;
+    const DigestReceiver_Model digest_receiver;
+    const Hash_Model          hash;
+    const Algorithm_Model     algorithm;
+    const Register_Model      registers;
+    const ::Model::Elem       drop;
+    const ::Model::Elem       recirculate;
+    const ::Model::Elem       verify_checksum;
+    const ::Model::Elem       update_checksum;
+    const ::Model::Elem       verify_checksum_with_payload;
+    const ::Model::Elem       update_checksum_with_payload;
+    const ::Model::Elem       log_msg;
+    const DirectMeter_Model   directMeter;
+    const DirectCounter_Model directCounter;
 
     static V1Model instance;
 };
 
+/// Stores the version of the global constant __v1model_version used
+/// in the 'version' public instance variable.
 class getV1ModelVersion : public Inspector {
     bool preorder(const IR::Declaration_Constant *dc) override {
         if (dc->name == "__v1model_version") {
             auto val = dc->initializer->to<IR::Constant>();
-            V1Model::instance.version = static_cast<unsigned>(val->value); }
+            version = static_cast<unsigned>(val->value); }
         return false; }
     bool preorder(const IR::Declaration *) override { return false; }
+
+ public:
+    unsigned version = 0;
 };
 
 }  // namespace P4V1

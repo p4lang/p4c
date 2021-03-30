@@ -204,14 +204,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._drop") action _drop_4() {
         meta._ing_metadata_drop0 = 1w1;
     }
-    @name(".set_egress_port") action set_egress_port(bit<9> egress_port) {
-        meta._ing_metadata_egress_port1 = egress_port;
+    @name(".set_egress_port") action set_egress_port(@name("egress_port") bit<9> egress_port_1) {
+        meta._ing_metadata_egress_port1 = egress_port_1;
     }
-    @name(".set_egress_port") action set_egress_port_3(bit<9> egress_port) {
-        meta._ing_metadata_egress_port1 = egress_port;
+    @name(".set_egress_port") action set_egress_port_3(@name("egress_port") bit<9> egress_port_2) {
+        meta._ing_metadata_egress_port1 = egress_port_2;
     }
-    @name(".set_egress_port") action set_egress_port_4(bit<9> egress_port) {
-        meta._ing_metadata_egress_port1 = egress_port;
+    @name(".set_egress_port") action set_egress_port_4(@name("egress_port") bit<9> egress_port_3) {
+        meta._ing_metadata_egress_port1 = egress_port_3;
     }
     @name(".discard") action discard() {
         mark_to_drop(standard_metadata);
@@ -323,7 +323,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                 l2_match_0.apply();
             }
         }
-
         if (hdr.tcp.isValid()) {
             tcp_check_0.apply();
         } else if (hdr.udp.isValid()) {

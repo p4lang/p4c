@@ -38,13 +38,13 @@ parser LJparse(packet_in b, out Parsed_rep p) {
 }
 
 control LjPipe(inout Parsed_rep p, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
-    @name("LjPipe.Drop_action") action Drop_action(out PortId port) {
+    @name("LjPipe.Drop_action") action Drop_action(@name("port") out PortId port) {
         port = 4w0xf;
     }
     @name("LjPipe.Drop_1") action Drop_0() {
         outCtrl.outputPort = 4w0xf;
     }
-    @name("LjPipe.Forward") action Forward(PortId outPort) {
+    @name("LjPipe.Forward") action Forward(@name("outPort") PortId outPort) {
         outCtrl.outputPort = outPort;
     }
     @name("LjPipe.Enet_lkup") table Enet_lkup_0 {

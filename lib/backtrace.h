@@ -52,4 +52,4 @@ template<class E> class backtrace_exception : public E {
     }
 };
 
-#endif /* _LIB_CRASH_H_ */
+#endif /* _LIB_BACKTRACE_H_ */

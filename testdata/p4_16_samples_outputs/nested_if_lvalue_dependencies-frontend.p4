@@ -63,7 +63,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     @name("MyIngress.z") bit<16> z_0;
     @name("MyIngress.ipv4_forward") action ipv4_forward() {
         {
-            @name("MyIngress.value_1") bit<16> value_1;
+            @name("MyIngress.value") bit<16> value_1;
             x_0 = hdr.ipv4.identification;
             y_0 = hdr.ipv4.hdrChecksum;
             z_0 = hdr.ipv4.totalLen;

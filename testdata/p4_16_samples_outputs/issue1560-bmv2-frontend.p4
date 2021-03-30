@@ -105,23 +105,23 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
     }
     @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
-    @name("cIngress.foo1") action foo1(IPv4Address dstAddr) {
-        hdr.ipv4.dstAddr = dstAddr;
+    @name("cIngress.foo1") action foo1(@name("dstAddr") IPv4Address dstAddr_1) {
+        hdr.ipv4.dstAddr = dstAddr_1;
     }
-    @name("cIngress.foo1") action foo1_3(IPv4Address dstAddr) {
-        hdr.ipv4.dstAddr = dstAddr;
+    @name("cIngress.foo1") action foo1_3(@name("dstAddr") IPv4Address dstAddr_2) {
+        hdr.ipv4.dstAddr = dstAddr_2;
     }
-    @name("cIngress.foo1") action foo1_4(IPv4Address dstAddr) {
-        hdr.ipv4.dstAddr = dstAddr;
+    @name("cIngress.foo1") action foo1_4(@name("dstAddr") IPv4Address dstAddr_3) {
+        hdr.ipv4.dstAddr = dstAddr_3;
     }
-    @name("cIngress.foo2") action foo2(IPv4Address srcAddr) {
-        hdr.ipv4.srcAddr = srcAddr;
+    @name("cIngress.foo2") action foo2(@name("srcAddr") IPv4Address srcAddr_1) {
+        hdr.ipv4.srcAddr = srcAddr_1;
     }
-    @name("cIngress.foo2") action foo2_3(IPv4Address srcAddr) {
-        hdr.ipv4.srcAddr = srcAddr;
+    @name("cIngress.foo2") action foo2_3(@name("srcAddr") IPv4Address srcAddr_2) {
+        hdr.ipv4.srcAddr = srcAddr_2;
     }
-    @name("cIngress.foo2") action foo2_4(IPv4Address srcAddr) {
-        hdr.ipv4.srcAddr = srcAddr;
+    @name("cIngress.foo2") action foo2_4(@name("srcAddr") IPv4Address srcAddr_3) {
+        hdr.ipv4.srcAddr = srcAddr_3;
     }
     @name("cIngress.t0") table t0_0 {
         key = {

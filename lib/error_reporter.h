@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_ERROR_REPORTER_H_
-#define P4C_LIB_ERROR_REPORTER_H_
+#ifndef _LIB_ERROR_REPORTER_H_
+#define _LIB_ERROR_REPORTER_H_
 
 #include "error_helper.h"
 #include "error_catalog.h"
@@ -254,4 +254,4 @@ class ErrorReporter final {
     std::unordered_map<cstring, DiagnosticAction> diagnosticActions;
 };
 
-#endif /* P4C_LIB_ERROR_REPORTER_H_ */
+#endif /* _LIB_ERROR_REPORTER_H_ */

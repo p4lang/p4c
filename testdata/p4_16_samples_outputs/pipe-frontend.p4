@@ -37,10 +37,10 @@ struct Packet_data {
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name("Q_pipe.p1.thost.B_action") action p1_thost_B_action_0(out bit<9> barg, BParamType bData) {
+    @name("Q_pipe.p1.thost.B_action") action p1_thost_B_action_0(@name("barg") out bit<9> barg, @name("bData") BParamType bData) {
         barg = bData;
     }
-    @name("Q_pipe.p1.thost.C_action") action p1_thost_C_action_0(bit<9> cData) {
+    @name("Q_pipe.p1.thost.C_action") action p1_thost_C_action_0(@name("cData") bit<9> cData) {
         qArg1.field1 = cData;
     }
     @name("Q_pipe.p1.thost.T") table p1_thost_T {

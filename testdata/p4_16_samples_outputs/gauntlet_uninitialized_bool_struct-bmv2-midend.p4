@@ -29,8 +29,8 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bool hasExited;
     @name("ingress.tmp") bool_struct tmp_0;
-    bit<16> dummy_bit;
-    bool_struct dummy_struct;
+    @name("dummy_bit") bit<16> dummy_bit;
+    @name("dummy_struct") bool_struct dummy_struct;
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("ingress.dummy_action") action dummy_action() {

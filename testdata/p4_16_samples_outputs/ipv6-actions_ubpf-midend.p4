@@ -83,29 +83,29 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     @name("pipe.Reject") action Reject() {
         mark_to_drop();
     }
-    @name("pipe.ipv6_modify_dstAddr") action ipv6_modify_dstAddr(bit<128> dstAddr) {
-        headers.ipv6.dstAddr = dstAddr;
+    @name("pipe.ipv6_modify_dstAddr") action ipv6_modify_dstAddr(@name("dstAddr") bit<128> dstAddr_1) {
+        headers.ipv6.dstAddr = dstAddr_1;
     }
     @name("pipe.ipv6_swap_addr") action ipv6_swap_addr() {
         tmp_0 = headers.ipv6.dstAddr;
         headers.ipv6.dstAddr = headers.ipv6.srcAddr;
         headers.ipv6.srcAddr = tmp_0;
     }
-    @name("pipe.set_flowlabel") action set_flowlabel(bit<20> label) {
-        headers.ipv6.flowLabel = label;
+    @name("pipe.set_flowlabel") action set_flowlabel(@name("label") bit<20> label_2) {
+        headers.ipv6.flowLabel = label_2;
     }
-    @name("pipe.set_traffic_class_flow_label") action set_traffic_class_flow_label(bit<8> trafficClass, bit<20> label) {
-        headers.ipv6.trafficClass = trafficClass;
-        headers.ipv6.flowLabel = label;
+    @name("pipe.set_traffic_class_flow_label") action set_traffic_class_flow_label(@name("trafficClass") bit<8> trafficClass_1, @name("label") bit<20> label_3) {
+        headers.ipv6.trafficClass = trafficClass_1;
+        headers.ipv6.flowLabel = label_3;
     }
-    @name("pipe.set_ipv6_version") action set_ipv6_version(bit<4> version) {
-        headers.ipv6.version = version;
+    @name("pipe.set_ipv6_version") action set_ipv6_version(@name("version") bit<4> version_1) {
+        headers.ipv6.version = version_1;
     }
-    @name("pipe.set_next_hdr") action set_next_hdr(bit<8> nextHdr) {
-        headers.ipv6.nextHdr = nextHdr;
+    @name("pipe.set_next_hdr") action set_next_hdr(@name("nextHdr") bit<8> nextHdr_1) {
+        headers.ipv6.nextHdr = nextHdr_1;
     }
-    @name("pipe.set_hop_limit") action set_hop_limit(bit<8> hopLimit) {
-        headers.ipv6.hopLimit = hopLimit;
+    @name("pipe.set_hop_limit") action set_hop_limit(@name("hopLimit") bit<8> hopLimit_1) {
+        headers.ipv6.hopLimit = hopLimit_1;
     }
     @name("pipe.filter_tbl") table filter_tbl_0 {
         key = {

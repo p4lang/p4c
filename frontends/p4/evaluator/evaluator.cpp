@@ -100,7 +100,7 @@ bool Evaluator::preorder(const IR::P4Program* program) {
 bool Evaluator::preorder(const IR::Declaration_Constant* decl) {
     LOG2("Evaluating " << dbp(decl));
     visit(decl->initializer);
-    auto value = getValue(decl);
+    auto value = getValue(decl->initializer);
     setValue(decl, value);
     return false;
 }

@@ -89,7 +89,6 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
             default: {
             }
         }
-
         if (!hasReturned) {
             tbl_issue2170bmv2l77.apply();
         }

@@ -36,8 +36,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name(".set_index") action set_index(bit<16> index, bit<9> port) {
-        meta._counter_metadata_counter_index0 = index;
+    @name(".set_index") action set_index(@name("index") bit<16> index_1, @name("port") bit<9> port) {
+        meta._counter_metadata_counter_index0 = index_1;
         standard_metadata.egress_spec = port;
     }
     @name(".count_entries") action count_entries() {

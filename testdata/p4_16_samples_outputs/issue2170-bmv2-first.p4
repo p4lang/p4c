@@ -61,7 +61,6 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
             default: {
             }
         }
-
         hdr.h.a = 8w0;
     }
 }

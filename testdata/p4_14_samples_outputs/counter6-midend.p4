@@ -69,7 +69,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @name(".act") action _act_1(bit<9> port, bit<12> idx) {
+    @name(".act") action _act_1(@name("port") bit<9> port, @name("idx") bit<12> idx) {
         standard_metadata.egress_spec = port;
         cntDum.count(idx);
     }
@@ -83,9 +83,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         default_action = NoAction_0();
     }
-    @name(".act") action _act_2(bit<9> port, bit<12> idx) {
-        standard_metadata.egress_spec = port;
-        cntDum.count(idx);
+    @name(".act") action _act_2(@name("port") bit<9> port_2, @name("idx") bit<12> idx_2) {
+        standard_metadata.egress_spec = port_2;
+        cntDum.count(idx_2);
     }
     @name(".tabB") table _tabB {
         actions = {

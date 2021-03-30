@@ -20,7 +20,7 @@ control DeparserImpl(packet_out packet, in headers_t hdr) {
 }
 
 control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @name(".send_to_cpu") action send_to_cpu(inout standard_metadata_t standard_metadata_1) {
+    @name(".send_to_cpu") action send_to_cpu(@name("standard_metadata") inout standard_metadata_t standard_metadata_1) {
         standard_metadata_1.egress_spec = 9w64;
     }
     @noWarn("unused") @name(".NoAction") action NoAction_0() {

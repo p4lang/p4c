@@ -27,7 +27,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @name("ingress.set_valid_action") action set_valid_action(out Headers tmp) {
+    @name("ingress.set_valid_action") action set_valid_action(@name("tmp") out Headers tmp) {
         tmp.eth_hdr.setValid();
         tmp.eth_hdr.dst_addr = 48w1;
         tmp.eth_hdr.src_addr = 48w1;

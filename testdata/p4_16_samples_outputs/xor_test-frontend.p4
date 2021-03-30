@@ -65,7 +65,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @name("MyIngress.forward_and_do_something") action forward_and_do_something(egressSpec_t port) {
+    @name("MyIngress.forward_and_do_something") action forward_and_do_something(@name("port") egressSpec_t port) {
         standard_metadata.egress_spec = port;
         if (hdr.ipv4.isValid()) {
             meta.before1 = hdr.ipv4.srcAddr;
@@ -99,7 +99,6 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
                         9w1 : forward_and_do_something(9w2);
                         9w2 : forward_and_do_something(9w1);
         }
-
         default_action = NoAction_0();
     }
     @name("MyIngress.debug") table debug_0 {

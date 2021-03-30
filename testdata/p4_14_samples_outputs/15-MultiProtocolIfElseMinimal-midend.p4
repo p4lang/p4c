@@ -88,11 +88,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".nop") action nop_2() {
     }
-    @name(".set_egress_port") action set_egress_port(bit<8> egress_port) {
-        meta._ing_metadata_egress_port1 = egress_port;
+    @name(".set_egress_port") action set_egress_port(@name("egress_port") bit<8> egress_port_1) {
+        meta._ing_metadata_egress_port1 = egress_port_1;
     }
-    @name(".set_egress_port") action set_egress_port_2(bit<8> egress_port) {
-        meta._ing_metadata_egress_port1 = egress_port;
+    @name(".set_egress_port") action set_egress_port_2(@name("egress_port") bit<8> egress_port_2) {
+        meta._ing_metadata_egress_port1 = egress_port_2;
     }
     @name(".ipv4_match") table ipv4_match_0 {
         actions = {

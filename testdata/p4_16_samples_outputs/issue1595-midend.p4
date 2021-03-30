@@ -112,7 +112,6 @@ control cIngress(inout Parsed_packet hdr, inout metadata_t meta, inout standard_
                 tbl_issue1595l79.apply();
             }
         }
-
     }
 }
 

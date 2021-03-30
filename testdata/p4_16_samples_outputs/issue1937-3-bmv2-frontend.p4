@@ -16,11 +16,9 @@ struct metadata_t {
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     @name("ingressImpl.tmp") bit<8> tmp;
-    @name("ingressImpl.tmp_0") bit<8> tmp_0;
     apply {
-        tmp_0 = hdr.h1.f1;
-        tmp = tmp_0 >> 2;
-        hdr.h1.f1 = tmp;
+        tmp = hdr.h1.f1;
+        hdr.h1.f1 = tmp >> 2;
         hdr.h1.f2 = 8w5 >> 2;
     }
 }

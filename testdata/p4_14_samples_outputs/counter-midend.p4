@@ -47,7 +47,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name(".my_direct_counter") direct_counter(CounterType.bytes) my_direct_counter_0;
-    @name(".m_action") action m_action_0(bit<14> idx) {
+    @name(".m_action") action m_action_0(@name("idx") bit<14> idx) {
         my_direct_counter_0.count();
         my_indirect_counter.count(idx);
         mark_to_drop(standard_metadata);

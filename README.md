@@ -110,7 +110,7 @@ dot -Tpdf ParserImpl.dot > ParserImpl.pdf
 2.  Install [dependencies](#dependencies). You can find specific instructions
     for Ubuntu 16.04 [here](#ubuntu-dependencies) and for macOS 10.12
     [here](#macos-dependencies).  You can also look at the
-    [travis installation script](tools/travis-build).
+    [CI installation script](tools/ci-build.sh).
 
 3.  Build. Building should also take place in a subdirectory named `build`.
     ```

@@ -3,8 +3,10 @@
 # Script for building in a Docker container on Travis.
 
 set -e  # Exit on error.
+set -x  # Make command execution verbose
 
-export P4C_PYTHON3="python3" # Python3 is required for p4c to run, P4C_DEPS would otherwise uninstall it
+# Python3 is required for p4c to run, P4C_DEPS would otherwise uninstall it
+export P4C_PYTHON3="python3"
 
 export P4C_DEPS="bison \
              build-essential \
@@ -118,11 +120,22 @@ function build() {
   mkdir -p build
   cd build
 
-  cmake .. '-DCMAKE_CXX_FLAGS:STRING=-O3' "$@"
+  cmake "$@" ..
   make
 }
 
-build "-DENABLE_UNIFIED_COMPILATION=${ENABLE_UNIFIED_COMPILATION}"
+# Strong optimization.
+export CXXFLAGS="${CXXFLAGS} -O3"
+# Add the gold linker early to allow sanitization in Ubuntu 16.04
+# Context: https://stackoverflow.com/a/50357910
+export CXXFLAGS="${CXXFLAGS} -fuse-ld=gold"
+# Catch null pointer dereferencing.
+export CXXFLAGS="${CXXFLAGS} -fsanitize=null"
+# Toggle unified compilation.
+CMAKE_FLAGS+="-DENABLE_UNIFIED_COMPILATION=${ENABLE_UNIFIED_COMPILATION} "
+# RELEASE should be default, but we want to make sure.
+CMAKE_FLAGS+="-DCMAKE_BUILD_TYPE=RELEASE"
+build ${CMAKE_FLAGS}
 
 make install
 /usr/local/bin/ccache -p -s

@@ -16,7 +16,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("IngressImpl.value") bit<32> value_0;
-    @name("IngressImpl.update_value") action update_value(out bit<32> value_2) {
+    @name("IngressImpl.update_value") action update_value(@name("value") out bit<32> value_2) {
         {
             @name("IngressImpl.hasReturned") bool hasReturned = false;
             @name("IngressImpl.retval") bit<32> retval;

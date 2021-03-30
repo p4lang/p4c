@@ -145,7 +145,7 @@ std::ostream &IR::DpdkHeaderType::toSpec(std::ostream &out) const {
             out << "\tbool";
         else {
             std::cout << (*it)->type->node_type_name() << std::endl;
-            BUG("Unsupported type");
+            BUG("%1% Unsupported type", *it);
         }
         out << " " << (*it)->name;
         out << std::endl;
@@ -244,7 +244,7 @@ std::ostream& IR::DpdkJmpCondStatement::toSpec(std::ostream& out) const {
 }
 
 std::ostream& IR::DpdkBinaryStatement::toSpec(std::ostream& out) const {
-    BUG_CHECK(dst == src1, "The first source field %1% in a binary operation"
+    BUG_CHECK(dst->equiv(*src1), "The first source field %1% in a binary operation"
             "must be the same as the destination field %2% to be supported by DPDK",
             src1, dst);
     out << instruction << " " << DPDK::toStr(dst)

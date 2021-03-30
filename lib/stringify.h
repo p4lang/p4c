@@ -16,8 +16,8 @@ limitations under the License.
 
 /* -*-c++-*- */
 
-#ifndef P4C_LIB_STRINGIFY_H_
-#define P4C_LIB_STRINGIFY_H_
+#ifndef _LIB_STRINGIFY_H_
+#define _LIB_STRINGIFY_H_
 
 #include <stdint.h>
 #include "gmputil.h"
@@ -72,4 +72,4 @@ cstring printf_format(const char* fmt_str, ...);
 // vprintf into a string
 cstring vprintf_format(const char* fmt_str, va_list ap);
 }  // namespace Util
-#endif /* P4C_LIB_STRINGIFY_H_ */
+#endif /* _LIB_STRINGIFY_H_ */

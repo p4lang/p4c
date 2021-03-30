@@ -88,20 +88,20 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".ing_drop") action ing_drop() {
         meta._ing_metadata_drop0 = 1w1;
     }
-    @name(".set_egress_port") action set_egress_port(bit<8> egress_port) {
-        meta._ing_metadata_egress_port1 = egress_port;
+    @name(".set_egress_port") action set_egress_port(@name("egress_port") bit<8> egress_port_1) {
+        meta._ing_metadata_egress_port1 = egress_port_1;
     }
-    @name(".set_f1") action set_f1(bit<8> f1) {
-        meta._ing_metadata_f12 = f1;
+    @name(".set_f1") action set_f1(@name("f1") bit<8> f1_1) {
+        meta._ing_metadata_f12 = f1_1;
     }
-    @name(".set_f2") action set_f2(bit<16> f2) {
-        meta._ing_metadata_f23 = f2;
+    @name(".set_f2") action set_f2(@name("f2") bit<16> f2_1) {
+        meta._ing_metadata_f23 = f2_1;
     }
-    @name(".set_f3") action set_f3(bit<32> f3) {
-        meta._ing_metadata_f34 = f3;
+    @name(".set_f3") action set_f3(@name("f3") bit<32> f3_1) {
+        meta._ing_metadata_f34 = f3_1;
     }
-    @name(".set_f4") action set_f4(bit<64> f4) {
-        meta._ing_metadata_f45 = f4;
+    @name(".set_f4") action set_f4(@name("f4") bit<64> f4_1) {
+        meta._ing_metadata_f45 = f4_1;
     }
     @name(".i_t1") table i_t1_0 {
         actions = {

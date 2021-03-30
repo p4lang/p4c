@@ -119,7 +119,8 @@ def run_timeout(options, args, timeout, stderr):
 timeout = 10 * 60
 
 def compare_files(options, produced, expected, ignore_case):
-    if options.replace:
+    # p4info files should not change
+    if options.replace and "p4info" not in produced:
         if options.verbose:
             print("Saving new version of ", expected)
         shutil.copy2(produced, expected)
@@ -264,9 +265,9 @@ def process_file(options, argv):
 
     if result != SUCCESS:
         print("Error compiling")
-        print("".join(open(stderr).readlines()))
+        print(open(stderr).read())
         # If the compiler crashed fail the test
-        if 'Compiler Bug' in open(stderr).readlines():
+        if 'Compiler Bug' in open(stderr).read():
             return FAILURE
 
     expected_error = isError(options.p4filename)

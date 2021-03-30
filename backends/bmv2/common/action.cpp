@@ -183,7 +183,7 @@ ActionConverter::convertActionParams(const IR::ParameterList *parameters,
             ::warning(ErrorType::WARN_UNUSED, "Unused action parameter %1%", p);
 
         auto param = new Util::JsonObject();
-        param->emplace("name", p->name);
+        param->emplace("name", p->externalName());
         auto type = ctxt->typeMap->getType(p, true);
         // TODO: added IR::Type_Enum here to support PSA_MeterColor_t
         // should re-consider how to support action parameters that is neither bit<> nor int<>

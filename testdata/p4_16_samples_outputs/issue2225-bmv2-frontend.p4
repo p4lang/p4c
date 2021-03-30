@@ -23,7 +23,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.do_action") action do_action(inout bit<16> val_0) {
+    @name("ingress.do_action") action do_action(@name("val_0") inout bit<16> val_0) {
         val_0 = 16w3;
         exit;
     }

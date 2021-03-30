@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_STRINGREF_H_
-#define P4C_LIB_STRINGREF_H_
+#ifndef _LIB_STRINGREF_H_
+#define _LIB_STRINGREF_H_
 
 #include <stdlib.h>
 #include <string.h>
@@ -197,4 +197,4 @@ class StringRef::Split {
 inline StringRef::Split StringRef::split(char ch) const { return Split(*this, nullptr, find(ch)); }
 inline StringRef::Split StringRef::split(const char *s) const { return Split(*this, s, find(s)); }
 
-#endif /* P4C_LIB_STRINGREF_H_ */
+#endif /* _LIB_STRINGREF_H_ */

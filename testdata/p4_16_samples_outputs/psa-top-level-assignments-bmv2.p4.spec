@@ -41,9 +41,11 @@ apply {
 	extract h.ethernet
 	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_egress_port 0x3
+	jmpnv LABEL_0FALSE h.ethernet
 	emit h.ethernet
+	LABEL_0FALSE :	jmpnv LABEL_1FALSE h.ethernet
 	emit h.ethernet
-	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_1FALSE :	tx m.psa_ingress_output_metadata_egress_port
 }
 
 

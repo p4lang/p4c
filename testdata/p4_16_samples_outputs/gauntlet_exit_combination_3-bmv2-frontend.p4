@@ -25,11 +25,11 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name("ingress.do_action") action do_action(inout bit<48> val) {
+    @name("ingress.do_action") action do_action(@name("val") inout bit<48> val) {
         val = 48w2;
         exit;
     }
-    @name("ingress.do_action") action do_action_2(inout bit<48> val_1) {
+    @name("ingress.do_action") action do_action_2(@name("val") inout bit<48> val_1) {
         val_1 = 48w2;
         exit;
     }

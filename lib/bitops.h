@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_BITOPS_H_
-#define P4C_LIB_BITOPS_H_
+#ifndef _LIB_BITOPS_H_
+#define _LIB_BITOPS_H_
 
 #include <limits.h>
 #include "bitvec.h"
@@ -52,4 +52,4 @@ static inline unsigned bitmask2bytemask(const bitvec &a) {
     return rv;
 }
 
-#endif /* P4C_LIB_BITOPS_H_ */
+#endif /* _LIB_BITOPS_H_ */

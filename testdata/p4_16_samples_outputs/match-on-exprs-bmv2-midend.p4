@@ -36,7 +36,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name("ingressImpl.my_drop") action my_drop() {
         mark_to_drop(stdmeta);
     }
-    @name("ingressImpl.foo") action foo(bit<9> out_port) {
+    @name("ingressImpl.foo") action foo(@name("out_port") bit<9> out_port) {
         hdr.ethernet.dstAddr[22:18] = hdr.ethernet.srcAddr[5:1];
         stdmeta.egress_spec = out_port;
     }

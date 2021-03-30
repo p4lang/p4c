@@ -68,13 +68,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".no_op") action _no_op_2() {
     }
-    @name(".set_bd_properties") action _set_bd_properties_0(bit<14> bd, bit<14> ingress_rid) {
-        meta._ingress_metadata_bd1 = bd;
+    @name(".set_bd_properties") action _set_bd_properties_0(@name("bd") bit<14> bd_1, @name("ingress_rid") bit<14> ingress_rid) {
+        meta._ingress_metadata_bd1 = bd_1;
         meta._ingress_metadata_rid2 = ingress_rid;
     }
-    @name(".set_bd_properties") action _set_bd_properties_2(bit<14> bd, bit<14> ingress_rid) {
-        meta._ingress_metadata_bd1 = bd;
-        meta._ingress_metadata_rid2 = ingress_rid;
+    @name(".set_bd_properties") action _set_bd_properties_2(@name("bd") bit<14> bd_2, @name("ingress_rid") bit<14> ingress_rid_1) {
+        meta._ingress_metadata_bd1 = bd_2;
+        meta._ingress_metadata_rid2 = ingress_rid_1;
     }
     @name(".port_vlan_mapping_miss") action _port_vlan_mapping_miss_0() {
         meta._ingress_metadata_drop_flag3 = 1w1;

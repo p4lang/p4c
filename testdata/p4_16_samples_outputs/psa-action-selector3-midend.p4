@@ -32,11 +32,11 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 control MyIC(inout ethernet_t a, inout user_meta_t b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
-    @name("MyIC.a1") action a1(bit<48> param) {
+    @name("MyIC.a1") action a1(@name("param") bit<48> param) {
         a.dstAddr = param;
     }
-    @name("MyIC.a2") action a2(bit<16> param) {
-        a.etherType = param;
+    @name("MyIC.a2") action a2(@name("param") bit<16> param_2) {
+        a.etherType = param_2;
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {

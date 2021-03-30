@@ -30,10 +30,12 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.simple_action") action simple_action(inout bit<32> dummy) {
+    @name("ingress.tmp") bit<48> tmp;
+    @name("ingress.simple_action") action simple_action(@name("dummy") inout bit<32> dummy) {
     }
     apply {
-        simple_action(h.h[h.eth_hdr.dst_addr].a);
+        tmp = h.eth_hdr.dst_addr;
+        simple_action(h.h[tmp].a);
     }
 }
 

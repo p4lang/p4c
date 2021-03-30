@@ -28,69 +28,69 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("MyIngress.do_n_rounds") action do_n_rounds(inout bit<16> x_0) {
+    @name("MyIngress.do_n_rounds") action do_n_rounds(@name("x") inout bit<16> x_0) {
         {
             @name("MyIngress.x") bit<16> x = x_0;
             x = x + 16w65535 & x;
             x_0 = x;
         }
         {
-            @name("MyIngress.x_2") bit<16> x_2 = x_0;
+            @name("MyIngress.x") bit<16> x_2 = x_0;
             x_2 = x_2 + 16w65535 & x_2;
             x_0 = x_2;
         }
         {
-            @name("MyIngress.x_3") bit<16> x_3 = x_0;
+            @name("MyIngress.x") bit<16> x_3 = x_0;
             x_3 = x_3 + 16w65535 & x_3;
             x_0 = x_3;
         }
         {
-            @name("MyIngress.x_4") bit<16> x_4 = x_0;
+            @name("MyIngress.x") bit<16> x_4 = x_0;
             x_4 = x_4 + 16w65535 & x_4;
             x_0 = x_4;
         }
         {
-            @name("MyIngress.x_5") bit<16> x_5 = x_0;
+            @name("MyIngress.x") bit<16> x_5 = x_0;
             x_5 = x_5 + 16w65535 & x_5;
             x_0 = x_5;
         }
         {
-            @name("MyIngress.x_6") bit<16> x_6 = x_0;
+            @name("MyIngress.x") bit<16> x_6 = x_0;
             x_6 = x_6 + 16w65535 & x_6;
             x_0 = x_6;
         }
         {
-            @name("MyIngress.x_7") bit<16> x_7 = x_0;
+            @name("MyIngress.x") bit<16> x_7 = x_0;
             x_7 = x_7 + 16w65535 & x_7;
             x_0 = x_7;
         }
         {
-            @name("MyIngress.x_8") bit<16> x_8 = x_0;
+            @name("MyIngress.x") bit<16> x_8 = x_0;
             x_8 = x_8 + 16w65535 & x_8;
             x_0 = x_8;
         }
         {
-            @name("MyIngress.x_9") bit<16> x_9 = x_0;
+            @name("MyIngress.x") bit<16> x_9 = x_0;
             x_9 = x_9 + 16w65535 & x_9;
             x_0 = x_9;
         }
         {
-            @name("MyIngress.x_10") bit<16> x_10 = x_0;
+            @name("MyIngress.x") bit<16> x_10 = x_0;
             x_10 = x_10 + 16w65535 & x_10;
             x_0 = x_10;
         }
         {
-            @name("MyIngress.x_11") bit<16> x_11 = x_0;
+            @name("MyIngress.x") bit<16> x_11 = x_0;
             x_11 = x_11 + 16w65535 & x_11;
             x_0 = x_11;
         }
         {
-            @name("MyIngress.x_12") bit<16> x_12 = x_0;
+            @name("MyIngress.x") bit<16> x_12 = x_0;
             x_12 = x_12 + 16w65535 & x_12;
             x_0 = x_12;
         }
         {
-            @name("MyIngress.x_13") bit<16> x_13 = x_0;
+            @name("MyIngress.x") bit<16> x_13 = x_0;
             x_13 = x_13 + 16w65535 & x_13;
             x_0 = x_13;
         }

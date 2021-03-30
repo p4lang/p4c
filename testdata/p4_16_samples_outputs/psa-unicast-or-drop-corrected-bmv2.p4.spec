@@ -72,10 +72,12 @@ apply {
 	table tbl_send_to_port
 	jmpneq LABEL_0END h.ethernet.dstAddr 0x0
 	table tbl_ingress_drop
-	LABEL_0END :	emit h.ethernet
-	extract h.ethernet
+	LABEL_0END :	jmpnv LABEL_1FALSE h.ethernet
 	emit h.ethernet
-	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_1FALSE :	extract h.ethernet
+	jmpnv LABEL_2FALSE h.ethernet
+	emit h.ethernet
+	LABEL_2FALSE :	tx m.psa_ingress_output_metadata_egress_port
 }
 
 

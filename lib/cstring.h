@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_CSTRING_H_
-#define P4C_LIB_CSTRING_H_
+#ifndef _LIB_CSTRING_H_
+#define _LIB_CSTRING_H_
 
 #include <cstring>
 #include <cstddef>
@@ -309,4 +309,4 @@ template<> struct hash<cstring> {
 };
 }  // namespace std
 
-#endif /* P4C_LIB_CSTRING_H_ */
+#endif /* _LIB_CSTRING_H_ */

@@ -25,7 +25,7 @@ struct Meta {
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.y") bit<64> y_0;
     @name("ingress.tmp") bit<16> tmp;
-    @name("ingress.iuJze") action iuJze(in bit<8> hyhe) {
+    @name("ingress.iuJze") action iuJze(@name("hyhe") in bit<8> hyhe) {
         {
             @name("ingress.hasReturned") bool hasReturned = false;
             @name("ingress.retval") bit<16> retval;

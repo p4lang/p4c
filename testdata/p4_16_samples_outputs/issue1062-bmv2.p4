@@ -62,7 +62,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
         const entries = {
                         error.NoError : set_error_idx(1);
         }
-
     }
     apply {
         t_exact.apply();

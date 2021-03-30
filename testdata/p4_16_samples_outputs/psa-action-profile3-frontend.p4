@@ -30,17 +30,17 @@ control MyIC(inout ethernet_t a, inout EMPTY b, in psa_ingress_input_metadata_t 
     @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
     @name("MyIC.ap") ActionProfile(32w1024) ap_0;
-    @name("MyIC.a1") action a1(bit<48> param) {
+    @name("MyIC.a1") action a1(@name("param") bit<48> param) {
         a.dstAddr = param;
     }
-    @name("MyIC.a1") action a1_2(bit<48> param) {
-        a.dstAddr = param;
+    @name("MyIC.a1") action a1_2(@name("param") bit<48> param_2) {
+        a.dstAddr = param_2;
     }
-    @name("MyIC.a2") action a2(bit<16> param) {
-        a.etherType = param;
+    @name("MyIC.a2") action a2(@name("param") bit<16> param_3) {
+        a.etherType = param_3;
     }
-    @name("MyIC.a2") action a2_2(bit<16> param) {
-        a.etherType = param;
+    @name("MyIC.a2") action a2_2(@name("param") bit<16> param_4) {
+        a.etherType = param_4;
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {

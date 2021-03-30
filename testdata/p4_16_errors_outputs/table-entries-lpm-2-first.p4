@@ -68,7 +68,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
                         8w0x11 &&& 8w0x81 : a_with_control_params(9w14);
                         8w0x0 : a_with_control_params(9w15);
         }
-
     }
     apply {
         t_lpm.apply();

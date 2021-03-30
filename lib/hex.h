@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_HEX_H_
-#define P4C_LIB_HEX_H_
+#ifndef _LIB_HEX_H_
+#define _LIB_HEX_H_
 
 #include <iostream>
 #include <iomanip>
@@ -54,4 +54,4 @@ class hexvec {
 
 std::ostream &operator<<(std::ostream &os, const hexvec &h);
 
-#endif /* P4C_LIB_HEX_H_ */
+#endif /* _LIB_HEX_H_ */

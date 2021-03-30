@@ -108,7 +108,6 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
                         9w1 : forward_and_do_something(9w2);
                         9w2 : forward_and_do_something(9w1);
         }
-
         default_action = NoAction();
     }
     table debug {

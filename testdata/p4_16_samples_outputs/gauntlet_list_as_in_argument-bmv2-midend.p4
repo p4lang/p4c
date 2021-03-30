@@ -24,7 +24,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") ethernet_t tmp;
-    ethernet_t val;
+    @name("val") ethernet_t val;
     @name("ingress.do_action") action do_action() {
         val = tmp;
         h.eth_hdr.eth_type = val.eth_type;

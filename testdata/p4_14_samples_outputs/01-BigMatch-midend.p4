@@ -84,17 +84,17 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".nop") action nop_8() {
     }
-    @name(".set_f1") action set_f1(bit<1024> f1) {
-        meta._ing_metadata_f12 = f1;
+    @name(".set_f1") action set_f1(@name("f1") bit<1024> f1_1) {
+        meta._ing_metadata_f12 = f1_1;
     }
-    @name(".set_f2") action set_f2(bit<512> f2) {
-        meta._ing_metadata_f23 = f2;
+    @name(".set_f2") action set_f2(@name("f2") bit<512> f2_1) {
+        meta._ing_metadata_f23 = f2_1;
     }
-    @name(".set_f3") action set_f3(bit<256> f3) {
-        meta._ing_metadata_f34 = f3;
+    @name(".set_f3") action set_f3(@name("f3") bit<256> f3_1) {
+        meta._ing_metadata_f34 = f3_1;
     }
-    @name(".set_f4") action set_f4(bit<128> f4) {
-        meta._ing_metadata_f45 = f4;
+    @name(".set_f4") action set_f4(@name("f4") bit<128> f4_1) {
+        meta._ing_metadata_f45 = f4_1;
     }
     @name(".i_t1") table i_t1_0 {
         actions = {
