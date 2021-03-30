@@ -110,6 +110,10 @@ set (P4_XFAIL_TESTS
 # will be no P4Info file.
 p4c_add_tests_w_p4runtime("p4" ${P4TEST_DRIVER} "${P4TEST_SUITES}" "${P4_XFAIL_TESTS}" "${P4RUNTIME_EXCLUDE}" "-a '--maxErrorCount 100'")
 
+set (P4TEST_PARSERUNROLL
+  "${P4C_SOURCE_DIR}/testdata/p4_16_samples/parser-unroll/*.p4")
+p4c_add_tests_w_p4runtime("p4unroll" ${P4TEST_DRIVER} "${P4TEST_PARSERUNROLL}" "${P4_XFAIL_TESTS}" "${P4RUNTIME_EXCLUDE}" "-a '--maxErrorCount 100 --loopsUnroll'")
+
 set (P4TEST_ERRORS
   "${P4C_SOURCE_DIR}/testdata/p4_16_errors/*.p4"
   "${P4C_SOURCE_DIR}/testdata/p4_14_errors/*.p4")

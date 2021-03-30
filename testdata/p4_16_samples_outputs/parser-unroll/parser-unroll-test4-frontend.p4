@@ -11,7 +11,7 @@ header ethernet_t {
 }
 
 header srcRoute_t {
-    bit<1>  bos;
+    bit<2>  bos;
     bit<15> port;
 }
 
@@ -35,31 +35,41 @@ struct metadata {
 
 struct headers {
     ethernet_t       ethernet;
-    srcRoute_t[16w3] srcRoutes;
+    srcRoute_t[16w4] srcRoutes;
     ipv4_t           ipv4;
+    bit<32>          index;
 }
 
 parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name("MyParser.index") int<32> index_0;
     state start {
-        index_0 = 32s0;
+        hdr.index = 32w0;
         packet.extract<ethernet_t>(hdr.ethernet);
         transition select(hdr.ethernet.etherType) {
-            16w0x1234: parse_srcRouting;
+            16w0: last;
+            16w1: access1;
+            16w2: access2;
+            16w3: access3;
             default: accept;
         }
     }
-    state parse_srcRouting {
-        packet.extract<srcRoute_t>(hdr.srcRoutes[index_0]);
-        index_0 = index_0 + 32s1;
-        transition select(hdr.srcRoutes[index_0 + -32s1].bos) {
-            1w1: parse_ipv4;
-            default: parse_srcRouting;
-        }
-    }
-    state parse_ipv4 {
-        packet.extract<ipv4_t>(hdr.ipv4);
+    state last {
+        hdr.index = hdr.index + 32w1;
         transition accept;
+    }
+    state access1 {
+        hdr.index = hdr.index + 32w1;
+        packet.extract<srcRoute_t>(hdr.srcRoutes.next);
+        transition last;
+    }
+    state access2 {
+        hdr.index = hdr.index + 32w1;
+        packet.extract<srcRoute_t>(hdr.srcRoutes.next);
+        transition access1;
+    }
+    state access3 {
+        hdr.index = hdr.index + 32w1;
+        packet.extract<srcRoute_t>(hdr.srcRoutes.next);
+        transition access2;
     }
 }
 

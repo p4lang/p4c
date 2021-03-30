@@ -9,11 +9,11 @@ namespace P4 {
 struct VisitedKey {
     cstring                     name;       // name of a state.
     std::map<cstring, size_t>   indexes;    // indexes of header stacks.
-    
+
     VisitedKey(cstring name, std::map<cstring, size_t>& indexes) : name(name), indexes(indexes) {
     }
-    
-    VisitedKey(const ParserStateInfo* stateInfo) {
+
+    explicit VisitedKey(const ParserStateInfo* stateInfo) {
         CHECK_NULL(stateInfo);
         name = stateInfo->state->name.name;
         indexes = stateInfo->statesIndexes;
@@ -132,8 +132,6 @@ class ParserStateRewriter : public Transform {
             return expression;
         auto* res = value->to<SymbolicInteger>()->constant->clone();
         newExpression->right = res;
-        //std::ostringstream ostr;
-        //ostr << expression->left;
         BUG_CHECK(res->fitsInt64(), "To big integer for a header stack index %1%", res);
         state->statesIndexes[expression->left->toString()] = (size_t)res->asInt64();
         return newExpression;
@@ -156,13 +154,9 @@ class ParserStateRewriter : public Transform {
                 else
                     idx = i;
             }
-            //std::ostringstream ostr;
-            //ostr << expression->expr;
             state->statesIndexes[expression->expr->toString()] = idx;
-            IR::ArrayIndex* newArray = new IR::ArrayIndex(expression->expr,
+            return new IR::ArrayIndex(expression->expr->clone(),
                                                           new IR::Constant(idx));
-            typeMap->setType(newArray, expression->expr->type);
-            return newArray;
         }
         return expression;
     }
@@ -680,8 +674,6 @@ void ParserStructure::addStateHSUsage(const IR::ParserState* state,
                                       const IR::Expression* expression) {
     if (state == nullptr || expression == nullptr || !expression->type->is<IR::Type_Stack>())
         return;
-    //std::ostringstream ostr;
-    //ostr << expression;
     auto i = statesWithHeaderStacks.find(state->name.name);
     if (i == statesWithHeaderStacks.end()) {
         std::set<cstring> s;
