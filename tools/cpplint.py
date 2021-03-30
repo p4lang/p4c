@@ -329,6 +329,8 @@ _ERROR_CATEGORIES = [
     'runtime/memset',
     'runtime/indentation_namespace',
     'runtime/operator',
+    # This check currently does not work correctly. So it is disabled
+    # 'runtime/override',
     'runtime/printf',
     'runtime/printf_format',
     'runtime/references',
@@ -6403,7 +6405,7 @@ def ProcessLine(filename, file_extension, clean_lines, line,
   CheckMakePairUsesDeduction(filename, clean_lines, line, error)
   CheckRedundantVirtual(filename, clean_lines, line, error)
   CheckRedundantOverrideOrFinal(filename, clean_lines, line, error)
-  CheckMissingOverrideOrFinal(filename, clean_lines, line, nesting_state, error)
+  # CheckMissingOverrideOrFinal(filename, clean_lines, line, nesting_state, error)
   if extra_check_functions:
     for check_fn in extra_check_functions:
       check_fn(filename, clean_lines, line, error)
