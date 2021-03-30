@@ -31,3 +31,7 @@ void IR::DpdkValidateStatement::dbprint(std::ostream& out) const {
 void IR::DpdkInvalidateStatement::dbprint(std::ostream& out) const {
     out << "invalidate " << header;
 }
+
+void IR::DpdkDropStatement::dbprint(std::ostream& out) const {
+    out << "drop";
+}

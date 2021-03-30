@@ -416,3 +416,8 @@ std::ostream& IR::DpdkInvalidateStatement::toSpec(std::ostream& out) const {
     return out;
 }
 
+std::ostream& IR::DpdkDropStatement::toSpec(std::ostream& out) const {
+    out << "drop";
+    return out;
+}
+

@@ -149,6 +149,7 @@ class ConvertStatementToDpdk : public Inspector {
     }
     void branchingInstructionGeneration(cstring true_label, cstring false_label,
                                         const IR::Expression *expr);
+    bool isAssignToDrop(const IR::Expression*);
     bool preorder(const IR::AssignmentStatement *a) override;
     bool preorder(const IR::IfStatement *a) override;
     bool preorder(const IR::MethodCallStatement *a) override;
