@@ -40,13 +40,11 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	invalidate h.ethernet
 	extract h.ethernet
-	jmpnv LABEL_0FALSE h.ethernet
 	emit h.ethernet
-	LABEL_0FALSE :	invalidate h.ethernet
+	invalidate h.ethernet
 	extract h.ethernet
-	jmpnv LABEL_1FALSE h.ethernet
 	emit h.ethernet
-	LABEL_1FALSE :	tx m.psa_ingress_output_metadata_egress_port
+	tx m.psa_ingress_output_metadata_egress_port
 }
 
 

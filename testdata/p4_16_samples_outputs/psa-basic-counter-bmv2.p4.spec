@@ -72,12 +72,10 @@ apply {
 	extract h.ethernet
 	table tbl_send_to_port
 	table tbl_0
-	jmpnv LABEL_0FALSE h.ethernet
 	emit h.ethernet
-	LABEL_0FALSE :	extract h.ethernet
-	jmpnv LABEL_1FALSE h.ethernet
+	extract h.ethernet
 	emit h.ethernet
-	LABEL_1FALSE :	tx m.psa_ingress_output_metadata_egress_port
+	tx m.psa_ingress_output_metadata_egress_port
 }
 
 
