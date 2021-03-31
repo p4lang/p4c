@@ -17,7 +17,6 @@ limitations under the License.
 #ifndef _MIDEND_PARSERUNROLL_H_
 #define _MIDEND_PARSERUNROLL_H_
 
-#include "ir/ir-generated.h"
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/callGraph.h"
