@@ -329,7 +329,7 @@ interface Type_Indexed {
 abstract Type_BaseList : Type, Type_Indexed {
     optional inline Vector<Type> components;
     validate{ components.check_null(); }
-    size_t getSize() const { return components.size(); }
+    size_t getSize() const override { return components.size(); }
     Type at(size_t index) const { return components.at(index); }
     int width_bits() const override {
         /// returning sum of the width of the elements
@@ -413,7 +413,7 @@ class Type_Stack : Type_Indexed, Type {
                 (sizeKnown() ? Util::toString(getSize()) : "?") + "]"; }
     dbprint{ out << elementType << "[" << size << "]"; }
     bool sizeKnown() const;
-    size_t getSize() const;
+    size_t getSize() const override;
     Type at(size_t _) const { return elementType; }
     static const cstring next;
     static const cstring last;
