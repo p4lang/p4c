@@ -55,11 +55,9 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	extract h.ethernet
 	table tbl_multicast
-	jmpnv LABEL_0FALSE h.ethernet
 	emit h.ethernet
-	LABEL_0FALSE :	jmpnv LABEL_1FALSE h.ethernet
 	emit h.ethernet
-	LABEL_1FALSE :	tx m.psa_ingress_output_metadata_egress_port
+	tx m.psa_ingress_output_metadata_egress_port
 }
 
 

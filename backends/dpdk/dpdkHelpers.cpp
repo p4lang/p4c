@@ -320,6 +320,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             BUG("not implemented for `apply` other than table");
         }
     } else if (auto a = mi->to<P4::ExternMethod>()) {
+        // std::cerr << a->originalExternType->getName() << std::endl;
         // Checksum function call
         if (a->originalExternType->getName().name == "InternetChecksum") {
             if (a->method->getName().name == "add") {
@@ -347,12 +348,9 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             if (a->method->getName().name == "emit") {
                 auto args = a->expr->arguments;
                 auto header = args->at(0);
-                auto false_label = Util::printf_format("label_%dfalse", next_label_id++);
                 if (header->expression->is<IR::Member>() ||
                     header->expression->is<IR::PathExpression>()) {
-                    add_instr(new IR::DpdkJmpIfInvalidStatement(false_label, header->expression));
                     add_instr(new IR::DpdkEmitStatement(header->expression));
-                    add_instr(new IR::DpdkLabelStatement(false_label));
                 } else {
                     ::error(
                         "One emit does not like this packet.emit(header.xxx)");
@@ -403,8 +401,6 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 auto reg = a->object->getName();
                 add_instr(new IR::DpdkRegisterWriteStatement(reg, index, src));
             }
-        } else if (a->originalExternType->getName() == "DirectCounter") {
-            ::error("DirectCounter is not supported in DPDK yet, please use Counter instead.");
         } else {
             ::error("%1%: Unknown extern function.", s);
         }
