@@ -18,11 +18,14 @@ limitations under the License.
 #define _IR_JSON_LOADER_H_
 
 #include <assert.h>
-#include <boost/optional.hpp>
+
 #include <string>
 #include <map>
 #include <unordered_map>
 #include <utility>
+
+#include <boost/optional.hpp>
+
 #include "lib/cstring.h"
 #include "lib/indent.h"
 #include "lib/match.h"

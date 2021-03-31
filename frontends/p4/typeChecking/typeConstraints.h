@@ -17,9 +17,11 @@ limitations under the License.
 #ifndef _TYPECHECKING_TYPECONSTRAINTS_H_
 #define _TYPECHECKING_TYPECONSTRAINTS_H_
 
+#include <sstream>
+
 #include <boost/optional.hpp>
 #include <boost/algorithm/string.hpp>
-#include <sstream>
+
 #include "ir/ir.h"
 #include "typeUnification.h"
 #include "typeConstraints.h"

@@ -14,9 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <vector>
+
 #include <boost/algorithm/string/replace.hpp>
 #include <boost/optional.hpp>
-#include <vector>
 
 #include "gtest/gtest.h"
 

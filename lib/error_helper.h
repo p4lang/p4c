@@ -16,12 +16,13 @@ limitations under the License.
 #ifndef _LIB_ERROR_HELPER_H_
 #define _LIB_ERROR_HELPER_H_
 
-#include <boost/format.hpp>
 #include <stdarg.h>
 #include <map>
 #include <set>
 #include <type_traits>
 #include <unordered_map>
+
+#include <boost/format.hpp>
 
 #include "lib/cstring.h"
 #include "lib/source_file.h"

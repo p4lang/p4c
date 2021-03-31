@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <boost/optional.hpp>
-
 #include <set>
 #include <unordered_map>
+
+#include <boost/optional.hpp>
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/fromv1.0/v1model.h"

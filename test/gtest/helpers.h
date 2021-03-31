@@ -17,8 +17,9 @@ limitations under the License.
 #ifndef TEST_GTEST_HELPERS_H_
 #define TEST_GTEST_HELPERS_H_
 
-#include <boost/optional.hpp>
 #include <string>
+
+#include <boost/optional.hpp>
 
 #include "frontends/common/options.h"
 #include "frontends/p4/parseAnnotations.h"

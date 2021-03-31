@@ -25,15 +25,14 @@ limitations under the License.
 #error "This backend requires the boost graph headers, which could not be found"
 #endif
 
-#include <boost/graph/graph_traits.hpp>
-#include <boost/graph/adjacency_list.hpp>
-#include <boost/graph/graphviz.hpp>
-
-#include <boost/optional.hpp>
-
 #include <map>
 #include <utility>  // std::pair
 #include <vector>
+
+#include <boost/graph/graph_traits.hpp>
+#include <boost/graph/adjacency_list.hpp>
+#include <boost/graph/graphviz.hpp>
+#include <boost/optional.hpp>
 
 #include "ir/ir.h"
 #include "ir/visitor.h"

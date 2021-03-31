@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <boost/graph/graphviz.hpp>
-
 #include <iostream>
+
+#include <boost/graph/graphviz.hpp>
 
 #include "graphs.h"
 

@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <boost/optional.hpp>
-
 #include <sstream>  // for std::ostringstream
+
+#include <boost/optional.hpp>
 
 #include "frontends/common/resolveReferences/referenceMap.h"
 // TODO(antonin): this include should go away when we cleanup getTableSize

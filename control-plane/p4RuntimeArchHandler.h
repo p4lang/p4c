@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef CONTROL_PLANE_P4RUNTIMEARCHHANDLER_H_
 #define CONTROL_PLANE_P4RUNTIMEARCHHANDLER_H_
 
-#include <boost/optional.hpp>
-
 #include <set>
+
+#include <boost/optional.hpp>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -92,7 +92,7 @@ class P4RuntimeSymbolType {
  private:
     // even if the constructor is protected, the static functions in the derived
     // classes cannot access it, which is why we use the make factory function
-    constexpr P4RuntimeSymbolType(p4rt_id_t id) noexcept
+    explicit constexpr P4RuntimeSymbolType(p4rt_id_t id) noexcept
         : id(id) { }
 
     /// The 8-bit id prefix for that type, as per the p4info.proto file.
