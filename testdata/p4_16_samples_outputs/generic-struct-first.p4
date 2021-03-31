@@ -1,8 +1,3 @@
-struct Header<St> {
-    St     data;
-    bit<1> valid;
-}
-
 struct S {
     bit<32> b;
 }
@@ -17,15 +12,6 @@ struct U {
 }
 
 const U u = (U){f = (Header_0){data = (S){b = 32w10},valid = 1w1}};
-struct H2<G> {
-    Header<G> g;
-    bit<1>    invalid;
-}
-
-struct H4<T> {
-    T x;
-}
-
 const Header_0 h2 = (Header_0){data = (S){b = 32w0},valid = 1w0};
 struct Header_1 {
     bit<16> data;
@@ -42,17 +28,6 @@ struct H2_0 {
 const H2_0 h1 = (H2_0){g = (Header_0){data = (S){b = 32w0},valid = 1w1},invalid = 1w1};
 const H2_0 h3 = (H2_0){g = (Header_0){data = (S){b = 32w0},valid = 1w1},invalid = 1w1};
 typedef H2_0 R;
-struct H3<T> {
-    R         r;
-    T         s;
-    H2<T>     h2;
-    H4<H2<T>> h3;
-}
-
-header GH<T> {
-    T data;
-}
-
 header X {
     bit<32> b;
 }
@@ -73,18 +48,14 @@ struct H4_0 {
 }
 
 struct H3_0 {
-    R    r;
-    S    s;
-    H2_0 h2;
-    H4_0 h3;
+    R           r;
+    S           s;
+    H2_0        h2;
+    H4_0        h3;
+    tuple<S, S> t;
 }
 
-const H3_0 h4 = (H3_0){r = (H2_0){g = (Header_0){data = (S){b = 32w10},valid = 1w0},invalid = 1w1},s = (S){b = 32w20},h2 = (H2_0){g = (Header_0){data = (S){b = 32w0},valid = 1w1},invalid = 1w1},h3 = (H4_0){x = (H2_0){g = (Header_0){data = (S){b = 32w0},valid = 1w1},invalid = 1w1}}};
-header_union HU<T> {
-    X     xu;
-    GH<T> h3u;
-}
-
+const H3_0 h4 = (H3_0){r = (H2_0){g = (Header_0){data = (S){b = 32w10},valid = 1w0},invalid = 1w1},s = (S){b = 32w20},h2 = (H2_0){g = (Header_0){data = (S){b = 32w0},valid = 1w1},invalid = 1w1},h3 = (H4_0){x = (H2_0){g = (Header_0){data = (S){b = 32w0},valid = 1w1},invalid = 1w1}},t = { (S){b = 32w0}, (S){b = 32w1} }};
 header_union HU_0 {
     X    xu;
     GH_0 h3u;

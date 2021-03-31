@@ -134,7 +134,7 @@ const IR::Node* CreateSpecializedTypes::postorder(IR::Type_Declaration* type) {
             renamed->name = name;
             renamed->typeParameters = empty;
             it.second->replacement = postorder(renamed)->to<IR::Type_StructLike>();
-            LOG3("Specializing " << dbp(type) << " with " << ts << " as " << dbp(renamed));
+            LOG3("CST Specializing " << dbp(type) << " with " << ts << " as " << dbp(renamed));
         }
     }
     return insert(type);
@@ -154,19 +154,22 @@ const IR::Node* ReplaceTypeUses::postorder(IR::Type_Specialized* type) {
     if (!t)
         return type;
     CHECK_NULL(t->replacement);
-    LOG3("Replacing " << dbp(type) << " with " << dbp(t->replacement));
+    LOG3("RTU Replacing " << dbp(type) << " with " << dbp(t->replacement));
     return t->replacement->getP4Type();
 }
 
 const IR::Node* ReplaceTypeUses::postorder(IR::StructExpression* expression) {
-    auto spec = getOriginal<IR::StructExpression>()->structType->to<IR::Type_Specialized>();
+    auto st = getOriginal<IR::StructExpression>()->structType;
+    CHECK_NULL(st);
+    auto spec = st->to<IR::Type_Specialized>();
     if (spec == nullptr)
         return expression;
     auto replacement = specMap->get(spec);
     if (replacement == nullptr)
         return expression;
     auto replType = replacement->replacement;
-    LOG3("Replacing " << dbp(expression->structType) << " with " << dbp(replacement->replacement));
+    LOG3("RTU Replacing " << dbp(expression->structType) << " with " <<
+         dbp(replacement->replacement));
     expression->structType = replType->getP4Type();
     return expression;
 }

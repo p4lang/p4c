@@ -766,8 +766,8 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
     auto concreteType = destType;
     if (auto tsc = destType->to<IR::Type_SpecializedCanonical>())
         concreteType = tsc->substituted;
+    bool cst = isCompileTimeConstant(sourceExpression);
     if (auto ts = concreteType->to<IR::Type_StructLike>()) {
-        bool cst = isCompileTimeConstant(sourceExpression);
         auto si = sourceExpression->to<IR::StructExpression>();
         auto type = destType->getP4Type();
         if (initType->is<IR::Type_UnknownStruct>() ||
@@ -811,6 +811,30 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
             sourceExpression = new IR::StructExpression(type, type, vec);
         }
         // else this is some other expression that evaluates to a struct
+        setType(sourceExpression, destType);
+        if (cst)
+            setCompileTimeConstant(sourceExpression);
+    } else if (auto tt = concreteType->to<IR::Type_Tuple>()) {
+        if (auto li = sourceExpression->to<IR::ListExpression>()) {
+            if (tt->getSize() != li->components.size()) {
+                typeError("%1%: destination type expects %2% fields, but source only has %3%",
+                          errorPosition, ts->fields.size(), li->components.size());
+                return sourceExpression;
+            }
+            bool changed = false;
+            IR::Vector<IR::Expression> vec;
+            for (size_t i = 0; i < tt->getSize(); i++) {
+                auto typeI = tt->at(i);
+                auto compI = li->components.at(i);
+                auto src = assignment(sourceExpression, typeI, compI);
+                if (src != compI)
+                    changed = true;
+                vec.push_back(src);
+            }
+            if (changed)
+                sourceExpression = new IR::ListExpression(vec);
+        }
+        // else this is some other expression that evaluates to a tuple
         setType(sourceExpression, destType);
         if (cst)
             setCompileTimeConstant(sourceExpression);

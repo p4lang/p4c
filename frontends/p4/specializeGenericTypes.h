@@ -149,10 +149,10 @@ struct S0 { bit<32> data; }
 S0 s;
 ```
  */
-class SpecializeGenericTypes : public PassRepeated {
+class DoSpecializeGenericTypes : public PassRepeated {
     TypeSpecializationMap specMap;
  public:
-    SpecializeGenericTypes(ReferenceMap* refMap, TypeMap* typeMap) {
+    DoSpecializeGenericTypes(ReferenceMap* refMap, TypeMap* typeMap) {
         passes.emplace_back(new PassRepeated({
                     new TypeChecking(refMap, typeMap),
                     new FindTypeSpecializations(&specMap),
@@ -166,6 +166,27 @@ class SpecializeGenericTypes : public PassRepeated {
         passes.emplace_back(new ClearTypeMap(typeMap, true));
         specMap.refMap = refMap;
         specMap.typeMap = typeMap;
+        setName("DoSpecializeGenericTypes");
+    }
+};
+
+class RemoveGenericTypes : public Transform {
+ public:
+    const IR::Node* postorder(IR::Type_StructLike* type) override {
+        if (!type->typeParameters->empty()) return nullptr;
+        return type;
+    }
+    const IR::Node* postorder(IR::Type_Stack* type) override {
+        if (type->elementType->is<IR::Type_Specialized>()) return nullptr;
+        return type;
+    }
+};
+
+class SpecializeGenericTypes : public PassManager {
+ public:
+    SpecializeGenericTypes(ReferenceMap* refMap, TypeMap* typeMap) {
+        passes.emplace_back(new DoSpecializeGenericTypes(refMap, typeMap));
+        passes.emplace_back(new RemoveGenericTypes());
         setName("SpecializeGenericTypes");
     }
 };
