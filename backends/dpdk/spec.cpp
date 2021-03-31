@@ -38,7 +38,7 @@ cstring toStr(const IR::BoolLiteral *const b) {
 
 cstring toStr(const IR::Member *const m) {
     std::ostringstream out;
-    out << m->member;
+    out << m->member.originalName;
     return toStr(m->expr) + "." + out.str();
 }
 
@@ -147,7 +147,7 @@ std::ostream &IR::DpdkHeaderType::toSpec(std::ostream &out) const {
             std::cout << (*it)->type->node_type_name() << std::endl;
             BUG("%1% Unsupported type", *it);
         }
-        out << " " << (*it)->name;
+        out << " " << (*it)->externalName();
         out << std::endl;
     }
     out << "}" << std::endl;
@@ -187,7 +187,7 @@ std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
                 std::cout << (*it)->type->node_type_name() << std::endl;
                 BUG("Unsupported type");
             }
-            out << " " << (*it)->name;
+            out << " " << (*it)->externalName();
             out << std::endl;
         }
         out << "}" << std::endl;
