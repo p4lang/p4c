@@ -23,7 +23,7 @@ limitations under the License.
 #include <unordered_map>
 
 #include "ir/configuration.h"
-#include "ir/ir.h" // for DebugHook definition
+#include "ir/ir.h"  // for DebugHook definition
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
 #include "lib/options.h"
@@ -45,14 +45,14 @@ class ParserOptions : public Util::Options {
 
  protected:
     // Function that is returned by getDebugHook.
-    void dumpPass(const char *manager, unsigned seq, const char *pass,
-                  const IR::Node *node) const;
+    void dumpPass(const char* manager, unsigned seq, const char* pass,
+                  const IR::Node* node) const;
     // Checks if parsed options make sense with respect to each-other.
     virtual void validateOptions() const;
 
  public:
     ParserOptions();
-    std::vector<const char *> *process(int argc, char *const argv[]) override;
+    std::vector<const char*>* process(int argc, char* const argv[]) override;
     enum class FrontendVersion { P4_14, P4_16 };
     // Name of executable that is being run.
     cstring exe_name;
@@ -75,9 +75,9 @@ class ParserOptions : public Util::Options {
     // Expect that the only remaining argument is the input file.
     void setInputFile();
     // Returns the output of the preprocessor.
-    FILE *preprocess();
+    FILE* preprocess();
     // Closes the input stream returned by preprocess.
-    void closeInput(FILE *input) const;
+    void closeInput(FILE* input) const;
     // True if we are compiling a P4 v1.0 or v1.1 program
     bool isv1() const;
     // Get a debug hook function suitable for insertion
@@ -167,4 +167,4 @@ class P4CContextWithOptions final : public P4CContext {
     OptionsType optionsInstance;
 };
 
-#endif /* FRONTENDS_COMMON_PARSER_OPTIONS_H_ */
+#endif  /* FRONTENDS_COMMON_PARSER_OPTIONS_H_*/
