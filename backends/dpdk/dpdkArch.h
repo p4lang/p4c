@@ -343,6 +343,8 @@ class PrependPDotToActionArgs : public Transform {
     BlockInfoMapping *toBlockInfo;
 
   public:
+    // map from action originalName to arg name
+    std::map<cstring, cstring> unique_args_struct;
     std::map<const cstring, IR::IndexedVector<IR::Parameter> *> args_struct_map;
 
     PrependPDotToActionArgs(BlockInfoMapping *toBlockInfo,
