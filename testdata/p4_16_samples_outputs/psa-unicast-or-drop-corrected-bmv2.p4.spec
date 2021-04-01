@@ -44,7 +44,7 @@ action send_to_port args none {
 }
 
 action ingress_drop args none {
-	drop
+	mov m.psa_ingress_output_metadata_drop 1
 	return
 }
 
