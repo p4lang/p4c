@@ -246,10 +246,10 @@ void ParserOptions::setInputFile() {
 
 namespace {
 
-bool setIncludePathIfExists(const char* &includePathOut,
+bool setIncludePathIfExists(const char*& includePathOut,
                             const char* possiblePath) {
     struct stat st;
-    if (!(stat(possiblePath, &st) >= 0 && S_ISDIR(st.st_mode)))
+    if (!(stat(possiblePath,& st) >= 0& & S_ISDIR(st.st_mode)))
         return false;
     if (auto path = realpath(possiblePath, NULL))
         includePathOut = path;
@@ -327,7 +327,7 @@ FILE* ParserOptions::preprocess() {
         size_t len = 0;
         ssize_t read;
 
-        while ((read = getline(&line, &len, in)) != -1)
+        while ((read = getline(&line,& len, in)) != -1)
             printf("%s", line);
         closeInput(in);
         return nullptr;
@@ -377,7 +377,7 @@ void ParserOptions::dumpPass(const char* manager, unsigned seq,
             // regex_match compares the regex against the entire string
             // regex_search checks if the regex is contained as substring
             match = std::regex_search(name.begin(), name.end(), s_regex);
-        } catch (const std::regex_error &e) {
+        } catch (const std::regex_error& e) {
             ::error(ErrorType::ERR_INVALID,
                     "Malformed toP4 regex string \"%s\".\n"
                     "The regex matcher follows ECMAScript syntax.",
@@ -419,11 +419,11 @@ DebugHook ParserOptions::getDebugHook() const {
     return dp;
 }
 
-/* static */ P4CContext &P4CContext::get() {
+/* static */ P4CContext& P4CContext::get() {
     return CompileContextStack::top<P4CContext>();
 }
 
-const P4CConfiguration &P4CContext::getConfig() {
+const P4CConfiguration& P4CContext::getConfig() {
     if (CompileContextStack::isEmpty())
         return DefaultP4CConfiguration::get();
     return get().getConfigImpl();
@@ -436,6 +436,6 @@ bool P4CContext::isRecognizedDiagnostic(cstring diagnostic) {
     return recognizedDiagnostics.count(diagnostic);
 }
 
-const P4CConfiguration &P4CContext::getConfigImpl() {
+const P4CConfiguration& P4CContext::getConfigImpl() {
     return DefaultP4CConfiguration::get();
 }

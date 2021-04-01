@@ -30,15 +30,15 @@ limitations under the License.
 
 // Standard include paths for .p4 header files. The values are determined by
 // `configure`.
-extern const char *p4includePath;
-extern const char *p4_14includePath;
+extern const char* p4includePath;
+extern const char* p4_14includePath;
 
 // Base class for compiler options.
 // This class contains the options for the front-ends.
 // Each back-end should subclass this file.
 class ParserOptions : public Util::Options {
     bool close_input = false;
-    static const char *defaultMessage;
+    static const char* defaultMessage;
 
     // annotation names that are to be ignored by the compiler
     std::set<cstring> disabledAnnotations;
@@ -95,17 +95,17 @@ class P4CContext : public BaseCompileContext {
  public:
     /// @return the current compilation context, which must inherit from
     /// P4CContext.
-    static P4CContext &get();
+    static P4CContext& get();
 
     /// @return the compiler configuration for the current compilation context.
     /// If there is no current compilation context, the default configuration is
     /// returned.
-    static const P4CConfiguration &getConfig();
+    static const P4CConfiguration& getConfig();
 
     P4CContext() {}
 
     /// @return the compiler options for this compilation context.
-    virtual ParserOptions &options() = 0;
+    virtual ParserOptions& options() = 0;
 
     /// @return the default diagnostic action for calls to `::warning()`.
     DiagnosticAction getDefaultWarningDiagnosticAction() final {
@@ -137,7 +137,7 @@ class P4CContext : public BaseCompileContext {
 
     /// @return the compiler configuration associated with this type of
     /// compilation context.
-    virtual const P4CConfiguration &getConfigImpl();
+    virtual const P4CConfiguration& getConfigImpl();
 };
 
 /// A utility template which can be used to easily make subclasses of P4CContext
@@ -148,19 +148,19 @@ class P4CContextWithOptions final : public P4CContext {
  public:
     /// @return the current compilation context, which must be of type
     /// P4CContextWithOptions<OptionsType>.
-    static P4CContextWithOptions &get() {
+    static P4CContextWithOptions& get() {
         return CompileContextStack::top<P4CContextWithOptions>();
     }
 
     P4CContextWithOptions() {}
 
     template <typename OptionsDerivedType>
-    P4CContextWithOptions(P4CContextWithOptions<OptionsDerivedType> &context) {
+    P4CContextWithOptions(P4CContextWithOptions<OptionsDerivedType>& context) {
         optionsInstance = context.options();
     }
 
     /// @return the compiler options for this compilation context.
-    OptionsType &options() override { return optionsInstance; }
+    OptionsType& options() override { return optionsInstance; }
 
  private:
     /// Compiler options for this compilation context.
