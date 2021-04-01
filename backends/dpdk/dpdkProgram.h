@@ -110,6 +110,7 @@ class ConvertToDpdkControl : public Inspector {
     IR::IndexedVector<IR::DpdkTable> tables;
     IR::IndexedVector<IR::DpdkAction> actions;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
+    std::set<cstring> unique_actions;
 
   public:
     ConvertToDpdkControl(
