@@ -56,7 +56,7 @@ table tbl_send_to_port_0 {
 	actions {
 		send_to_port_0
 	}
-	default_action send_to_port args none 
+	default_action send_to_port_0 args none 
 	size 0
 }
 
