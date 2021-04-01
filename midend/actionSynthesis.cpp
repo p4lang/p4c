@@ -60,7 +60,7 @@ const IR::Node* DoMoveActionsToTables::postorder(IR::MethodCallStatement* statem
         ++arg;
     }
     BUG_CHECK(arg == mc->arguments->end(), "%1%: mismatched arguments", mc);
-    auto amce = new IR::MethodCallExpression(mc->srcInfo, mc->method, mc->typeArguments, otherArgs);
+    auto amce = new IR::MethodCallExpression(mc->srcInfo, actionPath, mc->typeArguments, otherArgs);
     auto defactval = new IR::ExpressionValue(amce);
     auto defprop = new IR::Property(
         IR::ID(IR::TableProperties::defaultActionPropertyName, nullptr),
