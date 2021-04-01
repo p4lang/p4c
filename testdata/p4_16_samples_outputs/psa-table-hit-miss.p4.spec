@@ -82,7 +82,7 @@ table tbl_ifMiss_0 {
 	actions {
 		ifMiss_2
 	}
-	default_action ifMiss args none 
+	default_action ifMiss_2 args none 
 	size 0
 }
 
@@ -91,7 +91,7 @@ table tbl_ifHit_0 {
 	actions {
 		ifHit_2
 	}
-	default_action ifHit args none 
+	default_action ifHit_2 args none 
 	size 0
 }
 
