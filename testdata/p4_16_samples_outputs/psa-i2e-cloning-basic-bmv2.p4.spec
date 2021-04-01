@@ -37,7 +37,7 @@ metadata instanceof metadata_t
 header ethernet instanceof ethernet_t
 
 action ingress_drop args none {
-	mov m.psa_ingress_output_metadata_drop 1
+	drop
 	return
 }
 
@@ -48,7 +48,7 @@ action send_to_port args none {
 	return
 }
 
-action clone_1 args none {
+action clone args none {
 	mov m.psa_ingress_output_metadata_clone 1
 	mov m.psa_ingress_output_metadata_clone_session_id 0x8
 	return
@@ -58,7 +58,7 @@ table tbl_clone {
 	actions {
 		clone_1
 	}
-	default_action clone_1 args none 
+	default_action clone args none 
 	size 0
 }
 

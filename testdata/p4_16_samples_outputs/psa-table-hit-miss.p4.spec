@@ -28,7 +28,7 @@ struct EMPTY_M {
 }
 metadata instanceof EMPTY_M
 
-action NoAction_0 args none {
+action NoAction args none {
 	return
 }
 
@@ -42,30 +42,20 @@ action ifHit args none {
 	return
 }
 
-action ifHit_2 args none {
-	invalidate h
-	return
-}
-
 action ifMiss args none {
 	validate h
 	return
 }
 
-action ifMiss_2 args none {
-	validate h
-	return
-}
-
-table tbl_0 {
+table tbl {
 	key {
 		h.srcAddr exact
 	}
 	actions {
-		NoAction_0
+		NoAction
 		remove_header
 	}
-	default_action NoAction_0 args none 
+	default_action NoAction args none 
 	size 0
 }
 
@@ -92,7 +82,7 @@ table tbl_ifMiss_0 {
 	actions {
 		ifMiss_2
 	}
-	default_action ifMiss_2 args none 
+	default_action ifMiss args none 
 	size 0
 }
 
@@ -101,7 +91,7 @@ table tbl_ifHit_0 {
 	actions {
 		ifHit_2
 	}
-	default_action ifHit_2 args none 
+	default_action ifHit args none 
 	size 0
 }
 

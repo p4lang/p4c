@@ -43,13 +43,6 @@ action send_to_port args none {
 	return
 }
 
-action send_to_port_0 args none {
-	mov m.psa_ingress_output_metadata_drop 0
-	mov m.psa_ingress_output_metadata_multicast_group 0x0
-	cast  h.ethernet.dstAddr bit_32 m.psa_ingress_output_metadata_egress_port
-	return
-}
-
 table tbl_send_to_port {
 	actions {
 		send_to_port
@@ -63,7 +56,7 @@ table tbl_send_to_port_0 {
 	actions {
 		send_to_port_0
 	}
-	default_action send_to_port_0 args none 
+	default_action send_to_port args none 
 	size 0
 }
 

@@ -44,16 +44,16 @@ action send_to_port args none {
 	return
 }
 
-action execute_1 args none {
+action execute args none {
 	counter_count counter_0 0x100
 	return
 }
 
-table tbl_0 {
+table tbl {
 	actions {
-		execute_1
+		execute
 	}
-	default_action execute_1 args none 
+	default_action execute args none 
 	size 0
 }
 
