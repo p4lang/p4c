@@ -50,6 +50,7 @@ cstring toStr(const IR::TypeNameExpression *const p) {
 
 cstring toStr(const IR::MethodCallExpression *const m) {
     if (auto path = m->method->to<IR::PathExpression>()) {
+        LOG1("path " << path);
         return path->path->name.toString();
     } else {
         ::error("%1% is not a PathExpression", m->toString());
@@ -325,7 +326,7 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
     return out;
 }
 std::ostream &IR::DpdkAction::toSpec(std::ostream &out) const {
-    out << "action " << name << " args ";
+    out << "action " << name.toString() << " args ";
 
     if (para.parameters.size() == 0)
         out << "none ";

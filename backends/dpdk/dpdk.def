@@ -24,7 +24,7 @@ abstract DpdkAsmStatement : IDPDKNode {
 
 class DpdkAction {
     inline IndexedVector<DpdkAsmStatement> statements;
-    inline cstring name;
+    inline ID name;
     inline ParameterList para;
     std::ostream& toSpec(std::ostream& out) const;
 #nodbprint

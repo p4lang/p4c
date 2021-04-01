@@ -97,6 +97,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     if (!dpdk_program)
         return;
     PassManager post_code_gen = {
+        new EliminateUnusedAction(),
         new DpdkAsmOptimization,
     };
 
