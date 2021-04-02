@@ -35,17 +35,6 @@ const IR::DpdkAsmStatement *ConvertToDpdkProgram::createListStatement(
     return new IR::DpdkListStatement(name, *stmts);
 }
 
-IR::IndexedVector<IR::DpdkAsmStatement> createPsaDropImpl() {
-    IR::IndexedVector<IR::DpdkAsmStatement> statements;
-    statements.push_back(new IR::DpdkLabelStatement("LABEL_DROP"));
-    statements.push_back(new IR::DpdkJmpNotEqualStatement("LABEL_DEPARSE",
-        new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_drop"),
-        new IR::Constant(1)));
-    statements.push_back(new IR::DpdkDropStatement());
-    statements.push_back(new IR::DpdkLabelStatement("LABEL_DEPARSE"));
-    return statements;
-}
-
 const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     IR::IndexedVector<IR::DpdkHeaderType> headerType;
     for (auto kv : structure.header_types) {
@@ -116,7 +105,7 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
             BUG("Unknown control block %s", kv.second->name);
     }
     auto ingress_deparser_converter =
-        new ConvertToDpdkControl(refmap, typemap, collector, csum_map);
+        new ConvertToDpdkControl(refmap, typemap, collector, csum_map, true);
     auto egress_deparser_converter =
         new ConvertToDpdkControl(refmap, typemap, collector, csum_map);
     for (auto kv : structure.deparsers) {
@@ -299,8 +288,18 @@ bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
     auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap,
                                                    collector, csum_map);
     c->body->apply(*helper);
+    if (deparser) {
+        add_inst(new IR::DpdkJmpNotEqualStatement("LABEL_DROP",
+            new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_drop"),
+            new IR::Constant(0))); }
+
     for (auto i : helper->get_instr()) {
         add_inst(i);
+    }
+
+    if (deparser) {
+        add_inst(new IR::DpdkLabelStatement("LABEL_DROP"));
+        add_inst(new IR::DpdkDropStatement());
     }
     return true;
 }
