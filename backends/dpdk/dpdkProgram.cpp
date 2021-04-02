@@ -35,6 +35,17 @@ const IR::DpdkAsmStatement *ConvertToDpdkProgram::createListStatement(
     return new IR::DpdkListStatement(name, *stmts);
 }
 
+IR::IndexedVector<IR::DpdkAsmStatement> createPsaDropImpl() {
+    IR::IndexedVector<IR::DpdkAsmStatement> statements;
+    statements.push_back(new IR::DpdkLabelStatement("LABEL_DROP"));
+    statements.push_back(new IR::DpdkJmpNotEqualStatement("LABEL_DEPARSE",
+        new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_drop"),
+        new IR::Constant(1)));
+    statements.push_back(new IR::DpdkDropStatement());
+    statements.push_back(new IR::DpdkLabelStatement("LABEL_DEPARSE"));
+    return statements;
+}
+
 const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     IR::IndexedVector<IR::DpdkHeaderType> headerType;
     for (auto kv : structure.header_types) {
@@ -119,6 +130,8 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     auto s = createListStatement(
         "ingress", {ingress_parser_converter->getInstructions(),
                     ingress_converter->getInstructions(),
+                    // drop/clone/resubmit support
+                    createPsaDropImpl(),
                     ingress_deparser_converter->getInstructions(),
                     egress_parser_converter->getInstructions(),
                     egress_converter->getInstructions(),
@@ -287,7 +300,6 @@ bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
                                                    collector, csum_map);
     c->body->apply(*helper);
     for (auto i : helper->get_instr()) {
-        LOG1("inst " << i);
         add_inst(i);
     }
     return true;
