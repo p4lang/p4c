@@ -21,34 +21,12 @@ namespace DPDK {
 
 int ConvertStatementToDpdk::next_label_id = 0;
 
-bool ConvertStatementToDpdk::isAssignToDrop(const IR::Expression* expr) {
-    if (!expr->is<IR::Member>())
-        return false;
-    auto member = expr->to<IR::Member>();
-    if (member->member != "psa_ingress_output_metadata_drop")
-        return false;
-
-    return true;
-}
-
 bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
     auto left = a->left;
     auto right = a->right;
     IR::DpdkAsmStatement *i = nullptr;
 
-    if (isAssignToDrop(left)) {
-        if (auto rhs = right->to<IR::BoolLiteral>()) {
-            // as an optimization, on a software target like dpdk, the drop
-            // action happens immediately to save cpu cycles.
-            if (rhs->value == true) {
-                i = new IR::DpdkDropStatement();
-            } else {
-                i = new IR::DpdkMovStatement(a->left, a->right);
-            }
-        } else {
-            BUG("not implemented");
-        }
-    } else if (auto r = right->to<IR::Operation_Binary>()) {
+    if (auto r = right->to<IR::Operation_Binary>()) {
         if (right->is<IR::Add>()) {
             i = new IR::DpdkAddStatement(left, r->left, r->right);
         } else if (right->is<IR::Sub>()) {
