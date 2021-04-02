@@ -225,6 +225,7 @@ macro(add_parser pname)
     ${FLEX_${pname}Lexer_OUTPUTS}
     ${BISON_${pname}Parser_OUTPUTS}
     )
+  set_source_files_properties(${pname}PARSER_GEN_SRCS PROPERTIES GENERATED TRUE)
 endmacro(add_parser)
 
 add_parser(v1)
@@ -249,8 +250,6 @@ set (FRONTEND_SOURCES
   )
 
 set_source_files_properties(${IR_GENERATED_SRCS} PROPERTIES GENERATED TRUE)
-set_source_files_properties(${v1PARSER_GEN_SRCS} PROPERTIES GENERATED TRUE)
-set_source_files_properties(${p4PARSER_GEN_SRCS} PROPERTIES GENERATED TRUE)
 
 set (FRONTEND_CPPLINT_FILES
   ${P4_FRONTEND_SRCS} ${P4_FRONTEND_HDRS}
