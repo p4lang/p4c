@@ -36,25 +36,11 @@ metadata instanceof metadata_t
 
 header ethernet instanceof ethernet_t
 
-action multicast args none {
-	mov m.psa_ingress_output_metadata_drop 0
-	cast  h.ethernet.dstAddr bit_32 m.psa_ingress_output_metadata_multicast_group
-	return
-}
-
-table tbl_multicast {
-	actions {
-		multicast
-	}
-	default_action multicast args none 
-	size 0
-}
-
-
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	extract h.ethernet
-	table tbl_multicast
+	mov m.psa_ingress_output_metadata_drop 0
+	cast  h.ethernet.dstAddr bit_32 m.psa_ingress_output_metadata_multicast_group
 	emit h.ethernet
 	extract h.ethernet
 	emit h.ethernet

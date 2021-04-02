@@ -37,16 +37,6 @@ action remove_header args none {
 	return
 }
 
-action ifHit args none {
-	invalidate h
-	return
-}
-
-action ifMiss args none {
-	validate h
-	return
-}
-
 table tbl {
 	key {
 		h.srcAddr exact
@@ -60,57 +50,21 @@ table tbl {
 }
 
 
-table tbl_ifHit {
-	actions {
-		ifHit
-	}
-	default_action ifHit args none 
-	size 0
-}
-
-
-table tbl_ifMiss {
-	actions {
-		ifMiss
-	}
-	default_action ifMiss args none 
-	size 0
-}
-
-
-table tbl_ifMiss_0 {
-	actions {
-		ifMiss_2
-	}
-	default_action ifMiss_2 args none 
-	size 0
-}
-
-
-table tbl_ifHit_0 {
-	actions {
-		ifHit_2
-	}
-	default_action ifHit_2 args none 
-	size 0
-}
-
-
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	extract h
 	table tbl_0
 	jmpnh LABEL_0END
-	table tbl_ifHit
+	invalidate h
 	LABEL_0END :	table tbl_0
 	jmph LABEL_1END
-	table tbl_ifMiss
+	validate h
 	LABEL_1END :	table tbl_0
 	jmph LABEL_2END
-	table tbl_ifMiss_0
+	validate h
 	LABEL_2END :	table tbl_0
 	jmpnh LABEL_3END
-	table tbl_ifHit_0
+	invalidate h
 	LABEL_3END :	tx m.psa_ingress_output_metadata_egress_port
 }
 
