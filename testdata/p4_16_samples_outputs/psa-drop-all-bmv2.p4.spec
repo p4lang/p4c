@@ -63,8 +63,8 @@ apply {
 	emit h.ipv4
 	emit h.ethernet
 	emit h.ipv4
-	LABEL_DROP :	drop
 	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_DROP: drop
 }
 
 

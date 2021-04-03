@@ -54,8 +54,8 @@ apply {
 	jmpneq LABEL_1END m.psa_egress_input_metadata_packet_path 0x3
 	mov h.ethernet.etherType 0xface
 	LABEL_1END :	emit h.ethernet
-	LABEL_DROP :	drop
 	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_DROP: drop
 }
 
 

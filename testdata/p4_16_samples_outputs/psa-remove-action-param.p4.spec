@@ -39,8 +39,9 @@ apply {
 	LABEL_0FALSE :	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
 	mov m.psa_ingress_output_metadata_egress_port 0xfffffffd
-	LABEL_0END :	drop
+	LABEL_0END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_DROP: drop
 }
 
 

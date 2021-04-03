@@ -67,8 +67,8 @@ apply {
 	mov m.psa_egress_output_metadata_clone_session_id 0xb
 	LABEL_4END :	mov h.ethernet.srcAddr 0xcafe
 	LABEL_1END :	emit h.ethernet
-	LABEL_DROP :	drop
 	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_DROP: drop
 }
 
 
