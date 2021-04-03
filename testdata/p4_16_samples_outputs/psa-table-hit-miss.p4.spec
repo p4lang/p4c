@@ -28,7 +28,7 @@ struct EMPTY_M {
 }
 metadata instanceof EMPTY_M
 
-action NoAction_0 args none {
+action NoAction args none {
 	return
 }
 
@@ -37,71 +37,15 @@ action remove_header args none {
 	return
 }
 
-action ifHit args none {
-	invalidate h
-	return
-}
-
-action ifHit_2 args none {
-	invalidate h
-	return
-}
-
-action ifMiss args none {
-	validate h
-	return
-}
-
-action ifMiss_2 args none {
-	validate h
-	return
-}
-
-table tbl_0 {
+table tbl {
 	key {
 		h.srcAddr exact
 	}
 	actions {
-		NoAction_0
+		NoAction
 		remove_header
 	}
-	default_action NoAction_0 args none 
-	size 0
-}
-
-
-table tbl_ifHit {
-	actions {
-		ifHit
-	}
-	default_action ifHit args none 
-	size 0
-}
-
-
-table tbl_ifMiss {
-	actions {
-		ifMiss
-	}
-	default_action ifMiss args none 
-	size 0
-}
-
-
-table tbl_ifMiss_0 {
-	actions {
-		ifMiss_2
-	}
-	default_action ifMiss_2 args none 
-	size 0
-}
-
-
-table tbl_ifHit_0 {
-	actions {
-		ifHit_2
-	}
-	default_action ifHit_2 args none 
+	default_action NoAction args none 
 	size 0
 }
 
@@ -111,16 +55,16 @@ apply {
 	extract h
 	table tbl_0
 	jmpnh LABEL_0END
-	table tbl_ifHit
+	invalidate h
 	LABEL_0END :	table tbl_0
 	jmph LABEL_1END
-	table tbl_ifMiss
+	validate h
 	LABEL_1END :	table tbl_0
 	jmph LABEL_2END
-	table tbl_ifMiss_0
+	validate h
 	LABEL_2END :	table tbl_0
 	jmpnh LABEL_3END
-	table tbl_ifHit_0
+	invalidate h
 	LABEL_3END :	tx m.psa_ingress_output_metadata_egress_port
 }
 

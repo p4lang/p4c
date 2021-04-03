@@ -36,54 +36,27 @@ metadata instanceof metadata_t
 
 header ethernet instanceof ethernet_t
 
-action send_to_port args none {
-	mov m.psa_ingress_output_metadata_drop 0
-	mov m.psa_ingress_output_metadata_multicast_group 0x0
-	mov m.psa_ingress_output_metadata_egress_port 0xfffffffa
-	return
-}
-
-action send_to_port_0 args none {
-	mov m.psa_ingress_output_metadata_drop 0
-	mov m.psa_ingress_output_metadata_multicast_group 0x0
-	cast  h.ethernet.dstAddr bit_32 m.psa_ingress_output_metadata_egress_port
-	return
-}
-
-table tbl_send_to_port {
-	actions {
-		send_to_port
-	}
-	default_action send_to_port args none 
-	size 0
-}
-
-
-table tbl_send_to_port_0 {
-	actions {
-		send_to_port_0
-	}
-	default_action send_to_port_0 args none 
-	size 0
-}
-
-
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	extract h.ethernet
 	jmpneq LABEL_0FALSE h.ethernet.dstAddr 0x8
 	jmpeq LABEL_0FALSE m.psa_ingress_input_metadata_packet_path 0x6
-	table tbl_send_to_port
+	mov m.psa_ingress_output_metadata_drop 0
+	mov m.psa_ingress_output_metadata_multicast_group 0x0
+	mov m.psa_ingress_output_metadata_egress_port 0xfffffffa
 	jmp LABEL_0END
-	LABEL_0FALSE :	table tbl_send_to_port_0
+	LABEL_0FALSE :	mov m.psa_ingress_output_metadata_drop 0
+	mov m.psa_ingress_output_metadata_multicast_group 0x0
+	cast  h.ethernet.dstAddr bit_32 m.psa_ingress_output_metadata_egress_port
 	LABEL_0END :	emit h.ethernet
 	extract h.ethernet
 	jmpneq LABEL_1FALSE m.psa_egress_input_metadata_packet_path 0x4
 	mov h.ethernet.etherType 0xface
 	jmp LABEL_1END
-	LABEL_1FALSE :	table tbl_clone
+	LABEL_1FALSE :	mov m.psa_egress_output_metadata_clone 1
+	mov m.psa_egress_output_metadata_clone_session_id 0x8
 	jmpneq LABEL_2END h.ethernet.dstAddr 0x9
-	table tbl_egress_drop
+	mov m.psa_egress_output_metadata_drop 1
 	mov m.psa_egress_output_metadata_clone_session_id 0x9
 	LABEL_2END :	jmpneq LABEL_3FALSE m.psa_egress_input_metadata_egress_port 0xfffffffa
 	mov h.ethernet.srcAddr 0xbeef

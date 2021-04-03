@@ -37,32 +37,16 @@ metadata instanceof metadata_t
 
 header ethernet instanceof ethernet_t
 
-action send_to_port args none {
-	mov m.psa_ingress_output_metadata_drop 0
-	mov m.psa_ingress_output_metadata_multicast_group 0x0
-	cast  h.ethernet.dstAddr bit_32 m.psa_ingress_output_metadata_egress_port
-	return
-}
-
-action execute_1 args none {
+action execute args none {
 	counter_count counter_0 0x100
 	return
 }
 
-table tbl_0 {
+table tbl {
 	actions {
-		execute_1
+		execute
 	}
-	default_action execute_1 args none 
-	size 0
-}
-
-
-table tbl_send_to_port {
-	actions {
-		send_to_port
-	}
-	default_action send_to_port args none 
+	default_action execute args none 
 	size 0
 }
 
@@ -70,7 +54,9 @@ table tbl_send_to_port {
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	extract h.ethernet
-	table tbl_send_to_port
+	mov m.psa_ingress_output_metadata_drop 0
+	mov m.psa_ingress_output_metadata_multicast_group 0x0
+	cast  h.ethernet.dstAddr bit_32 m.psa_ingress_output_metadata_egress_port
 	table tbl_0
 	emit h.ethernet
 	extract h.ethernet

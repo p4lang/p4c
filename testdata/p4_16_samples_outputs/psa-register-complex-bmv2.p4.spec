@@ -1,5 +1,12 @@
 
-struct EMPTY_M {
+
+struct ethernet_t {
+	bit<48> dstAddr
+	bit<48> srcAddr
+	bit<16> etherType
+}
+
+struct metadata_t {
 	bit<32> psa_ingress_parser_input_metadata_ingress_port
 	bit<32> psa_ingress_parser_input_metadata_packet_path
 	bit<32> psa_egress_parser_input_metadata_egress_port
@@ -25,35 +32,36 @@ struct EMPTY_M {
 	bit<8> psa_egress_output_metadata_clone
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
+	bit<48> Ingress_tmp_2
+	bit<48> Ingress_tmp_3
+	bit<48> Ingress_tmp
+	bit<48> Ingress_tmp_0
+	bit<48> Ingress_tmp_1
 }
-metadata instanceof EMPTY_M
+metadata instanceof metadata_t
 
-action NoAction args none {
-	return
-}
-
-action remove_header args none {
-	invalidate h
-	return
-}
-
-table tbl {
-	key {
-		h.srcAddr exact
-	}
-	actions {
-		NoAction
-		remove_header
-	}
-	default_action NoAction args none 
-	size 0
-}
-
+header ethernet instanceof ethernet_t
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	extract h
-	table tbl_0
+	extract h.ethernet
+	register_write regfile_0 0x1 0x3
+	register_write regfile_0 0x2 0x4
+	mov m.Ingress_tmp m.Ingress_tmp_0
+	add m.Ingress_tmp m.Ingress_tmp_1
+	mov h.ethernet.dstAddr m.Ingress_tmp
+	add h.ethernet.dstAddr 0xfffffffffffb
+	mov m.Ingress_tmp_2 m.Ingress_tmp_0
+	add m.Ingress_tmp_2 m.Ingress_tmp_1
+	mov m.Ingress_tmp_3 m.Ingress_tmp_2
+	add m.Ingress_tmp_3 0xfffffffffffb
+	jmpneq LABEL_0END m.Ingress_tmp_3 0x2
+	mov m.psa_ingress_output_metadata_drop 0
+	mov m.psa_ingress_output_metadata_multicast_group 0x0
+	cast  h.ethernet.dstAddr bit_32 m.psa_ingress_output_metadata_egress_port
+	LABEL_0END :	emit h.ethernet
+	extract h.ethernet
+	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
 }
 

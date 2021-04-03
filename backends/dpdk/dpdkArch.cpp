@@ -871,11 +871,11 @@ const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Action *a) {
         for (auto p : a->parameters->parameters) {
             l->push_back(p);
         }
-        args_struct_map.emplace(a->name.name + "_arg_t", l);
+        args_struct_map.emplace(a->name.toString() + "_arg_t", l);
         auto new_l = new IR::IndexedVector<IR::Parameter>;
         new_l->push_back(new IR::Parameter(
             IR::ID("t"), IR::Direction::None,
-            new IR::Type_Name(IR::ID(a->name.name + "_arg_t"))));
+            new IR::Type_Name(IR::ID(a->name.toString() + "_arg_t"))));
         a->parameters = new IR::ParameterList(*new_l);
     }
     return a;
@@ -893,7 +893,7 @@ const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Program *program) {
                                 new IR::IndexedVector<IR::StructField>;
                             for (auto field : *kv.second) {
                                 fields->push_back(new IR::StructField(
-                                    field->name, field->type));
+                                    field->name.toString(), field->type));
                             }
                             new_objs->push_back(
                                 new IR::Type_Struct(IR::ID(kv.first), *fields));
@@ -919,7 +919,7 @@ const IR::Node *PrependPDotToActionArgs::preorder(IR::PathExpression *path) {
                 if (para->equiv(*p)) {
                     prune();
                     return new IR::Member(new IR::PathExpression(IR::ID("t")),
-                                          path->path->name);
+                                          path->path->name.toString());
                 }
             }
         }

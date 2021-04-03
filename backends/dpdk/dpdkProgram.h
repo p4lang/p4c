@@ -110,6 +110,7 @@ class ConvertToDpdkControl : public Inspector {
     IR::IndexedVector<IR::DpdkTable> tables;
     IR::IndexedVector<IR::DpdkAction> actions;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
+    std::set<cstring> unique_actions;
 
   public:
     ConvertToDpdkControl(
@@ -132,6 +133,52 @@ class ConvertToDpdkControl : public Inspector {
     void add_inst(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
     void add_table(const IR::DpdkTable *t) { tables.push_back(t); }
     void add_action(const IR::DpdkAction *a) { actions.push_back(a); }
+};
+
+class CollectActionUses : public Inspector {
+    ordered_set<cstring>& actions;
+
+ public:
+    CollectActionUses(ordered_set<cstring>& a) : actions(a) { }
+    bool preorder(const IR::ActionListElement* ale) {
+        if (auto mce = ale->expression->to<IR::MethodCallExpression>()) {
+            if (auto path = mce->method->to<IR::PathExpression>()) {
+                actions.insert(path->path->name.toString());
+            }
+        }
+        return false;
+    }
+};
+
+class ElimUnusedActions : public Transform {
+    const ordered_set<cstring>& used_actions;
+    std::set<cstring> kept_actions;
+
+ public:
+    ElimUnusedActions(const ordered_set<cstring>& a) : used_actions(a) {}
+    const IR::Node* postorder(IR::DpdkAction* a) override {
+        if (kept_actions.count(a->name.toString()) != 0)
+            return nullptr;
+        if (used_actions.find(a->name.toString()) != used_actions.end()) {
+            kept_actions.insert(a->name.toString());
+            return a; }
+        return nullptr;
+    }
+};
+
+// frontend generates multiple copies of the same action in the localizeActions pass,
+// they are not useful for dpdk datapath. Removed the duplicated actions in
+// this pass.
+class EliminateUnusedAction : public PassManager {
+    ordered_set<cstring> actions;
+
+ public:
+    EliminateUnusedAction() {
+        addPasses( {
+            new CollectActionUses(actions),
+            new ElimUnusedActions(actions)
+        });
+    }
 };
 
 } // namespace DPDK

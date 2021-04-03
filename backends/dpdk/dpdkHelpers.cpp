@@ -233,7 +233,7 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
         } else {
             BUG("%1%:not implemented method instance", expr);
         }
-    } else if (auto path = expr->to<IR::PathExpression>()) {
+    } else if (expr->is<IR::PathExpression>()) {
         if (is_and) {
             instructions.push_back(new IR::DpdkJmpNotEqualStatement(
                         false_label, expr, new IR::Constant(1)));
@@ -419,6 +419,13 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             add_instr(new IR::DpdkInvalidateStatement(a->appliedTo));
         } else {
             BUG("%1% function not implemented.", s);
+        }
+    } else if (auto a = mi->to<P4::ActionCall>()) {
+        auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap,
+                collector, csum_map);
+        a->action->body->apply(*helper);
+        for (auto i : helper->get_instr()) {
+            add_instr(i);
         }
     } else {
         BUG("%1% function not implemented.", s);
