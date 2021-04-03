@@ -50,7 +50,6 @@ apply {
 	cast  h.ethernet.dstAddr bit_32 m.psa_ingress_output_metadata_egress_port
 	LABEL_0END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
-	LABEL_DROP :	drop
 	extract h.ethernet
 	jmpneq LABEL_1FALSE m.psa_egress_input_metadata_packet_path 0x4
 	mov h.ethernet.etherType 0xface
@@ -68,6 +67,7 @@ apply {
 	mov m.psa_egress_output_metadata_clone_session_id 0xb
 	LABEL_4END :	mov h.ethernet.srcAddr 0xcafe
 	LABEL_1END :	emit h.ethernet
+	LABEL_DROP :	drop
 	tx m.psa_ingress_output_metadata_egress_port
 }
 

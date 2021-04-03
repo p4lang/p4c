@@ -43,8 +43,8 @@ apply {
 	cast  h.ethernet.dstAddr bit_32 m.psa_ingress_output_metadata_multicast_group
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
-	LABEL_DROP :	drop
 	emit h.ethernet
+	LABEL_DROP :	drop
 	tx m.psa_ingress_output_metadata_egress_port
 }
 

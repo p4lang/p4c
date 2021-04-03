@@ -81,10 +81,10 @@ apply {
 	LABEL_0END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.output_data
-	LABEL_DROP :	drop
 	extract h.ethernet
 	emit h.ethernet
 	emit h.output_data
+	LABEL_DROP :	drop
 	tx m.psa_ingress_output_metadata_egress_port
 }
 

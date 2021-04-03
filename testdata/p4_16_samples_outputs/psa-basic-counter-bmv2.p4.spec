@@ -60,9 +60,9 @@ apply {
 	table tbl_0
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
-	LABEL_DROP :	drop
 	extract h.ethernet
 	emit h.ethernet
+	LABEL_DROP :	drop
 	tx m.psa_ingress_output_metadata_egress_port
 }
 
