@@ -117,13 +117,6 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
             BUG("Unknown deparser block %s", kv.second->name);
     }
 
-    auto add_drop_label = [&](){
-        IR::IndexedVector<IR::DpdkAsmStatement> statements;
-        statements.push_back(new IR::DpdkLabelStatement("LABEL_DROP"));
-        statements.push_back(new IR::DpdkDropStatement());
-        return statements;
-    };
-
     auto s = createListStatement(
         "ingress", {ingress_parser_converter->getInstructions(),
                     ingress_converter->getInstructions(),
@@ -131,8 +124,6 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
                     egress_parser_converter->getInstructions(),
                     egress_converter->getInstructions(),
                     egress_deparser_converter->getInstructions(),
-                    // routine for drop operation
-                    add_drop_label()
                     });
     statements.push_back(s);
 

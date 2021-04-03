@@ -208,6 +208,7 @@ std::ostream &IR::DpdkListStatement::toSpec(std::ostream &out) const {
             out << std::endl;
     }
     out << "\ttx m.psa_ingress_output_metadata_egress_port" << std::endl;
+    out << "\tLABEL_DROP: drop" << std::endl;
     out << "}" << std::endl;
     return out;
 }
