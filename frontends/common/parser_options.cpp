@@ -249,7 +249,7 @@ namespace {
 bool setIncludePathIfExists(const char*& includePathOut,
                             const char* possiblePath) {
     struct stat st;
-    if (!(stat(possiblePath,& st) >= 0& & S_ISDIR(st.st_mode)))
+    if (!(stat(possiblePath,& st) >= 0 && S_ISDIR(st.st_mode)))
         return false;
     if (auto path = realpath(possiblePath, NULL))
         includePathOut = path;
