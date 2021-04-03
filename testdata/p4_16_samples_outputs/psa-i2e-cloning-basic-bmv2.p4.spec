@@ -48,7 +48,9 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
 	cast  h.ethernet.dstAddr bit_32 m.psa_ingress_output_metadata_egress_port
-	LABEL_0END :	emit h.ethernet
+	LABEL_0END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	emit h.ethernet
+	LABEL_DROP :	drop
 	extract h.ethernet
 	jmpneq LABEL_1END m.psa_egress_input_metadata_packet_path 0x3
 	mov h.ethernet.etherType 0xface

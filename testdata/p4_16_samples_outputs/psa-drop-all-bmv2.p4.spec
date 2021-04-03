@@ -58,8 +58,10 @@ apply {
 	jmpeq INGRESSPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
-	INGRESSPARSERIMPL_ACCEPT :	emit h.ethernet
+	INGRESSPARSERIMPL_ACCEPT :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	emit h.ethernet
 	emit h.ipv4
+	LABEL_DROP :	drop
 	emit h.ethernet
 	emit h.ipv4
 	tx m.psa_ingress_output_metadata_egress_port

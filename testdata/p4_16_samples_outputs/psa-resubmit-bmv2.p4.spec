@@ -78,8 +78,10 @@ apply {
 	jmp LABEL_0END
 	LABEL_6FALSE :	jmpneq LABEL_0END m.psa_ingress_input_metadata_packet_path 0x6
 	mov h.output_data.word0 0x7
-	LABEL_0END :	emit h.ethernet
+	LABEL_0END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	emit h.ethernet
 	emit h.output_data
+	LABEL_DROP :	drop
 	extract h.ethernet
 	emit h.ethernet
 	emit h.output_data

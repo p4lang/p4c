@@ -1,11 +1,5 @@
 
-struct ethernet_t {
-	bit<48> dstAddr
-	bit<48> srcAddr
-	bit<16> etherType
-}
-
-struct metadata {
+struct EMPTY_M {
 	bit<32> psa_ingress_parser_input_metadata_ingress_port
 	bit<32> psa_ingress_parser_input_metadata_packet_path
 	bit<32> psa_egress_parser_input_metadata_egress_port
@@ -32,20 +26,35 @@ struct metadata {
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
 }
-metadata instanceof metadata
+metadata instanceof EMPTY_M
 
-header ethernet instanceof ethernet_t
+action NoAction args none {
+	return
+}
+
+action drop args none {
+	mov m.psa_ingress_output_metadata_drop 1
+	return
+}
+
+table tbl {
+	key {
+		h.srcAddr exact
+	}
+	actions {
+		NoAction
+		drop
+	}
+	default_action NoAction args none 
+	size 0
+}
+
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
-	invalidate h.ethernet
-	extract h.ethernet
-	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
-	emit h.ethernet
-	LABEL_DROP :	drop
-	invalidate h.ethernet
-	extract h.ethernet
-	emit h.ethernet
+	extract h
+	table tbl_0
+	drop
 	tx m.psa_ingress_output_metadata_egress_port
 }
 

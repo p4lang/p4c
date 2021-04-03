@@ -65,7 +65,8 @@ apply {
 	LABEL_2END :	table tbl_0
 	jmpnh LABEL_3END
 	invalidate h
-	LABEL_3END :	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_3END :	drop
+	tx m.psa_ingress_output_metadata_egress_port
 }
 
 

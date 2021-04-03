@@ -49,7 +49,8 @@ apply {
 	extract h
 	jmpv LABEL_0END h
 	table tbl_0
-	LABEL_0END :	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_0END :	drop
+	tx m.psa_ingress_output_metadata_egress_port
 }
 
 

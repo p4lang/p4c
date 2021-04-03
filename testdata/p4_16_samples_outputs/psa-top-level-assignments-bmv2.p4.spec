@@ -41,7 +41,9 @@ apply {
 	extract h.ethernet
 	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_egress_port 0x3
+	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
+	LABEL_DROP :	drop
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
 }

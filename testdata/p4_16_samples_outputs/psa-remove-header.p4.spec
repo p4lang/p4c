@@ -54,6 +54,7 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	extract h
 	table tbl_0
+	drop
 	tx m.psa_ingress_output_metadata_egress_port
 }
 
