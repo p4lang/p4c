@@ -119,8 +119,6 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     auto s = createListStatement(
         "ingress", {ingress_parser_converter->getInstructions(),
                     ingress_converter->getInstructions(),
-                    // drop/clone/resubmit support
-                    createPsaDropImpl(),
                     ingress_deparser_converter->getInstructions(),
                     egress_parser_converter->getInstructions(),
                     egress_converter->getInstructions(),
