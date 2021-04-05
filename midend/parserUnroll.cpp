@@ -330,7 +330,7 @@ class ParserSymbolicInterpreter {
                 // errors in the original state are signalled
                 ::error(ErrorType::ERR_EXPRESSION, "%1%: error %2% will be triggered\n%3%",
                         exc->errorPosition, exc->message(), stateChain(state));
-            // else this error will occur sin a clone of the state produced
+            // else this error will occur in a clone of the state produced
             // by unrolling - if the state is reached.  So we don't give an error.
             return false;
         }

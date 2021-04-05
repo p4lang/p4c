@@ -36,6 +36,7 @@ limitations under the License.
 #include "midend/local_copyprop.h"
 #include "midend/midEndLast.h"
 #include "midend/noMatch.h"
+#include "midend/parserUnroll.h"
 #include "midend/removeExits.h"
 #include "midend/removeLeftSlices.h"
 #include "midend/removeMiss.h"
@@ -107,6 +108,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
             new P4::ValidateTableProperties({"implementation"}),
             new P4::RemoveLeftSlices(&refMap, &typeMap),
             new EBPF::Lower(&refMap, &typeMap),
+            new P4::ParsersUnroll(true, &refMap, &typeMap),
             evaluator,
             new P4::MidEndLast()
         });
