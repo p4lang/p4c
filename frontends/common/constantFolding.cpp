@@ -103,7 +103,8 @@ const IR::Node* DoConstantFolding::postorder(IR::Type_Bits* type) {
         if (auto cst = type->expression->to<IR::Constant>()) {
             type->size = cst->asInt();
             type->expression = nullptr;
-            if (type->size <= 0) {
+            if (type->size < 0 ||
+                (type->size == 0 && type->isSigned)) {
                 ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
                 // Convert it to something legal so we don't get
                 // weird errors elsewhere.

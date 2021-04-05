@@ -1,4 +1,12 @@
-issue1986.p4(18): [--Werror=invalid] error: : invalid width; 0 must be positive
-            {0w0
-             ^^^
-[--Werror=overlimit] error: 1 errors encountered, aborting compilation
+issue1986.p4(17): [--Werror=type-error] error: SelectExpression
+        transition select(1w0) {
+                   ^
+  ---- Actual error:
+  Cannot unify type 'bit<0>' with type 'bit<1>'
+  ---- Originating from:
+issue1986.p4(18): 'match' case label type 'tuple<bit<0>>' does not match expected type 'tuple<bit<1>>'
+             {0w0}: accept;
+             ^^^^^
+issue1986.p4(17)
+          transition select(1w0) {
+                            ^^^

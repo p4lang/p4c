@@ -75,7 +75,9 @@ void ValidateParsedProgram::postorder(const IR::Type_Bits* type) {
     if (type->expression)
         // cannot validate yet
         return;
-    if (type->size <= 0)
+    if (type->size < 0)
+        ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
+    if (type->size == 0 && type->isSigned)
         ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
 }
 
@@ -83,7 +85,7 @@ void ValidateParsedProgram::postorder(const IR::Type_Varbits* type) {
     if (type->expression)
         // cannot validate yet
         return;
-    if (type->size <= 0)
+    if (type->size < 0)
         ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
 }
 
