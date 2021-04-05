@@ -187,7 +187,7 @@ class MidEnd : public PassManager {
 };
 
 /// Relative path to the examples
-const char *relPath = "../testdata/p4_16_samples/parser-unroll/";
+const char *relPath = "../testdata/p4_16_samples/";
 
 // #define PARSER_UNROLL_TIME_CHECKING
 
@@ -281,7 +281,7 @@ TEST_F(P4CParserUnroll, test3) {
 }
 
 TEST_F(P4CParserUnroll, switch_20160512) {
-    auto parsers =  loadExample("../../p4_14_samples/switch_20160512/switch.p4",
+    auto parsers =  loadExample("../p4_14_samples/switch_20160512/switch.p4",
         CompilerOptions::FrontendVersion::P4_14);
     ASSERT_TRUE(parsers.first);
     ASSERT_TRUE(parsers.second);
