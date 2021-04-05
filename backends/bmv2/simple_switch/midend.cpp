@@ -41,6 +41,7 @@ limitations under the License.
 #include "midend/replaceSelectRange.h"
 #include "midend/local_copyprop.h"
 #include "midend/nestedStructs.h"
+#include "midend/parserUnroll.h"
 #include "midend/removeLeftSlices.h"
 #include "midend/removeMiss.h"
 #include "midend/removeParameters.h"
@@ -125,9 +126,10 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options, std::ostream* o
             // control plane API, we remove them as well for P4-14 programs.
             isv1 ? new P4::RemoveUnusedActionParameters(&refMap) : nullptr,
             new P4::TypeChecking(&refMap, &typeMap),
-            new P4::MidEndLast(),
+            options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr,
             evaluator,
             [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
+            new P4::MidEndLast()
         });
         if (options.listMidendPasses) {
             listPasses(*outStream, "\n");

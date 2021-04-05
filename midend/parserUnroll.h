@@ -19,34 +19,49 @@ limitations under the License.
 
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/callGraph.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
-#include "frontends/p4/callGraph.h"
 #include "interpreter.h"
 
 namespace P4 {
+
+/// Name of out of bound state
+const char outOfBoundsStateName[] = "stateOutOfBound";
 
 //////////////////////////////////////////////
 // The following are for a single parser
 
 /// Information produced for a parser state by the symbolic evaluator
 struct ParserStateInfo {
-    const IR::P4Parser*    parser;
-    const IR::ParserState* state;  // original state this is produced from
-    const ParserStateInfo* predecessor;  // how we got here in the symbolic evaluation
-    cstring                name;  // new state name
-    ValueMap*              before;
-    ValueMap*              after;
-
+    friend class ParserStateRewriter;
+    cstring                         name;   // new state name
+    const IR::P4Parser*             parser;
+    const IR::ParserState*          state;  // original state this is produced from
+    const ParserStateInfo*          predecessor;     // how we got here in the symbolic evaluation
+    ValueMap*                       before;
+    ValueMap*                       after;
+    IR::ParserState*                newState;        // pointer to a new state
+    size_t                          currentIndex;
+    std::map<cstring, size_t>       statesIndexes;   // global map in state indexes
+    // set of parsers' states names with are in current path.
+    std::unordered_set<cstring>     scenarioStates;
+    std::unordered_set<cstring>     scenarioHS;      // scenario header stack's operations
     ParserStateInfo(cstring name, const IR::P4Parser* parser, const IR::ParserState* state,
-                    const ParserStateInfo* predecessor, ValueMap* before) :
-            parser(parser), state(state), predecessor(predecessor),
-            name(name), before(before), after(nullptr)
-    { CHECK_NULL(parser); CHECK_NULL(state); CHECK_NULL(before); }
+                    const ParserStateInfo* predecessor, ValueMap* before, size_t index) :
+            name(name), parser(parser), state(state), predecessor(predecessor),
+            before(before), after(nullptr), newState(nullptr), currentIndex(index) {
+        CHECK_NULL(parser); CHECK_NULL(state); CHECK_NULL(before);
+        if (predecessor) {
+            statesIndexes = predecessor->statesIndexes;
+            scenarioHS = predecessor->scenarioHS;
+        }
+    }
 };
 
 /// Information produced for a parser by the symbolic evaluator
 class ParserInfo {
+    friend class RewriteAllParsers;
     // for each original state a vector of states produced by unrolling
     std::map<cstring, std::vector<ParserStateInfo*>*> states;
  public:
@@ -66,18 +81,27 @@ class ParserInfo {
         auto vec = get(origState);
         vec->push_back(si);
     }
+    std::map<cstring, std::vector<ParserStateInfo*>*>& getStates() {
+        return states;
+    }
 };
 
 typedef CallGraph<const IR::ParserState*> StateCallGraph;
 
 /// Information about a parser in the input program
 class ParserStructure {
+    friend class ParserStateRewriter;
+    friend class ParserSymbolicInterpreter;
+    friend class AnalyzeParser;
     std::map<cstring, const IR::ParserState*> stateMap;
-    StateCallGraph* callGraph;
+
  public:
     const IR::P4Parser*    parser;
     const IR::ParserState* start;
     const ParserInfo*      result;
+    StateCallGraph*        callGraph;
+    std::map<cstring, std::set<cstring> > statesWithHeaderStacks;
+    std::map<cstring, size_t>  callsIndexes;  // map for curent calls of state insite current one
     void setParser(const IR::P4Parser* parser) {
         CHECK_NULL(parser);
         callGraph = new StateCallGraph(parser->name);
@@ -91,57 +115,54 @@ class ParserStructure {
     void calls(const IR::ParserState* caller, const IR::ParserState* callee)
     { callGraph->calls(caller, callee); }
 
-    void analyze(ReferenceMap* refMap, TypeMap* typeMap, bool unroll);
+    bool analyze(ReferenceMap* refMap, TypeMap* typeMap, bool unroll);
+    /// check reachability for usage of header stack
+    bool reachableHSUsage(IR::ID id, const ParserStateInfo* state) const;
+
+ protected:
+    /// evaluates rechable states with HS operations for each path.
+    void evaluateReachability();
+    /// add HS name which is used in a current state.
+    void addStateHSUsage(const IR::ParserState* state, const IR::Expression* expression);
 };
 
 class AnalyzeParser : public Inspector {
     const ReferenceMap* refMap;
     ParserStructure*    current;
+    const IR::ParserState* currentState;
  public:
     AnalyzeParser(const ReferenceMap* refMap, ParserStructure* current) :
-            refMap(refMap), current(current) {
+            refMap(refMap), current(current), currentState(nullptr) {
         CHECK_NULL(refMap); CHECK_NULL(current); setName("AnalyzeParser");
         visitDagOnce = false;
     }
 
     bool preorder(const IR::P4Parser* parser) override {
         LOG2("Scanning " << parser);
-        current->parser = parser;
+        current->setParser(parser);
         return true;
     }
     bool preorder(const IR::ParserState* state) override;
+    void postorder(const IR::ParserState* state) override;
+    void postorder(const IR::ArrayIndex* array) override;
+    void postorder(const IR::Member* member) override;
     void postorder(const IR::PathExpression* expression) override;
 };
 
-#if 0
-class ParserUnroller : public Transform {
-    ReferenceMap*    refMap;
-    TypeMap*         typeMap;
-    ParserStructure* parser;
- public:
-    ParserUnroller(ReferenceMap* refMap, TypeMap* typeMap, ParserStructure* parser) :
-            refMap(refMap), typeMap(typeMap), parser(parser) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(parser);
-        setName("ParserUnroller");
-        visitDagOnce = false;
-    }
-};
-#endif
-
 // Applied to a P4Parser object.
 class ParserRewriter : public PassManager {
-    ParserStructure  current;
+    ParserStructure         current;
+    friend class RewriteAllParsers;
  public:
-    ParserRewriter(ReferenceMap* refMap, TypeMap* typeMap, bool unroll) {
+    bool hasOutOfboundState;
+    ParserRewriter(ReferenceMap* refMap,
+                   TypeMap* typeMap, bool unroll) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap);
         setName("ParserRewriter");
         addPasses({
             new AnalyzeParser(refMap, &current),
             [this, refMap, typeMap, unroll](void) {
-                current.analyze(refMap, typeMap, unroll); },
-#if 0
-            unroll ? new ParserUnroller(refMap, typeMap, &current) : 0,
-#endif
+                hasOutOfboundState = current.analyze(refMap, typeMap, unroll); },
         });
     }
 };
@@ -150,16 +171,50 @@ class ParserRewriter : public PassManager {
 // The following are applied to the entire program
 
 class RewriteAllParsers : public Transform {
-    ReferenceMap* refMap;
-    TypeMap*      typeMap;
-    bool          unroll;
+    ReferenceMap*           refMap;
+    TypeMap*                typeMap;
+    bool                    unroll;
+
  public:
     RewriteAllParsers(ReferenceMap* refMap, TypeMap* typeMap, bool unroll) :
-            refMap(refMap), typeMap(typeMap), unroll(unroll)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("RewriteAllParsers"); }
+            refMap(refMap), typeMap(typeMap), unroll(unroll) {
+        CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("RewriteAllParsers");
+    }
+
+    // start generation of a code
     const IR::Node* postorder(IR::P4Parser* parser) override {
+        // making rewriting
         auto rewriter = new ParserRewriter(refMap, typeMap, unroll);
-        return parser->apply(*rewriter);
+        parser->apply(*rewriter);
+        /// make a new parser
+        BUG_CHECK(rewriter->current.result,
+                  "No result was found after unrolling of the parser loop");
+        IR::P4Parser* newParser = parser->clone();
+        IR::IndexedVector<IR::ParserState> states = newParser->states;
+        newParser->states.clear();
+        if (rewriter->hasOutOfboundState) {
+            // generating state with verify(false, error.StackOutOfBounds)
+            IR::Vector<IR::Argument>* arguments = new IR::Vector<IR::Argument>();
+            arguments->push_back(new IR::Argument(new IR::BoolLiteral(false)));
+            arguments->push_back(new IR::Argument(new IR::Member(
+                new IR::TypeNameExpression(new IR::Type_Name(IR::ID("error"))),
+                    IR::ID("StackOutOfBounds"))));
+            IR::IndexedVector<IR::StatOrDecl> components;
+            components.push_back(new IR::MethodCallStatement(
+                new IR::MethodCallExpression(new IR::PathExpression(IR::ID("verify")), arguments)));
+            auto* outOfBoundsState = new IR::ParserState(IR::ID(outOfBoundsStateName), components,
+                nullptr);
+            newParser->states.push_back(outOfBoundsState);
+        }
+        for (auto& i : rewriter->current.result->states) {
+            for (auto& j : *i.second)
+                if (j->newState)
+                    newParser->states.push_back(j->newState);
+        }
+        // adding accept/reject
+        newParser->states.push_back(new IR::ParserState(IR::ParserState::accept, nullptr));
+        newParser->states.push_back(new IR::ParserState(IR::ParserState::reject, nullptr));
+        return newParser;
     }
 };
 

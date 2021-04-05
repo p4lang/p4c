@@ -43,6 +43,7 @@ limitations under the License.
 #include "midend/local_copyprop.h"
 #include "midend/midEndLast.h"
 #include "midend/nestedStructs.h"
+#include "midend/parserUnroll.h"
 #include "midend/noMatch.h"
 #include "midend/predication.h"
 #include "midend/removeExits.h"
@@ -142,6 +143,7 @@ MidEnd::MidEnd(CompilerOptions& options, std::ostream* outStream) {
             return root; },
         new P4::SynthesizeActions(&refMap, &typeMap, new SkipControls(v1controls)),
         new P4::MoveActionsToTables(&refMap, &typeMap),
+        options.loopsUnrolling ? new P4::ParsersUnroll(true, &refMap, &typeMap) : nullptr,
         evaluator,
         [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
         new P4::MidEndLast()

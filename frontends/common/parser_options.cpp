@@ -195,6 +195,9 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
     registerOption("--dump", "folder",
                    [this](const char* arg) { dumpFolder = arg; return true; },
                    "[Compiler debugging] Folder where P4 programs are dumped\n");
+    registerOption("--loopsUnroll", nullptr,
+                   [this](const char*) { loopsUnrolling = true; return true; },
+                   "Unrolling all parser's loops");
 }
 
 void ParserOptions::setInputFile() {

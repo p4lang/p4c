@@ -117,6 +117,9 @@ class ParserOptions : public Util::Options {
     bool isAnnotationDisabled(const IR::Annotation *) const;
 
     virtual bool enable_intrinsic_metadata_fix();
+
+    // if true unroll all parser's loop inside midend
+    bool loopsUnrolling = false;
 };
 
 
