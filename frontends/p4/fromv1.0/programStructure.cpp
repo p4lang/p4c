@@ -610,7 +610,7 @@ void ProgramStructure::include(cstring filename, cstring ppoptions) {
 void ProgramStructure::loadModel() {
     // This includes in turn core.p4
     std::stringstream versionArg;
-    versionArg << "-DV1MODEL_VERSION=20200408";
+    versionArg << "-DV1MODEL_VERSION=" << V1Model::version2020;
     include(V1Model::instance.file.name, versionArg.str());
 
     metadataInstances.insert(v1model.standardMetadataType.name);

@@ -56,6 +56,8 @@ int Type_InfInt::nextId = 0;
 
 Annotations* Annotations::empty = new Annotations(Vector<Annotation>());
 
+const Type* Type_Stack::at(size_t) const { return elementType; }
+
 const Type_Bits* Type_Bits::get(int width, bool isSigned) {
     // map (width, signed) to type
     using bit_type_key = std::pair<int, bool>;

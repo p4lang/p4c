@@ -28,5 +28,7 @@ P4CoreLibrary P4CoreLibrary::instance;
 namespace P4V1 {
 
 V1Model V1Model::instance;
+const char* V1Model::versionInitial = "20180101";
+const char* V1Model::version2020 = "20200408";
 
 }  // namespace P4V1
