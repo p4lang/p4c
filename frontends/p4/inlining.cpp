@@ -465,12 +465,16 @@ Visitor::profile_t GeneralInliner::init_apply(const IR::Node* node) {
 }
 
 /* Build the substitutions needed for args and locals of the thing being inlined.
- * P4Block here may be either P4Control or P4Parser */
-template<class P4Block>
+ * P4Block here may be either P4Control or P4Parser.
+ * P4BlockType should be either Type_Control or Type_Parser to match the P4Block. */
+template<class P4Block, class P4BlockType>
 void GeneralInliner::inline_subst(P4Block *caller,
-                                  IR::IndexedVector<IR::Declaration> P4Block::*blockLocals) {
+                                  IR::IndexedVector<IR::Declaration> P4Block::*blockLocals,
+                                  const P4BlockType *P4Block::*blockType) {
     LOG3("Analyzing " << dbp(caller));
     IR::IndexedVector<IR::Declaration> locals;
+    P4BlockType *type = (caller->*blockType)->clone();
+    IR::Annotations *annos = type->annotations->clone();
     for (auto s : caller->*blockLocals) {
         /* Even if we inline the block, the declaration may still be needed.
            Consider this example:
@@ -492,6 +496,14 @@ void GeneralInliner::inline_subst(P4Block *caller,
             CHECK_NULL(callee);
             auto substs = new PerInstanceSubstitutions();
             workToDo->substitutions[inst] = substs;
+
+            // Propagate annotations
+            const IR::Annotations *calleeAnnos = (callee->*blockType)->annotations;
+            for (auto *ann : calleeAnnos->annotations) {
+                if (!annos->getSingle(ann->name)) {
+                    annos->add(ann);
+                }
+            }
 
             // Substitute constructor parameters
             substs->paramSubst.populate(callee->getConstructorParameters(), inst->arguments);
@@ -585,6 +597,8 @@ void GeneralInliner::inline_subst(P4Block *caller,
         }
     }
     caller->*blockLocals = locals;
+    type->annotations = annos;
+    caller->*blockType = type;
 }
 
 const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
@@ -596,7 +610,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
     }
 
     workToDo = &toInline->callerToWork[orig];
-    inline_subst(caller, &IR::P4Control::controlLocals);
+    inline_subst(caller, &IR::P4Control::controlLocals, &IR::P4Control::type);
     visit(caller->body);
     list->replace(orig, caller);
     workToDo = nullptr;
@@ -872,7 +886,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Parser* caller) {
     }
 
     workToDo = &toInline->callerToWork[orig];
-    inline_subst(caller, &IR::P4Parser::parserLocals);
+    inline_subst(caller, &IR::P4Parser::parserLocals, &IR::P4Parser::type);
     visit(caller->states, "states");
     list->replace(orig, caller);
     workToDo = nullptr;

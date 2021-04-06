@@ -225,7 +225,9 @@ class GeneralInliner : public AbstractInliner<InlineList, InlineSummary> {
     }
     // controlled visiting order
     const IR::Node* preorder(IR::MethodCallStatement* statement) override;
-    template<class T> void inline_subst(T *caller, IR::IndexedVector<IR::Declaration> T::*locals);
+    template<class T, class U>
+    void inline_subst(T *caller, IR::IndexedVector<IR::Declaration> T::*locals,
+                      const U *T::*type);
     const IR::Node* preorder(IR::P4Control* caller) override;
     const IR::Node* preorder(IR::P4Parser* caller) override;
     const IR::Node* preorder(IR::ParserState* state) override;
