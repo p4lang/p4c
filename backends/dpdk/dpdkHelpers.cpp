@@ -246,8 +246,9 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
             if (auto a = mi->to<P4::ApplyMethod>()) {
                 if (a->isTableApply()) {
                     if (mem->member == IR::Type_Table::hit) {
+                        auto tbl = a->object->to<IR::P4Table>();
                         instructions.push_back(
-                                new IR::DpdkApplyStatement(a->object->getName()));
+                                new IR::DpdkApplyStatement(tbl->name.toString()));
                         if (is_and) {
                             instructions.push_back(
                                     new IR::DpdkJmpMissStatement(false_label));
@@ -315,7 +316,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
     if (auto a = mi->to<P4::ApplyMethod>()) {
         if (a->isTableApply()) {
             auto table = a->object->to<IR::P4Table>();
-            add_instr(new IR::DpdkApplyStatement(table->name));
+            add_instr(new IR::DpdkApplyStatement(table->name.toString()));
         } else {
             BUG("not implemented for `apply` other than table");
         }
