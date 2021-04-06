@@ -1,0 +1,45 @@
+#!/bin/bash
+
+. ./packaging.conf
+
+# ------ Revert debian/changelog and debian/control -------------------------
+# git checkout debian/changelog CMakeLists.txt
+
+
+# ------ Current GIT version ------------------------------------------------
+CHANGELOG_HEADER="`head -n1 debian/changelog`"
+
+# The package name, e.g. MyApplication
+PACKAGE=`echo $CHANGELOG_HEADER | sed -e "s/(.*//" -e "s/ //g"`
+# The package distribution, e.g. precise, raring, ...
+PACKAGE_DISTRIBUTION=`echo $CHANGELOG_HEADER | sed -e "s/[^)]*)//" -e "s/;.*//g" -e "s/ //g"`
+# The package's version, e.g. 1.2.3-1ubuntu1
+PACKAGE_VERSION=`echo $CHANGELOG_HEADER | sed -e "s/.*(//" -e "s/).*//" -e "s/ //g" -e "s/ //g" -e "s/^[0-9]://g" -e "s/+.*//g"`
+# The package's output version, e.g. 1.2.3-1ubuntu
+OUTPUT_VERSION=`echo $PACKAGE_VERSION   | sed -e "s/\(ubuntu\|ppa\)[0-9]*$/\1/"`
+# The package's Debian version, e.g. 1.2.3-1
+DEBIAN_VERSION=`echo $OUTPUT_VERSION    | sed -e "s/\(ubuntu\|ppa\)$//1"`
+# The package's upstream version, e.g. 1.2.3
+UPSTREAM_VERSION=`echo $DEBIAN_VERSION  | sed -e "s/-[0-9]*$//"`
+# The package's plain upstream version, e.g. 1.2.3 (without e.g. ~svn<xxxx>)
+PLAIN_VERSION=`echo $UPSTREAM_VERSION   | sed -e "s/\([0-9\.]*\)[-+~].*$/\1/"`
+
+GIT_VERSION="g`env LANG=en date -u +"%Y%m%d%H%M"`"
+GIT_ID="${GIT_VERSION}~`cat .git/ORIG_HEAD | cut -b 1-6`"   # Name may not be too long! Just take 6 digits ...
+
+# ------ Change CMakeLists.txt ----------------------------------------------
+sed "s#set (P4C_SEM_VERSION_STRING \".*\")#set (P4C_SEM_VERSION_STRING \"${PACKAGE_VERSION}+$GIT_ID\")#g" <CMakeLists.txt >CMakeLists.txt.new
+
+# ------ Create debian/changelog --------------------------------------------
+(
+   echo "p4c (${UPSTREAM_VERSION}+${GIT_ID}-1ppa1) unstable; urgency=medium"
+   echo ""
+   echo "  * Self-made package"
+   echo ""
+   echo " -- $MAINTAINER  `env LANG=en date +"%a, %02d %b %Y %H:%M:%S %z"`"
+) | tee debian/changelog.new
+
+
+# ------ Apply changes ------------------------------------------------------
+mv CMakeLists.txt.new CMakeLists.txt
+mv debian/changelog.new debian/changelog
