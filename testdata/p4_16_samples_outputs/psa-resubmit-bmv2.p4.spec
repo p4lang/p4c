@@ -46,6 +46,7 @@ header output_data instanceof output_data_t
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
+	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
 	extract h.output_data
 	mov m.psa_ingress_output_metadata_drop 0
@@ -85,7 +86,7 @@ apply {
 	emit h.ethernet
 	emit h.output_data
 	tx m.psa_ingress_output_metadata_egress_port
-	LABEL_DROP: drop
+	LABEL_DROP : drop
 }
 
 

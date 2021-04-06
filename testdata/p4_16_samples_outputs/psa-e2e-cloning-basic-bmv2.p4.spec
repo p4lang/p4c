@@ -38,6 +38,7 @@ header ethernet instanceof ethernet_t
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
+	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
 	jmpneq LABEL_0FALSE h.ethernet.dstAddr 0x8
 	jmpeq LABEL_0FALSE m.psa_ingress_input_metadata_packet_path 0x6
@@ -68,7 +69,7 @@ apply {
 	LABEL_4END :	mov h.ethernet.srcAddr 0xcafe
 	LABEL_1END :	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
-	LABEL_DROP: drop
+	LABEL_DROP : drop
 }
 
 

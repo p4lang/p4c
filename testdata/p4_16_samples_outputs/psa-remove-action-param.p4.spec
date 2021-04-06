@@ -30,6 +30,7 @@ metadata instanceof EMPTY_M
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
+	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h
 	jmpv LABEL_0FALSE h
 	mov m.psa_ingress_output_metadata_drop 0
@@ -41,7 +42,7 @@ apply {
 	mov m.psa_ingress_output_metadata_egress_port 0xfffffffd
 	LABEL_0END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	tx m.psa_ingress_output_metadata_egress_port
-	LABEL_DROP: drop
+	LABEL_DROP : drop
 }
 
 

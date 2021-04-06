@@ -54,6 +54,7 @@ header ipv4 instanceof ipv4_t
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
+	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
 	jmpeq INGRESSPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp INGRESSPARSERIMPL_ACCEPT
@@ -66,7 +67,7 @@ apply {
 	emit h.ethernet
 	emit h.ipv4
 	tx m.psa_ingress_output_metadata_egress_port
-	LABEL_DROP: drop
+	LABEL_DROP : drop
 }
 
 
