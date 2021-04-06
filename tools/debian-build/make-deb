@@ -30,6 +30,10 @@ set -e
 # ./make-deb bionic|disco|...   => for Launchpad PPA
 # ---------------------------------------------------------------------------
 
+# ====== Path variables =========================================
+FILE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+P4C_DIR="${FILE_DIR}/../.."
+DEBIAN_DIR="${P4C_DIR}/debian"
 
 # Set current Debian debhelper version here
 # for building unstable/testing/stable packages
@@ -50,7 +54,7 @@ if [ "${DISTRIBUTIONS}" == "" ] ; then
 fi
 
 
-CHANGELOG_HEADER="`head -n1 debian/changelog`"
+CHANGELOG_HEADER="`head -n1 ${DEBIAN_DIR}/changelog`"
 
 # The package name, e.g. MyApplication
 PACKAGE=`echo ${CHANGELOG_HEADER} | sed -e "s/(.*//" -e "s/ //g"`
