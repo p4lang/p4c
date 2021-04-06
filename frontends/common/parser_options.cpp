@@ -178,9 +178,6 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
         "Report an error for a compiler diagnostic, or treat all warnings as "
         "errors if no diagnostic is specified.",
         OptionFlags::OptionalArgument);
-    registerOption("--loopsUnroll", nullptr,
-                   [this](const char*) { loopsUnrolling = true; return true; },
-                   "Unrolling all parser's loops");
     registerOption(
         "--maxErrorCount", "errorCount",
         [](const char* arg) {

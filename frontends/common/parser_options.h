@@ -85,8 +85,6 @@ class ParserOptions : public Util::Options {
     DebugHook getDebugHook() const;
     // Check whether this particular annotation was disabled
     bool isAnnotationDisabled(const IR::Annotation *a) const;
-    bool loopsUnrolling = false;
-    // if true unroll all parser's loop inside midend
 };
 
 /// A compilation context which exposes compiler options and a compiler

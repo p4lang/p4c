@@ -76,5 +76,7 @@ class CompilerOptions : public ParserOptions {
     // Architecture
     cstring arch = nullptr;
     virtual bool enable_intrinsic_metadata_fix();
+    // if true unroll all parser's loop inside midend
+    bool loopsUnrolling = false;
 };
 #endif  /* FRONTENDS_COMMON_OPTIONS_H_ */

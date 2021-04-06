@@ -31,7 +31,7 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
         "to one of `passX' strings.\n");
     registerOption(
         "--listFrontendPasses", nullptr,
-        [this](const char* ) {
+        [this](const char*) {
             listFrontendPasses = true;
             P4::FrontEnd frontend;
             frontend.run(*this, nullptr, false, outStream);
@@ -59,14 +59,14 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
         "Dump the compiler IR after the midend as JSON in the specified file.");
     registerOption(
         "--ndebug", nullptr,
-        [this](const char* ) {
+        [this](const char*) {
             ndebug = true;
             return true;
         },
         "Compile program in non-debug mode.\n");
     registerOption(
         "--testJson", nullptr,
-        [this](const char* ) {
+        [this](const char*) {
             debugJson = true;
             return true;
         },
@@ -147,6 +147,13 @@ CompilerOptions::CompilerOptions() : ParserOptions() {
             return true;
         },
         "Compile for the specified architecture.");
+    registerOption(
+        "--loopsUnroll", nullptr,
+        [this](const char*) {
+            loopsUnrolling = true;
+            return true;
+        },
+        "Unrolling all parser's loops");
 }
 
 bool CompilerOptions::enable_intrinsic_metadata_fix() { return true; }
