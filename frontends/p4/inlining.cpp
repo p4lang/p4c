@@ -500,7 +500,7 @@ void GeneralInliner::inline_subst(P4Block *caller,
             // Propagate annotations
             const IR::Annotations *calleeAnnos = (callee->*blockType)->annotations;
             for (auto *ann : calleeAnnos->annotations) {
-                if (!annos->getSingle(ann->name)) {
+                if (!annos->getSingle(ann->name) && !Inline::isAnnotationNoPropagate(ann->name)) {
                     annos->add(ann);
                 }
             }
@@ -893,5 +893,8 @@ const IR::Node* GeneralInliner::preorder(IR::P4Parser* caller) {
     prune();
     return caller;
 }
+
+// set of annotations to _not_ propagate during inlining
+std::set<cstring> Inline::noPropagateAnnotations = { "name" };
 
 }  // namespace P4

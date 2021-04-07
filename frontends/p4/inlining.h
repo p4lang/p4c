@@ -252,6 +252,7 @@ will be enough.  Multiple iterations are necessary only when instances are
 passed as arguments using constructor arguments.
 */
 class Inline : public PassRepeated {
+    static std::set<cstring> noPropagateAnnotations;
  public:
     Inline(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator)
     : PassManager({
@@ -259,6 +260,16 @@ class Inline : public PassRepeated {
         // After inlining the output of the evaluator changes, so
         // we have to run it again
         evaluator }) {}
+
+    /// Do not propagate annotation \p name during inlining
+    static void setAnnotationNoPropagate(cstring name) {
+        noPropagateAnnotations.emplace(name);
+    }
+
+    /// Is annotation \p name excluded from inline propagation?
+    static bool isAnnotationNoPropagate(cstring name) {
+        return noPropagateAnnotations.count(name);
+    }
 };
 
 }  // namespace P4
