@@ -448,3 +448,8 @@ class DpdkInvalidateStatement: DpdkAsmStatement, IDPDKNode {
     Expression header;
     std::ostream& toSpec(std::ostream& out) const override;
 }
+
+class DpdkDropStatement: DpdkAsmStatement, IDPDKNode {
+    std::ostream& toSpec(std::ostream& out) const override;
+}
+

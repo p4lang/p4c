@@ -105,7 +105,7 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
             BUG("Unknown control block %s", kv.second->name);
     }
     auto ingress_deparser_converter =
-        new ConvertToDpdkControl(refmap, typemap, collector, csum_map);
+        new ConvertToDpdkControl(refmap, typemap, collector, csum_map, true);
     auto egress_deparser_converter =
         new ConvertToDpdkControl(refmap, typemap, collector, csum_map);
     for (auto kv : structure.deparsers) {
@@ -116,13 +116,15 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
         else
             BUG("Unknown deparser block %s", kv.second->name);
     }
+
     auto s = createListStatement(
         "ingress", {ingress_parser_converter->getInstructions(),
                     ingress_converter->getInstructions(),
                     ingress_deparser_converter->getInstructions(),
                     egress_parser_converter->getInstructions(),
                     egress_converter->getInstructions(),
-                    egress_deparser_converter->getInstructions()});
+                    egress_deparser_converter->getInstructions(),
+                    });
     statements.push_back(s);
 
     return new IR::DpdkAsmProgram(
@@ -286,10 +288,15 @@ bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
     auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap,
                                                    collector, csum_map);
     c->body->apply(*helper);
+    if (deparser) {
+        add_inst(new IR::DpdkJmpNotEqualStatement("LABEL_DROP",
+            new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_drop"),
+            new IR::Constant(0))); }
+
     for (auto i : helper->get_instr()) {
-        LOG1("inst " << i);
         add_inst(i);
     }
+
     return true;
 }
 }  // namespace DPDK

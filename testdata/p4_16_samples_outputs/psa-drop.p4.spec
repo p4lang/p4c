@@ -1,26 +1,5 @@
 
-struct ethernet_t {
-	bit<48> dstAddr
-	bit<48> srcAddr
-	bit<16> etherType
-}
-
-struct ipv4_t {
-	bit<4> version
-	bit<4> ihl
-	bit<8> diffserv
-	bit<16> totalLen
-	bit<16> identification
-	bit<3> flags
-	bit<13> fragOffset
-	bit<8> ttl
-	bit<8> protocol
-	bit<16> hdrChecksum
-	bit<32> srcAddr
-	bit<32> dstAddr
-}
-
-struct metadata_t {
+struct EMPTY_M {
 	bit<32> psa_ingress_parser_input_metadata_ingress_port
 	bit<32> psa_ingress_parser_input_metadata_packet_path
 	bit<32> psa_egress_parser_input_metadata_egress_port
@@ -47,23 +26,36 @@ struct metadata_t {
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
 }
-metadata instanceof metadata_t
+metadata instanceof EMPTY_M
 
-header ethernet instanceof ethernet_t
-header ipv4 instanceof ipv4_t
+action NoAction args none {
+	return
+}
+
+action drop args none {
+	mov m.psa_ingress_output_metadata_drop 1
+	return
+}
+
+table tbl {
+	key {
+		h.srcAddr exact
+	}
+	actions {
+		NoAction
+		drop
+	}
+	default_action NoAction args none 
+	size 0
+}
+
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
-	extract h.ethernet
-	jmpeq INGRESSPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
-	jmp INGRESSPARSERIMPL_ACCEPT
-	INGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
-	INGRESSPARSERIMPL_ACCEPT :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
-	emit h.ethernet
-	emit h.ipv4
-	emit h.ethernet
-	emit h.ipv4
+	extract h
+	table tbl
+	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP : drop
 }

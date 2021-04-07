@@ -38,12 +38,15 @@ header ethernet instanceof ethernet_t
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
+	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
 	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_egress_port 0x3
+	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_DROP : drop
 }
 
 

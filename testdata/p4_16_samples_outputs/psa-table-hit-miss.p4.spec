@@ -52,20 +52,22 @@ table tbl {
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
+	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h
-	table tbl_0
+	table tbl
 	jmpnh LABEL_0END
 	invalidate h
-	LABEL_0END :	table tbl_0
+	LABEL_0END :	table tbl
 	jmph LABEL_1END
 	validate h
-	LABEL_1END :	table tbl_0
+	LABEL_1END :	table tbl
 	jmph LABEL_2END
 	validate h
-	LABEL_2END :	table tbl_0
+	LABEL_2END :	table tbl
 	jmpnh LABEL_3END
 	invalidate h
 	LABEL_3END :	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_DROP : drop
 }
 
 
