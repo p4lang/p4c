@@ -109,7 +109,7 @@ void TypeMap::setType(const IR::Node* element, const IR::Type* type) {
     auto it = typeMap.find(element);
     if (it != typeMap.end()) {
         const IR::Type* existingType = it->second;
-        if (!TypeMap::implicitlyConvertibleTo(type, existingType, false))
+        if (!implicitlyConvertibleTo(type, existingType))
             BUG("Changing type of %1% in type map from %2% to %3%",
                 dbp(element), dbp(existingType), dbp(type));
         return;
@@ -146,7 +146,7 @@ void TypeMap::addSubstitutions(const TypeVariableSubstitution* tvs) {
 // Deep structural equivalence between canonical types.
 // Does not do unification of type variables - a type variable is only
 // equivalent to itself.  nullptr is only equivalent to nullptr.
-bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool strictStruct) {
+bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right) const {
     if (left == nullptr)
         return right == nullptr;
     if (right == nullptr)
@@ -158,7 +158,7 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool stric
     if (left->is<IR::Type_Base>() || left->is<IR::Type_Newtype>())
         return *left == *right;
     if (auto tt = left->to<IR::Type_Type>())
-        return equivalent(tt->type, right->to<IR::Type_Type>()->type, strictStruct);
+        return equivalent(tt->type, right->to<IR::Type_Type>()->type);
     if (left->is<IR::Type_Error>())
         return true;
     if (auto lv = left->to<IR::ITypeVar>()) {
@@ -177,7 +177,7 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool stric
                     "%1%: Size of header stack type should be a constant", right);
             return false;
         }
-        return equivalent(ls->elementType, rs->elementType, strictStruct) &&
+        return equivalent(ls->elementType, rs->elementType) &&
                 ls->getSize() == rs->getSize();
     }
     if (auto le = left->to<IR::Type_Enum>()) {
@@ -202,7 +202,7 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool stric
             auto fr = sr->fields.at(i);
             if (fl->name != fr->name)
                 return false;
-            if (!equivalent(fl->type, fr->type, strictStruct))
+            if (!equivalent(fl->type, fr->type))
                 return false;
         }
         return true;
@@ -214,7 +214,7 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool stric
         for (size_t i = 0; i < lt->components.size(); i++) {
             auto l = lt->components.at(i);
             auto r = rt->components.at(i);
-            if (!equivalent(l, r, strictStruct))
+            if (!equivalent(l, r))
                 return false;
         }
         return true;
@@ -226,14 +226,14 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool stric
         for (size_t i = 0; i < lt->components.size(); i++) {
             auto l = lt->components.at(i);
             auto r = rt->components.at(i);
-            if (!equivalent(l, r, strictStruct))
+            if (!equivalent(l, r))
                 return false;
         }
         return true;
     }
     if (auto lt = left->to<IR::Type_Set>()) {
         auto rt = right->to<IR::Type_Set>();
-        return equivalent(lt->elementType, rt->elementType, strictStruct);
+        return equivalent(lt->elementType, rt->elementType);
     }
     if (auto lp = left->to<IR::Type_Package>()) {
         auto rp = right->to<IR::Type_Package>();
@@ -248,7 +248,7 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool stric
         for (size_t i = 0; i < lm->typeParameters->size(); i++) {
             auto lp = lm->typeParameters->parameters.at(i);
             auto rp = rm->typeParameters->parameters.at(i);
-            if (!equivalent(lp, rp, strictStruct))
+            if (!equivalent(lp, rp))
                 return false;
         }
         // Don't check the return type.
@@ -259,18 +259,18 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool stric
             auto rp = rm->parameters->parameters.at(i);
             if (lp->direction != rp->direction)
                 return false;
-            if (!equivalent(lp->type, rp->type, strictStruct))
+            if (!equivalent(lp->type, rp->type))
                 return false;
         }
         return true;
     }
     if (auto a = left->to<IR::IApply>()) {
         return equivalent(a->getApplyMethodType(),
-                          right->to<IR::IApply>()->getApplyMethodType(), strictStruct);
+                          right->to<IR::IApply>()->getApplyMethodType());
     }
     if (auto ls = left->to<IR::Type_SpecializedCanonical>()) {
         auto rs = right->to<IR::Type_SpecializedCanonical>();
-        return equivalent(ls->substituted, rs->substituted, strictStruct);
+        return equivalent(ls->substituted, rs->substituted);
     }
     if (auto la = left->to<IR::Type_ActionEnum>()) {
         auto ra = right->to<IR::Type_ActionEnum>();
@@ -284,10 +284,10 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool stric
         for (size_t i = 0; i < lm->typeParameters->size(); i++) {
             auto lp = lm->typeParameters->parameters.at(i);
             auto rp = rm->typeParameters->parameters.at(i);
-            if (!equivalent(lp, rp, strictStruct))
+            if (!equivalent(lp, rp))
                 return false;
         }
-        if (!equivalent(lm->returnType, rm->returnType, strictStruct))
+        if (!equivalent(lm->returnType, rm->returnType))
             return false;
         if (lm->parameters->size() != rm->parameters->size())
             return false;
@@ -296,7 +296,7 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool stric
             auto rp = rm->parameters->parameters.at(i);
             if (lp->direction != rp->direction)
                 return false;
-            if (!equivalent(lp->type, rp->type, strictStruct))
+            if (!equivalent(lp->type, rp->type))
                 return false;
         }
         return true;
@@ -312,8 +312,8 @@ bool TypeMap::equivalent(const IR::Type* left, const IR::Type* right, bool stric
     return false;
 }
 
-bool TypeMap::implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to, bool strictStruct) {
-    if (TypeMap::equivalent(from, to, strictStruct))
+bool TypeMap::implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to) const {
+    if (equivalent(from, to))
         return true;
     if (from->is<IR::Type_InfInt>() && to->is<IR::Type_InfInt>())
         // this case is not caught by the equivalence check
@@ -326,7 +326,7 @@ bool TypeMap::implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to, 
             for (size_t i = 0; i < rt->components.size(); i++) {
                 auto fl = sl->fields.at(i);
                 auto r = rt->components.at(i);
-                if (!TypeMap::implicitlyConvertibleTo(fl->type, r, strictStruct))
+                if (!implicitlyConvertibleTo(fl->type, r))
                     return false;
             }
             return true;
@@ -337,7 +337,7 @@ bool TypeMap::implicitlyConvertibleTo(const IR::Type* from, const IR::Type* to, 
             for (size_t i = 0; i < rt->components.size(); i++) {
                 auto f = sl->components.at(i);
                 auto r = rt->components.at(i);
-                if (!TypeMap::implicitlyConvertibleTo(f, r, strictStruct))
+                if (!implicitlyConvertibleTo(f, r))
                     return false;
             }
             return true;
@@ -360,7 +360,7 @@ const IR::Type* TypeMap::getCanonical(const IR::Type* type) {
         BUG("%1%: unexpected type", type);
 
     for (auto t : *searchIn) {
-        if (TypeMap::equivalent(type, t, true))
+        if (equivalent(type, t))
             return t;
     }
     searchIn->push_back(type);

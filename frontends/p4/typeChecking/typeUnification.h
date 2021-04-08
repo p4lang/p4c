@@ -36,19 +36,15 @@ Constraint solving can fail, which means that the program does not type-check.
 */
 class TypeUnification final {
     TypeConstraints*  constraints;
-    bool strictStruct;
+    const TypeMap* typeMap;
 
     bool unifyCall(const EqualityConstraint* constraint);
     bool unifyFunctions(const EqualityConstraint* constraint,
                         bool skipReturnValues = false);
     bool unifyBlocks(const EqualityConstraint* constraint);
  public:
-    /// @param constraints Constraints to satisfy
-    /// @param strictStruct If true non-anonymous structures will unify
-    ///                     only if the have the same name, otherwise
-    ///                     they will unify when they have the same fields.
-    TypeUnification(TypeConstraints* constraints, bool strictStruct) :
-            constraints(constraints), strictStruct(strictStruct) {}
+    TypeUnification(TypeConstraints* constraints, const P4::TypeMap* typeMap) :
+            constraints(constraints), typeMap(typeMap) {}
     /**
      * Return false if unification fails right away.
      * Generates a set of type constraints.

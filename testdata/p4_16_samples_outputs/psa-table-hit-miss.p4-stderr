@@ -1,3 +1,9 @@
 psa-table-hit-miss.p4(62): [--Wwarn=invalid_header] warning: accessing a field of a potentially invalid header hdr.ethernet
             hdr.ethernet.srcAddr : exact;
             ^^^^^^^^^^^^
+psa.p4(594): [--Wwarn=unused] warning: 'W' is unused
+extern Counter<W, S> {
+               ^
+psa.p4(623): [--Wwarn=unused] warning: 'W' is unused
+extern DirectCounter<W> {
+                     ^
