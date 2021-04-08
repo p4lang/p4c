@@ -39,19 +39,19 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
         }
         default_action = NoAction_0();
     }
-    @hidden action annotationinlinepropagate79() {
+    @hidden action annotationinlinepropagate76() {
         hdr.hdr.field = 16w0x1;
     }
-    @hidden table tbl_annotationinlinepropagate79 {
+    @hidden table tbl_annotationinlinepropagate76 {
         actions = {
-            annotationinlinepropagate79();
+            annotationinlinepropagate76();
         }
-        const default_action = annotationinlinepropagate79();
+        const default_action = annotationinlinepropagate76();
     }
     apply {
         @my_anno_3 {
             if (!inner_inner_table.apply().hit) {
-                tbl_annotationinlinepropagate79.apply();
+                tbl_annotationinlinepropagate76.apply();
             }
         }
     }
