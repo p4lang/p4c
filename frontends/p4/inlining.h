@@ -216,6 +216,7 @@ class GeneralInliner : public AbstractInliner<InlineList, InlineSummary> {
     ReferenceMap* refMap;
     TypeMap* typeMap;
     InlineSummary::PerCaller* workToDo;
+
  public:
     explicit GeneralInliner(bool isv1) :
             refMap(new ReferenceMap()), typeMap(new TypeMap()), workToDo(nullptr) {
@@ -242,6 +243,7 @@ class GeneralInliner : public AbstractInliner<InlineList, InlineSummary> {
 /// Performs one round of inlining bottoms-up
 class InlinePass : public PassManager {
     InlineList toInline;
+
  public:
     InlinePass(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator)
     : PassManager({
@@ -258,6 +260,7 @@ passed as arguments using constructor arguments.
 */
 class Inline : public PassRepeated {
     static std::set<cstring> noPropagateAnnotations;
+
  public:
     Inline(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator)
     : PassManager({
