@@ -31,31 +31,31 @@ class CompilerOptions : public ParserOptions {
  public:
     CompilerOptions();
 
-    // if true, skip frontend passes whose names are contained in
-    // passesToExcludeFrontend vector
+    // If true, skip frontend passes whose names are contained in
+    // passesToExcludeFrontend vector.
     bool excludeFrontendPasses = false;
     bool listFrontendPasses = false;
-    // if true, skip midend passes whose names are contained in
-    // passesToExcludeMidend vector
+    // If true, skip midend passes whose names are contained in
+    // passesToExcludeMidend vector.
     bool excludeMidendPasses = false;
     bool listMidendPasses = false;
-    // if true, skip backend passes whose names are contained in
-    // passesToExcludeBackend vector
+    // If true, skip backend passes whose names are contained in
+    // passesToExcludeBackend vector.
     bool excludeBackendPasses = false;
-    // strings matched against pass names that should be excluded from Frontend
-    // passes
+    // Strings matched against pass names that should be excluded from frontend
+    // passes.
     std::vector<cstring> passesToExcludeFrontend;
-    // strings matched against pass names that should be excluded from Midend
-    // passes
+    // Strings matched against pass names that should be excluded from midend
+    // passes.
     std::vector<cstring> passesToExcludeMidend;
-    // strings matched against pass names that should be excluded from Backend
-    // passes
+    // Strings matched against pass names that should be excluded from backend
+    // passes.
     std::vector<cstring> passesToExcludeBackend;
-    // Dump a JSON representation of the IR in the file
+    // Dump a JSON representation of the IR in the file.
     cstring dumpJsonFile = nullptr;
-    // Dump and undump the IR tree
+    // Dump and undump the IR tree.
     bool debugJson = false;
-    // if this flag is true, compile program in non-debug mode
+    // if this flag is true, compile program in non-debug mode.
     bool ndebug = false;
     // Write a P4Runtime control plane API description to the specified file.
     cstring p4RuntimeFile = nullptr;
@@ -69,14 +69,15 @@ class CompilerOptions : public ParserOptions {
     cstring p4RuntimeEntriesFiles = nullptr;
     // Choose format for P4Runtime API description.
     P4::P4RuntimeFormat p4RuntimeFormat = P4::P4RuntimeFormat::BINARY;
-    // Pretty-print the program in the specified file
+    // Pretty-print the program in the specified file.
     cstring prettyPrintFile = nullptr;
-    // Target
+    // Target.
     cstring target = nullptr;
-    // Architecture
+    // Architecture.
     cstring arch = nullptr;
-    virtual bool enable_intrinsic_metadata_fix();
-    // if true unroll all parser's loop inside midend
+    // If true, unroll all parser loops inside the midend.
     bool loopsUnrolling = false;
+
+    virtual bool enable_intrinsic_metadata_fix();
 };
 #endif  /* FRONTENDS_COMMON_OPTIONS_H_ */

@@ -257,7 +257,7 @@ bool setIncludePathIfExists(const char*& includePathOut,
 
 }  // namespace
 
-std::vector<const char* >* ParserOptions::process(int argc,
+std::vector<const char*>* ParserOptions::process(int argc,
                                                   char* const argv[]) {
     char buffer[PATH_MAX];
 
