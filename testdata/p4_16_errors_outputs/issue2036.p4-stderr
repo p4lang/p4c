@@ -2,14 +2,14 @@ issue2036.p4(23): [--Werror=type-error] error: d.apply
     d.apply(a);
     ^^^^^^^^^^
   ---- Actual error:
-issue2036.p4(19): Cannot unify type 'Tuple(1)' with type 'struct s'
+issue2036.p4(19): Cannot unify type 'tuple<bit<8>>' with type 'struct s'
     tuple<bit<8>> a = { 0 };
     ^^^^^^^^^^^^^
 issue2036.p4(8)
   struct s {
          ^
   ---- Originating from:
-issue2036.p4(23): Type of argument 'a' (Tuple(1)) does not match type of parameter 'z' (struct s)
+issue2036.p4(23): Type of argument 'a' (tuple<bit<8>>) does not match type of parameter 'z' (struct s)
       d.apply(a);
               ^
 issue2036.p4(19)

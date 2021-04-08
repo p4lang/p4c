@@ -93,13 +93,15 @@ const Type_String *Type_String::get() {
 }
 
 const Type::Bits *Type::Bits::get(Util::SourceInfo si, int sz, bool isSigned) {
-    if (sz <= 0)
-        ::error(ErrorType::ERR_INVALID, "%1%: Width cannot be negative or zero", si);
+    if (sz < 0)
+        ::error(ErrorType::ERR_INVALID, "%1%: Width cannot be negative", si);
+    if (sz == 0 && isSigned)
+        ::error(ErrorType::ERR_INVALID, "%1%: Width cannot be zero", si);
     return get(sz, isSigned);
 }
 
 const Type::Varbits *Type::Varbits::get(Util::SourceInfo si, int sz) {
-    if (sz <= 0)
+    if (sz < 0)
         ::error(ErrorType::ERR_INVALID, "%1%: Width cannot be negative or zero", si);
     return new Type::Varbits(si, sz);
 }

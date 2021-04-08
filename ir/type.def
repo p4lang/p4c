@@ -338,18 +338,27 @@ abstract Type_BaseList : Type, Type_Indexed {
             rv += f->width_bits();
         }
         return rv; }
+    toString{
+        std::string result = "tuple<";
+        bool first = true;
+        for (auto t : components) {
+            if (!first)
+                result += ", ";
+            first = false;
+            result += t->toString();
+        }
+        return result + ">";
+    }
 }
 
 /// The type of an expressionList; can be unified with both Type_Tuple and Type_Struct
 class Type_List : Type_BaseList {
     // In error messages this is shown as if it is a Tuple
-    toString{ return "Tuple(" + Util::toString(components.size()) + ")"; }
     const Type* getP4Type() const override;
 }
 
 /// The type of a tuple.
 class Type_Tuple : Type_BaseList {
-    toString{ return "Tuple(" + Util::toString(components.size()) + ")"; }
     const Type* getP4Type() const override;
 }
 

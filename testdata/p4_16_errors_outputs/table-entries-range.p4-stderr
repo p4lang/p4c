@@ -4,6 +4,6 @@ table-entries-range.p4(71): [--Werror=type-error] error: Entry
   ---- Actual error:
   Tuples with different sizes 1 vs 2
   ---- Originating from:
-table-entries-range.p4(71): Table entry has type 'Tuple(1)' which is not the expected type 'Tuple(2)'
+table-entries-range.p4(71): Table entry has type 'tuple<bit<8>>' which is not the expected type 'tuple<int, int>'
               (0x18, 0xF) : a_with_control_params(24); // not a range
               ^^^^^^^^^^^

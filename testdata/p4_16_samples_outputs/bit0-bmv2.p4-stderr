@@ -1,0 +1,3 @@
+bit0-bmv2.p4(34): [--Wwarn=mismatch] warning: 1: value does not fit in 0 bits
+        bit<0> tmp = 1;
+                     ^

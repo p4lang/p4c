@@ -22,6 +22,8 @@ namespace P4 {
 bool TypeMap::typeIsEmpty(const IR::Type* type) const {
     if (auto bt = type->to<IR::Type_Bits>()) {
         return bt->size == 0;
+    } else if (auto vt = type->to<IR::Type_Varbits>()) {
+        return vt->size == 0;
     } else if (auto tt = type->to<IR::Type_Tuple>()) {
         if (tt->getSize() == 0)
             return true;
