@@ -21,17 +21,6 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
-  "declaration not found"
-  testdata/p4_16_samples/psa-action-selector1.p4
-  testdata/p4_16_samples/psa-action-selector2.p4
-  testdata/p4_16_samples/psa-action-selector3.p4
-  testdata/p4_16_samples/psa-hash.p4
-  testdata/p4_16_samples/psa-random.p4
-  testdata/p4_16_samples/psa-register2.p4
-  testdata/p4_16_samples/psa-register3.p4
-  )
-
-p4c_add_xfail_reason("dpdk"
   "Unsupported parser loop"
   testdata/p4_16_samples/psa-example-digest-bmv2.p4
   testdata/p4_16_samples/psa-example-counters-bmv2.p4
@@ -61,6 +50,16 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
+  "Not implemented"
+  testdata/p4_16_samples/psa-random.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
   "Error compiling"
   testdata/p4_16_samples/psa-recirculate-no-meta-bmv2.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "get_hash's arg is not a ListExpression"
+  testdata/p4_16_samples/psa-hash.p4
   )
