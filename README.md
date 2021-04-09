@@ -97,6 +97,16 @@ dot -Tpdf ParserImpl.dot > ParserImpl.pdf
 
 # Getting started
 
+## Installing p4c from a Debian repository
+p4c has package support for several Ubuntu distributions (Ubuntu 20.04 to Ubuntu 21.04).
+It can be installed by adding the following ppa:
+```bash
+sudo add-apt-repository ppa:dreibh/ppa
+sudo apt update
+sudo apt install p4lang-p4c
+```
+
+## Installing p4c from source
 1.  Clone the repository. It includes submodules, so be sure to use
     `--recursive` to pull them in:
     ```
