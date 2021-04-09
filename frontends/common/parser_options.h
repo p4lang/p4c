@@ -21,11 +21,12 @@ limitations under the License.
 
 #include <set>
 #include <unordered_map>
+
+#include "ir/configuration.h"
+#include "ir/ir.h"  // for DebugHook definition
 #include "lib/compile_context.h"
 #include "lib/cstring.h"
 #include "lib/options.h"
-#include "ir/configuration.h"
-#include "ir/ir.h"  // for DebugHook definition
 
 // Standard include paths for .p4 header files. The values are determined by
 // `configure`.
@@ -42,22 +43,17 @@ class ParserOptions : public Util::Options {
     // annotation names that are to be ignored by the compiler
     std::set<cstring> disabledAnnotations;
 
-    // Checks if parsed options make sense with respect to each-other.
-    void validateOptions() const;
-
  protected:
     // Function that is returned by getDebugHook.
-    void dumpPass(const char* manager, unsigned seq, const char* pass, const IR::Node* node) const;
+    void dumpPass(const char* manager, unsigned seq, const char* pass,
+                  const IR::Node* node) const;
+    // Checks if parsed options make sense with respect to each-other.
+    virtual void validateOptions() const;
 
  public:
     ParserOptions();
     std::vector<const char*>* process(int argc, char* const argv[]) override;
-
-    enum class FrontendVersion {
-        P4_14,
-        P4_16
-    };
-
+    enum class FrontendVersion { P4_14, P4_16 };
     // Name of executable that is being run.
     cstring exe_name;
     // Which language to compile
@@ -68,70 +64,40 @@ class ParserOptions : public Util::Options {
     cstring file = nullptr;
     // if true preprocess only
     bool doNotCompile = false;
-    // Pretty-print the program in the specified file
-    cstring prettyPrintFile = nullptr;
     // Compiler version.
     cstring compilerVersion;
     // if true skip preprocess
     bool doNotPreprocess = false;
-    // if true, skip midend passes whose names are contained in passesToExcludeMidend vector
-    bool excludeMidendPasses = false;
-    bool listMidendPasses = false;
-    // if true, skip backend passes whose names are contained in passesToExcludeBackend vector
-    bool excludeBackendPasses = false;
-    // strings matched against pass names that should be excluded from Midend passes
-    std::vector<cstring> passesToExcludeMidend;
-    // strings matched against pass names that should be excluded from Backend passes
-    std::vector<cstring> passesToExcludeBackend;
-    // Write a P4Runtime control plane API description to the specified file.
-    cstring p4RuntimeFile = nullptr;
-    // Write static table entries as a P4Runtime WriteRequest message to the specified file.
-    cstring p4RuntimeEntriesFile = nullptr;
-
-    // Dump a JSON representation of the IR in the file
-    cstring dumpJsonFile = nullptr;
-
-    // Dump and undump the IR tree
-    bool debugJson = false;
-
-    // if this flag is true, compile program in non-debug mode
-    bool ndebug = false;
-    // substrings matched agains pass names
+    // substrings matched against pass names
     std::vector<cstring> top4;
     // debugging dumps of programs written in this folder
     cstring dumpFolder = ".";
     // Expect that the only remaining argument is the input file.
     void setInputFile();
-
     // Returns the output of the preprocessor.
     FILE* preprocess();
     // Closes the input stream returned by preprocess.
     void closeInput(FILE* input) const;
-
     // True if we are compiling a P4 v1.0 or v1.1 program
     bool isv1() const;
     // Get a debug hook function suitable for insertion
     // in the pass managers that are executed.
     DebugHook getDebugHook() const;
-
-    bool isAnnotationDisabled(const IR::Annotation *) const;
-
-    virtual bool enable_intrinsic_metadata_fix();
-
-    // if true unroll all parser's loop inside midend
-    bool loopsUnrolling = false;
+    // Check whether this particular annotation was disabled
+    bool isAnnotationDisabled(const IR::Annotation *a) const;
 };
 
-
-/// A compilation context which exposes compiler options and a compiler configuration.
+/// A compilation context which exposes compiler options and a compiler
+/// configuration.
 class P4CContext : public BaseCompileContext {
  public:
     /// @return the current compilation context, which must inherit from
     /// P4CContext.
     static P4CContext& get();
 
-    /// @return the compiler configuration for the current compilation context. If there is no
-    /// current compilation context, the default configuration is returned.
+    /// @return the compiler configuration for the current compilation context.
+    /// If there is no current compilation context, the default configuration is
+    /// returned.
     static const P4CConfiguration& getConfig();
 
     P4CContext() {}
@@ -151,8 +117,8 @@ class P4CContext : public BaseCompileContext {
 
     /// @return the action to take for the given diagnostic, falling back to the
     /// default action if it wasn't overridden via the command line or a pragma.
-    DiagnosticAction
-    getDiagnosticAction(cstring diagnostic, DiagnosticAction defaultAction) final {
+    DiagnosticAction getDiagnosticAction(cstring diagnostic,
+                                         DiagnosticAction defaultAction) final {
         return errorReporter().getDiagnosticAction(diagnostic, defaultAction);
     }
 
@@ -167,7 +133,8 @@ class P4CContext : public BaseCompileContext {
     /// doesn't affect functionality.
     virtual bool isRecognizedDiagnostic(cstring diagnostic);
 
-    /// @return the compiler configuration associated with this type of compilation context.
+    /// @return the compiler configuration associated with this type of
+    /// compilation context.
     virtual const P4CConfiguration& getConfigImpl();
 };
 
@@ -198,4 +165,4 @@ class P4CContextWithOptions final : public P4CContext {
     OptionsType optionsInstance;
 };
 
-#endif /* FRONTENDS_COMMON_PARSER_OPTIONS_H_ */
+#endif  /* FRONTENDS_COMMON_PARSER_OPTIONS_H_*/
