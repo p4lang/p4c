@@ -286,7 +286,26 @@ bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s) {
     return true;
 }
 
+const IR::Node *ReplaceMetadataHeaderName::preorder(IR::PathExpression *pe) {
+    auto declaration = refMap->getDeclaration(pe->path);
+    if (auto decl = declaration->to<IR::Parameter>()) {
+        if (auto type = decl->type->to<IR::Type_Name>()) {
+            if (type->path->name == info->header_type){
+                    return new IR::PathExpression(IR::ID("h"));
+                } else if (type->path->name == info->local_metadata_type){
+                    return new IR::PathExpression(IR::ID("m"));
+                }
+            }
+        }
+    return pe;
+}
+
 const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Member *m) {
+    /* PathExpressions are handled in a separate preorder function
+      Hence do not process them here */
+    if (!(m->expr->is<IR::Member>()))
+        prune();
+
     if (auto p = m->expr->to<IR::PathExpression>()) {
         auto declaration = refMap->getDeclaration(p->path);
         if (auto decl = declaration->to<IR::Parameter>()) {

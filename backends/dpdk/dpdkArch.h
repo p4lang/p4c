@@ -132,6 +132,7 @@ class ReplaceMetadataHeaderName : public Transform {
         : refMap(refMap), info(info) {}
     const IR::Node *preorder(IR::Member *m) override;
     const IR::Node *preorder(IR::Parameter *p) override;
+    const IR::Node *preorder(IR::PathExpression *pe) override;
 };
 
 // Previously, we have collected the information about how the single metadata
