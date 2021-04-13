@@ -2,12 +2,17 @@
 
 . ./packaging.conf
 
+# ------ Path variables ----------------------------------------------------
+FILE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+P4C_DIR="${FILE_DIR}/../.."
+DEBIAN_DIR="${P4C_DIR}/debian"
+
 # ------ Revert debian/changelog and debian/control -------------------------
 # git checkout debian/changelog CMakeLists.txt
 
 
 # ------ Current GIT version ------------------------------------------------
-CHANGELOG_HEADER="`head -n1 debian/changelog`"
+CHANGELOG_HEADER="`head -n1 ${DEBIAN_DIR}/changelog`"
 
 # The package name, e.g. MyApplication
 PACKAGE=`echo $CHANGELOG_HEADER | sed -e "s/(.*//" -e "s/ //g"`
@@ -25,10 +30,11 @@ UPSTREAM_VERSION=`echo $DEBIAN_VERSION  | sed -e "s/-[0-9]*$//"`
 PLAIN_VERSION=`echo $UPSTREAM_VERSION   | sed -e "s/\([0-9\.]*\)[-+~].*$/\1/"`
 
 GIT_VERSION="g`env LANG=en date -u +"%Y%m%d%H%M"`"
-GIT_ID="${GIT_VERSION}~`cat .git/ORIG_HEAD | cut -b 1-6`"   # Name may not be too long! Just take 6 digits ...
+# Name may not be too long! Just take 6 digits ...
+GIT_ID="${GIT_VERSION}~`cat ${P4C_DIR}/.git/ORIG_HEAD | cut -b 1-6`"
 
 # ------ Change CMakeLists.txt ----------------------------------------------
-sed "s#set (P4C_SEM_VERSION_STRING \".*\")#set (P4C_SEM_VERSION_STRING \"${PACKAGE_VERSION}+$GIT_ID\")#g" <CMakeLists.txt >CMakeLists.txt.new
+sed "s#set (P4C_SEM_VERSION_STRING \".*\")#set (P4C_SEM_VERSION_STRING \"${PACKAGE_VERSION}+$GIT_ID\")#g" <${P4C_DIR}/CMakeLists.txt >CMakeLists.txt.new
 
 # ------ Create debian/changelog --------------------------------------------
 (
@@ -37,9 +43,9 @@ sed "s#set (P4C_SEM_VERSION_STRING \".*\")#set (P4C_SEM_VERSION_STRING \"${PACKA
    echo "  * Self-made package"
    echo ""
    echo " -- $MAINTAINER  `env LANG=en date +"%a, %02d %b %Y %H:%M:%S %z"`"
-) | tee debian/changelog.new
+) | tee ${DEBIAN_DIR}/changelog.new
 
 
 # ------ Apply changes ------------------------------------------------------
-mv CMakeLists.txt.new CMakeLists.txt
-mv debian/changelog.new debian/changelog
+mv CMakeLists.txt.new  ${P4C_DIR}/CMakeLists.txt
+mv ${DEBIAN_DIR}/changelog.new  ${DEBIAN_DIR}/changelog
