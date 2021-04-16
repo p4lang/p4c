@@ -41,9 +41,13 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
             i = new IR::DpdkLAndStatement(left, r->left, r->right);
         } else if (right->is<IR::Leq>()) {
             i = new IR::DpdkLeqStatement(left, r->left, r->right);
+        // FIXME: do we need bit_or and bit_and instructions?
+        } else if (right->is<IR::BOr>()) {
+            i = new IR::DpdkOrStatement(left, r->left, r->right);
+        } else if (right->is<IR::BAnd>()) {
+            i = new IR::DpdkAndStatement(left, r->left, r->right);
         } else {
-            std::cerr << right->node_type_name() << std::endl;
-            BUG("not implemented.");
+            BUG("%1% not implemented.", right);
         }
     } else if (auto m = right->to<IR::MethodCallExpression>()) {
         auto mi = P4::MethodInstance::resolve(m, refmap, typemap);
@@ -215,6 +219,15 @@ bool BranchingInstructionGeneration::generate(const IR::Expression *expr,
         } else {
             instructions.push_back(new IR::DpdkJmpGreaterStatement(
                         true_label, grt->left, grt->right)); }
+        return is_and;
+    } else if (auto leq = expr->to<IR::Leq>()) {
+        if (is_and) {
+            instructions.push_back(new IR::DpdkJmpGreaterStatement(
+                        false_label, leq->left, leq->right));
+        } else {
+            instructions.push_back(new IR::DpdkJmpLessOrEqualStatement(
+                        true_label, leq->left, leq->right));
+        }
         return is_and;
     } else if (auto mce = expr->to<IR::MethodCallExpression>()) {
         auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);

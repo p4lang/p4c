@@ -401,9 +401,14 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
             a->right = new IR::Shr(left_tmp, right_tmp);
         } else if (right->is<IR::Equ>()) {
             a->right = new IR::Equ(left_tmp, right_tmp);
+        } else if (right->is<IR::BOr>()) {
+            a->right = new IR::BOr(left_tmp, right_tmp);
+        } else if (right->is<IR::BAnd>()) {
+            a->right = new IR::BAnd(left_tmp, right_tmp);
+        } else if (right->is<IR::BXor>()) {
+            a->right = new IR::BXor(left_tmp, right_tmp);
         } else {
-            std::cerr << right->node_type_name() << std::endl;
-            BUG("not implemented.");
+            BUG("%1%not implemented.", right);
         }
         code_block->push_back(a);
         return new IR::BlockStatement(*code_block);
@@ -652,6 +657,10 @@ bool LogicalExpressionUnroll::preorder(const IR::Operation_Binary *bin) {
             bin_expr = new IR::Grt(left_root, right_root);
         } else if (bin->is<IR::Lss>()) {
             bin_expr = new IR::Lss(left_root, right_root);
+        } else if (bin->is<IR::Leq>()) {
+            bin_expr = new IR::Leq(left_root, right_root);
+        } else if (bin->is<IR::Geq>()) {
+            bin_expr = new IR::Geq(left_root, right_root);
         } else {
             BUG("%1%: not implemented", bin);
         }
@@ -777,6 +786,8 @@ ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
                 expr = new IR::LAnd(left, src2);
             } else if (right->is<IR::Leq>()) {
                 expr = new IR::Leq(left, src2);
+            } else if (right->is<IR::BOr>()) {
+                expr = new IR::BOr(left, src2);
             } else {
                 BUG("%1%: not implemented.", a);
             }

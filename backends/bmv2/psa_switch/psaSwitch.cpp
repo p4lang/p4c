@@ -474,6 +474,10 @@ void InspectPsaProgram::addTypesAndInstances(const IR::Type_StructLike* type, bo
                 LOG5("Field is a Type_Error");
                 pinfo->scalars_width += 32;
                 pinfo->scalarMetadataFields.emplace(f, newName);
+            } else if (ft->is<IR::Type_Enum>()) {
+                LOG5("Field is a Type_Enum");
+                pinfo->scalars_width += 32;
+                pinfo->scalarMetadataFields.emplace(f, newName);
             } else {
                 BUG("%1%: Unhandled type for %2%", ft, f);
             }
