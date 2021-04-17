@@ -90,7 +90,9 @@ class TypeMap final : public ProgramMap {
     const TypeVariableSubstitution* getSubstitutions() const { return &allTypeVariables; }
 
     /// Check deep structural equivalence; defined between canonical types only.
-    bool equivalent(const IR::Type* left, const IR::Type* right) const;
+    /// @param strict  If true use strict equivalence checks, irrespective
+    ///        of the strictStruct flag, else use the strictStruct flag value.
+    bool equivalent(const IR::Type* left, const IR::Type* right, bool strict = false) const;
     /// This is the same as equivalence, but it also allows some legal
     /// implicit conversions, such as a tuple type to a struct type, which
     /// is used when initializing a struct with a list expression.
