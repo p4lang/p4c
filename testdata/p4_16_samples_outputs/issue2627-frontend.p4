@@ -1,3 +1,7 @@
+struct H3<T> {
+    tuple<T> t;
+}
+
 struct S {
     bit<32> b;
 }

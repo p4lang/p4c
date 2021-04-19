@@ -1,0 +1,3 @@
+issue1834-bmv2.p4(23): [--Wwarn=unused] warning: 'a' is unused
+    action act(test_t a) { } // did not work before PR #1792 was merged
+                      ^

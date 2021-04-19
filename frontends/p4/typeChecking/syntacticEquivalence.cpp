@@ -21,7 +21,7 @@ namespace P4 {
 bool SameExpression::sameType(const IR::Type* left, const IR::Type* right) const {
     auto lt = typeMap->getType(left, true);
     auto rt = typeMap->getType(right, true);
-    return TypeMap::equivalent(lt, rt);
+    return typeMap->equivalent(lt, rt);
 }
 
 bool SameExpression::sameExpressions(const IR::Vector<IR::Expression>* left,

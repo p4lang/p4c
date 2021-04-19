@@ -18,6 +18,7 @@ limitations under the License.
 #define _TYPECHECKING_TYPEUNIFICATION_H_
 
 #include "ir/ir.h"
+#include "frontends/p4/typeMap.h"
 
 namespace P4 {
 
@@ -36,13 +37,15 @@ Constraint solving can fail, which means that the program does not type-check.
 */
 class TypeUnification final {
     TypeConstraints*  constraints;
+    const TypeMap* typeMap;
 
     bool unifyCall(const EqualityConstraint* constraint);
     bool unifyFunctions(const EqualityConstraint* constraint,
                         bool skipReturnValues = false);
     bool unifyBlocks(const EqualityConstraint* constraint);
  public:
-    explicit TypeUnification(TypeConstraints* constraints) : constraints(constraints) {}
+    TypeUnification(TypeConstraints* constraints, const P4::TypeMap* typeMap) :
+            constraints(constraints), typeMap(typeMap) {}
     /**
      * Return false if unification fails right away.
      * Generates a set of type constraints.

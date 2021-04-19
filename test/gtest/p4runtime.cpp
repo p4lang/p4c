@@ -991,7 +991,8 @@ TEST_F(P4Runtime, PSADigests) {
     )"), CompilerOptions::FrontendVersion::P4_16, "psa");
 
     ASSERT_TRUE(test);
-    EXPECT_EQ(0u, ::diagnosticCount());
+    // 2 warnings
+    EXPECT_EQ(2u, ::diagnosticCount());
     const auto &typeInfo = test->p4Info->type_info();
 
     // Verify that that the digest() instances match the ones we expect from the

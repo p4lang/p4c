@@ -114,6 +114,26 @@ const IR::Node* RemoveUnusedDeclarations::process(const IR::IDeclaration* decl) 
     return nullptr;
 }
 
+const IR::Node* RemoveUnusedDeclarations::preorder(IR::Parameter* param) {
+    // Skip all things that just declare "prototypes"
+    if (findContext<IR::Type_Parser>() && !findContext<IR::P4Parser>())
+        return param;
+    if (findContext<IR::Type_Control>() && !findContext<IR::P4Control>())
+        return param;
+    if (findContext<IR::Type_Package>())
+        return param;
+    if (findContext<IR::Type_Method>() && !findContext<IR::Function>())
+        return param;
+    return warnIfUnused(param);
+}
+
+const IR::Node* RemoveUnusedDeclarations::warnIfUnused(const IR::Node* node) {
+    if (!refMap->isUsed(getOriginal<IR::IDeclaration>()))
+        if (giveWarning(getOriginal()))
+            ::warning(ErrorType::WARN_UNUSED, "'%1%' is unused", node);
+    return node;
+}
+
 const IR::Node* RemoveUnusedDeclarations::preorder(IR::Declaration_Instance* decl) {
     // Don't delete instances; they may have consequences on the control-plane API
     if (decl->getName().name == IR::P4Program::main && getParent<IR::P4Program>())

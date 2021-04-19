@@ -1,1 +1,4 @@
+extern.p4(17): [--Wwarn=unused] warning: 'T' is unused
+extern Crc16 <T> {
+              ^
 [--Wwarn=missing] warning: Program does not contain a `main' module

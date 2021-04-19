@@ -1,0 +1,3 @@
+gauntlet_return_truncate-bmv2.p4(31): [--Wwarn=unused] warning: 'hyhe' is unused
+    action iuJze(in bit<8> hyhe) {
+                           ^^^^

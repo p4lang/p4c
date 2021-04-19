@@ -7,8 +7,7 @@ const IR::Type* ReplacementMap::convertType(const IR::Type* type) {
     auto it = replacement.find(type);
     if (it != replacement.end())
         return it->second;
-    if (type->is<IR::Type_Struct>()) {
-        auto st = type->to<IR::Type_Struct>();
+    if (auto st = type->to<IR::Type_Struct>()) {
         bool changes = false;
         IR::IndexedVector<IR::StructField> fields;
         for (auto f : st->fields) {
@@ -27,11 +26,11 @@ const IR::Type* ReplacementMap::convertType(const IR::Type* type) {
         } else {
             return type;
         }
-    } else if (type->is<IR::Type_BaseList>()) {
+    } else if (auto bl = type->to<IR::Type_BaseList>()) {
         cstring name = ng->newName("tuple");
         IR::IndexedVector<IR::StructField> fields;
         size_t index = 0;
-        for (auto t : type->to<IR::Type_BaseList>()->components) {
+        for (auto t : bl->components) {
             auto ftype = convertType(t);
             auto fname = cstring("f") + cstring(std::to_string(index));
             auto field = new IR::StructField(IR::ID(fname), ftype->getP4Type());
@@ -66,8 +65,14 @@ IR::IndexedVector<IR::Node>* ReplacementMap::getNewReplacements() {
     return retval;
 }
 
-const IR::Node* DoReplaceTuples::postorder(IR::Type_BaseList*) {
+const IR::Node* DoReplaceTuples::postorder(IR::Type_BaseList* bl) {
     auto type = getOriginal<IR::Type_BaseList>();
+    // If any of the arguments is a type variable leave the type unchanged
+    for (auto arg : type->components) {
+        auto targ = repl->typeMap->getTypeType(arg, true);
+        if (targ->is<IR::Type_Var>())
+            return bl;
+    }
     auto canon = repl->typeMap->getTypeType(type, true)->to<IR::Type_BaseList>();
     auto st = repl->getReplacement(canon)->getP4Type();
     return st;

@@ -149,10 +149,10 @@ struct S0 { bit<32> data; }
 S0 s;
 ```
  */
-class DoSpecializeGenericTypes : public PassRepeated {
+class SpecializeGenericTypes : public PassRepeated {
     TypeSpecializationMap specMap;
  public:
-    DoSpecializeGenericTypes(ReferenceMap* refMap, TypeMap* typeMap) {
+    SpecializeGenericTypes(ReferenceMap* refMap, TypeMap* typeMap) {
         passes.emplace_back(new PassRepeated({
                     new TypeChecking(refMap, typeMap),
                     new FindTypeSpecializations(&specMap),
@@ -166,10 +166,13 @@ class DoSpecializeGenericTypes : public PassRepeated {
         passes.emplace_back(new ClearTypeMap(typeMap, true));
         specMap.refMap = refMap;
         specMap.typeMap = typeMap;
-        setName("DoSpecializeGenericTypes");
+        setName("SpecializeGenericTypes");
     }
 };
 
+/// Removes all structs or stacks that are generic
+//  Note: this pass is currently not used, but some
+//  back-ends may find it useful.
 class RemoveGenericTypes : public Transform {
  public:
     const IR::Node* postorder(IR::Type_StructLike* type) override {
@@ -179,15 +182,6 @@ class RemoveGenericTypes : public Transform {
     const IR::Node* postorder(IR::Type_Stack* type) override {
         if (type->elementType->is<IR::Type_Specialized>()) return nullptr;
         return type;
-    }
-};
-
-class SpecializeGenericTypes : public PassManager {
- public:
-    SpecializeGenericTypes(ReferenceMap* refMap, TypeMap* typeMap) {
-        passes.emplace_back(new DoSpecializeGenericTypes(refMap, typeMap));
-        passes.emplace_back(new RemoveGenericTypes());
-        setName("SpecializeGenericTypes");
     }
 };
 

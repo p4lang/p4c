@@ -73,6 +73,13 @@ limitations under the License.
 namespace P4 {
 
 namespace {
+
+/* Base class for inspectors that do not really visit the program. */
+class NoVisit : public Inspector {
+    // prune visit
+    bool preorder(const IR::P4Program*) override { return false; }
+};
+
 /**
 This pass outputs the program as a P4 source file.
 */
@@ -97,14 +104,13 @@ class PrettyPrint : public Inspector {
         return false;  // prune
     }
 };
-}  // namespace
 
 /**
  * This pass is a no-op whose purpose is to mark the end of the
  * front-end, which is useful for debugging. It is implemented as an
  * empty @ref PassManager (instead of a @ref Visitor) for efficiency.
  */
-class FrontEndLast : public PassManager {
+class FrontEndLast : public NoVisit {
  public:
     FrontEndLast() { setName("FrontEndLast"); }
 };
@@ -113,10 +119,25 @@ class FrontEndLast : public PassManager {
  * This pass is a no-op whose purpose is to mark a point in the
  * front-end, used for testing.
  */
-class FrontEndDump : public PassManager {
+class FrontEndDump : public NoVisit {
  public:
     FrontEndDump() { setName("FrontEndDump"); }
 };
+
+/** Changes the value of strictStruct in the typeMap */
+class SetStrictStruct : public NoVisit {
+    TypeMap* typeMap;
+    bool strictStruct;
+ public:
+    SetStrictStruct(TypeMap* typeMap, bool strict):
+            typeMap(typeMap), strictStruct(strict) {}
+    Visitor::profile_t init_apply(const IR::Node* node) override {
+        typeMap->setStrictStruct(strictStruct);
+        return Inspector::init_apply(node);
+    }
+};
+
+}  // namespace
 
 // TODO: remove skipSideEffectOrdering flag
 const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4Program* program,
@@ -151,13 +172,17 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new CheckNamedArgs(),
         // Type checking and type inference.  Also inserts
         // explicit casts where implicit casts exist.
+        new SetStrictStruct(&typeMap, true),  // Next pass uses strict struct checking
         new TypeInference(&refMap, &typeMap, false),  // insert casts
+        new SetStrictStruct(&typeMap, false),
         new ValidateMatchAnnotations(&typeMap),
         new BindTypeVariables(&refMap, &typeMap),
         new SpecializeGenericTypes(&refMap, &typeMap),
         new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
         new ResolveReferences(&refMap),
+        new SetStrictStruct(&typeMap, true),  // Next pass uses strict struct checking
         new TypeInference(&refMap, &typeMap, false),  // more casts may be needed
+        new SetStrictStruct(&typeMap, false),
         new RemoveParserIfs(&refMap, &typeMap),
         new StructInitializers(&refMap, &typeMap),
         new SpecializeGenericFunctions(&refMap, &typeMap),

@@ -1,0 +1,3 @@
+gauntlet_exit_combination_18-bmv2.p4(28): [--Wwarn=unused] warning: 'dummy' is unused
+    action simple_action(inout bit<48> dummy) {
+                                       ^^^^^

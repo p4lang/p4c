@@ -1,0 +1,3 @@
+gauntlet_indirect_hdr_assign_1-bmv2.p4(27): [--Wwarn=unused] warning: 'val' is unused
+    action do_action(inout Headers val) {
+                                   ^^^
