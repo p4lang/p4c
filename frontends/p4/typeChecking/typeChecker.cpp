@@ -2045,7 +2045,8 @@ const IR::Node* TypeInference::postorder(IR::ArrayIndex* expression) {
     }
     // if index is negative here it means it's not a constant
 
-    if (!rtype->is<IR::Type_Bits>() && (index < 0)) {
+    if ((index < 0) && !rtype->is<IR::Type_Bits>()
+        && !rtype->is<IR::Type_SerEnum>()) {
         typeError("Array index %1% must be an integer, but it has type %2%",
                   expression->right, rtype->toString());
         return expression;
