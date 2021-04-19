@@ -307,6 +307,9 @@ class V1Model : public ::Model::Model {
     const DirectCounter_Model directCounter;
 
     static V1Model instance;
+    // The following match constants appearing in v1model.p4
+    static const char* versionInitial;  // 20180101
+    static const char* versionCurrent;  // 20200408
 };
 
 /// Stores the version of the global constant __v1model_version used
