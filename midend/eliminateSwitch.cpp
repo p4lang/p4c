@@ -54,7 +54,17 @@ const IR::Node* DoEliminateSwitch::postorder(IR::SwitchStatement* statement) {
     IR::Vector<IR::SwitchCase> cases;
     IR::Vector<IR::Entry> entries;
     properties.push_back(new IR::Property(src, "key", new IR::Key({tableKeyEl}), false));
-    IR::ID defaultAction = P4CoreLibrary::instance.noAction.Id();
+
+    cstring actionName = refMap->newName(prefix + "_default");
+    auto defAct = new IR::P4Action(
+        src, actionName, hidden, new IR::ParameterList(),
+        new IR::BlockStatement());
+    auto actionCall = new IR::MethodCallExpression(
+        src, new IR::PathExpression(actionName));
+    toInsert.push_back(defAct);
+    auto ale = new IR::ActionListElement(src, actionCall);
+    actionsList.push_back(ale);
+    IR::ID defaultAction = actionName;
 
     // Create actions
     IR::Vector<IR::Expression> pendingLabels;  // switch labels with no statement

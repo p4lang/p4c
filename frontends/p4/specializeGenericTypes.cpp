@@ -29,7 +29,7 @@ bool TypeSpecializationMap::same(
     for (size_t i = 0; i < spec->argumentTypes->size(); i++) {
         auto argl = spec->argumentTypes->at(i);
         auto argr = typeMap->getType(right->arguments->at(i), true);
-        if (!typeMap->equivalent(argl, argr))
+        if (!typeMap->equivalent(argl, argr, true))
             return false;
     }
     return true;
@@ -114,6 +114,8 @@ void FindTypeSpecializations::postorder(const IR::Type_Specialized* type) {
         insert = findContext<IR::Declaration_Constant>();
     if (!insert)
         insert = findContext<IR::Declaration_Variable>();
+    if (!insert)
+        insert = findContext<IR::Declaration_Instance>();
     CHECK_NULL(insert);
     specMap->add(type, st, insert);
 }

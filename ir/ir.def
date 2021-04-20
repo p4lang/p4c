@@ -469,8 +469,16 @@ class MethodCallStatement : Statement {
     toString{ return methodCall->toString(); }
 }
 
-class SwitchCase {
+/// A label in a switch on a union must declare a new "variable",
+/// which will store the value of the union field.
+/// switch (u) { case b as ub:  {} }.  "ub" is the alias.
+class Declaration_Alias : Declaration {
+#nodbprint
+}
+
+class SwitchCase : ISimpleNamespace {
     Expression       label;
+    optional NullOK Declaration_Alias alias;
     NullOK Statement statement;  // If missing then it's a fall-through
 #nodbprint
     validate{
@@ -478,6 +486,13 @@ class SwitchCase {
                   "%1%: Expected a block statement",
                   statement);
     }
+    Util::Enumerator<IDeclaration> *getDeclarations() const override {
+        if (alias) return new Util::SingletonEnumerator<const IR::IDeclaration*>(alias);
+        return new Util::EmptyEnumerator<const IR::IDeclaration*>();
+    }
+    IDeclaration getDeclByName(cstring name) const override {
+        if (alias && alias->name == name) return alias;
+        return nullptr; }
 }
 
 // The type system will enforce the fact that

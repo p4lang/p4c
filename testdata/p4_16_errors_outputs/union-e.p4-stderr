@@ -1,0 +1,36 @@
+union-e.p4(16): [--Werror=type-error] error: Field 'u' of 'struct G' cannot have type 'union U'
+    U u;
+      ^
+union-e.p4(5)
+union U {
+      ^
+union-e.p4(23): [--Werror=type-error] error: u.x: union fields can only be assigned to, or they can be read in switch labels
+        bit<32> z = u.x; // not within a switch
+                    ^^^
+union-e.p4(24): [--Werror=type-error] error: u.x: union fields can only be assigned to, or they can be read in switch labels
+        u.x.b = 0; // not within a switch
+        ^^^
+union-e.p4(25): [--Werror=type-error] error: u.x: union fields can only be assigned to, or they can be read in switch labels
+        U u1 = u.x;
+               ^^^
+union-e.p4(27): [--Werror=type-error] error: Field G is not a member of 'union U'
+            u.G: { } // no such field in union
+              ^
+union-e.p4(5)
+union U {
+      ^
+union-e.p4(34): [--Werror=type-error] error: u.s: union fields can only be assigned to, or they can be read in switch labels
+                    u1.x as x: { u.s.b = (bit<8>)u.y + (bit<8>)x; } // u.y is not guarded
+                                 ^^^
+union-e.p4(34): [--Werror=type-error] error: u.y: union fields can only be assigned to, or they can be read in switch labels
+                    u1.x as x: { u.s.b = (bit<8>)u.y + (bit<8>)x; } // u.y is not guarded
+                                                 ^^^
+union-e.p4(30): [--Werror=type-error] error: SwitchCase: switch label on a union must select a union field
+            u1.x: { } // incompatible label
+            ^^^^
+union-e.p4(31): [--Werror=type-error] error: SwitchCase: switch label on a union must select a union field
+            3: { } // not a union field
+            ^
+union-e.p4(40): [--Werror=type-error] error: u.y: must be a compile-time constant
+            u.y: { } // wrong label type
+            ^^^

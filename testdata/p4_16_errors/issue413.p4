@@ -40,7 +40,7 @@ parser parserI(packet_in pkt,
         // Should it be allowed in P4_16 language?
         foo2((bit<16>) c1d, b1a);
         // This line also causes a similar compiler crash.
-        //foo2((bit<16>) meta.a, b1b);
+        foo2((bit<16>) meta.a, b1b);
         pkt.extract(hdr.ethernet);
         transition accept;
     }

@@ -151,7 +151,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new CheckNamedArgs(),
         // Type checking and type inference.  Also inserts
         // explicit casts where implicit casts exist.
-        new TypeInference(&refMap, &typeMap, false),  // insert casts
+        new TypeInference(&refMap, &typeMap, false, true),  // insert casts, strict struct checks
         new ValidateMatchAnnotations(&typeMap),
         new BindTypeVariables(&refMap, &typeMap),
         new SpecializeGenericTypes(&refMap, &typeMap),

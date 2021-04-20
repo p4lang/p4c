@@ -85,7 +85,7 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, DeclarationLookup* 
             } else {
                 BUG("unexpected expression %1% resolving method instance", mem->expr); }
             if (type->is<IR::Type_SpecializedCanonical>())
-                type = type->to<IR::Type_SpecializedCanonical>()->substituted->to<IR::Type>();
+                type = type->to<IR::Type_SpecializedCanonical>()->substituted;
             BUG_CHECK(type != nullptr, "Could not resolve type for %1%", decl);
             if (type->is<IR::IApply>() &&
                 mem->member == IR::IApply::applyMethodName) {

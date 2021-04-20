@@ -2,6 +2,8 @@
 
 control c(inout bit<32> b) {
     bit<32> switch_0_key;
+    @hidden action switch_0_default() {
+    }
     @hidden action switch_0_case() {
     }
     @hidden action switch_0_case_0() {
@@ -13,6 +15,7 @@ control c(inout bit<32> b) {
             switch_0_key: exact;
         }
         actions = {
+            switch_0_default();
             switch_0_case();
             switch_0_case_0();
             switch_0_case_1();

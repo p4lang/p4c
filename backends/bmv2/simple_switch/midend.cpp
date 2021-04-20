@@ -22,6 +22,7 @@ limitations under the License.
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/simplifyParsers.h"
+#include "frontends/p4/simplifySwitch.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
@@ -36,6 +37,7 @@ limitations under the License.
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
 #include "midend/eliminateSwitch.h"
+#include "midend/eliminateUnion.h"
 #include "midend/flattenHeaders.h"
 #include "midend/flattenInterfaceStructs.h"
 #include "midend/replaceSelectRange.h"
@@ -73,6 +75,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options, std::ostream* o
         addPasses({
             options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
             new P4::CheckTableSize(),
+            new P4::EliminateUnion(&refMap, &typeMap),
             new P4::RemoveMiss(&refMap, &typeMap),
             new P4::EliminateNewtype(&refMap, &typeMap),
             new P4::EliminateSerEnums(&refMap, &typeMap),
@@ -106,6 +109,7 @@ SimpleSwitchMidEnd::SimpleSwitchMidEnd(CompilerOptions& options, std::ostream* o
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::LocalCopyPropagation(&refMap, &typeMap),
             new P4::ConstantFolding(&refMap, &typeMap),
+            new P4::SimplifySwitch(&refMap, &typeMap),
             new P4::StrengthReduction(&refMap, &typeMap),
             new P4::SimplifyKey(&refMap, &typeMap,
                                 new P4::OrPolicy(

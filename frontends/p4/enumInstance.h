@@ -36,7 +36,7 @@ class EnumInstance : public InstanceBase {
     /// referring to an enum
     static EnumInstance* resolve(const IR::Expression* expression, const P4::TypeMap* typeMap);
     bool equals(const EnumInstance* other) const {
-        return TypeMap::equivalent(type, other->type) &&
+        return TypeMap::equivalent(type, other->type, true) &&
                 name.name == other->name.name;
     }
 };

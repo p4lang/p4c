@@ -200,6 +200,39 @@ class EmptyEnumerator : public Enumerator<T> {
         throw std::logic_error("You cannot call 'getCurrent' on an EmptyEnumerator"); }
 };
 
+template <typename T>
+class SingletonEnumerator : public Enumerator<T> {
+    T value;
+
+ public:
+    explicit SingletonEnumerator(T value): value(value) {}
+    cstring toString() const { return "SingletonEnumerator"; }
+    bool moveNext() {
+        switch (this->state) {
+            case EnumeratorState::NotStarted:
+                this->state = EnumeratorState::PastEnd;
+                return true;
+            case EnumeratorState::PastEnd:
+                return false;
+            case EnumeratorState::Valid:
+                break;
+        }
+        throw std::runtime_error("Unexpected enumerator state");
+    }
+
+    T getCurrent() const {
+        switch (this->state) {
+            case EnumeratorState::NotStarted:
+                return value;
+            case EnumeratorState::Valid:
+                break;
+            case EnumeratorState::PastEnd:
+                throw std::logic_error("You cannot call 'getCurrent' past the collection end");
+        }
+        throw std::runtime_error("Unexpected enumerator state");
+    }
+};
+
 /////////////////////////////////////////////////////////////////////
 
 /* filters according to a predicate */

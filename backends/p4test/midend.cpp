@@ -21,6 +21,7 @@ limitations under the License.
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/simplifyParsers.h"
+#include "frontends/p4/simplifySwitch.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/typeMap.h"
@@ -35,11 +36,12 @@ limitations under the License.
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateSerEnums.h"
 #include "midend/eliminateSwitch.h"
+#include "midend/eliminateUnion.h"
+#include "midend/expandEmit.h"
+#include "midend/expandLookahead.h"
 #include "midend/flattenHeaders.h"
 #include "midend/flattenInterfaceStructs.h"
 #include "midend/replaceSelectRange.h"
-#include "midend/expandEmit.h"
-#include "midend/expandLookahead.h"
 #include "midend/local_copyprop.h"
 #include "midend/midEndLast.h"
 #include "midend/nestedStructs.h"
@@ -81,6 +83,7 @@ MidEnd::MidEnd(CompilerOptions& options, std::ostream* outStream) {
     addPasses({
         options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap) : nullptr,
         new P4::RemoveMiss(&refMap, &typeMap),
+        new P4::EliminateUnion(&refMap, &typeMap),
         new P4::EliminateNewtype(&refMap, &typeMap),
         new P4::EliminateSerEnums(&refMap, &typeMap),
         new P4::RemoveActionParameters(&refMap, &typeMap),
@@ -111,6 +114,7 @@ MidEnd::MidEnd(CompilerOptions& options, std::ostream* outStream) {
         new P4::LocalCopyPropagation(&refMap, &typeMap),
         new P4::ConstantFolding(&refMap, &typeMap),
         new P4::StrengthReduction(&refMap, &typeMap),
+        new P4::SimplifySwitch(&refMap, &typeMap),
         new P4::MoveDeclarations(),  // more may have been introduced
         new P4::SimplifyControlFlow(&refMap, &typeMap),
         new P4::CompileTimeOperations(),

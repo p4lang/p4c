@@ -445,16 +445,35 @@ class FindUninitialized : public Inspector {
 
         auto points = currentDefinitions->getPoints(read);
         if (reportUninitialized && !lhs && points->containsBeforeStart()) {
-            // Do not report uninitialized values on the LHS.
-            // This could happen if we are writing to an array element
-            // with an unknown index.
-            auto type = typeMap->getType(expression, true);
-            cstring message;
-            if (type->is<IR::Type_Base>())
-                message = "%1% may be uninitialized";
-            else
-                message = "%1% may not be completely initialized";
-            ::warning(ErrorType::WARN_UNINITIALIZED_USE, message, expression);
+            bool skipWarning = false;
+            // Additional handling for unions
+            // (1) Any direct read of a field like u.f, where u is a union
+            // is safe due to the type-checking rules.
+            if (auto mem = expression->to<IR::Member>()) {
+                auto type = typeMap->getType(mem->expr);
+                if (type->is<IR::Type_Union>())
+                    skipWarning = true;
+            }
+
+            // (2) switch (u) for u a union-value expression is safe.
+            if (getParent<IR::SwitchStatement>()) {
+                auto type = typeMap->getType(getOriginal());
+                if (type->is<IR::Type_Union>())
+                    skipWarning = true;
+            }
+
+            if (!skipWarning) {
+                // Do not report uninitialized values on the LHS.
+                // This could happen if we are writing to an array element
+                // with an unknown index.
+                auto type = typeMap->getType(expression, true);
+                cstring message;
+                if (type->is<IR::Type_Base>())
+                    message = "%1% may be uninitialized";
+                else
+                    message = "%1% may not be completely initialized";
+                ::warning(ErrorType::WARN_UNINITIALIZED_USE, message, expression);
+            }
         }
 
         hasUses->add(points);

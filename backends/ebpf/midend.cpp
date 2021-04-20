@@ -21,6 +21,7 @@ limitations under the License.
 #include "frontends/p4/moveDeclarations.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/simplifyParsers.h"
+#include "frontends/p4/simplifySwitch.h"
 #include "frontends/p4/strengthReduction.h"
 #include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -32,7 +33,9 @@ limitations under the License.
 #include "midend/copyStructures.h"
 #include "midend/convertEnums.h"
 #include "midend/eliminateNewtype.h"
+#include "midend/eliminateSwitch.h"
 #include "midend/eliminateTuples.h"
+#include "midend/eliminateUnion.h"
 #include "midend/local_copyprop.h"
 #include "midend/midEndLast.h"
 #include "midend/noMatch.h"
@@ -78,6 +81,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
     PassManager midEnd = {};
     if (options.loadIRFromJson == false) {
         midEnd.addPasses({
+            new P4::EliminateUnion(&refMap, &typeMap),
             new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
             new P4::RemoveMiss(&refMap, &typeMap),
             new P4::ClearTypeMap(&typeMap),
@@ -99,12 +103,14 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
             new P4::EliminateTuples(&refMap, &typeMap),
             new P4::LocalCopyPropagation(&refMap, &typeMap),
             new P4::SimplifySelectList(&refMap, &typeMap),
+            new P4::SimplifySwitch(&refMap, &typeMap),
             new P4::MoveDeclarations(),  // more may have been introduced
             new P4::RemoveSelectBooleans(&refMap, &typeMap),
             new P4::SingleArgumentSelect(),
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::SimplifyControlFlow(&refMap, &typeMap),
             new P4::TableHit(&refMap, &typeMap),
+            new P4::EliminateSwitch(&refMap, &typeMap),
             new P4::ValidateTableProperties({"implementation"}),
             new P4::RemoveLeftSlices(&refMap, &typeMap),
             new EBPF::Lower(&refMap, &typeMap),

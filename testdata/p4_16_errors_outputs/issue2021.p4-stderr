@@ -5,9 +5,9 @@ issue2021.p4(9): [--Werror=type-error] error: f
         f(.x);
         ^^^^^
   ---- Actual error:
-issue2021.p4(3): : Read-only value used for out/inout parameter 'a'
-  const bit<8> x = 8w1;
-                   ^^^
+issue2021.p4(9): : Read-only value used for out/inout parameter 'a'
+          f(.x);
+             ^
 issue2021.p4(4)
   extern void f(out bit<8> a);
                            ^

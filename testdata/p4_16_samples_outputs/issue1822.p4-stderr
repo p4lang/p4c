@@ -1,0 +1,3 @@
+issue1822.p4(1): [--Wwarn=unused] warning: 'X' is unused
+control C<X>();
+          ^

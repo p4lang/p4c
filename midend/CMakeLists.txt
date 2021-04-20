@@ -22,6 +22,7 @@ set (MIDEND_SRCS
   eliminateSwitch.cpp
   eliminateTuples.cpp
   eliminateTypedefs.cpp
+  eliminateUnion.cpp
   expandEmit.cpp
   expandLookahead.cpp
   fillEnumMap.cpp
@@ -63,6 +64,7 @@ set (MIDEND_HDRS
   eliminateSwitch.h
   eliminateTuples.h
   eliminateTypedefs.h
+  eliminateUnion.h
   expandEmit.h
   expandLookahead.h
   expr_uses.h

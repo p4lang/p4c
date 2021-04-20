@@ -273,6 +273,7 @@ abstract Type_StructLike : Type_Declaration, INestedNamespace, ISimpleNamespace,
         return fields.getDeclaration(name); }
     validate{ fields.check_null(); }
     dbprint;
+    size_t size() const { return fields.size(); }
 #apply
 }
 
@@ -305,6 +306,11 @@ class Type_Header : Type_StructLike {
     static const cstring isValid;
 #nodbprint
     toString{ return cstring("header ") + externalName(); }
+}
+
+class Type_Union : Type_StructLike {
+#nodbprint
+    toString{ return cstring("union ") + externalName(); }
 }
 
 class Type_Set : Type {
@@ -438,13 +444,22 @@ class Type_Stack : Type_Indexed, Type {
    extern E<T> { ... }
    Type_Specialized represents a type such
    E<bit<32>>
-   baseType is Type_Extern E, arguments is a vector containing Type_Bits(32) */
+   baseType is Type_Name E, arguments is a vector containing Type_Bits(32) */
 class Type_Specialized : Type {
     Type_Name    baseType;
     Vector<Type> arguments;
-    toString{ return baseType->toString() + "<...>"; }
     validate{ arguments->check_null(); }
     const Type* getP4Type() const override;
+    toString{
+        cstring result = baseType->toString() + "<";
+        cstring sep = "";
+        for (auto t : *arguments) {
+            result += sep + t->toString();
+            sep = ", ";
+        }
+        result += ">";
+        return result;
+    }
 }
 
 /** Canonical representation of a Type_Specialized;
@@ -455,13 +470,32 @@ class Type_SpecializedCanonical : Type {
     /// 'substituted' is baseType with all type
     /// variables substituted with the arguments.
     Type         substituted;  // always IMayBeGenericType
+    Type_Specialized original; // IR node in program that maps to this type
 #nodbprint
     validate{
         arguments->check_null();
         BUG_CHECK(baseType->is<IMayBeGenericType>(), "base type %1% is not generic", baseType);
         BUG_CHECK(substituted->is<IMayBeGenericType>(), "substituted %1% is not generic", substituted);
     }
+    visit_children {
+        Type::visit_children(v);
+        v.visit(baseType, "baseType");
+        v.visit(arguments, "arguments");
+        v.visit(substituted, "substituted");
+        // do *not* visit 'original', ever; it would lead to an infinite loop
+    }
+    // Always a Type_Specialized
     const Type* getP4Type() const override;
+    toString{
+        cstring result = baseType->toString() + "<";
+        cstring sep = "";
+        for (auto t : *arguments) {
+            result += sep + t->toString();
+            sep = ", ";
+        }
+        result += ">";
+        return result;
+    }
 }
 
 /// A declaration that consists of just an identifier, e.g., an enum member
@@ -476,16 +510,25 @@ class Type_String : Type_Base {
     toString{ return "string"; }
 }
 
-class Type_Enum : Type_Declaration, ISimpleNamespace, IAnnotated {
+interface IEnum : ISimpleNamespace {
+    virtual size_t size() const = 0;
+}
+
+/// Code common to Type_Enum and Type_SerEnum
+abstract Type_EnumBase : Type_Declaration, IEnum, IAnnotated {
     optional Annotations annotations = Annotations::empty;
-    inline IndexedVector<Declaration_ID> members;
     Annotations getAnnotations() const override { return annotations; }
+}
+
+class Type_Enum : Type_EnumBase {
+    inline IndexedVector<Declaration_ID> members;
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return members.getDeclaration(name); }
 #nodbprint
     validate{ members.check_null(); }
+    size_t size() const { return members.size(); }
 }
 
 /// A member of a serializable enum with a backing value
@@ -496,17 +539,16 @@ class SerEnumMember : Declaration, CompileTimeValue {
 }
 
 /** A serializable enumeration with a backing type */
-class Type_SerEnum : Type_Declaration, ISimpleNamespace, IAnnotated {
-    optional Annotations annotations = Annotations::empty;
+class Type_SerEnum : Type_EnumBase {
     Type type;
     inline IndexedVector<SerEnumMember> members;
-    Annotations getAnnotations() const override { return annotations; }
     Util::Enumerator<IDeclaration>* getDeclarations() const override {
         return members.getDeclarations(); }
     IDeclaration getDeclByName(cstring name) const override {
         return members.getDeclaration(name); }
 #nodbprint
     validate{ members.check_null(); }
+    size_t size() const { return members.size(); }
 }
 
 class Type_Table : Type, IApply {
@@ -558,6 +600,8 @@ class Type_Method : Type_MethodBase {
     // The name is only used to give better error messages.
     cstring name;
     toString { return name; }
+    /// Do not use the name when comparing for equivalence.
+    equiv { return Type_MethodBase::equiv(a); }
 }
 
 /// Describes an argument of a MethodCall

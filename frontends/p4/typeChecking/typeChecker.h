@@ -75,14 +75,17 @@ class TypeInference : public Transform {
     const IR::Node* initialNode;
 
  public:
-    // If readOnly=true it will assert that it behaves like
-    // an Inspector.
+    // @param readOnly If ftrue it will assert that it behaves like
+    //        an Inspector.
+    // @param strictStruct If true it will require strict structure
+    //                     equality.
     TypeInference(ReferenceMap* refMap, TypeMap* typeMap,
-                  bool readOnly = false);
+                  bool readOnly = false, bool strictStruct = false);
 
  protected:
     // If true we expect to leave the program unchanged
     bool readOnly;
+    bool strictStruct;
     const IR::Type* getType(const IR::Node* element) const;
     const IR::Type* getTypeType(const IR::Node* element) const;
     void setType(const IR::Node* element, const IR::Type* type);
@@ -204,6 +207,7 @@ class TypeInference : public Transform {
     // check invariants for entire list before checking the entries
     const IR::Node* preorder(IR::EntriesList* el) override;
 
+    const IR::Node* postorder(IR::Declaration_Alias* decl) override;
     const IR::Node* postorder(IR::Declaration_MatchKind* decl) override;
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
     const IR::Node* postorder(IR::Declaration_Constant* constant) override;
@@ -222,6 +226,7 @@ class TypeInference : public Transform {
     const IR::Node* postorder(IR::Type_Enum* type) override;
     const IR::Node* postorder(IR::Type_SerEnum* type) override;
     const IR::Node* postorder(IR::Type_Extern* type) override;
+    const IR::Node* postorder(IR::Type_Union* type) override;
     const IR::Node* postorder(IR::StructField* field) override;
     const IR::Node* postorder(IR::Type_Header* type) override;
     const IR::Node* postorder(IR::Type_Stack* type) override;
