@@ -18,18 +18,6 @@ struct Safe {
     Safe_Tag tag;
 }
 
-enum Either_Tag {
-    t,
-    u,
-    None
-}
-
-struct Either<T, U> {
-    T          t;
-    U          u;
-    Either_Tag tag;
-}
-
 enum Either_0_Tag {
     t,
     u,

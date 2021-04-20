@@ -33,6 +33,7 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout
     state start {
         bit<8> b1b;
         foo2((bit<16>)c1d, b1a);
+        foo2((bit<16>)meta.a, b1b);
         pkt.extract(hdr.ethernet);
         transition accept;
     }

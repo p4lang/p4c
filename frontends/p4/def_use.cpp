@@ -134,6 +134,11 @@ void StructLocation::addFieldToLocationSet(cstring field, LocationSet* result) c
     result->add(f);
 }
 
+void TupleLocation::removeHeadersFromLocationSet(LocationSet* result) const {
+    for (auto f : elements)
+        f->removeHeadersFromLocationSet(result);
+}
+
 void StructLocation::removeHeadersFromLocationSet(LocationSet* result) const {
     if (!type->is<IR::Type_Struct>()) return;
     for (auto f : fieldLocations)
@@ -149,7 +154,7 @@ void ArrayLocation::addLastIndexFieldToLocationSet(LocationSet* result) const {
     result->add(getLastIndexField());
 }
 
-void ArrayLocation::addElementToLocationSet(unsigned index, LocationSet* result) const {
+void IndexedLocation::addElementToLocationSet(unsigned index, LocationSet* result) const {
     BUG_CHECK(index < elements.size(), "%1%: out of bounds index", index);
     result->add(elements.at(index));
 }
@@ -219,7 +224,7 @@ const LocationSet* LocationSet::getIndex(unsigned index) const {
     auto result = new LocationSet();
     for (auto l : locations) {
         auto array = l->to<IndexedLocation>();
-        array->addElement(index, result);
+        array->addElementToLocationSet(index, result);
     }
     return result;
 }

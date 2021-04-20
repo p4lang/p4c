@@ -10,11 +10,6 @@ union Safe {
     S       f;
 }
 
-union Either<T, U> {
-    T t;
-    U u;
-}
-
 union Either_0 {
     bit<32> t;
     bit<16> u;

@@ -164,7 +164,8 @@ const IR::Node* DoEliminateUnion::postorder(IR::AssignmentStatement* statement) 
     auto assign = new IR::AssignmentStatement(
         statement->srcInfo, new IR::Member(
             mem->srcInfo, mem->expr, tagField->second),
-        new IR::Member(new IR::TypeNameExpression(enumName->second), mem->member));
+        new IR::Member(statement->right->srcInfo,
+                       new IR::TypeNameExpression(enumName->second), mem->member));
     IR::IndexedVector<IR::StatOrDecl> body;
     body.push_back(statement);
     body.push_back(assign);

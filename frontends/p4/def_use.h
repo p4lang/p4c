@@ -112,14 +112,14 @@ class StructLocation : public WithFieldsLocation {
                   "%1%: unexpected type", type);
     }
 
- protected:
+    bool isHeader() const { return type->is<IR::Type_Header>(); }
+    bool isUnion() const { return type->is<IR::Type_Union>(); }
+    bool isHeaderUnion() const { return type->is<IR::Type_HeaderUnion>(); }
+    bool isStruct() const { return type->is<IR::Type_Struct>(); }
     virtual void addFieldToLocationSet(cstring field, LocationSet* addTo) const;
     void addValidBitsToLocationSet(LocationSet* result) const override;
     void removeHeadersFromLocationSet(LocationSet* result) const override;
     void addLastIndexFieldToLocationSet(LocationSet* result) const override;
-    bool isHeader() const { return type->is<IR::Type_Header>(); }
-    bool isHeaderUnion() const { return type->is<IR::Type_HeaderUnion>(); }
-    bool isStruct() const { return type->is<IR::Type_Struct>(); }
 };
 
 /// Interface for locations that support an index operation
@@ -137,7 +137,7 @@ class IndexedLocation : public StorageLocation {
         BUG_CHECK(it != nullptr, "%1%: unexpected type", type);
         elements.resize(it->getSize());
     }
-    void addElement(unsigned index, LocationSet* result) const;
+    void addElementToLocationSet(unsigned index, LocationSet* result) const;
     std::vector<const StorageLocation*>::const_iterator begin() const
     { return elements.cbegin(); }
     std::vector<const StorageLocation*>::const_iterator end() const
@@ -149,9 +149,9 @@ class TupleLocation : public IndexedLocation {
  public:
     TupleLocation(const IR::Type* type, cstring name) : IndexedLocation(type, name) {}
     size_t getSize() const { return elements.size(); }
-    void addValidBits(LocationSet*) const override {}
-    void addLastIndexField(LocationSet*) const override {}
-    void removeHeaders(LocationSet* result) const override;
+    void addValidBitsToLocationSet(LocationSet*) const override {}
+    void addLastIndexFieldToLocationSet(LocationSet*) const override {}
+    void removeHeadersFromLocationSet(LocationSet* result) const override;
 };
 
 class ArrayLocation : public IndexedLocation {
@@ -167,7 +167,6 @@ class ArrayLocation : public IndexedLocation {
         for (unsigned i = 0; i < elements.size(); i++)
             out << *elements.at(i) << " ";
     }
-    void addElementToLocationSet(unsigned index, LocationSet* result) const;
     void addValidBitsToLocationSet(LocationSet* result) const override;
     void removeHeadersFromLocationSet(LocationSet*) const override {}  // no results added
     void addLastIndexFieldToLocationSet(LocationSet* result) const override;

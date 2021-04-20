@@ -12,25 +12,31 @@ union U1 {
     bit<32> x;
 }
 
+struct G {
+    U u;
+}
+
 control c() {
     apply {
         U u;
         u.x = 2;
         bit<32> z = u.x;
         u.x.b = 0;
-        U u1 = U.x;
+        U u1 = u.x;
         switch (u) {
-            U.y: {
+            u.G: {
+            }
+            u.y as y: {
                 u.x = 0;
             }
-            U1.x: {
+            u1.x: {
             }
             3: {
             }
-            U.s: {
+            u.s: {
                 switch (u1) {
-                    U.x: {
-                        u.s.b = (bit<8>)u.y + (bit<8>)u1.x;
+                    u1.x as x: {
+                        u.s.b = (bit<8>)u.y + (bit<8>)x;
                     }
                 }
                 ;
@@ -38,7 +44,13 @@ control c() {
             }
         }
         switch (z) {
-            U.y: {
+            u.y: {
+            }
+        }
+        G g;
+        switch (g.u) {
+            g.u.x: 
+            g.u.y: {
             }
         }
     }

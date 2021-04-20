@@ -1,8 +1,3 @@
-struct S<T, N> {
-    T       field;
-    bit<32> otherField;
-}
-
 struct S_0 {
     bit<32> field;
     bit<32> otherField;

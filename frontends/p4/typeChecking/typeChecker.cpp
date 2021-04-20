@@ -709,7 +709,7 @@ bool TypeInference::canCastBetween(const IR::Type* dest, const IR::Type* src) co
         } else if (dest->is<IR::Type_Boolean>()) {
             return f->size == 1 && !f->isSigned;
         } else if (auto de = dest->to<IR::Type_SerEnum>()) {
-            return TypeMap::equivalent(src, getTypeType(de->type));
+            return TypeMap::equivalent(src, getTypeType(de->type), true);
         } else if (dest->is<IR::Type_InfInt>()) {
             return true;
         }
@@ -2872,7 +2872,8 @@ const IR::Node* TypeInference::postorder(IR::Member* expression) {
                     context->child_index == 0;
             bool inLabel = context->node->is<IR::SwitchCase>();
             if (!assignedTo && !inLabel) {
-                typeError("%1%: union fields can only be assigned to or read in switch labels",
+                typeError("%1%: union fields can only be assigned to, "
+                          "or they can be read in switch labels",
                           expression);
                 return expression;
             }
@@ -3695,11 +3696,6 @@ const IR::Node* TypeInference::postorder(IR::SwitchStatement* stat) {
             for (auto &c : stat->cases) {
                 if (c->label->is<IR::DefaultExpression>())
                     continue;
-                if (c->alias == nullptr) {
-                    typeError("%1%: switch label on a union must specify an identifier alias",
-                              c->label);
-                    continue;
-                }
                 auto mem = c->label->to<IR::Member>();
                 if (mem == nullptr) {
                     typeError("%1%: switch label on a union must select a union field", c);

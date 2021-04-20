@@ -1,6 +1,4 @@
-safeunion1.p4(7): [--Wwarn=mismatch] warning: Safe_Tag.b: constant expression in switch
-union Safe {
-      ^^^^
-safeunion1.p4(13): [--Wwarn=mismatch] warning: Either_0_Tag.None: constant expression in switch
-union Either<T, U> {
-      ^^^^^^
+[--Wwarn=mismatch] warning: Safe_Tag.b: constant expression in switch
+safeunion1.p4(38): [--Wwarn=mismatch] warning: Either_0_Tag.None: constant expression in switch
+        switch (e) {
+                ^
