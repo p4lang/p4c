@@ -863,8 +863,10 @@ DoConstantFolding::setContains(const IR::Expression* keySet, const IR::Expressio
 
     if (select->is<IR::BoolLiteral>()) {
         auto key = getConstant(keySet);
-        if (key == nullptr)
+        if (key == nullptr) {
             ::error(ErrorType::ERR_TYPE_ERROR, "%1%: expression must evaluate to a constant", key);
+            return Result::No;
+        }
         BUG_CHECK(key->is<IR::BoolLiteral>(), "%1%: expected a boolean", key);
         if (select->to<IR::BoolLiteral>()->value == key->to<IR::BoolLiteral>()->value)
             return Result::Yes;
@@ -874,8 +876,10 @@ DoConstantFolding::setContains(const IR::Expression* keySet, const IR::Expressio
     if (select->is<IR::Member>()) {
         // This must be an enum value
         auto key = getConstant(keySet);
-        if (key == nullptr)
+        if (key == nullptr) {
             ::error(ErrorType::ERR_TYPE_ERROR, "%1%: expression must evaluate to a constant", key);
+            return Result::No;
+        }
         auto sel = getConstant(select);
         // For Enum and SerEnum instances we can just use expression equivalence.
         // This assumes that type checking does not allow us to compare constants to SerEnums.

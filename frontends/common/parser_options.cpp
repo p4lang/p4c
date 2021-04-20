@@ -305,7 +305,8 @@ FILE* ParserOptions::preprocess() {
             cstring(" -C -undef -nostdinc -x assembler-with-cpp") + " " +
             preprocessor_options +
             (driverP4IncludePath ? " -I" + cstring(driverP4IncludePath) : "") +
-            " -I" + (isv1() ? p4_14includePath : p4includePath) + " " + file;
+            " -I" + (isv1() ? p4_14includePath : p4includePath) + " " +
+            (file != nullptr ? file : "");
 
         if (Log::verbose())
             std::cerr << "Invoking preprocessor " << std::endl
