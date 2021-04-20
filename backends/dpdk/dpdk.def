@@ -308,6 +308,13 @@ class DpdkLAndStatement: DpdkBinaryStatement {
         DpdkBinaryStatement("land", dst, src1, src2) { }
 }
 
+class DpdkLOrStatement: DpdkBinaryStatement {
+#nodbprint
+#noconstructor
+    DpdkLOrStatement(Expression dst, Expression src1, Expression src2) :
+        DpdkBinaryStatement("lor", dst, src1, src2) { }
+}
+
 class DpdkLeqStatement: DpdkBinaryStatement {
 #nodbprint
 #noconstructor

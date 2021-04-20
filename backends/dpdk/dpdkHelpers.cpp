@@ -39,13 +39,16 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
             i = new IR::DpdkEquStatement(left, r->left, r->right);
         } else if (right->is<IR::LAnd>()) {
             i = new IR::DpdkLAndStatement(left, r->left, r->right);
+        } else if (right->is<IR::LOr>()) {
+            i = new IR::DpdkLOrStatement(left, r->left, r->right);
         } else if (right->is<IR::Leq>()) {
             i = new IR::DpdkLeqStatement(left, r->left, r->right);
-        // FIXME: do we need bit_or and bit_and instructions?
         } else if (right->is<IR::BOr>()) {
             i = new IR::DpdkOrStatement(left, r->left, r->right);
         } else if (right->is<IR::BAnd>()) {
             i = new IR::DpdkAndStatement(left, r->left, r->right);
+        } else if (right->is<IR::BXor>()) {
+            i = new IR::DpdkXorStatement(left, r->left, r->right);
         } else {
             BUG("%1% not implemented.", right);
         }

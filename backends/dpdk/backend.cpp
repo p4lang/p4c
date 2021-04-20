@@ -93,7 +93,6 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     toAsm.addDebugHook(hook, true);
     program = program->apply(toAsm);
     dpdk_program = convertToDpdk->getDpdkProgram();
-    LOG3("dpdk program " << dpdk_program);
     if (!dpdk_program)
         return;
     PassManager post_code_gen = {

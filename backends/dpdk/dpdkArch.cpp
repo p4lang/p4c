@@ -130,11 +130,10 @@ const IR::Node *ConvertToDpdkArch::postorder(IR::P4Control *c) {
     auto orig = getOriginal();
     if (block_info->count(orig) != 0) {
         auto bi = block_info->at(orig);
-        LOG1("bi " << bi.pipe << " " << bi.gress << " " << bi.block);
         auto tc = rewriteControlType(c->type, bi.pipe);
         auto cont = new IR::P4Control(c->name, tc, c->constructorParams,
                                       c->controlLocals, c->body);
-        LOG1(cont);
+        LOG3(cont);
         return cont;
     }
     return c;
@@ -144,11 +143,10 @@ const IR::Node *ConvertToDpdkArch::postorder(IR::P4Parser *p) {
     auto orig = getOriginal();
     if (block_info->count(orig) != 0) {
         auto bi = block_info->at(orig);
-        LOG1("bi " << bi.pipe << " " << bi.gress << " " << bi.block);
         auto tp = rewriteParserType(p->type, bi.pipe);
         auto prsr = new IR::P4Parser(p->name, tp, p->constructorParams,
                                      p->parserLocals, p->states);
-        LOG1(prsr);
+        LOG3(prsr);
         return prsr;
     }
     return p;
@@ -391,25 +389,11 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
         for (auto d : right_unroller->decl)
             injector.collect(control, parser, d);
         prune();
-        if (right->is<IR::Add>()) {
-            a->right = new IR::Add(left_tmp, right_tmp);
-        } else if (right->is<IR::Sub>()) {
-            a->right = new IR::Sub(left_tmp, right_tmp);
-        } else if (right->is<IR::Shl>()) {
-            a->right = new IR::Shl(left_tmp, right_tmp);
-        } else if (right->is<IR::Shr>()) {
-            a->right = new IR::Shr(left_tmp, right_tmp);
-        } else if (right->is<IR::Equ>()) {
-            a->right = new IR::Equ(left_tmp, right_tmp);
-        } else if (right->is<IR::BOr>()) {
-            a->right = new IR::BOr(left_tmp, right_tmp);
-        } else if (right->is<IR::BAnd>()) {
-            a->right = new IR::BAnd(left_tmp, right_tmp);
-        } else if (right->is<IR::BXor>()) {
-            a->right = new IR::BXor(left_tmp, right_tmp);
-        } else {
-            BUG("%1%not implemented.", right);
-        }
+        IR::Operation_Binary *bin_expr;
+        bin_expr = bin->clone();
+        bin_expr->left = left_tmp;
+        bin_expr->right = right_tmp;
+        a->right = bin_expr;
         code_block->push_back(a);
         return new IR::BlockStatement(*code_block);
     } else if (isSimpleExpression(right)) {
@@ -493,34 +477,14 @@ bool ExpressionUnroll::preorder(const IR::Operation_Binary *bin) {
         right_root = bin->right;
 
     root = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
-    const IR::Expression *bin_expr;
+
     decl.push_back(new IR::Declaration_Variable(root->path->name, bin->type));
-    if (bin->is<IR::Add>()) {
-        bin_expr = new IR::Add(left_root, right_root);
-    } else if (bin->is<IR::Sub>()) {
-        bin_expr = new IR::Sub(left_root, right_root);
-    } else if (bin->is<IR::Shl>()) {
-        bin_expr = new IR::Shl(left_root, right_root);
-    } else if (bin->is<IR::Shr>()) {
-        bin_expr = new IR::Shr(left_root, right_root);
-    } else if (bin->is<IR::Equ>()) {
-        bin_expr = new IR::Equ(left_root, right_root);
-    } else if (bin->is<IR::LAnd>()) {
-        bin_expr = new IR::LAnd(left_root, right_root);
-    } else if (bin->is<IR::Leq>()) {
-        bin_expr = new IR::Leq(left_root, right_root);
-    } else if (bin->is<IR::Lss>()) {
-        bin_expr = new IR::Lss(left_root, right_root);
-    } else if (bin->is<IR::Geq>()) {
-        bin_expr = new IR::Geq(left_root, right_root);
-    } else if (bin->is<IR::Grt>()) {
-        bin_expr = new IR::Grt(left_root, right_root);
-    } else if (bin->is<IR::Neq>()) {
-        bin_expr = new IR::Neq(left_root, right_root);
-    } else {
-        std::cerr << bin->node_type_name() << std::endl;
-        BUG("not implemented");
-    }
+
+    IR::Operation_Binary *bin_expr;
+    bin_expr = bin->clone();
+    bin_expr->left = left_root;
+    bin_expr->right = right_root;
+
     stmt.push_back(new IR::AssignmentStatement(root, bin_expr));
     return false;
 }
@@ -643,45 +607,21 @@ bool LogicalExpressionUnroll::preorder(const IR::Operation_Binary *bin) {
     if (!right_root)
         right_root = bin->right;
 
-    IR::Expression *bin_expr;
     if (is_logical(bin)) {
-        if (bin->is<IR::LAnd>()) {
-            bin_expr = new IR::LAnd(left_root, right_root);
-        } else if (bin->is<IR::LOr>()) {
-            bin_expr = new IR::LOr(left_root, right_root);
-        } else if (bin->is<IR::Equ>()) {
-            bin_expr = new IR::Equ(left_root, right_root);
-        } else if (bin->is<IR::Neq>()) {
-            bin_expr = new IR::Neq(left_root, right_root);
-        } else if (bin->is<IR::Grt>()) {
-            bin_expr = new IR::Grt(left_root, right_root);
-        } else if (bin->is<IR::Lss>()) {
-            bin_expr = new IR::Lss(left_root, right_root);
-        } else if (bin->is<IR::Leq>()) {
-            bin_expr = new IR::Leq(left_root, right_root);
-        } else if (bin->is<IR::Geq>()) {
-            bin_expr = new IR::Geq(left_root, right_root);
-        } else {
-            BUG("%1%: not implemented", bin);
-        }
+        IR::Operation_Binary *bin_expr;
+        bin_expr = bin->clone();
+        bin_expr->left = left_root;
+        bin_expr->right = right_root;
         root = bin_expr;
     } else {
         auto tmp = new IR::PathExpression(IR::ID(refMap->newName("tmp")));
         root = tmp;
         decl.push_back(
             new IR::Declaration_Variable(tmp->path->name, bin->type));
-        if (bin->is<IR::Add>()) {
-            bin_expr = new IR::Add(left_root, right_root);
-        } else if (bin->is<IR::Sub>()) {
-            bin_expr = new IR::Sub(left_root, right_root);
-        } else if (bin->is<IR::Shl>()) {
-            bin_expr = new IR::Shl(left_root, right_root);
-        } else if (bin->is<IR::Shr>()) {
-            bin_expr = new IR::Shr(left_root, right_root);
-        } else {
-            std::cerr << bin->node_type_name() << std::endl;
-            BUG("%1%: not implemented", bin);
-        }
+        IR::Operation_Binary *bin_expr;
+        bin_expr = bin->clone();
+        bin_expr->left = left_root;
+        bin_expr->right = right_root;
         stmt.push_back(new IR::AssignmentStatement(root, bin_expr));
     }
     return false;
@@ -738,20 +678,11 @@ ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
         if (left->equiv(*r->left)) {
             return a;
         } else if (left->equiv(*r->right)) {
-            if (right->is<IR::Add>()) {
-                a->right = new IR::Add(r->right, r->left);
-            } else if (right->is<IR::Sub>()) {
-                a->right = new IR::Sub(r->right, r->left);
-            } else if (right->is<IR::Shl>()) {
-                a->right = new IR::Shl(r->right, r->left);
-            } else if (right->is<IR::Shr>()) {
-                a->right = new IR::Shr(r->right, r->left);
-            } else if (right->is<IR::Equ>()) {
-                a->right = new IR::Equ(r->right, r->left);
-            } else {
-                std::cerr << right->node_type_name() << std::endl;
-                BUG("%1%: not implemented.", a);
-            }
+            IR::Operation_Binary *bin_expr;
+            bin_expr = r->clone();
+            bin_expr->left = r->right;
+            bin_expr->right = r->left;
+            a->right = bin_expr;
             return a;
         } else {
             IR::IndexedVector<IR::StatOrDecl> code_block;
@@ -772,25 +703,9 @@ ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
             }
             code_block.push_back(new IR::AssignmentStatement(left, src1));
             IR::Operation_Binary *expr;
-            if (right->is<IR::Add>()) {
-                expr = new IR::Add(left, src2);
-            } else if (right->is<IR::Sub>()) {
-                expr = new IR::Sub(left, src2);
-            } else if (right->is<IR::Shl>()) {
-                expr = new IR::Shl(left, src2);
-            } else if (right->is<IR::Shr>()) {
-                expr = new IR::Shr(left, src2);
-            } else if (right->is<IR::Equ>()) {
-                expr = new IR::Equ(left, src2);
-            } else if (right->is<IR::LAnd>()) {
-                expr = new IR::LAnd(left, src2);
-            } else if (right->is<IR::Leq>()) {
-                expr = new IR::Leq(left, src2);
-            } else if (right->is<IR::BOr>()) {
-                expr = new IR::BOr(left, src2);
-            } else {
-                BUG("%1%: not implemented.", a);
-            }
+            expr = r->clone();
+            expr->left = left;
+            expr->right = src2;
             code_block.push_back(new IR::AssignmentStatement(left, expr));
             // code_block.push_back(new IR::AssignmentStatement(left, tmp));
             return new IR::BlockStatement(code_block);
