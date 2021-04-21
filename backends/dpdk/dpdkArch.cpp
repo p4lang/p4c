@@ -336,15 +336,64 @@ const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Member *m) {
     return m;
 }
 
-const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Parameter *p) {
-    if (auto type = p->type->to<IR::Type_Name>()) {
-        if (type->path->name == info->header_type) {
-            return new IR::Parameter(IR::ID("h"), p->direction, p->type);
-        } else if (type->path->name == info->local_metadata_type) {
-            return new IR::Parameter(IR::ID("m"), p->direction, p->type);
-        }
+/* This function replaces the header and metadata parameter names in control
+ * blocks with "h" and "m" respectively.
+ * It assumes that  ConvertToDpdkArch pass has converted the control blocks to
+ * this form for DPDK Architecture
+ *         control ingressDeparser(packet_out bufffer, header hdr, metadata md);
+ *         control egressDeparser(packet_out bufffer, header hdr, metadata md);
+ *         control ingress(header hdr, metadata md);
+ *         control egress(header hdr, metadata md);
+*/
+const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Type_Control *c) {
+    auto applyParams = new IR::ParameterList();
+    auto param0 = c->applyParams->parameters.at(0);
+    cstring param0_type = param0->type->to<IR::Type_Name>()->path->name;
+
+    /* For IngressDeparser and EgressDeparser, first parameter is packet_out type.
+       This is followed by header and metadata parameters */
+    if (param0_type == "packet_out"){
+        auto header = c->applyParams->parameters.at(1);
+        auto local_metadata = c->applyParams->parameters.at(2);
+        header = new IR::Parameter(IR::ID("h"), header->direction, header->type);
+        local_metadata = new IR::Parameter(IR::ID("m"), local_metadata->direction, local_metadata->type);
+        applyParams->push_back(c->getApplyParameters()->getParameter(0));
+        applyParams->push_back(header);
+        applyParams->push_back(local_metadata);
     }
-    return p;
+    else {
+        /* For Ingress and Egress blocks, there are only two parameters: header and metadata */
+        auto header = c->applyParams->parameters.at(0);
+        auto local_metadata = c->applyParams->parameters.at(1);
+        header = new IR::Parameter(IR::ID("h"), header->direction, header->type);
+        local_metadata = new IR::Parameter(IR::ID("m"), local_metadata->direction, local_metadata->type);
+        applyParams->push_back(header);
+        applyParams->push_back(local_metadata);
+    }
+
+    return new IR::Type_Control(c->name, c->annotations, c->typeParameters,
+                                applyParams);
+}
+
+/* This function replaces the header and metadata parameter names in parser
+ * blocks with "h" and "m" respectively.
+ * It assumes that ConvertToDpdkArch pass has converted Ingress/Egress
+ *  parser blocks to this form for DPDK Architecture
+ *         control ingressParser(packet_in bufffer, header hdr, metadata md);
+ *         control egressParser(packet_in bufffer, header hdr, metadata md);
+*/
+const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Type_Parser *p) {
+    auto applyParams = new IR::ParameterList();
+    auto header = p->applyParams->parameters.at(1);
+    auto local_metadata = p->applyParams->parameters.at(2);
+    header = new IR::Parameter(IR::ID("h"), header->direction, header->type);
+    local_metadata = new IR::Parameter(IR::ID("m"), local_metadata->direction, local_metadata->type);
+    applyParams->push_back(p->getApplyParameters()->getParameter(0));
+    applyParams->push_back(header);
+    applyParams->push_back(local_metadata);
+ 
+    return new IR::Type_Parser(p->name, p->annotations, p->typeParameters,
+                               applyParams);
 }
 
 const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct *s) {

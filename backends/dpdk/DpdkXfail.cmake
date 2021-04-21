@@ -1,26 +1,4 @@
 p4c_add_xfail_reason("dpdk"
-  "Duplicates declaration"
-  testdata/p4_16_samples/psa-action-profile1.p4
-  testdata/p4_16_samples/psa-action-profile2.p4
-  testdata/p4_16_samples/psa-action-profile3.p4
-  testdata/p4_16_samples/psa-action-profile4.p4
-  testdata/p4_16_samples/psa-counter1.p4
-  testdata/p4_16_samples/psa-counter2.p4
-  testdata/p4_16_samples/psa-counter3.p4
-  testdata/p4_16_samples/psa-counter4.p4
-  testdata/p4_16_samples/psa-counter6.p4
-  testdata/p4_16_samples/psa-custom-type-counter-index.p4
-  testdata/p4_16_samples/psa-idle-timeout.p4
-  testdata/p4_16_samples/psa-meter1.p4
-  testdata/p4_16_samples/psa-meter3.p4
-  testdata/p4_16_samples/psa-meter4.p4
-  testdata/p4_16_samples/psa-meter5.p4
-  testdata/p4_16_samples/psa-meter6.p4
-  testdata/p4_16_samples/psa-test.p4
-  testdata/p4_16_samples/psa-register1.p4
-  )
-
-p4c_add_xfail_reason("dpdk"
   "Unsupported parser loop"
   testdata/p4_16_samples/psa-example-digest-bmv2.p4
   testdata/p4_16_samples/psa-example-counters-bmv2.p4
@@ -28,11 +6,14 @@ p4c_add_xfail_reason("dpdk"
 
 p4c_add_xfail_reason("dpdk"
   "not implemented"
+  testdata/p4_16_samples/psa-action-profile2.p4
   testdata/p4_16_samples/psa-example-register2-bmv2.p4
   )
 
 p4c_add_xfail_reason("dpdk"
   "Unhandled type for"
+  testdata/p4_16_samples/psa-meter3.p4
+  testdata/p4_16_samples/psa-meter1.p4
   testdata/p4_16_samples/psa-meter7-bmv2.p4
   )
 
@@ -62,4 +43,15 @@ p4c_add_xfail_reason("dpdk"
 p4c_add_xfail_reason("dpdk"
   "get_hash's arg is not a ListExpression"
   testdata/p4_16_samples/psa-hash.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "Unknown extern function"
+  testdata/p4_16_samples/psa-counter6.p4
+  testdata/p4_16_samples/psa-meter6.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "unhandled declaration type"
+  testdata/p4_16_samples/psa-test.p4
   )
