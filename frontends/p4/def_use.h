@@ -30,6 +30,7 @@ class LocationSet;
 /// Abstraction for something that is has a left value (variable, parameter)
 class StorageLocation : public IHasDbPrint {
     static unsigned crtid;
+
  public:
     virtual ~StorageLocation() {}
     unsigned id;
