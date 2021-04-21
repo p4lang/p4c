@@ -65,34 +65,23 @@ namespace DPDK {
 
 /**
 This class implements a policy suitable for the ConvertEnums pass.
-The policy is: convert all enums that are not part of the psa.
-Use 32-bit values for all enums.
-Also convert PSA_PacketPath_t to bit<32>
+The policy is: convert all enums to bit<32>
 */
-class PsaEnumOn32Bits : public P4::ChooseEnumRepresentation {
-    cstring filename;
+class EnumOn32Bits : public P4::ChooseEnumRepresentation {
 
-    bool convert(const IR::Type_Enum *type) const override {
-        if (type->name == "PSA_PacketPath_t")
-            return true;
-        if (type->srcInfo.isValid()) {
-            auto sourceFile = type->srcInfo.getSourceFile();
-            if (sourceFile.endsWith(filename))
-                // Don't convert any of the standard enums
-                return false;
-        }
+    bool convert(const IR::Type_Enum *) const override {
         return true;
     }
     unsigned enumSize(unsigned) const override { return 32; }
  public:
-    explicit PsaEnumOn32Bits(cstring filename) : filename(filename) {}
+    EnumOn32Bits() {}
 };
 
 PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options,
                                  std::ostream *outStream)
     : MidEnd(options) {
     auto convertEnums =
-        new P4::ConvertEnums(&refMap, &typeMap, new PsaEnumOn32Bits("psa.p4"));
+        new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     std::function<bool(const Context *, const IR::Expression *)> policy =
         [=](const Context *ctx, const IR::Expression *e) -> bool {
@@ -186,7 +175,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options,
         }
     } else {
         auto fillEnumMap =
-            new P4::FillEnumMap(new PsaEnumOn32Bits("psa.p4"), &typeMap);
+            new P4::FillEnumMap(new EnumOn32Bits(), &typeMap);
         addPasses({
             new P4::ResolveReferences(&refMap),
             new P4::TypeChecking(&refMap, &typeMap),
