@@ -29,6 +29,8 @@ const cstring StorageFactory::indexFieldName = "$lastIndex";
 const LocationSet* LocationSet::empty = new LocationSet();
 ProgramPoint ProgramPoint::beforeStart;
 
+unsigned StorageLocation::crtid = 0;
+
 StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) const {
     if (type->is<IR::Type_Bits>() ||
         type->is<IR::Type_Boolean>() ||
@@ -424,7 +426,7 @@ void ComputeWriteSet::enterScope(const IR::ParameterList* parameters,
     if (locals != nullptr) {
         for (auto d : *locals) {
             if (d->is<IR::Declaration_Variable>()) {
-                StorageLocation* loc = allDefinitions->storageMap->add(d);
+                StorageLocation* loc = allDefinitions->storageMap->getOrAdd(d);
                 if (loc != nullptr) {
                     defs->setDefinition(loc, uninit);
                     auto valid = loc->getValidBits();
@@ -437,6 +439,8 @@ void ComputeWriteSet::enterScope(const IR::ParameterList* parameters,
     }
     allDefinitions->setDefinitionsAt(entryPoint, defs, false);
     currentDefinitions = defs;
+    LOG3("CWS Entered scope " << entryPoint << " definitions are " <<
+         IndentCtl::endl << defs);
 }
 
 void ComputeWriteSet::exitScope(const IR::ParameterList* parameters,
@@ -445,16 +449,15 @@ void ComputeWriteSet::exitScope(const IR::ParameterList* parameters,
     if (parameters != nullptr) {
         for (auto p : parameters->parameters) {
             StorageLocation* loc = allDefinitions->storageMap->getStorage(p);
-            if (loc == nullptr)
-                continue;
-            currentDefinitions->removeLocation(loc);
+            if (loc != nullptr)
+                currentDefinitions->removeLocation(loc);
         }
     }
     if (locals != nullptr) {
         for (auto d : *locals) {
             if (d->is<IR::Declaration_Variable>()) {
                 StorageLocation* loc = allDefinitions->storageMap->getStorage(d);
-                if (loc == nullptr)
+                if (loc != nullptr)
                     currentDefinitions->removeLocation(loc);
             }
         }
@@ -707,8 +710,8 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
             (void)c->getNode()->apply(cw);
         currentDefinitions = cw.currentDefinitions;
         exitDefinitions = exitDefinitions->joinDefinitions(cw.exitDefinitions);
-        LOG3("Definitions after call of " << DBPrint::Brief << expression << ": " <<
-             currentDefinitions << DBPrint::Reset << IndentCtl::unindent);
+        LOG3("Definitions after call of " << DBPrint::Brief << expression << ":" <<
+             IndentCtl::endl << currentDefinitions << DBPrint::Reset << IndentCtl::unindent);
     }
 
     auto result = LocationSet::empty;
