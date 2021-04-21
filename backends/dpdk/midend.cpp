@@ -68,7 +68,6 @@ This class implements a policy suitable for the ConvertEnums pass.
 The policy is: convert all enums to bit<32>
 */
 class EnumOn32Bits : public P4::ChooseEnumRepresentation {
-
     bool convert(const IR::Type_Enum *) const override {
         return true;
     }
