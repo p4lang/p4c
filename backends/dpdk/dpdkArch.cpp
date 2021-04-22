@@ -301,7 +301,8 @@ const IR::Node *ReplaceMetadataHeaderName::preorder(IR::PathExpression *pe) {
 const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Member *m) {
     /* PathExpressions are handled in a separate preorder function
       Hence do not process them here */
-    if (!(m->expr->is<IR::Member>()))
+    if (!m->expr->is<IR::Member>() &&
+        !m->expr->is<IR::ArrayIndex>())
         prune();
 
     if (auto p = m->expr->to<IR::PathExpression>()) {
