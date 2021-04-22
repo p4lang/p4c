@@ -38,7 +38,7 @@ const IR::DpdkAsmStatement *ConvertToDpdkProgram::createListStatement(
 const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     IR::IndexedVector<IR::DpdkHeaderType> headerType;
     for (auto kv : structure.header_types) {
-        // std::cout << kv.second << std::endl;
+        LOG3("add header type " << kv.second);
         auto h = kv.second;
         auto ht = new IR::DpdkHeaderType(h->srcInfo, h->name, h->annotations,
                                          h->fields);

@@ -35,3 +35,8 @@ void IR::DpdkInvalidateStatement::dbprint(std::ostream& out) const {
 void IR::DpdkDropStatement::dbprint(std::ostream& out) const {
     out << "drop";
 }
+
+void IR::DpdkAsmProgram::dbprint(std::ostream& out) const {
+    for (auto h : headerType)
+        out << h;
+}
