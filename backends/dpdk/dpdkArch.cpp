@@ -356,17 +356,18 @@ const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Type_Control *c) {
         auto header = c->applyParams->parameters.at(1);
         auto local_metadata = c->applyParams->parameters.at(2);
         header = new IR::Parameter(IR::ID("h"), header->direction, header->type);
-        local_metadata = new IR::Parameter(IR::ID("m"), local_metadata->direction, local_metadata->type);
+        local_metadata = new IR::Parameter(IR::ID("m"),
+                                           local_metadata->direction, local_metadata->type);
         applyParams->push_back(c->getApplyParameters()->getParameter(0));
         applyParams->push_back(header);
         applyParams->push_back(local_metadata);
-    }
-    else {
+    } else {
         /* For Ingress and Egress blocks, there are only two parameters: header and metadata */
         auto header = c->applyParams->parameters.at(0);
         auto local_metadata = c->applyParams->parameters.at(1);
         header = new IR::Parameter(IR::ID("h"), header->direction, header->type);
-        local_metadata = new IR::Parameter(IR::ID("m"), local_metadata->direction, local_metadata->type);
+        local_metadata = new IR::Parameter(IR::ID("m"),
+                                           local_metadata->direction, local_metadata->type);
         applyParams->push_back(header);
         applyParams->push_back(local_metadata);
     }
@@ -387,11 +388,12 @@ const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Type_Parser *p) {
     auto header = p->applyParams->parameters.at(1);
     auto local_metadata = p->applyParams->parameters.at(2);
     header = new IR::Parameter(IR::ID("h"), header->direction, header->type);
-    local_metadata = new IR::Parameter(IR::ID("m"), local_metadata->direction, local_metadata->type);
+    local_metadata = new IR::Parameter(IR::ID("m"),
+                                       local_metadata->direction, local_metadata->type);
     applyParams->push_back(p->getApplyParameters()->getParameter(0));
     applyParams->push_back(header);
     applyParams->push_back(local_metadata);
- 
+
     return new IR::Type_Parser(p->name, p->annotations, p->typeParameters,
                                applyParams);
 }
