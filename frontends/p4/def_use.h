@@ -29,11 +29,14 @@ class LocationSet;
 
 /// Abstraction for something that is has a left value (variable, parameter)
 class StorageLocation : public IHasDbPrint {
+    static unsigned crtid;
+
  public:
     virtual ~StorageLocation() {}
+    unsigned id;
     const IR::Type* type;
     const cstring name;
-    StorageLocation(const IR::Type* type, cstring name) : type(type), name(name)
+    StorageLocation(const IR::Type* type, cstring name) : id(crtid++), type(type), name(name)
     { CHECK_NULL(type); }
     template <class T>
     const T* to() const {
@@ -46,7 +49,7 @@ class StorageLocation : public IHasDbPrint {
         return result != nullptr;
     }
     virtual void dbprint(std::ostream& out) const {
-        out << name;
+        out << id << " " << name;
     }
     cstring toString() const { return name; }
 
@@ -220,7 +223,7 @@ class LocationSet : public IHasDbPrint {
 };
 
 /// Maps a declaration to its associated storage.
-class StorageMap {
+class StorageMap : public IHasDbPrint {
     /// Storage location for each declaration.
     ordered_map<const IR::IDeclaration*, StorageLocation*> storage;
     StorageFactory factory;
@@ -235,7 +238,7 @@ class StorageMap {
     StorageLocation* add(const IR::IDeclaration* decl) {
         CHECK_NULL(decl);
         auto type = typeMap->getType(decl->getNode(), true);
-        auto loc = factory.create(type, decl->externalName());
+        auto loc = factory.create(type, decl->getName() + "/" + decl->externalName());
         if (loc != nullptr)
             storage.emplace(decl, loc);
         return loc;
@@ -447,7 +450,7 @@ class AllDefinitions : public IHasDbPrint {
  *
  */
 
-class ComputeWriteSet : public Inspector {
+class ComputeWriteSet : public Inspector, public IHasDbPrint {
  protected:
     AllDefinitions*     allDefinitions;  /// Result computed by this pass.
     Definitions*        currentDefinitions;  /// Before statement currently processed.
@@ -487,6 +490,12 @@ class ComputeWriteSet : public Inspector {
     void expressionWrites(const IR::Expression* expression, const LocationSet* loc) {
         CHECK_NULL(expression); CHECK_NULL(loc);
         writes.emplace(expression, loc);
+    }
+    virtual void dbprint(std::ostream& out) const {
+        if (writes.empty())
+            out << "No writes";
+        for (auto &it : writes)
+            out << it.first << " writes " << it.second << IndentCtl::endl;
     }
 
  public:

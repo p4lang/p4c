@@ -7,13 +7,11 @@ p4c_add_xfail_reason("dpdk"
 p4c_add_xfail_reason("dpdk"
   "not implemented"
   testdata/p4_16_samples/psa-action-profile2.p4
-  testdata/p4_16_samples/psa-example-register2-bmv2.p4
   )
-
+ 
 p4c_add_xfail_reason("dpdk"
-  "Unhandled type for"
+  "Meter Not implemented"
   testdata/p4_16_samples/psa-meter3.p4
-  testdata/p4_16_samples/psa-meter1.p4
   testdata/p4_16_samples/psa-meter7-bmv2.p4
   )
 
@@ -26,6 +24,7 @@ p4c_add_xfail_reason("dpdk"
 
 p4c_add_xfail_reason("dpdk"
   "Not Implemented"
+  testdata/p4_16_samples/psa-example-register2-bmv2.p4
   testdata/p4_16_samples/psa-register-read-write-2-bmv2.p4
   testdata/p4_16_samples/psa-end-of-ingress-test-bmv2.p4
   )
