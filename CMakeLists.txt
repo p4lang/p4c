@@ -87,6 +87,9 @@ if (BUILD_STATIC_RELEASE)
   set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
   set(CMAKE_EXE_LINKER_FLAGS "-static")
   set(P4C_STATIC_BUILD STATIC)
+  # This is required for Ubuntu 16.04
+  # Why? I do not know. Some issue regarding linking in older GCC versions
+  set(CMAKE_EXE_LINKER_FLAGS "-Wl,--no-as-needed -ldl")
   add_definitions(-DP4C_STATIC_BUILD)
 endif ()
 
