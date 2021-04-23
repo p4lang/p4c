@@ -67,13 +67,15 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
 	jmpeq MYIP_PARSE_VLAN_TAG h.ethernet.etherType 0x8100
-	jmp MYIP_PARSE_VLAN_TAG2
+	jmp MYIP_ACCEPT
 	MYIP_PARSE_VLAN_TAG :	extract h.vlan_tag_0
 	jmpeq MYIP_PARSE_VLAN_TAG1 h.vlan_tag_0.ether_type 0x8100
-	jmp MYIP_PARSE_VLAN_TAG2
+	jmp MYIP_ACCEPT
 	MYIP_PARSE_VLAN_TAG1 :	extract h.vlan_tag_1
+	jmpeq MYIP_PARSE_VLAN_TAG2 h.vlan_tag_1.ether_type 0x8100
+	jmp MYIP_ACCEPT
 	MYIP_PARSE_VLAN_TAG2 :	verify 0 error.StackOutOfBounds
-	jmpv LABEL_0END h.ethernet
+	MYIP_ACCEPT :	jmpv LABEL_0END h.ethernet
 	table tbl
 	LABEL_0END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
