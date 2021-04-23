@@ -205,15 +205,16 @@ add_cxx_compiler_option ("-Wextra")
 add_cxx_compiler_option ("-Wno-overloaded-virtual")
 add_cxx_compiler_option ("-Wno-deprecated")
 add_cxx_compiler_option ("-Wno-deprecated-declarations")
-# we want to optimize the binary size for a static release binary
-if (BUILD_STATIC_RELEASE)
-  add_cxx_compiler_option ("-flto")
-endif ()
 # Enable/disable runtime exceptions on nullpointer dereferencing
 # add_cxx_compiler_option ("-fsanitize=null")
 
 # If we're on GCC, use the gold linker if available.
 if(CMAKE_COMPILER_IS_GNUCC)
+    # We want to optimize the binary size for a static release binary.
+    # This only works with modern versions of GCC.
+    if (BUILD_STATIC_RELEASE AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
+      add_cxx_compiler_option ("-flto")
+    endif ()
     execute_process(
             COMMAND ${CMAKE_C_COMPILER} -fuse-ld=gold -Wl,--version
             ERROR_QUIET OUTPUT_VARIABLE LD_VERSION)
