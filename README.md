@@ -137,10 +137,18 @@ sudo apt install p4lang-p4c
       symbols to run in gdb. Default is RELEASE.
      - `-DCMAKE_INSTALL_PREFIX=<path>` -- set the directory where
        `make install` installs the compiler. Defaults to /usr/local.
-     - `-DENABLE_BMV2=ON|OFF`. Enable the bmv2 backend. Default ON.
-     - `-DENABLE_EBPF=ON|OFF`. Enable the ebpf backend. Default ON.
-     - `-DENABLE_P4C_GRAPHS=ON|OFF`. Enable the p4c-graphs backend. Default ON.
-     - `-DENABLE_P4TEST=ON|OFF`. Enable the p4test backend. Default ON.
+     - `-DENABLE_BMV2=ON|OFF`. Enable [the bmv2
+       backend](backends/bmv2/README.md). Default ON.
+     - `-DENABLE_EBPF=ON|OFF`. Enable [the ebpf
+       backend](backends/ebpf/README.md). Default ON.
+     - `-DENABLE_UBPF=ON|OFF`. Enable [the ubpf
+       backend](backends/ubpf/README.md). Default ON.
+     - `-DENABLE_DPDK=ON|OFF`. Enable [the DPDK
+       backend](backends/dpdk/README.md). Default ON.
+     - `-DENABLE_P4C_GRAPHS=ON|OFF`. Enable [the p4c-graphs
+       backend](backends/graphs/README.md). Default ON.
+     - `-DENABLE_P4TEST=ON|OFF`. Enable [the p4test
+       backend](backends/p4test/README.md). Default ON.
      - `-DENABLE_DOCS=ON|OFF`. Build documentation. Default is OFF.
      - `-DENABLE_GC=ON|OFF`. Enable the use of the garbage collection
        library. Default is ON.
@@ -148,6 +156,9 @@ sudo apt install p4lang-p4c
        Default is ON.
      - `-DENABLE_PROTOBUF_STATIC=ON|OFF`. Enable the use of static
        protobuf libraries. Default is ON.
+     - `-DENABLE_MULTITHREAD=ON|OFF`. Use multithreading.  Default is
+       OFF.
+     - `-DENABLE_GMP=ON|OFF`. Use the GMP library.  Default is ON.
 
     If adding new targets to this build system, please see
     [instructions](#defining-new-cmake-targets).
