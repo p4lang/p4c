@@ -26,9 +26,13 @@ header ethernet_t {
     bit<16>         etherType;
 }
 
-parser MyIP(packet_in buffer, out ethernet_t h, inout EMPTY_M b, in psa_ingress_parser_input_metadata_t c, in EMPTY_RESUB d, in EMPTY_RECIRC e) {
+struct headers_t {
+    ethernet_t ethernet;
+}
+
+parser MyIP(packet_in buffer, out headers_t hdr, inout EMPTY_M b, in psa_ingress_parser_input_metadata_t c, in EMPTY_RESUB d, in EMPTY_RECIRC e) {
     state start {
-        buffer.extract<ethernet_t>(h);
+        buffer.extract<ethernet_t>(hdr.ethernet);
         transition accept;
     }
 }
@@ -39,15 +43,15 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout EMPTY_M b, in psa_egress_pars
     }
 }
 
-control MyIC(inout ethernet_t a, inout EMPTY_M b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
+control MyIC(inout headers_t hdr, inout EMPTY_M b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("MyIC.remove_header") action remove_header() {
-        a.setInvalid();
+        hdr.ethernet.setInvalid();
     }
     @name("MyIC.tbl") table tbl_0 {
         key = {
-            a.srcAddr: exact @name("a.srcAddr") ;
+            hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
         }
         actions = {
             NoAction_0();
@@ -65,7 +69,7 @@ control MyEC(inout EMPTY_H a, inout EMPTY_M b, in psa_egress_input_metadata_t c,
     }
 }
 
-control MyID(packet_out buffer, out EMPTY_CLONE a, out EMPTY_RESUB b, out EMPTY_BRIDGE c, inout ethernet_t d, in EMPTY_M e, in psa_ingress_output_metadata_t f) {
+control MyID(packet_out buffer, out EMPTY_CLONE a, out EMPTY_RESUB b, out EMPTY_BRIDGE c, inout headers_t hdr, in EMPTY_M e, in psa_ingress_output_metadata_t f) {
     apply {
     }
 }
@@ -75,9 +79,9 @@ control MyED(packet_out buffer, out EMPTY_CLONE a, out EMPTY_RECIRC b, inout EMP
     }
 }
 
-IngressPipeline<ethernet_t, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC>(MyIP(), MyIC(), MyID()) ip;
+IngressPipeline<headers_t, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC>(MyIP(), MyIC(), MyID()) ip;
 
 EgressPipeline<EMPTY_H, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RECIRC>(MyEP(), MyEC(), MyED()) ep;
 
-PSA_Switch<ethernet_t, EMPTY_M, EMPTY_H, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
+PSA_Switch<headers_t, EMPTY_M, EMPTY_H, EMPTY_M, EMPTY_BRIDGE, EMPTY_CLONE, EMPTY_CLONE, EMPTY_RESUB, EMPTY_RECIRC>(ip, PacketReplicationEngine(), ep, BufferingQueueingEngine()) main;
 

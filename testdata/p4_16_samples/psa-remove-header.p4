@@ -16,16 +16,20 @@ header ethernet_t {
     bit<16>         etherType;
 }
 
+struct headers_t {
+    ethernet_t       ethernet;
+}
+
 parser MyIP(
     packet_in buffer,
-    out ethernet_t h,
+    out headers_t hdr,
     inout EMPTY_M b,
     in psa_ingress_parser_input_metadata_t c,
     in EMPTY_RESUB d,
     in EMPTY_RECIRC e) {
 
     state start {
-        buffer.extract(h);
+        buffer.extract(hdr.ethernet);
         transition accept;
     }
 }
@@ -44,18 +48,18 @@ parser MyEP(
 }
 
 control MyIC(
-    inout ethernet_t a,
+    inout headers_t hdr,
     inout EMPTY_M b,
     in psa_ingress_input_metadata_t c,
     inout psa_ingress_output_metadata_t d) {
 
     action remove_header() {
-        a.setInvalid();
+        hdr.ethernet.setInvalid();
     }
 
     table tbl {
         key = {
-            a.srcAddr : exact;
+            hdr.ethernet.srcAddr : exact;
         }
         actions = {
             NoAction;
@@ -81,7 +85,7 @@ control MyID(
     out EMPTY_CLONE a,
     out EMPTY_RESUB b,
     out EMPTY_BRIDGE c,
-    inout ethernet_t d,
+    inout headers_t hdr,
     in EMPTY_M e,
     in psa_ingress_output_metadata_t f) {
     apply { }
