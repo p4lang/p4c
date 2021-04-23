@@ -267,6 +267,10 @@ class ParserSymbolicInterpreter {
                 auto dv = d->to<IR::Declaration_Variable>();
                 if (dv->initializer != nullptr)
                     value = ev.evaluate(dv->initializer, false);
+            } else if (d->is<IR::P4ValueSet>()) {
+                // The midend symbolic interpreter does not have
+                // a representation for value_set.
+                continue;
             }
 
             if (value == nullptr)

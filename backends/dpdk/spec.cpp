@@ -30,6 +30,13 @@ cstring toStr(const IR::Constant *const c) {
     out << "0x" << std::hex << c->value;
     return out.str();
 }
+
+cstring toDecimal(const IR::Constant*const c) {
+    std::ostringstream out;
+    out << c->value;
+    return out.str();
+}
+
 cstring toStr(const IR::BoolLiteral *const b) {
     std::ostringstream out;
     out << b->value;
@@ -72,9 +79,14 @@ cstring toStr(const IR::Expression *const exp) {
         return toStr(e);
     else if (auto e = exp->to<IR::Cast>())
         return toStr(e->expr);
-    else {
+    else if (auto e = exp->to<IR::ArrayIndex>()) {
+        if (auto cst = e->right->to<IR::Constant>()) {
+            return toStr(e->left) + "_" + toDecimal(cst);
+        } else {
+            ::error("%1% is not a constant", e->right);
+        }
+    } else
         BUG("%1% not implemented", exp);
-    }
     return "";
 }
 
@@ -143,9 +155,10 @@ std::ostream &IR::DpdkHeaderType::toSpec(std::ostream &out) const {
             out << "\t" << t->path->name;
         else if ((*it)->type->to<IR::Type_Boolean>())
             out << "\tbool";
+        else if (auto t = (*it)->type->to<IR::Type_Varbits>())
+            out << "\tbit<" << t->width_bits() << ">";
         else {
-            std::cout << (*it)->type->node_type_name() << std::endl;
-            BUG("%1% Unsupported type", *it);
+            BUG("Unsupported type: %1% ", *it);
         }
         out << " " << (*it)->externalName();
         out << std::endl;
@@ -157,12 +170,22 @@ std::ostream &IR::DpdkHeaderType::toSpec(std::ostream &out) const {
 std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
     if (getAnnotations()->getSingle("__packet_data__")) {
         for (auto it = fields.begin(); it != fields.end(); ++it) {
-            if (auto t = (*it)->type->to<IR::Type_Name>())
+            if (auto t = (*it)->type->to<IR::Type_Name>()) {
                 out << "header " << (*it)->name << " instanceof "
                     << t->path->name;
-            else {
-                std::cout << (*it)->type->node_type_name() << std::endl;
-                BUG("Unsupported type");
+            } else if (auto t = (*it)->type->to<IR::Type_Stack>()) {
+                if (!t->elementType->is<IR::Type_Name>())
+                    BUG("%1% Unsupported type", t->elementType);
+                cstring type_name = t->elementType->to<IR::Type_Name>()->path->name;
+                if (!t->size->is<IR::Constant>()) {
+                    BUG("Header stack index in %1% must be compile-time constant", t);
+                }
+                for (auto i = 0; i < t->size->to<IR::Constant>()->value; i++) {
+                    out << "header " << (*it)->name << "_" << i << " instanceof "
+                        << type_name << std::endl;
+                }
+            } else {
+                BUG("Unsupported type %1%", *it);
             }
             out << std::endl;
         }
