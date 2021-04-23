@@ -232,7 +232,9 @@ std::pair<const IR::P4Parser*, const IR::P4Parser*> rewriteParser(const IR::P4Pr
 
 /// Loads example from a file
 const IR::P4Program* load_model(const char* curFile, CompilerOptions& options) {
-    std::string relPath = getenv("P4C_SOURCE_DIR");
+    const char* sourceDir = getenv("P4C_SOURCE_DIR");
+    BUG_CHECK(sourceDir, "Can't find environment variale 'P4C_SOURCE_DIR'"); 
+    std::string relPath = sourceDir;
     relPath.append("/");
     std::string includeDir = relPath + std::string("p4include");
     setenv("P4C_16_INCLUDE_PATH", includeDir.c_str(), 1);
