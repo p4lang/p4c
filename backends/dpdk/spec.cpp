@@ -155,9 +155,10 @@ std::ostream &IR::DpdkHeaderType::toSpec(std::ostream &out) const {
             out << "\t" << t->path->name;
         else if ((*it)->type->to<IR::Type_Boolean>())
             out << "\tbool";
+        else if (auto t = (*it)->type->to<IR::Type_Varbits>())
+            out << "\tbit<" << t->width_bits() << ">";
         else {
-            std::cout << (*it)->type->node_type_name() << std::endl;
-            BUG("%1% Unsupported type", *it);
+            BUG("Unsupported type: %1% ", *it);
         }
         out << " " << (*it)->externalName();
         out << std::endl;
