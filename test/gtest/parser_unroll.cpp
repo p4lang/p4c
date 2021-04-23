@@ -241,7 +241,7 @@ const IR::P4Program* load_model(const char* curFile, CompilerOptions& options) {
     options.loopsUnrolling = true;
     options.compilerVersion = P4TEST_VERSION_STRING;
     options.file = relPath;
-    options.file += "testdata/p4_16_sample/";
+    options.file += "testdata/p4_16_samples/";
     options.file += curFile;
     return P4::parseP4File(options);
 }
