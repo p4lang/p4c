@@ -3,6 +3,11 @@
 This backend produces visual representations of a P4 program as dot files. For
 now it only supports the generation of graphs for top-level control and parser blocks.
 
+dot files can be processed by the `dot` command from
+[Graphviz](http://graphviz.org), which can lay out the nodes and
+edges of the graphs and write the result in many different graphical
+file formats.
+
 ## Dependencies
 
 In addition to other p4c dependencies, this backend requires the Boost graph

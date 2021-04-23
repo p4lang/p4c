@@ -451,7 +451,6 @@ class ConvertInternetChecksum : public PassManager {
 class BreakLogicalExpressionParenthesis : public Transform {
   public:
     const IR::Node *postorder(IR::LAnd *land) {
-        std::cout << land << std::endl;
         if (auto land2 = land->left->to<IR::LAnd>()) {
             auto sub = new IR::LAnd(land2->right, land->right);
             return new IR::LAnd(land2->left, sub);
@@ -468,7 +467,6 @@ class BreakLogicalExpressionParenthesis : public Transform {
         return land;
     }
     const IR::Node *postorder(IR::LOr *lor) {
-        std::cout << lor << std::endl;
         if (auto lor2 = lor->left->to<IR::LOr>()) {
             auto sub = new IR::LOr(lor2->right, lor->right);
             return new IR::LOr(lor2->left, sub);
