@@ -86,6 +86,8 @@ if (BUILD_STATIC_RELEASE)
   set(Boost_USE_STATIC_LIBS ON)
   set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
   set(CMAKE_EXE_LINKER_FLAGS "-static")
+  set(P4C_STATIC_BUILD STATIC)
+  add_compile_definitions(P4C_STATIC_BUILD)
 endif ()
 
 # required tools and libraries

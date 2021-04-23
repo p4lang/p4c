@@ -38,7 +38,8 @@ static bool done_init, started_init;
 // One can disable the GC, e.g., to run under Valgrind, by editing config.h
 #if HAVE_LIBGC
 
-#ifndef GC_CPP_H
+// These customizations do not work with static builds so we have to disable them.
+#ifndef P4C_STATIC_BUILD
 // emergency pool to allow a few extra allocations after a bad_alloc is thrown so we
 // can generate reasonable errors, a stack trace, etc
 static char emergency_pool[16*1024];
@@ -71,7 +72,7 @@ void operator delete(void *p) _GLIBCXX_USE_NOEXCEPT {
 
 void *operator new[](std::size_t size) { return ::operator new(size); }
 void operator delete[](void *p) _GLIBCXX_USE_NOEXCEPT { ::operator delete(p); }
-#endif  // GC_CPP_H
+#endif  // P4C_STATIC_BUILD
 
 void *realloc(void *ptr, size_t size) {
     if (!done_init) {

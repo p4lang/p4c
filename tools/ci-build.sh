@@ -141,6 +141,8 @@ export CXXFLAGS="${CXXFLAGS} -fuse-ld=gold"
 export CXXFLAGS="${CXXFLAGS} -fsanitize=null"
 # Toggle unified compilation.
 CMAKE_FLAGS+="-DENABLE_UNIFIED_COMPILATION=${ENABLE_UNIFIED_COMPILATION} "
+# Toggle static builds.
+CMAKE_FLAGS+="-DBUILD_STATIC_RELEASE=${BUILD_STATIC_RELEASE} "
 # RELEASE should be default, but we want to make sure.
 CMAKE_FLAGS+="-DCMAKE_BUILD_TYPE=RELEASE"
 build ${CMAKE_FLAGS}

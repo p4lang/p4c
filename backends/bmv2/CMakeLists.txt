@@ -83,11 +83,7 @@ set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.def PARENT_SC
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_BACKEND_COMMON_SRCS};${BMV2_BACKEND_COMMON_HDRS}")
 
 build_unified(BMV2_BACKEND_COMMON_SRCS)
-if (BUILD_STATIC_RELEASE)
-  add_library(bmv2backend STATIC ${BMV2_BACKEND_COMMON_SRCS})
-else()
-  add_library(bmv2backend ${BMV2_BACKEND_COMMON_SRCS})
-endif ()
+add_library(bmv2backend ${P4C_STATIC_BUILD} ${BMV2_BACKEND_COMMON_SRCS})
 add_dependencies(bmv2backend genIR frontend)
 
 build_unified(BMV2_SIMPLE_SWITCH_SRCS)
