@@ -9,7 +9,7 @@ AC_CONFIG_HEADERS([config.h])
 AC_PROG_CC
 AC_PROG_CXX
 
-AM_PATH_PYTHON([2.7],, [:])
+AM_PATH_PYTHON([3.5],, [:])
 
 LT_INIT
 
