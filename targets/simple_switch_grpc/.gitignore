@@ -8,7 +8,3 @@ simple_switch_grpc
 tests/example
 tests/example.run
 tests/test_gtest
-
-cpp_out
-grpc_out
-py_out

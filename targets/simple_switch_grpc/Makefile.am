@@ -58,32 +58,32 @@ $(GRPC_LIBS) $(PROTOBUF_LIBS)
 
 # dataplane_interface.proto
 
-EXTRA_DIST = p4/bm/dataplane_interface.proto
+EXTRA_DIST = ../../services/p4/bm/dataplane_interface.proto
 
-proto = $(abs_srcdir)/p4/bm/dataplane_interface.proto
+proto = $(abs_srcdir)/../../services/p4/bm/dataplane_interface.proto
 
-PROTOFLAGS = -I$(abs_srcdir)
+PROTOFLAGS = -I$(abs_srcdir)/../../services
 
 proto_cpp_files = \
-cpp_out/p4/bm/dataplane_interface.pb.cc \
-cpp_out/p4/bm/dataplane_interface.pb.h
+../../services/cpp_out/p4/bm/dataplane_interface.pb.cc \
+../../services/cpp_out/p4/bm/dataplane_interface.pb.h
 
 proto_grpc_files = \
-grpc_out/p4/bm/dataplane_interface.grpc.pb.cc \
-grpc_out/p4/bm/dataplane_interface.grpc.pb.h
+../../services/grpc_out/p4/bm/dataplane_interface.grpc.pb.cc \
+../../services/grpc_out/p4/bm/dataplane_interface.grpc.pb.h
 
-includep4bmdir = $(includedir)/p4/bm/
+includep4bmdir = $(includedir)/../../services/p4/bm/
 nodist_includep4bm_HEADERS = \
-cpp_out/p4/bm/dataplane_interface.pb.h \
-grpc_out/p4/bm/dataplane_interface.grpc.pb.h
+../../services/cpp_out/p4/bm/dataplane_interface.pb.h \
+../../services/grpc_out/p4/bm/dataplane_interface.grpc.pb.h
 
 BUILT_SOURCES = $(proto_cpp_files) $(proto_grpc_files)
 
 if HAVE_GRPC_PY_PLUGIN
-p4bmpydir = $(pythondir)/p4/bm
+p4bmpydir = $(pythondir)/../../services/p4/bm
 nodist_p4bmpy_PYTHON = \
-py_out/p4/bm/dataplane_interface_pb2.py \
-py_out/p4/bm/__init__.py
+../../services/py_out/p4/bm/dataplane_interface_pb2.py \
+../../services/py_out/p4/bm/__init__.py
 
 BUILT_SOURCES += \
 $(nodist_p4bmpy_PYTHON)
@@ -94,18 +94,18 @@ endif
 proto_files.ts: $(proto)
 	@rm -f proto_files.tmp
 	@touch proto_files.tmp
-	@mkdir -p $(builddir)/cpp_out
-	@mkdir -p $(builddir)/grpc_out
-	$(PROTOC) $^ --cpp_out $(builddir)/cpp_out $(PROTOFLAGS)
-	$(PROTOC) $^ --grpc_out $(builddir)/grpc_out --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN) $(PROTOFLAGS)
+	@mkdir -p $(builddir)/../../services/cpp_out
+	@mkdir -p $(builddir)/../../services/grpc_out
+	$(PROTOC) $^ --cpp_out $(builddir)/../../services/cpp_out $(PROTOFLAGS)
+	$(PROTOC) $^ --grpc_out $(builddir)/../../services/grpc_out --plugin=protoc-gen-grpc=$(GRPC_CPP_PLUGIN) $(PROTOFLAGS)
 if HAVE_GRPC_PY_PLUGIN
-	@mkdir -p $(builddir)/py_out
+	@mkdir -p $(builddir)/../../services/py_out
 # With the Python plugin, it seems that I need to use a single command for proto
 # + grpc and that the output directory needs to be the same (because the grpc
 # plugin inserts code into the proto-generated files). But maybe I am just using
 # an old version of the Python plugin.
-	$(PROTOC) $^ --python_out $(builddir)/py_out $(PROTOFLAGS) --grpc_out $(builddir)/py_out --plugin=protoc-gen-grpc=$(GRPC_PY_PLUGIN)
-	@touch $(builddir)/py_out/p4/bm/__init__.py
+	$(PROTOC) $^ --python_out $(builddir)/../../services/py_out $(PROTOFLAGS) --grpc_out $(builddir)/../../services/py_out --plugin=protoc-gen-grpc=$(GRPC_PY_PLUGIN)
+	@touch $(builddir)/../../services/py_out/p4/bm/__init__.py
 endif
 	@mv -f proto_files.tmp $@
 
@@ -129,7 +129,7 @@ $(BUILT_SOURCES): proto_files.ts
 	fi
 
 AM_CPPFLAGS += -Icpp_out -Igrpc_out \
--I$(builddir)/cpp_out -I$(builddir)/grpc_out
+-I$(builddir)/../../services/cpp_out -I$(builddir)/../../services/grpc_out
 
 nodist_libbm_grpc_dataplane_la_SOURCES = $(proto_cpp_files) $(proto_grpc_files)
 # no warnings or Werror for auto-generated sources
