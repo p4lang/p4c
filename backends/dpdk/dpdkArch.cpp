@@ -349,7 +349,9 @@ const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Type_Control *c) {
     auto paramSize = c->applyParams->size();
 
     if (!(paramSize == 2 || paramSize == 3))
-        BUG("Unexpected number of arguments for %1%", c->name);
+        ::error(ErrorType::ERR_MODEL,
+                ("Unexpected number of arguments for %1%. Are you using an up-to-date 'psa.p4'?"),
+                 c->name);
 
     int header_index = 0;
 
@@ -384,7 +386,9 @@ const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Type_Parser *p) {
     auto paramSize = p->applyParams->size();
 
     if (paramSize != 3)
-        BUG("Unexpected number of arguments for %1%", p->name);
+        ::error(ErrorType::ERR_MODEL,
+                ("Unexpected number of arguments for %1%. Are you using an up-to-date 'psa.p4'?"),
+                 p->name);
 
     auto header = p->applyParams->parameters.at(1);
     auto local_metadata = p->applyParams->parameters.at(2);
