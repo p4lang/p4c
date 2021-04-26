@@ -3,11 +3,6 @@ LABEL maintainer="Antonin Bas <antonin@barefootnetworks.com>"
 LABEL description="This Docker image does not have any dependency on PI or P4 \
 Runtime, it only builds bmv2 simple_switch."
 
-# Default to using 2 make jobs, which is a good default for CI. If you're
-# building locally or you know there are more cores available, you may want to
-# override this.
-ARG MAKEFLAGS=-j2
-
 ENV BM_DEPS automake \
             build-essential \
             curl \
@@ -30,14 +25,14 @@ ENV BM_RUNTIME_DEPS libboost-program-options1.58.0 \
                     python
 COPY . /behavioral-model/
 WORKDIR /behavioral-model/
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends $BM_DEPS $BM_RUNTIME_DEPS && \
+RUN apt-get update -qq && \
+    apt-get install -qq --no-install-recommends $BM_DEPS $BM_RUNTIME_DEPS && \
     ./autogen.sh && \
     ./configure --enable-debugger && \
-    make && \
+    make -j$(nproc) && \
     make install-strip && \
     ldconfig && \
-    apt-get purge -y $BM_DEPS && \
-    apt-get autoremove --purge -y && \
+    apt-get purge -qq $BM_DEPS && \
+    apt-get autoremove --purge -qq && \
     rm -rf /behavioral-model /var/cache/apt/* /var/lib/apt/lists/* && \
     echo 'Build image ready'

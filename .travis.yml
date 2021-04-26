@@ -47,6 +47,6 @@ install:
 
 script:
   - ci_env=`bash <(curl -s https://codecov.io/env)`
-  - docker run $ci_env --env GCOV -w /behavioral-model bm /bin/bash -c "make check -j2 && ./travis/codecov.sh"
-  - if [ "$sswitch_grpc" = "yes" ]; then docker run -w /behavioral-model/targets/simple_switch_grpc bm make check -j2; fi
+  - docker run --rm $ci_env --env GCOV -w /behavioral-model bm /bin/bash -c "make check -j$(nproc) && ./travis/codecov.sh"
+  - if [ "$sswitch_grpc" = "yes" ]; then docker run --rm -w /behavioral-model/targets/simple_switch_grpc bm make check -j$(nproc); fi
   - bash tools/check_style.sh
