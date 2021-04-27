@@ -259,7 +259,6 @@ std::pair<const IR::P4Parser*, const IR::P4Parser*> loadExample(const char *file
     options.process(1, (char* const*)&argv);
     options.langVersion = langVersion;
     const IR::P4Program* program = load_model(file, options);
-    unsetenv("P4C_16_INCLUDE_PATH");
     if (!program)
         return std::make_pair(nullptr, nullptr);
     return rewriteParser(program, options);
