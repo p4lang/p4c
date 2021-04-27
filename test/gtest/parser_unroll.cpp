@@ -235,13 +235,19 @@ std::pair<const IR::P4Parser*, const IR::P4Parser*> rewriteParser(const IR::P4Pr
 /// Loads example from a file
 const IR::P4Program* load_model(const char* curFile, CompilerOptions& options) {
     std::string includeDir = std::string(relPath) + std::string("p4include");
+    auto originalEnv = getenv("P4C_16_INCLUDE_PATH");
     setenv("P4C_16_INCLUDE_PATH", includeDir.c_str(), 1);
     options.loopsUnrolling = true;
     options.compilerVersion = P4TEST_VERSION_STRING;
     options.file = relPath;
     options.file += "testdata/p4_16_samples/";
     options.file += curFile;
-    return P4::parseP4File(options);
+    auto program = P4::parseP4File(options);
+    if (!originalEnv)
+        unsetenv("P4C_16_INCLUDE_PATH");
+    else
+        setenv("P4C_16_INCLUDE_PATH", originalEnv, 1);
+    return program;
 }
 
 std::pair<const IR::P4Parser*, const IR::P4Parser*> loadExample(const char *file,
@@ -253,6 +259,7 @@ std::pair<const IR::P4Parser*, const IR::P4Parser*> loadExample(const char *file
     options.process(1, (char* const*)&argv);
     options.langVersion = langVersion;
     const IR::P4Program* program = load_model(file, options);
+    unsetenv("P4C_16_INCLUDE_PATH");
     if (!program)
         return std::make_pair(nullptr, nullptr);
     return rewriteParser(program, options);
