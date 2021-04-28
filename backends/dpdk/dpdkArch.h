@@ -122,6 +122,8 @@ class CollectMetadataHeaderInfo : public Inspector {
 // This pass modifies all metadata references and header reference. For
 // metadata, struct_name.field_name -> m.struct_name_field_name. For header
 // headers.header_name.field_name -> h.header_name.field_name
+// The parameter named for header and metadata are also updated to "h" and
+// "m" respectively.
 class ReplaceMetadataHeaderName : public Transform {
     P4::ReferenceMap *refMap;
     CollectMetadataHeaderInfo *info;
@@ -130,8 +132,9 @@ class ReplaceMetadataHeaderName : public Transform {
     ReplaceMetadataHeaderName(P4::ReferenceMap *refMap,
                               CollectMetadataHeaderInfo *info)
         : refMap(refMap), info(info) {}
+    const IR::Node *preorder(IR::Type_Parser *p) override;
+    const IR::Node *preorder(IR::Type_Control *c) override;
     const IR::Node *preorder(IR::Member *m) override;
-    const IR::Node *preorder(IR::Parameter *p) override;
     const IR::Node *preorder(IR::PathExpression *pe) override;
 };
 
