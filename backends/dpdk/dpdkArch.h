@@ -370,15 +370,11 @@ class CollectInternetChecksumInstance : public Inspector {
         std::map<const IR::Declaration_Instance *, cstring> *csum_map)
         : csum_map(csum_map) {}
     bool preorder(const IR::Declaration_Instance *d) override {
-        if (d->type->is<IR::Type_Name>()) {
-            if (d->type->to<IR::Type_Name>()->path->name.name ==
-                "InternetChecksum") {
-                if (findContext<IR::P4Control>() or
-                    findContext<IR::P4Parser>()) {
-                    std::ostringstream s;
-                    s << "state_" << index++;
-                    csum_map->emplace(d, s.str());
-                }
+        if (auto tn = d->type->to<IR::Type_Name>()) {
+            if (tn->path->name.name == "InternetChecksum") {
+                std::ostringstream s;
+                s << "state_" << index++;
+                csum_map->emplace(d, s.str());
             }
         }
         return false;
