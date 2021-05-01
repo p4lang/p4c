@@ -362,16 +362,19 @@ class PrependPDotToActionArgs : public Transform {
 // x. For dst = cksum.get(), it will be translated to mov dst state. This pass
 // collects checksum instances and index them.
 class CollectInternetChecksumInstance : public Inspector {
+    P4::TypeMap* typeMap;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
     int index = 0;
 
   public:
     CollectInternetChecksumInstance(
+            P4::TypeMap *typeMap,
         std::map<const IR::Declaration_Instance *, cstring> *csum_map)
-        : csum_map(csum_map) {}
+        : typeMap(typeMap), csum_map(csum_map) {}
     bool preorder(const IR::Declaration_Instance *d) override {
-        if (auto tn = d->type->to<IR::Type_Name>()) {
-            if (tn->path->name.name == "InternetChecksum") {
+        auto type = typeMap->getType(d, true);
+        if (auto extn = type->to<IR::Type_Extern>()) {
+            if (extn->name == "InternetChecksum") {
                 std::ostringstream s;
                 s << "state_" << index++;
                 csum_map->emplace(d, s.str());
@@ -430,8 +433,8 @@ class InjectInternetChecksumIntermediateValue : public Transform {
 class ConvertInternetChecksum : public PassManager {
   public:
     std::map<const IR::Declaration_Instance *, cstring> csum_map;
-    ConvertInternetChecksum(CollectMetadataHeaderInfo *info) {
-        passes.push_back(new CollectInternetChecksumInstance(&csum_map));
+    ConvertInternetChecksum(P4::TypeMap *typeMap, CollectMetadataHeaderInfo *info) {
+        passes.push_back(new CollectInternetChecksumInstance(typeMap, &csum_map));
         passes.push_back(
             new InjectInternetChecksumIntermediateValue(info, &csum_map));
     }
@@ -585,7 +588,7 @@ class RewriteToDpdkArch : public PassManager {
         }));
         passes.push_back(new CollectLocalVariableToMetadata(
             &parsePsa->toBlockInfo, info, refMap));
-        auto checksum_convertor = new ConvertInternetChecksum(info);
+        auto checksum_convertor = new ConvertInternetChecksum(typeMap, info);
         passes.push_back(checksum_convertor);
         csum_map = &checksum_convertor->csum_map;
         auto p = new PrependPDotToActionArgs(&parsePsa->toBlockInfo, refMap);
