@@ -381,6 +381,14 @@ class DpdkChecksumAddStatement : DpdkAsmStatement, IDPDKNode {
 #nodbprint
 }
 
+class DpdkChecksumSubStatement : DpdkAsmStatement, IDPDKNode {
+    cstring csum;
+    cstring intermediate_value;
+    Expression field;
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+
 class DpdkGetHashStatement : DpdkAsmStatement, IDPDKNode {
     cstring hash;
     Expression fields;
