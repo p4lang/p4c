@@ -145,8 +145,8 @@ def check_generated_files(options, tmpdir, expecteddir):
     for file in files:
         if options.verbose:
             print("Checking", file)
-        produced = tmpdir + "/" + file
-        expected = expecteddir + "/" + file
+        produced = os.path.join(tmpdir, file)
+        expected = os.path.join(expecteddir, file)
         if not os.path.isfile(expected):
             if options.verbose:
                 print("Expected file does not exist; creating", expected)
@@ -158,7 +158,7 @@ def check_generated_files(options, tmpdir, expecteddir):
     return SUCCESS
 
 def file_name(tmpfolder, base, suffix, ext):
-    return tmpfolder + "/" + base + "-" + suffix + ext
+    return os.path.join(tmpfolder, base + "-" + suffix + ext)
 
 def process_file(options, argv):
     assert isinstance(options, Options)
@@ -187,25 +187,25 @@ def process_file(options, argv):
 
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
-    ppfile = tmpdir + "/" + basename                  # after parsing
+    ppfile = os.path.join(tmpdir, basename)  # after parsing
     referenceOutputs = ",".join(list(rename.keys()))
-    stderr = tmpdir + "/" + basename + "-stderr"
-    spec = tmpdir + "/" + basename + ".spec"
-    p4runtimeFile = tmpdir + "/" + basename + ".p4info.txt"
-    p4runtimeEntriesFile = tmpdir + "/" + basename + ".entries.txt"
+    stderr = os.path.join(tmpdir, basename + "-stderr")
+    spec = os.path.join(tmpdir, basename + ".spec")
+    p4runtimeFile = os.path.join(tmpdir, basename + ".p4info.txt")
+    p4runtimeEntriesFile = os.path.join(tmpdir, basename + ".entries.txt")
 
     # Create the `json_outputs` directory if it doesn't already exist. There's a
     # race here since multiple tests may run this code in parallel, so we can't
     # check if it exists beforehand.
     try:
-        os.mkdir("./json_outputs")
+        os.mkdir("json_outputs")
     except OSError as exc:
         if exc.errno == errno.EEXIST:
             pass
         else:
             raise
 
-    jsonfile = "./json_outputs" + "/" + basename + ".json"
+    jsonfile = os.path.join("json_outputs", basename + ".json")
 
     # P4Info generation requires knowledge of the architecture, so we must
     # invoke the compiler with a valid --arch.
@@ -263,7 +263,7 @@ def process_file(options, argv):
     lastFile = None
 
     for k in sorted(rename.keys()):
-        files = glob.glob(tmpdir + "/" + base + "*" + k + "*.p4")
+        files = glob.glob(os.path.join(tmpdir, base + "*" + k + "*.p4"))
         if len(files) > 1:
             print("Multiple files matching", k)
         elif len(files) == 1:
