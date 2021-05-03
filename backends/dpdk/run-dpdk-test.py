@@ -331,7 +331,7 @@ def main(argv):
         elif argv[0] == "--p4runtime":
             options.generateP4Runtime = True
         else:
-            print("Uknown option ", argv[0], file=sys.stderr)
+            print("Unknown option ", argv[0], file=sys.stderr)
             usage(options)
             sys.exit(FAILURE)
         argv = argv[1:]
