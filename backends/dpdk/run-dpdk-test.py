@@ -200,9 +200,7 @@ def process_file(options, argv):
     try:
         os.mkdir("json_outputs")
     except OSError as exc:
-        if exc.errno == errno.EEXIST:
-            pass
-        else:
+        if exc.errno != errno.EEXIST:
             raise
 
     # P4Info generation requires knowledge of the architecture, so we must
@@ -249,13 +247,10 @@ def process_file(options, argv):
         if 'Compiler Bug' in open(stderr).readlines():
             return FAILURE
 
+    # invert result
     expected_error = isError(options.p4filename)
-    if expected_error:
-        # invert result
-        if result == SUCCESS:
-            result = FAILURE
-        else:
-            result = SUCCESS
+    if expected_error and result == SUCCESS:
+        result = FAILURE
 
     # Canonicalize the generated file names
     for k in sorted(rename.keys()):
