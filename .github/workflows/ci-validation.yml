@@ -2,9 +2,9 @@ name: "validate-p4c"
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   # We run validation in parallel with the normal tests

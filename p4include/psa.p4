@@ -71,7 +71,7 @@ typedef bit<64> TimestampUint_t;
  * 16 bits of clone/mirror session id are comparable to the type
  * CloneSessionIdUint_t here.  See occurrences of clone_spec in this
  * file for details:
- * https://github.com/p4lang/behavioral-model/blob/master/targets/simple_switch/simple_switch.cpp
+ * https://github.com/p4lang/behavioral-model/blob/main/targets/simple_switch/simple_switch.cpp
  */
 
 @p4runtime_translation("p4.org/psa/v1/PortId_t", 32)
