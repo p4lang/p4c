@@ -263,7 +263,7 @@ def process_file(options, argv):
                 newName = file_name(tmpdir, base, rename[k], ext)
                 os.rename(file, newName)
 
-    if (result == SUCCESS):
+    if result == SUCCESS:
         result = check_generated_files(options, tmpdir, expected_dirname)
 
     if options.cleanupTmp:
