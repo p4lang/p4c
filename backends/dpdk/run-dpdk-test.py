@@ -205,8 +205,6 @@ def process_file(options, argv):
         else:
             raise
 
-    jsonfile = os.path.join("json_outputs", basename + ".json")
-
     # P4Info generation requires knowledge of the architecture, so we must
     # invoke the compiler with a valid --arch.
     def getArch(path):
@@ -260,8 +258,6 @@ def process_file(options, argv):
             result = SUCCESS
 
     # Canonicalize the generated file names
-    lastFile = None
-
     for k in sorted(rename.keys()):
         files = glob.glob(os.path.join(tmpdir, base + "*" + k + "*.p4"))
         if len(files) > 1:
@@ -271,7 +267,6 @@ def process_file(options, argv):
             if os.path.isfile(file):
                 newName = file_name(tmpdir, base, rename[k], ext)
                 os.rename(file, newName)
-                lastFile = newName
 
     if (result == SUCCESS):
         result = check_generated_files(options, tmpdir, expected_dirname)
