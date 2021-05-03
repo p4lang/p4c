@@ -128,13 +128,13 @@ def compare_files(options, produced, expected, ignore_case):
     if options.verbose:
         print("Comparing", expected, "and", produced)
 
-    args = "-B -u -w";
+    args = "-B -u -w"
     if ignore_case:
-        args = args + " -i";
+        args = args + " -i"
     cmd = ("diff " + args + " " + expected + " " + produced + " >&2")
     if options.verbose:
         print(cmd)
-    exitcode = subprocess.call(cmd, shell=True);
+    exitcode = subprocess.call(cmd, shell=True)
     if exitcode == 0:
         return SUCCESS
     else:
@@ -234,7 +234,7 @@ def process_file(options, argv):
             args.extend(["--p4runtime-entries-files", p4runtimeEntriesFile])
 
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
-        args.extend(["--std", "p4-14"]);
+        args.extend(["--std", "p4-14"])
     args.extend(argv)
     if options.runDebugger:
         if options.runDebugger_skip > 0:
@@ -263,9 +263,9 @@ def process_file(options, argv):
     lastFile = None
 
     for k in sorted(rename.keys()):
-        files = glob.glob(tmpdir + "/" + base + "*" + k + "*.p4");
+        files = glob.glob(tmpdir + "/" + base + "*" + k + "*.p4")
         if len(files) > 1:
-            print("Multiple files matching", k);
+            print("Multiple files matching", k)
         elif len(files) == 1:
             file = files[0]
             if os.path.isfile(file):
@@ -274,7 +274,7 @@ def process_file(options, argv):
                 lastFile = newName
 
     if (result == SUCCESS):
-        result = check_generated_files(options, tmpdir, expected_dirname);
+        result = check_generated_files(options, tmpdir, expected_dirname)
 
     if options.cleanupTmp:
         if options.verbose:
@@ -286,7 +286,7 @@ def isdir(path):
     try:
         return stat.S_ISDIR(os.stat(path).st_mode)
     except OSError:
-        return False;
+        return False
 
 ######################### main
 
@@ -320,7 +320,7 @@ def main(argv):
                 usage(options)
                 sys.exit(FAILURE)
             else:
-                options.compilerOptions += argv[1].split();
+                options.compilerOptions += argv[1].split()
                 argv = argv[1:]
         elif argv[0][1] == 'D' or argv[0][1] == 'I' or argv[0][1] == 'T':
             options.compilerOptions.append(argv[0])
@@ -342,7 +342,7 @@ def main(argv):
     options.p4filename=argv[-1]
     options.testName = None
     if options.p4filename.startswith(options.compilerSrcdir):
-        options.testName = options.p4filename[len(options.compilerSrcdir):];
+        options.testName = options.p4filename[len(options.compilerSrcdir):]
         if options.testName.startswith('/'):
             options.testName = options.testName[1:]
         if options.testName.endswith('.p4'):
