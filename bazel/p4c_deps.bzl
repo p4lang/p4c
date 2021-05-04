@@ -24,8 +24,8 @@ filegroup(
     if not native.existing_rule("com_github_nelhage_rules_boost"):
         git_repository(
             name = "com_github_nelhage_rules_boost",
-            # Newest commit on main branch as of Jan 22, 2021.
-            commit = "77dbe5a5262c71a2fe2c033677f50aaa0e31090d",
+            # Newest commit on main branch as of May 3, 2021.
+            commit = "2598b37ce68226fab465c0f0e10988af872b6dc9",
             remote = "https://github.com/nelhage/rules_boost",
             shallow_since = "1611019749 -0800",
         )
