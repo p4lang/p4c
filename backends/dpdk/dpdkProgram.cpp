@@ -146,14 +146,14 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
     for (auto l : p->parserLocals) {
         collector->push_variable(new IR::DpdkDeclaration(l));
     }
-    std::unordered_map<cstring, int> degree_map;
-    std::unordered_map<cstring, IR::ParserState> state_map;
-    std::vector<IR::ParserState> stack;
+    ordered_map<cstring, int> degree_map;
+    ordered_map<cstring, const IR::ParserState*> state_map;
+    std::vector<const IR::ParserState*> stack;
     for (auto state : p->states) {
         if (state->name == "start")
-            stack.push_back(*state);
+            stack.push_back(state);
         degree_map.insert({state->name.toString(), 0});
-        state_map.insert({state->name.toString(), *state});
+        state_map.insert({state->name.toString(), state});
     }
     for (auto state : p->states) {
         if (state->selectExpression) {
@@ -183,9 +183,9 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
         stack.pop_back();
 
         // the main body
-        auto i = new IR::DpdkLabelStatement(append_parser_name(p, state.name));
+        auto i = new IR::DpdkLabelStatement(append_parser_name(p, state->name));
         add_instr(i);
-        auto c = state.components;
+        auto c = state->components;
         for (auto stat : c) {
             DPDK::ConvertStatementToDpdk h(refmap, typemap, this->collector,
                                            csum_map);
@@ -193,8 +193,8 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
             for (auto i : h.get_instr())
                 add_instr(i);
         }
-        if (state.selectExpression) {
-            if (auto e = state.selectExpression->to<IR::SelectExpression>()) {
+        if (state->selectExpression) {
+            if (auto e = state->selectExpression->to<IR::SelectExpression>()) {
                 const IR::Expression *switch_var;
                 BUG_CHECK(e->select->components.size() == 1,
                         "Unsupported select expression %1%", e->select);
@@ -210,7 +210,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
                     }
                 }
             } else if (auto path =
-                           state.selectExpression->to<IR::PathExpression>()) {
+                           state->selectExpression->to<IR::PathExpression>()) {
                 auto i = new IR::DpdkJmpLabelStatement(
                         append_parser_name(p, path->path->name));
                 add_instr(i);
@@ -219,38 +219,43 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
             }
         }
         // ===========
-        if (state.selectExpression) {
-            if (state.selectExpression->is<IR::SelectExpression>()) {
+        if (state->selectExpression) {
+            if (state->selectExpression->is<IR::SelectExpression>()) {
                 auto select =
-                    state.selectExpression->to<IR::SelectExpression>();
+                    state->selectExpression->to<IR::SelectExpression>();
                 for (auto pair : select->selectCases) {
                     auto result = degree_map.find(pair->state->toString());
                     if (result != degree_map.end()) {
                         result->second--;
                     }
                 }
-            } else if (state.selectExpression->is<IR::PathExpression>()) {
-                auto got = degree_map.find(state.selectExpression->toString());
+            } else if (state->selectExpression->is<IR::PathExpression>()) {
+                auto got = degree_map.find(state->selectExpression->toString());
                 if (got != degree_map.end()) {
                     got->second--;
                 }
             }
         }
 
-        for (auto pair : degree_map) {
-            if (pair.second == 0) {
-                auto result = state_map.find(pair.first);
+        std::set<cstring> node_to_remove;
+        for (auto& it: degree_map) {
+            auto degree = it.second;
+            if (degree == 0) {
+                auto result = state_map.find(it.first);
                 if (result != state_map.end()) {
                     stack.push_back(result->second);
-                    degree_map.erase(result->first);
+                    node_to_remove.insert(it.first);
                 }
             }
+        }
+        for (auto node : node_to_remove) {
+            degree_map.erase(node);
         }
 
         if (degree_map.size() > 0 && stack.size() == 0)
             BUG("Unsupported parser loop");
 
-        if (state.name == "start")
+        if (state->name == "start")
             continue;
     }
     return false;
