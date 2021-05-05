@@ -357,8 +357,8 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                             a->object->getName(), intermediate, field));
                     }
                 } else {
-                    ::error(
-                        "The argument of InternetCheckSum.add is not a list.");
+                    add_instr(new IR::DpdkChecksumAddStatement(
+                                a->object->getName(), intermediate, arg->expression));
                 }
             } else if (a->method->getName().name == "subtract") {
                 auto args = a->expr->arguments;
@@ -369,9 +369,12 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                             a->object->getName(), intermediate, field));
                     }
                 } else {
-                    ::error(
-                        "The argument of InternetCheckSum.subtract is not a list.");
+                    add_instr(new IR::DpdkChecksumSubStatement(
+                                a->object->getName(), intermediate, arg->expression));
                 }
+            } else if (a->method->getName().name == "clear") {
+                add_instr(new IR::DpdkChecksumClearStatement(
+                            a->object->getName(), intermediate));
             }
         } else if (a->originalExternType->getName().name == "packet_out") {
             if (a->method->getName().name == "emit") {
