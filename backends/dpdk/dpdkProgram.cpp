@@ -184,7 +184,9 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
 
         // the main body
         auto i = new IR::DpdkLabelStatement(append_parser_name(p, state->name));
-        add_instr(i);
+        // 'accept' and 'rejet' states are hardcoded to the end of parser.
+        if (state->name != IR::ParserState::accept && state->name != IR::ParserState::reject)
+            add_instr(i);
         auto c = state->components;
         for (auto stat : c) {
             DPDK::ConvertStatementToDpdk h(refmap, typemap, this->collector,
@@ -238,7 +240,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
         }
 
         std::set<cstring> node_to_remove;
-        for (auto& it: degree_map) {
+        for (auto& it : degree_map) {
             auto degree = it.second;
             if (degree == 0) {
                 auto result = state_map.find(it.first);
@@ -258,6 +260,9 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
         if (state->name == "start")
             continue;
     }
+
+    add_instr(new IR::DpdkLabelStatement(append_parser_name(p, IR::ParserState::reject)));
+    add_instr(new IR::DpdkLabelStatement(append_parser_name(p, IR::ParserState::accept)));
     return false;
 }
 
