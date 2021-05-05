@@ -438,8 +438,17 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             auto args = a->expr->arguments;
             auto condition = args->at(0);
             auto error = args->at(1);
-            add_instr(new IR::DpdkVerifyStatement(condition->expression,
-                                                  error->expression));
+            if (auto boolean = condition->expression->to<IR::BoolLiteral>()) {
+                if (!boolean->value) {
+                    // always false, convert to drop.
+                    add_instr(new IR::DpdkDropStatement());
+                } else {
+                    // always true, ignore verify() statement.
+                }
+            } else {
+                add_instr(new IR::DpdkVerifyStatement(condition->expression,
+                            error->expression));
+            }
         }
     } else if (auto a = mi->to<P4::BuiltInMethod>()) {
         if (a->name == "setValid") {
