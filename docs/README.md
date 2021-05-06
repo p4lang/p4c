@@ -119,7 +119,7 @@ Happy writing! Should you have any questions, please don't hesitate to ask.
 
 ```
 git fetch upstream
-git rebase upstream/master
+git rebase upstream/main
 git push -f
 ```
 

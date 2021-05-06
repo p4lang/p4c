@@ -2,7 +2,7 @@
 
 branches:
   only:
-  - master
+  - main
   - stable
 
 dist: xenial

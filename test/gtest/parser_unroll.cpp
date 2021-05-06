@@ -2,6 +2,8 @@
 
 #include <fstream>
 
+#include "env.h"
+
 #include "gtest/gtest.h"
 #include "ir/ir.h"
 #include "helpers.h"
@@ -186,9 +188,6 @@ class MidEnd : public PassManager {
         return toplevel; }
 };
 
-/// Relative path to the examples
-const char *relPath = "../testdata/p4_16_samples/";
-
 // #define PARSER_UNROLL_TIME_CHECKING
 
 #ifdef PARSER_UNROLL_TIME_CHECKING
@@ -235,12 +234,20 @@ std::pair<const IR::P4Parser*, const IR::P4Parser*> rewriteParser(const IR::P4Pr
 
 /// Loads example from a file
 const IR::P4Program* load_model(const char* curFile, CompilerOptions& options) {
-    setenv("P4C_16_INCLUDE_PATH", "../p4include", 1);
+    std::string includeDir = std::string(relPath) + std::string("p4include");
+    auto originalEnv = getenv("P4C_16_INCLUDE_PATH");
+    setenv("P4C_16_INCLUDE_PATH", includeDir.c_str(), 1);
     options.loopsUnrolling = true;
     options.compilerVersion = P4TEST_VERSION_STRING;
     options.file = relPath;
+    options.file += "testdata/p4_16_samples/";
     options.file += curFile;
-    return P4::parseP4File(options);
+    auto program = P4::parseP4File(options);
+    if (!originalEnv)
+        unsetenv("P4C_16_INCLUDE_PATH");
+    else
+        setenv("P4C_16_INCLUDE_PATH", originalEnv, 1);
+    return program;
 }
 
 std::pair<const IR::P4Parser*, const IR::P4Parser*> loadExample(const char *file,

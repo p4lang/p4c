@@ -128,13 +128,13 @@ def compare_files(options, produced, expected, ignore_case):
     if options.verbose:
         print("Comparing", expected, "and", produced)
 
-    args = "-B -u -w";
+    args = "-B -u -w"
     if ignore_case:
-        args = args + " -i";
+        args = args + " -i"
     cmd = ("diff " + args + " " + expected + " " + produced + " >&2")
     if options.verbose:
         print(cmd)
-    exitcode = subprocess.call(cmd, shell=True);
+    exitcode = subprocess.call(cmd, shell=True)
     if exitcode == 0:
         return SUCCESS
     else:
@@ -145,8 +145,8 @@ def check_generated_files(options, tmpdir, expecteddir):
     for file in files:
         if options.verbose:
             print("Checking", file)
-        produced = tmpdir + "/" + file
-        expected = expecteddir + "/" + file
+        produced = os.path.join(tmpdir, file)
+        expected = os.path.join(expecteddir, file)
         if not os.path.isfile(expected):
             if options.verbose:
                 print("Expected file does not exist; creating", expected)
@@ -158,7 +158,7 @@ def check_generated_files(options, tmpdir, expecteddir):
     return SUCCESS
 
 def file_name(tmpfolder, base, suffix, ext):
-    return tmpfolder + "/" + base + "-" + suffix + ext
+    return os.path.join(tmpfolder, base + "-" + suffix + ext)
 
 def process_file(options, argv):
     assert isinstance(options, Options)
@@ -187,25 +187,21 @@ def process_file(options, argv):
 
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
-    ppfile = tmpdir + "/" + basename                  # after parsing
+    ppfile = os.path.join(tmpdir, basename)  # after parsing
     referenceOutputs = ",".join(list(rename.keys()))
-    stderr = tmpdir + "/" + basename + "-stderr"
-    spec = tmpdir + "/" + basename + ".spec"
-    p4runtimeFile = tmpdir + "/" + basename + ".p4info.txt"
-    p4runtimeEntriesFile = tmpdir + "/" + basename + ".entries.txt"
+    stderr = os.path.join(tmpdir, basename + "-stderr")
+    spec = os.path.join(tmpdir, basename + ".spec")
+    p4runtimeFile = os.path.join(tmpdir, basename + ".p4info.txt")
+    p4runtimeEntriesFile = os.path.join(tmpdir, basename + ".entries.txt")
 
     # Create the `json_outputs` directory if it doesn't already exist. There's a
     # race here since multiple tests may run this code in parallel, so we can't
     # check if it exists beforehand.
     try:
-        os.mkdir("./json_outputs")
+        os.mkdir("json_outputs")
     except OSError as exc:
-        if exc.errno == errno.EEXIST:
-            pass
-        else:
+        if exc.errno != errno.EEXIST:
             raise
-
-    jsonfile = "./json_outputs" + "/" + basename + ".json"
 
     # P4Info generation requires knowledge of the architecture, so we must
     # invoke the compiler with a valid --arch.
@@ -234,7 +230,7 @@ def process_file(options, argv):
             args.extend(["--p4runtime-entries-files", p4runtimeEntriesFile])
 
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
-        args.extend(["--std", "p4-14"]);
+        args.extend(["--std", "p4-14"])
     args.extend(argv)
     if options.runDebugger:
         if options.runDebugger_skip > 0:
@@ -251,30 +247,24 @@ def process_file(options, argv):
         if 'Compiler Bug' in open(stderr).readlines():
             return FAILURE
 
+    # invert result
     expected_error = isError(options.p4filename)
-    if expected_error:
-        # invert result
-        if result == SUCCESS:
-            result = FAILURE
-        else:
-            result = SUCCESS
+    if expected_error and result == SUCCESS:
+        result = FAILURE
 
     # Canonicalize the generated file names
-    lastFile = None
-
     for k in sorted(rename.keys()):
-        files = glob.glob(tmpdir + "/" + base + "*" + k + "*.p4");
+        files = glob.glob(os.path.join(tmpdir, base + "*" + k + "*.p4"))
         if len(files) > 1:
-            print("Multiple files matching", k);
+            print("Multiple files matching", k)
         elif len(files) == 1:
             file = files[0]
             if os.path.isfile(file):
                 newName = file_name(tmpdir, base, rename[k], ext)
                 os.rename(file, newName)
-                lastFile = newName
 
-    if (result == SUCCESS):
-        result = check_generated_files(options, tmpdir, expected_dirname);
+    if result == SUCCESS:
+        result = check_generated_files(options, tmpdir, expected_dirname)
 
     if options.cleanupTmp:
         if options.verbose:
@@ -286,7 +276,7 @@ def isdir(path):
     try:
         return stat.S_ISDIR(os.stat(path).st_mode)
     except OSError:
-        return False;
+        return False
 
 ######################### main
 
@@ -320,7 +310,7 @@ def main(argv):
                 usage(options)
                 sys.exit(FAILURE)
             else:
-                options.compilerOptions += argv[1].split();
+                options.compilerOptions += argv[1].split()
                 argv = argv[1:]
         elif argv[0][1] == 'D' or argv[0][1] == 'I' or argv[0][1] == 'T':
             options.compilerOptions.append(argv[0])
@@ -331,7 +321,7 @@ def main(argv):
         elif argv[0] == "--p4runtime":
             options.generateP4Runtime = True
         else:
-            print("Uknown option ", argv[0], file=sys.stderr)
+            print("Unknown option ", argv[0], file=sys.stderr)
             usage(options)
             sys.exit(FAILURE)
         argv = argv[1:]
@@ -342,7 +332,7 @@ def main(argv):
     options.p4filename=argv[-1]
     options.testName = None
     if options.p4filename.startswith(options.compilerSrcdir):
-        options.testName = options.p4filename[len(options.compilerSrcdir):];
+        options.testName = options.p4filename[len(options.compilerSrcdir):]
         if options.testName.startswith('/'):
             options.testName = options.testName[1:]
         if options.testName.endswith('.p4'):

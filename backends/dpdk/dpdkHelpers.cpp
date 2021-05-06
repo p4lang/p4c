@@ -339,15 +339,16 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
     } else if (auto a = mi->to<P4::ExternMethod>()) {
         // Checksum function call
         if (a->originalExternType->getName().name == "InternetChecksum") {
+            auto res =
+                csum_map->find(a->object->to<IR::Declaration_Instance>());
+            cstring intermediate;
+            if (res != csum_map->end()) {
+                intermediate = res->second;
+            } else {
+                BUG("checksum map does not collect all checksum def.");
+            }
+
             if (a->method->getName().name == "add") {
-                auto res =
-                    csum_map->find(a->object->to<IR::Declaration_Instance>());
-                cstring intermediate;
-                if (res != csum_map->end()) {
-                    intermediate = res->second;
-                } else {
-                    BUG("checksum map does not collect all checksum def.");
-                }
                 auto args = a->expr->arguments;
                 const IR::Argument *arg = args->at(0);
                 if (auto l = arg->expression->to<IR::ListExpression>()) {
@@ -356,9 +357,24 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                             a->object->getName(), intermediate, field));
                     }
                 } else {
-                    ::error(
-                        "The argument of InternetCheckSum.add is not a list.");
+                    add_instr(new IR::DpdkChecksumAddStatement(
+                                a->object->getName(), intermediate, arg->expression));
                 }
+            } else if (a->method->getName().name == "subtract") {
+                auto args = a->expr->arguments;
+                const IR::Argument *arg = args->at(0);
+                if (auto l = arg->expression->to<IR::ListExpression>()) {
+                    for (auto field : l->components) {
+                        add_instr(new IR::DpdkChecksumSubStatement(
+                            a->object->getName(), intermediate, field));
+                    }
+                } else {
+                    add_instr(new IR::DpdkChecksumSubStatement(
+                                a->object->getName(), intermediate, arg->expression));
+                }
+            } else if (a->method->getName().name == "clear") {
+                add_instr(new IR::DpdkChecksumClearStatement(
+                            a->object->getName(), intermediate));
             }
         } else if (a->originalExternType->getName().name == "packet_out") {
             if (a->method->getName().name == "emit") {

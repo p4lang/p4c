@@ -379,7 +379,7 @@ const IR::Node* DoStrengthReduction::postorder(IR::Slice* expr) {
     if (shift_of) {
         if (!shift_of->type->is<IR::Type_Bits>())
             return expr;
-        if (shift_of->type->to<IR::Type_Bits>()->isSigned)
+        if (shift_of->type->to<IR::Type_Bits>()->isSigned && expr->e0->is<IR::Shr>())
             return expr;
         int hi = expr->getH();
         int lo = expr->getL();

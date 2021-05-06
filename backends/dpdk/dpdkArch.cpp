@@ -339,8 +339,8 @@ const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Member *m) {
  * blocks with "h" and "m" respectively.
  * It assumes that ConvertToDpdkArch pass has converted the control blocks to
  * the following form for DPDK Architecture:
- *         control ingressDeparser(packet_out bufffer, header hdr, metadata md);
- *         control egressDeparser(packet_out bufffer, header hdr, metadata md);
+ *         control ingressDeparser(packet_out buffer, header hdr, metadata md);
+ *         control egressDeparser(packet_out buffer, header hdr, metadata md);
  *         control ingress(header hdr, metadata md);
  *         control egress(header hdr, metadata md);
 */
@@ -348,57 +348,59 @@ const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Type_Control *c) {
     auto applyParams = new IR::ParameterList();
     auto paramSize = c->applyParams->size();
 
-    if (paramSize == 2 || paramSize == 3) {
-        int header_index = 0;
+    if (!(paramSize == 2 || paramSize == 3))
+        ::error(ErrorType::ERR_MODEL,
+                ("Unexpected number of arguments for %1%. Are you using an up-to-date 'psa.p4'?"),
+                 c->name);
 
-        /* For IngressDeparser and EgressDeparser, Header and metadata parameters are
-           at index 1 and 2 respectively. */
-        if (paramSize == 3) {
-            header_index = 1;
-            applyParams->push_back(c->getApplyParameters()->getParameter(0));
-        }
+    int header_index = 0;
 
-        auto header = c->applyParams->parameters.at(header_index);
-        auto local_metadata = c->applyParams->parameters.at(header_index + 1);
-        header = new IR::Parameter(IR::ID("h"), header->direction, header->type);
-        local_metadata = new IR::Parameter(IR::ID("m"), local_metadata->direction,
-                                           local_metadata->type);
-        applyParams->push_back(header);
-        applyParams->push_back(local_metadata);
-
-        return new IR::Type_Control(c->name, c->annotations, c->typeParameters,
-                                    applyParams);
+    /* For IngressDeparser and EgressDeparser, Header and metadata parameters are
+       at index 1 and 2 respectively. */
+    if (paramSize == 3) {
+        header_index = 1;
+        applyParams->push_back(c->getApplyParameters()->getParameter(0));
     }
 
-    return c;
+    auto header = c->applyParams->parameters.at(header_index);
+    auto local_metadata = c->applyParams->parameters.at(header_index + 1);
+    header = new IR::Parameter(IR::ID("h"), header->direction, header->type);
+    local_metadata = new IR::Parameter(IR::ID("m"), local_metadata->direction,
+                                       local_metadata->type);
+    applyParams->push_back(header);
+    applyParams->push_back(local_metadata);
+
+    return new IR::Type_Control(c->name, c->annotations, c->typeParameters,
+                                applyParams);
 }
 
 /* This function replaces the header and metadata parameter names in parser
  * blocks with "h" and "m" respectively.
  * It assumes that ConvertToDpdkArch pass has converted Ingress/Egress
  * parser blocks to the following form for DPDK Architecture:
- *         parser ingressParser(packet_in bufffer, header hdr, metadata md);
- *         parser egressParser(packet_in bufffer, header hdr, metadata md);
+ *         parser ingressParser(packet_in buffer, header hdr, metadata md);
+ *         parser egressParser(packet_in buffer, header hdr, metadata md);
 */
 const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Type_Parser *p) {
     auto applyParams = new IR::ParameterList();
     auto paramSize = p->applyParams->size();
 
-    if (paramSize == 3) {
-        auto header = p->applyParams->parameters.at(1);
-        auto local_metadata = p->applyParams->parameters.at(2);
-        header = new IR::Parameter(IR::ID("h"), header->direction, header->type);
-        local_metadata = new IR::Parameter(IR::ID("m"), local_metadata->direction,
-                                           local_metadata->type);
-        applyParams->push_back(p->getApplyParameters()->getParameter(0));
-        applyParams->push_back(header);
-        applyParams->push_back(local_metadata);
+    if (paramSize != 3)
+        ::error(ErrorType::ERR_MODEL,
+                ("Unexpected number of arguments for %1%. Are you using an up-to-date 'psa.p4'?"),
+                 p->name);
 
-        return new IR::Type_Parser(p->name, p->annotations, p->typeParameters,
-                                   applyParams);
-    }
+    auto header = p->applyParams->parameters.at(1);
+    auto local_metadata = p->applyParams->parameters.at(2);
+    header = new IR::Parameter(IR::ID("h"), header->direction, header->type);
+    local_metadata = new IR::Parameter(IR::ID("m"), local_metadata->direction,
+                                       local_metadata->type);
+    applyParams->push_back(p->getApplyParameters()->getParameter(0));
+    applyParams->push_back(header);
+    applyParams->push_back(local_metadata);
 
-    return p;
+    return new IR::Type_Parser(p->name, p->annotations, p->typeParameters,
+                               applyParams);
 }
 
 const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct *s) {

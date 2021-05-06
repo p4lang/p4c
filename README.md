@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/p4lang/p4c.svg?branch=master)](https://travis-ci.com/p4lang/p4c)
+[![Build Status](https://travis-ci.com/p4lang/p4c.svg?branch=main)](https://travis-ci.com/p4lang/p4c)
 
 # p4c
 
@@ -17,15 +17,17 @@ make adding new backends easy.
 
 The code contains five sample backends:
 * p4c-bm2-ss: can be used to target the P4 `simple_switch` written using
-  the BMv2 behavioral model https://github.com/p4lang/behavioral-model
-* p4c-ebpf: can be used to generate C code which can be compiled to EBPF
+  the BMv2 behavioral model https://github.com/p4lang/behavioral-model,
+* p4c-dpdk: can be used to target the DPDK software switch (SXS) pipeline 
+  https://doc.dpdk.org/guides/rel_notes/release_20_11.html,
+* p4c-ebpf: can be used to generate C code which can be compiled to eBPF
   https://en.wikipedia.org/wiki/Berkeley_Packet_Filter and then loaded
-  in the Linux kernel for packet filtering
+  in the Linux kernel for packet filtering,
 * p4test: a source-to-source P4 translator which can be used for
-  testing, learning compiler internals and debugging.
+  testing, learning compiler internals and debugging,
 * p4c-graphs: can be used to generate visual representations of a P4 program;
-  for now it only supports generating graphs of top-level control flows.
-* p4c-ubfp: can be used to generate ebpf code that runs in user-space
+  for now it only supports generating graphs of top-level control flows, and
+* p4c-ubfp: can be used to generate eBPF code that runs in user-space.
 
 Sample command lines:
 

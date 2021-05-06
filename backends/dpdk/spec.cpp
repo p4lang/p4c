@@ -377,6 +377,18 @@ std::ostream &IR::DpdkChecksumAddStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
+std::ostream &IR::DpdkChecksumSubStatement::toSpec(std::ostream &out) const {
+    out << "cksub "
+        << "h.cksum_state." << intermediate_value << " " << DPDK::toStr(field);
+    return out;
+}
+
+std::ostream &IR::DpdkChecksumClearStatement::toSpec(std::ostream &out) const {
+    out << "mov "
+        << "h.cksum_state." << intermediate_value << " " << "0x0";
+    return out;
+}
+
 std::ostream &IR::DpdkGetHashStatement::toSpec(std::ostream &out) const {
     out << "hash_get " << DPDK::toStr(dst) << " " << hash << " (";
     if (auto l = fields->to<IR::ListExpression>()) {

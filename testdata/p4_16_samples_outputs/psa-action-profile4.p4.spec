@@ -1,5 +1,11 @@
 
 
+struct ethernet_t {
+	bit<48> dstAddr
+	bit<48> srcAddr
+	bit<16> etherType
+}
+
 struct EMPTY {
 	bit<32> psa_ingress_parser_input_metadata_ingress_port
 	bit<32> psa_ingress_parser_input_metadata_packet_path
@@ -29,6 +35,8 @@ struct EMPTY {
 }
 metadata instanceof EMPTY
 
+header ethernet instanceof ethernet_t
+
 struct a1_arg_t {
 	bit<48> param
 }
@@ -42,18 +50,18 @@ action NoAction args none {
 }
 
 action a1 args instanceof a1_arg_t {
-	mov h.dstAddr t.param
+	mov h.ethernet.dstAddr t.param
 	return
 }
 
 action a2 args instanceof a2_arg_t {
-	mov h.etherType t.param
+	mov h.ethernet.etherType t.param
 	return
 }
 
 table tbl {
 	key {
-		h.srcAddr exact
+		h.ethernet.srcAddr exact
 	}
 	actions {
 		NoAction
@@ -67,7 +75,7 @@ table tbl {
 
 table tbl2 {
 	key {
-		h.srcAddr exact
+		h.ethernet.srcAddr exact
 	}
 	actions {
 		NoAction
@@ -82,12 +90,11 @@ table tbl2 {
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
-	extract h
+	extract h.ethernet
 	table tbl
 	table tbl2
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
-	emit h
-	tx m.psa_ingress_output_metadata_egress_port
+	emit h.ethernet
 	LABEL_DROP : drop
 }
 

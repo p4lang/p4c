@@ -2,9 +2,9 @@ name: "test-p4c"
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   # Build and test p4c on Ubuntu 16.04

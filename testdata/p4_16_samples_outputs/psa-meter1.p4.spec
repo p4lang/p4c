@@ -1,5 +1,11 @@
 
 
+struct ethernet_t {
+	bit<48> dstAddr
+	bit<48> srcAddr
+	bit<16> etherType
+}
+
 struct EMPTY {
 	bit<32> psa_ingress_parser_input_metadata_ingress_port
 	bit<32> psa_ingress_parser_input_metadata_packet_path
@@ -29,6 +35,8 @@ struct EMPTY {
 }
 metadata instanceof EMPTY
 
+header ethernet instanceof ethernet_t
+
 struct execute_arg_t {
 	bit<12> index
 	bit<32> color
@@ -45,7 +53,7 @@ action execute args instanceof execute_arg_t {
 
 table tbl {
 	key {
-		h.srcAddr exact
+		h.ethernet.srcAddr exact
 	}
 	actions {
 		NoAction
@@ -59,7 +67,7 @@ table tbl {
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
-	extract h
+	extract h.ethernet
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	tx m.psa_ingress_output_metadata_egress_port
