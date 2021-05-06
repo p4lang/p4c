@@ -69,7 +69,7 @@ table tbl {
 	}
 	default_action NoAction args none 
 	action_selector ap_0
-	size 0
+	size 0x10000
 }
 
 
@@ -83,7 +83,7 @@ table tbl2 {
 	}
 	default_action NoAction args none 
 	action_selector ap_0
-	size 0
+	size 0x10000
 }
 
 
@@ -95,6 +95,7 @@ apply {
 	table tbl2
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
+	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP : drop
 }
 
