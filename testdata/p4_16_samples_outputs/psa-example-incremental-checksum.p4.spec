@@ -127,6 +127,7 @@ apply {
 	emit h.ethernet
 	emit h.ipv4
 	emit h.tcp
+	mov h.cksum_state.state_0 0x0
 	ckadd h.cksum_state.state_0 h.ipv4.version
 	ckadd h.cksum_state.state_0 h.ipv4.ihl
 	ckadd h.cksum_state.state_0 h.ipv4.diffserv
@@ -139,6 +140,7 @@ apply {
 	ckadd h.cksum_state.state_0 h.ipv4.srcAddr
 	ckadd h.cksum_state.state_0 h.ipv4.dstAddr
 	mov h.ipv4.hdrChecksum h.cksum_state.state_0
+	mov h.cksum_state.state_0 0x0
 	cksub h.cksum_state.state_0 h.tcp.checksum
 	cksub h.cksum_state.state_0 m.local_metadata__fwd_metadata_old_srcAddr0
 	ckadd h.cksum_state.state_0 h.ipv4.srcAddr
