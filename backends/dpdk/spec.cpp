@@ -344,7 +344,7 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
     if (auto size = properties->getProperty("size")) {
         out << "\tsize " << DPDK::toStr(size->value) << "" << std::endl;
     } else {
-        out << "\tsize 0" << std::endl;
+        out << "\tsize 0x10000" << std::endl;
     }
     out << "}" << std::endl;
     return out;

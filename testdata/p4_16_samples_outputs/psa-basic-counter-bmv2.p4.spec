@@ -47,7 +47,7 @@ table tbl {
 		execute
 	}
 	default_action execute args none 
-	size 0
+	size 0x10000
 }
 
 
