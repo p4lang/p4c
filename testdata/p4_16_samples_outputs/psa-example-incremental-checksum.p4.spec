@@ -107,7 +107,7 @@ table route {
 		NoAction
 	}
 	default_action NoAction args none 
-	size 0
+	size 0x10000
 }
 
 

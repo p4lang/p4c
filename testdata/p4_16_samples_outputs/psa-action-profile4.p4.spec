@@ -69,7 +69,7 @@ table tbl {
 	}
 	default_action NoAction args none 
 	action_selector ap_0
-	size 0
+	size 0x10000
 }
 
 
@@ -83,7 +83,7 @@ table tbl2 {
 	}
 	default_action NoAction args none 
 	action_selector ap_0
-	size 0
+	size 0x10000
 }
 
 

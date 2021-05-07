@@ -74,7 +74,7 @@ table tbl {
 	}
 	default_action NoAction args none 
 	action_selector as_0
-	size 0
+	size 0x10000
 }
 
 
