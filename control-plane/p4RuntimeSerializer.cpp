@@ -400,6 +400,9 @@ class P4RuntimeSymbolTable : public P4RuntimeSymbolTableIface {
              boost::optional<p4rt_id_t> id = boost::none) override {
         auto& symbolTable = symbolTables[type];
         if (symbolTable.find(name) != symbolTable.end()) {
+            LOG1(" Cannot add duplicate symbol " << name);
+            ::error(ErrorType::ERR_DUPLICATE,
+                "%1%: control plane name used multiple times", name);
             return;  // This is a duplicate, but that's OK.
         }
 
