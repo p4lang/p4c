@@ -41,6 +41,8 @@ struct execute_register_arg_t {
 	bit<10> idx
 }
 
+regarray reg_0 size 0x400 initval 0
+
 action NoAction args none {
 	return
 }

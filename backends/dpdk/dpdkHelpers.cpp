@@ -74,7 +74,7 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                         left, e->object->getName(), intermediate);
                 }
             } else if (e->originalExternType->getName().name == "Register") {
-                if (e->method->getName().name == "get") {
+                if (e->method->getName().name == "read") {
                     auto index = (*e->expr->arguments)[0]->expression;
                     i = new IR::DpdkRegisterReadStatement(
                         left, e->object->getName(), index);
@@ -421,12 +421,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                 BUG("Counter function not implemented");
             }
         } else if (a->originalExternType->getName().name == "Register") {
-            if (a->method->getName().name == "read") {
-                std::cerr
-                    << "ignore this register read, because the return value is "
-                       "optimized."
-                    << std::endl;
-            } else if (a->method->getName().name == "write") {
+            if (a->method->getName().name == "write") {
                 auto args = a->expr->arguments;
                 auto index = args->at(0)->expression;
                 auto src = args->at(1)->expression;

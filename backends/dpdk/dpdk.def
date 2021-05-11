@@ -8,6 +8,11 @@ class DpdkDeclaration : IDPDKNode {
 #nodbprint
 }
 
+class DpdkExternDeclaration :  Declaration_Instance, IDPDKNode {
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+
 class DpdkHeaderType : Type_Header, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
@@ -46,6 +51,7 @@ class DpdkTable {
 class DpdkAsmProgram {
     inline IndexedVector<DpdkHeaderType> headerType;
     inline IndexedVector<DpdkStructType> structType;
+    inline IndexedVector<DpdkExternDeclaration> externDeclarations;
     inline IndexedVector<DpdkAction> actions;
     inline IndexedVector<DpdkTable> tables;
     inline IndexedVector<DpdkAsmStatement> statements;
@@ -438,6 +444,14 @@ class DpdkMeterExecuteStatement: DpdkAsmStatement, IDPDKNode {
 class DpdkCounterCountStatement: DpdkAsmStatement, IDPDKNode {
     cstring counter;
     Expression index;
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+
+class DpdkRegisterDeclStatement: DpdkAsmStatement {
+    cstring reg;
+    Expression size;
+    NullOK optional Expression init_val;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
