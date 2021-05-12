@@ -464,6 +464,9 @@ class CollectRegisterDeclaration : public Inspector {
                         ::error("%1%: expected size and optionally init_val as arguments", d);
                      }
                     reg_map->emplace(d, d->name);
+                } else {
+                    ::warning(ErrorType::WARN_INVALID, "%1%: Register instantiation found outside
+                              control blocks. PSA does not permit this.", d);
                 }
             }
          }
