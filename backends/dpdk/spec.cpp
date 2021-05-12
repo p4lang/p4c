@@ -99,8 +99,7 @@ cstring toStr(const IR::Type *const type) {
         return out.str();
     } else if (auto n = type->to<IR::Type_Name>()) {
         return n->path->name;
-    } else if (type->is<IR::Type_Specialized>()) {
-        auto n = type->to<IR::Type_Specialized>();
+    } else if (auto n = type->to<IR::Type_Specialized>()) {
         return n->baseType->path->name.name;
     } else {
         std::cerr << type->node_type_name() << std::endl;
@@ -154,12 +153,14 @@ std::ostream &IR::DpdkDeclaration::toSpec(std::ostream &out) const {
 std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
     if ( DPDK::toStr(this->getType()) == "Register") {
         auto args = this->arguments;
-        if (args->size() == 0)
+        if (args->size() == 0) {
           ::error ("Register extern declaration %1% must contain a size parameter\n", this->Name());
-        auto size = args->at(0)->expression;
-        auto init_val = args->size() == 2? args->at(1)->expression: nullptr;
-        auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name(), size, init_val);
-        regDecl->toSpec(out) << std::endl;
+        } else {
+          auto size = args->at(0)->expression;
+          auto init_val = args->size() == 2? args->at(1)->expression: nullptr;
+          auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name(), size, init_val);
+          regDecl->toSpec(out) << std::endl;
+        }
     }
     else if ( DPDK::toStr(this->getType()) == "Counter") {
     //TODO yet to be implemented
