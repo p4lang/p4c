@@ -465,8 +465,9 @@ class CollectRegisterDeclaration : public Inspector {
                      }
                     reg_map->emplace(d, d->name);
                 } else {
-                    ::warning(ErrorType::WARN_INVALID, "%1%: Register instantiation found outside
-                              control blocks. PSA does not permit this.", d);
+                    ::warning(ErrorType::WARN_INVALID,
+                              "%1%: Register instantiation found outside control blocks. " \
+                               "PSA does not permit this.", d);
                 }
             }
          }
