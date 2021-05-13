@@ -211,6 +211,7 @@ std::pair<const IR::P4Parser*, const IR::P4Parser*> rewriteParser(const IR::P4Pr
                                                                   CompilerOptions& options) {
     P4::FrontEnd frontend;
     program = frontend.run(options, program);
+    CHECK_NULL(program);
     P4::ReferenceMap    refMap;
     P4::TypeMap         typeMap;
 

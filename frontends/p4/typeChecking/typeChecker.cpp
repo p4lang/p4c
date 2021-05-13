@@ -818,7 +818,7 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
         if (auto li = sourceExpression->to<IR::ListExpression>()) {
             if (tt->getSize() != li->components.size()) {
                 typeError("%1%: destination type expects %2% fields, but source only has %3%",
-                          errorPosition, ts->fields.size(), li->components.size());
+                          errorPosition, tt->getSize(), li->components.size());
                 return sourceExpression;
             }
             bool changed = false;
