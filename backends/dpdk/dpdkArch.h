@@ -459,16 +459,10 @@ class CollectRegisterDeclaration : public Inspector {
             auto type = d->type->to<IR::Type_Specialized>();
             auto externTypeName = type->baseType->path->name.name;
             if (externTypeName == "Register"){
-                if (findContext<IR::P4Control>()){
-                    if (d->arguments->size() != 1 and d->arguments->size() != 2 ) {
-                        ::error("%1%: expected size and optionally init_val as arguments", d);
-                     }
-                    reg_map->emplace(d, d->name);
-                } else {
-                    ::warning(ErrorType::WARN_INVALID,
-                              "%1%: Register instantiation found outside control blocks. " \
-                               "PSA does not permit this.", d);
-                }
+              if (d->arguments->size() != 1 and d->arguments->size() != 2 ) {
+                  ::error("%1%: expected size and optionally init_val as arguments", d);
+              }
+              reg_map->emplace(d, d->name);
             }
          }
          return false;
