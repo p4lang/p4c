@@ -42,12 +42,16 @@ metadata instanceof metadata_t
 
 header ethernet instanceof ethernet_t
 
+regarray regfile_0 size 0x80 initval 0
+
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
-	register_write regfile_0 0x1 0x3
-	register_write regfile_0 0x2 0x4
+	regwr regfile_0 0x1 0x3
+	regwr regfile_0 0x2 0x4
+	regrd m.Ingress_tmp_0 regfile_0 0x1
+	regrd m.Ingress_tmp_1 regfile_0 0x2
 	mov m.Ingress_tmp m.Ingress_tmp_0
 	add m.Ingress_tmp m.Ingress_tmp_1
 	mov h.ethernet.dstAddr m.Ingress_tmp

@@ -42,12 +42,14 @@ struct execute_register_arg_t {
 	bit<10> idx
 }
 
+regarray reg_0 size 0x400 initval 0
+
 action NoAction args none {
 	return
 }
 
 action execute_register args instanceof execute_register_arg_t {
-	register_write reg_0 t.idx m.local_metadata_data
+	regwr reg_0 t.idx m.local_metadata_data
 	return
 }
 

@@ -79,6 +79,13 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
         structType.push_back(st);
     }
 
+    IR::IndexedVector<IR::DpdkExternDeclaration> externDecls;
+    for (auto kv : *reg_map) {
+        auto s = kv.first;
+        auto st = new IR::DpdkExternDeclaration(s->name, s->annotations, s->type, s->arguments);
+        externDecls.push_back(st);
+    }
+
     IR::IndexedVector<IR::DpdkAsmStatement> statements;
     auto ingress_parser_converter =
         new ConvertToDpdkParser(refmap, typemap, collector, csum_map);
@@ -128,7 +135,7 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     statements.push_back(s);
 
     return new IR::DpdkAsmProgram(
-        headerType, structType, ingress_converter->getActions(),
+        headerType, structType, externDecls, ingress_converter->getActions(),
         ingress_converter->getTables(), statements, collector->get_globals());
 }
 

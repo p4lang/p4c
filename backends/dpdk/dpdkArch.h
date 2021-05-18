@@ -443,6 +443,40 @@ class ConvertInternetChecksum : public PassManager {
     }
 };
 
+/* This pass collects PSA register declaration instances and push them to a map
+ * for emitting to the .spec file later */
+class CollectRegisterDeclaration : public Inspector {
+    std::map<const IR::Declaration_Instance *, cstring> *reg_map;
+    P4::TypeMap *typeMap;
+
+  public:
+    CollectRegisterDeclaration(
+        std::map<const IR::Declaration_Instance *, cstring> *reg_map, P4::TypeMap *typeMap)
+        : reg_map(reg_map) , typeMap(typeMap) {}
+
+    bool preorder(const IR::Declaration_Instance *d) override {
+        if (d->type->is<IR::Type_Specialized>()) {
+            auto type = d->type->to<IR::Type_Specialized>();
+            auto externTypeName = type->baseType->path->name.name;
+            if (externTypeName == "Register"){
+              if (d->arguments->size() != 1 and d->arguments->size() != 2 ) {
+                  ::error("%1%: expected size and optionally init_val as arguments", d);
+              }
+              reg_map->emplace(d, d->name);
+            }
+         }
+         return false;
+    }
+};
+
+class AddRegisterDeclaration : public PassManager {
+  public:
+    std::map<const IR::Declaration_Instance *, cstring> reg_map;
+    AddRegisterDeclaration(P4::TypeMap *typeMap) {
+        passes.push_back(new CollectRegisterDeclaration(&reg_map, typeMap));
+    }
+};
+
 // This pass is preparing logical expression for following branching statement
 // optimization. This pass breaks parenthesis looks liks this: (a && b) && c.
 // After this pass, the expression looks like this: a && b && c. (The AST is
@@ -551,6 +585,7 @@ class RewriteToDpdkArch : public PassManager {
     std::map<const cstring, IR::IndexedVector<IR::Parameter> *>
         *args_struct_map;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
+    std::map<const IR::Declaration_Instance *, cstring> *reg_map;
     RewriteToDpdkArch(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                       DpdkVariableCollector *collector) {
         setName("RewriteToDpdkArch");
@@ -598,6 +633,9 @@ class RewriteToDpdkArch : public PassManager {
         args_struct_map = &p->args_struct_map;
         passes.push_back(p);
         passes.push_back(new ConvertLogicalExpression);
+        auto insertRegDeclaration = new AddRegisterDeclaration(typeMap);
+        passes.push_back(insertRegDeclaration);
+        reg_map = &insertRegDeclaration->reg_map;
     }
 };
 

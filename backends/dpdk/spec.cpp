@@ -99,6 +99,8 @@ cstring toStr(const IR::Type *const type) {
         return out.str();
     } else if (auto n = type->to<IR::Type_Name>()) {
         return n->path->name;
+    } else if (auto n = type->to<IR::Type_Specialized>()) {
+        return n->baseType->path->name.name;
     } else {
         std::cerr << type->node_type_name() << std::endl;
         BUG("not implemented type");
@@ -124,6 +126,8 @@ std::ostream &IR::DpdkAsmProgram::toSpec(std::ostream &out) const {
         h->toSpec(out) << std::endl;
     for (auto s : structType)
         s->toSpec(out) << std::endl;
+    for (auto s : externDeclarations)
+        s->toSpec(out) << std::endl;
     for (auto a : actions) {
         a->toSpec(out) << std::endl << std::endl;
     }
@@ -143,6 +147,27 @@ std::ostream &IR::DpdkAsmStatement::toSpec(std::ostream &out) const {
 
 std::ostream &IR::DpdkDeclaration::toSpec(std::ostream &out) const {
     // TBD
+    return out;
+}
+
+std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
+    if ( DPDK::toStr(this->getType()) == "Register") {
+        auto args = this->arguments;
+        if (args->size() == 0) {
+          ::error ("Register extern declaration %1% must contain a size parameter\n", this->Name());
+        } else {
+          auto size = args->at(0)->expression;
+          auto init_val = args->size() == 2? args->at(1)->expression: nullptr;
+          auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name(), size, init_val);
+          regDecl->toSpec(out) << std::endl;
+        }
+    }
+    else if ( DPDK::toStr(this->getType()) == "Counter") {
+    //TODO yet to be implemented
+    }
+    else if ( DPDK::toStr(this->getType()) == "Meter") {
+    //TODO yet to be implemented
+    }
     return out;
 }
 
@@ -431,14 +456,23 @@ std::ostream &IR::DpdkCounterCountStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
+std::ostream &IR::DpdkRegisterDeclStatement::toSpec(std::ostream &out) const {
+    out << "regarray " << reg << " size " << DPDK::toStr(size) << " initval ";
+    if (init_val)
+        out << DPDK::toStr(init_val);
+    else
+        out << "0";
+    return out;
+}
+
 std::ostream &IR::DpdkRegisterReadStatement::toSpec(std::ostream &out) const {
-    out << "register_read " << DPDK::toStr(dst) << " " << reg << " "
+    out << "regrd " << DPDK::toStr(dst) << " " << reg << " "
         << DPDK::toStr(index);
     return out;
 }
 
 std::ostream &IR::DpdkRegisterWriteStatement::toSpec(std::ostream &out) const {
-    out << "register_write " << reg << " " << DPDK::toStr(index) << " "
+    out << "regwr " << reg << " " << DPDK::toStr(index) << " "
         << DPDK::toStr(src);
     return out;
 }
