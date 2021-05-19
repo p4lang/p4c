@@ -110,6 +110,7 @@ class Type_Varbits : Type_Base {
     NullOK optional Expression  expression = nullptr;  // only used temporarily
     static Type_Varbits get(Util::SourceInfo si, int size = 0);
     static Type_Varbits get();
+    int width_bits() const override { return size; }
     toString{ return cstring("varbit<") + Util::toString(size) + ">"; }
     dbprint { out << "varbit<" << size << ">"; }
 }
