@@ -25,14 +25,14 @@ MethodInstance*
 MethodInstance::resolve(const IR::MethodCallExpression* mce, DeclarationLookup* refMap,
                         TypeMap* typeMap, bool useExpressionType, const Visitor::Context *ctxt,
                         bool incomplete) {
-    auto mt = typeMap->getType(mce->method);
+    auto mt = typeMap ? typeMap->getType(mce->method) : nullptr;
     if (mt == nullptr && useExpressionType)
         mt = mce->method->type;
     CHECK_NULL(mt);
     BUG_CHECK(mt->is<IR::Type_MethodBase>(), "%1%: expected a MethodBase type", mt);
     auto originalType = mt->to<IR::Type_MethodBase>();
     auto actualType = originalType;
-    if (!mce->typeArguments->empty()) {
+    if (typeMap && !mce->typeArguments->empty()) {
         auto t = TypeInference::specialize(originalType, mce->typeArguments);
         CHECK_NULL(t);
         actualType = t->to<IR::Type_MethodBase>();
@@ -44,7 +44,7 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, DeclarationLookup* 
     // mt can be Type_Method or Type_Action
     if (mce->method->is<IR::Member>()) {
         auto mem = mce->method->to<IR::Member>();
-        auto basetype = typeMap->getType(mem->expr);
+        auto basetype = typeMap ? typeMap->getType(mem->expr) : mem->expr->type;
         if (basetype == nullptr) {
             if (useExpressionType)
                 basetype = mem->expr->type;
@@ -73,7 +73,7 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, DeclarationLookup* 
                 decl = refMap->getDeclaration(th, true);
             } else if (auto pe = mem->expr->to<IR::PathExpression>()) {
                 decl = refMap->getDeclaration(pe->path, true);
-                type = typeMap->getType(decl->getNode());
+                type = typeMap ? typeMap->getType(decl->getNode()) : pe->type;
             } else if (auto mc = mem->expr->to<IR::MethodCallExpression>()) {
                 auto mi = resolve(mc, refMap, typeMap, useExpressionType);
                 decl = mi->object;
@@ -81,7 +81,7 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, DeclarationLookup* 
             } else if (auto cce = mem->expr->to<IR::ConstructorCallExpression>()) {
                 auto cc = ConstructorCall::resolve(cce, refMap, typeMap);
                 decl = cc->to<ExternConstructorCall>()->type;
-                type = typeMap->getTypeType(cce->constructedType, true);
+                type = typeMap ? typeMap->getTypeType(cce->constructedType, true) : cce->type;
             } else {
                 BUG("unexpected expression %1% resolving method instance", mem->expr); }
             if (type->is<IR::Type_SpecializedCanonical>())
@@ -127,7 +127,7 @@ MethodInstance::resolve(const IR::MethodCallExpression* mce, DeclarationLookup* 
 ConstructorCall*
 ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
                          DeclarationLookup* refMap, TypeMap* typeMap) {
-    auto ct = typeMap->getTypeType(cce->constructedType, true);
+    auto ct = typeMap ? typeMap->getTypeType(cce->constructedType, true) : cce->type;
     ConstructorCall* result;
     const IR::Vector<IR::Type>* typeArguments;
     const IR::Type_Name* type;
@@ -144,7 +144,7 @@ ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
     }
 
     if (auto tsc = ct->to<IR::Type_SpecializedCanonical>())
-        ct = typeMap->getTypeType(tsc->baseType, true);
+        ct = typeMap ? typeMap->getTypeType(tsc->baseType, true) : tsc;
 
     if (ct->is<IR::Type_Extern>()) {
         auto decl = refMap->getDeclaration(type->path, true);
@@ -172,7 +172,7 @@ ConstructorCall::resolve(const IR::ConstructorCallExpression* cce,
 Instantiation* Instantiation::resolve(const IR::Declaration_Instance* instance,
                                       DeclarationLookup* ,
                                       TypeMap* typeMap) {
-    auto type = typeMap->getTypeType(instance->type, true);
+    auto type = typeMap ? typeMap->getTypeType(instance->type, true) : instance->type;
     auto simpleType = type;
     const IR::Vector<IR::Type>* typeArguments;
 
