@@ -139,8 +139,8 @@ const IR::Node* RenameSymbols::postorder(IR::PathExpression* expression) {
     auto newName = renameMap->getName(decl);
     auto name = IR::ID(expression->path->name.srcInfo, newName,
                        expression->path->name.originalName);
-    auto result = new IR::PathExpression(name);
-    return result;
+    expression->path = new IR::Path(name);
+    return expression;
 }
 
 const IR::Node* RenameSymbols::postorder(IR::Declaration_Instance* decl) {
