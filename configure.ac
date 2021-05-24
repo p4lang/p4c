@@ -46,7 +46,7 @@ AC_ARG_WITH([pdfixed],
 AM_CONDITIONAL([COND_PDFIXED], [test "$want_pdfixed" = yes])
 
 AC_ARG_WITH([nanomsg],
-    AS_HELP_STRING([--with-nanomsg], [Build Nanomsg RPC service, if disabled then you must have some other way of controlling the switch]),
+    AS_HELP_STRING([--with-nanomsg], [Support generating Nanomsg events]),
     [want_nanomsg="$withval"], [want_nanomsg=yes])
 
 AM_CONDITIONAL([COND_NANOMSG], [test "$want_nanomsg" = yes])
@@ -255,6 +255,7 @@ AC_CHECK_HEADER([boost/multiprecision/gmp.hpp], [], [AC_MSG_ERROR([Missing boost
 AC_CHECK_HEADER([boost/program_options.hpp], [], [AC_MSG_ERROR([Missing boost program options header])])
 AC_CHECK_HEADER([boost/functional/hash.hpp], [], [AC_MSG_ERROR([Missing boost functional hash header])])
 AC_CHECK_HEADER([boost/filesystem.hpp], [], [AC_MSG_ERROR([Missing boost filesystem header])])
+AC_CHECK_HEADER([boost/container/flat_set.hpp], [], [AC_MSG_ERROR([Boost flat_set header not found])])
 
 AC_SUBST([AM_CPPFLAGS], ["-I\$(top_srcdir)/include \
                           -I\$(top_builddir)/include \

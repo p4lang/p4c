@@ -1,4 +1,5 @@
 /* Copyright 2013-present Barefoot Networks, Inc.
+ * Copyright 2021 VMware, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,18 +15,20 @@
  */
 
 /*
- * Antonin Bas (antonin@barefootnetworks.com)
+ * Antonin Bas
  *
  */
 
 #ifndef BM_BM_SIM_HANDLE_MGR_H_
 #define BM_BM_SIM_HANDLE_MGR_H_
 
+#include <bm/config.h>
+
 #include <algorithm>  // for swap
 #include <type_traits>
 #include <utility>
 
-#include <Judy.h>
+#include "dynamic_bitset.h"
 
 namespace bm {
 
@@ -33,6 +36,10 @@ using handle_t = uintptr_t;
 
 class HandleMgr {
  public:
+  using bitset = DynamicBitset;
+  using size_type = bitset::size_type;
+  static constexpr size_type npos = bitset::npos;
+
   // iterators: since they are very simple, I did not mind duplicating the
   // code. Maybe it would be a good idea to condition the const'ness of the
   // iterator with a boolean template, to unify the 2 iterators.
@@ -58,13 +65,12 @@ class HandleMgr {
     }
 
     iterator& operator++() {
-      int Rc_int;
-      Word_t jindex = index;;
-      J1N(Rc_int, handle_mgr->handles, jindex);
-      if (!Rc_int)
+      auto pos = static_cast<size_type>(index);
+      pos = handle_mgr->handles.find_next(pos);
+      if (pos == npos)
         index = -1;
       else
-        index = jindex;
+        index = static_cast<handle_t>(pos);
       return *this;
     }
 
@@ -106,13 +112,12 @@ class HandleMgr {
     }
 
     const const_iterator& operator++() {
-      int Rc_int;
-      Word_t jindex = index;
-      J1N(Rc_int, handle_mgr->handles, jindex);
-      if (!Rc_int)
+      auto pos = static_cast<size_type>(index);
+      pos = handle_mgr->handles.find_next(pos);
+      if (pos == npos)
         index = -1;
       else
-        index = jindex;
+        index = static_cast<handle_t>(pos);
       return *this;
     }
 
@@ -130,43 +135,6 @@ class HandleMgr {
 
 
  public:
-  HandleMgr()
-    : handles((Pvoid_t) NULL) {}
-
-  /* Copy constructor */
-  HandleMgr(const HandleMgr& other)
-    : handles((Pvoid_t) NULL) {
-    int Rc_iter, Rc_set;
-    Word_t index = 0;
-    J1F(Rc_iter, other.handles, index);
-    while (Rc_iter) {
-      J1S(Rc_set, handles, index);
-      J1N(Rc_iter, other.handles, index);
-    }
-  }
-
-  /* Move constructor */
-  HandleMgr(HandleMgr&& other) noexcept
-  : handles(other.handles) {}
-
-  ~HandleMgr() {
-    clear();
-  }
-
-  /* Copy assignment operator */
-  HandleMgr &operator=(const HandleMgr &other) {
-    HandleMgr tmp(other);  // re-use copy-constructor
-    *this = std::move(tmp);  // re-use move-assignment
-    return *this;
-  }
-
-  /* Move assignment operator */
-  HandleMgr &operator=(HandleMgr &&other) noexcept {
-    // simplified move-constructor that also protects against move-to-self.
-    std::swap(handles, other.handles);  // repeat for all elements
-    return *this;
-  }
-
   bool operator==(const HandleMgr &other) const {
     return (handles == other.handles);
   }
@@ -178,90 +146,84 @@ class HandleMgr {
   /* Return 0 on success, -1 on failure */
 
   int get_handle(handle_t *handle) {
-    Word_t jhandle = 0;
-    int Rc;
-
-    J1FE(Rc, handles, jhandle);  // Judy1FirstEmpty()
-    if (!Rc) return -1;
-    J1S(Rc, handles, jhandle);  // Judy1Set()
-    if (!Rc) return -1;
-
-    *handle = jhandle;
-
+    auto pos = first_unset;
+    *handle = static_cast<handle_t>(pos);
+    auto s = handles.size();
+    if (pos < s) {
+      handles.set(pos);
+      first_unset = handles.find_unset_next(first_unset);
+    } else {
+      assert(pos == s);
+      first_unset++;
+      handles.push_back(true);
+    }
     return 0;
   }
 
   int release_handle(handle_t handle) {
-    int Rc;
-    J1U(Rc, handles, handle);  // Judy1Unset()
-    return Rc ? 0 : -1;
+    auto pos = static_cast<size_type>(handle);
+    auto s = handles.size();
+    if (pos >= s || !handles.reset(pos)) return -1;
+    if (first_unset > pos) first_unset = pos;
+    return 0;
   }
 
   int set_handle(handle_t handle) {
-    int Rc;
-    J1S(Rc, handles, handle);
-    return Rc ? 0 : -1;
+    auto pos = static_cast<size_type>(handle);
+    auto s = handles.size();
+    if (pos >= s)
+      handles.resize(pos + 1);
+    else if (!handles.set(pos))
+      return -1;
+    if (first_unset == pos) first_unset = handles.find_unset_next(pos);
+    return 0;
   }
 
   size_t size() const {
-    Word_t size;
-    J1C(size, handles, 0, -1);
-    return size;
+    return static_cast<size_t>(handles.count());
   }
 
   bool valid_handle(handle_t handle) const {
-    int Rc;
-    J1T(Rc, handles, handle);  // Judy1Test()
-    return (Rc == 1);
+    auto pos = static_cast<size_type>(handle);
+    auto s = handles.size();
+    if (pos >= s) return false;
+    return handles.test(pos);
   }
 
   void clear() {
-    Word_t Rc_word;
-    // only clang complains, not gcc
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wsign-compare"
-#endif
-    J1FA(Rc_word, handles);
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif
+    handles.clear();
+    first_unset = 0;
   }
 
   // iterators
 
   iterator begin() {
-    Word_t index = 0;
-    int Rc_int;
-    J1F(Rc_int, handles, index);
-    if (!Rc_int) index = -1;
-    return iterator(this, index);
+    auto pos = handles.find_first();
+    if (pos == npos)
+      return iterator(this, -1);
+    else
+      return iterator(this, static_cast<handle_t>(pos));
   }
 
   const_iterator begin() const {
-    Word_t index = 0;
-    int Rc_int;
-    J1F(Rc_int, handles, index);
-    if (!Rc_int) index = -1;
-    return const_iterator(this, index);
+    auto pos = handles.find_first();
+    if (pos == npos)
+      return const_iterator(this, -1);
+    else
+      return const_iterator(this, static_cast<handle_t>(pos));
   }
 
   iterator end() {
-    Word_t index = -1;
-    /* int Rc_int; */
-    /* J1L(Rc_int, handles, index); */
-    return iterator(this, index);
+    return iterator(this, -1);
   }
 
   const_iterator end() const {
-    Word_t index = -1;
-    /* int Rc_int; */
-    /* J1L(Rc_int, handles, index); */
-    return const_iterator(this, index);
+    return const_iterator(this, -1);
   }
 
  private:
-  Pvoid_t handles;
+  bitset handles;
+  size_type first_unset{0};
 };
 
 }  // namespace bm

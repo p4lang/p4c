@@ -1,4 +1,5 @@
 /* Copyright 2013-present Barefoot Networks, Inc.
+ * Copyright 2021 VMware, Inc.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +15,7 @@
  */
 
 /*
- * Antonin Bas (antonin@barefootnetworks.com)
+ * Antonin Bas
  *
  */
 
@@ -28,9 +29,9 @@ using bm::handle_t;
 using testing::Types;
 
 template <typename IteratorType>
-class SimpleTest : public ::testing::Test {
+class HandleMgrIteratorTest : public ::testing::Test {
  protected:
-  SimpleTest() {}
+  HandleMgrIteratorTest() {}
 
   virtual void SetUp() {}
 
@@ -39,16 +40,15 @@ class SimpleTest : public ::testing::Test {
 
 using IteratorTypes = Types<HandleMgr::iterator, HandleMgr::const_iterator>;
 
-TYPED_TEST_CASE(SimpleTest, IteratorTypes);
+TYPED_TEST_CASE(HandleMgrIteratorTest, IteratorTypes);
 
-TYPED_TEST(SimpleTest, Iterate) {
+TYPED_TEST(HandleMgrIteratorTest, Iterate) {
   HandleMgr handle_mgr;
 
   const int N = 32;
   handle_t handles[N];
 
-  int rc;
-  int i;
+  int rc, i;
 
   for (i = 0; i < N; i++) {
     rc = handle_mgr.get_handle(&handles[i]);
@@ -56,8 +56,58 @@ TYPED_TEST(SimpleTest, Iterate) {
   }
 
   i = 0;
-  for (TypeParam it = handle_mgr.begin(); it != handle_mgr.end(); ++it) {
+  for (auto it = handle_mgr.begin(); it != handle_mgr.end(); ++it) {
     ASSERT_EQ(handles[i++], *it);
   }
   ASSERT_EQ(N, i);
+}
+
+class HandleMgrTest : public ::testing::Test {
+ protected:
+  HandleMgrTest() {}
+
+  virtual void SetUp() {}
+
+  // virtual void TearDown() {}
+};
+
+TEST_F(HandleMgrTest, LargeTest) {
+  HandleMgr handle_mgr;
+  const int N = 10000;
+  int num_active_handles = 0;
+  std::vector<handle_t> handles(N);
+  int rc, i;
+  for (i = 0; i < N; i++) {
+    rc = handle_mgr.get_handle(&handles[i]);
+    ASSERT_EQ(0, rc);
+    num_active_handles++;
+  }
+  for (i = 0; i < N; i += 2) {
+    rc = handle_mgr.release_handle(handles[i]);
+    ASSERT_EQ(0, rc);
+    num_active_handles--;
+  }
+  for (i = 0; i < N; i++) {
+    if (i % 2 == 0) {
+      ASSERT_FALSE(handle_mgr.valid_handle(handles[i]));
+    } else {
+      ASSERT_TRUE(handle_mgr.valid_handle(handles[i]));
+    }
+  }
+  i = 0;
+  for (auto it = handle_mgr.begin(); it != handle_mgr.end(); ++it) {
+    i++;
+  }
+  ASSERT_EQ(num_active_handles, i);
+  for (i = 0; i < N; i += 2) {
+    rc = handle_mgr.get_handle(&handles[i]);
+    ASSERT_EQ(0, rc);
+    num_active_handles++;
+  }
+  ASSERT_EQ(N, num_active_handles);
+  i = 0;
+  for (auto it = handle_mgr.begin(); it != handle_mgr.end(); ++it) {
+    i++;
+  }
+  ASSERT_EQ(num_active_handles, i);
 }
