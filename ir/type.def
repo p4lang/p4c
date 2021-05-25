@@ -263,6 +263,17 @@ abstract Type_StructLike : Type_Declaration, INestedNamespace, ISimpleNamespace,
         }
         return -1;
     }
+    // This function returns offset in bits.
+    int getFieldBitOffset(cstring name) const {
+        int offset = 0;
+        for (auto f : fields) {
+            if (f->name == name) {
+                return offset;
+            }
+            offset += f->type->width_bits();
+        }
+        return -1;
+    }
     int width_bits() const override {
         int rv = 0;
         for (auto f : fields) {
@@ -297,6 +308,14 @@ class Type_HeaderUnion : Type_StructLike {
         for (auto f : fields)
             rv = std::max(rv, f->type->width_bits());
         return rv; }
+    // offset of any union field is 0
+    int getFieldBitOffset(cstring name) const {
+        for (auto f : fields) {
+            if (f->name == name) {
+                return 0;
+            }
+        }
+        return -1; }
 }
 
 class Type_Header : Type_StructLike {
