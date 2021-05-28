@@ -104,6 +104,14 @@ class MethodInstance : public InstanceBase {
                                    DeclarationLookup* refMap, TypeMap* typeMap,
                                    const Visitor::Context *ctxt = nullptr)
     { return resolve(mcs->methodCall, refMap, typeMap, false, ctxt, false); }
+    static MethodInstance* resolve(const IR::MethodCallExpression* mce,
+                                   DeclarationLookup* refMap,
+                                   const Visitor::Context *ctxt = nullptr)
+    { return resolve(mce, refMap, nullptr, true, ctxt, false); }
+    static MethodInstance* resolve(const IR::MethodCallStatement* mcs,
+                                   DeclarationLookup* refMap,
+                                   const Visitor::Context *ctxt = nullptr)
+    { return resolve(mcs->methodCall, refMap, nullptr, true, ctxt, false); }
     const IR::ParameterList* getOriginalParameters() const
     { return originalMethodType->parameters; }
     const IR::ParameterList* getActualParameters() const
