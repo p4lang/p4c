@@ -39,12 +39,15 @@ becomes (actual implementatation is slightly optimized):
 }
 */
 class Predication final : public Transform {
-    class EmptyStatementRemover final : public Modifier {
+    /** Private Transformer only for Predication pass.
+     *  Used to remove EmptyStatements and empty BlockStatements from the code.
+     */
+    class EmptyStatementRemover final : public Transform {
      public:
         EmptyStatementRemover() {}
-        bool preorder(IR::BlockStatement * block) override;
+        const IR::Node* postorder(IR::EmptyStatement* statement) override;
+        const IR::Node* postorder(IR::BlockStatement* statement) override;
     };
-
     /**
      * Private Transformer only for Predication pass.
      * This pass operates on nested Mux expressions(?:). 
@@ -53,25 +56,37 @@ class Predication final : public Transform {
      */
     class ExpressionReplacer final : public Transform {
      private:
+        // Original assignment that the replacer works on
         const IR::AssignmentStatement * statement;
-        const std::vector<bool>& travesalPath;
+        // To keep track of the path used while traversing nested if-else statements:
+        //      IF - true / ELSE - false
+        const std::vector<bool>& traversalPath;
+        // To store the condition used in every if-else statement
         std::vector<const IR::Expression*>& conditions;
+        // Nesting level of Mux expressions
         unsigned currentNestingLevel = 0;
+        // An indicator used to implement the logic for ArrayIndex transformation
+        bool visitingIndex = false;
      public:
         explicit ExpressionReplacer(const IR::AssignmentStatement * a,
                                     std::vector<bool>& t,
                                     std::vector<const IR::Expression*>& c)
-        : statement(a), travesalPath(t), conditions(c)
+        : statement(a), traversalPath(t), conditions(c)
         { CHECK_NULL(a); }
         const IR::Mux * preorder(IR::Mux * mux) override;
         void emplaceExpression(IR::Mux * mux);
         void visitBranch(IR::Mux * mux, bool then);
+        void setVisitingIndex(bool val);
     };
 
+    // Used to dynamically generate names for variables in parts of code
     NameGenerator* generator;
+    // Used to remove empty statements and empty block statements that appear in the code
     EmptyStatementRemover remover;
-    std::vector<IR::BlockStatement*> blocks;
     bool inside_action;
+    // Used to indicate whether or not an ArrayIndex should be modified.
+    bool modifyIndex = false;
+    // Tracking the nesting level of IF-ELSE statements
     unsigned ifNestingLevel;
     // Tracking the nesting level of dependency assignment
     unsigned depNestingLevel;
@@ -79,19 +94,20 @@ class Predication final : public Transform {
     // If current statement is equal to any member of dependentNames,
     // isStatementdependent of the coresponding statement is set to true.
     std::vector<cstring> dependentNames;
-    // Traverse path of nested if-else statements
-    // true at the end of the vector means that you are currently visiting 'then' branch'
-    // false at the end of the vector means that you are in the else branch of the if statement.
-    // Size of this vector is the current if nesting level.
-    std::vector<bool> travesalPath;
+    // Traverse path of nested if-else statements.
+    // Size of this vector is the current IF nesting level. IF - true / ELSE - false
+    std::vector<bool> traversalPath;
     std::vector<cstring> dependencies;
     // Collects assignment statements with transformed right expression.
-    // liveAssignments are pushed at the back of liveAssigns vetor.
+    // liveAssignments are pushed at the back of liveAssigns vector.
     std::map<cstring, const IR::AssignmentStatement *> liveAssignments;
     // Vector of assignment statements which collects assignments from
     // liveAssignments and dependencies in adequate order. In preorder
     // of if statements assignments from liveAssigns are pushed on rv block.
     std::vector<const IR::AssignmentStatement*> liveAssigns;
+    // Vector of ArrayIndex declarations which is used to temporary
+    // store these declarations so they can later be pushed on the 'rv' block.
+    std::vector<const IR::Declaration*> indexDeclarations;
     // Map that shows if the current statement is dependent.
     // Bool value is true for dependent statements,
     // false for statements that are not dependent.
