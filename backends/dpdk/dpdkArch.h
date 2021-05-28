@@ -231,14 +231,13 @@ class StatementUnroll : public Transform {
  */
 class ExpressionUnroll : public Inspector {
     P4::ReferenceMap *refMap;
-    DpdkVariableCollector *collector;
 
   public:
     IR::IndexedVector<IR::StatOrDecl> stmt;
     IR::IndexedVector<IR::Declaration> decl;
     IR::PathExpression *root;
-    ExpressionUnroll(P4::ReferenceMap *refMap, DpdkVariableCollector *collector) :
-        refMap(refMap), collector(collector) {
+    ExpressionUnroll(P4::ReferenceMap *refMap, DpdkVariableCollector *) :
+        refMap(refMap) {
         setName("ExpressionUnroll");
     }
     bool preorder(const IR::Operation_Unary *a) override;
@@ -455,8 +454,8 @@ class CollectRegisterDeclaration : public Inspector {
         : reg_map(reg_map) , typeMap(typeMap) {}
 
     bool preorder(const IR::Declaration_Instance *d) override {
-        if (d->type->is<IR::Type_Specialized>()) {
-            auto type = d->type->to<IR::Type_Specialized>();
+        auto dtype = typeMap->getType(d);
+        if (auto type = dtype->to<IR::Type_Specialized>()) {
             auto externTypeName = type->baseType->path->name.name;
             if (externTypeName == "Register"){
               if (d->arguments->size() != 1 and d->arguments->size() != 2 ) {

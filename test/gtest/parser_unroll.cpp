@@ -195,12 +195,8 @@ class MidEnd : public PassManager {
 #endif
 
 const IR::P4Parser* getParser(const IR::P4Program* program) {
-    cstring parserName = "MyParser";
-   /* std::function<bool(const IR::IDeclaration*)> filter =
-            [parserName](const IR::IDeclaration* d)
-            { CHECK_NULL(d); return d->getName().name.find(parserName.c_str()) != nullptr; };*/
     std::function<bool(const IR::IDeclaration*)> filter =
-            [parserName](const IR::IDeclaration* d)
+            [](const IR::IDeclaration* d)
             { CHECK_NULL(d); return d->is<IR::P4Parser>(); };
     const auto* newDeclVector = program->getDeclarations()->where(filter)->toVector();
     return (*newDeclVector)[0]->to<IR::P4Parser>();
