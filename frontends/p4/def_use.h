@@ -48,7 +48,7 @@ class StorageLocation : public IHasDbPrint {
         auto result = dynamic_cast<const T*>(this);
         return result != nullptr;
     }
-    virtual void dbprint(std::ostream& out) const override {
+    void dbprint(std::ostream& out) const override {
         out << id << " " << name;
     }
     cstring toString() const { return name; }
@@ -209,7 +209,7 @@ class LocationSet : public IHasDbPrint {
     void addCanonical(const StorageLocation* location);
     ordered_set<const StorageLocation*>::const_iterator begin() const { return locations.cbegin(); }
     ordered_set<const StorageLocation*>::const_iterator end()   const { return locations.cend(); }
-    virtual void dbprint(std::ostream& out) const override {
+    void dbprint(std::ostream& out) const override {
         if (locations.empty())
             out << "LocationSet::empty";
         for (auto l : locations) {
@@ -254,7 +254,7 @@ class StorageMap : public IHasDbPrint {
         auto result = ::get(storage, decl);
         return result;
     }
-    virtual void dbprint(std::ostream& out) const override {
+    void dbprint(std::ostream& out) const override {
         for (auto &it : storage)
             out << it.first << ": " << it.second << IndentCtl::endl;
     }
@@ -491,7 +491,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
         CHECK_NULL(expression); CHECK_NULL(loc);
         writes.emplace(expression, loc);
     }
-    virtual void dbprint(std::ostream& out) const override {
+    void dbprint(std::ostream& out) const override {
         if (writes.empty())
             out << "No writes";
         for (auto &it : writes)
