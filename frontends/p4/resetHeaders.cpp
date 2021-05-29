@@ -52,17 +52,17 @@ void DoResetHeaders::generateResets(
 }
 
 const IR::Node* DoResetHeaders::postorder(IR::Declaration_Variable* decl) {
-    if (findContext<IR::ParserState>() == nullptr)
-        return decl;
     if (decl->initializer != nullptr)
         return decl;
     auto resets = new IR::Vector<IR::StatOrDecl>();
     resets->push_back(decl);
+#if 0
     BUG_CHECK(getContext()->node->is<IR::Vector<IR::StatOrDecl>>() ||
               getContext()->node->is<IR::ParserState>() ||
               getContext()->node->is<IR::BlockStatement>(),
               "%1%: parent is not Vector<StatOrDecl>, but %2%",
               decl, getContext()->node);
+#endif
     auto type = typeMap->getType(getOriginal(), true);
     auto path = new IR::PathExpression(decl->getName());
     generateResets(typeMap, type, path, resets);

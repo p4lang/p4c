@@ -23,8 +23,7 @@ limitations under the License.
 
 namespace P4 {
 
-/** @brief Explicitly invalidate uninitialized header variables declared in
- * parser states.
+/** @brief Explicitly invalidate uninitialized header variables.
  *
  * A local uninitialized variable in a parser state that represents a header
  * must be invalid every time the parser state is entered.  Hence,
