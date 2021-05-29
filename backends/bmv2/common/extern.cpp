@@ -237,9 +237,9 @@ ExternConverter::createCalculation(ConversionContext* ctxt,
         } else {
             for (auto f : type->to<IR::Type_StructLike>()->fields) {
                 auto e = new IR::Member(fields, f->name);
-            	auto ftype = ctxt->typeMap->getType(f);
-            	ctxt->typeMap->setType(e, ftype);
-            	list->push_back(e);
+                auto ftype = ctxt->typeMap->getType(f);
+                ctxt->typeMap->setType(e, ftype);
+                list->push_back(e);
             }
         }
         fields = list;
