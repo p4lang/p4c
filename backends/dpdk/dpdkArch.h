@@ -446,16 +446,15 @@ class ConvertInternetChecksum : public PassManager {
  * for emitting to the .spec file later */
 class CollectRegisterDeclaration : public Inspector {
     std::map<const IR::Declaration_Instance *, cstring> *reg_map;
-    P4::TypeMap *typeMap;
-
+    
   public:
     CollectRegisterDeclaration(
-        std::map<const IR::Declaration_Instance *, cstring> *reg_map, P4::TypeMap *typeMap)
-        : reg_map(reg_map) , typeMap(typeMap) {}
+        std::map<const IR::Declaration_Instance *, cstring> *reg_map, P4::TypeMap *)
+        : reg_map(reg_map) {}
 
     bool preorder(const IR::Declaration_Instance *d) override {
-        auto dtype = typeMap->getType(d);
-        if (auto type = dtype->to<IR::Type_Specialized>()) {
+        if (d->type->is<IR::Type_Specialized>()) {
+            auto type = d->type->to<IR::Type_Specialized>();
             auto externTypeName = type->baseType->path->name.name;
             if (externTypeName == "Register"){
               if (d->arguments->size() != 1 and d->arguments->size() != 2 ) {
