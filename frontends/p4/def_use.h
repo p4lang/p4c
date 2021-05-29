@@ -48,7 +48,7 @@ class StorageLocation : public IHasDbPrint {
         auto result = dynamic_cast<const T*>(this);
         return result != nullptr;
     }
-    virtual void dbprint(std::ostream& out) const {
+    void dbprint(std::ostream& out) const override {
         out << id << " " << name;
     }
     cstring toString() const { return name; }
@@ -209,7 +209,7 @@ class LocationSet : public IHasDbPrint {
     void addCanonical(const StorageLocation* location);
     ordered_set<const StorageLocation*>::const_iterator begin() const { return locations.cbegin(); }
     ordered_set<const StorageLocation*>::const_iterator end()   const { return locations.cend(); }
-    virtual void dbprint(std::ostream& out) const {
+    void dbprint(std::ostream& out) const override {
         if (locations.empty())
             out << "LocationSet::empty";
         for (auto l : locations) {
@@ -254,7 +254,7 @@ class StorageMap : public IHasDbPrint {
         auto result = ::get(storage, decl);
         return result;
     }
-    virtual void dbprint(std::ostream& out) const {
+    void dbprint(std::ostream& out) const override {
         for (auto &it : storage)
             out << it.first << ": " << it.second << IndentCtl::endl;
     }
@@ -282,7 +282,7 @@ class ProgramPoint : public IHasDbPrint {
     ProgramPoint after() { return ProgramPoint(*this, nullptr); }
     bool operator==(const ProgramPoint& other) const;
     std::size_t hash() const;
-    void dbprint(std::ostream& out) const {
+    void dbprint(std::ostream& out) const override {
         if (isBeforeStart()) {
             out << "<BeforeStart>";
         } else {
@@ -336,7 +336,7 @@ class ProgramPoints : public IHasDbPrint {
     void add(ProgramPoint point) { points.emplace(point); }
     const ProgramPoints* merge(const ProgramPoints* with) const;
     bool operator==(const ProgramPoints& other) const;
-    void dbprint(std::ostream& out) const {
+    void dbprint(std::ostream& out) const override {
         out << "{";
         for (auto p : points)
             out << p << " ";
@@ -380,7 +380,7 @@ class Definitions : public IHasDbPrint {
         return r; }
     const ProgramPoints* getPoints(const LocationSet* locations) const;
     bool operator==(const Definitions& other) const;
-    void dbprint(std::ostream& out) const {
+    void dbprint(std::ostream& out) const override {
         if (unreachable) {
             out << "  Unreachable" << IndentCtl::endl;
         }
@@ -433,7 +433,7 @@ class AllDefinitions : public IHasDbPrint {
         }
         atPoint[point] = defs;
     }
-    void dbprint(std::ostream& out) const {
+    void dbprint(std::ostream& out) const override {
         for (auto e : atPoint)
             out << e.first << " => " << e.second << IndentCtl::endl;
     }
@@ -491,7 +491,7 @@ class ComputeWriteSet : public Inspector, public IHasDbPrint {
         CHECK_NULL(expression); CHECK_NULL(loc);
         writes.emplace(expression, loc);
     }
-    virtual void dbprint(std::ostream& out) const {
+    void dbprint(std::ostream& out) const override {
         if (writes.empty())
             out << "No writes";
         for (auto &it : writes)
