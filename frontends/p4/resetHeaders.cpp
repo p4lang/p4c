@@ -35,6 +35,7 @@ void DoResetHeaders::generateResets(
         auto args = new IR::Vector<IR::Argument>();
         auto mc = new IR::MethodCallExpression(expr->srcInfo, method, args);
         auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
+        LOG3("Reset header " << expr);
         resets->push_back(stat);
     } else if (type->is<IR::Type_Stack>()) {
         auto tstack = type->to<IR::Type_Stack>();
