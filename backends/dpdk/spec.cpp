@@ -342,8 +342,12 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
     if (match_keys) {
         out << "\tkey {" << std::endl;
         for (auto key : match_keys->keyElements) {
-            out << "\t\t" << DPDK::toStr(key->expression) << " "
-                << DPDK::toStr(key->matchType) << std::endl;
+            out << "\t\t" << DPDK::toStr(key->expression) << " ";
+            if ((key->matchType)->toString() == "ternary") {
+                out << "wildcard" << std::endl;
+            } else {
+                out << DPDK::toStr(key->matchType) << std::endl;
+            }
         }
         out << "\t}" << std::endl;
     }

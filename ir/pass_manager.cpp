@@ -39,7 +39,7 @@ void PassManager::removePasses(const std::vector<cstring> &exclude) {
 void PassManager::listPasses(std::ostream &out, cstring sep) const {
     bool first = true;
     for (auto p : passes) {
-        if (first) out << sep;
+        if (!first) out << sep;
         out << p->name();
         first = false; }
 }
