@@ -263,6 +263,22 @@ abstract Type_StructLike : Type_Declaration, INestedNamespace, ISimpleNamespace,
         }
         return -1;
     }
+    /// This function returns start offset of the given field name in bits.
+    /// If the given name is not a valid field name, -1 is returned.
+    /// The given offset may not be correct if varbit field(s) present in between.
+    /// Offset for all fields will be correct if:
+    ///  - the type has only fixed width fields
+    ///  - the type has fixed width fields with only one varbit field as a last member.
+    int getFieldBitOffset(cstring name) const {
+        int offset = 0;
+        for (auto f : fields) {
+            if (f->name == name) {
+                return offset;
+            }
+            offset += f->type->width_bits();
+        }
+        return -1;
+    }
     int width_bits() const override {
         int rv = 0;
         for (auto f : fields) {
@@ -297,6 +313,14 @@ class Type_HeaderUnion : Type_StructLike {
         for (auto f : fields)
             rv = std::max(rv, f->type->width_bits());
         return rv; }
+    /// start offset of any field in a union is 0
+    int getFieldBitOffset(cstring name) const {
+        for (auto f : fields) {
+            if (f->name == name) {
+                return 0;
+            }
+        }
+        return -1; }
 }
 
 class Type_Header : Type_StructLike {
