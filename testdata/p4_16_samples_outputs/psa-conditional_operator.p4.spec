@@ -58,7 +58,7 @@ action execute args none {
 
 table tbl {
 	key {
-		h.ethernet.srcAddr wildcard
+		h.ethernet.srcAddr exact
 	}
 	actions {
 		NoAction

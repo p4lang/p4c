@@ -58,7 +58,7 @@ control MyIC(
     }
     table tbl {
         key = {
-            hdr.ethernet.srcAddr : ternary;
+            hdr.ethernet.srcAddr : exact;
         }
         actions = { NoAction; execute; }
     }
