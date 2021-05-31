@@ -231,14 +231,13 @@ class StatementUnroll : public Transform {
  */
 class ExpressionUnroll : public Inspector {
     P4::ReferenceMap *refMap;
-    DpdkVariableCollector *collector;
 
   public:
     IR::IndexedVector<IR::StatOrDecl> stmt;
     IR::IndexedVector<IR::Declaration> decl;
     IR::PathExpression *root;
-    ExpressionUnroll(P4::ReferenceMap *refMap, DpdkVariableCollector *collector) :
-        refMap(refMap), collector(collector) {
+    ExpressionUnroll(P4::ReferenceMap *refMap, DpdkVariableCollector *) :
+        refMap(refMap) {
         setName("ExpressionUnroll");
     }
     bool preorder(const IR::Operation_Unary *a) override;
@@ -447,12 +446,11 @@ class ConvertInternetChecksum : public PassManager {
  * for emitting to the .spec file later */
 class CollectRegisterDeclaration : public Inspector {
     std::map<const IR::Declaration_Instance *, cstring> *reg_map;
-    P4::TypeMap *typeMap;
-
+    
   public:
     CollectRegisterDeclaration(
-        std::map<const IR::Declaration_Instance *, cstring> *reg_map, P4::TypeMap *typeMap)
-        : reg_map(reg_map) , typeMap(typeMap) {}
+        std::map<const IR::Declaration_Instance *, cstring> *reg_map, P4::TypeMap *)
+        : reg_map(reg_map) {}
 
     bool preorder(const IR::Declaration_Instance *d) override {
         if (d->type->is<IR::Type_Specialized>()) {
