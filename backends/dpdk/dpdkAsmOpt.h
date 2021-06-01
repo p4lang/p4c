@@ -86,6 +86,12 @@ class RemoveLabelAfterLabel : public Transform {
     const IR::Node *postorder(IR::DpdkListStatement *l) override;
 };
 
+// This pass removes jmp if it is immediately after unconditional jmp.
+class RemoveDeadCodeAfterUncondJmp : public Transform {
+ public:
+    const IR::Node* postorder(IR::DpdkListStatement *l) override;
+};
+
 class DpdkAsmOptimization : public PassRepeated {
   private:
   public:
@@ -95,6 +101,7 @@ class DpdkAsmOptimization : public PassRepeated {
         passes.push_back(r);
         passes.push_back(new RemoveConsecutiveJmpAndLabel);
         passes.push_back(new RemoveRedundantLabel);
+        passes.push_back(new RemoveDeadCodeAfterUncondJmp);
         passes.push_back(r);
         passes.push_back(new ThreadJumps);
     }

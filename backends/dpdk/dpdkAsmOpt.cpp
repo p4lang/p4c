@@ -102,12 +102,10 @@ const IR::Node *ThreadJumps::postorder(IR::DpdkListStatement *l) {
     for (auto stmt : l->statements) {
         if (!cache) {
             if (auto label = stmt->to<IR::DpdkLabelStatement>()) {
-                LOG1("label " << label);
                 cache = label;
             }
         } else {
             if (auto jmp = stmt->to<IR::DpdkJmpLabelStatement>()) {
-                LOG1("emplace " << cache->label << " " << jmp->label);
                 label_map.emplace(cache->label, jmp->label);
             } else {
                 cache = nullptr;
@@ -140,12 +138,10 @@ const IR::Node *RemoveLabelAfterLabel::postorder(IR::DpdkListStatement *l) {
     for (auto stmt : l->statements) {
         if (!cache) {
             if (auto label = stmt->to<IR::DpdkLabelStatement>()) {
-                LOG1("label " << label);
                 cache = label;
             }
         } else {
             if (auto label = stmt->to<IR::DpdkLabelStatement>()) {
-                LOG1("label " << label);
                 label_map.emplace(cache->label, label->label);
             } else {
                 cache = nullptr;
@@ -165,6 +161,31 @@ const IR::Node *RemoveLabelAfterLabel::postorder(IR::DpdkListStatement *l) {
             }
         } else {
             new_l->push_back(stmt);
+        }
+    }
+    if (changed)
+        l->statements = *new_l;
+    return l;
+}
+
+const IR::Node* RemoveDeadCodeAfterUncondJmp::postorder(IR::DpdkListStatement *l) {
+    const IR::DpdkJmpLabelStatement *cache = nullptr;
+    auto new_l = new IR::IndexedVector<IR::DpdkAsmStatement>();
+    bool changed = false;
+    for (auto stmt : l->statements) {
+        if (!cache) {
+            if (auto jmp = stmt->to<IR::DpdkJmpLabelStatement>()) {
+                cache = jmp;
+                changed = true;
+            }
+            new_l->push_back(stmt);
+        } else {
+            if (stmt->is<IR::DpdkLabelStatement>()) {
+                cache = nullptr;
+                new_l->push_back(stmt);
+            } else {
+                LOG5("removing " << stmt);
+            }
         }
     }
     if (changed)
