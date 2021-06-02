@@ -68,10 +68,16 @@ class PacketIn : public Model::Extern_Model {
  public:
     PacketIn() :
             Extern_Model("packet_in"),
-            extract("extract"), lookahead("lookahead"),
+            extract("extract"), extract_greedy("extract_greedy"),
+            extract_atomic("extract_atomic"),lookahead("lookahead"),
+            lookahead_greedy("lookahead_greedy"), lookahead_atomic("lookahead_atomic"),
             advance("advance"), length("length") {}
     Model::Elem extract;
+    Model::Elem extract_greedy;
+    Model::Elem extract_atomic;
     Model::Elem lookahead;
+    Model::Elem lookahead_greedy;
+    Model::Elem lookahead_atomic;
     Model::Elem advance;
     Model::Elem length;
     int extractSecondArgSize = 32;

@@ -45,7 +45,11 @@ extern packet_in {
     /// Read bits from the packet without advancing the cursor.
     /// @returns: the bits read from the packet.
     /// T may be an arbitrary fixed-size type.
+    void extract_atomic<T>(out T hdr);
+    void extract_greedy<T>(out T hdr);
     T lookahead<T>();
+    T lookahead_greedy<T>();
+    T lookahead_atomic<T>();
     /// Advance the packet cursor by the specified number of bits.
     void advance(in bit<32> sizeInBits);
     /// @return packet length in bytes.  This method may be unavailable on

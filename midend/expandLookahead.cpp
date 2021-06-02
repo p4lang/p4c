@@ -73,7 +73,9 @@ DoExpandLookahead::convertLookahead(const IR::MethodCallExpression* expression) 
         return nullptr;
     auto em = mi->to<P4::ExternMethod>();
     if (em->originalExternType->name != P4CoreLibrary::instance.packetIn.name ||
-        em->method->name != P4CoreLibrary::instance.packetIn.lookahead.name)
+        (em->method->name != P4CoreLibrary::instance.packetIn.lookahead.name &&
+         em->method->name != P4CoreLibrary::instance.packetIn.lookahead_greedy.name &&
+         em->method->name != P4CoreLibrary::instance.packetIn.lookahead_atomic.name))
         return nullptr;
 
     // this is a call to packet_in.lookahead.
