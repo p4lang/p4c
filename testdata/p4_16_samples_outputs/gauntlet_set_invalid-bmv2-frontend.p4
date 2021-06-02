@@ -31,6 +31,7 @@ parser p(packet_in pkt, out Headers h, inout Meta meta, inout standard_metadata_
 
 control ingress(inout Headers h, inout Meta meta, inout standard_metadata_t stdmeta) {
     apply {
+        h.h.a = 8w1;
         h.h.setInvalid();
         h.h.setValid();
         h.h.b = 8w2;
