@@ -34,6 +34,22 @@ control c(out bit<1> x) {
     @hidden action equality31() {
         x = 1w0;
     }
+    @hidden action equality14() {
+        h1_0.setInvalid();
+        h2_0.setInvalid();
+        s1_0_h.setInvalid();
+        s2_0_h.setInvalid();
+        a1_0[0].setInvalid();
+        a1_0[1].setInvalid();
+        a2_0[0].setInvalid();
+        a2_0[1].setInvalid();
+    }
+    @hidden table tbl_equality14 {
+        actions = {
+            equality14();
+        }
+        const default_action = equality14();
+    }
     @hidden table tbl_equality23 {
         actions = {
             equality23();
@@ -65,6 +81,7 @@ control c(out bit<1> x) {
         const default_action = equality31();
     }
     apply {
+        tbl_equality14.apply();
         if (a_0 == b_0) {
             tbl_equality23.apply();
         } else if (!h1_0.isValid() && !h2_0.isValid() || h1_0.isValid() && h2_0.isValid() && h1_0.a == h2_0.a && h1_0.b == h2_0.b) {

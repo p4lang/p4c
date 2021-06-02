@@ -55,6 +55,7 @@ control deparser(packet_out b, in Headers h) {
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.c.tmp") hdr[1] c_tmp;
     apply {
+        c_tmp[0].setInvalid();
         c_tmp[0].row.alt1.valid = 1w1;
         c_tmp[0].f = h.h.f + 32w1;
         h.h.f = c_tmp[0].f;

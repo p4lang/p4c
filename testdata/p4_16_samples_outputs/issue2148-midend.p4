@@ -21,17 +21,18 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action issue2148l21() {
         new_val_0 = 32w232;
     }
-    @hidden action issue2148l18() {
+    @hidden action issue2148l17() {
+        not_initialized_0.setInvalid();
         new_val_0 = 32w1;
     }
     @hidden action issue2148l30() {
         h.h.a = (bit<16>)new_val_0;
     }
-    @hidden table tbl_issue2148l18 {
+    @hidden table tbl_issue2148l17 {
         actions = {
-            issue2148l18();
+            issue2148l17();
         }
-        const default_action = issue2148l18();
+        const default_action = issue2148l17();
     }
     @hidden table tbl_issue2148l21 {
         actions = {
@@ -52,7 +53,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = do_thing_action();
     }
     apply {
-        tbl_issue2148l18.apply();
+        tbl_issue2148l17.apply();
         if (not_initialized_0.a < 16w6) {
             ;
         } else {

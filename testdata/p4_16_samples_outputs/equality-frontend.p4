@@ -18,6 +18,14 @@ control c(out bit<1> x) {
     @name("c.a1") H[2] a1_0;
     @name("c.a2") H[2] a2_0;
     apply {
+        h1_0.setInvalid();
+        h2_0.setInvalid();
+        s1_0.h.setInvalid();
+        s2_0.h.setInvalid();
+        a1_0[0].setInvalid();
+        a1_0[1].setInvalid();
+        a2_0[0].setInvalid();
+        a2_0[1].setInvalid();
         if (a_0 == b_0) {
             x = 1w1;
         } else if (h1_0 == h2_0) {

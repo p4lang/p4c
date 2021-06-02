@@ -32,6 +32,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.x") H x_0;
     apply {
+        x_0.setInvalid();
         x_0.a = 16w2;
         h.eth_hdr.eth_type = x_0.a;
     }

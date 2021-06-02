@@ -29,6 +29,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             @name("ingress.retval") bit<32> retval;
             @name("ingress.tmp1") H[2] tmp1_0;
             @name("ingress.tmp2") H[2] tmp2_0;
+            tmp1_0[0].setInvalid();
+            tmp1_0[1].setInvalid();
+            tmp2_0[0].setInvalid();
+            tmp2_0[1].setInvalid();
             if (tmp2_0[0].a <= 32w3) {
                 tmp1_0[0] = tmp2_0[1];
             }

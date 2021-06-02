@@ -28,6 +28,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp1") ethernet_t tmp1_0;
     @name("ingress.tmp2") ethernet_t tmp2_0;
     apply {
+        tmp1_0.setInvalid();
+        tmp2_0.setInvalid();
         tmp1_0.setValid();
         tmp1_0 = (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1};
         h.eth_hdr1 = tmp1_0;

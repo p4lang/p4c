@@ -385,6 +385,8 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
 control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd, out psa_ingress_deparser_output_metadata_t ostd) {
     @name("IngressDeparserImpl.clone_md") clone_metadata_t clone_md_0;
     apply {
+        clone_md_0.data.h0.setInvalid();
+        clone_md_0.data.h1.setInvalid();
         clone_md_0.data.h1.setValid();
         clone_md_0.data.h1 = (clone_1_t){data = 32w0};
         clone_md_0.type = 3w0;

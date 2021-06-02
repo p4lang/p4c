@@ -22,6 +22,7 @@ control cc() {
     @name("cc.hdr") headers hdr_0;
     @name("cc.tmp") headers tmp;
     apply {
+        hdr_0.ipv4_option_timestamp.setInvalid();
         tmp = (headers){ipv4_option_timestamp = hdr_0.ipv4_option_timestamp};
         get<headers>(tmp);
     }

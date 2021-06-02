@@ -45,6 +45,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     @name("ParserImpl.tmp_hdr") ipv4_t_1 tmp_hdr_0;
     bit<160> tmp;
     @name(".start") state start {
+        tmp_hdr_0.setInvalid();
         tmp = packet.lookahead<bit<160>>();
         tmp_hdr_0.setValid();
         tmp_hdr_0.version = tmp[159:156];
