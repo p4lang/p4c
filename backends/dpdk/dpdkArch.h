@@ -333,10 +333,22 @@ class CollectLocalVariableToMetadata : public Transform {
     const IR::Node *postorder(IR::P4Parser *p) override;
 };
 
+// This pass inserts a temporary variable to hold intermediate value for handling &&&
+// set operation in transition select statement. This pass inserts this temporary
+// variable into parser local variables and later CollectLocalVariableToMetadata pass
+// injects it into metadata struct.
+class inserttmpMaskVar : public Transform {
+    P4::ReferenceMap *refMap;
+
+  public:
+    inserttmpMaskVar(P4::ReferenceMap *refMap):refMap(refMap) {}
+    const IR::Node *postorder(IR::P4Parser *p) override;
+};
+
 // According to dpdk spec, action parameters should prepend a p. In order to
 // respect this, we need at first make all action parameter lists into separate
 // structs and declare that struct in the P4 program. Then we modify the action
-// parameter list. Eventuall, it will only contain one parameter `t`, which is a
+// parameter list. Eventually, it will only contain one parameter `t`, which is a
 // struct containing all parameters previously defined. Next, we prepend t. in
 // front of action parameters. Please note that it is possible that the user
 // defines a struct paremeter himself or define multiple struct parameters in
@@ -610,6 +622,7 @@ class RewriteToDpdkArch : public PassManager {
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
         passes.push_back(new ConvertBinaryOperationTo2Params());
+        passes.push_back(new inserttmpMaskVar(refMap));
         parsePsa = new ParsePsa();
         passes.push_back(evaluator);
         passes.push_back(new VisitFunctor([evaluator, parsePsa]() {

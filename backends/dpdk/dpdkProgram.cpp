@@ -36,6 +36,7 @@ const IR::DpdkAsmStatement *ConvertToDpdkProgram::createListStatement(
 }
 
 const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
+    const IR::PathExpression *parserMask = nullptr;
     IR::IndexedVector<IR::DpdkHeaderType> headerType;
     for (auto kv : structure.header_types) {
         LOG3("add header type " << kv.second);
@@ -52,6 +53,14 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
                     {new IR::Annotation(IR::ID("__metadata__"), {})});
                 for (auto anno : s->annotations->annotations)
                     annotations->add(anno);
+
+                /* Fetch temporary variable created earlier for holding b & c for &&& operation */
+                for (auto field : s->fields) {
+                   if ((field->name.name).find("tmpMask_b_AND_c")) {
+                       parserMask = new IR::PathExpression(IR::ID("m."+field->name.name));
+                   }
+                }
+
                 auto st = new IR::DpdkStructType(s->srcInfo, s->name,
                                                  annotations, s->fields);
                 structType.push_back(st);
@@ -88,9 +97,9 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
 
     IR::IndexedVector<IR::DpdkAsmStatement> statements;
     auto ingress_parser_converter =
-        new ConvertToDpdkParser(refmap, typemap, collector, csum_map);
+        new ConvertToDpdkParser(refmap, typemap, collector, csum_map, parserMask);
     auto egress_parser_converter =
-        new ConvertToDpdkParser(refmap, typemap, collector, csum_map);
+        new ConvertToDpdkParser(refmap, typemap, collector, csum_map, parserMask);
     for (auto kv : structure.parsers) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_parser_converter);
@@ -210,8 +219,29 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
                 switch_var = e->select->components[0];
                 for (auto v : e->selectCases) {
                     if (!v->keyset->is<IR::DefaultExpression>()) {
-                        add_instr(new IR::DpdkJmpEqualStatement(
-                            append_parser_name(p, v->state->path->name), switch_var, v->keyset));
+                        if (v->keyset->is<IR::Mask>()) {
+                            auto maskexpr = v->keyset->to<IR::Mask>();
+                            auto left = maskexpr->left;
+                            auto right = maskexpr->right;
+                            /* Dpdk architecture requires that both operands of &&& be constants */
+                            if (!left->is<IR::Constant>() || !left->is<IR::Constant>())
+                                ::error(ErrorType::ERR_UNSUPPORTED,
+                                        "Non constant values are not supported in Mask operation");
+                            if (tmpMask) {
+                                unsigned value = right->to<IR::Constant>()->asUnsigned() &
+                                                 left->to<IR::Constant>()->asUnsigned();
+                                add_instr(new IR::DpdkMovStatement(tmpMask, switch_var));
+                                add_instr(new IR::DpdkAndStatement(tmpMask, tmpMask, right));
+                                add_instr(new IR::DpdkJmpEqualStatement(
+                                          append_parser_name(p, v->state->path->name),
+                                                            tmpMask, new IR::Constant(value)));
+                            } else {
+                               BUG("Temporary variable to hold input mask is not found.");
+                            }
+                        } else {
+                            add_instr(new IR::DpdkJmpEqualStatement(
+                              append_parser_name(p, v->state->path->name), switch_var, v->keyset));
+                        }
                     } else {
                         auto i = new IR::DpdkJmpLabelStatement(
                                 append_parser_name(p, v->state->path->name));

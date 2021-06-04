@@ -56,6 +56,6 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
-  "unhandled declaration type"
+  "Unhandled declaration type"
   testdata/p4_16_samples/psa-test.p4
   )

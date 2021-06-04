@@ -87,14 +87,14 @@ class ConvertToDpdkParser : public Inspector {
     P4::TypeMap *typemap;
     DpdkVariableCollector *collector;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
-
+    const IR::PathExpression *tmpMask;
   public:
     ConvertToDpdkParser(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkVariableCollector *collector,
-        std::map<const IR::Declaration_Instance *, cstring> *csum_map)
+        std::map<const IR::Declaration_Instance *, cstring> *csum_map, const IR::PathExpression *tmpMask)
         : refmap(refmap), typemap(typemap), collector(collector),
-          csum_map(csum_map) {}
+          csum_map(csum_map), tmpMask(tmpMask) {}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() {
         return instructions;
     }

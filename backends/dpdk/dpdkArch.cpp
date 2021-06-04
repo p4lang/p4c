@@ -790,7 +790,7 @@ const IR::Node *CollectLocalVariableToMetadata::preorder(IR::P4Program *p) {
         } else if (kv.second.pipe == "Ingress") {
             auto control = kv.first->to<IR::P4Control>();
             locals_map.emplace(kv.second.pipe, control->controlLocals);
-        } else if (kv.second.pipe == "IngressParser") {
+        } else if (kv.second.pipe == "IngressDeparser") {
             auto control = kv.first->to<IR::P4Control>();
             locals_map.emplace(kv.second.pipe, control->controlLocals);
         } else if (kv.second.pipe == "EgressParser") {
@@ -816,7 +816,7 @@ const IR::Node *CollectLocalVariableToMetadata::postorder(IR::Type_Struct *s) {
                         IR::ID(kv.first + "_" + dv->name.name), dv->type));
                 } else if (!d->is<IR::P4Action>() && !d->is<IR::P4Table>() &&
                            !d->is<IR::Declaration_Instance>()) {
-                    BUG("%1%: unhandled declaration type", s);
+                    BUG("%1%: Unhandled declaration type", s);
                 }
             }
         }
@@ -855,6 +855,7 @@ const IR::Node *CollectLocalVariableToMetadata::postorder(IR::P4Control *c) {
     c->controlLocals = decls;
     return c;
 }
+
 const IR::Node *CollectLocalVariableToMetadata::postorder(IR::P4Parser *p) {
     IR::IndexedVector<IR::Declaration> decls;
     for (auto d : p->parserLocals) {
@@ -862,6 +863,58 @@ const IR::Node *CollectLocalVariableToMetadata::postorder(IR::P4Parser *p) {
             decls.push_back(d);
         } else if (!d->is<IR::Declaration_Variable>()) {
             BUG("%1%: Unhandled declaration type in parser", p);
+        }
+    }
+    p->parserLocals = decls;
+    return p;
+}
+
+// DPDK assembly does not have an operator corresponding to &&& operator.
+// Hence,
+//     transition select(c) {
+//         a &&& b : state1;
+//     }
+// is implemented as follows:
+// if (c & b == a & b ), jmp state1
+//
+// This function inserts a placeholder temporary variable for holding the result of
+// & operation (c & b). a and b are compile-time constants and hence (a & b) does not
+// require another temporary variable.
+const IR::Node *inserttmpMaskVar::postorder(IR::P4Parser *p) {
+    bool maskVarInserted = false;
+    IR::IndexedVector<IR::Declaration> decls;
+    for (auto d : p->parserLocals) {
+        if (d->is<IR::Declaration_Instance>()) {
+            decls.push_back(d);
+        } else if (d->is<IR::Declaration_Variable>()) {
+            decls.push_back(d);
+        } else {
+            BUG("%1%: Unhandled declaration type in parser", p);
+        }
+    }
+
+    for (auto state : p->states) {
+        if (maskVarInserted == true)
+            break;
+        if (!state->selectExpression)
+            continue;
+        if (state->selectExpression->is<IR::SelectExpression>()) {
+            auto e = state->selectExpression->to<IR::SelectExpression>();
+            for (auto v : e->selectCases) {
+                if (!v->keyset->is<IR::DefaultExpression>()) {
+                    if (v->keyset->is<IR::Mask>()) {
+                       /* insert a temporary variable to parserLocals. This will
+                       later be inserted into the metadata structure by
+                       CollectLocalVariableToMetadata pass */
+                        auto type = v->keyset->to<IR::Mask>()->left->type;
+                        auto maskvar = new IR::PathExpression(
+                                           IR::ID(refMap->newName("tmpMask_b_AND_c")));
+                        decls.push_back(new IR::Declaration_Variable(maskvar->path->name, type));
+                        maskVarInserted = true;
+                        break;
+                    }
+                }
+            }
         }
     }
     p->parserLocals = decls;
