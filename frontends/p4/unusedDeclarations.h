@@ -32,6 +32,7 @@ namespace P4 {
  *  - IR::Type_Method
  *  - IR::Type_StructLike
  *  - IR::TypeParameters
+ *  - IR::Method
  *
  * Additionally, IR::Declaration_Instance nodes for extern instances are not
  * removed but still trigger warnings.
@@ -94,6 +95,8 @@ class RemoveUnusedDeclarations : public Transform {
     { prune(); return type; }
     const IR::Node* preorder(IR::Type_Method* type) override
     { prune(); return type; }
+    const IR::Node* preorder(IR::Method* decl) override
+    { prune(); return decl; }
     const IR::Node* preorder(IR::Parameter* param) override { return param; }  // never dead
     const IR::Node* preorder(IR::NamedExpression* ne) override { return ne; }  // idem
     const IR::Node* preorder(IR::TypeParameters* p) override { prune(); return p; }  // "
