@@ -323,8 +323,7 @@ bool StateTranslationVisitor::preorder(const IR::MethodCallExpression* expressio
     auto mi = P4::MethodInstance::resolve(expression,
                                           state->parser->program->refMap,
                                           state->parser->program->typeMap);
-    auto extMethod = mi->to<P4::ExternMethod>();
-    if (extMethod != nullptr) {
+    if (auto extMethod = mi->to<P4::ExternMethod>()) {
         auto decl = extMethod->object;
         if (decl == state->parser->packet) {
             if (extMethod->method->name.name == p4lib.packetIn.extract.name) {
@@ -337,6 +336,21 @@ bool StateTranslationVisitor::preorder(const IR::MethodCallExpression* expressio
                 return false;
             }
             BUG("Unhandled packet method %1%", expression->method);
+            return false;
+        }
+    } else if (auto bim = mi->to<P4::BuiltInMethod>()) {
+        builder->emitIndent();
+        if (bim->name == IR::Type_Header::isValid) {
+            visit(bim->appliedTo);
+            builder->append(".ebpf_valid");
+            return false;
+        } else if (bim->name == IR::Type_Header::setValid) {
+            visit(bim->appliedTo);
+            builder->append(".ebpf_valid = true");
+            return false;
+        } else if (bim->name == IR::Type_Header::setInvalid) {
+            visit(bim->appliedTo);
+            builder->append(".ebpf_valid = false");
             return false;
         }
     }
