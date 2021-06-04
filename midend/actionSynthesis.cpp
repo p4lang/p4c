@@ -125,6 +125,10 @@ const IR::Node* DoSynthesizeActions::postorder(IR::P4Control* control) {
 }
 
 const IR::Node* DoSynthesizeActions::preorder(IR::BlockStatement* statement) {
+    if (statement->annotations->getSingle("atomic")) {
+        return createAction(statement);
+    }
+
     // Find a chain of statements to convert
     auto actbody = new IR::BlockStatement;  // build here new action
     auto left = new IR::BlockStatement(statement->annotations);  // leftover statements
