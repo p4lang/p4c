@@ -229,11 +229,18 @@ ExternConverter::createCalculation(ConversionContext* ctxt,
             modelError("%1%: expected a struct", fields);
             return calcName;
         }
-        for (auto f : type->to<IR::Type_StructLike>()->fields) {
-            auto e = new IR::Member(fields, f->name);
-            auto ftype = ctxt->typeMap->getType(f);
-            ctxt->typeMap->setType(e, ftype);
-            list->push_back(e);
+        if (auto se = fields->to<IR::StructExpression>()) {
+            for (auto f : se->components) {
+                auto e = f->expression;
+                list->push_back(e);
+            }
+        } else {
+            for (auto f : type->to<IR::Type_StructLike>()->fields) {
+                auto e = new IR::Member(fields, f->name);
+                auto ftype = ctxt->typeMap->getType(f);
+                ctxt->typeMap->setType(e, ftype);
+                list->push_back(e);
+            }
         }
         fields = list;
         ctxt->typeMap->setType(fields, type);
