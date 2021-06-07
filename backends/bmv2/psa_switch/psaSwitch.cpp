@@ -122,18 +122,34 @@ void PsaProgramStructure::createScalars(ConversionContext* ctxt) {
     auto name = scalars.begin()->first;
     ctxt->json->add_header("scalars_t", name);
     ctxt->json->add_header_type("scalars_t");
-
+    unsigned max_length = 0;
     for (auto kv : scalars) {
         LOG5("Adding a scalar field " << kv.second << " to generated json");
         auto field = new Util::JsonArray();
         auto ftype = typeMap->getType(kv.second, true);
         if (auto type = ftype->to<IR::Type_Bits>()) {
             field->append(kv.second->name);
+            max_length+=type->size;
             field->append(type->size);
             field->append(type->isSigned);
+        } else if (auto type = ftype->to<IR::Type_Boolean>()) {
+            field->append(kv.second->name);
+            max_length+=1;
+            field->append(1);
+            field->append(false);
         } else {
-            BUG_CHECK(kv.second, "%1 is not of Type_Bits");
+            BUG_CHECK(kv.second, "%1 is not of Type_Bits or Type_Boolean");
         }
+        ctxt->json->add_header_field("scalars_t", field);
+    }
+    // must add padding
+    unsigned padding = max_length % 8;
+    if (padding != 0) {
+        cstring name = refMap->newName("_padding");
+        auto field = new Util::JsonArray();
+        field->append(name);
+        field->append(8 - padding);
+        field->append(false);
         ctxt->json->add_header_field("scalars_t", field);
     }
 }
@@ -489,6 +505,9 @@ bool InspectPsaProgram::preorder(const IR::Declaration_Variable* dv) {
         if (ft->is<IR::Type_Bits>()) {
             LOG5("Adding " << dv << " into scalars map");
             pinfo->scalars.emplace(scalarsName, dv);
+        } else if (ft->is<IR::Type_Boolean>()) {
+            LOG5("Adding " << dv << " into scalars map");
+            pinfo->scalars.emplace(scalarsName, dv);
         }
 
         return false;
@@ -615,6 +634,27 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     json->add_meta_info();
 }
 
+cstring PsaProgramStructure::convertHashAlgorithm(cstring algo) {
+    cstring result;
+    if (algo == "CRC32")
+        result = "crc32";
+    else if (algo == "CRC32_CUSTOM")
+        result = "crc32_custom";
+    else if (algo == "CRC16")
+        result = "crc16";
+    else if (algo == "CRC16_CUSTOM")
+        result = "crc16_custom";
+    else if (algo == "IDENTITY")
+        result = "identity";
+    else if (algo == "ONES_COMPLEMET16")
+        result = "";
+    else if (algo == "TARGET_DEFAULT")
+        result = "";
+    else
+        ::error(ErrorType::ERR_UNSUPPORTED, "Unsupported algorithm %1%", algo);
+    return result;
+}
+
 ExternConverter_Hash ExternConverter_Hash::singleton;
 ExternConverter_Checksum ExternConverter_Checksum::singleton;
 ExternConverter_InternetChecksum ExternConverter_InternetChecksum::singleton;
@@ -636,11 +676,59 @@ Util::IJson* ExternConverter_Hash::convertExternObject(
     return primitive;
 }
 
-Util::IJson* ExternConverter_Checksum::convertExternObject(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
-    UNUSED const bool& emitExterns) {
-    auto primitive = mkPrimitive("Checksum");
+Util::IJson *ExternConverter_Checksum::convertExternObject(
+    UNUSED ConversionContext *ctxt, UNUSED const P4::ExternMethod *em,
+    UNUSED const IR::MethodCallExpression *mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED const bool &emitExterns){
+    Util::JsonObject* primitive=nullptr;
+    if (mc->arguments->size()<2)
+        primitive = mkPrimitive("_" + em->originalExternType->name +
+                                 "_" + em->method->name);
+    else
+        primitive = mkPrimitive("_" + em->originalExternType->name +
+                                 "_" + "get_verify");
+    auto parameters = mkParameters(primitive);
+    primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
+    auto cksum = new Util::JsonObject();
+    cksum->emplace("type", "extern");
+    cksum->emplace("value", em->object->controlPlaneName());
+    parameters->append(cksum);
+    if (em->method->name=="update") {
+        auto psaStructure = static_cast<PsaProgramStructure *>(ctxt->structure);
+        cstring algo;
+        for (auto decls : psaStructure->extern_instances) {
+            if (decls.first == em->object->getName().name) {
+                auto ei = P4::EnumInstance::resolve(decls.second->arguments->at(0)->expression,
+                                                    ctxt->typeMap);
+                algo = ei->name.name;
+                break;
+            }
+        }
+        algo=psaStructure->convertHashAlgorithm(algo);
+        cstring calcName = ctxt->refMap->newName("calc_");
+        auto calc = new Util::JsonObject();
+        calc->emplace("name", calcName);
+        calc->emplace("id", nextId("calculations"));
+        calc->emplace("algo",algo);
+        auto arg = mc->arguments->at(0);
+        auto jexpr = ctxt->conv->convert(arg->expression, true, false);
+        calc->emplace("input", jexpr);
+        ctxt->json->calculations->append(calc);
+        auto calcPar=new Util::JsonObject();
+        calcPar->emplace("type","calculation");
+        calcPar->emplace("value",calcName);
+        parameters->append(calcPar);
+    } else if (em->method->name=="get") {
+        if (mc->arguments->size()==2) {
+        auto dst = ctxt->conv->convertLeftValue(mc->arguments->at(0)->expression);
+        auto equOp = ctxt->conv->convert(mc->arguments->at(1)->expression);
+        parameters->append(dst);
+        parameters->append(equOp);
+        } else if (mc->arguments->size()==1) {
+        auto dst = ctxt->conv->convert(mc->arguments->at(0)->expression);
+        parameters->append(dst);
+        }
+    }
     return primitive;
 }
 
@@ -831,8 +919,50 @@ void ExternConverter_Hash::convertExternInstance(
 
 void ExternConverter_Checksum::convertExternInstance(
     UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns)
-{ /* TODO */ }
+    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+    auto inst = c->to<IR::Declaration_Instance>();
+    cstring name = inst->controlPlaneName();
+    auto trim=inst->controlPlaneName().find(".");
+    auto block=inst->controlPlaneName().trim(trim);
+    auto psaStructure = static_cast<PsaProgramStructure *>(ctxt->structure);
+    auto ingressParser = psaStructure->parsers.at("ingress")->controlPlaneName();
+    auto ingressDeparser=psaStructure->deparsers.at("ingress")->controlPlaneName();
+    auto egressParser = psaStructure->parsers.at("egress")->controlPlaneName();
+    auto egressDeparser=psaStructure->deparsers.at("egress")->controlPlaneName();
+        if (block!=ingressParser && block!=ingressDeparser
+                                && block!=egressParser && block!=egressDeparser) {
+        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported in pipeline on this target", eb);
+    }
+    // add checksum instance
+    auto jcksum=new Util::JsonObject();
+    jcksum->emplace("name", name);
+    jcksum->emplace("id", nextId("extern_instances"));
+    jcksum->emplace("type", eb->getName());
+    jcksum->emplace_non_null("source_info", inst->sourceInfoJsonObj());
+    ctxt->json->externs->append(jcksum);
+
+    // add attributes
+    if (eb->getConstructorParameters()->size() != 1) {
+      modelError("%1%: expected one parameter", eb);
+      return;
+    }
+
+    Util::JsonArray *arr = ctxt->json->insert_array_field(jcksum, "attribute_values");
+
+    auto algo = eb->findParameterValue("hash");
+    CHECK_NULL(algo);
+    if (!algo->is<IR::Declaration_ID>()) {
+        modelError("%1%: expected a member", algo->getNode());
+        return;
+    }
+    cstring algo_name = algo->to<IR::Declaration_ID>()->name;
+    algo_name=psaStructure->convertHashAlgorithm(algo_name);
+    auto k = new Util::JsonObject();
+    k->emplace("name", "hash");
+    k->emplace("type", "string");
+    k->emplace("value", algo_name);
+    arr->append(k);
+}
 
 void ExternConverter_InternetChecksum::convertExternInstance(
     UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
