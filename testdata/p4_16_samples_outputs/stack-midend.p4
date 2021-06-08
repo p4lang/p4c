@@ -17,20 +17,24 @@ parser p() {
 
 control c() {
     @name("c.stack") h[4] stack_1;
-    @hidden action stack39() {
+    @hidden action stack38() {
+        stack_1[0].setInvalid();
+        stack_1[1].setInvalid();
+        stack_1[2].setInvalid();
+        stack_1[3].setInvalid();
         stack_1[3].setValid();
         stack_1[2] = stack_1[3];
         stack_1.push_front(2);
         stack_1.pop_front(2);
     }
-    @hidden table tbl_stack39 {
+    @hidden table tbl_stack38 {
         actions = {
-            stack39();
+            stack38();
         }
-        const default_action = stack39();
+        const default_action = stack38();
     }
     apply {
-        tbl_stack39.apply();
+        tbl_stack38.apply();
     }
 }
 

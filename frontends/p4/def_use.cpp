@@ -666,12 +666,10 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
     if (auto bim = mi->to<BuiltInMethod>()) {
         auto base = getWrites(bim->appliedTo);
         cstring name = bim->name.name;
-        if (name == IR::Type_Header::setInvalid) {
-            // modifies all fields of the header!
-            expressionWrites(expression, base);
-            return false;
-        } else if (name == IR::Type_Header::setValid) {
-            // modifies only the valid field
+        if (name == IR::Type_Header::setInvalid || name == IR::Type_Header::setValid) {
+            // modifies only the valid field.
+            // setInvalid may in fact write all fields, but
+            // it will not really "define" them.
             auto v = base->getField(StorageFactory::validFieldName);
             expressionWrites(expression, v);
             return false;

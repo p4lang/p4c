@@ -23,11 +23,10 @@ limitations under the License.
 
 namespace P4 {
 
-/** @brief Explicitly invalidate uninitialized header variables declared in
- * parser states.
+/** @brief Explicitly invalidate uninitialized header variables.
  *
- * A local uninitialized variable in a parser state that represents a header
- * must be invalid every time the parser state is entered.  Hence,
+ * A local uninitialized variable that represents a header
+ * must be initialized to invalid.  For example:
  *
 ```
 state X {
@@ -51,11 +50,12 @@ state X {
  *
  * @pre An up-to-date TypeMap.
  *
- * @post All parser states with uninitialized header variables have explicit
+ * @post Uninitialized header variables have explicit
  * statements that invalidate those headers.
  */
 class DoResetHeaders : public Transform {
     const TypeMap* typeMap;
+    IR::IndexedVector<IR::StatOrDecl> insert;
 
  public:
     static void generateResets(
@@ -64,6 +64,8 @@ class DoResetHeaders : public Transform {
     explicit DoResetHeaders(const TypeMap* typeMap) : typeMap(typeMap) {
         CHECK_NULL(typeMap); setName("DoResetHeaders"); }
     const IR::Node* postorder(IR::Declaration_Variable* decl) override;
+    const IR::Node* postorder(IR::P4Control* control) override;
+    const IR::Node* postorder(IR::ParserState* state) override;
 };
 
 /// Invokes TypeChecking followed by DoResetHeaders.

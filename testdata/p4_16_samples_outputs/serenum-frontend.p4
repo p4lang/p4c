@@ -23,6 +23,7 @@ struct Headers {
 parser prs(packet_in p, out Headers h) {
     @name("prs.e") Ethernet e_0;
     state start {
+        e_0.setInvalid();
         p.extract<Ethernet>(e_0);
         transition select(e_0.type) {
             EthTypes.IPv4: accept;

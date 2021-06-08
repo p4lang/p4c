@@ -34,6 +34,7 @@ header GH_1 {
     S data;
 }
 
+typedef GH_1[3] Stack;
 struct H4_0 {
     H2_0 x;
 }
@@ -52,7 +53,16 @@ header_union HU_0 {
 }
 
 control c(out bit<1> x) {
+    @name("c.gh") GH_1 gh_0;
+    @name("c.s") Stack s_0;
+    @name("c.z") HU_0 z_0;
     apply {
+        gh_0.setInvalid();
+        s_0[0].setInvalid();
+        s_0[1].setInvalid();
+        s_0[2].setInvalid();
+        z_0.xu.setInvalid();
+        z_0.h3u.setInvalid();
         x = 1w0;
     }
 }

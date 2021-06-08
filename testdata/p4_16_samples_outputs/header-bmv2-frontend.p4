@@ -44,6 +44,7 @@ control deparser(packet_out b, in Headers h) {
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.c.tmp") hdr c_tmp;
     apply {
+        c_tmp.setInvalid();
         c_tmp.f = h.h.f + 32w1;
         h.h.f = c_tmp.f;
         sm.egress_spec = 9w0;

@@ -86,6 +86,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         }
     }
     @name(".start") state start {
+        tmp_hdr_0.setInvalid();
         transition parse_ethernet;
     }
 }

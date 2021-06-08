@@ -74,6 +74,7 @@ parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_m
 }
 
 control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
+    @name("ingress.bh") bitvec_hdr bh_0;
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("ingress.do_act") action do_act() {
@@ -91,20 +92,31 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
         }
         default_action = NoAction_0();
     }
-    @hidden action issue1653complexbmv2l95() {
+    @hidden action issue1653complexbmv2l71() {
+        bh_0.setInvalid();
+    }
+    @hidden action issue1653complexbmv2l94() {
+        bh_0._row_alt1_type10 = 16w0x800;
         h.bvh0._row_alt1_type10 = 16w0x800;
         local_metadata._row0_alt0_useHash3 = true;
         clone3<row_t>(CloneType.I2E, 32w0, (row_t){alt0 = (alt_t){valid = local_metadata._row0_alt0_valid0,port = local_metadata._row0_alt0_port1,hashRes = local_metadata._row0_alt0_hashRes2,useHash = true,type = local_metadata._row0_alt0_type4,pad = local_metadata._row0_alt0_pad5},alt1 = (alt_t){valid = local_metadata._row0_alt1_valid6,port = local_metadata._row0_alt1_port7,hashRes = local_metadata._row0_alt1_hashRes8,useHash = local_metadata._row0_alt1_useHash9,type = local_metadata._row0_alt1_type10,pad = local_metadata._row0_alt1_pad11}});
     }
-    @hidden table tbl_issue1653complexbmv2l95 {
+    @hidden table tbl_issue1653complexbmv2l71 {
         actions = {
-            issue1653complexbmv2l95();
+            issue1653complexbmv2l71();
         }
-        const default_action = issue1653complexbmv2l95();
+        const default_action = issue1653complexbmv2l71();
+    }
+    @hidden table tbl_issue1653complexbmv2l94 {
+        actions = {
+            issue1653complexbmv2l94();
+        }
+        const default_action = issue1653complexbmv2l94();
     }
     apply {
+        tbl_issue1653complexbmv2l71.apply();
         tns_0.apply();
-        tbl_issue1653complexbmv2l95.apply();
+        tbl_issue1653complexbmv2l94.apply();
     }
 }
 

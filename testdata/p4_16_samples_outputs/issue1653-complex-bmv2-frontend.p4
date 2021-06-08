@@ -70,6 +70,7 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
         default_action = NoAction_0();
     }
     apply {
+        bh_0.setInvalid();
         tns_0.apply();
         bh_0.row.alt1.type = EthTypes.IPv4;
         h.bvh0.row.alt1.type = bh_0.row.alt1.type;

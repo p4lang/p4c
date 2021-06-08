@@ -22,6 +22,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             @name("ingress.retval") bit<16> retval;
             @name("ingress.not_initialized") H not_initialized_0;
             @name("ingress.new_val") bit<32> new_val_0;
+            not_initialized_0.setInvalid();
             new_val_0 = 32w1;
             if (not_initialized_0.a < 16w6) {
                 ;

@@ -44,6 +44,8 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         if (hdr.h == hdr.a[0]) {
             hdr.same.same = hdr.same.same | 8w4;
         }
+        tmp_0[0].setInvalid();
+        tmp_0[1].setInvalid();
         tmp_0[0] = hdr.h;
         tmp_0[1] = hdr.a[0];
         if (tmp_0 == hdr.a) {

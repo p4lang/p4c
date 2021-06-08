@@ -9,6 +9,7 @@ parser P(packet_in p, out H[2] h) {
     @name("P.tmp") H tmp;
     @name("P.tmp") bit<32> tmp_0;
     state start {
+        tmp.setInvalid();
         p.extract<H>(tmp);
         transition select(tmp.field) {
             32w0: n1;

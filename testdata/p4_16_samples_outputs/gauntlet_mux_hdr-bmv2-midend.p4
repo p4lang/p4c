@@ -26,6 +26,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @noWarn("unused") @name(".NoAction") action NoAction_0() {
     }
     @name("ingress.simple_action") action simple_action() {
+        tmp1_0[0].setInvalid();
+        tmp1_0[1].setInvalid();
+        tmp2_0[0].setInvalid();
+        tmp2_0[1].setInvalid();
         tmp1_0[0] = (tmp2_0[0].a <= 32w3 ? tmp2_0[1] : tmp1_0[0]);
         h.h.a = tmp1_0[0].a;
     }

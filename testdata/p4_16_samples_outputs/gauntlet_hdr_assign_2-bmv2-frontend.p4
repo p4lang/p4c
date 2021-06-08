@@ -31,6 +31,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
+        h.h.a = 8w1;
         h.h.setInvalid();
         if (sm.egress_port == 9w2) {
             h.h.setValid();
