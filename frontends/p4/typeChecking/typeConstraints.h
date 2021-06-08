@@ -86,25 +86,25 @@ class TypeConstraint : public IHasDbPrint {
         boost::format fmt = boost::format(errFormat);
         switch (errArguments.size()) {
             case 0:
-                message = ::error_helper(fmt, "", "", "", "");
+               message = boost::str(fmt);
                 break;
             case 1:
                 explanation += explain(0, explainer);
-                message = ::error_helper(fmt, "", "", "", "", errArguments.at(0));
+                message = ::error_helper(fmt, errArguments.at(0)).toString();
                 break;
             case 2:
                 explanation += explain(0, explainer);
                 explanation += explain(1, explainer);
                 message = ::error_helper(
-                    fmt, "", "", "", "", errArguments.at(0), errArguments.at(1));
+                    fmt, errArguments.at(0), errArguments.at(1)).toString();
                 break;
             case 3:
                 explanation += explain(0, explainer);
                 explanation += explain(1, explainer);
                 explanation += explain(2, explainer);
                 message = ::error_helper(
-                    fmt, "", "", "", "",
-                    errArguments.at(0), errArguments.at(1), errArguments.at(2));
+                    fmt, errArguments.at(0), errArguments.at(1),
+                    errArguments.at(2)).toString();
                 break;
             case 4:
                 explanation += explain(0, explainer);
@@ -112,8 +112,8 @@ class TypeConstraint : public IHasDbPrint {
                 explanation += explain(2, explainer);
                 explanation += explain(3, explainer);
                 message = ::error_helper(
-                    fmt, "", "", "", "", errArguments.at(0), errArguments.at(1),
-                    errArguments.at(2), errArguments.at(3));
+                    fmt, errArguments.at(0), errArguments.at(1),
+                    errArguments.at(2), errArguments.at(3)).toString();
                 break;
             default:
                 BUG("Unexpected argument count for error message");
@@ -136,7 +136,7 @@ class TypeConstraint : public IHasDbPrint {
         /// the analysis started.
         boost::format fmt(format);
         cstring message = cstring("  ---- Actual error:\n") +
-                ::error_helper(fmt, "", "", "", "", args...);
+                ::error_helper(fmt, args...).toString();
         auto o = origin;
         auto constraint = this;
         Explain explainer(subst);

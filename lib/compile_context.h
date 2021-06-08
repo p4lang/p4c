@@ -93,7 +93,7 @@ class BaseCompileContext : public ICompileContext {
     static BaseCompileContext& get();
 
     /// @return the error reporter for this compilation context.
-    ErrorReporter& errorReporter();
+    virtual ErrorReporter& errorReporter();
 
     /// @return the default diagnostic action for calls to `::warning()`.
     virtual DiagnosticAction getDefaultWarningDiagnosticAction();
