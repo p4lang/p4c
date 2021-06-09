@@ -1,4 +1,6 @@
 
+
+
 struct ethernet_t {
 	bit<48> dstAddr
 	bit<48> srcAddr
@@ -61,7 +63,8 @@ struct metadata {
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
 	bit<16> local_metadata_data
-	bit<8> IngressParser_tmpMask_b_AND_c
+	bit<16> tmpMask
+	bit<8> tmpMask_0
 }
 metadata instanceof metadata
 
@@ -95,14 +98,14 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
-	mov m.IngressParser_tmpMask_b_AND_c h.ethernet.etherType
-	and m.IngressParser_tmpMask_b_AND_c 0xf00
-	jmpeq INGRESSPARSERIMPL_PARSE_IPV4 m.IngressParser_tmpMask_b_AND_c 0x800
+	mov m.tmpMask h.ethernet.etherType
+	and m.tmpMask 0xf00
+	jmpeq INGRESSPARSERIMPL_PARSE_IPV4 m.tmpMask 0x800
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
-	mov m.IngressParser_tmpMask_b_AND_c h.ipv4.protocol
-	and m.IngressParser_tmpMask_b_AND_c 0xfc
-	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.IngressParser_tmpMask_b_AND_c 0x4
+	mov m.tmpMask_0 h.ipv4.protocol
+	and m.tmpMask_0 0xfc
+	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.tmpMask_0 0x4
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
 	INGRESSPARSERIMPL_ACCEPT :	table tbl

@@ -87,14 +87,17 @@ class ConvertToDpdkParser : public Inspector {
     P4::TypeMap *typemap;
     DpdkVariableCollector *collector;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
-    const IR::PathExpression *tmpMask;
+
+    IR::Type_Struct *metadataStruct;
+
   public:
     ConvertToDpdkParser(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkVariableCollector *collector,
-        std::map<const IR::Declaration_Instance *, cstring> *csum_map, const IR::PathExpression *tmpMask)
+
+        std::map<const IR::Declaration_Instance *, cstring> *csum_map, IR::Type_Struct *metadataStruct)
         : refmap(refmap), typemap(typemap), collector(collector),
-          csum_map(csum_map), tmpMask(tmpMask) {}
+          csum_map(csum_map), metadataStruct(metadataStruct) {}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() {
         return instructions;
     }
@@ -102,6 +105,7 @@ class ConvertToDpdkParser : public Inspector {
     bool preorder(const IR::ParserState *s) override;
     void add_instr(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
     cstring append_parser_name(const IR::P4Parser* p, cstring);
+    void add_metadata_field(IR::Declaration_Variable *d);
 };
 
 class ConvertToDpdkControl : public Inspector {
