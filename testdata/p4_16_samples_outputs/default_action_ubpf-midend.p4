@@ -21,8 +21,8 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    @name("pipe.add") action add(@name("data") bit<32> data) {
-        headers.h.b = headers.h.a + data;
+    @name("pipe.add") action add(@name("data") bit<32> data_1) {
+        headers.h.b = headers.h.a + data_1;
     }
     @name("pipe.tbl_a") table tbl_a_0 {
         actions = {
