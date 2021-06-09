@@ -154,12 +154,15 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::ParserState* state) {
 // Try to guess whether a file is a "system" file
 bool RemoveUnusedDeclarations::isSystemFile(cstring file) {
     if (file.startsWith(p4includePath)) return true;
+    // if the backend is invoked directly with '-I p4include'
+    if (file.startsWith("p4include")) return true;
     return false;
 }
 
 cstring RemoveUnusedDeclarations::ifSystemFile(const IR::Node* node) {
     if (!node->srcInfo.isValid()) return nullptr;
     auto sourceFile = node->srcInfo.getSourceFile();
+    LOG1("source file " << sourceFile << " " << p4includePath);
     if (isSystemFile(sourceFile))
         return sourceFile;
     return nullptr;
