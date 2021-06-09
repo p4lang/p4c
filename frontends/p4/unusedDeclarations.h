@@ -32,6 +32,7 @@ namespace P4 {
  *  - IR::Type_Method
  *  - IR::Type_StructLike
  *  - IR::TypeParameters
+ *  - IR::Method if declared in system headers
  *
  * Additionally, IR::Declaration_Instance nodes for extern instances are not
  * removed but still trigger warnings.
@@ -82,6 +83,7 @@ class RemoveUnusedDeclarations : public Transform {
     const IR::Node* preorder(IR::Type_SerEnum* type)  override;
 
     const IR::Node* preorder(IR::Declaration_Instance* decl) override;
+    const IR::Node* preorder(IR::Method* decl) override;
 
     // The following kinds of nodes are not deleted even if they are unreferenced
     const IR::Node* preorder(IR::Type_Error* type) override
@@ -101,6 +103,8 @@ class RemoveUnusedDeclarations : public Transform {
     const IR::Node* preorder(IR::Declaration_Variable* decl)  override;
     const IR::Node* preorder(IR::Declaration* decl) override { return process(decl); }
     const IR::Node* preorder(IR::Type_Declaration* decl) override { return process(decl); }
+    bool isSystemFile(cstring file);
+    cstring ifSystemFile(const IR::Node* node);  // return file containing node if system file
 };
 
 /** @brief Iterates RemoveUnusedDeclarations until convergence.
