@@ -35,6 +35,7 @@ void DoResetHeaders::generateResets(
         auto args = new IR::Vector<IR::Argument>();
         auto mc = new IR::MethodCallExpression(expr->srcInfo, method, args);
         auto stat = new IR::MethodCallStatement(mc->srcInfo, mc);
+        LOG3("Reset header " << expr);
         resets->push_back(stat);
     } else if (type->is<IR::Type_Stack>()) {
         auto tstack = type->to<IR::Type_Stack>();
@@ -52,23 +53,45 @@ void DoResetHeaders::generateResets(
 }
 
 const IR::Node* DoResetHeaders::postorder(IR::Declaration_Variable* decl) {
-    if (findContext<IR::ParserState>() == nullptr)
-        return decl;
     if (decl->initializer != nullptr)
         return decl;
-    auto resets = new IR::Vector<IR::StatOrDecl>();
-    resets->push_back(decl);
-    BUG_CHECK(getContext()->node->is<IR::Vector<IR::StatOrDecl>>() ||
-              getContext()->node->is<IR::ParserState>() ||
-              getContext()->node->is<IR::BlockStatement>(),
-              "%1%: parent is not Vector<StatOrDecl>, but %2%",
-              decl, getContext()->node);
+    LOG3("DoResetHeaders context " << dbp(getContext()->node));
     auto type = typeMap->getType(getOriginal(), true);
     auto path = new IR::PathExpression(decl->getName());
-    generateResets(typeMap, type, path, resets);
-    if (resets->size() == 1)
+    auto parent = getContext()->node;
+    // For declarations in parsers and controls we have to insert the
+    // reset in the start state or the body respectively.
+    bool separate = parent->is<IR::P4Parser>() || parent->is<IR::P4Control>();
+    if (!separate) {
+        auto resets = new IR::Vector<IR::StatOrDecl>();
+        resets->push_back(decl);
+        generateResets(typeMap, type, path, resets);
+        if (resets->size() == 1)
+            return decl;
+        return resets;
+    } else {
+        generateResets(typeMap, type, path, &insert);
         return decl;
-    return resets;
+    }
+}
+
+const IR::Node* DoResetHeaders::postorder(IR::P4Control* control) {
+    insert.append(control->body->components);
+    control->body = new IR::BlockStatement(
+        control->body->srcInfo,
+        control->body->annotations,
+        insert);
+    insert.clear();
+    return control;
+}
+
+const IR::Node* DoResetHeaders::postorder(IR::ParserState* state) {
+    if (state->name != IR::ParserState::start)
+        return state;
+    insert.append(state->components);
+    state->components = insert;
+    insert.clear();
+    return state;
 }
 
 }  // namespace P4

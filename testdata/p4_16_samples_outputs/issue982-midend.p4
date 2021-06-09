@@ -385,7 +385,9 @@ control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata me
         ostd.clone_metadata.data.h0 = clone_md_0_data.h0;
         ostd.clone_metadata.data.h1 = clone_md_0_data.h1;
     }
-    @hidden action issue982l417() {
+    @hidden action issue982l416() {
+        clone_md_0_data.h0.setInvalid();
+        clone_md_0_data.h1.setInvalid();
         clone_md_0_data.h1.setValid();
         clone_md_0_data.h1.data = 32w0;
     }
@@ -393,11 +395,11 @@ control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata me
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_issue982l417 {
+    @hidden table tbl_issue982l416 {
         actions = {
-            issue982l417();
+            issue982l416();
         }
-        const default_action = issue982l417();
+        const default_action = issue982l416();
     }
     @hidden table tbl_issue982l420 {
         actions = {
@@ -412,7 +414,7 @@ control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata me
         const default_action = issue982l422();
     }
     apply {
-        tbl_issue982l417.apply();
+        tbl_issue982l416.apply();
         if (meta._custom_clone_id1 == 3w1) {
             tbl_issue982l420.apply();
         }

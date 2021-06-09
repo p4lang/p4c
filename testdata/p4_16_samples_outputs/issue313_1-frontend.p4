@@ -15,6 +15,8 @@ control ctrl(inout struct_t input, out header_h output) {
         tmp1_0 = tmp0_0;
     }
     apply {
+        tmp0_0.setInvalid();
+        tmp1_0.setInvalid();
         act();
         output = tmp1_0;
     }

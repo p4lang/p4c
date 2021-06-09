@@ -64,6 +64,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     bit<160> tmp;
     bit<160> tmp_0;
     @name(".start") state start {
+        tmp_hdr_1.setInvalid();
+        tmp_hdr_2.setInvalid();
         packet.extract<simpleipv4_t>(hdr.sh.next);
         packet.extract<simpleipv4_t>(hdr.sh.next);
         tmp = packet.lookahead<bit<160>>();

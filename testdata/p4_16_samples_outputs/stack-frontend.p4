@@ -19,6 +19,10 @@ control c() {
     @name("c.stack") h[4] stack_1;
     @name("c.b") h b_0;
     apply {
+        stack_1[0].setInvalid();
+        stack_1[1].setInvalid();
+        stack_1[2].setInvalid();
+        stack_1[3].setInvalid();
         stack_1[3].setValid();
         b_0 = stack_1[3];
         stack_1[2] = b_0;

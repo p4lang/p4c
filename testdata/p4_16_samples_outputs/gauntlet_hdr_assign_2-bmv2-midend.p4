@@ -36,17 +36,18 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @hidden action gauntlet_hdr_assign_2bmv2l43() {
         h.h.setValid();
     }
-    @hidden action gauntlet_hdr_assign_2bmv2l38() {
+    @hidden action gauntlet_hdr_assign_2bmv2l37() {
+        h.h.a = 8w1;
         h.h.setInvalid();
     }
     @hidden action gauntlet_hdr_assign_2bmv2l45() {
         h.h.b = 8w2;
     }
-    @hidden table tbl_gauntlet_hdr_assign_2bmv2l38 {
+    @hidden table tbl_gauntlet_hdr_assign_2bmv2l37 {
         actions = {
-            gauntlet_hdr_assign_2bmv2l38();
+            gauntlet_hdr_assign_2bmv2l37();
         }
-        const default_action = gauntlet_hdr_assign_2bmv2l38();
+        const default_action = gauntlet_hdr_assign_2bmv2l37();
     }
     @hidden table tbl_gauntlet_hdr_assign_2bmv2l41 {
         actions = {
@@ -67,7 +68,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = gauntlet_hdr_assign_2bmv2l45();
     }
     apply {
-        tbl_gauntlet_hdr_assign_2bmv2l38.apply();
+        tbl_gauntlet_hdr_assign_2bmv2l37.apply();
         if (sm.egress_port == 9w2) {
             tbl_gauntlet_hdr_assign_2bmv2l41.apply();
         } else {
