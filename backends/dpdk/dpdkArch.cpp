@@ -869,58 +869,6 @@ const IR::Node *CollectLocalVariableToMetadata::postorder(IR::P4Parser *p) {
     return p;
 }
 
-// DPDK assembly does not have an operator corresponding to &&& operator.
-// Hence,
-//     transition select(c) {
-//         a &&& b : state1;
-//     }
-// is implemented as follows:
-// if (c & b == a & b ), jmp state1
-//
-// This function inserts a placeholder temporary variable for holding the result of
-// & operation (c & b). a and b are compile-time constants and hence (a & b) does not
-// require another temporary variable.
-const IR::Node *inserttmpMaskVar::postorder(IR::P4Parser *p) {
-    bool maskVarInserted = false;
-    IR::IndexedVector<IR::Declaration> decls;
-    for (auto d : p->parserLocals) {
-        if (d->is<IR::Declaration_Instance>()) {
-            decls.push_back(d);
-        } else if (d->is<IR::Declaration_Variable>()) {
-            decls.push_back(d);
-        } else {
-            BUG("%1%: Unhandled declaration type in parser", p);
-        }
-    }
-
-    for (auto state : p->states) {
-        if (maskVarInserted == true)
-            break;
-        if (!state->selectExpression)
-            continue;
-        if (state->selectExpression->is<IR::SelectExpression>()) {
-            auto e = state->selectExpression->to<IR::SelectExpression>();
-            for (auto v : e->selectCases) {
-                if (!v->keyset->is<IR::DefaultExpression>()) {
-                    if (v->keyset->is<IR::Mask>()) {
-                       /* insert a temporary variable to parserLocals. This will
-                       later be inserted into the metadata structure by
-                       CollectLocalVariableToMetadata pass */
-                        auto type = v->keyset->to<IR::Mask>()->left->type;
-                        auto maskvar = new IR::PathExpression(
-                                           IR::ID(refMap->newName("tmpMask_b_AND_c")));
-                        decls.push_back(new IR::Declaration_Variable(maskvar->path->name, type));
-                        maskVarInserted = true;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    p->parserLocals = decls;
-    return p;
-}
-
 const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Action *a) {
     if (a->parameters->size() > 0) {
         auto l = new IR::IndexedVector<IR::Parameter>;

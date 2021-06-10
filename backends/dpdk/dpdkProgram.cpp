@@ -36,7 +36,6 @@ const IR::DpdkAsmStatement *ConvertToDpdkProgram::createListStatement(
 }
 
 const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
-
     IR::Type_Struct *metadataStruct = nullptr;
 
     for (auto obj : prog->objects) {
