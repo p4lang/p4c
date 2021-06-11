@@ -1,5 +1,5 @@
 /*
-Copyright 2016 VMware, Inc.
+Copyright 2021 VMware, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,35 +14,55 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include "simplifyKey.h"
+#include "keySideEffect.h"
+#include "sideEffects.h"
 #include "frontends/p4/methodInstance.h"
-#include "frontends/p4/sideEffects.h"
 
 namespace P4 {
 
-bool IsValid::isSimple(const IR::Expression* expression, const Visitor::Context *) {
-    if (!expression->is<IR::MethodCallExpression>())
-        return false;
-    auto mi = MethodInstance::resolve(expression->to<IR::MethodCallExpression>(), refMap, typeMap);
-    if (!mi->is<BuiltInMethod>())
-        return false;
-    auto bi = mi->to<BuiltInMethod>();
-    if (bi->name.name == IR::Type_Header::isValid) {
-        // isValid() is simple when applied to headers, but complicated when applied to unions.
-        auto baseType = typeMap->getType(bi->appliedTo, true);
-        if (baseType->is<IR::Type_HeaderUnion>())
-            return false;
-        return true;
+namespace {
+// Checks to see whether an IR node includes a table.apply() sub-expression
+class HasTableApply : public Inspector {
+    ReferenceMap* refMap;
+    TypeMap*      typeMap;
+ public:
+    const IR::P4Table*  table;
+    const IR::MethodCallExpression* call;
+    HasTableApply(ReferenceMap* refMap, TypeMap* typeMap) :
+            refMap(refMap), typeMap(typeMap), table(nullptr), call(nullptr)
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("HasTableApply"); }
+
+    void postorder(const IR::MethodCallExpression* expression) override {
+        auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+        if (!mi->isApply()) return;
+        auto am = mi->to<P4::ApplyMethod>();
+        if (!am->object->is<IR::P4Table>()) return;
+        BUG_CHECK(table == nullptr, "%1% and %2%: multiple table applications in one expression",
+                  table, am->object);
+        table = am->object->to<IR::P4Table>();
+        call = expression;
+        LOG3("Invoked table is " << dbp(table));
     }
-    return false;
+};
+}  // namespace
+
+const IR::Node* DoKeySideEffect::preorder(IR::Key* key) {
+    // If any key field has side effects then pull out all
+    // the key field values.
+    LOG3("Visiting " << key);
+    bool complex = false;
+    for (auto k : key->keyElements)
+        complex = complex || P4::SideEffects::check(k->expression, refMap, typeMap);
+    if (!complex)
+        prune();
+    else
+        LOG3("Will pull out " << key);
+    return key;
 }
 
-const IR::Node* DoSimplifyKey::postorder(IR::KeyElement* element) {
-    LOG1("Key element " << element);
-    bool simple = key_policy->isSimple(element->expression, getContext());
-    if (simple)
-        return element;
-
+const IR::Node* DoKeySideEffect::postorder(IR::KeyElement* element) {
+    // If we got here we need to pull the key element out.
+    LOG3("Extracting key element " << element);
     auto table = findOrigCtxt<IR::P4Table>();
     CHECK_NULL(table);
     TableInsertions* insertions;
@@ -70,7 +90,7 @@ const IR::Node* DoSimplifyKey::postorder(IR::KeyElement* element) {
     return element;
 }
 
-const IR::Node* DoSimplifyKey::postorder(IR::P4Table* table) {
+const IR::Node* DoKeySideEffect::postorder(IR::P4Table* table) {
     auto insertions = ::get(toInsert, getOriginal<IR::P4Table>());
     if (insertions == nullptr)
         return table;
@@ -82,8 +102,8 @@ const IR::Node* DoSimplifyKey::postorder(IR::P4Table* table) {
     return result;
 }
 
-const IR::Node* DoSimplifyKey::doStatement(const IR::Statement* statement,
-                                           const IR::Expression *expression) {
+const IR::Node* DoKeySideEffect::doStatement(const IR::Statement* statement,
+                                             const IR::Expression *expression) {
     LOG3("Visiting " << getOriginal());
     HasTableApply hta(refMap, typeMap);
     (void)expression->apply(hta);

@@ -545,8 +545,10 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
     // See whether we assign the result of the call to a temporary
     if (type->is<IR::Type_Void>() ||               // no return type
         getParent<IR::MethodCallStatement>()) {    // result of call is not used
-        statements.push_back(new IR::MethodCallStatement(mce->srcInfo, mce));
-        rv = nullptr;
+        if (!copyBack->empty()) {
+            statements.push_back(new IR::MethodCallStatement(mce->srcInfo, mce));
+            rv = nullptr;
+        }  // else just return mce
     } else if (tbl_apply) {
         typeMap->setType(mce, type);
         rv = mce;
@@ -682,5 +684,83 @@ void DoSimplifyExpressions::end_apply(const IR::Node *) {
     BUG_CHECK(toInsert.empty(), "DoSimplifyExpressions::end_apply orphaned declarations");
     BUG_CHECK(statements.empty(), "DoSimplifyExpressions::end_apply orphaned statements");
 }
+
+///////////////////////////////////////////////
+
+const IR::Node* KeySideEffect::preorder(IR::Key* key) {
+    // If any key field has side effects then pull out all
+    // the key field values.
+    LOG3("Visiting " << key);
+    bool complex = false;
+    for (auto k : key->keyElements)
+        complex = complex || P4::SideEffects::check(k->expression, refMap, typeMap);
+    if (!complex)
+        prune();
+    else
+        LOG3("Will pull out " << key);
+    return key;
+}
+
+const IR::Node* KeySideEffect::postorder(IR::KeyElement* element) {
+    // If we got here we need to pull the key element out.
+    LOG3("Extracting key element " << element);
+    auto table = findOrigCtxt<IR::P4Table>();
+    CHECK_NULL(table);
+    TableInsertions* insertions;
+    auto it = toInsert.find(table);
+    if (it == toInsert.end()) {
+        insertions = new TableInsertions();
+        toInsert.emplace(table, insertions);
+    } else {
+        insertions = it->second;
+    }
+
+    auto tmp = refMap->newName("key");
+    auto type = typeMap->getType(element->expression, true);
+    auto decl = new IR::Declaration_Variable(tmp, type, nullptr);
+    insertions->declarations.push_back(decl);
+    auto left = new IR::PathExpression(tmp);
+    auto right = element->expression;
+    auto assign = new IR::AssignmentStatement(element->expression->srcInfo, left, right);
+    insertions->statements.push_back(assign);
+
+    auto path = new IR::PathExpression(tmp);
+    // This preserves annotations on the key
+    element->expression = path;
+    LOG2("Created new key expression " << element);
+    return element;
+}
+
+const IR::Node* KeySideEffect::postorder(IR::P4Table* table) {
+    auto insertions = ::get(toInsert, getOriginal<IR::P4Table>());
+    if (insertions == nullptr)
+        return table;
+
+    auto result = new IR::IndexedVector<IR::Declaration>();
+    for (auto d : insertions->declarations)
+        result->push_back(d);
+    result->push_back(table);
+    return result;
+}
+
+const IR::Node* KeySideEffect::doStatement(const IR::Statement* statement,
+                                             const IR::Expression *expression) {
+    LOG3("Visiting " << getOriginal());
+    HasTableApply hta(refMap, typeMap);
+    (void)expression->apply(hta);
+    if (hta.table == nullptr)
+        return statement;
+    auto insertions = get(toInsert, hta.table);
+    if (insertions == nullptr)
+        return statement;
+
+    auto result = new IR::IndexedVector<IR::StatOrDecl>();
+    for (auto assign : insertions->statements)
+        result->push_back(assign);
+    result->push_back(statement);
+    auto block = new IR::BlockStatement(*result);
+    return block;
+}
+
 
 }  // namespace P4

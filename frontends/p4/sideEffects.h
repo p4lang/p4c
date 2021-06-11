@@ -26,6 +26,30 @@ limitations under the License.
 
 namespace P4 {
 
+/// Checks to see whether an IR node includes a table.apply() sub-expression
+class HasTableApply : public Inspector {
+    ReferenceMap* refMap;
+    TypeMap*      typeMap;
+ public:
+    const IR::P4Table*  table;
+    const IR::MethodCallExpression* call;
+    HasTableApply(ReferenceMap* refMap, TypeMap* typeMap) :
+            refMap(refMap), typeMap(typeMap), table(nullptr), call(nullptr)
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("HasTableApply"); }
+
+    void postorder(const IR::MethodCallExpression* expression) override {
+        auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+        if (!mi->isApply()) return;
+        auto am = mi->to<P4::ApplyMethod>();
+        if (!am->object->is<IR::P4Table>()) return;
+        BUG_CHECK(table == nullptr, "%1% and %2%: multiple table applications in one expression",
+                  table, am->object);
+        table = am->object->to<IR::P4Table>();
+        call = expression;
+        LOG3("Invoked table is " << dbp(table));
+    }
+};
+
 /** @brief Determines whether an expression may have method or constructor
  * invocations.
  *
@@ -83,13 +107,10 @@ class SideEffects : public Inspector {
         expression->apply(se);
         return se.nodeWithSideEffect != nullptr;
     }
-    /// @return true if the expression may have side-effects.
-    static bool hasSideEffect(const IR::Expression* exp,
-                      ReferenceMap* refMap,
-                      TypeMap* typeMap) {
-        auto mce = exp->to<IR::MethodCallExpression>();
-        if (mce == nullptr)
-            return false;
+    /// @return true if the method call expression may have side-effects.
+    static bool hasSideEffect(const IR::MethodCallExpression* mce,
+                              ReferenceMap* refMap,
+                              TypeMap* typeMap) {
         // mce does not produce a side effect in few cases:
         //  * isValid()
         //  * function with all in parameters
@@ -212,12 +233,88 @@ class DoSimplifyExpressions : public Transform, P4WriteContext {
     void end_apply(const IR::Node *) override;
 };
 
-class SideEffectOrdering : public PassManager {
+class TableInsertions {
  public:
-    SideEffectOrdering(ReferenceMap* refMap, TypeMap* typeMap, bool skipSideEffectOrdering) {
+    std::vector<const IR::Declaration_Variable*> declarations;
+    std::vector<const IR::AssignmentStatement*> statements;
+};
+
+/**
+ * This pass is an adaptation of the midend code SimplifyKey.
+ * If a key computation involves side effects then all key field
+ * computations are lifted prior to the table application.
+ * We need to lift all key field computations since the order
+ * of side-effects needs to be preserved.
+ *
+ * \code{.cpp}
+ *  table t {
+ *    key = { a: exact,
+ *            f() : exact; }
+ *    ...
+ *  }
+ *  apply {
+ *    t.apply();
+ *  }
+ * \endcode
+ *
+ * is transformed to
+ *
+ * \code{.cpp}
+ *  bit<32> key_0;
+ *  bit<32> key_1;
+ *  table t {
+ *    key = { key_0 : exact;
+ *            key_1 : exact; }
+ *    ...
+ *  }
+ *  apply {
+ *    key_0 = a;
+ *    key_1 = f();
+ *    t.apply();
+ *  }
+ * \endcode
+ *
+ * @pre none
+ * @post all complex table key expressions are replaced with a simpler expression.
+ */
+class KeySideEffect : public Transform {
+    ReferenceMap* refMap;
+    TypeMap*      typeMap;
+    std::map<const IR::P4Table*, TableInsertions*> toInsert;
+
+ public:
+    KeySideEffect(ReferenceMap* refMap, TypeMap* typeMap)
+        : refMap(refMap), typeMap(typeMap)
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("KeySideEffect"); }
+    const IR::Node* doStatement(const IR::Statement* statement, const IR::Expression* expression);
+
+    const IR::Node* preorder(IR::Key* key) override;
+
+    // These should be all kinds of statements that may contain a table apply
+    // after the program has been simplified
+    const IR::Node* postorder(IR::MethodCallStatement* statement) override
+    { return doStatement(statement, statement->methodCall); }
+    const IR::Node* postorder(IR::IfStatement* statement) override
+    { return doStatement(statement, statement->condition); }
+    const IR::Node* postorder(IR::SwitchStatement* statement) override
+    { return doStatement(statement, statement->expression); }
+    const IR::Node* postorder(IR::AssignmentStatement* statement) override
+    { return doStatement(statement, statement->right); }
+    const IR::Node* postorder(IR::KeyElement* element) override;
+    const IR::Node* postorder(IR::P4Table* table) override;
+};
+
+class SideEffectOrdering : public PassRepeated {
+ public:
+    SideEffectOrdering(ReferenceMap* refMap, TypeMap* typeMap, bool skipSideEffectOrdering,
+                       TypeChecking* typeChecking = nullptr) {
+        if (!typeChecking)
+            typeChecking = new TypeChecking(refMap, typeMap);
         if (!skipSideEffectOrdering) {
             passes.push_back(new TypeChecking(refMap, typeMap));
             passes.push_back(new DoSimplifyExpressions(refMap, typeMap));
+            passes.push_back(typeChecking);
+            passes.push_back(new KeySideEffect(refMap, typeMap));
         }
         setName("SideEffectOrdering");
     }
