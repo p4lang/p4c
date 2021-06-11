@@ -349,7 +349,6 @@ class SideEffectOrdering : public PassRepeated {
     std::set<const IR::P4Table*> invokedInKey;
     // Temporaries that were added
     std::set<const IR::Expression*> added;
-
  public:
     SideEffectOrdering(ReferenceMap* refMap, TypeMap* typeMap, bool skipSideEffectOrdering,
                        TypeChecking* typeChecking = nullptr) {
