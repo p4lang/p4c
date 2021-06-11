@@ -2527,12 +2527,22 @@ const IR::Node* TypeInference::postorder(IR::Cast* expression) {
                 return expression;
             }
         } else if (auto le = expression->expr->to<IR::ListExpression>()) {
-            if (st->fields.size() == 0 && le->size() == 0) {
-                // Empty structs
+            if (st->fields.size() == le->size()) {
+                IR::IndexedVector<IR::NamedExpression> vec;
+                for (size_t i = 0; i < st->fields.size(); i++) {
+                    auto fieldI = st->fields.at(i);
+                    auto compI = le->components.at(i);
+                    auto src = assignment(expression, fieldI->type, compI);
+                    vec.push_back(new IR::NamedExpression(fieldI->name, src));
+                }
                 auto result = new IR::StructExpression(
-                    le->srcInfo, castType->getP4Type(), IR::IndexedVector<IR::NamedExpression>());
+                    le->srcInfo, castType->getP4Type(), vec);
                 setType(result, st);
                 return result;
+            } else {
+                typeError("%1%: destination type expects %2% fields, but source only has %3%",
+                          expression, st->fields.size(), le->components.size());
+                return expression;
             }
         }
     }
