@@ -61,6 +61,16 @@ const IR::Node* DoSimplifyControlFlow::postorder(IR::BlockStatement* statement) 
 
 const IR::Node* DoSimplifyControlFlow::postorder(IR::IfStatement* statement)  {
     LOG3("Visiting " << dbp(getOriginal()));
+    if (auto lnot = statement->condition->to<IR::LNot>()) {
+        // swap branches
+        statement->condition = lnot->expr;
+        auto e = statement->ifFalse;
+        if (!e)
+            e = new IR::EmptyStatement();
+        statement->ifFalse = statement->ifTrue;
+        statement->ifTrue = e;
+    }
+
     if (SideEffects::check(statement->condition, refMap, typeMap))
         return statement;
     if (statement->ifTrue->is<IR::EmptyStatement>() &&

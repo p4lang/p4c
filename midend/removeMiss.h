@@ -26,6 +26,7 @@ namespace P4 {
 
 /**
  *  This visitor converts table.apply().miss into !table.apply().hit.
+ *  In an if statement it actually inverts the branches.
  */
 class DoRemoveMiss : public Transform {
     ReferenceMap* refMap;
@@ -35,6 +36,7 @@ class DoRemoveMiss : public Transform {
             refMap(refMap), typeMap(typeMap)
     { visitDagOnce = false; CHECK_NULL(typeMap); setName("DoRemoveMiss"); }
     const IR::Node* preorder(IR::Member* expression) override;
+    const IR::Node* preorder(IR::IfStatement* statement) override;
 };
 
 class RemoveMiss : public PassManager {
