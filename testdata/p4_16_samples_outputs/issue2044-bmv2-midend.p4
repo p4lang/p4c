@@ -62,7 +62,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const default_action = issue2044bmv2l37();
     }
     apply {
-        if (!t_0.apply().hit) {
+        if (t_0.apply().hit) {
+            ;
+        } else {
             tbl_issue2044bmv2l37.apply();
         }
     }

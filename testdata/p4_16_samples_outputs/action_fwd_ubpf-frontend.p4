@@ -23,7 +23,9 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         } else {
             hasReturned = true;
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             std_meta.output_action = ubpf_action.REDIRECT;
         }
     }

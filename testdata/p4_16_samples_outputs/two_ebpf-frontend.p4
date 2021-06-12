@@ -65,11 +65,15 @@ control pipe(inout Headers_t headers, out bool pass) {
     apply {
         @name("pipe.hasReturned") bool hasReturned = false;
         pass = true;
-        if (!headers.ipv4.isValid()) {
+        if (headers.ipv4.isValid()) {
+            ;
+        } else {
             pass = false;
             hasReturned = true;
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             address_0 = headers.ipv4.srcAddr;
             pass_0 = pass;
             c1_Check_ip.apply();

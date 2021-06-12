@@ -105,7 +105,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         if (hdr.hdr0.isValid()) {
             t0.apply();
         }
-        if (!hdr.hdr0.isValid()) {
+        if (hdr.hdr0.isValid()) {
+            ;
+        } else {
             t1.apply();
         }
         if (hdr.hdr0.isValid() || hdr.hdr0.isValid()) {

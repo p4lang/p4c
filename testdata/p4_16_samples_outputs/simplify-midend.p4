@@ -35,17 +35,17 @@ control c(out bool x) {
     @hidden action simplify31() {
         x = true;
     }
-    @hidden action simplify32() {
-        tmp_0 = false;
-    }
     @hidden action act_1() {
         tmp_1 = true;
     }
     @hidden action act_2() {
         tmp_1 = false;
     }
-    @hidden action simplify32_0() {
+    @hidden action simplify32() {
         tmp_0 = tmp_1;
+    }
+    @hidden action simplify32_0() {
+        tmp_0 = false;
     }
     @hidden action simplify33() {
         x = false;
@@ -68,12 +68,6 @@ control c(out bool x) {
         }
         const default_action = act_0();
     }
-    @hidden table tbl_simplify32 {
-        actions = {
-            simplify32();
-        }
-        const default_action = simplify32();
-    }
     @hidden table tbl_act_1 {
         actions = {
             act_1();
@@ -85,6 +79,12 @@ control c(out bool x) {
             act_2();
         }
         const default_action = act_2();
+    }
+    @hidden table tbl_simplify32 {
+        actions = {
+            simplify32();
+        }
+        const default_action = simplify32();
     }
     @hidden table tbl_simplify32_0 {
         actions = {
@@ -105,14 +105,14 @@ control c(out bool x) {
         } else {
             tbl_act_0.apply();
         }
-        if (!tmp) {
-            tbl_simplify32.apply();
-        } else {
+        if (tmp) {
             if (t2_0.apply().hit) {
                 tbl_act_1.apply();
             } else {
                 tbl_act_2.apply();
             }
+            tbl_simplify32.apply();
+        } else {
             tbl_simplify32_0.apply();
         }
         if (tmp_0) {

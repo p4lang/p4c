@@ -29,21 +29,21 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.c1") bool c1_0;
     @name("ingress.c2") bool c2_0;
     @name("ingress.simple_action") action simple_action() {
-        h.eth_hdr.src_addr = (h.eth_hdr.eth_type != 16w1 ? 48w1 : h.eth_hdr.src_addr);
-        val1_eth_hdr = (h.eth_hdr.eth_type != 16w1 ? h.eth_hdr : val1_eth_hdr);
-        val_eth_hdr = (h.eth_hdr.eth_type != 16w1 ? val1_eth_hdr : val_eth_hdr);
-        c_0 = (h.eth_hdr.eth_type != 16w1 ? true : c_0);
-        c1_0 = (h.eth_hdr.eth_type != 16w1 ? false : c1_0);
-        c2_0 = (h.eth_hdr.eth_type != 16w1 ? true : c2_0);
-        val_eth_hdr.eth_type = (h.eth_hdr.eth_type != 16w1 ? (c_0 ? 16w0 : val_eth_hdr.eth_type) : val_eth_hdr.eth_type);
-        val_eth_hdr.eth_type = (h.eth_hdr.eth_type != 16w1 ? (c_0 ? (c1_0 ? val_eth_hdr.eth_type + 16w1 : val_eth_hdr.eth_type) : val_eth_hdr.eth_type) : val_eth_hdr.eth_type);
-        val_eth_hdr.eth_type = (h.eth_hdr.eth_type != 16w1 ? (c_0 ? (c1_0 ? val_eth_hdr.eth_type : val_eth_hdr.eth_type + 16w2) : val_eth_hdr.eth_type) : val_eth_hdr.eth_type);
-        val_eth_hdr.eth_type = (h.eth_hdr.eth_type != 16w1 ? (c_0 ? val_eth_hdr.eth_type + 16w3 : val_eth_hdr.eth_type) : val_eth_hdr.eth_type);
-        val_eth_hdr.eth_type = (h.eth_hdr.eth_type != 16w1 ? (c_0 ? val_eth_hdr.eth_type : (c2_0 ? val_eth_hdr.eth_type + 16w4 : val_eth_hdr.eth_type)) : val_eth_hdr.eth_type);
-        val_eth_hdr.eth_type = (h.eth_hdr.eth_type != 16w1 ? (c_0 ? val_eth_hdr.eth_type : (c2_0 ? val_eth_hdr.eth_type : val_eth_hdr.eth_type + 16w5)) : val_eth_hdr.eth_type);
-        val1_eth_hdr = (h.eth_hdr.eth_type != 16w1 ? val_eth_hdr : val1_eth_hdr);
-        val1_eth_hdr.dst_addr = (h.eth_hdr.eth_type != 16w1 ? 48w3 : val1_eth_hdr.dst_addr);
-        h.eth_hdr = (h.eth_hdr.eth_type != 16w1 ? val1_eth_hdr : h.eth_hdr);
+        h.eth_hdr.src_addr = (h.eth_hdr.eth_type == 16w1 ? h.eth_hdr.src_addr : 48w1);
+        val1_eth_hdr = (h.eth_hdr.eth_type == 16w1 ? val1_eth_hdr : h.eth_hdr);
+        val_eth_hdr = (h.eth_hdr.eth_type == 16w1 ? val_eth_hdr : val1_eth_hdr);
+        c_0 = (h.eth_hdr.eth_type == 16w1 ? c_0 : true);
+        c1_0 = (h.eth_hdr.eth_type == 16w1 ? c1_0 : false);
+        c2_0 = (h.eth_hdr.eth_type == 16w1 ? c2_0 : true);
+        val_eth_hdr.eth_type = (h.eth_hdr.eth_type == 16w1 ? val_eth_hdr.eth_type : (c_0 ? 16w0 : val_eth_hdr.eth_type));
+        val_eth_hdr.eth_type = (h.eth_hdr.eth_type == 16w1 ? val_eth_hdr.eth_type : (c_0 ? (c1_0 ? val_eth_hdr.eth_type + 16w1 : val_eth_hdr.eth_type) : val_eth_hdr.eth_type));
+        val_eth_hdr.eth_type = (h.eth_hdr.eth_type == 16w1 ? val_eth_hdr.eth_type : (c_0 ? (c1_0 ? val_eth_hdr.eth_type : val_eth_hdr.eth_type + 16w2) : val_eth_hdr.eth_type));
+        val_eth_hdr.eth_type = (h.eth_hdr.eth_type == 16w1 ? val_eth_hdr.eth_type : (c_0 ? val_eth_hdr.eth_type + 16w3 : val_eth_hdr.eth_type));
+        val_eth_hdr.eth_type = (h.eth_hdr.eth_type == 16w1 ? val_eth_hdr.eth_type : (c_0 ? val_eth_hdr.eth_type : (c2_0 ? val_eth_hdr.eth_type + 16w4 : val_eth_hdr.eth_type)));
+        val_eth_hdr.eth_type = (h.eth_hdr.eth_type == 16w1 ? val_eth_hdr.eth_type : (c_0 ? val_eth_hdr.eth_type : (c2_0 ? val_eth_hdr.eth_type : val_eth_hdr.eth_type + 16w5)));
+        val1_eth_hdr = (h.eth_hdr.eth_type == 16w1 ? val1_eth_hdr : val_eth_hdr);
+        val1_eth_hdr.dst_addr = (h.eth_hdr.eth_type == 16w1 ? val1_eth_hdr.dst_addr : 48w3);
+        h.eth_hdr = (h.eth_hdr.eth_type == 16w1 ? h.eth_hdr : val1_eth_hdr);
     }
     @hidden action issue2345with_nested_if65() {
         h.eth_hdr.src_addr = 48w2;

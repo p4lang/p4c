@@ -79,10 +79,14 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         tbl_gauntlet_uninitialized_bool_structbmv2l31.apply();
         switch (simple_table_0.apply().action_run) {
             dummy_action: {
-                if (!tmp_0.is_bool) {
+                if (tmp_0.is_bool) {
+                    ;
+                } else {
                     tbl_gauntlet_uninitialized_bool_structbmv2l47.apply();
                 }
-                if (!hasExited) {
+                if (hasExited) {
+                    ;
+                } else {
                     tbl_gauntlet_uninitialized_bool_structbmv2l49.apply();
                 }
             }

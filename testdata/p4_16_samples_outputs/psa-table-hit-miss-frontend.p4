@@ -78,10 +78,14 @@ control MyIC(inout headers_t hdr, inout EMPTY_M b, in psa_ingress_input_metadata
         if (tbl_0.apply().miss) {
             ifMiss();
         }
-        if (!tbl_0.apply().hit) {
+        if (tbl_0.apply().hit) {
+            ;
+        } else {
             ifMiss_2();
         }
-        if (!tbl_0.apply().miss) {
+        if (tbl_0.apply().miss) {
+            ;
+        } else {
             ifHit_2();
         }
     }

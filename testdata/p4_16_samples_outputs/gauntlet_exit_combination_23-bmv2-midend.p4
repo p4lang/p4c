@@ -71,14 +71,18 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         tbl_act.apply();
         switch (simple_table_0.apply().action_run) {
             simple_action: {
-                if (!hasExited) {
+                if (hasExited) {
+                    ;
+                } else {
                     tbl_gauntlet_exit_combination_23bmv2l43.apply();
                 }
             }
             default: {
             }
         }
-        if (!hasExited) {
+        if (hasExited) {
+            ;
+        } else {
             tbl_gauntlet_exit_combination_23bmv2l46.apply();
         }
     }

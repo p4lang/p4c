@@ -63,15 +63,17 @@ control c(inout Headers h) {
     }
     apply {
         tbl_act.apply();
-        if (!h.eth.isValid()) {
+        if (h.eth.isValid()) {
+            ;
+        } else {
             tbl_serenumint39.apply();
         }
-        if (!hasReturned) {
-            if (h.eth.type == 24s0x800) {
-                tbl_serenumint41.apply();
-            } else {
-                tbl_serenumint43.apply();
-            }
+        if (hasReturned) {
+            ;
+        } else if (h.eth.type == 24s0x800) {
+            tbl_serenumint41.apply();
+        } else {
+            tbl_serenumint43.apply();
         }
     }
 }

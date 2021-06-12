@@ -77,7 +77,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             default: {
             }
         }
-        if (!hasExited) {
+        if (hasExited) {
+            ;
+        } else {
             tbl_gauntlet_exit_combination_2bmv2l45.apply();
         }
     }

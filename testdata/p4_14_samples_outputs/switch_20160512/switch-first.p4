@@ -3577,11 +3577,11 @@ control process_int_endpoint(inout headers hdr, inout metadata meta, inout stand
         default_action = NoAction();
     }
     apply {
-        if (!hdr.int_header.isValid()) {
-            int_source.apply();
-        } else {
+        if (hdr.int_header.isValid()) {
             int_terminate.apply();
             int_sink_update_outer.apply();
+        } else {
+            int_source.apply();
         }
     }
 }
@@ -5984,7 +5984,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         process_ingress_sflow_0.apply(hdr, meta, standard_metadata);
         process_storm_control_0.apply(hdr, meta, standard_metadata);
         if (meta.ingress_metadata.port_type != 2w1) {
-            if (!(hdr.mpls[0].isValid() && meta.l3_metadata.fib_hit == 1w1)) {
+            if (hdr.mpls[0].isValid() && meta.l3_metadata.fib_hit == 1w1) {
+                ;
+            } else {
                 process_validate_packet_0.apply(hdr, meta, standard_metadata);
                 process_mac_0.apply(hdr, meta, standard_metadata);
                 if (meta.l3_metadata.lkp_ip_type == 2w0) {

@@ -210,25 +210,33 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
             tbl_Drop_action.apply();
             tbl_vssexample191.apply();
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             ipv4_match_0.apply();
             if (outCtrl.outputPort == 4w0xf) {
                 tbl_vssexample195.apply();
             }
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             check_ttl_0.apply();
             if (outCtrl.outputPort == 4w0xe) {
                 tbl_vssexample198.apply();
             }
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             dmac_0.apply();
             if (outCtrl.outputPort == 4w0xf) {
                 tbl_vssexample201.apply();
             }
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             smac_0.apply();
         }
     }

@@ -123,7 +123,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             } else {
                 tbl_act_1.apply();
             }
-            if (!hasExited) {
+            if (hasExited) {
+                ;
+            } else {
                 if (tmp_0) {
                     tbl_gauntlet_exit_combination_22bmv2l40.apply();
                 } else {
@@ -134,7 +136,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         } else {
             tbl_gauntlet_exit_combination_22bmv2l40_2.apply();
         }
-        if (!hasExited) {
+        if (hasExited) {
+            ;
+        } else {
             tbl_gauntlet_exit_combination_22bmv2l40_3.apply();
         }
     }
