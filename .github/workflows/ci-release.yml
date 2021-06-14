@@ -2,9 +2,9 @@ name: "release-p4c"
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   # Build a p4c release on Ubuntu 16.04
