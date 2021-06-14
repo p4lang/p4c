@@ -1,5 +1,4 @@
-[![Build Status](https://travis-ci.com/p4lang/p4c.svg?branch=main)](https://travis-ci.com/p4lang/p4c)
-
+[![Build Status](https://github.com/p4lang/p4c/actions/workflows/ci-test.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-test.yml)
 # p4c
 
 p4c is a reference compiler for the P4 programming language.
