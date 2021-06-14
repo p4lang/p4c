@@ -59,24 +59,29 @@ struct ErrorMessage {
         return p;
     }
 
-    std::string toString() const {
+    // original implementation, TODO: delete this
+    std::string _toString() const {
         std::string result = position.toPositionString().c_str();
         if (!result.empty()) result += ": ";
         result += getPrefix() + message + "\n" + tail + suffix;
         return result;
     }
 
-    std::string toString2() const {
+    std::string toString() const {
         std::string result = "";
-        if (!locations.empty()) {
+        std::string mainFragment = "";
+        if (!locations.empty() && locations.front().isValid()) {
             result += locations.front().toPositionString() + ": ";
+            mainFragment = locations.front().toSourceFragment();
         }
 
-        result += getPrefix() + message;
+        result += getPrefix() + message + "\n" + mainFragment;
 
         for (unsigned i = 1; i < locations.size(); i++) {
-            result += "\n" + locations[i].toPositionString() + "\n" + locations[i].toSourceFragment();
+            result += locations[i].toPositionString() + "\n" + locations[i].toSourceFragment();
         }
+
+        result += suffix;
 
         return result;
     }

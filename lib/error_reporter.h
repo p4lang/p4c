@@ -43,7 +43,6 @@ class ErrorReporter {
 
     /// Output the message and flush the stream
     virtual void emit_message(const ErrorMessage &msg) {
-        std::cerr << "Emmiting: " << outputstream << std::endl;
         *outputstream << msg.toString();
         outputstream->flush();
     }
