@@ -34,15 +34,18 @@ struct ErrorMessage {
     Type type = Type::None;
     std::string prefix = "";  // Typically error/warning type from catalog
     std::string message = "";  // Actual formatted message
-    std::vector<Util::SourceInfo> locations; // Relevant source locations for this error
+    std::vector<Util::SourceInfo> locations = {}; // Relevant source locations for this error
+    std::string suffix = "";  // Used by errorWithSuffix
+
+/*
     Util::SourceInfo position;  // Position in P4 source
     std::string tail = "";  // Extra P4 source positions
-    std::string suffix = "";  // Used by errorWithSuffix
+*/
 
     ErrorMessage() {}
     // Invoked from backwards compatible error_helper
     ErrorMessage(const std::string &prefix, const Util::SourceInfo &info, std::string &suffix)
-        : prefix(prefix), position(info), suffix(suffix) {}
+        : prefix(prefix), locations({info}), suffix(suffix) {}
     // Invoked from error_reporter
     ErrorMessage(Type type, const std::string &prefix, const std::string &suffix)
         : type(type), prefix(prefix), suffix(suffix) {}
@@ -60,12 +63,12 @@ struct ErrorMessage {
     }
 
     // original implementation, TODO: delete this
-    std::string _toString() const {
+    /*std::string _toString() const {
         std::string result = position.toPositionString().c_str();
         if (!result.empty()) result += ": ";
         result += getPrefix() + message + "\n" + tail + suffix;
         return result;
-    }
+    }*/
 
     std::string toString() const {
         std::string result = "";
@@ -78,7 +81,8 @@ struct ErrorMessage {
         result += getPrefix() + message + "\n" + mainFragment;
 
         for (unsigned i = 1; i < locations.size(); i++) {
-            result += locations[i].toPositionString() + "\n" + locations[i].toSourceFragment();
+            if (locations[i].isValid())
+                result += locations[i].toPositionString() + "\n" + locations[i].toSourceFragment();
         }
 
         result += suffix;
@@ -205,8 +209,7 @@ auto error_helper(boost::format& f, ErrorMessage out, const T& t, Args... args) 
 template<class... Args>
 ErrorMessage error_helper(boost::format& f, ErrorMessage out, const Util::SourceInfo &info,
                          Args... args) {
-    cstring posString = info.toPositionString();
-    out.locations.push_back(info);
+    /*cstring posString = info.toPositionString();
     if (!out.position.isValid()) { // if there is not already something stored in out.position
         out.position = info;
         posString = "";
@@ -214,16 +217,16 @@ ErrorMessage error_helper(boost::format& f, ErrorMessage out, const Util::Source
         if (!posString.isNullOrEmpty())
             posString += "\n";
     }
-    out.tail += posString + info.toSourceFragment();
+    out.tail += posString + info.toSourceFragment();*/
 
+    if (info.isValid()) out.locations.push_back(info);
     return error_helper(f % "", out, std::forward<Args>(args)...);
 }
 
 template<typename T, class... Args>
 auto error_helper(boost::format& f, ErrorMessage out, const T *t, Args... args) ->
     typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, ErrorMessage>::type {
-    cstring posString = t->getSourceInfo().toPositionString();
-    out.locations.push_back(t->getSourceInfo());
+    /*cstring posString = t->getSourceInfo().toPositionString();
     if (!out.position.isValid()) {
         out.position = t->getSourceInfo();
         posString = "";
@@ -231,16 +234,17 @@ auto error_helper(boost::format& f, ErrorMessage out, const T *t, Args... args) 
         if (!posString.isNullOrEmpty())
             posString += "\n";
     }
-    out.tail += posString + t->getSourceInfo().toSourceFragment();
+    out.tail += posString + t->getSourceInfo().toSourceFragment();*/
 
+    auto info = t->getSourceInfo();
+    if (info.isValid()) out.locations.push_back(info);
     return error_helper(f % t->toString(), out, std::forward<Args>(args)...);
 }
 
 template<typename T, class... Args>
 auto error_helper(boost::format& f, ErrorMessage out, const T &t, Args... args) ->
     typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, ErrorMessage>::type {
-    cstring posString = t.getSourceInfo().toPositionString();
-    out.locations.push_back(t.getSourceInfo());
+    /*cstring posString = t.getSourceInfo().toPositionString();
     if (!out.position.isValid()) {
         out.position = t.getSourceInfo();
         posString = "";
@@ -248,8 +252,10 @@ auto error_helper(boost::format& f, ErrorMessage out, const T &t, Args... args) 
         if (!posString.isNullOrEmpty())
             posString += "\n";
     }
-    out.tail += posString + t.getSourceInfo().toSourceFragment();
+    out.tail += posString + t.getSourceInfo().toSourceFragment();*/
 
+    auto info = t.getSourceInfo();
+    if (info.isValid()) out.locations.push_back(info);
     return error_helper(f % t.toString(), out, std::forward<Args>(args)...);
 }
 
@@ -270,8 +276,8 @@ ErrorMessage error_helper(boost::format& f, ErrorMessage &msg, Args... args) {
 
 // This overload exists for backwards compatibility
 template<class... Args>
-ErrorMessage error_helper(boost::format& f, std::string prefix,
-                          Util::SourceInfo info, std::string suffix, Args... args) {
+ErrorMessage error_helper(boost::format& f, const std::string &prefix,
+                          const Util::SourceInfo &info, const std::string &suffix, Args... args) {
     ErrorMessage msg(prefix, info, suffix);
     return ::priv::error_helper(f, msg, std::forward<Args>(args)...);
 }
