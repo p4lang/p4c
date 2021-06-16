@@ -229,7 +229,7 @@ struct tuple_0 {
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum<tuple_0, bit<16>>(true, { hdr.ipv4_base.version, hdr.ipv4_base.ihl, hdr.ipv4_base.diffserv, hdr.ipv4_base.totalLen, hdr.ipv4_base.identification, hdr.ipv4_base.flags, hdr.ipv4_base.fragOffset, hdr.ipv4_base.ttl, hdr.ipv4_base.protocol, hdr.ipv4_base.srcAddr, hdr.ipv4_base.dstAddr, hdr.ipv4_option_security, hdr.ipv4_option_NOP[0], hdr.ipv4_option_timestamp }, hdr.ipv4_base.hdrChecksum, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(true, (tuple_0){f0 = hdr.ipv4_base.version,f1 = hdr.ipv4_base.ihl,f2 = hdr.ipv4_base.diffserv,f3 = hdr.ipv4_base.totalLen,f4 = hdr.ipv4_base.identification,f5 = hdr.ipv4_base.flags,f6 = hdr.ipv4_base.fragOffset,f7 = hdr.ipv4_base.ttl,f8 = hdr.ipv4_base.protocol,f9 = hdr.ipv4_base.srcAddr,f10 = hdr.ipv4_base.dstAddr,f11 = hdr.ipv4_option_security,f12 = hdr.ipv4_option_NOP[0],f13 = hdr.ipv4_option_timestamp}, hdr.ipv4_base.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 

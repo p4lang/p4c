@@ -875,15 +875,21 @@ SimpleSwitchBackend::createCalculation(cstring algo, const IR::Expression* field
         // expand it into a list
         auto list = new IR::ListExpression({});
         auto type = typeMap->getType(fields, true);
-        if (!type->is<IR::Type_StructLike>()) {
+        auto st = type->to<IR::Type_StructLike>();
+        if (!st) {
             modelError("%1%: expected a struct", fields);
             return calcName;
         }
-        for (auto f : type->to<IR::Type_StructLike>()->fields) {
-            auto e = new IR::Member(fields, f->name);
-            auto ftype = typeMap->getType(f);
-            typeMap->setType(e, ftype);
-            list->push_back(e);
+        if (auto se = fields->to<IR::StructExpression>()) {
+            for (auto f : se->components)
+                list->push_back(f->expression);
+        } else {
+            for (auto f : st->fields) {
+                auto e = new IR::Member(fields, f->name);
+                auto ftype = typeMap->getType(f);
+                typeMap->setType(e, ftype);
+                list->push_back(e);
+            }
         }
         fields = list;
         typeMap->setType(fields, type);
@@ -914,6 +920,7 @@ class EnsureExpressionIsSimple : public Inspector {
                 "%1%: Computations are not supported in %2%", expression, block);
         return false;
     }
+    bool preorder(const IR::StructExpression*) override { return true; }
     bool preorder(const IR::PathExpression*) override { return true; }
     bool preorder(const IR::Member*) override { return true; }
     bool preorder(const IR::ListExpression*) override { return true; }

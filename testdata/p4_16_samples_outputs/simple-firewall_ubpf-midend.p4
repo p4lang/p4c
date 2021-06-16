@@ -107,10 +107,10 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         mark_to_drop();
     }
     @hidden action simplefirewall_ubpf125() {
-        hash<tuple_0>(meta._conn_id2, HashAlgorithm.lookup3, { headers.ipv4.srcAddr, headers.ipv4.dstAddr });
+        hash<tuple_0>(meta._conn_id2, HashAlgorithm.lookup3, (tuple_0){f0 = headers.ipv4.srcAddr,f1 = headers.ipv4.dstAddr});
     }
     @hidden action simplefirewall_ubpf127() {
-        hash<tuple_0>(meta._conn_id2, HashAlgorithm.lookup3, { headers.ipv4.dstAddr, headers.ipv4.srcAddr });
+        hash<tuple_0>(meta._conn_id2, HashAlgorithm.lookup3, (tuple_0){f0 = headers.ipv4.dstAddr,f1 = headers.ipv4.srcAddr});
     }
     @hidden action simplefirewall_ubpf130() {
         meta._connInfo_s0 = conn_state_0.read(meta._conn_id2);

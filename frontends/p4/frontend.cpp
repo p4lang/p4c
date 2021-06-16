@@ -30,6 +30,7 @@ limitations under the License.
 // Passes
 #include "actionsInlining.h"
 #include "checkConstants.h"
+#include "checkCoreMethods.h"
 #include "checkNamedArgs.h"
 #include "createBuiltins.h"
 #include "defaultArguments.h"
@@ -158,6 +159,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
         new ResolveReferences(&refMap),
         new TypeInference(&refMap, &typeMap, false),  // more casts may be needed
+        new CheckCoreMethods(&refMap, &typeMap),
         new RemoveParserIfs(&refMap, &typeMap),
         new StructInitializers(&refMap, &typeMap),
         new SpecializeGenericFunctions(&refMap, &typeMap),

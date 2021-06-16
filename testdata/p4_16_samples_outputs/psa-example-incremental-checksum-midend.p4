@@ -168,12 +168,12 @@ control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_met
     @name("EgressDeparserImpl.ck") InternetChecksum() ck_0;
     @hidden action psaexampleincrementalchecksum191() {
         ck_0.clear();
-        ck_0.add<tuple_0>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+        ck_0.add<tuple_0>((tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr});
         hdr.ipv4.hdrChecksum = ck_0.get();
         ck_0.clear();
-        ck_0.subtract<tuple_1>({ hdr.tcp.checksum });
-        ck_0.subtract<tuple_2>({ user_meta._fwd_metadata_old_srcAddr0 });
-        ck_0.add<tuple_2>({ hdr.ipv4.srcAddr });
+        ck_0.subtract<tuple_1>((tuple_1){f0 = hdr.tcp.checksum});
+        ck_0.subtract<tuple_2>((tuple_2){f0 = user_meta._fwd_metadata_old_srcAddr0});
+        ck_0.add<tuple_2>((tuple_2){f0 = hdr.ipv4.srcAddr});
         hdr.tcp.checksum = ck_0.get();
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);

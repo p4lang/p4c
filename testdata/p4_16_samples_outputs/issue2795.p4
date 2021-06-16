@@ -8,6 +8,7 @@ header H {
 control c(packet_out p) {
     apply {
         p.emit((H){ 0, 1 });
+        p.emit<H>({ 0, 1 });
     }
 }
 

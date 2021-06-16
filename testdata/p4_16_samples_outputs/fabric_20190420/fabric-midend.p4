@@ -218,14 +218,14 @@ struct tuple_0 {
 
 control FabricComputeChecksum(inout parsed_headers_t hdr, inout fabric_metadata_t meta) {
     apply {
-        update_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.dscp, hdr.ipv4.ecn, hdr.ipv4.total_len, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.frag_offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.src_addr, hdr.ipv4.dst_addr }, hdr.ipv4.hdr_checksum, HashAlgorithm.csum16);
-        update_checksum<tuple_0, bit<16>>(hdr.gtpu_ipv4.isValid(), { hdr.gtpu_ipv4.version, hdr.gtpu_ipv4.ihl, hdr.gtpu_ipv4.dscp, hdr.gtpu_ipv4.ecn, hdr.gtpu_ipv4.total_len, hdr.gtpu_ipv4.identification, hdr.gtpu_ipv4.flags, hdr.gtpu_ipv4.frag_offset, hdr.gtpu_ipv4.ttl, hdr.gtpu_ipv4.protocol, hdr.gtpu_ipv4.src_addr, hdr.gtpu_ipv4.dst_addr }, hdr.gtpu_ipv4.hdr_checksum, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.dscp,f3 = hdr.ipv4.ecn,f4 = hdr.ipv4.total_len,f5 = hdr.ipv4.identification,f6 = hdr.ipv4.flags,f7 = hdr.ipv4.frag_offset,f8 = hdr.ipv4.ttl,f9 = hdr.ipv4.protocol,f10 = hdr.ipv4.src_addr,f11 = hdr.ipv4.dst_addr}, hdr.ipv4.hdr_checksum, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(hdr.gtpu_ipv4.isValid(), (tuple_0){f0 = hdr.gtpu_ipv4.version,f1 = hdr.gtpu_ipv4.ihl,f2 = hdr.gtpu_ipv4.dscp,f3 = hdr.gtpu_ipv4.ecn,f4 = hdr.gtpu_ipv4.total_len,f5 = hdr.gtpu_ipv4.identification,f6 = hdr.gtpu_ipv4.flags,f7 = hdr.gtpu_ipv4.frag_offset,f8 = hdr.gtpu_ipv4.ttl,f9 = hdr.gtpu_ipv4.protocol,f10 = hdr.gtpu_ipv4.src_addr,f11 = hdr.gtpu_ipv4.dst_addr}, hdr.gtpu_ipv4.hdr_checksum, HashAlgorithm.csum16);
     }
 }
 
 control FabricVerifyChecksum(inout parsed_headers_t hdr, inout fabric_metadata_t meta) {
     apply {
-        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.dscp, hdr.ipv4.ecn, hdr.ipv4.total_len, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.frag_offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.src_addr, hdr.ipv4.dst_addr }, hdr.ipv4.hdr_checksum, HashAlgorithm.csum16);
+        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.dscp,f3 = hdr.ipv4.ecn,f4 = hdr.ipv4.total_len,f5 = hdr.ipv4.identification,f6 = hdr.ipv4.flags,f7 = hdr.ipv4.frag_offset,f8 = hdr.ipv4.ttl,f9 = hdr.ipv4.protocol,f10 = hdr.ipv4.src_addr,f11 = hdr.ipv4.dst_addr}, hdr.ipv4.hdr_checksum, HashAlgorithm.csum16);
     }
 }
 

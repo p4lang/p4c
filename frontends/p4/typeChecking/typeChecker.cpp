@@ -3115,7 +3115,7 @@ TypeInference::actionCall(bool inActionList,
     return actionCall;
 }
 
-bool TypeInference::hasVarbitsOrUnions(const IR::Type* type) const {
+bool hasVarbitsOrUnions(const TypeMap* typeMap, const IR::Type* type) {
     // called for a canonical type
     if (type->is<IR::Type_HeaderUnion>() || type->is<IR::Type_Varbits>()) {
         return true;
@@ -3137,10 +3137,10 @@ bool TypeInference::hasVarbitsOrUnions(const IR::Type* type) const {
         }
         return varbit != nullptr;
     } else if (auto at = type->to<IR::Type_Stack>()) {
-        return hasVarbitsOrUnions(at->elementType);
+        return hasVarbitsOrUnions(typeMap, at->elementType);
     } else if (auto tpl = type->to<IR::Type_Tuple>()) {
         for (auto f : tpl->components) {
-            if (hasVarbitsOrUnions(f))
+            if (hasVarbitsOrUnions(typeMap, f))
                 return true;
         }
     }
@@ -3163,98 +3163,6 @@ bool TypeInference::onlyBitsOrBitStructs(const IR::Type* type) const {
         return true;
     }
     return false;
-}
-
-void TypeInference::checkEmitType(const IR::Expression* emit, const IR::Type* type) const {
-    if (type->is<IR::Type_Header>() || type->is<IR::Type_Stack>() ||
-        type->is<IR::Type_HeaderUnion>())
-        return;
-
-    if (type->is<IR::Type_Struct>()) {
-        for (auto f : type->to<IR::Type_Struct>()->fields) {
-            auto ftype = typeMap->getType(f);
-            if (ftype == nullptr)
-                continue;
-            checkEmitType(emit, ftype);
-        }
-        return;
-    }
-
-    if (auto list = type->to<IR::Type_BaseList>()) {
-        for (auto f : list->components) {
-            auto ftype = typeMap->getType(f);
-            if (ftype == nullptr)
-                continue;
-            checkEmitType(emit, ftype);
-        }
-        return;
-    }
-
-    typeError("%1%: argument must be a header, stack or union, or a struct or tuple of such types",
-            emit);
-}
-
-void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
-    P4CoreLibrary &corelib = P4CoreLibrary::instance;
-    auto et = em->actualExternType;
-    auto mce = em->expr;
-    unsigned argCount = mce->arguments->size();
-
-    if (et->name == corelib.packetIn.name) {
-        if (em->method->name == corelib.packetIn.extract.name) {
-            if (argCount == 0) {
-                // core.p4 is corrupted.
-                typeError("%1%: Expected exactly 1 argument for %2% method",
-                          mce, corelib.packetIn.extract.name);
-                return;
-            }
-
-            auto arg0 = mce->arguments->at(0);
-            auto argType = typeMap->getType(arg0, true);
-            if (!argType->is<IR::Type_Header>() && !argType->is<IR::Type_Dontcare>()) {
-                typeError("%1%: argument must be a header", mce->arguments->at(0));
-                return;
-            }
-
-            if (argCount == 1) {
-                if (hasVarbitsOrUnions(argType))
-                    // This will never have unions, but may have varbits
-                    typeError("%1%: argument cannot contain varbit fields", arg0);
-            } else if (argCount == 2) {
-                if (!hasVarbitsOrUnions(argType))
-                    typeError("%1%: argument should contain a varbit field", arg0);
-            } else {
-                // core.p4 is corrupted.
-                typeError("%1%: Expected 1 or 2 arguments for '%2%' method",
-                          mce, corelib.packetIn.extract.name);
-            }
-        } else if (em->method->name == corelib.packetIn.lookahead.name) {
-            // this is a call to packet_in.lookahead.
-            if (mce->typeArguments->size() != 1) {
-                typeError("Expected 1 type parameter for %1%", em->method);
-                return;
-            }
-            auto targ = em->expr->typeArguments->at(0);
-            auto typearg = typeMap->getTypeType(targ, true);
-            if (hasVarbitsOrUnions(typearg)) {
-                typeError("%1%: type argument must be a fixed-width type", targ);
-                return;
-            }
-        }
-    } else if (et->name == corelib.packetOut.name) {
-        if (em->method->name == corelib.packetOut.emit.name) {
-            if (argCount == 1) {
-                auto arg = mce->arguments->at(0);
-                auto argType = typeMap->getType(arg, true);
-                checkEmitType(mce, argType);
-            } else {
-                // core.p4 is corrupted.
-                typeError("%1%: Expected 1 argument for '%2%' method",
-                          mce, corelib.packetOut.emit.name);
-                return;
-            }
-        }
-    }
 }
 
 const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
@@ -3379,6 +3287,40 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         auto result = cts.convert(expression)->to<IR::MethodCallExpression>();  // cast arguments
         if (::errorCount() > 0)
             return expression;
+
+        // Arguments may need to be cast, e.g., list expression to a
+        // header type.
+        auto paramIt = functionType->parameters->begin();
+        auto newArgs = new IR::Vector<IR::Argument>();
+        bool changed = false;
+        for (auto arg : *expression->arguments) {
+            cstring argName = arg->name.name;
+            bool named = !argName.isNullOrEmpty();
+            const IR::Parameter* param;
+
+            if (named) {
+                param = functionType->parameters->getParameter(argName);
+            } else {
+                param = *paramIt;
+            }
+
+            auto newExpr = arg->expression;
+            if (param->direction == IR::Direction::In)
+                newExpr = assignment(arg, param->type, arg->expression);
+
+            if (newExpr != arg->expression) {
+                changed = true;
+                newArgs->push_back(new IR::Argument(arg->srcInfo, arg->name, newExpr));
+            } else {
+                newArgs->push_back(arg);
+            }
+            if (!named)
+                ++paramIt;
+        }
+
+        if (changed)
+            result = new IR::MethodCallExpression(
+                result->srcInfo, result->type, result->method, result->typeArguments, newArgs);
         setType(result, returnType);
 
         auto mi = MethodInstance::resolve(result, refMap, typeMap, nullptr, true);
@@ -3387,20 +3329,11 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             return expression;
         }
 
-        // Check that verify is only invoked from parsers.
-        if (auto ef = mi->to<ExternFunction>()) {
-            if (ef->method->name == IR::ParserState::verify)
-                if (!findContext<IR::P4Parser>())
-                    typeError("%1%: may only be invoked in parsers", ef->expr);
-            if (constArgs) {
-                // extern functions with constant args are compile-time constants
-                setCompileTimeConstant(expression);
-                setCompileTimeConstant(getOriginal<IR::Expression>());
-            }
+        if (mi->is<ExternFunction>() && constArgs) {
+           // extern functions with constant args are compile-time constants
+           setCompileTimeConstant(expression);
+           setCompileTimeConstant(getOriginal<IR::Expression>());
         }
-
-        if (mi->is<ExternMethod>())
-            checkCorelibMethods(mi->to<ExternMethod>());
 
         auto bi = mi->to<BuiltInMethod>();
         if ((findContext<IR::SelectCase>()) &&
@@ -3409,7 +3342,6 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             typeError("%1%: no function calls allowed in this context", expression);
             return expression;
         }
-
         return result;
     }
     return expression;

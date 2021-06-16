@@ -127,7 +127,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         standard_metadata.egress_spec = standard_metadata.ingress_port;
     }
     @name("MyIngress.operation_crc") action operation_crc() {
-        hash<bit<32>, bit<32>, tuple_0, bit<64>>(nselect_0, HashAlgorithm.crc32, hdr.p4calc.operand_b, { hdr.p4calc.operand_a }, 64w8589934592);
+        hash<bit<32>, bit<32>, tuple_0, bit<64>>(nselect_0, HashAlgorithm.crc32, hdr.p4calc.operand_b, (tuple_0){f0 = hdr.p4calc.operand_a}, 64w8589934592);
         hdr.p4calc.res = nselect_0;
         tmp_5 = hdr.ethernet.dstAddr;
         hdr.ethernet.dstAddr = hdr.ethernet.srcAddr;
@@ -185,7 +185,7 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
 
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum<tuple_0, bit<32>>(hdr.p4calc.isValid(), { hdr.p4calc.operand_a }, hdr.p4calc.res, HashAlgorithm.crc32);
+        update_checksum<tuple_0, bit<32>>(hdr.p4calc.isValid(), (tuple_0){f0 = hdr.p4calc.operand_a}, hdr.p4calc.res, HashAlgorithm.crc32);
     }
 }
 
