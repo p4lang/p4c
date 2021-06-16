@@ -26,6 +26,7 @@ limitations under the License.
 #include "backends/dpdk/midend.h"
 #include "backends/dpdk/options.h"
 #include "control-plane/p4RuntimeSerializer.h"
+#include "control-plane/table_driven_schema_gen.h"
 #include "frontends/common/applyOptionsPragmas.h"
 #include "frontends/common/parseInput.h"
 #include "frontends/p4/frontend.h"
@@ -94,6 +95,17 @@ int main(int argc, char *const argv[]) {
     P4::serializeP4RuntimeIfRequired(program, options);
     if (::errorCount() > 0)
         return 1;
+
+    if (!options.bfRtSchema.isNullOrEmpty()) {
+        auto p4Runtime = P4::generateP4Runtime(program, options.arch);
+        auto p4rt = new P4::TDSG::TableDrivenSchemaGenerator(*p4Runtime.p4Info);
+        std::ostream* out = openFile(options.bfRtSchema, false);
+        if (!out) {
+            ::error("Could not open BF-RT schema file: %1%", options.bfRtSchema);
+            return 1;
+        }
+        p4rt->serializeBfRtSchema(out);
+    }
 
     DPDK::PsaSwitchMidEnd midEnd(options);
     midEnd.addDebugHook(hook);
