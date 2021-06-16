@@ -49,6 +49,9 @@ struct ErrorMessage {
     // Invoked from error_reporter
     ErrorMessage(Type type, const std::string &prefix, const std::string &suffix)
         : type(type), prefix(prefix), suffix(suffix) {}
+    ErrorMessage(Type type, const std::string &prefix, const std::string &message,
+                 const std::vector<Util::SourceInfo> &locations, const std::string &suffix)
+        : type(type), prefix(prefix), message(message), locations(locations), suffix(suffix) {}
 
     std::string getPrefix() const;
     std::string toString() const;
