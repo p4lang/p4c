@@ -1053,6 +1053,18 @@ void ExternConverter_Random::convertExternInstance(
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
 
+    // make sure max > min
+    auto min = eb->findParameterValue("min");
+    CHECK_NULL(min);
+    auto min_c = min->to<IR::Constant>();
+    auto max = eb->findParameterValue("max");
+    CHECK_NULL(max);
+    auto max_c = max->to<IR::Constant>();
+
+    if (max_c->asInt() < min_c->asInt()) {
+        ::error(ErrorType::ERR_INVALID, "%1%: Invalid range (min > max) for Random.", name);
+    }
+
     // adding random instance into extern_instances
     auto jext_mtr = new Util::JsonObject();
     jext_mtr->emplace("name", name);
@@ -1065,14 +1077,11 @@ void ExternConverter_Random::convertExternInstance(
     Util::JsonArray *arr = ctxt->json->insert_array_field(jext_mtr, "attribute_values");
 
     // range min
-    auto min = eb->findParameterValue("min");
-    CHECK_NULL(min);
     if (!min->is<IR::Constant>()) {
         modelError("%1%: expected a constant", min->getNode());
         return;
     }
     auto attr0 = eb->getConstructorParameters()->getParameter(0);
-    auto min_c = min->to<IR::Constant>();
     auto bitwidth0 = ctxt->typeMap->minWidthBits(min_c->type, min->getNode());
     cstring val0 = BMV2::stringRepr(min_c->value, ROUNDUP(bitwidth0, 8));
     auto rmin = new Util::JsonObject();
@@ -1082,14 +1091,11 @@ void ExternConverter_Random::convertExternInstance(
     arr->append(rmin);
 
     // range max
-    auto max = eb->findParameterValue("max");
-    CHECK_NULL(max);
     if (!max->is<IR::Constant>()) {
         modelError("%1%: expected a constant", max->getNode());
         return;
     }
     auto attr1 = eb->getConstructorParameters()->getParameter(1);
-    auto max_c = max->to<IR::Constant>();
     auto bitwidth1 = ctxt->typeMap->minWidthBits(max_c->type, max->getNode());
     cstring val1 = BMV2::stringRepr(max_c->value, ROUNDUP(bitwidth1, 8));
     auto rmax = new Util::JsonObject();
