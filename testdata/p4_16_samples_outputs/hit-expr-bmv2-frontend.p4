@@ -26,7 +26,9 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         default_action = NoAction_0();
     }
     apply {
-        if (!t_0.apply().hit) {
+        if (t_0.apply().hit) {
+            ;
+        } else {
             ;
         }
     }

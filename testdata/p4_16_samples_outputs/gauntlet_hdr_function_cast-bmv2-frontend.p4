@@ -39,7 +39,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
                 retval.setValid();
                 retval = (ethernet_t){dst_addr = 48w2,src_addr = 48w2,eth_type = 16w2};
             }
-            if (!hasReturned) {
+            if (hasReturned) {
+                ;
+            } else {
                 hasReturned = true;
                 retval.setValid();
                 retval = (ethernet_t){dst_addr = 48w3,src_addr = 48w3,eth_type = 16w3};

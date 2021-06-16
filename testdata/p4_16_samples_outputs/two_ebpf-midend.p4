@@ -114,10 +114,14 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     apply {
         tbl_two_ebpf66.apply();
-        if (!headers.ipv4.isValid()) {
+        if (headers.ipv4.isValid()) {
+            ;
+        } else {
             tbl_two_ebpf69.apply();
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             tbl_act.apply();
             c1_Check_ip.apply();
             tbl_act_0.apply();

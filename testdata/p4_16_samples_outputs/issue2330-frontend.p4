@@ -33,7 +33,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         } else {
             hasReturned = true;
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             {
                 @name("ingress.val_0") bit<16> val_0 = h.eth_hdr.eth_type;
                 h.eth_hdr.eth_type = val_0;

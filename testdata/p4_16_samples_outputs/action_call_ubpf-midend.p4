@@ -53,7 +53,9 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     apply {
         tbl_act.apply();
         tbl_a_0.apply();
-        if (!hasExited) {
+        if (hasExited) {
+            ;
+        } else {
             tbl_action_call_ubpf65.apply();
         }
     }

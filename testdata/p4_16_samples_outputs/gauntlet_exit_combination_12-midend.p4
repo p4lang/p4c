@@ -57,7 +57,9 @@ control ingress(inout Headers h) {
         tbl_act.apply();
         switch (simple_table_0.apply().action_run) {
             do_action: {
-                if (!hasExited) {
+                if (hasExited) {
+                    ;
+                } else {
                     tbl_gauntlet_exit_combination_12l42.apply();
                 }
             }

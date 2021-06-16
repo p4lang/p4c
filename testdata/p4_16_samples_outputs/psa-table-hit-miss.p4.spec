@@ -86,11 +86,13 @@ apply {
 	jmpnh LABEL_0END
 	invalidate h.ethernet
 	LABEL_0END :	table tbl
-	jmph LABEL_1END
-	validate h.ethernet
+	jmpnh LABEL_1FALSE
+	jmp LABEL_1END
+	LABEL_1FALSE :	validate h.ethernet
 	LABEL_1END :	table tbl
-	jmph LABEL_2END
-	validate h.ethernet
+	jmpnh LABEL_2FALSE
+	jmp LABEL_2END
+	LABEL_2FALSE :	validate h.ethernet
 	LABEL_2END :	table tbl
 	jmpnh LABEL_3END
 	invalidate h.ethernet

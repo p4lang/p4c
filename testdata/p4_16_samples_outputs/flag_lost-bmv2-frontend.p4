@@ -83,7 +83,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         if (hdr.ipv4.isValid()) {
             ipv4_lpm_0.apply();
         }
-        if (!meta.test_bool) {
+        if (meta.test_bool) {
+            ;
+        } else {
             drop_2();
         }
     }

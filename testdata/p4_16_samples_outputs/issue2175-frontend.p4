@@ -8,7 +8,9 @@ control c(inout bit<8> v) {
                 val_0 = 8w1;
                 hasReturned_0 = true;
             }
-            if (!hasReturned_0) {
+            if (hasReturned_0) {
+                ;
+            } else {
                 val_0 = 8w2;
             }
             v = val_0;
@@ -17,7 +19,9 @@ control c(inout bit<8> v) {
             v = 8w1;
             hasReturned = true;
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             v = 8w2;
         }
     }

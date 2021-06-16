@@ -138,7 +138,8 @@ MTONLY(
         *p++ = "0123456789abcdef"[(a >> shift) & 0xf];
         shift -= 4; }
     *p++ = '\n';
-    (void) write(to_child, buffer, p-buffer);
+    auto _unused = write(to_child, buffer, p-buffer);
+    (void)_unused;
     p = buffer;
     int len;
     while (p < buffer + sizeof(buffer) - 1 &&

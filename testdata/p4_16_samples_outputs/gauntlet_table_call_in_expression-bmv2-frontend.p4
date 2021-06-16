@@ -46,10 +46,10 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         tmp = simple_table_0.apply().hit;
-        if (!tmp) {
-            tmp_0 = false;
-        } else {
+        if (tmp) {
             tmp_0 = h.eth_hdr.src_addr == h.eth_hdr.dst_addr;
+        } else {
+            tmp_0 = false;
         }
         if (tmp_0) {
             h.eth_hdr.src_addr = 48w2;

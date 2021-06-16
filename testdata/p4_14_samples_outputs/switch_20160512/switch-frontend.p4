@@ -5690,11 +5690,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                 }
             }
         }
-        if (!hdr.int_header.isValid()) {
-            _int_source.apply();
-        } else {
+        if (hdr.int_header.isValid()) {
             _int_terminate.apply();
             _int_sink_update_outer.apply();
+        } else {
+            _int_source.apply();
         }
         if (meta.ingress_metadata.port_type != 2w0) {
             _fabric_ingress_dst_lkp_0.apply();
@@ -5768,7 +5768,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _storm_control.apply();
         }
         if (meta.ingress_metadata.port_type != 2w1) {
-            if (!(hdr.mpls[0].isValid() && meta.l3_metadata.fib_hit == 1w1)) {
+            if (hdr.mpls[0].isValid() && meta.l3_metadata.fib_hit == 1w1) {
+                ;
+            } else {
                 if (meta.ingress_metadata.drop_flag == 1w0) {
                     _validate_packet.apply();
                 }

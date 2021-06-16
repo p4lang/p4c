@@ -818,10 +818,14 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     }
     apply {
         tbl_fabric78.apply();
-        if (!hdr.gtpu.isValid()) {
+        if (hdr.gtpu.isValid()) {
+            ;
+        } else {
             tbl_spgw30.apply();
         }
-        if (!spgw_normalizer_hasReturned) {
+        if (spgw_normalizer_hasReturned) {
+            ;
+        } else {
             tbl_spgw31.apply();
             if (hdr.inner_udp.isValid()) {
                 tbl_spgw35.apply();
@@ -832,18 +836,24 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         if (hdr.packet_out.isValid()) {
             tbl_packetio25.apply();
         }
-        if (!hasExited) {
+        if (hasExited) {
+            ;
+        } else {
             if (hdr.vlan_tag.isValid()) {
                 tbl_filtering105.apply();
             }
-            if (!hdr.mpls.isValid()) {
+            if (hdr.mpls.isValid()) {
+                ;
+            } else {
                 tbl_filtering115.apply();
             }
             filtering_ingress_port_vlan.apply();
             filtering_fwd_classifier.apply();
             tbl_act.apply();
             if (hdr.gtpu.isValid()) {
-                if (!spgw_ingress_s1u_filter_table.apply().hit) {
+                if (spgw_ingress_s1u_filter_table.apply().hit) {
+                    ;
+                } else {
                     tbl_spgw149.apply();
                 }
                 tbl_spgw151.apply();
@@ -853,20 +863,24 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
             } else {
                 tbl_spgw156.apply();
             }
-            if (!spgw_ingress_hasReturned) {
+            if (spgw_ingress_hasReturned) {
+                ;
+            } else {
                 tbl_spgw175.apply();
             }
-            if (!fabric_metadata._skip_forwarding7) {
-                if (fabric_metadata._fwd_type9 == 3w0) {
-                    forwarding_bridging.apply();
-                } else if (fabric_metadata._fwd_type9 == 3w1) {
-                    forwarding_mpls.apply();
-                } else if (fabric_metadata._fwd_type9 == 3w2) {
-                    forwarding_routing_v4.apply();
-                }
+            if (fabric_metadata._skip_forwarding7) {
+                ;
+            } else if (fabric_metadata._fwd_type9 == 3w0) {
+                forwarding_bridging.apply();
+            } else if (fabric_metadata._fwd_type9 == 3w1) {
+                forwarding_mpls.apply();
+            } else if (fabric_metadata._fwd_type9 == 3w2) {
+                forwarding_routing_v4.apply();
             }
             acl_acl.apply();
-            if (!fabric_metadata._skip_next8) {
+            if (fabric_metadata._skip_next8) {
+                ;
+            } else {
                 next_xconnect.apply();
                 next_hashed.apply();
                 next_multicast.apply();
@@ -1068,15 +1082,17 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
         if (fabric_metadata._is_controller_packet_out12) {
             tbl_packetio41.apply();
         }
-        if (!hasExited_0) {
-            if (standard_metadata.egress_port == 9w255) {
-                if (fabric_metadata._is_multicast11 && !fabric_metadata._clone_to_cpu13) {
-                    tbl_packetio47.apply();
-                }
-                tbl_packetio49.apply();
+        if (hasExited_0) {
+            ;
+        } else if (standard_metadata.egress_port == 9w255) {
+            if (fabric_metadata._is_multicast11 && !fabric_metadata._clone_to_cpu13) {
+                tbl_packetio47.apply();
             }
+            tbl_packetio49.apply();
         }
-        if (!hasExited_0) {
+        if (hasExited_0) {
+            ;
+        } else {
             if (fabric_metadata._is_multicast11 && standard_metadata.ingress_port == standard_metadata.egress_port) {
                 tbl_next308.apply();
             }
@@ -1087,10 +1103,10 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
             } else {
                 tbl_egress_next_set_mpls.apply();
             }
-            if (!egress_next_egress_vlan.apply().hit) {
-                if (fabric_metadata._vlan_id2 != 12w4094) {
-                    tbl_egress_next_push_vlan.apply();
-                }
+            if (egress_next_egress_vlan.apply().hit) {
+                ;
+            } else if (fabric_metadata._vlan_id2 != 12w4094) {
+                tbl_egress_next_push_vlan.apply();
             }
             if (hdr.mpls.isValid()) {
                 tbl_next326.apply();

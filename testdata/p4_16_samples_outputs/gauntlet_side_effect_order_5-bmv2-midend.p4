@@ -81,13 +81,15 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             } else {
                 tbl_gauntlet_side_effect_order_5bmv2l22.apply();
             }
-            if (!hasReturned) {
-                if (h.eth_hdr.src_addr <= 48w25) {
-                    tbl_gauntlet_side_effect_order_5bmv2l25.apply();
-                }
+            if (hasReturned) {
+                ;
+            } else if (h.eth_hdr.src_addr <= 48w25) {
+                tbl_gauntlet_side_effect_order_5bmv2l25.apply();
             }
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             tbl_gauntlet_side_effect_order_5bmv2l28.apply();
         }
         tbl_act_0.apply();

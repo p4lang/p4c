@@ -50,7 +50,9 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
     }
     apply {
         @my_anno_3 {
-            if (!inner_inner_table.apply().hit) {
+            if (inner_inner_table.apply().hit) {
+                ;
+            } else {
                 tbl_annotationinlinepropagate76.apply();
             }
         }

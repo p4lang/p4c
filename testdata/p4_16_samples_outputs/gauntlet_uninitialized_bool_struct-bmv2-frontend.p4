@@ -46,7 +46,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         tmp_0 = (bool_struct){is_bool = false};
         switch (simple_table_0.apply().action_run) {
             dummy_action: {
-                if (!tmp_0.is_bool) {
+                if (tmp_0.is_bool) {
+                    ;
+                } else {
                     exit;
                 }
                 h.eth_hdr.dst_addr = 48w1;

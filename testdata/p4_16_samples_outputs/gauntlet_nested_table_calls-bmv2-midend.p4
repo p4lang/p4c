@@ -102,7 +102,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         } else {
             tbl_act_1.apply();
         }
-        if (!hasExited) {
+        if (hasExited) {
+            ;
+        } else {
             if (tmp) {
                 tbl_gauntlet_nested_table_callsbmv2l44.apply();
             } else {

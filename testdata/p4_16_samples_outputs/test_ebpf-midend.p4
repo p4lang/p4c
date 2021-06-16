@@ -84,10 +84,14 @@ control pipe(inout Headers_t headers, out bool pass) {
     }
     apply {
         tbl_test_ebpf68.apply();
-        if (!headers.ipv4.isValid()) {
+        if (headers.ipv4.isValid()) {
+            ;
+        } else {
             tbl_test_ebpf72.apply();
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             Check_src_ip_0.apply();
         }
     }

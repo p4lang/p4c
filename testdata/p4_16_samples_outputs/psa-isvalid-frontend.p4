@@ -56,7 +56,9 @@ control MyIC(inout headers_t hdr, inout EMPTY_M b, in psa_ingress_input_metadata
         default_action = NoAction_0();
     }
     apply {
-        if (!hdr.ethernet.isValid()) {
+        if (hdr.ethernet.isValid()) {
+            ;
+        } else {
             tbl_0.apply();
         }
     }

@@ -52,7 +52,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             default: {
             }
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             do_action_2(h.eth_hdr.dst_addr);
         }
     }

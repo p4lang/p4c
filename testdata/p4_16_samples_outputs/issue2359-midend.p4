@@ -26,7 +26,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bool hasExited;
     @name("ingress.do_action") action do_action() {
         h.eth_hdr.src_addr = h.eth_hdr.src_addr;
-        hasExited = (h.eth_hdr.eth_type != 16w1 ? true : hasExited);
+        hasExited = (h.eth_hdr.eth_type == 16w1 ? hasExited : true);
     }
     @hidden action act() {
         hasExited = false;

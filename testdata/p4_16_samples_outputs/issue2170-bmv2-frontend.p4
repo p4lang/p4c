@@ -60,7 +60,9 @@ control ingress(inout Parsed_packet hdr, inout Metadata meta, inout standard_met
             default: {
             }
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             hdr.h.a = 8w0;
         }
     }

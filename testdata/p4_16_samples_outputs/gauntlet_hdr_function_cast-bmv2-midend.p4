@@ -97,7 +97,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         } else if (h.eth_hdr1.eth_type == 16w2) {
             tbl_gauntlet_hdr_function_castbmv2l24.apply();
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             tbl_gauntlet_hdr_function_castbmv2l26.apply();
         }
         tbl_gauntlet_hdr_function_castbmv2l30.apply();

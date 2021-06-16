@@ -95,8 +95,9 @@ apply {
 	jmpeq MYIP_PARSE_VLAN_TAG2 h.vlan_tag_1.ether_type 0x8100
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_VLAN_TAG2 :	verify 0 error.StackOutOfBounds
-	MYIP_ACCEPT :	jmpv LABEL_0END h.ethernet
-	table tbl
+	MYIP_ACCEPT :	jmpnv LABEL_0FALSE h.ethernet
+	jmp LABEL_0END
+	LABEL_0FALSE :	table tbl
 	LABEL_0END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	emit h.vlan_tag_0

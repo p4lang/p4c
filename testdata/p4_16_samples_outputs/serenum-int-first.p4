@@ -34,7 +34,9 @@ parser prs(packet_in p, out Headers h) {
 
 control c(inout Headers h) {
     apply {
-        if (!h.eth.isValid()) {
+        if (h.eth.isValid()) {
+            ;
+        } else {
             return;
         }
         if (h.eth.type == EthTypes.IPv4) {

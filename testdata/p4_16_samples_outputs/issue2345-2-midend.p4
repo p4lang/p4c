@@ -23,23 +23,24 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @name("ingress.hasReturned") bool hasReturned;
     ethernet_t val_0_eth_hdr;
     ethernet_t val1_0_eth_hdr;
     ethernet_t val1_1_eth_hdr;
-    bool cond_0;
     @name("ingress.simple_action") action simple_action() {
-        cond_0 = h.eth_hdr.eth_type != 16w1;
-        h.eth_hdr.src_addr = (h.eth_hdr.eth_type != 16w1 ? 48w1 : h.eth_hdr.src_addr);
-        val_0_eth_hdr = (h.eth_hdr.eth_type != 16w1 ? h.eth_hdr : val_0_eth_hdr);
-        val1_0_eth_hdr = (h.eth_hdr.eth_type != 16w1 ? val_0_eth_hdr : val1_0_eth_hdr);
-        val1_0_eth_hdr.dst_addr = (h.eth_hdr.eth_type != 16w1 ? val1_0_eth_hdr.dst_addr + 48w3 : val1_0_eth_hdr.dst_addr);
-        val_0_eth_hdr = (h.eth_hdr.eth_type != 16w1 ? val1_0_eth_hdr : val_0_eth_hdr);
-        val_0_eth_hdr.eth_type = (h.eth_hdr.eth_type != 16w1 ? 16w2 : val_0_eth_hdr.eth_type);
-        val1_1_eth_hdr = (h.eth_hdr.eth_type != 16w1 ? val_0_eth_hdr : val1_1_eth_hdr);
-        val1_1_eth_hdr.dst_addr = (h.eth_hdr.eth_type != 16w1 ? val1_1_eth_hdr.dst_addr + 48w3 : val1_1_eth_hdr.dst_addr);
-        val_0_eth_hdr = (h.eth_hdr.eth_type != 16w1 ? val1_1_eth_hdr : val_0_eth_hdr);
-        h.eth_hdr = (h.eth_hdr.eth_type != 16w1 ? val_0_eth_hdr : h.eth_hdr);
-        h.eth_hdr.dst_addr = (cond_0 ? h.eth_hdr.dst_addr + 48w4 : h.eth_hdr.dst_addr);
+        hasReturned = false;
+        hasReturned = h.eth_hdr.eth_type == 16w1;
+        h.eth_hdr.src_addr = (h.eth_hdr.eth_type == 16w1 ? h.eth_hdr.src_addr : 48w1);
+        val_0_eth_hdr = (h.eth_hdr.eth_type == 16w1 ? val_0_eth_hdr : h.eth_hdr);
+        val1_0_eth_hdr = (h.eth_hdr.eth_type == 16w1 ? val1_0_eth_hdr : val_0_eth_hdr);
+        val1_0_eth_hdr.dst_addr = (h.eth_hdr.eth_type == 16w1 ? val1_0_eth_hdr.dst_addr : val1_0_eth_hdr.dst_addr + 48w3);
+        val_0_eth_hdr = (h.eth_hdr.eth_type == 16w1 ? val_0_eth_hdr : val1_0_eth_hdr);
+        val_0_eth_hdr.eth_type = (h.eth_hdr.eth_type == 16w1 ? val_0_eth_hdr.eth_type : 16w2);
+        val1_1_eth_hdr = (h.eth_hdr.eth_type == 16w1 ? val1_1_eth_hdr : val_0_eth_hdr);
+        val1_1_eth_hdr.dst_addr = (h.eth_hdr.eth_type == 16w1 ? val1_1_eth_hdr.dst_addr : val1_1_eth_hdr.dst_addr + 48w3);
+        val_0_eth_hdr = (h.eth_hdr.eth_type == 16w1 ? val_0_eth_hdr : val1_1_eth_hdr);
+        h.eth_hdr = (h.eth_hdr.eth_type == 16w1 ? h.eth_hdr : val_0_eth_hdr);
+        h.eth_hdr.dst_addr = (hasReturned ? h.eth_hdr.dst_addr : h.eth_hdr.dst_addr + 48w4);
     }
     @hidden action issue23452l49() {
         h.eth_hdr.src_addr = 48w2;
