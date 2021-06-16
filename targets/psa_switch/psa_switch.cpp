@@ -65,6 +65,7 @@ REGISTER_HASH(bmv2_hash);
 extern int import_primitives();
 extern int import_counters();
 extern int import_meters();
+extern int import_random();
 
 namespace bm {
 
@@ -181,6 +182,7 @@ PsaSwitch::PsaSwitch(bool enable_swap)
   import_primitives();
   import_counters();
   import_meters();
+  import_random();
 }
 
 #define PACKET_LENGTH_REG_IDX 0
