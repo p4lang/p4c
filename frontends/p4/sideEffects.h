@@ -181,10 +181,13 @@ a[tmp1].x = tmp4;        // assign result of call of f to actual left value
 class DoSimplifyExpressions : public Transform, P4WriteContext {
     ReferenceMap*        refMap;
     TypeMap*             typeMap;
+    // Expressions holding temporaries that are already added.
+    std::set<const IR::Expression*>* added;
 
     IR::IndexedVector<IR::Declaration> toInsert;  // temporaries
     IR::IndexedVector<IR::StatOrDecl> statements;
-    /// Set of temporaries introduced for method call results
+    /// Set of temporaries introduced for method call results during
+    /// this pass.
     std::set<const IR::Expression*> temporaries;
 
     cstring createTemporary(const IR::Type* type);
@@ -194,8 +197,9 @@ class DoSimplifyExpressions : public Transform, P4WriteContext {
     bool containsHeaderType(const IR::Type* type);
 
  public:
-    DoSimplifyExpressions(ReferenceMap* refMap, TypeMap* typeMap)
-            : refMap(refMap), typeMap(typeMap) {
+    DoSimplifyExpressions(ReferenceMap* refMap, TypeMap* typeMap,
+                          std::set<const IR::Expression*>* added)
+            : refMap(refMap), typeMap(typeMap), added(added) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap);
         setName("DoSimplifyExpressions");
     }
@@ -281,11 +285,12 @@ class KeySideEffect : public Transform {
     ReferenceMap* refMap;
     TypeMap*      typeMap;
     std::map<const IR::P4Table*, TableInsertions*> toInsert;
+    std::set<const IR::P4Table*>* invokedInKey;
 
  public:
-    KeySideEffect(ReferenceMap* refMap, TypeMap* typeMap)
-        : refMap(refMap), typeMap(typeMap)
-    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("KeySideEffect"); }
+    KeySideEffect(ReferenceMap* refMap, TypeMap* typeMap, std::set<const IR::P4Table*>* invokedInKey)
+            : refMap(refMap), typeMap(typeMap), invokedInKey(invokedInKey)
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(invokedInKey); setName("KeySideEffect"); }
     const IR::Node* doStatement(const IR::Statement* statement, const IR::Expression* expression);
 
     const IR::Node* preorder(IR::Key* key) override;
@@ -302,9 +307,48 @@ class KeySideEffect : public Transform {
     { return doStatement(statement, statement->right); }
     const IR::Node* postorder(IR::KeyElement* element) override;
     const IR::Node* postorder(IR::P4Table* table) override;
+    const IR::Node* preorder(IR::P4Table* table) override;
+};
+
+/// Discovers tables that are invoked within key computations
+/// for other tables: e.g.
+/// table Y { ... }
+/// table X { key = { ... Y.apply.hit() ... } }
+/// This inserts Y into the map invokedInKey;
+class TablesInKeys : public Inspector {
+    ReferenceMap* refMap;
+    TypeMap*      typeMap;
+    std::set<const IR::P4Table*>* invokedInKey;
+
+ public:
+    TablesInKeys(ReferenceMap* refMap, TypeMap* typeMap, std::set<const IR::P4Table*>* invokedInKey)
+            : refMap(refMap), typeMap(typeMap), invokedInKey(invokedInKey)
+    { CHECK_NULL(invokedInKey); setName("TableInKeys"); }
+    Visitor::profile_t init_apply(const IR::Node* node) override {
+        invokedInKey->clear();
+        return Inspector::init_apply(node);
+    }
+    void postorder(const IR::MethodCallExpression* mce) override {
+        if (!findContext<IR::Key>())
+            return;
+        HasTableApply hta(refMap, typeMap);
+        (void)mce->apply(hta);
+        if (hta.table != nullptr) {
+            LOG2("Table " << hta.table << " invoked in key of another table");
+            invokedInKey->emplace(hta.table);
+        }
+    }
 };
 
 class SideEffectOrdering : public PassRepeated {
+    // Contains all tables that are invoked within key
+    // computations for other tables.  The keys for these
+    // inner tables cannot be expanded until the keys of
+    // the caller tables have been expanded.
+    std::set<const IR::P4Table*> invokedInKey;
+    // Temporaries that were added
+    std::set<const IR::Expression*> added;
+
  public:
     SideEffectOrdering(ReferenceMap* refMap, TypeMap* typeMap, bool skipSideEffectOrdering,
                        TypeChecking* typeChecking = nullptr) {
@@ -312,9 +356,10 @@ class SideEffectOrdering : public PassRepeated {
             typeChecking = new TypeChecking(refMap, typeMap);
         if (!skipSideEffectOrdering) {
             passes.push_back(new TypeChecking(refMap, typeMap));
-            passes.push_back(new DoSimplifyExpressions(refMap, typeMap));
+            passes.push_back(new DoSimplifyExpressions(refMap, typeMap, &added));
             passes.push_back(typeChecking);
-            passes.push_back(new KeySideEffect(refMap, typeMap));
+            passes.push_back(new TablesInKeys(refMap, typeMap, &invokedInKey));
+            passes.push_back(new KeySideEffect(refMap, typeMap, &invokedInKey));
         }
         setName("SideEffectOrdering");
     }

@@ -42,6 +42,7 @@ const IR::Expression* DoSimplifyExpressions::addAssignment(
     auto stat = new IR::AssignmentStatement(srcInfo, left, expression);
     statements.push_back(stat);
     auto result = left->clone();
+    added->emplace(result);
     return result;
 }
 
@@ -68,11 +69,16 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::ArrayIndex* expression) {
         CHECK_NULL(expression->left);
         visit(expression->right);
         CHECK_NULL(expression->right);
-        if (!expression->right->is<IR::Constant>()) {
-            auto indexType = typeMap->getType(expression->right, true);
-            auto tmp = createTemporary(indexType);
-            expression->right = addAssignment(expression->srcInfo, tmp, expression->right);
-            typeMap->setType(expression->right, indexType);
+        if (added->find(expression->right) == added->end()) {
+            // If the index is a fresh temporary we don't need to replace it again;
+            // we are sure it will not alias anything else.
+            // Otherwise this can lead to an infinite loop.
+            if (!expression->right->is<IR::Constant>()) {
+                auto indexType = typeMap->getType(expression->right, true);
+                auto tmp = createTemporary(indexType);
+                expression->right = addAssignment(expression->srcInfo, tmp, expression->right);
+                typeMap->setType(expression->right, indexType);
+            }
         }
     }
     typeMap->setType(expression, type);
@@ -501,6 +507,8 @@ const IR::Node* DoSimplifyExpressions::preorder(IR::MethodCallExpression* mce) {
                     paramtype = typeMap->getType(arg, true);
                 auto tmp = createTemporary(paramtype);
                 argValue = new IR::PathExpression(IR::ID(tmp, nullptr));
+                typeMap->setType(argValue, paramtype);
+                typeMap->setLeftValue(argValue);
                 if (p->direction != IR::Direction::Out) {
                     auto clone = argValue->clone();
                     auto stat = new IR::AssignmentStatement(clone, argex);
@@ -695,6 +703,7 @@ const IR::Node* KeySideEffect::preorder(IR::Key* key) {
     for (auto k : key->keyElements)
         complex = complex || P4::SideEffects::check(k->expression, refMap, typeMap);
     if (!complex)
+        // This prune will prevent the postoder(IR::KeyElement*) below from executing
         prune();
     else
         LOG3("Will pull out " << key);
@@ -731,6 +740,17 @@ const IR::Node* KeySideEffect::postorder(IR::KeyElement* element) {
     return element;
 }
 
+const IR::Node* KeySideEffect::preorder(IR::P4Table* table) {
+    auto orig = getOriginal<IR::P4Table>();
+    if (invokedInKey->find(orig) != invokedInKey->end()) {
+        // if this table is invoked in some key computation do not
+        // analyze its key yet; we will do this in a future iteration.
+        LOG2("Will not analyze key of " << table);
+        prune();
+    }
+    return table;
+}
+
 const IR::Node* KeySideEffect::postorder(IR::P4Table* table) {
     auto insertions = ::get(toInsert, getOriginal<IR::P4Table>());
     if (insertions == nullptr)
@@ -744,7 +764,7 @@ const IR::Node* KeySideEffect::postorder(IR::P4Table* table) {
 }
 
 const IR::Node* KeySideEffect::doStatement(const IR::Statement* statement,
-                                             const IR::Expression *expression) {
+                                           const IR::Expression *expression) {
     LOG3("Visiting " << getOriginal());
     HasTableApply hta(refMap, typeMap);
     (void)expression->apply(hta);
