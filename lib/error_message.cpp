@@ -2,12 +2,16 @@
 
 std::string ErrorMessage::getPrefix() const {
     std::string p = prefix;
-    if (type == Type::Error) {
-        if (p.empty()) p = "error: ";
-        else p = "[--Werror=" + p + "] error: ";
-    } else if (type == Type::Warning) {
-        if (p.empty()) p = "warning: ";
-        else p = "[--Wwarn=" + p + "] warning: ";
+    if (type == MessageType::Error) {
+        if (p.empty())
+            p = "error: ";
+        else
+            p = "[--Werror=" + p + "] error: ";
+    } else if (type == MessageType::Warning) {
+        if (p.empty())
+            p = "warning: ";
+        else
+            p = "[--Wwarn=" + p + "] warning: ";
     }
     return p;
 }
@@ -33,5 +37,6 @@ std::string ErrorMessage::toString() const {
 }
 
 std::string ParserErrorMessage::toString() const {
-    return std::string(location.toPositionString().c_str()) + ":" + message + "\n" + location.toSourceFragment().c_str();
+    return std::string(location.toPositionString().c_str()) + ":" + message + "\n" +
+           location.toSourceFragment().c_str();
 }

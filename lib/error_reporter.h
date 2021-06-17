@@ -132,17 +132,17 @@ class ErrorReporter {
                   const char* format, const char* suffix, T... args) {
         if (action == DiagnosticAction::Ignore) return;
 
-        ErrorMessage::Type msgType = ErrorMessage::Type::None;
+        ErrorMessage::MessageType msgType = ErrorMessage::MessageType::None;
         if (action == DiagnosticAction::Warn) {
             // Avoid burying errors in a pile of warnings: don't emit any more warnings if we've
             // emitted errors.
             if (errorCount > 0) return;
 
             warningCount++;
-            msgType = ErrorMessage::Type::Warning;
+            msgType = ErrorMessage::MessageType::Warning;
         } else if (action == DiagnosticAction::Error) {
             errorCount++;
-            msgType = ErrorMessage::Type::Error;
+            msgType = ErrorMessage::MessageType::Error;
         }
 
         boost::format fmt(format);

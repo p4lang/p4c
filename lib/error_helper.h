@@ -151,7 +151,6 @@ auto error_helper(boost::format& f, ErrorMessage out, const T *t, Args... args) 
 template<typename T, class... Args>
 auto error_helper(boost::format& f, ErrorMessage out, const T &t, Args... args) ->
     typename std::enable_if<std::is_base_of<Util::IHasSourceInfo, T>::value, ErrorMessage>::type {
-
     auto info = t.getSourceInfo();
     if (info.isValid()) out.locations.push_back(info);
     return error_helper(f % t.toString(), out, std::forward<Args>(args)...);

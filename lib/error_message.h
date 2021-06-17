@@ -34,22 +34,22 @@ limitations under the License.
  *  directly and those uses need to call toString() on returned object.
  */
 struct ErrorMessage {
-    enum class Type : std::size_t { None, Error, Warning };
+    enum class MessageType : std::size_t { None, Error, Warning };
 
-    Type type = Type::None;
+    MessageType type = MessageType::None;
     std::string prefix = "";  /// Typically error/warning type from catalog
     std::string message = "";  /// Particular formatted message
-    std::vector<Util::SourceInfo> locations = {}; /// Relevant source locations for this error
+    std::vector<Util::SourceInfo> locations = {};  /// Relevant source locations for this error
     std::string suffix = "";  /// Used by errorWithSuffix
 
     ErrorMessage() {}
     // Invoked from backwards compatible error_helper
-    ErrorMessage(const std::string &prefix, const Util::SourceInfo &info, std::string &suffix)
+    ErrorMessage(const std::string &prefix, const Util::SourceInfo &info, const std::string &suffix)
         : prefix(prefix), locations({info}), suffix(suffix) {}
     // Invoked from error_reporter
-    ErrorMessage(Type type, const std::string &prefix, const std::string &suffix)
+    ErrorMessage(MessageType type, const std::string &prefix, const std::string &suffix)
         : type(type), prefix(prefix), suffix(suffix) {}
-    ErrorMessage(Type type, const std::string &prefix, const std::string &message,
+    ErrorMessage(MessageType type, const std::string &prefix, const std::string &message,
                  const std::vector<Util::SourceInfo> &locations, const std::string &suffix)
         : type(type), prefix(prefix), message(message), locations(locations), suffix(suffix) {}
 
@@ -65,7 +65,8 @@ struct ParserErrorMessage {
     Util::SourceInfo location;
     cstring message;
 
-    ParserErrorMessage(const Util::SourceInfo &loc, const cstring &msg) : location(loc), message(msg) {}
+    ParserErrorMessage(const Util::SourceInfo &loc, const cstring &msg)
+        : location(loc), message(msg) {}
 
     std::string toString() const;
 };
