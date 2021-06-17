@@ -288,7 +288,8 @@ class KeySideEffect : public Transform {
     std::set<const IR::P4Table*>* invokedInKey;
 
  public:
-    KeySideEffect(ReferenceMap* refMap, TypeMap* typeMap, std::set<const IR::P4Table*>* invokedInKey)
+    KeySideEffect(ReferenceMap* refMap, TypeMap* typeMap,
+                  std::set<const IR::P4Table*>* invokedInKey)
             : refMap(refMap), typeMap(typeMap), invokedInKey(invokedInKey)
     { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(invokedInKey); setName("KeySideEffect"); }
     const IR::Node* doStatement(const IR::Statement* statement, const IR::Expression* expression);
