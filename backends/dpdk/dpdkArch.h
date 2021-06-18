@@ -336,7 +336,7 @@ class CollectLocalVariableToMetadata : public Transform {
 // According to dpdk spec, action parameters should prepend a p. In order to
 // respect this, we need at first make all action parameter lists into separate
 // structs and declare that struct in the P4 program. Then we modify the action
-// parameter list. Eventuall, it will only contain one parameter `t`, which is a
+// parameter list. Eventually, it will only contain one parameter `t`, which is a
 // struct containing all parameters previously defined. Next, we prepend t. in
 // front of action parameters. Please note that it is possible that the user
 // defines a struct paremeter himself or define multiple struct parameters in

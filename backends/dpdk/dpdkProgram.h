@@ -79,6 +79,8 @@ class ConvertToDpdkProgram : public Transform {
             statements);
     const IR::Node *preorder(IR::P4Program *p) override;
     const IR::DpdkAsmProgram *getDpdkProgram() { return dpdk_program; }
+    IR::IndexedVector<IR::DpdkStructType> UpdateHeaderMetadata(
+                      IR::P4Program *prog, IR::Type_Struct *metadata);
 };
 
 class ConvertToDpdkParser : public Inspector {
@@ -88,13 +90,16 @@ class ConvertToDpdkParser : public Inspector {
     DpdkVariableCollector *collector;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
 
+    IR::Type_Struct *metadataStruct;
+
   public:
     ConvertToDpdkParser(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkVariableCollector *collector,
-        std::map<const IR::Declaration_Instance *, cstring> *csum_map)
+
+        std::map<const IR::Declaration_Instance *, cstring> *csum_map, IR::Type_Struct *metadataStruct)
         : refmap(refmap), typemap(typemap), collector(collector),
-          csum_map(csum_map) {}
+          csum_map(csum_map), metadataStruct(metadataStruct) {}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() {
         return instructions;
     }
@@ -102,6 +107,7 @@ class ConvertToDpdkParser : public Inspector {
     bool preorder(const IR::ParserState *s) override;
     void add_instr(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
     cstring append_parser_name(const IR::P4Parser* p, cstring);
+    IR::Declaration_Variable *addNewTmpVarToMetadata (cstring name, const IR::Type* type);
 };
 
 class ConvertToDpdkControl : public Inspector {

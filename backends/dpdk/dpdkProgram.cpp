@@ -35,16 +35,14 @@ const IR::DpdkAsmStatement *ConvertToDpdkProgram::createListStatement(
     return new IR::DpdkListStatement(name, *stmts);
 }
 
-const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
-    IR::IndexedVector<IR::DpdkHeaderType> headerType;
-    for (auto kv : structure.header_types) {
-        LOG3("add header type " << kv.second);
-        auto h = kv.second;
-        auto ht = new IR::DpdkHeaderType(h->srcInfo, h->name, h->annotations,
-                                         h->fields);
-        headerType.push_back(ht);
-    }
+/* Insert the metadata structure updated with tmp variables created during parser conversion
+   Add annotations to metadata and header structures and add all the structures to DPDK
+   structtype.
+*/
+IR::IndexedVector<IR::DpdkStructType> ConvertToDpdkProgram::UpdateHeaderMetadata
+                                      (IR::P4Program *prog, IR::Type_Struct *metadata) {
     IR::IndexedVector<IR::DpdkStructType> structType;
+    auto new_objs = new IR::Vector<IR::Node>;
     for (auto obj : prog->objects) {
         if (auto s = obj->to<IR::Type_Struct>()) {
             if (s->name.name == info->local_metadata_type) {
@@ -52,45 +50,53 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
                     {new IR::Annotation(IR::ID("__metadata__"), {})});
                 for (auto anno : s->annotations->annotations)
                     annotations->add(anno);
+                new_objs->push_back(metadata);
                 auto st = new IR::DpdkStructType(s->srcInfo, s->name,
-                                                 annotations, s->fields);
+                                                 annotations, metadata->fields);
                 structType.push_back(st);
-            } else if (args_struct_map->find(s->name.name) !=
-                       args_struct_map->end()) {
-                auto st = new IR::DpdkStructType(s->srcInfo, s->name,
+            } else {
+                if (args_struct_map->find(s->name.name) !=
+                         args_struct_map->end()) {
+                    auto st = new IR::DpdkStructType(s->srcInfo, s->name,
                                                  s->annotations, s->fields);
-                structType.push_back(st);
-            } else if (s->name.name == info->header_type) {
-                auto *annotations = new IR::Annotations(
-                    {new IR::Annotation(IR::ID("__packet_data__"), {})});
-                for (auto anno : s->annotations->annotations)
-                    annotations->add(anno);
-                auto st = new IR::DpdkStructType(s->srcInfo, s->name,
+                   structType.push_back(st);
+                } else if (s->name.name == info->header_type) {
+                    auto *annotations = new IR::Annotations(
+                        {new IR::Annotation(IR::ID("__packet_data__"), {})});
+                    for (auto anno : s->annotations->annotations)
+                         annotations->add(anno);
+                    auto st = new IR::DpdkStructType(s->srcInfo, s->name,
                                                  s->annotations, s->fields);
-                structType.push_back(st);
+                    structType.push_back(st);
+                }
+                new_objs->push_back(s);
+            }
+        } else {
+            new_objs->push_back(obj);
+        }
+    }
+    prog->objects = *new_objs;
+    return structType;
+}
+
+const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
+    IR::Type_Struct *metadataStruct = nullptr;
+
+    for (auto obj : prog->objects) {
+        if (auto s = obj->to<IR::Type_Struct>()) {
+            if (s->name.name == info->local_metadata_type) {
+                metadataStruct = s->clone();
+                break;
             }
         }
     }
 
-    for (auto kv : structure.metadata_types) {
-        auto s = kv.second;
-        auto st = new IR::DpdkStructType(s->srcInfo, s->name, s->annotations,
-                                         s->fields);
-        structType.push_back(st);
-    }
-
-    IR::IndexedVector<IR::DpdkExternDeclaration> externDecls;
-    for (auto kv : *reg_map) {
-        auto s = kv.first;
-        auto st = new IR::DpdkExternDeclaration(s->name, s->annotations, s->type, s->arguments);
-        externDecls.push_back(st);
-    }
-
     IR::IndexedVector<IR::DpdkAsmStatement> statements;
+
     auto ingress_parser_converter =
-        new ConvertToDpdkParser(refmap, typemap, collector, csum_map);
+        new ConvertToDpdkParser(refmap, typemap, collector, csum_map, metadataStruct);
     auto egress_parser_converter =
-        new ConvertToDpdkParser(refmap, typemap, collector, csum_map);
+        new ConvertToDpdkParser(refmap, typemap, collector, csum_map, metadataStruct);
     for (auto kv : structure.parsers) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_parser_converter);
@@ -134,6 +140,30 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
                     });
     statements.push_back(s);
 
+    IR::IndexedVector<IR::DpdkHeaderType> headerType;
+    for (auto kv : structure.header_types) {
+        LOG3("add header type " << kv.second);
+        auto h = kv.second;
+        auto ht = new IR::DpdkHeaderType(h->srcInfo, h->name, h->annotations,
+                                         h->fields);
+        headerType.push_back(ht);
+    }
+    IR::IndexedVector<IR::DpdkStructType> structType = UpdateHeaderMetadata(prog, metadataStruct);
+
+    for (auto kv : structure.metadata_types) {
+        auto s = kv.second;
+        auto st = new IR::DpdkStructType(s->srcInfo, s->name, s->annotations,
+                                         s->fields);
+        structType.push_back(st);
+    }
+
+    IR::IndexedVector<IR::DpdkExternDeclaration> externDecls;
+    for (auto kv : *reg_map) {
+        auto s = kv.first;
+        auto st = new IR::DpdkExternDeclaration(s->name, s->annotations, s->type, s->arguments);
+        externDecls.push_back(st);
+    }
+
     return new IR::DpdkAsmProgram(
         headerType, structType, externDecls, ingress_converter->getActions(),
         ingress_converter->getTables(), statements, collector->get_globals());
@@ -147,6 +177,15 @@ const IR::Node *ConvertToDpdkProgram::preorder(IR::P4Program *prog) {
 
 cstring ConvertToDpdkParser::append_parser_name(const IR::P4Parser *p, cstring label) {
     return p->name + "_" + label;
+}
+
+IR::Declaration_Variable *ConvertToDpdkParser::addNewTmpVarToMetadata(cstring name,
+                                                                       const IR::Type* type) {
+    auto newTmpVar =  new IR::Declaration_Variable(IR::ID(
+                                               refmap->newName(name)), type);
+    metadataStruct->fields.push_back(new IR::StructField(IR::ID(newTmpVar->name.name),
+                                                         newTmpVar->type));
+    return newTmpVar;
 }
 
 bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
@@ -210,8 +249,29 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
                 switch_var = e->select->components[0];
                 for (auto v : e->selectCases) {
                     if (!v->keyset->is<IR::DefaultExpression>()) {
-                        add_instr(new IR::DpdkJmpEqualStatement(
-                            append_parser_name(p, v->state->path->name), switch_var, v->keyset));
+                        if (v->keyset->is<IR::Mask>()) {
+                            auto maskexpr = v->keyset->to<IR::Mask>();
+                            auto left = maskexpr->left;
+                            auto right = maskexpr->right;
+                            /* Dpdk architecture requires that both operands of &&& be constants */
+                            if (!left->is<IR::Constant>() || !left->is<IR::Constant>())
+                                ::error(ErrorType::ERR_UNSUPPORTED,
+                                        "Non constant values are not supported in Mask operation");
+                            unsigned value = right->to<IR::Constant>()->asUnsigned() &
+                                             left->to<IR::Constant>()->asUnsigned();
+                            auto tmpDecl = addNewTmpVarToMetadata("tmpMask", switch_var->type);
+                            auto tmpMask = new IR::PathExpression(
+                                               IR::ID("m." + tmpDecl->name.name));
+                            collector->push_variable(new IR::DpdkDeclaration(tmpDecl));
+                            add_instr(new IR::DpdkMovStatement(tmpMask, switch_var));
+                            add_instr(new IR::DpdkAndStatement(tmpMask, tmpMask, right));
+                            add_instr(new IR::DpdkJmpEqualStatement(
+                                         append_parser_name(p, v->state->path->name),
+                                                            tmpMask, new IR::Constant(value)));
+                        } else {
+                            add_instr(new IR::DpdkJmpEqualStatement(
+                              append_parser_name(p, v->state->path->name), switch_var, v->keyset));
+                        }
                     } else {
                         auto i = new IR::DpdkJmpLabelStatement(
                                 append_parser_name(p, v->state->path->name));
