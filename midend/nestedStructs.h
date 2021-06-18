@@ -48,7 +48,7 @@ class ComplexValues final {
     struct FieldsMap : public Component {
         ordered_map<cstring, Component*> members;
         const IR::Type* type;
-        FieldsMap(const IR::Type* type): type(type) {
+        explicit FieldsMap(const IR::Type* type): type(type) {
             CHECK_NULL(type);
             BUG_CHECK(type->is<IR::Type_Struct>(), "%1%: expected a struct", type);
         }
