@@ -756,8 +756,7 @@ ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
                 std::cerr << r->right->node_type_name() << std::endl;
                 std::cerr << r->left->node_type_name() << std::endl;
                 BUG("Confronting a expression that can be simplified to become "
-                    "a "
-                    "constant.");
+                    "a constant.");
             }
             code_block.push_back(new IR::AssignmentStatement(left, src1));
             IR::Operation_Binary *expr;

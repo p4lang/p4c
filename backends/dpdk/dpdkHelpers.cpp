@@ -356,6 +356,11 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                         add_instr(new IR::DpdkChecksumAddStatement(
                             a->object->getName(), intermediate, field));
                     }
+                } else if (auto s = arg->expression->to<IR::StructExpression>()) {
+                    for (auto field : s->components) {
+                        add_instr(new IR::DpdkChecksumAddStatement(
+                            a->object->getName(), intermediate, field->expression));
+                    }
                 } else {
                     add_instr(new IR::DpdkChecksumAddStatement(
                                 a->object->getName(), intermediate, arg->expression));
@@ -367,6 +372,11 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                     for (auto field : l->components) {
                         add_instr(new IR::DpdkChecksumSubStatement(
                             a->object->getName(), intermediate, field));
+                    }
+                } else if (auto s = arg->expression->to<IR::StructExpression>()) {
+                    for (auto field : s->components) {
+                        add_instr(new IR::DpdkChecksumSubStatement(
+                            a->object->getName(), intermediate, field->expression));
                     }
                 } else {
                     add_instr(new IR::DpdkChecksumSubStatement(
