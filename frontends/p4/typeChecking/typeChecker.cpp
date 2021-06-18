@@ -3218,7 +3218,21 @@ void TypeInference::checkCorelibMethods(const ExternMethod* em) const {
                 typeError("%1%: Expected 1 or 2 arguments for '%2%' method",
                           mce, corelib.packetIn.extract.name);
             }
-        } else if (em->method->name == corelib.packetIn.lookahead.name) {
+        } else if (em->method->name == corelib.packetIn.extract_greedy.name ||
+                   em->method->name == corelib.packetIn.extract_atomic.name) {
+            if (argCount != 1) {
+                typeError("%1%: Expected 1 argument for '%2%' method",
+                           mce, em->method->name);
+            }
+            auto arg0 = mce->arguments->at(0);
+            auto argType = typeMap->getType(arg0, true);
+            if (!argType->is<IR::Type_Header>() && !argType->is<IR::Type_Dontcare>()) {
+                typeError("%1%: argument must be a header", mce->arguments->at(0));
+                return;
+            }
+        } else if (em->method->name == corelib.packetIn.lookahead.name ||
+                   em->method->name == corelib.packetIn.lookahead_greedy.name ||
+                   em->method->name == corelib.packetIn.lookahead_atomic.name) {
             // this is a call to packet_in.lookahead.
             if (mce->typeArguments->size() != 1) {
                 typeError("Expected 1 type parameter for %1%", em->method);
