@@ -130,7 +130,7 @@ TypeInference::TypeInference(ReferenceMap* refMap, TypeMap* typeMap, bool readOn
 
 Visitor::profile_t TypeInference::init_apply(const IR::Node* node) {
     if (node->is<IR::P4Program>()) {
-        LOG2("Reference map for type checker:" << std::endl << refMap);
+        LOG3("Reference map for type checker:" << std::endl << refMap);
         LOG2("TypeInference for " << dbp(node));
     }
     initialNode = node;
@@ -3284,10 +3284,7 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         setType(expression, returnType);
 
         ConstantTypeSubstitution cts(tvs, refMap, typeMap, this);
-        auto result = cts.convert(expression)->to<IR::MethodCallExpression>();  // cast arguments
-        if (::errorCount() > 0)
-            return expression;
-
+        auto result = expression;
         // Arguments may need to be cast, e.g., list expression to a
         // header type.
         auto paramIt = functionType->parameters->begin();
@@ -3305,10 +3302,17 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
             }
 
             auto newExpr = arg->expression;
-            if (param->direction == IR::Direction::In)
+            if (param->direction == IR::Direction::In) {
+                // This is like an assignment; may make additional conversions.
                 newExpr = assignment(arg, param->type, arg->expression);
-
+            } else {
+                // Insert casts for 'int' values.
+                newExpr = cts.convert(newExpr)->to<IR::Expression>();
+            }
+            if (::errorCount() > 0)
+                return expression;
             if (newExpr != arg->expression) {
+                LOG2("Changing method argument to " << newExpr);
                 changed = true;
                 newArgs->push_back(new IR::Argument(arg->srcInfo, arg->name, newExpr));
             } else {
