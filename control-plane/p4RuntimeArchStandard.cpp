@@ -81,7 +81,7 @@ template<> struct ActionProfileTraits<Arch::V1MODEL2020> {
 template<> struct ActionProfileTraits<Arch::PSA> {
     static const cstring name() { return "action profile"; }
     static const cstring propertyName() {
-        return "implementation";
+        return "psa_implementation";
     }
     static const cstring typeName() {
         return "ActionProfile";

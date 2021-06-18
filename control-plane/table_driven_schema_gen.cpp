@@ -178,6 +178,10 @@ TableDrivenSchemaGenerator::ActionProf::from(const p4configv1::P4Info& p4info,
                                         const p4configv1::ActionProfile& actionProfile) {
     const auto& pre = actionProfile.preamble();
     auto profileId = makeBfRtId(pre.id(), p4configv1::P4Ids::ACTION_PROFILE);
+    LOG1("action profile size " << actionProfile.table_ids().size());
+    for (auto id : actionProfile.table_ids()) {
+        LOG1("id " << id);
+    }
     auto tableIds = collectTableIds(
         p4info, actionProfile.table_ids().begin(), actionProfile.table_ids().end());
     return ActionProf{pre.name(), profileId, actionProfile.size(), tableIds,
