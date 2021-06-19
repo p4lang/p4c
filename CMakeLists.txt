@@ -91,7 +91,7 @@ if (BUILD_STATIC_RELEASE)
   # Set the static variable
   set(P4C_STATIC_BUILD STATIC)
   # Do not bring in dynamic libstdcc and libgcc
-  set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++")
+  set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++ -Wl,-z,muldefs")
   add_definitions(-DP4C_STATIC_BUILD)
 endif ()
 

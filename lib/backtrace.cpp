@@ -34,7 +34,7 @@ void backtrace_fill_stacktrace(std::string &msg, void *const*backtrace, int size
     free(strings);
 }
 
-#if defined(__GLIBC__) && !defined(P4C_STATIC_BUILD)
+#ifdef __GLIBC__
 /* DANGER -- overrides for glibc++ exception throwers to include a stack trace.
  * correct functions depends on library internals, so may not work on some versions
  * and will fail with non-GNU libc++ */
