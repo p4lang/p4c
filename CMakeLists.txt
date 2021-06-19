@@ -83,17 +83,15 @@ set (P4C_LIB_DEPS)
 # set the required options for a static release build
 if (BUILD_STATIC_RELEASE)
   message(STATUS "Building static release binaries")
-  set(Boost_USE_STATIC_LIBS ON)
   set(BUILD_SHARED_LIBS OFF)
   set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
-  set (CMAKE_CXX_FLAGS "-static-libgcc -static-libstdc++ ${CMAKE_CXX_FLAGS}")
-  set(CMAKE_EXE_LINKER_FLAGS "-static ${CMAKE_EXE_LINKER_FLAGS}")
+  # Link Boost statically
+  set(Boost_USE_STATIC_LIBS ON)
+  set(Boost_USE_STATIC_RUNTIME ON)
+  # Set the static variable
   set(P4C_STATIC_BUILD STATIC)
-  set_property(GLOBAL PROPERTY LINK_SEARCH_START_STATIC ON)
-  set_property(GLOBAL PROPERTY LINK_SEARCH_END_STATIC ON)
-  # This is required for Ubuntu 16.04
-  # Why? I do not know. Some issue regarding linking in older GCC versions
-  set(CMAKE_EXE_LINKER_FLAGS "-Wl,--no-as-needed -ldl ${CMAKE_EXE_LINKER_FLAGS}" )
+  # Do not bring in dynamic libstdcc and libgcc
+  set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++")
   add_definitions(-DP4C_STATIC_BUILD)
 endif ()
 

@@ -137,8 +137,12 @@ export CXXFLAGS="${CXXFLAGS} -O3"
 # Add the gold linker early to allow sanitization in Ubuntu 16.04
 # Context: https://stackoverflow.com/a/50357910
 export CXXFLAGS="${CXXFLAGS} -fuse-ld=gold"
-# Catch null pointer dereferencing.
-export CXXFLAGS="${CXXFLAGS} -fsanitize=null"
+# Because of a bug with Ubuntu16.04 and static linking combined with the
+# sanitize library, we have to disable this check for static builds.
+if [ "$ENABLE_UNIFIED_COMPILATION" != "ON" ]; then
+ # Catch null pointer dereferencing.
+  export CXXFLAGS="${CXXFLAGS} -fsanitize=null"
+fi
 # Toggle unified compilation.
 CMAKE_FLAGS+="-DENABLE_UNIFIED_COMPILATION=${ENABLE_UNIFIED_COMPILATION} "
 # Toggle static builds.
