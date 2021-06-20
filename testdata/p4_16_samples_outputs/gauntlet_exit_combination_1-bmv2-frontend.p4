@@ -50,7 +50,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
                 hasReturned = true;
             }
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             do_action();
         }
     }

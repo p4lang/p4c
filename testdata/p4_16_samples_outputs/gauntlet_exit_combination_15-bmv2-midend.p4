@@ -103,7 +103,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
                 tbl_gauntlet_exit_combination_15bmv2l51.apply();
             }
         }
-        if (!hasExited) {
+        if (hasExited) {
+            ;
+        } else {
             tbl_gauntlet_exit_combination_15bmv2l55.apply();
         }
     }

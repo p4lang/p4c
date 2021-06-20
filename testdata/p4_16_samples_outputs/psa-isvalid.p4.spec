@@ -76,9 +76,11 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
-	jmpv LABEL_0END h.ethernet
-	table tbl
-	LABEL_0END :	tx m.psa_ingress_output_metadata_egress_port
+	jmpnv LABEL_0FALSE h.ethernet
+	jmp LABEL_0END
+	LABEL_0FALSE :	table tbl
+	LABEL_0END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP : drop
 }
 

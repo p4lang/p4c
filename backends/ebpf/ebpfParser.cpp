@@ -179,14 +179,15 @@ StateTranslationVisitor::compileExtractField(
         if (wordsToRead <= 1) {
             helper = "load_byte";
             loadSize = 8;
-        } else if (widthToExtract <= 16)  {
+        } else if (wordsToRead <= 2)  {
             helper = "load_half";
             loadSize = 16;
-        } else if (widthToExtract <= 32) {
+        } else if (wordsToRead <= 4) {
             helper = "load_word";
             loadSize = 32;
         } else {
-            if (widthToExtract > 64) BUG("Unexpected width %d", widthToExtract);
+            // TODO: this is wrong, since a 60-bit unaligned read may require 9 words.
+            if (wordsToRead > 64) BUG("Unexpected width %d", widthToExtract);
             helper = "load_dword";
             loadSize = 64;
         }

@@ -72,7 +72,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         tbl_act.apply();
-        if (!h.h.isValid()) {
+        if (h.h.isValid()) {
+            ;
+        } else {
             tbl_issue1386l12.apply();
         }
         tbl_arithinlineskeleton51.apply();

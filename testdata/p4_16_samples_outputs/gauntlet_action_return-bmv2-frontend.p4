@@ -32,7 +32,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         } else {
             val = 8w3;
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             hasReturned = true;
         }
     }

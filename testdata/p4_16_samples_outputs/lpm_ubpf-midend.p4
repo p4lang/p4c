@@ -88,10 +88,14 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     apply {
         tbl_act.apply();
-        if (!headers.ipv4.isValid()) {
+        if (headers.ipv4.isValid()) {
+            ;
+        } else {
             tbl_lpm_ubpf59.apply();
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             Check_src_ip_0.apply();
         }
     }

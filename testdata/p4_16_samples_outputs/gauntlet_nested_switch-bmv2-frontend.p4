@@ -49,7 +49,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
                 }
             }
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             h.eth_hdr.eth_type = 16w1;
         }
     }

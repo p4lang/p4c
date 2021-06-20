@@ -124,11 +124,15 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             } else {
                 tbl_act_1.apply();
             }
-            if (!hasExited) {
+            if (hasExited) {
+                ;
+            } else {
                 tbl_gauntlet_exit_combination_19bmv2l43_0.apply();
             }
         }
-        if (!hasExited) {
+        if (hasExited) {
+            ;
+        } else {
             if (tmp) {
                 tbl_gauntlet_exit_combination_19bmv2l43_1.apply();
             } else {

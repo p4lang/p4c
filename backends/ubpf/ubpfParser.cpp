@@ -200,10 +200,10 @@ UBPFStateTranslationVisitor::compileExtractField(
         if (wordsToRead <= 1) {
             helper = "load_byte";
             loadSize = 8;
-        } else if (widthToExtract <= 16)  {
+        } else if (wordsToRead <= 2)  {
             helper = "load_half";
             loadSize = 16;
-        } else if (widthToExtract <= 32) {
+        } else if (wordsToRead <= 4) {
             helper = "load_word";
             loadSize = 32;
         } else {

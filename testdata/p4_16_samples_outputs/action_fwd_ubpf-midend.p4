@@ -69,7 +69,9 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         } else {
             tbl_action_fwd_ubpf26.apply();
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             tbl_action_fwd_ubpf28.apply();
         }
     }

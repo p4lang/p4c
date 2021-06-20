@@ -73,7 +73,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         tbl_act.apply();
         tbl_call_action.apply();
         tbl_gauntlet_nested_switchbmv2l38.apply();
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             tbl_gauntlet_nested_switchbmv2l47.apply();
         }
     }

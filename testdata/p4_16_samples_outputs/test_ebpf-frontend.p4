@@ -64,11 +64,15 @@ control pipe(inout Headers_t headers, out bool pass) {
     apply {
         @name("pipe.hasReturned") bool hasReturned = false;
         pass = true;
-        if (!headers.ipv4.isValid()) {
+        if (headers.ipv4.isValid()) {
+            ;
+        } else {
             pass = false;
             hasReturned = true;
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             Check_src_ip_0.apply();
         }
     }

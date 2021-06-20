@@ -31,7 +31,9 @@ control c(out bit<16> b) {
     }
     apply {
         tbl_act.apply();
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             tbl_function4.apply();
         }
         tbl_function9.apply();

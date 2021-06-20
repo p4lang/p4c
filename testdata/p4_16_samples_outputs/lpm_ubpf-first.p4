@@ -63,7 +63,9 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         default_action = Reject(32w0);
     }
     apply {
-        if (!headers.ipv4.isValid()) {
+        if (headers.ipv4.isValid()) {
+            ;
+        } else {
             headers.ipv4.setInvalid();
             headers.ipv4.setValid();
             mark_to_drop();

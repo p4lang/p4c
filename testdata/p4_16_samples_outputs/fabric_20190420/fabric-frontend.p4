@@ -672,10 +672,14 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
             hdr.gtpu_ipv4.setInvalid();
             hdr.gtpu_udp.setInvalid();
             @name("FabricIngress.spgw_normalizer.hasReturned") bool spgw_normalizer_hasReturned = false;
-            if (!hdr.gtpu.isValid()) {
+            if (hdr.gtpu.isValid()) {
+                ;
+            } else {
                 spgw_normalizer_hasReturned = true;
             }
-            if (!spgw_normalizer_hasReturned) {
+            if (spgw_normalizer_hasReturned) {
+                ;
+            } else {
                 hdr.gtpu_ipv4 = hdr.ipv4;
                 hdr.ipv4 = hdr.inner_ipv4;
                 hdr.gtpu_udp = hdr.udp;
@@ -698,7 +702,9 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
             fabric_metadata.vlan_pri = hdr.vlan_tag.pri;
             fabric_metadata.vlan_cfi = hdr.vlan_tag.cfi;
         }
-        if (!hdr.mpls.isValid()) {
+        if (hdr.mpls.isValid()) {
+            ;
+        } else {
             fabric_metadata.mpls_ttl = 8w65;
         }
         filtering_ingress_port_vlan.apply();
@@ -706,7 +712,9 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         {
             @name("FabricIngress.spgw_ingress.hasReturned_0") bool spgw_ingress_hasReturned = false;
             if (hdr.gtpu.isValid()) {
-                if (!spgw_ingress_s1u_filter_table.apply().hit) {
+                if (spgw_ingress_s1u_filter_table.apply().hit) {
+                    ;
+                } else {
                     mark_to_drop(standard_metadata);
                 }
                 fabric_metadata.spgw.direction = 2w1;
@@ -717,21 +725,25 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
                 fabric_metadata.spgw.direction = 2w0;
                 spgw_ingress_hasReturned = true;
             }
-            if (!spgw_ingress_hasReturned) {
+            if (spgw_ingress_hasReturned) {
+                ;
+            } else {
                 fabric_metadata.spgw.ipv4_len = hdr.ipv4.total_len;
             }
         }
-        if (!fabric_metadata.skip_forwarding) {
-            if (fabric_metadata.fwd_type == 3w0) {
-                forwarding_bridging.apply();
-            } else if (fabric_metadata.fwd_type == 3w1) {
-                forwarding_mpls.apply();
-            } else if (fabric_metadata.fwd_type == 3w2) {
-                forwarding_routing_v4.apply();
-            }
+        if (fabric_metadata.skip_forwarding) {
+            ;
+        } else if (fabric_metadata.fwd_type == 3w0) {
+            forwarding_bridging.apply();
+        } else if (fabric_metadata.fwd_type == 3w1) {
+            forwarding_mpls.apply();
+        } else if (fabric_metadata.fwd_type == 3w2) {
+            forwarding_routing_v4.apply();
         }
         acl_acl.apply();
-        if (!fabric_metadata.skip_next) {
+        if (fabric_metadata.skip_next) {
+            ;
+        } else {
             next_xconnect.apply();
             next_hashed.apply();
             next_multicast.apply();
@@ -841,10 +853,10 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
         } else {
             egress_next_set_mpls_0();
         }
-        if (!egress_next_egress_vlan.apply().hit) {
-            if (fabric_metadata.vlan_id != 12w4094) {
-                egress_next_push_vlan_0();
-            }
+        if (egress_next_egress_vlan.apply().hit) {
+            ;
+        } else if (fabric_metadata.vlan_id != 12w4094) {
+            egress_next_push_vlan_0();
         }
         if (hdr.mpls.isValid()) {
             hdr.mpls.ttl = hdr.mpls.ttl + 8w255;

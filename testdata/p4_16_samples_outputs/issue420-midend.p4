@@ -36,7 +36,7 @@ control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_m
     }
     @name("cIngress.foo") action foo(@name("bar") bit<16> bar) {
         hdr.ethernet.srcAddr = (bar == 16w0xf00d ? 48w0xdeadbeeff00d : hdr.ethernet.srcAddr);
-        hdr.ethernet.srcAddr = (bar != 16w0xf00d ? 48w0x215241100ff2 : hdr.ethernet.srcAddr);
+        hdr.ethernet.srcAddr = (bar == 16w0xf00d ? hdr.ethernet.srcAddr : 48w0x215241100ff2);
     }
     @name("cIngress.tbl1") table tbl1_0 {
         key = {

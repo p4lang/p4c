@@ -67,7 +67,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             default: {
             }
         }
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             exit;
         }
     }

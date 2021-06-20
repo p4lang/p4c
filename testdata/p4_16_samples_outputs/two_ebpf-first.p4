@@ -67,7 +67,9 @@ control pipe(inout Headers_t headers, out bool pass) {
     Check() c1;
     apply {
         pass = true;
-        if (!headers.ipv4.isValid()) {
+        if (headers.ipv4.isValid()) {
+            ;
+        } else {
             pass = false;
             return;
         }
