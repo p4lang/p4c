@@ -3270,10 +3270,6 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         auto prop = findContext<IR::Property>();
         if (prop != nullptr && prop->name == IR::TableProperties::actionsPropertyName)
             inActionsList = true;
-        if (findContext<IR::Key>()) {
-            typeError("%1%: Action calls are not allowed in table keys", expression);
-            return expression;
-        }
         return actionCall(inActionsList, expression);
     } else {
         // Constant-fold minSizeInBits, minSizeInBytes
