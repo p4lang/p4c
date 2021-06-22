@@ -164,6 +164,20 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
         externDecls.push_back(st);
     }
 
+    /* Pushing Counter declarations */
+    for (auto kv : *cnt_map) {
+        auto s = kv.first;
+        auto st = new IR::DpdkExternDeclaration(s->name, s->annotations, s->type, s->arguments);
+        externDecls.push_back(st);
+    }
+
+    /* Pushing Meter declarations */
+    for (auto kv : *met_map) {
+        auto s = kv.first;
+        auto st = new IR::DpdkExternDeclaration(s->name, s->annotations, s->type, s->arguments);
+        externDecls.push_back(st);
+    }
+
     return new IR::DpdkAsmProgram(
         headerType, structType, externDecls, ingress_converter->getActions(),
         ingress_converter->getTables(), statements, collector->get_globals());

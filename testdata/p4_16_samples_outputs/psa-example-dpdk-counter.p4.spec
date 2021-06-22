@@ -1,11 +1,14 @@
 
+
+
+
 struct ethernet_t {
 	bit<48> dstAddr
 	bit<48> srcAddr
 	bit<16> etherType
 }
 
-struct user_meta_t {
+struct EMPTY {
 	bit<32> psa_ingress_parser_input_metadata_ingress_port
 	bit<32> psa_ingress_parser_input_metadata_packet_path
 	bit<32> psa_egress_parser_input_metadata_egress_port
@@ -31,11 +34,8 @@ struct user_meta_t {
 	bit<8> psa_egress_output_metadata_clone
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
-	bit<16> local_metadata_data
-	bit<16> Ingress_tmp_0
-	bit<16> Ingress_tmp_1
 }
-metadata instanceof user_meta_t
+metadata instanceof EMPTY
 
 header ethernet instanceof ethernet_t
 
@@ -59,44 +59,22 @@ struct psa_egress_deparser_input_metadata_t {
 	bit<32> egress_port
 }
 
-action NoAction args none {
-	return
-}
+regarray counter2_0 size 0x400 initval 0x0
 
-action execute args none {
-	jmpeq LABEL_1FALSE m.local_metadata_data 0x0
-	LABEL_1TRUE :	mov m.Ingress_tmp_0 0x0
-	jmp LABEL_1END
-	LABEL_1FALSE :	mov m.Ingress_tmp_0 0x1
-	LABEL_1END :	mov m.local_metadata_data m.Ingress_tmp_0
-	add m.local_metadata_data 0x1
-	return
-}
+regarray counter1_0 size 0x400 initval 0x0
 
-table tbl {
-	key {
-		h.ethernet.srcAddr exact
-	}
-	actions {
-		NoAction
-		execute
-	}
-	default_action NoAction args none 
-	size 0x10000
-}
+regarray counter0_0_packets size 0x400 initval 0x0
 
+regarray counter0_0_bytes size 0x400 initval 0x0
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
-	jmpeq LABEL_0FALSE m.local_metadata_data 0x0
-	mov m.Ingress_tmp_1 0x2
-	jmp LABEL_0END
-	LABEL_0FALSE :	mov m.Ingress_tmp_1 0x5
-	LABEL_0END :	mov m.local_metadata_data m.Ingress_tmp_1
-	add m.local_metadata_data 0x5
-	table tbl
+	regadd counter0_0_packets 0x400 0x14
+	regadd counter0_0_bytes 0x400 1
+	regadd counter1_0 0x200 0x40
+	regadd counter2_0 0x400 1
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP : drop
