@@ -3392,6 +3392,14 @@ const IR::Node* TypeInference::postorder(IR::MethodCallExpression* expression) {
         if (mi->is<ExternMethod>())
             checkCorelibMethods(mi->to<ExternMethod>());
 
+        auto bi = mi->to<BuiltInMethod>();
+        if ((findContext<IR::SelectCase>()) &&
+            (!bi || (bi->name == IR::Type_Stack::pop_front ||
+                     bi->name == IR::Type_Stack::push_front))) {
+            typeError("%1%: no function calls allowed in this context", expression);
+            return expression;
+        }
+
         return result;
     }
     return expression;
