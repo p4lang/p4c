@@ -40,6 +40,7 @@ OPTION (ENABLE_PROTOBUF_STATIC "Link against Protobuf statically" ON)
 OPTION (ENABLE_GC "Use libgc" ON)
 OPTION (ENABLE_MULTITHREAD "Use multithreading" OFF)
 OPTION (ENABLE_GMP "Use GMP library" ON)
+OPTION (BUILD_STATIC_RELEASE "Build a statically linked release binary" OFF)
 
 set (P4C_DRIVER_NAME "p4c" CACHE STRING "Customize the name of the driver script")
 
@@ -79,6 +80,21 @@ include(UnifiedBuild)
 set (P4C_CXX_FLAGS "")
 set (P4C_LIB_DEPS)
 
+# set the required options for a static release build
+if (BUILD_STATIC_RELEASE)
+  message(STATUS "Building static release binaries")
+  set(BUILD_SHARED_LIBS OFF)
+  set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
+  # Link Boost statically
+  set(Boost_USE_STATIC_LIBS ON)
+  set(Boost_USE_STATIC_RUNTIME ON)
+  # Set the static variable
+  set(P4C_STATIC_BUILD STATIC)
+  # Do not bring in dynamic libstdcc and libgcc
+  set(CMAKE_EXE_LINKER_FLAGS "-static -static-libgcc -static-libstdc++ -Wl,-z,muldefs")
+  add_definitions(-DP4C_STATIC_BUILD)
+endif ()
+
 # required tools and libraries
 find_package (PythonInterp 3 REQUIRED)
 find_package (FLEX 2.0 REQUIRED)
@@ -102,7 +118,7 @@ find_package (Boost REQUIRED COMPONENTS iostreams)
 # otherwise ordered_map code tries to use boost::get (graph)
 add_definitions ("-DBOOST_NO_ARGUMENT_DEPENDENT_LOOKUP")
 if (ENABLE_GC)
-  find_package (LibGc 7.2.0 REQUIRED)
+  find_package (LibGc 7.4.2 REQUIRED)
   set (HAVE_LIBGC 1)
 endif ()
 if (ENABLE_MULTITHREAD)
@@ -193,10 +209,16 @@ add_cxx_compiler_option ("-Wextra")
 add_cxx_compiler_option ("-Wno-overloaded-virtual")
 add_cxx_compiler_option ("-Wno-deprecated")
 add_cxx_compiler_option ("-Wno-deprecated-declarations")
+# Enable/disable runtime exceptions on nullpointer dereferencing
 # add_cxx_compiler_option ("-fsanitize=null")
 
 # If we're on GCC, use the gold linker if available.
 if(CMAKE_COMPILER_IS_GNUCC)
+    # We want to optimize the binary size for a static release binary.
+    # This only works with modern versions of GCC.
+    if (BUILD_STATIC_RELEASE AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 8.0)
+      add_cxx_compiler_option ("-flto")
+    endif ()
     execute_process(
             COMMAND ${CMAKE_C_COMPILER} -fuse-ld=gold -Wl,--version
             ERROR_QUIET OUTPUT_VARIABLE LD_VERSION)
