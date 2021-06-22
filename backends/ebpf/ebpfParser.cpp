@@ -122,7 +122,7 @@ bool StateTranslationVisitor::preorder(const IR::ParserState* parserState) {
 
 bool StateTranslationVisitor::preorder(const IR::SelectExpression* expression) {
     hasDefault = false;
-    BUG_CHECK(expression->select->components.size() == 1
+    BUG_CHECK(expression->select->components.size() == 1,
               "%1%: tuple not eliminated in select",
               expression->select);
     builder->emitIndent();
