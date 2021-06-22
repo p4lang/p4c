@@ -159,6 +159,9 @@ class ControlConverter : public Inspector {
                 ::error(ErrorType::ERR_EXPECTED, "%1%: expected a number", sz);
             }
         }
+        if (auto entries = table->getEntries()) {
+            size = entries->entries.size();
+        }
         if (size == 0)
             size = BMV2::TableAttributes::defaultTableSize;
 
