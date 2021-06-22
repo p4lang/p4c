@@ -122,12 +122,9 @@ bool StateTranslationVisitor::preorder(const IR::ParserState* parserState) {
 
 bool StateTranslationVisitor::preorder(const IR::SelectExpression* expression) {
     hasDefault = false;
-    if (expression->select->components.size() != 1) {
-        // TODO: this does not handle correctly tuples
-        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                "%1%: only supporting a single argument for select", expression->select);
-        return false;
-    }
+    BUG_CHECK(expression->select->components.size() == 1
+              "%1%: tuple not eliminated in select",
+              expression->select);
     builder->emitIndent();
     builder->append("switch (");
     visit(expression->select);
