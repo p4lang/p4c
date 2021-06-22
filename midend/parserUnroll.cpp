@@ -347,7 +347,7 @@ class ParserSymbolicInterpreter {
     /// Returns pointer to genereted statement if execution completes successfully,
     /// and 'nullptr' if an error occurred.
     const IR::StatOrDecl* executeStatement(ParserStateInfo* state, const IR::StatOrDecl* sord,
-                          ValueMap* valueMap) {
+                                           ValueMap* valueMap) {
         const IR::StatOrDecl* newSord = nullptr;
         ExpressionEvaluator ev(refMap, typeMap, valueMap);
 
@@ -386,7 +386,7 @@ class ParserSymbolicInterpreter {
                                              const IR::Expression*>;
 
     EvaluationSelectResult evaluateSelect(ParserStateInfo* state,
-                                   ValueMap* valueMap) {
+                                          ValueMap* valueMap) {
         const IR::Expression* newSelect = nullptr;
         auto select = state->state->selectExpression;
         if (select == nullptr)

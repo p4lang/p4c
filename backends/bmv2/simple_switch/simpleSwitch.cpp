@@ -803,6 +803,36 @@ void ExternConverter_action_selector::convertExternInstance(
     ctxt->action_profiles->append(action_profile);
 }
 
+namespace {
+/// Converts expr into a ListExpression or returns nullptr if not
+/// possible
+static const IR::ListExpression* convertToList(const IR::Expression* expr, P4::TypeMap* typeMap) {
+    if (auto l = expr->to<IR::ListExpression>())
+        return l;
+
+    // expand it into a list
+    auto list = new IR::ListExpression({});
+    auto type = typeMap->getType(expr, true);
+    auto st = type->to<IR::Type_StructLike>();
+    if (!st) {
+        return nullptr;
+    }
+    if (auto se = expr->to<IR::StructExpression>()) {
+        for (auto f : se->components)
+            list->push_back(f->expression);
+    } else {
+        for (auto f : st->fields) {
+            auto e = new IR::Member(expr, f->name);
+            auto ftype = typeMap->getType(f);
+            typeMap->setType(e, ftype);
+            list->push_back(e);
+        }
+    }
+    typeMap->setType(list, type);
+    return list;
+}
+}  // namespace
+
 Util::IJson* ExternConverter_log_msg::convertExternFunction(
     ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
     const IR::MethodCallExpression* mc, const IR::StatOrDecl* s,
@@ -822,25 +852,21 @@ Util::IJson* ExternConverter_log_msg::convertExternFunction(
         auto arg1 = mc->arguments->at(1)->expression;
         // this must be a list expression, with all components
         // evaluating to integral types.
-        auto argType = ctxt->typeMap->getType(arg1);
-        if (auto ts = argType->to<IR::Type_List>()) {
-            for (auto tf : ts->components) {
-                if (!tf->is<IR::Type_Bits>() && !tf->is<IR::Type_Boolean>()) {
-                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                            "%1%: only integral values supported for logged values", mc);
-                    return primitive;
-                }
-            }
-        } else {
+        auto le = convertToList(arg1, ctxt->typeMap);
+        if (!le) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "%1%: Second argument must be a list expression: %2%", mc, arg1);
+                     "%1%: Second argument must be a list expression: %2%", mc, arg1);
             return primitive;
         }
 
-        auto le = arg1->to<IR::ListExpression>();
-        CHECK_NULL(le);
         auto arr = new Util::JsonArray();
         for (auto v : le->components) {
+            auto tf = ctxt->typeMap->getType(v);
+            if (!tf->is<IR::Type_Bits>() && !tf->is<IR::Type_Boolean>()) {
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "%1%: only integral values supported for logged values", mc);
+                return primitive;
+            }
             auto val = ctxt->conv->convert(v, false, true, true);
             arr->append(val);
         }
@@ -871,22 +897,10 @@ SimpleSwitchBackend::createCalculation(cstring algo, const IR::Expression* field
     if (sourcePositionNode != nullptr)
         calc->emplace_non_null("source_info", sourcePositionNode->sourceInfoJsonObj());
     calc->emplace("algo", algo);
-    if (!fields->is<IR::ListExpression>()) {
-        // expand it into a list
-        auto list = new IR::ListExpression({});
-        auto type = typeMap->getType(fields, true);
-        if (!type->is<IR::Type_StructLike>()) {
-            modelError("%1%: expected a struct", fields);
-            return calcName;
-        }
-        for (auto f : type->to<IR::Type_StructLike>()->fields) {
-            auto e = new IR::Member(fields, f->name);
-            auto ftype = typeMap->getType(f);
-            typeMap->setType(e, ftype);
-            list->push_back(e);
-        }
-        fields = list;
-        typeMap->setType(fields, type);
+    fields = convertToList(fields, typeMap);
+    if (!fields) {
+        modelError("%1%: expected a struct", fields);
+        return calcName;
     }
     auto jright = conv->convertWithConstantWidths(fields);
     if (withPayload) {
@@ -914,6 +928,7 @@ class EnsureExpressionIsSimple : public Inspector {
                 "%1%: Computations are not supported in %2%", expression, block);
         return false;
     }
+    bool preorder(const IR::StructExpression*) override { return true; }
     bool preorder(const IR::PathExpression*) override { return true; }
     bool preorder(const IR::Member*) override { return true; }
     bool preorder(const IR::ListExpression*) override { return true; }

@@ -27,7 +27,7 @@ void ComplexValues::explode(cstring prefix, const IR::Type_Struct* type,
         cstring fname = prefix + "_" + f->name;
         auto ftype = typeMap->getType(f, true);
         if (isNestedStruct(ftype)) {
-            auto submap = new FieldsMap();
+            auto submap = new FieldsMap(ftype);
             map->members.emplace(f->name.name, submap);
             explode(fname, ftype->to<IR::Type_Struct>(), submap, result);
         } else {
@@ -50,7 +50,7 @@ const IR::Node* RemoveNestedStructs::postorder(IR::Declaration_Variable* decl) {
     BUG_CHECK(decl->annotations->size() == 0 ||
               (decl->annotations->size() == 1 && decl->annotations->getSingle("name") != nullptr),
               "%1%: don't know how to handle variable annotations other than @name", decl);
-    auto map = new ComplexValues::FieldsMap();
+    auto map = new ComplexValues::FieldsMap(type);
     values->values.emplace(getOriginal<IR::Declaration_Variable>(), map);
     if (findContext<IR::Function>()) {
         auto result = new IR::IndexedVector<IR::StatOrDecl>();

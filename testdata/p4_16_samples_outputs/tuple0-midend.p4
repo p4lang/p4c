@@ -12,7 +12,7 @@ control c() {
         x_0.f0 = 32w10;
         x_0.f1 = false;
         f(x_0);
-        f({ 32w20, true });
+        f((tuple_0){f0 = 32w20,f1 = true});
     }
     @hidden table tbl_tuple0l23 {
         actions = {

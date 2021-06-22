@@ -146,6 +146,7 @@ class ExpressionEvaluator : public Inspector {
     bool preorder(const IR::ArrayIndex* expression) override;
     void postorder(const IR::ArrayIndex* expression) override;
     void postorder(const IR::ListExpression* expression) override;
+    void postorder(const IR::StructExpression* expression) override;
     void postorder(const IR::MethodCallExpression* expression) override;
 
  public:
@@ -364,11 +365,9 @@ class SymbolicEnum final : public ScalarValue {
 };
 
 class SymbolicStruct : public SymbolicValue {
- protected:
+ public:
     explicit SymbolicStruct(const IR::Type_StructLike* type) :
             SymbolicValue(type) { CHECK_NULL(type); }
-
- public:
     std::map<cstring, SymbolicValue*> fieldValue;
     SymbolicStruct(const IR::Type_StructLike* type, bool uninitialized,
                    const SymbolicValueFactory* factory);

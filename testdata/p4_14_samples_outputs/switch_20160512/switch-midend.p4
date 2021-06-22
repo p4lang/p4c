@@ -3143,16 +3143,16 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     }
     @name(".egress_mirror") action _egress_mirror_0(@name("session_id") bit<32> session_id) {
         meta._i2e_metadata_mirror_session_id36 = (bit<16>)session_id;
-        clone3<tuple_0>(CloneType.E2E, session_id, { meta._i2e_metadata_ingress_tstamp35, (bit<16>)session_id });
+        clone3<tuple_0>(CloneType.E2E, session_id, (tuple_0){f0 = meta._i2e_metadata_ingress_tstamp35,f1 = (bit<16>)session_id});
     }
     @name(".egress_mirror_drop") action _egress_mirror_drop_0(@name("session_id") bit<32> session_id_6) {
         meta._i2e_metadata_mirror_session_id36 = (bit<16>)session_id_6;
-        clone3<tuple_0>(CloneType.E2E, session_id_6, { meta._i2e_metadata_ingress_tstamp35, (bit<16>)session_id_6 });
+        clone3<tuple_0>(CloneType.E2E, session_id_6, (tuple_0){f0 = meta._i2e_metadata_ingress_tstamp35,f1 = (bit<16>)session_id_6});
         mark_to_drop(standard_metadata);
     }
     @name(".egress_redirect_to_cpu") action _egress_redirect_to_cpu_0(@name("reason_code") bit<16> reason_code_0) {
         meta._fabric_metadata_reason_code28 = reason_code_0;
-        clone3<tuple_1>(CloneType.E2E, 32w250, { meta._ingress_metadata_bd42, meta._ingress_metadata_ifindex38, reason_code_0, meta._ingress_metadata_ingress_port37 });
+        clone3<tuple_1>(CloneType.E2E, 32w250, (tuple_1){f0 = meta._ingress_metadata_bd42,f1 = meta._ingress_metadata_ifindex38,f2 = reason_code_0,f3 = meta._ingress_metadata_ingress_port37});
         mark_to_drop(standard_metadata);
     }
     @name(".egress_acl") table _egress_acl {
@@ -3811,7 +3811,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         meta._int_metadata_insert_byte_cnt50 = meta._int_metadata_gpe_int_hdr_len51 << 2;
         meta._int_metadata_i2e_sink54 = 1w1;
         meta._i2e_metadata_mirror_session_id36 = (bit<16>)mirror_id;
-        clone3<tuple_2>(CloneType.I2E, mirror_id, { 1w1, (bit<16>)mirror_id });
+        clone3<tuple_2>(CloneType.I2E, mirror_id, (tuple_2){f0 = 1w1,f1 = (bit<16>)mirror_id});
         hdr.int_header.setInvalid();
         hdr.int_val[0].setInvalid();
         hdr.int_val[1].setInvalid();
@@ -4501,7 +4501,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         _sflow_ingress_session_pkt_counter.count();
         meta._fabric_metadata_reason_code28 = reason_code_5;
         meta._i2e_metadata_mirror_session_id36 = (bit<16>)sflow_i2e_mirror_id;
-        clone3<tuple_3>(CloneType.I2E, sflow_i2e_mirror_id, { { meta._ingress_metadata_bd42, meta._ingress_metadata_ifindex38, reason_code_5, meta._ingress_metadata_ingress_port37 }, meta._sflow_metadata_sflow_session_id136, (bit<16>)sflow_i2e_mirror_id });
+        clone3<tuple_3>(CloneType.I2E, sflow_i2e_mirror_id, (tuple_3){f0 = (tuple_1){f0 = meta._ingress_metadata_bd42,f1 = meta._ingress_metadata_ifindex38,f2 = reason_code_5,f3 = meta._ingress_metadata_ingress_port37},f1 = meta._sflow_metadata_sflow_session_id136,f2 = (bit<16>)sflow_i2e_mirror_id});
     }
     @name(".sflow_ing_take_sample") table _sflow_ing_take_sample {
         actions = {
@@ -4685,7 +4685,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".acl_mirror") action _acl_mirror_1(@name("session_id") bit<32> session_id_8, @name("acl_stats_index") bit<14> acl_stats_index_20, @name("acl_meter_index") bit<16> acl_meter_index_11) {
         meta._i2e_metadata_mirror_session_id36 = (bit<16>)session_id_8;
         meta._i2e_metadata_ingress_tstamp35 = (bit<32>)standard_metadata.ingress_global_timestamp;
-        clone3<tuple_0>(CloneType.I2E, session_id_8, { (bit<32>)standard_metadata.ingress_global_timestamp, (bit<16>)session_id_8 });
+        clone3<tuple_0>(CloneType.I2E, session_id_8, (tuple_0){f0 = (bit<32>)standard_metadata.ingress_global_timestamp,f1 = (bit<16>)session_id_8});
         meta._acl_metadata_acl_stats_index11 = acl_stats_index_20;
         meta._meter_metadata_meter_index107 = acl_meter_index_11;
     }
@@ -4760,14 +4760,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".acl_mirror") action _acl_mirror_2(@name("session_id") bit<32> session_id_9, @name("acl_stats_index") bit<14> acl_stats_index_27, @name("acl_meter_index") bit<16> acl_meter_index_18) {
         meta._i2e_metadata_mirror_session_id36 = (bit<16>)session_id_9;
         meta._i2e_metadata_ingress_tstamp35 = (bit<32>)standard_metadata.ingress_global_timestamp;
-        clone3<tuple_0>(CloneType.I2E, session_id_9, { (bit<32>)standard_metadata.ingress_global_timestamp, (bit<16>)session_id_9 });
+        clone3<tuple_0>(CloneType.I2E, session_id_9, (tuple_0){f0 = (bit<32>)standard_metadata.ingress_global_timestamp,f1 = (bit<16>)session_id_9});
         meta._acl_metadata_acl_stats_index11 = acl_stats_index_27;
         meta._meter_metadata_meter_index107 = acl_meter_index_18;
     }
     @name(".acl_mirror") action _acl_mirror_4(@name("session_id") bit<32> session_id_10, @name("acl_stats_index") bit<14> acl_stats_index_28, @name("acl_meter_index") bit<16> acl_meter_index_19) {
         meta._i2e_metadata_mirror_session_id36 = (bit<16>)session_id_10;
         meta._i2e_metadata_ingress_tstamp35 = (bit<32>)standard_metadata.ingress_global_timestamp;
-        clone3<tuple_0>(CloneType.I2E, session_id_10, { (bit<32>)standard_metadata.ingress_global_timestamp, (bit<16>)session_id_10 });
+        clone3<tuple_0>(CloneType.I2E, session_id_10, (tuple_0){f0 = (bit<32>)standard_metadata.ingress_global_timestamp,f1 = (bit<16>)session_id_10});
         meta._acl_metadata_acl_stats_index11 = acl_stats_index_28;
         meta._meter_metadata_meter_index107 = acl_meter_index_19;
     }
@@ -5403,15 +5403,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         default_action = NoAction_208();
     }
     @name(".compute_lkp_ipv4_hash") action _compute_lkp_ipv4_hash_0() {
-        hash<bit<16>, bit<16>, tuple_4, bit<32>>(meta._hash_metadata_hash132, HashAlgorithm.crc16, 16w0, { meta._ipv4_metadata_lkp_ipv4_sa56, meta._ipv4_metadata_lkp_ipv4_da57, meta._l3_metadata_lkp_ip_proto82, meta._l3_metadata_lkp_l4_sport85, meta._l3_metadata_lkp_l4_dport86 }, 32w65536);
-        hash<bit<16>, bit<16>, tuple_5, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, { meta._l2_metadata_lkp_mac_sa65, meta._l2_metadata_lkp_mac_da66, meta._ipv4_metadata_lkp_ipv4_sa56, meta._ipv4_metadata_lkp_ipv4_da57, meta._l3_metadata_lkp_ip_proto82, meta._l3_metadata_lkp_l4_sport85, meta._l3_metadata_lkp_l4_dport86 }, 32w65536);
+        hash<bit<16>, bit<16>, tuple_4, bit<32>>(meta._hash_metadata_hash132, HashAlgorithm.crc16, 16w0, (tuple_4){f0 = meta._ipv4_metadata_lkp_ipv4_sa56,f1 = meta._ipv4_metadata_lkp_ipv4_da57,f2 = meta._l3_metadata_lkp_ip_proto82,f3 = meta._l3_metadata_lkp_l4_sport85,f4 = meta._l3_metadata_lkp_l4_dport86}, 32w65536);
+        hash<bit<16>, bit<16>, tuple_5, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, (tuple_5){f0 = meta._l2_metadata_lkp_mac_sa65,f1 = meta._l2_metadata_lkp_mac_da66,f2 = meta._ipv4_metadata_lkp_ipv4_sa56,f3 = meta._ipv4_metadata_lkp_ipv4_da57,f4 = meta._l3_metadata_lkp_ip_proto82,f5 = meta._l3_metadata_lkp_l4_sport85,f6 = meta._l3_metadata_lkp_l4_dport86}, 32w65536);
     }
     @name(".compute_lkp_ipv6_hash") action _compute_lkp_ipv6_hash_0() {
-        hash<bit<16>, bit<16>, tuple_6, bit<32>>(meta._hash_metadata_hash132, HashAlgorithm.crc16, 16w0, { meta._ipv6_metadata_lkp_ipv6_sa60, meta._ipv6_metadata_lkp_ipv6_da61, meta._l3_metadata_lkp_ip_proto82, meta._l3_metadata_lkp_l4_sport85, meta._l3_metadata_lkp_l4_dport86 }, 32w65536);
-        hash<bit<16>, bit<16>, tuple_7, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, { meta._l2_metadata_lkp_mac_sa65, meta._l2_metadata_lkp_mac_da66, meta._ipv6_metadata_lkp_ipv6_sa60, meta._ipv6_metadata_lkp_ipv6_da61, meta._l3_metadata_lkp_ip_proto82, meta._l3_metadata_lkp_l4_sport85, meta._l3_metadata_lkp_l4_dport86 }, 32w65536);
+        hash<bit<16>, bit<16>, tuple_6, bit<32>>(meta._hash_metadata_hash132, HashAlgorithm.crc16, 16w0, (tuple_6){f0 = meta._ipv6_metadata_lkp_ipv6_sa60,f1 = meta._ipv6_metadata_lkp_ipv6_da61,f2 = meta._l3_metadata_lkp_ip_proto82,f3 = meta._l3_metadata_lkp_l4_sport85,f4 = meta._l3_metadata_lkp_l4_dport86}, 32w65536);
+        hash<bit<16>, bit<16>, tuple_7, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, (tuple_7){f0 = meta._l2_metadata_lkp_mac_sa65,f1 = meta._l2_metadata_lkp_mac_da66,f2 = meta._ipv6_metadata_lkp_ipv6_sa60,f3 = meta._ipv6_metadata_lkp_ipv6_da61,f4 = meta._l3_metadata_lkp_ip_proto82,f5 = meta._l3_metadata_lkp_l4_sport85,f6 = meta._l3_metadata_lkp_l4_dport86}, 32w65536);
     }
     @name(".compute_lkp_non_ip_hash") action _compute_lkp_non_ip_hash_0() {
-        hash<bit<16>, bit<16>, tuple_8, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, { meta._ingress_metadata_ifindex38, meta._l2_metadata_lkp_mac_sa65, meta._l2_metadata_lkp_mac_da66, meta._l2_metadata_lkp_mac_type68 }, 32w65536);
+        hash<bit<16>, bit<16>, tuple_8, bit<32>>(meta._hash_metadata_hash233, HashAlgorithm.crc16, 16w0, (tuple_8){f0 = meta._ingress_metadata_ifindex38,f1 = meta._l2_metadata_lkp_mac_sa65,f2 = meta._l2_metadata_lkp_mac_da66,f3 = meta._l2_metadata_lkp_mac_type68}, 32w65536);
     }
     @name(".computed_two_hashes") action _computed_two_hashes_0() {
         meta._hash_metadata_entropy_hash34 = meta._hash_metadata_hash233;
@@ -5761,16 +5761,16 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".copy_to_cpu_with_reason") action _copy_to_cpu_with_reason_0(@name("reason_code") bit<16> reason_code_6) {
         meta._fabric_metadata_reason_code28 = reason_code_6;
-        clone3<tuple_1>(CloneType.I2E, 32w250, { meta._ingress_metadata_bd42, meta._ingress_metadata_ifindex38, reason_code_6, meta._ingress_metadata_ingress_port37 });
+        clone3<tuple_1>(CloneType.I2E, 32w250, (tuple_1){f0 = meta._ingress_metadata_bd42,f1 = meta._ingress_metadata_ifindex38,f2 = reason_code_6,f3 = meta._ingress_metadata_ingress_port37});
     }
     @name(".redirect_to_cpu") action _redirect_to_cpu_0(@name("reason_code") bit<16> reason_code_7) {
         meta._fabric_metadata_reason_code28 = reason_code_7;
-        clone3<tuple_1>(CloneType.I2E, 32w250, { meta._ingress_metadata_bd42, meta._ingress_metadata_ifindex38, reason_code_7, meta._ingress_metadata_ingress_port37 });
+        clone3<tuple_1>(CloneType.I2E, 32w250, (tuple_1){f0 = meta._ingress_metadata_bd42,f1 = meta._ingress_metadata_ifindex38,f2 = reason_code_7,f3 = meta._ingress_metadata_ingress_port37});
         mark_to_drop(standard_metadata);
         meta._fabric_metadata_dst_device29 = 8w0;
     }
     @name(".copy_to_cpu") action _copy_to_cpu_0() {
-        clone3<tuple_1>(CloneType.I2E, 32w250, { meta._ingress_metadata_bd42, meta._ingress_metadata_ifindex38, meta._fabric_metadata_reason_code28, meta._ingress_metadata_ingress_port37 });
+        clone3<tuple_1>(CloneType.I2E, 32w250, (tuple_1){f0 = meta._ingress_metadata_bd42,f1 = meta._ingress_metadata_ifindex38,f2 = meta._fabric_metadata_reason_code28,f3 = meta._ingress_metadata_ingress_port37});
     }
     @name(".drop_packet") action _drop_packet_0() {
         mark_to_drop(standard_metadata);
@@ -5780,7 +5780,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         mark_to_drop(standard_metadata);
     }
     @name(".negative_mirror") action _negative_mirror_0(@name("session_id") bit<32> session_id_11) {
-        clone3<tuple_9>(CloneType.I2E, session_id_11, { meta._ingress_metadata_ifindex38, meta._ingress_metadata_drop_reason44 });
+        clone3<tuple_9>(CloneType.I2E, session_id_11, (tuple_9){f0 = meta._ingress_metadata_ifindex38,f1 = meta._ingress_metadata_drop_reason44});
         mark_to_drop(standard_metadata);
     }
     @name(".drop_stats") table _drop_stats {
@@ -6192,15 +6192,15 @@ struct tuple_10 {
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        verify_checksum<tuple_10, bit<16>>(hdr.inner_ipv4.ihl == 4w5, { hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr }, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
-        verify_checksum<tuple_10, bit<16>>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        verify_checksum<tuple_10, bit<16>>(hdr.inner_ipv4.ihl == 4w5, (tuple_10){f0 = hdr.inner_ipv4.version,f1 = hdr.inner_ipv4.ihl,f2 = hdr.inner_ipv4.diffserv,f3 = hdr.inner_ipv4.totalLen,f4 = hdr.inner_ipv4.identification,f5 = hdr.inner_ipv4.flags,f6 = hdr.inner_ipv4.fragOffset,f7 = hdr.inner_ipv4.ttl,f8 = hdr.inner_ipv4.protocol,f9 = hdr.inner_ipv4.srcAddr,f10 = hdr.inner_ipv4.dstAddr}, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
+        verify_checksum<tuple_10, bit<16>>(hdr.ipv4.ihl == 4w5, (tuple_10){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum<tuple_10, bit<16>>(hdr.inner_ipv4.ihl == 4w5, { hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr }, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
-        update_checksum<tuple_10, bit<16>>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        update_checksum<tuple_10, bit<16>>(hdr.inner_ipv4.ihl == 4w5, (tuple_10){f0 = hdr.inner_ipv4.version,f1 = hdr.inner_ipv4.ihl,f2 = hdr.inner_ipv4.diffserv,f3 = hdr.inner_ipv4.totalLen,f4 = hdr.inner_ipv4.identification,f5 = hdr.inner_ipv4.flags,f6 = hdr.inner_ipv4.fragOffset,f7 = hdr.inner_ipv4.ttl,f8 = hdr.inner_ipv4.protocol,f9 = hdr.inner_ipv4.srcAddr,f10 = hdr.inner_ipv4.dstAddr}, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
+        update_checksum<tuple_10, bit<16>>(hdr.ipv4.ihl == 4w5, (tuple_10){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 

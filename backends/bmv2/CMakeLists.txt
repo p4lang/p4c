@@ -164,10 +164,12 @@ set (XFAIL_TESTS
   # to be recirculated, resubmitted, etc. it still has the bug of not
   # preserving the metadata specified in the program's field_lists, so
   # the STF tests fail because of issue #1669.  As of this writing,
-  # this program is the _only_ p4c test program that relies for its
+  # these programs rely for
   # successful execution on the preservation of metadata across
   # resubmit, recirculate, and/or clone operations.
+  testdata/p4_14_samples/p414-special-ops.p4
   testdata/p4_14_samples/p414-special-ops-2-bmv2.p4
+  testdata/p4_14_samples/p414-special-ops-3-bmv2.p4
   # This test uses a feature currently unsupported in the BMv2 back-end.
   testdata/p4_16_samples/issue907-bmv2.p4
   # This test uses a table graph that is not implementable in BMv2

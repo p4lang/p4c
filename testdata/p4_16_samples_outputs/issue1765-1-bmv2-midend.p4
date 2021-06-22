@@ -180,7 +180,7 @@ struct tuple_0 {
 
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum_with_payload<tuple_0, bit<16>>(meta.do_cksum == 1w1, { hdr.ipv6.src_addr, hdr.ipv6.dst_addr, (bit<32>)hdr.ipv6.payload_length, 24w0, 8w58 }, hdr.icmp6.checksum, HashAlgorithm.csum16);
+        update_checksum_with_payload<tuple_0, bit<16>>(meta.do_cksum == 1w1, (tuple_0){f0 = hdr.ipv6.src_addr,f1 = hdr.ipv6.dst_addr,f2 = (bit<32>)hdr.ipv6.payload_length,f3 = 24w0,f4 = 8w58}, hdr.icmp6.checksum, HashAlgorithm.csum16);
     }
 }
 

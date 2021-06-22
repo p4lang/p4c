@@ -2462,7 +2462,7 @@ void ProgramStructure::createChecksumUpdates() {
     auto type = new IR::Type_Control(v1model.compute.Id(), params);
     auto body = new IR::BlockStatement;
     for (auto cf : calculated_fields) {
-        LOG3("Conveting " << cf);
+        LOG3("Converting " << cf);
         auto dest = conv.convert(cf->field);
 
         for (auto uov : cf->specs) {
@@ -2499,14 +2499,14 @@ void ProgramStructure::createChecksumUpdates() {
                 auto newAnnot = new IR::Annotation(annot->name, {}, false);
                 for (auto expr : annot->expr)
                     newAnnot->expr.push_back(expr);
-                newAnnot->expr.push_back(methodCallExpression);
+                newAnnot->expr.push_back(new IR::StringLiteral(methodCallExpression->toString()));
                 body->annotations = body->annotations->add(newAnnot);
             }
             for (auto annot : flc->annotations->annotations) {
                 auto newAnnot = new IR::Annotation(annot->name, {}, false);
                 for (auto expr : annot->expr)
                     newAnnot->expr.push_back(expr);
-                newAnnot->expr.push_back(methodCallExpression);
+                newAnnot->expr.push_back(new IR::StringLiteral(methodCallExpression->toString()));
                 body->annotations = body->annotations->add(newAnnot);
             }
 

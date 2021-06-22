@@ -8,7 +8,7 @@ p4c_add_xfail_reason("dpdk"
   "not implemented"
   testdata/p4_16_samples/psa-action-profile2.p4
   )
- 
+
 p4c_add_xfail_reason("dpdk"
   "Meter Not implemented"
   testdata/p4_16_samples/psa-meter3.p4
@@ -25,7 +25,8 @@ p4c_add_xfail_reason("dpdk"
   "error: AssignmentStatement"
   testdata/p4_16_samples/psa-multicast-basic-2-bmv2.p4
   testdata/p4_16_samples/psa-unicast-or-drop-bmv2.p4
-  )
+  testdata/p4_16_samples/psa-example-parser-checksum.p4
+)
 
 p4c_add_xfail_reason("dpdk"
   "Not Implemented"

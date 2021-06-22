@@ -22,7 +22,7 @@ control cc() {
     ipv4_option_timestamp_t hdr_0_ipv4_option_timestamp;
     @hidden action annotationbug22() {
         hdr_0_ipv4_option_timestamp.setInvalid();
-        get<headers>({ hdr_0_ipv4_option_timestamp });
+        get<headers>((headers){ipv4_option_timestamp = hdr_0_ipv4_option_timestamp});
     }
     @hidden table tbl_annotationbug22 {
         actions = {

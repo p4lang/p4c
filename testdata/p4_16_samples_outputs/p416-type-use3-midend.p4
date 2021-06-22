@@ -150,13 +150,13 @@ struct tuple_0 {
 
 control verifyChecksum(inout headers_t hdr, inout meta_t meta) {
     apply {
-        verify_checksum<tuple_0, bit<16>>(hdr.custom.isValid(), { hdr.custom.e, hdr.custom.ed, hdr.custom.et, hdr.custom.edd, hdr.custom.edt, hdr.custom.etd, hdr.custom.ett, hdr.custom.eddd, hdr.custom.eddt, hdr.custom.edtd, hdr.custom.edtt, hdr.custom.etdd, hdr.custom.etdt, hdr.custom.ettd, hdr.custom.ettt }, hdr.custom.checksum, HashAlgorithm.csum16);
+        verify_checksum<tuple_0, bit<16>>(hdr.custom.isValid(), (tuple_0){f0 = hdr.custom.e,f1 = hdr.custom.ed,f2 = hdr.custom.et,f3 = hdr.custom.edd,f4 = hdr.custom.edt,f5 = hdr.custom.etd,f6 = hdr.custom.ett,f7 = hdr.custom.eddd,f8 = hdr.custom.eddt,f9 = hdr.custom.edtd,f10 = hdr.custom.edtt,f11 = hdr.custom.etdd,f12 = hdr.custom.etdt,f13 = hdr.custom.ettd,f14 = hdr.custom.ettt}, hdr.custom.checksum, HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers_t hdr, inout meta_t meta) {
     apply {
-        update_checksum<tuple_0, bit<16>>(hdr.custom.isValid(), { hdr.custom.e, hdr.custom.ed, hdr.custom.et, hdr.custom.edd, hdr.custom.edt, hdr.custom.etd, hdr.custom.ett, hdr.custom.eddd, hdr.custom.eddt, hdr.custom.edtd, hdr.custom.edtt, hdr.custom.etdd, hdr.custom.etdt, hdr.custom.ettd, hdr.custom.ettt }, hdr.custom.checksum, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(hdr.custom.isValid(), (tuple_0){f0 = hdr.custom.e,f1 = hdr.custom.ed,f2 = hdr.custom.et,f3 = hdr.custom.edd,f4 = hdr.custom.edt,f5 = hdr.custom.etd,f6 = hdr.custom.ett,f7 = hdr.custom.eddd,f8 = hdr.custom.eddt,f9 = hdr.custom.edtd,f10 = hdr.custom.edtt,f11 = hdr.custom.etdd,f12 = hdr.custom.etdt,f13 = hdr.custom.ettd,f14 = hdr.custom.ettt}, hdr.custom.checksum, HashAlgorithm.csum16);
     }
 }
 

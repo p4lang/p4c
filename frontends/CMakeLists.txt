@@ -16,6 +16,7 @@ set (P4_FRONTEND_SRCS
   p4/actionsInlining.cpp
   p4/callGraph.cpp
   p4/checkConstants.cpp
+  p4/checkCoreMethods.cpp
   p4/checkNamedArgs.cpp
   p4/createBuiltins.cpp
   p4/def_use.cpp
@@ -81,6 +82,7 @@ set (P4_FRONTEND_HDRS
   p4/alias.h
   p4/callGraph.h
   p4/checkConstants.h
+  p4/checkCoreMethods.h
   p4/checkNamedArgs.h
   p4/cloner.h
   p4/commonInlining.h
