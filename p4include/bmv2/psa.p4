@@ -29,8 +29,12 @@ limitations under the License.
 
 /* Target device for which this section is customized:
  *
- * DPDK back end as implemented by p4c-dpdk in the repository
- * https://github.com/p4lang/p4c
+ * BMv2 PSA as implemented by the psa_switch software switch from the
+ * repository https://github.com/p4lang/behavioral-model
+ *
+ * The bit widths for BMv2 psa_switch have been chosen to be the same
+ * as the corresponding InHeader types later.  This simplifies the
+ * implementation of P4Runtime for BMv2 psa_switch.
  */
 
 /* These are defined using `typedef`, not `type`, so they are truly
@@ -47,16 +51,10 @@ limitations under the License.
  *
  * Note that the width of typedef <name>Uint_t will always be the same
  * as the width of type <name>_t. */
-
-/* WARNING!  Andy Fingerhut made up the following numbers for the DPDK
- * target data plane bit widths.  No one should believe they are
- * accurate until they * have been approved by the p4c-dpdk
- * implementers. */
-
-typedef bit<9>  PortIdUint_t;
-typedef bit<16> MulticastGroupUint_t;
-typedef bit<10> CloneSessionIdUint_t;
-typedef bit<2>  ClassOfServiceUint_t;
+typedef bit<32> PortIdUint_t;
+typedef bit<32> MulticastGroupUint_t;
+typedef bit<16> CloneSessionIdUint_t;
+typedef bit<8>  ClassOfServiceUint_t;
 typedef bit<16> PacketLengthUint_t;
 typedef bit<16> EgressInstanceUint_t;
 typedef bit<64> TimestampUint_t;
@@ -352,9 +350,8 @@ extern void assume(in bool check);
 
 // BEGIN:Match_kinds
 match_kind {
-    range,    /// Used to represent min..max intervals
-    selector, /// Used for dynamic action selection via the ActionSelector extern
-    optional  /// Either an exact match, or a wildcard matching any value for the entire field
+    range,   /// Used to represent min..max intervals
+    selector /// Used for dynamic action selection via the ActionSelector extern
 }
 // END:Match_kinds
 
@@ -548,7 +545,7 @@ enum PSA_CounterType_t {
 
 extern Counter<W, S> {
   Counter(bit<32> n_counters, PSA_CounterType_t type);
-  void count(in S index, @optional in bit<32> increment);
+  void count(in S index);
 
   /*
   /// The control plane API uses 64-bit wide counter values.  It is
@@ -613,12 +610,12 @@ extern Meter<S> {
   // Use this method call to perform a color aware meter update (see
   // RFC 2698). The color of the packet before the method call was
   // made is specified by the color parameter.
-  PSA_MeterColor_t execute(in S index, in PSA_MeterColor_t color, @optional in bit<32> pkt_len);
+  PSA_MeterColor_t execute(in S index, in PSA_MeterColor_t color);
 
   // Use this method call to perform a color blind meter update (see
   // RFC 2698).  It may be implemented via a call to execute(index,
   // MeterColor_t.GREEN), which has the same behavior.
-  PSA_MeterColor_t execute(in S index, @optional in bit<32> pkt_len);
+  PSA_MeterColor_t execute(in S index);
 
   /*
   @ControlPlaneAPI

@@ -2,11 +2,11 @@
 #include "lib/exename.h"
 #include "frontends/common/parser_options.h"
 
-namespace DPDK {
+namespace BMV2 {
 
 std::vector<const char*>* PsaSwitchOptions::process(int argc, char* const argv[]) {
     searchForIncludePath(p4includePath,
-            {"p4include/dpdk", "../p4include/dpdk", "../../p4include/dpdk"},
+            {"p4include/bmv2", "../p4include/bmv2", "../../p4include/bmv2"},
             exename(argv[0]));
 
     auto remainingOptions = CompilerOptions::process(argc, argv);
@@ -14,4 +14,4 @@ std::vector<const char*>* PsaSwitchOptions::process(int argc, char* const argv[]
     return remainingOptions;
 }
 
-};  // namespace DPDK
+}  // namespace BMV2
