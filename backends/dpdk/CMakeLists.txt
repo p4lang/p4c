@@ -36,6 +36,7 @@ set(P4C_DPDK_SOURCES
     dpdkVarCollector.cpp
     dpdkArch.cpp
     dpdkAsmOpt.cpp
+    options.cpp
     )
 
 set(P4C_DPDK_HEADERS
