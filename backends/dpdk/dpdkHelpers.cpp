@@ -78,18 +78,20 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     auto argSize = e->expr->arguments->size();
 
                     // DPDK target needs index and packet length as mandatory parameters
-                    if (argSize < 2)
+                    if (argSize < 2) {
                         ::error(ErrorType::ERR_UNEXPECTED, "Expected atleast 2 arguments for %1%",
                                 e->object->getName());
+                        return false;
+                    }
                     const IR::Expression *color_in = nullptr;
                     const IR::Expression *length = nullptr;
-                    auto index = (*e->expr->arguments)[0]->expression;
+                    auto index = e->expr->arguments->at(0)->expression;
                     if (argSize == 2) {
-                        length = (*e->expr->arguments)[1]->expression;
+                        length = e->expr->arguments->at(1)->expression;
                         color_in = new IR::Constant(1);
                     } else if (argSize == 3) {
-                        length = (*e->expr->arguments)[2]->expression;
-                        color_in = (*e->expr->arguments)[1]->expression;
+                        length = e->expr->arguments->at(2)->expression;
+                        color_in = e->expr->arguments->at(1)->expression;
                     }
                     i = new IR::DpdkMeterExecuteStatement(
                          e->object->getName(), index, length, color_in, left);

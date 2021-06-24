@@ -442,99 +442,44 @@ class ConvertInternetChecksum : public PassManager {
     }
 };
 
-/* This pass collects PSA register declaration instances and push them to a map
- * for emitting to the .spec file later */
-class CollectRegisterDeclaration : public Inspector {
-    std::map<const IR::Declaration_Instance *, cstring> *reg_map;
+/* This pass collects PSA extern meter, counter and register declaration instances and 
+   push them to map for emitting to the .spec file later */
+class CollectExternDeclaration : public Inspector {
     P4::TypeMap *typeMap;
 
-  public:
-    CollectRegisterDeclaration(
-        std::map<const IR::Declaration_Instance *, cstring> *reg_map, P4::TypeMap *typeMap)
-        : reg_map(reg_map),  typeMap(typeMap) {}
-
-    bool preorder(const IR::Declaration_Instance *d) override {
-        if (d->type->is<IR::Type_Specialized>()) {
-            auto type = d->type->to<IR::Type_Specialized>();
-            auto externTypeName = type->baseType->path->name.name;
-            if (externTypeName == "Register"){
-                if (d->arguments->size() != 1 and d->arguments->size() != 2 ) {
-                    ::error("%1%: expected size and optionally init_val as arguments", d);
-                }
-                reg_map->emplace(d, d->name);
-            }
-        }
-        return false;
-    }
-};
-
-/* This pass collects PSA meter declaration instances and push them to a map
- * for emitting to the .spec file later */
-class CollectMeterDeclaration : public Inspector {
-    std::map<const IR::Declaration_Instance *, cstring> *met_map;
-    P4::TypeMap *typeMap;
-
-  public:
-    CollectMeterDeclaration(
-        std::map<const IR::Declaration_Instance *, cstring> *met_map, P4::TypeMap *typeMap)
-        : met_map(met_map) , typeMap(typeMap) {}
-
-    bool preorder(const IR::Declaration_Instance *d) override {
-        if (d->type->is<IR::Type_Specialized>()) {
-            auto type = d->type->to<IR::Type_Specialized>();
-            auto externTypeName = type->baseType->path->name.name;
-            if (externTypeName == "Meter"){
-                if (d->arguments->size() != 2) {
-                    ::error("%1%: expected number of meters and type of meter as arguments", d);
-                } else {
-                    if (d->arguments->at(1) == 0)
-                        ::warning(ErrorType::WARN_UNSUPPORTED,
-                                  "%1%: Packet metering is not supported." \
-                                  " Falling back to byte metering.", d);
-                    met_map->emplace(d, d->name);
-                }
-            }
-         }
-         return false;
-    }
-};
-
-/* This pass collects PSA counter declaration instances and push them to a map
- * for emitting to the .spec file later */
-class CollectCounterDeclaration : public Inspector {
-    std::map<const IR::Declaration_Instance *, cstring> *cnt_map;
-    P4::TypeMap *typeMap;
-
-  public:
-    CollectCounterDeclaration(
-        std::map<const IR::Declaration_Instance *, cstring> *cnt_map, P4::TypeMap *typeMap)
-        : cnt_map(cnt_map) , typeMap(typeMap) {}
-
-    bool preorder(const IR::Declaration_Instance *d) override {
-        if (d->type->is<IR::Type_Specialized>()) {
-            auto type = d->type->to<IR::Type_Specialized>();
-            auto externTypeName = type->baseType->path->name.name;
-            if (externTypeName == "Counter"){
-                if (d->arguments->size() != 2 ) {
-                    ::error("%1%: expected n_counters and counter type as arguments", d);
-                }
-                cnt_map->emplace(d, d->name);
-            }
-        }
-        return false;
-    }
-};
-
-/* This passmanager is for collecting the extern declarations for register meter and counter */
-class AddExternDeclaration : public PassManager {
   public:
     std::map<const IR::Declaration_Instance *, cstring> reg_map;
     std::map<const IR::Declaration_Instance *, cstring> cnt_map;
     std::map<const IR::Declaration_Instance *, cstring> met_map;
-    AddExternDeclaration(P4::TypeMap *typeMap) {
-        passes.push_back(new CollectRegisterDeclaration(&reg_map, typeMap));
-        passes.push_back(new CollectCounterDeclaration(&cnt_map, typeMap));
-        passes.push_back(new CollectMeterDeclaration(&met_map, typeMap));
+
+    CollectExternDeclaration(P4::TypeMap *typeMap) : typeMap(typeMap) {}
+    bool preorder(const IR::Declaration_Instance *d) override {
+        if (auto type = d->type->to<IR::Type_Specialized>()) {
+            auto externTypeName = type->baseType->path->name.name;
+            if (externTypeName == "Meter") {
+                if (d->arguments->size() != 2) {
+                    ::error("%1%: expected number of meters and type of meter as arguments", d);
+                } else {
+                    /* Check if the meter is of PACKETS (0) type */
+                    if (d->arguments->at(1)->expression->to<IR::Constant>()->asUnsigned() == 0)
+                        ::warning(ErrorType::WARN_UNSUPPORTED,
+                                  "%1%: Packet metering is not supported." \
+                                  " Falling back to byte metering.", d);
+                    met_map.emplace(d, d->name);
+                }
+            } else if (externTypeName == "Counter") {
+                if (d->arguments->size() != 2 ) {
+                    ::error("%1%: expected number of_counters and type of counter as arguments", d);
+                }
+                cnt_map.emplace(d, d->name);
+            } else if (externTypeName == "Register") {
+                if (d->arguments->size() != 1 and d->arguments->size() != 2 ) {
+                    ::error("%1%: expected size and optionally init_val as arguments", d);
+                }
+                reg_map.emplace(d, d->name);
+            }
+         }
+         return false;
     }
 };
 
@@ -696,7 +641,7 @@ class RewriteToDpdkArch : public PassManager {
         args_struct_map = &p->args_struct_map;
         passes.push_back(p);
         passes.push_back(new ConvertLogicalExpression);
-        auto insertExternDeclaration = new AddExternDeclaration(typeMap);
+        auto insertExternDeclaration = new CollectExternDeclaration(typeMap);
         passes.push_back(insertExternDeclaration);
         reg_map = &insertExternDeclaration->reg_map;
         cnt_map = &insertExternDeclaration->cnt_map;
