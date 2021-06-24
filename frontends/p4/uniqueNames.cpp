@@ -135,10 +135,10 @@ const IR::Node* RenameSymbols::postorder(IR::PathExpression* expression) {
     // This should be a local name.
     BUG_CHECK(!expression->path->absolute,
               "%1%: renaming absolute path", expression);
-    LOG2("Renaming " << expression->path);
     auto newName = renameMap->getName(decl);
     auto name = IR::ID(expression->path->name.srcInfo, newName,
                        expression->path->name.originalName);
+    LOG2("Renaming " << dbp(expression->path) << " to " << name);
     expression->path = new IR::Path(name);
     return expression;
 }

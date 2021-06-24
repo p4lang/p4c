@@ -38,7 +38,6 @@ set (MIDEND_SRCS
   removeExits.cpp
   removeLeftSlices.cpp
   removeMiss.cpp
-  removeParameters.cpp
   removeSelectBooleans.cpp
   replaceSelectRange.cpp
   removeUnusedParameters.cpp
@@ -82,7 +81,6 @@ set (MIDEND_HDRS
   removeExits.h
   removeLeftSlices.h
   removeMiss.h
-  removeParameters.h
   removeSelectBooleans.h
   removeUnusedParameters.h
   replaceSelectRange.h
