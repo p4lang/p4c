@@ -37,7 +37,7 @@ parser prs(packet_in p, out Headers_t headers) {
 }
 
 control pipe(inout Headers_t headers, out bool xout) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("pipe.set_flowlabel") action set_flowlabel(@name("label") bit<20> label) {
         headers.ipv6.ip_version_traffic_class_and_flow_label[31:12] = label;
@@ -48,13 +48,13 @@ control pipe(inout Headers_t headers, out bool xout) {
         }
         actions = {
             set_flowlabel();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         const entries = {
                         128w0x200204200380deadbeeff00d0d090001 : set_flowlabel(20w52);
         }
         implementation = hash_table(32w8);
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         xout = true;

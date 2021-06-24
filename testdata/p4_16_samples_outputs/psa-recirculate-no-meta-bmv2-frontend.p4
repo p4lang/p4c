@@ -35,26 +35,36 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 }
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarnUnused @name(".send_to_port") action send_to_port(@name("meta") inout psa_ingress_output_metadata_t meta_1, @name("egress_port") in PortId_t egress_port_1) {
-        meta_1.drop = false;
-        meta_1.multicast_group = (MulticastGroup_t)32w0;
-        meta_1.egress_port = egress_port_1;
-    }
-    @noWarnUnused @name(".send_to_port") action send_to_port_0(@name("meta") inout psa_ingress_output_metadata_t meta_2, @name("egress_port") in PortId_t egress_port_2) {
-        meta_2.drop = false;
-        meta_2.multicast_group = (MulticastGroup_t)32w0;
-        meta_2.egress_port = egress_port_2;
-    }
     @name("cIngress.int_packet_path") bit<32> int_packet_path_0;
+    @name("cIngress.meta") psa_ingress_output_metadata_t meta_0;
+    @name("cIngress.egress_port") PortId_t egress_port_0;
+    @name("cIngress.meta") psa_ingress_output_metadata_t meta_3;
+    @name("cIngress.egress_port") PortId_t egress_port_3;
+    @noWarnUnused @name(".send_to_port") action send_to_port_1() {
+        meta_0 = ostd;
+        egress_port_0 = (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr;
+        meta_0.drop = false;
+        meta_0.multicast_group = (MulticastGroup_t)32w0;
+        meta_0.egress_port = egress_port_0;
+        ostd = meta_0;
+    }
+    @noWarnUnused @name(".send_to_port") action send_to_port_2() {
+        meta_3 = ostd;
+        egress_port_3 = (PortId_t)32w0xfffffffa;
+        meta_3.drop = false;
+        meta_3.multicast_group = (MulticastGroup_t)32w0;
+        meta_3.egress_port = egress_port_3;
+        ostd = meta_3;
+    }
     @name("cIngress.record_ingress_ports_in_pkt") action record_ingress_ports_in_pkt() {
         hdr.output_data.word1 = (PortIdUint_t)istd.ingress_port;
     }
     apply {
         if (hdr.ethernet.dstAddr[3:0] >= 4w4) {
             record_ingress_ports_in_pkt();
-            send_to_port(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr);
+            send_to_port_1();
         } else {
-            send_to_port_0(ostd, (PortId_t)32w0xfffffffa);
+            send_to_port_2();
         }
         int_packet_path_0 = 32w8;
         if (istd.packet_path == PSA_PacketPath_t.NORMAL) {

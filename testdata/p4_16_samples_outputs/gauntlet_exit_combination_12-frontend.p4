@@ -18,7 +18,7 @@ parser p(packet_in pkt, out Headers hdr) {
 }
 
 control ingress(inout Headers h) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.do_action") action do_action() {
         if (h.eth_hdr.src_addr == 48w1) {
@@ -33,9 +33,9 @@ control ingress(inout Headers h) {
         }
         actions = {
             do_action();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         switch (simple_table_0.apply().action_run) {

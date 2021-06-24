@@ -33,7 +33,7 @@ parser p(packet_in pkt, out Headers h, inout Meta m, inout standard_metadata_t s
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bit<32> key_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.c.a") action c_a_0() {
         h.h.b = h.h.a;
@@ -44,9 +44,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         actions = {
             c_a_0();
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action gauntlet_variable_shadowingbmv2l31() {
         m.test = 8w1;

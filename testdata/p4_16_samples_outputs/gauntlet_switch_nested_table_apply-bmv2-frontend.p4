@@ -23,37 +23,39 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("ingress.tmp") Headers tmp_0;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @name("ingress.set_valid_action") action set_valid_action(@name("tmp") out Headers tmp) {
-        tmp.eth_hdr.setValid();
-        tmp.eth_hdr.dst_addr = 48w1;
-        tmp.eth_hdr.src_addr = 48w1;
+    @name("ingress.set_valid_action") action set_valid_action() {
+        tmp_0.eth_hdr.setValid();
+        tmp_0.eth_hdr.dst_addr = 48w1;
+        tmp_0.eth_hdr.src_addr = 48w1;
+        h = tmp_0;
     }
     @name("ingress.simple_table_1") table simple_table {
         key = {
             128w1: exact @name("JGOUaj") ;
         }
         actions = {
-            set_valid_action(h);
-            @defaultonly NoAction_0();
+            set_valid_action();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name("ingress.simple_table_2") table simple_table_0 {
         key = {
             48w1: exact @name("qkgOtm") ;
         }
         actions = {
-            NoAction_3();
+            NoAction_2();
         }
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         switch (simple_table_0.apply().action_run) {
-            NoAction_3: {
+            NoAction_2: {
                 simple_table.apply();
             }
         }

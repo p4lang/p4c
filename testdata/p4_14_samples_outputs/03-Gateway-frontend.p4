@@ -45,19 +45,19 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name(".nop") action nop() {
     }
     @name(".e_t1") table e_t1_0 {
         actions = {
             nop();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_2();
         }
         key = {
             hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr") ;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     apply {
         e_t1_0.apply();
@@ -65,21 +65,21 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_7() {
+    @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_8() {
+    @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_9() {
+    @noWarn("unused") @name(".NoAction") action NoAction_6() {
     }
     @name(".nop") action nop_2() {
     }
-    @name(".nop") action nop_6() {
+    @name(".nop") action nop_3() {
     }
-    @name(".nop") action nop_7() {
+    @name(".nop") action nop_4() {
     }
-    @name(".nop") action nop_8() {
+    @name(".nop") action nop_5() {
     }
     @name(".ing_drop") action ing_drop() {
         meta.ing_metadata.drop = 1w1;
@@ -105,49 +105,49 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             ing_drop();
             set_egress_port();
             set_f1();
-            @defaultonly NoAction_1();
+            @defaultonly NoAction_3();
         }
         key = {
             hdr.vag.f1: exact @name("vag.f1") ;
         }
         size = 1024;
-        default_action = NoAction_1();
+        default_action = NoAction_3();
     }
     @name(".i_t2") table i_t2_0 {
         actions = {
-            nop_6();
+            nop_3();
             set_f2();
-            @defaultonly NoAction_7();
+            @defaultonly NoAction_4();
         }
         key = {
             hdr.vag.f2: exact @name("vag.f2") ;
         }
         size = 1024;
-        default_action = NoAction_7();
+        default_action = NoAction_4();
     }
     @name(".i_t3") table i_t3_0 {
         actions = {
-            nop_7();
+            nop_4();
             set_f3();
-            @defaultonly NoAction_8();
+            @defaultonly NoAction_5();
         }
         key = {
             hdr.vag.f3: exact @name("vag.f3") ;
         }
         size = 1024;
-        default_action = NoAction_8();
+        default_action = NoAction_5();
     }
     @name(".i_t4") table i_t4_0 {
         actions = {
-            nop_8();
+            nop_5();
             set_f4();
-            @defaultonly NoAction_9();
+            @defaultonly NoAction_6();
         }
         key = {
             hdr.vag.f4: exact @name("vag.f4") ;
         }
         size = 1024;
-        default_action = NoAction_9();
+        default_action = NoAction_6();
     }
     apply {
         i_t1_0.apply();

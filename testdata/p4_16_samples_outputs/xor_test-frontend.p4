@@ -61,9 +61,9 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("MyIngress.forward_and_do_something") action forward_and_do_something(@name("port") egressSpec_t port) {
         standard_metadata.egress_spec = port;
@@ -93,13 +93,13 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         }
         actions = {
             forward_and_do_something();
-            NoAction_0();
+            NoAction_1();
         }
         const entries = {
                         9w1 : forward_and_do_something(9w2);
                         9w2 : forward_and_do_something(9w1);
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name("MyIngress.debug") table debug_0 {
         key = {
@@ -113,9 +113,9 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
             meta.after4 : exact @name("meta.after4") ;
         }
         actions = {
-            NoAction_3();
+            NoAction_2();
         }
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         if (hdr.ipv4.isValid()) {

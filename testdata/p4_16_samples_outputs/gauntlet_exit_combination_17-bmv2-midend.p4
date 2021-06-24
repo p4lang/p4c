@@ -27,13 +27,13 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.hasReturned") bool hasReturned;
     bit<48> key_0;
     bit<48> key_1;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("ingress.dummy_action") action dummy_action() {
     }
-    @name("ingress.dummy_action") action dummy_action_2() {
+    @name("ingress.dummy_action") action dummy_action_1() {
     }
     @name("ingress.simple_table_1") table simple_table {
         key = {
@@ -41,19 +41,19 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         actions = {
             dummy_action();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name("ingress.simple_table_2") table simple_table_0 {
         key = {
             key_1: exact @name("key") ;
         }
         actions = {
-            dummy_action_2();
-            @defaultonly NoAction_3();
+            dummy_action_1();
+            @defaultonly NoAction_2();
         }
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     @hidden action gauntlet_exit_combination_17bmv2l49() {
         h.eth_hdr.src_addr = 48w4;
@@ -100,7 +100,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             dummy_action: {
                 tbl_gauntlet_exit_combination_17bmv2l38.apply();
                 switch (simple_table_0.apply().action_run) {
-                    dummy_action_2: {
+                    dummy_action_1: {
                         tbl_gauntlet_exit_combination_17bmv2l49.apply();
                     }
                     default: {

@@ -30,7 +30,7 @@ control c2(inout headers hdr, inout metadata meta, inout standard_metadata_t std
 }
 
 control c3(inout headers hdr, inout metadata meta, inout standard_metadata_t std_meta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c3.a") action a() {
         hdr.h.x = 8w0;
@@ -40,9 +40,9 @@ control c3(inout headers hdr, inout metadata meta, inout standard_metadata_t std
         }
         actions = {
             a();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         t_0.apply();

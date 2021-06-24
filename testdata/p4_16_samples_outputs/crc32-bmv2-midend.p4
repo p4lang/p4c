@@ -137,7 +137,7 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     @name("MyIngress.operation_drop") action operation_drop() {
         mark_to_drop(standard_metadata);
     }
-    @name("MyIngress.operation_drop") action operation_drop_2() {
+    @name("MyIngress.operation_drop") action operation_drop_1() {
         mark_to_drop(standard_metadata);
     }
     @name("MyIngress.calculate") table calculate_0 {
@@ -165,9 +165,9 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     @hidden table tbl_operation_drop {
         actions = {
-            operation_drop_2();
+            operation_drop_1();
         }
-        const default_action = operation_drop_2();
+        const default_action = operation_drop_1();
     }
     apply {
         if (hdr.p4calc.isValid()) {

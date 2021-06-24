@@ -15,20 +15,22 @@ struct Meta {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<8> tmp;
-    @name("ingress.action_thing") action action_thing(@name("c") inout bit<32> c) {
-        {
-            @name("ingress.d_0") bit<32> d_0;
-            @name("ingress.hasReturned") bool hasReturned = false;
-            @name("ingress.retval") bit<8> retval;
-            hasReturned = true;
-            retval = 8w1;
-            c = d_0;
-            tmp = retval;
-        }
-        c = (bit<32>)tmp;
+    @name("ingress.c") bit<32> c_0;
+    @name("ingress.d_0") bit<32> d;
+    @name("ingress.hasReturned") bool hasReturned;
+    @name("ingress.retval") bit<8> retval;
+    @name("ingress.action_thing") action action_thing() {
+        c_0 = sm.enq_timestamp;
+        hasReturned = false;
+        hasReturned = true;
+        retval = 8w1;
+        c_0 = d;
+        tmp = retval;
+        c_0 = (bit<32>)tmp;
+        sm.enq_timestamp = c_0;
     }
     apply {
-        action_thing(sm.enq_timestamp);
+        action_thing();
     }
 }
 

@@ -45,7 +45,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.my_a") action my_a() {
         h.h.f = 32w0;
     }
-    @name("ingress.my_a") action my_a_2() {
+    @name("ingress.my_a") action my_a_1() {
         h.h.f = 32w1;
     }
     @hidden table tbl_my_a {
@@ -56,9 +56,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @hidden table tbl_my_a_0 {
         actions = {
-            my_a_2();
+            my_a_1();
         }
-        const default_action = my_a_2();
+        const default_action = my_a_1();
     }
     apply {
         tbl_my_a.apply();

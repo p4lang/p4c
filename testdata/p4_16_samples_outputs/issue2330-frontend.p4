@@ -25,8 +25,10 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.pointless_bool") bool pointless_bool_0;
     @name("ingress.tmp") bit<48> tmp;
+    @name("ingress.hasReturned") bool hasReturned;
+    @name("ingress.val_0") bit<16> val;
     @name("ingress.do_action") action do_action() {
-        @name("ingress.hasReturned") bool hasReturned = false;
+        hasReturned = false;
         pointless_bool_0 = true;
         if (h.eth_hdr.dst_addr != 48w0) {
             ;
@@ -36,10 +38,8 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         if (hasReturned) {
             ;
         } else {
-            {
-                @name("ingress.val_0") bit<16> val_0 = h.eth_hdr.eth_type;
-                h.eth_hdr.eth_type = val_0;
-            }
+            val = h.eth_hdr.eth_type;
+            h.eth_hdr.eth_type = val;
             if (pointless_bool_0) {
                 tmp = 48w1;
             } else {

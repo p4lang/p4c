@@ -27,7 +27,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".my_drop") action my_drop() {
         mark_to_drop(standard_metadata);
@@ -39,12 +39,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             my_drop();
             set_egress_port();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
             standard_metadata.ingress_port: exact @name("standard_metadata.ingress_port") ;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         repeater_0.apply();

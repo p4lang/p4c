@@ -40,7 +40,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_2") bit<8> tmp_2;
-    @name("ingress.val_0") bit<8> val_0;
+    @name("ingress.val_0") bit<8> val;
     @hidden action gauntlet_short_circuitbmv2l55() {
         tmp_2 = 8w1;
     }
@@ -48,7 +48,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         tmp_2 = 8w2;
     }
     @hidden action act() {
-        h.b.b = val_0;
+        h.b.b = val;
     }
     @hidden action gauntlet_short_circuitbmv2l55_1() {
         h.b.a = tmp_2;
@@ -79,7 +79,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     apply {
         tbl_act.apply();
-        if (8w1 != val_0) {
+        if (8w1 != val) {
             tbl_gauntlet_short_circuitbmv2l55.apply();
         } else {
             tbl_gauntlet_short_circuitbmv2l55_0.apply();

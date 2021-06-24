@@ -23,7 +23,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.dummy") action dummy() {
     }
@@ -33,9 +33,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         actions = {
             dummy();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         switch (simple_table_0.apply().action_run) {

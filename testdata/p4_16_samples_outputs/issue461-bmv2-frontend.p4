@@ -52,8 +52,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".my_drop") action my_drop(@name("smeta") inout standard_metadata_t smeta) {
-        mark_to_drop(smeta);
+    @name("ingress.smeta") standard_metadata_t smeta_0;
+    @name(".my_drop") action my_drop_1() {
+        smeta_0 = standard_metadata;
+        mark_to_drop(smeta_0);
+        standard_metadata = smeta_0;
     }
     @name("ingress.ipv4_da_lpm_stats") direct_counter(CounterType.packets) ipv4_da_lpm_stats_0;
     @name("ingress.set_l2ptr") action set_l2ptr(@name("l2ptr") bit<32> l2ptr_1) {
@@ -84,12 +87,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("ingress.mac_da") table mac_da_0 {
         actions = {
             set_bd_dmac_intf();
-            my_drop(standard_metadata);
+            my_drop_1();
         }
         key = {
             meta.fwd_metadata.l2ptr: exact @name("meta.fwd_metadata.l2ptr") ;
         }
-        default_action = my_drop(standard_metadata);
+        default_action = my_drop_1();
     }
     apply {
         ipv4_da_lpm_0.apply();
@@ -98,8 +101,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".my_drop") action my_drop_0(@name("smeta") inout standard_metadata_t smeta_1) {
-        mark_to_drop(smeta_1);
+    @name("egress.smeta") standard_metadata_t smeta_2;
+    @name(".my_drop") action my_drop_2() {
+        smeta_2 = standard_metadata;
+        mark_to_drop(smeta_2);
+        standard_metadata = smeta_2;
     }
     @name("egress.rewrite_mac") action rewrite_mac(@name("smac") bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
@@ -107,12 +113,12 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
     @name("egress.send_frame") table send_frame_0 {
         actions = {
             rewrite_mac();
-            my_drop_0(standard_metadata);
+            my_drop_2();
         }
         key = {
             meta.fwd_metadata.out_bd: exact @name("meta.fwd_metadata.out_bd") ;
         }
-        default_action = my_drop_0(standard_metadata);
+        default_action = my_drop_2();
     }
     apply {
         send_frame_0.apply();

@@ -36,19 +36,19 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name(".nop") action nop() {
     }
     @name(".t2") table t2_0 {
         actions = {
             nop();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_2();
         }
         key = {
             hdr.mac_sa.mac: exact @name("mac_sa.mac") ;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     apply {
         t2_0.apply();
@@ -56,20 +56,20 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
     @name(".nop") action nop_2() {
     }
     @name(".t1") table t1_0 {
         actions = {
             nop_2();
-            @defaultonly NoAction_1();
+            @defaultonly NoAction_3();
         }
         key = {
             hdr.mac_da.mac       : exact @name("mac_da.mac") ;
             hdr.len_or_type.value: exact @name("len_or_type.value") ;
         }
-        default_action = NoAction_1();
+        default_action = NoAction_3();
     }
     apply {
         t1_0.apply();

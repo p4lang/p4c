@@ -1,10 +1,10 @@
 control p(out bit<1> y) {
-    @name("p.x") bit<1> x_1;
+    @name("p.x") bit<1> x_2;
     @name("p.b") action b() {
-        y = x_1;
+        y = x_2;
     }
     @hidden action inline33() {
-        x_1 = 1w1;
+        x_2 = 1w1;
     }
     @hidden table tbl_inline33 {
         actions = {

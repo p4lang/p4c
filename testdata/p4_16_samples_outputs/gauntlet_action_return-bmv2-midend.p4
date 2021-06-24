@@ -22,7 +22,7 @@ struct Meta {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_key") bit<128> tmp_key_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.do_action") action do_action() {
         h.h.a = (h.h.a > 8w10 ? 8w2 : 8w3);
@@ -33,9 +33,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         actions = {
             do_action();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action gauntlet_action_returnbmv2l22() {
         tmp_key_0 = 128w2;

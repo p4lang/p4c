@@ -21,11 +21,11 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
 
 control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t standard_meta) {
     @name("Eg.res") bit<64> res_0;
-    @name("val") bit<64> val;
+    @name("Eg.val") bit<64> val_0;
     @name("Eg.update") action update() {
-        val = res_0;
-        val[31:0] = res_0[31:0];
-        res_0 = val;
+        val_0 = res_0;
+        val_0[31:0] = res_0[31:0];
+        res_0 = val_0;
     }
     @hidden action muxbmv2l58() {
         res_0 = 64w0;

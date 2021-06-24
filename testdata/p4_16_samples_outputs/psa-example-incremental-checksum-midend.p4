@@ -80,7 +80,7 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.drop") action drop_1() {
         @noWarnUnused {
@@ -103,9 +103,9 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         actions = {
             forward();
             drop_1();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         if (hdr.ipv4.isValid()) {

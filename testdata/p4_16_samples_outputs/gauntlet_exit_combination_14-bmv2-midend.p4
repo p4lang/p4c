@@ -25,7 +25,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bool hasExited;
     bit<128> key_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.exit_action") action exit_action() {
         hasExited = true;
@@ -36,9 +36,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         actions = {
             exit_action();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action gauntlet_exit_combination_14bmv2l41() {
         h.eth_hdr.eth_type = 16w1;

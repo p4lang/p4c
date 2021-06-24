@@ -30,13 +30,13 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
-    }
     @name("ingress.dummy_val") bit<8> dummy_val_0;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    }
     @name("ingress.simple_action") action simple_action() {
         h.h[0].a = dummy_val_0;
     }
-    @name("ingress.simple_action") action simple_action_2() {
+    @name("ingress.simple_action") action simple_action_1() {
         h.h[0].a = dummy_val_0;
     }
     @name("ingress.simple_table") table simple_table_0 {
@@ -45,13 +45,13 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         actions = {
             simple_action();
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         dummy_val_0 = h.h[0].a;
-        simple_action_2();
+        simple_action_1();
         dummy_val_0 = 8w255;
         simple_table_0.apply();
     }

@@ -201,13 +201,8 @@ void ValidateParsedProgram::postorder(const IR::EntriesList* l) {
                 "%1%: invalid initializer. Table initializers must be constant.", l);
 }
 
-/// Switch statements are not allowed in actions.
 /// Default label in switch statement is always the last one.
 void ValidateParsedProgram::postorder(const IR::SwitchStatement* statement) {
-    auto inAction = findContext<IR::P4Action>();
-    if (inAction != nullptr)
-        ::error(ErrorType::ERR_INVALID,
-                "%1%: invalid statement. 'switch' statements not allowed in actions.", statement);
     const IR::SwitchCase *defaultFound = nullptr;
     for (auto c : statement->cases) {
         if (defaultFound != nullptr) {

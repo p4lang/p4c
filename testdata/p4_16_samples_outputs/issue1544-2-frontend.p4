@@ -1,52 +1,55 @@
 control c(inout bit<32> x) {
     @name("c.tmp_0") bit<32> tmp;
     @name("c.tmp_1") bit<32> tmp_0;
+    @name("c.a_0") bit<32> a;
+    @name("c.b_0") bit<32> b;
+    @name("c.hasReturned") bool hasReturned;
+    @name("c.retval") bit<32> retval;
+    @name("c.tmp") bit<32> tmp_1;
+    @name("c.a_1") bit<32> a_3;
+    @name("c.b_1") bit<32> b_3;
+    @name("c.hasReturned") bool hasReturned_1;
+    @name("c.retval") bit<32> retval_1;
+    @name("c.tmp") bit<32> tmp_5;
+    @name("c.a_2") bit<32> a_4;
+    @name("c.b_2") bit<32> b_4;
+    @name("c.hasReturned") bool hasReturned_2;
+    @name("c.retval") bit<32> retval_2;
+    @name("c.tmp") bit<32> tmp_6;
     apply {
-        {
-            @name("c.a_0") bit<32> a_0 = x;
-            @name("c.b_0") bit<32> b_0 = x + 32w1;
-            @name("c.hasReturned") bool hasReturned = false;
-            @name("c.retval") bit<32> retval;
-            @name("c.tmp") bit<32> tmp_1;
-            if (a_0 > b_0) {
-                tmp_1 = b_0;
-            } else {
-                tmp_1 = a_0;
-            }
-            hasReturned = true;
-            retval = tmp_1;
-            tmp = retval;
+        a = x;
+        b = x + 32w1;
+        hasReturned = false;
+        if (a > b) {
+            tmp_1 = b;
+        } else {
+            tmp_1 = a;
         }
-        {
-            @name("c.a_1") bit<32> a_1 = x;
-            @name("c.b_1") bit<32> b_1 = x + 32w4294967295;
-            @name("c.hasReturned") bool hasReturned_1 = false;
-            @name("c.retval") bit<32> retval_1;
-            @name("c.tmp") bit<32> tmp_5;
-            if (a_1 > b_1) {
-                tmp_5 = b_1;
-            } else {
-                tmp_5 = a_1;
-            }
-            hasReturned_1 = true;
-            retval_1 = tmp_5;
-            tmp_0 = retval_1;
+        hasReturned = true;
+        retval = tmp_1;
+        tmp = retval;
+        a_3 = x;
+        b_3 = x + 32w4294967295;
+        hasReturned_1 = false;
+        if (a_3 > b_3) {
+            tmp_5 = b_3;
+        } else {
+            tmp_5 = a_3;
         }
-        {
-            @name("c.a_2") bit<32> a_2 = tmp;
-            @name("c.b_2") bit<32> b_2 = tmp_0;
-            @name("c.hasReturned") bool hasReturned_2 = false;
-            @name("c.retval") bit<32> retval_2;
-            @name("c.tmp") bit<32> tmp_6;
-            if (a_2 > b_2) {
-                tmp_6 = b_2;
-            } else {
-                tmp_6 = a_2;
-            }
-            hasReturned_2 = true;
-            retval_2 = tmp_6;
-            x = retval_2;
+        hasReturned_1 = true;
+        retval_1 = tmp_5;
+        tmp_0 = retval_1;
+        a_4 = tmp;
+        b_4 = tmp_0;
+        hasReturned_2 = false;
+        if (a_4 > b_4) {
+            tmp_6 = b_4;
+        } else {
+            tmp_6 = a_4;
         }
+        hasReturned_2 = true;
+        retval_2 = tmp_6;
+        x = retval_2;
     }
 }
 

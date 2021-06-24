@@ -31,11 +31,14 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<48> tmp;
-    @name("ingress.simple_action") action simple_action(@name("dummy") inout bit<32> dummy) {
+    @name("ingress.dummy") bit<32> dummy_0;
+    @name("ingress.simple_action") action simple_action() {
+        dummy_0 = h.h[tmp].a;
+        h.h[tmp].a = dummy_0;
     }
     apply {
         tmp = h.eth_hdr.dst_addr;
-        simple_action(h.h[tmp].a);
+        simple_action();
     }
 }
 

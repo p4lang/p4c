@@ -32,10 +32,12 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout
 }
 
 control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("cIngress.hasReturned") bool hasReturned;
+    @name("cIngress.hasReturned_0") bool hasReturned_0;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("cIngress.foo") action foo(@name("bar") bit<16> bar) {
-        @name("cIngress.hasReturned") bool hasReturned = false;
+        hasReturned = false;
         if (bar == 16w0xf00d) {
             hdr.ethernet.srcAddr = 48w0xdeadbeeff00d;
             hasReturned = true;
@@ -51,12 +53,12 @@ control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_m
         }
         actions = {
             foo();
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
-        @name("cIngress.hasReturned_0") bool hasReturned_0 = false;
+        hasReturned_0 = false;
         tbl1_0.apply();
         hasReturned_0 = true;
     }

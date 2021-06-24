@@ -54,12 +54,12 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     @name("ingress.tmp") PacketByteCountState_t tmp_0;
-    @name("s") PacketByteCountState_t s;
-    @name(".update_pkt_ip_byte_count") action update_pkt_ip_byte_count() {
-        s = tmp_0;
-        s[79:48] = tmp_0[79:48] + 32w1;
-        s[47:0] = s[47:0] + (bit<48>)hdr.ipv4.totalLen;
-        tmp_0 = s;
+    @name("ingress.s") PacketByteCountState_t s_0;
+    @name(".update_pkt_ip_byte_count") action update_pkt_ip_byte_count_0() {
+        s_0 = tmp_0;
+        s_0[79:48] = tmp_0[79:48] + 32w1;
+        s_0[47:0] = s_0[47:0] + (bit<48>)hdr.ipv4.totalLen;
+        tmp_0 = s_0;
     }
     @name("ingress.port_pkt_ip_bytes_in") Register<PacketByteCountState_t, PortId_t>(32w512) port_pkt_ip_bytes_in_0;
     @hidden action psaexampleregister2bmv2l130() {
@@ -87,9 +87,9 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     @hidden table tbl_update_pkt_ip_byte_count {
         actions = {
-            update_pkt_ip_byte_count();
+            update_pkt_ip_byte_count_0();
         }
-        const default_action = update_pkt_ip_byte_count();
+        const default_action = update_pkt_ip_byte_count_0();
     }
     @hidden table tbl_psaexampleregister2bmv2l132 {
         actions = {

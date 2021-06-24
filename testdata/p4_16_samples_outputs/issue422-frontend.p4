@@ -32,7 +32,7 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout
 }
 
 control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("cIngress.foo") action foo() {
     }
@@ -41,9 +41,9 @@ control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_m
         }
         actions = {
             foo();
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         tbl1_0.apply();

@@ -41,15 +41,15 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_6() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_7() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_8() {
+    @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_9() {
+    @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
     @name(".set0b1") action set0b1(@name("val") bit<8> val) {
         hdr.extra[0].b1 = val;
@@ -65,13 +65,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".noop") action noop() {
     }
-    @name(".noop") action noop_5() {
+    @name(".noop") action noop_1() {
     }
-    @name(".noop") action noop_6() {
+    @name(".noop") action noop_2() {
     }
-    @name(".noop") action noop_7() {
+    @name(".noop") action noop_3() {
     }
-    @name(".noop") action noop_8() {
+    @name(".noop") action noop_4() {
     }
     @name(".setb2") action setb2(@name("val") bit<8> val_11) {
         hdr.data.b2 = val_11;
@@ -93,56 +93,56 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             act2();
             act3();
             noop();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
             hdr.extra[0].h: ternary @name("extra[0].h") ;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".tbl1") table tbl1_0 {
         actions = {
             setb2();
-            noop_5();
-            @defaultonly NoAction_6();
+            noop_1();
+            @defaultonly NoAction_2();
         }
         key = {
             hdr.data.f2: ternary @name("data.f2") ;
         }
-        default_action = NoAction_6();
+        default_action = NoAction_2();
     }
     @name(".tbl2") table tbl2_0 {
         actions = {
             set1b1();
-            noop_6();
-            @defaultonly NoAction_7();
+            noop_2();
+            @defaultonly NoAction_3();
         }
         key = {
             hdr.data.f2: ternary @name("data.f2") ;
         }
-        default_action = NoAction_7();
+        default_action = NoAction_3();
     }
     @name(".tbl3") table tbl3_0 {
         actions = {
             set2b2();
-            noop_7();
-            @defaultonly NoAction_8();
+            noop_3();
+            @defaultonly NoAction_4();
         }
         key = {
             hdr.data.f2: ternary @name("data.f2") ;
         }
-        default_action = NoAction_8();
+        default_action = NoAction_4();
     }
     @name(".test1") table test1_0 {
         actions = {
             setb1();
-            noop_8();
-            @defaultonly NoAction_9();
+            noop_4();
+            @defaultonly NoAction_5();
         }
         key = {
             hdr.data.f1: ternary @name("data.f1") ;
         }
-        default_action = NoAction_9();
+        default_action = NoAction_5();
     }
     apply {
         test1_0.apply();
