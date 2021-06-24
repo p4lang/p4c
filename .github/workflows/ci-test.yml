@@ -25,6 +25,11 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Cancel previous runs
+      uses: styfle/cancel-workflow-action@0.9.0
+      with:
+        access_token: ${{ github.token }}
+
     - name: Build (Linux)
       run: |
         tools/start_ccache
