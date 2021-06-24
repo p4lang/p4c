@@ -22,10 +22,10 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
-    }
     @name("ingress.tmp_1") H tmp;
     @name("ingress.val") bit<8> val_0;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    }
     @name("ingress.do_action") action do_action() {
         sm.ingress_port = 9w0;
     }
@@ -35,9 +35,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         actions = {
             do_action();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         tmp.setValid();

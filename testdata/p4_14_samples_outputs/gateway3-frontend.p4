@@ -27,9 +27,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("._drop") action _drop() {
         mark_to_drop(standard_metadata);
@@ -38,13 +38,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.data.b1 = val;
         standard_metadata.egress_spec = port;
     }
-    @name(".setb1") action setb1_2(@name("val") bit<8> val_1, @name("port") bit<9> port_1) {
+    @name(".setb1") action setb1_1(@name("val") bit<8> val_1, @name("port") bit<9> port_1) {
         hdr.data.b1 = val_1;
         standard_metadata.egress_spec = port_1;
     }
     @name(".noop") action noop() {
     }
-    @name(".noop") action noop_2() {
+    @name(".noop") action noop_1() {
     }
     @name(".set_default_behavior_drop") table set_default_behavior_drop_0 {
         actions = {
@@ -56,23 +56,23 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             setb1();
             noop();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
             hdr.data.f1: exact @name("data.f1") ;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".test2") table test2_0 {
         actions = {
-            setb1_2();
-            noop_2();
-            @defaultonly NoAction_3();
+            setb1_1();
+            noop_1();
+            @defaultonly NoAction_2();
         }
         key = {
             hdr.data.f2: exact @name("data.f2") ;
         }
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         set_default_behavior_drop_0.apply();

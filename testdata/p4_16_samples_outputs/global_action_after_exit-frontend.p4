@@ -23,12 +23,15 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name(".do_action") action do_action(@name("val") inout ethernet_t val) {
-        val.eth_type = 16w0xdead;
+    @name("ingress.val") ethernet_t val_0;
+    @name(".do_action") action do_action_0() {
+        val_0 = h.eth_hdr;
+        val_0.eth_type = 16w0xdead;
+        h.eth_hdr = val_0;
     }
     apply {
         exit;
-        do_action(h.eth_hdr);
+        do_action_0();
     }
 }
 

@@ -32,10 +32,10 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.val_0") bit<8> val_0;
-    @name("ingress.val_1") bit<8> val_1;
+    @name("ingress.val_0") bit<8> val;
+    @name("ingress.val_1") bit<8> val_2;
     @hidden action gauntlet_side_effect_order_3bmv2l46() {
-        m.tmp = val_1;
+        m.tmp = val_2;
         h.h.a = 8w1;
     }
     @hidden table tbl_gauntlet_side_effect_order_3bmv2l46 {

@@ -16,9 +16,9 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("IngressI.c1.drop") action c1_drop_0() {
         mark_to_drop(smeta);
@@ -29,9 +29,9 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         }
         actions = {
             c1_drop_0();
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
     }
     @name("IngressI.c2.drop") action c2_drop_0() {
         mark_to_drop(smeta);
@@ -42,9 +42,9 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         }
         actions = {
             c2_drop_0();
-            NoAction_3();
+            NoAction_2();
         }
-        const default_action = NoAction_3();
+        const default_action = NoAction_2();
     }
     apply {
         _t0.apply();

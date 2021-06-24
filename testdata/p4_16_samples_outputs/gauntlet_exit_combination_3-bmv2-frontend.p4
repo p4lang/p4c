@@ -23,28 +23,37 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("ingress.hasReturned") bool hasReturned;
+    @name("ingress.val") bit<48> val_0;
+    @name("ingress.val") bit<48> val_2;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("ingress.do_action") action do_action(@name("val") inout bit<48> val) {
-        val = 48w2;
+    @name("ingress.do_action") action do_action() {
+        val_0 = h.eth_hdr.src_addr;
+        val_0 = 48w2;
+        h.eth_hdr.src_addr = val_0;
         exit;
+        h.eth_hdr.src_addr = val_0;
     }
-    @name("ingress.do_action") action do_action_2(@name("val") inout bit<48> val_1) {
-        val_1 = 48w2;
+    @name("ingress.do_action") action do_action_1() {
+        val_2 = h.eth_hdr.dst_addr;
+        val_2 = 48w2;
+        h.eth_hdr.dst_addr = val_2;
         exit;
+        h.eth_hdr.dst_addr = val_2;
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
             h.eth_hdr.eth_type: exact @name("key") ;
         }
         actions = {
-            do_action(h.eth_hdr.src_addr);
-            @defaultonly NoAction_0();
+            do_action();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
-        @name("ingress.hasReturned") bool hasReturned = false;
+        hasReturned = false;
         switch (simple_table_0.apply().action_run) {
             do_action: {
                 hasReturned = true;
@@ -55,7 +64,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         if (hasReturned) {
             ;
         } else {
-            do_action_2(h.eth_hdr.dst_addr);
+            do_action_1();
         }
     }
 }

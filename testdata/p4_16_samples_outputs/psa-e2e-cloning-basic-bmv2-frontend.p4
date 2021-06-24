@@ -26,21 +26,31 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 }
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarnUnused @name(".send_to_port") action send_to_port(@name("meta") inout psa_ingress_output_metadata_t meta_2, @name("egress_port") in PortId_t egress_port_1) {
-        meta_2.drop = false;
-        meta_2.multicast_group = (MulticastGroup_t)32w0;
-        meta_2.egress_port = egress_port_1;
+    @name("cIngress.meta") psa_ingress_output_metadata_t meta_0;
+    @name("cIngress.egress_port") PortId_t egress_port_0;
+    @name("cIngress.meta") psa_ingress_output_metadata_t meta_1;
+    @name("cIngress.egress_port") PortId_t egress_port_3;
+    @noWarnUnused @name(".send_to_port") action send_to_port_1() {
+        meta_0 = ostd;
+        egress_port_0 = (PortId_t)32w0xfffffffa;
+        meta_0.drop = false;
+        meta_0.multicast_group = (MulticastGroup_t)32w0;
+        meta_0.egress_port = egress_port_0;
+        ostd = meta_0;
     }
-    @noWarnUnused @name(".send_to_port") action send_to_port_0(@name("meta") inout psa_ingress_output_metadata_t meta_3, @name("egress_port") in PortId_t egress_port_2) {
-        meta_3.drop = false;
-        meta_3.multicast_group = (MulticastGroup_t)32w0;
-        meta_3.egress_port = egress_port_2;
+    @noWarnUnused @name(".send_to_port") action send_to_port_2() {
+        meta_1 = ostd;
+        egress_port_3 = (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr;
+        meta_1.drop = false;
+        meta_1.multicast_group = (MulticastGroup_t)32w0;
+        meta_1.egress_port = egress_port_3;
+        ostd = meta_1;
     }
     apply {
         if (hdr.ethernet.dstAddr == 48w8 && istd.packet_path != PSA_PacketPath_t.RECIRCULATE) {
-            send_to_port(ostd, (PortId_t)32w0xfffffffa);
+            send_to_port_1();
         } else {
-            send_to_port_0(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr);
+            send_to_port_2();
         }
     }
 }
@@ -53,8 +63,11 @@ parser EgressParserImpl(packet_in buffer, out headers_t hdr, inout metadata_t us
 }
 
 control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    @noWarnUnused @name(".egress_drop") action egress_drop(@name("meta") inout psa_egress_output_metadata_t meta_4) {
-        meta_4.drop = true;
+    @name("cEgress.meta") psa_egress_output_metadata_t meta_5;
+    @noWarnUnused @name(".egress_drop") action egress_drop_0() {
+        meta_5 = ostd;
+        meta_5.drop = true;
+        ostd = meta_5;
     }
     @name("cEgress.clone") action clone_1() {
         ostd.clone = true;
@@ -66,7 +79,7 @@ control cEgress(inout headers_t hdr, inout metadata_t user_meta, in psa_egress_i
         } else {
             clone_1();
             if (hdr.ethernet.dstAddr == 48w9) {
-                egress_drop(ostd);
+                egress_drop_0();
                 ostd.clone_session_id = (CloneSessionId_t)16w9;
             }
             if (istd.egress_port == (PortId_t)32w0xfffffffa) {

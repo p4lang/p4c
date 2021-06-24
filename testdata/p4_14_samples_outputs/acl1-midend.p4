@@ -245,9 +245,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 @name(".drop_stats_2") counter<bit<8>>(32w256, CounterType.packets) drop_stats_2;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name(".drop_stats_update") action drop_stats_update() {
         drop_stats_2.count(meta._ingress_metadata_drop_reason21);
@@ -272,10 +272,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".drop_stats") table drop_stats_1 {
         actions = {
             drop_stats_update();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         size = 256;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".system_acl") table system_acl_0 {
         actions = {
@@ -286,7 +286,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             drop_packet_with_reason();
             negative_mirror();
             congestion_mirror_set();
-            @defaultonly NoAction_3();
+            @defaultonly NoAction_2();
         }
         key = {
             meta._acl_metadata_if_label8                : ternary @name("acl_metadata.if_label") ;
@@ -318,7 +318,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta._ingress_metadata_enable_dod23         : ternary @name("ingress_metadata.enable_dod") ;
         }
         size = 512;
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         system_acl_0.apply();

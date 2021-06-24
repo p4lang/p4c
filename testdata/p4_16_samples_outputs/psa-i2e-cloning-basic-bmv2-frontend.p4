@@ -26,13 +26,21 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 }
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarnUnused @name(".ingress_drop") action ingress_drop(@name("meta") inout psa_ingress_output_metadata_t meta_2) {
-        meta_2.drop = true;
+    @name("cIngress.meta") psa_ingress_output_metadata_t meta_0;
+    @name("cIngress.meta") psa_ingress_output_metadata_t meta_1;
+    @name("cIngress.egress_port") PortId_t egress_port_0;
+    @noWarnUnused @name(".ingress_drop") action ingress_drop_0() {
+        meta_0 = ostd;
+        meta_0.drop = true;
+        ostd = meta_0;
     }
-    @noWarnUnused @name(".send_to_port") action send_to_port(@name("meta") inout psa_ingress_output_metadata_t meta_3, @name("egress_port") in PortId_t egress_port_1) {
-        meta_3.drop = false;
-        meta_3.multicast_group = (MulticastGroup_t)32w0;
-        meta_3.egress_port = egress_port_1;
+    @noWarnUnused @name(".send_to_port") action send_to_port_0() {
+        meta_1 = ostd;
+        egress_port_0 = (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr;
+        meta_1.drop = false;
+        meta_1.multicast_group = (MulticastGroup_t)32w0;
+        meta_1.egress_port = egress_port_0;
+        ostd = meta_1;
     }
     @name("cIngress.clone") action clone_1() {
         ostd.clone = true;
@@ -41,10 +49,10 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     apply {
         clone_1();
         if (hdr.ethernet.dstAddr == 48w9) {
-            ingress_drop(ostd);
+            ingress_drop_0();
         } else {
             hdr.ethernet.srcAddr = 48w0xcafe;
-            send_to_port(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr);
+            send_to_port_0();
         }
     }
 }

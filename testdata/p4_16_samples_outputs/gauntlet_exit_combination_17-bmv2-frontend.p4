@@ -23,13 +23,14 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("ingress.hasReturned") bool hasReturned;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("ingress.dummy_action") action dummy_action() {
     }
-    @name("ingress.dummy_action") action dummy_action_2() {
+    @name("ingress.dummy_action") action dummy_action_1() {
     }
     @name("ingress.simple_table_1") table simple_table {
         key = {
@@ -37,26 +38,26 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         actions = {
             dummy_action();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name("ingress.simple_table_2") table simple_table_0 {
         key = {
             48w1: exact @name("key") ;
         }
         actions = {
-            dummy_action_2();
-            @defaultonly NoAction_3();
+            dummy_action_1();
+            @defaultonly NoAction_2();
         }
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
-        @name("ingress.hasReturned") bool hasReturned = false;
+        hasReturned = false;
         switch (simple_table.apply().action_run) {
             dummy_action: {
                 switch (simple_table_0.apply().action_run) {
-                    dummy_action_2: {
+                    dummy_action_1: {
                         h.eth_hdr.src_addr = 48w4;
                         hasReturned = true;
                     }

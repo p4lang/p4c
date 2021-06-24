@@ -15,21 +15,20 @@ struct Meta {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("ingress.hasReturned") bool hasReturned;
+    @name("ingress.retval") bit<32> retval;
+    @name("ingress.tmp1") H tmp1_0;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.simple_action") action simple_action() {
-        {
-            @name("ingress.hasReturned") bool hasReturned = false;
-            @name("ingress.retval") bit<32> retval;
-            @name("ingress.tmp1") H tmp1_0;
-            tmp1_0.setInvalid();
-            if (tmp1_0.a != 32w10) {
-                tmp1_0.a = tmp1_0.a + 32w10;
-            }
-            hasReturned = true;
-            retval = tmp1_0.a;
-            h.h.a = retval;
+        hasReturned = false;
+        tmp1_0.setInvalid();
+        if (tmp1_0.a != 32w10) {
+            tmp1_0.a = tmp1_0.a + 32w10;
         }
+        hasReturned = true;
+        retval = tmp1_0.a;
+        h.h.a = retval;
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
@@ -37,9 +36,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         actions = {
             simple_action();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         simple_table_0.apply();

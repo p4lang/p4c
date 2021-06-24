@@ -43,26 +43,26 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_1") bit<8> tmp_1;
     @name("ingress.tmp_2") bit<1> tmp_2;
     @name("ingress.tmp_3") bit<1> tmp_3;
+    @name("ingress.val_0") bit<1> val;
+    @name("ingress.hasReturned") bool hasReturned;
+    @name("ingress.retval") bit<1> retval;
+    @name("ingress.val_1") bit<8> val_2;
+    @name("ingress.hasReturned_0") bool hasReturned_0;
+    @name("ingress.retval_0") bit<1> retval_0;
     apply {
-        {
-            @name("ingress.val_0") bit<1> val_0 = h.i.idx;
-            @name("ingress.hasReturned") bool hasReturned = false;
-            @name("ingress.retval") bit<1> retval;
-            hasReturned = true;
-            retval = val_0;
-            tmp = retval;
-        }
+        val = h.i.idx;
+        hasReturned = false;
+        hasReturned = true;
+        retval = val;
+        tmp = retval;
         tmp_0 = tmp;
         tmp_1 = h.h[tmp_0].a;
-        {
-            @name("ingress.val_1") bit<8> val_1 = tmp_1;
-            @name("ingress.hasReturned_0") bool hasReturned_0 = false;
-            @name("ingress.retval_0") bit<1> retval_0;
-            hasReturned_0 = true;
-            retval_0 = 1w0;
-            tmp_1 = val_1;
-            tmp_2 = retval_0;
-        }
+        val_2 = tmp_1;
+        hasReturned_0 = false;
+        hasReturned_0 = true;
+        retval_0 = 1w0;
+        tmp_1 = val_2;
+        tmp_2 = retval_0;
         h.h[tmp_0].a = tmp_1;
         tmp_3 = tmp_2;
         h.h[tmp_3].a = 8w1;

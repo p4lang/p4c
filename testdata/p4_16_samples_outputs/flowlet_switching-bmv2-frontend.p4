@@ -85,7 +85,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("egress.rewrite_mac") action rewrite_mac(@name("smac") bit<48> smac) {
         hdr.ethernet.srcAddr = smac;
@@ -97,13 +97,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             rewrite_mac();
             _drop();
-            NoAction_0();
+            NoAction_2();
         }
         key = {
             standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
         }
         size = 256;
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     apply {
         send_frame_0.apply();
@@ -111,25 +111,25 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_8() {
+    @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_9() {
+    @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_10() {
+    @noWarn("unused") @name(".NoAction") action NoAction_6() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_11() {
+    @noWarn("unused") @name(".NoAction") action NoAction_7() {
     }
     @name("ingress.flowlet_id") register<bit<16>>(32w8192) flowlet_id_0;
     @name("ingress.flowlet_lasttime") register<bit<32>>(32w8192) flowlet_lasttime_0;
     @name("ingress._drop") action _drop_2() {
         mark_to_drop(standard_metadata);
     }
-    @name("ingress._drop") action _drop_5() {
+    @name("ingress._drop") action _drop_3() {
         mark_to_drop(standard_metadata);
     }
-    @name("ingress._drop") action _drop_6() {
+    @name("ingress._drop") action _drop_4() {
         mark_to_drop(standard_metadata);
     }
     @name("ingress.set_ecmp_select") action set_ecmp_select(@name("ecmp_base") bit<8> ecmp_base, @name("ecmp_count") bit<8> ecmp_count) {
@@ -159,51 +159,51 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _drop_2();
             set_ecmp_select();
-            NoAction_1();
+            NoAction_3();
         }
         key = {
             hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
         }
         size = 1024;
-        default_action = NoAction_1();
+        default_action = NoAction_3();
     }
     @name("ingress.ecmp_nhop") table ecmp_nhop_0 {
         actions = {
-            _drop_5();
+            _drop_3();
             set_nhop();
-            NoAction_8();
+            NoAction_4();
         }
         key = {
             meta.ingress_metadata.ecmp_offset: exact @name("meta.ingress_metadata.ecmp_offset") ;
         }
         size = 16384;
-        default_action = NoAction_8();
+        default_action = NoAction_4();
     }
     @name("ingress.flowlet") table flowlet_0 {
         actions = {
             lookup_flowlet_map();
-            NoAction_9();
+            NoAction_5();
         }
-        default_action = NoAction_9();
+        default_action = NoAction_5();
     }
     @name("ingress.forward") table forward_0 {
         actions = {
             set_dmac();
-            _drop_6();
-            NoAction_10();
+            _drop_4();
+            NoAction_6();
         }
         key = {
             meta.ingress_metadata.nhop_ipv4: exact @name("meta.ingress_metadata.nhop_ipv4") ;
         }
         size = 512;
-        default_action = NoAction_10();
+        default_action = NoAction_6();
     }
     @name("ingress.new_flowlet") table new_flowlet_0 {
         actions = {
             update_flowlet_id();
-            NoAction_11();
+            NoAction_7();
         }
-        default_action = NoAction_11();
+        default_action = NoAction_7();
     }
     apply {
         @atomic {

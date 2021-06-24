@@ -34,8 +34,9 @@ parser prs(packet_in p, out Headers h) {
 }
 
 control c(inout Headers h) {
+    @name("c.hasReturned") bool hasReturned;
     apply {
-        @name("c.hasReturned") bool hasReturned = false;
+        hasReturned = false;
         if (h.eth.isValid()) {
             ;
         } else {

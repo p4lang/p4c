@@ -23,19 +23,26 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name(".assign_addrs") action assign_addrs(@name("h") inout Headers h_1, @name("check_1") bool check_1, @name("check_2") bool check_2) {
-        h_1.eth_hdr.dst_addr = 48w4;
-        if (check_1) {
-            h_1.eth_hdr.dst_addr = 48w2;
-            if (check_2) {
-                h_1.eth_hdr.src_addr = 48w3;
+    @name("ingress.h") Headers h_0;
+    @name("ingress.check_1") bool check_0;
+    @name("ingress.check_2") bool check_3;
+    @name(".assign_addrs") action assign_addrs_0() {
+        h_0 = h;
+        check_0 = true;
+        check_3 = true;
+        h_0.eth_hdr.dst_addr = 48w4;
+        if (check_0) {
+            h_0.eth_hdr.dst_addr = 48w2;
+            if (check_3) {
+                h_0.eth_hdr.src_addr = 48w3;
             } else {
-                h_1.eth_hdr.dst_addr = 48w1;
+                h_0.eth_hdr.dst_addr = 48w1;
             }
         }
+        h = h_0;
     }
     apply {
-        assign_addrs(h, true, true);
+        assign_addrs_0();
     }
 }
 

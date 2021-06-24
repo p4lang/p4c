@@ -39,22 +39,23 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_0") bit<3> tmp;
     @name("ingress.tmp_1") bit<3> tmp_0;
+    @name("ingress.val_0") bit<3> val;
+    @name("ingress.bound_val_0") bit<3> bound_val;
+    @name("ingress.hasReturned") bool hasReturned;
+    @name("ingress.retval") bit<3> retval;
+    @name("ingress.tmp") bit<3> tmp_1;
     apply {
-        {
-            @name("ingress.val_0") bit<3> val_0 = h.i.a;
-            @name("ingress.bound_val_0") bit<3> bound_val_0 = 3w1;
-            @name("ingress.hasReturned") bool hasReturned = false;
-            @name("ingress.retval") bit<3> retval;
-            @name("ingress.tmp") bit<3> tmp_1;
-            if (val_0 > bound_val_0) {
-                tmp_1 = bound_val_0;
-            } else {
-                tmp_1 = val_0;
-            }
-            hasReturned = true;
-            retval = tmp_1;
-            tmp = retval;
+        val = h.i.a;
+        bound_val = 3w1;
+        hasReturned = false;
+        if (val > bound_val) {
+            tmp_1 = bound_val;
+        } else {
+            tmp_1 = val;
         }
+        hasReturned = true;
+        retval = tmp_1;
+        tmp = retval;
         tmp_0 = tmp;
         h.h[tmp_0].a = 32w1;
     }

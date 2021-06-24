@@ -23,20 +23,20 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    ethernet_t h_1_eth_hdr;
-    @name(".assign_addrs") action assign_addrs() {
-        h_1_eth_hdr = h.eth_hdr;
-        h_1_eth_hdr.dst_addr = 48w4;
-        h_1_eth_hdr.dst_addr = 48w2;
-        h_1_eth_hdr.src_addr = 48w3;
-        h_1_eth_hdr.dst_addr = 48w2;
-        h.eth_hdr = h_1_eth_hdr;
+    ethernet_t h_0_eth_hdr;
+    @name(".assign_addrs") action assign_addrs_0() {
+        h_0_eth_hdr = h.eth_hdr;
+        h_0_eth_hdr.dst_addr = 48w4;
+        h_0_eth_hdr.dst_addr = 48w2;
+        h_0_eth_hdr.src_addr = 48w3;
+        h_0_eth_hdr.dst_addr = 48w2;
+        h.eth_hdr = h_0_eth_hdr;
     }
     @hidden table tbl_assign_addrs {
         actions = {
-            assign_addrs();
+            assign_addrs_0();
         }
-        const default_action = assign_addrs();
+        const default_action = assign_addrs_0();
     }
     apply {
         tbl_assign_addrs.apply();

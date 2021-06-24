@@ -13,7 +13,7 @@ control c(out bool b) {
     @name("c.a") action a() {
         xv_0 = 16w65533;
     }
-    @name("c.a") action a_2() {
+    @name("c.a") action a_1() {
         xv_0 = 16w0;
     }
     @hidden action namedarg1l22() {
@@ -35,9 +35,9 @@ control c(out bool b) {
     }
     @hidden table tbl_a_0 {
         actions = {
-            a_2();
+            a_1();
         }
-        const default_action = a_2();
+        const default_action = a_1();
     }
     @hidden table tbl_namedarg1l22 {
         actions = {

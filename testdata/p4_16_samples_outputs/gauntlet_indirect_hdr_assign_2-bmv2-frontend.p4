@@ -23,11 +23,13 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.simple_action") action simple_action(@name("val") in ethernet_t val) {
-        h.eth_hdr.src_addr = val.src_addr;
+    @name("ingress.val") ethernet_t val_0;
+    @name("ingress.simple_action") action simple_action() {
+        val_0 = h.eth_hdr;
+        h.eth_hdr.src_addr = val_0.src_addr;
     }
     apply {
-        simple_action(h.eth_hdr);
+        simple_action();
     }
 }
 

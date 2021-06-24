@@ -85,14 +85,14 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("._drop") action _drop() {
         mark_to_drop(standard_metadata);
     }
-    @name("._drop") action _drop_2() {
+    @name("._drop") action _drop_1() {
         mark_to_drop(standard_metadata);
     }
     @name(".route") action route() {
@@ -107,23 +107,23 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".drop_pkt") table drop_pkt_0 {
         actions = {
             _drop();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         size = 1;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".route_pkt") table route_pkt_0 {
         actions = {
-            _drop_2();
+            _drop_1();
             route();
-            @defaultonly NoAction_3();
+            @defaultonly NoAction_2();
         }
         key = {
             hdr.axon_head.isValid()     : exact @name("axon_head.$valid$") ;
             hdr.axon_fwdHop[0].isValid(): exact @name("axon_fwdHop[0].$valid$") ;
         }
         size = 1;
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         if (hdr.axon_head.axonLength != meta.my_metadata.headerLen) {

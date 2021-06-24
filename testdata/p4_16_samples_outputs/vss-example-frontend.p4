@@ -79,19 +79,20 @@ parser TopParser(packet_in b, out Parsed_packet p) {
 }
 
 control TopPipe(inout Parsed_packet headers, in error parseError, in InControl inCtrl, out OutControl outCtrl) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
-    }
     @name("TopPipe.nextHop") IPv4Address nextHop_0;
+    @name("TopPipe.hasReturned") bool hasReturned;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    }
     @name("TopPipe.Drop_action") action Drop_action() {
         outCtrl.outputPort = 4w0xf;
     }
-    @name("TopPipe.Drop_action") action Drop_action_4() {
+    @name("TopPipe.Drop_action") action Drop_action_1() {
         outCtrl.outputPort = 4w0xf;
     }
-    @name("TopPipe.Drop_action") action Drop_action_5() {
+    @name("TopPipe.Drop_action") action Drop_action_2() {
         outCtrl.outputPort = 4w0xf;
     }
-    @name("TopPipe.Drop_action") action Drop_action_6() {
+    @name("TopPipe.Drop_action") action Drop_action_3() {
         outCtrl.outputPort = 4w0xf;
     }
     @name("TopPipe.Set_nhop") action Set_nhop(@name("ipv4_dest") IPv4Address ipv4_dest, @name("port") PortId port) {
@@ -119,42 +120,42 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         }
         actions = {
             Send_to_cpu();
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
     }
-    @name("TopPipe.Set_dmac") action Set_dmac(@name("dmac") EthernetAddress dmac) {
-        headers.ethernet.dstAddr = dmac;
+    @name("TopPipe.Set_dmac") action Set_dmac(@name("dmac") EthernetAddress dmac_0) {
+        headers.ethernet.dstAddr = dmac_0;
     }
-    @name("TopPipe.dmac") table dmac_0 {
+    @name("TopPipe.dmac") table dmac_1 {
         key = {
             nextHop_0: exact @name("nextHop") ;
         }
         actions = {
-            Drop_action_4();
+            Drop_action_1();
             Set_dmac();
         }
         size = 1024;
-        default_action = Drop_action_4();
+        default_action = Drop_action_1();
     }
-    @name("TopPipe.Set_smac") action Set_smac(@name("smac") EthernetAddress smac) {
-        headers.ethernet.srcAddr = smac;
+    @name("TopPipe.Set_smac") action Set_smac(@name("smac") EthernetAddress smac_0) {
+        headers.ethernet.srcAddr = smac_0;
     }
-    @name("TopPipe.smac") table smac_0 {
+    @name("TopPipe.smac") table smac_1 {
         key = {
             outCtrl.outputPort: exact @name("outCtrl.outputPort") ;
         }
         actions = {
-            Drop_action_5();
+            Drop_action_2();
             Set_smac();
         }
         size = 16;
-        default_action = Drop_action_5();
+        default_action = Drop_action_2();
     }
     apply {
-        @name("TopPipe.hasReturned") bool hasReturned = false;
+        hasReturned = false;
         if (parseError != error.NoError) {
-            Drop_action_6();
+            Drop_action_3();
             hasReturned = true;
         }
         if (hasReturned) {
@@ -176,7 +177,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         if (hasReturned) {
             ;
         } else {
-            dmac_0.apply();
+            dmac_1.apply();
             if (outCtrl.outputPort == 4w0xf) {
                 hasReturned = true;
             }
@@ -184,7 +185,7 @@ control TopPipe(inout Parsed_packet headers, in error parseError, in InControl i
         if (hasReturned) {
             ;
         } else {
-            smac_0.apply();
+            smac_1.apply();
         }
     }
 }

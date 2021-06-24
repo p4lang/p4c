@@ -55,7 +55,7 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIngress.ipv4_forward") action ipv4_forward() {
         hdr.ipv4.totalLen = hdr.ipv4.totalLen + (hdr.ipv4.identification > 16w0 ? 16w0 : (hdr.ipv4.identification > 16w1 ? 16w1 : (hdr.ipv4.identification > 16w2 ? 16w2 : (hdr.ipv4.identification > 16w3 ? 16w3 : 16w4)))) + hdr.ipv4.hdrChecksum;
@@ -69,10 +69,10 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         actions = {
             ipv4_forward();
             drop();
-            NoAction_0();
+            NoAction_1();
         }
         size = 1024;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         ipv4_lpm_0.apply();

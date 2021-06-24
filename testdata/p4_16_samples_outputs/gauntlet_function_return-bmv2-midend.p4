@@ -14,7 +14,7 @@ struct Meta {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.d_0") bit<32> d_0;
+    @name("ingress.d_0") bit<32> d;
     @name("ingress.action_thing") action action_thing() {
         sm.enq_timestamp = 32w1;
     }

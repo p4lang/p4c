@@ -30,9 +30,9 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.dummy_1") H dummy_1;
+    @name("ingress.dummy_0") H dummy_2;
     @hidden action act() {
-        h.h = dummy_1;
+        h.h = dummy_2;
     }
     @hidden table tbl_act {
         actions = {

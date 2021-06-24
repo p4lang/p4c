@@ -26,7 +26,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bool hasExited;
     @name("ingress.hasReturned") bool hasReturned;
     bit<48> key_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.simple_action") action simple_action() {
         h.eth_hdr.src_addr = 48w1;
@@ -37,9 +37,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         actions = {
             simple_action();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action gauntlet_exit_combination_9bmv2l45() {
         hasReturned = true;

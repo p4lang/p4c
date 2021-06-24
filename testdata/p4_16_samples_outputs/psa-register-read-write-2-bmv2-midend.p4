@@ -43,7 +43,7 @@ parser MyEP(packet_in pkt, out headers_t hdr, inout metadata_t user_meta, in psa
 control MyIC(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     @name("MyIC.orig_data") bit<16> orig_data_0;
     @name("MyIC.next_data") bit<16> next_data_0;
-    @noWarnUnused @name(".send_to_port") action send_to_port() {
+    @noWarnUnused @name(".send_to_port") action send_to_port_0() {
         ostd.drop = false;
         ostd.multicast_group = 32w0;
         ostd.egress_port = 32w1;
@@ -108,9 +108,9 @@ control MyIC(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_inp
     }
     @hidden table tbl_send_to_port {
         actions = {
-            send_to_port();
+            send_to_port_0();
         }
-        const default_action = send_to_port();
+        const default_action = send_to_port_0();
     }
     apply {
         if (hdr.ethernet.isValid()) {

@@ -43,7 +43,7 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout metadata b, in psa_egress_par
 }
 
 control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIC.forward") action forward() {
         b.meta = a.srcAddr | a.dstAddr;
@@ -56,9 +56,9 @@ control MyIC(inout ethernet_t a, inout metadata b, in psa_ingress_input_metadata
         }
         actions = {
             forward();
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         tbl_0.apply();

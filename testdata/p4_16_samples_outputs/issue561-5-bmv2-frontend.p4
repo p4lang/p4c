@@ -47,7 +47,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.debug_hdr") table debug_hdr_0 {
         key = {
@@ -56,9 +56,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.u[0].byte.isValid() : exact @name("hdr.u[0].byte.$valid$") ;
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
     }
     apply {
         debug_hdr_0.apply();

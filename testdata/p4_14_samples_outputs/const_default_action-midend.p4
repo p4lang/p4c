@@ -66,20 +66,20 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name(".no_op") action _no_op_0() {
     }
-    @name(".no_op") action _no_op_2() {
+    @name(".no_op") action _no_op_1() {
     }
     @name(".set_bd_properties") action _set_bd_properties_0(@name("bd") bit<14> bd_1, @name("ingress_rid") bit<14> ingress_rid) {
         meta._ingress_metadata_bd1 = bd_1;
         meta._ingress_metadata_rid2 = ingress_rid;
     }
-    @name(".set_bd_properties") action _set_bd_properties_2(@name("bd") bit<14> bd_2, @name("ingress_rid") bit<14> ingress_rid_1) {
+    @name(".set_bd_properties") action _set_bd_properties_1(@name("bd") bit<14> bd_2, @name("ingress_rid") bit<14> ingress_rid_1) {
         meta._ingress_metadata_bd1 = bd_2;
         meta._ingress_metadata_rid2 = ingress_rid_1;
     }
     @name(".port_vlan_mapping_miss") action _port_vlan_mapping_miss_0() {
         meta._ingress_metadata_drop_flag3 = 1w1;
     }
-    @name(".port_vlan_mapping_miss") action _port_vlan_mapping_miss_2() {
+    @name(".port_vlan_mapping_miss") action _port_vlan_mapping_miss_1() {
         meta._ingress_metadata_drop_flag3 = 1w1;
     }
     @name(".port_vlan_to_bd_mapping") table _port_vlan_to_bd_mapping {
@@ -98,15 +98,15 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".vlan_to_bd_mapping") table _vlan_to_bd_mapping {
         actions = {
-            _set_bd_properties_2();
-            _port_vlan_mapping_miss_2();
-            @defaultonly _no_op_2();
+            _set_bd_properties_1();
+            _port_vlan_mapping_miss_1();
+            @defaultonly _no_op_1();
         }
         key = {
             hdr.vlan_tag_[0].vid: exact @name("vlan_tag_[0].vid") ;
         }
         size = 1024;
-        const default_action = _no_op_2();
+        const default_action = _no_op_1();
         implementation = bd_action_profile;
     }
     apply {

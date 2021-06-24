@@ -69,9 +69,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name(".drop") action drop() {
     }
@@ -85,22 +85,22 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             drop();
             forward();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
             hdr.ipv4.dstAddr: ternary @name("ipv4.dstAddr") ;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".setup") table setup_0 {
         actions = {
             do_setup();
-            @defaultonly NoAction_3();
+            @defaultonly NoAction_2();
         }
         key = {
             hdr.ethernet.isValid(): exact @name("ethernet.$valid$") ;
         }
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         setup_0.apply();

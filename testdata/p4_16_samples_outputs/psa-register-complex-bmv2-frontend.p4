@@ -26,16 +26,21 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 }
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarnUnused @name(".send_to_port") action send_to_port(@name("meta") inout psa_ingress_output_metadata_t meta_1, @name("egress_port") in PortId_t egress_port_1) {
-        meta_1.drop = false;
-        meta_1.multicast_group = (MulticastGroup_t)32w0;
-        meta_1.egress_port = egress_port_1;
-    }
     @name("cIngress.tmp") bit<48> tmp;
     @name("cIngress.tmp_0") bit<48> tmp_0;
     @name("cIngress.tmp_1") bit<48> tmp_1;
     @name("cIngress.tmp_2") bit<48> tmp_2;
     @name("cIngress.tmp_3") bit<48> tmp_3;
+    @name("cIngress.meta") psa_ingress_output_metadata_t meta_0;
+    @name("cIngress.egress_port") PortId_t egress_port_0;
+    @noWarnUnused @name(".send_to_port") action send_to_port_0() {
+        meta_0 = ostd;
+        egress_port_0 = (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr;
+        meta_0.drop = false;
+        meta_0.multicast_group = (MulticastGroup_t)32w0;
+        meta_0.egress_port = egress_port_0;
+        ostd = meta_0;
+    }
     @name("cIngress.regfile") Register<EthernetAddress, bit<32>>(32w128) regfile_0;
     apply {
         regfile_0.write(32w1, 48w3);
@@ -47,7 +52,7 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
         tmp_3 = tmp_2 + 48w281474976710651;
         hdr.ethernet.dstAddr = tmp_3;
         if (hdr.ethernet.dstAddr == 48w2) {
-            send_to_port(ostd, (PortId_t)(PortIdUint_t)hdr.ethernet.dstAddr);
+            send_to_port_0();
         }
     }
 }
