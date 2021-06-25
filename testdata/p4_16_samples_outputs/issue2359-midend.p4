@@ -24,9 +24,12 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bool hasExited;
+    @name("ingress.val") bit<48> val_0;
     @name("ingress.do_action") action do_action() {
+        val_0 = h.eth_hdr.src_addr;
         h.eth_hdr.src_addr = h.eth_hdr.src_addr;
         hasExited = (h.eth_hdr.eth_type == 16w1 ? hasExited : true);
+        h.eth_hdr.src_addr = (hasExited ? h.eth_hdr.src_addr : val_0);
     }
     @hidden action act() {
         hasExited = false;

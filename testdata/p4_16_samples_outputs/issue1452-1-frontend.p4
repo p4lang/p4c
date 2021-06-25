@@ -1,10 +1,12 @@
 control c() {
     @name("c.x") bit<32> x_0;
-    @name("c.b") action b(@name("arg") out bit<32> arg) {
-        arg = 32w2;
+    @name("c.arg") bit<32> arg_0;
+    @name("c.b") action b() {
+        arg_0 = 32w2;
+        x_0 = arg_0;
     }
     apply {
-        b(x_0);
+        b();
     }
 }
 

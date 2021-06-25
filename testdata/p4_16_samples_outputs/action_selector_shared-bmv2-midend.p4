@@ -16,14 +16,14 @@ parser ParserI(packet_in pk, out H hdr, inout M meta, inout standard_metadata_t 
 }
 
 control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("IngressI.drop") action drop() {
         mark_to_drop(smeta);
     }
-    @name("IngressI.drop") action drop_2() {
+    @name("IngressI.drop") action drop_1() {
         mark_to_drop(smeta);
     }
     @name("IngressI.as") action_selector(HashAlgorithm.identity, 32w1024, 32w10) as_0;
@@ -33,9 +33,9 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
         }
         actions = {
             drop();
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
         @name("ap_ws") implementation = as_0;
     }
     @name("IngressI.indirect_ws_1") table indirect_ws_2 {
@@ -43,10 +43,10 @@ control IngressI(inout H hdr, inout M meta, inout standard_metadata_t smeta) {
             meta.hash1: selector @name("meta.hash1") ;
         }
         actions = {
-            drop_2();
-            NoAction_3();
+            drop_1();
+            NoAction_2();
         }
-        const default_action = NoAction_3();
+        const default_action = NoAction_2();
         @name("ap_ws") implementation = as_0;
     }
     apply {

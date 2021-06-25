@@ -108,7 +108,7 @@ control computeChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("egress._drop") action _drop() {
         mark_to_drop(standard_metadata);
@@ -119,10 +119,10 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         }
         actions = {
             _drop();
-            NoAction_0();
+            NoAction_1();
         }
         size = 2;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         drop_tbl_0.apply();

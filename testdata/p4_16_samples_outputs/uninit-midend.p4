@@ -48,7 +48,7 @@ control c(out bit<32> v) {
     @name("c.e") bit<32> e_0;
     @name("c.a1") action a1() {
     }
-    @name("c.a1") action a1_2() {
+    @name("c.a1") action a1_1() {
     }
     @name("c.a2") action a2() {
     }
@@ -79,9 +79,9 @@ control c(out bit<32> v) {
     }
     @hidden table tbl_a1 {
         actions = {
-            a1_2();
+            a1_1();
         }
-        const default_action = a1_2();
+        const default_action = a1_1();
     }
     apply {
         if (e_0 > 32w0) {

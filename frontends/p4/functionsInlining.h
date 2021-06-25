@@ -20,6 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/unusedDeclarations.h"
+#include "frontends/p4/cloner.h"
 #include "commonInlining.h"
 
 namespace P4 {
@@ -86,16 +87,36 @@ class FunctionsInliner : public AbstractInliner<FunctionsInlineList, FunctionsIn
 
 typedef InlineDriver<FunctionsInlineList, FunctionsInlineWorkList> InlineFunctionsDriver;
 
-class InlineFunctions : public PassRepeated {
+/// Convert distinct variable declarations into distinct nodes in the
+/// IR tree.
+class CloneVariableDeclarations : public Transform {
+ public:
+    CloneVariableDeclarations() {
+        setName("CloneVariableDeclarations");
+        visitDagOnce = false;
+    }
+    const IR::Node* postorder(IR::Declaration_Variable* declaration) override {
+        // this will have a different declid
+        auto result = new IR::Declaration_Variable(
+            declaration->srcInfo, declaration->getName(), declaration->annotations,
+            declaration->type, declaration->initializer);
+        LOG3("Cloned " << dbp(result));
+        return result;
+    }
+};
+
+class InlineFunctions : public PassManager {
     FunctionsInlineList functionsToInline;
 
  public:
     InlineFunctions(ReferenceMap* refMap, TypeMap* typeMap) {
-        passes.push_back(new TypeChecking(refMap, typeMap));
-        passes.push_back(new DiscoverFunctionsInlining(&functionsToInline, refMap, typeMap));
-        passes.push_back(new InlineFunctionsDriver(&functionsToInline,
-                                                   new FunctionsInliner(refMap->isV1())));
-        passes.push_back(new RemoveAllUnusedDeclarations(refMap));
+        passes.push_back(new PassRepeated({
+                    new TypeChecking(refMap, typeMap),
+                    new DiscoverFunctionsInlining(&functionsToInline, refMap, typeMap),
+                    new InlineFunctionsDriver(&functionsToInline,
+                                              new FunctionsInliner(refMap->isV1())),
+                    new RemoveAllUnusedDeclarations(refMap)}));
+        passes.push_back(new CloneVariableDeclarations());
         setName("InlineFunctions");
     }
 };

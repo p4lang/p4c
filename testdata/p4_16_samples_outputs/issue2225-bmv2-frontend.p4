@@ -23,12 +23,16 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.do_action") action do_action(@name("val_0") inout bit<16> val_0) {
-        val_0 = 16w3;
+    @name("ingress.val_0") bit<16> val;
+    @name("ingress.do_action") action do_action() {
+        val = h.eth_hdr.eth_type;
+        val = 16w3;
+        h.eth_hdr.eth_type = val;
         exit;
+        h.eth_hdr.eth_type = val;
     }
     apply {
-        do_action(h.eth_hdr.eth_type);
+        do_action();
     }
 }
 

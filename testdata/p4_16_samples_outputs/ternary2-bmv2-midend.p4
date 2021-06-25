@@ -55,24 +55,24 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
     }
     @name("ingress.noop") action noop() {
     }
-    @name("ingress.noop") action noop_5() {
+    @name("ingress.noop") action noop_1() {
     }
-    @name("ingress.noop") action noop_6() {
+    @name("ingress.noop") action noop_2() {
     }
-    @name("ingress.noop") action noop_7() {
+    @name("ingress.noop") action noop_3() {
     }
-    @name("ingress.noop") action noop_8() {
+    @name("ingress.noop") action noop_4() {
     }
     @name("ingress.setbyte") action setbyte(@name("val") bit<8> val_5) {
         hdrs.extra[0].b1 = val_5;
     }
-    @name("ingress.setbyte") action setbyte_4(@name("val") bit<8> val_6) {
+    @name("ingress.setbyte") action setbyte_1(@name("val") bit<8> val_6) {
         hdrs.data.b2 = val_6;
     }
-    @name("ingress.setbyte") action setbyte_5(@name("val") bit<8> val_7) {
+    @name("ingress.setbyte") action setbyte_2(@name("val") bit<8> val_7) {
         hdrs.extra[1].b1 = val_7;
     }
-    @name("ingress.setbyte") action setbyte_6(@name("val") bit<8> val_8) {
+    @name("ingress.setbyte") action setbyte_3(@name("val") bit<8> val_8) {
         hdrs.extra[2].b2 = val_8;
     }
     @name("ingress.act1") action act1(@name("val") bit<8> val_9) {
@@ -103,39 +103,39 @@ control ingress(inout packet_t hdrs, inout Meta m, inout standard_metadata_t met
             act1();
             act2();
             act3();
-            noop_5();
+            noop_1();
         }
-        default_action = noop_5();
+        default_action = noop_1();
     }
     @name("ingress.tbl1") table tbl1_0 {
         key = {
             hdrs.data.f2: ternary @name("hdrs.data.f2") ;
         }
         actions = {
-            setbyte_4();
-            noop_6();
+            setbyte_1();
+            noop_2();
         }
-        default_action = noop_6();
+        default_action = noop_2();
     }
     @name("ingress.tbl2") table tbl2_0 {
         key = {
             hdrs.data.f2: ternary @name("hdrs.data.f2") ;
         }
         actions = {
-            setbyte_5();
-            noop_7();
+            setbyte_2();
+            noop_3();
         }
-        default_action = noop_7();
+        default_action = noop_3();
     }
     @name("ingress.tbl3") table tbl3_0 {
         key = {
             hdrs.data.f2: ternary @name("hdrs.data.f2") ;
         }
         actions = {
-            setbyte_6();
-            noop_8();
+            setbyte_3();
+            noop_4();
         }
-        default_action = noop_8();
+        default_action = noop_4();
     }
     apply {
         test1_0.apply();

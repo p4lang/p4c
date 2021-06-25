@@ -55,7 +55,6 @@ limitations under the License.
 #include "lib/log.h"
 #include "lib/nullstream.h"
 #include "lib/ordered_set.h"
-#include "midend/removeParameters.h"
 
 #include "bytestrings.h"
 #include "flattenHeader.h"
@@ -1890,9 +1889,6 @@ P4RuntimeSerializer::generateP4Runtime(const IR::P4Program* program, cstring arc
     auto* evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     PassManager p4RuntimeFixups = {
         new ControlPlaneAPI::ParseAnnotations(),
-        // We can only handle a very restricted class of action parameters - the
-        // types need to be bit<> or int<> - so we fail without this pass.
-        new P4::RemoveActionParameters(&refMap, &typeMap),
         // Update types and reevaluate the program.
         new P4::TypeChecking(&refMap, &typeMap, /* updateExpressions = */ true),
         evaluator

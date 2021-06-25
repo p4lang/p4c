@@ -14,8 +14,9 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
+    @name("pipe.hasReturned") bool hasReturned;
     apply {
-        @name("pipe.hasReturned") bool hasReturned = false;
+        hasReturned = false;
         if (std_meta.input_port == 32w1) {
             std_meta.output_port = 32w2;
         } else if (std_meta.input_port == 32w2) {

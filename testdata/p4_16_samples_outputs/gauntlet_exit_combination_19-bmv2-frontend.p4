@@ -23,25 +23,25 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name(".exit_action") action exit_action() {
-        exit;
-    }
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
-    }
     @name("ingress.simple_eq") bool simple_eq_0;
     @name("ingress.assign") bit<16> assign_0;
     @name("ingress.tmp") bool tmp;
     @name("ingress.tmp_0") bool tmp_0;
     @name("ingress.tmp_1") bit<16> tmp_1;
+    @name(".exit_action") action exit_action_0() {
+        exit;
+    }
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    }
     @name("ingress.simple_table_2") table simple_table {
         key = {
             h.eth_hdr.src_addr: exact @name("key") ;
         }
         actions = {
-            exit_action();
-            @defaultonly NoAction_0();
+            exit_action_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         simple_eq_0 = h.eth_hdr.eth_type == 16w1;

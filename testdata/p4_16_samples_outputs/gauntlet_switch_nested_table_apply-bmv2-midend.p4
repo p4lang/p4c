@@ -23,18 +23,18 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    ethernet_t tmp_eth_hdr;
+    ethernet_t tmp_0_eth_hdr;
     bit<128> key_0;
     bit<48> key_1;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("ingress.set_valid_action") action set_valid_action() {
-        tmp_eth_hdr.setValid();
-        tmp_eth_hdr.dst_addr = 48w1;
-        tmp_eth_hdr.src_addr = 48w1;
-        h.eth_hdr = tmp_eth_hdr;
+        tmp_0_eth_hdr.setValid();
+        tmp_0_eth_hdr.dst_addr = 48w1;
+        tmp_0_eth_hdr.src_addr = 48w1;
+        h.eth_hdr = tmp_0_eth_hdr;
     }
     @name("ingress.simple_table_1") table simple_table {
         key = {
@@ -42,18 +42,18 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         actions = {
             set_valid_action();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name("ingress.simple_table_2") table simple_table_0 {
         key = {
             key_1: exact @name("qkgOtm") ;
         }
         actions = {
-            NoAction_3();
+            NoAction_2();
         }
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     @hidden action gauntlet_switch_nested_table_applybmv2l34() {
         key_0 = 128w1;
@@ -76,7 +76,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     apply {
         tbl_gauntlet_switch_nested_table_applybmv2l42.apply();
         switch (simple_table_0.apply().action_run) {
-            NoAction_3: {
+            NoAction_2: {
                 tbl_gauntlet_switch_nested_table_applybmv2l34.apply();
                 simple_table.apply();
             }

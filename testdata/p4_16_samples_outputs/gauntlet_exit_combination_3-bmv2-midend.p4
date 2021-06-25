@@ -25,13 +25,13 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bool hasExited;
     @name("ingress.hasReturned") bool hasReturned;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.do_action") action do_action() {
         h.eth_hdr.src_addr = 48w2;
         hasExited = true;
     }
-    @name("ingress.do_action") action do_action_2() {
+    @name("ingress.do_action") action do_action_1() {
         h.eth_hdr.dst_addr = 48w2;
         hasExited = true;
     }
@@ -41,9 +41,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         actions = {
             do_action();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action gauntlet_exit_combination_3bmv2l42() {
         hasReturned = true;
@@ -66,9 +66,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @hidden table tbl_do_action {
         actions = {
-            do_action_2();
+            do_action_1();
         }
-        const default_action = do_action_2();
+        const default_action = do_action_1();
     }
     apply {
         tbl_act.apply();

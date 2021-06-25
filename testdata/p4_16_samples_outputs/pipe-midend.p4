@@ -35,7 +35,7 @@ struct Packet_data {
 }
 
 control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("Q_pipe.p1.thost.B_action") action p1_thost_B_action_0(@name("bData") BParamType bData) {
         qArg1.field1 = bData;
@@ -64,9 +64,9 @@ control Q_pipe(inout TArg1 qArg1, inout TArg2 qArg2) {
         }
         actions = {
             p1_Drop_0();
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
     }
     apply {
         p1_thost_T.apply();

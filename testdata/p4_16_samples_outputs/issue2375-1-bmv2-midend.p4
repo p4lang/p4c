@@ -24,7 +24,7 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bool tmp_0;
-    @name("val") bool val;
+    @name("ingress.val") bool val;
     @name("ingress.do_action") action do_action() {
         val = tmp_0;
         tmp_0 = val;

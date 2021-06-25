@@ -43,13 +43,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("._nop") action _nop() {
     }
-    @name("._nop") action _nop_2() {
+    @name("._nop") action _nop_1() {
     }
     @name(".set_port") action set_port(@name("port") bit<9> port) {
         standard_metadata.egress_spec = port;
@@ -62,25 +62,25 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             _nop();
             set_port();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
             meta.mymeta.f1: exact @name("mymeta.f1") ;
         }
         size = 128;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".t_ingress_2") table t_ingress_0 {
         actions = {
-            _nop_2();
+            _nop_1();
             _resubmit();
-            @defaultonly NoAction_3();
+            @defaultonly NoAction_2();
         }
         key = {
             meta.mymeta.f1: exact @name("mymeta.f1") ;
         }
         size = 128;
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         t_ingress.apply();

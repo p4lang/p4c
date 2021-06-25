@@ -15,17 +15,25 @@ struct metadata_t {
 }
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    @name(".foo") action foo(@name("x") out bit<8> x, @name("y") in bit<8> y=5) {
-        x = y >> 2;
-    }
-    @name(".foo") action foo_0(@name("x") out bit<8> x_1, @name("y") in bit<8> y_1=5) {
-        x_1 = y_1 >> 2;
-    }
     @name("ingressImpl.tmp") bit<8> tmp;
+    @name("ingressImpl.x") bit<8> x_0;
+    @name("ingressImpl.y") bit<8> y_0;
+    @name("ingressImpl.x") bit<8> x_2;
+    @name("ingressImpl.y") bit<8> y_2;
+    @name(".foo") action foo_1() {
+        y_0 = tmp;
+        x_0 = y_0 >> 2;
+        hdr.h1.f1 = x_0;
+    }
+    @name(".foo") action foo_2() {
+        y_2 = 8w5;
+        x_2 = y_2 >> 2;
+        hdr.h1.f2 = x_2;
+    }
     apply {
         tmp = hdr.h1.f1;
-        foo(hdr.h1.f1, tmp);
-        foo_0(x_1 = hdr.h1.f2, y_1 = 8w5);
+        foo_1();
+        foo_2();
     }
 }
 

@@ -26,7 +26,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".a1") action a1() {
         meta.m.f1 = 32w1;
@@ -34,9 +34,9 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".t1") table t1_0 {
         actions = {
             a1();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         t1_0.apply();

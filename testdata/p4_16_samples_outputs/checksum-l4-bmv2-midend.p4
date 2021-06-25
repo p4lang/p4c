@@ -132,9 +132,9 @@ parser parserI(packet_in pkt, out headers hdr, inout metadata meta, inout standa
 }
 
 control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("cIngress.foot") action foot() {
         hdr.tcp.srcPort = hdr.tcp.srcPort + 16w1;
@@ -152,9 +152,9 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         }
         actions = {
             foot();
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
         const entries = {
                         16w80 : foot();
         }
@@ -165,9 +165,9 @@ control cIngress(inout headers hdr, inout metadata meta, inout standard_metadata
         }
         actions = {
             foou();
-            NoAction_3();
+            NoAction_2();
         }
-        const default_action = NoAction_3();
+        const default_action = NoAction_2();
         const entries = {
                         16w80 : foou();
         }
@@ -234,17 +234,17 @@ struct tuple_2 {
 
 control vc(inout headers hdr, inout metadata meta) {
     apply {
-        verify_checksum<tuple_0, bit<16>>(true, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.options }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
-        verify_checksum_with_payload<tuple_1, bit<16>>(hdr.tcp.isValid(), { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, 8w0, hdr.ipv4.protocol, meta._l4Len2, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.tcp.seqNo, hdr.tcp.ackNo, hdr.tcp.dataOffset, hdr.tcp.res, hdr.tcp.ecn, hdr.tcp.ctrl, hdr.tcp.window, hdr.tcp.urgentPtr, hdr.tcp.options }, hdr.tcp.checksum, HashAlgorithm.csum16);
-        verify_checksum_with_payload<tuple_2, bit<16>>(hdr.udp.isValid(), { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, 8w0, hdr.ipv4.protocol, meta._l4Len2, hdr.udp.srcPort, hdr.udp.dstPort, hdr.udp.length_ }, hdr.udp.checksum, HashAlgorithm.csum16);
+        verify_checksum<tuple_0, bit<16>>(true, (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr,f11 = hdr.ipv4.options}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        verify_checksum_with_payload<tuple_1, bit<16>>(hdr.tcp.isValid(), (tuple_1){f0 = hdr.ipv4.srcAddr,f1 = hdr.ipv4.dstAddr,f2 = 8w0,f3 = hdr.ipv4.protocol,f4 = meta._l4Len2,f5 = hdr.tcp.srcPort,f6 = hdr.tcp.dstPort,f7 = hdr.tcp.seqNo,f8 = hdr.tcp.ackNo,f9 = hdr.tcp.dataOffset,f10 = hdr.tcp.res,f11 = hdr.tcp.ecn,f12 = hdr.tcp.ctrl,f13 = hdr.tcp.window,f14 = hdr.tcp.urgentPtr,f15 = hdr.tcp.options}, hdr.tcp.checksum, HashAlgorithm.csum16);
+        verify_checksum_with_payload<tuple_2, bit<16>>(hdr.udp.isValid(), (tuple_2){f0 = hdr.ipv4.srcAddr,f1 = hdr.ipv4.dstAddr,f2 = 8w0,f3 = hdr.ipv4.protocol,f4 = meta._l4Len2,f5 = hdr.udp.srcPort,f6 = hdr.udp.dstPort,f7 = hdr.udp.length_}, hdr.udp.checksum, HashAlgorithm.csum16);
     }
 }
 
 control uc(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum<tuple_0, bit<16>>(true, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.ipv4.options }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
-        update_checksum_with_payload<tuple_1, bit<16>>(hdr.tcp.isValid(), { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, 8w0, hdr.ipv4.protocol, meta._l4Len2, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.tcp.seqNo, hdr.tcp.ackNo, hdr.tcp.dataOffset, hdr.tcp.res, hdr.tcp.ecn, hdr.tcp.ctrl, hdr.tcp.window, hdr.tcp.urgentPtr, hdr.tcp.options }, hdr.tcp.checksum, HashAlgorithm.csum16);
-        update_checksum_with_payload<tuple_2, bit<16>>(hdr.udp.isValid(), { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, 8w0, hdr.ipv4.protocol, meta._l4Len2, hdr.udp.srcPort, hdr.udp.dstPort, hdr.udp.length_ }, hdr.udp.checksum, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(true, (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr,f11 = hdr.ipv4.options}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        update_checksum_with_payload<tuple_1, bit<16>>(hdr.tcp.isValid(), (tuple_1){f0 = hdr.ipv4.srcAddr,f1 = hdr.ipv4.dstAddr,f2 = 8w0,f3 = hdr.ipv4.protocol,f4 = meta._l4Len2,f5 = hdr.tcp.srcPort,f6 = hdr.tcp.dstPort,f7 = hdr.tcp.seqNo,f8 = hdr.tcp.ackNo,f9 = hdr.tcp.dataOffset,f10 = hdr.tcp.res,f11 = hdr.tcp.ecn,f12 = hdr.tcp.ctrl,f13 = hdr.tcp.window,f14 = hdr.tcp.urgentPtr,f15 = hdr.tcp.options}, hdr.tcp.checksum, HashAlgorithm.csum16);
+        update_checksum_with_payload<tuple_2, bit<16>>(hdr.udp.isValid(), (tuple_2){f0 = hdr.ipv4.srcAddr,f1 = hdr.ipv4.dstAddr,f2 = 8w0,f3 = hdr.ipv4.protocol,f4 = meta._l4Len2,f5 = hdr.udp.srcPort,f6 = hdr.udp.dstPort,f7 = hdr.udp.length_}, hdr.udp.checksum, HashAlgorithm.csum16);
     }
 }
 

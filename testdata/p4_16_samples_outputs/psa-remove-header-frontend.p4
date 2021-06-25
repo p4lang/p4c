@@ -44,7 +44,7 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout EMPTY_M b, in psa_egress_pars
 }
 
 control MyIC(inout headers_t hdr, inout EMPTY_M b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIC.remove_header") action remove_header() {
         hdr.ethernet.setInvalid();
@@ -54,10 +54,10 @@ control MyIC(inout headers_t hdr, inout EMPTY_M b, in psa_ingress_input_metadata
             hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
             remove_header();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         tbl_0.apply();

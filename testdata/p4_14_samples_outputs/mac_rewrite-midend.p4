@@ -96,9 +96,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name(".do_setup") action do_setup(@name("idx") bit<9> idx, @name("routed") bit<1> routed_1) {
         meta._egress_metadata_mac_da5 = hdr.ethernet.dstAddr;
@@ -108,12 +108,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".setup") table setup_0 {
         actions = {
             do_setup();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
             hdr.ethernet.isValid(): exact @name("ethernet.$valid$") ;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".nop") action _nop_0() {
     }
@@ -144,7 +144,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             _rewrite_ipv4_multicast_mac_0();
             _rewrite_ipv6_unicast_mac_0();
             _rewrite_ipv6_multicast_mac_0();
-            @defaultonly NoAction_3();
+            @defaultonly NoAction_2();
         }
         key = {
             meta._egress_metadata_smac_idx1: exact @name("egress_metadata.smac_idx") ;
@@ -152,7 +152,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ipv6.isValid()             : exact @name("ipv6.$valid$") ;
         }
         size = 512;
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         setup_0.apply();

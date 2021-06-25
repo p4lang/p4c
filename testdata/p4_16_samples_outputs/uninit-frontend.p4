@@ -43,7 +43,7 @@ control c(out bit<32> v) {
     @name("c.e") bit<32> e_0;
     @name("c.a1") action a1() {
     }
-    @name("c.a1") action a1_2() {
+    @name("c.a1") action a1_1() {
     }
     @name("c.a2") action a2() {
     }
@@ -70,7 +70,7 @@ control c(out bit<32> v) {
         if (e_0 > 32w0) {
             t_0.apply();
         } else {
-            a1_2();
+            a1_1();
         }
     }
 }

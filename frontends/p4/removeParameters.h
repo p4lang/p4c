@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef _MIDEND_REMOVEPARAMETERS_H_
-#define _MIDEND_REMOVEPARAMETERS_H_
+#ifndef _FRONTENDS_P4_REMOVEPARAMETERS_H_
+#define _FRONTENDS_P4_REMOVEPARAMETERS_H_
 
 #include "ir/ir.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
@@ -110,6 +110,7 @@ class FindActionParameters : public Inspector {
  * @pre This pass requires each action to have a single caller.
  *      It must run after the LocalizeActions pass, which
  *      in turn must be run after actions inlining.
+ *      It also run after UniqueParameters pass.
  * @post in/inout/out parameters of an action are removed.
  */
 class DoRemoveActionParameters : public Transform {
@@ -135,4 +136,4 @@ class RemoveActionParameters : public PassManager {
 
 }  // namespace P4
 
-#endif /* _MIDEND_REMOVEPARAMETERS_H_ */
+#endif /* _FRONTENDS_P4_REMOVEPARAMETERS_H_ */

@@ -29,9 +29,9 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("val") ethernet_t val;
+    @name("ingress.val") ethernet_t val_0;
     @name("ingress.do_action") action do_action() {
-        h.eth_hdr = val;
+        h.eth_hdr = val_0;
     }
     @hidden table tbl_do_action {
         actions = {

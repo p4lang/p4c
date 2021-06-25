@@ -23,23 +23,27 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
-    }
     @name("ingress.simple_val") bit<16> simple_val_0;
-    @name("ingress.call_action") action call_action(@name("val") inout bit<48> val) {
+    @name("ingress.hasReturned") bool hasReturned;
+    @name("ingress.val") bit<48> val_0;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    }
+    @name("ingress.call_action") action call_action() {
+        val_0 = h.eth_hdr.src_addr;
+        h.eth_hdr.src_addr = val_0;
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
         }
         actions = {
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
-        @name("ingress.hasReturned") bool hasReturned = false;
+        hasReturned = false;
         simple_val_0 = 16w2;
-        call_action(h.eth_hdr.src_addr);
+        call_action();
         if (simple_val_0 <= 16w5) {
             hasReturned = true;
         } else {

@@ -48,7 +48,7 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
     @name("pipe.hasReturned") bool hasReturned;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("pipe.Reject") action Reject(@name("add") IPv4Address add) {
         mark_to_drop();
@@ -61,7 +61,7 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         }
         actions = {
             Reject();
-            NoAction_0();
+            NoAction_1();
         }
         default_action = Reject(32w0);
     }

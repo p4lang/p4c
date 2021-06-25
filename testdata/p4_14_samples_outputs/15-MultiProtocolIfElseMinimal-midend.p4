@@ -80,41 +80,41 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name(".nop") action nop() {
     }
-    @name(".nop") action nop_2() {
+    @name(".nop") action nop_1() {
     }
     @name(".set_egress_port") action set_egress_port(@name("egress_port") bit<8> egress_port_1) {
         meta._ing_metadata_egress_port1 = egress_port_1;
     }
-    @name(".set_egress_port") action set_egress_port_2(@name("egress_port") bit<8> egress_port_2) {
+    @name(".set_egress_port") action set_egress_port_1(@name("egress_port") bit<8> egress_port_2) {
         meta._ing_metadata_egress_port1 = egress_port_2;
     }
     @name(".ipv4_match") table ipv4_match_0 {
         actions = {
             nop();
             set_egress_port();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
             hdr.ipv4.srcAddr: exact @name("ipv4.srcAddr") ;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".l2_match") table l2_match_0 {
         actions = {
-            nop_2();
-            set_egress_port_2();
-            @defaultonly NoAction_3();
+            nop_1();
+            set_egress_port_1();
+            @defaultonly NoAction_2();
         }
         key = {
             hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr") ;
         }
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         if (hdr.ethernet.etherType == 16w0x800) {

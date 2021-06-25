@@ -61,13 +61,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710633;
         meta._mymeta_f14 = meta._mymeta_f14 + 8w23;
         meta._mymeta_clone_e2e_count2 = meta._mymeta_clone_e2e_count2 + 8w1;
-        clone3<tuple_0>(CloneType.E2E, 32w1, { meta._mymeta_clone_e2e_count2, meta._mymeta_f14 });
+        clone3<tuple_0>(CloneType.E2E, 32w1, (tuple_0){f0 = meta._mymeta_clone_e2e_count2,f1 = meta._mymeta_f14});
     }
     @name(".do_recirculate") action do_recirculate() {
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710637;
         meta._mymeta_f14 = meta._mymeta_f14 + 8w19;
         meta._mymeta_recirculate_count1 = meta._mymeta_recirculate_count1 + 8w1;
-        recirculate<tuple_0>({ meta._mymeta_recirculate_count1, meta._mymeta_f14 });
+        recirculate<tuple_0>((tuple_0){f0 = meta._mymeta_recirculate_count1,f1 = meta._mymeta_f14});
     }
     @name("._nop") action _nop() {
     }
@@ -267,11 +267,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         hdr.ethernet.srcAddr = hdr.ethernet.srcAddr + 48w281474976710639;
         meta._mymeta_f14 = meta._mymeta_f14 + 8w17;
         meta._mymeta_resubmit_count0 = meta._mymeta_resubmit_count0 + 8w1;
-        resubmit<tuple_0>({ meta._mymeta_resubmit_count0, meta._mymeta_f14 });
+        resubmit<tuple_0>((tuple_0){f0 = meta._mymeta_resubmit_count0,f1 = meta._mymeta_f14});
     }
-    @name("._nop") action _nop_5() {
+    @name("._nop") action _nop_3() {
     }
-    @name("._nop") action _nop_6() {
+    @name("._nop") action _nop_4() {
     }
     @name(".ing_inc_mymeta_counts") action ing_inc_mymeta_counts() {
         meta._mymeta_resubmit_count0 = meta._mymeta_resubmit_count0 + 8w1;
@@ -295,7 +295,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     }
     @name(".t_ing_debug_table1") table t_ing_debug_table1_0 {
         actions = {
-            _nop_5();
+            _nop_3();
         }
         key = {
             standard_metadata.ingress_port            : exact @name("standard_metadata.ingress_port") ;
@@ -316,11 +316,11 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ethernet.srcAddr                      : exact @name("ethernet.srcAddr") ;
             hdr.ethernet.etherType                    : exact @name("ethernet.etherType") ;
         }
-        default_action = _nop_5();
+        default_action = _nop_3();
     }
     @name(".t_ing_debug_table2") table t_ing_debug_table2_0 {
         actions = {
-            _nop_6();
+            _nop_4();
         }
         key = {
             standard_metadata.ingress_port            : exact @name("standard_metadata.ingress_port") ;
@@ -341,7 +341,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ethernet.srcAddr                      : exact @name("ethernet.srcAddr") ;
             hdr.ethernet.etherType                    : exact @name("ethernet.etherType") ;
         }
-        default_action = _nop_6();
+        default_action = _nop_4();
     }
     @name(".t_ing_inc_mymeta_counts") table t_ing_inc_mymeta_counts_0 {
         actions = {

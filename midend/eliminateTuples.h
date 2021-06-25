@@ -62,6 +62,9 @@ class ReplacementMap {
  *
  *   @pre none
  *   @post ensure all tuples are replaced with struct.
+ *         Notice that ListExpressions are not converted
+ *         to StructExpressions; a subsequent type checking
+ *         is needed for that.
 */
 class DoReplaceTuples final : public Transform {
     ReplacementMap* repl;

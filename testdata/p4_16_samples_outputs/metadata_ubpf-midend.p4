@@ -24,9 +24,9 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("pipe.fill_metadata") action fill_metadata() {
         meta.etherType = headers.ethernet.etherType;
@@ -37,9 +37,9 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         }
         actions = {
             fill_metadata();
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name("pipe.change_etherType") action change_etherType() {
         headers.ethernet.etherType = 16w0x86dd;
@@ -50,9 +50,9 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
         }
         actions = {
             change_etherType();
-            NoAction_3();
+            NoAction_2();
         }
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         tbl_0.apply();

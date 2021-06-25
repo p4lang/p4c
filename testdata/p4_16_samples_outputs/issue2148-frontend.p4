@@ -14,25 +14,24 @@ struct Meta {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @name("ingress.hasReturned") bool hasReturned;
+    @name("ingress.retval") bit<16> retval;
+    @name("ingress.not_initialized") H not_initialized_0;
+    @name("ingress.new_val") bit<32> new_val_0;
     @name("ingress.do_thing_action") action do_thing_action() {
     }
     apply {
-        {
-            @name("ingress.hasReturned") bool hasReturned = false;
-            @name("ingress.retval") bit<16> retval;
-            @name("ingress.not_initialized") H not_initialized_0;
-            @name("ingress.new_val") bit<32> new_val_0;
-            not_initialized_0.setInvalid();
-            new_val_0 = 32w1;
-            if (not_initialized_0.a < 16w6) {
-                ;
-            } else {
-                new_val_0 = 32w232;
-            }
-            hasReturned = true;
-            retval = (bit<16>)new_val_0;
-            h.h.a = retval;
+        hasReturned = false;
+        not_initialized_0.setInvalid();
+        new_val_0 = 32w1;
+        if (not_initialized_0.a < 16w6) {
+            ;
+        } else {
+            new_val_0 = 32w232;
         }
+        hasReturned = true;
+        retval = (bit<16>)new_val_0;
+        h.h.a = retval;
         do_thing_action();
     }
 }

@@ -30,13 +30,13 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @name("ingress.hPSe_0") bit<8> hPSe_0;
-    @name("ingress.hPSe_1") bit<8> hPSe_1;
+    @name("ingress.hPSe_0") bit<8> hPSe;
+    @name("ingress.hPSe_1") bit<8> hPSe_2;
     @hidden action act() {
-        h.h.a = hPSe_0;
+        h.h.a = hPSe;
     }
     @hidden action act_0() {
-        h.h.b = hPSe_1;
+        h.h.b = hPSe_2;
     }
     @hidden action gauntlet_side_effects_in_muxbmv2l36() {
         h.eth_hdr.eth_type = 16w2;

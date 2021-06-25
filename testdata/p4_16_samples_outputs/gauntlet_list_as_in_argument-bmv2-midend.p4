@@ -24,10 +24,10 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") ethernet_t tmp;
-    @name("val") ethernet_t val;
+    @name("ingress.val") ethernet_t val_0;
     @name("ingress.do_action") action do_action() {
-        val = tmp;
-        h.eth_hdr.eth_type = val.eth_type;
+        val_0 = tmp;
+        h.eth_hdr.eth_type = val_0.eth_type;
     }
     @hidden action act() {
         tmp.setValid();

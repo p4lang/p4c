@@ -55,12 +55,12 @@ control verifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.drop") action drop() {
         mark_to_drop(standard_metadata);
     }
-    @name("ingress.drop") action drop_2() {
+    @name("ingress.drop") action drop_1() {
         mark_to_drop(standard_metadata);
     }
     @name("ingress.ipv4_forward") action ipv4_forward(@name("dstAddr") macAddr_t dstAddr_1, @name("port") egressSpec_t port) {
@@ -71,12 +71,12 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.ipv4.dstAddr: lpm @name("hdr.ipv4.dstAddr") ;
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
             ipv4_forward();
             drop();
         }
         size = 1024;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         meta.test_bool = false;
@@ -86,7 +86,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         if (meta.test_bool) {
             ;
         } else {
-            drop_2();
+            drop_1();
         }
     }
 }

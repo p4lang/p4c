@@ -30,7 +30,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".cnt") direct_counter(CounterType.packets) cnt_0;
     @name(".act") action act_0(@name("port") bit<9> port) {
@@ -40,14 +40,14 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".tab1") table tab1_0 {
         actions = {
             act_0();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
             hdr.ethernet.dstAddr: exact @name("ethernet.dstAddr") ;
         }
         size = 128;
         counters = cnt_0;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         tab1_0.apply();

@@ -47,7 +47,7 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.debug_table_cksum1") table debug_table_cksum1_0 {
         key = {
@@ -66,9 +66,9 @@ control ingress(inout headers hdr, inout metadata user_meta, inout standard_meta
             user_meta._fwd_meta_x44           : exact @name("user_meta.fwd_meta.x4") ;
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action issue983bmv2l108() {
         hdr.ethernet.dstAddr[47:40] = 8w1;

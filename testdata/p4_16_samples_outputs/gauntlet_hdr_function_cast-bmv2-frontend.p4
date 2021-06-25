@@ -25,38 +25,37 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
+    @name("ingress.val_0") bit<16> val;
+    @name("ingress.hasReturned") bool hasReturned;
+    @name("ingress.retval") ethernet_t retval;
+    @name("ingress.hasReturned_0") bool hasReturned_0;
+    @name("ingress.retval_0") ethernet_t retval_0;
     apply {
-        {
-            @name("ingress.val_0") bit<16> val_0 = h.eth_hdr1.eth_type;
-            @name("ingress.hasReturned") bool hasReturned = false;
-            @name("ingress.retval") ethernet_t retval;
-            if (val_0 == 16w1) {
-                hasReturned = true;
-                retval.setValid();
-                retval = (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1};
-            } else if (val_0 == 16w2) {
-                hasReturned = true;
-                retval.setValid();
-                retval = (ethernet_t){dst_addr = 48w2,src_addr = 48w2,eth_type = 16w2};
-            }
-            if (hasReturned) {
-                ;
-            } else {
-                hasReturned = true;
-                retval.setValid();
-                retval = (ethernet_t){dst_addr = 48w3,src_addr = 48w3,eth_type = 16w3};
-            }
-            h.eth_hdr1.eth_type = val_0;
-            h.eth_hdr1 = retval;
+        val = h.eth_hdr1.eth_type;
+        hasReturned = false;
+        if (val == 16w1) {
+            hasReturned = true;
+            retval.setValid();
+            retval = (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1};
+        } else if (val == 16w2) {
+            hasReturned = true;
+            retval.setValid();
+            retval = (ethernet_t){dst_addr = 48w2,src_addr = 48w2,eth_type = 16w2};
         }
-        {
-            @name("ingress.hasReturned_0") bool hasReturned_0 = false;
-            @name("ingress.retval_0") ethernet_t retval_0;
-            hasReturned_0 = true;
-            retval_0.setValid();
-            retval_0 = (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1};
-            h.eth_hdr2 = retval_0;
+        if (hasReturned) {
+            ;
+        } else {
+            hasReturned = true;
+            retval.setValid();
+            retval = (ethernet_t){dst_addr = 48w3,src_addr = 48w3,eth_type = 16w3};
         }
+        h.eth_hdr1.eth_type = val;
+        h.eth_hdr1 = retval;
+        hasReturned_0 = false;
+        hasReturned_0 = true;
+        retval_0.setValid();
+        retval_0 = (ethernet_t){dst_addr = 48w1,src_addr = 48w1,eth_type = 16w1};
+        h.eth_hdr2 = retval_0;
     }
 }
 

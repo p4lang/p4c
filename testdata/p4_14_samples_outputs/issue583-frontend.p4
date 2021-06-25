@@ -186,20 +186,19 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 @name(".cnt1") counter<bit<5>>(32w32, CounterType.packets) cnt1;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("ingress.ttl") bit<8> ttl_1;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name(".drop_pkt") action drop_pkt() {
         mark_to_drop(standard_metadata);
     }
     @name(".hop_ipv4") action hop_ipv4(@name("egress_spec") bit<9> egress_spec_0) {
-        {
-            @name("ingress.ttl") bit<8> ttl_1 = hdr.ipv4.ttl;
-            ttl_1 = ttl_1 + 8w255;
-            standard_metadata.egress_spec = egress_spec_0;
-            hdr.ipv4.ttl = ttl_1;
-        }
+        ttl_1 = hdr.ipv4.ttl;
+        ttl_1 = ttl_1 + 8w255;
+        standard_metadata.egress_spec = egress_spec_0;
+        hdr.ipv4.ttl = ttl_1;
     }
     @name(".act") action act() {
         cnt1.count(5w10);
@@ -208,22 +207,22 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             drop_pkt();
             hop_ipv4();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
             hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr") ;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".table_2") table table_0 {
         actions = {
             act();
-            @defaultonly NoAction_3();
+            @defaultonly NoAction_2();
         }
         key = {
             hdr.ipv4.dstAddr: lpm @name("ipv4.dstAddr") ;
         }
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         ipv4_routing_0.apply();

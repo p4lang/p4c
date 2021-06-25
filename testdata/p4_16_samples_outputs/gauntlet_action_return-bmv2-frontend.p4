@@ -21,32 +21,36 @@ struct Meta {
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
-    }
     @name("ingress.tmp_key") bit<128> tmp_key_0;
-    @name("ingress.do_action") action do_action(@name("val") inout bit<8> val) {
-        @name("ingress.hasReturned") bool hasReturned = false;
-        if (val > 8w10) {
-            val = 8w2;
+    @name("ingress.hasReturned") bool hasReturned;
+    @name("ingress.val") bit<8> val_0;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    }
+    @name("ingress.do_action") action do_action() {
+        val_0 = h.h.a;
+        hasReturned = false;
+        if (val_0 > 8w10) {
+            val_0 = 8w2;
             hasReturned = true;
         } else {
-            val = 8w3;
+            val_0 = 8w3;
         }
         if (hasReturned) {
             ;
         } else {
             hasReturned = true;
         }
+        h.h.a = val_0;
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
             tmp_key_0: exact @name("bKiScA") ;
         }
         actions = {
-            do_action(h.h.a);
-            @defaultonly NoAction_0();
+            do_action();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         tmp_key_0 = 128w2;

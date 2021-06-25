@@ -26,7 +26,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bool hasExited;
     @name("ingress.hasReturned") bool hasReturned;
     bit<8> key_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.dummy_action") action dummy_action() {
     }
@@ -36,9 +36,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         actions = {
             dummy_action();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action gauntlet_exit_combination_16bmv2l43() {
         h.eth_hdr.eth_type = 16w1;

@@ -51,7 +51,6 @@ limitations under the License.
 #include "midend/removeLeftSlices.h"
 #include "midend/removeExits.h"
 #include "midend/removeMiss.h"
-#include "midend/removeParameters.h"
 #include "midend/removeSelectBooleans.h"
 #include "midend/removeUnusedParameters.h"
 #include "midend/replaceSelectRange.h"
@@ -116,7 +115,6 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options,
             new P4::RemoveMiss(&refMap, &typeMap),
             new P4::EliminateNewtype(&refMap, &typeMap),
             new P4::EliminateSerEnums(&refMap, &typeMap),
-            new P4::RemoveActionParameters(&refMap, &typeMap),
             convertEnums,
             new VisitFunctor([this, convertEnums]() {
                 enumMap = convertEnums->getEnumMapping();

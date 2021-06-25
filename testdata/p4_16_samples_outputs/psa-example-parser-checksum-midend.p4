@@ -85,7 +85,7 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
         buffer.extract<ipv4_t>(hdr.ipv4);
         verify(hdr.ipv4.ihl == 4w5, error.UnhandledIPv4Options);
         ck_0.clear();
-        ck_0.add<tuple_0>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+        ck_0.add<tuple_0>((tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr});
         verify(ck_0.get() == hdr.ipv4.hdrChecksum, error.BadIPv4HeaderChecksum);
         transition select(hdr.ipv4.protocol) {
             8w6: parse_tcp;
@@ -100,7 +100,7 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     bool hasExited;
-    @noWarnUnused @name(".ingress_drop") action ingress_drop() {
+    @noWarnUnused @name(".ingress_drop") action ingress_drop_0() {
         ostd.drop = true;
     }
     @name("ingress.parser_error_counts") DirectCounter<PacketCounter_t>(PSA_CounterType_t.PACKETS) parser_error_counts_0;
@@ -141,9 +141,9 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     @hidden table tbl_ingress_drop {
         actions = {
-            ingress_drop();
+            ingress_drop_0();
         }
-        const default_action = ingress_drop();
+        const default_action = ingress_drop_0();
     }
     @hidden table tbl_psaexampleparserchecksum184 {
         actions = {
@@ -193,7 +193,7 @@ control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_met
     @name("EgressDeparserImpl.ck") InternetChecksum() ck_1;
     @hidden action psaexampleparserchecksum238() {
         ck_1.clear();
-        ck_1.add<tuple_0>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+        ck_1.add<tuple_0>((tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr});
         hdr.ipv4.hdrChecksum = ck_1.get();
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);

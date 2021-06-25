@@ -26,7 +26,7 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.do_thing") action do_thing() {
         h.h.a = c_0;
     }
-    @name("ingress.do_thing") action do_thing_2() {
+    @name("ingress.do_thing") action do_thing_1() {
         h.h.a = c_0;
     }
     @hidden action gauntlet_copy_outbmv2l23() {
@@ -46,9 +46,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     }
     @hidden table tbl_do_thing_0 {
         actions = {
-            do_thing_2();
+            do_thing_1();
         }
-        const default_action = do_thing_2();
+        const default_action = do_thing_1();
     }
     apply {
         tbl_gauntlet_copy_outbmv2l23.apply();

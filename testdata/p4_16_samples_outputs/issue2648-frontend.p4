@@ -24,14 +24,13 @@ parser p(packet_in pkt, out Headers hdr) {
 control ingress(inout Headers h) {
     @name("ingress.tmp") bit<8> tmp;
     @name("ingress.tmp_0") bit<8> tmp_0;
+    @name("ingress.hasReturned") bool hasReturned;
+    @name("ingress.retval") bit<8> retval;
     apply {
-        {
-            @name("ingress.hasReturned") bool hasReturned = false;
-            @name("ingress.retval") bit<8> retval;
-            hasReturned = true;
-            retval = ((H){a = 8w1}).a;
-            tmp = retval;
-        }
+        hasReturned = false;
+        hasReturned = true;
+        retval = ((H){a = 8w1}).a;
+        tmp = retval;
         tmp_0 = tmp;
         h.h[tmp_0].a = 8w1;
     }

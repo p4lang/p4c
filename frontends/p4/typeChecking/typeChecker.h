@@ -60,6 +60,13 @@ class TypeChecking : public PassManager {
                  bool updateExpressions = false);
 };
 
+template<typename... T>
+void typeError(const char* format, T... args) {
+    ::error(ErrorType::ERR_TYPE_ERROR, format, args...);
+}
+/// True if the type contains any varbit or header_union subtypes
+bool hasVarbitsOrUnions(const TypeMap* typeMap, const IR::Type* type);
+
 // Actual type checking algorithm.
 // In general this pass should not be called directly; call TypeChecking instead.
 // It is a transform because it may convert implicit casts into explicit casts.
@@ -129,10 +136,7 @@ class TypeInference : public Transform {
     virtual const IR::ParameterList* canonicalizeParameters(const IR::ParameterList* params);
 
     // various helpers
-    bool hasVarbitsOrUnions(const IR::Type* type) const;
     bool onlyBitsOrBitStructs(const IR::Type* type) const;
-    void checkCorelibMethods(const ExternMethod* em) const;
-    void checkEmitType(const IR::Expression* emit, const IR::Type* type) const;
     bool containsHeader(const IR::Type* canonType);
     bool validateFields(const IR::Type* type,
                         std::function<bool(const IR::Type*)> checker) const;
@@ -174,10 +178,6 @@ class TypeInference : public Transform {
     using Transform::postorder;
     using Transform::preorder;
 
-    template<typename... T>
-    static void typeError(const char* format, T... args) {
-        ::error(ErrorType::ERR_TYPE_ERROR, format, args...);
-    }
     static const IR::Type* specialize(const IR::IMayBeGenericType* type,
                                       const IR::Vector<IR::Type>* arguments);
     const IR::Node* pruneIfDone(const IR::Node* node)
