@@ -62,9 +62,18 @@ EBPFBoolType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
     builder->appendFormat(" %s", id.c_str());
 }
 
+void
+EBPFBoolType::declareInit(CodeBuilder* builder, cstring id, bool asPointer) {
+  declare(builder, id, asPointer);
+}
+
 /////////////////////////////////////////////////////////////
 
 void EBPFStackType::declare(CodeBuilder* builder, cstring id, bool) {
+    elementType->declareArray(builder, id, size);
+}
+
+void EBPFStackType::declareInit(CodeBuilder* builder, cstring id, bool) {
     elementType->declareArray(builder, id, size);
 }
 
@@ -133,6 +142,23 @@ EBPFScalarType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
     }
 }
 
+void
+EBPFScalarType::declareInit(CodeBuilder* builder, cstring id, bool asPointer) {
+    if (EBPFScalarType::generatesScalar(width)) {
+        emit(builder);
+        if (asPointer)
+            builder->append("*");
+        builder->spc();
+        id = id + cstring(" = 0");
+        builder->append(id);
+    } else {
+        if (asPointer)
+            builder->append("u8*");
+        else
+            builder->appendFormat("uint8_t %s[%d]", id.c_str(), bytesRequired());
+    }
+}
+
 //////////////////////////////////////////////////////////
 
 EBPFStructType::EBPFStructType(const IR::Type_StructLike* strct) :
@@ -169,6 +195,10 @@ EBPFStructType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
     if (asPointer)
         builder->append("*");
     builder->appendFormat(" %s %s", name.c_str(), id.c_str());
+}
+
+void EBPFStructType::declareInit(CodeBuilder* builder, cstring id, bool asPointer) {
+    declare(builder, id, asPointer);
 }
 
 void EBPFStructType::emitInitializer(CodeBuilder* builder) {
@@ -239,6 +269,10 @@ void EBPFTypeName::declare(CodeBuilder* builder, cstring id, bool asPointer) {
         canonical->declare(builder, id, asPointer);
 }
 
+void EBPFTypeName::declareInit(CodeBuilder* builder, cstring id, bool asPointer) {
+    declare(builder, id, asPointer);
+}
+
 void EBPFTypeName::emitInitializer(CodeBuilder* builder) {
     if (canonical != nullptr)
         canonical->emitInitializer(builder);
@@ -279,6 +313,10 @@ void EBPFEnumType::declare(EBPF::CodeBuilder* builder, cstring id, bool asPointe
         builder->append("*");
     builder->append(" ");
     builder->append(id);
+}
+
+void EBPFEnumType::declareInit(CodeBuilder* builder, cstring id, bool asPointer) {
+    declare(builder, id, asPointer);
 }
 
 void EBPFEnumType::emit(EBPF::CodeBuilder* builder) {

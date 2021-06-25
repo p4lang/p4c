@@ -95,6 +95,22 @@ namespace UBPF {
         }
     }
 
+    void UBPFScalarType::declareInit(EBPF::CodeBuilder *builder, cstring id, bool asPointer) {
+        if (EBPFScalarType::generatesScalar(width)) {
+            emit(builder);
+            if (asPointer)
+                builder->append("*");
+            builder->spc();
+            id = id + cstring(" = 0");
+            builder->append(id);
+        } else {
+            if (asPointer)
+                builder->append("uint8_t*");
+            else
+                builder->appendFormat("uint8_t %s[%d]", id.c_str(), bytesRequired());
+        }
+    }
+
     void UBPFStructType::emit(EBPF::CodeBuilder *builder) {
         builder->emitIndent();
         builder->append(kind);
@@ -140,6 +156,9 @@ namespace UBPF {
         builder->appendFormat("%s", id.c_str());
     }
 
+    void UBPFStructType::declareInit(EBPF::CodeBuilder *builder, cstring id, bool asPointer) {
+        declare(builder, id, asPointer);
+    }
     //////////////////////////////////////////////////////////
 
     void UBPFEnumType::emit(EBPF::CodeBuilder *builder) {
@@ -211,6 +230,10 @@ namespace UBPF {
         builder->append(name);
         builder->spc();
         builder->append(id.c_str());
+    }
+
+    void UBPFListType::declareInit(EBPF::CodeBuilder *builder, cstring id, bool asPointer) {
+        declare(builder, id, asPointer);
     }
 
     void UBPFListType::emitInitializer(EBPF::CodeBuilder* builder) {
