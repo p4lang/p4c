@@ -24,7 +24,9 @@ namespace EBPF {
 
 namespace {
 class StateTranslationVisitor : public CodeGenInspector {
-    bool hasDefault;
+    // stores the result of evaluating the select argument
+    cstring selectValue;
+
     P4::P4CoreLibrary& p4lib;
     const EBPFParserState* state;
 
@@ -36,7 +38,7 @@ class StateTranslationVisitor : public CodeGenInspector {
  public:
     explicit StateTranslationVisitor(const EBPFParserState* state) :
             CodeGenInspector(state->parser->program->refMap, state->parser->program->typeMap),
-            hasDefault(false), p4lib(P4::P4CoreLibrary::instance), state(state) {}
+            p4lib(P4::P4CoreLibrary::instance), state(state) {}
     bool preorder(const IR::ParserState* state) override;
     bool preorder(const IR::SelectCase* selectCase) override;
     bool preorder(const IR::SelectExpression* expression) override;
@@ -111,7 +113,7 @@ bool StateTranslationVisitor::preorder(const IR::ParserState* parserState) {
         if (!parserState->selectExpression->is<IR::PathExpression>())
             BUG("Expected a PathExpression, got a %1%", parserState->selectExpression);
         builder->emitIndent();
-        builder->append("goto ");
+        builder->append(" goto ");
         visit(parserState->selectExpression);
         builder->endOfStatement(true);
     }
@@ -121,39 +123,47 @@ bool StateTranslationVisitor::preorder(const IR::ParserState* parserState) {
 }
 
 bool StateTranslationVisitor::preorder(const IR::SelectExpression* expression) {
-    hasDefault = false;
     BUG_CHECK(expression->select->components.size() == 1,
               "%1%: tuple not eliminated in select",
               expression->select);
+    selectValue = state->parser->program->refMap->newName("select");
+    auto type = state->parser->program->typeMap->getType(expression->select, true);
+    if (auto list = type->to<IR::Type_List>()) {
+        BUG_CHECK(list->components.size() == 1, "%1% list type with more than 1 element", list);
+        type = list->components.at(0);
+    }
+    auto etype = EBPFTypeFactory::instance->create(type);
     builder->emitIndent();
-    builder->append("switch (");
+    etype->declare(builder, selectValue, false);
+    builder->endOfStatement(true);
+    builder->emitIndent();
+    builder->appendFormat("%s = ", selectValue);
     visit(expression->select);
-    builder->append(") ");
-    builder->blockStart();
-
+    builder->endOfStatement(true);
     for (auto e : expression->selectCases)
         visit(e);
 
-    if (!hasDefault) {
-        builder->emitIndent();
-        builder->appendFormat("default: goto %s;", IR::ParserState::reject.c_str());
-        builder->newline();
-    }
-
-    builder->blockEnd(true);
+    builder->emitIndent();
+    builder->appendFormat("else goto %s;", IR::ParserState::reject.c_str());
+    builder->newline();
     return false;
 }
 
 bool StateTranslationVisitor::preorder(const IR::SelectCase* selectCase) {
     builder->emitIndent();
-    if (selectCase->keyset->is<IR::DefaultExpression>()) {
-        hasDefault = true;
-        builder->append("default: ");
+    builder->appendFormat("if ((%s", selectValue);
+    if (auto mask = selectCase->keyset->to<IR::Mask>()) {
+        builder->append(" & ");
+        visit(mask->right);
+        builder->append(") == (");
+        visit(mask->left);
+        builder->append(" & ");
+        visit(mask->right);
     } else {
-        builder->append("case ");
+        builder->append(" == ");
         visit(selectCase->keyset);
-        builder->append(": ");
     }
+    builder->append("))");
     builder->append("goto ");
     visit(selectCase->state);
     builder->endOfStatement(true);

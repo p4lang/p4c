@@ -96,7 +96,7 @@ MidEnd::run(EbpfOptions& options, const IR::P4Program* program, std::ostream* ou
                 new P4::SimplifySelectList(&refMap, &typeMap),
                 new P4::MoveDeclarations(),  // more may have been introduced
                 new P4::RemoveSelectBooleans(&refMap, &typeMap),
-                new P4::SingleArgumentSelect(),
+                new P4::SingleArgumentSelect(&refMap, &typeMap),
                 new P4::ConstantFolding(&refMap, &typeMap),
                 new P4::SimplifyControlFlow(&refMap, &typeMap),
                 new P4::TableHit(&refMap, &typeMap),
