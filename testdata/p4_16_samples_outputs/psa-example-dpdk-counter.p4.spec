@@ -59,13 +59,13 @@ struct psa_egress_deparser_input_metadata_t {
 	bit<32> egress_port
 }
 
-regarray counter2_0 size 0x400 initval 0x0
-
-regarray counter1_0 size 0x400 initval 0x0
-
 regarray counter0_0_packets size 0x400 initval 0x0
 
 regarray counter0_0_bytes size 0x400 initval 0x0
+
+regarray counter2_0 size 0x400 initval 0x0
+
+regarray counter1_0 size 0x400 initval 0x0
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
