@@ -443,15 +443,12 @@ class ConvertInternetChecksum : public PassManager {
 };
 
 /* This pass collects PSA extern meter, counter and register declaration instances and 
-   push them to map for emitting to the .spec file later */
+   push them to a vector for emitting to the .spec file later */
 class CollectExternDeclaration : public Inspector {
     P4::TypeMap *typeMap;
 
   public:
-    std::map<const IR::Declaration_Instance *, cstring> reg_map;
-    std::map<const IR::Declaration_Instance *, cstring> cnt_map;
-    std::map<const IR::Declaration_Instance *, cstring> met_map;
-
+    std::vector<const IR::Declaration_Instance *> externDecls;
     CollectExternDeclaration(P4::TypeMap *typeMap) : typeMap(typeMap) {}
     bool preorder(const IR::Declaration_Instance *d) override {
         if (auto type = d->type->to<IR::Type_Specialized>()) {
@@ -465,19 +462,20 @@ class CollectExternDeclaration : public Inspector {
                         ::warning(ErrorType::WARN_UNSUPPORTED,
                                   "%1%: Packet metering is not supported." \
                                   " Falling back to byte metering.", d);
-                    met_map.emplace(d, d->name);
                 }
             } else if (externTypeName == "Counter") {
                 if (d->arguments->size() != 2 ) {
                     ::error("%1%: expected number of_counters and type of counter as arguments", d);
                 }
-                cnt_map.emplace(d, d->name);
             } else if (externTypeName == "Register") {
                 if (d->arguments->size() != 1 and d->arguments->size() != 2 ) {
                     ::error("%1%: expected size and optionally init_val as arguments", d);
                 }
-                reg_map.emplace(d, d->name);
+            } else {
+                // unsupported extern type
+                return false;
             }
+            externDecls.push_back(d);
          }
          return false;
     }
@@ -591,9 +589,7 @@ class RewriteToDpdkArch : public PassManager {
     std::map<const cstring, IR::IndexedVector<IR::Parameter> *>
         *args_struct_map;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
-    std::map<const IR::Declaration_Instance *, cstring> *reg_map;
-    std::map<const IR::Declaration_Instance *, cstring> *cnt_map;
-    std::map<const IR::Declaration_Instance *, cstring> *met_map;
+    std::vector<const IR::Declaration_Instance *> *externDecls;
     RewriteToDpdkArch(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                       DpdkVariableCollector *collector) {
         setName("RewriteToDpdkArch");
@@ -643,9 +639,7 @@ class RewriteToDpdkArch : public PassManager {
         passes.push_back(new ConvertLogicalExpression);
         auto insertExternDeclaration = new CollectExternDeclaration(typeMap);
         passes.push_back(insertExternDeclaration);
-        reg_map = &insertExternDeclaration->reg_map;
-        cnt_map = &insertExternDeclaration->cnt_map;
-        met_map = &insertExternDeclaration->met_map;
+        externDecls = &insertExternDeclaration->externDecls;
     }
 };
 

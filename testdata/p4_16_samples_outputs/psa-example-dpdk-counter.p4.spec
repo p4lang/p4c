@@ -63,9 +63,9 @@ regarray counter0_0_packets size 0x400 initval 0x0
 
 regarray counter0_0_bytes size 0x400 initval 0x0
 
-regarray counter2_0 size 0x400 initval 0x0
-
 regarray counter1_0 size 0x400 initval 0x0
+
+regarray counter2_0 size 0x400 initval 0x0
 
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
