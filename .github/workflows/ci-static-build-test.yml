@@ -1,4 +1,4 @@
-name: "release-p4c"
+name: "static-build-test-p4c"
 
 on:
   push:
