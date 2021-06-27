@@ -1,0 +1,26 @@
+name: GitHub Release
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'Version.txt'
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Get version
+        run: |
+          VERSION="v$(cat Version.txt)"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
