@@ -53,8 +53,6 @@ static const IR::Expression* convertList(
 }
 
 bool DoSingleArgumentSelect::preorder(IR::SelectExpression* expression) {
-    if (expression->select->size() <= 1)
-        return false;
     selectListType = typeMap->getType(expression->select, true);
     auto conv = convertList(expression->select, selectListType);
     auto list = new IR::ListExpression(IR::Vector<IR::Expression>());
