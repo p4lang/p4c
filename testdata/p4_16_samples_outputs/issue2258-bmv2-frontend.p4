@@ -23,26 +23,25 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
-    }
     @name("ingress.key_0") bit<16> key_0;
+    @name("ingress.hasReturned") bool hasReturned;
+    @name("ingress.retval") bit<16> retval;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
             key_0: exact @name("dummy_name") ;
         }
         actions = {
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
-        {
-            @name("ingress.hasReturned") bool hasReturned = false;
-            @name("ingress.retval") bit<16> retval;
-            hasReturned = true;
-            retval = 16w1;
-            key_0 = retval;
-        }
+        hasReturned = false;
+        hasReturned = true;
+        retval = 16w1;
+        key_0 = retval;
         simple_table_0.apply();
     }
 }

@@ -21,27 +21,27 @@ control ingress(inout Headers h) {
     @name("ingress.tmp") bool tmp;
     @name("ingress.tmp_0") bit<8> tmp_0;
     bit<48> key_1;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("ingress.simple_table_1") table simple_table {
         key = {
             key_1: exact @name("KOXpQP") ;
         }
         actions = {
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name("ingress.simple_table_2") table simple_table_0 {
         key = {
             tmp_0: exact @name("key") ;
         }
         actions = {
-            @defaultonly NoAction_3();
+            @defaultonly NoAction_2();
         }
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     @hidden action act() {
         tmp = true;
