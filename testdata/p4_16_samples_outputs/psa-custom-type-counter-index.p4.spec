@@ -57,12 +57,14 @@ struct psa_egress_deparser_input_metadata_t {
 	bit<32> egress_port
 }
 
+regarray counter_0 size 0x400 initval 0x0
+
 action NoAction args none {
 	return
 }
 
 action execute args none {
-	counter_count counter_0 0x400
+	regadd counter_0 0x400 1
 	return
 }
 

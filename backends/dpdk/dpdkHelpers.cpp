@@ -73,6 +73,29 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     i = new IR::DpdkGetChecksumStatement(
                         left, e->object->getName(), intermediate);
                 }
+            } else if (e->originalExternType->getName().name == "Meter") {
+                if (e->method->getName().name == "execute") {
+                    auto argSize = e->expr->arguments->size();
+
+                    // DPDK target needs index and packet length as mandatory parameters
+                    if (argSize < 2) {
+                        ::error(ErrorType::ERR_UNEXPECTED, "Expected atleast 2 arguments for %1%",
+                                e->object->getName());
+                        return false;
+                    }
+                    const IR::Expression *color_in = nullptr;
+                    const IR::Expression *length = nullptr;
+                    auto index = e->expr->arguments->at(0)->expression;
+                    if (argSize == 2) {
+                        length = e->expr->arguments->at(1)->expression;
+                        color_in = new IR::Constant(1);
+                    } else if (argSize == 3) {
+                        length = e->expr->arguments->at(2)->expression;
+                        color_in = e->expr->arguments->at(1)->expression;
+                    }
+                    i = new IR::DpdkMeterExecuteStatement(
+                         e->object->getName(), index, length, color_in, left);
+                }
             } else if (e->originalExternType->getName().name == "Register") {
                 if (e->method->getName().name == "read") {
                     auto index = (*e->expr->arguments)[0]->expression;
@@ -412,21 +435,46 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             }
         } else if (a->originalExternType->getName().name == "Meter") {
             if (a->method->getName().name == "execute") {
-                auto args = a->expr->arguments;
-                auto index = args->at(0)->expression;
-                auto color = args->at(1)->expression;
-                auto meter = a->object->getName();
-                add_instr(
-                    new IR::DpdkMeterExecuteStatement(meter, index, color));
+                // DPDK target requires the result of meter execute method is assigned to a
+                // variable of PSA_MeterColor_t type.
+                ::error(ErrorType::ERR_UNSUPPORTED, "LHS of meter execute statement is missing " \
+                        "Use this format instead : color_out = %1%.execute(index, color_in)",
+                         a->object->getName());
             } else {
                 BUG("Meter function not implemented.");
             }
         } else if (a->originalExternType->getName().name == "Counter") {
+            auto di = a->object->to<IR::Declaration_Instance>();
+            auto declArgs = di->arguments;
+            unsigned value = 0;
+            auto counter_type = declArgs->at(1)->expression;
+            if (counter_type->is<IR::Constant>())
+                value = counter_type->to<IR::Constant>()->asUnsigned();
             if (a->method->getName().name == "count") {
                 auto args = a->expr->arguments;
-                auto index = args->at(0)->expression;
-                auto counter = a->object->getName();
-                add_instr(new IR::DpdkCounterCountStatement(counter, index));
+                if (args->size() < 1){
+                    ::error(ErrorType::ERR_UNEXPECTED, "Expected atleast 1 arguments for %1%",
+                            a->object->getName());
+                } else {
+                    const IR::Expression *incr = nullptr;
+                    auto index = args->at(0)->expression;
+                    auto counter = a->object->getName();
+                    if (args->size() == 2)
+                        incr = args->at(1)->expression;
+                    if (value == 2) {
+                        if (incr) {
+                            add_instr(new IR::DpdkCounterCountStatement(counter+"_packets",
+                                                                        index, incr));
+                            add_instr(new IR::DpdkCounterCountStatement(counter+"_bytes",
+                                                                        index));
+                        } else {
+                           ::error(ErrorType::ERR_UNEXPECTED,
+                                   "Expected packet length argument for %1%", a->object->getName());
+                        }
+                     } else {
+                         add_instr(new IR::DpdkCounterCountStatement(counter, index, incr));
+                     }
+                }
             } else {
                 BUG("Counter function not implemented");
             }

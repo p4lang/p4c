@@ -65,13 +65,10 @@ action NoAction args none {
 
 action execute args none {
 	jmpeq LABEL_1FALSE m.local_metadata_data 0x0
-	LABEL_1TRUE :
-	mov m.Ingress_tmp_0 0x0
+	LABEL_1TRUE :	mov m.Ingress_tmp_0 0x0
 	jmp LABEL_1END
-	LABEL_1FALSE :
-	mov m.Ingress_tmp_0 0x1
-	LABEL_1END :
-	mov m.local_metadata_data m.Ingress_tmp_0
+	LABEL_1FALSE :	mov m.Ingress_tmp_0 0x1
+	LABEL_1END :	mov m.local_metadata_data m.Ingress_tmp_0
 	add m.local_metadata_data 0x1
 	return
 }

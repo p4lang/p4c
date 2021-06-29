@@ -433,10 +433,19 @@ class DpdkVerifyStatement: DpdkAsmStatement, IDPDKNode {
 #nodbprint
 }
 
+class DpdkMeterDeclStatement: DpdkAsmStatement {
+    cstring meter;
+    Expression size;
+    std::ostream& toSpec(std::ostream& out) const override;
+#nodbprint
+}
+
 class DpdkMeterExecuteStatement: DpdkAsmStatement, IDPDKNode {
     cstring meter;
     Expression index;
-    Expression color;
+    NullOK Expression length;
+    Expression color_in;
+    Expression color_out;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
@@ -444,6 +453,7 @@ class DpdkMeterExecuteStatement: DpdkAsmStatement, IDPDKNode {
 class DpdkCounterCountStatement: DpdkAsmStatement, IDPDKNode {
     cstring counter;
     Expression index;
+    NullOK optional Expression incr;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
