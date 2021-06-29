@@ -24,45 +24,27 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.key_0") bool key_0;
-<<<<<<< HEAD
     @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @noWarn("unused") @name(".NoAction") action NoAction_2() {
-=======
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
-    }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
->>>>>>> One more test
     }
     @name("ingress.sub_table") table sub_table_0 {
         key = {
             h.eth_hdr.eth_type: exact @name("dummy_name") ;
         }
         actions = {
-<<<<<<< HEAD
             @defaultonly NoAction_1();
         }
         default_action = NoAction_1();
-=======
-            @defaultonly NoAction_0();
-        }
-        default_action = NoAction_0();
->>>>>>> One more test
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
             key_0: exact @name("dummy_name") ;
         }
         actions = {
-<<<<<<< HEAD
             @defaultonly NoAction_2();
         }
         default_action = NoAction_2();
-=======
-            @defaultonly NoAction_3();
-        }
-        default_action = NoAction_3();
->>>>>>> One more test
     }
     @hidden action act() {
         key_0 = true;
