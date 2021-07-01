@@ -53,18 +53,13 @@ limitations under the License.
  * accurate until they * have been approved by the p4c-dpdk
  * implementers. */
 
-typedef bit<9>  PortIdUint_t;
-typedef bit<16> MulticastGroupUint_t;
-typedef bit<10> CloneSessionIdUint_t;
-typedef bit<2>  ClassOfServiceUint_t;
+typedef bit<32>  PortIdUint_t;
+typedef bit<32> MulticastGroupUint_t;
+typedef bit<16> CloneSessionIdUint_t;
+typedef bit<8>  ClassOfServiceUint_t;
 typedef bit<16> PacketLengthUint_t;
 typedef bit<16> EgressInstanceUint_t;
 typedef bit<64> TimestampUint_t;
-
-const PortId_t PSA_PORT_RECIRCULATE = (PortId_t) 0xfffffffa;
-const PortId_t PSA_PORT_CPU = (PortId_t) 0xfffffffd;
-
-const CloneSessionId_t PSA_CLONE_SESSION_TO_CPU = (CloneSessionId_t) 0;
 
 /* Note: clone_spec in BMv2 simple_switch v1model is 32 bits wide, but
  * it is used such that 16 of its bits contain a clone/mirror session
@@ -90,6 +85,11 @@ type EgressInstanceUint_t EgressInstance_t;
 @p4runtime_translation("p4.org/psa/v1/Timestamp_t", 64)
 type TimestampUint_t      Timestamp_t;
 typedef error   ParserError_t;
+
+const PortId_t PSA_PORT_RECIRCULATE = (PortId_t) 0xfffffffa;
+const PortId_t PSA_PORT_CPU = (PortId_t) 0xfffffffd;
+
+const CloneSessionId_t PSA_CLONE_SESSION_TO_CPU = (CloneSessionId_t) 0;
 
 /**********************************************************************
  * End of the part of this target-customized psa.p4 include file that
