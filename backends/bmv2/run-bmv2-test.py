@@ -18,41 +18,61 @@
 
 from subprocess import Popen
 from threading import Thread
-import json
 import sys
-import re
 import os
-import stat
 import tempfile
 import shutil
-import difflib
-import subprocess
-import time
-import random
-import errno
-try:
-    from scapy.layers.all import *
-    from scapy.utils import *
-except ImportError:
-    pass
+import argparse
+
+from scapy.layers.all import *
+from scapy.utils import *
 from bmv2stf import RunBMV2
-import pdb
 SUCCESS = 0
 FAILURE = 1
+
+
+PARSER = argparse.ArgumentParser()
+PARSER.add_argument("rootdir", help="the root directory of "
+                    "the compiler source tree")
+PARSER.add_argument("p4filename", help="the p4 file to process")
+PARSER.add_argument("-b", "--nocleanup", action="store_false",
+                    help="do not remove temporary results for failing tests")
+PARSER.add_argument("-bd", "--buildir", dest="builddir", default="build",
+                    help="The path to the compiler build directory, "
+                    "default is \"build\".")
+PARSER.add_argument("-v", "--verbose", action="store_true",
+                    help="verbose operation")
+PARSER.add_argument("-f", "--replace", action="store_true",
+                    help="replace reference outputs with newly generated ones")
+PARSER.add_argument("-p", "--usePsa", dest="use_psa", action="store_true",
+                    help="Use psa switch")
+PARSER.add_argument("-pp", dest="pp",
+                    help="pass this option to the compiler")
+PARSER.add_argument("-gdb", "--gdb", action="store_true",
+                    help="Run the compiler under gdb.")
+PARSER.add_argument("-a", dest="compiler_options",
+                    default=[], action='append', nargs="?",
+                    help="Pass this option string to the compiler")
+PARSER.add_argument("--target-specific-switch-arg", dest="switch_options",
+                    default=[], action='append', nargs="?",
+                    help="Pass this target-specific option to the switch")
+PARSER.add_argument("--init", dest="init_cmds", default=[],
+                    action='append', nargs="?",
+                    help="Run <cmd> before the start of the test")
+PARSER.add_argument("--observation-log", dest="obs_log",
+                    help="save packet output to <file>")
 
 
 class Options(object):
     def __init__(self):
         self.binary = ""                # this program's name
         self.cleanupTmp = True          # if false do not remote tmp folder created
-        self.p4Filename = ""            # file that is being compiled
+        self.p4filename = ""            # file that is being compiled
         self.compilerSrcDir = ""        # path to compiler source tree
-        # default of the build dir is just the working directory
-        self.compilerBuildDir = "."
+        self.compilerBuildDir = ""        # path to compiler build directory
         self.verbose = False
         self.replace = False            # replace previous outputs
         self.compilerOptions = []
-        self.switchOptions = []
         self.switchTargetSpecificOptions = []
         self.hasBMv2 = False            # Is the behavioral model installed?
         self.usePsa = False             # Use the psa switch behavioral model?
@@ -108,27 +128,6 @@ class ConfigH(object):
 
     def __str__(self):
         return str(self.vars)
-
-
-def usage(options):
-    name = options.binary
-    print(name, "usage:")
-    print(name, "rootdir [options] file.p4")
-    print("Invokes compiler on the supplied file, possibly adding extra arguments")
-    print("`rootdir` is the root directory of the compiler source tree")
-    print("options:")
-    print("          -b: do not remove temporary results for failing tests")
-    print("          -v: verbose operation")
-    print("          -p: use psa switch")
-    print("          -f: replace reference outputs with newly generated ones")
-    print("          -a option: pass this option to the compiler")
-    print("          --switch-arg option: pass this general option to the switch")
-    print("          --target-specific-switch-arg option: pass this target-specific option to the switch")
-    print("          -gdb: run compiler under gdb")
-    print("          --pp file: pass this option to the compiler")
-    print("          -observation-log <file>: save packet output to <file>")
-    print("          --init <cmd>: Run <cmd> before the start of the test")
-    print("          -bd <folder>: Specify the build <folder> in the compiler source directory")
 
 
 def isError(p4filename):
@@ -238,14 +237,17 @@ def process_file(options, argv):
         raise Exception("No such file " + options.p4filename)
 
     if options.usePsa:
-        binary = options.compilerBuildDir + "/p4c-bm2-psa"
+        binary = options.compilerSrcDir + "/" + \
+            options.compilerBuildDir + "/p4c-bm2-psa"
     else:
-        binary = options.compilerBuildDir + "/p4c-bm2-ss"
+        binary = options.compilerSrcDir + "/" + \
+            options.compilerBuildDir + "/p4c-bm2-ss"
 
     args = [binary, "-o", jsonfile] + options.compilerOptions
     if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
         args.extend(["--std", "p4-14"])
-    args.extend(argv)  # includes p4filename
+    args.append(options.p4filename)
+    args.extend(argv)
     if options.runDebugger:
         args[0:0] = options.runDebugger.split()
         os.execvp(args[0], args)
@@ -276,100 +278,19 @@ def process_file(options, argv):
         shutil.rmtree(tmpdir)
     return result
 
-######################### main
 
 def main(argv):
-    options = Options()
 
-    options.binary = argv[0]
-    if len(argv) <= 2:
-        usage(options)
-        sys.exit(FAILURE)
-
-    options.compilerSrcDir = argv[1]
-    argv = argv[2:]
-    if not os.path.isdir(options.compilerSrcDir):
-        print(options.compilerSrcDir + " is not a folder", file=sys.stderr)
-        usage(options)
-        sys.exit(FAILURE)
-
-    while argv[0][0] == '-':
-        if argv[0] == "-b":
-            options.cleanupTmp = False
-        elif argv[0] == "-v":
-            options.verbose = True
-        elif argv[0] == "-f":
-            options.replace = True
-        elif argv[0] == "-p":
-            options.usePsa = True
-        elif argv[0] == "-a":
-            if len(argv) == 0:
-                reportError("Missing argument for -a option")
-                usage(options)
-                sys.exit(FAILURE)
-            else:
-                options.compilerOptions += argv[1].split()
-                argv = argv[1:]
-        elif argv[0] == "--switch-arg":
-            if len(argv) == 0:
-                reportError("Missing argument for --switch-arg option")
-                usage(options)
-                sys.exit(FAILURE)
-            else:
-                options.switchOptions += argv[1].split()
-                argv = argv[1:]
-        elif argv[0] == "--target-specific-switch-arg":
-            if len(argv) == 0:
-                reportError(
-                    "Missing argument for --target-specific-switch-arg option")
-                usage(options)
-                sys.exit(FAILURE)
-            else:
-                options.switchTargetSpecificOptions += argv[1].split()
-                argv = argv[1:]
-        elif argv[0][1] == 'D' or argv[0][1] == 'I' or argv[0][1] == 'T':
-            options.compilerOptions.append(argv[0])
-        elif argv[0] == "-gdb":
-            options.runDebugger = "gdb --args"
-        elif argv[0] == '-observation-log':
-            if len(argv) == 0:
-                reportError("Missing argument for -observation-log option")
-                usage(options)
-                sys.exit(FAILURE)
-            else:
-                options.observationLog = argv[1]
-                argv = argv[1:]
-        elif argv[0] == "--pp":
-            options.compilerOptions.append(argv[0])
-            argv = argv[1:]
-            options.compilerOptions.append(argv[0])
-        elif argv[0] == "--init":
-            if len(argv) == 0:
-                reportError("Missing argument for --init option")
-                usage(options)
-                sys.exit(FAILURE)
-            else:
-                options.initCommands.append(argv[1])
-                argv = argv[1:]
-        elif argv[0] == "-bd":
-            options.compilerBuildDir = argv[1]
-            argv = argv[1:]
-        else:
-            reportError("Unknown option ", argv[0])
-            usage(options)
-            sys.exit(FAILURE)
-        argv = argv[1:]
-    config = ConfigH(options.compilerBuildDir + "/config.h")
+    config = ConfigH(options.compilerSrcDir + "/" +
+                     options.compilerBuildDir + "/config.h")
     if not config.ok:
         print("Error parsing config.h")
         sys.exit(FAILURE)
 
     options.hasBMv2 = "HAVE_SIMPLE_SWITCH" in config.vars
     if not options.hasBMv2:
-        reportError(
-            "config.h indicates that BMv2 is not installed; will skip running BMv2 tests")
-
-    options.p4filename = argv[-1]
+        reportError("config.h indicates that BMv2 is not installed"
+                    "will skip running BMv2 tests")
     options.testName = None
     if options.p4filename.startswith(options.compilerSrcDir):
         options.testName = options.p4filename[len(options.compilerSrcDir):];
@@ -378,10 +299,10 @@ def main(argv):
         if options.testName.endswith('.p4'):
             options.testName = options.testName[:-3]
         options.testName = "bmv2/" + options.testName
-
     if not options.observationLog:
         if options.testName:
-            options.observationLog = os.path.join('%s.p4.obs' % options.testName)
+            options.observationLog = os.path.join(
+                '%s.p4.obs' % options.testName)
         else:
             basename = os.path.basename(options.p4filename)
             base, ext = os.path.splitext(basename)
@@ -399,5 +320,43 @@ def main(argv):
     sys.exit(result)
 
 
+def check_path(path):
+    """Checks if a path is an actual directory and converts the input
+        to an absolute path"""
+    if not os.path.exists(path):
+        msg = "{0} does not exist".format(path)
+        raise argparse.ArgumentTypeError(msg)
+    return os.path.abspath(os.path.expanduser(path))
+
+
 if __name__ == "__main__":
-    main(sys.argv)
+    # Parse options and process argv
+    args, argv = PARSER.parse_known_args()
+    options = Options()
+    options.binary = "hello"
+    options.p4filename = check_path(args.p4filename)
+    options.compilerSrcDir = check_path(args.rootdir)
+    options.compilerBuildDir = args.builddir
+    options.verbose = args.verbose
+    options.replace = args.replace
+    options.cleanupTmp = args.nocleanup
+    for compiler_option in args.compiler_options:
+        options.compilerOptions.extend(compiler_option.split())
+    for switch_option in args.switch_options:
+        options.switchTargetSpecificOptions.extend(switch_option.split())
+    for init_cmd in args.init_cmds:
+        options.initCommands.append(init_cmd)
+    options.usePsa = args.use_psa
+    if args.pp:
+        options.compilerOptions.append(args.pp)
+    if args.gdb:
+        options.runDebugger = "gdb --args"
+    options.observationLog = args.obs_log
+    residual_argv = []
+    for arg in argv:
+        if arg in('-D', '-I', '-T'):
+            options.compilerOptions.append(arg)
+        else:
+            residual_argv.append(arg)
+    # All args after '--' are intended for the p4 compiler
+    main(residual_argv)
