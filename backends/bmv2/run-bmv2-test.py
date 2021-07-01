@@ -61,9 +61,13 @@ PARSER.add_argument("--init", dest="init_cmds", default=[],
                     help="Run <cmd> before the start of the test")
 PARSER.add_argument("--observation-log", dest="obs_log",
                     help="save packet output to <file>")
+PARSER.add_argument("-tf", "--testfile", dest="testfile",
+                    help="Provide the path for the stf file for this test. "
+                    "If no path is provided, the script will search for an"
+                    " stf file in the same folder.")
 
 
-class Options(object):
+class Options():
     def __init__(self):
         self.binary = ""                # this program's name
         self.cleanupTmp = True          # if false do not remote tmp folder created
@@ -94,7 +98,7 @@ def nextWord(text, sep=" "):
     return l, r
 
 
-class ConfigH(object):
+class ConfigH():
     # Represents an autoconf config.h file
     # fortunately the structure of these files is very constrained
     def __init__(self, file):
@@ -139,8 +143,8 @@ def reportError(*message):
     print("***", *message)
 
 
-class Local(object):
-    # object to hold local vars accessable to nested functions
+class Local():
+    # object to hold local vars accessible to nested functions
     pass
 
 
@@ -184,14 +188,17 @@ def run_model(options, tmpdir, jsonfile):
     base, ext = os.path.splitext(basename)
     dirname = os.path.dirname(options.p4filename)
 
-    testfile = dirname + "/" + base + ".stf"
-    print("Check for ", testfile)
-    if not os.path.isfile(testfile):
-        # If no stf file is present just use the empty file
-        testfile = dirname + "/empty.stf"
-    if not os.path.isfile(testfile):
-        # If no empty.stf present, don't try to run the model at all
-        return SUCCESS
+    testfile = options.testfile
+    # If no test file is provided, try to find it in the folder.
+    if (not testfile):
+        testfile = dirname + "/" + base + ".stf"
+        print("Check for ", testfile)
+        if not os.path.isfile(testfile):
+            # If no stf file is present just use the empty file
+            testfile = dirname + "/empty.stf"
+        if not os.path.isfile(testfile):
+            # If no empty.stf present, don't try to run the model at all
+            return SUCCESS
     bmv2 = RunBMV2(tmpdir, options, jsonfile)
     result = bmv2.generate_model_inputs(testfile)
     if result != SUCCESS:
@@ -223,7 +230,8 @@ def process_file(options, argv):
     basename = os.path.basename(options.p4filename)
     base, ext = os.path.splitext(basename)
     dirname = os.path.dirname(options.p4filename)
-    expected_dirname = dirname + "_outputs"  # expected outputs are here
+    # expected outputs are here
+    expected_dirname = dirname + "_outputs"
 
     if options.verbose:
         print("Writing temporary files into ", tmpdir)
@@ -252,7 +260,6 @@ def process_file(options, argv):
         args[0:0] = options.runDebugger.split()
         os.execvp(args[0], args)
     result = run_timeout(options, args, timeout, stderr)
-    #result = SUCCESS
 
     if result != SUCCESS:
         print("Error compiling")
@@ -293,7 +300,7 @@ def main(argv):
                     "will skip running BMv2 tests")
     options.testName = None
     if options.p4filename.startswith(options.compilerSrcDir):
-        options.testName = options.p4filename[len(options.compilerSrcDir):];
+        options.testName = options.p4filename[len(options.compilerSrcDir):]
         if options.testName.startswith('/'):
             options.testName = options.testName[1:]
         if options.testName.endswith('.p4'):
@@ -333,13 +340,15 @@ if __name__ == "__main__":
     # Parse options and process argv
     args, argv = PARSER.parse_known_args()
     options = Options()
-    options.binary = "hello"
+    options.binary = ""
     options.p4filename = check_path(args.p4filename)
     options.compilerSrcDir = check_path(args.rootdir)
     options.compilerBuildDir = args.builddir
     options.verbose = args.verbose
     options.replace = args.replace
     options.cleanupTmp = args.nocleanup
+    options.testfile = args.testfile
+
     for compiler_option in args.compiler_options:
         options.compilerOptions.extend(compiler_option.split())
     for switch_option in args.switch_options:
@@ -354,7 +363,7 @@ if __name__ == "__main__":
     options.observationLog = args.obs_log
     residual_argv = []
     for arg in argv:
-        if arg in('-D', '-I', '-T'):
+        if arg in ('-D', '-I', '-T'):
             options.compilerOptions.append(arg)
         else:
             residual_argv.append(arg)
