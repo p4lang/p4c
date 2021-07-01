@@ -91,16 +91,6 @@ class Options(object):
         self.extern = ""                # Path to C file with extern definition
 
 
-def check_path(path):
-    """Checks if a path is an actual directory and converts the input
-        to an absolute path"""
-    if not os.path.exists(path):
-        msg = "{0} does not exist".format(path)
-        raise argparse.ArgumentTypeError(msg)
-    else:
-        return os.path.abspath(os.path.expanduser(path))
-
-
 def run_model(ebpf, stffile):
     result = ebpf.generate_model_inputs(stffile)
     if result != SUCCESS:
@@ -183,8 +173,8 @@ if __name__ == '__main__':
     # Parse options and process argv
     args, argv = PARSER.parse_known_args()
     options = Options()
-    options.compiler = check_path(args.compiler)
-    options.p4filename = check_path(args.p4filename)
+    options.compiler = check_if_file(args.compiler)
+    options.p4filename = check_if_file(args.p4filename)
     options.verbose = args.verbose
     options.replace = args.replace
     options.cleanupTmp = args.nocleanup
