@@ -17,6 +17,8 @@ SymbolicValue* SymbolicValueFactory::create(const IR::Type* type, bool uninitial
         return new SymbolicStruct(type->to<IR::Type_Struct>(), uninitialized, this);
     if (type->is<IR::Type_Header>())
         return new SymbolicHeader(type->to<IR::Type_Header>(), uninitialized, this);
+    if (type->is<IR::Type_HeaderUnion>())
+        return new SymbolicStruct(type->to<IR::Type_HeaderUnion>(), uninitialized, this);
     if (type->is<IR::Type_Varbits>())
         return new SymbolicVarbit(type->to<IR::Type_Varbits>());
     if (type->is<IR::Type_Stack>()) {
@@ -676,16 +678,6 @@ void ExpressionEvaluator::postorder(const IR::ListExpression* expression) {
     set(expression, result);
 }
 
-void ExpressionEvaluator::postorder(const IR::StructExpression* expression) {
-    auto type = typeMap->getType(expression, true);
-    auto result = new SymbolicStruct(type->to<IR::Type_StructLike>());
-    for (auto e : expression->components) {
-        auto v = get(e->expression);
-        result->set(e->name, v);
-    }
-    set(expression, result);
-}
-
 void ExpressionEvaluator::postorder(const IR::BoolLiteral* expression) {
     set(expression, new SymbolicBool(expression));
 }
@@ -716,11 +708,11 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
         return;
     }
     if (lv->isUnknown()) {
-        set(expression, new SymbolicBool(ScalarValue::ValueState::NotConstant));
+        set(expression, l);
         return;
     }
     if (rv->isUnknown()) {
-        set(expression, new SymbolicBool(ScalarValue::ValueState::NotConstant));
+        set(expression, r);
         return;
     }
 
