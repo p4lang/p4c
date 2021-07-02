@@ -58,7 +58,11 @@ if (NOT $ENV{P4C_VERSION} STREQUAL "")
 else()
   # Semantic version numbering: <major>.<minor>.<patch>[-rcX]
   # Examples: 0.5.1, 1.0.0-rc1, 1.0.1-alpha
-  set (P4C_SEM_VERSION_STRING "1.2.0+g202103291035~a69e52")
+  execute_process (COMMAND cat Version.txt
+    OUTPUT_VARIABLE P4C_SEM_VERSION_STRING
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE rc
+    WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
   string (REGEX MATCH "([0-9]+)\\.([0-9]+)\\.([0-9]+)([-0-9a-z\\.]*).*"
     __p4c_version ${P4C_SEM_VERSION_STRING})
   set (P4C_VERSION_MAJOR ${CMAKE_MATCH_1})
@@ -377,6 +381,11 @@ add_custom_target(update_includes ALL
     ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/\$$h ${P4C_BINARY_DIR}/p4include \;
   done
   )
+if (ENABLE_DPDK)
+add_custom_target(dpdk_includes ALL
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include/dpdk
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/dpdk/psa.p4 ${P4C_BINARY_DIR}/p4include/dpdk)
+endif ()
 
 # Installation
 # Targets install themselves. Here we install the core headers

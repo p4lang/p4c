@@ -23,11 +23,14 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
-    }
     @name("ingress.tmp") bool tmp;
     @name("ingress.tmp_0") bit<16> tmp_0;
     @name("ingress.tmp_1") bit<16> tmp_1;
+    @name("ingress.input_value_0") bit<16> input_value;
+    @name("ingress.hasReturned") bool hasReturned;
+    @name("ingress.retval") bit<16> retval;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    }
     @name("ingress.exit_action") action exit_action() {
         exit;
     }
@@ -37,9 +40,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         actions = {
             exit_action();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         tmp = exit_table_0.apply().hit;
@@ -49,14 +52,11 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
             tmp_0 = 16w2;
         }
         tmp_1 = tmp_0;
-        {
-            @name("ingress.input_value_0") bit<16> input_value_0 = tmp_1;
-            @name("ingress.hasReturned") bool hasReturned = false;
-            @name("ingress.retval") bit<16> retval;
-            hasReturned = true;
-            retval = input_value_0;
-            h.eth_hdr.eth_type = retval;
-        }
+        input_value = tmp_1;
+        hasReturned = false;
+        hasReturned = true;
+        retval = input_value;
+        h.eth_hdr.eth_type = retval;
     }
 }
 

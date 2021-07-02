@@ -47,7 +47,7 @@ control pipe(inout Headers_t headers, out bool pass) {
     @name("pipe.address_0") IPv4Address address_0;
     @name("pipe.pass_0") bool pass_0;
     @name("pipe.hasReturned") bool hasReturned;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("pipe.c1.Reject") action c1_Reject_0() {
         pass_0 = false;
@@ -58,10 +58,10 @@ control pipe(inout Headers_t headers, out bool pass) {
         }
         actions = {
             c1_Reject_0();
-            NoAction_0();
+            NoAction_1();
         }
         implementation = hash_table(32w1024);
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
     }
     @hidden action two_ebpf69() {
         pass = false;

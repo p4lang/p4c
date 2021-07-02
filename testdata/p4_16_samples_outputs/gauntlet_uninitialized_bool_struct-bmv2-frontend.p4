@@ -27,20 +27,24 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 }
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
-    }
     @name("ingress.tmp") bool_struct tmp_0;
-    @name("ingress.dummy_action") action dummy_action(@name("dummy_bit") out bit<16> dummy_bit, @name("dummy_struct") out bool_struct dummy_struct) {
+    @name("ingress.dummy_bit") bit<16> dummy_bit_0;
+    @name("ingress.dummy_struct") bool_struct dummy_struct_0;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    }
+    @name("ingress.dummy_action") action dummy_action() {
+        h.eth_hdr.eth_type = dummy_bit_0;
+        tmp_0 = dummy_struct_0;
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
             h.eth_hdr.src_addr: exact @name("MsRuxx") ;
         }
         actions = {
-            dummy_action(h.eth_hdr.eth_type, tmp_0);
-            @defaultonly NoAction_0();
+            dummy_action();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         tmp_0 = (bool_struct){is_bool = false};

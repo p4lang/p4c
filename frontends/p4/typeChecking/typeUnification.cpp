@@ -44,27 +44,10 @@ bool TypeUnification::unifyCall(const EqualityConstraint* constraint) {
     }
     constraints->addUnifiableTypeVariable(src->returnType);  // always a type variable
 
+    // Adding type parameters last will ensure that they are matched first
+    // since the algorithms pops constraints from the back of the list
     for (auto tv : dest->typeParameters->parameters)
         constraints->addUnifiableTypeVariable(tv);
-
-    if (src->typeArguments->size() != 0) {
-        if (dest->typeParameters->size() != src->typeArguments->size())
-            return constraint->reportError(constraints->getCurrentSubstitution(),
-                "%1%: %2% type parameters expected, but %3% type arguments supplied",
-                dest, dest->typeParameters->size(), src->typeArguments->size());
-
-        size_t i = 0;
-        for (auto tv : dest->typeParameters->parameters) {
-            auto type = src->typeArguments->at(i++);
-            // variable type represents type of formal method argument
-            // written beetween angle brackets, and tv should be replaced
-            // with type of an actual argument
-            auto c = constraint->create(type, tv);
-            c->setError("Type parameter '%1%' substituted with type argument '%2%'",
-                        { type, tv });
-            constraints->add(c);
-        }
-    }
 
     if (dest->parameters->size() < src->arguments->size())
         return constraint->reportError(constraints->getCurrentSubstitution(),
@@ -136,6 +119,25 @@ bool TypeUnification::unifyCall(const EqualityConstraint* constraint) {
         return constraint->reportError(
             constraints->getCurrentSubstitution(),
             "%1%: No argument supplied for parameter", p.second);
+    }
+
+    if (src->typeArguments->size() != 0) {
+        if (dest->typeParameters->size() != src->typeArguments->size())
+            return constraint->reportError(constraints->getCurrentSubstitution(),
+                "%1%: %2% type parameters expected, but %3% type arguments supplied",
+                dest, dest->typeParameters->size(), src->typeArguments->size());
+
+        size_t i = 0;
+        for (auto tv : dest->typeParameters->parameters) {
+            auto type = src->typeArguments->at(i++);
+            // variable type represents type of formal method argument
+            // written beetween angle brackets, and tv should be replaced
+            // with type of an actual argument
+            auto c = constraint->create(type, tv);
+            c->setError("Type parameter '%1%' substituted with type argument '%2%'",
+                        { type, tv });
+            constraints->add(c);
+        }
     }
 
     return true;

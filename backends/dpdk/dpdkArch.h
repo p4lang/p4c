@@ -442,36 +442,42 @@ class ConvertInternetChecksum : public PassManager {
     }
 };
 
-/* This pass collects PSA register declaration instances and push them to a map
- * for emitting to the .spec file later */
-class CollectRegisterDeclaration : public Inspector {
-    std::map<const IR::Declaration_Instance *, cstring> *reg_map;
-    
-  public:
-    CollectRegisterDeclaration(
-        std::map<const IR::Declaration_Instance *, cstring> *reg_map, P4::TypeMap *)
-        : reg_map(reg_map) {}
+/* This pass collects PSA extern meter, counter and register declaration instances and 
+   push them to a vector for emitting to the .spec file later */
+class CollectExternDeclaration : public Inspector {
+    P4::TypeMap *typeMap;
 
+  public:
+    std::vector<const IR::Declaration_Instance *> externDecls;
+    CollectExternDeclaration(P4::TypeMap *typeMap) : typeMap(typeMap) {}
     bool preorder(const IR::Declaration_Instance *d) override {
-        if (d->type->is<IR::Type_Specialized>()) {
-            auto type = d->type->to<IR::Type_Specialized>();
+        if (auto type = d->type->to<IR::Type_Specialized>()) {
             auto externTypeName = type->baseType->path->name.name;
-            if (externTypeName == "Register"){
-              if (d->arguments->size() != 1 and d->arguments->size() != 2 ) {
-                  ::error("%1%: expected size and optionally init_val as arguments", d);
-              }
-              reg_map->emplace(d, d->name);
+            if (externTypeName == "Meter") {
+                if (d->arguments->size() != 2) {
+                    ::error("%1%: expected number of meters and type of meter as arguments", d);
+                } else {
+                    /* Check if the meter is of PACKETS (0) type */
+                    if (d->arguments->at(1)->expression->to<IR::Constant>()->asUnsigned() == 0)
+                        ::warning(ErrorType::WARN_UNSUPPORTED,
+                                  "%1%: Packet metering is not supported." \
+                                  " Falling back to byte metering.", d);
+                }
+            } else if (externTypeName == "Counter") {
+                if (d->arguments->size() != 2 ) {
+                    ::error("%1%: expected number of_counters and type of counter as arguments", d);
+                }
+            } else if (externTypeName == "Register") {
+                if (d->arguments->size() != 1 and d->arguments->size() != 2 ) {
+                    ::error("%1%: expected size and optionally init_val as arguments", d);
+                }
+            } else {
+                // unsupported extern type
+                return false;
             }
+            externDecls.push_back(d);
          }
          return false;
-    }
-};
-
-class AddRegisterDeclaration : public PassManager {
-  public:
-    std::map<const IR::Declaration_Instance *, cstring> reg_map;
-    AddRegisterDeclaration(P4::TypeMap *typeMap) {
-        passes.push_back(new CollectRegisterDeclaration(&reg_map, typeMap));
     }
 };
 
@@ -583,7 +589,7 @@ class RewriteToDpdkArch : public PassManager {
     std::map<const cstring, IR::IndexedVector<IR::Parameter> *>
         *args_struct_map;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
-    std::map<const IR::Declaration_Instance *, cstring> *reg_map;
+    std::vector<const IR::Declaration_Instance *> *externDecls;
     RewriteToDpdkArch(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                       DpdkVariableCollector *collector) {
         setName("RewriteToDpdkArch");
@@ -631,9 +637,9 @@ class RewriteToDpdkArch : public PassManager {
         args_struct_map = &p->args_struct_map;
         passes.push_back(p);
         passes.push_back(new ConvertLogicalExpression);
-        auto insertRegDeclaration = new AddRegisterDeclaration(typeMap);
-        passes.push_back(insertRegDeclaration);
-        reg_map = &insertRegDeclaration->reg_map;
+        auto insertExternDeclaration = new CollectExternDeclaration(typeMap);
+        passes.push_back(insertExternDeclaration);
+        externDecls = &insertExternDeclaration->externDecls;
     }
 };
 

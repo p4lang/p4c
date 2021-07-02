@@ -17,7 +17,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @name("IngressImpl.registerData") bit<1> registerData_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("IngressImpl.testRegister") register<bit<1>>(32w1) testRegister_0;
     @name("IngressImpl.debug_table") table debug_table_0 {
@@ -25,9 +25,9 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
             meta.test: exact @name("meta.test") ;
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action issue1814bmv2l33() {
         testRegister_0.read(registerData_0, 32w0);

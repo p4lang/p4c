@@ -43,17 +43,16 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp_0") bit<8> tmp_0;
     @name("ingress.tmp_1") bool tmp_1;
     @name("ingress.tmp_2") bit<8> tmp_2;
+    @name("ingress.val_0") bit<8> val;
+    @name("ingress.hasReturned") bool hasReturned;
+    @name("ingress.retval") bit<8> retval;
     apply {
         tmp = 8w1;
-        {
-            @name("ingress.val_0") bit<8> val_0;
-            @name("ingress.hasReturned") bool hasReturned = false;
-            @name("ingress.retval") bit<8> retval;
-            hasReturned = true;
-            retval = val_0;
-            h.b.b = val_0;
-            tmp_0 = retval;
-        }
+        hasReturned = false;
+        hasReturned = true;
+        retval = val;
+        h.b.b = val;
+        tmp_0 = retval;
         tmp_1 = tmp != tmp_0;
         if (tmp_1) {
             tmp_2 = 8w1;

@@ -839,7 +839,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 @name(".outer_bd_action_profile") action_profile(32w256) outer_bd_action_profile;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".set_bd") action set_bd(@name("outer_vlan_bd") bit<16> outer_vlan_bd, @name("vrf") bit<12> vrf_5, @name("rmac_group") bit<10> rmac_group_5, @name("bd_label") bit<16> bd_label_5, @name("uuc_mc_index") bit<16> uuc_mc_index_5, @name("bcast_mc_index") bit<16> bcast_mc_index_5, @name("umc_mc_index") bit<16> umc_mc_index_5, @name("ipv4_unicast_enabled") bit<1> ipv4_unicast_enabled_5, @name("igmp_snooping_enabled") bit<1> igmp_snooping_enabled_5, @name("stp_group") bit<10> stp_group_5) {
         meta._ingress_metadata_vrf22 = vrf_5;
@@ -956,7 +956,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             set_outer_bd_ipv4_mcast_switch_ipv6_mcast_route_flags();
             set_outer_bd_ipv4_mcast_route_ipv6_mcast_switch_flags();
             set_outer_bd_ipv4_mcast_route_ipv6_mcast_route_flags();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
             meta._ingress_metadata_ifindex21: exact @name("ingress_metadata.ifindex") ;
@@ -967,7 +967,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         }
         size = 32768;
         implementation = outer_bd_action_profile;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         port_vlan_mapping_0.apply();
@@ -1037,15 +1037,15 @@ struct tuple_0 {
 
 control verifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), { hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr }, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
-        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), (tuple_0){f0 = hdr.inner_ipv4.version,f1 = hdr.inner_ipv4.ihl,f2 = hdr.inner_ipv4.diffserv,f3 = hdr.inner_ipv4.totalLen,f4 = hdr.inner_ipv4.identification,f5 = hdr.inner_ipv4.flags,f6 = hdr.inner_ipv4.fragOffset,f7 = hdr.inner_ipv4.ttl,f8 = hdr.inner_ipv4.protocol,f9 = hdr.inner_ipv4.srcAddr,f10 = hdr.inner_ipv4.dstAddr}, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
+        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.ihl == 4w5, (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), { hdr.inner_ipv4.version, hdr.inner_ipv4.ihl, hdr.inner_ipv4.diffserv, hdr.inner_ipv4.totalLen, hdr.inner_ipv4.identification, hdr.inner_ipv4.flags, hdr.inner_ipv4.fragOffset, hdr.inner_ipv4.ttl, hdr.inner_ipv4.protocol, hdr.inner_ipv4.srcAddr, hdr.inner_ipv4.dstAddr }, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
-        update_checksum<tuple_0, bit<16>>(hdr.ipv4.ihl == 4w5, { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), (tuple_0){f0 = hdr.inner_ipv4.version,f1 = hdr.inner_ipv4.ihl,f2 = hdr.inner_ipv4.diffserv,f3 = hdr.inner_ipv4.totalLen,f4 = hdr.inner_ipv4.identification,f5 = hdr.inner_ipv4.flags,f6 = hdr.inner_ipv4.fragOffset,f7 = hdr.inner_ipv4.ttl,f8 = hdr.inner_ipv4.protocol,f9 = hdr.inner_ipv4.srcAddr,f10 = hdr.inner_ipv4.dstAddr}, hdr.inner_ipv4.hdrChecksum, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(hdr.ipv4.ihl == 4w5, (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 

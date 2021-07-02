@@ -47,7 +47,7 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("pipe.Reject") action Reject() {
         mark_to_drop();
@@ -123,9 +123,9 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             set_flags_ttl();
             set_fragOffset_srcAddr();
             Reject();
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         filter_tbl_0.apply();

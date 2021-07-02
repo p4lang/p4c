@@ -20,7 +20,7 @@ control c(inout bit<1> r) {
     @hidden action nestedtuple1l32() {
         s_f1_f0.f = 1w0;
         s_f1_f1.f = 1w1;
-        f<tuple_0>({ s_f1_f0, s_f1_f1 });
+        f<tuple_0>((tuple_0){f0 = s_f1_f0,f1 = s_f1_f1});
         r = 1w0;
     }
     @hidden table tbl_nestedtuple1l32 {

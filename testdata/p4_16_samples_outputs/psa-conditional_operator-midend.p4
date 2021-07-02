@@ -34,7 +34,7 @@ parser MyEP(packet_in buffer, out EMPTY a, inout EMPTY b, in psa_egress_parser_i
 
 control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
     @name("MyIC.tmp_1") bit<16> tmp_1;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIC.execute") action execute_1() {
         b.data = (b.data != 16w0 ? 16w0 : 16w1) + 16w1;
@@ -44,10 +44,10 @@ control MyIC(inout headers_t hdr, inout user_meta_t b, in psa_ingress_input_meta
             hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
             execute_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action psaconditional_operator67() {
         tmp_1 = 16w2;

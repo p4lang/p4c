@@ -157,15 +157,14 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
         structType.push_back(st);
     }
 
-    IR::IndexedVector<IR::DpdkExternDeclaration> externDecls;
-    for (auto kv : *reg_map) {
-        auto s = kv.first;
-        auto st = new IR::DpdkExternDeclaration(s->name, s->annotations, s->type, s->arguments);
-        externDecls.push_back(st);
+    IR::IndexedVector<IR::DpdkExternDeclaration> dpdkExternDecls;
+    for (auto ed : *externDecls) {
+        auto st = new IR::DpdkExternDeclaration(ed->name, ed->annotations, ed->type, ed->arguments);
+        dpdkExternDecls.push_back(st);
     }
 
     return new IR::DpdkAsmProgram(
-        headerType, structType, externDecls, ingress_converter->getActions(),
+        headerType, structType, dpdkExternDecls, ingress_converter->getActions(),
         ingress_converter->getTables(), statements, collector->get_globals());
 }
 

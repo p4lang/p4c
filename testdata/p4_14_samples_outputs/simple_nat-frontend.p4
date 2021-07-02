@@ -121,9 +121,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
     @name(".do_rewrites") action do_rewrites(@name("smac") bit<48> smac) {
         hdr.cpu_header.setInvalid();
@@ -147,20 +147,20 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             do_rewrites();
             _drop();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_2();
         }
         key = {
             standard_metadata.egress_port: exact @name("standard_metadata.egress_port") ;
         }
         size = 256;
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     @name(".send_to_cpu") table send_to_cpu_0 {
         actions = {
             do_cpu_encap();
-            @defaultonly NoAction_1();
+            @defaultonly NoAction_3();
         }
-        default_action = NoAction_1();
+        default_action = NoAction_3();
     }
     apply {
         if (standard_metadata.instance_type == 32w0) {
@@ -172,13 +172,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_8() {
+    @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_9() {
+    @noWarn("unused") @name(".NoAction") action NoAction_5() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_10() {
+    @noWarn("unused") @name(".NoAction") action NoAction_6() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_11() {
+    @noWarn("unused") @name(".NoAction") action NoAction_7() {
     }
     @name(".set_dmac") action set_dmac(@name("dmac") bit<48> dmac) {
         hdr.ethernet.dstAddr = dmac;
@@ -186,13 +186,13 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name("._drop") action _drop_2() {
         mark_to_drop(standard_metadata);
     }
-    @name("._drop") action _drop_6() {
+    @name("._drop") action _drop_3() {
         mark_to_drop(standard_metadata);
     }
-    @name("._drop") action _drop_7() {
+    @name("._drop") action _drop_4() {
         mark_to_drop(standard_metadata);
     }
-    @name("._drop") action _drop_8() {
+    @name("._drop") action _drop_5() {
         mark_to_drop(standard_metadata);
     }
     @name(".set_if_info") action set_if_info(@name("ipv4_addr") bit<32> ipv4_addr, @name("mac_addr") bit<48> mac_addr, @name("is_ext") bit<1> is_ext) {
@@ -229,46 +229,46 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
         actions = {
             set_dmac();
             _drop_2();
-            @defaultonly NoAction_8();
+            @defaultonly NoAction_4();
         }
         key = {
             meta.meta.nhop_ipv4: exact @name("meta.nhop_ipv4") ;
         }
         size = 512;
-        default_action = NoAction_8();
+        default_action = NoAction_4();
     }
     @name(".if_info") table if_info_0 {
         actions = {
-            _drop_6();
+            _drop_3();
             set_if_info();
-            @defaultonly NoAction_9();
+            @defaultonly NoAction_5();
         }
         key = {
             meta.meta.if_index: exact @name("meta.if_index") ;
         }
-        default_action = NoAction_9();
+        default_action = NoAction_5();
     }
     @name(".ipv4_lpm") table ipv4_lpm_0 {
         actions = {
             set_nhop();
-            _drop_7();
-            @defaultonly NoAction_10();
+            _drop_4();
+            @defaultonly NoAction_6();
         }
         key = {
             meta.meta.ipv4_da: lpm @name("meta.ipv4_da") ;
         }
         size = 1024;
-        default_action = NoAction_10();
+        default_action = NoAction_6();
     }
     @name(".nat") table nat_0 {
         actions = {
-            _drop_8();
+            _drop_5();
             nat_miss_int_to_ext();
             nat_miss_ext_to_int();
             nat_hit_int_to_ext();
             nat_hit_ext_to_int();
             nat_no_nat();
-            @defaultonly NoAction_11();
+            @defaultonly NoAction_7();
         }
         key = {
             meta.meta.is_ext_if: exact @name("meta.is_ext_if") ;
@@ -280,7 +280,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             hdr.tcp.dstPort    : ternary @name("tcp.dstPort") ;
         }
         size = 128;
-        default_action = NoAction_11();
+        default_action = NoAction_7();
     }
     apply {
         if_info_0.apply();

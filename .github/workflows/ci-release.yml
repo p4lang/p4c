@@ -1,24 +1,26 @@
-name: "release-p4c"
+name: GitHub Release
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
+    branches:
+      - main
+    paths:
+      - 'Version.txt'
 jobs:
-  # Build a p4c release on Ubuntu 16.04
-  build-linux:
-    strategy:
-      fail-fast: false
+  build:
     runs-on: ubuntu-latest
-    env:
-      CTEST_PARALLEL_LEVEL: 4
     steps:
-    - uses: actions/checkout@v2
-      with:
-        submodules: recursive
-    - name: Build (Linux)
-      run: |
-        tools/start_ccache
-        docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=build --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg BUILD_STATIC_RELEASE=ON --build-arg ENABLE_GMP=ON .
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Get version
+        run: |
+          VERSION="v$(cat Version.txt)"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,10 +1,13 @@
 control ingress(inout bit<8> h) {
     @name("ingress.tmp") bit<8> tmp_0;
-    @name("ingress.a") action a(@name("b") inout bit<8> b) {
+    @name("ingress.b") bit<8> b_0;
+    @name("ingress.a") action a() {
+        b_0 = tmp_0;
+        tmp_0 = b_0;
     }
     apply {
         tmp_0 = h;
-        a(tmp_0);
+        a();
         h = tmp_0;
     }
 }

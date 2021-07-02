@@ -154,19 +154,50 @@ std::ostream &IR::DpdkExternDeclaration::toSpec(std::ostream &out) const {
     if ( DPDK::toStr(this->getType()) == "Register") {
         auto args = this->arguments;
         if (args->size() == 0) {
-          ::error ("Register extern declaration %1% must contain a size parameter\n", this->Name());
+            ::error ("Register extern declaration %1% must contain a size parameter\n", this->Name());
         } else {
-          auto size = args->at(0)->expression;
-          auto init_val = args->size() == 2? args->at(1)->expression: nullptr;
-          auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name(), size, init_val);
-          regDecl->toSpec(out) << std::endl;
+            auto size = args->at(0)->expression;
+            auto init_val = args->size() == 2? args->at(1)->expression: nullptr;
+            auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name(), size, init_val);
+            regDecl->toSpec(out) << std::endl;
         }
     }
     else if ( DPDK::toStr(this->getType()) == "Counter") {
-    //TODO yet to be implemented
+        auto args = this->arguments;
+        unsigned value = 0;
+        if (args->size() < 2) {
+            ::error ("Counter extern declaration %1% must contain 2 parameters\n", this->Name());
+        } else {
+            auto n_counters = args->at(0)->expression;
+            auto counter_type = args->at(1)->expression;
+            if (counter_type->is<IR::Constant>())
+                value = counter_type->to<IR::Constant>()->asUnsigned();
+            if (value == 2) {
+                /* For PACKETS_AND_BYTES counter type, two regarray declarations are emitted and
+                   the counter name is suffixed with _packets and _bytes */
+                auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name()+"_packets", n_counters,
+                                                                 new IR::Constant(0));
+                regDecl->toSpec(out) << std::endl << std::endl;
+                regDecl = new IR::DpdkRegisterDeclStatement(this->Name()+"_bytes", n_counters,
+                                                            new IR::Constant(0));
+                regDecl->toSpec(out) << std::endl;
+            } else {
+                auto regDecl = new IR::DpdkRegisterDeclStatement(this->Name(), n_counters,
+                                                                 new IR::Constant(0));
+                regDecl->toSpec(out) << std::endl;
+            }
+        }
     }
     else if ( DPDK::toStr(this->getType()) == "Meter") {
-    //TODO yet to be implemented
+        auto args = this->arguments;
+        if (args->size() < 2) {
+            ::error ("Meter extern declaration %1% must contain a size parameter \
+                      and meter type parameter", this->Name());
+        } else {
+            auto n_meters = args->at(0)->expression;
+            auto metDecl = new IR::DpdkMeterDeclStatement(this->Name(), n_meters);
+            metDecl->toSpec(out) << std::endl;
+        }
     }
     return out;
 }
@@ -392,7 +423,9 @@ std::ostream &IR::DpdkAction::toSpec(std::ostream &out) const {
     out << "{" << std::endl;
     for (auto i : statements) {
         out << "\t";
-        i->toSpec(out) << std::endl;
+        i->toSpec(out);
+        if (!i->to<IR::DpdkLabelStatement>())
+            out << std::endl;
     }
     out << "\treturn" << std::endl;
     out << "}";
@@ -449,14 +482,26 @@ std::ostream &IR::DpdkVerifyStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
-std::ostream &IR::DpdkMeterExecuteStatement::toSpec(std::ostream &out) const {
-    out << "meter_execute " << meter << " " << DPDK::toStr(index) << " "
-        << DPDK::toStr(color);
+std::ostream &IR::DpdkMeterDeclStatement::toSpec(std::ostream &out) const {
+    out << "metarray " << meter << " size " << DPDK::toStr(size);
     return out;
 }
 
+std::ostream &IR::DpdkMeterExecuteStatement::toSpec(std::ostream &out) const {
+    out << "meter " << meter << " " << DPDK::toStr(index) << " " << DPDK::toStr(length);
+    out << " " << DPDK::toStr(color_in) << " " << DPDK::toStr(color_out);
+    return out;
+}
+
+/* DPDK target uses Registers for implementing using Counters, atomic register add instruction
+   is used for incrementing the counter. Packet counters are incremented by packet length
+   specified as parameter and byte counters are incremente by 1 */
 std::ostream &IR::DpdkCounterCountStatement::toSpec(std::ostream &out) const {
-    out << "counter_count " << counter << " " << DPDK::toStr(index);
+    out << "regadd " << counter << " " << DPDK::toStr(index) << " ";
+    if (incr)
+        out << DPDK::toStr(incr);
+    else
+        out << "1";
     return out;
 }
 

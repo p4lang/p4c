@@ -218,14 +218,14 @@ struct tuple_0 {
 
 control FabricComputeChecksum(inout parsed_headers_t hdr, inout fabric_metadata_t meta) {
     apply {
-        update_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.dscp, hdr.ipv4.ecn, hdr.ipv4.total_len, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.frag_offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.src_addr, hdr.ipv4.dst_addr }, hdr.ipv4.hdr_checksum, HashAlgorithm.csum16);
-        update_checksum<tuple_0, bit<16>>(hdr.gtpu_ipv4.isValid(), { hdr.gtpu_ipv4.version, hdr.gtpu_ipv4.ihl, hdr.gtpu_ipv4.dscp, hdr.gtpu_ipv4.ecn, hdr.gtpu_ipv4.total_len, hdr.gtpu_ipv4.identification, hdr.gtpu_ipv4.flags, hdr.gtpu_ipv4.frag_offset, hdr.gtpu_ipv4.ttl, hdr.gtpu_ipv4.protocol, hdr.gtpu_ipv4.src_addr, hdr.gtpu_ipv4.dst_addr }, hdr.gtpu_ipv4.hdr_checksum, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.dscp,f3 = hdr.ipv4.ecn,f4 = hdr.ipv4.total_len,f5 = hdr.ipv4.identification,f6 = hdr.ipv4.flags,f7 = hdr.ipv4.frag_offset,f8 = hdr.ipv4.ttl,f9 = hdr.ipv4.protocol,f10 = hdr.ipv4.src_addr,f11 = hdr.ipv4.dst_addr}, hdr.ipv4.hdr_checksum, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(hdr.gtpu_ipv4.isValid(), (tuple_0){f0 = hdr.gtpu_ipv4.version,f1 = hdr.gtpu_ipv4.ihl,f2 = hdr.gtpu_ipv4.dscp,f3 = hdr.gtpu_ipv4.ecn,f4 = hdr.gtpu_ipv4.total_len,f5 = hdr.gtpu_ipv4.identification,f6 = hdr.gtpu_ipv4.flags,f7 = hdr.gtpu_ipv4.frag_offset,f8 = hdr.gtpu_ipv4.ttl,f9 = hdr.gtpu_ipv4.protocol,f10 = hdr.gtpu_ipv4.src_addr,f11 = hdr.gtpu_ipv4.dst_addr}, hdr.gtpu_ipv4.hdr_checksum, HashAlgorithm.csum16);
     }
 }
 
 control FabricVerifyChecksum(inout parsed_headers_t hdr, inout fabric_metadata_t meta) {
     apply {
-        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.dscp, hdr.ipv4.ecn, hdr.ipv4.total_len, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.frag_offset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.src_addr, hdr.ipv4.dst_addr }, hdr.ipv4.hdr_checksum, HashAlgorithm.csum16);
+        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.dscp,f3 = hdr.ipv4.ecn,f4 = hdr.ipv4.total_len,f5 = hdr.ipv4.identification,f6 = hdr.ipv4.flags,f7 = hdr.ipv4.frag_offset,f8 = hdr.ipv4.ttl,f9 = hdr.ipv4.protocol,f10 = hdr.ipv4.src_addr,f11 = hdr.ipv4.dst_addr}, hdr.ipv4.hdr_checksum, HashAlgorithm.csum16);
     }
 }
 
@@ -354,23 +354,23 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
     bool hasExited;
     @name("FabricIngress.spgw_normalizer.hasReturned") bool spgw_normalizer_hasReturned;
     @name("FabricIngress.spgw_ingress.hasReturned_0") bool spgw_ingress_hasReturned;
-    @name(".nop") action nop() {
+    @name(".nop") action nop_2() {
     }
-    @name(".nop") action nop_0() {
+    @name(".nop") action nop_3() {
     }
-    @name(".nop") action nop_1() {
+    @name(".nop") action nop_4() {
     }
-    @name(".nop") action nop_12() {
+    @name(".nop") action nop_5() {
     }
-    @name(".nop") action nop_13() {
+    @name(".nop") action nop_6() {
     }
-    @name(".nop") action nop_14() {
+    @name(".nop") action nop_7() {
     }
-    @name(".nop") action nop_15() {
+    @name(".nop") action nop_8() {
     }
-    @name(".nop") action nop_16() {
+    @name(".nop") action nop_9() {
     }
-    @name(".nop") action nop_17() {
+    @name(".nop") action nop_10() {
     }
     @name("FabricIngress.spgw_ingress.ue_counter") direct_counter(CounterType.packets_and_bytes) spgw_ingress_ue_counter;
     @hidden @name("FabricIngress.spgw_ingress.gtpu_decap") action spgw_ingress_gtpu_decap_0() {
@@ -390,9 +390,9 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         }
         actions = {
             spgw_ingress_set_dl_sess_info_0();
-            @defaultonly nop();
+            @defaultonly nop_2();
         }
-        const default_action = nop();
+        const default_action = nop_2();
         counters = spgw_ingress_ue_counter;
     }
     @name("FabricIngress.spgw_ingress.s1u_filter_table") table spgw_ingress_s1u_filter_table {
@@ -400,9 +400,9 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
             hdr.gtpu_ipv4.dst_addr: exact @name("gtp_ipv4_dst") ;
         }
         actions = {
-            nop_0();
+            nop_3();
         }
-        const default_action = nop_0();
+        const default_action = nop_3();
     }
     @name("FabricIngress.filtering.ingress_port_vlan_counter") direct_counter(CounterType.packets_and_bytes) filtering_ingress_port_vlan_counter;
     @name("FabricIngress.filtering.deny") action filtering_deny_0() {
@@ -462,9 +462,9 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         }
         actions = {
             forwarding_set_next_id_bridging_0();
-            @defaultonly nop_1();
+            @defaultonly nop_4();
         }
-        const default_action = nop_1();
+        const default_action = nop_4();
         counters = forwarding_bridging_counter;
         size = 1024;
     }
@@ -480,9 +480,9 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         }
         actions = {
             forwarding_pop_mpls_and_next_0();
-            @defaultonly nop_12();
+            @defaultonly nop_5();
         }
-        const default_action = nop_12();
+        const default_action = nop_5();
         counters = forwarding_mpls_counter;
         size = 1024;
     }
@@ -501,9 +501,9 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         actions = {
             forwarding_set_next_id_routing_v4_0();
             forwarding_nop_routing_v4_0();
-            @defaultonly nop_13();
+            @defaultonly nop_6();
         }
-        const default_action = nop_13();
+        const default_action = nop_6();
         counters = forwarding_routing_v4_counter;
         size = 1024;
     }
@@ -566,9 +566,9 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         }
         actions = {
             next_set_vlan_0();
-            @defaultonly nop_14();
+            @defaultonly nop_7();
         }
-        const default_action = nop_14();
+        const default_action = nop_7();
         counters = next_next_vlan_counter;
         size = 1024;
     }
@@ -589,10 +589,10 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         actions = {
             next_output_xconnect_0();
             next_set_next_id_xconnect_0();
-            @defaultonly nop_15();
+            @defaultonly nop_8();
         }
         counters = next_xconnect_counter;
-        const default_action = nop_15();
+        const default_action = nop_8();
         size = 1024;
     }
     @max_group_size(16) @name("FabricIngress.next.hashed_selector") action_selector(HashAlgorithm.crc16, 32w1024, 32w16) next_hashed_selector;
@@ -627,11 +627,11 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
             next_output_hashed_0();
             next_routing_hashed_0();
             next_mpls_routing_hashed_0();
-            @defaultonly nop_16();
+            @defaultonly nop_9();
         }
         implementation = next_hashed_selector;
         counters = next_hashed_counter;
-        const default_action = nop_16();
+        const default_action = nop_9();
         size = 1024;
     }
     @name("FabricIngress.next.multicast_counter") direct_counter(CounterType.packets_and_bytes) next_multicast_counter;
@@ -646,10 +646,10 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
         }
         actions = {
             next_set_mcast_group_id_0();
-            @defaultonly nop_17();
+            @defaultonly nop_10();
         }
         counters = next_multicast_counter;
-        const default_action = nop_17();
+        const default_action = nop_10();
         size = 1024;
     }
     @name("FabricIngress.port_counters_control.egress_port_counter") counter(32w511, CounterType.packets_and_bytes) port_counters_control_egress_port_counter;
@@ -898,7 +898,7 @@ control FabricIngress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric
 
 control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_metadata, inout standard_metadata_t standard_metadata) {
     bool hasExited_0;
-    @name(".nop") action nop_18() {
+    @name(".nop") action nop_11() {
     }
     @hidden @name("FabricEgress.spgw_egress.gtpu_encap") action spgw_egress_gtpu_encap_0() {
         hdr.gtpu_ipv4.setValid();
@@ -964,9 +964,9 @@ control FabricEgress(inout parsed_headers_t hdr, inout fabric_metadata_t fabric_
         }
         actions = {
             egress_next_pop_vlan_0();
-            @defaultonly nop_18();
+            @defaultonly nop_11();
         }
-        const default_action = nop_18();
+        const default_action = nop_11();
         counters = egress_next_egress_vlan_counter;
         size = 1024;
     }

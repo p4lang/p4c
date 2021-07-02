@@ -676,6 +676,16 @@ void ExpressionEvaluator::postorder(const IR::ListExpression* expression) {
     set(expression, result);
 }
 
+void ExpressionEvaluator::postorder(const IR::StructExpression* expression) {
+    auto type = typeMap->getType(expression, true);
+    auto result = new SymbolicStruct(type->to<IR::Type_StructLike>());
+    for (auto e : expression->components) {
+        auto v = get(e->expression);
+        result->set(e->name, v);
+    }
+    set(expression, result);
+}
+
 void ExpressionEvaluator::postorder(const IR::BoolLiteral* expression) {
     set(expression, new SymbolicBool(expression));
 }
@@ -706,11 +716,11 @@ void ExpressionEvaluator::postorder(const IR::Operation_Relation* expression) {
         return;
     }
     if (lv->isUnknown()) {
-        set(expression, l);
+        set(expression, new SymbolicBool(ScalarValue::ValueState::NotConstant));
         return;
     }
     if (rv->isUnknown()) {
-        set(expression, r);
+        set(expression, new SymbolicBool(ScalarValue::ValueState::NotConstant));
         return;
     }
 

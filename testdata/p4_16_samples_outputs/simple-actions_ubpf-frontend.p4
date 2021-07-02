@@ -60,9 +60,9 @@ parser prs(packet_in p, out Headers_t headers, inout metadata meta, inout standa
 }
 
 control pipe(inout Headers_t headers, inout metadata meta, inout standard_metadata std_meta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
-    }
     @name("pipe.tmp") bit<32> tmp_0;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    }
     @name("pipe.ip_modify_saddr") action ip_modify_saddr(@name("srcAddr") bit<32> srcAddr_1) {
         headers.ipv4.srcAddr = srcAddr_1;
     }
@@ -112,9 +112,9 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
             ip_swap_addrs();
             ip_modify_saddr();
             Reject();
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         filter_tbl_0.apply();

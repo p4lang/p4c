@@ -39,15 +39,24 @@ control ingress(inout Parsed_packet h, inout Metadata m, inout standard_metadata
     @name("ingress.tmp") bit<8> tmp;
     @name("ingress.tmp_0") bit<8> tmp_0;
     @name("ingress.tmp_1") bit<8> tmp_1;
-    @name("ingress.do_action_2") action do_action_0(@name("val_0") inout bit<8> val_0, @name("val_1") inout bit<8> val_1, @name("val_2") inout bit<8> val_2) {
-        val_1 = 8w2;
-        val_2 = 8w0;
+    @name("ingress.val_0") bit<8> val;
+    @name("ingress.val_1") bit<8> val_3;
+    @name("ingress.val_2") bit<8> val_4;
+    @name("ingress.do_action_2") action do_action_0() {
+        val = tmp;
+        val_3 = tmp_0;
+        val_4 = tmp_1;
+        val_3 = 8w2;
+        val_4 = 8w0;
+        tmp = val;
+        tmp_0 = val_3;
+        tmp_1 = val_4;
     }
     apply {
         tmp = h.h.b;
         tmp_0 = h.h.b;
         tmp_1 = h.h.b;
-        do_action_0(tmp, tmp_0, tmp_1);
+        do_action_0();
         h.h.b = tmp_1;
         if (h.h.b > 8w1) {
             h.h.a = 8w1;

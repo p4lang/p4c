@@ -19,7 +19,7 @@ parser p(packet_in pkt, out Headers hdr) {
 
 control ingress(inout Headers h) {
     bool hasExited;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.do_action") action do_action() {
         hasExited = (h.eth_hdr.src_addr == 48w1 ? true : hasExited);
@@ -31,9 +31,9 @@ control ingress(inout Headers h) {
         }
         actions = {
             do_action();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action gauntlet_exit_combination_12l42() {
         h.eth_hdr.eth_type = 16w0xdead;

@@ -29,13 +29,13 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     bool hasExited;
     @name("ingress.tmp") bool_struct tmp_0;
-    @name("dummy_bit") bit<16> dummy_bit;
-    @name("dummy_struct") bool_struct dummy_struct;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("ingress.dummy_bit") bit<16> dummy_bit_0;
+    @name("ingress.dummy_struct") bool_struct dummy_struct_0;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.dummy_action") action dummy_action() {
-        h.eth_hdr.eth_type = dummy_bit;
-        tmp_0.is_bool = dummy_struct.is_bool;
+        h.eth_hdr.eth_type = dummy_bit_0;
+        tmp_0.is_bool = dummy_struct_0.is_bool;
     }
     @name("ingress.simple_table") table simple_table_0 {
         key = {
@@ -43,9 +43,9 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         }
         actions = {
             dummy_action();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action gauntlet_uninitialized_bool_structbmv2l47() {
         hasExited = true;

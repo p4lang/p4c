@@ -33,7 +33,7 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 @my_anno_5 @my_anno_3 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIngress.inner.set_hdr") action inner_set_hdr_0(@name("val") bit<16> val) {
         hdr.hdr.field = val;
@@ -41,9 +41,9 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
     @my_anno_4 @name("MyIngress.inner.inner_table") table inner_inner_table {
         actions = {
             inner_set_hdr_0();
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         @my_anno_3 {

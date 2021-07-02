@@ -110,7 +110,7 @@ control Ingress(inout headers hdr, out bool xout) {
     @name("Ingress.operation_drop") action operation_drop() {
         xout = false;
     }
-    @name("Ingress.operation_drop") action operation_drop_2() {
+    @name("Ingress.operation_drop") action operation_drop_1() {
         xout = false;
     }
     @name("Ingress.calculate") table calculate_0 {
@@ -146,9 +146,9 @@ control Ingress(inout headers hdr, out bool xout) {
     }
     @hidden table tbl_operation_drop {
         actions = {
-            operation_drop_2();
+            operation_drop_1();
         }
-        const default_action = operation_drop_2();
+        const default_action = operation_drop_1();
     }
     apply {
         tbl_calcebpf152.apply();

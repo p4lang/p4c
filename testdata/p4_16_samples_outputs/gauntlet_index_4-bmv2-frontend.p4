@@ -31,16 +31,19 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bit<32> tmp;
-    @name("ingress.do_something") action do_something(@name("val") inout bit<32> val) {
+    @name("ingress.val") bit<32> val_0;
+    @name("ingress.do_something") action do_something() {
+        val_0 = h.h[0].a;
         if (h.eth_hdr.eth_type == 16w1) {
             tmp = 32w1;
         } else {
             tmp = 32w2;
         }
-        val = tmp;
+        val_0 = tmp;
+        h.h[0].a = val_0;
     }
     apply {
-        do_something(h.h[0].a);
+        do_something();
     }
 }
 

@@ -12,6 +12,15 @@ control ingress(inout Headers h) {
     @name("ingress.tmp_2") bit<8> tmp_2;
     @name("ingress.tmp_3") bit<8> tmp_3;
     @name("ingress.tmp_4") bit<8> tmp_4;
+    @name("ingress.x_0") bit<8> x;
+    @name("ingress.hasReturned") bool hasReturned;
+    @name("ingress.retval") bit<8> retval;
+    @name("ingress.z_1") bit<8> z;
+    @name("ingress.hasReturned_0") bool hasReturned_0;
+    @name("ingress.retval_0") bit<8> retval_0;
+    @name("ingress.x_1") bit<8> x_2;
+    @name("ingress.hasReturned") bool hasReturned_3;
+    @name("ingress.retval") bit<8> retval_3;
     @name("ingress.a") action a_1() {
         h.b = 8w0;
     }
@@ -33,34 +42,25 @@ control ingress(inout Headers h) {
             tmp_1 = h.b;
         }
         tmp_2 = tmp_1;
-        {
-            @name("ingress.x_0") bit<8> x_0 = tmp;
-            @name("ingress.hasReturned") bool hasReturned = false;
-            @name("ingress.retval") bit<8> retval;
-            hasReturned = true;
-            retval = 8w4;
-            tmp = x_0;
-        }
+        x = tmp;
+        hasReturned = false;
+        hasReturned = true;
+        retval = 8w4;
+        tmp = x;
         h.a = tmp;
         tmp_3 = h.a;
-        {
-            @name("ingress.z_1") bit<8> z_0 = h.a;
-            @name("ingress.hasReturned_0") bool hasReturned_0 = false;
-            @name("ingress.retval_0") bit<8> retval_0;
-            z_0 = 8w3;
-            hasReturned_0 = true;
-            retval_0 = 8w1;
-            h.a = z_0;
-            tmp_4 = retval_0;
-        }
-        {
-            @name("ingress.x_1") bit<8> x_1 = tmp_3;
-            @name("ingress.hasReturned") bool hasReturned_3 = false;
-            @name("ingress.retval") bit<8> retval_3;
-            hasReturned_3 = true;
-            retval_3 = 8w4;
-            tmp_3 = x_1;
-        }
+        z = h.a;
+        hasReturned_0 = false;
+        z = 8w3;
+        hasReturned_0 = true;
+        retval_0 = 8w1;
+        h.a = z;
+        tmp_4 = retval_0;
+        x_2 = tmp_3;
+        hasReturned_3 = false;
+        hasReturned_3 = true;
+        retval_3 = 8w4;
+        tmp_3 = x_2;
         h.a = tmp_3;
     }
 }

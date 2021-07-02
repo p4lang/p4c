@@ -44,7 +44,7 @@ parser MyEP(packet_in buffer, out EMPTY_H a, inout EMPTY_M b, in psa_egress_pars
 }
 
 control MyIC(inout headers_t hdr, inout EMPTY_M b, in psa_ingress_input_metadata_t c, inout psa_ingress_output_metadata_t d) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIC.remove_header") action remove_header() {
         hdr.ethernet.setInvalid();
@@ -54,21 +54,21 @@ control MyIC(inout headers_t hdr, inout EMPTY_M b, in psa_ingress_input_metadata
             hdr.ethernet.srcAddr: exact @name("hdr.ethernet.srcAddr") ;
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
             remove_header();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name("MyIC.ifHit") action ifHit() {
         hdr.ethernet.setInvalid();
     }
-    @name("MyIC.ifHit") action ifHit_2() {
+    @name("MyIC.ifHit") action ifHit_1() {
         hdr.ethernet.setInvalid();
     }
     @name("MyIC.ifMiss") action ifMiss() {
         hdr.ethernet.setValid();
     }
-    @name("MyIC.ifMiss") action ifMiss_2() {
+    @name("MyIC.ifMiss") action ifMiss_1() {
         hdr.ethernet.setValid();
     }
     apply {
@@ -81,12 +81,12 @@ control MyIC(inout headers_t hdr, inout EMPTY_M b, in psa_ingress_input_metadata
         if (tbl_0.apply().hit) {
             ;
         } else {
-            ifMiss_2();
+            ifMiss_1();
         }
         if (tbl_0.apply().miss) {
             ;
         } else {
-            ifHit_2();
+            ifHit_1();
         }
     }
 }

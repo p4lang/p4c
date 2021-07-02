@@ -9,7 +9,7 @@ extern Virtual {
 
 control c(inout bit<16> p) {
     @name("c.local") bit<16> local_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.cntr") Virtual() cntr_0 = {
         bit<16> f(in bit<16> ix) {
@@ -29,9 +29,9 @@ control c(inout bit<16> p) {
         actions = {
             add_ctr();
             final_ctr();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action virtual3l47() {
         local_0 = 16w4;

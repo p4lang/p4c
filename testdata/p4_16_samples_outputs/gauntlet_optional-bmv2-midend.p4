@@ -46,7 +46,7 @@ struct tuple_0 {
 control egress(inout Headers h) {
     @name("egress.ipv4_checksum") Checksum() ipv4_checksum_0;
     @hidden action gauntlet_optionalbmv2l45() {
-        h.h.result = ipv4_checksum_0.update<tuple_0>({ h.eth_hdr.dst_addr, h.eth_hdr.src_addr, h.eth_hdr.eth_type });
+        h.h.result = ipv4_checksum_0.update<tuple_0>((tuple_0){f0 = h.eth_hdr.dst_addr,f1 = h.eth_hdr.src_addr,f2 = h.eth_hdr.eth_type});
     }
     @hidden table tbl_gauntlet_optionalbmv2l45 {
         actions = {

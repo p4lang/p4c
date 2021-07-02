@@ -58,11 +58,15 @@ struct psa_egress_deparser_input_metadata_t {
 	bit<32> egress_port
 }
 
+regarray counter0_0 size 0x400 initval 0x0
+
+regarray counter1_0 size 0x400 initval 0x0
+
 apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
-	counter_count counter0_0 0x400
+	regadd counter0_0 0x400 1
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP : drop

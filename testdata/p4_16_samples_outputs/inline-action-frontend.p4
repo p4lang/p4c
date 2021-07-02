@@ -1,15 +1,13 @@
 control p(inout bit<1> bt) {
+    @name("p.y0") bit<1> y0;
+    @name("p.y0") bit<1> y0_1;
     @name("p.b") action b() {
-        {
-            @name("p.y0") bit<1> y0 = bt;
-            y0 = y0 | 1w1;
-            bt = y0;
-        }
-        {
-            @name("p.y0") bit<1> y0_1 = bt;
-            y0_1 = y0_1 | 1w1;
-            bt = y0_1;
-        }
+        y0 = bt;
+        y0 = y0 | 1w1;
+        bt = y0;
+        y0_1 = bt;
+        y0_1 = y0_1 | 1w1;
+        bt = y0_1;
     }
     @name("p.t") table t_0 {
         actions = {

@@ -85,32 +85,32 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     @name("pipe.update_conn_state") action update_conn_state() {
         conn_state_0.write(meta._conn_id2, 32w2);
     }
-    @name("pipe.update_conn_state") action update_conn_state_2() {
+    @name("pipe.update_conn_state") action update_conn_state_1() {
         conn_state_0.write(meta._conn_id2, 32w3);
     }
     @name("pipe.update_conn_info") action update_conn_info() {
         conn_state_0.write(meta._conn_id2, 32w1);
         conn_srv_addr_0.write(meta._conn_id2, headers.ipv4.dstAddr);
     }
-    @name("pipe.update_conn_info") action update_conn_info_3() {
+    @name("pipe.update_conn_info") action update_conn_info_1() {
         conn_state_0.write(meta._conn_id2, 32w0);
         conn_srv_addr_0.write(meta._conn_id2, 32w0);
     }
-    @name("pipe.update_conn_info") action update_conn_info_4() {
+    @name("pipe.update_conn_info") action update_conn_info_2() {
         conn_state_0.write(meta._conn_id2, 32w0);
         conn_srv_addr_0.write(meta._conn_id2, 32w0);
     }
     @name("pipe._drop") action _drop() {
         mark_to_drop();
     }
-    @name("pipe._drop") action _drop_2() {
+    @name("pipe._drop") action _drop_1() {
         mark_to_drop();
     }
     @hidden action simplefirewall_ubpf125() {
-        hash<tuple_0>(meta._conn_id2, HashAlgorithm.lookup3, { headers.ipv4.srcAddr, headers.ipv4.dstAddr });
+        hash<tuple_0>(meta._conn_id2, HashAlgorithm.lookup3, (tuple_0){f0 = headers.ipv4.srcAddr,f1 = headers.ipv4.dstAddr});
     }
     @hidden action simplefirewall_ubpf127() {
-        hash<tuple_0>(meta._conn_id2, HashAlgorithm.lookup3, { headers.ipv4.dstAddr, headers.ipv4.srcAddr });
+        hash<tuple_0>(meta._conn_id2, HashAlgorithm.lookup3, (tuple_0){f0 = headers.ipv4.dstAddr,f1 = headers.ipv4.srcAddr});
     }
     @hidden action simplefirewall_ubpf130() {
         meta._connInfo_s0 = conn_state_0.read(meta._conn_id2);
@@ -154,27 +154,27 @@ control pipe(inout Headers_t headers, inout metadata meta, inout standard_metada
     }
     @hidden table tbl_update_conn_info_0 {
         actions = {
-            update_conn_info_3();
+            update_conn_info_1();
         }
-        const default_action = update_conn_info_3();
+        const default_action = update_conn_info_1();
     }
     @hidden table tbl__drop_0 {
         actions = {
-            _drop_2();
+            _drop_1();
         }
-        const default_action = _drop_2();
+        const default_action = _drop_1();
     }
     @hidden table tbl_update_conn_state_0 {
         actions = {
-            update_conn_state_2();
+            update_conn_state_1();
         }
-        const default_action = update_conn_state_2();
+        const default_action = update_conn_state_1();
     }
     @hidden table tbl_update_conn_info_1 {
         actions = {
-            update_conn_info_4();
+            update_conn_info_2();
         }
-        const default_action = update_conn_info_4();
+        const default_action = update_conn_info_2();
     }
     apply {
         if (headers.tcp.isValid()) {

@@ -55,8 +55,6 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
-    }
     @name("MyIngress.c") bool c_0;
     @name("MyIngress.c1") bool c1_0;
     @name("MyIngress.c2") bool c2_0;
@@ -64,29 +62,29 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
     @name("MyIngress.x") bit<16> x_0;
     @name("MyIngress.y") bit<16> y_0;
     @name("MyIngress.z") bit<16> z_0;
+    @name("MyIngress.value") bit<16> value_1;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    }
     @name("MyIngress.ipv4_forward") action ipv4_forward() {
-        {
-            @name("MyIngress.value") bit<16> value_1;
-            y_0 = hdr.ipv4.hdrChecksum;
-            z_0 = hdr.ipv4.totalLen;
-            c_0 = hdr.ipv4.identification > 16w0;
-            c1_0 = hdr.ipv4.identification > 16w1;
-            c2_0 = hdr.ipv4.identification > 16w2;
-            c3_0 = hdr.ipv4.identification > 16w3;
-            if (c_0) {
-                x_0 = 16w0;
-            } else if (c1_0) {
-                x_0 = 16w1;
-            } else if (c2_0) {
-                x_0 = 16w2;
-            } else if (c3_0) {
-                x_0 = 16w3;
-            } else {
-                x_0 = 16w4;
-            }
-            value_1 = z_0 + x_0 + y_0;
-            hdr.ipv4.totalLen = value_1;
+        y_0 = hdr.ipv4.hdrChecksum;
+        z_0 = hdr.ipv4.totalLen;
+        c_0 = hdr.ipv4.identification > 16w0;
+        c1_0 = hdr.ipv4.identification > 16w1;
+        c2_0 = hdr.ipv4.identification > 16w2;
+        c3_0 = hdr.ipv4.identification > 16w3;
+        if (c_0) {
+            x_0 = 16w0;
+        } else if (c1_0) {
+            x_0 = 16w1;
+        } else if (c2_0) {
+            x_0 = 16w2;
+        } else if (c3_0) {
+            x_0 = 16w3;
+        } else {
+            x_0 = 16w4;
         }
+        value_1 = z_0 + x_0 + y_0;
+        hdr.ipv4.totalLen = value_1;
     }
     @name("MyIngress.drop") action drop() {
     }
@@ -97,10 +95,10 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         actions = {
             ipv4_forward();
             drop();
-            NoAction_0();
+            NoAction_1();
         }
         size = 1024;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         ipv4_lpm_0.apply();

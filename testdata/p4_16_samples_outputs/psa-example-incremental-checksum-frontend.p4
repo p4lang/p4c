@@ -80,11 +80,14 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("ingress.meta") psa_ingress_output_metadata_t meta_2;
+    @name("ingress.meta") psa_ingress_output_metadata_t meta_3;
+    @name("ingress.egress_port") PortId_t egress_port_1;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.drop") action drop_1() {
         @noWarnUnused {
-            @name("ingress.meta") psa_ingress_output_metadata_t meta_2 = ostd;
+            meta_2 = ostd;
             meta_2.drop = true;
             ostd = meta_2;
         }
@@ -93,8 +96,8 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         user_meta.fwd_metadata.old_srcAddr = hdr.ipv4.srcAddr;
         hdr.ipv4.srcAddr = srcAddr_1;
         @noWarnUnused {
-            @name("ingress.meta") psa_ingress_output_metadata_t meta_3 = ostd;
-            @name("ingress.egress_port") PortId_t egress_port_1 = port;
+            meta_3 = ostd;
+            egress_port_1 = port;
             meta_3.drop = false;
             meta_3.multicast_group = (MulticastGroup_t)32w0;
             meta_3.egress_port = egress_port_1;
@@ -108,9 +111,9 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         actions = {
             forward();
             drop_1();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         if (hdr.ipv4.isValid()) {

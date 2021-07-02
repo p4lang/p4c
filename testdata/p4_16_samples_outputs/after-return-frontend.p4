@@ -1,7 +1,8 @@
 control ctrl() {
     @name("ctrl.a") bit<32> a_0;
+    @name("ctrl.hasReturned") bool hasReturned;
     apply {
-        @name("ctrl.hasReturned") bool hasReturned = false;
+        hasReturned = false;
         a_0 = 32w0;
         if (a_0 == 32w0) {
             hasReturned = true;

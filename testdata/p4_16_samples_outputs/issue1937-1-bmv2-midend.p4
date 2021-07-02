@@ -16,10 +16,10 @@ struct metadata_t {
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     @name("ingressImpl.tmp") bit<8> tmp;
-    @name(".foo") action foo() {
+    @name(".foo") action foo_1() {
         hdr.h1.f1 = tmp >> 2;
     }
-    @name(".foo") action foo_0() {
+    @name(".foo") action foo_2() {
         hdr.h1.f2 = 8w1;
     }
     @hidden action act() {
@@ -33,15 +33,15 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     }
     @hidden table tbl_foo {
         actions = {
-            foo();
+            foo_1();
         }
-        const default_action = foo();
+        const default_action = foo_1();
     }
     @hidden table tbl_foo_0 {
         actions = {
-            foo_0();
+            foo_2();
         }
-        const default_action = foo_0();
+        const default_action = foo_2();
     }
     apply {
         tbl_act.apply();

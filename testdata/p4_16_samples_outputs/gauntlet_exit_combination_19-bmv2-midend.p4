@@ -27,20 +27,20 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bool tmp;
     @name("ingress.tmp_0") bool tmp_0;
     @name("ingress.tmp_1") bit<16> tmp_1;
-    @name(".exit_action") action exit_action() {
+    @name(".exit_action") action exit_action_0() {
         hasExited = true;
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.simple_table_2") table simple_table {
         key = {
             h.eth_hdr.src_addr: exact @name("key") ;
         }
         actions = {
-            exit_action();
-            @defaultonly NoAction_0();
+            exit_action_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action gauntlet_exit_combination_19bmv2l43() {
         tmp = true;

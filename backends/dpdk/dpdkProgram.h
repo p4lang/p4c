@@ -57,8 +57,7 @@ class ConvertToDpdkProgram : public Transform {
     std::map<const cstring, IR::IndexedVector<IR::Parameter> *>
         *args_struct_map;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
-    std::map<const IR::Declaration_Instance *, cstring> *reg_map;
-
+    std::vector<const IR::Declaration_Instance *> *externDecls; 
   public:
     ConvertToDpdkProgram(BMV2::PsaProgramStructure &structure,
                          P4::ReferenceMap *refmap, P4::TypeMap *typemap,
@@ -69,7 +68,7 @@ class ConvertToDpdkProgram : public Transform {
         info = dpdkarch->info;
         args_struct_map = dpdkarch->args_struct_map;
         csum_map = dpdkarch->csum_map;
-        reg_map = dpdkarch->reg_map;
+        externDecls = dpdkarch->externDecls;
     }
 
     const IR::DpdkAsmProgram *create(IR::P4Program *prog);

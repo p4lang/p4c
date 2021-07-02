@@ -32,8 +32,9 @@ parser parserI(packet_in pkt, out Parsed_packet hdr, inout mystruct1 meta, inout
 }
 
 control cIngress(inout Parsed_packet hdr, inout mystruct1 meta, inout standard_metadata_t stdmeta) {
+    @name("cIngress.hasReturned") bool hasReturned;
     @name("cIngress.foo") action foo() {
-        @name("cIngress.hasReturned") bool hasReturned = false;
+        hasReturned = false;
         meta.b = meta.b + 4w5;
         if (meta.b > 4w10) {
             meta.b = meta.b ^ 4w5;

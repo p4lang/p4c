@@ -152,59 +152,59 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_4() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_5() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
     @name(".nop") action nop() {
     }
-    @name(".nop") action nop_3() {
+    @name(".nop") action nop_1() {
     }
-    @name(".nop") action nop_4() {
+    @name(".nop") action nop_2() {
     }
     @name(".set_egress_port") action set_egress_port(@name("egress_port") bit<8> egress_port_1) {
         meta._ing_metadata_egress_port1 = egress_port_1;
     }
-    @name(".set_egress_port") action set_egress_port_3(@name("egress_port") bit<8> egress_port_2) {
+    @name(".set_egress_port") action set_egress_port_1(@name("egress_port") bit<8> egress_port_2) {
         meta._ing_metadata_egress_port1 = egress_port_2;
     }
-    @name(".set_egress_port") action set_egress_port_4(@name("egress_port") bit<8> egress_port_3) {
+    @name(".set_egress_port") action set_egress_port_2(@name("egress_port") bit<8> egress_port_3) {
         meta._ing_metadata_egress_port1 = egress_port_3;
     }
     @name(".ipv4_match") table ipv4_match_0 {
         actions = {
             nop();
             set_egress_port();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
             hdr.ipv4.srcAddr: exact @name("ipv4.srcAddr") ;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".ipv6_match") table ipv6_match_0 {
         actions = {
-            nop_3();
-            set_egress_port_3();
-            @defaultonly NoAction_4();
+            nop_1();
+            set_egress_port_1();
+            @defaultonly NoAction_2();
         }
         key = {
             hdr.ipv6.srcAddr: exact @name("ipv6.srcAddr") ;
         }
-        default_action = NoAction_4();
+        default_action = NoAction_2();
     }
     @name(".l2_match") table l2_match_0 {
         actions = {
-            nop_4();
-            set_egress_port_4();
-            @defaultonly NoAction_5();
+            nop_2();
+            set_egress_port_2();
+            @defaultonly NoAction_3();
         }
         key = {
             hdr.ethernet.srcAddr: exact @name("ethernet.srcAddr") ;
         }
-        default_action = NoAction_5();
+        default_action = NoAction_3();
     }
     apply {
         if (hdr.ethernet.etherType == 16w0x800) {

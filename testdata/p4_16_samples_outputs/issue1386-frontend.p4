@@ -43,20 +43,19 @@ control deparser(packet_out b, in Headers h) {
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.c.n") bit<8> c_n;
+    @name("ingress.c.hasReturned") bool c_hasReturned;
     apply {
-        {
-            @name("ingress.c.hasReturned") bool c_hasReturned = false;
-            c_n = 8w0;
-            if (h.h.isValid()) {
-                ;
-            } else {
-                c_hasReturned = true;
-            }
-            if (c_hasReturned) {
-                ;
-            } else if (c_n > 8w0) {
-                h.h.setValid();
-            }
+        c_hasReturned = false;
+        c_n = 8w0;
+        if (h.h.isValid()) {
+            ;
+        } else {
+            c_hasReturned = true;
+        }
+        if (c_hasReturned) {
+            ;
+        } else if (c_n > 8w0) {
+            h.h.setValid();
         }
         sm.egress_spec = 9w0;
     }

@@ -271,13 +271,13 @@ struct tuple_0 {
 
 control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
     apply {
-        verify_checksum<tuple_0, bit<16>>(hdr.custom.isValid(), { hdr.custom._addr00, hdr.custom._addr11, hdr.custom._addr22, hdr.custom._e3, hdr.custom._e04, hdr.custom._e15, hdr.custom._e26, hdr.custom._e007, hdr.custom._e018, hdr.custom._e029, hdr.custom._e1010, hdr.custom._e1111, hdr.custom._e1212, hdr.custom._e2013, hdr.custom._e2114, hdr.custom._e2215, hdr.custom._e00116, hdr.custom._e00217, hdr.custom._e10118, hdr.custom._e10219, hdr.custom._e20120, hdr.custom._e20221, hdr.custom._e22022, hdr.custom._e002001023, hdr.custom._e002002024, hdr.custom._s028 }, hdr.custom._checksum27, HashAlgorithm.csum16);
+        verify_checksum<tuple_0, bit<16>>(hdr.custom.isValid(), (tuple_0){f0 = hdr.custom._addr00,f1 = hdr.custom._addr11,f2 = hdr.custom._addr22,f3 = hdr.custom._e3,f4 = hdr.custom._e04,f5 = hdr.custom._e15,f6 = hdr.custom._e26,f7 = hdr.custom._e007,f8 = hdr.custom._e018,f9 = hdr.custom._e029,f10 = hdr.custom._e1010,f11 = hdr.custom._e1111,f12 = hdr.custom._e1212,f13 = hdr.custom._e2013,f14 = hdr.custom._e2114,f15 = hdr.custom._e2215,f16 = hdr.custom._e00116,f17 = hdr.custom._e00217,f18 = hdr.custom._e10118,f19 = hdr.custom._e10219,f20 = hdr.custom._e20120,f21 = hdr.custom._e20221,f22 = hdr.custom._e22022,f23 = hdr.custom._e002001023,f24 = hdr.custom._e002002024,f25 = hdr.custom._s028}, hdr.custom._checksum27, HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers_t hdr, inout metadata_t meta) {
     apply {
-        update_checksum<tuple_0, bit<16>>(hdr.custom.isValid(), { hdr.custom._addr00, hdr.custom._addr11, hdr.custom._addr22, hdr.custom._e3, hdr.custom._e04, hdr.custom._e15, hdr.custom._e26, hdr.custom._e007, hdr.custom._e018, hdr.custom._e029, hdr.custom._e1010, hdr.custom._e1111, hdr.custom._e1212, hdr.custom._e2013, hdr.custom._e2114, hdr.custom._e2215, hdr.custom._e00116, hdr.custom._e00217, hdr.custom._e10118, hdr.custom._e10219, hdr.custom._e20120, hdr.custom._e20221, hdr.custom._e22022, hdr.custom._e002001023, hdr.custom._e002002024, hdr.custom._s028 }, hdr.custom._checksum27, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(hdr.custom.isValid(), (tuple_0){f0 = hdr.custom._addr00,f1 = hdr.custom._addr11,f2 = hdr.custom._addr22,f3 = hdr.custom._e3,f4 = hdr.custom._e04,f5 = hdr.custom._e15,f6 = hdr.custom._e26,f7 = hdr.custom._e007,f8 = hdr.custom._e018,f9 = hdr.custom._e029,f10 = hdr.custom._e1010,f11 = hdr.custom._e1111,f12 = hdr.custom._e1212,f13 = hdr.custom._e2013,f14 = hdr.custom._e2114,f15 = hdr.custom._e2215,f16 = hdr.custom._e00116,f17 = hdr.custom._e00217,f18 = hdr.custom._e10118,f19 = hdr.custom._e10219,f20 = hdr.custom._e20120,f21 = hdr.custom._e20221,f22 = hdr.custom._e22022,f23 = hdr.custom._e002001023,f24 = hdr.custom._e002002024,f25 = hdr.custom._s028}, hdr.custom._checksum27, HashAlgorithm.csum16);
     }
 }
 

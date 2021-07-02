@@ -24,19 +24,22 @@ parser p(packet_in pkt, out Headers hdr, inout Meta m, inout standard_metadata_t
 
 control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
     @name("ingress.tmp") bool tmp_0;
-    @name("ingress.do_action") action do_action(@name("val") inout bool val) {
-        {
-            @name("ingress.val_1") bool val_1 = tmp_0;
-            @name("ingress.hasReturned") bool hasReturned = false;
-            @name("ingress.retval") bit<32> retval;
-            hasReturned = true;
-            retval = 32w1;
-            tmp_0 = val_1;
-        }
+    @name("ingress.val") bool val;
+    @name("ingress.val_0") bool val_2;
+    @name("ingress.hasReturned") bool hasReturned;
+    @name("ingress.retval") bit<32> retval;
+    @name("ingress.do_action") action do_action() {
+        val = tmp_0;
+        val_2 = tmp_0;
+        hasReturned = false;
+        hasReturned = true;
+        retval = 32w1;
+        tmp_0 = val_2;
+        tmp_0 = val;
     }
     apply {
         tmp_0 = false;
-        do_action(tmp_0);
+        do_action();
     }
 }
 

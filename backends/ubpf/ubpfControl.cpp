@@ -623,7 +623,7 @@ namespace UBPF {
             auto vd = decl->to<IR::Declaration_Variable>();
             auto etype = UBPFTypeFactory::instance->create(vd->type);
             builder->emitIndent();
-            etype->declare(builder, vd->name, false);
+            etype->declareInit(builder, vd->name, false);
             builder->endOfStatement(true);
             BUG_CHECK(vd->initializer == nullptr,
                       "%1%: declarations with initializers not supported",

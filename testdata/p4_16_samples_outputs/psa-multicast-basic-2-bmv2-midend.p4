@@ -35,7 +35,7 @@ parser IngressParserImpl(packet_in pkt, out headers_t hdr, inout metadata_t user
 }
 
 control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarnUnused @name(".multicast") action multicast() {
+    @noWarnUnused @name(".multicast") action multicast_0() {
         ostd.drop = false;
         ostd.multicast_group = (MulticastGroupUint_t)hdr.ethernet.dstAddr;
     }
@@ -44,9 +44,9 @@ control cIngress(inout headers_t hdr, inout metadata_t user_meta, in psa_ingress
     }
     @hidden table tbl_multicast {
         actions = {
-            multicast();
+            multicast_0();
         }
-        const default_action = multicast();
+        const default_action = multicast_0();
     }
     @hidden table tbl_psamulticastbasic2bmv2l98 {
         actions = {

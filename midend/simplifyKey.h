@@ -20,6 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
+#include "frontends/p4/sideEffects.h"
 
 namespace P4 {
 
@@ -104,12 +105,6 @@ class OrPolicy : public KeyIsSimple {
     bool isSimple(const IR::Expression* expression, const Visitor::Context* ctxt) {
         return left->isSimple(expression, ctxt) || right->isSimple(expression, ctxt);
     }
-};
-
-class TableInsertions {
- public:
-    std::vector<const IR::Declaration_Variable*> declarations;
-    std::vector<const IR::AssignmentStatement*> statements;
 };
 
 /**
