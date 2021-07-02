@@ -1,10 +1,10 @@
-#include "table_driven_schema_gen.h"
+#include "control-plane/bfruntime.h"
 
 namespace P4 {
 
-namespace TDSG {
+namespace BFRT {
 
-using P4::TDSG::P4Id;
+using P4::BFRT::P4Id;
 
 TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info& p4info,
                        const p4configv1::P4DataTypeSpec& typeSpec,
@@ -120,8 +120,8 @@ TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info& p4info,
 }
 
 // Counter
-boost::optional<TableDrivenSchemaGenerator::Counter>
-TableDrivenSchemaGenerator::Counter::from(const p4configv1::Counter& counterInstance) {
+boost::optional<BFRuntimeGenerator::Counter>
+BFRuntimeGenerator::Counter::from(const p4configv1::Counter& counterInstance) {
     const auto& pre = counterInstance.preamble();
     auto id = makeBfRtId(pre.id(), p4configv1::P4Ids::COUNTER);
     // TODO(antonin): this works because the enum values are the same for
@@ -131,8 +131,8 @@ TableDrivenSchemaGenerator::Counter::from(const p4configv1::Counter& counterInst
     return Counter{pre.name(), id, counterInstance.size(), unit, transformAnnotations(pre)};
 }
 
-boost::optional<TableDrivenSchemaGenerator::Counter>
-TableDrivenSchemaGenerator::Counter::fromDirect(const p4configv1::DirectCounter& counterInstance) {
+boost::optional<BFRuntimeGenerator::Counter>
+BFRuntimeGenerator::Counter::fromDirect(const p4configv1::DirectCounter& counterInstance) {
     const auto& pre = counterInstance.preamble();
     auto id = makeBfRtId(pre.id(), p4configv1::P4Ids::DIRECT_COUNTER);
     auto unit = static_cast<Unit>(counterInstance.spec().unit());
@@ -140,8 +140,8 @@ TableDrivenSchemaGenerator::Counter::fromDirect(const p4configv1::DirectCounter&
 }
 
 // Meter
-boost::optional<TableDrivenSchemaGenerator::Meter>
-TableDrivenSchemaGenerator::Meter::from(const p4configv1::Meter& meterInstance) {
+boost::optional<BFRuntimeGenerator::Meter>
+BFRuntimeGenerator::Meter::from(const p4configv1::Meter& meterInstance) {
     const auto& pre = meterInstance.preamble();
     auto id = makeBfRtId(pre.id(), p4configv1::P4Ids::METER);
     // TODO(antonin): this works because the enum values are the same for
@@ -159,8 +159,8 @@ TableDrivenSchemaGenerator::Meter::from(const p4configv1::Meter& meterInstance) 
     return Meter{pre.name(), id, meterInstance.size(), unit, type, transformAnnotations(pre)};
 }
 
-boost::optional<TableDrivenSchemaGenerator::Meter>
-TableDrivenSchemaGenerator::Meter::fromDirect(const p4configv1::DirectMeter& meterInstance) {
+boost::optional<BFRuntimeGenerator::Meter>
+BFRuntimeGenerator::Meter::fromDirect(const p4configv1::DirectMeter& meterInstance) {
     const auto& pre = meterInstance.preamble();
     auto id = makeBfRtId(pre.id(), p4configv1::P4Ids::DIRECT_METER);
     auto unit = static_cast<Unit>(meterInstance.spec().unit());
@@ -169,19 +169,15 @@ TableDrivenSchemaGenerator::Meter::fromDirect(const p4configv1::DirectMeter& met
 }
 
 // ActionProfile
-P4Id TableDrivenSchemaGenerator::ActionProf::makeActProfId(P4Id implementationId) {
+P4Id BFRuntimeGenerator::ActionProf::makeActProfId(P4Id implementationId) {
   return makeBfRtId(implementationId, p4configv1::P4Ids::ACTION_PROFILE);
 }
 
-boost::optional<TableDrivenSchemaGenerator::ActionProf>
-TableDrivenSchemaGenerator::ActionProf::from(const p4configv1::P4Info& p4info,
+boost::optional<BFRuntimeGenerator::ActionProf>
+BFRuntimeGenerator::ActionProf::from(const p4configv1::P4Info& p4info,
                                         const p4configv1::ActionProfile& actionProfile) {
     const auto& pre = actionProfile.preamble();
     auto profileId = makeBfRtId(pre.id(), p4configv1::P4Ids::ACTION_PROFILE);
-    LOG1("action profile size " << actionProfile.table_ids().size());
-    for (auto id : actionProfile.table_ids()) {
-        LOG1("id " << id);
-    }
     auto tableIds = collectTableIds(
         p4info, actionProfile.table_ids().begin(), actionProfile.table_ids().end());
     return ActionProf{pre.name(), profileId, actionProfile.size(), tableIds,
@@ -189,15 +185,15 @@ TableDrivenSchemaGenerator::ActionProf::from(const p4configv1::P4Info& p4info,
 }
 
 // Digest
-boost::optional<TableDrivenSchemaGenerator::Digest>
-TableDrivenSchemaGenerator::Digest::from(const p4configv1::Digest& digest) {
+boost::optional<BFRuntimeGenerator::Digest>
+BFRuntimeGenerator::Digest::from(const p4configv1::Digest& digest) {
     const auto& pre = digest.preamble();
     auto id = makeBfRtId(pre.id(), p4configv1::P4Ids::DIGEST);
     return Digest{pre.name(), id, digest.type_spec(), transformAnnotations(pre)};
 }
 
-boost::optional<TableDrivenSchemaGenerator::Counter>
-TableDrivenSchemaGenerator::getDirectCounter(P4Id counterId) const {
+boost::optional<BFRuntimeGenerator::Counter>
+BFRuntimeGenerator::getDirectCounter(P4Id counterId) const {
     if (isOfType(counterId, p4configv1::P4Ids::DIRECT_COUNTER)) {
         auto* counter = Standard::findDirectCounter(p4info, counterId);
         if (counter == nullptr) return boost::none;
@@ -206,8 +202,8 @@ TableDrivenSchemaGenerator::getDirectCounter(P4Id counterId) const {
     return boost::none;
 }
 
-boost::optional<TableDrivenSchemaGenerator::Meter>
-TableDrivenSchemaGenerator::getDirectMeter(P4Id meterId) const {
+boost::optional<BFRuntimeGenerator::Meter>
+BFRuntimeGenerator::getDirectMeter(P4Id meterId) const {
     if (isOfType(meterId, p4configv1::P4Ids::DIRECT_METER)) {
         auto* meter = Standard::findDirectMeter(p4info, meterId);
         if (meter == nullptr) return boost::none;
@@ -217,8 +213,8 @@ TableDrivenSchemaGenerator::getDirectMeter(P4Id meterId) const {
 }
 
 // TBD
-// boost::optional<TableDrivenSchemaGenerator::Register>
-// TableDrivenSchemaGenerator::getRegister(P4Id registerId) const {
+// boost::optional<BFRuntimeGenerator::Register>
+// BFRuntimeGenerator::getRegister(P4Id registerId) const {
 //     if (!isOfType(registerId, p4configv1::P4Ids::DIRECT_REGISTER)) return boost::none;
 //     auto* externInstance = findExternInstance(p4info, registerId);
 //     if (externInstance == nullptr) return boost::none;
@@ -226,7 +222,7 @@ TableDrivenSchemaGenerator::getDirectMeter(P4Id meterId) const {
 // }
 
 Util::JsonObject*
-TableDrivenSchemaGenerator::makeCommonDataField(P4Id id, cstring name,
+BFRuntimeGenerator::makeCommonDataField(P4Id id, cstring name,
                                          Util::JsonObject* type, bool repeated,
                                          Util::JsonArray* annotations) {
     auto* dataField = new Util::JsonObject();
@@ -242,7 +238,7 @@ TableDrivenSchemaGenerator::makeCommonDataField(P4Id id, cstring name,
 }
 
 Util::JsonObject*
-TableDrivenSchemaGenerator::makeContainerDataField(P4Id id, cstring name,
+BFRuntimeGenerator::makeContainerDataField(P4Id id, cstring name,
                                             Util::JsonArray* items, bool repeated,
                                             Util::JsonArray* annotations) {
     auto* dataField = new Util::JsonObject();
@@ -258,7 +254,7 @@ TableDrivenSchemaGenerator::makeContainerDataField(P4Id id, cstring name,
 }
 
 void
-TableDrivenSchemaGenerator::addActionDataField(Util::JsonArray* dataJson,
+BFRuntimeGenerator::addActionDataField(Util::JsonArray* dataJson,
                                             P4Id id, const std::string& name, bool mandatory,
                                             bool read_only, Util::JsonObject* type,
                                             Util::JsonArray* annotations) {
@@ -277,7 +273,7 @@ TableDrivenSchemaGenerator::addActionDataField(Util::JsonArray* dataJson,
 }
 
 void
-TableDrivenSchemaGenerator::addKeyField(Util::JsonArray* dataJson, P4Id id, cstring name,
+BFRuntimeGenerator::addKeyField(Util::JsonArray* dataJson, P4Id id, cstring name,
                                  bool mandatory, cstring matchType, Util::JsonObject* type,
                                  Util::JsonArray* annotations) {
     auto* dataField = new Util::JsonObject();
@@ -295,7 +291,7 @@ TableDrivenSchemaGenerator::addKeyField(Util::JsonArray* dataJson, P4Id id, cstr
 }
 
 /* static */ Util::JsonObject*
-TableDrivenSchemaGenerator::initTableJson(const std::string& name,
+BFRuntimeGenerator::initTableJson(const std::string& name,
                                    P4Id id,
                                    cstring tableType,
                                    int64_t size,
@@ -311,14 +307,14 @@ TableDrivenSchemaGenerator::initTableJson(const std::string& name,
 }
 
 /* static */ void
-TableDrivenSchemaGenerator::addToDependsOn(Util::JsonObject* tableJson, P4Id id) {
+BFRuntimeGenerator::addToDependsOn(Util::JsonObject* tableJson, P4Id id) {
     auto* dependsOnJson = tableJson->get("depends_on")->to<Util::JsonArray>();
     CHECK_NULL(dependsOnJson);
     dependsOnJson->append(id);
 }
 
 void
-TableDrivenSchemaGenerator::addCounterCommon(Util::JsonArray* tablesJson,
+BFRuntimeGenerator::addCounterCommon(Util::JsonArray* tablesJson,
                                                 const Counter& counter) const {
     auto* tableJson = initTableJson(
         counter.name, counter.id, "Counter", counter.size, counter.annotations);
@@ -342,8 +338,8 @@ TableDrivenSchemaGenerator::addCounterCommon(Util::JsonArray* tablesJson,
 }
 
 void
-TableDrivenSchemaGenerator::addCounterDataFields(Util::JsonArray* dataJson,
-                            const TableDrivenSchemaGenerator::Counter& counter) {
+BFRuntimeGenerator::addCounterDataFields(Util::JsonArray* dataJson,
+                            const BFRuntimeGenerator::Counter& counter) {
     static const uint64_t defaultCounterValue = 0u;
     if (counter.unit == Counter::Unit::BYTES
         || counter.unit == Counter::Unit::BOTH) {
@@ -362,8 +358,8 @@ TableDrivenSchemaGenerator::addCounterDataFields(Util::JsonArray* dataJson,
 }
 
 void
-TableDrivenSchemaGenerator::addMeterCommon(Util::JsonArray* tablesJson,
-                    const TableDrivenSchemaGenerator::Meter& meter) const {
+BFRuntimeGenerator::addMeterCommon(Util::JsonArray* tablesJson,
+                    const BFRuntimeGenerator::Meter& meter) const {
     auto* tableJson = initTableJson(meter.name, meter.id, "Meter", meter.size);
 
     auto* keyJson = new Util::JsonArray();
@@ -385,7 +381,7 @@ TableDrivenSchemaGenerator::addMeterCommon(Util::JsonArray* tablesJson,
 }
 
 void
-TableDrivenSchemaGenerator::transformTypeSpecToDataFields(Util::JsonArray* fieldsJson,
+BFRuntimeGenerator::transformTypeSpecToDataFields(Util::JsonArray* fieldsJson,
                                                    const p4configv1::P4DataTypeSpec& typeSpec,
                                                    cstring instanceType,
                                                    cstring instanceName,
@@ -402,8 +398,8 @@ TableDrivenSchemaGenerator::transformTypeSpecToDataFields(Util::JsonArray* field
 }
 
 void
-TableDrivenSchemaGenerator::addRegisterDataFields(Util::JsonArray* dataJson,
-                                           const TableDrivenSchemaGenerator::Register& register_,
+BFRuntimeGenerator::addRegisterDataFields(Util::JsonArray* dataJson,
+                                           const BFRuntimeGenerator::Register& register_,
                                            P4Id idOffset) const {
     auto* fieldsJson = new Util::JsonArray();
     transformTypeSpecToDataFields(
@@ -430,8 +426,8 @@ TableDrivenSchemaGenerator::addRegisterDataFields(Util::JsonArray* dataJson,
 }
 
 void
-TableDrivenSchemaGenerator::addRegisterCommon(Util::JsonArray* tablesJson,
-                    const TableDrivenSchemaGenerator::Register& register_) const {
+BFRuntimeGenerator::addRegisterCommon(Util::JsonArray* tablesJson,
+                    const BFRuntimeGenerator::Register& register_) const {
     auto* tableJson = initTableJson(register_.name, register_.id, "Register", register_.size);
 
     auto* keyJson = new Util::JsonArray();
@@ -453,8 +449,8 @@ TableDrivenSchemaGenerator::addRegisterCommon(Util::JsonArray* tablesJson,
 }
 
 void
-TableDrivenSchemaGenerator::addMeterDataFields(Util::JsonArray* dataJson,
-                                const TableDrivenSchemaGenerator::Meter& meter) {
+BFRuntimeGenerator::addMeterDataFields(Util::JsonArray* dataJson,
+                                const BFRuntimeGenerator::Meter& meter) {
     // default value for rates and bursts (all GREEN)
     static const uint64_t maxUint64 = std::numeric_limits<uint64_t>::max();
     if (meter.unit == Meter::Unit::BYTES) {
@@ -513,8 +509,8 @@ TableDrivenSchemaGenerator::addMeterDataFields(Util::JsonArray* dataJson,
 }
 
 void
-TableDrivenSchemaGenerator::addActionProfCommon(Util::JsonArray* tablesJson,
-                    const TableDrivenSchemaGenerator::ActionProf& actionProf) const {
+BFRuntimeGenerator::addActionProfCommon(Util::JsonArray* tablesJson,
+                    const BFRuntimeGenerator::ActionProf& actionProf) const {
     auto* tableJson = initTableJson(
         actionProf.name, actionProf.id, "Action", actionProf.size, actionProf.annotations);
 
@@ -543,7 +539,7 @@ TableDrivenSchemaGenerator::addActionProfCommon(Util::JsonArray* tablesJson,
 
 
 boost::optional<bool>
-TableDrivenSchemaGenerator::actProfHasSelector(P4Id actProfId) const {
+BFRuntimeGenerator::actProfHasSelector(P4Id actProfId) const {
     if (isOfType(actProfId, p4configv1::P4Ids::ACTION_PROFILE)) {
         auto* actionProf = Standard::findActionProf(p4info, actProfId);
         if (actionProf == nullptr) return boost::none;
@@ -553,7 +549,7 @@ TableDrivenSchemaGenerator::actProfHasSelector(P4Id actProfId) const {
 }
 
 Util::JsonArray*
-TableDrivenSchemaGenerator::makeActionSpecs(const p4configv1::Table& table,
+BFRuntimeGenerator::makeActionSpecs(const p4configv1::Table& table,
                                                 P4Id* maxActionParamId) const {
     auto* specs = new Util::JsonArray();
     P4Id maxId = 0;
@@ -602,8 +598,8 @@ TableDrivenSchemaGenerator::makeActionSpecs(const p4configv1::Table& table,
 }
 
 void
-TableDrivenSchemaGenerator::addLearnFilterCommon(Util::JsonArray* learnFiltersJson,
-                            const TableDrivenSchemaGenerator::Digest& digest) const {
+BFRuntimeGenerator::addLearnFilterCommon(Util::JsonArray* learnFiltersJson,
+                            const BFRuntimeGenerator::Digest& digest) const {
     auto* learnFilterJson = new Util::JsonObject();
     learnFilterJson->emplace("name", digest.name);
     learnFilterJson->emplace("id", digest.id);
@@ -617,7 +613,7 @@ TableDrivenSchemaGenerator::addLearnFilterCommon(Util::JsonArray* learnFiltersJs
 }
 
 void
-TableDrivenSchemaGenerator::addLearnFilters(Util::JsonArray* learnFiltersJson) const {
+BFRuntimeGenerator::addLearnFilters(Util::JsonArray* learnFiltersJson) const {
     for (const auto& digest : p4info.digests()) {
         auto digestInstance = Digest::from(digest);
         if (digestInstance == boost::none) continue;
@@ -625,7 +621,7 @@ TableDrivenSchemaGenerator::addLearnFilters(Util::JsonArray* learnFiltersJson) c
     }
 }
 
-void TableDrivenSchemaGenerator::addDirectResources(const p4configv1::Table& table,
+void BFRuntimeGenerator::addDirectResources(const p4configv1::Table& table,
         Util::JsonArray* dataJson, Util::JsonArray* operationsJson,
         Util::JsonArray* attributesJson, P4Id maxActionParamId) const {
     // direct resources
@@ -644,18 +640,37 @@ void TableDrivenSchemaGenerator::addDirectResources(const p4configv1::Table& tab
 }
 
 bool
-TableDrivenSchemaGenerator::addActionProfIds(const p4configv1::Table& table,
+BFRuntimeGenerator::addActionProfIds(const p4configv1::Table& table,
         Util::JsonObject* tableJson) const {
     auto implementationId = table.implementation_id();
     if (implementationId > 0) {
         P4Id actProfId = ActionProf::makeActProfId(implementationId);
+        auto hasSelector = actProfHasSelector(implementationId);
         addToDependsOn(tableJson, actProfId);
     }
     return true;
 }
 
 void
-TableDrivenSchemaGenerator::addMatchTables(Util::JsonArray* tablesJson) const {
+BFRuntimeGenerator::addMatchActionData(const p4configv1::Table &table,
+        Util::JsonObject* tableJson, Util::JsonArray* dataJson,
+                                        P4Id maxActionParamId) const {
+    cstring tableType = tableJson->get("table_type")->to<Util::JsonValue>()->getString();
+    if (tableType == "MatchAction_Direct") {
+        tableJson->emplace(
+            "action_specs", makeActionSpecs(table, &maxActionParamId));
+    } else if (tableType == "MatchAction_Indirect") {
+        auto* f = makeCommonDataField(
+            TD_DATA_ACTION_MEMBER_ID, "$ACTION_MEMBER_ID",
+            makeTypeInt("uint32"), false /* repeated */);
+        addSingleton(dataJson, f, true /* mandatory */, false /* read-only */);
+    } else {
+        BUG("Invalid table type '%1%'", tableType);
+    }
+}
+
+void
+BFRuntimeGenerator::addMatchTables(Util::JsonArray* tablesJson) const {
     for (const auto& table : p4info.tables()) {
         const auto& pre = table.preamble();
         std::set<std::string> dupKey;
@@ -752,35 +767,13 @@ TableDrivenSchemaGenerator::addMatchTables(Util::JsonArray* tablesJson) const {
         // will be used as an offset for other P4-dependent fields (e.g. direct
         // register fields).
         P4Id maxActionParamId = 0;
-        cstring tableType = tableJson->get("table_type")->to<Util::JsonValue>()->getString();
-        if (tableType == "MatchAction_Direct") {
-            tableJson->emplace(
-                "action_specs", makeActionSpecs(table, &maxActionParamId));
-        } else if (tableType == "MatchAction_Indirect") {
-            auto* f = makeCommonDataField(
-                TD_DATA_ACTION_MEMBER_ID, "$ACTION_MEMBER_ID",
-                makeTypeInt("uint32"), false /* repeated */);
-            addSingleton(dataJson, f, true /* mandatory */, false /* read-only */);
-        } else if (tableType == "MatchAction_Indirect_Selector") {
-            // action member id and selector group id are mutually-exclusive, so
-            // we use a "oneof" here.
-            auto* choicesDataJson = new Util::JsonArray();
-            choicesDataJson->append(makeCommonDataField(
-                TD_DATA_ACTION_MEMBER_ID, "$ACTION_MEMBER_ID",
-                makeTypeInt("uint32"), false /* repeated */));
-            choicesDataJson->append(makeCommonDataField(
-                TD_DATA_SELECTOR_GROUP_ID, "$SELECTOR_GROUP_ID",
-                makeTypeInt("uint32"), false /* repeated */));
-            addOneOf(dataJson, choicesDataJson, true /* mandatory */, false /* read-only */);
-        } else {
-            BUG("Invalid table type '%1%'", tableType);
-        }
+        addMatchActionData(table, tableJson, dataJson, maxActionParamId);
         maxActionParamId++;
 
         auto* operationsJson = new Util::JsonArray();
         auto* attributesJson = new Util::JsonArray();
 
-        addDirectResources(table, dataJson, operationsJson, attributesJson);
+        addDirectResources(table, dataJson, operationsJson, attributesJson, maxActionParamId);
 
         attributesJson->append("EntryScope");
 
@@ -825,7 +818,7 @@ TableDrivenSchemaGenerator::addMatchTables(Util::JsonArray* tablesJson) const {
 }
 
 void
-TableDrivenSchemaGenerator::addActionProfs(Util::JsonArray* tablesJson) const {
+BFRuntimeGenerator::addActionProfs(Util::JsonArray* tablesJson) const {
     for (const auto& actionProf : p4info.action_profiles()) {
         auto actionProfInstance = ActionProf::from(p4info, actionProf);
         if (actionProfInstance == boost::none) continue;
@@ -834,7 +827,7 @@ TableDrivenSchemaGenerator::addActionProfs(Util::JsonArray* tablesJson) const {
 }
 
 void
-TableDrivenSchemaGenerator::addCounters(Util::JsonArray* tablesJson) const {
+BFRuntimeGenerator::addCounters(Util::JsonArray* tablesJson) const {
     for (const auto& counter : p4info.counters()) {
         auto counterInstance = Counter::from(counter);
         if (counterInstance == boost::none) continue;
@@ -843,7 +836,7 @@ TableDrivenSchemaGenerator::addCounters(Util::JsonArray* tablesJson) const {
 }
 
 void
-TableDrivenSchemaGenerator::addMeters(Util::JsonArray* tablesJson) const {
+BFRuntimeGenerator::addMeters(Util::JsonArray* tablesJson) const {
     for (const auto& meter : p4info.meters()) {
         auto meterInstance = Meter::from(meter);
         if (meterInstance == boost::none) continue;
@@ -852,7 +845,7 @@ TableDrivenSchemaGenerator::addMeters(Util::JsonArray* tablesJson) const {
 }
 
 const Util::JsonObject*
-TableDrivenSchemaGenerator::genSchema() const {
+BFRuntimeGenerator::genSchema() const {
     auto* json = new Util::JsonObject();
 
     json->emplace("schema_version", cstring("1.0.0"));
@@ -873,12 +866,12 @@ TableDrivenSchemaGenerator::genSchema() const {
     return json;
 }
 
-void TableDrivenSchemaGenerator::serializeBfRtSchema(std::ostream* destination) {
+void BFRuntimeGenerator::serializeBfRtSchema(std::ostream* destination) {
     auto* json = genSchema();
     json->serialize(*destination);
     destination->flush();
 }
 
-}  // namespace TDSG
+}  // namespace BFRT
 
 }  // namespace P4
