@@ -347,7 +347,7 @@ class ParserSymbolicInterpreter {
     /// Returns pointer to genereted statement if execution completes successfully,
     /// and 'nullptr' if an error occurred.
     const IR::StatOrDecl* executeStatement(ParserStateInfo* state, const IR::StatOrDecl* sord,
-                                           ValueMap* valueMap) {
+                          ValueMap* valueMap) {
         const IR::StatOrDecl* newSord = nullptr;
         ExpressionEvaluator ev(refMap, typeMap, valueMap);
 
@@ -386,7 +386,7 @@ class ParserSymbolicInterpreter {
                                              const IR::Expression*>;
 
     EvaluationSelectResult evaluateSelect(ParserStateInfo* state,
-                                          ValueMap* valueMap) {
+                                   ValueMap* valueMap) {
         const IR::Expression* newSelect = nullptr;
         auto select = state->state->selectExpression;
         if (select == nullptr)
@@ -565,7 +565,34 @@ class ParserSymbolicInterpreter {
             newStates.insert(newName);
         }
         for (auto s : state->state->components) {
-            auto* newComponent = executeStatement(state, s, valueMap);
+            const IR::StatOrDecl* newComponent = nullptr;
+            if (s->is<IR::IfStatement>()){
+                ExpressionEvaluator ev(refMap, typeMap, valueMap);
+                auto ifs = s->to<IR::IfStatement>();
+                auto ifcond = ev.evaluate(ifs->condition, true);
+                auto success = reportIfError(state, ifcond);
+                if (success) {
+                    const IR::Statement* conds = nullptr;
+                    if (ifcond)
+                        conds = ifs->ifTrue;
+                    else 
+                        conds = ifs->ifFalse;
+                    if (conds->is<IR::BlockStatement>()) {
+                            const auto* bs = conds->to<IR::BlockStatement>();
+                            for (auto* component : bs->components) {
+                                newComponent = executeStatement(state, component, valueMap);
+                                if (!newComponent)
+                                    return EvaluationStateResult(nullptr, true);
+                                if (unroll)
+                                    components.push_back(newComponent);
+                            }
+                    } else {
+                            newComponent = executeStatement(state, conds, valueMap);
+                    }
+                }
+            } else {
+                newComponent = executeStatement(state, s, valueMap);
+            }
             if (!newComponent)
                 return EvaluationStateResult(nullptr, true);
             if (unroll)
