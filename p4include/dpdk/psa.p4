@@ -16,8 +16,6 @@ limitations under the License.
 #ifndef __PSA_P4__
 #define __PSA_P4__
 
-#include<core.p4>
-
 /**
  *   P4-16 declaration of the Portable Switch Architecture
  */
@@ -33,6 +31,7 @@ limitations under the License.
  * https://github.com/p4lang/p4c
  */
 
+// BEGIN:Type_defns
 /* These are defined using `typedef`, not `type`, so they are truly
  * just different names for the type bit<W> for the particular width W
  * shown.  Unlike the `type` definitions below, values declared with
@@ -47,12 +46,6 @@ limitations under the License.
  *
  * Note that the width of typedef <name>Uint_t will always be the same
  * as the width of type <name>_t. */
-
-/* WARNING!  Andy Fingerhut made up the following numbers for the DPDK
- * target data plane bit widths.  No one should believe they are
- * accurate until they * have been approved by the p4c-dpdk
- * implementers. */
-
 typedef bit<32>  PortIdUint_t;
 typedef bit<32> MulticastGroupUint_t;
 typedef bit<16> CloneSessionIdUint_t;
@@ -60,15 +53,6 @@ typedef bit<8>  ClassOfServiceUint_t;
 typedef bit<16> PacketLengthUint_t;
 typedef bit<16> EgressInstanceUint_t;
 typedef bit<64> TimestampUint_t;
-
-/* Note: clone_spec in BMv2 simple_switch v1model is 32 bits wide, but
- * it is used such that 16 of its bits contain a clone/mirror session
- * id, and 16 bits contain the numeric id of a field_list.  Only the
- * 16 bits of clone/mirror session id are comparable to the type
- * CloneSessionIdUint_t here.  See occurrences of clone_spec in this
- * file for details:
- * https://github.com/p4lang/behavioral-model/blob/master/targets/simple_switch/simple_switch.cpp
- */
 
 @p4runtime_translation("p4.org/psa/v1/PortId_t", 32)
 type PortIdUint_t         PortId_t;
@@ -90,6 +74,7 @@ const PortId_t PSA_PORT_RECIRCULATE = (PortId_t) 0xfffffffa;
 const PortId_t PSA_PORT_CPU = (PortId_t) 0xfffffffd;
 
 const CloneSessionId_t PSA_CLONE_SESSION_TO_CPU = (CloneSessionId_t) 0;
+// END:Type_defns
 
 /**********************************************************************
  * End of the part of this target-customized psa.p4 include file that

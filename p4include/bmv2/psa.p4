@@ -16,8 +16,6 @@ limitations under the License.
 #ifndef __PSA_P4__
 #define __PSA_P4__
 
-#include<core.p4>
-
 /**
  *   P4-16 declaration of the Portable Switch Architecture
  */
@@ -34,9 +32,9 @@ limitations under the License.
  *
  * The bit widths for BMv2 psa_switch have been chosen to be the same
  * as the corresponding InHeader types later.  This simplifies the
- * implementation of P4Runtime for BMv2 psa_switch.
- */
+ * implementation of P4Runtime for BMv2 psa_switch. */
 
+// BEGIN:Type_defns
 /* These are defined using `typedef`, not `type`, so they are truly
  * just different names for the type bit<W> for the particular width W
  * shown.  Unlike the `type` definitions below, values declared with
@@ -59,18 +57,13 @@ typedef bit<16> PacketLengthUint_t;
 typedef bit<16> EgressInstanceUint_t;
 typedef bit<64> TimestampUint_t;
 
-const PortId_t PSA_PORT_RECIRCULATE = (PortId_t) 0xfffffffa;
-const PortId_t PSA_PORT_CPU = (PortId_t) 0xfffffffd;
-
-const CloneSessionId_t PSA_CLONE_SESSION_TO_CPU = (CloneSessionId_t) 0;
-
 /* Note: clone_spec in BMv2 simple_switch v1model is 32 bits wide, but
  * it is used such that 16 of its bits contain a clone/mirror session
  * id, and 16 bits contain the numeric id of a field_list.  Only the
  * 16 bits of clone/mirror session id are comparable to the type
  * CloneSessionIdUint_t here.  See occurrences of clone_spec in this
  * file for details:
- * https://github.com/p4lang/behavioral-model/blob/master/targets/simple_switch/simple_switch.cpp
+ * https://github.com/p4lang/behavioral-model/blob/main/targets/simple_switch/simple_switch.cpp
  */
 
 @p4runtime_translation("p4.org/psa/v1/PortId_t", 32)
@@ -88,6 +81,12 @@ type EgressInstanceUint_t EgressInstance_t;
 @p4runtime_translation("p4.org/psa/v1/Timestamp_t", 64)
 type TimestampUint_t      Timestamp_t;
 typedef error   ParserError_t;
+
+const PortId_t PSA_PORT_RECIRCULATE = (PortId_t) 0xfffffffa;
+const PortId_t PSA_PORT_CPU = (PortId_t) 0xfffffffd;
+
+const CloneSessionId_t PSA_CLONE_SESSION_TO_CPU = (CloneSessionId_t) 0;
+// END:Type_defns
 
 /**********************************************************************
  * End of the part of this target-customized psa.p4 include file that
@@ -350,8 +349,9 @@ extern void assume(in bool check);
 
 // BEGIN:Match_kinds
 match_kind {
-    range,   /// Used to represent min..max intervals
-    selector /// Used for dynamic action selection via the ActionSelector extern
+    range,    /// Used to represent min..max intervals
+    selector, /// Used for dynamic action selection via the ActionSelector extern
+    optional  /// Either an exact match, or a wildcard matching any value for the entire field
 }
 // END:Match_kinds
 
