@@ -187,6 +187,75 @@ IR::Declaration_Variable *ConvertToDpdkParser::addNewTmpVarToMetadata(cstring na
     return newTmpVar;
 }
 
+/* This is a helper function for handling the transition select statement. It populates the left
+   and right operands of comparison, to be used  in conditional jump instructions. When the keyset
+   of select case is simple expressions, it populates the left and rigt operands with the input
+   expressions. When the keyset is Mask expression "a &&& b", it inserts temporary variables in
+   Metadata structure and populates the left and right operands of comparison with
+   "input & b" and "a & b" */
+void ConvertToDpdkParser::getCondVars(const IR::Expression *sv, const IR::Expression *ce,
+                                      IR::Expression **leftExpr, IR::Expression **rightExpr) {
+    if (auto maskexpr = ce->to<IR::Mask>()) {
+        auto left = maskexpr->left;
+        auto right = maskexpr->right;
+        /* Dpdk architecture requires that both operands of &&& be constants */
+        if (!left->is<IR::Constant>() || !left->is<IR::Constant>()) {
+            ::error(ErrorType::ERR_UNSUPPORTED,
+                    "Non constant values are not supported in Mask operation");
+            return;
+        }
+        unsigned value = right->to<IR::Constant>()->asUnsigned() &
+                         left->to<IR::Constant>()->asUnsigned();
+        auto tmpDecl = addNewTmpVarToMetadata("tmpMask", sv->type);
+        auto tmpMask = new IR::PathExpression(
+                           IR::ID("m." + tmpDecl->name.name));
+        collector->push_variable(new IR::DpdkDeclaration(tmpDecl));
+        add_instr(new IR::DpdkMovStatement(tmpMask, sv));
+        add_instr(new IR::DpdkAndStatement(tmpMask, tmpMask, right));
+        *leftExpr = tmpMask;
+        *rightExpr = new IR::Constant(value);
+    } else {
+        *leftExpr = sv->clone();
+        *rightExpr = ce->clone();
+    }
+}
+
+/* This is a helper function for handling tuple expressions in select statement in parser block.
+   The tuple expressions are evaluated as exact match of each element in the tuple and is
+   translated to dpdk assembly by short-circuiting the conditions where beginning of each keyset
+   starts with a unique case label.
+
+   transition select(a,b) {              Equivalent dpdk assembly:
+       (a1, b1) : state1;
+       (a2, b2) : state2;                jmpneq case1 a, a1
+       (a3, b3) : state3;                jmpneq case1 b, b1
+       }                    ==>          jmp state1
+   is evaluated as                       case1:   jmpneq case2 a, a2
+   if (a == a1 && b == b1)               jmpneq case2 b, b2
+       goto state1                       jmp state2
+   else (a == a2 && b == b2)             case2:    jmpneq case a, a3
+       goto state2                       jmpneq case2 b, b3
+   .....                                 jmp state3
+                                         ....
+    This function emits a series of jmps for each keyset.
+*/
+void ConvertToDpdkParser::handleTupleExpression(const IR::ListExpression *cl,
+                                                const IR::ListExpression *input, int inputSize,
+                                                cstring trueLabel, cstring falseLabel) {
+    IR::Expression *left;
+    IR::Expression *right;
+    /* Compare each element in the input tuple with the keyset tuple */
+    for (auto i = 0; i < inputSize; i++) {
+        auto switch_var = input->components.at(i);
+        auto caseExpr = cl->components.at(i);
+        if (!caseExpr->is<IR::DefaultExpression>()) {
+            getCondVars(switch_var, caseExpr, &left, &right);
+            add_instr(new IR::DpdkJmpNotEqualStatement(falseLabel, left, right));
+        }
+    }
+    add_instr(new IR::DpdkJmpLabelStatement(trueLabel));
+}
+
 bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
     for (auto l : p->parserLocals) {
         collector->push_variable(new IR::DpdkDeclaration(l));
@@ -240,41 +309,59 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
             for (auto i : h.get_instr())
                 add_instr(i);
         }
+
+        // Handle transition select statement
         if (state->selectExpression) {
             if (auto e = state->selectExpression->to<IR::SelectExpression>()) {
+                auto caseList = e->selectCases;
                 const IR::Expression *switch_var;
-                BUG_CHECK(e->select->components.size() == 1,
-                        "Unsupported select expression %1%", e->select);
-                switch_var = e->select->components[0];
-                for (auto v : e->selectCases) {
-                    if (!v->keyset->is<IR::DefaultExpression>()) {
-                        if (v->keyset->is<IR::Mask>()) {
-                            auto maskexpr = v->keyset->to<IR::Mask>();
-                            auto left = maskexpr->left;
-                            auto right = maskexpr->right;
-                            /* Dpdk architecture requires that both operands of &&& be constants */
-                            if (!left->is<IR::Constant>() || !left->is<IR::Constant>())
-                                ::error(ErrorType::ERR_UNSUPPORTED,
-                                        "Non constant values are not supported in Mask operation");
-                            unsigned value = right->to<IR::Constant>()->asUnsigned() &
-                                             left->to<IR::Constant>()->asUnsigned();
-                            auto tmpDecl = addNewTmpVarToMetadata("tmpMask", switch_var->type);
-                            auto tmpMask = new IR::PathExpression(
-                                               IR::ID("m." + tmpDecl->name.name));
-                            collector->push_variable(new IR::DpdkDeclaration(tmpDecl));
-                            add_instr(new IR::DpdkMovStatement(tmpMask, switch_var));
-                            add_instr(new IR::DpdkAndStatement(tmpMask, tmpMask, right));
+                const IR::Expression *caseExpr;
+                IR::Expression *left;
+                IR::Expression *right;
+
+                /* Handling single expression in keyset as special case because :
+                   - for tuple expression we emit a series of jmpneq followed by an unconditional
+                     jump, handling single expression separately by emitting a jmpeq saves us one
+                     unconditional jmp
+                   - the keyset for single expression is not a ListExpression, so handling it with
+                     tuple expressions would anyways require additional and conversion to
+                     ListExpression.
+                */
+                if (e->select->components.size() == 1) {
+                    switch_var = e->select->components.at(0);
+                    for (auto sc : caseList) {
+                        caseExpr = sc->keyset;
+                        if (!sc->keyset->is<IR::DefaultExpression>()){
+                            getCondVars(switch_var, caseExpr, &left, &right);
                             add_instr(new IR::DpdkJmpEqualStatement(
-                                         append_parser_name(p, v->state->path->name),
-                                                            tmpMask, new IR::Constant(value)));
+                                      append_parser_name(p, sc->state->path->name), left, right));
                         } else {
-                            add_instr(new IR::DpdkJmpEqualStatement(
-                              append_parser_name(p, v->state->path->name), switch_var, v->keyset));
+                            add_instr(new IR::DpdkJmpLabelStatement(
+                                      append_parser_name(p, sc->state->path->name)));
                         }
-                    } else {
-                        auto i = new IR::DpdkJmpLabelStatement(
-                                append_parser_name(p, v->state->path->name));
-                        add_instr(i);
+                    }
+                } else {
+                    auto tupleInputExpr = e->select;
+                    auto inputSize = tupleInputExpr->components.size();
+                    auto count = 0;
+                    cstring trueLabel, falseLabel;
+                    /* For each select case, emit the block start label and then a series of
+                       jmp instructions. */
+                    for (auto sc : caseList) {
+                        cstring labelName = state->name + "_" + std::to_string(count++);
+                        add_instr(new IR::DpdkLabelStatement(append_parser_name(p, labelName)));
+                        if (!sc->keyset->is<IR::DefaultExpression>()) {
+                            /* Create label names, falseLabel for next keyset comparison and
+                               trueLabel for the state to jump on match */
+                            falseLabel = state->name + "_" + std::to_string(count);
+                            trueLabel = sc->state->path->name;
+                            handleTupleExpression(sc->keyset->to<IR::ListExpression>(),
+                                                  tupleInputExpr, inputSize, append_parser_name(p,
+                                                  trueLabel), append_parser_name(p, falseLabel));
+                        } else {
+                            add_instr(new IR::DpdkJmpLabelStatement(
+                                      append_parser_name(p, sc->state->path->name)));
+                        }
                     }
                 }
             } else if (auto path =

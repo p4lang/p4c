@@ -57,7 +57,7 @@ class ConvertToDpdkProgram : public Transform {
     std::map<const cstring, IR::IndexedVector<IR::Parameter> *>
         *args_struct_map;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
-    std::vector<const IR::Declaration_Instance *> *externDecls; 
+    std::vector<const IR::Declaration_Instance *> *externDecls;
   public:
     ConvertToDpdkProgram(BMV2::PsaProgramStructure &structure,
                          P4::ReferenceMap *refmap, P4::TypeMap *typemap,
@@ -102,11 +102,16 @@ class ConvertToDpdkParser : public Inspector {
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() {
         return instructions;
     }
+
     bool preorder(const IR::P4Parser *a) override;
     bool preorder(const IR::ParserState *s) override;
     void add_instr(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
     cstring append_parser_name(const IR::P4Parser* p, cstring);
     IR::Declaration_Variable *addNewTmpVarToMetadata (cstring name, const IR::Type* type);
+    void handleTupleExpression(const IR::ListExpression *cl, const IR::ListExpression *input,
+                               int inputSize, cstring trueLabel, cstring falseLabel);
+    void getCondVars(const IR::Expression *sv, const IR::Expression *ce,
+                     IR::Expression **leftExpr, IR::Expression **rightExpr);
 };
 
 class ConvertToDpdkControl : public Inspector {
