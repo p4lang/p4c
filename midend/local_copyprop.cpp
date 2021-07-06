@@ -245,8 +245,8 @@ const IR::Expression *DoLocalCopyPropagation::copyprop_name(cstring name) {
     LOG6("  copyprop_name(" << name << ")" << (isWrite() ? " (write)" : ""));
     if (isWrite()) {
         dropValuesUsing(name);
-        if (inferForFunc)
-            inferForFunc->writes.insert(name);
+        if (inferForFunc) {
+            inferForFunc->is_first_write_insert = inferForFunc->writes.insert(name).second; }
         if (isRead() || findContext<IR::MethodCallExpression>()) {
             /* If this is being used as an 'out' param of a method call, its not really
              * read, but we can't dead-code eliminate it without eliminating the entire
@@ -322,6 +322,9 @@ IR::AssignmentStatement *DoLocalCopyPropagation::preorder(IR::AssignmentStatemen
 IR::AssignmentStatement *DoLocalCopyPropagation::postorder(IR::AssignmentStatement *as) {
     if (as->left->equiv(*as->right)) {
         LOG3("  removing noop assignment " << *as);
+        if (inferForFunc && inferForFunc->is_first_write_insert) {
+            inferForFunc->writes.erase(expr_name(as->left));
+            inferForFunc->is_first_write_insert = false; }
         return nullptr; }
     // FIXME -- if as->right is an uninitialized value, we could legally eliminate this
     // assignment, which would simplify (and minimize) the code.  This could be a separate
