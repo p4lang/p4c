@@ -195,15 +195,19 @@ IR::Declaration_Variable *ConvertToDpdkParser::addNewTmpVarToMetadata(cstring na
    "input & b" and "a & b" */
 void ConvertToDpdkParser::getCondVars(const IR::Expression *sv, const IR::Expression *ce,
                                       IR::Expression **leftExpr, IR::Expression **rightExpr) {
+    if (sv->is<IR::Constant>() && sv->type->width_bits() > 32) {
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "%1%, Constant expression wider than 32-bit is not permitted", sv);
+        return;
+    }
+    if (sv->type->width_bits() > 64) {
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "%1%, Select expression wider than 64-bit is not permitted", sv);
+        return;
+    }
     if (auto maskexpr = ce->to<IR::Mask>()) {
         auto left = maskexpr->left;
         auto right = maskexpr->right;
-        /* Dpdk architecture requires that both operands of &&& be constants */
-        if (!left->is<IR::Constant>() || !left->is<IR::Constant>()) {
-            ::error(ErrorType::ERR_UNSUPPORTED,
-                    "Non constant values are not supported in Mask operation");
-            return;
-        }
         unsigned value = right->to<IR::Constant>()->asUnsigned() &
                          left->to<IR::Constant>()->asUnsigned();
         auto tmpDecl = addNewTmpVarToMetadata("tmpMask", sv->type);
