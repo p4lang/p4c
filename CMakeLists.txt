@@ -390,8 +390,7 @@ endif ()
 # Installation
 # Targets install themselves. Here we install the core headers
 install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
-  DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}
-  FILES_MATCHING PATTERN "*.p4")
+  DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
 
 # cpplint
 list ( SORT CPPLINT_FILES )

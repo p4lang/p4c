@@ -301,6 +301,19 @@ std::vector<const char*>* ParserOptions::process(int argc,
 
 void ParserOptions::validateOptions() const {}
 
+const char* ParserOptions::getIncludePath() {
+    cstring path = "";
+    // the p4c driver sets environment variables for include
+    // paths.  check the environment and add these to the command
+    // line for the preprocessor
+    char* driverP4IncludePath = isv1() ? getenv("P4C_14_INCLUDE_PATH")
+        : getenv("P4C_16_INCLUDE_PATH");
+    if (driverP4IncludePath != nullptr)
+        path += (cstring(" -I") + cstring(driverP4IncludePath));
+    path += cstring(" -I") + (isv1() ? p4_14includePath : p4includePath);
+    return path.c_str();
+}
+
 FILE* ParserOptions::preprocess() {
     FILE* in = nullptr;
 
@@ -313,16 +326,11 @@ FILE* ParserOptions::preprocess() {
 #else
         std::string cmd("cpp");
 #endif
-        // the p4c driver sets environment variables for include
-        // paths.  check the environment and add these to the command
-        // line for the preprocessor
-        char* driverP4IncludePath = isv1() ? getenv("P4C_14_INCLUDE_PATH")
-                                           : getenv("P4C_16_INCLUDE_PATH");
+
         cmd +=
             cstring(" -C -undef -nostdinc -x assembler-with-cpp") + " " +
             preprocessor_options +
-            (driverP4IncludePath ? " -I" + cstring(driverP4IncludePath) : "") +
-            " -I" + (isv1() ? p4_14includePath : p4includePath) + " " +
+            getIncludePath() + " " +
             (file != nullptr ? file : "");
 
         if (Log::verbose())
