@@ -20,6 +20,7 @@
 import subprocess
 from subprocess import Popen
 from threading import Timer
+from pathlib import Path
 import sys
 import os
 from scapy.packet import Raw
@@ -141,3 +142,35 @@ def check_root():
     """ This function returns False if the user does not have root privileges.
         Caution: Only works on Unix systems """
     return (os.getuid() == 0)
+
+
+class PathError(RuntimeError):
+    pass
+
+def check_if_file(input_path):
+    """Checks if a path is a file and converts the input
+        to an absolute path"""
+    input_path = Path(input_path)
+    if not input_path.exists():
+        msg = "{0} does not exist".format(input_path)
+        report_err(sys.stderr, msg)
+        sys.exit(1)
+    if not input_path.is_file():
+        msg = "{0} is not a file".format(input_path)
+        report_err(sys.stderr, msg)
+        sys.exit(1)
+    return str(input_path.absolute())
+
+def check_if_dir(input_path):
+    """Checks if a path is an actual directory and converts the input
+        to an absolute path"""
+    input_path = Path(input_path)
+    if not input_path.exists():
+        msg = "{0} does not exist".format(input_path)
+        report_err(sys.stderr, msg)
+        sys.exit(1)
+    if not input_path.is_dir():
+        msg = "{0} is not a directory".format(input_path)
+        report_err(sys.stderr, msg)
+        sys.exit(1)
+    return str(input_path.absolute())
