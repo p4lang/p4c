@@ -311,6 +311,8 @@ const char* ParserOptions::getIncludePath() {
     if (driverP4IncludePath != nullptr)
         path += (cstring(" -I") + cstring(driverP4IncludePath));
     path += cstring(" -I") + (isv1() ? p4_14includePath : p4includePath);
+    if (!isv1())
+        path += cstring(" -I") + p4includePath + cstring("/bmv2");
     return path.c_str();
 }
 
