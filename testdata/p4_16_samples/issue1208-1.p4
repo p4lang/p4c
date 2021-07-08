@@ -1,5 +1,5 @@
 #include <core.p4>
-#include "../p4include/psa.p4"
+#include <psa.p4>
 struct EMPTY { };
 
 parser MyIP(
