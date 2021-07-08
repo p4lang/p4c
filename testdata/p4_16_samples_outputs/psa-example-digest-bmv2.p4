@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
 enum bit<16> EthTypes {
     IPv4 = 0x800,
