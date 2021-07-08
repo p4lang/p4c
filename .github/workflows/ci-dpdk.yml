@@ -1,0 +1,55 @@
+name: "test-p4c-dpdk"
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Build dpdk and test p4c-dpdk on Ubuntu 18.04
+  build-dpdk:
+    name: ${{ join(matrix.config.*, '-') }}
+    runs-on: ${{ matrix.config.os }}
+    env:
+      AARCH64: ${{ matrix.config.cross == 'aarch64' }}
+      ABI_CHECKS: ${{ contains(matrix.config.checks, 'abi') }}
+      BUILD_32BIT: ${{ matrix.config.cross == 'i386' }}
+      BUILD_DOCS: ${{ contains(matrix.config.checks, 'doc') }}
+      CC: ccache ${{ matrix.config.compiler }}
+      DEF_LIB: ${{ matrix.config.library }}
+      LIBABIGAIL_VERSION: libabigail-1.8
+      REF_GIT_TAG: v21.05
+      RUN_TESTS: ${{ contains(matrix.config.checks, 'tests') }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - os: ubuntu-latest
+            compiler: gcc
+            library: static
+    env:
+      CTEST_PARALLEL_LEVEL: 4
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Cancel previous runs
+      uses: styfle/cancel-workflow-action@0.9.0
+      with:
+        access_token: ${{ github.token }}
+
+    - name: Build (DPDK)
+      uses: DPDK/dpdk@v21.05
+
+    - name: Build (Linux)
+      run: |
+        tools/start_ccache
+        docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg ENABLE_GMP=ON .
+
+      # run with sudo (...) --privileged
+    - name: Run tests (Linux)
+      run: |
+        sudo docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random
+
