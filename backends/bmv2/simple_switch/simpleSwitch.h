@@ -52,6 +52,21 @@ class V1ProgramStructure : public ProgramStructure {
     const IR::P4Control* deparser = nullptr;
 
     V1ProgramStructure() { }
+    BlockConverted blockKind(const IR::Node* node) const {
+        if (node == parser)
+            return BlockConverted::Parser;
+        else if (node == ingress)
+            return BlockConverted::Ingress;
+        else if (node == egress)
+            return BlockConverted::Egress;
+        else if (node == compute_checksum)
+            return BlockConverted::ChecksumCompute;
+        else if (node == verify_checksum)
+            return BlockConverted::ChecksumVerify;
+        else if (node == deparser)
+            return BlockConverted::Deparser;
+        return BlockConverted::None;
+    }
 };
 
 class SimpleSwitchExpressionConverter : public ExpressionConverter {

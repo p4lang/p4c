@@ -43,7 +43,7 @@ static cstring lvalue_name(const IR::Expression *exp) {
     return cstring();
 }
 
-const IR::Node* Predication::EmptyStatementRemover::postorder(IR::EmptyStatement* statement) {
+const IR::Node* Predication::EmptyStatementRemover::postorder(IR::EmptyStatement*) {
     return nullptr;
 }
 
