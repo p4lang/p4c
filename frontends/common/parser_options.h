@@ -74,6 +74,8 @@ class ParserOptions : public Util::Options {
     cstring dumpFolder = ".";
     // Expect that the only remaining argument is the input file.
     void setInputFile();
+    // Return target specific include path.
+    const char *getIncludePath() override;
     // Returns the output of the preprocessor.
     FILE* preprocess();
     // Closes the input stream returned by preprocess.

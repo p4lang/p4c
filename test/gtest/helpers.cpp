@@ -42,6 +42,7 @@ std::string makeP4Source(const char* file, unsigned line,
             source << P4CTestEnvironment::get()->v1Model();
             break;
         case P4Headers::PSA:
+            source << P4CTestEnvironment::get()->coreP4();
             source << P4CTestEnvironment::get()->psaP4();
             break;
     }
@@ -129,7 +130,7 @@ P4CTestEnvironment::P4CTestEnvironment() {
     _coreP4 = readHeader("p4include/core.p4");
     _v1Model = readHeader("p4include/v1model.p4", true,
                           "V1MODEL_VERSION", 20200408);
-    _psaP4 = readHeader("p4include/psa.p4", true);
+    _psaP4 = readHeader("p4include/bmv2/psa.p4", true);
 }
 
 namespace Test {

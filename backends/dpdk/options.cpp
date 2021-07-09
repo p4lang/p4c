@@ -14,4 +14,17 @@ std::vector<const char*>* PsaSwitchOptions::process(int argc, char* const argv[]
     return remainingOptions;
 }
 
+const char* PsaSwitchOptions::getIncludePath() {
+    char* driverP4IncludePath = isv1() ? getenv("P4C_14_INCLUDE_PATH")
+        : getenv("P4C_16_INCLUDE_PATH");
+    cstring path = "";
+    if (driverP4IncludePath != nullptr)
+        path += cstring(" -I") + cstring(driverP4IncludePath);
+
+    path += cstring(" -I") + (isv1() ? p4_14includePath : p4includePath);
+    if (!isv1())
+        path += cstring(" -I") + p4includePath + cstring("/dpdk");
+    return path.c_str();
+}
+
 };  // namespace DPDK
