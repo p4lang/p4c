@@ -65,3 +65,27 @@ p4c_add_xfail_reason("dpdk"
   "Unhandled declaration type"
   testdata/p4_16_samples/psa-test.p4
   )
+
+p4c_add_xfail_reason("dpdk"
+  "Mismatched header/metadata struct for"
+  testdata/p4_16_samples/psa-action-selector1.p4
+  testdata/p4_16_samples/psa-action-selector2.p4
+  testdata/p4_16_samples/psa-action-selector3.p4
+  testdata/p4_16_samples/psa-dpdk-lpm-match-err4.p4
+  testdata/p4_16_samples/psa-dpdk-lpm-match-err5.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "Only one LPM match field is permitted per table"
+  testdata/p4_16_samples/psa-dpdk-lpm-match-err1.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "Non 'exact' match kind not permitted"
+  testdata/p4_16_samples/psa-dpdk-lpm-match-err2.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "Key field wider than 64-bit is not permitted"
+  testdata/p4_16_samples/psa-dpdk-lpm-match-err3.p4
+  )
