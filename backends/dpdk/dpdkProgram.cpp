@@ -196,12 +196,12 @@ IR::Declaration_Variable *ConvertToDpdkParser::addNewTmpVarToMetadata(cstring na
 void ConvertToDpdkParser::getCondVars(const IR::Expression *sv, const IR::Expression *ce,
                                       IR::Expression **leftExpr, IR::Expression **rightExpr) {
     if (sv->is<IR::Constant>() && sv->type->width_bits() > 32) {
-        ::error(ErrorType::ERR_UNEXPECTED,
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "%1%, Constant expression wider than 32-bit is not permitted", sv);
         return;
     }
     if (sv->type->width_bits() > 64) {
-        ::error(ErrorType::ERR_UNEXPECTED,
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
                 "%1%, Select expression wider than 64-bit is not permitted", sv);
         return;
     }
@@ -347,21 +347,20 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
                 } else {
                     auto tupleInputExpr = e->select;
                     auto inputSize = tupleInputExpr->components.size();
-                    auto count = 0;
                     cstring trueLabel, falseLabel;
                     /* For each select case, emit the block start label and then a series of
                        jmp instructions. */
                     for (auto sc : caseList) {
-                        cstring labelName = state->name + "_" + std::to_string(count++);
-                        add_instr(new IR::DpdkLabelStatement(append_parser_name(p, labelName)));
                         if (!sc->keyset->is<IR::DefaultExpression>()) {
                             /* Create label names, falseLabel for next keyset comparison and
                                trueLabel for the state to jump on match */
-                            falseLabel = state->name + "_" + std::to_string(count);
+                            falseLabel = refmap->newName(state->name);
                             trueLabel = sc->state->path->name;
                             handleTupleExpression(sc->keyset->to<IR::ListExpression>(),
                                                   tupleInputExpr, inputSize, append_parser_name(p,
                                                   trueLabel), append_parser_name(p, falseLabel));
+                            add_instr(new IR::DpdkLabelStatement(
+                                      append_parser_name(p, falseLabel)));
                         } else {
                             add_instr(new IR::DpdkJmpLabelStatement(
                                       append_parser_name(p, sc->state->path->name)));

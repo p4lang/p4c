@@ -116,15 +116,15 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
-	jmpneq INGRESSPARSERIMPL_START_1 h.ethernet.etherType 0x800
-	jmpneq INGRESSPARSERIMPL_START_1 h.ethernet.srcAddr 0xf00
+	jmpneq INGRESSPARSERIMPL_START_0 h.ethernet.etherType 0x800
+	jmpneq INGRESSPARSERIMPL_START_0 h.ethernet.srcAddr 0xf00
 	jmp INGRESSPARSERIMPL_PARSE_IPV4
-	INGRESSPARSERIMPL_START_1 :	mov m.tmpMask h.ethernet.etherType
+	INGRESSPARSERIMPL_START_0 :	mov m.tmpMask h.ethernet.etherType
 	and m.tmpMask 0xf00
-	jmpneq INGRESSPARSERIMPL_START_2 m.tmpMask 0x800
-	jmpneq INGRESSPARSERIMPL_START_2 h.ethernet.srcAddr 0x3883
+	jmpneq INGRESSPARSERIMPL_START_1 m.tmpMask 0x800
+	jmpneq INGRESSPARSERIMPL_START_1 h.ethernet.srcAddr 0x3883
 	jmp INGRESSPARSERIMPL_PARSE_TCP
-	INGRESSPARSERIMPL_START_2 :	jmpneq INGRESSPARSERIMPL_ACCEPT h.ethernet.srcAddr 0x678
+	INGRESSPARSERIMPL_START_1 :	jmpneq INGRESSPARSERIMPL_ACCEPT h.ethernet.srcAddr 0x678
 	jmp INGRESSPARSERIMPL_PARSE_IPV4
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
