@@ -57,7 +57,7 @@ class ConvertToDpdkProgram : public Transform {
     std::map<const cstring, IR::IndexedVector<IR::Parameter> *>
         *args_struct_map;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
-    std::vector<const IR::Declaration_Instance *> *externDecls; 
+    std::vector<const IR::Declaration_Instance *> *externDecls;
   public:
     ConvertToDpdkProgram(BMV2::PsaProgramStructure &structure,
                          P4::ReferenceMap *refmap, P4::TypeMap *typemap,
@@ -109,12 +109,14 @@ class ConvertToDpdkParser : public Inspector {
     IR::Declaration_Variable *addNewTmpVarToMetadata (cstring name, const IR::Type* type);
 };
 
+
 class ConvertToDpdkControl : public Inspector {
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
     DpdkVariableCollector *collector;
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     IR::IndexedVector<IR::DpdkTable> tables;
+    IR::IndexedVector<IR::DpdkSelector> selectors;
     IR::IndexedVector<IR::DpdkAction> actions;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
     std::set<cstring> unique_actions;
@@ -130,6 +132,7 @@ class ConvertToDpdkControl : public Inspector {
           csum_map(csum_map), deparser(deparser) {}
 
     IR::IndexedVector<IR::DpdkTable> &getTables() { return tables; }
+    IR::IndexedVector<IR::DpdkSelector> &getSelectors() { return selectors; }
     IR::IndexedVector<IR::DpdkAction> &getActions() { return actions; }
     IR::IndexedVector<IR::DpdkAsmStatement> &getInstructions() {
         return instructions;
@@ -141,7 +144,11 @@ class ConvertToDpdkControl : public Inspector {
 
     void add_inst(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
     void add_table(const IR::DpdkTable *t) { tables.push_back(t); }
+    void add_table(const IR::DpdkSelector *s) { selectors.push_back(s); }
     void add_action(const IR::DpdkAction *a) { actions.push_back(a); }
+
+	boost::optional<cstring> getIdFromProperty(const IR::P4Table*, cstring);
+	boost::optional<int> getNumberFromProperty(const IR::P4Table*, cstring);
 };
 
 class CollectActionUses : public Inspector {

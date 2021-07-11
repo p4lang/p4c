@@ -442,7 +442,7 @@ class ConvertInternetChecksum : public PassManager {
     }
 };
 
-/* This pass collects PSA extern meter, counter and register declaration instances and 
+/* This pass collects PSA extern meter, counter and register declaration instances and
    push them to a vector for emitting to the .spec file later */
 class CollectExternDeclaration : public Inspector {
     P4::TypeMap *typeMap;
@@ -583,6 +583,25 @@ class ConvertLogicalExpression : public PassManager {
     }
 };
 
+/*
+ * Split ActionSelector into three tables:
+ *   base table that matches on exact/ternary key and generates a group id
+ *   group table that matches on group id and generates a member id
+ *   member table that runs an action based on member id.
+ */
+class SplitActionSelectorTable : public Transform {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+	std::map<cstring, cstring> selector_tables;
+	std::map<cstring, cstring> member_tables;
+
+  public:
+    SplitActionSelectorTable(P4::ReferenceMap *refMap, P4::TypeMap* typeMap) :
+		refMap(refMap), typeMap(typeMap) {}
+    const IR::Node* postorder(IR::P4Table* tbl) override;
+    const IR::Node* postorder(IR::MethodCallStatement* ) override;
+};
+
 class RewriteToDpdkArch : public PassManager {
   public:
     CollectMetadataHeaderInfo *info;
@@ -609,6 +628,9 @@ class RewriteToDpdkArch : public PassManager {
         }));
         passes.push_back(info);
         passes.push_back(new ConvertToDpdkArch(&parsePsa->toBlockInfo));
+        passes.push_back(new SplitActionSelectorTable(refMap, typeMap));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
         passes.push_back(new ReplaceMetadataHeaderName(refMap, info));
         passes.push_back(new InjectJumboStruct(info));
         passes.push_back(new StatementUnroll(refMap, collector));

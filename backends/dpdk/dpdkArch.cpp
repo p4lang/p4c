@@ -24,6 +24,7 @@ limitations under the License.
  */
 
 #include "dpdkArch.h"
+#include "frontends/p4/coreLibrary.h"
 
 namespace DPDK {
 
@@ -928,6 +929,126 @@ const IR::Node *PrependPDotToActionArgs::preorder(IR::PathExpression *path) {
         }
     }
     return path;
+}
+
+const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
+	LOG1("tbl " << tbl);
+    auto decls = new IR::IndexedVector<IR::Declaration>();
+
+	cstring group_id = refMap->newName(tbl->name + "_group_id");
+    cstring memberKeyName = refMap->newName(tbl->name + "_member_id");
+
+	auto group_id_decl = new IR::Declaration_Variable(group_id, IR::Type_Bits::get(32));
+	auto member_id_decl = new IR::Declaration_Variable(memberKeyName, IR::Type_Bits::get(32));
+	decls->push_back(group_id_decl);
+	decls->push_back(member_id_decl);
+
+	auto hidden = new IR::Annotations();
+	hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
+
+    // base table matches on non-selector key and set group_id
+    IR::Vector<IR::KeyElement> match_keys;
+    for (auto key : tbl->getKey()->keyElements) {
+        if (key->matchType->toString() != "selector") {
+            match_keys.push_back(key);
+        }
+    }
+    IR::IndexedVector<IR::ActionListElement> actionsList;
+
+    cstring actionName = refMap->newName(tbl->name + "_set_group_id");
+    auto actionCall = new IR::MethodCallExpression(new IR::PathExpression(actionName));
+    actionsList.push_back(new IR::ActionListElement(actionCall));
+	actionsList.push_back(new IR::ActionListElement(tbl->getDefaultAction()));
+    IR::IndexedVector<IR::Property> properties;
+    properties.push_back(new IR::Property("actions", new IR::ActionList(actionsList), false));
+    properties.push_back(new IR::Property("key", new IR::Key(match_keys), false));
+	properties.push_back(new IR::Property("default_action",
+						 new IR::ExpressionValue(tbl->getDefaultAction()), false));
+	properties.push_back(new IR::Property("size", new IR::ExpressionValue(tbl->getSizeProperty()), false));
+    auto base_table = new IR::P4Table(tbl->name, new IR::TableProperties(properties));
+
+	// create action that sets group_id
+	auto set_group_id = new IR::AssignmentStatement(
+			new IR::PathExpression(group_id), new IR::PathExpression("group_id"));
+	auto parameter = new IR::Parameter("group_id", IR::Direction::None, IR::Type_Bits::get(32));
+    auto action = new IR::P4Action(
+            actionName, hidden, new IR::ParameterList({ parameter }),
+            new IR::BlockStatement({ set_group_id }));
+	decls->push_back(action);
+    decls->push_back(base_table);
+
+    // group table match on group_id
+    IR::Vector<IR::KeyElement> selector_keys;
+    for (auto key : tbl->getKey()->keyElements) {
+        if (key->matchType->toString() == "selector") {
+            selector_keys.push_back(key);
+        }
+    }
+    IR::IndexedVector<IR::Property> selector_properties;
+    selector_properties.push_back(new IR::Property("selector", new IR::Key(selector_keys), false));
+	selector_properties.push_back(new IR::Property("group_id",
+		new IR::ExpressionValue(new IR::PathExpression(group_id)), false));
+	selector_properties.push_back(new IR::Property("member_id",
+		new IR::ExpressionValue(new IR::PathExpression(memberKeyName)), false));
+	selector_properties.push_back(new IR::Property("n_groups_max",
+		new IR::ExpressionValue(new IR::Constant(1)), false));
+	selector_properties.push_back(new IR::Property("n_members_per_group_max",
+		new IR::ExpressionValue(new IR::Constant(8)), false));
+	selector_properties.push_back(new IR::Property("actions", new IR::ActionList({}), false));
+    cstring selectorTableName = refMap->newName(tbl->name + "_group_table");
+    auto group_table = new IR::P4Table(selectorTableName, new IR::TableProperties(selector_properties));
+    decls->push_back(group_table);
+
+    // member table match on member_id
+    IR::Vector<IR::KeyElement> member_keys;
+    auto tableKeyEl = new IR::KeyElement(new IR::PathExpression(memberKeyName),
+            new IR::PathExpression(P4::P4CoreLibrary::instance.exactMatch.Id()));
+    member_keys.push_back(tableKeyEl);
+    IR::IndexedVector<IR::Property> member_properties;
+    member_properties.push_back(new IR::Property("key", new IR::Key(member_keys), false));
+
+    IR::IndexedVector<IR::ActionListElement> memberActionList;
+    for (auto action : tbl->getActionList()->actionList)
+        memberActionList.push_back(action);
+    member_properties.push_back(new IR::Property("actions", new IR::ActionList(memberActionList), false));
+	member_properties.push_back(new IR::Property("size", new IR::ExpressionValue(tbl->getSizeProperty()), false));
+	member_properties.push_back(new IR::Property("default_action",
+                                new IR::ExpressionValue(tbl->getDefaultAction()), false));
+
+    cstring memberTableName = refMap->newName(tbl->name + "_member_table");
+    auto member_table = new IR::P4Table(memberTableName, new IR::TableProperties(member_properties));
+    decls->push_back(member_table);
+
+	selector_tables.emplace(tbl->name, selectorTableName);
+	member_tables.emplace(tbl->name, memberTableName);
+
+    return decls;
+}
+
+const IR::Node* SplitActionSelectorTable::postorder(IR::MethodCallStatement *statement) {
+	auto methodCall = statement->methodCall;
+	auto mi = P4::MethodInstance::resolve(methodCall, refMap, typeMap);
+	auto decls = new IR::IndexedVector<IR::StatOrDecl>();
+	if (auto apply = mi->to<P4::ApplyMethod>()) {
+		decls->push_back(statement);
+		auto tableName = apply->object->getName().name;
+		if (selector_tables.find(tableName) != selector_tables.end()) {
+			auto selectorTable = selector_tables.at(tableName);
+			decls->push_back(new IR::MethodCallStatement(
+				new IR::MethodCallExpression(
+				new IR::Member(new IR::PathExpression(selectorTable),
+							   IR::ID(IR::IApply::applyMethodName)))));
+		}
+		if (member_tables.find(tableName) != member_tables.end()) {
+			auto memberTable = member_tables.at(tableName);
+			decls->push_back(new IR::MethodCallStatement(
+				new IR::MethodCallExpression(
+				new IR::Member(new IR::PathExpression(memberTable),
+								IR::ID(IR::IApply::applyMethodName)))));
+		}
+		return decls;
+	}
+	return statement;
 }
 
 }  // namespace DPDK

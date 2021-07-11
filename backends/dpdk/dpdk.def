@@ -47,6 +47,19 @@ class DpdkTable {
 #novalidate
 }
 
+class DpdkSelector {
+    inline cstring name;
+    inline cstring group_id;
+    inline cstring member_id;
+    Key selectors;
+    int n_groups_max;
+    int n_members_per_group_max;
+
+	std::ostream& toSpec(std::ostream& out) const;
+#nodbprint
+#novalidate
+}
+
 // Toplevel Assembly representation
 class DpdkAsmProgram {
     inline IndexedVector<DpdkHeaderType> headerType;
@@ -54,6 +67,7 @@ class DpdkAsmProgram {
     inline IndexedVector<DpdkExternDeclaration> externDeclarations;
     inline IndexedVector<DpdkAction> actions;
     inline IndexedVector<DpdkTable> tables;
+	inline IndexedVector<DpdkSelector> selectors;
     inline IndexedVector<DpdkAsmStatement> statements;
     inline IndexedVector<DpdkDeclaration> globals;
     std::ostream& toSpec(std::ostream& out) const;
