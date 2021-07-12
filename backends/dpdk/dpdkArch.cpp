@@ -1016,7 +1016,9 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     properties.push_back(new IR::Property("key", new IR::Key(match_keys), false));
 	properties.push_back(new IR::Property("default_action",
 						 new IR::ExpressionValue(tbl->getDefaultAction()), false));
-	properties.push_back(new IR::Property("size", new IR::ExpressionValue(tbl->getSizeProperty()), false));
+    if (tbl->getSizeProperty()) {
+        properties.push_back(new IR::Property("size",
+                             new IR::ExpressionValue(tbl->getSizeProperty()), false)); }
     auto base_table = new IR::P4Table(tbl->name, new IR::TableProperties(properties));
 
 	// create action that sets group_id
@@ -1063,7 +1065,9 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     for (auto action : tbl->getActionList()->actionList)
         memberActionList.push_back(action);
     member_properties.push_back(new IR::Property("actions", new IR::ActionList(memberActionList), false));
-	member_properties.push_back(new IR::Property("size", new IR::ExpressionValue(tbl->getSizeProperty()), false));
+    if (tbl->getSizeProperty()) {
+        member_properties.push_back(new IR::Property("size",
+                                    new IR::ExpressionValue(tbl->getSizeProperty()), false)); }
 	member_properties.push_back(new IR::Property("default_action",
                                 new IR::ExpressionValue(tbl->getDefaultAction()), false));
 
