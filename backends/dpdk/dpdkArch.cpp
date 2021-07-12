@@ -25,6 +25,9 @@ limitations under the License.
 
 #include "dpdkArch.h"
 #include "frontends/p4/coreLibrary.h"
+#include "frontends/common/resolveReferences/referenceMap.h"
+#include "frontends/p4/externInstance.h"
+#include "frontends/p4/typeMap.h"
 
 namespace DPDK {
 
@@ -931,8 +934,57 @@ const IR::Node *PrependPDotToActionArgs::preorder(IR::PathExpression *path) {
     return path;
 }
 
+namespace Helpers {
+
+boost::optional<P4::ExternInstance>
+getExternInstanceFromProperty(const IR::P4Table* table,
+                              const cstring& propertyName,
+                              P4::ReferenceMap* refMap,
+                              P4::TypeMap* typeMap,
+                              bool *isConstructedInPlace) {
+    auto property = table->properties->getProperty(propertyName);
+    if (property == nullptr) return boost::none;
+    if (!property->value->is<IR::ExpressionValue>()) {
+        ::error(ErrorType::ERR_EXPECTED,
+                "Expected %1% property value for table %2% to be an expression: %3%",
+                propertyName, table->controlPlaneName(), property);
+        return boost::none;
+    }
+
+    auto expr = property->value->to<IR::ExpressionValue>()->expression;
+    if (isConstructedInPlace) *isConstructedInPlace = expr->is<IR::ConstructorCallExpression>();
+    if (expr->is<IR::ConstructorCallExpression>()
+        && property->getAnnotation(IR::Annotation::nameAnnotation) == nullptr) {
+        ::error(ErrorType::ERR_UNSUPPORTED,
+                "Table '%1%' has an anonymous table property '%2%' with no name annotation, "
+                "which is not supported by P4Runtime", table->controlPlaneName(), propertyName);
+        return boost::none;
+    }
+    auto name = property->controlPlaneName();
+    auto externInstance = P4::ExternInstance::resolve(expr, refMap, typeMap, name);
+    if (!externInstance) {
+        ::error(ErrorType::ERR_INVALID,
+                "Expected %1% property value for table %2% to resolve to an "
+                "extern instance: %3%", propertyName, table->controlPlaneName(),
+                property);
+        return boost::none;
+    }
+
+    return externInstance;
+}
+
+}
+
 const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
-	LOG1("tbl " << tbl);
+
+    bool isConstructedInPlace = false;
+    auto instance = Helpers::getExternInstanceFromProperty(tbl, "psa_implementation",
+                                                           refMap, typeMap, &isConstructedInPlace);
+    if (!instance)
+        return tbl;
+    if (instance->type->name != "ActionSelector")
+        return tbl;
+
     auto decls = new IR::IndexedVector<IR::Declaration>();
 
 	cstring group_id = refMap->newName(tbl->name + "_group_id");
