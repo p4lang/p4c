@@ -592,7 +592,8 @@ class ConvertLogicalExpression : public PassManager {
 class SplitActionSelectorTable : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
-	std::map<cstring, cstring> selector_tables;
+    std::set<cstring> action_selector_tables;
+	std::map<cstring, cstring> group_tables;
 	std::map<cstring, cstring> member_tables;
 
   public:

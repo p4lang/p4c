@@ -1071,7 +1071,8 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     auto member_table = new IR::P4Table(memberTableName, new IR::TableProperties(member_properties));
     decls->push_back(member_table);
 
-	selector_tables.emplace(tbl->name, selectorTableName);
+    action_selector_tables.insert(tbl->name);
+	group_tables.emplace(tbl->name, selectorTableName);
 	member_tables.emplace(tbl->name, memberTableName);
 
     return decls;
@@ -1080,12 +1081,17 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
 const IR::Node* SplitActionSelectorTable::postorder(IR::MethodCallStatement *statement) {
 	auto methodCall = statement->methodCall;
 	auto mi = P4::MethodInstance::resolve(methodCall, refMap, typeMap);
-	auto decls = new IR::IndexedVector<IR::StatOrDecl>();
 	if (auto apply = mi->to<P4::ApplyMethod>()) {
+        if (!apply->isTableApply())
+            return statement;
+        auto table = apply->object->to<IR::P4Table>();
+        if (action_selector_tables.count(table->name) == 0)
+            return statement;
+	    auto decls = new IR::IndexedVector<IR::StatOrDecl>();
 		decls->push_back(statement);
 		auto tableName = apply->object->getName().name;
-		if (selector_tables.find(tableName) != selector_tables.end()) {
-			auto selectorTable = selector_tables.at(tableName);
+		if (group_tables.find(tableName) != group_tables.end()) {
+			auto selectorTable = group_tables.at(tableName);
 			decls->push_back(new IR::MethodCallStatement(
 				new IR::MethodCallExpression(
 				new IR::Member(new IR::PathExpression(selectorTable),
