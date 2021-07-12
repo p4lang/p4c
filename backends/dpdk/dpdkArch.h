@@ -615,6 +615,9 @@ class RewriteToDpdkArch : public PassManager {
         auto *evaluator = new P4::EvaluatorPass(refMap, typeMap);
         auto *parsePsa = new ParsePsa();
         info = new CollectMetadataHeaderInfo(&parsePsa->toBlockInfo);
+        passes.push_back(new SplitActionSelectorTable(refMap, typeMap));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
         passes.push_back(evaluator);
         passes.push_back(new VisitFunctor([evaluator, parsePsa]() {
             auto toplevel = evaluator->getToplevelBlock();
@@ -628,9 +631,6 @@ class RewriteToDpdkArch : public PassManager {
         }));
         passes.push_back(info);
         passes.push_back(new ConvertToDpdkArch(&parsePsa->toBlockInfo));
-        passes.push_back(new SplitActionSelectorTable(refMap, typeMap));
-        passes.push_back(new P4::ClearTypeMap(typeMap));
-        passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
         passes.push_back(new ReplaceMetadataHeaderName(refMap, info));
         passes.push_back(new InjectJumboStruct(info));
         passes.push_back(new StatementUnroll(refMap, collector));
