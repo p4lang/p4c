@@ -120,3 +120,103 @@ p4_library = rule(
     incompatible_use_toolchain_transition = True,
     toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
 )
+
+def _p4_graphs_impl(ctx):
+    p4c = ctx.executable._p4c
+    p4file = ctx.file.src
+    p4deps = ctx.files._p4include + ctx.files.deps
+    output_file = ctx.outputs.out_file
+    graph_dir = output_file.path + "-graphs-dir"
+    args = [
+        p4file.path,
+        "--std",
+        ctx.attr.std,
+        "--arch",
+        ctx.attr.arch,
+        "--graphs-dir",
+        graph_dir,
+    ]
+    if ctx.attr.extra_args:
+        args.append(ctx.attr.extra_args)
+
+    include_dirs = {d.dirname: 0 for d in p4deps}  # Use dict to express set.
+    include_dirs["."] = 0  # Enable include paths relative to workspace root.
+    args += [("-I" + dir) for dir in include_dirs.keys()]
+
+    cpp_toolchain = find_cpp_toolchain(ctx)
+    ctx.actions.run_shell(
+        command = """
+            # p4c invokes cc for preprocessing; we provide it below.
+            function cc () {{ "{cc}" "$@"; }}
+            export -f cc
+            # Create the output directory
+            mkdir "{graph_dir}"
+            # Run the compiler
+            "{p4c}" {p4c_args}
+            # Merge all output graphs
+            cat "{graph_dir}"/* > {output_file}
+        """.format(
+            cc = cpp_toolchain.compiler_executable,
+            p4c = p4c.path,
+            p4c_args = " ".join(args),
+            graph_dir = graph_dir,
+            output_file = output_file.path,
+        ),
+        inputs = p4deps + [p4file],
+        tools = depset(
+            direct = [p4c],
+            transitive = [cpp_toolchain.all_files],
+        ),
+        outputs = [output_file],
+        progress_message = "Generating the graphs for P4 program %s" % p4file.short_path,
+        use_default_shell_env = True,
+    )
+
+p4_graphs = rule(
+    doc = "Generates the graphs for a P4 program using p4c-graphs, and merges them in a single GraphViz file. This file can be later processed by gvpack and dot.",
+    implementation = _p4_graphs_impl,
+    attrs = {
+        "src": attr.label(
+            doc = "P4 source file to pass to p4c.",
+            mandatory = True,
+            allow_single_file = [".p4"],
+        ),
+        "deps": attr.label_list(
+            doc = "Additional P4 dependencies (optional). Use for #include-ed files.",
+            mandatory = False,
+            allow_files = [".p4", ".h"],
+            default = [],
+        ),
+        "out_file": attr.output(
+            doc = "The name of the output DOT file",
+            mandatory = True,
+        ),
+        "arch": attr.string(
+            doc = "The --arch argument passed to p4c (default: v1model).",
+            mandatory = False,
+            default = "v1model",
+        ),
+        "std": attr.string(
+            doc = "The --std argument passed to p4c (default: p4-16).",
+            mandatory = False,
+            default = "p4-16",
+        ),
+        "extra_args": attr.string(
+            doc = "String of additional command line arguments to pass to p4c.",
+            mandatory = False,
+            default = "",
+        ),
+        "_p4c": attr.label(
+            default = Label("@com_github_p4lang_p4c//:p4c_bmv2"),
+            executable = True,
+            cfg = "target",
+        ),
+        "_p4include": attr.label(
+            default = Label("@com_github_p4lang_p4c//:p4include"),
+            allow_files = [".p4", ".h"],
+        ),
+        "_cc_toolchain": attr.label(default = Label("@bazel_tools//tools/cpp:current_cc_toolchain")),
+    },
+    incompatible_use_toolchain_transition = True,
+    toolchains = ["@bazel_tools//tools/cpp:toolchain_type"],
+)
