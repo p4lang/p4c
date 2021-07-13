@@ -388,8 +388,24 @@ class Data {
   }
 
   //! NC
+  template<typename T,
+           typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+  friend bool operator==(const Data &lhs, const T &rhs) {
+    assert(lhs.arith);
+    return lhs.value.convert_to<T>() == rhs;
+  }
+
+  //! NC
   friend bool operator!=(const Data &lhs, const Data &rhs) {
     assert(lhs.arith && rhs.arith);
+    return !(lhs == rhs);
+  }
+
+  //! NC
+  template<typename T,
+           typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
+  friend bool operator!=(const Data &lhs, const T &rhs) {
+    assert(lhs.arith);
     return !(lhs == rhs);
   }
 

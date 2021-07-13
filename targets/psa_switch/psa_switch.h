@@ -37,6 +37,7 @@
 #include "externs/psa_counter.h"
 #include "externs/psa_meter.h"
 #include "externs/psa_random.h"
+#include "externs/psa_internet_checksum.h"
 
 // TODO(antonin)
 // experimental support for priority queueing

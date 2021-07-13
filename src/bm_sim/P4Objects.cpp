@@ -339,6 +339,12 @@ P4Objects::process_single_param(ActionFn* action_fn,
       process_single_param(action_fn, cfg_parameter_value, primitive_name);
     }
     action_fn->parameter_end_vector();
+  } else if (type == "field_list") {
+    action_fn->start_field_list();
+    for (const auto &cfg_parameter_value : cfg_parameter["value"]) {
+      process_single_param(action_fn, cfg_parameter_value, primitive_name);
+    }
+    action_fn->end_field_list();
   } else if (type == "runtime_data") {
     auto action_data_offset = cfg_parameter["value"].asUInt();
     auto runtime_data_size = action_fn->get_num_params();

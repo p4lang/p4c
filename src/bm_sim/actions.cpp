@@ -283,6 +283,25 @@ ActionFn::parameter_end_vector() {
 }
 
 void
+ActionFn::start_field_list() {
+  ActionParam param;
+  param.tag = ActionParam::PARAMS_FIELDS;
+  auto start = static_cast<unsigned int>(sub_params.size());
+  param.params_vector = {start, start /* end */};
+  params.push_back(param);
+  params.swap(sub_params);
+}
+
+void
+ActionFn::end_field_list() {
+  params.swap(sub_params);
+  assert(params.back().tag == ActionParam::PARAMS_FIELDS &&
+         "no vector was started");
+  auto end = static_cast<unsigned int>(sub_params.size());
+  params.back().params_vector.end = end;
+}
+
+void
 ActionFn::push_back_primitive(ActionPrimitive_ *primitive,
                               std::unique_ptr<SourceInfo> source_info) {
   size_t param_offset = 0;

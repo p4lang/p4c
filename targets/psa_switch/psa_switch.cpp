@@ -66,6 +66,7 @@ extern int import_primitives();
 extern int import_counters();
 extern int import_meters();
 extern int import_random();
+extern int import_internet_checksum();
 
 namespace bm {
 
@@ -183,6 +184,7 @@ PsaSwitch::PsaSwitch(bool enable_swap)
   import_counters();
   import_meters();
   import_random();
+  import_internet_checksum();
 }
 
 #define PACKET_LENGTH_REG_IDX 0
