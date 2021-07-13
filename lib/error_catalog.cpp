@@ -58,8 +58,8 @@ const int ErrorType::WARN_PARSER_TRANSITION = 1014;
 const int ErrorType::WARN_UNREACHABLE       = 1015;
 const int ErrorType::WARN_SHADOWING         = 1016;
 const int ErrorType::WARN_IGNORE            = 1017;
-const int ErrorType::WARN_UNINITIALIZED_OUT_PARAM  = 1017;
-const int ErrorType::WARN_UNINITIALIZED_USE = 1018;
+const int ErrorType::WARN_UNINITIALIZED_OUT_PARAM  = 1018;
+const int ErrorType::WARN_UNINITIALIZED_USE = 1019;
 const int ErrorType::WARN_MAX_WARNINGS      = 2142;
 
 // map from errorCode to ErrorSig
