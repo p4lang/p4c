@@ -207,7 +207,7 @@ p4_graphs = rule(
             default = "",
         ),
         "_p4c": attr.label(
-            default = Label("@com_github_p4lang_p4c//:p4c_bmv2"),
+            default = Label("@com_github_p4lang_p4c//:p4c_graphs"),
             executable = True,
             cfg = "target",
         ),
