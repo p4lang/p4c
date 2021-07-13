@@ -2,26 +2,62 @@
 
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 
-def _p4_library_impl(ctx):
-    p4c = ctx.executable._p4c
+def _extract_common_p4c_args(ctx):
+    """Extract input files and common arguments for p4c build rules."""
     p4file = ctx.file.src
     p4deps = ctx.files._p4include + ctx.files.deps
-    target = ctx.attr.target
     args = [
         p4file.path,
         "--std",
         ctx.attr.std,
-        "--target",
-        (target if target else "bmv2"),
         "--arch",
         ctx.attr.arch,
     ]
-    if ctx.attr.extra_args:
-        args.append(ctx.attr.extra_args)
 
     include_dirs = {d.dirname: 0 for d in p4deps}  # Use dict to express set.
     include_dirs["."] = 0  # Enable include paths relative to workspace root.
     args += [("-I" + dir) for dir in include_dirs.keys()]
+    inputs = p4deps + [p4file]
+
+    return (args, inputs)
+
+def _run_p4c_with_cc(ctx, p4c, command, **run_shell_kwargs):
+    """Run given sequence of shell commands using `run_shell` action after
+setting up the C compiler toolchain.
+
+This function also sets up the `tools` parameter for `run_shell` to
+set up p4c and the cpp toolchain, and `kwargs` is passed to
+`run_shell`.
+    """
+    cpp_toolchain = find_cpp_toolchain(ctx)
+    ctx.actions.run_shell(
+        command = """
+            # p4c invokes cc for preprocessing; we provide it below.
+            function cc () {{ "{cc}" "$@"; }}
+            export -f cc
+
+            {command}
+        """.format(
+            cc = cpp_toolchain.compiler_executable,
+            command = command,
+        ),
+        tools = depset(
+            direct = [p4c],
+            transitive = [cpp_toolchain.all_files],
+        ),
+        use_default_shell_env = True,
+        **run_shell_kwargs
+    )
+
+def _p4_library_impl(ctx):
+    p4c = ctx.executable._p4c
+    p4file = ctx.file.src
+    target = ctx.attr.target
+    (args, inputs) = _extract_common_p4c_args(ctx)
+    args += ["--target", (target if target else "bmv2")]
+
+    if ctx.attr.extra_args:
+        args.append(ctx.attr.extra_args)
 
     outputs = []
 
@@ -40,27 +76,18 @@ def _p4_library_impl(ctx):
     if not outputs:
         fail("No outputs specified. Must specify p4info_out or target_out or both.")
 
-    cpp_toolchain = find_cpp_toolchain(ctx)
-    ctx.actions.run_shell(
+    _run_p4c_with_cc(
+        ctx,
+        p4c = p4c,
         command = """
-            # p4c invokes cc for preprocessing; we provide it below.
-            function cc () {{ "{cc}" "$@"; }}
-            export -f cc
-
             "{p4c}" {p4c_args}
         """.format(
-            cc = cpp_toolchain.compiler_executable,
             p4c = p4c.path,
             p4c_args = " ".join(args),
         ),
-        inputs = p4deps + [p4file],
-        tools = depset(
-            direct = [p4c],
-            transitive = [cpp_toolchain.all_files],
-        ),
+        inputs = inputs,
         outputs = outputs,
         progress_message = "Compiling P4 program %s" % p4file.short_path,
-        use_default_shell_env = True,
     )
 
 p4_library = rule(
@@ -94,12 +121,12 @@ p4_library = rule(
         "arch": attr.string(
             doc = "The --arch argument passed to p4c (default: v1model).",
             mandatory = False,
-            default = "v1model"
+            default = "v1model",
         ),
         "std": attr.string(
             doc = "The --std argument passed to p4c (default: p4-16).",
             mandatory = False,
-            default = "p4-16"
+            default = "p4-16",
         ),
         "extra_args": attr.string(
             doc = "String of additional command line arguments to pass to p4c.",
@@ -124,33 +151,19 @@ p4_library = rule(
 def _p4_graphs_impl(ctx):
     p4c = ctx.executable._p4c
     p4file = ctx.file.src
-    p4deps = ctx.files._p4include + ctx.files.deps
-    output_file = ctx.outputs.out_file
-    graph_dir = output_file.path + "-graphs-dir"
-    args = [
-        p4file.path,
-        "--std",
-        ctx.attr.std,
-        "--arch",
-        ctx.attr.arch,
-        "--graphs-dir",
-        graph_dir,
-    ]
-    if ctx.attr.extra_args:
-        args.append(ctx.attr.extra_args)
+    output_file = ctx.outputs.out
 
-    include_dirs = {d.dirname: 0 for d in p4deps}  # Use dict to express set.
-    include_dirs["."] = 0  # Enable include paths relative to workspace root.
-    args += [("-I" + dir) for dir in include_dirs.keys()]
     if not output_file.path.lower().endswith(".dot"):
         fail("The output graph file must have extension .dot")
 
-    cpp_toolchain = find_cpp_toolchain(ctx)
-    ctx.actions.run_shell(
+    (args, inputs) = _extract_common_p4c_args(ctx)
+    graph_dir = output_file.path + "-graphs-dir"
+    args += ["--graphs-dir", graph_dir]
+
+    _run_p4c_with_cc(
+        ctx,
+        p4c = p4c,
         command = """
-            # p4c invokes cc for preprocessing; we provide it below.
-            function cc () {{ "{cc}" "$@"; }}
-            export -f cc
             # Create the output directory
             mkdir "{graph_dir}"
             # Run the compiler
@@ -158,20 +171,14 @@ def _p4_graphs_impl(ctx):
             # Merge all output graphs
             cat "{graph_dir}"/* > {output_file}
         """.format(
-            cc = cpp_toolchain.compiler_executable,
             p4c = p4c.path,
             p4c_args = " ".join(args),
             graph_dir = graph_dir,
             output_file = output_file.path,
         ),
-        inputs = p4deps + [p4file],
-        tools = depset(
-            direct = [p4c],
-            transitive = [cpp_toolchain.all_files],
-        ),
+        inputs = inputs,
         outputs = [output_file],
         progress_message = "Generating the graphs for P4 program %s" % p4file.short_path,
-        use_default_shell_env = True,
     )
 
 p4_graphs = rule(
@@ -189,7 +196,7 @@ p4_graphs = rule(
             allow_files = [".p4", ".h"],
             default = [],
         ),
-        "out_file": attr.output(
+        "out": attr.output(
             doc = "The name of the output DOT file",
             mandatory = True,
         ),
