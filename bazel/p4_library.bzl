@@ -168,7 +168,7 @@ def _p4_graphs_impl(ctx):
             mkdir "{graph_dir}"
             # Run the compiler
             "{p4c}" {p4c_args}
-            # Merge all output graphs
+            # Merge all output graphs, the * needs to be outside the quotes for globbing
             cat "{graph_dir}"/* > {output_file}
         """.format(
             p4c = p4c.path,
