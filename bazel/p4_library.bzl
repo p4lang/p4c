@@ -3,7 +3,7 @@
 load("@bazel_tools//tools/cpp:toolchain_utils.bzl", "find_cpp_toolchain")
 
 def _extract_common_p4c_args(ctx):
-    """Extract input files and common arguments for p4c build rules."""
+    """Extract common arguments for p4c build rules."""
     p4file = ctx.file.src
     p4deps = ctx.files._p4include + ctx.files.deps
     args = [
@@ -17,9 +17,14 @@ def _extract_common_p4c_args(ctx):
     include_dirs = {d.dirname: 0 for d in p4deps}  # Use dict to express set.
     include_dirs["."] = 0  # Enable include paths relative to workspace root.
     args += [("-I" + dir) for dir in include_dirs.keys()]
-    inputs = p4deps + [p4file]
 
-    return (args, inputs)
+    return args
+
+def _extract_p4c_inputs(ctx):
+    """Extract input p4 files to give to p4c from the build rule context."""
+    p4file = ctx.file.src
+    p4deps = ctx.files._p4include + ctx.files.deps
+    return p4deps + [p4file]
 
 def _run_p4c_with_cc(ctx, p4c, command, **run_shell_kwargs):
     """Run given sequence of shell commands using `run_shell` action after
@@ -53,7 +58,7 @@ def _p4_library_impl(ctx):
     p4c = ctx.executable._p4c
     p4file = ctx.file.src
     target = ctx.attr.target
-    (args, inputs) = _extract_common_p4c_args(ctx)
+    args = _extract_common_p4c_args(ctx)
     args += ["--target", (target if target else "bmv2")]
 
     if ctx.attr.extra_args:
@@ -85,7 +90,7 @@ def _p4_library_impl(ctx):
             p4c = p4c.path,
             p4c_args = " ".join(args),
         ),
-        inputs = inputs,
+        inputs = _extract_p4c_inputs(ctx),
         outputs = outputs,
         progress_message = "Compiling P4 program %s" % p4file.short_path,
     )
@@ -156,7 +161,7 @@ def _p4_graphs_impl(ctx):
     if not output_file.path.lower().endswith(".dot"):
         fail("The output graph file must have extension .dot")
 
-    (args, inputs) = _extract_common_p4c_args(ctx)
+    args = _extract_common_p4c_args(ctx)
     graph_dir = output_file.path + "-graphs-dir"
     args += ["--graphs-dir", graph_dir]
 
@@ -176,7 +181,7 @@ def _p4_graphs_impl(ctx):
             graph_dir = graph_dir,
             output_file = output_file.path,
         ),
-        inputs = inputs,
+        inputs = _extract_p4c_inputs(ctx),
         outputs = [output_file],
         progress_message = "Generating the graphs for P4 program %s" % p4file.short_path,
     )
