@@ -142,6 +142,8 @@ def _p4_graphs_impl(ctx):
     include_dirs = {d.dirname: 0 for d in p4deps}  # Use dict to express set.
     include_dirs["."] = 0  # Enable include paths relative to workspace root.
     args += [("-I" + dir) for dir in include_dirs.keys()]
+    if not output_file.path.lower().endswith(".dot"):
+        fail("The output graph file must have extension .dot")
 
     cpp_toolchain = find_cpp_toolchain(ctx)
     ctx.actions.run_shell(
