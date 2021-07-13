@@ -26,7 +26,7 @@ def _extract_p4c_inputs(ctx):
     p4deps = ctx.files._p4include + ctx.files.deps
     return p4deps + [p4file]
 
-def _run_p4c_with_cc(ctx, p4c, command, **run_shell_kwargs):
+def _run_shell_cmd_with_p4c(ctx, command, **run_shell_kwargs):
     """Run given sequence of shell commands using `run_shell` action after
 setting up the C compiler toolchain.
 
@@ -34,6 +34,11 @@ This function also sets up the `tools` parameter for `run_shell` to
 set up p4c and the cpp toolchain, and `kwargs` is passed to
 `run_shell`.
     """
+
+    if not hasattr(ctx.executable, "_p4c"):
+        fail("The build rule does not specify the p4c executable via `_p4c` attribute.")
+    p4c = ctx.executable._p4c
+
     cpp_toolchain = find_cpp_toolchain(ctx)
     ctx.actions.run_shell(
         command = """
@@ -81,9 +86,8 @@ def _p4_library_impl(ctx):
     if not outputs:
         fail("No outputs specified. Must specify p4info_out or target_out or both.")
 
-    _run_p4c_with_cc(
+    _run_shell_cmd_with_p4c(
         ctx,
-        p4c = p4c,
         command = """
             "{p4c}" {p4c_args}
         """.format(
@@ -165,9 +169,8 @@ def _p4_graphs_impl(ctx):
     graph_dir = output_file.path + "-graphs-dir"
     args += ["--graphs-dir", graph_dir]
 
-    _run_p4c_with_cc(
+    _run_shell_cmd_with_p4c(
         ctx,
-        p4c = p4c,
         command = """
             # Create the output directory
             mkdir "{graph_dir}"
