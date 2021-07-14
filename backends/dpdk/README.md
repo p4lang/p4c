@@ -23,9 +23,8 @@ generate the 'spec' file:
 p4c-dpdk vxlan.p4 -o vxlan.spec
 ```
 
-To load the 'spec' file in dpdk:
-
-TBD
+To load the 'spec' file in dpdk follow the instructions in the
+[Pipeline Application User Guide](https://doc.dpdk.org/guides/sample_app_ug/pipeline.html).
 
 
 ## Known issues
