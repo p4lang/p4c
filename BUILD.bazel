@@ -315,3 +315,57 @@ cc_library(
         ":lib",
     ],
 )
+
+# These rules build the graphs backend
+cc_binary(
+    name = "p4c_graphs",
+    srcs = [
+        "backends/graphs/p4c-graphs.cpp",
+    ],
+    data = [":p4include"],
+    linkopts = [
+        "-lgmp",
+        "-lgmpxx",
+    ],
+    deps = [
+        ":config_h",
+        ":ir_frontend_midend_control_plane",
+        ":lib",
+        ":p4c_backend_graphs_lib",
+    ],
+)
+
+genrule(
+    name = "p4c_graphs_version",
+    srcs = ["backends/graphs/version.h.cmake"],
+    outs = ["backends/graphs/version.h"],
+    cmd = "sed 's|@P4C_VERSION@|0.0.0.0|g' $(SRCS) > $(OUTS)",
+    visibility = ["//visibility:private"],
+)
+
+cc_library(
+    name = "p4c_backend_graphs_lib",
+    srcs = [
+        "backends/graphs/controls.cpp",
+        "backends/graphs/graphs.cpp",
+        "backends/graphs/p4c-graphs.cpp",
+        "backends/graphs/parsers.cpp",
+    ],
+    hdrs = [
+        "backends/graphs/controls.h",
+        "backends/graphs/graphs.h",
+        "backends/graphs/parsers.h",
+        "backends/graphs/version.h",
+    ],
+    defines = [
+        # Disable ADL for boost, otherwise the method resolution for
+        # `ordered_map` and `graph` clash on method `boost::get`
+        "BOOST_NO_ARGUMENT_DEPENDENT_LOOKUP",
+    ],
+    deps = [
+        ":config_h",
+        ":ir_frontend_midend_control_plane",
+        ":lib",
+        "@boost//:graph",
+    ],
+)

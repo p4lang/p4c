@@ -1,4 +1,4 @@
-load("@com_github_p4lang_p4c//:bazel/p4_library.bzl", "p4_library")
+load("@com_github_p4lang_p4c//:bazel/p4_library.bzl", "p4_library", "p4_graphs")
 
 p4_library(
   name = "program",
@@ -17,4 +17,11 @@ p4_library(
   target_out = "program.bmv2.json",     # Optional.
   arch = "v1model",                     # Optional (default: "v1model").
   visibility = ["//:__subpackages__"],  # Optional.
+)
+
+p4_graphs(
+  name = "program_graphs",
+  src = "program.p4",
+  deps = ["empty.p4"],
+  out = "program_graphs.dot",
 )
