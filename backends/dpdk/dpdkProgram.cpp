@@ -165,7 +165,8 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
 
     return new IR::DpdkAsmProgram(
         headerType, structType, dpdkExternDecls, ingress_converter->getActions(),
-        ingress_converter->getTables(), statements, collector->get_globals());
+        ingress_converter->getTables(), ingress_converter->getSelectors(),
+        statements, collector->get_globals());
 }
 
 const IR::Node *ConvertToDpdkProgram::preorder(IR::P4Program *prog) {
@@ -438,10 +439,71 @@ bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
     return false;
 }
 
-bool ConvertToDpdkControl::preorder(const IR::P4Table *a) {
-    auto t = new IR::DpdkTable(a->name.toString(), a->getKey(), a->getActionList(),
-                               a->getDefaultAction(), a->properties);
-    tables.push_back(t);
+boost::optional<cstring> ConvertToDpdkControl::getIdFromProperty(const IR::P4Table* table,
+                                                                 cstring propertyName) {
+    auto property = table->properties->getProperty(propertyName);
+    if (property == nullptr) return boost::none;
+    if (!property->value->is<IR::ExpressionValue>()) {
+        ::error(ErrorType::ERR_EXPECTED,
+                "Expected %1% property value for table %2% to be an expression: %3%",
+                propertyName, table->controlPlaneName(), property);
+        return boost::none;
+    }
+    auto expr = property->value->to<IR::ExpressionValue>()->expression;
+    if (!expr->is<IR::Member>()) {
+        ::error(ErrorType::ERR_EXPECTED,
+                "Exprected %1% property value for table %2% to be a member",
+                propertyName, table->controlPlaneName());
+        return boost::none;
+    }
+
+    return expr->to<IR::Member>()->toString();
+}
+
+boost::optional<int> ConvertToDpdkControl::getNumberFromProperty(const IR::P4Table* table,
+                                                                 cstring propertyName) {
+    auto property = table->properties->getProperty(propertyName);
+    if (property == nullptr) return boost::none;
+    if (!property->value->is<IR::ExpressionValue>()) {
+        ::error(ErrorType::ERR_EXPECTED,
+                "Expected %1% property value for table %2% to be an expression: %3%",
+                propertyName, table->controlPlaneName(), property);
+        return boost::none;
+    }
+    auto expr = property->value->to<IR::ExpressionValue>()->expression;
+    if (!expr->is<IR::Constant>()) {
+        ::error(ErrorType::ERR_EXPECTED,
+                "Exprected %1% property value for table %2% to be a constant",
+                propertyName, table->controlPlaneName());
+        return boost::none;
+    }
+
+    return expr->to<IR::Constant>()->asInt();
+}
+
+
+bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
+    if (t->properties->getProperty("selector") != nullptr) {
+        auto group_id = getIdFromProperty(t, "group_id");
+        auto member_id = getIdFromProperty(t, "member_id");
+        auto selector_key = t->properties->getProperty("selector");
+        auto n_groups_max = getNumberFromProperty(t, "n_groups_max");
+        auto n_members_per_group_max = getNumberFromProperty(t, "n_members_per_group_max");
+
+        if (group_id == boost::none || member_id == boost::none ||
+            n_groups_max == boost::none || n_members_per_group_max == boost::none)
+            return false;
+
+        auto selector = new IR::DpdkSelector(t->name,
+            *group_id, *member_id, selector_key->value->to<IR::Key>(),
+            *n_groups_max, *n_members_per_group_max);
+
+        selectors.push_back(selector);
+    } else {
+        auto table = new IR::DpdkTable(t->name.toString(), t->getKey(), t->getActionList(),
+                t->getDefaultAction(), t->properties);
+        tables.push_back(table);
+    }
     return false;
 }
 
