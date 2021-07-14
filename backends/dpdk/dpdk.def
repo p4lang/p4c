@@ -77,7 +77,6 @@ class DpdkListStatement : DpdkAsmStatement, IDPDKNode {
     optional cstring name;
     optional inline IndexedVector<DpdkAsmStatement> statements;
     std::ostream& toSpec(std::ostream& out) const override;
-#nodbprint
 }
 
 class DpdkApplyStatement : DpdkAsmStatement, IDPDKNode {
@@ -92,7 +91,6 @@ class DpdkEmitStatement : DpdkAsmStatement, IDPDKNode {
 class DpdkExtractStatement : DpdkAsmStatement, IDPDKNode {
     Expression header;
     std::ostream& toSpec(std::ostream& out) const override;
-#nodbprint
 }
 
 abstract DpdkJmpStatement : DpdkAsmStatement {
@@ -155,10 +153,9 @@ abstract DpdkJmpCondStatement : DpdkJmpStatement {
 }
 
 class DpdkJmpEqualStatement: DpdkJmpCondStatement, IDPDKNode {
-#nodbprint
-#noconstructor
     DpdkJmpEqualStatement(cstring label, Expression src1, Expression src2) :
         DpdkJmpCondStatement("jmpeq", label, src1, src2) { }
+#noconstructor
 }
 
 class DpdkJmpNotEqualStatement: DpdkJmpCondStatement, IDPDKNode {
@@ -222,10 +219,9 @@ abstract DpdkUnaryStatement : DpdkAssignmentStatement {
 }
 
 class DpdkMovStatement : DpdkUnaryStatement {
-#nodbprint
-#noconstructor
     DpdkMovStatement(Expression dst, Expression src) :
         DpdkUnaryStatement("mov", dst, src) { }
+#noconstructor
 }
 
 class DpdkNegStatement: DpdkUnaryStatement {

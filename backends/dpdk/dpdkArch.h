@@ -603,6 +603,14 @@ class SplitActionSelectorTable : public Transform {
     const IR::Node* postorder(IR::MethodCallStatement* ) override;
 };
 
+class ConvertActionSelector : public PassManager {
+ public:
+    ConvertActionSelector(P4::ReferenceMap *refMap, P4::TypeMap* typeMap) {
+        passes.emplace_back(new P4::TypeChecking(refMap, typeMap));
+        passes.emplace_back(new SplitActionSelectorTable(refMap, typeMap));
+    }
+};
+
 class RewriteToDpdkArch : public PassManager {
   public:
     CollectMetadataHeaderInfo *info;
@@ -616,9 +624,7 @@ class RewriteToDpdkArch : public PassManager {
         auto *evaluator = new P4::EvaluatorPass(refMap, typeMap);
         auto *parsePsa = new ParsePsa();
         info = new CollectMetadataHeaderInfo(&parsePsa->toBlockInfo);
-        passes.push_back(new SplitActionSelectorTable(refMap, typeMap));
-        passes.push_back(new P4::ClearTypeMap(typeMap));
-        passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
+        passes.push_back(new ConvertActionSelector(refMap, typeMap));
         passes.push_back(evaluator);
         passes.push_back(new VisitFunctor([evaluator, parsePsa]() {
             auto toplevel = evaluator->getToplevelBlock();
