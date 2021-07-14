@@ -976,7 +976,6 @@ getExternInstanceFromProperty(const IR::P4Table* table,
 }
 
 const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
-
     bool isConstructedInPlace = false;
     auto instance = Helpers::getExternInstanceFromProperty(tbl, "psa_implementation",
                                                            refMap, typeMap, &isConstructedInPlace);
@@ -984,6 +983,21 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
         return tbl;
     if (instance->type->name != "ActionSelector")
         return tbl;
+
+    if (!instance->arguments->at(1)->expression->is<IR::Constant>())
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "The 'size' argument of ActionSelector %1% must be a constant", *instance->name);
+    int n_groups_max = instance->arguments->at(1)->expression->to<IR::Constant>()->asInt();
+    if (!instance->arguments->at(2)->expression->is<IR::Constant>())
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "The 'outputWidth' argument of ActionSelector %1% must be a constant",
+                *instance->name);
+    auto outputWidth = instance->arguments->at(2)->expression->to<IR::Constant>()->asInt();
+    if (outputWidth >= 32)
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "The 'outputWidth' argument of ActionSelector %1% must be smaller than 32",
+                *instance->name);
+    int n_members_per_group_max = 1 << outputWidth;
 
     auto decls = new IR::IndexedVector<IR::Declaration>();
 
@@ -1044,10 +1058,11 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
 		new IR::ExpressionValue(new IR::PathExpression(group_id)), false));
 	selector_properties.push_back(new IR::Property("member_id",
 		new IR::ExpressionValue(new IR::PathExpression(memberKeyName)), false));
+
 	selector_properties.push_back(new IR::Property("n_groups_max",
-		new IR::ExpressionValue(new IR::Constant(1)), false));
+		new IR::ExpressionValue(new IR::Constant(n_groups_max)), false));
 	selector_properties.push_back(new IR::Property("n_members_per_group_max",
-		new IR::ExpressionValue(new IR::Constant(8)), false));
+		new IR::ExpressionValue(new IR::Constant(n_members_per_group_max)), false));
 	selector_properties.push_back(new IR::Property("actions", new IR::ActionList({}), false));
     cstring selectorTableName = refMap->newName(tbl->name + "_group_table");
     auto group_table = new IR::P4Table(selectorTableName, new IR::TableProperties(selector_properties));
