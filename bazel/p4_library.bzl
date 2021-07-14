@@ -22,9 +22,7 @@ def _extract_common_p4c_args(ctx):
 
 def _extract_p4c_inputs(ctx):
     """Extract input p4 files to give to p4c from the build rule context."""
-    p4file = ctx.file.src
-    p4deps = ctx.files._p4include + ctx.files.deps
-    return p4deps + [p4file]
+    return ctx.files._p4include + ctx.files.deps + [ctx.file.src]
 
 def _run_shell_cmd_with_p4c(ctx, command, **run_shell_kwargs):
     """Run given shell command using `run_shell` action after setting up
