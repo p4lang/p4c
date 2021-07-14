@@ -1126,7 +1126,7 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::MethodCallStatement *sta
                 new IR::Member(new IR::PathExpression(memberTable),
                                 IR::ID(IR::IApply::applyMethodName)))));
         }
-        return decls;
+        return new IR::BlockStatement(*decls);
     }
     return statement;
 }
