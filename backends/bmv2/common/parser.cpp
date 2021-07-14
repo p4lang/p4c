@@ -48,6 +48,61 @@ cstring ParserConverter::jsonAssignment(const IR::Type* type, bool inParser) {
 Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat) {
     auto result = new Util::JsonObject();
     auto params = mkArrayField(result, "parameters");
+    auto isR=false;
+    IR::MethodCallExpression *mce2 = nullptr;
+    if (stat->is<IR::AssignmentStatement>()) {
+        auto assign = stat->to<IR::AssignmentStatement>();
+        if (assign->right->is<IR::MethodCallExpression>()) {
+            auto mce = assign->right->to<IR::MethodCallExpression>();
+            auto minst = P4::MethodInstance::resolve(mce, ctxt->refMap, ctxt->typeMap);
+            if (minst->is<P4::ExternMethod>()) {
+                auto extmeth = minst->to<P4::ExternMethod>();
+                if ((extmeth->method->name.name == "get"
+                    || extmeth->method->name.name == "get_state")
+                    && extmeth->originalExternType->name == "InternetChecksum") {
+                    const IR::Expression *l;
+                    l = assign->left;
+                    isR=true;
+                    auto dest = new IR::Argument(l);
+                    auto args = new IR::Vector<IR::Argument>();
+                    args->push_back(dest);  // dest
+                    mce2 = new IR::MethodCallExpression(mce->method, mce->typeArguments);
+                    mce2->arguments = args;
+                    stat = new IR::MethodCallStatement(mce);
+                }
+            }
+        } else if (assign->right->is<IR::Equ>()
+                && (assign->right->to<IR::Equ>()->right->is<IR::MethodCallExpression>()
+                    || assign->right->to<IR::Equ>()->left->is<IR::MethodCallExpression>())) {
+            auto equ=assign->right->to<IR::Equ>();
+            const IR::MethodCallExpression* mce=nullptr;
+            const IR::Expression *l,*r;
+            if (assign->right->to<IR::Equ>()->right->is<IR::MethodCallExpression>()) {
+                mce = equ->right->to<IR::MethodCallExpression>();
+                r=equ->left;
+            } else {
+                mce = equ->left->to<IR::MethodCallExpression>();
+                r=equ->right;
+            }
+            auto minst = P4::MethodInstance::resolve(mce, ctxt->refMap, ctxt->typeMap);
+            if (minst->is<P4::ExternMethod>()) {
+                auto extmeth = minst->to<P4::ExternMethod>();
+                if (extmeth->method->name.name == "get"
+                    && extmeth->originalExternType->name == "InternetChecksum") {
+                    l=assign->left;
+                    isR=true;
+                    auto dest = new IR::Argument(l);
+                    auto equOp=new IR::Argument(r);
+                    auto args = new IR::Vector<IR::Argument>();
+                    args->push_back(dest);  // dest
+                    args->push_back(equOp);
+                    mce2 = new IR::MethodCallExpression(mce->method, mce->typeArguments);
+                    mce2->arguments = args;
+                    stat = new IR::MethodCallStatement(mce);
+                }
+            }
+        }
+    }
     if (stat->is<IR::AssignmentStatement>()) {
         auto assign = stat->to<IR::AssignmentStatement>();
         auto type = ctxt->typeMap->getType(assign->left, true);
@@ -169,8 +224,26 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                 result->emplace("op", "advance");
                 params->append(jexpr);
                 return result;
+            } else if ((extmeth->originalExternType->name == "InternetChecksum"
+                            && (extmeth->method->name.name == "clear"
+                            || extmeth->method->name.name == "add"
+                            || extmeth->method->name.name == "subtract"
+                            || extmeth->method->name.name == "get_state"
+                            || extmeth->method->name.name == "set_state"
+                            || extmeth->method->name.name == "get"))) {
+                Util::IJson* json;
+                if (isR) {
+                    json = ExternConverter::cvtExternObject(ctxt, extmeth, mce2, stat, true);
+                } else {
+                    json = ExternConverter::cvtExternObject(ctxt, extmeth, mce, stat, true);
+                }
+                if (json) {
+                    result->emplace("op","primitive");
+                    params->append(json);
+                }
+                return result;
             }
-        } else if (minst->is<P4::ExternFunction>()) {
+            } else if (minst->is<P4::ExternFunction>()) {
             auto extfn = minst->to<P4::ExternFunction>();
             auto extFuncName = extfn->method->name.name;
             if (extFuncName == IR::ParserState::verify) {
@@ -521,6 +594,27 @@ bool ParserConverter::preorder(const IR::P4Parser* parser) {
             auto transition = createDefaultTransition();
             ctxt->json->add_parser_transition(state_id, transition);
         }
+    }
+    for (auto p : parser->parserLocals) {
+        if (p->is<IR::Declaration_Constant>() ||
+        p->is<IR::Declaration_Variable>() ||
+        p->is<IR::P4Action>() ||
+        p->is<IR::P4Table>())
+        continue;
+        if (p->is<IR::Declaration_Instance>()) {
+            auto bl = ctxt->structure->resourceMap.at(p);
+            CHECK_NULL(bl);
+            if (bl->is<IR::ControlBlock>() || bl->is<IR::ParserBlock>())
+                // Since this block has not been inlined, it is probably unused
+                // So we don't do anything.
+                continue;
+            if (bl->is<IR::ExternBlock>()) {
+                auto eb = bl->to<IR::ExternBlock>();
+                ExternConverter::cvtExternInstance(ctxt, p, eb, true);
+                continue;
+            }
+        }
+        // P4C_UNIMPLEMENTED("%1%: not yet handled", c);
     }
     return false;
 }
