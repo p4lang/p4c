@@ -66,6 +66,7 @@ class DoLocalCopyPropagation : public ControlFlowVisitor, Transform, P4WriteCont
     struct FuncInfo {
         std::set<cstring>       reads, writes;
         int                     apply_count = 0;
+        bool                    is_first_write_insert = false;
     };
     std::map<cstring, VarInfo>          available;
     std::map<cstring, TableInfo>        &tables;
