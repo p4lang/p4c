@@ -1001,16 +1001,16 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
 
     auto decls = new IR::IndexedVector<IR::Declaration>();
 
-	cstring group_id = refMap->newName(tbl->name + "_group_id");
+    cstring group_id = refMap->newName(tbl->name + "_group_id");
     cstring memberKeyName = refMap->newName(tbl->name + "_member_id");
 
-	auto group_id_decl = new IR::Declaration_Variable(group_id, IR::Type_Bits::get(32));
-	auto member_id_decl = new IR::Declaration_Variable(memberKeyName, IR::Type_Bits::get(32));
-	decls->push_back(group_id_decl);
-	decls->push_back(member_id_decl);
+    auto group_id_decl = new IR::Declaration_Variable(group_id, IR::Type_Bits::get(32));
+    auto member_id_decl = new IR::Declaration_Variable(memberKeyName, IR::Type_Bits::get(32));
+    decls->push_back(group_id_decl);
+    decls->push_back(member_id_decl);
 
-	auto hidden = new IR::Annotations();
-	hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
+    auto hidden = new IR::Annotations();
+    hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
 
     // base table matches on non-selector key and set group_id
     IR::Vector<IR::KeyElement> match_keys;
@@ -1024,25 +1024,25 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     cstring actionName = refMap->newName(tbl->name + "_set_group_id");
     auto actionCall = new IR::MethodCallExpression(new IR::PathExpression(actionName));
     actionsList.push_back(new IR::ActionListElement(actionCall));
-	actionsList.push_back(new IR::ActionListElement(tbl->getDefaultAction()));
+    actionsList.push_back(new IR::ActionListElement(tbl->getDefaultAction()));
     IR::IndexedVector<IR::Property> properties;
     properties.push_back(new IR::Property("actions", new IR::ActionList(actionsList), false));
     properties.push_back(new IR::Property("key", new IR::Key(match_keys), false));
-	properties.push_back(new IR::Property("default_action",
-						 new IR::ExpressionValue(tbl->getDefaultAction()), false));
+    properties.push_back(new IR::Property("default_action",
+                         new IR::ExpressionValue(tbl->getDefaultAction()), false));
     if (tbl->getSizeProperty()) {
         properties.push_back(new IR::Property("size",
                              new IR::ExpressionValue(tbl->getSizeProperty()), false)); }
     auto base_table = new IR::P4Table(tbl->name, new IR::TableProperties(properties));
 
-	// create action that sets group_id
-	auto set_group_id = new IR::AssignmentStatement(
-			new IR::PathExpression(group_id), new IR::PathExpression("group_id"));
-	auto parameter = new IR::Parameter("group_id", IR::Direction::None, IR::Type_Bits::get(32));
+    // create action that sets group_id
+    auto set_group_id = new IR::AssignmentStatement(
+            new IR::PathExpression(group_id), new IR::PathExpression("group_id"));
+    auto parameter = new IR::Parameter("group_id", IR::Direction::None, IR::Type_Bits::get(32));
     auto action = new IR::P4Action(
             actionName, hidden, new IR::ParameterList({ parameter }),
             new IR::BlockStatement({ set_group_id }));
-	decls->push_back(action);
+    decls->push_back(action);
     decls->push_back(base_table);
 
     // group table match on group_id
@@ -1054,18 +1054,19 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     }
     IR::IndexedVector<IR::Property> selector_properties;
     selector_properties.push_back(new IR::Property("selector", new IR::Key(selector_keys), false));
-	selector_properties.push_back(new IR::Property("group_id",
-		new IR::ExpressionValue(new IR::PathExpression(group_id)), false));
-	selector_properties.push_back(new IR::Property("member_id",
-		new IR::ExpressionValue(new IR::PathExpression(memberKeyName)), false));
+    selector_properties.push_back(new IR::Property("group_id",
+        new IR::ExpressionValue(new IR::PathExpression(group_id)), false));
+    selector_properties.push_back(new IR::Property("member_id",
+        new IR::ExpressionValue(new IR::PathExpression(memberKeyName)), false));
 
-	selector_properties.push_back(new IR::Property("n_groups_max",
-		new IR::ExpressionValue(new IR::Constant(n_groups_max)), false));
-	selector_properties.push_back(new IR::Property("n_members_per_group_max",
-		new IR::ExpressionValue(new IR::Constant(n_members_per_group_max)), false));
-	selector_properties.push_back(new IR::Property("actions", new IR::ActionList({}), false));
+    selector_properties.push_back(new IR::Property("n_groups_max",
+        new IR::ExpressionValue(new IR::Constant(n_groups_max)), false));
+    selector_properties.push_back(new IR::Property("n_members_per_group_max",
+        new IR::ExpressionValue(new IR::Constant(n_members_per_group_max)), false));
+    selector_properties.push_back(new IR::Property("actions", new IR::ActionList({}), false));
     cstring selectorTableName = refMap->newName(tbl->name + "_group_table");
-    auto group_table = new IR::P4Table(selectorTableName, new IR::TableProperties(selector_properties));
+    auto group_table = new IR::P4Table(selectorTableName,
+                                       new IR::TableProperties(selector_properties));
     decls->push_back(group_table);
 
     // member table match on member_id
@@ -1079,53 +1080,55 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     IR::IndexedVector<IR::ActionListElement> memberActionList;
     for (auto action : tbl->getActionList()->actionList)
         memberActionList.push_back(action);
-    member_properties.push_back(new IR::Property("actions", new IR::ActionList(memberActionList), false));
+    member_properties.push_back(new IR::Property("actions",
+                                                 new IR::ActionList(memberActionList), false));
     if (tbl->getSizeProperty()) {
         member_properties.push_back(new IR::Property("size",
                                     new IR::ExpressionValue(tbl->getSizeProperty()), false)); }
-	member_properties.push_back(new IR::Property("default_action",
+    member_properties.push_back(new IR::Property("default_action",
                                 new IR::ExpressionValue(tbl->getDefaultAction()), false));
 
     cstring memberTableName = refMap->newName(tbl->name + "_member_table");
-    auto member_table = new IR::P4Table(memberTableName, new IR::TableProperties(member_properties));
+    auto member_table = new IR::P4Table(memberTableName,
+                                        new IR::TableProperties(member_properties));
     decls->push_back(member_table);
 
     action_selector_tables.insert(tbl->name);
-	group_tables.emplace(tbl->name, selectorTableName);
-	member_tables.emplace(tbl->name, memberTableName);
+    group_tables.emplace(tbl->name, selectorTableName);
+    member_tables.emplace(tbl->name, memberTableName);
 
     return decls;
 }
 
 const IR::Node* SplitActionSelectorTable::postorder(IR::MethodCallStatement *statement) {
-	auto methodCall = statement->methodCall;
-	auto mi = P4::MethodInstance::resolve(methodCall, refMap, typeMap);
-	if (auto apply = mi->to<P4::ApplyMethod>()) {
+    auto methodCall = statement->methodCall;
+    auto mi = P4::MethodInstance::resolve(methodCall, refMap, typeMap);
+    if (auto apply = mi->to<P4::ApplyMethod>()) {
         if (!apply->isTableApply())
             return statement;
         auto table = apply->object->to<IR::P4Table>();
         if (action_selector_tables.count(table->name) == 0)
             return statement;
-	    auto decls = new IR::IndexedVector<IR::StatOrDecl>();
-		decls->push_back(statement);
-		auto tableName = apply->object->getName().name;
-		if (group_tables.find(tableName) != group_tables.end()) {
-			auto selectorTable = group_tables.at(tableName);
-			decls->push_back(new IR::MethodCallStatement(
-				new IR::MethodCallExpression(
-				new IR::Member(new IR::PathExpression(selectorTable),
-							   IR::ID(IR::IApply::applyMethodName)))));
-		}
-		if (member_tables.find(tableName) != member_tables.end()) {
-			auto memberTable = member_tables.at(tableName);
-			decls->push_back(new IR::MethodCallStatement(
-				new IR::MethodCallExpression(
-				new IR::Member(new IR::PathExpression(memberTable),
-								IR::ID(IR::IApply::applyMethodName)))));
-		}
-		return decls;
-	}
-	return statement;
+        auto decls = new IR::IndexedVector<IR::StatOrDecl>();
+        decls->push_back(statement);
+        auto tableName = apply->object->getName().name;
+        if (group_tables.find(tableName) != group_tables.end()) {
+            auto selectorTable = group_tables.at(tableName);
+            decls->push_back(new IR::MethodCallStatement(
+                new IR::MethodCallExpression(
+                new IR::Member(new IR::PathExpression(selectorTable),
+                               IR::ID(IR::IApply::applyMethodName)))));
+        }
+        if (member_tables.find(tableName) != member_tables.end()) {
+            auto memberTable = member_tables.at(tableName);
+            decls->push_back(new IR::MethodCallStatement(
+                new IR::MethodCallExpression(
+                new IR::Member(new IR::PathExpression(memberTable),
+                                IR::ID(IR::IApply::applyMethodName)))));
+        }
+        return decls;
+    }
+    return statement;
 }
 
 }  // namespace DPDK

@@ -126,8 +126,8 @@ selector tbl_0_group_table {
 		m.local_metadata_data2
 	}
 	member_id m.Ingress_tbl_0_member_id
-	n_groups_max 1
-	n_members_per_group_max 8
+	n_groups_max 1024
+	n_members_per_group_max 65536
 }
 
 apply {

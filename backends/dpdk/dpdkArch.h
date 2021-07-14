@@ -593,12 +593,12 @@ class SplitActionSelectorTable : public Transform {
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
     std::set<cstring> action_selector_tables;
-	std::map<cstring, cstring> group_tables;
-	std::map<cstring, cstring> member_tables;
+    std::map<cstring, cstring> group_tables;
+    std::map<cstring, cstring> member_tables;
 
   public:
     SplitActionSelectorTable(P4::ReferenceMap *refMap, P4::TypeMap* typeMap) :
-		refMap(refMap), typeMap(typeMap) {}
+        refMap(refMap), typeMap(typeMap) {}
     const IR::Node* postorder(IR::P4Table* tbl) override;
     const IR::Node* postorder(IR::MethodCallStatement* ) override;
 };
