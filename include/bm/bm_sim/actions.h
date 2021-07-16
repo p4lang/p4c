@@ -181,7 +181,7 @@ struct ActionParam {
         EXPRESSION_HEADER_UNION, EXPRESSION_HEADER_UNION_STACK,
         EXTERN_INSTANCE,
         STRING,
-        HEADER_UNION, HEADER_UNION_STACK, PARAMS_VECTOR, PARAMS_FIELDS} tag;
+        HEADER_UNION, HEADER_UNION_STACK, PARAMS_VECTOR, FIELD_LIST} tag;
 
   union {
     unsigned int const_offset;
@@ -217,6 +217,11 @@ struct ActionParam {
       unsigned int start;
       unsigned int end;
     } params_vector;
+
+    struct {
+      unsigned int start;
+      unsigned int end;
+    } field_list;
 
     // special case when trying to access a field in the last header of a stack
     struct {
@@ -265,11 +270,13 @@ struct ActionEngineState {
   const ActionData &action_data;
   const std::vector<Data> &const_values;
   const std::vector<ActionParam> &parameters_vector;
+  const std::vector<ActionParam> &field_list;
 
   ActionEngineState(Packet *pkt,
                     const ActionData &action_data,
                     const std::vector<Data> &const_values,
-                    const std::vector<ActionParam> &parameters_vector);
+                    const std::vector<ActionParam> &parameters_vector,
+                    const std::vector<ActionParam> &field_list);
 };
 
 // template specializations for ActionParam "casting"
@@ -548,15 +555,15 @@ ActionParam::to<const std::vector<Data>>(ActionEngineState *state) const {
 template <> inline
 const std::vector<Field>
 ActionParam::to<const std::vector<Field>>(ActionEngineState *state) const {
-  _BM_ASSERT(tag == ActionParam::PARAMS_FIELDS && "not a params vector");
+  _BM_ASSERT(tag == ActionParam::FIELD_LIST && "not a field list");
   std::vector<Field> vec;
 
-  for (auto i = params_vector.start ; i < params_vector.end ; i++) {
+  for (auto i = field_list.start ; i < field_list.end ; i++) {
     // re-use previously-defined cast method; note that we use to<const Field &>
     // and not to<const Field>, as it does not exists
-    // if something in the parameters_vector cannot be cast to "const Field &",
+    // if something in the field list cannot be cast to "const Field &",
     // the code will assert
-    vec.push_back(state->parameters_vector[i].to<const Field &>(state));
+    vec.push_back(state->field_list[i].to<const Field &>(state));
   }
 
   return vec;
@@ -768,8 +775,8 @@ class ActionFn :  public NamedP4Object {
   // signal the end.
   void parameter_start_vector();
   void parameter_end_vector();
-  void start_field_list();
-  void end_field_list();
+  void parameter_start_field_list();
+  void parameter_end_field_list();
 
   void push_back_primitive(ActionPrimitive_ *primitive,
                            std::unique_ptr<SourceInfo> source_info = nullptr);
@@ -784,6 +791,7 @@ class ActionFn :  public NamedP4Object {
   std::vector<ActionPrimitiveCall> primitives{};
   ParameterList params{};
   ParameterList sub_params{};
+  ParameterList field_params{};
   RegisterSync register_sync{};
   std::vector<Data> const_values{};
   // should I store the objects in the vector, instead of pointers?
