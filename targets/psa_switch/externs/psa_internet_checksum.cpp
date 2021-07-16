@@ -77,7 +77,7 @@ PSA_InternetChecksum::add(const std::vector<Field> fields) {
     bm::Data field_shl;
 
     // Concatenate fields in one single data
-    for (int i = fields.size() - 1 ; i >= 0 ; i--) {
+    for (int i = fields.size() - 1; i >= 0; i--) {
         field_shl.shift_left(fields.at(i), n_bits);
         input.add(input, field_shl);
         n_bits += fields.at(i).get_nbits();
@@ -100,7 +100,7 @@ PSA_InternetChecksum::subtract(const std::vector<Field> fields) {
     bm::Data field_shl;
 
     // Concatenate fields in one single data
-    for (int i = fields.size() - 1 ; i >= 0 ; i--) {
+    for (int i = fields.size() - 1; i >= 0; i--) {
         field_shl.shift_left(fields.at(i), n_bits);
         input.add(input, field_shl);
         n_bits += fields.at(i).get_nbits();
