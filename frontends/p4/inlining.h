@@ -100,12 +100,67 @@ struct PerInstanceSubstitutions {
 struct InlineSummary : public IHasDbPrint {
     /// Various substitutions that must be applied for each instance
     struct PerCaller {  // information for each caller
+        /// Pair identifying all the invocations of the subparser which can use the same
+        /// inlined states because the path after returning from the subparser is identical
+        /// for all such invocations.
+        ///
+        /// Invocations are characterized by:
+        /// - Pointer to the apply method call statement (comparing apply method call statement
+        ///   ensures that the same instance is invoked and same arguments are passed to the call)
+        /// - Pointer to the transition statement expression which has to be the name of
+        ///   the state (select expression is not allowed)
+        ///
+        /// Additional conditions which need to be met:
+        /// - there is no other statement between the invocation of the subparser and
+        ///   the transition statement
+        /// - transition statement has to be the name of the state (select expression is
+        ///   not allowed)
+        typedef std::pair<const IR::MethodCallStatement*,
+                           const IR::PathExpression*> InlinedInvocationInfo;
+
+        /// Hash for InlinedInvocationInfo used as a key for unordered_map
+        struct key_hash {
+            std::size_t operator() (const InlinedInvocationInfo &k) const {
+                std::ostringstream oss;
+                std::get<0>(k)->dbprint(oss);
+                std::get<1>(k)->dbprint(oss);
+                return std::hash<std::string>{}(oss.str());
+            }
+        };
+
+        /// Binary equality predicate for InlinedInvocationInfo used as a key for unordered_map
+        struct key_equal {
+            bool operator() (const InlinedInvocationInfo &v0,
+                    const InlinedInvocationInfo &v1) const {
+                return std::get<0>(v0)->equiv(*std::get<0>(v1)) &&
+                        std::get<1>(v0)->equiv(*std::get<1>(v1));
+            }
+        };
+
         /// For each instance (key) the container that is intantiated.
         std::map<const IR::Declaration_Instance*, const IR::IContainer*> declToCallee;
         /// For each instance (key) we must apply a bunch of substitutions
         std::map<const IR::Declaration_Instance*, PerInstanceSubstitutions*> substitutions;
         /// For each invocation (key) call the instance that is invoked.
         std::map<const IR::MethodCallStatement*, const IR::Declaration_Instance*> callToInstance;
+        /// For each distinct invocation of the subparser identified by InlinedInvocationInfo
+        /// we store the ID of the next caller parser state which is a new state replacing
+        /// the start state of the callee parser (subparser).
+        /// Transition to this state is used in case there is another subparser invocation
+        /// which has the equivalent InlinedInvocationInfo.
+        ///
+        /// Subparser invocations are considered to be equivalent when following conditions
+        /// are met (which means that the path in the parse graph is the same after returning
+        /// from subparser call):
+        /// - apply method call statements of the invocations are equivalent (which means that
+        ///   the same subparser instance is invoked and the same arguments are passed to
+        ///   the apply method)
+        /// - there is no statement between apply method call statement and transition statement
+        /// - transition statement is a name of the state (not a select expression)
+        /// - name of the state in transition statement is the same
+        std::unordered_map<const InlinedInvocationInfo, const IR::ID, key_hash, key_equal>
+                invocationToState;
+
         /// @returns nullptr if there isn't exactly one caller,
         /// otherwise the single caller of this instance.
         const IR::MethodCallStatement* uniqueCaller(
