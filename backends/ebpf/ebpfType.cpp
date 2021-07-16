@@ -64,7 +64,7 @@ EBPFBoolType::declare(CodeBuilder* builder, cstring id, bool asPointer) {
 
 void
 EBPFBoolType::declareInit(CodeBuilder* builder, cstring id, bool asPointer) {
-  declare(builder, id, asPointer);
+    declare(builder, id, asPointer);
 }
 
 /////////////////////////////////////////////////////////////
