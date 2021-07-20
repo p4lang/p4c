@@ -67,15 +67,6 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
-  "Mismatched header/metadata struct for"
-  testdata/p4_16_samples/psa-action-selector1.p4
-  testdata/p4_16_samples/psa-action-selector2.p4
-  testdata/p4_16_samples/psa-action-selector3.p4
-  testdata/p4_16_samples/psa-dpdk-lpm-match-err4.p4
-  testdata/p4_16_samples/psa-dpdk-lpm-match-err5.p4
-  )
-
-p4c_add_xfail_reason("dpdk"
   "Only one LPM match field is permitted per table"
   testdata/p4_16_samples/psa-dpdk-lpm-match-err1.p4
   )

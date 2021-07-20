@@ -442,7 +442,7 @@ class ConvertInternetChecksum : public PassManager {
     }
 };
 
-/* This pass collects PSA extern meter, counter and register declaration instances and 
+/* This pass collects PSA extern meter, counter and register declaration instances and
    push them to a vector for emitting to the .spec file later */
 class CollectExternDeclaration : public Inspector {
     P4::TypeMap *typeMap;
@@ -583,6 +583,24 @@ class ConvertLogicalExpression : public PassManager {
     }
 };
 
+// This pass transforms the Tables such that all the Match keys are part of the same
+// header/metadata struct. If the match keys are from different headers, this pass creates
+// mirror copies of the struct field into the metadata struct and updates the table to use
+// the metadata copy.
+class copyMatchKeysToSingleStruct : public Transform {
+  private:
+    P4::ReferenceMap *refMap;
+    DeclarationInjector injector;
+    cstring controlBlock = nullptr;
+    std::map<cstring, IR::IndexedVector<IR::StatOrDecl>> stmt_map;
+
+  public:
+    copyMatchKeysToSingleStruct(P4::ReferenceMap *refMap) : refMap(refMap) {}
+    const IR::Node *postorder(IR::P4Control *a) override;
+    const IR::Node *postorder(IR::P4Table *a) override;
+    bool isMatchkeyCopyNeeded(IR::P4Table *a);
+};
+
 class RewriteToDpdkArch : public PassManager {
   public:
     CollectMetadataHeaderInfo *info;
@@ -611,6 +629,8 @@ class RewriteToDpdkArch : public PassManager {
         passes.push_back(new ConvertToDpdkArch(&parsePsa->toBlockInfo));
         passes.push_back(new ReplaceMetadataHeaderName(refMap, info));
         passes.push_back(new InjectJumboStruct(info));
+        passes.push_back(new copyMatchKeysToSingleStruct(refMap));
+        passes.push_back(new P4::ResolveReferences(refMap));
         passes.push_back(new StatementUnroll(refMap, collector));
         passes.push_back(new IfStatementUnroll(refMap, collector));
         passes.push_back(new P4::ClearTypeMap(typeMap));

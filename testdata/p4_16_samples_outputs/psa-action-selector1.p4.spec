@@ -33,6 +33,7 @@ struct user_meta_t {
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
 	bit<16> local_metadata_data
+	bit<48> Ingress_tbl_ethernet_srcAddr
 }
 metadata instanceof user_meta_t
 
@@ -82,7 +83,7 @@ action a2 args instanceof a2_arg_t {
 
 table tbl {
 	key {
-		h.ethernet.srcAddr exact
+		m.Ingress_tbl_ethernet_srcAddr exact
 		m.local_metadata_data selector
 	}
 	actions {
@@ -100,6 +101,7 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
+	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet

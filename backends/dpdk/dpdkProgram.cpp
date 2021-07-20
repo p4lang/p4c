@@ -443,37 +443,17 @@ bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
      - Maximum allowed key size of header/metadata field is 64 bits.
      - If there is a key field with lpm match kind, the other match fields, if any,
        must all be exact match.
-     - All the match fields should be part of the same header/metadata struct.
 */
 void ConvertToDpdkControl::checkTableValid(const IR::P4Table *a) {
     auto keys = a->getKey();
     auto lpmCount = 0;
     auto nonExactCount = 0;
-    const IR::Member* firstKey = nullptr;
 
     if (!keys || keys->keyElements.size() == 0) {
         return;
     }
 
-    /* All table key fields are converted to Member expressions in earlier passes,
-       with header field prefixed with "h." and metadata fields prefixed with "m." */
-    if (!(firstKey = keys->keyElements.at(0)->expression->to<IR::Member>())) {
-        ::error(ErrorType::ERR_UNEXPECTED,"Expected a member expression as table key field, "
-                "found %1%", firstKey);
-        return;
-    }
-
     for (auto key : keys->keyElements) {
-        /* Key fields should be part of same header/metadata struct */
-        if (auto matchField = key->expression->to<IR::Member>()) {
-            if (matchField->expr->toString() != firstKey->expr->toString()) {
-                ::error(ErrorType::ERR_UNEXPECTED, "Mismatched header/metadata struct for key "
-                        "elements in table %1%. DPDK target enforces all table key fields to be "
-                        "part of same header/metadata struct",a->name.toString());
-                return;
-            }
-        }
-
         /* Maximum allowed key size of header/metadata field is 64 bits */
         if (key->expression->type->width_bits() > DPDK_MAX_HEADER_METADATA_FIELD_SIZE) {
             ::error(ErrorType::ERR_UNEXPECTED, "Key field wider than 64-bit is not permitted %1%",

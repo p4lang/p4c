@@ -930,4 +930,129 @@ const IR::Node *PrependPDotToActionArgs::preorder(IR::PathExpression *path) {
     return path;
 }
 
+/* This function updates the control block with newly created declarations and
+   statements for table match keys */
+const IR::Node *copyMatchKeysToSingleStruct::postorder(IR::P4Control *c) {
+    auto control = getOriginal();
+    injector.inject_control(control, c);
+    if (controlBlock && c->name == controlBlock) {
+        for (auto sm : stmt_map) {
+            if (sm.first == c->name) {
+                if (sm.second.empty())
+                    return c;
+                sm.second.append(c->body->components);
+                auto newBody = new IR::BlockStatement(c->body->annotations, sm.second);
+                c->body = newBody;
+                return c;
+            }
+        }
+    }
+    return c;
+}
+
+/* This function transforms the table so that all match keys come from the same struct.
+   Mirror copies of match fields are created in metadata struct and table is updated to
+   use the metadata fields.
+
+   control ingress(inout headers h, inout metadata m) {
+   {
+       ...
+       table tbl {
+           key = {
+               hdr.ethernet.srcAddr : lpm;
+               hdr.ipv4.totalLen : exact;
+           }
+           ...
+       }
+       apply {
+           tbl.apply();
+       }
+   }
+
+   gets translated to
+   control ingress(inout headers h, inout metadata m) {
+       bit<48> tbl_ethernet_srcAddr;  // These declarations are later copied to metadata struct
+       bit<16> tbl_ipv4_totalLen;     // in CollectLocalVariableToMetadata pass.
+       ...
+       table tbl {
+           key = {
+               tbl_ethernet_srcAddr: lpm;
+               tbl_ipv4_totalLen   : exact;
+           }
+	   ...
+       }
+       apply {
+           tbl_ethernet_srcAddr = h.ethernet.srcAddr;
+           tbl_ipv4_totalLen = h.ipv4.totalLen;
+           tbl_0.apply();
+       }
+  }
+*/
+const IR::Node *copyMatchKeysToSingleStruct::postorder(IR::P4Table *p) {
+    if (isMatchkeyCopyNeeded(p)) {
+        IR::IndexedVector<IR::Declaration> decl;
+        IR::IndexedVector<IR::StatOrDecl> stmt;
+        IR::PathExpression *keyPathExpr = nullptr;
+        IR::Vector<IR::KeyElement> newKeys;
+        auto keys = p->getKey();
+
+        for (auto key : keys->keyElements) {
+            /* Key fields should be part of same header/metadata struct */
+            if (auto matchField = key->expression) {
+                auto keyName = matchField->toString();
+                /* All header fields are prefixed with "h.",
+                   prefix the match field with table name */
+                if (keyName.startsWith("h.")) {
+                    keyName = keyName.replace('.','_');
+                    keyName = keyName.replace("h_",p->name.toString()+"_");
+                    keyPathExpr = new IR::PathExpression(IR::ID(refMap->newName(keyName)));
+                    decl.push_back(new IR::Declaration_Variable(
+                                   keyPathExpr->path->name, matchField->type));
+                    stmt.push_back(new IR::AssignmentStatement(keyPathExpr, matchField));
+                    newKeys.push_back(new IR::KeyElement(keyPathExpr, key->matchType));
+                } else {
+                    newKeys.push_back(key);
+                }
+            }
+        }
+
+        auto control = findOrigCtxt<IR::P4Control>();
+        controlBlock = control->name;
+        stmt_map.emplace(controlBlock, stmt);
+
+        for (auto d : decl) {
+            injector.collect(control, nullptr, d);
+        }
+
+        auto props = IR::IndexedVector<IR::Property>(p->properties->properties);
+        props.removeByName(IR::TableProperties::keyPropertyName);
+        props.push_back(new IR::Property("key", new IR::Key(newKeys), false));
+        p->properties = new IR::TableProperties(p->properties->srcInfo, props);
+        return new IR::P4Table(p->name, p->annotations, p->properties);
+    }
+
+    return p;
+}
+
+bool copyMatchKeysToSingleStruct::isMatchkeyCopyNeeded(IR::P4Table *t) {
+    auto keys = t->getKey();
+    const IR::Expression* firstKey = nullptr;
+
+    if (!keys || keys->keyElements.size() == 0) {
+        return false;
+    }
+
+    firstKey = keys->keyElements.at(0)->expression;
+    for (auto key : keys->keyElements) {
+        /* Key fields should be part of same header/metadata struct */
+        if (key->expression->toString() != firstKey->toString()) {
+            ::warning(ErrorType::WARN_UNSUPPORTED, "Mismatched header/metadata struct for key "
+                      "elements in table %1%. Copying all match fields to metadata",
+                       t->name.toString());
+            return true;
+        }
+    }
+    return false;
+}
+
 }  // namespace DPDK
