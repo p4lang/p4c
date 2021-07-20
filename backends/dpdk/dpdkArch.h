@@ -601,6 +601,8 @@ class SplitActionSelectorTable : public Transform {
         refMap(refMap), typeMap(typeMap) {}
     const IR::Node* postorder(IR::P4Table* tbl) override;
     const IR::Node* postorder(IR::MethodCallStatement* ) override;
+    const IR::Node* postorder(IR::IfStatement* ) override;
+    const IR::Node* postorder(IR::SwitchStatement* ) override;
 };
 
 class ConvertActionSelector : public PassManager {

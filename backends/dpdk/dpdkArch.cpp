@@ -28,6 +28,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/externInstance.h"
 #include "frontends/p4/typeMap.h"
+#include "frontends/p4/tableApply.h"
 
 namespace DPDK {
 
@@ -1128,6 +1129,112 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::MethodCallStatement *sta
         }
         return new IR::BlockStatement(*decls);
     }
+    return statement;
+}
+
+// assume that the condition is simplified to contain only simple expression,
+// such as table.apply().hit or table.apply().miss.
+const IR::Node* SplitActionSelectorTable::postorder(IR::IfStatement* statement) {
+    auto cond = statement->condition;
+    bool negated = false;
+    if (auto neg = cond->to<IR::LNot>()) {
+        // We handle !hit, which may have been created by the
+        // removal of miss
+        negated = true;
+        cond = neg->expr; }
+
+    if (!P4::TableApplySolver::isHit(cond, refMap, typeMap))
+        return statement;
+    if (!cond->is<IR::Member>())
+        return statement;
+
+    auto member = cond->to<IR::Member>();
+    if (!member->expr->is<IR::MethodCallExpression>())
+        return statement;
+    auto mce = member->expr->to<IR::MethodCallExpression>();
+    auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
+
+    if (auto apply = mi->to<P4::ApplyMethod>()) {
+        if (!apply->isTableApply())
+            return statement;
+        auto table = apply->object->to<IR::P4Table>();
+        LOG1("abc");
+        if (action_selector_tables.count(table->name) == 0)
+            return statement;
+        // suppose t.apply() is converted to
+        // t0.apply(); t1.apply(); t2.apply();
+        //
+        // then
+        //
+        // if (!t.apply().hit) {
+        //   foo();
+        // }
+        // is equivalent to
+        // if (t0.apply().hit) {
+        //   if (t1.apply().hit) {
+        //      if (t2.apply().hit) {
+        //        ; }
+        //      else {
+        //        foo(); }
+        //   else {
+        //      foo(); }
+        // else {
+        //   foo(); } } }
+        //
+        // if (t.apply().hit) {
+        //   foo();
+        // }
+        // is equivalent to
+        // if (t0.apply().hit) {
+        //   if (t1.apply().hit) {
+        //      if (t2.apply().hit) {
+        //        foo();
+        //      }
+        //   }
+        // }
+        if (negated) {
+            auto tableName = apply->object->getName().name;
+            if (member_tables.count(tableName) == 0)
+                return statement;
+            auto memberTable = member_tables.at(tableName);
+            auto t2stat = new IR::LNot(new IR::Member(new IR::MethodCallExpression(
+                new IR::Member(new IR::PathExpression(memberTable),
+                IR::ID(IR::IApply::applyMethodName))), "hit"));
+            auto selectorTable = group_tables.at(tableName);
+            auto t1stat = new IR::LNot(new IR::Member(new IR::MethodCallExpression(
+                new IR::Member(new IR::PathExpression(selectorTable),
+                IR::ID(IR::IApply::applyMethodName))), "hit"));
+
+            auto ret = new IR::IfStatement(cond,
+                    statement->ifTrue,
+                    new IR::IfStatement(t1stat, statement->ifTrue,
+                        new IR::IfStatement(t2stat, statement->ifTrue, statement->ifFalse)));
+            return ret;
+        } else {
+            auto tableName = apply->object->getName().name;
+            if (member_tables.count(tableName) == 0)
+                return statement;
+            auto memberTable = member_tables.at(tableName);
+            auto t2stat = new IR::Member(new IR::MethodCallExpression(
+                        new IR::Member(new IR::PathExpression(memberTable),
+                            IR::ID(IR::IApply::applyMethodName))), "hit");
+            auto selectorTable = group_tables.at(tableName);
+            auto t1stat = new IR::Member(new IR::MethodCallExpression(
+                        new IR::Member(new IR::PathExpression(selectorTable),
+                            IR::ID(IR::IApply::applyMethodName))), "hit");
+
+            auto ret = new IR::IfStatement(cond,
+                    new IR::IfStatement(t1stat,
+                        new IR::IfStatement(t2stat, statement->ifTrue, statement->ifFalse),
+                        statement->ifFalse),
+                    statement->ifFalse);
+            return ret;
+        }
+    }
+    return statement;
+}
+
+const IR::Node* SplitActionSelectorTable::postorder(IR::SwitchStatement* statement) {
     return statement;
 }
 
