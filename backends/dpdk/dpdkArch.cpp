@@ -985,19 +985,31 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     if (instance->type->name != "ActionSelector")
         return tbl;
 
-    if (!instance->arguments->at(1)->expression->is<IR::Constant>())
+    if (instance->arguments->size() != 2) {
+        ::error("Incorrect number of argument on action selector %1%", *instance->name);
+        return tbl;
+    }
+
+    if (!instance->arguments->at(1)->expression->is<IR::Constant>()) {
         ::error(ErrorType::ERR_UNEXPECTED,
                 "The 'size' argument of ActionSelector %1% must be a constant", *instance->name);
+        return tbl;
+    }
+
     int n_groups_max = instance->arguments->at(1)->expression->to<IR::Constant>()->asInt();
-    if (!instance->arguments->at(2)->expression->is<IR::Constant>())
+    if (!instance->arguments->at(2)->expression->is<IR::Constant>()) {
         ::error(ErrorType::ERR_UNEXPECTED,
                 "The 'outputWidth' argument of ActionSelector %1% must be a constant",
                 *instance->name);
+        return tbl;
+    }
     auto outputWidth = instance->arguments->at(2)->expression->to<IR::Constant>()->asInt();
-    if (outputWidth >= 32)
+    if (outputWidth >= 32) {
         ::error(ErrorType::ERR_UNEXPECTED,
                 "The 'outputWidth' argument of ActionSelector %1% must be smaller than 32",
                 *instance->name);
+        return tbl;
+    }
     int n_members_per_group_max = 1 << outputWidth;
 
     auto decls = new IR::IndexedVector<IR::Declaration>();
@@ -1104,6 +1116,13 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
 const IR::Node* SplitActionSelectorTable::postorder(IR::MethodCallStatement *statement) {
     auto methodCall = statement->methodCall;
     auto mi = P4::MethodInstance::resolve(methodCall, refMap, typeMap);
+    auto gen_apply = [](cstring table) {
+        IR::Statement *expr = new IR::MethodCallStatement(
+                new IR::MethodCallExpression(
+                new IR::Member(new IR::PathExpression(table),
+                IR::ID(IR::IApply::applyMethodName))));
+        return expr;
+    };
     if (auto apply = mi->to<P4::ApplyMethod>()) {
         if (!apply->isTableApply())
             return statement;
@@ -1113,20 +1132,18 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::MethodCallStatement *sta
         auto decls = new IR::IndexedVector<IR::StatOrDecl>();
         decls->push_back(statement);
         auto tableName = apply->object->getName().name;
-        if (group_tables.find(tableName) != group_tables.end()) {
-            auto selectorTable = group_tables.at(tableName);
-            decls->push_back(new IR::MethodCallStatement(
-                new IR::MethodCallExpression(
-                new IR::Member(new IR::PathExpression(selectorTable),
-                               IR::ID(IR::IApply::applyMethodName)))));
+        if (group_tables.count(tableName) == 0) {
+            ::error("Unable to find group table %1%", tableName);
+            return statement;
         }
-        if (member_tables.find(tableName) != member_tables.end()) {
-            auto memberTable = member_tables.at(tableName);
-            decls->push_back(new IR::MethodCallStatement(
-                new IR::MethodCallExpression(
-                new IR::Member(new IR::PathExpression(memberTable),
-                                IR::ID(IR::IApply::applyMethodName)))));
+        auto selectorTable = group_tables.at(tableName);
+        decls->push_back(gen_apply(selectorTable));
+        if (member_tables.count(tableName) == 0) {
+            ::error("Unable to find member table %1%", tableName);
+            return statement;
         }
+        auto memberTable = member_tables.at(tableName);
+        decls->push_back(gen_apply(memberTable));
         return new IR::BlockStatement(*decls);
     }
     return statement;

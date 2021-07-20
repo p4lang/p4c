@@ -147,8 +147,8 @@ class ConvertToDpdkControl : public Inspector {
     void add_table(const IR::DpdkSelector *s) { selectors.push_back(s); }
     void add_action(const IR::DpdkAction *a) { actions.push_back(a); }
 
-	boost::optional<cstring> getIdFromProperty(const IR::P4Table*, cstring);
-	boost::optional<int> getNumberFromProperty(const IR::P4Table*, cstring);
+    boost::optional<cstring> getIdFromProperty(const IR::P4Table*, cstring);
+    boost::optional<int> getNumberFromProperty(const IR::P4Table*, cstring);
 };
 
 class CollectActionUses : public Inspector {
