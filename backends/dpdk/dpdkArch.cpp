@@ -1132,8 +1132,7 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::MethodCallStatement *sta
     return statement;
 }
 
-// assume that the condition is simplified to contain only simple expression,
-// such as table.apply().hit or table.apply().miss.
+// assume the RemoveMiss pass is applied
 const IR::Node* SplitActionSelectorTable::postorder(IR::IfStatement* statement) {
     auto cond = statement->condition;
     bool negated = false;
@@ -1154,17 +1153,25 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::IfStatement* statement) 
     auto mce = member->expr->to<IR::MethodCallExpression>();
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
 
+    auto apply_hit = [](cstring table, bool negated){
+        IR::Expression *expr = new IR::Member(new IR::MethodCallExpression(
+                new IR::Member(new IR::PathExpression(table),
+                IR::ID(IR::IApply::applyMethodName))), "hit");
+        if (negated)
+            expr = new IR::LNot(expr);
+        return expr;
+    };
+
     if (auto apply = mi->to<P4::ApplyMethod>()) {
         if (!apply->isTableApply())
             return statement;
         auto table = apply->object->to<IR::P4Table>();
-        LOG1("abc");
         if (action_selector_tables.count(table->name) == 0)
             return statement;
-        // suppose t.apply() is converted to
-        // t0.apply(); t1.apply(); t2.apply();
-        //
-        // then
+        // an action selector t.apply() is converted to
+        // t0.apply();  // base table
+        // t1.apply();  // group table
+        // t2.apply();  // member table
         //
         // if (!t.apply().hit) {
         //   foo();
@@ -1192,49 +1199,88 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::IfStatement* statement) 
         //      }
         //   }
         // }
+        auto tableName = apply->object->getName().name;
+        if (member_tables.count(tableName) == 0)
+            return statement;
+        auto memberTable = member_tables.at(tableName);
+        auto t2stat = apply_hit(memberTable, negated);
+        auto selectorTable = group_tables.at(tableName);
+        auto t1stat = apply_hit(selectorTable, negated);
+
+        IR::IfStatement* ret = nullptr;
         if (negated) {
-            auto tableName = apply->object->getName().name;
-            if (member_tables.count(tableName) == 0)
-                return statement;
-            auto memberTable = member_tables.at(tableName);
-            auto t2stat = new IR::LNot(new IR::Member(new IR::MethodCallExpression(
-                new IR::Member(new IR::PathExpression(memberTable),
-                IR::ID(IR::IApply::applyMethodName))), "hit"));
-            auto selectorTable = group_tables.at(tableName);
-            auto t1stat = new IR::LNot(new IR::Member(new IR::MethodCallExpression(
-                new IR::Member(new IR::PathExpression(selectorTable),
-                IR::ID(IR::IApply::applyMethodName))), "hit"));
-
-            auto ret = new IR::IfStatement(cond,
-                    statement->ifTrue,
-                    new IR::IfStatement(t1stat, statement->ifTrue,
-                        new IR::IfStatement(t2stat, statement->ifTrue, statement->ifFalse)));
-            return ret;
+            ret = new IR::IfStatement(cond, statement->ifTrue,
+                  new IR::IfStatement(t1stat, statement->ifTrue,
+                  new IR::IfStatement(t2stat, statement->ifTrue,
+                  statement->ifFalse)));
         } else {
-            auto tableName = apply->object->getName().name;
-            if (member_tables.count(tableName) == 0)
-                return statement;
-            auto memberTable = member_tables.at(tableName);
-            auto t2stat = new IR::Member(new IR::MethodCallExpression(
-                        new IR::Member(new IR::PathExpression(memberTable),
-                            IR::ID(IR::IApply::applyMethodName))), "hit");
-            auto selectorTable = group_tables.at(tableName);
-            auto t1stat = new IR::Member(new IR::MethodCallExpression(
-                        new IR::Member(new IR::PathExpression(selectorTable),
-                            IR::ID(IR::IApply::applyMethodName))), "hit");
-
-            auto ret = new IR::IfStatement(cond,
-                    new IR::IfStatement(t1stat,
-                        new IR::IfStatement(t2stat, statement->ifTrue, statement->ifFalse),
-                        statement->ifFalse),
-                    statement->ifFalse);
-            return ret;
+            ret = new IR::IfStatement(cond,
+                  new IR::IfStatement(t1stat,
+                  new IR::IfStatement(t2stat, statement->ifTrue,
+                  statement->ifFalse),
+                  statement->ifFalse),
+                  statement->ifFalse);
         }
+        return ret;
     }
     return statement;
 }
 
 const IR::Node* SplitActionSelectorTable::postorder(IR::SwitchStatement* statement) {
+    auto expr = statement->expression;
+    auto member = expr->to<IR::Member>();
+    if (member->member != "action_run")
+        return statement;
+    if (!member->expr->is<IR::MethodCallExpression>())
+        return statement;
+    auto mce = member->expr->to<IR::MethodCallExpression>();
+    auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
+    auto gen_apply = [](cstring table) {
+        IR::Statement *expr = new IR::MethodCallStatement(
+                new IR::MethodCallExpression(
+                new IR::Member(new IR::PathExpression(table),
+                IR::ID(IR::IApply::applyMethodName))));
+        return expr;
+    };
+    auto gen_action_run = [](cstring table) {
+        IR::Expression *expr = new IR::Member(new IR::MethodCallExpression(
+                new IR::Member(new IR::PathExpression(table),
+                IR::ID(IR::IApply::applyMethodName))), "action_run");
+        return expr;
+    };
+
+    if (auto apply = mi->to<P4::ApplyMethod>()) {
+        if (!apply->isTableApply())
+            return statement;
+        auto table = apply->object->to<IR::P4Table>();
+        if (action_selector_tables.count(table->name) == 0)
+            return statement;
+        // switch(t0.apply()) {} is converted to
+        //
+        // t0.apply();
+        // t1.apply();
+        // switch(t2.apply()) {}
+        //
+        auto t0stat = gen_apply(table->name);
+        auto tableName = apply->object->getName().name;
+        if (member_tables.count(tableName) == 0) {
+            ::error("Unable to find member table %1%", tableName);
+            return statement; }
+        auto memberTable = member_tables.at(tableName);
+        auto t2stat = gen_action_run(memberTable);
+        if (group_tables.count(tableName) == 0) {
+            ::error("Unable to find group table %1%", tableName);
+            return statement; }
+        auto selectorTable = group_tables.at(tableName);
+        auto t1stat = gen_apply(selectorTable);
+
+        auto decls = new IR::IndexedVector<IR::StatOrDecl>();
+        decls->push_back(t0stat);
+        decls->push_back(t1stat);
+        decls->push_back(new IR::SwitchStatement(statement->srcInfo,
+                    t2stat, statement->cases));
+        return new IR::BlockStatement(*decls);
+    }
     return statement;
 }
 

@@ -53,8 +53,8 @@ control MyIC(
     inout psa_ingress_output_metadata_t d) {
 
     ActionSelector(PSA_HashAlgorithm_t.CRC32, 32w1024, 32w16) as;
-    action a1(bit<48> param) { hdr.ethernet.dstAddr = param; }
-    action a2(bit<16> param) { hdr.ethernet.etherType = param; }
+    @name(".a1") action a1(bit<48> param) { hdr.ethernet.dstAddr = param; }
+    @name(".a2") action a2(bit<16> param) { hdr.ethernet.etherType = param; }
     table tbl {
         key = {
             hdr.ethernet.srcAddr : exact;
@@ -68,21 +68,14 @@ control MyIC(
         actions = { NoAction; }
     }
 
+    table bar {
+        actions = { NoAction; }
+    }
+
     apply {
-        if (tbl.apply().hit) {
-            foo.apply();
-        }
-
-        if (!tbl.apply().miss) {
-            foo.apply();
-        }
-
-        if (!tbl.apply().hit) {
-            foo.apply();
-        }
-
-        if (tbl.apply().miss) {
-            foo.apply();
+        switch (tbl.apply().action_run) {
+            a1: { foo.apply(); }
+            a2: { bar.apply(); }
         }
     }
 }
