@@ -5,8 +5,13 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
-  "not implemented"
+  "Expected psa_implementation property value for table.* to resolve to an extern instance"
   testdata/p4_16_samples/psa-action-profile2.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "Not implemented"
+  testdata/p4_16_samples/psa-action-selector5.p4
   )
 
 p4c_add_xfail_reason("dpdk"

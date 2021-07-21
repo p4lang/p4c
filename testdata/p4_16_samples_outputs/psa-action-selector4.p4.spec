@@ -118,6 +118,15 @@ table tbl_0_member_table {
 }
 
 
+table foo {
+	actions {
+		NoAction
+	}
+	default_action NoAction args none 
+	size 0x10000
+}
+
+
 selector tbl_0_group_table {
 	group_id m.Ingress_tbl_0_group_id
 	selector {
@@ -133,9 +142,36 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
 	table tbl
+	jmpnh LABEL_0END
 	table tbl_0_group_table
+	jmpnh LABEL_0END
 	table tbl_0_member_table
-	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	jmpnh LABEL_0END
+	table foo
+	LABEL_0END :	table tbl
+	jmpnh LABEL_3END
+	table tbl_0_group_table
+	jmpnh LABEL_3END
+	table tbl_0_member_table
+	jmpnh LABEL_3END
+	table foo
+	LABEL_3END :	table tbl
+	jmpnh LABEL_6END
+	table tbl_0_group_table
+	jmpnh LABEL_6END
+	table tbl_0_member_table
+	jmpnh LABEL_8FALSE
+	jmp LABEL_6END
+	LABEL_8FALSE :	table foo
+	LABEL_6END :	table tbl
+	jmpnh LABEL_9END
+	table tbl_0_group_table
+	jmpnh LABEL_9END
+	table tbl_0_member_table
+	jmpnh LABEL_11FALSE
+	jmp LABEL_9END
+	LABEL_11FALSE :	table foo
+	LABEL_9END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP : drop
