@@ -985,7 +985,7 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     if (instance->type->name != "ActionSelector")
         return tbl;
 
-    if (instance->arguments->size() != 2) {
+    if (instance->arguments->size() != 3) {
         ::error("Incorrect number of argument on action selector %1%", *instance->name);
         return tbl;
     }

@@ -613,6 +613,12 @@ class ConvertActionSelector : public PassManager {
     }
 };
 
+class DpdkArchLast : public PassManager {
+ public:
+    DpdkArchLast() { setName("DpdkArchLast"); }
+};
+
+
 class RewriteToDpdkArch : public PassManager {
   public:
     CollectMetadataHeaderInfo *info;
@@ -671,6 +677,7 @@ class RewriteToDpdkArch : public PassManager {
         auto insertExternDeclaration = new CollectExternDeclaration(typeMap);
         passes.push_back(insertExternDeclaration);
         externDecls = &insertExternDeclaration->externDecls;
+        passes.push_back(new DpdkArchLast());
     }
 };
 
