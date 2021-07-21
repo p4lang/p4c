@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <bmv2/psa.p4>
+#include <psa.p4>
 
 
 typedef bit<48>  EthernetAddress;
@@ -63,16 +63,17 @@ parser IngressParserImpl(packet_in buffer,
 {
     state start {
         buffer.extract(hdr.ethernet);
-        transition select(hdr.ethernet.etherType) {
-            0x0800 &&& 0x0F00: parse_ipv4;
-            default: accept;
+        transition select(hdr.ethernet.etherType, hdr.ethernet.srcAddr) {
+            (16w0x0800, 48w0xF00) : parse_ipv4;
+            (0x800 &&& 0xF00, 48w0x3883) : parse_tcp;
+            (_, 0x678): parse_ipv4;
+            default : accept;
         }
     }
     state parse_ipv4 {
         buffer.extract(hdr.ipv4);
         transition select(hdr.ipv4.protocol) {
-            8w4 .. 8w7: parse_tcp;
-            default: accept;
+            _ : parse_tcp;
         }
     }
     state parse_tcp {

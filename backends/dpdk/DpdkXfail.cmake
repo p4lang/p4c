@@ -15,7 +15,7 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
-  "Ambiguous method execute"
+  "LHS of meter execute statement is missing"
   testdata/p4_16_samples/psa-meter1.p4
 )
 
