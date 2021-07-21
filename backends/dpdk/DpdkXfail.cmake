@@ -10,6 +10,11 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
+  "Not implemented"
+  testdata/p4_16_samples/psa-action-selector5.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
   "Ambiguous method execute"
   testdata/p4_16_samples/psa-meter1.p4
 )
