@@ -310,6 +310,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
         for (auto stat : c) {
             DPDK::ConvertStatementToDpdk h(refmap, typemap, this->collector,
                                            csum_map);
+            h.set_parser(p);
             stat->apply(h);
             for (auto i : h.get_instr())
                 add_instr(i);

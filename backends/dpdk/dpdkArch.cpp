@@ -735,6 +735,9 @@ const IR::Node *
 ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
     auto right = a->right;
     auto left = a->left;
+    // This pass does not apply to 'bool foo = (a == b)' or 'bool foo = (a > b)' etc.
+    if (right->to<IR::Operation_Relation>())
+        return a;
     if (auto r = right->to<IR::Operation_Binary>()) {
         if (!isSimpleExpression(r->right) || !isSimpleExpression(r->left))
             BUG("%1%: Statement Unroll pass failed", a);
