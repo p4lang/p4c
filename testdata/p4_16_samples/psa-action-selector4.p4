@@ -1,11 +1,13 @@
 #include <core.p4>
-#include <bmv2/psa.p4>
+#include <psa.p4>
 
 struct EMPTY { };
 
-header EMPTY_H {};
-
 typedef bit<48>  EthernetAddress;
+
+struct user_meta_t {
+    bit<16> data;
+}
 
 header ethernet_t {
     EthernetAddress dstAddr;
@@ -14,16 +16,16 @@ header ethernet_t {
 }
 
 struct headers_t {
-    ethernet_t       ethernet;
+    ethernet_t ethernet;
 }
 
 parser MyIP(
     packet_in buffer,
     out headers_t hdr,
-    inout EMPTY b,
+    inout user_meta_t b,
     in psa_ingress_parser_input_metadata_t c,
-    in EMPTY_H d,
-    in EMPTY_H e) {
+    in EMPTY d,
+    in EMPTY e) {
 
     state start {
         buffer.extract(hdr.ethernet);
@@ -37,39 +39,51 @@ parser MyEP(
     inout EMPTY b,
     in psa_egress_parser_input_metadata_t c,
     in EMPTY d,
-    in EMPTY_H e,
-    in EMPTY_H f) {
+    in EMPTY e,
+    in EMPTY f) {
     state start {
         transition accept;
     }
 }
 
-type bit<12> CounterIndex_t;
-
 control MyIC(
     inout headers_t hdr,
-    inout EMPTY b,
+    inout user_meta_t b,
     in psa_ingress_input_metadata_t c,
     inout psa_ingress_output_metadata_t d) {
 
-    Counter<bit<10>,CounterIndex_t>(1024, PSA_CounterType_t.PACKETS) counter;
-
-    action execute() {
-        counter.count((CounterIndex_t)1024);
-    }
-
+    ActionSelector(PSA_HashAlgorithm_t.CRC32, 32w1024, 32w16) as;
+    action a1(bit<48> param) { hdr.ethernet.dstAddr = param; }
+    action a2(bit<16> param) { hdr.ethernet.etherType = param; }
     table tbl {
         key = {
             hdr.ethernet.srcAddr : exact;
+            b.data : selector;
         }
-        actions = {
-            NoAction;
-            execute;
-        }
+        actions = { NoAction; a1; a2; }
+        psa_implementation = as;
+    }
+
+    table foo {
+        actions = { NoAction; }
     }
 
     apply {
-        tbl.apply();
+        if (tbl.apply().hit) {
+            foo.apply();
+        }
+
+        if (!tbl.apply().miss) {
+            foo.apply();
+        }
+
+        if (!tbl.apply().hit) {
+            foo.apply();
+        }
+
+        if (tbl.apply().miss) {
+            foo.apply();
+        }
     }
 }
 
@@ -83,19 +97,21 @@ control MyEC(
 
 control MyID(
     packet_out buffer,
-    out EMPTY_H a,
-    out EMPTY_H b,
+    out EMPTY a,
+    out EMPTY b,
     out EMPTY c,
     inout headers_t hdr,
-    in EMPTY e,
+    in user_meta_t e,
     in psa_ingress_output_metadata_t f) {
-    apply { }
+    apply {
+        buffer.emit(hdr.ethernet);
+    }
 }
 
 control MyED(
     packet_out buffer,
-    out EMPTY_H a,
-    out EMPTY_H b,
+    out EMPTY a,
+    out EMPTY b,
     inout EMPTY c,
     in EMPTY d,
     in psa_egress_output_metadata_t e,
