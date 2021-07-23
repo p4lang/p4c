@@ -791,7 +791,6 @@ class ActionFn :  public NamedP4Object {
   std::vector<ActionPrimitiveCall> primitives{};
   ParameterList params{};
   ParameterList sub_params{};
-  ParameterList field_params{};
   RegisterSync register_sync{};
   std::vector<Data> const_values{};
   // should I store the objects in the vector, instead of pointers?

@@ -41,9 +41,9 @@ class PSA_InternetChecksum : public bm::ExternType {
 
     void clear();
 
-    void add(const std::vector<Field> fields);
+    void add(const std::vector<Field> &fields);
 
-    void subtract(const std::vector<Field> fields);
+    void subtract(const std::vector<Field> &fields);
 
     void get_state(Field &dst) const;
 

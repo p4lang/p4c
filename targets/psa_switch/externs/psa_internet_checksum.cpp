@@ -24,6 +24,21 @@
 
 namespace {
 
+void
+concatenate_fields(const std::vector<bm::Field> &fields, bm::Data &input) {
+    uint16_t n_bits = 0;
+    bm::Data field_shl;
+
+    // Concatenate fields in one single data
+    for (int i = fields.size() - 1; i >= 0; i--) {
+        field_shl.shift_left(fields.at(i), n_bits);
+        input.add(input, field_shl);
+        n_bits += fields.at(i).get_nbits();
+    }
+
+    _BM_ASSERT(n_bits % 16 == 0);
+}
+
 uint16_t 
 ones_complement_sum(uint16_t x, uint16_t y) {
     uint32_t ret = (uint32_t) x + (uint32_t) y; 
@@ -70,48 +85,28 @@ PSA_InternetChecksum::clear() {
 }
 
 void
-PSA_InternetChecksum::add(const std::vector<Field> fields) {
+PSA_InternetChecksum::add(const std::vector<Field> &fields) {
     bm::Data input(0);
-    uint16_t n_bits = 0;
-    const uint8_t base = 16;
-    bm::Data field_shl;
 
-    // Concatenate fields in one single data
-    for (int i = fields.size() - 1; i >= 0; i--) {
-        field_shl.shift_left(fields.at(i), n_bits);
-        input.add(input, field_shl);
-        n_bits += fields.at(i).get_nbits();
-    }
+    concatenate_fields(fields, input);
 
-    _BM_ASSERT(n_bits % 16 == 0);
-
-    while (input.get<uint64_t>() != 0) {
+    while (!input.test_eq(0)) {
         uint16_t d = input.get<uint16_t>();
         sum = ones_complement_sum(sum, d);
-        input.shift_right(input, base);
+        input.shift_right(input, 16);
     }
 }
 
 void
-PSA_InternetChecksum::subtract(const std::vector<Field> fields) {
+PSA_InternetChecksum::subtract(const std::vector<Field> &fields) {
     bm::Data input(0);
-    uint16_t n_bits = 0;
-    const uint8_t base = 16;
-    bm::Data field_shl;
 
-    // Concatenate fields in one single data
-    for (int i = fields.size() - 1; i >= 0; i--) {
-        field_shl.shift_left(fields.at(i), n_bits);
-        input.add(input, field_shl);
-        n_bits += fields.at(i).get_nbits();
-    }
+    concatenate_fields(fields, input);
 
-    _BM_ASSERT(n_bits % 16 == 0);
-
-    while (input.get<uint64_t>() != 0) {
+    while (!input.test_eq(0)) {
         uint16_t d = input.get<uint16_t>();
         sum = ones_complement_sum(sum, ~d);
-        input.shift_right(input, base);
+        input.shift_right(input, 16);
     }
 }
 
