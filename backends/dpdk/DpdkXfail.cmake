@@ -12,6 +12,8 @@ p4c_add_xfail_reason("dpdk"
 p4c_add_xfail_reason("dpdk"
   "Not implemented"
   testdata/p4_16_samples/psa-action-selector5.p4
+  testdata/p4_16_samples/psa-dpdk-table-key-consolidation-switch.p4
+  testdata/p4_16_samples/psa-random.p4
   )
 
 p4c_add_xfail_reason("dpdk"
@@ -43,11 +45,6 @@ p4c_add_xfail_reason("dpdk"
   testdata/p4_16_samples/psa-example-register2-bmv2.p4
   testdata/p4_16_samples/psa-register-read-write-2-bmv2.p4
   testdata/p4_16_samples/psa-end-of-ingress-test-bmv2.p4
-  )
-
-p4c_add_xfail_reason("dpdk"
-  "Not implemented"
-  testdata/p4_16_samples/psa-random.p4
   )
 
 p4c_add_xfail_reason("dpdk"
