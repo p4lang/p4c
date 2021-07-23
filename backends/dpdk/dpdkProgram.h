@@ -61,6 +61,8 @@ class ConvertToDpdkProgram : public Transform {
         *args_struct_map;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
     std::vector<const IR::Declaration_Instance *> *externDecls;
+    std::map<cstring, int> *error_map;
+
   public:
     ConvertToDpdkProgram(BMV2::PsaProgramStructure &structure,
                          P4::ReferenceMap *refmap, P4::TypeMap *typemap,
@@ -72,6 +74,7 @@ class ConvertToDpdkProgram : public Transform {
         args_struct_map = dpdkarch->args_struct_map;
         csum_map = dpdkarch->csum_map;
         externDecls = dpdkarch->externDecls;
+        error_map = dpdkarch->error_map;
     }
 
     const IR::DpdkAsmProgram *create(IR::P4Program *prog);
@@ -91,17 +94,19 @@ class ConvertToDpdkParser : public Inspector {
     P4::TypeMap *typemap;
     DpdkVariableCollector *collector;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
-
+    std::map<cstring, int> *error_map;
     IR::Type_Struct *metadataStruct;
 
   public:
     ConvertToDpdkParser(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkVariableCollector *collector,
-
-        std::map<const IR::Declaration_Instance *, cstring> *csum_map, IR::Type_Struct *metadataStruct)
+        std::map<const IR::Declaration_Instance *, cstring> *csum_map,
+        std::map<cstring, int> *error_map,
+        IR::Type_Struct *metadataStruct)
         : refmap(refmap), typemap(typemap), collector(collector),
-          csum_map(csum_map), metadataStruct(metadataStruct) {}
+          csum_map(csum_map), error_map(error_map),
+          metadataStruct(metadataStruct) {}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() {
         return instructions;
     }
@@ -127,6 +132,7 @@ class ConvertToDpdkControl : public Inspector {
     IR::IndexedVector<IR::DpdkSelector> selectors;
     IR::IndexedVector<IR::DpdkAction> actions;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
+    std::map<cstring, int> *error_map;
     std::set<cstring> unique_actions;
     bool deparser;
 
@@ -135,9 +141,10 @@ class ConvertToDpdkControl : public Inspector {
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkVariableCollector *collector,
         std::map<const IR::Declaration_Instance *, cstring> *csum_map,
+        std::map<cstring, int> *error_map,
         bool deparser = false)
         : typemap(typemap), refmap(refmap), collector(collector),
-          csum_map(csum_map), deparser(deparser) {}
+          csum_map(csum_map), error_map(error_map), deparser(deparser) {}
 
     IR::IndexedVector<IR::DpdkTable> &getTables() { return tables; }
     IR::IndexedVector<IR::DpdkSelector> &getSelectors() { return selectors; }

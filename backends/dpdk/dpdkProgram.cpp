@@ -94,9 +94,9 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     IR::IndexedVector<IR::DpdkAsmStatement> statements;
 
     auto ingress_parser_converter =
-        new ConvertToDpdkParser(refmap, typemap, collector, csum_map, metadataStruct);
+        new ConvertToDpdkParser(refmap, typemap, collector, csum_map, error_map, metadataStruct);
     auto egress_parser_converter =
-        new ConvertToDpdkParser(refmap, typemap, collector, csum_map, metadataStruct);
+        new ConvertToDpdkParser(refmap, typemap, collector, csum_map, error_map, metadataStruct);
     for (auto kv : structure.parsers) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_parser_converter);
@@ -106,9 +106,9 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
             BUG("Unknown parser %s", kv.second->name);
     }
     auto ingress_converter =
-        new ConvertToDpdkControl(refmap, typemap, collector, csum_map);
+        new ConvertToDpdkControl(refmap, typemap, collector, csum_map, error_map);
     auto egress_converter =
-        new ConvertToDpdkControl(refmap, typemap, collector, csum_map);
+        new ConvertToDpdkControl(refmap, typemap, collector, csum_map, error_map);
     for (auto kv : structure.pipelines) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_converter);
@@ -118,9 +118,9 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
             BUG("Unknown control block %s", kv.second->name);
     }
     auto ingress_deparser_converter =
-        new ConvertToDpdkControl(refmap, typemap, collector, csum_map, true);
+        new ConvertToDpdkControl(refmap, typemap, collector, csum_map, error_map, true);
     auto egress_deparser_converter =
-        new ConvertToDpdkControl(refmap, typemap, collector, csum_map);
+        new ConvertToDpdkControl(refmap, typemap, collector, csum_map, error_map);
     for (auto kv : structure.deparsers) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_deparser_converter);
@@ -309,7 +309,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
         auto c = state->components;
         for (auto stat : c) {
             DPDK::ConvertStatementToDpdk h(refmap, typemap, this->collector,
-                                           csum_map);
+                                           csum_map, error_map);
             h.set_parser(p);
             stat->apply(h);
             for (auto i : h.get_instr())
@@ -429,7 +429,7 @@ bool ConvertToDpdkParser::preorder(const IR::ParserState *) { return false; }
 // =====================Control=============================
 bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
     auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap,
-                                                   collector, csum_map);
+                                                   collector, csum_map, error_map);
     a->body->apply(*helper);
     auto stmt_list = new IR::IndexedVector<IR::DpdkAsmStatement>();
     for (auto i : helper->get_instr())
@@ -560,7 +560,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
         }
     }
     auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap,
-                                                   collector, csum_map);
+                                                   collector, csum_map, error_map);
     c->body->apply(*helper);
     if (deparser) {
         add_inst(new IR::DpdkJmpNotEqualStatement("LABEL_DROP",

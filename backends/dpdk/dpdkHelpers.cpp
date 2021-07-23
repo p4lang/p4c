@@ -21,10 +21,8 @@ namespace DPDK {
 
 int ConvertStatementToDpdk::next_label_id = 0;
 
-// convert statements like:
-// bool a = (b == c);
-// bool a = (b > c);
-// into the corresponding branching instructions in dpdk.
+// convert relation comparison statements into the corresponding branching
+// instructions in dpdk.
 void ConvertStatementToDpdk::process_relation_operation(const IR::Expression* dst,
                                                         const IR::Operation_Relation* op) {
     auto true_label = Util::printf_format("label_%dtrue", next_label_id);
@@ -32,23 +30,25 @@ void ConvertStatementToDpdk::process_relation_operation(const IR::Expression* ds
     auto end_label = Util::printf_format("label_%dend", next_label_id++);
     if (op->is<IR::Equ>()) {
         add_instr(new IR::DpdkJmpEqualStatement(true_label, op->left, op->right));
-        add_instr(new IR::DpdkLabelStatement(false_label));
-        add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(false)));
-        add_instr(new IR::DpdkJmpLabelStatement(end_label));
-        add_instr(new IR::DpdkLabelStatement(true_label));
-        add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(true)));
-        add_instr(new IR::DpdkLabelStatement(end_label));
     } else if (op->is<IR::Neq>()) {
         add_instr(new IR::DpdkJmpNotEqualStatement(true_label, op->left, op->right));
-        add_instr(new IR::DpdkLabelStatement(true_label));
-        add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(true)));
-        add_instr(new IR::DpdkJmpLabelStatement(end_label));
-        add_instr(new IR::DpdkLabelStatement(false_label));
-        add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(false)));
-        add_instr(new IR::DpdkLabelStatement(end_label));
+    } else if (op->is<IR::Lss>()) {
+        add_instr(new IR::DpdkJmpLessStatement(true_label, op->left, op->right));
+    } else if (op->is<IR::Grt>()) {
+        add_instr(new IR::DpdkJmpGreaterStatement(true_label, op->left, op->right));
+    } else if (op->is<IR::Leq>()) {
+        add_instr(new IR::DpdkJmpLessOrEqualStatement(true_label, op->left, op->right));
+    } else if (op->is<IR::Geq>()) {
+        add_instr(new IR::DpdkJmpGreaterEqualStatement(true_label, op->left, op->right));
     } else {
         BUG("%1% not implemented.", op);
     }
+    add_instr(new IR::DpdkLabelStatement(false_label));
+    add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(false)));
+    add_instr(new IR::DpdkJmpLabelStatement(end_label));
+    add_instr(new IR::DpdkLabelStatement(true_label));
+    add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(true)));
+    add_instr(new IR::DpdkLabelStatement(end_label));
 }
 
 bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
@@ -532,12 +532,15 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             auto args = a->expr->arguments;
             auto condition = args->at(0);
             auto error = args->at(1);
+            if (!error->expression->is<IR::Member>())
+                ::error("%1%: must be one of the existing errors", s);
+            auto error_id = error_map->at(error->expression->to<IR::Member>()->member);
             auto end_label = Util::printf_format("label_%dend", next_label_id++);
             add_instr(new IR::DpdkJmpEqualStatement(
                         end_label,
                         condition->expression, new IR::BoolLiteral(false)));
             add_instr(new IR::DpdkMovStatement(
-                        new IR::PathExpression("metadata"), new IR::Constant(0)));
+                        new IR::PathExpression("metadata"), new IR::Constant(error_id)));
             add_instr(new IR::DpdkJmpLabelStatement(
                         append_parser_name(parser, IR::ParserState::reject)));
             add_instr(new IR::DpdkLabelStatement(end_label));
@@ -553,7 +556,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         }
     } else if (auto a = mi->to<P4::ActionCall>()) {
         auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap,
-                collector, csum_map);
+                collector, csum_map, error_map);
         a->action->body->apply(*helper);
         for (auto i : helper->get_instr()) {
             add_instr(i);
