@@ -17,6 +17,11 @@ limitations under the License.
 #ifndef _FRONTENDS_P4_COMMONINLINING_H_
 #define _FRONTENDS_P4_COMMONINLINING_H_
 
+#define DEBUG_INLINER 0
+
+#if DEBUG_INLINER
+#include "frontends/p4/toP4/toP4.h"
+#endif
 #include "frontends/p4/callGraph.h"
 #include "ir/ir.h"
 
@@ -177,7 +182,7 @@ class InlineDriver : public Visitor {
             if (::errorCount() > 0)
                 break;
 
-#if 0
+#if DEBUG_INLINER
             // debugging code; we don't have an easy way to dump the program here,
             // since we are not between passes
             ToP4 top4(&std::cout, false, nullptr);

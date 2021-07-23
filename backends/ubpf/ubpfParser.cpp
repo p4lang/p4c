@@ -128,19 +128,21 @@ bool UBPFStateTranslationVisitor::preorder(const IR::ParserState* parserState) {
 
 bool UBPFStateTranslationVisitor::preorder(const IR::SelectCase* selectCase) {
     builder->emitIndent();
-    builder->appendFormat("if ((%s", selectValue);
     if (auto mask = selectCase->keyset->to<IR::Mask>()) {
+        builder->appendFormat("if ((%s", selectValue);
         builder->append(" & ");
         visit(mask->right);
         builder->append(") == (");
         visit(mask->left);
         builder->append(" & ");
         visit(mask->right);
+        builder->append("))");
     } else {
+        builder->appendFormat("if (%s", selectValue);
         builder->append(" == ");
         visit(selectCase->keyset);
+        builder->append(")");
     }
-    builder->append("))");
     builder->append("goto ");
     visit(selectCase->state);
     builder->endOfStatement(true);
