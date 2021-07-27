@@ -178,6 +178,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options,
             new P4::RemoveSelectBooleans(&refMap, &typeMap),
             new P4::FlattenHeaders(&refMap, &typeMap),
             new P4::FlattenInterfaceStructs(&refMap, &typeMap),
+            new P4::SimplifyControlFlow(&refMap, &typeMap),
             new P4::ParsersUnroll(true, &refMap, &typeMap),
             new P4::ReplaceSelectRange(&refMap, &typeMap),
             // DPDK architecture does not currently support predicated instructions
