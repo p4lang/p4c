@@ -445,13 +445,13 @@ bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
      - If there is a key field with lpm match kind, the other match fields, if any,
        must all be exact match.
 */
-void ConvertToDpdkControl::checkTableValid(const IR::P4Table *a) {
+bool ConvertToDpdkControl::checkTableValid(const IR::P4Table *a) {
     auto keys = a->getKey();
     auto lpmCount = 0;
     auto nonExactCount = 0;
 
     if (!keys || keys->keyElements.size() == 0) {
-        return;
+        return true;
     }
 
     for (auto key : keys->keyElements) {
@@ -459,7 +459,7 @@ void ConvertToDpdkControl::checkTableValid(const IR::P4Table *a) {
         if (key->expression->type->width_bits() > DPDK_MAX_HEADER_METADATA_FIELD_SIZE) {
             ::error(ErrorType::ERR_UNEXPECTED, "Key field wider than 64-bit is not permitted %1%",
                     key->expression);
-            return;
+            return false;
         }
 
         auto matchKind = key->matchType->toString();
@@ -473,10 +473,13 @@ void ConvertToDpdkControl::checkTableValid(const IR::P4Table *a) {
     if (lpmCount > 1) {
         ::error(ErrorType::ERR_UNEXPECTED, "Only one LPM match field is permitted per table, "
                 "more than one lpm field found in table (%1%)", a->name.toString());
+        return false;
     } else if (lpmCount == 1 && nonExactCount > 0) {
         ::error(ErrorType::ERR_UNEXPECTED, "Non 'exact' match kind not permitted in table (%1%) "
                 "with 'lpm' match kind", a->name.toString());
+        return false;
     }
+    return true;
 }
 
 boost::optional<cstring> ConvertToDpdkControl::getIdFromProperty(const IR::P4Table* table,
@@ -523,27 +526,28 @@ boost::optional<int> ConvertToDpdkControl::getNumberFromProperty(const IR::P4Tab
 
 
 bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
-    checkTableValid(t);
-    if (t->properties->getProperty("selector") != nullptr) {
-        auto group_id = getIdFromProperty(t, "group_id");
-        auto member_id = getIdFromProperty(t, "member_id");
-        auto selector_key = t->properties->getProperty("selector");
-        auto n_groups_max = getNumberFromProperty(t, "n_groups_max");
-        auto n_members_per_group_max = getNumberFromProperty(t, "n_members_per_group_max");
+    if (checkTableValid(t)) {
+        if (t->properties->getProperty("selector") != nullptr) {
+            auto group_id = getIdFromProperty(t, "group_id");
+            auto member_id = getIdFromProperty(t, "member_id");
+            auto selector_key = t->properties->getProperty("selector");
+            auto n_groups_max = getNumberFromProperty(t, "n_groups_max");
+            auto n_members_per_group_max = getNumberFromProperty(t, "n_members_per_group_max");
 
-        if (group_id == boost::none || member_id == boost::none ||
-            n_groups_max == boost::none || n_members_per_group_max == boost::none)
-            return false;
+            if (group_id == boost::none || member_id == boost::none ||
+                n_groups_max == boost::none || n_members_per_group_max == boost::none)
+                return false;
 
-        auto selector = new IR::DpdkSelector(t->name,
-            *group_id, *member_id, selector_key->value->to<IR::Key>(),
-            *n_groups_max, *n_members_per_group_max);
+            auto selector = new IR::DpdkSelector(t->name,
+                *group_id, *member_id, selector_key->value->to<IR::Key>(),
+                *n_groups_max, *n_members_per_group_max);
 
-        selectors.push_back(selector);
-    } else {
-        auto table = new IR::DpdkTable(t->name.toString(), t->getKey(), t->getActionList(),
-                t->getDefaultAction(), t->properties);
-        tables.push_back(table);
+            selectors.push_back(selector);
+        } else {
+            auto table = new IR::DpdkTable(t->name.toString(), t->getKey(), t->getActionList(),
+                    t->getDefaultAction(), t->properties);
+            tables.push_back(table);
+        }
     }
     return false;
 }
