@@ -343,6 +343,7 @@ class CollectLocalVariableToMetadata : public Transform {
 // defines a struct paremeter himself or define multiple struct parameters in
 // action parameterlist. Current implementation does not support this.
 class PrependPDotToActionArgs : public Transform {
+    P4::TypeMap* typeMap;
     P4::ReferenceMap *refMap;
     BlockInfoMapping *toBlockInfo;
 
@@ -350,11 +351,13 @@ class PrependPDotToActionArgs : public Transform {
     std::map<const cstring, IR::IndexedVector<IR::Parameter> *> args_struct_map;
 
     PrependPDotToActionArgs(BlockInfoMapping *toBlockInfo,
+                            P4::TypeMap* typeMap,
                             P4::ReferenceMap *refMap)
-        : refMap(refMap), toBlockInfo(toBlockInfo) {}
+        : typeMap(typeMap), refMap(refMap), toBlockInfo(toBlockInfo) {}
     const IR::Node *postorder(IR::P4Action *a) override;
     const IR::Node *postorder(IR::P4Program *s) override;
     const IR::Node *preorder(IR::PathExpression *path) override;
+    const IR::Node *preorder(IR::MethodCallExpression*) override;
 };
 
 // For dpdk asm, there is not object-oriented. Therefore, we cannot define a
@@ -634,7 +637,6 @@ class CollectErrors : public Inspector {
     std::map<cstring, int> error_map;
     CollectErrors() {}
     void postorder(const IR::Type_Error* error) override {
-        LOG1("type error " << error);
         int id = 0;
         for (auto err : error->members) {
             if (error_map.count(err->name.name) == 0) {
@@ -710,7 +712,7 @@ class RewriteToDpdkArch : public PassManager {
         auto checksum_convertor = new ConvertInternetChecksum(typeMap, info);
         passes.push_back(checksum_convertor);
         csum_map = &checksum_convertor->csum_map;
-        auto p = new PrependPDotToActionArgs(&parsePsa->toBlockInfo, refMap);
+        auto p = new PrependPDotToActionArgs(&parsePsa->toBlockInfo, typeMap, refMap);
         args_struct_map = &p->args_struct_map;
         passes.push_back(p);
         passes.push_back(new ConvertLogicalExpression);

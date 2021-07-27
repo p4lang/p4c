@@ -544,7 +544,6 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             add_instr(new IR::DpdkJmpLabelStatement(
                         append_parser_name(parser, IR::ParserState::reject)));
             add_instr(new IR::DpdkLabelStatement(end_label));
-
         }
     } else if (auto a = mi->to<P4::BuiltInMethod>()) {
         if (a->name == "setValid") {
