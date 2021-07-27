@@ -981,7 +981,12 @@ getExternInstanceFromProperty(const IR::P4Table* table,
 // for subsequent table lookup.
 std::tuple<const IR::P4Table*, cstring>
 SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
-    auto actionName = refMap->newName(tbl->name + "_set_id");
+    cstring actionName;
+    if (implementation == TableImplementation::ACTION_SELECTOR) {
+        actionName = refMap->newName(tbl->name + "_set_group_id");
+    } else if (implementation == TableImplementation::ACTION_PROFILE) {
+        actionName = refMap->newName(tbl->name + "_set_member_id");
+    }
     auto hidden = new IR::Annotations();
     hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
     IR::Vector<IR::KeyElement> match_keys;
@@ -1003,17 +1008,17 @@ SplitP4TableCommon::create_match_table(const IR::P4Table *tbl) {
     if (tbl->getSizeProperty()) {
         properties.push_back(new IR::Property("size",
                              new IR::ExpressionValue(tbl->getSizeProperty()), false)); }
-    auto base_table = new IR::P4Table(tbl->name, new IR::TableProperties(properties));
-    return std::make_tuple(base_table, actionName);
+    auto match_table = new IR::P4Table(tbl->name, new IR::TableProperties(properties));
+    return std::make_tuple(match_table, actionName);
 }
 
 const IR::P4Action*
-SplitP4TableCommon::create_action(cstring actionName, cstring group_id) {
+SplitP4TableCommon::create_action(cstring actionName, cstring group_id, cstring param) {
     auto hidden = new IR::Annotations();
     hidden->add(new IR::Annotation(IR::Annotation::hiddenAnnotation, {}));
     auto set_id = new IR::AssignmentStatement(
-            new IR::PathExpression(group_id), new IR::PathExpression("id"));
-    auto parameter = new IR::Parameter("id", IR::Direction::None, IR::Type_Bits::get(32));
+            new IR::PathExpression(group_id), new IR::PathExpression(param));
+    auto parameter = new IR::Parameter(param, IR::Direction::None, IR::Type_Bits::get(32));
     auto action = new IR::P4Action(
             actionName, hidden, new IR::ParameterList({ parameter }),
             new IR::BlockStatement({ set_id }));
@@ -1022,9 +1027,9 @@ SplitP4TableCommon::create_action(cstring actionName, cstring group_id) {
 
 const IR::P4Table*
 SplitP4TableCommon::create_member_table(const IR::P4Table* tbl,
-        cstring memberKeyName) {
+        cstring member_id) {
     IR::Vector<IR::KeyElement> member_keys;
-    auto tableKeyEl = new IR::KeyElement(new IR::PathExpression(memberKeyName),
+    auto tableKeyEl = new IR::KeyElement(new IR::PathExpression(member_id),
             new IR::PathExpression(P4::P4CoreLibrary::instance.exactMatch.Id()));
     member_keys.push_back(tableKeyEl);
     IR::IndexedVector<IR::Property> member_properties;
@@ -1114,32 +1119,31 @@ const IR::Node* SplitActionSelectorTable::postorder(IR::P4Table* tbl) {
     auto decls = new IR::IndexedVector<IR::Declaration>();
 
     cstring group_id = refMap->newName(tbl->name + "_group_id");
-    cstring memberKeyName = refMap->newName(tbl->name + "_member_id");
+    cstring member_id = refMap->newName(tbl->name + "_member_id");
 
     auto group_id_decl = new IR::Declaration_Variable(group_id, IR::Type_Bits::get(32));
-    auto member_id_decl = new IR::Declaration_Variable(memberKeyName, IR::Type_Bits::get(32));
+    auto member_id_decl = new IR::Declaration_Variable(member_id, IR::Type_Bits::get(32));
     decls->push_back(group_id_decl);
     decls->push_back(member_id_decl);
 
     // base table matches on non-selector key and set group_id
     cstring actionName;
-    const IR::P4Table* base_table;
-    std::tie(base_table, actionName) = create_match_table(tbl);
-    decls->push_back(base_table);
-
-    auto action = create_action(actionName, group_id);
+    const IR::P4Table* match_table;
+    std::tie(match_table, actionName) = create_match_table(tbl);
+    auto action = create_action(actionName, group_id, "group_id");
     decls->push_back(action);
+    decls->push_back(match_table);
 
     // group table match on group_id
-    auto group_table = create_group_table(tbl, group_id, memberKeyName,
+    auto group_table = create_group_table(tbl, group_id, member_id,
                                           n_groups_max, n_members_per_group_max);
     decls->push_back(group_table);
 
     // member table match on member_id
-    auto member_table = create_member_table(tbl, memberKeyName);
+    auto member_table = create_member_table(tbl, member_id);
     decls->push_back(member_table);
 
-    base_tables.insert(tbl->name);
+    match_tables.insert(tbl->name);
     group_tables.emplace(tbl->name, group_table->name);
     member_tables.emplace(tbl->name, member_table->name);
 
@@ -1166,23 +1170,23 @@ const IR::Node* SplitActionProfileTable::postorder(IR::P4Table* tbl) {
     }
 
     auto decls = new IR::IndexedVector<IR::Declaration>();
-    cstring memberKeyName = refMap->newName(tbl->name + "_member_id");
+    cstring member_id = refMap->newName(tbl->name + "_member_id");
 
-    auto member_id_decl = new IR::Declaration_Variable(memberKeyName, IR::Type_Bits::get(32));
+    auto member_id_decl = new IR::Declaration_Variable(member_id, IR::Type_Bits::get(32));
     decls->push_back(member_id_decl);
 
     cstring actionName;
-    const IR::P4Table* base_table;
-    std::tie(base_table, actionName) = create_match_table(tbl);
-    auto action = create_action(actionName, memberKeyName);
+    const IR::P4Table* match_table;
+    std::tie(match_table, actionName) = create_match_table(tbl);
+    auto action = create_action(actionName, member_id, "member_id");
     decls->push_back(action);
-    decls->push_back(base_table);
+    decls->push_back(match_table);
 
     // member table match on member_id
-    auto member_table = create_member_table(tbl, memberKeyName);
+    auto member_table = create_member_table(tbl, member_id);
     decls->push_back(member_table);
 
-    base_tables.insert(tbl->name);
+    match_tables.insert(tbl->name);
     member_tables.emplace(tbl->name, member_table->name);
 
     return decls;
@@ -1202,7 +1206,7 @@ const IR::Node* SplitP4TableCommon::postorder(IR::MethodCallStatement *statement
         if (!apply->isTableApply())
             return statement;
         auto table = apply->object->to<IR::P4Table>();
-        if (base_tables.count(table->name) == 0)
+        if (match_tables.count(table->name) == 0)
             return statement;
         auto decls = new IR::IndexedVector<IR::StatOrDecl>();
         decls->push_back(statement);
@@ -1260,7 +1264,7 @@ const IR::Node* SplitP4TableCommon::postorder(IR::IfStatement* statement) {
         if (!apply->isTableApply())
             return statement;
         auto table = apply->object->to<IR::P4Table>();
-        if (base_tables.count(table->name) == 0)
+        if (match_tables.count(table->name) == 0)
             return statement;
         // an action selector t.apply() is converted to
         // t0.apply();  // base table
@@ -1363,7 +1367,7 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
         if (!apply->isTableApply())
             return statement;
         auto table = apply->object->to<IR::P4Table>();
-        if (base_tables.count(table->name) == 0)
+        if (match_tables.count(table->name) == 0)
             return statement;
 
         // switch(t0.apply()) {} is converted to

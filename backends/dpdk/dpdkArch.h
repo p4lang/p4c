@@ -584,19 +584,15 @@ class ConvertLogicalExpression : public PassManager {
 };
 
 /*
- * Split ActionSelector into three tables:
- *   base table that matches on exact/ternary key and generates a group id
- *   group table that matches on group id and generates a member id
- *   member table that runs an action based on member id.
+ * Common code between SplitActionSelectorTable and SplitActionProfileTable
  */
-
 class SplitP4TableCommon : public Transform {
   public:
     enum class TableImplementation { DEFAULT, ACTION_PROFILE, ACTION_SELECTOR };
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
     TableImplementation implementation;
-    std::set<cstring> base_tables;
+    std::set<cstring> match_tables;
     std::map<cstring, cstring> group_tables;
     std::map<cstring, cstring> member_tables;
 
@@ -610,11 +606,17 @@ class SplitP4TableCommon : public Transform {
     const IR::Node* postorder(IR::SwitchStatement* ) override;
 
     std::tuple<const IR::P4Table*, cstring> create_match_table(const IR::P4Table* /* tbl */);
-    const IR::P4Action* create_action(cstring /* actionName */, cstring /* id */);
+    const IR::P4Action* create_action(cstring /* actionName */, cstring /* id */, cstring);
     const IR::P4Table* create_member_table(const IR::P4Table*, cstring);
     const IR::P4Table* create_group_table(const IR::P4Table*, cstring, cstring, int, int);
 };
 
+/*
+ * Split ActionSelector into three tables:
+ *   match table that matches on exact/ternary key and generates a group id
+ *   group table that matches on group id and generates a member id
+ *   member table that runs an action based on member id.
+ */
 class SplitActionSelectorTable : public SplitP4TableCommon {
   public:
 
@@ -624,6 +626,11 @@ class SplitActionSelectorTable : public SplitP4TableCommon {
     const IR::Node* postorder(IR::P4Table* tbl) override;
 };
 
+/*
+ * Split ActionProfile into two tables:
+ *   match table that matches on exact/ternary key and generates a member id
+ *   member table that runs an action based on member id.
+ */
 class SplitActionProfileTable : public SplitP4TableCommon {
  public:
     SplitActionProfileTable(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
@@ -640,7 +647,11 @@ class ConvertActionSelectorAndProfile : public PassManager {
     ConvertActionSelectorAndProfile(P4::ReferenceMap *refMap, P4::TypeMap* typeMap) {
         passes.emplace_back(new P4::TypeChecking(refMap, typeMap));
         passes.emplace_back(new SplitActionSelectorTable(refMap, typeMap));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.emplace_back(new P4::TypeChecking(refMap, typeMap, true));
         passes.emplace_back(new SplitActionProfileTable(refMap, typeMap));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.emplace_back(new P4::TypeChecking(refMap, typeMap, true));
     }
 };
 
