@@ -583,7 +583,7 @@ class ConvertLogicalExpression : public PassManager {
     }
 };
 
-/*
+/**
  * Common code between SplitActionSelectorTable and SplitActionProfileTable
  */
 class SplitP4TableCommon : public Transform {
@@ -611,7 +611,7 @@ class SplitP4TableCommon : public Transform {
     const IR::P4Table* create_group_table(const IR::P4Table*, cstring, cstring, int, int);
 };
 
-/*
+/**
  * Split ActionSelector into three tables:
  *   match table that matches on exact/ternary key and generates a group id
  *   group table that matches on group id and generates a member id
@@ -626,7 +626,7 @@ class SplitActionSelectorTable : public SplitP4TableCommon {
     const IR::Node* postorder(IR::P4Table* tbl) override;
 };
 
-/*
+/**
  * Split ActionProfile into two tables:
  *   match table that matches on exact/ternary key and generates a member id
  *   member table that runs an action based on member id.
@@ -639,7 +639,7 @@ class SplitActionProfileTable : public SplitP4TableCommon {
     const IR::Node* postorder(IR::P4Table* tbl) override;
 };
 
-/*
+/**
  * Handle ActionSelector and ActionProfile extern in PSA
  */
 class ConvertActionSelectorAndProfile : public PassManager {
