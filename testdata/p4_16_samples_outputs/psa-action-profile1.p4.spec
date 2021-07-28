@@ -32,6 +32,7 @@ struct EMPTY {
 	bit<8> psa_egress_output_metadata_clone
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
+	bit<32> Ingress_tbl_0_member_id
 }
 metadata instanceof EMPTY
 
@@ -43,6 +44,10 @@ struct a1_arg_t {
 
 struct a2_arg_t {
 	bit<16> param
+}
+
+struct tbl_0_set_member_id_arg_t {
+	bit<32> member_id
 }
 
 struct psa_ingress_output_metadata_t {
@@ -79,9 +84,27 @@ action a2 args instanceof a2_arg_t {
 	return
 }
 
+action tbl_0_set_member_id args instanceof tbl_0_set_member_id_arg_t {
+	mov m.Ingress_tbl_0_member_id t.member_id
+	return
+}
+
 table tbl {
 	key {
 		h.ethernet.srcAddr exact
+	}
+	actions {
+		tbl_0_set_member_id
+		NoAction
+	}
+	default_action NoAction args none 
+	size 0x10000
+}
+
+
+table tbl_0_member_table {
+	key {
+		m.Ingress_tbl_0_member_id exact
 	}
 	actions {
 		NoAction
@@ -89,7 +112,6 @@ table tbl {
 		a2
 	}
 	default_action NoAction args none 
-	action_selector ap_0
 	size 0x10000
 }
 
@@ -99,6 +121,7 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
 	table tbl
+	table tbl_0_member_table
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
 	tx m.psa_ingress_output_metadata_egress_port
