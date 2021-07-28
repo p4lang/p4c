@@ -87,25 +87,35 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options,
         if (auto mce = findContext<IR::MethodCallExpression>(ctx)) {
             auto mi = P4::MethodInstance::resolve(mce, &refMap, &typeMap);
             if (auto em = mi->to<P4::ExternMethod>()) {
-                if (em->originalExternType->getName().name ==
-                    "InternetChecksum") {
-                    if (em->method->getName().name == "add") {
+                cstring externType = em->originalExternType->getName().name;
+                cstring externMethod = em->method->getName().name;
+
+                std::vector<std::pair<cstring, cstring>> doNotCopyPropList = {
+                    {"Checksum", "update"},
+                    {"Hash", "get_hash"},
+                    {"InternetChecksum", "add"},
+                    {"InternetChecksum", "subtract"},
+                    {"InternetChecksum", "set_state"},
+                    {"Register", "read"},
+                    {"Register", "write"},
+                    {"Counter", "count"},
+                    {"Meter", "execute"},
+                    {"Digest", "pack"},
+                };
+                for (auto f : doNotCopyPropList) {
+                    if (externType == f.first && externMethod == f.second) {
+                        return false; } }
+            } else if (auto ef = mi->to<P4::ExternFunction>()) {
+                cstring externFuncName = ef->method->getName().name;
+                std::vector<cstring> doNotCopyPropList = {
+                    "verify",
+                };
+                for (auto f : doNotCopyPropList) {
+                    if (externFuncName == f)
                         return false;
-                    }
                 }
             }
         }
-
-        auto mce = e->to<IR::MethodCallExpression>();
-        if (mce == nullptr)
-            return true;
-        auto mi = P4::MethodInstance::resolve(mce, &refMap, &typeMap);
-        auto em = mi->to<P4::ExternMethod>();
-        if (em == nullptr)
-            return true;
-        if (em->originalExternType->name.name == "Register" ||
-            em->method->name.name == "read")
-            return false;
         return true;
     };
     if (DPDK::PsaSwitchContext::get().options().loadIRFromJson == false) {

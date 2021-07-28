@@ -735,6 +735,9 @@ const IR::Node *
 ConvertBinaryOperationTo2Params::postorder(IR::AssignmentStatement *a) {
     auto right = a->right;
     auto left = a->left;
+    // This pass does not apply to 'bool foo = (a == b)' or 'bool foo = (a > b)' etc.
+    if (right->to<IR::Operation_Relation>())
+        return a;
     if (auto r = right->to<IR::Operation_Binary>()) {
         if (!isSimpleExpression(r->right) || !isSimpleExpression(r->left))
             BUG("%1%: Statement Unroll pass failed", a);
@@ -933,6 +936,31 @@ const IR::Node *PrependPDotToActionArgs::preorder(IR::PathExpression *path) {
         }
     }
     return path;
+}
+
+const IR::Node* PrependPDotToActionArgs::preorder(IR::MethodCallExpression* mce) {
+    auto property = findContext<IR::Property>();
+    if (!property)
+        return mce;
+    if (property->name != "default_action" &&
+        property->name != "entries")
+        return mce;
+    auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
+    if (!mi->is<P4::ActionCall>())
+        return mce;
+    // We assume all action call has been converted to take struct as input,
+    // therefore, the arguments must be passed in as a list expression
+    if (mce->arguments->size() == 0)
+        return mce;
+    IR::Vector<IR::Expression> components;
+    for (auto arg : *mce->arguments) {
+        components.push_back(arg->expression);
+    }
+    auto arguments = new IR::Vector<IR::Argument>;
+    arguments->push_back(new IR::Argument(new IR::ListExpression(components)));
+    return new IR::MethodCallExpression(
+            mce->method,
+            arguments);
 }
 
 /* This function transforms the table so that all match keys come from the same struct.

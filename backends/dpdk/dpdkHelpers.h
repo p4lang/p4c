@@ -136,14 +136,18 @@ class ConvertStatementToDpdk : public Inspector {
     P4::ReferenceMap *refmap;
     DpdkVariableCollector *collector;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
+    std::map<cstring, int> *error_map;
+    const IR::P4Parser *parser = nullptr;
 
   public:
     ConvertStatementToDpdk(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkVariableCollector *collector,
-        std::map<const IR::Declaration_Instance *, cstring> *csum_map)
+        std::map<const IR::Declaration_Instance *, cstring> *csum_map,
+        std::map<cstring, int> *error_map)
         : typemap(typemap), refmap(refmap),
-          collector(collector), csum_map(csum_map) {}
+          collector(collector), csum_map(csum_map),
+          error_map(error_map) {}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() {
         return instructions;
     }
@@ -155,10 +159,11 @@ class ConvertStatementToDpdk : public Inspector {
     bool preorder(const IR::SwitchStatement* a) override;
 
     void add_instr(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
-    IR::IndexedVector<IR::DpdkAsmStatement> &get_instr() {
-        return instructions;
-    }
+    IR::IndexedVector<IR::DpdkAsmStatement> &get_instr() { return instructions; }
     int get_label_num() { return next_label_id; }
+    void process_relation_operation(const IR::Expression*, const IR::Operation_Relation*);
+    cstring append_parser_name(const IR::P4Parser* p, cstring);
+    void set_parser(const IR::P4Parser* p) { parser = p; }
 };
 
 } // namespace DPDK

@@ -109,7 +109,7 @@ action execute args instanceof execute_arg_t {
 	jmp LABEL_1END
 	LABEL_1FALSE :	mov m.Ingress_tmp 0x0
 	LABEL_1END :	mov m.local_metadata_port_out m.Ingress_tmp
-	regwr reg_0 t.index m.Ingress_tmp
+	regwr reg_0 t.index m.local_metadata_port_out
 	return
 }
 
