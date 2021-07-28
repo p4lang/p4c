@@ -585,6 +585,56 @@ SymbolicVoid* SymbolicVoid::instance = new SymbolicVoid();
 
 /*****************************************************************************************/
 
+void ExpressionEvaluator::postorder(const IR::Operation_Ternary* expression) {
+    auto e0 = get(expression->e0);
+    if (e0->is<SymbolicError>()) {
+        set(expression, e0);
+        return;
+    }
+    auto e1 = get(expression->e1);
+    if (e1->is<SymbolicError>()) {
+        set(expression, e1);
+        return;
+    }
+    auto e2 = get(expression->e2);
+    if (e2->is<SymbolicError>()) {
+        set(expression, e2);
+        return;
+    }
+    auto clone = expression->clone();
+    BUG_CHECK(e0->is<SymbolicInteger>(), "%1%: expected an SymbolicInteger", e0);
+    BUG_CHECK(e1->is<SymbolicInteger>(), "%1%: expected an SymbolicInteger", e1);
+    BUG_CHECK(e2->is<SymbolicInteger>(), "%1%: expected an SymbolicInteger", e2);
+    auto e0i = e0->to<SymbolicInteger>();
+    auto e1i = e1->to<SymbolicInteger>();
+    auto e2i = e2->to<SymbolicInteger>();
+    if (e0i->isUninitialized()) {
+        auto result = new SymbolicStaticError(expression->e0, "Uninitialized");
+        set(expression, result);
+        return;
+    } else if (e1i->isUninitialized()) {
+        auto result = new SymbolicStaticError(expression->e1, "Uninitialized");
+        set(expression, result);
+        return;
+    } else if (e2i->isUninitialized()) {
+        auto result = new SymbolicStaticError(expression->e2, "Uninitialized");
+        set(expression, result);
+        return;
+    }else if (!e0i->isUnknown() && !e1i->isUnknown() && !e2i->isUnknown()) {
+        clone->e0 = e0i->constant;
+        clone->e1 = e1i->constant;
+        clone->e2 = e2i->constant;
+        DoConstantFolding cf(refMap, typeMap);
+        auto result = clone->apply(cf);
+        BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
+        set(expression, new SymbolicInteger(result->to<IR::Constant>()));
+        return;
+    }
+    auto type = typeMap->getType(expression, true);
+    set(expression, new SymbolicInteger(ScalarValue::ValueState::NotConstant,
+                                        type->to<IR::Type_Bits>()));
+}
+
 void ExpressionEvaluator::postorder(const IR::Operation_Binary* expression) {
     auto l = get(expression->left);
     if (l->is<SymbolicError>()) {
