@@ -42,20 +42,25 @@ namespace UBPF {
         auto sz = block->getParameterValue(
                 program->model.registerModel.sizeParam.name);
         if (sz == nullptr || !sz->is<IR::Constant>()) {
-            error("Expected an integer argument for parameter %1% or %2%; is the model corrupted?",
+            error(ErrorType::ERR_MODEL,
+                  "Expected an integer argument for parameter %1% or %2%; is the model corrupted?",
                   program->model.registerModel.sizeParam.name, name);
             return;
         }
         auto cst = sz->to<IR::Constant>();
         if (!cst->fitsInt()) {
-            error("%1%: size too large", cst);
+            error(ErrorType::ERR_OVERLIMIT, "%1%: size too large", cst);
             return;
         }
         size = cst->asInt();
         if (size <= 0) {
-            error("%1%: negative size", cst);
+            error(ErrorType::ERR_UNEXPECTED, "%1%: negative size", cst);
             return;
         }
+    }
+
+    void UBPFRegister::emitInstance(EBPF::CodeBuilder *builder) {
+        UBPFTableBase::emitInstance(builder, EBPF::TableHash);
     }
 
     void UBPFRegister::emitMethodInvocation(EBPF::CodeBuilder *builder,
@@ -69,7 +74,7 @@ namespace UBPF {
             emitRegisterWrite(builder, method->expr);
             return;
         }
-        error("%1%: Unexpected method for %2%", method->expr,
+        error(ErrorType::ERR_UNEXPECTED, "%1%: Unexpected method for %2%", method->expr,
               program->model.registerModel.read.name);
     }
 
@@ -149,6 +154,5 @@ namespace UBPF {
 
         last_key_name = keyName;
     }
+
 }  // namespace UBPF
-
-

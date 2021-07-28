@@ -63,7 +63,8 @@ namespace UBPF {
                 builder->appendFormat(" = ubpf_hash(&%s, sizeof(%s))",
                         hashKeyInstanceName, hashKeyInstanceName);
             } else {
-                ::error("%1%: Not supported hash algorithm type", algorithmType);
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "%1%: Not supported hash algorithm type", algorithmType);
             }
 
             return;
@@ -74,7 +75,7 @@ namespace UBPF {
                 visit(function->expr->arguments->at(0)->expression);
                 builder->append(")");
             } else {
-                ::error("%1%: One argument expected", function->expr);
+                ::error(ErrorType::ERR_EXPECTED, "%1%: One argument expected", function->expr);
             }
             return;
         }
@@ -112,7 +113,8 @@ namespace UBPF {
 
         auto atype = UBPFTypeFactory::instance->create(dataArgument->type);
         if (!atype->is<UBPFListType>()) {
-            ::error("%1%: Unsupported argument type", dataArgument->type);
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "%1%: Unsupported argument type", dataArgument->type);
         }
         auto ubpfList = atype->to<UBPFListType>();
         ubpfList->name = this->refMap->newName("tuple");
@@ -154,7 +156,8 @@ namespace UBPF {
 
         if (declType->name.name == p4lib.packetOut.name) {
             if (method->method->name.name == p4lib.packetOut.emit.name) {
-                ::error("%1%: Emit extern not supported in control block", method->expr);
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "%1%: Emit extern not supported in control block", method->expr);
                 return;
             }
         } else if (declType->name.name ==
@@ -170,7 +173,7 @@ namespace UBPF {
             pRegister->emitMethodInvocation(builder, method);
             return;
         }
-        ::error("%1%: Unexpected method call", method->expr);
+        ::error(ErrorType::ERR_UNEXPECTED, "%1%: Unexpected method call", method->expr);
     }
 
     void
@@ -221,6 +224,30 @@ namespace UBPF {
         }
 
         builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat("if (%s == NULL) ", valueName.c_str());
+        builder->blockStart();
+
+        builder->emitIndent();
+        builder->appendLine("/* miss; find default action */");
+        builder->emitIndent();
+        builder->appendFormat("%s = 0", control->hitVariable.c_str());
+        builder->endOfStatement(true);
+
+        builder->emitIndent();
+        builder->append("value = ");
+        builder->target->emitTableLookup(builder, table->defaultActionMapName,
+                                         control->program->zeroKey, valueName);
+        builder->endOfStatement(true);
+        builder->blockEnd(false);
+        builder->append(" else ");
+        builder->blockStart();
+        builder->emitIndent();
+        builder->appendFormat("%s = 1", control->hitVariable.c_str());
+        builder->endOfStatement(true);
+        builder->blockEnd(true);
+
         builder->emitIndent();
         builder->appendFormat("if (%s != NULL) ", valueName.c_str());
         builder->blockStart();
@@ -315,7 +342,7 @@ namespace UBPF {
             return false;
         }
 
-        ::error("Unsupported method invocation %1%", expression);
+        ::error(ErrorType::ERR_UNEXPECTED, "Unsupported method invocation %1%", expression);
         return false;
     }
 
@@ -569,7 +596,7 @@ namespace UBPF {
             } else if (!b->is<IR::Block>()) {
                 continue;
             } else {
-                ::error("Unexpected block %s nested within control",
+                ::error(ErrorType::ERR_UNEXPECTED, "Unexpected block %s nested within control",
                         b->toString());
             }
         }
@@ -596,7 +623,7 @@ namespace UBPF {
             auto vd = decl->to<IR::Declaration_Variable>();
             auto etype = UBPFTypeFactory::instance->create(vd->type);
             builder->emitIndent();
-            etype->declare(builder, vd->name, false);
+            etype->declareInit(builder, vd->name, false);
             builder->endOfStatement(true);
             BUG_CHECK(vd->initializer == nullptr,
                       "%1%: declarations with initializers not supported",
@@ -622,11 +649,19 @@ namespace UBPF {
             it.second->emitInstance(builder);
     }
 
+    void UBPFControl::emitTableInitializers(EBPF::CodeBuilder *builder) {
+        for (auto it : tables)
+            it.second->emitInitializer(builder);
+    }
+
     bool UBPFControl::build() {
+        hitVariable = program->refMap->newName("hit");
         passVariable = program->refMap->newName("pass");
         auto pl = controlBlock->container->type->applyParams;
-        if (pl->size() != 3) {
-            ::error("Expected control block to have exactly 3 parameter");
+        size_t numberOfArgs = UBPFModel::instance.numberOfControlBlockArguments();
+        if (pl->size() != numberOfArgs) {
+            ::error(ErrorType::ERR_EXPECTED,
+                    "Expected control block to have exactly %d parameter", numberOfArgs);
             return false;
         }
 

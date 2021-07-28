@@ -19,7 +19,8 @@ limitations under the License.
 namespace P4 {
 
 void KeyNameGenerator::error(const IR::Expression* expression) {
-    ::error("%1%: Complex key expression requires a @name annotation",
+    ::error(ErrorType::ERR_EXPECTED,
+            "%1%: Complex key expression requires a @name annotation",
             expression);
 }
 
@@ -90,7 +91,7 @@ void KeyNameGenerator::postorder(const IR::ArrayIndex* expression) {
 }
 
 void KeyNameGenerator::postorder(const IR::Constant* expression)
-{ name.emplace(expression, expression->toString()); }
+{ name.emplace(expression, Util::toString(expression->value, 0, false, expression->base)); }
 
 void KeyNameGenerator::postorder(const IR::Slice* expression) {
     cstring e0 = getName(expression->e0);

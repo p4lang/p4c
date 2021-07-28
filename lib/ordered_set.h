@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_ORDERED_SET_H_
-#define P4C_LIB_ORDERED_SET_H_
+#ifndef _LIB_ORDERED_SET_H_
+#define _LIB_ORDERED_SET_H_
 
 #include <functional>
 #include <initializer_list>
@@ -205,7 +205,8 @@ class ordered_set {
         auto old = find(*it);
         if (old != data.end()) {
             data.erase(old); }
-        data_map.emplace(&*it, it); }
+        data_map.emplace(&*it, it);
+        return std::make_pair(it, true); }
 
     /* should be erase(const_iterator), but glibc++ std::list::erase is broken */
     iterator erase(iterator pos) {
@@ -246,4 +247,4 @@ auto intersects(const ordered_set<T, C1, A1> &a, const U &b) -> decltype(b.begin
     for (auto &el : b) if (a.count(el)) return true;
     return false; }
 
-#endif /* P4C_LIB_ORDERED_SET_H_ */
+#endif /* _LIB_ORDERED_SET_H_ */

@@ -1,4 +1,4 @@
-issue2413.p4(23): error: x: No argument supplied for b
+issue2413.p4(23): [--Werror=uninitialized] error: x: No argument supplied for b
         x(a);
         ^^^^
 issue2413.p4(18)

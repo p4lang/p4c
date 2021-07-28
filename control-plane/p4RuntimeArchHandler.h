@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef CONTROL_PLANE_P4RUNTIMEARCHHANDLER_H_
 #define CONTROL_PLANE_P4RUNTIMEARCHHANDLER_H_
 
-#include <boost/optional.hpp>
-
 #include <set>
+
+#include <boost/optional.hpp>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -92,7 +92,7 @@ class P4RuntimeSymbolType {
  private:
     // even if the constructor is protected, the static functions in the derived
     // classes cannot access it, which is why we use the make factory function
-    constexpr P4RuntimeSymbolType(p4rt_id_t id) noexcept
+    explicit constexpr P4RuntimeSymbolType(p4rt_id_t id) noexcept
         : id(id) { }
 
     /// The 8-bit id prefix for that type, as per the p4info.proto file.
@@ -390,14 +390,15 @@ struct Counterlike {
         // P4Info.
         auto unit = instance->getParameterValue("type");
         if (!unit->is<IR::Declaration_ID>()) {
-            ::error("%1% '%2%' has a unit type which is not an enum constant: %3%",
+            ::error(ErrorType::ERR_INVALID,
+                    "%1% '%2%' has a unit type which is not an enum constant: %3%",
                     CounterlikeTraits<Kind>::name(), declaration, unit);
             return boost::none;
         }
 
         auto size = instance->getParameterValue(CounterlikeTraits<Kind>::sizeParamName());
         if (!size->template is<IR::Constant>()) {
-            ::error("%1% '%2%' has a non-constant size: %3%",
+            ::error(ErrorType::ERR_INVALID, "%1% '%2%' has a non-constant size: %3%",
                     CounterlikeTraits<Kind>::name(), declaration, size);
             return boost::none;
         }
@@ -438,19 +439,22 @@ struct Counterlike {
                   "Caller should've ensured we have a name");
 
         if (instance.type->name != CounterlikeTraits<Kind>::directTypeName()) {
-            ::error("Expected a direct %1%: %2%", CounterlikeTraits<Kind>::name(),
+            ::error(ErrorType::ERR_EXPECTED,
+                    "Expected a direct %1%: %2%", CounterlikeTraits<Kind>::name(),
                     instance.expression);
             return boost::none;
         }
 
         auto unitArgument = instance.substitution.lookupByName("type")->expression;
         if (unitArgument == nullptr) {
-            ::error("Direct %1% instance %2% should take a constructor argument",
+            ::error(ErrorType::ERR_EXPECTED,
+                    "Direct %1% instance %2% should take a constructor argument",
                     CounterlikeTraits<Kind>::name(), instance.expression);
             return boost::none;
         }
         if (!unitArgument->is<IR::Member>()) {
-            ::error("Direct %1% instance %2% has an unexpected constructor argument",
+            ::error(ErrorType::ERR_UNEXPECTED,
+                    "Direct %1% instance %2% has an unexpected constructor argument",
                     CounterlikeTraits<Kind>::name(), instance.expression);
             return boost::none;
         }

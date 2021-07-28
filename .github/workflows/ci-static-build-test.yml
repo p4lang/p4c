@@ -1,0 +1,24 @@
+name: "static-build-test-p4c"
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Build a p4c release on Ubuntu 16.04
+  build-linux:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+    env:
+      CTEST_PARALLEL_LEVEL: 4
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Build (Linux)
+      run: |
+        tools/start_ccache
+        docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=build --build-arg ENABLE_UNIFIED_COMPILATION=ON --build-arg BUILD_STATIC_RELEASE=ON --build-arg ENABLE_GMP=ON .

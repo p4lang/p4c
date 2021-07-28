@@ -49,6 +49,8 @@ TEST_F(FromJSONTest, load_ir_from_json) {
     ASSERT_FALSE(exitCode);
     exitCode = system("diff outputTO.json outputFROM.json");
     ASSERT_FALSE(exitCode);
+    exitCode = system("rm -f outputFROM.json outputTo.json");
+    ASSERT_FALSE(exitCode);
 }
 
 }  // namespace Test

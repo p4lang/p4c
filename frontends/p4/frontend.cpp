@@ -30,6 +30,7 @@ limitations under the License.
 // Passes
 #include "actionsInlining.h"
 #include "checkConstants.h"
+#include "checkCoreMethods.h"
 #include "checkNamedArgs.h"
 #include "createBuiltins.h"
 #include "defaultArguments.h"
@@ -46,6 +47,8 @@ limitations under the License.
 #include "moveDeclarations.h"
 #include "parseAnnotations.h"
 #include "parserControlFlow.h"
+#include "reassociation.h"
+#include "removeParameters.h"
 #include "removeReturns.h"
 #include "resetHeaders.h"
 #include "setHeaders.h"
@@ -53,8 +56,10 @@ limitations under the License.
 #include "simplify.h"
 #include "simplifyDefUse.h"
 #include "simplifyParsers.h"
+#include "simplifySwitch.h"
 #include "specialize.h"
 #include "specializeGenericFunctions.h"
+#include "specializeGenericTypes.h"
 #include "strengthReduction.h"
 #include "structInitializers.h"
 #include "switchAddDefault.h"
@@ -127,7 +132,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
     refMap.setIsV1(isv1);
 
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
-    std::initializer_list<Visitor *> frontendPasses = {
+    PassManager passes({
         new P4V1::getV1ModelVersion,
         // Parse annotations
         new ParseAnnotationBodies(&parseAnnotations, &typeMap),
@@ -143,22 +148,27 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         // Desugars direct parser and control applications
         // into instantiations followed by application
         new InstantiateDirectCalls(&refMap),
-        // Type checking and type inference.  Also inserts
-        // explicit casts where implicit casts exist.
         new ResolveReferences(&refMap),  // check shadowing
         new Deprecated(&refMap),
         new CheckNamedArgs(),
+        // Type checking and type inference.  Also inserts
+        // explicit casts where implicit casts exist.
         new TypeInference(&refMap, &typeMap, false),  // insert casts
         new ValidateMatchAnnotations(&typeMap),
-        new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
         new BindTypeVariables(&refMap, &typeMap),
-        new RemoveParserControlFlow(&refMap, &typeMap),
+        new SpecializeGenericTypes(&refMap, &typeMap),
+        new DefaultArguments(&refMap, &typeMap),  // add default argument values to parameters
+        new ResolveReferences(&refMap),
+        new TypeInference(&refMap, &typeMap, false),  // more casts may be needed
+        new CheckCoreMethods(&refMap, &typeMap),
+        new RemoveParserIfs(&refMap, &typeMap),
         new StructInitializers(&refMap, &typeMap),
         new SpecializeGenericFunctions(&refMap, &typeMap),
         new TableKeyNames(&refMap, &typeMap),
-        new PassRepeated({
+        PassRepeated({
             new ConstantFolding(&refMap, &typeMap),
             new StrengthReduction(&refMap, &typeMap),
+            new Reassociation(),
             new UselessCasts(&refMap, &typeMap)
         }),
         new SimplifyControlFlow(&refMap, &typeMap),
@@ -171,8 +181,8 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new MoveInitializers(&refMap),
         new SideEffectOrdering(&refMap, &typeMap, skipSideEffectOrdering),
-        new SetHeaders(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
+        new SimplifySwitch(&refMap, &typeMap),
         new MoveDeclarations(),  // Move all local declarations to the beginning
         new SimplifyDefUse(&refMap, &typeMap),
         new UniqueParameters(&refMap, &typeMap),
@@ -187,29 +197,30 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         evaluator,
         new Inline(&refMap, &typeMap, evaluator),
         new InlineActions(&refMap, &typeMap),
+        new LocalizeAllActions(&refMap),
+        new UniqueNames(&refMap),
+        new UniqueParameters(&refMap, &typeMap),
+        // Must be done before inlining functions, to allow
+        // function calls used as action arguments to be inlined
+        // in the proper place.
+        new RemoveActionParameters(&refMap, &typeMap),
         new InlineFunctions(&refMap, &typeMap),
+        new SetHeaders(&refMap, &typeMap),
         // Check for constants only after inlining
         new CheckConstants(&refMap, &typeMap),
         new SimplifyControlFlow(&refMap, &typeMap),
-        new RemoveParserControlFlow(&refMap, &typeMap),
-        new UniqueNames(&refMap),
-        new LocalizeAllActions(&refMap),
+        new RemoveParserControlFlow(&refMap, &typeMap),  // more ifs may have been added to parsers
         new UniqueNames(&refMap),  // needed again after inlining
-        new UniqueParameters(&refMap, &typeMap),
+        new MoveDeclarations(),  // needed again after inlining
         new SimplifyControlFlow(&refMap, &typeMap),
         new HierarchicalNames(),
         new FrontEndLast(),
-    };
+    });
     if (options.listFrontendPasses) {
-        for (auto it : frontendPasses) {
-            if (it != nullptr) {
-                *outStream << it->name() <<'\n';
-            }
-        }
+        passes.listPasses(*outStream, "\n");
+        *outStream << std::endl;
         return nullptr;
     }
-
-    PassManager passes(frontendPasses);
 
     if (options.excludeFrontendPasses) {
        passes.removePasses(options.passesToExcludeFrontend);

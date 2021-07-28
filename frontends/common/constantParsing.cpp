@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "constantParsing.h"
 
-#include "ir/configuration.h"
+#include "frontends/common/options.h"
 #include "ir/ir.h"
 #include "lib/gmputil.h"
 #include "lib/source_file.h"
@@ -39,10 +39,10 @@ parseConstantWithWidth(Util::SourceInfo srcInfo, const char* text,
     sep += strspn(sep, " \t\r\n");
     if (sep == nullptr || !*sep)
        BUG("Expected to find separator %1%", text);
-    if (size <= 0) {
+    if (size < 0) {
         ::error(ErrorType::ERR_INVALID, "%1%: invalid width; %2% must be positive", srcInfo, size);
         return nullptr; }
-    if (size > P4CConfiguration::MaximumWidthSupported) {
+    if (size > P4CContext::getConfig().maximumWidthSupported()) {
         ::error(ErrorType::ERR_OVERLIMIT, "%1%: %2% size too large", srcInfo, size);
         return nullptr; }
 

@@ -16,7 +16,7 @@ limitations under the License.
 
 #include "lib/gmputil.h"
 #include "constantFolding.h"
-#include "ir/configuration.h"
+#include "frontends/common/options.h"
 #include "frontends/p4/enumInstance.h"
 
 namespace P4 {
@@ -103,7 +103,8 @@ const IR::Node* DoConstantFolding::postorder(IR::Type_Bits* type) {
         if (auto cst = type->expression->to<IR::Constant>()) {
             type->size = cst->asInt();
             type->expression = nullptr;
-            if (type->size <= 0) {
+            if (type->size < 0 ||
+                (type->size == 0 && type->isSigned)) {
                 ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
                 // Convert it to something legal so we don't get
                 // weird errors elsewhere.
@@ -154,11 +155,26 @@ const IR::Node* DoConstantFolding::postorder(IR::Declaration_Constant* d) {
             } else if (!d->type->is<IR::Type_InfInt>()) {
                 // Don't fold this yet, we can't evaluate the cast.
                 return d;
+            } else {
+                // Destination type is InfInt; we must "erase" the width of the source
+                if (!cst->type->is<IR::Type_InfInt>()) {
+                    init = new IR::Constant(cst->srcInfo, cst->value, cst->base);
+                }
             }
         }
         if (init != d->initializer)
             d = new IR::Declaration_Constant(d->srcInfo, d->name, d->annotations, d->type, init);
     }
+    if (!typesKnown && (init->is<IR::StructExpression>() ||
+                        // If we substitute structs before type checking we may lose casts
+                        // e.g. struct S { bit<8> x; }
+                        // const S s = { x = 1024 };
+                        // const bit<16> z = (bit<16>)s.x;
+                        // If we substitute this too early we may get a value of 1024 for z.
+                        init->is<IR::Cast>()))
+                        // Also, note that early in the compilation some struct expressions may
+                        // still be represented as cast expressions that cast to a struct type.
+        return d;
     LOG3("Constant " << d << " set to " << init);
     constants.emplace(getOriginal<IR::Declaration_Constant>(), init);
     return d;
@@ -180,6 +196,43 @@ const IR::Node* DoConstantFolding::preorder(IR::ArrayIndex* e) {
     visit(e->right);
     assignmentTarget = save;
     prune();
+
+    if (!typesKnown)
+        return e;
+    auto orig = getOriginal<IR::ArrayIndex>();
+    auto type = typeMap->getType(orig->left, true);
+    if (type->is<IR::Type_Tuple>()) {
+        auto init = getConstant(e->right);
+        if (init == nullptr) {
+            if (typesKnown)
+                ::error(ErrorType::ERR_INVALID,
+                        "%1%: Index must evaluate to a constant", e->right);
+            return e;
+        }
+        if (auto cst = init->to<IR::Constant>()) {
+            if (!cst->fitsInt()) {
+                ::error(ErrorType::ERR_INVALID, "Index too large: %1%", cst);
+                return e;
+            }
+            int index = cst->asInt();
+            if (index < 0) {
+                ::error(ErrorType::ERR_INVALID,
+                        "Tuple index %1% must be constant", e->right);
+                return e;
+            }
+            auto value = getConstant(e->left);
+            if (!value)
+                return e;
+            if (auto list = value->to<IR::ListExpression>()) {
+                if (static_cast<size_t>(index) >= list->size()) {
+                    ::error(ErrorType::ERR_INVALID,
+                            "Tuple index %1% out of bounds", e->right);
+                    return e;
+                }
+                return CloneConstants::clone(list->components.at(static_cast<size_t>(index)));
+            }
+        }
+    }
     return e;
 }
 
@@ -515,11 +568,20 @@ const IR::Node* DoConstantFolding::postorder(IR::LOr* e) {
     return new IR::BoolLiteral(left->srcInfo, true);
 }
 
+static bool overflowWidth(const IR::Node* node, int width) {
+    if (width > P4CContext::getConfig().maximumWidthSupported()) {
+        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Compiler only supports widths up to %2%",
+                node, P4CContext::getConfig().maximumWidthSupported());
+        return true;
+    }
+    return false;
+}
+
 const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
     const IR::Expression* msb = getConstant(e->e1);
     const IR::Expression* lsb = getConstant(e->e2);
     if (msb == nullptr || lsb == nullptr) {
-        ::error(ErrorType::ERR_EXPECTED, "%1%: bit indexes must be compile-time constants", e);
+        ::error(ErrorType::ERR_EXPECTED, "%1%: bit indices must be compile-time constants", e);
         return e;
     }
 
@@ -550,12 +612,8 @@ const IR::Node* DoConstantFolding::postorder(IR::Slice* e) {
                 "%1%: bit slicing should be specified as [msb:lsb]", e);
         return e;
     }
-    if (m > P4CConfiguration::MaximumWidthSupported ||
-        l > P4CConfiguration::MaximumWidthSupported) {
-        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Compiler only supports widths up to %2%",
-                e, P4CConfiguration::MaximumWidthSupported);
+    if (overflowWidth(e, m) || overflowWidth(e, l))
         return e;
-    }
     big_int value = cbase->value >> l;
     big_int mask = 1;
     mask = (mask << (m - l + 1)) - 1;
@@ -571,7 +629,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
     auto type = typeMap->getType(orig->expr, true);
     auto origtype = typeMap->getType(orig);
 
-    const IR::Expression* result;
+    const IR::Expression* result = e;
     if (type->is<IR::Type_Stack>() && e->member == IR::Type_Stack::arraySize) {
         auto st = type->to<IR::Type_Stack>();
         auto size = st->getSize();
@@ -580,6 +638,7 @@ const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
         auto expr = getConstant(e->expr);
         if (expr == nullptr)
             return e;
+
         auto structType = type->to<IR::Type_StructLike>();
         if (structType == nullptr)
             BUG("Expected a struct type, got %1%", type);
@@ -595,14 +654,15 @@ const IR::Node* DoConstantFolding::postorder(IR::Member* e) {
             }
 
             if (!found)
-                BUG("Could not find field %1% in type %2%", e->member, type);
+                    BUG("Could not find field %1% in type %2%", e->member, type);
             result = CloneConstants::clone(list->components.at(index));
         } else if (auto si = expr->to<IR::StructExpression>()) {
             if (origtype->is<IR::Type_Header>() && e->member.name == IR::Type_Header::isValid)
                 return e;
             auto ne = si->components.getDeclaration<IR::NamedExpression>(e->member.name);
-            BUG_CHECK(ne != nullptr, "Could not find field %1% in initializer %2%", e->member, si);
-            return CloneConstants::clone(ne->expression);
+            BUG_CHECK(ne != nullptr,
+                      "Could not find field %1% in initializer %2%", e->member, si);
+                return CloneConstants::clone(ne->expression);
         } else {
             BUG("Unexpected initializer: %1%", expr);
         }
@@ -635,6 +695,8 @@ const IR::Node* DoConstantFolding::postorder(IR::Concat* e) {
     }
 
     auto resultType = IR::Type_Bits::get(lt->size + rt->size, lt->isSigned);
+    if (overflowWidth(e, resultType->size))
+        return e;
     big_int value = Util::shift_left(left->value, static_cast<unsigned>(rt->size)) + right->value;
     return new IR::Constant(e->srcInfo, resultType, value, left->base);
 }
@@ -704,6 +766,8 @@ const IR::Node* DoConstantFolding::shift(const IR::Operation_Binary* e) {
 
     big_int value = cl->value;
     unsigned shift = static_cast<unsigned>(cr->asInt());
+    if (overflowWidth(e, shift))
+        return e;
 
     auto tb = left->type->to<IR::Type_Bits>();
     if (tb != nullptr) {
@@ -781,10 +845,8 @@ DoConstantFolding::Result
 DoConstantFolding::setContains(const IR::Expression* keySet, const IR::Expression* select) const {
     if (keySet->is<IR::DefaultExpression>())
         return Result::Yes;
-    if (select->is<IR::ListExpression>()) {
-        auto list = select->to<IR::ListExpression>();
-        if (keySet->is<IR::ListExpression>()) {
-            auto klist = keySet->to<IR::ListExpression>();
+    if (auto list = select->to<IR::ListExpression>()) {
+        if (auto klist = keySet->to<IR::ListExpression>()) {
             BUG_CHECK(list->components.size() == klist->components.size(),
                       "%1% and %2% size mismatch", list, klist);
             for (unsigned i=0; i < list->components.size(); i++) {
@@ -801,22 +863,38 @@ DoConstantFolding::setContains(const IR::Expression* keySet, const IR::Expressio
 
     if (select->is<IR::BoolLiteral>()) {
         auto key = getConstant(keySet);
-        if (key == nullptr)
+        if (key == nullptr) {
             ::error(ErrorType::ERR_TYPE_ERROR, "%1%: expression must evaluate to a constant", key);
+            return Result::No;
+        }
         BUG_CHECK(key->is<IR::BoolLiteral>(), "%1%: expected a boolean", key);
         if (select->to<IR::BoolLiteral>()->value == key->to<IR::BoolLiteral>()->value)
             return Result::Yes;
         return Result::No;
     }
 
-    BUG_CHECK(select->is<IR::Constant>(), "%1%: expected a constant", select);
-    auto cst = select->to<IR::Constant>();
-    if (keySet->is<IR::Constant>()) {
-        if (keySet->to<IR::Constant>()->value == cst->value)
+    if (select->is<IR::Member>()) {
+        // This must be an enum value
+        auto key = getConstant(keySet);
+        if (key == nullptr) {
+            ::error(ErrorType::ERR_TYPE_ERROR, "%1%: expression must evaluate to a constant", key);
+            return Result::No;
+        }
+        auto sel = getConstant(select);
+        // For Enum and SerEnum instances we can just use expression equivalence.
+        // This assumes that type checking does not allow us to compare constants to SerEnums.
+        if (key->equiv(*sel))
             return Result::Yes;
         return Result::No;
-    } else if (keySet->is<IR::Range>()) {
-        auto range = keySet->to<IR::Range>();
+    }
+
+    BUG_CHECK(select->is<IR::Constant>(), "%1%: expected a constant", select);
+    auto cst = select->to<IR::Constant>();
+    if (auto kc = keySet->to<IR::Constant>()) {
+        if (kc->value == cst->value)
+            return Result::Yes;
+        return Result::No;
+    } else if (auto range = keySet->to<IR::Range>()) {
         auto left = getConstant(range->left);
         if (left == nullptr) {
             ::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant", left);
@@ -831,15 +909,14 @@ DoConstantFolding::setContains(const IR::Expression* keySet, const IR::Expressio
             right->to<IR::Constant>()->value >= cst->value)
             return Result::Yes;
         return Result::No;
-    } else if (keySet->is<IR::Mask>()) {
+    } else if (auto mask = keySet->to<IR::Mask>()) {
         // check if left & right == cst & right
-        auto range = keySet->to<IR::Mask>();
-        auto left = getConstant(range->left);
+        auto left = getConstant(mask->left);
         if (left == nullptr) {
             ::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant", left);
             return Result::DontKnow;
         }
-        auto right = getConstant(range->right);
+        auto right = getConstant(mask->right);
         if (right == nullptr) {
             ::error(ErrorType::ERR_INVALID, "%1%: expression must evaluate to a constant", right);
             return Result::DontKnow;

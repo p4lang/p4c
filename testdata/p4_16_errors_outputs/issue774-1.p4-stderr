@@ -1,3 +1,14 @@
-issue774-1.p4(7): [--Werror=type-error] error: : don't care argument only allowed for out parameters
+issue774-1.p4(7): [--Werror=type-error] error: f
         f(_);
-          ^
+        ^^^^
+  ---- Actual error:
+issue774-1.p4(7): : don't care argument is only allowed for out parameters
+          f(_);
+            ^
+  ---- Originating from:
+issue774-1.p4(3): Function type 'f' does not match invocation type '<Method call>'
+  extern void f(in bit<32> x);
+              ^
+issue774-1.p4(7)
+          f(_);
+          ^^^^

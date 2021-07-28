@@ -100,7 +100,8 @@ const IR::Node* ActionsInliner::preorder(IR::MethodCallStatement* statement) {
             // This works because there can be no side-effects in the evaluation of this
             // argument.
             if (!argument) {
-                ::error("%1%: No argument supplied for %2%", statement, param);
+                ::error(ErrorType::ERR_UNINITIALIZED,
+                        "%1%: No argument supplied for %2%", statement, param);
                 continue;
             }
             subst.add(param, argument);

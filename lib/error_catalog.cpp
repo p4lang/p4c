@@ -35,6 +35,7 @@ const int ErrorType::ERR_UNSUPPORTED_ON_TARGET = 12;
 const int ErrorType::ERR_DUPLICATE     =  13;
 const int ErrorType::ERR_IO            =  14;
 const int ErrorType::ERR_UNREACHABLE   =  15;
+const int ErrorType::ERR_MODEL         =  16;
 // If we specialize for 1000 error types we're good!
 const int ErrorType::ERR_MAX_ERRORS    = 999;
 
@@ -57,6 +58,8 @@ const int ErrorType::WARN_PARSER_TRANSITION = 1014;
 const int ErrorType::WARN_UNREACHABLE       = 1015;
 const int ErrorType::WARN_SHADOWING         = 1016;
 const int ErrorType::WARN_IGNORE            = 1017;
+const int ErrorType::WARN_UNINITIALIZED_OUT_PARAM  = 1018;
+const int ErrorType::WARN_UNINITIALIZED_USE = 1019;
 const int ErrorType::WARN_MAX_WARNINGS      = 2142;
 
 // map from errorCode to ErrorSig
@@ -77,6 +80,7 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     { ErrorType::ERR_UNSUPPORTED_ON_TARGET, "target-error"},
     { ErrorType::ERR_DUPLICATE,          "duplicate"},
     { ErrorType::ERR_IO,                 "I/O error"},
+    { ErrorType::ERR_MODEL,              "Target model error"},
 
     // Warnings
     { ErrorType::LEGACY_WARNING,         "legacy"},
@@ -96,5 +100,7 @@ std::map<int, cstring> ErrorCatalog::errorCatalog = {
     { ErrorType::WARN_PARSER_TRANSITION, "parser-transition"},
     { ErrorType::WARN_UNREACHABLE,       "parser-transition"},
     { ErrorType::WARN_SHADOWING,         "shadow"},
+    { ErrorType::WARN_UNINITIALIZED_USE, "uninitialized_use"},
+    { ErrorType::WARN_UNINITIALIZED_OUT_PARAM,     "uninitialized_out_param"},
     { ErrorType::WARN_IGNORE,            "ignore"}
 };

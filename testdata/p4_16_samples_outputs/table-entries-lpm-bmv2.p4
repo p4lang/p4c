@@ -66,7 +66,6 @@ control ingress(inout Header_t h, inout Meta_t m, inout standard_metadata_t stan
                         0x12 : a_with_control_params(12);
                         default : a_with_control_params(13);
         }
-
     }
     apply {
         t_lpm.apply();

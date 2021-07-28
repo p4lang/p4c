@@ -26,8 +26,6 @@ namespace P4 {
 class RenameMap {
     /// Internal declaration name
     std::map<const IR::IDeclaration*, cstring> newName;
-    /// all actions that appear in tables
-    std::set<const IR::P4Action*> inTable;
     /// Map from method call to action that is being called
     std::map<const IR::MethodCallExpression*, const IR::P4Action*> actionCall;
 
@@ -45,8 +43,6 @@ class RenameMap {
     }
     void foundInTable(const IR::P4Action* action);
     void markActionCall(const IR::P4Action* action, const IR::MethodCallExpression* call);
-    bool isInTable(const IR::P4Action* action)
-    { return inTable.find(action) != inTable.end(); }
     const IR::P4Action* actionCalled(const IR::MethodCallExpression* expression) const;
 };
 
@@ -80,8 +76,14 @@ class FindSymbols : public Inspector {
     }
     void postorder(const IR::Declaration_Variable* decl) override
     { doDecl(decl); }
-    void postorder(const IR::Declaration_Constant* decl) override
-    { doDecl(decl); }
+    void postorder(const IR::Declaration_Constant* decl) override {
+        // Skip toplevel constants with names like __
+        // We assume that these do not clash and no new symbols with
+        // these names will be added.
+        if (decl->getName().name.startsWith("__") && getParent<IR::P4Program>())
+            return;
+        doDecl(decl);
+    }
     void postorder(const IR::Declaration_Instance* decl) override
     { if (!isTopLevel()) doDecl(decl); }
     void postorder(const IR::P4Table* decl) override
@@ -119,12 +121,8 @@ class FindParameters : public Inspector {
     ReferenceMap* refMap;  // used to generate new names
     RenameMap*    renameMap;
 
-    // If all is true then rename all parameters, else rename only
-    // directional parameters
-    void doParameters(const IR::ParameterList* pl, bool all) {
+    void doParameters(const IR::ParameterList* pl) {
         for (auto p : pl->parameters) {
-            if (!all && p->direction == IR::Direction::None)
-                continue;
             cstring newName = refMap->newName(p->name);
             renameMap->setNewName(p, newName);
         }
@@ -134,8 +132,7 @@ class FindParameters : public Inspector {
             refMap(refMap), renameMap(renameMap)
     { CHECK_NULL(refMap); CHECK_NULL(renameMap); setName("FindParameters"); }
     void postorder(const IR::P4Action* action) override {
-        bool inTable = renameMap->isInTable(action);
-        doParameters(action->parameters, !inTable);
+        doParameters(action->parameters);
     }
 };
 

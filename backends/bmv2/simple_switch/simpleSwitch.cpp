@@ -36,9 +36,8 @@ using BMV2::stringRepr;
 namespace BMV2 {
 
 void ParseV1Architecture::modelError(const char* format, const IR::Node* node) {
-    ::error(ErrorType::ERR_UNSUPPORTED,
-            (cstring("%1%") + format +
-             "\nAre you using an up-to-date v1model.p4?").c_str(), node);
+    ::error(ErrorType::ERR_MODEL,
+            (cstring(format) + "\nAre you using an up-to-date v1model.p4?").c_str(), node);
 }
 
 bool ParseV1Architecture::preorder(const IR::PackageBlock* main) {
@@ -216,7 +215,7 @@ Util::IJson* ExternConverter_hash::convertExternFunction(
     auto ei = P4::EnumInstance::resolve(mc->arguments->at(1)->expression, ctxt->typeMap);
     CHECK_NULL(ei);
     if (supportedHashAlgorithms.find(ei->name) == supportedHashAlgorithms.end()) {
-        ::error("%1%: unexpected algorithm", ei->name);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET, "%1%: unexpected algorithm", ei->name);
         return nullptr;
     }
     auto fields = mc->arguments->at(3);
@@ -497,7 +496,8 @@ void ExternConverter_meter::convertExternInstance(
     else if (mkind_name == v1model.meter.meterType.bytes.name)
         type = "bytes";
     else
-        ::error("Unexpected meter type %1%", mkind->getNode());
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "Unexpected meter type %1%", mkind->getNode());
     jmtr->emplace("type", type);
     ctxt->json->meter_arrays->append(jmtr);
 }
@@ -554,7 +554,8 @@ void ExternConverter_register::convertExternInstance(
         return;
     }
     if (sz->to<IR::Constant>()->value == 0)
-        error("%1%: direct registers are not supported in bmv2", inst);
+        error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+              "%1%: direct registers are not supported in bmv2", inst);
     jreg->emplace("size", sz->to<IR::Constant>()->value);
     if (!eb->instanceType->is<IR::Type_SpecializedCanonical>()) {
         modelError("%1%: Expected a generic specialized type", eb->instanceType);
@@ -567,12 +568,14 @@ void ExternConverter_register::convertExternInstance(
     }
     auto regType = st->arguments->at(0);
     if (!regType->is<IR::Type_Bits>()) {
-        ::error("%1%: Only registers with bit or int types are currently supported", eb);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "%1%: Only registers with bit or int types are currently supported", eb);
         return;
     }
     unsigned width = regType->width_bits();
     if (width == 0) {
-        ::error("%1%: unknown width", st->arguments->at(0));
+        ::error(ErrorType::ERR_EXPRESSION,
+                "%1%: unknown width", st->arguments->at(0));
         return;
     }
     jreg->emplace("bitwidth", width);
@@ -699,8 +702,10 @@ void ExternConverter_action_profile::convertExternInstance(
 
     auto add_size = [&action_profile, &eb](const cstring &pname) {
         auto sz = eb->findParameterValue(pname);
+        BUG_CHECK(sz, "%1%Invalid declaration of extern ctor: no size param",
+                  eb->constructor->srcInfo);
         if (!sz->is<IR::Constant>()) {
-            ::error("%1%: expected a constant", sz);
+            ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
             return;
         }
         action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
@@ -719,11 +724,12 @@ void ExternConverter_action_profile::convertExternInstance(
         }
         auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
         selector->emplace("algo", algo);
-        auto input = ctxt->selector_check->get_selector_input(inst);
+        auto input = ctxt->get_selector_input(inst);
         if (input == nullptr) {
             // the selector is never used by any table, we cannot figure out its
             // input and therefore cannot include it in the JSON
-            ::warning("Action selector '%1%' is never referenced by a table "
+            ::warning(ErrorType::WARN_UNUSED,
+                      "Action selector '%1%' is never referenced by a table "
                       "and cannot be included in bmv2 JSON", c);
             return;
         }
@@ -755,8 +761,10 @@ void ExternConverter_action_selector::convertExternInstance(
 
     auto add_size = [&action_profile, &eb](const cstring &pname) {
         auto sz = eb->findParameterValue(pname);
+        BUG_CHECK(sz, "%1%Invalid declaration of extern ctor: no size param",
+                  eb->constructor->srcInfo);
         if (!sz->is<IR::Constant>()) {
-            ::error("%1%: expected a constant", sz);
+            ::error(ErrorType::ERR_EXPECTED, "%1%: expected a constant", sz);
             return;
         }
         action_profile->emplace("max_size", sz->to<IR::Constant>()->value);
@@ -775,11 +783,12 @@ void ExternConverter_action_selector::convertExternInstance(
         }
         auto algo = ExternConverter::convertHashAlgorithm(hash->to<IR::Declaration_ID>()->name);
         selector->emplace("algo", algo);
-        auto input = ctxt->selector_check->get_selector_input(inst);
+        auto input = ctxt->get_selector_input(inst);
         if (input == nullptr) {
             // the selector is never used by any table, we cannot figure out its
             // input and therefore cannot include it in the JSON
-            ::warning("Action selector '%1%' is never referenced by a table "
+            ::warning(ErrorType::WARN_UNUSED,
+                      "Action selector '%1%' is never referenced by a table "
                       "and cannot be included in bmv2 JSON", c);
             return;
         }
@@ -793,6 +802,36 @@ void ExternConverter_action_selector::convertExternInstance(
 
     ctxt->action_profiles->append(action_profile);
 }
+
+namespace {
+/// Converts expr into a ListExpression or returns nullptr if not
+/// possible
+static const IR::ListExpression* convertToList(const IR::Expression* expr, P4::TypeMap* typeMap) {
+    if (auto l = expr->to<IR::ListExpression>())
+        return l;
+
+    // expand it into a list
+    auto list = new IR::ListExpression({});
+    auto type = typeMap->getType(expr, true);
+    auto st = type->to<IR::Type_StructLike>();
+    if (!st) {
+        return nullptr;
+    }
+    if (auto se = expr->to<IR::StructExpression>()) {
+        for (auto f : se->components)
+            list->push_back(f->expression);
+    } else {
+        for (auto f : st->fields) {
+            auto e = new IR::Member(expr, f->name);
+            auto ftype = typeMap->getType(f);
+            typeMap->setType(e, ftype);
+            list->push_back(e);
+        }
+    }
+    typeMap->setType(list, type);
+    return list;
+}
+}  // namespace
 
 Util::IJson* ExternConverter_log_msg::convertExternFunction(
     ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
@@ -813,25 +852,21 @@ Util::IJson* ExternConverter_log_msg::convertExternFunction(
         auto arg1 = mc->arguments->at(1)->expression;
         // this must be a list expression, with all components
         // evaluating to integral types.
-        auto argType = ctxt->typeMap->getType(arg1);
-        if (auto ts = argType->to<IR::Type_List>()) {
-            for (auto tf : ts->components) {
-                if (!tf->is<IR::Type_Bits>() && !tf->is<IR::Type_Boolean>()) {
-                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                            "%1%: only integral values supported for logged values", mc);
-                    return primitive;
-                }
-            }
-        } else {
+        auto le = convertToList(arg1, ctxt->typeMap);
+        if (!le) {
             ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
-                    "%1%: Second argument must be a list expression: %2%", mc, arg1);
+                     "%1%: Second argument must be a list expression: %2%", mc, arg1);
             return primitive;
         }
 
-        auto le = arg1->to<IR::ListExpression>();
-        CHECK_NULL(le);
         auto arr = new Util::JsonArray();
         for (auto v : le->components) {
+            auto tf = ctxt->typeMap->getType(v);
+            if (!tf->is<IR::Type_Bits>() && !tf->is<IR::Type_Boolean>()) {
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "%1%: only integral values supported for logged values", mc);
+                return primitive;
+            }
             auto val = ctxt->conv->convert(v, false, true, true);
             arr->append(val);
         }
@@ -846,8 +881,9 @@ Util::IJson* ExternConverter_log_msg::convertExternFunction(
 
 void
 SimpleSwitchBackend::modelError(const char* format, const IR::Node* node) const {
-    ::error(format, node);
-    ::error("Are you using an up-to-date v1model.p4?");
+    ::error(ErrorType::ERR_MODEL,
+            (cstring("%1%") + format +
+             "\nAre you using an up-to-date v1model.p4?").c_str(), node);
 }
 
 cstring
@@ -861,22 +897,10 @@ SimpleSwitchBackend::createCalculation(cstring algo, const IR::Expression* field
     if (sourcePositionNode != nullptr)
         calc->emplace_non_null("source_info", sourcePositionNode->sourceInfoJsonObj());
     calc->emplace("algo", algo);
-    if (!fields->is<IR::ListExpression>()) {
-        // expand it into a list
-        auto list = new IR::ListExpression({});
-        auto type = typeMap->getType(fields, true);
-        if (!type->is<IR::Type_StructLike>()) {
-            modelError("%1%: expected a struct", fields);
-            return calcName;
-        }
-        for (auto f : type->to<IR::Type_StructLike>()->fields) {
-            auto e = new IR::Member(fields, f->name);
-            auto ftype = typeMap->getType(f);
-            typeMap->setType(e, ftype);
-            list->push_back(e);
-        }
-        fields = list;
-        typeMap->setType(fields, type);
+    fields = convertToList(fields, typeMap);
+    if (!fields) {
+        modelError("%1%: expected a struct", fields);
+        return calcName;
     }
     auto jright = conv->convertWithConstantWidths(fields);
     if (withPayload) {
@@ -904,6 +928,7 @@ class EnsureExpressionIsSimple : public Inspector {
                 "%1%: Computations are not supported in %2%", expression, block);
         return false;
     }
+    bool preorder(const IR::StructExpression*) override { return true; }
     bool preorder(const IR::PathExpression*) override { return true; }
     bool preorder(const IR::Member*) override { return true; }
     bool preorder(const IR::ListExpression*) override { return true; }
@@ -962,7 +987,7 @@ SimpleSwitchBackend::convertChecksum(const IR::BlockStatement *block, Util::Json
                 }
             }
         }
-        ::error("%1%: Only calls to %2% or %3% allowed", stat,
+        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Only calls to %2% or %3% allowed", stat,
                 verify ? v1model.verify_checksum.name : v1model.update_checksum.name,
                 verify ? v1model.verify_checksum_with_payload.name :
                 v1model.update_checksum_with_payload.name);
@@ -1010,12 +1035,14 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     auto metaParam = params->parameters.at(2);
     auto paramType = metaParam->type;
     if (!paramType->is<IR::Type_Name>()) {
-        ::error("%1%: expected the user metadata type to be a struct", paramType);
+        ::error(ErrorType::ERR_EXPECTED,
+                "%1%: expected the user metadata type to be a struct", paramType);
         return;
     }
     auto decl = refMap->getDeclaration(paramType->to<IR::Type_Name>()->path);
     if (!decl->is<IR::Type_Struct>()) {
-        ::error("%1%: expected the user metadata type to be a struct", paramType);
+        ::error(ErrorType::ERR_EXPECTED,
+                "%1%: expected the user metadata type to be a struct", paramType);
         return;
     }
     userMetaType = decl->to<IR::Type_Struct>();
@@ -1026,13 +1053,15 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         auto headersParam = params->parameters.at(1);
         auto headersType = headersParam->type;
         if (!headersType->is<IR::Type_Name>()) {
-            ::error("%1%: expected type to be a struct", headersParam->type);
+            ::error(ErrorType::ERR_EXPECTED,
+                    "%1%: expected type to be a struct", headersParam->type);
             return;
         }
         decl = refMap->getDeclaration(headersType->to<IR::Type_Name>()->path);
         auto st = decl->to<IR::Type_Struct>();
         if (st == nullptr) {
-            ::error("%1%: expected type to be a struct", headersParam->type);
+            ::error(ErrorType::ERR_EXPECTED,
+                    "%1%: expected type to be a struct", headersParam->type);
             return;
         }
         LOG2("Headers type is " << st);
@@ -1041,7 +1070,8 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
             if (!t->is<IR::Type_Header>() &&
                 !t->is<IR::Type_Stack>() &&
                 !t->is<IR::Type_HeaderUnion>()) {
-                ::error("%1%: the type should be a struct of headers, stacks, or unions",
+                ::error(ErrorType::ERR_EXPECTED,
+                        "%1%: the type should be a struct of headers, stacks, or unions",
                         headersParam->type);
                 return;
             }
@@ -1081,7 +1111,7 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
         new P4::ClonePathExpressions(),
         new P4::ClearTypeMap(typeMap),
         evaluator,
-        new VisitFunctor([this, evaluator]() { toplevel = evaluator->getToplevelBlock(); }),
+        [this, evaluator]() { toplevel = evaluator->getToplevelBlock(); },
     });
 
     auto hook = options.getDebugHook();
@@ -1138,10 +1168,12 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
 
     createActions(ctxt, structure);
 
-    auto cconv = new ControlConverter(ctxt, "ingress", options.emitExterns);
+    auto cconv = new ControlConverter<Standard::Arch::V1MODEL>(ctxt,
+            "ingress", options.emitExterns);
     structure->ingress->apply(*cconv);
 
-    cconv = new ControlConverter(ctxt, "egress", options.emitExterns);
+    cconv = new ControlConverter<Standard::Arch::V1MODEL>(ctxt,
+            "egress", options.emitExterns);
     structure->egress->apply(*cconv);
 
     auto dconv = new DeparserConverter(ctxt);

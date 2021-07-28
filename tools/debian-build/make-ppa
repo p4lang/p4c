@@ -1,0 +1,134 @@
+#!/usr/bin/env bash
+#
+# Packaging Scripts
+# Copyright (C) 2002-2021 by Thomas Dreibholz
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Contact: dreibh@iem.uni-due.de
+
+# Bash options:
+set -e
+
+# ====== Path variables =========================================
+FILE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+P4C_DIR="${FILE_DIR}/../.."
+DEBIAN_DIR="${P4C_DIR}/debian"
+
+COPR=0
+DPUT=0
+
+# NOTE: These are the supported distributions by Ubuntu Launchpad and Debian:
+DPUT_DISTRIBUTIONS="precise trusty xenial bionic focal groovy hirsute   unstable"
+
+while [ $# -gt 0 ] ; do
+   if [ "$1" == "dput" ] ; then
+      DPUT=1
+   elif [ "$1" == "copr" ] ; then
+      COPR=1
+   elif [ "$1" == "all" ] ; then
+      DPUT=1
+      COPR=1
+   else
+      echo >&2 "Usage: $0 [dput] [copr] [all]"
+      exit 1
+   fi
+   shift
+done
+
+if [ ${DPUT} -eq 0 -a ${COPR} -eq 0 ] ; then
+   COPR=1
+   DPUT=1
+fi
+
+if [ ! -e debian/ ] ; then
+   DPUT=0
+fi
+if [ ! -e rpm/ ] ; then
+   COPR=0
+fi
+
+
+# ====== Build source packages ==============================================
+./clean-deb
+if [ ${DPUT} -ne 0 ] ; then
+   . ./packaging.conf
+   if [ "${NOT_TARGET_DISTRIBUTIONS}" == "" ] ; then
+      echo >&2 "ERROR: Define NOT_TARGET_DISTRIBUTIONS in packaging.conf!"
+      exit 1
+   fi
+   buildForDistribution=""
+   for dputDistribution in ${DPUT_DISTRIBUTIONS} ; do
+      notATarget=0
+      for notTargetDistribution in ${NOT_TARGET_DISTRIBUTIONS} ; do
+         if [ "${notTargetDistribution}" == "${dputDistribution}" ] ; then
+            notATarget=1
+            break
+         fi
+      done
+      if [ $notATarget -eq 0 ] ; then
+         buildForDistribution="${buildForDistribution} ${dputDistribution}"
+      fi
+   done
+
+   echo "Building for distributions:${buildForDistribution}"
+   ./make-deb ${buildForDistribution}
+fi
+
+if [ ${COPR} -ne 0 ] ; then
+   if [ -e rpm -o -e ./make-srpm ] ; then
+      ./make-srpm || exit 1
+   else
+      echo >&2 "ERROR: RPM files not found!"
+      exit 1
+   fi
+fi
+
+
+# ====== dput ===============================================================
+if [ ${DPUT} -ne 0 ] ; then
+   changeFiles=`find . -mindepth 1 -maxdepth 1 -name "*.changes"`
+   for changeFile in ${changeFiles} ; do
+      if [[ ${changeFile} =~ -[0-9]_source.changes$ ]] ; then
+         dput mentors ${changeFile}
+      else
+         dput ppa ${changeFile}
+      fi
+   done
+fi
+
+
+# ====== COPR ===============================================================
+if [ ${COPR} -ne 0 ] ; then
+   PACKAGE=`grep "^Name:" rpm/*.spec | head -n1 | sed -e "s/Name://g" -e "s/[ \t]*//g"`
+   SRPM=`find ${HOME}/rpmbuild/SRPMS -name "${PACKAGE}-*.src.rpm"`
+   if [ ! -e "${SRPM}" ] ; then
+      echo >&2 "ERROR: ${PACKAGE}-*.src.rpm not found!"
+      exit 1
+   fi
+
+   COPR_CLI=""
+   for directory in /usr/bin /usr/local/bin ~/.local/bin ; do
+      if [ -x "${directory}/copr-cli" ] ; then
+         COPR_CLI="${directory}/copr-cli"
+         break
+      fi
+   done
+   if [ "${COPR_CLI}" == "" ] ; then
+      echo >&2 "ERROR: copr-cli not found!"
+      exit 1
+   fi
+   echo "Using ${COPR_CLI}"
+
+   ${COPR_CLI} build --nowait ppa ${SRPM}
+fi

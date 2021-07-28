@@ -1,0 +1,6 @@
+issue2544_shadowing1.p4(25): [--Werror=shadow] error: declaration of 'h' shadows a parameter 'h'
+        Headers h = h;
+        ^^^^^^^^^^^^^^
+issue2544_shadowing1.p4(23)
+control ingress(inout Headers h) {
+                              ^

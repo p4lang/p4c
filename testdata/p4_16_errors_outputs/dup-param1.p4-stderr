@@ -4,4 +4,4 @@ control MyIngress<p>(inout bit<32> p)
 dup-param1.p4(17)
 control MyIngress<p>(inout bit<32> p)
                   ^
-error: 1 errors encountered, aborting compilation
+[--Werror=overlimit] error: 1 errors encountered, aborting compilation

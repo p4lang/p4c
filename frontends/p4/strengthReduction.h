@@ -74,6 +74,8 @@ class DoStrengthReduction final : public Transform {
     const IR::Node* postorder(IR::Cmpl* expr) override;
     const IR::Node* postorder(IR::BAnd* expr) override;
     const IR::Node* postorder(IR::BOr* expr) override;
+    const IR::Node* postorder(IR::Equ* expr) override;
+    const IR::Node* postorder(IR::Neq* expr) override;
     const IR::Node* postorder(IR::BXor* expr) override;
     const IR::Node* postorder(IR::LAnd* expr) override;
     const IR::Node* postorder(IR::LOr* expr) override;
@@ -85,7 +87,10 @@ class DoStrengthReduction final : public Transform {
     const IR::Node* postorder(IR::Mul* expr) override;
     const IR::Node* postorder(IR::Div* expr) override;
     const IR::Node* postorder(IR::Mod* expr) override;
+    const IR::Node* postorder(IR::Mux* expr) override;
     const IR::Node* postorder(IR::Slice* expr) override;
+    const IR::Node* postorder(IR::Mask* expr) override;
+    const IR::Node* postorder(IR::Range* expr) override;
 };
 
 class StrengthReduction : public PassManager {

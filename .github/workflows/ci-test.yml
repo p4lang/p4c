@@ -1,0 +1,83 @@
+name: "test-p4c"
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  # Build and test p4c on Ubuntu 16.04
+  build-linux:
+    strategy:
+      fail-fast: false
+      matrix:
+        unified: [ON, OFF]
+        enable_gmp: [ON, OFF]
+        exclude:
+          - unified: OFF
+            enable_gmp: OFF
+    runs-on: ubuntu-latest
+    env:
+      CTEST_PARALLEL_LEVEL: 4
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Cancel previous runs
+      uses: styfle/cancel-workflow-action@0.9.0
+      with:
+        access_token: ${{ github.token }}
+
+    - name: Build (Linux)
+      run: |
+        tools/start_ccache
+        # To flush out issues with unified vs. non-unified builds,
+        # do a non-unified build before continuing with the rest,
+        # which produces a unified build.
+        docker build --network ccache_network -t p4c --build-arg IMAGE_TYPE=test --build-arg ENABLE_UNIFIED_COMPILATION=${{matrix.unified}} --build-arg ENABLE_GMP=${{ matrix.enable_gmp }} .
+
+      # run with sudo (...) --privileged
+      # this is needed to create network namespaces for the ebpf tests
+    - name: Run tests (Linux)
+      run: |
+        sudo docker run --privileged -w /p4c/build -e $CTEST_PARALLEL_LEVEL p4c ctest --output-on-failure --schedule-random
+      if: matrix.unified == 'ON'
+
+  # Build and test p4c on MacOS 10.15
+  build-mac-os:
+    strategy:
+      fail-fast: false
+      matrix:
+        unified: [ON, OFF]
+        enable_gmp: [ON, OFF]
+        exclude:
+          - unified: OFF
+            enable_gmp: OFF
+    runs-on: macos-10.15
+    env:
+      CTEST_PARALLEL_LEVEL: 4
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: recursive
+
+    - name: Install dependencies (MacOS)
+      run: |
+           tools/install_mac_deps.sh
+           echo "/usr/local/opt/bison/bin" >> $GITHUB_PATH
+
+    - name: Build (MacOS)
+      run: |
+          # To flush out issues with unified vs. non-unified builds,
+          # do a non-unified build before continuing with the rest,
+          # which produces a unified build.
+          # On MacOS we have noticed problems with the C++
+          # garbage-collector, so we disable it
+          ./bootstrap.sh -DENABLE_GC=OFF -DCMAKE_BUILD_TYPE=RELEASE -DENABLE_UNIFIED_COMPILATION=${{matrix.unified}} -DENABLE_GMP=${{ matrix.enable_gmp }} && cd build && make -j2
+
+    - name: Run tests (MacOS)
+      run: |
+        ctest --output-on-failure -j 2 --schedule-random -LE "bpf$"
+      if: matrix.unified == 'ON'

@@ -56,8 +56,11 @@ static const IR::Type* validateType(
 const IR::Type* DoBindTypeVariables::getVarValue(
     const IR::Type_Var* var, const IR::Node* errorPosition) const {
     auto type = typeMap->getSubstitution(var);
-    if (type == nullptr)
-        return new IR::Type_Dontcare;
+    if (type == nullptr) {
+        ::error(ErrorType::ERR_TYPE_ERROR, "%1%: could not infer a type for variable %2%",
+                errorPosition, var);
+        return nullptr;
+    }
     auto result = validateType(type, typeMap, errorPosition);
     LOG2("Replacing " << var << " with " << result);
     return result;
@@ -75,6 +78,8 @@ const IR::Node* DoBindTypeVariables::postorder(IR::Declaration_Instance* decl) {
     if (decl->type->is<IR::Type_Specialized>())
         return decl;
     auto type = typeMap->getType(getOriginal(), true);
+    if (auto tsc = type->to<IR::Type_SpecializedCanonical>())
+        type = tsc->substituted;
     BUG_CHECK(type->is<IR::IMayBeGenericType>(), "%1%: unexpected type %2% for declaration",
               decl, type);
     auto mt = type->to<IR::IMayBeGenericType>();

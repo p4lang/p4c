@@ -26,4 +26,18 @@ const IR::Node* DoRemoveMiss::preorder(IR::Member* expression) {
     return new IR::LNot(hit);
 }
 
+const IR::Node* DoRemoveMiss::preorder(IR::IfStatement* statement) {
+    if (!TableApplySolver::isMiss(statement->condition, refMap, typeMap))
+        return statement;
+    auto mem = statement->condition->checkedTo<IR::Member>();
+    auto hit = new IR::Member(mem->expr, IR::Type_Table::hit);
+    statement->condition = hit;
+    auto e = statement->ifFalse;
+    if (!e)
+        e = new IR::EmptyStatement();
+    statement->ifFalse = statement->ifTrue;
+    statement->ifTrue = e;
+    return statement;
+}
+
 }  // namespace P4

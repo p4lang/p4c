@@ -38,7 +38,6 @@ control EgressI(inout H hdr, inout M meta, inout std_meta_t std_meta) {
             default: {
             }
         }
-
     }
 }
 

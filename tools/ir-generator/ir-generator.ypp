@@ -420,7 +420,7 @@ IrDefinitions *parse(char** files, int count) {
         yydebug = atoi(p);
 #endif
     if (count <= 0) {
-        ::error("No input files specified");
+        ::error(ErrorType::ERR_EXPECTED, "No input files specified");
         errors = 1; }
 
     for (int i = 0; i < count; i++) {
@@ -429,11 +429,12 @@ IrDefinitions *parse(char** files, int count) {
             yyrestart(fp);
             BEGIN(NORMAL);
             errors |= yyparse();
+            fclose(fp);
             if (errors & 2) {
-                error("out of memory");
+                error(ErrorType::ERR_OVERLIMIT, "out of memory");
                 break; }
         } else {
-            ::error("Cannot open file %s", files[i]);
+            ::error(ErrorType::ERR_IO, "Cannot open file %s", files[i]);
             perror("");
             errors |= 1; } }
 

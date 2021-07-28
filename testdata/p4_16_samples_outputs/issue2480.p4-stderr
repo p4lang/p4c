@@ -1,0 +1,3 @@
+issue2480.p4(10): [--Wwarn=unused] warning: poly: unused instance
+    CRCPolynomial(coeff=8w32) poly;
+                              ^^^^

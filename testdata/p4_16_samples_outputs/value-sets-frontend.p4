@@ -16,7 +16,7 @@ extern ValueSet {
 }
 
 parser TopParser(packet_in b, out Parsed_packet p) {
-    bit<8> setIndex_0;
+    @name("TopParser.setIndex") bit<8> setIndex_0;
     @name("TopParser.ethtype_kinds") ValueSet(32w5) ethtype_kinds_0;
     state start {
         b.extract<Ethernet_h>(p.ethernet);

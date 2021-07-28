@@ -16,10 +16,11 @@ limitations under the License.
 
 #include "parseInput.h"
 
-#include <boost/optional.hpp>
 #include <cstdio>
 #include <iostream>
 #include <sstream>
+
+#include <boost/optional.hpp>
 
 #include "frontends/parsers/parserDriver.h"
 #include "frontends/p4/fromv1.0/converters.h"
@@ -38,7 +39,8 @@ const IR::P4Program* parseP4String(const char* sourceFile, unsigned sourceLine,
         : P4ParserDriver::parse(stream, sourceFile, sourceLine);
 
     if (::errorCount() > 0) {
-        ::error("%1% errors encountered, aborting compilation", ::errorCount());
+        ::error(ErrorType::ERR_OVERLIMIT,
+                "%1% errors encountered, aborting compilation", ::errorCount());
         return nullptr;
     }
     BUG_CHECK(result != nullptr, "Parsing failed, but we didn't report an error");

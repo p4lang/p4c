@@ -38,9 +38,15 @@ add_dependencies(p4c-graphs genIR frontend)
 install (TARGETS p4c-graphs
   RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 
+file(RELATIVE_PATH
+  CURRENT_BINARY_DIR_PATH_REL
+  ${P4C_BINARY_DIR}
+  ${CMAKE_CURRENT_BINARY_DIR}
+)
+
 # This link is not required but it is convenient to have access to this
 # backend in the top-level build directory, along with all the other backends.
 add_custom_target(linkgraphs
-  COMMAND ${CMAKE_COMMAND} -E create_symlink `realpath --relative-to=${P4C_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/p4c-graphs` ${P4C_BINARY_DIR}/p4c-graphs
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4c-graphs ${P4C_BINARY_DIR}/p4c-graphs
   )
 add_dependencies(p4c_driver linkgraphs)

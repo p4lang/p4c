@@ -312,7 +312,7 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
 }
 
 control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_metadata_t istd, inout psa_egress_output_metadata_t ostd) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("egress.process_clone_h0") action process_clone_h0() {
         user_meta._fwd_metadata_outport0 = (bit<32>)user_meta._clone_02.data;
@@ -327,9 +327,9 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
         actions = {
             process_clone_h0();
             process_clone_h1();
-            NoAction_0();
+            NoAction_2();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     apply {
         t_0.apply();
@@ -356,9 +356,9 @@ parser IngressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadat
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @name("ingress.do_clone") action do_clone(PortId_t port) {
+    @name("ingress.do_clone") action do_clone(@name("port") PortId_t port) {
         ostd.clone = true;
         ostd.clone_port = port;
         user_meta._custom_clone_id1 = 3w1;
@@ -369,9 +369,9 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
         }
         actions = {
             do_clone();
-            NoAction_1();
+            NoAction_3();
         }
-        default_action = NoAction_1();
+        default_action = NoAction_3();
     }
     apply {
         t_1.apply();
@@ -385,8 +385,9 @@ control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata me
         ostd.clone_metadata.data.h0 = clone_md_0_data.h0;
         ostd.clone_metadata.data.h1 = clone_md_0_data.h1;
     }
-    @hidden action issue982l417() {
-        clone_md_0_data.h1.setValid();
+    @hidden action issue982l416() {
+        clone_md_0_data.h0.setInvalid();
+        clone_md_0_data.h1.setInvalid();
         clone_md_0_data.h1.setValid();
         clone_md_0_data.h1.data = 32w0;
     }
@@ -394,11 +395,11 @@ control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata me
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_issue982l417 {
+    @hidden table tbl_issue982l416 {
         actions = {
-            issue982l417();
+            issue982l416();
         }
-        const default_action = issue982l417();
+        const default_action = issue982l416();
     }
     @hidden table tbl_issue982l420 {
         actions = {
@@ -413,7 +414,7 @@ control IngressDeparserImpl(packet_out packet, inout headers hdr, in metadata me
         const default_action = issue982l422();
     }
     apply {
-        tbl_issue982l417.apply();
+        tbl_issue982l416.apply();
         if (meta._custom_clone_id1 == 3w1) {
             tbl_issue982l420.apply();
         }

@@ -97,7 +97,6 @@ control Ingress(inout headers hdr, out bool xout) {
                         8w0x7c : operation_or();
                         8w0x5e : operation_xor();
         }
-
         implementation = hash_table(32w8);
     }
     apply {

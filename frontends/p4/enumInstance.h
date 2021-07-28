@@ -35,6 +35,10 @@ class EnumInstance : public InstanceBase {
     /// Returns nullptr if the expression is not a compile-time constant
     /// referring to an enum
     static EnumInstance* resolve(const IR::Expression* expression, const P4::TypeMap* typeMap);
+    bool equals(const EnumInstance* other) const {
+        return TypeMap::equivalent(type, other->type) &&
+                name.name == other->name.name;
+    }
 };
 
 /// An instance of a simple enum, e.g., X.A from enum X { A, B }

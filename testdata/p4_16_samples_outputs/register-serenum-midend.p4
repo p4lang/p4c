@@ -13,8 +13,9 @@ struct Headers {
 }
 
 parser prs(packet_in p, out Headers h) {
-    Ethernet e_0;
+    @name("prs.e") Ethernet e_0;
     state start {
+        e_0.setInvalid();
         p.extract<Ethernet>(e_0);
         transition select(e_0.type) {
             16w0x800: accept;

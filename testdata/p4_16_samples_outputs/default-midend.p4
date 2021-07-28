@@ -5,7 +5,7 @@ header Header {
 }
 
 parser p0(packet_in p, out Header h) {
-    bool b_0;
+    @name("p0.b") bool b_0;
     state start {
         b_0 = true;
         p.extract<Header>(h);

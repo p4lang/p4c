@@ -20,20 +20,20 @@ control DeparserImpl(packet_out packet, in headers_t hdr) {
 }
 
 control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
-    @name(".send_to_cpu") action send_to_cpu() {
+    @name(".send_to_cpu") action send_to_cpu_0() {
         standard_metadata.egress_spec = 9w64;
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.t0") table t0_0 {
         key = {
             standard_metadata.ingress_port: ternary @name("standard_metadata.ingress_port") ;
         }
         actions = {
-            send_to_cpu();
-            @defaultonly NoAction_0();
+            send_to_cpu_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         t0_0.apply();

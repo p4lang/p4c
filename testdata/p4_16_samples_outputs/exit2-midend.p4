@@ -3,7 +3,7 @@ control ctrl(out bit<32> c) {
     @name("ctrl.e") action e() {
         hasExited = true;
     }
-    @name("ctrl.e") action e_2() {
+    @name("ctrl.e") action e_1() {
         hasExited = true;
     }
     @hidden action exit2l31() {
@@ -34,7 +34,9 @@ control ctrl(out bit<32> c) {
     apply {
         tbl_exit2l31.apply();
         tbl_e.apply();
-        if (!hasExited) {
+        if (hasExited) {
+            ;
+        } else {
             tbl_exit2l41.apply();
         }
     }

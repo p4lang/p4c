@@ -31,10 +31,9 @@ namespace P4V1 {
 
 class ConversionContext {
  public:
-    ConversionContext() {}
-    const IR::Expression* header;
-    const IR::Expression* userMetadata;
-    const IR::Expression* standardMetadata;
+    const IR::Expression* header = nullptr;
+    const IR::Expression* userMetadata = nullptr;
+    const IR::Expression* standardMetadata = nullptr;
     virtual void clear() {
         header = nullptr;
         userMetadata = nullptr;
@@ -191,11 +190,11 @@ class ProgramStructure {
     /// extra local instances to control created by primitive translation
     std::vector<const IR::Declaration*> localInstances;
 
-    ConversionContext* conversionContext;
+    ConversionContext* conversionContext = nullptr;
 
-    IR::Vector<IR::Type>* emptyTypeArguments;
-    const IR::Parameter* parserPacketIn;
-    const IR::Parameter* parserHeadersOut;
+    IR::Vector<IR::Type>* emptyTypeArguments = nullptr;
+    const IR::Parameter* parserPacketIn = nullptr;
+    const IR::Parameter* parserHeadersOut = nullptr;
 
  public:
     // output is constructed here

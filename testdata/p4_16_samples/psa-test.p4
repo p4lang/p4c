@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
 struct EMPTY { };
 
@@ -7,9 +7,13 @@ header hdr_t {
     bit<16> field;
 }
 
+struct headers_t {
+    hdr_t       h1;
+}
+
 parser MyIP(
     packet_in buffer,
-    out hdr_t a,
+    out headers_t hdr,
     inout EMPTY b,
     in psa_ingress_parser_input_metadata_t c,
     in EMPTY d,
@@ -17,8 +21,8 @@ parser MyIP(
 
     value_set<bit<16>>(4) pvs;
     state start {
-        buffer.extract(a);
-        transition select(a.field) {
+        buffer.extract(hdr.h1);
+        transition select(hdr.h1.field) {
             pvs : accept;
             default : accept;
         }
@@ -39,7 +43,7 @@ parser MyEP(
 }
 
 control MyIC(
-    inout hdr_t a,
+    inout headers_t hdr,
     inout EMPTY b,
     in psa_ingress_input_metadata_t c,
     inout psa_ingress_output_metadata_t d) {
@@ -59,7 +63,7 @@ control MyID(
     out EMPTY a,
     out EMPTY b,
     out EMPTY c,
-    inout hdr_t d,
+    inout headers_t hdr,
     in EMPTY e,
     in psa_ingress_output_metadata_t f) {
     apply { }

@@ -93,12 +93,12 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 }
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingressImpl.my_drop") action my_drop() {
         mark_to_drop(stdmeta);
     }
-    @name("ingressImpl.set_addr") action set_addr(IPv4Addr_t new_dstAddr) {
+    @name("ingressImpl.set_addr") action set_addr(@name("new_dstAddr") IPv4Addr_t new_dstAddr) {
         hdr.ipv4.dstAddr = new_dstAddr;
         stdmeta.egress_spec = stdmeta.ingress_port;
     }
@@ -109,9 +109,9 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         actions = {
             set_addr();
             my_drop();
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
     }
     apply {
         t1_0.apply();

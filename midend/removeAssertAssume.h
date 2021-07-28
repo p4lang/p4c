@@ -19,7 +19,7 @@ class DoRemoveAssertAssume : public Transform {
         setName("DoRemoveAssertAssume");
     }
 
-    const IR::Node* preorder(IR::MethodCallStatement* statement);
+    const IR::Node* preorder(IR::MethodCallStatement* statement) override;
 };
 
 class RemoveAssertAssume final : public PassManager {

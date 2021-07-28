@@ -28,17 +28,17 @@ parser parse(packet_in pk, out parsed_packet_t hdr, inout my_meta_t my_metadata,
 
 extern s1_t choose_entry(in choices_t choices);
 control ingress(inout parsed_packet_t hdr, inout my_meta_t my_meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("ingress.select_entry") action select_entry(choices_t choices) {
-        my_meta.entry = choose_entry(choices);
+    @name("ingress.select_entry") action select_entry(@name("choices") choices_t choices_1) {
+        my_meta.entry = choose_entry(choices_1);
     }
     @name("ingress.t") table t_0 {
         actions = {
             select_entry();
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
     }
     apply {
         t_0.apply();

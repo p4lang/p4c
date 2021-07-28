@@ -152,36 +152,36 @@ parser ParserImpl(packet_in packet, out headers_t hdr, inout metadata_t meta, in
 }
 
 control ingress(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    @name("ingress.set_output") action set_output(bit<9> out_port) {
+    @name("ingress.set_output") action set_output(@name("out_port") bit<9> out_port) {
         stdmeta.egress_spec = out_port;
     }
-    @name("ingress.set_headers") action set_headers(Eth0_t addr0, Eth1_t addr1, Eth2_t addr2, bit<8> e, Custom0_t e0, Custom1_t e1, Custom2_t e2, Custom00_t e00, Custom01_t e01, Custom02_t e02, Custom10_t e10, Custom11_t e11, Custom12_t e12, Custom20_t e20, Custom21_t e21, Custom22_t e22, Custom001_t e001, Custom002_t e002, Custom101_t e101, Custom102_t e102, Custom201_t e201, Custom202_t e202, Custom220_t e220, Custom0020010_t e0020010, Custom0020020_t e0020020, bit<8> s0) {
-        hdr.custom._addr00 = addr0;
-        hdr.custom._addr11 = addr1;
-        hdr.custom._addr22 = addr2;
-        hdr.custom._e3 = e;
-        hdr.custom._e04 = e0;
-        hdr.custom._e15 = e1;
-        hdr.custom._e26 = e2;
-        hdr.custom._e007 = e00;
-        hdr.custom._e018 = e01;
-        hdr.custom._e029 = e02;
-        hdr.custom._e1010 = e10;
-        hdr.custom._e1111 = e11;
-        hdr.custom._e1212 = e12;
-        hdr.custom._e2013 = e20;
-        hdr.custom._e2114 = e21;
-        hdr.custom._e2215 = e22;
-        hdr.custom._e00116 = e001;
-        hdr.custom._e00217 = e002;
-        hdr.custom._e10118 = e101;
-        hdr.custom._e10219 = e102;
-        hdr.custom._e20120 = e201;
-        hdr.custom._e20221 = e202;
-        hdr.custom._e22022 = e220;
-        hdr.custom._e002001023 = e0020010;
-        hdr.custom._e002002024 = e0020020;
-        hdr.custom._s028 = s0;
+    @name("ingress.set_headers") action set_headers(@name("addr0") Eth0_t addr0_1, @name("addr1") Eth1_t addr1_1, @name("addr2") Eth2_t addr2_1, @name("e") bit<8> e_1, @name("e0") Custom0_t e0_1, @name("e1") Custom1_t e1_1, @name("e2") Custom2_t e2_1, @name("e00") Custom00_t e00_1, @name("e01") Custom01_t e01_1, @name("e02") Custom02_t e02_1, @name("e10") Custom10_t e10_1, @name("e11") Custom11_t e11_1, @name("e12") Custom12_t e12_1, @name("e20") Custom20_t e20_1, @name("e21") Custom21_t e21_1, @name("e22") Custom22_t e22_1, @name("e001") Custom001_t e001_1, @name("e002") Custom002_t e002_1, @name("e101") Custom101_t e101_1, @name("e102") Custom102_t e102_1, @name("e201") Custom201_t e201_1, @name("e202") Custom202_t e202_1, @name("e220") Custom220_t e220_1, @name("e0020010") Custom0020010_t e0020010_1, @name("e0020020") Custom0020020_t e0020020_1, @name("s0") bit<8> s0_1) {
+        hdr.custom._addr00 = addr0_1;
+        hdr.custom._addr11 = addr1_1;
+        hdr.custom._addr22 = addr2_1;
+        hdr.custom._e3 = e_1;
+        hdr.custom._e04 = e0_1;
+        hdr.custom._e15 = e1_1;
+        hdr.custom._e26 = e2_1;
+        hdr.custom._e007 = e00_1;
+        hdr.custom._e018 = e01_1;
+        hdr.custom._e029 = e02_1;
+        hdr.custom._e1010 = e10_1;
+        hdr.custom._e1111 = e11_1;
+        hdr.custom._e1212 = e12_1;
+        hdr.custom._e2013 = e20_1;
+        hdr.custom._e2114 = e21_1;
+        hdr.custom._e2215 = e22_1;
+        hdr.custom._e00116 = e001_1;
+        hdr.custom._e00217 = e002_1;
+        hdr.custom._e10118 = e101_1;
+        hdr.custom._e10219 = e102_1;
+        hdr.custom._e20120 = e201_1;
+        hdr.custom._e20221 = e202_1;
+        hdr.custom._e22022 = e220_1;
+        hdr.custom._e002001023 = e0020010_1;
+        hdr.custom._e002002024 = e0020020_1;
+        hdr.custom._s028 = s0_1;
     }
     @name("ingress.my_drop") action my_drop() {
     }
@@ -241,43 +241,43 @@ control DeparserImpl(packet_out packet, in headers_t hdr) {
 }
 
 struct tuple_0 {
-    bit<48> field;
-    bit<48> field_0;
-    bit<48> field_1;
-    bit<8>  field_2;
-    bit<8>  field_3;
-    bit<8>  field_4;
-    bit<8>  field_5;
-    bit<8>  field_6;
-    bit<8>  field_7;
-    bit<8>  field_8;
-    bit<8>  field_9;
-    bit<8>  field_10;
-    bit<8>  field_11;
-    bit<8>  field_12;
-    bit<8>  field_13;
-    bit<8>  field_14;
-    bit<8>  field_15;
-    bit<8>  field_16;
-    bit<8>  field_17;
-    bit<8>  field_18;
-    bit<8>  field_19;
-    bit<8>  field_20;
-    bit<8>  field_21;
-    bit<8>  field_22;
-    bit<8>  field_23;
-    bit<8>  field_24;
+    bit<48> f0;
+    bit<48> f1;
+    bit<48> f2;
+    bit<8>  f3;
+    bit<8>  f4;
+    bit<8>  f5;
+    bit<8>  f6;
+    bit<8>  f7;
+    bit<8>  f8;
+    bit<8>  f9;
+    bit<8>  f10;
+    bit<8>  f11;
+    bit<8>  f12;
+    bit<8>  f13;
+    bit<8>  f14;
+    bit<8>  f15;
+    bit<8>  f16;
+    bit<8>  f17;
+    bit<8>  f18;
+    bit<8>  f19;
+    bit<8>  f20;
+    bit<8>  f21;
+    bit<8>  f22;
+    bit<8>  f23;
+    bit<8>  f24;
+    bit<8>  f25;
 }
 
 control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
     apply {
-        verify_checksum<tuple_0, bit<16>>(hdr.custom.isValid(), { hdr.custom._addr00, hdr.custom._addr11, hdr.custom._addr22, hdr.custom._e3, hdr.custom._e04, hdr.custom._e15, hdr.custom._e26, hdr.custom._e007, hdr.custom._e018, hdr.custom._e029, hdr.custom._e1010, hdr.custom._e1111, hdr.custom._e1212, hdr.custom._e2013, hdr.custom._e2114, hdr.custom._e2215, hdr.custom._e00116, hdr.custom._e00217, hdr.custom._e10118, hdr.custom._e10219, hdr.custom._e20120, hdr.custom._e20221, hdr.custom._e22022, hdr.custom._e002001023, hdr.custom._e002002024, hdr.custom._s028 }, hdr.custom._checksum27, HashAlgorithm.csum16);
+        verify_checksum<tuple_0, bit<16>>(hdr.custom.isValid(), (tuple_0){f0 = hdr.custom._addr00,f1 = hdr.custom._addr11,f2 = hdr.custom._addr22,f3 = hdr.custom._e3,f4 = hdr.custom._e04,f5 = hdr.custom._e15,f6 = hdr.custom._e26,f7 = hdr.custom._e007,f8 = hdr.custom._e018,f9 = hdr.custom._e029,f10 = hdr.custom._e1010,f11 = hdr.custom._e1111,f12 = hdr.custom._e1212,f13 = hdr.custom._e2013,f14 = hdr.custom._e2114,f15 = hdr.custom._e2215,f16 = hdr.custom._e00116,f17 = hdr.custom._e00217,f18 = hdr.custom._e10118,f19 = hdr.custom._e10219,f20 = hdr.custom._e20120,f21 = hdr.custom._e20221,f22 = hdr.custom._e22022,f23 = hdr.custom._e002001023,f24 = hdr.custom._e002002024,f25 = hdr.custom._s028}, hdr.custom._checksum27, HashAlgorithm.csum16);
     }
 }
 
 control computeChecksum(inout headers_t hdr, inout metadata_t meta) {
     apply {
-        update_checksum<tuple_0, bit<16>>(hdr.custom.isValid(), { hdr.custom._addr00, hdr.custom._addr11, hdr.custom._addr22, hdr.custom._e3, hdr.custom._e04, hdr.custom._e15, hdr.custom._e26, hdr.custom._e007, hdr.custom._e018, hdr.custom._e029, hdr.custom._e1010, hdr.custom._e1111, hdr.custom._e1212, hdr.custom._e2013, hdr.custom._e2114, hdr.custom._e2215, hdr.custom._e00116, hdr.custom._e00217, hdr.custom._e10118, hdr.custom._e10219, hdr.custom._e20120, hdr.custom._e20221, hdr.custom._e22022, hdr.custom._e002001023, hdr.custom._e002002024, hdr.custom._s028 }, hdr.custom._checksum27, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(hdr.custom.isValid(), (tuple_0){f0 = hdr.custom._addr00,f1 = hdr.custom._addr11,f2 = hdr.custom._addr22,f3 = hdr.custom._e3,f4 = hdr.custom._e04,f5 = hdr.custom._e15,f6 = hdr.custom._e26,f7 = hdr.custom._e007,f8 = hdr.custom._e018,f9 = hdr.custom._e029,f10 = hdr.custom._e1010,f11 = hdr.custom._e1111,f12 = hdr.custom._e1212,f13 = hdr.custom._e2013,f14 = hdr.custom._e2114,f15 = hdr.custom._e2215,f16 = hdr.custom._e00116,f17 = hdr.custom._e00217,f18 = hdr.custom._e10118,f19 = hdr.custom._e10219,f20 = hdr.custom._e20120,f21 = hdr.custom._e20221,f22 = hdr.custom._e22022,f23 = hdr.custom._e002001023,f24 = hdr.custom._e002002024,f25 = hdr.custom._s028}, hdr.custom._checksum27, HashAlgorithm.csum16);
     }
 }
 

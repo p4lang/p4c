@@ -285,7 +285,9 @@ class Substitutions : public SubstituteParameters {
         cstring newName = renameMap->getName(orig);
         cstring extName = renameMap->getExtName(orig);
         LOG3("Renaming " << dbp(orig) << " to " << newName << "(" << extName << ")");
+        auto annos = setNameAnnotation(extName, decl->annotations);
         decl->name = newName;
+        decl->annotations = annos;
         return decl;
     }
     const IR::Node* postorder(IR::PathExpression* expression) override {
@@ -339,7 +341,8 @@ void InlineList::analyze() {
         if (!allowMultipleCalls && inl->invocations.size() > 1) {
             ++it;
             auto second = *it;
-            ::error("Multiple invocations of the same object "
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "Multiple invocations of the same object "
                     "not supported on this target: %1%, %2%",
                     first, second);
             continue;
@@ -413,7 +416,7 @@ void DiscoverInlining::visit_all(const IR::Block* block) {
 bool DiscoverInlining::preorder(const IR::ControlBlock* block) {
     LOG4("Visiting " << block);
     if (getContext()->node->is<IR::ParserBlock>()) {
-        ::error("%1%: instantiation of control in parser",
+        ::error(ErrorType::ERR_INVALID, "%1%: instantiation of control in parser",
                 block->node);
         return false;
     } else if (getContext()->node->is<IR::ControlBlock>() && allowControls) {
@@ -434,7 +437,7 @@ bool DiscoverInlining::preorder(const IR::ControlBlock* block) {
 bool DiscoverInlining::preorder(const IR::ParserBlock* block) {
     LOG4("Visiting " << block);
     if (getContext()->node->is<IR::ControlBlock>()) {
-        ::error("%1%: instantiation of parser in control",
+        ::error(ErrorType::ERR_INVALID, "%1%: instantiation of parser in control",
                 block->node);
         return false;
     } else if (getContext()->node->is<IR::ParserBlock>()) {
@@ -462,12 +465,16 @@ Visitor::profile_t GeneralInliner::init_apply(const IR::Node* node) {
 }
 
 /* Build the substitutions needed for args and locals of the thing being inlined.
- * P4Block here may be either P4Control or P4Parser */
-template<class P4Block>
+ * P4Block here may be either P4Control or P4Parser.
+ * P4BlockType should be either Type_Control or Type_Parser to match the P4Block. */
+template<class P4Block, class P4BlockType>
 void GeneralInliner::inline_subst(P4Block *caller,
-                                  IR::IndexedVector<IR::Declaration> P4Block::*blockLocals) {
+                                  IR::IndexedVector<IR::Declaration> P4Block::*blockLocals,
+                                  const P4BlockType *P4Block::*blockType) {
     LOG3("Analyzing " << dbp(caller));
     IR::IndexedVector<IR::Declaration> locals;
+    P4BlockType *type = (caller->*blockType)->clone();
+    IR::Annotations *annos = type->annotations->clone();
     for (auto s : caller->*blockLocals) {
         /* Even if we inline the block, the declaration may still be needed.
            Consider this example:
@@ -490,6 +497,14 @@ void GeneralInliner::inline_subst(P4Block *caller,
             auto substs = new PerInstanceSubstitutions();
             workToDo->substitutions[inst] = substs;
 
+            // Propagate annotations
+            const IR::Annotations *calleeAnnos = (callee->*blockType)->annotations;
+            for (auto *ann : calleeAnnos->annotations) {
+                if (!annos->getSingle(ann->name) && !Inline::isAnnotationNoPropagate(ann->name)) {
+                    annos->add(ann);
+                }
+            }
+
             // Substitute constructor parameters
             substs->paramSubst.populate(callee->getConstructorParameters(), inst->arguments);
             if (auto spec = inst->type->to<IR::Type_Specialized>()) {
@@ -506,6 +521,7 @@ void GeneralInliner::inline_subst(P4Block *caller,
             std::set<const IR::Parameter*> useTemporary;
 
             const IR::MethodCallStatement *call = nullptr;
+            const IR::MethodCallStatement *firstCall = nullptr;  // to get directionless parameters
             for (auto m : workToDo->callToInstance) {
                 if (m.second != inst) continue;
                 if (call) {
@@ -513,8 +529,9 @@ void GeneralInliner::inline_subst(P4Block *caller,
                         call = nullptr;
                         break; }
                 } else {
-                    call = m.first; } }
-            MethodInstance *mi = nullptr;
+                    call = firstCall = m.first; } }
+            CHECK_NULL(firstCall);
+            MethodInstance *mi = MethodInstance::resolve(firstCall, refMap, typeMap);
             if (call != nullptr) {
                 // All call sites are the same (call is one of them), so we use the
                 // same arguments in all cases.  So we can avoid copies if args do
@@ -522,7 +539,6 @@ void GeneralInliner::inline_subst(P4Block *caller,
                 std::map<const IR::Parameter*, const LocationSet*> locationSets;
                 FindLocationSets fls(refMap, typeMap);
 
-                mi = MethodInstance::resolve(call, refMap, typeMap);
                 for (auto param : *mi->substitution.getParametersInArgumentOrder()) {
                     auto arg = mi->substitution.lookup(param);
                     auto ls = fls.locations(arg->expression);
@@ -544,11 +560,14 @@ void GeneralInliner::inline_subst(P4Block *caller,
                 }
             }
 
-            // Substitute applyParameters which are not directionless
+            // Substitute applyParameters
             // with fresh variable names or with the call arguments.
             for (auto param : callee->getApplyParameters()->parameters) {
-                if (param->direction == IR::Direction::None)
+                if (param->direction == IR::Direction::None) {
+                    auto initializer = mi->substitution.lookup(param);
+                    substs->paramSubst.add(param, initializer);
                     continue;
+                }
                 if (call != nullptr && (useTemporary.find(param) == useTemporary.end())) {
                     // Substitute argument directly
                     CHECK_NULL(mi);
@@ -578,6 +597,8 @@ void GeneralInliner::inline_subst(P4Block *caller,
         }
     }
     caller->*blockLocals = locals;
+    type->annotations = annos;
+    caller->*blockType = type;
 }
 
 const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
@@ -589,7 +610,7 @@ const IR::Node* GeneralInliner::preorder(IR::P4Control* caller) {
     }
 
     workToDo = &toInline->callerToWork[orig];
-    inline_subst(caller, &IR::P4Control::controlLocals);
+    inline_subst(caller, &IR::P4Control::controlLocals, &IR::P4Control::type);
     visit(caller->body);
     list->replace(orig, caller);
     workToDo = nullptr;
@@ -631,8 +652,17 @@ const IR::Node* GeneralInliner::preorder(IR::MethodCallStatement* statement) {
             // This is important, since this variable may be used many times.
             DoResetHeaders::generateResets(typeMap, paramType, initializer->expression, &body);
         } else if (param->direction == IR::Direction::None) {
+            // already set; the value must be the same, or else we cannot compile
             auto initializer = mi->substitution.lookup(param);
-            substs->paramSubst.add(param, initializer);
+            auto prev = substs->paramSubst.lookup(param);
+            if (!initializer->equiv(*prev))
+                // This is a compile-time constant, since this is a non-directional
+                // parameter, so the value should be independent on the context.
+                ::error(ErrorType::ERR_INVALID,
+                     "%1%: non-directional parameters must be substitued with the "
+                     "same value in all invocations; two different substitutions are "
+                     "%2% and %3%", param, initializer, prev);
+            continue;
         }
     }
 
@@ -783,7 +813,17 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
                 // This is important, since this variable may be used many times.
                 DoResetHeaders::generateResets(typeMap, paramType, arg->expression, &current);
             } else if (param->direction == IR::Direction::None) {
-                substs->paramSubst.add(param, initializer);
+                // already set; the value must be the same, or else we cannot compile
+                auto prev = substs->paramSubst.lookup(param);
+                CHECK_NULL(prev);
+                if (!initializer->equiv(*prev))
+                    // This is a compile-time constant, since this is a non-directional
+                    // parameter, so the value should be independent on the context.
+                    ::error(ErrorType::ERR_INVALID,
+                            "%1%: non-directional parameters must be substitued with the "
+                            "same value in all invocations; two different substitutions are "
+                            "%2% and %3%", param, initializer, prev);
+                continue;
             }
         }
 
@@ -846,12 +886,15 @@ const IR::Node* GeneralInliner::preorder(IR::P4Parser* caller) {
     }
 
     workToDo = &toInline->callerToWork[orig];
-    inline_subst(caller, &IR::P4Parser::parserLocals);
+    inline_subst(caller, &IR::P4Parser::parserLocals, &IR::P4Parser::type);
     visit(caller->states, "states");
     list->replace(orig, caller);
     workToDo = nullptr;
     prune();
     return caller;
 }
+
+// set of annotations to _not_ propagate during inlining
+std::set<cstring> Inline::noPropagateAnnotations = { "name" };
 
 }  // namespace P4

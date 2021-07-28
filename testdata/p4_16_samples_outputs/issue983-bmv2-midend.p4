@@ -47,7 +47,7 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
 }
 
 control ingress(inout headers hdr, inout metadata user_meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.debug_table_cksum1") table debug_table_cksum1_0 {
         key = {
@@ -66,9 +66,9 @@ control ingress(inout headers hdr, inout metadata user_meta, inout standard_meta
             user_meta._fwd_meta_x44           : exact @name("user_meta.fwd_meta.x4") ;
         }
         actions = {
-            NoAction_0();
+            NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @hidden action issue983bmv2l108() {
         hdr.ethernet.dstAddr[47:40] = 8w1;
@@ -76,7 +76,7 @@ control ingress(inout headers hdr, inout metadata user_meta, inout standard_meta
     @hidden action issue983bmv2l92() {
         user_meta._fwd_meta_tmp0 = ~hdr.ethernet.etherType;
         user_meta._fwd_meta_x11 = (bit<32>)~hdr.ethernet.etherType;
-        user_meta._fwd_meta_x22 = ((bit<32>)~hdr.ethernet.etherType)[31:16] + ((bit<32>)~hdr.ethernet.etherType)[15:0];
+        user_meta._fwd_meta_x22 = ((bit<32>)~hdr.ethernet.etherType)[31:16] + ~hdr.ethernet.etherType;
         user_meta._fwd_meta_x33 = (bit<32>)~hdr.ethernet.etherType;
         user_meta._fwd_meta_x44 = ~(bit<32>)hdr.ethernet.etherType;
         user_meta._fwd_meta_exp_etherType5 = 16w0x800;
@@ -142,7 +142,7 @@ control ingress(inout headers hdr, inout metadata user_meta, inout standard_meta
         if ((bit<32>)~hdr.ethernet.etherType != 32w0xf7ff) {
             tbl_issue983bmv2l111.apply();
         }
-        if (((bit<32>)~hdr.ethernet.etherType)[31:16] + ((bit<32>)~hdr.ethernet.etherType)[15:0] != 16w0xf7ff) {
+        if (((bit<32>)~hdr.ethernet.etherType)[31:16] + ~hdr.ethernet.etherType != 16w0xf7ff) {
             tbl_issue983bmv2l114.apply();
         }
         if ((bit<32>)~hdr.ethernet.etherType != 32w0xf7ff) {

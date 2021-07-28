@@ -53,7 +53,7 @@ DoReplaceSelectRange::rangeToMasks(const IR::Range *r) {
     big_int range_size_remaining = max - min + 1;
 
     while (range_size_remaining > 0) {
-        big_int range_size = ((big_int) 1) << ffs(min);
+        big_int range_size = ((big_int) 1) << ((min == 0) ? 0 : ffs(min));
 
         while (range_size > range_size_remaining)
             range_size >>= 1;

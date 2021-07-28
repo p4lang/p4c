@@ -170,9 +170,12 @@ bool ToP4::preorder(const IR::P4Program* program) {
                     const char *p = sourceFile.c_str() + strlen(p4includePath);
                     if (*p == '/') p++;
                     if (P4V1::V1Model::instance.file.name == p) {
-                        std::stringstream buf;
-                        buf << "#define V1MODEL_VERSION " << P4V1::V1Model::instance.version;
-                        builder.appendLine(buf.str()); }
+                        P4V1::getV1ModelVersion g;
+                        program->apply(g);
+                        builder.append("#define V1MODEL_VERSION ");
+                        builder.append(g.version);
+                        builder.appendLine("");
+                    }
                     builder.append("#include <");
                     builder.append(p);
                     builder.appendLine(">");
@@ -493,6 +496,7 @@ bool ToP4::process(const IR::Type_StructLike* t, const char* name) {
         visit(t->annotations);
         builder.appendFormat("%s ", name); }
     builder.append(t->name);
+    visit(t->typeParameters);
     if (!isDeclaration)
         return false;
     builder.spc();
@@ -558,40 +562,18 @@ bool ToP4::preorder(const IR::Type_Control* t) {
 ///////////////////////
 
 bool ToP4::preorder(const IR::Constant* c) {
-    big_int value = c->value;
-    big_int zero = 0;
-    if (value < zero) {
-        builder.append("-");
-        value = -value;
-    }
-
     const IR::Type_Bits* tb = dynamic_cast<const IR::Type_Bits*>(c->type);
-    if (tb != nullptr) {
-        builder.appendFormat("%d", tb->size);
-        builder.append(tb->isSigned ? "s" : "w");
+    unsigned width;
+    bool sign;
+    if (tb == nullptr) {
+        width = 0;
+        sign = false;
+    } else {
+        width = tb->size;
+        sign = tb->isSigned;
     }
-    switch (c->base) {
-        case 2:
-            builder.append("0b");
-            break;
-        case 8:
-            builder.append("0o");
-            break;
-        case 16:
-            builder.append("0x");
-            break;
-        case 10:
-            break;
-        default:
-            BUG("%1%: Unexpected base %2%", c, c->base);
-    }
-    std::deque<char> buf;
-    do {
-        buf.push_front("0123456789abcdef"[static_cast<int>(static_cast<big_int>(value % c->base))]);
-        value = value / c->base;
-    } while (value > 0);
-    for (auto ch : buf)
-        builder.appendFormat("%c", ch);
+    cstring s = Util::toString(c->value, width, sign, c->base);
+    builder.append(s);
     return false;
 }
 
@@ -877,9 +859,9 @@ bool ToP4::preorder(const IR::NamedExpression* e) {
 bool ToP4::preorder(const IR::StructExpression* e) {
     if (expressionPrecedence > DBPrint::Prec_Prefix)
         builder.append("(");
-    if (e->typeName != nullptr) {
+    if (e->structType != nullptr) {
         builder.append("(");
-        visit(e->typeName);
+        visit(e->structType);
         builder.append(")");
     }
     builder.append("{");
@@ -1126,7 +1108,7 @@ bool ToP4::preorder(const IR::SwitchStatement* s) {
     setVecSep("\n", "\n");
     preorder(&s->cases);
     doneVec();
-    builder.blockEnd(true);
+    builder.blockEnd(false);
     return false;
 }
 
@@ -1401,7 +1383,6 @@ bool ToP4::preorder(const IR::EntriesList *l) {
     builder.decreaseIndent();
     builder.emitIndent();
     builder.append("}");
-    builder.newline();
     return false;
 }
 
@@ -1439,4 +1420,17 @@ bool ToP4::preorder(const IR::Path* p) {
     builder.append(p->asString());
     return false;
 }
+
+std::string toP4(const IR::INode* node) {
+    std::stringstream stream;
+    P4::ToP4 toP4(&stream, false);
+    node->getNode()->apply(toP4);
+    return stream.str();
+}
+
+void dumpP4(const IR::INode* node) {
+    auto s = toP4(node);
+    std::cout << s;
+}
+
 }  // namespace P4

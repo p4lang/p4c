@@ -25,12 +25,12 @@ parser EmptyParser(packet_in b, out headers_t headers, inout metadata_t meta, in
 }
 
 struct tuple_0 {
-    bit<16> field;
+    bit<16> f0;
 }
 
 control EmptyVerifyChecksum(inout headers_t hdr, inout metadata_t meta) {
     apply {
-        verify_checksum<tuple_0, bit<16>>(false, { 16w0 }, meta._cksum_result0, HashAlgorithm.csum16);
+        verify_checksum<tuple_0, bit<16>>(false, (tuple_0){f0 = 16w0}, meta._cksum_result0, HashAlgorithm.csum16);
     }
 }
 
@@ -56,9 +56,9 @@ control EmptyEgress(inout headers_t hdr, inout metadata_t meta, inout standard_m
 
 control EmptyComputeChecksum(inout headers_t hdr, inout metadata_t meta) {
     apply {
-        update_checksum<tuple_0, bit<16>>(false, { 16w0 }, meta._cksum_result0, HashAlgorithm.csum16);
-        update_checksum<tuple_0, bit<16>>(hdr.e.isValid(), { 16w0 }, meta._cksum_result0, HashAlgorithm.csum16);
-        update_checksum<tuple_0, bit<16>>(meta._b1 == 1w0, { 16w0 }, meta._cksum_result0, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(false, (tuple_0){f0 = 16w0}, meta._cksum_result0, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(hdr.e.isValid(), (tuple_0){f0 = 16w0}, meta._cksum_result0, HashAlgorithm.csum16);
+        update_checksum<tuple_0, bit<16>>(meta._b1 == 1w0, (tuple_0){f0 = 16w0}, meta._cksum_result0, HashAlgorithm.csum16);
     }
 }
 

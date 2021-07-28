@@ -35,44 +35,44 @@ enum MyEnum_t {
 }
 
 struct tuple_0 {
-    bool field;
+    bool f0;
 }
 
 struct tuple_1 {
-    bit<1> field_0;
+    bit<1> f0;
 }
 
 struct tuple_2 {
-    int<8> field_1;
+    int<8> f0;
 }
 
 struct tuple_3 {
-    bit<8> field_2;
+    bit<8> f0;
 }
 
 struct tuple_4 {
-    MyEnum_t field_3;
+    MyEnum_t f0;
 }
 
 struct tuple_5 {
-    bit<10> field_4;
+    bit<10> f0;
 }
 
 struct tuple_6 {
-    ethernet_t field_5;
+    ethernet_t f0;
 }
 
 struct tuple_7 {
-    standard_metadata_t field_6;
+    standard_metadata_t f0;
 }
 
 struct tuple_8 {
-    error field_7;
+    error f0;
 }
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    MyEnum_t enum1_0;
-    bit<10> serenum1_0;
+    @name("ingressImpl.enum1") MyEnum_t enum1_0;
+    @name("ingressImpl.serenum1") bit<10> serenum1_0;
     @hidden action issue2201bmv2l111() {
         enum1_0 = MyEnum_t.VAL1;
     }
@@ -83,12 +83,12 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         enum1_0 = MyEnum_t.VAL3;
     }
     @hidden action issue2201bmv2l79() {
-        log_msg<tuple_0>("bool1={}", { (bool)hdr.ethernet.dstAddr[0:0] });
-        log_msg<tuple_1>("(bit<1>) bool1={}", { (bit<1>)(bool)hdr.ethernet.dstAddr[0:0] });
-        log_msg<tuple_1>("(bit<1>) (!bool1)={}", { (bit<1>)!(bool)hdr.ethernet.dstAddr[0:0] });
-        log_msg<tuple_1>("bit1={}", { hdr.ethernet.dstAddr[0:0] });
-        log_msg<tuple_2>("signed1={}", { -8s128 });
-        log_msg<tuple_3>("unsigned1={}", { 8w128 });
+        log_msg<tuple_0>("bool1={}", (tuple_0){f0 = (bool)hdr.ethernet.dstAddr[0:0]});
+        log_msg<tuple_1>("(bit<1>) bool1={}", (tuple_1){f0 = (bit<1>)(bool)hdr.ethernet.dstAddr[0:0]});
+        log_msg<tuple_1>("(bit<1>) (!bool1)={}", (tuple_1){f0 = (bit<1>)!(bool)hdr.ethernet.dstAddr[0:0]});
+        log_msg<tuple_1>("bit1={}", (tuple_1){f0 = hdr.ethernet.dstAddr[0:0]});
+        log_msg<tuple_2>("signed1={}", (tuple_2){f0 = -8s128});
+        log_msg<tuple_3>("unsigned1={}", (tuple_3){f0 = 8w128});
     }
     @hidden action issue2201bmv2l126() {
         serenum1_0 = 10w17;
@@ -100,13 +100,13 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         serenum1_0 = 10w19;
     }
     @hidden action issue2201bmv2l122() {
-        log_msg<tuple_4>("enum1={}", { enum1_0 });
+        log_msg<tuple_4>("enum1={}", (tuple_4){f0 = enum1_0});
     }
     @hidden action issue2201bmv2l134() {
-        log_msg<tuple_5>("serenum1={}", { serenum1_0 });
-        log_msg<tuple_6>("hdr.ethernet={}", { hdr.ethernet });
-        log_msg<tuple_7>("stdmeta={}", { stdmeta });
-        log_msg<tuple_8>("error.PacketTooShort={}", { error.PacketTooShort });
+        log_msg<tuple_5>("serenum1={}", (tuple_5){f0 = serenum1_0});
+        log_msg<tuple_6>("hdr.ethernet={}", (tuple_6){f0 = hdr.ethernet});
+        log_msg<tuple_7>("stdmeta={}", (tuple_7){f0 = stdmeta});
+        log_msg<tuple_8>("error.PacketTooShort={}", (tuple_8){f0 = error.PacketTooShort});
     }
     @hidden table tbl_issue2201bmv2l79 {
         actions = {

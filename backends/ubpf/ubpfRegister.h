@@ -27,6 +27,7 @@ namespace UBPF {
         UBPFRegister(const UBPFProgram *program, const IR::ExternBlock *block,
                      cstring name, EBPF::CodeGenInspector *codeGen);
 
+        void emitInstance(EBPF::CodeBuilder *builder);
         void emitRegisterRead(EBPF::CodeBuilder *builder,
                               const IR::MethodCallExpression *expression);
         void emitRegisterWrite(EBPF::CodeBuilder *builder,

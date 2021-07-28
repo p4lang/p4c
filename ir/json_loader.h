@@ -18,11 +18,14 @@ limitations under the License.
 #define _IR_JSON_LOADER_H_
 
 #include <assert.h>
-#include <boost/optional.hpp>
+
 #include <string>
 #include <map>
 #include <unordered_map>
 #include <utility>
+
+#include <boost/optional.hpp>
+
 #include "lib/cstring.h"
 #include "lib/indent.h"
 #include "lib/match.h"
@@ -271,6 +274,14 @@ class JSONLoader {
     template<typename T>
     void load(JsonData* json, T &v) {
         JSONLoader(json, node_refs).unpack_json(v); }
+
+    template<typename T>
+    void load(const std::string field, T *&v) {
+        JSONLoader loader(*this, field);
+        if (loader.json == nullptr) {
+            v = nullptr;
+        } else {
+            loader.unpack_json(v); } }
 
     template<typename T>
     void load(const std::string field, T &v) {

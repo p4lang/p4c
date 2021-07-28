@@ -47,14 +47,18 @@ class ComplexValues final {
 
     struct FieldsMap : public Component {
         ordered_map<cstring, Component*> members;
-        FieldsMap() = default;
+        const IR::Type* type;
+        explicit FieldsMap(const IR::Type* type): type(type) {
+            CHECK_NULL(type);
+            BUG_CHECK(type->is<IR::Type_Struct>(), "%1%: expected a struct", type);
+        }
         const IR::Expression* convertToExpression() override {
-            auto vec = new IR::ListExpression({});
+            IR::IndexedVector<IR::NamedExpression> vec;
             for (auto m : members) {
                 auto e = m.second->convertToExpression();
-                vec->push_back(e);
+                vec.push_back(new IR::NamedExpression(m.first, e));
             }
-            return vec;
+            return new IR::StructExpression(type->getP4Type(), vec);
         }
         Component* getComponent(cstring name) override
         { return ::get(members, name); }
@@ -114,7 +118,7 @@ class ComplexValues final {
  *  This does not work if the second argument of f is out or inout,
  *  since the list expression is not a l-value.  This pass cannot be
  *  used in this case.  This can arise only if there are extern functions
- *  that can return nested structs.
+ *  that can have out arguments with types that are structs.
  *
  *  @pre: This pass should be run after CopyStructures, EliminateTuples, and
  *        MoveInitializers.
@@ -134,6 +138,7 @@ class RemoveNestedStructs final : public Transform {
     const IR::Node* postorder(IR::Member* expression) override;
     /// replace reference to nested structs with the corresponding non-nested version
     const IR::Node* postorder(IR::PathExpression* expression) override;
+    const IR::Node* postorder(IR::MethodCallExpression* expression) override;
 };
 
 class NestedStructs final : public PassManager {

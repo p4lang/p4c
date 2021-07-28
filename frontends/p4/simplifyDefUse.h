@@ -47,10 +47,10 @@ class DoSimplifyDefUse : public Transform {
     { return process(control); }
 };
 
-class SimplifyDefUse : public PassManager {
+class SimplifyDefUse : public PassRepeated {
  public:
     SimplifyDefUse(ReferenceMap* refMap, TypeMap* typeMap,
-             TypeChecking* typeChecking = nullptr) {
+             TypeChecking* typeChecking = nullptr) : PassRepeated({}) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap);
         if (!typeChecking)
             typeChecking = new TypeChecking(refMap, typeMap);

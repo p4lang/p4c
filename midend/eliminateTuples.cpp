@@ -1,3 +1,4 @@
+#include <string>
 #include "eliminateTuples.h"
 
 namespace P4 {
@@ -29,11 +30,13 @@ const IR::Type* ReplacementMap::convertType(const IR::Type* type) {
     } else if (type->is<IR::Type_BaseList>()) {
         cstring name = ng->newName("tuple");
         IR::IndexedVector<IR::StructField> fields;
+        size_t index = 0;
         for (auto t : type->to<IR::Type_BaseList>()->components) {
             auto ftype = convertType(t);
-            auto fname = ng->newName("field");
+            auto fname = cstring("f") + cstring(std::to_string(index));
             auto field = new IR::StructField(IR::ID(fname), ftype->getP4Type());
             fields.push_back(field);
+            index++;
         }
         auto result = new IR::Type_Struct(name, fields);
         LOG3("Converted " << dbp(type) << " to " << dbp(result));
@@ -81,6 +84,18 @@ const IR::Node* DoReplaceTuples::insertReplacements(const IR::Node* before) {
     LOG3("Inserting replacements before " << dbp(before));
     result->push_back(before);
     return result;
+}
+
+const IR::Node* DoReplaceTuples::postorder(IR::ArrayIndex* expression) {
+    auto type = repl->typeMap->getType(expression->left);
+    if (type->is<IR::Type_Tuple>()) {
+        auto cst = expression->right->to<IR::Constant>();
+        BUG_CHECK(cst, "%1%: Expected a constant", expression->right);
+        cstring field = cstring("f") + Util::toString(cst->asInt());
+        auto src = expression->right->srcInfo;
+        return new IR::Member(src, expression->left, IR::ID(src, field));
+    }
+    return expression;
 }
 
 }  // namespace P4

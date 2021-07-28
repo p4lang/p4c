@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_CSTRING_H_
-#define P4C_LIB_CSTRING_H_
+#ifndef _LIB_CSTRING_H_
+#define _LIB_CSTRING_H_
 
 #include <cstring>
 #include <cstddef>
@@ -257,6 +257,9 @@ class cstring {
     /// @return the total size in bytes of all interned strings. @count is set
     /// to the total number of interned strings.
     static size_t cache_size(size_t &count);
+
+    // convert the cstring to upper case
+    cstring toUpper();
 };
 
 inline bool operator==(const char *a, cstring b) { return b == a; }
@@ -306,4 +309,4 @@ template<> struct hash<cstring> {
 };
 }  // namespace std
 
-#endif /* P4C_LIB_CSTRING_H_ */
+#endif /* _LIB_CSTRING_H_ */

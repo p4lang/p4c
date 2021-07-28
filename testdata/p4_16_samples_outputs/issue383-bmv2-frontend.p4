@@ -51,7 +51,9 @@ parser parse(packet_in pk, out parsed_packet_t h, inout local_metadata_t local_m
 }
 
 control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("ingress.s") tst_t s_0;
+    @name("ingress.bh") bitvec_hdr bh_0;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingress.do_act") action do_act() {
         h.bvh1.row.alt1.valid = 1w0;
@@ -63,11 +65,15 @@ control ingress(inout parsed_packet_t h, inout local_metadata_t local_metadata, 
         }
         actions = {
             do_act();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
+        s_0.col.bvh.setInvalid();
+        s_0.bvh0.setInvalid();
+        s_0.bvh1.setInvalid();
+        bh_0.setInvalid();
         tns_0.apply();
         local_metadata.col.bvh.row.alt0.valid = 1w0;
         local_metadata.row0.alt0 = local_metadata.row1.alt1;

@@ -1,6 +1,6 @@
 control c(out bit<16> b) {
-    bool hasReturned;
-    bit<16> retval;
+    @name("c.hasReturned") bool hasReturned;
+    @name("c.retval") bit<16> retval;
     @hidden action function4() {
         hasReturned = true;
         retval = 16w12;
@@ -31,7 +31,9 @@ control c(out bit<16> b) {
     }
     apply {
         tbl_act.apply();
-        if (!hasReturned) {
+        if (hasReturned) {
+            ;
+        } else {
             tbl_function4.apply();
         }
         tbl_function9.apply();

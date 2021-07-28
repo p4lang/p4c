@@ -10,4 +10,4 @@ package S<T, T>
 template_e.p4(16)
 package S<T, T>
           ^
-error: 2 errors encountered, aborting compilation
+[--Werror=overlimit] error: 2 errors encountered, aborting compilation

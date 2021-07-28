@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_ALLOC_H_
-#define P4C_LIB_ALLOC_H_
+#ifndef _LIB_ALLOC_H_
+#define _LIB_ALLOC_H_
 
 #include <stdlib.h>
 #include <stdexcept>
@@ -109,4 +109,4 @@ template<class T, int R, int C> class Alloc2D : public Alloc2Dbase<T> {
     Alloc2Dbase<T> &base() { return *this; }
 };
 
-#endif /* P4C_LIB_ALLOC_H_ */
+#endif /* _LIB_ALLOC_H_ */

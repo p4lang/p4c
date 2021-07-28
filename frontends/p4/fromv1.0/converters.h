@@ -363,7 +363,9 @@ class ComputeTableCallGraph : public Inspector {
         if (tbl == nullptr)
             ::error(ErrorType::ERR_NOT_FOUND, "%1%: Could not find table", apply->name);
         auto parent = findContext<IR::V1Control>();
-        ERROR_CHECK(parent != nullptr, "%1%: Apply not within a control block?", apply);
+        if (!parent)
+            ::error(ErrorType::ERR_UNEXPECTED,
+                    "%1%: Apply not within a control block?", apply);
 
         auto ctrl = get(structure->tableMapping, tbl);
 

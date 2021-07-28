@@ -171,51 +171,51 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 struct tuple_0 {
-    bit<128> field;
-    bit<128> field_0;
-    bit<32>  field_1;
-    bit<24>  field_2;
-    bit<8>   field_3;
+    bit<128> f0;
+    bit<128> f1;
+    bit<32>  f2;
+    bit<24>  f3;
+    bit<8>   f4;
 }
 
 control MyComputeChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        update_checksum_with_payload<tuple_0, bit<16>>(meta.do_cksum == 1w1, { hdr.ipv6.src_addr, hdr.ipv6.dst_addr, (bit<32>)hdr.ipv6.payload_length, 24w0, 8w58 }, hdr.icmp6.checksum, HashAlgorithm.csum16);
+        update_checksum_with_payload<tuple_0, bit<16>>(meta.do_cksum == 1w1, (tuple_0){f0 = hdr.ipv6.src_addr,f1 = hdr.ipv6.dst_addr,f2 = (bit<32>)hdr.ipv6.payload_length,f3 = 24w0,f4 = 8w58}, hdr.icmp6.checksum, HashAlgorithm.csum16);
     }
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    mac_addr_t mac_tmp_0;
-    ipv6_addr_t addr_tmp_0;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @name("MyIngress.mac_tmp") mac_addr_t mac_tmp_0;
+    @name("MyIngress.addr_tmp") ipv6_addr_t addr_tmp_0;
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_4() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_5() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @name("MyIngress.set_egress_port") action set_egress_port(port_t out_port) {
+    @name("MyIngress.set_egress_port") action set_egress_port(@name("out_port") port_t out_port) {
         standard_metadata.egress_spec = out_port;
     }
-    @name("MyIngress.set_egress_port") action set_egress_port_2(port_t out_port) {
-        standard_metadata.egress_spec = out_port;
+    @name("MyIngress.set_egress_port") action set_egress_port_1(@name("out_port") port_t out_port_1) {
+        standard_metadata.egress_spec = out_port_1;
     }
     @name("MyIngress.controller_debug") action controller_debug() {
         meta.task = 16w3;
         meta.ingress_port = standard_metadata.ingress_port;
         clone3<metadata>(CloneType.I2E, 32w100, meta);
     }
-    @name("MyIngress.controller_debug") action controller_debug_2() {
+    @name("MyIngress.controller_debug") action controller_debug_1() {
         meta.task = 16w3;
         meta.ingress_port = standard_metadata.ingress_port;
         clone3<metadata>(CloneType.I2E, 32w100, meta);
     }
-    @name("MyIngress.controller_reply") action controller_reply(task_t task) {
-        meta.task = task;
+    @name("MyIngress.controller_reply") action controller_reply(@name("task") task_t task_1) {
+        meta.task = task_1;
         meta.ingress_port = standard_metadata.ingress_port;
         clone3<metadata>(CloneType.I2E, 32w100, meta);
     }
-    @name("MyIngress.controller_reply") action controller_reply_2(task_t task) {
-        meta.task = task;
+    @name("MyIngress.controller_reply") action controller_reply_1(@name("task") task_t task_2) {
+        meta.task = task_2;
         meta.ingress_port = standard_metadata.ingress_port;
         clone3<metadata>(CloneType.I2E, 32w100, meta);
     }
@@ -237,10 +237,10 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
             controller_debug();
             controller_reply();
             icmp6_echo_reply();
-            NoAction_0();
+            NoAction_1();
         }
         size = 64;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name("MyIngress.v6_networks") table v6_networks_0 {
         key = {
@@ -248,23 +248,23 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         }
         actions = {
             set_egress_port();
-            controller_debug_2();
-            controller_reply_2();
-            NoAction_4();
+            controller_debug_1();
+            controller_reply_1();
+            NoAction_2();
         }
         size = 64;
-        default_action = NoAction_4();
+        default_action = NoAction_2();
     }
     @name("MyIngress.v4_networks") table v4_networks_0 {
         key = {
             hdr.ipv4.dst_addr: lpm @name("hdr.ipv4.dst_addr") ;
         }
         actions = {
-            set_egress_port_2();
-            NoAction_5();
+            set_egress_port_1();
+            NoAction_3();
         }
         size = 64;
-        default_action = NoAction_5();
+        default_action = NoAction_3();
     }
     apply {
         if (hdr.ipv6.isValid()) {

@@ -10,8 +10,8 @@ struct S {
 
 extern void f<D>(in D data);
 control c(inout bit<1> r) {
-    S s;
-    bit<1> tmp_0;
+    @name("c.s_0") S s;
+    @name("c.tmp") bit<1> tmp_0;
     apply {
         s = (S){f1 = { (T){f = 1w0}, (T){f = 1w1} },f2 = (T){f = 1w0},z = 1w1};
         f<tuple<T, T>>(s.f1);

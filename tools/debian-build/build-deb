@@ -1,0 +1,126 @@
+#!/usr/bin/env bash
+#
+# Debian/Ubuntu Packaging Scripts
+# Copyright (C) 2002-2021 by Thomas Dreibholz
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#   http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# Contact: dreibh@iem.uni-due.de
+
+# Bash options:
+set -e
+
+# ====== Path variables =========================================
+FILE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+P4C_DIR="${FILE_DIR}/../.."
+DEBIAN_DIR="${P4C_DIR}/debian"
+
+# ====== Obtain package and version information =============================
+OVERRIDE_PACKAGE_DISTRIBUTION="$1"
+
+CHANGELOG_HEADER="`head -n1 ${DEBIAN_DIR}/changelog`"
+
+# The package name, e.g. MyApplication
+PACKAGE=`echo ${CHANGELOG_HEADER} | sed -e "s/(.*//" -e "s/ //g"`
+# The package distribution, e.g. precise, raring, ...
+PACKAGE_DISTRIBUTION=`echo ${CHANGELOG_HEADER} | sed -e "s/[^)]*)//" -e "s/;.*//g" -e "s/ //g"`
+# The package's version, e.g. 1.2.3-1ubuntu1
+PACKAGE_VERSION=`echo ${CHANGELOG_HEADER} | sed -e "s/.*(//" -e "s/).*//" -e "s/ //g" -e "s/ //g" -e "s/^[0-9]://g"`
+# The package's output version, e.g. 1.2.3-1ubuntu
+OUTPUT_VERSION=`echo ${PACKAGE_VERSION}   | sed -e "s/\(ubuntu\|ppa\)[0-9]*$/\1/"`
+# The package's Debian version, e.g. 1.2.3-1
+DEBIAN_VERSION=`echo ${OUTPUT_VERSION}    | sed -e "s/\(ubuntu\|ppa\)$//1"`
+# The package's upstream version, e.g. 1.2.3
+UPSTREAM_VERSION=`echo ${DEBIAN_VERSION}  | sed -e "s/-[0-9]*$//"`
+# The package's plain upstream version, e.g. 1.2.3 (without e.g. ~svn<xxxx>)
+PLAIN_VERSION=`echo ${UPSTREAM_VERSION}   | sed -e "s/\([0-9\.]*\)[-+~].*$/\1/"`
+
+
+echo -e "\x1b[34m######################################################################\x1b[0m"
+echo -e "\x1b[34mCHANGELOG_HEADER:     ${CHANGELOG_HEADER}\x1b[0m"
+echo -e "\x1b[34mPACKAGE:              ${PACKAGE}\x1b[0m"
+echo -e "\x1b[34mPACKAGE_DISTRIBUTION: ${PACKAGE_DISTRIBUTION}\x1b[0m"
+echo -e "\x1b[34mPACKAGE_VERSION       ${PACKAGE_VERSION}\x1b[0m"
+echo -e "\x1b[34mOUTPUT_VERSION:       ${OUTPUT_VERSION}\x1b[0m"
+echo -e "\x1b[34mDEBIAN_VERSION:       ${DEBIAN_VERSION}\x1b[0m"
+echo -e "\x1b[34mUPSTREAM_VERSION:     ${UPSTREAM_VERSION}\x1b[0m"
+echo -e "\x1b[34mPLAIN_VERSION:        ${PLAIN_VERSION}\x1b[0m"
+echo -e "\x1b[34m######################################################################\x1b[0m"
+
+if [ ! -e ./packaging.conf ] ; then
+   echo >&2 "ERROR: packaging.conf does not exist -> no configuration for the new package!"
+   exit 1
+fi
+. ./packaging.conf
+
+if [ "${OVERRIDE_PACKAGE_DISTRIBUTION}" != "" ] ; then
+   PACKAGE_DISTRIBUTION="${OVERRIDE_PACKAGE_DISTRIBUTION}"
+   echo ""
+   echo -e "\x1b[34m**** Overriding PACKAGE_DISTRIBUTION: PACKAGE_DISTRIBUTION=${PACKAGE_DISTRIBUTION}! ****\x1b[0m"
+   echo ""
+fi
+
+
+# ====== Create source package ==============================================
+sudo echo ""
+./clean-deb
+./make-deb ${PACKAGE_DISTRIBUTION}
+
+if [ "${PACKAGE_DISTRIBUTION}" == "unstable" -o \
+     "${PACKAGE_DISTRIBUTION}" == "testing"  -o \
+     "${PACKAGE_DISTRIBUTION}" == "stable"   -o \
+     "${PACKAGE_DISTRIBUTION}" == "default" ] ; then
+   if [ "${PACKAGE_DISTRIBUTION}" == "default" ] ; then
+      version=${PACKAGE_VERSION}
+   else
+      version=${DEBIAN_VERSION}
+   fi
+   changesFilesPattern="${PACKAGE}_${version}_*.changes"
+   dscFile=`ls ${PACKAGE}_${version}.dsc | tail -n1`
+else
+   changesFilesPattern="${PACKAGE}_${OUTPUT_VERSION}~${PACKAGE_DISTRIBUTION}[0-9]_*.changes"
+   dscFile=`ls ${PACKAGE}_${OUTPUT_VERSION}~${PACKAGE_DISTRIBUTION}[0-9].dsc | tail -n1`
+fi
+
+
+# ====== Build binary package ===============================================
+echo -e ""
+echo -e "\x1b[34m`date +%FT%H:%M:%S`: ====== Building binary package ========================================\x1b[0m"
+echo -e ""
+
+if [ ! -e "${dscFile}" ] ; then
+    echo >&2 "ERROR: Unable to find description file ${dscFile}!"
+    exit 1
+fi
+sudo pbuilder build ${dscFile}
+
+
+# ====== Run lintian ========================================================
+echo -e ""
+echo -e "\x1b[34m`date +%FT%H:%M:%S`: ====== Running lintian ================================================\x1b[0m"
+echo -e ""
+
+changesFile=`find /var/cache/pbuilder/result/ -name "${changesFilesPattern}"`
+if [ ! -e "${changesFile}" ] ; then
+    echo >&2 "ERROR: Unable to find changes file ${changesFile}!"
+    exit 1
+fi
+
+profile="ubuntu"
+if [ "${PACKAGE_DISTRIBUTION}" == "unstable" -o \
+     "${PACKAGE_DISTRIBUTION}" == "testing"  -o \
+     "${PACKAGE_DISTRIBUTION}" == "stable" ] ; then
+   profile="debian"
+fi
+echo "Calling: lintian -iIEv --pedantic --suppress-tags file-references-package-build-path --profile ${profile} ${changesFile}"
+lintian -iIEv --pedantic --suppress-tags file-references-package-build-path --profile ${profile} ${changesFile} || true

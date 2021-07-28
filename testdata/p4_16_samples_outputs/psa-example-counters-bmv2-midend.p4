@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -80,7 +80,7 @@ parser EgressParserImpl(packet_in buffer, out headers parsed_hdr, inout metadata
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     @name("ingress.port_bytes_in") Counter<ByteCounter_t, PortId_t>(32w512, PSA_CounterType_t.BYTES) port_bytes_in_0;
     @name("ingress.per_prefix_pkt_byte_count") DirectCounter<PacketByteCounter_t>(PSA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_byte_count_0;
-    @name("ingress.next_hop") action next_hop(PortId_t oport) {
+    @name("ingress.next_hop") action next_hop(@name("oport") PortId_t oport) {
         per_prefix_pkt_byte_count_0.count();
         @noWarnUnused {
             ostd.drop = false;

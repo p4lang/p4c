@@ -18,7 +18,7 @@ struct Headers {
 }
 
 control c(in Headers h) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("c.a") action a() {
     }
@@ -28,9 +28,9 @@ control c(in Headers h) {
         }
         actions = {
             a();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         t_0.apply();

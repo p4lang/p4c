@@ -23,7 +23,6 @@ limitations under the License.
 #define UBPF_MODEL_VERSION 20200515
 #endif
 
-/* TODO: handle the uBPF model version in the compiler. */
 const bit<32> __ubpf_model_version = UBPF_MODEL_VERSION;
 
 #if UBPF_MODEL_VERSION >= 20200515
@@ -179,4 +178,3 @@ package ubpf<H, M>(parse<H, M> prs,
                 deparser<H> dprs);
 
 #endif /* _UBPF_MODEL_P4_ */
-

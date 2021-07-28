@@ -1,5 +1,5 @@
 control p() {
-    bit<1> x_3;
+    @name("p.x_1") bit<1> x_3;
     @name("p.b") action b() {
     }
     @hidden action decl2l32() {

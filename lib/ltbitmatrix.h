@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_LTBITMATRIX_H_
-#define P4C_LIB_LTBITMATRIX_H_
+#ifndef _LIB_LTBITMATRIX_H_
+#define _LIB_LTBITMATRIX_H_
 
 #include "bitvec.h"
 
@@ -99,4 +99,4 @@ inline bool operator>>(const char *p, LTBitMatrix &bm) {
     return true;
 }
 
-#endif /* P4C_LIB_LTBITMATRIX_H_ */
+#endif /* _LIB_LTBITMATRIX_H_ */

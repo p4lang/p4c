@@ -1,5 +1,5 @@
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
 struct EMPTY {
 }
@@ -60,7 +60,7 @@ struct digest_t {
 control MyID(packet_out buffer, out EMPTY a, out EMPTY b, out EMPTY c, inout headers hdr, in EMPTY e, in psa_ingress_output_metadata_t f) {
     @name("MyID.digest") Digest<digest_t>() digest_0;
     @hidden action p4rt_digest_complex78() {
-        digest_0.pack({ hdr.h, f.egress_port });
+        digest_0.pack((digest_t){h = hdr.h,port = f.egress_port});
     }
     @hidden table tbl_p4rt_digest_complex78 {
         actions = {

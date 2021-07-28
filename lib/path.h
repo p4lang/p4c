@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_PATH_H_
-#define P4C_LIB_PATH_H_
+#ifndef _LIB_PATH_H_
+#define _LIB_PATH_H_
 
 /*
   It's 2015 and C++ still does not have a portable way to manipulate pathnames.
@@ -67,4 +67,4 @@ class PathName final {
 };
 }  // namespace Util
 
-#endif /* P4C_LIB_PATH_H_ */
+#endif /* _LIB_PATH_H_ */

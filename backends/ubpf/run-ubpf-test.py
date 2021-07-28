@@ -28,8 +28,8 @@ if __name__ == "__main__":
     # Parse options and process argv
     args, argv = arg_parser.parse_known_args()
     options = run_ebpf_test.Options()
-    options.compiler = run_ebpf_test.check_path(args.compiler)
-    options.p4filename = run_ebpf_test.check_path(args.p4filename)
+    options.compiler = run_ebpf_test.check_if_file(args.compiler)
+    options.p4filename = run_ebpf_test.check_if_file(args.p4filename)
     options.verbose = args.verbose
     options.replace = args.replace
     options.cleanupTmp = args.nocleanup

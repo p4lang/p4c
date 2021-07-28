@@ -16,6 +16,7 @@ limitations under the License.
 
 #include "unusedDeclarations.h"
 #include "sideEffects.h"
+#include "frontends/common/parser_options.h"
 
 namespace P4 {
 
@@ -104,6 +105,9 @@ const IR::Node* RemoveUnusedDeclarations::process(const IR::IDeclaration* decl) 
     LOG3("Visiting " << decl);
     if (decl->getName().name == IR::ParserState::verify && getParent<IR::P4Program>())
         return decl->getNode();
+    if (decl->getName().name.startsWith("__"))
+        // Internal identifiers, e.g., __v1model_version
+        return decl->getNode();
     if (refMap->isUsed(getOriginal<IR::IDeclaration>()))
         return decl->getNode();
     LOG3("Removing " << getOriginal());
@@ -143,6 +147,38 @@ const IR::Node* RemoveUnusedDeclarations::preorder(IR::ParserState* state) {
     if (refMap->isUsed(getOriginal<IR::ParserState>()))
         return state;
     LOG3("Removing " << state);
+    prune();
+    return nullptr;
+}
+
+// Try to guess whether a file is a "system" file
+bool RemoveUnusedDeclarations::isSystemFile(cstring file) {
+    if (file.startsWith(p4includePath)) return true;
+    // if the backend is invoked directly with '-I p4include'
+    if (file.startsWith("p4include")) return true;
+    return false;
+}
+
+cstring RemoveUnusedDeclarations::ifSystemFile(const IR::Node* node) {
+    if (!node->srcInfo.isValid()) return nullptr;
+    auto sourceFile = node->srcInfo.getSourceFile();
+    LOG1("source file " << sourceFile << " " << p4includePath);
+    if (isSystemFile(sourceFile))
+        return sourceFile;
+    return nullptr;
+}
+
+// extern functions declared in "system" files should be kept,
+// even if it is not referenced in the user program. Compiler
+// backend may synthesize code to use the extern functions.
+const IR::Node* RemoveUnusedDeclarations::preorder(IR::Method* method)
+{
+    if (ifSystemFile(method->getNode()))
+        return method;
+
+    if (refMap->isUsed(getOriginal<IR::Method>()))
+        return method;
+    LOG3("Removing " << method);
     prune();
     return nullptr;
 }

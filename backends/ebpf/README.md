@@ -29,7 +29,8 @@ Communications Review in 2014:
 P4 itself is protocol-independent but allows programmers to express a
 rich set of data plane behaviors and protocols.  This back-end only
 supports the newest version of the P4 programming language,
-[P4_16](http://p4.org/wp-content/uploads/2016/12/P4_16-prerelease-Dec_16.html). The core P4 abstractions are:
+[P4_16](http://p4.org/wp-content/uploads/2016/12/P4_16-prerelease-Dec_16.html).
+The core P4 abstractions are:
 
 * Headers describe the format (the set of fields and their
   sizes) of each header within a packet.
@@ -179,7 +180,13 @@ dataplane/control-plane APIs.
 
 ### Dependencies
 
-Our eBPF programs require a Linux kernel with version 4.15 or newer. The eBPF backend relies on [libbpf](https://github.com/libbpf/libbpf), which provides kernel- and distribution-independent header files. libbpf must be available in order to compile the generated eBPF C code into eBPF byte code. To install libbpf, run `python3 backends/ebpf/build_libbpf` in the p4c folder.
+Our eBPF programs require a Linux kernel with version 4.15 or
+newer. The eBPF backend relies on
+[libbpf](https://github.com/libbpf/libbpf), which provides kernel- and
+distribution-independent header files. libbpf must be available in
+order to compile the generated eBPF C code into eBPF byte code. To
+install libbpf, run `python3 backends/ebpf/build_libbpf` in the p4c
+folder.
 
 In addition the following packages and programs are required to run the full test suite:
 

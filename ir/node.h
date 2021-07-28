@@ -56,6 +56,16 @@ class INode : public Util::IHasSourceInfo, public IHasDbPrint {
     template<typename T> bool is() const { return to<T>() != nullptr; }
     template<typename T> const T *to() const { return dynamic_cast<const T*>(this); }
     template<typename T> const T &as() const { return dynamic_cast<const T&>(*this); }
+
+    /// A checked version of INode::to. A BUG occurs if the cast fails.
+    ///
+    /// A similar effect can be achieved with `&as<T>()`, but this method produces a message that
+    /// is easier to debug.
+    template<typename T> const T *checkedTo() const {
+        const auto *result = to<T>();
+        BUG_CHECK(result, "Cast failed: %1% is not a %2%.", this, T::static_type_name());
+        return result;
+    }
 };
 
 class Node : public virtual INode {
@@ -69,6 +79,8 @@ class Node : public virtual INode {
     virtual const Node *apply_visitor_preorder(Transform &v);
     virtual const Node *apply_visitor_postorder(Transform &v);
     virtual void apply_visitor_revisit(Transform &v, const Node *n) const;
+    Node &operator=(const Node &) = default;
+    Node &operator=(Node &&) = default;
 
  protected:
     static int currentId;

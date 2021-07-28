@@ -152,7 +152,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                     ipv4_fib_lpm.apply();
                 }
             }
-
             nexthop.apply();
         }
     }

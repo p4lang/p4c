@@ -34,7 +34,8 @@ bool EBPFProgram::build() {
                   "; are you using the wrong architecture?", pack->type->name);
 
     if (pack->getConstructorParameters()->size() != 2) {
-        ::error("Expected toplevel package %1% to have 2 parameters", pack->type);
+        ::error(ErrorType::ERR_EXPECTED,
+                "Expected toplevel package %1% to have 2 parameters", pack->type);
         return false;
     }
 

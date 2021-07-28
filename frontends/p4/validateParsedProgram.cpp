@@ -75,7 +75,9 @@ void ValidateParsedProgram::postorder(const IR::Type_Bits* type) {
     if (type->expression)
         // cannot validate yet
         return;
-    if (type->size <= 0)
+    if (type->size < 0)
+        ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
+    if (type->size == 0 && type->isSigned)
         ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
 }
 
@@ -83,7 +85,7 @@ void ValidateParsedProgram::postorder(const IR::Type_Varbits* type) {
     if (type->expression)
         // cannot validate yet
         return;
-    if (type->size <= 0)
+    if (type->size < 0)
         ::error(ErrorType::ERR_INVALID, "%1%: invalid type size", type);
 }
 
@@ -199,21 +201,23 @@ void ValidateParsedProgram::postorder(const IR::EntriesList* l) {
                 "%1%: invalid initializer. Table initializers must be constant.", l);
 }
 
-/// Switch statements are not allowed in actions.
 /// Default label in switch statement is always the last one.
 void ValidateParsedProgram::postorder(const IR::SwitchStatement* statement) {
-    auto inAction = findContext<IR::P4Action>();
-    if (inAction != nullptr)
-        ::error(ErrorType::ERR_INVALID,
-                "%1%: invalid statement. 'switch' statements not allowed in actions.", statement);
-    bool defaultFound = false;
+    const IR::SwitchCase *defaultFound = nullptr;
     for (auto c : statement->cases) {
-        if (defaultFound) {
-            ::warning(ErrorType::WARN_ORDERING, "%1%: label following default label.", c);
+        if (defaultFound != nullptr) {
+            if (c->label->is<IR::DefaultExpression>())
+                ::error(ErrorType::ERR_INVALID,
+                        "%1% has multiple 'default' labels: %2% and %3%.",
+                        statement, defaultFound->label, c->label);
+            else
+                ::warning(ErrorType::WARN_ORDERING,
+                          "%1%: label following 'default' %2% label.",
+                          c->label, defaultFound->label);
             break;
         }
         if (c->label->is<IR::DefaultExpression>())
-            defaultFound = true;
+            defaultFound = c;
     }
 }
 

@@ -130,6 +130,7 @@ class Visitor {
         v.parallel_visit_children(*this); }
 
     virtual Visitor *clone() const { BUG("need %s::clone method",  name()); return nullptr; }
+    virtual bool check_clone(const Visitor *a) { return typeid(*this) == typeid(*a); }
 
     // Functions for IR visit_children to call for ControlFlowVisitors.
     virtual Visitor &flow_clone() { return *this; }
@@ -190,6 +191,10 @@ class Visitor {
     template <class T> inline const T *findOrigCtxt() const {
         const Context *c = ctxt;
         return findOrigCtxt<T>(c); }
+    inline bool isInContext(const IR::Node *n) const {
+        for (auto *c = ctxt; c; c = c->parent) {
+            if (c->node == n || c->original == n) return true; }
+        return false; }
 
     /// @return the current node - i.e., the node that was passed to preorder()
     /// or postorder(). For Modifiers and Transforms, this is a clone of the
@@ -237,7 +242,6 @@ class Visitor {
 
     void visit_children(const IR::Node *, std::function<void()> fn) { fn(); }
     class ChangeTracker;  // used by Modifier and Transform -- private to them
-    virtual bool check_clone(const Visitor *) { return true; }
     // This overrides visitDagOnce for a single node -- can only be called from
     // preorder and postorder functions
     void visitOnce() const { *visitCurrentOnce = true; }
@@ -322,11 +326,11 @@ class Transform : public virtual Visitor {
 };
 
 class ControlFlowVisitor : public virtual Visitor {
-    std::map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> *flow_join_points = 0;
     std::map<cstring, ControlFlowVisitor &>     &globals;
 
  protected:
     ControlFlowVisitor* clone() const override = 0;
+    std::map<const IR::Node *, std::pair<ControlFlowVisitor *, int>> *flow_join_points = 0;
     void init_join_flows(const IR::Node *root) override;
     bool join_flows(const IR::Node *n) override;
 

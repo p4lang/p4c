@@ -110,6 +110,15 @@ class ToP4 : public Inspector {
             outStream(outStream),
             mainFile(mainFile)
     { visitDagOnce = false; setName("ToP4"); }
+    ToP4() :  // this is useful for debugging
+            expressionPrecedence(DBPrint::Prec_Low),
+            isDeclaration(true),
+            showIR(false),
+            withinArgument(false),
+            builder(* new Util::SourceCodeBuilder()),
+            outStream(&std::cout),
+            mainFile(nullptr)
+    { visitDagOnce = false; setName("ToP4"); }
 
     using Inspector::preorder;
 
@@ -237,6 +246,9 @@ class ToP4 : public Inspector {
     // in case it is accidentally called on a V1Program
     bool preorder(const IR::V1Program*) override { return false; }
 };
+
+std::string toP4(const IR::INode* node);
+void dumpP4(const IR::INode* node);
 
 }  // namespace P4
 

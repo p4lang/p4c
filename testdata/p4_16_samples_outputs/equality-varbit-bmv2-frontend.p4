@@ -22,7 +22,7 @@ parser p(packet_in b, out headers hdr, inout metadata meta, inout standard_metad
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t stdmeta) {
-    H h_0;
+    @name("ingress.h") H h_0;
     apply {
         stdmeta.egress_spec = 9w0;
         h_0 = hdr.h;

@@ -17,8 +17,8 @@ limitations under the License.
 /* -*-c++-*-
    C#-like enumerator interface */
 
-#ifndef P4C_LIB_ENUMERATOR_H_
-#define P4C_LIB_ENUMERATOR_H_
+#ifndef _LIB_ENUMERATOR_H_
+#define _LIB_ENUMERATOR_H_
 
 #include <vector>
 #include <list>
@@ -186,6 +186,18 @@ class GenericEnumerator : public Enumerator<typename Iter::value_type> {
         }
         throw std::runtime_error("Unexpected enumerator state");
     }
+};
+
+/////////////////////////////////////////////////////////////////////
+
+/* always returns false */
+template <typename T>
+class EmptyEnumerator : public Enumerator<T> {
+ public:
+    cstring toString() const { return "EmptyEnumerator"; }
+    bool moveNext() { return false; }
+    T getCurrent() const {
+        throw std::logic_error("You cannot call 'getCurrent' on an EmptyEnumerator"); }
 };
 
 /////////////////////////////////////////////////////////////////////
@@ -563,4 +575,4 @@ bool EnumeratorHandle<T>::operator != (const EnumeratorHandle<T>& other) const {
 }
 
 }  // namespace Util
-#endif  /* P4C_LIB_ENUMERATOR_H_ */
+#endif  /* _LIB_ENUMERATOR_H_ */

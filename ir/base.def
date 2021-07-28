@@ -17,7 +17,11 @@
 #end
 
 /// a value that can be evaluated at compile-time
-interface CompileTimeValue {}
+interface CompileTimeValue {
+    bool equiv(const CompileTimeValue& other) const {
+        return this->getNode()->equiv(*other.getNode());
+    }
+}
 
 /// Base class for P4 types
 abstract Type {

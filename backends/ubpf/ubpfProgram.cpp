@@ -32,7 +32,8 @@ namespace UBPF {
                                                pack->type->name);
 
         if (pack->getConstructorParameters()->size() != 3) {
-            ::error("Expected toplevel package %1% to have 3 parameters", pack->type);
+            ::error(ErrorType::ERR_MODEL,
+                    "Expected toplevel package %1% to have 3 parameters", pack->type);
             return false;
         }
 
@@ -139,6 +140,15 @@ namespace UBPF {
         emitTableDefinition(builder);
         builder->newline();
         control->emitTableTypes(builder);
+        builder->appendLine("#if CONTROL_PLANE");
+        builder->appendLine("static void init_tables() ");
+        builder->blockStart();
+        builder->emitIndent();
+        builder->appendFormat("uint32_t %s = 0;", zeroKey.c_str());
+        builder->newline();
+        control->emitTableInitializers(builder);
+        builder->blockEnd(true);
+        builder->appendLine("#endif");
         builder->appendLine("#endif");
     }
 
@@ -174,7 +184,15 @@ namespace UBPF {
         builder->blockStart();
 
         builder->emitIndent();
+        builder->append("UBPF_MAP_TYPE_ARRAY = 1,");
+        builder->newline();
+
+        builder->emitIndent();
         builder->append("UBPF_MAP_TYPE_HASHMAP = 4,");
+        builder->newline();
+
+        builder->emitIndent();
+        builder->append("UBPF_MAP_TYPE_LPM_TRIE = 5,");
         builder->newline();
 
         builder->blockEnd(false);
@@ -244,7 +262,15 @@ namespace UBPF {
         builder->newline();
 
         builder->emitIndent();
+        builder->appendFormat("uint8_t %s = 0;", control->hitVariable);
+        builder->newline();
+
+        builder->emitIndent();
         builder->appendFormat("unsigned char %s;", byteVar.c_str());
+        builder->newline();
+
+        builder->emitIndent();
+        builder->appendFormat("uint32_t %s = 0;", zeroKey.c_str());
         builder->newline();
 
         builder->emitIndent();

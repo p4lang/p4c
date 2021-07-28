@@ -17,8 +17,8 @@
 set (prefix ${CMAKE_INSTALL_PREFIX})
 set (exec_prefix ${CMAKE_INSTALL_PREFIX})
 set (datarootdir "\${prefix}/share")
-configure_file ("p4c.in" "${P4C_BINARY_DIR}/p4c" @ONLY)
-execute_process(COMMAND chmod a+x ${P4C_BINARY_DIR}/p4c)
+configure_file ("p4c.in" "${P4C_BINARY_DIR}/${P4C_DRIVER_NAME}" @ONLY)
+execute_process(COMMAND chmod a+x ${P4C_BINARY_DIR}/${P4C_DRIVER_NAME})
 
 
 set (P4C_DRIVER_SRCS
@@ -36,8 +36,11 @@ endif()
 if (ENABLE_EBPF)
   list (APPEND P4C_TARGET_CFGS p4c_src/p4c.ebpf.cfg)
 endif()
+if (ENABLE_DPDK)
+  list (APPEND P4C_TARGET_CFGS p4c_src/p4c.dpdk.cfg)
+endif()
 
-install (PROGRAMS ${P4C_BINARY_DIR}/p4c
+install (PROGRAMS ${P4C_BINARY_DIR}/${P4C_DRIVER_NAME}
   DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 install (DIRECTORY p4c_src
   DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}
@@ -55,7 +58,7 @@ add_custom_command(OUTPUT ${P4C_DRIVER_DST}
           for f in ${P4C_DRIVER_SRCS} ${P4C_TARGET_CFGS} \; do
           ${CMAKE_COMMAND} -E copy_if_different \$$f ${P4C_BINARY_DIR}/p4c_src \;
           done
-  COMMAND chmod a+x ${P4C_BINARY_DIR}/p4c
+  COMMAND chmod a+x ${P4C_BINARY_DIR}/${P4C_DRIVER_NAME}
   DEPENDS ${P4C_DRIVER_SRCS}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMENT "Copying p4c driver"

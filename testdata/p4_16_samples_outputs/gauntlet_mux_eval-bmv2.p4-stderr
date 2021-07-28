@@ -1,0 +1,3 @@
+gauntlet_mux_eval-bmv2.p4(31): [--Wwarn=uninitialized_use] warning: tmp.src_addr may be uninitialized
+        h.eth_hdr.src_addr = tmp.src_addr;
+                             ^^^^^^^^^^^^

@@ -38,10 +38,12 @@ namespace UBPF {
         virtual void compileEmit(const IR::Vector<IR::Argument> *args);
 
         bool notSupported(const IR::Expression* expression)
-        { ::error("%1%: not supported in Deparser", expression); return false; }
+        { ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                  "%1%: not supported in Deparser", expression); return false; }
 
         bool notSupported(const IR::StatOrDecl* statOrDecl)
-        { ::error("%1%: not supported in Deparser", statOrDecl); return false; }
+        { ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                  "%1%: not supported in Deparser", statOrDecl); return false; }
 
         bool preorder(const IR::MethodCallExpression *expression) override;
         bool preorder(const IR::AssignmentStatement *a) override { return notSupported(a); };

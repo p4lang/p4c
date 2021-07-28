@@ -1,4 +1,6 @@
-[![Build Status](https://travis-ci.com/p4lang/p4c.svg?branch=master)](https://travis-ci.com/p4lang/p4c)
+[![Main Build](https://github.com/p4lang/p4c/actions/workflows/ci-test.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-test.yml)
+[![Bazel Build](https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-bazel.yml)
+[![Validation](https://github.com/p4lang/p4c/actions/workflows/ci-validation.yml/badge.svg)](https://github.com/p4lang/p4c/actions/workflows/ci-validation.yml)
 
 # p4c
 
@@ -17,15 +19,17 @@ make adding new backends easy.
 
 The code contains five sample backends:
 * p4c-bm2-ss: can be used to target the P4 `simple_switch` written using
-  the BMv2 behavioral model https://github.com/p4lang/behavioral-model
-* p4c-ebpf: can be used to generate C code which can be compiled to EBPF
+  the BMv2 behavioral model https://github.com/p4lang/behavioral-model,
+* p4c-dpdk: can be used to target the DPDK software switch (SXS) pipeline 
+  https://doc.dpdk.org/guides/rel_notes/release_20_11.html,
+* p4c-ebpf: can be used to generate C code which can be compiled to eBPF
   https://en.wikipedia.org/wiki/Berkeley_Packet_Filter and then loaded
-  in the Linux kernel for packet filtering
+  in the Linux kernel for packet filtering,
 * p4test: a source-to-source P4 translator which can be used for
-  testing, learning compiler internals and debugging.
+  testing, learning compiler internals and debugging,
 * p4c-graphs: can be used to generate visual representations of a P4 program;
-  for now it only supports generating graphs of top-level control flows.
-* p4c-ubfp: can be used to generate ebpf code that runs in user-space
+  for now it only supports generating graphs of top-level control flows, and
+* p4c-ubfp: can be used to generate eBPF code that runs in user-space.
 
 Sample command lines:
 
@@ -97,6 +101,16 @@ dot -Tpdf ParserImpl.dot > ParserImpl.pdf
 
 # Getting started
 
+## Installing p4c from a Debian repository
+p4c has package support for several Ubuntu distributions (Ubuntu 20.04 to Ubuntu 21.04).
+It can be installed by adding the following ppa:
+```bash
+sudo add-apt-repository ppa:dreibh/ppa
+sudo apt update
+sudo apt install p4lang-p4c
+```
+
+## Installing p4c from source
 1.  Clone the repository. It includes submodules, so be sure to use
     `--recursive` to pull them in:
     ```
@@ -110,7 +124,7 @@ dot -Tpdf ParserImpl.dot > ParserImpl.pdf
 2.  Install [dependencies](#dependencies). You can find specific instructions
     for Ubuntu 16.04 [here](#ubuntu-dependencies) and for macOS 10.12
     [here](#macos-dependencies).  You can also look at the
-    [travis installation script](tools/travis-build).
+    [CI installation script](tools/ci-build.sh).
 
 3.  Build. Building should also take place in a subdirectory named `build`.
     ```
@@ -127,10 +141,18 @@ dot -Tpdf ParserImpl.dot > ParserImpl.pdf
       symbols to run in gdb. Default is RELEASE.
      - `-DCMAKE_INSTALL_PREFIX=<path>` -- set the directory where
        `make install` installs the compiler. Defaults to /usr/local.
-     - `-DENABLE_BMV2=ON|OFF`. Enable the bmv2 backend. Default ON.
-     - `-DENABLE_EBPF=ON|OFF`. Enable the ebpf backend. Default ON.
-     - `-DENABLE_P4C_GRAPHS=ON|OFF`. Enable the p4c-graphs backend. Default ON.
-     - `-DENABLE_P4TEST=ON|OFF`. Enable the p4test backend. Default ON.
+     - `-DENABLE_BMV2=ON|OFF`. Enable [the bmv2
+       backend](backends/bmv2/README.md). Default ON.
+     - `-DENABLE_EBPF=ON|OFF`. Enable [the ebpf
+       backend](backends/ebpf/README.md). Default ON.
+     - `-DENABLE_UBPF=ON|OFF`. Enable [the ubpf
+       backend](backends/ubpf/README.md). Default ON.
+     - `-DENABLE_DPDK=ON|OFF`. Enable [the DPDK
+       backend](backends/dpdk/README.md). Default ON.
+     - `-DENABLE_P4C_GRAPHS=ON|OFF`. Enable [the p4c-graphs
+       backend](backends/graphs/README.md). Default ON.
+     - `-DENABLE_P4TEST=ON|OFF`. Enable [the p4test
+       backend](backends/p4test/README.md). Default ON.
      - `-DENABLE_DOCS=ON|OFF`. Build documentation. Default is OFF.
      - `-DENABLE_GC=ON|OFF`. Enable the use of the garbage collection
        library. Default is ON.
@@ -138,6 +160,9 @@ dot -Tpdf ParserImpl.dot > ParserImpl.pdf
        Default is ON.
      - `-DENABLE_PROTOBUF_STATIC=ON|OFF`. Enable the use of static
        protobuf libraries. Default is ON.
+     - `-DENABLE_MULTITHREAD=ON|OFF`. Use multithreading.  Default is
+       OFF.
+     - `-DENABLE_GMP=ON|OFF`. Use the GMP library.  Default is ON.
 
     If adding new targets to this build system, please see
     [instructions](#defining-new-cmake-targets).
@@ -200,12 +225,12 @@ included with `p4c` are documented here:
 Most dependencies can be installed using `apt-get install`:
 
 ```bash
-$ sudo apt-get install cmake g++ git automake libtool libgc-dev bison flex
-libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev
-libboost-graph-dev llvm pkg-config python python-scapy python-ipaddr python-ply python3-pip
+sudo apt-get install cmake g++ git automake libtool libgc-dev bison flex \
+libfl-dev libgmp-dev libboost-dev libboost-iostreams-dev \
+libboost-graph-dev llvm pkg-config python python-scapy python-ipaddr python-ply python3-pip \
 tcpdump
 
-$ pip3 install scapy ply
+pip3 install scapy ply
 ```
 
 For documentation building:
@@ -280,11 +305,12 @@ Installing on macOS:
 
 P4c relies on [BDW garbage collector](https://github.com/ivmai/bdwgc)
 to manage its memory.  By default, the p4c exectuables are linked with
-the garbage collector library.  In rare cases when the GC causes
-problems, this can be disabled by setting `ENABLE_GC` cmake option to
-`OFF`.  However, this will dramatically increase the memory usage by the
-compiler, and may become impractical for compiling large programs.  **Do
-not disable the GC**, unless you really have to.
+the garbage collector library.  When the GC causes problems, this can
+be disabled by setting `ENABLE_GC` cmake option to `OFF`.  However,
+this will dramatically increase the memory usage by the compiler, and
+may become impractical for compiling large programs.  **Do not disable
+the GC**, unless you really have to.  We have noticed that this may be
+a problem on MacOS.
 
 # Development tools
 

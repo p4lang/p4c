@@ -1,5 +1,5 @@
 /*
-Copyright 2013-present Barefoot Networks, Inc. 
+Copyright 2013-present Barefoot Networks, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_LOG_H_
-#define P4C_LIB_LOG_H_
+#ifndef _LIB_LOG_H_
+#define _LIB_LOG_H_
 
 #include <functional>
 #include <iostream>
@@ -125,11 +125,11 @@ void increaseVerbosity();
                           << X << std::endl                                     \
                       : std::clog)
 
-#define ERROR(X) (std::clog << "ERROR: " << X << std::endl)
-#define WARNING(X) (::Log::verbose()                               \
+#define P4C_ERROR(X) (std::clog << "ERROR: " << X << std::endl)
+#define P4C_WARNING(X) (::Log::verbose()                               \
                       ? std::clog << "WARNING: " << X << std::endl \
                       : std::clog)
-#define ERRWARN(C, X) ((C) ? ERROR(X) : WARNING(X))
+#define ERRWARN(C, X) ((C) ? P4C_ERROR(X) : P4C_WARNING(X))
 
 static inline std::ostream &operator<<(std::ostream &out,
                                        std::function<std::ostream &(std::ostream&)> fn) {
@@ -165,4 +165,4 @@ template<class T> std::ostream &operator<<(std::ostream &out, const std::set<T> 
     out << (sep+1) << ')';
     return out; }
 
-#endif /* P4C_LIB_LOG_H_ */
+#endif /* _LIB_LOG_H_ */

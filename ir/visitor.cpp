@@ -14,9 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+
 #include <time.h>
 #include "ir.h"
 #include "lib/log.h"
+
+#include "visitor.h"
 
 /** @class Visitor::ChangeTracker
  *  @brief Assists visitors in traversing the IR.
@@ -63,7 +66,7 @@ class Visitor::ChangeTracker {
      * `start(@final); finish(@final);` were invoked.
      *
      * @return true if the node has changed or been removed or coalesced.
-     * 
+     *
      * @exception Util::CompilerBug This method fails if `start(@orig)` has not
      * previously been invoked.
      */
@@ -113,7 +116,7 @@ class Visitor::ChangeTracker {
      *  and we don't want to visit @n again the next time we see it.
      * That is, `start(@n)` has been invoked, followed by `finish(@n)`,
      * and the visitOnce field is true.
-     * 
+     *
      * @return true if @n has been visited and the visitor is finished and visitOnce is true
      */
     bool done(const IR::Node *n) const {
@@ -224,6 +227,7 @@ struct PushContext {
         current.parent = stack;
         current.node = current.original = node;
         current.child_index = 0;
+        current.child_name = "";
         current.depth = stack ? stack->depth+1 : 1;
         assert(current.depth < 10000);    // stack overflow?
         stack = &current; }
@@ -438,22 +442,22 @@ bool ControlFlowVisitor::join_flows(const IR::Node *n) {
 bool Inspector::check_clone(const Visitor *v) {
     auto *t = dynamic_cast<const Inspector *>(v);
     BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
-    return true;
+    return Visitor::check_clone(v);
 }
 bool Modifier::check_clone(const Visitor *v) {
     auto *t = dynamic_cast<const Modifier *>(v);
     BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
-    return true;
+    return Visitor::check_clone(v);
 }
 bool Transform::check_clone(const Visitor *v) {
     auto *t = dynamic_cast<const Transform *>(v);
     BUG_CHECK(t && t->visited == visited, "Clone failed to copy base object");
-    return true;
+    return Visitor::check_clone(v);
 }
 
 ControlFlowVisitor &ControlFlowVisitor::flow_clone() {
     auto *rv = clone();
-    assert(rv->check_clone(this));
+    BUG_CHECK(rv->check_clone(this), "Clone failed to copy visitor type");
     return *rv;
 }
 

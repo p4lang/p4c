@@ -1,0 +1,233 @@
+mc_mgrp_create 7
+mc_node_create 257 8 9
+mc_node_associate 7 0
+
+# This STF test and corresponding PSA architecture test program are
+# intended to try out all possible end-of-ingress packet behaviores of
+# the PSA architecture, and verify that an implementation correctly
+# prioritizes the flags like drop, resubmit, and multicast_group being
+# 0 or non-0, relative to each other, as specified in the PSA
+# specification.
+
+# The P4 program is written to copy parts of the ethernet.dstAddr
+# field into PSA ingress standard metadata fields drop, resubmit,
+# multicast_group, egress_port.
+
+# Here is a visual breakdown of the sub-fields of dstAddr
+#packet 2 00 00 0000 0000 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
+#         ^^ least significant bit is cast to bool and assigned to drop
+#            ^^ least significant bit is cast to bool and assigned to resubmit
+#               ^^^^ assigned to multicast_group
+#                    ^^^^ assigned to egress_port
+
+# I believe the list below should be all interesting combinations of
+# these 4 values of:
+
+# drop true/false
+# resubmit true/false,
+# multicast_group 0/non-0 (7 is used for non-0 value in these tests).
+# egress_port 0/non-0
+
+# egress_port 0 or non-0 should not affect the behavior, except
+# whether the packet unicasts to port 0 or non-0, but I will include
+# test cases that exercise that, anyway (using 5 as the non-0 value in
+# these tests).
+
+# Later when ingress-to-egress cloning is supported in the PSA
+# implementation, it would be good to double the number of test cases
+# to cover all of these cross-producted with clone true/false.
+
+# drop=false (0) cases:
+# 00 00 0000 0000
+# 00 00 0000 0005
+# 00 00 0007 0000
+# 00 00 0007 0005
+# 00 01 0000 0000
+# 00 01 0000 0005
+# 00 01 0007 0000
+# 00 01 0007 0005
+
+# drop=true (1) cases:
+# 01 00 0000 0000
+# 01 00 0000 0005
+# 01 00 0007 0000
+# 01 00 0007 0005
+# 01 01 0000 0000
+# 01 01 0000 0005
+# 01 01 0007 0000
+# 01 01 0007 0005
+
+######################################################################
+# drop=false (0) cases:
+######################################################################
+
+# Note that as of 2020-Aug-31, p4c STF tests push packets into the
+# BMv2 switch without any attempt to wait for the previously sent
+# packet to first finish processing.
+
+# Also, BMv2's ingress and egress processing are separate threads that
+# can interleave in time in fairly arbitrary ways.
+
+# Thus for two packets P1 and P2, both sent into port 2, the P1
+# unicast out port 5, and P2 unicast out port 6, the order of
+# procesing in BMv2 could be any of these:
+
+# P1 ingress
+# P2 ingress
+# P1 egress
+# P2 egress
+
+# P1 ingress
+# P2 ingress
+# P2 egress
+# P1 egress
+
+# P1 ingress
+# P1 egress
+# P2 ingress
+# P2 egress
+
+# About the only thing one can guarantee from the STF test is that "P1
+# ingress" will occur before "P2 ingress", and the only reason you can
+# do so is that P1 and P2 are sent into the same port 2.  If they were
+# sent into different ports, even that would not be guaranteed.
+
+# Thus it seems that if we want to write STF tests that use P4
+# registers to verify that packets reach certain parts of the
+# processing, we either need:
+
+# (a) A way to make STF tests stop and wait until all previously
+# packets sent in have finished processing, before sending in the next
+# packet.
+
+# or
+
+# (b) all packets that write and read registers, where the read
+# register results are included in the output packets and checked by
+# expected packets in the STF test, should follow the same 'path' of
+# input port, ingress processing, the same number of resubmit and/or
+# recirculate operations in the same order, and multicast to the same
+# multicast_group, or unicast to the same output port, before leaving
+# on an output port, as the 'data packets' that cause the P4 register
+# to be updated.
+
+# For now, I will comment out all packets intended to initialize and
+# read P4 registers in this test.  This still leaves a very important
+# part of the test, which is verifying that the majority of the
+# packets come out the correct output ports, and modified as they
+# should be by the P4 program.
+
+
+### # First initialize the egress packet seen register to 0, read it to
+### # confirm it is 0, so that at the end of all of these drop=false cases
+### # we can read it again and confirm that when packets reach egress,
+### # that register is updating as it should.
+###
+### # write index 0 with value 0
+### packet 2 000000000000 00000000 0000 c1 00   deadbeef deadbeef deadbeef deadbeef
+### expect 0 000000000000 00000000 0000 c1 00   00000001 deadbeef deadbeef deadbeef
+###
+### # read index 0 and confirm it has value 0
+### packet 2 000000000000 00000000 0000 c0 00   deadbeef deadbeef deadbeef deadbeef
+### expect 0 000000000000 00000000 0000 c0 00   00000000 deadbeef deadbeef deadbeef
+
+
+packet 2 00 00 0000 0000 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
+#        ^^ least significant bit is cast to bool and assigned to drop
+#           ^^ least significant bit is cast to bool and assigned to resubmit
+#              ^^^^ assigned to multicast_group
+#                   ^^^^ assigned to egress_port
+# packet should unicast to port 0
+expect 0 00 00 0000 0000 000000000000 0000   00000001 00000000 00000000 00000002
+
+packet 2 00 00 0000 0005 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
+# packet should unicast to port 5
+expect 5 00 00 0000 0005 000000000000 0000   00000001 00000005 00000000 00000002
+
+packet 2 00 00 0007 0000 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
+# packet should multicast to group 7
+expect 8 00 00 0007 0000 000000000000 0000   00000001 00000008 00000101 00000003
+expect 9 00 00 0007 0000 000000000000 0000   00000001 00000009 00000101 00000003
+
+packet 2 00 00 0007 0005 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
+# packet should multicast to group 7
+expect 8 00 00 0007 0005 000000000000 0000   00000001 00000008 00000101 00000003
+expect 9 00 00 0007 0005 000000000000 0000   00000001 00000009 00000101 00000003
+
+packet 2 00 01 0000 0000 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
+# packet should resubmit once, then unicast to port 0
+expect 0 00 01 0000 0000 000000000000 0000   00000006 00000000 00000000 00000002
+
+packet 2 00 01 0000 0005 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
+# packet should resubmit once, then unicast to port 5
+expect 5 00 01 0000 0005 000000000000 0000   00000006 00000005 00000000 00000002
+
+packet 2 00 01 0007 0000 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
+# packet should resubmit once, then multicast to group 7
+expect 8 00 01 0007 0000 000000000000 0000   00000006 00000008 00000101 00000003
+expect 9 00 01 0007 0000 000000000000 0000   00000006 00000009 00000101 00000003
+
+packet 2 00 01 0007 0005 000000000000 0000   deadbeef deadbeef deadbeef deadbeef
+# packet should resubmit once, then multicast to group 7
+expect 8 00 01 0007 0005 000000000000 0000   00000006 00000008 00000101 00000003
+expect 9 00 01 0007 0005 000000000000 0000   00000006 00000009 00000101 00000003
+
+# read index 0 and confirm it has value equal to number of data
+# packets that went through egress processing since we initialized it
+# to 0, counting each multicast copy separately, since each copy
+# executes egress code independently of each other.
+
+# As a testing wrinkle, since these packets might be sent very close
+# in time to eah other, and bmv2 can process multiple packets
+# concurrently, a packet that is not resubmitted might 'pass up' a
+# packet that is resubmitted.  That is, this sequence of events is
+# possible:
+
+# send in packet A that will be resubmitted and one unicast copy comes out
+# send in packet B that will not be resubmitted and one unicast copy comes out
+# unicast copy of B comes out
+# unicast copy of A comes out
+
+### packet 2 000100000000 00000000 0000 c0 00   deadbeef deadbeef deadbeef deadbeef
+### expect 0 000100000000 00000000 0000 c0 00   00000001 deadbeef deadbeef deadbeef
+
+######################################################################
+# drop=true (1) cases:
+######################################################################
+
+### # This set of tests use the register index 1, instead of 0 as used
+### # above, to keep them more independent of each other (the test P4
+### # program uses the least significant 8 bits of the etherType as the
+### # index to access within the register array).  It also sends command
+### # packets to output port 1 instead of output port 0, again in an
+### # effort to keep the output packet stream more predictable in its
+### # order.
+###
+### # First initialize the egress packet seen register to 0, read it to
+### # confirm it is 0, so that at the end of all of these drop=false cases
+### # we can read it again and confirm that when packets reach egress,
+### # that register is updating as it should.
+###
+### # write index 1 with value 0
+### packet 2 000000000001 00000000 0000 c1 01   deadbeef deadbeef deadbeef deadbeef
+### expect 1 000000000001 00000000 0000 c1 01   00000001 deadbeef deadbeef deadbeef
+
+### # read index 1 and confirm it has value 0
+### packet 2 000000000001 00000000 0001 c0 01   deadbeef deadbeef deadbeef deadbeef
+### expect 1 000000000001 00000000 0001 c0 01   00000000 deadbeef deadbeef deadbeef
+
+packet 2 01 00 0000 0000 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
+packet 2 01 00 0000 0005 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
+packet 2 01 00 0007 0000 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
+packet 2 01 00 0007 0005 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
+packet 2 01 01 0000 0000 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
+packet 2 01 01 0000 0005 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
+packet 2 01 01 0007 0000 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
+packet 2 01 01 0007 0005 000000000000 0001   deadbeef deadbeef deadbeef deadbeef
+
+
+### # read index 1 and confirm it still has value 0, since none of the
+### # recent data packets should have ever reached egress processing.
+###
+### packet 2 000100000001 00000000 0001 c0 01   deadbeef deadbeef deadbeef deadbeef
+### expect 1 000100000001 00000000 0001 c0 01   00000000 deadbeef deadbeef deadbeef

@@ -16,6 +16,7 @@ limitations under the License.
 
 #include <utility>
 #include "ir.h"
+#include "frontends/common/options.h"
 
 namespace IR {
 
@@ -55,6 +56,8 @@ int Type_InfInt::nextId = 0;
 
 Annotations* Annotations::empty = new Annotations(Vector<Annotation>());
 
+const Type* Type_Stack::at(size_t) const { return elementType; }
+
 const Type_Bits* Type_Bits::get(int width, bool isSigned) {
     // map (width, signed) to type
     using bit_type_key = std::pair<int, bool>;
@@ -64,6 +67,9 @@ const Type_Bits* Type_Bits::get(int width, bool isSigned) {
     auto &result = (*type_map)[std::make_pair(width, isSigned)];
     if (!result)
         result = new Type_Bits(width, isSigned);
+    if (width > P4CContext::getConfig().maximumWidthSupported())
+        ::error(ErrorType::ERR_UNSUPPORTED, "%1%: Compiler only supports widths up to %2%",
+                result, P4CContext::getConfig().maximumWidthSupported());
     return result;
 }
 
@@ -89,13 +95,15 @@ const Type_String *Type_String::get() {
 }
 
 const Type::Bits *Type::Bits::get(Util::SourceInfo si, int sz, bool isSigned) {
-    if (sz <= 0)
-        ::error(ErrorType::ERR_INVALID, "%1%: Width cannot be negative or zero", si);
+    if (sz < 0)
+        ::error(ErrorType::ERR_INVALID, "%1%: Width cannot be negative", si);
+    if (sz == 0 && isSigned)
+        ::error(ErrorType::ERR_INVALID, "%1%: Width cannot be zero", si);
     return get(sz, isSigned);
 }
 
 const Type::Varbits *Type::Varbits::get(Util::SourceInfo si, int sz) {
-    if (sz <= 0)
+    if (sz < 0)
         ::error(ErrorType::ERR_INVALID, "%1%: Width cannot be negative or zero", si);
     return new Type::Varbits(si, sz);
 }
@@ -183,7 +191,12 @@ const Type* Type_SpecializedCanonical::getP4Type() const {
         auto at = a->getP4Type();
         args->push_back(at);
     }
-    return new IR::Type_Specialized(srcInfo, baseType->getP4Type()->to<IR::Type_Name>(), args);
+    auto bt = baseType->getP4Type();
+    if (auto tn = bt->to<IR::Type_Name>())
+        return new IR::Type_Specialized(srcInfo, tn, args);
+    auto st = baseType->to<IR::Type_StructLike>();
+    BUG_CHECK(st != nullptr, "%1%: expected a struct", baseType);
+    return new IR::Type_Specialized(srcInfo, new IR::Type_Name(st->getName()), args);
 }
 
 }  // namespace IR

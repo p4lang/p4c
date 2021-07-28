@@ -25,20 +25,20 @@ limitations under the License.
 #include "frontends/p4/toP4/toP4.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 #include "frontends/p4/typeMap.h"
-#include "frontends/p4/uniqueNames.h"
 #include "frontends/p4/unusedDeclarations.h"
 #include "midend/actionSynthesis.h"
 #include "midend/complexComparison.h"
+#include "midend/copyStructures.h"
 #include "midend/convertEnums.h"
 #include "midend/eliminateNewtype.h"
 #include "midend/eliminateTuples.h"
 #include "midend/local_copyprop.h"
 #include "midend/midEndLast.h"
 #include "midend/noMatch.h"
+#include "midend/parserUnroll.h"
 #include "midend/removeExits.h"
 #include "midend/removeLeftSlices.h"
 #include "midend/removeMiss.h"
-#include "midend/removeParameters.h"
 #include "midend/removeSelectBooleans.h"
 #include "midend/simplifyKey.h"
 #include "midend/simplifySelectCases.h"
@@ -75,13 +75,12 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
 
     PassManager midEnd = {};
     if (options.loadIRFromJson == false) {
-        std::initializer_list<Visitor *> midendPasses = {
+        midEnd.addPasses({
             new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits()),
-            new P4::RemoveMiss(&refMap, &typeMap),
             new P4::ClearTypeMap(&typeMap),
+            new P4::RemoveMiss(&refMap, &typeMap),
             new P4::EliminateNewtype(&refMap, &typeMap),
             new P4::SimplifyControlFlow(&refMap, &typeMap),
-            new P4::RemoveActionParameters(&refMap, &typeMap),
             new P4::SimplifyKey(&refMap, &typeMap,
                                 new P4::OrPolicy(
                                     new P4::IsValid(&refMap, &typeMap),
@@ -93,6 +92,7 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
             new P4::SimplifyParsers(&refMap),
             new P4::StrengthReduction(&refMap, &typeMap),
             new P4::SimplifyComparisons(&refMap, &typeMap),
+            new P4::CopyStructures(&refMap, &typeMap),
             new P4::EliminateTuples(&refMap, &typeMap),
             new P4::LocalCopyPropagation(&refMap, &typeMap),
             new P4::SimplifySelectList(&refMap, &typeMap),
@@ -105,27 +105,23 @@ const IR::ToplevelBlock* MidEnd::run(EbpfOptions& options,
             new P4::ValidateTableProperties({"implementation"}),
             new P4::RemoveLeftSlices(&refMap, &typeMap),
             new EBPF::Lower(&refMap, &typeMap),
+            new P4::ParsersUnroll(true, &refMap, &typeMap),
             evaluator,
             new P4::MidEndLast()
-        };
+        });
         if (options.listMidendPasses) {
-            for (auto it : midendPasses) {
-                if (it != nullptr) {
-                    *outStream << it->name() <<'\n';
-                }
-            }
-            return nullptr;
+            midEnd.listPasses(*outStream, "\n");
+            *outStream << std::endl;
         }
-        midEnd = midendPasses;
         if (options.excludeMidendPasses) {
             midEnd.removePasses(options.passesToExcludeMidend);
         }
     } else {
-        midEnd = {
+        midEnd.addPasses({
             new P4::ResolveReferences(&refMap),
             new P4::TypeChecking(&refMap, &typeMap),
             evaluator
-        };
+        });
     }
     midEnd.setName("MidEnd");
     midEnd.addDebugHooks(hooks);

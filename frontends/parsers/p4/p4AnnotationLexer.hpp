@@ -1,5 +1,5 @@
-#ifndef FRONTENDS_P4_P4ANNOTATIONLEXER_H_
-#define FRONTENDS_P4_P4ANNOTATIONLEXER_H_
+#ifndef FRONTENDS_PARSERS_P4_P4ANNOTATIONLEXER_HPP_
+#define FRONTENDS_PARSERS_P4_P4ANNOTATIONLEXER_HPP_
 
 #include "frontends/parsers/p4/abstractP4Lexer.hpp"
 #include "frontends/parsers/p4/p4parser.hpp"
@@ -58,4 +58,4 @@ class P4AnnotationLexer : public AbstractP4Lexer {
 
 }  // namespace P4
 
-#endif  /* FRONTENDS_P4_P4ANNOTATIONLEXER_H_ */
+#endif  /* FRONTENDS_PARSERS_P4_P4ANNOTATIONLEXER_HPP_ */

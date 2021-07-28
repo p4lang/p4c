@@ -86,16 +86,16 @@ control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
-    @name("MyIngress.set_dmac") action set_dmac(macAddr_t dstAddr) {
-        hdr.ethernet.dstAddr = dstAddr;
+    @name("MyIngress.set_dmac") action set_dmac(@name("dstAddr") macAddr_t dstAddr_2) {
+        hdr.ethernet.dstAddr = dstAddr_2;
     }
     @name("MyIngress.drop") action drop() {
     }
-    @name("MyIngress.drop") action drop_2() {
+    @name("MyIngress.drop") action drop_1() {
     }
     @name("MyIngress.forward") table forward_0 {
         key = {
@@ -104,13 +104,13 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         actions = {
             set_dmac();
             drop();
-            NoAction_0();
+            NoAction_2();
         }
         size = 1024;
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
-    @name("MyIngress.set_nhop") action set_nhop(ip4Addr_t dstAddr, egressSpec_t port) {
-        hdr.ipv4.dstAddr = dstAddr;
+    @name("MyIngress.set_nhop") action set_nhop(@name("dstAddr") ip4Addr_t dstAddr_3, @name("port") egressSpec_t port) {
+        hdr.ipv4.dstAddr = dstAddr_3;
         standard_metadata.egress_spec = port;
     }
     @name("MyIngress.ipv4_lpm") table ipv4_lpm_0 {
@@ -119,11 +119,11 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         }
         actions = {
             set_nhop();
-            drop_2();
-            NoAction_1();
+            drop_1();
+            NoAction_3();
         }
         size = 1024;
-        default_action = NoAction_1();
+        default_action = NoAction_3();
     }
     @name("MyIngress.send_digest") action send_digest() {
         meta.test_digest.in_mac_srcAddr = hdr.ethernet.srcAddr;
@@ -144,10 +144,10 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
 }
 
 control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_5() {
+    @noWarn("unused") @name(".NoAction") action NoAction_4() {
     }
-    @name("MyEgress.rewrite_mac") action rewrite_mac(macAddr_t srcAddr) {
-        hdr.ethernet.srcAddr = srcAddr;
+    @name("MyEgress.rewrite_mac") action rewrite_mac(@name("srcAddr") macAddr_t srcAddr_1) {
+        hdr.ethernet.srcAddr = srcAddr_1;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
     }
     @name("MyEgress.send_frame") table send_frame_0 {
@@ -156,10 +156,10 @@ control MyEgress(inout headers hdr, inout metadata meta, inout standard_metadata
         }
         actions = {
             rewrite_mac();
-            NoAction_5();
+            NoAction_4();
         }
         size = 1024;
-        default_action = NoAction_5();
+        default_action = NoAction_4();
     }
     apply {
         send_frame_0.apply();

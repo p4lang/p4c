@@ -15,8 +15,9 @@ limitations under the License.
 */
 
 #include "resolveReferences.h"
-#include <boost/range/adaptor/reversed.hpp>
+
 #include <sstream>
+#include <boost/range/adaptor/reversed.hpp>
 #include "frontends/common/options.h"
 
 namespace P4 {
@@ -65,7 +66,7 @@ ResolutionContext::lookup(const IR::INamespace *current, IR::ID name,
 
         if (!anyOrder && name.srcInfo.isValid()) {
             std::function<bool(const IR::IDeclaration*)> locationFilter =
-                    [name](const IR::IDeclaration *d) {
+                    [this, name, type](const IR::IDeclaration *d) {
                 if (d->is<IR::Type_Var>() || d->is<IR::ParserState>())
                     // type vars and parser states may be used before their definitions
                     return true;
@@ -73,6 +74,18 @@ ResolutionContext::lookup(const IR::INamespace *current, IR::ID name,
                 Util::SourceInfo dsi = d->getNode()->srcInfo;
                 bool before = dsi <= nsi;
                 LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
+
+                if (type == ResolutionType::Type) {
+                    if (auto *type_decl = findContext<IR::Type_Declaration>())
+                        if (type_decl->getNode() == d->getNode()) {
+                            ::error(ErrorType::ERR_UNSUPPORTED,
+                                "Self-referencing types not supported: '%1%' within '%2%'",
+                                name, d->getNode()); }
+                } else if (type == ResolutionType::Any) {
+                    if (auto *decl_ctxt = findContext<IR::Declaration>())
+                        if (decl_ctxt->getNode() == d->getNode())
+                            before = false; }
+
                 return before; };
             decls = decls->where(locationFilter); }
 
@@ -107,6 +120,12 @@ ResolutionContext::lookup(const IR::INamespace *current, IR::ID name,
                 Util::SourceInfo dsi = decl->getNode()->srcInfo;
                 bool before = dsi <= nsi;
                 LOG3("\tPosition test:" << dsi << "<=" << nsi << "=" << before);
+
+                if (type == ResolutionType::Any)
+                    if (auto* ctxt = findContext<IR::Declaration>()) {
+                        if (ctxt->getNode() == decl->getNode()) {
+                            before = false; } }
+
                 if (!before)
                     decl = nullptr; } }
         if (decl) {
@@ -184,9 +203,9 @@ ResolutionContext::resolveUnique(IR::ID name,
     if (decls->size() == 1)
         return decls->at(0);
 
-    ::error(ErrorType::ERR_INVALID, "%1%: multiple matching declarations", name);
+    ::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations", name);
     for (auto a : *decls)
-        ::error("Candidate: %1%", a);
+        ::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
     return nullptr;
 }
 
@@ -200,9 +219,9 @@ ResolutionContext::getDeclaration(const IR::Path *path, bool notNull) const {
         if (decls->empty()) {
             ::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", path->name);
         } else if (decls->size() != 1) {
-            ::error(ErrorType::ERR_INVALID, "%1%: multiple matching declarations", path->name);
+            ::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations", path->name);
             for (auto a : *decls)
-                ::error("Candidate: %1%", a);
+                ::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
         } else {
             result = decls->at(0); }
     } else {
@@ -278,7 +297,7 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
             continue;
 
         if (prev_in_scope.count(decl->getName()))
-            ::warning(ErrorType::WARN_SHADOWING, "%1% shadows %2%", node,
+            ::warning(ErrorType::WARN_SHADOWING, "'%1%' shadows '%2%'", node,
                       prev_in_scope.at(decl->getName()));
         else if (!node->is<IR::Method>() && !node->is<IR::Function>())
             prev_in_scope[decl->getName()] = node;
@@ -300,7 +319,16 @@ void ResolveReferences::checkShadowing(const IR::INamespace *ns) const {
                 // attribute locals often match attributes
                 continue;
 
-            ::warning(ErrorType::WARN_SHADOWING, "%1% shadows %2%", node, pnode);
+            // parameter shadowing
+            if (node->is<IR::Declaration>() &&
+                !node->is<IR::Parameter>()) {
+                auto *decl_node = node->to<IR::Declaration>();
+                if (auto *param = pnode->to<IR::Parameter>())
+                    if (decl_node->name.name == param->name.name)
+                        ::error(ErrorType::WARN_SHADOWING,
+                                "declaration of '%1%' shadows a parameter '%2%'", node, pnode); }
+
+            ::warning(ErrorType::WARN_SHADOWING, "'%1%' shadows '%2%'", node, pnode);
         }
     }
 }
@@ -345,10 +373,10 @@ bool ResolveReferences::preorder(const IR::KeyElement *ke) {
         ::error(ErrorType::ERR_NOT_FOUND, "%1%: declaration not found", ke->matchType->path->name);
         refMap->usedName(ke->matchType->path->name.name);
     } else if (decls->size() != 1) {
-        ::error(ErrorType::ERR_INVALID, "%1%: multiple matching declarations",
+        ::error(ErrorType::ERR_DUPLICATE, "%1%: multiple matching declarations",
                 ke->matchType->path->name);
         for (auto a : *decls)
-            ::error("Candidate: %1%", a);
+            ::error(ErrorType::ERR_DUPLICATE, "Candidate: %1%", a);
     } else {
         refMap->setDeclaration(ke->matchType->path, decls->at(0));
     }

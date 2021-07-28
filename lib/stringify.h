@@ -16,8 +16,8 @@ limitations under the License.
 
 /* -*-c++-*- */
 
-#ifndef P4C_LIB_STRINGIFY_H_
-#define P4C_LIB_STRINGIFY_H_
+#ifndef _LIB_STRINGIFY_H_
+#define _LIB_STRINGIFY_H_
 
 #include <stdint.h>
 #include "gmputil.h"
@@ -63,7 +63,8 @@ cstring toString(std::string value);
 cstring toString(const char* value);
 cstring toString(cstring value);
 cstring toString(StringRef value);
-cstring toString(const big_int* value, unsigned int base = 10);
+/// A width of zero indicates that no width should be displayed.
+cstring toString(const big_int value, unsigned width, bool sign, unsigned int base = 10);
 cstring toString(const void* value);
 
 // printf into a string
@@ -71,4 +72,4 @@ cstring printf_format(const char* fmt_str, ...);
 // vprintf into a string
 cstring vprintf_format(const char* fmt_str, va_list ap);
 }  // namespace Util
-#endif /* P4C_LIB_STRINGIFY_H_ */
+#endif /* _LIB_STRINGIFY_H_ */

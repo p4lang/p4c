@@ -43,7 +43,8 @@ namespace UBPF {
         if (options.target.isNullOrEmpty() || options.target == "ubpf") {
             target = new UbpfTarget();
         } else {
-            ::error("Unknown target %s; legal choice is 'ubpf'", options.target);
+            ::error(ErrorType::ERR_INVALID,
+                    "Unknown target %s; legal choice is 'ubpf'", options.target);
             return;
         }
 

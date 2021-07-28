@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_ERROR_CATALOG_H_
-#define P4C_LIB_ERROR_CATALOG_H_
+#ifndef _LIB_ERROR_CATALOG_H_
+#define _LIB_ERROR_CATALOG_H_
 
 #include <map>
 #include <string>
@@ -45,6 +45,7 @@ class ErrorType {
     static const int ERR_DUPLICATE;           // duplicate objects
     static const int ERR_IO;                  // IO error
     static const int ERR_UNREACHABLE;         // unreachable parser state
+    static const int ERR_MODEL;               // something is wrong with the target model
 
     // If we specialize for 1000 error types we're good!
     static const int ERR_MAX_ERRORS;
@@ -58,6 +59,8 @@ class ErrorType {
     static const int WARN_UNSUPPORTED;        // unsupported construct
     static const int WARN_DEPRECATED;         // deprecated feature
     static const int WARN_UNINITIALIZED;      // unitialized instance
+    static const int WARN_UNINITIALIZED_USE;  // use of uninitialized value
+    static const int WARN_UNINITIALIZED_OUT_PARAM;  // output parameter may be uninitialized
     static const int WARN_UNUSED;             // unused instance
     static const int WARN_MISSING;            // missing construct
     static const int WARN_ORDERING;           // inconsistent statement ordering
@@ -107,4 +110,4 @@ class ErrorCatalog {
     static std::map<int, cstring> errorCatalog;
 };
 
-#endif  // P4C_LIB_ERROR_CATALOG_H_
+#endif  // _LIB_ERROR_CATALOG_H_

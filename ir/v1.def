@@ -241,11 +241,7 @@ class CalculatedField : IAnnotated {
         bool                    update;
         ID                      name;
         Expression              cond;
-        //update_or_verify(Util::SourceInfo si, bool u, ID n, const Expression *c)
-        //: srcInfo(si), update(u), name(n), cond(c) {}
-
-        update_or_verify(bool u, ID n, const Expression *c) : update(u), name(n), cond(c) {}
-        update_or_verify() {}
+        update_or_verify() {}  // FIXME -- needed by umpack_json(safe_vector) -- should not be
     }
     safe_vector<update_or_verify> specs = {};
     Annotations                 annotations;
@@ -316,7 +312,7 @@ abstract CounterOrMeter : Stateful {
         else if (strcasecmp(t.c_str(), "bytes") == 0) type = CounterType::BYTES;
         else if (strcasecmp(t.c_str(), "packets_and_bytes") == 0 ||
                  strcasecmp(t.c_str(), "PacketAndBytes") == 0) type = CounterType::BOTH;
-        else error("%s: Unknown type %s", srcInfo, t); }  // NOLINT
+        else error(ErrorType::ERR_UNKNOWN, "%s: Unknown type %s", srcInfo, t); }  // NOLINT
 }
 
 class Counter : CounterOrMeter {

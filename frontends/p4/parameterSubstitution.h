@@ -84,13 +84,18 @@ class ParameterSubstitution : public IHasDbPrint {
     /// Only works if parameters were inserted using populate.
     Util::Enumerator<const IR::Parameter*>* getParametersInOrder() const {
         if (paramList == nullptr)
-            return nullptr;
+            return new Util::EmptyEnumerator<const IR::Parameter*>;
         return paramList->getEnumerator();
     }
 
     void dbprint(std::ostream& out) const {
-        for (auto s : parametersByName)
-            out << dbp(s.second) << "=>" << dbp(lookupByName(s.first)) << std::endl;
+        if (paramList != nullptr) {
+            for (auto s : *paramList->getEnumerator())
+                out << dbp(s) << "=>" << dbp(lookup(s)) << std::endl;
+        } else {
+            for (auto s : parametersByName)
+                out << dbp(s.second) << "=>" << dbp(lookupByName(s.first)) << std::endl;
+        }
     }
 };
 

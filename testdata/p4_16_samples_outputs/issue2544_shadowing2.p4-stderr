@@ -1,0 +1,6 @@
+issue2544_shadowing2.p4(28): [--Wwarn=shadow] warning: 'foo' shadows 'foo'
+        bit<8> foo = foo;
+        ^^^^^^^^^^^^^^^^^
+issue2544_shadowing2.p4(26)
+    bit<8> foo = 4;
+    ^^^^^^^^^^^^^^^

@@ -11,7 +11,6 @@ tables {
     id: 25218586
   }
   size: 1024
-  idle_timeout_behavior: NOTIFY_CONTROL
 }
 actions {
   preamble {
@@ -19,6 +18,13 @@ actions {
     name: "send_to_port"
     alias: "send_to_port"
     annotations: "@noWarnUnused"
+  }
+}
+actions {
+  preamble {
+    id: 20711895
+    name: "cIngress.record_ingress_ports_in_pkt"
+    alias: "record_ingress_ports_in_pkt"
   }
 }
 actions {

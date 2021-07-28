@@ -1,7 +1,7 @@
 #include <core.p4>
 
 control Ing(out bit<32> a) {
-    bool b_0;
+    @name("Ing.b") bool b_0;
     @name("Ing.cond") action cond() {
         a = (b_0 ? 32w5 : 32w10);
     }

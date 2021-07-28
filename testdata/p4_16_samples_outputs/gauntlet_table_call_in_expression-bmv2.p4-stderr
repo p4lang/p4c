@@ -1,0 +1,6 @@
+gauntlet_table_call_in_expression-bmv2.p4(32): [--Wwarn=shadow] warning: 'simple_action' shadows 'simple_action'
+    action simple_action() {
+           ^^^^^^^^^^^^^
+gauntlet_table_call_in_expression-bmv2.p4(14)
+bit<16> simple_action() {
+        ^^^^^^^^^^^^^

@@ -29,6 +29,8 @@ const cstring StorageFactory::indexFieldName = "$lastIndex";
 const LocationSet* LocationSet::empty = new LocationSet();
 ProgramPoint ProgramPoint::beforeStart;
 
+unsigned StorageLocation::crtid = 0;
+
 StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) const {
     if (type->is<IR::Type_Bits>() ||
         type->is<IR::Type_Boolean>() ||
@@ -39,15 +41,36 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
         // Since we don't have any operations except assignment for a
         // type described by a type variable, we treat is as a base type.
         type->is<IR::Type_Var>() ||
-        // Similarly for tuples.  This may need to be revisited if we
-        // add tuple field accessors.
-        type->is<IR::Type_Tuple>() ||
         // Also for newtype
         type->is<IR::Type_Newtype>())
         return new BaseLocation(type, name);
-    if (type->is<IR::Type_StructLike>()) {
-        type = typeMap->getTypeType(type, true);  // get the canonical version
-        auto st = type->to<IR::Type_StructLike>();
+    if (auto bl = type->to<IR::Type_BaseList>()) {
+        // A tuple with no fields is treated like a base location.
+        // The other tuples are treated as a collection of their
+        // fields.  We need to treat the empty tuple specially because
+        // otherwise, since there are no fields, assignments like t =
+        // {} would be treated as doing nothing.  However, these
+        // assignments do something: they intialize the value
+        // (although it's not clear what an uninitialized value of
+        // type empty tuple could be).
+        if (bl->getSize() == 0)
+            return new BaseLocation(type, name);
+
+        // Tuple and List
+        auto result = new TupleLocation(type, name);
+        size_t index = 0;
+        for (auto t : bl->components) {
+            cstring fieldName = name + "[" + Util::toString(index) + "]";
+            auto sl = create(t, fieldName);
+            result->createElement(index, sl);
+            index++;
+        }
+        return result;
+    }
+    if (auto st = type->to<IR::Type_StructLike>()) {
+        if (st->is<IR::Type_Struct>() && st->fields.size() == 0)
+            // See the comment above about empty tuples
+            return new BaseLocation(type, name);
         auto result = new StructLocation(type, name);
 
         // For header unions we will model all of the valid fields
@@ -64,21 +87,18 @@ StorageLocation* StorageFactory::create(const IR::Type* type, cstring name) cons
             if (globalValid != nullptr)
                 dynamic_cast<StructLocation*>(sl)->replaceField(
                     fieldName + "." + validFieldName, globalValid);
-            result->addField(f->name, sl);
+            result->createField(f->name.name, sl);
         }
         if (st->is<IR::Type_Header>()) {
             auto valid = create(IR::Type_Boolean::get(), name + "." + validFieldName);
-            result->addField(validFieldName, valid);
+            result->createField(validFieldName, valid);
         }
         return result;
-    }
-    if (type->is<IR::Type_Stack>()) {
-        type = typeMap->getTypeType(type, true);  // get the canonical version
-        auto st = type->to<IR::Type_Stack>();
+    } else if (auto st = type->to<IR::Type_Stack>()) {
         auto result = new ArrayLocation(st, name);
         for (unsigned i = 0; i < st->getSize(); i++) {
             auto sl = create(st->elementType, name + "[" + Util::toString(i) + "]");
-            result->addElement(i, sl);
+            result->createElement(i, sl);
         }
         result->setLastIndexField(create(IR::Type_Bits::get(32), name + "." + indexFieldName));
         return result;
@@ -115,6 +135,11 @@ void StructLocation::addField(cstring field, LocationSet* result) const {
     result->add(f);
 }
 
+void TupleLocation::removeHeaders(LocationSet* result) const {
+    for (auto f : elements)
+        f->removeHeaders(result);
+}
+
 void StructLocation::removeHeaders(LocationSet* result) const {
     if (!type->is<IR::Type_Struct>()) return;
     for (auto f : fieldLocations)
@@ -130,8 +155,7 @@ void ArrayLocation::addLastIndexField(LocationSet* result) const {
     result->add(getLastIndexField());
 }
 
-
-void ArrayLocation::addElement(unsigned index, LocationSet* result) const {
+void IndexedLocation::addElement(unsigned index, LocationSet* result) const {
     BUG_CHECK(index < elements.size(), "%1%: out of bounds index", index);
     result->add(elements.at(index));
 }
@@ -201,7 +225,7 @@ const LocationSet* LocationSet::getValidField() const
 const LocationSet* LocationSet::getIndex(unsigned index) const {
     auto result = new LocationSet();
     for (auto l : locations) {
-        auto array = l->to<ArrayLocation>();
+        auto array = l->to<IndexedLocation>();
         array->addElement(index, result);
     }
     return result;
@@ -227,11 +251,11 @@ const LocationSet* LocationSet::canonicalize() const {
 void LocationSet::addCanonical(const StorageLocation* location) {
     if (location->is<BaseLocation>()) {
         add(location);
-    } else if (location->is<StructLocation>()) {
-        for (auto f : location->to<StructLocation>()->fields())
+    } else if (auto wfl = location->to<WithFieldsLocation>()) {
+        for (auto f : wfl->fields())
             addCanonical(f);
-    } else if (location->is<ArrayLocation>()) {
-        for (auto e : *location->to<ArrayLocation>())
+    } else if (auto a = location->to<IndexedLocation>()) {
+        for (auto e : *a)
             addCanonical(e);
     } else {
         BUG("unexpected location");
@@ -402,7 +426,7 @@ void ComputeWriteSet::enterScope(const IR::ParameterList* parameters,
     if (locals != nullptr) {
         for (auto d : *locals) {
             if (d->is<IR::Declaration_Variable>()) {
-                StorageLocation* loc = allDefinitions->storageMap->add(d);
+                StorageLocation* loc = allDefinitions->storageMap->getOrAdd(d);
                 if (loc != nullptr) {
                     defs->setDefinition(loc, uninit);
                     auto valid = loc->getValidBits();
@@ -415,7 +439,8 @@ void ComputeWriteSet::enterScope(const IR::ParameterList* parameters,
     }
     allDefinitions->setDefinitionsAt(entryPoint, defs, false);
     currentDefinitions = defs;
-    LOG3("Definitions at " << entryPoint << ":" << currentDefinitions);
+    LOG3("CWS Entered scope " << entryPoint << " definitions are " <<
+         IndentCtl::endl << defs);
 }
 
 void ComputeWriteSet::exitScope(const IR::ParameterList* parameters,
@@ -424,16 +449,15 @@ void ComputeWriteSet::exitScope(const IR::ParameterList* parameters,
     if (parameters != nullptr) {
         for (auto p : parameters->parameters) {
             StorageLocation* loc = allDefinitions->storageMap->getStorage(p);
-            if (loc == nullptr)
-                continue;
-            currentDefinitions->removeLocation(loc);
+            if (loc != nullptr)
+                currentDefinitions->removeLocation(loc);
         }
     }
     if (locals != nullptr) {
         for (auto d : *locals) {
             if (d->is<IR::Declaration_Variable>()) {
                 StorageLocation* loc = allDefinitions->storageMap->getStorage(d);
-                if (loc == nullptr)
+                if (loc != nullptr)
                     currentDefinitions->removeLocation(loc);
             }
         }
@@ -469,7 +493,7 @@ bool ComputeWriteSet::setDefinitions(Definitions* defs, const IR::Node* node, bo
     if (findContext<IR::ParserState>())
         overwrite = true;
     allDefinitions->setDefinitionsAt(point, currentDefinitions, overwrite);
-    LOG3("CWS Definitions at " << point << " are " << std::endl << defs);
+    LOG3("CWS Definitions at " << point << " are " << IndentCtl::endl << defs);
     return false;  // always returns false
 }
 
@@ -642,12 +666,10 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
     if (auto bim = mi->to<BuiltInMethod>()) {
         auto base = getWrites(bim->appliedTo);
         cstring name = bim->name.name;
-        if (name == IR::Type_Header::setInvalid) {
-            // modifies all fields of the header!
-            expressionWrites(expression, base);
-            return false;
-        } else if (name == IR::Type_Header::setValid) {
-            // modifies only the valid field
+        if (name == IR::Type_Header::setInvalid || name == IR::Type_Header::setValid) {
+            // modifies only the valid field.
+            // setInvalid may in fact write all fields, but
+            // it will not really "define" them.
             auto v = base->getField(StorageFactory::validFieldName);
             expressionWrites(expression, v);
             return false;
@@ -678,15 +700,16 @@ bool ComputeWriteSet::preorder(const IR::MethodCallExpression* expression) {
         // symbolically call all the methods that might be called via this extern method
         callees = em->mayCall(); }
     if (!callees.empty()) {
-        LOG3("Analyzing callees of " << expression << DBPrint::Brief << callees << DBPrint::Reset);
+        LOG3("Analyzing callees of " << expression << DBPrint::Brief << callees <<
+             DBPrint::Reset << IndentCtl::indent);
         ProgramPoint pt(callingContext, expression);
         ComputeWriteSet cw(this, pt, currentDefinitions);
         for (auto c : callees)
             (void)c->getNode()->apply(cw);
         currentDefinitions = cw.currentDefinitions;
         exitDefinitions = exitDefinitions->joinDefinitions(cw.exitDefinitions);
-        LOG3("Definitions after call of " << DBPrint::Brief << expression << ": " <<
-             currentDefinitions << DBPrint::Reset);
+        LOG3("Definitions after call of " << DBPrint::Brief << expression << ":" <<
+             IndentCtl::endl << currentDefinitions << DBPrint::Reset << IndentCtl::unindent);
     }
 
     auto result = LocationSet::empty;
@@ -863,12 +886,17 @@ bool ComputeWriteSet::preorder(const IR::SwitchStatement* statement) {
     }
     auto table = TableApplySolver::isActionRun(
         statement->expression, storageMap->refMap, storageMap->typeMap);
-    CHECK_NULL(table);
-    auto al = table->getActionList();
-    bool allCases = statement->cases.size() == al->size();
-    if (!seenDefault && !allCases)
-        // no case may have been executed
+    if (table) {
+        auto al = table->getActionList();
+        bool allCases = statement->cases.size() == al->size();
+        if (!seenDefault && !allCases)
+            // no case may have been executed
+            result = result->joinDefinitions(save);
+    } else {
+        // TODO: in some cases we can check for exhaustive matches,
+        // but this is conservative.
         result = result->joinDefinitions(save);
+    }
     return setDefinitions(result);
 }
 
@@ -972,12 +1000,12 @@ bool ComputeWriteSet::preorder(const IR::MethodCallStatement* statement) {
 }  // namespace P4
 
 // functions for calling from gdb
-void dump(const P4::StorageLocation *s) { std::cout << *s << std::endl; }
-void dump(const P4::StorageMap *s) { std::cout << *s << std::endl; }
-void dump(const P4::LocationSet *s) { std::cout << *s << std::endl; }
-void dump(const P4::ProgramPoint *p) { std::cout << *p << std::endl; }
-void dump(const P4::ProgramPoint &p) { std::cout << p << std::endl; }
-void dump(const P4::ProgramPoints *p) { std::cout << *p << std::endl; }
-void dump(const P4::ProgramPoints &p) { std::cout << p << std::endl; }
-void dump(const P4::Definitions *d) { std::cout << *d << std::endl; }
-void dump(const P4::AllDefinitions *d) { std::cout << *d << std::endl; }
+void dump(const P4::StorageLocation *s) { std::cout << *s << IndentCtl::endl; }
+void dump(const P4::StorageMap *s) { std::cout << *s << IndentCtl::endl; }
+void dump(const P4::LocationSet *s) { std::cout << *s << IndentCtl::endl; }
+void dump(const P4::ProgramPoint *p) { std::cout << *p << IndentCtl::endl; }
+void dump(const P4::ProgramPoint &p) { std::cout << p << IndentCtl::endl; }
+void dump(const P4::ProgramPoints *p) { std::cout << *p << IndentCtl::endl; }
+void dump(const P4::ProgramPoints &p) { std::cout << p << IndentCtl::endl; }
+void dump(const P4::Definitions *d) { std::cout << *d << IndentCtl::endl; }
+void dump(const P4::AllDefinitions *d) { std::cout << *d << IndentCtl::endl; }

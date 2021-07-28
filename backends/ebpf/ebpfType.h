@@ -32,6 +32,7 @@ class EBPFType : public EBPFObject {
     const IR::Type* type;
     virtual void emit(CodeBuilder* builder) = 0;
     virtual void declare(CodeBuilder* builder, cstring id, bool asPointer) = 0;
+    virtual void declareInit(CodeBuilder* builder, cstring id, bool asPointer) = 0;
     virtual void emitInitializer(CodeBuilder* builder) = 0;
     virtual void declareArray(CodeBuilder* /*builder*/, cstring /*id*/, unsigned /*size*/)
     { BUG("%1%: unsupported array", type); }
@@ -67,6 +68,7 @@ class EBPFBoolType : public EBPFType, public IHasWidth {
     void emit(CodeBuilder* builder) override
     { builder->append("u8"); }
     void declare(CodeBuilder* builder, cstring id, bool asPointer) override;
+    void declareInit(CodeBuilder* builder, cstring id, bool asPointer) override;
     void emitInitializer(CodeBuilder* builder) override
     { builder->append("0"); }
     unsigned widthInBits() override { return 1; }
@@ -84,6 +86,7 @@ class EBPFStackType : public EBPFType, public IHasWidth {
     }
     void emit(CodeBuilder*) override {}
     void declare(CodeBuilder* builder, cstring id, bool asPointer) override;
+    void declareInit(CodeBuilder* builder, cstring id, bool asPointer) override;
     void emitInitializer(CodeBuilder* builder) override;
     unsigned widthInBits() override;
     unsigned implementationWidthInBits() override;
@@ -99,6 +102,7 @@ class EBPFScalarType : public EBPFType, public IHasWidth {
     unsigned alignment() const;
     void emit(CodeBuilder* builder) override;
     void declare(CodeBuilder* builder, cstring id, bool asPointer) override;
+    void declareInit(CodeBuilder* builder, cstring id, bool asPointer) override;
     void emitInitializer(CodeBuilder* builder) override
     { builder->append("0"); }
     unsigned widthInBits() override { return width; }
@@ -117,6 +121,7 @@ class EBPFTypeName : public EBPFType, public IHasWidth {
             EBPFType(type), type(type), canonical(canonical) {}
     void emit(CodeBuilder* builder) override { canonical->emit(builder); }
     void declare(CodeBuilder* builder, cstring id, bool asPointer) override;
+    void declareInit(CodeBuilder* builder, cstring id, bool asPointer) override;
     void emitInitializer(CodeBuilder* builder) override;
     unsigned widthInBits() override;
     unsigned implementationWidthInBits() override;
@@ -144,6 +149,7 @@ class EBPFStructType : public EBPFType, public IHasWidth {
 
     explicit EBPFStructType(const IR::Type_StructLike* strct);
     void declare(CodeBuilder* builder, cstring id, bool asPointer) override;
+    void declareInit(CodeBuilder* builder, cstring id, bool asPointer) override;
     void emitInitializer(CodeBuilder* builder) override;
     unsigned widthInBits() override { return width; }
     unsigned implementationWidthInBits() override { return implWidth; }
@@ -156,6 +162,7 @@ class EBPFEnumType : public EBPFType, public EBPF::IHasWidth {
     explicit EBPFEnumType(const IR::Type_Enum* type) : EBPFType(type) {}
     void emit(CodeBuilder* builder) override;
     void declare(CodeBuilder* builder, cstring id, bool asPointer) override;
+    void declareInit(CodeBuilder* builder, cstring id, bool asPointer) override;
     void emitInitializer(CodeBuilder* builder) override
     { builder->append("0"); }
     unsigned widthInBits() override { return 32; }

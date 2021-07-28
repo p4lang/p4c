@@ -9,6 +9,7 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
+    @name("ParserImpl.tmp_0") bit<32> tmp_0;
     @name(".$start") state start {
         transition select((bit<32>)standard_metadata.instance_type) {
             32w0: start_0;
@@ -21,7 +22,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition accept;
     }
     @packet_entry @name(".start_e2e_mirrored") state start_e2e_mirrored {
-        packet.lookahead<bit<32>>();
+        tmp_0 = packet.lookahead<bit<32>>();
         transition accept;
     }
     @packet_entry @name(".start_i2e_mirrored") state start_i2e_mirrored {
@@ -34,19 +35,19 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".nop") action nop() {
     }
     @name(".exact") table exact_1 {
         actions = {
             nop();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
             standard_metadata.egress_spec: exact @name("standard_metadata.egress_spec") ;
         }
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         exact_1.apply();

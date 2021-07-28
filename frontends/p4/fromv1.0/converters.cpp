@@ -37,7 +37,7 @@ ExpressionConverter::getFieldType(const IR::Type_StructLike* ht, cstring fieldNa
 // These can only come from the key of a table.
 const IR::Node* ExpressionConverter::postorder(IR::Mask* expression) {
     if (!expression->right->is<IR::Constant>()) {
-        ::error("%1%: Mask must be a constant", expression->right);
+        ::error(ErrorType::ERR_INVALID, "%1%: Mask must be a constant", expression->right);
         return expression;
     }
 
@@ -95,13 +95,14 @@ const IR::Node* ExpressionConverter::postorder(IR::Primitive* primitive) {
         auto a = primitive->operands.at(0);
         auto b = primitive->operands.at(1);
         if (!a->is<IR::Constant>() || !b->is<IR::Constant>()) {
-            ::error("%1%: must have constant arguments", primitive);
+            ::error(ErrorType::ERR_INVALID,
+                    "%1%: must have constant arguments", primitive);
             return primitive;
         }
         auto aval = a->to<IR::Constant>()->asInt();
         auto bval = b->to<IR::Constant>()->asInt();
         if (aval < 0 || bval <= 0) {
-            ::error("%1%: negative offsets?", primitive);
+            ::error(ErrorType::ERR_INVALID, "%1%: negative offsets?", primitive);
             return primitive;
         }
 
@@ -136,7 +137,7 @@ const IR::Node* ExpressionConverter::postorder(IR::Primitive* primitive) {
 const IR::Node* ExpressionConverter::postorder(IR::PathExpression *ref) {
     if (ref->path->name.name == "latest") {
         if (structure->latest == nullptr) {
-            ::error("%1%: latest not yet defined", ref);
+            ::error(ErrorType::ERR_INVALID, "%1%: latest not yet defined", ref);
             return ref;
         }
         return structure->latest;
@@ -215,7 +216,8 @@ const IR::Node* ExpressionConverter::postorder(IR::HeaderStackItemRef* ref) {
         return result;
     }
 
-    ::error("Illegal array index %1%: must be a constant, 'last', or 'next'.", ref);
+    ::error(ErrorType::ERR_UNSUPPORTED,
+            "Illegal array index %1%: must be a constant, 'last', or 'next'.", ref);
     return ref;
 }
 
@@ -309,11 +311,11 @@ const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
         for (auto a : apply->actions) {
             if (a.first == "hit") {
                 if (hit != nullptr)
-                    ::error("%1%: Duplicate 'hit' label", hit);
+                    ::error(ErrorType::ERR_DUPLICATE, "%1%: Duplicate 'hit' label", hit);
                 hit = a.second;
             } else if (a.first == "miss") {
                 if (miss != nullptr)
-                    ::error("%1%: Duplicate 'miss' label", hit);
+                    ::error(ErrorType::ERR_DUPLICATE, "%1%: Duplicate 'miss' label", hit);
                 miss = a.second;
             } else {
                 otherLabels = true;
@@ -321,7 +323,7 @@ const IR::Node* StatementConverter::preorder(IR::Apply* apply) {
         }
 
         if ((hit != nullptr || miss != nullptr) && otherLabels)
-            ::error("%1%: Cannot mix 'hit'/'miss' and other labels", apply);
+            ::error(ErrorType::ERR_INVALID, "%1%: Cannot mix 'hit'/'miss' and other labels", apply);
 
         if (!otherLabels) {
             StatementConverter conv(structure, renameMap);
@@ -413,12 +415,12 @@ const IR::Type_Varbits *TypeConverter::postorder(IR::Type_Varbits *vbtype) {
         if (auto type = findContext<IR::Type_StructLike>()) {
             if (auto max = type->getAnnotation("max_length")) {
                 if (max->expr.size() != 1 || !max->expr[0]->is<IR::Constant>())
-                    error("%s: max_length must be a constant", max);
+                    error(ErrorType::ERR_UNSUPPORTED, "%s: max_length must be a constant", max);
                 else
                     vbtype->size = 8 * max->expr[0]->to<IR::Constant>()->asInt() -
                                    type->width_bits(); } } }
     if (vbtype->size == 0)
-        error("%s: no max_length for * field size", vbtype);
+        error(ErrorType::ERR_NOT_FOUND, "%s: no max_length for * field size", vbtype);
     return vbtype;
 }
 
@@ -443,7 +445,8 @@ class ValidateLenExpr : public Inspector {
         BUG_CHECK(!expression->path->absolute, "%1%: absolute path", expression);
         cstring name = expression->path->name.name;
         if (prior.find(name) == prior.end())
-            ::error("%1%: header length must depend only on fields prior to the varbit field %2%",
+            ::error(ErrorType::ERR_INVALID,
+                    "%1%: header length must depend only on fields prior to the varbit field %2%",
                     expression, varbitField);
     }
 };
@@ -498,7 +501,7 @@ class FixupExtern : public Modifier {
         // FIXME -- 0-arg one if needed
         if (!type->lookupMethod(type->name, new IR::Vector<IR::Argument>())) {
             type->methods.push_back(new IR::Method(type->name, new IR::Type_Method(
-                                                new IR::ParameterList()))); } }
+                new IR::ParameterList(), type->getName()))); } }
     void postorder(IR::Method *meth) override {
         if (meth->name == origname) meth->name = extname; }
     // Convert extern methods that take a field_list_calculation to take a type param instead

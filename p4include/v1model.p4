@@ -19,7 +19,7 @@ limitations under the License.
 /* Note 1: More details about the definition of v1model architecture
  * can be found at the location below.
  *
- * https://github.com/p4lang/behavioral-model/blob/master/docs/simple_switch.md
+ * https://github.com/p4lang/behavioral-model/blob/main/docs/simple_switch.md
  *
  * Note 2: There were several discussions among P4 working group
  * members in early 2019 regarding exactly how resubmit, recirculate,
@@ -27,7 +27,7 @@ limitations under the License.
  * controls, but the values of the fields to be preserved is the value
  * they have when that control is finished executing.  That is how
  * these operations are defined in P4_14.  See
- * https://github.com/p4lang/behavioral-model/blob/master/docs/simple_switch.md#restrictions-on-recirculate-resubmit-and-clone-operations
+ * https://github.com/p4lang/behavioral-model/blob/main/docs/simple_switch.md#restrictions-on-recirculate-resubmit-and-clone-operations
  * for more details on the current state of affairs.
  *
  * Note 3: There are at least some P4_14 implementations where
@@ -425,7 +425,7 @@ extern void mark_to_drop();
  * packet to do something other than drop.
  *
  * See
- * https://github.com/p4lang/behavioral-model/blob/master/docs/simple_switch.md
+ * https://github.com/p4lang/behavioral-model/blob/main/docs/simple_switch.md
  * -- in particular the section "Pseudocode for what happens at the
  * end of ingress and egress processing" -- for the relative priority
  * of the different possible things that can happen to a packet when

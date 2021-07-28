@@ -32,7 +32,7 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
     @name("ingressImpl.act_miss") action act_miss() {
         hdr.ethernet.srcAddr = 48w0xdeadbeef;
     }
-    @name("ingressImpl.act_hit") action act_hit(bit<48> x) {
+    @name("ingressImpl.act_hit") action act_hit(@name("x") bit<48> x) {
         hdr.ethernet.srcAddr = x;
     }
     @name("ingressImpl.lpm1") table lpm1_0 {
@@ -44,11 +44,10 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
             act_hit();
         }
         const entries = {
-                        48w0xa0102030000 &&& 48w0xffffffffffff : act_hit(48w1);
+                        48w0xa0102030000 : act_hit(48w1);
                         48w0xa0000000000 &&& 48w0xff0000000000 : act_hit(48w2);
                         48w0x0 &&& 48w0x0 : act_hit(48w3);
         }
-
         const default_action = act_miss();
     }
     @hidden action v1modelconstentriesbmv2l77() {

@@ -1,0 +1,10 @@
+pkg_info {
+  arch: "v1model"
+}
+actions {
+  preamble {
+    id: 18507033
+    name: "assign_addrs"
+    alias: "assign_addrs"
+  }
+}

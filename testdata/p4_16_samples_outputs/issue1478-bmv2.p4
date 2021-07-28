@@ -55,7 +55,6 @@ control ingress(inout Headers h, inout Meta m, inout standard_metadata_t sm) {
         const entries = {
                         0 : NoAction();
         }
-
         size = 10;
     }
     apply {

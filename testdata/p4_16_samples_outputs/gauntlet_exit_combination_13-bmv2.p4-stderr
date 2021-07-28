@@ -1,0 +1,6 @@
+gauntlet_exit_combination_13-bmv2.p4(32): [--Wwarn=ignore-prop] warning: KeyElement: constant key element
+            8w1 : exact @name("bblsPX") ;
+            ^^^
+gauntlet_exit_combination_13-bmv2.p4(32): [--Wwarn=mismatch] warning: 8w1: Constant key field
+            8w1 : exact @name("bblsPX") ;
+            ^^^

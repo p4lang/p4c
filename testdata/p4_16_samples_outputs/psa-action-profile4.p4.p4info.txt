@@ -9,7 +9,7 @@ tables {
   }
   match_fields {
     id: 1
-    name: "a.srcAddr"
+    name: "hdr.ethernet.srcAddr"
     bitwidth: 48
     match_type: EXACT
   }
@@ -20,7 +20,6 @@ tables {
     id: 23466264
   }
   size: 1024
-  idle_timeout_behavior: NOTIFY_CONTROL
 }
 tables {
   preamble {
@@ -30,7 +29,7 @@ tables {
   }
   match_fields {
     id: 1
-    name: "a.srcAddr"
+    name: "hdr.ethernet.srcAddr"
     bitwidth: 48
     match_type: EXACT
   }
@@ -41,7 +40,6 @@ tables {
     id: 21832421
   }
   size: 1024
-  idle_timeout_behavior: NOTIFY_CONTROL
 }
 actions {
   preamble {

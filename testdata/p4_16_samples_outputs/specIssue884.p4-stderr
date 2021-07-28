@@ -1,0 +1,12 @@
+specIssue884.p4(35): [--Wwarn=unused] warning: hash1: unused instance
+    Hash<bit<32>>(algo=HashAlgorithm_t.CRC32) hash1;
+                                              ^^^^^
+specIssue884.p4(36): [--Wwarn=unused] warning: hash2: unused instance
+    Hash<bit<32>>(poly=CRCPolynomial(coeff=16w0x107)) hash2;
+                                                      ^^^^^
+specIssue884.p4(42): [--Wwarn=unused] warning: hash3: unused instance
+    Hash<bit<32>>(matrix=hamming) hash3;
+                                  ^^^^^
+specIssue884.p4(43): [--Wwarn=unused] warning: hash4: unused instance
+    Hash<bit<32>>(formula="magic_formula()") hash4;
+                                             ^^^^^

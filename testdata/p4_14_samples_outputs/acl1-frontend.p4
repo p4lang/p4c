@@ -171,37 +171,37 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 @name(".drop_stats_2") counter<bit<8>>(32w256, CounterType.packets) drop_stats_2;
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @noWarn("unused") @name(".NoAction") action NoAction_3() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name(".drop_stats_update") action drop_stats_update() {
         drop_stats_2.count(meta.ingress_metadata.drop_reason);
     }
     @name(".nop") action nop() {
     }
-    @name(".copy_to_cpu") action copy_to_cpu(bit<16> reason_code) {
-        meta.fabric_metadata.reason_code = reason_code;
+    @name(".copy_to_cpu") action copy_to_cpu(@name("reason_code") bit<16> reason_code_2) {
+        meta.fabric_metadata.reason_code = reason_code_2;
     }
-    @name(".redirect_to_cpu") action redirect_to_cpu(bit<16> reason_code) {
-        meta.fabric_metadata.reason_code = reason_code;
+    @name(".redirect_to_cpu") action redirect_to_cpu(@name("reason_code") bit<16> reason_code_3) {
+        meta.fabric_metadata.reason_code = reason_code_3;
     }
     @name(".drop_packet") action drop_packet() {
     }
-    @name(".drop_packet_with_reason") action drop_packet_with_reason(bit<8> drop_reason) {
-        drop_stats.count(drop_reason);
+    @name(".drop_packet_with_reason") action drop_packet_with_reason(@name("drop_reason") bit<8> drop_reason_1) {
+        drop_stats.count(drop_reason_1);
     }
-    @name(".negative_mirror") action negative_mirror(bit<8> session_id) {
+    @name(".negative_mirror") action negative_mirror(@name("session_id") bit<8> session_id) {
     }
     @name(".congestion_mirror_set") action congestion_mirror_set() {
     }
     @name(".drop_stats") table drop_stats_1 {
         actions = {
             drop_stats_update();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         size = 256;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     @name(".system_acl") table system_acl_0 {
         actions = {
@@ -212,7 +212,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             drop_packet_with_reason();
             negative_mirror();
             congestion_mirror_set();
-            @defaultonly NoAction_3();
+            @defaultonly NoAction_2();
         }
         key = {
             meta.acl_metadata.if_label               : ternary @name("acl_metadata.if_label") ;
@@ -244,7 +244,7 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
             meta.ingress_metadata.enable_dod         : ternary @name("ingress_metadata.enable_dod") ;
         }
         size = 512;
-        default_action = NoAction_3();
+        default_action = NoAction_2();
     }
     apply {
         system_acl_0.apply();

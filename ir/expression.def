@@ -215,7 +215,19 @@ class Constant : Literal {
     Constant operator-(const Constant &c) const;
     Constant operator-() const;
 #end
-    toString { return Util::toString(&value, base); }
+    toString {
+        const IR::Type_Bits* tb = dynamic_cast<const IR::Type_Bits*>(type);
+        unsigned width;
+        bool sign;
+        if (tb == nullptr) {
+            width = 0;
+            sign = false;
+        } else {
+            width = tb->size;
+            sign = tb->isSigned;
+        }
+        return Util::toString(value, width, sign, base);
+    }
     visit_children { v.visit(type, "type"); }
 }
 
@@ -298,6 +310,7 @@ class ArrayIndex : Operation_Binary {
     ArrayIndex {
         if (auto st = left ? left->type->to<IR::Type_Stack>() : nullptr)
             type = st->elementType; }
+    toString{ return left->toString() + "[" + right->toString() + "]"; }
 }
 
 class Range : Operation_Binary {
@@ -408,9 +421,14 @@ class ListExpression : Expression {
 class StructExpression : Expression {
     /// The struct or header type that is being intialized.
     /// May only be known after type checking; so it can be nullptr.
-    NullOK optional Type_Name typeName;
+    NullOK Type structType;
     inline IndexedVector<NamedExpression> components;
-    validate { components.check_null(); }
+    validate {
+        components.check_null(); components.validate();
+        BUG_CHECK(structType == nullptr || structType->is<IR::Type_Name>() ||
+                  structType->is<IR::Type_Specialized>(),
+                  "%1%: unexpected struct type", this);
+    }
     size_t size() const { return components.size(); }
 }
 

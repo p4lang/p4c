@@ -28,12 +28,13 @@ control Ing(inout Headers headers, inout Metadata meta, inout standard_metadata_
 }
 
 control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t standard_meta) {
-    Key inKey_0;
-    Key defaultKey_0;
-    bool same_0;
-    Value val;
-    bool done_0;
-    bool ok_0;
+    @name("Eg.inKey") Key inKey_0;
+    @name("Eg.defaultKey") Key defaultKey_0;
+    @name("Eg.same") bool same_0;
+    @name("Eg.val") Value val;
+    @name("Eg.done") bool done_0;
+    @name("Eg.ok") bool ok_0;
+    @name("Eg.val") Value val_0;
     @name("Eg.test") action test() {
         inKey_0 = (Key){field1 = 32w1};
         defaultKey_0 = (Key){field1 = 32w0};
@@ -42,7 +43,7 @@ control Eg(inout Headers hdrs, inout Metadata meta, inout standard_metadata_t st
         done_0 = false;
         ok_0 = !done_0 && same_0;
         if (ok_0) {
-            Value val_0 = val;
+            val_0 = val;
             val_0.field1 = 32w8;
             val = val_0;
         }

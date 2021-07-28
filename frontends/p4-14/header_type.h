@@ -20,7 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 
 class CheckHeaderTypes : public Modifier {
-    const IR::V1Program    *global;
+    const IR::V1Program    *global = nullptr;
  public:
     CheckHeaderTypes() { setName("CheckHeaderTypes"); }
     bool preorder(IR::V1Program *glob) override { global = glob; return true; }
@@ -28,13 +28,15 @@ class CheckHeaderTypes : public Modifier {
         if (auto type = global->get<IR::v1HeaderType>(meta->type_name))
             meta->type = type->as_metadata;
         else
-            error("%s: No header type %s", meta->srcInfo, meta->type_name);
+            error(ErrorType::ERR_TYPE_ERROR,
+                  "%s: No header type %s", meta->srcInfo, meta->type_name);
         return true; }
     bool preorder(IR::HeaderOrMetadata *hdr) override {
         if (auto type = global->get<IR::v1HeaderType>(hdr->type_name))
             hdr->type = type->as_header;
         else
-            error("%s: No header type %s", hdr->srcInfo, hdr->type_name);
+            error(ErrorType::ERR_TYPE_ERROR,
+                  "%s: No header type %s", hdr->srcInfo, hdr->type_name);
         return true; }
 };
 

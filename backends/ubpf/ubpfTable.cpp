@@ -134,52 +134,34 @@ class UbpfActionTranslationVisitor : public EBPF::CodeGenInspector {
 };  // UbpfActionTranslationVisitor
 }  // namespace
 
-void UBPFTableBase::emitInstance(EBPF::CodeBuilder *builder) {
-    builder->append("struct ");
-    builder->appendFormat("ubpf_map_def %s = ", dataMapName);
-    builder->spc();
-    builder->blockStart();
+void UBPFTableBase::emitInstance(EBPF::CodeBuilder *builder, EBPF::TableKind tableKind) {
+    BUG_CHECK(keyType != nullptr, "Key type of %1% is not set", instanceName);
+    BUG_CHECK(valueType != nullptr, "Value type of %1% is not set", instanceName);
 
-    builder->emitIndent();
-    builder->append(".type = UBPF_MAP_TYPE_HASHMAP,");
-    builder->newline();
-
-    builder->emitIndent();
-    if (keyType != nullptr && keyType->is<IR::Type_Bits>()) {
+    cstring keyTypeStr;
+    if (keyType->is<IR::Type_Bits>()) {
         auto tb = keyType->to<IR::Type_Bits>();
         auto scalar = new UBPFScalarType(tb);
-        builder->append(".key_size = sizeof(");
-        scalar->emit(builder);
-        builder->append("),");
-    } else {
-        builder->appendFormat(".key_size = sizeof(struct %s),",
-                              keyTypeName.c_str());
+        keyTypeStr = scalar->getAsString();
+    } else if (keyType->is<IR::Type_StructLike>()) {
+        keyTypeStr = cstring("struct ") + keyTypeName.c_str();;
     }
-    builder->newline();
+    // Key type is not null, but we didn't handle it
+    BUG_CHECK(!keyTypeStr.isNullOrEmpty(), "Key type %1% not supported", keyType->toString());
 
-    builder->emitIndent();
-    if (valueType != nullptr && valueType->is<IR::Type_Bits>()) {
+    cstring valueTypeStr;
+    if (valueType->is<IR::Type_Bits>()) {
         auto tb = valueType->to<IR::Type_Bits>();
         auto scalar = new UBPFScalarType(tb);
-        builder->append(".value_size = sizeof(");
-        scalar->emit(builder);
-        builder->append("),");
-    } else {
-        builder->appendFormat(".value_size = sizeof(struct %s),",
-                              valueTypeName.c_str());
+        valueTypeStr = scalar->getAsString();
+    } else if (valueType->is<IR::Type_StructLike>()) {
+        valueTypeStr = cstring("struct ") + valueTypeName.c_str();
     }
-    builder->newline();
+    // Value type is not null, but we didn't handle it
+    BUG_CHECK(!valueTypeStr.isNullOrEmpty(), "Value type %1% not supported", valueType->toString());
 
-    builder->emitIndent();
-    builder->appendFormat(".max_entries = %d,", size);
-    builder->newline();
-
-    builder->emitIndent();
-    builder->append(".nb_hash_functions = 0,");
-    builder->newline();
-
-    builder->blockEnd(false);
-    builder->endOfStatement(true);
+    builder->target->emitTableDecl(builder, dataMapName, tableKind,
+                                   keyTypeStr, valueTypeStr, size);
 }
 
 UBPFTable::UBPFTable(const UBPFProgram *program,
@@ -199,7 +181,41 @@ UBPFTable::UBPFTable(const UBPFProgram *program,
     keyGenerator = table->container->getKey();
     actionList = table->container->getActionList();
 
+    keyType = new IR::Type_Struct(IR::ID(keyTypeName));
+    valueType = new IR::Type_Struct(IR::ID(valueTypeName));
+
     setTableSize(table);
+    setTableKind();
+}
+
+void UBPFTable::emitInstance(EBPF::CodeBuilder *builder) {
+    UBPFTableBase::emitInstance(builder, tableKind);
+    builder->target->emitTableDecl(builder, defaultActionMapName, EBPF::TableArray,
+                                   program->arrayIndexType,
+                                   cstring("struct ") + valueTypeName, 1);
+}
+
+void UBPFTable::setTableKind() {
+    if (keyGenerator == nullptr) {
+        return;
+    }
+    // set table kind to HASH by default
+    EBPF::TableKind tableKind = EBPF::TableHash;
+
+    // If any key field is LPM we will generate an LPM table
+    for (auto it : keyGenerator->keyElements) {
+        auto mtdecl = program->refMap->getDeclaration(it->matchType->path, true);
+        auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
+        if (matchType->name.name == P4::P4CoreLibrary::instance.lpmMatch.name) {
+            if (tableKind == EBPF::TableLPMTrie) {
+                ::error(ErrorType::ERR_UNSUPPORTED,
+                        "only one LPM field allowed", it->matchType);
+                return;
+            }
+            tableKind = EBPF::TableLPMTrie;
+        }
+    }
+    this->tableKind = tableKind;
 }
 
 void UBPFTable::setTableSize(const IR::TableBlock *table) {
@@ -242,7 +258,7 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
             auto ebpfType = UBPFTypeFactory::instance->create(type);
             cstring fieldName = c->expression->toString().replace('.', '_');
             if (!ebpfType->is<EBPF::IHasWidth>()) {
-                ::error("%1%: illegal type %2% for key field", c, type);
+                ::error(ErrorType::ERR_INVALID, "%1%: illegal type %2% for key field", c, type);
                 return;
             }
             unsigned width = ebpfType->to<EBPF::IHasWidth>()->widthInBits();
@@ -253,9 +269,14 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
         }
 
         // Emit key in decreasing order size - this way there will be no gaps
+        unsigned key_idx = 0;
         for (auto it = ordered.rbegin(); it != ordered.rend(); ++it) {
             auto c = it->second;
-
+            if (tableKind == EBPF::TableLPMTrie) {
+                builder->emitIndent();
+                builder->appendFormat("uint32_t prefix_len%d;", key_idx);
+                builder->newline();
+            }
             auto ebpfType = ::get(keyTypes, c);
             builder->emitIndent();
             cstring fieldName = ::get(keyFieldNames, c);
@@ -268,9 +289,11 @@ void UBPFTable::emitKeyType(EBPF::CodeBuilder *builder) {
             auto mtdecl = program->refMap->getDeclaration(
                     c->matchType->path, true);
             auto matchType = mtdecl->getNode()->to<IR::Declaration_ID>();
-            if (matchType->name.name !=
-                P4::P4CoreLibrary::instance.exactMatch.name)
-                ::error("Match of type %1% not supported", c->matchType);
+            if (matchType->name.name != P4::P4CoreLibrary::instance.exactMatch.name &&
+                matchType->name.name != P4::P4CoreLibrary::instance.lpmMatch.name)
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "Match of type %1% not supported", c->matchType);
+            key_idx++;
         }
     }
 
@@ -288,7 +311,7 @@ void UBPFTable::emitActionArguments(EBPF::CodeBuilder *builder,
     for (auto p : *action->parameters->getEnumerator()) {
         builder->emitIndent();
         auto type = UBPFTypeFactory::instance->create(p->type);
-        type->declare(builder, p->name.name, false);
+        type->declare(builder, p->externalName(), false);
         builder->endOfStatement(true);
     }
 
@@ -426,7 +449,73 @@ void UBPFTable::emitAction(EBPF::CodeBuilder *builder, cstring valueName) {
 
     builder->blockEnd(true);
 }
+
+void UBPFTable::emitInitializer(EBPF::CodeBuilder *builder) {
+    const IR::P4Table* t = table->container;
+    const IR::Expression* defaultAction = t->getDefaultAction();
+    BUG_CHECK(defaultAction->is<IR::MethodCallExpression>(),
+              "%1%: expected an action call", defaultAction);
+    auto mce = defaultAction->to<IR::MethodCallExpression>();
+    auto mi = P4::MethodInstance::resolve(mce, program->refMap, program->typeMap);
+
+    auto defact = t->properties->getProperty(IR::TableProperties::defaultActionPropertyName);
+    // uBPF does not support setting default action at compile time.
+    // Default action must be set from a control plane and 'const' qualifier
+    // does not permit to modify default action by a control plane.
+    if (defact->isConstant) {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "%1%: uBPF target does not allow 'const default_action'. "
+                "Use `default_action` instead.", defact);
+    }
+    auto ac = mi->to<P4::ActionCall>();
+    BUG_CHECK(ac != nullptr, "%1%: expected an action call", mce);
+    auto action = ac->action;
+
+    cstring name = generateActionName(action);
+    cstring defaultTable = defaultActionMapName;
+    cstring value = name + "_value";
+
+    builder->emitIndent();
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat("struct %s %s = ", valueTypeName.c_str(), value.c_str());
+    builder->blockStart();
+    builder->emitIndent();
+    builder->appendFormat(".action = %s,", name.c_str());
+    builder->newline();
+    EBPF::CodeGenInspector cg(program->refMap, program->typeMap);
+    cg.setBuilder(builder);
+    builder->emitIndent();
+    builder->appendFormat(".u = {.%s = {", name.c_str());
+    for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+        auto arg = mi->substitution.lookup(p);
+        arg->apply(cg);
+        builder->append(",");
+    }
+    builder->append("}},\n");
+    builder->blockEnd(false);
+    builder->endOfStatement(true);
+
+    builder->emitIndent();
+    builder->appendFormat("INIT_UBPF_TABLE(\"%s\", sizeof(%s), sizeof(%s));", defaultTable,
+            program->zeroKey.c_str(), value);
+    builder->newline();
+
+    builder->emitIndent();
+    builder->target->emitTableUpdate(builder, defaultTable, program->zeroKey, "&" + value);
+    builder->endOfStatement(true);
+    builder->blockEnd(true);
+
+
+    // Check if there are const entries.
+    auto entries = t->getEntries();
+    if (entries != nullptr) {
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "%1%: Immutable table entries cannot be configured by the uBPF target "
+                "and should not be used.",
+                entries);
+    }
+}
+
+
 }  // namespace UBPF
-
-
-

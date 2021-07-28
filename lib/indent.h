@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_INDENT_H_
-#define P4C_LIB_INDENT_H_
+#ifndef _LIB_INDENT_H_
+#define _LIB_INDENT_H_
 
 #include <iostream>
 #include <iomanip>
@@ -50,4 +50,4 @@ inline std::ostream &indent(std::ostream &out) { ++indent_t::getindent(out); ret
 inline std::ostream &unindent(std::ostream &out) { --indent_t::getindent(out); return out; }
 }  // end namespace IndentCtl
 
-#endif /* P4C_LIB_INDENT_H_ */
+#endif /* _LIB_INDENT_H_ */

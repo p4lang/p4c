@@ -1,4 +1,4 @@
-issue2267.p4(4): [--Wwarn=shadow] warning: t shadows t
+issue2267.p4(4): [--Wwarn=shadow] warning: 't' shadows 't'
   table t {
         ^
 issue2267.p4(3)

@@ -26,7 +26,6 @@ control c(bit<32> x) {
                         32w0xb000003 : Set_dmac(dmac = (EthernetAddress)48w0x112233445577);
                         32w0xb000000 &&& 32w0xff000000 : drop();
         }
-
         default_action = Set_dmac((EthernetAddress)48w0xaabbccddeeff);
         implementation = tbl();
     }

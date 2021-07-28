@@ -5,7 +5,7 @@ header Header {
 }
 
 parser p1(packet_in p, out Header h) {
-    bit<1> x_0;
+    @name("p1.x") bit<1> x_0;
     state start {
         transition select(x_0) {
             1w0: chain1;

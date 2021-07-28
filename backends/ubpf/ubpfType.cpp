@@ -48,7 +48,8 @@ namespace UBPF {
         } else if (auto tpl = type->to<IR::Type_List>()) {
             result = new UBPFListType(tpl);
         } else {
-            ::error("Type %1% not supported", type);
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "Type %1% not supported", type);
         }
         return result;
     }
@@ -66,12 +67,41 @@ namespace UBPF {
             builder->appendFormat("uint8_t*");
     }
 
+    cstring UBPFScalarType::getAsString() {
+        if (width <= 8)
+            return cstring("uint8_t");
+        else if (width <= 16)
+            return cstring("uint16_t");
+        else if (width <= 32)
+            return cstring("uint32_t");
+        else if (width <= 64)
+            return cstring("uint64_t");
+        else
+            return cstring("uint8_t*");
+    }
+
     void UBPFScalarType::declare(EBPF::CodeBuilder *builder, cstring id, bool asPointer) {
         if (EBPFScalarType::generatesScalar(width)) {
             emit(builder);
             if (asPointer)
                 builder->append("*");
             builder->spc();
+            builder->append(id);
+        } else {
+            if (asPointer)
+                builder->append("uint8_t*");
+            else
+                builder->appendFormat("uint8_t %s[%d]", id.c_str(), bytesRequired());
+        }
+    }
+
+    void UBPFScalarType::declareInit(EBPF::CodeBuilder *builder, cstring id, bool asPointer) {
+        if (EBPFScalarType::generatesScalar(width)) {
+            emit(builder);
+            if (asPointer)
+                builder->append("*");
+            builder->spc();
+            id = id + cstring(" = 0");
             builder->append(id);
         } else {
             if (asPointer)
@@ -126,6 +156,9 @@ namespace UBPF {
         builder->appendFormat("%s", id.c_str());
     }
 
+    void UBPFStructType::declareInit(EBPF::CodeBuilder *builder, cstring id, bool asPointer) {
+        declare(builder, id, asPointer);
+    }
     //////////////////////////////////////////////////////////
 
     void UBPFEnumType::emit(EBPF::CodeBuilder *builder) {
@@ -152,7 +185,8 @@ namespace UBPF {
             auto ltype = UBPFTypeFactory::instance->create(el);
             auto wt = dynamic_cast<IHasWidth*>(ltype);
             if (wt == nullptr) {
-                ::error("UBPF: Unsupported type in Type_List: %s", el->getP4Type());
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "UBPF: Unsupported type in Type_List: %s", el->getP4Type());
             } else {
                 width += wt->widthInBits();
                 implWidth += wt->implementationWidthInBits();
@@ -181,7 +215,8 @@ namespace UBPF {
                     elements.push_back(pad);
                     paddingIndex++;
                 } else {
-                    ::error("Not supported bitwidth in %1$", this->type->getNode());
+                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                            "Not supported bitwidth in %1%", this->type->getNode());
                 }
             }
             idx++;
@@ -195,6 +230,10 @@ namespace UBPF {
         builder->append(name);
         builder->spc();
         builder->append(id.c_str());
+    }
+
+    void UBPFListType::declareInit(EBPF::CodeBuilder *builder, cstring id, bool asPointer) {
+        declare(builder, id, asPointer);
     }
 
     void UBPFListType::emitInitializer(EBPF::CodeBuilder* builder) {

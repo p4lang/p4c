@@ -16,8 +16,8 @@ limitations under the License.
 
 /* -*-c++-*- */
 
-#ifndef P4C_LIB_EXCEPTIONS_H_
-#define P4C_LIB_EXCEPTIONS_H_
+#ifndef _LIB_EXCEPTIONS_H_
+#define _LIB_EXCEPTIONS_H_
 
 #include <exception>
 #include "lib/error_helper.h"
@@ -98,4 +98,4 @@ class CompilationError : public P4CExceptionBase {
 /// Report an error and exit
 #define FATAL_ERROR(...) do { throw Util::CompilationError(__VA_ARGS__); } while (0)
 
-#endif /* P4C_LIB_EXCEPTIONS_H_ */
+#endif /* _LIB_EXCEPTIONS_H_ */

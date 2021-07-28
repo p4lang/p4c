@@ -82,11 +82,11 @@ bool StateTranslationVisitor::preorder(const IR::AssignmentStatement* statement)
                 return false;
             }
         }
-        ::error("Unexpected method call in parser %1%", statement->right);
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "Unexpected method call in parser %1%", statement->right);
     }
 
-    CodeGenInspector::visit(statement);
-    return false;
+    return CodeGenInspector::preorder(statement);
 }
 
 bool StateTranslationVisitor::preorder(const IR::ParserState* parserState) {
@@ -122,11 +122,9 @@ bool StateTranslationVisitor::preorder(const IR::ParserState* parserState) {
 
 bool StateTranslationVisitor::preorder(const IR::SelectExpression* expression) {
     hasDefault = false;
-    if (expression->select->components.size() != 1) {
-        // TODO: this does not handle correctly tuples
-        ::error("%1%: only supporting a single argument for select", expression->select);
-        return false;
-    }
+    BUG_CHECK(expression->select->components.size() == 1,
+              "%1%: tuple not eliminated in select",
+              expression->select);
     builder->emitIndent();
     builder->append("switch (");
     visit(expression->select);
@@ -178,14 +176,15 @@ StateTranslationVisitor::compileExtractField(
         if (wordsToRead <= 1) {
             helper = "load_byte";
             loadSize = 8;
-        } else if (widthToExtract <= 16)  {
+        } else if (wordsToRead <= 2)  {
             helper = "load_half";
             loadSize = 16;
-        } else if (widthToExtract <= 32) {
+        } else if (wordsToRead <= 4) {
             helper = "load_word";
             loadSize = 32;
         } else {
-            if (widthToExtract > 64) BUG("Unexpected width %d", widthToExtract);
+            // TODO: this is wrong, since a 60-bit unaligned read may require 9 words.
+            if (wordsToRead > 64) BUG("Unexpected width %d", widthToExtract);
             helper = "load_dword";
             loadSize = 64;
         }
@@ -258,7 +257,8 @@ StateTranslationVisitor::compileExtract(const IR::Expression* destination) {
     auto type = state->parser->typeMap->getType(destination);
     auto ht = type->to<IR::Type_StructLike>();
     if (ht == nullptr) {
-        ::error("Cannot extract to a non-struct type %1%", destination);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "Cannot extract to a non-struct type %1%", destination);
         return;
     }
 
@@ -287,7 +287,8 @@ StateTranslationVisitor::compileExtract(const IR::Expression* destination) {
         auto etype = EBPFTypeFactory::instance->create(ftype);
         auto et = dynamic_cast<IHasWidth*>(etype);
         if (et == nullptr) {
-            ::error("Only headers with fixed widths supported %1%", f);
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "Only headers with fixed widths supported %1%", f);
             return;
         }
         compileExtractField(destination, f->name, alignment, etype);
@@ -320,13 +321,13 @@ bool StateTranslationVisitor::preorder(const IR::MethodCallExpression* expressio
     auto mi = P4::MethodInstance::resolve(expression,
                                           state->parser->program->refMap,
                                           state->parser->program->typeMap);
-    auto extMethod = mi->to<P4::ExternMethod>();
-    if (extMethod != nullptr) {
+    if (auto extMethod = mi->to<P4::ExternMethod>()) {
         auto decl = extMethod->object;
         if (decl == state->parser->packet) {
             if (extMethod->method->name.name == p4lib.packetIn.extract.name) {
                 if (expression->arguments->size() != 1) {
-                    ::error("Variable-sized header fields not yet supported %1%", expression);
+                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                            "Variable-sized header fields not yet supported %1%", expression);
                     return false;
                 }
                 compileExtract(expression->arguments->at(0)->expression);
@@ -335,9 +336,25 @@ bool StateTranslationVisitor::preorder(const IR::MethodCallExpression* expressio
             BUG("Unhandled packet method %1%", expression->method);
             return false;
         }
+    } else if (auto bim = mi->to<P4::BuiltInMethod>()) {
+        builder->emitIndent();
+        if (bim->name == IR::Type_Header::isValid) {
+            visit(bim->appliedTo);
+            builder->append(".ebpf_valid");
+            return false;
+        } else if (bim->name == IR::Type_Header::setValid) {
+            visit(bim->appliedTo);
+            builder->append(".ebpf_valid = true");
+            return false;
+        } else if (bim->name == IR::Type_Header::setInvalid) {
+            visit(bim->appliedTo);
+            builder->append(".ebpf_valid = false");
+            return false;
+        }
     }
 
-    ::error("Unexpected method call in parser %1%", expression);
+    ::error(ErrorType::ERR_UNEXPECTED,
+            "Unexpected method call in parser %1%", expression);
     return false;
 }
 
@@ -404,7 +421,8 @@ void EBPFParser::emit(CodeBuilder* builder) {
 bool EBPFParser::build() {
     auto pl = parserBlock->container->type->applyParams;
     if (pl->size() != 2) {
-        ::error("Expected parser to have exactly 2 parameters");
+        ::error(ErrorType::ERR_EXPECTED,
+                "Expected parser to have exactly 2 parameters");
         return false;
     }
 

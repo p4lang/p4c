@@ -3,7 +3,7 @@ error {
     BadIPv4HeaderChecksum
 }
 #include <core.p4>
-#include <psa.p4>
+#include <bmv2/psa.p4>
 
 typedef bit<48> EthernetAddress;
 header ethernet_t {
@@ -59,17 +59,17 @@ struct headers {
 typedef bit<32> PacketCounter_t;
 typedef bit<8> ErrorIndex_t;
 struct tuple_0 {
-    bit<4>  field;
-    bit<4>  field_0;
-    bit<8>  field_1;
-    bit<16> field_2;
-    bit<16> field_3;
-    bit<3>  field_4;
-    bit<13> field_5;
-    bit<8>  field_6;
-    bit<8>  field_7;
-    bit<32> field_8;
-    bit<32> field_9;
+    bit<4>  f0;
+    bit<4>  f1;
+    bit<8>  f2;
+    bit<16> f3;
+    bit<16> f4;
+    bit<3>  f5;
+    bit<13> f6;
+    bit<8>  f7;
+    bit<8>  f8;
+    bit<32> f9;
+    bit<32> f10;
 }
 
 parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_meta, in psa_ingress_parser_input_metadata_t istd, in empty_metadata_t resubmit_meta, in empty_metadata_t recirculate_meta) {
@@ -85,7 +85,7 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
         buffer.extract<ipv4_t>(hdr.ipv4);
         verify(hdr.ipv4.ihl == 4w5, error.UnhandledIPv4Options);
         ck_0.clear();
-        ck_0.add<tuple_0>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+        ck_0.add<tuple_0>((tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr});
         verify(ck_0.get() == hdr.ipv4.hdrChecksum, error.BadIPv4HeaderChecksum);
         transition select(hdr.ipv4.protocol) {
             8w6: parse_tcp;
@@ -100,11 +100,11 @@ parser IngressParserImpl(packet_in buffer, out headers hdr, inout metadata user_
 
 control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_input_metadata_t istd, inout psa_ingress_output_metadata_t ostd) {
     bool hasExited;
-    @noWarnUnused @name(".ingress_drop") action ingress_drop() {
+    @noWarnUnused @name(".ingress_drop") action ingress_drop_0() {
         ostd.drop = true;
     }
     @name("ingress.parser_error_counts") DirectCounter<PacketCounter_t>(PSA_CounterType_t.PACKETS) parser_error_counts_0;
-    @name("ingress.set_error_idx") action set_error_idx(ErrorIndex_t idx) {
+    @name("ingress.set_error_idx") action set_error_idx(@name("idx") ErrorIndex_t idx) {
         parser_error_counts_0.count();
     }
     @name("ingress.parser_error_count_and_convert") table parser_error_count_and_convert_0 {
@@ -125,10 +125,9 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
                         error.BadIPv4HeaderChecksum : set_error_idx(8w7);
                         error.UnhandledIPv4Options : set_error_idx(8w8);
         }
-
         psa_direct_counter = parser_error_counts_0;
     }
-    @hidden action psaexampleparserchecksum184() {
+    @hidden action psaexampleparserchecksum185() {
         hasExited = true;
     }
     @hidden action act() {
@@ -142,22 +141,22 @@ control ingress(inout headers hdr, inout metadata user_meta, in psa_ingress_inpu
     }
     @hidden table tbl_ingress_drop {
         actions = {
-            ingress_drop();
+            ingress_drop_0();
         }
-        const default_action = ingress_drop();
+        const default_action = ingress_drop_0();
     }
-    @hidden table tbl_psaexampleparserchecksum184 {
+    @hidden table tbl_psaexampleparserchecksum185 {
         actions = {
-            psaexampleparserchecksum184();
+            psaexampleparserchecksum185();
         }
-        const default_action = psaexampleparserchecksum184();
+        const default_action = psaexampleparserchecksum185();
     }
     apply {
         tbl_act.apply();
         if (istd.parser_error != error.NoError) {
             parser_error_count_and_convert_0.apply();
             tbl_ingress_drop.apply();
-            tbl_psaexampleparserchecksum184.apply();
+            tbl_psaexampleparserchecksum185.apply();
         }
     }
 }
@@ -174,40 +173,40 @@ control egress(inout headers hdr, inout metadata user_meta, in psa_egress_input_
 }
 
 control IngressDeparserImpl(packet_out packet, out empty_metadata_t clone_i2e_meta, out empty_metadata_t resubmit_meta, out empty_metadata_t normal_meta, inout headers hdr, in metadata meta, in psa_ingress_output_metadata_t istd) {
-    @hidden action psaexampleparserchecksum221() {
+    @hidden action psaexampleparserchecksum222() {
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
         packet.emit<tcp_t>(hdr.tcp);
     }
-    @hidden table tbl_psaexampleparserchecksum221 {
+    @hidden table tbl_psaexampleparserchecksum222 {
         actions = {
-            psaexampleparserchecksum221();
+            psaexampleparserchecksum222();
         }
-        const default_action = psaexampleparserchecksum221();
+        const default_action = psaexampleparserchecksum222();
     }
     apply {
-        tbl_psaexampleparserchecksum221.apply();
+        tbl_psaexampleparserchecksum222.apply();
     }
 }
 
 control EgressDeparserImpl(packet_out packet, out empty_metadata_t clone_e2e_meta, out empty_metadata_t recirculate_meta, inout headers hdr, in metadata meta, in psa_egress_output_metadata_t istd, in psa_egress_deparser_input_metadata_t edstd) {
     @name("EgressDeparserImpl.ck") InternetChecksum() ck_1;
-    @hidden action psaexampleparserchecksum238() {
+    @hidden action psaexampleparserchecksum239() {
         ck_1.clear();
-        ck_1.add<tuple_0>({ hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr });
+        ck_1.add<tuple_0>((tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr});
         hdr.ipv4.hdrChecksum = ck_1.get();
         packet.emit<ethernet_t>(hdr.ethernet);
         packet.emit<ipv4_t>(hdr.ipv4);
         packet.emit<tcp_t>(hdr.tcp);
     }
-    @hidden table tbl_psaexampleparserchecksum238 {
+    @hidden table tbl_psaexampleparserchecksum239 {
         actions = {
-            psaexampleparserchecksum238();
+            psaexampleparserchecksum239();
         }
-        const default_action = psaexampleparserchecksum238();
+        const default_action = psaexampleparserchecksum239();
     }
     apply {
-        tbl_psaexampleparserchecksum238.apply();
+        tbl_psaexampleparserchecksum239.apply();
     }
 }
 

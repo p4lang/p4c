@@ -17,6 +17,7 @@ limitations under the License.
 #include "ubpfParser.h"
 #include "ubpfType.h"
 #include "ubpfHelpers.h"
+#include "ubpfModel.h"
 #include "frontends/p4/coreLibrary.h"
 #include "frontends/p4/methodInstance.h"
 
@@ -143,7 +144,8 @@ bool UBPFStateTranslationVisitor::preorder(const IR::SelectExpression* expressio
     hasDefault = false;
     if (expression->select->components.size() != 1) {
         // TODO: this does not handle correctly tuples
-        ::error("%1%: only supporting a single argument for select", expression->select);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "%1%: only supporting a single argument for select", expression->select);
         return false;
     }
     builder->emitIndent();
@@ -198,10 +200,10 @@ UBPFStateTranslationVisitor::compileExtractField(
         if (wordsToRead <= 1) {
             helper = "load_byte";
             loadSize = 8;
-        } else if (widthToExtract <= 16)  {
+        } else if (wordsToRead <= 2)  {
             helper = "load_half";
             loadSize = 16;
-        } else if (widthToExtract <= 32) {
+        } else if (wordsToRead <= 4) {
             helper = "load_word";
             loadSize = 32;
         } else {
@@ -285,7 +287,8 @@ UBPFStateTranslationVisitor::compileExtract(const IR::Expression* destination) {
     auto ht = type->to<IR::Type_StructLike>();
 
     if (ht == nullptr) {
-        ::error("Cannot extract to a non-struct type %1%", destination);
+        ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                "Cannot extract to a non-struct type %1%", destination);
         return;
     }
 
@@ -298,7 +301,8 @@ UBPFStateTranslationVisitor::compileExtract(const IR::Expression* destination) {
         auto etype = UBPFTypeFactory::instance->create(ftype);
         auto et = dynamic_cast<EBPF::IHasWidth*>(etype);
         if (et == nullptr) {
-            ::error("Only headers with fixed widths supported %1%", f);
+            ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                    "Only headers with fixed widths supported %1%", f);
             return;
         }
         compileExtractField(destination, f->name, alignment, etype);
@@ -389,7 +393,8 @@ bool UBPFStateTranslationVisitor::preorder(const IR::MethodCallExpression* expre
         if (decl == state->parser->packet) {
             if (extMethod->method->name.name == p4lib.packetIn.extract.name) {
                 if (expression->arguments->size() != 1) {
-                    ::error("Variable-sized header fields not yet supported %1%", expression);
+                    ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                            "Variable-sized header fields not yet supported %1%", expression);
                     return false;
                 }
                 compileExtract(expression->arguments->at(0)->expression);
@@ -410,7 +415,7 @@ bool UBPFStateTranslationVisitor::preorder(const IR::MethodCallExpression* expre
         }
     }
 
-    ::error("Unexpected method call in parser %1%", expression);
+    ::error(ErrorType::ERR_UNEXPECTED, "Unexpected method call in parser %1%", expression);
 
     return false;
 }
@@ -431,7 +436,8 @@ bool UBPFStateTranslationVisitor::preorder(const IR::AssignmentStatement* stat) 
                 return false;
             }
         }
-        ::error("Unexpected method call in parser %1%", stat->right);
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "Unexpected method call in parser %1%", stat->right);
     } else {
         builder->emitIndent();
         visit(stat->left);
@@ -443,13 +449,13 @@ bool UBPFStateTranslationVisitor::preorder(const IR::AssignmentStatement* stat) 
     return false;
 }
 
-void UBPF::UBPFParserState::emit(EBPF::CodeBuilder* builder) {
+void UBPFParserState::emit(EBPF::CodeBuilder* builder) {
     UBPFStateTranslationVisitor visitor(this);
     visitor.setBuilder(builder);
     state->apply(visitor);
 }
 
-void UBPF::UBPFParser::emit(EBPF::CodeBuilder *builder) {
+void UBPFParser::emit(EBPF::CodeBuilder *builder) {
     for (auto s : states)
         s->emit(builder);
 
@@ -464,10 +470,12 @@ void UBPF::UBPFParser::emit(EBPF::CodeBuilder *builder) {
     builder->newline();
 }
 
-bool UBPF::UBPFParser::build() {
+bool UBPFParser::build() {
     auto pl = parserBlock->container->type->applyParams;
-    if (pl->size() != 4) {
-        ::error("Expected parser to have exactly 4 parameters");
+    size_t numberOfArgs = UBPFModel::instance.numberOfParserArguments();
+    if (pl->size() != numberOfArgs) {
+        ::error(ErrorType::ERR_EXPECTED,
+                "Expected parser to have exactly %d parameters", numberOfArgs);
         return false;
     }
 

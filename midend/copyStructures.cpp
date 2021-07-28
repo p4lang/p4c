@@ -24,7 +24,7 @@ const IR::Node* RemoveAliases::postorder(IR::AssignmentStatement* statement) {
     if (!type->is<IR::Type_StructLike>())
         return statement;
 
-    ReadsWrites rw(refMap, false);
+    ReadsWrites rw(refMap);
     if (!rw.mayAlias(statement->left, statement->right))
         return statement;
     auto tmp = refMap->newName("tmp");
@@ -62,7 +62,8 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
     if (ltype->is<IR::Type_StructLike>()) {
         if (statement->right->is<IR::MethodCallExpression>()) {
             if (errorOnMethodCall)
-                ::error("%1%: functions or methods returning structures "
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "%1%: functions or methods returning structures "
                         "are not supported on this target",
                         statement->right);
             return statement;
@@ -71,13 +72,6 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
         auto retval = new IR::IndexedVector<IR::StatOrDecl>();
         auto strct = ltype->to<IR::Type_StructLike>();
         if (auto list = statement->right->to<IR::ListExpression>()) {
-            if (ltype->is<IR::Type_Header>()) {
-                auto setValid = new IR::Member(
-                    statement->srcInfo, statement->left, IR::Type_Header::setValid);
-                auto mc = new IR::MethodCallStatement(
-                    new IR::MethodCallExpression(statement->srcInfo, setValid));
-                retval->push_back(mc);
-            }
             unsigned index = 0;
             for (auto f : strct->fields) {
                 auto right = list->components.at(index);
@@ -86,13 +80,6 @@ const IR::Node* DoCopyStructures::postorder(IR::AssignmentStatement* statement) 
                 index++;
             }
         } else if (auto si = statement->right->to<IR::StructExpression>()) {
-            if (ltype->is<IR::Type_Header>()) {
-                auto setValid = new IR::Member(
-                    statement->srcInfo, statement->left, IR::Type_Header::setValid);
-                auto mc = new IR::MethodCallStatement(
-                    new IR::MethodCallExpression(statement->srcInfo, setValid));
-                retval->push_back(mc);
-            }
             for (auto f : strct->fields) {
                 auto right = si->components.getDeclaration<IR::NamedExpression>(f->name);
                 auto left = new IR::Member(statement->left, f->name);

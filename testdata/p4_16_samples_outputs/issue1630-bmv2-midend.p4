@@ -49,34 +49,34 @@ parser MyParser(packet_in packet, out headers hdr, inout metadata meta, inout st
 }
 
 struct tuple_0 {
-    bit<4>  field;
-    bit<4>  field_0;
-    bit<8>  field_1;
-    bit<16> field_2;
-    bit<16> field_3;
-    bit<3>  field_4;
-    bit<13> field_5;
-    bit<8>  field_6;
-    bit<8>  field_7;
-    bit<32> field_8;
-    bit<32> field_9;
+    bit<4>  f0;
+    bit<4>  f1;
+    bit<8>  f2;
+    bit<16> f3;
+    bit<16> f4;
+    bit<3>  f5;
+    bit<13> f6;
+    bit<8>  f7;
+    bit<8>  f8;
+    bit<32> f9;
+    bit<32> f10;
 }
 
 control MyVerifyChecksum(inout headers hdr, inout metadata meta) {
     apply {
-        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), { hdr.ipv4.version, hdr.ipv4.ihl, hdr.ipv4.diffserv, hdr.ipv4.totalLen, hdr.ipv4.identification, hdr.ipv4.flags, hdr.ipv4.fragOffset, hdr.ipv4.ttl, hdr.ipv4.protocol, hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
+        verify_checksum<tuple_0, bit<16>>(hdr.ipv4.isValid(), (tuple_0){f0 = hdr.ipv4.version,f1 = hdr.ipv4.ihl,f2 = hdr.ipv4.diffserv,f3 = hdr.ipv4.totalLen,f4 = hdr.ipv4.identification,f5 = hdr.ipv4.flags,f6 = hdr.ipv4.fragOffset,f7 = hdr.ipv4.ttl,f8 = hdr.ipv4.protocol,f9 = hdr.ipv4.srcAddr,f10 = hdr.ipv4.dstAddr}, hdr.ipv4.hdrChecksum, HashAlgorithm.csum16);
     }
 }
 
 control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("MyIngress.drop") action drop() {
         mark_to_drop(standard_metadata);
     }
-    @name("MyIngress.ipv4_forward") action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
+    @name("MyIngress.ipv4_forward") action ipv4_forward(@name("dstAddr") macAddr_t dstAddr_1, @name("port") egressSpec_t port) {
         hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
-        hdr.ethernet.dstAddr = dstAddr;
+        hdr.ethernet.dstAddr = dstAddr_1;
         standard_metadata.egress_spec = port;
         hdr.ipv4.ttl = hdr.ipv4.ttl + 8w255;
         hdr.ipv4.hdrChecksum = 16w1;
@@ -88,10 +88,10 @@ control MyIngress(inout headers hdr, inout metadata meta, inout standard_metadat
         actions = {
             ipv4_forward();
             drop();
-            NoAction_0();
+            NoAction_1();
         }
         size = 1024;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         if (hdr.ipv4.isValid()) {

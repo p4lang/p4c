@@ -65,7 +65,7 @@ parseV1Program(Input& stream, const char* sourceFile, unsigned sourceLine,
  * on failure. If failure occurs, an error will also be reported.
  */
 template <typename C = P4V1::Converter>
-const IR::P4Program* parseP4File(CompilerOptions& options) {
+const IR::P4Program* parseP4File(ParserOptions& options) {
     BUG_CHECK(&options == &P4CContext::get().options(),
               "Parsing using options that don't match the current "
               "compiler context");
@@ -89,7 +89,8 @@ const IR::P4Program* parseP4File(CompilerOptions& options) {
     options.closeInput(in);
 
     if (::errorCount() > 0) {
-        ::error("%1% errors encountered, aborting compilation", ::errorCount());
+        ::error(ErrorType::ERR_OVERLIMIT,
+                "%1% errors encountered, aborting compilation", ::errorCount());
         return nullptr;
     }
     BUG_CHECK(result != nullptr, "Parsing failed, but we didn't report an error");

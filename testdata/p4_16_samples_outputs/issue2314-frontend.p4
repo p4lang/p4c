@@ -26,7 +26,7 @@ struct m {
 }
 
 parser MyParser(packet_in b, out h hdr, inout m meta, inout standard_metadata_t std) {
-    bit<16> l3_etherType;
+    @name("MyParser.l3.etherType") bit<16> l3_etherType;
     state start {
         transition start_0;
     }

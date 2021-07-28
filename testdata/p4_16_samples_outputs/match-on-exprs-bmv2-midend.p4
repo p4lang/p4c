@@ -31,12 +31,12 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
     bit<48> key_1;
     bit<16> key_2;
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name("ingressImpl.my_drop") action my_drop() {
         mark_to_drop(stdmeta);
     }
-    @name("ingressImpl.foo") action foo(bit<9> out_port) {
+    @name("ingressImpl.foo") action foo(@name("out_port") bit<9> out_port) {
         hdr.ethernet.dstAddr[22:18] = hdr.ethernet.srcAddr[5:1];
         stdmeta.egress_spec = out_port;
     }
@@ -49,9 +49,9 @@ control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_m
         actions = {
             foo();
             my_drop();
-            NoAction_0();
+            NoAction_1();
         }
-        const default_action = NoAction_0();
+        const default_action = NoAction_1();
     }
     @hidden action matchonexprsbmv2l64() {
         key_1 = hdr.ethernet.dstAddr & 48w0x10101010101;

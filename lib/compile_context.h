@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#ifndef P4C_LIB_COMPILE_CONTEXT_H_
-#define P4C_LIB_COMPILE_CONTEXT_H_
+#ifndef _LIB_COMPILE_CONTEXT_H_
+#define _LIB_COMPILE_CONTEXT_H_
 
 #include <typeinfo>
 #include <vector>
@@ -47,6 +47,10 @@ struct CompileContextStack final {
         auto* current = dynamic_cast<CompileContextType*>(stack.back());
         if (!current) reportContextMismatch(typeid(CompileContextType).name());
         return *current;
+    }
+
+    static bool isEmpty() {
+        return getStack().empty();
     }
 
  private:
@@ -89,7 +93,7 @@ class BaseCompileContext : public ICompileContext {
     static BaseCompileContext& get();
 
     /// @return the error reporter for this compilation context.
-    ErrorReporter& errorReporter();
+    virtual ErrorReporter& errorReporter();
 
     /// @return the default diagnostic action for calls to `::warning()`.
     virtual DiagnosticAction getDefaultWarningDiagnosticAction();
@@ -107,4 +111,4 @@ class BaseCompileContext : public ICompileContext {
     ErrorReporter errorReporterInstance;
 };
 
-#endif /* P4C_LIB_COMPILE_CONTEXT_H_ */
+#endif /* _LIB_COMPILE_CONTEXT_H_ */

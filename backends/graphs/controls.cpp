@@ -14,9 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-#include <boost/graph/graphviz.hpp>
-
 #include <iostream>
+
+#include <boost/graph/graphviz.hpp>
 
 #include "graphs.h"
 
@@ -79,7 +79,7 @@ void ControlGraphs::writeGraphToFile(const Graph &g, const cstring &name) {
     auto path = Util::PathName(graphsDir).join(name + ".dot");
     auto out = openFile(path.toString(), false);
     if (out == nullptr) {
-        ::error("Failed to open file %1%", path.toString());
+        ::error(ErrorType::ERR_IO, "Failed to open file %1%", path.toString());
         return;
     }
     // custom label writers not supported with subgraphs, so we populate
@@ -213,7 +213,8 @@ bool ControlGraphs::preorder(const IR::MethodCallStatement *statement) {
             visit(am->object->to<IR::P4Table>());
         } else if (am->applyObject->is<IR::Type_Control>()) {
             if (am->object->is<IR::Parameter>()) {
-                ::error("%1%: control parameters are not supported by this target",
+                ::error(ErrorType::ERR_UNSUPPORTED_ON_TARGET,
+                        "%1%: control parameters are not supported by this target",
                         am->object);
               return false;
             }

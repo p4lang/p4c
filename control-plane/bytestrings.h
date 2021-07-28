@@ -17,9 +17,9 @@ limitations under the License.
 #ifndef CONTROL_PLANE_BYTESTRINGS_H_
 #define CONTROL_PLANE_BYTESTRINGS_H_
 
-#include <boost/optional.hpp>
-
 #include <string>
+
+#include <boost/optional.hpp>
 
 #include "lib/gmputil.h"
 

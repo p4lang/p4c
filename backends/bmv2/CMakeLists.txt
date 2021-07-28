@@ -36,6 +36,7 @@ set (BMV2_PSA_SWITCH_SRCS
     psa_switch/midend.cpp
     psa_switch/midend.h
     psa_switch/psaSwitch.cpp
+    psa_switch/options.cpp
     psa_switch/psaSwitch.h
     psa_switch/options.h
     )
@@ -44,7 +45,6 @@ add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_PSA_SWITCH_SRCS}")
 set (BMV2_BACKEND_COMMON_SRCS
   common/JsonObjects.cpp
   common/action.cpp
-  common/control.cpp
   common/controlFlowGraph.cpp
   common/deparser.cpp
   common/expression.cpp
@@ -56,7 +56,6 @@ set (BMV2_BACKEND_COMMON_SRCS
   common/metermap.cpp
   common/parser.cpp
   common/programStructure.cpp
-  common/sharedActionSelectorCheck.cpp
   )
 
 set (BMV2_BACKEND_COMMON_HDRS
@@ -85,7 +84,7 @@ set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.def PARENT_SC
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${BMV2_BACKEND_COMMON_SRCS};${BMV2_BACKEND_COMMON_HDRS}")
 
 build_unified(BMV2_BACKEND_COMMON_SRCS)
-add_library(bmv2backend ${BMV2_BACKEND_COMMON_SRCS})
+add_library(bmv2backend ${P4C_STATIC_BUILD} ${BMV2_BACKEND_COMMON_SRCS})
 add_dependencies(bmv2backend genIR frontend)
 
 build_unified(BMV2_SIMPLE_SWITCH_SRCS)
@@ -99,14 +98,26 @@ add_executable(p4c-bm2-psa ${BMV2_PSA_SWITCH_SRCS})
 target_link_libraries (p4c-bm2-psa bmv2backend ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
 install(TARGETS p4c-bm2-psa RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
 
+file(RELATIVE_PATH
+    CURRENT_BINARY_DIR_PATH_REL
+    ${P4C_BINARY_DIR}
+    ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+file(RELATIVE_PATH
+    P4C_BINARY_DIR_PATH_REL
+    ${CMAKE_CURRENT_BINARY_DIR}
+    ${P4C_BINARY_DIR}
+)
+
 # hack to get around the fact that the test scripts expect the backend
 # binary to be in the top level directory. This should go away when we
 # remove automake and fix the scripts.
 add_custom_target(linkbmv2
-  COMMAND ${CMAKE_COMMAND} -E create_symlink `realpath --relative-to=${P4C_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/p4c-bm2-ss` ${P4C_BINARY_DIR}/p4c-bm2-ss
-  COMMAND ${CMAKE_COMMAND} -E create_symlink `realpath --relative-to=${P4C_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/p4c-bm2-psa` ${P4C_BINARY_DIR}/p4c-bm2-psa
-  COMMAND ${CMAKE_COMMAND} -E create_symlink `realpath --relative-to=${CMAKE_CURRENT_BINARY_DIR} ${P4C_BINARY_DIR}/p4include` ${CMAKE_CURRENT_BINARY_DIR}/p4include
-  COMMAND ${CMAKE_COMMAND} -E create_symlink `realpath --relative-to=${CMAKE_CURRENT_BINARY_DIR} ${P4C_BINARY_DIR}/p4_14include` ${CMAKE_CURRENT_BINARY_DIR}/p4_14include
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4c-bm2-ss ${P4C_BINARY_DIR}/p4c-bm2-ss
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${CURRENT_BINARY_DIR_PATH_REL}/p4c-bm2-psa ${P4C_BINARY_DIR}/p4c-bm2-psa
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4include ${CMAKE_CURRENT_BINARY_DIR}/p4include
+  COMMAND ${CMAKE_COMMAND} -E create_symlink ${P4C_BINARY_DIR_PATH_REL}/p4_14include ${CMAKE_CURRENT_BINARY_DIR}/p4_14include
   )
 add_dependencies(p4c_driver linkbmv2)
 
@@ -138,7 +149,7 @@ set (BMV2_PSA_TEST_SUITES
 
 # -p to use psa switch model
 # -a to pass flags to compiler
-set (testExtraFlags "${testExtraFlags} -p -a '--target bmv2 --arch psa'")
+set (testExtraFlags "${testExtraFlags} -p -a='--target bmv2 --arch psa'")
 
 set (XFAIL_TESTS
   # This test defines two lpm keys for a table.
@@ -154,10 +165,12 @@ set (XFAIL_TESTS
   # to be recirculated, resubmitted, etc. it still has the bug of not
   # preserving the metadata specified in the program's field_lists, so
   # the STF tests fail because of issue #1669.  As of this writing,
-  # this program is the _only_ p4c test program that relies for its
+  # these programs rely for
   # successful execution on the preservation of metadata across
   # resubmit, recirculate, and/or clone operations.
+  testdata/p4_14_samples/p414-special-ops.p4
   testdata/p4_14_samples/p414-special-ops-2-bmv2.p4
+  testdata/p4_14_samples/p414-special-ops-3-bmv2.p4
   # This test uses a feature currently unsupported in the BMv2 back-end.
   testdata/p4_16_samples/issue907-bmv2.p4
   # This test uses a table graph that is not implementable in BMv2
@@ -178,11 +191,10 @@ set (XFAIL_TESTS
   # These test use computations in the verify/update checksum controls - unsupported
   testdata/p4_16_samples/issue1765-bmv2.p4
   testdata/p4_16_samples/issue1765-1-bmv2.p4
-  # These tests require bmv2's psa_switch to support std metadata passing at minimum
-  testdata/p4_16_samples/psa-ingress-input-meta-bmv2.p4
-  # Next two use unknown externs
+  # Next three use unknown externs
   testdata/p4_16_samples/issue1882-bmv2.p4
   testdata/p4_16_samples/issue1882-1-bmv2.p4
+  testdata/p4_16_samples/issue2664-bmv2.p4
   # This one uses arguments of incorrect types to log_msg
   testdata/p4_16_samples/issue2201-bmv2.p4
 )
@@ -190,7 +202,7 @@ set (XFAIL_TESTS
 if (HAVE_SIMPLE_SWITCH)
   p4c_add_tests("bmv2" ${BMV2_DRIVER} "${BMV2_V1MODEL_TEST_SUITES}" "${XFAIL_TESTS}")
   add_library(extern_func_module MODULE EXCLUDE_FROM_ALL "${P4C_SOURCE_DIR}/testdata/extern_modules/extern-funcs-bmv2.cpp" )
-  p4c_add_test_with_args("bmv2" ${BMV2_DRIVER} FALSE "bmv2_emit_externs" "testdata/p4_16_samples/extern-funcs-bmv2.p4" "-a --emit-externs --target-specific-switch-arg \"--load-modules ${CMAKE_CURRENT_BINARY_DIR}/libextern_func_module.so\" --init \"make extern_func_module\"" "")
+  p4c_add_test_with_args("bmv2" ${BMV2_DRIVER} FALSE "bmv2_emit_externs" "testdata/p4_16_samples/extern-funcs-bmv2.p4" "-a=--emit-externs --target-specific-switch-arg=\"--load-modules ${CMAKE_CURRENT_BINARY_DIR}/libextern_func_module.so\" --init=\"make extern_func_module\"" "")
 else()
   MESSAGE(WARNING "BMv2 simple switch is not available, not adding v1model BMv2 tests")
 endif()

@@ -31,7 +31,7 @@ add_definitions(-DGTEST_HAS_SEH=0)
 add_definitions(-DGTEST_HAS_PTHREAD=0)
 
 # Build the GTest library itself.
-add_library(gtest ${GTEST_ROOT}/src/gtest-all.cc)
+add_library(gtest ${P4C_STATIC_BUILD} ${GTEST_ROOT}/src/gtest-all.cc)
 
 set (GTEST_UNITTEST_SOURCES
   gtest/arch_test.cpp
@@ -53,6 +53,7 @@ set (GTEST_UNITTEST_SOURCES
   gtest/opeq_test.cpp
   gtest/ordered_map.cpp
   gtest/ordered_set.cpp
+  gtest/parser_unroll.cpp
   gtest/path_test.cpp
   gtest/p4runtime.cpp
   gtest/source_file_test.cpp
@@ -90,6 +91,8 @@ set (GTESTP4C_SOURCES ${GTEST_SOURCES} ${GTEST_BASE_SOURCES})
 # can add GTests to `GTEST_SOURCES` to include them in the test executable. They
 # can also link in additional libraries, if needed, by adding them to
 # `GTEST_LDADD`.
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/test)
+configure_file(gtest/env.h.in ${CMAKE_CURRENT_BINARY_DIR}/test/env.h)
 add_executable (gtestp4c ${GTESTP4C_SOURCES})
 target_link_libraries (gtestp4c ${GTEST_LDADD} ${P4C_LIBRARIES} gtest ${P4C_LIB_DEPS})
 

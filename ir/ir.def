@@ -290,7 +290,7 @@ class TableProperties : ISimpleNamespace {
     static const cstring entriesPropertyName;
     static const cstring sizePropertyName;
 #nodbprint
-    validate{ properties.check_null(); properties.check_valid(); }
+    validate{ properties.check_null(); properties.validate(); }
 }
 
 class P4Table : Declaration, IAnnotated, IApply {
@@ -329,7 +329,7 @@ class P4Table : Declaration, IAnnotated, IApply {
             if (auto ev = d->value->to<IR::ExpressionValue>()) {
                 if (auto k = ev->expression->to<IR::Constant>()) {
                     return k; } }
-            error("%1% must be a constant numeric expression", d); }
+            error(ErrorType::ERR_INVALID, "%1% must be a constant numeric expression", d); }
         return nullptr; }
     Constant getSizeProperty() const {
         return getConstantProperty(TableProperties::sizePropertyName);
@@ -444,7 +444,6 @@ class IfStatement : Statement {
         clone.visit(ifFalse, "ifFalse");
         v.flow_merge(clone);
     }
-    validate{ CHECK_NULL(ifTrue); }
 }
 
 class BlockStatement : Statement, ISimpleNamespace, IAnnotated {
@@ -470,13 +469,10 @@ class MethodCallStatement : Statement {
 }
 
 class SwitchCase {
-    Expression       label;  // Can be DefaultExpression or a PathExpression
+    Expression       label;
     NullOK Statement statement;  // If missing then it's a fall-through
 #nodbprint
     validate{
-        if (!(label->is<IR::DefaultExpression>() || label->is<IR::PathExpression>()))
-            ::error(ErrorType::ERR_EXPRESSION,
-                    "%1%: Unexpected expression for switch case", *this);
         BUG_CHECK(statement == nullptr || statement->is<IR::BlockStatement>(),
                   "%1%: Expected a block statement",
                   statement);

@@ -35,7 +35,7 @@ control verifyChecksum(inout headers_t hdr, inout metadata_t meta) {
 }
 
 control ingressImpl(inout headers_t hdr, inout metadata_t meta, inout standard_metadata_t stdmeta) {
-    bit<8> error_as_int_0;
+    @name("ingressImpl.error_as_int") bit<8> error_as_int_0;
     @hidden action testparserinvalidargumenterrorbmv2l68() {
         error_as_int_0 = 8w0;
     }

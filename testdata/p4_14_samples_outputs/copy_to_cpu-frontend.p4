@@ -29,7 +29,8 @@ struct headers {
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    bit<64> tmp;
+    @name("ParserImpl.tmp") bit<64> tmp;
+    @name("ParserImpl.tmp_0") bit<64> tmp_0;
     @name(".parse_cpu_header") state parse_cpu_header {
         packet.extract<cpu_header_t>(hdr.cpu_header);
         transition parse_ethernet;
@@ -39,7 +40,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition accept;
     }
     @name(".start") state start {
-        tmp = packet.lookahead<bit<64>>();
+        tmp_0 = packet.lookahead<bit<64>>();
+        tmp = tmp_0;
         transition select(tmp) {
             64w0: parse_cpu_header;
             default: parse_ethernet;
@@ -48,7 +50,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_2() {
     }
     @name("._drop") action _drop() {
         mark_to_drop(standard_metadata);
@@ -62,13 +64,13 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
         actions = {
             _drop();
             do_cpu_encap();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_2();
         }
         key = {
             standard_metadata.instance_type: exact @name("standard_metadata.instance_type") ;
         }
         size = 16;
-        default_action = NoAction_0();
+        default_action = NoAction_2();
     }
     apply {
         redirect_0.apply();
@@ -76,7 +78,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_1() {
+    @noWarn("unused") @name(".NoAction") action NoAction_3() {
     }
     @name(".do_copy_to_cpu") action do_copy_to_cpu() {
         clone3<tuple<standard_metadata_t>>(CloneType.I2E, 32w250, { standard_metadata });
@@ -84,10 +86,10 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
     @name(".copy_to_cpu") table copy_to_cpu_0 {
         actions = {
             do_copy_to_cpu();
-            @defaultonly NoAction_1();
+            @defaultonly NoAction_3();
         }
         size = 1;
-        default_action = NoAction_1();
+        default_action = NoAction_3();
     }
     apply {
         copy_to_cpu_0.apply();

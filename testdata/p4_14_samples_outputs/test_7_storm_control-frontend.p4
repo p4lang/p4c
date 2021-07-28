@@ -104,25 +104,25 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
     @name(".no_action") action no_action() {
     }
-    @name(".ing_meter_set") action ing_meter_set(bit<16> meter_) {
-        meta.ingress_metadata.ing_meter = meter_;
+    @name(".ing_meter_set") action ing_meter_set(@name("meter_") bit<16> meter_1) {
+        meta.ingress_metadata.ing_meter = meter_1;
     }
     @name(".storm_control") table storm_control_0 {
         actions = {
             no_action();
             ing_meter_set();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         key = {
             meta.ingress_metadata.bd: exact @name("ingress_metadata.bd") ;
             hdr.ethernet.dstAddr    : ternary @name("ethernet.dstAddr") ;
         }
         size = 8192;
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         storm_control_0.apply();

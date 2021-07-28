@@ -18,6 +18,8 @@ limitations under the License.
 #include "lib/gc.h"
 #include "lib/n4.h"
 
+#include "pass_manager.h"
+
 void PassManager::removePasses(const std::vector<cstring> &exclude) {
     for (auto it : exclude) {
         bool excluded = false;
@@ -32,6 +34,14 @@ void PassManager::removePasses(const std::vector<cstring> &exclude) {
             throw std::runtime_error("Trying to exclude unknown pass '" + it + "'");
         }
     }
+}
+
+void PassManager::listPasses(std::ostream &out, cstring sep) const {
+    bool first = true;
+    for (auto p : passes) {
+        if (!first) out << sep;
+        out << p->name();
+        first = false; }
 }
 
 const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *) {
@@ -53,11 +63,12 @@ const IR::Node *PassManager::apply_visitor(const IR::Node *program, const char *
                 backup.emplace_back(it, program); } }
         try {
             try {
-                size_t maxmem;
                 LOG1(log_indent << name() << " invoking " << v->name());
                 auto after = program->apply(**it);
-                LOG3(log_indent << "heap after " << v->name() << ": in use " <<
-                     n4(gc_mem_inuse(&maxmem)) << "B, max " << n4(maxmem) << "B");
+                if (LOGGING(3)) {
+                    size_t maxmem, mem = gc_mem_inuse(&maxmem);  // triggers gc
+                    LOG3(log_indent << "heap after " << v->name() << ": in use " <<
+                         n4(mem) << "B, max " << n4(maxmem) << "B"); }
                 if (stop_on_error && ::errorCount() > initial_error_count)
                     break;
                 if ((program = after) == nullptr) break;

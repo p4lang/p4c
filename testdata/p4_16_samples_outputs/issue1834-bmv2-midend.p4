@@ -17,9 +17,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @noWarn("unused") @name(".NoAction") action NoAction_0() {
+    @noWarn("unused") @name(".NoAction") action NoAction_1() {
     }
-    @name("IngressImpl.act") action act(test_t a) {
+    @name("IngressImpl.act") action act(@name("a") test_t a) {
     }
     @name("IngressImpl.test_table") table test_table_0 {
         key = {
@@ -27,13 +27,12 @@ control IngressImpl(inout headers hdr, inout metadata meta, inout standard_metad
         }
         actions = {
             act();
-            @defaultonly NoAction_0();
+            @defaultonly NoAction_1();
         }
         const entries = {
                         8w1 : act(8w1);
         }
-
-        default_action = NoAction_0();
+        default_action = NoAction_1();
     }
     apply {
         test_table_0.apply();

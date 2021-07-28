@@ -166,7 +166,6 @@ control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_
                 default: {
                 }
             }
-
             nexthop.apply();
         }
     }

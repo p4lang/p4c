@@ -215,7 +215,7 @@ class P4ParserDriver final : public AbstractParserDriver {
 
     // flag to track when template args are expected, to adjust the precedence
     // of '<'
-    bool template_args;
+    bool template_args = false;
 
  private:
     P4ParserDriver();

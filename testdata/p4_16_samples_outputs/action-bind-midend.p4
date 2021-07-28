@@ -1,5 +1,5 @@
 control c(inout bit<32> x) {
-    @name("c.a") action a(bit<32> d) {
+    @name("c.a") action a(@name("d") bit<32> d) {
         x = d;
     }
     @name("c.t") table t_0 {

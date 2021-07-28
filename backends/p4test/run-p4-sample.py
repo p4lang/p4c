@@ -119,7 +119,8 @@ def run_timeout(options, args, timeout, stderr):
 timeout = 10 * 60
 
 def compare_files(options, produced, expected, ignore_case):
-    if options.replace:
+    # p4info files should not change
+    if options.replace and "p4info" not in produced:
         if options.verbose:
             print("Saving new version of ", expected)
         shutil.copy2(produced, expected)
@@ -185,6 +186,11 @@ def process_file(options, argv):
     basename = os.path.basename(options.p4filename)
     base, ext = os.path.splitext(basename)
     dirname = os.path.dirname(options.p4filename)
+    loops_unrolling = False
+    for option in options.compilerOptions:
+        if option == "--loopsUnroll":
+            loops_unrolling = True
+            break
     if "_samples/" in dirname:
         expected_dirname = dirname.replace("_samples/", "_samples_outputs/", 1)
     elif "_errors/" in dirname:
@@ -193,7 +199,9 @@ def process_file(options, argv):
         expected_dirname = dirname.replace("p4_14/", "p4_14_outputs/", 1)
     elif "p4_16/" in dirname:
         expected_dirname = dirname.replace("p4_16/", "p4_16_outputs/", 1)
-    else:
+    elif loops_unrolling:
+        expected_dirname = dirname + "_outputs/parser-unroll"
+    else:    
         expected_dirname = dirname + "_outputs"  # expected outputs are here
     if not os.path.exists(expected_dirname):
         os.makedirs(expected_dirname)
@@ -264,9 +272,9 @@ def process_file(options, argv):
 
     if result != SUCCESS:
         print("Error compiling")
-        print("".join(open(stderr).readlines()))
+        print(open(stderr).read())
         # If the compiler crashed fail the test
-        if 'Compiler Bug' in open(stderr).readlines():
+        if 'Compiler Bug' in open(stderr).read():
             return FAILURE
 
     expected_error = isError(options.p4filename)

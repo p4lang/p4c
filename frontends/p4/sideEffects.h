@@ -26,6 +26,30 @@ limitations under the License.
 
 namespace P4 {
 
+/// Checks to see whether an IR node includes a table.apply() sub-expression
+class HasTableApply : public Inspector {
+    ReferenceMap* refMap;
+    TypeMap*      typeMap;
+ public:
+    const IR::P4Table*  table;
+    const IR::MethodCallExpression* call;
+    HasTableApply(ReferenceMap* refMap, TypeMap* typeMap) :
+            refMap(refMap), typeMap(typeMap), table(nullptr), call(nullptr)
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); setName("HasTableApply"); }
+
+    void postorder(const IR::MethodCallExpression* expression) override {
+        auto mi = MethodInstance::resolve(expression, refMap, typeMap);
+        if (!mi->isApply()) return;
+        auto am = mi->to<P4::ApplyMethod>();
+        if (!am->object->is<IR::P4Table>()) return;
+        BUG_CHECK(table == nullptr, "%1% and %2%: multiple table applications in one expression",
+                  table, am->object);
+        table = am->object->to<IR::P4Table>();
+        call = expression;
+        LOG3("Invoked table is " << dbp(table));
+    }
+};
+
 /** @brief Determines whether an expression may have method or constructor
  * invocations.
  *
@@ -83,6 +107,43 @@ class SideEffects : public Inspector {
         expression->apply(se);
         return se.nodeWithSideEffect != nullptr;
     }
+    /// @return true if the method call expression may have side-effects.
+    static bool hasSideEffect(const IR::MethodCallExpression* mce,
+                              ReferenceMap* refMap,
+                              TypeMap* typeMap) {
+        // mce does not produce a side effect in few cases:
+        //  * isValid()
+        //  * function with all in parameters
+        //  * extern function with noSideEffectsAnnotation
+        //  * extern method with noSideEffectsAnnotation
+        auto mi = MethodInstance::resolve(mce, refMap, typeMap);
+        if (mi->is<FunctionCall>()) {
+            for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
+                if (p->hasOut()) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        if (auto em = mi->to<P4::ExternMethod>()) {
+            if (em->method->getAnnotation(IR::Annotation::noSideEffectsAnnotation)) {
+                return false;
+            }
+            return true;
+        }
+        if (auto ef = mi->to<P4::ExternFunction>()) {
+            if (ef->method->getAnnotation(IR::Annotation::noSideEffectsAnnotation)) {
+                return false;
+            }
+            return true;
+        }
+        if (auto bim = mi->to<BuiltInMethod>()) {
+            if (bim->name.name == IR::Type_Header::isValid) {
+                return false;
+            }
+        }
+        return true;
+    }
 };
 
 /** @brief Convert expressions so that each expression contains at most one
@@ -120,9 +181,14 @@ a[tmp1].x = tmp4;        // assign result of call of f to actual left value
 class DoSimplifyExpressions : public Transform, P4WriteContext {
     ReferenceMap*        refMap;
     TypeMap*             typeMap;
+    // Expressions holding temporaries that are already added.
+    std::set<const IR::Expression*>* added;
 
     IR::IndexedVector<IR::Declaration> toInsert;  // temporaries
     IR::IndexedVector<IR::StatOrDecl> statements;
+    /// Set of temporaries introduced for method call results during
+    /// this pass.
+    std::set<const IR::Expression*> temporaries;
 
     cstring createTemporary(const IR::Type* type);
     const IR::Expression* addAssignment(Util::SourceInfo srcInfo, cstring varName,
@@ -131,13 +197,16 @@ class DoSimplifyExpressions : public Transform, P4WriteContext {
     bool containsHeaderType(const IR::Type* type);
 
  public:
-    DoSimplifyExpressions(ReferenceMap* refMap, TypeMap* typeMap)
-            : refMap(refMap), typeMap(typeMap) {
+    DoSimplifyExpressions(ReferenceMap* refMap, TypeMap* typeMap,
+                          std::set<const IR::Expression*>* added)
+            : refMap(refMap), typeMap(typeMap), added(added) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap);
         setName("DoSimplifyExpressions");
     }
 
     const IR::Node* postorder(IR::Expression* expression) override;
+    const IR::Node* preorder(IR::StructExpression * expression) override;
+    const IR::Node* preorder(IR::ListExpression * expression) override;
     const IR::Node* preorder(IR::Literal* expression) override;
     const IR::Node* preorder(IR::ArrayIndex* expression) override;
     const IR::Node* preorder(IR::Member* expression) override;
@@ -168,12 +237,131 @@ class DoSimplifyExpressions : public Transform, P4WriteContext {
     void end_apply(const IR::Node *) override;
 };
 
-class SideEffectOrdering : public PassManager {
+class TableInsertions {
  public:
-    SideEffectOrdering(ReferenceMap* refMap, TypeMap* typeMap, bool skipSideEffectOrdering) {
+    std::vector<const IR::Declaration_Variable*> declarations;
+    std::vector<const IR::AssignmentStatement*> statements;
+};
+
+/**
+ * This pass is an adaptation of the midend code SimplifyKey.
+ * If a key computation involves side effects then all key field
+ * computations are lifted prior to the table application.
+ * We need to lift all key field computations since the order
+ * of side-effects needs to be preserved.
+ *
+ * \code{.cpp}
+ *  table t {
+ *    key = { a: exact,
+ *            f() : exact; }
+ *    ...
+ *  }
+ *  apply {
+ *    t.apply();
+ *  }
+ * \endcode
+ *
+ * is transformed to
+ *
+ * \code{.cpp}
+ *  bit<32> key_0;
+ *  bit<32> key_1;
+ *  table t {
+ *    key = { key_0 : exact;
+ *            key_1 : exact; }
+ *    ...
+ *  }
+ *  apply {
+ *    key_0 = a;
+ *    key_1 = f();
+ *    t.apply();
+ *  }
+ * \endcode
+ *
+ * @pre none
+ * @post all complex table key expressions are replaced with a simpler expression.
+ */
+class KeySideEffect : public Transform {
+ protected:
+    ReferenceMap* refMap;
+    TypeMap*      typeMap;
+    std::map<const IR::P4Table*, TableInsertions*> toInsert;
+    std::set<const IR::P4Table*>* invokedInKey;
+
+ public:
+    KeySideEffect(ReferenceMap* refMap, TypeMap* typeMap,
+                  std::set<const IR::P4Table*>* invokedInKey)
+            : refMap(refMap), typeMap(typeMap), invokedInKey(invokedInKey)
+    { CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(invokedInKey); setName("KeySideEffect"); }
+    const IR::Node* doStatement(const IR::Statement* statement, const IR::Expression* expression);
+
+    const IR::Node* preorder(IR::Key* key) override;
+
+    // These should be all kinds of statements that may contain a table apply
+    // after the program has been simplified
+    const IR::Node* postorder(IR::MethodCallStatement* statement) override
+    { return doStatement(statement, statement->methodCall); }
+    const IR::Node* postorder(IR::IfStatement* statement) override
+    { return doStatement(statement, statement->condition); }
+    const IR::Node* postorder(IR::SwitchStatement* statement) override
+    { return doStatement(statement, statement->expression); }
+    const IR::Node* postorder(IR::AssignmentStatement* statement) override
+    { return doStatement(statement, statement->right); }
+    const IR::Node* postorder(IR::KeyElement* element) override;
+    const IR::Node* postorder(IR::P4Table* table) override;
+    const IR::Node* preorder(IR::P4Table* table) override;
+};
+
+/// Discovers tables that are invoked within key computations
+/// for other tables: e.g.
+/// table Y { ... }
+/// table X { key = { ... Y.apply.hit() ... } }
+/// This inserts Y into the map invokedInKey;
+class TablesInKeys : public Inspector {
+    ReferenceMap* refMap;
+    TypeMap*      typeMap;
+    std::set<const IR::P4Table*>* invokedInKey;
+
+ public:
+    TablesInKeys(ReferenceMap* refMap, TypeMap* typeMap, std::set<const IR::P4Table*>* invokedInKey)
+            : refMap(refMap), typeMap(typeMap), invokedInKey(invokedInKey)
+    { CHECK_NULL(invokedInKey); setName("TableInKeys"); }
+    Visitor::profile_t init_apply(const IR::Node* node) override {
+        invokedInKey->clear();
+        return Inspector::init_apply(node);
+    }
+    void postorder(const IR::MethodCallExpression* mce) override {
+        if (!findContext<IR::Key>())
+            return;
+        HasTableApply hta(refMap, typeMap);
+        (void)mce->apply(hta);
+        if (hta.table != nullptr) {
+            LOG2("Table " << hta.table << " invoked in key of another table");
+            invokedInKey->emplace(hta.table);
+        }
+    }
+};
+
+class SideEffectOrdering : public PassRepeated {
+    // Contains all tables that are invoked within key
+    // computations for other tables.  The keys for these
+    // inner tables cannot be expanded until the keys of
+    // the caller tables have been expanded.
+    std::set<const IR::P4Table*> invokedInKey;
+    // Temporaries that were added
+    std::set<const IR::Expression*> added;
+
+ public:
+    SideEffectOrdering(ReferenceMap* refMap, TypeMap* typeMap, bool skipSideEffectOrdering,
+                       TypeChecking* typeChecking = nullptr) {
+        if (!typeChecking)
+            typeChecking = new TypeChecking(refMap, typeMap);
         if (!skipSideEffectOrdering) {
             passes.push_back(new TypeChecking(refMap, typeMap));
-            passes.push_back(new DoSimplifyExpressions(refMap, typeMap));
+            passes.push_back(new DoSimplifyExpressions(refMap, typeMap, &added));
+            passes.push_back(typeChecking);
+            passes.push_back(new TablesInKeys(refMap, typeMap, &invokedInKey));
+            passes.push_back(new KeySideEffect(refMap, typeMap, &invokedInKey));
         }
         setName("SideEffectOrdering");
     }

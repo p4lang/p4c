@@ -1,0 +1,3 @@
+constStruct.p4(6): [--Wwarn=mismatch] warning: 8w1024: value does not fit in 8 bits
+    x = 1024
+        ^^^^
