@@ -138,6 +138,7 @@ class ExpressionEvaluator : public Inspector {
 
     void postorder(const IR::Constant* expression) override;
     void postorder(const IR::BoolLiteral* expression) override;
+    void postorder(const IR::Operation_Ternary* expression) override;
     void postorder(const IR::Operation_Binary* expression) override;
     void postorder(const IR::Operation_Relation* expression) override;
     void postorder(const IR::Operation_Unary* expression) override;
