@@ -94,9 +94,9 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     IR::IndexedVector<IR::DpdkAsmStatement> statements;
 
     auto ingress_parser_converter =
-        new ConvertToDpdkParser(refmap, typemap, collector, csum_map, metadataStruct);
+        new ConvertToDpdkParser(refmap, typemap, collector, csum_map, error_map, metadataStruct);
     auto egress_parser_converter =
-        new ConvertToDpdkParser(refmap, typemap, collector, csum_map, metadataStruct);
+        new ConvertToDpdkParser(refmap, typemap, collector, csum_map, error_map, metadataStruct);
     for (auto kv : structure.parsers) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_parser_converter);
@@ -106,9 +106,9 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
             BUG("Unknown parser %s", kv.second->name);
     }
     auto ingress_converter =
-        new ConvertToDpdkControl(refmap, typemap, collector, csum_map);
+        new ConvertToDpdkControl(refmap, typemap, collector, csum_map, error_map);
     auto egress_converter =
-        new ConvertToDpdkControl(refmap, typemap, collector, csum_map);
+        new ConvertToDpdkControl(refmap, typemap, collector, csum_map, error_map);
     for (auto kv : structure.pipelines) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_converter);
@@ -118,9 +118,9 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
             BUG("Unknown control block %s", kv.second->name);
     }
     auto ingress_deparser_converter =
-        new ConvertToDpdkControl(refmap, typemap, collector, csum_map, true);
+        new ConvertToDpdkControl(refmap, typemap, collector, csum_map, error_map, true);
     auto egress_deparser_converter =
-        new ConvertToDpdkControl(refmap, typemap, collector, csum_map);
+        new ConvertToDpdkControl(refmap, typemap, collector, csum_map, error_map);
     for (auto kv : structure.deparsers) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_deparser_converter);
@@ -309,7 +309,8 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
         auto c = state->components;
         for (auto stat : c) {
             DPDK::ConvertStatementToDpdk h(refmap, typemap, this->collector,
-                                           csum_map);
+                                           csum_map, error_map);
+            h.set_parser(p);
             stat->apply(h);
             for (auto i : h.get_instr())
                 add_instr(i);
@@ -428,7 +429,7 @@ bool ConvertToDpdkParser::preorder(const IR::ParserState *) { return false; }
 // =====================Control=============================
 bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
     auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap,
-                                                   collector, csum_map);
+                                                   collector, csum_map, error_map);
     a->body->apply(*helper);
     auto stmt_list = new IR::IndexedVector<IR::DpdkAsmStatement>();
     for (auto i : helper->get_instr())
@@ -437,6 +438,49 @@ bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
     auto action = new IR::DpdkAction(*stmt_list, a->name, *a->parameters);
     actions.push_back(action);
     return false;
+}
+
+/* This function checks if a table satisfies the DPDK limitations mentioned below:
+     - Only one LPM match field allowed per table.
+     - Maximum allowed key size of header/metadata field is 64 bits.
+     - If there is a key field with lpm match kind, the other match fields, if any,
+       must all be exact match.
+*/
+bool ConvertToDpdkControl::checkTableValid(const IR::P4Table *a) {
+    auto keys = a->getKey();
+    auto lpmCount = 0;
+    auto nonExactCount = 0;
+
+    if (!keys || keys->keyElements.size() == 0) {
+        return true;
+    }
+
+    for (auto key : keys->keyElements) {
+        /* Maximum allowed key size of header/metadata field is 64 bits */
+        if (key->expression->type->width_bits() > DPDK_MAX_HEADER_METADATA_FIELD_SIZE) {
+            ::error(ErrorType::ERR_UNEXPECTED, "Key field wider than 64-bit is not permitted %1%",
+                    key->expression);
+            return false;
+        }
+
+        auto matchKind = key->matchType->toString();
+        if (matchKind == "lpm") {
+            ++lpmCount;
+        } else if (matchKind != "exact") {
+            ++nonExactCount;
+        }
+    }
+
+    if (lpmCount > 1) {
+        ::error(ErrorType::ERR_UNEXPECTED, "Only one LPM match field is permitted per table, "
+                "more than one lpm field found in table (%1%)", a->name.toString());
+        return false;
+    } else if (lpmCount == 1 && nonExactCount > 0) {
+        ::error(ErrorType::ERR_UNEXPECTED, "Non 'exact' match kind not permitted in table (%1%) "
+                "with 'lpm' match kind", a->name.toString());
+        return false;
+    }
+    return true;
 }
 
 boost::optional<cstring> ConvertToDpdkControl::getIdFromProperty(const IR::P4Table* table,
@@ -483,26 +527,28 @@ boost::optional<int> ConvertToDpdkControl::getNumberFromProperty(const IR::P4Tab
 
 
 bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
-    if (t->properties->getProperty("selector") != nullptr) {
-        auto group_id = getIdFromProperty(t, "group_id");
-        auto member_id = getIdFromProperty(t, "member_id");
-        auto selector_key = t->properties->getProperty("selector");
-        auto n_groups_max = getNumberFromProperty(t, "n_groups_max");
-        auto n_members_per_group_max = getNumberFromProperty(t, "n_members_per_group_max");
+    if (checkTableValid(t)) {
+        if (t->properties->getProperty("selector") != nullptr) {
+            auto group_id = getIdFromProperty(t, "group_id");
+            auto member_id = getIdFromProperty(t, "member_id");
+            auto selector_key = t->properties->getProperty("selector");
+            auto n_groups_max = getNumberFromProperty(t, "n_groups_max");
+            auto n_members_per_group_max = getNumberFromProperty(t, "n_members_per_group_max");
 
-        if (group_id == boost::none || member_id == boost::none ||
-            n_groups_max == boost::none || n_members_per_group_max == boost::none)
-            return false;
+            if (group_id == boost::none || member_id == boost::none ||
+                n_groups_max == boost::none || n_members_per_group_max == boost::none)
+                return false;
 
-        auto selector = new IR::DpdkSelector(t->name,
-            *group_id, *member_id, selector_key->value->to<IR::Key>(),
-            *n_groups_max, *n_members_per_group_max);
+            auto selector = new IR::DpdkSelector(t->name,
+                *group_id, *member_id, selector_key->value->to<IR::Key>(),
+                *n_groups_max, *n_members_per_group_max);
 
-        selectors.push_back(selector);
-    } else {
-        auto table = new IR::DpdkTable(t->name.toString(), t->getKey(), t->getActionList(),
-                t->getDefaultAction(), t->properties);
-        tables.push_back(table);
+            selectors.push_back(selector);
+        } else {
+            auto table = new IR::DpdkTable(t->name.toString(), t->getKey(), t->getActionList(),
+                    t->getDefaultAction(), t->properties);
+            tables.push_back(table);
+        }
     }
     return false;
 }
@@ -514,7 +560,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
         }
     }
     auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap,
-                                                   collector, csum_map);
+                                                   collector, csum_map, error_map);
     c->body->apply(*helper);
     if (deparser) {
         add_inst(new IR::DpdkJmpNotEqualStatement("LABEL_DROP",
