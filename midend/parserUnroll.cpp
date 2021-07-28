@@ -346,12 +346,10 @@ class ParserSymbolicInterpreter {
     /// Executes symbolically the specified statement.
     /// Returns pointer to genereted statement if execution completes successfully,
     /// and 'nullptr' if an error occurred.
-    const IR::Vector<IR::StatOrDecl> executeStatement(ParserStateInfo* state,
-                                    const IR::StatOrDecl* sord, ValueMap* valueMap) {
-        IR::Vector<IR::StatOrDecl> newSord;
+    const IR::StatOrDecl* executeStatement(ParserStateInfo* state, const IR::StatOrDecl* sord,
+                                           ValueMap* valueMap) {
+        const IR::StatOrDecl* newSord = nullptr;
         ExpressionEvaluator ev(refMap, typeMap, valueMap);
-        ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,
-                                     visitedStates);
         bool success = true;
         if (sord->is<IR::AssignmentStatement>()) {
             auto ass = sord->to<IR::AssignmentStatement>();
@@ -369,7 +367,7 @@ class ParserSymbolicInterpreter {
             auto e = ev.evaluate(mc->methodCall, false);
             success = reportIfError(state, e);
         } else if (sord->is<IR::IfStatement>()) {
-            auto ifs = sord->to<IR::IfStatement>();
+            auto ifs = sord->to<IR::IfStatement>()->clone();
             auto ifcond = ev.evaluate(ifs->condition, true);
             success = reportIfError(state, ifcond);
             if (success) {
@@ -380,24 +378,31 @@ class ParserSymbolicInterpreter {
                     ifComponent = ifs->ifFalse;
                 if (ifComponent->is<IR::BlockStatement>()) {
                      const auto* bs = ifComponent->to<IR::BlockStatement>();
+                     IR::IndexedVector<IR::StatOrDecl> newComponents;
                     for (auto* component : bs->components) {
-                        auto newComponents = executeStatement(state, component, valueMap);
-                        if (newComponents.size()>0)
-                            for (auto newComponent : newComponents) {
-                                const IR::Node* node = newComponent->apply(rewriter);
-                                newSord.push_back(node->to<IR::StatOrDecl>());
-                            }
+                        auto newComponent = executeStatement(state, component, valueMap);
+                        if (!newComponent)
+                            success = false;
+                        else
+                            newComponents.push_back(newComponent);
                     }
+                    if(ifcond)
+                        ifs->ifTrue = new IR::BlockStatement(newComponents);
+                    else
+                        ifs->ifFalse = new IR::BlockStatement(newComponents);
                 } else {
-                    auto newComponents = executeStatement(state, ifComponent, valueMap);
-                    if (newComponents.size()>0)
-                        for (auto newComponent : newComponents) {
-                            const IR::Node* node = newComponent->apply(rewriter);
-                            newSord.push_back(node->to<IR::StatOrDecl>());
-                        }
+                    auto newComponent = executeStatement(state, ifComponent, valueMap);
+                    if (!newComponent) {
+                        success = false;
+                    } else {
+                        if (ifcond)
+                            ifs->ifTrue = newComponent->to<IR::Statement>();
+                        else
+                            ifs->ifFalse = newComponent->to<IR::Statement>();
+                    }
                 }
             }
-            return newSord;
+            sord = ifs;
         } else {
             BUG("%1%: unexpected declaration or statement", sord);
         }
@@ -405,7 +410,10 @@ class ParserSymbolicInterpreter {
             ParserStateRewriter rewriter(structure, state, valueMap, refMap, typeMap, &ev,
                                          visitedStates);
             const IR::Node* node = sord->apply(rewriter);
-            newSord.push_back(node->to<IR::StatOrDecl>());
+            newSord = node->to<IR::StatOrDecl>();
+        } else {
+            newSord = nullptr;
+        }
         LOG2("After " << sord << " state is\n" << valueMap);
         return newSord;
     }
@@ -593,12 +601,11 @@ class ParserSymbolicInterpreter {
             newStates.insert(newName);
         }
         for (auto s : state->state->components) {
-            auto newComponents = executeStatement(state, s, valueMap);
-            if (newComponents.size() == 0)
+            auto* newComponent = executeStatement(state, s, valueMap);
+            if (!newComponent)
                 return EvaluationStateResult(nullptr, true);
             if (unroll)
-                for (auto newComponentElement : newComponents)
-                    components.push_back(newComponentElement);
+                components.push_back(newComponent);
         }
         state->after = valueMap;
         auto result = evaluateSelect(state, valueMap);
@@ -716,4 +723,6 @@ void ParserStructure::addStateHSUsage(const IR::ParserState* state,
         i->second.insert(expression->toString());
     }
 }
+
+
 }  // namespace P4
