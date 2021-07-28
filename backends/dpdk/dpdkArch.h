@@ -20,6 +20,7 @@ limitations under the License.
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeMap.h"
+#include "frontends/p4/sideEffects.h"
 #include <ir/ir.h>
 #include "lib/error.h"
 namespace DPDK {
@@ -583,6 +584,21 @@ class ConvertLogicalExpression : public PassManager {
     }
 };
 
+// This pass transforms the tables such that all the Match keys are part of the same
+// header/metadata struct. If the match keys are from different headers, this pass creates
+// mirror copies of the struct field into the metadata struct and updates the table to use
+// the metadata copy.
+class CopyMatchKeysToSingleStruct : public P4::KeySideEffect {
+ public:
+    CopyMatchKeysToSingleStruct(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+             std::set<const IR::P4Table*>* invokedInKey)
+             : P4::KeySideEffect (refMap, typeMap, invokedInKey)
+    { setName("CopyMatchKeysToSingleStruct"); }
+
+    const IR::Node* preorder(IR::Key* key) override;
+    const IR::Node* postorder(IR::KeyElement* element) override;
+};
+
 /*
  * Split ActionSelector into three tables:
  *   base table that matches on exact/ternary key and generates a group id
@@ -618,7 +634,6 @@ class DpdkArchLast : public PassManager {
     DpdkArchLast() { setName("DpdkArchLast"); }
 };
 
-
 class RewriteToDpdkArch : public PassManager {
   public:
     CollectMetadataHeaderInfo *info;
@@ -626,6 +641,7 @@ class RewriteToDpdkArch : public PassManager {
         *args_struct_map;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
     std::vector<const IR::Declaration_Instance *> *externDecls;
+    std::set<const IR::P4Table*> invokedInKey;
     RewriteToDpdkArch(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                       DpdkVariableCollector *collector) {
         setName("RewriteToDpdkArch");
@@ -648,6 +664,10 @@ class RewriteToDpdkArch : public PassManager {
         passes.push_back(new ConvertToDpdkArch(&parsePsa->toBlockInfo));
         passes.push_back(new ReplaceMetadataHeaderName(refMap, info));
         passes.push_back(new InjectJumboStruct(info));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
+        passes.push_back(new CopyMatchKeysToSingleStruct(refMap, typeMap, &invokedInKey));
+        passes.push_back(new P4::ResolveReferences(refMap));
         passes.push_back(new StatementUnroll(refMap, collector));
         passes.push_back(new IfStatementUnroll(refMap, collector));
         passes.push_back(new P4::ClearTypeMap(typeMap));

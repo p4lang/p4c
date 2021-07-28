@@ -43,6 +43,9 @@ limitations under the License.
 #include "lib/json.h"
 namespace DPDK {
 
+/* Maximum size in bits for fields in header and metadata structures */
+#define DPDK_MAX_HEADER_METADATA_FIELD_SIZE 64
+
 class ConvertToDpdkProgram : public Transform {
     std::map<int, cstring> reg_id_to_name;
     std::map<cstring, int> reg_name_to_id;
@@ -146,6 +149,7 @@ class ConvertToDpdkControl : public Inspector {
     bool preorder(const IR::P4Action *a) override;
     bool preorder(const IR::P4Table *a) override;
     bool preorder(const IR::P4Control *) override;
+    bool checkTableValid(const IR::P4Table *a);
 
     void add_inst(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
     void add_table(const IR::DpdkTable *t) { tables.push_back(t); }

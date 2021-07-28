@@ -282,6 +282,7 @@ class TableInsertions {
  * @post all complex table key expressions are replaced with a simpler expression.
  */
 class KeySideEffect : public Transform {
+ protected:
     ReferenceMap* refMap;
     TypeMap*      typeMap;
     std::map<const IR::P4Table*, TableInsertions*> toInsert;

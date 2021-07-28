@@ -12,6 +12,8 @@ p4c_add_xfail_reason("dpdk"
 p4c_add_xfail_reason("dpdk"
   "Not implemented"
   testdata/p4_16_samples/psa-action-selector5.p4
+  testdata/p4_16_samples/psa-dpdk-table-key-consolidation-switch.p4
+  testdata/p4_16_samples/psa-random.p4
   )
 
 p4c_add_xfail_reason("dpdk"
@@ -46,11 +48,6 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
-  "Not implemented"
-  testdata/p4_16_samples/psa-random.p4
-  )
-
-p4c_add_xfail_reason("dpdk"
   "Error compiling"
   testdata/p4_16_samples/psa-recirculate-no-meta-bmv2.p4
   )
@@ -69,4 +66,19 @@ p4c_add_xfail_reason("dpdk"
 p4c_add_xfail_reason("dpdk"
   "Unhandled declaration type"
   testdata/p4_16_samples/psa-test.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "Only one LPM match field is permitted per table"
+  testdata/p4_16_samples/psa-dpdk-lpm-match-err1.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "Non 'exact' match kind not permitted"
+  testdata/p4_16_samples/psa-dpdk-lpm-match-err2.p4
+  )
+
+p4c_add_xfail_reason("dpdk"
+  "Key field wider than 64-bit is not permitted"
+  testdata/p4_16_samples/psa-dpdk-lpm-match-err3.p4
   )

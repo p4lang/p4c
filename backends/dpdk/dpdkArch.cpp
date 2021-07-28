@@ -935,6 +935,109 @@ const IR::Node *PrependPDotToActionArgs::preorder(IR::PathExpression *path) {
     return path;
 }
 
+/* This function transforms the table so that all match keys come from the same struct.
+   Mirror copies of match fields are created in metadata struct and table is updated to
+   use the metadata fields.
+
+   control ingress(inout headers h, inout metadata m) {
+   {
+       ...
+       table tbl {
+           key = {
+               hdr.ethernet.srcAddr : lpm;
+               hdr.ipv4.totalLen : exact;
+           }
+           ...
+       }
+       apply {
+           tbl.apply();
+       }
+   }
+
+   gets translated to
+   control ingress(inout headers h, inout metadata m) {
+       bit<48> tbl_ethernet_srcAddr;  // These declarations are later copied to metadata struct
+       bit<16> tbl_ipv4_totalLen;     // in CollectLocalVariableToMetadata pass.
+       ...
+       table tbl {
+           key = {
+               tbl_ethernet_srcAddr: lpm;
+               tbl_ipv4_totalLen   : exact;
+           }
+	   ...
+       }
+       apply {
+           tbl_ethernet_srcAddr = h.ethernet.srcAddr;
+           tbl_ipv4_totalLen = h.ipv4.totalLen;
+           tbl_0.apply();
+       }
+  }
+*/
+
+const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
+    // If any key field is from different structure, put all keys in metadata
+    LOG3("Visiting " << keys);
+    bool copyNeeded = false;
+    const IR::Expression* firstKey = nullptr;
+
+    if (!keys || keys->keyElements.size() == 0) {
+        prune();
+        return keys;
+    }
+
+    firstKey = keys->keyElements.at(0)->expression;
+    for (auto key : keys->keyElements) {
+        /* Key fields should be part of same header/metadata struct */
+        if (key->expression->toString() != firstKey->toString()) {
+            ::warning(ErrorType::WARN_UNSUPPORTED, "Mismatched header/metadata struct for key "
+                      "elements in table %1%. Copying all match fields to metadata",
+                       findOrigCtxt<IR::P4Table>()->name.toString());
+            copyNeeded = true;
+            break;
+        }
+    }
+
+    if (!copyNeeded)
+        // This prune will prevent the postoder(IR::KeyElement*) below from executing
+        prune();
+    else
+        LOG3("Will pull out " << keys);
+    return keys;
+}
+
+const IR::Node* CopyMatchKeysToSingleStruct::postorder(IR::KeyElement* element) {
+    // If we got here we need to put the key element in metadata.
+    LOG3("Extracting key element " << element);
+    auto table = findOrigCtxt<IR::P4Table>();
+    CHECK_NULL(table);
+    P4::TableInsertions* insertions;
+    auto it = toInsert.find(table);
+    if (it == toInsert.end()) {
+        insertions = new P4::TableInsertions();
+        toInsert.emplace(table, insertions);
+    } else {
+        insertions = it->second;
+    }
+
+    auto keyName =  element->expression->toString();
+
+    /* All header fields are prefixed with "h.", prefix the match field with table name */
+    if (keyName.startsWith("h.")) {
+        keyName = keyName.replace('.','_');
+        keyName = keyName.replace("h_",table->name.toString()+"_");
+        auto keyPathExpr = new IR::PathExpression(IR::ID(refMap->newName(keyName)));
+        auto decl = new IR::Declaration_Variable(keyPathExpr->path->name,
+                                                 element->expression->type, nullptr);
+        insertions->declarations.push_back(decl);
+        auto right = element->expression;
+        auto assign = new IR::AssignmentStatement(element->expression->srcInfo,
+                                                  keyPathExpr, right);
+        insertions->statements.push_back(assign);
+        element->expression = keyPathExpr;
+    }
+    return element;
+}
+
 namespace Helpers {
 
 boost::optional<P4::ExternInstance>
