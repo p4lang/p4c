@@ -255,7 +255,7 @@ BFRuntimeGenerator::makeContainerDataField(P4Id id, cstring name,
 
 void
 BFRuntimeGenerator::addActionDataField(Util::JsonArray* dataJson,
-        P4Id id, const std::string& name, bool mandatory, bool read_only, 
+        P4Id id, const std::string& name, bool mandatory, bool read_only,
         Util::JsonObject* type, Util::JsonArray* annotations) {
     auto* dataField = new Util::JsonObject();
     dataField->emplace("id", id);
@@ -382,7 +382,7 @@ BFRuntimeGenerator::addMeterCommon(Util::JsonArray* tablesJson,
 void
 BFRuntimeGenerator::transformTypeSpecToDataFields(Util::JsonArray* fieldsJson,
         const p4configv1::P4DataTypeSpec& typeSpec, cstring instanceType, cstring instanceName,
-        const std::vector<cstring> *fieldNames, cstring prefix, cstring suffix, 
+        const std::vector<cstring> *fieldNames, cstring prefix, cstring suffix,
         P4Id idOffset) const {
     auto parser = TypeSpecParser::make(
         p4info, typeSpec, instanceType, instanceName, fieldNames, prefix, suffix, idOffset);

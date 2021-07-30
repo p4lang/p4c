@@ -39,7 +39,8 @@ struct BFRuntimeSchemaGenerator::ActionSelector {
             return boost::none;
         }
         auto selectorId = makeBFRuntimeId(pre.id(), ::dpdk::P4Ids::ACTION_SELECTOR);
-        auto selectorGetMemId = makeBFRuntimeId(pre.id(), ::dpdk::P4Ids::ACTION_SELECTOR_GET_MEMBER);
+        auto selectorGetMemId = makeBFRuntimeId(pre.id(),
+                ::dpdk::P4Ids::ACTION_SELECTOR_GET_MEMBER);
         auto tableIds = collectTableIds(
             p4info, actionSelector.table_ids().begin(), actionSelector.table_ids().end());
         return ActionSelector{pre.name(), pre.name() + "_get_member",
