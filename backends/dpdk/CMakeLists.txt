@@ -37,7 +37,7 @@ add_custom_command(
     --cpp_out ${P4C_BINARY_DIR}/control-plane/p4/config/dpdk
     --python_out ${P4C_BINARY_DIR}/control-plane/p4/config/dpdk
           ${DPDK_P4RUNTIME_INFO_PROTO}
-  DEPENDS ${DPDK_P4RUNTIME_INFO_PROTO}
+  DEPENDS ${DPDK_P4RUNTIME_INFO_PROTO} dpdk_runtime_dir
   COMMENT "Generating protobuf files for p4info on target DPDK."
   )
 
@@ -124,7 +124,7 @@ set(EXTENSION_FRONTEND_SOURCES ${EXTENSION_FRONTEND_SOURCES} ${QUAL_DPDK_IR_SRCS
 add_cpplint_files(${CMAKE_CURRENT_SOURCE_DIR} "${P4C_DPDK_SOURCES}" "${P4C_DPDK_HEADERS}" "${DPDK_IR_SRCS}")
 add_executable(p4c-dpdk ${P4C_DPDK_SOURCES})
 target_link_libraries (p4c-dpdk dpdk_runtime ${P4C_LIBRARIES} ${P4C_LIB_DEPS})
-add_dependencies(p4c-dpdk dpdk_runtime_dir dpdk_runtime genIR frontend)
+add_dependencies(p4c-dpdk dpdk_runtime genIR frontend)
 
 install (TARGETS p4c-dpdk
         RUNTIME DESTINATION ${P4C_RUNTIME_OUTPUT_DIRECTORY})
