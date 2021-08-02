@@ -140,12 +140,10 @@ const IR::Node *RemoveLabelAfterLabel::postorder(IR::DpdkListStatement *l) {
     for (auto stmt : l->statements) {
         if (!cache) {
             if (auto label = stmt->to<IR::DpdkLabelStatement>()) {
-                LOG1("label " << label);
                 cache = label;
             }
         } else {
             if (auto label = stmt->to<IR::DpdkLabelStatement>()) {
-                LOG1("label " << label);
                 label_map.emplace(cache->label, label->label);
             } else {
                 cache = nullptr;

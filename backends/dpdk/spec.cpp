@@ -134,6 +134,9 @@ std::ostream &IR::DpdkAsmProgram::toSpec(std::ostream &out) const {
     for (auto t : tables) {
         t->toSpec(out) << std::endl << std::endl;
     }
+    for (auto s : selectors) {
+        s->toSpec(out) << std::endl;
+    }
     for (auto s : statements) {
         s->toSpec(out) << std::endl;
     }
@@ -409,6 +412,24 @@ std::ostream &IR::DpdkTable::toSpec(std::ostream &out) const {
     out << "}" << std::endl;
     return out;
 }
+
+std::ostream &IR::DpdkSelector::toSpec(std::ostream &out) const {
+    out << "selector " << name << " {" << std::endl;
+    out << "\tgroup_id " << group_id << std::endl;
+    if (selectors) {
+        out << "\tselector {" << std::endl;
+        for (auto key : selectors->keyElements) {
+            out << "\t\t" << DPDK::toStr(key->expression) << std::endl;
+        }
+        out << "\t}" << std::endl;
+    }
+    out << "\tmember_id " << member_id << std::endl;
+    out << "\tn_groups_max " << n_groups_max << std::endl;
+    out << "\tn_members_per_group_max " << n_members_per_group_max << std::endl;
+    out << "}" << std::endl;
+    return out;
+}
+
 std::ostream &IR::DpdkAction::toSpec(std::ostream &out) const {
     out << "action " << name.toString() << " args ";
 

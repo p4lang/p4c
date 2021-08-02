@@ -39,6 +39,8 @@ class PsaSwitchOptions : public BMV2::BMV2Options {
 
     /// Process the command line arguments and set options accordingly.
     std::vector<const char*>* process(int argc, char* const argv[]) override;
+
+    const char* getIncludePath() override;
 };
 
 using PsaSwitchContext = P4CContextWithOptions<PsaSwitchOptions>;

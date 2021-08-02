@@ -377,6 +377,8 @@ set (OTHER_HEADERS
 add_custom_target(update_includes ALL
   COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/*.p4 ${P4C_BINARY_DIR}/p4include
+  COMMAND ${CMAKE_COMMAND} -E make_directory ${P4C_BINARY_DIR}/p4include/bmv2
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${P4C_SOURCE_DIR}/p4include/bmv2/psa.p4 ${P4C_BINARY_DIR}/p4include/bmv2
   COMMAND for h in ${OTHER_HEADERS} \; do
     ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/\$$h ${P4C_BINARY_DIR}/p4include \;
   done
@@ -390,8 +392,7 @@ endif ()
 # Installation
 # Targets install themselves. Here we install the core headers
 install (DIRECTORY ${P4C_SOURCE_DIR}/p4include
-  DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY}
-  FILES_MATCHING PATTERN "*.p4")
+  DESTINATION ${P4C_ARTIFACTS_OUTPUT_DIRECTORY})
 
 # cpplint
 list ( SORT CPPLINT_FILES )

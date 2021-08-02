@@ -28,6 +28,11 @@ limitations under the License.
 
 namespace DPDK {
 
+class DpdkArchFirst : public PassManager {
+ public:
+    DpdkArchFirst() { setName("DpdkArchFirst"); }
+};
+
 void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
     BMV2::PsaProgramStructure structure(refMap, typeMap);
@@ -50,16 +55,16 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     auto rewriteToDpdkArch =
         new DPDK::RewriteToDpdkArch(refMap, typeMap, &collector);
     PassManager simplify = {
+        new DpdkArchFirst(),
         new P4::EliminateTypedef(refMap, typeMap),
         // because the user metadata type has changed
         new P4::ClearTypeMap(typeMap),
         new P4::TypeChecking(refMap, typeMap),
+        // TBD: implement dpdk lowering passes instead of reusing bmv2's
+        // lowering pass.
         new BMV2::LowerExpressions(typeMap),
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
-        new BMV2::RemoveComplexExpressions(
-            refMap, typeMap,
-            new BMV2::ProcessControls(&structure.pipeline_controls)),
         new P4::RemoveAllUnusedDeclarations(refMap),
         // Convert to Dpdk specific format
         rewriteToDpdkArch,

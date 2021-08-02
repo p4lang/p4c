@@ -91,6 +91,8 @@ class Options {
      */
     virtual std::vector<const char*>* process(int argc, char* const argv[]);
 
+    virtual const char* getIncludePath() = 0;
+
     void usage();
 };
 

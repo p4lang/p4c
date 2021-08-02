@@ -199,13 +199,30 @@ def main():
         print(display_supported_targets(cfg))
         sys.exit(0)
 
+    # check that the tuple value is correct
+    backend = (opts.target, opts.arch)
+    if (len(backend) != 2):
+        parser.error("Invalid target and arch tuple: {}\n{}".\
+                     format(backend, display_supported_targets(cfg)))
+
+    # find the backend
+    backend = None
+    for target in cfg.target:
+        regex = target._backend.replace('*', '[a-zA-Z0-9*]*')
+        pattern = re.compile(regex)
+        if (pattern.match(opts.target + '-' + opts.arch)):
+            backend = target
+            break
+    if backend == None:
+        parser.error("Unknown backend: {}-{}".format(str(opts.target),
+                                                     str(opts.arch)))
+
     # When using --help-* options, we don't necessarily need to pass an input file
     # However, by default the driver checks the input and fails if it does not exist.
-    # Also, loading the backend configuration files requires a source file to be set,
-    # so in that case, we set the input to dummy.p4 and expect that the backend itself
-    # will do its printing and ignore the input file.
-    # If not, the compiler will error out anyway.
-    checkInput = not opts.help_pragmas
+    # In that case we set source to dummy.p4 so sanity checking works. Backend can
+    # force this behaviour for its own help options by overriding the
+    # should_not_check_input method.
+    checkInput = not (opts.help_pragmas or backend.should_not_check_input(opts))
 
     input_specified = False
     if opts.source_file:
@@ -226,24 +243,6 @@ def main():
         print('Input file {} does not exist'.format(opts.source_file),
               file = sys.stderr)
         sys.exit(1)
-
-    # check that the tuple value is correct
-    backend = (opts.target, opts.arch)
-    if (len(backend) != 2):
-        parser.error("Invalid target and arch tuple: {}\n{}".\
-                     format(backend, display_supported_targets(cfg)))
-
-    # find the backend
-    backend = None
-    for target in cfg.target:
-        regex = target._backend.replace('*', '[a-zA-Z0-9*]*')
-        pattern = re.compile(regex)
-        if (pattern.match(opts.target + '-' + opts.arch)):
-            backend = target
-            break
-    if backend == None:
-        parser.error("Unknown backend: {}-{}".format(str(opts.target),
-                                                     str(opts.arch)))
 
     # set all configuration and command line options for backend
     backend.process_command_line_options(opts)
