@@ -28,6 +28,7 @@ ParseAnnotations::HandlerMap ParseAnnotations::standardHandlers() {
             PARSE_EMPTY(IR::Annotation::optionalAnnotation),
             PARSE_EMPTY(IR::Annotation::pureAnnotation),
             PARSE_EMPTY(IR::Annotation::noSideEffectsAnnotation),
+            PARSE_EMPTY("disable_optimization"),
 
             // string literal argument.
             PARSE(IR::Annotation::nameAnnotation, StringLiteral),
