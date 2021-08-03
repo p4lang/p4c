@@ -964,7 +964,7 @@ const IR::Node *PrependPDotToActionArgs::preorder(IR::PathExpression *path) {
                tbl_ethernet_srcAddr: lpm;
                tbl_ipv4_totalLen   : exact;
            }
-	   ...
+           ...
        }
        apply {
            tbl_ethernet_srcAddr = h.ethernet.srcAddr;
@@ -978,30 +978,44 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
     // If any key field is from different structure, put all keys in metadata
     LOG3("Visiting " << keys);
     bool copyNeeded = false;
-    const IR::Expression* firstKey = nullptr;
 
     if (!keys || keys->keyElements.size() == 0) {
         prune();
         return keys;
     }
 
-    firstKey = keys->keyElements.at(0)->expression;
-    for (auto key : keys->keyElements) {
-        /* Key fields should be part of same header/metadata struct */
-        if (key->expression->toString() != firstKey->toString()) {
-            ::warning(ErrorType::WARN_UNSUPPORTED, "Mismatched header/metadata struct for key "
-                      "elements in table %1%. Copying all match fields to metadata",
-                       findOrigCtxt<IR::P4Table>()->name.toString());
-            copyNeeded = true;
-            break;
-        }
+    cstring firstKeyStr = "";
+    bool firstKeyHdr = false;
+
+    if (auto firstKeyField = keys->keyElements.at(0)->expression->to<IR::Member>()) {
+        firstKeyStr = firstKeyField->expr->toString();
+        if (firstKeyStr.startsWith("h"))
+            firstKeyHdr = true;
     }
 
-    if (!copyNeeded)
-        // This prune will prevent the postoder(IR::KeyElement*) below from executing
+    /* Key fields should be part of same header/metadata struct */
+    for (auto key : keys->keyElements) {
+        cstring keyTypeStr = "";
+        if (auto keyField = key->expression->to<IR::Member>()) {
+            keyTypeStr =keyField->expr->toString();
+        }
+        if (firstKeyStr != keyTypeStr) {
+            if (firstKeyHdr || keyTypeStr.startsWith("h")) {
+                copyNeeded = true;
+                break;
+             }
+         }
+    }
+
+    if (!copyNeeded) {
+        // This prune will prevent the postorder(IR::KeyElement*) below from executing
         prune();
-    else
+    } else {
+        ::warning(ErrorType::WARN_UNSUPPORTED, "Mismatched header/metadata struct for key "
+                  "elements in table %1%. Copying all match fields to metadata",
+                   findOrigCtxt<IR::P4Table>()->name.toString());
         LOG3("Will pull out " << keys);
+    }
     return keys;
 }
 
