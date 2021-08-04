@@ -660,10 +660,10 @@ void ExpressionEvaluator::postorder(const IR::Operation_Binary* expression) {
         return;
     }
     auto clone = expression->clone();
-    BUG_CHECK(l->is<SymbolicInteger>(), "%1%: expected an SymbolicInteger", l);
-    BUG_CHECK(r->is<SymbolicInteger>(), "%1%: expected an SymbolicInteger", r);
-    auto li = l->to<SymbolicInteger>();
-    auto ri = r->to<SymbolicInteger>();
+    BUG_CHECK(l->is<ScalarValue>(), "%1%: expected an SymbolicInteger", l);
+    BUG_CHECK(r->is<ScalarValue>(), "%1%: expected an SymbolicInteger", r);
+    auto li = l->to<ScalarValue>();
+    auto ri = r->to<ScalarValue>();
     if (li->isUninitialized()) {
         auto result = new SymbolicStaticError(expression->left, "Uninitialized");
         set(expression, result);
@@ -673,8 +673,8 @@ void ExpressionEvaluator::postorder(const IR::Operation_Binary* expression) {
         set(expression, result);
         return;
     } else if (!li->isUnknown() && !ri->isUnknown()) {
-        clone->left = li->constant;
-        clone->right = ri->constant;
+        clone->left = getConstant(li);
+        clone->right = getConstant(ri);
         DoConstantFolding cf(refMap, typeMap);
         auto result = clone->apply(cf);
         BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
