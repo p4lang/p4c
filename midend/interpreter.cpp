@@ -585,6 +585,16 @@ SymbolicVoid* SymbolicVoid::instance = new SymbolicVoid();
 
 /*****************************************************************************************/
 
+const IR::Expression* getConstant(const ScalarValue* constant) {
+    if (constant->is<SymbolicBool>()) {
+        return new IR::BoolLiteral(IR::Type::Boolean::get(),
+            constant->to<SymbolicBool>()->value);
+    } else if (constant->is<SymbolicInteger>()){
+        return constant->to<SymbolicInteger>()->constant;
+    }
+    BUG("Unimplemented structure for expression evaluation %1%", constant);
+}
+
 void ExpressionEvaluator::postorder(const IR::Operation_Ternary* expression) {
     auto e0 = get(expression->e0);
     if (e0->is<SymbolicError>()) {
@@ -602,12 +612,15 @@ void ExpressionEvaluator::postorder(const IR::Operation_Ternary* expression) {
         return;
     }
     auto clone = expression->clone();
-    BUG_CHECK(e0->is<SymbolicInteger>(), "%1%: expected an SymbolicInteger", e0);
-    BUG_CHECK(e1->is<SymbolicInteger>(), "%1%: expected an SymbolicInteger", e1);
-    BUG_CHECK(e2->is<SymbolicInteger>(), "%1%: expected an SymbolicInteger", e2);
-    auto e0i = e0->to<SymbolicInteger>();
-    auto e1i = e1->to<SymbolicInteger>();
-    auto e2i = e2->to<SymbolicInteger>();
+    BUG_CHECK(e0->is<SymbolicInteger>() || e0->is<SymbolicBool>(),
+        "%1%: expected an SymbolicInteger", e0);
+    if (e0->is<SymbolicInteger>()) {  // for Slice
+        BUG_CHECK(e1->is<SymbolicInteger>(), "%1%: expected an SymbolicInteger", e1);
+        BUG_CHECK(e2->is<SymbolicInteger>(), "%1%: expected an SymbolicInteger", e2);
+    }
+    auto e0i = e0->to<ScalarValue>();
+    auto e1i = e1->to<ScalarValue>();
+    auto e2i = e2->to<ScalarValue>();
     if (e0i->isUninitialized()) {
         auto result = new SymbolicStaticError(expression->e0, "Uninitialized");
         set(expression, result);
@@ -621,9 +634,9 @@ void ExpressionEvaluator::postorder(const IR::Operation_Ternary* expression) {
         set(expression, result);
         return;
     }else if (!e0i->isUnknown() && !e1i->isUnknown() && !e2i->isUnknown()) {
-        clone->e0 = e0i->constant;
-        clone->e1 = e1i->constant;
-        clone->e2 = e2i->constant;
+        clone->e0 = getConstant(e0i);
+        clone->e1 = getConstant(e1i);
+        clone->e2 = getConstant(e2i);
         DoConstantFolding cf(refMap, typeMap);
         auto result = clone->apply(cf);
         BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
