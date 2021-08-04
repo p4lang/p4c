@@ -1,6 +1,9 @@
 SUBDIRS = .
 
 AM_CPPFLAGS += \
+-I$(top_srcdir)/src/bm_sim \
+-I$(top_srcdir)/src/BMI \
+-I$(top_srcdir)/targets/psa_switch/externs \
 -isystem $(top_srcdir)/third_party/gtest/include \
 -I$(srcdir)/.. \
 -I$(srcdir)/ \
@@ -12,10 +15,12 @@ $(top_builddir)/src/bm_apps/libbmapps.la \
 
 # Define unit tests
 common_source = main.cpp
+TESTS = test_internet_checksum
 
 check_PROGRAMS = $(TESTS) test_all
 
 # Sources for tests
+test_internet_checksum_SOURCES             = $(common_source) test_internet_checksum.cpp
 
-test_all_SOURCES = $(common_source)
-
+test_all_SOURCES = $(common_source) \
+test_internet_checksum.cpp
