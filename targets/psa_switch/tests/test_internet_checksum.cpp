@@ -31,6 +31,7 @@
 using namespace bm;
 using namespace bm::psa;
 
+extern int import_internet_checksum();
 
 /* Frame (34 bytes) */
 static const unsigned char raw_pkt[34] = {
@@ -122,13 +123,20 @@ class PSA_InternetChecksumTest : public ::testing::Test {
                                         PacketBuffer(34, (const char *) raw_pkt, 
                                         sizeof(raw_pkt)), phv_source.get())));
         parser.parse(packet.get());
+
+        import_internet_checksum();
     }
 
     // virtual void TearDown() { }
 };
 
+static std::unique_ptr<ActionPrimitive_> get_extern_primitive(
+    const std::string &extern_name, const std::string &method_name) {
+    return ActionOpcodesMap::get_instance()->get_primitive(
+        "_" + extern_name + "_" + method_name);
+}
+
 TEST_F(PSA_InternetChecksumTest, PSA_InternetChecksumMethods) {
-    
     uint16_t cksum;
     uint16_t sum;
     auto phv = packet.get()->get_phv();
@@ -136,8 +144,7 @@ TEST_F(PSA_InternetChecksumTest, PSA_InternetChecksumMethods) {
     // ACTION ADD
     ActionFn actionFn_add("_InternetChecksum_add", 0, 0);
     ActionFnEntry actionFnEntry_add(&actionFn_add);
-    auto primitive_add =  ActionOpcodesMap::get_instance()->
-                            get_primitive("_InternetChecksum_add");
+    auto primitive_add = get_extern_primitive("InternetChecksum", "add");
     ASSERT_NE(nullptr, primitive_add);
     actionFn_add.push_back_primitive(primitive_add.get());
     actionFn_add.parameter_push_back_extern_instance(instance.get());
@@ -158,8 +165,7 @@ TEST_F(PSA_InternetChecksumTest, PSA_InternetChecksumMethods) {
     // ACTION GET
     ActionFn actionFn_get("_InternetChecksum_get", 0, 0);
     ActionFnEntry actionFnEntry_get(&actionFn_get);
-    auto primitive_get =  ActionOpcodesMap::get_instance()->
-                            get_primitive("_InternetChecksum_get");
+    auto primitive_get = get_extern_primitive("InternetChecksum", "get");
     ASSERT_NE(nullptr, primitive_get);
     actionFn_get.push_back_primitive(primitive_get.get());
     actionFn_get.parameter_push_back_extern_instance(instance.get());
@@ -168,8 +174,7 @@ TEST_F(PSA_InternetChecksumTest, PSA_InternetChecksumMethods) {
     // ACTION SUBTRACT 
     ActionFn actionFn_sub("_InternetChecksum_subtract", 0, 0);
     ActionFnEntry actionFnEntry_sub(&actionFn_sub);
-    auto primitive_sub =  ActionOpcodesMap::get_instance()->
-                            get_primitive("_InternetChecksum_subtract");
+    auto primitive_sub = get_extern_primitive("InternetChecksum", "subtract");
     ASSERT_NE(nullptr, primitive_sub);
     actionFn_sub.push_back_primitive(primitive_sub.get());
     actionFn_sub.parameter_push_back_extern_instance(instance.get());
@@ -181,8 +186,7 @@ TEST_F(PSA_InternetChecksumTest, PSA_InternetChecksumMethods) {
     // ACTION GET_STATE
     ActionFn actionFn_get_state("_InternetChecksum_get_state", 0, 0);
     ActionFnEntry actionFnEntry_get_state(&actionFn_get_state);
-    auto primitive_get_state =  ActionOpcodesMap::get_instance()->
-                            get_primitive("_InternetChecksum_get_state");
+    auto primitive_get_state = get_extern_primitive("InternetChecksum", "get_state");
     ASSERT_NE(nullptr, primitive_get_state);
     actionFn_get_state.push_back_primitive(primitive_get_state.get());
     actionFn_get_state.parameter_push_back_extern_instance(instance.get());
@@ -191,8 +195,7 @@ TEST_F(PSA_InternetChecksumTest, PSA_InternetChecksumMethods) {
     // ACTION SET_STATE
     ActionFn actionFn_set_state("_InternetChecksum_set_state", 0, 0);
     ActionFnEntry actionFnEntry_set_state(&actionFn_set_state);
-    auto primitive_set_state =  ActionOpcodesMap::get_instance()->
-                            get_primitive("_InternetChecksum_set_state");
+    auto primitive_set_state = get_extern_primitive("InternetChecksum", "set_state");
     ASSERT_NE(nullptr, primitive_set_state);
     actionFn_set_state.push_back_primitive(primitive_set_state.get());
     actionFn_set_state.parameter_push_back_extern_instance(instance.get());
@@ -222,10 +225,3 @@ TEST_F(PSA_InternetChecksumTest, PSA_InternetChecksumMethods) {
     actionFnEntry_get_state(packet.get());
     ASSERT_EQ(sum, phv->get_field("meta.tmp").get<uint16_t>());
 }
-
-BM_REGISTER_EXTERN_W_NAME(InternetChecksum, PSA_InternetChecksum);
-BM_REGISTER_EXTERN_W_NAME_METHOD(InternetChecksum, PSA_InternetChecksum, add, const std::vector<Field>);
-BM_REGISTER_EXTERN_W_NAME_METHOD(InternetChecksum, PSA_InternetChecksum, subtract, const std::vector<Field>);
-BM_REGISTER_EXTERN_W_NAME_METHOD(InternetChecksum, PSA_InternetChecksum, get, Field &);
-BM_REGISTER_EXTERN_W_NAME_METHOD(InternetChecksum, PSA_InternetChecksum, get_state, Field &);
-BM_REGISTER_EXTERN_W_NAME_METHOD(InternetChecksum, PSA_InternetChecksum, set_state,const Data &);
