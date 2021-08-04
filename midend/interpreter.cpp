@@ -615,8 +615,8 @@ void ExpressionEvaluator::postorder(const IR::Operation_Ternary* expression) {
     BUG_CHECK(e0->is<SymbolicInteger>() || e0->is<SymbolicBool>(),
         "%1%: expected an SymbolicInteger", e0);
     if (e0->is<SymbolicInteger>()) {  // for Slice
-        BUG_CHECK(e1->is<SymbolicInteger>(), "%1%: expected an SymbolicInteger", e1);
-        BUG_CHECK(e2->is<SymbolicInteger>(), "%1%: expected an SymbolicInteger", e2);
+        BUG_CHECK(e1->is<SymbolicInteger>(), "%1%: expected an ScalarValue", e1);
+        BUG_CHECK(e2->is<SymbolicInteger>(), "%1%: expected an ScalarValue", e2);
     }
     auto e0i = e0->to<ScalarValue>();
     auto e1i = e1->to<ScalarValue>();
@@ -660,8 +660,8 @@ void ExpressionEvaluator::postorder(const IR::Operation_Binary* expression) {
         return;
     }
     auto clone = expression->clone();
-    BUG_CHECK(l->is<ScalarValue>(), "%1%: expected an SymbolicInteger", l);
-    BUG_CHECK(r->is<ScalarValue>(), "%1%: expected an SymbolicInteger", r);
+    BUG_CHECK(l->is<ScalarValue>(), "%1%: expected an ScalarValue", l);
+    BUG_CHECK(r->is<ScalarValue>(), "%1%: expected an ScalarValue", r);
     auto li = l->to<ScalarValue>();
     auto ri = r->to<ScalarValue>();
     if (li->isUninitialized()) {
