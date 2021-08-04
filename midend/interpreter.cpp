@@ -595,6 +595,18 @@ const IR::Expression* getConstant(const ScalarValue* constant) {
     BUG("Unimplemented structure for expression evaluation %1%", constant);
 }
 
+void ExpressionEvaluator::checkResult(const IR::Expression* expression,
+                                      const IR::Expression* result) {
+    if (result->is<IR::Constant>()){
+        set(expression, new SymbolicInteger(result->to<IR::Constant>()));
+        return;
+    } else if (result->is<IR::BoolLiteral>()){
+        set(expression, new SymbolicBool(result->to<IR::BoolLiteral>()->value));
+        return;
+    }
+    BUG("%1% : expected a constant/bool literal", result);
+}
+
 void ExpressionEvaluator::postorder(const IR::Operation_Ternary* expression) {
     auto e0 = get(expression->e0);
     if (e0->is<SymbolicError>()) {
@@ -612,12 +624,9 @@ void ExpressionEvaluator::postorder(const IR::Operation_Ternary* expression) {
         return;
     }
     auto clone = expression->clone();
-    BUG_CHECK(e0->is<SymbolicInteger>() || e0->is<SymbolicBool>(),
-        "%1%: expected an SymbolicInteger", e0);
-    if (e0->is<SymbolicInteger>()) {  // for Slice
-        BUG_CHECK(e1->is<SymbolicInteger>(), "%1%: expected an ScalarValue", e1);
-        BUG_CHECK(e2->is<SymbolicInteger>(), "%1%: expected an ScalarValue", e2);
-    }
+    BUG_CHECK(e0->is<ScalarValue>(), "%1%: expected an ScalarValue", e0);
+    BUG_CHECK(e1->is<ScalarValue>(), "%1%: expected an ScalarValue", e1);
+    BUG_CHECK(e2->is<ScalarValue>(), "%1%: expected an ScalarValue", e2);
     auto e0i = e0->to<ScalarValue>();
     auto e1i = e1->to<ScalarValue>();
     auto e2i = e2->to<ScalarValue>();
@@ -639,8 +648,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Ternary* expression) {
         clone->e2 = getConstant(e2i);
         DoConstantFolding cf(refMap, typeMap);
         auto result = clone->apply(cf);
-        BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
-        set(expression, new SymbolicInteger(result->to<IR::Constant>()));
+        checkResult(expression, result);
         return;
     }
     auto type = typeMap->getType(expression, true);
@@ -677,8 +685,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Binary* expression) {
         clone->right = getConstant(ri);
         DoConstantFolding cf(refMap, typeMap);
         auto result = clone->apply(cf);
-        BUG_CHECK(result->is<IR::Constant>(), "%1%: expected a constant", result);
-        set(expression, new SymbolicInteger(result->to<IR::Constant>()));
+        checkResult(expression, result);
         return;
     }
     auto type = typeMap->getType(expression, true);
