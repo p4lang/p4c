@@ -343,6 +343,7 @@ class CollectLocalVariableToMetadata : public Transform {
 // defines a struct paremeter himself or define multiple struct parameters in
 // action parameterlist. Current implementation does not support this.
 class PrependPDotToActionArgs : public Transform {
+    P4::TypeMap* typeMap;
     P4::ReferenceMap *refMap;
     BlockInfoMapping *toBlockInfo;
 
@@ -350,11 +351,13 @@ class PrependPDotToActionArgs : public Transform {
     std::map<const cstring, IR::IndexedVector<IR::Parameter> *> args_struct_map;
 
     PrependPDotToActionArgs(BlockInfoMapping *toBlockInfo,
+                            P4::TypeMap* typeMap,
                             P4::ReferenceMap *refMap)
-        : refMap(refMap), toBlockInfo(toBlockInfo) {}
+        : typeMap(typeMap), refMap(refMap), toBlockInfo(toBlockInfo) {}
     const IR::Node *postorder(IR::P4Action *a) override;
     const IR::Node *postorder(IR::P4Program *s) override;
     const IR::Node *preorder(IR::PathExpression *path) override;
+    const IR::Node *preorder(IR::MethodCallExpression*) override;
 };
 
 // For dpdk asm, there is not object-oriented. Therefore, we cannot define a
@@ -599,33 +602,89 @@ class CopyMatchKeysToSingleStruct : public P4::KeySideEffect {
     const IR::Node* postorder(IR::KeyElement* element) override;
 };
 
-/*
- * Split ActionSelector into three tables:
- *   base table that matches on exact/ternary key and generates a group id
- *   group table that matches on group id and generates a member id
- *   member table that runs an action based on member id.
+/**
+ * Common code between SplitActionSelectorTable and SplitActionProfileTable
  */
-class SplitActionSelectorTable : public Transform {
+class SplitP4TableCommon : public Transform {
+  public:
+    enum class TableImplementation { DEFAULT, ACTION_PROFILE, ACTION_SELECTOR };
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
-    std::set<cstring> action_selector_tables;
+    TableImplementation implementation;
+    std::set<cstring> match_tables;
     std::map<cstring, cstring> group_tables;
     std::map<cstring, cstring> member_tables;
 
-  public:
-    SplitActionSelectorTable(P4::ReferenceMap *refMap, P4::TypeMap* typeMap) :
-        refMap(refMap), typeMap(typeMap) {}
-    const IR::Node* postorder(IR::P4Table* tbl) override;
+    SplitP4TableCommon(P4::ReferenceMap *refMap, P4::TypeMap* typeMap) :
+        refMap(refMap), typeMap(typeMap) {
+        implementation = TableImplementation::DEFAULT;
+    }
+
     const IR::Node* postorder(IR::MethodCallStatement* ) override;
     const IR::Node* postorder(IR::IfStatement* ) override;
     const IR::Node* postorder(IR::SwitchStatement* ) override;
+
+    std::tuple<const IR::P4Table*, cstring> create_match_table(const IR::P4Table* /* tbl */);
+    const IR::P4Action* create_action(cstring /* actionName */, cstring /* id */, cstring);
+    const IR::P4Table* create_member_table(const IR::P4Table*, cstring);
+    const IR::P4Table* create_group_table(const IR::P4Table*, cstring, cstring, int, int);
 };
 
-class ConvertActionSelector : public PassManager {
+/**
+ * Split ActionSelector into three tables:
+ *   match table that matches on exact/ternary key and generates a group id
+ *   group table that matches on group id and generates a member id
+ *   member table that runs an action based on member id.
+ */
+class SplitActionSelectorTable : public SplitP4TableCommon {
+  public:
+
+    SplitActionSelectorTable(P4::ReferenceMap *refMap, P4::TypeMap* typeMap) :
+        SplitP4TableCommon(refMap, typeMap) {
+        implementation = TableImplementation::ACTION_SELECTOR; }
+    const IR::Node* postorder(IR::P4Table* tbl) override;
+};
+
+/**
+ * Split ActionProfile into two tables:
+ *   match table that matches on exact/ternary key and generates a member id
+ *   member table that runs an action based on member id.
+ */
+class SplitActionProfileTable : public SplitP4TableCommon {
  public:
-    ConvertActionSelector(P4::ReferenceMap *refMap, P4::TypeMap* typeMap) {
+    SplitActionProfileTable(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
+        SplitP4TableCommon(refMap, typeMap) {
+        implementation = TableImplementation::ACTION_PROFILE; }
+    const IR::Node* postorder(IR::P4Table* tbl) override;
+};
+
+/**
+ * Handle ActionSelector and ActionProfile extern in PSA
+ */
+class ConvertActionSelectorAndProfile : public PassManager {
+ public:
+    ConvertActionSelectorAndProfile(P4::ReferenceMap *refMap, P4::TypeMap* typeMap) {
         passes.emplace_back(new P4::TypeChecking(refMap, typeMap));
         passes.emplace_back(new SplitActionSelectorTable(refMap, typeMap));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.emplace_back(new P4::TypeChecking(refMap, typeMap, true));
+        passes.emplace_back(new SplitActionProfileTable(refMap, typeMap));
+        passes.push_back(new P4::ClearTypeMap(typeMap));
+        passes.emplace_back(new P4::TypeChecking(refMap, typeMap, true));
+    }
+};
+
+class CollectErrors : public Inspector {
+ public:
+    std::map<cstring, int> error_map;
+    CollectErrors() {}
+    void postorder(const IR::Type_Error* error) override {
+        int id = 0;
+        for (auto err : error->members) {
+            if (error_map.count(err->name.name) == 0) {
+                error_map.emplace(err->name.name, id++);
+            }
+        }
     }
 };
 
@@ -636,19 +695,21 @@ class DpdkArchLast : public PassManager {
 
 class RewriteToDpdkArch : public PassManager {
   public:
+    // TBD: refactor the following data struture into ProgramInfo
     CollectMetadataHeaderInfo *info;
     std::map<const cstring, IR::IndexedVector<IR::Parameter> *>
         *args_struct_map;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
     std::vector<const IR::Declaration_Instance *> *externDecls;
     std::set<const IR::P4Table*> invokedInKey;
+    std::map<cstring, int> *error_map;
     RewriteToDpdkArch(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
                       DpdkVariableCollector *collector) {
         setName("RewriteToDpdkArch");
         auto *evaluator = new P4::EvaluatorPass(refMap, typeMap);
         auto *parsePsa = new ParsePsa();
         info = new CollectMetadataHeaderInfo(&parsePsa->toBlockInfo);
-        passes.push_back(new ConvertActionSelector(refMap, typeMap));
+        passes.push_back(new ConvertActionSelectorAndProfile(refMap, typeMap));
         passes.push_back(evaluator);
         passes.push_back(new VisitFunctor([evaluator, parsePsa]() {
             auto toplevel = evaluator->getToplevelBlock();
@@ -687,10 +748,13 @@ class RewriteToDpdkArch : public PassManager {
         }));
         passes.push_back(new CollectLocalVariableToMetadata(
             &parsePsa->toBlockInfo, info, refMap));
+        auto collect_errors = new CollectErrors();
+        passes.push_back(collect_errors);
+        error_map = &collect_errors->error_map;
         auto checksum_convertor = new ConvertInternetChecksum(typeMap, info);
         passes.push_back(checksum_convertor);
         csum_map = &checksum_convertor->csum_map;
-        auto p = new PrependPDotToActionArgs(&parsePsa->toBlockInfo, refMap);
+        auto p = new PrependPDotToActionArgs(&parsePsa->toBlockInfo, typeMap, refMap);
         args_struct_map = &p->args_struct_map;
         passes.push_back(p);
         passes.push_back(new ConvertLogicalExpression);
