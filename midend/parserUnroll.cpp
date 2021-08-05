@@ -366,6 +366,16 @@ class ParserSymbolicInterpreter {
             auto mc = sord->to<IR::MethodCallStatement>();
             auto e = ev.evaluate(mc->methodCall, false);
             success = reportIfError(state, e);
+        } else if (auto bs = sord->to<IR::BlockStatement>()) {
+            IR::IndexedVector<IR::StatOrDecl> newComponents;
+            for (auto* component : bs->components) {
+                auto newComponent = executeStatement(state, component, valueMap);
+                if (!newComponent)
+                    success = false;
+                else
+                    newComponents.push_back(newComponent);    
+            }
+            sord = new IR::BlockStatement(newComponents);
         } else if (sord->is<IR::IfStatement>()) {
             auto ifs = sord->to<IR::IfStatement>()->clone();
             auto ifcond = ev.evaluate(ifs->condition, true);
@@ -376,31 +386,16 @@ class ParserSymbolicInterpreter {
                     ifComponent = ifs->ifTrue;
                 else 
                     ifComponent = ifs->ifFalse;
-                if (ifComponent->is<IR::BlockStatement>()) {
-                     const auto* bs = ifComponent->to<IR::BlockStatement>();
-                     IR::IndexedVector<IR::StatOrDecl> newComponents;
-                    for (auto* component : bs->components) {
-                        auto newComponent = executeStatement(state, component, valueMap);
-                        if (!newComponent)
-                            success = false;
-                        else
-                            newComponents.push_back(newComponent);
-                    }
-                    if(ifcond)
-                        ifs->ifTrue = new IR::BlockStatement(newComponents);
-                    else
-                        ifs->ifFalse = new IR::BlockStatement(newComponents);
+                auto newComponent = executeStatement(state, ifComponent, valueMap);
+                if (!newComponent) {
+                    success = false;
                 } else {
-                    auto newComponent = executeStatement(state, ifComponent, valueMap);
-                    if (!newComponent) {
-                        success = false;
-                    } else {
-                        if (ifcond)
-                            ifs->ifTrue = newComponent->to<IR::Statement>();
-                        else
-                            ifs->ifFalse = newComponent->to<IR::Statement>();
-                    }
+                    if (ifcond)
+                        ifs->ifTrue = newComponent->to<IR::Statement>();
+                    else
+                        ifs->ifFalse = newComponent->to<IR::Statement>();
                 }
+                
             }
             sord = ifs;
         } else {
