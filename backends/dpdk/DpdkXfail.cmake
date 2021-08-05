@@ -27,17 +27,10 @@ p4c_add_xfail_reason("dpdk"
   testdata/p4_16_samples/psa-meter7-bmv2.p4
 )
 
-# symbolic evaluator does not support verify() statement
-p4c_add_xfail_reason("dpdk"
-  "unknown: expected a bool"
-  testdata/p4_16_samples/psa-example-parser-checksum.p4
-  )
-
 p4c_add_xfail_reason("dpdk"
   "error: AssignmentStatement"
   testdata/p4_16_samples/psa-multicast-basic-2-bmv2.p4
   testdata/p4_16_samples/psa-unicast-or-drop-bmv2.p4
-  testdata/p4_16_samples/psa-example-parser-checksum.p4
 )
 
 p4c_add_xfail_reason("dpdk"
@@ -61,6 +54,7 @@ p4c_add_xfail_reason("dpdk"
   "Unknown extern function"
   testdata/p4_16_samples/psa-counter6.p4
   testdata/p4_16_samples/psa-meter6.p4
+  testdata/p4_16_samples/psa-example-parser-checksum.p4
   )
 
 p4c_add_xfail_reason("dpdk"

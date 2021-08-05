@@ -32,6 +32,7 @@ struct metadata_t {
 	bit<8> psa_egress_output_metadata_clone
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
+	bit<48> Ingress_tmp
 }
 metadata instanceof metadata_t
 
@@ -68,7 +69,8 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0
 	mov m.psa_ingress_output_metadata_multicast_group 0x0
 	cast  h.ethernet.dstAddr bit_32 m.psa_ingress_output_metadata_egress_port
-	jmpneq LABEL_0END h.ethernet.dstAddr 0x0
+	regrd m.Ingress_tmp regfile_0 0x1
+	jmpneq LABEL_0END m.Ingress_tmp 0x0
 	mov m.psa_ingress_output_metadata_drop 1
 	LABEL_0END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
