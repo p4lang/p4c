@@ -903,7 +903,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
 
                 if (expression->arguments->size() == 1) {
                     // 1-argument extract method
-                    if (!fixed || !argType->is<IR::Type_Header>()) {
+                    if (!fixed && !argType->is<IR::Type_Header>()) {
                         auto result = new SymbolicStaticError(
                             arg0, "Expected a fixed-size header as argument");
                         set(expression, result);
@@ -914,7 +914,7 @@ void ExpressionEvaluator::postorder(const IR::MethodCallExpression* expression) 
                               "%1%: expected 2 arguments", expression);
                     // TODO: check first argument type more in depth; i.e. only
                     // one varbit field allowed
-                    if (fixed || !argType->is<IR::Type_Header>()) {
+                    if (fixed && !argType->is<IR::Type_Header>()) {
                         auto result = new SymbolicStaticError(
                             arg0, "Expected a variable-size header as argument");
                         set(expression, result);
