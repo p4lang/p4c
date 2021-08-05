@@ -1,8 +1,6 @@
 SUBDIRS = .
 
 AM_CPPFLAGS += \
--I$(top_srcdir)/src/bm_sim \
--I$(top_srcdir)/src/BMI \
 -I$(top_srcdir)/targets/psa_switch/externs \
 -isystem $(top_srcdir)/third_party/gtest/include \
 -I$(srcdir)/.. \
