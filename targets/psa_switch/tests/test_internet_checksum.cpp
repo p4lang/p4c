@@ -35,11 +35,11 @@ extern int import_internet_checksum();
 
 /* Frame (34 bytes) */
 static const unsigned char raw_pkt[34] = {
-    0x52, 0x54, 0x00, 0x12, 0x35, 0x02, 0x08, 0x00, 
-    0x27, 0x01, 0x8b, 0xbc, 0x08, 0x00, 0x00, 0xFE, 
-    0xC5, 0x23, 0xFD, 0xA1, 0xD6, 0x8A, 0xAF, 0x02, 
-    0xFF, 0xFF, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 
-    0x00, 0x02                              
+    0x52, 0x54, 0x00, 0x12, 0x35, 0x02, 0x08, 0x00,
+    0x27, 0x01, 0x8b, 0xbc, 0x08, 0x00, 0x00, 0xFE,
+    0xC5, 0x23, 0xFD, 0xA1, 0xD6, 0x8A, 0xAF, 0x02,
+    0xFF, 0xFF, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00,
+    0x00, 0x02
 };
 
 class PSA_InternetChecksumTest : public ::testing::Test {
@@ -98,7 +98,7 @@ class PSA_InternetChecksumTest : public ::testing::Test {
 
     virtual void SetUp() {
         phv_source->set_phv_factory(0, &phv_factory);
-    
+
         ParseSwitchKeyBuilder ethernetKeyBuilder;
         ethernetKeyBuilder.push_back_field(ethernetHeader, 2, 16);  // ethertype
         ethernetParseState.set_key_builder(ethernetKeyBuilder);
@@ -115,19 +115,19 @@ class PSA_InternetChecksumTest : public ::testing::Test {
         ethernet_ipv4_key[1] = 0x00;
         ethernetParseState.add_switch_case(sizeof(ethernet_ipv4_key),
                                         ethernet_ipv4_key, &ipv4ParseState);
-    
+
         parser.set_init_state(&ethernetParseState);
 
         packet = std::unique_ptr<Packet>(new Packet(Packet::make_new(
                                         sizeof(raw_pkt),
-                                        PacketBuffer(34, (const char *) raw_pkt, 
+                                        PacketBuffer(34, (const char *) raw_pkt,
                                         sizeof(raw_pkt)), phv_source.get())));
         parser.parse(packet.get());
 
         import_internet_checksum();
     }
 
-    // virtual void TearDown() { }
+    virtual void TearDown() { }
 };
 
 static std::unique_ptr<ActionPrimitive_> get_extern_primitive(
@@ -171,7 +171,7 @@ TEST_F(PSA_InternetChecksumTest, PSA_InternetChecksumMethods) {
     actionFn_get.parameter_push_back_extern_instance(instance.get());
     actionFn_get.parameter_push_back_field(ipv4Header, 9);
 
-    // ACTION SUBTRACT 
+    // ACTION SUBTRACT
     ActionFn actionFn_sub("_InternetChecksum_subtract", 0, 0);
     ActionFnEntry actionFnEntry_sub(&actionFn_sub);
     auto primitive_sub = get_extern_primitive("InternetChecksum", "subtract");

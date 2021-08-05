@@ -39,10 +39,10 @@ concatenate_fields(const std::vector<bm::Field> &fields, bm::Data &input) {
     _BM_ASSERT(n_bits % 16 == 0);
 }
 
-uint16_t 
+uint16_t
 ones_complement_sum(uint16_t x, uint16_t y) {
-    uint32_t ret = (uint32_t) x + (uint32_t) y; 
-    if (ret >= 0x10000) 
+    uint32_t ret = (uint32_t) x + (uint32_t) y;
+    if (ret >= 0x10000)
         ret++;
 
     return ret;

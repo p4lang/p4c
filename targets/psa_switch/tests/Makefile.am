@@ -20,7 +20,7 @@ TESTS = test_internet_checksum
 check_PROGRAMS = $(TESTS) test_all
 
 # Sources for tests
-test_internet_checksum_SOURCES             = $(common_source) test_internet_checksum.cpp
+test_internet_checksum_SOURCES = $(common_source) test_internet_checksum.cpp
 
 test_all_SOURCES = $(common_source) \
 test_internet_checksum.cpp
