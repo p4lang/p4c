@@ -151,6 +151,7 @@ class ExpressionEvaluator : public Inspector {
     void postorder(const IR::MethodCallExpression* expression) override;
     void checkResult(const IR::Expression* expression,
                      const IR::Expression* result);
+    void setNonConstant(const IR::Expression* expression);
 
  public:
     ExpressionEvaluator(ReferenceMap* refMap, TypeMap* typeMap, ValueMap* valueMap) :

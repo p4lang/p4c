@@ -607,6 +607,16 @@ void ExpressionEvaluator::checkResult(const IR::Expression* expression,
     BUG("%1% : expected a constant/bool literal", result);
 }
 
+void ExpressionEvaluator::setNonConstant(const IR::Expression* expression) {
+    auto type = typeMap->getType(expression, true);
+    if (expression->type->is<IR::BoolLiteral>()) {
+        set(expression, new SymbolicBool(ScalarValue::ValueState::NotConstant));
+    } else {
+        set(expression, new SymbolicInteger(ScalarValue::ValueState::NotConstant,
+                                            type->to<IR::Type_Bits>()));
+    }
+}
+
 void ExpressionEvaluator::postorder(const IR::Operation_Ternary* expression) {
     auto e0 = get(expression->e0);
     if (e0->is<SymbolicError>()) {
@@ -651,9 +661,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Ternary* expression) {
         checkResult(expression, result);
         return;
     }
-    auto type = typeMap->getType(expression, true);
-    set(expression, new SymbolicInteger(ScalarValue::ValueState::NotConstant,
-                                        type->to<IR::Type_Bits>()));
+    setNonConstant(expression);
 }
 
 void ExpressionEvaluator::postorder(const IR::Operation_Binary* expression) {
@@ -688,9 +696,7 @@ void ExpressionEvaluator::postorder(const IR::Operation_Binary* expression) {
         checkResult(expression, result);
         return;
     }
-    auto type = typeMap->getType(expression, true);
-    set(expression, new SymbolicInteger(ScalarValue::ValueState::NotConstant,
-                                        type->to<IR::Type_Bits>()));
+    setNonConstant(expression);
 }
 
 void ExpressionEvaluator::postorder(const IR::Operation_Unary* expression) {
