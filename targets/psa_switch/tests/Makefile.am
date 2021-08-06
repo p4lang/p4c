@@ -1,7 +1,6 @@
 SUBDIRS = .
 
 AM_CPPFLAGS += \
--I$(top_srcdir)/targets/psa_switch/externs \
 -isystem $(top_srcdir)/third_party/gtest/include \
 -I$(srcdir)/.. \
 -I$(srcdir)/ \

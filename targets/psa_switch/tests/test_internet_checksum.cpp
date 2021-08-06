@@ -17,6 +17,7 @@
  *
  */
 
+#include <gtest/gtest.h>
 
 #include <bm/bm_sim/packet.h>
 #include <bm/bm_sim/parser.h>
@@ -25,11 +26,7 @@
 #include <bm/bm_sim/actions.h>
 #include <bm/bm_sim/extern.h>
 
-#include<psa_internet_checksum.h>
-#include <gtest/gtest.h>
-
 using namespace bm;
-using namespace bm::psa;
 
 extern int import_internet_checksum();
 
