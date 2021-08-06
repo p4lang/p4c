@@ -1017,7 +1017,9 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
 
     if (auto firstKeyField = keys->keyElements.at(0)->expression->to<IR::Member>()) {
         firstKeyStr = firstKeyField->expr->toString();
-        /* All header fields are prefixed with "h", check if the first key is part of a header */
+        /* ReplaceMetadataHeaderName pass converts all header fields to the form
+          "h.<header_name>.<field_name> and similarly metadata fields are prefixed with "m.".
+           Check if the match key is part of a header by checking the "h" prefix. */
         if (firstKeyStr.startsWith("h"))
             firstKeyHdr = true;
     }
