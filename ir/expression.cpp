@@ -1,19 +1,3 @@
-/*
-Copyright 2013-present Barefoot Networks, Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 #include "ir.h"
 #include "dbprint.h"
 #include "lib/gmputil.h"
@@ -66,61 +50,45 @@ IR::Constant::handleOverflow(bool noWarning) {
         BUG("%1%: Null type in typed constant", this);
     if (type->is<IR::Type_InfInt>())
         return;
-    if (auto tb = type->to<IR::Type_Bits>()){
-      int width = tb->size;
-      big_int one = 1;
-      big_int mask = Util::mask(width);
+    auto tb = type->to<IR::Type_Bits>();
+    if (tb == nullptr) {
+        BUG("%1%: Unexpected type for constant %2%", this, type);
+        return;
+    }
 
-      if (tb->isSigned) {
+    int width = tb->size;
+    big_int one = 1;
+    big_int mask = Util::mask(width);
+
+    if (tb->isSigned) {
         big_int max = (one << (width - 1)) - 1;
         big_int min = -(one << (width - 1));
         if (value < min || value > max) {
-          if (!noWarning)
-            ::warning(ErrorType::WARN_OVERFLOW,
-                      "%1%: signed value does not fit in %2% bits", this, width);
-          LOG2("value=" << value << ", min=" << min <<
-                ", max=" << max << ", masked=" << (value & mask) <<
-                ", adj=" << ((value & mask) - (one << width)));
-          value = value & mask;
-          if (value > max)
-            value -= (one << width);
+            if (!noWarning)
+                ::warning(ErrorType::WARN_OVERFLOW,
+                          "%1%: signed value does not fit in %2% bits", this, width);
+            LOG2("value=" << value << ", min=" << min <<
+                 ", max=" << max << ", masked=" << (value & mask) <<
+                 ", adj=" << ((value & mask) - (one << width)));
+            value = value & mask;
+            if (value > max)
+                value -= (one << width);
         }
-      } else {
+    } else {
         if (value < 0) {
-          if (!noWarning)
-            ::warning(ErrorType::WARN_MISMATCH,
-                      "%1%: negative value with unsigned type", this);
+            if (!noWarning)
+                ::warning(ErrorType::WARN_MISMATCH,
+                          "%1%: negative value with unsigned type", this);
         } else if ((value & mask) != value) {
             if (!noWarning)
-              ::warning(ErrorType::WARN_MISMATCH,
-                        "%1%: value does not fit in %2% bits", this, width);
+                ::warning(ErrorType::WARN_MISMATCH,
+                          "%1%: value does not fit in %2% bits", this, width);
         }
 
         value = value & mask;
         if (value < 0)
-          BUG("Negative value after masking %1%", value);
-      }
-  } else if (auto tb = type->to<IR::Type_Varbits>()) {
-      int width = tb->size;
-      big_int one = 1;
-      big_int mask = Util::mask(width);
-      if (value < 0) {
-        if (!noWarning)
-          ::warning(ErrorType::WARN_MISMATCH,
-                    "%1%: negative value with unsigned type", this);
-      } else if ((value & mask) != value) {
-        if (!noWarning)
-          ::warning(ErrorType::WARN_MISMATCH,
-                    "%1%: value does not fit in %2% bits", this, width);
-      }
-
-      value = value & mask;
-      if (value < 0)
-        BUG("Negative value after masking %1%", value);
-  } else {
-      BUG("%1%: Unexpected type for constant %2%", this, type);
-      return;
-  }
+            BUG("Negative value after masking %1%", value);
+    }
 }
 
 IR::Constant
