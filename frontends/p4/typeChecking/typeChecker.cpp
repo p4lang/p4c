@@ -735,6 +735,8 @@ TypeInference::assignment(const IR::Node* errorPosition, const IR::Type* destTyp
                           const IR::Expression* sourceExpression) {
     if (destType->is<IR::Type_Unknown>())
         BUG("Unknown destination type");
+    if (destType->is<IR::Type_Dontcare>())
+        return sourceExpression;
     const IR::Type* initType = getType(sourceExpression);
     if (initType == nullptr)
         return sourceExpression;
