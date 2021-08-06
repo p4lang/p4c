@@ -68,36 +68,11 @@ static Util::JsonObject* findJsonTable(Util::JsonArray* tablesJson, cstring tblN
     return nullptr;
 }
 
-// See https://stackoverflow.com/a/33799784/4538702
-static std::string escapeJson(const std::string& s) {
-    std::ostringstream o;
-    for (char c : s) {
-        switch (c) {
-            case '"': o << "\\\""; break;
-            case '\\': o << "\\\\"; break;
-            case '\b': o << "\\b"; break;
-            case '\f': o << "\\f"; break;
-            case '\n': o << "\\n"; break;
-            case '\r': o << "\\r"; break;
-            case '\t': o << "\\t"; break;
-            default: {
-                if ('\x00' <= c && c <= '\x1f') {
-                    o << "\\u"
-                      << std::hex << std::setw(4) << std::setfill('0') << static_cast<int>(c);
-                } else {
-                    o << c;
-                }
-            }
-        }
-    }
-    return o.str();
-}
-
-static Util::JsonObject* transformAnnotation(const std::string& annotation) {
+static Util::JsonObject* transformAnnotation(const cstring& annotation) {
     auto* annotationJson = new Util::JsonObject();
     // TODO(antonin): annotation string will need to be parsed so we can have it
     // in key/value format here.
-    annotationJson->emplace("name", escapeJson(annotation));
+    annotationJson->emplace("name", annotation.escapeJson());
     return annotationJson;
 }
 
