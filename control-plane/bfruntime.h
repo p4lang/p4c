@@ -133,30 +133,32 @@ static auto findP4InfoObject(const It& first, const It& last, P4Id objectId)
     return &*desiredObject;
 }
 
-static const p4configv1::Table* findTable(const p4configv1::P4Info& p4info, P4Id tableId) {
+static const p4configv1::Table* 
+findTable(const p4configv1::P4Info& p4info, P4Id tableId) {
     const auto& tables = p4info.tables();
     return findP4InfoObject(tables.begin(), tables.end(), tableId);
 }
 
-static const p4configv1::Action* findAction(const p4configv1::P4Info& p4info, P4Id actionId) {
+static const p4configv1::Action* 
+findAction(const p4configv1::P4Info& p4info, P4Id actionId) {
     const auto& actions = p4info.actions();
     return Standard::findP4InfoObject(actions.begin(), actions.end(), actionId);
 }
 
-static const p4configv1::ActionProfile* findActionProf(const p4configv1::P4Info& p4info,
-                                                         P4Id actionProfId) {
+static const p4configv1::ActionProfile* 
+findActionProf(const p4configv1::P4Info& p4info, P4Id actionProfId) {
     const auto& actionProfs = p4info.action_profiles();
     return findP4InfoObject(actionProfs.begin(), actionProfs.end(), actionProfId);
 }
 
-static const p4configv1::DirectCounter* findDirectCounter(const p4configv1::P4Info& p4info,
-                                                            P4Id counterId) {
+static const p4configv1::DirectCounter* 
+findDirectCounter(const p4configv1::P4Info& p4info, P4Id counterId) {
     const auto& counters = p4info.direct_counters();
     return findP4InfoObject(counters.begin(), counters.end(), counterId);
 }
 
-static const p4configv1::DirectMeter* findDirectMeter(const p4configv1::P4Info& p4info,
-                                                        P4Id meterId) {
+static const p4configv1::DirectMeter* 
+findDirectMeter(const p4configv1::P4Info& p4info, P4Id meterId) {
     const auto& meters = p4info.direct_meters();
     return findP4InfoObject(meters.begin(), meters.end(), meterId);
 }
@@ -185,8 +187,8 @@ static Util::JsonObject* makeTypeBool(boost::optional<bool> defaultValue = boost
     return typeObj;
 }
 
-static Util::JsonObject* makeTypeBytes(int width,
-                                       boost::optional<int64_t> defaultValue = boost::none) {
+static Util::JsonObject* makeTypeBytes(int width, 
+        boost::optional<int64_t> defaultValue = boost::none) {
     auto* typeObj = new Util::JsonObject();
     typeObj->emplace("type", "bytes");
     typeObj->emplace("width", width);

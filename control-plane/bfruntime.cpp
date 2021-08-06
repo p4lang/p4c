@@ -21,13 +21,13 @@ namespace BFRT {
 using P4::BFRT::P4Id;
 
 TypeSpecParser TypeSpecParser::make(const p4configv1::P4Info& p4info,
-                       const p4configv1::P4DataTypeSpec& typeSpec,
-                       cstring instanceType,
-                       cstring instanceName,
-                       const std::vector<cstring> *fieldNames,
-                       cstring prefix,
-                       cstring suffix,
-                       P4Id idOffset) {
+        const p4configv1::P4DataTypeSpec& typeSpec,
+        cstring instanceType,
+        cstring instanceName,
+        const std::vector<cstring> *fieldNames,
+        cstring prefix,
+        cstring suffix,
+        P4Id idOffset) {
     Fields fields;
     const auto& typeInfo = p4info.type_info();
 
@@ -177,7 +177,7 @@ P4Id BFRuntimeGenerator::ActionProf::makeActProfId(P4Id implementationId) {
 
 boost::optional<BFRuntimeGenerator::ActionProf>
 BFRuntimeGenerator::ActionProf::from(const p4configv1::P4Info& p4info,
-                                        const p4configv1::ActionProfile& actionProfile) {
+        const p4configv1::ActionProfile& actionProfile) {
     const auto& pre = actionProfile.preamble();
     auto profileId = makeBFRuntimeId(pre.id(), p4configv1::P4Ids::ACTION_PROFILE);
     auto tableIds = collectTableIds(
@@ -225,8 +225,7 @@ BFRuntimeGenerator::getDirectMeter(P4Id meterId) const {
 
 Util::JsonObject*
 BFRuntimeGenerator::makeCommonDataField(P4Id id, cstring name,
-                                         Util::JsonObject* type, bool repeated,
-                                         Util::JsonArray* annotations) {
+        Util::JsonObject* type, bool repeated, Util::JsonArray* annotations) {
     auto* dataField = new Util::JsonObject();
     dataField->emplace("id", id);
     dataField->emplace("name", name);
@@ -241,8 +240,7 @@ BFRuntimeGenerator::makeCommonDataField(P4Id id, cstring name,
 
 Util::JsonObject*
 BFRuntimeGenerator::makeContainerDataField(P4Id id, cstring name,
-                                            Util::JsonArray* items, bool repeated,
-                                            Util::JsonArray* annotations) {
+        Util::JsonArray* items, bool repeated, Util::JsonArray* annotations) {
     auto* dataField = new Util::JsonObject();
     dataField->emplace("id", id);
     dataField->emplace("name", name);
@@ -257,9 +255,8 @@ BFRuntimeGenerator::makeContainerDataField(P4Id id, cstring name,
 
 void
 BFRuntimeGenerator::addActionDataField(Util::JsonArray* dataJson,
-                                            P4Id id, const std::string& name, bool mandatory,
-                                            bool read_only, Util::JsonObject* type,
-                                            Util::JsonArray* annotations) {
+        P4Id id, const std::string& name, bool mandatory, bool read_only, 
+        Util::JsonObject* type, Util::JsonArray* annotations) {
     auto* dataField = new Util::JsonObject();
     dataField->emplace("id", id);
     dataField->emplace("name", name);
@@ -276,8 +273,7 @@ BFRuntimeGenerator::addActionDataField(Util::JsonArray* dataJson,
 
 void
 BFRuntimeGenerator::addKeyField(Util::JsonArray* dataJson, P4Id id, cstring name,
-                                 bool mandatory, cstring matchType, Util::JsonObject* type,
-                                 Util::JsonArray* annotations) {
+        bool mandatory, cstring matchType, Util::JsonObject* type, Util::JsonArray* annotations) {
     auto* dataField = new Util::JsonObject();
     dataField->emplace("id", id);
     dataField->emplace("name", name);
@@ -294,10 +290,7 @@ BFRuntimeGenerator::addKeyField(Util::JsonArray* dataJson, P4Id id, cstring name
 
 /* static */ Util::JsonObject*
 BFRuntimeGenerator::initTableJson(const std::string& name,
-                                   P4Id id,
-                                   cstring tableType,
-                                   int64_t size,
-                                   Util::JsonArray* annotations) {
+        P4Id id, cstring tableType, int64_t size, Util::JsonArray* annotations) {
     auto* tableJson = new Util::JsonObject();
     tableJson->emplace("name", name);
     tableJson->emplace("id", id);
@@ -321,7 +314,7 @@ BFRuntimeGenerator::addToDependsOn(Util::JsonObject* tableJson, P4Id id) {
 
 void
 BFRuntimeGenerator::addCounterCommon(Util::JsonArray* tablesJson,
-                                                const Counter& counter) const {
+        const Counter& counter) const {
     auto* tableJson = initTableJson(
         counter.name, counter.id, "Counter", counter.size, counter.annotations);
 
@@ -345,7 +338,7 @@ BFRuntimeGenerator::addCounterCommon(Util::JsonArray* tablesJson,
 
 void
 BFRuntimeGenerator::addCounterDataFields(Util::JsonArray* dataJson,
-                            const BFRuntimeGenerator::Counter& counter) {
+        const BFRuntimeGenerator::Counter& counter) {
     static const uint64_t defaultCounterValue = 0u;
     if (counter.unit == Counter::Unit::BYTES
         || counter.unit == Counter::Unit::BOTH) {
@@ -365,7 +358,7 @@ BFRuntimeGenerator::addCounterDataFields(Util::JsonArray* dataJson,
 
 void
 BFRuntimeGenerator::addMeterCommon(Util::JsonArray* tablesJson,
-                    const BFRuntimeGenerator::Meter& meter) const {
+        const BFRuntimeGenerator::Meter& meter) const {
     auto* tableJson = initTableJson(meter.name, meter.id, "Meter", meter.size);
 
     auto* keyJson = new Util::JsonArray();
@@ -388,13 +381,9 @@ BFRuntimeGenerator::addMeterCommon(Util::JsonArray* tablesJson,
 
 void
 BFRuntimeGenerator::transformTypeSpecToDataFields(Util::JsonArray* fieldsJson,
-                                                   const p4configv1::P4DataTypeSpec& typeSpec,
-                                                   cstring instanceType,
-                                                   cstring instanceName,
-                                                   const std::vector<cstring> *fieldNames,
-                                                   cstring prefix,
-                                                   cstring suffix,
-                                                   P4Id idOffset) const {
+        const p4configv1::P4DataTypeSpec& typeSpec, cstring instanceType, cstring instanceName,
+        const std::vector<cstring> *fieldNames, cstring prefix, cstring suffix, 
+        P4Id idOffset) const {
     auto parser = TypeSpecParser::make(
         p4info, typeSpec, instanceType, instanceName, fieldNames, prefix, suffix, idOffset);
     for (const auto &f : parser) {
@@ -405,8 +394,7 @@ BFRuntimeGenerator::transformTypeSpecToDataFields(Util::JsonArray* fieldsJson,
 
 void
 BFRuntimeGenerator::addRegisterDataFields(Util::JsonArray* dataJson,
-                                           const BFRuntimeGenerator::Register& register_,
-                                           P4Id idOffset) const {
+        const BFRuntimeGenerator::Register& register_, P4Id idOffset) const {
     auto* fieldsJson = new Util::JsonArray();
     transformTypeSpecToDataFields(
         fieldsJson, register_.typeSpec, "Register", register_.name,
@@ -433,7 +421,7 @@ BFRuntimeGenerator::addRegisterDataFields(Util::JsonArray* dataJson,
 
 void
 BFRuntimeGenerator::addRegisterCommon(Util::JsonArray* tablesJson,
-                    const BFRuntimeGenerator::Register& register_) const {
+        const BFRuntimeGenerator::Register& register_) const {
     auto* tableJson = initTableJson(register_.name, register_.id, "Register", register_.size);
 
     auto* keyJson = new Util::JsonArray();
@@ -456,7 +444,7 @@ BFRuntimeGenerator::addRegisterCommon(Util::JsonArray* tablesJson,
 
 void
 BFRuntimeGenerator::addMeterDataFields(Util::JsonArray* dataJson,
-                                const BFRuntimeGenerator::Meter& meter) {
+        const BFRuntimeGenerator::Meter& meter) {
     // default value for rates and bursts (all GREEN)
     static const uint64_t maxUint64 = std::numeric_limits<uint64_t>::max();
     if (meter.unit == Meter::Unit::BYTES) {
@@ -516,7 +504,7 @@ BFRuntimeGenerator::addMeterDataFields(Util::JsonArray* dataJson,
 
 void
 BFRuntimeGenerator::addActionProfCommon(Util::JsonArray* tablesJson,
-                    const BFRuntimeGenerator::ActionProf& actionProf) const {
+        const BFRuntimeGenerator::ActionProf& actionProf) const {
     auto* tableJson = initTableJson(
         actionProf.name, actionProf.id, "Action", actionProf.size, actionProf.annotations);
 
@@ -562,7 +550,7 @@ BFRuntimeGenerator::actProfHasSelector(P4Id actProfId) const {
 
 Util::JsonArray*
 BFRuntimeGenerator::makeActionSpecs(const p4configv1::Table& table,
-                                                P4Id* maxActionParamId) const {
+        P4Id* maxActionParamId) const {
     auto* specs = new Util::JsonArray();
     P4Id maxId = 0;
     for (const auto& action_ref : table.action_refs()) {
@@ -611,7 +599,7 @@ BFRuntimeGenerator::makeActionSpecs(const p4configv1::Table& table,
 
 void
 BFRuntimeGenerator::addLearnFilterCommon(Util::JsonArray* learnFiltersJson,
-                            const BFRuntimeGenerator::Digest& digest) const {
+        const BFRuntimeGenerator::Digest& digest) const {
     auto* learnFilterJson = new Util::JsonObject();
     learnFilterJson->emplace("name", digest.name);
     learnFilterJson->emplace("id", digest.id);

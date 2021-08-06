@@ -80,36 +80,36 @@ BFRuntimeSchemaGenerator::addMatchActionData(const p4configv1::Table& table,
 
 void
 BFRuntimeSchemaGenerator::addActionSelectorGetMemberCommon(Util::JsonArray* tablesJson,
-                                        const ActionSelector& actionSelector) const {
-        auto* tableJson = initTableJson(actionSelector.get_mem_name,
-                actionSelector.get_mem_id, "SelectorGetMember", 1 /* size */,
-                actionSelector.annotations);
+        const ActionSelector& actionSelector) const {
+    auto* tableJson = initTableJson(actionSelector.get_mem_name,
+            actionSelector.get_mem_id, "SelectorGetMember", 1 /* size */,
+            actionSelector.annotations);
 
-        auto* keyJson = new Util::JsonArray();
-        addKeyField(keyJson, BF_RT_DATA_SELECTOR_GROUP_ID, "$SELECTOR_GROUP_ID",
-                            true /* mandatory */, "Exact", makeTypeInt("uint64"));
-        addKeyField(keyJson, BF_RT_DATA_HASH_VALUE, "hash_value",
-                            true /* mandatory */, "Exact", makeTypeInt("uint64"));
-        tableJson->emplace("key", keyJson);
+    auto* keyJson = new Util::JsonArray();
+    addKeyField(keyJson, BF_RT_DATA_SELECTOR_GROUP_ID, "$SELECTOR_GROUP_ID",
+                        true /* mandatory */, "Exact", makeTypeInt("uint64"));
+    addKeyField(keyJson, BF_RT_DATA_HASH_VALUE, "hash_value",
+                        true /* mandatory */, "Exact", makeTypeInt("uint64"));
+    tableJson->emplace("key", keyJson);
 
-        auto* dataJson = new Util::JsonArray();
-        {
-            auto* f = makeCommonDataField(BF_RT_DATA_ACTION_MEMBER_ID, "$ACTION_MEMBER_ID",
-            makeTypeInt("uint64"), false /* repeated */);
-            addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
-        }
-        tableJson->emplace("data", dataJson);
+    auto* dataJson = new Util::JsonArray();
+    {
+        auto* f = makeCommonDataField(BF_RT_DATA_ACTION_MEMBER_ID, "$ACTION_MEMBER_ID",
+        makeTypeInt("uint64"), false /* repeated */);
+        addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
+    }
+    tableJson->emplace("data", dataJson);
 
-        tableJson->emplace("supported_operations", new Util::JsonArray());
-        tableJson->emplace("attributes", new Util::JsonArray());
-        addToDependsOn(tableJson, actionSelector.id);
+    tableJson->emplace("supported_operations", new Util::JsonArray());
+    tableJson->emplace("attributes", new Util::JsonArray());
+    addToDependsOn(tableJson, actionSelector.id);
 
-        tablesJson->append(tableJson);
+    tablesJson->append(tableJson);
 }
 
 void
 BFRuntimeSchemaGenerator::addActionSelectorCommon(Util::JsonArray* tablesJson,
-                const ActionSelector& actionSelector) const {
+        const ActionSelector& actionSelector) const {
     // TODO(antonin): formalize ID allocation for selector tables
     // repeat same annotations as for action table
     // the maximum number of groups is the table size for the selector table
@@ -231,7 +231,7 @@ BFRuntimeSchemaGenerator::genSchema() const {
 
 void
 BFRuntimeSchemaGenerator::addDPDKExterns(Util::JsonArray* tablesJson,
-                                      Util::JsonArray* learnFiltersJson) const {
+        Util::JsonArray* learnFiltersJson) const {
     for (const auto& externType : p4info.externs()) {
         auto externTypeId = static_cast<::dpdk::P4Ids::Prefix>(externType.extern_type_id());
         if (externTypeId == ::dpdk::P4Ids::ACTION_SELECTOR) {

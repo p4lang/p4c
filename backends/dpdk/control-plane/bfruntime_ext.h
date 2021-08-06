@@ -69,15 +69,14 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
     // Externs only for DPDK backend
     struct ActionSelector;
 
-    void addDPDKExterns(Util::JsonArray* tablesJson,
-                                    Util::JsonArray* learnFiltersJson) const;
+    void addDPDKExterns(Util::JsonArray* tablesJson, Util::JsonArray* learnFiltersJson) const;
     void addActionSelectorCommon(Util::JsonArray* tablesJson,
                                  const ActionSelector& actionProf) const;
     void addActionSelectorGetMemberCommon(Util::JsonArray* tablesJson,
-                                    const ActionSelector& actionProf) const;
+                                          const ActionSelector& actionProf) const;
     void addActionProfs(Util::JsonArray* tablesJson) const override;
     bool addActionProfIds(const p4configv1::Table& table,
-                            Util::JsonObject* tableJson) const override;
+                          Util::JsonObject* tableJson) const override;
     void addMatchActionData(const p4configv1::Table& table,
             Util::JsonObject* tableJson, Util::JsonArray* dataJson,
             P4Id maxActionParamId) const ;
