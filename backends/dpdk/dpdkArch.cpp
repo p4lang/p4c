@@ -1017,6 +1017,7 @@ const IR::Node* CopyMatchKeysToSingleStruct::preorder(IR::Key* keys) {
 
     if (auto firstKeyField = keys->keyElements.at(0)->expression->to<IR::Member>()) {
         firstKeyStr = firstKeyField->expr->toString();
+        /* All header fields are prefixed with "h", check if the first key is part of a header */
         if (firstKeyStr.startsWith("h"))
             firstKeyHdr = true;
     }
