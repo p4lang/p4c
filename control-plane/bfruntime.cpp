@@ -320,7 +320,7 @@ BFRuntimeGenerator::addCounterCommon(Util::JsonArray* tablesJson,
 
     auto* keyJson = new Util::JsonArray();
     addKeyField(keyJson, TD_DATA_COUNTER_INDEX, "$COUNTER_INDEX",
-                true /* mandatory */, "Exact", makeTypeInt("uint32"));
+                true /* mandatory */, "Exact", makeType("uint32"));
     tableJson->emplace("key", keyJson);
 
     auto* dataJson = new Util::JsonArray();
@@ -344,14 +344,14 @@ BFRuntimeGenerator::addCounterDataFields(Util::JsonArray* dataJson,
         || counter.unit == Counter::Unit::BOTH) {
         auto* f = makeCommonDataField(
             TD_DATA_COUNTER_SPEC_BYTES, "$COUNTER_SPEC_BYTES",
-            makeTypeInt("uint64", defaultCounterValue), false /* repeated */);
+            makeType("uint64", defaultCounterValue), false /* repeated */);
         addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
     }
     if (counter.unit == Counter::Unit::PACKETS
         || counter.unit == Counter::Unit::BOTH) {
         auto* f = makeCommonDataField(
             TD_DATA_COUNTER_SPEC_PKTS, "$COUNTER_SPEC_PKTS",
-            makeTypeInt("uint64", defaultCounterValue), false /* repeated */);
+            makeType("uint64", defaultCounterValue), false /* repeated */);
         addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
     }
 }
@@ -363,7 +363,7 @@ BFRuntimeGenerator::addMeterCommon(Util::JsonArray* tablesJson,
 
     auto* keyJson = new Util::JsonArray();
     addKeyField(keyJson, TD_DATA_METER_INDEX, "$METER_INDEX",
-                true /* mandatory */, "Exact", makeTypeInt("uint32"));
+                true /* mandatory */, "Exact", makeType("uint32"));
     tableJson->emplace("key", keyJson);
 
     auto* dataJson = new Util::JsonArray();
@@ -426,7 +426,7 @@ BFRuntimeGenerator::addRegisterCommon(Util::JsonArray* tablesJson,
 
     auto* keyJson = new Util::JsonArray();
     addKeyField(keyJson, TD_DATA_REGISTER_INDEX, "$REGISTER_INDEX",
-                true /* mandatory */, "Exact", makeTypeInt("uint32"));
+                true /* mandatory */, "Exact", makeType("uint32"));
     tableJson->emplace("key", keyJson);
 
     auto* dataJson = new Util::JsonArray();
@@ -451,50 +451,50 @@ BFRuntimeGenerator::addMeterDataFields(Util::JsonArray* dataJson,
         {
             auto* f = makeCommonDataField(
                 TD_DATA_METER_SPEC_CIR_KBPS, "$METER_SPEC_CIR_KBPS",
-                makeTypeInt("uint64", maxUint64), false /* repeated */);
+                makeType("uint64", maxUint64), false /* repeated */);
             addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
         }
         {
             auto* f = makeCommonDataField(
                 TD_DATA_METER_SPEC_PIR_KBPS, "$METER_SPEC_PIR_KBPS",
-                makeTypeInt("uint64", maxUint64), false /* repeated */);
+                makeType("uint64", maxUint64), false /* repeated */);
             addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
         }
         {
             auto* f = makeCommonDataField(
                 TD_DATA_METER_SPEC_CBS_KBITS, "$METER_SPEC_CBS_KBITS",
-                makeTypeInt("uint64", maxUint64), false /* repeated */);
+                makeType("uint64", maxUint64), false /* repeated */);
             addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
         }
         {
             auto* f = makeCommonDataField(
                 TD_DATA_METER_SPEC_PBS_KBITS, "$METER_SPEC_PBS_KBITS",
-                makeTypeInt("uint64", maxUint64), false /* repeated */);
+                makeType("uint64", maxUint64), false /* repeated */);
             addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
         }
     } else if (meter.unit == Meter::Unit::PACKETS) {
         {
             auto* f = makeCommonDataField(
                 TD_DATA_METER_SPEC_CIR_PPS, "$METER_SPEC_CIR_PPS",
-                makeTypeInt("uint64", maxUint64), false /* repeated */);
+                makeType("uint64", maxUint64), false /* repeated */);
             addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
         }
         {
             auto* f = makeCommonDataField(
                 TD_DATA_METER_SPEC_PIR_PPS, "$METER_SPEC_PIR_PPS",
-                makeTypeInt("uint64", maxUint64), false /* repeated */);
+                makeType("uint64", maxUint64), false /* repeated */);
             addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
         }
         {
             auto* f = makeCommonDataField(
                 TD_DATA_METER_SPEC_CBS_PKTS, "$METER_SPEC_CBS_PKTS",
-                makeTypeInt("uint64", maxUint64), false /* repeated */);
+                makeType("uint64", maxUint64), false /* repeated */);
             addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
         }
         {
             auto* f = makeCommonDataField(
                 TD_DATA_METER_SPEC_PBS_PKTS, "$METER_SPEC_PBS_PKTS",
-                makeTypeInt("uint64", maxUint64), false /* repeated */);
+                makeType("uint64", maxUint64), false /* repeated */);
             addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
         }
     } else {
@@ -510,7 +510,7 @@ BFRuntimeGenerator::addActionProfCommon(Util::JsonArray* tablesJson,
 
     auto* keyJson = new Util::JsonArray();
     addKeyField(keyJson, TD_DATA_ACTION_MEMBER_ID, "$ACTION_MEMBER_ID",
-                true /* mandatory */, "Exact", makeTypeInt("uint32"));
+                true /* mandatory */, "Exact", makeType("uint32"));
     tableJson->emplace("key", keyJson);
 
     if (actionProf.tableIds.empty()) {
@@ -739,7 +739,7 @@ BFRuntimeGenerator::addMatchTables(Util::JsonArray* tablesJson) const {
             // DRV-3112 - Make key fields not mandatory, this allows user to use a
             // driver initialized default value (0).
             addKeyField(keyJson, TD_DATA_MATCH_PRIORITY, "$MATCH_PRIORITY",
-                        false /* mandatory */, "Exact", makeTypeInt("uint32"));
+                        false /* mandatory */, "Exact", makeType("uint32"));
         }
         tableJson->emplace("key", keyJson);
 
@@ -755,7 +755,7 @@ BFRuntimeGenerator::addMatchTables(Util::JsonArray* tablesJson) const {
         } else if (tableType == "MatchAction_Indirect") {
             auto* f = makeCommonDataField(
                 TD_DATA_ACTION_MEMBER_ID, "$ACTION_MEMBER_ID",
-                makeTypeInt("uint32"), false /* repeated */);
+                makeType("uint32"), false /* repeated */);
             addSingleton(dataJson, f, true /* mandatory */, false /* read-only */);
         } else if (tableType == "MatchAction_Indirect_Selector") {
             // action member id and selector group id are mutually-exclusive, so
@@ -763,10 +763,10 @@ BFRuntimeGenerator::addMatchTables(Util::JsonArray* tablesJson) const {
             auto* choicesDataJson = new Util::JsonArray();
             choicesDataJson->append(makeCommonDataField(
                 TD_DATA_ACTION_MEMBER_ID, "$ACTION_MEMBER_ID",
-                makeTypeInt("uint32"), false /* repeated */));
+                makeType("uint32"), false /* repeated */));
             choicesDataJson->append(makeCommonDataField(
                 TD_DATA_SELECTOR_GROUP_ID, "$SELECTOR_GROUP_ID",
-                makeTypeInt("uint32"), false /* repeated */));
+                makeType("uint32"), false /* repeated */));
             addOneOf(dataJson, choicesDataJson, true /* mandatory */, false /* read-only */);
         } else {
             BUG("Invalid table type '%1%'", tableType);
@@ -801,7 +801,7 @@ BFRuntimeGenerator::addMatchTables(Util::JsonArray* tablesJson) const {
 
             auto* fEntryTTL = makeCommonDataField(
                 TD_DATA_ENTRY_TTL, "$ENTRY_TTL",
-                makeTypeInt("uint32", 0 /* default TTL -> ageing disabled */),
+                makeType("uint32", 0 /* default TTL -> ageing disabled */),
                 false /* repeated */);
             auto* fEntryHitState = makeCommonDataField(
                 TD_DATA_ENTRY_HIT_STATE, "$ENTRY_HIT_STATE",

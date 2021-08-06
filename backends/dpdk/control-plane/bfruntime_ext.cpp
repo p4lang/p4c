@@ -60,7 +60,7 @@ BFRuntimeSchemaGenerator::addMatchActionData(const p4configv1::Table& table,
     } else if (tableType == "MatchAction_Indirect") {
         auto* f = makeCommonDataField(
             BF_RT_DATA_ACTION_MEMBER_ID, "$ACTION_MEMBER_ID",
-            makeTypeInt("uint32"), false /* repeated */);
+            makeType("uint32"), false /* repeated */);
         addSingleton(dataJson, f, true /* mandatory */, false /* read-only */);
     } else if (tableType == "MatchAction_Indirect_Selector") {
         // action member id and selector group id are mutually-exclusive, so
@@ -68,10 +68,10 @@ BFRuntimeSchemaGenerator::addMatchActionData(const p4configv1::Table& table,
         auto* choicesDataJson = new Util::JsonArray();
         choicesDataJson->append(makeCommonDataField(
             BF_RT_DATA_ACTION_MEMBER_ID, "$ACTION_MEMBER_ID",
-            makeTypeInt("uint32"), false /* repeated */));
+            makeType("uint32"), false /* repeated */));
         choicesDataJson->append(makeCommonDataField(
             BF_RT_DATA_SELECTOR_GROUP_ID, "$SELECTOR_GROUP_ID",
-            makeTypeInt("uint32"), false /* repeated */));
+            makeType("uint32"), false /* repeated */));
         addOneOf(dataJson, choicesDataJson, true /* mandatory */, false /* read-only */);
     } else {
         BUG("Invalid table type '%1%'", tableType);
@@ -87,15 +87,15 @@ BFRuntimeSchemaGenerator::addActionSelectorGetMemberCommon(Util::JsonArray* tabl
 
     auto* keyJson = new Util::JsonArray();
     addKeyField(keyJson, BF_RT_DATA_SELECTOR_GROUP_ID, "$SELECTOR_GROUP_ID",
-                        true /* mandatory */, "Exact", makeTypeInt("uint64"));
+                        true /* mandatory */, "Exact", makeType("uint64"));
     addKeyField(keyJson, BF_RT_DATA_HASH_VALUE, "hash_value",
-                        true /* mandatory */, "Exact", makeTypeInt("uint64"));
+                        true /* mandatory */, "Exact", makeType("uint64"));
     tableJson->emplace("key", keyJson);
 
     auto* dataJson = new Util::JsonArray();
     {
         auto* f = makeCommonDataField(BF_RT_DATA_ACTION_MEMBER_ID, "$ACTION_MEMBER_ID",
-        makeTypeInt("uint64"), false /* repeated */);
+        makeType("uint64"), false /* repeated */);
         addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
     }
     tableJson->emplace("data", dataJson);
@@ -119,14 +119,14 @@ BFRuntimeSchemaGenerator::addActionSelectorCommon(Util::JsonArray* tablesJson,
 
     auto* keyJson = new Util::JsonArray();
     addKeyField(keyJson, BF_RT_DATA_SELECTOR_GROUP_ID, "$SELECTOR_GROUP_ID",
-            true /* mandatory */, "Exact", makeTypeInt("uint32"));
+            true /* mandatory */, "Exact", makeType("uint32"));
     tableJson->emplace("key", keyJson);
 
     auto* dataJson = new Util::JsonArray();
     {
         auto* f = makeCommonDataField(
                 BF_RT_DATA_ACTION_MEMBER_ID, "$ACTION_MEMBER_ID",
-                makeTypeInt("uint32"), true /* repeated */);
+                makeType("uint32"), true /* repeated */);
         addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
     }
     {
@@ -138,7 +138,7 @@ BFRuntimeSchemaGenerator::addActionSelectorCommon(Util::JsonArray* tablesJson,
     {
         auto* f = makeCommonDataField(
                 BF_RT_DATA_MAX_GROUP_SIZE, "$MAX_GROUP_SIZE",
-                makeTypeInt("uint32", actionSelector.max_group_size), false /* repeated */);
+                makeType("uint32", actionSelector.max_group_size), false /* repeated */);
         addSingleton(dataJson, f, false /* mandatory */, false /* read-only */);
     }
     tableJson->emplace("data", dataJson);

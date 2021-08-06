@@ -165,14 +165,14 @@ findDirectMeter(const p4configv1::P4Info& p4info, P4Id meterId) {
 
 }  // namespace Standard
 
-static Util::JsonObject* makeTypeInt(cstring type) {
+static Util::JsonObject* makeType(cstring type) {
     auto* typeObj = new Util::JsonObject();
     typeObj->emplace("type", type);
     return typeObj;
 }
 
 template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-static Util::JsonObject* makeTypeInt(cstring type, T defaultValue) {
+static Util::JsonObject* makeType(cstring type, T defaultValue) {
     auto* typeObj = new Util::JsonObject();
     typeObj->emplace("type", type);
     typeObj->emplace("default_value", defaultValue);
