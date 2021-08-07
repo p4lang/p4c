@@ -103,12 +103,7 @@ TEST_F(SimpleSwitchGrpcTest_Meter, ReadDefault) {
     EXPECT_TRUE(status.ok());
     EXPECT_EQ(read_response.entities_size(), 1);
     const auto &read_entry = read_response.entities(0).table_entry();
-    ASSERT_TRUE(read_entry.has_meter_config());
-    const auto &meter_config = read_entry.meter_config();
-    EXPECT_EQ(meter_config.pir(), -1);
-    EXPECT_EQ(meter_config.pburst(), -1);
-    EXPECT_EQ(meter_config.cir(), -1);
-    EXPECT_EQ(meter_config.cburst(), -1);
+    ASSERT_FALSE(read_entry.has_meter_config());
   }
 }
 
