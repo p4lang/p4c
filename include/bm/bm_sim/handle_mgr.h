@@ -152,6 +152,7 @@ class HandleMgr {
     if (pos < s) {
       handles.set(pos);
       first_unset = handles.find_unset_next(first_unset);
+      first_unset = (first_unset == DynamicBitset::npos) ? s : first_unset;
     } else {
       assert(pos == s);
       first_unset++;
@@ -173,9 +174,12 @@ class HandleMgr {
     auto s = handles.size();
     if (pos >= s)
       handles.resize(pos + 1);
-    else if (!handles.set(pos))
+    if (!handles.set(pos))
       return -1;
-    if (first_unset == pos) first_unset = handles.find_unset_next(pos);
+    if (first_unset == pos) {
+      first_unset = handles.find_unset_next(pos);
+      first_unset = (first_unset == DynamicBitset::npos) ? s : first_unset;
+    }
     return 0;
   }
 

@@ -21,6 +21,7 @@
 
 #include <gtest/gtest.h>
 
+#include <bm/bm_sim/dynamic_bitset.h>
 #include <bm/bm_sim/handle_mgr.h>
 
 using bm::HandleMgr;
@@ -110,4 +111,31 @@ TEST_F(HandleMgrTest, LargeTest) {
     i++;
   }
   ASSERT_EQ(num_active_handles, i);
+}
+
+TEST_F(HandleMgrTest, FirstUnsetUpdateGetHandle) {
+  HandleMgr handle_mgr;
+  handle_t handle;
+  ASSERT_EQ(0, handle_mgr.get_handle(&handle));
+  ASSERT_EQ(0, handle_mgr.release_handle(handle));
+  ASSERT_EQ(0, handle_mgr.get_handle(&handle));
+  ASSERT_EQ(0, handle_mgr.get_handle(&handle));
+}
+
+TEST_F(HandleMgrTest, FirstUnsetUpdateSetHandle) {
+  const int block_width = std::numeric_limits<bm::DynamicBitset::Block>::digits;
+  HandleMgr handle_mgr;
+  for (int i = 0; i < block_width; i++) {
+    ASSERT_EQ(0, handle_mgr.set_handle(i));
+  }
+  handle_t handle;
+  ASSERT_EQ(0, handle_mgr.get_handle(&handle));
+}
+
+TEST_F(HandleMgrTest, SetHandle) {
+  HandleMgr handle_mgr;
+  ASSERT_EQ(0, handle_mgr.set_handle(0));
+  ASSERT_EQ(0, handle_mgr.release_handle(0));
+  ASSERT_EQ(0, handle_mgr.set_handle(0));
+  ASSERT_EQ(0, handle_mgr.set_handle(1));
 }

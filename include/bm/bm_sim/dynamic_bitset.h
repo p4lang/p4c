@@ -144,7 +144,7 @@ class DynamicBitset {
 
   void resize(size_type new_num_bits) {
     num_bits = new_num_bits;
-    words.resize(num_bits / block_width);
+    words.resize((num_bits + block_width - 1) / block_width);
   }
 
  private:
