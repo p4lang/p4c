@@ -45,6 +45,7 @@ class Options(object):
         self.runDebugger = False
         self.runDebugger_skip = 0
         self.generateP4Runtime = False
+        self.generateBfRt = False
 
 def usage(options):
     name = options.binary
@@ -58,6 +59,7 @@ def usage(options):
     print("          -f: replace reference outputs with newly generated ones")
     print("          -a \"args\": pass args to the compiler")
     print("          --p4runtime: generate P4Info message in text format")
+    print("          --bfrt: generate BfRt message in text format")
 
 def isError(p4filename):
     # True if the filename represents a p4 program that should fail
@@ -187,6 +189,9 @@ def process_file(options, argv):
         print("Writing temporary files into ", tmpdir)
     stderr = os.path.join(tmpdir, basename + "-error")
     spec = os.path.join(tmpdir, basename + ".spec")
+    p4runtimeFile = os.path.join(tmpdir, basename + ".p4info.txt")
+    p4runtimeEntriesFile = os.path.join(tmpdir, basename + ".entries.txt")
+    bfRtSchemaFile = os.path.join(tmpdir, basename + ".bfrt.json")
     def getArch(path):
         v1Pattern = re.compile('include.*v1model\.p4')
         psaPattern = re.compile('include.*psa\.p4')
@@ -207,6 +212,14 @@ def process_file(options, argv):
     arch = getArch(options.p4filename)
     if arch is not None:
         args.extend(["--arch", arch])
+        if options.generateP4Runtime:
+            args.extend(["--p4runtime-files", p4runtimeFile])
+            args.extend(["--p4runtime-entries-files", p4runtimeEntriesFile])
+        if options.generateBfRt:
+            args.extend(["--bf-rt-schema", bfRtSchemaFile])
+
+    if "p4_14" in options.p4filename or "v1_samples" in options.p4filename:
+        args.extend(["--std", "p4-14"])
     args.extend(argv)
     if options.runDebugger:
         if options.runDebugger_skip > 0:
@@ -285,6 +298,8 @@ def main(argv):
                 options.runDebugger_skip = int(argv[0][4:]) - 1
         elif argv[0] == "--p4runtime":
             options.generateP4Runtime = True
+        elif argv[0] == "--bfrt":
+            options.generateBfRt = True
         else:
             print("Unknown option ", argv[0], file=sys.stderr)
             usage(options)
