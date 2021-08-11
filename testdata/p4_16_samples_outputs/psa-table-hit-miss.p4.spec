@@ -96,7 +96,8 @@ apply {
 	LABEL_2END :	table tbl
 	jmpnh LABEL_3END
 	invalidate h.ethernet
-	LABEL_3END :	tx m.psa_ingress_output_metadata_egress_port
+	LABEL_3END :	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
+	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP : drop
 }
 

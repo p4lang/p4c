@@ -91,7 +91,7 @@ action NoAction args none {
 action execute args instanceof execute_arg_t {
 	meter meter0_0 t.index h.ipv4.totalLen m.Ingress_color_in_0 m.Ingress_color_out_0
 	jmpneq LABEL_1FALSE m.Ingress_color_out_0 0x1
-	LABEL_1TRUE :	mov m.Ingress_tmp 0x1
+	mov m.Ingress_tmp 0x1
 	jmp LABEL_1END
 	LABEL_1FALSE :	mov m.Ingress_tmp 0x0
 	LABEL_1END :	mov m.local_metadata_port_out m.Ingress_tmp
