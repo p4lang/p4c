@@ -303,6 +303,13 @@ class Data {
   }
 
   //! NC
+  void bit_and(const Data &src1, uint64_t src2) {
+    assert(src1.arith);
+    value = src1.value & src2;
+    export_bytes();
+  }
+
+  //! NC
   void bit_or(const Data &src1, const Data &src2) {
     assert(src1.arith && src2.arith);
     value = src1.value | src2.value;

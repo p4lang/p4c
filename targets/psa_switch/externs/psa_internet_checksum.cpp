@@ -87,11 +87,13 @@ PSA_InternetChecksum::clear() {
 void
 PSA_InternetChecksum::add(const std::vector<Field> &fields) {
     bm::Data input(0);
+    bm::Data chunk;
 
     concatenate_fields(fields, input);
 
     while (!input.test_eq(0)) {
-        uint16_t d = input.get<uint16_t>();
+        chunk.bit_and(input, 0xFFFF);
+        uint16_t d = chunk.get<uint16_t>();
         sum = ones_complement_sum(sum, d);
         input.shift_right(input, 16);
     }
@@ -100,11 +102,13 @@ PSA_InternetChecksum::add(const std::vector<Field> &fields) {
 void
 PSA_InternetChecksum::subtract(const std::vector<Field> &fields) {
     bm::Data input(0);
+    bm::Data chunk;
 
     concatenate_fields(fields, input);
 
     while (!input.test_eq(0)) {
-        uint16_t d = input.get<uint16_t>();
+        chunk.bit_and(input, 0xFFFF);
+        uint16_t d = chunk.get<uint16_t>();
         sum = ones_complement_sum(sum, ~d);
         input.shift_right(input, 16);
     }
