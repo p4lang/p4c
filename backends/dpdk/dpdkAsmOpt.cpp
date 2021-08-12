@@ -85,8 +85,8 @@ const IR::IndexedVector<IR::DpdkAsmStatement> *RemoveConsecutiveJmpAndLabel::rem
             new_l->push_back(stmt);
         }
     }
-    // Do not remove jump to LABEL_DROP as LABEL_DROP is not part of statement list
-    // and should not be optimized here.
+    // Do not remove jump to LABEL_DROP as LABEL_DROP is not part of statement list and
+    // should not be optimized here.
     if (cache && cache->label == "LABEL_DROP")
         new_l->push_back(cache);
     return  new_l;
