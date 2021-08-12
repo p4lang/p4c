@@ -129,12 +129,12 @@ void PsaProgramStructure::createScalars(ConversionContext* ctxt) {
         auto ftype = typeMap->getType(kv.second, true);
         if (auto type = ftype->to<IR::Type_Bits>()) {
             field->append(kv.second->name);
-            max_length+=type->size;
+            max_length += type->size;
             field->append(type->size);
             field->append(type->isSigned);
         } else if (auto type = ftype->to<IR::Type_Boolean>()) {
             field->append(kv.second->name);
-            max_length+=1;
+            max_length += 1;
             field->append(1);
             field->append(false);
         } else {
@@ -683,16 +683,16 @@ Util::IJson* ExternConverter_InternetChecksum::convertExternObject(
     if (em->method->name == "add" || em->method->name == "subtract") {
         auto fieldList=new Util::JsonObject();
         fieldList->emplace("type","field_list");
-        auto fieldsJson = ctxt->conv->convert(mc->arguments->at(0)->expression,true,false);
+        auto fieldsJson = ctxt->conv->convert(mc->arguments->at(0)->expression, true, false);
         fieldList->emplace("value",fieldsJson);
         parameters->append(fieldList);
     } else if (em->method->name != "clear") {
-        if (mc->arguments->size()==2) {  // get_verify
+        if (mc->arguments->size() == 2) {  // get_verify
         auto dst = ctxt->conv->convertLeftValue(mc->arguments->at(0)->expression);
         auto equOp = ctxt->conv->convert(mc->arguments->at(1)->expression);
         parameters->append(dst);
         parameters->append(equOp);
-        } else if (mc->arguments->size()==1) {
+        } else if (mc->arguments->size()==1) { // get and get_state
         auto dst = ctxt->conv->convert(mc->arguments->at(0)->expression);
         parameters->append(dst);
         }
@@ -887,19 +887,19 @@ void ExternConverter_InternetChecksum::convertExternInstance(
     UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
-    auto trim=inst->controlPlaneName().find(".");
-    auto block=inst->controlPlaneName().trim(trim);
+    auto trim = inst->controlPlaneName().find(".");
+    auto block = inst->controlPlaneName().trim(trim);
     auto psaStructure = static_cast<PsaProgramStructure *>(ctxt->structure);
     auto ingressParser = psaStructure->parsers.at("ingress")->controlPlaneName();
-    auto ingressDeparser=psaStructure->deparsers.at("ingress")->controlPlaneName();
+    auto ingressDeparser = psaStructure->deparsers.at("ingress")->controlPlaneName();
     auto egressParser = psaStructure->parsers.at("egress")->controlPlaneName();
-    auto egressDeparser=psaStructure->deparsers.at("egress")->controlPlaneName();
-        if (block!=ingressParser && block!=ingressDeparser
+    auto egressDeparser = psaStructure->deparsers.at("egress")->controlPlaneName();
+        if (block != ingressParser && block!=ingressDeparser
                                 && block!=egressParser && block!=egressDeparser) {
         ::error(ErrorType::ERR_UNSUPPORTED, "%1%: not supported in pipeline on this target", eb);
     }
     // add checksum instance
-    auto jcksum=new Util::JsonObject();
+    auto jcksum = new Util::JsonObject();
     jcksum->emplace("name", name);
     jcksum->emplace("id", nextId("extern_instances"));
     jcksum->emplace("type", eb->getName());

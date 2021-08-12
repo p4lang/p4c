@@ -48,7 +48,7 @@ cstring ParserConverter::jsonAssignment(const IR::Type* type, bool inParser) {
 Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat) {
     auto result = new Util::JsonObject();
     auto params = mkArrayField(result, "parameters");
-    auto isR=false;
+    auto isR = false;
     IR::MethodCallExpression *mce2 = nullptr;
     if (stat->is<IR::AssignmentStatement>()) {
         auto assign = stat->to<IR::AssignmentStatement>();
@@ -79,10 +79,10 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
             const IR::Expression *l,*r;
             if (assign->right->to<IR::Equ>()->right->is<IR::MethodCallExpression>()) {
                 mce = equ->right->to<IR::MethodCallExpression>();
-                r=equ->left;
+                r = equ->left;
             } else {
                 mce = equ->left->to<IR::MethodCallExpression>();
-                r=equ->right;
+                r = equ->right;
             }
             auto minst = P4::MethodInstance::resolve(mce, ctxt->refMap, ctxt->typeMap);
             if (minst->is<P4::ExternMethod>()) {
@@ -92,7 +92,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                     l=assign->left;
                     isR=true;
                     auto dest = new IR::Argument(l);
-                    auto equOp=new IR::Argument(r);
+                    auto equOp = new IR::Argument(r);
                     auto args = new IR::Vector<IR::Argument>();
                     args->push_back(dest);  // dest
                     args->push_back(equOp);

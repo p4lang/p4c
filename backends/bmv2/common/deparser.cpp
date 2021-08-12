@@ -24,7 +24,7 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
                                           Util::JsonArray* order, Util::JsonArray* primitives) {
     ctxt->conv->simpleExpressionsOnly = true;
     for (auto s : *body) {
-        auto isR=false;
+        auto isR = false;
         IR::MethodCallExpression *mce2 = nullptr;
         if (auto block = s->to<IR::BlockStatement>()) {
             convertDeparserBody(&block->components, order, primitives);
@@ -45,7 +45,7 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
                     && extmeth->originalExternType->name == "InternetChecksum") {
                         const IR::Expression *l;
                         l = assign->left;
-                        isR=true;
+                        isR = true;
                         auto dest = new IR::Argument(l);
                         auto args = new IR::Vector<IR::Argument>();
                         args->push_back(dest);  // dest
