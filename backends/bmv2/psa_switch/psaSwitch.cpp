@@ -692,7 +692,7 @@ Util::IJson* ExternConverter_InternetChecksum::convertExternObject(
         auto equOp = ctxt->conv->convert(mc->arguments->at(1)->expression);
         parameters->append(dst);
         parameters->append(equOp);
-        } else if (mc->arguments->size()==1) { // get and get_state
+        } else if (mc->arguments->size()==1) {  // get and get_state
         auto dst = ctxt->conv->convert(mc->arguments->at(0)->expression);
         parameters->append(dst);
         }
