@@ -55,12 +55,12 @@ void ConvertStatementToDpdk::process_relation_operation(const IR::Expression* ds
    Hence we convert the expression var = a LOP b into if-else statements.
    var = a || b            ||     var = a && b
 => if (a){                 ||=>   if (!a)
-       var = 1;            ||         var = 0;
+       var = true;         ||         var = false;
    } else {                ||     } else {
        if (b)              ||         if (!b)
-           var = 1;        ||             var = 0;
+           var = true;     ||             var = false;
        else                ||         else
-           var = 0;        ||             var = 1;
+           var = false;    ||             var = true;
    }                       ||     }
 
    This function assumes complex logical operations are converted to simple expressions by
