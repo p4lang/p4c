@@ -55,8 +55,7 @@ SymbolicValue* SymbolicValueFactory::create(const IR::Type* type, bool uninitial
 }
 
 bool SymbolicValueFactory::isFixedWidth(const IR::Type* type) const {
-    type = typeMap->getType(type, true);
-    type = type->to<IR::Type_Type>()->type;
+    type = typeMap->getTypeType(type, true);
     if (type->is<IR::Type_Varbits>())
         return false;
     if (type->is<IR::Type_Extern>())
@@ -675,6 +674,16 @@ void ExpressionEvaluator::postorder(const IR::ListExpression* expression) {
     for (auto e : expression->components) {
         auto v = get(e);
         result->add(v);
+    }
+    set(expression, result);
+}
+
+void ExpressionEvaluator::postorder(const IR::StructExpression* expression) {
+    auto type = typeMap->getType(expression, true);
+    auto result = new SymbolicStruct(type->to<IR::Type_StructLike>());
+    for (auto e : expression->components) {
+        auto v = get(e->expression);
+        result->set(e->name, v);
     }
     set(expression, result);
 }
