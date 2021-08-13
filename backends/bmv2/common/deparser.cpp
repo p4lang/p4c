@@ -154,10 +154,6 @@ bool DeparserConverter::preorder(const IR::P4Control* control) {
         if (c->is<IR::Declaration_Instance>()) {
             auto bl = ctxt->structure->resourceMap.at(c);
             CHECK_NULL(bl);
-            if (bl->is<IR::ControlBlock>() || bl->is<IR::ParserBlock>())
-                // Since this block has not been inlined, it is probably unused
-                // So we don't do anything.
-                continue;
             if (bl->is<IR::ExternBlock>()) {
                 auto eb = bl->to<IR::ExternBlock>();
                 ExternConverter::cvtExternInstance(ctxt, c, eb, true);

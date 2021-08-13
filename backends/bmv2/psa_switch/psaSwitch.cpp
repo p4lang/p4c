@@ -667,13 +667,34 @@ Util::IJson* ExternConverter_InternetChecksum::convertExternObject(
     UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
-    Util::JsonObject* primitive=nullptr;
-    if (mc->arguments->size()<2)
-        primitive = mkPrimitive("_" + em->originalExternType->name +
-                                 "_" + em->method->name);
-    else
-        primitive = mkPrimitive("_" + em->originalExternType->name +
-                                 "_" + "get_verify");
+    Util::JsonObject* primitive = nullptr;
+    if (em->method->name == "add" || em->method->name == "subtract" ||
+        em->method->name == "get_state" || em->method->name == "set_state") {
+        if (mc->arguments->size() != 1) {
+            modelError("Expected 1 argument for %1%", mc);
+            return nullptr;
+        } else
+            primitive = mkPrimitive("_" + em->originalExternType->name +
+                                    "_" + em->method->name);
+    } else if (em->method->name == "get") {
+        if (mc->arguments->size() == 1)
+            primitive = mkPrimitive("_" + em->originalExternType->name +
+                                    "_" + em->method->name);
+        else if (mc->arguments->size() == 2)
+            primitive = mkPrimitive("_" + em->originalExternType->name +
+                                    "_" + "get_verify");
+        else {
+            modelError("Unexpected number of arguments for %1%", mc);
+            return nullptr;
+        }
+    } else if (em->method->name == "clear") {
+        if (mc->arguments->size() != 0) {
+            modelError("Expected 0 argument for %1%", mc);
+            return nullptr;
+        } else
+            primitive = mkPrimitive("_" + em->originalExternType->name +
+                                    "_" + em->method->name);
+    }
     auto parameters = mkParameters(primitive);
     primitive->emplace_non_null("source_info", s->sourceInfoJsonObj());
     auto cksum = new Util::JsonObject();
@@ -688,13 +709,13 @@ Util::IJson* ExternConverter_InternetChecksum::convertExternObject(
         parameters->append(fieldList);
     } else if (em->method->name != "clear") {
         if (mc->arguments->size() == 2) {  // get_verify
-        auto dst = ctxt->conv->convertLeftValue(mc->arguments->at(0)->expression);
-        auto equOp = ctxt->conv->convert(mc->arguments->at(1)->expression);
-        parameters->append(dst);
-        parameters->append(equOp);
-        } else if (mc->arguments->size()==1) {  // get and get_state
-        auto dst = ctxt->conv->convert(mc->arguments->at(0)->expression);
-        parameters->append(dst);
+            auto dst = ctxt->conv->convertLeftValue(mc->arguments->at(0)->expression);
+            auto equOp = ctxt->conv->convert(mc->arguments->at(1)->expression);
+            parameters->append(dst);
+            parameters->append(equOp);
+        } else if (mc->arguments->size() == 1) {  // get or get_state or set_state
+            auto dst = ctxt->conv->convert(mc->arguments->at(0)->expression);
+            parameters->append(dst);
         }
     }
     return primitive;
