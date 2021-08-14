@@ -16,6 +16,7 @@ limitations under the License.
 #include <unordered_map>
 #include "backend.h"
 #include "backends/bmv2/psa_switch/psaSwitch.h"
+#include "backends/common/lower.h"
 #include "dpdkArch.h"
 #include "dpdkAsmOpt.h"
 #include "dpdkHelpers.h"
@@ -63,6 +64,8 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
         // TBD: implement dpdk lowering passes instead of reusing bmv2's
         // lowering pass.
         new BMV2::LowerExpressions(typeMap),
+        // Needed to simplify parameters in select expression
+        new P4::RemoveComplexExpressions(refMap, typeMap),
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),

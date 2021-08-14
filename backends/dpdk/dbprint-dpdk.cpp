@@ -50,6 +50,10 @@ void IR::DpdkExtractStatement::dbprint(std::ostream& out) const {
     out << "extract " << header << std::endl;
 }
 
+void IR::DpdkLookAheadStatement::dbprint(std::ostream& out) const {
+    out << "lookahead " << header << std::endl;
+}
+
 void IR::DpdkJmpEqualStatement::dbprint(std::ostream& out) const {
     out << "jmpeq " << label << " " << src1 << " " << src2 << std::endl;
 }

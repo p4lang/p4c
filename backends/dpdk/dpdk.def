@@ -93,6 +93,11 @@ class DpdkExtractStatement : DpdkAsmStatement, IDPDKNode {
     std::ostream& toSpec(std::ostream& out) const override;
 }
 
+class DpdkLookAheadStatement : DpdkAsmStatement, IDPDKNode {
+    Expression header;
+    std::ostream& toSpec(std::ostream& out) const override;
+}
+
 abstract DpdkJmpStatement : DpdkAsmStatement {
     cstring instruction;
     cstring label;

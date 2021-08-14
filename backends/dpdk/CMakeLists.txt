@@ -60,6 +60,7 @@ set(P4C_DPDK_SOURCES
     ../bmv2/common/parser.cpp
     ../bmv2/common/programStructure.cpp
     ../bmv2/psa_switch/psaSwitch.cpp
+    ../common/lower.cpp
     backend.cpp
     main.cpp
     midend.cpp
@@ -96,6 +97,7 @@ set(P4C_DPDK_HEADERS
     ../bmv2/common/programStructure.h
     ../bmv2/common/sharedActionSelectorCheck.h
     ../bmv2/psa_switch/psaSwitch.h
+    ../common/lower.h
     backend.h
     midend.h
     dpdkHelpers.h

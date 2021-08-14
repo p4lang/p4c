@@ -311,6 +311,11 @@ std::ostream &IR::DpdkExtractStatement::toSpec(std::ostream &out) const {
     return out;
 }
 
+std::ostream &IR::DpdkLookAheadStatement::toSpec(std::ostream &out) const {
+    out << "lookahead " << DPDK::toStr(header);
+    return out;
+}
+
 std::ostream &IR::DpdkJmpStatement::toSpec(std::ostream &out) const {
     out << instruction << " " << label;
     return out;

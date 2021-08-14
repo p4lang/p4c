@@ -84,6 +84,9 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options,
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     std::function<bool(const Context *, const IR::Expression *)> policy =
         [=](const Context *ctx, const IR::Expression *e) -> bool {
+        if (ctx == nullptr) {
+            LOG3("Context for expression " << e << " is nullptr");
+            return false; }
         if (auto mce = findContext<IR::MethodCallExpression>(ctx)) {
             auto mi = P4::MethodInstance::resolve(mce, &refMap, &typeMap);
             if (auto em = mi->to<P4::ExternMethod>()) {
@@ -115,6 +118,9 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options,
                         return false;
                 }
             }
+        // } else if (auto select = findContext<IR::SelectExpression>(ctx)) {
+        //     LOG1("expression " << e);
+        //     return true;
         }
         return true;
     };

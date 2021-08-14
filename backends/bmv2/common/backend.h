@@ -17,6 +17,7 @@ limitations under the License.
 #ifndef BACKENDS_BMV2_COMMON_BACKEND_H_
 #define BACKENDS_BMV2_COMMON_BACKEND_H_
 
+#include "backends/common/lower.h"
 #include "controlFlowGraph.h"
 #include "expression.h"
 #include "frontends/common/model.h"
@@ -95,7 +96,7 @@ are in the specified set.
 For example, we expect that the code in ingress and egress will have complex
 expression removed.
 */
-class ProcessControls : public BMV2::RemoveComplexExpressionsPolicy {
+class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
     const std::set<cstring> *process;
 
  public:

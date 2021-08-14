@@ -134,6 +134,12 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                     i = new IR::DpdkRegisterReadStatement(
                         left, e->object->getName(), index);
                 }
+            } else if (e->originalExternType->getName().name == "packet_in") {
+                if (e->method->getName().name == "lookahead") {
+                    dump(e->expr);
+                    // auto header = (*e->expr->arguments)[0]->expression;
+                    // i = new IR::DpdkLookAheadStatement(header);
+                }
             } else {
                 BUG("%1% Not implemented", e->originalExternType->name);
             }

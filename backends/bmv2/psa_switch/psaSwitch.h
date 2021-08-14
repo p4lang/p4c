@@ -29,6 +29,7 @@ limitations under the License.
 #include "frontends/p4/typeMap.h"
 #include "frontends/p4/simplify.h"
 #include "frontends/p4/unusedDeclarations.h"
+#include "backends/common/lower.h"
 #include "backends/bmv2/common/action.h"
 #include "backends/bmv2/common/control.h"
 #include "backends/bmv2/common/deparser.h"

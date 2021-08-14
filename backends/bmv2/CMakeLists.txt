@@ -56,6 +56,7 @@ set (BMV2_BACKEND_COMMON_SRCS
   common/metermap.cpp
   common/parser.cpp
   common/programStructure.cpp
+  ../common/lower.cpp
   )
 
 set (BMV2_BACKEND_COMMON_HDRS
@@ -78,6 +79,7 @@ set (BMV2_BACKEND_COMMON_HDRS
   common/parser.h
   common/programStructure.h
   common/sharedActionSelectorCheck.h
+  ../common/lower.h
   )
 
 set (IR_DEF_FILES ${IR_DEF_FILES} ${CMAKE_CURRENT_SOURCE_DIR}/bmv2.def PARENT_SCOPE)

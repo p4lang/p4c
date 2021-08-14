@@ -1,0 +1,62 @@
+pkg_info {
+  arch: "psa"
+}
+tables {
+  preamble {
+    id: 41185813
+    name: "ingress.ipv4_exact"
+    alias: "ipv4_exact"
+  }
+  match_fields {
+    id: 1
+    name: "headers.ipv4.dst_addr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  match_fields {
+    id: 2
+    name: "headers.ipv4.src_addr"
+    bitwidth: 32
+    match_type: EXACT
+  }
+  action_refs {
+    id: 30548487
+  }
+  action_refs {
+    id: 33281717
+  }
+  size: 1024
+}
+actions {
+  preamble {
+    id: 33281717
+    name: "ingress.drop"
+    alias: "drop"
+  }
+}
+actions {
+  preamble {
+    id: 30548487
+    name: "ingress.ipv4_forward"
+    alias: "ipv4_forward"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 32
+    type_name {
+      name: "PortId_t"
+    }
+  }
+}
+type_info {
+  new_types {
+    key: "PortId_t"
+    value {
+      translated_type {
+        uri: "p4.org/psa/v1/PortId_t"
+        sdn_bitwidth: 32
+      }
+    }
+  }
+}
