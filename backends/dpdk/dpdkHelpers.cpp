@@ -51,9 +51,53 @@ void ConvertStatementToDpdk::process_relation_operation(const IR::Expression* ds
     add_instr(new IR::DpdkLabelStatement(end_label));
 }
 
+/* DPDK target does not support storing result of logical operations such as || and &&.
+   Hence we convert the expression var = a LOP b into if-else statements.
+   var = a || b            ||     var = a && b
+=> if (a){                 ||=>   if (!a)
+       var = true;         ||         var = false;
+   } else {                ||     } else {
+       if (b)              ||         if (!b)
+           var = true;     ||             var = false;
+       else                ||         else
+           var = false;    ||             var = true;
+   }                       ||     }
+
+   This function assumes complex logical operations are converted to simple expressions by
+   ConvertLogicalExpression pass.
+*/
+void ConvertStatementToDpdk::process_logical_operation(const IR::Expression* dst,
+                                                        const IR::Operation_Binary* op) {
+    if (!op->is<IR::LOr>() && !op->is<IR::LAnd>())
+        return;
+    auto true_label = Util::printf_format("label_%dtrue", next_label_id);
+    auto false_label = Util::printf_format("label_%dfalse", next_label_id);
+    auto end_label = Util::printf_format("label_%dend", next_label_id++);
+    if (op->is<IR::LOr>()) {
+        add_instr(new IR::DpdkJmpEqualStatement(true_label, op->left, new IR::Constant(true)));
+        add_instr(new IR::DpdkJmpEqualStatement(true_label, op->right, new IR::Constant(true)));
+        add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(false)));
+        add_instr(new IR::DpdkJmpLabelStatement(end_label));
+        add_instr(new IR::DpdkLabelStatement(true_label));
+        add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(true)));
+        add_instr(new IR::DpdkLabelStatement(end_label));
+    } else if (op->is<IR::LAnd>()) {
+        add_instr(new IR::DpdkJmpEqualStatement(false_label, op->left, new IR::Constant(false)));
+        add_instr(new IR::DpdkJmpEqualStatement(false_label, op->right, new IR::Constant(false)));
+        add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(true)));
+        add_instr(new IR::DpdkJmpLabelStatement(end_label));
+        add_instr(new IR::DpdkLabelStatement(false_label));
+        add_instr(new IR::DpdkMovStatement(dst, new IR::Constant(false)));
+        add_instr(new IR::DpdkLabelStatement(end_label));
+    } else {
+        BUG("%1% not implemented.", op);
+    }
+}
+
 bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
     auto left = a->left;
     auto right = a->right;
+
     IR::DpdkAsmStatement *i = nullptr;
 
     if (auto r = right->to<IR::Operation_Relation>()) {
@@ -69,10 +113,8 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
             i = new IR::DpdkShrStatement(left, r->left, r->right);
         } else if (right->is<IR::Equ>()) {
             i = new IR::DpdkEquStatement(left, r->left, r->right);
-        } else if (right->is<IR::LAnd>()) {
-            i = new IR::DpdkLAndStatement(left, r->left, r->right);
-        } else if (right->is<IR::LOr>()) {
-            i = new IR::DpdkLOrStatement(left, r->left, r->right);
+        } else if (right->is<IR::LOr>() || right->is<IR::LAnd>()) {
+            process_logical_operation(left, r);
         } else if (right->is<IR::Leq>()) {
             i = new IR::DpdkLeqStatement(left, r->left, r->right);
         } else if (right->is<IR::BOr>()) {
@@ -138,7 +180,21 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
                 BUG("%1% Not implemented", e->originalExternType->name);
             }
         } else if (auto b = mi->to<P4::BuiltInMethod>()) {
-            BUG("%1% Not Implemented", b->name);
+            if (b->name == "isValid") {
+                /* DPDK target does not support isvalid() method call as RHS of assignment
+                   Hence, var = hdr.isValid() is translated as
+                   var = true;
+                   if (!(hdr.isValid()))
+                       var = false;
+                */
+                auto end_label = Util::printf_format("label_%dend", next_label_id++);
+                add_instr(new IR::DpdkMovStatement(left, new IR::BoolLiteral(true)));
+                add_instr(new IR::DpdkJmpIfValidStatement(end_label, b->appliedTo));
+                add_instr(new IR::DpdkMovStatement(left, new IR::BoolLiteral(false)));
+                i = new IR::DpdkLabelStatement(end_label);
+            } else {
+                BUG("%1% Not Implemented", b->name);
+            }
         } else {
             BUG("%1% Not implemented", m);
         }
@@ -150,7 +206,21 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
         } else if (auto c = right->to<IR::Cmpl>()) {
             i = new IR::DpdkCmplStatement(left, c->expr);
         } else if (auto ln = right->to<IR::LNot>()) {
-            i = new IR::DpdkLNotStatement(left, ln->expr);
+            /* DPDK target does not support storing result of logical NOT operation.
+               Hence we convert the expression var = !a into if-else statement.
+               if (a == 0)
+                   var = 1;
+               else
+                   var = 0;
+            */
+            auto true_label = Util::printf_format("label_%dtrue", next_label_id);
+            auto end_label = Util::printf_format("label_%dend", next_label_id++);
+            add_instr(new IR::DpdkJmpEqualStatement(true_label, ln->expr, new IR::Constant(false)));
+            add_instr(new IR::DpdkMovStatement(left, new IR::Constant(false)));
+            add_instr(new IR::DpdkJmpLabelStatement(end_label));
+            add_instr(new IR::DpdkLabelStatement(true_label));
+            add_instr(new IR::DpdkMovStatement(left, new IR::Constant(true)));
+            i = new IR::DpdkLabelStatement(end_label);
         } else {
             std::cerr << right->node_type_name() << std::endl;
             BUG("Not implemented.");
