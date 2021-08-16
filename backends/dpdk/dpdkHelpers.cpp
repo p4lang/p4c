@@ -497,18 +497,21 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
                     auto counter = a->object->getName();
                     if (args->size() == 2)
                         incr = args->at(1)->expression;
+                    if (!incr && value > 0) {
+                        ::error(ErrorType::ERR_UNEXPECTED,
+                                "Expected packet length argument for %1%", a->object->getName());
+                        return false;
+                    }
                     if (value == 2) {
-                        if (incr) {
-                            add_instr(new IR::DpdkCounterCountStatement(counter+"_packets",
-                                                                        index, incr));
-                            add_instr(new IR::DpdkCounterCountStatement(counter+"_bytes",
+                        add_instr(new IR::DpdkCounterCountStatement(counter+"_packets",
                                                                         index));
-                        } else {
-                           ::error(ErrorType::ERR_UNEXPECTED,
-                                   "Expected packet length argument for %1%", a->object->getName());
-                        }
-                     } else {
-                         add_instr(new IR::DpdkCounterCountStatement(counter, index, incr));
+                        add_instr(new IR::DpdkCounterCountStatement(counter+"_bytes",
+                                                                        index, incr));
+                    } else {
+                         if (value == 1)
+                             add_instr(new IR::DpdkCounterCountStatement(counter, index, incr));
+                         else
+                             add_instr(new IR::DpdkCounterCountStatement(counter, index));
                      }
                 }
             } else {

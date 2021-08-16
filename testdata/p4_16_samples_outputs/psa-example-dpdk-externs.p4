@@ -75,9 +75,9 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
     apply {
         if (user_meta.port_out == 1) {
             tbl.apply();
-            counter0.count(1024, 20);
-            counter1.count(512, 64);
-            counter2.count(1024);
+            counter0.count(1023, 20);
+            counter1.count(512);
+            counter2.count(1023, 64);
             user_meta.port_out = reg.read(1);
         } else {
             return;

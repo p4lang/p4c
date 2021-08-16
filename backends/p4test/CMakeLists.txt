@@ -105,6 +105,9 @@ set (P4_XFAIL_TESTS
   # This program uses a list of expressions on the 'psa_implementation' property
   # which is currently unsupported
   testdata/p4_16_samples/psa-action-profile2.p4
+  # This program uses conditional execution inside action body which is currently
+  # unsupported
+  testdata/p4_16_samples/psa-dpdk-action-jumpOpt.p4
   )
 # we invoke p4c with --p4runtime-files even for programs in p4_16_errors. This
 # enables us to use p4_16_errors even for programs which pass compilation but
