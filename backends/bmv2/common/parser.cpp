@@ -57,6 +57,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
             auto minst = P4::MethodInstance::resolve(mce, ctxt->refMap, ctxt->typeMap);
             if (minst->is<P4::ExternMethod>()) {
                 auto extmeth = minst->to<P4::ExternMethod>();
+                // PSA backend extern
                 if ((extmeth->method->name.name == "get"
                     || extmeth->method->name.name == "get_state")
                     && extmeth->originalExternType->name == "InternetChecksum") {
@@ -87,6 +88,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
             auto minst = P4::MethodInstance::resolve(mce, ctxt->refMap, ctxt->typeMap);
             if (minst->is<P4::ExternMethod>()) {
                 auto extmeth = minst->to<P4::ExternMethod>();
+                // PSA backend extern
                 if (extmeth->method->name.name == "get"
                     && extmeth->originalExternType->name == "InternetChecksum") {
                     l=assign->left;
@@ -231,6 +233,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                             || extmeth->method->name.name == "get_state"
                             || extmeth->method->name.name == "set_state"
                             || extmeth->method->name.name == "get"))) {
+                // PSA backend extern
                 Util::IJson* json;
                 if (isR) {
                     json = ExternConverter::cvtExternObject(ctxt, extmeth, mce2, stat, true);
@@ -243,7 +246,7 @@ Util::IJson* ParserConverter::convertParserStatement(const IR::StatOrDecl* stat)
                 }
                 return result;
             }
-            } else if (minst->is<P4::ExternFunction>()) {
+        } else if (minst->is<P4::ExternFunction>()) {
             auto extfn = minst->to<P4::ExternFunction>();
             auto extFuncName = extfn->method->name.name;
             if (extFuncName == IR::ParserState::verify) {

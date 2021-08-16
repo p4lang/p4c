@@ -40,6 +40,7 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
                 auto minst = P4::MethodInstance::resolve(mce, ctxt->refMap, ctxt->typeMap);
                 if (minst->is<P4::ExternMethod>()) {
                     auto extmeth = minst->to<P4::ExternMethod>();
+                // PSA backend extern
                 if ((extmeth->method->name.name == "get"
                     || extmeth->method->name.name == "get_state")
                     && extmeth->originalExternType->name == "InternetChecksum") {
@@ -102,6 +103,7 @@ void DeparserConverter::convertDeparserBody(const IR::Vector<IR::StatOrDecl>* bo
                             || em->method->name.name == "get_state"
                             || em->method->name.name == "set_state"
                             || em->method->name.name == "get")) {
+                    // PSA backend extern
                     ctxt->conv->simpleExpressionsOnly = false;
                     Util::IJson* json;
                     if (isR) {
