@@ -827,11 +827,13 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
             }
         }
 
-        // Check if there are already inlined states of the callee subparser of the same instance
-        // as this one with the same arguments, no statements after this call and transition
-        // to the same state (without select expression).
-        // If yes, we can reuse those states as after returning from callee subparser the parser
-        // continues in the same path.
+        /**
+         * Check if there are already inlined states of the callee subparser of the same instance
+         * as this one with the same arguments, no statements after this call and transition
+         * to the same state (without select expression).
+         * If yes, we can reuse those states as after returning from callee subparser the parser
+         * continues in the same path.
+         */
         if (optimizeParserInlining && (e + 1) == state->components.end() &&
                 state->selectExpression->is<IR::PathExpression>()) {
             auto invoc = std::make_pair(call, state->selectExpression->to<IR::PathExpression>());
@@ -867,10 +869,12 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
             states->push_back(s);
         }
 
-        // If there is no other statement after this invocation of the subparser and
-        // transition does not use select expression, we store the ID of the inlined subparser's
-        // start state, currently processed invocation statement and the transition statement
-        // expression.
+        /**
+         * If there is no other statement after this invocation of the subparser and
+         * transition does not use select expression, we store the ID of the inlined subparser's
+         * start state, currently processed invocation statement and the transition statement
+         * expression.
+         */
         if (optimizeParserInlining && (e + 1) == state->components.end() &&
                 state->selectExpression->is<IR::PathExpression>()) {
             auto invoc = std::make_pair(call, state->selectExpression->to<IR::PathExpression>());
