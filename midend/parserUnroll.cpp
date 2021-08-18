@@ -382,20 +382,23 @@ class ParserSymbolicInterpreter {
             success = reportIfError(state, ifcond);
             if (success) {
                 const IR::Statement* ifComponent = nullptr;
-                if (ifcond)
-                    ifComponent = ifs->ifTrue;
-                else 
-                    ifComponent = ifs->ifFalse;
-                auto newComponent = executeStatement(state, ifComponent, valueMap);
-                if (!newComponent) {
-                    success = false;
-                } else {
+                if (ifcond != nullptr) {
                     if (ifcond)
-                        ifs->ifTrue = newComponent->to<IR::Statement>();
-                    else
-                        ifs->ifFalse = newComponent->to<IR::Statement>();
+                        ifComponent = ifs->ifTrue;
+                    else 
+                        ifComponent = ifs->ifFalse;
+                    auto newComponent = executeStatement(state, ifComponent, valueMap);
+                    if (!newComponent) {
+                        success = false;
+                    } else {
+                        if (ifcond)
+                            ifs->ifTrue = newComponent->to<IR::Statement>();
+                        else
+                            ifs->ifFalse = newComponent->to<IR::Statement>();
+                    }
+                } else {
+                    success = false;
                 }
-                
             }
             sord = ifs;
         } else {
@@ -417,7 +420,7 @@ class ParserSymbolicInterpreter {
                                              const IR::Expression*>;
 
     EvaluationSelectResult evaluateSelect(ParserStateInfo* state,
-                                   ValueMap* valueMap) {
+                                          ValueMap* valueMap) {
         const IR::Expression* newSelect = nullptr;
         auto select = state->state->selectExpression;
         if (select == nullptr)
