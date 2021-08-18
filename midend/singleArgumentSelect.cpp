@@ -14,7 +14,11 @@ DoSingleArgumentSelect::Pair::Pair(const IR::Expression* e, const IR::Type* type
         hasMask = true;
     } else {
         expr = e;
-        mask = new IR::Constant(srcInfo, type, Util::maskFromSlice(type->width_bits()-1, 0), 16);
+        unsigned width = type->width_bits();
+        if (width == 0)
+            mask = new IR::Constant(srcInfo, type, 0, 16);
+        else
+            mask = new IR::Constant(srcInfo, type, Util::maskFromSlice(width-1, 0), 16);
         hasMask = false;
     }
 }
@@ -52,8 +56,24 @@ static const IR::Expression* convertList(
         return new IR::Mask(expression->srcInfo, expr, mask);
 }
 
+// Check that all components of type are Type_Bits.
+void DoSingleArgumentSelect::checkExpressionType(const IR::Expression* expression) {
+    auto type = typeMap->getType(expression, true);
+    if (type->is<IR::Type_Bits>()) {
+        return;
+    } else if (auto le = expression->to<IR::ListExpression>()) {
+        for (auto c: le->components) {
+            checkExpressionType(c);
+        }
+    } else {
+        ::error("%1%: expression type %2% not supported in select expression",
+                expression, type);
+    }
+}
+
 bool DoSingleArgumentSelect::preorder(IR::SelectExpression* expression) {
     selectListType = typeMap->getType(expression->select, true);
+    checkExpressionType(expression->select);
     auto conv = convertList(expression->select, selectListType);
     auto list = new IR::ListExpression(IR::Vector<IR::Expression>());
     list->push_back(conv);

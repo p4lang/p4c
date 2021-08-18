@@ -27,7 +27,7 @@ namespace P4 {
    A similar transformation is done for the labels.
    @pre
    This should be run after SimplifySelectList and RemoveSelectBooleans.
-   It assumes that all select arguments are scalar values.
+   It assumes that all select arguments are scalar values of type Type_Bits.
 */
 class DoSingleArgumentSelect : public Modifier {
     TypeMap* typeMap;
@@ -46,6 +46,10 @@ class DoSingleArgumentSelect : public Modifier {
 
         Pair(const IR::Expression* source, const IR::Type* type);
     };
+
+    // Validate that the expression contains only subexpressions
+    // of supported types.
+    void checkExpressionType(const IR::Expression* expression);
 
     bool preorder(IR::SelectCase* selCase) override;
     bool preorder(IR::SelectExpression* expression) override;
