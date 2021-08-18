@@ -62,7 +62,7 @@ void DoSingleArgumentSelect::checkExpressionType(const IR::Expression* expressio
     if (type->is<IR::Type_Bits>()) {
         return;
     } else if (auto le = expression->to<IR::ListExpression>()) {
-        for (auto c: le->components) {
+        for (auto c : le->components) {
             checkExpressionType(c);
         }
     } else {
