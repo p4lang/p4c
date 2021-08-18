@@ -22,6 +22,7 @@ limitations under the License.
 #include "ir/ir.h"
 
 #include "p4RuntimeArchHandler.h"
+#include "frontends/p4/fromv1.0/v1model.h"
 
 namespace p4configv1 = ::p4::config::v1;
 
