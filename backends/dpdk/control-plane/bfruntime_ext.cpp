@@ -232,7 +232,7 @@ BFRuntimeSchemaGenerator::genSchema() const {
 
 void
 BFRuntimeSchemaGenerator::addDPDKExterns(Util::JsonArray* tablesJson,
-        Util::JsonArray* learnFiltersJson) const {
+        Util::JsonArray*) const {
     for (const auto& externType : p4info.externs()) {
         auto externTypeId = static_cast<::dpdk::P4Ids::Prefix>(externType.extern_type_id());
         if (externTypeId == ::dpdk::P4Ids::ACTION_SELECTOR) {

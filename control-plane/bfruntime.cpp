@@ -623,7 +623,7 @@ BFRuntimeGenerator::addLearnFilters(Util::JsonArray* learnFiltersJson) const {
 
 void BFRuntimeGenerator::addDirectResources(const p4configv1::Table& table,
         Util::JsonArray* dataJson, Util::JsonArray* operationsJson,
-        Util::JsonArray* attributesJson, P4Id maxActionParamId) const {
+        Util::JsonArray* attributesJson, P4Id) const {
     // direct resources
     for (auto directResId : table.direct_resource_ids()) {
         if (auto counter = getDirectCounter(directResId)) {

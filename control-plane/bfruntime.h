@@ -49,15 +49,15 @@ using P4Id = uint32_t;
 
 // Helpers
 template <typename T, typename R>
-static constexpr P4Id makeBFRuntimeId(T base, R prefix) {
+static inline constexpr P4Id makeBFRuntimeId(T base, R prefix) {
     return static_cast<P4Id>((base & 0xffffff) | (prefix << 24));
 }
 
-static constexpr P4Id getIdPrefix(P4Id id) {
+static inline constexpr P4Id getIdPrefix(P4Id id) {
     return ((id >> 24) & 0xff);
 }
 
-static Util::JsonObject* findJsonTable(Util::JsonArray* tablesJson, cstring tblName) {
+static inline Util::JsonObject* findJsonTable(Util::JsonArray* tablesJson, cstring tblName) {
     for (auto *t : *tablesJson) {
         auto *tblObj = t->to<Util::JsonObject>();
         auto tName = tblObj->get("name")->to<Util::JsonValue>()->getString();
@@ -68,7 +68,7 @@ static Util::JsonObject* findJsonTable(Util::JsonArray* tablesJson, cstring tblN
     return nullptr;
 }
 
-static Util::JsonObject* transformAnnotation(const cstring& annotation) {
+static inline Util::JsonObject* transformAnnotation(const cstring& annotation) {
     auto* annotationJson = new Util::JsonObject();
     // TODO(antonin): annotation string will need to be parsed so we can have it
     // in key/value format here.
@@ -77,27 +77,27 @@ static Util::JsonObject* transformAnnotation(const cstring& annotation) {
 }
 
 template <typename It>
-static Util::JsonArray* transformAnnotations(const It& first, const It& last) {
+static inline Util::JsonArray* transformAnnotations(const It& first, const It& last) {
     auto* annotations = new Util::JsonArray();
     for (auto it = first; it != last; it++)
         annotations->append(transformAnnotation(*it));
     return annotations;
 }
 
-static Util::JsonArray* transformAnnotations(const p4configv1::Preamble& pre) {
+static inline Util::JsonArray* transformAnnotations(const p4configv1::Preamble& pre) {
     return transformAnnotations(pre.annotations().begin(), pre.annotations().end());
 }
 
 /// @returns true if @id's prefix matches the provided PSA @prefix value
 template <typename T>
-static bool isOfType(P4Id id, T prefix) {
+static inline bool isOfType(P4Id id, T prefix) {
     return getIdPrefix(id) == static_cast<P4Id>(prefix);
 }
 
 namespace Standard {
 
 template <typename It>
-static auto findP4InfoObject(const It& first, const It& last, P4Id objectId)
+static inline auto findP4InfoObject(const It& first, const It& last, P4Id objectId)
     -> const typename std::iterator_traits<It>::value_type* {
     using T = typename std::iterator_traits<It>::value_type;
     auto desiredObject = std::find_if(first, last,
@@ -108,31 +108,31 @@ static auto findP4InfoObject(const It& first, const It& last, P4Id objectId)
     return &*desiredObject;
 }
 
-static const p4configv1::Table*
+static inline const p4configv1::Table*
 findTable(const p4configv1::P4Info& p4info, P4Id tableId) {
     const auto& tables = p4info.tables();
     return findP4InfoObject(tables.begin(), tables.end(), tableId);
 }
 
-static const p4configv1::Action*
+static inline const p4configv1::Action*
 findAction(const p4configv1::P4Info& p4info, P4Id actionId) {
     const auto& actions = p4info.actions();
     return Standard::findP4InfoObject(actions.begin(), actions.end(), actionId);
 }
 
-static const p4configv1::ActionProfile*
+static inline const p4configv1::ActionProfile*
 findActionProf(const p4configv1::P4Info& p4info, P4Id actionProfId) {
     const auto& actionProfs = p4info.action_profiles();
     return findP4InfoObject(actionProfs.begin(), actionProfs.end(), actionProfId);
 }
 
-static const p4configv1::DirectCounter*
+static inline const p4configv1::DirectCounter*
 findDirectCounter(const p4configv1::P4Info& p4info, P4Id counterId) {
     const auto& counters = p4info.direct_counters();
     return findP4InfoObject(counters.begin(), counters.end(), counterId);
 }
 
-static const p4configv1::DirectMeter*
+static inline const p4configv1::DirectMeter*
 findDirectMeter(const p4configv1::P4Info& p4info, P4Id meterId) {
     const auto& meters = p4info.direct_meters();
     return findP4InfoObject(meters.begin(), meters.end(), meterId);
@@ -140,21 +140,21 @@ findDirectMeter(const p4configv1::P4Info& p4info, P4Id meterId) {
 
 }  // namespace Standard
 
-static Util::JsonObject* makeType(cstring type) {
+static inline Util::JsonObject* makeType(cstring type) {
     auto* typeObj = new Util::JsonObject();
     typeObj->emplace("type", type);
     return typeObj;
 }
 
 template <typename T, typename std::enable_if<std::is_integral<T>::value, int>::type = 0>
-static Util::JsonObject* makeType(cstring type, T defaultValue) {
+static inline Util::JsonObject* makeType(cstring type, T defaultValue) {
     auto* typeObj = new Util::JsonObject();
     typeObj->emplace("type", type);
     typeObj->emplace("default_value", defaultValue);
     return typeObj;
 }
 
-static Util::JsonObject* makeTypeBool(boost::optional<bool> defaultValue = boost::none) {
+static inline Util::JsonObject* makeTypeBool(boost::optional<bool> defaultValue = boost::none) {
     auto* typeObj = new Util::JsonObject();
     typeObj->emplace("type", "bool");
     if (defaultValue != boost::none)
@@ -162,7 +162,7 @@ static Util::JsonObject* makeTypeBool(boost::optional<bool> defaultValue = boost
     return typeObj;
 }
 
-static Util::JsonObject* makeTypeBytes(int width,
+static inline Util::JsonObject* makeTypeBytes(int width,
         boost::optional<int64_t> defaultValue = boost::none) {
     auto* typeObj = new Util::JsonObject();
     typeObj->emplace("type", "bytes");
@@ -172,7 +172,7 @@ static Util::JsonObject* makeTypeBytes(int width,
     return typeObj;
 }
 
-static Util::JsonObject* makeTypeEnum(const std::vector<cstring>& choices,
+static inline Util::JsonObject* makeTypeEnum(const std::vector<cstring>& choices,
                                       boost::optional<cstring> defaultValue = boost::none) {
     auto* typeObj = new Util::JsonObject();
     typeObj->emplace("type", "string");
@@ -185,7 +185,7 @@ static Util::JsonObject* makeTypeEnum(const std::vector<cstring>& choices,
     return typeObj;
 }
 
-static void addSingleton(Util::JsonArray* dataJson,
+static inline void addSingleton(Util::JsonArray* dataJson,
                          Util::JsonObject* dataField, bool mandatory, bool readOnly) {
     auto* singletonJson = new Util::JsonObject();
     singletonJson->emplace("mandatory", mandatory);
@@ -194,7 +194,7 @@ static void addSingleton(Util::JsonArray* dataJson,
     dataJson->append(singletonJson);
 }
 
-static void addOneOf(Util::JsonArray* dataJson,
+static inline void addOneOf(Util::JsonArray* dataJson,
                      Util::JsonArray* choicesJson, bool mandatory, bool readOnly) {
     auto* oneOfJson = new Util::JsonObject();
     oneOfJson->emplace("mandatory", mandatory);
@@ -203,7 +203,8 @@ static void addOneOf(Util::JsonArray* dataJson,
     dataJson->append(oneOfJson);
 }
 
-static boost::optional<cstring> transformMatchType(p4configv1::MatchField_MatchType matchType) {
+static inline boost::optional<cstring> transformMatchType(
+    p4configv1::MatchField_MatchType matchType) {
     switch (matchType) {
         case p4configv1::MatchField_MatchType_UNSPECIFIED:
             return boost::none;
@@ -222,7 +223,7 @@ static boost::optional<cstring> transformMatchType(p4configv1::MatchField_MatchT
     }
 }
 
-static boost::optional<cstring> transformOtherMatchType(std::string matchType) {
+static inline boost::optional<cstring> transformOtherMatchType(std::string matchType) {
     if (matchType == "atcam_partition_index")
         return cstring("ATCAM");
     else if (matchType == "dleft_hash")

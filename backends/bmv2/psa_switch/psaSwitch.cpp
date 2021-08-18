@@ -132,7 +132,7 @@ void PsaProgramStructure::createScalars(ConversionContext* ctxt) {
             max_length += type->size;
             field->append(type->size);
             field->append(type->isSigned);
-        } else if (auto type = ftype->to<IR::Type_Boolean>()) {
+        } else if (ftype->is<IR::Type_Boolean>()) {
             field->append(kv.second->name);
             max_length += 1;
             field->append(1);
