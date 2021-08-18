@@ -28,6 +28,9 @@ bool DoStrengthReduction::isOne(const IR::Expression* expr) const {
 }
 
 bool DoStrengthReduction::isZero(const IR::Expression* expr) const {
+    if (auto bt = expr->type->to<IR::Type_Bits>()) {
+        return bt->width_bits() == 0;
+    }
     auto cst = expr->to<IR::Constant>();
     if (cst == nullptr)
         return false;
@@ -47,6 +50,7 @@ bool DoStrengthReduction::isFalse(const IR::Expression* expr) const {
         return false;
     return !cst->value;
 }
+
 int DoStrengthReduction::isPowerOf2(const IR::Expression* expr) const {
     auto cst = expr->to<IR::Constant>();
     if (cst == nullptr)
