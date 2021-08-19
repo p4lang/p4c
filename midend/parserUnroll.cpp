@@ -315,7 +315,7 @@ class ParserSymbolicInterpreter {
     }
 
     /// Return false if an error can be detected statically
-    bool reportIfError(const ParserStateInfo* state, SymbolicValue* value) const {
+    bool reportIfError(const ParserStateInfo* state, const SymbolicValue* value) const {
         if (value->is<SymbolicException>()) {
             auto exc = value->to<SymbolicException>();
 
@@ -373,7 +373,7 @@ class ParserSymbolicInterpreter {
                 if (!newComponent)
                     success = false;
                 else
-                    newComponents.push_back(newComponent);    
+                    newComponents.push_back(newComponent);
             }
             sord = new IR::BlockStatement(newComponents);
         } else if (sord->is<IR::IfStatement>()) {
@@ -384,7 +384,7 @@ class ParserSymbolicInterpreter {
                 const IR::Statement* ifComponent = nullptr;
                 if (ifcond)
                     ifComponent = ifs->ifTrue;
-                else 
+                else
                     ifComponent = ifs->ifFalse;
                 auto newComponent = executeStatement(state, ifComponent, valueMap);
                 if (!newComponent) {
