@@ -83,7 +83,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options,
         new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     std::function<bool(const Context *, const IR::Expression *)> policy =
-        [=](const Context *ctx, const IR::Expression *e) -> bool {
+        [=](const Context *ctx, const IR::Expression *) -> bool {
         if (auto mce = findContext<IR::MethodCallExpression>(ctx)) {
             auto mi = P4::MethodInstance::resolve(mce, &refMap, &typeMap);
             if (auto em = mi->to<P4::ExternMethod>()) {

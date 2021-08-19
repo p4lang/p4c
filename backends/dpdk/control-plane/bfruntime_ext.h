@@ -23,18 +23,6 @@ namespace P4 {
 
 namespace BFRT {
 
-static Util::JsonObject* makeTypeString(boost::optional<cstring> defaultValue = boost::none) {
-    auto* typeObj = new Util::JsonObject();
-    typeObj->emplace("type", "string");
-    if (defaultValue != boost::none)
-        typeObj->emplace("default_value", *defaultValue);
-    return typeObj;
-}
-
-static P4Id makeActSelectorId(P4Id implementationId) {
-    return makeBFRuntimeId(implementationId, ::dpdk::P4Ids::ACTION_SELECTOR);
-}
-
 /// This class is in charge of translating the P4Info Protobuf message used in
 /// the context of P4Runtime to the BF-RT info JSON used by the BF-RT API.
 class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
@@ -101,6 +89,6 @@ class BFRuntimeSchemaGenerator : public BFRuntimeGenerator {
 
 }  // namespace BFRT
 
-}  // namespace P4 
+}  // namespace P4
 
 #endif  // DPDK_CONTROL_PLANE_BFRUNTIME_EXT_H_
