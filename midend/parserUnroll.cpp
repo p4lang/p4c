@@ -378,26 +378,22 @@ class ParserSymbolicInterpreter {
             sord = new IR::BlockStatement(newComponents);
         } else if (sord->is<IR::IfStatement>()) {
             auto ifs = sord->to<IR::IfStatement>()->clone();
-            auto ifcond = ev.evaluate(ifs->condition, true);
+            const auto* ifcond = ev.evaluate(ifs->condition, true);
             success = reportIfError(state, ifcond);
             if (success) {
                 const IR::Statement* ifComponent = nullptr;
-                if (ifcond != nullptr) {
-                    if (ifcond)
-                        ifComponent = ifs->ifTrue;
-                    else 
-                        ifComponent = ifs->ifFalse;
-                    auto newComponent = executeStatement(state, ifComponent, valueMap);
-                    if (!newComponent) {
-                        success = false;
-                    } else {
-                        if (ifcond)
-                            ifs->ifTrue = newComponent->to<IR::Statement>();
-                        else
-                            ifs->ifFalse = newComponent->to<IR::Statement>();
-                    }
-                } else {
+                if (ifcond)
+                    ifComponent = ifs->ifTrue;
+                else 
+                    ifComponent = ifs->ifFalse;
+                auto newComponent = executeStatement(state, ifComponent, valueMap);
+                if (!newComponent) {
                     success = false;
+                } else {
+                    if (ifcond)
+                        ifs->ifTrue = newComponent->to<IR::Statement>();
+                    else
+                        ifs->ifFalse = newComponent->to<IR::Statement>();
                 }
             }
             sord = ifs;
