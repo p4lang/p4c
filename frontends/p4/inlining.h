@@ -273,9 +273,9 @@ struct InlineSummary : public IHasDbPrint {
          * @attention
          * This field is used only when the optimization of parser inlining is enabled,
          * otherwise it is not used.
-         * The optimization is enabled by default.
-         * The optimization can be disabled using command line option
-         * --disable-parser-inlining-optimization.
+         * The optimization is disabled by default.
+         * The optimization can be enabled using command line option
+         * --parser-inline-opt.
          */
         std::unordered_map<const InlinedInvocationInfo, const IR::ID, key_hash, key_equal>
                 invocationToState;
