@@ -376,27 +376,6 @@ class ParserSymbolicInterpreter {
                     newComponents.push_back(newComponent);
             }
             sord = new IR::BlockStatement(newComponents);
-        } else if (sord->is<IR::IfStatement>()) {
-            auto ifs = sord->to<IR::IfStatement>()->clone();
-            const auto* ifcond = ev.evaluate(ifs->condition, true);
-            success = reportIfError(state, ifcond);
-            if (success) {
-                const IR::Statement* ifComponent = nullptr;
-                if (ifcond)
-                    ifComponent = ifs->ifTrue;
-                else
-                    ifComponent = ifs->ifFalse;
-                auto newComponent = executeStatement(state, ifComponent, valueMap);
-                if (!newComponent) {
-                    success = false;
-                } else {
-                    if (ifcond)
-                        ifs->ifTrue = newComponent->to<IR::Statement>();
-                    else
-                        ifs->ifFalse = newComponent->to<IR::Statement>();
-                }
-            }
-            sord = ifs;
         } else {
             BUG("%1%: unexpected declaration or statement", sord);
         }
