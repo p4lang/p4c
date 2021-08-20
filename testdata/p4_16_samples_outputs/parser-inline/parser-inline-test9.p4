@@ -59,9 +59,9 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
         if (hdr.h1.f == 42) {
-            standard_metadata.egress_port = 1;
+            standard_metadata.egress_spec = 1;
         } else {
-            standard_metadata.egress_port = 10;
+            standard_metadata.egress_spec = 10;
         }
     }
 }

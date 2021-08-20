@@ -57,10 +57,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @hidden action parserinlinetest10l59() {
-        standard_metadata.egress_port = 9w1;
+        standard_metadata.egress_spec = 9w1;
     }
     @hidden action parserinlinetest10l61() {
-        standard_metadata.egress_port = 9w10;
+        standard_metadata.egress_spec = 9w10;
     }
     @hidden table tbl_parserinlinetest10l59 {
         actions = {

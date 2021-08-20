@@ -88,11 +88,11 @@ parser ParserImpl(      packet_in           packet,
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
         if (hdr.h2.isValid()) {
-            standard_metadata.egress_port = 2;
+            standard_metadata.egress_spec = 2;
         } else if (hdr.h3.isValid()) {
-            standard_metadata.egress_port = 3;
+            standard_metadata.egress_spec = 3;
         } else {
-            standard_metadata.egress_port = 10;
+            standard_metadata.egress_spec = 10;
         }
     }
 }

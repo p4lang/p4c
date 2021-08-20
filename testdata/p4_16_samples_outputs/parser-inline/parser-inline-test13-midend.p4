@@ -119,13 +119,13 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     @hidden action parserinlinetest13l100() {
-        standard_metadata.egress_port = 9w2;
+        standard_metadata.egress_spec = 9w2;
     }
     @hidden action parserinlinetest13l102() {
-        standard_metadata.egress_port = 9w3;
+        standard_metadata.egress_spec = 9w3;
     }
     @hidden action parserinlinetest13l104() {
-        standard_metadata.egress_port = 9w10;
+        standard_metadata.egress_spec = 9w10;
     }
     @hidden table tbl_parserinlinetest13l100 {
         actions = {
