@@ -57,29 +57,29 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @hidden action subparser_inlining9l58() {
+    @hidden action parserinlinetest9l58() {
         standard_metadata.egress_port = 9w1;
     }
-    @hidden action subparser_inlining9l60() {
+    @hidden action parserinlinetest9l60() {
         standard_metadata.egress_port = 9w10;
     }
-    @hidden table tbl_subparser_inlining9l58 {
+    @hidden table tbl_parserinlinetest9l58 {
         actions = {
-            subparser_inlining9l58();
+            parserinlinetest9l58();
         }
-        const default_action = subparser_inlining9l58();
+        const default_action = parserinlinetest9l58();
     }
-    @hidden table tbl_subparser_inlining9l60 {
+    @hidden table tbl_parserinlinetest9l60 {
         actions = {
-            subparser_inlining9l60();
+            parserinlinetest9l60();
         }
-        const default_action = subparser_inlining9l60();
+        const default_action = parserinlinetest9l60();
     }
     apply {
         if (hdr.h1.f == 8w42) {
-            tbl_subparser_inlining9l58.apply();
+            tbl_parserinlinetest9l58.apply();
         } else {
-            tbl_subparser_inlining9l60.apply();
+            tbl_parserinlinetest9l60.apply();
         }
     }
 }

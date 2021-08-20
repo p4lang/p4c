@@ -61,8 +61,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition p0_0;
     }
     state p0_0 {
-        packet.extract<data_t>(hdr.h4);
-        transition accept;
+        transition select(phdr_0_h1.f) {
+            8w1: p2;
+            default: accept;
+        }
     }
     state p1 {
         hdr.h1.setInvalid();
@@ -89,45 +91,53 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition p1_0;
     }
     state p1_0 {
+        transition select(phdr_0_h1.f) {
+            8w1: reject;
+            default: accept;
+        }
+    }
+    state p2 {
+        hdr.h4.f = phdr_0_h1.f;
+        hdr.h4.setValid();
         transition accept;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @hidden action subparser_inlining6l93() {
+    @hidden action parserinlinetest4l103() {
         standard_metadata.egress_port = 9w2;
     }
-    @hidden action subparser_inlining6l95() {
+    @hidden action parserinlinetest4l105() {
         standard_metadata.egress_port = 9w3;
     }
-    @hidden action subparser_inlining6l97() {
+    @hidden action parserinlinetest4l107() {
         standard_metadata.egress_port = 9w10;
     }
-    @hidden table tbl_subparser_inlining6l93 {
+    @hidden table tbl_parserinlinetest4l103 {
         actions = {
-            subparser_inlining6l93();
+            parserinlinetest4l103();
         }
-        const default_action = subparser_inlining6l93();
+        const default_action = parserinlinetest4l103();
     }
-    @hidden table tbl_subparser_inlining6l95 {
+    @hidden table tbl_parserinlinetest4l105 {
         actions = {
-            subparser_inlining6l95();
+            parserinlinetest4l105();
         }
-        const default_action = subparser_inlining6l95();
+        const default_action = parserinlinetest4l105();
     }
-    @hidden table tbl_subparser_inlining6l97 {
+    @hidden table tbl_parserinlinetest4l107 {
         actions = {
-            subparser_inlining6l97();
+            parserinlinetest4l107();
         }
-        const default_action = subparser_inlining6l97();
+        const default_action = parserinlinetest4l107();
     }
     apply {
         if (hdr.h2.isValid()) {
-            tbl_subparser_inlining6l93.apply();
+            tbl_parserinlinetest4l103.apply();
         } else if (hdr.h3.isValid()) {
-            tbl_subparser_inlining6l95.apply();
+            tbl_parserinlinetest4l105.apply();
         } else {
-            tbl_subparser_inlining6l97.apply();
+            tbl_parserinlinetest4l107.apply();
         }
     }
 }

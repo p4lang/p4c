@@ -12,6 +12,7 @@ header data_t {
 struct headers {
     data_t h1;
     data_t h2;
+    data_t h3;
 }
 
 parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
@@ -22,7 +23,8 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition select(standard_metadata.ingress_port) {
             9w0: p0;
             9w1: p1;
-            default: p2;
+            9w2: p2;
+            default: p3;
         }
     }
     state p0 {
@@ -42,34 +44,41 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         hdr_0 = hdr.h2;
         hdr_0.f = 8w42;
         hdr.h2 = hdr_0;
+        packet.extract<data_t>(hdr.h3);
+        transition accept;
+    }
+    state p3 {
+        hdr_0 = hdr.h2;
+        hdr_0.f = 8w42;
+        hdr.h2 = hdr_0;
         transition accept;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @hidden action subparser_inlining8l53() {
+    @hidden action parserinlinetest10l59() {
         standard_metadata.egress_port = 9w1;
     }
-    @hidden action subparser_inlining8l55() {
+    @hidden action parserinlinetest10l61() {
         standard_metadata.egress_port = 9w10;
     }
-    @hidden table tbl_subparser_inlining8l53 {
+    @hidden table tbl_parserinlinetest10l59 {
         actions = {
-            subparser_inlining8l53();
+            parserinlinetest10l59();
         }
-        const default_action = subparser_inlining8l53();
+        const default_action = parserinlinetest10l59();
     }
-    @hidden table tbl_subparser_inlining8l55 {
+    @hidden table tbl_parserinlinetest10l61 {
         actions = {
-            subparser_inlining8l55();
+            parserinlinetest10l61();
         }
-        const default_action = subparser_inlining8l55();
+        const default_action = parserinlinetest10l61();
     }
     apply {
         if (hdr.h1.f == 8w42) {
-            tbl_subparser_inlining8l53.apply();
+            tbl_parserinlinetest10l59.apply();
         } else {
-            tbl_subparser_inlining8l55.apply();
+            tbl_parserinlinetest10l61.apply();
         }
     }
 }

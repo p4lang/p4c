@@ -41,9 +41,6 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         hdr.h2.setInvalid();
         hdr.h3.setInvalid();
         hdr.h4.setInvalid();
-        transition Subparser_start;
-    }
-    state Subparser_start {
         p_shdr_h1.setInvalid();
         packet.extract<data_t>(hdr.h1);
         transition select(hdr.h1.f) {
@@ -64,54 +61,83 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition p0_0;
     }
     state p0_0 {
-        hdr.h4.f = phdr_0_h1.f;
-        hdr.h4.setValid();
-        transition accept;
+        transition select(phdr_0_h1.f) {
+            8w1: p2;
+            default: accept;
+        }
     }
     state p1 {
         hdr.h1.setInvalid();
         hdr.h2.setInvalid();
         hdr.h3.setInvalid();
         hdr.h4.setInvalid();
-        transition Subparser_start;
+        p_shdr_h1.setInvalid();
+        packet.extract<data_t>(hdr.h1);
+        transition select(hdr.h1.f) {
+            8w1: Subparser_sp1_0;
+            8w2: Subparser_sp2_0;
+            default: p1_0;
+        }
+    }
+    state Subparser_sp1_0 {
+        packet.extract<data_t>(hdr.h3);
+        packet.extract<data_t>(p_shdr_h1);
+        phdr_0_h1.f = p_shdr_h1.f;
+        phdr_0_h1.setValid();
+        transition p1_0;
+    }
+    state Subparser_sp2_0 {
+        packet.extract<data_t16>(hdr.h2);
+        transition p1_0;
+    }
+    state p1_0 {
+        transition select(phdr_0_h1.f) {
+            8w1: p2;
+            default: accept;
+        }
+    }
+    state p2 {
+        hdr.h4.f = phdr_0_h1.f;
+        hdr.h4.setValid();
+        transition accept;
     }
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @hidden action subparser_inlining1l91() {
+    @hidden action parserinlinetest3l103() {
         standard_metadata.egress_port = 9w2;
     }
-    @hidden action subparser_inlining1l93() {
+    @hidden action parserinlinetest3l105() {
         standard_metadata.egress_port = 9w3;
     }
-    @hidden action subparser_inlining1l95() {
+    @hidden action parserinlinetest3l107() {
         standard_metadata.egress_port = 9w10;
     }
-    @hidden table tbl_subparser_inlining1l91 {
+    @hidden table tbl_parserinlinetest3l103 {
         actions = {
-            subparser_inlining1l91();
+            parserinlinetest3l103();
         }
-        const default_action = subparser_inlining1l91();
+        const default_action = parserinlinetest3l103();
     }
-    @hidden table tbl_subparser_inlining1l93 {
+    @hidden table tbl_parserinlinetest3l105 {
         actions = {
-            subparser_inlining1l93();
+            parserinlinetest3l105();
         }
-        const default_action = subparser_inlining1l93();
+        const default_action = parserinlinetest3l105();
     }
-    @hidden table tbl_subparser_inlining1l95 {
+    @hidden table tbl_parserinlinetest3l107 {
         actions = {
-            subparser_inlining1l95();
+            parserinlinetest3l107();
         }
-        const default_action = subparser_inlining1l95();
+        const default_action = parserinlinetest3l107();
     }
     apply {
         if (hdr.h2.isValid()) {
-            tbl_subparser_inlining1l91.apply();
+            tbl_parserinlinetest3l103.apply();
         } else if (hdr.h3.isValid()) {
-            tbl_subparser_inlining1l93.apply();
+            tbl_parserinlinetest3l105.apply();
         } else {
-            tbl_subparser_inlining1l95.apply();
+            tbl_parserinlinetest3l107.apply();
         }
     }
 }
