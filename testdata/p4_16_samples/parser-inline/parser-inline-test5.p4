@@ -53,8 +53,7 @@ parser Subparser(      packet_in packet,
     }
 
     state sp3 {
-        inout_hdr.h1.f = shdr.h1.f;
-        inout_hdr.h1.setValid();
+        inout_hdr.h1 = shdr.h1;
         transition accept;
     }
 }

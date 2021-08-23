@@ -52,8 +52,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state Subparser_sp1 {
         packet.extract<data_t>(hdr.h3);
         packet.extract<data_t>(p_shdr_h1);
-        phdr_0_h1.f = p_shdr_h1.f;
-        phdr_0_h1.setValid();
+        phdr_0_h1 = p_shdr_h1;
         transition p0_0;
     }
     state Subparser_sp2 {
@@ -80,8 +79,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state Subparser_sp1_0 {
         packet.extract<data_t>(hdr.h3);
         packet.extract<data_t>(p_shdr_h1);
-        phdr_0_h1.f = p_shdr_h1.f;
-        phdr_0_h1.setValid();
+        phdr_0_h1 = p_shdr_h1;
         transition p1_0;
     }
     state Subparser_sp2_0 {
@@ -95,40 +93,40 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @hidden action parserinlinetest5l94() {
+    @hidden action parserinlinetest5l93() {
         standard_metadata.egress_spec = 9w2;
     }
-    @hidden action parserinlinetest5l96() {
+    @hidden action parserinlinetest5l95() {
         standard_metadata.egress_spec = 9w3;
     }
-    @hidden action parserinlinetest5l98() {
+    @hidden action parserinlinetest5l97() {
         standard_metadata.egress_spec = 9w10;
     }
-    @hidden table tbl_parserinlinetest5l94 {
+    @hidden table tbl_parserinlinetest5l93 {
         actions = {
-            parserinlinetest5l94();
+            parserinlinetest5l93();
         }
-        const default_action = parserinlinetest5l94();
+        const default_action = parserinlinetest5l93();
     }
-    @hidden table tbl_parserinlinetest5l96 {
+    @hidden table tbl_parserinlinetest5l95 {
         actions = {
-            parserinlinetest5l96();
+            parserinlinetest5l95();
         }
-        const default_action = parserinlinetest5l96();
+        const default_action = parserinlinetest5l95();
     }
-    @hidden table tbl_parserinlinetest5l98 {
+    @hidden table tbl_parserinlinetest5l97 {
         actions = {
-            parserinlinetest5l98();
+            parserinlinetest5l97();
         }
-        const default_action = parserinlinetest5l98();
+        const default_action = parserinlinetest5l97();
     }
     apply {
         if (hdr.h2.isValid()) {
-            tbl_parserinlinetest5l94.apply();
+            tbl_parserinlinetest5l93.apply();
         } else if (hdr.h3.isValid()) {
-            tbl_parserinlinetest5l96.apply();
+            tbl_parserinlinetest5l95.apply();
         } else {
-            tbl_parserinlinetest5l98.apply();
+            tbl_parserinlinetest5l97.apply();
         }
     }
 }

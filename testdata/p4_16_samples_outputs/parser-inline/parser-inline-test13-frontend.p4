@@ -59,8 +59,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state Subparser_sp1 {
         packet.extract<data_t>(hdr_0.h3);
         packet.extract<data_t>(p_shdr.h1);
-        inout_hdr_0.h1.f = p_shdr.h1.f;
-        inout_hdr_0.h1.setValid();
+        inout_hdr_0.h1 = p_shdr.h1;
         transition p0_0;
     }
     state Subparser_sp2 {
@@ -94,8 +93,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
     state Subparser_sp1_0 {
         packet.extract<data_t>(hdr_0.h3);
         packet.extract<data_t>(p_shdr.h1);
-        inout_hdr_0.h1.f = p_shdr.h1.f;
-        inout_hdr_0.h1.setValid();
+        inout_hdr_0.h1 = p_shdr.h1;
         transition p1_0;
     }
     state Subparser_sp2_0 {
@@ -108,8 +106,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition p2;
     }
     state p2 {
-        hdr.h4.f = 8w42;
-        hdr.h4.setValid();
+        packet.extract<data_t>(hdr.h4);
         transition accept;
     }
 }

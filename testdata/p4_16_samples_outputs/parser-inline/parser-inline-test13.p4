@@ -44,8 +44,7 @@ parser Subparser(packet_in packet, out headers hdr, inout headers2 inout_hdr) {
         transition accept;
     }
     state sp3 {
-        inout_hdr.h1.f = shdr.h1.f;
-        inout_hdr.h1.setValid();
+        inout_hdr.h1 = shdr.h1;
         transition accept;
     }
 }
@@ -72,8 +71,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
         transition p2;
     }
     state p2 {
-        hdr.h4.f = 42;
-        hdr.h4.setValid();
+        packet.extract(hdr.h4);
         transition accept;
     }
 }
