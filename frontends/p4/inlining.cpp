@@ -832,7 +832,7 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
         // to the same state (without select expression).
         // If yes, we can reuse those states as after returning from callee subparser the parser
         // continues in the same path.
-        if (e + 1 == state->components.end() &&
+        if (optimizeParserInlining && (e + 1) == state->components.end() &&
                 state->selectExpression->is<IR::PathExpression>()) {
             auto invoc = std::make_pair(call, state->selectExpression->to<IR::PathExpression>());
             if (workToDo->invocationToState.find(invoc) != workToDo->invocationToState.end()) {
@@ -871,7 +871,7 @@ const IR::Node* GeneralInliner::preorder(IR::ParserState* state) {
         // transition does not use select expression, we store the ID of the inlined subparser's
         // start state, currently processed invocation statement and the transition statement
         // expression.
-        if (e + 1 == state->components.end() &&
+        if (optimizeParserInlining && (e + 1) == state->components.end() &&
                 state->selectExpression->is<IR::PathExpression>()) {
             auto invoc = std::make_pair(call, state->selectExpression->to<IR::PathExpression>());
             auto ret = workToDo->invocationToState.emplace(invoc, newStartName);

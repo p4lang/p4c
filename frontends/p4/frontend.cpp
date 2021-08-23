@@ -195,7 +195,7 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new RemoveAllUnusedDeclarations(&refMap),
         new ClearTypeMap(&typeMap),
         evaluator,
-        new Inline(&refMap, &typeMap, evaluator),
+        new Inline(&refMap, &typeMap, evaluator, options.optimizeParserInlining),
         new InlineActions(&refMap, &typeMap),
         new LocalizeAllActions(&refMap),
         new UniqueNames(&refMap),

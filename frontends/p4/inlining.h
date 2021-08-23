@@ -271,10 +271,12 @@ class GeneralInliner : public AbstractInliner<InlineList, InlineSummary> {
     ReferenceMap* refMap;
     TypeMap* typeMap;
     InlineSummary::PerCaller* workToDo;
+    bool optimizeParserInlining;
 
  public:
-    explicit GeneralInliner(bool isv1) :
-            refMap(new ReferenceMap()), typeMap(new TypeMap()), workToDo(nullptr) {
+    explicit GeneralInliner(bool isv1, bool _optimizeParserInlining) :
+            refMap(new ReferenceMap()), typeMap(new TypeMap()), workToDo(nullptr),
+            optimizeParserInlining(_optimizeParserInlining) {
         setName("GeneralInliner");
         refMap->setIsV1(isv1);
         visitDagOnce = false;
@@ -300,11 +302,13 @@ class InlinePass : public PassManager {
     InlineList toInline;
 
  public:
-    InlinePass(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator)
+    InlinePass(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator,
+            bool optimizeParserInlining)
     : PassManager({
         new TypeChecking(refMap, typeMap),
         new DiscoverInlining(&toInline, refMap, typeMap, evaluator),
-        new InlineDriver<InlineList, InlineSummary>(&toInline, new GeneralInliner(refMap->isV1())),
+        new InlineDriver<InlineList, InlineSummary>(&toInline, new GeneralInliner(refMap->isV1(),
+            optimizeParserInlining)),
         new RemoveAllUnusedDeclarations(refMap) }) { setName("InlinePass"); }
 };
 
@@ -317,9 +321,10 @@ class Inline : public PassRepeated {
     static std::set<cstring> noPropagateAnnotations;
 
  public:
-    Inline(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator)
+    Inline(ReferenceMap* refMap, TypeMap* typeMap, EvaluatorPass* evaluator,
+            bool optimizeParserInlining)
     : PassManager({
-        new InlinePass(refMap, typeMap, evaluator),
+        new InlinePass(refMap, typeMap, evaluator, optimizeParserInlining),
         // After inlining the output of the evaluator changes, so
         // we have to run it again
         evaluator }) { setName("Inline"); }

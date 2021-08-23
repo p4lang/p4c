@@ -223,6 +223,21 @@ ParserOptions::ParserOptions() : Util::Options(defaultMessage) {
             return true;
         },
         "[Compiler debugging] Folder where P4 programs are dumped\n");
+    registerOption(
+        "--disable-parser-inlining-optimization", nullptr,
+        [this](const char*) {
+            optimizeParserInlining = false;
+            return true;
+        },
+        "Disable optimization of inlining callee parsers (subparsers).\n"
+        "When the optimization is disabled, for each invocation of the subparser\n"
+        "all states of the subparser are inlined, which means that the subparser\n"
+        "might be inlined multiple times even if it is the same instance\n"
+        "which is invoked multiple times.\n"
+        "When the optimization is enabled, compiler tries to identify the cases,\n"
+        "when it can inline the subparser's states only once for multiple\n"
+        "invocations of the same subparser instance.\n"
+        "The optimization is enabled by default.");
     registerUsage(
         "loglevel format is: \"sourceFile:level,...,sourceFile:level\"\n"
         "where 'sourceFile' is a compiler source file and "
