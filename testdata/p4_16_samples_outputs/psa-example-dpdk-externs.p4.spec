@@ -104,7 +104,7 @@ action NoAction args none {
 
 action execute args instanceof execute_arg_t {
 	meter meter0_0 t.index h.ipv4.totalLen m.Ingress_color_in_0 m.Ingress_color_out_0
-	jmpneq LABEL_1FALSE m.Ingress_color_out_0 0x1
+	jmpneq LABEL_1FALSE m.Ingress_color_out_0 0x0
 	mov m.Ingress_tmp 0x1
 	jmp LABEL_1END
 	LABEL_1FALSE :	mov m.Ingress_tmp 0x0
@@ -133,7 +133,7 @@ apply {
 	jmpeq INGRESSPARSERIMPL_PARSE_IPV4 h.ethernet.etherType 0x800
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
-	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_color_in_0 0x0
+	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_color_in_0 0x2
 	jmpneq LABEL_0END m.local_metadata_port_out 0x1
 	table tbl
 	regadd counter0_0_packets 0x3ff 1
