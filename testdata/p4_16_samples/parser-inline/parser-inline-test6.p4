@@ -89,9 +89,19 @@ parser ParserImpl(      packet_in           packet,
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
     apply {
         if (hdr.h2.isValid()) {
-            standard_metadata.egress_spec = 2;
+            if (hdr.h4.isValid()) {
+                standard_metadata.egress_spec = 2;
+            } else {
+                standard_metadata.egress_spec = 12;
+            }
         } else if (hdr.h3.isValid()) {
-            standard_metadata.egress_spec = 3;
+            if (hdr.h4.isValid()) {
+                standard_metadata.egress_spec = 3;
+            } else {
+                standard_metadata.egress_spec = 13;
+            }
+        } else if (hdr.h4.isValid()) {
+            standard_metadata.egress_spec = 11;
         } else {
             standard_metadata.egress_spec = 10;
         }

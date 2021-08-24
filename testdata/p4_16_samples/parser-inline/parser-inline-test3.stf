@@ -1,0 +1,44 @@
+packet  2 01 23 45 67 89
+expect 10 23 45 67 89
+
+packet  0 01 23 45 67 89
+expect 10 23 01 45 67 89
+
+packet  1 01 23 45 67 89
+expect 10 23 01 45 67 89
+
+packet  0 01 01 23 01 67
+expect  3 01 23 01 67
+
+packet  1 01 01 23 01 67
+expect  3 01 23 01 67
+
+packet  0 01 01 23 45 67
+expect  3 01 23 67
+
+packet  1 01 01 23 45 67
+expect  3 01 23 67
+
+packet  0 01 02 34 56 78
+expect  2 02 34 56 01 78
+
+packet  1 01 02 34 56 78
+expect  2 02 34 56 01 78
+
+packet  0 02 23 45 67 89
+expect 10 23 45 67 89
+
+packet  1 02 23 45 67 89
+expect 10 23 45 67 89
+
+packet  0 02 01 23 45 67
+expect  3 01 23 67
+
+packet  1 02 01 23 45 67
+expect  3 01 23 67
+
+packet  0 02 02 34 56 78
+expect  2 02 34 56 78
+
+packet  1 02 02 34 56 78
+expect  2 02 34 56 78

@@ -92,40 +92,77 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata meta, inout 
 }
 
 control ingress(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @hidden action parserinlinetest6l92() {
+    @hidden action parserinlinetest6l93() {
         standard_metadata.egress_spec = 9w2;
     }
-    @hidden action parserinlinetest6l94() {
+    @hidden action parserinlinetest6l95() {
+        standard_metadata.egress_spec = 9w12;
+    }
+    @hidden action parserinlinetest6l99() {
         standard_metadata.egress_spec = 9w3;
     }
-    @hidden action parserinlinetest6l96() {
+    @hidden action parserinlinetest6l101() {
+        standard_metadata.egress_spec = 9w13;
+    }
+    @hidden action parserinlinetest6l104() {
+        standard_metadata.egress_spec = 9w11;
+    }
+    @hidden action parserinlinetest6l106() {
         standard_metadata.egress_spec = 9w10;
     }
-    @hidden table tbl_parserinlinetest6l92 {
+    @hidden table tbl_parserinlinetest6l93 {
         actions = {
-            parserinlinetest6l92();
+            parserinlinetest6l93();
         }
-        const default_action = parserinlinetest6l92();
+        const default_action = parserinlinetest6l93();
     }
-    @hidden table tbl_parserinlinetest6l94 {
+    @hidden table tbl_parserinlinetest6l95 {
         actions = {
-            parserinlinetest6l94();
+            parserinlinetest6l95();
         }
-        const default_action = parserinlinetest6l94();
+        const default_action = parserinlinetest6l95();
     }
-    @hidden table tbl_parserinlinetest6l96 {
+    @hidden table tbl_parserinlinetest6l99 {
         actions = {
-            parserinlinetest6l96();
+            parserinlinetest6l99();
         }
-        const default_action = parserinlinetest6l96();
+        const default_action = parserinlinetest6l99();
+    }
+    @hidden table tbl_parserinlinetest6l101 {
+        actions = {
+            parserinlinetest6l101();
+        }
+        const default_action = parserinlinetest6l101();
+    }
+    @hidden table tbl_parserinlinetest6l104 {
+        actions = {
+            parserinlinetest6l104();
+        }
+        const default_action = parserinlinetest6l104();
+    }
+    @hidden table tbl_parserinlinetest6l106 {
+        actions = {
+            parserinlinetest6l106();
+        }
+        const default_action = parserinlinetest6l106();
     }
     apply {
         if (hdr.h2.isValid()) {
-            tbl_parserinlinetest6l92.apply();
+            if (hdr.h4.isValid()) {
+                tbl_parserinlinetest6l93.apply();
+            } else {
+                tbl_parserinlinetest6l95.apply();
+            }
         } else if (hdr.h3.isValid()) {
-            tbl_parserinlinetest6l94.apply();
+            if (hdr.h4.isValid()) {
+                tbl_parserinlinetest6l99.apply();
+            } else {
+                tbl_parserinlinetest6l101.apply();
+            }
+        } else if (hdr.h4.isValid()) {
+            tbl_parserinlinetest6l104.apply();
         } else {
-            tbl_parserinlinetest6l96.apply();
+            tbl_parserinlinetest6l106.apply();
         }
     }
 }

@@ -58,6 +58,7 @@ control egress(inout headers hdr, inout metadata meta, inout standard_metadata_t
 
 control DeparserImpl(packet_out packet, in headers hdr) {
     apply {
+        packet.emit(hdr);
     }
 }
 
