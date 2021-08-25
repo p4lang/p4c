@@ -16,11 +16,13 @@ limitations under the License.
 #include <unordered_map>
 #include "backend.h"
 #include "backends/bmv2/psa_switch/psaSwitch.h"
+#include "backends/common/pna.h"
 #include "dpdkArch.h"
 #include "dpdkAsmOpt.h"
 #include "dpdkHelpers.h"
 #include "dpdkProgram.h"
 #include "dpdkVarCollector.h"
+#include "programStructure.h"
 #include "midend/eliminateTypedefs.h"
 #include "ir/dbprint.h"
 #include "ir/ir.h"
@@ -33,10 +35,76 @@ class DpdkArchFirst : public PassManager {
     DpdkArchFirst() { setName("DpdkArchFirst"); }
 };
 
-void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
+void Backend::execute(const IR::P4Program* program) {
+    auto convertToDpdk = new ConvertToDpdkProgram(
+        structure, refMap, typeMap, &collector, rewriteToDpdkArch);
+    PassManager toAsm = {
+        new BMV2::DiscoverStructure(&structure),
+        new BMV2::InspectPsaProgram(refMap, typeMap, &structure),
+        // convert to assembly program
+        convertToDpdk,
+    };
+    toAsm.addDebugHook(hook, true);
+    program = program->apply(toAsm);
+    dpdk_program = convertToDpdk->getDpdkProgram();
+    if (!dpdk_program)
+        return;
+    PassManager post_code_gen = {
+        new EliminateUnusedAction(),
+        new DpdkAsmOptimization,
+    };
+    dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
+}
+
+void PnaBackend::convert(const IR::ToplevelBlock *tlb) {
+    auto main = tlb->getMain();
+    if (!main) return;
+    if (main->type->name != "PNA_NIC") {
+        ::warning(ErrorType::WARN_INVALID,
+                  "%1%: the main package should be called PNA_NIC"
+                  "; are you using the wrong architecture?",
+                  main->type->name);
+    }
+
+    DpdkProgramStructure structure;
+    auto parsePnaArch = new P4::ParsePnaArchitecture(&structure);
+    main->apply(*parsePnaArch);
+
+    auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
+    auto program = tlb->getProgram();
+    DpdkVariableCollector collector;
+    auto rewriteToDpdkArch =
+        new DPDK::RewriteToDpdkArch(refMap, typeMap, &collector);
+    PassManager simplify = {
+        new DpdkArchFirst(),
+        new P4::EliminateTypedef(refMap, typeMap),
+        // because the user metadata type has changed
+        new P4::ClearTypeMap(typeMap),
+        new P4::TypeChecking(refMap, typeMap),
+        // TBD: implement dpdk lowering passes instead of reusing bmv2's
+        // lowering pass.
+        new BMV2::LowerExpressions(typeMap),
+        new P4::ConstantFolding(refMap, typeMap, false),
+        new P4::TypeChecking(refMap, typeMap),
+        new P4::RemoveAllUnusedDeclarations(refMap),
+        // Convert to Dpdk specific format
+        rewriteToDpdkArch,
+        new P4::ClearTypeMap(typeMap),
+        new P4::TypeChecking(refMap, typeMap, true),
+        evaluator,
+        new VisitFunctor([this, evaluator, structure]() {
+            toplevel = evaluator->getToplevelBlock();
+        }),
+    };
+    auto hook = options.getDebugHook();
+    simplify.addDebugHook(hook, true);
+    program = program->apply(simplify);
+
+    // from this point, there is not psa/pna.
+}
+
+void PsaBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
-    BMV2::PsaProgramStructure structure(refMap, typeMap);
-    auto parsePsaArch = new BMV2::ParsePsaArchitecture(&structure);
     auto main = tlb->getMain();
     if (!main)
         return;
@@ -47,6 +115,8 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
                   "; are you using the wrong architecture?",
                   main->type->name);
 
+    BMV2::PsaProgramStructure structure(refMap, typeMap);
+    auto parsePsaArch = new BMV2::ParsePsaArchitecture(&structure);
     main->apply(*parsePsaArch);
 
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
@@ -87,29 +157,6 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
         return;  // no main
     main->apply(*parsePsaArch);
     program = toplevel->getProgram();
-    auto convertToDpdk = new ConvertToDpdkProgram(
-        structure, refMap, typeMap, &collector, rewriteToDpdkArch);
-    PassManager toAsm = {
-        new BMV2::DiscoverStructure(&structure),
-        new BMV2::InspectPsaProgram(refMap, typeMap, &structure),
-        // convert to assembly program
-        convertToDpdk,
-    };
-    toAsm.addDebugHook(hook, true);
-    program = program->apply(toAsm);
-    dpdk_program = convertToDpdk->getDpdkProgram();
-    if (!dpdk_program)
-        return;
-    PassManager post_code_gen = {
-        new EliminateUnusedAction(),
-        new DpdkAsmOptimization,
-    };
-
-    dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
-}
-
-void PsaSwitchBackend::codegen(std::ostream &out) const {
-    dpdk_program->toSpec(out) << std::endl;
 }
 
 }  // namespace DPDK

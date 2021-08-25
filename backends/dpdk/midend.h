@@ -17,20 +17,39 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_PSA_SWITCH_MIDEND_H_
 #define BACKENDS_DPDK_PSA_SWITCH_MIDEND_H_
 
-#include "backends/bmv2/common/midend.h"
-#include "backends/bmv2/common/options.h"
-#include "frontends/common/options.h"
 #include "ir/ir.h"
+#include "frontends/common/options.h"
 #include "midend/convertEnums.h"
 
 namespace DPDK {
 
-class PsaSwitchMidEnd : public BMV2::MidEnd {
+/**
+This class implements a policy suitable for the ConvertEnums pass.
+The policy is: convert all enums to bit<32>
+*/
+class EnumOn32Bits : public P4::ChooseEnumRepresentation {
+    bool convert(const IR::Type_Enum *) const override {
+        return true;
+    }
+    unsigned enumSize(unsigned) const override { return 32; }
+ public:
+    EnumOn32Bits() {}
+};
+
+class MidEnd : public PassManager {
   public:
+    P4::ReferenceMap    refMap;
+    P4::TypeMap         typeMap;
+    const IR::ToplevelBlock   *toplevel = nullptr;
+    P4::ConvertEnums::EnumMapping enumMap;
+
     // If p4c is run with option '--listMidendPasses', outStream is used for
     // printing passes names
-    explicit PsaSwitchMidEnd(CompilerOptions &options,
-                             std::ostream *outStream = nullptr);
+    explicit MidEnd(CompilerOptions &options);
+
+    const IR::ToplevelBlock* process(const IR::P4Program *&program) {
+        program = program->apply(*this);
+        return toplevel; }
 };
 
 } // namespace DPDK

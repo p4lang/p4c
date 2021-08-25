@@ -44,8 +44,8 @@ limitations under the License.
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
 
-    AutoCompileContext autoPsaSwitchContext(new DPDK::PsaSwitchContext);
-    auto &options = DPDK::PsaSwitchContext::get().options();
+    AutoCompileContext context(new DPDK::DpdkContext);
+    auto &options = DPDK::DpdkContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = BMV2_PSA_VERSION_STRING;
 
@@ -114,7 +114,7 @@ int main(int argc, char *const argv[]) {
         p4rt->serializeBFRuntimeSchema(out);
     }
 
-    DPDK::PsaSwitchMidEnd midEnd(options);
+    DPDK::MidEnd midEnd(options);
     midEnd.addDebugHook(hook);
     try {
         toplevel = midEnd.process(program);
@@ -131,19 +131,16 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0)
         return 1;
 
-    auto backend = new DPDK::PsaSwitchBackend(options, &midEnd.refMap,
-                                              &midEnd.typeMap, &midEnd.enumMap);
-
-    // Necessary because BMV2Context is expected at the top of stack in further
-    // processing
-    AutoCompileContext autoContext(
-        new BMV2::BMV2Context(DPDK::PsaSwitchContext::get()));
-    try {
-        backend->convert(toplevel);
-    } catch (const std::exception &bug) {
-        std::cerr << bug.what() << std::endl;
-        return 1;
+    DPDK::Backend* backend = nullptr;
+    if (options.arch == "pna") {
+        backend = new DPDK::PnaBackend(&midEnd.refMap, &midEnd.typeMap);
+    } else if (options.arch == "psa") {
+        backend = new DPDK::PsaBackend(&midEnd.refMap, &midEnd.typeMap);
+    } else {
+        ::error("Unsupported architecture %s", options.arch);
     }
+    backend->convert(toplevel);
+
     if (::errorCount() > 0)
         return 1;
 

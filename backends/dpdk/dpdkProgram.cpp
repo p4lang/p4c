@@ -79,7 +79,11 @@ IR::IndexedVector<IR::DpdkStructType> ConvertToDpdkProgram::UpdateHeaderMetadata
     return structType;
 }
 
-const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
+const IR::DpdkAsmProgram *ConvertToDpdkProgram::create_from_pna(IR::P4Program *prog) {
+    return nullptr;
+}
+
+const IR::DpdkAsmProgram *ConvertToDpdkProgram::create_from_psa(IR::P4Program *prog) {
     IR::Type_Struct *metadataStruct = nullptr;
 
     for (auto obj : prog->objects) {
@@ -170,8 +174,11 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
 }
 
 const IR::Node *ConvertToDpdkProgram::preorder(IR::P4Program *prog) {
-    // std::cout << prog << std::endl;
-    dpdk_program = create(prog);
+    if (options.arch == "pna") {
+        dpdk_program = create_from_pna(prog);
+    } else if (options.arch == "psa") {
+        dpdk_program = create_from_psa(prog);
+    }
     return prog;
 }
 

@@ -41,6 +41,8 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/gmputil.h"
 #include "lib/json.h"
+#include "options.h"
+
 namespace DPDK {
 
 /* Maximum size in bits for fields in header and metadata structures */
@@ -51,7 +53,8 @@ class ConvertToDpdkProgram : public Transform {
     std::map<cstring, int> reg_name_to_id;
     std::map<cstring, cstring> symbol_table;
 
-    BMV2::PsaProgramStructure &structure;
+    DpdkOptions& options;
+    DpdkProgramStructure &structure;
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
     DpdkVariableCollector *collector;
@@ -68,7 +71,8 @@ class ConvertToDpdkProgram : public Transform {
                          P4::ReferenceMap *refmap, P4::TypeMap *typemap,
                          DpdkVariableCollector *collector,
                          DPDK::RewriteToDpdkArch *dpdkarch)
-        : structure(structure), typemap(typemap), refmap(refmap),
+        : options(DpdkContext::get().options()),
+          structure(structure), typemap(typemap), refmap(refmap),
           collector(collector) {
         info = dpdkarch->info;
         args_struct_map = dpdkarch->args_struct_map;
@@ -77,7 +81,8 @@ class ConvertToDpdkProgram : public Transform {
         error_map = dpdkarch->error_map;
     }
 
-    const IR::DpdkAsmProgram *create(IR::P4Program *prog);
+    const IR::DpdkAsmProgram *create_from_psa(IR::P4Program *prog);
+    const IR::DpdkAsmProgram *create_from_pna(IR::P4Program *prog);
     const IR::DpdkAsmStatement *createListStatement(
         cstring name,
         std::initializer_list<IR::IndexedVector<IR::DpdkAsmStatement>>

@@ -78,7 +78,6 @@ void expressionUnrollSanityCheck(const IR::Expression *e) {
 }
 
 const IR::Node *ConvertToDpdkArch::postorder(IR::P4Program *p) {
-    // std::cout << p << std::endl;
     return p;
 }
 

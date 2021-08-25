@@ -39,19 +39,37 @@ limitations under the License.
 #include "ir/ir.h"
 #include "lib/gmputil.h"
 #include "lib/json.h"
+#include "backends/dpdk/options.h"
 
 namespace DPDK {
-class PsaSwitchBackend : public BMV2::Backend {
-    BMV2::BMV2Options &options;
-    const IR::DpdkAsmProgram *dpdk_program = nullptr;
 
-  public:
+// Backend is the base class for PnaBackend and PsaBackend.
+class Backend {
+ public:
+    DpdkOptions&                     options;
+    P4::ReferenceMap*                refMap;
+    P4::TypeMap*                     typeMap;
+    const IR::DpdkAsmProgram *       dpdk_program = nullptr;
+    const IR::ToplevelBlock*         toplevel = nullptr;
+
+    Backend(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) :
+        options(DpdkContext::get().options()), refMap(refMap), typeMap(typeMap) {}
+    virtual void convert(const IR::ToplevelBlock* block) = 0;
+    void codegen(std::ostream &out) const { dpdk_program->toSpec(out) << std::endl; }
+    void translateToDpdkArch(const IR::ToplevelBlock *tlb);
+    void execute(const IR::P4Program*);
+};
+
+class PnaBackend : public Backend {
+ public:
     void convert(const IR::ToplevelBlock *tlb) override;
-    PsaSwitchBackend(BMV2::BMV2Options &options, P4::ReferenceMap *refMap,
-                     P4::TypeMap *typeMap,
-                     P4::ConvertEnums::EnumMapping *enumMap)
-        : Backend(options, refMap, typeMap, enumMap), options(options) {}
-    void codegen(std::ostream &) const;
+    PnaBackend(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) : Backend(refMap, typeMap) {}
+};
+
+class PsaBackend : public Backend {
+ public:
+    void convert(const IR::ToplevelBlock *tlb) override;
+    PsaBackend(P4::ReferenceMap* refMap, P4::TypeMap* typeMap) : Backend(refMap, typeMap) {}
 };
 
 } // namespace DPDK
