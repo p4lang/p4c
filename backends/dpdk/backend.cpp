@@ -35,8 +35,8 @@ class DpdkArchFirst : public PassManager {
 
 void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
-    BMV2::PsaProgramStructure structure(refMap, typeMap);
-    auto parsePsaArch = new BMV2::ParsePsaArchitecture(&structure);
+    BMV2::PsaProgramStructure psa_structure(refMap, typeMap);
+    auto parsePsaArch = new BMV2::ParsePsaArchitecture(&psa_structure);
     auto main = tlb->getMain();
     if (!main)
         return;
@@ -52,8 +52,9 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
     auto program = tlb->getProgram();
     DpdkVariableCollector collector;
+    DpdkProgramStructure structure;
     auto rewriteToDpdkArch =
-        new DPDK::RewriteToDpdkArch(refMap, typeMap, &collector);
+        new DPDK::RewriteToDpdkArch(refMap, typeMap, &collector, &structure);
     PassManager simplify = {
         new DpdkArchFirst(),
         new P4::EliminateTypedef(refMap, typeMap),
@@ -80,7 +81,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     program = program->apply(simplify);
 
     // map IR node to compile-time allocated resource blocks.
-    toplevel->apply(*new BMV2::BuildResourceMap(&structure.resourceMap));
+    toplevel->apply(*new BMV2::BuildResourceMap(&psa_structure.resourceMap));
 
     main = toplevel->getMain();
     if (!main)
@@ -88,10 +89,10 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     main->apply(*parsePsaArch);
     program = toplevel->getProgram();
     auto convertToDpdk = new ConvertToDpdkProgram(
-        structure, refMap, typeMap, &collector, rewriteToDpdkArch);
+        psa_structure, refMap, typeMap, &collector, rewriteToDpdkArch, &structure);
     PassManager toAsm = {
-        new BMV2::DiscoverStructure(&structure),
-        new BMV2::InspectPsaProgram(refMap, typeMap, &structure),
+        // new BMV2::DiscoverStructure(&structure),
+        // new BMV2::InspectPsaProgram(refMap, typeMap, &structure),
         // convert to assembly program
         convertToDpdk,
     };

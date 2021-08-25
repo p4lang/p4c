@@ -23,6 +23,8 @@ limitations under the License.
 #include "frontends/p4/sideEffects.h"
 #include <ir/ir.h>
 #include "lib/error.h"
+#include "dpdkProgramStructure.h"
+
 namespace DPDK {
 
 cstring TypeStruct2Name(const cstring *s);
@@ -346,14 +348,15 @@ class PrependPDotToActionArgs : public Transform {
     P4::TypeMap* typeMap;
     P4::ReferenceMap *refMap;
     BlockInfoMapping *toBlockInfo;
+    DpdkProgramStructure* structure;
 
   public:
-    std::map<const cstring, IR::IndexedVector<IR::Parameter> *> args_struct_map;
-
     PrependPDotToActionArgs(BlockInfoMapping *toBlockInfo,
                             P4::TypeMap* typeMap,
-                            P4::ReferenceMap *refMap)
-        : typeMap(typeMap), refMap(refMap), toBlockInfo(toBlockInfo) {}
+                            P4::ReferenceMap *refMap,
+                            DpdkProgramStructure* structure)
+        : typeMap(typeMap), refMap(refMap), toBlockInfo(toBlockInfo),
+          structure(structure) {}
     const IR::Node *postorder(IR::P4Action *a) override;
     const IR::Node *postorder(IR::P4Program *s) override;
     const IR::Node *preorder(IR::PathExpression *path) override;
@@ -697,14 +700,13 @@ class RewriteToDpdkArch : public PassManager {
   public:
     // TBD: refactor the following data struture into ProgramInfo
     CollectMetadataHeaderInfo *info;
-    std::map<const cstring, IR::IndexedVector<IR::Parameter> *>
-        *args_struct_map;
     std::map<const IR::Declaration_Instance *, cstring> *csum_map;
     std::vector<const IR::Declaration_Instance *> *externDecls;
     std::set<const IR::P4Table*> invokedInKey;
     std::map<cstring, int> *error_map;
     RewriteToDpdkArch(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                      DpdkVariableCollector *collector) {
+                      DpdkVariableCollector *collector,
+                      DpdkProgramStructure *structure) {
         setName("RewriteToDpdkArch");
         auto *evaluator = new P4::EvaluatorPass(refMap, typeMap);
         auto *parsePsa = new ParsePsa();
@@ -754,8 +756,7 @@ class RewriteToDpdkArch : public PassManager {
         auto checksum_convertor = new ConvertInternetChecksum(typeMap, info);
         passes.push_back(checksum_convertor);
         csum_map = &checksum_convertor->csum_map;
-        auto p = new PrependPDotToActionArgs(&parsePsa->toBlockInfo, typeMap, refMap);
-        args_struct_map = &p->args_struct_map;
+        auto p = new PrependPDotToActionArgs(&parsePsa->toBlockInfo, typeMap, refMap, structure);
         passes.push_back(p);
         passes.push_back(new ConvertLogicalExpression);
         auto insertExternDeclaration = new CollectExternDeclaration(typeMap);

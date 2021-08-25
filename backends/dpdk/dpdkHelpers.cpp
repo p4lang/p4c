@@ -138,10 +138,10 @@ bool ConvertStatementToDpdk::preorder(const IR::AssignmentStatement *a) {
             } else if (e->originalExternType->getName().name ==
                        "InternetChecksum") {
                 if (e->method->getName().name == "get") {
-                    auto res = csum_map->find(
+                    auto res = structure->csum_map.find(
                         e->object->to<IR::Declaration_Instance>());
                     cstring intermediate;
-                    if (res != csum_map->end()) {
+                    if (res != structure->csum_map.end()) {
                         intermediate = res->second;
                     }
                     i = new IR::DpdkGetChecksumStatement(
@@ -469,9 +469,9 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
         // Checksum function call
         if (a->originalExternType->getName().name == "InternetChecksum") {
             auto res =
-                csum_map->find(a->object->to<IR::Declaration_Instance>());
+                structure->csum_map.find(a->object->to<IR::Declaration_Instance>());
             cstring intermediate;
-            if (res != csum_map->end()) {
+            if (res != structure->csum_map.end()) {
                 intermediate = res->second;
             } else {
                 BUG("checksum map does not collect all checksum def.");
@@ -607,7 +607,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             auto error = args->at(1);
             if (!error->expression->is<IR::Member>())
                 ::error("%1%: must be one of the existing errors", s);
-            auto error_id = error_map->at(error->expression->to<IR::Member>()->member);
+            auto error_id = structure->error_map.at(error->expression->to<IR::Member>()->member);
             auto end_label = Util::printf_format("label_%dend", next_label_id++);
             add_instr(new IR::DpdkJmpEqualStatement(
                         end_label,
@@ -627,8 +627,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             BUG("%1% function not implemented.", s);
         }
     } else if (auto a = mi->to<P4::ActionCall>()) {
-        auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap,
-                collector, csum_map, error_map);
+        auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, collector, structure);
         a->action->body->apply(*helper);
         for (auto i : helper->get_instr()) {
             add_instr(i);

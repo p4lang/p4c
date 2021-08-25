@@ -882,7 +882,7 @@ const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Action *a) {
         for (auto p : a->parameters->parameters) {
             l->push_back(p);
         }
-        args_struct_map.emplace(a->name.toString() + "_arg_t", l);
+        structure->args_struct_map.emplace(a->name.toString() + "_arg_t", l);
         auto new_l = new IR::IndexedVector<IR::Parameter>;
         new_l->push_back(new IR::Parameter(
             IR::ID("t"), IR::Direction::None,
@@ -899,7 +899,7 @@ const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Program *program) {
             for (auto kv : *toBlockInfo) {
                 if (kv.second.pipe == "Ingress") {
                     if (kv.first->to<IR::P4Control>()->name == control->name) {
-                        for (auto kv : args_struct_map) {
+                        for (auto kv : structure->args_struct_map) {
                             auto fields =
                                 new IR::IndexedVector<IR::StructField>;
                             for (auto field : *kv.second) {

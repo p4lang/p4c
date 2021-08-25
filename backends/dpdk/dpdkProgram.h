@@ -29,6 +29,7 @@ limitations under the License.
 #include "backends/bmv2/psa_switch/psaSwitch.h"
 #include "dpdkArch.h"
 #include "dpdkVarCollector.h"
+#include "dpdkProgramStructure.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
@@ -51,30 +52,23 @@ class ConvertToDpdkProgram : public Transform {
     std::map<cstring, int> reg_name_to_id;
     std::map<cstring, cstring> symbol_table;
 
-    BMV2::PsaProgramStructure &structure;
+    BMV2::PsaProgramStructure &old_structure;
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
     DpdkVariableCollector *collector;
+    DpdkProgramStructure *structure;
     const IR::DpdkAsmProgram *dpdk_program;
     CollectMetadataHeaderInfo *info;
-    std::map<const cstring, IR::IndexedVector<IR::Parameter> *>
-        *args_struct_map;
-    std::map<const IR::Declaration_Instance *, cstring> *csum_map;
-    std::vector<const IR::Declaration_Instance *> *externDecls;
-    std::map<cstring, int> *error_map;
 
   public:
     ConvertToDpdkProgram(BMV2::PsaProgramStructure &structure,
                          P4::ReferenceMap *refmap, P4::TypeMap *typemap,
                          DpdkVariableCollector *collector,
-                         DPDK::RewriteToDpdkArch *dpdkarch)
-        : structure(structure), typemap(typemap), refmap(refmap),
-          collector(collector) {
+                         DPDK::RewriteToDpdkArch *dpdkarch,
+                         DpdkProgramStructure *dp)
+        : old_structure(structure), typemap(typemap), refmap(refmap),
+          collector(collector), structure(dp) {
         info = dpdkarch->info;
-        args_struct_map = dpdkarch->args_struct_map;
-        csum_map = dpdkarch->csum_map;
-        externDecls = dpdkarch->externDecls;
-        error_map = dpdkarch->error_map;
     }
 
     const IR::DpdkAsmProgram *create(IR::P4Program *prog);
@@ -93,19 +87,17 @@ class ConvertToDpdkParser : public Inspector {
     P4::ReferenceMap *refmap;
     P4::TypeMap *typemap;
     DpdkVariableCollector *collector;
-    std::map<const IR::Declaration_Instance *, cstring> *csum_map;
-    std::map<cstring, int> *error_map;
+    DpdkProgramStructure *structure;
     IR::Type_Struct *metadataStruct;
 
   public:
     ConvertToDpdkParser(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkVariableCollector *collector,
-        std::map<const IR::Declaration_Instance *, cstring> *csum_map,
-        std::map<cstring, int> *error_map,
+        DpdkProgramStructure* structure,
         IR::Type_Struct *metadataStruct)
         : refmap(refmap), typemap(typemap), collector(collector),
-          csum_map(csum_map), error_map(error_map),
+          structure(structure),
           metadataStruct(metadataStruct) {}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() {
         return instructions;
@@ -127,12 +119,11 @@ class ConvertToDpdkControl : public Inspector {
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
     DpdkVariableCollector *collector;
+    DpdkProgramStructure *structure;
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     IR::IndexedVector<IR::DpdkTable> tables;
     IR::IndexedVector<IR::DpdkSelector> selectors;
     IR::IndexedVector<IR::DpdkAction> actions;
-    std::map<const IR::Declaration_Instance *, cstring> *csum_map;
-    std::map<cstring, int> *error_map;
     std::set<cstring> unique_actions;
     bool deparser;
 
@@ -140,11 +131,10 @@ class ConvertToDpdkControl : public Inspector {
     ConvertToDpdkControl(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkVariableCollector *collector,
-        std::map<const IR::Declaration_Instance *, cstring> *csum_map,
-        std::map<cstring, int> *error_map,
+        DpdkProgramStructure *structure,
         bool deparser = false)
         : typemap(typemap), refmap(refmap), collector(collector),
-          csum_map(csum_map), error_map(error_map), deparser(deparser) {}
+          structure(structure), deparser(deparser) {}
 
     IR::IndexedVector<IR::DpdkTable> &getTables() { return tables; }
     IR::IndexedVector<IR::DpdkSelector> &getSelectors() { return selectors; }

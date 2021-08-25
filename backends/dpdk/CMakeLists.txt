@@ -103,6 +103,7 @@ set(P4C_DPDK_HEADERS
     dpdkVarCollector.h
     dpdkArch.h
     dpdkAsmOpt.h
+    dpdkProgramStructure.h
     options.h
     control-plane/bfruntime_ext.h
     control-plane/bfruntime_arch_handler.h

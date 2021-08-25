@@ -28,6 +28,7 @@ limitations under the License.
 #include "backends/bmv2/common/programStructure.h"
 #include "backends/bmv2/psa_switch/psaSwitch.h"
 #include "dpdkVarCollector.h"
+#include "dpdkProgramStructure.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"
@@ -135,19 +136,16 @@ class ConvertStatementToDpdk : public Inspector {
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
     DpdkVariableCollector *collector;
-    std::map<const IR::Declaration_Instance *, cstring> *csum_map;
-    std::map<cstring, int> *error_map;
+    DpdkProgramStructure *structure;
     const IR::P4Parser *parser = nullptr;
 
   public:
     ConvertStatementToDpdk(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
         DpdkVariableCollector *collector,
-        std::map<const IR::Declaration_Instance *, cstring> *csum_map,
-        std::map<cstring, int> *error_map)
+        DpdkProgramStructure *structure)
         : typemap(typemap), refmap(refmap),
-          collector(collector), csum_map(csum_map),
-          error_map(error_map) {}
+          collector(collector), structure(structure) {}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() {
         return instructions;
     }
