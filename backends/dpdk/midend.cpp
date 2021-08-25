@@ -71,6 +71,18 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     bool convert(const IR::Type_Enum *) const override {
         return true;
     }
+
+    /* This function assigns DPDK target compatible values to the enums */
+    unsigned encoding(const IR::Type_Enum *type, unsigned n) const override {
+        if (type->name == "PSA_MeterColor_t") {
+           /* DPDK target assumes the following values for Meter colors
+              (Green: 0, Yellow: 1, Red: 2)
+              For PSA, the default values are  RED: 0, Green: 1, Yellow: 2 */
+            return (n + 2) % 3;
+        }
+        return n;
+    }
+
     unsigned enumSize(unsigned) const override { return 32; }
  public:
     EnumOn32Bits() {}
@@ -83,7 +95,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options,
         new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
     std::function<bool(const Context *, const IR::Expression *)> policy =
-        [=](const Context *ctx, const IR::Expression *e) -> bool {
+        [=](const Context *ctx, const IR::Expression *) -> bool {
         if (auto mce = findContext<IR::MethodCallExpression>(ctx)) {
             auto mi = P4::MethodInstance::resolve(mce, &refMap, &typeMap);
             if (auto em = mi->to<P4::ExternMethod>()) {

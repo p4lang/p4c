@@ -19,6 +19,7 @@ tables {
   action_refs {
     id: 23466264
   }
+  implementation_id: 298015716
   size: 1024
 }
 tables {
@@ -39,6 +40,7 @@ tables {
   action_refs {
     id: 21832421
   }
+  implementation_id: 298015716
   size: 1024
 }
 actions {
@@ -79,6 +81,8 @@ action_profiles {
     name: "MyIC.ap"
     alias: "ap"
   }
+  table_ids: 39967501
+  table_ids: 47318070
   size: 1024
 }
 type_info {
