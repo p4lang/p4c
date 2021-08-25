@@ -90,6 +90,6 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason(
-  "Key field wider than 64-bit is not permitted"
+  "rror: Key field wider than 64-bit is not permitted h.ipv4.newfield"
   testdata/p4_16_samples/psa-dpdk-lpm-match-err3.p4
   )
