@@ -2,6 +2,7 @@
 #include "frontends/common/constantFolding.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/coreLibrary.h"
+#include "lib/exceptions.h"
 
 namespace P4 {
 
@@ -609,11 +610,13 @@ void ExpressionEvaluator::checkResult(const IR::Expression* expression,
 
 void ExpressionEvaluator::setNonConstant(const IR::Expression* expression) {
     auto type = typeMap->getType(expression, true);
-    if (expression->type->is<IR::BoolLiteral>()) {
+    if (type->is<IR::BoolLiteral>()) {
         set(expression, new SymbolicBool(ScalarValue::ValueState::NotConstant));
-    } else {
+    } else if (type->is<IR::Type_Bits>()) {
         set(expression, new SymbolicInteger(ScalarValue::ValueState::NotConstant,
                                             type->to<IR::Type_Bits>()));
+    } else {
+        BUG("Non Type_Bits type %1% for expression %2%", type, expression);
     }
 }
 
