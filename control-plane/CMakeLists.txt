@@ -77,6 +77,7 @@ set (CONTROLPLANE_SRCS
   p4RuntimeArchStandard.cpp
   p4RuntimeSerializer.cpp
   typeSpecConverter.cpp
+  bfruntime.cpp
   )
 set (CONTROLPLANE_SOURCES
   ${P4RUNTIME_GEN_SRCS}
@@ -90,6 +91,7 @@ set (CONTROLPLANE_HDRS
   p4RuntimeArchStandard.h
   p4RuntimeSerializer.h
   typeSpecConverter.h
+  bfruntime.h
   )
 
 add_cpplint_files (${CMAKE_CURRENT_SOURCE_DIR} "${CONTROLPLANE_HDRS};${CONTROLPLANE_SRCS}")

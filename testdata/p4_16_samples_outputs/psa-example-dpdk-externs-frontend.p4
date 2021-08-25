@@ -87,9 +87,9 @@ control ingress(inout headers hdr, inout metadata_t user_meta, in psa_ingress_in
         color_in_0 = PSA_MeterColor_t.RED;
         if (user_meta.port_out == 32w1) {
             tbl_0.apply();
-            counter0_0.count(12w1024, 32w20);
-            counter1_0.count(12w512, 32w64);
-            counter2_0.count(12w1024);
+            counter0_0.count(12w1023, 32w20);
+            counter1_0.count(12w512);
+            counter2_0.count(12w1023, 32w64);
             user_meta.port_out = reg_0.read(12w1);
         } else {
             hasReturned = true;

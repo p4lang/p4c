@@ -161,6 +161,7 @@ class ConvertStatementToDpdk : public Inspector {
     void add_instr(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
     IR::IndexedVector<IR::DpdkAsmStatement> &get_instr() { return instructions; }
     int get_label_num() { return next_label_id; }
+    void process_logical_operation(const IR::Expression*, const IR::Operation_Binary*);
     void process_relation_operation(const IR::Expression*, const IR::Operation_Relation*);
     cstring append_parser_name(const IR::P4Parser* p, cstring);
     void set_parser(const IR::P4Parser* p) { parser = p; }

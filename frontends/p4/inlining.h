@@ -250,7 +250,7 @@ class InlinePass : public PassManager {
         new TypeChecking(refMap, typeMap),
         new DiscoverInlining(&toInline, refMap, typeMap, evaluator),
         new InlineDriver<InlineList, InlineSummary>(&toInline, new GeneralInliner(refMap->isV1())),
-        new RemoveAllUnusedDeclarations(refMap) }) { }
+        new RemoveAllUnusedDeclarations(refMap) }) { setName("InlinePass"); }
 };
 
 /**
@@ -267,7 +267,7 @@ class Inline : public PassRepeated {
         new InlinePass(refMap, typeMap, evaluator),
         // After inlining the output of the evaluator changes, so
         // we have to run it again
-        evaluator }) {}
+        evaluator }) { setName("Inline"); }
 
     /// Do not propagate annotation \p name during inlining
     static void setAnnotationNoPropagate(cstring name) {

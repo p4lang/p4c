@@ -24,6 +24,8 @@ namespace DPDK {
 
 class PsaSwitchOptions : public BMV2::BMV2Options {
   public:
+    cstring bfRtSchema = "";
+
     PsaSwitchOptions() {
         registerOption(
             "--listMidendPasses", nullptr,
@@ -35,6 +37,9 @@ class PsaSwitchOptions : public BMV2::BMV2Options {
                 return false;
             },
             "[PsaSwitch back-end] Lists exact name of all midend passes.\n");
+        registerOption("--bf-rt-schema", "file",
+                [this](const char *arg) { bfRtSchema = arg; return true; },
+                "Generate and write BF-RT JSON schema to the specified file");
     }
 
     /// Process the command line arguments and set options accordingly.
