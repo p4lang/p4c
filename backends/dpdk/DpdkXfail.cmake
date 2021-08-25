@@ -88,3 +88,8 @@ p4c_add_xfail_reason("dpdk"
   "packet_in Not implemented"
   testdata/p4_16_samples/psa-example-dpdk-varbit.p4
   )
+
+p4c_add_xfail_reason(
+  "Key field wider than 64-bit is not permitted"
+  psa-dpdk-lpm-match-err3.p4
+  )
