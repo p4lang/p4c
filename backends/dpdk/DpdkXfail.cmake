@@ -91,5 +91,5 @@ p4c_add_xfail_reason("dpdk"
 
 p4c_add_xfail_reason(
   "Key field wider than 64-bit is not permitted"
-  psa-dpdk-lpm-match-err3.p4
+  testdata/p4_16_samples/psa-dpdk-lpm-match-err3.p4
   )
