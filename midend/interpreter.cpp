@@ -17,6 +17,8 @@ SymbolicValue* SymbolicValueFactory::create(const IR::Type* type, bool uninitial
         return new SymbolicStruct(type->to<IR::Type_Struct>(), uninitialized, this);
     if (type->is<IR::Type_Header>())
         return new SymbolicHeader(type->to<IR::Type_Header>(), uninitialized, this);
+    if (type->is<IR::Type_HeaderUnion>())
+        return new SymbolicStruct(type->to<IR::Type_HeaderUnion>(), uninitialized, this);
     if (type->is<IR::Type_Varbits>())
         return new SymbolicVarbit(type->to<IR::Type_Varbits>());
     if (type->is<IR::Type_Stack>()) {
@@ -53,7 +55,7 @@ SymbolicValue* SymbolicValueFactory::create(const IR::Type* type, bool uninitial
 }
 
 bool SymbolicValueFactory::isFixedWidth(const IR::Type* type) const {
-    type = typeMap->getType(type, true);
+    type = typeMap->getTypeType(type, true);
     if (type->is<IR::Type_Varbits>())
         return false;
     if (type->is<IR::Type_Extern>())
