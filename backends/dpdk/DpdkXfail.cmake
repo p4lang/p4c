@@ -86,6 +86,6 @@ p4c_add_xfail_reason("dpdk"
   )
 
 p4c_add_xfail_reason("dpdk"
-  "packet_in Not implemented"
+  "Could not find type"
   testdata/p4_16_samples/psa-example-dpdk-varbit.p4
   )
