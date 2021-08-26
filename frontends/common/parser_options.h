@@ -72,6 +72,8 @@ class ParserOptions : public Util::Options {
     std::vector<cstring> top4;
     // debugging dumps of programs written in this folder
     cstring dumpFolder = ".";
+    // If false, optimization of callee parsers (subparsers) inlining is disabled.
+    bool optimizeParserInlining = false;
     // Expect that the only remaining argument is the input file.
     void setInputFile();
     // Return target specific include path.

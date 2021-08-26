@@ -162,6 +162,11 @@ class BackendDriver:
         if opts.disabled_annos is not None:
             self.add_command_option('compiler',
                                     '--disable-annotations={}'.format(opts.disabled_annos))
+
+        # enable parser inlining optimization
+        if opts.optimizeParserInlining:
+            self.add_command_option('compiler', '--parser-inline-opt')
+
         # set developer options
         if (os.environ['P4C_BUILD_TYPE'] == "DEVELOPER"):
             for option in opts.log_levels:
