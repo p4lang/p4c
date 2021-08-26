@@ -367,6 +367,16 @@ class ParserSymbolicInterpreter {
             auto mc = sord->to<IR::MethodCallStatement>();
             auto e = ev.evaluate(mc->methodCall, false);
             success = reportIfError(state, e);
+        } else if (auto bs = sord->to<IR::BlockStatement>()) {
+            IR::IndexedVector<IR::StatOrDecl> newComponents;
+            for (auto* component : bs->components) {
+                auto newComponent = executeStatement(state, component, valueMap);
+                if (!newComponent)
+                    success = false;
+                else
+                    newComponents.push_back(newComponent);
+            }
+            sord = new IR::BlockStatement(newComponents);
         } else {
             BUG("%1%: unexpected declaration or statement", sord);
         }
