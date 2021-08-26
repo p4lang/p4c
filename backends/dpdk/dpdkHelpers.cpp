@@ -627,7 +627,7 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             BUG("%1% function not implemented.", s);
         }
     } else if (auto a = mi->to<P4::ActionCall>()) {
-        auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, collector, structure);
+        auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
         a->action->body->apply(*helper);
         for (auto i : helper->get_instr()) {
             add_instr(i);

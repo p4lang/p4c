@@ -5,7 +5,11 @@
 
 /* Collect information related to P4 programs targeting dpdk */
 class DpdkProgramStructure {
+ private:
+    IR::IndexedVector<IR::DpdkDeclaration> variables;
+
  public:
+    DpdkProgramStructure() { }
     ordered_map<cstring, const IR::Type_Header*> header_types;
     ordered_map<cstring, const IR::Type_Struct*> metadata_types;
 
@@ -19,6 +23,11 @@ class DpdkProgramStructure {
     std::vector<const IR::Declaration_Instance *>               externDecls;
 
     IR::Type_Struct * metadataStruct;
+
+    void push_variable(const IR::DpdkDeclaration * d) {
+        variables.push_back(d); }
+    IR::IndexedVector<IR::DpdkDeclaration> &get_globals() {
+        return variables; }
 };
 
 #endif /* BACKENDS_DPDK_PROGRAM_STRUCTURE_H_ */

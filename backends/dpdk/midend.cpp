@@ -89,8 +89,7 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
 };
 
 PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options,
-                                 std::ostream *outStream)
-    : MidEnd(options) {
+                                 std::ostream *outStream) {
     auto convertEnums =
         new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);

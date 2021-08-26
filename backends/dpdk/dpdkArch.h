@@ -16,7 +16,7 @@ limitations under the License.
 
 #ifndef BACKENDS_CONVERT_TO_DPDK_ARCH_H_
 #define BACKENDS_CONVERT_TO_DPDK_ARCH_H_
-#include "dpdkVarCollector.h"
+
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/evaluator/evaluator.h"
 #include "frontends/p4/typeMap.h"
@@ -212,12 +212,12 @@ class DeclarationInjector {
 class StatementUnroll : public Transform {
   private:
     P4::ReferenceMap *refMap;
-    DpdkVariableCollector *collector;
+    DpdkProgramStructure *structure;
     DeclarationInjector injector;
 
   public:
-    StatementUnroll(P4::ReferenceMap *refMap, DpdkVariableCollector *collector) :
-        refMap(refMap), collector(collector) {}
+    StatementUnroll(P4::ReferenceMap *refMap, DpdkProgramStructure *structure) :
+        refMap(refMap), structure(structure) {}
     const IR::Node *preorder(IR::AssignmentStatement *a) override;
     const IR::Node *postorder(IR::P4Control *a) override;
     const IR::Node *postorder(IR::P4Parser *a) override;
@@ -239,7 +239,7 @@ class ExpressionUnroll : public Inspector {
     IR::IndexedVector<IR::StatOrDecl> stmt;
     IR::IndexedVector<IR::Declaration> decl;
     IR::PathExpression *root;
-    ExpressionUnroll(P4::ReferenceMap *refMap, DpdkVariableCollector *) :
+    ExpressionUnroll(P4::ReferenceMap *refMap, DpdkProgramStructure *) :
         refMap(refMap) {
         setName("ExpressionUnroll");
     }
@@ -258,12 +258,12 @@ class ExpressionUnroll : public Inspector {
 class IfStatementUnroll : public Transform {
   private:
     P4::ReferenceMap *refMap;
-    DpdkVariableCollector *collector;
+    DpdkProgramStructure *structure;
     DeclarationInjector injector;
 
   public:
-    IfStatementUnroll(P4::ReferenceMap* refMap, DpdkVariableCollector *collector) :
-        refMap(refMap), collector(collector) {
+    IfStatementUnroll(P4::ReferenceMap* refMap, DpdkProgramStructure *structure) :
+        refMap(refMap), structure(structure) {
         setName("IfStatementUnroll");
     }
     const IR::Node *postorder(IR::IfStatement *a) override;
@@ -276,7 +276,7 @@ class IfStatementUnroll : public Transform {
  */
 class LogicalExpressionUnroll : public Inspector {
     P4::ReferenceMap* refMap;
-    DpdkVariableCollector *collector;
+    DpdkProgramStructure *structure;
 
   public:
     IR::IndexedVector<IR::StatOrDecl> stmt;
@@ -293,8 +293,8 @@ class LogicalExpressionUnroll : public Inspector {
             return false;
     }
 
-    LogicalExpressionUnroll(P4::ReferenceMap* refMap, DpdkVariableCollector *collector)
-        : refMap(refMap), collector(collector) {}
+    LogicalExpressionUnroll(P4::ReferenceMap* refMap, DpdkProgramStructure *structure)
+        : refMap(refMap), structure(structure) {}
     bool preorder(const IR::Operation_Unary *a) override;
     bool preorder(const IR::Operation_Binary *a) override;
     bool preorder(const IR::MethodCallExpression *a) override;
@@ -705,7 +705,6 @@ class RewriteToDpdkArch : public PassManager {
     std::set<const IR::P4Table*> invokedInKey;
     std::map<cstring, int> *error_map;
     RewriteToDpdkArch(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                      DpdkVariableCollector *collector,
                       DpdkProgramStructure *structure) {
         setName("RewriteToDpdkArch");
         auto *evaluator = new P4::EvaluatorPass(refMap, typeMap);
@@ -731,8 +730,8 @@ class RewriteToDpdkArch : public PassManager {
         passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
         passes.push_back(new CopyMatchKeysToSingleStruct(refMap, typeMap, &invokedInKey));
         passes.push_back(new P4::ResolveReferences(refMap));
-        passes.push_back(new StatementUnroll(refMap, collector));
-        passes.push_back(new IfStatementUnroll(refMap, collector));
+        passes.push_back(new StatementUnroll(refMap, structure));
+        passes.push_back(new IfStatementUnroll(refMap, structure));
         passes.push_back(new P4::ClearTypeMap(typeMap));
         passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
         passes.push_back(new ConvertBinaryOperationTo2Params());

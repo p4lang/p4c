@@ -94,9 +94,9 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     IR::IndexedVector<IR::DpdkAsmStatement> statements;
 
     auto ingress_parser_converter =
-        new ConvertToDpdkParser(refmap, typemap, collector, structure, metadataStruct);
+        new ConvertToDpdkParser(refmap, typemap, structure, metadataStruct);
     auto egress_parser_converter =
-        new ConvertToDpdkParser(refmap, typemap, collector, structure, metadataStruct);
+        new ConvertToDpdkParser(refmap, typemap, structure, metadataStruct);
     for (auto kv : structure->parsers) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_parser_converter);
@@ -106,9 +106,9 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
             BUG("Unknown parser %s", kv.second->name);
     }
     auto ingress_converter =
-        new ConvertToDpdkControl(refmap, typemap, collector, structure);
+        new ConvertToDpdkControl(refmap, typemap, structure);
     auto egress_converter =
-        new ConvertToDpdkControl(refmap, typemap, collector, structure);
+        new ConvertToDpdkControl(refmap, typemap, structure);
     for (auto kv : structure->pipelines) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_converter);
@@ -118,9 +118,9 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
             BUG("Unknown control block %s", kv.second->name);
     }
     auto ingress_deparser_converter =
-        new ConvertToDpdkControl(refmap, typemap, collector, structure, true);
+        new ConvertToDpdkControl(refmap, typemap, structure, true);
     auto egress_deparser_converter =
-        new ConvertToDpdkControl(refmap, typemap, collector, structure);
+        new ConvertToDpdkControl(refmap, typemap, structure);
     for (auto kv : structure->deparsers) {
         if (kv.first == "ingress")
             kv.second->apply(*ingress_deparser_converter);
@@ -166,7 +166,7 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     return new IR::DpdkAsmProgram(
         headerType, structType, dpdkExternDecls, ingress_converter->getActions(),
         ingress_converter->getTables(), ingress_converter->getSelectors(),
-        statements, collector->get_globals());
+        statements, structure->get_globals());
 }
 
 const IR::Node *ConvertToDpdkProgram::preorder(IR::P4Program *prog) {
@@ -214,7 +214,7 @@ void ConvertToDpdkParser::getCondVars(const IR::Expression *sv, const IR::Expres
         auto tmpDecl = addNewTmpVarToMetadata("tmpMask", sv->type);
         auto tmpMask = new IR::PathExpression(
                            IR::ID("m." + tmpDecl->name.name));
-        collector->push_variable(new IR::DpdkDeclaration(tmpDecl));
+        structure->push_variable(new IR::DpdkDeclaration(tmpDecl));
         add_instr(new IR::DpdkMovStatement(tmpMask, sv));
         add_instr(new IR::DpdkAndStatement(tmpMask, tmpMask, right));
         *leftExpr = tmpMask;
@@ -263,7 +263,7 @@ void ConvertToDpdkParser::handleTupleExpression(const IR::ListExpression *cl,
 
 bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
     for (auto l : p->parserLocals) {
-        collector->push_variable(new IR::DpdkDeclaration(l));
+        structure->push_variable(new IR::DpdkDeclaration(l));
     }
     ordered_map<cstring, int> degree_map;
     ordered_map<cstring, const IR::ParserState*> state_map;
@@ -308,7 +308,7 @@ bool ConvertToDpdkParser::preorder(const IR::P4Parser *p) {
             add_instr(i);
         auto c = state->components;
         for (auto stat : c) {
-            DPDK::ConvertStatementToDpdk h(refmap, typemap, collector, structure);
+            DPDK::ConvertStatementToDpdk h(refmap, typemap, structure);
             h.set_parser(p);
             stat->apply(h);
             for (auto i : h.get_instr())
@@ -427,7 +427,7 @@ bool ConvertToDpdkParser::preorder(const IR::ParserState *) { return false; }
 
 // =====================Control=============================
 bool ConvertToDpdkControl::preorder(const IR::P4Action *a) {
-    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, collector, structure);
+    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
     a->body->apply(*helper);
     auto stmt_list = new IR::IndexedVector<IR::DpdkAsmStatement>();
     for (auto i : helper->get_instr())
@@ -554,11 +554,10 @@ bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
 bool ConvertToDpdkControl::preorder(const IR::P4Control *c) {
     for (auto l : c->controlLocals) {
         if (!l->is<IR::P4Action>() && !l->is<IR::P4Table>()) {
-            collector->push_variable(new IR::DpdkDeclaration(l));
+            structure->push_variable(new IR::DpdkDeclaration(l));
         }
     }
-    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap,
-                                                   collector, structure);
+    auto helper = new DPDK::ConvertStatementToDpdk(refmap, typemap, structure);
     c->body->apply(*helper);
     if (deparser) {
         add_inst(new IR::DpdkJmpNotEqualStatement("LABEL_DROP",

@@ -15,12 +15,10 @@ limitations under the License.
 */
 #include <unordered_map>
 #include "backend.h"
-#include "backends/bmv2/psa_switch/psaSwitch.h"
 #include "dpdkArch.h"
 #include "dpdkAsmOpt.h"
 #include "dpdkHelpers.h"
 #include "dpdkProgram.h"
-#include "dpdkVarCollector.h"
 #include "midend/eliminateTypedefs.h"
 #include "ir/dbprint.h"
 #include "ir/ir.h"
@@ -35,26 +33,13 @@ class DpdkArchFirst : public PassManager {
 
 void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
-    BMV2::PsaProgramStructure psa_structure(refMap, typeMap);
-    auto parsePsaArch = new BMV2::ParsePsaArchitecture(&psa_structure);
-    auto main = tlb->getMain();
-    if (!main)
-        return;
-
-    if (main->type->name != "PSA_Switch")
-        ::warning(ErrorType::WARN_INVALID,
-                  "%1%: the main package should be called PSA_Switch"
-                  "; are you using the wrong architecture?",
-                  main->type->name);
-
-    main->apply(*parsePsaArch);
 
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
     auto program = tlb->getProgram();
-    DpdkVariableCollector collector;
+
     DpdkProgramStructure structure;
     auto rewriteToDpdkArch =
-        new DPDK::RewriteToDpdkArch(refMap, typeMap, &collector, &structure);
+        new DPDK::RewriteToDpdkArch(refMap, typeMap, &structure);
     PassManager simplify = {
         new DpdkArchFirst(),
         new P4::EliminateTypedef(refMap, typeMap),
@@ -81,15 +66,10 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     program = program->apply(simplify);
 
     // map IR node to compile-time allocated resource blocks.
-    toplevel->apply(*new BMV2::BuildResourceMap(&psa_structure.resourceMap));
-
-    main = toplevel->getMain();
-    if (!main)
-        return;  // no main
-    main->apply(*parsePsaArch);
+    // toplevel->apply(*new BMV2::BuildResourceMap(&structure.resourceMap));
     program = toplevel->getProgram();
-    auto convertToDpdk = new ConvertToDpdkProgram(
-        psa_structure, refMap, typeMap, &collector, rewriteToDpdkArch, &structure);
+
+    auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap,  rewriteToDpdkArch, &structure);
     PassManager toAsm = {
         // new BMV2::DiscoverStructure(&structure),
         // new BMV2::InspectPsaProgram(refMap, typeMap, &structure),

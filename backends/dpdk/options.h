@@ -17,21 +17,23 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_PSA_SWITCH_OPTIONS_H_
 #define BACKENDS_DPDK_PSA_SWITCH_OPTIONS_H_
 
-#include "backends/bmv2/common/options.h"
 #include "backends/dpdk/midend.h"
 
 namespace DPDK {
 
-class PsaSwitchOptions : public BMV2::BMV2Options {
+class PsaSwitchOptions : public CompilerOptions {
   public:
     cstring bfRtSchema = "";
+    // file to output to
+    cstring outputFile = nullptr;
+    // read from json
+    bool loadIRFromJson = false;
 
     PsaSwitchOptions() {
         registerOption(
             "--listMidendPasses", nullptr,
             [this](const char *) {
                 listMidendPasses = true;
-                loadIRFromJson = false;
                 DPDK::PsaSwitchMidEnd midEnd(*this, outStream);
                 exit(0);
                 return false;
@@ -40,6 +42,13 @@ class PsaSwitchOptions : public BMV2::BMV2Options {
         registerOption("--bf-rt-schema", "file",
                 [this](const char *arg) { bfRtSchema = arg; return true; },
                 "Generate and write BF-RT JSON schema to the specified file");
+        registerOption("-o", "outfile",
+                [this](const char* arg) { outputFile = arg; return true; },
+                "Write output to outfile");
+        registerOption("--fromJSON", "file",
+                [this](const char* arg) { loadIRFromJson = true; file = arg; return true; },
+                "Use IR representation from JsonFile dumped previously,"\
+                "the compilation starts with reduced midEnd.");
     }
 
     /// Process the command line arguments and set options accordingly.

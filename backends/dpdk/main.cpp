@@ -19,9 +19,6 @@ limitations under the License.
 #include <iostream>
 #include <string>
 
-#include "backends/bmv2/common/JsonObjects.h"
-#include "backends/bmv2/common/backend.h"
-#include "backends/bmv2/psa_switch/version.h"
 #include "backends/dpdk/backend.h"
 #include "backends/dpdk/midend.h"
 #include "backends/dpdk/options.h"
@@ -47,7 +44,7 @@ int main(int argc, char *const argv[]) {
     AutoCompileContext autoPsaSwitchContext(new DPDK::PsaSwitchContext);
     auto &options = DPDK::PsaSwitchContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
-    options.compilerVersion = BMV2_PSA_VERSION_STRING;
+    options.compilerVersion = "0.1";
 
     if (options.process(argc, argv) != nullptr) {
         if (options.loadIRFromJson == false)
@@ -134,16 +131,7 @@ int main(int argc, char *const argv[]) {
     auto backend = new DPDK::PsaSwitchBackend(options, &midEnd.refMap,
                                               &midEnd.typeMap, &midEnd.enumMap);
 
-    // Necessary because BMV2Context is expected at the top of stack in further
-    // processing
-    AutoCompileContext autoContext(
-        new BMV2::BMV2Context(DPDK::PsaSwitchContext::get()));
-    try {
-        backend->convert(toplevel);
-    } catch (const std::exception &bug) {
-        std::cerr << bug.what() << std::endl;
-        return 1;
-    }
+    backend->convert(toplevel);
     if (::errorCount() > 0)
         return 1;
 

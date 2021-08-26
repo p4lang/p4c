@@ -17,18 +17,7 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_PROGRAM_H_
 #define BACKENDS_DPDK_PROGRAM_H_
 
-#include "backends/bmv2/common/action.h"
-#include "backends/bmv2/common/control.h"
-#include "backends/bmv2/common/deparser.h"
-#include "backends/bmv2/common/extern.h"
-#include "backends/bmv2/common/header.h"
-#include "backends/bmv2/common/helpers.h"
-#include "backends/bmv2/common/lower.h"
-#include "backends/bmv2/common/parser.h"
-#include "backends/bmv2/common/programStructure.h"
-#include "backends/bmv2/psa_switch/psaSwitch.h"
 #include "dpdkArch.h"
-#include "dpdkVarCollector.h"
 #include "dpdkProgramStructure.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
@@ -48,26 +37,17 @@ namespace DPDK {
 #define DPDK_MAX_HEADER_METADATA_FIELD_SIZE 64
 
 class ConvertToDpdkProgram : public Transform {
-    std::map<int, cstring> reg_id_to_name;
-    std::map<cstring, int> reg_name_to_id;
-    std::map<cstring, cstring> symbol_table;
-
-    BMV2::PsaProgramStructure &old_structure;
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
-    DpdkVariableCollector *collector;
     DpdkProgramStructure *structure;
     const IR::DpdkAsmProgram *dpdk_program;
     CollectMetadataHeaderInfo *info;
 
   public:
-    ConvertToDpdkProgram(BMV2::PsaProgramStructure &structure,
-                         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
-                         DpdkVariableCollector *collector,
+    ConvertToDpdkProgram(P4::ReferenceMap *refmap, P4::TypeMap *typemap,
                          DPDK::RewriteToDpdkArch *dpdkarch,
-                         DpdkProgramStructure *dp)
-        : old_structure(structure), typemap(typemap), refmap(refmap),
-          collector(collector), structure(dp) {
+                         DpdkProgramStructure *structure)
+        : typemap(typemap), refmap(refmap), structure(structure) {
         info = dpdkarch->info;
     }
 
@@ -86,18 +66,15 @@ class ConvertToDpdkParser : public Inspector {
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     P4::ReferenceMap *refmap;
     P4::TypeMap *typemap;
-    DpdkVariableCollector *collector;
     DpdkProgramStructure *structure;
     IR::Type_Struct *metadataStruct;
 
   public:
     ConvertToDpdkParser(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
-        DpdkVariableCollector *collector,
         DpdkProgramStructure* structure,
         IR::Type_Struct *metadataStruct)
-        : refmap(refmap), typemap(typemap), collector(collector),
-          structure(structure),
+        : refmap(refmap), typemap(typemap), structure(structure),
           metadataStruct(metadataStruct) {}
     IR::IndexedVector<IR::DpdkAsmStatement> getInstructions() {
         return instructions;
@@ -118,7 +95,6 @@ class ConvertToDpdkParser : public Inspector {
 class ConvertToDpdkControl : public Inspector {
     P4::TypeMap *typemap;
     P4::ReferenceMap *refmap;
-    DpdkVariableCollector *collector;
     DpdkProgramStructure *structure;
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     IR::IndexedVector<IR::DpdkTable> tables;
@@ -130,11 +106,9 @@ class ConvertToDpdkControl : public Inspector {
   public:
     ConvertToDpdkControl(
         P4::ReferenceMap *refmap, P4::TypeMap *typemap,
-        DpdkVariableCollector *collector,
         DpdkProgramStructure *structure,
         bool deparser = false)
-        : typemap(typemap), refmap(refmap), collector(collector),
-          structure(structure), deparser(deparser) {}
+        : typemap(typemap), refmap(refmap), structure(structure), deparser(deparser) {}
 
     IR::IndexedVector<IR::DpdkTable> &getTables() { return tables; }
     IR::IndexedVector<IR::DpdkSelector> &getSelectors() { return selectors; }

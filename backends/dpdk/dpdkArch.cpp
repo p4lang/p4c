@@ -433,8 +433,8 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
     } else if (auto bin = right->to<IR::Operation_Binary>()) {
         expressionUnrollSanityCheck(bin->right);
         expressionUnrollSanityCheck(bin->left);
-        auto left_unroller = new ExpressionUnroll(refMap, collector);
-        auto right_unroller = new ExpressionUnroll(refMap, collector);
+        auto left_unroller = new ExpressionUnroll(refMap, structure);
+        auto right_unroller = new ExpressionUnroll(refMap, structure);
         bin->left->apply(*left_unroller);
         const IR::Expression *left_tmp = left_unroller->root;
         bin->right->apply(*right_unroller);
@@ -464,7 +464,7 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
     } else if (auto un = right->to<IR::Operation_Unary>()) {
         auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
         expressionUnrollSanityCheck(un->expr);
-        auto unroller = new ExpressionUnroll(refMap, collector);
+        auto unroller = new ExpressionUnroll(refMap, structure);
         un->expr->apply(*unroller);
         prune();
         const IR::Expression *un_tmp = unroller->root;
@@ -591,7 +591,7 @@ bool ExpressionUnroll::preorder(const IR::BoolLiteral *) {
 const IR::Node *IfStatementUnroll::postorder(IR::IfStatement *i) {
     auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
     expressionUnrollSanityCheck(i->condition);
-    auto unroller = new LogicalExpressionUnroll(refMap, collector);
+    auto unroller = new LogicalExpressionUnroll(refMap, structure);
     i->condition->apply(*unroller);
     for (auto i : unroller->stmt)
         code_block->push_back(i);
