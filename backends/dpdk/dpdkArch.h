@@ -636,6 +636,11 @@ class CollectErrors : public Inspector {
     }
 };
 
+class DpdkArchFirst : public PassManager {
+ public:
+    DpdkArchFirst() { setName("DpdkArchFirst"); }
+};
+
 class DpdkArchLast : public PassManager {
  public:
     DpdkArchLast() { setName("DpdkArchLast"); }
@@ -659,38 +664,6 @@ class CollectProgramStructure : public PassManager {
             main->apply(*parseDpdk);
         }));
      }
-};
-
-class RewriteToDpdkArch : public PassManager {
-  public:
-    std::set<const IR::P4Table*> invokedInKey;
-    RewriteToDpdkArch(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
-                      DpdkProgramStructure *structure) {
-        setName("RewriteToDpdkArch");
-        passes.push_back(new ConvertActionSelectorAndProfile(refMap, typeMap));
-        passes.push_back(new CollectProgramStructure(refMap, typeMap, structure));
-        passes.push_back(new CollectMetadataHeaderInfo(structure));
-        passes.push_back(new ConvertToDpdkArch(structure));
-        passes.push_back(new ReplaceMetadataHeaderName(refMap, structure));
-        passes.push_back(new InjectJumboStruct(structure));
-        passes.push_back(new P4::ClearTypeMap(typeMap));
-        passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
-        passes.push_back(new CopyMatchKeysToSingleStruct(refMap, typeMap, &invokedInKey));
-        passes.push_back(new P4::ResolveReferences(refMap));
-        passes.push_back(new StatementUnroll(refMap, structure));
-        passes.push_back(new IfStatementUnroll(refMap, structure));
-        passes.push_back(new P4::ClearTypeMap(typeMap));
-        passes.push_back(new P4::TypeChecking(refMap, typeMap, true));
-        passes.push_back(new ConvertBinaryOperationTo2Params());
-        passes.push_back(new CollectProgramStructure(refMap, typeMap, structure));
-        passes.push_back(new CollectLocalVariableToMetadata(refMap, structure));
-        passes.push_back(new CollectErrors(structure));
-        passes.push_back(new ConvertInternetChecksum(typeMap, structure));
-        passes.push_back(new PrependPDotToActionArgs(typeMap, refMap, structure));
-        passes.push_back(new ConvertLogicalExpression);
-        passes.push_back(new CollectExternDeclaration(structure));
-        passes.push_back(new DpdkArchLast());
-    }
 };
 
 }; // namespace DPDK

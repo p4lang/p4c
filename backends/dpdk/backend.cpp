@@ -26,11 +26,6 @@ limitations under the License.
 
 namespace DPDK {
 
-class DpdkArchFirst : public PassManager {
- public:
-    DpdkArchFirst() { setName("DpdkArchFirst"); }
-};
-
 void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
     DpdkProgramStructure structure;
@@ -39,50 +34,54 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     if (!main) return;
     main->apply(*parseDpdkArch);
 
-    auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
+    auto hook = options.getDebugHook();
     auto program = tlb->getProgram();
 
-    auto rewriteToDpdkArch =
-        new DPDK::RewriteToDpdkArch(refMap, typeMap, &structure);
+    std::set<const IR::P4Table*> invokedInKey;
+    auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure);
     PassManager simplify = {
         new DpdkArchFirst(),
         new P4::EliminateTypedef(refMap, typeMap),
-        // because the user metadata type has changed
         new P4::ClearTypeMap(typeMap),
         new P4::TypeChecking(refMap, typeMap),
-        // TBD: implement dpdk lowering passes instead of reusing bmv2's
-        // lowering pass.
+        // TBD: implement dpdk lowering passes instead of reusing bmv2's lowering pass.
         new BMV2::LowerExpressions(typeMap),
         new P4::ConstantFolding(refMap, typeMap, false),
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
-        // Convert to Dpdk specific format
-        rewriteToDpdkArch,
+        new ConvertActionSelectorAndProfile(refMap, typeMap),
+        new CollectProgramStructure(refMap, typeMap, &structure),
+        new CollectMetadataHeaderInfo(&structure),
+        new ConvertToDpdkArch(&structure),
+        new ReplaceMetadataHeaderName(refMap, &structure),
+        new InjectJumboStruct(&structure),
         new P4::ClearTypeMap(typeMap),
         new P4::TypeChecking(refMap, typeMap, true),
-        evaluator,
-        new VisitFunctor([this, evaluator, structure]() {
-            toplevel = evaluator->getToplevelBlock();
-        }),
-    };
-    auto hook = options.getDebugHook();
-    simplify.addDebugHook(hook, true);
-    program = program->apply(simplify);
-
-    main = toplevel->getMain();
-    if (!main) return;
-    main->apply(*parseDpdkArch);
-
-    program = toplevel->getProgram();
-
-    auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure);
-    PassManager toAsm = {
+        new CopyMatchKeysToSingleStruct(refMap, typeMap, &invokedInKey),
+        new P4::ResolveReferences(refMap),
+        new StatementUnroll(refMap, &structure),
+        new IfStatementUnroll(refMap, &structure),
+        new P4::ClearTypeMap(typeMap),
+        new P4::TypeChecking(refMap, typeMap, true),
+        new ConvertBinaryOperationTo2Params(),
+        new CollectProgramStructure(refMap, typeMap, &structure),
+        new CollectLocalVariableToMetadata(refMap, &structure),
+        new CollectErrors(&structure),
+        new ConvertInternetChecksum(typeMap, &structure),
+        new PrependPDotToActionArgs(typeMap, refMap, &structure),
+        new ConvertLogicalExpression(),
+        new CollectExternDeclaration(&structure),
+        new P4::ClearTypeMap(typeMap),
+        new P4::TypeChecking(refMap, typeMap, true),
+        new CollectProgramStructure(refMap, typeMap, &structure),
         new InspectDpdkProgram(refMap, typeMap, &structure),
+        new DpdkArchLast(),
         // convert to assembly program
         convertToDpdk,
     };
-    toAsm.addDebugHook(hook, true);
-    program = program->apply(toAsm);
+    simplify.addDebugHook(hook, true);
+    program = program->apply(simplify);
+
     dpdk_program = convertToDpdk->getDpdkProgram();
     if (!dpdk_program)
         return;
