@@ -837,7 +837,6 @@ const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Program *program) {
                 new_objs->push_back(
                         new IR::Type_Struct(IR::ID(kv.first), *fields));
             }
-
         }
     }
     for (auto obj : program->objects) {
