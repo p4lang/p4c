@@ -46,7 +46,6 @@ set (P4_FRONTEND_SRCS
   p4/reassociation.cpp
   p4/removeParameters.cpp
   p4/removeReturns.cpp
-  p4/removeZeroWidth.cpp
   p4/reservedWords.cpp
   p4/resetHeaders.cpp
   p4/setHeaders.cpp
@@ -117,7 +116,6 @@ set (P4_FRONTEND_HDRS
   p4/reassociation.h
   p4/removeParameters.h
   p4/removeReturns.h
-  p4/removeZeroWidth.h
   p4/reservedWords.h
   p4/resetHeaders.h
   p4/setHeaders.h

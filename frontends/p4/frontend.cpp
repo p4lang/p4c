@@ -50,7 +50,6 @@ limitations under the License.
 #include "reassociation.h"
 #include "removeParameters.h"
 #include "removeReturns.h"
-#include "removeZeroWidth.h"
 #include "resetHeaders.h"
 #include "setHeaders.h"
 #include "sideEffects.h"
@@ -164,7 +163,6 @@ const IR::P4Program *FrontEnd::run(const CompilerOptions &options, const IR::P4P
         new CheckCoreMethods(&refMap, &typeMap),
         new RemoveParserIfs(&refMap, &typeMap),
         new StructInitializers(&refMap, &typeMap),
-        new RemoveZeroWidth(&refMap, &typeMap),
         new SpecializeGenericFunctions(&refMap, &typeMap),
         new TableKeyNames(&refMap, &typeMap),
         PassRepeated({
