@@ -130,8 +130,21 @@ Util::IJson* ExternConverter_clone::convertExternFunction(
         modelError("%1%: must be a constant on this target", cloneType);
         return nullptr;
     }
-    cstring prim = ei->name == "I2E" ? "clone_ingress_pkt_to_egress" :
-                   "clone_egress_pkt_to_egress";
+    cstring prim;
+    if (ei->name == "I2E") {
+        prim = "clone_ingress_pkt_to_egress";
+        if (ctxt->blockConverted != BlockConverted::Ingress) {
+            ::error("'clone(I2E, ...) not invoked in ingress %1%", mc);
+            return nullptr;
+        }
+    } else {
+        prim = "clone_egress_pkt_to_egress";
+        if (ctxt->blockConverted != BlockConverted::Egress) {
+            ::error("'clone(E2E, ...) not invoked in egress %1%", mc);
+            return nullptr;
+        }
+    }
+
     auto session = ctxt->conv->convert(mc->arguments->at(1)->expression);
     auto primitive = mkPrimitive(prim);
     auto parameters = mkParameters(primitive);
@@ -148,7 +161,7 @@ Util::IJson* ExternConverter_clone::convertExternFunction(
 }
 
 Util::IJson* ExternConverter_clone3::convertExternFunction(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
     (void) v1model.clone.clone3.name;
@@ -166,8 +179,20 @@ Util::IJson* ExternConverter_clone3::convertExternFunction(
         modelError("%1%: must be a constant on this target", cloneType);
         return nullptr;
     }
-    cstring prim = ei->name == "I2E" ? "clone_ingress_pkt_to_egress" :
-                   "clone_egress_pkt_to_egress";
+    cstring prim;
+    if (ei->name == "I2E") {
+        prim = "clone_ingress_pkt_to_egress";
+        if (ctxt->blockConverted != BlockConverted::Ingress) {
+            ::error("'clone3(I2E, ...) not invoked in ingress %1%", mc);
+            return nullptr;
+        }
+    } else {
+        prim = "clone_egress_pkt_to_egress";
+        if (ctxt->blockConverted != BlockConverted::Egress) {
+            ::error("'clone3(E2E, ...) not invoked in egress %1%", mc);
+            return nullptr;
+        }
+    }
     auto session = ctxt->conv->convert(mc->arguments->at(1)->expression);
     auto primitive = mkPrimitive(prim);
     auto parameters = mkParameters(primitive);
@@ -268,9 +293,13 @@ Util::IJson* ExternConverter_digest::convertExternFunction(
 }
 
 Util::IJson* ExternConverter_resubmit::convertExternFunction(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
+    if (ctxt->blockConverted != BlockConverted::Ingress) {
+        ::error("'resubmit' can only be invoked in ingress %1%", mc);
+        return nullptr;
+    }
     if (mc->arguments->size() != 1) {
         modelError("Expected 1 argument for %1%", mc);
         return nullptr;
@@ -309,9 +338,13 @@ Util::IJson* ExternConverter_resubmit::convertExternFunction(
 }
 
 Util::IJson* ExternConverter_recirculate::convertExternFunction(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
+    ConversionContext* ctxt, UNUSED const P4::ExternFunction* ef,
     UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl* s,
     UNUSED const bool emitExterns) {
+    if (ctxt->blockConverted != BlockConverted::Egress) {
+        ::error("'resubmit' can only be invoked in egress %1%", mc);
+        return nullptr;
+    }
     if (mc->arguments->size() != 1) {
         modelError("Expected 1 argument for %1%", mc);
         return nullptr;
@@ -998,6 +1031,7 @@ void SimpleSwitchBackend::createActions(ConversionContext* ctxt, V1ProgramStruct
     auto cvt = new ActionConverter(ctxt, options.emitExterns);
     for (auto it : structure->actions) {
         auto action = it.first;
+        ctxt->blockConverted = structure->blockKind(it.second);
         action->apply(*cvt);
     }
 }
@@ -1163,25 +1197,32 @@ SimpleSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     auto hconv = new HeaderConverter(ctxt, scalarsName);
     program->apply(*hconv);
 
+    ctxt->blockConverted = BlockConverted::Parser;
     auto pconv = new ParserConverter(ctxt);
     structure->parser->apply(*pconv);
 
+    ctxt->blockConverted = BlockConverted::None;
     createActions(ctxt, structure);
 
+    ctxt->blockConverted = BlockConverted::Ingress;
     auto cconv = new ControlConverter<Standard::Arch::V1MODEL>(ctxt,
             "ingress", options.emitExterns);
     structure->ingress->apply(*cconv);
 
+    ctxt->blockConverted = BlockConverted::Egress;
     cconv = new ControlConverter<Standard::Arch::V1MODEL>(ctxt,
             "egress", options.emitExterns);
     structure->egress->apply(*cconv);
 
+    ctxt->blockConverted = BlockConverted::Deparser;
     auto dconv = new DeparserConverter(ctxt);
     structure->deparser->apply(*dconv);
 
+    ctxt->blockConverted = BlockConverted::ChecksumCompute;
     convertChecksum(structure->compute_checksum->body, json->checksums,
                     json->calculations, false);
 
+    ctxt->blockConverted = BlockConverted::ChecksumVerify;
     convertChecksum(structure->verify_checksum->body, json->checksums,
                     json->calculations, true);
 

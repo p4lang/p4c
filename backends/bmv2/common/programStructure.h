@@ -23,6 +23,16 @@ namespace BMV2 {
 
 using ResourceMap = ordered_map<const IR::Node*, const IR::CompileTimeValue*>;
 
+enum class BlockConverted {
+    None,
+    Parser,
+    Ingress,
+    Egress,
+    Deparser,
+    ChecksumCompute,
+    ChecksumVerify
+};
+
 // Represents all the compile-time information about a P4-16 program that
 // is common to all bmv2 targets (simple switch and psa switch).
 class ProgramStructure {

@@ -299,6 +299,8 @@ struct ConversionContext {
     P4::ReferenceMap*                refMap;
     P4::TypeMap*                     typeMap;
     const IR::ToplevelBlock*         toplevel;
+    // Block currently being converted
+    BlockConverted                   blockConverted;
     //
     ProgramStructure*                structure;
     // expression converter is used in many places.
@@ -320,8 +322,8 @@ struct ConversionContext {
     ConversionContext(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
                       const IR::ToplevelBlock* toplevel, ProgramStructure* structure,
                       ExpressionConverter* conv, JsonObjects* json) :
-        refMap(refMap), typeMap(typeMap), toplevel(toplevel), structure(structure),
-        conv(conv), json(json) { }
+            refMap(refMap), typeMap(typeMap), toplevel(toplevel),
+            blockConverted(BlockConverted::None), structure(structure), conv(conv), json(json) { }
 };
 
 Util::IJson* nodeName(const CFG::Node* node);
