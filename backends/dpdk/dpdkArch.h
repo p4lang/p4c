@@ -48,11 +48,8 @@ class ConvertToDpdkArch : public Transform {
     const IR::Type_Control *rewriteControlType(const IR::Type_Control *, cstring);
     const IR::Type_Parser *rewriteParserType(const IR::Type_Parser *, cstring);
     const IR::Type_Control *rewriteDeparserType(const IR::Type_Control *, cstring);
-    // const IR::Node *postorder(IR::P4Program *prog) override;
     const IR::Node *postorder(IR::Type_Control *c) override;
     const IR::Node *postorder(IR::Type_Parser *p) override;
-    // const IR::Node *postorder(IR::P4Control *c) override;
-    // const IR::Node *postorder(IR::P4Parser *c) override;
 
   public:
     ConvertToDpdkArch(DpdkProgramStructure *structure) : structure(structure) {

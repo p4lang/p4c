@@ -11,14 +11,6 @@ bool ParseDpdkArchitecture::preorder(const IR::ToplevelBlock* block) {
     return false;
 }
 
-/*
-bool ParseDpdkArchitecture::preorder(const IR::ExternBlock* block) {
-    if (block->node->is<IR::Declaration>())
-        structure->globals.push_back(block);
-    return false;
-}
-*/
-
 void ParseDpdkArchitecture::parse_pna_block(const IR::PackageBlock *block) {
     auto p = block->findParameterValue("main_parser");
     if (p == nullptr) {
@@ -193,7 +185,6 @@ void InspectDpdkProgram::addTypesAndInstances(const IR::Type_StructLike* type, b
         } else if (ft->is<IR::Type_Stack>()) {
             LOG5("Field is Type_Stack " << ft->toString());
             auto stack = ft->to<IR::Type_Stack>();
-            // auto stack_name = f->controlPlaneName();
             auto stack_size = stack->getSize();
             auto type = typeMap->getTypeType(stack->elementType, true);
             BUG_CHECK(type->is<IR::Type_Header>(), "%1% not a header type", stack->elementType);
@@ -203,12 +194,8 @@ void InspectDpdkProgram::addTypesAndInstances(const IR::Type_StructLike* type, b
             std::vector<unsigned> ids;
             for (unsigned i = 0; i < stack_size; i++) {
                 cstring hdrName = f->controlPlaneName() + "[" + Util::toString(i) + "]";
-                /* TODO */
-                // auto id = json->add_header(stack_type, hdrName);
                 addHeaderInstance(stack_type, hdrName);
-                // ids.push_back(id);
             }
-            // addHeaderStackInstance();
         } else {
             // Treat this field like a scalar local variable
             cstring newName = refMap->newName(type->getName() + "." + f->name);
@@ -253,6 +240,8 @@ bool InspectDpdkProgram::preorder(const IR::Declaration_Variable* dv) {
         } else if (ft->is<IR::Type_Boolean>()) {
             LOG5("Adding " << dv << " into scalars map");
             structure->scalars.emplace(scalarsName, dv);
+        } else {
+            BUG("Unhandled type %1%", dv);
         }
 
         return false;
