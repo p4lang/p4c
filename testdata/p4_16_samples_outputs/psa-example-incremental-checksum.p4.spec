@@ -39,6 +39,11 @@ struct cksum_state_t {
 	bit<16> state_0
 }
 
+struct forward_arg_t {
+	bit<32> port
+	bit<32> srcAddr
+}
+
 struct metadata {
 	bit<32> psa_ingress_parser_input_metadata_ingress_port
 	bit<32> psa_ingress_parser_input_metadata_packet_path
@@ -73,11 +78,6 @@ header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 header tcp instanceof tcp_t
 header cksum_state instanceof cksum_state_t
-
-struct forward_arg_t {
-	bit<32> port
-	bit<32> srcAddr
-}
 
 struct psa_ingress_output_metadata_t {
 	bit<8> class_of_service

@@ -32,8 +32,8 @@ struct user_meta_t {
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
 	bit<16> local_metadata_data
-	bit<16> Ingress_tmp_0
-	bit<16> Ingress_tmp_1
+	bit<16> ingress_tmp_0
+	bit<16> ingress_tmp_1
 }
 metadata instanceof user_meta_t
 
@@ -65,10 +65,10 @@ action NoAction args none {
 
 action execute args none {
 	jmpeq LABEL_1FALSE m.local_metadata_data 0x0
-	mov m.Ingress_tmp_0 0x0
+	mov m.ingress_tmp_0 0x0
 	jmp LABEL_1END
-	LABEL_1FALSE :	mov m.Ingress_tmp_0 0x1
-	LABEL_1END :	mov m.local_metadata_data m.Ingress_tmp_0
+	LABEL_1FALSE :	mov m.ingress_tmp_0 0x1
+	LABEL_1END :	mov m.local_metadata_data m.ingress_tmp_0
 	add m.local_metadata_data 0x1
 	return
 }
@@ -91,10 +91,10 @@ apply {
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
 	jmpeq LABEL_0FALSE m.local_metadata_data 0x0
-	mov m.Ingress_tmp_1 0x2
+	mov m.ingress_tmp_1 0x2
 	jmp LABEL_0END
-	LABEL_0FALSE :	mov m.Ingress_tmp_1 0x5
-	LABEL_0END :	mov m.local_metadata_data m.Ingress_tmp_1
+	LABEL_0FALSE :	mov m.ingress_tmp_1 0x5
+	LABEL_0END :	mov m.local_metadata_data m.ingress_tmp_1
 	add m.local_metadata_data 0x5
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0

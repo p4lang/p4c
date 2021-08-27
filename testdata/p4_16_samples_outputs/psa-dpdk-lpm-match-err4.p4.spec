@@ -1,28 +1,43 @@
 
 
+
 struct ethernet_t {
 	bit<48> dstAddr
 	bit<48> srcAddr
 	bit<16> etherType
 }
 
-struct a1_arg_t {
-	bit<48> param
+struct ipv4_t {
+	bit<4> version
+	bit<4> ihl
+	bit<8> diffserv
+	bit<16> totalLen
+	bit<16> identification
+	bit<3> flags
+	bit<13> fragOffset
+	bit<8> ttl
+	bit<8> protocol
+	bit<16> hdrChecksum
+	bit<32> srcAddr
+	bit<32> dstAddr
+	bit<80> newfield
 }
 
-struct a2_arg_t {
-	bit<16> param
+struct tcp_t {
+	bit<16> srcPort
+	bit<16> dstPort
+	bit<32> seqNo
+	bit<32> ackNo
+	bit<4> dataOffset
+	bit<3> res
+	bit<3> ecn
+	bit<6> ctrl
+	bit<16> window
+	bit<16> checksum
+	bit<16> urgentPtr
 }
 
-struct tbl2_0_set_member_id_arg_t {
-	bit<32> member_id
-}
-
-struct tbl_0_set_member_id_arg_t {
-	bit<32> member_id
-}
-
-struct EMPTY {
+struct metadata {
 	bit<32> psa_ingress_parser_input_metadata_ingress_port
 	bit<32> psa_ingress_parser_input_metadata_packet_path
 	bit<32> psa_egress_parser_input_metadata_egress_port
@@ -48,12 +63,17 @@ struct EMPTY {
 	bit<8> psa_egress_output_metadata_clone
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
-	bit<32> ingress_tbl_0_member_id
-	bit<32> ingress_tbl2_0_member_id
+	bit<16> local_metadata_data
+	bit<48> ingress_tbl_ethernet_srcAddr
+	bit<16> ingress_tbl_ipv4_totalLen
+	bit<16> tmpMask
+	bit<8> tmpMask_0
 }
-metadata instanceof EMPTY
+metadata instanceof metadata
 
 header ethernet instanceof ethernet_t
+header ipv4 instanceof ipv4_t
+header tcp instanceof tcp_t
 
 struct psa_ingress_output_metadata_t {
 	bit<8> class_of_service
@@ -79,72 +99,19 @@ action NoAction args none {
 	return
 }
 
-action a1 args instanceof a1_arg_t {
-	mov h.ethernet.dstAddr t.param
-	return
-}
-
-action a2 args instanceof a2_arg_t {
-	mov h.ethernet.etherType t.param
-	return
-}
-
-action tbl_0_set_member_id args instanceof tbl_0_set_member_id_arg_t {
-	mov m.ingress_tbl_0_member_id t.member_id
-	return
-}
-
-action tbl2_0_set_member_id args instanceof tbl2_0_set_member_id_arg_t {
-	mov m.ingress_tbl2_0_member_id t.member_id
+action execute args none {
+	mov m.local_metadata_data 0x1
 	return
 }
 
 table tbl {
 	key {
-		h.ethernet.srcAddr exact
-	}
-	actions {
-		tbl_0_set_member_id
-		NoAction
-	}
-	default_action NoAction args none 
-	size 0x10000
-}
-
-
-table tbl_0_member_table {
-	key {
-		m.ingress_tbl_0_member_id exact
+		m.ingress_tbl_ethernet_srcAddr lpm
+		m.ingress_tbl_ipv4_totalLen exact
 	}
 	actions {
 		NoAction
-		a2
-	}
-	default_action NoAction args none 
-	size 0x10000
-}
-
-
-table tbl2 {
-	key {
-		h.ethernet.srcAddr exact
-	}
-	actions {
-		tbl2_0_set_member_id
-		NoAction
-	}
-	default_action NoAction args none 
-	size 0x10000
-}
-
-
-table tbl2_0_member_table {
-	key {
-		m.ingress_tbl2_0_member_id exact
-	}
-	actions {
-		NoAction
-		a1
+		execute
 	}
 	default_action NoAction args none 
 	size 0x10000
@@ -155,12 +122,27 @@ apply {
 	rx m.psa_ingress_input_metadata_ingress_port
 	mov m.psa_ingress_output_metadata_drop 0x0
 	extract h.ethernet
+	mov m.tmpMask h.ethernet.etherType
+	and m.tmpMask 0xf00
+	jmpeq INGRESSPARSERIMPL_PARSE_IPV4 m.tmpMask 0x800
+	jmpeq INGRESSPARSERIMPL_PARSE_TCP h.ethernet.etherType 0xd00
+	jmp INGRESSPARSERIMPL_ACCEPT
+	INGRESSPARSERIMPL_PARSE_IPV4 :	extract h.ipv4
+	mov m.tmpMask_0 h.ipv4.protocol
+	and m.tmpMask_0 0xfc
+	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.tmpMask_0 0x4
+	jmp INGRESSPARSERIMPL_ACCEPT
+	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
+	INGRESSPARSERIMPL_ACCEPT :	mov m.ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	mov m.ingress_tbl_ipv4_totalLen h.ipv4.totalLen
 	table tbl
-	table tbl_0_member_table
-	table tbl2
-	table tbl2_0_member_table
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
+	emit h.ipv4
+	emit h.tcp
+	emit h.ethernet
+	emit h.ipv4
+	emit h.tcp
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP : drop
 }
