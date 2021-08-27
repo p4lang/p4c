@@ -21,7 +21,7 @@ limitations under the License.
 
 namespace DPDK {
 
-class PsaSwitchOptions : public CompilerOptions {
+class DpdkOptions : public CompilerOptions {
   public:
     cstring bfRtSchema = "";
     // file to output to
@@ -29,16 +29,16 @@ class PsaSwitchOptions : public CompilerOptions {
     // read from json
     bool loadIRFromJson = false;
 
-    PsaSwitchOptions() {
+    DpdkOptions() {
         registerOption(
             "--listMidendPasses", nullptr,
             [this](const char *) {
                 listMidendPasses = true;
-                DPDK::PsaSwitchMidEnd midEnd(*this, outStream);
+                DPDK::DpdkMidEnd midEnd(*this, outStream);
                 exit(0);
                 return false;
             },
-            "[PsaSwitch back-end] Lists exact name of all midend passes.\n");
+            "[Dpdk back-end] Lists exact name of all midend passes.\n");
         registerOption("--bf-rt-schema", "file",
                 [this](const char *arg) { bfRtSchema = arg; return true; },
                 "Generate and write BF-RT JSON schema to the specified file");
@@ -57,7 +57,7 @@ class PsaSwitchOptions : public CompilerOptions {
     const char* getIncludePath() override;
 };
 
-using PsaSwitchContext = P4CContextWithOptions<PsaSwitchOptions>;
+using DpdkContext = P4CContextWithOptions<DpdkOptions>;
 
 }; // namespace DPDK
 

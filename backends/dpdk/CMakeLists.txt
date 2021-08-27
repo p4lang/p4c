@@ -51,6 +51,7 @@ set(P4C_DPDK_SOURCES
     midend.cpp
     dpdkHelpers.cpp
     dpdkProgram.cpp
+    dpdkProgramStructure.cpp
     dpdkArch.cpp
     dpdkAsmOpt.cpp
     options.cpp

@@ -23,7 +23,7 @@ limitations under the License.
 
 namespace DPDK {
 
-class PsaSwitchMidEnd : public PassManager {
+class DpdkMidEnd : public PassManager {
   public:
     // These will be accurate when the mid-end completes evaluation
     P4::ReferenceMap    refMap;
@@ -33,7 +33,7 @@ class PsaSwitchMidEnd : public PassManager {
 
     // If p4c is run with option '--listMidendPasses', outStream is used for
     // printing passes names
-    explicit PsaSwitchMidEnd(CompilerOptions &options,
+    explicit DpdkMidEnd(CompilerOptions &options,
                              std::ostream *outStream = nullptr);
 
     const IR::ToplevelBlock* process(const IR::P4Program *&program) {

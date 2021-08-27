@@ -45,7 +45,7 @@ IR::IndexedVector<IR::DpdkStructType> ConvertToDpdkProgram::UpdateHeaderMetadata
     auto new_objs = new IR::Vector<IR::Node>;
     for (auto obj : prog->objects) {
         if (auto s = obj->to<IR::Type_Struct>()) {
-            if (s->name.name == info->local_metadata_type) {
+            if (s->name.name == structure->local_metadata_type) {
                 auto *annotations = new IR::Annotations(
                     {new IR::Annotation(IR::ID("__metadata__"), {})});
                 for (auto anno : s->annotations->annotations)
@@ -60,7 +60,7 @@ IR::IndexedVector<IR::DpdkStructType> ConvertToDpdkProgram::UpdateHeaderMetadata
                     auto st = new IR::DpdkStructType(s->srcInfo, s->name,
                                                  s->annotations, s->fields);
                    structType.push_back(st);
-                } else if (s->name.name == info->header_type) {
+                } else if (s->name.name == structure->header_type) {
                     auto *annotations = new IR::Annotations(
                         {new IR::Annotation(IR::ID("__packet_data__"), {})});
                     for (auto anno : s->annotations->annotations)
@@ -84,7 +84,7 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
 
     for (auto obj : prog->objects) {
         if (auto s = obj->to<IR::Type_Struct>()) {
-            if (s->name.name == info->local_metadata_type) {
+            if (s->name.name == structure->local_metadata_type) {
                 metadataStruct = s->clone();
                 break;
             }

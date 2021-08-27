@@ -41,8 +41,8 @@ limitations under the License.
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
 
-    AutoCompileContext autoPsaSwitchContext(new DPDK::PsaSwitchContext);
-    auto &options = DPDK::PsaSwitchContext::get().options();
+    AutoCompileContext autoDpdkContext(new DPDK::DpdkContext);
+    auto &options = DPDK::DpdkContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
     options.compilerVersion = "0.1";
 
@@ -111,7 +111,7 @@ int main(int argc, char *const argv[]) {
         p4rt->serializeBFRuntimeSchema(out);
     }
 
-    DPDK::PsaSwitchMidEnd midEnd(options);
+    DPDK::DpdkMidEnd midEnd(options);
     midEnd.addDebugHook(hook);
     try {
         toplevel = midEnd.process(program);
@@ -128,7 +128,7 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0)
         return 1;
 
-    auto backend = new DPDK::PsaSwitchBackend(options, &midEnd.refMap,
+    auto backend = new DPDK::DpdkBackend(options, &midEnd.refMap,
                                               &midEnd.typeMap, &midEnd.enumMap);
 
     backend->convert(toplevel);

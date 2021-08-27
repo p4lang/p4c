@@ -32,8 +32,8 @@ limitations under the License.
 #include "options.h"
 
 namespace DPDK {
-class PsaSwitchBackend {
-    PsaSwitchOptions &options;
+class DpdkBackend {
+    DpdkOptions &options;
     P4::ReferenceMap *refMap;
     P4::TypeMap* typeMap;
     P4::ConvertEnums::EnumMapping *enumMap;
@@ -43,7 +43,7 @@ class PsaSwitchBackend {
 
   public:
     void convert(const IR::ToplevelBlock *tlb);
-    PsaSwitchBackend(PsaSwitchOptions &options, P4::ReferenceMap *refMap,
+    DpdkBackend(DpdkOptions &options, P4::ReferenceMap *refMap,
                      P4::TypeMap *typeMap,
                      P4::ConvertEnums::EnumMapping *enumMap)
         : options(options), refMap(refMap), typeMap(typeMap), enumMap(enumMap) {}

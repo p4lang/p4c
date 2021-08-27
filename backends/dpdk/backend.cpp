@@ -31,13 +31,17 @@ class DpdkArchFirst : public PassManager {
     DpdkArchFirst() { setName("DpdkArchFirst"); }
 };
 
-void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
+void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
     CHECK_NULL(tlb);
+    DpdkProgramStructure structure;
+    auto parseDpdkArch = new ParseDpdkArchitecture(&structure);
+    auto main = tlb->getMain();
+    if (!main) return;
+    main->apply(*parseDpdkArch);
 
     auto evaluator = new P4::EvaluatorPass(refMap, typeMap);
     auto program = tlb->getProgram();
 
-    DpdkProgramStructure structure;
     auto rewriteToDpdkArch =
         new DPDK::RewriteToDpdkArch(refMap, typeMap, &structure);
     PassManager simplify = {
@@ -65,14 +69,15 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     simplify.addDebugHook(hook, true);
     program = program->apply(simplify);
 
-    // map IR node to compile-time allocated resource blocks.
-    // toplevel->apply(*new BMV2::BuildResourceMap(&structure.resourceMap));
+    main = toplevel->getMain();
+    if (!main) return;
+    main->apply(*parseDpdkArch);
+
     program = toplevel->getProgram();
 
-    auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap,  rewriteToDpdkArch, &structure);
+    auto convertToDpdk = new ConvertToDpdkProgram(refMap, typeMap, &structure);
     PassManager toAsm = {
-        // new BMV2::DiscoverStructure(&structure),
-        // new BMV2::InspectPsaProgram(refMap, typeMap, &structure),
+        new InspectDpdkProgram(refMap, typeMap, &structure),
         // convert to assembly program
         convertToDpdk,
     };
@@ -89,7 +94,7 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock *tlb) {
     dpdk_program = dpdk_program->apply(post_code_gen)->to<IR::DpdkAsmProgram>();
 }
 
-void PsaSwitchBackend::codegen(std::ostream &out) const {
+void DpdkBackend::codegen(std::ostream &out) const {
     dpdk_program->toSpec(out) << std::endl;
 }
 

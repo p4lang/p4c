@@ -41,15 +41,11 @@ class ConvertToDpdkProgram : public Transform {
     P4::ReferenceMap *refmap;
     DpdkProgramStructure *structure;
     const IR::DpdkAsmProgram *dpdk_program;
-    CollectMetadataHeaderInfo *info;
 
   public:
     ConvertToDpdkProgram(P4::ReferenceMap *refmap, P4::TypeMap *typemap,
-                         DPDK::RewriteToDpdkArch *dpdkarch,
                          DpdkProgramStructure *structure)
-        : typemap(typemap), refmap(refmap), structure(structure) {
-        info = dpdkarch->info;
-    }
+        : typemap(typemap), refmap(refmap), structure(structure) { }
 
     const IR::DpdkAsmProgram *create(IR::P4Program *prog);
     const IR::DpdkAsmStatement *createListStatement(
