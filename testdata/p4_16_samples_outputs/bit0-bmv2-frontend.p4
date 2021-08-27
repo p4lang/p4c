@@ -31,7 +31,7 @@ control ingress(inout Headers h) {
         tmp_0 = 0;
         h.h.a = tmp_0;
         h.h.b = (bit<1>)h.h.a;
-        h.h.c = h.h.a + (bit<0>)h.h.b;
+        h.h.c = h.h.a;
     }
 }
 

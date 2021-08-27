@@ -1,0 +1,2 @@
+[--Wwarn=unsupported] warning: Mismatched header/metadata struct for key elements in table tbl. Copying all match fields to metadata
+[--Wwarn=unsupported] warning: Mismatched header/metadata struct for key elements in table foo. Copying all match fields to metadata

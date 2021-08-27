@@ -1,0 +1,3 @@
+psa-example-dpdk-meter1.p4(54): [--Wwarn=unsupported] warning: ingress.meter0: Packet metering is not supported. Falling back to byte metering.
+    Meter<bit<12>>(1024, PSA_MeterType_t.PACKETS) meter0;
+                                                  ^^^^^^
