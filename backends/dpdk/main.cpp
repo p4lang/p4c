@@ -19,9 +19,6 @@ limitations under the License.
 #include <iostream>
 #include <string>
 
-#include "backends/bmv2/common/JsonObjects.h"
-#include "backends/bmv2/common/backend.h"
-#include "backends/bmv2/psa_switch/version.h"
 #include "backends/dpdk/backend.h"
 #include "backends/dpdk/midend.h"
 #include "backends/dpdk/options.h"
@@ -44,10 +41,10 @@ limitations under the License.
 int main(int argc, char *const argv[]) {
     setup_gc_logging();
 
-    AutoCompileContext autoPsaSwitchContext(new DPDK::PsaSwitchContext);
-    auto &options = DPDK::PsaSwitchContext::get().options();
+    AutoCompileContext autoDpdkContext(new DPDK::DpdkContext);
+    auto &options = DPDK::DpdkContext::get().options();
     options.langVersion = CompilerOptions::FrontendVersion::P4_16;
-    options.compilerVersion = BMV2_PSA_VERSION_STRING;
+    options.compilerVersion = "0.1";
 
     if (options.process(argc, argv) != nullptr) {
         if (options.loadIRFromJson == false)
@@ -114,7 +111,7 @@ int main(int argc, char *const argv[]) {
         p4rt->serializeBFRuntimeSchema(out);
     }
 
-    DPDK::PsaSwitchMidEnd midEnd(options);
+    DPDK::DpdkMidEnd midEnd(options);
     midEnd.addDebugHook(hook);
     try {
         toplevel = midEnd.process(program);
@@ -131,19 +128,10 @@ int main(int argc, char *const argv[]) {
     if (::errorCount() > 0)
         return 1;
 
-    auto backend = new DPDK::PsaSwitchBackend(options, &midEnd.refMap,
+    auto backend = new DPDK::DpdkBackend(options, &midEnd.refMap,
                                               &midEnd.typeMap, &midEnd.enumMap);
 
-    // Necessary because BMV2Context is expected at the top of stack in further
-    // processing
-    AutoCompileContext autoContext(
-        new BMV2::BMV2Context(DPDK::PsaSwitchContext::get()));
-    try {
-        backend->convert(toplevel);
-    } catch (const std::exception &bug) {
-        std::cerr << bug.what() << std::endl;
-        return 1;
-    }
+    backend->convert(toplevel);
     if (::errorCount() > 0)
         return 1;
 

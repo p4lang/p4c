@@ -77,43 +77,62 @@ void expressionUnrollSanityCheck(const IR::Expression *e) {
     }
 }
 
-const IR::Node *ConvertToDpdkArch::postorder(IR::P4Program *p) {
-    // std::cout << p << std::endl;
-    return p;
-}
-
 const IR::Type_Control *
 ConvertToDpdkArch::rewriteControlType(const IR::Type_Control *c, cstring name) {
     auto applyParams = new IR::ParameterList();
-    if (name == "Ingress" || name == "Egress") {
+    if (name == "ingress" || name == "egress" ||
+        name == "Ingress" || name == "Egress") {
         applyParams->push_back(c->applyParams->parameters.at(0));
         applyParams->push_back(c->applyParams->parameters.at(1));
-    } else if (name == "IngressDeparser") {
-        applyParams->push_back(c->applyParams->parameters.at(0));
-        applyParams->push_back(c->applyParams->parameters.at(4));
-        applyParams->push_back(c->applyParams->parameters.at(5));
-    } else if (name == "EgressDeparser") {
-        applyParams->push_back(c->applyParams->parameters.at(0));
-        applyParams->push_back(c->applyParams->parameters.at(3));
-        applyParams->push_back(c->applyParams->parameters.at(4));
     }
     auto tc = new IR::Type_Control(c->name, c->annotations, c->typeParameters,
                                    applyParams);
     return tc;
 }
 
+const IR::Type_Control *
+ConvertToDpdkArch::rewriteDeparserType(const IR::Type_Control *c, cstring name) {
+    auto applyParams = new IR::ParameterList();
+    if (name == "ingress" || name == "IngressDeparser") {
+        applyParams->push_back(c->applyParams->parameters.at(0));
+        applyParams->push_back(c->applyParams->parameters.at(4));
+        applyParams->push_back(c->applyParams->parameters.at(5));
+    } else if (name == "egress" || name == "EgressDeparser") {
+        applyParams->push_back(c->applyParams->parameters.at(0));
+        applyParams->push_back(c->applyParams->parameters.at(3));
+        applyParams->push_back(c->applyParams->parameters.at(4));
+    }
+    auto tc = new IR::Type_Control(c->name, c->annotations, c->typeParameters, applyParams);
+    return tc;
+}
+
 // translate control block signature in arch.p4
 const IR::Node *ConvertToDpdkArch::postorder(IR::Type_Control *c) {
-    auto ctxt = findOrigCtxt<IR::P4Control>();
-    if (ctxt)
-        return c;
-    return rewriteControlType(c, c->name);
+    const IR::Type_Control* t = nullptr;
+    for (auto kv : structure->pipelines) {
+        if (kv.second->type->name != c->name)
+            continue;
+        t = rewriteControlType(c, kv.first);
+    }
+    for (auto kv : structure->deparsers) {
+        if (kv.second->type->name != c->name)
+            continue;
+        t = rewriteDeparserType(c, kv.first);
+    }
+    // Ingress, Egress, IngressDeparser, EgressDeparser are reserved name in psa.p4
+    if (c->name == "Ingress" || c->name == "Egress") {
+        t = rewriteControlType(c, c->name);
+    } else if (c->name == "IngressDeparser" || c->name == "EgressDeparser") {
+        t = rewriteDeparserType(c, c->name);
+    }
+    return t;
 }
 
 const IR::Type_Parser *
 ConvertToDpdkArch::rewriteParserType(const IR::Type_Parser *p, cstring name) {
     auto applyParams = new IR::ParameterList();
-    if (name == "IngressParser" || name == "EgressParser") {
+    if (name == "ingress" || name == "egress" ||
+        name == "IngressParser" || name == "EgressParser") {
         applyParams->push_back(p->applyParams->parameters.at(0));
         applyParams->push_back(p->applyParams->parameters.at(1));
         applyParams->push_back(p->applyParams->parameters.at(2));
@@ -125,101 +144,18 @@ ConvertToDpdkArch::rewriteParserType(const IR::Type_Parser *p, cstring name) {
 }
 
 const IR::Node *ConvertToDpdkArch::postorder(IR::Type_Parser *p) {
-    auto ctxt = findOrigCtxt<IR::P4Parser>();
-    if (ctxt)
-        return p;
-    return rewriteParserType(p, p->name);
-}
-
-const IR::Node *ConvertToDpdkArch::postorder(IR::P4Control *c) {
-    auto orig = getOriginal();
-    if (block_info->count(orig) != 0) {
-        auto bi = block_info->at(orig);
-        auto tc = rewriteControlType(c->type, bi.pipe);
-        auto cont = new IR::P4Control(c->name, tc, c->constructorParams,
-                                      c->controlLocals, c->body);
-        LOG3(cont);
-        return cont;
+    const IR::Type_Parser* t = nullptr;
+    for (auto kv : structure->parsers) {
+        LOG1("type " << kv.second->type << " p " << p->name);
+        if (kv.second->type->name != p->name)
+            continue;
+        LOG1("p name " << p->name);
+        t = rewriteParserType(p, kv.first);
     }
-    return c;
-}
-
-const IR::Node *ConvertToDpdkArch::postorder(IR::P4Parser *p) {
-    auto orig = getOriginal();
-    if (block_info->count(orig) != 0) {
-        auto bi = block_info->at(orig);
-        auto tp = rewriteParserType(p->type, bi.pipe);
-        auto prsr = new IR::P4Parser(p->name, tp, p->constructorParams,
-                                     p->parserLocals, p->states);
-        LOG3(prsr);
-        return prsr;
+    if (p->name == "IngressParser" || p->name == "EgressParser") {
+        t = rewriteParserType(p, p->name);
     }
-    return p;
-}
-
-void ParsePsa::parseIngressPipeline(const IR::PackageBlock *block) {
-    auto ingress_parser = block->getParameterValue("ip");
-    if (!ingress_parser->is<IR::ParserBlock>())
-        ::error(ErrorType::ERR_UNEXPECTED, "Expected ParserBlock for %1%",
-                ingress_parser);
-    BlockInfo ip("IngressParser", INGRESS, PARSER);
-    toBlockInfo.emplace(ingress_parser->to<IR::ParserBlock>()->container, ip);
-
-    auto ingress = block->getParameterValue("ig");
-    if (!ingress->is<IR::ControlBlock>())
-        ::error(ErrorType::ERR_UNEXPECTED, "Expected ControlBlock for %1%",
-                ingress);
-    BlockInfo ig("Ingress", INGRESS, PIPELINE);
-    toBlockInfo.emplace(ingress->to<IR::ControlBlock>()->container, ig);
-
-    auto ingress_deparser = block->getParameterValue("id");
-    if (!ingress_deparser->is<IR::ControlBlock>())
-        ::error(ErrorType::ERR_UNEXPECTED, "Expected ControlBlock for %1%",
-                ingress_deparser);
-    BlockInfo id("IngressDeparser", INGRESS, DEPARSER);
-    toBlockInfo.emplace(ingress_deparser->to<IR::ControlBlock>()->container,
-                        id);
-}
-
-void ParsePsa::parseEgressPipeline(const IR::PackageBlock *block) {
-    auto egress_parser = block->getParameterValue("ep");
-    if (!egress_parser->is<IR::ParserBlock>())
-        ::error(ErrorType::ERR_UNEXPECTED, "Expected ParserBlock for %1%",
-                egress_parser);
-    BlockInfo ep("EgressParser", EGRESS, PARSER);
-    toBlockInfo.emplace(egress_parser->to<IR::ParserBlock>()->container, ep);
-
-    auto egress = block->getParameterValue("eg");
-    if (!egress->is<IR::ControlBlock>())
-        ::error(ErrorType::ERR_UNEXPECTED, "Expected ControlBlock for %1%",
-                egress);
-    BlockInfo eg("Egress", EGRESS, PIPELINE);
-    toBlockInfo.emplace(egress->to<IR::ControlBlock>()->container, eg);
-
-    auto egress_deparser = block->getParameterValue("ed");
-    if (!egress_deparser->is<IR::ControlBlock>())
-        ::error(ErrorType::ERR_UNEXPECTED, "Expected ControlBlock for %1%",
-                egress_deparser);
-    BlockInfo ed("EgressDeparser", EGRESS, DEPARSER);
-    toBlockInfo.emplace(egress_deparser->to<IR::ControlBlock>()->container, ed);
-}
-
-bool ParsePsa::preorder(const IR::PackageBlock *block) {
-    auto decl = block->node->to<IR::Declaration_Instance>();
-    // If no declaration found (anonymous instantiation) get the pipe name from
-    // arch definition
-    cstring pipe = decl->Name();
-    BUG_CHECK(!pipe.isNullOrEmpty(),
-              "Cannot determine pipe name for pipe block");
-
-    auto ingress = block->getParameterValue("ingress");
-    if (auto block = ingress->to<IR::PackageBlock>())
-        parseIngressPipeline(block);
-    auto egress = block->getParameterValue("egress");
-    if (auto block = egress->to<IR::PackageBlock>())
-        parseEgressPipeline(block);
-
-    return false;
+    return t;
 }
 
 void CollectMetadataHeaderInfo::pushMetadata(const IR::ParameterList* params,
@@ -230,44 +166,49 @@ void CollectMetadataHeaderInfo::pushMetadata(const IR::ParameterList* params,
 }
 
 void CollectMetadataHeaderInfo::pushMetadata(const IR::Parameter *p) {
-    for (auto m : used_metadata) {
+    for (auto m : structure->used_metadata) {
         if (m->to<IR::Type_Name>()->path->name.name ==
             p->type->to<IR::Type_Name>()->path->name.name) {
             return;
         }
     }
-    used_metadata.push_back(p->type);
+    structure->used_metadata.push_back(p->type);
 }
 
 bool CollectMetadataHeaderInfo::preorder(const IR::P4Program *) {
-    for (auto kv : *toBlockInfo) {
-        if (kv.second.pipe == "IngressParser") {
-            auto parser = kv.first->to<IR::P4Parser>();
-            auto local_metadata = parser->getApplyParameters()->getParameter(2);
-            local_metadata_type =
-                local_metadata->type->to<IR::Type_Name>()->path->name;
-            auto header = parser->getApplyParameters()->getParameter(1);
-            header_type = header->type->to<IR::Type_Name>()->path->name;
-            auto params = parser->getApplyParameters();
+    for (auto kv : structure->parsers) {
+        if (kv.first == "ingress") {
+            auto local_metadata = kv.second->getApplyParameters()->getParameter(2);
+            structure->local_metadata_type = local_metadata->type->to<IR::Type_Name>()->path->name;
+            auto header = kv.second->getApplyParameters()->getParameter(1);
+            structure->header_type = header->type->to<IR::Type_Name>()->path->name;
+            auto params = kv.second->getApplyParameters();
             pushMetadata(params, { 2, 3, 4, 5 });
-        } else if (kv.second.pipe == "Ingress") {
-            auto control = kv.first->to<IR::P4Control>();
+        } else if (kv.first == "egress") {
+            auto params = kv.second->getApplyParameters();
+            pushMetadata(params, { 2, 3, 4, 5, 6 });
+        }
+    }
+
+    for (auto kv : structure->pipelines) {
+        if (kv.first == "ingress") {
+            auto control = kv.second->to<IR::P4Control>();
             auto params = control->getApplyParameters();
             pushMetadata(params, { 1, 2, 3 });
-        } else if (kv.second.pipe == "IngressParser") {
-            auto deparser = kv.first->to<IR::P4Control>();
+        } else if (kv.first == "egress") {
+            auto control = kv.second->to<IR::P4Control>();
+            auto params = control->getApplyParameters();
+            pushMetadata(params, { 1, 2, 3 });
+        }
+    }
+
+    for (auto kv : structure->deparsers) {
+        if (kv.first == "ingress") {
+            auto deparser = kv.second->to<IR::P4Control>();
             auto params = deparser->getApplyParameters();
             pushMetadata(params, { 1, 2, 3, 5, 6 });
-        } else if (kv.second.pipe == "EgressParser") {
-            auto parser = kv.first->to<IR::P4Parser>();
-            auto params = parser->getApplyParameters();
-            pushMetadata(params, { 2, 3, 4, 5, 6 });
-        } else if (kv.second.pipe == "Egress") {
-            auto control = kv.first->to<IR::P4Control>();
-            auto params = control->getApplyParameters();
-            pushMetadata(params, { 1, 2, 3 });
-        } else if (kv.second.pipe == "EgressDeparser") {
-            auto deparser = kv.first->to<IR::P4Control>();
+        } else if (kv.first == "egress") {
+            auto deparser = kv.second->to<IR::P4Control>();
             auto params = deparser->getApplyParameters();
             pushMetadata(params, { 1, 2, 4, 5, 6 });
         }
@@ -276,10 +217,10 @@ bool CollectMetadataHeaderInfo::preorder(const IR::P4Program *) {
 }
 
 bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s) {
-    for (auto m : used_metadata) {
+    for (auto m : structure->used_metadata) {
         if (m->to<IR::Type_Name>()->path->name.name == s->name.name) {
             for (auto field : s->fields) {
-                fields.push_back(new IR::StructField(
+                structure->fields.push_back(new IR::StructField(
                     IR::ID(TypeStruct2Name(s->name.name) + "_" + field->name),
                     field->type));
             }
@@ -293,13 +234,13 @@ const IR::Node *ReplaceMetadataHeaderName::preorder(IR::PathExpression *pe) {
     auto declaration = refMap->getDeclaration(pe->path);
     if (auto decl = declaration->to<IR::Parameter>()) {
         if (auto type = decl->type->to<IR::Type_Name>()) {
-            if (type->path->name == info->header_type){
-                    return new IR::PathExpression(IR::ID("h"));
-                } else if (type->path->name == info->local_metadata_type){
-                    return new IR::PathExpression(IR::ID("m"));
-                }
+            if (type->path->name == structure->header_type){
+                return new IR::PathExpression(IR::ID("h"));
+            } else if (type->path->name == structure->local_metadata_type){
+                return new IR::PathExpression(IR::ID("m"));
             }
         }
+    }
     return pe;
 }
 
@@ -326,10 +267,10 @@ const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Member *m) {
                         new IR::PathExpression(IR::ID("m")),
                         IR::ID(TypeStruct2Name(type->path->name.name) + "_" +
                                m->member.name));
-                } else if (type->path->name == info->header_type) {
+                } else if (type->path->name == structure->header_type) {
                     return new IR::Member(new IR::PathExpression(IR::ID("h")),
                                           IR::ID(m->member.name));
-                } else if (type->path->name == info->local_metadata_type) {
+                } else if (type->path->name == structure->local_metadata_type) {
                     return new IR::Member(
                         new IR::PathExpression(IR::ID("m")),
                         IR::ID("local_metadata_" + m->member.name));
@@ -409,11 +350,11 @@ const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Type_Parser *p) {
 }
 
 const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct *s) {
-    if (s->name == info->local_metadata_type) {
+    if (s->name == structure->local_metadata_type) {
         auto *annotations = new IR::Annotations(
             {new IR::Annotation(IR::ID("__metadata__"), {})});
-        return new IR::Type_Struct(s->name, annotations, info->fields);
-    } else if (s->name == info->header_type) {
+        return new IR::Type_Struct(s->name, annotations, structure->fields);
+    } else if (s->name == structure->header_type) {
         auto *annotations = new IR::Annotations(
             {new IR::Annotation(IR::ID("__packet_data__"), {})});
         return new IR::Type_Struct(s->name, annotations, s->fields);
@@ -433,8 +374,8 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
     } else if (auto bin = right->to<IR::Operation_Binary>()) {
         expressionUnrollSanityCheck(bin->right);
         expressionUnrollSanityCheck(bin->left);
-        auto left_unroller = new ExpressionUnroll(refMap, collector);
-        auto right_unroller = new ExpressionUnroll(refMap, collector);
+        auto left_unroller = new ExpressionUnroll(refMap, structure);
+        auto right_unroller = new ExpressionUnroll(refMap, structure);
         bin->left->apply(*left_unroller);
         const IR::Expression *left_tmp = left_unroller->root;
         bin->right->apply(*right_unroller);
@@ -464,7 +405,7 @@ const IR::Node *StatementUnroll::preorder(IR::AssignmentStatement *a) {
     } else if (auto un = right->to<IR::Operation_Unary>()) {
         auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
         expressionUnrollSanityCheck(un->expr);
-        auto unroller = new ExpressionUnroll(refMap, collector);
+        auto unroller = new ExpressionUnroll(refMap, structure);
         un->expr->apply(*unroller);
         prune();
         const IR::Expression *un_tmp = unroller->root;
@@ -591,7 +532,7 @@ bool ExpressionUnroll::preorder(const IR::BoolLiteral *) {
 const IR::Node *IfStatementUnroll::postorder(IR::IfStatement *i) {
     auto code_block = new IR::IndexedVector<IR::StatOrDecl>;
     expressionUnrollSanityCheck(i->condition);
-    auto unroller = new LogicalExpressionUnroll(refMap, collector);
+    auto unroller = new LogicalExpressionUnroll(refMap, structure);
     i->condition->apply(*unroller);
     for (auto i : unroller->stmt)
         code_block->push_back(i);
@@ -790,32 +731,21 @@ const IR::Node *ConvertBinaryOperationTo2Params::postorder(IR::P4Parser *a) {
 }
 
 const IR::Node *CollectLocalVariableToMetadata::preorder(IR::P4Program *p) {
-    for (auto kv : *toBlockInfo) {
-        if (kv.second.pipe == "IngressParser") {
-            auto parser = kv.first->to<IR::P4Parser>();
-            locals_map.emplace(kv.second.pipe, parser->parserLocals);
-        } else if (kv.second.pipe == "Ingress") {
-            auto control = kv.first->to<IR::P4Control>();
-            locals_map.emplace(kv.second.pipe, control->controlLocals);
-        } else if (kv.second.pipe == "IngressDeparser") {
-            auto control = kv.first->to<IR::P4Control>();
-            locals_map.emplace(kv.second.pipe, control->controlLocals);
-        } else if (kv.second.pipe == "EgressParser") {
-            auto parser = kv.first->to<IR::P4Parser>();
-            locals_map.emplace(kv.second.pipe, parser->parserLocals);
-        } else if (kv.second.pipe == "Egress") {
-            auto control = kv.first->to<IR::P4Control>();
-            locals_map.emplace(kv.second.pipe, control->controlLocals);
-        } else if (kv.second.pipe == "EgressDeparser") {
-            auto control = kv.first->to<IR::P4Control>();
-            locals_map.emplace(kv.second.pipe, control->controlLocals);
-        }
+    for (auto kv : structure->parsers) {
+        locals_map.emplace(kv.first+"_parser", kv.second->parserLocals);
     }
+    for (auto kv : structure->pipelines) {
+        locals_map.emplace(kv.first, kv.second->controlLocals);
+    }
+    for (auto kv : structure->deparsers) {
+        locals_map.emplace(kv.first+"_deprser", kv.second->controlLocals);
+    }
+    LOG1("locals_map " << locals_map.size());
     return p;
 }
 
 const IR::Node *CollectLocalVariableToMetadata::postorder(IR::Type_Struct *s) {
-    if (s->name.name == info->local_metadata_type) {
+    if (s->name.name == structure->local_metadata_type) {
         for (auto kv : locals_map) {
             for (auto d : kv.second) {
                 if (auto dv = d->to<IR::Declaration_Variable>()) {
@@ -837,6 +767,7 @@ CollectLocalVariableToMetadata::postorder(IR::PathExpression *p) {
             refMap->getDeclaration(p->path)->to<IR::Declaration_Variable>()) {
         for (auto kv : locals_map) {
             for (auto d : kv.second) {
+                LOG1("d=" << d << " decl=" << decl);
                 if (d->equiv(*decl)) {
                     return new IR::Member(
                         new IR::PathExpression(IR::ID("m")),
@@ -882,7 +813,7 @@ const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Action *a) {
         for (auto p : a->parameters->parameters) {
             l->push_back(p);
         }
-        args_struct_map.emplace(a->name.toString() + "_arg_t", l);
+        structure->args_struct_map.emplace(a->name.toString() + "_arg_t", l);
         auto new_l = new IR::IndexedVector<IR::Parameter>;
         new_l->push_back(new IR::Parameter(
             IR::ID("t"), IR::Direction::None,
@@ -894,25 +825,21 @@ const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Action *a) {
 
 const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Program *program) {
     auto new_objs = new IR::Vector<IR::Node>;
-    for (auto obj : program->objects) {
-        if (auto control = obj->to<IR::P4Control>()) {
-            for (auto kv : *toBlockInfo) {
-                if (kv.second.pipe == "Ingress") {
-                    if (kv.first->to<IR::P4Control>()->name == control->name) {
-                        for (auto kv : args_struct_map) {
-                            auto fields =
-                                new IR::IndexedVector<IR::StructField>;
-                            for (auto field : *kv.second) {
-                                fields->push_back(new IR::StructField(
-                                    field->name.toString(), field->type));
-                            }
-                            new_objs->push_back(
-                                new IR::Type_Struct(IR::ID(kv.first), *fields));
-                        }
-                    }
+    for (auto pipeline : structure->pipelines) {
+        if (pipeline.first == "ingress") {
+            for (auto kv : structure->args_struct_map) {
+                auto fields =
+                    new IR::IndexedVector<IR::StructField>;
+                for (auto field : *kv.second) {
+                    fields->push_back(new IR::StructField(
+                                field->name.toString(), field->type));
                 }
+                new_objs->push_back(
+                        new IR::Type_Struct(IR::ID(kv.first), *fields));
             }
         }
+    }
+    for (auto obj : program->objects) {
         new_objs->push_back(obj);
     }
     program->objects = *new_objs;

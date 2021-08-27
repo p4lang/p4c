@@ -6,6 +6,18 @@ struct ethernet_t {
 	bit<16> etherType
 }
 
+struct a1_arg_t {
+	bit<48> param
+}
+
+struct a2_arg_t {
+	bit<16> param
+}
+
+struct tbl_0_set_group_id_arg_t {
+	bit<32> group_id
+}
+
 struct user_meta_t {
 	bit<32> psa_ingress_parser_input_metadata_ingress_port
 	bit<32> psa_ingress_parser_input_metadata_packet_path
@@ -33,24 +45,12 @@ struct user_meta_t {
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
 	bit<16> local_metadata_data
-	bit<32> Ingress_tbl_0_group_id
-	bit<32> Ingress_tbl_0_member_id
+	bit<32> ingress_tbl_0_group_id
+	bit<32> ingress_tbl_0_member_id
 }
 metadata instanceof user_meta_t
 
 header ethernet instanceof ethernet_t
-
-struct a1_arg_t {
-	bit<48> param
-}
-
-struct a2_arg_t {
-	bit<16> param
-}
-
-struct tbl_0_set_group_id_arg_t {
-	bit<32> group_id
-}
 
 struct psa_ingress_output_metadata_t {
 	bit<8> class_of_service
@@ -87,7 +87,7 @@ action a2 args instanceof a2_arg_t {
 }
 
 action tbl_0_set_group_id args instanceof tbl_0_set_group_id_arg_t {
-	mov m.Ingress_tbl_0_group_id t.group_id
+	mov m.ingress_tbl_0_group_id t.group_id
 	return
 }
 
@@ -106,7 +106,7 @@ table tbl {
 
 table tbl_0_member_table {
 	key {
-		m.Ingress_tbl_0_member_id exact
+		m.ingress_tbl_0_member_id exact
 	}
 	actions {
 		NoAction
@@ -119,11 +119,11 @@ table tbl_0_member_table {
 
 
 selector tbl_0_group_table {
-	group_id m.Ingress_tbl_0_group_id
+	group_id m.ingress_tbl_0_group_id
 	selector {
 		m.local_metadata_data
 	}
-	member_id m.Ingress_tbl_0_member_id
+	member_id m.ingress_tbl_0_member_id
 	n_groups_max 1024
 	n_members_per_group_max 65536
 }

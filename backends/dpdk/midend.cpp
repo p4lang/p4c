@@ -88,9 +88,8 @@ class EnumOn32Bits : public P4::ChooseEnumRepresentation {
     EnumOn32Bits() {}
 };
 
-PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options,
-                                 std::ostream *outStream)
-    : MidEnd(options) {
+DpdkMidEnd::DpdkMidEnd(CompilerOptions &options,
+                                 std::ostream *outStream) {
     auto convertEnums =
         new P4::ConvertEnums(&refMap, &typeMap, new EnumOn32Bits());
     auto evaluator = new P4::EvaluatorPass(&refMap, &typeMap);
@@ -130,7 +129,7 @@ PsaSwitchMidEnd::PsaSwitchMidEnd(CompilerOptions &options,
         }
         return true;
     };
-    if (DPDK::PsaSwitchContext::get().options().loadIRFromJson == false) {
+    if (DPDK::DpdkContext::get().options().loadIRFromJson == false) {
         addPasses({
             options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap)
                            : nullptr,

@@ -7,6 +7,14 @@ struct ethernet_t {
 	bit<16> etherType
 }
 
+struct a1_arg_t {
+	bit<48> param
+}
+
+struct a2_arg_t {
+	bit<16> param
+}
+
 struct EMPTY {
 	bit<32> psa_ingress_parser_input_metadata_ingress_port
 	bit<32> psa_ingress_parser_input_metadata_packet_path
@@ -37,14 +45,6 @@ struct EMPTY {
 metadata instanceof EMPTY
 
 header ethernet instanceof ethernet_t
-
-struct a1_arg_t {
-	bit<48> param
-}
-
-struct a2_arg_t {
-	bit<16> param
-}
 
 struct psa_ingress_output_metadata_t {
 	bit<8> class_of_service

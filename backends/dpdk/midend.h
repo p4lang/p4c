@@ -17,20 +17,28 @@ limitations under the License.
 #ifndef BACKENDS_DPDK_PSA_SWITCH_MIDEND_H_
 #define BACKENDS_DPDK_PSA_SWITCH_MIDEND_H_
 
-#include "backends/bmv2/common/midend.h"
-#include "backends/bmv2/common/options.h"
 #include "frontends/common/options.h"
 #include "ir/ir.h"
 #include "midend/convertEnums.h"
 
 namespace DPDK {
 
-class PsaSwitchMidEnd : public BMV2::MidEnd {
+class DpdkMidEnd : public PassManager {
   public:
+    // These will be accurate when the mid-end completes evaluation
+    P4::ReferenceMap    refMap;
+    P4::TypeMap         typeMap;
+    const IR::ToplevelBlock   *toplevel = nullptr;
+    P4::ConvertEnums::EnumMapping enumMap;
+
     // If p4c is run with option '--listMidendPasses', outStream is used for
     // printing passes names
-    explicit PsaSwitchMidEnd(CompilerOptions &options,
+    explicit DpdkMidEnd(CompilerOptions &options,
                              std::ostream *outStream = nullptr);
+
+    const IR::ToplevelBlock* process(const IR::P4Program *&program) {
+        program = program->apply(*this);
+        return toplevel; }
 };
 
 } // namespace DPDK

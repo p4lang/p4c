@@ -4,7 +4,7 @@
 
 namespace DPDK {
 
-std::vector<const char*>* PsaSwitchOptions::process(int argc, char* const argv[]) {
+std::vector<const char*>* DpdkOptions::process(int argc, char* const argv[]) {
     searchForIncludePath(p4includePath,
             {"p4include/dpdk", "../p4include/dpdk", "../../p4include/dpdk"},
             exename(argv[0]));
@@ -14,7 +14,7 @@ std::vector<const char*>* PsaSwitchOptions::process(int argc, char* const argv[]
     return remainingOptions;
 }
 
-const char* PsaSwitchOptions::getIncludePath() {
+const char* DpdkOptions::getIncludePath() {
     char* driverP4IncludePath = isv1() ? getenv("P4C_14_INCLUDE_PATH")
         : getenv("P4C_16_INCLUDE_PATH");
     cstring path = "";

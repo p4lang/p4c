@@ -45,27 +45,13 @@ add_library(dpdk_runtime STATIC ${DPDK_P4RUNTIME_INFO_GEN_SRCS})
 set_source_files_properties (${DPDK_P4RUNTIME_INFO_GEN_SRCS} PROPERTIES GENERATED TRUE)
 
 set(P4C_DPDK_SOURCES
-    ../bmv2/common/helpers.cpp
-    ../bmv2/common/JsonObjects.cpp
-    ../bmv2/common/action.cpp
-    ../bmv2/common/controlFlowGraph.cpp
-    ../bmv2/common/deparser.cpp
-    ../bmv2/common/expression.cpp
-    ../bmv2/common/extern.cpp
-    ../bmv2/common/globals.cpp
-    ../bmv2/common/header.cpp
-    ../bmv2/common/helpers.cpp
     ../bmv2/common/lower.cpp
-    ../bmv2/common/metermap.cpp
-    ../bmv2/common/parser.cpp
-    ../bmv2/common/programStructure.cpp
-    ../bmv2/psa_switch/psaSwitch.cpp
     backend.cpp
     main.cpp
     midend.cpp
     dpdkHelpers.cpp
     dpdkProgram.cpp
-    dpdkVarCollector.cpp
+    dpdkProgramStructure.cpp
     dpdkArch.cpp
     dpdkAsmOpt.cpp
     options.cpp
@@ -73,36 +59,14 @@ set(P4C_DPDK_SOURCES
     )
 
 set(P4C_DPDK_HEADERS
-    ../bmv2/psa_switch/midend.h
-    ../bmv2/common/helpers.h
-    ../bmv2/common/JsonObjects.h
     ../bmv2/common/lower.h
-    ../bmv2/common/action.h
-    ../bmv2/common/annotations.h
-    ../bmv2/common/backend.h
-    ../bmv2/common/control.h
-    ../bmv2/common/controlFlowGraph.h
-    ../bmv2/common/deparser.h
-    ../bmv2/common/expression.h
-    ../bmv2/common/extern.h
-    ../bmv2/common/globals.h
-    ../bmv2/common/header.h
-    ../bmv2/common/helpers.h
-    ../bmv2/common/lower.h
-    ../bmv2/common/metermap.h
-    ../bmv2/common/midend.h
-    ../bmv2/common/options.h
-    ../bmv2/common/parser.h
-    ../bmv2/common/programStructure.h
-    ../bmv2/common/sharedActionSelectorCheck.h
-    ../bmv2/psa_switch/psaSwitch.h
     backend.h
     midend.h
     dpdkHelpers.h
     dpdkProgram.h
-    dpdkVarCollector.h
     dpdkArch.h
     dpdkAsmOpt.h
+    dpdkProgramStructure.h
     options.h
     control-plane/bfruntime_ext.h
     control-plane/bfruntime_arch_handler.h

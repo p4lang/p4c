@@ -37,6 +37,18 @@ struct tcp_t {
 	bit<16> urgentPtr
 }
 
+struct a1_arg_t {
+	bit<48> param
+}
+
+struct a2_arg_t {
+	bit<16> param
+}
+
+struct a3_arg_t {
+	bit<48> param
+}
+
 struct user_meta_t {
 	bit<32> psa_ingress_parser_input_metadata_ingress_port
 	bit<32> psa_ingress_parser_input_metadata_packet_path
@@ -65,8 +77,8 @@ struct user_meta_t {
 	bit<8> psa_egress_output_metadata_drop
 	bit<16> local_metadata_data
 	bit<16> local_metadata_data1
-	bit<48> Ingress_tbl_ethernet_srcAddr
-	bit<48> Ingress_foo_ethernet_dstAddr
+	bit<48> ingress_tbl_ethernet_srcAddr
+	bit<48> ingress_foo_ethernet_dstAddr
 	bit<16> tmpMask
 	bit<8> tmpMask_0
 }
@@ -75,18 +87,6 @@ metadata instanceof user_meta_t
 header ethernet instanceof ethernet_t
 header ipv4 instanceof ipv4_t
 header tcp instanceof tcp_t
-
-struct a1_arg_t {
-	bit<48> param
-}
-
-struct a2_arg_t {
-	bit<16> param
-}
-
-struct a3_arg_t {
-	bit<48> param
-}
 
 struct psa_ingress_output_metadata_t {
 	bit<8> class_of_service
@@ -129,7 +129,7 @@ action a3 args instanceof a3_arg_t {
 
 table tbl {
 	key {
-		m.Ingress_tbl_ethernet_srcAddr exact
+		m.ingress_tbl_ethernet_srcAddr exact
 		m.local_metadata_data exact
 		m.local_metadata_data1 lpm
 	}
@@ -145,7 +145,7 @@ table tbl {
 
 table foo {
 	key {
-		m.Ingress_foo_ethernet_dstAddr exact
+		m.ingress_foo_ethernet_dstAddr exact
 		m.local_metadata_data exact
 		m.local_metadata_data1 lpm
 	}
@@ -183,10 +183,10 @@ apply {
 	jmpeq MYIP_PARSE_TCP m.tmpMask_0 0x4
 	jmp MYIP_ACCEPT
 	MYIP_PARSE_TCP :	extract h.tcp
-	MYIP_ACCEPT :	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	MYIP_ACCEPT :	mov m.ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
 	table tbl
 	jmpnh LABEL_0END
-	mov m.Ingress_foo_ethernet_dstAddr h.ethernet.dstAddr
+	mov m.ingress_foo_ethernet_dstAddr h.ethernet.dstAddr
 	table foo
 	LABEL_0END :	table tbl
 	jmpnh LABEL_1END
