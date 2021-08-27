@@ -17,7 +17,6 @@ limitations under the License.
 #include <unordered_map>
 #include "dpdkProgram.h"
 #include "backend.h"
-#include "backends/bmv2/psa_switch/psaSwitch.h"
 #include "dpdkHelpers.h"
 #include "ir/dbprint.h"
 #include "ir/ir.h"

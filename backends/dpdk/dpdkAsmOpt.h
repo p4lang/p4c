@@ -17,16 +17,6 @@ limitations under the License.
 #ifndef BACKEND_DPDK_OPTIMIZATION_H_
 #define BACKEND_DPDK_OPTIMIZATION_H_
 
-#include "backends/bmv2/common/action.h"
-#include "backends/bmv2/common/control.h"
-#include "backends/bmv2/common/deparser.h"
-#include "backends/bmv2/common/extern.h"
-#include "backends/bmv2/common/header.h"
-#include "backends/bmv2/common/helpers.h"
-#include "backends/bmv2/common/lower.h"
-#include "backends/bmv2/common/parser.h"
-#include "backends/bmv2/common/programStructure.h"
-#include "backends/bmv2/psa_switch/psaSwitch.h"
 #include "frontends/common/constantFolding.h"
 #include "frontends/common/resolveReferences/referenceMap.h"
 #include "frontends/p4/coreLibrary.h"

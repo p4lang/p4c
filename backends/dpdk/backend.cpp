@@ -23,6 +23,7 @@ limitations under the License.
 #include "ir/dbprint.h"
 #include "ir/ir.h"
 #include "lib/stringify.h"
+#include "../bmv2/common/lower.h"
 
 namespace DPDK {
 
