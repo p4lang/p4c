@@ -130,17 +130,10 @@ control MainControlImpl(
     in    pna_main_input_metadata_t  istd,
     inout pna_main_output_metadata_t ostd)
 {
-    Counter<ByteCounter_t, PortId_t>(NUM_PORTS, PNA_CounterType_t.BYTES)
-        port_bytes_in;
-    DirectCounter<PacketByteCounter_t>(PNA_CounterType_t.PACKETS_AND_BYTES)
-        per_prefix_pkt_byte_count;
-
     action next_hop(PortId_t vport) {
-        per_prefix_pkt_byte_count.count();
         send_to_port(vport);
     }
     action default_route_drop() {
-        per_prefix_pkt_byte_count.count();
         drop_packet();
     }
     table ipv4_da_lpm {
@@ -152,11 +145,8 @@ control MainControlImpl(
             default_route_drop;
         }
         const default_action = default_route_drop;
-        // table ipv4_da_lpm owns this DirectCounter instance
-        pna_direct_counter = per_prefix_pkt_byte_count;
     }
     apply {
-        port_bytes_in.count(istd.input_port);
         if (hdr.ipv4.isValid()) {
             ipv4_da_lpm.apply();
         }

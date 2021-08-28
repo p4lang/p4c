@@ -18,16 +18,16 @@ void ParseDpdkArchitecture::parse_pna_block(const IR::PackageBlock *block) {
         return;
     }
     auto parser = p->to<IR::ParserBlock>();
-    structure->parsers.emplace("ingress", parser->container);
+    structure->parsers.emplace("MainParserT", parser->container);
     p = block->findParameterValue("pre_control");
     auto pre_control = p->to<IR::ControlBlock>();
-    structure->pipelines.emplace("ingress_pre", pre_control->container);
+    structure->pipelines.emplace("PreControlT", pre_control->container);
     p = block->findParameterValue("main_control");
     auto pipeline = p->to<IR::ControlBlock>();
-    structure->pipelines.emplace("ingress", pipeline->container);
+    structure->pipelines.emplace("MainControlT", pipeline->container);
     p = block->findParameterValue("main_deparser");
     auto deparser = p->to<IR::ControlBlock>();
-    structure->deparsers.emplace("ingress", deparser->container);
+    structure->deparsers.emplace("MainDeparserT", deparser->container);
 }
 
 void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
@@ -43,21 +43,21 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
             return;
         }
         auto parser = p->to<IR::ParserBlock>();
-        structure->parsers.emplace("ingress", parser->container);
+        structure->parsers.emplace("IngressParser", parser->container);
         p = ingress->findParameterValue("ig");
         if (!p) {
             ::error("'ingress' package %1% has no parameter named 'ig'", block);
             return;
         }
         auto pipeline = p->to<IR::ControlBlock>();
-        structure->pipelines.emplace("ingress", pipeline->container);
+        structure->pipelines.emplace("Ingress", pipeline->container);
         p = ingress->findParameterValue("id");
         if (!p) {
             ::error("'ingress' package %1% has no parameter named 'id'", block);
             return;
         }
         auto deparser = p->to<IR::ControlBlock>();
-        structure->deparsers.emplace("ingress", deparser->container);
+        structure->deparsers.emplace("IngressDeparser", deparser->container);
     }
     pkg = block->findParameterValue("egress");
     if (auto egress = pkg->to<IR::PackageBlock>()) {
@@ -67,21 +67,21 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
             return;
         }
         auto parser = p->to<IR::ParserBlock>();
-        structure->parsers.emplace("egress", parser->container);
+        structure->parsers.emplace("EgressParser", parser->container);
         p = egress->findParameterValue("eg");
         if (!p) {
             ::error("'egress' package %1% has no parameter named 'eg'", block);
             return;
         }
         auto pipeline = p->to<IR::ControlBlock>();
-        structure->pipelines.emplace("egress", pipeline->container);
+        structure->pipelines.emplace("Egress", pipeline->container);
         p = egress->findParameterValue("ed");
         if (!p) {
             ::error("'egress' package %1% has no parameter named 'ed'", block);
             return;
         }
         auto deparser = p->to<IR::ControlBlock>();
-        structure->deparsers.emplace("egress", deparser->container);
+        structure->deparsers.emplace("EgressDeparser", deparser->container);
     }
 }
 
