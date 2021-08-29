@@ -64,12 +64,12 @@ struct metadata {
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
 	bit<16> local_metadata_data
-	bit<8> ingress_tmp
-	bit<8> ingress_tmp_0
-	bit<8> ingress_tmp_1
-	bit<8> ingress_key_0
-	bit<48> ingress_tbl_ethernet_dstAddr
-	bit<48> ingress_tbl_ethernet_srcAddr
+	bit<8> Ingress_tmp
+	bit<8> Ingress_tmp_0
+	bit<8> Ingress_tmp_1
+	bit<8> Ingress_key_0
+	bit<48> Ingress_tbl_ethernet_dstAddr
+	bit<48> Ingress_tbl_ethernet_srcAddr
 	bit<16> tmpMask
 	bit<8> tmpMask_0
 }
@@ -110,9 +110,9 @@ action execute args none {
 
 table tbl {
 	key {
-		m.ingress_key_0 exact
-		m.ingress_tbl_ethernet_dstAddr exact
-		m.ingress_tbl_ethernet_srcAddr exact
+		m.Ingress_key_0 exact
+		m.Ingress_tbl_ethernet_dstAddr exact
+		m.Ingress_tbl_ethernet_srcAddr exact
 	}
 	actions {
 		NoAction
@@ -138,24 +138,24 @@ apply {
 	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.tmpMask_0 0x4
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
-	INGRESSPARSERIMPL_ACCEPT :	mov m.ingress_tmp 1
+	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_tmp 1
 	jmpv LABEL_0END h.ethernet
-	mov m.ingress_tmp 0
-	LABEL_0END :	jmpeq LABEL_1TRUE m.ingress_tmp 0x0
-	mov m.ingress_tmp_0 0x0
+	mov m.Ingress_tmp 0
+	LABEL_0END :	jmpeq LABEL_1TRUE m.Ingress_tmp 0x0
+	mov m.Ingress_tmp_0 0x0
 	jmp LABEL_1END
-	LABEL_1TRUE :	mov m.ingress_tmp_0 0x1
-	LABEL_1END :	mov m.ingress_tmp_1 1
+	LABEL_1TRUE :	mov m.Ingress_tmp_0 0x1
+	LABEL_1END :	mov m.Ingress_tmp_1 1
 	jmpv LABEL_2END h.ipv4
-	mov m.ingress_tmp_1 0
-	LABEL_2END :	mov m.ingress_key_0 m.ingress_tmp_0
-	jmpeq LABEL_3TRUE m.ingress_key_0 0x1
-	jmpeq LABEL_3TRUE m.ingress_tmp_1 0x1
-	mov m.ingress_key_0 0x0
+	mov m.Ingress_tmp_1 0
+	LABEL_2END :	mov m.Ingress_key_0 m.Ingress_tmp_0
+	jmpeq LABEL_3TRUE m.Ingress_key_0 0x1
+	jmpeq LABEL_3TRUE m.Ingress_tmp_1 0x1
+	mov m.Ingress_key_0 0x0
 	jmp LABEL_3END
-	LABEL_3TRUE :	mov m.ingress_key_0 0x1
-	LABEL_3END :	mov m.ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
-	mov m.ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
+	LABEL_3TRUE :	mov m.Ingress_key_0 0x1
+	LABEL_3END :	mov m.Ingress_tbl_ethernet_dstAddr h.ethernet.dstAddr
+	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet

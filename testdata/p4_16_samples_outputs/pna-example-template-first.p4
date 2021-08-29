@@ -58,14 +58,10 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    Counter<ByteCounter_t, PortId_t>(32w4, PNA_CounterType_t.BYTES) port_bytes_in;
-    DirectCounter<PacketByteCounter_t>(PNA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_byte_count;
     action next_hop(PortId_t vport) {
-        per_prefix_pkt_byte_count.count();
         send_to_port(vport);
     }
     action default_route_drop() {
-        per_prefix_pkt_byte_count.count();
         drop_packet();
     }
     table ipv4_da_lpm {
@@ -77,10 +73,8 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
             default_route_drop();
         }
         const default_action = default_route_drop();
-        pna_direct_counter = per_prefix_pkt_byte_count;
     }
     apply {
-        port_bytes_in.count(istd.input_port);
         if (hdr.ipv4.isValid()) {
             ipv4_da_lpm.apply();
         }
