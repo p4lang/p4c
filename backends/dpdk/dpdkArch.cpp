@@ -194,9 +194,9 @@ const IR::Node *ConvertToDpdkArch::preorder(IR::PathExpression *pe) {
     auto declaration = refMap->getDeclaration(pe->path);
     if (auto decl = declaration->to<IR::Parameter>()) {
         if (auto type = decl->type->to<IR::Type_Name>()) {
-            if (type->path->name == structure->header_type){
+            if (type->path->name == structure->header_type) {
                 return new IR::PathExpression(IR::ID("h"));
-            } else if (type->path->name == structure->local_metadata_type){
+            } else if (type->path->name == structure->local_metadata_type) {
                 return new IR::PathExpression(IR::ID("m"));
             }
         }
