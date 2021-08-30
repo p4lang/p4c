@@ -1,3 +1,12 @@
 issue1937-2-bmv2.p4(33): [--Wwarn=uninitialized_use] warning: hdr.h1.f1 may be uninitialized
         foo.apply(hdr.h1.f1, hdr.h1.f1);
                              ^^^^^^^^^
+issue1937-2-bmv2.p4(33): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.h1
+        foo.apply(hdr.h1.f1, hdr.h1.f1);
+                             ^^^^^^
+issue1937-2-bmv2.p4(33): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.h1
+        foo.apply(hdr.h1.f1, hdr.h1.f1);
+                  ^^^^^^
+issue1937-2-bmv2.p4(34): [--Wwarn=invalid_header] warning: accessing a field of an invalid header hdr.h1
+        foo.apply(hdr.h1.f2);
+                  ^^^^^^

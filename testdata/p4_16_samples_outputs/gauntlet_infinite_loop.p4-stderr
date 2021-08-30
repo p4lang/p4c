@@ -19,3 +19,6 @@ gauntlet_infinite_loop.p4(37)
 gauntlet_infinite_loop.p4(23): [--Wwarn=uninitialized_use] warning: padding.p may be uninitialized
         transition select(padding.p) {
                           ^^^^^^^^^
+gauntlet_infinite_loop.p4(23): [--Wwarn=invalid_header] warning: accessing a field of an invalid header padding
+        transition select(padding.p) {
+                          ^^^^^^^

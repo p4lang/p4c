@@ -25,6 +25,24 @@ uninit.p4(42): [--Wwarn=uninitialized_use] warning: stack[1] may not be complete
 uninit.p4(62): [--Wwarn=uninitialized_use] warning: c may be uninitialized
         c = !c; // uninitialized;
              ^
+uninit.p4(34): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h
+        h.data1 = 0;
+        ^
+uninit.p4(36): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h
+        g(h.data2, g(h.data2, h.data2)); // uninitialized
+          ^
+uninit.p4(36): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h
+        g(h.data2, g(h.data2, h.data2)); // uninitialized
+                              ^
+uninit.p4(36): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h
+        g(h.data2, g(h.data2, h.data2)); // uninitialized
+                     ^
+uninit.p4(41): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h
+        h.data2 = h.data3 + 1; // uninitialized
+        ^
+uninit.p4(41): [--Wwarn=invalid_header] warning: accessing a field of an invalid header h
+        h.data2 = h.data3 + 1; // uninitialized
+                  ^
 uninit.p4(82): [--Wwarn=uninitialized_use] warning: b may be uninitialized
         b = b + 1; // uninitialized
             ^
