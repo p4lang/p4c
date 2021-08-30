@@ -111,13 +111,8 @@ action execute args none {
 
 table tbl {
 	key {
-<<<<<<< HEAD
 		m.ingress_tbl_ethernet_srcAddr lpm
 		m.ingress_tbl_ipv4_totalLen exact
-=======
-		m.Ingress_tbl_ethernet_srcAddr lpm
-		m.Ingress_tbl_ipv4_totalLen exact
->>>>>>> Add missing reference outputs
 	}
 	actions {
 		NoAction
@@ -143,13 +138,8 @@ apply {
 	jmpeq INGRESSPARSERIMPL_PARSE_TCP m.tmpMask_0 0x4
 	jmp INGRESSPARSERIMPL_ACCEPT
 	INGRESSPARSERIMPL_PARSE_TCP :	extract h.tcp
-<<<<<<< HEAD
 	INGRESSPARSERIMPL_ACCEPT :	mov m.ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
 	mov m.ingress_tbl_ipv4_totalLen h.ipv4.totalLen
-=======
-	INGRESSPARSERIMPL_ACCEPT :	mov m.Ingress_tbl_ethernet_srcAddr h.ethernet.srcAddr
-	mov m.Ingress_tbl_ipv4_totalLen h.ipv4.totalLen
->>>>>>> Add missing reference outputs
 	table tbl
 	jmpneq LABEL_DROP m.psa_ingress_output_metadata_drop 0x0
 	emit h.ethernet
