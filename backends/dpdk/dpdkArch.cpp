@@ -44,21 +44,25 @@ bool isNonConstantSimpleExpression(const IR::Expression *e) {
     return false;
 }
 
+bool isStandardMetadata(cstring name) {
+    bool isStdMeta = name == "psa_ingress_parser_input_metadata_t" ||
+                     name == "psa_ingress_input_metadata_t" ||
+                     name == "psa_ingress_output_metadata_t" ||
+                     name == "psa_egress_parser_input_metadata_t" ||
+                     name == "psa_egress_input_metadata_t" ||
+                     name == "psa_egress_output_metadata_t" ||
+                     name == "psa_egress_deparser_input_metadata_t" ||
+                     name == "pna_pre_input_metadata_t" ||
+                     name == "pna_pre_output_metadata_t" ||
+                     name == "pna_main_input_metadata_t" ||
+                     name == "pna_main_output_metadata_t" ||
+                     name == "pna_main_parser_input_metadata_t";
+    return isStdMeta;
+}
+
 cstring TypeStruct2Name(const cstring s) {
-    if (s == "psa_ingress_parser_input_metadata_t") {
-        return "psa_ingress_parser_input_metadata";
-    } else if (s == "psa_ingress_input_metadata_t") {
-        return "psa_ingress_input_metadata";
-    } else if (s == "psa_ingress_output_metadata_t") {
-        return "psa_ingress_output_metadata";
-    } else if (s == "psa_egress_parser_input_metadata_t") {
-        return "psa_egress_parser_input_metadata";
-    } else if (s == "psa_egress_input_metadata_t") {
-        return "psa_egress_input_metadata";
-    } else if (s == "psa_egress_output_metadata_t") {
-        return "psa_egress_output_metadata";
-    } else if (s == "psa_egress_deparser_input_metadata_t") {
-        return "psa_egress_deparser_input_metadata";
+    if (isStandardMetadata(s)) {
+        return s.substr(0, s.size() - 2);
     } else {
         return "local_metadata";
     }
@@ -80,10 +84,21 @@ void expressionUnrollSanityCheck(const IR::Expression *e) {
 const IR::Type_Control *
 ConvertToDpdkArch::rewriteControlType(const IR::Type_Control *c, cstring name) {
     auto applyParams = new IR::ParameterList();
-    if (name == "ingress" || name == "egress" ||
-        name == "Ingress" || name == "Egress") {
-        applyParams->push_back(c->applyParams->parameters.at(0));
-        applyParams->push_back(c->applyParams->parameters.at(1));
+    if (name == "Ingress" || name == "Egress") {
+        auto header = c->applyParams->parameters.at(0);
+        applyParams->push_back(new IR::Parameter(IR::ID("h"), header->direction, header->type));
+        auto meta = c->applyParams->parameters.at(1);
+        applyParams->push_back(new IR::Parameter(IR::ID("m"), meta->direction, meta->type));
+    } else if (name == "PreControlT") {
+        auto header = c->applyParams->parameters.at(0);
+        applyParams->push_back(new IR::Parameter(IR::ID("h"), header->direction, header->type));
+        auto meta = c->applyParams->parameters.at(1);
+        applyParams->push_back(new IR::Parameter(IR::ID("m"), meta->direction, meta->type));
+    } else if (name == "MainControlT") {
+        auto header = c->applyParams->parameters.at(0);
+        applyParams->push_back(new IR::Parameter(IR::ID("h"), header->direction, header->type));
+        auto meta = c->applyParams->parameters.at(1);
+        applyParams->push_back(new IR::Parameter(IR::ID("m"), meta->direction, meta->type));
     }
     auto tc = new IR::Type_Control(c->name, c->annotations, c->typeParameters,
                                    applyParams);
@@ -93,14 +108,24 @@ ConvertToDpdkArch::rewriteControlType(const IR::Type_Control *c, cstring name) {
 const IR::Type_Control *
 ConvertToDpdkArch::rewriteDeparserType(const IR::Type_Control *c, cstring name) {
     auto applyParams = new IR::ParameterList();
-    if (name == "ingress" || name == "IngressDeparser") {
+    if (name == "IngressDeparser") {
         applyParams->push_back(c->applyParams->parameters.at(0));
-        applyParams->push_back(c->applyParams->parameters.at(4));
-        applyParams->push_back(c->applyParams->parameters.at(5));
-    } else if (name == "egress" || name == "EgressDeparser") {
+        auto header = c->applyParams->parameters.at(4);
+        applyParams->push_back(new IR::Parameter(IR::ID("h"), header->direction, header->type));
+        auto meta = c->applyParams->parameters.at(5);
+        applyParams->push_back(new IR::Parameter(IR::ID("m"), meta->direction, meta->type));
+    } else if (name == "EgressDeparser") {
         applyParams->push_back(c->applyParams->parameters.at(0));
-        applyParams->push_back(c->applyParams->parameters.at(3));
-        applyParams->push_back(c->applyParams->parameters.at(4));
+        auto header = c->applyParams->parameters.at(3);
+        applyParams->push_back(new IR::Parameter(IR::ID("h"), header->direction, header->type));
+        auto meta = c->applyParams->parameters.at(4);
+        applyParams->push_back(new IR::Parameter(IR::ID("m"), meta->direction, meta->type));
+    } else if (name == "MainDeparserT") {
+        applyParams->push_back(c->applyParams->parameters.at(0));
+        auto header = c->applyParams->parameters.at(1);
+        applyParams->push_back(new IR::Parameter(IR::ID("h"), header->direction, header->type));
+        auto meta = c->applyParams->parameters.at(2);
+        applyParams->push_back(new IR::Parameter(IR::ID("m"), meta->direction, meta->type));
     }
     auto tc = new IR::Type_Control(c->name, c->annotations, c->typeParameters, applyParams);
     return tc;
@@ -122,7 +147,13 @@ const IR::Node *ConvertToDpdkArch::postorder(IR::Type_Control *c) {
     // Ingress, Egress, IngressDeparser, EgressDeparser are reserved name in psa.p4
     if (c->name == "Ingress" || c->name == "Egress") {
         t = rewriteControlType(c, c->name);
+    } else if (c->name == "MainControlT") {
+        t = rewriteControlType(c, c->name);
+    } else if (c->name == "PreControlT") {
+        t = rewriteControlType(c, c->name);
     } else if (c->name == "IngressDeparser" || c->name == "EgressDeparser") {
+        t = rewriteDeparserType(c, c->name);
+    } else if (c->name == "MainDeparserT") {
         t = rewriteDeparserType(c, c->name);
     }
     return t;
@@ -131,32 +162,80 @@ const IR::Node *ConvertToDpdkArch::postorder(IR::Type_Control *c) {
 const IR::Type_Parser *
 ConvertToDpdkArch::rewriteParserType(const IR::Type_Parser *p, cstring name) {
     auto applyParams = new IR::ParameterList();
-    if (name == "ingress" || name == "egress" ||
-        name == "IngressParser" || name == "EgressParser") {
+    if (name == "IngressParser" || name == "EgressParser" ||
+        name == "MainParserT") {
         applyParams->push_back(p->applyParams->parameters.at(0));
-        applyParams->push_back(p->applyParams->parameters.at(1));
-        applyParams->push_back(p->applyParams->parameters.at(2));
+        auto header = p->applyParams->parameters.at(1);
+        applyParams->push_back(new IR::Parameter(IR::ID("h"), header->direction, header->type));
+        auto meta = p->applyParams->parameters.at(2);
+        applyParams->push_back(new IR::Parameter(IR::ID("m"), meta->direction, meta->type));
     }
     auto tp = new IR::Type_Parser(p->name, p->annotations, p->typeParameters,
                                   applyParams);
-
     return tp;
 }
 
 const IR::Node *ConvertToDpdkArch::postorder(IR::Type_Parser *p) {
     const IR::Type_Parser* t = nullptr;
     for (auto kv : structure->parsers) {
-        LOG1("type " << kv.second->type << " p " << p->name);
         if (kv.second->type->name != p->name)
             continue;
-        LOG1("p name " << p->name);
         t = rewriteParserType(p, kv.first);
     }
     if (p->name == "IngressParser" || p->name == "EgressParser") {
         t = rewriteParserType(p, p->name);
+    } else if (p->name == "MainParserT") {
+        t = rewriteParserType(p, p->name);
     }
     return t;
 }
+
+const IR::Node *ConvertToDpdkArch::preorder(IR::PathExpression *pe) {
+    auto declaration = refMap->getDeclaration(pe->path);
+    if (auto decl = declaration->to<IR::Parameter>()) {
+        if (auto type = decl->type->to<IR::Type_Name>()) {
+            if (type->path->name == structure->header_type) {
+                return new IR::PathExpression(IR::ID("h"));
+            } else if (type->path->name == structure->local_metadata_type) {
+                return new IR::PathExpression(IR::ID("m"));
+            }
+        }
+    }
+    return pe;
+}
+
+const IR::Node *ConvertToDpdkArch::preorder(IR::Member *m) {
+    /* PathExpressions are handled in a separate preorder function
+       Hence do not process them here */
+    if (!m->expr->is<IR::Member>() &&
+        !m->expr->is<IR::ArrayIndex>())
+        prune();
+
+    if (auto p = m->expr->to<IR::PathExpression>()) {
+        auto declaration = refMap->getDeclaration(p->path);
+        if (auto decl = declaration->to<IR::Parameter>()) {
+            if (auto type = decl->type->to<IR::Type_Name>()) {
+                if (isStandardMetadata(type->path->name)) {
+                    return new IR::Member(
+                        new IR::PathExpression(IR::ID("m")),
+                        IR::ID(TypeStruct2Name(type->path->name.name) + "_" +
+                               m->member.name));
+                } else if (type->path->name == structure->header_type) {
+                    return new IR::Member(new IR::PathExpression(IR::ID("h")),
+                                          IR::ID(m->member.name));
+                } else if (type->path->name == structure->local_metadata_type) {
+                    LOG1("metadata " << type->path->name);
+                    return new IR::Member(
+                        new IR::PathExpression(IR::ID("m")),
+                        IR::ID("local_metadata_" + m->member.name));
+                }
+            }
+        }
+    }
+    return m;
+}
+
+
 
 void CollectMetadataHeaderInfo::pushMetadata(const IR::ParameterList* params,
         std::list<int> indices) {
@@ -177,25 +256,40 @@ void CollectMetadataHeaderInfo::pushMetadata(const IR::Parameter *p) {
 
 bool CollectMetadataHeaderInfo::preorder(const IR::P4Program *) {
     for (auto kv : structure->parsers) {
-        if (kv.first == "ingress") {
+        if (kv.first == "IngressParser") {
             auto local_metadata = kv.second->getApplyParameters()->getParameter(2);
             structure->local_metadata_type = local_metadata->type->to<IR::Type_Name>()->path->name;
             auto header = kv.second->getApplyParameters()->getParameter(1);
             structure->header_type = header->type->to<IR::Type_Name>()->path->name;
             auto params = kv.second->getApplyParameters();
             pushMetadata(params, { 2, 3, 4, 5 });
-        } else if (kv.first == "egress") {
+        } else if (kv.first == "EgressParser") {
             auto params = kv.second->getApplyParameters();
             pushMetadata(params, { 2, 3, 4, 5, 6 });
+        } else if (kv.first == "MainParserT") {
+            auto local_metadata = kv.second->getApplyParameters()->getParameter(2);
+            structure->local_metadata_type = local_metadata->type->to<IR::Type_Name>()->path->name;
+            auto header = kv.second->getApplyParameters()->getParameter(1);
+            structure->header_type = header->type->to<IR::Type_Name>()->path->name;
+            auto params = kv.second->getApplyParameters();
+            pushMetadata(params, { 2, 3 });
         }
     }
 
     for (auto kv : structure->pipelines) {
-        if (kv.first == "ingress") {
+        if (kv.first == "Ingress") {
             auto control = kv.second->to<IR::P4Control>();
             auto params = control->getApplyParameters();
             pushMetadata(params, { 1, 2, 3 });
-        } else if (kv.first == "egress") {
+        } else if (kv.first == "Egress") {
+            auto control = kv.second->to<IR::P4Control>();
+            auto params = control->getApplyParameters();
+            pushMetadata(params, { 1, 2, 3 });
+        } else if (kv.first == "MainControlT") {
+            auto control = kv.second->to<IR::P4Control>();
+            auto params = control->getApplyParameters();
+            pushMetadata(params, { 1, 2, 3 });
+        } else if (kv.first == "PreControlT") {
             auto control = kv.second->to<IR::P4Control>();
             auto params = control->getApplyParameters();
             pushMetadata(params, { 1, 2, 3 });
@@ -203,14 +297,18 @@ bool CollectMetadataHeaderInfo::preorder(const IR::P4Program *) {
     }
 
     for (auto kv : structure->deparsers) {
-        if (kv.first == "ingress") {
+        if (kv.first == "IngressDeparser") {
             auto deparser = kv.second->to<IR::P4Control>();
             auto params = deparser->getApplyParameters();
             pushMetadata(params, { 1, 2, 3, 5, 6 });
-        } else if (kv.first == "egress") {
+        } else if (kv.first == "EgressDeparser") {
             auto deparser = kv.second->to<IR::P4Control>();
             auto params = deparser->getApplyParameters();
             pushMetadata(params, { 1, 2, 4, 5, 6 });
+        } else if (kv.first == "MainDeparser") {
+            auto deparser = kv.second->to<IR::P4Control>();
+            auto params = deparser->getApplyParameters();
+            pushMetadata(params, { 1, 2, 3 });
         }
     }
     return true;
@@ -228,125 +326,6 @@ bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s) {
         }
     }
     return true;
-}
-
-const IR::Node *ReplaceMetadataHeaderName::preorder(IR::PathExpression *pe) {
-    auto declaration = refMap->getDeclaration(pe->path);
-    if (auto decl = declaration->to<IR::Parameter>()) {
-        if (auto type = decl->type->to<IR::Type_Name>()) {
-            if (type->path->name == structure->header_type){
-                return new IR::PathExpression(IR::ID("h"));
-            } else if (type->path->name == structure->local_metadata_type){
-                return new IR::PathExpression(IR::ID("m"));
-            }
-        }
-    }
-    return pe;
-}
-
-const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Member *m) {
-    /* PathExpressions are handled in a separate preorder function
-       Hence do not process them here */
-    if (!m->expr->is<IR::Member>() &&
-        !m->expr->is<IR::ArrayIndex>())
-        prune();
-
-    if (auto p = m->expr->to<IR::PathExpression>()) {
-        auto declaration = refMap->getDeclaration(p->path);
-        if (auto decl = declaration->to<IR::Parameter>()) {
-            if (auto type = decl->type->to<IR::Type_Name>()) {
-                if (type->path->name == "psa_ingress_parser_input_metadata_t" ||
-                    type->path->name == "psa_ingress_input_metadata_t" ||
-                    type->path->name == "psa_ingress_output_metadata_t" ||
-                    type->path->name == "psa_egress_parser_input_metadata_t" ||
-                    type->path->name == "psa_egress_input_metadata_t" ||
-                    type->path->name == "psa_egress_output_metadata_t" ||
-                    type->path->name ==
-                        "psa_egress_deparser_input_metadata_t") {
-                    return new IR::Member(
-                        new IR::PathExpression(IR::ID("m")),
-                        IR::ID(TypeStruct2Name(type->path->name.name) + "_" +
-                               m->member.name));
-                } else if (type->path->name == structure->header_type) {
-                    return new IR::Member(new IR::PathExpression(IR::ID("h")),
-                                          IR::ID(m->member.name));
-                } else if (type->path->name == structure->local_metadata_type) {
-                    return new IR::Member(
-                        new IR::PathExpression(IR::ID("m")),
-                        IR::ID("local_metadata_" + m->member.name));
-                }
-            }
-        }
-    }
-    return m;
-}
-
-/* This function replaces the header and metadata parameter names in control
- * blocks with "h" and "m" respectively.
- * It assumes that ConvertToDpdkArch pass has converted the control blocks to
- * the following form for DPDK Architecture:
- *         control ingressDeparser(packet_out buffer, header hdr, metadata md);
- *         control egressDeparser(packet_out buffer, header hdr, metadata md);
- *         control ingress(header hdr, metadata md);
- *         control egress(header hdr, metadata md);
-*/
-const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Type_Control *c) {
-    auto applyParams = new IR::ParameterList();
-    auto paramSize = c->applyParams->size();
-
-    if (!(paramSize == 2 || paramSize == 3))
-        ::error(ErrorType::ERR_MODEL,
-                ("Unexpected number of arguments for %1%. Are you using an up-to-date 'psa.p4'?"),
-                 c->name);
-
-    int header_index = 0;
-
-    /* For IngressDeparser and EgressDeparser, Header and metadata parameters are
-       at index 1 and 2 respectively. */
-    if (paramSize == 3) {
-        header_index = 1;
-        applyParams->push_back(c->getApplyParameters()->getParameter(0));
-    }
-
-    auto header = c->applyParams->parameters.at(header_index);
-    auto local_metadata = c->applyParams->parameters.at(header_index + 1);
-    header = new IR::Parameter(IR::ID("h"), header->direction, header->type);
-    local_metadata = new IR::Parameter(IR::ID("m"), local_metadata->direction,
-                                       local_metadata->type);
-    applyParams->push_back(header);
-    applyParams->push_back(local_metadata);
-
-    return new IR::Type_Control(c->name, c->annotations, c->typeParameters,
-                                applyParams);
-}
-
-/* This function replaces the header and metadata parameter names in parser
- * blocks with "h" and "m" respectively.
- * It assumes that ConvertToDpdkArch pass has converted Ingress/Egress
- * parser blocks to the following form for DPDK Architecture:
- *         parser ingressParser(packet_in buffer, header hdr, metadata md);
- *         parser egressParser(packet_in buffer, header hdr, metadata md);
-*/
-const IR::Node *ReplaceMetadataHeaderName::preorder(IR::Type_Parser *p) {
-    auto applyParams = new IR::ParameterList();
-    auto paramSize = p->applyParams->size();
-
-    if (paramSize != 3)
-        ::error(ErrorType::ERR_MODEL,
-                ("Unexpected number of arguments for %1%. Are you using an up-to-date 'psa.p4'?"),
-                 p->name);
-
-    auto header = p->applyParams->parameters.at(1);
-    auto local_metadata = p->applyParams->parameters.at(2);
-    header = new IR::Parameter(IR::ID("h"), header->direction, header->type);
-    local_metadata = new IR::Parameter(IR::ID("m"), local_metadata->direction,
-                                       local_metadata->type);
-    applyParams->push_back(p->getApplyParameters()->getParameter(0));
-    applyParams->push_back(header);
-    applyParams->push_back(local_metadata);
-
-    return new IR::Type_Parser(p->name, p->annotations, p->typeParameters,
-                               applyParams);
 }
 
 const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct *s) {
@@ -740,7 +719,6 @@ const IR::Node *CollectLocalVariableToMetadata::preorder(IR::P4Program *p) {
     for (auto kv : structure->deparsers) {
         locals_map.emplace(kv.first+"_deprser", kv.second->controlLocals);
     }
-    LOG1("locals_map " << locals_map.size());
     return p;
 }
 
@@ -767,7 +745,6 @@ CollectLocalVariableToMetadata::postorder(IR::PathExpression *p) {
             refMap->getDeclaration(p->path)->to<IR::Declaration_Variable>()) {
         for (auto kv : locals_map) {
             for (auto d : kv.second) {
-                LOG1("d=" << d << " decl=" << decl);
                 if (d->equiv(*decl)) {
                     return new IR::Member(
                         new IR::PathExpression(IR::ID("m")),
@@ -825,8 +802,9 @@ const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Action *a) {
 
 const IR::Node *PrependPDotToActionArgs::postorder(IR::P4Program *program) {
     auto new_objs = new IR::Vector<IR::Node>;
-    for (auto pipeline : structure->pipelines) {
-        if (pipeline.first == "ingress") {
+    for (auto kv : structure->pipelines) {
+        if (kv.first == "Ingress" ||
+            kv.first == "MainControlT") {
             for (auto kv : structure->args_struct_map) {
                 auto fields =
                     new IR::IndexedVector<IR::StructField>;

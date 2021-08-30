@@ -26,8 +26,6 @@ header ipv4_t {
 struct empty_metadata_t {
 }
 
-typedef bit<48> ByteCounter_t;
-typedef bit<80> PacketByteCounter_t;
 struct main_metadata_t {
 }
 
@@ -56,14 +54,10 @@ parser MainParserImpl(packet_in pkt, out headers_t hdr, inout main_metadata_t ma
 }
 
 control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in pna_main_input_metadata_t istd, inout pna_main_output_metadata_t ostd) {
-    @name("MainControlImpl.port_bytes_in") Counter<ByteCounter_t, PortId_t>(32w4, PNA_CounterType_t.BYTES) port_bytes_in_0;
-    @name("MainControlImpl.per_prefix_pkt_byte_count") DirectCounter<PacketByteCounter_t>(PNA_CounterType_t.PACKETS_AND_BYTES) per_prefix_pkt_byte_count_0;
     @name("MainControlImpl.next_hop") action next_hop(@name("vport") PortId_t vport) {
-        per_prefix_pkt_byte_count_0.count();
         send_to_port(vport);
     }
     @name("MainControlImpl.default_route_drop") action default_route_drop() {
-        per_prefix_pkt_byte_count_0.count();
         drop_packet();
     }
     @name("MainControlImpl.ipv4_da_lpm") table ipv4_da_lpm_0 {
@@ -75,19 +69,8 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
             default_route_drop();
         }
         const default_action = default_route_drop();
-        pna_direct_counter = per_prefix_pkt_byte_count_0;
-    }
-    @hidden action pnaexampletemplate159() {
-        port_bytes_in_0.count(istd.input_port);
-    }
-    @hidden table tbl_pnaexampletemplate159 {
-        actions = {
-            pnaexampletemplate159();
-        }
-        const default_action = pnaexampletemplate159();
     }
     apply {
-        tbl_pnaexampletemplate159.apply();
         if (hdr.ipv4.isValid()) {
             ipv4_da_lpm_0.apply();
         }
@@ -95,18 +78,18 @@ control MainControlImpl(inout headers_t hdr, inout main_metadata_t user_meta, in
 }
 
 control MainDeparserImpl(packet_out pkt, in headers_t hdr, in main_metadata_t user_meta, in pna_main_output_metadata_t ostd) {
-    @hidden action pnaexampletemplate174() {
+    @hidden action pnaexampletemplate164() {
         pkt.emit<ethernet_t>(hdr.ethernet);
         pkt.emit<ipv4_t>(hdr.ipv4);
     }
-    @hidden table tbl_pnaexampletemplate174 {
+    @hidden table tbl_pnaexampletemplate164 {
         actions = {
-            pnaexampletemplate174();
+            pnaexampletemplate164();
         }
-        const default_action = pnaexampletemplate174();
+        const default_action = pnaexampletemplate164();
     }
     apply {
-        tbl_pnaexampletemplate174.apply();
+        tbl_pnaexampletemplate164.apply();
     }
 }
 

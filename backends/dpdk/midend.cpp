@@ -129,6 +129,20 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options,
         }
         return true;
     };
+
+    std::function<Inspector*(cstring)> validateTableProperties =
+        [=](cstring arch) -> Inspector* {
+        if (arch == "pna") {
+            return new P4::ValidateTableProperties({"pna_implementation",
+                    "pna_direct_counter", "pna_direct_meter", "pna_idle_timeout", "size"});
+        } else if (arch == "psa") {
+            return new P4::ValidateTableProperties({"psa_implementation",
+                    "psa_direct_counter", "psa_direct_meter", "psa_idle_timeout", "size"});
+        } else {
+            return nullptr;
+        }
+    };
+
     if (DPDK::DpdkContext::get().options().loadIRFromJson == false) {
         addPasses({
             options.ndebug ? new P4::RemoveAssertAssume(&refMap, &typeMap)
@@ -172,9 +186,7 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options,
             new P4::LocalCopyPropagation(&refMap, &typeMap, nullptr, policy),
             new P4::ConstantFolding(&refMap, &typeMap),
             new P4::MoveDeclarations(),
-            new P4::ValidateTableProperties(
-                {"psa_implementation", "psa_direct_counter", "psa_direct_meter",
-                 "psa_idle_timeout", "size"}),
+            validateTableProperties(options.arch),
             new P4::SimplifyControlFlow(&refMap, &typeMap),
             new P4::CompileTimeOperations(),
             new P4::TableHit(&refMap, &typeMap),

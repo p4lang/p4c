@@ -42,17 +42,27 @@ class CollectMetadataHeaderInfo;
  * pass the type checking. In addition, this pass changes the definition of
  * P4Control and P4Parser(parameter list) in the P4 program provided by the
  * user.
+ *
+ * This pass also modifies all metadata references and header reference. For
+ * metadata, struct_name.field_name -> m.struct_name_field_name. For header
+ * headers.header_name.field_name -> h.header_name.field_name The parameter
+ * named for header and metadata are also updated to "h" and "m" respectively.
  */
 class ConvertToDpdkArch : public Transform {
+    P4::ReferenceMap *refMap;
     DpdkProgramStructure *structure;
+
     const IR::Type_Control *rewriteControlType(const IR::Type_Control *, cstring);
     const IR::Type_Parser *rewriteParserType(const IR::Type_Parser *, cstring);
     const IR::Type_Control *rewriteDeparserType(const IR::Type_Control *, cstring);
     const IR::Node *postorder(IR::Type_Control *c) override;
     const IR::Node *postorder(IR::Type_Parser *p) override;
+    const IR::Node *preorder(IR::Member *m) override;
+    const IR::Node *preorder(IR::PathExpression *pe) override;
 
   public:
-    ConvertToDpdkArch(DpdkProgramStructure *structure) : structure(structure) {
+    ConvertToDpdkArch(P4::ReferenceMap *refMap, DpdkProgramStructure *structure) :
+        refMap(refMap), structure(structure) {
         CHECK_NULL(structure);
     }
 };
@@ -72,24 +82,6 @@ class CollectMetadataHeaderInfo : public Inspector {
         : structure(structure) {}
     bool preorder(const IR::P4Program *p) override;
     bool preorder(const IR::Type_Struct *s) override;
-};
-
-// This pass modifies all metadata references and header reference. For
-// metadata, struct_name.field_name -> m.struct_name_field_name. For header
-// headers.header_name.field_name -> h.header_name.field_name
-// The parameter named for header and metadata are also updated to "h" and
-// "m" respectively.
-class ReplaceMetadataHeaderName : public Transform {
-    P4::ReferenceMap *refMap;
-    DpdkProgramStructure *structure;
-
-  public:
-    ReplaceMetadataHeaderName(P4::ReferenceMap *refMap, DpdkProgramStructure *structure)
-        : refMap(refMap), structure(structure) {}
-    const IR::Node *preorder(IR::Type_Parser *p) override;
-    const IR::Node *preorder(IR::Type_Control *c) override;
-    const IR::Node *preorder(IR::Member *m) override;
-    const IR::Node *preorder(IR::PathExpression *pe) override;
 };
 
 // Previously, we have collected the information about how the single metadata

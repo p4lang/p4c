@@ -129,7 +129,7 @@ int main(int argc, char *const argv[]) {
         return 1;
 
     auto backend = new DPDK::DpdkBackend(options, &midEnd.refMap,
-                                              &midEnd.typeMap, &midEnd.enumMap);
+                                         &midEnd.typeMap, &midEnd.enumMap);
 
     backend->convert(toplevel);
     if (::errorCount() > 0)

@@ -97,10 +97,12 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     auto egress_parser_converter =
         new ConvertToDpdkParser(refmap, typemap, structure, metadataStruct);
     for (auto kv : structure->parsers) {
-        if (kv.first == "ingress")
+        if (kv.first == "IngressParser")
             kv.second->apply(*ingress_parser_converter);
-        else if (kv.first == "egress")
+        else if (kv.first == "EgressParser")
             kv.second->apply(*egress_parser_converter);
+        else if (kv.first == "MainParserT")
+            kv.second->apply(*ingress_parser_converter);
         else
             BUG("Unknown parser %s", kv.second->name);
     }
@@ -109,10 +111,14 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     auto egress_converter =
         new ConvertToDpdkControl(refmap, typemap, structure);
     for (auto kv : structure->pipelines) {
-        if (kv.first == "ingress")
+        if (kv.first == "Ingress")
             kv.second->apply(*ingress_converter);
-        else if (kv.first == "egress")
+        else if (kv.first == "Egress")
             kv.second->apply(*egress_converter);
+        else if (kv.first == "PreControlT")
+            kv.second->apply(*ingress_converter);
+        else if (kv.first == "MainControlT")
+            kv.second->apply(*ingress_converter);
         else
             BUG("Unknown control block %s", kv.second->name);
     }
@@ -121,10 +127,12 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     auto egress_deparser_converter =
         new ConvertToDpdkControl(refmap, typemap, structure);
     for (auto kv : structure->deparsers) {
-        if (kv.first == "ingress")
+        if (kv.first == "IngressDeparser")
             kv.second->apply(*ingress_deparser_converter);
-        else if (kv.first == "egress")
+        else if (kv.first == "EgressDeparser")
             kv.second->apply(*egress_deparser_converter);
+        else if (kv.first == "MainDeparserT")
+            kv.second->apply(*ingress_deparser_converter);
         else
             BUG("Unknown deparser block %s", kv.second->name);
     }
