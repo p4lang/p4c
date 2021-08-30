@@ -64,13 +64,8 @@ struct metadata {
 	bit<16> psa_egress_output_metadata_clone_session_id
 	bit<8> psa_egress_output_metadata_drop
 	bit<16> local_metadata_data
-<<<<<<< HEAD
 	bit<48> ingress_tbl_ethernet_srcAddr
 	bit<16> ingress_tbl_ipv4_totalLen
-=======
-	bit<48> Ingress_tbl_ethernet_srcAddr
-	bit<16> Ingress_tbl_ipv4_totalLen
->>>>>>> Add missing reference outputs
 	bit<16> tmpMask
 	bit<8> tmpMask_0
 }
@@ -118,7 +113,7 @@ table tbl {
 		NoAction
 		execute
 	}
-	default_action NoAction args none 
+	default_action NoAction args none
 	size 0x10000
 }
 
@@ -151,5 +146,3 @@ apply {
 	tx m.psa_ingress_output_metadata_egress_port
 	LABEL_DROP : drop
 }
-
-
