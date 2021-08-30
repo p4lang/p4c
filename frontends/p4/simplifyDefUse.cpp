@@ -19,6 +19,7 @@ limitations under the License.
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/tableApply.h"
 #include "frontends/p4/sideEffects.h"
+#include "frontends/p4/parserCallGraph.h"
 
 namespace P4 {
 
@@ -97,6 +98,153 @@ class HasUses {
     }
 };
 
+class HeaderDefinitions {
+    ReferenceMap* refMap;
+    StorageMap* storageMap;
+
+    /// The current values of the header valid bits are stored here. If a header is in the
+    /// map and the value of its valid bit is true, then the header is currently valid. If
+    /// the header is in the map and the value of its valid bit is false, then the header is
+    /// currently invalid. If the header is not in the map, then the header is potentially
+    /// invalid (for example, this can happen when the header is valid at the end of the then
+    /// branch and invalid at the end of the else branch of an if statement or if the header
+    /// is valid entering a parser state on some input branches and invalid on some other)
+    ordered_map<const StorageLocation*, bool> defs;
+
+    /// Currently isValid() expressions in if conditions are not processed, so all headers
+    /// for which isValid() is called are temporarly stored here until the end of the block
+    /// or until the valid bit is changed again in the block.
+    ordered_set<const StorageLocation*> notReport;
+
+ public:
+    HeaderDefinitions(ReferenceMap* refMap, StorageMap* storageMap) :
+        refMap(refMap), storageMap(storageMap)
+        { CHECK_NULL(refMap); CHECK_NULL(storageMap); }
+
+    /// Helper function for getting a storage location from an expression
+    const StorageLocation* getStorageLocation(const IR::Expression* expression) const {
+        if (auto expr = expression->to<IR::PathExpression>()) {
+            return storageMap->getStorage(refMap->getDeclaration(expr->path, true));
+        } else if (auto expr = expression->to<IR::Member>()) {
+            auto storage = getStorageLocation(expr->expr);
+            if (auto struct_storage = storage->to<StructLocation>()) {
+                LocationSet ls;
+                struct_storage->addField(expr->member, &ls);
+                if (!ls.isEmpty())
+                    return *ls.begin();
+            }
+        }
+        return nullptr;
+    }
+
+    void checkLocation(const StorageLocation* storage) {
+        BUG_CHECK(storage->is<StructLocation>() &&
+                        (storage->to<StructLocation>()->isHeader()
+                         || storage->to<StructLocation>()->isHeaderUnion()),
+                "location %1% is not a header", storage->name);
+    }
+
+    void add(const StorageLocation* storage, bool valid) {
+        if (!storage)
+            return;
+
+        checkLocation(storage);
+        defs.emplace(storage, valid);
+        notReport.erase(storage);
+    }
+
+    void add(const IR::Expression *expr, bool valid) {
+        if (!expr)
+            return;
+
+        auto storage = getStorageLocation(expr);
+        add(storage, valid);
+    }
+
+    void update(const StorageLocation *storage, bool valid) {
+        if (!storage)
+            return;
+
+        checkLocation(storage);
+        defs[storage] = valid;
+        notReport.erase(storage);
+    }
+
+    void update(const IR::Expression* expr, bool valid) {
+        if (!expr)
+            return;
+
+        auto storage = getStorageLocation(expr);
+        update(storage, valid);
+    }
+
+    const bool* find(const StorageLocation* storage) const {
+        if (!storage)
+            return new bool(true);
+
+        if (notReport.find(storage) != notReport.end())
+            return new bool(true);
+
+        return ::getref(defs, storage);
+    }
+
+    const bool* find(const IR::Expression* expr) const {
+        if (!expr)
+            return new bool(true);
+
+        auto storage = getStorageLocation(expr);
+        return find(storage);
+    }
+
+    void remove(const StorageLocation* storage) {
+        defs.erase(storage);
+    }
+
+    void remove(const IR::Expression* expr) {
+        if (!expr)
+            return;
+
+        auto storage = getStorageLocation(expr);
+        remove(storage);
+    }
+
+    void clear() { defs.clear(); }
+
+    HeaderDefinitions* clone() const { return new HeaderDefinitions(*this); }
+
+    bool operator==(const HeaderDefinitions& other) const {
+        return defs == other.defs && notReport == other.notReport;
+    }
+
+    bool operator!=(const HeaderDefinitions& other) const { return !(*this == other); }
+
+    HeaderDefinitions* intersect(const HeaderDefinitions* other) const {
+        HeaderDefinitions* result = new HeaderDefinitions(refMap, storageMap);
+        for (auto def : defs) {
+            auto val = other->find(def.first);
+            if (val && *val == def.second)
+                result->add(def.first, def.second);
+        }
+        return result;
+    }
+
+    void addToNotReport(const IR::Expression* expr) {
+        if (!expr)
+            return;
+
+        auto storage = getStorageLocation(expr);
+        if (!storage)
+            return;
+
+        checkLocation(storage);
+        notReport.emplace(storage);
+    }
+
+    void setNotReport(const HeaderDefinitions* other) {
+        notReport = other->notReport;
+    }
+};
+
 // Run for each parser and control separately
 // Somewhat of a misnamed pass -- the main point of this pass is to find all the uses
 // of each definition, and fill in the `hasUses` output with all the definitions that have
@@ -116,6 +264,9 @@ class FindUninitialized : public Inspector {
     /// If true the current statement is unreachable
     bool            unreachable;
     bool            virtualMethod;
+
+    HeaderDefinitions* headerDefs;
+    bool reportInvalidHeaders = true;
 
     const LocationSet* getReads(const IR::Expression* expression, bool nonNull = false) const {
         auto result = ::get(readLocations, expression);
@@ -146,14 +297,16 @@ class FindUninitialized : public Inspector {
             context(context), refMap(parent->definitions->storageMap->refMap),
             typeMap(parent->definitions->storageMap->typeMap),
             definitions(parent->definitions), lhs(false), currentPoint(context),
-            hasUses(parent->hasUses), virtualMethod(false) { visitDagOnce = false; }
+            hasUses(parent->hasUses), virtualMethod(false), headerDefs(parent->headerDefs),
+            reportInvalidHeaders(parent->reportInvalidHeaders)    { visitDagOnce = false; }
 
  public:
     FindUninitialized(AllDefinitions* definitions, HasUses* hasUses) :
             refMap(definitions->storageMap->refMap),
             typeMap(definitions->storageMap->typeMap),
             definitions(definitions), lhs(false), currentPoint(),
-            hasUses(hasUses), virtualMethod(false) {
+            hasUses(hasUses), virtualMethod(false),
+            headerDefs(new HeaderDefinitions(refMap, definitions->storageMap)) {
         CHECK_NULL(refMap); CHECK_NULL(typeMap); CHECK_NULL(definitions);
         CHECK_NULL(hasUses);
         visitDagOnce = false; }
@@ -177,6 +330,24 @@ class FindUninitialized : public Inspector {
         LOG3("FU Current point is (after) " << currentPoint <<
                 " definitions are " << IndentCtl::endl << defs);
         return defs;
+    }
+
+    void initHeaderParam(const StorageLocation* storage, bool value) {
+        if (auto struct_storage = storage->to<StructLocation>()) {
+            if (struct_storage->isHeader()) {
+                headerDefs->update(struct_storage, value);
+            } else if (struct_storage->isStruct()) {
+                for (auto f : struct_storage->fields())
+                    initHeaderParam(f, value);
+            }
+        }
+    }
+
+    // Called at the beginning of controls, parsers and functions
+    void initHeaderParams(const IR::ParameterList* parameters) {
+        for (auto p : parameters->parameters)
+            if (auto storage = definitions->storageMap->getStorage(p))
+                initHeaderParam(storage, p->direction != IR::Direction::Out);
     }
 
     void checkOutParameters(const IR::IDeclaration* block,
@@ -211,6 +382,8 @@ class FindUninitialized : public Inspector {
         LOG3("FU Visiting control " << control->name << "[" << control->id << "]");
         BUG_CHECK(context.isBeforeStart(), "non-empty context in FindUnitialized::P4Control");
         currentPoint = ProgramPoint(control);
+        headerDefs->clear();
+        initHeaderParams(control->getApplyMethodType()->parameters);
         visitVirtualMethods(control->controlLocals);
         unreachable = false;
         visit(control->body);
@@ -221,15 +394,19 @@ class FindUninitialized : public Inspector {
     }
 
     bool preorder(const IR::Function* func) override {
+        HeaderDefinitions* saveHeaderDefs = nullptr;
         if (virtualMethod) {
             LOG3("Virtual method");
             context = ProgramPoint::beforeStart;
             unreachable = false;
+            // we must save the definitions from the outer block
+            saveHeaderDefs = headerDefs->clone();
         }
         LOG3("FU Visiting function " << dbp(func) << " called by " << context);
         LOG5(func);
         auto point = ProgramPoint(context, func);
         currentPoint = point;
+        initHeaderParams(func->type->parameters);
         visit(func->body);
         bool checkReturn = !func->type->returnType->is<IR::Type_Void>();
         if (checkReturn) {
@@ -248,6 +425,9 @@ class FindUninitialized : public Inspector {
         LOG3("Context after function " << currentPoint);
         auto current = getCurrentDefinitions();
         checkOutParameters(func, func->type->parameters, current);
+        if (saveHeaderDefs) {
+            headerDefs = saveHeaderDefs;
+        }
         return false;
     }
 
@@ -271,8 +451,63 @@ class FindUninitialized : public Inspector {
     bool preorder(const IR::P4Parser* parser) override {
         LOG3("FU Visiting parser " << parser->name << "[" << parser->id << "]");
         currentPoint = ProgramPoint(parser);
+        headerDefs->clear();
+        initHeaderParams(parser->getApplyMethodType()->parameters);
         visitVirtualMethods(parser->parserLocals);
-        visit(parser->states, "states");
+
+        auto startState = parser->getDeclByName(IR::ParserState::start)->to<IR::ParserState>();
+        auto acceptState = parser->getDeclByName(IR::ParserState::accept)->to<IR::ParserState>();
+
+        ParserCallGraph transitions("transitions");
+        ComputeParserCG pcg(refMap, &transitions);
+
+        (void)parser->apply(pcg);
+        ordered_set<const IR::ParserState*> toRun;  // worklist
+        ordered_map<const IR::ParserState*, HeaderDefinitions*> inputHeaderDefs;
+
+        toRun.emplace(startState);
+        inputHeaderDefs.emplace(startState, headerDefs);
+
+        // We do not report warnings until we have all definitions for every parser state
+        reportInvalidHeaders = false;
+
+        while (!toRun.empty()) {
+            auto state = *toRun.begin();
+            toRun.erase(state);
+            LOG3("Traversing " << dbp(state));
+
+            // We need a new visitor to visit the state,
+            // but we use the same data structures
+            headerDefs = inputHeaderDefs[state]->clone();
+            FindUninitialized fu(this, currentPoint);
+            (void)state->apply(fu);
+
+            auto next = transitions.getCallees(state);
+            for (auto n : *next) {
+                if (inputHeaderDefs.find(n) == inputHeaderDefs.end()) {
+                    inputHeaderDefs[n] = headerDefs->clone();
+                    toRun.emplace(n);
+                } else {
+                    auto joined = inputHeaderDefs[n]->intersect(headerDefs);
+                    if (*joined != *inputHeaderDefs[n]) {
+                        inputHeaderDefs[n] = joined;
+                        toRun.emplace(n);
+                    }
+                }
+            }
+        }
+
+        reportInvalidHeaders = true;
+        for (auto state : parser->states) {
+            if (inputHeaderDefs.find(state) == inputHeaderDefs.end()) {
+                inputHeaderDefs.emplace(state,
+                                        new HeaderDefinitions(refMap, definitions->storageMap));
+            }
+            headerDefs = inputHeaderDefs[state];
+            visit(state);
+        }
+
+        headerDefs = inputHeaderDefs[acceptState];
         unreachable = false;
         auto accept = ProgramPoint(parser->getDeclByName(IR::ParserState::accept)->getNode());
         auto acceptdefs = definitions->getDefinitions(accept, true);
@@ -339,6 +574,83 @@ class FindUninitialized : public Inspector {
         return loc;
     }
 
+    // Used in header-to-header and struct-to-struct assignments
+    void processHeadersInAssignment(const StorageLocation* dst, const StorageLocation* src) {
+        if (!dst || !src)
+            return;
+
+        auto dst_struct_storage = dst->to<StructLocation>();
+        auto src_struct_storage = src->to<StructLocation>();
+
+        if (!dst_struct_storage || !src_struct_storage)
+            return;
+
+        if (dst_struct_storage->isHeader() && src_struct_storage->isHeader()) {
+            auto val = headerDefs->find(src);
+            if (val)
+                headerDefs->update(dst, *val);
+            else
+                headerDefs->remove(dst);
+
+            return;
+        }
+
+        if (dst_struct_storage->isStruct() && src_struct_storage->isStruct()) {
+            auto dst_fields = dst_struct_storage->fields();
+            auto src_fields = src_struct_storage->fields();
+
+            auto it1 = dst_fields.begin();
+            auto it2 = src_fields.begin();
+            while (it1 != dst_fields.end() && it2 != src_fields.end()) {
+                processHeadersInAssignment(*it1, *it2);
+                ++it1;
+                ++it2;
+            }
+        }
+    }
+
+    // Used for more complex assignments
+    void processHeadersInAssignment(const StorageLocation* dst, const IR::Expression* src,
+                                    const IR::Type* src_type) {
+        if (!dst || !src || !src_type)
+            return;
+
+        if (auto dst_struct_storage = dst->to<StructLocation>()) {
+            if (dst_struct_storage->isHeader()) {
+                if (src->is<IR::StructExpression>()) {
+                    // always sets the valid bit to true
+                    headerDefs->update(dst, true);
+                } else if (src->is<IR::MethodCallExpression>()) {
+                    // return value of a function
+                    headerDefs->update(dst, true);
+                } else if (src->is<IR::ArrayIndex>()) {
+                    // TODO: header stacks
+                    headerDefs->update(dst, true);
+                } else if (src_type->is<IR::Type_Header>()) {
+                    processHeadersInAssignment(dst, headerDefs->getStorageLocation(src));
+                }
+                return;
+            }
+
+            if (dst_struct_storage->isStruct()) {
+                if (auto list = src->to<IR::StructExpression>()) {
+                    auto it = list->components.begin();
+                    for (auto field : dst_struct_storage->fields()) {
+                        processHeadersInAssignment(field, (*it)->expression,
+                                                typeMap->getType((*it)->expression, true));
+                        ++it;
+                    }
+                } else if (src->is<IR::MethodCallExpression>()) {
+                    for (auto field : dst_struct_storage->fields()) {
+                        processHeadersInAssignment(field, src, src_type);
+                    }
+                } else if (src_type->is<IR::Type_Struct>()) {
+                    processHeadersInAssignment(dst, headerDefs->getStorageLocation(src));
+                }
+            }
+        }
+    }
+
     bool preorder(const IR::AssignmentStatement* statement) override {
         LOG3("FU Visiting " << dbp(statement) << " " << statement << IndentCtl::indent);
         if (!unreachable) {
@@ -349,6 +661,9 @@ class FindUninitialized : public Inspector {
             lhs = false;
             visit(statement->right);
             LOG3("FU Returned from " << statement->right);
+            processHeadersInAssignment(headerDefs->getStorageLocation(statement->left),
+                                       statement->right,
+                                       typeMap->getType(statement->right, true));
         } else {
             LOG3("Unreachable");
         }
@@ -395,7 +710,9 @@ class FindUninitialized : public Inspector {
     bool preorder(const IR::IfStatement* statement) override {
         LOG3("FU Visiting " << statement);
         if (!unreachable) {
+            auto saveHeaderDefsBeforeCondition = headerDefs->clone();
             visit(statement->condition);
+            auto saveHeaderDefsAfterCondition = headerDefs->clone();
             currentPoint = ProgramPoint(context, statement->condition);
             auto saveCurrent = currentPoint;
             auto saveUnreachable = unreachable;
@@ -404,9 +721,12 @@ class FindUninitialized : public Inspector {
             unreachable = saveUnreachable;
             if (statement->ifFalse != nullptr) {
                 currentPoint = saveCurrent;
+                std::swap(headerDefs, saveHeaderDefsAfterCondition);
                 visit(statement->ifFalse);
             }
             unreachable = unreachableAfterThen && unreachable;
+            headerDefs = headerDefs->intersect(saveHeaderDefsAfterCondition);
+            headerDefs->setNotReport(saveHeaderDefsBeforeCondition);
         } else {
             LOG3("Unreachable");
         }
@@ -417,20 +737,39 @@ class FindUninitialized : public Inspector {
         LOG3("FU Visiting " << statement);
         if (!unreachable) {
             bool finalUnreachable = true;
+            bool hasDefault = false;
+            auto saveHeaderDefsBeforeExpr = headerDefs->clone();
             visit(statement->expression);
+            auto saveHeaderDefsAfterExpr = headerDefs->clone();
+            HeaderDefinitions* finalHeaderDefs = nullptr;
             currentPoint = ProgramPoint(context, statement->expression);
             auto saveCurrent = currentPoint;
             auto saveUnreachable = unreachable;
             for (auto c : statement->cases) {
                 if (c->statement != nullptr) {
                     LOG3("Visiting " << c);
+                    if (c->label->is<IR::DefaultExpression>())
+                        hasDefault = true;
                     currentPoint = saveCurrent;
                     unreachable = saveUnreachable;
+                    headerDefs = saveHeaderDefsAfterExpr->clone();
                     visit(c);
                     finalUnreachable = finalUnreachable && unreachable;
+                    if (finalHeaderDefs) {
+                        finalHeaderDefs = finalHeaderDefs->intersect(headerDefs);
+                    } else {
+                        finalHeaderDefs = headerDefs;
+                    }
                 }
             }
             unreachable = finalUnreachable;
+            if (finalHeaderDefs) {
+                if (hasDefault)
+                    headerDefs = finalHeaderDefs;
+                else
+                    headerDefs = finalHeaderDefs->intersect(saveHeaderDefsAfterExpr);
+            }
+            headerDefs->setNotReport(saveHeaderDefsBeforeExpr);
         } else {
             LOG3("Unreachable");
         }
@@ -558,18 +897,65 @@ class FindUninitialized : public Inspector {
         LOG3("FU Visiting " << table->name);
         auto savePoint = ProgramPoint(context, table);
         currentPoint = savePoint;
+        auto saveHeaderDefsBeforeKey = headerDefs->clone();
         auto key = table->getKey();
         visit(key);
+        auto saveHeaderDefsAfterKey = headerDefs->clone();
+        HeaderDefinitions* finalHeaderDefs = nullptr;
         auto actions = table->getActionList();
         for (auto ale : actions->actionList) {
             BUG_CHECK(ale->expression->is<IR::MethodCallExpression>(),
                       "%1%: unexpected entry in action list", ale);
+            headerDefs = saveHeaderDefsAfterKey->clone();
             visit(ale->expression);
             currentPoint = savePoint;  // restore the current point
                                     // it is modified by the inter-procedural analysis
+            if (finalHeaderDefs) {
+                finalHeaderDefs = finalHeaderDefs->intersect(headerDefs);
+            } else {
+                finalHeaderDefs = headerDefs;
+            }
         }
+        if (finalHeaderDefs) {
+            headerDefs = finalHeaderDefs;
+        }
+        headerDefs->setNotReport(saveHeaderDefsBeforeKey);
         LOG3("FU Returning from " << table->name);
         return false;
+    }
+
+    void reportWarningIfInvalidHeader(const IR::Expression* expression, const IR::Type *expr_type) {
+        if (!reportInvalidHeaders)
+            return;
+
+        if (expr_type->is<IR::Type_Header>()) {
+            if (auto member = expression->to<IR::Member>()) {
+                // TODO: header unions
+                if (typeMap->getType(member->expr, true)->is<IR::Type_HeaderUnion>())
+                    return;
+            }
+            LOG3("Checking if [" << expression->id << "]: " << expression << " is valid");
+            auto valid_ptr = headerDefs->find(expression);
+            if (!valid_ptr) {
+                LOG3("accessing a field of a potentially invalid header ["
+                     << expression->id << "]: " << expression);
+                ::warning(ErrorType::WARN_INVALID_HEADER,
+                          "accessing a field of a potentially invalid header %1%", expression);
+            } else if (!*valid_ptr) {
+                LOG3("accessing a field of an invalid header ["
+                     << expression->id << "]: " << expression);
+                ::warning(ErrorType::WARN_INVALID_HEADER,
+                          "accessing a field of an invalid header %1%", expression);
+            } else {
+                LOG3("acessing a field of a valid header ["
+                     << expression->id << "]: " << expression);
+            }
+        } else if (auto structType = expr_type->to<IR::Type_Struct>()) {
+            for (auto field : structType->fields) {
+                IR::Member member(expression, field->name);
+                reportWarningIfInvalidHeader(&member, typeMap->getType(field, true));
+            }
+        }
     }
 
     bool preorder(const IR::MethodCallExpression* expression) override {
@@ -589,17 +975,46 @@ class FindUninitialized : public Inspector {
                 auto storage = base->getField(StorageFactory::validFieldName);
                 reads(expression, storage);
                 registerUses(expression);
+                // TODO: conditions with isValid()
+                headerDefs->addToNotReport(bim->appliedTo);
                 return false;
+            } else if (name == IR::Type_Header::setValid) {
+                headerDefs->update(bim->appliedTo, true);
+            } else if (name == IR::Type_Header::setInvalid) {
+                headerDefs->update(bim->appliedTo, false);
             }
         }
 
         // The effect of copy-in: in arguments are read
         LOG3("Summarizing call effect on in arguments; definitions are " << IndentCtl::endl <<
              getCurrentDefinitions());
+
+        bool isControlOrParserApply = false;
+        if (mi->isApply()) {
+            auto am = mi->to<ApplyMethod>();
+            isControlOrParserApply = !am->isTableApply();
+        }
         for (auto p : *mi->substitution.getParametersInArgumentOrder()) {
             auto expr = mi->substitution.lookup(p);
             if (p->direction != IR::Direction::Out) {
                 visit(expr);
+            }
+
+            // We assume control and parser apply calls set all output headers to valid
+            if (isControlOrParserApply)
+                continue;
+
+            if (auto actionCall = mi->to<ActionCall>()) {
+                if (auto param = actionCall->action->parameters->getParameter(p->name)) {
+                    if (p->direction == IR::Direction::Out) {
+                        initHeaderParam(definitions->storageMap->getStorage(param), false);
+                    } else {
+                        // we can treat the argument passing as an assignment
+                        processHeadersInAssignment(definitions->storageMap->getStorage(param),
+                                                   expr->expression,
+                                                   typeMap->getType(expr->expression, true));
+                    }
+                }
             }
         }
 
@@ -614,6 +1029,18 @@ class FindUninitialized : public Inspector {
                 callee.push_back(table);
             }
         } else if (auto em = mi->to<ExternMethod>()) {
+            auto args = em->expr->arguments;
+            if (args->size() > 0) {
+                auto header = args->at(0);
+                if (em->originalExternType->getName().name == "packet_in" &&
+                    em->method->getName().name == "extract") {
+                        headerDefs->update(header->expression, true);
+                } else if (em->originalExternType->getName().name == "packet_out" &&
+                         em->method->getName().name == "emit") {
+                    reportWarningIfInvalidHeader(header->expression,
+                                       typeMap->getType(header->expression, true));
+                }
+            }
             LOG4("##call to extern " << expression);
             callee = em->mayCall(); }
 
@@ -637,8 +1064,21 @@ class FindUninitialized : public Inspector {
                 lhs = true;
                 visit(expr);
                 lhs = save;
+
+                if (isControlOrParserApply) {
+                    initHeaderParam(headerDefs->getStorageLocation(expr->expression), true);
+                    continue;
+                }
+
+                if (auto actionCall = mi->to<ActionCall>()) {
+                    if (auto param = actionCall->action->parameters->getParameter(p->name)) {
+                        processHeadersInAssignment(headerDefs->getStorageLocation(expr->expression),
+                                                   definitions->storageMap->getStorage(param));
+                    }
+                }
             }
         }
+
         reads(expression, LocationSet::empty);
         return false;
     }
@@ -679,6 +1119,8 @@ class FindUninitialized : public Inspector {
                 registerUses(expression, false);
                 return false;
             }
+        } else if (basetype->is<IR::Type_Header>()) {
+            reportWarningIfInvalidHeader(expression->expr, basetype);
         }
 
         auto fields = storage->getField(expression->member);

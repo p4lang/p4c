@@ -72,6 +72,7 @@ class ErrorType {
     static const int WARN_UNREACHABLE;        // parser state unreachable
     static const int WARN_SHADOWING;          // instance shadowing
     static const int WARN_IGNORE;             // simply ignore
+    static const int WARN_INVALID_HEADER;     // access to fields of an invalid header
 
     static const int WARN_MAX_WARNINGS;
 };
