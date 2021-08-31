@@ -19,8 +19,8 @@ limitations under the License.
 #ifndef _LIB_EXCEPTIONS_H_
 #define _LIB_EXCEPTIONS_H_
 
-#include <exception>
 #include <unistd.h>
+#include <exception>
 #include "lib/error_helper.h"
 
 namespace Util {
@@ -56,12 +56,12 @@ class CompilerBug final : public P4CExceptionBase {
  public:
     template <typename... T>
     CompilerBug(const char* format, T... args)
-            : P4CExceptionBase(format, args...) { 
+            : P4CExceptionBase(format, args...) {
         // Check if output is redirected and if so, then don't color text so that
         // escape characters are not present
-        const bool isCerrRedirected = ttyname(fileno(stderr)) == nullptr; 
-        message = (isCerrRedirected ? "" : cstring(ANSI_RED)) + "Compiler Bug" 
-                + (isCerrRedirected ? "" : ANSI_CLR) + ":\n" + message; 
+        const bool isCerrRedirected = ttyname(fileno(stderr)) == nullptr;  // NOLINT(runtime/threadsafe_fn)
+        message = (isCerrRedirected ? "" : cstring(ANSI_RED)) + "Compiler Bug"
+                + (isCerrRedirected ? "" : ANSI_CLR) + ":\n" + message;
     }
 
     template <typename... T>
@@ -69,10 +69,10 @@ class CompilerBug final : public P4CExceptionBase {
             : P4CExceptionBase(format, args...) {
         // Check if output is redirected and if so, then don't color text so that
         // escape characters are not present
-        const bool isCerrRedirected = ttyname(fileno(stderr)) == nullptr; 
+        const bool isCerrRedirected = ttyname(fileno(stderr)) == nullptr;  // NOLINT(runtime/threadsafe_fn)
         message = cstring("In file: ") + file + ":" + Util::toString(line) + "\n" +
-                + (isCerrRedirected ? "" : ANSI_RED) + "Compiler Bug" 
-                + (isCerrRedirected ? "" : ANSI_CLR) + ": " + message; 
+                + (isCerrRedirected ? "" : ANSI_RED) + "Compiler Bug"
+                + (isCerrRedirected ? "" : ANSI_CLR) + ": " + message;
     }
 };
 
@@ -81,21 +81,21 @@ class CompilerUnimplemented final : public P4CExceptionBase {
  public:
     template <typename... T>
     CompilerUnimplemented(const char* format, T... args)
-            : P4CExceptionBase(format, args...) { 
+            : P4CExceptionBase(format, args...) {
         // Do not add colors when redirecting to stderr
-        const bool isCerrRedirected = ttyname(fileno(stderr)) == nullptr;
+        const bool isCerrRedirected = ttyname(fileno(stderr)) == nullptr;  // NOLINT(runtime/threadsafe_fn)
         message = (isCerrRedirected ? "" : cstring(ANSI_BLUE)) + "Not yet implemented"
-                + (isCerrRedirected ? "" : ANSI_CLR) + ":\n" + message; 
+                + (isCerrRedirected ? "" : ANSI_CLR) + ":\n" + message;
     }
-    
+
     template <typename... T>
     CompilerUnimplemented(int line, const char* file, const char* format, T... args)
             : P4CExceptionBase(format, args...) {
         // Do not add colors when redirecting to stderr
-        const bool isCerrRedirected = ttyname(fileno(stderr)) == nullptr;
-        message = cstring("In file: ") + file + ":" + Util::toString(line) + "\n" 
-                + (isCerrRedirected ? "" : ANSI_BLUE) + "Unimplemented compiler support" 
-                + (isCerrRedirected ? "" : ANSI_CLR) + ": " + message; 
+        const bool isCerrRedirected = ttyname(fileno(stderr)) == nullptr;  // NOLINT(runtime/threadsafe_fn)
+        message = cstring("In file: ") + file + ":" + Util::toString(line) + "\n"
+                + (isCerrRedirected ? "" : ANSI_BLUE) + "Unimplemented compiler support"
+                + (isCerrRedirected ? "" : ANSI_CLR) + ": " + message;
     }
 };
 

@@ -14,8 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+#include <unistd.h>
 #include <exception>
 
+#include "gmock/gmock.h"
 #include "gtest/gtest.h"
 #include "lib/cstring.h"
 #include "lib/exceptions.h"
@@ -28,8 +30,12 @@ TEST(UtilException, Messages) {
         throw CompilerBug("test");
     } catch (std::exception &ex) {
         cstring err(ex.what());
-        cstring expected = cstring(ANSI_RED) + "Compiler Bug" + ANSI_CLR +":\ntest\n";
-        EXPECT_EQ(expected, err);
+        cstring redir_msg("Compiler Bug:\ntest\n");
+        cstring no_redir_msg = cstring(ANSI_RED) + "Compiler Bug" + ANSI_CLR +":\ntest\n";
+        cstring opts[] = {redir_msg, no_redir_msg};
+        // The error message might or might not be colorized based on if the test are redirected 
+        // or not, to make sure both options are valid an array is used.
+        EXPECT_THAT(opts, ::testing::Contains(err));
     }
 
     try {
