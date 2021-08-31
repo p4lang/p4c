@@ -28,6 +28,10 @@ bool DoStrengthReduction::isOne(const IR::Expression* expr) const {
 }
 
 bool DoStrengthReduction::isZero(const IR::Expression* expr) const {
+    if (auto bt = expr->type->to<IR::Type_Bits>()) {
+        if (bt->width_bits() == 0)
+            return true;
+    }
     auto cst = expr->to<IR::Constant>();
     if (cst == nullptr)
         return false;
@@ -47,6 +51,7 @@ bool DoStrengthReduction::isFalse(const IR::Expression* expr) const {
         return false;
     return !cst->value;
 }
+
 int DoStrengthReduction::isPowerOf2(const IR::Expression* expr) const {
     auto cst = expr->to<IR::Constant>();
     if (cst == nullptr)
@@ -362,6 +367,16 @@ const IR::Node* DoStrengthReduction::postorder(IR::Mux* expr) {
         return new IR::Mux(lnot->expr, expr->e2, expr->e1);
     else if (!hasSideEffects(expr) && expr->e1->equiv(*expr->e2))
         return expr->e1;
+    return expr;
+}
+
+const IR::Node* DoStrengthReduction::postorder(IR::Concat* expr) {
+    if (auto bt = expr->left->type->to<IR::Type_Bits>())
+        if (bt->width_bits() == 0)
+            return expr->right;
+    if (auto bt = expr->right->type->to<IR::Type_Bits>())
+        if (bt->width_bits() == 0)
+            return expr->left;
     return expr;
 }
 

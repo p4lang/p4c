@@ -57,8 +57,6 @@ class DoStrengthReduction final : public Transform {
     /// and a power of `2` and `-1` otherwise.
     int isPowerOf2(const IR::Expression* expr) const;
 
-    const IR::Node* simplifyShift(IR::Slice* expr);
-    const IR::Node* simplifyConcat(IR::Slice* expr);
     /// Used to determine conservatively if an expression
     /// has side-effects.  If we had a refMap or a typeMap
     /// we could use them here.
@@ -91,6 +89,7 @@ class DoStrengthReduction final : public Transform {
     const IR::Node* postorder(IR::Slice* expr) override;
     const IR::Node* postorder(IR::Mask* expr) override;
     const IR::Node* postorder(IR::Range* expr) override;
+    const IR::Node* postorder(IR::Concat* expr) override;
 
     const IR::BlockStatement *preorder(IR::BlockStatement *bs) override {
         if (bs->annotations->getSingle("disable_optimization"))
