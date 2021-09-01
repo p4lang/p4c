@@ -31,7 +31,7 @@ constexpr char ANSI_BLUE[] = "\e[34m";
 constexpr char ANSI_CLR[]  = "\e[0m";
 
 /// Checks if stderr is redirected to a file
-bool is_cerr_redirected() {
+inline bool is_cerr_redirected() {
     return ttyname(fileno(stderr)) == nullptr;  // NOLINT(runtime/threadsafe_fn)
 }
 
