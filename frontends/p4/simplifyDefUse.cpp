@@ -129,6 +129,7 @@ class FindUninitialized : public Inspector {
         LOG3(expression << " reads " << loc);
         CHECK_NULL(expression);
         CHECK_NULL(loc);
+        readLocations.erase(expression);
         readLocations.emplace(expression, loc);
     }
     bool setCurrent(const IR::Statement* statement) {
@@ -284,11 +285,66 @@ class FindUninitialized : public Inspector {
         return false;
     }
 
+    // expr is an sub-expression that appears in the lhs of an assignment.
+    // parent is one of it's parent expressions.
+    //
+    // When we assign to a header we are also implicitly reading the header's
+    // valid flag.
+    // Consider this example:
+    // header H { ... };
+    // H a;
+    // a.x = 1;  <<< This has an effect only if a is valid.
+    //               So this write actually reads the valid flag of a.
+    // The function will recurse the structure of expr until it finds
+    // a header and will mark the header valid bit as read.
+    // It returns the LocationSet of parent.
+    const LocationSet* checkHeaderFieldWrite(
+        const IR::Expression* expr, const IR::Expression* parent) {
+        const LocationSet* loc;
+        if (auto mem = parent->to<IR::Member>()) {
+            loc = checkHeaderFieldWrite(expr, mem->expr);
+            loc = loc->getField(mem->member);
+        } else if (auto ai = parent->to<IR::ArrayIndex>()) {
+            loc = checkHeaderFieldWrite(expr, ai->left);
+            if (auto cst = ai->right->to<IR::Constant>()) {
+                auto index = cst->asInt();
+                loc = loc->getIndex(index);
+            }
+            // else let loc be the whole array
+        } else if (auto pe = parent->to<IR::PathExpression>()) {
+            auto decl = refMap->getDeclaration(pe->path, true);
+            auto storage = definitions->storageMap->getStorage(decl);
+            if (storage != nullptr)
+                loc = new LocationSet(storage);
+            else
+                loc = LocationSet::empty;
+        } else if (auto slice = parent->to<IR::Slice>()) {
+            loc = checkHeaderFieldWrite(expr, slice->e0);
+        } else {
+            BUG("%1%: unexpected expression on LHS", parent);
+        }
+
+        auto type = typeMap->getType(parent, true);
+        if (type->is<IR::Type_Header>()) {
+            if (expr != parent) {
+                // If we are writing to an entire header (expr ==
+                // parent) we are actually overwriting the valid bit
+                // as well.  So we are not reading it.
+                loc = loc->getValidField();
+                LOG3("Expression " << expr << " reads valid bit " << loc);
+                reads(expr, loc);
+                registerUses(expr);
+            }
+        }
+        return loc;
+    }
+
     bool preorder(const IR::AssignmentStatement* statement) override {
         LOG3("FU Visiting " << dbp(statement) << " " << statement << IndentCtl::indent);
         if (!unreachable) {
             lhs = true;
             visit(statement->left);
+            checkHeaderFieldWrite(statement->left, statement->left);
             LOG3("FU Returned from " << statement->left);
             lhs = false;
             visit(statement->right);
@@ -670,11 +726,10 @@ class FindUninitialized : public Inspector {
 
     bool preorder(const IR::ArrayIndex* expression) override {
         LOG3("FU Visiting [" << expression->id << "]: " << expression);
-        if (expression->right->is<IR::Constant>()) {
+        if (auto cst = expression->right->to<IR::Constant>()) {
             if (lhs) {
                 reads(expression, LocationSet::empty);
             } else {
-                auto cst = expression->right->to<IR::Constant>();
                 auto index = cst->asInt();
                 visit(expression->left);
                 auto storage = getReads(expression->left, true);

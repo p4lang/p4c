@@ -199,8 +199,7 @@ const LocationSet* LocationSet::getArrayLastIndex() const {
 const LocationSet* LocationSet::getField(cstring field) const {
     auto result = new LocationSet();
     for (auto l : locations) {
-        if (l->is<StructLocation>()) {
-            auto strct = l->to<StructLocation>();
+        if (auto strct = l->to<StructLocation>()) {
             if (field == StorageFactory::validFieldName && strct->isHeaderUnion()) {
                 // special handling for union.isValid()
                 for (auto f : strct->fields()) {
@@ -209,9 +208,7 @@ const LocationSet* LocationSet::getField(cstring field) const {
             } else {
                 strct->addField(field, result);
             }
-        } else {
-            BUG_CHECK(l->is<ArrayLocation>(), "%1%: expected an ArrayLocation", l);
-            auto array = l->to<ArrayLocation>();
+        } else if (auto array = l->to<ArrayLocation>()) {
             for (auto f : *array)
                 f->to<StructLocation>()->addField(field, result);
         }
