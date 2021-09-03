@@ -170,9 +170,17 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
         dpdkExternDecls.push_back(st);
     }
 
+    auto tables = ingress_converter->getTables();
+    tables.append(egress_converter->getTables());
+
+    auto actions = ingress_converter->getActions();
+    actions.append(egress_converter->getActions());
+
+    auto selectors = ingress_converter->getSelectors();
+    selectors.append(egress_converter->getSelectors());
+
     return new IR::DpdkAsmProgram(
-        headerType, structType, dpdkExternDecls, ingress_converter->getActions(),
-        ingress_converter->getTables(), ingress_converter->getSelectors(),
+        headerType, structType, dpdkExternDecls, actions, tables, selectors,
         statements, structure->get_globals());
 }
 
