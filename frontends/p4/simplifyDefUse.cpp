@@ -18,6 +18,7 @@ limitations under the License.
 #include "frontends/p4/def_use.h"
 #include "frontends/p4/methodInstance.h"
 #include "frontends/p4/tableApply.h"
+#include "frontends/p4/ternaryBool.h"
 #include "frontends/p4/sideEffects.h"
 #include "frontends/p4/parserCallGraph.h"
 
@@ -102,14 +103,13 @@ class HeaderDefinitions {
     ReferenceMap* refMap;
     StorageMap* storageMap;
 
-    /// The current values of the header valid bits are stored here. If a header is in the
-    /// map and the value of its valid bit is true, then the header is currently valid. If
-    /// the header is in the map and the value of its valid bit is false, then the header is
-    /// currently invalid. If the header is not in the map, then the header is potentially
-    /// invalid (for example, this can happen when the header is valid at the end of the then
-    /// branch and invalid at the end of the else branch of an if statement or if the header
-    /// is valid entering a parser state on some input branches and invalid on some other)
-    ordered_map<const StorageLocation*, bool> defs;
+    /// The current values of the header valid bits are stored here. If the value in the map is Yes,
+    /// then the header is currently valid. If the value in the map is No, then the header is
+    /// currently invalid. If the value in the map is Maybe, then the header is potentially invalid
+    /// (for example, this can happen when the header is valid at the end of the then branch and
+    /// invalid at the end of the else branch of an if statement, or if the header is valid entering
+    /// a parser state on some input branches and invalid on some other)
+    ordered_map<const StorageLocation*, TernaryBool> defs;
 
     /// Currently isValid() expressions in if conditions are not processed, so all headers
     /// for which isValid() is called are temporarly stored here until the end of the block
@@ -144,7 +144,7 @@ class HeaderDefinitions {
                 "location %1% is not a header", storage->name);
     }
 
-    void add(const StorageLocation* storage, bool valid) {
+    void add(const StorageLocation* storage, TernaryBool valid) {
         if (!storage)
             return;
 
@@ -153,7 +153,7 @@ class HeaderDefinitions {
         notReport.erase(storage);
     }
 
-    void add(const IR::Expression *expr, bool valid) {
+    void add(const IR::Expression *expr, TernaryBool valid) {
         if (!expr)
             return;
 
@@ -161,7 +161,7 @@ class HeaderDefinitions {
         add(storage, valid);
     }
 
-    void update(const StorageLocation *storage, bool valid) {
+    void update(const StorageLocation *storage, TernaryBool valid) {
         if (!storage)
             return;
 
@@ -170,7 +170,7 @@ class HeaderDefinitions {
         notReport.erase(storage);
     }
 
-    void update(const IR::Expression* expr, bool valid) {
+    void update(const IR::Expression* expr, TernaryBool valid) {
         if (!expr)
             return;
 
@@ -178,19 +178,19 @@ class HeaderDefinitions {
         update(storage, valid);
     }
 
-    const bool* find(const StorageLocation* storage) const {
+    TernaryBool find(const StorageLocation* storage) const {
         if (!storage)
-            return new bool(true);
+            return TernaryBool::Yes;
 
         if (notReport.find(storage) != notReport.end())
-            return new bool(true);
+            return TernaryBool::Yes;
 
-        return ::getref(defs, storage);
+        return ::get(defs, storage, TernaryBool::Maybe);
     }
 
-    const bool* find(const IR::Expression* expr) const {
+    TernaryBool find(const IR::Expression* expr) const {
         if (!expr)
-            return new bool(true);
+            return TernaryBool::Yes;
 
         auto storage = getStorageLocation(expr);
         return find(storage);
@@ -221,9 +221,8 @@ class HeaderDefinitions {
     HeaderDefinitions* intersect(const HeaderDefinitions* other) const {
         HeaderDefinitions* result = new HeaderDefinitions(refMap, storageMap);
         for (auto def : defs) {
-            auto val = other->find(def.first);
-            if (val && *val == def.second)
-                result->add(def.first, def.second);
+            auto valid = other->find(def.first);
+            result->add(def.first, valid == def.second ? valid : TernaryBool::Maybe);
         }
         return result;
     }
@@ -332,7 +331,7 @@ class FindUninitialized : public Inspector {
         return defs;
     }
 
-    void initHeaderParam(const StorageLocation* storage, bool value) {
+    void initHeaderParam(const StorageLocation* storage, TernaryBool value) {
         if (auto struct_storage = storage->to<StructLocation>()) {
             if (struct_storage->isHeader()) {
                 headerDefs->update(struct_storage, value);
@@ -346,8 +345,11 @@ class FindUninitialized : public Inspector {
     // Called at the beginning of controls, parsers and functions
     void initHeaderParams(const IR::ParameterList* parameters) {
         for (auto p : parameters->parameters)
-            if (auto storage = definitions->storageMap->getStorage(p))
-                initHeaderParam(storage, p->direction != IR::Direction::Out);
+            if (auto storage = definitions->storageMap->getStorage(p)) {
+                initHeaderParam(storage, p->direction != IR::Direction::Out
+                                         ? TernaryBool::Yes
+                                         : TernaryBool::No);
+            }
     }
 
     void checkOutParameters(const IR::IDeclaration* block,
@@ -488,9 +490,9 @@ class FindUninitialized : public Inspector {
                     inputHeaderDefs[n] = headerDefs->clone();
                     toRun.emplace(n);
                 } else {
-                    auto joined = inputHeaderDefs[n]->intersect(headerDefs);
-                    if (*joined != *inputHeaderDefs[n]) {
-                        inputHeaderDefs[n] = joined;
+                    auto newInputDefs = inputHeaderDefs[n]->intersect(headerDefs);
+                    if (*newInputDefs != *inputHeaderDefs[n]) {
+                        inputHeaderDefs[n] = newInputDefs;
                         toRun.emplace(n);
                     }
                 }
@@ -586,11 +588,8 @@ class FindUninitialized : public Inspector {
             return;
 
         if (dst_struct_storage->isHeader() && src_struct_storage->isHeader()) {
-            auto val = headerDefs->find(src);
-            if (val)
-                headerDefs->update(dst, *val);
-            else
-                headerDefs->remove(dst);
+            auto valid = headerDefs->find(src);
+            headerDefs->update(dst, valid);
 
             return;
         }
@@ -619,15 +618,17 @@ class FindUninitialized : public Inspector {
             if (dst_struct_storage->isHeader()) {
                 if (src->is<IR::StructExpression>()) {
                     // always sets the valid bit to true
-                    headerDefs->update(dst, true);
+                    headerDefs->update(dst, TernaryBool::Yes);
                 } else if (src->is<IR::MethodCallExpression>()) {
                     // return value of a function
-                    headerDefs->update(dst, true);
+                    headerDefs->update(dst, TernaryBool::Yes);
                 } else if (src->is<IR::ArrayIndex>()) {
                     // TODO: header stacks
-                    headerDefs->update(dst, true);
+                    headerDefs->update(dst, TernaryBool::Yes);
                 } else if (src_type->is<IR::Type_Header>()) {
                     processHeadersInAssignment(dst, headerDefs->getStorageLocation(src));
+                } else {
+                    BUG("%1%: unexpected expression on RHS", src);
                 }
                 return;
             }
@@ -646,6 +647,8 @@ class FindUninitialized : public Inspector {
                     }
                 } else if (src_type->is<IR::Type_Struct>()) {
                     processHeadersInAssignment(dst, headerDefs->getStorageLocation(src));
+                } else {
+                    BUG("%1%: unexpected expression on RHS", src);
                 }
             }
         }
@@ -935,17 +938,17 @@ class FindUninitialized : public Inspector {
                     return;
             }
             LOG3("Checking if [" << expression->id << "]: " << expression << " is valid");
-            auto valid_ptr = headerDefs->find(expression);
-            if (!valid_ptr) {
-                LOG3("accessing a field of a potentially invalid header ["
-                     << expression->id << "]: " << expression);
-                ::warning(ErrorType::WARN_INVALID_HEADER,
-                          "accessing a field of a potentially invalid header %1%", expression);
-            } else if (!*valid_ptr) {
+            auto valid = headerDefs->find(expression);
+            if (valid == TernaryBool::No) {
                 LOG3("accessing a field of an invalid header ["
                      << expression->id << "]: " << expression);
                 ::warning(ErrorType::WARN_INVALID_HEADER,
                           "accessing a field of an invalid header %1%", expression);
+            } else if (valid == TernaryBool::Maybe) {
+                LOG3("accessing a field of a potentially invalid header ["
+                     << expression->id << "]: " << expression);
+                ::warning(ErrorType::WARN_INVALID_HEADER,
+                          "accessing a field of a potentially invalid header %1%", expression);
             } else {
                 LOG3("acessing a field of a valid header ["
                      << expression->id << "]: " << expression);
@@ -979,9 +982,9 @@ class FindUninitialized : public Inspector {
                 headerDefs->addToNotReport(bim->appliedTo);
                 return false;
             } else if (name == IR::Type_Header::setValid) {
-                headerDefs->update(bim->appliedTo, true);
+                headerDefs->update(bim->appliedTo, TernaryBool::Yes);
             } else if (name == IR::Type_Header::setInvalid) {
-                headerDefs->update(bim->appliedTo, false);
+                headerDefs->update(bim->appliedTo, TernaryBool::No);
             }
         }
 
@@ -1000,14 +1003,16 @@ class FindUninitialized : public Inspector {
                 visit(expr);
             }
 
-            // We assume control and parser apply calls set all output headers to valid
-            if (isControlOrParserApply)
+            // We assume control and parser apply calls and
+            // extern methods set all output headers to valid
+            if (isControlOrParserApply || mi->to<ExternMethod>())
                 continue;
 
             if (auto actionCall = mi->to<ActionCall>()) {
                 if (auto param = actionCall->action->parameters->getParameter(p->name)) {
                     if (p->direction == IR::Direction::Out) {
-                        initHeaderParam(definitions->storageMap->getStorage(param), false);
+                        initHeaderParam(definitions->storageMap->getStorage(param),
+                                        TernaryBool::No);
                     } else {
                         // we can treat the argument passing as an assignment
                         processHeadersInAssignment(definitions->storageMap->getStorage(param),
@@ -1029,18 +1034,6 @@ class FindUninitialized : public Inspector {
                 callee.push_back(table);
             }
         } else if (auto em = mi->to<ExternMethod>()) {
-            auto args = em->expr->arguments;
-            if (args->size() > 0) {
-                auto header = args->at(0);
-                if (em->originalExternType->getName().name == "packet_in" &&
-                    em->method->getName().name == "extract") {
-                        headerDefs->update(header->expression, true);
-                } else if (em->originalExternType->getName().name == "packet_out" &&
-                         em->method->getName().name == "emit") {
-                    reportWarningIfInvalidHeader(header->expression,
-                                       typeMap->getType(header->expression, true));
-                }
-            }
             LOG4("##call to extern " << expression);
             callee = em->mayCall(); }
 
@@ -1065,8 +1058,9 @@ class FindUninitialized : public Inspector {
                 visit(expr);
                 lhs = save;
 
-                if (isControlOrParserApply) {
-                    initHeaderParam(headerDefs->getStorageLocation(expr->expression), true);
+                if (isControlOrParserApply || mi->to<ExternMethod>()) {
+                    initHeaderParam(headerDefs->getStorageLocation(expr->expression),
+                                                                   TernaryBool::Yes);
                     continue;
                 }
 

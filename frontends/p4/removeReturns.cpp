@@ -121,7 +121,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::P4Control* control) {
 }
 
 const IR::Node* DoRemoveReturns::preorder(IR::ReturnStatement* statement) {
-    set(Returns::Yes);
+    set(TernaryBool::Yes);
     auto vec = new IR::IndexedVector<IR::StatOrDecl>();
 
     auto left = new IR::PathExpression(returnVar);
@@ -136,24 +136,24 @@ const IR::Node* DoRemoveReturns::preorder(IR::ReturnStatement* statement) {
 }
 
 const IR::Node* DoRemoveReturns::preorder(IR::ExitStatement* statement) {
-    set(Returns::Yes);  // exit implies return
+    set(TernaryBool::Yes);  // exit implies return
     return statement;
 }
 
 const IR::Node* DoRemoveReturns::preorder(IR::BlockStatement* statement) {
     auto block = new IR::BlockStatement;
     auto currentBlock = block;
-    Returns ret = Returns::No;
+    TernaryBool ret = TernaryBool::No;
     for (auto s : statement->components) {
         push();
         visit(s);
         currentBlock->push_back(s);
-        Returns r = hasReturned();
+        TernaryBool r = hasReturned();
         pop();
-        if (r == Returns::Yes) {
+        if (r == TernaryBool::Yes) {
             ret = r;
             break;
-        } else if (r == Returns::Maybe) {
+        } else if (r == TernaryBool::Maybe) {
             auto newBlock = new IR::BlockStatement;
             auto path = new IR::PathExpression(returnVar);
             auto condition = new IR::LNot(path);
@@ -175,7 +175,7 @@ const IR::Node* DoRemoveReturns::preorder(IR::IfStatement* statement) {
     if (statement->ifTrue == nullptr)
         statement->ifTrue = new IR::EmptyStatement();
     auto rt = hasReturned();
-    auto rf = Returns::No;
+    auto rf = TernaryBool::No;
     pop();
     if (statement->ifFalse != nullptr) {
         push();
@@ -183,25 +183,25 @@ const IR::Node* DoRemoveReturns::preorder(IR::IfStatement* statement) {
         rf = hasReturned();
         pop();
     }
-    if (rt == Returns::Yes && rf == Returns::Yes)
-        set(Returns::Yes);
-    else if (rt == Returns::No && rf == Returns::No)
-        set(Returns::No);
+    if (rt == TernaryBool::Yes && rf == TernaryBool::Yes)
+        set(TernaryBool::Yes);
+    else if (rt == TernaryBool::No && rf == TernaryBool::No)
+        set(TernaryBool::No);
     else
-        set(Returns::Maybe);
+        set(TernaryBool::Maybe);
     prune();
     return statement;
 }
 
 const IR::Node* DoRemoveReturns::preorder(IR::SwitchStatement* statement) {
-    auto r = Returns::No;
+    auto r = TernaryBool::No;
     push();
     for (auto &swCase : statement->cases) {
         push();
         visit(swCase);
-        if (hasReturned() != Returns::No)
+        if (hasReturned() != TernaryBool::No)
             // this is conservative: we don't check if we cover all labels.
-            r = Returns::Maybe;
+            r = TernaryBool::Maybe;
         pop();
     }
     pop();
