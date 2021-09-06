@@ -568,6 +568,7 @@ void InspectPsaProgram::postorder(const IR::P4Control *c) {
 void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     CHECK_NULL(tlb);
     PsaProgramStructure structure(refMap, typeMap);
+
     auto parsePsaArch = new ParsePsaArchitecture(&structure);
     auto main = tlb->getMain();
     if (!main) return;
@@ -633,6 +634,24 @@ void PsaSwitchBackend::convert(const IR::ToplevelBlock* tlb) {
     json->add_meta_info();
 }
 
+cstring PsaProgramStructure::convertHashAlgorithm(cstring algo) {
+    cstring result;
+
+    if (algo == "CRC16") {
+        result = "crc16";
+    } else if (algo == "CRC16_CUSTOM") {
+        result = "crc16_custom";
+    } else if (algo == "CRC32") {
+        result = "crc32";
+    } else if (algo == "CRC32_CUSTOM") {
+        result = "crc32_custom";
+    } else if (algo == "IDENTITY") {
+        result  = "identity";
+    }
+
+    return result;
+}
+
 ExternConverter_Hash ExternConverter_Hash::singleton;
 ExternConverter_Checksum ExternConverter_Checksum::singleton;
 ExternConverter_InternetChecksum ExternConverter_InternetChecksum::singleton;
@@ -647,8 +666,8 @@ ExternConverter_ActionSelector ExternConverter_ActionSelector::singleton;
 ExternConverter_Digest ExternConverter_Digest::singleton;
 
 Util::IJson* ExternConverter_Hash::convertExternObject(
-    UNUSED ConversionContext* ctxt, UNUSED const P4::ExternMethod* em,
-    UNUSED const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
+    UNUSED ConversionContext* ctxt, const P4::ExternMethod* em,
+    const IR::MethodCallExpression* mc, UNUSED const IR::StatOrDecl *s,
     UNUSED const bool& emitExterns) {
     Util::JsonObject* primitive = nullptr;
     if (mc->arguments->size() == 2)
@@ -669,7 +688,7 @@ Util::IJson* ExternConverter_Hash::convertExternObject(
     parameters->append(hash);
     if (mc->arguments->size() == 2) {  // get_hash
         auto dst = ctxt->conv->convertLeftValue(mc->arguments->at(0)->expression);
-        auto fieldList=new Util::JsonObject();
+        auto fieldList = new Util::JsonObject();
         fieldList->emplace("type", "field_list");
         auto fieldsJson = ctxt->conv->convert(mc->arguments->at(1)->expression, true, false);
         fieldList->emplace("value", fieldsJson);
@@ -930,10 +949,11 @@ Util::IJson* ExternConverter_Digest::convertExternObject(
 }
 
 void ExternConverter_Hash::convertExternInstance(
-    UNUSED ConversionContext* ctxt, UNUSED const IR::Declaration* c,
-    UNUSED const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
+    ConversionContext* ctxt, const IR::Declaration* c,
+    const IR::ExternBlock* eb, UNUSED const bool& emitExterns) {
     auto inst = c->to<IR::Declaration_Instance>();
     cstring name = inst->controlPlaneName();
+    auto psaStructure = static_cast<PsaProgramStructure *>(ctxt->structure);
 
     // add hash instance
     auto jhash=new Util::JsonObject();
@@ -954,10 +974,11 @@ void ExternConverter_Hash::convertExternInstance(
     auto algo = eb->findParameterValue("algo");
     CHECK_NULL(algo);
     if (!algo->is<IR::Declaration_ID>()) {
-        modelError("%1%: expected a member", algo->getNode());
+        modelError("%1%: expected a declaration", algo->getNode());
         return;
     }
     cstring algo_name = algo->to<IR::Declaration_ID>()->name;
+    algo_name = psaStructure->convertHashAlgorithm(algo_name);
     auto k = new Util::JsonObject();
     k->emplace("name", "algo");
     k->emplace("type", "string");

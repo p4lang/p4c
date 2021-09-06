@@ -167,6 +167,7 @@ class PsaProgramStructure : public ProgramStructure {
     void createControls(ConversionContext* ctxt);
     void createDeparsers(ConversionContext* ctxt);
     void createGlobals();
+    cstring convertHashAlgorithm(cstring algo);
 
     std::set<cstring> non_pipeline_controls;
     std::set<cstring> pipeline_controls;

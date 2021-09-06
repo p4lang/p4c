@@ -75,19 +75,20 @@ void ActionConverter::convertActionBody(const IR::Vector<IR::StatOrDecl>* body,
                         mce2->arguments = args;
                         s = new IR::MethodCallStatement(mce);
                     } else if (em->originalExternType->name.name == "Hash" ||
-                                                em->method->name.name == "get_hash") {
+                                            em->method->name.name == "get_hash") {
                         isR = true;
                         auto dest = new IR::Argument(l);
                         auto args = new IR::Vector<IR::Argument>();
                         args->push_back(dest);
+                        BUG_CHECK(mce->arguments->size() == 1 || mce->arguments->size() == 3,
+                                                    "Expected 1 or 3 argument for %1%", mce);
                         if (mce->arguments->size() == 3) {
                             args->push_back(mce->arguments->at(0));  // base
                             args->push_back(mce->arguments->at(1));  // data
                             args->push_back(mce->arguments->at(2));  // max
                         } else if (mce->arguments->size() == 1) {
                             args->push_back(mce->arguments->at(0));  // data
-                        } else
-                            BUG("%1%: expected 1 or 3 arguments", mce);
+                        }
                         mce2 = new IR::MethodCallExpression(mce->method, mce->typeArguments);
                         mce2->arguments = args;
                         s = new IR::MethodCallStatement(mce);
