@@ -609,6 +609,40 @@ class ConvertActionSelectorAndProfile : public PassManager {
     }
 };
 
+class CollectAddOnMissTable : public Inspector {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    DpdkProgramStructure* structure;
+
+ public:
+    CollectAddOnMissTable(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
+            DpdkProgramStructure* structure) :
+    refMap(refMap), typeMap(typeMap), structure(structure) {}
+    void postorder(const IR::P4Table* t) override;
+};
+
+class TransformAddOnMissTable : public Transform {
+    P4::ReferenceMap* refMap;
+    P4::TypeMap* typeMap;
+    DpdkProgramStructure *structure;
+
+ public:
+    TransformAddOnMissTable(P4::ReferenceMap *refMap, P4::TypeMap* typeMap,
+            DpdkProgramStructure *structure) :
+        refMap(refMap), typeMap(typeMap), structure(structure) {}
+
+    const IR::Node* preorder(IR::P4Action* action) override;
+};
+
+class ConvertAddOnMiss : public PassManager {
+ public:
+    ConvertAddOnMiss(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+            DpdkProgramStructure* structure) {
+        passes.push_back(new CollectAddOnMissTable(refMap, typeMap, structure));
+        passes.push_back(new TransformAddOnMissTable(refMap, typeMap, structure));
+    }
+};
+
 class CollectErrors : public Inspector {
     DpdkProgramStructure *structure;
 

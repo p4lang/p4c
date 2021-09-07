@@ -51,6 +51,7 @@ void DpdkBackend::convert(const IR::ToplevelBlock *tlb) {
         new P4::TypeChecking(refMap, typeMap),
         new P4::RemoveAllUnusedDeclarations(refMap),
         new ConvertActionSelectorAndProfile(refMap, typeMap),
+        new ConvertAddOnMiss(refMap, typeMap, &structure),
         new CollectProgramStructure(refMap, typeMap, &structure),
         new CollectMetadataHeaderInfo(&structure),
         new ConvertToDpdkArch(refMap, &structure),

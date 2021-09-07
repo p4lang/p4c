@@ -1458,5 +1458,56 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
     return statement;
 }
 
+void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
+    auto add_on_miss = t->properties->getProperty("add_on_miss");
+    if (add_on_miss == nullptr) return;
+    if (!add_on_miss->value->is<IR::ExpressionValue>()) {
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "%1%: expected expression for 'add_on_miss' property", add_on_miss);
+        return; }
+    auto expression = add_on_miss->value->to<IR::ExpressionValue>()->expression;
+    if (!expression->is<IR::BoolLiteral>()) {
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "%1%: expected boolean for 'add_on_miss' property", add_on_miss);
+        return; }
+    auto value = expression->to<IR::BoolLiteral>();
+    if (!value) return;
+    structure->learner_tables.insert(t->name.name);
+
+    auto default_action = t->properties->getProperty("default_action");
+    if (!default_action) {
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "%1%: default_action not defined for table %2%", default_action, t->name);
+        return; }
+    if (!default_action->value->is<IR::ExpressionValue>()) {
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "%1%: expected expression for 'add_on_miss' property", default_action);
+        return; }
+    expression = default_action->value->to<IR::ExpressionValue>()->expression;
+    if (!expression->is<IR::MethodCallExpression>()) {
+        ::error(ErrorType::ERR_UNEXPECTED,
+                "%1%: expected expression to an action", default_action);
+        return; }
+    auto methodCall = expression->to<IR::MethodCallExpression>();
+    if (!methodCall) return;
+    auto expr = methodCall->method->to<IR::PathExpression>();
+    if (!expr) return;
+    auto path = expr->path->to<IR::Path>();
+    if (!path) return;
+
+    auto action = refMap->getDeclaration(expr->path, true);
+    if (!action) return;
+    if (!action->is<IR::P4Action>()) return ;
+    structure->add_on_miss_actions.emplace(action->to<IR::P4Action>()->name, action->to<IR::P4Action>());
+}
+
+const IR::Node* TransformAddOnMissTable::preorder(IR::P4Action *action) {
+    if (structure->add_on_miss_actions.count(action->name) == 0)
+        return action;
+
+    LOG1("action " << action);
+    return action;
+}
+
 }  // namespace DPDK
 

@@ -19,6 +19,10 @@ struct DpdkProgramStructure {
     ordered_map<cstring, const IR::Declaration_Variable*> header_stacks;
     ordered_map<cstring, const IR::Declaration_Variable*> header_unions;
 
+    // learner tables
+    ordered_set<cstring> learner_tables;
+    ordered_map<cstring, const IR::P4Action*> add_on_miss_actions;
+
     IR::IndexedVector<IR::DpdkDeclaration>       variables;
 
     ordered_map<cstring, const IR::P4Parser*> parsers;

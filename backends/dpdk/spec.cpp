@@ -137,6 +137,9 @@ std::ostream &IR::DpdkAsmProgram::toSpec(std::ostream &out) const {
     for (auto s : selectors) {
         s->toSpec(out) << std::endl;
     }
+    for (auto s : learners) {
+        s->toSpec(out) << std::endl;
+    }
     for (auto s : statements) {
         s->toSpec(out) << std::endl;
     }
@@ -428,6 +431,45 @@ std::ostream &IR::DpdkSelector::toSpec(std::ostream &out) const {
     out << "\tn_members_per_group_max " << n_members_per_group_max << std::endl;
     out << "}" << std::endl;
     return out;
+}
+
+std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
+    out << "learner " << name << " {" << std::endl;
+    if (match_keys) {
+        out << "\tkey {" << std::endl;
+        for (auto key : match_keys->keyElements) {
+            out << "\t\t" << DPDK::toStr(key->expression) << std::endl;
+        }
+    }
+    out << "\t}" << std::endl;
+    out << "\tactions {" << std::endl;
+    for (auto action : actions->actionList) {
+        out << "\t\t" << DPDK::toStr(action->expression) << std::endl;
+    }
+    out << "\t}" << std::endl;
+
+    out << "\tdefault_action " << DPDK::toStr(default_action);
+    if (default_action->to<IR::MethodCallExpression>()->arguments->size() ==
+        0) {
+        out << " args none ";
+    } else {
+        BUG("non-zero default action arguments not supported yet");
+    }
+    out << std::endl;
+    if (auto size = properties->getProperty("size")) {
+        out << "\tsize " << DPDK::toStr(size->value) << "" << std::endl;
+    } else {
+        out << "\tsize 0x10000" << std::endl;
+    }
+    if (auto size = properties->getProperty("psa_idle_timeout")) {
+        out << "\ttimeout " << DPDK::toStr(size->value) << "" << std::endl;
+    } else {
+        out << "\ttimeout 120"<< std::endl;
+    }
+
+    out << "}" << std::endl;
+    return out;
+
 }
 
 std::ostream &IR::DpdkAction::toSpec(std::ostream &out) const {

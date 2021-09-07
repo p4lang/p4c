@@ -134,7 +134,8 @@ DpdkMidEnd::DpdkMidEnd(CompilerOptions &options,
         [=](cstring arch) -> Inspector* {
         if (arch == "pna") {
             return new P4::ValidateTableProperties({"pna_implementation",
-                    "pna_direct_counter", "pna_direct_meter", "pna_idle_timeout", "size"});
+                    "pna_direct_counter", "pna_direct_meter", "pna_idle_timeout", "size",
+                    "add_on_miss"});
         } else if (arch == "psa") {
             return new P4::ValidateTableProperties({"psa_implementation",
                     "psa_direct_counter", "psa_direct_meter", "psa_idle_timeout", "size"});

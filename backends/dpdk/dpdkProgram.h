@@ -95,6 +95,7 @@ class ConvertToDpdkControl : public Inspector {
     IR::IndexedVector<IR::DpdkAsmStatement> instructions;
     IR::IndexedVector<IR::DpdkTable> tables;
     IR::IndexedVector<IR::DpdkSelector> selectors;
+    IR::IndexedVector<IR::DpdkLearner> learners;
     IR::IndexedVector<IR::DpdkAction> actions;
     std::set<cstring> unique_actions;
     bool deparser;
@@ -108,6 +109,7 @@ class ConvertToDpdkControl : public Inspector {
 
     IR::IndexedVector<IR::DpdkTable> &getTables() { return tables; }
     IR::IndexedVector<IR::DpdkSelector> &getSelectors() { return selectors; }
+    IR::IndexedVector<IR::DpdkLearner> &getLearners() { return learners; }
     IR::IndexedVector<IR::DpdkAction> &getActions() { return actions; }
     IR::IndexedVector<IR::DpdkAsmStatement> &getInstructions() {
         return instructions;
@@ -121,6 +123,7 @@ class ConvertToDpdkControl : public Inspector {
     void add_inst(const IR::DpdkAsmStatement *s) { instructions.push_back(s); }
     void add_table(const IR::DpdkTable *t) { tables.push_back(t); }
     void add_table(const IR::DpdkSelector *s) { selectors.push_back(s); }
+    void add_table(const IR::DpdkLearner*s) { learners.push_back(s); }
     void add_action(const IR::DpdkAction *a) { actions.push_back(a); }
 
     boost::optional<cstring> getIdFromProperty(const IR::P4Table*, cstring);

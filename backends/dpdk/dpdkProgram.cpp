@@ -179,8 +179,11 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     auto selectors = ingress_converter->getSelectors();
     selectors.append(egress_converter->getSelectors());
 
+    auto learners = ingress_converter->getLearners();
+    learners.append(egress_converter->getLearners());
+
     return new IR::DpdkAsmProgram(
-        headerType, structType, dpdkExternDecls, actions, tables, selectors,
+        headerType, structType, dpdkExternDecls, actions, tables, selectors, learners,
         statements, structure->get_globals());
 }
 
@@ -540,28 +543,34 @@ boost::optional<int> ConvertToDpdkControl::getNumberFromProperty(const IR::P4Tab
 
 
 bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
-    if (checkTableValid(t)) {
-        if (t->properties->getProperty("selector") != nullptr) {
-            auto group_id = getIdFromProperty(t, "group_id");
-            auto member_id = getIdFromProperty(t, "member_id");
-            auto selector_key = t->properties->getProperty("selector");
-            auto n_groups_max = getNumberFromProperty(t, "n_groups_max");
-            auto n_members_per_group_max = getNumberFromProperty(t, "n_members_per_group_max");
+    if (!checkTableValid(t))
+        return false;
 
-            if (group_id == boost::none || member_id == boost::none ||
+    if (t->properties->getProperty("selector") != nullptr) {
+        auto group_id = getIdFromProperty(t, "group_id");
+        auto member_id = getIdFromProperty(t, "member_id");
+        auto selector_key = t->properties->getProperty("selector");
+        auto n_groups_max = getNumberFromProperty(t, "n_groups_max");
+        auto n_members_per_group_max = getNumberFromProperty(t, "n_members_per_group_max");
+
+        if (group_id == boost::none || member_id == boost::none ||
                 n_groups_max == boost::none || n_members_per_group_max == boost::none)
-                return false;
+            return false;
 
-            auto selector = new IR::DpdkSelector(t->name,
+        auto selector = new IR::DpdkSelector(t->name,
                 *group_id, *member_id, selector_key->value->to<IR::Key>(),
                 *n_groups_max, *n_members_per_group_max);
 
-            selectors.push_back(selector);
-        } else {
-            auto table = new IR::DpdkTable(t->name.toString(), t->getKey(), t->getActionList(),
-                    t->getDefaultAction(), t->properties);
-            tables.push_back(table);
-        }
+        selectors.push_back(selector);
+    } else if (structure->learner_tables.count(t->name.name) != 0) {
+        LOG1("learner table " << t->name.name);
+        auto learner = new IR::DpdkLearner(t->name, t->getKey(), t->getActionList(),
+                t->getDefaultAction(), t->properties);
+        learners.push_back(learner);
+    } else {
+        auto table = new IR::DpdkTable(t->name.toString(), t->getKey(), t->getActionList(),
+                t->getDefaultAction(), t->properties);
+        tables.push_back(table);
     }
     return false;
 }

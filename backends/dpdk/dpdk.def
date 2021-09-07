@@ -60,6 +60,18 @@ class DpdkSelector {
 #novalidate
 }
 
+class DpdkLearner {
+    inline cstring name;
+    Key match_keys;
+    ActionList actions;
+    Expression default_action;
+    TableProperties properties;
+
+    std::ostream& toSpec(std::ostream& out) const;
+#nodbprint
+#novalidate
+}
+
 // Toplevel Assembly representation
 class DpdkAsmProgram {
     inline IndexedVector<DpdkHeaderType> headerType;
@@ -68,6 +80,7 @@ class DpdkAsmProgram {
     inline IndexedVector<DpdkAction> actions;
     inline IndexedVector<DpdkTable> tables;
 	inline IndexedVector<DpdkSelector> selectors;
+	inline IndexedVector<DpdkLearner> learners;
     inline IndexedVector<DpdkAsmStatement> statements;
     inline IndexedVector<DpdkDeclaration> globals;
     std::ostream& toSpec(std::ostream& out) const;
