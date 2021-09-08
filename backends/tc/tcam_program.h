@@ -115,6 +115,11 @@ class TCAMProgram final {
   TCAMEntry &FindOrInsertTCAMEntry(const State &, const Value &, const Mask &);
   // Insert an empty TCAM entry, removing the old one if there is any
   TCAMEntry &InsertTCAMEntry(const State &, Value, Mask);
+
+  // Find the entry that matches given state and key according to longest prefix
+  // match.
+  const TCAMEntry *FindMatchingEntry(const State &state,
+                                     const Value &key) const;
 };
 
 }  // namespace backends::tc

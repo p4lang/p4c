@@ -23,16 +23,6 @@ class InliningTest : public testing::Test {
   PassManager pass_manager_;
 };
 
-// Helper function to build the TCAM program with the relevant headers used in
-// this test.
-TCAMProgram TCAMProgramWithTestHeaders(TCAMTable&& tcam_table) {
-  return TCAMProgram{
-      .tcam_table_ = std::move(tcam_table),
-      .header_instantiations_ = {{"foo", "foo_t"}},
-      .header_type_definitions_ = {{"foo_t", {{"bar", 8}, {"baz", 8}}}},
-  };
-}
-
 TEST_F(InliningTest, InlineSimpleTransition) {
   // Test inlining simple TCAM entries that have NextState as the only
   // instruction.

@@ -20,6 +20,7 @@ class Range {
 
   Range(const Range&) = default;
   Range(Range&&) = default;
+  Range& operator=(const Range&) = default;
 
   bool operator==(const Range& that) const {
     return this->from() == that.from() && this->to() == that.to();
@@ -35,8 +36,8 @@ class Range {
 
  private:
   Range(uint32_t from, uint32_t to) : from_(from), to_(to) {}
-  const uint32_t from_;
-  const uint32_t to_;
+  uint32_t from_;
+  uint32_t to_;
 };
 
 std::ostream& operator<<(std::ostream& out, const Range& range);

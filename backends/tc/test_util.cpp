@@ -66,4 +66,12 @@ TCAMProgram TCAMProgramWithGivenTransitions(
   return TCAMProgram{std::move(tcam_table), {}, {}};
 }
 
+TCAMProgram TCAMProgramWithTestHeaders(TCAMTable&& tcam_table) {
+  return TCAMProgram{
+      .tcam_table_ = std::move(tcam_table),
+      .header_instantiations_ = {{"foo", "foo_t"}},
+      .header_type_definitions_ = {{"foo_t", {{"bar", 8}, {"baz", 8}}}},
+  };
+}
+
 }  // namespace backends::tc

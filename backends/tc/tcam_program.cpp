@@ -177,4 +177,42 @@ TCAMEntry& TCAMProgram::InsertTCAMEntry(const State& state, Value value,
   return *tcam_vec.rbegin();
 }
 
+// Find the entry that matches given state and key according to longest prefix
+// match.
+const TCAMEntry* TCAMProgram::FindMatchingEntry(const State& state,
+                                                const Value& key) const {
+  auto entries = tcam_table_.find(state);
+  if (entries == tcam_table_.end()) {
+    return nullptr;
+  }
+
+  const TCAMEntry* lpm_entry = nullptr;
+  absl::optional<size_t> match_length;
+  for (const auto& entry : entries->second) {
+    if (key.size() < entry.mask.size()) {
+      // The key is too short for this mask
+      continue;
+    }
+
+    size_t prefix_length = 0;
+    bool fail = false;
+    for (size_t i = 0; i < entry.mask.size(); ++i) {
+      if (entry.mask[i]) {
+        if (key[i] != entry.value[i]) {
+          fail = true;
+          break;
+        }
+        prefix_length = i + 1;
+      }
+    }
+    if (!fail && (!match_length || prefix_length > *match_length)) {
+      // this entry is the current longest-prefix match
+      lpm_entry = &entry;
+      match_length = prefix_length;
+    }
+  }
+
+  return lpm_entry;
+}
+
 }  // namespace backends::tc

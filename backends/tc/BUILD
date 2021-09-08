@@ -389,6 +389,56 @@ cc_test(
     ],
 )
 
+cc_test(
+    name = "tcam_program_test",
+    size = "small",
+    srcs = [
+        "tcam_program_test.cpp",
+    ],
+    copts = ["-fexceptions"],
+    features = ["-use_header_modules"],
+    linkopts = ["-lgmp"],
+    deps = [
+        ":tcam_program",
+        ":test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "test_util_test",
+    size = "small",
+    srcs = [
+        "test_util_test.cpp",
+    ],
+    copts = ["-fexceptions"],
+    features = ["-use_header_modules"],
+    linkopts = ["-lgmp"],
+    deps = [
+        ":test_util",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "simulator_test",
+    size = "small",
+    srcs = [
+        "simulator_test.cpp",
+    ],
+    copts = ["-fexceptions"],
+    features = ["-use_header_modules"],
+    linkopts = ["-lgmp"],
+    deps = [
+        ":instruction",
+        ":simulator",
+        ":test_util",
+        ":util",
+        ":yaml_parser",
+        "@com_google_googletest//:gtest_main",
+    ],
+)
+
 cc_binary(
     name = "p4c_tc",
     srcs = [
@@ -407,5 +457,23 @@ cc_binary(
         ":yaml_parser",
         ":yaml_serializer",
         "@com_google_absl//absl/memory",
+    ],
+)
+
+cc_library(
+    name = "simulator",
+    srcs = [
+        "simulator.cpp",
+    ],
+    hdrs = [
+        "simulator.h",
+    ],
+    copts = ["-fexceptions"],
+    features = ["-use_header_modules"],
+    deps = [
+        ":instruction",
+        ":tcam_program",
+        ":util",
+        "@com_google_absl//absl/container:flat_hash_map",
     ],
 )

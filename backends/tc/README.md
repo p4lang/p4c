@@ -214,6 +214,8 @@ contains the corresponding implementation):
   - `dead_state_elimination.h` removes unreachable states.
 - `yaml_parser.h` and `yaml_serializer.h` handle converting TCAM programs
   from/to the YAML representation.
+- `simulator.h` contains the parser simulator that loads a TCAM program and
+  parses a given packet buffer.
 - `test_util.h` contains the utility functions used only for testing.
 - All files ending with `_test.cpp` are tests for a particular feature or module
   (for example, `util_test.cpp` tests the `util` module, and `lookahed_test.cpp`
@@ -442,3 +444,13 @@ the LLADDR format or the slash notation for specifying the mask.
 The header matcher matches a packet when:
  - The packet is successfully parsed.
  - The `HEADER_FIELD` is marked as available
+
+## Parser simulator
+
+The `ParserSimulator` class defined in `simulator.h` loads a TCAM program (which
+can be parsed from YAML). Currently, the simulator is just a library.
+`simulator_test.cpp` shows how to load a TCAM program from YAML, and how to
+invoke the parser. `test_util.h` contains some helper functions for creating the
+packet buffer (bitvector) the simulator expects from a pair of `char` iterators,
+so the packet can be loaded from a `std::string` or a `std::vector`. The helper
+copies over the packet data to the bitvector representation.
