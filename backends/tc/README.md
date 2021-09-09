@@ -109,7 +109,7 @@ following components:
 
 Visually, the components of the TCAM-based machine are as follows:
 
-![Visual diagram for the abstract machine](tcam-machine.png)
+![Visual diagram for the abstract machine](resources/tcam-machine.png)
 
 In the diagram above, the current state is `eth_out` and the current key is
 `0x0800` (EtherType of IPv4 packets) so the abstract machine loads the
@@ -235,7 +235,7 @@ the match, and the out-state is responsible for selecting which next in-state to
 go to. As an example, the parser described by the diagram on the left is
 translated to the parser described by the diagram on the right:
 
-![State diagram showing a P4 parse graph and the parse graph corresponding to the parser with added in/out states](parse-graphs.png)
+![State diagram showing a P4 parse graph and the parse graph corresponding to the parser with added in/out states](resources/parse-graphs.png)
 
 This translation results in redundant states that can be inlined into the caller
 state, the optimization passes perform this inlining and clean-up the unused
