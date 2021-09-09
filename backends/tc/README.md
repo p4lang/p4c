@@ -100,7 +100,7 @@ following components:
   (key & mask) == value &&& mask` (here, `&&` is logical and, and `&&&` is bit
   masking as used in P4).
 - A write-only key-value store for the extracted header fields. This is a
-  mapping from each header field (such as `ethernet.heaerType`) to the extracted
+  mapping from each header field (such as `ethernet.etherType`) to the extracted
   value.
 - Definitions of header types and header instances the parser extracts from the
   packet. These definitions maintain only the sizes and the order of header
@@ -218,8 +218,9 @@ contains the corresponding implementation):
   parses a given packet buffer.
 - `test_util.h` contains the utility functions used only for testing.
 - All files ending with `_test.cpp` are tests for a particular feature or module
-  (for example, `util_test.cpp` tests the `util` module, and `lookahed_test.cpp`
-  tests the support for `parser.lookahead`). The tests use GoogleTest.
+  (for example, `util_test.cpp` tests the `util` module, and
+  `lookahead_test.cpp` tests the support for `parser.lookahead`). The tests use
+  GoogleTest.
 
 ### Translating the parser states
 
