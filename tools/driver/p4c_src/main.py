@@ -158,14 +158,14 @@ def main():
                         help="Compile program in non-debug mode.\n",
                         action="store_true", default=False)
     parser.add_argument("--parser-inline-opt", dest="optimizeParserInlining",
-                        help="Enable optimization of inlining of callee parsers (subparsers)."
-                            "The optimization is disabled by default."
-                            "When the optimization is disabled, for each invocation of the subparser"
-                            "all states of the subparser are inlined, which means that the subparser"
-                            "might be inlined multiple times even if it is the same instance"
-                            "which is invoked multiple times."
-                            "When the optimization is enabled, compiler tries to identify the cases,"
-                            "when it can inline the subparser's states only once for multiple"
+                        help="Enable optimization of inlining of callee parsers (subparsers). "
+                            "The optimization is disabled by default. "
+                            "When the optimization is disabled, for each invocation of the subparser "
+                            "all states of the subparser are inlined, which means that the subparser "
+                            "might be inlined multiple times even if it is the same instance "
+                            "which is invoked multiple times. "
+                            "When the optimization is enabled, compiler tries to identify the cases, "
+                            "when it can inline the subparser's states only once for multiple "
                             "invocations of the same subparser instance.",
                         action="store_true", default=False)
 
