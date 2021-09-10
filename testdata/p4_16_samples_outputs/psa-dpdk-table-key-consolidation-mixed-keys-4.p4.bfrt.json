@@ -2,7 +2,11 @@
   "schema_version" : "1.0.0",
   "tables" : [
     {
+<<<<<<< HEAD
       "name" : "ep.egress.tbl",
+=======
+      "name" : "egress.tbl",
+>>>>>>> Changed reference outputs
       "id" : 35478861,
       "table_type" : "MatchAction_Direct",
       "size" : 1024,
