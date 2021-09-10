@@ -18,6 +18,7 @@ limitations under the License.
 #define _FRONTENDS_P4_REMOVERETURNS_H_
 
 #include "ir/ir.h"
+#include "frontends/p4/ternaryBool.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
 #include "frontends/p4/typeChecking/typeChecker.h"
 
@@ -65,17 +66,11 @@ class DoRemoveReturns : public Transform {
     cstring           variableName;
     cstring           retValName;
 
-    enum class Returns {
-        Yes,
-        No,
-        Maybe
-    };
-
-    std::vector<Returns> stack;
-    void push() { stack.push_back(Returns::No); }
+    std::vector<TernaryBool> stack;
+    void push() { stack.push_back(TernaryBool::No); }
     void pop() { stack.pop_back(); }
-    void set(Returns r) { BUG_CHECK(!stack.empty(), "Empty stack"); stack.back() = r; }
-    Returns hasReturned() { BUG_CHECK(!stack.empty(), "Empty stack"); return stack.back(); }
+    void set(TernaryBool r) { BUG_CHECK(!stack.empty(), "Empty stack"); stack.back() = r; }
+    TernaryBool hasReturned() { BUG_CHECK(!stack.empty(), "Empty stack"); return stack.back(); }
 
  public:
     explicit DoRemoveReturns(P4::ReferenceMap* refMap,

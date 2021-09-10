@@ -56,7 +56,7 @@ void DoRemoveExits::callExit(const IR::Node* node) {
 }
 
 const IR::Node* DoRemoveExits::preorder(IR::ExitStatement* statement) {
-    set(Returns::Yes);
+    set(TernaryBool::Yes);
     auto left = new IR::PathExpression(returnVar);
     return new IR::AssignmentStatement(statement->srcInfo, left,
                                        new IR::BoolLiteral(true));
@@ -81,7 +81,7 @@ const IR::Node* DoRemoveExits::preorder(IR::P4Action* action) {
     push();
     visit(action->body);
     auto r = hasReturned();
-    if (r != Returns::No) {
+    if (r != TernaryBool::No) {
         callExit(action);
         callExit(getOriginal());
     }
@@ -129,17 +129,17 @@ const IR::Node* DoRemoveExits::preorder(IR::P4Control* control) {
 const IR::Node* DoRemoveExits::preorder(IR::BlockStatement* statement) {
     auto block = new IR::BlockStatement;
     auto currentBlock = block;
-    Returns ret = Returns::No;
+    TernaryBool ret = TernaryBool::No;
     for (auto s : statement->components) {
         push();
         visit(s);
         currentBlock->push_back(s);
-        Returns r = hasReturned();
+        TernaryBool r = hasReturned();
         pop();
-        if (r == Returns::Yes) {
+        if (r == TernaryBool::Yes) {
             ret = r;
             break;
-        } else if (r == Returns::Maybe) {
+        } else if (r == TernaryBool::Maybe) {
             auto newBlock = new IR::BlockStatement;
             auto path = new IR::PathExpression(returnVar);
             auto condition = new IR::LNot(path);
@@ -163,7 +163,7 @@ const IR::Node* DoRemoveExits::preorder(IR::IfStatement* statement) {
 
     CallsExit ce(refMap, typeMap, &callsExit);
     (void)statement->condition->apply(ce);
-    auto rcond = ce.callsExit ? Returns::Maybe : Returns::No;
+    auto rcond = ce.callsExit ? TernaryBool::Maybe : TernaryBool::No;
 
     visit(statement->ifTrue);
     if (statement->ifTrue == nullptr)
@@ -175,7 +175,7 @@ const IR::Node* DoRemoveExits::preorder(IR::IfStatement* statement) {
         statement->ifTrue = newif;
     }
     auto rt = hasReturned();
-    auto rf = Returns::No;
+    auto rf = TernaryBool::No;
     pop();
     if (statement->ifFalse != nullptr) {
         push();
@@ -189,33 +189,33 @@ const IR::Node* DoRemoveExits::preorder(IR::IfStatement* statement) {
         rf = hasReturned();
         pop();
     }
-    if (rcond == Returns::Yes || (rt == Returns::Yes && rf == Returns::Yes))
-        set(Returns::Yes);
-    else if (rcond == Returns::No && rt == Returns::No && rf == Returns::No)
-        set(Returns::No);
+    if (rcond == TernaryBool::Yes || (rt == TernaryBool::Yes && rf == TernaryBool::Yes))
+        set(TernaryBool::Yes);
+    else if (rcond == TernaryBool::No && rt == TernaryBool::No && rf == TernaryBool::No)
+        set(TernaryBool::No);
     else
-        set(Returns::Maybe);
+        set(TernaryBool::Maybe);
     prune();
     return statement;
 }
 
 const IR::Node* DoRemoveExits::preorder(IR::SwitchStatement* statement) {
-    auto r = Returns::No;
+    auto r = TernaryBool::No;
     CallsExit ce(refMap, typeMap, &callsExit);
     (void)statement->expression->apply(ce);
 
     /* FIXME -- alter cases in place rather than allocating a new Vector */
     IR::Vector<IR::SwitchCase> *cases = nullptr;
     if (ce.callsExit) {
-        r = Returns::Maybe;
+        r = TernaryBool::Maybe;
         cases = new IR::Vector<IR::SwitchCase>();
     }
     for (auto &c : statement->cases) {
         push();
         visit(c);
-        if (hasReturned() != Returns::No)
+        if (hasReturned() != TernaryBool::No)
             // this is conservative: we don't check if we cover all labels.
-            r = Returns::Maybe;
+            r = TernaryBool::Maybe;
         if (cases != nullptr) {
             IR::Statement* stat = nullptr;
             if (c->statement != nullptr) {
@@ -240,7 +240,7 @@ const IR::Node* DoRemoveExits::preorder(IR::AssignmentStatement* statement) {
     CallsExit ce(refMap, typeMap, &callsExit);
     (void)statement->apply(ce);
     if (ce.callsExit)
-        set(Returns::Maybe);
+        set(TernaryBool::Maybe);
     return statement;
 }
 
@@ -248,7 +248,7 @@ const IR::Node* DoRemoveExits::preorder(IR::MethodCallStatement* statement) {
     CallsExit ce(refMap, typeMap, &callsExit);
     (void)statement->apply(ce);
     if (ce.callsExit)
-        set(Returns::Maybe);
+        set(TernaryBool::Maybe);
     return statement;
 }
 
