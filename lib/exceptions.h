@@ -39,7 +39,7 @@ inline bool is_cerr_redirected() {
 
 /// Function used to delete color in case of cerr output being redirected
 inline const char *cerr_colorize(const char *color) {
-    if(is_cerr_redirected()){
+    if (is_cerr_redirected()) {
         return "";
     }
     return color;
@@ -47,7 +47,7 @@ inline const char *cerr_colorize(const char *color) {
 
 /// Used to clear colors on terminal
 inline const char *cerr_clear_colors() {
-    if(is_cerr_redirected()){
+    if (is_cerr_redirected()) {
         return "";
     }
     return ANSI_CLR;
