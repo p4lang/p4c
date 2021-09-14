@@ -33,7 +33,12 @@ constexpr char ANSI_CLR[]  = "\e[0m";
 /// Checks if stderr is redirected to a file
 /// Check is done only once and then saved to a static variable
 inline bool is_cerr_redirected() {
-    static bool is_redir = ttyname(fileno(stderr)) == nullptr;  // NOLINT(runtime/threadsafe_fn)
+    static bool initialized(false);
+    static bool is_redir;
+    if (!initialized) {
+        initialized = true;
+        is_redir = ttyname(fileno(stderr)) == nullptr;  // NOLINT(runtime/threadsafe_fn)
+    }
     return is_redir;
 }
 
