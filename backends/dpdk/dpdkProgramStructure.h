@@ -7,6 +7,7 @@
 
 /* Collect information related to P4 programs targeting dpdk */
 struct DpdkProgramStructure {
+    cstring p4arch;  // 'pna' or 'psa'
     ordered_map<cstring, const IR::Declaration_Variable*> scalars;
     unsigned                            scalars_width = 0;
 
@@ -19,9 +20,10 @@ struct DpdkProgramStructure {
     ordered_map<cstring, const IR::Declaration_Variable*> header_stacks;
     ordered_map<cstring, const IR::Declaration_Variable*> header_unions;
 
-    // learner tables
+    // table and action info for learner tables
     ordered_set<cstring> learner_tables;
-    ordered_map<cstring, const IR::P4Action*> add_on_miss_actions;
+    ordered_set<cstring> learner_actions;
+    ordered_map<cstring, std::vector<cstring>> learner_action_params;
 
     IR::IndexedVector<IR::DpdkDeclaration>       variables;
 

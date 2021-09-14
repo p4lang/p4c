@@ -146,8 +146,10 @@ const IR::Node *ConvertToDpdkArch::postorder(IR::Type_Control *c) {
     }
     // Ingress, Egress, IngressDeparser, EgressDeparser are reserved name in psa.p4
     if (c->name == "Ingress" || c->name == "Egress") {
+        structure->p4arch = "psa";
         t = rewriteControlType(c, c->name);
     } else if (c->name == "MainControlT") {
+        structure->p4arch = "pna";
         t = rewriteControlType(c, c->name);
     } else if (c->name == "PreControlT") {
         t = rewriteControlType(c, c->name);
@@ -1498,16 +1500,42 @@ void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
     auto action = refMap->getDeclaration(expr->path, true);
     if (!action) return;
     if (!action->is<IR::P4Action>()) return ;
-    structure->add_on_miss_actions.emplace(action->to<IR::P4Action>()->name, action->to<IR::P4Action>());
+    //structure->learner_actions.emplace(action->to<IR::P4Action>()->name, action->to<IR::P4Action>());
+}
+
+void CollectAddOnMissTable::postorder(const IR::MethodCallExpression *mce) {
+    auto ctxt = findContext<IR::P4Action>();
+    if (!ctxt) return;
+
+    auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
+    if (!mi->is<P4::ExternFunction>()) return;
+    auto func = mi->to<P4::ExternFunction>();
+    LOG1("func " << func->expr);
+    if (func->method->name != "add_entry") return;
+    if (mce->arguments->size() != 2) return;
+    auto action = mce->arguments->at(0);
+    LOG1("action " << action);
+    if (!action->expression->is<IR::StringLiteral>())
+        ::error(ErrorType::ERR_UNEXPECTED, "%1% expected string in first argument", mce);
+    auto action_name = action->expression->to<IR::StringLiteral>()->value;
+
+    LOG1("learner action " << action_name);
+    structure->learner_actions.insert(action_name);
 }
 
 const IR::Node* TransformAddOnMissTable::preorder(IR::P4Action *action) {
-    if (structure->add_on_miss_actions.count(action->name) == 0)
+
+    if (structure->learner_actions.count(action->name) == 0)
         return action;
 
-    LOG1("action " << action);
+    std::vector<cstring> action_params;
+    for (auto param: *action->parameters) {
+        action_params.push_back(param->name.name);
+    }
+    structure->learner_action_params.emplace(action->name, action_params);
     return action;
 }
+
 
 }  // namespace DPDK
 

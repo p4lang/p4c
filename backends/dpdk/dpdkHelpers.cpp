@@ -617,6 +617,47 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             add_instr(new IR::DpdkJmpLabelStatement(
                         append_parser_name(parser, IR::ParserState::reject)));
             add_instr(new IR::DpdkLabelStatement(end_label));
+        } else if (a->method->name == "add_entry") {
+            if (a->expr->arguments->size() != 2)
+                ::error("%1%: must have two arguments", a->method);
+
+            auto action = a->expr->arguments->at(0)->expression;
+            if (!action->is<IR::StringLiteral>())
+                ::error(ErrorType::ERR_UNEXPECTED, "%1% expected string in first argument", s);
+            auto action_name = action->to<IR::StringLiteral>()->value;
+
+            auto param = a->expr->arguments->at(1)->expression;
+            IR::Expression* argument = nullptr;
+            if (auto constant = param->to<IR::Constant>()) {
+                LOG1("look up action " << action_name);
+                if (structure->learner_action_params.count(action_name) != 0) {
+                    auto params = structure->learner_action_params.at(action_name);
+                    auto field_name = IR::ID(action_name + "_" + params[0]);
+                    add_instr(new IR::DpdkMovStatement(
+                                new IR::Member(new IR::PathExpression("m"), field_name),
+                                constant));
+                    argument = new IR::Member(new IR::PathExpression("m"), field_name);
+                } else {
+                }
+            } else if (auto params = param->to<IR::StructExpression>()) {
+                for (auto p : params->components) {
+                    auto field_name = IR::ID(action_name + "_" + p->name);
+                    add_instr(new IR::DpdkMovStatement(
+                                new IR::Member(new IR::PathExpression("m"), field_name), new IR::Constant(0)));
+                }
+                auto arg0 = params->components.at(0);
+                auto field0 = IR::ID(action_name + "_" + arg0->name);
+                argument = new IR::Member(new IR::PathExpression("m"), field0);
+            } else {
+                ::error(ErrorType::ERR_UNSUPPORTED, "argument %1% is not supported", param);
+            }
+            add_instr(new IR::DpdkLearnStatement(action_name, argument));
+        } else if (a->method->name == "send_to_port") {
+            add_instr(new IR::DpdkMovStatement(
+                new IR::Member(new IR::PathExpression("m"), "pna_main_output_metadata_output_port"),
+                a->expr->arguments->at(0)->expression));
+        } else {
+            ::error("%1%: Unknown extern function", s);
         }
     } else if (auto a = mi->to<P4::BuiltInMethod>()) {
         if (a->name == "setValid") {

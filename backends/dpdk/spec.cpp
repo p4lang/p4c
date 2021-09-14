@@ -285,15 +285,12 @@ std::ostream &IR::DpdkStructType::toSpec(std::ostream &out) const {
 
 std::ostream &IR::DpdkListStatement::toSpec(std::ostream &out) const {
     out << "apply {" << std::endl;
-    out << "\trx m.psa_ingress_input_metadata_ingress_port" << std::endl;
-    out << "\tmov m.psa_ingress_output_metadata_drop 0x0" << std::endl;
     for (auto s : statements) {
         out << "\t";
         s->toSpec(out);
         if (!s->to<IR::DpdkLabelStatement>())
             out << std::endl;
     }
-    out << "\ttx m.psa_ingress_output_metadata_egress_port" << std::endl;
     out << "\tLABEL_DROP : drop" << std::endl;
     out << "}" << std::endl;
     return out;
@@ -301,6 +298,11 @@ std::ostream &IR::DpdkListStatement::toSpec(std::ostream &out) const {
 
 std::ostream &IR::DpdkApplyStatement::toSpec(std::ostream &out) const {
     out << "table " << table;
+    return out;
+}
+
+std::ostream &IR::DpdkLearnStatement::toSpec(std::ostream &out) const {
+    out << "learn " << action << " args " << argument;
     return out;
 }
 
@@ -345,12 +347,12 @@ std::ostream& IR::DpdkUnaryStatement::toSpec(std::ostream& out) const {
 }
 
 std::ostream &IR::DpdkRxStatement::toSpec(std::ostream &out) const {
-    out << "rx ";
+    out << "rx " << DPDK::toStr(port);
     return out;
 }
 
 std::ostream &IR::DpdkTxStatement::toSpec(std::ostream &out) const {
-    out << "tx ";
+    out << "tx " << DPDK::toStr(port);
     return out;
 }
 

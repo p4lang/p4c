@@ -23,17 +23,6 @@ limitations under the License.
 #include "lib/stringify.h"
 
 namespace DPDK {
-const IR::DpdkAsmStatement *ConvertToDpdkProgram::createListStatement(
-    cstring name,
-    std::initializer_list<IR::IndexedVector<IR::DpdkAsmStatement>> list) {
-
-    auto stmts = new IR::IndexedVector<IR::DpdkAsmStatement>();
-    for (auto l : list) {
-        stmts->append(l);
-    }
-    return new IR::DpdkListStatement(name, *stmts);
-}
-
 /* Insert the metadata structure updated with tmp variables created during parser conversion
    Add annotations to metadata and header structures and add all the structures to DPDK
    structtype.
@@ -77,6 +66,40 @@ IR::IndexedVector<IR::DpdkStructType> ConvertToDpdkProgram::UpdateHeaderMetadata
     prog->objects = *new_objs;
     return structType;
 }
+
+IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_pna_preamble() {
+    IR::IndexedVector<IR::DpdkAsmStatement> instr;
+    instr.push_back(new IR::DpdkRxStatement(
+        new IR::Member(new IR::PathExpression("m"), "pna_main_input_metadata_input_port")));
+    return instr;
+}
+
+IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_psa_preamble() {
+    IR::IndexedVector<IR::DpdkAsmStatement> instr;
+    instr.push_back(new IR::DpdkRxStatement(
+        new IR::Member(new IR::PathExpression("m"), "psa_ingress_input_metadata_ingress_port")));
+    instr.push_back(new IR::DpdkMovStatement(
+        new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_drop"),
+        new IR::Constant(0)));
+    return instr;
+}
+
+IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_pna_postamble() {
+    IR::IndexedVector<IR::DpdkAsmStatement> instr;
+    instr.push_back(new IR::DpdkTxStatement(
+        new IR::Member(new IR::PathExpression("m"), "pna_main_output_metadata_egress_port")));
+    return instr;
+}
+
+IR::IndexedVector<IR::DpdkAsmStatement> ConvertToDpdkProgram::create_psa_postamble() {
+    IR::IndexedVector<IR::DpdkAsmStatement> instr;
+    instr.push_back(new IR::DpdkTxStatement(
+        new IR::Member(new IR::PathExpression("m"), "psa_ingress_output_metadata_egress_port")));
+    instr.push_back(new IR::DpdkLabelStatement("drop"));
+    instr.push_back(new IR::DpdkDropStatement());
+    return instr;
+}
+
 
 const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
     IR::Type_Struct *metadataStruct = nullptr;
@@ -137,19 +160,28 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
             BUG("Unknown deparser block %s", kv.second->name);
     }
 
-    auto s = createListStatement(
-        "ingress", {ingress_parser_converter->getInstructions(),
-                    ingress_converter->getInstructions(),
-                    ingress_deparser_converter->getInstructions(),
-                    egress_parser_converter->getInstructions(),
-                    egress_converter->getInstructions(),
-                    egress_deparser_converter->getInstructions(),
-                    });
-    statements.push_back(s);
+    IR::IndexedVector<IR::DpdkAsmStatement> instr;
+    if (structure->p4arch == "pna")
+        instr.append(create_pna_preamble());
+    else if (structure->p4arch == "psa")
+        instr.append(create_psa_preamble());
+
+    instr.append(ingress_parser_converter->getInstructions());
+    instr.append(ingress_converter->getInstructions());
+    instr.append(ingress_deparser_converter->getInstructions());
+    instr.append(egress_parser_converter->getInstructions());
+    instr.append(egress_converter->getInstructions());
+    instr.append(egress_deparser_converter->getInstructions());
+
+    if (structure->p4arch == "pna")
+        instr.append(create_pna_postamble());
+    else if (structure->p4arch == "psa")
+        instr.append(create_psa_postamble());
+
+    statements.push_back(new IR::DpdkListStatement(instr));
 
     IR::IndexedVector<IR::DpdkHeaderType> headerType;
     for (auto kv : structure->header_types) {
-        LOG3("add header type " << kv.second);
         auto h = kv.second;
         auto ht = new IR::DpdkHeaderType(h->srcInfo, h->name, h->annotations,
                                          h->fields);
@@ -188,7 +220,6 @@ const IR::DpdkAsmProgram *ConvertToDpdkProgram::create(IR::P4Program *prog) {
 }
 
 const IR::Node *ConvertToDpdkProgram::preorder(IR::P4Program *prog) {
-    // std::cout << prog << std::endl;
     dpdk_program = create(prog);
     return prog;
 }
@@ -563,7 +594,7 @@ bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
 
         selectors.push_back(selector);
     } else if (structure->learner_tables.count(t->name.name) != 0) {
-        LOG1("learner table " << t->name.name);
+        //
         auto learner = new IR::DpdkLearner(t->name, t->getKey(), t->getActionList(),
                 t->getDefaultAction(), t->properties);
         learners.push_back(learner);

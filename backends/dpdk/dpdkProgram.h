@@ -48,10 +48,10 @@ class ConvertToDpdkProgram : public Transform {
         : typemap(typemap), refmap(refmap), structure(structure) { }
 
     const IR::DpdkAsmProgram *create(IR::P4Program *prog);
-    const IR::DpdkAsmStatement *createListStatement(
-        cstring name,
-        std::initializer_list<IR::IndexedVector<IR::DpdkAsmStatement>>
-            statements);
+    IR::IndexedVector<IR::DpdkAsmStatement> create_pna_preamble();
+    IR::IndexedVector<IR::DpdkAsmStatement> create_psa_preamble();
+    IR::IndexedVector<IR::DpdkAsmStatement> create_pna_postamble();
+    IR::IndexedVector<IR::DpdkAsmStatement> create_psa_postamble();
     const IR::Node *preorder(IR::P4Program *p) override;
     const IR::DpdkAsmProgram *getDpdkProgram() { return dpdk_program; }
     IR::IndexedVector<IR::DpdkStructType> UpdateHeaderMetadata(

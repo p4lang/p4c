@@ -619,6 +619,7 @@ class CollectAddOnMissTable : public Inspector {
             DpdkProgramStructure* structure) :
     refMap(refMap), typeMap(typeMap), structure(structure) {}
     void postorder(const IR::P4Table* t) override;
+    void postorder(const IR::MethodCallExpression*) override;
 };
 
 class TransformAddOnMissTable : public Transform {

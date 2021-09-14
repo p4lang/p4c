@@ -87,7 +87,6 @@ class DpdkAsmProgram {
 }
 
 class DpdkListStatement : DpdkAsmStatement, IDPDKNode {
-    optional cstring name;
     optional inline IndexedVector<DpdkAsmStatement> statements;
     std::ostream& toSpec(std::ostream& out) const override;
 }
@@ -96,6 +95,13 @@ class DpdkApplyStatement : DpdkAsmStatement, IDPDKNode {
     cstring table;
     std::ostream& toSpec(std::ostream& out) const override;
 }
+
+class DpdkLearnStatement : DpdkAsmStatement, IDPDKNode {
+    cstring action;
+    optional Expression argument;
+    std::ostream& toSpec(std::ostream& out) const override;
+}
+
 class DpdkEmitStatement : DpdkAsmStatement, IDPDKNode {
     Expression header;
     std::ostream& toSpec(std::ostream& out) const override;
@@ -206,11 +212,13 @@ class DpdkJmpLessStatement: DpdkJmpCondStatement, IDPDKNode {
 }
 
 class DpdkRxStatement : DpdkAsmStatement, IDPDKNode {
+    Expression port;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }
 
 class DpdkTxStatement : DpdkAsmStatement, IDPDKNode {
+    Expression port;
     std::ostream& toSpec(std::ostream& out) const override;
 #nodbprint
 }

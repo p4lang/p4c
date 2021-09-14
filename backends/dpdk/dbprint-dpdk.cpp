@@ -16,6 +16,10 @@ void IR::DpdkApplyStatement::dbprint(std::ostream& out) const {
     out << "apply " << table << std::endl;
 }
 
+void IR::DpdkLearnStatement::dbprint(std::ostream& out) const {
+    out << "learn " << action << std::endl;
+}
+
 void IR::DpdkEmitStatement::dbprint(std::ostream& out) const {
     out << "emit " << header << std::endl;
 }
