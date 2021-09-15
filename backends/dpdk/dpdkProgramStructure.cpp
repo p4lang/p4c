@@ -275,4 +275,7 @@ bool InspectDpdkProgram::preorder(const IR::Parameter* param) {
     return false;
 }
 
-
+bool InspectDpdkProgram::preorder(const IR::P4Action* action) {
+    structure->actions.emplace(action->name, action);
+    return false;
+}

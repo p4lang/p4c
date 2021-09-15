@@ -629,10 +629,10 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             auto param = a->expr->arguments->at(1)->expression;
             IR::Expression* argument = nullptr;
             if (auto constant = param->to<IR::Constant>()) {
-                LOG1("look up action " << action_name);
-                if (structure->learner_action_params.count(action_name) != 0) {
-                    auto params = structure->learner_action_params.at(action_name);
-                    auto field_name = IR::ID(action_name + "_" + params[0]);
+                if (structure->actions.count(action_name) != 0) {
+                    auto action = structure->actions.at(action_name);
+                    auto params = action->parameters->parameters;
+                    auto field_name = IR::ID(action_name + "_" + params.at(0)->name);
                     add_instr(new IR::DpdkMovStatement(
                                 new IR::Member(new IR::PathExpression("m"), field_name),
                                 constant));

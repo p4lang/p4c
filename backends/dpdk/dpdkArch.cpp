@@ -1461,81 +1461,64 @@ const IR::Node* SplitP4TableCommon::postorder(IR::SwitchStatement* statement) {
 }
 
 void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
+    bool use_add_on_miss = false;
     auto add_on_miss = t->properties->getProperty("add_on_miss");
     if (add_on_miss == nullptr) return;
-    if (!add_on_miss->value->is<IR::ExpressionValue>()) {
-        ::error(ErrorType::ERR_UNEXPECTED,
-                "%1%: expected expression for 'add_on_miss' property", add_on_miss);
-        return; }
-    auto expression = add_on_miss->value->to<IR::ExpressionValue>()->expression;
-    if (!expression->is<IR::BoolLiteral>()) {
-        ::error(ErrorType::ERR_UNEXPECTED,
-                "%1%: expected boolean for 'add_on_miss' property", add_on_miss);
-        return; }
-    auto value = expression->to<IR::BoolLiteral>();
-    if (!value) return;
-    structure->learner_tables.insert(t->name.name);
+    if (add_on_miss->value->is<IR::ExpressionValue>()) {
+        auto expr = add_on_miss->value->to<IR::ExpressionValue>()->expression;
+        if (!expr->is<IR::BoolLiteral>()) {
+            ::error(ErrorType::ERR_UNEXPECTED,
+                    "%1%: expected boolean for 'add_on_miss' property", add_on_miss);
+            return;
+        } else {
+            use_add_on_miss = expr->to<IR::BoolLiteral>()->value;
+            if (use_add_on_miss)
+                structure->learner_tables.insert(t->name.name);
+        }
+    }
 
+    /* sanity checks */
     auto default_action = t->properties->getProperty("default_action");
-    if (!default_action) {
+    if (use_add_on_miss && default_action == nullptr) {
         ::error(ErrorType::ERR_UNEXPECTED,
-                "%1%: default_action not defined for table %2%", default_action, t->name);
-        return; }
-    if (!default_action->value->is<IR::ExpressionValue>()) {
-        ::error(ErrorType::ERR_UNEXPECTED,
-                "%1%: expected expression for 'add_on_miss' property", default_action);
-        return; }
-    expression = default_action->value->to<IR::ExpressionValue>()->expression;
-    if (!expression->is<IR::MethodCallExpression>()) {
-        ::error(ErrorType::ERR_UNEXPECTED,
-                "%1%: expected expression to an action", default_action);
-        return; }
-    auto methodCall = expression->to<IR::MethodCallExpression>();
-    if (!methodCall) return;
-    auto expr = methodCall->method->to<IR::PathExpression>();
-    if (!expr) return;
-    auto path = expr->path->to<IR::Path>();
-    if (!path) return;
-
-    auto action = refMap->getDeclaration(expr->path, true);
-    if (!action) return;
-    if (!action->is<IR::P4Action>()) return ;
-    //structure->learner_actions.emplace(action->to<IR::P4Action>()->name, action->to<IR::P4Action>());
+                "%1%: add_on_miss property is defined, "
+                "but default_action not specificed for table %2%", default_action, t->name);
+        return;
+    }
+    if (default_action->value->is<IR::ExpressionValue>()) {
+        auto expr = default_action->value->to<IR::ExpressionValue>()->expression;
+        if (!expr->is<IR::MethodCallExpression>()) {
+            ::error(ErrorType::ERR_UNEXPECTED,
+                    "%1%: expected expression to an action", default_action);
+            return; }
+        auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
+                refMap, typeMap);
+        if (mi->is<P4::ActionCall>()) {
+            auto ac = mi->to<P4::ActionCall>();
+            if (ac->action->parameters->parameters.size() != 0) {
+                ::error(ErrorType::ERR_UNEXPECTED,
+                    "%1%: action cannot have action argument when used with add_on_miss",
+                    default_action);
+                return;
+            }
+        }
+    }
 }
 
 void CollectAddOnMissTable::postorder(const IR::MethodCallExpression *mce) {
-    auto ctxt = findContext<IR::P4Action>();
-    if (!ctxt) return;
-
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
-    if (!mi->is<P4::ExternFunction>()) return;
+    if (!mi->is<P4::ExternFunction>())
+        return;
     auto func = mi->to<P4::ExternFunction>();
-    LOG1("func " << func->expr);
-    if (func->method->name != "add_entry") return;
-    if (mce->arguments->size() != 2) return;
-    auto action = mce->arguments->at(0);
-    LOG1("action " << action);
-    if (!action->expression->is<IR::StringLiteral>())
-        ::error(ErrorType::ERR_UNEXPECTED, "%1% expected string in first argument", mce);
-    auto action_name = action->expression->to<IR::StringLiteral>()->value;
 
-    LOG1("learner action " << action_name);
+    if (func->method->name != "add_entry")
+        return;
+    // assuming checking on number of arguments is already performed in frontend.
+    auto action = mce->arguments->at(0);
+    // assuming syntax check is already performed earlier
+    auto action_name = action->expression->to<IR::StringLiteral>()->value;
     structure->learner_actions.insert(action_name);
 }
-
-const IR::Node* TransformAddOnMissTable::preorder(IR::P4Action *action) {
-
-    if (structure->learner_actions.count(action->name) == 0)
-        return action;
-
-    std::vector<cstring> action_params;
-    for (auto param: *action->parameters) {
-        action_params.push_back(param->name.name);
-    }
-    structure->learner_action_params.emplace(action->name, action_params);
-    return action;
-}
-
 
 }  // namespace DPDK
 

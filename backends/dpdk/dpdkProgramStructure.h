@@ -19,6 +19,7 @@ struct DpdkProgramStructure {
     ordered_map<cstring, const IR::Declaration_Variable*> metadata;
     ordered_map<cstring, const IR::Declaration_Variable*> header_stacks;
     ordered_map<cstring, const IR::Declaration_Variable*> header_unions;
+    ordered_map<cstring, const IR::P4Action*> actions;
 
     // table and action info for learner tables
     ordered_set<cstring> learner_tables;
@@ -80,6 +81,7 @@ class ParseDpdkArchitecture : public Inspector {
         structure->parsers.clear();
         structure->deparsers.clear();
         structure->pipelines.clear();
+        structure->actions.clear();
         return Inspector::init_apply(root);
     }
 };
@@ -101,6 +103,7 @@ class InspectDpdkProgram : public Inspector {
     void addHeaderInstance(const IR::Type_StructLike *st, cstring name);
     bool preorder(const IR::Declaration_Variable* dv) override;
     bool preorder(const IR::Parameter* parameter) override;
+    bool preorder(const IR::P4Action*) override;
     bool isStandardMetadata(cstring);
 };
 
