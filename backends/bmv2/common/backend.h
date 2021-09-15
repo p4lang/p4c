@@ -32,6 +32,7 @@ limitations under the License.
 #include "JsonObjects.h"
 #include "metermap.h"
 #include "midend/convertEnums.h"
+#include "midend/removeComplexExpressions.h"
 #include "midend/actionSynthesis.h"
 #include "midend/removeLeftSlices.h"
 #include "sharedActionSelectorCheck.h"
@@ -95,7 +96,7 @@ are in the specified set.
 For example, we expect that the code in ingress and egress will have complex
 expression removed.
 */
-class ProcessControls : public BMV2::RemoveComplexExpressionsPolicy {
+class ProcessControls : public P4::RemoveComplexExpressionsPolicy {
     const std::set<cstring> *process;
 
  public:

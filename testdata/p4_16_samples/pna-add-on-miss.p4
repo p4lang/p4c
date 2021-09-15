@@ -134,7 +134,8 @@ control MainControlImpl(
         send_to_port(vport);
     }
     action add_on_miss_action() {
-        add_entry(action_name="next_hop", action_params = 32w0);
+        bit<32> tmp;
+        add_entry(action_name="next_hop", action_params = tmp);
     }
     table ipv4_da {
         key = {
@@ -147,9 +148,28 @@ control MainControlImpl(
         add_on_miss = true;
         const default_action = add_on_miss_action;
     }
+    action next_hop2(PortId_t vport, bit<32> newAddr) {
+        send_to_port(vport);
+        hdr.ipv4.srcAddr = newAddr;
+    }
+    action add_on_miss_action2() {
+        add_entry(action_name="next_hop", action_params = {32w0, 32w1234});
+    }
+    table ipv4_da2 {
+        key = {
+            hdr.ipv4.dstAddr: exact;
+        }
+        actions = {
+            next_hop2;
+            add_on_miss_action2;
+        }
+        add_on_miss = true;
+        const default_action = add_on_miss_action2;
+    }
     apply {
         if (hdr.ipv4.isValid()) {
             ipv4_da.apply();
+            ipv4_da2.apply();
         }
     }
 }
