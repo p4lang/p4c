@@ -43,7 +43,7 @@ struct DpdkProgramStructure {
     IR::Type_Struct * metadataStruct;
     cstring local_metadata_type;
     cstring header_type;
-    IR::IndexedVector<IR::StructField> fields;
+    IR::IndexedVector<IR::StructField> compiler_added_fields;
     IR::Vector<IR::Type> used_metadata;
 
     void push_variable(const IR::DpdkDeclaration * d) {

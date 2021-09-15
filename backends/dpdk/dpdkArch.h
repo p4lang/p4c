@@ -618,16 +618,9 @@ class CollectAddOnMissTable : public Inspector {
     CollectAddOnMissTable(P4::ReferenceMap *refMap, P4::TypeMap *typeMap,
             DpdkProgramStructure* structure) :
     refMap(refMap), typeMap(typeMap), structure(structure) {}
-    void postorder(const IR::P4Table* t) override;
-    void postorder(const IR::MethodCallExpression*) override;
-};
 
-class ConvertAddOnMiss : public PassManager {
- public:
-    ConvertAddOnMiss(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-            DpdkProgramStructure* structure) {
-        passes.push_back(new CollectAddOnMissTable(refMap, typeMap, structure));
-    }
+    void postorder(const IR::P4Table* t) override;
+    void postorder(const IR::MethodCallStatement*) override;
 };
 
 class CollectErrors : public Inspector {

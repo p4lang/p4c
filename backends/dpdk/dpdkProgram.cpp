@@ -46,8 +46,8 @@ IR::IndexedVector<IR::DpdkStructType> ConvertToDpdkProgram::UpdateHeaderMetadata
                 if (structure->args_struct_map.find(s->name.name) !=
                          structure->args_struct_map.end()) {
                     auto st = new IR::DpdkStructType(s->srcInfo, s->name,
-                                                 s->annotations, s->fields);
-                   structType.push_back(st);
+                            s->annotations, s->fields);
+                    structType.push_back(st);
                 } else if (s->name.name == structure->header_type) {
                     auto *annotations = new IR::Annotations(
                         {new IR::Annotation(IR::ID("__packet_data__"), {})});

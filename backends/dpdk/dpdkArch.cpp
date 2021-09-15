@@ -226,7 +226,6 @@ const IR::Node *ConvertToDpdkArch::preorder(IR::Member *m) {
                     return new IR::Member(new IR::PathExpression(IR::ID("h")),
                                           IR::ID(m->member.name));
                 } else if (type->path->name == structure->local_metadata_type) {
-                    LOG1("metadata " << type->path->name);
                     return new IR::Member(
                         new IR::PathExpression(IR::ID("m")),
                         IR::ID("local_metadata_" + m->member.name));
@@ -320,7 +319,7 @@ bool CollectMetadataHeaderInfo::preorder(const IR::Type_Struct *s) {
     for (auto m : structure->used_metadata) {
         if (m->to<IR::Type_Name>()->path->name.name == s->name.name) {
             for (auto field : s->fields) {
-                structure->fields.push_back(new IR::StructField(
+                structure->compiler_added_fields.push_back(new IR::StructField(
                     IR::ID(TypeStruct2Name(s->name.name) + "_" + field->name),
                     field->type));
             }
@@ -334,7 +333,7 @@ const IR::Node *InjectJumboStruct::preorder(IR::Type_Struct *s) {
     if (s->name == structure->local_metadata_type) {
         auto *annotations = new IR::Annotations(
             {new IR::Annotation(IR::ID("__metadata__"), {})});
-        return new IR::Type_Struct(s->name, annotations, structure->fields);
+        return new IR::Type_Struct(s->name, annotations, structure->compiler_added_fields);
     } else if (s->name == structure->header_type) {
         auto *annotations = new IR::Annotations(
             {new IR::Annotation(IR::ID("__packet_data__"), {})});
@@ -1503,21 +1502,26 @@ void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
             }
         }
     }
+    return;
 }
 
-void CollectAddOnMissTable::postorder(const IR::MethodCallExpression *mce) {
+void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
+    auto mce = mcs->methodCall;
     auto mi = P4::MethodInstance::resolve(mce, refMap, typeMap);
-    if (!mi->is<P4::ExternFunction>())
+    if (!mi->is<P4::ExternFunction>()) {
         return;
+    }
     auto func = mi->to<P4::ExternFunction>();
-
-    if (func->method->name != "add_entry")
+    if (func->method->name != "add_entry") {
         return;
+    }
+
     // assuming checking on number of arguments is already performed in frontend.
     auto action = mce->arguments->at(0);
     // assuming syntax check is already performed earlier
     auto action_name = action->expression->to<IR::StringLiteral>()->value;
     structure->learner_actions.insert(action_name);
+    return;
 }
 
 }  // namespace DPDK
