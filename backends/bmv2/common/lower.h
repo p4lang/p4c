@@ -20,6 +20,7 @@ limitations under the License.
 #include "ir/ir.h"
 #include "frontends/p4/typeMap.h"
 #include "frontends/common/resolveReferences/resolveReferences.h"
+#include "midend/removeComplexExpressions.h"
 
 namespace BMV2 {
 
@@ -47,6 +48,15 @@ class LowerExpressions : public Transform {
     const IR::Node* postorder(IR::Concat* expression) override;
     const IR::Node* preorder(IR::P4Table* table) override
     { prune(); return table; }  // don't simplify expressions in table
+};
+
+class RemoveComplexExpressions: public P4::RemoveComplexExpressions {
+ public:
+    RemoveComplexExpressions(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                             P4::RemoveComplexExpressionsPolicy* policy = nullptr) :
+    P4::RemoveComplexExpressions(refMap, typeMap, policy) {}
+
+    const IR::Node* postorder(IR::MethodCallExpression* expression) override;
 };
 
 }  // namespace BMV2

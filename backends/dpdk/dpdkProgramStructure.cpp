@@ -87,9 +87,11 @@ void ParseDpdkArchitecture::parse_psa_block(const IR::PackageBlock *block) {
 
 bool ParseDpdkArchitecture::preorder(const IR::PackageBlock* block) {
     auto &options = DPDK::DpdkContext::get().options();
-    if (options.arch == "psa") {
+    if (options.arch == "psa" ||
+        block->instanceType->to<IR::Type_Package>()->name == "PSA_Switch") {
         parse_psa_block(block);
-    } else if (options.arch == "pna") {
+    } else if (options.arch == "pna" ||
+        block->instanceType->to<IR::Type_Package>()->name == "PNA_NIC") {
         parse_pna_block(block);
     } else {
         ::error("Unknown architecture %1%", options.arch);

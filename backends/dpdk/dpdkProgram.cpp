@@ -594,7 +594,6 @@ bool ConvertToDpdkControl::preorder(const IR::P4Table *t) {
 
         selectors.push_back(selector);
     } else if (structure->learner_tables.count(t->name.name) != 0) {
-        //
         auto learner = new IR::DpdkLearner(t->name, t->getKey(), t->getActionList(),
                 t->getDefaultAction(), t->properties);
         learners.push_back(learner);

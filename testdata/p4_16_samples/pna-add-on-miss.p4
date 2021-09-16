@@ -134,7 +134,7 @@ control MainControlImpl(
         send_to_port(vport);
     }
     action add_on_miss_action() {
-        bit<32> tmp;
+        bit<32> tmp = 0;
         add_entry(action_name="next_hop", action_params = tmp);
     }
     table ipv4_da {

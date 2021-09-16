@@ -43,19 +43,11 @@ into temporaries.
 Convert a statement like lookahead<T>() into tmp = lookahead<T>();
 */
 class RemoveComplexExpressions : public Transform {
-    IR::IndexedVector<IR::Declaration> newDecls;
-    IR::IndexedVector<IR::StatOrDecl>  assignments;
-
- public:
     P4::ReferenceMap* refMap;
     P4::TypeMap* typeMap;
     RemoveComplexExpressionsPolicy* policy;
-
-    RemoveComplexExpressions(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
-                             RemoveComplexExpressionsPolicy* policy = nullptr) :
-            refMap(refMap), typeMap(typeMap), policy(policy) {
-        CHECK_NULL(refMap); CHECK_NULL(typeMap);
-        setName("RemoveComplexExpressions"); }
+    IR::IndexedVector<IR::Declaration> newDecls;
+    IR::IndexedVector<IR::StatOrDecl>  assignments;
 
     const IR::PathExpression* createTemporary(const IR::Expression* expression);
     const IR::Expression* simplifyExpression(const IR::Expression* expression, bool force);
@@ -68,6 +60,12 @@ class RemoveComplexExpressions : public Transform {
 
     const IR::Node* simpleStatement(IR::Statement* statement);
 
+ public:
+    RemoveComplexExpressions(P4::ReferenceMap* refMap, P4::TypeMap* typeMap,
+                             RemoveComplexExpressionsPolicy* policy = nullptr) :
+            refMap(refMap), typeMap(typeMap), policy(policy) {
+        CHECK_NULL(refMap); CHECK_NULL(typeMap);
+        setName("RemoveComplexExpressions"); }
     const IR::Node* postorder(IR::SelectExpression* expression) override;
     const IR::Node* preorder(IR::ParserState* state) override
     { assignments.clear(); return state; }

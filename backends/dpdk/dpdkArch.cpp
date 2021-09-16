@@ -1486,23 +1486,18 @@ void CollectAddOnMissTable::postorder(const IR::P4Table* t) {
     }
     if (default_action->value->is<IR::ExpressionValue>()) {
         auto expr = default_action->value->to<IR::ExpressionValue>()->expression;
-        if (!expr->is<IR::MethodCallExpression>()) {
-            ::error(ErrorType::ERR_UNEXPECTED,
-                    "%1%: expected expression to an action", default_action);
-            return; }
+        BUG_CHECK(expr->is<IR::MethodCallExpression>(),
+            "%1%: expected expression to an action", default_action);
         auto mi = P4::MethodInstance::resolve(expr->to<IR::MethodCallExpression>(),
                 refMap, typeMap);
-        if (mi->is<P4::ActionCall>()) {
-            auto ac = mi->to<P4::ActionCall>();
-            if (ac->action->parameters->parameters.size() != 0) {
-                ::error(ErrorType::ERR_UNEXPECTED,
+        BUG_CHECK(mi->is<P4::ActionCall>(),
+            "%1%: expected action in default_action", default_action);
+        if (mi->to<P4::ActionCall>()->action->parameters->parameters.size() != 0) {
+            ::error(ErrorType::ERR_UNEXPECTED,
                     "%1%: action cannot have action argument when used with add_on_miss",
                     default_action);
-                return;
-            }
         }
     }
-    return;
 }
 
 void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
@@ -1515,8 +1510,11 @@ void CollectAddOnMissTable::postorder(const IR::MethodCallStatement *mcs) {
     if (func->method->name != "add_entry") {
         return;
     }
+    auto ctxt = findContext<IR::P4Action>();
+    BUG_CHECK(ctxt != nullptr, "%1%: add_entry extern can only be used in an action", mcs);
 
     // assuming checking on number of arguments is already performed in frontend.
+    BUG_CHECK(mce->arguments->size() == 2, "%1%: expected two arguments in add_entry extern", mcs);
     auto action = mce->arguments->at(0);
     // assuming syntax check is already performed earlier
     auto action_name = action->expression->to<IR::StringLiteral>()->value;

@@ -627,10 +627,14 @@ bool ConvertStatementToDpdk::preorder(const IR::MethodCallStatement *s) {
             } else if (param->is<IR::StructExpression>()) {
                 auto argument = param->to<IR::StructExpression>()->components.at(0)->expression;
                 add_instr(new IR::DpdkLearnStatement(action_name, argument));
+            } else if (param->is<IR::Constant>()) {
+                add_instr(new IR::DpdkLearnStatement(action_name, param));
             } else {
                 ::error("%1%: unhandled function", s);
             }
         } else if (a->method->name == "send_to_port") {
+            BUG_CHECK(a->expr->arguments->size() == 1,
+                "%1%: expected one argument for send_to_port extern", a);
             add_instr(new IR::DpdkMovStatement(
                 new IR::Member(new IR::PathExpression("m"), "pna_main_output_metadata_output_port"),
                 a->expr->arguments->at(0)->expression));

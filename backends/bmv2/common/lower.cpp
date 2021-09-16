@@ -148,4 +148,60 @@ const IR::Node* LowerExpressions::postorder(IR::Concat* expression) {
 
 /////////////////////////////////////////////////////////////
 
+const IR::Node*
+RemoveComplexExpressions::postorder(IR::MethodCallExpression* expression) {
+    if (expression->arguments->size() == 0)
+        return expression;
+    auto mi = P4::MethodInstance::resolve(expression, refMap, typeMap);
+    if (mi->isApply() || mi->is<P4::BuiltInMethod>())
+        return expression;
+
+    if (auto ef = mi->to<P4::ExternFunction>()) {
+        if (ef->method->name == P4V1::V1Model::instance.digest_receiver.name) {
+            // Special handling for digest; the semantics on bmv2 is to
+            // execute the digest at the very end of the pipeline, and to
+            // pass a reference to the fields, so fields can be modified
+            // and the latest value is part of the digest.  We want the
+            // digest to appear as if it is executed instantly, so we copy
+            // the data to temporaries.  This could be a problem for P4-14
+            // programs that depend on this semantics, but we hope that no
+            // one knew of this feature, since it was not very clearly
+            // documented.
+            if (expression->arguments->size() != 2) {
+                ::error(ErrorType::ERR_EXPECTED, "%1%: expected 2 arguments", expression);
+                return expression;
+            }
+            auto vec = new IR::Vector<IR::Argument>();
+            // Digest has two arguments, we have to save the second one.
+            // It should be a list expression.
+            vec->push_back(expression->arguments->at(0));
+            auto arg1 = expression->arguments->at(1)->expression;
+            if (auto list = arg1->to<IR::ListExpression>()) {
+                auto simplified = simplifyExpressions(&list->components, true);
+                arg1 = new IR::ListExpression(arg1->srcInfo, *simplified);
+                vec->push_back(new IR::Argument(arg1));
+            } else if (auto si = arg1->to<IR::StructExpression>()) {
+                auto list = simplifyExpressions(&si->components);
+                arg1 = new IR::StructExpression(
+                    si->srcInfo, si->structType, si->structType, *list);
+                vec->push_back(new IR::Argument(arg1));
+            } else {
+                auto tmp = new IR::Argument(
+                    expression->arguments->at(1)->srcInfo,
+                    createTemporary(expression->arguments->at(1)->expression));
+                vec->push_back(tmp);
+            }
+            expression->arguments = vec;
+            return expression;
+        }
+    }
+
+    auto vec = simplifyExpressions(expression->arguments);
+    if (vec != expression->arguments)
+        expression->arguments = vec;
+    return expression;
+}
+
+
+
 }  // namespace BMV2

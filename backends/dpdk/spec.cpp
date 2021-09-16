@@ -4,6 +4,9 @@
 
 using namespace DBPrint;
 
+static constexpr unsigned DEFAULT_LEARNER_TABLE_SIZE = 0x10000;
+static constexpr unsigned DEFAULT_LEARNER_TABLE_TIMEOUT = 120;
+
 void add_space(std::ostream &out, int size) {
     out << std::setfill(' ') << std::setw(size) << " ";
 }
@@ -461,12 +464,12 @@ std::ostream& IR::DpdkLearner::toSpec(std::ostream& out) const {
     if (auto size = properties->getProperty("size")) {
         out << "\tsize " << DPDK::toStr(size->value) << "" << std::endl;
     } else {
-        out << "\tsize 0x10000" << std::endl;
+        out << "\tsize " << DEFAULT_LEARNER_TABLE_SIZE << std::endl;
     }
     if (auto size = properties->getProperty("psa_idle_timeout")) {
         out << "\ttimeout " << DPDK::toStr(size->value) << "" << std::endl;
     } else {
-        out << "\ttimeout 120"<< std::endl;
+        out << "\ttimeout " << DEFAULT_LEARNER_TABLE_TIMEOUT << std::endl;
     }
 
     out << "}" << std::endl;
